@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Markdown Editor with LaTeX</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true,
+        packages: ['base', 'ams'],
+      },
+      svg: {
+        fontCache: 'local',
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    #editorContainer {
+      display: flex;
+      flex: 1;
+      background-color: #f0f0f0;
+      height: 100%;
+    }
+
+    #inputPane, #outputPane {
+      width: 50%;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    #inputPane {
+      border-right: 1px solid #ccc;
+    }
+
+    .pane-heading {
+      background-color: #333;
+      color: #fff;
+      margin: 0;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .buttonContainer {
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      padding: 20px;
+      border: none;
+      resize: none;
+      font-size: 16px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    #renderedOutput {
+      flex: 1;
+      padding: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    code {
+      background-color: #f0f0f0;
+      padding: 0.1em 0.2em;
+      border-radius: 3px;
+      font-size: 0.95em;
+      line-height: 1;
+      font-family: "Courier New", Courier, monospace;
+      vertical-align: baseline;
+    }
+
+    table {
+      max-width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      border: 1px solid black;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    @media print {
+      body {
+        display: block;
+        margin: 0;
+      }
+
+      #editorContainer {
+        display: block;
+      }
+
+      #inputPane {
+        display: none;
+      }
+
+      #outputPane {
+        width: auto;
+        padding: 15mm;
+      }
+
+      #outputPane .pane-heading,
+      .no-print {
+        display: none;
+      }
+
+      svg, pre {
+        page-break-inside: avoid;
+      }
+
+      #renderedOutput {
+        font-size: 12pt;
+        line-height: 1.6;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="editorContainer">
+    <div id="inputPane">
+      <h2 class="pane-heading">Markdown Input</h2>
+      <div class="buttonContainer">
+        <button id="loadFileButton">Load .md File</button>
+        <button id="saveMDButton">Save as .md</button>
+        <button id="clearButton">Clear Input</button>
+        <button id="loadSampleButton">Load Sample Document</button>
+      </div>
+      <textarea id="markdownInput" placeholder="Type your Markdown with LaTeX equations here..."></textarea>
+    </div>
+    <div id="outputPane">
+      <h2 class="pane-heading">Rendered Output</h2>
+      <div class="buttonContainer no-print">
+        <button id="printButton">Print to PDF</button>
+        <button id="exportHTMLButton">Export as HTML</button>
+      </div>
+      <div id="renderedOutput"></div>
+    </div>
+  </div>
+
+  <script>
+    const markdownInput = document.getElementById('markdownInput');
+    const renderedOutput = document.getElementById('renderedOutput');
+    const clearButton = document.getElementById('clearButton');
+    const loadSampleButton = document.getElementById('loadSampleButton');
+    const exportHTMLButton = document.getElementById('exportHTMLButton');
+    const printButton = document.getElementById('printButton');
+    const saveMDButton = document.getElementById('saveMDButton');
+    const loadFileButton = document.getElementById('loadFileButton');
+
+    const sampleDocument = `# THIS IS A DEMO OF THE USE OF:
+
+1. (GitHub) Markdown  
+2. (A bit of) LaTeX  
+3. HTML tags
+
+---
+
+## 1. Markdown
+
+### Headings
+
+# This is a HUGE Heading!
+
+#### This is not as huge~~
+
+### Lists
+
+-   Item Zero
+    1.  I am item one  
+    2.  I am item two  
+        -   I can **bold** it.  
+        -   I can ~~strikethrough~~ it.  
+-   I can *italicize* it.  
+
+<br>
+
+### Blockquotes
+
+> This is a quotation  
+> 
+>> And this is a quotation within a **quotation**  
+
+<br>
+
+### Code Blocks
+
+~~~python
+# I can type my codes here
+import sympy as sp
+for i in range(5):
+    print(i)
+    i = i * 2
+~~~
+
+---
+
+### Tables
+
+| Name     | Age | Profession  |
+|----------|-----|-------------|
+| Alice    | 25  | Engineer    |
+| Bob      | 30  | Designer    |
+| Charlie  | 35  | Teacher     |
+
+---
+
+### Links
+
+**Inline Link:**  
+I can insert a [link](https://www.google.com).  
+
+**Reference Links:**  
+I get 10 times more traffic from [Google][1] than from [Yahoo][2].
+
+---
+
+## 2. Using LaTeX
+
+### Greek Letters
+
+$\\alpha \\quad \\beta \\quad \\lambda \\quad \\Lambda \\quad \\theta \\quad \\Omega$  
+$\\mu_\\tau^\\alpha \\quad \\nu \\quad \\tau \\quad \\epsilon \\quad \\psi \\quad \\rho \\quad g_{\\mu\\nu}$  
+
+---
+
+### Math Expressions
+
+1. In-line example: This is an $\\alpha$, and this is a $\\beta$.  
+2. Displayed example:  
+
+$$
+\\frac{1}{x}
+$$
+
+$$
+\\boxed{M_\\odot^2}
+$$
+
+$$
+x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
+$$
+
+$$
+\\int_{t=-\\infty}^{\\infty} \\ln \\frac{1}{t^e} \\ dt
+$$
+
+$$
+\\ddot{x} = \\frac{d \\dot{x}}{dt} = \\frac{d^2x}{dt^2}
+$$
+
+---
+
+### Chemical Equations
+
+$$
+{Na_{(aq)}}^+ + {Cl_{(aq)}}^- \\longrightarrow NaCl_{(s)}
+$$
+
+---
+
+### Matrices
+
+$$
+\\begin{pmatrix}
+a & b & c \\\\\\\\
+d & e & f \\\\\\\\
+g & h & i \\\\\\\\
+\\end{pmatrix}
+\\cdot
+\\begin{vmatrix}
+a & b \\\\\\\\
+c & d \\\\\\\\
+\\end{vmatrix} =
+\\begin{bmatrix}
+\\alpha_{11} & \\alpha_{12} & \\alpha_{13} \\\\\\\\
+\\alpha_{21} & \\alpha_{22} & \\alpha_{23} \\\\\\\\
+\\alpha_{31} & \\alpha_{32} & \\alpha_{33} \\\\\\\\
+\\end{bmatrix}
+$$
+
+---
+
+### Equation Alignment
+
+$$
+\\begin{aligned}
+ax^2 + b^2 + c &= 0 \\\\\\\\
+x &= \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
+\\end{aligned}
+$$
+
+---
+
+### Bracket Size
+
+$\\left( \\frac{1}{\\sqrt[n]{2}} \\right)$ **vs** $( \\frac{1}{\\sqrt[n]{2}} )$
+
+---
+
+## 3. Using HTML
+
+<p align="center">
+<img src="https://www.google.com/logos/doodles/2022/stephen-hawkings-80th-birthday-6753651837109174-2xa.gif" width="250">
+</p>
+
+<p align="center">
+Fig. 1 - This is the caption. What a nice picture!
+</p>
+
+---
+
+[1]: http://google.com/ "Google"  
+[2]: http://search.yahoo.com/ "Yahoo Search"`;
+
+    function renderContent() {
+      const inputText = markdownInput.value;
+      const sanitizedContent = DOMPurify.sanitize(marked.parse(inputText));
+      renderedOutput.innerHTML = sanitizedContent;
+      MathJax.typesetPromise([renderedOutput]).catch(console.error);
+    }
+
+    async function printToPDF() {
+      await MathJax.typesetPromise([renderedOutput]);
+      window.print();
+    }
+
+    function exportHTML() {
+      const fileName = prompt('Enter file name for the HTML export:', 'document.html');
+      if (!fileName) return;
+
+      const sanitizedHTML = renderedOutput.innerHTML;
+      const doc = document.implementation.createHTMLDocument('Exported Document');
+      const head = doc.head;
+      const body = doc.body;
+
+      const style = document.createElement('style');
+      style.textContent = `
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          margin: 20px;
+        }
+        table {
+          max-width: 90%;
+          margin: 20px auto;
+          border-collapse: collapse;
+          border: 1px solid black;
+        }
+        th, td {
+          border: 1px solid black;
+          padding: 8px;
+          text-align: left;
+        }
+        th {
+          background-color: #f4f4f4;
+        }
+      `;
+      head.appendChild(style);
+
+      const mathjaxScript = document.createElement('script');
+      mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+      head.appendChild(mathjaxScript);
+
+      body.innerHTML = sanitizedHTML;
+
+      const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
+      const blob = new Blob([exportedHTML], { type: 'text/html' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    }
+
+    function saveMarkdown() {
+      const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
+      if (!fileName) return;
+
+      const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    }
+
+    function loadMarkdownFile() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.md,text/markdown';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = event => {
+            markdownInput.value = event.target.result;
+            renderContent();
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    }
+
+    markdownInput.addEventListener('input', renderContent);
+    printButton.addEventListener('click', printToPDF);
+    exportHTMLButton.addEventListener('click', exportHTML);
+    saveMDButton.addEventListener('click', saveMarkdown);
+    loadFileButton.addEventListener('click', loadMarkdownFile);
+    loadSampleButton.addEventListener('click', () => {
+      markdownInput.value = sampleDocument;
+      renderContent();
+    });
+    clearButton.addEventListener('click', () => {
+      markdownInput.value = '';
+      renderContent();
+    });
+
+    renderContent();
+  </script>
+</body>
+</html>
