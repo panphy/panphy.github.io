@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graph Plotting & Curve Fitting Tools</title>
+    <title>Graph Plotting & Curve Fitting Tool</title>
     <!-- Plotly.js for graphing -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- Math.js for mathematical computations -->
@@ -91,13 +91,15 @@
             width: 100%;
             margin-bottom: 20px;
             border-collapse: collapse;
-            table-layout: fixed; /* Fixed table layout for better control */
+            table-layout: auto; /* Changed from fixed to auto for dynamic widths */
         }
 
         .data-table th, .data-table td {
             text-align: center;
             padding: 8px;
             border: 1px solid #ccc;
+            vertical-align: middle;
+            white-space: normal; /* Allows text to wrap */
         }
 
         /* Input Fields in Table Headers */
@@ -128,6 +130,8 @@
             border-radius: 4px;
             word-wrap: break-word;
             display: inline-block;
+            max-width: 100%; /* Ensures LaTeX doesn't exceed cell width */
+            overflow-wrap: break-word;
         }
 
         /* Input Fields in Data Rows */
@@ -263,6 +267,8 @@
             flex: 1;
             min-width: 100px;
             text-align: center;
+            max-width: 100%; /* Ensures LaTeX doesn't exceed cell width */
+            overflow-wrap: break-word;
         }
 
         /* Plot Area Styling */
@@ -508,6 +514,17 @@
                             </td>
                         </tr>
                         <!-- Row 6 -->
+                        <tr>
+                            <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
+                            <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
+                            <td class="error-column" style="display: none;">
+                                <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" />
+                            </td>
+                            <td class="error-column" style="display: none;">
+                                <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" />
+                            </td>
+                        </tr>
+                        <!-- Row 7 -->
                         <tr>
                             <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
                             <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
