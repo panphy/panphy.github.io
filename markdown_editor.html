@@ -188,11 +188,13 @@
     const saveMDButton = document.getElementById('saveMDButton');
     const loadFileButton = document.getElementById('loadFileButton');
 
-    const sampleDocument = `# THIS IS A DEMO OF THE USE OF:
+    const sampleDocument = `
+
+# THIS IS A DEMO OF THE USE OF:
 
 1. (GitHub) Markdown  
-2. (A bit of) LaTeX  
-3. HTML tags
+2. (A Bit of) LaTeX  
+3. HTML Tags  
 
 ---
 
@@ -200,18 +202,18 @@
 
 ### Headings
 
-# This is a HUGE Heading!
+# Warning: This is a HUGE Heading!
 
-#### This is not as huge~~
+#### This is Not as Huge~~ Phew!
 
 ### Lists
 
--   Item Zero
-    1.  I am item one  
-    2.  I am item two  
-        -   I can **bold** it.  
-        -   I can ~~strikethrough~~ it.  
--   I can *italicize* it.  
+- **Item Zero**  
+    1. I am item one  
+    2. I am item two  
+        - I can **bold** it.  
+        - I can ~~strikethrough~~ it.  
+- I can *italicize* it. So _can_ I!
 
 <br>
 
@@ -219,7 +221,7 @@
 
 > This is a quotation  
 > 
->> And this is a quotation within a **quotation**  
+>> And this is a quotation within a **quotation**. *Because why not?*
 
 <br>
 
@@ -227,31 +229,32 @@
 
 ~~~python
 # I can type my codes here
-import sympy as sp
+import sympy as sym
+
 for i in range(5):
     print(i)
-    i = i * 2
+    i = i * 2  # Doubling the fun!
 ~~~
 
 ---
 
 ### Tables
 
-| Name     | Age | Profession  |
-|----------|-----|-------------|
-| Alice    | 25  | Engineer    |
-| Bob      | 30  | Designer    |
-| Charlie  | 35  | Teacher     |
+| Name | Half life | Profession |
+|---|---|---|
+| Ace | 11 | Engineer |
+| Queen | 13 | Philosopher |
+| King | 17 | Physicist |
 
 ---
 
 ### Links
 
 **Inline Link:**  
-I can insert a [link](https://www.google.com).  
+I can insert a [link](https://www.youtube.com) that takes you to the land of endless cat videos.
 
 **Reference Links:**  
-I get 10 times more traffic from [Google][1] than from [Yahoo][2].
+I get 10 times more traffic from [Google][1] than from [Yahoo][2]. Sorry, Yahoo, we still remember you.
 
 ---
 
@@ -259,15 +262,19 @@ I get 10 times more traffic from [Google][1] than from [Yahoo][2].
 
 ### Greek Letters
 
-$\\alpha \\quad \\beta \\quad \\lambda \\quad \\Lambda \\quad \\theta \\quad \\Omega$  
+*In case you need more symbols...*
+
+$\\alpha \\space \\beta \\space \\lambda \\space \\Lambda \\space \\theta \\space \\Omega$
+
 $\\mu_\\tau^\\alpha \\quad \\nu \\quad \\tau \\quad \\epsilon \\quad \\psi \\quad \\rho \\quad g_{\\mu\\nu}$  
 
 ---
 
 ### Math Expressions
 
-1. In-line example: This is an $\\alpha$, and this is a $\\beta$.  
-2. Displayed example:  
+1. **In-line example:** This is an $\\alpha$, and this is a $\\beta$.  
+
+2. **Displayed example:**  
 
 $$
 \\frac{1}{x}
@@ -282,19 +289,11 @@ x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
 $$
 
 $$
-\\int_{t=-\\infty}^{\\infty} \\ln \\frac{1}{t^e} \\ dt
+\\int_{t=-\\infty}^{\\infty} \\ln \\frac{1}{t^e} dt
 $$
 
 $$
 \\ddot{x} = \\frac{d \\dot{x}}{dt} = \\frac{d^2x}{dt^2}
-$$
-
----
-
-### Chemical Equations
-
-$$
-{Na_{(aq)}}^+ + {Cl_{(aq)}}^- \\longrightarrow NaCl_{(s)}
 $$
 
 ---
@@ -334,24 +333,47 @@ $$
 
 ### Bracket Size
 
-$\\left( \\frac{1}{\\sqrt[n]{2}} \\right)$ **vs** $( \\frac{1}{\\sqrt[n]{2}} )$
+$\\left( \\frac{1}{\\sqrt[n]{2}} \\right)$ **vs** $( \\frac{1}{\\sqrt[n]{2}} )$ 
+
+*Because size does matter... sometimes.*
+
+---
+
+### Chemical Equations
+
+$$
+{Na_{(aq)}}^+ + {Cl_{(aq)}}^- \\longrightarrow NaCl_{(s)}
+$$
+
+*Chemistry deserves some LaTeX love too.*
 
 ---
 
 ## 3. Using HTML
 
 <p align="center">
-<img src="https://www.google.com/logos/doodles/2022/stephen-hawkings-80th-birthday-6753651837109174-2xa.gif" width="250">
+    <img src="https://www.google.com/logos/doodles/2022/stephen-hawkings-80th-birthday-6753651837109174-2xa.gif" width="250" alt="Stephen Hawking's 80th Birthday">
 </p>
 
 <p align="center">
-Fig. 1 - This is the caption. What a nice picture!
+    <em>Fig. 1 - This is the caption. What a nice picture!</em>
 </p>
+
+*Because even Markdown needs a little HTML magic.*
+
+---
+
+| And there you have it!
+| :---
+_A whimsical tour through Markdown, LaTeX, and HTML. May your documents be ever stylish and your equations ever balanced!_
 
 ---
 
 [1]: http://google.com/ "Google"  
-[2]: http://search.yahoo.com/ "Yahoo Search"`;
+[2]: http://search.yahoo.com/ "Yahoo Search"
+
+
+`;
 
     function renderContent() {
       const inputText = markdownInput.value;
