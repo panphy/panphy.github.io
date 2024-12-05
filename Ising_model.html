@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2D Ising Model Simulation</title>
+  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .container {
+      width: 80%;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .control-group {
+      flex: 1;
+      min-width: 250px;
+    }
+    .control-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .control-group input[type="range"] {
+      width: 100%;
+    }
+    .simulation-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    #grid {
+      display: grid;
+      border: 2px solid #ddd;
+    }
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid lightgray;
+    }
+    .spin-up {
+      background-color: white;
+    }
+    .spin-down {
+      background-color: black;
+    }
+    .button-group {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .button-group button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .button-group button:hover {
+      background-color: #0056b3;
+    }
+    #warning {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>2D Ising Model Simulation</h1>
+  </header>
+  <div class="container">
+    <p id="warning">Warning: Using larger grid sizes may slow down your browser.</p>
+    <div class="controls">
+      <div class="control-group">
+        <label for="smallGridSize">Small Grid Size:</label>
+        <input id="smallGridSize" type="range" min="5" max="50" value="30" oninput="updateSmallGridSize(this.value)">
+        <p><span id="smallGridSizeValue">30</span> x <span id="smallGridSizeValue2">30</span></p>
+      </div>
+      <div class="control-group">
+        <label for="largeGridSize">Large Grid Size:</label>
+        <input id="largeGridSize" type="range" min="50" max="200" value="50" oninput="updateLargeGridSize(this.value)">
+        <p><span id="largeGridSizeValue">50</span> x <span id="largeGridSizeValue2">50</span></p>
+      </div>
+      <div class="control-group">
+        <label for="temperature">Temperature:</label>
+        <input id="temperature" type="range" min="0.1" max="2.5" step="0.1" value="2.5" oninput="updateTemperature(this.value)">
+        <p><span id="temperatureValue">2.5 T<sub>c</sub></span></p>
+      </div>
+    </div>
+    <div class="simulation-area">
+      <div id="grid"></div>
+    </div>
+    <div class="button-group">
+      <button onclick="startSimulation()">Run</button>
+      <button onclick="pauseSimulation()">Pause</button>
+    </div>
+  </div>
+  <script>
+    let size = 30; // Starting grid size
+    let T = 2.5 * 2.269; // Starting temperature (maximum value scaled to T_c)
+    const T_c = 2.269; // Critical temperature for the 2D Ising model
+    const J = 1; // Interaction energy
+    let grid = [];
+    let simulationInterval;
+    const container = document.getElementById('grid');
+    const smallGridSizeValue = document.getElementById('smallGridSizeValue');
+    const smallGridSizeValue2 = document.getElementById('smallGridSizeValue2');
+    const largeGridSizeValue = document.getElementById('largeGridSizeValue');
+    const largeGridSizeValue2 = document.getElementById('largeGridSizeValue2');
+    const temperatureValue = document.getElementById('temperatureValue');
+
+    const totalGridSize = 500; // Fixed simulation area size in pixels
+
+    function initializeGrid() {
+      grid = [];
+      for (let i = 0; i < size; i++) {
+        grid[i] = [];
+        for (let j = 0; j < size; j++) {
+          grid[i][j] = Math.random() > 0.5 ? 1 : -1;
+        }
+      }
+      renderGrid();
+    }
+
+    function renderGrid() {
+      container.innerHTML = ''; // Clear previous grid
+      const cellSize = totalGridSize / size; // Dynamically calculate cell size
+      container.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
+      container.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
+
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell', grid[i][j] === 1 ? 'spin-up' : 'spin-down');
+          cell.style.width = `${cellSize}px`;
+          cell.style.height = `${cellSize}px`;
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function monteCarloStep() {
+      for (let step = 0; step < size * size; step++) {
+        const i = Math.floor(Math.random() * size);
+        const j = Math.floor(Math.random() * size);
+        const dE = -2 * calculateEnergy(i, j);
+        if (dE < 0 || Math.random() < Math.exp(-dE / T)) {
+          grid[i][j] *= -1; // Flip the spin
+        }
+      }
+    }
+
+    function calculateEnergy(i, j) {
+      const spin = grid[i][j];
+      let sumNeighbors = 0;
+      const neighbors = [
+        [(i - 1 + size) % size, j],
+        [(i + 1) % size, j],
+        [i, (j - 1 + size) % size],
+        [i, (j + 1) % size],
+      ];
+      for (const [ni, nj] of neighbors) {
+        sumNeighbors += grid[ni][nj];
+      }
+      return -J * spin * sumNeighbors;
+    }
+
+    function startSimulation() {
+      if (!simulationInterval) {
+        simulationInterval = setInterval(() => {
+          monteCarloStep();
+          renderGrid();
+        }, 100);
+      }
+    }
+
+    function pauseSimulation() {
+      clearInterval(simulationInterval);
+      simulationInterval = null;
+    }
+
+    function updateSmallGridSize(newSize) {
+      size = parseInt(newSize, 10);
+      smallGridSizeValue.textContent = size;
+      smallGridSizeValue2.textContent = size;
+      initializeGrid();
+    }
+
+    function updateLargeGridSize(newSize) {
+      size = parseInt(newSize, 10);
+      largeGridSizeValue.textContent = size;
+      largeGridSizeValue2.textContent = size;
+      initializeGrid();
+    }
+
+    function updateTemperature(newTemp) {
+      T = parseFloat(newTemp) * T_c;
+      temperatureValue.innerHTML = `${(T / T_c).toFixed(1)} T<sub>c</sub>`;
+    }
+
+    initializeGrid();
+  </script>
+</body>
+</html>
