@@ -3,56 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Timer</title>
+    <title>Timer</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50; /* Body background */
+            color: #ecf0f1;
+        }
+        .container {
             text-align: center;
-            margin-top: 50px;
+            background: #34495e; /* Container background */
+            padding: 0; /* Removed padding to accommodate the title's own padding */
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 80vw;
+            max-width: 800px;
+            overflow: hidden; /* Ensures child elements respect the container's border radius */
+        }
+        h1 {
+            font-size: 4vw;
+            margin: 0;
+            padding: 1rem 0;
+            background-color: #333333; /* Distinct dark grey background */
+            color: #ffffff; /* White font color */
+            border-radius: 15px 15px 0 0; /* Rounded top corners to match container */
         }
         .time {
-            font-size: 2em;
-            margin: 10px 0;
+            font-size: 7vw;
+            font-weight: bold;
+            margin: 1rem 0;
         }
         .extra-time {
-            color: red;
+            color: #e74c3c;
+        }
+        .label {
+            font-size: 1.5vw;
+            color: #e74c3c;
+            margin-top: 0.5rem;
         }
         .info {
-            margin: 20px 0;
-            font-size: 1.2em;
+            font-size: 1.5vw;
+            color: #95a5a6;
+            margin: 1rem 0;
+        }
+        .inputs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem; /* Unified spacing */
+            margin: 1.5rem;
         }
         input {
-            padding: 10px;
-            font-size: 1em;
-            margin: 5px;
+            padding: 0.8rem;
+            font-size: 1.2rem;
+            border: 1px solid #7f8c8d;
+            border-radius: 10px;
+            width: 25%;
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+        input:focus {
+            border-color: #f39c12;
+            outline: none;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 columns */
+            gap: 1rem; /* Unified spacing */
+            justify-items: center;
+            padding: 1.5rem;
         }
         button {
-            padding: 10px 20px;
-            font-size: 1em;
-            margin: 5px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            color: #ecf0f1;
+            width: 100%;
+            max-width: 120px; /* Adjusted for responsiveness */
+        }
+        button.set {
+            background-color: #f39c12;
+        }
+        button.start {
+            background-color: #27ae60;
+        }
+        button.pause {
+            background-color: #2980b9;
+        }
+        button.clear {
+            background-color: #c0392b;
+        }
+        button.resume {
+            background-color: #27ae60;
+        }
+        button.reset {
+            background-color: #2980b9;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            opacity: 0.9;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 6vw;
+            }
+            .time {
+                font-size: 10vw;
+            }
+            .label, .info {
+                font-size: 3vw;
+            }
+            input {
+                width: 30%;
+            }
+            button {
+                max-width: 100px;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            .buttons {
+                grid-template-columns: repeat(2, 1fr); /* Adjust grid on smaller screens */
+                gap: 0.8rem; /* Slightly reduced gap for better fit */
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Advanced Timer</h1>
-    <div class="time" id="original-time">00:00:00</div>
-    <div class="time extra-time" id="extra-time">00:00:00</div>
-    <div class="info" id="start-end-times"></div>
-    <input type="number" id="hours" placeholder="Hours" min="0">
-    <input type="number" id="minutes" placeholder="Minutes" min="0" max="59">
-    <input type="number" id="seconds" placeholder="Seconds" min="0" max="59">
-    <button onclick="setTimer()">Set Timer</button>
-    <button onclick="startTimer()">Start</button>
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="clearTimer()">Clear</button>
+    <div class="container">
+        <h1>Timer</h1>
+        <div class="time" id="original-time">00:00:00</div>
+        <div class="label">25% Extra Time</div>
+        <div class="time extra-time" id="extra-time">00:00:00</div>
+        <div class="info" id="start-end-times"></div>
+
+        <div class="inputs">
+            <input type="number" id="hours" placeholder="Hrs" min="0">
+            <input type="number" id="minutes" placeholder="Min" min="0" max="59">
+            <input type="number" id="seconds" placeholder="Sec" min="0" max="59">
+        </div>
+
+        <div class="buttons">
+            <button class="set" onclick="setTimer()">Set Timer</button>
+            <button class="start" onclick="startTimer()">Start</button>
+            <button class="pause" onclick="pauseTimer()">Pause</button>
+            <button class="clear" onclick="clearTimer()">Clear</button>
+            <button class="resume" onclick="resumeTimer()">Resume</button>
+            <button class="reset" onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
 
     <audio id="alarm-sound" src="/ding.mp3"></audio>
 
     <script>
-        let timerInterval;
+        let originalTimerInterval;
+        let extraTimerInterval;
         let remainingTime = 0;
         let extraRemainingTime = 0;
+        let paused = false;
+        let originalEndTimeObj = null;
+        let extraEndTimeObj = null;
 
         function formatTime(hours, minutes, seconds) {
             return String(hours).padStart(2, '0') + ':' + 
@@ -85,58 +201,123 @@
                 extraRemainingTime % 60
             );
 
-            document.getElementById('start-end-times').textContent = "";
+            document.getElementById('start-end-times').innerHTML = "";
+            paused = false;
         }
 
         function startTimer() {
             if (remainingTime <= 0) return;
 
-            clearInterval(timerInterval);
-
             const now = new Date();
             const startTime = format24HourTime(now);
-            const endTime = new Date(now.getTime() + extraRemainingTime * 1000);
-            document.getElementById('start-end-times').textContent = `Start Time: ${startTime}, End Time: ${format24HourTime(endTime)}`;
+            originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
+            extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
 
-            timerInterval = setInterval(() => {
+            document.getElementById('start-end-times').innerHTML = 
+                `Start: ${startTime} | End: ${format24HourTime(originalEndTimeObj)} ` +
+                `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
+
+            clearInterval(originalTimerInterval);
+            clearInterval(extraTimerInterval);
+
+            originalTimerInterval = setInterval(() => {
                 if (remainingTime > 0) {
                     remainingTime--;
-                    extraRemainingTime--;
-
                     document.getElementById('original-time').textContent = formatTime(
                         Math.floor(remainingTime / 3600),
                         Math.floor((remainingTime % 3600) / 60),
                         remainingTime % 60
                     );
+                } else {
+                    clearInterval(originalTimerInterval);
+                    document.getElementById('alarm-sound').play();
+                    alert('Original timer finished!');
+                }
+            }, 1000);
 
+            extraTimerInterval = setInterval(() => {
+                if (extraRemainingTime > 0) {
+                    extraRemainingTime--;
                     document.getElementById('extra-time').textContent = formatTime(
                         Math.floor(extraRemainingTime / 3600),
                         Math.floor((extraRemainingTime % 3600) / 60),
                         extraRemainingTime % 60
                     );
-
                 } else {
-                    clearInterval(timerInterval);
+                    clearInterval(extraTimerInterval);
                     document.getElementById('alarm-sound').play();
-                    alert('Timer finished!');
+                    alert('25% Extra Time finished!');
                 }
             }, 1000);
         }
 
         function pauseTimer() {
-            clearInterval(timerInterval);
+            clearInterval(originalTimerInterval);
+            clearInterval(extraTimerInterval);
+            paused = true;
+        }
+
+        function resumeTimer() {
+            if (!paused) return;
+            paused = false;
+            const now = new Date();
+            // Recalculate end times based on remaining time
+            originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
+            extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
+
+            document.getElementById('start-end-times').innerHTML = 
+                `Start: ${format24HourTime(now)} | End: ${format24HourTime(originalEndTimeObj)} ` +
+                `<span class="extra-time">| Extra End: ${format24HourTime(extraEndTimeObj)}</span>`;
+
+            originalTimerInterval = setInterval(() => {
+                if (remainingTime > 0) {
+                    remainingTime--;
+                    document.getElementById('original-time').textContent = formatTime(
+                        Math.floor(remainingTime / 3600),
+                        Math.floor((remainingTime % 3600) / 60),
+                        remainingTime % 60
+                    );
+                } else {
+                    clearInterval(originalTimerInterval);
+                    document.getElementById('alarm-sound').play();
+                    alert('Original timer finished!');
+                }
+            }, 1000);
+
+            extraTimerInterval = setInterval(() => {
+                if (extraRemainingTime > 0) {
+                    extraRemainingTime--;
+                    document.getElementById('extra-time').textContent = formatTime(
+                        Math.floor(extraRemainingTime / 3600),
+                        Math.floor((extraRemainingTime % 3600) / 60),
+                        extraRemainingTime % 60
+                    );
+                } else {
+                    clearInterval(extraTimerInterval);
+                    document.getElementById('alarm-sound').play();
+                    alert('25% Extra Time finished!');
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(originalTimerInterval);
+            clearInterval(extraTimerInterval);
+            setTimer();
         }
 
         function clearTimer() {
-            clearInterval(timerInterval);
+            clearInterval(originalTimerInterval);
+            clearInterval(extraTimerInterval);
             remainingTime = 0;
             extraRemainingTime = 0;
             document.getElementById('original-time').textContent = "00:00:00";
             document.getElementById('extra-time').textContent = "00:00:00";
-            document.getElementById('start-end-times').textContent = "";
+            document.getElementById('start-end-times').innerHTML = "";
             document.getElementById('hours').value = "";
             document.getElementById('minutes').value = "";
             document.getElementById('seconds').value = "";
+            paused = false;
         }
     </script>
 </body>
