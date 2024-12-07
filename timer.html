@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
     <style>
-        /* Apply box-sizing to all elements */
+        /* Apply box-sizing to all elements for consistent sizing */
         *, *::before, *::after {
             box-sizing: border-box;
         }
@@ -14,11 +14,11 @@
             font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* Changed from center to flex-start */
-            padding-top: 2rem; /* Added padding to prevent clipping */
+            align-items: flex-start; /* Align container to the top */
+            padding-top: 2rem; /* Space from the top to prevent clipping */
             height: 100vh;
             margin: 0;
-            background-color: #2c3e50;
+            background-color: #2c3e50; /* Overall background remains unchanged */
             color: #ecf0f1;
         }
         .container {
@@ -29,15 +29,15 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             width: 80vw;
             max-width: 800px;
-            overflow: hidden;
+            /* overflow: hidden; */ /* Removed to prevent clipping */
         }
         h1 {
-            font-size: 4vw;
+            font-size: 3.5vw; /* Reduced from 4vw to prevent clipping */
             margin: 0;
-            padding: 1rem 0;
-            background-color: #333333;
-            color: #ffffff;
-            border-radius: 15px 15px 0 0;
+            padding: 1.2rem 0; /* Increased padding for better spacing */
+            background-color: #333333; /* Distinct dark grey background for the title */
+            color: #ffffff; /* White font color */
+            border-radius: 15px 15px 0 0; /* Rounded top corners to match container */
         }
         .time {
             font-size: 9vw;
@@ -60,7 +60,7 @@
         .inputs {
             display: flex;
             justify-content: center;
-            gap: 1rem;
+            gap: 1rem; /* Unified spacing */
             margin: 1.5rem;
         }
         input {
@@ -78,8 +78,8 @@
         }
         .buttons {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+            grid-template-columns: repeat(3, 1fr); /* 3 columns */
+            gap: 1rem; /* Unified spacing */
             justify-items: center;
             padding: 1.5rem;
         }
@@ -92,7 +92,7 @@
             transition: background 0.3s, transform 0.2s;
             color: #ecf0f1;
             width: 100%;
-            max-width: 120px;
+            max-width: 120px; /* Adjusted for responsiveness */
         }
         button.set {
             background-color: #f39c12;
@@ -135,8 +135,8 @@
                 font-size: 0.9rem;
             }
             .buttons {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.8rem;
+                grid-template-columns: repeat(2, 1fr); /* Adjust grid on smaller screens */
+                gap: 0.8rem; /* Slightly reduced gap for better fit */
             }
         }
     </style>
@@ -237,7 +237,7 @@
                 } else {
                     clearInterval(originalTimerInterval);
                     document.getElementById('alarm-sound').play();
-                    alert('Original timer finished!');
+                    // alert('Original timer finished!'); /* Removed */
                 }
             }, 1000);
 
@@ -252,7 +252,7 @@
                 } else {
                     clearInterval(extraTimerInterval);
                     document.getElementById('alarm-sound').play();
-                    alert('25% Extra Time finished!');
+                    // alert('25% Extra Time finished!'); /* Removed */
                 }
             }, 1000);
         }
@@ -285,7 +285,7 @@
                 } else {
                     clearInterval(originalTimerInterval);
                     document.getElementById('alarm-sound').play();
-                    alert('Original timer finished!');
+                    // alert('Original timer finished!'); /* Removed */
                 }
             }, 1000);
 
@@ -300,7 +300,7 @@
                 } else {
                     clearInterval(extraTimerInterval);
                     document.getElementById('alarm-sound').play();
-                    alert('25% Extra Time finished!');
+                    // alert('25% Extra Time finished!'); /* Removed */
                 }
             }, 1000);
         }
