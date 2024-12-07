@@ -519,28 +519,32 @@
 
                 videoElement.srcObject = null; 
                 videoElement.src = URL.createObjectURL(file);
+                videoElement.controls = true; // Restore controls
                 videoElement.autoplay = false;
                 videoElement.load();
 
                 videoElement.onloadedmetadata = () => {
-                    let dur = videoElement.duration;
-                    if (!isFinite(dur)) {
-                        if (videoElement.seekable.length > 0) {
+                    // Ensure proper duration and dimensions on iOS
+                    videoElement.play().then(() => {
+                        videoElement.pause();
+
+                        let dur = videoElement.duration;
+                        if (!isFinite(dur) && videoElement.seekable.length > 0) {
                             dur = videoElement.seekable.end(videoElement.seekable.length - 1);
-                        } else {
-                            dur = 0;
                         }
-                    }
-                    slider.max = dur;
-                    slider.value = 0; 
-                    timeDisplay.textContent = formatTime(0); 
-                    videoElement.currentTime = 0;
-                    videoElement.pause();
-                    videoElement.addEventListener('seeked', () => {
-                        resizeOverlay(); 
-                        drawOverlay();
-                        drawFrame();
-                    }, { once: true });
+                        if (!isFinite(dur)) dur = 0;
+                        slider.max = dur;
+                        slider.value = 0; 
+                        timeDisplay.textContent = formatTime(0); 
+                        videoElement.currentTime = 0;
+                        videoElement.pause();
+                        videoElement.addEventListener('seeked', () => {
+                            resizeOverlay(); 
+                            drawOverlay();
+                            drawFrame();
+                        }, { once: true });
+                    });
+
                 };
 
                 liveVideo.style.display = "none";
@@ -565,28 +569,30 @@
 
             videoElement.srcObject = null; 
             videoElement.src = URL.createObjectURL(recordedBlob);
+            videoElement.controls = true; // Restore controls
             videoElement.autoplay = false; 
             videoElement.load();
 
             videoElement.onloadedmetadata = () => {
-                let dur = videoElement.duration;
-                if (!isFinite(dur)) {
-                    if (videoElement.seekable.length > 0) {
+                videoElement.play().then(() => {
+                    videoElement.pause();
+
+                    let dur = videoElement.duration;
+                    if (!isFinite(dur) && videoElement.seekable.length > 0) {
                         dur = videoElement.seekable.end(videoElement.seekable.length - 1);
-                    } else {
-                        dur = 0;
                     }
-                }
-                slider.max = dur;
-                slider.value = 0; 
-                timeDisplay.textContent = formatTime(0); 
-                videoElement.currentTime = 0;
-                videoElement.pause();
-                videoElement.addEventListener('seeked', () => {
-                    resizeOverlay(); 
-                    drawOverlay(); 
-                    drawFrame(); 
-                }, { once: true });
+                    if (!isFinite(dur)) dur = 0;
+                    slider.max = dur;
+                    slider.value = 0; 
+                    timeDisplay.textContent = formatTime(0); 
+                    videoElement.currentTime = 0;
+                    videoElement.pause();
+                    videoElement.addEventListener('seeked', () => {
+                        resizeOverlay(); 
+                        drawOverlay(); 
+                        drawFrame(); 
+                    }, { once: true });
+                });
             };
 
             liveVideo.style.display = "none";
@@ -619,7 +625,8 @@
         videoElement.addEventListener("timeupdate", () => {
             slider.value = videoElement.currentTime; 
             timeDisplay.textContent = formatTime(videoElement.currentTime); 
-            if (!skippingFrame) drawFrame(); 
+            // Always draw the frame to update the display
+            drawFrame(); 
         });
 
         slider.addEventListener("input", () => {
@@ -665,9 +672,7 @@
         });
 
         function drawFrame() {
-            // If video dimensions not ready or invalid, do nothing
-            if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) return;
-
+            resizeOverlay(); // Ensure correct sizing each time
             frameCanvas.width = videoElement.videoWidth;
             frameCanvas.height = videoElement.videoHeight;
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
@@ -702,7 +707,6 @@
         }
 
         function skipToNextFrame() {
-            // Prevent going beyond video end
             if (videoElement.currentTime + (1/30) >= videoElement.duration) {
                 message.textContent = "Reached end of video.";
                 return;
@@ -756,9 +760,6 @@
                                     display: true,
                                     text: "Time (s)",
                                 },
-                                grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-                                },
                             },
                             y: {
                                 type: "linear",
@@ -766,9 +767,6 @@
                                 title: {
                                     display: true,
                                     text: `Position (${scaleUnit})`,
-                                },
-                                grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
                                 },
                             },
                         },
@@ -883,12 +881,7 @@
 
             drawOverlay();
             drawFrame();
-
-            if (positionChart) {
-                positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-                plotPosition(); 
-            }
-
+            plotPosition();
             message.textContent = "Calibration cleared. Positions are now in pixel units.";
         });
 
