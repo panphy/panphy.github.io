@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classic Tetris Game</title>
+    <title>Modern Tetris Game</title>
     <style>
         /* General body styling */
         body {
@@ -167,6 +167,23 @@
 
         let board = Array.from({ length: rows }, () => Array(columns).fill(0));
 
+        // Randomize the first piece
+        let nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
+        let nextPiece = createPiece(nextPieceType);
+
+        // Initialize the current piece as the first random piece
+        let currentPiece = {
+            piece: nextPiece,
+            color: colors[nextPieceType]
+        };
+
+        // Prepare the next random piece
+        nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
+        nextPiece = createPiece(nextPieceType);
+
+        // Position of the current piece
+        let piecePos = { x: 5, y: 0 };
+
         function createPiece(type) {
             return shapes[type].map(row => [...row]);
         }
@@ -204,27 +221,6 @@
             }
         }
 
-        function collide(board, piece, offset) {
-            for (let y = 0; y < piece.length; y++) {
-                for (let x = 0; x < piece[y].length; x++) {
-                    if (piece[y][x] && (board[y + offset.y] && board[y + offset.y][x + offset.x]) !== 0) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        function merge(board, piece, offset, color) {
-            piece.forEach((row, y) => {
-                row.forEach((value, x) => {
-                    if (value) {
-                        board[y + offset.y][x + offset.x] = color;
-                    }
-                });
-            });
-        }
-
         async function clearRows() {
             let lines = 0;
             for (let y = board.length - 1; y >= 0; y--) {
@@ -243,7 +239,7 @@
             linesCleared += lines;
             linesClearedForSpeedIncrease += lines;
 
-            if (linesClearedForSpeedIncrease >= 3) {
+            if (linesClearedForSpeedIncrease >= 3) { // Speed up after every 3 lines cleared
                 increaseSpeed();
                 linesClearedForSpeedIncrease = 0;
             }
@@ -252,18 +248,8 @@
         }
 
         function increaseSpeed() {
-            dropInterval *= 0.70;
+            dropInterval *= 0.60; // Speed increases by 40%
             console.log(`Speed increased! New drop interval: ${dropInterval}ms`);
-        }
-
-        let piece = createPiece('T');
-        let piecePos = { x: 5, y: 0 };
-        let currentPiece = { piece, color: colors['T'] };
-        let nextPieceType = 'L';
-        let nextPiece = createPiece(nextPieceType);
-
-        function rotate(piece) {
-            return piece[0].map((_, i) => piece.map(row => row[i])).reverse();
         }
 
         function drop() {
@@ -311,28 +297,6 @@
             gameOverElement.style.display = "none";
         }
 
-        function move(direction) {
-            piecePos.x += direction;
-            if (collide(board, currentPiece.piece, piecePos)) {
-                piecePos.x -= direction;
-            }
-        }
-
-        function rotatePiece() {
-            const rotatedPiece = rotate(currentPiece.piece);
-            const oldX = piecePos.x;
-            let offset = 1;
-            while (collide(board, rotatedPiece, piecePos)) {
-                piecePos.x += offset;
-                offset = -(offset + (offset > 0 ? 1 : -1));
-                if (offset > currentPiece.piece[0].length) {
-                    piecePos.x = oldX;
-                    return;
-                }
-            }
-            currentPiece.piece = rotatedPiece;
-        }
-
         function draw() {
             context.clearRect(0, 0, canvas.width, canvas.height);
             drawPiece(currentPiece.piece, piecePos, currentPiece.color);
@@ -366,6 +330,53 @@
                 rotatePiece();
             }
         });
+
+        function move(direction) {
+            piecePos.x += direction;
+            if (collide(board, currentPiece.piece, piecePos)) {
+                piecePos.x -= direction;
+            }
+        }
+
+        function rotatePiece() {
+            const rotatedPiece = rotate(currentPiece.piece);
+            const oldX = piecePos.x;
+            let offset = 1;
+            while (collide(board, rotatedPiece, piecePos)) {
+                piecePos.x += offset;
+                offset = -(offset + (offset > 0 ? 1 : -1));
+                if (offset > currentPiece.piece[0].length) {
+                    piecePos.x = oldX;
+                    return;
+                }
+            }
+            currentPiece.piece = rotatedPiece;
+        }
+
+        function rotate(piece) {
+            return piece[0].map((_, i) => piece.map(row => row[i])).reverse();
+        }
+
+        function collide(board, piece, offset) {
+            for (let y = 0; y < piece.length; y++) {
+                for (let x = 0; x < piece[y].length; x++) {
+                    if (piece[y][x] && (board[y + offset.y] && board[y + offset.y][x + offset.x]) !== 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function merge(board, piece, offset, color) {
+            piece.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        board[y + offset.y][x + offset.x] = color;
+                    }
+                });
+            });
+        }
 
         function restartGame() {
             board = Array.from({ length: rows }, () => Array(columns).fill(0));
