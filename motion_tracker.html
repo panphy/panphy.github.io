@@ -24,6 +24,15 @@
             color: white; 
         }
 
+        /* Warning Banner */
+        #warningBanner {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ffeeba;
+        }
+
         #message {
             font-size: 1.2em;
             font-weight: bold;
@@ -41,6 +50,7 @@
             margin: 20px auto;
             padding: 10px 0;
             flex-wrap: wrap;
+            max-width: 900px;
         }
 
         #controls button {
@@ -132,7 +142,7 @@
             width: 48%; 
             max-width: 600px;
             min-width: 300px;
-	    min-height: 200px; 
+            min-height: 200px; 
         }
 
         video, canvas {
@@ -326,6 +336,11 @@
 </head>
 <body>
     <h1>Motion Tracker</h1>
+    
+    <!-- Warning Banner -->
+    <div id="warningBanner">
+        <strong>Note:</strong> This application is optimized for desktop browsers. Functionality on mobile devices may be limited.
+    </div>
 
     <!-- Calibration Prompt Modal -->
     <div id="calibrationPrompt">
@@ -382,8 +397,8 @@
     </div>
 
     <div id="velocityControls" style="display: none;">
-	<button id="plotVx">Plot vₓ vs t</button>
-	<button id="plotVy">Plot vᵧ vs t</button>
+        <button id="plotVx">Plot vₓ vs t</button>
+        <button id="plotVy">Plot vᵧ vs t</button>
         <button id="backToPosition">Plot x vs t and y vs t</button>
     </div>
 
@@ -414,7 +429,6 @@
         const plotVyButton = document.getElementById('plotVy');
         const backToPositionButton = document.getElementById('backToPosition');
         const overlayCanvas = document.getElementById('overlayCanvas');
-        const videoWrapper = document.getElementById('videoWrapper');
         const ctx = frameCanvas.getContext('2d');
         const overlayCtx = overlayCanvas.getContext('2d');
         const clearControls = document.getElementById('clearControls');
@@ -432,6 +446,7 @@
         const confirmExportButton = document.getElementById('confirmExport');
         const cancelExportButton = document.getElementById('cancelExport');
         const crosshair = document.getElementById('crosshair');
+        const warningBanner = document.getElementById('warningBanner');
 
         let mediaRecorder;
         let recordedChunks = [];
@@ -462,11 +477,15 @@
             return frameCanvas.height - y;
         }
 
+        // Prevent form submissions to avoid page reloads
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', (e) => e.preventDefault());
+        });
+
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
                 liveVideo.srcObject = stream;
-        	// Add this line to ensure video plays on iOS:
-        	liveVideo.play().catch(err => console.log('Video play error:', err));
+                liveVideo.play().catch(err => console.log('Video play error:', err));
 
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = (event) => {
@@ -550,7 +569,7 @@
                 playPauseButton.style.display = "inline-block";
                 slider.style.display = "inline-block";
                 timeDisplay.style.display = "inline-block";
-                message.innerHTML = "Use the slide bar to select the starting frame.<br>Click on the object to track its position.";
+                message.innerHTML = "Use the slider to navigate frames.<br>Click on the object to track its position.";
             }
         });
 
@@ -589,7 +608,7 @@
             playPauseButton.style.display = "inline-block";
             slider.style.display = "inline-block";
             timeDisplay.style.display = "inline-block";
-            message.innerHTML = "Use the slide bar to select the starting frame.<br>Click on the object to track its position.";
+            message.innerHTML = "Use the slider to navigate frames.<br>Click on the object to track its position.";
         }
 
         playPauseButton.addEventListener('click', () => {
@@ -835,7 +854,6 @@
 
         backToPositionButton.addEventListener("click", () => {
             plotPosition();
-            // After plotting position, no extra update needed since plotPosition() updates chart
         });
 
         clearDataPointsButton.addEventListener("click", () => {
@@ -999,9 +1017,7 @@
                 overlayCtx.stroke();
             }
 
-            // Draw axes and cyan dot only in analysis mode
             if (mode === "analyze") {
-                // If no origin set, use default (0,0)
                 let ox = originSet ? originPoint.x : 0;
                 let oy = originSet ? originPoint.y : 0;
 
@@ -1012,19 +1028,16 @@
                 overlayCtx.lineWidth = 4;
                 overlayCtx.strokeStyle = 'black';
 
-                // X axis
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, originCanvasY);
                 overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
                 overlayCtx.stroke();
 
-                // Y axis
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(originCanvasX, 0);
                 overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
                 overlayCtx.stroke();
 
-                // White inner lines
                 overlayCtx.lineWidth = 2;
                 overlayCtx.strokeStyle = 'white';
 
@@ -1038,7 +1051,6 @@
                 overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
                 overlayCtx.stroke();
 
-                // Cyan dot at origin
                 overlayCtx.fillStyle = "cyan";
                 overlayCtx.beginPath();
                 overlayCtx.arc(originCanvasX, originCanvasY, 5, 0, 2 * Math.PI);
@@ -1186,7 +1198,7 @@
 
         window.addEventListener('click', (event) => {
             if (event.target == calibrationPrompt) {
-                calibrationPrompt.style.display = "none";
+                hideCalibrationPrompt();
                 calibrationMode = false;
                 isDrawingCalibration = false;
                 calibrationStart = null;
