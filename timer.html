@@ -171,9 +171,9 @@
         </div>
     </div>
 
-    <!-- Separate audio elements for original and extra timers -->
-    <audio id="alarm-sound-original" src="/ding.mp3"></audio>
-    <audio id="alarm-sound-extra" src="/ding.mp3"></audio>
+    <!-- Separate audio elements for original and extra timers with preload -->
+    <audio id="alarm-sound-original" src="/ding.mp3" preload="auto"></audio>
+    <audio id="alarm-sound-extra" src="/ding.mp3" preload="auto"></audio>
 
     <script>
         let originalTimerInterval;
@@ -352,6 +352,14 @@
             alarmSound.currentTime = 0; // Reset to start
             alarmSound.play();
         }
+
+        // Preload audio by loading them when the page loads
+        window.addEventListener('load', () => {
+            const originalAlarm = document.getElementById('alarm-sound-original');
+            const extraAlarm = document.getElementById('alarm-sound-extra');
+            originalAlarm.load();
+            extraAlarm.load();
+        });
     </script>
 </body>
 </html>
