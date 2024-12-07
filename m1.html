@@ -415,8 +415,6 @@
         const backToPositionButton = document.getElementById('backToPosition');
         const overlayCanvas = document.getElementById('overlayCanvas');
         const videoWrapper = document.getElementById('videoWrapper');
-        const ctx = frameCanvas.getContext('2d');
-        const overlayCtx = overlayCanvas.getContext('2d');
         const clearControls = document.getElementById('clearControls');
         const clearDataPointsButton = document.getElementById('clearDataPoints');
         const clearCalibrationButton = document.getElementById('clearCalibration');
@@ -433,6 +431,8 @@
         const cancelExportButton = document.getElementById('cancelExport');
         const crosshair = document.getElementById('crosshair');
 
+        let ctx = frameCanvas.getContext('2d');
+        let overlayCtx = overlayCanvas.getContext('2d');
         let mediaRecorder;
         let recordedChunks = [];
         let recordedBlob = null;
@@ -452,7 +452,9 @@
 
         let originMode = false;
         let originSet = false;
-        let originPoint = { x: 0, y: 0 }; 
+        let originPoint = { x: 0, y: 0 };
+
+        let initializedOnce = false;
 
         function canvasYToCartesianY(y) {
             return frameCanvas.height - y;
@@ -460,6 +462,14 @@
 
         function cartesianYToCanvasY(y) {
             return frameCanvas.height - y;
+        }
+
+        // Scale canvases for high DPI screens
+        function scaleCanvasForDPI(canvas, context, width, height) {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            context.scale(dpr, dpr);
         }
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -510,6 +520,42 @@
             videoUploadInput.click();
         });
 
+        function handleLoadedMetadata() {
+            // Attempt to finalize video duration and dimensions by playing once
+            const finalize = () => {
+                videoElement.pause();
+                let dur = videoElement.duration;
+                if (!isFinite(dur) && videoElement.seekable.length > 0) {
+                    dur = videoElement.seekable.end(videoElement.seekable.length - 1);
+                }
+                if (!isFinite(dur)) dur = 0;
+                slider.max = dur;
+                slider.value = 0; 
+                timeDisplay.textContent = formatTime(0); 
+                videoElement.currentTime = 0;
+                videoElement.pause();
+
+                videoElement.addEventListener('seeked', () => {
+                    resizeOverlay(); 
+                    drawOverlay();
+                    drawFrame();
+                }, { once: true });
+
+                videoElement.currentTime = 0;
+                drawOverlay();
+                drawFrame();
+            };
+
+            const onTimeUpdateOnce = () => {
+                videoElement.removeEventListener('timeupdate', onTimeUpdateOnce);
+                finalize();
+            };
+
+            // Play and wait for a timeupdate to ensure dimensions correct on mobile
+            videoElement.addEventListener('timeupdate', onTimeUpdateOnce);
+            videoElement.play();
+        }
+
         videoUploadInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
@@ -519,33 +565,9 @@
 
                 videoElement.srcObject = null; 
                 videoElement.src = URL.createObjectURL(file);
-                videoElement.controls = true; // Restore controls
                 videoElement.autoplay = false;
                 videoElement.load();
-
-                videoElement.onloadedmetadata = () => {
-                    // Ensure proper duration and dimensions on iOS
-                    videoElement.play().then(() => {
-                        videoElement.pause();
-
-                        let dur = videoElement.duration;
-                        if (!isFinite(dur) && videoElement.seekable.length > 0) {
-                            dur = videoElement.seekable.end(videoElement.seekable.length - 1);
-                        }
-                        if (!isFinite(dur)) dur = 0;
-                        slider.max = dur;
-                        slider.value = 0; 
-                        timeDisplay.textContent = formatTime(0); 
-                        videoElement.currentTime = 0;
-                        videoElement.pause();
-                        videoElement.addEventListener('seeked', () => {
-                            resizeOverlay(); 
-                            drawOverlay();
-                            drawFrame();
-                        }, { once: true });
-                    });
-
-                };
+                videoElement.onloadedmetadata = handleLoadedMetadata;
 
                 liveVideo.style.display = "none";
                 frameCanvas.style.display = "block";
@@ -569,31 +591,9 @@
 
             videoElement.srcObject = null; 
             videoElement.src = URL.createObjectURL(recordedBlob);
-            videoElement.controls = true; // Restore controls
             videoElement.autoplay = false; 
             videoElement.load();
-
-            videoElement.onloadedmetadata = () => {
-                videoElement.play().then(() => {
-                    videoElement.pause();
-
-                    let dur = videoElement.duration;
-                    if (!isFinite(dur) && videoElement.seekable.length > 0) {
-                        dur = videoElement.seekable.end(videoElement.seekable.length - 1);
-                    }
-                    if (!isFinite(dur)) dur = 0;
-                    slider.max = dur;
-                    slider.value = 0; 
-                    timeDisplay.textContent = formatTime(0); 
-                    videoElement.currentTime = 0;
-                    videoElement.pause();
-                    videoElement.addEventListener('seeked', () => {
-                        resizeOverlay(); 
-                        drawOverlay(); 
-                        drawFrame(); 
-                    }, { once: true });
-                });
-            };
+            videoElement.onloadedmetadata = handleLoadedMetadata;
 
             liveVideo.style.display = "none";
             frameCanvas.style.display = "block";
@@ -623,10 +623,11 @@
         });
 
         videoElement.addEventListener("timeupdate", () => {
-            slider.value = videoElement.currentTime; 
-            timeDisplay.textContent = formatTime(videoElement.currentTime); 
-            // Always draw the frame to update the display
+            const t = isFinite(videoElement.currentTime) ? videoElement.currentTime : 0;
+            slider.value = Math.min(t, slider.max); 
+            timeDisplay.textContent = formatTime(t); 
             drawFrame(); 
+            drawOverlay(); 
         });
 
         slider.addEventListener("input", () => {
@@ -672,14 +673,13 @@
         });
 
         function drawFrame() {
-            resizeOverlay(); // Ensure correct sizing each time
-            frameCanvas.width = videoElement.videoWidth;
-            frameCanvas.height = videoElement.videoHeight;
+            if (!videoElement.videoWidth || !videoElement.videoHeight) return;
+            scaleCanvasForDPI(frameCanvas, ctx, videoElement.videoWidth, videoElement.videoHeight);
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-            ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
+            ctx.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight);
 
             const referenceHeight = 1080; 
-            const scale = frameCanvas.height / referenceHeight;
+            const scale = (videoElement.videoHeight) / referenceHeight;
             const crossSize = 25 * scale; 
             const circleRadius = 25 * scale; 
 
@@ -985,17 +985,15 @@
         }
 
         function resizeOverlay() {
-            const visibleElement = mode === "record" ? liveVideo : frameCanvas;
-            if (visibleElement.videoWidth && visibleElement.videoHeight) {
-                overlayCanvas.width = visibleElement.videoWidth;
-                overlayCanvas.height = visibleElement.videoHeight;
-            } else {
-                overlayCanvas.width = visibleElement.clientWidth;
-                overlayCanvas.height = visibleElement.clientHeight;
-            }
+            if (!videoElement.videoWidth || !videoElement.videoHeight) return;
+            let dpr = window.devicePixelRatio || 1;
+            overlayCanvas.width = videoElement.videoWidth * dpr;
+            overlayCanvas.height = videoElement.videoHeight * dpr;
+            overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
         function drawOverlay() {
+            if (!videoElement.videoWidth || !videoElement.videoHeight) return;
             resizeOverlay(); 
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
@@ -1003,17 +1001,20 @@
             overlayCtx.strokeStyle = "rgba(200, 200, 200, 0.7)";
             overlayCtx.lineWidth = 1;
 
-            for (let x = 0; x <= overlayCanvas.width; x += gridSize) {
+            const width = overlayCanvas.width;
+            const height = overlayCanvas.height;
+
+            for (let x = 0; x <= width; x += gridSize) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(x, 0);
-                overlayCtx.lineTo(x, overlayCanvas.height);
+                overlayCtx.lineTo(x, height);
                 overlayCtx.stroke();
             }
 
-            for (let y = 0; y <= overlayCanvas.height; y += gridSize) {
+            for (let y = 0; y <= height; y += gridSize) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, y);
-                overlayCtx.lineTo(overlayCanvas.width, y);
+                overlayCtx.lineTo(width, y);
                 overlayCtx.stroke();
             }
 
@@ -1030,12 +1031,12 @@
 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
+                overlayCtx.lineTo(width, originCanvasY);
                 overlayCtx.stroke();
 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
+                overlayCtx.lineTo(originCanvasX, height);
                 overlayCtx.stroke();
 
                 overlayCtx.lineWidth = 2;
@@ -1043,12 +1044,12 @@
 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
+                overlayCtx.lineTo(width, originCanvasY);
                 overlayCtx.stroke();
 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
+                overlayCtx.lineTo(originCanvasX, height);
                 overlayCtx.stroke();
 
                 overlayCtx.fillStyle = "cyan";
@@ -1073,17 +1074,14 @@
 
         window.addEventListener('resize', () => {
             if (mode === "analyze") {
-                resizeOverlay();
-                drawOverlay();
                 drawFrame();
+                drawOverlay();
             } else if (mode === "record") {
-                resizeOverlay();
                 drawOverlay();
             }
         });
 
         liveVideo.addEventListener('loadedmetadata', () => {
-            resizeOverlay();
             drawOverlay();
         });
 
