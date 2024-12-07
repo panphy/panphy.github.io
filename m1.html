@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motion Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -13,6 +13,7 @@
             background-color: #f9f9f9;
             color: #333;
         }
+
         h1 {
             text-align: center;
             font-size: 2.5em;
@@ -22,6 +23,7 @@
             background-color: #333; 
             color: white; 
         }
+
         #message {
             font-size: 1.2em;
             font-weight: bold;
@@ -30,6 +32,7 @@
             color: #666;
             max-width: 800px;
         }
+
         #controls {
             display: flex;
             justify-content: center;
@@ -39,6 +42,7 @@
             padding: 10px 0;
             flex-wrap: wrap;
         }
+
         #controls button {
             padding: 10px 20px;
             border: none;
@@ -50,25 +54,32 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         #controls button:disabled {
             background-color: #a9a9a9;
             cursor: not-allowed;
         }
+
         #controls button:hover:not(:disabled) {
             background-color: #0056b3;
         }
+
         .clear-button {
             background-color: #dc3545; 
         }
+
         .clear-button:hover:not(:disabled) {
             background-color: #c82333;
         }
+
         .export-button {
             background-color: #17a2b8; 
         }
+
         .export-button:hover:not(:disabled) {
             background-color: #138496;
         }
+
         #controls input[type="range"] {
             appearance: none;
             background: #007bff;
@@ -79,6 +90,7 @@
             cursor: pointer;
             width: 200px;
         }
+
         #controls input[type="range"]::-webkit-slider-thumb {
             appearance: none;
             width: 15px;
@@ -89,6 +101,7 @@
             cursor: pointer;
             margin-top: -5px;
         }
+
         #controls input[type="range"]::-moz-range-thumb {
             width: 15px;
             height: 15px;
@@ -97,10 +110,12 @@
             border: 2px solid #007bff;
             cursor: pointer;
         }
+
         #controls span {
             font-size: 1.1em;
             color: #333;
         }
+
         #analysisContainer {
             display: flex;
             justify-content: space-evenly;
@@ -111,6 +126,7 @@
             gap: 20px;
             max-width: 1200px;
         }
+
         #videoWrapper {
             position: relative;
             width: 48%; 
@@ -118,6 +134,7 @@
             min-width: 300px;
             min-height: 200px; 
         }
+
         video, canvas {
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -125,6 +142,7 @@
             background-color: #f5f5f5;
             display: block;
         }
+
         #overlayCanvas {
             position: absolute;
             top: 0;
@@ -135,6 +153,7 @@
             pointer-events: none;
             background-color: transparent;
         }
+
         #chartCanvasContainer {
             display: flex;
             justify-content: center;
@@ -145,14 +164,17 @@
             max-width: 600px;
             height: 400px;
         }
+
         #chartCanvasContainer canvas {
             width: 100%;
             height: 100%;
         }
+
         #velocityControls {
             text-align: center;
             margin-top: 20px;
         }
+
         #velocityControls button {
             margin: 10px;
             padding: 10px 20px;
@@ -164,13 +186,16 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         #velocityControls button:hover {
             background-color: #218838;
         }
+
         #clearControls {
             text-align: center;
             margin-top: 10px;
         }
+
         #clearControls button {
             margin: 5px;
             padding: 10px 20px;
@@ -181,14 +206,23 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         @media (max-width: 768px) {
             #analysisContainer {
                 flex-direction: column;
             }
+
             #videoWrapper, #chartCanvasContainer {
                 width: 90%;
             }
         }
+
+        .calibration-line {
+            stroke: orange;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+        }
+
         #calibrationPrompt, #exportPrompt {
             position: fixed;
             top: 50%;
@@ -204,23 +238,28 @@
             width: 300px;
             box-sizing: border-box;
         }
+
         #calibrationPrompt h2, #exportPrompt h2 {
             margin-top: 0;
             text-align: center;
         }
+
         #calibrationPrompt p, #exportPrompt p {
             text-align: center;
         }
+
         #calibrationPrompt form, #exportPrompt form {
             display: flex;
             flex-direction: column;
         }
+
         #calibrationPrompt input, #exportPrompt input {
             width: 100%;
             padding: 8px;
             margin: 10px 0;
             box-sizing: border-box;
         }
+
         #calibrationPrompt button, #exportPrompt button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -231,15 +270,19 @@
             width: 48%;
             font-size: 1em;
         }
+
         #calibrationPrompt button:hover, #exportPrompt button:hover:not(.cancel-button) {
             background-color: #0056b3;
         }
+
         .cancel-button {
             background-color: #dc3545;
         }
+
         .cancel-button:hover {
             background-color: #c82333;
         }
+
         .crosshair {
             position: absolute;
             width: 20px;
@@ -248,11 +291,13 @@
             z-index: 3;
             display: none;
         }
+
         .crosshair::before, .crosshair::after {
             content: '';
             position: absolute;
             background-color: red;
         }
+
         .crosshair::before {
             top: 50%;
             left: 0;
@@ -260,6 +305,7 @@
             height: 1px;
             transform: translateY(-50%);
         }
+
         .crosshair::after {
             left: 50%;
             top: 0;
@@ -267,6 +313,7 @@
             height: 100%;
             transform: translateX(-50%);
         }
+
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
@@ -284,7 +331,7 @@
     <div id="calibrationPrompt">
         <h2>Calibration</h2>
         <p>Enter the actual length and unit of the drawn line:</p>
-        <form onsubmit="return false;" autocomplete="off">
+        <form autocomplete="off">
             <input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
             <input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
@@ -298,7 +345,7 @@
     <div id="exportPrompt">
         <h2>Export Data</h2>
         <p>Enter the desired filename for the exported data:</p>
-        <form onsubmit="return false;" autocomplete="off">
+        <form autocomplete="off">
             <input type="text" id="exportFilename" name="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmExport">Export</button>
@@ -324,7 +371,7 @@
 
     <div id="analysisContainer">
         <div id="videoWrapper">
-            <video id="liveVideo" autoplay muted playsinline webkit-playsinline preload="metadata"></video>
+            <video id="liveVideo" autoplay muted playsinline webkit-playsinline></video>
             <canvas id="frameCanvas" style="display: none;"></canvas>
             <canvas id="overlayCanvas"></canvas>
             <div class="crosshair" id="crosshair"></div>
@@ -368,6 +415,8 @@
         const backToPositionButton = document.getElementById('backToPosition');
         const overlayCanvas = document.getElementById('overlayCanvas');
         const videoWrapper = document.getElementById('videoWrapper');
+        const ctx = frameCanvas.getContext('2d');
+        const overlayCtx = overlayCanvas.getContext('2d');
         const clearControls = document.getElementById('clearControls');
         const clearDataPointsButton = document.getElementById('clearDataPoints');
         const clearCalibrationButton = document.getElementById('clearCalibration');
@@ -384,8 +433,6 @@
         const cancelExportButton = document.getElementById('cancelExport');
         const crosshair = document.getElementById('crosshair');
 
-        let ctx = frameCanvas.getContext('2d');
-        let overlayCtx = overlayCanvas.getContext('2d');
         let mediaRecorder;
         let recordedChunks = [];
         let recordedBlob = null;
@@ -395,19 +442,22 @@
         let skippingFrame = false; 
         let videoElement = liveVideo; 
         let mode = "record"; 
+
         let calibrationMode = false;
         let calibrationStart = null;
         let calibrationEnd = null;
         let scaleFactor = 1; 
         let scaleUnit = "pixels";
         let isDrawingCalibration = false;
+
         let originMode = false;
         let originSet = false;
-        let originPoint = { x: 0, y: 0 };
+        let originPoint = { x: 0, y: 0 }; 
 
         function canvasYToCartesianY(y) {
             return frameCanvas.height - y;
         }
+
         function cartesianYToCanvasY(y) {
             return frameCanvas.height - y;
         }
@@ -415,6 +465,7 @@
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
                 liveVideo.srcObject = stream;
+                // Add this line to ensure video plays on iOS:
                 liveVideo.play().catch(err => console.log('Video play error:', err));
 
                 mediaRecorder = new MediaRecorder(stream);
@@ -469,12 +520,21 @@
 
                 videoElement.srcObject = null; 
                 videoElement.src = URL.createObjectURL(file);
+                videoElement.controls = true;
                 videoElement.autoplay = false;
                 videoElement.load();
 
-                videoElement.onloadedmetadata = () => {
-                    finalizeVideoInitialization();
-                };
+                videoElement.addEventListener('loadedmetadata', () => { // Changed from 'loadeddata' to 'loadedmetadata'
+                    videoElement.pause();
+                    videoElement.currentTime = 0;
+                    slider.max = videoElement.duration || 0; 
+                    slider.value = 0;
+                    timeDisplay.textContent = formatTime(0);
+
+                    resizeOverlay();
+                    drawOverlay();
+                    drawFrame();
+                }, { once: true });
 
                 liveVideo.style.display = "none";
                 frameCanvas.style.display = "block";
@@ -498,11 +558,21 @@
 
             videoElement.srcObject = null; 
             videoElement.src = URL.createObjectURL(recordedBlob);
+            videoElement.controls = true;
             videoElement.autoplay = false; 
             videoElement.load();
 
             videoElement.onloadedmetadata = () => {
-                finalizeVideoInitialization();
+                slider.max = videoElement.duration; 
+                slider.value = 0; 
+                timeDisplay.textContent = formatTime(0); 
+                videoElement.currentTime = 0;
+                videoElement.pause();
+                videoElement.addEventListener('seeked', () => {
+                    resizeOverlay(); 
+                    drawOverlay(); 
+                    drawFrame(); 
+                }, { once: true });
             };
 
             liveVideo.style.display = "none";
@@ -521,35 +591,6 @@
             message.innerHTML = "Use the slide bar to select the starting frame.<br>Click on the object to track its position.";
         }
 
-        function finalizeVideoInitialization() {
-            let dur = videoElement.duration;
-            if (!isFinite(dur) && videoElement.seekable.length > 0) {
-                dur = videoElement.seekable.end(videoElement.seekable.length - 1);
-            }
-            if (!isFinite(dur)) dur = 0;
-            slider.max = dur;
-            slider.value = 0; 
-            timeDisplay.textContent = formatTime(0); 
-            videoElement.currentTime = 0;
-            videoElement.pause();
-
-            videoElement.addEventListener('seeked', () => {
-                setupCanvasDimensions();
-                drawOverlay();
-                drawFrame();
-            }, { once: true });
-
-            videoElement.currentTime = 0; 
-        }
-
-        function setupCanvasDimensions() {
-            if (!videoElement.videoWidth || !videoElement.videoHeight) return;
-            frameCanvas.width = videoElement.videoWidth;
-            frameCanvas.height = videoElement.videoHeight;
-            overlayCanvas.width = videoElement.videoWidth;
-            overlayCanvas.height = videoElement.videoHeight;
-        }
-
         playPauseButton.addEventListener('click', () => {
             if (isPlaying) {
                 videoElement.pause();
@@ -562,73 +603,49 @@
         });
 
         videoElement.addEventListener("timeupdate", () => {
-            const t = isFinite(videoElement.currentTime) ? videoElement.currentTime : 0;
-            slider.value = Math.min(t, slider.max); 
-            timeDisplay.textContent = formatTime(t); 
-            drawFrame(); 
-            drawOverlay(); 
+            slider.value = videoElement.currentTime; 
+            timeDisplay.textContent = formatTime(videoElement.currentTime); 
+            if (!skippingFrame) drawFrame(); 
         });
 
         slider.addEventListener("input", () => {
-            const val = parseFloat(slider.value);
-            if (val <= videoElement.duration) {
-                videoElement.currentTime = val; 
-            }
+            videoElement.currentTime = parseFloat(slider.value); 
         });
 
-        // Use pointer events for mobile compatibility
-        overlayCanvas.addEventListener('pointerdown', startCalibrationOrOrigin);
-        overlayCanvas.addEventListener('pointermove', moveCalibrationOrCrosshair);
-        overlayCanvas.addEventListener('pointerup', endCalibration);
+        // Add pointerup event for mobile compatibility
+        overlayCanvas.addEventListener('pointerup', handleOverlayPointerUp);
+        frameCanvas.addEventListener('pointerup', handleFramePointerUp);
 
-        function startCalibrationOrOrigin(event) {
-            if (!calibrationMode) return;
-            isDrawingCalibration = true;
-            const rect = overlayCanvas.getBoundingClientRect();
-            const scaleX = overlayCanvas.width / rect.width;
-            const scaleY = overlayCanvas.height / rect.height;
-            const x = (event.clientX - rect.left) * scaleX;
-            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-            calibrationStart = { x, y };
-            calibrationEnd = { x, y };
-            event.preventDefault();
-        }
+        overlayCanvas.addEventListener('click', (event) => {
+            handleOverlayPointerUp(event);
+        });
 
-        function moveCalibrationOrCrosshair(event) {
-            if ((calibrationMode || originMode) && mode === "analyze") {
-                const rect = overlayCanvas.getBoundingClientRect();
-                const crossX = event.clientX - rect.left;
-                const crossY = event.clientY - rect.top;
-                crosshair.style.left = `${crossX - 10}px`;
-                crosshair.style.top = `${crossY - 10}px`;
-                crosshair.style.display = "block";
-            }
-            if (calibrationMode && isDrawingCalibration) {
+        frameCanvas.addEventListener('click', (event) => {
+            handleFramePointerUp(event);
+        });
+
+        function handleOverlayPointerUp(event) {
+            if (mode === "analyze" && originMode && !calibrationMode) {
                 const rect = overlayCanvas.getBoundingClientRect();
                 const scaleX = overlayCanvas.width / rect.width;
                 const scaleY = overlayCanvas.height / rect.height;
                 const x = (event.clientX - rect.left) * scaleX;
-                const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-                calibrationEnd = { x, y };
+                const y = (event.clientY - rect.top) * scaleY;
+                const cartesianY = canvasYToCartesianY(y);
+                originPoint = { x: x, y: cartesianY };
+                originSet = true;
+                originMode = false;
+                frameCanvas.style.cursor = "default";
+                crosshair.style.display = "none";
+                overlayCanvas.style.pointerEvents = "none";
+                message.textContent = "Origin set. Data will now be plotted relative to the chosen origin.";
                 drawOverlay();
-                event.preventDefault();
+                plotPosition();
             }
         }
 
-        function endCalibration(event) {
-            if (!calibrationMode || !isDrawingCalibration) return;
-            isDrawingCalibration = false;
-            calibrationMode = false;
-            overlayCanvas.style.pointerEvents = "none";
-            frameCanvas.style.cursor = "default";
-            message.innerHTML = "Calibration line drawn. Enter actual length and unit.";
-            showCalibrationPrompt();
-        }
-
-        // Set origin with frameCanvas pointerdown (for accurate coordinate mapping)
-        frameCanvas.addEventListener('pointerdown', (event) => {
+        function handleFramePointerUp(event) {
             if (mode === "analyze" && !calibrationMode && !originMode) {
-                // Selecting data point
                 const rect = frameCanvas.getBoundingClientRect();
                 const scaleX = frameCanvas.width / rect.width; 
                 const scaleY = frameCanvas.height / rect.height; 
@@ -639,33 +656,22 @@
                 frameData.push({ x: canvasX, y: cartesianY, time: videoElement.currentTime });
                 plotPosition();
                 skipToNextFrame();
-            } else if (mode === "analyze" && originMode && !calibrationMode) {
-                // Selecting origin
-                const rect = frameCanvas.getBoundingClientRect();
-                const scaleX = frameCanvas.width / rect.width; 
-                const scaleY = frameCanvas.height / rect.height; 
-                const canvasX = (event.clientX - rect.left) * scaleX;
-                const canvasY = (event.clientY - rect.top) * scaleY;
-                const cartesianY = canvasYToCartesianY(canvasY);
-                originPoint = { x: canvasX, y: cartesianY };
-                originSet = true;
-                originMode = false;
-                frameCanvas.style.cursor = "default";
-                crosshair.style.display = "none";
-                overlayCanvas.style.pointerEvents = "none";
-                message.textContent = "Origin set. Data will now be plotted relative to the chosen origin.";
-                drawOverlay();
-                plotPosition();
             }
-        });
+        }
 
         function drawFrame() {
-            if (!videoElement.videoWidth || !videoElement.videoHeight) return;
+            if (!videoElement.videoWidth || !videoElement.videoHeight) {
+                // If video dimensions are not available, retry after a short delay
+                setTimeout(drawFrame, 100);
+                return;
+            }
+            frameCanvas.width = videoElement.videoWidth;
+            frameCanvas.height = videoElement.videoHeight;
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
             ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
 
             const referenceHeight = 1080; 
-            const scale = (frameCanvas.height) / referenceHeight;
+            const scale = frameCanvas.height / referenceHeight;
             const crossSize = 25 * scale; 
             const circleRadius = 25 * scale; 
 
@@ -677,13 +683,13 @@
         }
 
         function drawDataPoint(x, y, crossSize, circleRadius) {
-            ctx.fillStyle = 'red'; 
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
             ctx.beginPath();
             ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.strokeStyle = 'red';
-            ctx.lineWidth = 2; 
+            ctx.lineWidth = 1; 
             ctx.beginPath();
             ctx.moveTo(x - crossSize, y);
             ctx.lineTo(x + crossSize, y);
@@ -693,12 +699,8 @@
         }
 
         function skipToNextFrame() {
-            if (videoElement.currentTime + (1/30) >= videoElement.duration) {
-                message.textContent = "Reached end of video.";
-                return;
-            }
             skippingFrame = true;
-            videoElement.currentTime = videoElement.currentTime + 1 / 30; 
+            videoElement.currentTime += 1 / 30; 
             videoElement.addEventListener('seeked', () => {
                 skippingFrame = false;
                 drawFrame();
@@ -745,6 +747,9 @@
                                     display: true,
                                     text: "Time (s)",
                                 },
+                                grid: {
+                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
+                                },
                             },
                             y: {
                                 type: "linear",
@@ -752,6 +757,9 @@
                                 title: {
                                     display: true,
                                     text: `Position (${scaleUnit})`,
+                                },
+                                grid: {
+                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
                                 },
                             },
                         },
@@ -798,7 +806,6 @@
             const velocityTimes = [];
             for (let i = 1; i < frameData.length; i++) {
                 const deltaTime = frameData[i].time - frameData[i - 1].time;
-                if (deltaTime <= 0) continue;
                 const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
                 const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
 
@@ -806,14 +813,17 @@
                 const deltaY = p2.y - p1.y;
                 const deltaPos = axis === 'x' ? deltaX : deltaY;
 
-                const velocity = (deltaPos * scaleFactor) / deltaTime;
-                velocityEstimates.push(velocity);
-                velocityTimes.push(frameData[i].time);
+                const velocity = deltaTime > 0 ? (deltaPos * scaleFactor) / deltaTime : 0;
+                if (deltaTime > 0) {
+                    velocityEstimates.push(velocity);
+                    velocityTimes.push(frameData[i].time);
+                }
             }
 
             const smoothedVelocities = [];
             const smoothedTimes = [];
-            for (let i = windowSize - 1; i < velocityEstimates.length; i++) {
+            for (let i = 0; i < velocityEstimates.length; i++) {
+                if (i < windowSize - 1) continue;
                 const window = velocityEstimates.slice(i - windowSize + 1, i + 1);
                 const averageVelocity = window.reduce((sum, val) => sum + val, 0) / windowSize;
                 smoothedVelocities.push(parseFloat(averageVelocity.toFixed(3)));
@@ -838,8 +848,10 @@
 
         plotVxButton.addEventListener("click", () => plotVelocity("x"));
         plotVyButton.addEventListener("click", () => plotVelocity("y"));
+
         backToPositionButton.addEventListener("click", () => {
             plotPosition();
+            // After plotting position, no extra update needed since plotPosition() updates chart
         });
 
         clearDataPointsButton.addEventListener("click", () => {
@@ -863,7 +875,12 @@
 
             drawOverlay();
             drawFrame();
-            plotPosition();
+
+            if (positionChart) {
+                positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
+                plotPosition(); 
+            }
+
             message.textContent = "Calibration cleared. Positions are now in pixel units.";
         });
 
@@ -895,10 +912,12 @@
 
         confirmExportButton.addEventListener('click', () => {
             const desiredFilename = exportFilenameInput.value.trim();
+
             if (desiredFilename === "") {
                 alert("Please enter a valid filename.");
                 return;
             }
+
             const sanitizedFilename = desiredFilename.replace(/[^a-zA-Z0-9-_.]/g, "_");
             let finalFilename = sanitizedFilename;
             if (!finalFilename.toLowerCase().endsWith(".csv")) {
@@ -918,18 +937,14 @@
             const velocityData = [];
             for (let i = 1; i < frameData.length; i++) {
                 const deltaTime = frameData[i].time - frameData[i - 1].time;
-                if (deltaTime <= 0) {
-                    velocityData.push({ v_x: "", v_y: "" });
-                    continue;
-                }
                 const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
                 const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
 
                 const deltaX = p2.x - p1.x;
                 const deltaY = p2.y - p1.y;
 
-                const v_x = (deltaX * scaleFactor) / deltaTime;
-                const v_y = (deltaY * scaleFactor) / deltaTime;
+                const v_x = deltaTime > 0 ? (deltaX * scaleFactor) / deltaTime : 0;
+                const v_y = deltaTime > 0 ? (deltaY * scaleFactor) / deltaTime : 0;
 
                 velocityData.push({ v_x, v_y });
             }
@@ -943,8 +958,8 @@
                 const time = frameData[i].time.toFixed(3);
                 const x = xAdj.toFixed(3);
                 const y = yAdj.toFixed(3);
-                const v_x = i > 0 && velocityData[i - 1].v_x !== undefined ? velocityData[i - 1].v_x.toFixed(3) : "";
-                const v_y = i > 0 && velocityData[i - 1].v_y !== undefined ? velocityData[i - 1].v_y.toFixed(3) : "";
+                const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
+                const v_y = i > 0 ? velocityData[i - 1].v_y.toFixed(3) : "";
                 csvContent += `${time},${x},${y},${v_x},${v_y}\n`;
             }
 
@@ -961,39 +976,49 @@
         }
 
         function formatTime(time) {
-            if (!isFinite(time) || time < 0) time = 0;
+            if (isNaN(time)) return "0:00.000";
             const minutes = Math.floor(time / 60);
             const seconds = Math.floor(time % 60);
             const milliseconds = Math.floor((time - Math.floor(time)) * 1000);
             return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
         }
 
+        function resizeOverlay() {
+            const visibleElement = mode === "record" ? liveVideo : frameCanvas;
+            if (visibleElement.videoWidth && visibleElement.videoHeight) {
+                overlayCanvas.width = visibleElement.videoWidth;
+                overlayCanvas.height = visibleElement.videoHeight;
+            } else {
+                overlayCanvas.width = visibleElement.clientWidth;
+                overlayCanvas.height = visibleElement.clientHeight;
+            }
+        }
+
         function drawOverlay() {
-            if (!videoElement.videoWidth || !videoElement.videoHeight) return;
+            resizeOverlay(); 
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
             const gridSize = 50; 
             overlayCtx.strokeStyle = "rgba(200, 200, 200, 0.7)";
             overlayCtx.lineWidth = 1;
 
-            const width = overlayCanvas.width;
-            const height = overlayCanvas.height;
-
-            for (let x = 0; x <= width; x += gridSize) {
+            for (let x = 0; x <= overlayCanvas.width; x += gridSize) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(x, 0);
-                overlayCtx.lineTo(x, height);
+                overlayCtx.lineTo(x, overlayCanvas.height);
                 overlayCtx.stroke();
             }
 
-            for (let y = 0; y <= height; y += gridSize) {
+            for (let y = 0; y <= overlayCanvas.height; y += gridSize) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, y);
-                overlayCtx.lineTo(width, y);
+                overlayCtx.lineTo(overlayCanvas.width, y);
                 overlayCtx.stroke();
             }
 
+            // Draw axes and cyan dot only in analysis mode
             if (mode === "analyze") {
+                // If no origin set, use default (0,0)
                 let ox = originSet ? originPoint.x : 0;
                 let oy = originSet ? originPoint.y : 0;
 
@@ -1004,29 +1029,33 @@
                 overlayCtx.lineWidth = 4;
                 overlayCtx.strokeStyle = 'black';
 
+                // X axis
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(width, originCanvasY);
+                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
                 overlayCtx.stroke();
 
+                // Y axis
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, height);
+                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
                 overlayCtx.stroke();
 
+                // White inner lines
                 overlayCtx.lineWidth = 2;
                 overlayCtx.strokeStyle = 'white';
 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(width, originCanvasY);
+                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
                 overlayCtx.stroke();
 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, height);
+                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
                 overlayCtx.stroke();
 
+                // Cyan dot at origin
                 overlayCtx.fillStyle = "cyan";
                 overlayCtx.beginPath();
                 overlayCtx.arc(originCanvasX, originCanvasY, 5, 0, 2 * Math.PI);
@@ -1047,6 +1076,22 @@
             }
         }
 
+        window.addEventListener('resize', () => {
+            if (mode === "analyze") {
+                resizeOverlay();
+                drawOverlay();
+                drawFrame();
+            } else if (mode === "record") {
+                resizeOverlay();
+                drawOverlay();
+            }
+        });
+
+        liveVideo.addEventListener('loadedmetadata', () => {
+            resizeOverlay();
+            drawOverlay();
+        });
+
         calibrateButton.addEventListener('click', () => {
             if (mode !== "analyze") return;
             originMode = false;
@@ -1056,9 +1101,63 @@
             isDrawingCalibration = false;
             calibrationStart = null;
             calibrationEnd = null;
-            message.textContent = "Calibration: Press and drag on the video to draw a calibration line.";
+            message.textContent = "Calibration: Click and drag on the video to draw a calibration line.";
             frameCanvas.style.cursor = "crosshair";
         });
+
+        overlayCanvas.addEventListener('mousemove', (event) => {
+            if ((calibrationMode || originMode) && mode === "analyze") {
+                const rect = overlayCanvas.getBoundingClientRect();
+                const crossX = event.clientX - rect.left;
+                const crossY = event.clientY - rect.top;
+                crosshair.style.left = `${crossX - 10}px`;
+                crosshair.style.top = `${crossY - 10}px`;
+                crosshair.style.display = "block";
+            }
+        });
+
+        overlayCanvas.addEventListener('mousedown', (event) => {
+            if (!calibrationMode) return;
+            isDrawingCalibration = true;
+            const rect = overlayCanvas.getBoundingClientRect();
+            const scaleX = overlayCanvas.width / rect.width;
+            const scaleY = overlayCanvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
+            calibrationStart = { x, y };
+            calibrationEnd = { x, y };
+        });
+
+        overlayCanvas.addEventListener('mousemove', (event) => {
+            if (!calibrationMode || !isDrawingCalibration) return;
+            const rect = overlayCanvas.getBoundingClientRect();
+            const scaleX = overlayCanvas.width / rect.width;
+            const scaleY = overlayCanvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
+            calibrationEnd = { x, y };
+            drawOverlay(); 
+        });
+
+        overlayCanvas.addEventListener('mouseup', (event) => {
+            if (!calibrationMode || !isDrawingCalibration) return;
+            isDrawingCalibration = false;
+            calibrationMode = false;
+            overlayCanvas.style.pointerEvents = "none";
+            frameCanvas.style.cursor = "default";
+            message.innerHTML = "Calibration line drawn. Enter actual length and unit.";
+            showCalibrationPrompt();
+        });
+
+        function showCalibrationPrompt() {
+            calibrationPrompt.style.display = "block";
+        }
+
+        function hideCalibrationPrompt() {
+            calibrationPrompt.style.display = "none";
+            actualLengthInput.value = "";
+            actualUnitInput.value = "";
+        }
 
         confirmCalibrationButton.addEventListener('click', () => {
             const actualLength = parseFloat(actualLengthInput.value);
@@ -1085,6 +1184,7 @@
             drawOverlay();
             drawFrame();
             plotPosition();
+
             message.textContent = `Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}`;
             crosshair.style.display = "none";
         });
@@ -1124,8 +1224,8 @@
             calibrationMode = false;
             isDrawingCalibration = false;
             originMode = true;
-            overlayCanvas.style.pointerEvents = "none"; 
-            message.textContent = "Tap on the video area to set the new origin.";
+            overlayCanvas.style.pointerEvents = "auto";
+            message.textContent = "Click on the video to set the new origin.";
             frameCanvas.style.cursor = "crosshair";
             crosshair.style.display = "block";
         });
