@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .time {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        .extra-time {
+            color: red;
+        }
+        .info {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        input {
+            padding: 10px;
+            font-size: 1em;
+            margin: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced Timer</h1>
+    <div class="time" id="original-time">00:00:00</div>
+    <div class="time extra-time" id="extra-time">00:00:00</div>
+    <div class="info" id="start-end-times"></div>
+    <input type="number" id="hours" placeholder="Hours" min="0">
+    <input type="number" id="minutes" placeholder="Minutes" min="0" max="59">
+    <input type="number" id="seconds" placeholder="Seconds" min="0" max="59">
+    <button onclick="setTimer()">Set Timer</button>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="clearTimer()">Clear</button>
+
+    <audio id="alarm-sound" src="/ding.mp3"></audio>
+
+    <script>
+        let timerInterval;
+        let remainingTime = 0;
+        let extraRemainingTime = 0;
+
+        function formatTime(hours, minutes, seconds) {
+            return String(hours).padStart(2, '0') + ':' + 
+                   String(minutes).padStart(2, '0') + ':' + 
+                   String(seconds).padStart(2, '0');
+        }
+
+        function format24HourTime(date) {
+            return String(date.getHours()).padStart(2, '0') + ':' + 
+                   String(date.getMinutes()).padStart(2, '0');
+        }
+
+        function setTimer() {
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+
+            remainingTime = hours * 3600 + minutes * 60 + seconds;
+            extraRemainingTime = Math.round(remainingTime * 1.25);
+
+            document.getElementById('original-time').textContent = formatTime(
+                Math.floor(remainingTime / 3600),
+                Math.floor((remainingTime % 3600) / 60),
+                remainingTime % 60
+            );
+
+            document.getElementById('extra-time').textContent = formatTime(
+                Math.floor(extraRemainingTime / 3600),
+                Math.floor((extraRemainingTime % 3600) / 60),
+                extraRemainingTime % 60
+            );
+
+            document.getElementById('start-end-times').textContent = "";
+        }
+
+        function startTimer() {
+            if (remainingTime <= 0) return;
+
+            clearInterval(timerInterval);
+
+            const now = new Date();
+            const startTime = format24HourTime(now);
+            const endTime = new Date(now.getTime() + extraRemainingTime * 1000);
+            document.getElementById('start-end-times').textContent = `Start Time: ${startTime}, End Time: ${format24HourTime(endTime)}`;
+
+            timerInterval = setInterval(() => {
+                if (remainingTime > 0) {
+                    remainingTime--;
+                    extraRemainingTime--;
+
+                    document.getElementById('original-time').textContent = formatTime(
+                        Math.floor(remainingTime / 3600),
+                        Math.floor((remainingTime % 3600) / 60),
+                        remainingTime % 60
+                    );
+
+                    document.getElementById('extra-time').textContent = formatTime(
+                        Math.floor(extraRemainingTime / 3600),
+                        Math.floor((extraRemainingTime % 3600) / 60),
+                        extraRemainingTime % 60
+                    );
+
+                } else {
+                    clearInterval(timerInterval);
+                    document.getElementById('alarm-sound').play();
+                    alert('Timer finished!');
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function clearTimer() {
+            clearInterval(timerInterval);
+            remainingTime = 0;
+            extraRemainingTime = 0;
+            document.getElementById('original-time').textContent = "00:00:00";
+            document.getElementById('extra-time').textContent = "00:00:00";
+            document.getElementById('start-end-times').textContent = "";
+            document.getElementById('hours').value = "";
+            document.getElementById('minutes').value = "";
+            document.getElementById('seconds').value = "";
+        }
+    </script>
+</body>
+</html>
