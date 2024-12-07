@@ -18,18 +18,35 @@
             padding: 1rem 0;
             text-align: center;
         }
-        nav {
-            margin: 1rem auto;
-            text-align: center;
+        .project-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem auto;
+            max-width: 800px;
         }
-        nav a {
-            margin: 0 1rem;
+        .project-link {
             text-decoration: none;
-            color: #4CAF50;
-            font-weight: bold;
         }
-        nav a:hover {
-            text-decoration: underline;
+        .button {
+            display: block;
+            padding: 1rem 2rem;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
         }
         section {
             max-width: 800px;
@@ -38,6 +55,7 @@
             background: white;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            text-align: center;
         }
         footer {
             text-align: center;
@@ -51,15 +69,26 @@
         <h1>Welcome to My Web Apps & Simulations</h1>
         <p>Explore my projects and interactive tools!</p>
     </header>
-    <nav>
-        <a href="/markdown_editor.html">Markdown Editor</a>
-        <a href="/curve_fitting.html">Graph Plotting + Curve Fitting</a>
-        <a href="/motion_tracker">Motion Tracker</a>
-        <a href="/Ising_model.html">2D Ising Model</a>
-        <a href="/dodge_game.html">Dodge the Dots</a>
-        <a href="/Tetris.html">Classic Tetris</a>
-        <!-- Add more links here -->
-    </nav>
+    <div class="project-links">
+        <a href="/markdown_editor.html" class="project-link">
+            <button class="button">Markdown Editor</button>
+        </a>
+        <a href="/curve_fitting.html" class="project-link">
+            <button class="button">Graph Plotting + Curve Fitting</button>
+        </a>
+        <a href="/motion_tracker" class="project-link">
+            <button class="button">Motion Tracker</button>
+        </a>
+        <a href="/Ising_model.html" class="project-link">
+            <button class="button">2D Ising Model</button>
+        </a>
+        <a href="/dodge_game.html" class="project-link">
+            <button class="button">Dodge the Dots</button>
+        </a>
+        <a href="/Tetris.html" class="project-link">
+            <button class="button">Classic Tetris</button>
+        </a>
+    </div>
     <section>
         <h2>About</h2>
         <p>This is the central hub for all my web applications and physics simulations. Click on any project above to explore further!</p>
