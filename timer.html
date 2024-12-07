@@ -116,6 +116,12 @@
             transform: translateY(-3px);
             opacity: 0.9;
         }
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
         @media (max-width: 600px) {
             h1 {
                 font-size: 6vw;
@@ -165,7 +171,9 @@
         </div>
     </div>
 
-    <audio id="alarm-sound" src="/ding.mp3"></audio>
+    <!-- Separate audio elements for original and extra timers -->
+    <audio id="alarm-sound-original" src="/ding.mp3"></audio>
+    <audio id="alarm-sound-extra" src="/ding.mp3"></audio>
 
     <script>
         let originalTimerInterval;
@@ -209,6 +217,7 @@
 
             document.getElementById('start-end-times').innerHTML = "";
             paused = false;
+            stopBlinking(); /* Ensure blinking is stopped */
         }
 
         function startTimer() {
@@ -236,8 +245,8 @@
                     );
                 } else {
                     clearInterval(originalTimerInterval);
-                    document.getElementById('alarm-sound').play();
-                    // alert('Original timer finished!'); /* Removed */
+                    playAlarm('alarm-sound-original');
+                    blinkTimer('original-time');
                 }
             }, 1000);
 
@@ -251,8 +260,8 @@
                     );
                 } else {
                     clearInterval(extraTimerInterval);
-                    document.getElementById('alarm-sound').play();
-                    // alert('25% Extra Time finished!'); /* Removed */
+                    playAlarm('alarm-sound-extra');
+                    blinkTimer('extra-time');
                 }
             }, 1000);
         }
@@ -284,8 +293,8 @@
                     );
                 } else {
                     clearInterval(originalTimerInterval);
-                    document.getElementById('alarm-sound').play();
-                    // alert('Original timer finished!'); /* Removed */
+                    playAlarm('alarm-sound-original');
+                    blinkTimer('original-time');
                 }
             }, 1000);
 
@@ -299,8 +308,8 @@
                     );
                 } else {
                     clearInterval(extraTimerInterval);
-                    document.getElementById('alarm-sound').play();
-                    // alert('25% Extra Time finished!'); /* Removed */
+                    playAlarm('alarm-sound-extra');
+                    blinkTimer('extra-time');
                 }
             }, 1000);
         }
@@ -323,6 +332,25 @@
             document.getElementById('minutes').value = "";
             document.getElementById('seconds').value = "";
             paused = false;
+            stopBlinking();
+        }
+
+        function blinkTimer(timerId) {
+            const timerElement = document.getElementById(timerId);
+            timerElement.classList.add('blink');
+        }
+
+        function stopBlinking() {
+            const blinkElements = document.querySelectorAll('.blink');
+            blinkElements.forEach(element => {
+                element.classList.remove('blink');
+            });
+        }
+
+        function playAlarm(alarmId) {
+            const alarmSound = document.getElementById(alarmId);
+            alarmSound.currentTime = 0; // Reset to start
+            alarmSound.play();
         }
     </script>
 </body>
