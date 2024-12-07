@@ -248,7 +248,7 @@
             text-align: center;
         }
 
-        #calibrationPrompt form, #exportPrompt form {
+        #calibrationPrompt div, #exportPrompt div {
             display: flex;
             flex-direction: column;
         }
@@ -267,8 +267,9 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 48%;
+            width: 100%;
             font-size: 1em;
+            margin-top: 10px;
         }
 
         #calibrationPrompt button:hover, #exportPrompt button:hover:not(.cancel-button) {
@@ -331,27 +332,27 @@
     <div id="calibrationPrompt">
         <h2>Calibration</h2>
         <p>Enter the actual length and unit of the drawn line:</p>
-        <form autocomplete="off">
+        <div>
             <input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
             <input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmCalibration">Confirm</button>
                 <button type="button" id="cancelCalibration" class="cancel-button">Cancel</button>
             </div>
-        </form>
+        </div>
     </div>
 
     <!-- Export Filename Prompt Modal -->
     <div id="exportPrompt">
         <h2>Export Data</h2>
         <p>Enter the desired filename for the exported data:</p>
-        <form autocomplete="off">
+        <div>
             <input type="text" id="exportFilename" name="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmExport">Export</button>
                 <button type="button" id="cancelExport" class="cancel-button">Cancel</button>
             </div>
-        </form>
+        </div>
     </div>
 
     <!-- Main Controls -->
@@ -414,7 +415,6 @@
         const plotVyButton = document.getElementById('plotVy');
         const backToPositionButton = document.getElementById('backToPosition');
         const overlayCanvas = document.getElementById('overlayCanvas');
-        const videoWrapper = document.getElementById('videoWrapper');
         const ctx = frameCanvas.getContext('2d');
         const overlayCtx = overlayCanvas.getContext('2d');
         const clearControls = document.getElementById('clearControls');
@@ -433,14 +433,6 @@
         const cancelExportButton = document.getElementById('cancelExport');
         const crosshair = document.getElementById('crosshair');
 
-        // Prevent form submission on Enter key (Issue 1)
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => e.preventDefault());
-        });
-
-        // Detect if the device is mobile
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
         let mediaRecorder;
         let recordedChunks = [];
         let recordedBlob = null;
@@ -456,7 +448,6 @@
         let calibrationEnd = null;
         let scaleFactor = 1; 
         let scaleUnit = "pixels";
-        let isDrawingCalibration = false;
 
         let originMode = false;
         let originSet = false;
@@ -473,7 +464,6 @@
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
                 liveVideo.srcObject = stream;
-                // Ensure video plays on iOS:
                 liveVideo.play().catch(err => console.log('Video play error:', err));
 
                 mediaRecorder = new MediaRecorder(stream);
@@ -532,12 +522,12 @@
                 videoElement.autoplay = false;
                 videoElement.load();
 
-                videoElement.addEventListener('loadedmetadata', () => { // Changed from 'loadeddata' to 'loadedmetadata'
-                    videoElement.pause();
-                    videoElement.currentTime = 0;
+                videoElement.addEventListener('loadedmetadata', () => {
                     slider.max = videoElement.duration || 0; 
-                    slider.value = 0;
-                    timeDisplay.textContent = formatTime(0);
+                    slider.value = 0; 
+                    timeDisplay.textContent = formatTime(0); 
+                    videoElement.currentTime = 0;
+                    videoElement.pause();
 
                     resizeOverlay();
                     drawOverlay();
@@ -557,7 +547,7 @@
                 playPauseButton.style.display = "inline-block";
                 slider.style.display = "inline-block";
                 timeDisplay.style.display = "inline-block";
-                message.innerHTML = "Use the slide bar to select the starting frame.<br>Click on the object to track its position.";
+                message.innerHTML = "Use the slider to navigate frames.<br>Click on the object to track its position.";
             }
         });
 
@@ -570,8 +560,8 @@
             videoElement.autoplay = false; 
             videoElement.load();
 
-            videoElement.onloadedmetadata = () => {
-                slider.max = videoElement.duration; 
+            videoElement.addEventListener('loadedmetadata', () => {
+                slider.max = videoElement.duration || 0; 
                 slider.value = 0; 
                 timeDisplay.textContent = formatTime(0); 
                 videoElement.currentTime = 0;
@@ -581,7 +571,7 @@
                     drawOverlay(); 
                     drawFrame(); 
                 }, { once: true });
-            };
+            }, { once: true });
 
             liveVideo.style.display = "none";
             frameCanvas.style.display = "block";
@@ -596,7 +586,7 @@
             playPauseButton.style.display = "inline-block";
             slider.style.display = "inline-block";
             timeDisplay.style.display = "inline-block";
-            message.innerHTML = "Use the slide bar to select the starting frame.<br>Click on the object to track its position.";
+            message.innerHTML = "Use the slider to navigate frames.<br>Click on the object to track its position.";
         }
 
         playPauseButton.addEventListener('click', () => {
@@ -616,28 +606,11 @@
             if (!skippingFrame) drawFrame(); 
         });
 
-        // Handle both 'input' and 'change' events for better mobile compatibility (Issue 4)
         slider.addEventListener("input", () => {
             videoElement.currentTime = parseFloat(slider.value); 
         });
 
-        slider.addEventListener("change", () => {
-            videoElement.currentTime = parseFloat(slider.value); 
-        });
-
-        // Add pointerup event for mobile compatibility
-        overlayCanvas.addEventListener('pointerup', handleOverlayPointerUp);
-        frameCanvas.addEventListener('pointerup', handleFramePointerUp);
-
         overlayCanvas.addEventListener('click', (event) => {
-            handleOverlayPointerUp(event);
-        });
-
-        frameCanvas.addEventListener('click', (event) => {
-            handleFramePointerUp(event);
-        });
-
-        function handleOverlayPointerUp(event) {
             if (mode === "analyze" && originMode && !calibrationMode) {
                 const rect = overlayCanvas.getBoundingClientRect();
                 const scaleX = overlayCanvas.width / rect.width;
@@ -655,9 +628,9 @@
                 drawOverlay();
                 plotPosition();
             }
-        }
+        });
 
-        function handleFramePointerUp(event) {
+        frameCanvas.addEventListener('click', (event) => {
             if (mode === "analyze" && !calibrationMode && !originMode) {
                 const rect = frameCanvas.getBoundingClientRect();
                 const scaleX = frameCanvas.width / rect.width; 
@@ -670,14 +643,9 @@
                 plotPosition();
                 skipToNextFrame();
             }
-        }
+        });
 
         function drawFrame() {
-            if (!videoElement.videoWidth || !videoElement.videoHeight) {
-                // If video dimensions are not available, retry after a short delay
-                setTimeout(drawFrame, 100);
-                return;
-            }
             frameCanvas.width = videoElement.videoWidth;
             frameCanvas.height = videoElement.videoHeight;
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
@@ -713,7 +681,8 @@
 
         function skipToNextFrame() {
             skippingFrame = true;
-            videoElement.currentTime += 1 / 30; 
+            const nextTime = videoElement.currentTime + (1 / 30); 
+            videoElement.currentTime = Math.min(nextTime, videoElement.duration);
             videoElement.addEventListener('seeked', () => {
                 skippingFrame = false;
                 drawFrame();
@@ -864,7 +833,6 @@
 
         backToPositionButton.addEventListener("click", () => {
             plotPosition();
-            // After plotting position, no extra update needed since plotPosition() updates chart
         });
 
         clearDataPointsButton.addEventListener("click", () => {
@@ -916,6 +884,7 @@
         function showExportPrompt() {
             exportFilenameInput.value = "motion_tracker_data"; 
             exportPrompt.style.display = "block";
+            exportFilenameInput.focus();
         }
 
         function hideExportPrompt() {
@@ -989,7 +958,6 @@
         }
 
         function formatTime(time) {
-            if (isNaN(time)) return "0:00.000";
             const minutes = Math.floor(time / 60);
             const seconds = Math.floor(time % 60);
             const milliseconds = Math.floor((time - Math.floor(time)) * 1000);
@@ -1029,9 +997,7 @@
                 overlayCtx.stroke();
             }
 
-            // Draw axes and cyan dot only in analysis mode
             if (mode === "analyze") {
-                // If no origin set, use default (0,0)
                 let ox = originSet ? originPoint.x : 0;
                 let oy = originSet ? originPoint.y : 0;
 
@@ -1111,16 +1077,10 @@
             crosshair.style.display = "none";
             overlayCanvas.style.pointerEvents = "auto"; 
             calibrationMode = true;
-            isDrawingCalibration = false;
             calibrationStart = null;
             calibrationEnd = null;
-            if (isMobile) {
-                message.textContent = "Calibration: Tap two points on the video to define a calibration line.";
-            } else {
-                message.textContent = "Calibration: Click and drag on the video to draw a calibration line.";
-            }
+            message.textContent = "Calibration: Click and drag on the video to draw a calibration line.";
             frameCanvas.style.cursor = "crosshair";
-            crosshair.style.display = "block";
         });
 
         overlayCanvas.addEventListener('mousemove', (event) => {
@@ -1136,76 +1096,43 @@
 
         overlayCanvas.addEventListener('mousedown', (event) => {
             if (!calibrationMode) return;
-            if (!isMobile) { // Desktop: Click and drag
-                isDrawingCalibration = true;
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (event.clientX - rect.left) * scaleX;
-                const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-                calibrationStart = { x, y };
-                calibrationEnd = { x, y };
-            }
-        });
-
-        overlayCanvas.addEventListener('touchstart', (event) => {
-            if (!calibrationMode) return;
-            if (isMobile) { // Mobile: Tap to select points
-                if (!calibrationStart) {
-                    const touch = event.touches[0];
-                    const rect = overlayCanvas.getBoundingClientRect();
-                    const scaleX = overlayCanvas.width / rect.width;
-                    const scaleY = overlayCanvas.height / rect.height;
-                    const x = (touch.clientX - rect.left) * scaleX;
-                    const y = canvasYToCartesianY((touch.clientY - rect.top) * scaleY);
-                    calibrationStart = { x, y };
-                    message.textContent = "Calibration: Tap the second point.";
-                } else if (!calibrationEnd) {
-                    const touch = event.touches[0];
-                    const rect = overlayCanvas.getBoundingClientRect();
-                    const scaleX = overlayCanvas.width / rect.width;
-                    const scaleY = overlayCanvas.height / rect.height;
-                    const x = (touch.clientX - rect.left) * scaleX;
-                    const y = canvasYToCartesianY((touch.clientY - rect.top) * scaleY);
-                    calibrationEnd = { x, y };
-                    finalizeCalibration();
-                }
-            }
+            const rect = overlayCanvas.getBoundingClientRect();
+            const scaleX = overlayCanvas.width / rect.width;
+            const scaleY = overlayCanvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
+            calibrationStart = { x, y };
+            calibrationEnd = { x, y };
+            calibrationMode = false;
+            isDrawingCalibration = true;
+            message.textContent = "Calibration: Drag to set the calibration line.";
         });
 
         overlayCanvas.addEventListener('mousemove', (event) => {
-            if (!calibrationMode || isMobile) return;
-            if (isDrawingCalibration) {
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (event.clientX - rect.left) * scaleX;
-                const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-                calibrationEnd = { x, y };
-                drawOverlay(); 
-            }
+            if (!calibrationMode && !isDrawingCalibration) return;
+            if (!isDrawingCalibration) return;
+            const rect = overlayCanvas.getBoundingClientRect();
+            const scaleX = overlayCanvas.width / rect.width;
+            const scaleY = overlayCanvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
+            calibrationEnd = { x, y };
+            drawOverlay(); 
         });
 
         overlayCanvas.addEventListener('mouseup', (event) => {
-            if (!calibrationMode || isMobile) return;
-            if (isDrawingCalibration) {
-                isDrawingCalibration = false;
-                finalizeCalibration();
-            }
-        });
-
-        function finalizeCalibration() {
+            if (!isDrawingCalibration) return;
+            isDrawingCalibration = false;
             calibrationMode = false;
             overlayCanvas.style.pointerEvents = "none";
             frameCanvas.style.cursor = "default";
-            if (!isMobile) {
-                message.innerHTML = "Calibration line drawn. Enter actual length and unit.";
-            }
+            message.innerHTML = "Calibration line drawn. Enter actual length and unit.";
             showCalibrationPrompt();
-        }
+        });
 
         function showCalibrationPrompt() {
             calibrationPrompt.style.display = "block";
+            actualLengthInput.focus();
         }
 
         function hideCalibrationPrompt() {
@@ -1256,19 +1183,8 @@
             message.textContent = "Calibration cancelled.";
         });
 
-        window.addEventListener('click', (event) => {
-            if (event.target == calibrationPrompt) {
-                calibrationPrompt.style.display = "none";
-                calibrationMode = false;
-                isDrawingCalibration = false;
-                calibrationStart = null;
-                calibrationEnd = null;
-                message.textContent = "Calibration cancelled.";
-                drawOverlay();
-                drawFrame();
-                crosshair.style.display = "none";
-            }
-            if (event.target == exportPrompt) {
+        exportPrompt.addEventListener('click', (event) => {
+            if (event.target === exportPrompt) {
                 hideExportPrompt();
                 message.textContent = "Export cancelled.";
             }
@@ -1277,1088 +1193,12 @@
         setOriginButton.addEventListener('click', () => {
             if (mode !== "analyze") return;
             calibrationMode = false;
-            isDrawingCalibration = false;
             originMode = true;
             overlayCanvas.style.pointerEvents = "auto";
             message.textContent = "Click on the video to set the new origin.";
             frameCanvas.style.cursor = "crosshair";
             crosshair.style.display = "block";
         });
-
-        // Handle Origin Selection on Mobile
-        overlayCanvas.addEventListener('touchend', (event) => {
-            if (mode === "analyze" && originMode && !calibrationMode && isMobile) {
-                const touch = event.changedTouches[0];
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (touch.clientX - rect.left) * scaleX;
-                const y = (touch.clientY - rect.top) * scaleY;
-                const cartesianY = canvasYToCartesianY(y);
-                originPoint = { x: x, y: cartesianY };
-                originSet = true;
-                originMode = false;
-                frameCanvas.style.cursor = "default";
-                crosshair.style.display = "none";
-                overlayCanvas.style.pointerEvents = "none";
-                message.textContent = "Origin set. Data will now be plotted relative to the chosen origin.";
-                drawOverlay();
-                plotPosition();
-            }
-        });
-
-        function drawFrame() {
-            if (!videoElement.videoWidth || !videoElement.videoHeight) {
-                // If video dimensions are not available, retry after a short delay
-                setTimeout(drawFrame, 100);
-                return;
-            }
-            frameCanvas.width = videoElement.videoWidth;
-            frameCanvas.height = videoElement.videoHeight;
-            ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-            ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
-
-            const referenceHeight = 1080; 
-            const scale = frameCanvas.height / referenceHeight;
-            const crossSize = 25 * scale; 
-            const circleRadius = 25 * scale; 
-
-            frameData.forEach((point) => {
-                const x = point.x;
-                const y = cartesianYToCanvasY(point.y);
-                drawDataPoint(x, y, crossSize, circleRadius);
-            });
-        }
-
-        function drawDataPoint(x, y, crossSize, circleRadius) {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
-            ctx.beginPath();
-            ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
-            ctx.fill();
-
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 1; 
-            ctx.beginPath();
-            ctx.moveTo(x - crossSize, y);
-            ctx.lineTo(x + crossSize, y);
-            ctx.moveTo(x, y - crossSize);
-            ctx.lineTo(x, y + crossSize);
-            ctx.stroke();
-        }
-
-        function skipToNextFrame() {
-            skippingFrame = true;
-            videoElement.currentTime += 1 / 30; 
-            videoElement.addEventListener('seeked', () => {
-                skippingFrame = false;
-                drawFrame();
-                drawOverlay(); 
-            }, { once: true });
-        }
-
-        function plotPosition() {
-            const xData = frameData.map((point) => parseFloat(point.time.toFixed(3))); 
-            const yDataX = frameData.map((p) => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
-            const yDataY = frameData.map((p) => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
-
-            if (!positionChart) {
-                positionChart = new Chart(positionChartCanvas.getContext("2d"), {
-                    type: "scatter",
-                    data: {
-                        datasets: [
-                            {
-                                label: "x vs t",
-                                data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-                                borderColor: "blue",
-                                backgroundColor: "blue",
-                                showLine: false,
-                                pointRadius: 4,
-                            },
-                            {
-                                label: "y vs t",
-                                data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-                                borderColor: "green",
-                                backgroundColor: "green",
-                                showLine: false,
-                                pointRadius: 4,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: "linear",
-                                position: "bottom",
-                                title: {
-                                    display: true,
-                                    text: "Time (s)",
-                                },
-                                grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-                                },
-                            },
-                            y: {
-                                type: "linear",
-                                position: "left",
-                                title: {
-                                    display: true,
-                                    text: `Position (${scaleUnit})`,
-                                },
-                                grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-                                },
-                            },
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top',
-                            }
-                        }
-                    },
-                });
-            } else {
-                positionChart.data.datasets = [
-                    {
-                        label: "x vs t",
-                        data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-                        borderColor: "blue",
-                        backgroundColor: "blue",
-                        showLine: false,
-                        pointRadius: 4,
-                    },
-                    {
-                        label: "y vs t",
-                        data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-                        borderColor: "green",
-                        backgroundColor: "green",
-                        showLine: false,
-                        pointRadius: 4,
-                    },
-                ];
-                positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-                positionChart.update();
-            }
-        }
-
-        function plotVelocity(axis) {
-            const windowSize = 3; 
-            if (frameData.length < windowSize) {
-                alert(`Insufficient data to calculate velocity. At least ${windowSize} points are needed.`);
-                return;
-            }
-
-            const velocityEstimates = [];
-            const velocityTimes = [];
-            for (let i = 1; i < frameData.length; i++) {
-                const deltaTime = frameData[i].time - frameData[i - 1].time;
-                const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-                const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-
-                const deltaX = p2.x - p1.x;
-                const deltaY = p2.y - p1.y;
-                const deltaPos = axis === 'x' ? deltaX : deltaY;
-
-                const velocity = deltaTime > 0 ? (deltaPos * scaleFactor) / deltaTime : 0;
-                if (deltaTime > 0) {
-                    velocityEstimates.push(velocity);
-                    velocityTimes.push(frameData[i].time);
-                }
-            }
-
-            const smoothedVelocities = [];
-            const smoothedTimes = [];
-            for (let i = 0; i < velocityEstimates.length; i++) {
-                if (i < windowSize - 1) continue;
-                const window = velocityEstimates.slice(i - windowSize + 1, i + 1);
-                const averageVelocity = window.reduce((sum, val) => sum + val, 0) / windowSize;
-                smoothedVelocities.push(parseFloat(averageVelocity.toFixed(3)));
-                const timeWindow = velocityTimes.slice(i - windowSize + 1, i + 1);
-                const midpointTime = (timeWindow[0] + timeWindow[windowSize - 1]) / 2;
-                smoothedTimes.push(parseFloat(midpointTime.toFixed(3)));
-            }
-
-            positionChart.data.datasets = [
-                {
-                    label: axis === "x" ? "vₓ vs t" : "vᵧ vs t",
-                    data: smoothedTimes.map((t, i) => ({ x: t, y: smoothedVelocities[i] })),
-                    borderColor: axis === "x" ? "blue" : "green",
-                    backgroundColor: axis === "x" ? "blue" : "green",
-                    showLine: false,
-                    pointRadius: 4,
-                },
-            ];
-            positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
-            positionChart.update();
-        }
-
-        plotVxButton.addEventListener("click", () => plotVelocity("x"));
-        plotVyButton.addEventListener("click", () => plotVelocity("y"));
-
-        backToPositionButton.addEventListener("click", () => {
-            plotPosition();
-            // After plotting position, no extra update needed since plotPosition() updates chart
-        });
-
-        clearDataPointsButton.addEventListener("click", () => {
-            frameData = []; 
-            if (positionChart) {
-                positionChart.data.datasets.forEach((dataset) => {
-                    dataset.data = [];
-                });
-                positionChart.update();
-            }
-            drawFrame(); 
-            drawOverlay(); 
-            message.textContent = "Data points cleared.";
-        });
-
-        clearCalibrationButton.addEventListener("click", () => {
-            scaleFactor = 1;
-            scaleUnit = "pixels";
-            calibrationStart = null;
-            calibrationEnd = null;
-
-            drawOverlay();
-            drawFrame();
-
-            if (positionChart) {
-                positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-                plotPosition(); 
-            }
-
-            message.textContent = "Calibration cleared. Positions are now in pixel units.";
-        });
-
-        clearOriginButton.addEventListener("click", () => {
-            originSet = false;
-            originPoint = { x: 0, y: 0 };
-            drawOverlay();
-            plotPosition();
-            message.textContent = "Origin cleared. Default origin (lower-left) is used.";
-        });
-
-        exportDataButton.addEventListener("click", () => {
-            if (frameData.length === 0) {
-                alert("No data to export.");
-                return;
-            }
-            showExportPrompt();
-        });
-
-        function showExportPrompt() {
-            exportFilenameInput.value = "motion_tracker_data"; 
-            exportPrompt.style.display = "block";
-        }
-
-        function hideExportPrompt() {
-            exportPrompt.style.display = "none";
-            exportFilenameInput.value = "";
-        }
-
-        confirmExportButton.addEventListener('click', () => {
-            const desiredFilename = exportFilenameInput.value.trim();
-
-            if (desiredFilename === "") {
-                alert("Please enter a valid filename.");
-                return;
-            }
-
-            const sanitizedFilename = desiredFilename.replace(/[^a-zA-Z0-9-_.]/g, "_");
-            let finalFilename = sanitizedFilename;
-            if (!finalFilename.toLowerCase().endsWith(".csv")) {
-                finalFilename += ".csv";
-            }
-
-            exportCSV(finalFilename);
-            hideExportPrompt();
-        });
-
-        cancelExportButton.addEventListener('click', () => {
-            hideExportPrompt();
-            message.textContent = "Export cancelled.";
-        });
-
-        function exportCSV(filename) {
-            const velocityData = [];
-            for (let i = 1; i < frameData.length; i++) {
-                const deltaTime = frameData[i].time - frameData[i - 1].time;
-                const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-                const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-
-                const deltaX = p2.x - p1.x;
-                const deltaY = p2.y - p1.y;
-
-                const v_x = deltaTime > 0 ? (deltaX * scaleFactor) / deltaTime : 0;
-                const v_y = deltaTime > 0 ? (deltaY * scaleFactor) / deltaTime : 0;
-
-                velocityData.push({ v_x, v_y });
-            }
-
-            let csvContent = `Time (s),x (${scaleUnit}),y (${scaleUnit}),v_x (${scaleUnit}/s),v_y (${scaleUnit}/s)\n`;
-
-            for (let i = 0; i < frameData.length; i++) {
-                const xAdj = (frameData[i].x - (originSet ? originPoint.x : 0)) * scaleFactor;
-                const yAdj = (frameData[i].y - (originSet ? originPoint.y : 0)) * scaleFactor;
-
-                const time = frameData[i].time.toFixed(3);
-                const x = xAdj.toFixed(3);
-                const y = yAdj.toFixed(3);
-                const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
-                const v_y = i > 0 ? velocityData[i - 1].v_y.toFixed(3) : "";
-                csvContent += `${time},${x},${y},${v_x},${v_y}\n`;
-            }
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", filename);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            message.textContent = `Data exported as ${filename}.`;
-        }
-
-        function formatTime(time) {
-            if (isNaN(time)) return "0:00.000";
-            const minutes = Math.floor(time / 60);
-            const seconds = Math.floor(time % 60);
-            const milliseconds = Math.floor((time - Math.floor(time)) * 1000);
-            return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
-        }
-
-        function resizeOverlay() {
-            const visibleElement = mode === "record" ? liveVideo : frameCanvas;
-            if (visibleElement.videoWidth && visibleElement.videoHeight) {
-                overlayCanvas.width = visibleElement.videoWidth;
-                overlayCanvas.height = visibleElement.videoHeight;
-            } else {
-                overlayCanvas.width = visibleElement.clientWidth;
-                overlayCanvas.height = visibleElement.clientHeight;
-            }
-        }
-
-        function drawOverlay() {
-            resizeOverlay(); 
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-            const gridSize = 50; 
-            overlayCtx.strokeStyle = "rgba(200, 200, 200, 0.7)";
-            overlayCtx.lineWidth = 1;
-
-            for (let x = 0; x <= overlayCanvas.width; x += gridSize) {
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(x, 0);
-                overlayCtx.lineTo(x, overlayCanvas.height);
-                overlayCtx.stroke();
-            }
-
-            for (let y = 0; y <= overlayCanvas.height; y += gridSize) {
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(0, y);
-                overlayCtx.lineTo(overlayCanvas.width, y);
-                overlayCtx.stroke();
-            }
-
-            // Draw axes and cyan dot only in analysis mode
-            if (mode === "analyze") {
-                // If no origin set, use default (0,0)
-                let ox = originSet ? originPoint.x : 0;
-                let oy = originSet ? originPoint.y : 0;
-
-                const originCanvasX = ox;
-                const originCanvasY = cartesianYToCanvasY(oy);
-
-                overlayCtx.save();
-                overlayCtx.lineWidth = 4;
-                overlayCtx.strokeStyle = 'black';
-
-                // X axis
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-                overlayCtx.stroke();
-
-                // Y axis
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-                overlayCtx.stroke();
-
-                // White inner lines
-                overlayCtx.lineWidth = 2;
-                overlayCtx.strokeStyle = 'white';
-
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-                overlayCtx.stroke();
-
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-                overlayCtx.stroke();
-
-                // Cyan dot at origin
-                overlayCtx.fillStyle = "cyan";
-                overlayCtx.beginPath();
-                overlayCtx.arc(originCanvasX, originCanvasY, 5, 0, 2 * Math.PI);
-                overlayCtx.fill();
-
-                overlayCtx.restore();
-            }
-
-            if (calibrationStart && calibrationEnd) {
-                overlayCtx.strokeStyle = "orange";
-                overlayCtx.lineWidth = 2;
-                overlayCtx.setLineDash([5, 5]); 
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(calibrationStart.x, cartesianYToCanvasY(calibrationStart.y));
-                overlayCtx.lineTo(calibrationEnd.x, cartesianYToCanvasY(calibrationEnd.y));
-                overlayCtx.stroke();
-                overlayCtx.setLineDash([]); 
-            }
-        }
-
-        window.addEventListener('resize', () => {
-            if (mode === "analyze") {
-                resizeOverlay();
-                drawOverlay();
-                drawFrame();
-            } else if (mode === "record") {
-                resizeOverlay();
-                drawOverlay();
-            }
-        });
-
-        liveVideo.addEventListener('loadedmetadata', () => {
-            resizeOverlay();
-            drawOverlay();
-        });
-
-        calibrateButton.addEventListener('click', () => {
-            if (mode !== "analyze") return;
-            originMode = false;
-            crosshair.style.display = "none";
-            overlayCanvas.style.pointerEvents = "auto"; 
-            calibrationMode = true;
-            isDrawingCalibration = false;
-            calibrationStart = null;
-            calibrationEnd = null;
-            if (isMobile) {
-                message.textContent = "Calibration: Tap two points on the video to define a calibration line.";
-            } else {
-                message.textContent = "Calibration: Click and drag on the video to draw a calibration line.";
-            }
-            frameCanvas.style.cursor = "crosshair";
-            crosshair.style.display = "block";
-        });
-
-        overlayCanvas.addEventListener('mousemove', (event) => {
-            if ((calibrationMode || originMode) && mode === "analyze") {
-                const rect = overlayCanvas.getBoundingClientRect();
-                const crossX = event.clientX - rect.left;
-                const crossY = event.clientY - rect.top;
-                crosshair.style.left = `${crossX - 10}px`;
-                crosshair.style.top = `${crossY - 10}px`;
-                crosshair.style.display = "block";
-            }
-        });
-
-        overlayCanvas.addEventListener('mousedown', (event) => {
-            if (!calibrationMode) return;
-            if (!isMobile) { // Desktop: Click and drag
-                isDrawingCalibration = true;
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (event.clientX - rect.left) * scaleX;
-                const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-                calibrationStart = { x, y };
-                calibrationEnd = { x, y };
-            }
-        });
-
-        overlayCanvas.addEventListener('touchstart', (event) => {
-            if (!calibrationMode) return;
-            if (isMobile) { // Mobile: Tap to select points
-                event.preventDefault(); // Prevent default touch behavior
-                if (!calibrationStart) {
-                    const touch = event.touches[0];
-                    const rect = overlayCanvas.getBoundingClientRect();
-                    const scaleX = overlayCanvas.width / rect.width;
-                    const scaleY = overlayCanvas.height / rect.height;
-                    const x = (touch.clientX - rect.left) * scaleX;
-                    const y = canvasYToCartesianY((touch.clientY - rect.top) * scaleY);
-                    calibrationStart = { x, y };
-                    message.textContent = "Calibration: Tap the second point.";
-                } else if (!calibrationEnd) {
-                    const touch = event.touches[0];
-                    const rect = overlayCanvas.getBoundingClientRect();
-                    const scaleX = overlayCanvas.width / rect.width;
-                    const scaleY = overlayCanvas.height / rect.height;
-                    const x = (touch.clientX - rect.left) * scaleX;
-                    const y = canvasYToCartesianY((touch.clientY - rect.top) * scaleY);
-                    calibrationEnd = { x, y };
-                    finalizeCalibration();
-                }
-            }
-        });
-
-        overlayCanvas.addEventListener('mousemove', (event) => {
-            if (!calibrationMode || isMobile) return;
-            if (isDrawingCalibration) {
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (event.clientX - rect.left) * scaleX;
-                const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-                calibrationEnd = { x, y };
-                drawOverlay(); 
-            }
-        });
-
-        overlayCanvas.addEventListener('mouseup', (event) => {
-            if (!calibrationMode || isMobile) return;
-            if (isDrawingCalibration) {
-                isDrawingCalibration = false;
-                finalizeCalibration();
-            }
-        });
-
-        function finalizeCalibration() {
-            calibrationMode = false;
-            overlayCanvas.style.pointerEvents = "none";
-            frameCanvas.style.cursor = "default";
-            if (!isMobile) {
-                message.innerHTML = "Calibration line drawn. Enter actual length and unit.";
-            }
-            showCalibrationPrompt();
-        }
-
-        function showCalibrationPrompt() {
-            calibrationPrompt.style.display = "block";
-        }
-
-        function hideCalibrationPrompt() {
-            calibrationPrompt.style.display = "none";
-            actualLengthInput.value = "";
-            actualUnitInput.value = "";
-        }
-
-        confirmCalibrationButton.addEventListener('click', () => {
-            const actualLength = parseFloat(actualLengthInput.value);
-            const actualUnit = actualUnitInput.value.trim();
-
-            if (isNaN(actualLength) || actualLength <= 0 || actualUnit === "") {
-                alert("Please enter a valid actual length (positive number) and unit.");
-                return;
-            }
-
-            const deltaX = calibrationEnd.x - calibrationStart.x;
-            const deltaY = calibrationEnd.y - calibrationStart.y;
-            const pixelLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-            if (pixelLength === 0) {
-                alert("Calibration line length cannot be zero.");
-                return;
-            }
-
-            scaleFactor = actualLength / pixelLength;
-            scaleUnit = actualUnit;
-
-            hideCalibrationPrompt();
-            drawOverlay();
-            drawFrame();
-            plotPosition();
-
-            message.textContent = `Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}`;
-            crosshair.style.display = "none";
-        });
-
-        cancelCalibrationButton.addEventListener('click', () => {
-            hideCalibrationPrompt();
-            calibrationMode = false;
-            isDrawingCalibration = false;
-            calibrationStart = null;
-            calibrationEnd = null;
-            drawOverlay();
-            drawFrame();
-            crosshair.style.display = "none";
-            message.textContent = "Calibration cancelled.";
-        });
-
-        window.addEventListener('click', (event) => {
-            if (event.target == calibrationPrompt) {
-                calibrationPrompt.style.display = "none";
-                calibrationMode = false;
-                isDrawingCalibration = false;
-                calibrationStart = null;
-                calibrationEnd = null;
-                message.textContent = "Calibration cancelled.";
-                drawOverlay();
-                drawFrame();
-                crosshair.style.display = "none";
-            }
-            if (event.target == exportPrompt) {
-                hideExportPrompt();
-                message.textContent = "Export cancelled.";
-            }
-        });
-
-        setOriginButton.addEventListener('click', () => {
-            if (mode !== "analyze") return;
-            calibrationMode = false;
-            isDrawingCalibration = false;
-            originMode = true;
-            overlayCanvas.style.pointerEvents = "auto";
-            message.textContent = "Click on the video to set the new origin.";
-            frameCanvas.style.cursor = "crosshair";
-            crosshair.style.display = "block";
-        });
-
-        // Handle Origin Selection on Mobile
-        overlayCanvas.addEventListener('touchend', (event) => {
-            if (mode === "analyze" && originMode && !calibrationMode && isMobile) {
-                const touch = event.changedTouches[0];
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (touch.clientX - rect.left) * scaleX;
-                const y = (touch.clientY - rect.top) * scaleY;
-                const cartesianY = canvasYToCartesianY(y);
-                originPoint = { x: x, y: cartesianY };
-                originSet = true;
-                originMode = false;
-                frameCanvas.style.cursor = "default";
-                crosshair.style.display = "none";
-                overlayCanvas.style.pointerEvents = "none";
-                message.textContent = "Origin set. Data will now be plotted relative to the chosen origin.";
-                drawOverlay();
-                plotPosition();
-            }
-        });
-
-        function drawFrame() {
-            if (!videoElement.videoWidth || !videoElement.videoHeight) {
-                // If video dimensions are not available, retry after a short delay
-                setTimeout(drawFrame, 100);
-                return;
-            }
-            frameCanvas.width = videoElement.videoWidth;
-            frameCanvas.height = videoElement.videoHeight;
-            ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-            ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
-
-            const referenceHeight = 1080; 
-            const scale = frameCanvas.height / referenceHeight;
-            const crossSize = 25 * scale; 
-            const circleRadius = 25 * scale; 
-
-            frameData.forEach((point) => {
-                const x = point.x;
-                const y = cartesianYToCanvasY(point.y);
-                drawDataPoint(x, y, crossSize, circleRadius);
-            });
-        }
-
-        function drawDataPoint(x, y, crossSize, circleRadius) {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
-            ctx.beginPath();
-            ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
-            ctx.fill();
-
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 1; 
-            ctx.beginPath();
-            ctx.moveTo(x - crossSize, y);
-            ctx.lineTo(x + crossSize, y);
-            ctx.moveTo(x, y - crossSize);
-            ctx.lineTo(x, y + crossSize);
-            ctx.stroke();
-        }
-
-        function skipToNextFrame() {
-            skippingFrame = true;
-            videoElement.currentTime += 1 / 30; 
-            videoElement.addEventListener('seeked', () => {
-                skippingFrame = false;
-                drawFrame();
-                drawOverlay(); 
-            }, { once: true });
-        }
-
-        function plotPosition() {
-            const xData = frameData.map((point) => parseFloat(point.time.toFixed(3))); 
-            const yDataX = frameData.map((p) => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
-            const yDataY = frameData.map((p) => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
-
-            if (!positionChart) {
-                positionChart = new Chart(positionChartCanvas.getContext("2d"), {
-                    type: "scatter",
-                    data: {
-                        datasets: [
-                            {
-                                label: "x vs t",
-                                data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-                                borderColor: "blue",
-                                backgroundColor: "blue",
-                                showLine: false,
-                                pointRadius: 4,
-                            },
-                            {
-                                label: "y vs t",
-                                data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-                                borderColor: "green",
-                                backgroundColor: "green",
-                                showLine: false,
-                                pointRadius: 4,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: "linear",
-                                position: "bottom",
-                                title: {
-                                    display: true,
-                                    text: "Time (s)",
-                                },
-                                grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-                                },
-                            },
-                            y: {
-                                type: "linear",
-                                position: "left",
-                                title: {
-                                    display: true,
-                                    text: `Position (${scaleUnit})`,
-                                },
-                                grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-                                },
-                            },
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top',
-                            }
-                        }
-                    },
-                });
-            } else {
-                positionChart.data.datasets = [
-                    {
-                        label: "x vs t",
-                        data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-                        borderColor: "blue",
-                        backgroundColor: "blue",
-                        showLine: false,
-                        pointRadius: 4,
-                    },
-                    {
-                        label: "y vs t",
-                        data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-                        borderColor: "green",
-                        backgroundColor: "green",
-                        showLine: false,
-                        pointRadius: 4,
-                    },
-                ];
-                positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-                positionChart.update();
-            }
-        }
-
-        function plotVelocity(axis) {
-            const windowSize = 3; 
-            if (frameData.length < windowSize) {
-                alert(`Insufficient data to calculate velocity. At least ${windowSize} points are needed.`);
-                return;
-            }
-
-            const velocityEstimates = [];
-            const velocityTimes = [];
-            for (let i = 1; i < frameData.length; i++) {
-                const deltaTime = frameData[i].time - frameData[i - 1].time;
-                const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-                const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-
-                const deltaX = p2.x - p1.x;
-                const deltaY = p2.y - p1.y;
-                const deltaPos = axis === 'x' ? deltaX : deltaY;
-
-                const velocity = deltaTime > 0 ? (deltaPos * scaleFactor) / deltaTime : 0;
-                if (deltaTime > 0) {
-                    velocityEstimates.push(velocity);
-                    velocityTimes.push(frameData[i].time);
-                }
-            }
-
-            const smoothedVelocities = [];
-            const smoothedTimes = [];
-            for (let i = 0; i < velocityEstimates.length; i++) {
-                if (i < windowSize - 1) continue;
-                const window = velocityEstimates.slice(i - windowSize + 1, i + 1);
-                const averageVelocity = window.reduce((sum, val) => sum + val, 0) / windowSize;
-                smoothedVelocities.push(parseFloat(averageVelocity.toFixed(3)));
-                const timeWindow = velocityTimes.slice(i - windowSize + 1, i + 1);
-                const midpointTime = (timeWindow[0] + timeWindow[windowSize - 1]) / 2;
-                smoothedTimes.push(parseFloat(midpointTime.toFixed(3)));
-            }
-
-            positionChart.data.datasets = [
-                {
-                    label: axis === "x" ? "vₓ vs t" : "vᵧ vs t",
-                    data: smoothedTimes.map((t, i) => ({ x: t, y: smoothedVelocities[i] })),
-                    borderColor: axis === "x" ? "blue" : "green",
-                    backgroundColor: axis === "x" ? "blue" : "green",
-                    showLine: false,
-                    pointRadius: 4,
-                },
-            ];
-            positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
-            positionChart.update();
-        }
-
-        plotVxButton.addEventListener("click", () => plotVelocity("x"));
-        plotVyButton.addEventListener("click", () => plotVelocity("y"));
-
-        backToPositionButton.addEventListener("click", () => {
-            plotPosition();
-            // After plotting position, no extra update needed since plotPosition() updates chart
-        });
-
-        clearDataPointsButton.addEventListener("click", () => {
-            frameData = []; 
-            if (positionChart) {
-                positionChart.data.datasets.forEach((dataset) => {
-                    dataset.data = [];
-                });
-                positionChart.update();
-            }
-            drawFrame(); 
-            drawOverlay(); 
-            message.textContent = "Data points cleared.";
-        });
-
-        clearCalibrationButton.addEventListener("click", () => {
-            scaleFactor = 1;
-            scaleUnit = "pixels";
-            calibrationStart = null;
-            calibrationEnd = null;
-
-            drawOverlay();
-            drawFrame();
-
-            if (positionChart) {
-                positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-                plotPosition(); 
-            }
-
-            message.textContent = "Calibration cleared. Positions are now in pixel units.";
-        });
-
-        clearOriginButton.addEventListener("click", () => {
-            originSet = false;
-            originPoint = { x: 0, y: 0 };
-            drawOverlay();
-            plotPosition();
-            message.textContent = "Origin cleared. Default origin (lower-left) is used.";
-        });
-
-        exportDataButton.addEventListener("click", () => {
-            if (frameData.length === 0) {
-                alert("No data to export.");
-                return;
-            }
-            showExportPrompt();
-        });
-
-        function showExportPrompt() {
-            exportFilenameInput.value = "motion_tracker_data"; 
-            exportPrompt.style.display = "block";
-        }
-
-        function hideExportPrompt() {
-            exportPrompt.style.display = "none";
-            exportFilenameInput.value = "";
-        }
-
-        confirmExportButton.addEventListener('click', () => {
-            const desiredFilename = exportFilenameInput.value.trim();
-
-            if (desiredFilename === "") {
-                alert("Please enter a valid filename.");
-                return;
-            }
-
-            const sanitizedFilename = desiredFilename.replace(/[^a-zA-Z0-9-_.]/g, "_");
-            let finalFilename = sanitizedFilename;
-            if (!finalFilename.toLowerCase().endsWith(".csv")) {
-                finalFilename += ".csv";
-            }
-
-            exportCSV(finalFilename);
-            hideExportPrompt();
-        });
-
-        cancelExportButton.addEventListener('click', () => {
-            hideExportPrompt();
-            message.textContent = "Export cancelled.";
-        });
-
-        function exportCSV(filename) {
-            const velocityData = [];
-            for (let i = 1; i < frameData.length; i++) {
-                const deltaTime = frameData[i].time - frameData[i - 1].time;
-                const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-                const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-
-                const deltaX = p2.x - p1.x;
-                const deltaY = p2.y - p1.y;
-
-                const v_x = deltaTime > 0 ? (deltaX * scaleFactor) / deltaTime : 0;
-                const v_y = deltaTime > 0 ? (deltaY * scaleFactor) / deltaTime : 0;
-
-                velocityData.push({ v_x, v_y });
-            }
-
-            let csvContent = `Time (s),x (${scaleUnit}),y (${scaleUnit}),v_x (${scaleUnit}/s),v_y (${scaleUnit}/s)\n`;
-
-            for (let i = 0; i < frameData.length; i++) {
-                const xAdj = (frameData[i].x - (originSet ? originPoint.x : 0)) * scaleFactor;
-                const yAdj = (frameData[i].y - (originSet ? originPoint.y : 0)) * scaleFactor;
-
-                const time = frameData[i].time.toFixed(3);
-                const x = xAdj.toFixed(3);
-                const y = yAdj.toFixed(3);
-                const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
-                const v_y = i > 0 ? velocityData[i - 1].v_y.toFixed(3) : "";
-                csvContent += `${time},${x},${y},${v_x},${v_y}\n`;
-            }
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", filename);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            message.textContent = `Data exported as ${filename}.`;
-        }
-
-        function formatTime(time) {
-            if (isNaN(time)) return "0:00.000";
-            const minutes = Math.floor(time / 60);
-            const seconds = Math.floor(time % 60);
-            const milliseconds = Math.floor((time - Math.floor(time)) * 1000);
-            return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
-        }
-
-        function resizeOverlay() {
-            const visibleElement = mode === "record" ? liveVideo : frameCanvas;
-            if (visibleElement.videoWidth && visibleElement.videoHeight) {
-                overlayCanvas.width = visibleElement.videoWidth;
-                overlayCanvas.height = visibleElement.videoHeight;
-            } else {
-                overlayCanvas.width = visibleElement.clientWidth;
-                overlayCanvas.height = visibleElement.clientHeight;
-            }
-        }
-
-        function drawOverlay() {
-            resizeOverlay(); 
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-            const gridSize = 50; 
-            overlayCtx.strokeStyle = "rgba(200, 200, 200, 0.7)";
-            overlayCtx.lineWidth = 1;
-
-            for (let x = 0; x <= overlayCanvas.width; x += gridSize) {
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(x, 0);
-                overlayCtx.lineTo(x, overlayCanvas.height);
-                overlayCtx.stroke();
-            }
-
-            for (let y = 0; y <= overlayCanvas.height; y += gridSize) {
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(0, y);
-                overlayCtx.lineTo(overlayCanvas.width, y);
-                overlayCtx.stroke();
-            }
-
-            // Draw axes and cyan dot only in analysis mode
-            if (mode === "analyze") {
-                // If no origin set, use default (0,0)
-                let ox = originSet ? originPoint.x : 0;
-                let oy = originSet ? originPoint.y : 0;
-
-                const originCanvasX = ox;
-                const originCanvasY = cartesianYToCanvasY(oy);
-
-                overlayCtx.save();
-                overlayCtx.lineWidth = 4;
-                overlayCtx.strokeStyle = 'black';
-
-                // X axis
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-                overlayCtx.stroke();
-
-                // Y axis
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-                overlayCtx.stroke();
-
-                // White inner lines
-                overlayCtx.lineWidth = 2;
-                overlayCtx.strokeStyle = 'white';
-
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(0, originCanvasY);
-                overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-                overlayCtx.stroke();
-
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(originCanvasX, 0);
-                overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-                overlayCtx.stroke();
-
-                // Cyan dot at origin
-                overlayCtx.fillStyle = "cyan";
-                overlayCtx.beginPath();
-                overlayCtx.arc(originCanvasX, originCanvasY, 5, 0, 2 * Math.PI);
-                overlayCtx.fill();
-
-                overlayCtx.restore();
-            }
-
-            if (calibrationStart && calibrationEnd) {
-                overlayCtx.strokeStyle = "orange";
-                overlayCtx.lineWidth = 2;
-                overlayCtx.setLineDash([5, 5]); 
-                overlayCtx.beginPath();
-                overlayCtx.moveTo(calibrationStart.x, cartesianYToCanvasY(calibrationStart.y));
-                overlayCtx.lineTo(calibrationEnd.x, cartesianYToCanvasY(calibrationEnd.y));
-                overlayCtx.stroke();
-                overlayCtx.setLineDash([]); 
-            }
-        }
     </script>
 </body>
 </html>
