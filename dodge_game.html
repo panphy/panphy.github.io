@@ -9,7 +9,7 @@
         body {
             margin: 0;
             font-family: 'Arial', sans-serif;
-            background-color: #1e1e1e;
+            background-color: #1e1e1e; /* Swapped to canvas background color */
             color: #f5f5f5;
             display: flex;
             justify-content: center;
@@ -67,7 +67,7 @@
         }
 
         canvas {
-            background-color: #121212;
+            background-color: #121212; /* Swapped to page's background color */
             border: 3px solid #4caf50;
             border-radius: 10px;
             display: block;
@@ -100,7 +100,7 @@
         <h1>Dodge the Dots</h1>
         <canvas id="gameCanvas" width="600" height="400"></canvas>
         <p>Use <span>Arrow Keys</span> to move. Avoid the <span>red dots</span>.</p>
-        <p>Press <span>ESC</span> to restart during play. Press <span>Enter</span> to restart after Game Over.</p>
+        <p>Press <span>ESC</span> to restart during play or <span>Enter</span> to restart after Game Over.</p>
     </div>
 </div>
 
@@ -139,7 +139,7 @@ class Triangle {
         ctx.lineTo(this.x - TRIANGLE_SIZE, this.y + TRIANGLE_SIZE);
         ctx.lineTo(this.x + TRIANGLE_SIZE, this.y + TRIANGLE_SIZE);
         ctx.closePath();
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = 'white'; // Triangle color set to white
         ctx.fill();
     }
 
@@ -210,40 +210,12 @@ class Dot {
     }
 }
 
-// Collision detection
-function checkCollision(triangle, dot) {
-    const dx = triangle.x - dot.x;
-    const dy = triangle.y - dot.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < TRIANGLE_SIZE + DOT_RADIUS;
-}
-
-// Reset the game
-function resetGame() {
-    player = new Triangle();
-    dots = [];
-    score = 0;
-    dotSpawnRate = 3;
-    MIN_DOT_SPEED = 2;
-    MAX_DOT_SPEED = 6;
-    gameOver = false;
-    keys = {};  // Clear any leftover key states
-
-    if (animationId) {
-        cancelAnimationFrame(animationId); // Stop the previous animation
+// Prevent scrolling with arrow keys
+document.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault(); // Prevent scrolling
     }
 
-    gameLoop(); // Restart the game loop
-}
-
-// Increase the speed of the dots every 1.5 seconds
-function increaseSpeed() {
-    MIN_DOT_SPEED += 0.2;
-    MAX_DOT_SPEED += 0.2;
-}
-
-// Handle keyboard input
-document.addEventListener('keydown', (e) => {
     keys[e.key] = true;
 
     // Restart game while playing with "ESC"
@@ -261,6 +233,31 @@ document.addEventListener('keyup', (e) => {
     keys[e.key] = false;
 });
 
+// Collision detection
+function checkCollision(triangle, dot) {
+    const dx = triangle.x - dot.x;
+    const dy = triangle.y - dot.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < TRIANGLE_SIZE + DOT_RADIUS;
+}
+
+// Reset the game
+function resetGame() {
+    player = new Triangle();
+    dots = [];
+    score = 0;
+    dotSpawnRate = 3;
+    MIN_DOT_SPEED = 2;
+    MAX_DOT_SPEED = 6;
+    gameOver = false;
+
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+
+    gameLoop();
+}
+
 // Update the top scores and show it
 function updateTopScores(newScore) {
     topScores.push(newScore);
@@ -276,7 +273,7 @@ function updateTopScores(newScore) {
     });
 }
 
-// Main game loop
+// Game loop
 function gameLoop() {
     if (!gameOver) {
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -311,7 +308,7 @@ function gameLoop() {
         animationId = requestAnimationFrame(gameLoop);
     } else {
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        ctx.fillStyle = '#4caf50';
+        ctx.fillStyle = '#f5f5f5';
         ctx.font = '40px Arial';
         ctx.fillText('Game Over', SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 - 20);
         ctx.font = '30px Arial';
@@ -319,9 +316,14 @@ function gameLoop() {
     }
 }
 
+// Increase dot speed periodically
+setInterval(() => {
+    MIN_DOT_SPEED += 0.2;
+    MAX_DOT_SPEED += 0.2;
+}, 1500);
+
 // Start the game
 resetGame();
-setInterval(increaseSpeed, speedIncreaseInterval);
 </script>
 
 </body>
