@@ -465,8 +465,7 @@
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
                 liveVideo.srcObject = stream;
-        	// Add this line to ensure video plays on iOS:
-        	liveVideo.play().catch(err => console.log('Video play error:', err));
+                liveVideo.play().catch(err => console.log('Video play error:', err));
 
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = (event) => {
@@ -524,33 +523,18 @@
                 videoElement.autoplay = false;
                 videoElement.load();
 
-		videoElement.addEventListener('loadeddata', () => {
-	    	// Once data is loaded, we know the video duration should be correct on iOS
-    		videoElement.pause();
-    		videoElement.currentTime = 0;
-    		slider.max = videoElement.duration || 0; 
-    		slider.value = 0;
-    		timeDisplay.textContent = formatTime(0);
-
-    		resizeOverlay();
-    		drawOverlay();
-    		drawFrame();
-	});
-
-
-
-//                videoElement.onloadedmetadata = () => {
-//                    slider.max = videoElement.duration; 
-//                    slider.value = 0; 
-//                    timeDisplay.textContent = formatTime(0); 
-//                    videoElement.currentTime = 0;
-//                    videoElement.pause();
-//                    videoElement.addEventListener('seeked', () => {
-//                        resizeOverlay(); 
-//                        drawOverlay();
-//                        drawFrame();
-//                    }, { once: true });
-//                };
+                videoElement.onloadedmetadata = () => {
+                    slider.max = videoElement.duration; 
+                    slider.value = 0; 
+                    timeDisplay.textContent = formatTime(0); 
+                    videoElement.currentTime = 0;
+                    videoElement.pause();
+                    videoElement.addEventListener('seeked', () => {
+                        resizeOverlay(); 
+                        drawOverlay();
+                        drawFrame();
+                    }, { once: true });
+                };
 
                 liveVideo.style.display = "none";
                 frameCanvas.style.display = "block";
@@ -850,7 +834,6 @@
 
         backToPositionButton.addEventListener("click", () => {
             plotPosition();
-            // After plotting position, no extra update needed since plotPosition() updates chart
         });
 
         clearDataPointsButton.addEventListener("click", () => {
@@ -1014,9 +997,7 @@
                 overlayCtx.stroke();
             }
 
-            // Draw axes and cyan dot only in analysis mode
             if (mode === "analyze") {
-                // If no origin set, use default (0,0)
                 let ox = originSet ? originPoint.x : 0;
                 let oy = originSet ? originPoint.y : 0;
 
@@ -1027,19 +1008,16 @@
                 overlayCtx.lineWidth = 4;
                 overlayCtx.strokeStyle = 'black';
 
-                // X axis
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, originCanvasY);
                 overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
                 overlayCtx.stroke();
 
-                // Y axis
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(originCanvasX, 0);
                 overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
                 overlayCtx.stroke();
 
-                // White inner lines
                 overlayCtx.lineWidth = 2;
                 overlayCtx.strokeStyle = 'white';
 
@@ -1053,7 +1031,6 @@
                 overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
                 overlayCtx.stroke();
 
-                // Cyan dot at origin
                 overlayCtx.fillStyle = "cyan";
                 overlayCtx.beginPath();
                 overlayCtx.arc(originCanvasX, originCanvasY, 5, 0, 2 * Math.PI);
