@@ -132,6 +132,7 @@
             width: 48%; 
             max-width: 600px;
             min-width: 300px;
+	    min-height: 200px; 
         }
 
         video, canvas {
@@ -370,7 +371,7 @@
 
     <div id="analysisContainer">
         <div id="videoWrapper">
-            <video id="liveVideo" autoplay muted></video>
+            <video id="liveVideo" autoplay muted playsinline webkit-playsinline></video>
             <canvas id="frameCanvas" style="display: none;"></canvas>
             <canvas id="overlayCanvas"></canvas>
             <div class="crosshair" id="crosshair"></div>
@@ -464,6 +465,8 @@
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then((stream) => {
                 liveVideo.srcObject = stream;
+        	// Add this line to ensure video plays on iOS:
+        	liveVideo.play().catch(err => console.log('Video play error:', err));
 
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = (event) => {
