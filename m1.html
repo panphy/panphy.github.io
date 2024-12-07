@@ -132,7 +132,7 @@
             width: 48%; 
             max-width: 600px;
             min-width: 300px;
-	    min-height: 200px; 
+            min-height: 200px; 
         }
 
         video, canvas {
@@ -371,7 +371,7 @@
 
     <div id="analysisContainer">
         <div id="videoWrapper">
-            <video id="liveVideo" autoplay muted playsinline webkit-playsinline></video>
+            <video id="liveVideo" autoplay muted playsinline webkit-playsinline preload="metadata"></video>
             <canvas id="frameCanvas" style="display: none;"></canvas>
             <canvas id="overlayCanvas"></canvas>
             <div class="crosshair" id="crosshair"></div>
@@ -519,12 +519,19 @@
 
                 videoElement.srcObject = null; 
                 videoElement.src = URL.createObjectURL(file);
-                videoElement.controls = true;
                 videoElement.autoplay = false;
                 videoElement.load();
 
                 videoElement.onloadedmetadata = () => {
-                    slider.max = videoElement.duration; 
+                    let dur = videoElement.duration;
+                    if (!isFinite(dur)) {
+                        if (videoElement.seekable.length > 0) {
+                            dur = videoElement.seekable.end(videoElement.seekable.length - 1);
+                        } else {
+                            dur = 0;
+                        }
+                    }
+                    slider.max = dur;
                     slider.value = 0; 
                     timeDisplay.textContent = formatTime(0); 
                     videoElement.currentTime = 0;
@@ -558,12 +565,19 @@
 
             videoElement.srcObject = null; 
             videoElement.src = URL.createObjectURL(recordedBlob);
-            videoElement.controls = true;
             videoElement.autoplay = false; 
             videoElement.load();
 
             videoElement.onloadedmetadata = () => {
-                slider.max = videoElement.duration; 
+                let dur = videoElement.duration;
+                if (!isFinite(dur)) {
+                    if (videoElement.seekable.length > 0) {
+                        dur = videoElement.seekable.end(videoElement.seekable.length - 1);
+                    } else {
+                        dur = 0;
+                    }
+                }
+                slider.max = dur;
                 slider.value = 0; 
                 timeDisplay.textContent = formatTime(0); 
                 videoElement.currentTime = 0;
@@ -609,7 +623,10 @@
         });
 
         slider.addEventListener("input", () => {
-            videoElement.currentTime = parseFloat(slider.value); 
+            const val = parseFloat(slider.value);
+            if (val <= videoElement.duration) {
+                videoElement.currentTime = val; 
+            }
         });
 
         overlayCanvas.addEventListener('click', (event) => {
@@ -648,6 +665,9 @@
         });
 
         function drawFrame() {
+            // If video dimensions not ready or invalid, do nothing
+            if (videoElement.videoWidth === 0 || videoElement.videoHeight === 0) return;
+
             frameCanvas.width = videoElement.videoWidth;
             frameCanvas.height = videoElement.videoHeight;
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
@@ -682,8 +702,14 @@
         }
 
         function skipToNextFrame() {
+            // Prevent going beyond video end
+            if (videoElement.currentTime + (1/30) >= videoElement.duration) {
+                message.textContent = "Reached end of video.";
+                return;
+            }
+
             skippingFrame = true;
-            videoElement.currentTime += 1 / 30; 
+            videoElement.currentTime = videoElement.currentTime + 1 / 30; 
             videoElement.addEventListener('seeked', () => {
                 skippingFrame = false;
                 drawFrame();
@@ -958,6 +984,7 @@
         }
 
         function formatTime(time) {
+            if (!isFinite(time) || time < 0) time = 0;
             const minutes = Math.floor(time / 60);
             const seconds = Math.floor(time % 60);
             const milliseconds = Math.floor((time - Math.floor(time)) * 1000);
