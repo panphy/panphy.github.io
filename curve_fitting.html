@@ -32,14 +32,14 @@
 
         /* Reminder Message Styling (Changed Color) */
         .reminder {
-	    background-color: #fff9c4; /* Pale light yellow background */
-    	    color: #856404;            /* Dark yellow text remains for readability */
-    	    border: 1px solid #ffeeba; /* Matching border */
-    	    padding: 0px 15px;        /* Reduced padding: top & bottom = 0px, left & right = 15px */
-    	    margin: 5px;
-    	    border-radius: 1px;
-    	    font-size: 14px;
-    	    text-align: center;        /* Centered text */            
+            background-color: #fff9c4; /* Pale light yellow background */
+            color: #856404;            /* Dark yellow text remains for readability */
+            border: 1px solid #ffeeba; /* Matching border */
+            padding: 0px 15px;        /* Reduced padding: top & bottom = 0px, left & right = 15px */
+            margin: 5px;
+            border-radius: 1px;
+            font-size: 14px;
+            text-align: center;        /* Centered text */            
         }
 
         /* Container for Input and Graph Sections */
@@ -168,7 +168,7 @@
             background-color: #ffffff;
         }
 
-        /* Button Styling (Overridden for Specific Buttons) */
+        /* Button Styling */
         button {
             padding: 10px 15px;
             background-color: #007bff;
@@ -183,6 +183,30 @@
 
         button:hover {
             background-color: #0056b3;
+        }
+
+        /* Fit Button Styling */
+        .fit-button {
+            background-color: #17a2b8; /* Teal background */
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .fit-button:hover {
+            background-color: #138496; /* Darker teal on hover */
+        }
+
+        /* Added Spacing Between Dropdown and Fit Curve Button */
+        .fit-method-section .fit-button {
+            margin-top: 15px; /* Added margin-top for spacing */
         }
 
         /* Button Container Styling */
@@ -415,6 +439,66 @@
             font-size: 14px;
             cursor: pointer;
         }
+
+        /* Advanced Fit Section Styling */
+        .advanced-fit-section {
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .advanced-fit-section h2 {
+            text-align: center;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .advanced-fit-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .advanced-fit-item label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .advanced-fit-item input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .advanced-fit-item input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .advanced-fit-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .advanced-fit-buttons button {
+            background-color: #17a2b8; /* Teal background */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px 12px;
+        }
+
+        .advanced-fit-buttons button:hover {
+            background-color: #138496; /* Darker teal on hover */
+        }
     </style>
 </head>
 <body>
@@ -604,9 +688,9 @@
                 </div>
             </div>
 
-            <!-- Fit Method Section -->
+            <!-- Basic Fit Method Section -->
             <div class="fit-method-section">
-                <h2>Fit Method</h2>
+                <h2>Basic Fit</h2>
                 <label for="fit-method">Choose Method:</label>
                 <select id="fit-method">
                     <option value="Linear">Linear</option>
@@ -617,7 +701,32 @@
                     <option value="Power">Power</option> <!-- Modified to include offset -->
                     <!-- Future Extensions: Gaussian, Lorentzian, User-Defined -->
                 </select>
-                <button style="margin-top: 10px;" onclick="fitCurve()">Fit Curve</button>
+                <button class="fit-button" onclick="fitCurve()">Fit Curve</button>
+            </div>
+
+            <!-- Advanced Fit Section -->
+            <div class="advanced-fit-section">
+                <h2>Advanced Fit</h2>
+                <p class="table-prompt">Fit a general sinusoidal function: \( y = A \cdot e^{bx} \cdot \sin(kx - \phi) \)</p>
+                <div class="advanced-fit-item">
+                    <label for="initial-A">Initial A:</label>
+                    <input type="number" id="initial-A" placeholder="Enter initial A" value="1">
+                </div>
+                <div class="advanced-fit-item">
+                    <label for="initial-b">Initial b:</label>
+                    <input type="number" id="initial-b" placeholder="Enter initial b" value="0">
+                </div>
+                <div class="advanced-fit-item">
+                    <label for="initial-k">Initial k:</label>
+                    <input type="number" id="initial-k" placeholder="Enter initial k" value="1">
+                </div>
+                <div class="advanced-fit-item">
+                    <label for="initial-phi">Initial φ (phi in radians):</label>
+                    <input type="number" id="initial-phi" placeholder="Enter initial φ" value="0">
+                </div>
+                <div class="advanced-fit-buttons">
+                    <button class="fit-button" onclick="fitSinusoidal()">Fit Sinusoidal Curve</button>
+                </div>
             </div>
         </div>
 
@@ -1228,12 +1337,6 @@
                 // Adjust y-values by subtracting c
                 const adjustedY = y.map(val => val - c);
 
-                // Ensure all adjusted y-values are positive
-                if (adjustedY.some(val => val <= 0)) {
-                    alert('After subtracting offset, all y values must be positive for exponential fitting.');
-                    return;
-                }
-
                 // Perform linear fit on adjusted y-values
                 const logAdjustedY = adjustedY.map(val => Math.log(val));
                 const { slope: b, intercept: lnA } = computeLinearFit(x, logAdjustedY);
@@ -1278,12 +1381,6 @@
 
                 // Adjust y-values by subtracting c
                 const adjustedY = y.map(val => val - c);
-
-                // Ensure all adjusted y-values are positive
-                if (adjustedY.some(val => val <= 0)) {
-                    alert('After subtracting offset, all y values must be positive for power fitting.');
-                    return;
-                }
 
                 // Perform linear fit on log-log transformed data
                 const logX = x.map(val => Math.log(val));
@@ -1769,6 +1866,110 @@
             } catch (error) {
                 console.error('Error applying global y uncertainties:', error);
                 alert('An error occurred while applying global y uncertainties. Please check the console for details.');
+            }
+        }
+
+        /**
+         * Performs curve fitting for the advanced sinusoidal function and updates the results.
+         */
+        function fitSinusoidal() {
+            try {
+                if (rawData.length < 4) { // Minimum data points for fitting
+                    alert('Please enter at least four data points for sinusoidal fitting.');
+                    return;
+                }
+
+                // Retrieve initial parameters
+                let A = parseFloat(document.getElementById('initial-A').value);
+                let b = parseFloat(document.getElementById('initial-b').value);
+                let k = parseFloat(document.getElementById('initial-k').value);
+                let phi = parseFloat(document.getElementById('initial-phi').value);
+
+                if (isNaN(A) || isNaN(b) || isNaN(k) || isNaN(phi)) {
+                    alert('Please provide valid initial parameters.');
+                    return;
+                }
+
+                // Perform nonlinear fitting using gradient descent
+                const params = { A: A, b: b, k: k, phi: phi };
+                const learningRate = 1e-5;
+                const maxIterations = 100000;
+                const tolerance = 1e-6;
+
+                let previousError = Infinity;
+                let iterations = 0;
+
+                while (iterations < maxIterations) {
+                    const predictions = rawData.map(point => params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi));
+                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+                    const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
+
+                    if (Math.abs(previousError - mse) < tolerance) {
+                        break;
+                    }
+
+                    previousError = mse;
+
+                    // Compute gradients
+                    let dA = 0, db = 0, dk = 0, dphi = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const xi = rawData[i].x;
+                        const yi = rawData[i].y;
+                        const sinTerm = Math.sin(params.k * xi - params.phi);
+                        const cosTerm = Math.cos(params.k * xi - params.phi);
+                        const expTerm = Math.exp(params.b * xi);
+
+                        const prediction = params.A * expTerm * sinTerm;
+                        const error = yi - prediction;
+
+                        dA += -2 * error * expTerm * sinTerm;
+                        db += -2 * error * params.A * xi * expTerm * sinTerm;
+                        dk += -2 * error * params.A * expTerm * xi * cosTerm;
+                        dphi += 2 * error * params.A * expTerm * cosTerm;
+                    }
+
+                // Update parameters
+                    params.A -= learningRate * dA;
+                    params.b -= learningRate * db;
+                    params.k -= learningRate * dk;
+                    params.phi -= learningRate * dphi;
+
+                    iterations++;
+                }
+
+                if (iterations === maxIterations) {
+                    alert('Fitting did not converge. Please try different initial parameters.');
+                    return;
+                }
+
+                // Generate fitted curve
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+                const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi));
+
+                const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi);
+
+                // Construct the fit equation with proper handling of negative coefficients
+                let equation = 'y = ';
+                // Handle A
+                if (params.A < 0) {
+                    equation += `-${Math.abs(params.A).toFixed(2)} e^{${params.b.toFixed(2)}x} \\sin(${params.k.toFixed(2)}x`;
+                } else {
+                    equation += `${params.A.toFixed(2)} e^{${params.b.toFixed(2)}x} \\sin(${params.k.toFixed(2)}x`;
+                }
+
+                // Handle phi
+                if (params.phi > 0) {
+                    equation += ` - ${params.phi.toFixed(2)}`;
+                } else if (params.phi < 0) {
+                    equation += ` + ${Math.abs(params.phi).toFixed(2)}`;
+                }
+                equation += ')';
+
+                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                plotFittedCurve(rawData.map(p => p.x), rawData.map(p => p.y), xFit, yFit, 'sinusoidal fit');
+            } catch (error) {
+                console.error('Error performing sinusoidal fit:', error);
+                alert('An error occurred during sinusoidal fitting. Please check the console for details.');
             }
         }
     </script>
