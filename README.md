@@ -1,0 +1,1 @@
+Welcome to the hub for all my web applications, physics simulations, and games! Each project here is the result of a collaborative effort between myself and ChatGPT. These tools and simulations are designed to provide interactive and educational experiences.
