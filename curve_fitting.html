@@ -869,41 +869,63 @@
             }
         }
 
-        // Navigate between input fields using Enter and Tab keys
+        // Navigate between input fields using Enter and Arrow keys
         function navigateTable(event) {
             try {
-                const inputs = Array.from(document.querySelectorAll('#data-table input'));
+                const key = event.key;
                 const currentInput = event.target;
-                const index = inputs.indexOf(currentInput);
 
-                if (event.key === 'Enter') {
-                    // Prevent form submission or other default behaviors
-                    event.preventDefault();
+                // Find the current cell and its indices
+                const currentCell = currentInput.parentElement;
+                const currentRow = currentCell.parentElement;
+                const table = currentRow.parentElement.parentElement;
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                const rowIndex = rows.indexOf(currentRow);
+                const cells = Array.from(currentRow.children);
+                const colIndex = cells.indexOf(currentCell);
 
-                    // Determine the column of the current input
-                    const currentCell = currentInput.parentElement;
-                    const currentRow = currentCell.parentElement;
-                    const cells = Array.from(currentRow.children);
-                    const currentColumnIndex = cells.indexOf(currentCell);
+                let targetRow = rowIndex;
+                let targetCol = colIndex;
 
-                    // Determine the next row's input in the same column
-                    const nextRow = currentRow.nextElementSibling;
-                    if (nextRow) {
-                        const nextInput = nextRow.children[currentColumnIndex].querySelector('input');
-                        if (nextInput) {
-                            nextInput.focus();
-                        }
-                    } else {
-                        // Optionally, add a new row if at the end
-                        addRow();
-                        const addedRow = currentRow.nextElementSibling;
-                        const addedInput = addedRow.children[currentColumnIndex].querySelector('input');
-                        if (addedInput) {
-                            addedInput.focus();
-                        }
-                    }
-                } else if (event.key === 'Tab') {
-                    // Allow default Tab behavior
+                switch (key) {
+                    case 'Enter':
+                        event.preventDefault();
+                        targetRow = rowIndex + 1;
+                        targetCol = colIndex;
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        targetCol = colIndex + 1;
+                        break;
+                    case 'ArrowLeft':
+                        event.preventDefault();
+                        targetCol = colIndex - 1;
+                        break;
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        targetRow = rowIndex + 1;
+                        break;
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        targetRow = rowIndex - 1;
+                        break;
+                    default:
+                        return; // Exit if it's not an arrow key or Enter
+                }
+
+                // Boundary checks
+                if (targetRow < 0) targetRow = 0;
+                if (targetRow >= rows.length) targetRow = rows.length - 1;
+                if (targetCol < 0) targetCol = 0;
+                if (targetCol >= cells.length) targetCol = cells.length - 1;
+
+                // Find the target cell and its input
+                const targetCell = rows[targetRow].children[targetCol];
+                const targetInput = targetCell.querySelector('input');
+
+                // Only focus if the input is visible
+                if (targetInput && targetInput.offsetParent !== null) { // offsetParent is null if element or its parents are hidden
+                    targetInput.focus();
                 }
             } catch (error) {
                 console.error('Error navigating table:', error);
