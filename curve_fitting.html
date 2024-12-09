@@ -707,7 +707,7 @@
             <!-- Advanced Fit Section -->
             <div class="advanced-fit-section">
                 <h2>Advanced Fit</h2>
-                <p class="table-prompt">Fit a general sinusoidal function: \( y = A \cdot e^{bx} \cdot \sin(kx - \phi) \)</p>
+                <p class="table-prompt">Fit a general sinusoidal function: \( y = A \cdot e^{bx} \cdot \sin(kx - \phi) + c \)</p>
                 <div class="advanced-fit-item">
                     <label for="initial-A">Initial A:</label>
                     <input type="number" id="initial-A" placeholder="Enter initial A" value="1">
@@ -723,6 +723,10 @@
                 <div class="advanced-fit-item">
                     <label for="initial-phi">Initial φ (phi in radians):</label>
                     <input type="number" id="initial-phi" placeholder="Enter initial φ" value="0">
+                </div>
+                <div class="advanced-fit-item">
+                    <label for="initial-c">Initial c:</label>
+                    <input type="number" id="initial-c" placeholder="Enter initial c" value="0">
                 </div>
                 <div class="advanced-fit-buttons">
                     <button class="fit-button" onclick="fitSinusoidal()">Fit Sinusoidal Curve</button>
@@ -1884,14 +1888,15 @@
                 let b = parseFloat(document.getElementById('initial-b').value);
                 let k = parseFloat(document.getElementById('initial-k').value);
                 let phi = parseFloat(document.getElementById('initial-phi').value);
+                let c = parseFloat(document.getElementById('initial-c').value);
 
-                if (isNaN(A) || isNaN(b) || isNaN(k) || isNaN(phi)) {
+                if (isNaN(A) || isNaN(b) || isNaN(k) || isNaN(phi) || isNaN(c)) {
                     alert('Please provide valid initial parameters.');
                     return;
                 }
 
                 // Perform nonlinear fitting using gradient descent
-                const params = { A: A, b: b, k: k, phi: phi };
+                const params = { A: A, b: b, k: k, phi: phi, c: c };
                 const learningRate = 1e-5;
                 const maxIterations = 100000;
                 const tolerance = 1e-6;
@@ -1900,7 +1905,7 @@
                 let iterations = 0;
 
                 while (iterations < maxIterations) {
-                    const predictions = rawData.map(point => params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi));
+                    const predictions = rawData.map(point => params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi) + params.c);
                     const errors = rawData.map((point, idx) => point.y - predictions[idx]);
                     const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
 
@@ -1911,7 +1916,7 @@
                     previousError = mse;
 
                     // Compute gradients
-                    let dA = 0, db = 0, dk = 0, dphi = 0;
+                    let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
                     for (let i = 0; i < rawData.length; i++) {
                         const xi = rawData[i].x;
                         const yi = rawData[i].y;
@@ -1919,20 +1924,22 @@
                         const cosTerm = Math.cos(params.k * xi - params.phi);
                         const expTerm = Math.exp(params.b * xi);
 
-                        const prediction = params.A * expTerm * sinTerm;
+                        const prediction = params.A * expTerm * sinTerm + params.c;
                         const error = yi - prediction;
 
                         dA += -2 * error * expTerm * sinTerm;
                         db += -2 * error * params.A * xi * expTerm * sinTerm;
                         dk += -2 * error * params.A * expTerm * xi * cosTerm;
                         dphi += 2 * error * params.A * expTerm * cosTerm;
+                        dc += -2 * error * 1; // Derivative w.r.t c
                     }
 
-                // Update parameters
+                    // Update parameters
                     params.A -= learningRate * dA;
                     params.b -= learningRate * db;
                     params.k -= learningRate * dk;
                     params.phi -= learningRate * dphi;
+                    params.c -= learningRate * dc;
 
                     iterations++;
                 }
@@ -1944,9 +1951,9 @@
 
                 // Generate fitted curve
                 const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi));
+                const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c);
 
-                const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi);
+                const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
 
                 // Construct the fit equation with proper handling of negative coefficients
                 let equation = 'y = ';
@@ -1964,6 +1971,17 @@
                     equation += ` + ${Math.abs(params.phi).toFixed(2)}`;
                 }
                 equation += ')';
+
+                // Handle c
+                if (params.c > 0) {
+                    equation += ` + ${params.c.toFixed(2)}`;
+                } else if (params.c < 0) {
+                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                }
+                // If c is approximately 0, omit it
+                else {
+                    // Do nothing; equation remains without the offset
+                }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
                 plotFittedCurve(rawData.map(p => p.x), rawData.map(p => p.y), xFit, yFit, 'sinusoidal fit');
