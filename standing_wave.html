@@ -123,8 +123,10 @@
 
         /* Canvas Styling */
         canvas {
-            width: 100%;
-            height: auto; /* Height will be set via JavaScript to maintain aspect ratio */
+            /* Removed width and height to prevent CSS scaling */
+            /* width: 100%; */
+            /* height: auto; */
+
             border: none;
             border-radius: 10px;
             background: #4a4a4a;
@@ -159,14 +161,7 @@
                 padding: 10px 15px;
             }
 
-            canvas {
-                height: 300px;
-            }
-
-            .controls {
-                grid-template-columns: 1fr;
-                grid-template-rows: repeat(6, auto);
-            }
+            /* Canvas will maintain aspect ratio via JS */
         }
     </style>
 </head>
@@ -178,15 +173,15 @@
             <div class="control-group">
                 <label class="control-label">Boundary Conditions</label>
                 <div style="width: 100%; margin-bottom: 10px;">
-                    <label for="leftBoundary" style="color: #bbbbbb;">Left Boundary:</label>
-                    <select id="leftBoundary">
+                    <label for="leftBoundary" style="color: #bbbbbb;" title="Select the boundary condition for the left end of the string.">Left Boundary:</label>
+                    <select id="leftBoundary" aria-label="Left Boundary Condition">
                         <option value="fixed">Fixed</option>
                         <option value="free">Free</option>
                     </select>
                 </div>
                 <div style="width: 100%;">
-                    <label for="rightBoundary" style="color: #bbbbbb;">Right Boundary:</label>
-                    <select id="rightBoundary">
+                    <label for="rightBoundary" style="color: #bbbbbb;" title="Select the boundary condition for the right end of the string.">Right Boundary:</label>
+                    <select id="rightBoundary" aria-label="Right Boundary Condition">
                         <option value="fixed">Fixed</option>
                         <option value="free">Free</option>
                     </select>
@@ -194,34 +189,35 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="amplitudeSlider">Amplitude (A): <span id="amplitudeValue">6.0</span></label>
-                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0">
+                <label class="control-label" for="amplitudeSlider" title="Adjust the maximum displacement of the wave.">Amplitude (A): <span id="amplitudeValue">6.0</span></label>
+                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0" aria-label="Amplitude Slider">
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="omegaSlider">Angular Frequency (ω): <span id="omegaValue">6.28</span> rad/s</label>
+                <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">Angular Frequency (ω): <span id="omegaValue">6.28</span> rad/s</label>
                 <label class="control-label">Frequency (f): <span id="frequencyValue">1.00</span> Hz</label>
-                <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28">
+                <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28" aria-label="Angular Frequency Slider">
             </div>
 
             <!-- Bottom Row: Orange Particle Position, Green Particle Position, Harmonic -->
             <div class="control-group">
-                <label class="control-label" for="positionSlider">Orange Particle Position (x): <span id="positionValue">0.50</span></label>
-                <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5">
+                <label class="control-label" for="positionSlider" title="Adjust the position of the orange particle along the string.">Orange Particle Position (x): <span id="positionValue">0.50</span></label>
+                <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Orange Particle Position Slider">
                 <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="greenPositionSlider">Green Particle Position (x): <span id="greenPositionValue">0.80</span></label>
-                <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8">
+                <label class="control-label" for="greenPositionSlider" title="Adjust the position of the green particle along the string.">Green Particle Position (x): <span id="greenPositionValue">0.80</span></label>
+                <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position Slider">
                 <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="modeSlider">Harmonic: <span id="modeValue">1st</span></label>
-                <input type="range" id="modeSlider" min="1" max="6" step="1" value="1">
+                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">Harmonic: <span id="modeValue">1st</span></label>
+                <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
             </div>
         </div>
+
         <p class="instructions">Press the "Enter" key to pause or resume the animation.</p>
 	<br>
         <canvas id="oscillationCanvas"></canvas>
@@ -270,9 +266,8 @@
         modeValue.textContent = getOrdinal(mode);
 
         let isPaused = false;
-        let time = 0;
-
-        const harmonicsDisplay = ["1st", "3rd", "5th", "7th", "9th", "11th"];
+        let time = 0; // Total elapsed time in seconds
+        let lastTimestamp = null; // To track elapsed time between frames
 
         // Function to determine allowed harmonics based on boundary conditions
         function getAllowedHarmonics() {
@@ -393,7 +388,7 @@
 
         // Function to resize the canvas while maintaining aspect ratio
         function resizeCanvas() {
-            const aspectRatio = 2; // Width:Height ratio
+            const aspectRatio = 2; // Width:Height ratio (e.g., 800:400 => 2:1)
             const containerWidth = canvas.parentElement.clientWidth;
             const width = containerWidth;
             const height = containerWidth / aspectRatio;
@@ -401,15 +396,22 @@
             // Set the canvas size
             canvas.width = width;
             canvas.height = height;
-
-            // Redraw after resizing
-            draw();
         }
 
-        // Drawing function
-        function draw() {
+        // Drawing function with real elapsed time and relative amplitude scaling
+        function draw(timestamp) {
+            if (!lastTimestamp) {
+                lastTimestamp = timestamp;
+            }
+            const deltaTime = (timestamp - lastTimestamp) / 1000; // Convert ms to seconds
+            lastTimestamp = timestamp;
+
             if (!isPaused) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Calculate scaling factor based on canvas height and max amplitude
+                const desiredFraction = 0.8; // Wave occupies 80% of half the canvas height
+                const amplitudeScale = (canvas.height / 2 * desiredFraction) / 10; // A_max = 10
 
                 // Draw the equilibrium line with #9e9eaa
                 ctx.beginPath();
@@ -427,7 +429,7 @@
                     const normalizedX = i / canvas.width;
                     let waveFunc = getWaveFunction(mode, normalizedX);
                     let y = A * Math.cos(omega * time) * waveFunc;
-                    let screenY = canvas.height / 2 - y * 20; // Scale y for visibility
+                    let screenY = canvas.height / 2 - y * amplitudeScale; // Scale y relative to canvas height
                     if (i === 0) {
                         ctx.moveTo(i, screenY);
                     } else {
@@ -440,30 +442,32 @@
 
                 // Draw the orange particle
                 const orangeX = xRed * canvas.width;
-                const orangeY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xRed) * 20;
-                ctx.beginPath();
-                ctx.arc(orangeX, orangeY, 8, 0, 2 * Math.PI);
-                ctx.fillStyle = "#ff9800"; // Orange particle color
-                ctx.fill();
-                ctx.strokeStyle = "#ffffff";
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                const orangeY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xRed) * amplitudeScale;
+                drawParticle(orangeX, orangeY, "#ff9800");
 
                 // Draw the green particle
                 const greenX = xGreen * canvas.width;
-                const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xGreen) * 20;
-                ctx.beginPath();
-                ctx.arc(greenX, greenY, 8, 0, 2 * Math.PI);
-                ctx.fillStyle = "#00e676"; // Green particle color
-                ctx.fill();
-                ctx.strokeStyle = "#ffffff";
-                ctx.lineWidth = 1;
-                ctx.stroke();
+                const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xGreen) * amplitudeScale;
+                drawParticle(greenX, greenY, "#00e676");
 
-                // Increment time
-                time += 0.02;
+                // Increment time based on actual elapsed time
+                time += deltaTime;
             }
+
             requestAnimationFrame(draw);
+        }
+
+        // Function to draw a particle ensuring it remains a perfect circle
+        function drawParticle(x, y, color) {
+            const particleRadius = Math.min(canvas.width, canvas.height) * 0.01; // 1% of the smaller dimension
+
+            ctx.beginPath();
+            ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = color; // Particle color
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.stroke();
         }
 
         // Pause/Resume functionality on Enter key press
@@ -478,6 +482,7 @@
             resizeCanvas();
             updateHarmonicSlider();
             updateAmplitudes();
+            requestAnimationFrame(draw); // Start the animation
         });
 
         // Adjust the canvas size on window resize
