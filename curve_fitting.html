@@ -294,7 +294,10 @@
 
         .advanced-fit-section select, 
         .advanced-fit-section .fit-method-select {
-            width: 100%;
+            
+    	    width: auto;
+    	    min-width: 150px;
+    	    max-width: 300px;
             padding: 8px;
             font-size: 14px;
             border: 1px solid #ccc;
@@ -554,7 +557,6 @@
     <div class="container">
         <div class="input-section">
             <h2>Data Input</h2>
-            <p class="table-prompt">Enter your data below.</p>
 
             <div class="table-container">
                 <table class="data-table" id="data-table">
@@ -700,7 +702,7 @@
                 </div>
 
                 <div id="BasicFit" class="tab-content active">
-                    <label for="fit-method">Choose Method:</label>
+                    <label for="fit-method">Fit Method:</label>
                     <select id="fit-method" onchange="updateBasicFitEquation()">
                         <option value="Linear">Linear</option>
                         <option value="Polynomial-2">Polynomial (2nd Degree)</option>
@@ -716,7 +718,7 @@
                 </div>
 
                 <div id="AdvancedFit" class="tab-content">
-                    <label for="advanced-fit-method">Choose Advanced Fit Method:</label>
+                    <label for="advanced-fit-method">Advanced Fit Method:</label>
                     <select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
                         <option value="Sinusoidal">Sinusoidal</option>
                         <option value="Gaussian">Gaussian</option>
