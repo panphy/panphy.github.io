@@ -305,23 +305,35 @@
             margin-bottom: 15px;
         }
 
-        .advanced-fit-item {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
-        }
+	.advanced-fit-item {
+	    display: flex;
+	    align-items: center;
+	    justify-content: flex-start;
+	    gap: 10px;
+	    margin-bottom: 10px;
+	}
 
-        .advanced-fit-item label {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
+	.advanced-fit-item label {
+	    flex: none;
+	    text-align: left;
+	    white-space: nowrap;
+	}
 
-        .advanced-fit-item input {
-            padding: 8px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+	.advanced-fit-item input {
+	    flex: none;
+	    width: auto;
+	    max-width: 200px;
+	    padding: 5px;
+	    border: 1px solid #ccc;
+	    border-radius: 4px;
+	}
+
+
+
+
+
+
+
 
         .advanced-fit-item input:focus {
             border-color: #007bff;
@@ -726,65 +738,65 @@
                     <div id="advanced-fit-general-equation" class="general-equation">
                         \( y = A e^{bx} \sin(kx - \phi) + c \)
                     </div>
-                    <p class="table-prompt">Enter initial fitting parameters below.</p>
+                    <p class="table-prompt">Enter initial fitting parameters below.</p><br>
                     
                     <div id="Sinusoidal-parameters" class="parameter-section active">
                         <div class="advanced-fit-item">
-                            <label for="initial-A">Initial A:</label>
+                            <label for="initial-A">A:</label>
                             <input type="number" id="initial-A" placeholder="Enter initial A" value="1">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-b">Initial b:</label>
+                            <label for="initial-b">b:</label>
                             <input type="number" id="initial-b" placeholder="Enter initial b" value="0">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-k">Initial k:</label>
+                            <label for="initial-k">k:</label>
                             <input type="number" id="initial-k" placeholder="Enter initial k" value="1">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-phi">Initial φ (in radians):</label>
+                            <label for="initial-phi">φ:</label>
                             <input type="number" id="initial-phi" placeholder="Enter initial φ" value="0">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-c">Initial c:</label>
+                            <label for="initial-c">c:</label>
                             <input type="number" id="initial-c" placeholder="Enter initial c" value="0">
                         </div>
                     </div>
 
                     <div id="Gaussian-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
-                            <label for="initial-A-gaussian">Initial A:</label>
+                            <label for="initial-A-gaussian">A:</label>
                             <input type="number" id="initial-A-gaussian" placeholder="Enter initial A" value="1">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-mu">Initial μ:</label>
+                            <label for="initial-mu">μ:</label>
                             <input type="number" id="initial-mu" placeholder="Enter initial μ" value="0">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-sigma">Initial σ:</label>
+                            <label for="initial-sigma">σ:</label>
                             <input type="number" id="initial-sigma" placeholder="Enter initial σ" value="1">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-c-gaussian">Initial c:</label>
+                            <label for="initial-c-gaussian">c:</label>
                             <input type="number" id="initial-c-gaussian" placeholder="Enter initial c" value="0">
                         </div>
                     </div>
 
                     <div id="Lorentzian-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
-                            <label for="initial-A-lorentzian">Initial A:</label>
+                            <label for="initial-A-lorentzian">A:</label>
                             <input type="number" id="initial-A-lorentzian" placeholder="Enter initial A" value="1">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-x0">Initial x₀:</label>
+                            <label for="initial-x0">x₀:</label>
                             <input type="number" id="initial-x0" placeholder="Enter initial x₀" value="0">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-gamma">Initial γ:</label>
+                            <label for="initial-gamma">γ:</label>
                             <input type="number" id="initial-gamma" placeholder="Enter initial γ" value="1">
                         </div>
                         <div class="advanced-fit-item">
-                            <label for="initial-c-lorentzian">Initial c:</label>
+                            <label for="initial-c-lorentzian">c:</label>
                             <input type="number" id="initial-c-lorentzian" placeholder="Enter initial c" value="0">
                         </div>
                     </div>
