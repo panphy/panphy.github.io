@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Standing Wave Simulation</title>
     <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
@@ -36,17 +43,17 @@
             padding: 30px;
         }
 
-        /* We have 6 boxes total: rearranging as requested */
+        /* Control Boxes Layout */
         .controls {
             display: grid;
-            /* 2 rows, 3 columns */
+            /* 3 columns and 2 rows */
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(2, auto);
             gap: 20px;
             margin-bottom: 30px;
         }
 
-        /* Text styling inside control boxes */
+        /* Control Box Styling */
         .control-group {
             background: #4a4a4a;
             padding: 15px 20px;
@@ -55,10 +62,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center; /* center align all text in control boxes */
+            text-align: center; /* Center-align all text */
         }
 
-        /* Make all text in control boxes bold */
+        /* Bold all text within control boxes */
         .control-group * {
             font-weight: bold;
         }
@@ -69,6 +76,7 @@
             color: #bbbbbb;
         }
 
+        /* Slider and Dropdown Styling */
         input[type="range"], select {
             width: 100%;
             padding: 8px;
@@ -84,6 +92,7 @@
             outline: none;
         }
 
+        /* Slider Thumb Styling */
         input[type="range"]::-webkit-slider-thumb {
             appearance: none;
             width: 16px;
@@ -112,9 +121,10 @@
             background: #ff79b0;
         }
 
+        /* Canvas Styling */
         canvas {
             width: 100%;
-            height: 400px;
+            height: auto; /* Height will be set via JavaScript to maintain aspect ratio */
             border: none;
             border-radius: 10px;
             background: #4a4a4a;
@@ -123,14 +133,16 @@
             margin: 0 auto;
         }
 
+        /* Instructions Styling */
         p.instructions {
             margin-top: 20px;
             font-size: 0.95em;
             color: #bbbbbb;
             text-align: center;
-            font-weight: normal; /* instructions remain normal weight */
+            font-weight: normal; /* Keep instructions normal weight */
         }
 
+        /* Responsive adjustments */
         @media (max-width: 800px) {
             .controls {
                 grid-template-columns: repeat(2, 1fr);
@@ -162,7 +174,7 @@
     <h1>Standing Wave Simulation</h1>
     <div class="container">
         <div class="controls">
-            <!-- Top row: Boundary Conditions (top left), Amplitude (top middle), Frequency (top right) -->
+            <!-- Top Row: Boundary Conditions, Amplitude, Frequency -->
             <div class="control-group">
                 <label class="control-label">Boundary Conditions</label>
                 <div style="width: 100%; margin-bottom: 10px;">
@@ -192,7 +204,7 @@
                 <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28">
             </div>
 
-            <!-- Bottom row: Orange particle position (bottom left), Green particle position (bottom middle), Harmonic (bottom right) -->
+            <!-- Bottom Row: Orange Particle Position, Green Particle Position, Harmonic -->
             <div class="control-group">
                 <label class="control-label" for="positionSlider">Orange Particle Position (x): <span id="positionValue">0.50</span></label>
                 <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5">
@@ -210,11 +222,18 @@
                 <input type="range" id="modeSlider" min="1" max="6" step="1" value="1">
             </div>
         </div>
-        <canvas id="oscillationCanvas" width="800" height="400"></canvas>
+        <canvas id="oscillationCanvas"></canvas>
         <p class="instructions"><strong>Instructions:</strong> Use the sliders and dropdowns above to adjust the standing wave parameters. Press the "Enter" key to pause or resume the animation.</p>
     </div>
 
     <script>
+        // Helper function to convert numbers to ordinal strings
+        function getOrdinal(n) {
+            const s = ["th", "st", "nd", "rd"],
+                  v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+
         const canvas = document.getElementById("oscillationCanvas");
         const ctx = canvas.getContext("2d");
 
@@ -243,34 +262,79 @@
         let leftBoundary = leftBoundarySelect.value; 
         let rightBoundary = rightBoundarySelect.value;
 
+        // Set initial display values
+        amplitudeValue.textContent = A.toFixed(1);
         omegaValue.textContent = omega.toFixed(2);
         frequencyValue.textContent = (omega / (2 * Math.PI)).toFixed(2);
+        modeValue.textContent = getOrdinal(mode);
 
         let isPaused = false;
         let time = 0;
 
-        const harmonics = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+        const harmonicsDisplay = ["1st", "3rd", "5th", "7th", "9th", "11th"];
 
+        // Function to determine allowed harmonics based on boundary conditions
+        function getAllowedHarmonics() {
+            if (
+                (leftBoundary === "fixed" && rightBoundary === "free") ||
+                (leftBoundary === "free" && rightBoundary === "fixed")
+            ) {
+                // Only odd harmonics allowed
+                return [1, 3, 5, 7, 9, 11];
+            } else {
+                // All harmonics allowed
+                return [1, 2, 3, 4, 5, 6];
+            }
+        }
+
+        // Function to update the harmonic slider based on allowed harmonics
+        function updateHarmonicSlider() {
+            const allowed = getAllowedHarmonics();
+            const minHarmonic = Math.min(...allowed);
+            const maxHarmonic = Math.max(...allowed);
+            const stepHarmonic = allowed[1] - allowed[0]; // Assuming uniform step
+
+            modeSlider.min = minHarmonic;
+            modeSlider.max = maxHarmonic;
+            modeSlider.step = stepHarmonic;
+
+            // If current mode is not allowed, set to the first allowed harmonic
+            if (!allowed.includes(mode)) {
+                mode = allowed[0];
+                modeSlider.value = mode;
+                modeValue.textContent = getOrdinal(mode);
+            } else {
+                modeValue.textContent = getOrdinal(mode);
+            }
+        }
+
+        // Function to update amplitude displays
         const updateAmplitudes = () => {
-            const redAmplitude = A * getWaveFunction(mode, xRed);
+            const orangeAmplitude = A * getWaveFunction(mode, xRed);
             const greenAmplitude = A * getWaveFunction(mode, xGreen);
-            redParticleAmplitude.textContent = Math.abs(redAmplitude).toFixed(2);
+            redParticleAmplitude.textContent = Math.abs(orangeAmplitude).toFixed(2);
             greenParticleAmplitude.textContent = Math.abs(greenAmplitude).toFixed(2);
         };
 
+        // Correct wave functions based on boundary conditions
         function getWaveFunction(n, x) {
             if (leftBoundary === "fixed" && rightBoundary === "fixed") {
+                // Fixed-Fixed: sin(nπx)
                 return Math.sin(n * Math.PI * x);
             } else if (leftBoundary === "fixed" && rightBoundary === "free") {
+                // Fixed-Free: sin((2n-1)πx/2)
                 return Math.sin((2 * n - 1) * Math.PI * x / 2);
             } else if (leftBoundary === "free" && rightBoundary === "fixed") {
+                // Free-Fixed: cos((2n-1)πx/2)
                 return Math.cos((2 * n - 1) * Math.PI * x / 2);
             } else if (leftBoundary === "free" && rightBoundary === "free") {
+                // Free-Free: cos(nπx)
                 return Math.cos(n * Math.PI * x);
             }
             return 0;
         }
 
+        // Event listeners for controls
         amplitudeSlider.addEventListener("input", () => {
             A = parseFloat(amplitudeSlider.value);
             amplitudeValue.textContent = A.toFixed(1);
@@ -279,7 +343,7 @@
 
         modeSlider.addEventListener("input", () => {
             mode = parseInt(modeSlider.value);
-            modeValue.textContent = harmonics[mode - 1];
+            modeValue.textContent = getOrdinal(mode);
             updateAmplitudes();
         });
 
@@ -303,14 +367,45 @@
 
         leftBoundarySelect.addEventListener("change", () => {
             leftBoundary = leftBoundarySelect.value;
+            updateHarmonicSlider();
             updateAmplitudes();
         });
 
         rightBoundarySelect.addEventListener("change", () => {
             rightBoundary = rightBoundarySelect.value;
+            updateHarmonicSlider();
             updateAmplitudes();
         });
 
+        // Function to convert number to ordinal string
+        function getOrdinalSuffix(n) {
+            let suffix = "th";
+            if (n % 100 < 11 || n % 100 > 13) {
+                switch (n % 10) {
+                    case 1: suffix = "st"; break;
+                    case 2: suffix = "nd"; break;
+                    case 3: suffix = "rd"; break;
+                }
+            }
+            return n + suffix;
+        }
+
+        // Function to resize the canvas while maintaining aspect ratio
+        function resizeCanvas() {
+            const aspectRatio = 2; // Width:Height ratio
+            const containerWidth = canvas.parentElement.clientWidth;
+            const width = containerWidth;
+            const height = containerWidth / aspectRatio;
+
+            // Set the canvas size
+            canvas.width = width;
+            canvas.height = height;
+
+            // Redraw after resizing
+            draw();
+        }
+
+        // Drawing function
         function draw() {
             if (!isPaused) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -331,7 +426,7 @@
                     const normalizedX = i / canvas.width;
                     let waveFunc = getWaveFunction(mode, normalizedX);
                     let y = A * Math.cos(omega * time) * waveFunc;
-                    let screenY = canvas.height / 2 - y * 20;
+                    let screenY = canvas.height / 2 - y * 20; // Scale y for visibility
                     if (i === 0) {
                         ctx.moveTo(i, screenY);
                     } else {
@@ -342,41 +437,52 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                // Draw orange particle (previously red)
-                const redX = xRed * canvas.width;
-                const redY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xRed) * 20;
+                // Draw the orange particle
+                const orangeX = xRed * canvas.width;
+                const orangeY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xRed) * 20;
                 ctx.beginPath();
-                ctx.arc(redX, redY, 8, 0, 2 * Math.PI);
+                ctx.arc(orangeX, orangeY, 8, 0, 2 * Math.PI);
                 ctx.fillStyle = "#ff9800"; // Orange particle color
                 ctx.fill();
                 ctx.strokeStyle = "#ffffff";
                 ctx.lineWidth = 1;
                 ctx.stroke();
 
-                // Draw green particle
+                // Draw the green particle
                 const greenX = xGreen * canvas.width;
                 const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xGreen) * 20;
                 ctx.beginPath();
                 ctx.arc(greenX, greenY, 8, 0, 2 * Math.PI);
-                ctx.fillStyle = "#00e676";
+                ctx.fillStyle = "#00e676"; // Green particle color
                 ctx.fill();
                 ctx.strokeStyle = "#ffffff";
                 ctx.lineWidth = 1;
                 ctx.stroke();
 
+                // Increment time
                 time += 0.02;
             }
             requestAnimationFrame(draw);
         }
 
+        // Pause/Resume functionality on Enter key press
         document.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
                 isPaused = !isPaused;
             }
         });
 
-        updateAmplitudes();
-        draw();
+        // Initialize the canvas size and harmonic slider on window load
+        window.addEventListener("load", () => {
+            resizeCanvas();
+            updateHarmonicSlider();
+            updateAmplitudes();
+        });
+
+        // Adjust the canvas size on window resize
+        window.addEventListener("resize", () => {
+            resizeCanvas();
+        });
     </script>
 </body>
 </html>
