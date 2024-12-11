@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graph Plotting & Curve Fitting Tool</title>
+    <title>Graph Plotting & Curve Fitting</title>
     <!-- Plotly.js for graphing -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- Math.js for mathematical computations -->
@@ -208,7 +208,7 @@
             background-color: #6aa84f;
             margin: 0;
             flex: 1;
-    	    font-size: 16px; /* Ensure all buttons have the same font size */
+    	    font-size: 16px;
         }
 
         .button-container .button-row button:hover {
@@ -370,14 +370,13 @@
 	.tabs {
     	    display: flex; /* Arrange children side by side */
     	    justify-content: flex-start; /* Align tabs to the left */
-    	    background-color: #f1f1f1;
     	    border-radius: 4px;
     	    margin-bottom: 15px;
 	}
 
 
 	.tabs button {
-    	    background-color: #eaeaea;
+    	    background-color: #f3f3f3;
     	    float: left;
     	    border: none;
     	    outline: none;
@@ -386,7 +385,7 @@
     	    transition: background-color 0.3s;
     	    font-size: 16px;
     	    border-radius: 4px;
-    	    color: #333;
+    	    color: #999999;
     	    width: 50%;
 	}
 
@@ -791,7 +790,7 @@
                     </div>
 
                     <div class="advanced-fit-buttons">
-                        <button class="fit-button" onclick="fitAdvancedCurve()">Fit Advanced Curve</button>
+                        <button class="fit-button" onclick="fitAdvancedCurve()">Fit Curve</button>
                     </div>
                 </div>
             </div>
