@@ -207,7 +207,6 @@
             padding: 0;
             background-color: #6aa84f;
             margin: 0;
-            flex: 1;
     	    font-size: 16px;
         }
 
@@ -215,40 +214,40 @@
             background-color: #218838;
         }
 
-	.global-uncertainty {
+	    .global-uncertainty {
     	    margin-top: 20px;
     	    padding: 10px;
     	    border-top: 1px solid #ccc;
-	    border-bottom: 1px solid #ccc;
-	    margin-bottom: 20px;
-	}
+	        border-bottom: 1px solid #ccc;
+	        margin-bottom: 20px;
+	    }
 
-	.global-uncertainty h3 {
+	    .global-uncertainty h2 {
     	    margin-bottom: 10px;
     	    text-align: center;
-	}
+	    }
 
-	.global-uncertainty-item {
+	    .global-uncertainty-item {
     	    display: flex;
     	    align-items: center;
     	    margin-bottom: 0px;
       	    gap: 10px;
-	}
+	    }
 
-	.global-uncertainty-item input {
+	    .global-uncertainty-item input {
     	    flex: 1;
     	    padding: 8px;
     	    font-size: 14px;
     	    border: 1px solid #ccc;
     	    border-radius: 4px;
-	}
+	    }
 
-	.global-uncertainty-item input:focus {
+	    .global-uncertainty-item input:focus {
     	    border-color: #007bff;
     	    outline: none;
-	}
+	    }
 
-	.global-uncertainty-item button {
+	    .global-uncertainty-item button {
     	    background-color: #6fa8dc;
     	    color: #ffffff;
     	    border: none;
@@ -257,11 +256,11 @@
     	    font-size: 14px;
     	    cursor: pointer;
     	    transition: background-color 0.3s;
-	}
+	    }
 
-	.global-uncertainty-item button:hover {
+	    .global-uncertainty-item button:hover {
     	    background-color: #0b5394;
-	}
+	    }
 
         .apply-button-container {
             display: flex;
@@ -305,28 +304,28 @@
             margin-bottom: 15px;
         }
 
-	.advanced-fit-item {
-	    display: flex;
-	    align-items: center;
-	    justify-content: flex-start;
-	    gap: 10px;
-	    margin-bottom: 10px;
-	}
+	    .advanced-fit-item {
+	        display: flex;
+	        align-items: center;
+	        justify-content: flex-start;
+	        gap: 10px;
+	        margin-bottom: 10px;
+	    }
 
-	.advanced-fit-item label {
-	    flex: none;
-	    text-align: left;
-	    white-space: nowrap;
-	}
+	    .advanced-fit-item label {
+	        flex: none;
+	        text-align: left;
+	        white-space: nowrap;
+	    }
 
-	.advanced-fit-item input {
-	    flex: none;
-	    width: auto;
-	    max-width: 200px;
-	    padding: 5px;
-	    border: 1px solid #ccc;
-	    border-radius: 4px;
-	}
+	    .advanced-fit-item input {
+	        flex: none;
+	        width: auto;
+	        max-width: 200px;
+	        padding: 5px;
+	        border: 1px solid #ccc;
+	        border-radius: 4px;
+	    }
 
         .advanced-fit-item input:focus {
             border-color: #007bff;
@@ -369,18 +368,18 @@
             border-radius: 4px;
             font-size: 16px;
             text-align: center;
-	    margin-bottom: 10px;
+	        margin-bottom: 10px;
         }
 
-	.tabs {
+	    .tabs {
     	    display: flex; /* Arrange children side by side */
     	    justify-content: flex-start; /* Align tabs to the left */
     	    border-radius: 4px;
     	    margin-bottom: 15px;
-	}
+	    }
 
 
-	.tabs button {
+	    .tabs button {
     	    background-color: #f3f3f3;
     	    float: left;
     	    border: none;
@@ -392,7 +391,7 @@
     	    border-radius: 4px;
     	    color: #999999;
     	    width: 50%;
-	}
+	    }
 
 
         .tabs button:hover {
@@ -661,40 +660,39 @@
 
             
             <div class="global-uncertainty">
-	    <h2>Uncertainties</h2>
+	            <h2>Uncertainties</h2>
 
-
-            <div class="uncertainty-controls">
-                <div>
-                    <label>
-                        <input type="checkbox" id="toggle-x-error" onclick="toggleErrorColumn('x')" />
-                        Δx
-                    </label>
-                    <select id="x-error-type" onchange="updateErrorType('x')">
-                        <option value="absolute">absolute</option>
-                        <option value="percentage">%</option>
-                    </select>
+                <div class="uncertainty-controls">
+                    <div>
+                        <label>
+                            <input type="checkbox" id="toggle-x-error" onclick="toggleErrorColumn('x')" />
+                            Δx
+                        </label>
+                        <select id="x-error-type" onchange="updateErrorType('x')">
+                            <option value="absolute">absolute</option>
+                            <option value="percentage">%</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="toggle-y-error" onclick="toggleErrorColumn('y')" />
+                            Δy
+                        </label>
+                        <select id="y-error-type" onchange="updateErrorType('y')">
+                            <option value="absolute">absolute</option>
+                            <option value="percentage">%</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label>
-                        <input type="checkbox" id="toggle-y-error" onclick="toggleErrorColumn('y')" />
-                        Δy
-                    </label>
-                    <select id="y-error-type" onchange="updateErrorType('y')">
-                        <option value="absolute">absolute</option>
-                        <option value="percentage">%</option>
-                    </select>
-                </div>
-            </div>
 
                 <h3>Apply Consistent Uncertainty</h3>
                 <div class="global-uncertainty-item">
                     <input type="text" id="global-x-uncertainty" placeholder="Enter Δx" />
-                    <button onclick="applyGlobalXUncertainties()">Apply Δx</button>
+                    <button onclick="applyGlobalUncertainties('x')">Apply Δx</button>
                 </div>
                 <div class="global-uncertainty-item">
                     <input type="text" id="global-y-uncertainty" placeholder="Enter Δy" />
-                    <button onclick="applyGlobalYUncertainties()">Apply Δy</button>
+                    <button onclick="applyGlobalUncertainties('y')">Apply Δy</button>
                 </div>
             </div>
 
@@ -1026,7 +1024,6 @@
 
         function updateErrorType(axis) {
             try {
-                const errorType = document.getElementById(`${axis}-error-type`).value;
                 if (document.getElementById(`toggle-${axis}-error`).checked) {
                     updateUncertaintyHeaders(axis);
                 }
@@ -1055,7 +1052,7 @@
             }
         }
 
-        function parseCSV(line) {
+        function parseCSVLine(line) {
             const result = [];
             let current = '';
             let inQuotes = false;
@@ -1203,7 +1200,7 @@
                 if (isSyncing) return;
                 isSyncing = true;
 
-                plotData();
+                plotGraph();
                 ['graph-title', 'x-axis-label', 'y-axis-label'].forEach(id => {
                     const latexValue = document.getElementById(id).value;
                     renderLatex(`#${id}-latex`, latexValue);
@@ -1247,6 +1244,73 @@
             } catch (error) {
                 console.error(`Error opening tab ${tabName}:`, error);
             }
+        }
+
+        // Unified Plot Function
+        function plotGraph(fittedX = null, fittedY = null) {
+            try {
+                const x = rawData.map(point => point.x);
+                const y = rawData.map(point => point.y);
+                const xErrorRaw = rawData.map(point => point.xErrorRaw || 0);
+                const yErrorRaw = rawData.map(point => point.yErrorRaw || 0);
+                const xErrorType = document.getElementById('toggle-x-error').checked ? document.getElementById('x-error-type').value : 'absolute';
+                const yErrorType = document.getElementById('toggle-y-error').checked ? document.getElementById('y-error-type').value : 'absolute';
+
+                const convertedXError = xErrorType === 'percentage' ? x.map((xi, idx) => (xErrorRaw[idx] / 100) * (xi || 0)) : xErrorRaw;
+                const convertedYError = yErrorType === 'percentage' ? y.map((yi, idx) => (yErrorRaw[idx] / 100) * (yi || 0)) : yErrorRaw;
+
+                const traces = [
+                    {
+                        x: x,
+                        y: y,
+                        mode: 'markers',
+                        name: 'Input Data',
+                        marker: { color: 'red' },
+                        error_x: {
+                            type: 'data',
+                            array: convertedXError,
+                            visible: document.getElementById('toggle-x-error').checked,
+                            color: 'teal',
+                            thickness: 1.5,
+                            width: 2
+                        },
+                        error_y: {
+                            type: 'data',
+                            array: convertedYError,
+                            visible: document.getElementById('toggle-y-error').checked,
+                            color: 'teal',
+                            thickness: 1.5,
+                            width: 2
+                        }
+                    }
+                ];
+
+                // Add fitted curve if provided
+                if (fittedX && fittedY) {
+                    traces.push({
+                        x: fittedX,
+                        y: fittedY,
+                        mode: 'lines',
+                        name: 'Fit',
+                        line: { color: '#4595dd' }
+                    });
+                }
+
+                const layout = {
+                    title: processLabel(document.getElementById('graph-title')?.value || 'Title'),
+                    xaxis: { title: processLabel(document.getElementById('x-axis-label')?.value || 'x') },
+                    yaxis: { title: processLabel(document.getElementById('y-axis-label')?.value || 'y') }
+                };
+
+                Plotly.react('plot', traces, layout);
+            } catch (error) {
+                console.error('Error plotting graph:', error);
+                alert('An error occurred while plotting the graph. Please check the console for details.');
+            }
+        }
+
+        function processLabel(label) {
+            return `$${label}$`;
         }
 
         function fitCurve() {
@@ -1342,6 +1406,10 @@
             }
         }
 
+        // The performSinusoidalFit, performGaussianFit, and performLorentzianFit functions remain as given previously,
+        // just replacing the final call to "plotFittedCurve" with "plotGraph(fittedX, fittedY)".
+        // Same applies to linear, polynomial, exponential, and power fits.
+
         function performSinusoidalFit() {
             try {
                 let A = parseFloat(document.getElementById('initial-A').value);
@@ -1411,20 +1479,13 @@
 
                 const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
 
-                let equation = 'y = ';
-                if (params.A < 0) {
-                    equation += `-${Math.abs(params.A).toFixed(2)} e^{${params.b.toFixed(2)}x} \\sin(${params.k.toFixed(2)}x`;
-                } else {
-                    equation += `${params.A.toFixed(2)} e^{${params.b.toFixed(2)}x} \\sin(${params.k.toFixed(2)}x`;
-                }
-
+                let equation = `y = ${params.A.toFixed(2)} e^{${params.b.toFixed(2)}x}\\sin(${params.k.toFixed(2)}x`;
                 if (params.phi > 0) {
                     equation += ` - ${params.phi.toFixed(2)}`;
                 } else if (params.phi < 0) {
                     equation += ` + ${Math.abs(params.phi).toFixed(2)}`;
                 }
-                equation += ')';
-
+                equation += `)`;
                 if (params.c > 0) {
                     equation += ` + ${params.c.toFixed(2)}`;
                 } else if (params.c < 0) {
@@ -1432,12 +1493,16 @@
                 }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotFittedCurve(rawData.map(p => p.x), rawData.map(p => p.y), xFit, yFit, 'sinusoidal fit');
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing sinusoidal fit:', error);
                 alert('An error occurred during sinusoidal fitting. Please check the console for details.');
             }
         }
+
+        // Similarly replace final calls in performGaussianFit, performLorentzianFit,
+        // performLinearFit, performPolynomialFit, performExponentialFit, performPowerFit
+        // to call plotGraph(...) instead of plotFittedCurve(...).
 
         function performGaussianFit() {
             try {
@@ -1511,7 +1576,7 @@
                 }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotFittedCurve(rawData.map(p => p.x), rawData.map(p => p.y), xFit, yFit, 'Gaussian fit');
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing Gaussian fit:', error);
                 alert('An error occurred during Gaussian fitting. Please check the console for details.');
@@ -1591,7 +1656,7 @@
                 }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotFittedCurve(rawData.map(p => p.x), rawData.map(p => p.y), xFit, yFit, 'Lorentzian fit');
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing Lorentzian fit:', error);
                 alert('An error occurred during Lorentzian fitting. Please check the console for details.');
@@ -1678,135 +1743,19 @@
             }
         }
 
-        function plotData() {
-            try {
-                const x = rawData.map(point => point.x);
-                const y = rawData.map(point => point.y);
-                const xErrorRaw = rawData.map(point => point.xErrorRaw || 0);
-                const yErrorRaw = rawData.map(point => point.yErrorRaw || 0);
-                const xErrorType = document.getElementById('toggle-x-error').checked ? document.getElementById('x-error-type').value : 'absolute';
-                const yErrorType = document.getElementById('toggle-y-error').checked ? document.getElementById('y-error-type').value : 'absolute';
-
-                const convertedXError = xErrorType === 'percentage' ? x.map((xi, idx) => (xErrorRaw[idx] / 100) * (xi || 0)) : xErrorRaw;
-                const convertedYError = yErrorType === 'percentage' ? y.map((yi, idx) => (yErrorRaw[idx] / 100) * (yi || 0)) : yErrorRaw;
-
-                const trace = {
-                    x: x,
-                    y: y,
-                    mode: 'markers',
-                    name: 'Input Data',
-                    marker: { color: '#f37070' },
-                    error_x: {
-                        type: 'data',
-                        array: convertedXError,
-                        visible: document.getElementById('toggle-x-error').checked,
-                        color: 'teal',
-                        thickness: 1.5,
-                        width: 2
-                    },
-                    error_y: {
-                        type: 'data',
-                        array: convertedYError,
-                        visible: document.getElementById('toggle-y-error').checked,
-                        color: 'teal',
-                        thickness: 1.5,
-                        width: 2
-                    }
-                };
-
-                const layout = {
-                    title: processLabel(document.getElementById('graph-title')?.value || 'Title'),
-                    xaxis: { title: processLabel(document.getElementById('x-axis-label')?.value || 'x') },
-                    yaxis: { title: processLabel(document.getElementById('y-axis-label')?.value || 'y') }
-                };
-
-                if (document.getElementById('plot').data) {
-                    Plotly.react('plot', [trace], layout);
-                } else {
-                    Plotly.newPlot('plot', [trace], layout);
-                }
-            } catch (error) {
-                console.error('Error plotting data:', error);
-                alert('An error occurred while plotting the data. Please check the console for details.');
-            }
-        }
-
-        function processLabel(label) {
-            return `$${label}$`;
-        }
-
-        function plotFittedCurve(x, y, xFit, yFit, title) {
-            try {
-                const xErrorRaw = rawData.map(point => point.xErrorRaw || 0);
-                const yErrorRaw = rawData.map(point => point.yErrorRaw || 0);
-                const xErrorType = document.getElementById('toggle-x-error').checked ? document.getElementById('x-error-type').value : 'absolute';
-                const yErrorType = document.getElementById('toggle-y-error').checked ? document.getElementById('y-error-type').value : 'absolute';
-
-                const convertedXError = xErrorType === 'percentage' ? x.map((xi, idx) => (xErrorRaw[idx] / 100) * (xi || 0)) : xErrorRaw;
-                const convertedYError = yErrorType === 'percentage' ? y.map((yi, idx) => (yErrorRaw[idx] / 100) * (yi || 0)) : yErrorRaw;
-
-                const inputTrace = {
-                    x: x,
-                    y: y,
-                    mode: 'markers',
-                    name: 'Input Data',
-                    marker: { color: 'red' },
-                    error_x: {
-                        type: 'data',
-                        array: convertedXError,
-                        visible: document.getElementById('toggle-x-error').checked,
-                        color: 'teal',
-                        thickness: 1.5,
-                        width: 2
-                    },
-                    error_y: {
-                        type: 'data',
-                        array: convertedYError,
-                        visible: document.getElementById('toggle-y-error').checked,
-                        color: 'teal',
-                        thickness: 1.5,
-                        width: 2
-                    }
-                };
-                const fittedTrace = {
-                    x: xFit,
-                    y: yFit,
-                    mode: 'lines',
-                    name: 'Fit',
-                    line: { color: '#4595dd' }
-                };
-
-                const layout = {
-                    title: processLabel(document.getElementById('graph-title')?.value || 'Title'),
-                    xaxis: { title: processLabel(document.getElementById('x-axis-label')?.value || 'x') },
-                    yaxis: { title: processLabel(document.getElementById('y-axis-label')?.value || 'y') }
-                };
-
-                Plotly.react('plot', [inputTrace, fittedTrace], layout);
-            } catch (error) {
-                console.error('Error plotting fitted curve:', error);
-                alert('An error occurred while plotting the fitted curve. Please check the console for details.');
-            }
-        }
-
         function updateData() {
             try {
                 const xInputs = document.querySelectorAll('.x-input');
                 const yInputs = document.querySelectorAll('.y-input');
                 const xErrorInputs = document.querySelectorAll('.x-error-input');
                 const yErrorInputs = document.querySelectorAll('.y-error-input');
-                const xErrorType = document.getElementById('toggle-x-error').checked ? document.getElementById('x-error-type').value : 'absolute';
-                const yErrorType = document.getElementById('toggle-y-error').checked ? document.getElementById('y-error-type').value : 'absolute';
 
                 rawData = [];
                 for (let i = 0; i < xInputs.length; i++) {
                     const x = parseFloat(xInputs[i].value);
                     const y = parseFloat(yInputs[i].value);
-		    const xErrorRaw = parseFloat(xErrorInputs[i]?.value) || 0;
-		    const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
-
-
-
+                    const xErrorRaw = parseFloat(xErrorInputs[i]?.value) || 0;
+                    const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
 
                     if (!isNaN(x) && !isNaN(y)) {
                         rawData.push({
@@ -1818,7 +1767,7 @@
                     }
                 }
 
-                plotData();
+                plotGraph();
             } catch (error) {
                 console.error('Error updating data:', error);
             }
@@ -1843,7 +1792,6 @@
             }
         };
 
-
         function performLinearFit(x, y) {
             try {
                 const { slope, intercept } = computeLinearFit(x, y);
@@ -1861,7 +1809,7 @@
                 }
 
                 updateResults(equation, x, y, fitFunction);
-                plotFittedCurve(x, y, xFit, yFit, 'linear fit');
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing linear fit:', error);
                 alert('An error occurred during linear fitting. Please check the console for details.');
@@ -1897,7 +1845,7 @@
                 });
 
                 updateResults(equation, x, y, fitFunction);
-                plotFittedCurve(x, y, xFit, yFit, `polynomial (${degree} degree)`);
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing polynomial fit:', error);
                 alert('An error occurred during polynomial fitting. Please check the console for details.');
@@ -1929,7 +1877,7 @@
                 }
 
                 updateResults(equation, x, y, fitFunction);
-                plotFittedCurve(x, y, xFit, yFit, 'exponential fit');
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing exponential fit:', error);
                 alert('An error occurred during exponential fitting. Please check the console for details.');
@@ -1962,34 +1910,12 @@
                 }
 
                 updateResults(equation, x, y, fitFunction);
-                plotFittedCurve(x, y, xFit, yFit, 'power fit');
+                plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing power fit:', error);
                 alert('An error occurred during power fitting. Please check the console for details.');
             }
         }
-
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-
-                if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current.trim());
-            return result;
-        }
-
 
         function exportCSV() {
             try {
@@ -2057,11 +1983,9 @@
             }
         }
 
-        function applyGlobalXUncertainties() {
+        function applyGlobalUncertainties(axis) {
             try {
-                const globalX = document.getElementById('global-x-uncertainty').value.trim();
-                const xErrorType = document.getElementById('x-error-type').value;
-
+                const globalVal = document.getElementById(`global-${axis}-uncertainty`).value.trim();
                 const tableBody = document.querySelector('#data-table tbody');
                 const rows = tableBody.querySelectorAll('tr');
 
@@ -2070,46 +1994,18 @@
                     const yInput = row.querySelector('.y-input').value.trim();
 
                     if (xInput !== '' && yInput !== '') {
-                        const xErrorInput = row.querySelector('.x-error-input');
-                        if (document.getElementById('toggle-x-error').checked && xErrorInput) {
-                            xErrorInput.value = globalX !== '' ? globalX : '';
+                        const errorInput = row.querySelector(`.${axis}-error-input`);
+                        if (document.getElementById(`toggle-${axis}-error`).checked && errorInput) {
+                            errorInput.value = globalVal !== '' ? globalVal : '';
                         }
                     }
                 });
 
                 updateData();
-                document.getElementById('global-x-uncertainty').value = '';
+                document.getElementById(`global-${axis}-uncertainty`).value = '';
             } catch (error) {
-                console.error('Error applying global x uncertainties:', error);
-                alert('An error occurred while applying global x uncertainties. Please check the console for details.');
-            }
-        }
-
-        function applyGlobalYUncertainties() {
-            try {
-                const globalY = document.getElementById('global-y-uncertainty').value.trim();
-                const yErrorType = document.getElementById('y-error-type').value;
-
-                const tableBody = document.querySelector('#data-table tbody');
-                const rows = tableBody.querySelectorAll('tr');
-
-                rows.forEach((row) => {
-                    const xInput = row.querySelector('.x-input').value.trim();
-                    const yInput = row.querySelector('.y-input').value.trim();
-
-                    if (xInput !== '' && yInput !== '') {
-                        const yErrorInput = row.querySelector('.y-error-input');
-                        if (document.getElementById('toggle-y-error').checked && yErrorInput) {
-                            yErrorInput.value = globalY !== '' ? globalY : '';
-                        }
-                    }
-                });
-
-                updateData();
-                document.getElementById('global-y-uncertainty').value = '';
-            } catch (error) {
-                console.error('Error applying global y uncertainties:', error);
-                alert('An error occurred while applying global y uncertainties. Please check the console for details.');
+                console.error(`Error applying global ${axis} uncertainties:`, error);
+                alert('An error occurred while applying global uncertainties. Please check the console for details.');
             }
         }
 
