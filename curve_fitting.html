@@ -588,8 +588,6 @@
                         <option value="Polynomial-2">Polynomial (2nd Degree)</option>
                         <option value="Polynomial-3">Polynomial (3rd Degree)</option>
                         <option value="Polynomial-4">Polynomial (4th Degree)</option>
-                        <option value="Exponential">Exponential</option>
-                        <option value="Power">Power</option>
                     </select>
                     <div id="basic-fit-equation" class="general-equation">
                         \( y = mx + c \)
@@ -600,73 +598,110 @@
                 <div id="AdvancedFit" class="tab-content">
                     <label for="advanced-fit-method">Advanced Fit Method:</label>
                     <select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
+                        <option value="Exponential">Exponential</option>
+                        <option value="Power">Power</option>
                         <option value="Sinusoidal">Sinusoidal</option>
                         <option value="Gaussian">Gaussian</option>
                         <option value="Lorentzian">Lorentzian</option>
                     </select>
                     <div id="advanced-fit-general-equation" class="general-equation">
-                        \( y = A e^{bx} \sin(kx - \phi) + c \)
+                        \( y = A e^{bx} + c \)
                     </div>
                     <p class="table-prompt">Enter initial fitting parameters below.</p><br>
                     
-                    <div id="Sinusoidal-parameters" class="parameter-section active">
+                    <!-- Exponential Parameters -->
+                    <div id="Exponential-parameters" class="parameter-section">
+                        <div class="advanced-fit-item">
+                            <label for="initial-A-exponential">A:</label>
+                            <input type="number" id="initial-A-exponential" value="1" step="any">
+                        </div>
+                        <div class="advanced-fit-item">
+                            <label for="initial-b-exponential">b:</label>
+                            <input type="number" id="initial-b-exponential" value="0.2" step="any">
+                        </div>
+                        <div class="advanced-fit-item">
+                            <label for="initial-c-exponential">c:</label>
+                            <input type="number" id="initial-c-exponential" value="0" step="any">
+                        </div>
+                    </div>
+
+                    <!-- Power Parameters -->
+                    <div id="Power-parameters" class="parameter-section">
+                        <div class="advanced-fit-item">
+                            <label for="initial-A-power">A:</label>
+                            <input type="number" id="initial-A-power" value="1" step="any">
+                        </div>
+                        <div class="advanced-fit-item">
+                            <label for="initial-b-power">b:</label>
+                            <input type="number" id="initial-b-power" value="1" step="any">
+                        </div>
+                        <div class="advanced-fit-item">
+                            <label for="initial-c-power">c:</label>
+                            <input type="number" id="initial-c-power" value="0" step="any">
+                        </div>
+                    </div>
+
+                    <!-- Sinusoidal Parameters -->
+                    <div id="Sinusoidal-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
                             <label for="initial-A">A:</label>
-                            <input type="number" id="initial-A" value="1">
+                            <input type="number" id="initial-A" value="1" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-b">b:</label>
-                            <input type="number" id="initial-b" value="0">
+                            <input type="number" id="initial-b" value="0" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-k">k:</label>
-                            <input type="number" id="initial-k" value="1">
+                            <input type="number" id="initial-k" value="1" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-phi">φ:</label>
-                            <input type="number" id="initial-phi" value="0">
+                            <input type="number" id="initial-phi" value="0" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-c">c:</label>
-                            <input type="number" id="initial-c" value="0">
+                            <input type="number" id="initial-c" value="0" step="any">
                         </div>
                     </div>
 
+                    <!-- Gaussian Parameters -->
                     <div id="Gaussian-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
                             <label for="initial-A-gaussian">A:</label>
-                            <input type="number" id="initial-A-gaussian" value="1">
+                            <input type="number" id="initial-A-gaussian" value="1" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-mu">μ:</label>
-                            <input type="number" id="initial-mu" value="0">
+                            <input type="number" id="initial-mu" value="0" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-sigma">σ:</label>
-                            <input type="number" id="initial-sigma" value="1">
+                            <input type="number" id="initial-sigma" value="1" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-c-gaussian">c:</label>
-                            <input type="number" id="initial-c-gaussian" value="0">
+                            <input type="number" id="initial-c-gaussian" value="0" step="any">
                         </div>
                     </div>
 
+                    <!-- Lorentzian Parameters -->
                     <div id="Lorentzian-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
                             <label for="initial-A-lorentzian">A:</label>
-                            <input type="number" id="initial-A-lorentzian" value="1">
+                            <input type="number" id="initial-A-lorentzian" value="1" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-x0">x₀:</label>
-                            <input type="number" id="initial-x0" value="0">
+                            <input type="number" id="initial-x0" value="0" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-gamma">γ:</label>
-                            <input type="number" id="initial-gamma" value="1">
+                            <input type="number" id="initial-gamma" value="1" step="any">
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-c-lorentzian">c:</label>
-                            <input type="number" id="initial-c-lorentzian" value="0">
+                            <input type="number" id="initial-c-lorentzian" value="0" step="any">
                         </div>
                     </div>
 
@@ -713,11 +748,11 @@
         const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 
         function formatLabelForLatex(label) {
-            return label.replace(/ /g, '\\space ');
+            return label ? label.replace(/ /g, '\\space ') : '';
         }
 
         function processLabel(label) {
-            return `$${formatLabelForLatex(label)}$`;
+            return label ? `$${formatLabelForLatex(label)}$` : '';
         }
 
         function initializeTable(initialRows = 7) {
@@ -850,21 +885,24 @@
         function updateUncertaintyHeaders(axis) {
             const columnName = document.getElementById(`${axis}-column-name`).value.trim() || (axis === 'x' ? 'x' : 'y');
             const errorType = document.getElementById(`${axis}-error-type`).value;
-            let headerLatex = `\\( \\pm \\Delta ${formatLabelForLatex(columnName)} \\)`;
-
+            let headerLatex = `\\pm \\Delta ${formatLabelForLatex(columnName)}`;
+            let headerFull = `\\( ${headerLatex} \\)`;
             if (errorType === 'percentage') {
-                headerLatex += ' (%)';
+                headerFull += ' (%)';
             }
 
             const headerElement = document.getElementById(`${axis}-error-header-latex`);
-            headerElement.innerHTML = headerLatex;
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, headerElement]);
+            if (headerElement) {
+                headerElement.innerHTML = headerFull;
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, headerElement]);
+            }
         }
 
         function updateErrorType(axis) {
             if (document.getElementById(`toggle-${axis}-error`).checked) {
                 updateUncertaintyHeaders(axis);
             }
+
             updateData();
         }
 
@@ -950,17 +988,17 @@
 
                 const xInput = row.querySelector('.x-input');
                 const yInput = row.querySelector('.y-input');
-                xInput.value = rowData[0] || '';
-                yInput.value = rowData[1] || '';
+                if (xInput) xInput.value = rowData[0] || '';
+                if (yInput) yInput.value = rowData[1] || '';
 
                 if (hasXError && rowData.length >= 3) {
                     const xErrorInput = row.querySelector('.x-error-input');
-                    xErrorInput.value = rowData[2] || '';
+                    if (xErrorInput) xErrorInput.value = rowData[2] || '';
                 }
 
                 if (hasYError && rowData.length >= 4) {
                     const yErrorInput = row.querySelector('.y-error-input');
-                    yErrorInput.value = rowData[3] || '';
+                    if (yErrorInput) yErrorInput.value = rowData[3] || '';
                 }
             }
 
@@ -968,16 +1006,10 @@
             if (dataRows.length < totalRows) {
                 for (let i = dataRows.length; i < totalRows; i++) {
                     const row = tableBody.rows[i];
-                    row.querySelector('.x-input').value = '';
-                    row.querySelector('.y-input').value = '';
-                    if (hasXError) {
-                        const xErrorInput = row.querySelector('.x-error-input');
-                        xErrorInput.value = '';
-                    }
-                    if (hasYError) {
-                        const yErrorInput = row.querySelector('.y-error-input');
-                        yErrorInput.value = '';
-                    }
+                    if (row.querySelector('.x-input')) row.querySelector('.x-input').value = '';
+                    if (row.querySelector('.y-input')) row.querySelector('.y-input').value = '';
+                    if (hasXError && row.querySelector('.x-error-input')) row.querySelector('.x-error-input').value = '';
+                    if (hasYError && row.querySelector('.y-error-input')) row.querySelector('.y-error-input').value = '';
                 }
             }
 
@@ -988,10 +1020,8 @@
         function updateLabels(type) {
             if (isSyncing) return;
             isSyncing = true;
-
             const value = document.getElementById(`${type}-column-name`).value;
-            const formattedValue = formatLabelForLatex(value);
-            renderLatex(`#${type}-column-latex`, formattedValue);
+            renderLatex(`#${type}-column-latex`, formatLabelForLatex(value));
 
             if (document.getElementById(`toggle-${type}-error`).checked) {
                 updateUncertaintyHeaders(type);
@@ -1003,6 +1033,7 @@
 
         function renderLatex(elementId, latexString) {
             const element = document.querySelector(elementId);
+            if (!element) return; // Safeguard
             element.innerHTML = `\\(${latexString}\\)`;
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
         }
@@ -1012,10 +1043,10 @@
             isSyncing = true;
 
             plotGraph();
-            const xColumnName = document.getElementById('x-column-name').value;
+            const xColumnName = document.getElementById('x-column-name').value || 'x';
             renderLatex('#x-column-latex', formatLabelForLatex(xColumnName));
 
-            const yColumnName = document.getElementById('y-column-name').value;
+            const yColumnName = document.getElementById('y-column-name').value || 'y';
             renderLatex('#y-column-latex', formatLabelForLatex(yColumnName));
 
             isSyncing = false;
@@ -1039,6 +1070,8 @@
             if (tabName === 'BasicFit') {
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('basic-fit-equation')]);
             } else if (tabName === 'AdvancedFit') {
+                // Trigger changeAdvancedFitMethod to display parameter boxes
+                changeAdvancedFitMethod();
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('advanced-fit-general-equation')]);
             }
         }
@@ -1114,11 +1147,8 @@
             } else if (fitMethod.startsWith('Polynomial')) {
                 const degree = parseInt(fitMethod.split('-')[1]);
                 performPolynomialFit(x, y, degree);
-            } else if (fitMethod === 'Exponential') {
-                performExponentialFit(x, y);
-            } else if (fitMethod === 'Power') {
-                performPowerFit(x, y);
             }
+            // Exponential and Power are handled in Advanced Fit
         }
 
         function updateBasicFitEquation() {
@@ -1134,19 +1164,18 @@
                     terms.push(`a_${i}x^{${i}}`);
                 }
                 equation = 'y = ' + terms.join(' + ');
-            } else if (fitMethod === 'Exponential') {
-                equation = 'y = A e^{bx} + c';
-            } else if (fitMethod === 'Power') {
-                equation = 'y = A x^{b} + c';
             }
 
-            document.getElementById('basic-fit-equation').innerHTML = `\\( ${equation} \\)`;
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('basic-fit-equation')]);
+            const equationElement = document.getElementById('basic-fit-equation');
+            if (equationElement) {
+                equationElement.innerHTML = `\\( ${equation} \\)`;
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, equationElement]);
+            }
         }
 
         function changeAdvancedFitMethod() {
             const selectedMethod = document.getElementById('advanced-fit-method').value;
-            const methods = ['Sinusoidal', 'Gaussian', 'Lorentzian'];
+            const methods = ['Exponential', 'Power', 'Sinusoidal', 'Gaussian', 'Lorentzian'];
 
             methods.forEach(method => {
                 const section = document.getElementById(`${method}-parameters`);
@@ -1158,24 +1187,224 @@
             });
 
             updateAdvancedFitEquation(selectedMethod);
+            setInitialParameters(selectedMethod);
         }
 
-	function updateAdvancedFitEquation(selectedMethod) {
-	    let equation = '';
-	    if (selectedMethod === 'Sinusoidal') {
-	        equation = 'y = A e^{bx} \\sin(kx - \\phi) + c';
-	    } else if (selectedMethod === 'Gaussian') {
-	        equation = 'y = A e^{-\\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
-	    } else if (selectedMethod === 'Lorentzian') {
-	        equation = 'y = A \\frac{\\gamma^2}{(x - x_0)^2 + \\gamma^2} + c';
-	    }
+        function updateAdvancedFitEquation(selectedMethod) {
+            let equation = '';
+            if (selectedMethod === 'Sinusoidal') {
+                equation = 'y = A e^{bx} \\sin(kx - \\phi) + c';
+            } else if (selectedMethod === 'Gaussian') {
+                equation = 'y = A e^{-\\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
+            } else if (selectedMethod === 'Lorentzian') {
+                equation = 'y = A \\frac{\\gamma^2}{(x - x_0)^2 + \\gamma^2} + c';
+            } else if (selectedMethod === 'Exponential') {
+                equation = 'y = A e^{bx} + c';
+            } else if (selectedMethod === 'Power') {
+                equation = 'y = A x^{b} + c';
+            }
 
-	    const equationElement = document.getElementById('advanced-fit-general-equation');
-	    equationElement.innerHTML = `\\(${equation}\\)`;
-	    MathJax.Hub.Queue(["Typeset", MathJax.Hub, equationElement]);
-	}
+            const equationElement = document.getElementById('advanced-fit-general-equation');
+            if (equationElement) {
+                equationElement.innerHTML = `\\(${equation}\\)`;
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, equationElement]);
+            }
+        }
 
+        // Helper function to calculate FWHM for Lorentzian Fit
+        function calculateFWHM(x, y, maxY) {
+            const halfMax = maxY / 2;
+            let left = null, right = null;
 
+            // Sort data by x
+            const sortedData = rawData.slice().sort((a, b) => a.x - b.x);
+
+            // Find left crossing
+            for (let i = 1; i < sortedData.length; i++) {
+                if (sortedData[i - 1].y < halfMax && sortedData[i].y >= halfMax) {
+                    // Linear interpolation
+                    const x1 = sortedData[i - 1].x;
+                    const y1 = sortedData[i - 1].y;
+                    const x2 = sortedData[i].x;
+                    const y2 = sortedData[i].y;
+                    left = x1 + (halfMax - y1) * (x2 - x1) / (y2 - y1);
+                    break;
+                }
+            }
+
+            // Find right crossing
+            for (let i = sortedData.length - 1; i > 0; i--) {
+                if (sortedData[i - 1].y < halfMax && sortedData[i].y >= halfMax) {
+                    // Linear interpolation
+                    const x1 = sortedData[i - 1].x;
+                    const y1 = sortedData[i - 1].y;
+                    const x2 = sortedData[i].x;
+                    const y2 = sortedData[i].y;
+                    right = x1 + (halfMax - y1) * (x2 - x1) / (y2 - y1);
+                    break;
+                }
+            }
+
+            if (left !== null && right !== null && right > left) {
+                return right - left;
+            } else {
+                // Fallback to range x /4
+                const minX = Math.min(...x);
+                const maxX = Math.max(...x);
+                return (maxX - minX) / 4;
+            }
+        }
+
+        // Function to set initial parameters based on selected method and data
+        function setInitialParameters(method) {
+            if (rawData.length === 0) return;
+
+            const x = rawData.map(p => p.x);
+            const y = rawData.map(p => p.y);
+            const meanX = x.reduce((sum, val) => sum + val, 0) / x.length;
+            const stdX = Math.sqrt(x.reduce((sum, val) => sum + Math.pow(val - meanX, 2), 0) / x.length);
+            const maxY = Math.max(...y);
+            const rangeX = Math.max(...x) - Math.min(...x);
+            const FWHM = calculateFWHM(x, y, maxY);
+
+            if (method === 'Gaussian') {
+                document.getElementById('initial-A-gaussian').value = maxY.toFixed(2);
+                document.getElementById('initial-mu').value = meanX.toFixed(2);
+                document.getElementById('initial-sigma').value = stdX.toFixed(2);
+                document.getElementById('initial-c-gaussian').value = '0';
+            } else if (method === 'Lorentzian') {
+                document.getElementById('initial-A-lorentzian').value = maxY.toFixed(2);
+                document.getElementById('initial-x0').value = meanX.toFixed(2);
+                document.getElementById('initial-gamma').value = FWHM.toFixed(2);
+                document.getElementById('initial-c-lorentzian').value = '0';
+            }
+        }
+
+        function computeLinearFit(x, y) {
+            try {
+                const xMean = x.reduce((sum, val) => sum + val, 0) / x.length;
+                const yMean = y.reduce((sum, val) => sum + val, 0) / y.length;
+
+                let numerator = 0, denominator = 0;
+                for (let i = 0; i < x.length; i++) {
+                    numerator += (x[i] - xMean) * (y[i] - yMean);
+                    denominator += (x[i] - xMean) ** 2;
+                }
+
+                const slope = numerator / denominator;
+                const intercept = yMean - slope * xMean;
+
+                return { slope, intercept };
+            } catch (error) {
+                console.error('Error computing linear fit:', error);
+                throw error;
+            }
+        }
+
+        function updateResults(equation, x, y, fitFunction) {
+            try {
+                const yPredicted = x.map(point => fitFunction(point));
+                const meanY = y.reduce((sum, yi) => sum + yi, 0) / y.length;
+
+                let ssTotal = 0, ssResidual = 0;
+                for (let i = 0; i < y.length; i++) {
+                    ssTotal += (y[i] - meanY) ** 2;
+                    ssResidual += (y[i] - yPredicted[i]) ** 2;
+                }
+
+                const rSquared = 1 - ssResidual / ssTotal;
+
+                const fitEquationElement = document.getElementById('fit-equation');
+                if (fitEquationElement) {
+                    fitEquationElement.innerHTML = `\\(${equation}\\)`;
+                    fitEquationElement.style.display = 'block';
+                }
+
+                const rSquaredContainer = document.getElementById('r-squared-container');
+                if (rSquaredContainer) {
+                    rSquaredContainer.innerHTML = `\\( R^2 = ${rSquared.toFixed(5)} \\)`;
+                    rSquaredContainer.style.display = 'block';
+                }
+
+                MathJax.Hub.Queue([
+                    "Typeset",
+                    MathJax.Hub,
+                    fitEquationElement
+                ]);
+                MathJax.Hub.Queue([
+                    "Typeset",
+                    MathJax.Hub,
+                    rSquaredContainer
+                ]);
+            } catch (error) {
+                console.error('Error updating results:', error);
+            }
+        }
+
+        function polyfit(x, y, degree) {
+            try {
+                const X = x.map(xi => Array.from({ length: degree + 1 }, (_, j) => xi ** (degree - j)));
+                const Xt = math.transpose(X);
+                const XtX = math.multiply(Xt, X);
+                const XtY = math.multiply(Xt, y);
+                const coefficients = math.lusolve(XtX, XtY).flat();
+                return coefficients;
+            } catch (error) {
+                console.error('Error performing polynomial fit:', error);
+                throw error;
+            }
+        }
+
+        function polyEval(coefficients, x) {
+            try {
+                return coefficients.reduce((sum, coef, i) => sum + coef * Math.pow(x, coefficients.length - i - 1), 0);
+            } catch (error) {
+                console.error('Error evaluating polynomial:', error);
+                throw error;
+            }
+        }
+
+        function updateData() {
+            try {
+                const xInputs = document.querySelectorAll('.x-input');
+                const yInputs = document.querySelectorAll('.y-input');
+                const xErrorInputs = document.querySelectorAll('.x-error-input');
+                const yErrorInputs = document.querySelectorAll('.y-error-input');
+
+                rawData = [];
+                for (let i = 0; i < xInputs.length; i++) {
+                    const x = parseFloat(xInputs[i].value);
+                    const y = parseFloat(yInputs[i].value);
+                    const xErrorRaw = parseFloat(xErrorInputs[i]?.value) || 0;
+                    const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
+
+                    if (!isNaN(x) && !isNaN(y)) {
+                        rawData.push({
+                            x: x,
+                            y: y,
+                            xErrorRaw: xErrorRaw,
+                            yErrorRaw: yErrorRaw
+                        });
+                    }
+                }
+
+                plotGraph();
+            } catch (error) {
+                console.error('Error updating data:', error);
+            }
+        }
+
+        window.onload = function() {
+            initializeTable();
+            ['x-column-name', 'y-column-name'].forEach(id => {
+                const value = document.getElementById(id).value;
+                renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
+            });
+
+            updateBasicFitEquation();
+            const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
+            changeAdvancedFitMethod();
+        };
 
         // Helper function to count decimal places in absolute uncertainty
         function countDecimalPlaces(numStr) {
@@ -1183,52 +1412,46 @@
             return numStr.length - numStr.indexOf('.') - 1;
         }
 
-        // Convert to s.f.
+        // Convert to significant figures
+        // Updated toSigFigs function to preserve trailing zeros
         function toSigFigs(num, sigFigs) {
-            return Number(num.toPrecision(sigFigs));
+            return num.toPrecision(sigFigs);
         }
 
-        // Format data value according to new rules:
-        // (1) If uncertainty not toggled: return raw input string as is.
-        // (2) If absolute uncertainty: match dp to the uncertainty's dp.
-        // (3) If percentage uncertainty:
-        //     If % ≤ 15%, 3 s.f.
-        //     If % > 15%, 2 s.f.
         function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
             if (!errorEnabled) {
-                // No uncertainty toggled for this axis
-                // Return raw input as is
+                // No uncertainty toggled for this axis => return raw input
                 return valueStr;
             }
 
-            if (!rowErr || isNaN(rowErr)) {
-                // Uncertainty is toggled but no valid uncertainty provided
-                // Just return raw input if no uncertainty given.
-                return valueStr;
-            }
+            // If uncertainty is toggled but no valid uncertainty provided
+            if (isNaN(rowErr)) return valueStr;
 
             if (errorType === 'absolute') {
-                // Match dp to uncertainty's dp
+                // Absolute uncertainty: match decimal places to uncertainty's decimal places
                 const dp = countDecimalPlaces(errorStr);
                 return val.toFixed(dp);
-            } else {
-                // percentage uncertainty
-                // Determine % from errStr and rowVal
+            } else if (errorType === 'percentage') {
+                // Percentage uncertainty
                 const perc = parseFloat(errorStr);
                 if (isNaN(perc) || rowVal === 0) {
-                    // If can't parse percentage or val=0, fallback
+                    // If can't parse percentage or val=0, fallback to raw input
                     return valueStr;
                 }
-                // If percentage ≤ 15%, 3 s.f. else 2 s.f.
-                const percentage = perc;
-                const sigFigs = (percentage <= 15) ? 3 : 2;
+
+                // If percentage ≤ 10%, 3 s.f. else 2 s.f.
+                const sigFigs = (perc <= 10) ? 3 : 2;
                 const sfVal = toSigFigs(val, sigFigs);
-                return sfVal.toString();
+                return sfVal; // Return as string to preserve trailing zeros
+            } else {
+                // Fallback to raw input
+                return valueStr;
             }
         }
 
         function exportPlainText() {
             try {
+                // Retrieve column headers
                 const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
                 const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
 
@@ -1236,40 +1459,51 @@
                 const yErrorEnabled = document.getElementById('toggle-y-error').checked;
 
                 const table = document.getElementById('data-table');
-                const rows = table.querySelectorAll('tbody tr');
+                const rows = table.querySelectorAll('tr');
 
-                // Build headers
-                let xUncHeading = '';
+                // Build headers with LaTeX formatting
+                let headers = [`$${xHeader}$`, `$${yHeader}$`];
                 if (xErrorEnabled) {
                     const xErrorType = document.getElementById('x-error-type').value;
-                    xUncHeading = `$\\pm \\Delta ${formatLabelForLatex(xHeader)}$`;
+                    let xUncHeading = `$\\pm \\Delta ${formatLabelForLatex(xHeader)}$`;
                     if (xErrorType === 'percentage') xUncHeading += ' (%)';
+                    headers.push(xUncHeading);
                 }
-
-                let yUncHeading = '';
                 if (yErrorEnabled) {
                     const yErrorType = document.getElementById('y-error-type').value;
-                    yUncHeading = `$\\pm \\Delta ${formatLabelForLatex(yHeader)}$`;
+                    let yUncHeading = `$\\pm \\Delta ${formatLabelForLatex(yHeader)}$`;
                     if (yErrorType === 'percentage') yUncHeading += ' (%)';
+                    headers.push(yUncHeading);
                 }
 
-                let headers = [`$${xHeader}$`, `$${yHeader}$`];
-                if (xErrorEnabled) headers.push(xUncHeading);
-                if (yErrorEnabled) headers.push(yUncHeading);
-
+                // Start building markdown with headers
                 let markdown = `| ${headers.join(' | ')} |\n`;
-                markdown += `|${headers.map(() => '---').join('|')}|\n`;
+                // Use ':---:' for center alignment
+                markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
 
-                for (let i = 0; i < rows.length; i++) {
-                    const xValStr = rows[i].querySelector('.x-input').value.trim();
-                    const yValStr = rows[i].querySelector('.y-input').value.trim();
+                // Iterate through data rows
+                for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                    const row = rows[i];
+                    if (!row) continue; // Safeguard
+
+                    const xInputElem = row.querySelector('.x-input');
+                    const yInputElem = row.querySelector('.y-input');
+
+                    if (!xInputElem || !yInputElem) continue; // Safeguard
+
+                    const xValStr = xInputElem.value.trim();
+                    const yValStr = yInputElem.value.trim();
+
                     if (xValStr === '' && yValStr === '') continue;
 
                     let xVal = parseFloat(xValStr);
                     let yVal = parseFloat(yValStr);
 
-                    const xErrStr = rows[i].querySelector('.x-error-input')?.value.trim() || '';
-                    const yErrStr = rows[i].querySelector('.y-error-input')?.value.trim() || '';
+                    const xErrInput = row.querySelector('.x-error-input');
+                    const yErrInput = row.querySelector('.y-error-input');
+
+                    const xErrStr = xErrInput ? xErrInput.value.trim() : '';
+                    const yErrStr = yErrInput ? yErrInput.value.trim() : '';
                     const xErrVal = parseFloat(xErrStr);
                     const yErrVal = parseFloat(yErrStr);
 
@@ -1300,16 +1534,17 @@
                     rowData.push(yFormatted);
 
                     if (xErrorEnabled) {
-                        rowData.push(xErrStr);
+                        rowData.push(xErrorEnabledThisRow ? xErrStr : '');
                     }
 
                     if (yErrorEnabled) {
-                        rowData.push(yErrStr);
+                        rowData.push(yErrorEnabledThisRow ? yErrStr : '');
                     }
 
                     markdown += `| ${rowData.join(' | ')} |\n`;
                 }
 
+                // Create a Blob from the markdown string
                 const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
@@ -1321,7 +1556,7 @@
                 document.body.removeChild(link);
             } catch (error) {
                 console.error('Error exporting plain text:', error);
-                alert('An error occurred while exporting the plain text file. Please check the console for details.');
+                alert('An error occurred while exporting the Markdown file. Please check the console for details.');
             }
         }
 
@@ -1360,8 +1595,11 @@
                     let xVal = parseFloat(xValStr);
                     let yVal = parseFloat(yValStr);
 
-                    const xErrStr = dataRows[i].querySelector('.x-error-input')?.value.trim() || '';
-                    const yErrStr = dataRows[i].querySelector('.y-error-input')?.value.trim() || '';
+                    const xErrInput = dataRows[i].querySelector('.x-error-input');
+                    const yErrInput = dataRows[i].querySelector('.y-error-input');
+
+                    const xErrStr = xErrInput ? xErrInput.value.trim() : '';
+                    const yErrStr = yErrInput ? yErrInput.value.trim() : '';
                     const xErrVal = parseFloat(xErrStr);
                     const yErrVal = parseFloat(yErrStr);
 
@@ -1391,11 +1629,11 @@
                     rowData.push(yFormatted);
 
                     if (xErrorEnabled) {
-                        rowData.push(xErrStr);
+                        rowData.push(xErrorEnabledThisRow ? xErrStr : '');
                     }
 
                     if (yErrorEnabled) {
-                        rowData.push(yErrStr);
+                        rowData.push(yErrorEnabledThisRow ? yErrStr : '');
                     }
 
                     csvContent += rowData.join(',') + '\n';
@@ -1438,14 +1676,18 @@
         }
 
         function fitAdvancedCurve() {
-            if (rawData.length < 4) {
+            if (rawData.length < 4) { // Increased to 4 for more complex fits
                 alert('Please enter at least four data points for advanced fitting.');
                 return;
             }
 
             const fitMethod = document.getElementById('advanced-fit-method').value;
 
-            if (fitMethod === 'Sinusoidal') {
+            if (fitMethod === 'Exponential') {
+                performExponentialFitAdvanced();
+            } else if (fitMethod === 'Power') {
+                performPowerFitAdvanced();
+            } else if (fitMethod === 'Sinusoidal') {
                 performSinusoidalFit();
             } else if (fitMethod === 'Gaussian') {
                 performGaussianFit();
@@ -1454,563 +1696,463 @@
             }
         }
 
-        // Revised formatDataForExport function based on the new rules:
-        // 1) If no uncertainty for that axis: return raw input as is.
-        // 2) If absolute uncertainty: derive dp from that row's absolute uncertainty.
-        //    dp = number of decimal places in the absolute uncertainty.
-        // 3) If percentage uncertainty:
-        //    If % ≤ 15%, then 3 s.f.
-        //    If % > 15%, then 2 s.f.
-        // Each row may differ.
-        function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
-            if (!errorEnabled) {
-                // No uncertainty toggled for this axis => return raw input
-                return valueStr;
-            }
+        function performLinearFit(x, y) {
+            try {
+                const { slope, intercept } = computeLinearFit(x, y);
 
-            // If uncertainty is toggled but no valid uncertainty => just return raw input
-            if (isNaN(rowErr)) return valueStr;
+                const xFit = [Math.min(...x), Math.max(...x)];
+                const yFit = xFit.map(xi => slope * xi + intercept);
 
-            if (errorType === 'absolute') {
-                // Absolute uncertainty: match dp to uncertainty's dp
-                const dp = countDecimalPlaces(errorStr);
-                return val.toFixed(dp);
-            } else {
-                // Percentage uncertainty:
-                const perc = parseFloat(errorStr);
-                if (isNaN(perc)) return valueStr; // can't parse percentage => fallback
+                const fitFunction = xi => slope * xi + intercept;
 
-                // If perc ≤ 15%, 3 s.f. else 2 s.f.
-                const sigFigs = (perc <= 15) ? 3 : 2;
-                const sfVal = toSigFigs(val, sigFigs);
-                return sfVal.toString();
+                let equation = `y = ${slope.toFixed(2)}x`;
+                if (intercept >= 0) {
+                    equation += ` + ${intercept.toFixed(2)}`;
+                } else {
+                    equation += ` - ${Math.abs(intercept).toFixed(2)}`;
+                }
+
+                updateResults(equation, x, y, fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing linear fit:', error);
+                alert('An error occurred during linear fitting. Please check the console for details.');
             }
         }
 
-        function toSigFigs(num, sigFigs) {
-            return Number(num.toPrecision(sigFigs));
-        }
+        function performPolynomialFit(x, y, degree) {
+            try {
+                const coefficients = polyfit(x, y, degree);
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
+                const yFit = xFit.map(xi => polyEval(coefficients, xi));
 
-        function countDecimalPlaces(numStr) {
-            if (!numStr.includes('.')) return 0;
-            return numStr.length - numStr.indexOf('.') - 1;
-        }
+                const fitFunction = xi => polyEval(coefficients, xi);
 
-        window.onload = function() {
-            initializeTable();
-            ['x-column-name', 'y-column-name'].forEach(id => {
-                const value = document.getElementById(id).value;
-                renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
-            });
+                let equation = 'y = ';
+                coefficients.forEach((c, i) => {
+                    const power = degree - i;
+                    if (c === 0) return;
 
-            updateBasicFitEquation();
-            const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
-            updateAdvancedFitEquation(initialAdvancedFitMethod);
-        };
+                    const absC = Math.abs(c).toFixed(2);
+                    const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
 
-
-            function performLinearFit(x, y) {
-                try {
-                    const { slope, intercept } = computeLinearFit(x, y);
-
-                    const xFit = [Math.min(...x), Math.max(...x)];
-                    const yFit = xFit.map(xi => slope * xi + intercept);
-
-                    const fitFunction = xi => slope * xi + intercept;
-
-                    let equation = `y = ${slope.toFixed(2)}x`;
-                    if (intercept >= 0) {
-                        equation += ` + ${intercept.toFixed(2)}`;
+                    let term = '';
+                    if (power === 0) {
+                        term = `${absC}`;
+                    } else if (power === 1) {
+                        term = `${absC}x`;
                     } else {
-                        equation += ` - ${Math.abs(intercept).toFixed(2)}`;
+                        term = `${absC}x^{${power}}`;
                     }
 
-                    updateResults(equation, x, y, fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing linear fit:', error);
-                    alert('An error occurred during linear fitting. Please check the console for details.');
-                }
+                    equation += `${sign}${term}`;
+                });
+
+                updateResults(equation, x, y, fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing polynomial fit:', error);
+                alert('An error occurred during polynomial fitting. Please check the console for details.');
             }
+        }
 
-            function performPolynomialFit(x, y, degree) {
-                try {
-                    const coefficients = polyfit(x, y, degree);
-                    const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-                    const yFit = xFit.map(xi => polyEval(coefficients, xi));
+        function performExponentialFitAdvanced() {
+            try {
+                // Retrieve initial parameters from Advanced Fit section
+                let A = parseFloat(document.getElementById('initial-A-exponential').value);
+                let b = parseFloat(document.getElementById('initial-b-exponential').value);
+                let c = parseFloat(document.getElementById('initial-c-exponential').value);
 
-                    const fitFunction = xi => polyEval(coefficients, xi);
-
-                    let equation = 'y = ';
-                    coefficients.forEach((c, i) => {
-                        const power = degree - i;
-                        if (c === 0) return;
-
-                        const absC = Math.abs(c).toFixed(2);
-                        const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
-
-                        let term = '';
-                        if (power === 0) {
-                            term = `${absC}`;
-                        } else if (power === 1) {
-                            term = `${absC}x`;
-                        } else {
-                            term = `${absC}x^{${power}}`;
-                        }
-
-                        equation += `${sign}${term}`;
-                    });
-
-                    updateResults(equation, x, y, fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing polynomial fit:', error);
-                    alert('An error occurred during polynomial fitting. Please check the console for details.');
+                if (isNaN(A) || isNaN(b) || isNaN(c)) {
+                    alert('Please provide valid initial parameters for Exponential fit.');
+                    return;
                 }
-            }
 
-            function performExponentialFit(x, y) {
-                try {
-                    const minY = Math.min(...y);
-                    const delta = Math.abs(minY) * 0.1 + 0.1;
-                    const c = minY - delta;
+                const learningRate = 1e-3;
+                const maxIterations = 10000;
+                const tolerance = 1e-6;
 
-                    const adjustedY = y.map(val => val - c);
-                    const validIndices = adjustedY.map((val, idx) => val > 0 ? idx : -1).filter(idx => idx !== -1);
+                let previousError = Infinity;
+                let iterations = 0;
 
-                    if (validIndices.length < 2) {
-                        alert('Not enough positive y-values for exponential fit.');
-                        return;
+                while (iterations < maxIterations) {
+                    const predictions = rawData.map(point => A * Math.exp(b * point.x) + c);
+                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
+
+                    if (Math.abs(previousError - mse) < tolerance) break;
+
+                    previousError = mse;
+
+                    let dA = 0, db = 0, dc = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const xi = rawData[i].x;
+                        const expTerm = Math.exp(b * xi);
+                        const error = errors[i];
+
+                        dA += -2 * error * expTerm;
+                        db += -2 * error * A * xi * expTerm;
+                        dc += -2 * error;
                     }
 
-                    const filteredX = validIndices.map(idx => x[idx]);
-                    const filteredY = validIndices.map(idx => adjustedY[idx]);
+                    // Update parameters
+                    A -= learningRate * dA;
+                    b -= learningRate * db;
+                    c -= learningRate * dc;
 
-                    const logAdjustedY = filteredY.map(val => Math.log(val));
-                    const { slope: b, intercept: lnA } = computeLinearFit(filteredX, logAdjustedY);
-                    const a = Math.exp(lnA);
-
-                    const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-                    const yFit = xFit.map(xi => a * Math.exp(b * xi) + c);
-
-                    const fitFunction = xi => a * Math.exp(b * xi) + c;
-
-                    let equation = `y = ${a.toFixed(2)} e^{${b.toFixed(2)}x}`;
-                    if (c > 0) {
-                        equation += ` + ${c.toFixed(2)}`;
-                    } else if (c < 0) {
-                        equation += ` - ${Math.abs(c).toFixed(2)}`;
-                    }
-
-                    updateResults(equation, x, y, fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing exponential fit:', error);
-                    alert('An error occurred during exponential fitting. Please check the console for details.');
+                    iterations++;
                 }
-            }
 
-            function performPowerFit(x, y) {
-                try {
-                    const minY = Math.min(...y);
-                    const delta = Math.abs(minY) * 0.1 + 0.1;
-                    const c = minY - delta;
-
-                    const adjustedY = y.map(val => val - c);
-                    const validIndices = adjustedY.map((val, idx) => val > 0 ? idx : -1).filter(idx => idx !== -1);
-
-                    if (validIndices.length < 2) {
-                        alert('Not enough positive y-values for power fit.');
-                        return;
-                    }
-
-                    const filteredX = validIndices.map(idx => x[idx]);
-                    const filteredY = validIndices.map(idx => adjustedY[idx]);
-
-                    const logX = filteredX.map(val => Math.log(val));
-                    const logY = filteredY.map(val => Math.log(val));
-                    const { slope: b, intercept: lnA } = computeLinearFit(logX, logY);
-                    const a = Math.exp(lnA);
-
-                    const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-                    const yFit = xFit.map(xi => a * Math.pow(xi, b) + c);
-
-                    const fitFunction = xi => a * Math.pow(xi, b) + c;
-
-                    let equation = `y = ${a.toFixed(2)}x^{${b.toFixed(2)}}`;
-                    if (c > 0) {
-                        equation += ` + ${c.toFixed(2)}`;
-                    } else if (c < 0) {
-                        equation += ` - ${Math.abs(c).toFixed(2)}`;
-                    }
-
-                    updateResults(equation, x, y, fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing power fit:', error);
-                    alert('An error occurred during power fitting. Please check the console for details.');
+                if (iterations === maxIterations) {
+                    alert("Exponential fitting did not converge. Try different initial guesses.");
+                    return;
                 }
-            }
 
-            function performSinusoidalFit() {
-                try {
-                    let A = parseFloat(document.getElementById('initial-A').value);
-                    let b = parseFloat(document.getElementById('initial-b').value);
-                    let k = parseFloat(document.getElementById('initial-k').value);
-                    let phi = parseFloat(document.getElementById('initial-phi').value);
-                    let c = parseFloat(document.getElementById('initial-c').value);
+                // Generate fitted curve
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+                const yFit = xFit.map(xi => A * Math.exp(b * xi) + c);
 
-                    if (isNaN(A) || isNaN(b) || isNaN(k) || isNaN(phi) || isNaN(c)) {
-                        alert('Please provide valid initial parameters for sinusoidal fit.');
-                        return;
-                    }
+                const fitFunction = xi => A * Math.exp(b * xi) + c;
 
-                    const params = { A: A, b: b, k: k, phi: phi, c: c };
-                    const learningRate = 1e-5;
-                    const maxIterations = 100000;
-                    const tolerance = 1e-6;
-
-                    let previousError = Infinity;
-                    let iterations = 0;
-
-                    while (iterations < maxIterations) {
-                        const predictions = rawData.map(point => params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi) + params.c);
-                        const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                        const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
-
-                        if (Math.abs(previousError - mse) < tolerance) {
-                            break;
-                        }
-
-                        previousError = mse;
-
-                        let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
-                        for (let i = 0; i < rawData.length; i++) {
-                            const xi = rawData[i].x;
-                            const yi = rawData[i].y;
-                            const sinTerm = Math.sin(params.k * xi - params.phi);
-                            const cosTerm = Math.cos(params.k * xi - params.phi);
-                            const expTerm = Math.exp(params.b * xi);
-
-                            const prediction = params.A * expTerm * sinTerm + params.c;
-                            const error = yi - prediction;
-
-                            dA += -2 * error * expTerm * sinTerm;
-                            db += -2 * error * params.A * xi * expTerm * sinTerm;
-                            dk += -2 * error * params.A * expTerm * xi * cosTerm;
-                            dphi += 2 * error * params.A * expTerm * cosTerm;
-                            dc += -2 * error;
-                        }
-
-                        params.A -= learningRate * dA;
-                        params.b -= learningRate * db;
-                        params.k -= learningRate * dk;
-                        params.phi -= learningRate * dphi;
-                        params.c -= learningRate * dc;
-
-                        iterations++;
-                    }
-
-                    if (iterations === maxIterations) {
-                        alert('Sinusoidal fitting did not converge. Please try different initial parameters.');
-                        return;
-                    }
-
-                    const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                    const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c);
-
-                    const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
-
-                    let equation = `y = ${params.A.toFixed(2)} e^{${params.b.toFixed(2)}x}\\sin(${params.k.toFixed(2)}x`;
-                    if (params.phi > 0) {
-                        equation += ` - ${params.phi.toFixed(2)}`;
-                    } else if (params.phi < 0) {
-                        equation += ` + ${Math.abs(params.phi).toFixed(2)}`;
-                    }
-                    equation += `)`;
-                    if (params.c > 0) {
-                        equation += ` + ${params.c.toFixed(2)}`;
-                    } else if (params.c < 0) {
-                        equation += ` - ${Math.abs(params.c).toFixed(2)}`;
-                    }
-
-                    updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing sinusoidal fit:', error);
-                    alert('An error occurred during sinusoidal fitting. Please check the console for details.');
+                // Equation string
+                let equation = `y = ${A.toFixed(2)} e^{${b.toFixed(2)}x}`;
+                if (c > 0) {
+                    equation += ` + ${c.toFixed(2)}`;
+                } else if (c < 0) {
+                    equation += ` - ${Math.abs(c).toFixed(2)}`;
                 }
+
+                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing exponential fit:', error);
+                alert('An error occurred during exponential fitting. Please check the console for details.');
             }
+        }
 
-            function performGaussianFit() {
-                try {
-                    let A = parseFloat(document.getElementById('initial-A-gaussian').value);
-                    let mu = parseFloat(document.getElementById('initial-mu').value);
-                    let sigma = parseFloat(document.getElementById('initial-sigma').value);
-                    let c = parseFloat(document.getElementById('initial-c-gaussian').value);
+        function performPowerFitAdvanced() {
+            try {
+                // Retrieve initial parameters from Advanced Fit section
+                let A = parseFloat(document.getElementById('initial-A-power').value);
+                let b = parseFloat(document.getElementById('initial-b-power').value);
+                let c = parseFloat(document.getElementById('initial-c-power').value);
 
-                    if (isNaN(A) || isNaN(mu) || isNaN(sigma) || isNaN(c)) {
-                        alert('Please provide valid initial parameters for Gaussian fit.');
-                        return;
-                    }
-
-                    const params = { A: A, mu: mu, sigma: sigma, c: c };
-                    const learningRate = 1e-5;
-                    const maxIterations = 100000;
-                    const tolerance = 1e-6;
-
-                    let previousError = Infinity;
-                    let iterations = 0;
-
-                    while (iterations < maxIterations) {
-                        const predictions = rawData.map(point => params.A * Math.exp(-((point.x - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
-                        const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                        const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
-
-                        if (Math.abs(previousError - mse) < tolerance) {
-                            break;
-                        }
-
-                        previousError = mse;
-
-                        let dA = 0, dmu = 0, dsigma = 0, dc = 0;
-                        for (let i = 0; i < rawData.length; i++) {
-                            const xi = rawData[i].x;
-                            const yi = rawData[i].y;
-                            const expTerm = Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2));
-
-                            const prediction = params.A * expTerm + params.c;
-                            const error = yi - prediction;
-
-                            dA += -2 * error * expTerm;
-                            dmu += -2 * error * params.A * expTerm * ((xi - params.mu) / (params.sigma ** 2));
-                            dsigma += -2 * error * params.A * expTerm * ((xi - params.mu) ** 2) / (params.sigma ** 3);
-                            dc += -2 * error;
-                        }
-
-                        params.A -= learningRate * dA;
-                        params.mu -= learningRate * dmu;
-                        params.sigma -= learningRate * dsigma;
-                        params.c -= learningRate * dc;
-
-                        iterations++;
-                    }
-
-                    if (iterations === maxIterations) {
-                        alert('Gaussian fitting did not converge. Please try different initial parameters.');
-                        return;
-                    }
-
-                    const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                    const yFit = xFit.map(xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
-
-                    const fitFunction = xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c;
-
-                    let equation = `y = ${params.A.toFixed(2)} e^{-\\frac{(x - ${params.mu.toFixed(2)})^2}{2(${params.sigma.toFixed(2)})^2}}`;
-                    if (params.c > 0) {
-                        equation += ` + ${params.c.toFixed(2)}`;
-                    } else if (params.c < 0) {
-                        equation += ` - ${Math.abs(params.c).toFixed(2)}`;
-                    }
-
-                    updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing Gaussian fit:', error);
-                    alert('An error occurred during Gaussian fitting. Please check the console for details.');
+                if (isNaN(A) || isNaN(b) || isNaN(c)) {
+                    alert('Please provide valid initial parameters for Power fit.');
+                    return;
                 }
-            }
 
-            function performLorentzianFit() {
-                try {
-                    let A = parseFloat(document.getElementById('initial-A-lorentzian').value);
-                    let x0 = parseFloat(document.getElementById('initial-x0').value);
-                    let gamma = parseFloat(document.getElementById('initial-gamma').value);
-                    let c = parseFloat(document.getElementById('initial-c-lorentzian').value);
+                const learningRate = 1e-3;
+                const maxIterations = 10000;
+                const tolerance = 1e-6;
 
-                    if (isNaN(A) || isNaN(x0) || isNaN(gamma) || isNaN(c)) {
-                        alert('Please provide valid initial parameters for Lorentzian fit.');
-                        return;
+                let previousError = Infinity;
+                let iterations = 0;
+
+                while (iterations < maxIterations) {
+                    const predictions = rawData.map(point => A * Math.pow(point.x, b) + c);
+                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
+
+                    if (Math.abs(previousError - mse) < tolerance) break;
+
+                    previousError = mse;
+
+                    let dA = 0, db = 0, dc = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const xi = rawData[i].x;
+                        if (xi === 0 && b <= 0) continue; // Avoid division by zero or log(0)
+                        const powerTerm = Math.pow(xi, b);
+                        const error = errors[i];
+
+                        dA += -2 * error * powerTerm;
+                        db += -2 * error * A * Math.log(xi) * powerTerm;
+                        dc += -2 * error;
                     }
 
-                    const params = { A: A, x0: x0, gamma: gamma, c: c };
-                    const learningRate = 1e-5;
-                    const maxIterations = 100000;
-                    const tolerance = 1e-6;
+                    // Update parameters
+                    A -= learningRate * dA;
+                    b -= learningRate * db;
+                    c -= learningRate * dc;
 
-                    let previousError = Infinity;
-                    let iterations = 0;
-
-                    while (iterations < maxIterations) {
-                        const predictions = rawData.map(point => params.A * (params.gamma ** 2) / ((point.x - params.x0) ** 2 + params.gamma ** 2) + params.c);
-                        const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                        const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
-
-                        if (Math.abs(previousError - mse) < tolerance) {
-                            break;
-                        }
-
-                        previousError = mse;
-
-                        let dA = 0, dx0 = 0, dgamma = 0, dc = 0;
-                        for (let i = 0; i < rawData.length; i++) {
-                            const xi = rawData[i].x;
-                            const yi = rawData[i].y;
-                            const denominator = ((xi - params.x0) ** 2 + params.gamma ** 2);
-                            const lorentzian = (params.gamma ** 2) / denominator;
-
-                            const prediction = params.A * lorentzian + params.c;
-                            const error = yi - prediction;
-
-                            dA += -2 * error * lorentzian;
-                            dx0 += -2 * error * params.A * (-2 * (xi - params.x0) * params.gamma ** 2) / (denominator ** 2);
-                            dgamma += -2 * error * params.A * (2 * params.gamma * denominator - 2 * (xi - params.x0) ** 2 * params.gamma) / (denominator ** 2);
-                            dc += -2 * error;
-                        }
-
-                        params.A -= learningRate * dA;
-                        params.x0 -= learningRate * dx0;
-                        params.gamma -= learningRate * dgamma;
-                        params.c -= learningRate * dc;
-
-                        iterations++;
-                    }
-
-                    if (iterations === maxIterations) {
-                        alert('Lorentzian fitting did not converge. Please try different initial parameters.');
-                        return;
-                    }
-
-                    const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                    const yFit = xFit.map(xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c);
-
-                    const fitFunction = xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c;
-
-                    let equation = `y = ${params.A.toFixed(2)} \\frac{(${params.gamma.toFixed(2)})^2}{(x - ${params.x0.toFixed(2)})^2 + (${params.gamma.toFixed(2)})^2}`;
-                    if (params.c > 0) {
-                        equation += ` + ${params.c.toFixed(2)}`;
-                    } else if (params.c < 0) {
-                        equation += ` - ${Math.abs(params.c).toFixed(2)}`;
-                    }
-
-                    updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                    plotGraph(xFit, yFit);
-                } catch (error) {
-                    console.error('Error performing Lorentzian fit:', error);
-                    alert('An error occurred during Lorentzian fitting. Please check the console for details.');
+                    iterations++;
                 }
+
+                if (iterations === maxIterations) {
+                    alert("Power fitting did not converge. Try different initial guesses.");
+                    return;
+                }
+
+                // Generate fitted curve
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+                const yFit = xFit.map(xi => A * Math.pow(xi, b) + c);
+
+                const fitFunction = xi => A * Math.pow(xi, b) + c;
+
+                // Equation string
+                let equation = `y = ${A.toFixed(2)}x^{${b.toFixed(2)}}`;
+                if (c > 0) {
+                    equation += ` + ${c.toFixed(2)}`;
+                } else if (c < 0) {
+                    equation += ` - ${Math.abs(c).toFixed(2)}`;
+                }
+
+                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing power fit:', error);
+                alert('An error occurred during power fitting. Please check the console for details.');
             }
+        }
 
-            function computeLinearFit(x, y) {
-                try {
-                    const xMean = x.reduce((sum, val) => sum + val, 0) / x.length;
-                    const yMean = y.reduce((sum, val) => sum + val, 0) / y.length;
+        function performSinusoidalFit() {
+            try {
+                let A = parseFloat(document.getElementById('initial-A').value);
+                let b = parseFloat(document.getElementById('initial-b').value);
+                let k = parseFloat(document.getElementById('initial-k').value);
+                let phi = parseFloat(document.getElementById('initial-phi').value);
+                let c = parseFloat(document.getElementById('initial-c').value);
 
-                    let numerator = 0, denominator = 0;
-                    for (let i = 0; i < x.length; i++) {
-                        numerator += (x[i] - xMean) * (y[i] - yMean);
-                        denominator += (x[i] - xMean) ** 2;
+                if (isNaN(A) || isNaN(b) || isNaN(k) || isNaN(phi) || isNaN(c)) {
+                    alert('Please provide valid initial parameters for Sinusoidal fit.');
+                    return;
+                }
+
+                const params = { A: A, b: b, k: k, phi: phi, c: c };
+                const learningRate = 1e-5;
+                const maxIterations = 100000;
+                const tolerance = 1e-6;
+
+                let previousError = Infinity;
+                let iterationsCount = 0;
+
+                while (iterationsCount < maxIterations) {
+                    const predictions = rawData.map(point => params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi) + params.c);
+                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+                    const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
+
+                    if (Math.abs(previousError - mse) < tolerance) {
+                        break;
                     }
 
-                    const slope = numerator / denominator;
-                    const intercept = yMean - slope * xMean;
+                    previousError = mse;
 
-                    return { slope, intercept };
-                } catch (error) {
-                    console.error('Error computing linear fit:', error);
-                    throw error;
-                }
-            }
+                    let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const xi = rawData[i].x;
+                        const yi = rawData[i].y;
+                        const sinTerm = Math.sin(params.k * xi - params.phi);
+                        const cosTerm = Math.cos(params.k * xi - params.phi);
+                        const expTerm = Math.exp(params.b * xi);
 
-            function updateResults(equation, x, y, fitFunction) {
-                try {
-                    const yPredicted = x.map(point => fitFunction(point));
-                    const meanY = y.reduce((sum, yi) => sum + yi, 0) / y.length;
+                        const prediction = params.A * expTerm * sinTerm + params.c;
+                        const error = yi - prediction;
 
-                    let ssTotal = 0, ssResidual = 0;
-                    for (let i = 0; i < y.length; i++) {
-                        ssTotal += (y[i] - meanY) ** 2;
-                        ssResidual += (y[i] - yPredicted[i]) ** 2;
+                        dA += -2 * error * expTerm * sinTerm;
+                        db += -2 * error * params.A * xi * expTerm * sinTerm;
+                        dk += -2 * error * params.A * expTerm * xi * cosTerm;
+                        dphi += 2 * error * params.A * expTerm * cosTerm;
+                        dc += -2 * error;
                     }
 
-                    const rSquared = 1 - ssResidual / ssTotal;
+                    params.A -= learningRate * dA;
+                    params.b -= learningRate * db;
+                    params.k -= learningRate * dk;
+                    params.phi -= learningRate * dphi;
+                    params.c -= learningRate * dc;
 
-                    const fitEquationElement = document.getElementById('fit-equation');
-                    fitEquationElement.innerHTML = `\\(${equation}\\)`;
-                    fitEquationElement.style.display = 'block';
-
-                    const rSquaredContainer = document.getElementById('r-squared-container');
-                    rSquaredContainer.innerHTML = `\\( R^2 = ${rSquared.toFixed(5)} \\)`;
-                    rSquaredContainer.style.display = 'block';
-
-                    MathJax.Hub.Queue([
-                        "Typeset",
-                        MathJax.Hub,
-                        fitEquationElement
-                    ]);
-                    MathJax.Hub.Queue([
-                        "Typeset",
-                        MathJax.Hub,
-                        rSquaredContainer
-                    ]);
-                } catch (error) {
-                    console.error('Error updating results:', error);
+                    iterationsCount++;
                 }
-            }
 
-            function polyfit(x, y, degree) {
-                try {
-                    const X = x.map(xi => Array.from({ length: degree + 1 }, (_, j) => xi ** (degree - j)));
-                    const Xt = math.transpose(X);
-                    const XtX = math.multiply(Xt, X);
-                    const XtY = math.multiply(Xt, y);
-                    const coefficients = math.lusolve(XtX, XtY).flat();
-                    return coefficients;
-                } catch (error) {
-                    console.error('Error performing polynomial fit:', error);
-                    throw error;
+                if (iterationsCount === maxIterations) {
+                    alert('Sinusoidal fitting did not converge. Please try different initial parameters.');
+                    return;
                 }
-            }
 
-            function polyEval(coefficients, x) {
-                try {
-                    return coefficients.reduce((sum, coef, i) => sum + coef * Math.pow(x, coefficients.length - i - 1), 0);
-                } catch (error) {
-                    console.error('Error evaluating polynomial:', error);
-                    throw error;
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+                const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c);
+
+                const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
+
+                let equation = `y = ${params.A.toFixed(2)} e^{${params.b.toFixed(2)}x}\\sin(${params.k.toFixed(2)}x`;
+                if (params.phi > 0) {
+                    equation += ` - ${params.phi.toFixed(2)}`;
+                } else if (params.phi < 0) {
+                    equation += ` + ${Math.abs(params.phi).toFixed(2)}`;
                 }
+                equation += `)`;
+                if (params.c > 0) {
+                    equation += ` + ${params.c.toFixed(2)}`;
+                } else if (params.c < 0) {
+                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                }
+
+                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing sinusoidal fit:', error);
+                alert('An error occurred during sinusoidal fitting. Please check the console for details.');
             }
+        }
 
-            function updateData() {
-                try {
-                    const xInputs = document.querySelectorAll('.x-input');
-                    const yInputs = document.querySelectorAll('.y-input');
-                    const xErrorInputs = document.querySelectorAll('.x-error-input');
-                    const yErrorInputs = document.querySelectorAll('.y-error-input');
+        function performGaussianFit() {
+            try {
+                let A = parseFloat(document.getElementById('initial-A-gaussian').value);
+                let mu = parseFloat(document.getElementById('initial-mu').value);
+                let sigma = parseFloat(document.getElementById('initial-sigma').value);
+                let c = parseFloat(document.getElementById('initial-c-gaussian').value);
 
-                    rawData = [];
-                    for (let i = 0; i < xInputs.length; i++) {
-                        const x = parseFloat(xInputs[i].value);
-                        const y = parseFloat(yInputs[i].value);
-                        const xErrorRaw = parseFloat(xErrorInputs[i]?.value) || 0;
-                        const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
+                if (isNaN(A) || isNaN(mu) || isNaN(sigma) || isNaN(c)) {
+                    alert('Please provide valid initial parameters for Gaussian fit.');
+                    return;
+                }
 
-                        if (!isNaN(x) && !isNaN(y)) {
-                            rawData.push({
-                                x: x,
-                                y: y,
-                                xErrorRaw: xErrorRaw,
-                                yErrorRaw: yErrorRaw
-                            });
-                        }
+                const params = { A: A, mu: mu, sigma: sigma, c: c };
+                const learningRate = 1e-5;
+                const maxIterations = 100000;
+                const tolerance = 1e-6;
+
+                let previousError = Infinity;
+                let iterationsCount = 0;
+
+                while (iterationsCount < maxIterations) {
+                    const predictions = rawData.map(point => params.A * Math.exp(-((point.x - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
+                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
+
+                    if (Math.abs(previousError - mse) < tolerance) {
+                        break;
                     }
 
-                    plotGraph();
-                } catch (error) {
-                    console.error('Error updating data:', error);
-                }
-            }
+                    previousError = mse;
 
+                    let dA = 0, dmu = 0, dsigma = 0, dc = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const xi = rawData[i].x;
+                        const yi = rawData[i].y;
+                        const expTerm = Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2));
+
+                        const prediction = params.A * expTerm + params.c;
+                        const error = yi - prediction;
+
+                        dA += -2 * error * expTerm;
+                        dmu += -2 * error * params.A * expTerm * ((xi - params.mu) / (params.sigma ** 2));
+                        dsigma += -2 * error * params.A * expTerm * ((xi - params.mu) ** 2) / (params.sigma ** 3);
+                        dc += -2 * error;
+                    }
+
+                    params.A -= learningRate * dA;
+                    params.mu -= learningRate * dmu;
+                    params.sigma -= learningRate * dsigma;
+                    params.c -= learningRate * dc;
+
+                    iterationsCount++;
+                }
+
+                if (iterationsCount === maxIterations) {
+                    alert('Gaussian fitting did not converge. Please try different initial parameters.');
+                    return;
+                }
+
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+                const yFit = xFit.map(xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
+
+                const fitFunction = xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c;
+
+                let equation = `y = ${params.A.toFixed(2)} e^{-\\frac{(x - ${params.mu.toFixed(2)})^2}{2(${params.sigma.toFixed(2)})^2}}`;
+                if (params.c > 0) {
+                    equation += ` + ${params.c.toFixed(2)}`;
+                } else if (params.c < 0) {
+                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                }
+
+                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing Gaussian fit:', error);
+                alert('An error occurred during Gaussian fitting. Please check the console for details.');
+            }
+        }
+
+        function performLorentzianFit() {
+            try {
+                let A = parseFloat(document.getElementById('initial-A-lorentzian').value);
+                let x0 = parseFloat(document.getElementById('initial-x0').value);
+                let gamma = parseFloat(document.getElementById('initial-gamma').value);
+                let c = parseFloat(document.getElementById('initial-c-lorentzian').value);
+
+                if (isNaN(A) || isNaN(x0) || isNaN(gamma) || isNaN(c)) {
+                    alert('Please provide valid initial parameters for Lorentzian fit.');
+                    return;
+                }
+
+                const params = { A: A, x0: x0, gamma: gamma, c: c };
+                const learningRate = 1e-5;
+                const maxIterations = 100000;
+                const tolerance = 1e-6;
+
+                let previousError = Infinity;
+                let iterationsCount = 0;
+
+                while (iterationsCount < maxIterations) {
+                    const predictions = rawData.map(point => params.A * (params.gamma ** 2) / ((point.x - params.x0) ** 2 + params.gamma ** 2) + params.c);
+                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
+
+                    if (Math.abs(previousError - mse) < tolerance) {
+                        break;
+                    }
+
+                    previousError = mse;
+
+                    let dA = 0, dx0 = 0, dgamma = 0, dc = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const xi = rawData[i].x;
+                        const yi = rawData[i].y;
+                        const denominator = ((xi - params.x0) ** 2 + params.gamma ** 2);
+                        const lorentzian = (params.gamma ** 2) / denominator;
+
+                        const prediction = params.A * lorentzian + params.c;
+                        const error = yi - prediction;
+
+                        dA += -2 * error * lorentzian;
+                        dx0 += -2 * error * params.A * (-2 * (xi - params.x0) * params.gamma ** 2) / (denominator ** 2);
+                        dgamma += -2 * error * params.A * (2 * params.gamma * denominator - 2 * (xi - params.x0) ** 2 * params.gamma) / (denominator ** 2);
+                        dc += -2 * error;
+                    }
+
+                    params.A -= learningRate * dA;
+                    params.x0 -= learningRate * dx0;
+                    params.gamma -= learningRate * dgamma;
+                    params.c -= learningRate * dc;
+
+                    iterationsCount++;
+                }
+
+                if (iterationsCount === maxIterations) {
+                    alert('Lorentzian fitting did not converge. Please try different initial parameters.');
+                    return;
+                }
+
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+                const yFit = xFit.map(xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c);
+
+                const fitFunction = xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c;
+
+                let equation = `y = ${params.A.toFixed(2)} \\frac{(${params.gamma.toFixed(2)})^2}{(x - ${params.x0.toFixed(2)})^2 + (${params.gamma.toFixed(2)})^2}`;
+                if (params.c > 0) {
+                    equation += ` + ${params.c.toFixed(2)}`;
+                } else if (params.c < 0) {
+                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                }
+
+                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                plotGraph(xFit, yFit);
+            } catch (error) {
+                console.error('Error performing Lorentzian fit:', error);
+                alert('An error occurred during Lorentzian fitting. Please check the console for details.');
+            }
+        }
     </script>
 </body>
 </html>
