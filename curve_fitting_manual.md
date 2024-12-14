@@ -57,9 +57,19 @@ Welcome to the **Graph Plotting & Curve Fitting** web application! This tool all
   - Click the **"Import .csv"** button and select a CSV file from your device.
   - Ensure that the CSV file has at least two columns for `x` and `y`. Additional columns can represent uncertainties.
 
+
+
 - **Exporting Data:**
   - Click the **"Export .csv"** button to download your data in CSV format.
   - Click the **"Export .md"** button to download your data in Markdown format, suitable for documentation or reports.
+
+|Note:
+|:---
+|Certainty levels (absolute or percentage uncertainties) play a crucial role in determining how data is formatted in the exported `.csv` and `.md` files. <p> Formatting rules are applied to ensure that the data maintains consistency and aligns with the provided uncertainties for precise representation in exported files. <p>Here's how they influence the precision:
+|1. **Absolute Uncertainties**:
+|The number of decimal places (d.p.) in the exported values matches the precision of the absolute uncertainty. <p> - For example, if the uncertainty is `±0.05`, the corresponding data value will be exported with two decimal places, e.g., `5.25 ± 0.05`.
+|2. **Percentage Uncertainties**:
+|The precision of exported values is adjusted to significant figures (s.f.) based on the percentage uncertainty: <p> - **Small uncertainties (≤ 10%)**: Values are exported with **3 significant figures**. <p> - **Large uncertainties (> 10%)**: Values are exported with **2 significant figures**. <p> - For instance, if the percentage uncertainty is `5%`, a value of `123.456` will be rounded to `123` (3 significant figures), while a `15%` uncertainty will round the same value to `120` (2 significant figures).
 
 ### 4. Performing Curve Fitting
 
