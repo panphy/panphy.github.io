@@ -6,6 +6,24 @@
     <title>Motion Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            /* Button Color Variables */
+            --btn-upload-color: #0079b1; /* Blue */
+            --btn-play-color: #49aa7a; /* Green */
+            --btn-calibration-color: #f0bd37; /* Yellow */
+            --btn-set-origin-color: #f0bd37; /* Yellow */
+            --btn-export-color: #40bec1; /* Teal */
+            --btn-clear-data-color: #ee4c4c; /* Red */
+            --btn-clear-calibration-color: #ec7070; /* Red */
+            --btn-clear-origin-color: #ec7070; /* Red */
+            
+            /* Dialog Button Colors */
+            --btn-confirm-color: #28a745; /* Green */
+            --hover-confirm-color: #1e7e34; /* Darker Green */
+            --btn-cancel-color: #dc3545; /* Red */
+            --hover-cancel-color: #c82333; /* Darker Red */
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             padding: 0;
@@ -16,10 +34,10 @@
 
         h1 {
             text-align: center;
-            font-size: 2.5em;
+            font-size: 2.2em;
             font-weight: bold;
             margin: 0;
-            padding: 20px 0;
+            padding: 10px 0;
             background-color: #333; 
             color: white; 
         }
@@ -39,57 +57,105 @@
             margin: 15px auto;
             color: #666;
             max-width: 800px;
+            line-height: 1.5;
         }
 
-        #controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin: 20px auto;
-            padding: 10px 0;
-            flex-wrap: wrap;
-            max-width: 900px;
+        /* Top Controls Section */
+        #topControls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        #controls button {
+        /* Button Styles with CSS Variables */
+        .control-button {
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            background-color: #007bff;
             color: white;
             font-size: 1em;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: filter 0.3s ease;
+            width: 100%;
         }
 
-        #controls button:disabled {
+        /* Specific Button Classes */
+        .btn-upload {
+            background-color: var(--btn-upload-color);
+        }
+
+        .btn-play {
+            background-color: var(--btn-play-color);
+        }
+
+        .btn-calibration {
+            background-color: var(--btn-calibration-color);
+        }
+
+        .btn-set-origin {
+            background-color: var(--btn-set-origin-color);
+        }
+
+        .btn-export {
+            background-color: var(--btn-export-color);
+        }
+
+        .btn-clear-data {
+            background-color: var(--btn-clear-data-color);
+        }
+
+        .btn-clear-calibration {
+            background-color: var(--btn-clear-calibration-color);
+        }
+
+        .btn-clear-origin {
+            background-color: var(--btn-clear-origin-color);
+        }
+
+        /* Hover Effect: Brightness Filter */
+        .control-button:hover:not(:disabled) {
+            filter: brightness(90%);
+        }
+
+        /* Dialog Button Colors */
+        #calibrationPrompt button, #exportPrompt button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 48%;
+            font-size: 1em;
+            color: white;
+            transition: filter 0.3s ease;
+        }
+
+        #calibrationPrompt #confirmCalibration, #exportPrompt #confirmExport {
+            background-color: var(--btn-confirm-color);
+        }
+
+        #calibrationPrompt #cancelCalibration, #exportPrompt #cancelExport {
+            background-color: var(--btn-cancel-color);
+        }
+
+        /* Hover Effect for Dialog Buttons */
+        #calibrationPrompt button:hover:not(:disabled), #exportPrompt button:hover:not(:disabled) {
+            filter: brightness(90%);
+        }
+
+        /* Disabled Buttons */
+        .control-button:disabled {
             background-color: #a9a9a9;
             cursor: not-allowed;
         }
 
-        #controls button:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-
-        .clear-button {
-            background-color: #dc3545; 
-        }
-
-        .clear-button:hover:not(:disabled) {
-            background-color: #c82333;
-        }
-
-        .export-button {
-            background-color: #17a2b8; 
-        }
-
-        .export-button:hover:not(:disabled) {
-            background-color: #138496;
-        }
-
-        #controls input[type="range"] {
+        /* Range Slider */
+        #slider {
             appearance: none;
             background: #007bff;
             height: 5px;
@@ -97,10 +163,10 @@
             outline: none;
             margin: 0 10px;
             cursor: pointer;
-            width: 200px;
+            width: 100%;
         }
 
-        #controls input[type="range"]::-webkit-slider-thumb {
+        #slider::-webkit-slider-thumb {
             appearance: none;
             width: 15px;
             height: 15px;
@@ -111,7 +177,7 @@
             margin-top: -5px;
         }
 
-        #controls input[type="range"]::-moz-range-thumb {
+        #slider::-moz-range-thumb {
             width: 15px;
             height: 15px;
             border-radius: 50%;
@@ -120,15 +186,11 @@
             cursor: pointer;
         }
 
-        #controls span {
-            font-size: 1.1em;
-            color: #333;
-        }
-
+        /* Analysis Container */
         #analysisContainer {
-            display: none; /* Hidden initially */
+            display: flex;
             justify-content: space-evenly;
-            align-items: center;
+            align-items: flex-start;
             flex-wrap: wrap;
             margin: 20px auto;
             padding: 20px;
@@ -136,11 +198,19 @@
             max-width: 1200px;
         }
 
-        #videoWrapper {
-            position: relative;
+        /* Video Section */
+        #videoSection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 48%; 
             max-width: 600px;
             min-width: 300px;
+        }
+
+        #videoWrapper {
+            position: relative;
+            width: 100%;
             min-height: 200px; 
         }
 
@@ -163,12 +233,50 @@
             background-color: transparent;
         }
 
-        #chartCanvasContainer {
-            display: none; /* Hidden initially */
-            flex: 1;
+        #frameCanvas {
+            display: none;
+        }
+
+        /* Video Control Bar and Frame Rate Message Container */
+        #controlsContainer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 10px;
+        }
+
+        /* Video Control Bar */
+        #videoControls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 60%;
+        }
+
+        #videoControls .control-button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            flex: 1; /* Ensure uniform width */
+        }
+
+        #videoControls #slider {
+            width: 150px;
+        }
+
+        /* Plot Section */
+        #plotSection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 48%;
             min-width: 300px;
             max-width: 600px;
+        }
+
+        #chartCanvasContainer {
+            width: 100%;
             height: 400px;
         }
 
@@ -177,61 +285,19 @@
             height: 100%;
         }
 
-        #velocityControls {
-            text-align: center;
-            margin-top: 20px;
-            display: none; /* Hidden initially */
-        }
-
-        #velocityControls button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 1em;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #velocityControls button:hover {
-            background-color: #218838;
-        }
-
-        #clearControls {
-            text-align: center;
+        /* Plot Buttons */
+        #plotButtons {
+            display: flex;
+            gap: 10px;
             margin-top: 10px;
-            display: none; /* Hidden initially */
+            width: 100%;
         }
 
-        #clearControls button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 1em;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+        #plotButtons .control-button {
+            flex: 1;
         }
 
-        @media (max-width: 768px) {
-            #analysisContainer {
-                flex-direction: column;
-            }
-
-            #videoWrapper, #chartCanvasContainer {
-                width: 90%;
-            }
-        }
-
-        .calibration-line {
-            stroke: orange;
-            stroke-width: 2;
-            stroke-dasharray: 5,5;
-        }
-
+        /* Calibration and Export Prompts */
         #calibrationPrompt, #exportPrompt {
             position: fixed;
             top: 50%;
@@ -271,27 +337,16 @@
 
         #calibrationPrompt button, #exportPrompt button {
             padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             width: 48%;
             font-size: 1em;
+            color: white;
+            transition: filter 0.3s ease;
         }
 
-        #calibrationPrompt button:hover, #exportPrompt button:hover:not(.cancel-button) {
-            background-color: #0056b3;
-        }
-
-        .cancel-button {
-            background-color: #dc3545;
-        }
-
-        .cancel-button:hover {
-            background-color: #c82333;
-        }
-
+        /* Crosshair */
         .crosshair {
             position: absolute;
             width: 20px;
@@ -332,18 +387,19 @@
             background-color: #fff !important;
         }
 
-        /* Initially disable some controls until a video is loaded */
-        #playPause:disabled, #calibrate:disabled, #setOrigin:disabled, #slider:disabled, 
-        #plotVx:disabled, #plotVy:disabled, #backToPosition:disabled, 
-        #clearDataPoints:disabled, #clearCalibration:disabled, 
-        #clearOrigin:disabled, #exportData:disabled {
-            background-color: #a9a9a9;
+        /* Frame Rate Message Styling */
+        #frameRateMessage {
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+            width: 35%; /* Adjust width as needed */
         }
 
         footer {
             text-align: center;
             padding: 10px;
-            background: #f4f4f4;
+            background: #f9f9f9;
             color: #555;
             margin-top: 10px;
         }
@@ -356,6 +412,20 @@
         <strong>Note:</strong> This application is optimized for desktop browsers. Functionality on mobile devices may be limited.
     </div>
 
+    <!-- Top Controls Section -->
+    <div id="topControls">
+        <button id="uploadVideo" class="control-button btn-upload" aria-label="Upload Video">Upload Video</button>
+        <button id="playPause" class="control-button btn-play" disabled>Play</button>
+        <button id="calibrate" class="control-button btn-calibration" disabled>Calibration</button>
+        <button id="setOrigin" class="control-button btn-set-origin" disabled>Set Origin</button>
+        <button id="exportData" class="control-button btn-export" disabled>Export .csv</button>
+        <button id="clearDataPoints" class="control-button btn-clear-data" disabled>Clear Data</button>
+        <button id="clearCalibration" class="control-button btn-clear-calibration" disabled>Clear Calibration</button>
+        <button id="clearOrigin" class="control-button btn-clear-origin" disabled>Clear Origin</button>
+        <!-- Hidden Video Upload Input -->
+        <input type="file" id="videoUploadInput" accept="video/*" style="display: none;">
+    </div>
+
     <!-- Calibration Prompt -->
     <div id="calibrationPrompt">
         <h2>Calibration</h2>
@@ -365,7 +435,7 @@
             <input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmCalibration">Confirm</button>
-                <button type="button" id="cancelCalibration" class="cancel-button">Cancel</button>
+                <button type="button" id="cancelCalibration">Cancel</button>
             </div>
         </form>
     </div>
@@ -378,56 +448,59 @@
             <input type="text" id="exportFilename" name="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmExport">Export</button>
-                <button type="button" id="cancelExport" class="cancel-button">Cancel</button>
+                <button type="button" id="cancelExport">Cancel</button>
             </div>
         </form>
     </div>
 
     <!-- Instruction Message -->
     <div id="message">
-        <br>Upload a video file to begin analysis.
-    </div>
-
-    <!-- Controls -->
-    <div id="controls">
-        <button id="uploadVideo">Upload Video</button>
-        <input type="file" id="videoUploadInput" accept="video/*" style="display: none;">
-
-        <button id="playPause" disabled>Play</button>
-        <button id="calibrate" disabled>Calibration</button>
-        <button id="setOrigin" disabled>Set Origin</button>
-        <input type="range" id="slider" min="0" max="1" step="0.001" value="0" disabled>
-        <span id="timeDisplay" style="display: inline-block;">0:00.000</span>
+        <p>Upload a video to begin analysis.</p>
     </div>
 
     <!-- Analysis Container -->
     <div id="analysisContainer">
-        <div id="videoWrapper">
-            <canvas id="frameCanvas" style="display: none;"></canvas>
-            <canvas id="overlayCanvas"></canvas>
-            <div class="crosshair" id="crosshair"></div>
+        <!-- Video Section -->
+        <div id="videoSection">
+            <div id="videoWrapper">
+                <canvas id="frameCanvas" style="display: none;"></canvas>
+                <canvas id="overlayCanvas"></canvas>
+                <div class="crosshair" id="crosshair"></div>
+            </div>
+            <!-- Controls Container -->
+            <div id="controlsContainer">
+                <!-- Frame Rate Message -->
+                <div id="frameRateMessage"></div>
+                <!-- Video Control Bar -->
+                <div id="videoControls">
+                    <input type="range" id="slider" min="0" max="1" step="0.001" value="0" disabled>
+                    <span id="timeDisplay">0:00.000</span>
+                </div>
+            </div>
         </div>
-        <div id="chartCanvasContainer">
-            <canvas id="positionChart"></canvas>
+        <!-- Plot Section -->
+        <div id="plotSection">
+            <div id="chartCanvasContainer">
+                <canvas id="positionChart"></canvas>
+            </div>
+            <!-- Plot Buttons -->
+            <div id="plotButtons">
+                <button id="plotVx" class="control-button btn-play" disabled>vₓ vs t</button>
+                <button id="plotVy" class="control-button btn-play" disabled>vᵧ vs t</button>
+                <button id="backToPosition" class="control-button btn-play" disabled>x-t and y-t</button>
+            </div>
         </div>
-    </div>
-
-    <!-- Velocity Controls -->
-    <div id="velocityControls">
-        <button id="plotVx" disabled>Plot vₓ vs t</button>
-        <button id="plotVy" disabled>Plot vᵧ vs t</button>
-        <button id="backToPosition" disabled>Plot x vs t and y vs t</button>
-    </div>
-
-    <!-- Clear and Export Controls -->
-    <div id="clearControls">
-        <button id="clearDataPoints" class="clear-button" disabled>Clear Data Points</button>
-        <button id="clearCalibration" class="clear-button" disabled>Clear Calibration</button>
-        <button id="clearOrigin" class="clear-button" disabled>Clear Origin</button>
-        <button id="exportData" class="export-button" disabled>Export Data</button>
     </div>
 
     <script>
+        // Data Point Colors Configuration
+        const dataPointColors = {
+            x: '#ae72e6',
+            y: '#fcb56a',
+            vx: '#549ad9',
+            vy: '#f48a8a'
+        };
+
         // Create a hidden video element
         let videoElement = document.createElement('video');
         videoElement.autoplay = false;
@@ -448,14 +521,12 @@
         const positionChartCanvas = document.getElementById('positionChart');
         const message = document.getElementById('message');
         const chartCanvasContainer = document.getElementById('chartCanvasContainer');
-        const velocityControls = document.getElementById('velocityControls');
         const plotVxButton = document.getElementById('plotVx');
         const plotVyButton = document.getElementById('plotVy');
         const backToPositionButton = document.getElementById('backToPosition');
         const overlayCanvas = document.getElementById('overlayCanvas');
         const ctx = frameCanvas.getContext('2d');
         const overlayCtx = overlayCanvas.getContext('2d');
-        const clearControls = document.getElementById('clearControls');
         const clearDataPointsButton = document.getElementById('clearDataPoints');
         const clearCalibrationButton = document.getElementById('clearCalibration');
         const clearOriginButton = document.getElementById('clearOrigin');
@@ -470,6 +541,7 @@
         const confirmExportButton = document.getElementById('confirmExport');
         const cancelExportButton = document.getElementById('cancelExport');
         const crosshair = document.getElementById('crosshair');
+        const frameRateMessage = document.getElementById('frameRateMessage');
 
         // Application state variables
         let frameData = [];
@@ -488,6 +560,9 @@
         let originMode = false;
         let originSet = false;
         let originPoint = { x: 0, y: 0 }; 
+
+        // New frameRate variable to handle dynamic frame rates
+        let frameRate = 30; // Default frame rate
 
         // Utility functions
         function canvasYToCartesianY(y) {
@@ -512,7 +587,7 @@
 
         // Initialize button states on page load
         document.addEventListener('DOMContentLoaded', () => {
-            // Disable all buttons except Upload
+            // Disable all buttons except Upload Video
             playPauseButton.disabled = true;
             calibrateButton.disabled = true;
             setOriginButton.disabled = true;
@@ -528,9 +603,13 @@
             // Hide analysis containers
             document.getElementById('analysisContainer').style.display = "none";
             chartCanvasContainer.style.display = "none";
-            velocityControls.style.display = "none";
-            clearControls.style.display = "none";
+            // Hide frameCanvas initially
             frameCanvas.style.display = "none";
+            // Hide export and calibration prompts
+            calibrationPrompt.style.display = "none";
+            exportPrompt.style.display = "none";
+            // Clear frame rate message
+            frameRateMessage.textContent = "";
         });
 
         // Upload Video Button Click
@@ -564,17 +643,11 @@
 
             frameCanvas.style.display = "block";
             chartCanvasContainer.style.display = "flex"; 
-            velocityControls.style.display = "block";
-            clearControls.style.display = "block"; 
-            calibrateButton.style.display = "inline-block"; 
-            setOriginButton.style.display = "inline-block";
-            playPauseButton.style.display = "inline-block";
-
             // Enable controls
-            slider.removeAttribute('disabled');
             playPauseButton.removeAttribute('disabled');
             calibrateButton.removeAttribute('disabled');
             setOriginButton.removeAttribute('disabled');
+            slider.removeAttribute('disabled');
             plotVxButton.removeAttribute('disabled');
             plotVyButton.removeAttribute('disabled');
             backToPositionButton.removeAttribute('disabled');
@@ -586,12 +659,54 @@
             // Show analysis container
             document.getElementById('analysisContainer').style.display = "flex";
 
-            // Update message
-            message.innerHTML = "Use the control bar to choose the starting frame. Select a point to track motion, and the video will automatically skip to the next frame.";
+            // Update instruction message
+            message.innerHTML = "<p>Use the control bar beneath the video to select the starting frame.</p><p>Select a point to track motion, and the video will automatically skip to the next frame.</p>";
+
+            // Estimate frame rate
+            estimateFrameRate();
+        }
+
+        // Function to estimate frame rate
+        function estimateFrameRate() {
+            // Play the video for a short duration to gather frame count
+            videoElement.currentTime = 0;
+            videoElement.play();
+            isPlaying = true;
+            playPauseButton.textContent = "Pause";
+
+            // Listen for a specific time to pause and calculate frame rate
+            const estimationDuration = 1; // seconds
+
+            function onTimeUpdate() {
+                const currentTime = videoElement.currentTime;
+                if (currentTime >= estimationDuration) {
+                    videoElement.pause();
+                    isPlaying = false;
+                    playPauseButton.textContent = "Play";
+                    videoElement.removeEventListener('timeupdate', onTimeUpdate);
+
+                    const quality = videoElement.getVideoPlaybackQuality ? videoElement.getVideoPlaybackQuality() : null;
+                    if (quality && quality.totalVideoFrames > 0) {
+                        frameRate = quality.totalVideoFrames / videoElement.currentTime;
+                        console.log(`Estimated Frame Rate: ${frameRate.toFixed(2)} FPS`);
+                        frameRateMessage.textContent = `Frame Rate ≈ ${frameRate.toFixed(2)} FPS`;
+                    } else {
+                        console.warn("Unable to estimate frame rate. Using default 30 FPS.");
+                        frameRate = 30; // Fallback to default
+                        frameRateMessage.textContent = `Frame Rate ≈ ${frameRate} FPS (Default)`;
+                    }
+                }
+            }
+
+            videoElement.addEventListener('timeupdate', onTimeUpdate);
         }
 
         // Play/Pause Button Click
         playPauseButton.addEventListener('click', () => {
+            togglePlayPause();
+        });
+
+        function togglePlayPause() {
             if (isPlaying) {
                 videoElement.pause();
                 playPauseButton.textContent = "Play";
@@ -600,7 +715,7 @@
                 playPauseButton.textContent = "Pause";
             }
             isPlaying = !isPlaying;
-        });
+        }
 
         // Video Time Update
         videoElement.addEventListener("timeupdate", () => {
@@ -647,7 +762,7 @@
                 overlayCanvas.style.pointerEvents = "none";
                 drawOverlay();
                 plotPosition();
-                message.textContent = "Origin set. Data will now be plotted relative to the chosen origin.";
+                message.innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
             }
         });
 
@@ -690,7 +805,7 @@
         // Skip to the next frame after adding a data point
         function skipToNextFrame() {
             skippingFrame = true;
-            videoElement.currentTime += 1 / 30; // Assuming 30 FPS
+            videoElement.currentTime += 1 / frameRate; // Use dynamic frameRate
             videoElement.addEventListener('seeked', () => {
                 skippingFrame = false;
                 drawFrame();
@@ -712,16 +827,16 @@
                             {
                                 label: "x vs t",
                                 data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-                                borderColor: "blue",
-                                backgroundColor: "blue",
+                                borderColor: dataPointColors.x,
+                                backgroundColor: dataPointColors.x,
                                 showLine: false,
                                 pointRadius: 4,
                             },
                             {
                                 label: "y vs t",
                                 data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-                                borderColor: "green",
-                                backgroundColor: "green",
+                                borderColor: dataPointColors.y,
+                                backgroundColor: dataPointColors.y,
                                 showLine: false,
                                 pointRadius: 4,
                             },
@@ -768,16 +883,16 @@
                     {
                         label: "x vs t",
                         data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-                        borderColor: "blue",
-                        backgroundColor: "blue",
+                        borderColor: dataPointColors.x,
+                        backgroundColor: dataPointColors.x,
                         showLine: false,
                         pointRadius: 4,
                     },
                     {
                         label: "y vs t",
                         data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-                        borderColor: "green",
-                        backgroundColor: "green",
+                        borderColor: dataPointColors.y,
+                        backgroundColor: dataPointColors.y,
                         showLine: false,
                         pointRadius: 4,
                     },
@@ -832,8 +947,8 @@
                 {
                     label: axis === "x" ? "vₓ vs t" : "vᵧ vs t",
                     data: smoothedTimes.map((t, i) => ({ x: t, y: smoothedVelocities[i] })),
-                    borderColor: axis === "x" ? "blue" : "green",
-                    backgroundColor: axis === "x" ? "blue" : "green",
+                    borderColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
+                    backgroundColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
                     showLine: false,
                     pointRadius: 4,
                 },
@@ -860,7 +975,7 @@
             }
             drawFrame(); 
             drawOverlay(); 
-            message.textContent = "Data points cleared.";
+            message.innerHTML = "<p>Data points cleared.</p>";
         });
 
         // Clear Calibration
@@ -878,7 +993,7 @@
                 plotPosition(); 
             }
 
-            message.textContent = "Calibration cleared. Positions are now in pixel units.";
+            message.innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
         });
 
         // Clear Origin
@@ -887,7 +1002,7 @@
             originPoint = { x: 0, y: 0 };
             drawOverlay();
             plotPosition();
-            message.textContent = "Origin cleared. Default origin (lower-left) is used.";
+            message.innerHTML = "<p>Origin cleared. Default origin (lower-left) is used.</p>";
         });
 
         // Export Data Button Click
@@ -928,13 +1043,13 @@
 
             exportCSV(finalFilename);
             hideExportPrompt();
-            message.textContent = `Data exported as ${finalFilename}.`;
+            message.innerHTML = `<p>Data exported as ${finalFilename}.</p>`;
         });
 
         // Cancel Export
         cancelExportButton.addEventListener('click', () => {
             hideExportPrompt();
-            message.textContent = "Export cancelled.";
+            message.innerHTML = "<p>Export cancelled.</p>";
         });
 
         // Export CSV Function
@@ -987,7 +1102,7 @@
             calibrationStart = null;
             calibrationEnd = null;
             frameCanvas.style.cursor = "crosshair";
-            message.textContent = "Calibration: Click and drag on the video to draw a calibration line.";
+            message.innerHTML = "<p>Calibration: Click and drag on the video to draw a calibration line.</p>";
         });
 
         // Overlay Canvas Mousemove - Show Crosshair
@@ -1004,38 +1119,41 @@
 
         // Overlay Canvas Mousedown - Start Drawing Calibration Line
         overlayCanvas.addEventListener('mousedown', (event) => {
-            if (!calibrationMode) return;
-            isDrawingCalibration = true;
-            const rect = overlayCanvas.getBoundingClientRect();
-            const scaleX = overlayCanvas.width / rect.width;
-            const scaleY = overlayCanvas.height / rect.height;
-            const x = (event.clientX - rect.left) * scaleX;
-            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-            calibrationStart = { x, y };
-            calibrationEnd = { x, y };
+            if (calibrationMode) {
+                isDrawingCalibration = true;
+                const rect = overlayCanvas.getBoundingClientRect();
+                const scaleX = overlayCanvas.width / rect.width;
+                const scaleY = overlayCanvas.height / rect.height;
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+                calibrationStart = { x, y };
+                calibrationEnd = { x, y };
+            }
         });
 
         // Overlay Canvas Mousemove - Update Calibration Line
         overlayCanvas.addEventListener('mousemove', (event) => {
-            if (!calibrationMode || !isDrawingCalibration) return;
-            const rect = overlayCanvas.getBoundingClientRect();
-            const scaleX = overlayCanvas.width / rect.width;
-            const scaleY = overlayCanvas.height / rect.height;
-            const x = (event.clientX - rect.left) * scaleX;
-            const y = canvasYToCartesianY((event.clientY - rect.top) * scaleY);
-            calibrationEnd = { x, y };
-            drawOverlay(); 
+            if (calibrationMode && isDrawingCalibration) {
+                const rect = overlayCanvas.getBoundingClientRect();
+                const scaleX = overlayCanvas.width / rect.width;
+                const scaleY = overlayCanvas.height / rect.height;
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+                calibrationEnd = { x, y };
+                drawOverlay(); 
+            }
         });
 
         // Overlay Canvas Mouseup - Finish Drawing Calibration Line
         overlayCanvas.addEventListener('mouseup', (event) => {
-            if (!calibrationMode || !isDrawingCalibration) return;
-            isDrawingCalibration = false;
-            calibrationMode = false;
-            overlayCanvas.style.pointerEvents = "none";
-            frameCanvas.style.cursor = "default";
-            message.textContent = "Calibration line drawn. Enter actual length and unit.";
-            showCalibrationPrompt();
+            if (calibrationMode && isDrawingCalibration) {
+                isDrawingCalibration = false;
+                calibrationMode = false;
+                overlayCanvas.style.pointerEvents = "none";
+                frameCanvas.style.cursor = "default";
+                message.innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
+                showCalibrationPrompt();
+            }
         });
 
         // Show Calibration Prompt
@@ -1076,7 +1194,7 @@
             drawOverlay();
             drawFrame();
             plotPosition();
-            message.textContent = `Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}`;
+            message.innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
             crosshair.style.display = "none";
         });
 
@@ -1090,7 +1208,7 @@
             drawOverlay();
             drawFrame();
             crosshair.style.display = "none";
-            message.textContent = "Calibration cancelled.";
+            message.innerHTML = "<p>Calibration cancelled.</p>";
         });
 
         // Click outside Calibration or Export Prompts to close them
@@ -1105,11 +1223,11 @@
                 drawFrame();
                 crosshair.style.display = "none";
                 overlayCanvas.style.pointerEvents = "none";
-                message.textContent = "Calibration cancelled.";
+                message.innerHTML = "<p>Calibration cancelled.</p>";
             }
             if (event.target == exportPrompt) {
                 hideExportPrompt();
-                message.textContent = "Export cancelled.";
+                message.innerHTML = "<p>Export cancelled.</p>";
             }
         });
 
@@ -1121,7 +1239,7 @@
             overlayCanvas.style.pointerEvents = "auto";
             frameCanvas.style.cursor = "crosshair";
             crosshair.style.display = "block";
-            message.textContent = "Origin Mode: Click on the video to set the new origin.";
+            message.innerHTML = "<p>Origin Mode: Click on the video to set the new origin.</p>";
         });
 
         // Resize Overlay Canvas to match video dimensions
@@ -1211,8 +1329,9 @@
                 overlayCtx.lineWidth = 2;
                 overlayCtx.setLineDash([5, 5]); 
                 overlayCtx.beginPath();
-                overlayCtx.moveTo(calibrationStart.x, cartesianYToCanvasY(calibrationStart.y));
-                overlayCtx.lineTo(calibrationEnd.x, cartesianYToCanvasY(calibrationEnd.y));
+                // Calibration line aligns with crosshair by using same coordinate system
+                overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
+                overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
                 overlayCtx.stroke();
                 overlayCtx.setLineDash([]); 
             }
@@ -1225,8 +1344,8 @@
                 overlayCtx.lineWidth = 2;
                 overlayCtx.setLineDash([5, 5]); 
                 overlayCtx.beginPath();
-                overlayCtx.moveTo(calibrationStart.x, cartesianYToCanvasY(calibrationStart.y));
-                overlayCtx.lineTo(calibrationEnd.x, cartesianYToCanvasY(calibrationEnd.y));
+                overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
+                overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
                 overlayCtx.stroke();
                 overlayCtx.setLineDash([]); 
             }
@@ -1238,10 +1357,9 @@
             drawFrame();
         });
     </script>
-</body>
 
     <footer>
         &copy; 2024 PanPhy. All rights reserved.
     </footer>
-
+</body>
 </html>
