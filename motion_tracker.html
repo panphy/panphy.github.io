@@ -9,10 +9,10 @@
         :root {
             /* Button Color Variables */
             --btn-upload-color: #0079b1; /* Blue */
-            --btn-play-color: #49aa7a; /* Green */
+            --btn-play-color: #17c5a3; /* Green */
             --btn-calibration-color: #f0bd37; /* Yellow */
             --btn-set-origin-color: #f0bd37; /* Yellow */
-            --btn-export-color: #40bec1; /* Teal */
+            --btn-export-color: #23a5d0; /* Teal */
             --btn-clear-data-color: #ee4c4c; /* Red */
             --btn-clear-calibration-color: #ec7070; /* Red */
             --btn-clear-origin-color: #ec7070; /* Red */
@@ -22,6 +22,11 @@
             --hover-confirm-color: #1e7e34; /* Darker Green */
             --btn-cancel-color: #dc3545; /* Red */
             --hover-cancel-color: #c82333; /* Darker Red */
+
+            /* Plot Button Color Variables */
+            --btn-plot-vx-color: #86b671;
+            --btn-plot-vy-color: #86b671;
+            --btn-backToPosition-color: #86b671;
         }
 
         body {
@@ -43,9 +48,9 @@
         }
 
         #warningBanner {
-            background-color: #fff3cd;
+            background-color: #fff8e3;
             color: #856404;
-            padding: 15px;
+            padding: 10px;
             text-align: center;
             border-bottom: 1px solid #ffeeba;
         }
@@ -116,6 +121,19 @@
 
         .btn-clear-origin {
             background-color: var(--btn-clear-origin-color);
+        }
+
+        /* Specific Plot Button Classes */
+        .btn-plot-vx {
+            background-color: var(--btn-plot-vx-color);
+        }
+
+        .btn-plot-vy {
+            background-color: var(--btn-plot-vy-color);
+        }
+
+        .btn-backToPosition {
+            background-color: var(--btn-backToPosition-color);
         }
 
         /* Hover Effect: Brightness Filter */
@@ -485,9 +503,9 @@
             </div>
             <!-- Plot Buttons -->
             <div id="plotButtons">
-                <button id="plotVx" class="control-button btn-play" disabled>vₓ vs t</button>
-                <button id="plotVy" class="control-button btn-play" disabled>vᵧ vs t</button>
-                <button id="backToPosition" class="control-button btn-play" disabled>x-t and y-t</button>
+                <button id="plotVx" class="control-button btn-plot-vx" disabled>vₓ vs t</button>
+                <button id="plotVy" class="control-button btn-plot-vy" disabled>vᵧ vs t</button>
+                <button id="backToPosition" class="control-button btn-backToPosition" disabled>x-t and y-t</button>
             </div>
         </div>
     </div>
@@ -564,6 +582,13 @@
         // New frameRate variable to handle dynamic frame rates
         let frameRate = 30; // Default frame rate
 
+        // Define a fixed grid size in display pixels
+        const gridSizeDisplay = 40; // Reduced from 50px to 40px
+
+        // Define fixed sizes for overlay elements in display pixels
+        const originDotRadiusDisplay = 5; // 5px
+        const axisLineWidthDisplay = 2; // 2px
+
         // Utility functions
         function canvasYToCartesianY(y) {
             return frameCanvas.height - y;
@@ -638,7 +663,8 @@
                 resizeOverlay(); 
                 drawOverlay();
                 drawFrame();
-                chartCanvasContainer.style.display = "flex";
+                chartCanvasContainer.style.display = "flex"; // Show container first
+                plotPosition(); // Then initialize the chart
             }, { once: true });
 
             frameCanvas.style.display = "block";
@@ -773,24 +799,25 @@
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
             ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
 
-            const referenceHeight = 1080; 
-            const scale = frameCanvas.height / referenceHeight;
-            const crossSize = 25 * scale; 
-            const circleRadius = 25 * scale; 
-
             frameData.forEach((point) => {
                 const x = point.x;
                 const y = cartesianYToCanvasY(point.y);
-                drawDataPoint(x, y, crossSize, circleRadius);
+                drawDataPoint(x, y);
             });
         }
 
         // Draw a single data point
-        function drawDataPoint(x, y, crossSize, circleRadius) {
+        function drawDataPoint(x, y) {
+            // Define fixed sizes in display pixels
+            const circleRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth); // Convert to canvas pixels
+
             ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
             ctx.beginPath();
             ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
             ctx.fill();
+
+            // Define fixed cross size in display pixels
+            const crossSize = 10 * (overlayCanvas.width / overlayCanvas.clientWidth); // 10px cross size
 
             ctx.strokeStyle = 'red';
             ctx.lineWidth = 1; 
@@ -825,7 +852,7 @@
                     data: {
                         datasets: [
                             {
-                                label: "x vs t",
+                                label: "x-position",
                                 data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
                                 borderColor: dataPointColors.x,
                                 backgroundColor: dataPointColors.x,
@@ -833,7 +860,7 @@
                                 pointRadius: 4,
                             },
                             {
-                                label: "y vs t",
+                                label: "y-position",
                                 data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
                                 borderColor: dataPointColors.y,
                                 backgroundColor: dataPointColors.y,
@@ -881,7 +908,7 @@
                 // Update existing chart
                 positionChart.data.datasets = [
                     {
-                        label: "x vs t",
+                        label: "x-position",
                         data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
                         borderColor: dataPointColors.x,
                         backgroundColor: dataPointColors.x,
@@ -889,7 +916,7 @@
                         pointRadius: 4,
                     },
                     {
-                        label: "y vs t",
+                        label: "y-position",
                         data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
                         borderColor: dataPointColors.y,
                         backgroundColor: dataPointColors.y,
@@ -945,7 +972,7 @@
 
             positionChart.data.datasets = [
                 {
-                    label: axis === "x" ? "vₓ vs t" : "vᵧ vs t",
+                    label: axis === "x" ? "x-velocity" : "y-velocity",
                     data: smoothedTimes.map((t, i) => ({ x: t, y: smoothedVelocities[i] })),
                     borderColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
                     backgroundColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
@@ -1258,12 +1285,19 @@
             resizeOverlay(); 
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-            const gridSize = 50; 
-            overlayCtx.strokeStyle = "rgba(200, 200, 200, 0.7)";
-            overlayCtx.lineWidth = 1;
+            // Calculate the ratio between canvas internal size and CSS display size
+            const gridStepX = gridSizeDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
+            const gridStepY = gridSizeDisplay * (overlayCanvas.height / overlayCanvas.clientHeight);
+
+            // Add shadow for outline effect
+            overlayCtx.save();
+            overlayCtx.shadowColor = "black";
+            overlayCtx.shadowBlur = 2;
+            overlayCtx.strokeStyle = "white"; // Primary color
+            overlayCtx.lineWidth = 0.5;
 
             // Draw vertical grid lines
-            for (let x = 0; x <= overlayCanvas.width; x += gridSize) {
+            for (let x = 0; x <= overlayCanvas.width; x += gridStepX) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(x, 0);
                 overlayCtx.lineTo(x, overlayCanvas.height);
@@ -1271,12 +1305,14 @@
             }
 
             // Draw horizontal grid lines
-            for (let y = 0; y <= overlayCanvas.height; y += gridSize) {
+            for (let y = 0; y <= overlayCanvas.height; y += gridStepY) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, y);
                 overlayCtx.lineTo(overlayCanvas.width, y);
                 overlayCtx.stroke();
             }
+
+            overlayCtx.restore(); // Remove shadow settings
 
             // Draw axes if origin is set or default
             let ox = originSet ? originPoint.x : 0;
@@ -1286,10 +1322,17 @@
             const originCanvasY = cartesianYToCanvasY(oy);
 
             overlayCtx.save();
-            overlayCtx.lineWidth = 4;
-            overlayCtx.strokeStyle = 'black';
+
+            // Define fixed line width in display pixels
+            const axisLineWidth = axisLineWidthDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
+            overlayCtx.lineWidth = axisLineWidth;
+
+            // Add shadow for outline effect
+            overlayCtx.shadowColor = "black";
+            overlayCtx.shadowBlur = 2;
 
             // X axis
+            overlayCtx.strokeStyle = 'white';
             overlayCtx.beginPath();
             overlayCtx.moveTo(0, originCanvasY);
             overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
@@ -1301,10 +1344,11 @@
             overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
             overlayCtx.stroke();
 
-            // White inner lines
-            overlayCtx.lineWidth = 2;
-            overlayCtx.strokeStyle = 'white';
+            overlayCtx.restore();
 
+            // Draw white inner lines
+            overlayCtx.lineWidth = axisLineWidthDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
+            overlayCtx.strokeStyle = 'white';
             overlayCtx.beginPath();
             overlayCtx.moveTo(0, originCanvasY);
             overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
@@ -1315,39 +1359,27 @@
             overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
             overlayCtx.stroke();
 
-            // Cyan dot at origin
+            // Add origin dot with fixed display size
+            const originDotRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
             overlayCtx.fillStyle = "cyan";
             overlayCtx.beginPath();
-            overlayCtx.arc(originCanvasX, originCanvasY, 5, 0, 2 * Math.PI);
+            overlayCtx.arc(originCanvasX, originCanvasY, originDotRadius, 0, 2 * Math.PI);
             overlayCtx.fill();
 
-            overlayCtx.restore();
-
-            // Draw calibration line if exists
+            // Draw calibration line with outline
             if (calibrationStart && calibrationEnd) {
+                overlayCtx.save();
+                overlayCtx.lineWidth = 2 * (overlayCanvas.width / overlayCanvas.clientWidth);
                 overlayCtx.strokeStyle = "orange";
-                overlayCtx.lineWidth = 2;
-                overlayCtx.setLineDash([5, 5]); 
-                overlayCtx.beginPath();
-                // Calibration line aligns with crosshair by using same coordinate system
-                overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
-                overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
-                overlayCtx.stroke();
-                overlayCtx.setLineDash([]); 
-            }
-        }
-
-        // Plot Calibration Line on Overlay
-        function drawCalibrationLine() {
-            if (calibrationStart && calibrationEnd) {
-                overlayCtx.strokeStyle = "orange";
-                overlayCtx.lineWidth = 2;
+                overlayCtx.shadowColor = "black";
+                overlayCtx.shadowBlur = 2;
                 overlayCtx.setLineDash([5, 5]); 
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
                 overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
                 overlayCtx.stroke();
                 overlayCtx.setLineDash([]); 
+                overlayCtx.restore();
             }
         }
 
