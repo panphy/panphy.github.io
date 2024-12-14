@@ -24,7 +24,7 @@ Welcome to the **Graph Plotting & Curve Fitting** web application! This tool all
 
 - **Graph Visualization:**
   - Interactive plots using Plotly.js.
-  - Customize graph titles and axis labels with LaTeX formatting.
+  - Customize the graph title and axis labels with LaTeX formatting.
 
 ## Getting Started
 
@@ -98,7 +98,7 @@ Welcome to the **Graph Plotting & Curve Fitting** web application! This tool all
   - Use uncertainties to account for measurement errors or variability in your data. Choose between absolute and percentage uncertainties based on your data's nature.
 
 - **LaTeX Formatting:**
-  - Utilize LaTeX syntax in labels and titles for clear and professional-looking mathematical expressions.
+  - Utilize LaTeX syntax in labels and the title for clear and professional-looking mathematical expressions.
 
 ## Troubleshooting
 
