@@ -1129,7 +1129,13 @@
                 yaxis: { title: processLabel(document.getElementById('y-column-name').value || 'y') }
             };
 
-            Plotly.react('plot', traces, layout);
+	    Plotly.react('plot', traces, layout, {
+	        toImageButtonOptions: {
+	            format: 'svg', // Choose your desired format
+	            filename: 'data_plot',
+	            scale: 1 // Adjust scale for higher resolution
+	        }
+	    });
         }
 
         function fitCurve() {
