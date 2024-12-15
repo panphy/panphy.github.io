@@ -239,7 +239,7 @@
             linesCleared += lines;
             linesClearedForSpeedIncrease += lines;
 
-            if (linesClearedForSpeedIncrease >= 3) { // Speed up after every 3 lines cleared
+            if (linesClearedForSpeedIncrease >= 2) { // Speed up after every 3 lines cleared
                 increaseSpeed();
                 linesClearedForSpeedIncrease = 0;
             }
@@ -248,7 +248,7 @@
         }
 
         function increaseSpeed() {
-            dropInterval *= 0.60; // Speed increases by 40%
+            dropInterval *= 0.80; // Speed increases by 20%
             console.log(`Speed increased! New drop interval: ${dropInterval}ms`);
         }
 
