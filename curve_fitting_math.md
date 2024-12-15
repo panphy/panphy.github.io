@@ -1,287 +1,322 @@
-# Fitting Methods Explanation
+# Curve Fitting Algorithms in the App
 
-## Introduction
+This document provides an in-depth explanation of the algorithms employed by the **Graph Plotting & Curve Fitting** application for various curve fitting methods. Understanding these algorithms will help users grasp how the application models data and the underlying computational processes involved.
 
-Curve fitting involves finding a mathematical model that best represents the relationship between variables in your data. The **Graph Plotting & Curve Fitting** application offers various fitting methods, each suitable for different types of data. This document explains how the best fit line or curve is obtained for each fitting method, detailing the mathematical foundations and algorithms used.
+## Table of Contents
 
-## 1. Linear Fit
+1. [Basic Fit Methods](#basic-fit-methods)
+   - [Linear Fit](#linear-fit)
+   - [Polynomial Fit](#polynomial-fit)
+   - [Exponential Fit](#exponential-fit)
+   - [Power Fit](#power-fit)
+2. [Advanced Fit Methods](#advanced-fit-methods)
+   - [Sinusoidal Fit](#sinusoidal-fit)
+   - [Gaussian Fit](#gaussian-fit)
+   - [Lorentzian Fit](#lorentzian-fit)
+3. [Conclusion](#conclusion)
 
-### Model Equation
+---
 
+## Basic Fit Methods
+
+Basic fit methods are foundational techniques used to establish a relationship between two variables. These methods typically involve linear algebra and are computationally efficient, making them suitable for a wide range of applications.
+
+### Linear Fit
+
+**Equation:**
 $$
-y = mx + c
-$$
-
-### Fitting Method
-
-The linear fit aims to find the slope ($m$) and intercept ($c$) that minimize the sum of the squared differences between the observed values and the values predicted by the model. This method is known as the **Least Squares Method**.
-
-### Process
-
-1. **Compute the Means:**
-   - Calculate the mean of the $x$ values ($\overline{x}$) and the mean of the $y$ values ($\overline{y}$).
-
-2. **Calculate the Slope ($m$):**
-   $$
-   m = \frac{\sum_{i=1}^{n} (x_i - \overline{x})(y_i - \overline{y})}{\sum_{i=1}^{n} (x_i - \overline{x})^2}
-   $$
-
-3. **Calculate the Intercept ($c$):**
-   $$
-   c = \overline{y} - m\overline{x}
-   $$
-
-4. **Formulate the Best Fit Line:**
-   - Substitute the calculated $m$ and $c$ into the model equation.
-
-### Initial Parameters
-
-- **Slope ($m$):** Initially estimated based on the general trend of the data.
-- **Intercept ($c$):** Set to the mean of the $y$-values to provide a starting point for optimization.
-
-### Reason for Initial Parameters
-
-Starting with the mean values provides a balanced initial guess, facilitating faster convergence of the fitting algorithm.
-
-## 2. Polynomial Fit
-
-### Model Equation
-
-For a polynomial of degree $n$:
-
-$$
-y = a_nx^n + a_{n-1}x^{n-1} + \dots + a_1x + a_0
+y = m x + c
 $$
 
-### Fitting Method
+**Algorithm Overview:**
 
-The polynomial fit extends the linear model by introducing higher-degree terms. The **Least Squares Method** is used to determine the coefficients ($a_n$ to $a_0$) that minimize the sum of squared residuals.
+The Linear Fit algorithm aims to find the best-fitting straight line through a set of data points by minimizing the sum of the squared vertical distances (residuals) between the data points and the line.
 
-### Process
+**Steps Involved:**
 
-1. **Construct the Vandermonde Matrix:**
-   - For each data point $(x_i, y_i)$, create a row in the matrix with powers of $x_i$ up to degree $n$.
+1. **Data Collection:**
+   - Collect pairs of data points $(x_i, y_i)$.
 
-2. **Apply the Least Squares Method:**
-   - Solve the normal equations:
-     $$
-     \mathbf{A}^T\mathbf{A}\mathbf{a} = \mathbf{A}^T\mathbf{y}
-     $$
-     where $\mathbf{A}$ is the Vandermonde matrix and $\mathbf{a}$ is the vector of coefficients.
+2. **Compute Means:**
+   - Calculate the mean of $(x)$ values: $\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i $.
+   - Calculate the mean of $y$ values: $\bar{y} = \frac{1}{n} \sum_{i=1}^{n} y_i $.
 
-3. **Determine the Coefficients:**
-   - Use matrix operations to solve for $\mathbf{a}$.
-
-4. **Formulate the Best Fit Polynomial:**
-   - Substitute the coefficients into the model equation.
-
-### Initial Parameters
-
-- **Coefficients ($a_n$ to $a_0$):** Initialized to 1 or 0 based on the degree to provide a neutral starting point for optimization.
-
-### Reason for Initial Parameters
-
-Simple initial coefficients help the fitting algorithm adjust iteratively without overcomplicating the model from the outset.
-
-## 3. Exponential Fit
-
-### Model Equation
-
+3. **Calculate Slope $(m)$:**
 $$
-y = A e^{bx} + c
+m = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n} (x_i - \bar{x})^2}
 $$
 
-### Fitting Method
-
-The exponential fit models data that exhibits exponential growth or decay. The **Nonlinear Least Squares Method** is employed to optimize the parameters $A$, $b$, and $c$.
-
-### Process
-
-1. **Define the Residuals:**
-   - For each data point, compute the residual:
-     $$
-     r_i = y_i - (A e^{bx_i} + c)
-     $$
-
-2. **Minimize the Sum of Squared Residuals:**
-   - Adjust $A$, $b$, and $c$ to minimize:
-     $$
-     \text{SSE} = \sum_{i=1}^{n} r_i^2
-     $$
-
-3. **Optimization Algorithm:**
-   - Use iterative algorithms like Gradient Descent or Levenberg-Marquardt to find the optimal parameters.
-
-### Initial Parameters
-
-- **Amplitude ($A$):** Set to 1 as a neutral starting point.
-- **Growth/Decay Rate ($b$):** Initialized to 0.2, representing a moderate rate.
-- **Offset ($c$):** Set to 0 to assume no vertical shift initially.
-
-### Reason for Initial Parameters
-
-These initial values provide a balance between flexibility and convergence speed, allowing the algorithm to adjust based on the data's behavior.
-
-## 4. Power Fit
-
-### Model Equation
-
+4. **Calculate Intercept $(c)$:**
 $$
-y = A x^{b} + c
+c = \bar{y} - m \bar{x}
 $$
 
-### Fitting Method
+5. **Result:**
+   - The equation $ y = m x + c$ represents the best-fitting line.
 
-The power fit models relationships where $y$ scales as a power of $x$. The **Nonlinear Least Squares Method** is used to optimize the parameters $A$, $b$, and $c$.
+**Optimization Technique:**
 
-### Process
+- **Ordinary Least Squares (OLS):** The Linear Fit uses OLS to minimize the residual sum of squares between observed and predicted values.
 
-1. **Define the Residuals:**
-   - For each data point, compute the residual:
-     $$
-     r_i = y_i - (A x_i^{b} + c)
-     $$
+### Polynomial Fit
 
-2. **Minimize the Sum of Squared Residuals:**
-   - Adjust $A$, $b$, and $c$ to minimize:
-     $$
-     \text{SSE} = \sum_{i=1}^{n} r_i^2
-     $$
-
-3. **Optimization Algorithm:**
-   - Use iterative algorithms like Gradient Descent or Levenberg-Marquardt to find the optimal parameters.
-
-### Initial Parameters
-
-- **Coefficient ($A$):** Set to 1 as a starting multiplier.
-- **Exponent ($b$):** Initialized to 1, representing a linear relationship.
-- **Offset ($c$):** Set to 0 assuming no vertical shift.
-
-### Reason for Initial Parameters
-
-Starting with $b=1$ allows the model to naturally adjust to both increasing and decreasing power relationships based on the data.
-
-## 5. Sinusoidal Fit
-
-### Model Equation
-
+**Equation (General Form of Degree $(d)$):**
 $$
-y = A e^{bx} \sin(kx - \phi) + c
+y = a_d x^d + a_{d-1} x^{d-1} + \dots + a_1 x + a_0
 $$
 
-### Fitting Method
+**Algorithm Overview:**
 
-The sinusoidal fit models periodic oscillations, potentially modulated by exponential growth or decay. The **Nonlinear Least Squares Method** is used to optimize the parameters $A$, $b$, $k$, $\phi$, and $c$.
+Polynomial Fit extends the Linear Fit by allowing the relationship between $x$ and $y$ to be modeled as a polynomial of degree $(d)$. This provides more flexibility to fit curved data trends.
 
-### Process
+**Steps Involved:**
 
-1. **Define the Residuals:**
-   - For each data point, compute the residual:
-     $$
-     r_i = y_i - (A e^{bx_i} \sin(kx_i - \phi) + c)
-     $$
+1. **Data Collection:**
+   - Gather data points $(x_i, y_i)$.
 
-2. **Minimize the Sum of Squared Residuals:**
-   - Adjust $A$, $b$, $k$, $\phi$, and $c$ to minimize:
-     $$
-     \text{SSE} = \sum_{i=1}^{n} r_i^2
-     $$
+2. **Construct Design Matrix $(X)$:**
+   - For a polynomial of degree $(d)$, construct a matrix where each row is $[x_i^d, x_i^{d-1}, \dots, x_i, 1]$.
 
-3. **Optimization Algorithm:**
-   - Use iterative algorithms like Gradient Descent or Levenberg-Marquardt to find the optimal parameters.
+3. **Apply Ordinary Least Squares:**
+   - Solve for the coefficient vector $\mathbf{a} = [a_d, a_{d-1}, \dots, a_1, a_0]^T$ using:
+$$
+\mathbf{a} = (X^T X)^{-1} X^T \mathbf{y}
+$$
+where $\mathbf{y}$ is the vector of $y_i$ values.
 
-### Initial Parameters
+4. **Result:**
+   - The polynomial equation represents the best-fitting curve.
 
-- **Amplitude ($A$):** Set to 1 to start with a standard oscillation magnitude.
-- **Exponential Rate ($b$):** Set to 0, assuming no modulation initially.
-- **Angular Frequency ($k$):** Initialized to 1 to represent a basic oscillation frequency.
-- **Phase Shift ($\phi$):** Set to 0, indicating no initial phase offset.
-- **Offset ($c$):** Set to 0, assuming no vertical shift.
+**Optimization Technique:**
 
-### Reason for Initial Parameters
+- **Matrix-Based OLS:** Utilizes linear algebra to solve for the polynomial coefficients that minimize the residual sum of squares.
 
-These values provide a neutral starting point for the fitting algorithm, allowing it to adjust parameters based on the data's oscillatory nature.
+### Exponential Fit
 
-## 6. Gaussian Fit
+**Equation:**
+$$
+y = A e^{b x}
+$$
 
-### Model Equation
+**Algorithm Overview:**
 
+The Exponential Fit models data where the dependent variable $y$ changes exponentially with the independent variable $x$. The algorithm linearizes the data to apply linear regression techniques.
+
+**Steps Involved:**
+
+1. **Data Collection:**
+   - Collect data points $(x_i, y_i)$ with $y_i > 0$.
+
+2. **Linearization:**
+   - Take the natural logarithm of both sides:
+$$
+\ln y = \ln A + b x
+$$
+Letting $Y = \ln y$ and $C = \ln A$, the equation becomes:
+$$
+Y = b x + C
+$$
+
+3. **Apply Linear Fit:**
+   - Perform Linear Fit on $(x_i, Y_i)$ to find slope $b$ and intercept $C$.
+
+4. **Determine Parameters:**
+   - $A = e^C$
+
+5. **Result:**
+   - The equation $y = A e^{b x}$ represents the best-fitting exponential curve.
+
+**Optimization Technique:**
+
+- **Linear Regression on Transformed Data:** The algorithm applies OLS to the linearized data to find the best-fitting parameters.
+
+### Power Fit
+
+**Equation:**
+$$
+y = A x^{b}
+$$
+
+**Algorithm Overview:**
+
+The Power Fit models a multiplicative relationship where $y$ varies as a power of $x$. Similar to the Exponential Fit, it linearizes the data to utilize linear regression.
+
+**Steps Involved:**
+
+1. **Data Collection:**
+   - Gather data points $(x_i, y_i)$ with $x_i > 0$ and $y_i > 0$.
+
+2. **Linearization:**
+   - Take the natural logarithm of both sides:
+$$
+\ln y = \ln A + b \ln x
+$$
+Letting $Y = \ln y$ and $X = \ln x$, the equation becomes:
+$$
+Y = b X + C
+$$
+where $C = \ln A$.
+
+3. **Apply Linear Fit:**
+   - Perform Linear Fit on \((X_i, Y_i)\) to determine slope \(b\) and intercept \(C\).
+
+4. **Determine Parameters:**
+   - $A = e^C$
+
+5. **Result:**
+   - The equation $y = A x^{b}$ represents the best-fitting power curve.
+
+**Optimization Technique:**
+
+- **Linear Regression on Log-Transformed Data:** By transforming the power relationship into a linear form, OLS is applied to estimate the parameters.
+
+---
+
+## Advanced Fit Methods
+
+Advanced fit methods are designed to model more complex data relationships that basic methods cannot accurately capture. These methods often involve iterative optimization techniques such as gradient descent to minimize error functions.
+
+### Sinusoidal Fit
+
+**Equation:**
+$$
+y = A e^{b x} \sin(k x - \phi) + c
+$$
+
+**Algorithm Overview:**
+
+The Sinusoidal Fit combines exponential growth or decay with a sinusoidal oscillation. This method is particularly useful for modeling damped oscillations or wave-like phenomena with underlying trends.
+
+**Steps Involved:**
+
+1. **Data Collection:**
+   - Collect data points $(x_i, y_i)$.
+
+2. **Initialize Parameters:**
+   - Set initial guesses for $A$, $b$, $k$, $\phi$, and $c$.
+
+3. **Define the Error Function:**
+   - Use Mean Squared Error (MSE):
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left( y_i - \left( A e^{b x_i} \sin(k x_i - \phi) + c \right) \right)^2
+$$
+
+4. **Gradient Descent Optimization:**
+   - **Compute Partial Derivatives:**
+     - Calculate the gradient of MSE with respect to each parameter.
+   - **Update Parameters:**
+     - Adjust parameters in the opposite direction of the gradient scaled by the learning rate.
+$$
+\theta_{\text{new}} = \theta_{\text{old}} - \alpha \frac{\partial \text{MSE}}{\partial \theta}
+$$
+where $\theta$ represents each parameter and $\alpha$ is the learning rate.
+   - **Iterate:**
+     - Repeat the process until convergence criteria are met (e.g., minimal change in MSE or maximum iterations reached).
+
+5. **Convergence Check:**
+   - If the change in MSE between iterations is below a predefined tolerance, terminate the algorithm.
+
+6. **Result:**
+   - The optimized parameters $A$, $b$, $k$, $\phi$, and $c$ define the best-fitting sinusoidal curve.
+
+**Optimization Technique:**
+
+- **Gradient Descent:** An iterative optimization algorithm that updates parameters to minimize the error function by moving in the direction opposite to the gradient.
+
+### Gaussian Fit
+
+**Equation:**
 $$
 y = A e^{-\frac{(x - \mu)^2}{2 \sigma^2}} + c
 $$
 
-### Fitting Method
+**Algorithm Overview:**
 
-The Gaussian fit models data that follows a bell-shaped distribution. The **Nonlinear Least Squares Method** is used to optimize the parameters $A$, $\mu$, $\sigma$, and $c$.
+The Gaussian Fit models data using a Gaussian (bell-shaped) function, which is ideal for representing single-peaked data distributions. This method is widely used in fields like statistics, spectroscopy, and signal processing.
 
-### Process
+**Steps Involved:**
 
-1. **Define the Residuals:**
-   - For each data point, compute the residual:
-     $$
-     r_i = y_i - \left( A e^{-\frac{(x_i - \mu)^2}{2 \sigma^2}} + c \right)
-     $$
+1. **Data Collection:**
+   - Gather data points $(x_i, y_i)$.
 
-2. **Minimize the Sum of Squared Residuals:**
-   - Adjust $A$, $\mu$, $\sigma$, and $c$ to minimize:
-     $$
-     \text{SSE} = \sum_{i=1}^{n} r_i^2
-     $$
+2. **Initialize Parameters:**
+   - Set initial guesses for $A$, $\mu$, $\sigma$, and $c$.
 
-3. **Optimization Algorithm:**
-   - Use iterative algorithms like Gradient Descent or Levenberg-Marquardt to find the optimal parameters.
+3. **Define the Error Function:**
+   - Use Mean Squared Error (MSE):
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left( y_i - \left( A e^{-\frac{(x_i - \mu)^2}{2 \sigma^2}} + c \right) \right)^2
+$$
 
-### Initial Parameters
+4. **Gradient Descent Optimization:**
+   - **Compute Partial Derivatives:**
+     - Calculate gradients of MSE with respect to $A$, $\mu$, $\sigma$, and $c$.
+   - **Update Parameters:**
+     - Adjust parameters using the gradients and learning rate.
+   - **Iterate:**
+     - Continue until the algorithm converges based on tolerance criteria.
 
-- **Amplitude ($A$):** Set to the maximum $y$-value in the data to represent the peak height.
-- **Mean ($\mu$):** Initialized to the mean of the $x$-values, positioning the center of the peak.
-- **Standard Deviation ($\sigma$):** Set to the standard deviation of the $x$-values to estimate the peak's width.
-- **Offset ($c$):** Set to 0, assuming no vertical shift initially.
+5. **Convergence Check:**
+   - Terminate when the change in MSE is below a specified threshold or when the maximum number of iterations is reached.
 
-### Reason for Initial Parameters
+6. **Result:**
+   - The optimized parameters $A$, $\mu$, $\sigma$, and $c$ define the best-fitting Gaussian curve.
 
-These initial settings are derived from the data's statistical properties, providing a strong foundation for accurate fitting.
+**Optimization Technique:**
 
-## 7. Lorentzian Fit
+- **Gradient Descent:** Similar to the Sinusoidal Fit, it iteratively updates parameters to minimize the MSE by following the gradient.
 
-### Model Equation
+### Lorentzian Fit
 
+**Equation:**
 $$
 y = A \frac{\gamma^2}{(x - x_0)^2 + \gamma^2} + c
 $$
 
-### Fitting Method
+**Algorithm Overview:**
 
-The Lorentzian fit models data following a Cauchy distribution, commonly used in spectroscopy and resonance phenomena. The **Nonlinear Least Squares Method** is used to optimize the parameters $A$, $x_0$, $\gamma$, and $c$.
+The Lorentzian Fit models data using a Lorentzian function, which is suitable for representing resonance phenomena with sharp peaks. It is commonly used in spectroscopy and physics to describe spectral lines and resonant frequencies.
 
-### Process
+**Steps Involved:**
 
-1. **Define the Residuals:**
-   - For each data point, compute the residual:
-     $$
-     r_i = y_i - \left( A \frac{\gamma^2}{(x_i - x_0)^2 + \gamma^2} + c \right)
-     $$
+1. **Data Collection:**
+   - Collect data points $(x_i, y_i)$.
 
-2. **Minimize the Sum of Squared Residuals:**
-   - Adjust $A$, $x_0$, $\gamma$, and $c$ to minimize:
-     $$
-     \text{SSE} = \sum_{i=1}^{n} r_i^2
-     $$
+2. **Initialize Parameters:**
+   - Set initial guesses for $A$, $x_0$, $\gamma$, and $c$.
 
-3. **Optimization Algorithm:**
-   - Use iterative algorithms like Gradient Descent or Levenberg-Marquardt to find the optimal parameters.
+3. **Define the Error Function:**
+   - Use Mean Squared Error (MSE):
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} \left( y_i - \left( A \frac{\gamma^2}{(x_i - x_0)^2 + \gamma^2} + c \right) \right)^2
+$$
 
-### Initial Parameters
+4. **Gradient Descent Optimization:**
+   - **Compute Partial Derivatives:**
+     - Calculate gradients of MSE with respect to $A$, $x_0$, $\gamma$, and $c$.
+   - **Update Parameters:**
+     - Adjust parameters based on the gradients and learning rate.
+   - **Iterate:**
+     - Repeat until convergence is achieved according to the tolerance criteria.
 
-- **Amplitude ($A$):** Set to the maximum $y$-value in the data.
-- **Center ($x_0$):** Initialized to the mean of the $x$-values.
-- **Half-Width at Half-Maximum ($\gamma$):** Calculated based on the Full Width at Half Maximum (FWHM) of the data.
-- **Offset ($c$):** Set to 0, assuming no vertical shift.
+5. **Convergence Check:**
+   - Stop the algorithm when the improvement in MSE is negligible or when the maximum number of iterations is reached.
 
-### Reason for Initial Parameters
+6. **Result:**
+   - The optimized parameters $A$, $x_0$, $\gamma$, and $c$ define the best-fitting Lorentzian curve.
 
-Using data-derived statistics ensures that the Lorentzian fit aligns closely with the data's central tendency and spread from the outset.
+**Optimization Technique:**
+
+- **Gradient Descent:** Utilizes the gradients of the MSE with respect to each parameter to iteratively refine the fit.
+
+---
 
 ## Conclusion
 
-Understanding the fitting models and their optimization processes is essential for effective data analysis. By selecting the appropriate model and providing informed initial parameters, you can achieve accurate and meaningful fits that enhance your data interpretation.
+The **Graph Plotting & Curve Fitting** application leverages a combination of linear algebra and iterative optimization algorithms to provide versatile and accurate curve fitting capabilities. 
+
+- **Basic Fit Methods** such as Linear, Polynomial, Exponential, and Power fits primarily rely on **Ordinary Least Squares (OLS)** and **linear regression** techniques, offering computational efficiency and simplicity for a wide range of data trends.
+
+- **Advanced Fit Methods** including Sinusoidal, Gaussian, and Lorentzian fits employ **Gradient Descent**, an iterative optimization algorithm, to handle more complex and non-linear data relationships. These methods allow for precise modeling of phenomena that exhibit oscillatory behavior, single-peaked distributions, or sharp resonance characteristics.
+
+Understanding the underlying algorithms enhances the user's ability to select the appropriate fit method based on the nature of their data and the specific requirements of their analysis.
