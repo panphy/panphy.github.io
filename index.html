@@ -1,135 +1,121 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PanPhy Projects Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* General body styling */
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1a1a1a;
-            color: #ccc;
+            background: #f4f4f9;
+            color: #333;
         }
+        /* Header styling */
         header {
-            background-color: #2c3e50;
-            color: #f4f4f9;
-            padding: 2rem 0;
+            background-color: #34495e;
+            color: #fff;
+            padding: 1rem 0;
             text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         header h1 {
             margin: 0;
-            font-size: 2.8rem;
-            letter-spacing: 1px;
+            font-size: 2.5rem;
         }
         header p {
-            margin: 0.5rem 0 0;
-            font-size: 1.2rem;
-        }
-        .warning {
-            background-color: #444;
-            color: #ffcc00;
-            padding: 0.8rem;
-            text-align: center;
-            border: 1px solid #666;
             font-size: 1rem;
-            line-height: 1.4;
-            margin: 1rem auto;
-            border-radius: 8px;
-            max-width: 1200px;
+            margin: 0.5rem 0;
         }
-        .project-areas {
+        /* Navigation bar styling */
+        nav {
+            background-color: #2c3e50;
             display: flex;
-            justify-content: space-between;
-            gap: 1.5rem;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            max-width: 1200px;
+            justify-content: center;
+            padding: 0.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .area {
-            flex: 1;
-            background: #2e2e2e;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .area:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
-        }
-        .area h2 {
-            margin-bottom: 1rem;
-            color: #f4f4f9;
-            font-size: 1.5rem;
-        }
-        .project-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .project-link {
+        nav a {
+            color: #fff;
             text-decoration: none;
-        }
-        .button {
-            display: block;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
+            margin: 0 1rem;
             font-size: 1rem;
             font-weight: bold;
-            transition: transform 0.2s ease, background-color 0.3s ease;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            transition: color 0.3s;
         }
-        .button:hover {
-            transform: translateY(-3px);
+        nav a:hover {
+            color: #ffcc00;
         }
-        .button-apps {
-            background-color: #5a6f88; /* Muted blue */
-        }
-        .button-apps:hover {
-            background-color: #4c5c70; /* Slightly darker muted blue */
-        }
-        .button-simulations {
-            background-color: #4d7b57; /* Muted green */
-        }
-        .button-simulations:hover {
-            background-color: #406349; /* Slightly darker muted green */
-        }
-        .button-games {
-            background-color: #a66a3c; /* Muted orange-brown */
-        }
-        .button-games:hover {
-            background-color: #8b5630; /* Slightly darker muted orange-brown */
-        }
-        .about-area {
-            margin: 2rem auto;
+        /* Section styling */
+        .section {
             max-width: 1200px;
-            padding: 1.5rem;
-            background: #2e2e2e;
-            border-radius: 12px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-            text-align: center;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
-        .about-area h2 {
-            color: #f4f4f9;
-            font-size: 1.5rem;
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            border-bottom: 2px solid #ffcc00;
+            display: inline-block;
         }
-        .about-area p {
-            margin: 1rem 0;
-            line-height: 1.6;
+        /* Grid layout for projects */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        /* Individual card styling */
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .card h3 {
+            font-size: 1.4rem;
+            margin: 1rem;
+            color: #34495e;
+        }
+        .card p {
             font-size: 1rem;
-            color: #ccc;
+            margin: 0 1rem 1rem;
+            color: #666;
         }
-        footer {
+        .card a {
+            display: block;
             text-align: center;
-            padding: 1rem;
-            background-color: #2c3e50;
-            color: #bbb;
+            background: #ffcc00;
+            color: #fff;
+            text-decoration: none;
+            padding: 0.8rem;
+            font-weight: bold;
+            border-radius: 0 0 8px 8px;
+            transition: background 0.3s;
+        }
+        .card a:hover {
+            background: #e6b800;
+        }
+        /* Footer styling */
+        footer {
+            background: #2c3e50;
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
             margin-top: 2rem;
         }
     </style>
@@ -137,77 +123,89 @@
 <body>
     <header>
         <h1>PanPhy Projects Hub</h1>
-        <p>Explore my projects and interactive tools!</p>
+        <p>Your portal to the tools, simulations, and games I made with AI.</p>
     </header>
+    <nav>
+        <a href="#tools">Tools</a>
+        <a href="#simulations">Simulations</a>
+        <a href="#games">Games</a>
+        <a href="#about">About</a>
+    </nav>
 
-    <!-- Warning Section -->
-    <div class="warning">
-        <p>Note: These projects are optimized for desktop devices. Some features may not function properly on tablets or mobile devices.</p>
+    <!-- Tools Section -->
+    <div class="section" id="tools">
+        <h2>Tools</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Markdown + LaTeX Editor</h3>
+                <p>A text editor for creating documents with Markdown and LaTeX.</p>
+                <a href="/markdown_editor.html">Explore</a>
+            </div>
+            <div class="card">
+                <h3>Graph Plotting + Curve Fitting</h3>
+                <p>Visualize data with curve fitting tools.</p>
+                <a href="/curve_fitting.html">Explore</a>
+            </div>
+            <div class="card">
+                <h3>Motion Tracker</h3>
+                <p>Analyze and track motion with ease.</p>
+                <a href="/motion_tracker">Explore</a>
+            </div>
+            <div class="card">
+                <h3>Exam Timer</h3>
+                <p>Automatically add extra time for those who need it.</p>
+                <a href="/timer">Explore</a>
+            </div>
+        </div>
     </div>
 
-    <div class="project-areas">
-        <!-- Apps Column -->
-        <div class="area">
-            <h2>Tools</h2>
-            <div class="project-container">
-                <a href="/markdown_editor.html" class="project-link">
-                    <div class="button button-apps">Markdown + LaTeX Editor</div>
-                </a>
-                <a href="/curve_fitting.html" class="project-link">
-                    <div class="button button-apps">Graph Plotting + Curve Fitting</div>
-                </a>
-                <a href="/motion_tracker" class="project-link">
-                    <div class="button button-apps">Motion Tracker</div>
-                </a>
-                <a href="/timer" class="project-link">
-                    <div class="button button-apps">Exam Timer</div>
-                </a>
+    <!-- Simulations Section -->
+    <div class="section" id="simulations">
+        <h2>Simulations</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>2D Ising Model</h3>
+                <p>Simulate and visualize the 2D Ising model.</p>
+                <a href="/Ising_model.html">Explore</a>
+            </div>
+            <div class="card">
+                <h3>Standing Wave</h3>
+                <p>Visualize standing wave with different boundary conditions.</p>
+                <a href="/standing_wave.html">Explore</a>
+            </div>
+            <div class="card">
+                <h3>Brownian Motion</h3>
+                <p>Learn about Brownian motion with this interactive simulation.</p>
+                <a href="/brownian_motion.html">Explore</a>
             </div>
         </div>
+    </div>
 
-        <!-- Simulations Column -->
-        <div class="area">
-            <h2>Simulations</h2>
-            <div class="project-container">
-                <a href="/Ising_model.html" class="project-link">
-                    <div class="button button-simulations">2D Ising Model</div>
-                </a>
-                <a href="/standing_wave.html" class="project-link">
-                    <div class="button button-simulations">Standing Wave</div>
-                </a>
-                <a href="/brownian_motion.html" class="project-link">
-                    <div class="button button-simulations">Brownian Motion</div>
-                </a>
+    <!-- Games Section -->
+    <div class="section" id="games">
+        <h2>Games</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Dodge the Dots</h3>
+                <p>Test your reflexes in this fun and challenging game.</p>
+                <a href="/dodge_game.html">Play</a>
             </div>
-        </div>
-
-        <!-- Games Column -->
-        <div class="area">
-            <h2>Games</h2>
-            <div class="project-container">
-                <a href="/dodge_game.html" class="project-link">
-                    <div class="button button-games">Dodge the Dots</div>
-                </a>
-                <a href="/Tetris.html" class="project-link">
-                    <div class="button button-games">Tetris</div>
-                </a>
+            <div class="card">
+                <h3>Tetris</h3>
+                <p>Enjoy the classic Tetris game.</p>
+                <a href="/Tetris.html">Play</a>
             </div>
         </div>
     </div>
 
     <!-- About Section -->
-    <div class="about-area">
+    <div class="section" id="about">
         <h2>About</h2>
-        <p>
-            Welcome to the hub for all my web applications, physics simulations, and games! 
-            Each project here is the result of a collaborative effort between myself and ChatGPT. 
-            These tools and simulations are designed to provide interactive and educational experiences.
-            Click on any project above to explore and enjoy!
-        </p>
+        <p>Welcome to the PanPhy Projects Hub. Each project here is the result of a collaborative effort between myself and ChatGPT. These tools and simulations are designed to provide interactive and educational experiences. Click on any project above to explore and enjoy!</p>
     </div>
 
     <footer>
-        <p>&copy; 2024 by Pan Leung</p>
+        <p>&copy; 2024 PanPhy Projects Hub | <a href="panphyhub@icloud.com" style="color: #ffcc00;">Contact Me</a></p>
     </footer>
 </body>
 </html>
