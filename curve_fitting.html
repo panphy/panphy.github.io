@@ -1288,14 +1288,14 @@
             const FWHM = calculateFWHM(x, y, maxY);
 
             if (method === 'Gaussian') {
-                document.getElementById('initial-A-gaussian').value = maxY.toFixed(2);
-                document.getElementById('initial-mu').value = meanX.toFixed(2);
-                document.getElementById('initial-sigma').value = stdX.toFixed(2);
+                document.getElementById('initial-A-gaussian').value = maxY.toFixed(3);
+                document.getElementById('initial-mu').value = meanX.toFixed(3);
+                document.getElementById('initial-sigma').value = stdX.toFixed(3);
                 document.getElementById('initial-c-gaussian').value = '0';
             } else if (method === 'Lorentzian') {
-                document.getElementById('initial-A-lorentzian').value = maxY.toFixed(2);
-                document.getElementById('initial-x0').value = meanX.toFixed(2);
-                document.getElementById('initial-gamma').value = FWHM.toFixed(2);
+                document.getElementById('initial-A-lorentzian').value = maxY.toFixed(3);
+                document.getElementById('initial-x0').value = meanX.toFixed(3);
+                document.getElementById('initial-gamma').value = FWHM.toFixed(3);
                 document.getElementById('initial-c-lorentzian').value = '0';
             } else if (method === 'Sinusoidal') {
                 // Initial parameters are set in the HTML with default values
@@ -1698,9 +1698,9 @@
 
                 const fitFunction = xi => slope * xi + intercept;
 
-                let equation = `y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}`;
+                let equation = `y = ${slope.toFixed(3)}x + ${intercept.toFixed(3)}`;
                 if (intercept < 0) {
-                    equation = `y = ${slope.toFixed(2)}x - ${Math.abs(intercept).toFixed(2)}`;
+                    equation = `y = ${slope.toFixed(3)}x - ${Math.abs(intercept).toFixed(3)}`;
                 }
 
                 updateResults(equation, x, y, fitFunction);
@@ -1724,7 +1724,7 @@
                     const power = degree - i;
                     if (c === 0) return;
 
-                    const absC = Math.abs(c).toFixed(2);
+                    const absC = Math.abs(c).toFixed(3);
                     const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
 
                     let term = '';
@@ -1771,7 +1771,7 @@
                 const fitFunction = xi => A * Math.exp(b * xi);
 
                 // Equation string
-                let equation = `y = ${A.toFixed(2)} e^{${b.toFixed(2)}x}`;
+                let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x}`;
 
                 updateResults(equation, x, validData.map(p => p.y), fitFunction);
                 plotGraph(xFit, yFit);
@@ -1806,7 +1806,7 @@
                 const fitFunction = xi => A * Math.pow(xi, b);
 
                 // Equation string
-                let equation = `y = ${A.toFixed(2)} x^{${b.toFixed(2)}}`;
+                let equation = `y = ${A.toFixed(3)} x^{${b.toFixed(3)}}`;
 
                 updateResults(equation, validData.map(p => p.x), validData.map(p => p.y), fitFunction);
                 plotGraph(xFitOriginal, yFit);
@@ -1886,17 +1886,17 @@
 
                 const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
 
-                let equation = `y = ${params.A.toFixed(2)} e^{${params.b.toFixed(2)}x}\\sin(${params.k.toFixed(2)}x`;
+                let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x}\\sin(${params.k.toFixed(3)}x`;
                 if (params.phi > 0) {
-                    equation += ` - ${params.phi.toFixed(2)}`;
+                    equation += ` - ${params.phi.toFixed(3)}`;
                 } else if (params.phi < 0) {
-                    equation += ` + ${Math.abs(params.phi).toFixed(2)}`;
+                    equation += ` + ${Math.abs(params.phi).toFixed(3)}`;
                 }
                 equation += `)`;
                 if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(2)}`;
+                    equation += ` + ${params.c.toFixed(3)}`;
                 } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
                 }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
@@ -1972,11 +1972,11 @@
 
                 const fitFunction = xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c;
 
-                let equation = `y = ${params.A.toFixed(2)} e^{-\\frac{(x - ${params.mu.toFixed(2)})^2}{2 (${params.sigma.toFixed(2)})^2}}`;
+                let equation = `y = ${params.A.toFixed(3)} e^{-\\frac{(x - ${params.mu.toFixed(3)})^2}{2 (${params.sigma.toFixed(3)})^2}}`;
                 if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(2)}`;
+                    equation += ` + ${params.c.toFixed(3)}`;
                 } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
                 }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
@@ -2053,11 +2053,11 @@
 
                 const fitFunction = xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c;
 
-                let equation = `y = ${params.A.toFixed(2)} \\frac{(${params.gamma.toFixed(2)})^2}{(x - ${params.x0.toFixed(2)})^2 + (${params.gamma.toFixed(2)})^2}`;
+                let equation = `y = ${params.A.toFixed(3)} \\frac{(${params.gamma.toFixed(3)})^2}{(x - ${params.x0.toFixed(3)})^2 + (${params.gamma.toFixed(3)})^2}`;
                 if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(2)}`;
+                    equation += ` + ${params.c.toFixed(3)}`;
                 } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(2)}`;
+                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
                 }
 
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
