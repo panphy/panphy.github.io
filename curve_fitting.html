@@ -40,7 +40,7 @@
         }
 
         .banner-left {
-            width: 120px; /* Adjust to match the combined width of banner-buttons */
+            width: 120px; /* Spacer for centering */
         }
 
         .banner-title {
@@ -529,7 +529,7 @@
 </head>
 <body>
     <div class="banner">
-        <div class="banner-left"></div> <!-- Added spacer div for centering -->
+        <div class="banner-left"></div> <!-- Spacer for centering -->
         <div class="banner-title">Graph Plotting & Curve Fitting</div>
         <div class="banner-buttons">
             <a href="/curve_fitting_manual.html" class="banner-button">Manual</a>
@@ -638,6 +638,8 @@
                         <option value="Polynomial-2">Polynomial (2nd Degree)</option>
                         <option value="Polynomial-3">Polynomial (3rd Degree)</option>
                         <option value="Polynomial-4">Polynomial (4th Degree)</option>
+                        <option value="Exponential">Exponential</option>
+                        <option value="Power">Power</option>
                     </select>
                     <div id="basic-fit-equation" class="general-equation">
                         \( y = mx + c \)
@@ -648,51 +650,17 @@
                 <div id="AdvancedFit" class="tab-content">
                     <label for="advanced-fit-method">Advanced Fit Method:</label>
                     <select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
-                        <option value="Exponential">Exponential</option>
-                        <option value="Power">Power</option>
                         <option value="Sinusoidal">Sinusoidal</option>
                         <option value="Gaussian">Gaussian</option>
                         <option value="Lorentzian">Lorentzian</option>
                     </select>
                     <div id="advanced-fit-general-equation" class="general-equation">
-                        \( y = A e^{bx} + c \)
+                        \( y = A e^{bx} \sin(kx - \phi) + c \)
                     </div>
                     <p class="table-prompt">Enter initial fitting parameters below.</p><br>
                     
-                    <!-- Exponential Parameters -->
-                    <div id="Exponential-parameters" class="parameter-section">
-                        <div class="advanced-fit-item">
-                            <label for="initial-A-exponential">A:</label>
-                            <input type="number" id="initial-A-exponential" value="1" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-b-exponential">b:</label>
-                            <input type="number" id="initial-b-exponential" value="0.2" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-c-exponential">c:</label>
-                            <input type="number" id="initial-c-exponential" value="0" step="any">
-                        </div>
-                    </div>
-
-                    <!-- Power Parameters -->
-                    <div id="Power-parameters" class="parameter-section">
-                        <div class="advanced-fit-item">
-                            <label for="initial-A-power">A:</label>
-                            <input type="number" id="initial-A-power" value="1" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-b-power">b:</label>
-                            <input type="number" id="initial-b-power" value="1" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-c-power">c:</label>
-                            <input type="number" id="initial-c-power" value="0" step="any">
-                        </div>
-                    </div>
-
                     <!-- Sinusoidal Parameters -->
-                    <div id="Sinusoidal-parameters" class="parameter-section">
+                    <div id="Sinusoidal-parameters" class="parameter-section active">
                         <div class="advanced-fit-item">
                             <label for="initial-A">A:</label>
                             <input type="number" id="initial-A" value="1" step="any">
@@ -1083,7 +1051,7 @@
 
         function renderLatex(elementId, latexString) {
             const element = document.querySelector(elementId);
-            if (!element) return; // Safeguard
+            if (!element) return;
             element.innerHTML = `\\(${latexString}\\)`;
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
         }
@@ -1120,7 +1088,6 @@
             if (tabName === 'BasicFit') {
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('basic-fit-equation')]);
             } else if (tabName === 'AdvancedFit') {
-                // Trigger changeAdvancedFitMethod to display parameter boxes
                 changeAdvancedFitMethod();
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('advanced-fit-general-equation')]);
             }
@@ -1181,9 +1148,9 @@
 
             Plotly.react('plot', traces, layout, {
                 toImageButtonOptions: {
-                    format: 'svg', // Choose your desired format
+                    format: 'svg',
                     filename: 'data_plot',
-                    scale: 1 // Adjust scale for higher resolution
+                    scale: 1
                 }
             });
         }
@@ -1194,17 +1161,18 @@
                 return;
             }
 
-            const x = rawData.map(point => point.x);
-            const y = rawData.map(point => point.y);
             const fitMethod = document.getElementById('fit-method').value;
 
             if (fitMethod === 'Linear') {
-                performLinearFit(x, y);
+                performLinearFit(rawData.map(p => p.x), rawData.map(p => p.y));
             } else if (fitMethod.startsWith('Polynomial')) {
                 const degree = parseInt(fitMethod.split('-')[1]);
-                performPolynomialFit(x, y, degree);
+                performPolynomialFit(rawData.map(p => p.x), rawData.map(p => p.y), degree);
+            } else if (fitMethod === 'Exponential') {
+                performExponentialFit();
+            } else if (fitMethod === 'Power') {
+                performPowerFit();
             }
-            // Exponential and Power are handled in Advanced Fit
         }
 
         function updateBasicFitEquation() {
@@ -1220,6 +1188,10 @@
                     terms.push(`a_${i}x^{${i}}`);
                 }
                 equation = 'y = ' + terms.join(' + ');
+            } else if (fitMethod === 'Exponential') {
+                equation = 'y = A e^{bx}';
+            } else if (fitMethod === 'Power') {
+                equation = 'y = A x^{b}';
             }
 
             const equationElement = document.getElementById('basic-fit-equation');
@@ -1231,7 +1203,7 @@
 
         function changeAdvancedFitMethod() {
             const selectedMethod = document.getElementById('advanced-fit-method').value;
-            const methods = ['Exponential', 'Power', 'Sinusoidal', 'Gaussian', 'Lorentzian'];
+            const methods = ['Sinusoidal', 'Gaussian', 'Lorentzian'];
 
             methods.forEach(method => {
                 const section = document.getElementById(`${method}-parameters`);
@@ -1254,10 +1226,6 @@
                 equation = 'y = A e^{-\\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
             } else if (selectedMethod === 'Lorentzian') {
                 equation = 'y = A \\frac{\\gamma^2}{(x - x_0)^2 + \\gamma^2} + c';
-            } else if (selectedMethod === 'Exponential') {
-                equation = 'y = A e^{bx} + c';
-            } else if (selectedMethod === 'Power') {
-                equation = 'y = A x^{b} + c';
             }
 
             const equationElement = document.getElementById('advanced-fit-general-equation');
@@ -1278,7 +1246,6 @@
             // Find left crossing
             for (let i = 1; i < sortedData.length; i++) {
                 if (sortedData[i - 1].y < halfMax && sortedData[i].y >= halfMax) {
-                    // Linear interpolation
                     const x1 = sortedData[i - 1].x;
                     const y1 = sortedData[i - 1].y;
                     const x2 = sortedData[i].x;
@@ -1291,7 +1258,6 @@
             // Find right crossing
             for (let i = sortedData.length - 1; i > 0; i--) {
                 if (sortedData[i - 1].y < halfMax && sortedData[i].y >= halfMax) {
-                    // Linear interpolation
                     const x1 = sortedData[i - 1].x;
                     const y1 = sortedData[i - 1].y;
                     const x2 = sortedData[i].x;
@@ -1304,7 +1270,6 @@
             if (left !== null && right !== null && right > left) {
                 return right - left;
             } else {
-                // Fallback to range x /4
                 const minX = Math.min(...x);
                 const maxX = Math.max(...x);
                 return (maxX - minX) / 4;
@@ -1320,7 +1285,6 @@
             const meanX = x.reduce((sum, val) => sum + val, 0) / x.length;
             const stdX = Math.sqrt(x.reduce((sum, val) => sum + Math.pow(val - meanX, 2), 0) / x.length);
             const maxY = Math.max(...y);
-            const rangeX = Math.max(...x) - Math.min(...x);
             const FWHM = calculateFWHM(x, y, maxY);
 
             if (method === 'Gaussian') {
@@ -1333,6 +1297,8 @@
                 document.getElementById('initial-x0').value = meanX.toFixed(2);
                 document.getElementById('initial-gamma').value = FWHM.toFixed(2);
                 document.getElementById('initial-c-lorentzian').value = '0';
+            } else if (method === 'Sinusoidal') {
+                // Initial parameters are set in the HTML with default values
             }
         }
 
@@ -1382,16 +1348,8 @@
                     rSquaredContainer.style.display = 'block';
                 }
 
-                MathJax.Hub.Queue([
-                    "Typeset",
-                    MathJax.Hub,
-                    fitEquationElement
-                ]);
-                MathJax.Hub.Queue([
-                    "Typeset",
-                    MathJax.Hub,
-                    rSquaredContainer
-                ]);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, fitEquationElement]);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, rSquaredContainer]);
             } catch (error) {
                 console.error('Error updating results:', error);
             }
@@ -1462,52 +1420,41 @@
             changeAdvancedFitMethod();
         };
 
-        // Helper function to count decimal places in absolute uncertainty
         function countDecimalPlaces(numStr) {
             if (!numStr.includes('.')) return 0;
             return numStr.length - numStr.indexOf('.') - 1;
         }
 
-        // Convert to significant figures
-        // Updated toSigFigs function to preserve trailing zeros
         function toSigFigs(num, sigFigs) {
             return num.toPrecision(sigFigs);
         }
 
         function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
             if (!errorEnabled) {
-                // No uncertainty toggled for this axis => return raw input
                 return valueStr;
             }
 
-            // If uncertainty is toggled but no valid uncertainty provided
             if (isNaN(rowErr)) return valueStr;
 
             if (errorType === 'absolute') {
-                // Absolute uncertainty: match decimal places to uncertainty's decimal places
                 const dp = countDecimalPlaces(errorStr);
                 return val.toFixed(dp);
             } else if (errorType === 'percentage') {
-                // Percentage uncertainty
                 const perc = parseFloat(errorStr);
-                if (isNaN(perc) || rowVal === 0) {
-                    // If can't parse percentage or val=0, fallback to raw input
+                if (isNaN(perc)) {
                     return valueStr;
                 }
 
-                // If percentage ≤ 10%, 3 s.f. else 2 s.f.
                 const sigFigs = (perc <= 10) ? 3 : 2;
                 const sfVal = toSigFigs(val, sigFigs);
-                return sfVal; // Return as string to preserve trailing zeros
+                return sfVal;
             } else {
-                // Fallback to raw input
                 return valueStr;
             }
         }
 
         function exportPlainText() {
             try {
-                // Retrieve column headers
                 const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
                 const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
 
@@ -1517,7 +1464,6 @@
                 const table = document.getElementById('data-table');
                 const rows = table.querySelectorAll('tr');
 
-                // Build headers with LaTeX formatting
                 let headers = [`$${xHeader}$`, `$${yHeader}$`];
                 if (xErrorEnabled) {
                     const xErrorType = document.getElementById('x-error-type').value;
@@ -1525,6 +1471,7 @@
                     if (xErrorType === 'percentage') xUncHeading += ' (%)';
                     headers.push(xUncHeading);
                 }
+
                 if (yErrorEnabled) {
                     const yErrorType = document.getElementById('y-error-type').value;
                     let yUncHeading = `$\\pm \\Delta ${formatLabelForLatex(yHeader)}$`;
@@ -1532,20 +1479,17 @@
                     headers.push(yUncHeading);
                 }
 
-                // Start building markdown with headers
                 let markdown = `| ${headers.join(' | ')} |\n`;
-                // Use ':---:' for center alignment
                 markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
 
-                // Iterate through data rows
-                for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
-                    if (!row) continue; // Safeguard
+                    if (!row) continue;
 
                     const xInputElem = row.querySelector('.x-input');
                     const yInputElem = row.querySelector('.y-input');
 
-                    if (!xInputElem || !yInputElem) continue; // Safeguard
+                    if (!xInputElem || !yInputElem) continue;
 
                     const xValStr = xInputElem.value.trim();
                     const yValStr = yInputElem.value.trim();
@@ -1570,7 +1514,6 @@
                     const yErrorType = document.getElementById('y-error-type').value;
 
                     let rowData = [];
-                    // Format x according to rules
                     let xFormatted = xValStr;
                     if (!isNaN(xVal)) {
                         xFormatted = formatDataForExport(
@@ -1578,7 +1521,6 @@
                         );
                     }
 
-                    // Format y according to rules
                     let yFormatted = yValStr;
                     if (!isNaN(yVal)) {
                         yFormatted = formatDataForExport(
@@ -1600,7 +1542,6 @@
                     markdown += `| ${rowData.join(' | ')} |\n`;
                 }
 
-                // Create a Blob from the markdown string
                 const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
@@ -1739,11 +1680,7 @@
 
             const fitMethod = document.getElementById('advanced-fit-method').value;
 
-            if (fitMethod === 'Exponential') {
-                performExponentialFitAdvanced();
-            } else if (fitMethod === 'Power') {
-                performPowerFitAdvanced();
-            } else if (fitMethod === 'Sinusoidal') {
+            if (fitMethod === 'Sinusoidal') {
                 performSinusoidalFit();
             } else if (fitMethod === 'Gaussian') {
                 performGaussianFit();
@@ -1761,11 +1698,9 @@
 
                 const fitFunction = xi => slope * xi + intercept;
 
-                let equation = `y = ${slope.toFixed(2)}x`;
-                if (intercept >= 0) {
-                    equation += ` + ${intercept.toFixed(2)}`;
-                } else {
-                    equation += ` - ${Math.abs(intercept).toFixed(2)}`;
+                let equation = `y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}`;
+                if (intercept < 0) {
+                    equation = `y = ${slope.toFixed(2)}x - ${Math.abs(intercept).toFixed(2)}`;
                 }
 
                 updateResults(equation, x, y, fitFunction);
@@ -1812,73 +1747,33 @@
             }
         }
 
-        function performExponentialFitAdvanced() {
+        function performExponentialFit() {
             try {
-                // Retrieve initial parameters from Advanced Fit section
-                let A = parseFloat(document.getElementById('initial-A-exponential').value);
-                let b = parseFloat(document.getElementById('initial-b-exponential').value);
-                let c = parseFloat(document.getElementById('initial-c-exponential').value);
-
-                if (isNaN(A) || isNaN(b) || isNaN(c)) {
-                    alert('Please provide valid initial parameters for Exponential fit.');
+                // Ensure all y values are positive
+                const validData = rawData.filter(point => point.y > 0);
+                if (validData.length < 2) {
+                    alert('Exponential fit requires all y values to be positive.');
                     return;
                 }
 
-                const learningRate = 1e-3;
-                const maxIterations = 10000;
-                const tolerance = 1e-6;
+                const x = validData.map(p => p.x);
+                const y = validData.map(p => Math.log(p.y));
 
-                let previousError = Infinity;
-                let iterations = 0;
+                const { slope, intercept } = computeLinearFit(x, y);
 
-                while (iterations < maxIterations) {
-                    const predictions = rawData.map(point => A * Math.exp(b * point.x) + c);
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
-
-                    if (Math.abs(previousError - mse) < tolerance) break;
-
-                    previousError = mse;
-
-                    let dA = 0, db = 0, dc = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        const expTerm = Math.exp(b * xi);
-                        const error = errors[i];
-
-                        dA += -2 * error * expTerm;
-                        db += -2 * error * A * xi * expTerm;
-                        dc += -2 * error;
-                    }
-
-                    // Update parameters
-                    A -= learningRate * dA;
-                    b -= learningRate * db;
-                    c -= learningRate * dc;
-
-                    iterations++;
-                }
-
-                if (iterations === maxIterations) {
-                    alert("Exponential fitting did not converge. Try different initial guesses.");
-                    return;
-                }
+                const b = slope;
+                const A = Math.exp(intercept);
 
                 // Generate fitted curve
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => A * Math.exp(b * xi) + c);
+                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
+                const yFit = xFit.map(xi => A * Math.exp(b * xi));
 
-                const fitFunction = xi => A * Math.exp(b * xi) + c;
+                const fitFunction = xi => A * Math.exp(b * xi);
 
                 // Equation string
                 let equation = `y = ${A.toFixed(2)} e^{${b.toFixed(2)}x}`;
-                if (c > 0) {
-                    equation += ` + ${c.toFixed(2)}`;
-                } else if (c < 0) {
-                    equation += ` - ${Math.abs(c).toFixed(2)}`;
-                }
 
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                updateResults(equation, x, validData.map(p => p.y), fitFunction);
                 plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing exponential fit:', error);
@@ -1886,75 +1781,35 @@
             }
         }
 
-        function performPowerFitAdvanced() {
+        function performPowerFit() {
             try {
-                // Retrieve initial parameters from Advanced Fit section
-                let A = parseFloat(document.getElementById('initial-A-power').value);
-                let b = parseFloat(document.getElementById('initial-b-power').value);
-                let c = parseFloat(document.getElementById('initial-c-power').value);
-
-                if (isNaN(A) || isNaN(b) || isNaN(c)) {
-                    alert('Please provide valid initial parameters for Power fit.');
+                // Ensure all y and x values are positive
+                const validData = rawData.filter(point => point.y > 0 && point.x > 0);
+                if (validData.length < 2) {
+                    alert('Power fit requires all x and y values to be positive.');
                     return;
                 }
 
-                const learningRate = 1e-3;
-                const maxIterations = 10000;
-                const tolerance = 1e-6;
+                const x = validData.map(p => Math.log(p.x));
+                const y = validData.map(p => Math.log(p.y));
 
-                let previousError = Infinity;
-                let iterations = 0;
+                const { slope, intercept } = computeLinearFit(x, y);
 
-                while (iterations < maxIterations) {
-                    const predictions = rawData.map(point => A * Math.pow(point.x, b) + c);
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
-
-                    if (Math.abs(previousError - mse) < tolerance) break;
-
-                    previousError = mse;
-
-                    let dA = 0, db = 0, dc = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        if (xi === 0 && b <= 0) continue; // Avoid division by zero or log(0)
-                        const powerTerm = Math.pow(xi, b);
-                        const error = errors[i];
-
-                        dA += -2 * error * powerTerm;
-                        db += -2 * error * A * Math.log(xi) * powerTerm;
-                        dc += -2 * error;
-                    }
-
-                // Update parameters
-                    A -= learningRate * dA;
-                    b -= learningRate * db;
-                    c -= learningRate * dc;
-
-                    iterations++;
-                }
-
-                if (iterations === maxIterations) {
-                    alert("Power fitting did not converge. Try different initial guesses.");
-                    return;
-                }
+                const b = slope;
+                const A = Math.exp(intercept);
 
                 // Generate fitted curve
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => A * Math.pow(xi, b) + c);
+                const xOriginal = validData.map(p => p.x);
+                const xFitOriginal = Array.from({ length: 100 }, (_, i) => Math.min(...xOriginal) + i * (Math.max(...xOriginal) - Math.min(...xOriginal)) / 99);
+                const yFit = xFitOriginal.map(xi => A * Math.pow(xi, b));
 
-                const fitFunction = xi => A * Math.pow(xi, b) + c;
+                const fitFunction = xi => A * Math.pow(xi, b);
 
                 // Equation string
-                let equation = `y = ${A.toFixed(2)}x^{${b.toFixed(2)}}`;
-                if (c > 0) {
-                    equation += ` + ${c.toFixed(2)}`;
-                } else if (c < 0) {
-                    equation += ` - ${Math.abs(c).toFixed(2)}`;
-                }
+                let equation = `y = ${A.toFixed(2)} x^{${b.toFixed(2)}}`;
 
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotGraph(xFit, yFit);
+                updateResults(equation, validData.map(p => p.x), validData.map(p => p.y), fitFunction);
+                plotGraph(xFitOriginal, yFit);
             } catch (error) {
                 console.error('Error performing power fit:', error);
                 alert('An error occurred during power fitting. Please check the console for details.');
@@ -2215,8 +2070,8 @@
     </script>
 </body>
 
-    <footer>
-        &copy; 2024 PanPhy. All rights reserved.
-    </footer>
+<footer>
+    &copy; 2024 PanPhy. All rights reserved.
+</footer>
 
 </html>
