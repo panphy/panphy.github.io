@@ -900,7 +900,7 @@
             updateData();
         }
 
-        function updateUncertaintyHeaders(axis) {
+            function updateUncertaintyHeaders(axis) {
             const columnName = document.getElementById(`${axis}-column-name`).value.trim() || (axis === 'x' ? 'x' : 'y');
             const errorType = document.getElementById(`${axis}-error-type`).value;
             let headerLatex = `\\pm \\Delta ${formatLabelForLatex(columnName)}`;
@@ -915,6 +915,7 @@
                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, headerElement]);
             }
         }
+
 
         function updateErrorType(axis) {
             if (document.getElementById(`toggle-${axis}-error`).checked) {
@@ -1453,109 +1454,153 @@
             }
         }
 
-        function exportPlainText() {
-            try {
-                const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
-                const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
-
-                const xErrorEnabled = document.getElementById('toggle-x-error').checked;
-                const yErrorEnabled = document.getElementById('toggle-y-error').checked;
-
-                const table = document.getElementById('data-table');
-                const rows = table.querySelectorAll('tr');
-
-                let headers = [`$${xHeader}$`, `$${yHeader}$`];
-                if (xErrorEnabled) {
-                    const xErrorType = document.getElementById('x-error-type').value;
-                    let xUncHeading = `$\\pm \\Delta ${formatLabelForLatex(xHeader)}$`;
-                    if (xErrorType === 'percentage') xUncHeading += ' (%)';
-                    headers.push(xUncHeading);
-                }
-
-                if (yErrorEnabled) {
-                    const yErrorType = document.getElementById('y-error-type').value;
-                    let yUncHeading = `$\\pm \\Delta ${formatLabelForLatex(yHeader)}$`;
-                    if (yErrorType === 'percentage') yUncHeading += ' (%)';
-                    headers.push(yUncHeading);
-                }
-
-                let markdown = `| ${headers.join(' | ')} |\n`;
-                markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
-
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row) continue;
-
-                    const xInputElem = row.querySelector('.x-input');
-                    const yInputElem = row.querySelector('.y-input');
-
-                    if (!xInputElem || !yInputElem) continue;
-
-                    const xValStr = xInputElem.value.trim();
-                    const yValStr = yInputElem.value.trim();
-
-                    if (xValStr === '' && yValStr === '') continue;
-
-                    let xVal = parseFloat(xValStr);
-                    let yVal = parseFloat(yValStr);
-
-                    const xErrInput = row.querySelector('.x-error-input');
-                    const yErrInput = row.querySelector('.y-error-input');
-
-                    const xErrStr = xErrInput ? xErrInput.value.trim() : '';
-                    const yErrStr = yErrInput ? yErrInput.value.trim() : '';
-                    const xErrVal = parseFloat(xErrStr);
-                    const yErrVal = parseFloat(yErrStr);
-
-                    const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
-                    const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
-
-                    const xErrorType = document.getElementById('x-error-type').value;
-                    const yErrorType = document.getElementById('y-error-type').value;
-
-                    let rowData = [];
-                    let xFormatted = xValStr;
-                    if (!isNaN(xVal)) {
-                        xFormatted = formatDataForExport(
-                            xValStr, xErrStr, xErrorEnabledThisRow, xErrorType, xVal, xVal, xErrVal
-                        );
-                    }
-
-                    let yFormatted = yValStr;
-                    if (!isNaN(yVal)) {
-                        yFormatted = formatDataForExport(
-                            yValStr, yErrStr, yErrorEnabledThisRow, yErrorType, yVal, yVal, yErrVal
-                        );
-                    }
-
-                    rowData.push(xFormatted);
-                    rowData.push(yFormatted);
-
-                    if (xErrorEnabled) {
-                        rowData.push(xErrorEnabledThisRow ? xErrStr : '');
-                    }
-
-                    if (yErrorEnabled) {
-                        rowData.push(yErrorEnabledThisRow ? yErrStr : '');
-                    }
-
-                    markdown += `| ${rowData.join(' | ')} |\n`;
-                }
-
-                const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'curve_fitting_data.md');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (error) {
-                console.error('Error exporting plain text:', error);
-                alert('An error occurred while exporting the Markdown file. Please check the console for details.');
+        function formatScientificNotation(numberStr) {
+            const sciRegex = /^([\d.]+)e([+-]?\d+)$/i;
+            const match = numberStr.match(sciRegex);
+            if (match) {
+                const coefficient = parseFloat(match[1]);
+                const exponent = parseInt(match[2]);
+                return `${coefficient} \\times 10^{${exponent}}`;
             }
+            return numberStr;
         }
+
+	function exportPlainText() {
+	    try {
+	        // Retrieve axis headings
+	        const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
+	        const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
+
+	        // Check if uncertainties are enabled
+	        const xErrorEnabled = document.getElementById('toggle-x-error').checked;
+	        const yErrorEnabled = document.getElementById('toggle-y-error').checked;
+
+	        // Get all rows from the data table
+	        const table = document.getElementById('data-table');
+	        const rows = table.querySelectorAll('tr');
+
+	        // Initialize headers with \quad spacing and replace spaces with \space
+	        let headers = [
+	            `$\\quad ${formatLabelForLatex(xHeader)} \\quad$`,
+	            `$\\quad ${formatLabelForLatex(yHeader)} \\quad$`
+	        ];
+
+	        // Handle X-axis uncertainty heading
+	        if (xErrorEnabled) {
+	            const xErrorType = document.getElementById('x-error-type').value;
+	            let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
+	            if (xErrorType === 'percentage') xUncHeading += ' \\space (\\\\%)';
+	            headers.push(`$\\quad ${xUncHeading} \\quad$`);
+	        }
+
+	        // Handle Y-axis uncertainty heading
+	        if (yErrorEnabled) {
+	            const yErrorType = document.getElementById('y-error-type').value;
+	            let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
+	            if (yErrorType === 'percentage') yUncHeading += ' \\space (\\\\%)';
+	            headers.push(`$\\quad ${yUncHeading} \\quad$`);
+	        }
+
+	        // Initialize Markdown table with headers
+	        let markdown = `| ${headers.join(' | ')} |\n`;
+	        markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
+
+	        // Iterate over each data row (starting from 1 to skip any existing header row)
+	        for (let i = 1; i < rows.length; i++) {
+	            const row = rows[i];
+	            if (!row) continue;
+
+	            const xInputElem = row.querySelector('.x-input');
+	            const yInputElem = row.querySelector('.y-input');
+
+	            if (!xInputElem || !yInputElem) continue;
+
+	            const xValStr = xInputElem.value.trim();
+	            const yValStr = yInputElem.value.trim();
+
+	            if (xValStr === '' && yValStr === '') continue;
+
+	            let xVal = parseFloat(xValStr);
+	            let yVal = parseFloat(yValStr);
+
+	            const xErrInput = row.querySelector('.x-error-input');
+	            const yErrInput = row.querySelector('.y-error-input');
+
+	            const xErrStr = xErrInput ? xErrInput.value.trim() : '';
+	            const yErrStr = yErrInput ? yErrInput.value.trim() : '';
+	            const xErrVal = parseFloat(xErrStr);
+	            const yErrVal = parseFloat(yErrStr);
+
+	            const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
+	            const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+
+	            const xErrorType = document.getElementById('x-error-type').value;
+	            const yErrorType = document.getElementById('y-error-type').value;
+
+	            let rowData = [];
+
+	            // Format X value
+	            let xFormatted = xValStr;
+	            if (!isNaN(xVal)) {
+	                xFormatted = formatDataForExport(
+	                    xValStr, xErrStr, xErrorEnabledThisRow, xErrorType, xVal, xVal, xErrVal
+	                );
+	                xFormatted = formatScientificNotation(xFormatted);
+	                xFormatted = `$${xFormatted}$`;
+	            }
+
+	            // Format Y value
+	            let yFormatted = yValStr;
+	            if (!isNaN(yVal)) {
+	                yFormatted = formatDataForExport(
+	                    yValStr, yErrStr, yErrorEnabledThisRow, yErrorType, yVal, yVal, yErrVal
+	                );
+	                yFormatted = formatScientificNotation(yFormatted);
+	                yFormatted = `$${yFormatted}$`;
+	            }
+
+	            rowData.push(xFormatted);
+	            rowData.push(yFormatted);
+
+	            // Format X uncertainty
+	            if (xErrorEnabled) {
+	                let xErrorFormatted = xErrorEnabledThisRow ? xErrStr : '';
+	                if (xErrorFormatted !== '') {
+	                    xErrorFormatted = formatScientificNotation(xErrorFormatted);
+	                    xErrorFormatted = `$${xErrorFormatted}$`;
+	                }
+	                rowData.push(xErrorFormatted);
+	            }
+
+	            // Format Y uncertainty
+	            if (yErrorEnabled) {
+	                let yErrorFormatted = yErrorEnabledThisRow ? yErrStr : '';
+	                if (yErrorFormatted !== '') {
+	                    yErrorFormatted = formatScientificNotation(yErrorFormatted);
+	                    yErrorFormatted = `$${yErrorFormatted}$`;
+	                }
+	                rowData.push(yErrorFormatted);
+	            }
+
+	            // Append the formatted row to the markdown string
+	            markdown += `| ${rowData.join(' | ')} |\n`;
+	        }
+
+	        // Create a Blob from the markdown content
+	        const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
+	        const url = URL.createObjectURL(blob);
+	        const link = document.createElement('a');
+	        link.setAttribute('href', url);
+	        link.setAttribute('download', 'curve_fitting_data.md');
+	        link.style.visibility = 'hidden';
+	        document.body.appendChild(link);
+	        link.click();
+	        document.body.removeChild(link);
+	    } catch (error) {
+	        console.error('Error exporting plain text:', error);
+	        alert('An error occurred while exporting the Markdown file. Please check the console for details.');
+	    }
+	}
 
         function exportCSV() {
             try {
