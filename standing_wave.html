@@ -41,6 +41,7 @@
             max-width: 1000px;
             width: 100%;
             padding: 30px;
+            overflow: hidden; /* Prevent child elements from overflowing */
         }
 
         /* Control Boxes Layout */
@@ -123,10 +124,8 @@
 
         /* Canvas Styling */
         canvas {
-            /* Removed width and height to prevent CSS scaling */
-            /* width: 100%; */
-            /* height: auto; */
-
+            width: 100%; /* Ensure canvas does not exceed container's width */
+            height: auto; /* Maintain aspect ratio */
             border: none;
             border-radius: 10px;
             background: #4a4a4a;
@@ -213,13 +212,13 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">Harmonic: <span id="modeValue">1st</span></label>
+                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">Harmonic: <span id="harmonicValue">1st</span></label>
                 <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
             </div>
         </div>
 
         <p class="instructions">Press the "Enter" key to pause or resume the animation.</p>
-	<br>
+    <br>
         <canvas id="oscillationCanvas"></canvas>
     </div>
 
@@ -243,7 +242,7 @@
         const rightBoundarySelect = document.getElementById("rightBoundary");
 
         const amplitudeValue = document.getElementById("amplitudeValue");
-        const modeValue = document.getElementById("modeValue");
+        const harmonicValue = document.getElementById("harmonicValue");
         const positionValue = document.getElementById("positionValue");
         const greenPositionValue = document.getElementById("greenPositionValue");
         const omegaValue = document.getElementById("omegaValue");
@@ -252,7 +251,7 @@
         const greenParticleAmplitude = document.getElementById("greenParticleAmplitude");
 
         let A = parseFloat(amplitudeSlider.value); 
-        let mode = parseInt(modeSlider.value); 
+        let modeIndex = parseInt(modeSlider.value); // Mode index (1-6)
         let xRed = parseFloat(positionSlider.value); 
         let xGreen = parseFloat(greenPositionSlider.value);
         let omega = parseFloat(omegaSlider.value); 
@@ -263,11 +262,13 @@
         amplitudeValue.textContent = A.toFixed(1);
         omegaValue.textContent = omega.toFixed(2);
         frequencyValue.textContent = (omega / (2 * Math.PI)).toFixed(2);
-        modeValue.textContent = getOrdinal(mode);
+        harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
 
         let isPaused = false;
         let time = 0; // Total elapsed time in seconds
         let lastTimestamp = null; // To track elapsed time between frames
+
+        let allowedHarmonics = []; // To store allowed harmonic numbers
 
         // Function to determine allowed harmonics based on boundary conditions
         function getAllowedHarmonics() {
@@ -283,51 +284,63 @@
             }
         }
 
-        // Function to update the harmonic slider based on allowed harmonics
-        function updateHarmonicSlider() {
-            const allowed = getAllowedHarmonics();
-            const minHarmonic = Math.min(...allowed);
-            const maxHarmonic = Math.max(...allowed);
-            const stepHarmonic = allowed[1] - allowed[0]; // Assuming uniform step
-
-            modeSlider.min = minHarmonic;
-            modeSlider.max = maxHarmonic;
-            modeSlider.step = stepHarmonic;
-
-            // If current mode is not allowed, set to the first allowed harmonic
-            if (!allowed.includes(mode)) {
-                mode = allowed[0];
-                modeSlider.value = mode;
-                modeValue.textContent = getOrdinal(mode);
+        // Function to get harmonic number based on mode index and boundary conditions
+        function getHarmonicNumber(mode) {
+            if (
+                (leftBoundary === "fixed" && rightBoundary === "free") ||
+                (leftBoundary === "free" && rightBoundary === "fixed")
+            ) {
+                return 2 * mode - 1; // Odd harmonics
             } else {
-                modeValue.textContent = getOrdinal(mode);
+                return mode; // All harmonics
             }
+        }
+
+        // Function to update allowed harmonics and harmonic number display
+        function updateAllowedHarmonics() {
+            allowedHarmonics = getAllowedHarmonics();
+            // Adjust mode index if it exceeds allowed harmonics
+            if (modeIndex > allowedHarmonics.length) {
+                modeIndex = allowedHarmonics.length;
+                modeSlider.value = modeIndex;
+            }
+            harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            updateAmplitudes();
         }
 
         // Function to update amplitude displays
         const updateAmplitudes = () => {
-            const orangeAmplitude = A * getWaveFunction(mode, xRed);
-            const greenAmplitude = A * getWaveFunction(mode, xGreen);
+            const k = getHarmonicNumber(modeIndex);
+            const orangeAmplitude = A * getWaveFunction(k, xRed);
+            const greenAmplitude = A * getWaveFunction(k, xGreen);
             redParticleAmplitude.textContent = Math.abs(orangeAmplitude).toFixed(2);
             greenParticleAmplitude.textContent = Math.abs(greenAmplitude).toFixed(2);
         };
 
         // Correct wave functions based on boundary conditions
-        function getWaveFunction(n, x) {
+        function getWaveFunction(k, x) {
             if (leftBoundary === "fixed" && rightBoundary === "fixed") {
-                // Fixed-Fixed: sin(nπx)
-                return Math.sin(n * Math.PI * x);
+                // Fixed-Fixed: sin(kπx)
+                return Math.sin(k * Math.PI * x);
             } else if (leftBoundary === "fixed" && rightBoundary === "free") {
-                // Fixed-Free: sin((2n-1)πx/2)
-                return Math.sin((2 * n - 1) * Math.PI * x / 2);
+                // Fixed-Free: sin(kπx/2)
+                return Math.sin((k * Math.PI * x) / 2);
             } else if (leftBoundary === "free" && rightBoundary === "fixed") {
-                // Free-Fixed: cos((2n-1)πx/2)
-                return Math.cos((2 * n - 1) * Math.PI * x / 2);
+                // Free-Fixed: cos(kπx/2)
+                return Math.cos((k * Math.PI * x) / 2);
             } else if (leftBoundary === "free" && rightBoundary === "free") {
-                // Free-Free: cos(nπx)
-                return Math.cos(n * Math.PI * x);
+                // Free-Free: cos(kπx)
+                return Math.cos(k * Math.PI * x);
             }
             return 0;
+        }
+
+        // Function to update the harmonic slider based on allowed harmonics
+        function updateHarmonicSlider() {
+            // No changes needed since harmonic number is based on mode index
+            // Just update the harmonic display
+            harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            updateAmplitudes();
         }
 
         // Event listeners for controls
@@ -338,8 +351,8 @@
         });
 
         modeSlider.addEventListener("input", () => {
-            mode = parseInt(modeSlider.value);
-            modeValue.textContent = getOrdinal(mode);
+            modeIndex = parseInt(modeSlider.value);
+            harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
             updateAmplitudes();
         });
 
@@ -363,35 +376,21 @@
 
         leftBoundarySelect.addEventListener("change", () => {
             leftBoundary = leftBoundarySelect.value;
+            updateAllowedHarmonics();
             updateHarmonicSlider();
-            updateAmplitudes();
         });
 
         rightBoundarySelect.addEventListener("change", () => {
             rightBoundary = rightBoundarySelect.value;
+            updateAllowedHarmonics();
             updateHarmonicSlider();
-            updateAmplitudes();
         });
-
-        // Function to convert number to ordinal string
-        function getOrdinalSuffix(n) {
-            let suffix = "th";
-            if (n % 100 < 11 || n % 100 > 13) {
-                switch (n % 10) {
-                    case 1: suffix = "st"; break;
-                    case 2: suffix = "nd"; break;
-                    case 3: suffix = "rd"; break;
-                }
-            }
-            return n + suffix;
-        }
 
         // Function to resize the canvas while maintaining aspect ratio
         function resizeCanvas() {
             const aspectRatio = 2; // Width:Height ratio (e.g., 800:400 => 2:1)
-            const containerWidth = canvas.parentElement.clientWidth;
-            const width = containerWidth;
-            const height = containerWidth / aspectRatio;
+            const width = canvas.clientWidth;
+            const height = width / aspectRatio;
 
             // Set the canvas size
             canvas.width = width;
@@ -423,11 +422,14 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
+                // Calculate harmonic number based on mode index
+                const k = getHarmonicNumber(modeIndex);
+
                 // Draw the oscillating string
                 ctx.beginPath();
                 for (let i = 0; i <= canvas.width; i++) {
                     const normalizedX = i / canvas.width;
-                    let waveFunc = getWaveFunction(mode, normalizedX);
+                    let waveFunc = getWaveFunction(k, normalizedX);
                     let y = A * Math.cos(omega * time) * waveFunc;
                     let screenY = canvas.height / 2 - y * amplitudeScale; // Scale y relative to canvas height
                     if (i === 0) {
@@ -442,12 +444,12 @@
 
                 // Draw the orange particle
                 const orangeX = xRed * canvas.width;
-                const orangeY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xRed) * amplitudeScale;
+                const orangeY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xRed) * amplitudeScale;
                 drawParticle(orangeX, orangeY, "#ff9800");
 
                 // Draw the green particle
                 const greenX = xGreen * canvas.width;
-                const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(mode, xGreen) * amplitudeScale;
+                const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xGreen) * amplitudeScale;
                 drawParticle(greenX, greenY, "#00e676");
 
                 // Increment time based on actual elapsed time
@@ -480,7 +482,8 @@
         // Initialize the canvas size and harmonic slider on window load
         window.addEventListener("load", () => {
             resizeCanvas();
-            updateHarmonicSlider();
+            updateAllowedHarmonics();
+            harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
             updateAmplitudes();
             requestAnimationFrame(draw); // Start the animation
         });
