@@ -765,9 +765,7 @@
 
         const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 
-        function formatLabelForLatex(label) {
-            return label ? label.replace(/ /g, '\\space ') : '';
-        }
+
 
         function processLabel(label) {
             return label ? `$${formatLabelForLatex(label)}$` : '';
@@ -1421,14 +1419,6 @@
             changeAdvancedFitMethod();
         };
 
-        function countDecimalPlaces(numStr) {
-            if (!numStr.includes('.')) return 0;
-            return numStr.length - numStr.indexOf('.') - 1;
-        }
-
-        function toSigFigs(num, sigFigs) {
-            return num.toPrecision(sigFigs);
-        }
 
         function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
             if (!errorEnabled) {
@@ -1454,153 +1444,314 @@
             }
         }
 
-        function formatScientificNotation(numberStr) {
-            const sciRegex = /^([\d.]+)e([+-]?\d+)$/i;
-            const match = numberStr.match(sciRegex);
-            if (match) {
-                const coefficient = parseFloat(match[1]);
-                const exponent = parseInt(match[2]);
-                return `${coefficient} \\times 10^{${exponent}}`;
-            }
-            return numberStr;
+    /**
+     * Formats labels for LaTeX by replacing spaces with \space.
+     * @param {string} label - The label to format.
+     * @returns {string} - The LaTeX-formatted label.
+     */
+    function formatLabelForLatex(label) {
+        return label ? label.replace(/ /g, '\\space ') : '';
+    }
+
+    /**
+     * Counts the number of decimal places in a number string.
+     * @param {string} numStr - The number as a string.
+     * @returns {number} - The number of decimal places.
+     */
+    function countDecimalPlaces(numStr) {
+        if (!numStr.includes('.')) return 0;
+        return numStr.length - numStr.indexOf('.') - 1;
+    }
+
+    /**
+    * Formats a number to the specified number of significant figures without using scientific notation.
+    * Preserves trailing zeros by returning a string.
+    * @param {number} num - The number to format.
+    * @param {number} sigFigs - The number of significant figures.
+    * @returns {string} - The formatted number as a string.
+    */
+    function toSigFigs(num, sigFigs) {
+        if (num === 0) return '0';
+        let numStr = num.toPrecision(sigFigs);
+    
+        // Check if the number is in scientific notation
+        if (numStr.includes('e') || numStr.includes('E')) {
+            const [mantissa, exponent] = numStr.split(/e/i);
+            const exponentVal = parseInt(exponent, 10);
+            let fixedNum = parseFloat(mantissa) * Math.pow(10, exponentVal);
+        
+            // Calculate the number of decimal places needed
+            const decimalPlaces = sigFigs - 1 - Math.floor(Math.log10(Math.abs(num)));
+            return fixedNum.toFixed(decimalPlaces > 0 ? decimalPlaces : 0);
         }
+    
+        return numStr;
+    }
 
-	function exportPlainText() {
-	    try {
-	        // Retrieve axis headings
-	        const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
-	        const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
 
-	        // Check if uncertainties are enabled
-	        const xErrorEnabled = document.getElementById('toggle-x-error').checked;
-	        const yErrorEnabled = document.getElementById('toggle-y-error').checked;
+    /**
+     * Formats a number into scientific notation for LaTeX with specified significant figures.
+     * @param {number} number - The number to format.
+     * @param {number} sigFigs - The number of significant figures.
+     * @returns {string} - The LaTeX-formatted scientific notation string.
+     */
+    function formatScientificNotation(number, sigFigs) {
+        if (number === 0) return '0';
+        const exponent = Math.floor(Math.log10(Math.abs(number)));
+        const mantissa = (number / Math.pow(10, exponent)).toFixed(sigFigs - 1);
+        return `${mantissa} \\times 10^{${exponent}}`;
+    }
 
-	        // Get all rows from the data table
-	        const table = document.getElementById('data-table');
-	        const rows = table.querySelectorAll('tr');
+    /**
+     * Formats data values based on uncertainty type.
+     * @param {number} dataVal - The data value.
+     * @param {number} uncertaintyVal - The uncertainty value.
+     * @param {string} uncertaintyType - The type of uncertainty ('absolute' or 'percentage').
+     * @param {boolean} useSciNotation - Whether to apply scientific notation.
+     * @returns {string} - The formatted data value.
+     */
+    function formatDataValue(dataVal, uncertaintyVal, uncertaintyType, useSciNotation) {
+        if (uncertaintyType === 'absolute') {
+            const dp = countDecimalPlaces(uncertaintyVal.toString());
+            return dataVal.toFixed(dp);
+        } else if (uncertaintyType === 'percentage') {
+            const perc = parseFloat(uncertaintyVal);
+            if (isNaN(perc)) return dataVal.toString();
+            const sigFigs = perc < 10 ? 3 : 2;
+            if (useSciNotation) {
+                return formatScientificNotation(dataVal, sigFigs);
+            } else {
+                return toSigFigs(dataVal, sigFigs);
+            }
+        } else {
+            // No uncertainty
+            return dataVal.toString();
+        }
+    }
 
-	        // Initialize headers with \quad spacing and replace spaces with \space
-	        let headers = [
-	            `$\\quad ${formatLabelForLatex(xHeader)} \\quad$`,
-	            `$\\quad ${formatLabelForLatex(yHeader)} \\quad$`
-	        ];
+    /**
+     * Formats uncertainties based on their type without applying scientific notation.
+     * @param {string} errStr - The uncertainty value as a string.
+     * @param {string} errorType - The type of uncertainty ('absolute' or 'percentage').
+     * @returns {string} - The formatted uncertainty string.
+     */
+    function formatUncertainty(errStr, errorType) {
+        if (errorType === 'percentage') {
+            const perc = parseFloat(errStr);
+            if (isNaN(perc)) return errStr;
+            const sigFigs = (perc < 10) ? 3 : 2;
+            return toSigFigs(perc, sigFigs);
+        } else if (errorType === 'absolute') {
+            const dp = countDecimalPlaces(errStr);
+            const errVal = parseFloat(errStr);
+            if (isNaN(errVal)) return errStr;
+            // Use toFixed to preserve trailing zeros based on decimal places
+            return errVal.toFixed(dp);
+        } else {
+            return errStr;
+        }
+    }
 
-	        // Handle X-axis uncertainty heading
-	        if (xErrorEnabled) {
-	            const xErrorType = document.getElementById('x-error-type').value;
-	            let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
-	            if (xErrorType === 'percentage') xUncHeading += ' \\space (\\%)';
-	            headers.push(`$\\quad ${xUncHeading} \\quad$`);
-	        }
+    /**
+     * The main function to export data as a Markdown (.md) file with LaTeX formatting.
+     */
+    function exportPlainText() {
+        try {
+            // Retrieve axis headings
+            const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
+            const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
 
-	        // Handle Y-axis uncertainty heading
-	        if (yErrorEnabled) {
-	            const yErrorType = document.getElementById('y-error-type').value;
-	            let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
-	            if (yErrorType === 'percentage') yUncHeading += ' \\space (\\%)';
-	            headers.push(`$\\quad ${yUncHeading} \\quad$`);
-	        }
+            // Check if uncertainties are enabled
+            const xErrorEnabled = document.getElementById('toggle-x-error').checked;
+            const yErrorEnabled = document.getElementById('toggle-y-error').checked;
 
-	        // Initialize Markdown table with headers
-	        let markdown = `| ${headers.join(' | ')} |\n`;
-	        markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
+            // Get uncertainty types
+            const xErrorType = document.getElementById('x-error-type').value;
+            const yErrorType = document.getElementById('y-error-type').value;
 
-	        // Iterate over each data row (starting from 1 to skip any existing header row)
-	        for (let i = 1; i < rows.length; i++) {
-	            const row = rows[i];
-	            if (!row) continue;
+            // Get all rows from the data table's tbody
+            const table = document.getElementById('data-table');
+            const rows = table.querySelectorAll('tbody tr'); // Only iterate over tbody rows
 
-	            const xInputElem = row.querySelector('.x-input');
-	            const yInputElem = row.querySelector('.y-input');
+            // Initialize arrays to collect all x and y values
+            let xValues = [];
+            let yValues = [];
 
-	            if (!xInputElem || !yInputElem) continue;
+            // Collect all x and y values for notation decision
+            rows.forEach(row => {
+                const xInputElem = row.querySelector('.x-input');
+                const yInputElem = row.querySelector('.y-input');
 
-	            const xValStr = xInputElem.value.trim();
-	            const yValStr = yInputElem.value.trim();
+                if (!xInputElem || !yInputElem) return;
 
-	            if (xValStr === '' && yValStr === '') continue;
+                const xValStr = xInputElem.value.trim();
+                const yValStr = yInputElem.value.trim();
 
-	            let xVal = parseFloat(xValStr);
-	            let yVal = parseFloat(yValStr);
+                if (xValStr !== '') {
+                    const xVal = parseFloat(xValStr);
+                    if (!isNaN(xVal)) {
+                        xValues.push(xVal);
+                    }
+                }
 
-	            const xErrInput = row.querySelector('.x-error-input');
-	            const yErrInput = row.querySelector('.y-error-input');
+                if (yValStr !== '') {
+                    const yVal = parseFloat(yValStr);
+                    if (!isNaN(yVal)) {
+                        yValues.push(yVal);
+                    }
+                }
+            });
 
-	            const xErrStr = xErrInput ? xErrInput.value.trim() : '';
-	            const yErrStr = yErrInput ? yErrInput.value.trim() : '';
-	            const xErrVal = parseFloat(xErrStr);
-	            const yErrVal = parseFloat(yErrStr);
+            // Determine if scientific notation is needed for x and y
+            const xUseSciNotation = xErrorEnabled && xErrorType === 'percentage' && xValues.some(val => val < -10000 || val > 10000);
+            const yUseSciNotation = yErrorEnabled && yErrorType === 'percentage' && yValues.some(val => val < -10000 || val > 10000);
 
-	            const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
-	            const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+            // Debugging: Log whether scientific notation will be used
+            console.log(`X Use Scientific Notation: ${xUseSciNotation}`);
+            console.log(`Y Use Scientific Notation: ${yUseSciNotation}`);
 
-	            const xErrorType = document.getElementById('x-error-type').value;
-	            const yErrorType = document.getElementById('y-error-type').value;
+            // Initialize headers with \quad spacing and replace spaces with \space
+            let headers = [
+                `$\\quad ${formatLabelForLatex(xHeader)} \\quad$`,
+                `$\\quad ${formatLabelForLatex(yHeader)} \\quad$`
+            ];
 
-	            let rowData = [];
+            // Handle X-axis uncertainty heading
+            if (xErrorEnabled) {
+                let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
+                if (xErrorType === 'percentage') xUncHeading += ' \\space (\\%)';
+                headers.push(`$\\quad ${xUncHeading} \\quad$`);
+            }
 
-	            // Format X value
-	            let xFormatted = xValStr;
-	            if (!isNaN(xVal)) {
-	                xFormatted = formatDataForExport(
-	                    xValStr, xErrStr, xErrorEnabledThisRow, xErrorType, xVal, xVal, xErrVal
-	                );
-	                xFormatted = formatScientificNotation(xFormatted);
-	                xFormatted = `$${xFormatted}$`;
-	            }
+            // Handle Y-axis uncertainty heading
+            if (yErrorEnabled) {
+                let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
+                if (yErrorType === 'percentage') yUncHeading += ' \\space (\\%)';
+                headers.push(`$\\quad ${yUncHeading} \\quad$`);
+            }
 
-	            // Format Y value
-	            let yFormatted = yValStr;
-	            if (!isNaN(yVal)) {
-	                yFormatted = formatDataForExport(
-	                    yValStr, yErrStr, yErrorEnabledThisRow, yErrorType, yVal, yVal, yErrVal
-	                );
-	                yFormatted = formatScientificNotation(yFormatted);
-	                yFormatted = `$${yFormatted}$`;
-	            }
+            // Initialize Markdown table with headers
+            let markdown = `| ${headers.join(' | ')} |\n`;
+            markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
 
-	            rowData.push(xFormatted);
-	            rowData.push(yFormatted);
+            // Iterate over each data row
+            rows.forEach(row => {
+                const xInputElem = row.querySelector('.x-input');
+                const yInputElem = row.querySelector('.y-input');
 
-	            // Format X uncertainty
-	            if (xErrorEnabled) {
-	                let xErrorFormatted = xErrorEnabledThisRow ? xErrStr : '';
-	                if (xErrorFormatted !== '') {
-	                    xErrorFormatted = formatScientificNotation(xErrorFormatted);
-	                    xErrorFormatted = `$${xErrorFormatted}$`;
-	                }
-	                rowData.push(xErrorFormatted);
-	            }
+                if (!xInputElem || !yInputElem) return;
 
-	            // Format Y uncertainty
-	            if (yErrorEnabled) {
-	                let yErrorFormatted = yErrorEnabledThisRow ? yErrStr : '';
-	                if (yErrorFormatted !== '') {
-	                    yErrorFormatted = formatScientificNotation(yErrorFormatted);
-	                    yErrorFormatted = `$${yErrorFormatted}$`;
-	                }
-	                rowData.push(yErrorFormatted);
-	            }
+                const xValStr = xInputElem.value.trim();
+                const yValStr = yInputElem.value.trim();
 
-	            // Append the formatted row to the markdown string
-	            markdown += `| ${rowData.join(' | ')} |\n`;
-	        }
+                if (xValStr === '' && yValStr === '') return;
 
-	        // Create a Blob from the markdown content
-	        const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
-	        const url = URL.createObjectURL(blob);
-	        const link = document.createElement('a');
-	        link.setAttribute('href', url);
-	        link.setAttribute('download', 'data.md');
-	        link.style.visibility = 'hidden';
-	        document.body.appendChild(link);
-	        link.click();
-	        document.body.removeChild(link);
-	    } catch (error) {
-	        console.error('Error exporting plain text:', error);
-	        alert('An error occurred while exporting the Markdown file. Please check the console for details.');
-	    }
-	}
+                const xVal = parseFloat(xValStr);
+                const yVal = parseFloat(yValStr);
+
+                const xErrInput = row.querySelector('.x-error-input');
+                const yErrInput = row.querySelector('.y-error-input');
+
+                const xErrStr = xErrInput ? xErrInput.value.trim() : '';
+                const yErrStr = yErrInput ? yErrInput.value.trim() : '';
+                const xErrVal = parseFloat(xErrStr);
+                const yErrVal = parseFloat(yErrStr);
+
+                const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
+                const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+
+                let rowData = [];
+
+                // Format X value
+                let xFormatted = xValStr;
+                if (!isNaN(xVal)) {
+                    if (xUseSciNotation && xErrorEnabledThisRow && xErrorType === 'percentage') {
+                        // Percentage uncertainty with scientific notation
+                        const sigFigs = xErrVal < 10 ? 3 : 2;
+                        const sciFormatted = formatScientificNotation(xVal, sigFigs);
+                        xFormatted = `$${sciFormatted}$`;
+                    } else if (xErrorEnabledThisRow && xErrorType === 'percentage') {
+                        // Percentage uncertainty without scientific notation
+                        const sigFigs = xErrVal < 10 ? 3 : 2;
+                        const sigFormatted = toSigFigs(xVal, sigFigs);
+                        xFormatted = `$${sigFormatted}$`;
+                    } else if (xErrorEnabledThisRow && xErrorType === 'absolute') {
+                        // Absolute uncertainty
+                        const formattedData = formatDataValue(xVal, xErrVal, 'absolute', false);
+                        xFormatted = `$${formattedData}$`;
+                    } else {
+                        // No uncertainty or other cases
+                        xFormatted = `$${xValStr}$`;
+                    }
+                }
+
+                // Format Y value
+                let yFormatted = yValStr;
+                if (!isNaN(yVal)) {
+                    if (yUseSciNotation && yErrorEnabledThisRow && yErrorType === 'percentage') {
+                        // Percentage uncertainty with scientific notation
+                        const sigFigs = yErrVal < 10 ? 3 : 2;
+                        const sciFormatted = formatScientificNotation(yVal, sigFigs);
+                        yFormatted = `$${sciFormatted}$`;
+                    } else if (yErrorEnabledThisRow && yErrorType === 'percentage') {
+                        // Percentage uncertainty without scientific notation
+                        const sigFigs = yErrVal < 10 ? 3 : 2;
+                        const sigFormatted = toSigFigs(yVal, sigFigs);
+                        yFormatted = `$${sigFormatted}$`;
+                    } else if (yErrorEnabledThisRow && yErrorType === 'absolute') {
+                        // Absolute uncertainty
+                        const formattedData = formatDataValue(yVal, yErrVal, 'absolute', false);
+                        yFormatted = `$${formattedData}$`;
+                    } else {
+                        // No uncertainty or other cases
+                        yFormatted = `$${yValStr}$`;
+                    }
+                }
+
+                rowData.push(xFormatted);
+                rowData.push(yFormatted);
+
+                // Format X uncertainty
+                if (xErrorEnabled) {
+                    let xErrorFormatted = xErrorEnabledThisRow ? formatUncertainty(xErrStr, xErrorType) : '';
+                    if (xErrorFormatted !== '') {
+                        xErrorFormatted = `$${xErrorFormatted}$`;
+                    }
+                    rowData.push(xErrorFormatted);
+                }
+
+                // Format Y uncertainty
+                if (yErrorEnabled) {
+                    let yErrorFormatted = yErrorEnabledThisRow ? formatUncertainty(yErrStr, yErrorType) : '';
+                    if (yErrorFormatted !== '') {
+                        yErrorFormatted = `$${yErrorFormatted}$`;
+                    }
+                    rowData.push(yErrorFormatted);
+                }
+
+                // Append the formatted row to the markdown string
+                markdown += `| ${rowData.join(' | ')} |\n`;
+            });
+
+            // Debugging: Log the final markdown content
+            console.log("Final Markdown Content:\n", markdown);
+
+            // Create a Blob from the markdown content
+            const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'data.md');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error exporting plain text:', error);
+            alert('An error occurred while exporting the Markdown file. Please check the console for details.');
+        }
+    }
+
 
         function exportCSV() {
             try {
