@@ -8,7 +8,7 @@
       tex: {
         inlineMath: [['$', '$']],
         displayMath: [['$$', '$$']],
-        processEscapes: true,
+        processEscapes: true, // Keeping as true
         packages: ['base', 'ams'],
       },
       svg: {
@@ -153,15 +153,20 @@
         font-size: 14pt;
         line-height: 1.6;
       }
+
+      /* Hide the footer when printing */
+      footer {
+        display: none;
+      }
     }
 
-        footer {
-            text-align: center;
-            padding: 10px;
-            background: #f4f4f4;
-            color: #555;
-            margin-top: 10px;
-        }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #f4f4f4;
+      color: #555;
+      margin-top: 10px;
+    }
 
   </style>
 </head>
@@ -187,6 +192,10 @@
     </div>
   </div>
 
+  <footer>
+    &copy; 2024 PanPhy. All rights reserved.
+  </footer>
+
   <script>
     const markdownInput = document.getElementById('markdownInput');
     const renderedOutput = document.getElementById('renderedOutput');
@@ -197,8 +206,8 @@
     const saveMDButton = document.getElementById('saveMDButton');
     const loadFileButton = document.getElementById('loadFileButton');
 
-    const sampleDocument = `
-
+    // Define sampleDocument using String.raw to preserve backslashes
+    const sampleDocument = String.raw`
 # THIS IS A DEMO OF THE USE OF:
 
 1. (GitHub) Markdown  
@@ -273,58 +282,58 @@ I get 10 times more traffic from [Google][1] than from [Yahoo][2]. Sorry, Yahoo,
 
 *In case you need more symbols...*
 
-$\\alpha \\space \\beta \\space \\lambda \\space \\Lambda \\space \\theta \\space \\Omega$
+$\alpha \space \beta \space \lambda \space \Lambda \space \theta \space \Omega$
 
-$\\mu_\\tau^\\alpha \\quad \\nu \\quad \\tau \\quad \\epsilon \\quad \\psi \\quad \\rho \\quad g_{\\mu\\nu}$  
+$\mu_\tau^\alpha \quad \nu \quad \tau \quad \epsilon \quad \psi \quad \rho \quad g_{\mu\nu}$  
 
 ---
 
 ### Math Expressions
 
-1. **In-line example:** This is an $\\alpha$, and this is a $\\beta$. Absolute zero is $-273 ^\\circ{C}$.  
+1. **In-line example:** This is an $\alpha$, and this is a $\beta$. Absolute zero is $-273 ^\circ{C}$.  
 
 2. **Displayed example:**  
 
-$$ \\frac{1}{x} $$
+$$ \frac{1}{x} $$
 
-$$ \\boxed{M_\\odot^2} $$
+$$ \boxed{M_\odot^2} $$
 
-$$ x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a} $$
+$$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
 
-$$ \\int_{t=-\\infty}^{\\infty} \\ln \\frac{1}{t^e} dt $$
+$$ \int_{t=-\infty}^{\infty} \ln \frac{1}{t^e} dt $$
 
-$$ \\ddot{x} = \\frac{d \\dot{x}}{dt} = \\frac{d^2x}{dt^2} $$
+$$ \ddot{x} = \frac{d \dot{x}}{dt} = \frac{d^2x}{dt^2} $$
 
-$$ \\left. \\frac{\\partial{y}}{\\partial{t}} \\right|_{t=5} $$
+$$ \left. \frac{\partial{y}}{\partial{t}} \right|_{t=5} $$
 
-$$ \\vec{\\nabla} \\cdot D = \\left| \\vec{\\nabla} \\times \\vec{A} \\right| $$
+$$ \vec{\nabla} \cdot D = \left| \vec{\nabla} \times \vec{A} \right| $$
 
-$$ {\\lim_{\\Delta x \\to 0}}  \\frac{f(x + \\Delta x) - f(x)}{\\Delta x} $$
+$$ {\lim_{\Delta x \to 0}}  \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
-|**Note:**
-|:---
-A strange behavior occurs when typing inline limit: <p> \` {\\lim_{\\Delta x \\to 0}} \` produces $ {\\lim_{\\Delta x \\to 0}} $. However, \` {\\lim\\limits_{\\Delta x \\to 0}} \` produces $ {\\lim\\limits_{\\Delta x \\to 0}} $.
+<br>
+
+- Interestingly, this is how to type an inline limit: $ {\lim\limits_{\Delta x \to 0}} $.
 
 ---
 
 ### Matrices
 
 $$
-\\begin{pmatrix}
-a & b & c \\\\\\\\
-d & e & f \\\\\\\\
-g & h & i \\\\\\\\
-\\end{pmatrix}
-\\cdot
-\\begin{vmatrix}
-a & b \\\\\\\\
-c & d \\\\\\\\
-\\end{vmatrix} =
-\\begin{bmatrix}
-\\alpha_{11} & \\alpha_{12} & \\alpha_{13} \\\\\\\\
-\\alpha_{21} & \\alpha_{22} & \\alpha_{23} \\\\\\\\
-\\alpha_{31} & \\alpha_{32} & \\alpha_{33} \\\\\\\\
-\\end{bmatrix}
+\begin{pmatrix}
+a & b & c \\
+d & e & f \\
+g & h & i \\
+\end{pmatrix}
+\cdot
+\begin{vmatrix}
+a & b \\
+c & d \\
+\end{vmatrix} =
+\begin{bmatrix}
+\alpha_{11} & \alpha_{12} & \alpha_{13} \\
+\alpha_{21} & \alpha_{22} & \alpha_{23} \\
+\alpha_{31} & \alpha_{32} & \alpha_{33} \\
+\end{bmatrix}
 $$
 
 ---
@@ -332,17 +341,17 @@ $$
 ### Equation Alignment
 
 $$
-\\begin{aligned}
-ax^2 + b^2 + c &= 0 \\\\\\\\
-x &= \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}
-\\end{aligned}
+\begin{aligned}
+ax^2 + b^2 + c &= 0 \\
+x &= \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\end{aligned}
 $$
 
 ---
 
 ### Bracket Size
 
-$\\left( \\frac{1}{\\sqrt[n]{2}} \\right)$ **vs** $( \\frac{1}{\\sqrt[n]{2}} )$ 
+$\left( \frac{1}{\sqrt[n]{2}} \right)$ **vs** $( \frac{1}{\sqrt[n]{2}} )$ 
 
 *Because size does matter... sometimes.*
 
@@ -351,7 +360,7 @@ $\\left( \\frac{1}{\\sqrt[n]{2}} \\right)$ **vs** $( \\frac{1}{\\sqrt[n]{2}} )$
 ### Chemical Equations
 
 $$
-{Na_{(aq)}}^+ + {Cl_{(aq)}}^- \\longrightarrow NaCl_{(s)}
+{Na_{(aq)}}^+ + {Cl_{(aq)}}^- \longrightarrow NaCl_{(s)}
 $$
 
 *Chemistry deserves some LaTeX love too.*
@@ -381,12 +390,31 @@ _A whimsical tour through Markdown, LaTeX, and HTML. May your documents be ever 
 [1]: http://google.com/ "Google"  
 [2]: http://search.yahoo.com/ "Yahoo Search"
 
+  `;
 
-`;
+    /**
+     * Preprocess the input Markdown by replacing all single backslashes with double backslashes
+     * within LaTeX math blocks. This ensures that LaTeX commands requiring backslashes are
+     * correctly interpreted by MathJax without affecting other parts of the Markdown content.
+     * 
+     * @param {string} input - The raw Markdown input from the user.
+     * @returns {string} - The processed Markdown with escaped backslashes in LaTeX blocks.
+     */
+    function preprocessMarkdown(input) {
+      // Regex to match inline ($...$) and display ($$...$$) math blocks
+      const regex = /(\$\$?)([\s\S]+?)\1/g;
+      return input.replace(regex, function(match, p1, p2) {
+        // Replace single backslashes with double backslashes within LaTeX blocks
+        const escaped = p2.replace(/\\/g, '\\\\');
+        return p1 + escaped + p1;
+      });
+    }
 
     function renderContent() {
       const inputText = markdownInput.value;
-      const sanitizedContent = DOMPurify.sanitize(marked.parse(inputText));
+      const preprocessedText = preprocessMarkdown(inputText);
+      const parsedMarkdown = marked.parse(preprocessedText);
+      const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
       renderedOutput.innerHTML = sanitizedContent;
       MathJax.typesetPromise([renderedOutput]).catch(console.error);
     }
@@ -428,6 +456,23 @@ _A whimsical tour through Markdown, LaTeX, and HTML. May your documents be ever 
         }
       `;
       head.appendChild(style);
+
+      // Add MathJax configuration
+      const mathjaxConfigScript = document.createElement('script');
+      mathjaxConfigScript.textContent = `
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']],
+            processEscapes: true, // Keeping as true
+            packages: ['base', 'ams'],
+          },
+          svg: {
+            fontCache: 'local',
+          }
+        };
+      `;
+      head.appendChild(mathjaxConfigScript);
 
       const mathjaxScript = document.createElement('script');
       mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
@@ -486,12 +531,9 @@ _A whimsical tour through Markdown, LaTeX, and HTML. May your documents be ever 
       renderContent();
     });
 
+    // Initial render
     renderContent();
   </script>
 </body>
-
-    <footer>
-        &copy; 2024 PanPhy. All rights reserved.
-    </footer>
 
 </html>
