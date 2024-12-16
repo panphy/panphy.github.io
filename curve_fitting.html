@@ -1489,7 +1489,7 @@
 	        if (xErrorEnabled) {
 	            const xErrorType = document.getElementById('x-error-type').value;
 	            let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
-	            if (xErrorType === 'percentage') xUncHeading += ' \\space (\\\\%)';
+	            if (xErrorType === 'percentage') xUncHeading += ' \\space (\\%)';
 	            headers.push(`$\\quad ${xUncHeading} \\quad$`);
 	        }
 
@@ -1497,7 +1497,7 @@
 	        if (yErrorEnabled) {
 	            const yErrorType = document.getElementById('y-error-type').value;
 	            let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
-	            if (yErrorType === 'percentage') yUncHeading += ' \\space (\\\\%)';
+	            if (yErrorType === 'percentage') yUncHeading += ' \\space (\\%)';
 	            headers.push(`$\\quad ${yUncHeading} \\quad$`);
 	        }
 
