@@ -161,6 +161,24 @@
       vertical-align: baseline;
     }
 
+    /* Code block styling */
+    pre {
+      background-color: var(--code-background);
+      padding: 16px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 10px 0;
+    }
+
+    pre code {
+      background: none; /* Remove background from code inside pre to avoid double background */
+      padding: 0;
+      border-radius: 0;
+      font-family: inherit; /* Inherit font from pre */
+    }
+
     table {
       max-width: 90%;
       margin: 20px auto;
