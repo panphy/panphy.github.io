@@ -19,174 +19,264 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
-<style>
-  body {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    margin: 0;
-    font-family: Helvetica, sans-serif;
-    line-height: 1.6;
-  }
+  <style>
+    :root {
+      --background-color: #ffffff;
+      --text-color: #000000;
+      --pane-background: #ffffff;
+      --pane-heading-background: #333333;
+      --pane-heading-color: #ffffff;
+      --button-background: #f0f0f0;
+      --button-color: #000000;
+      --border-color: #ccc;
+      --code-background: #f0f0f0;
+      --table-border-color: black;
+      --table-header-background: #f4f4f4;
+    }
 
-  #editorContainer {
-    display: flex;
-    flex: 1;
-    background-color: #f0f0f0;
-    height: 100%;
-  }
+    body.dark-mode {
+      --background-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --pane-background: #1e1e1e;
+      --pane-heading-background: #2d2c2c;
+      --pane-heading-color: #ffffff;
+      --button-background: #474646;
+      --button-color: #ffffff;
+      --border-color: #555555;
+      --code-background: #2c2c2c;
+      --table-border-color: #555555;
+      --table-header-background: #333333;
+    }
 
-  #inputPane, #outputPane {
-    width: 50%;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  #inputPane {
-    border-right: 1px solid #ccc;
-  }
-
-  .pane-heading {
-    background-color: #333;
-    color: #fff;
-    margin: 0;
-    padding: 5px;
-    text-align: center;
-  }
-
-  .buttonContainer {
-    margin: 10px 0;
-    text-align: center;
-  }
-
-  textarea {
-    flex: 1;
-    width: 100%;
-    padding: 20px;
-    border: none;
-    resize: none;
-    font-size: 16px;
-    line-height: 1.5;
-    box-sizing: border-box;
-    overflow-y: auto;
-    min-height: 0;
-  }
-
-  #renderedOutput {
-    flex: 1;
-    padding: 20px;
-    font-size: 16px;
-    line-height: 1.5;
-    box-sizing: border-box;
-    overflow-y: auto;
-    min-height: 0;
-  }
-
-  code {
-    background-color: #f0f0f0;
-    padding: 0.1em 0.2em;
-    border-radius: 3px;
-    font-size: 0.95em;
-    line-height: 1;
-    font-family: "Courier New", Courier, monospace;
-    vertical-align: baseline;
-  }
-
-  table {
-    max-width: 90%;
-    margin: 20px auto;
-    border-collapse: collapse;
-    border: 1px solid black;
-  }
-
-  th, td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: left;
-  }
-
-  th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-  }
-
-  button {
-    margin: 5px;
-    padding: 8px 12px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  /* Hide the page-break div on screen */
-  .page-break {
-    display: none;
-  }
-
-  @media print {
     body {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
       margin: 0;
+      font-family: Helvetica, sans-serif;
+      line-height: 1.6;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
     }
 
     #editorContainer {
-      display: block;
+      display: flex;
+      flex: 1;
+      background-color: var(--pane-background);
+      height: 100%;
+      border-top: 0px solid var(--border-color);
+      border-bottom: 0px solid var(--border-color);
+    }
+
+    body.dark-mode #editorContainer {
+      background-color: var(--pane-background);
+    }
+
+    #inputPane, #outputPane {
+      width: 50%;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: var(--pane-background);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border: none;
     }
 
     #inputPane {
-      display: none;
+      border-right: 1px solid var(--border-color);
     }
 
-    #outputPane {
-      width: auto;
-      padding: 15mm;
+    .pane-heading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      background-color: var(--pane-heading-background);
+      color: var(--pane-heading-color);
+      margin: 0;
+      padding: 10px;
+      text-align: center;
     }
 
-    #outputPane .pane-heading,
-    .no-print {
-      display: none;
+    .pane-heading-container h2 {
+      margin: 0;
+      flex: 1;
     }
 
-    svg, pre {
-      page-break-inside: avoid;
+    .theme-toggle-button {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--pane-heading-color);
+    }
+
+    .buttonContainer {
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    body.dark-mode .buttonContainer button {
+      background-color: var(--button-background);
+      color: var(--button-color);
+      border: none;
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      padding: 20px;
+      border: none;
+      resize: none;
+      font-size: 16px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      overflow-y: auto;
+      background-color: var(--pane-background);
+      color: var(--text-color);
     }
 
     #renderedOutput {
-      font-size: 14pt;
-      line-height: 1.6;
+      flex: 1;
+      padding: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+      box-sizing: border-box;
+      overflow-y: auto;
+      background-color: var(--pane-background);
+      color: var(--text-color);
     }
 
-    /* Hide the footer when printing */
-    footer {
+    code {
+      background-color: var(--code-background);
+      padding: 0.1em 0.2em;
+      border-radius: 3px;
+      font-size: 0.95em;
+      line-height: 1;
+      font-family: "Courier New", Courier, monospace;
+      vertical-align: baseline;
+    }
+
+    table {
+      max-width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      border: 1px solid var(--table-border-color);
+    }
+
+    th, td {
+      border: 1px solid var(--table-border-color);
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--table-header-background);
+      font-weight: bold;
+    }
+
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: var(--button-background);
+      color: var(--button-color);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    /* Hide the page-break div on screen */
+    .page-break {
       display: none;
     }
 
-    /* Page Break Support */
-    .page-break {
-      display: block;              /* Ensure the div is rendered */
-      page-break-after: always;    /* Insert a page break after this div */
-      height: 0;                   /* Prevent the div from taking up space */
+    @media print {
+      body {
+        display: block;
+        margin: 0;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      #editorContainer {
+        display: block;
+      }
+
+      #inputPane {
+        display: none;
+      }
+
+      #outputPane {
+        width: auto;
+        padding: 15mm;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: none;
+      }
+
+      #outputPane .pane-heading,
+      .no-print {
+        display: none !important;
+      }
+
+      svg, pre {
+        page-break-inside: avoid;
+      }
+
+      #renderedOutput {
+        font-size: 14pt;
+        line-height: 1.6;
+      }
+
+      /* Hide the footer when printing */
+      footer {
+        display: none;
+      }
+
+      /* Page Break Support */
+      .page-break {
+        display: block;              /* Ensure the div is rendered */
+        page-break-after: always;    /* Insert a page break after this div */
+        height: 0;                   /* Prevent the div from taking up space */
+      }
+
+      /* Ensure MathJax equations are black in print */
+      svg {
+        color: #000000 !important; /* Sets the text color to black */
+        stroke: #000000 !important; /* Ensures box outlines like \boxed remain visible */
+      }
     }
-  }
 
-  footer {
-    text-align: center;
-    padding: 10px;
-    background: #f4f4f4;
-    color: #555;
-    margin-top: 10px;
-  }
-</style>
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #f4f4f4;
+      color: #555;
+      margin-top: 10px;
+    }
 
-
+    body.dark-mode footer {
+      background: #2d2c2c;
+      color: #ccc;
+    }
+  </style>
 </head>
 <body>
   <div id="editorContainer">
     <div id="inputPane">
-      <h2 class="pane-heading">Markdown Input</h2>
+      <div class="pane-heading-container">
+        <h2 class="pane-heading">Markdown Input</h2>
+      </div>
       <div class="buttonContainer">
         <button id="loadFileButton">Load .md File</button>
         <button id="saveMDButton">Save as .md</button>
@@ -196,7 +286,10 @@
       <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
     </div>
     <div id="outputPane">
-      <h2 class="pane-heading">Rendered Output</h2>
+      <div class="pane-heading-container">
+        <h2 class="pane-heading">Rendered Output</h2>
+        <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode" title="Switch to Dark Mode">☀</button>
+      </div>
       <div class="buttonContainer no-print">
         <button id="printButton">Print to PDF</button>
         <button id="exportHTMLButton">Export as HTML</button>
@@ -218,6 +311,7 @@
     const printButton = document.getElementById('printButton');
     const saveMDButton = document.getElementById('saveMDButton');
     const loadFileButton = document.getElementById('loadFileButton');
+    const themeToggleButton = document.getElementById('themeToggleButton');
 
     // Define sampleDocument using String.raw to preserve backslashes
     const sampleDocument = String.raw`
@@ -282,8 +376,8 @@ for i in range(5):
 
 | Name | Age | Profession |
 |:---:|:---:|:---:|
-| Eddard | 35 | Protector of the Realm 🛡 |
-| Albus | 115 | Wizard 🔥 |
+| Eddard | 35 | Protector of the Realm 👑 |
+| Albus | 115 | Wizard 🔥|
 | Tony | 38 | Inventor 🤖 |
 
 ---
@@ -419,148 +513,173 @@ A whimsical tour through Markdown, LaTeX, and HTML. May your documents be ever s
 [2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
   `;
 
-    /**
-     * Preprocess the input Markdown by replacing all single backslashes with double backslashes
-     * within LaTeX math blocks. This ensures that LaTeX commands requiring backslashes are
-     * correctly interpreted by MathJax without affecting other parts of the Markdown content.
-     * 
-     * @param {string} input - The raw Markdown input from the user.
-     * @returns {string} - The processed Markdown with escaped backslashes in LaTeX blocks.
-     */
-    function preprocessMarkdown(input) {
-      // Regex to match inline ($...$) and display ($$...$$) math blocks
-      const regex = /(\$\$?)([\s\S]+?)\1/g;
-      return input.replace(regex, function(match, p1, p2) {
-        // Replace single backslashes with double backslashes within LaTeX blocks
-        const escaped = p2.replace(/\\/g, '\\\\');
-        return p1 + escaped + p1;
-      });
-    }
+  /**
+   * Preprocess the input Markdown by replacing all single backslashes with double backslashes
+   * within LaTeX math blocks. This ensures that LaTeX commands requiring backslashes are
+   * correctly interpreted by MathJax without affecting other parts of the Markdown content.
+   * 
+   * @param {string} input - The raw Markdown input from the user.
+   * @returns {string} - The processed Markdown with escaped backslashes in LaTeX blocks.
+   */
+  function preprocessMarkdown(input) {
+    // Regex to match inline ($...$) and display ($$...$$) math blocks
+    const regex = /(\$\$?)([\s\S]+?)\1/g;
+    return input.replace(regex, function(match, p1, p2) {
+      // Replace single backslashes with double backslashes within LaTeX blocks
+      const escaped = p2.replace(/\\/g, '\\\\');
+      return p1 + escaped + p1;
+    });
+  }
 
-    function renderContent() {
-      const inputText = markdownInput.value;
-      const preprocessedText = preprocessMarkdown(inputText);
-      const parsedMarkdown = marked.parse(preprocessedText);
-      const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-      renderedOutput.innerHTML = sanitizedContent;
-      MathJax.typesetPromise([renderedOutput]).catch(console.error);
-    }
+  function renderContent() {
+    const inputText = markdownInput.value;
+    const preprocessedText = preprocessMarkdown(inputText);
+    const parsedMarkdown = marked.parse(preprocessedText);
+    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+    renderedOutput.innerHTML = sanitizedContent;
+    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  }
 
-    async function printToPDF() {
-      await MathJax.typesetPromise([renderedOutput]);
-      window.print();
-    }
+  async function printToPDF() {
+    await MathJax.typesetPromise([renderedOutput]);
+    window.print();
+  }
 
-    function exportHTML() {
-      const fileName = prompt('Enter file name for the HTML export:', 'document.html');
-      if (!fileName) return;
+  function exportHTML() {
+    const fileName = prompt('Enter file name for the HTML export:', 'document.html');
+    if (!fileName) return;
 
-      const sanitizedHTML = renderedOutput.innerHTML;
-      const doc = document.implementation.createHTMLDocument('Exported Document');
-      const head = doc.head;
-      const body = doc.body;
+    const sanitizedHTML = renderedOutput.innerHTML;
+    const doc = document.implementation.createHTMLDocument('Exported Document');
+    const head = doc.head;
+    const body = doc.body;
 
-      const style = document.createElement('style');
-      style.textContent = `
-        body {
-          font-family: Helvetica, sans-serif;
-          line-height: 1.6;
-          margin: 20px;
-        }
-        table {
-          max-width: 90%;
-          margin: 20px auto;
-          border-collapse: collapse;
-          border: 1px solid black;
-        }
-        th, td {
-          border: 1px solid black;
-          padding: 8px;
-          text-align: left;
-        }
-        th {
-          background-color: #f4f4f4;
-        }
-      `;
-      head.appendChild(style);
+    const style = document.createElement('style');
+    style.textContent = `
+      body {
+        font-family: Helvetica, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+        background-color: #ffffff;
+        color: #000000;
+      }
+      table {
+        max-width: 90%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        border: 1px solid black;
+      }
+      th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f4f4f4;
+      }
+      code {
+        background-color: #f0f0f0;
+        padding: 0.1em 0.2em;
+        border-radius: 3px;
+        font-size: 0.95em;
+        line-height: 1;
+        font-family: "Courier New", Courier, monospace;
+        vertical-align: baseline;
+      }
+    `;
+    head.appendChild(style);
 
-      // Add MathJax configuration
-      const mathjaxConfigScript = document.createElement('script');
-      mathjaxConfigScript.textContent = `
-        window.MathJax = {
-          tex: {
-            inlineMath: [['$', '$']],
-            displayMath: [['$$', '$$']],
-            processEscapes: true, // Keeping as true
-            packages: ['base', 'ams'],
-          },
-          svg: {
-            fontCache: 'local',
-          }
-        };
-      `;
-      head.appendChild(mathjaxConfigScript);
-
-      const mathjaxScript = document.createElement('script');
-      mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
-      head.appendChild(mathjaxScript);
-
-      body.innerHTML = sanitizedHTML;
-
-      const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
-      const blob = new Blob([exportedHTML], { type: 'text/html' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
-    }
-
-    function saveMarkdown() {
-      const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
-      if (!fileName) return;
-
-      const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
-    }
-
-    function loadMarkdownFile() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.md,text/markdown';
-      input.onchange = e => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = event => {
-            markdownInput.value = event.target.result;
-            renderContent();
-          };
-          reader.readAsText(file);
+    // Add MathJax configuration
+    const mathjaxConfigScript = document.createElement('script');
+    mathjaxConfigScript.textContent = `
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          displayMath: [['$$', '$$']],
+          processEscapes: true, // Keeping as true
+          packages: ['base', 'ams'],
+        },
+        svg: {
+          fontCache: 'local',
         }
       };
-      input.click();
+    `;
+    head.appendChild(mathjaxConfigScript);
+
+    const mathjaxScript = document.createElement('script');
+    mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+    head.appendChild(mathjaxScript);
+
+    body.innerHTML = sanitizedHTML;
+
+    const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
+    const blob = new Blob([exportedHTML], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+  }
+
+  function saveMarkdown() {
+    const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
+    if (!fileName) return;
+
+    const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+  }
+
+  function loadMarkdownFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.md,text/markdown';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = event => {
+          markdownInput.value = event.target.result;
+          renderContent();
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    if (document.body.classList.contains('dark-mode')) {
+      themeToggleButton.textContent = '🌙';
+      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+    } else {
+      themeToggleButton.textContent = '☀';
+      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
     }
+  }
 
-    markdownInput.addEventListener('input', renderContent);
-    printButton.addEventListener('click', printToPDF);
-    exportHTMLButton.addEventListener('click', exportHTML);
-    saveMDButton.addEventListener('click', saveMarkdown);
-    loadFileButton.addEventListener('click', loadMarkdownFile);
-    loadSampleButton.addEventListener('click', () => {
-      markdownInput.value = sampleDocument;
-      renderContent();
-    });
-    clearButton.addEventListener('click', () => {
-      markdownInput.value = '';
-      renderContent();
-    });
-
-    // Initial render
+  // Event Listeners
+  markdownInput.addEventListener('input', renderContent);
+  printButton.addEventListener('click', printToPDF);
+  exportHTMLButton.addEventListener('click', exportHTML);
+  saveMDButton.addEventListener('click', saveMarkdown);
+  loadFileButton.addEventListener('click', loadMarkdownFile);
+  loadSampleButton.addEventListener('click', () => {
+    markdownInput.value = sampleDocument;
     renderContent();
+  });
+  clearButton.addEventListener('click', () => {
+    markdownInput.value = '';
+    renderContent();
+  });
+  themeToggleButton.addEventListener('click', toggleTheme);
+
+  // Initial render
+  renderContent();
   </script>
 </body>
-
 </html>
