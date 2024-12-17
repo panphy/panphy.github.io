@@ -335,7 +335,7 @@ Ever felt like your document is missing a little *sparkle*? ✨ Tired of clickin
 
 **1.1 Headings**
 > # ⚠️This is a HUGE Heading!⚠️
-> ### This is Not as Huge~~ Phew 😙!
+> ### This is not as HUGE~~ Phew 😙!
 
 **1.2 Lists**
 - Let's make a list in a list in a list...
@@ -347,7 +347,7 @@ Ever felt like your document is missing a little *sparkle*? ✨ Tired of clickin
 
 **1.3 Blockquotes**
 > This is a quotation. 
->> And this is a quotation within a **quotation**. *Because why not?*
+>> And this is a quotation within a quotation. *Because why not?*
 
 **1.4 Code Blocks**
 
@@ -369,10 +369,10 @@ for i in range(5):
 
 **1.6 Links**
 
-- 1.5.1 **Inline Link:**  
+- 1.6.1 **Inline Link:**  
 > I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog videos. 🐶
 
-- 1.5.2 **Reference Links:**
+- 1.6.2 **Reference Links:**
   - *"[Markdown][1] is a lightweight markup language for creating formatted text using a plain-text editor."*
   
   - *"[LaTeX][2] is widely used in academia for the communication and publication of scientific documents and technical note-taking in many fields, owing partially to its support for complex mathematical notation."*
@@ -459,28 +459,29 @@ $$
 
 ---
 
-## 3. Using HTML
+## 3. HTML
 
-(*Because even Markdown needs a little HTML magic.*)
+> (*Because even Markdown needs a little HTML magic.*)
 
+**3.1 Page Break**
 - If you want to insert a page break in the printed PDF, insert this:
 
-> <code> \<div class="page-break"\>\<\/div\> </code>
+>> <code> \<div class="page-break"\>\<\/div\> </code>
 
-> (It is invisible in the HTML. 😉)
+>> (It is invisible in the HTML. 😉)
 
 <div class="page-break"></div>
 
+**3.2 Line Break**
 - Can you find the line breaks I made with <code>\<br\></code> in this doc?
 
 <br>
 
+**3.3 Inserting picture (and its alignment)
 - Let's insert a picture!
-
 <p align="center">
     <img src="https://panphy.github.io/sample_pic.webp" width="250" alt="Made with ChatGPT">
 </p>
-
 <p align="center">
     Fig. 1 - This is the caption. What a nice picture!
 </p>
