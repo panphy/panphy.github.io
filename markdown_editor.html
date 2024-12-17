@@ -19,156 +19,169 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
-  <style>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    font-family: Helvetica, sans-serif;
+    line-height: 1.6;
+  }
+
+  #editorContainer {
+    display: flex;
+    flex: 1;
+    background-color: #f0f0f0;
+    height: 100%;
+  }
+
+  #inputPane, #outputPane {
+    width: 50%;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  #inputPane {
+    border-right: 1px solid #ccc;
+  }
+
+  .pane-heading {
+    background-color: #333;
+    color: #fff;
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .buttonContainer {
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  textarea {
+    flex: 1;
+    width: 100%;
+    padding: 20px;
+    border: none;
+    resize: none;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  #renderedOutput {
+    flex: 1;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  code {
+    background-color: #f0f0f0;
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
+    font-size: 0.95em;
+    line-height: 1;
+    font-family: "Courier New", Courier, monospace;
+    vertical-align: baseline;
+  }
+
+  table {
+    max-width: 90%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    border: 1px solid black;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+
+  button {
+    margin: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Hide the page-break div on screen */
+  .page-break {
+    display: none;
+  }
+
+  @media print {
     body {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      display: block;
       margin: 0;
-      font-family: Helvetica, sans-serif;
-      line-height: 1.6;
     }
 
     #editorContainer {
-      display: flex;
-      flex: 1;
-      background-color: #f0f0f0;
-      height: 100%;
-    }
-
-    #inputPane, #outputPane {
-      width: 50%;
-      padding: 0;
-      box-sizing: border-box;
-      background-color: #fff;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
+      display: block;
     }
 
     #inputPane {
-      border-right: 1px solid #ccc;
+      display: none;
     }
 
-    .pane-heading {
-      background-color: #333;
-      color: #fff;
-      margin: 0;
-      padding: 5px;
-      text-align: center;
+    #outputPane {
+      width: auto;
+      padding: 15mm;
     }
 
-    .buttonContainer {
-      margin: 10px 0;
-      text-align: center;
+    #outputPane .pane-heading,
+    .no-print {
+      display: none;
     }
 
-    textarea {
-      flex: 1;
-      width: 100%;
-      padding: 20px;
-      border: none;
-      resize: none;
-      font-size: 16px;
-      line-height: 1.5;
-      box-sizing: border-box;
-      overflow-y: auto;
-      min-height: 0;
+    svg, pre {
+      page-break-inside: avoid;
     }
 
     #renderedOutput {
-      flex: 1;
-      padding: 20px;
-      font-size: 16px;
-      line-height: 1.5;
-      box-sizing: border-box;
-      overflow-y: auto;
-      min-height: 0;
+      font-size: 14pt;
+      line-height: 1.6;
     }
 
-    code {
-      background-color: #f0f0f0;
-      padding: 0.1em 0.2em;
-      border-radius: 3px;
-      font-size: 0.95em;
-      line-height: 1;
-      font-family: "Courier New", Courier, monospace;
-      vertical-align: baseline;
-    }
-
-    table {
-      max-width: 90%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      border: 1px solid black;
-    }
-
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #f4f4f4;
-      font-weight: bold;
-    }
-
-    button {
-      margin: 5px;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    @media print {
-      body {
-        display: block;
-        margin: 0;
-      }
-
-      #editorContainer {
-        display: block;
-      }
-
-      #inputPane {
-        display: none;
-      }
-
-      #outputPane {
-        width: auto;
-        padding: 15mm;
-      }
-
-      #outputPane .pane-heading,
-      .no-print {
-        display: none;
-      }
-
-      svg, pre {
-        page-break-inside: avoid;
-      }
-
-      #renderedOutput {
-        font-size: 14pt;
-        line-height: 1.6;
-      }
-
-      /* Hide the footer when printing */
-      footer {
-        display: none;
-      }
-    }
-
+    /* Hide the footer when printing */
     footer {
-      text-align: center;
-      padding: 10px;
-      background: #f4f4f4;
-      color: #555;
-      margin-top: 10px;
+      display: none;
     }
 
-  </style>
+    /* Page Break Support */
+    .page-break {
+      display: block;              /* Ensure the div is rendered */
+      page-break-after: always;    /* Insert a page break after this div */
+      height: 0;                    /* Prevent the div from taking up space */
+    }
+  }
+
+  footer {
+    text-align: center;
+    padding: 10px;
+    background: #f4f4f4;
+    color: #555;
+    margin-top: 10px;
+  }
+</style>
+
+
 </head>
 <body>
   <div id="editorContainer">
@@ -208,20 +221,19 @@
 
     // Define sampleDocument using String.raw to preserve backslashes
     const sampleDocument = String.raw`
-
 # Welcome to the Markdown & LaTeX Playground! 🎉
 
-Ever felt like your plain text is missing a little *sparkle*? ✨ Whether you're a markdown maestro or a LaTeX legend (or just here for the cool math symbols), this editor is your new best friend. Dive in, unleash your creativity, and watch your documents transform from "meh" to "magnificent"! Happy editing! 📝🚀
+Ever felt like your plain text is missing a little *sparkle*? ✨ Tired of clicking countless buttons to format your tables or hunting for symbols in hidden dropdown menus? This editor is your new best friend. Dive in, unleash your creativity, and watch your documents transform from "meh" to "magnificent"! Happy editing! 📝🚀
 
 <br>
 
 ---
 
-# THIS IS A DEMO OF THE USE OF:
+# This is a demo of...
 
-1. (GitHub) Markdown  
-2. (A Bit of) LaTeX  
-3. HTML Tags  
+1. a bit of Markdown,  
+2. a tiny little bit of LaTeX, and  
+3. a few HTML Tags
 
 ---
 
@@ -231,7 +243,9 @@ Ever felt like your plain text is missing a little *sparkle*? ✨ Whether you're
 
 # Warning: This is a HUGE Heading!
 
-#### This is Not as Huge~~ Phew!
+#### This is Not as Huge~~ Phew 😙!
+
+---
 
 ### Lists
 
@@ -242,21 +256,20 @@ Ever felt like your plain text is missing a little *sparkle*? ✨ Whether you're
         - I can ~~strikethrough~~ it.  
 - I can *italicize* it. _And so can I!_
 
-<br>
+---
 
 ### Blockquotes
 
-> This is a quotation  
+> This is a quotation.
 > 
 >> And this is a quotation within a **quotation**. *Because why not?*
 
-<br>
+---
 
 ### Code Blocks
 
 ~~~python
-# I can type my codes here
-import sympy as sym
+# I can type my codes here.
 
 for i in range(5):
     print(i)
@@ -267,25 +280,27 @@ for i in range(5):
 
 ### Tables
 
-| Name | Half life | Profession |
-|---|---|---|
-| Ace | 11 | Engineer |
-| Queen | 13 | Philosopher |
-| King | 17 | Physicist |
+| Name  | Age  | Race  | Profession    |
+|:-----:|:----:|:-----:|:-------------:|
+| Ace   | 21   | Human | Knight 🐴     |
+| Queen | 82   | Elf   | Sorceress 🔥  |
+| King  | 152  | Dwarf | Necromancer 💀|
 
 ---
 
 ### Links
 
 **Inline Link:**  
-I can insert a [link](https://www.youtube.com) that takes you to the land of endless cat videos.
+I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog 🐶 videos.
 
 **Reference Links:**  
-I get 10 times more traffic from [Google][1] than from [Yahoo][2]. Sorry, Yahoo, we still remember you.
+> *"[Markdown][1] is a lightweight markup language for creating formatted text using a plain-text editor."*
+
+> *"[LaTeX][2] is widely used in academia for the communication and publication of scientific documents and technical note-taking in many fields, owing partially to its support for complex mathematical notation."*
 
 ---
 
-## 2. Using LaTeX
+## 2. LaTeX
 
 ### Greek Letters
 
@@ -299,7 +314,7 @@ $\mu_\tau^\alpha \quad \nu \quad \tau \quad \epsilon \quad \psi \quad \rho \quad
 
 ### Math Expressions
 
-1. **In-line examples:** This is an $\alpha$, and this is a $\beta$. Absolute zero is $-273 ^\circ{C}$.  
+1. **In-line examples:** This is an $\alpha$, and this is a $\beta$. Absolute zero is $-273 ^\circ{C}$ 🥶.  
 
 2. **Displayed examples:**  
 
@@ -319,13 +334,11 @@ $$ \vec{\nabla} \cdot D = \left| \vec{\nabla} \times \vec{A} \right| $$
 
 $$ {\lim_{\Delta x \to 0}}  \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
-<br>
+|Note
+|:---
+Interestingly, this is how to type an inline limit: $ {\lim\limits_{\Delta x \to 0}} $.
 
-- Interestingly, this is how to type an inline limit: $ {\lim\limits_{\Delta x \to 0}} $.
-
----
-
-### Matrices
+3. **Matrices**
 
 $$
 \begin{pmatrix}
@@ -345,9 +358,7 @@ c & d \\
 \end{bmatrix}
 $$
 
----
-
-### Equation Alignment
+4. **Equation Alignment**
 
 $$
 \begin{aligned}
@@ -356,13 +367,11 @@ x &= \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 \end{aligned}
 $$
 
----
+5. **Bracket Size**
 
-### Bracket Size
+$$ \left( \frac{1}{\sqrt[n]{2}} \right) \space \text{vs} \space ( \frac{1}{\sqrt[n]{2}} ) $$
 
-$\left( \frac{1}{\sqrt[n]{2}} \right)$ **vs** $( \frac{1}{\sqrt[n]{2}} )$ 
-
-*Because size does matter... sometimes.*
+(*Because size does matter... sometimes.*)
 
 ---
 
@@ -372,15 +381,27 @@ $$
 {Na_{(aq)}}^+ + {Cl_{(aq)}}^- \longrightarrow NaCl_{(s)}
 $$
 
-*Chemistry deserves some LaTeX love too.*
+*🧪 Chemistry deserves some LaTeX love too.*
 
 ---
 
 ## 3. Using HTML
 
-Don't you see the blank lines I made with **\<br\>** throughout this doc?
+(*Because even Markdown needs a little HTML magic.*)
+
+- If you want to insert a page break in the printed PDF, insert this:
+
+> <code> \<div class="page-break"\>\<\/div\> </code>
+
+> (It is invisible in the PDF and the HTML. 😉)
+
+<div class="page-break"></div>
+
+- Can you find the line breaks I made with <code>\<br\></code> in this doc?
 
 <br>
+
+- Let's insert a picture!
 
 <p align="center">
     <img src="https://www.google.com/logos/doodles/2022/stephen-hawkings-80th-birthday-6753651837109174-2xa.gif" width="250" alt="Stephen Hawking's 80th Birthday">
@@ -390,19 +411,14 @@ Don't you see the blank lines I made with **\<br\>** throughout this doc?
     <em>Fig. 1 - This is the caption. What a nice picture!</em>
 </p>
 
-*Because even Markdown needs a little HTML magic.*
-
 ---
 
 | And there you have it!
 | :---
 _A whimsical tour through Markdown, LaTeX, and HTML. May your documents be ever stylish and your equations ever balanced!_
 
----
-
-[1]: http://google.com/ "Google"  
-[2]: http://search.yahoo.com/ "Yahoo Search"
-
+[1]: https://en.wikipedia.org/wiki/Markdown "Markdown"  
+[2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
   `;
 
     /**
