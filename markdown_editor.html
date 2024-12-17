@@ -64,7 +64,7 @@
       --button-background: #474646;
       --button-color: #ffffff;
       --border-color: #555555;
-      --code-background: #2c2c2c;
+      --code-background: #2c2c2c; /* Darker background for code blocks */
       --table-border-color: #555555;
       --table-header-background: #333333;
     }
@@ -75,7 +75,7 @@
       height: 100vh;
       margin: 0;
       font-family: Helvetica, sans-serif;
-      line-height: 1.6; /* Increased for better readability */
+      line-height: 1.5; /* Set line-height to 1.5 */
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
@@ -163,9 +163,9 @@
 
     #renderedOutput {
       flex: 1;
-      padding: 0px;
+      padding: 20px;
       font-size: 16px;
-      line-height: 1.5;
+      line-height: 1.5; /* Consistent line-height */
       box-sizing: border-box;
       overflow-y: auto;
       background-color: var(--pane-background);
@@ -177,7 +177,7 @@
       background-color: var(--code-background);
       padding: 0.1em 0.2em;
       border-radius: 3px;
-      font-size: 0.95em;
+      font-size: 1.05em; /* Increased font size for better visibility */
       line-height: 1; /* Maintain tight spacing for inline code */
       font-family: "Courier New", Courier, monospace;
       vertical-align: baseline;
@@ -186,25 +186,27 @@
     /* Code block styling */
     pre {
       background-color: var(--code-background);
-      padding: 0px;
+      padding: 0; /* Removed padding */
       border-radius: 5px;
       overflow-x: auto;
-      font-size: 16px;
-      line-height: 1.5;
-      margin: 2px 0;
+      font-size: 1.1em; /* Increased font size */
+      line-height: 1.5; /* Set line-height to 1.5 */
+      margin: 10px 0;
     }
 
     pre code {
       background: none; /* Let Highlight.js handle background */
-      padding: 0;
+      padding: 0; /* Removed padding */
       border-radius: 0;
       font-family: inherit; /* Inherit font from pre */
       line-height: 1.5; /* Ensure line-height is applied */
+      font-size: inherit; /* Inherit font size */
     }
 
     /* Highlight.js Styles */
     .hljs {
       line-height: 1.5; /* Ensure Highlight.js respects line-height */
+      font-size: 1.1em; /* Match the font size of pre */
     }
 
     .hljs-comment,
@@ -259,7 +261,7 @@
         margin: 0;
         background-color: #ffffff !important;
         color: #000000 !important;
-        line-height: 1.5;
+        line-height: 1.5; /* Ensure body has appropriate line-height */
       }
 
       #editorContainer {
@@ -276,7 +278,7 @@
         background-color: #ffffff !important;
         color: #000000 !important;
         border: none;
-        line-height: 1.5;
+        line-height: 1.5; /* Ensure output pane has appropriate line-height */
       }
 
       #outputPane .pane-heading,
@@ -286,7 +288,7 @@
 
       svg, pre {
         page-break-inside: avoid;
-        line-height: 1.6; /* Ensure code blocks have appropriate line-height */
+        line-height: 1.5; /* Ensure code blocks have appropriate line-height */
       }
 
       #renderedOutput {
@@ -315,13 +317,15 @@
       /* Preserve Highlight.js styles in print */
       pre {
         background-color: #f0f0f0 !important; /* Ensure background is visible */
-        line-height: 1.5 !important;
+        line-height: 1.5 !important; /* Ensure line-height is increased */
+        font-size: 1.1em !important; /* Ensure font size is increased */
       }
 
       /* Ensure code colors are preserved */
       .hljs {
         color: #000000 !important;
         line-height: 1.5 !important; /* Ensure line-height is increased */
+        font-size: 1.1em !important; /* Ensure font size is increased */
       }
 
       .hljs-comment,
@@ -652,7 +656,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       style.textContent = `
         body {
           font-family: Helvetica, sans-serif;
-          line-height: 1.6; /* Consistent line-height */
+          line-height: 1.5; /* Consistent line-height */
           margin: 20px;
           background-color: #ffffff;
           color: #000000;
@@ -675,31 +679,33 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           background-color: #f0f0f0;
           padding: 0.1em 0.2em;
           border-radius: 3px;
-          font-size: 0.95em;
+          font-size: 1.05em; /* Increased font size */
           line-height: 1; /* Maintain tight spacing for inline code */
           font-family: "Courier New", Courier, monospace;
           vertical-align: baseline;
         }
         pre {
           background-color: #f0f0f0;
-          padding: 16px;
+          padding: 0; /* Removed padding */
           border-radius: 5px;
           overflow-x: auto;
-          font-size: 14px;
-          line-height: 1.6; /* Increased Line Height */
+          font-size: 1.1em; /* Increased font size */
+          line-height: 1.5; /* Set line-height to 1.5 */
           margin: 10px 0;
         }
         pre code {
           background: none; /* Let Highlight.js handle background */
-          padding: 0;
+          padding: 0; /* Removed padding */
           border-radius: 0;
           font-family: inherit; /* Inherit font from pre */
-          line-height: 1.6; /* Ensure line-height is applied */
+          line-height: 1.5; /* Ensure line-height is applied */
+          font-size: inherit; /* Inherit font size */
         }
 
         /* Highlight.js Styles */
         .hljs {
-          line-height: 1.6; /* Ensure Highlight.js respects line-height */
+          line-height: 1.5; /* Ensure Highlight.js respects line-height */
+          font-size: 1.1em; /* Match the font size of pre */
         }
 
         .hljs-comment,
