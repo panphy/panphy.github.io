@@ -64,9 +64,10 @@
       --button-background: #474646;
       --button-color: #ffffff;
       --border-color: #555555;
-      --code-background: #2c2c2c; /* Darker background for code blocks */
+      --code-background: #2f2f2f; /* Darker background for code blocks */
       --table-border-color: #555555;
       --table-header-background: #333333;
+      --code-text-color: #f8f8f2; /* Brightened code text color */
     }
 
     body {
@@ -177,10 +178,11 @@
       background-color: var(--code-background);
       padding: 0.1em 0.2em;
       border-radius: 3px;
-      font-size: 1.05em; /* Increased font size for better visibility */
+      font-size: 0.95em; /* Set font size to 0.95em */
       line-height: 1; /* Maintain tight spacing for inline code */
       font-family: "Courier New", Courier, monospace;
       vertical-align: baseline;
+      color: inherit; /* Inherit color to allow Highlight.js to apply */
     }
 
     /* Code block styling */
@@ -189,9 +191,9 @@
       padding: 0; /* Removed padding */
       border-radius: 5px;
       overflow-x: auto;
-      font-size: 1.1em; /* Increased font size */
+      font-size: 0.95em; /* Set font size to 0.95em */
       line-height: 1.5; /* Set line-height to 1.5 */
-      margin: 10px 0;
+      margin: 2px 0; /* Further reduced margin */
     }
 
     pre code {
@@ -201,17 +203,61 @@
       font-family: inherit; /* Inherit font from pre */
       line-height: 1.5; /* Ensure line-height is applied */
       font-size: inherit; /* Inherit font size */
+      color: inherit; /* Inherit color to allow Highlight.js to apply */
     }
 
     /* Highlight.js Styles */
     .hljs {
       line-height: 1.5; /* Ensure Highlight.js respects line-height */
-      font-size: 1.1em; /* Match the font size of pre */
+      font-size: 0.95em; /* Match the font size of pre */
+      background-color: inherit; /* Ensure background is inherited from pre */
+      color: inherit; /* Inherit color to allow custom coloring */
     }
 
-    .hljs-comment,
-    .hljs-quote {
-      color: #008000 !important; /* Example: green for comments */
+    /* Custom Highlight.js Colors for Dark Mode */
+    body.dark-mode .hljs {
+      color: var(--code-text-color); /* Brightened code text color */
+    }
+
+    body.dark-mode .hljs-comment,
+    body.dark-mode .hljs-quote {
+      color: #8d9a70 !important; /* Darker green for comments */
+    }
+
+    body.dark-mode .hljs-keyword,
+    body.dark-mode .hljs-selector-tag,
+    body.dark-mode .hljs-subst {
+      color: #66d9ef !important; /* Bright blue for keywords */
+    }
+
+    body.dark-mode .hljs-string,
+    body.dark-mode .hljs-doctag {
+      color: #e6db74 !important; /* Yellow for strings */
+    }
+
+    body.dark-mode .hljs-number,
+    body.dark-mode .hljs-regexp,
+    body.dark-mode .hljs-tag .hljs-attr {
+      color: #ae81ff !important; /* Purple for numbers and attributes */
+    }
+
+    body.dark-mode .hljs-title,
+    body.dark-mode .hljs-section {
+      color: #a6e22e !important; /* Green for titles and sections */
+    }
+
+    body.dark-mode .hljs-type,
+    body.dark-mode .hljs-built_in {
+      color: #fd971f !important; /* Orange for types and built-ins */
+    }
+
+    body.dark-mode .hljs-symbol,
+    body.dark-mode .hljs-bullet {
+      color: #f92672 !important; /* Pink for symbols and bullets */
+    }
+
+    body.dark-mode .hljs-link {
+      color: #e6db74 !important; /* Yellow for links */
     }
 
     /* Add more .hljs-* styles as needed based on the Highlight.js theme */
@@ -317,15 +363,17 @@
       /* Preserve Highlight.js styles in print */
       pre {
         background-color: #f0f0f0 !important; /* Ensure background is visible */
-        line-height: 1.5 !important; /* Ensure line-height is increased */
-        font-size: 1.1em !important; /* Ensure font size is increased */
+        line-height: 1.5 !important; /* Ensure line-height is set */
+        font-size: 0.95em !important; /* Ensure font size is consistent */
+        margin: 2px 0 !important; /* Ensure reduced margin is applied */
       }
 
       /* Ensure code colors are preserved */
       .hljs {
         color: #000000 !important;
-        line-height: 1.5 !important; /* Ensure line-height is increased */
-        font-size: 1.1em !important; /* Ensure font size is increased */
+        line-height: 1.5 !important; /* Ensure line-height is set */
+        font-size: 0.95em !important; /* Ensure font size is consistent */
+        background-color: inherit !important; /* Inherit background */
       }
 
       .hljs-comment,
@@ -674,24 +722,26 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
         }
         th {
           background-color: #f4f4f4;
+          font-weight: bold;
         }
         code {
           background-color: #f0f0f0;
           padding: 0.1em 0.2em;
           border-radius: 3px;
-          font-size: 1.05em; /* Increased font size */
+          font-size: 0.95em; /* Set font size to 0.95em */
           line-height: 1; /* Maintain tight spacing for inline code */
           font-family: "Courier New", Courier, monospace;
           vertical-align: baseline;
+          color: inherit; /* Inherit color to allow Highlight.js to apply */
         }
         pre {
           background-color: #f0f0f0;
           padding: 0; /* Removed padding */
           border-radius: 5px;
           overflow-x: auto;
-          font-size: 1.1em; /* Increased font size */
+          font-size: 0.95em; /* Set font size to 0.95em */
           line-height: 1.5; /* Set line-height to 1.5 */
-          margin: 10px 0;
+          margin: 2px 0; /* Further reduced margin */
         }
         pre code {
           background: none; /* Let Highlight.js handle background */
@@ -700,17 +750,61 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           font-family: inherit; /* Inherit font from pre */
           line-height: 1.5; /* Ensure line-height is applied */
           font-size: inherit; /* Inherit font size */
+          color: inherit; /* Inherit color to allow Highlight.js to apply */
         }
 
         /* Highlight.js Styles */
         .hljs {
           line-height: 1.5; /* Ensure Highlight.js respects line-height */
-          font-size: 1.1em; /* Match the font size of pre */
+          font-size: 0.95em; /* Match the font size of pre */
+          background-color: inherit; /* Ensure background is inherited from pre */
+          color: inherit; /* Inherit color to allow custom coloring */
         }
 
-        .hljs-comment,
-        .hljs-quote {
-          color: #008000 !important; /* Example: green for comments */
+        /* Custom Highlight.js Colors for Dark Mode */
+        body.dark-mode .hljs {
+          color: #f8f8f2 !important; /* Brightened code text color */
+        }
+
+        body.dark-mode .hljs-comment,
+        body.dark-mode .hljs-quote {
+          color: #75715e !important; /* Darker green for comments */
+        }
+
+        body.dark-mode .hljs-keyword,
+        body.dark-mode .hljs-selector-tag,
+        body.dark-mode .hljs-subst {
+          color: #66d9ef !important; /* Bright blue for keywords */
+        }
+
+        body.dark-mode .hljs-string,
+        body.dark-mode .hljs-doctag {
+          color: #e6db74 !important; /* Yellow for strings */
+        }
+
+        body.dark-mode .hljs-number,
+        body.dark-mode .hljs-regexp,
+        body.dark-mode .hljs-tag .hljs-attr {
+          color: #ae81ff !important; /* Purple for numbers and attributes */
+        }
+
+        body.dark-mode .hljs-title,
+        body.dark-mode .hljs-section {
+          color: #a6e22e !important; /* Green for titles and sections */
+        }
+
+        body.dark-mode .hljs-type,
+        body.dark-mode .hljs-built_in {
+          color: #fd971f !important; /* Orange for types and built-ins */
+        }
+
+        body.dark-mode .hljs-symbol,
+        body.dark-mode .hljs-bullet {
+          color: #f92672 !important; /* Pink for symbols and bullets */
+        }
+
+        body.dark-mode .hljs-link {
+          color: #e6db74 !important; /* Yellow for links */
         }
 
         /* Add more .hljs-* styles as needed based on the Highlight.js theme */
