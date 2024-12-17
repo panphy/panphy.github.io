@@ -35,7 +35,7 @@
   
   <!-- Initialize Highlight.js after DOM content is loaded -->
   <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
+    document.addEventListener('DOMContentLoaded', () => {
       hljs.highlightAll();
     });
   </script>
@@ -75,7 +75,7 @@
       height: 100vh;
       margin: 0;
       font-family: Helvetica, sans-serif;
-      line-height: 1.6;
+      line-height: 1.6; /* Increased for better readability */
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
@@ -165,7 +165,7 @@
       flex: 1;
       padding: 20px;
       font-size: 16px;
-      line-height: 1.5;
+      line-height: 1.6; /* Increased Line Height */
       box-sizing: border-box;
       overflow-y: auto;
       background-color: var(--pane-background);
@@ -178,20 +178,20 @@
       padding: 0.1em 0.2em;
       border-radius: 3px;
       font-size: 0.95em;
-      line-height: 1;
+      line-height: 1; /* Maintain tight spacing for inline code */
       font-family: "Courier New", Courier, monospace;
       vertical-align: baseline;
     }
 
-    /* Code block styling - Remove pre code styles to prevent conflicts */
+    /* Code block styling */
     pre {
       background-color: var(--code-background);
-      padding: 0px;
+      padding: 16px;
       border-radius: 5px;
       overflow-x: auto;
-      font-size: 16px;
-      line-height: 2;
-      margin: 3px 0;
+      font-size: 14px;
+      line-height: 1.6; /* Increased Line Height */
+      margin: 10px 0;
     }
 
     pre code {
@@ -199,7 +199,20 @@
       padding: 0;
       border-radius: 0;
       font-family: inherit; /* Inherit font from pre */
+      line-height: 1.6; /* Ensure line-height is applied */
     }
+
+    /* Highlight.js Styles */
+    .hljs {
+      line-height: 1.6; /* Ensure Highlight.js respects line-height */
+    }
+
+    .hljs-comment,
+    .hljs-quote {
+      color: #008000 !important; /* Example: green for comments */
+    }
+
+    /* Add more .hljs-* styles as needed based on the Highlight.js theme */
 
     table {
       max-width: 90%;
@@ -246,6 +259,7 @@
         margin: 0;
         background-color: #ffffff !important;
         color: #000000 !important;
+        line-height: 1.6; /* Ensure body has appropriate line-height */
       }
 
       #editorContainer {
@@ -262,6 +276,7 @@
         background-color: #ffffff !important;
         color: #000000 !important;
         border: none;
+        line-height: 1.6; /* Ensure output pane has appropriate line-height */
       }
 
       #outputPane .pane-heading,
@@ -271,6 +286,7 @@
 
       svg, pre {
         page-break-inside: avoid;
+        line-height: 1.6; /* Ensure code blocks have appropriate line-height */
       }
 
       #renderedOutput {
@@ -299,11 +315,13 @@
       /* Preserve Highlight.js styles in print */
       pre {
         background-color: #f0f0f0 !important; /* Ensure background is visible */
+        line-height: 1.6 !important; /* Ensure line-height is increased */
       }
 
       /* Ensure code colors are preserved */
       .hljs {
         color: #000000 !important;
+        line-height: 1.6 !important; /* Ensure line-height is increased */
       }
 
       .hljs-comment,
@@ -419,11 +437,11 @@ for i in range(5):
 
 **1.5 Tables**
 
-| Name | Age | Profession |
+| Name   | Age | Profession |
 |:---:|:---:|:---:|
 | Eddard | 35 | Lord 🐺 |
-| Albus | 115 | Wizard 🧙‍♂️|
-| Tony | 38 | Inventor 🤖 |
+| Albus  | 115 | Wizard 🧙‍♂️|
+| Tony   | 38 | Inventor 🤖 |
 
 **1.6 Links**
 
@@ -579,9 +597,10 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
       // Configure Marked to add language classes and use Highlight.js for syntax highlighting
       marked.setOptions({
+        langPrefix: 'hljs language-', // Highlight.js expects a top-level 'hljs' class
         highlight: function(code, lang) {
           if (lang && hljs.getLanguage(lang)) {
-            return hljs.highlightElement(document.createElement('code')).value;
+            return hljs.highlight(code, { language: lang }).value;
           } else {
             return hljs.highlightAuto(code).value;
           }
@@ -633,7 +652,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       style.textContent = `
         body {
           font-family: Helvetica, sans-serif;
-          line-height: 1.6;
+          line-height: 1.6; /* Consistent line-height */
           margin: 20px;
           background-color: #ffffff;
           color: #000000;
@@ -657,7 +676,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           padding: 0.1em 0.2em;
           border-radius: 3px;
           font-size: 0.95em;
-          line-height: 1;
+          line-height: 1; /* Maintain tight spacing for inline code */
           font-family: "Courier New", Courier, monospace;
           vertical-align: baseline;
         }
@@ -667,15 +686,28 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           border-radius: 5px;
           overflow-x: auto;
           font-size: 14px;
-          line-height: 1.5;
+          line-height: 1.6; /* Increased Line Height */
           margin: 10px 0;
         }
         pre code {
-          background: none;
+          background: none; /* Let Highlight.js handle background */
           padding: 0;
           border-radius: 0;
-          font-family: inherit;
+          font-family: inherit; /* Inherit font from pre */
+          line-height: 1.6; /* Ensure line-height is applied */
         }
+
+        /* Highlight.js Styles */
+        .hljs {
+          line-height: 1.6; /* Ensure Highlight.js respects line-height */
+        }
+
+        .hljs-comment,
+        .hljs-quote {
+          color: #008000 !important; /* Example: green for comments */
+        }
+
+        /* Add more .hljs-* styles as needed based on the Highlight.js theme */
       `;
       head.appendChild(style);
 
@@ -693,7 +725,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       // Add Highlight.js Initialization Script
       const highlightInit = document.createElement('script');
       highlightInit.textContent = `
-        window.addEventListener('DOMContentLoaded', (event) => {
+        window.addEventListener('DOMContentLoaded', () => {
           hljs.highlightAll();
         });
       `;
