@@ -297,6 +297,11 @@
 
     /* Highlight.js Styles in Print */
     @media print {
+      /* Define page margins */
+      @page {
+        margin: 15mm; /* Adjust as needed */
+      }
+
       body {
         display: block;
         margin: 0;
@@ -322,7 +327,14 @@
         line-height: 1.5; /* Ensure output pane has appropriate line-height */
       }
 
-      #outputPane .pane-heading,
+      /* Hide the entire pane heading container */
+      .pane-heading-container {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      /* Hide elements with 'no-print' class */
       .no-print {
         display: none !important;
       }
