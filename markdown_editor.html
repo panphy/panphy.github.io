@@ -262,6 +262,7 @@
 
     /* Add more .hljs-* styles as needed based on the Highlight.js theme */
 
+    /* Updated table styles */
     table {
       max-width: 90%;
       margin: 20px auto;
@@ -272,35 +273,29 @@
     th, td {
       border: 1px solid var(--table-border-color);
       padding: 8px;
+      /* Removed fixed alignment */
+      /* text-align: left; */
+    }
+
+    /* Alignment based on the 'align' attribute */
+    th[align="left"], td[align="left"] {
       text-align: left;
     }
 
-    th {
-      background-color: var(--table-header-background);
-      font-weight: bold;
+    th[align="center"], td[align="center"] {
+      text-align: center;
     }
 
-    button {
-      margin: 5px;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      background-color: var(--button-background);
-      color: var(--button-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      transition: background-color 0.3s, color 0.3s;
+    th[align="right"], td[align="right"] {
+      text-align: right;
     }
 
-    button:hover {
-      opacity: 0.8;
+    /* Optional: Default alignment if 'align' attribute is not specified */
+    th, td {
+      text-align: left; /* You can set a default alignment if desired */
     }
 
-    /* Hide the page-break div on screen */
-    .page-break {
-      display: none;
-    }
-
+    /* Highlight.js Styles in Print */
     @media print {
       body {
         display: block;
@@ -382,6 +377,24 @@
       }
 
       /* Add more .hljs-* styles as needed based on the Highlight.js theme */
+
+      /* Alignment based on the 'align' attribute in print */
+      th[align="left"], td[align="left"] {
+        text-align: left !important;
+      }
+
+      th[align="center"], td[align="center"] {
+        text-align: center !important;
+      }
+
+      th[align="right"], td[align="right"] {
+        text-align: right !important;
+      }
+
+      /* Optional: Default alignment in print */
+      th, td {
+        text-align: left !important; /* Set a default alignment if no 'align' attribute is present */
+      }
     }
 
     footer {
@@ -395,6 +408,23 @@
     body.dark-mode footer {
       background: #2d2c2c;
       color: #ccc;
+    }
+
+    /* Original Button Styles */
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: var(--button-background);
+      color: var(--button-color);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.8;
     }
   </style>
 
@@ -490,7 +520,7 @@ for i in range(5):
 **1.5 Tables**
 
 | Name   | Age | Profession |
-|:---:|:---:|:---:|
+|:---|:---:|---:|
 | Eddard | 35 | Lord 🐺 |
 | Albus  | 115 | Wizard 🧙‍♂️|
 | Tony   | 38 | Inventor 🤖 |
@@ -649,6 +679,9 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
       // Configure Marked to add language classes and use Highlight.js for syntax highlighting
       marked.setOptions({
+        gfm: true, // Enable GitHub Flavored Markdown
+        headerIds: true, // Enable header IDs
+        tables: true, // Ensure tables are enabled
         langPrefix: 'hljs language-', // Highlight.js expects a top-level 'hljs' class
         highlight: function(code, lang) {
           if (lang && hljs.getLanguage(lang)) {
@@ -718,12 +751,27 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
         th, td {
           border: 1px solid black;
           padding: 8px;
+          /* Removed fixed alignment */
+          /* text-align: left; */
+        }
+        /* Alignment based on the 'align' attribute */
+        th[align="left"], td[align="left"] {
           text-align: left;
         }
-        th {
-          background-color: #f4f4f4;
-          font-weight: bold;
+
+        th[align="center"], td[align="center"] {
+          text-align: center;
         }
+
+        th[align="right"], td[align="right"] {
+          text-align: right;
+        }
+
+        /* Optional: Default alignment if 'align' attribute is not specified */
+        th, td {
+          text-align: left; /* You can set a default alignment if desired */
+        }
+
         code {
           background-color: #f0f0f0;
           padding: 0.1em 0.2em;
@@ -739,7 +787,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           padding: 0; /* Removed padding */
           border-radius: 5px;
           overflow-x: auto;
-          font-size: 0.95em; /* Set font size to 0.95em */
+          font-size: 1.05em; /* Set font size to 1.05em */
           line-height: 1.5; /* Set line-height to 1.5 */
           margin: 2px 0; /* Further reduced margin */
         }
@@ -756,7 +804,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
         /* Highlight.js Styles */
         .hljs {
           line-height: 1.5; /* Ensure Highlight.js respects line-height */
-          font-size: 0.95em; /* Match the font size of pre */
+          font-size: 1.05em; /* Match the font size of pre */
           background-color: inherit; /* Ensure background is inherited from pre */
           color: inherit; /* Inherit color to allow custom coloring */
         }
@@ -768,7 +816,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
         body.dark-mode .hljs-comment,
         body.dark-mode .hljs-quote {
-          color: #75715e !important; /* Darker green for comments */
+          color: #8d9a70 !important; /* Darker green for comments */
         }
 
         body.dark-mode .hljs-keyword,
