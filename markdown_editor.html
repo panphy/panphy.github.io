@@ -594,7 +594,7 @@
     const loadFileButton = document.getElementById('loadFileButton');
     const themeToggleButton = document.getElementById('themeToggleButton');
     const highlightStyle = document.getElementById('highlightStyle');
-    const syncScrollSwitch = document.getElementById('syncScrollSwitch'); // Updated variable name
+    const syncScrollSwitch = document.getElementById('syncScrollSwitch');
 
     // Define sampleDocument using String.raw to preserve backslashes
     const sampleDocument = String.raw`
@@ -783,464 +783,529 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 [2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
   `;
 
-  /**
-   * Preprocess the input Markdown by replacing all single backslashes with double backslashes
-   * within LaTeX math blocks. This ensures that LaTeX commands requiring backslashes are
-   * correctly interpreted by MathJax without affecting other parts of the Markdown content.
-   * 
-   * @param {string} input - The raw Markdown input from the user.
-   * @returns {string} - The processed Markdown with escaped backslashes in LaTeX blocks.
-   */
-  function preprocessMarkdown(input) {
-    // Regex to match inline ($...$) and display ($$...$$) math blocks
-    const regex = /(\$\$?)([\s\S]+?)\1/g;
-    return input.replace(regex, function(match, p1, p2) {
-      // Replace single backslashes with double backslashes within LaTeX blocks
-      const escaped = p2.replace(/\\/g, '\\\\');
-      return p1 + escaped + p1;
-    });
-  }
-
-  function renderContent() {
-    const inputText = markdownInput.value;
-    const preprocessedText = preprocessMarkdown(inputText);
-
-    // Configure Marked to add language classes and use Highlight.js for syntax highlighting
-    marked.setOptions({
-      gfm: true, // Enable GitHub Flavored Markdown
-      headerIds: true, // Enable header IDs
-      tables: true, // Ensure tables are enabled
-      langPrefix: 'hljs language-', // Highlight.js expects a top-level 'hljs' class
-      highlight: function(code, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-          return hljs.highlight(code, { language: lang }).value;
-        } else {
-          return hljs.highlightAuto(code).value;
-        }
-      }
-    });
-
-    const parsedMarkdown = marked.parse(preprocessedText);
-    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-    renderedOutput.innerHTML = sanitizedContent;
-    
-    // Apply syntax highlighting to the newly added code blocks
-    hljs.highlightAll();
-
-    // Re-apply MathJax after rendering
-    MathJax.typesetPromise([renderedOutput]).catch(console.error);
-  }
-
-  async function printToPDF() {
-    // Remove dark-mode class temporarily to enforce light mode in print
-    const body = document.body;
-    const hadDarkMode = body.classList.contains('dark-mode');
-    if (hadDarkMode) {
-      body.classList.remove('dark-mode');
-    }
-
-    // Ensure Highlight.js uses light theme during print
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-
-    // Ensure MathJax has finished rendering
-    await MathJax.typesetPromise([renderedOutput]);
-
-    // Re-apply Highlight.js before printing
-    hljs.highlightAll();
-
-    window.print();
-
-    // Re-add dark-mode class after printing if it was present
-    if (hadDarkMode) {
-      body.classList.add('dark-mode');
-      // Re-apply the dark theme for Highlight.js
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      updateThemeToggleButton(); // Update the toggle button icon and attributes
-    }
-  }
-
-  function exportHTML() {
-    const fileName = prompt('Enter file name for the HTML export:', 'document.html');
-    if (!fileName) return;
-
-    const sanitizedHTML = renderedOutput.innerHTML;
-    const doc = document.implementation.createHTMLDocument('Exported Document');
-    const head = doc.head;
-    const body = doc.body;
-
-    // Add meta charset
-    const meta = document.createElement('meta');
-    meta.setAttribute('charset', 'UTF-8');
-    head.appendChild(meta);
-
-    // Add title
-    const title = document.createElement('title');
-    title.textContent = 'Exported Document';
-    head.appendChild(title);
-
-    // Add custom styles
-    const style = document.createElement('style');
-    style.textContent = `
-      :root {
-        --background-color: #ffffff;
-        --text-color: #000000;
-        --pane-background: #ffffff;
-        --pane-heading-background: #333333;
-        --pane-heading-color: #ffffff;
-        --button-background: #f0f0f0;
-        --button-color: #000000;
-        --border-color: #ccc;
-        --code-background: #f0f0f0;
-        --table-border-color: black;
-        --table-header-background: #f4f4f4;
-        /* CSS Variables for Toggle Switch */
-        --switch-width: 43px;
-        --switch-height: 20px;
-        --slider-size: 15px;
-        --slider-transform: 23px;
-        --switch-active-color: #009688; /* Teal */
-        --switch-background-color: #ccc;
-        --switch-knob-color: white;
-        --switch-label-font-size: 18px;
-      }
-
-      body.dark-mode {
-        --background-color: #1e1e1e;
-        --text-color: #e0e0e0;
-        --pane-background: #1e1e1e;
-        --pane-heading-background: #2d2c2c;
-        --pane-heading-color: #ffffff;
-        --button-background: #474646;
-        --button-color: #ffffff;
-        --border-color: #555555;
-        --code-background: #2f2f2f;
-        --table-border-color: #555555;
-        --table-header-background: #333333;
-        --code-text-color: #f8f8f2; /* Brightened code text color */
-        /* Toggle Switch Active Color in Dark Mode */
-        --switch-active-color: #009688; /* Teal remains consistent */
-      }
-
-      body {
-        font-family: Helvetica, sans-serif;
-        line-height: 1.5; /* Consistent line-height */
-        margin: 20px;
-        background-color: var(--background-color);
-        color: var(--text-color);
-      }
-      /* Ensure all elements inherit background and text colors */
-      body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
-        background-color: var(--background-color);
-        color: var(--text-color);
-      }
-
-      table {
-        max-width: 90%;
-        margin: 20px auto;
-        border-collapse: collapse;
-        border: 1px solid var(--table-border-color);
-      }
-
-      th, td {
-        border: 1px solid var(--table-border-color);
-        padding: 8px;
-      }
-
-      /* Alignment based on the 'align' attribute */
-      th[align="left"], td[align="left"] {
-        text-align: left;
-      }
-
-      th[align="center"], td[align="center"] {
-        text-align: center;
-      }
-
-      th[align="right"], td[align="right"] {
-        text-align: right;
-      }
-
-      /* Optional: Default alignment if 'align' attribute is not specified */
-      th, td {
-        text-align: left; /* You can set a default alignment if desired */
-      }
-
-      code {
-        background-color: var(--code-background);
-        padding: 0.1em 0.2em;
-        border-radius: 3px;
-        font-size: 0.95em;
-        line-height: 1;
-        font-family: "Courier New", Courier, monospace;
-        vertical-align: baseline;
-        color: inherit;
-      }
-
-      pre {
-        background-color: var(--code-background);
-        padding: 0;
-        border-radius: 5px;
-        overflow-x: auto;
-        font-size: 1.05em;
-        line-height: 1.5;
-        margin: 2px 0;
-      }
-
-      pre code {
-        background: none;
-        padding: 0;
-        border-radius: 0;
-        font-family: inherit;
-        line-height: 1.5;
-        font-size: inherit;
-        color: inherit;
-      }
-
-      .hljs {
-        line-height: 1.5;
-        font-size: 1.05em;
-        background-color: inherit;
-        color: inherit;
-      }
-
-      /* Custom Highlight.js Colors for Dark Mode */
-      body.dark-mode .hljs {
-        color: #f8f8f2 !important;
-      }
-
-      body.dark-mode .hljs-comment,
-      body.dark-mode .hljs-quote {
-        color: #8d9a70 !important;
-      }
-
-      body.dark-mode .hljs-keyword,
-      body.dark-mode .hljs-selector-tag,
-      body.dark-mode .hljs-subst {
-        color: #66d9ef !important;
-      }
-
-      body.dark-mode .hljs-string,
-      body.dark-mode .hljs-doctag {
-        color: #e6db74 !important;
-      }
-
-      body.dark-mode .hljs-number,
-      body.dark-mode .hljs-regexp,
-      body.dark-mode .hljs-tag .hljs-attr {
-        color: #ae81ff !important;
-      }
-
-      body.dark-mode .hljs-title,
-      body.dark-mode .hljs-section {
-        color: #a6e22e !important;
-      }
-
-      body.dark-mode .hljs-type,
-      body.dark-mode .hljs-built_in {
-        color: #fd971f !important;
-      }
-
-      body.dark-mode .hljs-symbol,
-      body.dark-mode .hljs-bullet {
-        color: #f92672 !important;
-      }
-
-      body.dark-mode .hljs-link {
-        color: #e6db74 !important;
-      }
-
-      /* Add more .hljs-* styles as needed based on the Highlight.js theme */
-
-      /* Inline styles for images to maintain alignment */
-      img {
-        max-width: 100%;
-        height: auto;
-      }
-    `;
-    head.appendChild(style);
-
-    // Add Highlight.js Stylesheet based on current theme
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const highlightLink = document.createElement('link');
-    highlightLink.rel = 'stylesheet';
-    if (isDarkMode) {
-      // Use a dark theme for Highlight.js, e.g., monokai
-      highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    } else {
-      // Use the default light theme
-      highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-    head.appendChild(highlightLink);
-
-    // Add Highlight.js Library
-    const highlightScript = document.createElement('script');
-    highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
-    head.appendChild(highlightScript);
-
-    // Add Highlight.js Initialization Script
-    const highlightInit = document.createElement('script');
-    highlightInit.textContent = `
-      window.addEventListener('DOMContentLoaded', () => {
-        hljs.highlightAll();
+    /**
+     * Preprocess the input Markdown by replacing all single backslashes with double backslashes
+     * within LaTeX math blocks. This ensures that LaTeX commands requiring backslashes are
+     * correctly interpreted by MathJax without affecting other parts of the Markdown content.
+     * 
+     * @param {string} input - The raw Markdown input from the user.
+     * @returns {string} - The processed Markdown with escaped backslashes in LaTeX blocks.
+     */
+    function preprocessMarkdown(input) {
+      // Regex to match inline ($...$) and display ($$...$$) math blocks
+      const regex = /(\$\$?)([\s\S]+?)\1/g;
+      return input.replace(regex, function(match, p1, p2) {
+        // Replace single backslashes with double backslashes within LaTeX blocks
+        const escaped = p2.replace(/\\/g, '\\\\');
+        return p1 + escaped + p1;
       });
-    `;
-    head.appendChild(highlightInit);
+    }
 
-    // Add MathJax Configuration
-    const mathjaxConfigScript = document.createElement('script');
-    mathjaxConfigScript.textContent = `
-      window.MathJax = {
-        tex: {
-          inlineMath: [['$', '$']],
-          displayMath: [['$$', '$$']],
-          processEscapes: true,
-          packages: ['base', 'ams'],
-        },
-        svg: {
-          fontCache: 'local',
+    function renderContent() {
+      const inputText = markdownInput.value;
+      const preprocessedText = preprocessMarkdown(inputText);
+
+      // Configure Marked to add language classes and use Highlight.js for syntax highlighting
+      marked.setOptions({
+        gfm: true, // Enable GitHub Flavored Markdown
+        headerIds: true, // Enable header IDs
+        tables: true, // Ensure tables are enabled
+        langPrefix: 'hljs language-', // Highlight.js expects a top-level 'hljs' class
+        highlight: function(code, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(code, { language: lang }).value;
+          } else {
+            return hljs.highlightAuto(code).value;
+          }
+        }
+      });
+
+      const parsedMarkdown = marked.parse(preprocessedText);
+      const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+      renderedOutput.innerHTML = sanitizedContent;
+      
+      // Apply syntax highlighting to the newly added code blocks
+      hljs.highlightAll();
+
+      // Re-apply MathJax after rendering
+      MathJax.typesetPromise([renderedOutput]).catch(console.error);
+    }
+
+    async function printToPDF() {
+      // Remove dark-mode class temporarily to enforce light mode in print
+      const body = document.body;
+      const hadDarkMode = body.classList.contains('dark-mode');
+      if (hadDarkMode) {
+        body.classList.remove('dark-mode');
+      }
+
+      // Ensure Highlight.js uses light theme during print
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+
+      // Ensure MathJax has finished rendering
+      await MathJax.typesetPromise([renderedOutput]);
+
+      // Re-apply Highlight.js before printing
+      hljs.highlightAll();
+
+      window.print();
+
+      // Re-add dark-mode class after printing if it was present
+      if (hadDarkMode) {
+        body.classList.add('dark-mode');
+        // Re-apply the dark theme for Highlight.js
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+        updateThemeToggleButton(); // Update the toggle button icon and attributes
+      }
+    }
+
+    function exportHTML() {
+      const fileName = prompt('Enter file name for the HTML export:', 'document.html');
+      if (!fileName) return;
+
+      const sanitizedHTML = renderedOutput.innerHTML;
+      const doc = document.implementation.createHTMLDocument('Exported Document');
+      const head = doc.head;
+      const body = doc.body;
+
+      // Add meta charset
+      const meta = document.createElement('meta');
+      meta.setAttribute('charset', 'UTF-8');
+      head.appendChild(meta);
+
+      // Add title
+      const title = document.createElement('title');
+      title.textContent = 'Exported Document';
+      head.appendChild(title);
+
+      // Add custom styles
+      const style = document.createElement('style');
+      style.textContent = `
+        :root {
+          --background-color: #ffffff;
+          --text-color: #000000;
+          --pane-background: #ffffff;
+          --pane-heading-background: #333333;
+          --pane-heading-color: #ffffff;
+          --button-background: #f0f0f0;
+          --button-color: #000000;
+          --border-color: #ccc;
+          --code-background: #f0f0f0;
+          --table-border-color: black;
+          --table-header-background: #f4f4f4;
+          /* CSS Variables for Toggle Switch */
+          --switch-width: 43px;
+          --switch-height: 20px;
+          --slider-size: 15px;
+          --slider-transform: 23px;
+          --switch-active-color: #009688; /* Teal */
+          --switch-background-color: #ccc;
+          --switch-knob-color: white;
+          --switch-label-font-size: 18px;
+        }
+
+        body.dark-mode {
+          --background-color: #1e1e1e;
+          --text-color: #e0e0e0;
+          --pane-background: #1e1e1e;
+          --pane-heading-background: #2d2c2c;
+          --pane-heading-color: #ffffff;
+          --button-background: #474646;
+          --button-color: #ffffff;
+          --border-color: #555555;
+          --code-background: #2f2f2f;
+          --table-border-color: #555555;
+          --table-header-background: #333333;
+          --code-text-color: #f8f8f2; /* Brightened code text color */
+          /* Toggle Switch Active Color in Dark Mode */
+          --switch-active-color: #009688; /* Teal remains consistent */
+        }
+
+        body {
+          font-family: Helvetica, sans-serif;
+          line-height: 1.5; /* Consistent line-height */
+          margin: 20px;
+          background-color: var(--background-color);
+          color: var(--text-color);
+        }
+        /* Ensure all elements inherit background and text colors */
+        body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
+          background-color: var(--background-color);
+          color: var(--text-color);
+        }
+
+        table {
+          max-width: 90%;
+          margin: 20px auto;
+          border-collapse: collapse;
+          border: 1px solid var(--table-border-color);
+        }
+
+        th, td {
+          border: 1px solid var(--table-border-color);
+          padding: 8px;
+        }
+
+        /* Alignment based on the 'align' attribute */
+        th[align="left"], td[align="left"] {
+          text-align: left;
+        }
+
+        th[align="center"], td[align="center"] {
+          text-align: center;
+        }
+
+        th[align="right"], td[align="right"] {
+          text-align: right;
+        }
+
+        /* Optional: Default alignment if 'align' attribute is not specified */
+        th, td {
+          text-align: left; /* You can set a default alignment if desired */
+        }
+
+        code {
+          background-color: var(--code-background);
+          padding: 0.1em 0.2em;
+          border-radius: 3px;
+          font-size: 0.95em;
+          line-height: 1;
+          font-family: "Courier New", Courier, monospace;
+          vertical-align: baseline;
+          color: inherit;
+        }
+
+        pre {
+          background-color: var(--code-background);
+          padding: 0;
+          border-radius: 5px;
+          overflow-x: auto;
+          font-size: 1.05em;
+          line-height: 1.5;
+          margin: 2px 0;
+        }
+
+        pre code {
+          background: none;
+          padding: 0;
+          border-radius: 0;
+          font-family: inherit;
+          line-height: 1.5;
+          font-size: inherit;
+          color: inherit;
+        }
+
+        .hljs {
+          line-height: 1.5;
+          font-size: 1.05em;
+          background-color: inherit;
+          color: inherit;
+        }
+
+        /* Custom Highlight.js Colors for Dark Mode */
+        body.dark-mode .hljs {
+          color: #f8f8f2 !important;
+        }
+
+        body.dark-mode .hljs-comment,
+        body.dark-mode .hljs-quote {
+          color: #8d9a70 !important;
+        }
+
+        body.dark-mode .hljs-keyword,
+        body.dark-mode .hljs-selector-tag,
+        body.dark-mode .hljs-subst {
+          color: #66d9ef !important;
+        }
+
+        body.dark-mode .hljs-string,
+        body.dark-mode .hljs-doctag {
+          color: #e6db74 !important;
+        }
+
+        body.dark-mode .hljs-number,
+        body.dark-mode .hljs-regexp,
+        body.dark-mode .hljs-tag .hljs-attr {
+          color: #ae81ff !important;
+        }
+
+        body.dark-mode .hljs-title,
+        body.dark-mode .hljs-section {
+          color: #a6e22e !important;
+        }
+
+        body.dark-mode .hljs-type,
+        body.dark-mode .hljs-built_in {
+          color: #fd971f !important;
+        }
+
+        body.dark-mode .hljs-symbol,
+        body.dark-mode .hljs-bullet {
+          color: #f92672 !important;
+        }
+
+        body.dark-mode .hljs-link {
+          color: #e6db74 !important;
+        }
+
+        /* Add more .hljs-* styles as needed based on the Highlight.js theme */
+
+        /* Inline styles for images to maintain alignment */
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+      `; // Custom styles end
+      head.appendChild(style);
+
+      // Add Highlight.js Stylesheet based on current theme
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      const highlightLink = document.createElement('link');
+      highlightLink.rel = 'stylesheet';
+      if (isDarkMode) {
+        // Use a dark theme for Highlight.js, e.g., monokai
+        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        // Use the default light theme
+        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+      head.appendChild(highlightLink);
+
+      // Add Highlight.js Library
+      const highlightScript = document.createElement('script');
+      highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
+      head.appendChild(highlightScript);
+
+      // Add Highlight.js Initialization Script
+      const highlightInit = document.createElement('script');
+      highlightInit.textContent = `
+        window.addEventListener('DOMContentLoaded', () => {
+          hljs.highlightAll();
+        });
+      `;
+      head.appendChild(highlightInit);
+
+      // Add MathJax Configuration
+      const mathjaxConfigScript = document.createElement('script');
+      mathjaxConfigScript.textContent = `
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']],
+            processEscapes: true,
+            packages: ['base', 'ams'],
+          },
+          svg: {
+            fontCache: 'local',
+          }
+        };
+      `;
+      head.appendChild(mathjaxConfigScript);
+
+      // Add MathJax Script
+      const mathjaxScript = document.createElement('script');
+      mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+      head.appendChild(mathjaxScript);
+
+      // Insert the sanitized HTML content
+      body.innerHTML = sanitizedHTML;
+
+      // Apply dark-mode class if active
+      if (isDarkMode) {
+        body.classList.add('dark-mode');
+      }
+
+      // Construct the full HTML
+      const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
+      const blob = new Blob([exportedHTML], { type: 'text/html' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    }
+
+    function saveMarkdown() {
+      const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
+      if (!fileName) return;
+
+      const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    }
+
+    function loadMarkdownFile() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.md,text/markdown';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = event => {
+            markdownInput.value = event.target.result;
+            renderContent();
+          };
+          reader.readAsText(file);
         }
       };
-    `;
-    head.appendChild(mathjaxConfigScript);
-
-    // Add MathJax Script
-    const mathjaxScript = document.createElement('script');
-    mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
-    head.appendChild(mathjaxScript);
-
-    // Insert the sanitized HTML content
-    body.innerHTML = sanitizedHTML;
-
-    // Apply dark-mode class if active
-    if (isDarkMode) {
-      body.classList.add('dark-mode');
+      input.click();
     }
 
-    // Construct the full HTML
-    const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
-    const blob = new Blob([exportedHTML], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-  }
-
-  function saveMarkdown() {
-    const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
-    if (!fileName) return;
-
-    const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-  }
-
-  function loadMarkdownFile() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.md,text/markdown';
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = event => {
-          markdownInput.value = event.target.result;
-          renderContent();
-        };
-        reader.readAsText(file);
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        themeToggleButton.textContent = '🌙';
+        themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+        themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+        // Change Highlight.js stylesheet to dark theme
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        themeToggleButton.textContent = '☀️';
+        themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+        themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+        // Change Highlight.js stylesheet to default light theme
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
       }
-    };
-    input.click();
-  }
+    }
 
-  function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    if (document.body.classList.contains('dark-mode')) {
-      themeToggleButton.textContent = '🌙';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-      // Change Highlight.js stylesheet to dark theme
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    } else {
-      themeToggleButton.textContent = '☀️';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-      // Change Highlight.js stylesheet to default light theme
+    function updateThemeToggleButton() {
+      if (document.body.classList.contains('dark-mode')) {
+        themeToggleButton.textContent = '🌙';
+        themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+        themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+      } else {
+        themeToggleButton.textContent = '☀️';
+        themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+        themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+      }
+    }
+
+    // Event Listeners
+    markdownInput.addEventListener('input', renderContent);
+    printButton.addEventListener('click', printToPDF);
+    exportHTMLButton.addEventListener('click', exportHTML);
+    saveMDButton.addEventListener('click', saveMarkdown);
+    loadFileButton.addEventListener('click', loadMarkdownFile);
+    loadSampleButton.addEventListener('click', () => {
+      markdownInput.value = sampleDocument;
+      renderContent();
+    });
+    clearButton.addEventListener('click', () => {
+      markdownInput.value = '';
+      renderContent();
+    });
+    themeToggleButton.addEventListener('click', toggleTheme);
+
+    // Initialize Sync Scroll based on the toggle's initial state
+    let isSyncScrollEnabled = syncScrollSwitch.checked;
+
+    // Flags to prevent infinite scroll loops
+    let isSyncingInputScroll = false;
+    let isSyncingOutputScroll = false;
+
+    // Toggle Scroll Sync Functionality
+    syncScrollSwitch.addEventListener('change', () => {
+      isSyncScrollEnabled = syncScrollSwitch.checked;
+    });
+
+    /**
+     * Throttle function to limit the rate at which a function can fire.
+     * @param {Function} func - The function to throttle.
+     * @param {number} limit - The time limit in milliseconds.
+     * @returns {Function}
+     */
+    function throttle(func, limit) {
+      let inThrottle;
+      return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      }
+    }
+
+    /**
+     * Synchronized Scrolling: Input to Output
+     */
+    const syncInputToOutput = throttle(() => {
+      if (!isSyncScrollEnabled || isSyncingInputScroll) return;
+
+      isSyncingOutputScroll = true;
+
+      requestAnimationFrame(() => {
+        const inputScrollTop = markdownInput.scrollTop;
+        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+
+        // Prevent division by zero
+        if (inputScrollHeight === 0) {
+          renderedOutput.scrollTop = 0;
+        } else {
+          const scrollRatio = inputScrollTop / inputScrollHeight;
+          const newOutputScrollTop = scrollRatio * outputScrollHeight;
+          if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) { // prevent unnecessary updates
+            renderedOutput.scrollTop = newOutputScrollTop;
+          }
+        }
+
+        isSyncingOutputScroll = false;
+      });
+    }, 16); // Approximately 60fps
+
+    /**
+     * Synchronized Scrolling: Output to Input
+     */
+    const syncOutputToInput = throttle(() => {
+      if (!isSyncScrollEnabled || isSyncingOutputScroll) return;
+
+      isSyncingInputScroll = true;
+
+      requestAnimationFrame(() => {
+        const outputScrollTop = renderedOutput.scrollTop;
+        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+
+        // Prevent division by zero
+        if (outputScrollHeight === 0) {
+          markdownInput.scrollTop = 0;
+        } else {
+          const scrollRatio = outputScrollTop / outputScrollHeight;
+          const newInputScrollTop = scrollRatio * inputScrollHeight;
+          if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) { // prevent unnecessary updates
+            markdownInput.scrollTop = newInputScrollTop;
+          }
+        }
+
+        isSyncingInputScroll = false;
+      });
+    }, 16); // Approximately 60fps
+
+    // Attach scroll event listeners with passive option
+    markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
+    renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
+
+    // Print Event Handlers to Switch Highlight.js Stylesheet
+    window.addEventListener('beforeprint', () => {
+      // Switch to light theme before printing
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-  }
+    });
 
-  function updateThemeToggleButton() {
-    if (document.body.classList.contains('dark-mode')) {
-      themeToggleButton.textContent = '🌙';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-    } else {
-      themeToggleButton.textContent = '☀️';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-    }
-  }
+    window.addEventListener('afterprint', () => {
+      // Revert to the current theme's Highlight.js stylesheet after printing
+      if (document.body.classList.contains('dark-mode')) {
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+    });
 
-  // Event Listeners
-  markdownInput.addEventListener('input', renderContent);
-  printButton.addEventListener('click', printToPDF);
-  exportHTMLButton.addEventListener('click', exportHTML);
-  saveMDButton.addEventListener('click', saveMarkdown);
-  loadFileButton.addEventListener('click', loadMarkdownFile);
-  loadSampleButton.addEventListener('click', () => {
-    markdownInput.value = sampleDocument;
+    // Initial render
     renderContent();
-  });
-  clearButton.addEventListener('click', () => {
-    markdownInput.value = '';
-    renderContent();
-  });
-  themeToggleButton.addEventListener('click', toggleTheme);
-
-  // Initialize Sync Scroll based on the toggle's initial state
-  let isSyncScrollEnabled = syncScrollSwitch.checked;
-
-  // Toggle Scroll Sync Functionality
-  syncScrollSwitch.addEventListener('change', () => {
-    isSyncScrollEnabled = syncScrollSwitch.checked;
-  });
-
-  // Synchronized Scrolling: Input to Output
-  markdownInput.addEventListener('scroll', () => {
-    if (!isSyncScrollEnabled) return; // Do not synchronize if not enabled
-
-    const inputScrollTop = markdownInput.scrollTop;
-    const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-    const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-    // Prevent division by zero
-    if (inputScrollHeight === 0) {
-      renderedOutput.scrollTop = 0;
-      return;
-    }
-
-    const scrollRatio = inputScrollTop / inputScrollHeight;
-    renderedOutput.scrollTop = scrollRatio * outputScrollHeight;
-  });
-
-  // Print Event Handlers to Switch Highlight.js Stylesheet
-  window.addEventListener('beforeprint', () => {
-    // Switch to light theme before printing
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-  });
-
-  window.addEventListener('afterprint', () => {
-    // Revert to the current theme's Highlight.js stylesheet after printing
-    if (document.body.classList.contains('dark-mode')) {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    } else {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-  });
-
-  // Initial render
-  renderContent();
   </script>
 </body>
 </html>
