@@ -1,101 +1,195 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graph Plotting & Curve Fitting - User Manual</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-            line-height: 1.6;
+<!DOCTYPE html><html><head><title>Exported Document</title><meta charset="UTF-8"><title>Exported Document</title><style>
+        :root {
+          --background-color: #ffffff;
+          --text-color: #000000;
+          --pane-background: #ffffff;
+          --pane-heading-background: #333333;
+          --pane-heading-color: #ffffff;
+          --button-background: #f0f0f0;
+          --button-color: #000000;
+          --border-color: #ccc;
+          --code-background: #f0f0f0;
+          --table-border-color: black;
+          --table-header-background: #f4f4f4;
+          /* CSS Variables for Toggle Switch */
+          --switch-width: 43px;
+          --switch-height: 20px;
+          --slider-size: 15px;
+          --slider-transform: 23px;
+          --switch-active-color: #009688; /* Teal */
+          --switch-background-color: #ccc;
+          --switch-knob-color: white;
+          --switch-label-font-size: 18px;
         }
-        header {
-            background: #0079b1;
-            color: #fff;
-            padding: 20px 0;
-            text-align: center;
+
+        body.dark-mode {
+          --background-color: #1e1e1e;
+          --text-color: #e0e0e0;
+          --pane-background: #1e1e1e;
+          --pane-heading-background: #2d2c2c;
+          --pane-heading-color: #ffffff;
+          --button-background: #474646;
+          --button-color: #ffffff;
+          --border-color: #555555;
+          --code-background: #2f2f2f;
+          --table-border-color: #555555;
+          --table-header-background: #333333;
+          --code-text-color: #f8f8f2; /* Brightened code text color */
+          /* Toggle Switch Active Color in Dark Mode */
+          --switch-active-color: #009688; /* Teal remains consistent */
         }
-        header h1 {
-            margin: 0;
-            font-size: 2rem;
-        }
-        main {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #0079b1;
-            border-bottom: 2px solid #0079b1;
-            padding-bottom: 5px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        a {
-            color: #0079b1;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            background: #f4f4f4;
-            color: #555;
-            margin-top: 20px;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-</head>
-<body>
-    <header>
-        <h1>Graph Plotting & Curve Fitting - User Manual</h1>
-    </header>
-    <main>
-        <!DOCTYPE html><html><head><title>Exported Document</title><style>
+
         body {
           font-family: Helvetica, sans-serif;
-          line-height: 1.6;
+          line-height: 1.5; /* Consistent line-height */
           margin: 20px;
+          background-color: var(--background-color);
+          color: var(--text-color);
         }
+        /* Ensure all elements inherit background and text colors */
+        body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
+          background-color: var(--background-color);
+          color: var(--text-color);
+        }
+
         table {
           max-width: 90%;
           margin: 20px auto;
           border-collapse: collapse;
-          border: 1px solid black;
+          border: 1px solid var(--table-border-color);
         }
+
         th, td {
-          border: 1px solid black;
+          border: 1px solid var(--table-border-color);
           padding: 8px;
+        }
+
+        /* Alignment based on the 'align' attribute */
+        th[align="left"], td[align="left"] {
           text-align: left;
         }
-        th {
-          background-color: #f4f4f4;
+
+        th[align="center"], td[align="center"] {
+          text-align: center;
         }
-      </style><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1>Graph Plotting &amp; Curve Fitting - User Manual</h1>
+
+        th[align="right"], td[align="right"] {
+          text-align: right;
+        }
+
+        /* Optional: Default alignment if 'align' attribute is not specified */
+        th, td {
+          text-align: left; /* You can set a default alignment if desired */
+        }
+
+        code {
+          background-color: var(--code-background);
+          padding: 0.1em 0.2em;
+          border-radius: 3px;
+          font-size: 0.95em;
+          line-height: 1;
+          font-family: "Courier New", Courier, monospace;
+          vertical-align: baseline;
+          color: inherit;
+        }
+
+        pre {
+          background-color: var(--code-background);
+          padding: 0;
+          border-radius: 5px;
+          overflow-x: auto;
+          font-size: 1.05em;
+          line-height: 1.5;
+          margin: 2px 0;
+        }
+
+        pre code {
+          background: none;
+          padding: 0;
+          border-radius: 0;
+          font-family: inherit;
+          line-height: 1.5;
+          font-size: inherit;
+          color: inherit;
+        }
+
+        .hljs {
+          line-height: 1.5;
+          font-size: 1.05em;
+          background-color: inherit;
+          color: inherit;
+        }
+
+        /* Custom Highlight.js Colors for Dark Mode */
+        body.dark-mode .hljs {
+          color: #f8f8f2 !important;
+        }
+
+        body.dark-mode .hljs-comment,
+        body.dark-mode .hljs-quote {
+          color: #8d9a70 !important;
+        }
+
+        body.dark-mode .hljs-keyword,
+        body.dark-mode .hljs-selector-tag,
+        body.dark-mode .hljs-subst {
+          color: #66d9ef !important;
+        }
+
+        body.dark-mode .hljs-string,
+        body.dark-mode .hljs-doctag {
+          color: #e6db74 !important;
+        }
+
+        body.dark-mode .hljs-number,
+        body.dark-mode .hljs-regexp,
+        body.dark-mode .hljs-tag .hljs-attr {
+          color: #ae81ff !important;
+        }
+
+        body.dark-mode .hljs-title,
+        body.dark-mode .hljs-section {
+          color: #a6e22e !important;
+        }
+
+        body.dark-mode .hljs-type,
+        body.dark-mode .hljs-built_in {
+          color: #fd971f !important;
+        }
+
+        body.dark-mode .hljs-symbol,
+        body.dark-mode .hljs-bullet {
+          color: #f92672 !important;
+        }
+
+        body.dark-mode .hljs-link {
+          color: #e6db74 !important;
+        }
+
+        /* Add more .hljs-* styles as needed based on the Highlight.js theme */
+
+        /* Inline styles for images to maintain alignment */
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+      </style><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script><script>
+        window.addEventListener('DOMContentLoaded', () => {
+          hljs.highlightAll();
+        });
+      </script><script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']],
+            processEscapes: true,
+            packages: ['base', 'ams'],
+          },
+          svg: {
+            fontCache: 'local',
+          }
+        };
+      </script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1>Graph Plotting &amp; Curve Fitting - User Manual</h1>
 <h2>Introduction</h2>
 <p>Welcome to the <strong>Graph Plotting &amp; Curve Fitting</strong> web application! This tool allows you to input data, visualize it through interactive graphs, and perform various curve fitting analyses to model your data effectively.</p>
 <h2>Features</h2>
@@ -117,7 +211,7 @@
 <li><p><strong>Curve Fitting:</strong></p>
 <ul>
 <li>Perform basic fits like Linear, Polynomial, Exponential and Power.</li>
-<li>Access advanced fitting models such as Sinusoidal, Gaussian, and Lorentzian.</li>
+<li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
 <li>Customize initial parameters for advanced fitting methods.</li>
 <li>View fitting equations and R² values.</li>
 </ul>
@@ -217,8 +311,8 @@
 <li><p><strong>Advanced Fit:</strong></p>
 <ul>
 <li>Navigate to the <strong>"Advanced Fit"</strong> tab.</li>
-<li>Select an advanced fitting method (Sinusoidal, Gaussian, Lorentzian) from the dropdown.</li>
-<li>Enter the initial parameters as prompted.</li>
+<li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
+<li>Some initial parameters are calculated based on the imported dataset. Change the initial parameters if needed.</li>
 <li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
 <li>The fitting equation and R² value will be displayed below the graph.</li>
 </ul>
@@ -265,11 +359,4 @@
 </ul>
 </li>
 </ul>
-
 </body></html>
-    </main>
-    <footer>
-        &copy; 2024 PanPhy. All rights reserved.
-    </footer>
-</body>
-</html>
