@@ -652,7 +652,6 @@
                     <select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
                         <option value="Sinusoidal">Sinusoidal</option>
                         <option value="Gaussian">Gaussian</option>
-                        <option value="Lorentzian">Lorentzian</option>
                     </select>
                     <div id="advanced-fit-general-equation" class="general-equation">
                         \( y = A e^{bx} \sin(kx - \phi) + c \)
@@ -703,26 +702,6 @@
                         </div>
                     </div>
 
-                    <!-- Lorentzian Parameters -->
-                    <div id="Lorentzian-parameters" class="parameter-section">
-                        <div class="advanced-fit-item">
-                            <label for="initial-A-lorentzian">A:</label>
-                            <input type="number" id="initial-A-lorentzian" value="1" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-x0">x₀:</label>
-                            <input type="number" id="initial-x0" value="0" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-gamma">γ:</label>
-                            <input type="number" id="initial-gamma" value="1" step="any">
-                        </div>
-                        <div class="advanced-fit-item">
-                            <label for="initial-c-lorentzian">c:</label>
-                            <input type="number" id="initial-c-lorentzian" value="0" step="any">
-                        </div>
-                    </div>
-
                     <div class="advanced-fit-buttons">
                         <button class="fit-button" onclick="fitAdvancedCurve()">Fit Curve</button>
                     </div>
@@ -765,8 +744,6 @@
 
         const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 
-
-
         function processLabel(label) {
             return label ? `$${formatLabelForLatex(label)}$` : '';
         }
@@ -805,15 +782,22 @@
                 isSyncing = true;
                 document.getElementById('x-column-name').value = 'x';
                 document.getElementById('y-column-name').value = 'y';
-                renderLatex('#x-column-latex', 'x');
-                renderLatex('#y-column-latex', 'y');
+                renderLatex('#x-column-latex', formatLabelForLatex('x'));
+                renderLatex('#y-column-latex', formatLabelForLatex('y'));
                 document.getElementById('graph-title').value = 'Title';
                 isSyncing = false;
             }
 
             initializeTable();
+
+            // Uncheck uncertainty toggles and hide columns
+            document.getElementById('toggle-x-error').checked = false;
             toggleErrorColumn('x');
+            document.getElementById('toggle-y-error').checked = false;
             toggleErrorColumn('y');
+
+            // Reset fitting parameters to defaults
+            setInitialParameters(getCurrentAdvancedFitMethod());
         }
 
         function navigateTable(event) {
@@ -896,9 +880,12 @@
             }
 
             updateData();
+
+            // Update initial parameters based on the selected advanced fit method
+            setInitialParameters(getCurrentAdvancedFitMethod());
         }
 
-            function updateUncertaintyHeaders(axis) {
+        function updateUncertaintyHeaders(axis) {
             const columnName = document.getElementById(`${axis}-column-name`).value.trim() || (axis === 'x' ? 'x' : 'y');
             const errorType = document.getElementById(`${axis}-error-type`).value;
             let headerLatex = `\\pm \\Delta ${formatLabelForLatex(columnName)}`;
@@ -921,6 +908,9 @@
             }
 
             updateData();
+
+            // Update initial parameters based on the selected advanced fit method
+            setInitialParameters(getCurrentAdvancedFitMethod());
         }
 
         function handleCSVUpload(event) {
@@ -1032,6 +1022,9 @@
 
             updateData();
             updatePlotAndRenderLatex();
+
+            // Update initial parameters based on the selected advanced fit method
+            setInitialParameters(getCurrentAdvancedFitMethod());
         }
 
         function updateLabels(type) {
@@ -1046,6 +1039,9 @@
 
             debouncedUpdatePlotAndRenderLatex();
             isSyncing = false;
+
+            // Update initial parameters based on the selected advanced fit method
+            setInitialParameters(getCurrentAdvancedFitMethod());
         }
 
         function renderLatex(elementId, latexString) {
@@ -1202,7 +1198,7 @@
 
         function changeAdvancedFitMethod() {
             const selectedMethod = document.getElementById('advanced-fit-method').value;
-            const methods = ['Sinusoidal', 'Gaussian', 'Lorentzian'];
+            const methods = ['Sinusoidal', 'Gaussian'];
 
             methods.forEach(method => {
                 const section = document.getElementById(`${method}-parameters`);
@@ -1223,8 +1219,6 @@
                 equation = 'y = A e^{bx} \\sin(kx - \\phi) + c';
             } else if (selectedMethod === 'Gaussian') {
                 equation = 'y = A e^{-\\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
-            } else if (selectedMethod === 'Lorentzian') {
-                equation = 'y = A \\frac{\\gamma^2}{(x - x_0)^2 + \\gamma^2} + c';
             }
 
             const equationElement = document.getElementById('advanced-fit-general-equation');
@@ -1234,7 +1228,7 @@
             }
         }
 
-        // Helper function to calculate FWHM for Lorentzian Fit
+        // Helper function to calculate FWHM for Gaussian Fit (optional, not used here)
         function calculateFWHM(x, y, maxY) {
             const halfMax = maxY / 2;
             let left = null, right = null;
@@ -1277,6 +1271,8 @@
 
         // Function to set initial parameters based on selected method and data
         function setInitialParameters(method) {
+            if (!method) return; // If method is undefined, do nothing
+
             if (rawData.length === 0) return;
 
             const x = rawData.map(p => p.x);
@@ -1289,16 +1285,34 @@
             if (method === 'Gaussian') {
                 document.getElementById('initial-A-gaussian').value = maxY.toFixed(3);
                 document.getElementById('initial-mu').value = meanX.toFixed(3);
-                document.getElementById('initial-sigma').value = stdX.toFixed(3);
+                document.getElementById('initial-sigma').value = (FWHM / (2 * Math.sqrt(2 * Math.log(2)))).toFixed(3);
                 document.getElementById('initial-c-gaussian').value = '0';
-            } else if (method === 'Lorentzian') {
-                document.getElementById('initial-A-lorentzian').value = maxY.toFixed(3);
-                document.getElementById('initial-x0').value = meanX.toFixed(3);
-                document.getElementById('initial-gamma').value = FWHM.toFixed(3);
-                document.getElementById('initial-c-lorentzian').value = '0';
             } else if (method === 'Sinusoidal') {
-                // Initial parameters are set in the HTML with default values
+                // Set A to maxY, b to slope from linear fit, phi to 0, c to meanY
+                const meanY = y.reduce((sum, val) => sum + val, 0) / y.length;
+                const linearFit = computeLinearFit(x, y);
+                const A = maxY - meanY;
+                const b = linearFit.slope;
+                const phi = 0;
+                const c = meanY;
+
+                // Estimate k from data and set it
+                const estimatedK = estimateKFromData();
+                if (estimatedK !== null) {
+                    document.getElementById('initial-k').value = estimatedK.toFixed(3);
+                } else {
+                    document.getElementById('initial-k').value = '1'; // Default value if estimation fails
+                }
+
+                document.getElementById('initial-A').value = A.toFixed(3);
+                document.getElementById('initial-b').value = b.toFixed(3);
+                document.getElementById('initial-phi').value = phi.toFixed(3);
+                document.getElementById('initial-c').value = c.toFixed(3);
             }
+        }
+
+        function getCurrentAdvancedFitMethod() {
+            return document.getElementById('advanced-fit-method').value;
         }
 
         function computeLinearFit(x, y) {
@@ -1419,7 +1433,6 @@
             changeAdvancedFitMethod();
         };
 
-
         function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
             if (!errorEnabled) {
                 return valueStr;
@@ -1444,825 +1457,807 @@
             }
         }
 
-    /**
-     * Formats labels for LaTeX by replacing spaces with \space.
-     * @param {string} label - The label to format.
-     * @returns {string} - The LaTeX-formatted label.
-     */
-    function formatLabelForLatex(label) {
-        return label ? label.replace(/ /g, '\\space ') : '';
-    }
+/**
+ * Formats labels for LaTeX by replacing spaces with \space.
+ * @param {string} label - The label to format.
+ * @returns {string} - The LaTeX-formatted label.
+ */
+function formatLabelForLatex(label) {
+    return label ? label.replace(/ /g, '\\space ') : '';
+}
 
-    /**
-     * Counts the number of decimal places in a number string.
-     * @param {string} numStr - The number as a string.
-     * @returns {number} - The number of decimal places.
-     */
-    function countDecimalPlaces(numStr) {
-        if (!numStr.includes('.')) return 0;
-        return numStr.length - numStr.indexOf('.') - 1;
-    }
+/**
+ * Counts the number of decimal places in a number string.
+ * @param {string} numStr - The number as a string.
+ * @returns {number} - The number of decimal places.
+ */
+function countDecimalPlaces(numStr) {
+    if (!numStr.includes('.')) return 0;
+    return numStr.length - numStr.indexOf('.') - 1;
+}
 
-    /**
-    * Formats a number to the specified number of significant figures without using scientific notation.
-    * Preserves trailing zeros by returning a string.
-    * @param {number} num - The number to format.
-    * @param {number} sigFigs - The number of significant figures.
-    * @returns {string} - The formatted number as a string.
-    */
-    function toSigFigs(num, sigFigs) {
-        if (num === 0) return '0';
-        let numStr = num.toPrecision(sigFigs);
+/**
+* Formats a number to the specified number of significant figures without using scientific notation.
+* Preserves trailing zeros by returning a string.
+* @param {number} num - The number to format.
+* @param {number} sigFigs - The number of significant figures.
+* @returns {string} - The formatted number as a string.
+*/
+function toSigFigs(num, sigFigs) {
+    if (num === 0) return '0';
+    let numStr = num.toPrecision(sigFigs);
+
+    // Check if the number is in scientific notation
+    if (numStr.includes('e') || numStr.includes('E')) {
+        const [mantissa, exponent] = numStr.split(/e/i);
+        const exponentVal = parseInt(exponent, 10);
+        let fixedNum = parseFloat(mantissa) * Math.pow(10, exponentVal);
     
-        // Check if the number is in scientific notation
-        if (numStr.includes('e') || numStr.includes('E')) {
-            const [mantissa, exponent] = numStr.split(/e/i);
-            const exponentVal = parseInt(exponent, 10);
-            let fixedNum = parseFloat(mantissa) * Math.pow(10, exponentVal);
-        
-            // Calculate the number of decimal places needed
-            const decimalPlaces = sigFigs - 1 - Math.floor(Math.log10(Math.abs(num)));
-            return fixedNum.toFixed(decimalPlaces > 0 ? decimalPlaces : 0);
+        // Calculate the number of decimal places needed
+        const decimalPlaces = sigFigs - 1 - Math.floor(Math.log10(Math.abs(num)));
+        return fixedNum.toFixed(decimalPlaces > 0 ? decimalPlaces : 0);
+    }
+
+    return numStr;
+}
+
+
+/**
+ * Formats a number into scientific notation for LaTeX with specified significant figures.
+ * @param {number} number - The number to format.
+ * @param {number} sigFigs - The number of significant figures.
+ * @returns {string} - The LaTeX-formatted scientific notation string.
+ */
+function formatScientificNotation(number, sigFigs) {
+    if (number === 0) return '0';
+    const exponent = Math.floor(Math.log10(Math.abs(number)));
+    const mantissa = (number / Math.pow(10, exponent)).toFixed(sigFigs - 1);
+    return `${mantissa} \\times 10^{${exponent}}`;
+}
+
+/**
+ * Formats data values based on uncertainty type.
+ * @param {number} dataVal - The data value.
+ * @param {number} uncertaintyVal - The uncertainty value.
+ * @param {string} uncertaintyType - The type of uncertainty ('absolute' or 'percentage').
+ * @param {boolean} useSciNotation - Whether to apply scientific notation.
+ * @returns {string} - The formatted data value.
+ */
+function formatDataValue(dataVal, uncertaintyVal, uncertaintyType, useSciNotation) {
+    if (uncertaintyType === 'absolute') {
+        const dp = countDecimalPlaces(uncertaintyVal.toString());
+        return dataVal.toFixed(dp);
+    } else if (uncertaintyType === 'percentage') {
+        const perc = parseFloat(uncertaintyVal);
+        if (isNaN(perc)) return dataVal.toString();
+        const sigFigs = perc < 10 ? 3 : 2;
+        if (useSciNotation) {
+            return formatScientificNotation(dataVal, sigFigs);
+        } else {
+            return toSigFigs(dataVal, sigFigs);
         }
-    
-        return numStr;
+    } else {
+        // No uncertainty
+        return dataVal.toString();
     }
+}
 
-
-    /**
-     * Formats a number into scientific notation for LaTeX with specified significant figures.
-     * @param {number} number - The number to format.
-     * @param {number} sigFigs - The number of significant figures.
-     * @returns {string} - The LaTeX-formatted scientific notation string.
-     */
-    function formatScientificNotation(number, sigFigs) {
-        if (number === 0) return '0';
-        const exponent = Math.floor(Math.log10(Math.abs(number)));
-        const mantissa = (number / Math.pow(10, exponent)).toFixed(sigFigs - 1);
-        return `${mantissa} \\times 10^{${exponent}}`;
+/**
+ * Formats uncertainties based on their type.
+ * - For percentage uncertainties: preserves the exact input and appends the LaTeX percentage symbol.
+ * - For absolute uncertainties: preserves trailing zeros based on decimal places.
+ * @param {string} errStr - The uncertainty value as a string.
+ * @param {string} errorType - The type of uncertainty ('absolute' or 'percentage').
+ * @returns {string} - The formatted uncertainty string.
+ */
+function formatUncertainty(errStr, errorType) {
+    if (errorType === 'percentage') {
+        // Preserve the exact input and append LaTeX percentage symbol
+        return errStr; // If % sign is needed, change this line to: return errStr + '\\%'
+    } else if (errorType === 'absolute') {
+        const dp = countDecimalPlaces(errStr);
+        const errVal = parseFloat(errStr);
+        if (isNaN(errVal)) return errStr;
+        // Use toFixed to preserve trailing zeros based on decimal places
+        return errVal.toFixed(dp);
+    } else {
+        return errStr;
     }
+}
 
-    /**
-     * Formats data values based on uncertainty type.
-     * @param {number} dataVal - The data value.
-     * @param {number} uncertaintyVal - The uncertainty value.
-     * @param {string} uncertaintyType - The type of uncertainty ('absolute' or 'percentage').
-     * @param {boolean} useSciNotation - Whether to apply scientific notation.
-     * @returns {string} - The formatted data value.
-     */
-    function formatDataValue(dataVal, uncertaintyVal, uncertaintyType, useSciNotation) {
-        if (uncertaintyType === 'absolute') {
-            const dp = countDecimalPlaces(uncertaintyVal.toString());
-            return dataVal.toFixed(dp);
-        } else if (uncertaintyType === 'percentage') {
-            const perc = parseFloat(uncertaintyVal);
-            if (isNaN(perc)) return dataVal.toString();
-            const sigFigs = perc < 10 ? 3 : 2;
-            if (useSciNotation) {
-                return formatScientificNotation(dataVal, sigFigs);
-            } else {
-                return toSigFigs(dataVal, sigFigs);
+/**
+ * The main function to export data as a Markdown (.md) file with LaTeX formatting.
+ */
+function exportPlainText() {
+    try {
+        // Retrieve axis headings
+        const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
+        const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
+
+        // Check if uncertainties are enabled
+        const xErrorEnabled = document.getElementById('toggle-x-error').checked;
+        const yErrorEnabled = document.getElementById('toggle-y-error').checked;
+
+        // Get uncertainty types
+        const xErrorType = document.getElementById('x-error-type').value;
+        const yErrorType = document.getElementById('y-error-type').value;
+
+        // Get all rows from the data table's tbody
+        const table = document.getElementById('data-table');
+        const rows = table.querySelectorAll('tbody tr'); // Only iterate over tbody rows
+
+        // Initialize arrays to collect all x and y values
+        let xValues = [];
+        let yValues = [];
+
+        // Collect all x and y values for notation decision
+        rows.forEach(row => {
+            const xInputElem = row.querySelector('.x-input');
+            const yInputElem = row.querySelector('.y-input');
+
+            if (!xInputElem || !yInputElem) return;
+
+            const xValStr = xInputElem.value.trim();
+            const yValStr = yInputElem.value.trim();
+
+            if (xValStr !== '') {
+                const xVal = parseFloat(xValStr);
+                if (!isNaN(xVal)) {
+                    xValues.push(xVal);
+                }
             }
-        } else {
-            // No uncertainty
-            return dataVal.toString();
+
+            if (yValStr !== '') {
+                const yVal = parseFloat(yValStr);
+                if (!isNaN(yVal)) {
+                    yValues.push(yVal);
+                }
+            }
+        });
+
+        // Determine if scientific notation is needed for x and y
+        const xUseSciNotation = xErrorEnabled && xErrorType === 'percentage' && xValues.some(val => val < -10000 || val > 10000);
+        const yUseSciNotation = yErrorEnabled && yErrorType === 'percentage' && yValues.some(val => val < -10000 || val > 10000);
+
+        // Debugging: Log whether scientific notation will be used
+        console.log(`X Use Scientific Notation: ${xUseSciNotation}`);
+        console.log(`Y Use Scientific Notation: ${yUseSciNotation}`);
+
+        // Initialize headers with \quad spacing and replace spaces with \space
+        let headers = [
+            `$${formatLabelForLatex(xHeader)}$`,
+            `$${formatLabelForLatex(yHeader)}$`
+        ];
+
+        // Handle X-axis uncertainty heading
+        if (xErrorEnabled) {
+            let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
+            if (xErrorType === 'percentage') xUncHeading += ' \\space (\\%)';
+            headers.push(`$${xUncHeading}$`);
         }
-    }
 
-    /**
-     * Formats uncertainties based on their type.
-     * - For percentage uncertainties: preserves the exact input and appends the LaTeX percentage symbol.
-     * - For absolute uncertainties: preserves trailing zeros based on decimal places.
-     * @param {string} errStr - The uncertainty value as a string.
-     * @param {string} errorType - The type of uncertainty ('absolute' or 'percentage').
-     * @returns {string} - The formatted uncertainty string.
-     */
-    function formatUncertainty(errStr, errorType) {
-        if (errorType === 'percentage') {
-            // Preserve the exact input and append LaTeX percentage symbol
-            return errStr; // If % sign is needed, change this line to: return errStr + '\\%'
-        } else if (errorType === 'absolute') {
-            const dp = countDecimalPlaces(errStr);
-            const errVal = parseFloat(errStr);
-            if (isNaN(errVal)) return errStr;
-            // Use toFixed to preserve trailing zeros based on decimal places
-            return errVal.toFixed(dp);
-        } else {
-            return errStr;
+        // Handle Y-axis uncertainty heading
+        if (yErrorEnabled) {
+            let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
+            if (yErrorType === 'percentage') yUncHeading += ' \\space (\\%)';
+            headers.push(`$${yUncHeading}$`);
         }
+
+        // Initialize Markdown table with headers
+        let markdown = `| ${headers.join(' | ')} |\n`;
+        markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
+
+        // Iterate over each data row
+        rows.forEach(row => {
+            const xInputElem = row.querySelector('.x-input');
+            const yInputElem = row.querySelector('.y-input');
+
+            if (!xInputElem || !yInputElem) return;
+
+            const xValStr = xInputElem.value.trim();
+            const yValStr = yInputElem.value.trim();
+
+            if (xValStr === '' && yValStr === '') return;
+
+            const xVal = parseFloat(xValStr);
+            const yVal = parseFloat(yValStr);
+
+            const xErrInput = row.querySelector('.x-error-input');
+            const yErrInput = row.querySelector('.y-error-input');
+
+            const xErrStr = xErrInput ? xErrInput.value.trim() : '';
+            const yErrStr = yErrInput ? yErrInput.value.trim() : '';
+            const xErrVal = parseFloat(xErrStr);
+            const yErrVal = parseFloat(yErrStr);
+
+            const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
+            const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+
+            let rowData = [];
+
+            // Format X value
+            let xFormatted = xValStr;
+            if (!isNaN(xVal)) {
+                if (xUseSciNotation && xErrorEnabledThisRow && xErrorType === 'percentage') {
+                    // Percentage uncertainty with scientific notation
+                    const sigFigs = xErrVal < 10 ? 3 : 2;
+                    const sciFormatted = formatScientificNotation(xVal, sigFigs);
+                    xFormatted = `$${sciFormatted}$`;
+                } else if (xErrorEnabledThisRow && xErrorType === 'percentage') {
+                    // Percentage uncertainty without scientific notation
+                    const sigFigs = xErrVal < 10 ? 3 : 2;
+                    const sigFormatted = toSigFigs(xVal, sigFigs);
+                    xFormatted = `$${sigFormatted}$`;
+                } else if (xErrorEnabledThisRow && xErrorType === 'absolute') {
+                    // Absolute uncertainty
+                    const formattedData = formatDataValue(xVal, xErrVal, 'absolute', false);
+                    xFormatted = `$${formattedData}$`;
+                } else {
+                    // No uncertainty or other cases
+                    xFormatted = `$${xValStr}$`;
+                }
+            }
+
+            // Format Y value
+            let yFormatted = yValStr;
+            if (!isNaN(yVal)) {
+                if (yUseSciNotation && yErrorEnabledThisRow && yErrorType === 'percentage') {
+                    // Percentage uncertainty with scientific notation
+                    const sigFigs = yErrVal < 10 ? 3 : 2;
+                    const sciFormatted = formatScientificNotation(yVal, sigFigs);
+                    yFormatted = `$${sciFormatted}$`;
+                } else if (yErrorEnabledThisRow && yErrorType === 'percentage') {
+                    // Percentage uncertainty without scientific notation
+                    const sigFigs = yErrVal < 10 ? 3 : 2;
+                    const sigFormatted = toSigFigs(yVal, sigFigs);
+                    yFormatted = `$${sigFormatted}$`;
+                } else if (yErrorEnabledThisRow && yErrorType === 'absolute') {
+                    // Absolute uncertainty
+                    const formattedData = formatDataValue(yVal, yErrVal, 'absolute', false);
+                    yFormatted = `$${formattedData}$`;
+                } else {
+                    // No uncertainty or other cases
+                    yFormatted = `$${yValStr}$`;
+                }
+            }
+
+            rowData.push(xFormatted);
+            rowData.push(yFormatted);
+
+            // Format X uncertainty
+            if (xErrorEnabled) {
+                let xErrorFormatted = xErrorEnabledThisRow ? formatUncertainty(xErrStr, xErrorType) : '';
+                if (xErrorFormatted !== '') {
+                    xErrorFormatted = `$${xErrorFormatted}$`;
+                }
+                rowData.push(xErrorFormatted);
+            }
+
+            // Format Y uncertainty
+            if (yErrorEnabled) {
+                let yErrorFormatted = yErrorEnabledThisRow ? formatUncertainty(yErrStr, yErrorType) : '';
+                if (yErrorFormatted !== '') {
+                    yErrorFormatted = `$${yErrorFormatted}$`;
+                }
+                rowData.push(yErrorFormatted);
+            }
+
+            // Append the formatted row to the markdown string
+            markdown += `| ${rowData.join(' | ')} |\n`;
+        });
+
+        // Debugging: Log the final markdown content
+        console.log("Final Markdown Content:\n", markdown);
+
+        // Create a Blob from the markdown content
+        const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'data.md');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error exporting plain text:', error);
+        alert('An error occurred while exporting the Markdown file. Please check the console for details.');
     }
+}
 
-    /**
-     * The main function to export data as a Markdown (.md) file with LaTeX formatting.
-     */
-    function exportPlainText() {
-        try {
-            // Retrieve axis headings
-            const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
-            const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
+function exportCSV() {
+    try {
+        const table = document.getElementById('data-table');
+        const rows = table.querySelectorAll('tr');
+        let csvContent = '';
 
-            // Check if uncertainties are enabled
-            const xErrorEnabled = document.getElementById('toggle-x-error').checked;
-            const yErrorEnabled = document.getElementById('toggle-y-error').checked;
+        const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
+        const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
+        const xErrorEnabled = document.getElementById('toggle-x-error').checked;
+        const yErrorEnabled = document.getElementById('toggle-y-error').checked;
 
-            // Get uncertainty types
+        const headers = [xHeader, yHeader];
+        if (xErrorEnabled) {
+            const xErrorType = document.getElementById('x-error-type').value;
+            const xErrorHead = xErrorType === 'percentage' ? `delta ${xHeader} (%)` : `delta ${xHeader}`;
+            headers.push(xErrorHead);
+        }
+        if (yErrorEnabled) {
+            const yErrorType = document.getElementById('y-error-type').value;
+            const yErrorHead = yErrorType === 'percentage' ? `delta ${yHeader} (%)` : `delta ${yHeader}`;
+            headers.push(yErrorHead);
+        }
+
+        csvContent += headers.join(',') + '\n';
+
+        const dataRows = table.querySelectorAll('tbody tr');
+
+        for (let i = 0; i < dataRows.length; i++) {
+            const xValStr = dataRows[i].querySelector('.x-input')?.value.trim() || '';
+            const yValStr = dataRows[i].querySelector('.y-input')?.value.trim() || '';
+            if (xValStr === '' && yValStr === '') continue;
+
+            let xVal = parseFloat(xValStr);
+            let yVal = parseFloat(yValStr);
+
+            const xErrInput = dataRows[i].querySelector('.x-error-input');
+            const yErrInput = dataRows[i].querySelector('.y-error-input');
+
+            const xErrStr = xErrInput ? xErrInput.value.trim() : '';
+            const yErrStr = yErrInput ? yErrInput.value.trim() : '';
+            const xErrVal = parseFloat(xErrStr);
+            const yErrVal = parseFloat(yErrStr);
+
+            const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
+            const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+
             const xErrorType = document.getElementById('x-error-type').value;
             const yErrorType = document.getElementById('y-error-type').value;
 
-            // Get all rows from the data table's tbody
-            const table = document.getElementById('data-table');
-            const rows = table.querySelectorAll('tbody tr'); // Only iterate over tbody rows
+            let rowData = [];
 
-            // Initialize arrays to collect all x and y values
-            let xValues = [];
-            let yValues = [];
+            let xFormatted = xValStr;
+            if (!isNaN(xVal)) {
+                xFormatted = formatDataForExport(
+                    xValStr, xErrStr, xErrorEnabledThisRow, xErrorType, xVal, xVal, xErrVal
+                );
+            }
 
-            // Collect all x and y values for notation decision
-            rows.forEach(row => {
-                const xInputElem = row.querySelector('.x-input');
-                const yInputElem = row.querySelector('.y-input');
+            let yFormatted = yValStr;
+            if (!isNaN(yVal)) {
+                yFormatted = formatDataForExport(
+                    yValStr, yErrStr, yErrorEnabledThisRow, yErrorType, yVal, yVal, yErrVal
+                );
+            }
 
-                if (!xInputElem || !yInputElem) return;
+            rowData.push(xFormatted);
+            rowData.push(yFormatted);
 
-                const xValStr = xInputElem.value.trim();
-                const yValStr = yInputElem.value.trim();
-
-                if (xValStr !== '') {
-                    const xVal = parseFloat(xValStr);
-                    if (!isNaN(xVal)) {
-                        xValues.push(xVal);
-                    }
-                }
-
-                if (yValStr !== '') {
-                    const yVal = parseFloat(yValStr);
-                    if (!isNaN(yVal)) {
-                        yValues.push(yVal);
-                    }
-                }
-            });
-
-            // Determine if scientific notation is needed for x and y
-            const xUseSciNotation = xErrorEnabled && xErrorType === 'percentage' && xValues.some(val => val < -10000 || val > 10000);
-            const yUseSciNotation = yErrorEnabled && yErrorType === 'percentage' && yValues.some(val => val < -10000 || val > 10000);
-
-            // Debugging: Log whether scientific notation will be used
-            console.log(`X Use Scientific Notation: ${xUseSciNotation}`);
-            console.log(`Y Use Scientific Notation: ${yUseSciNotation}`);
-
-            // Initialize headers with \quad spacing and replace spaces with \space
-            let headers = [
-                `$${formatLabelForLatex(xHeader)}$`,
-                `$${formatLabelForLatex(yHeader)}$`
-            ];
-
-            // Handle X-axis uncertainty heading
             if (xErrorEnabled) {
-                let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
-                if (xErrorType === 'percentage') xUncHeading += ' \\space (\\%)';
-                headers.push(`$${xUncHeading}$`);
+                rowData.push(xErrorEnabledThisRow ? xErrStr : '');
             }
 
-            // Handle Y-axis uncertainty heading
             if (yErrorEnabled) {
-                let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
-                if (yErrorType === 'percentage') yUncHeading += ' \\space (\\%)';
-                headers.push(`$${yUncHeading}$`);
+                rowData.push(yErrorEnabledThisRow ? yErrStr : '');
             }
 
-            // Initialize Markdown table with headers
-            let markdown = `| ${headers.join(' | ')} |\n`;
-            markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
+            csvContent += rowData.join(',') + '\n';
+        }
 
-            // Iterate over each data row
-            rows.forEach(row => {
-                const xInputElem = row.querySelector('.x-input');
-                const yInputElem = row.querySelector('.y-input');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'data.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        alert('An error occurred while exporting the CSV. Please check the console for details.');
+    }
+}
 
-                if (!xInputElem || !yInputElem) return;
+function applyGlobalUncertainties(axis) {
+    const globalVal = document.getElementById(`global-${axis}-uncertainty`).value.trim();
+    const tableBody = document.querySelector('#data-table tbody');
+    const rows = tableBody.querySelectorAll('tr');
 
-                const xValStr = xInputElem.value.trim();
-                const yValStr = yInputElem.value.trim();
+    rows.forEach((row) => {
+        const xInput = row.querySelector('.x-input').value.trim();
+        const yInput = row.querySelector('.y-input').value.trim();
 
-                if (xValStr === '' && yValStr === '') return;
+        if (xInput !== '' && yInput !== '') {
+            const errorInput = row.querySelector(`.${axis}-error-input`);
+            if (document.getElementById(`toggle-${axis}-error`).checked && errorInput) {
+                errorInput.value = globalVal !== '' ? globalVal : '';
+            }
+        }
+    });
 
-                const xVal = parseFloat(xValStr);
-                const yVal = parseFloat(yValStr);
+    updateData();
+    document.getElementById(`global-${axis}-uncertainty`).value = '';
 
-                const xErrInput = row.querySelector('.x-error-input');
-                const yErrInput = row.querySelector('.y-error-input');
+    // Update initial parameters based on the selected advanced fit method
+    setInitialParameters(getCurrentAdvancedFitMethod());
+}
 
-                const xErrStr = xErrInput ? xErrInput.value.trim() : '';
-                const yErrStr = yErrInput ? yErrInput.value.trim() : '';
-                const xErrVal = parseFloat(xErrStr);
-                const yErrVal = parseFloat(yErrStr);
+function fitAdvancedCurve() {
+    if (rawData.length < 4) { // Increased to 4 for more complex fits
+        alert('Please enter at least four data points for advanced fitting.');
+        return;
+    }
 
-                const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
-                const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+    const fitMethod = document.getElementById('advanced-fit-method').value;
 
-                let rowData = [];
+    if (fitMethod === 'Sinusoidal') {
+        performSinusoidalFit();
+    } else if (fitMethod === 'Gaussian') {
+        performGaussianFit();
+    }
+}
 
-                // Format X value
-                let xFormatted = xValStr;
-                if (!isNaN(xVal)) {
-                    if (xUseSciNotation && xErrorEnabledThisRow && xErrorType === 'percentage') {
-                        // Percentage uncertainty with scientific notation
-                        const sigFigs = xErrVal < 10 ? 3 : 2;
-                        const sciFormatted = formatScientificNotation(xVal, sigFigs);
-                        xFormatted = `$${sciFormatted}$`;
-                    } else if (xErrorEnabledThisRow && xErrorType === 'percentage') {
-                        // Percentage uncertainty without scientific notation
-                        const sigFigs = xErrVal < 10 ? 3 : 2;
-                        const sigFormatted = toSigFigs(xVal, sigFigs);
-                        xFormatted = `$${sigFormatted}$`;
-                    } else if (xErrorEnabledThisRow && xErrorType === 'absolute') {
-                        // Absolute uncertainty
-                        const formattedData = formatDataValue(xVal, xErrVal, 'absolute', false);
-                        xFormatted = `$${formattedData}$`;
-                    } else {
-                        // No uncertainty or other cases
-                        xFormatted = `$${xValStr}$`;
-                    }
-                }
+function performLinearFit(x, y) {
+    try {
+        const { slope, intercept } = computeLinearFit(x, y);
 
-                // Format Y value
-                let yFormatted = yValStr;
-                if (!isNaN(yVal)) {
-                    if (yUseSciNotation && yErrorEnabledThisRow && yErrorType === 'percentage') {
-                        // Percentage uncertainty with scientific notation
-                        const sigFigs = yErrVal < 10 ? 3 : 2;
-                        const sciFormatted = formatScientificNotation(yVal, sigFigs);
-                        yFormatted = `$${sciFormatted}$`;
-                    } else if (yErrorEnabledThisRow && yErrorType === 'percentage') {
-                        // Percentage uncertainty without scientific notation
-                        const sigFigs = yErrVal < 10 ? 3 : 2;
-                        const sigFormatted = toSigFigs(yVal, sigFigs);
-                        yFormatted = `$${sigFormatted}$`;
-                    } else if (yErrorEnabledThisRow && yErrorType === 'absolute') {
-                        // Absolute uncertainty
-                        const formattedData = formatDataValue(yVal, yErrVal, 'absolute', false);
-                        yFormatted = `$${formattedData}$`;
-                    } else {
-                        // No uncertainty or other cases
-                        yFormatted = `$${yValStr}$`;
-                    }
-                }
+        const xFit = [Math.min(...x), Math.max(...x)];
+        const yFit = xFit.map(xi => slope * xi + intercept);
 
-                rowData.push(xFormatted);
-                rowData.push(yFormatted);
+        const fitFunction = xi => slope * xi + intercept;
 
-                // Format X uncertainty
-                if (xErrorEnabled) {
-                    let xErrorFormatted = xErrorEnabledThisRow ? formatUncertainty(xErrStr, xErrorType) : '';
-                    if (xErrorFormatted !== '') {
-                        xErrorFormatted = `$${xErrorFormatted}$`;
-                    }
-                    rowData.push(xErrorFormatted);
-                }
+        let equation = `y = ${slope.toFixed(3)}x + ${intercept.toFixed(3)}`;
+        if (intercept < 0) {
+            equation = `y = ${slope.toFixed(3)}x - ${Math.abs(intercept).toFixed(3)}`;
+        }
 
-                // Format Y uncertainty
-                if (yErrorEnabled) {
-                    let yErrorFormatted = yErrorEnabledThisRow ? formatUncertainty(yErrStr, yErrorType) : '';
-                    if (yErrorFormatted !== '') {
-                        yErrorFormatted = `$${yErrorFormatted}$`;
-                    }
-                    rowData.push(yErrorFormatted);
-                }
+        updateResults(equation, x, y, fitFunction);
+        plotGraph(xFit, yFit);
+    } catch (error) {
+        console.error('Error performing linear fit:', error);
+        alert('An error occurred during linear fitting. Please check the console for details.');
+    }
+}
 
-                // Append the formatted row to the markdown string
-                markdown += `| ${rowData.join(' | ')} |\n`;
-            });
+function performPolynomialFit(x, y, degree) {
+    try {
+        const coefficients = polyfit(x, y, degree);
+        const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
+        const yFit = xFit.map(xi => polyEval(coefficients, xi));
 
-            // Debugging: Log the final markdown content
-            console.log("Final Markdown Content:\n", markdown);
+        const fitFunction = xi => polyEval(coefficients, xi);
 
-            // Create a Blob from the markdown content
-            const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'data.md');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('Error exporting plain text:', error);
-            alert('An error occurred while exporting the Markdown file. Please check the console for details.');
+        let equation = 'y = ';
+        coefficients.forEach((c, i) => {
+            const power = degree - i;
+            if (c === 0) return;
+
+            const absC = Math.abs(c).toFixed(3);
+            const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
+
+            let term = '';
+            if (power === 0) {
+                term = `${absC}`;
+            } else if (power === 1) {
+                term = `${absC}x`;
+            } else {
+                term = `${absC}x^{${power}}`;
+            }
+
+            equation += `${sign}${term}`;
+        });
+
+        updateResults(equation, x, y, fitFunction);
+        plotGraph(xFit, yFit);
+    } catch (error) {
+        console.error('Error performing polynomial fit:', error);
+        alert('An error occurred during polynomial fitting. Please check the console for details.');
+    }
+}
+
+function performExponentialFit() {
+    try {
+        // Ensure all y values are positive
+        const validData = rawData.filter(point => point.y > 0);
+        if (validData.length < 2) {
+            alert('Exponential fit requires all y values to be positive.');
+            return;
+        }
+
+        const x = validData.map(p => p.x);
+        const y = validData.map(p => Math.log(p.y));
+
+        const { slope, intercept } = computeLinearFit(x, y);
+
+        const b = slope;
+        const A = Math.exp(intercept);
+
+        // Generate fitted curve
+        const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
+        const yFit = xFit.map(xi => A * Math.exp(b * xi));
+
+        const fitFunction = xi => A * Math.exp(b * xi);
+
+        // Equation string
+        let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x}`;
+
+        updateResults(equation, x, validData.map(p => p.y), fitFunction);
+        plotGraph(xFit, yFit);
+    } catch (error) {
+        console.error('Error performing exponential fit:', error);
+        alert('An error occurred during exponential fitting. Please check the console for details.');
+    }
+}
+
+function performPowerFit() {
+    try {
+        // Ensure all y and x values are positive
+        const validData = rawData.filter(point => point.y > 0 && point.x > 0);
+        if (validData.length < 2) {
+            alert('Power fit requires all x and y values to be positive.');
+            return;
+        }
+
+        const x = validData.map(p => Math.log(p.x));
+        const y = validData.map(p => Math.log(p.y));
+
+        const { slope, intercept } = computeLinearFit(x, y);
+
+        const b = slope;
+        const A = Math.exp(intercept);
+
+        // Generate fitted curve
+        const xOriginal = validData.map(p => p.x);
+        const xFitOriginal = Array.from({ length: 100 }, (_, i) => Math.min(...xOriginal) + i * (Math.max(...xOriginal) - Math.min(...xOriginal)) / 99);
+        const yFit = xFitOriginal.map(xi => A * Math.pow(xi, b));
+
+        const fitFunction = xi => A * Math.pow(xi, b);
+
+        // Equation string
+        let equation = `y = ${A.toFixed(3)} x^{${b.toFixed(3)}}`;
+
+        updateResults(equation, validData.map(p => p.x), validData.map(p => p.y), fitFunction);
+        plotGraph(xFitOriginal, yFit);
+    } catch (error) {
+        console.error('Error performing power fit:', error);
+        alert('An error occurred during power fitting. Please check the console for details.');
+    }
+}
+
+function estimateKFromData() {
+    if (rawData.length < 2) {
+        alert('Not enough data points to estimate k.');
+        return null;
+    }
+
+    const x = rawData.map(point => point.x);
+    const y = rawData.map(point => point.y);
+
+    // Detect peaks in y
+    let peaks = [];
+    for (let i = 1; i < y.length - 1; i++) {
+        if (y[i] > y[i - 1] && y[i] > y[i + 1]) {
+            peaks.push(x[i]);
         }
     }
 
+    if (peaks.length < 2) {
+        alert('Insufficient peaks to estimate the period.');
+        return null;
+    }
 
-        function exportCSV() {
-            try {
-                const table = document.getElementById('data-table');
-                const rows = table.querySelectorAll('tr');
-                let csvContent = '';
+    // Calculate distances between consecutive peaks
+    let periods = [];
+    for (let i = 1; i < peaks.length; i++) {
+        periods.push(peaks[i] - peaks[i - 1]);
+    }
 
-                const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
-                const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
-                const xErrorEnabled = document.getElementById('toggle-x-error').checked;
-                const yErrorEnabled = document.getElementById('toggle-y-error').checked;
+    const T = periods.reduce((sum, p) => sum + p, 0) / periods.length; // Average period
+    const k = 2 * Math.PI / T;
 
-                const headers = [xHeader, yHeader];
-                if (xErrorEnabled) {
-                    const xErrorType = document.getElementById('x-error-type').value;
-                    const xErrorHead = xErrorType === 'percentage' ? `delta ${xHeader} (%)` : `delta ${xHeader}`;
-                    headers.push(xErrorHead);
-                }
-                if (yErrorEnabled) {
-                    const yErrorType = document.getElementById('y-error-type').value;
-                    const yErrorHead = yErrorType === 'percentage' ? `delta ${yHeader} (%)` : `delta ${yHeader}`;
-                    headers.push(yErrorHead);
-                }
+    console.log(`Estimated period (T): ${T}, Estimated k: ${k}`);
+    return k;
+}
 
-                csvContent += headers.join(',') + '\n';
 
-                const dataRows = table.querySelectorAll('tbody tr');
+function performSinusoidalFit() {
+    try {
+        let A = parseFloat(document.getElementById('initial-A').value);
+        let b = parseFloat(document.getElementById('initial-b').value);
+        let k = parseFloat(document.getElementById('initial-k').value);
+        let phi = parseFloat(document.getElementById('initial-phi').value);
+        let c = parseFloat(document.getElementById('initial-c').value);
 
-                for (let i = 0; i < dataRows.length; i++) {
-                    const xValStr = dataRows[i].querySelector('.x-input')?.value.trim() || '';
-                    const yValStr = dataRows[i].querySelector('.y-input')?.value.trim() || '';
-                    if (xValStr === '' && yValStr === '') continue;
+        // Estimate k if not valid
+        if (isNaN(k) || k <= 0) {
+            const estimatedK = estimateKFromData();
+            if (estimatedK !== null) {
+                k = estimatedK;
+                console.log(`Using estimated k: ${k}`);
 
-                    let xVal = parseFloat(xValStr);
-                    let yVal = parseFloat(yValStr);
-
-                    const xErrInput = dataRows[i].querySelector('.x-error-input');
-                    const yErrInput = dataRows[i].querySelector('.y-error-input');
-
-                    const xErrStr = xErrInput ? xErrInput.value.trim() : '';
-                    const yErrStr = yErrInput ? yErrInput.value.trim() : '';
-                    const xErrVal = parseFloat(xErrStr);
-                    const yErrVal = parseFloat(yErrStr);
-
-                    const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
-                    const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
-
-                    const xErrorType = document.getElementById('x-error-type').value;
-                    const yErrorType = document.getElementById('y-error-type').value;
-
-                    let rowData = [];
-
-                    let xFormatted = xValStr;
-                    if (!isNaN(xVal)) {
-                        xFormatted = formatDataForExport(
-                            xValStr, xErrStr, xErrorEnabledThisRow, xErrorType, xVal, xVal, xErrVal
-                        );
-                    }
-
-                    let yFormatted = yValStr;
-                    if (!isNaN(yVal)) {
-                        yFormatted = formatDataForExport(
-                            yValStr, yErrStr, yErrorEnabledThisRow, yErrorType, yVal, yVal, yErrVal
-                        );
-                    }
-
-                    rowData.push(xFormatted);
-                    rowData.push(yFormatted);
-
-                    if (xErrorEnabled) {
-                        rowData.push(xErrorEnabledThisRow ? xErrStr : '');
-                    }
-
-                    if (yErrorEnabled) {
-                        rowData.push(yErrorEnabledThisRow ? yErrStr : '');
-                    }
-
-                    csvContent += rowData.join(',') + '\n';
-                }
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'data.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (error) {
-                console.error('Error exporting CSV:', error);
-                alert('An error occurred while exporting the CSV. Please check the console for details.');
-            }
-        }
-
-        function applyGlobalUncertainties(axis) {
-            const globalVal = document.getElementById(`global-${axis}-uncertainty`).value.trim();
-            const tableBody = document.querySelector('#data-table tbody');
-            const rows = tableBody.querySelectorAll('tr');
-
-            rows.forEach((row) => {
-                const xInput = row.querySelector('.x-input').value.trim();
-                const yInput = row.querySelector('.y-input').value.trim();
-
-                if (xInput !== '' && yInput !== '') {
-                    const errorInput = row.querySelector(`.${axis}-error-input`);
-                    if (document.getElementById(`toggle-${axis}-error`).checked && errorInput) {
-                        errorInput.value = globalVal !== '' ? globalVal : '';
-                    }
-                }
-            });
-
-            updateData();
-            document.getElementById(`global-${axis}-uncertainty`).value = '';
-        }
-
-        function fitAdvancedCurve() {
-            if (rawData.length < 4) { // Increased to 4 for more complex fits
-                alert('Please enter at least four data points for advanced fitting.');
+                // Update the input box for k
+                document.getElementById('initial-k').value = k.toFixed(3);
+            } else {
+                alert('Failed to estimate k. Please provide an initial value.');
                 return;
             }
-
-            const fitMethod = document.getElementById('advanced-fit-method').value;
-
-            if (fitMethod === 'Sinusoidal') {
-                performSinusoidalFit();
-            } else if (fitMethod === 'Gaussian') {
-                performGaussianFit();
-            } else if (fitMethod === 'Lorentzian') {
-                performLorentzianFit();
-            }
         }
 
-        function performLinearFit(x, y) {
-            try {
-                const { slope, intercept } = computeLinearFit(x, y);
-
-                const xFit = [Math.min(...x), Math.max(...x)];
-                const yFit = xFit.map(xi => slope * xi + intercept);
-
-                const fitFunction = xi => slope * xi + intercept;
-
-                let equation = `y = ${slope.toFixed(3)}x + ${intercept.toFixed(3)}`;
-                if (intercept < 0) {
-                    equation = `y = ${slope.toFixed(3)}x - ${Math.abs(intercept).toFixed(3)}`;
-                }
-
-                updateResults(equation, x, y, fitFunction);
-                plotGraph(xFit, yFit);
-            } catch (error) {
-                console.error('Error performing linear fit:', error);
-                alert('An error occurred during linear fitting. Please check the console for details.');
-            }
+        // Validate other parameters
+        if (isNaN(A) || isNaN(b) || isNaN(phi) || isNaN(c)) {
+            alert('Please provide valid initial parameters for Sinusoidal fit.');
+            return;
         }
 
-        function performPolynomialFit(x, y, degree) {
-            try {
-                const coefficients = polyfit(x, y, degree);
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-                const yFit = xFit.map(xi => polyEval(coefficients, xi));
+        // Continue with the fitting process using the updated parameters...
+        const params = { A: A, b: b, k: k, phi: phi, c: c };
+        const learningRate = 1e-5;
+        const maxIterations = 100000;
+        const tolerance = 1e-6;
 
-                const fitFunction = xi => polyEval(coefficients, xi);
+        let previousError = Infinity;
+        let iterationsCount = 0;
 
-                let equation = 'y = ';
-                coefficients.forEach((c, i) => {
-                    const power = degree - i;
-                    if (c === 0) return;
+        while (iterationsCount < maxIterations) {
+            const predictions = rawData.map(point =>
+                params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi) + params.c
+            );
+            const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+            const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
 
-                    const absC = Math.abs(c).toFixed(3);
-                    const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
-
-                    let term = '';
-                    if (power === 0) {
-                        term = `${absC}`;
-                    } else if (power === 1) {
-                        term = `${absC}x`;
-                    } else {
-                        term = `${absC}x^{${power}}`;
-                    }
-
-                    equation += `${sign}${term}`;
-                });
-
-                updateResults(equation, x, y, fitFunction);
-                plotGraph(xFit, yFit);
-            } catch (error) {
-                console.error('Error performing polynomial fit:', error);
-                alert('An error occurred during polynomial fitting. Please check the console for details.');
+            if (Math.abs(previousError - mse) < tolerance) {
+                break;
             }
+
+            previousError = mse;
+
+            let dA = 0,
+                db = 0,
+                dk = 0,
+                dphi = 0,
+                dc = 0;
+            for (let i = 0; i < rawData.length; i++) {
+                const xi = rawData[i].x;
+                const yi = rawData[i].y;
+                const sinTerm = Math.sin(params.k * xi - params.phi);
+                const cosTerm = Math.cos(params.k * xi - params.phi);
+                const expTerm = Math.exp(params.b * xi);
+
+                const prediction = params.A * expTerm * sinTerm + params.c;
+                const error = yi - prediction;
+
+                dA += -2 * error * expTerm * sinTerm;
+                db += -2 * error * params.A * xi * expTerm * sinTerm;
+                dk += -2 * error * params.A * expTerm * xi * cosTerm;
+                dphi += 2 * error * params.A * expTerm * cosTerm;
+                dc += -2 * error;
+            }
+
+            params.A -= learningRate * dA;
+            params.b -= learningRate * db;
+            params.k -= learningRate * dk;
+            params.phi -= learningRate * dphi;
+            params.c -= learningRate * dc;
+
+            iterationsCount++;
         }
 
-        function performExponentialFit() {
-            try {
-                // Ensure all y values are positive
-                const validData = rawData.filter(point => point.y > 0);
-                if (validData.length < 2) {
-                    alert('Exponential fit requires all y values to be positive.');
-                    return;
-                }
-
-                const x = validData.map(p => p.x);
-                const y = validData.map(p => Math.log(p.y));
-
-                const { slope, intercept } = computeLinearFit(x, y);
-
-                const b = slope;
-                const A = Math.exp(intercept);
-
-                // Generate fitted curve
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-                const yFit = xFit.map(xi => A * Math.exp(b * xi));
-
-                const fitFunction = xi => A * Math.exp(b * xi);
-
-                // Equation string
-                let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x}`;
-
-                updateResults(equation, x, validData.map(p => p.y), fitFunction);
-                plotGraph(xFit, yFit);
-            } catch (error) {
-                console.error('Error performing exponential fit:', error);
-                alert('An error occurred during exponential fitting. Please check the console for details.');
-            }
+        if (iterationsCount === maxIterations) {
+            alert('Sinusoidal fitting did not converge. Please try different initial parameters.');
+            return;
         }
 
-        function performPowerFit() {
-            try {
-                // Ensure all y and x values are positive
-                const validData = rawData.filter(point => point.y > 0 && point.x > 0);
-                if (validData.length < 2) {
-                    alert('Power fit requires all x and y values to be positive.');
-                    return;
-                }
+        const xFit = Array.from({ length: 100 }, (_, i) =>
+            Math.min(...rawData.map(p => p.x)) +
+            i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99
+        );
+        const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c);
 
-                const x = validData.map(p => Math.log(p.x));
-                const y = validData.map(p => Math.log(p.y));
+        const fitFunction = xi =>
+            params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
 
-                const { slope, intercept } = computeLinearFit(x, y);
-
-                const b = slope;
-                const A = Math.exp(intercept);
-
-                // Generate fitted curve
-                const xOriginal = validData.map(p => p.x);
-                const xFitOriginal = Array.from({ length: 100 }, (_, i) => Math.min(...xOriginal) + i * (Math.max(...xOriginal) - Math.min(...xOriginal)) / 99);
-                const yFit = xFitOriginal.map(xi => A * Math.pow(xi, b));
-
-                const fitFunction = xi => A * Math.pow(xi, b);
-
-                // Equation string
-                let equation = `y = ${A.toFixed(3)} x^{${b.toFixed(3)}}`;
-
-                updateResults(equation, validData.map(p => p.x), validData.map(p => p.y), fitFunction);
-                plotGraph(xFitOriginal, yFit);
-            } catch (error) {
-                console.error('Error performing power fit:', error);
-                alert('An error occurred during power fitting. Please check the console for details.');
-            }
+        let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x}\\sin(${params.k.toFixed(3)}x`;
+        if (params.phi > 0) {
+            equation += ` - ${params.phi.toFixed(3)}`;
+        } else if (params.phi < 0) {
+            equation += ` + ${Math.abs(params.phi).toFixed(3)}`;
+        }
+        equation += `)`;
+        if (params.c > 0) {
+            equation += ` + ${params.c.toFixed(3)}`;
+        } else if (params.c < 0) {
+            equation += ` - ${Math.abs(params.c).toFixed(3)}`;
         }
 
-        function performSinusoidalFit() {
-            try {
-                let A = parseFloat(document.getElementById('initial-A').value);
-                let b = parseFloat(document.getElementById('initial-b').value);
-                let k = parseFloat(document.getElementById('initial-k').value);
-                let phi = parseFloat(document.getElementById('initial-phi').value);
-                let c = parseFloat(document.getElementById('initial-c').value);
+        updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+        plotGraph(xFit, yFit);
+    } catch (error) {
+        console.error('Error performing sinusoidal fit:', error);
+        alert('An error occurred during sinusoidal fitting. Please check the console for details.');
+    }
+}
 
-                if (isNaN(A) || isNaN(b) || isNaN(k) || isNaN(phi) || isNaN(c)) {
-                    alert('Please provide valid initial parameters for Sinusoidal fit.');
-                    return;
-                }
+function performGaussianFit() {
+    try {
+        let A = parseFloat(document.getElementById('initial-A-gaussian').value);
+        let mu = parseFloat(document.getElementById('initial-mu').value);
+        let sigma = parseFloat(document.getElementById('initial-sigma').value);
+        let c = parseFloat(document.getElementById('initial-c-gaussian').value);
 
-                const params = { A: A, b: b, k: k, phi: phi, c: c };
-                const learningRate = 1e-5;
-                const maxIterations = 100000;
-                const tolerance = 1e-6;
-
-                let previousError = Infinity;
-                let iterationsCount = 0;
-
-                while (iterationsCount < maxIterations) {
-                    const predictions = rawData.map(point => params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi) + params.c);
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err * err, 0) / errors.length;
-
-                    if (Math.abs(previousError - mse) < tolerance) {
-                        break;
-                    }
-
-                    previousError = mse;
-
-                    let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        const yi = rawData[i].y;
-                        const sinTerm = Math.sin(params.k * xi - params.phi);
-                        const cosTerm = Math.cos(params.k * xi - params.phi);
-                        const expTerm = Math.exp(params.b * xi);
-
-                        const prediction = params.A * expTerm * sinTerm + params.c;
-                        const error = yi - prediction;
-
-                        dA += -2 * error * expTerm * sinTerm;
-                        db += -2 * error * params.A * xi * expTerm * sinTerm;
-                        dk += -2 * error * params.A * expTerm * xi * cosTerm;
-                        dphi += 2 * error * params.A * expTerm * cosTerm;
-                        dc += -2 * error;
-                    }
-
-                // Update parameters
-                    params.A -= learningRate * dA;
-                    params.b -= learningRate * db;
-                    params.k -= learningRate * dk;
-                    params.phi -= learningRate * dphi;
-                    params.c -= learningRate * dc;
-
-                    iterationsCount++;
-                }
-
-                if (iterationsCount === maxIterations) {
-                    alert('Sinusoidal fitting did not converge. Please try different initial parameters.');
-                    return;
-                }
-
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c);
-
-                const fitFunction = xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
-
-                let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x}\\sin(${params.k.toFixed(3)}x`;
-                if (params.phi > 0) {
-                    equation += ` - ${params.phi.toFixed(3)}`;
-                } else if (params.phi < 0) {
-                    equation += ` + ${Math.abs(params.phi).toFixed(3)}`;
-                }
-                equation += `)`;
-                if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(3)}`;
-                } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
-                }
-
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotGraph(xFit, yFit);
-            } catch (error) {
-                console.error('Error performing sinusoidal fit:', error);
-                alert('An error occurred during sinusoidal fitting. Please check the console for details.');
-            }
+        if (isNaN(A) || isNaN(mu) || isNaN(sigma) || isNaN(c)) {
+            alert('Please provide valid initial parameters for Gaussian fit.');
+            return;
         }
 
-        function performGaussianFit() {
-            try {
-                let A = parseFloat(document.getElementById('initial-A-gaussian').value);
-                let mu = parseFloat(document.getElementById('initial-mu').value);
-                let sigma = parseFloat(document.getElementById('initial-sigma').value);
-                let c = parseFloat(document.getElementById('initial-c-gaussian').value);
+        const params = { A: A, mu: mu, sigma: sigma, c: c };
+        const learningRate = 1e-5;
+        const maxIterations = 100000;
+        const tolerance = 1e-6;
 
-                if (isNaN(A) || isNaN(mu) || isNaN(sigma) || isNaN(c)) {
-                    alert('Please provide valid initial parameters for Gaussian fit.');
-                    return;
-                }
+        let previousError = Infinity;
+        let iterationsCount = 0;
 
-                const params = { A: A, mu: mu, sigma: sigma, c: c };
-                const learningRate = 1e-5;
-                const maxIterations = 100000;
-                const tolerance = 1e-6;
+        while (iterationsCount < maxIterations) {
+            const predictions = rawData.map(point => params.A * Math.exp(-((point.x - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
+            const errors = rawData.map((point, idx) => point.y - predictions[idx]);
+            const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
 
-                let previousError = Infinity;
-                let iterationsCount = 0;
-
-                while (iterationsCount < maxIterations) {
-                    const predictions = rawData.map(point => params.A * Math.exp(-((point.x - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
-
-                    if (Math.abs(previousError - mse) < tolerance) {
-                        break;
-                    }
-
-                    previousError = mse;
-
-                    let dA = 0, dmu = 0, dsigma = 0, dc = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        const yi = rawData[i].y;
-                        const expTerm = Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2));
-
-                        const prediction = params.A * expTerm + params.c;
-                        const error = yi - prediction;
-
-                        dA += -2 * error * expTerm;
-                        dmu += -2 * error * params.A * expTerm * ((xi - params.mu) / (params.sigma ** 2));
-                        dsigma += -2 * error * params.A * expTerm * ((xi - params.mu) ** 2) / (params.sigma ** 3);
-                        dc += -2 * error;
-                    }
-
-                // Update parameters
-                    params.A -= learningRate * dA;
-                    params.mu -= learningRate * dmu;
-                    params.sigma -= learningRate * dsigma;
-                    params.c -= learningRate * dc;
-
-                    iterationsCount++;
-                }
-
-                if (iterationsCount === maxIterations) {
-                    alert('Gaussian fitting did not converge. Please try different initial parameters.');
-                    return;
-                }
-
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
-
-                const fitFunction = xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c;
-
-                let equation = `y = ${params.A.toFixed(3)} e^{-\\frac{(x - ${params.mu.toFixed(3)})^2}{2 (${params.sigma.toFixed(3)})^2}}`;
-                if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(3)}`;
-                } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
-                }
-
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotGraph(xFit, yFit);
-            } catch (error) {
-                console.error('Error performing Gaussian fit:', error);
-                alert('An error occurred during Gaussian fitting. Please check the console for details.');
+            if (Math.abs(previousError - mse) < tolerance) {
+                break;
             }
+
+            previousError = mse;
+
+            let dA = 0, dmu = 0, dsigma = 0, dc = 0;
+            for (let i = 0; i < rawData.length; i++) {
+                const xi = rawData[i].x;
+                const yi = rawData[i].y;
+                const expTerm = Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2));
+
+                const prediction = params.A * expTerm + params.c;
+                const error = yi - prediction;
+
+                dA += -2 * error * expTerm;
+                dmu += -2 * error * params.A * expTerm * ((xi - params.mu) / (params.sigma ** 2));
+                dsigma += -2 * error * params.A * expTerm * ((xi - params.mu) ** 2) / (params.sigma ** 3);
+                dc += -2 * error;
+            }
+
+            // Update parameters
+            params.A -= learningRate * dA;
+            params.mu -= learningRate * dmu;
+            params.sigma -= learningRate * dsigma;
+            params.c -= learningRate * dc;
+
+            iterationsCount++;
         }
 
-        function performLorentzianFit() {
-            try {
-                let A = parseFloat(document.getElementById('initial-A-lorentzian').value);
-                let x0 = parseFloat(document.getElementById('initial-x0').value);
-                let gamma = parseFloat(document.getElementById('initial-gamma').value);
-                let c = parseFloat(document.getElementById('initial-c-lorentzian').value);
-
-                if (isNaN(A) || isNaN(x0) || isNaN(gamma) || isNaN(c)) {
-                    alert('Please provide valid initial parameters for Lorentzian fit.');
-                    return;
-                }
-
-                const params = { A: A, x0: x0, gamma: gamma, c: c };
-                const learningRate = 1e-5;
-                const maxIterations = 100000;
-                const tolerance = 1e-6;
-
-                let previousError = Infinity;
-                let iterationsCount = 0;
-
-                while (iterationsCount < maxIterations) {
-                    const predictions = rawData.map(point => params.A * (params.gamma ** 2) / ((point.x - params.x0) ** 2 + params.gamma ** 2) + params.c);
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
-
-                    if (Math.abs(previousError - mse) < tolerance) {
-                        break;
-                    }
-
-                    previousError = mse;
-
-                    let dA = 0, dx0 = 0, dgamma = 0, dc = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        const yi = rawData[i].y;
-                        const denominator = ((xi - params.x0) ** 2 + params.gamma ** 2);
-                        const lorentzian = (params.gamma ** 2) / denominator;
-
-                        const prediction = params.A * lorentzian + params.c;
-                        const error = yi - prediction;
-
-                        dA += -2 * error * lorentzian;
-                        dx0 += -2 * error * params.A * (-2 * (xi - params.x0) * params.gamma ** 2) / (denominator ** 2);
-                        dgamma += -2 * error * params.A * (2 * params.gamma * denominator - 2 * (xi - params.x0) ** 2 * params.gamma) / (denominator ** 2);
-                        dc += -2 * error;
-                    }
-
-                // Update parameters
-                    params.A -= learningRate * dA;
-                    params.x0 -= learningRate * dx0;
-                    params.gamma -= learningRate * dgamma;
-                    params.c -= learningRate * dc;
-
-                    iterationsCount++;
-                }
-
-                if (iterationsCount === maxIterations) {
-                    alert('Lorentzian fitting did not converge. Please try different initial parameters.');
-                    return;
-                }
-
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c);
-
-                const fitFunction = xi => params.A * (params.gamma ** 2) / ((xi - params.x0) ** 2 + params.gamma ** 2) + params.c;
-
-                let equation = `y = ${params.A.toFixed(3)} \\frac{(${params.gamma.toFixed(3)})^2}{(x - ${params.x0.toFixed(3)})^2 + (${params.gamma.toFixed(3)})^2}`;
-                if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(3)}`;
-                } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
-                }
-
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
-                plotGraph(xFit, yFit);
-            } catch (error) {
-                console.error('Error performing Lorentzian fit:', error);
-                alert('An error occurred during Lorentzian fitting. Please check the console for details.');
-            }
+        if (iterationsCount === maxIterations) {
+            alert('Gaussian fitting did not converge. Please try different initial parameters.');
+            return;
         }
+
+        const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
+        const yFit = xFit.map(xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
+
+        const fitFunction = xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c;
+
+        let equation = `y = ${params.A.toFixed(3)} e^{-\\frac{(x - ${params.mu.toFixed(3)})^2}{2 (${params.sigma.toFixed(3)})^2}}`;
+        if (params.c > 0) {
+            equation += ` + ${params.c.toFixed(3)}`;
+        } else if (params.c < 0) {
+            equation += ` - ${Math.abs(params.c).toFixed(3)}`;
+        }
+
+        updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+        plotGraph(xFit, yFit);
+    } catch (error) {
+        console.error('Error performing Gaussian fit:', error);
+        alert('An error occurred during Gaussian fitting. Please check the console for details.');
+    }
+}
+
     </script>
 </body>
 
