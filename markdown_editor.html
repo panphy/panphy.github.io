@@ -26,9 +26,8 @@
   <!-- DOMPurify -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
   
-  <!-- Highlight.js Stylesheet -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+  <!-- Highlight.js Stylesheets -->
+  <link id="highlightStyle" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
   
   <!-- Highlight.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
@@ -297,17 +296,26 @@
 
     /* Highlight.js Styles in Print */
     @media print {
-      /* Define page margins */
-      @page {
-        margin: 15mm; /* Adjust as needed */
+      /* Override CSS Variables to Light Mode */
+      :root {
+        --background-color: #ffffff !important;
+        --text-color: #000000 !important;
+        --pane-background: #ffffff !important;
+        --pane-heading-background: #333333 !important;
+        --pane-heading-color: #ffffff !important;
+        --button-background: #f0f0f0 !important;
+        --button-color: #000000 !important;
+        --border-color: #ccc !important;
+        --code-background: #f0f0f0 !important;
+        --table-border-color: black !important;
+        --table-header-background: #f4f4f4 !important;
       }
 
+      /* Ensure body uses light mode colors */
       body {
-        display: block;
-        margin: 0;
         background-color: #ffffff !important;
         color: #000000 !important;
-        line-height: 1.5; /* Ensure body has appropriate line-height */
+        line-height: 1.5 !important;
       }
 
       #editorContainer {
@@ -319,12 +327,12 @@
       }
 
       #outputPane {
-        width: auto;
-        padding: 15mm;
+        width: auto !important;
+        padding: 15mm !important;
         background-color: #ffffff !important;
         color: #000000 !important;
-        border: none;
-        line-height: 1.5; /* Ensure output pane has appropriate line-height */
+        border: none !important;
+        line-height: 1.5 !important;
       }
 
       /* Hide the entire pane heading container */
@@ -340,18 +348,18 @@
       }
 
       svg, pre {
-        page-break-inside: avoid;
-        line-height: 1.5; /* Ensure code blocks have appropriate line-height */
+        page-break-inside: avoid !important;
+        line-height: 1.5 !important;
       }
 
       #renderedOutput {
-        font-size: 14pt;
-        line-height: 1.5;
+        font-size: 14pt !important;
+        line-height: 1.5 !important;
       }
 
       /* Hide the footer when printing */
       footer {
-        display: none;
+        display: none !important;
       }
 
       /* Page Break Support */
@@ -461,8 +469,8 @@
         <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode" title="Switch to Dark Mode">☀️</button>
       </div>
       <div class="buttonContainer no-print">
-        <button id="printButton">Print to PDF</button>
-        <button id="exportHTMLButton">Export as HTML</button>
+        <button id="printButton" title="Prints in Light Mode">Print to PDF</button>
+        <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
       </div>
       <div id="renderedOutput"></div>
     </div>
@@ -482,6 +490,7 @@
     const saveMDButton = document.getElementById('saveMDButton');
     const loadFileButton = document.getElementById('loadFileButton');
     const themeToggleButton = document.getElementById('themeToggleButton');
+    const highlightStyle = document.getElementById('highlightStyle');
 
     // Define sampleDocument using String.raw to preserve backslashes
     const sampleDocument = String.raw`
@@ -719,6 +728,16 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
     }
 
     async function printToPDF() {
+      // Remove dark-mode class temporarily to enforce light mode in print
+      const body = document.body;
+      const hadDarkMode = body.classList.contains('dark-mode');
+      if (hadDarkMode) {
+        body.classList.remove('dark-mode');
+      }
+
+      // Ensure Highlight.js uses light theme during print
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+
       // Ensure MathJax has finished rendering
       await MathJax.typesetPromise([renderedOutput]);
 
@@ -726,6 +745,14 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       hljs.highlightAll();
 
       window.print();
+
+      // Re-add dark-mode class after printing if it was present
+      if (hadDarkMode) {
+        body.classList.add('dark-mode');
+        // Re-apply the dark theme for Highlight.js
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+        updateThemeToggleButton(); // Update the toggle button icon and attributes
+      }
     }
 
     function exportHTML() {
@@ -750,25 +777,60 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       // Add custom styles
       const style = document.createElement('style');
       style.textContent = `
+        :root {
+          --background-color: #ffffff;
+          --text-color: #000000;
+          --pane-background: #ffffff;
+          --pane-heading-background: #333333;
+          --pane-heading-color: #ffffff;
+          --button-background: #f0f0f0;
+          --button-color: #000000;
+          --border-color: #ccc;
+          --code-background: #f0f0f0;
+          --table-border-color: black;
+          --table-header-background: #f4f4f4;
+        }
+
+        body.dark-mode {
+          --background-color: #1e1e1e;
+          --text-color: #e0e0e0;
+          --pane-background: #1e1e1e;
+          --pane-heading-background: #2d2c2c;
+          --pane-heading-color: #ffffff;
+          --button-background: #474646;
+          --button-color: #ffffff;
+          --border-color: #555555;
+          --code-background: #2f2f2f;
+          --table-border-color: #555555;
+          --table-header-background: #333333;
+          --code-text-color: #f8f8f2;
+        }
+
         body {
           font-family: Helvetica, sans-serif;
           line-height: 1.5; /* Consistent line-height */
           margin: 20px;
-          background-color: #ffffff;
-          color: #000000;
+          background-color: var(--background-color);
+          color: var(--text-color);
         }
+        /* Ensure all elements inherit background and text colors */
+        body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
+          background-color: var(--background-color);
+          color: var(--text-color);
+        }
+
         table {
           max-width: 90%;
           margin: 20px auto;
           border-collapse: collapse;
-          border: 1px solid black;
+          border: 1px solid var(--table-border-color);
         }
+
         th, td {
-          border: 1px solid black;
+          border: 1px solid var(--table-border-color);
           padding: 8px;
-          /* Removed fixed alignment */
-          /* text-align: left; */
         }
+
         /* Alignment based on the 'align' attribute */
         th[align="left"], td[align="left"] {
           text-align: left;
@@ -788,97 +850,111 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
         }
 
         code {
-          background-color: #f0f0f0;
+          background-color: var(--code-background);
           padding: 0.1em 0.2em;
           border-radius: 3px;
-          font-size: 0.95em; /* Set font size to 0.95em */
-          line-height: 1; /* Maintain tight spacing for inline code */
+          font-size: 0.95em;
+          line-height: 1;
           font-family: "Courier New", Courier, monospace;
           vertical-align: baseline;
-          color: inherit; /* Inherit color to allow Highlight.js to apply */
-        }
-        pre {
-          background-color: #f0f0f0;
-          padding: 0; /* Removed padding */
-          border-radius: 5px;
-          overflow-x: auto;
-          font-size: 1.05em; /* Set font size to 1.05em */
-          line-height: 1.5; /* Set line-height to 1.5 */
-          margin: 2px 0; /* Further reduced margin */
-        }
-        pre code {
-          background: none; /* Let Highlight.js handle background */
-          padding: 0; /* Removed padding */
-          border-radius: 0;
-          font-family: inherit; /* Inherit font from pre */
-          line-height: 1.5; /* Ensure line-height is applied */
-          font-size: inherit; /* Inherit font size */
-          color: inherit; /* Inherit color to allow Highlight.js to apply */
+          color: inherit;
         }
 
-        /* Highlight.js Styles */
+        pre {
+          background-color: var(--code-background);
+          padding: 0;
+          border-radius: 5px;
+          overflow-x: auto;
+          font-size: 1.05em;
+          line-height: 1.5;
+          margin: 2px 0;
+        }
+
+        pre code {
+          background: none;
+          padding: 0;
+          border-radius: 0;
+          font-family: inherit;
+          line-height: 1.5;
+          font-size: inherit;
+          color: inherit;
+        }
+
         .hljs {
-          line-height: 1.5; /* Ensure Highlight.js respects line-height */
-          font-size: 1.05em; /* Match the font size of pre */
-          background-color: inherit; /* Ensure background is inherited from pre */
-          color: inherit; /* Inherit color to allow custom coloring */
+          line-height: 1.5;
+          font-size: 1.05em;
+          background-color: inherit;
+          color: inherit;
         }
 
         /* Custom Highlight.js Colors for Dark Mode */
         body.dark-mode .hljs {
-          color: #f8f8f2 !important; /* Brightened code text color */
+          color: #f8f8f2 !important;
         }
 
         body.dark-mode .hljs-comment,
         body.dark-mode .hljs-quote {
-          color: #8d9a70 !important; /* Darker green for comments */
+          color: #8d9a70 !important;
         }
 
         body.dark-mode .hljs-keyword,
         body.dark-mode .hljs-selector-tag,
         body.dark-mode .hljs-subst {
-          color: #66d9ef !important; /* Bright blue for keywords */
+          color: #66d9ef !important;
         }
 
         body.dark-mode .hljs-string,
         body.dark-mode .hljs-doctag {
-          color: #e6db74 !important; /* Yellow for strings */
+          color: #e6db74 !important;
         }
 
         body.dark-mode .hljs-number,
         body.dark-mode .hljs-regexp,
         body.dark-mode .hljs-tag .hljs-attr {
-          color: #ae81ff !important; /* Purple for numbers and attributes */
+          color: #ae81ff !important;
         }
 
         body.dark-mode .hljs-title,
         body.dark-mode .hljs-section {
-          color: #a6e22e !important; /* Green for titles and sections */
+          color: #a6e22e !important;
         }
 
         body.dark-mode .hljs-type,
         body.dark-mode .hljs-built_in {
-          color: #fd971f !important; /* Orange for types and built-ins */
+          color: #fd971f !important;
         }
 
         body.dark-mode .hljs-symbol,
         body.dark-mode .hljs-bullet {
-          color: #f92672 !important; /* Pink for symbols and bullets */
+          color: #f92672 !important;
         }
 
         body.dark-mode .hljs-link {
-          color: #e6db74 !important; /* Yellow for links */
+          color: #e6db74 !important;
         }
 
         /* Add more .hljs-* styles as needed based on the Highlight.js theme */
+
+        /* Inline styles for images to maintain alignment */
+        img {
+          max-width: 100%;
+          height: auto;
+        }
       `;
       head.appendChild(style);
 
-      // Add Highlight.js Stylesheet
-      const highlightStyle = document.createElement('link');
-      highlightStyle.rel = 'stylesheet';
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      head.appendChild(highlightStyle);
+      // Add Highlight.js Stylesheet based on current theme
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      const highlightLink = document.createElement('link');
+      highlightLink.rel = 'stylesheet';
+      if (isDarkMode) {
+        // Use a dark theme for Highlight.js, e.g., monokai
+        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        // Use the default light theme
+        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+      head.appendChild(highlightLink);
 
       // Add Highlight.js Library
       const highlightScript = document.createElement('script');
@@ -918,6 +994,11 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
       // Insert the sanitized HTML content
       body.innerHTML = sanitizedHTML;
+
+      // Apply dark-mode class if active
+      if (isDarkMode) {
+        body.classList.add('dark-mode');
+      }
 
       // Construct the full HTML
       const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
@@ -963,6 +1044,22 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
         themeToggleButton.textContent = '🌙';
         themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
         themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+        // Change Highlight.js stylesheet to dark theme
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        themeToggleButton.textContent = '☀️';
+        themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+        themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+        // Change Highlight.js stylesheet to default light theme
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+    }
+
+    function updateThemeToggleButton() {
+      if (document.body.classList.contains('dark-mode')) {
+        themeToggleButton.textContent = '🌙';
+        themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+        themeToggleButton.setAttribute('title', 'Switch to Light Mode');
       } else {
         themeToggleButton.textContent = '☀️';
         themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
@@ -985,6 +1082,37 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       renderContent();
     });
     themeToggleButton.addEventListener('click', toggleTheme);
+
+    // Synchronized Scrolling: Input to Output
+    markdownInput.addEventListener('scroll', () => {
+      const inputScrollTop = markdownInput.scrollTop;
+      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+
+      // Prevent division by zero
+      if (inputScrollHeight === 0) {
+        renderedOutput.scrollTop = 0;
+        return;
+      }
+
+      const scrollRatio = inputScrollTop / inputScrollHeight;
+      renderedOutput.scrollTop = scrollRatio * outputScrollHeight;
+    });
+
+    // Print Event Handlers to Switch Highlight.js Stylesheet
+    window.addEventListener('beforeprint', () => {
+      // Switch to light theme before printing
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+    });
+
+    window.addEventListener('afterprint', () => {
+      // Revert to the current theme's Highlight.js stylesheet after printing
+      if (document.body.classList.contains('dark-mode')) {
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+    });
 
     // Initial render
     renderContent();
