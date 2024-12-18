@@ -1530,17 +1530,17 @@
     }
 
     /**
-     * Formats uncertainties based on their type without applying scientific notation.
+     * Formats uncertainties based on their type.
+     * - For percentage uncertainties: preserves the exact input and appends the LaTeX percentage symbol.
+     * - For absolute uncertainties: preserves trailing zeros based on decimal places.
      * @param {string} errStr - The uncertainty value as a string.
      * @param {string} errorType - The type of uncertainty ('absolute' or 'percentage').
      * @returns {string} - The formatted uncertainty string.
      */
     function formatUncertainty(errStr, errorType) {
         if (errorType === 'percentage') {
-            const perc = parseFloat(errStr);
-            if (isNaN(perc)) return errStr;
-            const sigFigs = (perc < 10) ? 3 : 2;
-            return toSigFigs(perc, sigFigs);
+            // Preserve the exact input and append LaTeX percentage symbol
+            return errStr + '\\%';
         } else if (errorType === 'absolute') {
             const dp = countDecimalPlaces(errStr);
             const errVal = parseFloat(errStr);
@@ -1612,22 +1612,22 @@
 
             // Initialize headers with \quad spacing and replace spaces with \space
             let headers = [
-                `$\\quad ${formatLabelForLatex(xHeader)} \\quad$`,
-                `$\\quad ${formatLabelForLatex(yHeader)} \\quad$`
+                `$${formatLabelForLatex(xHeader)}$`,
+                `$${formatLabelForLatex(yHeader)}$`
             ];
 
             // Handle X-axis uncertainty heading
             if (xErrorEnabled) {
                 let xUncHeading = `\\pm \\Delta ${formatLabelForLatex(xHeader)}`;
                 if (xErrorType === 'percentage') xUncHeading += ' \\space (\\%)';
-                headers.push(`$\\quad ${xUncHeading} \\quad$`);
+                headers.push(`$${xUncHeading}$`);
             }
 
             // Handle Y-axis uncertainty heading
             if (yErrorEnabled) {
                 let yUncHeading = `\\pm \\Delta ${formatLabelForLatex(yHeader)}`;
                 if (yErrorType === 'percentage') yUncHeading += ' \\space (\\%)';
-                headers.push(`$\\quad ${yUncHeading} \\quad$`);
+                headers.push(`$${yUncHeading}$`);
             }
 
             // Initialize Markdown table with headers
