@@ -1540,7 +1540,7 @@
     function formatUncertainty(errStr, errorType) {
         if (errorType === 'percentage') {
             // Preserve the exact input and append LaTeX percentage symbol
-            return errStr + '\\%';
+            return errStr; // If % sign is needed, change this line to: return errStr + '\\%'
         } else if (errorType === 'absolute') {
             const dp = countDecimalPlaces(errStr);
             const errVal = parseFloat(errStr);
