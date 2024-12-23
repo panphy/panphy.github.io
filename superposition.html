@@ -67,6 +67,31 @@
             background-color: #1e1e1e;
         }
 
+        /* Play/Pause Button */
+        #playPauseBtn {
+            width: 120px;
+            height: 40px;
+            margin: 0 auto;   /* center horizontally */
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #20c997;
+            color: #3a3a3a;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        #playPauseBtn:hover {
+            background-color: #17a188; /* Slightly darker */
+        }
+
+        /* Note under the canvas about SPACE BAR */
+        #note {
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
         /* Side Controls (Wave Controls & Toggles) */
         #sideControls {
             flex: 1;
@@ -200,13 +225,6 @@
             transform: translateX(24px);
         }
 
-        /* Note under the canvas about SPACE BAR */
-        #note {
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             #mainWrapper {
@@ -256,6 +274,9 @@
 
         <!-- The Canvas -->
         <canvas id="waveCanvas"></canvas>
+
+        <!-- Play/Pause Button -->
+        <button id="playPauseBtn">Pause</button>
 
         <!-- Note about SPACE BAR -->
         <div id="note">
@@ -348,11 +369,13 @@
 const canvas = document.getElementById('waveCanvas');
 const ctx = canvas.getContext('2d');
 
+// Button
+const playPauseBtn = document.getElementById('playPauseBtn');
+
 // Wave 1 controls
 const amplitude1Slider = document.getElementById('amplitude1');
 const frequency1Slider = document.getElementById('frequency1');
 const speed1Slider     = document.getElementById('speed1');
-
 const amplitude1Value  = document.getElementById('amplitude1Value');
 const frequency1Value  = document.getElementById('frequency1Value');
 const speed1Value      = document.getElementById('speed1Value');
@@ -361,7 +384,6 @@ const speed1Value      = document.getElementById('speed1Value');
 const amplitude2Slider = document.getElementById('amplitude2');
 const frequency2Slider = document.getElementById('frequency2');
 const speed2Slider     = document.getElementById('speed2');
-
 const amplitude2Value  = document.getElementById('amplitude2Value');
 const frequency2Value  = document.getElementById('frequency2Value');
 const speed2Value      = document.getElementById('speed2Value');
@@ -411,6 +433,7 @@ updateSliderValues();
 /*******************************************************
  *   Event Listeners
  *******************************************************/
+// Sliders
 amplitude1Slider.addEventListener('input', () => {
   amplitude1 = parseFloat(amplitude1Slider.value);
   updateSliderValues(); 
@@ -454,9 +477,25 @@ timeMotionSlider.addEventListener('input', () => {
   drawWaves();
 });
 
+// Toggles
 toggleWave1.addEventListener('change', () => { drawWaves(); });
 toggleWave2.addEventListener('change', () => { drawWaves(); });
 toggleSuperposition.addEventListener('change', () => { drawWaves(); });
+
+// Play/Pause Button
+playPauseBtn.addEventListener('click', () => {
+  running = !running;
+  if (running) {
+    // Resume
+    playPauseBtn.textContent = "Pause";
+    lastTimestamp = null;
+    animationId = requestAnimationFrame(animate);
+  } else {
+    // Pause
+    playPauseBtn.textContent = "Play";
+    cancelAnimationFrame(animationId);
+  }
+});
 
 /*******************************************************
  *   Canvas Setup (High DPI)
@@ -488,13 +527,6 @@ let running = true;
 let lastTimestamp = null;
 let accumulatedTime = 0;
 
-/**
- * Draw the waves on the canvas.
- * 
- * We always compute wave1Val and wave2Val (for each x),
- * but only show them if toggled on. Meanwhile, the superposition
- * is always the sum of wave1Val + wave2Val, regardless of toggles.
- */
 function drawWaves() {
   const t = accumulatedTime / 1000; // convert ms -> seconds
 
@@ -525,10 +557,8 @@ function drawWaves() {
   if (toggleWave1.checked) {
     ctx.beginPath();
     for (let x = 0; x <= width; x++) {
-      const xVirtual = x / timeZoom; // horizontal zoom
+      const xVirtual = x / timeZoom;
       const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
-
-      // transform to canvas Y
       const canvasY = baseline - wave1Val;
       if (x === 0) ctx.moveTo(x, canvasY);
       else         ctx.lineTo(x, canvasY);
@@ -544,7 +574,6 @@ function drawWaves() {
     for (let x = 0; x <= width; x++) {
       const xVirtual = x / timeZoom;
       const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
-
       const canvasY = baseline - wave2Val;
       if (x === 0) ctx.moveTo(x, canvasY);
       else         ctx.lineTo(x, canvasY);
@@ -555,13 +584,11 @@ function drawWaves() {
   }
 
   // ========== Draw Superposition If Toggled On ==========
-  // The sum is ALWAYS wave1Val + wave2Val, even if wave1 or wave2 are toggled off for display.
   if (toggleSuperposition.checked) {
     ctx.beginPath();
     for (let x = 0; x <= width; x++) {
       const xVirtual = x / timeZoom;
 
-      // We always compute wave1Val, wave2Val (the "true" wave forms).
       const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
       const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
 
@@ -577,7 +604,6 @@ function drawWaves() {
   }
 }
 
-// The animation loop
 function animate(timestamp) {
   if (!running) {
     lastTimestamp = null;
@@ -595,7 +621,7 @@ function animate(timestamp) {
   animationId = requestAnimationFrame(animate);
 }
 
-// Start
+// Start animation
 animationId = requestAnimationFrame(animate);
 
 /*******************************************************
@@ -605,11 +631,14 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Space' || e.key === ' ') {
     e.preventDefault(); // Stop space from scrolling
     running = !running;
+
     if (running) {
+      playPauseBtn.textContent = "Pause";
+      lastTimestamp = null;
       animationId = requestAnimationFrame(animate);
     } else {
+      playPauseBtn.textContent = "Play";
       cancelAnimationFrame(animationId);
-      lastTimestamp = null;
     }
   }
 });
