@@ -24,7 +24,7 @@
             text-align: center;
             padding: 5px;
             background: #1e1e1e;
-            color: #555;
+            color: #888;
             margin-top: 5px;
         }
 
@@ -41,11 +41,10 @@
         #controls-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
             padding: 10px 20px;
             background-color: #333333; /* Dark Grey Background */
-            border-bottom: 1px solid #555555; /* Slightly Lighter Grey Border */
         }
 
         /* Sliders */
@@ -126,9 +125,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 20px;
-            background-color: #2d2d2d;
-            border-bottom: 1px solid #444;
+            padding: 10px 0px;
+            background-color: #2d2d2d00;
         }
 
         #instructions {
@@ -208,7 +206,7 @@
     <!-- Instructions and Average Speed -->
     <div id="instructions-container">
         <div id="instructions">
-            Press ENTER to pause.
+            Press SPACE BAR to pause.
         </div>
         <div id="avgSpeedDisplay">Average Speed: 0</div>
     </div>
@@ -310,7 +308,8 @@
 
         // Handle keyboard events
         document.addEventListener('keydown', function(e) {
-            if (e.code === 'Enter') {
+            if (e.code === 'Space') {
+		e.preventDefault();
                 paused = !paused;
             }
         });
