@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Motion Tracker</title>
+    <title>Motion Tracker with MediaInfo.js</title>
+
+    <!-- 1) Include Chart.js for plotting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 2) Include MediaInfo.js (WASM build). 
+         This is ~1MB or more, so be aware of loading overhead. 
+         For the most up-to-date link, see: https://github.com/MediaArea/MediaInfo.js 
+    -->
+    <script src="https://unpkg.com/mediainfo.js/dist/MediaInfoModule.js"></script>
+
     <style>
         :root {
             /* Button Color Variables */
@@ -427,7 +436,8 @@
     <h1>Motion Tracker</h1>
     
     <div id="warningBanner">
-        <strong>Note:</strong> This application is optimized for desktop browsers. Functionality on mobile devices may be limited.
+        <strong>Note:</strong> This app is optimized for desktop. On iOS, use the latest version for best performance.
+
     </div>
 
     <!-- Top Controls Section -->
@@ -511,6 +521,14 @@
     </div>
 
     <script>
+        // (A) First, initialize MediaInfo in an async manner:
+        let mediaInfoModule = null;  // Will hold the MediaInfo WASM instance
+        // We'll do this once the page loads:
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize MediaInfo with 'format: "object"' so it returns data as an object
+            mediaInfoModule = await MediaInfo({ format: 'object' });
+        });
+
         // Data Point Colors Configuration
         const dataPointColors = {
             x: '#ae72e6',
@@ -579,15 +597,14 @@
         let originSet = false;
         let originPoint = { x: 0, y: 0 }; 
 
-        // New frameRate variable to handle dynamic frame rates
-        let frameRate = 30; // Default frame rate
+        // We'll store the frame rate once determined from MediaInfo, fallback to 30 if needed
+        let frameRate = 30; // default, updated after parsing if possible
 
         // Define a fixed grid size in display pixels
-        const gridSizeDisplay = 40; // Reduced from 50px to 40px
-
+        const gridSizeDisplay = 40; 
         // Define fixed sizes for overlay elements in display pixels
-        const originDotRadiusDisplay = 5; // 5px
-        const axisLineWidthDisplay = 2; // 2px
+        const originDotRadiusDisplay = 5; 
+        const axisLineWidthDisplay = 2; 
 
         // Utility functions
         function canvasYToCartesianY(y) {
@@ -643,28 +660,67 @@
         });
 
         // Video Upload Input Change
-        videoUploadInput.addEventListener('change', (event) => {
+        videoUploadInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (file) {
+                // (B) Attempt to parse the video file's metadata with MediaInfo
+                // to get the container-declared frame rate.
+                try {
+                    if (mediaInfoModule) {
+                        const arrayBuffer = await file.arrayBuffer();
+                        // analyzeData expects two callbacks:
+                        //   1) size: a function returning total size 
+                        //   2) readChunk: a function that slices the data 
+                        const result = await mediaInfoModule.analyzeData(
+                            () => arrayBuffer.byteLength,
+                            (offset, length) => arrayBuffer.slice(offset, offset + length)
+                        );
+
+                        // The result is an object with .media.track[]; find the "Video" track
+                        const videoTrack = result.media.track.find(t => t["@type"] === "Video");
+                        if (videoTrack && videoTrack.FrameRate) {
+                            frameRate = parseFloat(videoTrack.FrameRate);
+                            if (isNaN(frameRate) || frameRate <= 0) {
+                                frameRate = 30; 
+                            }
+                            console.log(`Auto-detected frame rate: ${frameRate} FPS`);
+                        } else {
+                            // No valid FrameRate found, fallback
+                            frameRate = 30;
+                            console.warn("No valid frame rate found in metadata; fallback 30 FPS");
+                        }
+                    } else {
+                        // If mediaInfoModule was somehow not loaded, fallback
+                        frameRate = 30;
+                        console.warn("MediaInfo not loaded yet; fallback 30 FPS");
+                    }
+                } catch (err) {
+                    console.warn("MediaInfo parse error, fallback 30 FPS:", err);
+                    frameRate = 30;
+                }
+
+                // (C) Now that we have a frame rate guess, proceed to load the video
                 recordedBlob = URL.createObjectURL(file);
                 videoElement.src = recordedBlob;
                 videoElement.addEventListener('loadedmetadata', onVideoLoaded);
             }
         });
 
-        // When video is loaded
+        // Called once the browser has loaded the video's metadata
         function onVideoLoaded() {
             slider.max = videoElement.duration; 
             slider.value = 0; 
             timeDisplay.textContent = formatTime(0); 
             videoElement.currentTime = 0;
             videoElement.pause();
+
+            // Force next lines to happen once after we can know the dimension
             videoElement.addEventListener('seeked', () => {
                 resizeOverlay(); 
                 drawOverlay();
                 drawFrame();
-                chartCanvasContainer.style.display = "flex"; // Show container first
-                plotPosition(); // Then initialize the chart
+                chartCanvasContainer.style.display = "flex"; 
+                plotPosition(); // Initialize the chart
             }, { once: true });
 
             frameCanvas.style.display = "block";
@@ -686,45 +742,10 @@
             document.getElementById('analysisContainer').style.display = "flex";
 
             // Update instruction message
-            message.innerHTML = "<p>Use the control bar beneath the video to select the starting frame.</p><p>Select a point to track motion, and the video will automatically skip to the next frame.</p>";
+            message.innerHTML = "<p>Use the control bar beneath the video to select the starting frame.</p><p>Select a point to track motion, and the video will skip to the next frame.</p>";
 
-            // Estimate frame rate
-            estimateFrameRate();
-        }
-
-        // Function to estimate frame rate
-        function estimateFrameRate() {
-            // Play the video for a short duration to gather frame count
-            videoElement.currentTime = 0;
-            videoElement.play();
-            isPlaying = true;
-            playPauseButton.textContent = "Pause";
-
-            // Listen for a specific time to pause and calculate frame rate
-            const estimationDuration = 1; // seconds
-
-            function onTimeUpdate() {
-                const currentTime = videoElement.currentTime;
-                if (currentTime >= estimationDuration) {
-                    videoElement.pause();
-                    isPlaying = false;
-                    playPauseButton.textContent = "Play";
-                    videoElement.removeEventListener('timeupdate', onTimeUpdate);
-
-                    const quality = videoElement.getVideoPlaybackQuality ? videoElement.getVideoPlaybackQuality() : null;
-                    if (quality && quality.totalVideoFrames > 0) {
-                        frameRate = quality.totalVideoFrames / videoElement.currentTime;
-                        console.log(`Estimated Frame Rate: ${frameRate.toFixed(2)} FPS`);
-                        frameRateMessage.textContent = `Frame Rate ≈ ${frameRate.toFixed(2)} FPS`;
-                    } else {
-                        console.warn("Unable to estimate frame rate. Using default 30 FPS.");
-                        frameRate = 30; // Fallback to default
-                        frameRateMessage.textContent = `Frame Rate ≈ ${frameRate} FPS (Default)`;
-                    }
-                }
-            }
-
-            videoElement.addEventListener('timeupdate', onTimeUpdate);
+            // Show the final frame rate in the UI
+            frameRateMessage.textContent = `Frame Rate = ${frameRate} FPS (Auto)`;
         }
 
         // Play/Pause Button Click
@@ -808,16 +829,14 @@
 
         // Draw a single data point
         function drawDataPoint(x, y) {
-            // Define fixed sizes in display pixels
-            const circleRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth); // Convert to canvas pixels
+            // Convert display size to canvas coordinates
+            const circleRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth); 
+            const crossSize = 10 * (overlayCanvas.width / overlayCanvas.clientWidth); 
 
             ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
             ctx.beginPath();
             ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
             ctx.fill();
-
-            // Define fixed cross size in display pixels
-            const crossSize = 10 * (overlayCanvas.width / overlayCanvas.clientWidth); // 10px cross size
 
             ctx.strokeStyle = 'red';
             ctx.lineWidth = 1; 
@@ -829,10 +848,10 @@
             ctx.stroke();
         }
 
-        // Skip to the next frame after adding a data point
+        // Skip to the next frame using the (auto-detected or fallback) frame rate
         function skipToNextFrame() {
             skippingFrame = true;
-            videoElement.currentTime += 1 / frameRate; // Use dynamic frameRate
+            videoElement.currentTime += 1 / frameRate; 
             videoElement.addEventListener('seeked', () => {
                 skippingFrame = false;
                 drawFrame();
@@ -955,6 +974,7 @@
                 }
             }
 
+            // Simple moving average or any smoothing
             const smoothedVelocities = [];
             const smoothedTimes = [];
             for (let i = 0; i < velocityEstimates.length; i++) {
@@ -967,9 +987,9 @@
                 smoothedTimes.push(parseFloat(midpointTime.toFixed(3)));
             }
 
-            // Update chart with velocity data
             if (!positionChart) return; // Safety check
 
+            // Update chart with velocity data
             positionChart.data.datasets = [
                 {
                     label: axis === "x" ? "x-velocity" : "y-velocity",
@@ -1285,15 +1305,15 @@
             resizeOverlay(); 
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-            // Calculate the ratio between canvas internal size and CSS display size
+            // Grid steps in *canvas* pixels
             const gridStepX = gridSizeDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
             const gridStepY = gridSizeDisplay * (overlayCanvas.height / overlayCanvas.clientHeight);
 
-            // Add shadow for outline effect
+            // Add shadow for outline
             overlayCtx.save();
             overlayCtx.shadowColor = "black";
             overlayCtx.shadowBlur = 2;
-            overlayCtx.strokeStyle = "white"; // Primary color
+            overlayCtx.strokeStyle = "white";
             overlayCtx.lineWidth = 0.5;
 
             // Draw vertical grid lines
@@ -1311,10 +1331,9 @@
                 overlayCtx.lineTo(overlayCanvas.width, y);
                 overlayCtx.stroke();
             }
+            overlayCtx.restore();
 
-            overlayCtx.restore(); // Remove shadow settings
-
-            // Draw axes if origin is set or default
+            // Draw axes if origin is set
             let ox = originSet ? originPoint.x : 0;
             let oy = originSet ? originPoint.y : 0;
 
@@ -1322,12 +1341,8 @@
             const originCanvasY = cartesianYToCanvasY(oy);
 
             overlayCtx.save();
-
-            // Define fixed line width in display pixels
             const axisLineWidth = axisLineWidthDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
             overlayCtx.lineWidth = axisLineWidth;
-
-            // Add shadow for outline effect
             overlayCtx.shadowColor = "black";
             overlayCtx.shadowBlur = 2;
 
@@ -1343,30 +1358,16 @@
             overlayCtx.moveTo(originCanvasX, 0);
             overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
             overlayCtx.stroke();
-
             overlayCtx.restore();
 
-            // Draw white inner lines
-            overlayCtx.lineWidth = axisLineWidthDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
-            overlayCtx.strokeStyle = 'white';
-            overlayCtx.beginPath();
-            overlayCtx.moveTo(0, originCanvasY);
-            overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-            overlayCtx.stroke();
-
-            overlayCtx.beginPath();
-            overlayCtx.moveTo(originCanvasX, 0);
-            overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-            overlayCtx.stroke();
-
-            // Add origin dot with fixed display size
+            // Origin dot
             const originDotRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
             overlayCtx.fillStyle = "cyan";
             overlayCtx.beginPath();
             overlayCtx.arc(originCanvasX, originCanvasY, originDotRadius, 0, 2 * Math.PI);
             overlayCtx.fill();
 
-            // Draw calibration line with outline
+            // Calibration line
             if (calibrationStart && calibrationEnd) {
                 overlayCtx.save();
                 overlayCtx.lineWidth = 2 * (overlayCanvas.width / overlayCanvas.clientWidth);
@@ -1383,7 +1384,7 @@
             }
         }
 
-        // Ensure overlay and frame canvas are correctly sized initially
+        // Ensure overlay and frame canvas are sized on window resize
         window.addEventListener('resize', () => {
             drawOverlay();
             drawFrame();
