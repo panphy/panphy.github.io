@@ -115,7 +115,7 @@
                 <h3>Top Scores</h3>
                 <div id="top-scores" style="text-align: center; font-size: 16px;"></div>
             </div>
-	    <center><p>&copy; 2024 <a href="https://panphy.github.io/">PanPhy</a>.<br>All rights reserved.</p></center>
+            <center><p>&copy; 2024 <a href="https://panphy.github.io/">PanPhy</a>.<br>All rights reserved.</p></center>
         </div>
 
         <!-- Game area -->
@@ -240,7 +240,7 @@
             linesCleared += lines;
             linesClearedForSpeedIncrease += lines;
 
-            if (linesClearedForSpeedIncrease >= 2) { // Speed up after every 3 lines cleared
+            if (linesClearedForSpeedIncrease >= 2) { // Speed up after every 2 lines cleared
                 increaseSpeed();
                 linesClearedForSpeedIncrease = 0;
             }
@@ -313,7 +313,12 @@
             });
         }
 
+        // Prevent arrow keys from scrolling (especially on iPad)
         document.addEventListener('keydown', event => {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+                event.preventDefault(); // <-- This stops the default scroll
+            }
+
             if (gameOver) {
                 if (event.key === 'Enter') {
                     restartGame();
@@ -361,7 +366,10 @@
         function collide(board, piece, offset) {
             for (let y = 0; y < piece.length; y++) {
                 for (let x = 0; x < piece[y].length; x++) {
-                    if (piece[y][x] && (board[y + offset.y] && board[y + offset.y][x + offset.x]) !== 0) {
+                    if (
+                        piece[y][x] &&
+                        (board[y + offset.y] && board[y + offset.y][x + offset.x]) !== 0
+                    ) {
                         return true;
                     }
                 }
