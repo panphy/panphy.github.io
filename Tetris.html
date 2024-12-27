@@ -23,7 +23,7 @@
       flex-direction: row;
       gap: 30px; /* Space between the info panel and the canvas/buttons section */
       margin-top: 20px; /* Some margin from the top, adjust as needed */
-      margin-bottom: 20pm;
+      margin-bottom: 20px; /* Added for a bit of bottom spacing; you had "20pm" which seems a typo */
       position: relative; /* So the game-over overlay can be absolutely positioned if needed */
     }
 
@@ -133,6 +133,7 @@
       color: #333;
       text-align: center;
       display: none;
+      min-width: 200px;
       z-index: 999; /* Ensure it's on top of the canvas */
     }
   </style>
@@ -156,7 +157,7 @@
         <h3>Top Scores</h3>
         <div id="top-scores" style="text-align: center; font-size: 16px;"></div>
       </div>
-      <center><p>&copy; 2024 <a href="https://panphy.github.io/" target="_blank">PanPhy</a>.<br/>All rights reserved.</p></center>
+      <center><p>&copy; 2024 <a href="https://panphy.github.io/">PanPhy</a>.<br/>All rights reserved.</p></center>
     </div>
 
     <!-- Canvas and arrow keys side by side, aligned at the bottom -->
@@ -165,7 +166,8 @@
       <div class="game-area">
         <canvas id="tetris" width="300" height="600"></canvas>
         <div id="game-over" class="game-over">
-          <strong>Game Over</strong><br><br>Press <strong>Enter</strong> to Restart
+          <strong>Game Over</strong><br><br>
+          Press <strong>Enter</strong> or <strong>Tap the Canvas</strong> to restart
         </div>
       </div>
 
@@ -410,6 +412,20 @@
           break;
       }
     });
+
+    // Allow tapping/clicking the canvas to restart if game is over
+    canvas.addEventListener('click', () => {
+      if (gameOver) {
+        restartGame();
+      }
+    });
+    // Also handle touchstart to ensure mobile devices can restart immediately
+    canvas.addEventListener('touchstart', (e) => {
+      if (gameOver) {
+        e.preventDefault();
+        restartGame();
+      }
+    }, { passive: false });
 
     // -------- Long-press logic for arrow buttons --------
     function registerLongPressButton(buttonId, pressAction) {
