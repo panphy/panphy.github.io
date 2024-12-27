@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Brownian Motion Simulation</title>
@@ -22,10 +22,15 @@
 
         footer {
             text-align: center;
-            padding: 5px;
+            padding: 10px;
             background: #1e1e1e;
             color: #888;
-            margin-top: 5px;
+            margin-top: auto; /* Push footer to the bottom */
+        }
+
+        footer a {
+            color: #888;
+            text-decoration: none;
         }
 
         h1 {
@@ -45,6 +50,7 @@
             align-items: center;
             padding: 10px 20px;
             background-color: #333333; /* Dark Grey Background */
+            gap: 10px; /* Added gap for better spacing */
         }
 
         /* Sliders */
@@ -52,7 +58,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 10px;
             padding: 10px;
             background-color: #444444; /* Darker Grey Box */
             border: 1px solid #555555; /* Slightly Lighter Grey Border */
@@ -64,6 +69,7 @@
             font-size: 16px; /* Increased Font Size */
             margin-bottom: 5px;
             color: #FFFFFF; /* White Font */
+            text-align: center;
         }
 
         .slider-group input[type="range"] {
@@ -97,7 +103,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 10px;
             padding: 10px;
             background-color: #444444; /* Darker Grey Box */
             border: 1px solid #555555; /* Slightly Lighter Grey Border */
@@ -126,12 +131,12 @@
             flex-direction: column;
             align-items: center;
             padding: 10px 0px;
-            background-color: #2d2d2d00;
+            background-color: transparent; /* Removed background color */
+            gap: 5px; /* Added gap for spacing */
         }
 
         #instructions {
             font-size: 14px;
-            margin-bottom: 5px;
             color: #ffffff;
         }
 
@@ -141,17 +146,31 @@
             color: #ffffff;
         }
 
+        /* Simulation Container Wrapper */
+        #simulation-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px; /* Reduced padding */
+            background-color: #1e1e1e;
+            flex-grow: 1; /* Allow it to grow and fill available space */
+        }
+
         /* Simulation Container */
         #container {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            flex: 1;
             background-color: #1e1e1e;
+            aspect-ratio: 1 / 1; /* Fixed 1:1 aspect ratio */
+            width: 100%;
+            max-width: 400px; /* Adjust as needed */
+            max-height: 400px; /* Ensure it doesn't exceed screen size */
         }
 
         canvas {
+            width: 100%;
+            height: 100%;
             background-color: #2d2d2d;
             border: 2px solid #4CAF50; /* Green Border */
             border-radius: 8px;
@@ -166,12 +185,33 @@
             }
 
             .slider-group, .controls-group {
-                margin: 8px 0;
                 width: 80%;
             }
 
             .slider-group input[type="range"] {
                 width: 120px;
+            }
+
+            #container {
+                max-width: 90vw;
+                max-height: 90vw; /* Use viewport width for max height in landscape */
+            }
+        }
+
+        /* Landscape-specific adjustments */
+        @media (orientation: landscape) and (max-width: 1024px) {
+            #controls-container {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .slider-group, .controls-group {
+                flex: 1 1 auto;
+            }
+
+            #container {
+                max-width: 90vh;
+                max-height: 90vh; /* Use viewport height for max size in landscape */
             }
         }
     </style>
@@ -183,16 +223,16 @@
     <div id="controls-container">
         <!-- Sliders -->
         <div class="slider-group">
-            <label for="numParticlesSlider">Particles: <span id="numParticlesDisplay">30</span></label>
-            <input type="range" id="numParticlesSlider" min="10" max="150" value="30">
+            <label for="numParticlesSlider">Particles: <span id="numParticlesDisplay">50</span></label>
+            <input type="range" id="numParticlesSlider" min="10" max="150" value="50">
         </div>
         <div class="slider-group">
             <label for="avgSpeedSlider">Average Speed: <span id="avgSpeedSliderDisplay">75</span></label>
-            <input type="range" id="avgSpeedSlider" min="10" max="200" value="75">
+            <input type="range" id="avgSpeedSlider" min="5" max="200" value="75">
         </div>
         <div class="slider-group">
             <label for="greenParticleSizeSlider">Big Particle Size: <span id="greenParticleSizeDisplay">16</span></label>
-            <input type="range" id="greenParticleSizeSlider" min="4" max="50" value="16">
+            <input type="range" id="greenParticleSizeSlider" min="4" max="80" value="20">
         </div>
 
         <!-- Controls -->
@@ -212,28 +252,44 @@
     </div>
     
     <!-- Container for the simulation canvas -->
-    <div id="container">
-        <canvas id="simulationCanvas" width="480" height="360"></canvas>
+    <div id="simulation-wrapper">
+        <div id="container">
+            <canvas id="simulationCanvas"></canvas>
+        </div>
     </div>
     
+    <footer>
+        &copy; 2024 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+    </footer>
+
     <script>
         // Get canvas and context
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Set canvas size based on container's aspect ratio
+        function resizeCanvas() {
+            const container = document.getElementById('container');
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            // Reinitialize particles to fit new size
+            initParticles();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', resizeCanvas);
+
         // Parameters
-        let numParticles = 30; // Initially 30 particles
-        const canvasWidth = 480;
-        const canvasHeight = 360;
+        let numParticles = 50; // Initially 50 particles
+        let canvasWidth = canvas.width;
+        let canvasHeight = canvas.height;
         const particleRadius = 4;
         const timeStep = 0.1;
         const mass = 1;
         let subSteps = 50;
         const collisionIterations = 5;
-
-        // Fixed container dimensions
-        const containerY = 0;
-        const containerHeight = canvasHeight;
 
         // Big Particle Parameters
         let bigParticleRadius = 16; // Default size
@@ -304,12 +360,13 @@
             bigParticleVel = { x: 0, y: 0 };
         }
 
+        // Initialize particles and big particle
         initParticles();
 
         // Handle keyboard events
         document.addEventListener('keydown', function(e) {
             if (e.code === 'Space') {
-		e.preventDefault();
+                e.preventDefault();
                 paused = !paused;
             }
         });
@@ -360,6 +417,10 @@
         mainLoop();
 
         function update() {
+            // Update canvas size in case of resize
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
+
             // Sub-step the update to increase collision checking frequency
             let subStepTime = timeStep / subSteps;
 
@@ -547,7 +608,7 @@
             // Draw container boundaries
             ctx.strokeStyle = '#4CAF50'; // Green boundary
             ctx.lineWidth = 2;
-            ctx.strokeRect(0, containerY, canvasWidth, containerHeight);
+            ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
             // Draw particles
             ctx.fillStyle = BLUE;
@@ -570,9 +631,5 @@
             document.getElementById('avgSpeedDisplay').textContent = 'Average Speed: ' + avgSpeed.toFixed(2);
         }
     </script>
-<footer>
-    &copy; 2024 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
-</footer>
-
 </body>
 </html>
