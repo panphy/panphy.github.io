@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tetris with Gestures</title>
+  <style>
+    /* General body styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #082235;
+      font-family: 'Arial', sans-serif;
+      color: #fff; /* Light text color */
+      overflow: hidden; /* Helps prevent scrolling on iPad if desired */
+    }
+
+    /* Game container */
+    .game-container {
+      display: flex;
+      flex-direction: row;
+      gap: 30px; /* Space between game and info panel */
+      position: relative; /* So the game-over overlay can position absolutely */
+    }
+
+    /* Game area */
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    canvas {
+      border: 3px solid #444;
+      background-color: #000;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+      touch-action: none; /* Helps prevent default browser gestures */
+    }
+
+    /* Info panel styling */
+    .info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 200px;
+    }
+
+    /* Individual boxes in the info panel */
+    .info-box {
+      background-color: #282a36;
+      border: 2px solid #444;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .info-box h3 {
+      margin: 0 0 10px 0; /* Add spacing below heading */
+      font-size: 18px;
+      color: #f8f8f2;
+      text-align: center;
+    }
+
+    .next-piece-grid {
+      display: grid;
+      grid-gap: 4px;
+      justify-content: center;
+      margin-top: 10px; /* Add spacing below "Next Piece" text */
+    }
+
+    .next-piece-block {
+      width: 20px;
+      height: 20px;
+    }
+
+    .next-piece-block.filled {
+      background-color: #f8f8f2; /* Filled block color */
+      border: 1px solid #555;
+    }
+
+    /* Game over overlay */
+    .game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #333;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+      font-size: 24px;
+      color: #333;
+      text-align: center;
+      display: none;
+      z-index: 999; /* Ensure it's on top */
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <!-- Info panel -->
+    <div class="info-panel">
+      <!-- Next piece box -->
+      <div class="info-box">
+        <h3>Next Piece</h3>
+        <div class="next-piece-grid" id="next-piece-grid"></div>
+      </div>
+      <!-- Lines cleared box -->
+      <div class="info-box">
+        <h3>Lines Cleared</h3>
+        <div id="lines-cleared" style="text-align: center; font-size: 20px;">0</div>
+      </div>
+      <!-- Top scores box -->
+      <div class="info-box">
+        <h3>Top Scores</h3>
+        <div id="top-scores" style="text-align: center; font-size: 16px;"></div>
+      </div>
+      <center>
+        <p>&copy; 2024 <a href="https://panphy.github.io/" target="_blank">PanPhy</a>.<br/>All rights reserved.</p>
+      </center>
+    </div>
+
+    <!-- Game area -->
+    <div class="game-area">
+      <canvas id="tetris" width="300" height="600"></canvas>
+      <div id="game-over" class="game-over">
+        Game Over<br/>Press Enter to Restart
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("tetris");
+    const context = canvas.getContext("2d");
+    const nextPieceGridElement = document.getElementById("next-piece-grid");
+    const linesClearedElement = document.getElementById("lines-cleared");
+    const topScoresElement = document.getElementById("top-scores");
+    const gameOverElement = document.getElementById("game-over");
+
+    const grid = 30;
+    const columns = canvas.width / grid;
+    const rows = canvas.height / grid;
+
+    let linesCleared = 0;
+    let topScores = [];
+    let gameOver = false;
+    let linesClearedForSpeedIncrease = 0;
+    let dropInterval = 1000;
+
+    const shapes = {
+      'I': [[1, 1, 1, 1]],
+      'J': [[1, 0, 0], [1, 1, 1]],
+      'L': [[0, 0, 1], [1, 1, 1]],
+      'O': [[1, 1], [1, 1]],
+      'S': [[0, 1, 1], [1, 1, 0]],
+      'Z': [[1, 1, 0], [0, 1, 1]],
+      'T': [[0, 1, 0], [1, 1, 1]]
+    };
+
+    const colors = {
+      'I': '#cc0000',
+      'J': '#e69138',
+      'L': '#f1c232',
+      'O': '#6aa84f',
+      'S': '#45818e',
+      'Z': '#3d85c6',
+      'T': '#674ea7'
+    };
+
+    let board = Array.from({ length: rows }, () => Array(columns).fill(0));
+
+    // Randomize the first piece
+    let nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
+    let nextPiece = createPiece(nextPieceType);
+
+    // Current piece
+    let currentPiece = {
+      piece: nextPiece,
+      color: colors[nextPieceType]
+    };
+
+    // Prepare the next random piece
+    nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
+    nextPiece = createPiece(nextPieceType);
+
+    // Position of the current piece
+    let piecePos = { x: 5, y: 0 };
+
+    // --- Create a piece from shapes ---
+    function createPiece(type) {
+      return shapes[type].map(row => [...row]);
+    }
+
+    // --- Draw the piece on the canvas ---
+    function drawPiece(piece, offset, color) {
+      piece.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value) {
+            context.fillStyle = color;
+            context.fillRect((x + offset.x) * grid, (y + offset.y) * grid, grid, grid);
+            context.strokeRect((x + offset.x) * grid, (y + offset.y) * grid, grid, grid);
+          }
+        });
+      });
+    }
+
+    // --- Draw the "Next piece" preview in the info box ---
+    function drawNextPiece(nextPiece) {
+      const rows = nextPiece.length;
+      const cols = nextPiece[0].length;
+
+      nextPieceGridElement.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+      nextPieceGridElement.innerHTML = '';
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const block = document.createElement('div');
+          block.classList.add('next-piece-block');
+
+          if (nextPiece[y][x]) {
+            block.classList.add('filled');
+          }
+          nextPieceGridElement.appendChild(block);
+        }
+      }
+    }
+
+    // --- Clear full rows, shift board, and handle speed increases ---
+    async function clearRows() {
+      let lines = 0;
+      for (let y = board.length - 1; y >= 0; y--) {
+        if (board[y].every(cell => cell !== 0)) {
+          lines++;
+          board[y].forEach((_, x) => {
+            board[y][x] = '#FFFFFF';
+          });
+          draw();
+          // Quick pause for visual effect
+          await new Promise(resolve => setTimeout(resolve, 50));
+          board.splice(y, 1);
+          board.unshift(Array(columns).fill(0));
+          y++;
+        }
+      }
+      linesCleared += lines;
+      linesClearedForSpeedIncrease += lines;
+
+      // Speed up after every 2 lines (adjust as desired)
+      if (linesClearedForSpeedIncrease >= 2) {
+        increaseSpeed();
+        linesClearedForSpeedIncrease = 0;
+      }
+
+      linesClearedElement.textContent = linesCleared;
+    }
+
+    // --- Increase drop speed by 20% ---
+    function increaseSpeed() {
+      dropInterval *= 0.8;
+      console.log(`Speed increased! New drop interval: ${dropInterval}ms`);
+    }
+
+    // --- Make the piece drop by one row ---
+    function drop() {
+      piecePos.y++;
+      if (collide(board, currentPiece.piece, piecePos)) {
+        piecePos.y--;
+        merge(board, currentPiece.piece, piecePos, currentPiece.color);
+        clearRows();
+        resetPiece();
+      }
+    }
+
+    // --- Reset the piece to the next piece, and create the next random piece ---
+    function resetPiece() {
+      currentPiece.piece = nextPiece;
+      currentPiece.color = colors[nextPieceType];
+      piecePos = { x: 5, y: 0 };
+
+      nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
+      nextPiece = createPiece(nextPieceType);
+      drawNextPiece(nextPiece);
+
+      // Check if new piece collides immediately => game over
+      if (collide(board, currentPiece.piece, piecePos)) {
+        gameOver = true;
+        addScoreToTopScores(linesCleared);
+        showGameOver();
+      }
+    }
+
+    // --- Add the current score to top scores, then show top 5 ---
+    function addScoreToTopScores(score) {
+      topScores.push(score);
+      topScores.sort((a, b) => b - a);
+      topScores = topScores.slice(0, 5);
+      updateTopScores();
+    }
+
+    // --- Update the top scores in the info panel ---
+    function updateTopScores() {
+      topScoresElement.innerHTML = topScores.map(s => `${s} lines cleared`).join('<br>');
+    }
+
+    // --- Show/hide game over overlay ---
+    function showGameOver() {
+      gameOverElement.style.display = "block";
+    }
+    function hideGameOver() {
+      gameOverElement.style.display = "none";
+    }
+
+    // --- Redraw the board & current piece ---
+    function draw() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw current falling piece
+      drawPiece(currentPiece.piece, piecePos, currentPiece.color);
+
+      // Draw the board
+      board.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value) {
+            context.fillStyle = value;
+            context.fillRect(x * grid, y * grid, grid, grid);
+            context.strokeRect(x * grid, y * grid, grid, grid);
+          }
+        });
+      });
+    }
+
+    // --- Keyboard controls ---
+    document.addEventListener('keydown', event => {
+      // Prevent arrow keys from scrolling
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+        event.preventDefault();
+      }
+
+      // If game over, only Enter restarts
+      if (gameOver) {
+        if (event.key === 'Enter') {
+          restartGame();
+        }
+        return;
+      }
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          move(-1);
+          break;
+        case 'ArrowRight':
+          move(1);
+          break;
+        case 'ArrowDown':
+          drop();
+          break;
+        case 'ArrowUp':
+          rotatePiece();
+          break;
+      }
+    });
+
+    // --- Move piece left or right ---
+    function move(direction) {
+      piecePos.x += direction;
+      if (collide(board, currentPiece.piece, piecePos)) {
+        piecePos.x -= direction;
+      }
+    }
+
+    // --- Rotate piece clockwise ---
+    function rotatePiece() {
+      const rotatedPiece = rotate(currentPiece.piece);
+      const oldX = piecePos.x;
+      let offset = 1;
+      while (collide(board, rotatedPiece, piecePos)) {
+        piecePos.x += offset;
+        offset = -(offset + (offset > 0 ? 1 : -1));
+        if (offset > rotatedPiece[0].length) {
+          piecePos.x = oldX;
+          return;
+        }
+      }
+      currentPiece.piece = rotatedPiece;
+    }
+
+    // --- Matrix transpose+reverse to rotate ---
+    function rotate(piece) {
+      return piece[0].map((_, i) => piece.map(row => row[i])).reverse();
+    }
+
+    // --- Check collision between piece and board ---
+    function collide(board, piece, offset) {
+      for (let y = 0; y < piece.length; y++) {
+        for (let x = 0; x < piece[y].length; x++) {
+          if (piece[y][x] &&
+              (board[y + offset.y] && board[y + offset.y][x + offset.x]) !== 0) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    // --- Merge the piece into the board ---
+    function merge(board, piece, offset, color) {
+      piece.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value) {
+            board[y + offset.y][x + offset.x] = color;
+          }
+        });
+      });
+    }
+
+    // --- Restart the game ---
+    function restartGame() {
+      board = Array.from({ length: rows }, () => Array(columns).fill(0));
+      linesCleared = 0;
+      linesClearedForSpeedIncrease = 0;
+      dropInterval = 1000;
+      linesClearedElement.textContent = linesCleared;
+      gameOver = false;
+      hideGameOver();
+      resetPiece();
+      update();
+    }
+
+    // --- Game loop with requestAnimationFrame ---
+    let lastTime = 0;
+    let dropCounter = 0;
+    function update(time = 0) {
+      if (gameOver) return;
+
+      const deltaTime = time - lastTime;
+      lastTime = time;
+
+      dropCounter += deltaTime;
+      if (dropCounter > dropInterval) {
+        drop();
+        dropCounter = 0;
+      }
+
+      draw();
+      if (!gameOver) {
+        requestAnimationFrame(update);
+      }
+    }
+
+    // -----------------------------------------------------------------
+    // Touch & Gesture controls
+    // -----------------------------------------------------------------
+    let startX = 0;
+    let startY = 0;
+    const swipeThreshold = 30; // Minimum distance (px) to trigger a swipe
+
+    // On some iOS browsers, we need to explicitly disable certain gestures
+    // or set `touch-action: none;` in CSS for the canvas.
+
+    canvas.addEventListener('touchstart', e => {
+      // Only handle single-finger touches for simplicity
+      if (e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', e => {
+      if (gameOver) return; // Do not process if game is over
+
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const deltaX = endX - startX;
+      const deltaY = endY - startY;
+
+      // Horizontal vs. Vertical movement
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe
+        if (Math.abs(deltaX) > swipeThreshold) {
+          // Left or right
+          if (deltaX < 0) {
+            move(-1); // Swipe left
+          } else {
+            move(1);  // Swipe right
+          }
+        } else {
+          // Very short horizontal movement => maybe treat as a 'tap' => rotate
+          rotatePiece();
+        }
+      } else {
+        // Vertical swipe
+        if (Math.abs(deltaY) > swipeThreshold) {
+          // Up or down
+          if (deltaY > 0) {
+            drop(); // Swipe down
+          } else {
+            rotatePiece(); // Swipe up
+          }
+        } else {
+          // Very short vertical movement => treat as tap => rotate
+          rotatePiece();
+        }
+      }
+    }, { passive: false });
+
+    // -----------------------------------------------------------------
+
+    // Start game
+    resetPiece();
+    update();
+  </script>
+</body>
+</html>
