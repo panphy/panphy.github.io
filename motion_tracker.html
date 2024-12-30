@@ -484,7 +484,7 @@
     <div id="frameRatePrompt">
         <h2>Set Frame Rate</h2>
         <p>
-            Please enter a new frame rate (examples: 24, 25, 30, 50, 60, 120, 240):
+            Please enter the correct frame rate. Typical values are 24, 30, 60, 240 fps:
         </p>
         <form autocomplete="off">
             <input type="number" id="userFrameRate" name="userFrameRate" placeholder="Enter FPS" value="30" min="1" step="0.1" autocomplete="off" />
@@ -725,7 +725,7 @@
                 plotPosition(); 
             });
 
-            message.innerHTML = "<p>Use the control bar beneath the video to select the starting frame.</p><p>Select a point to track motion, and the video will skip to the next frame.</p>";
+            message.innerHTML = "<ul align='left'><li>Use the brown button above to enter the frame rate (default is 30 fps).<li>Use the control bar beneath the video to select the starting frame.<li>Select a point to track motion, and the video will skip to the next frame.</ul>";
         }
 
         // Play/Pause
