@@ -8,23 +8,17 @@
     <!-- 1) Include Chart.js for plotting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- 2) Include MediaInfo.js (WASM build). 
-         This is ~1MB or more, so be aware of loading overhead. 
-         For the most up-to-date link, see: https://github.com/MediaArea/MediaInfo.js 
-    -->
-    <script src="https://unpkg.com/mediainfo.js/dist/MediaInfoModule.js"></script>
-
     <style>
         :root {
             /* Button Color Variables */
             --btn-upload-color: #0079b1; /* Blue */
-            --btn-play-color: #17c5a3; /* Green */
+            --btn-play-color: #17c5a3;   /* Green */
             --btn-calibration-color: #f0bd37; /* Yellow */
-            --btn-set-origin-color: #f0bd37; /* Yellow */
-            --btn-export-color: #23a5d0; /* Teal */
-            --btn-clear-data-color: #ee4c4c; /* Red */
+            --btn-set-origin-color: #f0bd37;  /* Yellow */
+            --btn-export-color: #23a5d0;      /* Teal */
+            --btn-clear-data-color: #ee4c4c;  /* Red */
             --btn-clear-calibration-color: #ec7070; /* Red */
-            --btn-clear-origin-color: #ec7070; /* Red */
+            --btn-clear-origin-color: #ec7070;      /* Red */
             
             /* Dialog Button Colors */
             --btn-confirm-color: #28a745; /* Green */
@@ -150,42 +144,9 @@
             filter: brightness(90%);
         }
 
-        /* Dialog Button Colors */
-        #calibrationPrompt button, 
-        #exportPrompt button, 
-        #frameRatePrompt button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 48%;
-            font-size: 1em;
-            color: white;
-            transition: filter 0.3s ease;
-        }
-
-        #calibrationPrompt #confirmCalibration, 
-        #exportPrompt #confirmExport, 
-        #frameRatePrompt #confirmFrameRate {
-            background-color: var(--btn-confirm-color);
-        }
-
-        #calibrationPrompt #cancelCalibration, 
-        #exportPrompt #cancelExport, 
-        #frameRatePrompt #cancelFrameRate {
-            background-color: var(--btn-cancel-color);
-        }
-
-        /* Hover Effect for Dialog Buttons */
-        #calibrationPrompt button:hover:not(:disabled), 
-        #exportPrompt button:hover:not(:disabled),
-        #frameRatePrompt button:hover:not(:disabled) {
-            filter: brightness(90%);
-        }
-
-        /* Disabled Buttons */
+        /* Disabled Buttons Appear Gray */
         .control-button:disabled {
-            background-color: #a9a9a9;
+            background-color: #a9a9a9 !important;
             cursor: not-allowed;
         }
 
@@ -272,7 +233,7 @@
             display: none;
         }
 
-        /* Video Control Bar and Frame Rate Message Container */
+        /* Video Control Bar */
         #controlsContainer {
             display: flex;
             justify-content: space-between;
@@ -282,7 +243,6 @@
             margin-top: 10px;
         }
 
-        /* Video Control Bar */
         #videoControls {
             display: flex;
             align-items: center;
@@ -345,7 +305,7 @@
             display: none;
             z-index: 10;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            width: 350px;
+            width: 300px;
             box-sizing: border-box;
         }
 
@@ -376,6 +336,39 @@
             padding: 8px;
             margin: 10px 0;
             box-sizing: border-box;
+        }
+
+        /* Dialog Buttons */
+        #calibrationPrompt button, 
+        #exportPrompt button, 
+        #frameRatePrompt button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 48%;
+            font-size: 1em;
+            color: white;
+            transition: filter 0.3s ease;
+        }
+
+        #calibrationPrompt #confirmCalibration, 
+        #exportPrompt #confirmExport, 
+        #frameRatePrompt #confirmFrameRate {
+            background-color: var(--btn-confirm-color);
+        }
+
+        #calibrationPrompt #cancelCalibration, 
+        #exportPrompt #cancelExport, 
+        #frameRatePrompt #cancelFrameRate {
+            background-color: var(--btn-cancel-color);
+        }
+
+        .control-button:hover:not(:disabled),
+        #calibrationPrompt button:hover:not(:disabled), 
+        #exportPrompt button:hover:not(:disabled),
+        #frameRatePrompt button:hover:not(:disabled) {
+            filter: brightness(90%);
         }
 
         /* Crosshair */
@@ -419,15 +412,6 @@
             background-color: #fff !important;
         }
 
-        /* Frame Rate Message Styling */
-        #frameRateMessage {
-            font-size: 1em;
-            font-weight: bold;
-            text-align: center;
-            color: #333;
-            width: 35%; /* Adjust width as needed */
-        }
-
         footer {
             text-align: center;
             padding: 10px;
@@ -458,10 +442,21 @@
         <input type="file" id="videoUploadInput" accept="video/*" style="display: none;">
     </div>
 
+    <!-- Frame Rate Button -->
+    <div id="frameRateContainer" style="text-align: center; margin-top: 10px;">
+        <button id="frameRateButton" class="control-button" 
+            style="width: auto; padding: 10px 15px; background-color: #666;"
+            title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120, 240)"
+            disabled>
+            Frame Rate: 30 fps
+        </button>
+    </div>
+
+    <!-- Prompts -->
     <!-- Calibration Prompt -->
     <div id="calibrationPrompt">
         <h2>Calibration</h2>
-        <p>Enter the actual length and unit of the drawn line:</p>
+        <p>Drag on the video to draw a line with a known length.</p>
         <form autocomplete="off">
             <input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
             <input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
@@ -489,8 +484,7 @@
     <div id="frameRatePrompt">
         <h2>Set Frame Rate</h2>
         <p>
-            Could not detect the frame rate.<br>
-            Please find the frame rate, and enter the value below:
+            Please enter a new frame rate (examples: 24, 25, 30, 50, 60, 120, 240):
         </p>
         <form autocomplete="off">
             <input type="number" id="userFrameRate" name="userFrameRate" placeholder="Enter FPS" value="30" min="1" step="0.1" autocomplete="off" />
@@ -517,8 +511,6 @@
             </div>
             <!-- Controls Container -->
             <div id="controlsContainer">
-                <!-- Frame Rate Message -->
-                <div id="frameRateMessage"></div>
                 <!-- Video Control Bar -->
                 <div id="videoControls">
                     <input type="range" id="slider" min="0" max="1" step="0.001" value="0" disabled>
@@ -541,19 +533,8 @@
     </div>
 
     <script>
-        // (A) Initialize MediaInfo in an async manner:
-        let mediaInfoModule = null;  // Will hold the MediaInfo WASM instance
-        document.addEventListener('DOMContentLoaded', async () => {
-            mediaInfoModule = await MediaInfo({ format: 'object' });
-        });
-
-        // Data Point Colors Configuration
-        const dataPointColors = {
-            x: '#ae72e6',
-            y: '#fcb56a',
-            vx: '#549ad9',
-            vy: '#f48a8a'
-        };
+        // Default Frame Rate
+        let frameRate = 30;
 
         // Create a hidden video element
         let videoElement = document.createElement('video');
@@ -563,45 +544,13 @@
         videoElement.playsinline = true;
         videoElement.webkitPlaysinline = true;
 
-        // Get DOM elements
-        const uploadVideoButton = document.getElementById('uploadVideo');
-        const videoUploadInput = document.getElementById('videoUploadInput');
-        const playPauseButton = document.getElementById('playPause');
-        const calibrateButton = document.getElementById('calibrate');
-        const setOriginButton = document.getElementById('setOrigin');
-        const slider = document.getElementById('slider');
-        const timeDisplay = document.getElementById('timeDisplay');
-        const frameCanvas = document.getElementById('frameCanvas');
-        const positionChartCanvas = document.getElementById('positionChart');
-        const message = document.getElementById('message');
-        const chartCanvasContainer = document.getElementById('chartCanvasContainer');
-        const plotVxButton = document.getElementById('plotVx');
-        const plotVyButton = document.getElementById('plotVy');
-        const backToPositionButton = document.getElementById('backToPosition');
-        const overlayCanvas = document.getElementById('overlayCanvas');
-        const ctx = frameCanvas.getContext('2d');
-        const overlayCtx = overlayCanvas.getContext('2d');
-        const clearDataPointsButton = document.getElementById('clearDataPoints');
-        const clearCalibrationButton = document.getElementById('clearCalibration');
-        const clearOriginButton = document.getElementById('clearOrigin');
-        const exportDataButton = document.getElementById('exportData');
-        const calibrationPrompt = document.getElementById('calibrationPrompt');
-        const actualLengthInput = document.getElementById('actualLength');
-        const actualUnitInput = document.getElementById('actualUnit');
-        const confirmCalibrationButton = document.getElementById('confirmCalibration');
-        const cancelCalibrationButton = document.getElementById('cancelCalibration');
-        const exportPrompt = document.getElementById('exportPrompt');
-        const exportFilenameInput = document.getElementById('exportFilename');
-        const confirmExportButton = document.getElementById('confirmExport');
-        const cancelExportButton = document.getElementById('cancelExport');
-        const crosshair = document.getElementById('crosshair');
-        const frameRateMessage = document.getElementById('frameRateMessage');
-
-        // Frame Rate Prompt elements
-        const frameRatePrompt = document.getElementById('frameRatePrompt');
-        const userFrameRateInput = document.getElementById('userFrameRate');
-        const confirmFrameRateButton = document.getElementById('confirmFrameRate');
-        const cancelFrameRateButton = document.getElementById('cancelFrameRate');
+        // Data Point Colors Configuration
+        const dataPointColors = {
+            x: '#ae72e6',
+            y: '#fcb56a',
+            vx: '#549ad9',
+            vy: '#f48a8a'
+        };
 
         // Application state variables
         let frameData = [];
@@ -609,7 +558,6 @@
         let positionChart;
         let skippingFrame = false; 
         let recordedBlob = null;
-        let pendingFile = null;  // We'll store the file temporarily
 
         let calibrationMode = false;
         let calibrationStart = null;
@@ -621,9 +569,6 @@
         let originMode = false;
         let originSet = false;
         let originPoint = { x: 0, y: 0 }; 
-
-        // We'll store the frame rate once determined from MediaInfo; fallback to 30 if needed
-        let frameRate = 30; 
 
         // Define a fixed grid size in display pixels
         const gridSizeDisplay = 40; 
@@ -647,14 +592,53 @@
             return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
         }
 
-        // Prevent form submission on Enter key
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => e.preventDefault());
-        });
+        // DOM References
+        const uploadVideoButton = document.getElementById('uploadVideo');
+        const videoUploadInput = document.getElementById('videoUploadInput');
+        const playPauseButton = document.getElementById('playPause');
+        const calibrateButton = document.getElementById('calibrate');
+        const setOriginButton = document.getElementById('setOrigin');
+        const slider = document.getElementById('slider');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const frameCanvas = document.getElementById('frameCanvas');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        const ctx = frameCanvas.getContext('2d');
+        const overlayCtx = overlayCanvas.getContext('2d');
+
+        const plotVxButton = document.getElementById('plotVx');
+        const plotVyButton = document.getElementById('plotVy');
+        const backToPositionButton = document.getElementById('backToPosition');
+        const clearDataPointsButton = document.getElementById('clearDataPoints');
+        const clearCalibrationButton = document.getElementById('clearCalibration');
+        const clearOriginButton = document.getElementById('clearOrigin');
+        const exportDataButton = document.getElementById('exportData');
+
+        const calibrationPrompt = document.getElementById('calibrationPrompt');
+        const actualLengthInput = document.getElementById('actualLength');
+        const actualUnitInput = document.getElementById('actualUnit');
+        const confirmCalibrationButton = document.getElementById('confirmCalibration');
+        const cancelCalibrationButton = document.getElementById('cancelCalibration');
+
+        const exportPrompt = document.getElementById('exportPrompt');
+        const exportFilenameInput = document.getElementById('exportFilename');
+        const confirmExportButton = document.getElementById('confirmExport');
+        const cancelExportButton = document.getElementById('cancelExport');
+
+        const frameRatePrompt = document.getElementById('frameRatePrompt');
+        const userFrameRateInput = document.getElementById('userFrameRate');
+        const confirmFrameRateButton = document.getElementById('confirmFrameRate');
+        const cancelFrameRateButton = document.getElementById('cancelFrameRate');
+
+        const crosshair = document.getElementById('crosshair');
+        const message = document.getElementById('message');
+        const chartCanvasContainer = document.getElementById('chartCanvasContainer');
+        const positionChartCanvas = document.getElementById('positionChart');
+
+        const frameRateButton = document.getElementById('frameRateButton'); 
 
         // Initialize button states on page load
         document.addEventListener('DOMContentLoaded', () => {
-            // Disable all buttons except Upload Video
+            // All non-upload buttons are disabled (and thus grey) by default
             playPauseButton.disabled = true;
             calibrateButton.disabled = true;
             setOriginButton.disabled = true;
@@ -666,151 +650,86 @@
             clearCalibrationButton.disabled = true;
             clearOriginButton.disabled = true;
             exportDataButton.disabled = true;
+            frameRateButton.disabled = true;
 
-            // Hide analysis containers
             document.getElementById('analysisContainer').style.display = "none";
             chartCanvasContainer.style.display = "none";
-            // Hide frameCanvas initially
             frameCanvas.style.display = "none";
-            // Hide export, calibration, and frameRate prompts
+
             calibrationPrompt.style.display = "none";
             exportPrompt.style.display = "none";
             frameRatePrompt.style.display = "none";
-            // Clear frame rate message
-            frameRateMessage.textContent = "";
+
+            // Default text on the frame rate button
+            frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
         });
 
-        // Upload Video Button Click
+        // Open file dialog
         uploadVideoButton.addEventListener('click', () => {
             videoUploadInput.click();
         });
 
-        // Video Upload Input Change
-        videoUploadInput.addEventListener('change', async (event) => {
+        // Video selected
+        videoUploadInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                pendingFile = file;  // Store the file so we can proceed after user sets frame rate if needed
-                // (B) Attempt to parse the video file's metadata with MediaInfo
-                try {
-                    if (mediaInfoModule) {
-                        const arrayBuffer = await file.arrayBuffer();
-                        const result = await mediaInfoModule.analyzeData(
-                            () => arrayBuffer.byteLength,
-                            (offset, length) => arrayBuffer.slice(offset, offset + length)
-                        );
-
-                        const videoTrack = result.media.track.find(t => t["@type"] === "Video");
-                        if (videoTrack && videoTrack.FrameRate) {
-                            frameRate = parseFloat(videoTrack.FrameRate);
-                            if (isNaN(frameRate) || frameRate <= 0) {
-                                // If invalid, prompt user
-                                showFrameRatePrompt();
-                            } else {
-                                console.log(`Auto-detected frame rate: ${frameRate} FPS`);
-                                proceedWithVideoLoad();
-                            }
-                        } else {
-                            // No valid FrameRate found, prompt user
-                            showFrameRatePrompt();
-                        }
-                    } else {
-                        // MediaInfo not loaded or something else, prompt user
-                        showFrameRatePrompt();
-                    }
-                } catch (err) {
-                    console.warn("MediaInfo parse error; prompting user to enter frame rate:", err);
-                    showFrameRatePrompt();
-                }
+                recordedBlob = URL.createObjectURL(file);
+                loadVideo();
             }
         });
 
-        // Show frame rate prompt
-        function showFrameRatePrompt() {
-            frameRatePrompt.style.display = "block";
-        }
-
-        // Hide frame rate prompt and reset input
-        function hideFrameRatePrompt() {
-            frameRatePrompt.style.display = "none";
-            userFrameRateInput.value = "30";
-        }
-
-        // Confirm frame rate
-        confirmFrameRateButton.addEventListener('click', () => {
-            const userInput = parseFloat(userFrameRateInput.value);
-            if (!isNaN(userInput) && userInput > 0) {
-                frameRate = userInput;
-            } else {
-                frameRate = 30;
-                alert("Invalid frame rate entered. Defaulting to 30 FPS.");
-            }
-            hideFrameRatePrompt();
-            proceedWithVideoLoad();
-        });
-
-        // Cancel frame rate
-        cancelFrameRateButton.addEventListener('click', () => {
-            frameRate = 30;
-            hideFrameRatePrompt();
-            proceedWithVideoLoad();
-        });
-
-        // (C) Proceed to load the video once we have a frame rate
-        function proceedWithVideoLoad() {
-            recordedBlob = URL.createObjectURL(pendingFile);
+        // Load video
+        function loadVideo() {
             videoElement.src = recordedBlob;
-            videoElement.addEventListener('loadedmetadata', onVideoLoaded);
+            // Once the metadata is loaded, set time=0
+            videoElement.addEventListener('loadedmetadata', onVideoMetadata);
         }
 
-        // Called once the browser has loaded the video's metadata
-        function onVideoLoaded() {
+        function onVideoMetadata() {
+            videoElement.removeEventListener('loadedmetadata', onVideoMetadata);
             slider.max = videoElement.duration; 
             slider.value = 0; 
-            timeDisplay.textContent = formatTime(0); 
-            videoElement.currentTime = 0;
+            videoElement.currentTime = 0; 
             videoElement.pause();
+            
+            // Wait for the video to have decoded at least one frame
+            videoElement.addEventListener('loadeddata', onVideoFirstFrame, { once: true });
+        }
 
-            // Force next lines after first seek
-            videoElement.addEventListener('seeked', () => {
+        // Called once the first frame is decoded
+        function onVideoFirstFrame() {
+            // Show the video frame canvas & analysis container
+            frameCanvas.style.display = "block";
+            chartCanvasContainer.style.display = "flex"; 
+            document.getElementById('analysisContainer').style.display = "flex";
+
+            // Enable controls (colors become visible)
+            playPauseButton.disabled = false;
+            calibrateButton.disabled = false;
+            setOriginButton.disabled = false;
+            slider.disabled = false;
+            plotVxButton.disabled = false;
+            plotVyButton.disabled = false;
+            backToPositionButton.disabled = false;
+            clearDataPointsButton.disabled = false;
+            clearCalibrationButton.disabled = false;
+            clearOriginButton.disabled = false;
+            exportDataButton.disabled = false;
+            frameRateButton.disabled = false;
+
+            // Next tick, do the overlay and draw
+            requestAnimationFrame(() => {
                 resizeOverlay(); 
                 drawOverlay();
                 drawFrame();
-                chartCanvasContainer.style.display = "flex"; 
                 plotPosition(); 
-            }, { once: true });
+            });
 
-            frameCanvas.style.display = "block";
-            chartCanvasContainer.style.display = "flex"; 
-
-            // Enable controls
-            playPauseButton.removeAttribute('disabled');
-            calibrateButton.removeAttribute('disabled');
-            setOriginButton.removeAttribute('disabled');
-            slider.removeAttribute('disabled');
-            plotVxButton.removeAttribute('disabled');
-            plotVyButton.removeAttribute('disabled');
-            backToPositionButton.removeAttribute('disabled');
-            clearDataPointsButton.removeAttribute('disabled');
-            clearCalibrationButton.removeAttribute('disabled');
-            clearOriginButton.removeAttribute('disabled');
-            exportDataButton.removeAttribute('disabled');
-
-            // Show analysis container
-            document.getElementById('analysisContainer').style.display = "flex";
-
-            // Update instruction message
             message.innerHTML = "<p>Use the control bar beneath the video to select the starting frame.</p><p>Select a point to track motion, and the video will skip to the next frame.</p>";
-
-            // Show the final frame rate in the UI
-            frameRateMessage.textContent = `Frame Rate = ${frameRate} FPS`;
         }
 
-        // Play/Pause Button Click
+        // Play/Pause
         playPauseButton.addEventListener('click', () => {
-            togglePlayPause();
-        });
-
-        function togglePlayPause() {
             if (isPlaying) {
                 videoElement.pause();
                 playPauseButton.textContent = "Play";
@@ -819,21 +738,21 @@
                 playPauseButton.textContent = "Pause";
             }
             isPlaying = !isPlaying;
-        }
+        });
 
-        // Video Time Update
+        // Time update
         videoElement.addEventListener("timeupdate", () => {
             slider.value = videoElement.currentTime; 
             timeDisplay.textContent = formatTime(videoElement.currentTime); 
             if (!skippingFrame) drawFrame(); 
         });
 
-        // Slider Input
+        // Slider input
         slider.addEventListener("input", () => {
             videoElement.currentTime = parseFloat(slider.value); 
         });
 
-        // Frame Canvas Click - Add Data Point (unless calibrating or setting origin)
+        // Frame Canvas Click
         frameCanvas.addEventListener('click', (event) => {
             if (!calibrationMode && !originMode) {
                 const rect = frameCanvas.getBoundingClientRect();
@@ -849,7 +768,7 @@
             }
         });
 
-        // Overlay Canvas Click - Set Origin (if in originMode)
+        // Overlay Canvas Click - Set Origin
         overlayCanvas.addEventListener('click', (event) => {
             if (originMode && !calibrationMode) {
                 const rect = overlayCanvas.getBoundingClientRect();
@@ -870,133 +789,30 @@
             }
         });
 
-        // --- Touch-compatible Calibration ---
-
-        // We'll unify mouse and touch events so iPad users can also
-        // click-and-drag to draw the calibration line.
-
-        // Start/continue drawing calibration line
-        function startCalibrationDraw(x, y) {
-            isDrawingCalibration = true;
-            calibrationStart = { x, y };
-            calibrationEnd = { x, y };
-        }
-
-        function updateCalibrationDraw(x, y) {
-            if (isDrawingCalibration) {
-                calibrationEnd = { x, y };
-                drawOverlay();
-            }
-        }
-
-        function endCalibrationDraw() {
-            if (!isDrawingCalibration) return;
-            isDrawingCalibration = false;
-            calibrationMode = false;
-            overlayCanvas.style.pointerEvents = "none";
-            frameCanvas.style.cursor = "default";
-            message.innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
-            showCalibrationPrompt();
-        }
-
-        // Mouse events
-        overlayCanvas.addEventListener('mousedown', (event) => {
-            if (calibrationMode) {
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (event.clientX - rect.left) * scaleX;
-                const y = (event.clientY - rect.top) * scaleY;
-                startCalibrationDraw(x, y);
-            }
+        // Frame Rate Button -> open prompt
+        frameRateButton.addEventListener('click', () => {
+            userFrameRateInput.value = frameRate; 
+            frameRatePrompt.style.display = "block";
         });
 
-        overlayCanvas.addEventListener('mousemove', (event) => {
-            if (calibrationMode && isDrawingCalibration) {
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (event.clientX - rect.left) * scaleX;
-                const y = (event.clientY - rect.top) * scaleY;
-                updateCalibrationDraw(x, y);
+        // Confirm new frame rate
+        confirmFrameRateButton.addEventListener('click', () => {
+            const userInput = parseFloat(userFrameRateInput.value);
+            if (!isNaN(userInput) && userInput > 0) {
+                frameRate = userInput;
+            } else {
+                alert("Invalid frame rate entered. Keeping the old value.");
             }
+            frameRatePrompt.style.display = "none";
+            frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
         });
 
-        overlayCanvas.addEventListener('mouseup', (event) => {
-            if (calibrationMode) {
-                endCalibrationDraw();
-            }
+        // Cancel new frame rate
+        cancelFrameRateButton.addEventListener('click', () => {
+            frameRatePrompt.style.display = "none";
         });
 
-        // Touch events
-        overlayCanvas.addEventListener('touchstart', (event) => {
-            if (calibrationMode && event.touches.length === 1) {
-                event.preventDefault(); // Prevent scrolling on iPad
-                const touch = event.touches[0];
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (touch.clientX - rect.left) * scaleX;
-                const y = (touch.clientY - rect.top) * scaleY;
-                startCalibrationDraw(x, y);
-            }
-        }, { passive: false });
-
-        overlayCanvas.addEventListener('touchmove', (event) => {
-            if (calibrationMode && isDrawingCalibration && event.touches.length === 1) {
-                event.preventDefault();
-                const touch = event.touches[0];
-                const rect = overlayCanvas.getBoundingClientRect();
-                const scaleX = overlayCanvas.width / rect.width;
-                const scaleY = overlayCanvas.height / rect.height;
-                const x = (touch.clientX - rect.left) * scaleX;
-                const y = (touch.clientY - rect.top) * scaleY;
-                updateCalibrationDraw(x, y);
-            }
-        }, { passive: false });
-
-        overlayCanvas.addEventListener('touchend', (event) => {
-            if (calibrationMode) {
-                event.preventDefault();
-                endCalibrationDraw();
-            }
-        }, { passive: false });
-
-        // Draw the current video frame and data points
-        function drawFrame() {
-            frameCanvas.width = videoElement.videoWidth;
-            frameCanvas.height = videoElement.videoHeight;
-            ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-            ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
-
-            frameData.forEach((point) => {
-                const x = point.x;
-                const y = cartesianYToCanvasY(point.y);
-                drawDataPoint(x, y);
-            });
-        }
-
-        // Draw a single data point
-        function drawDataPoint(x, y) {
-            const circleRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth); 
-            const crossSize = 10 * (overlayCanvas.width / overlayCanvas.clientWidth); 
-
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
-            ctx.beginPath();
-            ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
-            ctx.fill();
-
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 1; 
-            ctx.beginPath();
-            ctx.moveTo(x - crossSize, y);
-            ctx.lineTo(x + crossSize, y);
-            ctx.moveTo(x, y - crossSize);
-            ctx.lineTo(x, y + crossSize);
-            ctx.stroke();
-        }
-
-        // Skip to the next frame using the (auto-detected or user-specified) frame rate
+        // Skip to next frame
         function skipToNextFrame() {
             skippingFrame = true;
             videoElement.currentTime += 1 / frameRate; 
@@ -1007,7 +823,7 @@
             }, { once: true });
         }
 
-        // Plot Position Data using Chart.js
+        // Plot Position
         function plotPosition() {
             const xData = frameData.map((p) => parseFloat(p.time.toFixed(3))); 
             const yDataX = frameData.map((p) => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
@@ -1072,7 +888,6 @@
                     },
                 });
             } else {
-                // Update existing chart
                 positionChart.data.datasets = [
                     {
                         label: "x-position",
@@ -1096,7 +911,7 @@
             }
         }
 
-        // Plot Velocity Data
+        // Plot Velocity
         function plotVelocity(axis) {
             const windowSize = 3; 
             if (frameData.length < windowSize) {
@@ -1120,15 +935,15 @@
                 const deltaX = p2.x - p1.x;
                 const deltaY = p2.y - p1.y;
                 const deltaPos = axis === 'x' ? deltaX : deltaY;
-
                 const velocity = deltaTime > 0 ? (deltaPos * scaleFactor) / deltaTime : 0;
+
                 if (deltaTime > 0) {
                     velocityEstimates.push(velocity);
                     velocityTimes.push(frameData[i].time);
                 }
             }
 
-            // Simple moving average or any smoothing
+            // Simple moving average
             const smoothedVelocities = [];
             const smoothedTimes = [];
             for (let i = 0; i < velocityEstimates.length; i++) {
@@ -1141,9 +956,8 @@
                 smoothedTimes.push(parseFloat(midpointTime.toFixed(3)));
             }
 
-            if (!positionChart) return; // Safety check
+            if (!positionChart) return;
 
-            // Update chart with velocity data
             positionChart.data.datasets = [
                 {
                     label: axis === "x" ? "x-velocity" : "y-velocity",
@@ -1158,14 +972,14 @@
             positionChart.update();
         }
 
-        // Plot Velocity Buttons
+        // Plot Buttons
         plotVxButton.addEventListener("click", () => plotVelocity("x"));
         plotVyButton.addEventListener("click", () => plotVelocity("y"));
         backToPositionButton.addEventListener("click", () => {
             plotPosition();
         });
 
-        // Clear Data Points
+        // Clear Data
         clearDataPointsButton.addEventListener("click", () => {
             frameData = []; 
             if (positionChart) {
@@ -1206,7 +1020,7 @@
             message.innerHTML = "<p>Origin cleared. Default origin (lower-left) is used.</p>";
         });
 
-        // Export Data Button Click
+        // Export
         exportDataButton.addEventListener("click", () => {
             if (frameData.length === 0) {
                 alert("No data to export.");
@@ -1215,19 +1029,16 @@
             showExportPrompt();
         });
 
-        // Show Export Prompt
         function showExportPrompt() {
             exportFilenameInput.value = "motion_tracker_data"; 
             exportPrompt.style.display = "block";
         }
 
-        // Hide Export Prompt
         function hideExportPrompt() {
             exportPrompt.style.display = "none";
             exportFilenameInput.value = "";
         }
 
-        // Confirm Export
         confirmExportButton.addEventListener('click', () => {
             const desiredFilename = exportFilenameInput.value.trim();
             if (desiredFilename === "") {
@@ -1246,13 +1057,11 @@
             message.innerHTML = `<p>Data exported as ${finalFilename}.</p>`;
         });
 
-        // Cancel Export
         cancelExportButton.addEventListener('click', () => {
             hideExportPrompt();
             message.innerHTML = "<p>Export cancelled.</p>";
         });
 
-        // Export CSV Function
         function exportCSV(filename) {
             const velocityData = [];
             for (let i = 1; i < frameData.length; i++) {
@@ -1297,7 +1106,7 @@
             document.body.removeChild(link);
         }
 
-        // Calibration Button Click
+        // Calibration
         calibrateButton.addEventListener('click', () => {
             crosshair.style.display = "none";
             overlayCanvas.style.pointerEvents = "auto"; 
@@ -1306,34 +1115,105 @@
             calibrationStart = null;
             calibrationEnd = null;
             frameCanvas.style.cursor = "crosshair";
-            message.innerHTML = "<p>Calibration: Drag your mouse/finger on the video to draw a line.</p>";
+            message.innerHTML = "<p>Drag on the video to draw a line with a known length.</p>";
         });
 
-        // Overlay Canvas Mousemove - Show Crosshair
-        overlayCanvas.addEventListener('mousemove', (event) => {
-            if (calibrationMode || originMode) {
+        // Mouse + Touch events for calibration
+        function startCalibrationDraw(x, y) {
+            isDrawingCalibration = true;
+            calibrationStart = { x, y };
+            calibrationEnd = { x, y };
+        }
+
+        function updateCalibrationDraw(x, y) {
+            if (isDrawingCalibration) {
+                calibrationEnd = { x, y };
+                drawOverlay();
+            }
+        }
+
+        function endCalibrationDraw() {
+            if (!isDrawingCalibration) return;
+            isDrawingCalibration = false;
+            calibrationMode = false;
+            overlayCanvas.style.pointerEvents = "none";
+            frameCanvas.style.cursor = "default";
+            message.innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
+            showCalibrationPrompt();
+        }
+
+        overlayCanvas.addEventListener('mousedown', (event) => {
+            if (calibrationMode) {
                 const rect = overlayCanvas.getBoundingClientRect();
-                const crossX = event.clientX - rect.left;
-                const crossY = event.clientY - rect.top;
-                crosshair.style.left = `${crossX - 10}px`;
-                crosshair.style.top = `${crossY - 10}px`;
-                crosshair.style.display = "block";
+                const scaleX = overlayCanvas.width / rect.width;
+                const scaleY = overlayCanvas.height / rect.height;
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+                startCalibrationDraw(x, y);
             }
         });
 
-        // Show Calibration Prompt
+        overlayCanvas.addEventListener('mousemove', (event) => {
+            if (calibrationMode && isDrawingCalibration) {
+                const rect = overlayCanvas.getBoundingClientRect();
+                const scaleX = overlayCanvas.width / rect.width;
+                const scaleY = overlayCanvas.height / rect.height;
+                const x = (event.clientX - rect.left) * scaleX;
+                const y = (event.clientY - rect.top) * scaleY;
+                updateCalibrationDraw(x, y);
+            }
+        });
+
+        overlayCanvas.addEventListener('mouseup', (event) => {
+            if (calibrationMode) {
+                endCalibrationDraw();
+            }
+        });
+
+        overlayCanvas.addEventListener('touchstart', (event) => {
+            if (calibrationMode && event.touches.length === 1) {
+                event.preventDefault();
+                const touch = event.touches[0];
+                const rect = overlayCanvas.getBoundingClientRect();
+                const scaleX = overlayCanvas.width / rect.width;
+                const scaleY = overlayCanvas.height / rect.height;
+                const x = (touch.clientX - rect.left) * scaleX;
+                const y = (touch.clientY - rect.top) * scaleY;
+                startCalibrationDraw(x, y);
+            }
+        }, { passive: false });
+
+        overlayCanvas.addEventListener('touchmove', (event) => {
+            if (calibrationMode && isDrawingCalibration && event.touches.length === 1) {
+                event.preventDefault();
+                const touch = event.touches[0];
+                const rect = overlayCanvas.getBoundingClientRect();
+                const scaleX = overlayCanvas.width / rect.width;
+                const scaleY = overlayCanvas.height / rect.height;
+                const x = (touch.clientX - rect.left) * scaleX;
+                const y = (touch.clientY - rect.top) * scaleY;
+                updateCalibrationDraw(x, y);
+            }
+        }, { passive: false });
+
+        overlayCanvas.addEventListener('touchend', (event) => {
+            if (calibrationMode) {
+                event.preventDefault();
+                endCalibrationDraw();
+            }
+        }, { passive: false });
+
+        // Show/Hide Calibration Prompt
         function showCalibrationPrompt() {
             calibrationPrompt.style.display = "block";
         }
 
-        // Hide Calibration Prompt
         function hideCalibrationPrompt() {
             calibrationPrompt.style.display = "none";
             actualLengthInput.value = "";
             actualUnitInput.value = "";
         }
 
-        // Confirm Calibration
         confirmCalibrationButton.addEventListener('click', () => {
             const actualLength = parseFloat(actualLengthInput.value);
             const actualUnit = actualUnitInput.value.trim();
@@ -1363,7 +1243,6 @@
             crosshair.style.display = "none";
         });
 
-        // Cancel Calibration
         cancelCalibrationButton.addEventListener('click', () => {
             hideCalibrationPrompt();
             calibrationMode = false;
@@ -1376,9 +1255,8 @@
             message.innerHTML = "<p>Calibration cancelled.</p>";
         });
 
-        // Click outside Calibration or Export Prompts to close them
+        // Hide prompts if clicked outside
         window.addEventListener('click', (event) => {
-            // Cancel calibration if user clicks outside the calibrationPrompt
             if (event.target == calibrationPrompt) {
                 hideCalibrationPrompt();
                 calibrationMode = false;
@@ -1391,20 +1269,16 @@
                 overlayCanvas.style.pointerEvents = "none";
                 message.innerHTML = "<p>Calibration cancelled.</p>";
             }
-            // Cancel export if user clicks outside the exportPrompt
             if (event.target == exportPrompt) {
                 hideExportPrompt();
                 message.innerHTML = "<p>Export cancelled.</p>";
             }
-            // Cancel frame rate prompt if user clicks outside it
             if (event.target == frameRatePrompt) {
-                hideFrameRatePrompt();
-                frameRate = 30;  // fallback if user clicks outside
-                proceedWithVideoLoad();
+                frameRatePrompt.style.display = "none";
             }
         });
 
-        // Set Origin Button Click
+        // Set Origin
         setOriginButton.addEventListener('click', () => {
             calibrationMode = false;
             isDrawingCalibration = false;
@@ -1412,10 +1286,46 @@
             overlayCanvas.style.pointerEvents = "auto";
             frameCanvas.style.cursor = "crosshair";
             crosshair.style.display = "block";
-            message.innerHTML = "<p>Origin Mode: Tap or click on the video to set the new origin.</p>";
+            message.innerHTML = "<p>Origin Mode: Click on the video to set the new origin.</p>";
         });
 
-        // Resize Overlay Canvas to match video dimensions
+        // Draw current frame
+        function drawFrame() {
+            frameCanvas.width = videoElement.videoWidth;
+            frameCanvas.height = videoElement.videoHeight;
+            ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
+
+            // Draw the video
+            ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
+
+            frameData.forEach((point) => {
+                const x = point.x;
+                const y = cartesianYToCanvasY(point.y);
+                drawDataPoint(x, y);
+            });
+        }
+
+        // Draw single data point
+        function drawDataPoint(x, y) {
+            const circleRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth); 
+            const crossSize = 10 * (overlayCanvas.width / overlayCanvas.clientWidth); 
+
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+            ctx.beginPath();
+            ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 1; 
+            ctx.beginPath();
+            ctx.moveTo(x - crossSize, y);
+            ctx.lineTo(x + crossSize, y);
+            ctx.moveTo(x, y - crossSize);
+            ctx.lineTo(x, y + crossSize);
+            ctx.stroke();
+        }
+
+        // Resize and redraw overlay
         function resizeOverlay() {
             if (videoElement.videoWidth && videoElement.videoHeight) {
                 overlayCanvas.width = videoElement.videoWidth;
@@ -1426,31 +1336,26 @@
             }
         }
 
-        // Draw Overlay - Grid, Axes, Calibration Line
         function drawOverlay() {
             resizeOverlay(); 
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-            // Grid steps in *canvas* pixels
+            // Grid
             const gridStepX = gridSizeDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
             const gridStepY = gridSizeDisplay * (overlayCanvas.height / overlayCanvas.clientHeight);
 
-            // Add shadow for outline
             overlayCtx.save();
             overlayCtx.shadowColor = "black";
             overlayCtx.shadowBlur = 2;
             overlayCtx.strokeStyle = "white";
             overlayCtx.lineWidth = 0.5;
 
-            // Draw vertical grid lines
             for (let x = 0; x <= overlayCanvas.width; x += gridStepX) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(x, 0);
                 overlayCtx.lineTo(x, overlayCanvas.height);
                 overlayCtx.stroke();
             }
-
-            // Draw horizontal grid lines
             for (let y = 0; y <= overlayCanvas.height; y += gridStepY) {
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(0, y);
@@ -1459,10 +1364,9 @@
             }
             overlayCtx.restore();
 
-            // Draw axes if origin is set
+            // Axes if origin is set
             let ox = originSet ? originPoint.x : 0;
             let oy = originSet ? originPoint.y : 0;
-
             const originCanvasX = ox;
             const originCanvasY = cartesianYToCanvasY(oy);
 
@@ -1510,7 +1414,7 @@
             }
         }
 
-        // Ensure overlay and frame canvas are sized on window resize
+        // Redraw on window resize
         window.addEventListener('resize', () => {
             drawOverlay();
             drawFrame();
