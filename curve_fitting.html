@@ -2043,9 +2043,10 @@ function estimateKFromData() {
     }
 
     if (peaks.length < 2) {
-        alert('Insufficient peaks to estimate the period.');
-        return null;
-    }
+    	// Instead of alerting, just return a default k value (e.g., k = 1)
+    	console.log("Insufficient peaks detected. Setting k = 1 by default.");
+    	return 1.0;
+	}
 
     // Calculate distances between consecutive peaks
     let periods = [];
