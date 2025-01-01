@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Audio Spectrum & Waveform Analyzer</title>
+  <style>
+    /* ==================== DARK THEME & BASIC LAYOUT ==================== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #121212;
+      color: #ffffff;
+      font-family: sans-serif;
+    }
+
+    /* Let the canvases grow/shrink dynamically with the window,
+       while keeping a ratio. The frequency canvas is 800×300 => ~8:3 ratio,
+       the waveform is 800×200 => ~8:2 ratio. */
+    canvas {
+      display: block;
+      margin: 0 auto;     /* center the canvas */
+      max-width: 100%;
+      height: auto;       /* keeps aspect ratio */
+    }
+
+    h1 {
+      text-align: center;
+      color: #98c616;
+      margin: 1rem 0 0.4rem 0;
+    }
+
+    #peak-frequency {
+      text-align: center;
+      margin: 0.5rem 0;
+      font-weight: bold;
+    }
+
+    /* Container for the frequency spectrum canvas */
+    #visualizer-container {
+      position: relative;
+      width: 80%;
+      max-width: 1000px;
+      margin: 0 auto; /* centers the container */
+    }
+
+    /* Tooltip for frequency & amplitude on hover (spectrum) */
+    #tooltip {
+      position: absolute;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      pointer-events: none;
+      font-size: 0.8rem;
+    }
+
+    /* Container for the waveform canvas */
+    #waveform-container {
+      width: 80%;
+      max-width: 1000px;
+      margin: 1rem auto; /* spacing from spectrum above */
+    }
+
+    /* Sliders container */
+    #sliders {
+      width: 80%;
+      max-width: 1000px;
+      margin: 0.5rem auto 1rem auto;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    #sliders label {
+      margin: 0 0.5rem 0 0;
+    }
+
+    input[type="range"] {
+      cursor: pointer;
+    }
+
+    /* ==================== BUTTONS & CONTROLS ==================== */
+    #controls {
+      text-align: center;
+      margin: 1rem auto;
+    }
+
+    /* Common button styling */
+    button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      color: #ffffff;
+    }
+
+    /* =========== Easily customizable per-button styles below =========== */
+    /* Run/Pause Toggle Button */
+    .toggle-button {
+      background-color: #ff8207;
+    }
+    .toggle-button:hover {
+      background-color: #e87503;
+    }
+
+    /* Export Buttons */
+    .export-button {
+      background-color: #17a2b8; /* Blue-ish */
+    }
+    .export-button:hover {
+      background-color: #138496;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #f4f4f400;
+      color: #888;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Audio Spectrum & Waveform Analyzer</h1>
+  <!-- Peak Frequency Display -->
+  <div id="peak-frequency">Peak Frequency: -- Hz</div>
+
+  <!-- Frequency Spectrum & Tooltip -->
+  <div id="visualizer-container">
+    <canvas id="visualizer" width="800" height="300"></canvas>
+    <div id="tooltip"></div>
+  </div>
+
+  <!-- Waveform Canvas -->
+  <div id="waveform-container">
+    <canvas id="waveform" width="800" height="200"></canvas>
+  </div>
+
+  <!-- Sliders for Waveform Zoom -->
+  <div id="sliders">
+    <div>
+      <label for="yScale">Amplitude Zoom:</label>
+      <input type="range" id="yScale" min="0.5" max="20" step="0.5" value="5">
+    </div>
+    <div>
+      <label for="xScale">Time Zoom:</label>
+      <input type="range" id="xScale" min="0.5" max="10" step="0.5" value="1">
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls">
+    <button id="toggleBtn" class="toggle-button">Pause</button>
+    <!-- Two Export Buttons -->
+    <button id="exportSpectrumBtn" class="export-button" disabled>Export Spectrum (.csv)</button>
+    <button id="exportWaveformBtn" class="export-button" disabled>Export Waveform (.csv)</button>
+  </div>
+
+  <footer>
+    &copy; 2025 <a href="https://panphy.github.io/" style="color:#888;">PanPhy</a>. All rights reserved.
+  </footer>
+
+  <script>
+    /************************************
+     *       ADJUSTABLE GRID SETTINGS   *
+     ************************************/
+    // Square grid spacing in screen pixels
+    const SQUARE_GRID_SPACING = 45;
+    // Grid line transparency (0 => invisible, 1 => fully opaque)
+    const SQUARE_GRID_ALPHA = 0.1;
+
+    // ------------------ Global Variables ------------------
+    let audioContext, analyzer, source, microphoneStream;
+    let isRunning = false;
+    let sampleRate;
+    const fftSize = 2048;
+
+    // Frequency data
+    let dataArray;         // frequency domain
+    // Waveform data
+    let timeDomainData;    // time domain
+
+    // We store frames while running, but we only use the last one at pause for final data
+    let freqDataHistory = [];
+
+    // The final frames captured at pause
+    let lastFreqFrame;
+    let lastWaveFrame;
+
+    // Zoom parameters
+    let waveAmplitudeScale = 5.0;
+    let waveTimeScale = 1.0;
+
+    // DOM references
+    const freqCanvas = document.getElementById('visualizer');
+    const freqCtx = freqCanvas.getContext('2d');
+
+    const waveCanvas = document.getElementById('waveform');
+    const waveCtx = waveCanvas.getContext('2d');
+
+    const tooltip = document.getElementById('tooltip');
+    const peakFreqDisplay = document.getElementById('peak-frequency');
+
+    const toggleBtn = document.getElementById('toggleBtn');
+    const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
+    const exportWaveformBtn = document.getElementById('exportWaveformBtn');
+
+    const yScaleSlider = document.getElementById('yScale');
+    const xScaleSlider = document.getElementById('xScale');
+
+    // ------------------ Main Entry ------------------
+    window.addEventListener('load', () => {
+      // Keep a perpetual draw loop so we can re-draw even if paused
+      requestAnimationFrame(drawLoop);
+
+      // Start mic capture
+      startSpectrum();
+    });
+
+    // ------------------ Button & Keyboard Listeners ------------------
+    toggleBtn.addEventListener('click', toggleRunPause);
+
+    // Two separate export functions for Spectrum & Waveform
+    exportSpectrumBtn.addEventListener('click', exportSpectrumAsCSV);
+    exportWaveformBtn.addEventListener('click', exportWaveformAsCSV);
+
+    // Press Space => pause/resume
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleRunPause();
+      }
+    });
+
+    // Mouse/Touch for freq hover (only active when paused)
+    freqCanvas.addEventListener('mousemove', onCanvasHover);
+    freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
+
+    // Sliders => adjust waveform scaling
+    yScaleSlider.addEventListener('input', () => {
+      waveAmplitudeScale = parseFloat(yScaleSlider.value);
+    });
+    xScaleSlider.addEventListener('input', () => {
+      waveTimeScale = parseFloat(xScaleSlider.value);
+    });
+
+    // ------------------ Microphone + Analyzer Setup ------------------
+    async function startSpectrum() {
+      if (isRunning) return;
+      isRunning = true;
+      toggleBtn.textContent = 'Pause';
+
+      // Disable export until paused
+      exportSpectrumBtn.disabled = true;
+      exportWaveformBtn.disabled = true;
+      freqDataHistory = [];
+
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        sampleRate = audioContext.sampleRate;
+      }
+
+      if (!microphoneStream) {
+        try {
+          microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          alert('Error accessing microphone: ' + err.message);
+          isRunning = false;
+          toggleBtn.textContent = 'Resume';
+          return;
+        }
+      }
+
+      if (!analyzer) {
+        analyzer = audioContext.createAnalyser();
+        analyzer.fftSize = fftSize;
+        dataArray = new Uint8Array(analyzer.frequencyBinCount);
+        timeDomainData = new Uint8Array(analyzer.fftSize);
+      }
+      if (!source) {
+        source = audioContext.createMediaStreamSource(microphoneStream);
+        source.connect(analyzer);
+      }
+    }
+
+    function toggleRunPause() {
+      if (isRunning) {
+        pauseSpectrum();
+      } else {
+        startSpectrum();
+      }
+    }
+
+    function pauseSpectrum() {
+      isRunning = false;
+      toggleBtn.textContent = 'Resume';
+
+      // Enable exports
+      exportSpectrumBtn.disabled = false;
+      exportWaveformBtn.disabled = false;
+
+      // Save final freq/time frames for paused inspection
+      lastFreqFrame = dataArray.slice();
+      lastWaveFrame = timeDomainData.slice();
+    }
+
+    // ------------------ The Continuous Draw Loop ------------------
+    function drawLoop() {
+      requestAnimationFrame(drawLoop);
+
+      // 1) Frequency Spectrum
+      freqCtx.fillStyle = '#1e1e1e';
+      freqCtx.fillRect(0, 0, freqCanvas.width, freqCanvas.height);
+
+      if (isRunning && analyzer) {
+        analyzer.getByteFrequencyData(dataArray);
+        freqDataHistory.push(Array.from(dataArray));
+      } else if (lastFreqFrame) {
+        // re-use final data if paused
+        dataArray.set(lastFreqFrame);
+      }
+
+      // Find peak freq
+      let peakIndex = 0;
+      let peakValue = -1;
+      for (let i = 0; i < dataArray.length; i++) {
+        if (dataArray[i] > peakValue) {
+          peakValue = dataArray[i];
+          peakIndex = i;
+        }
+      }
+      const peakFreq = indexToFrequency(peakIndex);
+      peakFreqDisplay.textContent = `Peak Frequency: ${peakFreq.toFixed(1)} Hz`;
+
+      // Draw freq bars
+      const barCount = dataArray.length;
+      const barWidth = freqCanvas.width / barCount;
+      for (let i = 0; i < barCount; i++) {
+        const barHeight = (dataArray[i] / 255) * freqCanvas.height * 0.8;
+        const x = i * barWidth;
+        const y = freqCanvas.height - barHeight;
+        freqCtx.fillStyle = `rgb(${barHeight + 50}, 50, 50)`;
+        freqCtx.fillRect(x, y, barWidth, barHeight);
+      }
+
+      // 2) Waveform
+      waveCtx.fillStyle = '#1e1e1e';
+      waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+      if (isRunning && analyzer) {
+        analyzer.getByteTimeDomainData(timeDomainData);
+        lastWaveFrame = timeDomainData.slice();
+      } else if (lastWaveFrame) {
+        timeDomainData.set(lastWaveFrame);
+      }
+
+      // Draw the square grid & time axis
+      drawSquareGridWithTime();
+
+      // Draw waveform trace
+      waveCtx.lineWidth = 2;
+      waveCtx.strokeStyle = '#98c616';
+      waveCtx.beginPath();
+
+      const totalSamples = timeDomainData.length;
+      let windowSize = totalSamples / waveTimeScale;
+      if (windowSize > totalSamples) windowSize = totalSamples;
+      windowSize = Math.max(2, Math.floor(windowSize));
+      const sliceWidth = waveCanvas.width / (windowSize - 1);
+
+      let x = 0;
+      for (let i = 0; i < windowSize; i++) {
+        const v = (timeDomainData[i] - 128) / 128.0;
+        const y = (waveCanvas.height / 2) + v * (waveCanvas.height / 2) * waveAmplitudeScale;
+        if (i === 0) waveCtx.moveTo(x, y);
+        else waveCtx.lineTo(x, y);
+        x += sliceWidth;
+      }
+      waveCtx.stroke();
+    }
+
+    // ------------------ Square Grid & Time Axis (in Screen Coordinates) ------------------
+    function drawSquareGridWithTime() {
+      waveCtx.save();
+
+      waveCtx.strokeStyle = `rgba(255,255,255,${SQUARE_GRID_ALPHA})`;
+      waveCtx.fillStyle = '#ffffff';
+      waveCtx.font = '12px sans-serif';
+
+      const dispW = waveCanvas.offsetWidth;  // actual on-screen width (px)
+      const dispH = waveCanvas.offsetHeight; // actual on-screen height (px)
+
+      const scaleX = waveCanvas.width / dispW;
+      const scaleY = waveCanvas.height / dispH;
+
+      // Time info
+      const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
+      let windowSize = totalSamples / waveTimeScale;
+      if (windowSize > totalSamples) windowSize = totalSamples;
+      windowSize = Math.max(1, Math.floor(windowSize));
+      const totalTimeSec = windowSize / (sampleRate || 44100);
+
+      // How many lines in each direction
+      const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
+      const numHorizLines = Math.floor(dispH / SQUARE_GRID_SPACING);
+
+      // Vertical lines
+      for (let i = 0; i <= numVertLines; i++) {
+        const screenX = i * SQUARE_GRID_SPACING;
+        const canvasX = screenX * scaleX;
+
+        waveCtx.beginPath();
+        waveCtx.moveTo(canvasX, 0);
+        waveCtx.lineTo(canvasX, waveCanvas.height);
+        waveCtx.stroke();
+
+        if (i % 2 === 0) {
+          const frac = screenX / dispW;
+          const ms = frac * totalTimeSec * 1000;
+          waveCtx.fillText(ms.toFixed(1) + ' ms', canvasX + 2, waveCanvas.height - 4);
+        }
+      }
+
+      // Horizontal lines
+      for (let j = 0; j <= numHorizLines; j++) {
+        const screenY = j * SQUARE_GRID_SPACING;
+        const canvasY = screenY * scaleY;
+
+        waveCtx.beginPath();
+        waveCtx.moveTo(0, canvasY);
+        waveCtx.lineTo(waveCanvas.width, canvasY);
+        waveCtx.stroke();
+      }
+
+      waveCtx.restore();
+    }
+
+    // ------------------ Export Spectrum (remove zero-amplitude) ------------------
+    function exportSpectrumAsCSV() {
+      if (!analyzer || !lastFreqFrame) {
+        alert("No paused data available. Please pause first.");
+        return;
+      }
+
+      // We'll skip bins that have amplitude=0
+      const binCount = analyzer.frequencyBinCount;
+      let csvContent = "data:text/csv;charset=utf-8,Frequency (Hz),Amplitude (a.u.)\n";
+
+      for (let i = 0; i < binCount; i++) {
+        const amp = lastFreqFrame[i];
+        if (amp > 0) { // skip zero
+          const freq = indexToFrequency(i);
+          csvContent += freq.toFixed(1) + "," + amp + "\n";
+        }
+      }
+
+      downloadCSV(csvContent, "spectrum_data.csv");
+    }
+
+    // ------------------ Export Waveform (Time vs Amplitude) => only first 10 ms ------------------
+    function exportWaveformAsCSV() {
+      if (!lastWaveFrame || !sampleRate) {
+        alert("No paused data available. Please pause first.");
+        return;
+      }
+      // We'll do "Time (ms),Amplitude (a.u.)" for each sample in the first 10 ms
+      // totalSamples for 10 ms => sampleRate * 0.01
+      let maxSamples = Math.floor(sampleRate * 0.01);  // 10 ms => 0.01 s
+      if (maxSamples > lastWaveFrame.length) {
+        maxSamples = lastWaveFrame.length;
+      }
+
+      let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (a.u.)\n";
+
+      for (let i = 0; i < maxSamples; i++) {
+        // time in seconds => i / sampleRate => convert to ms
+        const timeMs = (i / sampleRate) * 1000;
+        const amplitude = lastWaveFrame[i];
+        csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
+      }
+
+      downloadCSV(csvContent, "waveform_data.csv");
+    }
+
+    // ------------------ Utility to Download a CSV string ------------------
+    function downloadCSV(csvString, filename) {
+      const encodedUri = encodeURI(csvString);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ------------------ Utility: bin <-> frequency conversion ------------------
+    function indexToFrequency(index) {
+      if (!sampleRate) return 0;
+      return index * (sampleRate / fftSize);
+    }
+    function frequencyToIndex(freq) {
+      if (!sampleRate) return 0;
+      return Math.round(freq / (sampleRate / fftSize));
+    }
+
+    // ------------------ Hover/Touch Inspection (Paused Only) ------------------
+    function onCanvasHover(e) {
+      if (isRunning || !lastFreqFrame) {
+        tooltip.style.display = 'none';
+        return;
+      }
+      const rect = freqCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      showTooltip(x, y);
+    }
+
+    function onCanvasTouch(e) {
+      if (isRunning || !lastFreqFrame) {
+        tooltip.style.display = 'none';
+        return;
+      }
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = freqCanvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      showTooltip(x, y);
+    }
+
+    function showTooltip(x, y) {
+      const binCount = analyzer.frequencyBinCount;
+      const barWidth = freqCanvas.width / binCount;
+      const binIndex = Math.floor(x / barWidth);
+      if (binIndex < 0 || binIndex >= binCount) {
+        tooltip.style.display = 'none';
+        return;
+      }
+
+      const freq = indexToFrequency(binIndex).toFixed(1);
+      const amplitude = lastFreqFrame[binIndex];
+
+      tooltip.style.display = 'block';
+      tooltip.style.left = (x + 10) + 'px';
+      tooltip.style.top = (y + 10) + 'px';
+      tooltip.innerHTML = `
+        <div>Freq: ${freq} Hz</div>
+        <div>Amp: ${amplitude}</div>
+      `;
+    }
+  </script>
+</body>
+</html>
