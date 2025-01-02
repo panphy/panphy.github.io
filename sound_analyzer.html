@@ -168,9 +168,7 @@
     /************************************
      *       ADJUSTABLE GRID SETTINGS   *
      ************************************/
-    // Square grid spacing in screen pixels
     const SQUARE_GRID_SPACING = 45;
-    // Grid line transparency (0 => invisible, 1 => fully opaque)
     const SQUARE_GRID_ALPHA = 0.1;
 
     // ------------------ Global Variables ------------------
@@ -180,14 +178,14 @@
     const fftSize = 2048;
 
     // Frequency data
-    let dataArray;         // frequency domain
+    let dataArray;
     // Waveform data
-    let timeDomainData;    // time domain
+    let timeDomainData;
 
-    // We store frames while running, but we only use the last one at pause for final data
+    // We store frames while running, but only the last one at pause
     let freqDataHistory = [];
 
-    // The final frames captured at pause
+    // Final paused frames
     let lastFreqFrame;
     let lastWaveFrame;
 
@@ -214,21 +212,16 @@
 
     // ------------------ Main Entry ------------------
     window.addEventListener('load', () => {
-      // Keep a perpetual draw loop so we can re-draw even if paused
-      requestAnimationFrame(drawLoop);
-
-      // Start mic capture
-      startSpectrum();
+      requestAnimationFrame(drawLoop); // always running
+      startSpectrum();                 // start mic
     });
 
     // ------------------ Button & Keyboard Listeners ------------------
     toggleBtn.addEventListener('click', toggleRunPause);
 
-    // Two separate export functions for Spectrum & Waveform
     exportSpectrumBtn.addEventListener('click', exportSpectrumAsCSV);
     exportWaveformBtn.addEventListener('click', exportWaveformAsCSV);
 
-    // Press Space => pause/resume
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
         e.preventDefault();
@@ -236,11 +229,9 @@
       }
     });
 
-    // Mouse/Touch for freq hover (only active when paused)
     freqCanvas.addEventListener('mousemove', onCanvasHover);
     freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
 
-    // Sliders => adjust waveform scaling
     yScaleSlider.addEventListener('input', () => {
       waveAmplitudeScale = parseFloat(yScaleSlider.value);
     });
@@ -254,7 +245,7 @@
       isRunning = true;
       toggleBtn.textContent = 'Pause';
 
-      // Disable export until paused
+      // Exports disabled until pause
       exportSpectrumBtn.disabled = true;
       exportWaveformBtn.disabled = true;
       freqDataHistory = [];
@@ -298,12 +289,9 @@
     function pauseSpectrum() {
       isRunning = false;
       toggleBtn.textContent = 'Resume';
-
-      // Enable exports
       exportSpectrumBtn.disabled = false;
       exportWaveformBtn.disabled = false;
 
-      // Save final freq/time frames for paused inspection
       lastFreqFrame = dataArray.slice();
       lastWaveFrame = timeDomainData.slice();
     }
@@ -312,7 +300,7 @@
     function drawLoop() {
       requestAnimationFrame(drawLoop);
 
-      // 1) Frequency Spectrum
+      // Frequency Spectrum
       freqCtx.fillStyle = '#1e1e1e';
       freqCtx.fillRect(0, 0, freqCanvas.width, freqCanvas.height);
 
@@ -320,13 +308,11 @@
         analyzer.getByteFrequencyData(dataArray);
         freqDataHistory.push(Array.from(dataArray));
       } else if (lastFreqFrame) {
-        // re-use final data if paused
         dataArray.set(lastFreqFrame);
       }
 
-      // Find peak freq
-      let peakIndex = 0;
-      let peakValue = -1;
+      // Peak freq
+      let peakIndex = 0, peakValue = -1;
       for (let i = 0; i < dataArray.length; i++) {
         if (dataArray[i] > peakValue) {
           peakValue = dataArray[i];
@@ -336,7 +322,7 @@
       const peakFreq = indexToFrequency(peakIndex);
       peakFreqDisplay.textContent = `Peak Frequency: ${peakFreq.toFixed(1)} Hz`;
 
-      // Draw freq bars
+      // freq bars
       const barCount = dataArray.length;
       const barWidth = freqCanvas.width / barCount;
       for (let i = 0; i < barCount; i++) {
@@ -347,7 +333,10 @@
         freqCtx.fillRect(x, y, barWidth, barHeight);
       }
 
-      // 2) Waveform
+      // Draw frequency axis
+      drawFrequencyAxis(freqCtx, freqCanvas.width, freqCanvas.height);
+
+      // Waveform
       waveCtx.fillStyle = '#1e1e1e';
       waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
 
@@ -358,10 +347,9 @@
         timeDomainData.set(lastWaveFrame);
       }
 
-      // Draw the square grid & time axis
       drawSquareGridWithTime();
 
-      // Draw waveform trace
+      // waveform trace
       waveCtx.lineWidth = 2;
       waveCtx.strokeStyle = '#98c616';
       waveCtx.beginPath();
@@ -383,16 +371,50 @@
       waveCtx.stroke();
     }
 
+    // ------------------ Draw the Frequency Axis ------------------
+    function drawFrequencyAxis(ctx, width, height) {
+      // Skip if we don't have what we need
+      if (!sampleRate || !analyzer) return;
+
+      // We'll draw ~5 major ticks from 0 Hz to sampleRate/2
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px sans-serif';
+
+      const maxFreq = sampleRate / 2;
+      const numTicks = 5;
+
+      for (let i = 0; i <= numTicks; i++) {
+        const freq = (maxFreq / numTicks) * i;
+        const bin = frequencyToIndex(freq);
+        const x = bin * (width / analyzer.frequencyBinCount);
+
+        // small tick line
+        ctx.beginPath();
+        ctx.moveTo(x, height - 5);
+        ctx.lineTo(x, height);
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // label
+        let label;
+        if (freq >= 1000) {
+          label = (freq / 1000).toFixed(1) + ' kHz';
+        } else {
+          label = freq.toFixed(0) + ' Hz';
+        }
+        ctx.fillText(label, x + 2, height - 6);
+      }
+    }
+
     // ------------------ Square Grid & Time Axis (in Screen Coordinates) ------------------
     function drawSquareGridWithTime() {
       waveCtx.save();
-
       waveCtx.strokeStyle = `rgba(255,255,255,${SQUARE_GRID_ALPHA})`;
       waveCtx.fillStyle = '#ffffff';
       waveCtx.font = '12px sans-serif';
 
-      const dispW = waveCanvas.offsetWidth;  // actual on-screen width (px)
-      const dispH = waveCanvas.offsetHeight; // actual on-screen height (px)
+      const dispW = waveCanvas.offsetWidth;
+      const dispH = waveCanvas.offsetHeight;
 
       const scaleX = waveCanvas.width / dispW;
       const scaleY = waveCanvas.height / dispH;
@@ -404,11 +426,11 @@
       windowSize = Math.max(1, Math.floor(windowSize));
       const totalTimeSec = windowSize / (sampleRate || 44100);
 
-      // How many lines in each direction
+      // Grid lines
       const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
       const numHorizLines = Math.floor(dispH / SQUARE_GRID_SPACING);
 
-      // Vertical lines
+      // vertical lines
       for (let i = 0; i <= numVertLines; i++) {
         const screenX = i * SQUARE_GRID_SPACING;
         const canvasX = screenX * scaleX;
@@ -425,7 +447,7 @@
         }
       }
 
-      // Horizontal lines
+      // horizontal lines
       for (let j = 0; j <= numHorizLines; j++) {
         const screenY = j * SQUARE_GRID_SPACING;
         const canvasY = screenY * scaleY;
@@ -446,13 +468,13 @@
         return;
       }
 
-      // We'll skip bins that have amplitude=0
       const binCount = analyzer.frequencyBinCount;
       let csvContent = "data:text/csv;charset=utf-8,Frequency (Hz),Amplitude (a.u.)\n";
 
       for (let i = 0; i < binCount; i++) {
         const amp = lastFreqFrame[i];
-        if (amp > 0) { // skip zero
+        // skip if amplitude = 0
+        if (amp > 0) {
           const freq = indexToFrequency(i);
           csvContent += freq.toFixed(1) + "," + amp + "\n";
         }
@@ -467,17 +489,14 @@
         alert("No paused data available. Please pause first.");
         return;
       }
-      // We'll do "Time (ms),Amplitude (a.u.)" for each sample in the first 10 ms
-      // totalSamples for 10 ms => sampleRate * 0.01
-      let maxSamples = Math.floor(sampleRate * 0.01);  // 10 ms => 0.01 s
+
+      let maxSamples = Math.floor(sampleRate * 0.01); // 10ms
       if (maxSamples > lastWaveFrame.length) {
         maxSamples = lastWaveFrame.length;
       }
 
       let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (a.u.)\n";
-
       for (let i = 0; i < maxSamples; i++) {
-        // time in seconds => i / sampleRate => convert to ms
         const timeMs = (i / sampleRate) * 1000;
         const amplitude = lastWaveFrame[i];
         csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
@@ -536,6 +555,7 @@
       const binCount = analyzer.frequencyBinCount;
       const barWidth = freqCanvas.width / binCount;
       const binIndex = Math.floor(x / barWidth);
+
       if (binIndex < 0 || binIndex >= binCount) {
         tooltip.style.display = 'none';
         return;
@@ -549,7 +569,7 @@
       tooltip.style.top = (y + 10) + 'px';
       tooltip.innerHTML = `
         <div>Freq: ${freq} Hz</div>
-        <div>Amp: ${amplitude}</div>
+        <div>Amp: ${amplitude} (a.u.)</div>
       `;
     }
   </script>
