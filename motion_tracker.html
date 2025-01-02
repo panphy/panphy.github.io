@@ -210,10 +210,15 @@
             min-height: 200px; 
         }
 
+        /*
+         * CHANGE #1: Use max-width:100%; height:auto; to maintain aspect ratio.
+         *            This prevents distortions that move the axis upward.
+         */
         video, canvas {
             border: 2px solid #ddd;
             border-radius: 8px;
-            width: 100%;
+            max-width: 100%; /* changed from width:100% */
+            height: auto;    /* keep aspect ratio */
             background-color: #f5f5f5;
             display: block;
         }
@@ -222,11 +227,10 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            /* We'll match the actual size in JS, but visually it scales with the container. */
+            background-color: transparent;
             z-index: 2;
             pointer-events: none;
-            background-color: transparent;
         }
 
         #frameCanvas {
@@ -576,11 +580,22 @@
         const originDotRadiusDisplay = 5; 
         const axisLineWidthDisplay = 2; 
 
-        // Utility functions
+        /*
+         * Since we want the bottom-left to be cartesian (0,0),
+         * we define the "canvasYToCartesianY" function so that:
+         *  cartesianY = y   =>  if y=0 is at the bottom visually,
+         * but in standard HTML canvas, y=0 is at the TOP.
+         * Therefore we do: cartesianY = (frameCanvas.height - y).
+         * This inverts so that y=0 in cartesian is the bottom edge.
+         */
         function canvasYToCartesianY(y) {
             return frameCanvas.height - y;
         }
 
+        /*
+         * Similarly, cartesianYToCanvasY: 
+         *   canvasY = frameCanvas.height - cartesianY
+         */
         function cartesianYToCanvasY(y) {
             return frameCanvas.height - y;
         }
@@ -698,12 +713,25 @@
 
         // Called once the first frame is decoded
         function onVideoFirstFrame() {
-            // Show the video frame canvas & analysis container
+            /*
+             * Reset origin to the bottom-left corner
+             * so the x-axis is visually at the bottom.
+             */
+            originSet = false;
+            originPoint = { x: 0, y: 0 };
+
+            /*
+             * Let the frameCanvas match the video's natural width/height (pixel size).
+             */
+            frameCanvas.width = videoElement.videoWidth;
+            frameCanvas.height = videoElement.videoHeight;
             frameCanvas.style.display = "block";
+
+            // Show analysis container and the chart area
             chartCanvasContainer.style.display = "flex"; 
             document.getElementById('analysisContainer').style.display = "flex";
 
-            // Enable controls (colors become visible)
+            // Enable controls
             playPauseButton.disabled = false;
             calibrateButton.disabled = false;
             setOriginButton.disabled = false;
@@ -717,15 +745,25 @@
             exportDataButton.disabled = false;
             frameRateButton.disabled = false;
 
-            // Next tick, do the overlay and draw
-            requestAnimationFrame(() => {
-                resizeOverlay(); 
-                drawOverlay();
-                drawFrame();
-                plotPosition(); 
-            });
+            // Force the first draw
+            drawFrame();
 
-            message.innerHTML = "<ul align='left'><li>Use the brown button above to enter the frame rate (default is 30 fps).<li>Use the control bar beneath the video to select the starting frame.<li>Select a point to track motion, and the video will skip to the next frame.</ul>";
+            /*
+             * CHANGE #2: Make sure overlayCanvas matches frameCanvas size (the actual size).
+             * This way, the bottom in overlayCanvas is the bottom in the actual displayed area.
+             */
+            resizeOverlay();
+            drawOverlay();
+            
+            // Plot initial data (none so far)
+            plotPosition();
+
+            message.innerHTML = 
+                "<ul align='left'>"
+                + "<li>Use the brown button above to enter the frame rate (default is 30 fps).</li>"
+                + "<li>Use the control bar beneath the video to select the starting frame.</li>"
+                + "<li>Select a point to track motion, and the video will skip to the next frame.</li>"
+                + "</ul>";
         }
 
         // Play/Pause
@@ -864,7 +902,10 @@
                                     text: "Time (s)",
                                 },
                                 grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
+                                    color: (context) =>
+                                        context.tick.value === 0
+                                            ? 'rgba(0,0,0,1)'
+                                            : 'rgba(200,200,200,0.7)',
                                 },
                             },
                             y: {
@@ -875,7 +916,10 @@
                                     text: `Position (${scaleUnit})`,
                                 },
                                 grid: {
-                                    color: (context) => context.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
+                                    color: (context) =>
+                                        context.tick.value === 0
+                                            ? 'rgba(0,0,0,1)'
+                                            : 'rgba(200,200,200,0.7)',
                                 },
                             },
                         },
@@ -1164,7 +1208,7 @@
             }
         });
 
-        overlayCanvas.addEventListener('mouseup', (event) => {
+        overlayCanvas.addEventListener('mouseup', () => {
             if (calibrationMode) {
                 endCalibrationDraw();
             }
@@ -1291,11 +1335,10 @@
 
         // Draw current frame
         function drawFrame() {
-            frameCanvas.width = videoElement.videoWidth;
-            frameCanvas.height = videoElement.videoHeight;
+            // We already set frameCanvas.width, frameCanvas.height to the video's natural size
             ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 
-            // Draw the video
+            // Draw the video scaled to the same size
             ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
 
             frameData.forEach((point) => {
@@ -1307,8 +1350,8 @@
 
         // Draw single data point
         function drawDataPoint(x, y) {
-            const circleRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth); 
-            const crossSize = 10 * (overlayCanvas.width / overlayCanvas.clientWidth); 
+            const circleRadius = originDotRadiusDisplay; 
+            const crossSize = 10; 
 
             ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
             ctx.beginPath();
@@ -1325,15 +1368,14 @@
             ctx.stroke();
         }
 
-        // Resize and redraw overlay
+        /*
+         * CHANGE #2 (continued): 
+         * Force overlayCanvas to match frameCanvas's size so that bottom in overlayCanvas 
+         * is indeed at the bottom visually.
+         */
         function resizeOverlay() {
-            if (videoElement.videoWidth && videoElement.videoHeight) {
-                overlayCanvas.width = videoElement.videoWidth;
-                overlayCanvas.height = videoElement.videoHeight;
-            } else {
-                overlayCanvas.width = frameCanvas.clientWidth;
-                overlayCanvas.height = frameCanvas.clientHeight;
-            }
+            overlayCanvas.width = frameCanvas.width;
+            overlayCanvas.height = frameCanvas.height;
         }
 
         function drawOverlay() {
@@ -1341,8 +1383,8 @@
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
             // Grid
-            const gridStepX = gridSizeDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
-            const gridStepY = gridSizeDisplay * (overlayCanvas.height / overlayCanvas.clientHeight);
+            const gridStepX = gridSizeDisplay; 
+            const gridStepY = gridSizeDisplay;
 
             overlayCtx.save();
             overlayCtx.shadowColor = "black";
@@ -1371,7 +1413,7 @@
             const originCanvasY = cartesianYToCanvasY(oy);
 
             overlayCtx.save();
-            const axisLineWidth = axisLineWidthDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
+            const axisLineWidth = axisLineWidthDisplay;
             overlayCtx.lineWidth = axisLineWidth;
             overlayCtx.shadowColor = "black";
             overlayCtx.shadowBlur = 2;
@@ -1391,7 +1433,7 @@
             overlayCtx.restore();
 
             // Origin dot
-            const originDotRadius = originDotRadiusDisplay * (overlayCanvas.width / overlayCanvas.clientWidth);
+            const originDotRadius = originDotRadiusDisplay;
             overlayCtx.fillStyle = "cyan";
             overlayCtx.beginPath();
             overlayCtx.arc(originCanvasX, originCanvasY, originDotRadius, 0, 2 * Math.PI);
@@ -1400,7 +1442,7 @@
             // Calibration line
             if (calibrationStart && calibrationEnd) {
                 overlayCtx.save();
-                overlayCtx.lineWidth = 2 * (overlayCanvas.width / overlayCanvas.clientWidth);
+                overlayCtx.lineWidth = 2;
                 overlayCtx.strokeStyle = "orange";
                 overlayCtx.shadowColor = "black";
                 overlayCtx.shadowBlur = 2;
