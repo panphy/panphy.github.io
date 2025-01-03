@@ -675,10 +675,10 @@ for i in range(5):
 
 **2.2 Math Expressions**
 
-- 2.2.1. **Inline Examples:**
+- 2.2.1 **Inline Examples:**
 > This is an $\alpha$, and this is a $\beta$. Absolute zero is $-273 ^\circ{C}$ 🥶.  
 
-- 2.2.2. **Displayed Examples:**
+- 2.2.2 **Displayed Examples:**
 
 $$ \frac{1}{x} $$
 
@@ -686,13 +686,13 @@ $$ \boxed{M_\odot^2} $$
 
 $$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
 
-$$ \int_{t=-\infty}^{\infty} \ln \frac{1}{t^e} dt $$
+$$ \int_{t=-\infty}^{\infty} \ln \frac{1}{t} dt $$
 
 $$ \ddot{x} = \frac{d \dot{x}}{dt} = \frac{d^2x}{dt^2} $$
 
 $$ \left. \frac{\partial{y}}{\partial{t}} \right|_{t=5} $$
 
-$$ \vec{\nabla} \cdot D = \left| \vec{\nabla} \times \vec{A} \right| $$
+$$ \vec{\nabla} \cdot D = \left| \vec{\nabla} \times \vec{A} \right| = 0 $$
 
 $$ {\lim_{\Delta x \to 0}}  \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
@@ -700,8 +700,26 @@ $$ {\lim_{\Delta x \to 0}}  \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 |:---
 <small>You need to type <code>\lim\limits_{\Delta x \to 0}</code> for the correct inline version of $ \lim\limits_{\Delta x \to 0} $. If you type <code>\lim_{\Delta x \to 0}</code> inline, you will get $\lim_{\Delta x \to 0}$ instead. (*What's the logic!?* 😑)</small>
 
-- 2.2.3. **Matrices**
+- 2.2.3 **Some more symbols:**
+$$
+\begin{array}{|c|c|}
+\hline
+x^{\prime} &\bar{x} &\hat{x} &\ge &\le \\
+\gg &\ll &\ngtr &\nless &\ne \\
+\sim &\simeq &\approx &\propto &\because \\
+\therefore &\odot &\otimes &\cdot &\times \\
+\div &\infty &\Leftrightarrow &\Longleftrightarrow &\Rightarrow \\
+\leftarrow &\rightarrow &\to &\leftrightharpoons &\hbar \\
+\triangle &\sum &\prod &\int &\oint \\
+\hline
+\end{array}
+$$
 
+> Note the mysterious <code>{|l|l|c|r|r|}</code> which occurs immediately after <code>\begin{array}</code>. Each of the letter in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries of the column should be aligned. The <code>|</code> represents a verticle line between two columns.
+
+
+
+- 2.2.4 **Matrices**
 $$
 \begin{pmatrix}
 a & b & c \\
@@ -710,18 +728,17 @@ g & h & i \\
 \end{pmatrix}
 \cdot
 \begin{vmatrix}
-a & b \\
-c & d \\
+\alpha & \beta \\
+\gamma & \delta \\
 \end{vmatrix} =
 \begin{bmatrix}
-\alpha_{11} & \alpha_{12} & \alpha_{13} \\
-\alpha_{21} & \alpha_{22} & \alpha_{23} \\
-\alpha_{31} & \alpha_{32} & \alpha_{33} \\
+A_{11} & A_{12} & A_{13} \\
+A_{21} & A_{22} & A_{23} \\
+A_{31} & A_{32} & A_{33} \\
 \end{bmatrix}
 $$
 
-- 2.2.4. **Equation Alignment**
-
+- 2.2.5 **Equation Alignment**
 $$
 \begin{aligned}
 \because ax^2 + b^2 + c &= 0 \\
@@ -729,18 +746,14 @@ $$
 \end{aligned}
 $$
 
-- 2.2.5. **Bracket Size**
-
+- 2.2.6 **Bracket Size**
 $$ \left( \frac{1}{\sqrt[n]{2}} \right) \space \text{vs} \space ( \frac{1}{\sqrt[n]{2}} ) $$
-
 > (*Because size does matter... sometimes.*)
 
 **2.3 Chemical Equations**
-
 $$
 {Na_{(aq)}}^+ + {Cl_{(aq)}}^- \longrightarrow NaCl_{(s)}
 $$
-
 > *🧪 Chemistry deserves some LaTeX love too.*
 
 ---
@@ -749,7 +762,7 @@ $$
 (*Because even Markdown needs a little HTML magic.*)
 
 **3.1 Page Break**
-- Want to start a new page in your printed PDF? Just add the following line wherever you’d like a fresh page to begin! 📃
+- Want to start a new page in your printed PDF? Just add the following line wherever you’d like a fresh page 📃 to begin!
 
 > <code> \<div class="page-break"\>\<\/div\> </code>
 
