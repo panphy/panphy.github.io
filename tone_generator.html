@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multi-Channel Tone Generator</title>
+  <style>
+    /* ========== CSS VARIABLES ========== */
+    :root {
+      --background-color: #1e1e1e;
+      --text-color: #ffffff;
+
+      /* Button colors */
+      --btn-bg-color: #444;
+      --btn-bg-hover: #555;
+      --btn-text-color: #ffffff;
+      --btn-border-color: #666;
+
+      /* Slider colors */
+      --slider-bg: #444;
+      --slider-thumb: #8fce00;
+    }
+
+    /* ========== GLOBAL & LAYOUT ========== */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevent the entire page from scrolling */
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 30px 0; /* Further increased margin for more space */
+      flex: 0 0 auto;
+      color: #20c997;
+    }
+
+    #content {
+      flex: 1 1 auto; /* Allow #content to grow and fill available space */
+      display: flex;
+      width: 100%;
+      max-width: 1300px;
+      margin: 0 auto;
+      gap: 20px;
+      overflow: hidden; /* Prevent overflow affecting other elements */
+    }
+
+    button,
+    input[type="range"],
+    input[type="number"] {
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* LEFT COLUMN (Channels) */
+    #leftColumn {
+      flex: 0 0 40%;
+      max-width: 40%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #444;
+      padding: 10px;
+      overflow: hidden; /* Ensure overflow is managed by child */
+      background-color: #2a2a2a;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    }
+    #channelsScrollContainer {
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1; /* Allow this container to take up remaining space */
+      padding-right: 10px;
+    }
+
+    /* RIGHT COLUMN (Controls + Combined Wave) */
+    #rightColumn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow: hidden; /* Prevent overflow from affecting layout */
+      background-color: #2a2a2a;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    }
+
+    /* ========== CHANNEL UI ========== */
+    .channel {
+      background-color: #3a3a3a;
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      width: 100%;
+    }
+    .channel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .channel-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      margin-right: 10px;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .slider-container span {
+      white-space: nowrap;
+      min-width: 60px;
+      text-align: right;
+    }
+    .freq-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .channel-canvas {
+      width: 100%;
+      height: 80px;
+      background-color: #1e1e1e;
+      border: 1px solid #666;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+
+    /* ========== BUTTONS ========== */
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      color: var(--btn-text-color);
+      background-color: var(--btn-bg-color);
+      border: 1px solid var(--btn-border-color);
+      border-radius: 4px;
+      margin-right: 5px;
+      text-decoration: none;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+    .btn:hover {
+      background-color: var(--btn-bg-hover);
+    }
+
+    /* ========== RANGE SLIDERS ========== */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--slider-bg);
+      border-radius: 2px;
+      border: none;
+      transition: background 0.3s;
+    }
+    input[type="range"]:hover {
+      background: #a0a0a0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      transition: background 0.3s;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      transition: background 0.3s;
+    }
+
+    /* ========== COMBINED WAVE AREA ========== */
+    #combinedWaveContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+      flex: 1 1 auto; /* Allow it to grow */
+    }
+    #sumCanvas {
+      width: 95%;
+      height: 160px;
+      background-color: #1e1e1e;
+      border: 2px solid #666;
+      border-radius: 8px;
+    }
+    #combinedWaveButtons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ========== TOP SLIDERS ROW ==========
+       Adjusted for better spacing and visibility */
+    #controlsContainer {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      gap: 20px;
+    }
+    .controlRow {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      flex: 1; /* Allow control rows to expand equally */
+      flex-direction: column;
+    }
+    .controlRow label {
+      margin-bottom: 5px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .controlRow span {
+      font-size: 0.85rem;
+      width: 60px;
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    /* ========== VOLUME SLIDER + LABEL ========== */
+    #volumeWrapper {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+      flex-direction: column;
+    }
+    #volumeWrapper label {
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      text-align: center;
+    }
+    #volumeSlider {
+      width: 120px;
+      max-width: 150px;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      margin: 10px 0;
+      flex: 0 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Multi-Channel Tone Generator</h1>
+
+  <div id="content">
+    <!-- LEFT COLUMN: Channels -->
+    <div id="leftColumn">
+      <button id="addChannelBtn" class="btn" style="margin-bottom: 10px;">Add Channel</button>
+      <div id="channelsScrollContainer"></div>
+    </div>
+
+    <!-- RIGHT COLUMN: Controls + Combined Wave -->
+    <div id="rightColumn">
+      <!-- 2 Sliders on top: Panning, Zoom In/Out -->
+      <div id="controlsContainer">
+        <div class="controlRow">
+          <label for="panningSlider">L/R Panning:</label>
+          <input type="range" id="panningSlider" min="-1" max="1" step="0.01" value="0">
+          <span id="panningValue">0.00</span>
+        </div>
+
+        <div class="controlRow">
+          <label for="zoomScaleSlider">Zoom In/Out:</label>
+          <!-- Renamed from Time Scale to Zoom In/Out -->
+          <input type="range" id="zoomScaleSlider" min="0.01" max="50" step="0.01" value="1">
+          <span id="zoomScaleValue">1.00x</span>
+        </div>
+      </div>
+
+      <div id="combinedWaveContainer">
+        <canvas id="sumCanvas"></canvas>
+        <div id="combinedWaveButtons">
+          <div id="volumeWrapper">
+            <label for="volumeSlider">Volume:</label>
+            <input
+              type="range"
+              id="volumeSlider"
+              min="0"
+              max="1"
+              step="0.01"
+              value="1"
+            >
+          </div>
+          <button id="toggleCombinedBtn" class="btn">Play Combined</button>
+          <button id="freezeBtn" class="btn">Freeze</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+  </footer>
+
+  <script>
+    /* ========== AUDIO CONTEXT & NODES ========== */
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext({ latencyHint: 'interactive' });
+
+    // Gains: channels -> masterGain -> volumeGain -> combinedGain -> panner -> destination
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
+
+    const volumeGain = audioCtx.createGain();
+    volumeGain.gain.value = 1;
+
+    const combinedGain = audioCtx.createGain();
+    combinedGain.gain.value = 0; // start off
+
+    masterGain.connect(volumeGain);
+    volumeGain.connect(combinedGain);
+
+    const stereoPanner = audioCtx.createStereoPanner();
+    combinedGain.connect(stereoPanner);
+    stereoPanner.connect(audioCtx.destination);
+
+    /* DOM Elements */
+    const addChannelBtn = document.getElementById('addChannelBtn');
+    const channelsScrollContainer = document.getElementById('channelsScrollContainer');
+
+    const panningSlider = document.getElementById('panningSlider');
+    const panningValue = document.getElementById('panningValue');
+
+    const zoomScaleSlider = document.getElementById('zoomScaleSlider');
+    const zoomScaleValue = document.getElementById('zoomScaleValue');
+
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    const toggleCombinedBtn = document.getElementById('toggleCombinedBtn');
+    const freezeBtn = document.getElementById('freezeBtn');
+
+    const sumCanvas = document.getElementById('sumCanvas');
+    const sumCtx = sumCanvas.getContext('2d');
+
+    /* Channels array */
+    const channels = [];
+
+    /* States */
+    let combinedPlaying = false;
+    let isFrozen = false;
+
+    // zoomScale: now from 0.01 to 50
+    let zoomScale = parseFloat(zoomScaleSlider.value);
+    zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
+
+    // Global time variable for animation
+    let accumulatedTime = 0; // in seconds
+    let lastTime = null; // To calculate deltaTime
+
+    // Define the scaling factor
+    const SCALE = 10; // Adjusted to achieve a reasonable animation speed
+
+    // ========== CREATE & REMOVE CHANNELS ==========
+    function addChannel() {
+      const channelIndex = channels.length + 1;
+
+      // Oscillator
+      const oscillator = audioCtx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 440;
+      oscillator.start();
+
+      // Channel gain
+      const channelGain = audioCtx.createGain();
+      channelGain.gain.value = 0; // muted initially
+      oscillator.connect(channelGain);
+      channelGain.connect(masterGain);
+
+      // Per-channel analyzer
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 16384; // Increased fftSize for better resolution
+      channelGain.connect(analyser);
+
+      // Channel UI
+      const channelDiv = document.createElement('div');
+      channelDiv.className = 'channel';
+
+      // Header
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'channel-header';
+      const title = document.createElement('h3');
+      title.textContent = `Channel ${channelIndex}`;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Remove';
+      removeBtn.className = 'btn';
+      removeBtn.onclick = () => removeChannel(channelIndex - 1);
+
+      headerDiv.appendChild(title);
+      headerDiv.appendChild(removeBtn);
+
+      // Frequency controls
+      const controlsDiv = document.createElement('div');
+      controlsDiv.className = 'slider-container freq-controls';
+
+      // Slider
+      const freqSlider = document.createElement('input');
+      freqSlider.type = 'range';
+      freqSlider.min = 15;
+      freqSlider.max = 23000;
+      freqSlider.value = 440;
+      freqSlider.step = 1;
+
+      // Number input
+      const freqNumber = document.createElement('input');
+      freqNumber.type = 'number';
+      freqNumber.min = 15;
+      freqNumber.max = 23000;
+      freqNumber.value = 440;
+      freqNumber.step = 1;
+      freqNumber.style.width = '70px';
+
+      const freqLabel = document.createElement('span');
+      freqLabel.textContent = '440 Hz';
+
+      // Sync slider & number
+      freqSlider.oninput = () => {
+        const freq = parseFloat(freqSlider.value);
+        freqNumber.value = freq;
+        freqLabel.textContent = `${freq} Hz`;
+        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        channels[channelIndex - 1].frequency = freq; // Update frequency in channel object
+      };
+      freqNumber.onchange = () => {
+        let val = parseFloat(freqNumber.value);
+        if (isNaN(val)) val = 440;
+        if (val < 15) val = 15;
+        if (val > 23000) val = 23000;
+        freqNumber.value = val;
+        freqSlider.value = val;
+        freqLabel.textContent = `${val} Hz`;
+        oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
+        channels[channelIndex - 1].frequency = val; // Update frequency in channel object
+      };
+
+      controlsDiv.appendChild(freqSlider);
+      controlsDiv.appendChild(freqNumber);
+      controlsDiv.appendChild(freqLabel);
+
+      // Play/Pause
+      const playPauseBtn = document.createElement('button');
+      playPauseBtn.textContent = 'Play';
+      playPauseBtn.className = 'btn';
+
+      let playing = false;
+      playPauseBtn.onclick = () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        playing = !playing;
+        channelGain.gain.setValueAtTime(playing ? 1 : 0, audioCtx.currentTime);
+        playPauseBtn.textContent = playing ? 'Pause' : 'Play';
+      };
+
+      // Channel waveform canvas
+      const canvas = document.createElement('canvas');
+      canvas.className = 'channel-canvas';
+      const ctx = canvas.getContext('2d');
+
+      // Assemble
+      channelDiv.appendChild(headerDiv);
+      channelDiv.appendChild(controlsDiv);
+      channelDiv.appendChild(playPauseBtn);
+      channelDiv.appendChild(canvas);
+
+      channelsScrollContainer.appendChild(channelDiv);
+
+      // Initialize channel object with frequency
+      const channelObj = {
+        oscillator,
+        channelGain,
+        analyser,
+        canvas,
+        ctx,
+        frequency: 440 // Initial frequency
+      };
+      channels.push(channelObj);
+
+      // Initial canvas sizing
+      resizeCanvas(canvas);
+    }
+
+    function removeChannel(index) {
+      const ch = channels[index];
+      if (!ch) return;
+      ch.oscillator.stop();
+      ch.oscillator.disconnect();
+      ch.channelGain.disconnect();
+      ch.analyser.disconnect();
+
+      channels.splice(index, 1);
+      channelsScrollContainer.removeChild(channelsScrollContainer.children[index]);
+
+      // Update channel numbering
+      Array.from(channelsScrollContainer.children).forEach((child, i) => {
+        const title = child.querySelector('h3');
+        title.textContent = `Channel ${i + 1}`;
+      });
+    }
+
+    // Helper: linear interpolation
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    // ========== DRAWING THE WAVES ==========
+    function draw(time) {
+      requestAnimationFrame(draw);
+      if (isFrozen) return;
+
+      if (!lastTime) {
+        lastTime = time;
+        return;
+      }
+
+      // Calculate deltaTime in seconds
+      const deltaTime = (time - lastTime) / 1000;
+      lastTime = time;
+
+      // Update accumulatedTime based on fixed scaling factor
+      accumulatedTime += (deltaTime) / SCALE; // Fixed animation speed
+
+      // Draw each channel
+      channels.forEach((ch, index) => drawOneWave(ch.analyser, ch.ctx, ch.canvas, '#57c7ff', ch.frequency, accumulatedTime));
+
+      // Draw combined wave
+      drawCombinedWave(sumCtx, sumCanvas, accumulatedTime);
+    }
+
+    function drawOneWave(analyser, ctx, canvas, strokeColor, frequency, accumulatedTime) {
+      const bufferLength = analyser.fftSize / 2; // e.g., 16384 / 2 = 8192
+      const dataArray = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(dataArray);
+
+      // Calculate cycles based on zoomScale
+      const cycles = zoomScale;
+
+      // Calculate sampleRate
+      const sampleRate = audioCtx.sampleRate;
+
+      // Calculate samples per cycle
+      const samplesPerCycle = sampleRate / frequency;
+
+      // Total samples to map across canvas
+      const totalSamples = cycles * samplesPerCycle;
+
+      ctx.fillStyle = '#1e1e1e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = strokeColor;
+      ctx.beginPath();
+
+      for (let x = 0; x < canvas.width; x++) {
+        const fraction = x / (canvas.width - 1);
+        let sampleIndex = fraction * totalSamples + accumulatedTime * samplesPerCycle;
+
+        // Wrap around to allow multiple cycles seamlessly
+        sampleIndex = sampleIndex % bufferLength;
+
+        const i0 = Math.floor(sampleIndex);
+        const i1 = (i0 + 1) % bufferLength;
+        const t = sampleIndex - i0;
+
+        const d0 = (dataArray[i0] - 128) / 128;
+        const d1 = (dataArray[i1] - 128) / 128;
+
+        const v = lerp(d0, d1, t);
+        const y = v * (canvas.height / 2) + (canvas.height / 2);
+
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+
+    function drawCombinedWave(ctx, canvas, accumulatedTime) {
+      if (channels.length === 0) {
+        // If no channels, clear the canvas
+        ctx.fillStyle = '#1e1e1e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      const bufferLength = 16384 / 2; // 8192
+      const sumData = new Float32Array(bufferLength);
+
+      // Sum up channels
+      channels.forEach(ch => {
+        const dataArray = new Uint8Array(ch.analyser.fftSize);
+        ch.analyser.getByteTimeDomainData(dataArray);
+        for (let i = 0; i < bufferLength; i++) {
+          sumData[i] += (dataArray[i] - 128) / 128;
+        }
+      });
+
+      // Calculate average frequency for combined wave mapping
+      const avgFrequency = channels.reduce((sum, ch) => sum + ch.frequency, 0) / channels.length;
+
+      // Calculate cycles based on zoomScale
+      const cycles = zoomScale;
+
+      // Calculate sampleRate
+      const sampleRate = audioCtx.sampleRate;
+
+      // Calculate samples per cycle
+      const samplesPerCycle = sampleRate / avgFrequency;
+
+      // Total samples to map across canvas
+      const totalSamples = cycles * samplesPerCycle;
+
+      // Find max amplitude for auto-scaling
+      let maxAmp = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const val = Math.abs(sumData[i]);
+        if (val > maxAmp) maxAmp = val;
+      }
+      if (maxAmp < 0.001) maxAmp = 0.001; // Prevent division by zero
+
+      ctx.fillStyle = '#1e1e1e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ff638f';
+      ctx.beginPath();
+
+      for (let x = 0; x < canvas.width; x++) {
+        const fraction = x / (canvas.width - 1);
+        let sampleIndex = fraction * totalSamples + accumulatedTime * samplesPerCycle;
+
+        // Wrap around to allow multiple cycles seamlessly
+        sampleIndex = sampleIndex % bufferLength;
+
+        const i0 = Math.floor(sampleIndex);
+        const i1 = (i0 + 1) % bufferLength;
+        const t = sampleIndex - i0;
+
+        const d0 = sumData[i0];
+        const d1 = sumData[i1];
+
+        // Normalize based on max amplitude
+        const waveVal = lerp(d0, d1, t) / maxAmp;
+        const y = waveVal * (canvas.height / 2) + (canvas.height / 2);
+
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+
+    // ========== EVENT LISTENERS ==========
+    addChannelBtn.addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      addChannel();
+    });
+
+    toggleCombinedBtn.addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      combinedPlaying = !combinedPlaying;
+      combinedGain.gain.setValueAtTime(combinedPlaying ? 1 : 0, audioCtx.currentTime);
+      toggleCombinedBtn.textContent = combinedPlaying ? 'Pause Combined' : 'Play Combined';
+    });
+
+    freezeBtn.addEventListener('click', () => {
+      toggleFreeze();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleFreeze();
+      }
+    });
+
+    function toggleFreeze() {
+      isFrozen = !isFrozen;
+      freezeBtn.textContent = isFrozen ? 'Unfreeze' : 'Freeze';
+      
+      if (isFrozen) {
+        // Mute all sounds by setting masterGain to 0
+        masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      } else {
+        // Restore masterGain to 1
+        masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
+      }
+    }
+
+    panningSlider.addEventListener('input', () => {
+      let panVal = parseFloat(panningSlider.value);
+      if (Math.abs(panVal) < 0.05) {
+        panVal = 0;
+        panningSlider.value = '0';
+      }
+      stereoPanner.pan.setValueAtTime(panVal, audioCtx.currentTime);
+      panningValue.textContent = panVal.toFixed(2);
+    });
+
+    zoomScaleSlider.addEventListener('input', () => {
+      zoomScale = parseFloat(zoomScaleSlider.value);
+      zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      const volVal = parseFloat(volumeSlider.value);
+      volumeGain.gain.setValueAtTime(volVal, audioCtx.currentTime);
+    });
+
+    // ========== INITIAL SETUP ==========
+    requestAnimationFrame(draw);
+    addChannel();
+
+    // ========== RESIZE CANVAS ==========
+    function resizeCanvas(canvas) {
+      // Set canvas width to its displayed width
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    // Debounce function to limit the rate at which a function can fire.
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    // Resize all canvases on window resize with debounce
+    window.addEventListener('resize', debounce(() => {
+      channels.forEach(ch => resizeCanvas(ch.canvas));
+      resizeCanvas(sumCanvas);
+    }, 200));
+
+    // Initial resize of sumCanvas
+    resizeCanvas(sumCanvas);
+  </script>
+</body>
+</html>
