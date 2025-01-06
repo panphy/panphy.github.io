@@ -4,28 +4,22 @@
   <meta charset="UTF-8">
   <title>Multi-Channel Tone Generator</title>
   <style>
-    /* ========== CSS VARIABLES ========== */
     :root {
       --background-color: #1e1e1e;
       --text-color: #ffffff;
-
-      /* Button colors */
       --btn-bg-color: #444;
       --btn-bg-hover: #555;
       --btn-text-color: #ffffff;
       --btn-border-color: #666;
-
-      /* Slider colors */
       --slider-bg: #444;
       --slider-thumb: #8fce00;
     }
 
-    /* ========== GLOBAL & LAYOUT ========== */
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden; /* Prevent the entire page from scrolling */
+      overflow: hidden;
     }
     * {
       box-sizing: border-box;
@@ -37,22 +31,20 @@
       display: flex;
       flex-direction: column;
     }
-
     h1 {
       text-align: center;
-      margin: 30px 0; /* Further increased margin for more space */
+      margin: 30px 0;
       flex: 0 0 auto;
       color: #7ae7b3;
     }
-
     #content {
-      flex: 1 1 auto; /* Allow #content to grow and fill available space */
+      flex: 1 1 auto;
       display: flex;
       width: 100%;
       max-width: 1300px;
       margin: 0 auto;
       gap: 20px;
-      overflow: hidden; /* Prevent overflow affecting other elements */
+      overflow: hidden;
     }
 
     button,
@@ -62,7 +54,7 @@
       outline: none;
     }
 
-    /* LEFT COLUMN (Channels) */
+    /* LEFT COLUMN */
     #leftColumn {
       flex: 0 0 40%;
       max-width: 40%;
@@ -70,31 +62,30 @@
       flex-direction: column;
       border-right: 1px solid #444;
       padding: 10px;
-      overflow: hidden; /* Ensure overflow is managed by child */
+      overflow: hidden;
       background-color: #2a2a2a;
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.5);
     }
     #channelsScrollContainer {
       overflow-y: auto;
-      overflow-x: hidden;
-      flex: 1; /* Allow this container to take up remaining space */
+      flex: 1;
       padding-right: 10px;
     }
 
-    /* RIGHT COLUMN (Controls + Combined Wave) */
+    /* RIGHT COLUMN */
     #rightColumn {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: 10px;
-      overflow: hidden; /* Prevent overflow from affecting layout */
+      overflow: hidden;
       background-color: #2a2a2a;
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.5);
     }
 
-    /* ========== CHANNEL UI ========== */
+    /* CHANNEL UI */
     .channel {
       background-color: #3a3a3a;
       border: 1px solid #444;
@@ -140,7 +131,7 @@
       margin-top: 5px;
     }
 
-    /* ========== BUTTONS ========== */
+    /* BUTTONS */
     .btn {
       display: inline-block;
       padding: 8px 16px;
@@ -158,7 +149,7 @@
       background-color: var(--btn-bg-hover);
     }
 
-    /* ========== RANGE SLIDERS ========== */
+    /* RANGE SLIDERS */
     input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
@@ -194,13 +185,13 @@
       transition: background 0.3s;
     }
 
-    /* ========== COMBINED WAVE AREA ========== */
+    /* COMBINED WAVE */
     #combinedWaveContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: 20px;
-      flex: 1 1 auto; /* Allow it to grow */
+      flex: 1 1 auto;
     }
     #sumCanvas {
       width: 95%;
@@ -215,8 +206,7 @@
       gap: 10px;
     }
 
-    /* ========== TOP SLIDERS ROW ==========
-       Adjusted for better spacing and visibility */
+    /* TOP SLIDERS ROW */
     #controlsContainer {
       display: flex;
       justify-content: space-between;
@@ -227,7 +217,7 @@
       display: flex;
       align-items: center;
       margin-bottom: 10px;
-      flex: 1; /* Allow control rows to expand equally */
+      flex: 1;
       flex-direction: column;
     }
     .controlRow label {
@@ -243,7 +233,7 @@
       margin-top: 5px;
     }
 
-    /* ========== VOLUME SLIDER + LABEL ========== */
+    /* VOLUME SLIDER + LABEL */
     #volumeWrapper {
       display: flex;
       align-items: center;
@@ -284,7 +274,7 @@
 
     <!-- RIGHT COLUMN: Controls + Combined Wave -->
     <div id="rightColumn">
-      <!-- 2 Sliders on top: Panning, Zoom In/Out -->
+      <!-- Sliders: Panning, Log-Time Scale, Zoom In/Out -->
       <div id="controlsContainer">
         <div class="controlRow">
           <label for="panningSlider">L/R Panning:</label>
@@ -292,9 +282,15 @@
           <span id="panningValue">0.00</span>
         </div>
 
+        <!-- LOGARITHMIC TIME SCALE: slider from -3 => 1 => 10^(-3..1) => 0.001x to 10x -->
+        <div class="controlRow">
+          <label for="timeScaleSlider">Animation Speed:</label>
+          <input type="range" id="timeScaleSlider" min="-3" max="1" step="0.01" value="0">
+          <span id="timeScaleValue">1.00x</span>
+        </div>
+
         <div class="controlRow">
           <label for="zoomScaleSlider">Zoom In/Out:</label>
-          <!-- Renamed from Time Scale to Zoom In/Out -->
           <input type="range" id="zoomScaleSlider" min="0.01" max="50" step="0.01" value="1">
           <span id="zoomScaleValue">1.00x</span>
         </div>
@@ -354,6 +350,10 @@
     const panningSlider = document.getElementById('panningSlider');
     const panningValue = document.getElementById('panningValue');
 
+    // LOG TIME SCALE: slider from -3..1 => timeScale = 10^sliderValue in [0.001..10]
+    const timeScaleSlider = document.getElementById('timeScaleSlider');
+    const timeScaleValue = document.getElementById('timeScaleValue');
+
     const zoomScaleSlider = document.getElementById('zoomScaleSlider');
     const zoomScaleValue = document.getElementById('zoomScaleValue');
 
@@ -372,39 +372,42 @@
     let combinedPlaying = false;
     let isFrozen = false;
 
-    // zoomScale: now from 0.01 to 50
+    // Zoom scale
     let zoomScale = parseFloat(zoomScaleSlider.value);
     zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
 
-    // Global time variable for animation
-    let accumulatedTime = 0; // in seconds
-    let lastTime = null; // To calculate deltaTime
+    // "timeScale" is derived from the slider (log scale)
+    // slider range: -3..1 => timeScale in [0.001..10]
+    let timeScale = Math.pow(10, parseFloat(timeScaleSlider.value));
+    timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
 
-    // Define the scaling factor
-    const SCALE = 10; // Adjusted to achieve a reasonable animation speed
+    // We'll track the total "time offset" for scrolling
+    let accumulatedTime = 0;
+    let lastTime = null; 
 
-    // ========== CREATE & REMOVE CHANNELS ==========
+    // If we want real-time => timeScale=1 => wave shows actual frequency
+    // If timeScale=0.001 => wave is slowed 1000x
+    // If timeScale=10 => wave is 10x faster than real time
+    // We keep SCALE=1 for straightforward mapping
+    const SCALE = 1;
+
+    // We'll keep a small base window in seconds
+    const BASE_WINDOW = 0.01;
+
+    /* ========== CREATE & REMOVE CHANNELS ========== */
     function addChannel() {
       const channelIndex = channels.length + 1;
 
-      // Oscillator
       const oscillator = audioCtx.createOscillator();
       oscillator.type = 'sine';
       oscillator.frequency.value = 440;
       oscillator.start();
 
-      // Channel gain
       const channelGain = audioCtx.createGain();
-      channelGain.gain.value = 0; // muted initially
+      channelGain.gain.value = 0; // start silent
       oscillator.connect(channelGain);
       channelGain.connect(masterGain);
 
-      // Per-channel analyzer
-      const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 16384; // Increased fftSize for better resolution
-      channelGain.connect(analyser);
-
-      // Channel UI
       const channelDiv = document.createElement('div');
       channelDiv.className = 'channel';
 
@@ -426,7 +429,6 @@
       const controlsDiv = document.createElement('div');
       controlsDiv.className = 'slider-container freq-controls';
 
-      // Slider
       const freqSlider = document.createElement('input');
       freqSlider.type = 'range';
       freqSlider.min = 15;
@@ -434,7 +436,6 @@
       freqSlider.value = 440;
       freqSlider.step = 1;
 
-      // Number input
       const freqNumber = document.createElement('input');
       freqNumber.type = 'number';
       freqNumber.min = 15;
@@ -446,13 +447,12 @@
       const freqLabel = document.createElement('span');
       freqLabel.textContent = '440 Hz';
 
-      // Sync slider & number
       freqSlider.oninput = () => {
         const freq = parseFloat(freqSlider.value);
         freqNumber.value = freq;
         freqLabel.textContent = `${freq} Hz`;
         oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        channels[channelIndex - 1].frequency = freq; // Update frequency in channel object
+        channels[channelIndex - 1].frequency = freq;
       };
       freqNumber.onchange = () => {
         let val = parseFloat(freqNumber.value);
@@ -463,7 +463,7 @@
         freqSlider.value = val;
         freqLabel.textContent = `${val} Hz`;
         oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
-        channels[channelIndex - 1].frequency = val; // Update frequency in channel object
+        channels[channelIndex - 1].frequency = val;
       };
 
       controlsDiv.appendChild(freqSlider);
@@ -474,7 +474,6 @@
       const playPauseBtn = document.createElement('button');
       playPauseBtn.textContent = 'Play';
       playPauseBtn.className = 'btn';
-
       let playing = false;
       playPauseBtn.onclick = () => {
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -483,12 +482,11 @@
         playPauseBtn.textContent = playing ? 'Pause' : 'Play';
       };
 
-      // Channel waveform canvas
+      // Wave canvas
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
 
-      // Assemble
       channelDiv.appendChild(headerDiv);
       channelDiv.appendChild(controlsDiv);
       channelDiv.appendChild(playPauseBtn);
@@ -496,18 +494,15 @@
 
       channelsScrollContainer.appendChild(channelDiv);
 
-      // Initialize channel object with frequency
       const channelObj = {
         oscillator,
         channelGain,
-        analyser,
         canvas,
         ctx,
-        frequency: 440 // Initial frequency
+        frequency: 440
       };
       channels.push(channelObj);
 
-      // Initial canvas sizing
       resizeCanvas(canvas);
     }
 
@@ -517,174 +512,87 @@
       ch.oscillator.stop();
       ch.oscillator.disconnect();
       ch.channelGain.disconnect();
-      ch.analyser.disconnect();
 
       channels.splice(index, 1);
       channelsScrollContainer.removeChild(channelsScrollContainer.children[index]);
 
-      // Update channel numbering
       Array.from(channelsScrollContainer.children).forEach((child, i) => {
         const title = child.querySelector('h3');
         title.textContent = `Channel ${i + 1}`;
       });
     }
 
-    // Helper: linear interpolation
-    function lerp(a, b, t) {
-      return a + (b - a) * t;
-    }
-
-    // ========== DRAWING THE WAVES ==========
+    // ========== DRAW LOOP ==========
     function draw(time) {
       requestAnimationFrame(draw);
-      if (isFrozen) return;
 
       if (!lastTime) {
         lastTime = time;
         return;
       }
-
-      // Calculate deltaTime in seconds
       const deltaTime = (time - lastTime) / 1000;
       lastTime = time;
 
-      // Update accumulatedTime based on fixed scaling factor
-      accumulatedTime += (deltaTime) / SCALE; // Fixed animation speed
+      if (!isFrozen) {
+        // timeScale = 10^sliderVal, so timeScale=1 => real time, 0.001 => 1000x slower, etc.
+        accumulatedTime += (deltaTime * timeScale) / (SCALE);
+      }
 
-      // Draw each channel
-      channels.forEach((ch, index) => drawOneWave(ch.analyser, ch.ctx, ch.canvas, '#57c7ff', ch.frequency, accumulatedTime));
-
-      // Draw combined wave
-      drawCombinedWave(sumCtx, sumCanvas, accumulatedTime);
+      channels.forEach(ch => drawChannelWave(ch, ch.ctx, ch.canvas));
+      drawCombinedWave(sumCtx, sumCanvas);
     }
 
-    function drawOneWave(analyser, ctx, canvas, strokeColor, frequency, accumulatedTime) {
-      const bufferLength = analyser.fftSize / 2; // e.g., 16384 / 2 = 8192
-      const dataArray = new Uint8Array(analyser.fftSize);
-      analyser.getByteTimeDomainData(dataArray);
-
-      // Calculate cycles based on zoomScale
-      const cycles = zoomScale;
-
-      // Calculate sampleRate
-      const sampleRate = audioCtx.sampleRate;
-
-      // Calculate samples per cycle
-      const samplesPerCycle = sampleRate / frequency;
-
-      // Total samples to map across canvas
-      const totalSamples = cycles * samplesPerCycle;
-
+    function drawChannelWave(channel, ctx, canvas) {
       ctx.fillStyle = '#1e1e1e';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.lineWidth = 2;
-      ctx.strokeStyle = strokeColor;
+      ctx.strokeStyle = '#57c7ff';
       ctx.beginPath();
 
+      const timeWindow = BASE_WINDOW * zoomScale;
       for (let x = 0; x < canvas.width; x++) {
         const fraction = x / (canvas.width - 1);
-        let sampleIndex = fraction * totalSamples + accumulatedTime * samplesPerCycle;
+        // time offset plus fraction of the time window
+        const t = accumulatedTime + fraction * timeWindow;
+        const val = Math.sin(2 * Math.PI * channel.frequency * t);
 
-        // Wrap around to allow multiple cycles seamlessly
-        sampleIndex = sampleIndex % bufferLength;
-
-        const i0 = Math.floor(sampleIndex);
-        const i1 = (i0 + 1) % bufferLength;
-        const t = sampleIndex - i0;
-
-        const d0 = (dataArray[i0] - 128) / 128;
-        const d1 = (dataArray[i1] - 128) / 128;
-
-        const v = lerp(d0, d1, t);
-        const y = v * (canvas.height / 2) + (canvas.height / 2);
-
-        if (x === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
+        const y = (val * 0.5 + 0.5) * canvas.height;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       }
       ctx.stroke();
     }
 
-    function drawCombinedWave(ctx, canvas, accumulatedTime) {
-      if (channels.length === 0) {
-        // If no channels, clear the canvas
-        ctx.fillStyle = '#1e1e1e';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return;
-      }
-
-      const bufferLength = 16384 / 2; // 8192
-      const sumData = new Float32Array(bufferLength);
-
-      // Sum up channels
-      channels.forEach(ch => {
-        const dataArray = new Uint8Array(ch.analyser.fftSize);
-        ch.analyser.getByteTimeDomainData(dataArray);
-        for (let i = 0; i < bufferLength; i++) {
-          sumData[i] += (dataArray[i] - 128) / 128;
-        }
-      });
-
-      // Calculate average frequency for combined wave mapping
-      const avgFrequency = channels.reduce((sum, ch) => sum + ch.frequency, 0) / channels.length;
-
-      // Calculate cycles based on zoomScale
-      const cycles = zoomScale;
-
-      // Calculate sampleRate
-      const sampleRate = audioCtx.sampleRate;
-
-      // Calculate samples per cycle
-      const samplesPerCycle = sampleRate / avgFrequency;
-
-      // Total samples to map across canvas
-      const totalSamples = cycles * samplesPerCycle;
-
-      // Find max amplitude for auto-scaling
-      let maxAmp = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const val = Math.abs(sumData[i]);
-        if (val > maxAmp) maxAmp = val;
-      }
-      if (maxAmp < 0.001) maxAmp = 0.001; // Prevent division by zero
-
+    function drawCombinedWave(ctx, canvas) {
       ctx.fillStyle = '#1e1e1e';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (channels.length === 0) return;
+
       ctx.lineWidth = 2;
       ctx.strokeStyle = '#ff638f';
       ctx.beginPath();
 
+      const timeWindow = BASE_WINDOW * zoomScale;
       for (let x = 0; x < canvas.width; x++) {
         const fraction = x / (canvas.width - 1);
-        let sampleIndex = fraction * totalSamples + accumulatedTime * samplesPerCycle;
+        const t = accumulatedTime + fraction * timeWindow;
 
-        // Wrap around to allow multiple cycles seamlessly
-        sampleIndex = sampleIndex % bufferLength;
+        let sumVal = 0;
+        channels.forEach(ch => {
+          sumVal += Math.sin(2 * Math.PI * ch.frequency * t);
+        });
+        const avgVal = sumVal / channels.length;
+        const y = (avgVal * 0.5 + 0.5) * canvas.height;
 
-        const i0 = Math.floor(sampleIndex);
-        const i1 = (i0 + 1) % bufferLength;
-        const t = sampleIndex - i0;
-
-        const d0 = sumData[i0];
-        const d1 = sumData[i1];
-
-        // Normalize based on max amplitude
-        const waveVal = lerp(d0, d1, t) / maxAmp;
-        const y = waveVal * (canvas.height / 2) + (canvas.height / 2);
-
-        if (x === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       }
       ctx.stroke();
     }
 
-    // ========== EVENT LISTENERS ==========
+    // ========== CONTROLS ==========
     addChannelBtn.addEventListener('click', () => {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       addChannel();
@@ -700,23 +608,18 @@
     freezeBtn.addEventListener('click', () => {
       toggleFreeze();
     });
-
     document.addEventListener('keydown', e => {
       if (e.code === 'Space') {
         e.preventDefault();
         toggleFreeze();
       }
     });
-
     function toggleFreeze() {
       isFrozen = !isFrozen;
       freezeBtn.textContent = isFrozen ? 'Unfreeze' : 'Freeze';
-      
       if (isFrozen) {
-        // Mute all sounds by setting masterGain to 0
         masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
       } else {
-        // Restore masterGain to 1
         masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
       }
     }
@@ -731,6 +634,14 @@
       panningValue.textContent = panVal.toFixed(2);
     });
 
+    // LOG Scale for timeScale: timeScale = 10^(sliderVal)
+    timeScaleSlider.addEventListener('input', () => {
+      const sliderVal = parseFloat(timeScaleSlider.value);  // -3..1
+      timeScale = Math.pow(10, sliderVal);                  // 10^sliderVal => [0.001..10]
+      // Display with up to 3 decimal places so 0.001 or 10.0 is shown properly
+      timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
+    });
+
     zoomScaleSlider.addEventListener('input', () => {
       zoomScale = parseFloat(zoomScaleSlider.value);
       zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
@@ -741,19 +652,17 @@
       volumeGain.gain.setValueAtTime(volVal, audioCtx.currentTime);
     });
 
-    // ========== INITIAL SETUP ==========
+    // ========== INIT ==========
     requestAnimationFrame(draw);
     addChannel();
 
-    // ========== RESIZE CANVAS ==========
+    // ========== RESIZE ==========
     function resizeCanvas(canvas) {
-      // Set canvas width to its displayed width
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
     }
 
-    // Debounce function to limit the rate at which a function can fire.
     function debounce(func, wait) {
       let timeout;
       return function(...args) {
@@ -762,13 +671,11 @@
       };
     }
 
-    // Resize all canvases on window resize with debounce
     window.addEventListener('resize', debounce(() => {
       channels.forEach(ch => resizeCanvas(ch.canvas));
       resizeCanvas(sumCanvas);
     }, 200));
 
-    // Initial resize of sumCanvas
     resizeCanvas(sumCanvas);
   </script>
 </body>
