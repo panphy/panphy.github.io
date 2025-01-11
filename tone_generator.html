@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Multi-Channel Tone Generator</title>
@@ -16,15 +17,18 @@
       --slider-thumb: #8fce00;
     }
 
-    html, body {
+    html,
+    body {
       height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
     }
+
     * {
       box-sizing: border-box;
     }
+
     body {
       background-color: var(--background-color);
       color: var(--text-color);
@@ -32,12 +36,14 @@
       display: flex;
       flex-direction: column;
     }
+
     h1 {
       text-align: center;
       margin: 30px 0;
       flex: 0 0 auto;
       color: #7ae7b3;
     }
+
     #content {
       flex: 1 1 auto;
       display: flex;
@@ -66,8 +72,9 @@
       overflow: hidden;
       background-color: #2a2a2a;
       border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     }
+
     #channelsScrollContainer {
       overflow-y: auto;
       flex: 1;
@@ -83,7 +90,7 @@
       overflow: hidden;
       background-color: #2a2a2a;
       border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     }
 
     /* CHANNEL UI */
@@ -95,17 +102,20 @@
       border-radius: 8px;
       width: 100%;
     }
+
     .channel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
     }
+
     .channel-header h3 {
       margin: 0;
       font-size: 1rem;
       margin-right: 10px;
     }
+
     .slider-container {
       display: flex;
       align-items: center;
@@ -113,16 +123,19 @@
       gap: 5px;
       margin-bottom: 5px;
     }
+
     .slider-container span {
       white-space: nowrap;
       min-width: 60px;
       text-align: right;
     }
+
     .freq-controls {
       display: flex;
       align-items: center;
       gap: 8px;
     }
+
     .channel-canvas {
       width: 100%;
       height: 80px;
@@ -146,6 +159,7 @@
       text-align: center;
       transition: background-color 0.2s;
     }
+
     .btn:hover {
       background-color: var(--btn-bg-hover);
     }
@@ -153,6 +167,7 @@
     /* RANGE SLIDERS */
     input[type="range"] {
       -webkit-appearance: none;
+      appearance: none;
       width: 100%;
       height: 4px;
       background: var(--slider-bg);
@@ -160,9 +175,11 @@
       border: none;
       transition: background 0.3s;
     }
+
     input[type="range"]:hover {
       background: #a0a0a0;
     }
+
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
@@ -172,9 +189,10 @@
       background: var(--slider-thumb);
       cursor: pointer;
       border: none;
-      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
       transition: background 0.3s;
     }
+
     input[type="range"]::-moz-range-thumb {
       width: 16px;
       height: 16px;
@@ -182,7 +200,7 @@
       background: var(--slider-thumb);
       cursor: pointer;
       border: none;
-      box-shadow: 0 0 2px rgba(0,0,0,0.5);
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
       transition: background 0.3s;
     }
 
@@ -194,6 +212,7 @@
       margin-top: 20px;
       flex: 1 1 auto;
     }
+
     #sumCanvas {
       width: 95%;
       height: 160px;
@@ -201,6 +220,7 @@
       border: 2px solid #666;
       border-radius: 8px;
     }
+
     #combinedWaveButtons {
       margin-top: 10px;
       display: flex;
@@ -214,6 +234,7 @@
       margin-bottom: 15px;
       gap: 20px;
     }
+
     .controlRow {
       display: flex;
       align-items: center;
@@ -221,12 +242,14 @@
       flex: 1;
       flex-direction: column;
     }
+
     .controlRow label {
       margin-bottom: 5px;
       font-size: 0.85rem;
       white-space: nowrap;
       text-align: center;
     }
+
     .controlRow span {
       font-size: 0.85rem;
       width: 60px;
@@ -241,12 +264,14 @@
       margin-right: 10px;
       flex-direction: column;
     }
+
     #volumeWrapper label {
       font-size: 0.85rem;
       margin-bottom: 5px;
       white-space: nowrap;
       text-align: center;
     }
+
     #volumeSlider {
       width: 120px;
       max-width: 150px;
@@ -255,17 +280,18 @@
     /* FOOTER */
     footer {
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       color: #888;
       margin: 10px 0;
       flex: 0 0 auto;
     }
 
     footer a {
-            color: #e1b400
-        }
+      color: #e1b400
+    }
   </style>
 </head>
+
 <body>
 
   <h1>Multi-Channel Tone Generator</h1>
@@ -306,14 +332,7 @@
         <div id="combinedWaveButtons">
           <div id="volumeWrapper">
             <label for="volumeSlider">Volume:</label>
-            <input
-              type="range"
-              id="volumeSlider"
-              min="0"
-              max="1"
-              step="0.01"
-              value="1"
-            >
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
           </div>
           <button id="toggleCombinedBtn" class="btn">Play Combined</button>
           <button id="freezeBtn" class="btn">Freeze</button>
@@ -388,7 +407,7 @@
 
     // We'll track the total "time offset" for scrolling
     let accumulatedTime = 0;
-    let lastTime = null; 
+    let lastTime = null;
 
     // If we want real-time => timeScale=1 => wave shows actual frequency
     // If timeScale=0.001 => wave is slowed 1000x
@@ -670,7 +689,7 @@
 
     function debounce(func, wait) {
       let timeout;
-      return function(...args) {
+      return function (...args) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
       };
@@ -684,4 +703,5 @@
     resizeCanvas(sumCanvas);
   </script>
 </body>
+
 </html>

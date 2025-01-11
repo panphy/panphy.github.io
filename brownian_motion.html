@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Brownian Motion Simulation</title>
@@ -26,7 +27,8 @@
             padding: 10px;
             background: #1e1e1e;
             color: #888;
-            margin-top: auto; /* Push footer to the bottom */
+            margin-top: auto;
+            /* Push footer to the bottom */
         }
 
         footer a {
@@ -39,7 +41,7 @@
             background-color: #2d2d2d;
             color: #ffffff;
             font-size: 26px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         /* Combined Controls Section */
@@ -49,8 +51,10 @@
             justify-content: center;
             align-items: center;
             padding: 10px 20px;
-            background-color: #333333; /* Dark Grey Background */
-            gap: 10px; /* Added gap for better spacing */
+            background-color: #333333;
+            /* Dark Grey Background */
+            gap: 10px;
+            /* Added gap for better spacing */
         }
 
         /* Sliders */
@@ -59,16 +63,20 @@
             flex-direction: column;
             align-items: center;
             padding: 10px;
-            background-color: #444444; /* Darker Grey Box */
-            border: 1px solid #555555; /* Slightly Lighter Grey Border */
+            background-color: #444444;
+            /* Darker Grey Box */
+            border: 1px solid #555555;
+            /* Slightly Lighter Grey Border */
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .slider-group label {
-            font-size: 16px; /* Increased Font Size */
+            font-size: 16px;
+            /* Increased Font Size */
             margin-bottom: 5px;
-            color: #FFFFFF; /* White Font */
+            color: #FFFFFF;
+            /* White Font */
             text-align: center;
         }
 
@@ -78,7 +86,8 @@
             appearance: none;
             height: 6px;
             border-radius: 3px;
-            background: #FF69B4; /* Soft Pink Track */
+            background: #FF69B4;
+            /* Soft Pink Track */
             outline: none;
         }
 
@@ -88,14 +97,16 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #FFB6C1; /* Light Pink Thumb */
+            background: #FFB6C1;
+            /* Light Pink Thumb */
             cursor: pointer;
             border: 2px solid #FFB6C1;
             transition: background 0.3s ease;
         }
 
         .slider-group input[type="range"]::-webkit-slider-thumb:hover {
-            background: #FFD1DC; /* Lighter Pink on Hover */
+            background: #FFD1DC;
+            /* Lighter Pink on Hover */
         }
 
         /* Controls */
@@ -104,25 +115,30 @@
             flex-direction: column;
             align-items: center;
             padding: 10px;
-            background-color: #444444; /* Darker Grey Box */
-            border: 1px solid #555555; /* Slightly Lighter Grey Border */
+            background-color: #444444;
+            /* Darker Grey Box */
+            border: 1px solid #555555;
+            /* Slightly Lighter Grey Border */
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .controls-group label {
-            font-size: 16px; /* Increased Font Size */
+            font-size: 16px;
+            /* Increased Font Size */
             display: flex;
             align-items: center;
             margin-bottom: 5px;
-            color: #FFFFFF; /* White Font */
+            color: #FFFFFF;
+            /* White Font */
         }
 
         .controls-group input[type="checkbox"] {
             margin-right: 8px;
             width: 16px;
             height: 16px;
-            accent-color: #4CAF50; /* Green Accent */
+            accent-color: #4CAF50;
+            /* Green Accent */
         }
 
         /* Instructions and Average Speed */
@@ -131,8 +147,10 @@
             flex-direction: column;
             align-items: center;
             padding: 10px 0px;
-            background-color: transparent; /* Removed background color */
-            gap: 5px; /* Added gap for spacing */
+            background-color: transparent;
+            /* Removed background color */
+            gap: 5px;
+            /* Added gap for spacing */
         }
 
         #instructions {
@@ -142,7 +160,8 @@
 
         #avgSpeedDisplay {
             font-weight: bold;
-            font-size: 16px; /* Increased Font Size */
+            font-size: 16px;
+            /* Increased Font Size */
             color: #ffffff;
         }
 
@@ -151,9 +170,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px; /* Reduced padding */
+            padding: 10px;
+            /* Reduced padding */
             background-color: #1e1e1e;
-            flex-grow: 1; /* Allow it to grow and fill available space */
+            flex-grow: 1;
+            /* Allow it to grow and fill available space */
         }
 
         /* Simulation Container */
@@ -162,19 +183,23 @@
             justify-content: center;
             align-items: center;
             background-color: #1e1e1e;
-            aspect-ratio: 1 / 1; /* Fixed 1:1 aspect ratio */
+            aspect-ratio: 1 / 1;
+            /* Fixed 1:1 aspect ratio */
             width: 100%;
-            max-width: 400px; /* Adjust as needed */
-            max-height: 400px; /* Ensure it doesn't exceed screen size */
+            max-width: 400px;
+            /* Adjust as needed */
+            max-height: 400px;
+            /* Ensure it doesn't exceed screen size */
         }
 
         canvas {
             width: 100%;
             height: 100%;
             background-color: #2d2d2d;
-            border: 2px solid #4CAF50; /* Green Border */
+            border: 2px solid #4CAF50;
+            /* Green Border */
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         /* Responsive Design */
@@ -184,7 +209,8 @@
                 align-items: center;
             }
 
-            .slider-group, .controls-group {
+            .slider-group,
+            .controls-group {
                 width: 80%;
             }
 
@@ -194,7 +220,8 @@
 
             #container {
                 max-width: 90vw;
-                max-height: 90vw; /* Use viewport width for max height in landscape */
+                max-height: 90vw;
+                /* Use viewport width for max height in landscape */
             }
         }
 
@@ -205,20 +232,23 @@
                 overflow-x: auto;
             }
 
-            .slider-group, .controls-group {
+            .slider-group,
+            .controls-group {
                 flex: 1 1 auto;
             }
 
             #container {
                 max-width: 90vh;
-                max-height: 90vh; /* Use viewport height for max size in landscape */
+                max-height: 90vh;
+                /* Use viewport height for max size in landscape */
             }
         }
     </style>
 </head>
+
 <body>
     <h1>Brownian Motion Simulation</h1>
-    
+
     <!-- Combined Controls Section -->
     <div id="controls-container">
         <!-- Sliders -->
@@ -231,7 +261,8 @@
             <input type="range" id="avgSpeedSlider" min="5" max="200" value="75">
         </div>
         <div class="slider-group">
-            <label for="greenParticleSizeSlider">Big Particle Size: <span id="greenParticleSizeDisplay">20</span></label>
+            <label for="greenParticleSizeSlider">Big Particle Size: <span
+                    id="greenParticleSizeDisplay">20</span></label>
             <input type="range" id="greenParticleSizeSlider" min="4" max="80" value="20">
         </div>
 
@@ -242,7 +273,7 @@
             </label>
         </div>
     </div>
-    
+
     <!-- Instructions and Average Speed -->
     <div id="instructions-container">
         <div id="instructions">
@@ -250,14 +281,14 @@
         </div>
         <div id="avgSpeedDisplay">Average Speed: 0</div>
     </div>
-    
+
     <!-- Container for the simulation canvas -->
     <div id="simulation-wrapper">
         <div id="container">
             <canvas id="simulationCanvas"></canvas>
         </div>
     </div>
-    
+
     <footer>
         &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
     </footer>
@@ -364,7 +395,7 @@
         initParticles();
 
         // Handle keyboard events
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.code === 'Space') {
                 e.preventDefault();
                 paused = !paused;
@@ -373,7 +404,7 @@
 
         // Handle checkboxes
         const brownianCheckbox = document.getElementById('brownianCheckbox');
-        brownianCheckbox.addEventListener('change', function() {
+        brownianCheckbox.addEventListener('change', function () {
             showBigParticle = this.checked;
             if (showBigParticle) {
                 initBigParticle();
@@ -383,7 +414,7 @@
         // Handle sliders
         const numParticlesSlider = document.getElementById('numParticlesSlider');
         const numParticlesDisplay = document.getElementById('numParticlesDisplay');
-        numParticlesSlider.addEventListener('input', function() {
+        numParticlesSlider.addEventListener('input', function () {
             numParticles = parseInt(this.value);
             numParticlesDisplay.textContent = numParticles;
             initParticles(); // Reinitialize particles with the new number
@@ -391,7 +422,7 @@
 
         const avgSpeedSlider = document.getElementById('avgSpeedSlider');
         const avgSpeedSliderDisplay = document.getElementById('avgSpeedSliderDisplay');
-        avgSpeedSlider.addEventListener('input', function() {
+        avgSpeedSlider.addEventListener('input', function () {
             desiredAvgSpeed = parseFloat(this.value);
             avgSpeedSliderDisplay.textContent = desiredAvgSpeed;
             adjustVelocitiesToDesiredAverageSpeed(); // Update particle speeds
@@ -399,7 +430,7 @@
 
         const greenParticleSizeSlider = document.getElementById('greenParticleSizeSlider');
         const greenParticleSizeDisplay = document.getElementById('greenParticleSizeDisplay');
-        greenParticleSizeSlider.addEventListener('input', function() {
+        greenParticleSizeSlider.addEventListener('input', function () {
             bigParticleRadius = parseFloat(this.value);
             greenParticleSizeDisplay.textContent = bigParticleRadius;
             bigParticleMass = 10 * bigParticleRadius; // Scale mass proportionally to size
@@ -632,4 +663,5 @@
         }
     </script>
 </body>
+
 </html>

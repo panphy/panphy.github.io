@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Motion Tracker</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -12,20 +13,32 @@
     <style>
         :root {
             /* Button Color Variables */
-            --btn-upload-color: #0079b1; /* Blue */
-            --btn-play-color: #17c5a3;   /* Green */
-            --btn-calibration-color: #f0bd37; /* Yellow */
-            --btn-set-origin-color: #f0bd37;  /* Yellow */
-            --btn-export-color: #23a5d0;      /* Teal */
-            --btn-clear-data-color: #ee4c4c;  /* Red */
-            --btn-clear-calibration-color: #ec7070; /* Red */
-            --btn-clear-origin-color: #ec7070;      /* Red */
-            
+            --btn-upload-color: #0079b1;
+            /* Blue */
+            --btn-play-color: #17c5a3;
+            /* Green */
+            --btn-calibration-color: #f0bd37;
+            /* Yellow */
+            --btn-set-origin-color: #f0bd37;
+            /* Yellow */
+            --btn-export-color: #23a5d0;
+            /* Teal */
+            --btn-clear-data-color: #ee4c4c;
+            /* Red */
+            --btn-clear-calibration-color: #ec7070;
+            /* Red */
+            --btn-clear-origin-color: #ec7070;
+            /* Red */
+
             /* Dialog Button Colors */
-            --btn-confirm-color: #28a745; /* Green */
-            --hover-confirm-color: #1e7e34; /* Darker Green */
-            --btn-cancel-color: #dc3545; /* Red */
-            --hover-cancel-color: #c82333; /* Darker Red */
+            --btn-confirm-color: #28a745;
+            /* Green */
+            --hover-confirm-color: #1e7e34;
+            /* Darker Green */
+            --btn-cancel-color: #dc3545;
+            /* Red */
+            --hover-cancel-color: #c82333;
+            /* Darker Red */
 
             /* Plot Button Color Variables */
             --btn-plot-vx-color: #86b671;
@@ -47,8 +60,8 @@
             font-weight: bold;
             margin: 0;
             padding: 10px 0;
-            background-color: #333; 
-            color: white; 
+            background-color: #333;
+            color: white;
         }
 
         #warningBanner {
@@ -200,7 +213,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 48%; 
+            width: 48%;
             max-width: 600px;
             min-width: 300px;
         }
@@ -208,18 +221,21 @@
         #videoWrapper {
             position: relative;
             width: 100%;
-            min-height: 200px; 
+            min-height: 200px;
         }
 
         /*
          * CHANGE #1: Use max-width:100%; height:auto; to maintain aspect ratio.
          *            This prevents distortions that move the axis upward.
          */
-        video, canvas {
+        video,
+        canvas {
             border: 2px solid #ddd;
             border-radius: 8px;
-            max-width: 100%; /* changed from width:100% */
-            height: auto;    /* keep aspect ratio */
+            max-width: 100%;
+            /* changed from width:100% */
+            height: auto;
+            /* keep aspect ratio */
             background-color: #f5f5f5;
             display: block;
         }
@@ -258,7 +274,8 @@
         #videoControls .control-button {
             padding: 8px 16px;
             font-size: 0.9em;
-            flex: 1; /* Ensure uniform width */
+            flex: 1;
+            /* Ensure uniform width */
         }
 
         #videoControls #slider {
@@ -298,7 +315,9 @@
         }
 
         /* Calibration, Export, Frame Rate Prompts */
-        #calibrationPrompt, #exportPrompt, #frameRatePrompt {
+        #calibrationPrompt,
+        #exportPrompt,
+        #frameRatePrompt {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -309,33 +328,33 @@
             border-radius: 8px;
             display: none;
             z-index: 10;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             width: 300px;
             box-sizing: border-box;
         }
 
-        #calibrationPrompt h2, 
-        #exportPrompt h2, 
+        #calibrationPrompt h2,
+        #exportPrompt h2,
         #frameRatePrompt h2 {
             margin-top: 0;
             text-align: center;
         }
 
-        #calibrationPrompt p, 
-        #exportPrompt p, 
+        #calibrationPrompt p,
+        #exportPrompt p,
         #frameRatePrompt p {
             text-align: center;
         }
 
-        #calibrationPrompt form, 
-        #exportPrompt form, 
+        #calibrationPrompt form,
+        #exportPrompt form,
         #frameRatePrompt form {
             display: flex;
             flex-direction: column;
         }
 
-        #calibrationPrompt input, 
-        #exportPrompt input, 
+        #calibrationPrompt input,
+        #exportPrompt input,
         #frameRatePrompt input {
             width: 100%;
             padding: 8px;
@@ -344,8 +363,8 @@
         }
 
         /* Dialog Buttons */
-        #calibrationPrompt button, 
-        #exportPrompt button, 
+        #calibrationPrompt button,
+        #exportPrompt button,
         #frameRatePrompt button {
             padding: 10px 20px;
             border: none;
@@ -357,20 +376,20 @@
             transition: filter 0.3s ease;
         }
 
-        #calibrationPrompt #confirmCalibration, 
-        #exportPrompt #confirmExport, 
+        #calibrationPrompt #confirmCalibration,
+        #exportPrompt #confirmExport,
         #frameRatePrompt #confirmFrameRate {
             background-color: var(--btn-confirm-color);
         }
 
-        #calibrationPrompt #cancelCalibration, 
-        #exportPrompt #cancelExport, 
+        #calibrationPrompt #cancelCalibration,
+        #exportPrompt #cancelExport,
         #frameRatePrompt #cancelFrameRate {
             background-color: var(--btn-cancel-color);
         }
 
         .control-button:hover:not(:disabled),
-        #calibrationPrompt button:hover:not(:disabled), 
+        #calibrationPrompt button:hover:not(:disabled),
         #exportPrompt button:hover:not(:disabled),
         #frameRatePrompt button:hover:not(:disabled) {
             filter: brightness(90%);
@@ -386,7 +405,8 @@
             display: none;
         }
 
-        .crosshair::before, .crosshair::after {
+        .crosshair::before,
+        .crosshair::after {
             content: '';
             position: absolute;
             background-color: red;
@@ -409,8 +429,8 @@
         }
 
         input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
         input:-webkit-autofill:active {
             transition: background-color 5000s ease-in-out 0s;
             -webkit-text-fill-color: #000 !important;
@@ -430,9 +450,10 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Motion Tracker</h1>
-    
+
     <div id="warningBanner">
         <strong>Note:</strong> This app is optimized for desktop. On iOS, use the latest version for best performance.
     </div>
@@ -453,10 +474,9 @@
 
     <!-- Frame Rate Button -->
     <div id="frameRateContainer" style="text-align: center; margin-top: 10px;">
-        <button id="frameRateButton" class="control-button" 
+        <button id="frameRateButton" class="control-button"
             style="width: auto; padding: 10px 15px; background-color: #a75908;"
-            title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120, 240)"
-            disabled>
+            title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120, 240)" disabled>
             Frame Rate: 30 fps
         </button>
     </div>
@@ -467,8 +487,10 @@
         <h2>Calibration</h2>
         <p>Drag on the video to draw a line with a known length.</p>
         <form autocomplete="off">
-            <input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
-            <input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
+            <input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001"
+                step="any" autocomplete="off">
+            <input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)"
+                autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmCalibration">Confirm</button>
                 <button type="button" id="cancelCalibration">Cancel</button>
@@ -481,7 +503,8 @@
         <h2>Export Data</h2>
         <p>Enter the desired filename for the exported data:</p>
         <form autocomplete="off">
-            <input type="text" id="exportFilename" name="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
+            <input type="text" id="exportFilename" name="exportFilename" placeholder="Filename"
+                value="motion_tracker_data" autocomplete="off">
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmExport">Export</button>
                 <button type="button" id="cancelExport">Cancel</button>
@@ -496,7 +519,8 @@
             Please enter the correct frame rate. Typical values are 24, 30, 60, 240 fps:
         </p>
         <form autocomplete="off">
-            <input type="number" id="userFrameRate" name="userFrameRate" placeholder="Enter FPS" value="30" min="1" step="0.1" autocomplete="off" />
+            <input type="number" id="userFrameRate" name="userFrameRate" placeholder="Enter FPS" value="30" min="1"
+                step="0.1" autocomplete="off" />
             <div style="display: flex; gap: 10px; justify-content: center;">
                 <button type="button" id="confirmFrameRate">Confirm</button>
                 <button type="button" id="cancelFrameRate">Cancel</button>
@@ -565,25 +589,25 @@
         let frameData = [];
         let isPlaying = false;
         let positionChart;
-        let skippingFrame = false; 
+        let skippingFrame = false;
         let recordedBlob = null;
 
         let calibrationMode = false;
         let calibrationStart = null;
         let calibrationEnd = null;
-        let scaleFactor = 1; 
+        let scaleFactor = 1;
         let scaleUnit = "pixels";
         let isDrawingCalibration = false;
 
         let originMode = false;
         let originSet = false;
-        let originPoint = { x: 0, y: 0 }; 
+        let originPoint = { x: 0, y: 0 };
 
         // Define a fixed grid size in display pixels
-        const gridSizeDisplay = 40; 
+        const gridSizeDisplay = 40;
         // Define fixed sizes for overlay elements in display pixels
-        const originDotRadiusDisplay = 5; 
-        const axisLineWidthDisplay = 2; 
+        const originDotRadiusDisplay = 5;
+        const axisLineWidthDisplay = 2;
 
         /*
          * Since we want the bottom-left to be cartesian (0,0),
@@ -654,7 +678,7 @@
         const chartCanvasContainer = document.getElementById('chartCanvasContainer');
         const positionChartCanvas = document.getElementById('positionChart');
 
-        const frameRateButton = document.getElementById('frameRateButton'); 
+        const frameRateButton = document.getElementById('frameRateButton');
 
         // Initialize button states on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -707,11 +731,11 @@
 
         function onVideoMetadata() {
             videoElement.removeEventListener('loadedmetadata', onVideoMetadata);
-            slider.max = videoElement.duration; 
-            slider.value = 0; 
-            videoElement.currentTime = 0; 
+            slider.max = videoElement.duration;
+            slider.value = 0;
+            videoElement.currentTime = 0;
             videoElement.pause();
-            
+
             // Wait for the video to have decoded at least one frame
             videoElement.addEventListener('loadeddata', onVideoFirstFrame, { once: true });
         }
@@ -733,7 +757,7 @@
             frameCanvas.style.display = "block";
 
             // Show analysis container and the chart area
-            chartCanvasContainer.style.display = "flex"; 
+            chartCanvasContainer.style.display = "flex";
             document.getElementById('analysisContainer').style.display = "flex";
 
             // Enable controls
@@ -759,11 +783,11 @@
              */
             resizeOverlay();
             drawOverlay();
-            
+
             // Plot initial data (none so far)
             plotPosition();
 
-            message.innerHTML = 
+            message.innerHTML =
                 "<ul align='left'>"
                 + "<li>Use the brown button above to enter the frame rate (default is 30 fps).</li>"
                 + "<li>Use the control bar beneath the video to select the starting frame.</li>"
@@ -785,22 +809,22 @@
 
         // Time update
         videoElement.addEventListener("timeupdate", () => {
-            slider.value = videoElement.currentTime; 
-            timeDisplay.textContent = formatTime(videoElement.currentTime); 
-            if (!skippingFrame) drawFrame(); 
+            slider.value = videoElement.currentTime;
+            timeDisplay.textContent = formatTime(videoElement.currentTime);
+            if (!skippingFrame) drawFrame();
         });
 
         // Slider input
         slider.addEventListener("input", () => {
-            videoElement.currentTime = parseFloat(slider.value); 
+            videoElement.currentTime = parseFloat(slider.value);
         });
 
         // Frame Canvas Click
         frameCanvas.addEventListener('click', (event) => {
             if (!calibrationMode && !originMode) {
                 const rect = frameCanvas.getBoundingClientRect();
-                const scaleX = frameCanvas.width / rect.width; 
-                const scaleY = frameCanvas.height / rect.height; 
+                const scaleX = frameCanvas.width / rect.width;
+                const scaleY = frameCanvas.height / rect.height;
                 const canvasX = (event.clientX - rect.left) * scaleX;
                 const canvasY = (event.clientY - rect.top) * scaleY;
                 const cartesianY = canvasYToCartesianY(canvasY);
@@ -834,7 +858,7 @@
 
         // Frame Rate Button -> open prompt
         frameRateButton.addEventListener('click', () => {
-            userFrameRateInput.value = frameRate; 
+            userFrameRateInput.value = frameRate;
             frameRatePrompt.style.display = "block";
         });
 
@@ -858,17 +882,17 @@
         // Skip to next frame
         function skipToNextFrame() {
             skippingFrame = true;
-            videoElement.currentTime += 1 / frameRate; 
+            videoElement.currentTime += 1 / frameRate;
             videoElement.addEventListener('seeked', () => {
                 skippingFrame = false;
                 drawFrame();
-                drawOverlay(); 
+                drawOverlay();
             }, { once: true });
         }
 
         // Plot Position
         function plotPosition() {
-            const xData = frameData.map((p) => parseFloat(p.time.toFixed(3))); 
+            const xData = frameData.map((p) => parseFloat(p.time.toFixed(3)));
             const yDataX = frameData.map((p) => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
             const yDataY = frameData.map((p) => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
 
@@ -962,7 +986,7 @@
 
         // Plot Velocity
         function plotVelocity(axis) {
-            const windowSize = 3; 
+            const windowSize = 3;
             if (frameData.length < windowSize) {
                 alert(`Insufficient data to calculate velocity. At least ${windowSize} points are needed.`);
                 return;
@@ -972,11 +996,11 @@
             const velocityTimes = [];
             for (let i = 1; i < frameData.length; i++) {
                 const deltaTime = frameData[i].time - frameData[i - 1].time;
-                const p1 = { 
+                const p1 = {
                     x: frameData[i - 1].x - (originSet ? originPoint.x : 0),
-                    y: frameData[i - 1].y - (originSet ? originPoint.y : 0) 
+                    y: frameData[i - 1].y - (originSet ? originPoint.y : 0)
                 };
-                const p2 = { 
+                const p2 = {
                     x: frameData[i].x - (originSet ? originPoint.x : 0),
                     y: frameData[i].y - (originSet ? originPoint.y : 0)
                 };
@@ -1030,15 +1054,15 @@
 
         // Clear Data
         clearDataPointsButton.addEventListener("click", () => {
-            frameData = []; 
+            frameData = [];
             if (positionChart) {
                 positionChart.data.datasets.forEach((dataset) => {
                     dataset.data = [];
                 });
                 positionChart.update();
             }
-            drawFrame(); 
-            drawOverlay(); 
+            drawFrame();
+            drawOverlay();
             message.innerHTML = "<p>Data points cleared.</p>";
         });
 
@@ -1054,7 +1078,7 @@
 
             if (positionChart) {
                 positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-                plotPosition(); 
+                plotPosition();
             }
 
             message.innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
@@ -1079,7 +1103,7 @@
         });
 
         function showExportPrompt() {
-            exportFilenameInput.value = "motion_tracker_data"; 
+            exportFilenameInput.value = "motion_tracker_data";
             exportPrompt.style.display = "block";
         }
 
@@ -1115,13 +1139,13 @@
             const velocityData = [];
             for (let i = 1; i < frameData.length; i++) {
                 const deltaTime = frameData[i].time - frameData[i - 1].time;
-                const p1 = { 
-                    x: frameData[i - 1].x - (originSet ? originPoint.x : 0), 
-                    y: frameData[i - 1].y - (originSet ? originPoint.y : 0) 
+                const p1 = {
+                    x: frameData[i - 1].x - (originSet ? originPoint.x : 0),
+                    y: frameData[i - 1].y - (originSet ? originPoint.y : 0)
                 };
-                const p2 = { 
-                    x: frameData[i].x - (originSet ? originPoint.x : 0), 
-                    y: frameData[i].y - (originSet ? originPoint.y : 0) 
+                const p2 = {
+                    x: frameData[i].x - (originSet ? originPoint.x : 0),
+                    y: frameData[i].y - (originSet ? originPoint.y : 0)
                 };
 
                 const deltaX = p2.x - p1.x;
@@ -1158,7 +1182,7 @@
         // Calibration
         calibrateButton.addEventListener('click', () => {
             crosshair.style.display = "none";
-            overlayCanvas.style.pointerEvents = "auto"; 
+            overlayCanvas.style.pointerEvents = "auto";
             calibrationMode = true;
             isDrawingCalibration = false;
             calibrationStart = null;
@@ -1355,16 +1379,16 @@
 
         // Draw single data point
         function drawDataPoint(x, y) {
-            const circleRadius = originDotRadiusDisplay; 
-            const crossSize = 10; 
+            const circleRadius = originDotRadiusDisplay;
+            const crossSize = 10;
 
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
             ctx.beginPath();
             ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.strokeStyle = 'red';
-            ctx.lineWidth = 1; 
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(x - crossSize, y);
             ctx.lineTo(x + crossSize, y);
@@ -1384,11 +1408,11 @@
         }
 
         function drawOverlay() {
-            resizeOverlay(); 
+            resizeOverlay();
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
             // Grid
-            const gridStepX = gridSizeDisplay; 
+            const gridStepX = gridSizeDisplay;
             const gridStepY = gridSizeDisplay;
 
             overlayCtx.save();
@@ -1451,12 +1475,12 @@
                 overlayCtx.strokeStyle = "orange";
                 overlayCtx.shadowColor = "black";
                 overlayCtx.shadowBlur = 2;
-                overlayCtx.setLineDash([5, 5]); 
+                overlayCtx.setLineDash([5, 5]);
                 overlayCtx.beginPath();
                 overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
                 overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
                 overlayCtx.stroke();
-                overlayCtx.setLineDash([]); 
+                overlayCtx.setLineDash([]);
                 overlayCtx.restore();
             }
         }
@@ -1472,4 +1496,5 @@
         &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
     </footer>
 </body>
+
 </html>

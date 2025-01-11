@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Wave Superposition Simulation</title>
@@ -25,7 +26,7 @@
         footer {
             text-align: center;
             padding: 5px;
-      	    background: #2c2c2c00;
+            background: #2c2c2c00;
             color: #888;
             margin-top: 5px;
         }
@@ -54,7 +55,7 @@
             background-color: #3a3a3a;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -75,7 +76,8 @@
 
         #waveCanvas {
             width: 100%;
-            height: 400px; /* Height is 4 times the maximum amplitude slider */
+            height: 400px;
+            /* Height is 4 times the maximum amplitude slider */
             border-radius: 8px;
             background-color: #1e1e1e;
         }
@@ -84,7 +86,8 @@
         #playPauseBtn {
             width: 120px;
             height: 40px;
-            margin: 0 auto;   /* center horizontally */
+            margin: 0 auto;
+            /* center horizontally */
             font-size: 1rem;
             cursor: pointer;
             border: none;
@@ -94,8 +97,10 @@
             font-weight: 600;
             transition: background-color 0.2s;
         }
+
         #playPauseBtn:hover {
-            background-color: #17a188; /* Slightly darker */
+            background-color: #17a188;
+            /* Slightly darker */
         }
 
         /* Note under the canvas about SPACE BAR */
@@ -118,7 +123,7 @@
             background-color: #3a3a3a;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -145,6 +150,7 @@
             width: 100%;
             cursor: pointer;
             -webkit-appearance: none;
+            appearance: none;
             background: transparent;
         }
 
@@ -170,7 +176,7 @@
             background: #20c997;
             cursor: pointer;
             border: none;
-            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
         }
 
         input[type=range]::-moz-range-thumb {
@@ -180,7 +186,7 @@
             background: #20c997;
             cursor: pointer;
             border: none;
-            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
         }
 
         /* Toggle Switch Styles */
@@ -212,7 +218,10 @@
         .slider-switch {
             position: absolute;
             cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: #ccc;
             transition: 0.4s;
             border-radius: 26px;
@@ -230,11 +239,11 @@
             border-radius: 50%;
         }
 
-        .switch input:checked + .slider-switch {
+        .switch input:checked+.slider-switch {
             background-color: #20c997;
         }
 
-        .switch input:checked + .slider-switch:before {
+        .switch input:checked+.slider-switch:before {
             transform: translateX(24px);
         }
 
@@ -244,420 +253,423 @@
                 flex-direction: column;
                 max-width: 100%;
             }
+
             #canvasContainer {
                 width: 100%;
             }
+
             #zoomMotionControls {
                 flex-direction: column;
             }
+
             #sideControls {
                 width: 100%;
             }
+
             #waveCanvas {
                 height: 300px;
             }
         }
     </style>
 </head>
+
 <body>
 
-<h1>Wave Superposition Simulation</h1>
+    <h1>Wave Superposition Simulation</h1>
 
-<div id="mainWrapper">
-    <!-- Canvas + Zoom/Motion -->
-    <div id="canvasContainer">
-        <!-- Zoom & Motion Sliders at the Top -->
-        <div id="zoomMotionControls">
-            <!-- Zoom Control -->
-            <div class="zoomMotion-group">
-                <label for="timeZoom">
-                    Zoom: <span id="timeZoomValue">1.0</span>x
-                </label>
-                <input type="range" id="timeZoom" min="0.1" max="5" step="0.1" value="1">
+    <div id="mainWrapper">
+        <!-- Canvas + Zoom/Motion -->
+        <div id="canvasContainer">
+            <!-- Zoom & Motion Sliders at the Top -->
+            <div id="zoomMotionControls">
+                <!-- Zoom Control -->
+                <div class="zoomMotion-group">
+                    <label for="timeZoom">
+                        Zoom: <span id="timeZoomValue">1.0</span>x
+                    </label>
+                    <input type="range" id="timeZoom" min="0.1" max="5" step="0.1" value="1">
+                </div>
+                <!-- Motion Speed Control -->
+                <div class="zoomMotion-group">
+                    <label for="timeMotion">
+                        Motion Speed: <span id="timeMotionValue">1.00</span>x
+                    </label>
+                    <input type="range" id="timeMotion" min="0.01" max="2" step="0.01" value="1">
+                </div>
             </div>
-            <!-- Motion Speed Control -->
-            <div class="zoomMotion-group">
-                <label for="timeMotion">
-                    Motion Speed: <span id="timeMotionValue">1.00</span>x
-                </label>
-                <input type="range" id="timeMotion"
-                       min="0.01" max="2" step="0.01" value="1">
+
+            <!-- The Canvas -->
+            <canvas id="waveCanvas"></canvas>
+
+            <!-- Play/Pause Button -->
+            <button id="playPauseBtn">Pause</button>
+
+            <!-- Note about SPACE BAR -->
+            <div id="note">
+                Press the SPACE BAR to Pause/Resume the Simulation
             </div>
         </div>
 
-        <!-- The Canvas -->
-        <canvas id="waveCanvas"></canvas>
+        <!-- Side Controls (Wave Controls & Toggles) -->
+        <div id="sideControls">
+            <!-- Wave 1 Controls -->
+            <div class="wave-controls">
+                <h3>Wave 1 (Left to Right)</h3>
+                <div class="control-group">
+                    <label for="amplitude1">
+                        Amplitude: <span id="amplitude1Value">60</span> px
+                    </label>
+                    <input type="range" id="amplitude1" min="10" max="100" value="60">
+                </div>
+                <div class="control-group">
+                    <label for="frequency1">
+                        Frequency: <span id="frequency1Value">1.0</span> Hz
+                    </label>
+                    <input type="range" id="frequency1" min="0.1" max="5" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label for="speed1">
+                        Wave Speed: <span id="speed1Value">200</span> px/s
+                    </label>
+                    <input type="range" id="speed1" min="50" max="500" step="10" value="200">
+                </div>
+            </div>
 
-        <!-- Play/Pause Button -->
-        <button id="playPauseBtn">Pause</button>
+            <!-- Wave 2 Controls -->
+            <div class="wave-controls">
+                <h3>Wave 2 (Right to Left)</h3>
+                <div class="control-group">
+                    <label for="amplitude2">
+                        Amplitude: <span id="amplitude2Value">60</span> px
+                    </label>
+                    <input type="range" id="amplitude2" min="10" max="100" value="60">
+                </div>
+                <div class="control-group">
+                    <label for="frequency2">
+                        Frequency: <span id="frequency2Value">1.0</span> Hz
+                    </label>
+                    <input type="range" id="frequency2" min="0.1" max="5" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label for="speed2">
+                        Wave Speed: <span id="speed2Value">200</span> px/s
+                    </label>
+                    <input type="range" id="speed2" min="50" max="500" step="10" value="200">
+                </div>
+            </div>
 
-        <!-- Note about SPACE BAR -->
-        <div id="note">
-            Press the SPACE BAR to Pause/Resume the Simulation
-        </div>
-    </div>
-
-    <!-- Side Controls (Wave Controls & Toggles) -->
-    <div id="sideControls">
-        <!-- Wave 1 Controls -->
-        <div class="wave-controls">
-            <h3>Wave 1 (Left to Right)</h3>
-            <div class="control-group">
-                <label for="amplitude1">
-                    Amplitude: <span id="amplitude1Value">60</span> px
-                </label>
-                <input type="range" id="amplitude1" min="10" max="100" value="60">
-            </div>
-            <div class="control-group">
-                <label for="frequency1">
-                    Frequency: <span id="frequency1Value">1.0</span> Hz
-                </label>
-                <input type="range" id="frequency1"
-                       min="0.1" max="5" step="0.1" value="1">
-            </div>
-            <div class="control-group">
-                <label for="speed1">
-                    Wave Speed: <span id="speed1Value">200</span> px/s
-                </label>
-                <input type="range" id="speed1" min="50" max="500" step="10" value="200">
-            </div>
-        </div>
-
-        <!-- Wave 2 Controls -->
-        <div class="wave-controls">
-            <h3>Wave 2 (Right to Left)</h3>
-            <div class="control-group">
-                <label for="amplitude2">
-                    Amplitude: <span id="amplitude2Value">60</span> px
-                </label>
-                <input type="range" id="amplitude2" min="10" max="100" value="60">
-            </div>
-            <div class="control-group">
-                <label for="frequency2">
-                    Frequency: <span id="frequency2Value">1.0</span> Hz
-                </label>
-                <input type="range" id="frequency2"
-                       min="0.1" max="5" step="0.1" value="1.0">
-            </div>
-            <div class="control-group">
-                <label for="speed2">
-                    Wave Speed: <span id="speed2Value">200</span> px/s
-                </label>
-                <input type="range" id="speed2" min="50" max="500" step="10" value="200">
-            </div>
-        </div>
-
-        <!-- Toggle Controls -->
-        <div class="toggle-controls">
-            <h3>Toggle Waves</h3>
-            <div class="toggle-group">
-                <label for="toggleWave1">Show Wave 1 (Blue)</label>
-                <label class="switch">
-                    <input type="checkbox" id="toggleWave1" checked>
-                    <span class="slider-switch"></span>
-                </label>
-            </div>
-            <div class="toggle-group">
-                <label for="toggleWave2">Show Wave 2 (Orange)</label>
-                <label class="switch">
-                    <input type="checkbox" id="toggleWave2">
-                    <span class="slider-switch"></span>
-                </label>
-            </div>
-            <div class="toggle-group">
-                <label for="toggleSuperposition">Show Superposition (Green)</label>
-                <label class="switch">
-                    <input type="checkbox" id="toggleSuperposition">
-                    <span class="slider-switch"></span>
-                </label>
+            <!-- Toggle Controls -->
+            <div class="toggle-controls">
+                <h3>Toggle Waves</h3>
+                <div class="toggle-group">
+                    <label for="toggleWave1">Show Wave 1 (Blue)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleWave1" checked>
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <label for="toggleWave2">Show Wave 2 (Orange)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleWave2">
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <label for="toggleSuperposition">Show Superposition (Green)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleSuperposition">
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-/*******************************************************
- *   Grab References
- *******************************************************/
-const canvas = document.getElementById('waveCanvas');
-const ctx = canvas.getContext('2d');
+    <script>
+        /*******************************************************
+         *   Grab References
+         *******************************************************/
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
 
-// Button
-const playPauseBtn = document.getElementById('playPauseBtn');
+        // Button
+        const playPauseBtn = document.getElementById('playPauseBtn');
 
-// Wave 1 controls
-const amplitude1Slider = document.getElementById('amplitude1');
-const frequency1Slider = document.getElementById('frequency1');
-const speed1Slider     = document.getElementById('speed1');
-const amplitude1Value  = document.getElementById('amplitude1Value');
-const frequency1Value  = document.getElementById('frequency1Value');
-const speed1Value      = document.getElementById('speed1Value');
+        // Wave 1 controls
+        const amplitude1Slider = document.getElementById('amplitude1');
+        const frequency1Slider = document.getElementById('frequency1');
+        const speed1Slider = document.getElementById('speed1');
+        const amplitude1Value = document.getElementById('amplitude1Value');
+        const frequency1Value = document.getElementById('frequency1Value');
+        const speed1Value = document.getElementById('speed1Value');
 
-// Wave 2 controls
-const amplitude2Slider = document.getElementById('amplitude2');
-const frequency2Slider = document.getElementById('frequency2');
-const speed2Slider     = document.getElementById('speed2');
-const amplitude2Value  = document.getElementById('amplitude2Value');
-const frequency2Value  = document.getElementById('frequency2Value');
-const speed2Value      = document.getElementById('speed2Value');
+        // Wave 2 controls
+        const amplitude2Slider = document.getElementById('amplitude2');
+        const frequency2Slider = document.getElementById('frequency2');
+        const speed2Slider = document.getElementById('speed2');
+        const amplitude2Value = document.getElementById('amplitude2Value');
+        const frequency2Value = document.getElementById('frequency2Value');
+        const speed2Value = document.getElementById('speed2Value');
 
-// Zoom & Motion
-const timeZoomSlider   = document.getElementById('timeZoom');
-const timeZoomValue    = document.getElementById('timeZoomValue');
-const timeMotionSlider = document.getElementById('timeMotion');
-const timeMotionValue  = document.getElementById('timeMotionValue');
+        // Zoom & Motion
+        const timeZoomSlider = document.getElementById('timeZoom');
+        const timeZoomValue = document.getElementById('timeZoomValue');
+        const timeMotionSlider = document.getElementById('timeMotion');
+        const timeMotionValue = document.getElementById('timeMotionValue');
 
-// Toggles
-const toggleWave1         = document.getElementById('toggleWave1');
-const toggleWave2         = document.getElementById('toggleWave2');
-const toggleSuperposition = document.getElementById('toggleSuperposition');
+        // Toggles
+        const toggleWave1 = document.getElementById('toggleWave1');
+        const toggleWave2 = document.getElementById('toggleWave2');
+        const toggleSuperposition = document.getElementById('toggleSuperposition');
 
-// Canvas size
-let width, height;
+        // Canvas size
+        let width, height;
 
-/*******************************************************
- *   Initialize Parameters
- *******************************************************/
-let amplitude1 = parseFloat(amplitude1Slider.value);
-let frequency1 = parseFloat(frequency1Slider.value);
-let speed1     = parseFloat(speed1Slider.value);
+        /*******************************************************
+         *   Initialize Parameters
+         *******************************************************/
+        let amplitude1 = parseFloat(amplitude1Slider.value);
+        let frequency1 = parseFloat(frequency1Slider.value);
+        let speed1 = parseFloat(speed1Slider.value);
 
-let amplitude2 = parseFloat(amplitude2Slider.value);
-let frequency2 = parseFloat(frequency2Slider.value);
-let speed2     = parseFloat(speed2Slider.value);
+        let amplitude2 = parseFloat(amplitude2Slider.value);
+        let frequency2 = parseFloat(frequency2Slider.value);
+        let speed2 = parseFloat(speed2Slider.value);
 
-let timeZoom   = parseFloat(timeZoomSlider.value);
-let timeMotion = parseFloat(timeMotionSlider.value);
+        let timeZoom = parseFloat(timeZoomSlider.value);
+        let timeMotion = parseFloat(timeMotionSlider.value);
 
-function updateSliderValues() {
-  amplitude1Value.textContent = amplitude1.toFixed(0);
-  frequency1Value.textContent = frequency1.toFixed(1);
-  speed1Value.textContent     = speed1.toFixed(0);
+        function updateSliderValues() {
+            amplitude1Value.textContent = amplitude1.toFixed(0);
+            frequency1Value.textContent = frequency1.toFixed(1);
+            speed1Value.textContent = speed1.toFixed(0);
 
-  amplitude2Value.textContent = amplitude2.toFixed(0);
-  frequency2Value.textContent = frequency2.toFixed(1);
-  speed2Value.textContent     = speed2.toFixed(0);
+            amplitude2Value.textContent = amplitude2.toFixed(0);
+            frequency2Value.textContent = frequency2.toFixed(1);
+            speed2Value.textContent = speed2.toFixed(0);
 
-  timeZoomValue.textContent   = timeZoom.toFixed(1);
-  timeMotionValue.textContent = timeMotion.toFixed(2);
-}
-updateSliderValues();
+            timeZoomValue.textContent = timeZoom.toFixed(1);
+            timeMotionValue.textContent = timeMotion.toFixed(2);
+        }
+        updateSliderValues();
 
-/*******************************************************
- *   Event Listeners
- *******************************************************/
-// Sliders
-amplitude1Slider.addEventListener('input', () => {
-  amplitude1 = parseFloat(amplitude1Slider.value);
-  updateSliderValues(); 
-  drawWaves();
-});
-frequency1Slider.addEventListener('input', () => {
-  frequency1 = parseFloat(frequency1Slider.value);
-  updateSliderValues();
-  drawWaves();
-});
-speed1Slider.addEventListener('input', () => {
-  speed1 = parseFloat(speed1Slider.value);
-  updateSliderValues();
-  drawWaves();
-});
+        /*******************************************************
+         *   Event Listeners
+         *******************************************************/
+        // Sliders
+        amplitude1Slider.addEventListener('input', () => {
+            amplitude1 = parseFloat(amplitude1Slider.value);
+            updateSliderValues();
+            drawWaves();
+        });
+        frequency1Slider.addEventListener('input', () => {
+            frequency1 = parseFloat(frequency1Slider.value);
+            updateSliderValues();
+            drawWaves();
+        });
+        speed1Slider.addEventListener('input', () => {
+            speed1 = parseFloat(speed1Slider.value);
+            updateSliderValues();
+            drawWaves();
+        });
 
-amplitude2Slider.addEventListener('input', () => {
-  amplitude2 = parseFloat(amplitude2Slider.value);
-  updateSliderValues(); 
-  drawWaves();
-});
-frequency2Slider.addEventListener('input', () => {
-  frequency2 = parseFloat(frequency2Slider.value);
-  updateSliderValues();
-  drawWaves();
-});
-speed2Slider.addEventListener('input', () => {
-  speed2 = parseFloat(speed2Slider.value);
-  updateSliderValues();
-  drawWaves();
-});
+        amplitude2Slider.addEventListener('input', () => {
+            amplitude2 = parseFloat(amplitude2Slider.value);
+            updateSliderValues();
+            drawWaves();
+        });
+        frequency2Slider.addEventListener('input', () => {
+            frequency2 = parseFloat(frequency2Slider.value);
+            updateSliderValues();
+            drawWaves();
+        });
+        speed2Slider.addEventListener('input', () => {
+            speed2 = parseFloat(speed2Slider.value);
+            updateSliderValues();
+            drawWaves();
+        });
 
-timeZoomSlider.addEventListener('input', () => {
-  timeZoom = parseFloat(timeZoomSlider.value);
-  updateSliderValues();
-  drawWaves();
-});
-timeMotionSlider.addEventListener('input', () => {
-  timeMotion = parseFloat(timeMotionSlider.value);
-  updateSliderValues();
-  drawWaves();
-});
+        timeZoomSlider.addEventListener('input', () => {
+            timeZoom = parseFloat(timeZoomSlider.value);
+            updateSliderValues();
+            drawWaves();
+        });
+        timeMotionSlider.addEventListener('input', () => {
+            timeMotion = parseFloat(timeMotionSlider.value);
+            updateSliderValues();
+            drawWaves();
+        });
 
-// Toggles
-toggleWave1.addEventListener('change', () => { drawWaves(); });
-toggleWave2.addEventListener('change', () => { drawWaves(); });
-toggleSuperposition.addEventListener('change', () => { drawWaves(); });
+        // Toggles
+        toggleWave1.addEventListener('change', () => { drawWaves(); });
+        toggleWave2.addEventListener('change', () => { drawWaves(); });
+        toggleSuperposition.addEventListener('change', () => { drawWaves(); });
 
-// Play/Pause Button
-playPauseBtn.addEventListener('click', () => {
-  running = !running;
-  if (running) {
-    // Resume
-    playPauseBtn.textContent = "Pause";
-    lastTimestamp = null;
-    animationId = requestAnimationFrame(animate);
-  } else {
-    // Pause
-    playPauseBtn.textContent = "Play";
-    cancelAnimationFrame(animationId);
-  }
-});
+        // Play/Pause Button
+        playPauseBtn.addEventListener('click', () => {
+            running = !running;
+            if (running) {
+                // Resume
+                playPauseBtn.textContent = "Pause";
+                lastTimestamp = null;
+                animationId = requestAnimationFrame(animate);
+            } else {
+                // Pause
+                playPauseBtn.textContent = "Play";
+                cancelAnimationFrame(animationId);
+            }
+        });
 
-/*******************************************************
- *   Canvas Setup (High DPI)
- *******************************************************/
-function setupCanvas() {
-  const ratio = window.devicePixelRatio || 1;
-  const computedStyle = getComputedStyle(canvas);
-  width  = parseInt(computedStyle.getPropertyValue('width'));
-  height = parseInt(computedStyle.getPropertyValue('height'));
+        /*******************************************************
+         *   Canvas Setup (High DPI)
+         *******************************************************/
+        function setupCanvas() {
+            const ratio = window.devicePixelRatio || 1;
+            const computedStyle = getComputedStyle(canvas);
+            width = parseInt(computedStyle.getPropertyValue('width'));
+            height = parseInt(computedStyle.getPropertyValue('height'));
 
-  canvas.width  = width * ratio;
-  canvas.height = height * ratio;
-  ctx.scale(ratio, ratio);
-}
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            ctx.scale(ratio, ratio);
+        }
 
-// Initial setup
-setupCanvas();
-window.addEventListener('resize', () => {
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  setupCanvas();
-  drawWaves();
-});
+        // Initial setup
+        setupCanvas();
+        window.addEventListener('resize', () => {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            setupCanvas();
+            drawWaves();
+        });
 
-/*******************************************************
- *   Animation
- *******************************************************/
-let animationId;
-let running = true;
-let lastTimestamp = null;
-let accumulatedTime = 0;
+        /*******************************************************
+         *   Animation
+         *******************************************************/
+        let animationId;
+        let running = true;
+        let lastTimestamp = null;
+        let accumulatedTime = 0;
 
-function drawWaves() {
-  const t = accumulatedTime / 1000; // convert ms -> seconds
+        function drawWaves() {
+            const t = accumulatedTime / 1000; // convert ms -> seconds
 
-  // Clear
-  ctx.clearRect(0, 0, width, height);
+            // Clear
+            ctx.clearRect(0, 0, width, height);
 
-  // Draw baseline
-  const baseline = height / 2;
-  ctx.beginPath();
-  ctx.moveTo(0, baseline);
-  ctx.lineTo(width, baseline);
-  ctx.strokeStyle = '#555';
-  ctx.lineWidth = 2;
-  ctx.stroke();
+            // Draw baseline
+            const baseline = height / 2;
+            ctx.beginPath();
+            ctx.moveTo(0, baseline);
+            ctx.lineTo(width, baseline);
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-  // Precompute angular freq & wave numbers
-  const omega1 = 2 * Math.PI * frequency1;
-  const omega2 = 2 * Math.PI * frequency2;
+            // Precompute angular freq & wave numbers
+            const omega1 = 2 * Math.PI * frequency1;
+            const omega2 = 2 * Math.PI * frequency2;
 
-  // Avoid dividing by zero if speed is extremely small
-  const actualSpeed1 = Math.max(speed1, 1e-6);
-  const actualSpeed2 = Math.max(speed2, 1e-6);
+            // Avoid dividing by zero if speed is extremely small
+            const actualSpeed1 = Math.max(speed1, 1e-6);
+            const actualSpeed2 = Math.max(speed2, 1e-6);
 
-  const k1 = omega1 / actualSpeed1; 
-  const k2 = omega2 / actualSpeed2;
+            const k1 = omega1 / actualSpeed1;
+            const k2 = omega2 / actualSpeed2;
 
-  // ========== Draw Wave 1 If Toggled On ==========
-  if (toggleWave1.checked) {
-    ctx.beginPath();
-    for (let x = 0; x <= width; x++) {
-      const xVirtual = x / timeZoom;
-      const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
-      const canvasY = baseline - wave1Val;
-      if (x === 0) ctx.moveTo(x, canvasY);
-      else         ctx.lineTo(x, canvasY);
-    }
-    ctx.strokeStyle = '#99ceff'; // Light blue
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
+            // ========== Draw Wave 1 If Toggled On ==========
+            if (toggleWave1.checked) {
+                ctx.beginPath();
+                for (let x = 0; x <= width; x++) {
+                    const xVirtual = x / timeZoom;
+                    const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
+                    const canvasY = baseline - wave1Val;
+                    if (x === 0) ctx.moveTo(x, canvasY);
+                    else ctx.lineTo(x, canvasY);
+                }
+                ctx.strokeStyle = '#99ceff'; // Light blue
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
 
-  // ========== Draw Wave 2 If Toggled On ==========
-  if (toggleWave2.checked) {
-    ctx.beginPath();
-    for (let x = 0; x <= width; x++) {
-      const xVirtual = x / timeZoom;
-      const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
-      const canvasY = baseline - wave2Val;
-      if (x === 0) ctx.moveTo(x, canvasY);
-      else         ctx.lineTo(x, canvasY);
-    }
-    ctx.strokeStyle = '#ff9649'; // Orange
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
+            // ========== Draw Wave 2 If Toggled On ==========
+            if (toggleWave2.checked) {
+                ctx.beginPath();
+                for (let x = 0; x <= width; x++) {
+                    const xVirtual = x / timeZoom;
+                    const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
+                    const canvasY = baseline - wave2Val;
+                    if (x === 0) ctx.moveTo(x, canvasY);
+                    else ctx.lineTo(x, canvasY);
+                }
+                ctx.strokeStyle = '#ff9649'; // Orange
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
 
-  // ========== Draw Superposition If Toggled On ==========
-  if (toggleSuperposition.checked) {
-    ctx.beginPath();
-    for (let x = 0; x <= width; x++) {
-      const xVirtual = x / timeZoom;
+            // ========== Draw Superposition If Toggled On ==========
+            if (toggleSuperposition.checked) {
+                ctx.beginPath();
+                for (let x = 0; x <= width; x++) {
+                    const xVirtual = x / timeZoom;
 
-      const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
-      const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
+                    const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
+                    const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
 
-      const sumVal = wave1Val + wave2Val;
-      const canvasY = baseline - sumVal;
+                    const sumVal = wave1Val + wave2Val;
+                    const canvasY = baseline - sumVal;
 
-      if (x === 0) ctx.moveTo(x, canvasY);
-      else         ctx.lineTo(x, canvasY);
-    }
-    ctx.strokeStyle = '#54f372'; // Green
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-  }
-}
+                    if (x === 0) ctx.moveTo(x, canvasY);
+                    else ctx.lineTo(x, canvasY);
+                }
+                ctx.strokeStyle = '#54f372'; // Green
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+        }
 
-function animate(timestamp) {
-  if (!running) {
-    lastTimestamp = null;
-    return;
-  }
-  if (!lastTimestamp) lastTimestamp = timestamp;
+        function animate(timestamp) {
+            if (!running) {
+                lastTimestamp = null;
+                return;
+            }
+            if (!lastTimestamp) lastTimestamp = timestamp;
 
-  const delta = timestamp - lastTimestamp;
-  lastTimestamp = timestamp;
+            const delta = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
 
-  // Speed up / slow down time by "timeMotion"
-  accumulatedTime += delta * timeMotion;
+            // Speed up / slow down time by "timeMotion"
+            accumulatedTime += delta * timeMotion;
 
-  drawWaves();
-  animationId = requestAnimationFrame(animate);
-}
+            drawWaves();
+            animationId = requestAnimationFrame(animate);
+        }
 
-// Start animation
-animationId = requestAnimationFrame(animate);
+        // Start animation
+        animationId = requestAnimationFrame(animate);
 
-/*******************************************************
- *   SPACE BAR: Pause/Resume
- *******************************************************/
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' || e.key === ' ') {
-    e.preventDefault(); // Stop space from scrolling
-    running = !running;
+        /*******************************************************
+         *   SPACE BAR: Pause/Resume
+         *******************************************************/
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault(); // Stop space from scrolling
+                running = !running;
 
-    if (running) {
-      playPauseBtn.textContent = "Pause";
-      lastTimestamp = null;
-      animationId = requestAnimationFrame(animate);
-    } else {
-      playPauseBtn.textContent = "Play";
-      cancelAnimationFrame(animationId);
-    }
-  }
-});
-</script>
-  <footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
-  </footer>
+                if (running) {
+                    playPauseBtn.textContent = "Pause";
+                    lastTimestamp = null;
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    playPauseBtn.textContent = "Play";
+                    cancelAnimationFrame(animationId);
+                }
+            }
+        });
+    </script>
+    <footer>
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+    </footer>
 </body>
+
 </html>

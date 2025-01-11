@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Markdown Editor with LaTeX</title>
   <link rel="icon" type="image/png" href="/favicon.png">
-  
+
   <!-- MathJax Configuration -->
   <script>
     window.MathJax = {
@@ -26,13 +27,14 @@
 
   <!-- DOMPurify -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
-  
+
   <!-- Highlight.js Stylesheets -->
-  <link id="highlightStyle" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
-  
+  <link id="highlightStyle" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+
   <!-- Highlight.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-  
+
   <!-- Initialize Highlight.js after DOM content is loaded -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -60,14 +62,22 @@
       /* -------------------------------
          CSS Variables for Toggle Switch
       --------------------------------- */
-      --switch-width: 42px;               /* Width of the switch */
-      --switch-height: 18px;              /* Height of the switch */
-      --slider-size: 13px;                /* Size of the toggle knob */
-      --slider-transform: 23px;           /* Distance the knob moves when toggled */
-      --switch-active-color: #009688;     /* Active background color of the switch */
-      --switch-background-color: #ccc;    /* Inactive background color of the switch */
-      --switch-knob-color: white;         /* Color of the toggle knob */
-      --switch-label-font-size: 14px;     /* Font size of the switch label */
+      --switch-width: 42px;
+      /* Width of the switch */
+      --switch-height: 18px;
+      /* Height of the switch */
+      --slider-size: 13px;
+      /* Size of the toggle knob */
+      --slider-transform: 23px;
+      /* Distance the knob moves when toggled */
+      --switch-active-color: #009688;
+      /* Active background color of the switch */
+      --switch-background-color: #ccc;
+      /* Inactive background color of the switch */
+      --switch-knob-color: white;
+      /* Color of the toggle knob */
+      --switch-label-font-size: 14px;
+      /* Font size of the switch label */
     }
 
     body.dark-mode {
@@ -79,12 +89,15 @@
       --button-background: #474646;
       --button-color: #ffffff;
       --border-color: #555555;
-      --code-background: #2f2f2f; /* Darker background for code blocks */
+      --code-background: #2f2f2f;
+      /* Darker background for code blocks */
       --table-border-color: #555555;
       --table-header-background: #333333;
-      --code-text-color: #f8f8f2; /* Brightened code text color */
+      --code-text-color: #f8f8f2;
+      /* Brightened code text color */
       /* Toggle Switch Active Color in Dark Mode */
-      --switch-active-color: #009688; /* Teal remains consistent */
+      --switch-active-color: #009688;
+      /* Teal remains consistent */
     }
 
     body {
@@ -93,7 +106,8 @@
       height: 100vh;
       margin: 0;
       font-family: Helvetica, sans-serif;
-      line-height: 1.5; /* Set line-height to 1.5 */
+      line-height: 1.5;
+      /* Set line-height to 1.5 */
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
@@ -112,7 +126,8 @@
       background-color: var(--pane-background);
     }
 
-    #inputPane, #outputPane {
+    #inputPane,
+    #outputPane {
       width: 50%;
       padding: 0;
       box-sizing: border-box;
@@ -175,7 +190,8 @@
     /* Toggle Switch Container */
     .toggle-container {
       position: absolute;
-      right: 15px; /* Adjust spacing from the edge as needed */
+      right: 15px;
+      /* Adjust spacing from the edge as needed */
       display: flex;
       align-items: center;
     }
@@ -184,9 +200,12 @@
     .switch {
       position: relative;
       display: inline-block;
-      width: var(--switch-width);  /* Width of the switch */
-      height: var(--switch-height); /* Height of the switch */
-      margin-left: 2px; /* Adjust spacing between label and switch */
+      width: var(--switch-width);
+      /* Width of the switch */
+      height: var(--switch-height);
+      /* Height of the switch */
+      margin-left: 2px;
+      /* Adjust spacing between label and switch */
     }
 
     .switch input {
@@ -202,39 +221,51 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: var(--switch-background-color); /* Inactive background color */
+      background-color: var(--switch-background-color);
+      /* Inactive background color */
       transition: 0.4s;
-      border-radius: calc(var(--switch-height) / 2); /* Fully rounded corners */
+      border-radius: calc(var(--switch-height) / 2);
+      /* Fully rounded corners */
     }
 
     .slider:before {
       position: absolute;
       content: "";
-      height: var(--slider-size); /* Size of the toggle knob */
-      width: var(--slider-size);   /* Size of the toggle knob */
-      left: 2.5px; /* Adjust position as needed */
-      bottom: 2.5px; /* Adjust position as needed */
-      background-color: var(--switch-knob-color); /* Color of the toggle knob */
+      height: var(--slider-size);
+      /* Size of the toggle knob */
+      width: var(--slider-size);
+      /* Size of the toggle knob */
+      left: 2.5px;
+      /* Adjust position as needed */
+      bottom: 2.5px;
+      /* Adjust position as needed */
+      background-color: var(--switch-knob-color);
+      /* Color of the toggle knob */
       transition: 0.4s;
       border-radius: 50%;
     }
 
-    input:checked + .slider {
-      background-color: var(--switch-active-color); /* Active background color */
+    input:checked+.slider {
+      background-color: var(--switch-active-color);
+      /* Active background color */
     }
 
-    input:focus + .slider {
-      box-shadow: 0 0 1px var(--switch-active-color); /* Focus shadow */
+    input:focus+.slider {
+      box-shadow: 0 0 1px var(--switch-active-color);
+      /* Focus shadow */
     }
 
-    input:checked + .slider:before {
-      transform: translateX(var(--slider-transform)); /* Move knob when checked */
+    input:checked+.slider:before {
+      transform: translateX(var(--slider-transform));
+      /* Move knob when checked */
     }
 
     /* Style for the Sync Scroll Label */
     .switch-label {
-      font-size: var(--switch-label-font-size); /* Font size of the label */
-      margin-right: 5px; /* Space between label and switch */
+      font-size: var(--switch-label-font-size);
+      /* Font size of the label */
+      margin-right: 5px;
+      /* Space between label and switch */
     }
 
     textarea {
@@ -255,7 +286,8 @@
       flex: 1;
       padding: 20px;
       font-size: 16px;
-      line-height: 1.5; /* Consistent line-height */
+      line-height: 1.5;
+      /* Consistent line-height */
       box-sizing: border-box;
       overflow-y: auto;
       background-color: var(--pane-background);
@@ -267,86 +299,112 @@
       background-color: var(--code-background);
       padding: 0.1em 0.2em;
       border-radius: 3px;
-      font-size: 0.95em; /* Set font size to 0.95em */
-      line-height: 1; /* Maintain tight spacing for inline code */
+      font-size: 0.95em;
+      /* Set font size to 0.95em */
+      line-height: 1;
+      /* Maintain tight spacing for inline code */
       font-family: "Courier New", Courier, monospace;
       vertical-align: baseline;
-      color: inherit; /* Inherit color to allow Highlight.js to apply */
+      color: inherit;
+      /* Inherit color to allow Highlight.js to apply */
     }
 
     /* Code block styling */
     pre {
       background-color: var(--code-background);
-      padding: 0; /* Removed padding */
+      padding: 0;
+      /* Removed padding */
       border-radius: 5px;
       overflow-x: auto;
-      font-size: 0.95em; /* Set font size to 0.95em */
-      line-height: 1.5; /* Set line-height to 1.5 */
-      margin: 2px 0; /* Further reduced margin */
+      font-size: 0.95em;
+      /* Set font size to 0.95em */
+      line-height: 1.5;
+      /* Set line-height to 1.5 */
+      margin: 2px 0;
+      /* Further reduced margin */
     }
 
     pre code {
-      background: none; /* Let Highlight.js handle background */
-      padding: 0; /* Removed padding */
+      background: none;
+      /* Let Highlight.js handle background */
+      padding: 0;
+      /* Removed padding */
       border-radius: 0;
-      font-family: inherit; /* Inherit font from pre */
-      line-height: 1.5; /* Ensure line-height is applied */
-      font-size: inherit; /* Inherit font size */
-      color: inherit; /* Inherit color to allow Highlight.js to apply */
+      font-family: inherit;
+      /* Inherit font from pre */
+      line-height: 1.5;
+      /* Ensure line-height is applied */
+      font-size: inherit;
+      /* Inherit font size */
+      color: inherit;
+      /* Inherit color to allow Highlight.js to apply */
     }
 
     /* Highlight.js Styles */
     .hljs {
-      line-height: 1.5; /* Ensure Highlight.js respects line-height */
-      font-size: 0.95em; /* Match the font size of pre */
-      background-color: inherit; /* Ensure background is inherited from pre */
-      color: inherit; /* Inherit color to allow custom coloring */
+      line-height: 1.5;
+      /* Ensure Highlight.js respects line-height */
+      font-size: 0.95em;
+      /* Match the font size of pre */
+      background-color: inherit;
+      /* Ensure background is inherited from pre */
+      color: inherit;
+      /* Inherit color to allow custom coloring */
     }
 
     /* Custom Highlight.js Colors for Dark Mode */
     body.dark-mode .hljs {
-      color: var(--code-text-color); /* Brightened code text color */
+      color: var(--code-text-color);
+      /* Brightened code text color */
     }
 
     body.dark-mode .hljs-comment,
     body.dark-mode .hljs-quote {
-      color: #8d9a70 !important; /* Darker green for comments */
+      color: #8d9a70 !important;
+      /* Darker green for comments */
     }
 
     body.dark-mode .hljs-keyword,
     body.dark-mode .hljs-selector-tag,
     body.dark-mode .hljs-subst {
-      color: #66d9ef !important; /* Bright blue for keywords */
+      color: #66d9ef !important;
+      /* Bright blue for keywords */
     }
 
     body.dark-mode .hljs-string,
     body.dark-mode .hljs-doctag {
-      color: #e6db74 !important; /* Yellow for strings */
+      color: #e6db74 !important;
+      /* Yellow for strings */
     }
 
     body.dark-mode .hljs-number,
     body.dark-mode .hljs-regexp,
     body.dark-mode .hljs-tag .hljs-attr {
-      color: #ae81ff !important; /* Purple for numbers and attributes */
+      color: #ae81ff !important;
+      /* Purple for numbers and attributes */
     }
 
     body.dark-mode .hljs-title,
     body.dark-mode .hljs-section {
-      color: #a6e22e !important; /* Green for titles and sections */
+      color: #a6e22e !important;
+      /* Green for titles and sections */
     }
 
     body.dark-mode .hljs-type,
     body.dark-mode .hljs-built_in {
-      color: #fd971f !important; /* Orange for types and built-ins */
+      color: #fd971f !important;
+      /* Orange for types and built-ins */
     }
 
     body.dark-mode .hljs-symbol,
     body.dark-mode .hljs-bullet {
-      color: #f92672 !important; /* Pink for symbols and bullets */
+      color: #f92672 !important;
+      /* Pink for symbols and bullets */
     }
 
     body.dark-mode .hljs-link {
-      color: #e6db74 !important; /* Yellow for links */
+      color: #e6db74 !important;
+      /* Yellow for links */
     }
 
     /* Add more .hljs-* styles as needed based on the Highlight.js theme */
@@ -359,7 +417,8 @@
       border: 1px solid var(--table-border-color);
     }
 
-    th, td {
+    th,
+    td {
       border: 1px solid var(--table-border-color);
       padding: 8px;
       /* Removed fixed alignment */
@@ -367,25 +426,31 @@
     }
 
     /* Alignment based on the 'align' attribute */
-    th[align="left"], td[align="left"] {
+    th[align="left"],
+    td[align="left"] {
       text-align: left;
     }
 
-    th[align="center"], td[align="center"] {
+    th[align="center"],
+    td[align="center"] {
       text-align: center;
     }
 
-    th[align="right"], td[align="right"] {
+    th[align="right"],
+    td[align="right"] {
       text-align: right;
     }
 
     /* Optional: Default alignment if 'align' attribute is not specified */
-    th, td {
-      text-align: left; /* You can set a default alignment if desired */
+    th,
+    td {
+      text-align: left;
+      /* You can set a default alignment if desired */
     }
 
     /* Highlight.js Styles in Print */
     @media print {
+
       /* Override CSS Variables to Light Mode */
       :root {
         --background-color: #ffffff !important;
@@ -442,7 +507,8 @@
         display: none !important;
       }
 
-      svg, pre {
+      svg,
+      pre {
         page-break-inside: avoid !important;
         line-height: 1.5 !important;
       }
@@ -459,56 +525,74 @@
 
       /* Page Break Support */
       .page-break {
-        display: block;              /* Ensure the div is rendered */
-        page-break-after: always;    /* Insert a page break after this div */
-        height: 0;                   /* Prevent the div from taking up space */
+        display: block;
+        /* Ensure the div is rendered */
+        page-break-after: always;
+        /* Insert a page break after this div */
+        height: 0;
+        /* Prevent the div from taking up space */
       }
 
       /* Ensure MathJax equations are black in print */
       svg {
-        color: #000000 !important; /* Sets the text color to black */
-        stroke: #000000 !important; /* Ensures box outlines like \boxed remain visible */
+        color: #000000 !important;
+        /* Sets the text color to black */
+        stroke: #000000 !important;
+        /* Ensures box outlines like \boxed remain visible */
       }
 
       /* Preserve Highlight.js styles in print */
       pre {
-        background-color: #f0f0f0 !important; /* Ensure background is visible */
-        line-height: 1.5 !important; /* Ensure line-height is set */
-        font-size: 0.95em !important; /* Ensure font size is consistent */
-        margin: 2px 0 !important; /* Ensure reduced margin is applied */
+        background-color: #f0f0f0 !important;
+        /* Ensure background is visible */
+        line-height: 1.5 !important;
+        /* Ensure line-height is set */
+        font-size: 0.95em !important;
+        /* Ensure font size is consistent */
+        margin: 2px 0 !important;
+        /* Ensure reduced margin is applied */
       }
 
       /* Ensure code colors are preserved */
       .hljs {
         color: #000000 !important;
-        line-height: 1.5 !important; /* Ensure line-height is set */
-        font-size: 0.95em !important; /* Ensure font size is consistent */
-        background-color: inherit !important; /* Inherit background */
+        line-height: 1.5 !important;
+        /* Ensure line-height is set */
+        font-size: 0.95em !important;
+        /* Ensure font size is consistent */
+        background-color: inherit !important;
+        /* Inherit background */
       }
 
       .hljs-comment,
       .hljs-quote {
-        color: #008000 !important; /* Example: green for comments */
+        color: #008000 !important;
+        /* Example: green for comments */
       }
 
       /* Add more .hljs-* styles as needed based on the Highlight.js theme */
 
       /* Alignment based on the 'align' attribute in print */
-      th[align="left"], td[align="left"] {
+      th[align="left"],
+      td[align="left"] {
         text-align: left !important;
       }
 
-      th[align="center"], td[align="center"] {
+      th[align="center"],
+      td[align="center"] {
         text-align: center !important;
       }
 
-      th[align="right"], td[align="right"] {
+      th[align="right"],
+      td[align="right"] {
         text-align: right !important;
       }
 
       /* Optional: Default alignment in print */
-      th, td {
-        text-align: left !important; /* Set a default alignment if no 'align' attribute is present */
+      th,
+      td {
+        text-align: left !important;
+        /* Set a default alignment if no 'align' attribute is present */
       }
     }
 
@@ -526,8 +610,8 @@
     }
 
     footer a {
-            color: #e1b400
-        }
+      color: #e1b400
+    }
 
     /* Original Button Styles */
     button {
@@ -548,6 +632,7 @@
   </style>
 
 </head>
+
 <body>
   <div id="editorContainer">
     <div id="inputPane">
@@ -565,12 +650,13 @@
     <div id="outputPane">
       <div class="pane-heading-container">
         <h2 class="pane-heading">Rendered Output</h2>
-        <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode" title="Switch to Dark Mode">☀️</button>
+        <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
+          title="Switch to Dark Mode">☀️</button>
       </div>
       <div class="buttonContainer no-print">
         <button id="printButton" title="Prints in light mode">Print to PDF</button>
         <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
-        
+
         <!-- Toggle Switch for Sync Scroll -->
         <div class="toggle-container">
           <label for="syncScrollSwitch" class="switch-label">Sync Scroll</label>
@@ -812,7 +898,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
     function preprocessMarkdown(input) {
       // Regex to match inline ($...$) and display ($$...$$) math blocks
       const regex = /(\$\$?)([\s\S]+?)\1/g;
-      return input.replace(regex, function(match, p1, p2) {
+      return input.replace(regex, function (match, p1, p2) {
         // Replace single backslashes with double backslashes within LaTeX blocks
         const escaped = p2.replace(/\\/g, '\\\\');
         return p1 + escaped + p1;
@@ -829,7 +915,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
         headerIds: true, // Enable header IDs
         tables: true, // Ensure tables are enabled
         langPrefix: 'hljs language-', // Highlight.js expects a top-level 'hljs' class
-        highlight: function(code, lang) {
+        highlight: function (code, lang) {
           if (lang && hljs.getLanguage(lang)) {
             return hljs.highlight(code, { language: lang }).value;
           } else {
@@ -841,7 +927,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       const parsedMarkdown = marked.parse(preprocessedText);
       const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
       renderedOutput.innerHTML = sanitizedContent;
-      
+
       // Apply syntax highlighting to the newly added code blocks
       hljs.highlightAll();
 
@@ -1236,7 +1322,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
      */
     function throttle(func, limit) {
       let inThrottle;
-      return function() {
+      return function () {
         const args = arguments;
         const context = this;
         if (!inThrottle) {
@@ -1326,4 +1412,5 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
     renderContent();
   </script>
 </body>
+
 </html>

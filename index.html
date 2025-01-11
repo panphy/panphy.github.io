@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -254,26 +255,33 @@
                 margin: 0 0.75rem;
                 font-size: 1rem;
             }
+
             .section h2 {
                 font-size: 1.75rem;
             }
+
             .card h3 {
                 font-size: 1.3rem;
             }
+
             .card p {
                 font-size: 0.95rem;
             }
+
             .card a {
                 padding: 0.7rem;
                 font-size: 0.95rem;
             }
+
             header {
                 padding: 1rem;
             }
+
             .theme-toggle {
                 top: 1rem;
                 right: 1rem;
             }
+
             .theme-toggle button {
                 width: 35px;
                 height: 35px;
@@ -287,6 +295,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <div>
@@ -388,7 +397,9 @@
     <!-- About Section -->
     <div class="section" id="about">
         <h2>About</h2>
-        <p>Welcome to the PanPhy Projects Hub. Each project here is the result of a collaborative effort between myself and ChatGPT. These tools and simulations are designed to provide interactive and educational experiences. Click on any project above to explore and enjoy!</p>
+        <p>Welcome to the PanPhy Projects Hub. Each project here is the result of a collaborative effort between myself
+            and ChatGPT. These tools and simulations are designed to provide interactive and educational experiences.
+            Click on any project above to explore and enjoy!</p>
     </div>
 
     <footer>
@@ -414,7 +425,7 @@
         }
 
         // Listen for button clicks to toggle theme
-        themeButton.addEventListener('click', function() {
+        themeButton.addEventListener('click', function () {
             let theme = document.documentElement.getAttribute('data-theme');
             if (theme === 'light') {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -428,4 +439,5 @@
         });
     </script>
 </body>
+
 </html>

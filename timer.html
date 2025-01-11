@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
         /* Apply box-sizing to all elements for consistent sizing */
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
@@ -20,7 +23,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 2rem; /* Space from the top */
+            padding-top: 2rem;
+            /* Space from the top */
         }
 
         /* Timer Container */
@@ -30,7 +34,7 @@
             padding: 1rem;
             width: 80vw;
             max-width: 800px;
-            text-align: center; 
+            text-align: center;
         }
 
         /* Timer banner fully rounded corners */
@@ -45,7 +49,8 @@
 
         /* Increased clock size for better visibility */
         .time {
-            font-size: 12vw; /* Bigger clock display */
+            font-size: 12vw;
+            /* Bigger clock display */
             font-weight: bold;
             margin: 1rem 0;
         }
@@ -68,7 +73,8 @@
 
         .inputs {
             display: flex;
-            justify-content: center; /* Center the inputs */
+            justify-content: center;
+            /* Center the inputs */
             gap: 1rem;
             margin: 1.5rem 0;
         }
@@ -78,11 +84,14 @@
             font-size: 1.2rem;
             border: 1px solid #7f8c8d;
             border-radius: 10px;
-            width: 12%; /* Smaller set time boxes */
+            width: 12%;
+            /* Smaller set time boxes */
             background: #2c3e50;
             color: #ecf0f1;
-            text-align: center; /* Center placeholder and typed text */
+            text-align: center;
+            /* Center placeholder and typed text */
         }
+
         input:focus {
             border-color: #f39c12;
             outline: none;
@@ -90,7 +99,8 @@
 
         /* Control Container (separate from timer container) */
         .control-container {
-            background: #3c597a; /* Slightly different shade for visual differentiation */
+            background: #3c597a;
+            /* Slightly different shade for visual differentiation */
             border-radius: 15px;
             padding: 1rem;
             width: 80vw;
@@ -102,9 +112,11 @@
         .control-area {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem; /* Closely arranged buttons */
+            gap: 0.5rem;
+            /* Closely arranged buttons */
             margin: 0 auto;
-            max-width: 300px; /* Limit width for a neat, focused look */
+            max-width: 300px;
+            /* Limit width for a neat, focused look */
         }
 
         button {
@@ -128,18 +140,23 @@
         button.set {
             background-color: #f39c12;
         }
+
         button.clear {
             background-color: #c0392b;
         }
+
         button.start {
             background-color: #27ae60;
         }
+
         button.pause {
             background-color: #2980b9;
         }
+
         button.resume {
             background-color: #27ae60;
         }
+
         button.reset {
             background-color: #2980b9;
         }
@@ -149,22 +166,31 @@
         }
 
         @keyframes blinker {
-            50% { opacity: 0; }
+            50% {
+                opacity: 0;
+            }
         }
 
         @media (max-width: 600px) {
             .timer-container h1 {
                 font-size: 6vw;
             }
+
             .time {
-                font-size: 14vw; /* Even larger on small screens if needed */
+                font-size: 14vw;
+                /* Even larger on small screens if needed */
             }
-            .label, .info {
+
+            .label,
+            .info {
                 font-size: 3vw;
             }
+
             input {
-                width: 20%; /* Slightly larger on mobile for easier tapping */
+                width: 20%;
+                /* Slightly larger on mobile for easier tapping */
             }
+
             button {
                 padding: 8px 10px;
                 font-size: 0.9rem;
@@ -182,9 +208,9 @@
         footer a {
             color: #e1b400
         }
-
     </style>
 </head>
+
 <body>
     <!-- Timer Area -->
     <div class="timer-container">
@@ -228,14 +254,14 @@
         let extraEndTimeObj = null;
 
         function formatTime(hours, minutes, seconds) {
-            return String(hours).padStart(2, '0') + ':' + 
-                   String(minutes).padStart(2, '0') + ':' + 
-                   String(seconds).padStart(2, '0');
+            return String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
         }
 
         function format24HourTime(date) {
-            return String(date.getHours()).padStart(2, '0') + ':' + 
-                   String(date.getMinutes()).padStart(2, '0');
+            return String(date.getHours()).padStart(2, '0') + ':' +
+                String(date.getMinutes()).padStart(2, '0');
         }
 
         function setTimer() {
@@ -271,7 +297,7 @@
             originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
             extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
 
-            document.getElementById('start-end-times').innerHTML = 
+            document.getElementById('start-end-times').innerHTML =
                 `Start: ${startTime} | End: ${format24HourTime(originalEndTimeObj)} ` +
                 `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
 
@@ -322,7 +348,7 @@
             originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
             extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
 
-            document.getElementById('start-end-times').innerHTML = 
+            document.getElementById('start-end-times').innerHTML =
                 `Start: ${format24HourTime(now)} | End: ${format24HourTime(originalEndTimeObj)} ` +
                 `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
 
@@ -407,4 +433,5 @@
         &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
     </footer>
 </body>
+
 </html>

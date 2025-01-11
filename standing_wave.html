@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +28,7 @@
         footer {
             text-align: center;
             padding: 5px;
-      	    background: ##25252500;
+            background: #25252500;
             color: #888;
             margin-top: 5px;
         }
@@ -50,11 +51,12 @@
         .container {
             background-color: #505050;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
             max-width: 1000px;
             width: 100%;
             padding: 30px;
-            overflow: hidden; /* Prevent child elements from overflowing */
+            overflow: hidden;
+            /* Prevent child elements from overflowing */
         }
 
         /* Control Boxes Layout */
@@ -72,11 +74,12 @@
             background: #3a3a3a;
             padding: 10px 15px;
             border-radius: 10px;
-            box-shadow: 0 0px 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0px 5px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center; /* Center-align all text */
+            text-align: center;
+            /* Center-align all text */
         }
 
         /* Bold all text within control boxes */
@@ -91,7 +94,8 @@
         }
 
         /* Slider and Dropdown Styling */
-        input[type="range"], select {
+        input[type="range"],
+        select {
             width: 100%;
             padding: 3px;
             margin-top: 5px;
@@ -101,7 +105,8 @@
             color: #e0e0e0;
         }
 
-        input[type="range"]:focus, select:focus {
+        input[type="range"]:focus,
+        select:focus {
             border: 1px solid #ffcc3f;
             outline: none;
         }
@@ -137,8 +142,10 @@
 
         /* Canvas Styling */
         canvas {
-            width: 100%; /* Ensure canvas does not exceed container's width */
-            height: auto; /* Maintain aspect ratio */
+            width: 100%;
+            /* Ensure canvas does not exceed container's width */
+            height: auto;
+            /* Maintain aspect ratio */
             border: none;
             border-radius: 10px;
             background: #1e1e1e;
@@ -152,7 +159,8 @@
             font-size: 0.90em;
             color: #bbbbbb;
             text-align: center;
-            font-weight: normal; /* Keep instructions normal weight */
+            font-weight: normal;
+            /* Keep instructions normal weight */
         }
 
         /* Responsive adjustments */
@@ -167,13 +175,16 @@
             h1 {
                 font-size: 2em;
             }
+
             .control-group {
                 padding: 10px 15px;
             }
+
             /* Canvas will maintain aspect ratio via JS */
         }
     </style>
 </head>
+
 <body>
     <h1>Standing Wave Simulation</h1>
     <div class="container">
@@ -182,14 +193,16 @@
             <div class="control-group">
                 <label class="control-label">Boundary Conditions</label>
                 <div style="width: 100%; margin-bottom: 10px;">
-                    <label for="leftBoundary" style="color: #ffcc3f;" title="Select the boundary condition for the left end of the string.">Left Boundary:</label>
+                    <label for="leftBoundary" style="color: #ffcc3f;"
+                        title="Select the boundary condition for the left end of the string.">Left Boundary:</label>
                     <select id="leftBoundary" aria-label="Left Boundary Condition">
                         <option value="fixed">Fixed</option>
                         <option value="free">Free</option>
                     </select>
                 </div>
                 <div style="width: 100%;">
-                    <label for="rightBoundary" style="color: #ffcc3f;" title="Select the boundary condition for the right end of the string.">Right Boundary:</label>
+                    <label for="rightBoundary" style="color: #ffcc3f;"
+                        title="Select the boundary condition for the right end of the string.">Right Boundary:</label>
                     <select id="rightBoundary" aria-label="Right Boundary Condition">
                         <option value="fixed">Fixed</option>
                         <option value="free">Free</option>
@@ -198,37 +211,49 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="amplitudeSlider" title="Adjust the maximum displacement of the wave.">Amplitude: <span id="amplitudeValue">6.0</span></label>
-                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0" aria-label="Amplitude Slider">
+                <label class="control-label" for="amplitudeSlider"
+                    title="Adjust the maximum displacement of the wave.">Amplitude: <span
+                        id="amplitudeValue">6.0</span></label>
+                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0"
+                    aria-label="Amplitude Slider">
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">Angular Frequency: <span id="omegaValue">6.28</span> rad/s</label>
+                <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">Angular
+                    Frequency: <span id="omegaValue">6.28</span> rad/s</label>
                 <label class="control-label">Frequency: <span id="frequencyValue">1.00</span> Hz</label>
-                <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28" aria-label="Angular Frequency Slider">
+                <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28"
+                    aria-label="Angular Frequency Slider">
             </div>
 
             <!-- Bottom Row: Red Particle Position, Green Particle Position, Harmonic -->
             <div class="control-group">
-                <label class="control-label" for="positionSlider" title="Adjust the position of the red particle along the string.">Red Particle Position: <span id="positionValue">0.50</span></label>
-                <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position Slider">
+                <label class="control-label" for="positionSlider"
+                    title="Adjust the position of the red particle along the string.">Red Particle Position: <span
+                        id="positionValue">0.50</span></label>
+                <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5"
+                    aria-label="Red Particle Position Slider">
                 <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="greenPositionSlider" title="Adjust the position of the green particle along the string.">Green Particle Position: <span id="greenPositionValue">0.80</span></label>
-                <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position Slider">
+                <label class="control-label" for="greenPositionSlider"
+                    title="Adjust the position of the green particle along the string.">Green Particle Position: <span
+                        id="greenPositionValue">0.80</span></label>
+                <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8"
+                    aria-label="Green Particle Position Slider">
                 <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
             </div>
 
             <div class="control-group">
-                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">Harmonic: <span id="harmonicValue">1st</span></label>
+                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">Harmonic:
+                    <span id="harmonicValue">1st</span></label>
                 <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
             </div>
         </div>
 
         <p class="instructions">Press the SPACE BAR to pause or resume the animation.</p>
-    <br>
+        <br>
         <canvas id="oscillationCanvas"></canvas>
     </div>
 
@@ -236,7 +261,7 @@
         // Helper function to convert numbers to ordinal strings
         function getOrdinal(n) {
             const s = ["th", "st", "nd", "rd"],
-                  v = n % 100;
+                v = n % 100;
             return n + (s[(v - 20) % 10] || s[v] || s[0]);
         }
 
@@ -260,12 +285,12 @@
         const redParticleAmplitude = document.getElementById("redParticleAmplitude");
         const greenParticleAmplitude = document.getElementById("greenParticleAmplitude");
 
-        let A = parseFloat(amplitudeSlider.value); 
+        let A = parseFloat(amplitudeSlider.value);
         let modeIndex = parseInt(modeSlider.value); // Mode index (1-6)
-        let xRed = parseFloat(positionSlider.value); 
+        let xRed = parseFloat(positionSlider.value);
         let xGreen = parseFloat(greenPositionSlider.value);
-        let omega = parseFloat(omegaSlider.value); 
-        let leftBoundary = leftBoundarySelect.value; 
+        let omega = parseFloat(omegaSlider.value);
+        let leftBoundary = leftBoundarySelect.value;
         let rightBoundary = rightBoundarySelect.value;
 
         // Set initial display values
@@ -485,7 +510,7 @@
         // Pause/Resume functionality on SPACE BAR key press
         document.addEventListener("keydown", (event) => {
             if (event.key === "Space" || event.key === ' ') {
-		event.preventDefault();
+                event.preventDefault();
                 isPaused = !isPaused;
             }
         });
@@ -504,8 +529,9 @@
             resizeCanvas();
         });
     </script>
-<footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
-</footer>
+    <footer>
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+    </footer>
 </body>
+
 </html>

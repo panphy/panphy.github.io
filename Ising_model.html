@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,12 +15,14 @@
       background-color: #f9f9f9;
       color: #333;
     }
+
     header {
       background-color: #333;
       color: #fff;
       text-align: center;
       padding: 3px 0;
     }
+
     footer {
       text-align: center;
       padding: 5px;
@@ -27,9 +30,11 @@
       color: #555;
       margin-top: 5px;
     }
+
     footer a {
-            color: #e1b400
-        }
+      color: #e1b400
+    }
+
     .container {
       width: 80%;
       margin: 20px auto;
@@ -38,50 +43,61 @@
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
+
     .controls {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       gap: 20px;
     }
+
     .control-group {
       flex: 1;
       min-width: 250px;
     }
+
     .control-group label {
       display: block;
       margin-bottom: 5px;
       font-weight: bold;
     }
+
     .control-group input[type="range"] {
       width: 100%;
     }
+
     .simulation-area {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: 20px;
     }
+
     #grid {
       display: grid;
       border: 2px solid #ddd;
     }
+
     .cell {
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px solid lightgray;
     }
+
     .spin-up {
       background-color: white;
     }
+
     .spin-down {
       background-color: black;
     }
+
     .button-group {
       text-align: center;
       margin: 20px 0;
     }
+
     .button-group button {
       margin: 5px;
       padding: 10px 20px;
@@ -93,9 +109,11 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
+
     .button-group button:hover {
       background-color: #0056b3;
     }
+
     #warning {
       color: red;
       font-weight: bold;
@@ -104,6 +122,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <h2>2D Ising Model Simulation</h2>
@@ -123,7 +142,8 @@
       </div>
       <div class="control-group">
         <label for="temperature">Temperature:</label>
-        <input id="temperature" type="range" min="0.1" max="2.5" step="0.1" value="2.5" oninput="updateTemperature(this.value)">
+        <input id="temperature" type="range" min="0.1" max="2.5" step="0.1" value="2.5"
+          oninput="updateTemperature(this.value)">
         <p><span id="temperatureValue">2.5 T<sub>c</sub></span></p>
       </div>
     </div>
@@ -246,4 +266,5 @@
   </footer>
 
 </body>
+
 </html>

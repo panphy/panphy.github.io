@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Dodge the Asteroids</title>
@@ -15,7 +16,8 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden; /* Prevent scrolling */
+      overflow: hidden;
+      /* Prevent scrolling */
     }
 
     /* Main Container */
@@ -73,7 +75,8 @@
       display: block;
       margin: 0 auto;
       touch-action: none;
-      -ms-touch-action: none; /* For older IE versions */
+      -ms-touch-action: none;
+      /* For older IE versions */
     }
 
     p {
@@ -97,445 +100,447 @@
     }
   </style>
 </head>
+
 <body>
 
-<div id="container">
-  <!-- Top Scores Section -->
-  <div id="topScores">
-    <h2>Top Scores</h2>
-    <ol id="scoreList"></ol>
+  <div id="container">
+    <!-- Top Scores Section -->
+    <div id="topScores">
+      <h2>Top Scores</h2>
+      <ol id="scoreList"></ol>
+    </div>
+
+    <!-- Game Section -->
+    <div id="gameContainer">
+      <h1>Dodge the Asteroids</h1>
+      <canvas id="gameCanvas" width="600" height="400"></canvas>
+      <p>Use <span>Arrow Keys</span> or <span>Drag</span> the spaceship to move. Avoid the <span>asteroids</span>.</p>
+      <p>Press <span>Enter</span> or tap the game area to restart after Game Over.</p>
+      <br>
+      <p>&copy; 2025 <a href="https://panphy.github.io/" style="color: #e1b400;">PanPhy</a>. All rights reserved.</p>
+    </div>
   </div>
 
-  <!-- Game Section -->
-  <div id="gameContainer">
-    <h1>Dodge the Asteroids</h1>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-    <p>Use <span>Arrow Keys</span> or <span>Drag</span> the spaceship to move. Avoid the <span>asteroids</span>.</p>
-    <p>Press <span>Enter</span> or tap the game area to restart after Game Over.</p>
-    <br>
-    <p>&copy; 2025 <a href="https://panphy.github.io/" style="color: #e1b400;">PanPhy</a>. All rights reserved.</p>
-  </div>
-</div>
+  <script>
+    /* -----------------------------------------------------------
+     * Global Variables
+     * -----------------------------------------------------------
+     */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-<script>
-/* -----------------------------------------------------------
- * Global Variables
- * -----------------------------------------------------------
- */
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+    const SCREEN_WIDTH = canvas.width;
+    const SCREEN_HEIGHT = canvas.height;
 
-const SCREEN_WIDTH = canvas.width;
-const SCREEN_HEIGHT = canvas.height;
+    // Images (Animated WebP, spaceship, asteroid)
+    const backgroundImg = new Image();
+    backgroundImg.src = 'background.png';
+    const spaceshipImg = new Image();
+    spaceshipImg.src = 'spaceship.png';
+    const asteroidImg = new Image();
+    asteroidImg.src = 'asteroid.png';
 
-// Images (Animated WebP, spaceship, asteroid)
-const backgroundImg = new Image();
-backgroundImg.src = 'background.png';
-const spaceshipImg = new Image();
-spaceshipImg.src = 'spaceship.png';
-const asteroidImg = new Image();
-asteroidImg.src = 'asteroid.png';
+    let gameOver = false;
+    let score = 0;
+    let asteroids = [];
+    let player;
+    let keys = {};
+    let animationId;
+    let topScores = [];
 
-let gameOver = false;
-let score = 0;
-let asteroids = [];
-let player;
-let keys = {};
-let animationId;
-let topScores = [];
+    // Asteroid spawn & speed parameters
+    let MIN_ASTEROID_SPEED = 2;
+    let MAX_ASTEROID_SPEED = 6;
+    let asteroidSpawnRate = 3;
+    const speedIncreaseInterval = 1500; // 1.5 seconds
 
-// Asteroid spawn & speed parameters
-let MIN_ASTEROID_SPEED = 2;
-let MAX_ASTEROID_SPEED = 6;
-let asteroidSpawnRate = 3;
-const speedIncreaseInterval = 1500; // 1.5 seconds
+    // Pointer control variables
+    let isPointerDown = false;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let spaceshipStartX = 0;
+    let spaceshipStartY = 0;
 
-// Pointer control variables
-let isPointerDown = false;
-let pointerStartX = 0;
-let pointerStartY = 0;
-let spaceshipStartX = 0;
-let spaceshipStartY = 0;
+    // We track when all images are loaded
+    let assetsLoaded = 0;
 
-// We track when all images are loaded
-let assetsLoaded = 0;
+    /* -----------------------------------------------------------
+     * Background Scrolling Variables
+     * -----------------------------------------------------------
+     * backgroundOffsetY: the vertical offset
+     * backgroundScrollSpeed: how fast the background scrolls.
+     * Adjust backgroundScrollSpeed to make the rolling faster or slower.
+     */
+    let backgroundOffsetY = 0;
+    let backgroundScrollSpeed = 2; // <-- Adjust this value to control background rolling speed
 
-/* -----------------------------------------------------------
- * Background Scrolling Variables
- * -----------------------------------------------------------
- * backgroundOffsetY: the vertical offset
- * backgroundScrollSpeed: how fast the background scrolls.
- * Adjust backgroundScrollSpeed to make the rolling faster or slower.
- */
-let backgroundOffsetY = 0;
-let backgroundScrollSpeed = 2; // <-- Adjust this value to control background rolling speed
-
-/* -----------------------------------------------------------
- * Spaceship Class
- * -----------------------------------------------------------
- */
-class Spaceship {
-  constructor() {
-    this.x = SCREEN_WIDTH / 2;
-    this.y = SCREEN_HEIGHT / 2;
-    this.width = 50;
-    this.height = 50;
-    this.radius = 15;
-    this.speed = 5;
-  }
-
-  move() {
-    let deltaX = 0;
-    let deltaY = 0;
-
-    if (keys['ArrowLeft']) {
-      deltaX -= 1;
-    }
-    if (keys['ArrowRight']) {
-      deltaX += 1;
-    }
-    if (keys['ArrowUp']) {
-      deltaY -= 1;
-    }
-    if (keys['ArrowDown']) {
-      deltaY += 1;
-    }
-
-    if (deltaX !== 0 || deltaY !== 0) {
-      const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const normX = (deltaX / magnitude) * this.speed;
-      const normY = (deltaY / magnitude) * this.speed;
-
-      const newX = this.x + normX;
-      const newY = this.y + normY;
-
-      // Boundary checks
-      if (newX - this.radius >= 0 && newX + this.radius <= SCREEN_WIDTH) {
-        this.x = newX;
+    /* -----------------------------------------------------------
+     * Spaceship Class
+     * -----------------------------------------------------------
+     */
+    class Spaceship {
+      constructor() {
+        this.x = SCREEN_WIDTH / 2;
+        this.y = SCREEN_HEIGHT / 2;
+        this.width = 50;
+        this.height = 50;
+        this.radius = 15;
+        this.speed = 5;
       }
-      if (newY - this.radius >= 0 && newY + this.radius <= SCREEN_HEIGHT) {
+
+      move() {
+        let deltaX = 0;
+        let deltaY = 0;
+
+        if (keys['ArrowLeft']) {
+          deltaX -= 1;
+        }
+        if (keys['ArrowRight']) {
+          deltaX += 1;
+        }
+        if (keys['ArrowUp']) {
+          deltaY -= 1;
+        }
+        if (keys['ArrowDown']) {
+          deltaY += 1;
+        }
+
+        if (deltaX !== 0 || deltaY !== 0) {
+          const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+          const normX = (deltaX / magnitude) * this.speed;
+          const normY = (deltaY / magnitude) * this.speed;
+
+          const newX = this.x + normX;
+          const newY = this.y + normY;
+
+          // Boundary checks
+          if (newX - this.radius >= 0 && newX + this.radius <= SCREEN_WIDTH) {
+            this.x = newX;
+          }
+          if (newY - this.radius >= 0 && newY + this.radius <= SCREEN_HEIGHT) {
+            this.y = newY;
+          }
+        }
+      }
+
+      setPosition(newX, newY) {
+        this.x = newX;
         this.y = newY;
       }
-    }
-  }
 
-  setPosition(newX, newY) {
-    this.x = newX;
-    this.y = newY;
-  }
-
-  draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.drawImage(
-      spaceshipImg,
-      -this.width / 2,
-      -this.height / 2,
-      this.width,
-      this.height
-    );
-    ctx.restore();
-  }
-}
-
-/* -----------------------------------------------------------
- * Asteroid Class
- * -----------------------------------------------------------
- */
-class Asteroid {
-  constructor() {
-    this.spawn();
-    // Random speed between MIN and MAX
-    this.speed =
-      Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) +
-      MIN_ASTEROID_SPEED;
-
-    // Random rotation angle + spin speed
-    this.angle = Math.random() * 2 * Math.PI;
-    this.rotationSpeed = (Math.random() - 0.5) * 0.05;
-
-    // Random scale for the asteroid (0.5x to 2x)
-    this.scale = 0.5 + Math.random() * 1.5;
-    this.width = 32 * this.scale;
-    this.height = 32 * this.scale;
-    this.radius = (this.width + this.height) / 4;
-  }
-
-  spawn() {
-    const edge = Math.floor(Math.random() * 4);
-    switch (edge) {
-      case 0: // Top
-        this.x = Math.random() * SCREEN_WIDTH;
-        this.y = -40;
-        break;
-      case 1: // Bottom
-        this.x = Math.random() * SCREEN_WIDTH;
-        this.y = SCREEN_HEIGHT + 40;
-        break;
-      case 2: // Left
-        this.x = -40;
-        this.y = Math.random() * SCREEN_HEIGHT;
-        break;
-      case 3: // Right
-        this.x = SCREEN_WIDTH + 40;
-        this.y = Math.random() * SCREEN_HEIGHT;
-        break;
-    }
-    const angle = Math.random() * 2 * Math.PI;
-    this.dx = Math.cos(angle);
-    this.dy = Math.sin(angle);
-  }
-
-  move() {
-    this.x += this.dx * this.speed;
-    this.y += this.dy * this.speed;
-    this.angle += this.rotationSpeed;
-  }
-
-  draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
-    ctx.drawImage(
-      asteroidImg,
-      -this.width / 2,
-      -this.height / 2,
-      this.width,
-      this.height
-    );
-    ctx.restore();
-  }
-
-  isOffScreen() {
-    return (
-      this.x < -100 ||
-      this.x > SCREEN_WIDTH + 100 ||
-      this.y < -100 ||
-      this.y > SCREEN_HEIGHT + 100
-    );
-  }
-}
-
-/* -----------------------------------------------------------
- * Asset Loading
- * -----------------------------------------------------------
- */
-function startIfReady() {
-  assetsLoaded++;
-  if (assetsLoaded === 3) {
-    // Once all images are loaded, start the game
-    resetGame();
-  }
-}
-
-backgroundImg.onload = startIfReady;
-spaceshipImg.onload = startIfReady;
-asteroidImg.onload = startIfReady;
-
-/* -----------------------------------------------------------
- * Input Handlers
- * -----------------------------------------------------------
- */
-document.addEventListener('keydown', (e) => {
-  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
-    e.preventDefault(); // Prevent scrolling
-  }
-  keys[e.key] = true;
-
-  if (gameOver && e.key === 'Enter') {
-    resetGame();
-  }
-});
-
-document.addEventListener('keyup', (e) => {
-  keys[e.key] = false;
-});
-
-canvas.addEventListener('pointerdown', (e) => {
-  if (gameOver) {
-    e.preventDefault();
-    resetGame();
-    return;
-  }
-  e.preventDefault();
-  isPointerDown = true;
-  pointerStartX = e.clientX;
-  pointerStartY = e.clientY;
-  spaceshipStartX = player.x;
-  spaceshipStartY = player.y;
-}, { passive: false });
-
-canvas.addEventListener('pointermove', (e) => {
-  if (isPointerDown && !gameOver) {
-    e.preventDefault();
-    const deltaX = e.clientX - pointerStartX;
-    const deltaY = e.clientY - pointerStartY;
-    let newX = spaceshipStartX + deltaX;
-    let newY = spaceshipStartY + deltaY;
-
-    newX = Math.max(player.radius, Math.min(SCREEN_WIDTH - player.radius, newX));
-    newY = Math.max(player.radius, Math.min(SCREEN_HEIGHT - player.radius, newY));
-    player.setPosition(newX, newY);
-  }
-}, { passive: false });
-
-canvas.addEventListener('pointerup', (e) => {
-  if (isPointerDown) {
-    e.preventDefault();
-    isPointerDown = false;
-  }
-}, { passive: false });
-
-canvas.addEventListener('pointercancel', (e) => {
-  if (isPointerDown) {
-    e.preventDefault();
-    isPointerDown = false;
-  }
-}, { passive: false });
-
-/* -----------------------------------------------------------
- * Collision Detection
- * -----------------------------------------------------------
- */
-function checkCollision(ship, asteroid) {
-  const dx = ship.x - asteroid.x;
-  const dy = ship.y - asteroid.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  return distance < ship.radius + asteroid.radius;
-}
-
-/* -----------------------------------------------------------
- * Game Logic
- * -----------------------------------------------------------
- */
-function resetGame() {
-  player = new Spaceship();
-  asteroids = [];
-  score = 0;
-  asteroidSpawnRate = 3;
-  MIN_ASTEROID_SPEED = 2;
-  MAX_ASTEROID_SPEED = 6;
-  gameOver = false;
-
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-  }
-  gameLoop();
-}
-
-function updateTopScores(newScore) {
-  topScores.push(newScore);
-  topScores.sort((a, b) => b - a);
-  topScores = topScores.slice(0, 5);
-
-  const scoreList = document.getElementById('scoreList');
-  scoreList.innerHTML = '';
-  topScores.forEach((sc) => {
-    const li = document.createElement('li');
-    li.textContent = sc;
-    scoreList.appendChild(li);
-  });
-}
-
-/* -----------------------------------------------------------
- * Rolling Background Function
- * -----------------------------------------------------------
- * We shift the background image down by backgroundOffsetY
- * each frame. Once offset >= backgroundImg.height, reset it
- * to 0 to create a seamless rolling effect.
- */
-function drawRollingBackground() {
-  // Increase the offset to "scroll" the background
-  backgroundOffsetY += backgroundScrollSpeed;
-
-  // Once it passes the image's height, wrap around
-  if (backgroundOffsetY >= backgroundImg.height) {
-    backgroundOffsetY = 0;
-  }
-
-  // Draw the tiled background in vertical strips
-  for (let y = -backgroundImg.height; y < SCREEN_HEIGHT; y += backgroundImg.height) {
-    for (let x = 0; x < SCREEN_WIDTH; x += backgroundImg.width) {
-      ctx.drawImage(backgroundImg, x, y + backgroundOffsetY);
-    }
-  }
-}
-
-/* -----------------------------------------------------------
- * The main game loop
- * -----------------------------------------------------------
- */
-function gameLoop() {
-  if (!gameOver) {
-    // 1) Draw the rolling background
-    drawRollingBackground();
-
-    // 2) Increase and display score
-    score++;
-    ctx.fillStyle = '#f5f5f5';
-    ctx.font = '18px Arial';
-    ctx.fillText('Score: ' + score, 10, 20);
-
-    // 3) Move and draw the spaceship
-    player.move();
-    player.draw();
-
-    // 4) Spawn asteroids
-    if (Math.random() * 100 < asteroidSpawnRate) {
-      asteroids.push(new Asteroid());
-    }
-
-    // 5) Update and draw asteroids
-    for (let i = asteroids.length - 1; i >= 0; i--) {
-      const m = asteroids[i];
-      m.move();
-      m.draw();
-
-      // Collision?
-      if (checkCollision(player, m)) {
-        gameOver = true;
-        updateTopScores(score);
-      }
-
-      // Remove if off screen
-      if (m.isOffScreen()) {
-        asteroids.splice(i, 1);
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.drawImage(
+          spaceshipImg,
+          -this.width / 2,
+          -this.height / 2,
+          this.width,
+          this.height
+        );
+        ctx.restore();
       }
     }
 
-    // 6) Gradually increase difficulty (spawn rate)
-    asteroidSpawnRate += 0.02;
+    /* -----------------------------------------------------------
+     * Asteroid Class
+     * -----------------------------------------------------------
+     */
+    class Asteroid {
+      constructor() {
+        this.spawn();
+        // Random speed between MIN and MAX
+        this.speed =
+          Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) +
+          MIN_ASTEROID_SPEED;
 
-    // Request the next frame
-    animationId = requestAnimationFrame(gameLoop);
-  } else {
-    // Slightly darken the screen
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        // Random rotation angle + spin speed
+        this.angle = Math.random() * 2 * Math.PI;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.05;
 
-    // Game Over text
-    ctx.fillStyle = '#f5f5f5';
-    ctx.font = '40px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40);
+        // Random scale for the asteroid (0.5x to 2x)
+        this.scale = 0.5 + Math.random() * 1.5;
+        this.width = 32 * this.scale;
+        this.height = 32 * this.scale;
+        this.radius = (this.width + this.height) / 4;
+      }
 
-    // Final score
-    ctx.font = '30px Arial';
-    ctx.fillText('Score: ' + score, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+      spawn() {
+        const edge = Math.floor(Math.random() * 4);
+        switch (edge) {
+          case 0: // Top
+            this.x = Math.random() * SCREEN_WIDTH;
+            this.y = -40;
+            break;
+          case 1: // Bottom
+            this.x = Math.random() * SCREEN_WIDTH;
+            this.y = SCREEN_HEIGHT + 40;
+            break;
+          case 2: // Left
+            this.x = -40;
+            this.y = Math.random() * SCREEN_HEIGHT;
+            break;
+          case 3: // Right
+            this.x = SCREEN_WIDTH + 40;
+            this.y = Math.random() * SCREEN_HEIGHT;
+            break;
+        }
+        const angle = Math.random() * 2 * Math.PI;
+        this.dx = Math.cos(angle);
+        this.dy = Math.sin(angle);
+      }
 
-    // Restart instruction
-    ctx.font = '20px Arial';
-    ctx.fillText('Press Enter or tap the game area to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40);
-    ctx.textAlign = 'start';
-  }
-}
+      move() {
+        this.x += this.dx * this.speed;
+        this.y += this.dy * this.speed;
+        this.angle += this.rotationSpeed;
+      }
 
-// Periodically increase the asteroid speed
-setInterval(() => {
-  MIN_ASTEROID_SPEED += 0.2;
-  MAX_ASTEROID_SPEED += 0.2;
-}, speedIncreaseInterval);
-</script>
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.drawImage(
+          asteroidImg,
+          -this.width / 2,
+          -this.height / 2,
+          this.width,
+          this.height
+        );
+        ctx.restore();
+      }
+
+      isOffScreen() {
+        return (
+          this.x < -100 ||
+          this.x > SCREEN_WIDTH + 100 ||
+          this.y < -100 ||
+          this.y > SCREEN_HEIGHT + 100
+        );
+      }
+    }
+
+    /* -----------------------------------------------------------
+     * Asset Loading
+     * -----------------------------------------------------------
+     */
+    function startIfReady() {
+      assetsLoaded++;
+      if (assetsLoaded === 3) {
+        // Once all images are loaded, start the game
+        resetGame();
+      }
+    }
+
+    backgroundImg.onload = startIfReady;
+    spaceshipImg.onload = startIfReady;
+    asteroidImg.onload = startIfReady;
+
+    /* -----------------------------------------------------------
+     * Input Handlers
+     * -----------------------------------------------------------
+     */
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault(); // Prevent scrolling
+      }
+      keys[e.key] = true;
+
+      if (gameOver && e.key === 'Enter') {
+        resetGame();
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+    });
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (gameOver) {
+        e.preventDefault();
+        resetGame();
+        return;
+      }
+      e.preventDefault();
+      isPointerDown = true;
+      pointerStartX = e.clientX;
+      pointerStartY = e.clientY;
+      spaceshipStartX = player.x;
+      spaceshipStartY = player.y;
+    }, { passive: false });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (isPointerDown && !gameOver) {
+        e.preventDefault();
+        const deltaX = e.clientX - pointerStartX;
+        const deltaY = e.clientY - pointerStartY;
+        let newX = spaceshipStartX + deltaX;
+        let newY = spaceshipStartY + deltaY;
+
+        newX = Math.max(player.radius, Math.min(SCREEN_WIDTH - player.radius, newX));
+        newY = Math.max(player.radius, Math.min(SCREEN_HEIGHT - player.radius, newY));
+        player.setPosition(newX, newY);
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('pointerup', (e) => {
+      if (isPointerDown) {
+        e.preventDefault();
+        isPointerDown = false;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('pointercancel', (e) => {
+      if (isPointerDown) {
+        e.preventDefault();
+        isPointerDown = false;
+      }
+    }, { passive: false });
+
+    /* -----------------------------------------------------------
+     * Collision Detection
+     * -----------------------------------------------------------
+     */
+    function checkCollision(ship, asteroid) {
+      const dx = ship.x - asteroid.x;
+      const dy = ship.y - asteroid.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < ship.radius + asteroid.radius;
+    }
+
+    /* -----------------------------------------------------------
+     * Game Logic
+     * -----------------------------------------------------------
+     */
+    function resetGame() {
+      player = new Spaceship();
+      asteroids = [];
+      score = 0;
+      asteroidSpawnRate = 3;
+      MIN_ASTEROID_SPEED = 2;
+      MAX_ASTEROID_SPEED = 6;
+      gameOver = false;
+
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      gameLoop();
+    }
+
+    function updateTopScores(newScore) {
+      topScores.push(newScore);
+      topScores.sort((a, b) => b - a);
+      topScores = topScores.slice(0, 5);
+
+      const scoreList = document.getElementById('scoreList');
+      scoreList.innerHTML = '';
+      topScores.forEach((sc) => {
+        const li = document.createElement('li');
+        li.textContent = sc;
+        scoreList.appendChild(li);
+      });
+    }
+
+    /* -----------------------------------------------------------
+     * Rolling Background Function
+     * -----------------------------------------------------------
+     * We shift the background image down by backgroundOffsetY
+     * each frame. Once offset >= backgroundImg.height, reset it
+     * to 0 to create a seamless rolling effect.
+     */
+    function drawRollingBackground() {
+      // Increase the offset to "scroll" the background
+      backgroundOffsetY += backgroundScrollSpeed;
+
+      // Once it passes the image's height, wrap around
+      if (backgroundOffsetY >= backgroundImg.height) {
+        backgroundOffsetY = 0;
+      }
+
+      // Draw the tiled background in vertical strips
+      for (let y = -backgroundImg.height; y < SCREEN_HEIGHT; y += backgroundImg.height) {
+        for (let x = 0; x < SCREEN_WIDTH; x += backgroundImg.width) {
+          ctx.drawImage(backgroundImg, x, y + backgroundOffsetY);
+        }
+      }
+    }
+
+    /* -----------------------------------------------------------
+     * The main game loop
+     * -----------------------------------------------------------
+     */
+    function gameLoop() {
+      if (!gameOver) {
+        // 1) Draw the rolling background
+        drawRollingBackground();
+
+        // 2) Increase and display score
+        score++;
+        ctx.fillStyle = '#f5f5f5';
+        ctx.font = '18px Arial';
+        ctx.fillText('Score: ' + score, 10, 20);
+
+        // 3) Move and draw the spaceship
+        player.move();
+        player.draw();
+
+        // 4) Spawn asteroids
+        if (Math.random() * 100 < asteroidSpawnRate) {
+          asteroids.push(new Asteroid());
+        }
+
+        // 5) Update and draw asteroids
+        for (let i = asteroids.length - 1; i >= 0; i--) {
+          const m = asteroids[i];
+          m.move();
+          m.draw();
+
+          // Collision?
+          if (checkCollision(player, m)) {
+            gameOver = true;
+            updateTopScores(score);
+          }
+
+          // Remove if off screen
+          if (m.isOffScreen()) {
+            asteroids.splice(i, 1);
+          }
+        }
+
+        // 6) Gradually increase difficulty (spawn rate)
+        asteroidSpawnRate += 0.02;
+
+        // Request the next frame
+        animationId = requestAnimationFrame(gameLoop);
+      } else {
+        // Slightly darken the screen
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        // Game Over text
+        ctx.fillStyle = '#f5f5f5';
+        ctx.font = '40px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40);
+
+        // Final score
+        ctx.font = '30px Arial';
+        ctx.fillText('Score: ' + score, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+
+        // Restart instruction
+        ctx.font = '20px Arial';
+        ctx.fillText('Press Enter or tap the game area to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40);
+        ctx.textAlign = 'start';
+      }
+    }
+
+    // Periodically increase the asteroid speed
+    setInterval(() => {
+      MIN_ASTEROID_SPEED += 0.2;
+      MAX_ASTEROID_SPEED += 0.2;
+    }, speedIncreaseInterval);
+  </script>
 
 </body>
+
 </html>

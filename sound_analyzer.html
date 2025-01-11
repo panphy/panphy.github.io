@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Audio Spectrum & Waveform Analyzer</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <style>
     /* ==================== DARK THEME & BASIC LAYOUT ==================== */
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       background: #121212;
@@ -19,9 +21,11 @@
        the waveform is 800×200 => ~8:2 ratio. */
     canvas {
       display: block;
-      margin: 0 auto;     /* center the canvas */
+      margin: 0 auto;
+      /* center the canvas */
       max-width: 100%;
-      height: auto;       /* keeps aspect ratio */
+      height: auto;
+      /* keeps aspect ratio */
     }
 
     h1 {
@@ -41,7 +45,8 @@
       position: relative;
       width: 80%;
       max-width: 1000px;
-      margin: 0 auto; /* centers the container */
+      margin: 0 auto;
+      /* centers the container */
     }
 
     /* Tooltip for frequency & amplitude on hover (spectrum) */
@@ -60,7 +65,8 @@
     #waveform-container {
       width: 80%;
       max-width: 1000px;
-      margin: 1rem auto; /* spacing from spectrum above */
+      margin: 1rem auto;
+      /* spacing from spectrum above */
     }
 
     /* Sliders container */
@@ -104,14 +110,17 @@
     .toggle-button {
       background-color: #ff8207;
     }
+
     .toggle-button:hover {
       background-color: #e87503;
     }
 
     /* Export Buttons */
     .export-button {
-      background-color: #17a2b8; /* Blue-ish */
+      background-color: #17a2b8;
+      /* Blue-ish */
     }
+
     .export-button:hover {
       background-color: #138496;
     }
@@ -125,10 +134,11 @@
     }
 
     footer a {
-            color: #e1b400
-        }
+      color: #e1b400
+    }
   </style>
 </head>
+
 <body>
   <h1>Audio Spectrum & Waveform Analyzer</h1>
   <!-- Peak Frequency Display -->
@@ -579,4 +589,5 @@
     }
   </script>
 </body>
+
 </html>
