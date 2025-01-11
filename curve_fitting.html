@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
     <!-- MathJax v2 for LaTeX rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
+
     <style>
         :root {
             --add-row-btn-color: #6aa84f;
@@ -2286,9 +2287,9 @@
             return bestFineOmega;
         }
 
-
         function performSinusoidalFit() {
             try {
+                // Parse initial parameters
                 let A = parseFloat(document.getElementById('initial-A').value);
                 let b = parseFloat(document.getElementById('initial-b').value);
                 let k = parseFloat(document.getElementById('initial-k').value);
@@ -2301,8 +2302,6 @@
                     if (estimatedK !== null) {
                         k = estimatedK;
                         console.log(`Using estimated k: ${k}`);
-
-                        // Update the input box for k
                         document.getElementById('initial-k').value = k.toFixed(3);
                     } else {
                         alert('Failed to estimate k. Please provide an initial value.');
@@ -2316,55 +2315,83 @@
                     return;
                 }
 
-                // Continue with the fitting process using the updated parameters...
-                const params = { A: A, b: b, k: k, phi: phi, c: c };
-                const learningRate = 1e-5;
+                // Define parameters object
+                let params = { A: A, b: b, k: k, phi: phi, c: c };
+
+                // Settings for the optimizer
+                let learningRate = 1e-5;
                 const maxIterations = 100000;
                 const tolerance = 1e-6;
-
                 let previousError = Infinity;
                 let iterationsCount = 0;
 
+                // Learning rate decay (optional)
+                const decayRate = 0.99995;
+
+                // Parameter for Huber loss
+                const delta = 1.0;  // You can adjust delta as needed
+
+                // Fitting loop using the Huber loss
                 while (iterationsCount < maxIterations) {
-                    const predictions = rawData.map(point =>
-                        params.A * Math.exp(params.b * point.x) * Math.sin(params.k * point.x - params.phi) + params.c
-                    );
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
+                    let totalLoss = 0;
 
-                    if (Math.abs(previousError - mse) < tolerance) {
-                        break;
-                    }
+                    // Initialize gradients to zero
+                    let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
 
-                    previousError = mse;
-
-                    let dA = 0,
-                        db = 0,
-                        dk = 0,
-                        dphi = 0,
-                        dc = 0;
                     for (let i = 0; i < rawData.length; i++) {
                         const xi = rawData[i].x;
                         const yi = rawData[i].y;
+
+                        const expTerm = Math.exp(params.b * xi);
                         const sinTerm = Math.sin(params.k * xi - params.phi);
                         const cosTerm = Math.cos(params.k * xi - params.phi);
-                        const expTerm = Math.exp(params.b * xi);
 
+                        // Prediction for the current point
                         const prediction = params.A * expTerm * sinTerm + params.c;
+
+                        // Compute the error
                         const error = yi - prediction;
 
-                        dA += -2 * error * expTerm * sinTerm;
-                        db += -2 * error * params.A * xi * expTerm * sinTerm;
-                        dk += -2 * error * params.A * expTerm * xi * cosTerm;
-                        dphi += 2 * error * params.A * expTerm * cosTerm;
-                        dc += -2 * error;
+                        // Compute Huber loss and its derivative
+                        let huberGrad;
+                        if (Math.abs(error) <= delta) {
+                            // Quadratic case
+                            totalLoss += error ** 2;
+                            huberGrad = 2 * error;
+                        } else {
+                            // Linear case
+                            totalLoss += 2 * delta * Math.abs(error) - delta ** 2;
+                            huberGrad = 2 * delta * Math.sign(error);
+                        }
+
+                        // Accumulate gradients using the chain rule.
+                        // Remember: derivative of loss wrt parameter = huberGrad * (derivative of prediction wrt parameter)
+                        dA += -huberGrad * expTerm * sinTerm;
+                        db += -huberGrad * params.A * xi * expTerm * sinTerm;
+                        dk += -huberGrad * params.A * expTerm * xi * cosTerm;
+                        dphi += huberGrad * params.A * expTerm * cosTerm;
+                        dc += -huberGrad;
                     }
 
+                    // Average loss over data points for comparison with tolerance
+                    const mse = totalLoss / rawData.length;
+
+                    // Check convergence
+                    if (Math.abs(previousError - mse) < tolerance) {
+                        console.log(`Convergence reached after ${iterationsCount} iterations.`);
+                        break;
+                    }
+                    previousError = mse;
+
+                    // Update parameters
                     params.A -= learningRate * dA;
                     params.b -= learningRate * db;
                     params.k -= learningRate * dk;
                     params.phi -= learningRate * dphi;
                     params.c -= learningRate * dc;
+
+                    // Optionally decay the learning rate to help convergence near minima.
+                    learningRate *= decayRate;
 
                     iterationsCount++;
                 }
@@ -2374,16 +2401,20 @@
                     return;
                 }
 
-                const xFit = Array.from({ length: 100 }, (_, i) =>
-                    Math.min(...rawData.map(p => p.x)) +
-                    i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99
+                // Generate fitted data for plotting
+                const xMin = Math.min(...rawData.map(p => p.x));
+                const xMax = Math.max(...rawData.map(p => p.x));
+                const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
+                const yFit = xFit.map(xi =>
+                    params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c
                 );
-                const yFit = xFit.map(xi => params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c);
 
+                // Create the fit function
                 const fitFunction = xi =>
                     params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
 
-                let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x}\\sin(${params.k.toFixed(3)}x`;
+                // Construct the equation string nicely
+                let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x} \\sin(${params.k.toFixed(3)}x`;
                 if (params.phi > 0) {
                     equation += ` - ${params.phi.toFixed(3)}`;
                 } else if (params.phi < 0) {
@@ -2396,6 +2427,7 @@
                     equation += ` - ${Math.abs(params.c).toFixed(3)}`;
                 }
 
+                // Update the UI with results and plot
                 updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
                 plotGraph(xFit, yFit);
             } catch (error) {
