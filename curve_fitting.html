@@ -65,7 +65,7 @@
             text-decoration: none;
             cursor: pointer;
             font-size: 14px;
-            padding: 5px 10px;
+            padding: 0px 0px;
             transition: color 0.3s;
         }
 
@@ -547,7 +547,6 @@
         <div class="banner-title">Graph Plotting & Curve Fitting</div>
         <div class="banner-buttons">
             <a href="/curve_fitting_manual.html" class="banner-button">Manual</a>
-            <a href="/curve_fitting_math.html" class="banner-button">Math</a>
         </div>
     </div>
 
@@ -2118,39 +2117,172 @@
         }
 
         function estimateKFromData() {
-            if (rawData.length < 2) {
-                alert('Not enough data points to estimate k.');
+            if (!rawData || rawData.length < 4) {
+                console.warn("Not enough data points to estimate k.");
                 return null;
             }
 
-            const x = rawData.map(point => point.x);
-            const y = rawData.map(point => point.y);
+            // === 1. Sort & detrend ===
+            const sortedData = [...rawData].sort((a, b) => a.x - b.x);
+            const x = sortedData.map(p => p.x);
+            const y = sortedData.map(p => p.y);
 
-            // Detect peaks in y
+            const N = x.length;
+            const xMin = x[0];
+            const xMax = x[N - 1];
+            const dataSpan = xMax - xMin;
+            if (dataSpan <= 0) {
+                console.warn("Degenerate or invalid X range.");
+                return null;
+            }
+
+            // Mean of y for detrending
+            const meanY = y.reduce((acc, val) => acc + val, 0) / N;
+            const yDetrended = y.map(val => val - meanY);
+
+            // We'll also need an approximate sampling step to gauge a "Nyquist" limit
+            //   (roughly valid if data is close to uniform in x).
+            const avgDx = dataSpan / (N - 1);
+            // A naive Nyquist frequency ~ π / avgDx
+            const nyquist = Math.PI / avgDx;
+
+            // === 2. Optional: Peak-detection for rough kGuess ===
             let peaks = [];
-            for (let i = 1; i < y.length - 1; i++) {
+            for (let i = 1; i < N - 1; i++) {
                 if (y[i] > y[i - 1] && y[i] > y[i + 1]) {
                     peaks.push(x[i]);
                 }
             }
-
-            if (peaks.length < 2) {
-                // Instead of alerting, just return a default k value (e.g., k = 1)
-                console.log("Insufficient peaks detected. Setting k = 1 by default.");
-                return 1.0;
+            let kGuess = null;
+            if (peaks.length >= 2) {
+                const intervals = [];
+                for (let i = 1; i < peaks.length; i++) {
+                    intervals.push(peaks[i] - peaks[i - 1]);
+                }
+                const avgPeriod = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                kGuess = (2 * Math.PI) / avgPeriod;
+                console.log(
+                    `Peak-detect guess => period ~ ${avgPeriod.toFixed(4)}, kGuess ~ ${kGuess.toFixed(4)}`
+                );
+            } else {
+                console.log("Not enough peaks for a peak-based guess.");
             }
 
-            // Calculate distances between consecutive peaks
-            let periods = [];
-            for (let i = 1; i < peaks.length; i++) {
-                periods.push(peaks[i] - peaks[i - 1]);
+            // === 3. Define an initial log-spaced frequency range ===
+            // We'll define a broad range, but not infinite.
+            // Lower bound: say 2π / (5 * dataSpan) => up to ~5 cycles across the entire domain
+            // or 1e-3 if that is bigger, just to avoid going too close to zero.
+            const minCandidate = Math.max(1e-3, (2 * Math.PI) / (5 * dataSpan));
+
+            // Upper bound: let's pick something around 5 × the naive Nyquist as a default
+            // (i.e. 5 × π / avgDx), but not less than, say, 10 if the data is extremely well-sampled.
+            let maxCandidate = Math.max(10, nyquist * 5);
+
+            // If we do have a kGuess, ensure that we include it by possibly expanding the range:
+            if (kGuess && Number.isFinite(kGuess) && kGuess > 0) {
+                if (kGuess < minCandidate) {
+                    // expand downward
+                    console.log(
+                        `kGuess < minCandidate => adjusting minCandidate from ${minCandidate.toFixed(4)} to ~${kGuess / 5}`
+                    );
+                    minCandidate <= 1e-7
+                        ? (minCandidate = 1e-7)
+                        : (minCandidate = Math.max(1e-7, kGuess / 5));
+                }
+                if (kGuess > maxCandidate) {
+                    console.log(
+                        `kGuess > maxCandidate => adjusting maxCandidate from ${maxCandidate.toFixed(4)} to ~${kGuess * 5}`
+                    );
+                    maxCandidate = kGuess * 5;
+                }
             }
 
-            const T = periods.reduce((sum, p) => sum + p, 0) / periods.length; // Average period
-            const k = 2 * Math.PI / T;
+            console.log(
+                `Log-search range: [${minCandidate.toFixed(4)}, ${maxCandidate.toFixed(4)}]`
+            );
 
-            console.log(`Estimated period (T): ${T}, Estimated k: ${k}`);
-            return k;
+            // === 4. Coarse search in log space ===
+            // We'll sample frequencies log-spaced from minCandidate to maxCandidate
+            const numLogSamples = 200; // ~200 log steps
+            const logMin = Math.log(minCandidate);
+            const logMax = Math.log(maxCandidate);
+
+            let bestCoarseOmega = 0;
+            let bestCoarseScore = -Infinity;
+
+            for (let i = 0; i < numLogSamples; i++) {
+                // Log spacing
+                const frac = i / (numLogSamples - 1);
+                const omega = Math.exp(logMin + frac * (logMax - logMin));
+
+                let sumSin = 0;
+                let sumCos = 0;
+                for (let j = 0; j < N; j++) {
+                    const val = yDetrended[j];
+                    const phase = omega * x[j];
+                    sumSin += val * Math.sin(phase);
+                    sumCos += val * Math.cos(phase);
+                }
+                const score = sumSin * sumSin + sumCos * sumCos;
+                if (score > bestCoarseScore) {
+                    bestCoarseScore = score;
+                    bestCoarseOmega = omega;
+                }
+            }
+            console.log(
+                `Log-coarse best => omega = ${bestCoarseOmega.toFixed(4)}, score = ${bestCoarseScore.toExponential(3)}`
+            );
+
+            // === 5. Fine local linear search around bestCoarseOmega ===
+            // We'll do ± 30% in linear space (adjust as desired)
+            const fineFactor = 0.3;
+            const fineMin = Math.max(minCandidate, bestCoarseOmega * (1 - fineFactor));
+            const fineMax = Math.min(maxCandidate, bestCoarseOmega * (1 + fineFactor));
+
+            let bestFineOmega = bestCoarseOmega;
+            let bestFineScore = bestCoarseScore;
+
+            if (fineMax <= fineMin) {
+                console.warn(
+                    `Fine search range is degenerate => [${fineMin}, ${fineMax}]. Returning coarse result.`
+                );
+                return bestCoarseOmega;
+            }
+
+            const numFine = 3000; // ~3k linear steps
+            const step = (fineMax - fineMin) / (numFine - 1);
+
+            for (let i = 0; i < numFine; i++) {
+                const omega = fineMin + i * step;
+                let sumSin = 0;
+                let sumCos = 0;
+                for (let j = 0; j < N; j++) {
+                    const val = yDetrended[j];
+                    const phase = omega * x[j];
+                    sumSin += val * Math.sin(phase);
+                    sumCos += val * Math.cos(phase);
+                }
+                const score = sumSin * sumSin + sumCos * sumCos;
+                if (score > bestFineScore) {
+                    bestFineScore = score;
+                    bestFineOmega = omega;
+                }
+            }
+            console.log(
+                `Fine search best => omega = ${bestFineOmega.toFixed(4)}, score = ${bestFineScore.toExponential(3)}`
+            );
+
+            // === 6. Final sanity check vs. Nyquist? ===
+            if (bestFineOmega > 2 * nyquist) {
+                console.warn(
+                    `Warning: best freq = ${bestFineOmega.toFixed(4)} is > 2 × Nyquist (~${(2 * nyquist).toFixed(4)}). Data may be under-sampled.`
+                );
+            }
+
+            console.log(
+                `Final estimated k = ${bestFineOmega.toFixed(4)}`
+            );
+            return bestFineOmega;
         }
 
 
@@ -2270,6 +2402,7 @@
                 alert('An error occurred during sinusoidal fitting. Please check the console for details.');
             }
         }
+
 
         function performGaussianFit() {
             try {
