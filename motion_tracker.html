@@ -225,15 +225,14 @@
         }
 
         /*
-         * CHANGE #1: Use max-width:100%; height:auto; to maintain aspect ratio.
-         *            This prevents distortions that move the axis upward.
+         * Use max-width:100%; height:auto; to maintain aspect ratio.
+         * This prevents distortions that move the axis upward.
          */
         video,
         canvas {
             border: 2px solid #ddd;
             border-radius: 8px;
             max-width: 100%;
-            /* changed from width:100% */
             height: auto;
             /* keep aspect ratio */
             background-color: #f5f5f5;
@@ -778,7 +777,7 @@
             drawFrame();
 
             /*
-             * CHANGE #2: Make sure overlayCanvas matches frameCanvas size (the actual size).
+             * Make sure overlayCanvas matches frameCanvas size (the actual size).
              * This way, the bottom in overlayCanvas is the bottom in the actual displayed area.
              */
             resizeOverlay();
@@ -788,7 +787,7 @@
             plotPosition();
 
             message.innerHTML =
-                "<ul align='left'>"
+                "<ul style='text-align: left; padding-left: 20px;'>"
                 + "<li>Use the brown button above to enter the frame rate (default is 30 fps).</li>"
                 + "<li>Use the control bar beneath the video to select the starting frame.</li>"
                 + "<li>Select a point to track motion, and the video will skip to the next frame.</li>"
@@ -1398,7 +1397,6 @@
         }
 
         /*
-         * CHANGE #2 (continued): 
          * Force overlayCanvas to match frameCanvas's size so that bottom in overlayCanvas 
          * is indeed at the bottom visually.
          */
