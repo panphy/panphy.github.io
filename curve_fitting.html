@@ -2402,9 +2402,9 @@
             }
         }
 
-
         function performGaussianFit() {
             try {
+                // Parse initial parameters from the DOM
                 let A = parseFloat(document.getElementById('initial-A-gaussian').value);
                 let mu = parseFloat(document.getElementById('initial-mu').value);
                 let sigma = parseFloat(document.getElementById('initial-sigma').value);
@@ -2415,67 +2415,115 @@
                     return;
                 }
 
-                const params = { A: A, mu: mu, sigma: sigma, c: c };
-                const learningRate = 1e-5;
-                const maxIterations = 100000;
-                const tolerance = 1e-6;
+                // Package our parameters in an object
+                const params = { A, mu, sigma, c };
 
-                let previousError = Infinity;
-                let iterationsCount = 0;
+                // -- Settings for the gradient descent --
+                const learningRateA = 1e-7;
+                const learningRateMu = 1e-7;
+                const learningRateSigma = 1e-7;
+                const learningRateC = 1e-7;
 
-                while (iterationsCount < maxIterations) {
-                    const predictions = rawData.map(point => params.A * Math.exp(-((point.x - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
-                    const errors = rawData.map((point, idx) => point.y - predictions[idx]);
-                    const mse = errors.reduce((sum, err) => sum + err ** 2, 0) / errors.length;
+                const maxIterations = 50000;
+                const tolerance = 1e-8;
 
-                    if (Math.abs(previousError - mse) < tolerance) {
+                // Gaussian function
+                function gaussian(x, p) {
+                    return p.A * Math.exp(-((x - p.mu) ** 2) / (2 * p.sigma ** 2)) + p.c;
+                }
+
+                // Compute mean-squared error for the current parameters
+                function computeMSE(p) {
+                    let mseSum = 0;
+                    for (let i = 0; i < rawData.length; i++) {
+                        const { x, y } = rawData[i];
+                        const prediction = gaussian(x, p);
+                        const error = y - prediction;
+                        mseSum += error * error;
+                    }
+                    return mseSum / rawData.length;
+                }
+
+                let previousError = computeMSE(params);
+
+                // Gradient descent main loop
+                for (let iteration = 0; iteration < maxIterations; iteration++) {
+                    // Accumulators for the partial derivatives
+                    let dA = 0, dMu = 0, dSigma = 0, dC = 0;
+
+                    // Compute partial derivatives for each data point and sum them
+                    for (let i = 0; i < rawData.length; i++) {
+                        const { x, y } = rawData[i];
+                        const expTerm = Math.exp(-((x - params.mu) ** 2) / (2 * params.sigma ** 2));
+                        const prediction = params.A * expTerm + params.c;
+                        const error = y - prediction; // error = (actual - predicted)
+
+                        // Accumulate derivatives
+                        dA += error * expTerm;
+                        dMu += error * params.A * expTerm * ((x - params.mu) / (params.sigma ** 2));
+                        dSigma += error * params.A * expTerm * ((x - params.mu) ** 2) / (params.sigma ** 3);
+                        dC += error;
+                    }
+
+                    // Average gradients and apply factor -2/N
+                    const N = rawData.length;
+                    dA = -2 * dA / N;
+                    dMu = -2 * dMu / N;
+                    dSigma = -2 * dSigma / N;
+                    dC = -2 * dC / N;
+
+                    // Update parameters with separate learning rates
+                    params.A -= learningRateA * dA;
+                    params.mu -= learningRateMu * dMu;
+                    params.sigma -= learningRateSigma * dSigma;
+                    params.c -= learningRateC * dC;
+
+                    // Ensure sigma stays positive
+                    if (params.sigma <= 0) {
+                        params.sigma = Math.abs(params.sigma) || 1e-6;
+                    }
+
+                    // Compute error and check convergence
+                    const currentError = computeMSE(params);
+                    if (Math.abs(previousError - currentError) < tolerance) {
                         break;
                     }
-
-                    previousError = mse;
-
-                    let dA = 0, dmu = 0, dsigma = 0, dc = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        const yi = rawData[i].y;
-                        const expTerm = Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2));
-
-                        const prediction = params.A * expTerm + params.c;
-                        const error = yi - prediction;
-
-                        dA += -2 * error * expTerm;
-                        dmu += -2 * error * params.A * expTerm * ((xi - params.mu) / (params.sigma ** 2));
-                        dsigma += -2 * error * params.A * expTerm * ((xi - params.mu) ** 2) / (params.sigma ** 3);
-                        dc += -2 * error;
-                    }
-
-                    // Update parameters
-                    params.A -= learningRate * dA;
-                    params.mu -= learningRate * dmu;
-                    params.sigma -= learningRate * dsigma;
-                    params.c -= learningRate * dc;
-
-                    iterationsCount++;
+                    previousError = currentError;
                 }
 
-                if (iterationsCount === maxIterations) {
-                    alert('Gaussian fitting did not converge. Please try different initial parameters.');
-                    return;
+                // Generate fitted curve data for plotting
+                const xValues = rawData.map(p => p.x);
+                const yValues = rawData.map(p => p.y);
+                const xMin = Math.min(...xValues);
+                const xMax = Math.max(...xValues);
+                const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
+                const yFit = xFit.map(xi => gaussian(xi, params));
+
+                // Construct a LaTeX formatted equation string
+                // Adjusting the mu term so that if mu is negative it appears as x + |mu|
+                let muTerm;
+                if (params.mu < 0) {
+                    muTerm = `(x + ${Math.abs(params.mu).toFixed(3)})`;
+                } else {
+                    muTerm = `(x - ${params.mu.toFixed(3)})`;
                 }
 
-                const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...rawData.map(p => p.x)) + i * (Math.max(...rawData.map(p => p.x)) - Math.min(...rawData.map(p => p.x))) / 99);
-                const yFit = xFit.map(xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c);
-
-                const fitFunction = xi => params.A * Math.exp(-((xi - params.mu) ** 2) / (2 * params.sigma ** 2)) + params.c;
-
-                let equation = `y = ${params.A.toFixed(3)} e^{-\\frac{(x - ${params.mu.toFixed(3)})^2}{2 (${params.sigma.toFixed(3)})^2}}`;
+                let equation = `$$
+y = ${params.A.toFixed(3)} \\; e^{-\\frac{${muTerm}^2}{2 \\; (${params.sigma.toFixed(3)})^2}}`;
                 if (params.c > 0) {
-                    equation += ` + ${params.c.toFixed(3)}`;
+                    equation += ` \\; + \\; ${params.c.toFixed(3)}`;
                 } else if (params.c < 0) {
-                    equation += ` - ${Math.abs(params.c).toFixed(3)}`;
+                    equation += ` \\; - \\; ${Math.abs(params.c).toFixed(3)}`;
                 }
+                equation += `$$`;
 
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                // Function for the fitted Gaussian
+                const fitFunction = xi => gaussian(xi, params);
+
+                // Update results in your UI (make sure your UI can render LaTeX)
+                updateResults(equation, xValues, yValues, fitFunction);
+
+                // Plot the graph with the fitted data
                 plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing Gaussian fit:', error);
