@@ -2508,14 +2508,12 @@
                     muTerm = `(x - ${params.mu.toFixed(3)})`;
                 }
 
-                let equation = `$$
-y = ${params.A.toFixed(3)} \\; e^{-\\frac{${muTerm}^2}{2 \\; (${params.sigma.toFixed(3)})^2}}`;
+                let equation = `y = ${params.A.toFixed(3)} \\; e^{-\\frac{${muTerm}^2}{2 \\; (${params.sigma.toFixed(3)})^2}}`;
                 if (params.c > 0) {
                     equation += ` \\; + \\; ${params.c.toFixed(3)}`;
                 } else if (params.c < 0) {
                     equation += ` \\; - \\; ${Math.abs(params.c).toFixed(3)}`;
-                }
-                equation += `$$`;
+                };
 
                 // Function for the fitted Gaussian
                 const fitFunction = xi => gaussian(xi, params);
