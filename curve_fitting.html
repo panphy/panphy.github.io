@@ -981,6 +981,7 @@
                 alert('CSV file must have at least two columns.');
                 return;
             }
+            // Determine if the CSV *initially* has X and Y errors
             const hasXError = headers.length >= 3;
             const hasYError = headers.length >= 4;
 
@@ -990,92 +991,90 @@
             document.getElementById('y-column-name').value = headers[1];
             renderLatex('#x-column-latex', formatLabelForLatex(headers[0]));
             renderLatex('#y-column-latex', formatLabelForLatex(headers[1]));
-            // Instead of just "Title", update the title using the helper function
             updateGraphTitle();
             isSyncing = false;
 
             // Clear existing rows (without resetting headers)
             clearRows(false);
 
-            // Update error toggles only once
+            // Set the toggles to match the CSV's existing columns
             document.getElementById('toggle-x-error').checked = hasXError;
             document.getElementById('toggle-y-error').checked = hasYError;
-            if (hasXError) toggleErrorColumn('x');
-            if (hasYError) toggleErrorColumn('y');
 
-            // 3) Prepare to build rows in memory
+            // 3) Build the new rows in memory
             const dataRows = lines.slice(1);
             const tableBody = document.querySelector('#data-table tbody');
             const fragment = document.createDocumentFragment();
 
-            // 4) Build each row *in memory* without appending to the DOM yet
             for (let i = 0; i < dataRows.length; i++) {
                 const rowData = parseCSVLine(dataRows[i]);
-
-                // Create a <tr>
                 const tr = document.createElement('tr');
 
-                // Build cells with <input> fields
                 // x cell
                 const tdX = document.createElement('td');
-                tdX.innerHTML = `<input type="text" class="x-input"
-                            onkeydown="navigateTable(event)"
-                            oninput="updateData()"
-                            placeholder="0"
-                            value="${rowData[0] || ''}">`;
+                tdX.innerHTML = `
+            <input type="text" class="x-input"
+                   onkeydown="navigateTable(event)"
+                   oninput="updateData()"
+                   placeholder="0"
+                   value="${rowData[0] || ''}">
+        `;
                 tr.appendChild(tdX);
 
                 // y cell
                 const tdY = document.createElement('td');
-                tdY.innerHTML = `<input type="text" class="y-input"
-                            onkeydown="navigateTable(event)"
-                            oninput="updateData()"
-                            placeholder="0"
-                            value="${rowData[1] || ''}">`;
+                tdY.innerHTML = `
+            <input type="text" class="y-input"
+                   onkeydown="navigateTable(event)"
+                   oninput="updateData()"
+                   placeholder="0"
+                   value="${rowData[1] || ''}">
+        `;
                 tr.appendChild(tdY);
 
-                // x-error cell (only if hasXError)
-                if (hasXError) {
-                    const tdXErr = document.createElement('td');
-                    tdXErr.className = 'error-column';
-                    tdXErr.style.display = 'table-cell';
-                    tdXErr.innerHTML = `<input type="text" class="x-error-input"
-                                    onkeydown="navigateTable(event)"
-                                    placeholder="±0"
-                                    oninput="updateData()"
-                                    value="${(rowData[2] || '')}">`;
-                    tr.appendChild(tdXErr);
-                }
+                // Always create the X-error column
+                const tdXErr = document.createElement('td');
+                tdXErr.className = 'error-column x-error-td';
+                tdXErr.innerHTML = `
+            <input type="text" class="x-error-input"
+                   onkeydown="navigateTable(event)"
+                   placeholder="±0"
+                   oninput="updateData()"
+                   value="${rowData[2] || ''}">
+        `;
+                // If CSV had no X errors, hide this column for now
+                if (!hasXError) tdXErr.style.display = 'none';
+                tr.appendChild(tdXErr);
 
-                // y-error cell (only if hasYError)
-                if (hasYError) {
-                    const tdYErr = document.createElement('td');
-                    tdYErr.className = 'error-column';
-                    tdYErr.style.display = 'table-cell';
-                    tdYErr.innerHTML = `<input type="text" class="y-error-input"
-                                    onkeydown="navigateTable(event)"
-                                    placeholder="±0"
-                                    oninput="updateData()"
-                                    value="${(rowData[3] || '')}">`;
-                    tr.appendChild(tdYErr);
-                }
+                // Always create the Y-error column
+                const tdYErr = document.createElement('td');
+                tdYErr.className = 'error-column y-error-td';
+                tdYErr.innerHTML = `
+            <input type="text" class="y-error-input"
+                   onkeydown="navigateTable(event)"
+                   placeholder="±0"
+                   oninput="updateData()"
+                   value="${rowData[3] || ''}">
+        `;
+                if (!hasYError) tdYErr.style.display = 'none';
+                tr.appendChild(tdYErr);
 
-                // Append this newly created row to the fragment
                 fragment.appendChild(tr);
             }
 
-            // 5) Wipe out the old table body and append all new rows at once
+            // 4) Replace the old table rows with our newly built fragment
             tableBody.innerHTML = '';
             tableBody.appendChild(fragment);
 
-            // 6) Call any one-time updates after the rows have been fully inserted
+            // 5) Update data, re-plot, etc.
             updateData();
             updatePlotAndRenderLatex();
-
-            // Update initial parameters for advanced fit method
             setInitialParameters(getCurrentAdvancedFitMethod());
-        }
 
+            // Finally, let toggleErrorColumn re-apply the current show/hide logic
+            toggleErrorColumn('x');
+            toggleErrorColumn('y');
+        }
 
         function updateLabels(type) {
             if (isSyncing) return;
