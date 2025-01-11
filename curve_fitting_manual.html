@@ -1,456 +1,362 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html><head><title>Exported Document</title><meta charset="UTF-8"><title>Exported Document</title><style>
+        :root {
+          --background-color: #ffffff;
+          --text-color: #000000;
+          --pane-background: #ffffff;
+          --pane-heading-background: #333333;
+          --pane-heading-color: #ffffff;
+          --button-background: #f0f0f0;
+          --button-color: #000000;
+          --border-color: #ccc;
+          --code-background: #f0f0f0;
+          --table-border-color: black;
+          --table-header-background: #f4f4f4;
+          /* CSS Variables for Toggle Switch */
+          --switch-width: 43px;
+          --switch-height: 20px;
+          --slider-size: 15px;
+          --slider-transform: 23px;
+          --switch-active-color: #009688; /* Teal */
+          --switch-background-color: #ccc;
+          --switch-knob-color: white;
+          --switch-label-font-size: 18px;
+        }
 
-<head>
-  <title>Exported Document</title>
-  <meta charset="UTF-8">
-  <title>Exported Document</title>
-  <style>
-    :root {
-      --background-color: #ffffff;
-      --text-color: #000000;
-      --pane-background: #ffffff;
-      --pane-heading-background: #333333;
-      --pane-heading-color: #ffffff;
-      --button-background: #f0f0f0;
-      --button-color: #000000;
-      --border-color: #ccc;
-      --code-background: #f0f0f0;
-      --table-border-color: black;
-      --table-header-background: #f4f4f4;
-      /* CSS Variables for Toggle Switch */
-      --switch-width: 43px;
-      --switch-height: 20px;
-      --slider-size: 15px;
-      --slider-transform: 23px;
-      --switch-active-color: #009688;
-      /* Teal */
-      --switch-background-color: #ccc;
-      --switch-knob-color: white;
-      --switch-label-font-size: 18px;
-    }
+        body.dark-mode {
+          --background-color: #1e1e1e;
+          --text-color: #e0e0e0;
+          --pane-background: #1e1e1e;
+          --pane-heading-background: #2d2c2c;
+          --pane-heading-color: #ffffff;
+          --button-background: #474646;
+          --button-color: #ffffff;
+          --border-color: #555555;
+          --code-background: #2f2f2f;
+          --table-border-color: #555555;
+          --table-header-background: #333333;
+          --code-text-color: #f8f8f2; /* Brightened code text color */
+          /* Toggle Switch Active Color in Dark Mode */
+          --switch-active-color: #009688; /* Teal remains consistent */
+        }
 
-    body.dark-mode {
-      --background-color: #1e1e1e;
-      --text-color: #e0e0e0;
-      --pane-background: #1e1e1e;
-      --pane-heading-background: #2d2c2c;
-      --pane-heading-color: #ffffff;
-      --button-background: #474646;
-      --button-color: #ffffff;
-      --border-color: #555555;
-      --code-background: #2f2f2f;
-      --table-border-color: #555555;
-      --table-header-background: #333333;
-      --code-text-color: #f8f8f2;
-      /* Brightened code text color */
-      /* Toggle Switch Active Color in Dark Mode */
-      --switch-active-color: #009688;
-      /* Teal remains consistent */
-    }
+        body {
+          font-family: Helvetica, sans-serif;
+          line-height: 1.5; /* Consistent line-height */
+          margin: 20px;
+          background-color: var(--background-color);
+          color: var(--text-color);
+        }
+        /* Ensure all elements inherit background and text colors */
+        body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
+          background-color: var(--background-color);
+          color: var(--text-color);
+        }
 
-    body {
-      font-family: Helvetica, sans-serif;
-      line-height: 1.5;
-      /* Consistent line-height */
-      margin: 20px;
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
+        table {
+          max-width: 90%;
+          margin: 20px auto;
+          border-collapse: collapse;
+          border: 1px solid var(--table-border-color);
+        }
 
-    /* Ensure all elements inherit background and text colors */
-    body,
-    div,
-    p,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    pre,
-    code,
-    table,
-    th,
-    td,
-    blockquote {
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
+        th, td {
+          border: 1px solid var(--table-border-color);
+          padding: 8px;
+        }
 
-    table {
-      max-width: 90%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      border: 1px solid var(--table-border-color);
-    }
+        /* Alignment based on the 'align' attribute */
+        th[align="left"], td[align="left"] {
+          text-align: left;
+        }
 
-    th,
-    td {
-      border: 1px solid var(--table-border-color);
-      padding: 8px;
-    }
+        th[align="center"], td[align="center"] {
+          text-align: center;
+        }
 
-    /* Alignment based on the 'align' attribute */
-    th[align="left"],
-    td[align="left"] {
-      text-align: left;
-    }
+        th[align="right"], td[align="right"] {
+          text-align: right;
+        }
 
-    th[align="center"],
-    td[align="center"] {
-      text-align: center;
-    }
+        /* Optional: Default alignment if 'align' attribute is not specified */
+        th, td {
+          text-align: left; /* You can set a default alignment if desired */
+        }
 
-    th[align="right"],
-    td[align="right"] {
-      text-align: right;
-    }
+        code {
+          background-color: var(--code-background);
+          padding: 0.1em 0.2em;
+          border-radius: 3px;
+          font-size: 0.95em;
+          line-height: 1;
+          font-family: "Courier New", Courier, monospace;
+          vertical-align: baseline;
+          color: inherit;
+        }
 
-    /* Optional: Default alignment if 'align' attribute is not specified */
-    th,
-    td {
-      text-align: left;
-      /* You can set a default alignment if desired */
-    }
+        pre {
+          background-color: var(--code-background);
+          padding: 0;
+          border-radius: 5px;
+          overflow-x: auto;
+          font-size: 1.05em;
+          line-height: 1.5;
+          margin: 2px 0;
+        }
 
-    code {
-      background-color: var(--code-background);
-      padding: 0.1em 0.2em;
-      border-radius: 3px;
-      font-size: 0.95em;
-      line-height: 1;
-      font-family: "Courier New", Courier, monospace;
-      vertical-align: baseline;
-      color: inherit;
-    }
+        pre code {
+          background: none;
+          padding: 0;
+          border-radius: 0;
+          font-family: inherit;
+          line-height: 1.5;
+          font-size: inherit;
+          color: inherit;
+        }
 
-    pre {
-      background-color: var(--code-background);
-      padding: 0;
-      border-radius: 5px;
-      overflow-x: auto;
-      font-size: 1.05em;
-      line-height: 1.5;
-      margin: 2px 0;
-    }
+        .hljs {
+          line-height: 1.5;
+          font-size: 1.05em;
+          background-color: inherit;
+          color: inherit;
+        }
 
-    pre code {
-      background: none;
-      padding: 0;
-      border-radius: 0;
-      font-family: inherit;
-      line-height: 1.5;
-      font-size: inherit;
-      color: inherit;
-    }
+        /* Custom Highlight.js Colors for Dark Mode */
+        body.dark-mode .hljs {
+          color: #f8f8f2 !important;
+        }
 
-    .hljs {
-      line-height: 1.5;
-      font-size: 1.05em;
-      background-color: inherit;
-      color: inherit;
-    }
+        body.dark-mode .hljs-comment,
+        body.dark-mode .hljs-quote {
+          color: #8d9a70 !important;
+        }
 
-    /* Custom Highlight.js Colors for Dark Mode */
-    body.dark-mode .hljs {
-      color: #f8f8f2 !important;
-    }
+        body.dark-mode .hljs-keyword,
+        body.dark-mode .hljs-selector-tag,
+        body.dark-mode .hljs-subst {
+          color: #66d9ef !important;
+        }
 
-    body.dark-mode .hljs-comment,
-    body.dark-mode .hljs-quote {
-      color: #8d9a70 !important;
-    }
+        body.dark-mode .hljs-string,
+        body.dark-mode .hljs-doctag {
+          color: #e6db74 !important;
+        }
 
-    body.dark-mode .hljs-keyword,
-    body.dark-mode .hljs-selector-tag,
-    body.dark-mode .hljs-subst {
-      color: #66d9ef !important;
-    }
+        body.dark-mode .hljs-number,
+        body.dark-mode .hljs-regexp,
+        body.dark-mode .hljs-tag .hljs-attr {
+          color: #ae81ff !important;
+        }
 
-    body.dark-mode .hljs-string,
-    body.dark-mode .hljs-doctag {
-      color: #e6db74 !important;
-    }
+        body.dark-mode .hljs-title,
+        body.dark-mode .hljs-section {
+          color: #a6e22e !important;
+        }
 
-    body.dark-mode .hljs-number,
-    body.dark-mode .hljs-regexp,
-    body.dark-mode .hljs-tag .hljs-attr {
-      color: #ae81ff !important;
-    }
+        body.dark-mode .hljs-type,
+        body.dark-mode .hljs-built_in {
+          color: #fd971f !important;
+        }
 
-    body.dark-mode .hljs-title,
-    body.dark-mode .hljs-section {
-      color: #a6e22e !important;
-    }
+        body.dark-mode .hljs-symbol,
+        body.dark-mode .hljs-bullet {
+          color: #f92672 !important;
+        }
 
-    body.dark-mode .hljs-type,
-    body.dark-mode .hljs-built_in {
-      color: #fd971f !important;
-    }
+        body.dark-mode .hljs-link {
+          color: #e6db74 !important;
+        }
 
-    body.dark-mode .hljs-symbol,
-    body.dark-mode .hljs-bullet {
-      color: #f92672 !important;
-    }
+        /* Add more .hljs-* styles as needed based on the Highlight.js theme */
 
-    body.dark-mode .hljs-link {
-      color: #e6db74 !important;
-    }
-
-    /* Add more .hljs-* styles as needed based on the Highlight.js theme */
-
-    /* Inline styles for images to maintain alignment */
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-  </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      hljs.highlightAll();
-    });
-  </script>
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$']],
-        displayMath: [['$$', '$$']],
-        processEscapes: true,
-        packages: ['base', 'ams'],
-      },
-      svg: {
-        fontCache: 'local',
-      }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-</head>
-
-<body>
-  <h1>Graph Plotting &amp; Curve Fitting - User Manual</h1>
-  <h2>Introduction</h2>
-  <p>Welcome to the <strong>Graph Plotting &amp; Curve Fitting</strong> web application! This tool allows you to input
-    data, visualize it through interactive graphs, and perform various curve fitting analyses to model your data
-    effectively.</p>
-  <h2>Features</h2>
-  <ul>
-    <li>
-      <p><strong>Data Input:</strong></p>
-      <ul>
-        <li>Enter your data points manually in the table.</li>
-        <li>Add or remove data rows as needed.</li>
-        <li>Toggle uncertainties (Δx and Δy) with options for absolute or percentage uncertainties.</li>
-        <li>Apply global uncertainties across all data points.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Data Import/Export:</strong></p>
-      <ul>
-        <li>Import data from a <code>.csv</code> file.</li>
-        <li>Export your data to <code>.csv</code> or <code>.md</code> (Markdown) formats.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Curve Fitting:</strong></p>
-      <ul>
-        <li>Perform basic fits like Linear, Polynomial, Exponential and Power.</li>
-        <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
-        <li>Customize initial parameters for advanced fitting methods.</li>
-        <li>View fitting equations and R² values.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Graph Visualization:</strong></p>
-      <ul>
-        <li>Interactive plots using Plotly.js.</li>
-        <li>Customize the graph title and axis labels with LaTeX formatting.</li>
-      </ul>
-    </li>
-  </ul>
-  <h2>Getting Started</h2>
-  <h3>1. Entering Data</h3>
-  <ul>
-    <li>
-      <p><strong>Adding Data Points:</strong></p>
-      <ul>
-        <li>Click the <strong>"Add Row"</strong> button to add a new data row.</li>
-        <li>Enter your <code>x</code> and <code>y</code> values in the respective input fields.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Removing Data Points:</strong></p>
-      <ul>
-        <li>Click the <strong>"Clear All"</strong> button to remove all data rows.</li>
-      </ul>
-    </li>
-  </ul>
-  <h3>2. Managing Uncertainties</h3>
-  <ul>
-    <li>
-      <p><strong>Toggling Uncertainties:</strong></p>
-      <ul>
-        <li>Check the <strong>Δx</strong> or <strong>Δy</strong> checkboxes to enable uncertainties for the respective
-          axis.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Selecting Uncertainty Type:</strong></p>
-      <ul>
-        <li>Choose between <strong>absolute</strong> or <strong>percentage</strong> uncertainties from the dropdown
-          menus.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Entering Uncertainties:</strong></p>
-      <ul>
-        <li>Enter the uncertainty values in the input fields that appear once uncertainties are enabled.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Applying Global Uncertainties:</strong></p>
-      <ul>
-        <li>Enter a value in the <strong>"Enter Δx"</strong> or <strong>"Enter Δy"</strong> fields and click the
-          corresponding <strong>"Apply Δx"</strong> or <strong>"Apply Δy"</strong> button to apply the uncertainty
-          across all data points.</li>
-      </ul>
-    </li>
-  </ul>
-  <h3>3. Importing and Exporting Data</h3>
-  <ul>
-    <li>
-      <p><strong>Importing from CSV:</strong></p>
-      <ul>
-        <li>Click the <strong>"Import .csv"</strong> button and select a CSV file from your device.</li>
-        <li>Ensure that the CSV file has at least two columns for <code>x</code> and <code>y</code>. Additional columns
-          can represent uncertainties.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Exporting Data:</strong></p>
-      <ul>
-        <li>Click the <strong>"Export .csv"</strong> button to download your data in CSV format.</li>
-        <li>Click the <strong>"Export .md"</strong> button to download your data in Markdown format, suitable for
-          documentation or reports.</li>
-      </ul>
-    </li>
-  </ul>
-  <table>
-    <thead>
-      <tr>
-        <th align="left">Note:</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td align="left">Certainty levels (absolute or percentage uncertainties) play a crucial role in determining how
-          data is formatted in the exported <code>.csv</code> and <code>.md</code> files. <p> Formatting rules are
-            applied to ensure that the data maintains consistency and aligns with the provided uncertainties for precise
-            representation in exported files. </p>
-          <p>Here's how they influence the precision:</p>
-        </td>
-      </tr>
-      <tr>
-        <td align="left">1. <strong>Absolute Uncertainties</strong>:</td>
-      </tr>
-      <tr>
-        <td align="left">The number of decimal places (d.p.) in the exported values matches the precision of the
-          absolute uncertainty. <p> - For example, if the uncertainty is <code>±0.05</code>, the corresponding data
-            value will be exported with two decimal places, e.g., <code>5.25 ± 0.05</code>.</p>
-        </td>
-      </tr>
-      <tr>
-        <td align="left">2. <strong>Percentage Uncertainties</strong>:</td>
-      </tr>
-      <tr>
-        <td align="left">The precision of exported values is adjusted to significant figures (s.f.) based on the
-          percentage uncertainty: <p> - <strong>Small uncertainties (≤ 10%)</strong>: Values are exported with <strong>3
-              significant figures</strong>. </p>
-          <p> - <strong>Medium uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2 significant
-              figures</strong>. </p>
-          <p> - <strong>Large uncertainties (≥ 50%)</strong>: Values are exported with <strong>1 significant
-              figures</strong>.</p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h3>4. Performing Curve Fitting</h3>
-  <ul>
-    <li>
-      <p><strong>Basic Fit:</strong></p>
-      <ul>
-        <li>Navigate to the <strong>"Basic Fit"</strong> tab.</li>
-        <li>Select a fitting method (Linear, Polynomial 2nd-4th degree, Exponential, Power) from the dropdown.</li>
-        <li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
-        <li>The fitting equation and R² value will be displayed below the graph.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Advanced Fit:</strong></p>
-      <ul>
-        <li>Navigate to the <strong>"Advanced Fit"</strong> tab.</li>
-        <li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
-        <li>Some initial parameters are calculated based on the imported dataset. Change the initial parameters if
-          needed.</li>
-        <li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
-        <li>The fitting equation and R² value will be displayed below the graph.</li>
-      </ul>
-    </li>
-  </ul>
-  <h2>Tips and Best Practices</h2>
-  <ul>
-    <li>
-      <p><strong>Data Quality:</strong></p>
-      <ul>
-        <li>Ensure that your data points are accurate and representative of the phenomenon you're modeling.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Choosing Initial Parameters:</strong></p>
-      <ul>
-        <li>For advanced fitting methods, selecting appropriate initial parameters can significantly impact the
-          convergence and accuracy of the fit.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Uncertainties:</strong></p>
-      <ul>
-        <li>Use uncertainties to account for measurement errors or variability in your data. Choose between absolute and
-          percentage uncertainties based on your data's nature.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>LaTeX Formatting:</strong></p>
-      <ul>
-        <li>Utilize LaTeX syntax in labels and the title for clear and professional-looking mathematical expressions.
-        </li>
-      </ul>
-    </li>
-  </ul>
-  <h2>Troubleshooting</h2>
-  <ul>
-    <li>
-      <p><strong>Fitting Did Not Converge:</strong></p>
-      <ul>
-        <li>If a fitting method fails to converge, try adjusting the initial parameters or selecting a different fitting
-          model.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Import Errors:</strong></p>
-      <ul>
-        <li>Ensure that your CSV file is properly formatted with headers and consistent columns.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>LaTeX Rendering Issues:</strong></p>
-      <ul>
-        <li>Verify that your LaTeX syntax is correct. Complex expressions might require additional formatting.</li>
-      </ul>
-    </li>
-  </ul>
-</body>
-
-</html>
+        /* Inline styles for images to maintain alignment */
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+      </style><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script><script>
+        window.addEventListener('DOMContentLoaded', () => {
+          hljs.highlightAll();
+        });
+      </script><script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']],
+            processEscapes: true,
+            packages: ['base', 'ams'],
+          },
+          svg: {
+            fontCache: 'local',
+          }
+        };
+      </script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script></head><body><h1>Graph Plotting &amp; Curve Fitting - User Manual</h1>
+<h2>Introduction</h2>
+<p>Welcome to the <strong>Graph Plotting &amp; Curve Fitting</strong> web application! This tool allows you to input data, visualize it through interactive graphs, and perform various curve fitting analyses to model your data effectively.</p>
+<h2>Features</h2>
+<ul>
+<li><p><strong>Data Input:</strong></p>
+<ul>
+<li>Enter your data points manually in the table.</li>
+<li>Add or remove data rows as needed.</li>
+<li>Toggle uncertainties (Δx and Δy) with options for absolute or percentage uncertainties.</li>
+<li>Apply global uncertainties across all data points.</li>
+</ul>
+</li>
+<li><p><strong>Data Import/Export:</strong></p>
+<ul>
+<li>Import data from a <code>.csv</code> file.</li>
+<li>Export your data to <code>.csv</code> or <code>.md</code> (Markdown) formats.</li>
+</ul>
+</li>
+<li><p><strong>Curve Fitting:</strong></p>
+<ul>
+<li>Perform basic fits like Linear, Polynomial, Exponential and Power.</li>
+<li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
+<li>Customize initial parameters for advanced fitting methods.</li>
+<li>View fitting equations and R² values.</li>
+</ul>
+</li>
+<li><p><strong>Graph Visualization:</strong></p>
+<ul>
+<li>Interactive plots using Plotly.js.</li>
+<li>Customize the graph title and axis labels with LaTeX formatting.</li>
+</ul>
+</li>
+</ul>
+<h2>Getting Started</h2>
+<h3>1. Entering Data</h3>
+<ul>
+<li><p><strong>Adding Data Points:</strong></p>
+<ul>
+<li>Click the <strong>"Add Row"</strong> button to add a new data row.</li>
+<li>Enter your <code>x</code> and <code>y</code> values in the respective input fields.</li>
+</ul>
+</li>
+<li><p><strong>Removing Data Points:</strong></p>
+<ul>
+<li>Click the <strong>"Clear All"</strong> button to remove all data rows.</li>
+</ul>
+</li>
+</ul>
+<h3>2. Managing Uncertainties</h3>
+<ul>
+<li><p><strong>Toggling Uncertainties:</strong></p>
+<ul>
+<li>Check the <strong>Δx</strong> or <strong>Δy</strong> checkboxes to enable uncertainties for the respective axis.</li>
+</ul>
+</li>
+<li><p><strong>Selecting Uncertainty Type:</strong></p>
+<ul>
+<li>Choose between <strong>absolute</strong> or <strong>percentage</strong> uncertainties from the dropdown menus.</li>
+</ul>
+</li>
+<li><p><strong>Entering Uncertainties:</strong></p>
+<ul>
+<li>Enter the uncertainty values in the input fields that appear once uncertainties are enabled.</li>
+</ul>
+</li>
+<li><p><strong>Applying Global Uncertainties:</strong></p>
+<ul>
+<li>Enter a value in the <strong>"Enter Δx"</strong> or <strong>"Enter Δy"</strong> fields and click the corresponding <strong>"Apply Δx"</strong> or <strong>"Apply Δy"</strong> button to apply the uncertainty across all data points.</li>
+</ul>
+</li>
+</ul>
+<h3>3. Importing and Exporting Data</h3>
+<ul>
+<li><p><strong>Importing from CSV:</strong></p>
+<ul>
+<li>Click the <strong>"Import .csv"</strong> button and select a CSV file from your device.</li>
+<li>Ensure that the CSV file has at least two columns for <code>x</code> and <code>y</code>. Additional columns can represent uncertainties.</li>
+</ul>
+</li>
+<li><p><strong>Exporting Data:</strong></p>
+<ul>
+<li>Click the <strong>"Export .csv"</strong> button to download your data in CSV format.</li>
+<li>Click the <strong>"Export .md"</strong> button to download your data in Markdown format, suitable for documentation or reports.</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Note:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Certainty levels (absolute or percentage uncertainties) play a crucial role in determining how data is formatted in the exported <code>.csv</code> and <code>.md</code> files. <p> Formatting rules are applied to ensure that the data maintains consistency and aligns with the provided uncertainties for precise representation in exported files. </p><p>Here's how they influence the precision:</p></td>
+</tr>
+<tr>
+<td align="left">1. <strong>Absolute Uncertainties</strong>:</td>
+</tr>
+<tr>
+<td align="left">The number of decimal places (d.p.) in the exported values matches the precision of the absolute uncertainty. <p> - For example, if the uncertainty is <code>±0.05</code>, the corresponding data value will be exported with two decimal places, e.g., <code>5.25 ± 0.05</code>.</p></td>
+</tr>
+<tr>
+<td align="left">2. <strong>Percentage Uncertainties</strong>:</td>
+</tr>
+<tr>
+<td align="left">The precision of exported values is adjusted to significant figures (s.f.) based on the percentage uncertainty: <p> - <strong>Small uncertainties (≤ 10%)</strong>: Values are exported with <strong>3 significant figures</strong>. </p><p> - <strong>Medium uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2 significant figures</strong>. </p><p> - <strong>Large uncertainties (≥ 50%)</strong>: Values are exported with <strong>1 significant figure</strong>.</p></td>
+</tr>
+</tbody></table>
+<h3>4. Performing Curve Fitting</h3>
+<ul>
+<li><p><strong>Basic Fit:</strong></p>
+<ul>
+<li>Navigate to the <strong>"Basic Fit"</strong> tab.</li>
+<li>Select a fitting method (Linear, Polynomial 2nd-4th degree, Exponential, Power) from the dropdown.</li>
+<li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
+<li>The fitting equation and R² value will be displayed below the graph.</li>
+</ul>
+</li>
+<li><p><strong>Advanced Fit:</strong></p>
+<ul>
+<li>Navigate to the <strong>"Advanced Fit"</strong> tab.</li>
+<li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
+<li>Some initial parameters are calculated based on the imported dataset. Change the initial parameters if needed.</li>
+<li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
+<li>The fitting equation and R² value will be displayed below the graph.</li>
+</ul>
+</li>
+</ul>
+<h2>Tips and Best Practices</h2>
+<ul>
+<li><p><strong>Data Quality:</strong></p>
+<ul>
+<li>Ensure that your data points are accurate and representative of the phenomenon you're modeling.</li>
+</ul>
+</li>
+<li><p><strong>Choosing Initial Parameters:</strong></p>
+<ul>
+<li>For advanced fitting methods, selecting appropriate initial parameters can significantly impact the convergence and accuracy of the fit.</li>
+</ul>
+</li>
+<li><p><strong>Uncertainties:</strong></p>
+<ul>
+<li>Use uncertainties to account for measurement errors or variability in your data. Choose between absolute and percentage uncertainties based on your data's nature.</li>
+</ul>
+</li>
+<li><p><strong>LaTeX Formatting:</strong></p>
+<ul>
+<li>Utilize LaTeX syntax in labels and the title for clear and professional-looking mathematical expressions.</li>
+</ul>
+</li>
+</ul>
+<h2>Troubleshooting</h2>
+<ul>
+<li><p><strong>Fitting Did Not Converge:</strong></p>
+<ul>
+<li>If a fitting method fails to converge, try adjusting the initial parameters or selecting a different fitting model.</li>
+</ul>
+</li>
+<li><p><strong>Import Errors:</strong></p>
+<ul>
+<li>Ensure that your CSV file is properly formatted with headers and consistent columns.</li>
+</ul>
+</li>
+<li><p><strong>LaTeX Rendering Issues:</strong></p>
+<ul>
+<li>Verify that your LaTeX syntax is correct. Complex expressions might require additional formatting.</li>
+</ul>
+</li>
+</ul>
+</body></html>
