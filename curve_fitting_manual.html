@@ -2,9 +2,9 @@
 <html>
 
 <head>
-  <title>Manual</title>
+  <title>Exported Document</title>
   <meta charset="UTF-8">
-  <title>Manual</title>
+  <title>Exported Document</title>
   <style>
     :root {
       --background-color: #ffffff;
@@ -368,11 +368,10 @@
         <td align="left">The precision of exported values is adjusted to significant figures (s.f.) based on the
           percentage uncertainty: <p> - <strong>Small uncertainties (≤ 10%)</strong>: Values are exported with <strong>3
               significant figures</strong>. </p>
-          <p> - <strong>Large uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2 significant
+          <p> - <strong>Medium uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2 significant
               figures</strong>. </p>
-          <p> - For instance, if the percentage uncertainty is <code>5%</code>, a value of <code>123.456</code> will be
-            rounded to <code>123</code> (3 significant figures), while a <code>15%</code> uncertainty will round the
-            same value to <code>120</code> (2 significant figures).</p>
+          <p> - <strong>Large uncertainties (≥ 50%)</strong>: Values are exported with <strong>1 significant
+              figures</strong>.</p>
         </td>
       </tr>
     </tbody>
