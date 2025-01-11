@@ -950,83 +950,112 @@
         }
 
         function parseCSV(text) {
-            const lines = text.trim().split('\n');
-            if (lines.length < 2) {
-                alert('CSV file must contain at least two rows (headers and one data row).');
-                return;
-            }
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) {
+        alert('CSV file must contain at least two rows (headers and one data row).');
+        return;
+    }
 
-            const headers = parseCSVLine(lines[0]);
-            if (headers.length < 2) {
-                alert('CSV file must have at least two columns.');
-                return;
-            }
+    // 1) Parse headers
+    const headers = parseCSVLine(lines[0]);
+    if (headers.length < 2) {
+        alert('CSV file must have at least two columns.');
+        return;
+    }
+    const hasXError = headers.length >= 3;
+    const hasYError = headers.length >= 4;
 
-            const hasXError = headers.length >= 3;
-            const hasYError = headers.length >= 4;
+    // 2) Update top-level inputs & toggles just once
+    isSyncing = true;
+    document.getElementById('x-column-name').value = headers[0];
+    document.getElementById('y-column-name').value = headers[1];
+    renderLatex('#x-column-latex', formatLabelForLatex(headers[0]));
+    renderLatex('#y-column-latex', formatLabelForLatex(headers[1]));
+    document.getElementById('graph-title').value = 'Title';
+    isSyncing = false;
 
-            isSyncing = true;
-            document.getElementById('x-column-name').value = headers[0];
-            document.getElementById('y-column-name').value = headers[1];
-            renderLatex('#x-column-latex', formatLabelForLatex(headers[0]));
-            renderLatex('#y-column-latex', formatLabelForLatex(headers[1]));
-            document.getElementById('graph-title').value = 'Title';
-            isSyncing = false;
+    // Clear existing rows (without resetting headers)
+    clearRows(false);
 
-            clearRows(false);
+    // Update error toggles only once
+    document.getElementById('toggle-x-error').checked = hasXError;
+    document.getElementById('toggle-y-error').checked = hasYError;
+    if (hasXError) toggleErrorColumn('x');
+    if (hasYError) toggleErrorColumn('y');
 
-            if (hasXError) {
-                document.getElementById('toggle-x-error').checked = true;
-                toggleErrorColumn('x');
-            }
-            if (hasYError) {
-                document.getElementById('toggle-y-error').checked = true;
-                toggleErrorColumn('y');
-            }
+    // 3) Prepare to build rows in memory
+    const dataRows = lines.slice(1);
+    const tableBody = document.querySelector('#data-table tbody');
+    const fragment = document.createDocumentFragment();
 
-            const dataRows = lines.slice(1);
-            const tableBody = document.querySelector('#data-table tbody');
+    // 4) Build each row *in memory* without appending to the DOM yet
+    for (let i = 0; i < dataRows.length; i++) {
+        const rowData = parseCSVLine(dataRows[i]);
+        
+        // Create a <tr>
+        const tr = document.createElement('tr');
 
-            for (let i = 0; i < dataRows.length; i++) {
-                if (i >= tableBody.rows.length) {
-                    addRow();
-                }
-                const rowData = parseCSVLine(dataRows[i]);
-                const row = tableBody.rows[i];
+        // Build cells with <input> fields
+        // x cell
+        const tdX = document.createElement('td');
+        tdX.innerHTML = `<input type="text" class="x-input"
+                            onkeydown="navigateTable(event)"
+                            oninput="updateData()"
+                            placeholder="0"
+                            value="${rowData[0] || ''}">`;
+        tr.appendChild(tdX);
 
-                const xInput = row.querySelector('.x-input');
-                const yInput = row.querySelector('.y-input');
-                if (xInput) xInput.value = rowData[0] || '';
-                if (yInput) yInput.value = rowData[1] || '';
+        // y cell
+        const tdY = document.createElement('td');
+        tdY.innerHTML = `<input type="text" class="y-input"
+                            onkeydown="navigateTable(event)"
+                            oninput="updateData()"
+                            placeholder="0"
+                            value="${rowData[1] || ''}">`;
+        tr.appendChild(tdY);
 
-                if (hasXError && rowData.length >= 3) {
-                    const xErrorInput = row.querySelector('.x-error-input');
-                    if (xErrorInput) xErrorInput.value = rowData[2] || '';
-                }
-
-                if (hasYError && rowData.length >= 4) {
-                    const yErrorInput = row.querySelector('.y-error-input');
-                    if (yErrorInput) yErrorInput.value = rowData[3] || '';
-                }
-            }
-
-            const totalRows = tableBody.rows.length;
-            if (dataRows.length < totalRows) {
-                for (let i = dataRows.length; i < totalRows; i++) {
-                    const row = tableBody.rows[i];
-                    if (row.querySelector('.x-input')) row.querySelector('.x-input').value = '';
-                    if (row.querySelector('.y-input')) row.querySelector('.y-input').value = '';
-                    if (hasXError && row.querySelector('.x-error-input')) row.querySelector('.x-error-input').value = '';
-                    if (hasYError && row.querySelector('.y-error-input')) row.querySelector('.y-error-input').value = '';
-                }
-            }
-
-            updateData();
-            updatePlotAndRenderLatex();
-
-            // Update initial parameters based on the selected advanced fit method
-            setInitialParameters(getCurrentAdvancedFitMethod());
+        // x-error cell (only if hasXError)
+        if (hasXError) {
+            const tdXErr = document.createElement('td');
+            tdXErr.className = 'error-column';
+            tdXErr.style.display = 'table-cell'; // or '' (to match your CSS)
+            tdXErr.innerHTML = `<input type="text" class="x-error-input"
+                                    onkeydown="navigateTable(event)"
+                                    placeholder="±0"
+                                    oninput="updateData()"
+                                    value="${(rowData[2] || '')}">`;
+            tr.appendChild(tdXErr);
         }
+
+        // y-error cell (only if hasYError)
+        if (hasYError) {
+            const tdYErr = document.createElement('td');
+            tdYErr.className = 'error-column';
+            tdYErr.style.display = 'table-cell';
+            tdYErr.innerHTML = `<input type="text" class="y-error-input"
+                                    onkeydown="navigateTable(event)"
+                                    placeholder="±0"
+                                    oninput="updateData()"
+                                    value="${(rowData[3] || '')}">`;
+            tr.appendChild(tdYErr);
+        }
+
+        // Append this newly created row to the fragment
+        fragment.appendChild(tr);
+    }
+
+    // 5) Wipe out the old table body and append all new rows at once
+    tableBody.innerHTML = '';
+    tableBody.appendChild(fragment);
+
+    // 6) Call any one-time updates after the rows have been fully inserted
+    updateData();
+    updatePlotAndRenderLatex();
+
+    // Update initial parameters for advanced fit method
+    setInitialParameters(getCurrentAdvancedFitMethod());
+}
+
 
         function updateLabels(type) {
             if (isSyncing) return;
