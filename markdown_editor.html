@@ -63,21 +63,13 @@
          CSS Variables for Toggle Switch
       --------------------------------- */
       --switch-width: 42px;
-      /* Width of the switch */
       --switch-height: 18px;
-      /* Height of the switch */
       --slider-size: 13px;
-      /* Size of the toggle knob */
       --slider-transform: 23px;
-      /* Distance the knob moves when toggled */
       --switch-active-color: #009688;
-      /* Active background color of the switch */
       --switch-background-color: #ccc;
-      /* Inactive background color of the switch */
       --switch-knob-color: white;
-      /* Color of the toggle knob */
       --switch-label-font-size: 14px;
-      /* Font size of the switch label */
     }
 
     body.dark-mode {
@@ -90,14 +82,10 @@
       --button-color: #ffffff;
       --border-color: #555555;
       --code-background: #2f2f2f;
-      /* Darker background for code blocks */
       --table-border-color: #555555;
       --table-header-background: #333333;
       --code-text-color: #f8f8f2;
-      /* Brightened code text color */
-      /* Toggle Switch Active Color in Dark Mode */
       --switch-active-color: #009688;
-      /* Teal remains consistent */
     }
 
     body {
@@ -107,7 +95,6 @@
       margin: 0;
       font-family: Helvetica, sans-serif;
       line-height: 1.5;
-      /* Set line-height to 1.5 */
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
@@ -184,28 +171,20 @@
       border: none;
     }
 
-    /* ----------------------------------------
-       Toggle Switch Container and Styles
-    ------------------------------------------- */
-    /* Toggle Switch Container */
+    /* Toggle Switch Container and Styles */
     .toggle-container {
       position: absolute;
       right: 15px;
-      /* Adjust spacing from the edge as needed */
       display: flex;
       align-items: center;
     }
 
-    /* Toggle Switch Styles */
     .switch {
       position: relative;
       display: inline-block;
       width: var(--switch-width);
-      /* Width of the switch */
       height: var(--switch-height);
-      /* Height of the switch */
       margin-left: 2px;
-      /* Adjust spacing between label and switch */
     }
 
     .switch input {
@@ -222,50 +201,37 @@
       right: 0;
       bottom: 0;
       background-color: var(--switch-background-color);
-      /* Inactive background color */
       transition: 0.4s;
       border-radius: calc(var(--switch-height) / 2);
-      /* Fully rounded corners */
     }
 
     .slider:before {
       position: absolute;
       content: "";
       height: var(--slider-size);
-      /* Size of the toggle knob */
       width: var(--slider-size);
-      /* Size of the toggle knob */
       left: 2.5px;
-      /* Adjust position as needed */
       bottom: 2.5px;
-      /* Adjust position as needed */
       background-color: var(--switch-knob-color);
-      /* Color of the toggle knob */
       transition: 0.4s;
       border-radius: 50%;
     }
 
     input:checked+.slider {
       background-color: var(--switch-active-color);
-      /* Active background color */
     }
 
     input:focus+.slider {
       box-shadow: 0 0 1px var(--switch-active-color);
-      /* Focus shadow */
     }
 
     input:checked+.slider:before {
       transform: translateX(var(--slider-transform));
-      /* Move knob when checked */
     }
 
-    /* Style for the Sync Scroll Label */
     .switch-label {
       font-size: var(--switch-label-font-size);
-      /* Font size of the label */
       margin-right: 5px;
-      /* Space between label and switch */
     }
 
     textarea {
@@ -287,129 +253,95 @@
       padding: 20px;
       font-size: 16px;
       line-height: 1.5;
-      /* Consistent line-height */
       box-sizing: border-box;
       overflow-y: auto;
       background-color: var(--pane-background);
       color: var(--text-color);
     }
 
-    /* Inline code styling */
     code {
       background-color: var(--code-background);
       padding: 0.1em 0.2em;
       border-radius: 3px;
       font-size: 0.95em;
-      /* Set font size to 0.95em */
       line-height: 1;
-      /* Maintain tight spacing for inline code */
       font-family: "Courier New", Courier, monospace;
       vertical-align: baseline;
       color: inherit;
-      /* Inherit color to allow Highlight.js to apply */
     }
 
-    /* Code block styling */
     pre {
       background-color: var(--code-background);
       padding: 0;
-      /* Removed padding */
       border-radius: 5px;
       overflow-x: auto;
       font-size: 0.95em;
-      /* Set font size to 0.95em */
       line-height: 1.5;
-      /* Set line-height to 1.5 */
       margin: 2px 0;
-      /* Further reduced margin */
     }
 
     pre code {
       background: none;
-      /* Let Highlight.js handle background */
       padding: 0;
-      /* Removed padding */
       border-radius: 0;
       font-family: inherit;
-      /* Inherit font from pre */
       line-height: 1.5;
-      /* Ensure line-height is applied */
       font-size: inherit;
-      /* Inherit font size */
       color: inherit;
-      /* Inherit color to allow Highlight.js to apply */
     }
 
-    /* Highlight.js Styles */
     .hljs {
       line-height: 1.5;
-      /* Ensure Highlight.js respects line-height */
       font-size: 0.95em;
-      /* Match the font size of pre */
       background-color: inherit;
-      /* Ensure background is inherited from pre */
       color: inherit;
-      /* Inherit color to allow custom coloring */
     }
 
-    /* Custom Highlight.js Colors for Dark Mode */
     body.dark-mode .hljs {
       color: var(--code-text-color);
-      /* Brightened code text color */
     }
 
     body.dark-mode .hljs-comment,
     body.dark-mode .hljs-quote {
       color: #8d9a70 !important;
-      /* Darker green for comments */
     }
 
     body.dark-mode .hljs-keyword,
     body.dark-mode .hljs-selector-tag,
     body.dark-mode .hljs-subst {
       color: #66d9ef !important;
-      /* Bright blue for keywords */
     }
 
     body.dark-mode .hljs-string,
     body.dark-mode .hljs-doctag {
       color: #e6db74 !important;
-      /* Yellow for strings */
     }
 
     body.dark-mode .hljs-number,
     body.dark-mode .hljs-regexp,
     body.dark-mode .hljs-tag .hljs-attr {
       color: #ae81ff !important;
-      /* Purple for numbers and attributes */
     }
 
     body.dark-mode .hljs-title,
     body.dark-mode .hljs-section {
       color: #a6e22e !important;
-      /* Green for titles and sections */
     }
 
     body.dark-mode .hljs-type,
     body.dark-mode .hljs-built_in {
       color: #fd971f !important;
-      /* Orange for types and built-ins */
     }
 
     body.dark-mode .hljs-symbol,
     body.dark-mode .hljs-bullet {
       color: #f92672 !important;
-      /* Pink for symbols and bullets */
     }
 
     body.dark-mode .hljs-link {
       color: #e6db74 !important;
-      /* Yellow for links */
     }
 
-    /* Add more .hljs-* styles as needed based on the Highlight.js theme */
-
-    /* Updated table styles */
     table {
       max-width: 90%;
       margin: 20px auto;
@@ -421,11 +353,8 @@
     td {
       border: 1px solid var(--table-border-color);
       padding: 8px;
-      /* Removed fixed alignment */
-      /* text-align: left; */
     }
 
-    /* Alignment based on the 'align' attribute */
     th[align="left"],
     td[align="left"] {
       text-align: left;
@@ -441,17 +370,12 @@
       text-align: right;
     }
 
-    /* Optional: Default alignment if 'align' attribute is not specified */
     th,
     td {
       text-align: left;
-      /* You can set a default alignment if desired */
     }
 
-    /* Highlight.js Styles in Print */
     @media print {
-
-      /* Override CSS Variables to Light Mode */
       :root {
         --background-color: #ffffff !important;
         --text-color: #000000 !important;
@@ -464,14 +388,12 @@
         --code-background: #f0f0f0 !important;
         --table-border-color: black !important;
         --table-header-background: #f4f4f4 !important;
-        /* Toggle Switch Variables */
         --switch-active-color: #009688 !important;
         --switch-background-color: #ccc !important;
         --switch-knob-color: white !important;
         --switch-label-font-size: 18px !important;
       }
 
-      /* Ensure body uses light mode colors */
       body {
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -495,14 +417,12 @@
         line-height: 1.5 !important;
       }
 
-      /* Hide the entire pane heading container */
       .pane-heading-container {
         display: none !important;
         margin: 0 !important;
         padding: 0 !important;
       }
 
-      /* Hide elements with 'no-print' class */
       .no-print {
         display: none !important;
       }
@@ -518,61 +438,40 @@
         line-height: 1.5 !important;
       }
 
-      /* Hide the footer when printing */
       footer {
         display: none !important;
       }
 
-      /* Page Break Support */
       .page-break {
         display: block;
-        /* Ensure the div is rendered */
         page-break-after: always;
-        /* Insert a page break after this div */
         height: 0;
-        /* Prevent the div from taking up space */
       }
 
-      /* Ensure MathJax equations are black in print */
       svg {
         color: #000000 !important;
-        /* Sets the text color to black */
         stroke: #000000 !important;
-        /* Ensures box outlines like \boxed remain visible */
       }
 
-      /* Preserve Highlight.js styles in print */
       pre {
         background-color: #f0f0f0 !important;
-        /* Ensure background is visible */
         line-height: 1.5 !important;
-        /* Ensure line-height is set */
         font-size: 0.95em !important;
-        /* Ensure font size is consistent */
         margin: 2px 0 !important;
-        /* Ensure reduced margin is applied */
       }
 
-      /* Ensure code colors are preserved */
       .hljs {
         color: #000000 !important;
         line-height: 1.5 !important;
-        /* Ensure line-height is set */
         font-size: 0.95em !important;
-        /* Ensure font size is consistent */
         background-color: inherit !important;
-        /* Inherit background */
       }
 
       .hljs-comment,
       .hljs-quote {
         color: #008000 !important;
-        /* Example: green for comments */
       }
 
-      /* Add more .hljs-* styles as needed based on the Highlight.js theme */
-
-      /* Alignment based on the 'align' attribute in print */
       th[align="left"],
       td[align="left"] {
         text-align: left !important;
@@ -588,11 +487,9 @@
         text-align: right !important;
       }
 
-      /* Optional: Default alignment in print */
       th,
       td {
         text-align: left !important;
-        /* Set a default alignment if no 'align' attribute is present */
       }
     }
 
@@ -613,7 +510,6 @@
       color: #e1b400
     }
 
-    /* Original Button Styles */
     button {
       margin: 5px;
       padding: 8px 12px;
@@ -741,7 +637,6 @@ for i in range(5):
 | Albus  | 115 | Wizard 🧙‍♂️|
 | Tony   | 38 | Inventor 🤖 |
 
-
 > (*Did you notice the fancy text alignment I gave each column?*)
 
 **1.6 Links**
@@ -807,8 +702,6 @@ x^{\prime} & \bar{x} & \hat{x} & \ge & \le \\
 $$
 
 > Note the mysterious <code>{|l|l|c|r|r|}</code> which occurs immediately after <code>\begin{array}</code>. Each of the letters in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries of the column should be aligned (left, left, center, right, right). The <code>|</code> represents a verticle line between columns.
-
-
 
 - 2.2.4 **Matrices**
 $$
@@ -885,21 +778,18 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
 [1]: https://en.wikipedia.org/wiki/Markdown "Markdown"  
 [2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
-  `;
+    `;
 
     /**
      * Preprocess the input Markdown by replacing all single backslashes with double backslashes
-     * within LaTeX math blocks. This ensures that LaTeX commands requiring backslashes are
-     * correctly interpreted by MathJax without affecting other parts of the Markdown content.
+     * within LaTeX math blocks.
      * 
-     * @param {string} input - The raw Markdown input from the user.
-     * @returns {string} - The processed Markdown with escaped backslashes in LaTeX blocks.
+     * @param {string} input - The raw Markdown input.
+     * @returns {string} - The processed Markdown with escaped backslashes.
      */
     function preprocessMarkdown(input) {
-      // Regex to match inline ($...$) and display ($$...$$) math blocks
       const regex = /(\$\$?)([\s\S]+?)\1/g;
       return input.replace(regex, function (match, p1, p2) {
-        // Replace single backslashes with double backslashes within LaTeX blocks
         const escaped = p2.replace(/\\/g, '\\\\');
         return p1 + escaped + p1;
       });
@@ -909,12 +799,11 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       const inputText = markdownInput.value;
       const preprocessedText = preprocessMarkdown(inputText);
 
-      // Configure Marked to add language classes and use Highlight.js for syntax highlighting
       marked.setOptions({
-        gfm: true, // Enable GitHub Flavored Markdown
-        headerIds: true, // Enable header IDs
-        tables: true, // Ensure tables are enabled
-        langPrefix: 'hljs language-', // Highlight.js expects a top-level 'hljs' class
+        gfm: true,
+        headerIds: true,
+        tables: true,
+        langPrefix: 'hljs language-',
         highlight: function (code, lang) {
           if (lang && hljs.getLanguage(lang)) {
             return hljs.highlight(code, { language: lang }).value;
@@ -928,38 +817,24 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
       renderedOutput.innerHTML = sanitizedContent;
 
-      // Apply syntax highlighting to the newly added code blocks
       hljs.highlightAll();
-
-      // Re-apply MathJax after rendering
       MathJax.typesetPromise([renderedOutput]).catch(console.error);
     }
 
     async function printToPDF() {
-      // Remove dark-mode class temporarily to enforce light mode in print
       const body = document.body;
       const hadDarkMode = body.classList.contains('dark-mode');
       if (hadDarkMode) {
         body.classList.remove('dark-mode');
       }
-
-      // Ensure Highlight.js uses light theme during print
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-
-      // Ensure MathJax has finished rendering
       await MathJax.typesetPromise([renderedOutput]);
-
-      // Re-apply Highlight.js before printing
       hljs.highlightAll();
-
       window.print();
-
-      // Re-add dark-mode class after printing if it was present
       if (hadDarkMode) {
         body.classList.add('dark-mode');
-        // Re-apply the dark theme for Highlight.js
         highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-        updateThemeToggleButton(); // Update the toggle button icon and attributes
+        updateThemeToggleButton();
       }
     }
 
@@ -972,17 +847,14 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       const head = doc.head;
       const body = doc.body;
 
-      // Add meta charset
       const meta = document.createElement('meta');
       meta.setAttribute('charset', 'UTF-8');
       head.appendChild(meta);
 
-      // Add title
       const title = document.createElement('title');
       title.textContent = 'Exported Document';
       head.appendChild(title);
 
-      // Add custom styles
       const style = document.createElement('style');
       style.textContent = `
         :root {
@@ -997,12 +869,11 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           --code-background: #f0f0f0;
           --table-border-color: black;
           --table-header-background: #f4f4f4;
-          /* CSS Variables for Toggle Switch */
           --switch-width: 43px;
           --switch-height: 20px;
           --slider-size: 15px;
           --slider-transform: 23px;
-          --switch-active-color: #009688; /* Teal */
+          --switch-active-color: #009688;
           --switch-background-color: #ccc;
           --switch-knob-color: white;
           --switch-label-font-size: 18px;
@@ -1020,19 +891,18 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           --code-background: #2f2f2f;
           --table-border-color: #555555;
           --table-header-background: #333333;
-          --code-text-color: #f8f8f2; /* Brightened code text color */
-          /* Toggle Switch Active Color in Dark Mode */
-          --switch-active-color: #009688; /* Teal remains consistent */
+          --code-text-color: #f8f8f2;
+          --switch-active-color: #009688;
         }
 
         body {
           font-family: Helvetica, sans-serif;
-          line-height: 1.5; /* Consistent line-height */
+          line-height: 1.5;
           margin: 20px;
           background-color: var(--background-color);
           color: var(--text-color);
         }
-        /* Ensure all elements inherit background and text colors */
+
         body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
           background-color: var(--background-color);
           color: var(--text-color);
@@ -1050,7 +920,6 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           padding: 8px;
         }
 
-        /* Alignment based on the 'align' attribute */
         th[align="left"], td[align="left"] {
           text-align: left;
         }
@@ -1063,9 +932,8 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           text-align: right;
         }
 
-        /* Optional: Default alignment if 'align' attribute is not specified */
         th, td {
-          text-align: left; /* You can set a default alignment if desired */
+          text-align: left;
         }
 
         code {
@@ -1106,7 +974,6 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           color: inherit;
         }
 
-        /* Custom Highlight.js Colors for Dark Mode */
         body.dark-mode .hljs {
           color: #f8f8f2 !important;
         }
@@ -1152,35 +1019,27 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           color: #e6db74 !important;
         }
 
-        /* Add more .hljs-* styles as needed based on the Highlight.js theme */
-
-        /* Inline styles for images to maintain alignment */
         img {
           max-width: 100%;
           height: auto;
         }
-      `; // Custom styles end
+      `;
       head.appendChild(style);
 
-      // Add Highlight.js Stylesheet based on current theme
       const isDarkMode = document.body.classList.contains('dark-mode');
       const highlightLink = document.createElement('link');
       highlightLink.rel = 'stylesheet';
       if (isDarkMode) {
-        // Use a dark theme for Highlight.js, e.g., monokai
         highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
       } else {
-        // Use the default light theme
         highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
       }
       head.appendChild(highlightLink);
 
-      // Add Highlight.js Library
       const highlightScript = document.createElement('script');
       highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
       head.appendChild(highlightScript);
 
-      // Add Highlight.js Initialization Script
       const highlightInit = document.createElement('script');
       highlightInit.textContent = `
         window.addEventListener('DOMContentLoaded', () => {
@@ -1189,7 +1048,6 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       `;
       head.appendChild(highlightInit);
 
-      // Add MathJax Configuration
       const mathjaxConfigScript = document.createElement('script');
       mathjaxConfigScript.textContent = `
         window.MathJax = {
@@ -1206,20 +1064,16 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       `;
       head.appendChild(mathjaxConfigScript);
 
-      // Add MathJax Script
       const mathjaxScript = document.createElement('script');
       mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
       head.appendChild(mathjaxScript);
 
-      // Insert the sanitized HTML content
       body.innerHTML = sanitizedHTML;
 
-      // Apply dark-mode class if active
       if (isDarkMode) {
         body.classList.add('dark-mode');
       }
 
-      // Construct the full HTML
       const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
       const blob = new Blob([exportedHTML], { type: 'text/html' });
       const link = document.createElement('a');
@@ -1257,23 +1111,45 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       input.click();
     }
 
+    /**
+     * Initialize the theme based on saved preference.
+     */
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        document.body.classList.remove('dark-mode');
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+      updateThemeToggleButton();
+    }
+
+    /**
+     * Toggle between dark and light themes and save the preference.
+     */
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
+
       if (document.body.classList.contains('dark-mode')) {
         themeToggleButton.textContent = '🌙';
         themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
         themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-        // Change Highlight.js stylesheet to dark theme
         highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+        localStorage.setItem('theme', 'dark');
       } else {
         themeToggleButton.textContent = '☀️';
         themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
         themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-        // Change Highlight.js stylesheet to default light theme
         highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+        localStorage.setItem('theme', 'light');
       }
     }
 
+    /**
+     * Update the theme toggle button's icon and attributes.
+     */
     function updateThemeToggleButton() {
       if (document.body.classList.contains('dark-mode')) {
         themeToggleButton.textContent = '🌙';
@@ -1286,7 +1162,90 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       }
     }
 
-    // Event Listeners
+    // Throttle function for scroll syncing
+    function throttle(func, limit) {
+      let inThrottle;
+      return function () {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+          func.apply(context, args);
+          inThrottle = true;
+          setTimeout(() => inThrottle = false, limit);
+        }
+      }
+    }
+
+    const syncInputToOutput = throttle(() => {
+      if (!syncScrollSwitch.checked) return;
+
+      isSyncingOutputScroll = true;
+
+      requestAnimationFrame(() => {
+        const inputScrollTop = markdownInput.scrollTop;
+        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+
+        if (inputScrollHeight === 0) {
+          renderedOutput.scrollTop = 0;
+        } else {
+          const scrollRatio = inputScrollTop / inputScrollHeight;
+          const newOutputScrollTop = scrollRatio * outputScrollHeight;
+          if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
+            renderedOutput.scrollTop = newOutputScrollTop;
+          }
+        }
+
+        isSyncingOutputScroll = false;
+      });
+    }, 16);
+
+    const syncOutputToInput = throttle(() => {
+      if (!syncScrollSwitch.checked) return;
+
+      isSyncingInputScroll = true;
+
+      requestAnimationFrame(() => {
+        const outputScrollTop = renderedOutput.scrollTop;
+        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+
+        if (outputScrollHeight === 0) {
+          markdownInput.scrollTop = 0;
+        } else {
+          const scrollRatio = outputScrollTop / outputScrollHeight;
+          const newInputScrollTop = scrollRatio * inputScrollHeight;
+          if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
+            markdownInput.scrollTop = newInputScrollTop;
+          }
+        }
+
+        isSyncingInputScroll = false;
+      });
+    }, 16);
+
+    let isSyncingInputScroll = false;
+    let isSyncingOutputScroll = false;
+
+    markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
+    renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
+
+    window.addEventListener('beforeprint', () => {
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+    });
+
+    window.addEventListener('afterprint', () => {
+      if (document.body.classList.contains('dark-mode')) {
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      } else {
+        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      }
+    });
+
+    // Initialize theme and render content on load
+    initializeTheme();
+    renderContent();
+
     markdownInput.addEventListener('input', renderContent);
     printButton.addEventListener('click', printToPDF);
     exportHTMLButton.addEventListener('click', exportHTML);
@@ -1301,115 +1260,6 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       renderContent();
     });
     themeToggleButton.addEventListener('click', toggleTheme);
-
-    // Initialize Sync Scroll based on the toggle's initial state
-    let isSyncScrollEnabled = syncScrollSwitch.checked;
-
-    // Flags to prevent infinite scroll loops
-    let isSyncingInputScroll = false;
-    let isSyncingOutputScroll = false;
-
-    // Toggle Scroll Sync Functionality
-    syncScrollSwitch.addEventListener('change', () => {
-      isSyncScrollEnabled = syncScrollSwitch.checked;
-    });
-
-    /**
-     * Throttle function to limit the rate at which a function can fire.
-     * @param {Function} func - The function to throttle.
-     * @param {number} limit - The time limit in milliseconds.
-     * @returns {Function}
-     */
-    function throttle(func, limit) {
-      let inThrottle;
-      return function () {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-          func.apply(context, args);
-          inThrottle = true;
-          setTimeout(() => inThrottle = false, limit);
-        }
-      }
-    }
-
-    /**
-     * Synchronized Scrolling: Input to Output
-     */
-    const syncInputToOutput = throttle(() => {
-      if (!isSyncScrollEnabled || isSyncingInputScroll) return;
-
-      isSyncingOutputScroll = true;
-
-      requestAnimationFrame(() => {
-        const inputScrollTop = markdownInput.scrollTop;
-        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-        // Prevent division by zero
-        if (inputScrollHeight === 0) {
-          renderedOutput.scrollTop = 0;
-        } else {
-          const scrollRatio = inputScrollTop / inputScrollHeight;
-          const newOutputScrollTop = scrollRatio * outputScrollHeight;
-          if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) { // prevent unnecessary updates
-            renderedOutput.scrollTop = newOutputScrollTop;
-          }
-        }
-
-        isSyncingOutputScroll = false;
-      });
-    }, 16); // Approximately 60fps
-
-    /**
-     * Synchronized Scrolling: Output to Input
-     */
-    const syncOutputToInput = throttle(() => {
-      if (!isSyncScrollEnabled || isSyncingOutputScroll) return;
-
-      isSyncingInputScroll = true;
-
-      requestAnimationFrame(() => {
-        const outputScrollTop = renderedOutput.scrollTop;
-        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-
-        // Prevent division by zero
-        if (outputScrollHeight === 0) {
-          markdownInput.scrollTop = 0;
-        } else {
-          const scrollRatio = outputScrollTop / outputScrollHeight;
-          const newInputScrollTop = scrollRatio * inputScrollHeight;
-          if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) { // prevent unnecessary updates
-            markdownInput.scrollTop = newInputScrollTop;
-          }
-        }
-
-        isSyncingInputScroll = false;
-      });
-    }, 16); // Approximately 60fps
-
-    // Attach scroll event listeners with passive option
-    markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
-    renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
-
-    // Print Event Handlers to Switch Highlight.js Stylesheet
-    window.addEventListener('beforeprint', () => {
-      // Switch to light theme before printing
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    });
-
-    window.addEventListener('afterprint', () => {
-      // Revert to the current theme's Highlight.js stylesheet after printing
-      if (document.body.classList.contains('dark-mode')) {
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      } else {
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      }
-    });
-
-    // Initial render
-    renderContent();
   </script>
 </body>
 
