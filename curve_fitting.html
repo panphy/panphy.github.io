@@ -750,7 +750,10 @@
     </div>
 
     <script>
-        let rawData = [];
+        let rawData = [];       // Holds multiple datasets.
+        let activeSet = 0;      // Active dataset index.
+        rawData.push([]);       // Initialize the first dataset.
+
         let isSyncing = false;
 
         function debounce(func, wait) {
@@ -1158,10 +1161,10 @@
 
 
         function plotGraph(fittedX = null, fittedY = null) {
-            const x = rawData.map(point => point.x);
-            const y = rawData.map(point => point.y);
-            const xErrorRaw = rawData.map(point => point.xErrorRaw || 0);
-            const yErrorRaw = rawData.map(point => point.yErrorRaw || 0);
+            const x = rawData[activeSet].map(point => point.x);
+            const y = rawData[activeSet].map(point => point.y);
+            const xErrorRaw = rawData[activeSet].map(point => point.xErrorRaw || 0);
+            const yErrorRaw = rawData[activeSet].map(point => point.yErrorRaw || 0);
             const xErrorType = document.getElementById('toggle-x-error').checked ? document.getElementById('x-error-type').value : 'absolute';
             const yErrorType = document.getElementById('toggle-y-error').checked ? document.getElementById('y-error-type').value : 'absolute';
 
@@ -1220,7 +1223,7 @@
         }
 
         function fitCurve() {
-            if (rawData.length < 2) {
+            if (rawData[activeSet].length < 2) {
                 alert('Please enter at least two data points.');
                 return;
             }
@@ -1228,10 +1231,10 @@
             const fitMethod = document.getElementById('fit-method').value;
 
             if (fitMethod === 'Linear') {
-                performLinearFit(rawData.map(p => p.x), rawData.map(p => p.y));
+                performLinearFit(rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y));
             } else if (fitMethod.startsWith('Polynomial')) {
                 const degree = parseInt(fitMethod.split('-')[1]);
-                performPolynomialFit(rawData.map(p => p.x), rawData.map(p => p.y), degree);
+                performPolynomialFit(rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y), degree);
             } else if (fitMethod === 'Exponential') {
                 performExponentialFit();
             } else if (fitMethod === 'Power') {
@@ -1303,7 +1306,7 @@
             let left = null, right = null;
 
             // Sort data by x
-            const sortedData = rawData.slice().sort((a, b) => a.x - b.x);
+            const sortedData = rawData[activeSet].slice().sort((a, b) => a.x - b.x);
 
             // Find left crossing
             for (let i = 1; i < sortedData.length; i++) {
@@ -1342,10 +1345,10 @@
         function setInitialParameters(method) {
             if (!method) return; // If method is undefined, do nothing
 
-            if (rawData.length === 0) return;
+            if (rawData[activeSet].length === 0) return;
 
-            const x = rawData.map(p => p.x);
-            const y = rawData.map(p => p.y);
+            const x = rawData[activeSet].map(p => p.x);
+            const y = rawData[activeSet].map(p => p.y);
             const meanX = x.reduce((sum, val) => sum + val, 0) / x.length;
             const stdX = Math.sqrt(x.reduce((sum, val) => sum + Math.pow(val - meanX, 2), 0) / x.length);
             const maxY = Math.max(...y);
@@ -1467,7 +1470,7 @@
                 const xErrorInputs = document.querySelectorAll('.x-error-input');
                 const yErrorInputs = document.querySelectorAll('.y-error-input');
 
-                rawData = [];
+                rawData[activeSet] = [];
                 for (let i = 0; i < xInputs.length; i++) {
                     const x = parseFloat(xInputs[i].value);
                     const y = parseFloat(yInputs[i].value);
@@ -1475,7 +1478,7 @@
                     const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
 
                     if (!isNaN(x) && !isNaN(y)) {
-                        rawData.push({
+                        rawData[activeSet].push({
                             x: x,
                             y: y,
                             xErrorRaw: xErrorRaw,
@@ -1982,7 +1985,7 @@
         }
 
         function fitAdvancedCurve() {
-            if (rawData.length < 4) { // Increased to 4 for more complex fits
+            if (rawData[activeSet].length < 4) { // Increased to 4 for more complex fits
                 alert('Please enter at least four data points for advanced fitting.');
                 return;
             }
@@ -2057,7 +2060,7 @@
         function performExponentialFit() {
             try {
                 // Ensure all y values are positive
-                const validData = rawData.filter(point => point.y > 0);
+                const validData = rawData[activeSet].filter(point => point.y > 0);
                 if (validData.length < 2) {
                     alert('Exponential fit requires all y values to be positive.');
                     return;
@@ -2091,7 +2094,7 @@
         function performPowerFit() {
             try {
                 // Ensure all y and x values are positive
-                const validData = rawData.filter(point => point.y > 0 && point.x > 0);
+                const validData = rawData[activeSet].filter(point => point.y > 0 && point.x > 0);
                 if (validData.length < 2) {
                     alert('Power fit requires all x and y values to be positive.');
                     return;
@@ -2124,13 +2127,13 @@
         }
 
         function estimateKFromData() {
-            if (!rawData || rawData.length < 4) {
+            if (!rawData[activeSet] || rawData[activeSet].length < 4) {
                 console.warn("Not enough data points to estimate k.");
                 return null;
             }
 
             // === 1. Sort & detrend ===
-            const sortedData = [...rawData].sort((a, b) => a.x - b.x);
+            const sortedData = [...rawData[activeSet]].sort((a, b) => a.x - b.x);
             const x = sortedData.map(p => p.x);
             const y = sortedData.map(p => p.y);
 
@@ -2343,9 +2346,9 @@
                     // Initialize gradients to zero
                     let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
 
-                    for (let i = 0; i < rawData.length; i++) {
-                        const xi = rawData[i].x;
-                        const yi = rawData[i].y;
+                    for (let i = 0; i < rawData[activeSet].length; i++) {
+                        const xi = rawData[activeSet][i].x;
+                        const yi = rawData[activeSet][i].y;
 
                         const expTerm = Math.exp(params.b * xi);
                         const sinTerm = Math.sin(params.k * xi - params.phi);
@@ -2379,7 +2382,7 @@
                     }
 
                     // Average loss over data points for comparison with tolerance
-                    const mse = totalLoss / rawData.length;
+                    const mse = totalLoss / rawData[activeSet].length;
 
                     // Check convergence
                     if (Math.abs(previousError - mse) < tolerance) {
@@ -2407,8 +2410,8 @@
                 }
 
                 // Generate fitted data for plotting
-                const xMin = Math.min(...rawData.map(p => p.x));
-                const xMax = Math.max(...rawData.map(p => p.x));
+                const xMin = Math.min(...rawData[activeSet].map(p => p.x));
+                const xMax = Math.max(...rawData[activeSet].map(p => p.x));
                 const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
                 const yFit = xFit.map(xi =>
                     params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c
@@ -2433,7 +2436,7 @@
                 }
 
                 // Update the UI with results and plot
-                updateResults(equation, rawData.map(p => p.x), rawData.map(p => p.y), fitFunction);
+                updateResults(equation, rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y), fitFunction);
                 plotGraph(xFit, yFit);
             } catch (error) {
                 console.error('Error performing sinusoidal fit:', error);
@@ -2474,13 +2477,13 @@
                 // Compute mean-squared error for the current parameters
                 function computeMSE(p) {
                     let mseSum = 0;
-                    for (let i = 0; i < rawData.length; i++) {
-                        const { x, y } = rawData[i];
+                    for (let i = 0; i < rawData[activeSet].length; i++) {
+                        const { x, y } = rawData[activeSet][i];
                         const prediction = gaussian(x, p);
                         const error = y - prediction;
                         mseSum += error * error;
                     }
-                    return mseSum / rawData.length;
+                    return mseSum / rawData[activeSet].length;
                 }
 
                 let previousError = computeMSE(params);
@@ -2491,8 +2494,8 @@
                     let dA = 0, dMu = 0, dSigma = 0, dC = 0;
 
                     // Compute partial derivatives for each data point and sum them
-                    for (let i = 0; i < rawData.length; i++) {
-                        const { x, y } = rawData[i];
+                    for (let i = 0; i < rawData[activeSet].length; i++) {
+                        const { x, y } = rawData[activeSet][i];
                         const expTerm = Math.exp(-((x - params.mu) ** 2) / (2 * params.sigma ** 2));
                         const prediction = params.A * expTerm + params.c;
                         const error = y - prediction; // error = (actual - predicted)
@@ -2505,7 +2508,7 @@
                     }
 
                     // Average gradients and apply factor -2/N
-                    const N = rawData.length;
+                    const N = rawData[activeSet].length;
                     dA = -2 * dA / N;
                     dMu = -2 * dMu / N;
                     dSigma = -2 * dSigma / N;
@@ -2531,8 +2534,8 @@
                 }
 
                 // Generate fitted curve data for plotting
-                const xValues = rawData.map(p => p.x);
-                const yValues = rawData.map(p => p.y);
+                const xValues = rawData[activeSet].map(p => p.x);
+                const yValues = rawData[activeSet].map(p => p.y);
                 const xMin = Math.min(...xValues);
                 const xMax = Math.max(...xValues);
                 const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
