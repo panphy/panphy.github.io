@@ -2,10 +2,10 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Graph Plotting & Curve Fitting</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <!-- Plotly.js for graphing -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- Math.js for computations -->
@@ -14,12 +14,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
 
     <style>
+        /* Existing CSS styles ... */
+
         :root {
             --add-row-btn-color: #6aa84f;
             --clear-all-btn-color: #e06666;
             --import-csv-btn-color: #45818e;
             --export-csv-btn-color: #7f7f7f;
             --export-md-btn-color: #7f7f7f;
+            --tab-bg-color: #f3f3f3;
+            --tab-active-bg-color: #ffd966;
+            --tab-border-color: #ccc;
+            --tab-close-color: #999;
+            --tab-close-hover-color: #e06666;
         }
 
         body {
@@ -81,6 +88,114 @@
             text-align: center;
         }
 
+        /* Dataset Tabs Bar */
+        .dataset-tabs-bar {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            background-color: #f4f4f4;
+            gap: 0;
+            flex-wrap: nowrap;
+            /* Don't wrap tabs; keep them in one row */
+            overflow-x: auto;
+            /* Enable horizontal scrolling if necessary */
+            -webkit-overflow-scrolling: touch;
+            /* For smoother scrolling on touch devices */
+            scrollbar-width: thin;
+            /* For Firefox (optional) */
+        }
+
+        /* Optional: Customize scrollbar for WebKit browsers */
+        .dataset-tabs-bar::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .dataset-tabs-bar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .dataset-tabs-bar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .dataset-tabs-bar::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+
+        /* Browser-style Tab */
+        .dataset-tab {
+            position: relative;
+            padding: 8px 16px;
+            background-color: #ddd;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            margin-right: 2px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Hover state for tabs */
+        .dataset-tab:hover {
+            background-color: #ccc;
+        }
+
+        /* Active tab is highlighted and appears attached to the content below */
+        .dataset-tab.active {
+            background-color: #ffba3b;
+            border-color: #aaa;
+            border-bottom: 1px solid #ffba3b;
+            /* Hide the border on the bottom so it appears attached */
+            font-weight: bold;
+        }
+
+        /* Tab label and close button styling */
+        .dataset-tab .tab-label {
+            margin-right: 5px;
+            white-space: nowrap;
+        }
+
+        .dataset-tab .tab-close {
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            padding-left: 4px;
+            user-select: none;
+        }
+
+        /* Change color on hover for close icon */
+        .dataset-tab .tab-close:hover {
+            color: #e06666;
+        }
+
+        /* "Add Dataset" button styled as a tab */
+        .add-dataset-btn {
+            flex: 0 0 auto;
+            padding: 8px 16px;
+            background-color: #16537e;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            margin-right: 2px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        /* Hover state for the Add button */
+        .add-dataset-btn:hover {
+            background-color: #113d5c;
+        }
+
         .container {
             display: flex;
             flex-direction: row;
@@ -111,7 +226,6 @@
             flex: 2 1 600px;
             min-width: 300px;
         }
-
 
         .input-section h2,
         .graph-section h2 {
@@ -542,7 +656,7 @@
         }
 
         footer a {
-            color: #e1b400
+            color: #e1b400;
         }
     </style>
 </head>
@@ -562,11 +676,19 @@
         </p>
     </div>
 
+    <!-- NEW: Dataset Tabs Bar -->
+    <div class="dataset-tabs-bar">
+        <div class="dataset-tab active">
+            <span class="tab-label">Dataset 1</span>
+            <span class="tab-close" title="Remove dataset">×</span>
+        </div>
+        <button class="add-dataset-btn">Add Dataset</button>
+    </div>
+
     <div class="container">
         <!-- Input section -->
         <div class="input-section">
-            <h2>Data Input</h2>
-
+            <h2>Data</h2>
             <div class="table-container">
                 <table class="data-table" id="data-table">
                     <thead>
@@ -610,7 +732,6 @@
 
             <div class="global-uncertainty">
                 <h2>Uncertainties</h2>
-
                 <div class="uncertainty-controls">
                     <div>
                         <label>
@@ -646,7 +767,7 @@
             </div>
 
             <div class="fit-method-section">
-                <h2>Curve Fitting</h2>
+                <h2>Best Fit Line</h2>
                 <div class="tabs">
                     <button class="tablink active" onclick="openTab(event, 'BasicFit')">Basic Fit</button>
                     <button class="tablink" onclick="openTab(event, 'AdvancedFit')">Advanced Fit</button>
@@ -683,23 +804,23 @@
                     <div id="Sinusoidal-parameters" class="parameter-section active">
                         <div class="advanced-fit-item">
                             <label for="initial-A">A:</label>
-                            <input type="number" id="initial-A" value="1" step="any">
+                            <input type="number" id="initial-A" value="1" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-b">b:</label>
-                            <input type="number" id="initial-b" value="0" step="any">
+                            <input type="number" id="initial-b" value="0" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-k">k:</label>
-                            <input type="number" id="initial-k" value="1" step="any">
+                            <input type="number" id="initial-k" value="1" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-phi">φ:</label>
-                            <input type="number" id="initial-phi" value="0" step="any">
+                            <input type="number" id="initial-phi" value="0" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-c">c:</label>
-                            <input type="number" id="initial-c" value="0" step="any">
+                            <input type="number" id="initial-c" value="0" step="any" />
                         </div>
                     </div>
 
@@ -707,19 +828,19 @@
                     <div id="Gaussian-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
                             <label for="initial-A-gaussian">A:</label>
-                            <input type="number" id="initial-A-gaussian" value="1" step="any">
+                            <input type="number" id="initial-A-gaussian" value="1" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-mu">μ:</label>
-                            <input type="number" id="initial-mu" value="0" step="any">
+                            <input type="number" id="initial-mu" value="0" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-sigma">σ:</label>
-                            <input type="number" id="initial-sigma" value="1" step="any">
+                            <input type="number" id="initial-sigma" value="1" step="any" />
                         </div>
                         <div class="advanced-fit-item">
                             <label for="initial-c-gaussian">c:</label>
-                            <input type="number" id="initial-c-gaussian" value="0" step="any">
+                            <input type="number" id="initial-c-gaussian" value="0" step="any" />
                         </div>
                     </div>
 
@@ -736,8 +857,7 @@
             <div class="graph-title-container">
                 <label for="graph-title">Title:</label>
                 <input type="text" id="graph-title" placeholder="Enter graph title"
-                    oninput="debouncedUpdatePlotAndRenderLatex()">
-
+                    oninput="debouncedUpdatePlotAndRenderLatex()" />
             </div>
             <div id="plot"></div>
 
@@ -755,9 +875,17 @@
 </body>
 
 <script>
-    let rawData = [];       // Holds multiple datasets.
-    let activeSet = 0;      // Active dataset index.
-    rawData.push([]);       // Initialize the first dataset.
+    let rawData = [];      // Each element will be an array of data points
+    let activeSet = 0;     // Index of the current active dataset
+    let datasetHeaders = {}; // Object to store headers per dataset, e.g. {0: {x: 'x', y: 'y'}, 1: {x: 'Time', y: 'Distance'}}
+    let datasetToggles = {};
+
+
+    rawData.push([]);
+    datasetHeaders[0] = { x: 'x', y: 'y' };
+    // At initialization, for dataset 0:
+    datasetToggles[0] = { x: false, y: false };
+
 
     let isSyncing = false;
 
@@ -781,17 +909,197 @@
 
     function initializeTable(initialRows = 7) {
         const tableBody = document.querySelector('#data-table tbody');
+        // Create the default empty rows
         for (let i = 0; i < initialRows; i++) {
             const newRow = tableBody.insertRow();
             newRow.innerHTML = `
-                    <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
-                    <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
-                    <td class="error-column" style="display: none;"><input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" /></td>
-                    <td class="error-column" style="display: none;"><input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" /></td>
-                `;
+            <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
+            <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
+            <td class="error-column" style="display: none;">
+                <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" />
+            </td>
+            <td class="error-column" style="display: none;">
+                <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" />
+            </td>
+        `;
         }
+        // Update the active dataset with the new (empty) rows.
         updateData();
     }
+
+    // Function to update the tabs bar UI
+    function updateDatasetTabsBar() {
+        const tabsBar = document.querySelector('.dataset-tabs-bar');
+        if (!tabsBar) return;
+
+        // Clear all tabs except the Add Dataset button.
+        // (Assume the Add Dataset button is a button element with class "add-dataset-btn")
+        // We'll rebuild the tabs portion first.
+        const existingTabs = Array.from(tabsBar.querySelectorAll('.dataset-tab'));
+        existingTabs.forEach(tab => tab.remove());
+
+        // For each dataset, create a tab element.
+        rawData.forEach((dataset, index) => {
+            const tab = document.createElement('div');
+            tab.classList.add('dataset-tab');
+            if (index === activeSet) {
+                tab.classList.add('active');
+            }
+            // Create a span for the label (e.g., "Dataset 1")
+            const labelSpan = document.createElement('span');
+            labelSpan.classList.add('tab-label');
+            labelSpan.textContent = `Dataset ${index + 1}`;
+            tab.appendChild(labelSpan);
+
+            // Create the close button. (Do not add a close icon if there is only one dataset.)
+            if (rawData.length > 1) {
+                const closeSpan = document.createElement('span');
+                closeSpan.classList.add('tab-close');
+                closeSpan.textContent = '×';
+                // When the close button is clicked, remove this dataset.
+                closeSpan.addEventListener('click', function (e) {
+                    // prevent the click from also firing the tab-switch event
+                    e.stopPropagation();
+                    removeDataset(index);
+                });
+                tab.appendChild(closeSpan);
+            }
+
+            // Clicking on a tab should switch to that dataset.
+            tab.addEventListener('click', function () {
+                switchDataset(index);
+            });
+
+            // Insert the new tab before the Add Dataset button.
+            // (We assume the Add Dataset button remains as the last element.)
+            const addBtn = tabsBar.querySelector('.add-dataset-btn');
+            tabsBar.insertBefore(tab, addBtn);
+        });
+    }
+
+    // Function to switch to a dataset given its index
+    function switchDataset(index) {
+        if (index < 0 || index >= rawData.length) {
+            console.error("Invalid dataset index.");
+            return;
+        }
+        activeSet = index;
+        updateDatasetTabsBar();
+
+        // Repopulate the table UI with data from rawData[activeSet]
+        populateTableFromActiveDataset();
+
+        // Load headers for this dataset
+        loadHeaders();
+
+        // Load uncertainty toggle state for this dataset
+        loadToggles();
+
+        // Update the graph and labels.
+        updatePlotAndRenderLatex();
+        updateLabels('x');
+        updateLabels('y');
+    }
+
+    function populateTableFromActiveDataset() {
+        const tableBody = document.querySelector('#data-table tbody');
+        tableBody.innerHTML = ''; // Clear current table
+
+        const dataset = rawData[activeSet] || [];
+        if (dataset.length > 0) {
+            dataset.forEach(point => {
+                const newRow = tableBody.insertRow();
+                newRow.innerHTML = `
+                <td>
+                    <input type="text" class="x-input"
+                           onkeydown="navigateTable(event)"
+                           oninput="updateData()"
+                           placeholder="0"
+                           value="${point.x}">
+                </td>
+                <td>
+                    <input type="text" class="y-input"
+                           onkeydown="navigateTable(event)"
+                           oninput="updateData()"
+                           placeholder="0"
+                           value="${point.y}">
+                </td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
+                    <input type="text" class="x-error-input"
+                           onkeydown="navigateTable(event)"
+                           placeholder="±0"
+                           oninput="updateData()"
+                           value="${point.xErrorRaw || ''}">
+                </td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
+                    <input type="text" class="y-error-input"
+                           onkeydown="navigateTable(event)"
+                           placeholder="±0"
+                           oninput="updateData()"
+                           value="${point.yErrorRaw || ''}">
+                </td>
+            `;
+            });
+        } else {
+            // If there is no data in the active dataset, initialize default rows.
+            initializeTable();
+        }
+    }
+
+    // Function to add a new dataset
+    function addDataset() {
+        // Add a new empty dataset to rawData.
+        rawData.push([]);
+
+        // Then switch to the newly added dataset.
+        activeSet = rawData.length - 1;
+        updateDatasetTabsBar();
+
+        // Now clear the UI for the active dataset 
+        // (clearRows() will create new empty rows since rawData[activeSet] is empty)
+        clearRows();
+
+        // Update the rest of the UI to reflect the new active dataset.
+        updateData();
+        updatePlotAndRenderLatex();
+    }
+
+    // Function to remove an existing dataset given its index
+    function removeDataset(index) {
+        if (rawData.length <= 1) {
+            alert("You must keep at least one dataset.");
+            return;
+        }
+
+        // Remove the dataset from rawData.
+        rawData.splice(index, 1);
+
+        // Adjust activeSet: if we removed an earlier dataset or the active set was the last one, update accordingly.
+        if (activeSet >= rawData.length) {
+            activeSet = rawData.length - 1;
+        }
+
+        updateDatasetTabsBar();
+
+        // Refresh UI based on the new active dataset.
+        updateData();
+        updatePlotAndRenderLatex();
+    }
+
+    // Attach the Add Dataset button click event
+    function initializeDatasetTabsBar() {
+        const addBtn = document.querySelector('.add-dataset-btn');
+        if (addBtn) {
+            addBtn.addEventListener('click', addDataset);
+        }
+        // Build the initial tabs UI.
+        updateDatasetTabsBar();
+    }
+
+    // Call this function in your window.onload or DOMContentLoaded event handler.
+    document.addEventListener("DOMContentLoaded", function () {
+        initializeDatasetTabsBar();
+    });
 
     function addRow() {
         const tableBody = document.querySelector('#data-table tbody');
@@ -822,7 +1130,30 @@
             isSyncing = false;
         }
 
-        initializeTable();
+        // Check if the active dataset has any data
+        if (rawData[activeSet] && rawData[activeSet].length > 0) {
+            // Rebuild table rows from the data already stored in rawData[activeSet]
+            rawData[activeSet].forEach(point => {
+                const newRow = tableBody.insertRow();
+                newRow.innerHTML = `
+                <td>
+                    <input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0" value="${point.x}">
+                </td>
+                <td>
+                    <input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0" value="${point.y}">
+                </td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
+                    <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" value="${point.xErrorRaw || ''}">
+                </td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
+                    <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" value="${point.yErrorRaw || ''}">
+                </td>
+            `;
+            });
+        } else {
+            // Otherwise, initialize with default rows if no data exists
+            initializeTable();
+        }
 
         // Uncheck uncertainty toggles and hide error columns
         document.getElementById('toggle-x-error').checked = false;
@@ -889,11 +1220,21 @@
     }
 
     function toggleErrorColumn(axis) {
-        const errorHeader = document.getElementById(`${axis}-error-header`);
+        // Get the checkbox element and its state.
         const checkBox = document.getElementById(`toggle-${axis}-error`);
+        const state = checkBox.checked;
+
+        // Save the state for the active dataset.
+        if (!datasetToggles[activeSet]) {
+            datasetToggles[activeSet] = { x: false, y: false };
+        }
+        datasetToggles[activeSet][axis] = state;
+
+        // Now update the UI for the active dataset.
+        const errorHeader = document.getElementById(`${axis}-error-header`);
         const errorInputs = document.querySelectorAll(`.${axis}-error-input`);
 
-        if (checkBox.checked) {
+        if (state) {
             errorHeader.style.display = 'table-cell';
             updateUncertaintyHeaders(axis);
             errorInputs.forEach((input) => {
@@ -914,10 +1255,59 @@
         }
 
         updateData();
-
-        // Update initial parameters based on the selected advanced fit method
         setInitialParameters(getCurrentAdvancedFitMethod());
     }
+
+    function loadToggles() {
+        const toggles = datasetToggles[activeSet] || { x: false, y: false };
+
+        document.getElementById('toggle-x-error').checked = toggles.x;
+        document.getElementById('toggle-y-error').checked = toggles.y;
+
+        // Update x error column:
+        const xErrorHeader = document.getElementById('x-error-header');
+        const xErrorInputs = document.querySelectorAll('.x-error-input');
+        if (toggles.x) {
+            xErrorHeader.style.display = 'table-cell';
+            xErrorInputs.forEach(input => {
+                const cell = input.parentElement;
+                if (cell) {
+                    cell.style.display = 'table-cell';
+                }
+            });
+        } else {
+            xErrorHeader.style.display = 'none';
+            xErrorInputs.forEach(input => {
+                const cell = input.parentElement;
+                if (cell) {
+                    cell.style.display = 'none';
+                }
+            });
+        }
+
+        // Update y error column:
+        const yErrorHeader = document.getElementById('y-error-header');
+        const yErrorInputs = document.querySelectorAll('.y-error-input');
+        if (toggles.y) {
+            yErrorHeader.style.display = 'table-cell';
+            yErrorInputs.forEach(input => {
+                const cell = input.parentElement;
+                if (cell) {
+                    cell.style.display = 'table-cell';
+                }
+            });
+        } else {
+            yErrorHeader.style.display = 'none';
+            yErrorInputs.forEach(input => {
+                const cell = input.parentElement;
+                if (cell) {
+                    cell.style.display = 'none';
+                }
+            });
+        }
+    }
+
+
 
     function updateUncertaintyHeaders(axis) {
         const columnName = document.getElementById(`${axis}-column-name`).value.trim() || (axis === 'x' ? 'x' : 'y');
@@ -954,6 +1344,7 @@
         const reader = new FileReader();
         reader.onload = function (e) {
             const text = e.target.result;
+            // Pass the CSV text to the parser so that it writes data into rawData[activeSet]
             parseCSV(text);
         };
         reader.onerror = function () {
@@ -961,6 +1352,7 @@
         };
         reader.readAsText(file);
     }
+
 
     function parseCSVLine(line) {
         const result = [];
@@ -995,27 +1387,27 @@
             alert('CSV file must have at least two columns.');
             return;
         }
-        // Determine if the CSV *initially* has X and Y errors
+        // Determine if the CSV initially has X and Y errors
         const hasXError = headers.length >= 3;
         const hasYError = headers.length >= 4;
 
-        // 2) Update top-level inputs & toggles just once
+        // 2) Store headers for the active dataset and update the UI via loadHeaders()
         isSyncing = true;
-        document.getElementById('x-column-name').value = headers[0];
-        document.getElementById('y-column-name').value = headers[1];
-        renderLatex('#x-column-latex', formatLabelForLatex(headers[0]));
-        renderLatex('#y-column-latex', formatLabelForLatex(headers[1]));
-        updateGraphTitle();
+        datasetHeaders[activeSet] = {
+            x: headers[0],
+            y: headers[1]
+        };
+        loadHeaders();  // This function sets the header input values and renders LaTeX.
         isSyncing = false;
 
-        // Clear existing rows (without resetting headers)
+        // Clear existing rows for this dataset without resetting headers
         clearRows(false);
 
-        // Set the toggles to match the CSV's existing columns
+        // Set the uncertainty toggles to match the CSV's columns
         document.getElementById('toggle-x-error').checked = hasXError;
         document.getElementById('toggle-y-error').checked = hasYError;
 
-        // 3) Build the new rows in memory
+        // 3) Build the new rows in memory based on the CSV data.
         const dataRows = lines.slice(1);
         const tableBody = document.querySelector('#data-table tbody');
         const fragment = document.createDocumentFragment();
@@ -1046,7 +1438,7 @@
         `;
             tr.appendChild(tdY);
 
-            // Always create the X-error column
+            // X-error cell
             const tdXErr = document.createElement('td');
             tdXErr.className = 'error-column x-error-td';
             tdXErr.innerHTML = `
@@ -1056,11 +1448,10 @@
                    oninput="updateData()"
                    value="${rowData[2] || ''}">
         `;
-            // If CSV had no X errors, hide this column for now
             if (!hasXError) tdXErr.style.display = 'none';
             tr.appendChild(tdXErr);
 
-            // Always create the Y-error column
+            // Y-error cell
             const tdYErr = document.createElement('td');
             tdYErr.className = 'error-column y-error-td';
             tdYErr.innerHTML = `
@@ -1080,15 +1471,28 @@
         tableBody.innerHTML = '';
         tableBody.appendChild(fragment);
 
-        // 5) Update data, re-plot, etc.
+        // 5) Update data in the active dataset, re-plot, etc.
         updateData();
         updatePlotAndRenderLatex();
         setInitialParameters(getCurrentAdvancedFitMethod());
 
-        // Finally, let toggleErrorColumn re-apply the current show/hide logic
+        // Re-apply uncertainty toggle display logic.
         toggleErrorColumn('x');
         toggleErrorColumn('y');
     }
+
+    function loadHeaders() {
+        // Use stored headers for the active dataset if available;
+        // otherwise, use defaults.
+        const headers = datasetHeaders[activeSet] || { x: 'x', y: 'y' };
+
+        document.getElementById('x-column-name').value = headers.x;
+        document.getElementById('y-column-name').value = headers.y;
+        renderLatex('#x-column-latex', formatLabelForLatex(headers.x));
+        renderLatex('#y-column-latex', formatLabelForLatex(headers.y));
+        updateGraphTitle();
+    }
+
 
     function updateLabels(type) {
         if (isSyncing) return;
@@ -1124,7 +1528,9 @@
         if (isSyncing) return;
         isSyncing = true;
 
+        // Assumes plotGraph() uses rawData[activeSet] internally.
         plotGraph();
+
         const xColumnName = document.getElementById('x-column-name').value || 'x';
         renderLatex('#x-column-latex', formatLabelForLatex(xColumnName));
 
@@ -1133,6 +1539,7 @@
 
         isSyncing = false;
     }
+
 
     function openTab(evt, tabName) {
         const tablinks = document.getElementsByClassName("tablink");
@@ -1228,6 +1635,7 @@
     }
 
     function fitCurve() {
+        // Ensure there are at least two data points in the active dataset.
         if (rawData[activeSet].length < 2) {
             alert('Please enter at least two data points.');
             return;
@@ -1235,6 +1643,8 @@
 
         const fitMethod = document.getElementById('fit-method').value;
 
+        // For fitting methods where you need x and y arrays,
+        // we are mapping rawData[activeSet] to extract the x and y values.
         if (fitMethod === 'Linear') {
             performLinearFit(rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y));
         } else if (fitMethod.startsWith('Polynomial')) {
@@ -1475,6 +1885,7 @@
             const xErrorInputs = document.querySelectorAll('.x-error-input');
             const yErrorInputs = document.querySelectorAll('.y-error-input');
 
+            // Clear the current active dataset and repopulate it from the table inputs.
             rawData[activeSet] = [];
             for (let i = 0; i < xInputs.length; i++) {
                 const x = parseFloat(xInputs[i].value);
@@ -1492,11 +1903,13 @@
                 }
             }
 
+            // Update the plot using only the active dataset.
             plotGraph();
         } catch (error) {
             console.error('Error updating data:', error);
         }
     }
+
 
     window.onload = function () {
         initializeTable();
