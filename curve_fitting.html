@@ -1117,48 +1117,26 @@
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = '';
 
+        // Clear the active dataset completely:
+        rawData[activeSet] = [];
+
         if (resetHeaders) {
             isSyncing = true;
-            document.getElementById('x-column-name').value = 'x';
-            document.getElementById('y-column-name').value = 'y';
-            renderLatex('#x-column-latex', formatLabelForLatex('x'));
-            renderLatex('#y-column-latex', formatLabelForLatex('y'));
-
-            // Update the graph title using our helper
+            // Reset headers for the active dataset
+            datasetHeaders[activeSet] = { x: 'x', y: 'y' };
+            loadHeaders(); // This function now loads headers from datasetHeaders[activeSet]
             updateGraphTitle();
-
             isSyncing = false;
         }
 
-        // Check if the active dataset has any data
-        if (rawData[activeSet] && rawData[activeSet].length > 0) {
-            // Rebuild table rows from the data already stored in rawData[activeSet]
-            rawData[activeSet].forEach(point => {
-                const newRow = tableBody.insertRow();
-                newRow.innerHTML = `
-                <td>
-                    <input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0" value="${point.x}">
-                </td>
-                <td>
-                    <input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0" value="${point.y}">
-                </td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
-                    <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" value="${point.xErrorRaw || ''}">
-                </td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
-                    <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" value="${point.yErrorRaw || ''}">
-                </td>
-            `;
-            });
-        } else {
-            // Otherwise, initialize with default rows if no data exists
-            initializeTable();
-        }
+        // Rebuild the table with default empty rows. 
+        // Since rawData[activeSet] is now empty, initializeTable() will create new empty rows.
+        initializeTable();
 
-        // Uncheck uncertainty toggles and hide error columns
+        // Reset uncertainty toggles for the active dataset
         document.getElementById('toggle-x-error').checked = false;
-        toggleErrorColumn('x');
         document.getElementById('toggle-y-error').checked = false;
+        toggleErrorColumn('x');
         toggleErrorColumn('y');
 
         // Reset fitting parameters to defaults
@@ -1917,6 +1895,8 @@
             const value = document.getElementById(id).value;
             renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
         });
+
+        clearRows()
 
         // Update the graph title based on the current column headings:
         updateGraphTitle();
