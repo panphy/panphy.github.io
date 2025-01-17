@@ -43,8 +43,8 @@
             align-items: center;
             background-color: #333;
             color: white;
-            padding: 20px;
-            font-size: 24px;
+            padding: 8px;
+            font-size: 22px;
             font-weight: bold;
             position: relative;
         }
@@ -83,8 +83,8 @@
 
         .reminder {
             color: #999999;
-            margin: 3px;
-            font-size: 13px;
+            margin: 3px 0;
+            font-size: 12px;
             text-align: center;
         }
 
@@ -123,8 +123,6 @@
             background: #999;
         }
 
-
-        /* Browser-style Tab */
         .dataset-tab {
             position: relative;
             padding: 8px 16px;
@@ -200,7 +198,7 @@
             display: flex;
             flex-direction: row;
             padding: 0px;
-            gap: 20px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
@@ -680,7 +678,7 @@
     <div class="dataset-tabs-bar">
         <div class="dataset-tab active">
             <span class="tab-label">Dataset 1</span>
-            <span class="tab-close" title="Remove dataset">×</span>
+            <span class="tab-close" title="Remove dataset">X</span>
         </div>
         <button class="add-dataset-btn">Add Dataset</button>
     </div>
@@ -883,9 +881,7 @@
 
     rawData.push([]);
     datasetHeaders[0] = { x: 'x', y: 'y' };
-    // At initialization, for dataset 0:
-    datasetToggles[0] = { x: false, y: false };
-
+    datasetToggles[0] = { x: false, y: false };  // At initialization, for dataset 0
 
     let isSyncing = false;
 
