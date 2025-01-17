@@ -1113,30 +1113,43 @@
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = '';
 
-        // Clear the active dataset completely:
-        rawData[activeSet] = [];
-
         if (resetHeaders) {
             isSyncing = true;
-            // Reset headers for the active dataset
-            datasetHeaders[activeSet] = { x: 'x', y: 'y' };
-            loadHeaders(); // This function now loads headers from datasetHeaders[activeSet]
+            document.getElementById('x-column-name').value = 'x';
+            document.getElementById('y-column-name').value = 'y';
+            renderLatex('#x-column-latex', formatLabelForLatex('x'));
+            renderLatex('#y-column-latex', formatLabelForLatex('y'));
+
+            // Update the graph title using our helper
             updateGraphTitle();
+
             isSyncing = false;
         }
 
-        // Rebuild the table with default empty rows. 
-        // Since rawData[activeSet] is now empty, initializeTable() will create new empty rows.
         initializeTable();
 
-        // Reset uncertainty toggles for the active dataset
+        // Uncheck uncertainty toggles and hide error columns
         document.getElementById('toggle-x-error').checked = false;
-        document.getElementById('toggle-y-error').checked = false;
         toggleErrorColumn('x');
+        document.getElementById('toggle-y-error').checked = false;
         toggleErrorColumn('y');
 
         // Reset fitting parameters to defaults
         setInitialParameters(getCurrentAdvancedFitMethod());
+
+        // Clear the fitting result
+        const fitEquationElement = document.getElementById('fit-equation');
+        const rSquaredElement = document.getElementById('r-squared-container');
+
+        if (fitEquationElement) {
+            fitEquationElement.style.display = 'none';
+            fitEquationElement.innerHTML = '';
+        }
+
+        if (rSquaredElement) {
+            rSquaredElement.style.display = 'none';
+            rSquaredElement.innerHTML = '';
+        }
     }
 
     function navigateTable(event) {
