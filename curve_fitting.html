@@ -123,6 +123,8 @@
             background: #999;
         }
 
+
+        /* Browser-style Tab */
         .dataset-tab {
             position: relative;
             padding: 8px 16px;
@@ -603,6 +605,29 @@
             margin-top: 20px;
         }
 
+        .plot-all-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .plot-all-btn {
+            padding: 8px 16px;
+            background-color: #a64d79;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, filter 0.3s;
+        }
+
+        .plot-all-btn:hover {
+            background-color: #741b47;
+            filter: brightness(90%);
+        }
+
+
         @media (max-width: 900px) {
             .container {
                 flex-direction: column;
@@ -645,12 +670,139 @@
             outline: none;
         }
 
+        /* Full-screen overlay container remains full-screen */
+        #popup-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+
+            /* Use flex to center the content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Remove extra padding so the content can size naturally */
+            padding: 0;
+        }
+
+        /* Popup content container: sized automatically to fit its content */
+        #popup-content {
+            display: inline-block;
+            background: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+
+            /* Remove max-width/height so that it fits content */
+            width: auto;
+            height: auto;
+            overflow: visible;
+            /* Allow content to determine size */
+        }
+
+        /* Popup title area */
+        #popup-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Container for the Plotly graph */
+        #popup-plot {
+            width: auto;
+            /* Remove fixed width */
+            height: auto;
+            /* Remove fixed height */
+            /* Optionally, you may set a min-width/min-height so the graph doesn't become too small */
+            min-width: 600px;
+            min-height: 400px;
+
+            /* Add a top margin to separate from the title */
+            margin-top: 20px;
+        }
+
+        /* Close button for the popup */
+        #popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e06666;
+            color: #fff;
+            border: none;
+            border-radius: 2px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        #popup-close:hover {
+            background: #cc5555;
+        }
+
+        /* Container for the combined plot controls */
+        .combined-plot-controls {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            /* Stack rows vertically */
+            gap: 10px;
+            /* Space between each row */
+        }
+
+        /* Each row for label and input arranged horizontally */
+        .control-row-horizontal {
+            display: flex;
+            align-items: center;
+            /* Vertically center the label and input */
+            gap: 10px;
+            /* Space between label and input */
+        }
+
+        /* Label styling */
+        .control-row-horizontal label {
+            width: 120px;
+            /* Fixed width for uniform label alignment */
+            font-weight: bold;
+        }
+
+        /* Input styling */
+        .control-row-horizontal input[type="text"] {
+            padding: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            flex-grow: 1;
+            box-sizing: border-box;
+        }
+
+        #popup-plot-container {
+            margin-top: 50px;
+            /* Adjust as needed */
+        }
+
+        #popup-content {
+            max-height: 90vh;
+            /* Use viewport units to limit the content's maximum height */
+            overflow-y: auto;
+            /* Enable vertical scrolling if content overflows */
+            padding: 20px;
+            /* (Optional) add some padding */
+        }
+
         footer {
             text-align: center;
             padding: 10px;
             background: #f4f4f4;
             color: #555;
-            margin-top: 10px;
+            margin: 10px auto 0;
+            width: 100%;
         }
 
         footer a {
@@ -678,7 +830,7 @@
     <div class="dataset-tabs-bar">
         <div class="dataset-tab active">
             <span class="tab-label">Dataset 1</span>
-            <span class="tab-close" title="Remove dataset">X</span>
+            <span class="tab-close" title="Remove dataset">×</span>
         </div>
         <button class="add-dataset-btn">Add Dataset</button>
     </div>
@@ -855,7 +1007,7 @@
             <div class="graph-title-container">
                 <label for="graph-title">Title:</label>
                 <input type="text" id="graph-title" placeholder="Enter graph title"
-                    oninput="debouncedUpdatePlotAndRenderLatex()" />
+                    oninput="debouncedUpdatePlotAndRenderLatex()">
             </div>
             <div id="plot"></div>
 
@@ -864,7 +1016,40 @@
                 <p id="fit-equation" style="display: none;"></p>
                 <p id="r-squared-container" style="display: none;"></p>
             </div>
+
+            <!-- New "Plot ALL Datasets" button -->
+            <div class="plot-all-container">
+                <button class="plot-all-btn" onclick="plotAllDatasets()">Plot ALL Datasets</button>
+            </div>
         </div>
+
+        <div id="popup-container" style="display: none;">
+            <div id="popup-content" style="max-height: 90vh; overflow-y: auto; padding: 20px;">
+                <button id="popup-close" onclick="closePopup()">Close</button>
+                <div id="popup-title">Combined Plot of All Datasets</div>
+                <!-- Wrap the Plotly div in its own container -->
+                <div id="popup-plot-container">
+                    <div id="popup-plot"></div>
+                </div>
+                <!-- New container for input boxes arranged in separate rows -->
+                <div id="combined-plot-controls" class="combined-plot-controls">
+                    <div class="control-row-horizontal">
+                        <label for="combined-title">Plot Title:</label>
+                        <input type="text" id="combined-title" placeholder="Combined Plot Title" />
+                    </div>
+                    <div class="control-row-horizontal">
+                        <label for="combined-x-label">X-Axis Label:</label>
+                        <input type="text" id="combined-x-label" placeholder="X-Axis Label" />
+                    </div>
+                    <div class="control-row-horizontal">
+                        <label for="combined-y-label">Y-Axis Label:</label>
+                        <input type="text" id="combined-y-label" placeholder="Y-Axis Label" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <footer>
@@ -874,15 +1059,19 @@
 </body>
 
 <script>
-    let rawData = [];      // Each element will be an array of data points
-    let activeSet = 0;     // Index of the current active dataset
-    let datasetHeaders = {}; // Object to store headers per dataset, e.g. {0: {x: 'x', y: 'y'}, 1: {x: 'Time', y: 'Distance'}}
-    let datasetToggles = {};
+    let rawData = [];  // Each element will be an array of data points
+    let activeSet = 0;  // Index of the current active dataset
+    let datasetHeaders = {};  // Object to store headers per dataset, e.g. {0: {x: 'x', y: 'y'}, 1: {x: 'Time', y: 'Distance'}}
+    let datasetToggles = {};  // Global object to hold fitted curves by dataset index.
+    let datasetErrorTypes = {}; // stores the error type per axis per dataset, e.g. { 0: { x: 'absolute', y: 'absolute' }, 1: { x: 'percentage', y: 'percentage' } }
+    let fittedCurves = {};
+    let datasetFitResults = {};  // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
 
 
     rawData.push([]);
-    datasetHeaders[0] = { x: 'x', y: 'y' };
-    datasetToggles[0] = { x: false, y: false };  // At initialization, for dataset 0
+    datasetHeaders[0] = { x: 'x', y: 'y' };  // At initialization, for dataset 0:
+    datasetToggles[0] = { x: false, y: false };
+    datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
 
     let isSyncing = false;
 
@@ -974,7 +1163,6 @@
         });
     }
 
-    // Function to switch to a dataset given its index
     function switchDataset(index) {
         if (index < 0 || index >= rawData.length) {
             console.error("Invalid dataset index.");
@@ -983,19 +1171,65 @@
         activeSet = index;
         updateDatasetTabsBar();
 
-        // Repopulate the table UI with data from rawData[activeSet]
+        // Repopulate the table UI with data from the active dataset.
         populateTableFromActiveDataset();
 
-        // Load headers for this dataset
+        // Load header values for this dataset.
         loadHeaders();
 
-        // Load uncertainty toggle state for this dataset
+        // Restore uncertainty toggle state.
         loadToggles();
 
-        // Update the graph and labels.
+        // Restore error type settings.
+        loadErrorTypes();
+
+        // Update the graph and LaTeX-rendered labels.
         updatePlotAndRenderLatex();
         updateLabels('x');
         updateLabels('y');
+
+        // **NEW:** Update the combined plot input boxes with the active dataset’s header values.
+        updateCombinedPlotInputsToActive();
+
+        // Restore or clear the fitting result for the current dataset.
+        const fitEquationElement = document.getElementById('fit-equation');
+        const rSquaredElement = document.getElementById('r-squared-container');
+        if (datasetFitResults.hasOwnProperty(activeSet)) {
+            const result = datasetFitResults[activeSet];
+            fitEquationElement.innerHTML = `\\(${result.equation}\\)`;
+            fitEquationElement.style.display = 'block';
+            rSquaredElement.innerHTML = `\\( R^2 = ${result.rSquared} \\)`;
+            rSquaredElement.style.display = 'block';
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, fitEquationElement]);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, rSquaredElement]);
+            }
+        } else {
+            fitEquationElement.style.display = 'none';
+            fitEquationElement.innerHTML = '';
+            rSquaredElement.style.display = 'none';
+            rSquaredElement.innerHTML = '';
+        }
+    }
+
+    function updateCombinedPlotInputsToActive() {
+        const title = document.getElementById('graph-title').value || 'y vs x';
+        const xLabel = processLabel(document.getElementById('x-column-name').value || 'x');
+        const yLabel = processLabel(document.getElementById('y-column-name').value || 'y');
+
+        const titleInput = document.getElementById('combined-title');
+        const xLabelInput = document.getElementById('combined-x-label');
+        const yLabelInput = document.getElementById('combined-y-label');
+
+        if (titleInput) {
+            titleInput.value = title;
+        }
+        if (xLabelInput) {
+            xLabelInput.value = xLabel;
+        }
+        if (yLabelInput) {
+            yLabelInput.value = yLabel;
+        }
     }
 
     function populateTableFromActiveDataset() {
@@ -1116,40 +1350,65 @@
 
         if (resetHeaders) {
             isSyncing = true;
+            // Reset header inputs to defaults.
             document.getElementById('x-column-name').value = 'x';
             document.getElementById('y-column-name').value = 'y';
+            document.getElementById('graph-title').value = 'y vs x';
             renderLatex('#x-column-latex', formatLabelForLatex('x'));
             renderLatex('#y-column-latex', formatLabelForLatex('y'));
-
-            // Update the graph title using our helper
             updateGraphTitle();
-
             isSyncing = false;
         }
 
         initializeTable();
 
-        // Uncheck uncertainty toggles and hide error columns
+        // Uncheck uncertainty toggles and hide error columns.
         document.getElementById('toggle-x-error').checked = false;
         toggleErrorColumn('x');
         document.getElementById('toggle-y-error').checked = false;
         toggleErrorColumn('y');
 
-        // Reset fitting parameters to defaults
+        // Reset fitting parameters.
         setInitialParameters(getCurrentAdvancedFitMethod());
 
-        // Clear the fitting result
+        // Clear the fitting result from the UI.
         const fitEquationElement = document.getElementById('fit-equation');
         const rSquaredElement = document.getElementById('r-squared-container');
-
         if (fitEquationElement) {
             fitEquationElement.style.display = 'none';
             fitEquationElement.innerHTML = '';
         }
-
         if (rSquaredElement) {
             rSquaredElement.style.display = 'none';
             rSquaredElement.innerHTML = '';
+        }
+
+        // Also clear the stored fitting result for the current dataset.
+        if (datasetFitResults.hasOwnProperty(activeSet)) {
+            delete datasetFitResults[activeSet];
+        }
+
+        // Update the combined plot input boxes to reflect default header values.
+        updateCombinedPlotInputsToActive();
+    }
+
+    function updateCombinedPlotInputsToActive() {
+        const title = document.getElementById('graph-title').value || 'y vs x';
+        const xLabel = processLabel(document.getElementById('x-column-name').value || 'x');
+        const yLabel = processLabel(document.getElementById('y-column-name').value || 'y');
+
+        const titleInput = document.getElementById('combined-title');
+        const xLabelInput = document.getElementById('combined-x-label');
+        const yLabelInput = document.getElementById('combined-y-label');
+
+        if (titleInput) {
+            titleInput.value = title;
+        }
+        if (xLabelInput) {
+            xLabelInput.value = xLabel;
+        }
+        if (yLabelInput) {
+            yLabelInput.value = yLabel;
         }
     }
 
@@ -1212,13 +1471,13 @@
         const checkBox = document.getElementById(`toggle-${axis}-error`);
         const state = checkBox.checked;
 
-        // Save the state for the active dataset.
+        // Ensure the toggles object exists for the current dataset.
         if (!datasetToggles[activeSet]) {
             datasetToggles[activeSet] = { x: false, y: false };
         }
         datasetToggles[activeSet][axis] = state;
 
-        // Now update the UI for the active dataset.
+        // Update the UI for the active dataset.
         const errorHeader = document.getElementById(`${axis}-error-header`);
         const errorInputs = document.querySelectorAll(`.${axis}-error-input`);
 
@@ -1313,16 +1572,43 @@
         }
     }
 
-
     function updateErrorType(axis) {
+        // Get the selected error type from the dropdown.
+        const errorType = document.getElementById(`${axis}-error-type`).value;
+
+        // Ensure the error type object exists for the current dataset.
+        if (!datasetErrorTypes[activeSet]) {
+            datasetErrorTypes[activeSet] = { x: 'absolute', y: 'absolute' };
+        }
+        datasetErrorTypes[activeSet][axis] = errorType;
+
+        // If uncertainty is enabled for this axis, update the uncertainty header.
         if (document.getElementById(`toggle-${axis}-error`).checked) {
             updateUncertaintyHeaders(axis);
         }
 
         updateData();
-
-        // Update initial parameters based on the selected advanced fit method
         setInitialParameters(getCurrentAdvancedFitMethod());
+    }
+
+    function loadErrorTypes() {
+        const xErrorTypeElement = document.getElementById('x-error-type');
+        const yErrorTypeElement = document.getElementById('y-error-type');
+
+        // Use stored error types or fallback to 'absolute'
+        const currentXErrorType = (datasetErrorTypes[activeSet] && datasetErrorTypes[activeSet].x) || 'absolute';
+        const currentYErrorType = (datasetErrorTypes[activeSet] && datasetErrorTypes[activeSet].y) || 'absolute';
+
+        if (xErrorTypeElement) {
+            xErrorTypeElement.value = currentXErrorType;
+        }
+        if (yErrorTypeElement) {
+            yErrorTypeElement.value = currentYErrorType;
+        }
+
+        // Ensure the uncertainty header is updated accordingly.
+        updateUncertaintyHeaders('x');
+        updateUncertaintyHeaders('y');
     }
 
     function handleCSVUpload(event) {
@@ -1561,6 +1847,12 @@
 
 
     function plotGraph(fittedX = null, fittedY = null) {
+        // If no fitted data was passed and a fitted curve exists for the active dataset, use it.
+        if ((fittedX === null || fittedY === null) && fittedCurves.hasOwnProperty(activeSet)) {
+            fittedX = fittedCurves[activeSet].x;
+            fittedY = fittedCurves[activeSet].y;
+        }
+
         const x = rawData[activeSet].map(point => point.x);
         const y = rawData[activeSet].map(point => point.y);
         const xErrorRaw = rawData[activeSet].map(point => point.xErrorRaw || 0);
@@ -1610,7 +1902,7 @@
         const layout = {
             xaxis: { title: processLabel(document.getElementById('x-column-name').value || 'x') },
             yaxis: { title: processLabel(document.getElementById('y-column-name').value || 'y') },
-            title: processLabel(document.getElementById('graph-title').value || `${yColumn} \\space \\text{vs} \\space ${xColumn}`),
+            title: processLabel(document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`)
         };
 
         Plotly.react('plot', traces, layout, {
@@ -1620,6 +1912,200 @@
                 scale: 1
             }
         });
+    }
+
+    function plotAllDatasets() {
+        const traces = [];
+        // Define an array of colors for the fitted curves.
+        const fitColors = ['#4595dd', '#dd4545', '#45dd7c', '#dd87f4', '#ffaa00', '#00aa99'];
+
+        // Process each dataset.
+        rawData.forEach((dataset, index) => {
+            // Create arrays for x, y, and the raw error values.
+            const x = dataset.map(point => point.x);
+            const y = dataset.map(point => point.y);
+            const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
+            const yErrorsRaw = dataset.map(point => point.yErrorRaw || 0);
+
+            // Determine the error type for this dataset (defaulting to absolute if not set)
+            const currentErrorTypes = (datasetErrorTypes[index]) ? datasetErrorTypes[index] : { x: 'absolute', y: 'absolute' };
+
+            // Convert the error values as needed.
+            // For x errors:
+            const xErrors = x.map((xi, idx) => {
+                if (currentErrorTypes.x === 'percentage') {
+                    // For percentage errors, convert as: (raw error / 100) * (data value)
+                    return (xErrorsRaw[idx] / 100) * (xi || 0);
+                } else {
+                    // For absolute errors, use the raw value.
+                    return xErrorsRaw[idx];
+                }
+            });
+            // For y errors:
+            const yErrors = y.map((yi, idx) => {
+                if (currentErrorTypes.y === 'percentage') {
+                    return (yErrorsRaw[idx] / 100) * (yi || 0);
+                } else {
+                    return yErrorsRaw[idx];
+                }
+            });
+
+            // Add the data trace.
+            traces.push({
+                x: x,
+                y: y,
+                mode: 'markers',
+                name: `Dataset ${index + 1}`,
+                marker: { size: 8 },
+                error_x: {
+                    type: 'data',
+                    array: xErrors,
+                    visible: true,
+                    color: 'teal',
+                    thickness: 1,
+                    width: 2
+                },
+                error_y: {
+                    type: 'data',
+                    array: yErrors,
+                    visible: true,
+                    color: 'teal',
+                    thickness: 1,
+                    width: 2
+                }
+            });
+
+            // If a fitted curve exists for this dataset, add it with a distinct color.
+            if (fittedCurves.hasOwnProperty(index)) {
+                const color = fitColors[index % fitColors.length];
+                traces.push({
+                    x: fittedCurves[index].x,
+                    y: fittedCurves[index].y,
+                    mode: 'lines',
+                    name: `Fit ${index + 1}`,
+                    line: { color: color }
+                });
+            }
+        });
+
+        // For the combined plot layout, retrieve title and axis labels from the input boxes,
+        // falling back to the active dataset's settings if needed.
+        let titleValue = document.getElementById('combined-title')
+            ? document.getElementById('combined-title').value
+            : null;
+        let xLabelValue = document.getElementById('combined-x-label')
+            ? document.getElementById('combined-x-label').value
+            : null;
+        let yLabelValue = document.getElementById('combined-y-label')
+            ? document.getElementById('combined-y-label').value
+            : null;
+
+        if (!titleValue) {
+            titleValue = document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
+        }
+        if (!xLabelValue) {
+            xLabelValue = processLabel(document.getElementById('x-column-name').value || 'x');
+        }
+        if (!yLabelValue) {
+            yLabelValue = processLabel(document.getElementById('y-column-name').value || 'y');
+        }
+
+        // Wrap the title in $ signs so MathJax renders it.
+        titleValue = '$' + titleValue + '$';
+
+        const layout = {
+            title: {
+                text: titleValue,
+                font: { size: 16 }
+            },
+            xaxis: { title: xLabelValue },
+            yaxis: { title: yLabelValue },
+            margin: { t: 100, b: 40, l: 40, r: 40 }
+        };
+
+        Plotly.newPlot('popup-plot', traces, layout);
+        showPopup();
+
+        // Trigger MathJax for LaTeX rendering.
+        if (typeof MathJax !== 'undefined') {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('popup-plot')]);
+        }
+    }
+
+    // Function to initialize the combined plot input boxes.
+    function initCombinedPlotInputs() {
+        // Assume there is a container element in your HTML with id "combined-plot-controls"
+        // If it doesn't exist yet, create and append it below the combined plot container.
+        let controlsContainer = document.getElementById('combined-plot-controls');
+        if (!controlsContainer) {
+            controlsContainer = document.createElement('div');
+            controlsContainer.id = 'combined-plot-controls';
+            // Optionally style the container here.
+            document.body.appendChild(controlsContainer);
+        }
+
+        // Create or select the title input.
+        let titleInput = document.getElementById('combined-title');
+        if (!titleInput) {
+            titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.id = 'combined-title';
+            titleInput.placeholder = 'Combined Plot Title';
+            controlsContainer.appendChild(titleInput);
+        }
+
+        // Create or select the x-axis label input.
+        let xLabelInput = document.getElementById('combined-x-label');
+        if (!xLabelInput) {
+            xLabelInput = document.createElement('input');
+            xLabelInput.type = 'text';
+            xLabelInput.id = 'combined-x-label';
+            xLabelInput.placeholder = 'X-Axis Label';
+            controlsContainer.appendChild(xLabelInput);
+        }
+
+        // Create or select the y-axis label input.
+        let yLabelInput = document.getElementById('combined-y-label');
+        if (!yLabelInput) {
+            yLabelInput = document.createElement('input');
+            yLabelInput.type = 'text';
+            yLabelInput.id = 'combined-y-label';
+            yLabelInput.placeholder = 'Y-Axis Label';
+            controlsContainer.appendChild(yLabelInput);
+        }
+
+        // Initialize the input boxes with the active dataset’s labels.
+        // For title, take the value from the active graph title input.
+        titleInput.value = document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
+        xLabelInput.value = processLabel(document.getElementById('x-column-name').value || 'x');
+        yLabelInput.value = processLabel(document.getElementById('y-column-name').value || 'y');
+
+        // Add event listeners: whenever any input value changes, update the combined plot.
+        titleInput.addEventListener('input', updateCombinedPlotFromInputs);
+        xLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+        yLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+    }
+
+    // Function to update the combined plot using the values from the new input boxes.
+    function updateCombinedPlotFromInputs() {
+        // Simply call plotAllDatasets; the updated version will check the input box values.
+        plotAllDatasets();
+    }
+
+    // This function makes the popup visible.
+    function showPopup() {
+        const popup = document.getElementById('popup-container');
+        if (popup) {
+            popup.style.display = 'block';
+        }
+    }
+
+    // This function hides the popup.
+    function closePopup() {
+        const popup = document.getElementById('popup-container');
+        if (popup) {
+            popup.style.display = 'none';
+        }
     }
 
     function fitCurve() {
@@ -1818,26 +2304,36 @@
 
             let ssTotal = 0, ssResidual = 0;
             for (let i = 0; i < y.length; i++) {
-                ssTotal += (y[i] - meanY) ** 2;
-                ssResidual += (y[i] - yPredicted[i]) ** 2;
+                ssTotal += Math.pow(y[i] - meanY, 2);
+                ssResidual += Math.pow(y[i] - yPredicted[i], 2);
             }
 
             const rSquared = 1 - ssResidual / ssTotal;
 
+            // Update the UI (fitting result container)
             const fitEquationElement = document.getElementById('fit-equation');
             if (fitEquationElement) {
                 fitEquationElement.innerHTML = `\\(${equation}\\)`;
                 fitEquationElement.style.display = 'block';
             }
 
-            const rSquaredContainer = document.getElementById('r-squared-container');
-            if (rSquaredContainer) {
-                rSquaredContainer.innerHTML = `\\( R^2 = ${rSquared.toFixed(5)} \\)`;
-                rSquaredContainer.style.display = 'block';
+            const rSquaredElement = document.getElementById('r-squared-container');
+            if (rSquaredElement) {
+                rSquaredElement.innerHTML = `\\( R^2 = ${rSquared.toFixed(5)} \\)`;
+                rSquaredElement.style.display = 'block';
             }
 
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, fitEquationElement]);
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, rSquaredContainer]);
+            // Trigger MathJax typesetting if available.
+            if (typeof MathJax !== 'undefined') {
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, fitEquationElement]);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub, rSquaredElement]);
+            }
+
+            // Store this result for the current dataset.
+            datasetFitResults[activeSet] = {
+                equation: equation,
+                rSquared: rSquared.toFixed(5)
+            };
         } catch (error) {
             console.error('Error updating results:', error);
         }
@@ -1898,7 +2394,6 @@
         }
     }
 
-
     window.onload = function () {
         initializeTable();
         ['x-column-name', 'y-column-name'].forEach(id => {
@@ -1906,7 +2401,7 @@
             renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
         });
 
-        clearRows()
+        clearRows();
 
         // Update the graph title based on the current column headings:
         updateGraphTitle();
@@ -2421,6 +2916,9 @@
                 equation = `y = ${slope.toFixed(3)}x - ${Math.abs(intercept).toFixed(3)}`;
             }
 
+            // Store the fitted curve for this dataset.
+            fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
+
             updateResults(equation, x, y, fitFunction);
             plotGraph(xFit, yFit);
         } catch (error) {
@@ -2457,6 +2955,9 @@
                 equation += `${sign}${term}`;
             });
 
+            // Store the fitted curve for this dataset.
+            fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
+
             updateResults(equation, x, y, fitFunction);
             plotGraph(xFit, yFit);
         } catch (error) {
@@ -2482,14 +2983,15 @@
             const b = slope;
             const A = Math.exp(intercept);
 
-            // Generate fitted curve
             const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
             const yFit = xFit.map(xi => A * Math.exp(b * xi));
 
             const fitFunction = xi => A * Math.exp(b * xi);
 
-            // Equation string
             let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x}`;
+
+            // Store the fitted curve for this dataset.
+            fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
 
             updateResults(equation, x, validData.map(p => p.y), fitFunction);
             plotGraph(xFit, yFit);
@@ -2516,15 +3018,16 @@
             const b = slope;
             const A = Math.exp(intercept);
 
-            // Generate fitted curve
             const xOriginal = validData.map(p => p.x);
             const xFitOriginal = Array.from({ length: 100 }, (_, i) => Math.min(...xOriginal) + i * (Math.max(...xOriginal) - Math.min(...xOriginal)) / 99);
             const yFit = xFitOriginal.map(xi => A * Math.pow(xi, b));
 
             const fitFunction = xi => A * Math.pow(xi, b);
 
-            // Equation string
             let equation = `y = ${A.toFixed(3)} x^{${b.toFixed(3)}}`;
+
+            // Store the fitted curve for this dataset.
+            fittedCurves[activeSet] = { x: xFitOriginal, y: yFit, equation: equation };
 
             updateResults(equation, validData.map(p => p.x), validData.map(p => p.y), fitFunction);
             plotGraph(xFitOriginal, yFit);
@@ -2705,14 +3208,12 @@
 
     function performSinusoidalFit() {
         try {
-            // Parse initial parameters
             let A = parseFloat(document.getElementById('initial-A').value);
             let b = parseFloat(document.getElementById('initial-b').value);
             let k = parseFloat(document.getElementById('initial-k').value);
             let phi = parseFloat(document.getElementById('initial-phi').value);
             let c = parseFloat(document.getElementById('initial-c').value);
 
-            // Estimate k if not valid
             if (isNaN(k) || k <= 0) {
                 const estimatedK = estimateKFromData();
                 if (estimatedK !== null) {
@@ -2725,33 +3226,24 @@
                 }
             }
 
-            // Validate other parameters
             if (isNaN(A) || isNaN(b) || isNaN(phi) || isNaN(c)) {
                 alert('Please provide valid initial parameters for Sinusoidal fit.');
                 return;
             }
 
-            // Define parameters object
             let params = { A: A, b: b, k: k, phi: phi, c: c };
 
-            // Settings for the optimizer
             let learningRate = 1e-5;
             const maxIterations = 100000;
             const tolerance = 1e-6;
             let previousError = Infinity;
             let iterationsCount = 0;
 
-            // Learning rate decay (optional)
             const decayRate = 0.99995;
+            const delta = 1.0;
 
-            // Parameter for Huber loss
-            const delta = 1.0;  // You can adjust delta as needed
-
-            // Fitting loop using the Huber loss
             while (iterationsCount < maxIterations) {
                 let totalLoss = 0;
-
-                // Initialize gradients to zero
                 let dA = 0, db = 0, dk = 0, dphi = 0, dc = 0;
 
                 for (let i = 0; i < rawData[activeSet].length; i++) {
@@ -2762,26 +3254,18 @@
                     const sinTerm = Math.sin(params.k * xi - params.phi);
                     const cosTerm = Math.cos(params.k * xi - params.phi);
 
-                    // Prediction for the current point
                     const prediction = params.A * expTerm * sinTerm + params.c;
-
-                    // Compute the error
                     const error = yi - prediction;
 
-                    // Compute Huber loss and its derivative
                     let huberGrad;
                     if (Math.abs(error) <= delta) {
-                        // Quadratic case
                         totalLoss += error ** 2;
                         huberGrad = 2 * error;
                     } else {
-                        // Linear case
                         totalLoss += 2 * delta * Math.abs(error) - delta ** 2;
                         huberGrad = 2 * delta * Math.sign(error);
                     }
 
-                    // Accumulate gradients using the chain rule.
-                    // Remember: derivative of loss wrt parameter = huberGrad * (derivative of prediction wrt parameter)
                     dA += -huberGrad * expTerm * sinTerm;
                     db += -huberGrad * params.A * xi * expTerm * sinTerm;
                     dk += -huberGrad * params.A * expTerm * xi * cosTerm;
@@ -2789,26 +3273,19 @@
                     dc += -huberGrad;
                 }
 
-                // Average loss over data points for comparison with tolerance
                 const mse = totalLoss / rawData[activeSet].length;
-
-                // Check convergence
                 if (Math.abs(previousError - mse) < tolerance) {
                     console.log(`Convergence reached after ${iterationsCount} iterations.`);
                     break;
                 }
                 previousError = mse;
 
-                // Update parameters
                 params.A -= learningRate * dA;
                 params.b -= learningRate * db;
                 params.k -= learningRate * dk;
                 params.phi -= learningRate * dphi;
                 params.c -= learningRate * dc;
-
-                // Optionally decay the learning rate to help convergence near minima.
                 learningRate *= decayRate;
-
                 iterationsCount++;
             }
 
@@ -2817,7 +3294,6 @@
                 return;
             }
 
-            // Generate fitted data for plotting
             const xMin = Math.min(...rawData[activeSet].map(p => p.x));
             const xMax = Math.max(...rawData[activeSet].map(p => p.x));
             const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
@@ -2825,11 +3301,9 @@
                 params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c
             );
 
-            // Create the fit function
             const fitFunction = xi =>
                 params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
 
-            // Construct the equation string nicely
             let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x} \\sin(${params.k.toFixed(3)}x`;
             if (params.phi > 0) {
                 equation += ` - ${params.phi.toFixed(3)}`;
@@ -2843,7 +3317,9 @@
                 equation += ` - ${Math.abs(params.c).toFixed(3)}`;
             }
 
-            // Update the UI with results and plot
+            // Store the fitted curve for this dataset.
+            fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
+
             updateResults(equation, rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y), fitFunction);
             plotGraph(xFit, yFit);
         } catch (error) {
@@ -2854,7 +3330,6 @@
 
     function performGaussianFit() {
         try {
-            // Parse initial parameters from the DOM
             let A = parseFloat(document.getElementById('initial-A-gaussian').value);
             let mu = parseFloat(document.getElementById('initial-mu').value);
             let sigma = parseFloat(document.getElementById('initial-sigma').value);
@@ -2865,10 +3340,8 @@
                 return;
             }
 
-            // Package our parameters in an object
             const params = { A, mu, sigma, c };
 
-            // -- Settings for the gradient descent --
             const learningRateA = 1e-7;
             const learningRateMu = 1e-7;
             const learningRateSigma = 1e-7;
@@ -2877,12 +3350,10 @@
             const maxIterations = 50000;
             const tolerance = 1e-8;
 
-            // Gaussian function
             function gaussian(x, p) {
                 return p.A * Math.exp(-((x - p.mu) ** 2) / (2 * p.sigma ** 2)) + p.c;
             }
 
-            // Compute mean-squared error for the current parameters
             function computeMSE(p) {
                 let mseSum = 0;
                 for (let i = 0; i < rawData[activeSet].length; i++) {
@@ -2896,44 +3367,36 @@
 
             let previousError = computeMSE(params);
 
-            // Gradient descent main loop
             for (let iteration = 0; iteration < maxIterations; iteration++) {
-                // Accumulators for the partial derivatives
                 let dA = 0, dMu = 0, dSigma = 0, dC = 0;
 
-                // Compute partial derivatives for each data point and sum them
                 for (let i = 0; i < rawData[activeSet].length; i++) {
                     const { x, y } = rawData[activeSet][i];
                     const expTerm = Math.exp(-((x - params.mu) ** 2) / (2 * params.sigma ** 2));
                     const prediction = params.A * expTerm + params.c;
-                    const error = y - prediction; // error = (actual - predicted)
+                    const error = y - prediction;
 
-                    // Accumulate derivatives
                     dA += error * expTerm;
                     dMu += error * params.A * expTerm * ((x - params.mu) / (params.sigma ** 2));
                     dSigma += error * params.A * expTerm * ((x - params.mu) ** 2) / (params.sigma ** 3);
                     dC += error;
                 }
 
-                // Average gradients and apply factor -2/N
                 const N = rawData[activeSet].length;
                 dA = -2 * dA / N;
                 dMu = -2 * dMu / N;
                 dSigma = -2 * dSigma / N;
                 dC = -2 * dC / N;
 
-                // Update parameters with separate learning rates
                 params.A -= learningRateA * dA;
                 params.mu -= learningRateMu * dMu;
                 params.sigma -= learningRateSigma * dSigma;
                 params.c -= learningRateC * dC;
 
-                // Ensure sigma stays positive
                 if (params.sigma <= 0) {
                     params.sigma = Math.abs(params.sigma) || 1e-6;
                 }
 
-                // Compute error and check convergence
                 const currentError = computeMSE(params);
                 if (Math.abs(previousError - currentError) < tolerance) {
                     break;
@@ -2941,7 +3404,6 @@
                 previousError = currentError;
             }
 
-            // Generate fitted curve data for plotting
             const xValues = rawData[activeSet].map(p => p.x);
             const yValues = rawData[activeSet].map(p => p.y);
             const xMin = Math.min(...xValues);
@@ -2949,15 +3411,12 @@
             const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
             const yFit = xFit.map(xi => gaussian(xi, params));
 
-            // Construct a LaTeX formatted equation string
-            // Adjusting the mu term so that if mu is negative it appears as x + |mu|
             let muTerm;
             if (params.mu < 0) {
                 muTerm = `(x + ${Math.abs(params.mu).toFixed(3)})`;
             } else {
                 muTerm = `(x - ${params.mu.toFixed(3)})`;
             }
-
             let equation = `y = ${params.A.toFixed(3)} \\; e^{-\\frac{${muTerm}^2}{2 \\; (${params.sigma.toFixed(3)})^2}}`;
             if (params.c > 0) {
                 equation += ` \\; + \\; ${params.c.toFixed(3)}`;
@@ -2965,19 +3424,53 @@
                 equation += ` \\; - \\; ${Math.abs(params.c).toFixed(3)}`;
             };
 
-            // Function for the fitted Gaussian
             const fitFunction = xi => gaussian(xi, params);
 
-            // Update results in your UI (make sure your UI can render LaTeX)
-            updateResults(equation, xValues, yValues, fitFunction);
+            // Store the fitted curve for this dataset.
+            fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
 
-            // Plot the graph with the fitted data
+            updateResults(equation, xValues, yValues, fitFunction);
             plotGraph(xFit, yFit);
         } catch (error) {
             console.error('Error performing Gaussian fit:', error);
             alert('An error occurred during Gaussian fitting. Please check the console for details.');
         }
     }
+
+    function initCombinedPlotInputs() {
+        // Select the input elements by their IDs.
+        const titleInput = document.getElementById('combined-title');
+        const xLabelInput = document.getElementById('combined-x-label');
+        const yLabelInput = document.getElementById('combined-y-label');
+
+        if (!titleInput || !xLabelInput || !yLabelInput) {
+            console.error('Combined plot input elements not found.');
+            return;
+        }
+
+        // Set initial values.
+        // For the title, we use the value from the active dataset's 'graph-title' input.
+        titleInput.value = document.getElementById('graph-title').value ||
+            `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
+        // For the axis labels, we use the processed values from the active dataset’s inputs.
+        xLabelInput.value = processLabel(document.getElementById('x-column-name').value || 'x');
+        yLabelInput.value = processLabel(document.getElementById('y-column-name').value || 'y');
+
+        // Attach event listeners so that when the user changes any value, the combined plot is updated.
+        titleInput.addEventListener('input', updateCombinedPlotFromInputs);
+        xLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+        yLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+    }
+
+    function updateCombinedPlotFromInputs() {
+        // Call the function that re-plots the combined plot using these new values.
+        plotAllDatasets();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Your other initialization code...
+        initCombinedPlotInputs();
+    });
 
 </script>
 
