@@ -14,8 +14,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
 
     <style>
-        /* Existing CSS styles ... */
-
         :root {
             --add-row-btn-color: #6aa84f;
             --clear-all-btn-color: #e06666;
@@ -123,8 +121,6 @@
             background: #999;
         }
 
-
-        /* Browser-style Tab */
         .dataset-tab {
             position: relative;
             padding: 8px 16px;
@@ -140,7 +136,6 @@
             color: #333;
         }
 
-        /* Hover state for tabs */
         .dataset-tab:hover {
             background-color: #ccc;
         }
@@ -168,7 +163,6 @@
             user-select: none;
         }
 
-        /* Change color on hover for close icon */
         .dataset-tab .tab-close:hover {
             color: #e06666;
         }
@@ -627,7 +621,6 @@
             filter: brightness(90%);
         }
 
-
         @media (max-width: 900px) {
             .container {
                 flex-direction: column;
@@ -670,7 +663,7 @@
             outline: none;
         }
 
-        /* Full-screen overlay container remains full-screen */
+        /* Full-screen overlay container */
         #popup-container {
             position: fixed;
             top: 0;
@@ -680,50 +673,54 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
 
-            /* Use flex to center the content */
+            /* Center the content using flexbox */
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Remove extra padding so the content can size naturally */
             padding: 0;
         }
 
-        /* Popup content container: sized automatically to fit its content */
         #popup-content {
-            display: inline-block;
             background: #fff;
+            /* White background */
             padding: 20px;
-            border-radius: 4px;
+            /* Inner padding */
+            border-radius: 5px;
+            /* Rounded corners */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            position: relative;
+            /* A subtle shadow */
 
-            /* Remove max-width/height so that it fits content */
-            width: auto;
+            width: 60%;
+            /* Set the popup width to 60% of the viewport */
+            max-width: 800px;
+            /* Optionally set a maximum width */
             height: auto;
-            overflow: visible;
-            /* Allow content to determine size */
+            /* Height auto */
+            max-height: 90vh;
+            /* Limit height so it doesn’t overflow the viewport */
+            overflow-y: auto;
+            /* Scroll if content overflows */
+
+            position: relative;
+            /* Ensure normal positioning so flex-centering applies */
         }
 
         /* Popup title area */
         #popup-title {
             font-size: 18px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 3px;
             text-align: center;
         }
 
         /* Container for the Plotly graph */
         #popup-plot {
             width: auto;
-            /* Remove fixed width */
             height: auto;
-            /* Remove fixed height */
-            /* Optionally, you may set a min-width/min-height so the graph doesn't become too small */
             min-width: 600px;
             min-height: 400px;
-
+            margin-top: 5px;
             /* Add a top margin to separate from the title */
-            margin-top: 20px;
         }
 
         /* Close button for the popup */
@@ -760,15 +757,12 @@
         .control-row-horizontal {
             display: flex;
             align-items: center;
-            /* Vertically center the label and input */
             gap: 10px;
-            /* Space between label and input */
         }
 
         /* Label styling */
         .control-row-horizontal label {
             width: 120px;
-            /* Fixed width for uniform label alignment */
             font-weight: bold;
         }
 
@@ -783,17 +777,7 @@
         }
 
         #popup-plot-container {
-            margin-top: 50px;
-            /* Adjust as needed */
-        }
-
-        #popup-content {
-            max-height: 90vh;
-            /* Use viewport units to limit the content's maximum height */
-            overflow-y: auto;
-            /* Enable vertical scrolling if content overflows */
-            padding: 20px;
-            /* (Optional) add some padding */
+            margin-top: 15px;
         }
 
         footer {
@@ -802,11 +786,12 @@
             background: #f4f4f4;
             color: #555;
             margin: 10px auto 0;
+            margin-bottom: 10px;
             width: 100%;
         }
 
         footer a {
-            color: #e1b400;
+            color: #ff5f1f;
         }
     </style>
 </head>
@@ -1031,19 +1016,19 @@
                 <div id="popup-plot-container">
                     <div id="popup-plot"></div>
                 </div>
-                <!-- New container for input boxes arranged in separate rows -->
+                <!-- Container for input boxes arranged in separate rows -->
                 <div id="combined-plot-controls" class="combined-plot-controls">
                     <div class="control-row-horizontal">
-                        <label for="combined-title">Plot Title:</label>
+                        <label for="combined-title">Title:</label>
                         <input type="text" id="combined-title" placeholder="Combined Plot Title" />
                     </div>
                     <div class="control-row-horizontal">
-                        <label for="combined-x-label">X-Axis Label:</label>
-                        <input type="text" id="combined-x-label" placeholder="X-Axis Label" />
+                        <label for="combined-x-label">x-axis Label:</label>
+                        <input type="text" id="combined-x-label" placeholder="x-axis Label" />
                     </div>
                     <div class="control-row-horizontal">
-                        <label for="combined-y-label">Y-Axis Label:</label>
-                        <input type="text" id="combined-y-label" placeholder="Y-Axis Label" />
+                        <label for="combined-y-label">y-axis Label:</label>
+                        <input type="text" id="combined-y-label" placeholder="y-axis Label" />
                     </div>
                 </div>
 
@@ -1067,6 +1052,10 @@
     let fittedCurves = {};
     let datasetFitResults = {};  // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
 
+    let lastPlotState = {
+        data: null,
+        layout: null
+    };
 
     rawData.push([]);
     datasetHeaders[0] = { x: 'x', y: 'y' };  // At initialization, for dataset 0:
@@ -1699,6 +1688,43 @@
         updateUncertaintyHeaders('y');
     }
 
+    function isPlotStateEqual(newData, newLayout) {
+        // Simple approach: compare JSON strings.
+        // Note: This works fine for small to moderate data sets.
+        const currentDataStr = JSON.stringify(lastPlotState.data);
+        const newDataStr = JSON.stringify(newData);
+        const currentLayoutStr = JSON.stringify(lastPlotState.layout);
+        const newLayoutStr = JSON.stringify(newLayout);
+        return currentDataStr === newDataStr && currentLayoutStr === newLayoutStr;
+    }
+
+    function updatePlotEfficiently() {
+        // Build the new data and layout from your current rawData, settings, etc.
+        // For illustration, let's assume you have functions that produce these:
+        const newData = buildPlotData();   // Your function that returns an array of traces.
+        const newLayout = buildPlotLayout(); // Your function that returns the layout object.
+
+        // Check if the new state is different from what was last plotted.
+        if (isPlotStateEqual(newData, newLayout)) {
+            // No changes: skip replotting.
+            console.log("No changes in plot state; skipping update.");
+            return;
+        }
+
+        // Otherwise, perform an efficient update with Plotly.react.
+        Plotly.react('plot', newData, newLayout, {
+            toImageButtonOptions: {
+                format: 'svg',
+                filename: 'data_plot',
+                scale: 1
+            }
+        });
+
+        // Update the cache.
+        lastPlotState.data = newData;
+        lastPlotState.layout = newLayout;
+    }
+
     function handleCSVUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -1933,25 +1959,35 @@
         document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
     }
 
-
     function plotGraph(fittedX = null, fittedY = null) {
-        // If no fitted data was passed and a fitted curve exists for the active dataset, use it.
+        // If fitted data is not provided and a fit exists, use that.
         if ((fittedX === null || fittedY === null) && fittedCurves.hasOwnProperty(activeSet)) {
             fittedX = fittedCurves[activeSet].x;
             fittedY = fittedCurves[activeSet].y;
         }
 
+        // Build data arrays based on the active dataset.
         const x = rawData[activeSet].map(point => point.x);
         const y = rawData[activeSet].map(point => point.y);
         const xErrorRaw = rawData[activeSet].map(point => point.xErrorRaw || 0);
         const yErrorRaw = rawData[activeSet].map(point => point.yErrorRaw || 0);
-        const xErrorType = document.getElementById('toggle-x-error').checked ? document.getElementById('x-error-type').value : 'absolute';
-        const yErrorType = document.getElementById('toggle-y-error').checked ? document.getElementById('y-error-type').value : 'absolute';
+        const xErrorType = document.getElementById('toggle-x-error').checked
+            ? document.getElementById('x-error-type').value
+            : 'absolute';
+        const yErrorType = document.getElementById('toggle-y-error').checked
+            ? document.getElementById('y-error-type').value
+            : 'absolute';
 
-        const convertedXError = xErrorType === 'percentage' ? x.map((xi, idx) => (xErrorRaw[idx] / 100) * (xi || 0)) : xErrorRaw;
-        const convertedYError = yErrorType === 'percentage' ? y.map((yi, idx) => (yErrorRaw[idx] / 100) * (yi || 0)) : yErrorRaw;
+        // Convert error values if using percentage uncertainties.
+        const convertedXError = x.map((xi, idx) =>
+            xErrorType === 'percentage' ? (xErrorRaw[idx] / 100) * (xi || 0) : xErrorRaw[idx]
+        );
+        const convertedYError = y.map((yi, idx) =>
+            yErrorType === 'percentage' ? (yErrorRaw[idx] / 100) * (yi || 0) : yErrorRaw[idx]
+        );
 
-        const traces = [
+        // Build the trace array.
+        const data = [
             {
                 x: x,
                 y: y,
@@ -1977,8 +2013,9 @@
             }
         ];
 
+        // If fitted data is available, add its trace.
         if (fittedX && fittedY) {
-            traces.push({
+            data.push({
                 x: fittedX,
                 y: fittedY,
                 mode: 'lines',
@@ -1987,58 +2024,56 @@
             });
         }
 
+        // Build the layout using the active dataset's header values.
         const layout = {
             xaxis: { title: processLabel(document.getElementById('x-column-name').value || 'x') },
             yaxis: { title: processLabel(document.getElementById('y-column-name').value || 'y') },
-            title: processLabel(document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`)
+            title: processLabel(document.getElementById('graph-title').value ||
+                `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`)
         };
 
-        Plotly.react('plot', traces, layout, {
+        // Only replot if the new state is different.
+        if (isPlotStateEqual(data, layout)) {
+            console.log("No changes in plot state; skipping update.");
+            return;
+        }
+
+        // Update the plot using Plotly.react.
+        Plotly.react('plot', data, layout, {
             toImageButtonOptions: {
                 format: 'svg',
                 filename: 'data_plot',
                 scale: 1
             }
         });
+
+        // Update the global cache.
+        lastPlotState.data = data;
+        lastPlotState.layout = layout;
     }
 
     function plotAllDatasets() {
         const traces = [];
-        // Define an array of colors for the fitted curves.
+        // Define an array of colors for fitted curves.
         const fitColors = ['#4595dd', '#dd4545', '#45dd7c', '#dd87f4', '#ffaa00', '#00aa99'];
 
         // Process each dataset.
         rawData.forEach((dataset, index) => {
-            // Create arrays for x, y, and the raw error values.
             const x = dataset.map(point => point.x);
             const y = dataset.map(point => point.y);
             const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
             const yErrorsRaw = dataset.map(point => point.yErrorRaw || 0);
 
-            // Determine the error type for this dataset (defaulting to absolute if not set)
-            const currentErrorTypes = (datasetErrorTypes[index]) ? datasetErrorTypes[index] : { x: 'absolute', y: 'absolute' };
+            // Get the error types for this dataset (default to absolute if not set).
+            const currentErrorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
+            const xErrors = x.map((xi, idx) =>
+                currentErrorTypes.x === 'percentage' ? (xErrorsRaw[idx] / 100) * (xi || 0) : xErrorsRaw[idx]
+            );
+            const yErrors = y.map((yi, idx) =>
+                currentErrorTypes.y === 'percentage' ? (yErrorsRaw[idx] / 100) * (yi || 0) : yErrorsRaw[idx]
+            );
 
-            // Convert the error values as needed.
-            // For x errors:
-            const xErrors = x.map((xi, idx) => {
-                if (currentErrorTypes.x === 'percentage') {
-                    // For percentage errors, convert as: (raw error / 100) * (data value)
-                    return (xErrorsRaw[idx] / 100) * (xi || 0);
-                } else {
-                    // For absolute errors, use the raw value.
-                    return xErrorsRaw[idx];
-                }
-            });
-            // For y errors:
-            const yErrors = y.map((yi, idx) => {
-                if (currentErrorTypes.y === 'percentage') {
-                    return (yErrorsRaw[idx] / 100) * (yi || 0);
-                } else {
-                    return yErrorsRaw[idx];
-                }
-            });
-
-            // Add the data trace.
+            // Add the data trace for this dataset.
             traces.push({
                 x: x,
                 y: y,
@@ -2063,7 +2098,7 @@
                 }
             });
 
-            // If a fitted curve exists for this dataset, add it with a distinct color.
+            // If a fitted curve exists for this dataset, add it.
             if (fittedCurves.hasOwnProperty(index)) {
                 const color = fitColors[index % fitColors.length];
                 traces.push({
@@ -2076,8 +2111,7 @@
             }
         });
 
-        // For the combined plot layout, retrieve title and axis labels from the input boxes,
-        // falling back to the active dataset's settings if needed.
+        // Retrieve header settings from the combined plot input boxes
         let titleValue = document.getElementById('combined-title')
             ? document.getElementById('combined-title').value
             : null;
@@ -2088,8 +2122,10 @@
             ? document.getElementById('combined-y-label').value
             : null;
 
+        // Fallback to active dataset's header values if the inputs are empty.
         if (!titleValue) {
-            titleValue = document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
+            titleValue = document.getElementById('graph-title').value ||
+                `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
         }
         if (!xLabelValue) {
             xLabelValue = processLabel(document.getElementById('x-column-name').value || 'x');
@@ -2098,23 +2134,30 @@
             yLabelValue = processLabel(document.getElementById('y-column-name').value || 'y');
         }
 
-        // Wrap the title in $ signs so MathJax renders it.
+        // Wrap the title in $ signs to enable LaTeX rendering.
         titleValue = '$' + titleValue + '$';
 
         const layout = {
-            title: {
-                text: titleValue,
-                font: { size: 16 }
-            },
+            title: { text: titleValue, font: { size: 16 } },
             xaxis: { title: xLabelValue },
             yaxis: { title: yLabelValue },
             margin: { t: 100, b: 40, l: 40, r: 40 }
         };
 
+        // Only update if there's a change.
+        if (isPlotStateEqual(traces, layout)) {
+            console.log("No changes detected in combined plot; skipping update.");
+            return;
+        }
+
         Plotly.newPlot('popup-plot', traces, layout);
+
+        // Update the global cache.
+        lastPlotState.data = traces;
+        lastPlotState.layout = layout;
+
         showPopup();
 
-        // Trigger MathJax for LaTeX rendering.
         if (typeof MathJax !== 'undefined') {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('popup-plot')]);
         }
