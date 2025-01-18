@@ -1554,6 +1554,94 @@
         }
     }
 
+    // Function to reindex all dataset-specific objects to match the new ordering in rawData.
+    function reindexDatasets() {
+        const newHeaders = {};
+        const newToggles = {};
+        const newErrorTypes = {};
+        const newFitResults = {};
+
+        // rawData is assumed to be an array. Loop over it and assign new keys (0, 1, 2, ...).
+        rawData.forEach((data, newIndex) => {
+            // If a header exists for this newIndex (it might have shifted from its old key), copy it.
+            // Otherwise, set a default.
+            newHeaders[newIndex] = datasetHeaders[newIndex] || { x: 'x', y: 'y' };
+            newToggles[newIndex] = datasetToggles[newIndex] || { x: false, y: false };
+            newErrorTypes[newIndex] = datasetErrorTypes[newIndex] || { x: 'absolute', y: 'absolute' };
+            if (datasetFitResults[newIndex]) {
+                newFitResults[newIndex] = datasetFitResults[newIndex];
+            }
+        });
+
+        // Replace the original objects with the re-indexed ones.
+        datasetHeaders = newHeaders;
+        datasetToggles = newToggles;
+        datasetErrorTypes = newErrorTypes;
+        datasetFitResults = newFitResults;
+    }
+
+    // Helper function to reindex dataset-specific global objects.
+    function reindexDatasets() {
+        const newHeaders = {};
+        const newToggles = {};
+        const newErrorTypes = {};
+        const newFitResults = {};
+
+        rawData.forEach((data, newIndex) => {
+            // Use existing values if available; otherwise, set defaults.
+            newHeaders[newIndex] = datasetHeaders[newIndex] || { x: 'x', y: 'y' };
+            newToggles[newIndex] = datasetToggles[newIndex] || { x: false, y: false };
+            newErrorTypes[newIndex] = datasetErrorTypes[newIndex] || { x: 'absolute', y: 'absolute' };
+            if (datasetFitResults[newIndex]) {
+                newFitResults[newIndex] = datasetFitResults[newIndex];
+            }
+        });
+
+        datasetHeaders = newHeaders;
+        datasetToggles = newToggles;
+        datasetErrorTypes = newErrorTypes;
+        datasetFitResults = newFitResults;
+    }
+
+    // Updated removeDataset function.
+    function removeDataset(index) {
+        if (rawData.length <= 1) {
+            alert("You must keep at least one dataset.");
+            return;
+        }
+
+        // Remove the dataset from rawData.
+        rawData.splice(index, 1);
+
+        // Reindex the global objects so that keys match rawData order.
+        reindexDatasets();
+
+        // Adjust activeSet if needed.
+        if (activeSet >= rawData.length) {
+            activeSet = rawData.length - 1;
+        }
+
+        updateDatasetTabsBar();
+
+        // Refresh UI using the data from the new active dataset.
+        updateData();
+        updatePlotAndRenderLatex();
+    }
+
+    // Attach the Add Dataset button click event.
+    function initializeDatasetTabsBar() {
+        const addBtn = document.querySelector('.add-dataset-btn');
+        if (addBtn) {
+            addBtn.addEventListener('click', addDataset);
+        }
+        // Build the initial tabs UI.
+        updateDatasetTabsBar();
+    }
+
+    // Call initializeDatasetTabsBar() in your DOMContentLoaded event handler.
+    document.addEventListener("DOMContentLoaded", function () {
+        initializeDatasetTabsBar();
+    });
 
 
     function updateUncertaintyHeaders(axis) {
