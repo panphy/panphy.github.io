@@ -244,194 +244,196 @@
     <audio id="alarm-sound-original" src="/ding.mp3" preload="auto"></audio>
     <audio id="alarm-sound-extra" src="/ding.mp3" preload="auto"></audio>
 
-    <script>
-        let originalTimerInterval;
-        let extraTimerInterval;
-        let remainingTime = 0;
-        let extraRemainingTime = 0;
-        let paused = false;
-        let originalEndTimeObj = null;
-        let extraEndTimeObj = null;
-
-        function formatTime(hours, minutes, seconds) {
-            return String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
-        }
-
-        function format24HourTime(date) {
-            return String(date.getHours()).padStart(2, '0') + ':' +
-                String(date.getMinutes()).padStart(2, '0');
-        }
-
-        function setTimer() {
-            const hours = parseInt(document.getElementById('hours').value) || 0;
-            const minutes = parseInt(document.getElementById('minutes').value) || 0;
-            const seconds = parseInt(document.getElementById('seconds').value) || 0;
-
-            remainingTime = hours * 3600 + minutes * 60 + seconds;
-            extraRemainingTime = Math.round(remainingTime * 1.25);
-
-            document.getElementById('original-time').textContent = formatTime(
-                Math.floor(remainingTime / 3600),
-                Math.floor((remainingTime % 3600) / 60),
-                remainingTime % 60
-            );
-
-            document.getElementById('extra-time').textContent = formatTime(
-                Math.floor(extraRemainingTime / 3600),
-                Math.floor((extraRemainingTime % 3600) / 60),
-                extraRemainingTime % 60
-            );
-
-            document.getElementById('start-end-times').innerHTML = "";
-            paused = false;
-            stopBlinking(); /* Ensure blinking is stopped */
-        }
-
-        function startTimer() {
-            if (remainingTime <= 0) return;
-
-            const now = new Date();
-            const startTime = format24HourTime(now);
-            originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
-            extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
-
-            document.getElementById('start-end-times').innerHTML =
-                `Start: ${startTime} | End: ${format24HourTime(originalEndTimeObj)} ` +
-                `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
-
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-
-            originalTimerInterval = setInterval(() => {
-                if (remainingTime > 0) {
-                    remainingTime--;
-                    document.getElementById('original-time').textContent = formatTime(
-                        Math.floor(remainingTime / 3600),
-                        Math.floor((remainingTime % 3600) / 60),
-                        remainingTime % 60
-                    );
-                } else {
-                    clearInterval(originalTimerInterval);
-                    playAlarm('alarm-sound-original');
-                    blinkTimer('original-time');
-                }
-            }, 1000);
-
-            extraTimerInterval = setInterval(() => {
-                if (extraRemainingTime > 0) {
-                    extraRemainingTime--;
-                    document.getElementById('extra-time').textContent = formatTime(
-                        Math.floor(extraRemainingTime / 3600),
-                        Math.floor((extraRemainingTime % 3600) / 60),
-                        extraRemainingTime % 60
-                    );
-                } else {
-                    clearInterval(extraTimerInterval);
-                    playAlarm('alarm-sound-extra');
-                    blinkTimer('extra-time');
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-            paused = true;
-        }
-
-        function resumeTimer() {
-            if (!paused) return;
-            paused = false;
-            const now = new Date();
-            originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
-            extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
-
-            document.getElementById('start-end-times').innerHTML =
-                `Start: ${format24HourTime(now)} | End: ${format24HourTime(originalEndTimeObj)} ` +
-                `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
-
-            originalTimerInterval = setInterval(() => {
-                if (remainingTime > 0) {
-                    remainingTime--;
-                    document.getElementById('original-time').textContent = formatTime(
-                        Math.floor(remainingTime / 3600),
-                        Math.floor((remainingTime % 3600) / 60),
-                        remainingTime % 60
-                    );
-                } else {
-                    clearInterval(originalTimerInterval);
-                    playAlarm('alarm-sound-original');
-                    blinkTimer('original-time');
-                }
-            }, 1000);
-
-            extraTimerInterval = setInterval(() => {
-                if (extraRemainingTime > 0) {
-                    extraRemainingTime--;
-                    document.getElementById('extra-time').textContent = formatTime(
-                        Math.floor(extraRemainingTime / 3600),
-                        Math.floor((extraRemainingTime % 3600) / 60),
-                        extraRemainingTime % 60
-                    );
-                } else {
-                    clearInterval(extraTimerInterval);
-                    playAlarm('alarm-sound-extra');
-                    blinkTimer('extra-time');
-                }
-            }, 1000);
-        }
-
-        function resetTimer() {
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-            setTimer();
-        }
-
-        function clearTimer() {
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-            remainingTime = 0;
-            extraRemainingTime = 0;
-            document.getElementById('original-time').textContent = "00:00:00";
-            document.getElementById('extra-time').textContent = "00:00:00";
-            document.getElementById('start-end-times').innerHTML = "";
-            document.getElementById('hours').value = "";
-            document.getElementById('minutes').value = "";
-            document.getElementById('seconds').value = "";
-            paused = false;
-            stopBlinking();
-        }
-
-        function blinkTimer(timerId) {
-            const timerElement = document.getElementById(timerId);
-            timerElement.classList.add('blink');
-        }
-
-        function stopBlinking() {
-            const blinkElements = document.querySelectorAll('.blink');
-            blinkElements.forEach(element => {
-                element.classList.remove('blink');
-            });
-        }
-
-        function playAlarm(alarmId) {
-            const alarmSound = document.getElementById(alarmId);
-            alarmSound.currentTime = 0; // Reset to start
-            alarmSound.play();
-        }
-
-        window.addEventListener('load', () => {
-            const originalAlarm = document.getElementById('alarm-sound-original');
-            const extraAlarm = document.getElementById('alarm-sound-extra');
-            originalAlarm.load();
-            extraAlarm.load();
-        });
-    </script>
     <footer>
-        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
+            My Projects</a>
     </footer>
 </body>
+
+<script>
+    let originalTimerInterval;
+    let extraTimerInterval;
+    let remainingTime = 0;
+    let extraRemainingTime = 0;
+    let paused = false;
+    let originalEndTimeObj = null;
+    let extraEndTimeObj = null;
+
+    function formatTime(hours, minutes, seconds) {
+        return String(hours).padStart(2, '0') + ':' +
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0');
+    }
+
+    function format24HourTime(date) {
+        return String(date.getHours()).padStart(2, '0') + ':' +
+            String(date.getMinutes()).padStart(2, '0');
+    }
+
+    function setTimer() {
+        const hours = parseInt(document.getElementById('hours').value) || 0;
+        const minutes = parseInt(document.getElementById('minutes').value) || 0;
+        const seconds = parseInt(document.getElementById('seconds').value) || 0;
+
+        remainingTime = hours * 3600 + minutes * 60 + seconds;
+        extraRemainingTime = Math.round(remainingTime * 1.25);
+
+        document.getElementById('original-time').textContent = formatTime(
+            Math.floor(remainingTime / 3600),
+            Math.floor((remainingTime % 3600) / 60),
+            remainingTime % 60
+        );
+
+        document.getElementById('extra-time').textContent = formatTime(
+            Math.floor(extraRemainingTime / 3600),
+            Math.floor((extraRemainingTime % 3600) / 60),
+            extraRemainingTime % 60
+        );
+
+        document.getElementById('start-end-times').innerHTML = "";
+        paused = false;
+        stopBlinking(); /* Ensure blinking is stopped */
+    }
+
+    function startTimer() {
+        if (remainingTime <= 0) return;
+
+        const now = new Date();
+        const startTime = format24HourTime(now);
+        originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
+        extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
+
+        document.getElementById('start-end-times').innerHTML =
+            `Start: ${startTime} | End: ${format24HourTime(originalEndTimeObj)} ` +
+            `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
+
+        clearInterval(originalTimerInterval);
+        clearInterval(extraTimerInterval);
+
+        originalTimerInterval = setInterval(() => {
+            if (remainingTime > 0) {
+                remainingTime--;
+                document.getElementById('original-time').textContent = formatTime(
+                    Math.floor(remainingTime / 3600),
+                    Math.floor((remainingTime % 3600) / 60),
+                    remainingTime % 60
+                );
+            } else {
+                clearInterval(originalTimerInterval);
+                playAlarm('alarm-sound-original');
+                blinkTimer('original-time');
+            }
+        }, 1000);
+
+        extraTimerInterval = setInterval(() => {
+            if (extraRemainingTime > 0) {
+                extraRemainingTime--;
+                document.getElementById('extra-time').textContent = formatTime(
+                    Math.floor(extraRemainingTime / 3600),
+                    Math.floor((extraRemainingTime % 3600) / 60),
+                    extraRemainingTime % 60
+                );
+            } else {
+                clearInterval(extraTimerInterval);
+                playAlarm('alarm-sound-extra');
+                blinkTimer('extra-time');
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(originalTimerInterval);
+        clearInterval(extraTimerInterval);
+        paused = true;
+    }
+
+    function resumeTimer() {
+        if (!paused) return;
+        paused = false;
+        const now = new Date();
+        originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
+        extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
+
+        document.getElementById('start-end-times').innerHTML =
+            `Start: ${format24HourTime(now)} | End: ${format24HourTime(originalEndTimeObj)} ` +
+            `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
+
+        originalTimerInterval = setInterval(() => {
+            if (remainingTime > 0) {
+                remainingTime--;
+                document.getElementById('original-time').textContent = formatTime(
+                    Math.floor(remainingTime / 3600),
+                    Math.floor((remainingTime % 3600) / 60),
+                    remainingTime % 60
+                );
+            } else {
+                clearInterval(originalTimerInterval);
+                playAlarm('alarm-sound-original');
+                blinkTimer('original-time');
+            }
+        }, 1000);
+
+        extraTimerInterval = setInterval(() => {
+            if (extraRemainingTime > 0) {
+                extraRemainingTime--;
+                document.getElementById('extra-time').textContent = formatTime(
+                    Math.floor(extraRemainingTime / 3600),
+                    Math.floor((extraRemainingTime % 3600) / 60),
+                    extraRemainingTime % 60
+                );
+            } else {
+                clearInterval(extraTimerInterval);
+                playAlarm('alarm-sound-extra');
+                blinkTimer('extra-time');
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        clearInterval(originalTimerInterval);
+        clearInterval(extraTimerInterval);
+        setTimer();
+    }
+
+    function clearTimer() {
+        clearInterval(originalTimerInterval);
+        clearInterval(extraTimerInterval);
+        remainingTime = 0;
+        extraRemainingTime = 0;
+        document.getElementById('original-time').textContent = "00:00:00";
+        document.getElementById('extra-time').textContent = "00:00:00";
+        document.getElementById('start-end-times').innerHTML = "";
+        document.getElementById('hours').value = "";
+        document.getElementById('minutes').value = "";
+        document.getElementById('seconds').value = "";
+        paused = false;
+        stopBlinking();
+    }
+
+    function blinkTimer(timerId) {
+        const timerElement = document.getElementById(timerId);
+        timerElement.classList.add('blink');
+    }
+
+    function stopBlinking() {
+        const blinkElements = document.querySelectorAll('.blink');
+        blinkElements.forEach(element => {
+            element.classList.remove('blink');
+        });
+    }
+
+    function playAlarm(alarmId) {
+        const alarmSound = document.getElementById(alarmId);
+        alarmSound.currentTime = 0; // Reset to start
+        alarmSound.play();
+    }
+
+    window.addEventListener('load', () => {
+        const originalAlarm = document.getElementById('alarm-sound-original');
+        const extraAlarm = document.getElementById('alarm-sound-extra');
+        originalAlarm.load();
+        extraAlarm.load();
+    });
+</script>
 
 </html>

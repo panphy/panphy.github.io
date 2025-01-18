@@ -386,290 +386,292 @@
         </div>
     </div>
 
-    <script>
-        /*******************************************************
-         *   Grab References
-         *******************************************************/
-        const canvas = document.getElementById('waveCanvas');
-        const ctx = canvas.getContext('2d');
+    <footer>
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
+            My Projects</a>
+    </footer>
+</body>
 
-        // Button
-        const playPauseBtn = document.getElementById('playPauseBtn');
+<script>
+    /*******************************************************
+     *   Grab References
+     *******************************************************/
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
 
-        // Wave 1 controls
-        const amplitude1Slider = document.getElementById('amplitude1');
-        const frequency1Slider = document.getElementById('frequency1');
-        const speed1Slider = document.getElementById('speed1');
-        const amplitude1Value = document.getElementById('amplitude1Value');
-        const frequency1Value = document.getElementById('frequency1Value');
-        const speed1Value = document.getElementById('speed1Value');
+    // Button
+    const playPauseBtn = document.getElementById('playPauseBtn');
 
-        // Wave 2 controls
-        const amplitude2Slider = document.getElementById('amplitude2');
-        const frequency2Slider = document.getElementById('frequency2');
-        const speed2Slider = document.getElementById('speed2');
-        const amplitude2Value = document.getElementById('amplitude2Value');
-        const frequency2Value = document.getElementById('frequency2Value');
-        const speed2Value = document.getElementById('speed2Value');
+    // Wave 1 controls
+    const amplitude1Slider = document.getElementById('amplitude1');
+    const frequency1Slider = document.getElementById('frequency1');
+    const speed1Slider = document.getElementById('speed1');
+    const amplitude1Value = document.getElementById('amplitude1Value');
+    const frequency1Value = document.getElementById('frequency1Value');
+    const speed1Value = document.getElementById('speed1Value');
 
-        // Zoom & Motion
-        const timeZoomSlider = document.getElementById('timeZoom');
-        const timeZoomValue = document.getElementById('timeZoomValue');
-        const timeMotionSlider = document.getElementById('timeMotion');
-        const timeMotionValue = document.getElementById('timeMotionValue');
+    // Wave 2 controls
+    const amplitude2Slider = document.getElementById('amplitude2');
+    const frequency2Slider = document.getElementById('frequency2');
+    const speed2Slider = document.getElementById('speed2');
+    const amplitude2Value = document.getElementById('amplitude2Value');
+    const frequency2Value = document.getElementById('frequency2Value');
+    const speed2Value = document.getElementById('speed2Value');
 
-        // Toggles
-        const toggleWave1 = document.getElementById('toggleWave1');
-        const toggleWave2 = document.getElementById('toggleWave2');
-        const toggleSuperposition = document.getElementById('toggleSuperposition');
+    // Zoom & Motion
+    const timeZoomSlider = document.getElementById('timeZoom');
+    const timeZoomValue = document.getElementById('timeZoomValue');
+    const timeMotionSlider = document.getElementById('timeMotion');
+    const timeMotionValue = document.getElementById('timeMotionValue');
 
-        // Canvas size
-        let width, height;
+    // Toggles
+    const toggleWave1 = document.getElementById('toggleWave1');
+    const toggleWave2 = document.getElementById('toggleWave2');
+    const toggleSuperposition = document.getElementById('toggleSuperposition');
 
-        /*******************************************************
-         *   Initialize Parameters
-         *******************************************************/
-        let amplitude1 = parseFloat(amplitude1Slider.value);
-        let frequency1 = parseFloat(frequency1Slider.value);
-        let speed1 = parseFloat(speed1Slider.value);
+    // Canvas size
+    let width, height;
 
-        let amplitude2 = parseFloat(amplitude2Slider.value);
-        let frequency2 = parseFloat(frequency2Slider.value);
-        let speed2 = parseFloat(speed2Slider.value);
+    /*******************************************************
+     *   Initialize Parameters
+     *******************************************************/
+    let amplitude1 = parseFloat(amplitude1Slider.value);
+    let frequency1 = parseFloat(frequency1Slider.value);
+    let speed1 = parseFloat(speed1Slider.value);
 
-        let timeZoom = parseFloat(timeZoomSlider.value);
-        let timeMotion = parseFloat(timeMotionSlider.value);
+    let amplitude2 = parseFloat(amplitude2Slider.value);
+    let frequency2 = parseFloat(frequency2Slider.value);
+    let speed2 = parseFloat(speed2Slider.value);
 
-        function updateSliderValues() {
-            amplitude1Value.textContent = amplitude1.toFixed(0);
-            frequency1Value.textContent = frequency1.toFixed(1);
-            speed1Value.textContent = speed1.toFixed(0);
+    let timeZoom = parseFloat(timeZoomSlider.value);
+    let timeMotion = parseFloat(timeMotionSlider.value);
 
-            amplitude2Value.textContent = amplitude2.toFixed(0);
-            frequency2Value.textContent = frequency2.toFixed(1);
-            speed2Value.textContent = speed2.toFixed(0);
+    function updateSliderValues() {
+        amplitude1Value.textContent = amplitude1.toFixed(0);
+        frequency1Value.textContent = frequency1.toFixed(1);
+        speed1Value.textContent = speed1.toFixed(0);
 
-            timeZoomValue.textContent = timeZoom.toFixed(1);
-            timeMotionValue.textContent = timeMotion.toFixed(2);
-        }
+        amplitude2Value.textContent = amplitude2.toFixed(0);
+        frequency2Value.textContent = frequency2.toFixed(1);
+        speed2Value.textContent = speed2.toFixed(0);
+
+        timeZoomValue.textContent = timeZoom.toFixed(1);
+        timeMotionValue.textContent = timeMotion.toFixed(2);
+    }
+    updateSliderValues();
+
+    /*******************************************************
+     *   Event Listeners
+     *******************************************************/
+    // Sliders
+    amplitude1Slider.addEventListener('input', () => {
+        amplitude1 = parseFloat(amplitude1Slider.value);
         updateSliderValues();
+        drawWaves();
+    });
+    frequency1Slider.addEventListener('input', () => {
+        frequency1 = parseFloat(frequency1Slider.value);
+        updateSliderValues();
+        drawWaves();
+    });
+    speed1Slider.addEventListener('input', () => {
+        speed1 = parseFloat(speed1Slider.value);
+        updateSliderValues();
+        drawWaves();
+    });
 
-        /*******************************************************
-         *   Event Listeners
-         *******************************************************/
-        // Sliders
-        amplitude1Slider.addEventListener('input', () => {
-            amplitude1 = parseFloat(amplitude1Slider.value);
-            updateSliderValues();
-            drawWaves();
-        });
-        frequency1Slider.addEventListener('input', () => {
-            frequency1 = parseFloat(frequency1Slider.value);
-            updateSliderValues();
-            drawWaves();
-        });
-        speed1Slider.addEventListener('input', () => {
-            speed1 = parseFloat(speed1Slider.value);
-            updateSliderValues();
-            drawWaves();
-        });
+    amplitude2Slider.addEventListener('input', () => {
+        amplitude2 = parseFloat(amplitude2Slider.value);
+        updateSliderValues();
+        drawWaves();
+    });
+    frequency2Slider.addEventListener('input', () => {
+        frequency2 = parseFloat(frequency2Slider.value);
+        updateSliderValues();
+        drawWaves();
+    });
+    speed2Slider.addEventListener('input', () => {
+        speed2 = parseFloat(speed2Slider.value);
+        updateSliderValues();
+        drawWaves();
+    });
 
-        amplitude2Slider.addEventListener('input', () => {
-            amplitude2 = parseFloat(amplitude2Slider.value);
-            updateSliderValues();
-            drawWaves();
-        });
-        frequency2Slider.addEventListener('input', () => {
-            frequency2 = parseFloat(frequency2Slider.value);
-            updateSliderValues();
-            drawWaves();
-        });
-        speed2Slider.addEventListener('input', () => {
-            speed2 = parseFloat(speed2Slider.value);
-            updateSliderValues();
-            drawWaves();
-        });
+    timeZoomSlider.addEventListener('input', () => {
+        timeZoom = parseFloat(timeZoomSlider.value);
+        updateSliderValues();
+        drawWaves();
+    });
+    timeMotionSlider.addEventListener('input', () => {
+        timeMotion = parseFloat(timeMotionSlider.value);
+        updateSliderValues();
+        drawWaves();
+    });
 
-        timeZoomSlider.addEventListener('input', () => {
-            timeZoom = parseFloat(timeZoomSlider.value);
-            updateSliderValues();
-            drawWaves();
-        });
-        timeMotionSlider.addEventListener('input', () => {
-            timeMotion = parseFloat(timeMotionSlider.value);
-            updateSliderValues();
-            drawWaves();
-        });
+    // Toggles
+    toggleWave1.addEventListener('change', () => { drawWaves(); });
+    toggleWave2.addEventListener('change', () => { drawWaves(); });
+    toggleSuperposition.addEventListener('change', () => { drawWaves(); });
 
-        // Toggles
-        toggleWave1.addEventListener('change', () => { drawWaves(); });
-        toggleWave2.addEventListener('change', () => { drawWaves(); });
-        toggleSuperposition.addEventListener('change', () => { drawWaves(); });
+    // Play/Pause Button
+    playPauseBtn.addEventListener('click', () => {
+        running = !running;
+        if (running) {
+            // Resume
+            playPauseBtn.textContent = "Pause";
+            lastTimestamp = null;
+            animationId = requestAnimationFrame(animate);
+        } else {
+            // Pause
+            playPauseBtn.textContent = "Play";
+            cancelAnimationFrame(animationId);
+        }
+    });
 
-        // Play/Pause Button
-        playPauseBtn.addEventListener('click', () => {
+    /*******************************************************
+     *   Canvas Setup (High DPI)
+     *******************************************************/
+    function setupCanvas() {
+        const ratio = window.devicePixelRatio || 1;
+        const computedStyle = getComputedStyle(canvas);
+        width = parseInt(computedStyle.getPropertyValue('width'));
+        height = parseInt(computedStyle.getPropertyValue('height'));
+
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+        ctx.scale(ratio, ratio);
+    }
+
+    // Initial setup
+    setupCanvas();
+    window.addEventListener('resize', () => {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        setupCanvas();
+        drawWaves();
+    });
+
+    /*******************************************************
+     *   Animation
+     *******************************************************/
+    let animationId;
+    let running = true;
+    let lastTimestamp = null;
+    let accumulatedTime = 0;
+
+    function drawWaves() {
+        const t = accumulatedTime / 1000; // convert ms -> seconds
+
+        // Clear
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw baseline
+        const baseline = height / 2;
+        ctx.beginPath();
+        ctx.moveTo(0, baseline);
+        ctx.lineTo(width, baseline);
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Precompute angular freq & wave numbers
+        const omega1 = 2 * Math.PI * frequency1;
+        const omega2 = 2 * Math.PI * frequency2;
+
+        // Avoid dividing by zero if speed is extremely small
+        const actualSpeed1 = Math.max(speed1, 1e-6);
+        const actualSpeed2 = Math.max(speed2, 1e-6);
+
+        const k1 = omega1 / actualSpeed1;
+        const k2 = omega2 / actualSpeed2;
+
+        // ========== Draw Wave 1 If Toggled On ==========
+        if (toggleWave1.checked) {
+            ctx.beginPath();
+            for (let x = 0; x <= width; x++) {
+                const xVirtual = x / timeZoom;
+                const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
+                const canvasY = baseline - wave1Val;
+                if (x === 0) ctx.moveTo(x, canvasY);
+                else ctx.lineTo(x, canvasY);
+            }
+            ctx.strokeStyle = '#99ceff'; // Light blue
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        // ========== Draw Wave 2 If Toggled On ==========
+        if (toggleWave2.checked) {
+            ctx.beginPath();
+            for (let x = 0; x <= width; x++) {
+                const xVirtual = x / timeZoom;
+                const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
+                const canvasY = baseline - wave2Val;
+                if (x === 0) ctx.moveTo(x, canvasY);
+                else ctx.lineTo(x, canvasY);
+            }
+            ctx.strokeStyle = '#ff9649'; // Orange
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        // ========== Draw Superposition If Toggled On ==========
+        if (toggleSuperposition.checked) {
+            ctx.beginPath();
+            for (let x = 0; x <= width; x++) {
+                const xVirtual = x / timeZoom;
+
+                const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
+                const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
+
+                const sumVal = wave1Val + wave2Val;
+                const canvasY = baseline - sumVal;
+
+                if (x === 0) ctx.moveTo(x, canvasY);
+                else ctx.lineTo(x, canvasY);
+            }
+            ctx.strokeStyle = '#54f372'; // Green
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+    }
+
+    function animate(timestamp) {
+        if (!running) {
+            lastTimestamp = null;
+            return;
+        }
+        if (!lastTimestamp) lastTimestamp = timestamp;
+
+        const delta = timestamp - lastTimestamp;
+        lastTimestamp = timestamp;
+
+        // Speed up / slow down time by "timeMotion"
+        accumulatedTime += delta * timeMotion;
+
+        drawWaves();
+        animationId = requestAnimationFrame(animate);
+    }
+
+    // Start animation
+    animationId = requestAnimationFrame(animate);
+
+    /*******************************************************
+     *   SPACE BAR: Pause/Resume
+     *******************************************************/
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.key === ' ') {
+            e.preventDefault(); // Stop space from scrolling
             running = !running;
+
             if (running) {
-                // Resume
                 playPauseBtn.textContent = "Pause";
                 lastTimestamp = null;
                 animationId = requestAnimationFrame(animate);
             } else {
-                // Pause
                 playPauseBtn.textContent = "Play";
                 cancelAnimationFrame(animationId);
             }
-        });
-
-        /*******************************************************
-         *   Canvas Setup (High DPI)
-         *******************************************************/
-        function setupCanvas() {
-            const ratio = window.devicePixelRatio || 1;
-            const computedStyle = getComputedStyle(canvas);
-            width = parseInt(computedStyle.getPropertyValue('width'));
-            height = parseInt(computedStyle.getPropertyValue('height'));
-
-            canvas.width = width * ratio;
-            canvas.height = height * ratio;
-            ctx.scale(ratio, ratio);
         }
-
-        // Initial setup
-        setupCanvas();
-        window.addEventListener('resize', () => {
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            setupCanvas();
-            drawWaves();
-        });
-
-        /*******************************************************
-         *   Animation
-         *******************************************************/
-        let animationId;
-        let running = true;
-        let lastTimestamp = null;
-        let accumulatedTime = 0;
-
-        function drawWaves() {
-            const t = accumulatedTime / 1000; // convert ms -> seconds
-
-            // Clear
-            ctx.clearRect(0, 0, width, height);
-
-            // Draw baseline
-            const baseline = height / 2;
-            ctx.beginPath();
-            ctx.moveTo(0, baseline);
-            ctx.lineTo(width, baseline);
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Precompute angular freq & wave numbers
-            const omega1 = 2 * Math.PI * frequency1;
-            const omega2 = 2 * Math.PI * frequency2;
-
-            // Avoid dividing by zero if speed is extremely small
-            const actualSpeed1 = Math.max(speed1, 1e-6);
-            const actualSpeed2 = Math.max(speed2, 1e-6);
-
-            const k1 = omega1 / actualSpeed1;
-            const k2 = omega2 / actualSpeed2;
-
-            // ========== Draw Wave 1 If Toggled On ==========
-            if (toggleWave1.checked) {
-                ctx.beginPath();
-                for (let x = 0; x <= width; x++) {
-                    const xVirtual = x / timeZoom;
-                    const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
-                    const canvasY = baseline - wave1Val;
-                    if (x === 0) ctx.moveTo(x, canvasY);
-                    else ctx.lineTo(x, canvasY);
-                }
-                ctx.strokeStyle = '#99ceff'; // Light blue
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-
-            // ========== Draw Wave 2 If Toggled On ==========
-            if (toggleWave2.checked) {
-                ctx.beginPath();
-                for (let x = 0; x <= width; x++) {
-                    const xVirtual = x / timeZoom;
-                    const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
-                    const canvasY = baseline - wave2Val;
-                    if (x === 0) ctx.moveTo(x, canvasY);
-                    else ctx.lineTo(x, canvasY);
-                }
-                ctx.strokeStyle = '#ff9649'; // Orange
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-
-            // ========== Draw Superposition If Toggled On ==========
-            if (toggleSuperposition.checked) {
-                ctx.beginPath();
-                for (let x = 0; x <= width; x++) {
-                    const xVirtual = x / timeZoom;
-
-                    const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
-                    const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
-
-                    const sumVal = wave1Val + wave2Val;
-                    const canvasY = baseline - sumVal;
-
-                    if (x === 0) ctx.moveTo(x, canvasY);
-                    else ctx.lineTo(x, canvasY);
-                }
-                ctx.strokeStyle = '#54f372'; // Green
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-            }
-        }
-
-        function animate(timestamp) {
-            if (!running) {
-                lastTimestamp = null;
-                return;
-            }
-            if (!lastTimestamp) lastTimestamp = timestamp;
-
-            const delta = timestamp - lastTimestamp;
-            lastTimestamp = timestamp;
-
-            // Speed up / slow down time by "timeMotion"
-            accumulatedTime += delta * timeMotion;
-
-            drawWaves();
-            animationId = requestAnimationFrame(animate);
-        }
-
-        // Start animation
-        animationId = requestAnimationFrame(animate);
-
-        /*******************************************************
-         *   SPACE BAR: Pause/Resume
-         *******************************************************/
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.key === ' ') {
-                e.preventDefault(); // Stop space from scrolling
-                running = !running;
-
-                if (running) {
-                    playPauseBtn.textContent = "Pause";
-                    lastTimestamp = null;
-                    animationId = requestAnimationFrame(animate);
-                } else {
-                    playPauseBtn.textContent = "Play";
-                    cancelAnimationFrame(animationId);
-                }
-            }
-        });
-    </script>
-    <footer>
-        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
-    </footer>
-</body>
+    });
+</script>
 
 </html>

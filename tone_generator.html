@@ -342,366 +342,367 @@
   </div>
 
   <footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
+      My Projects</a>
   </footer>
-
-  <script>
-    /* ========== AUDIO CONTEXT & NODES ========== */
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext({ latencyHint: 'interactive' });
-
-    // Gains: channels -> masterGain -> volumeGain -> combinedGain -> panner -> destination
-    const masterGain = audioCtx.createGain();
-    masterGain.gain.value = 1;
-
-    const volumeGain = audioCtx.createGain();
-    volumeGain.gain.value = 1;
-
-    const combinedGain = audioCtx.createGain();
-    combinedGain.gain.value = 0; // start off
-
-    masterGain.connect(volumeGain);
-    volumeGain.connect(combinedGain);
-
-    const stereoPanner = audioCtx.createStereoPanner();
-    combinedGain.connect(stereoPanner);
-    stereoPanner.connect(audioCtx.destination);
-
-    /* DOM Elements */
-    const addChannelBtn = document.getElementById('addChannelBtn');
-    const channelsScrollContainer = document.getElementById('channelsScrollContainer');
-
-    const panningSlider = document.getElementById('panningSlider');
-    const panningValue = document.getElementById('panningValue');
-
-    // LOG TIME SCALE: slider from -3..1 => timeScale = 10^sliderValue in [0.001..10]
-    const timeScaleSlider = document.getElementById('timeScaleSlider');
-    const timeScaleValue = document.getElementById('timeScaleValue');
-
-    const zoomScaleSlider = document.getElementById('zoomScaleSlider');
-    const zoomScaleValue = document.getElementById('zoomScaleValue');
-
-    const volumeSlider = document.getElementById('volumeSlider');
-
-    const toggleCombinedBtn = document.getElementById('toggleCombinedBtn');
-    const freezeBtn = document.getElementById('freezeBtn');
-
-    const sumCanvas = document.getElementById('sumCanvas');
-    const sumCtx = sumCanvas.getContext('2d');
-
-    /* Channels array */
-    const channels = [];
-
-    /* States */
-    let combinedPlaying = false;
-    let isFrozen = false;
-
-    // Zoom scale
-    let zoomScale = parseFloat(zoomScaleSlider.value);
-    zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
-
-    // "timeScale" is derived from the slider (log scale)
-    // slider range: -3..1 => timeScale in [0.001..10]
-    let timeScale = Math.pow(10, parseFloat(timeScaleSlider.value));
-    timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
-
-    // We'll track the total "time offset" for scrolling
-    let accumulatedTime = 0;
-    let lastTime = null;
-
-    // If we want real-time => timeScale=1 => wave shows actual frequency
-    // If timeScale=0.001 => wave is slowed 1000x
-    // If timeScale=10 => wave is 10x faster than real time
-    // We keep SCALE=1 for straightforward mapping
-    const SCALE = 1;
-
-    // We'll keep a small base window in seconds
-    const BASE_WINDOW = 0.01;
-
-    /* ========== CREATE & REMOVE CHANNELS ========== */
-    function addChannel() {
-      const channelIndex = channels.length + 1;
-
-      const oscillator = audioCtx.createOscillator();
-      oscillator.type = 'sine';
-      oscillator.frequency.value = 440;
-      oscillator.start();
-
-      const channelGain = audioCtx.createGain();
-      channelGain.gain.value = 0; // start silent
-      oscillator.connect(channelGain);
-      channelGain.connect(masterGain);
-
-      const channelDiv = document.createElement('div');
-      channelDiv.className = 'channel';
-
-      // Header
-      const headerDiv = document.createElement('div');
-      headerDiv.className = 'channel-header';
-      const title = document.createElement('h3');
-      title.textContent = `Channel ${channelIndex}`;
-
-      const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'Remove';
-      removeBtn.className = 'btn';
-      removeBtn.onclick = () => removeChannel(channelIndex - 1);
-
-      headerDiv.appendChild(title);
-      headerDiv.appendChild(removeBtn);
-
-      // Frequency controls
-      const controlsDiv = document.createElement('div');
-      controlsDiv.className = 'slider-container freq-controls';
-
-      const freqSlider = document.createElement('input');
-      freqSlider.type = 'range';
-      freqSlider.min = 15;
-      freqSlider.max = 23000;
-      freqSlider.value = 440;
-      freqSlider.step = 1;
-
-      const freqNumber = document.createElement('input');
-      freqNumber.type = 'number';
-      freqNumber.min = 15;
-      freqNumber.max = 23000;
-      freqNumber.value = 440;
-      freqNumber.step = 1;
-      freqNumber.style.width = '70px';
-
-      const freqLabel = document.createElement('span');
-      freqLabel.textContent = '440 Hz';
-
-      freqSlider.oninput = () => {
-        const freq = parseFloat(freqSlider.value);
-        freqNumber.value = freq;
-        freqLabel.textContent = `${freq} Hz`;
-        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        channels[channelIndex - 1].frequency = freq;
-      };
-      freqNumber.onchange = () => {
-        let val = parseFloat(freqNumber.value);
-        if (isNaN(val)) val = 440;
-        if (val < 15) val = 15;
-        if (val > 23000) val = 23000;
-        freqNumber.value = val;
-        freqSlider.value = val;
-        freqLabel.textContent = `${val} Hz`;
-        oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
-        channels[channelIndex - 1].frequency = val;
-      };
-
-      controlsDiv.appendChild(freqSlider);
-      controlsDiv.appendChild(freqNumber);
-      controlsDiv.appendChild(freqLabel);
-
-      // Play/Pause
-      const playPauseBtn = document.createElement('button');
-      playPauseBtn.textContent = 'Play';
-      playPauseBtn.className = 'btn';
-      let playing = false;
-      playPauseBtn.onclick = () => {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        playing = !playing;
-        channelGain.gain.setValueAtTime(playing ? 1 : 0, audioCtx.currentTime);
-        playPauseBtn.textContent = playing ? 'Pause' : 'Play';
-      };
-
-      // Wave canvas
-      const canvas = document.createElement('canvas');
-      canvas.className = 'channel-canvas';
-      const ctx = canvas.getContext('2d');
-
-      channelDiv.appendChild(headerDiv);
-      channelDiv.appendChild(controlsDiv);
-      channelDiv.appendChild(playPauseBtn);
-      channelDiv.appendChild(canvas);
-
-      channelsScrollContainer.appendChild(channelDiv);
-
-      const channelObj = {
-        oscillator,
-        channelGain,
-        canvas,
-        ctx,
-        frequency: 440
-      };
-      channels.push(channelObj);
-
-      resizeCanvas(canvas);
-    }
-
-    function removeChannel(index) {
-      const ch = channels[index];
-      if (!ch) return;
-      ch.oscillator.stop();
-      ch.oscillator.disconnect();
-      ch.channelGain.disconnect();
-
-      channels.splice(index, 1);
-      channelsScrollContainer.removeChild(channelsScrollContainer.children[index]);
-
-      Array.from(channelsScrollContainer.children).forEach((child, i) => {
-        const title = child.querySelector('h3');
-        title.textContent = `Channel ${i + 1}`;
-      });
-    }
-
-    // ========== DRAW LOOP ==========
-    function draw(time) {
-      requestAnimationFrame(draw);
-
-      if (!lastTime) {
-        lastTime = time;
-        return;
-      }
-      const deltaTime = (time - lastTime) / 1000;
-      lastTime = time;
-
-      if (!isFrozen) {
-        // timeScale = 10^sliderVal, so timeScale=1 => real time, 0.001 => 1000x slower, etc.
-        accumulatedTime += (deltaTime * timeScale) / (SCALE);
-      }
-
-      channels.forEach(ch => drawChannelWave(ch, ch.ctx, ch.canvas));
-      drawCombinedWave(sumCtx, sumCanvas);
-    }
-
-    function drawChannelWave(channel, ctx, canvas) {
-      ctx.fillStyle = '#1e1e1e';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#57c7ff';
-      ctx.beginPath();
-
-      const timeWindow = BASE_WINDOW * zoomScale;
-      for (let x = 0; x < canvas.width; x++) {
-        const fraction = x / (canvas.width - 1);
-        // time offset plus fraction of the time window
-        const t = accumulatedTime + fraction * timeWindow;
-        const val = Math.sin(2 * Math.PI * channel.frequency * t);
-
-        const y = (val * 0.5 + 0.5) * canvas.height;
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    }
-
-    function drawCombinedWave(ctx, canvas) {
-      ctx.fillStyle = '#1e1e1e';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (channels.length === 0) return;
-
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#ff638f';
-      ctx.beginPath();
-
-      const timeWindow = BASE_WINDOW * zoomScale;
-      for (let x = 0; x < canvas.width; x++) {
-        const fraction = x / (canvas.width - 1);
-        const t = accumulatedTime + fraction * timeWindow;
-
-        let sumVal = 0;
-        channels.forEach(ch => {
-          sumVal += Math.sin(2 * Math.PI * ch.frequency * t);
-        });
-        const avgVal = sumVal / channels.length;
-        const y = (avgVal * 0.5 + 0.5) * canvas.height;
-
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    }
-
-    // ========== CONTROLS ==========
-    addChannelBtn.addEventListener('click', () => {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      addChannel();
-    });
-
-    toggleCombinedBtn.addEventListener('click', () => {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      combinedPlaying = !combinedPlaying;
-      combinedGain.gain.setValueAtTime(combinedPlaying ? 1 : 0, audioCtx.currentTime);
-      toggleCombinedBtn.textContent = combinedPlaying ? 'Pause Combined' : 'Play Combined';
-    });
-
-    freezeBtn.addEventListener('click', () => {
-      toggleFreeze();
-    });
-    document.addEventListener('keydown', e => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        toggleFreeze();
-      }
-    });
-    function toggleFreeze() {
-      isFrozen = !isFrozen;
-      freezeBtn.textContent = isFrozen ? 'Unfreeze' : 'Freeze';
-      if (isFrozen) {
-        masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-      } else {
-        masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
-      }
-    }
-
-    panningSlider.addEventListener('input', () => {
-      let panVal = parseFloat(panningSlider.value);
-      if (Math.abs(panVal) < 0.05) {
-        panVal = 0;
-        panningSlider.value = '0';
-      }
-      stereoPanner.pan.setValueAtTime(panVal, audioCtx.currentTime);
-      panningValue.textContent = panVal.toFixed(2);
-    });
-
-    // LOG Scale for timeScale: timeScale = 10^(sliderVal)
-    timeScaleSlider.addEventListener('input', () => {
-      const sliderVal = parseFloat(timeScaleSlider.value);  // -3..1
-      timeScale = Math.pow(10, sliderVal);                  // 10^sliderVal => [0.001..10]
-      // Display with up to 3 decimal places so 0.001 or 10.0 is shown properly
-      timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
-    });
-
-    zoomScaleSlider.addEventListener('input', () => {
-      zoomScale = parseFloat(zoomScaleSlider.value);
-      zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
-    });
-
-    volumeSlider.addEventListener('input', () => {
-      const volVal = parseFloat(volumeSlider.value);
-      volumeGain.gain.setValueAtTime(volVal, audioCtx.currentTime);
-    });
-
-    // ========== INIT ==========
-    requestAnimationFrame(draw);
-    addChannel();
-
-    // ========== RESIZE ==========
-    function resizeCanvas(canvas) {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-    }
-
-    function debounce(func, wait) {
-      let timeout;
-      return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
-    }
-
-    window.addEventListener('resize', debounce(() => {
-      channels.forEach(ch => resizeCanvas(ch.canvas));
-      resizeCanvas(sumCanvas);
-    }, 200));
-
-    resizeCanvas(sumCanvas);
-  </script>
 </body>
+
+<script>
+  /* ========== AUDIO CONTEXT & NODES ========== */
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext({ latencyHint: 'interactive' });
+
+  // Gains: channels -> masterGain -> volumeGain -> combinedGain -> panner -> destination
+  const masterGain = audioCtx.createGain();
+  masterGain.gain.value = 1;
+
+  const volumeGain = audioCtx.createGain();
+  volumeGain.gain.value = 1;
+
+  const combinedGain = audioCtx.createGain();
+  combinedGain.gain.value = 0; // start off
+
+  masterGain.connect(volumeGain);
+  volumeGain.connect(combinedGain);
+
+  const stereoPanner = audioCtx.createStereoPanner();
+  combinedGain.connect(stereoPanner);
+  stereoPanner.connect(audioCtx.destination);
+
+  /* DOM Elements */
+  const addChannelBtn = document.getElementById('addChannelBtn');
+  const channelsScrollContainer = document.getElementById('channelsScrollContainer');
+
+  const panningSlider = document.getElementById('panningSlider');
+  const panningValue = document.getElementById('panningValue');
+
+  // LOG TIME SCALE: slider from -3..1 => timeScale = 10^sliderValue in [0.001..10]
+  const timeScaleSlider = document.getElementById('timeScaleSlider');
+  const timeScaleValue = document.getElementById('timeScaleValue');
+
+  const zoomScaleSlider = document.getElementById('zoomScaleSlider');
+  const zoomScaleValue = document.getElementById('zoomScaleValue');
+
+  const volumeSlider = document.getElementById('volumeSlider');
+
+  const toggleCombinedBtn = document.getElementById('toggleCombinedBtn');
+  const freezeBtn = document.getElementById('freezeBtn');
+
+  const sumCanvas = document.getElementById('sumCanvas');
+  const sumCtx = sumCanvas.getContext('2d');
+
+  /* Channels array */
+  const channels = [];
+
+  /* States */
+  let combinedPlaying = false;
+  let isFrozen = false;
+
+  // Zoom scale
+  let zoomScale = parseFloat(zoomScaleSlider.value);
+  zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
+
+  // "timeScale" is derived from the slider (log scale)
+  // slider range: -3..1 => timeScale in [0.001..10]
+  let timeScale = Math.pow(10, parseFloat(timeScaleSlider.value));
+  timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
+
+  // We'll track the total "time offset" for scrolling
+  let accumulatedTime = 0;
+  let lastTime = null;
+
+  // If we want real-time => timeScale=1 => wave shows actual frequency
+  // If timeScale=0.001 => wave is slowed 1000x
+  // If timeScale=10 => wave is 10x faster than real time
+  // We keep SCALE=1 for straightforward mapping
+  const SCALE = 1;
+
+  // We'll keep a small base window in seconds
+  const BASE_WINDOW = 0.01;
+
+  /* ========== CREATE & REMOVE CHANNELS ========== */
+  function addChannel() {
+    const channelIndex = channels.length + 1;
+
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 440;
+    oscillator.start();
+
+    const channelGain = audioCtx.createGain();
+    channelGain.gain.value = 0; // start silent
+    oscillator.connect(channelGain);
+    channelGain.connect(masterGain);
+
+    const channelDiv = document.createElement('div');
+    channelDiv.className = 'channel';
+
+    // Header
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'channel-header';
+    const title = document.createElement('h3');
+    title.textContent = `Channel ${channelIndex}`;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.className = 'btn';
+    removeBtn.onclick = () => removeChannel(channelIndex - 1);
+
+    headerDiv.appendChild(title);
+    headerDiv.appendChild(removeBtn);
+
+    // Frequency controls
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'slider-container freq-controls';
+
+    const freqSlider = document.createElement('input');
+    freqSlider.type = 'range';
+    freqSlider.min = 15;
+    freqSlider.max = 23000;
+    freqSlider.value = 440;
+    freqSlider.step = 1;
+
+    const freqNumber = document.createElement('input');
+    freqNumber.type = 'number';
+    freqNumber.min = 15;
+    freqNumber.max = 23000;
+    freqNumber.value = 440;
+    freqNumber.step = 1;
+    freqNumber.style.width = '70px';
+
+    const freqLabel = document.createElement('span');
+    freqLabel.textContent = '440 Hz';
+
+    freqSlider.oninput = () => {
+      const freq = parseFloat(freqSlider.value);
+      freqNumber.value = freq;
+      freqLabel.textContent = `${freq} Hz`;
+      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      channels[channelIndex - 1].frequency = freq;
+    };
+    freqNumber.onchange = () => {
+      let val = parseFloat(freqNumber.value);
+      if (isNaN(val)) val = 440;
+      if (val < 15) val = 15;
+      if (val > 23000) val = 23000;
+      freqNumber.value = val;
+      freqSlider.value = val;
+      freqLabel.textContent = `${val} Hz`;
+      oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
+      channels[channelIndex - 1].frequency = val;
+    };
+
+    controlsDiv.appendChild(freqSlider);
+    controlsDiv.appendChild(freqNumber);
+    controlsDiv.appendChild(freqLabel);
+
+    // Play/Pause
+    const playPauseBtn = document.createElement('button');
+    playPauseBtn.textContent = 'Play';
+    playPauseBtn.className = 'btn';
+    let playing = false;
+    playPauseBtn.onclick = () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      playing = !playing;
+      channelGain.gain.setValueAtTime(playing ? 1 : 0, audioCtx.currentTime);
+      playPauseBtn.textContent = playing ? 'Pause' : 'Play';
+    };
+
+    // Wave canvas
+    const canvas = document.createElement('canvas');
+    canvas.className = 'channel-canvas';
+    const ctx = canvas.getContext('2d');
+
+    channelDiv.appendChild(headerDiv);
+    channelDiv.appendChild(controlsDiv);
+    channelDiv.appendChild(playPauseBtn);
+    channelDiv.appendChild(canvas);
+
+    channelsScrollContainer.appendChild(channelDiv);
+
+    const channelObj = {
+      oscillator,
+      channelGain,
+      canvas,
+      ctx,
+      frequency: 440
+    };
+    channels.push(channelObj);
+
+    resizeCanvas(canvas);
+  }
+
+  function removeChannel(index) {
+    const ch = channels[index];
+    if (!ch) return;
+    ch.oscillator.stop();
+    ch.oscillator.disconnect();
+    ch.channelGain.disconnect();
+
+    channels.splice(index, 1);
+    channelsScrollContainer.removeChild(channelsScrollContainer.children[index]);
+
+    Array.from(channelsScrollContainer.children).forEach((child, i) => {
+      const title = child.querySelector('h3');
+      title.textContent = `Channel ${i + 1}`;
+    });
+  }
+
+  // ========== DRAW LOOP ==========
+  function draw(time) {
+    requestAnimationFrame(draw);
+
+    if (!lastTime) {
+      lastTime = time;
+      return;
+    }
+    const deltaTime = (time - lastTime) / 1000;
+    lastTime = time;
+
+    if (!isFrozen) {
+      // timeScale = 10^sliderVal, so timeScale=1 => real time, 0.001 => 1000x slower, etc.
+      accumulatedTime += (deltaTime * timeScale) / (SCALE);
+    }
+
+    channels.forEach(ch => drawChannelWave(ch, ch.ctx, ch.canvas));
+    drawCombinedWave(sumCtx, sumCanvas);
+  }
+
+  function drawChannelWave(channel, ctx, canvas) {
+    ctx.fillStyle = '#1e1e1e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#57c7ff';
+    ctx.beginPath();
+
+    const timeWindow = BASE_WINDOW * zoomScale;
+    for (let x = 0; x < canvas.width; x++) {
+      const fraction = x / (canvas.width - 1);
+      // time offset plus fraction of the time window
+      const t = accumulatedTime + fraction * timeWindow;
+      const val = Math.sin(2 * Math.PI * channel.frequency * t);
+
+      const y = (val * 0.5 + 0.5) * canvas.height;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  function drawCombinedWave(ctx, canvas) {
+    ctx.fillStyle = '#1e1e1e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (channels.length === 0) return;
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ff638f';
+    ctx.beginPath();
+
+    const timeWindow = BASE_WINDOW * zoomScale;
+    for (let x = 0; x < canvas.width; x++) {
+      const fraction = x / (canvas.width - 1);
+      const t = accumulatedTime + fraction * timeWindow;
+
+      let sumVal = 0;
+      channels.forEach(ch => {
+        sumVal += Math.sin(2 * Math.PI * ch.frequency * t);
+      });
+      const avgVal = sumVal / channels.length;
+      const y = (avgVal * 0.5 + 0.5) * canvas.height;
+
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  // ========== CONTROLS ==========
+  addChannelBtn.addEventListener('click', () => {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    addChannel();
+  });
+
+  toggleCombinedBtn.addEventListener('click', () => {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    combinedPlaying = !combinedPlaying;
+    combinedGain.gain.setValueAtTime(combinedPlaying ? 1 : 0, audioCtx.currentTime);
+    toggleCombinedBtn.textContent = combinedPlaying ? 'Pause Combined' : 'Play Combined';
+  });
+
+  freezeBtn.addEventListener('click', () => {
+    toggleFreeze();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      toggleFreeze();
+    }
+  });
+  function toggleFreeze() {
+    isFrozen = !isFrozen;
+    freezeBtn.textContent = isFrozen ? 'Unfreeze' : 'Freeze';
+    if (isFrozen) {
+      masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    } else {
+      masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
+    }
+  }
+
+  panningSlider.addEventListener('input', () => {
+    let panVal = parseFloat(panningSlider.value);
+    if (Math.abs(panVal) < 0.05) {
+      panVal = 0;
+      panningSlider.value = '0';
+    }
+    stereoPanner.pan.setValueAtTime(panVal, audioCtx.currentTime);
+    panningValue.textContent = panVal.toFixed(2);
+  });
+
+  // LOG Scale for timeScale: timeScale = 10^(sliderVal)
+  timeScaleSlider.addEventListener('input', () => {
+    const sliderVal = parseFloat(timeScaleSlider.value);  // -3..1
+    timeScale = Math.pow(10, sliderVal);                  // 10^sliderVal => [0.001..10]
+    // Display with up to 3 decimal places so 0.001 or 10.0 is shown properly
+    timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
+  });
+
+  zoomScaleSlider.addEventListener('input', () => {
+    zoomScale = parseFloat(zoomScaleSlider.value);
+    zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
+  });
+
+  volumeSlider.addEventListener('input', () => {
+    const volVal = parseFloat(volumeSlider.value);
+    volumeGain.gain.setValueAtTime(volVal, audioCtx.currentTime);
+  });
+
+  // ========== INIT ==========
+  requestAnimationFrame(draw);
+  addChannel();
+
+  // ========== RESIZE ==========
+  function resizeCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  window.addEventListener('resize', debounce(() => {
+    channels.forEach(ch => resizeCanvas(ch.canvas));
+    resizeCanvas(sumCanvas);
+  }, 200));
+
+  resizeCanvas(sumCanvas);
+</script>
 
 </html>

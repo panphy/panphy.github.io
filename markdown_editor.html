@@ -567,24 +567,26 @@
   </div>
 
   <footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
+      My Projects</a>
   </footer>
+</body>
 
-  <script>
-    const markdownInput = document.getElementById('markdownInput');
-    const renderedOutput = document.getElementById('renderedOutput');
-    const clearButton = document.getElementById('clearButton');
-    const loadSampleButton = document.getElementById('loadSampleButton');
-    const exportHTMLButton = document.getElementById('exportHTMLButton');
-    const printButton = document.getElementById('printButton');
-    const saveMDButton = document.getElementById('saveMDButton');
-    const loadFileButton = document.getElementById('loadFileButton');
-    const themeToggleButton = document.getElementById('themeToggleButton');
-    const highlightStyle = document.getElementById('highlightStyle');
-    const syncScrollSwitch = document.getElementById('syncScrollSwitch');
+<script>
+  const markdownInput = document.getElementById('markdownInput');
+  const renderedOutput = document.getElementById('renderedOutput');
+  const clearButton = document.getElementById('clearButton');
+  const loadSampleButton = document.getElementById('loadSampleButton');
+  const exportHTMLButton = document.getElementById('exportHTMLButton');
+  const printButton = document.getElementById('printButton');
+  const saveMDButton = document.getElementById('saveMDButton');
+  const loadFileButton = document.getElementById('loadFileButton');
+  const themeToggleButton = document.getElementById('themeToggleButton');
+  const highlightStyle = document.getElementById('highlightStyle');
+  const syncScrollSwitch = document.getElementById('syncScrollSwitch');
 
-    // Define sampleDocument using String.raw to preserve backslashes
-    const sampleDocument = String.raw`
+  // Define sampleDocument using String.raw to preserve backslashes
+  const sampleDocument = String.raw`
 # Welcome to the Markdown & LaTeX Playground! 🎉
 
 Ever felt like your document is missing a little *sparkle*? ✨ Tired of clicking countless buttons to format your tables or hunting for symbols in hidden dropdown menus? This editor is your new best friend. Dive in, unleash your creativity, and watch your documents transform from "meh" to "magnificent"! Happy editing! 📝🚀
@@ -780,83 +782,83 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 [2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
     `;
 
-    /**
-     * Preprocess the input Markdown by replacing all single backslashes with double backslashes
-     * within LaTeX math blocks.
-     * 
-     * @param {string} input - The raw Markdown input.
-     * @returns {string} - The processed Markdown with escaped backslashes.
-     */
-    function preprocessMarkdown(input) {
-      const regex = /(\$\$?)([\s\S]+?)\1/g;
-      return input.replace(regex, function (match, p1, p2) {
-        const escaped = p2.replace(/\\/g, '\\\\');
-        return p1 + escaped + p1;
-      });
-    }
+  /**
+   * Preprocess the input Markdown by replacing all single backslashes with double backslashes
+   * within LaTeX math blocks.
+   * 
+   * @param {string} input - The raw Markdown input.
+   * @returns {string} - The processed Markdown with escaped backslashes.
+   */
+  function preprocessMarkdown(input) {
+    const regex = /(\$\$?)([\s\S]+?)\1/g;
+    return input.replace(regex, function (match, p1, p2) {
+      const escaped = p2.replace(/\\/g, '\\\\');
+      return p1 + escaped + p1;
+    });
+  }
 
-    function renderContent() {
-      const inputText = markdownInput.value;
-      const preprocessedText = preprocessMarkdown(inputText);
+  function renderContent() {
+    const inputText = markdownInput.value;
+    const preprocessedText = preprocessMarkdown(inputText);
 
-      marked.setOptions({
-        gfm: true,
-        headerIds: true,
-        tables: true,
-        langPrefix: 'hljs language-',
-        highlight: function (code, lang) {
-          if (lang && hljs.getLanguage(lang)) {
-            return hljs.highlight(code, { language: lang }).value;
-          } else {
-            return hljs.highlightAuto(code).value;
-          }
+    marked.setOptions({
+      gfm: true,
+      headerIds: true,
+      tables: true,
+      langPrefix: 'hljs language-',
+      highlight: function (code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          return hljs.highlight(code, { language: lang }).value;
+        } else {
+          return hljs.highlightAuto(code).value;
         }
-      });
-
-      const parsedMarkdown = marked.parse(preprocessedText);
-      const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-      renderedOutput.innerHTML = sanitizedContent;
-
-      hljs.highlightAll();
-      MathJax.typesetPromise([renderedOutput]).catch(console.error);
-    }
-
-    async function printToPDF() {
-      const body = document.body;
-      const hadDarkMode = body.classList.contains('dark-mode');
-      if (hadDarkMode) {
-        body.classList.remove('dark-mode');
       }
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      await MathJax.typesetPromise([renderedOutput]);
-      hljs.highlightAll();
-      window.print();
-      if (hadDarkMode) {
-        body.classList.add('dark-mode');
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-        updateThemeToggleButton();
-      }
+    });
+
+    const parsedMarkdown = marked.parse(preprocessedText);
+    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+    renderedOutput.innerHTML = sanitizedContent;
+
+    hljs.highlightAll();
+    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  }
+
+  async function printToPDF() {
+    const body = document.body;
+    const hadDarkMode = body.classList.contains('dark-mode');
+    if (hadDarkMode) {
+      body.classList.remove('dark-mode');
     }
+    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+    await MathJax.typesetPromise([renderedOutput]);
+    hljs.highlightAll();
+    window.print();
+    if (hadDarkMode) {
+      body.classList.add('dark-mode');
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      updateThemeToggleButton();
+    }
+  }
 
-    function exportHTML() {
-      const fileName = prompt('Enter file name for the HTML export:', 'document.html');
-      if (!fileName) return;
+  function exportHTML() {
+    const fileName = prompt('Enter file name for the HTML export:', 'document.html');
+    if (!fileName) return;
 
-      const sanitizedHTML = renderedOutput.innerHTML;
-      const doc = document.implementation.createHTMLDocument('Exported Document');
-      const head = doc.head;
-      const body = doc.body;
+    const sanitizedHTML = renderedOutput.innerHTML;
+    const doc = document.implementation.createHTMLDocument('Exported Document');
+    const head = doc.head;
+    const body = doc.body;
 
-      const meta = document.createElement('meta');
-      meta.setAttribute('charset', 'UTF-8');
-      head.appendChild(meta);
+    const meta = document.createElement('meta');
+    meta.setAttribute('charset', 'UTF-8');
+    head.appendChild(meta);
 
-      const title = document.createElement('title');
-      title.textContent = 'Exported Document';
-      head.appendChild(title);
+    const title = document.createElement('title');
+    title.textContent = 'Exported Document';
+    head.appendChild(title);
 
-      const style = document.createElement('style');
-      style.textContent = `
+    const style = document.createElement('style');
+    style.textContent = `
         :root {
           --background-color: #ffffff;
           --text-color: #000000;
@@ -1024,32 +1026,32 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           height: auto;
         }
       `;
-      head.appendChild(style);
+    head.appendChild(style);
 
-      const isDarkMode = document.body.classList.contains('dark-mode');
-      const highlightLink = document.createElement('link');
-      highlightLink.rel = 'stylesheet';
-      if (isDarkMode) {
-        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      } else {
-        highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      }
-      head.appendChild(highlightLink);
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const highlightLink = document.createElement('link');
+    highlightLink.rel = 'stylesheet';
+    if (isDarkMode) {
+      highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+    } else {
+      highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+    }
+    head.appendChild(highlightLink);
 
-      const highlightScript = document.createElement('script');
-      highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
-      head.appendChild(highlightScript);
+    const highlightScript = document.createElement('script');
+    highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
+    head.appendChild(highlightScript);
 
-      const highlightInit = document.createElement('script');
-      highlightInit.textContent = `
+    const highlightInit = document.createElement('script');
+    highlightInit.textContent = `
         window.addEventListener('DOMContentLoaded', () => {
           hljs.highlightAll();
         });
       `;
-      head.appendChild(highlightInit);
+    head.appendChild(highlightInit);
 
-      const mathjaxConfigScript = document.createElement('script');
-      mathjaxConfigScript.textContent = `
+    const mathjaxConfigScript = document.createElement('script');
+    mathjaxConfigScript.textContent = `
         window.MathJax = {
           tex: {
             inlineMath: [['$', '$']],
@@ -1062,205 +1064,204 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
           }
         };
       `;
-      head.appendChild(mathjaxConfigScript);
+    head.appendChild(mathjaxConfigScript);
 
-      const mathjaxScript = document.createElement('script');
-      mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
-      head.appendChild(mathjaxScript);
+    const mathjaxScript = document.createElement('script');
+    mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+    head.appendChild(mathjaxScript);
 
-      body.innerHTML = sanitizedHTML;
+    body.innerHTML = sanitizedHTML;
 
-      if (isDarkMode) {
-        body.classList.add('dark-mode');
+    if (isDarkMode) {
+      body.classList.add('dark-mode');
+    }
+
+    const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
+    const blob = new Blob([exportedHTML], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+  }
+
+  function saveMarkdown() {
+    const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
+    if (!fileName) return;
+
+    const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+  }
+
+  function loadMarkdownFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.md,text/markdown';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = event => {
+          markdownInput.value = event.target.result;
+          renderContent();
+        };
+        reader.readAsText(file);
       }
+    };
+    input.click();
+  }
 
-      const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
-      const blob = new Blob([exportedHTML], { type: 'text/html' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
-    }
-
-    function saveMarkdown() {
-      const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
-      if (!fileName) return;
-
-      const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      link.click();
-    }
-
-    function loadMarkdownFile() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.md,text/markdown';
-      input.onchange = e => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = event => {
-            markdownInput.value = event.target.result;
-            renderContent();
-          };
-          reader.readAsText(file);
-        }
-      };
-      input.click();
-    }
-
-    /**
-     * Initialize the theme based on saved preference.
-     */
-    function initializeTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      } else {
-        document.body.classList.remove('dark-mode');
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      }
-      updateThemeToggleButton();
-    }
-
-    /**
-     * Toggle between dark and light themes and save the preference.
-     */
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-
-      if (document.body.classList.contains('dark-mode')) {
-        themeToggleButton.textContent = '🌙';
-        themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-        themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-        localStorage.setItem('theme', 'dark');
-      } else {
-        themeToggleButton.textContent = '☀️';
-        themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-        themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-        localStorage.setItem('theme', 'light');
-      }
-    }
-
-    /**
-     * Update the theme toggle button's icon and attributes.
-     */
-    function updateThemeToggleButton() {
-      if (document.body.classList.contains('dark-mode')) {
-        themeToggleButton.textContent = '🌙';
-        themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-        themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-      } else {
-        themeToggleButton.textContent = '☀️';
-        themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-        themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-      }
-    }
-
-    // Throttle function for scroll syncing
-    function throttle(func, limit) {
-      let inThrottle;
-      return function () {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-          func.apply(context, args);
-          inThrottle = true;
-          setTimeout(() => inThrottle = false, limit);
-        }
-      }
-    }
-
-    const syncInputToOutput = throttle(() => {
-      if (!syncScrollSwitch.checked) return;
-
-      isSyncingOutputScroll = true;
-
-      requestAnimationFrame(() => {
-        const inputScrollTop = markdownInput.scrollTop;
-        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-        if (inputScrollHeight === 0) {
-          renderedOutput.scrollTop = 0;
-        } else {
-          const scrollRatio = inputScrollTop / inputScrollHeight;
-          const newOutputScrollTop = scrollRatio * outputScrollHeight;
-          if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
-            renderedOutput.scrollTop = newOutputScrollTop;
-          }
-        }
-
-        isSyncingOutputScroll = false;
-      });
-    }, 16);
-
-    const syncOutputToInput = throttle(() => {
-      if (!syncScrollSwitch.checked) return;
-
-      isSyncingInputScroll = true;
-
-      requestAnimationFrame(() => {
-        const outputScrollTop = renderedOutput.scrollTop;
-        const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-        const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-
-        if (outputScrollHeight === 0) {
-          markdownInput.scrollTop = 0;
-        } else {
-          const scrollRatio = outputScrollTop / outputScrollHeight;
-          const newInputScrollTop = scrollRatio * inputScrollHeight;
-          if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
-            markdownInput.scrollTop = newInputScrollTop;
-          }
-        }
-
-        isSyncingInputScroll = false;
-      });
-    }, 16);
-
-    let isSyncingInputScroll = false;
-    let isSyncingOutputScroll = false;
-
-    markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
-    renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
-
-    window.addEventListener('beforeprint', () => {
+  /**
+   * Initialize the theme based on saved preference.
+   */
+  function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+    } else {
+      document.body.classList.remove('dark-mode');
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    });
+    }
+    updateThemeToggleButton();
+  }
 
-    window.addEventListener('afterprint', () => {
-      if (document.body.classList.contains('dark-mode')) {
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      } else {
-        highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+  /**
+   * Toggle between dark and light themes and save the preference.
+   */
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+
+    if (document.body.classList.contains('dark-mode')) {
+      themeToggleButton.textContent = '🌙';
+      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+      localStorage.setItem('theme', 'dark');
+    } else {
+      themeToggleButton.textContent = '☀️';
+      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
+  /**
+   * Update the theme toggle button's icon and attributes.
+   */
+  function updateThemeToggleButton() {
+    if (document.body.classList.contains('dark-mode')) {
+      themeToggleButton.textContent = '🌙';
+      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+    } else {
+      themeToggleButton.textContent = '☀️';
+      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+    }
+  }
+
+  // Throttle function for scroll syncing
+  function throttle(func, limit) {
+    let inThrottle;
+    return function () {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
       }
-    });
+    }
+  }
 
-    // Initialize theme and render content on load
-    initializeTheme();
+  const syncInputToOutput = throttle(() => {
+    if (!syncScrollSwitch.checked) return;
+
+    isSyncingOutputScroll = true;
+
+    requestAnimationFrame(() => {
+      const inputScrollTop = markdownInput.scrollTop;
+      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+
+      if (inputScrollHeight === 0) {
+        renderedOutput.scrollTop = 0;
+      } else {
+        const scrollRatio = inputScrollTop / inputScrollHeight;
+        const newOutputScrollTop = scrollRatio * outputScrollHeight;
+        if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
+          renderedOutput.scrollTop = newOutputScrollTop;
+        }
+      }
+
+      isSyncingOutputScroll = false;
+    });
+  }, 16);
+
+  const syncOutputToInput = throttle(() => {
+    if (!syncScrollSwitch.checked) return;
+
+    isSyncingInputScroll = true;
+
+    requestAnimationFrame(() => {
+      const outputScrollTop = renderedOutput.scrollTop;
+      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+
+      if (outputScrollHeight === 0) {
+        markdownInput.scrollTop = 0;
+      } else {
+        const scrollRatio = outputScrollTop / outputScrollHeight;
+        const newInputScrollTop = scrollRatio * inputScrollHeight;
+        if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
+          markdownInput.scrollTop = newInputScrollTop;
+        }
+      }
+
+      isSyncingInputScroll = false;
+    });
+  }, 16);
+
+  let isSyncingInputScroll = false;
+  let isSyncingOutputScroll = false;
+
+  markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
+  renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
+
+  window.addEventListener('beforeprint', () => {
+    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+  });
+
+  window.addEventListener('afterprint', () => {
+    if (document.body.classList.contains('dark-mode')) {
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+    } else {
+      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+    }
+  });
+
+  // Initialize theme and render content on load
+  initializeTheme();
+  renderContent();
+
+  markdownInput.addEventListener('input', renderContent);
+  printButton.addEventListener('click', printToPDF);
+  exportHTMLButton.addEventListener('click', exportHTML);
+  saveMDButton.addEventListener('click', saveMarkdown);
+  loadFileButton.addEventListener('click', loadMarkdownFile);
+  loadSampleButton.addEventListener('click', () => {
+    markdownInput.value = sampleDocument;
     renderContent();
-
-    markdownInput.addEventListener('input', renderContent);
-    printButton.addEventListener('click', printToPDF);
-    exportHTMLButton.addEventListener('click', exportHTML);
-    saveMDButton.addEventListener('click', saveMarkdown);
-    loadFileButton.addEventListener('click', loadMarkdownFile);
-    loadSampleButton.addEventListener('click', () => {
-      markdownInput.value = sampleDocument;
-      renderContent();
-    });
-    clearButton.addEventListener('click', () => {
-      markdownInput.value = '';
-      renderContent();
-    });
-    themeToggleButton.addEventListener('click', toggleTheme);
-  </script>
-</body>
+  });
+  clearButton.addEventListener('click', () => {
+    markdownInput.value = '';
+    renderContent();
+  });
+  themeToggleButton.addEventListener('click', toggleTheme);
+</script>
 
 </html>

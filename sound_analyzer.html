@@ -176,418 +176,419 @@
   </div>
 
   <footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>. All rights reserved.
+    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
+      My Projects</a>
   </footer>
+</body>
 
-  <script>
-    /************************************
-     *       ADJUSTABLE GRID SETTINGS   *
-     ************************************/
-    const SQUARE_GRID_SPACING = 45;
-    const SQUARE_GRID_ALPHA = 0.1;
+<script>
+  /************************************
+   *       ADJUSTABLE GRID SETTINGS   *
+   ************************************/
+  const SQUARE_GRID_SPACING = 45;
+  const SQUARE_GRID_ALPHA = 0.1;
 
-    // ------------------ Global Variables ------------------
-    let audioContext, analyzer, source, microphoneStream;
-    let isRunning = false;
-    let sampleRate;
-    const fftSize = 2048;
+  // ------------------ Global Variables ------------------
+  let audioContext, analyzer, source, microphoneStream;
+  let isRunning = false;
+  let sampleRate;
+  const fftSize = 2048;
 
-    // Frequency data
-    let dataArray;
-    // Waveform data
-    let timeDomainData;
+  // Frequency data
+  let dataArray;
+  // Waveform data
+  let timeDomainData;
 
-    // We store frames while running, but only the last one at pause
-    let freqDataHistory = [];
+  // We store frames while running, but only the last one at pause
+  let freqDataHistory = [];
 
-    // Final paused frames
-    let lastFreqFrame;
-    let lastWaveFrame;
+  // Final paused frames
+  let lastFreqFrame;
+  let lastWaveFrame;
 
-    // Zoom parameters
-    let waveAmplitudeScale = 5.0;
-    let waveTimeScale = 1.0;
+  // Zoom parameters
+  let waveAmplitudeScale = 5.0;
+  let waveTimeScale = 1.0;
 
-    // DOM references
-    const freqCanvas = document.getElementById('visualizer');
-    const freqCtx = freqCanvas.getContext('2d');
+  // DOM references
+  const freqCanvas = document.getElementById('visualizer');
+  const freqCtx = freqCanvas.getContext('2d');
 
-    const waveCanvas = document.getElementById('waveform');
-    const waveCtx = waveCanvas.getContext('2d');
+  const waveCanvas = document.getElementById('waveform');
+  const waveCtx = waveCanvas.getContext('2d');
 
-    const tooltip = document.getElementById('tooltip');
-    const peakFreqDisplay = document.getElementById('peak-frequency');
+  const tooltip = document.getElementById('tooltip');
+  const peakFreqDisplay = document.getElementById('peak-frequency');
 
-    const toggleBtn = document.getElementById('toggleBtn');
-    const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
-    const exportWaveformBtn = document.getElementById('exportWaveformBtn');
+  const toggleBtn = document.getElementById('toggleBtn');
+  const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
+  const exportWaveformBtn = document.getElementById('exportWaveformBtn');
 
-    const yScaleSlider = document.getElementById('yScale');
-    const xScaleSlider = document.getElementById('xScale');
+  const yScaleSlider = document.getElementById('yScale');
+  const xScaleSlider = document.getElementById('xScale');
 
-    // ------------------ Main Entry ------------------
-    window.addEventListener('load', () => {
-      requestAnimationFrame(drawLoop); // always running
-      startSpectrum();                 // start mic
-    });
+  // ------------------ Main Entry ------------------
+  window.addEventListener('load', () => {
+    requestAnimationFrame(drawLoop); // always running
+    startSpectrum();                 // start mic
+  });
 
-    // ------------------ Button & Keyboard Listeners ------------------
-    toggleBtn.addEventListener('click', toggleRunPause);
+  // ------------------ Button & Keyboard Listeners ------------------
+  toggleBtn.addEventListener('click', toggleRunPause);
 
-    exportSpectrumBtn.addEventListener('click', exportSpectrumAsCSV);
-    exportWaveformBtn.addEventListener('click', exportWaveformAsCSV);
+  exportSpectrumBtn.addEventListener('click', exportSpectrumAsCSV);
+  exportWaveformBtn.addEventListener('click', exportWaveformAsCSV);
 
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        toggleRunPause();
-      }
-    });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      toggleRunPause();
+    }
+  });
 
-    freqCanvas.addEventListener('mousemove', onCanvasHover);
-    freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
+  freqCanvas.addEventListener('mousemove', onCanvasHover);
+  freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
 
-    yScaleSlider.addEventListener('input', () => {
-      waveAmplitudeScale = parseFloat(yScaleSlider.value);
-    });
-    xScaleSlider.addEventListener('input', () => {
-      waveTimeScale = parseFloat(xScaleSlider.value);
-    });
+  yScaleSlider.addEventListener('input', () => {
+    waveAmplitudeScale = parseFloat(yScaleSlider.value);
+  });
+  xScaleSlider.addEventListener('input', () => {
+    waveTimeScale = parseFloat(xScaleSlider.value);
+  });
 
-    // ------------------ Microphone + Analyzer Setup ------------------
-    async function startSpectrum() {
-      if (isRunning) return;
-      isRunning = true;
-      toggleBtn.textContent = 'Pause';
+  // ------------------ Microphone + Analyzer Setup ------------------
+  async function startSpectrum() {
+    if (isRunning) return;
+    isRunning = true;
+    toggleBtn.textContent = 'Pause';
 
-      // Exports disabled until pause
-      exportSpectrumBtn.disabled = true;
-      exportWaveformBtn.disabled = true;
-      freqDataHistory = [];
+    // Exports disabled until pause
+    exportSpectrumBtn.disabled = true;
+    exportWaveformBtn.disabled = true;
+    freqDataHistory = [];
 
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        sampleRate = audioContext.sampleRate;
-      }
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      sampleRate = audioContext.sampleRate;
+    }
 
-      if (!microphoneStream) {
-        try {
-          microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (err) {
-          alert('Error accessing microphone: ' + err.message);
-          isRunning = false;
-          toggleBtn.textContent = 'Resume';
-          return;
-        }
-      }
-
-      if (!analyzer) {
-        analyzer = audioContext.createAnalyser();
-        analyzer.fftSize = fftSize;
-        dataArray = new Uint8Array(analyzer.frequencyBinCount);
-        timeDomainData = new Uint8Array(analyzer.fftSize);
-      }
-      if (!source) {
-        source = audioContext.createMediaStreamSource(microphoneStream);
-        source.connect(analyzer);
+    if (!microphoneStream) {
+      try {
+        microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        alert('Error accessing microphone: ' + err.message);
+        isRunning = false;
+        toggleBtn.textContent = 'Resume';
+        return;
       }
     }
 
-    function toggleRunPause() {
-      if (isRunning) {
-        pauseSpectrum();
-      } else {
-        startSpectrum();
-      }
+    if (!analyzer) {
+      analyzer = audioContext.createAnalyser();
+      analyzer.fftSize = fftSize;
+      dataArray = new Uint8Array(analyzer.frequencyBinCount);
+      timeDomainData = new Uint8Array(analyzer.fftSize);
+    }
+    if (!source) {
+      source = audioContext.createMediaStreamSource(microphoneStream);
+      source.connect(analyzer);
+    }
+  }
+
+  function toggleRunPause() {
+    if (isRunning) {
+      pauseSpectrum();
+    } else {
+      startSpectrum();
+    }
+  }
+
+  function pauseSpectrum() {
+    isRunning = false;
+    toggleBtn.textContent = 'Resume';
+    exportSpectrumBtn.disabled = false;
+    exportWaveformBtn.disabled = false;
+
+    lastFreqFrame = dataArray.slice();
+    lastWaveFrame = timeDomainData.slice();
+  }
+
+  // ------------------ The Continuous Draw Loop ------------------
+  function drawLoop() {
+    requestAnimationFrame(drawLoop);
+
+    // Frequency Spectrum
+    freqCtx.fillStyle = '#1e1e1e';
+    freqCtx.fillRect(0, 0, freqCanvas.width, freqCanvas.height);
+
+    if (isRunning && analyzer) {
+      analyzer.getByteFrequencyData(dataArray);
+      freqDataHistory.push(Array.from(dataArray));
+    } else if (lastFreqFrame) {
+      dataArray.set(lastFreqFrame);
     }
 
-    function pauseSpectrum() {
-      isRunning = false;
-      toggleBtn.textContent = 'Resume';
-      exportSpectrumBtn.disabled = false;
-      exportWaveformBtn.disabled = false;
+    // Peak freq
+    let peakIndex = 0, peakValue = -1;
+    for (let i = 0; i < dataArray.length; i++) {
+      if (dataArray[i] > peakValue) {
+        peakValue = dataArray[i];
+        peakIndex = i;
+      }
+    }
+    const peakFreq = indexToFrequency(peakIndex);
+    peakFreqDisplay.textContent = `Peak Frequency: ${peakFreq.toFixed(1)} Hz`;
 
-      lastFreqFrame = dataArray.slice();
+    // freq bars
+    const barCount = dataArray.length;
+    const barWidth = freqCanvas.width / barCount;
+    for (let i = 0; i < barCount; i++) {
+      const barHeight = (dataArray[i] / 255) * freqCanvas.height * 0.8;
+      const x = i * barWidth;
+      const y = freqCanvas.height - barHeight;
+      freqCtx.fillStyle = `rgb(${barHeight + 50}, 50, 50)`;
+      freqCtx.fillRect(x, y, barWidth, barHeight);
+    }
+
+    // Draw frequency axis
+    drawFrequencyAxis(freqCtx, freqCanvas.width, freqCanvas.height);
+
+    // Waveform
+    waveCtx.fillStyle = '#1e1e1e';
+    waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+    if (isRunning && analyzer) {
+      analyzer.getByteTimeDomainData(timeDomainData);
       lastWaveFrame = timeDomainData.slice();
+    } else if (lastWaveFrame) {
+      timeDomainData.set(lastWaveFrame);
     }
 
-    // ------------------ The Continuous Draw Loop ------------------
-    function drawLoop() {
-      requestAnimationFrame(drawLoop);
+    drawSquareGridWithTime();
 
-      // Frequency Spectrum
-      freqCtx.fillStyle = '#1e1e1e';
-      freqCtx.fillRect(0, 0, freqCanvas.width, freqCanvas.height);
+    // waveform trace
+    waveCtx.lineWidth = 2;
+    waveCtx.strokeStyle = '#98c616';
+    waveCtx.beginPath();
 
-      if (isRunning && analyzer) {
-        analyzer.getByteFrequencyData(dataArray);
-        freqDataHistory.push(Array.from(dataArray));
-      } else if (lastFreqFrame) {
-        dataArray.set(lastFreqFrame);
+    const totalSamples = timeDomainData.length;
+    let windowSize = totalSamples / waveTimeScale;
+    if (windowSize > totalSamples) windowSize = totalSamples;
+    windowSize = Math.max(2, Math.floor(windowSize));
+    const sliceWidth = waveCanvas.width / (windowSize - 1);
+
+    let x = 0;
+    for (let i = 0; i < windowSize; i++) {
+      const v = (timeDomainData[i] - 128) / 128.0;
+      const y = (waveCanvas.height / 2) + v * (waveCanvas.height / 2) * waveAmplitudeScale;
+      if (i === 0) waveCtx.moveTo(x, y);
+      else waveCtx.lineTo(x, y);
+      x += sliceWidth;
+    }
+    waveCtx.stroke();
+  }
+
+  // ------------------ Draw the Frequency Axis ------------------
+  function drawFrequencyAxis(ctx, width, height) {
+    // Skip if we don't have what we need
+    if (!sampleRate || !analyzer) return;
+
+    // We'll draw ~5 major ticks from 0 Hz to sampleRate/2
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '12px sans-serif';
+
+    const maxFreq = sampleRate / 2;
+    const numTicks = 5;
+
+    for (let i = 0; i <= numTicks; i++) {
+      const freq = (maxFreq / numTicks) * i;
+      const bin = frequencyToIndex(freq);
+      const x = bin * (width / analyzer.frequencyBinCount);
+
+      // small tick line
+      ctx.beginPath();
+      ctx.moveTo(x, height - 5);
+      ctx.lineTo(x, height);
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      // label
+      let label;
+      if (freq >= 1000) {
+        label = (freq / 1000).toFixed(1) + ' kHz';
+      } else {
+        label = freq.toFixed(0) + ' Hz';
       }
+      ctx.fillText(label, x + 2, height - 6);
+    }
+  }
 
-      // Peak freq
-      let peakIndex = 0, peakValue = -1;
-      for (let i = 0; i < dataArray.length; i++) {
-        if (dataArray[i] > peakValue) {
-          peakValue = dataArray[i];
-          peakIndex = i;
-        }
-      }
-      const peakFreq = indexToFrequency(peakIndex);
-      peakFreqDisplay.textContent = `Peak Frequency: ${peakFreq.toFixed(1)} Hz`;
+  // ------------------ Square Grid & Time Axis (in Screen Coordinates) ------------------
+  function drawSquareGridWithTime() {
+    waveCtx.save();
+    waveCtx.strokeStyle = `rgba(255,255,255,${SQUARE_GRID_ALPHA})`;
+    waveCtx.fillStyle = '#ffffff';
+    waveCtx.font = '12px sans-serif';
 
-      // freq bars
-      const barCount = dataArray.length;
-      const barWidth = freqCanvas.width / barCount;
-      for (let i = 0; i < barCount; i++) {
-        const barHeight = (dataArray[i] / 255) * freqCanvas.height * 0.8;
-        const x = i * barWidth;
-        const y = freqCanvas.height - barHeight;
-        freqCtx.fillStyle = `rgb(${barHeight + 50}, 50, 50)`;
-        freqCtx.fillRect(x, y, barWidth, barHeight);
-      }
+    const dispW = waveCanvas.offsetWidth;
+    const dispH = waveCanvas.offsetHeight;
 
-      // Draw frequency axis
-      drawFrequencyAxis(freqCtx, freqCanvas.width, freqCanvas.height);
+    const scaleX = waveCanvas.width / dispW;
+    const scaleY = waveCanvas.height / dispH;
 
-      // Waveform
-      waveCtx.fillStyle = '#1e1e1e';
-      waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+    // Time info
+    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
+    let windowSize = totalSamples / waveTimeScale;
+    if (windowSize > totalSamples) windowSize = totalSamples;
+    windowSize = Math.max(1, Math.floor(windowSize));
+    const totalTimeSec = windowSize / (sampleRate || 44100);
 
-      if (isRunning && analyzer) {
-        analyzer.getByteTimeDomainData(timeDomainData);
-        lastWaveFrame = timeDomainData.slice();
-      } else if (lastWaveFrame) {
-        timeDomainData.set(lastWaveFrame);
-      }
+    // Grid lines
+    const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
+    const numHorizLines = Math.floor(dispH / SQUARE_GRID_SPACING);
 
-      drawSquareGridWithTime();
+    // vertical lines
+    for (let i = 0; i <= numVertLines; i++) {
+      const screenX = i * SQUARE_GRID_SPACING;
+      const canvasX = screenX * scaleX;
 
-      // waveform trace
-      waveCtx.lineWidth = 2;
-      waveCtx.strokeStyle = '#98c616';
       waveCtx.beginPath();
+      waveCtx.moveTo(canvasX, 0);
+      waveCtx.lineTo(canvasX, waveCanvas.height);
+      waveCtx.stroke();
 
-      const totalSamples = timeDomainData.length;
-      let windowSize = totalSamples / waveTimeScale;
-      if (windowSize > totalSamples) windowSize = totalSamples;
-      windowSize = Math.max(2, Math.floor(windowSize));
-      const sliceWidth = waveCanvas.width / (windowSize - 1);
-
-      let x = 0;
-      for (let i = 0; i < windowSize; i++) {
-        const v = (timeDomainData[i] - 128) / 128.0;
-        const y = (waveCanvas.height / 2) + v * (waveCanvas.height / 2) * waveAmplitudeScale;
-        if (i === 0) waveCtx.moveTo(x, y);
-        else waveCtx.lineTo(x, y);
-        x += sliceWidth;
+      if (i % 2 === 0) {
+        const frac = screenX / dispW;
+        const ms = frac * totalTimeSec * 1000;
+        waveCtx.fillText(ms.toFixed(1) + ' ms', canvasX + 2, waveCanvas.height - 4);
       }
+    }
+
+    // horizontal lines
+    for (let j = 0; j <= numHorizLines; j++) {
+      const screenY = j * SQUARE_GRID_SPACING;
+      const canvasY = screenY * scaleY;
+
+      waveCtx.beginPath();
+      waveCtx.moveTo(0, canvasY);
+      waveCtx.lineTo(waveCanvas.width, canvasY);
       waveCtx.stroke();
     }
 
-    // ------------------ Draw the Frequency Axis ------------------
-    function drawFrequencyAxis(ctx, width, height) {
-      // Skip if we don't have what we need
-      if (!sampleRate || !analyzer) return;
+    waveCtx.restore();
+  }
 
-      // We'll draw ~5 major ticks from 0 Hz to sampleRate/2
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
+  // ------------------ Export Spectrum (remove zero-amplitude) ------------------
+  function exportSpectrumAsCSV() {
+    if (!analyzer || !lastFreqFrame) {
+      alert("No paused data available. Please pause first.");
+      return;
+    }
 
-      const maxFreq = sampleRate / 2;
-      const numTicks = 5;
+    const binCount = analyzer.frequencyBinCount;
+    let csvContent = "data:text/csv;charset=utf-8,Frequency (Hz),Amplitude (a.u.)\n";
 
-      for (let i = 0; i <= numTicks; i++) {
-        const freq = (maxFreq / numTicks) * i;
-        const bin = frequencyToIndex(freq);
-        const x = bin * (width / analyzer.frequencyBinCount);
-
-        // small tick line
-        ctx.beginPath();
-        ctx.moveTo(x, height - 5);
-        ctx.lineTo(x, height);
-        ctx.strokeStyle = '#ffffff';
-        ctx.stroke();
-
-        // label
-        let label;
-        if (freq >= 1000) {
-          label = (freq / 1000).toFixed(1) + ' kHz';
-        } else {
-          label = freq.toFixed(0) + ' Hz';
-        }
-        ctx.fillText(label, x + 2, height - 6);
+    for (let i = 0; i < binCount; i++) {
+      const amp = lastFreqFrame[i];
+      // skip if amplitude = 0
+      if (amp > 0) {
+        const freq = indexToFrequency(i);
+        csvContent += freq.toFixed(1) + "," + amp + "\n";
       }
     }
 
-    // ------------------ Square Grid & Time Axis (in Screen Coordinates) ------------------
-    function drawSquareGridWithTime() {
-      waveCtx.save();
-      waveCtx.strokeStyle = `rgba(255,255,255,${SQUARE_GRID_ALPHA})`;
-      waveCtx.fillStyle = '#ffffff';
-      waveCtx.font = '12px sans-serif';
+    downloadCSV(csvContent, "spectrum_data.csv");
+  }
 
-      const dispW = waveCanvas.offsetWidth;
-      const dispH = waveCanvas.offsetHeight;
-
-      const scaleX = waveCanvas.width / dispW;
-      const scaleY = waveCanvas.height / dispH;
-
-      // Time info
-      const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
-      let windowSize = totalSamples / waveTimeScale;
-      if (windowSize > totalSamples) windowSize = totalSamples;
-      windowSize = Math.max(1, Math.floor(windowSize));
-      const totalTimeSec = windowSize / (sampleRate || 44100);
-
-      // Grid lines
-      const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
-      const numHorizLines = Math.floor(dispH / SQUARE_GRID_SPACING);
-
-      // vertical lines
-      for (let i = 0; i <= numVertLines; i++) {
-        const screenX = i * SQUARE_GRID_SPACING;
-        const canvasX = screenX * scaleX;
-
-        waveCtx.beginPath();
-        waveCtx.moveTo(canvasX, 0);
-        waveCtx.lineTo(canvasX, waveCanvas.height);
-        waveCtx.stroke();
-
-        if (i % 2 === 0) {
-          const frac = screenX / dispW;
-          const ms = frac * totalTimeSec * 1000;
-          waveCtx.fillText(ms.toFixed(1) + ' ms', canvasX + 2, waveCanvas.height - 4);
-        }
-      }
-
-      // horizontal lines
-      for (let j = 0; j <= numHorizLines; j++) {
-        const screenY = j * SQUARE_GRID_SPACING;
-        const canvasY = screenY * scaleY;
-
-        waveCtx.beginPath();
-        waveCtx.moveTo(0, canvasY);
-        waveCtx.lineTo(waveCanvas.width, canvasY);
-        waveCtx.stroke();
-      }
-
-      waveCtx.restore();
+  // ------------------ Export Waveform (Time vs Amplitude) => only first 10 ms ------------------
+  function exportWaveformAsCSV() {
+    if (!lastWaveFrame || !sampleRate) {
+      alert("No paused data available. Please pause first.");
+      return;
     }
 
-    // ------------------ Export Spectrum (remove zero-amplitude) ------------------
-    function exportSpectrumAsCSV() {
-      if (!analyzer || !lastFreqFrame) {
-        alert("No paused data available. Please pause first.");
-        return;
-      }
-
-      const binCount = analyzer.frequencyBinCount;
-      let csvContent = "data:text/csv;charset=utf-8,Frequency (Hz),Amplitude (a.u.)\n";
-
-      for (let i = 0; i < binCount; i++) {
-        const amp = lastFreqFrame[i];
-        // skip if amplitude = 0
-        if (amp > 0) {
-          const freq = indexToFrequency(i);
-          csvContent += freq.toFixed(1) + "," + amp + "\n";
-        }
-      }
-
-      downloadCSV(csvContent, "spectrum_data.csv");
+    let maxSamples = Math.floor(sampleRate * 0.01); // 10ms
+    if (maxSamples > lastWaveFrame.length) {
+      maxSamples = lastWaveFrame.length;
     }
 
-    // ------------------ Export Waveform (Time vs Amplitude) => only first 10 ms ------------------
-    function exportWaveformAsCSV() {
-      if (!lastWaveFrame || !sampleRate) {
-        alert("No paused data available. Please pause first.");
-        return;
-      }
-
-      let maxSamples = Math.floor(sampleRate * 0.01); // 10ms
-      if (maxSamples > lastWaveFrame.length) {
-        maxSamples = lastWaveFrame.length;
-      }
-
-      let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (a.u.)\n";
-      for (let i = 0; i < maxSamples; i++) {
-        const timeMs = (i / sampleRate) * 1000;
-        const amplitude = lastWaveFrame[i];
-        csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
-      }
-
-      downloadCSV(csvContent, "waveform_data.csv");
+    let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (a.u.)\n";
+    for (let i = 0; i < maxSamples; i++) {
+      const timeMs = (i / sampleRate) * 1000;
+      const amplitude = lastWaveFrame[i];
+      csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
     }
 
-    // ------------------ Utility to Download a CSV string ------------------
-    function downloadCSV(csvString, filename) {
-      const encodedUri = encodeURI(csvString);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    downloadCSV(csvContent, "waveform_data.csv");
+  }
+
+  // ------------------ Utility to Download a CSV string ------------------
+  function downloadCSV(csvString, filename) {
+    const encodedUri = encodeURI(csvString);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // ------------------ Utility: bin <-> frequency conversion ------------------
+  function indexToFrequency(index) {
+    if (!sampleRate) return 0;
+    return index * (sampleRate / fftSize);
+  }
+  function frequencyToIndex(freq) {
+    if (!sampleRate) return 0;
+    return Math.round(freq / (sampleRate / fftSize));
+  }
+
+  // ------------------ Hover/Touch Inspection (Paused Only) ------------------
+  function onCanvasHover(e) {
+    if (isRunning || !lastFreqFrame) {
+      tooltip.style.display = 'none';
+      return;
+    }
+    const rect = freqCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    showTooltip(x, y);
+  }
+
+  function onCanvasTouch(e) {
+    if (isRunning || !lastFreqFrame) {
+      tooltip.style.display = 'none';
+      return;
+    }
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = freqCanvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    showTooltip(x, y);
+  }
+
+  function showTooltip(x, y) {
+    const binCount = analyzer.frequencyBinCount;
+    const barWidth = freqCanvas.width / binCount;
+    const binIndex = Math.floor(x / barWidth);
+
+    if (binIndex < 0 || binIndex >= binCount) {
+      tooltip.style.display = 'none';
+      return;
     }
 
-    // ------------------ Utility: bin <-> frequency conversion ------------------
-    function indexToFrequency(index) {
-      if (!sampleRate) return 0;
-      return index * (sampleRate / fftSize);
-    }
-    function frequencyToIndex(freq) {
-      if (!sampleRate) return 0;
-      return Math.round(freq / (sampleRate / fftSize));
-    }
+    const freq = indexToFrequency(binIndex).toFixed(1);
+    const amplitude = lastFreqFrame[binIndex];
 
-    // ------------------ Hover/Touch Inspection (Paused Only) ------------------
-    function onCanvasHover(e) {
-      if (isRunning || !lastFreqFrame) {
-        tooltip.style.display = 'none';
-        return;
-      }
-      const rect = freqCanvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      showTooltip(x, y);
-    }
-
-    function onCanvasTouch(e) {
-      if (isRunning || !lastFreqFrame) {
-        tooltip.style.display = 'none';
-        return;
-      }
-      e.preventDefault();
-      const touch = e.touches[0];
-      const rect = freqCanvas.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      showTooltip(x, y);
-    }
-
-    function showTooltip(x, y) {
-      const binCount = analyzer.frequencyBinCount;
-      const barWidth = freqCanvas.width / binCount;
-      const binIndex = Math.floor(x / barWidth);
-
-      if (binIndex < 0 || binIndex >= binCount) {
-        tooltip.style.display = 'none';
-        return;
-      }
-
-      const freq = indexToFrequency(binIndex).toFixed(1);
-      const amplitude = lastFreqFrame[binIndex];
-
-      tooltip.style.display = 'block';
-      tooltip.style.left = (x + 10) + 'px';
-      tooltip.style.top = (y + 10) + 'px';
-      tooltip.innerHTML = `
+    tooltip.style.display = 'block';
+    tooltip.style.left = (x + 10) + 'px';
+    tooltip.style.top = (y + 10) + 'px';
+    tooltip.innerHTML = `
         <div>Freq: ${freq} Hz</div>
         <div>Amp: ${amplitude} (a.u.)</div>
       `;
-    }
-  </script>
-</body>
+  }
+</script>
 
 </html>
