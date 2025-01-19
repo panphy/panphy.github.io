@@ -687,13 +687,13 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             width: 60%;
             /* Set the popup width to 60% of the viewport */
-            max-width: 800px;
+            max-width: 1200px;
             /* Optionally set a maximum width */
             height: auto;
             /* Height auto */
             max-height: 90vh;
             /* Limit height so it doesn’t overflow the viewport */
-            overflow-y: auto;
+            overflow: auto;
             /* Scroll if content overflows */
             position: relative;
             /* Ensure normal positioning so flex-centering applies */
@@ -2074,7 +2074,7 @@
                     array: xErrors,
                     visible: true,
                     color: 'teal',
-                    thickness: 1,
+                    thickness: 0.5,
                     width: 2
                 },
                 error_y: {
@@ -2082,7 +2082,7 @@
                     array: yErrors,
                     visible: true,
                     color: 'teal',
-                    thickness: 1,
+                    thickness: 0.5,
                     width: 2
                 }
             });
@@ -2110,18 +2110,6 @@
         let yLabelValue = document.getElementById('combined-y-label')
             ? document.getElementById('combined-y-label').value
             : null;
-
-        // Fallback to active dataset's header values if the inputs are empty.
-        if (!titleValue) {
-            titleValue = document.getElementById('graph-title').value ||
-                `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
-        }
-        if (!xLabelValue) {
-            xLabelValue = processLabel(document.getElementById('x-column-name').value || 'x');
-        }
-        if (!yLabelValue) {
-            yLabelValue = processLabel(document.getElementById('y-column-name').value || 'y');
-        }
 
         // Wrap the title in $ signs to enable LaTeX rendering.
         titleValue = '$' + titleValue + '$';
@@ -2181,7 +2169,7 @@
             titleInput = document.createElement('input');
             titleInput.type = 'text';
             titleInput.id = 'combined-title';
-            titleInput.placeholder = 'Combined Plot Title';
+            titleInput.placeholder = 'Title';
             controlsContainer.appendChild(titleInput);
         }
 
@@ -2191,7 +2179,7 @@
             xLabelInput = document.createElement('input');
             xLabelInput.type = 'text';
             xLabelInput.id = 'combined-x-label';
-            xLabelInput.placeholder = 'X-Axis Label';
+            xLabelInput.placeholder = 'x-axis Label';
             controlsContainer.appendChild(xLabelInput);
         }
 
@@ -2201,7 +2189,7 @@
             yLabelInput = document.createElement('input');
             yLabelInput.type = 'text';
             yLabelInput.id = 'combined-y-label';
-            yLabelInput.placeholder = 'Y-Axis Label';
+            yLabelInput.placeholder = 'y-axis Label';
             controlsContainer.appendChild(yLabelInput);
         }
 
