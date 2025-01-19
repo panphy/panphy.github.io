@@ -12,35 +12,18 @@
 
     <style>
         :root {
-            /* Button Color Variables */
             --btn-upload-color: #0079b1;
-            /* Blue */
             --btn-play-color: #17c5a3;
-            /* Green */
             --btn-calibration-color: #f0bd37;
-            /* Yellow */
             --btn-set-origin-color: #f0bd37;
-            /* Yellow */
             --btn-export-color: #23a5d0;
-            /* Teal */
             --btn-clear-data-color: #ee4c4c;
-            /* Red */
             --btn-clear-calibration-color: #ec7070;
-            /* Red */
             --btn-clear-origin-color: #ec7070;
-            /* Red */
-
-            /* Dialog Button Colors */
             --btn-confirm-color: #28a745;
-            /* Green */
             --hover-confirm-color: #1e7e34;
-            /* Darker Green */
             --btn-cancel-color: #dc3545;
-            /* Red */
             --hover-cancel-color: #c82333;
-            /* Darker Red */
-
-            /* Plot Button Color Variables */
             --btn-plot-vx-color: #86b671;
             --btn-plot-vy-color: #86b671;
             --btn-backToPosition-color: #86b671;
@@ -82,7 +65,6 @@
             line-height: 1.5;
         }
 
-        /* Top Controls Section */
         #topControls {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -94,7 +76,6 @@
             margin: 0 auto;
         }
 
-        /* Button Styles with CSS Variables */
         .control-button {
             padding: 10px 20px;
             border: none;
@@ -107,7 +88,6 @@
             width: 100%;
         }
 
-        /* Specific Button Classes */
         .btn-upload {
             background-color: var(--btn-upload-color);
         }
@@ -140,7 +120,6 @@
             background-color: var(--btn-clear-origin-color);
         }
 
-        /* Specific Plot Button Classes */
         .btn-plot-vx {
             background-color: var(--btn-plot-vx-color);
         }
@@ -153,7 +132,6 @@
             background-color: var(--btn-backToPosition-color);
         }
 
-        /* Hover Effect: Brightness Filter */
         .control-button:hover:not(:disabled) {
             filter: brightness(90%);
         }
@@ -196,7 +174,6 @@
             cursor: pointer;
         }
 
-        /* Analysis Container */
         #analysisContainer {
             display: flex;
             justify-content: space-evenly;
@@ -208,7 +185,6 @@
             max-width: 1200px;
         }
 
-        /* Video Section */
         #videoSection {
             display: flex;
             flex-direction: column;
@@ -281,7 +257,6 @@
             width: 800px;
         }
 
-        /* Plot Section */
         #plotSection {
             display: flex;
             flex-direction: column;
@@ -301,7 +276,6 @@
             height: 100%;
         }
 
-        /* Plot Buttons */
         #plotButtons {
             display: flex;
             gap: 10px;
@@ -313,8 +287,7 @@
             flex: 1;
         }
 
-        /* Calibration, Export, Frame Rate Prompts */
-        #calibrationPrompt,
+        \  #calibrationPrompt,
         #exportPrompt,
         #frameRatePrompt {
             position: fixed;
@@ -361,7 +334,6 @@
             box-sizing: border-box;
         }
 
-        /* Dialog Buttons */
         #calibrationPrompt button,
         #exportPrompt button,
         #frameRatePrompt button {
@@ -394,7 +366,6 @@
             filter: brightness(90%);
         }
 
-        /* Crosshair */
         .crosshair {
             position: absolute;
             width: 20px;

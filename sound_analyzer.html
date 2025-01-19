@@ -6,7 +6,6 @@
   <title>Audio Spectrum & Waveform Analyzer</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <style>
-    /* ==================== DARK THEME & BASIC LAYOUT ==================== */
     html,
     body {
       margin: 0;
@@ -88,13 +87,11 @@
       cursor: pointer;
     }
 
-    /* ==================== BUTTONS & CONTROLS ==================== */
     #controls {
       text-align: center;
       margin: 1rem auto;
     }
 
-    /* Common button styling */
     button {
       margin: 0.5rem;
       padding: 0.5rem 1rem;
@@ -105,8 +102,6 @@
       color: #ffffff;
     }
 
-    /* =========== Easily customizable per-button styles below =========== */
-    /* Run/Pause Toggle Button */
     .toggle-button {
       background-color: #ff8207;
     }
@@ -115,10 +110,8 @@
       background-color: #e87503;
     }
 
-    /* Export Buttons */
     .export-button {
       background-color: #17a2b8;
-      /* Blue-ish */
     }
 
     .export-button:hover {
@@ -182,9 +175,7 @@
 </body>
 
 <script>
-  /************************************
-   *       ADJUSTABLE GRID SETTINGS   *
-   ************************************/
+  /* ADJUSTABLE GRID SETTINGS */
   const SQUARE_GRID_SPACING = 45;
   const SQUARE_GRID_ALPHA = 0.1;
 
