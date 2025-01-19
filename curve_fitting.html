@@ -1700,7 +1700,6 @@
 
     function updatePlotEfficiently() {
         // Build the new data and layout from your current rawData, settings, etc.
-        // For illustration, let's assume you have functions that produce these:
         const newData = buildPlotData();   // Your function that returns an array of traces.
         const newLayout = buildPlotLayout(); // Your function that returns the layout object.
 
@@ -2026,10 +2025,25 @@
 
         // Build the layout using the active dataset's header values.
         const layout = {
-            xaxis: { title: processLabel(document.getElementById('x-column-name').value || 'x') },
-            yaxis: { title: processLabel(document.getElementById('y-column-name').value || 'y') },
+            xaxis: {
+                title: processLabel(document.getElementById('x-column-name').value || 'x')
+            },
+            yaxis: {
+                title: {
+                    text: processLabel(document.getElementById('y-column-name').value || 'y'),
+                    standoff: 20 // Increase space between y-axis label and values
+                },
+                titlefont: { size: 14 },
+                automargin: true
+            },
             title: processLabel(document.getElementById('graph-title').value ||
-                `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`)
+                `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`),
+            margin: {
+                l: 70,  // increased left margin for extra spacing
+                t: 50,
+                b: 50,
+                r: 30
+            }
         };
 
         // Only replot if the new state is different.
@@ -2140,8 +2154,13 @@
         const layout = {
             title: { text: titleValue, font: { size: 16 } },
             xaxis: { title: xLabelValue },
-            yaxis: { title: yLabelValue },
-            margin: { t: 100, b: 40, l: 40, r: 40 }
+            yaxis: {
+                title: {
+                    text: yLabelValue,
+                    standoff: 20 // Increase spacing between y-axis label and values
+                }
+            },
+            margin: { t: 100, b: 70, l: 70, r: 30 }
         };
 
         // Only update if there's a change.
