@@ -663,15 +663,28 @@
             outline: none;
         }
 
-        /* Full-screen overlay container */
-        #popup-container {
+        /* Full-screen semi-transparent background */
+        #popup-background {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
+            /* 50% transparent black */
             z-index: 1000;
+            /* Ensure it's behind the popup */
+        }
+
+        /* Full-screen overlay container */
+        #popup-container {
+            position: fixed;
+            top: 2%;
+            left: 17.5%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0);
+            z-index: 1001;
 
             /* Center the content using flexbox */
             display: flex;
@@ -685,9 +698,9 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            width: 60%;
-            /* Set the popup width to 60% of the viewport */
-            max-width: 1200px;
+            width: 65%;
+            /* Set the popup width to 65% of the viewport */
+            max-width: 800px;
             /* Optionally set a maximum width */
             height: auto;
             /* Height auto */
@@ -1000,8 +1013,11 @@
             </div>
         </div>
 
+        <!-- Transparent Background -->
+        <div id="popup-background" style="display: none;"></div>
+
         <div id="popup-container" style="display: none;">
-            <div id="popup-content" style="max-height: 90vh; overflow-y: auto; padding: 20px;">
+            <div id="popup-content">
                 <button id="popup-close" onclick="closePopup()">Close</button>
                 <div id="popup-title">Combined Plot of All Datasets</div>
                 <!-- Wrap the Plotly div in its own container -->
@@ -2211,19 +2227,31 @@
         plotAllDatasets();
     }
 
-    // This function makes the popup visible.
+    // This function makes both the popup and the background visible.
     function showPopup() {
-        const popup = document.getElementById('popup-container');
-        if (popup) {
-            popup.style.display = 'block';
+        const popupBackground = document.getElementById('popup-background');
+        const popupContainer = document.getElementById('popup-container');
+
+        if (popupBackground) {
+            popupBackground.style.display = 'block'; // Show the transparent background
+        }
+
+        if (popupContainer) {
+            popupContainer.style.display = 'block'; // Show the popup content
         }
     }
 
-    // This function hides the popup.
+    // This function hides both the popup and the background.
     function closePopup() {
-        const popup = document.getElementById('popup-container');
-        if (popup) {
-            popup.style.display = 'none';
+        const popupBackground = document.getElementById('popup-background');
+        const popupContainer = document.getElementById('popup-container');
+
+        if (popupBackground) {
+            popupBackground.style.display = 'none'; // Hide the transparent background
+        }
+
+        if (popupContainer) {
+            popupContainer.style.display = 'none'; // Hide the popup content
         }
     }
 
