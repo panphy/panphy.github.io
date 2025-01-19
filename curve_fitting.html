@@ -1988,16 +1988,16 @@
                     type: 'data',
                     array: convertedXError,
                     visible: document.getElementById('toggle-x-error').checked,
-                    color: 'teal',
-                    thickness: 0.5,
+                    color: '#5b5b5b',
+                    thickness: 0.8,
                     width: 2
                 },
                 error_y: {
                     type: 'data',
                     array: convertedYError,
                     visible: document.getElementById('toggle-y-error').checked,
-                    color: 'teal',
-                    thickness: 0.5,
+                    color: '#5b5b5b',
+                    thickness: 0.8,
                     width: 2
                 }
             }
@@ -2059,8 +2059,9 @@
 
     function plotAllDatasets() {
         const traces = [];
-        // Define an array of colors for fitted curves.
-        const fitColors = ['#e06666', '#f6b26b', '#ffd966', '#93c47d', '#6fa8dc', '#8e7cc3'];
+        // Define an array of colors for datasets and fitted curves.
+        const datasetColors = ['#264653', '#287271', '#2a9d8f', '#e9c46a', '#f4a261', '#ee8959', '#e76f51'];
+        const fitColors = ['#84e3c8', '#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5', '#ff8b94', '#ff7480'];
 
         // Process each dataset.
         rawData.forEach((dataset, index) => {
@@ -2084,21 +2085,21 @@
                 y: y,
                 mode: 'markers',
                 name: `Dataset ${index + 1}`,
-                marker: { size: 8 },
+                marker: { size: 8, color: datasetColors[index % datasetColors.length] }, // Use dataset color
                 error_x: {
                     type: 'data',
                     array: xErrors,
                     visible: true,
-                    color: 'teal',
-                    thickness: 0.5,
+                    color: datasetColors[index % datasetColors.length], // Match dataset color
+                    thickness: 0.8,
                     width: 2
                 },
                 error_y: {
                     type: 'data',
                     array: yErrors,
                     visible: true,
-                    color: 'teal',
-                    thickness: 0.5,
+                    color: datasetColors[index % datasetColors.length], // Match dataset color
+                    thickness: 0.8,
                     width: 2
                 }
             });
@@ -2136,7 +2137,7 @@
             yaxis: {
                 title: {
                     text: yLabelValue,
-                    standoff: 20 // Increase spacing between y-axis label and values
+                    standoff: 40 // Increase spacing between y-axis label and values
                 }
             },
             margin: { t: 100, b: 70, l: 85, r: 30 }
