@@ -682,14 +682,9 @@
 
         #popup-content {
             background: #fff;
-            /* White background */
             padding: 20px;
-            /* Inner padding */
             border-radius: 5px;
-            /* Rounded corners */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            /* A subtle shadow */
-
             width: 60%;
             /* Set the popup width to 60% of the viewport */
             max-width: 800px;
@@ -700,7 +695,6 @@
             /* Limit height so it doesn’t overflow the viewport */
             overflow-y: auto;
             /* Scroll if content overflows */
-
             position: relative;
             /* Ensure normal positioning so flex-centering applies */
         }
@@ -811,7 +805,6 @@
         </p>
     </div>
 
-    <!-- NEW: Dataset Tabs Bar -->
     <div class="dataset-tabs-bar">
         <div class="dataset-tab active">
             <span class="tab-label">Dataset 1</span>
@@ -1002,7 +995,6 @@
                 <p id="r-squared-container" style="display: none;"></p>
             </div>
 
-            <!-- New "Plot ALL Datasets" button -->
             <div class="plot-all-container">
                 <button class="plot-all-btn" onclick="plotAllDatasets()">Plot ALL Datasets</button>
             </div>
@@ -1108,8 +1100,6 @@
         if (!tabsBar) return;
 
         // Clear all tabs except the Add Dataset button.
-        // (Assume the Add Dataset button is a button element with class "add-dataset-btn")
-        // We'll rebuild the tabs portion first.
         const existingTabs = Array.from(tabsBar.querySelectorAll('.dataset-tab'));
         existingTabs.forEach(tab => tab.remove());
 
@@ -1177,7 +1167,7 @@
         updateLabels('x');
         updateLabels('y');
 
-        // **NEW:** Update the combined plot input boxes with the active dataset’s header values.
+        // Update the combined plot input boxes with the active dataset’s header values.
         updateCombinedPlotInputsToActive();
 
         // Restore or clear the fitting result for the current dataset.
@@ -1315,11 +1305,6 @@
         // Build the initial tabs UI.
         updateDatasetTabsBar();
     }
-
-    // Call this function in your window.onload or DOMContentLoaded event handler.
-    document.addEventListener("DOMContentLoaded", function () {
-        initializeDatasetTabsBar();
-    });
 
     function addRow() {
         const tableBody = document.querySelector('#data-table tbody');
@@ -1627,12 +1612,6 @@
         updateDatasetTabsBar();
     }
 
-    // Call initializeDatasetTabsBar() in your DOMContentLoaded event handler.
-    document.addEventListener("DOMContentLoaded", function () {
-        initializeDatasetTabsBar();
-    });
-
-
     function updateUncertaintyHeaders(axis) {
         const columnName = document.getElementById(`${axis}-column-name`).value.trim() || (axis === 'x' ? 'x' : 'y');
         const errorType = document.getElementById(`${axis}-error-type`).value;
@@ -1739,7 +1718,6 @@
         };
         reader.readAsText(file);
     }
-
 
     function parseCSVLine(line) {
         const result = [];
@@ -1880,7 +1858,6 @@
         updateGraphTitle();
     }
 
-
     function updateLabels(type) {
         if (isSyncing) return;
         isSyncing = true;
@@ -1902,7 +1879,6 @@
         // Update initial parameters based on the selected advanced fit method
         setInitialParameters(getCurrentAdvancedFitMethod());
     }
-
 
     function renderLatex(elementId, latexString) {
         const element = document.querySelector(elementId);
@@ -1926,7 +1902,6 @@
 
         isSyncing = false;
     }
-
 
     function openTab(evt, tabName) {
         const tablinks = document.getElementsByClassName("tablink");
@@ -2544,44 +2519,6 @@
         }
     }
 
-    window.onload = function () {
-        initializeTable();
-        ['x-column-name', 'y-column-name'].forEach(id => {
-            const value = document.getElementById(id).value;
-            renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
-        });
-
-        clearRows();
-
-        // Update the graph title based on the current column headings:
-        updateGraphTitle();
-
-        // Trigger typesetting for the new graph title if necessary.
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('graph-title')]);
-
-        updateBasicFitEquation();
-        const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
-        changeAdvancedFitMethod();
-    };
-
-    document.addEventListener("DOMContentLoaded", function () {
-
-        ['x-column-name', 'y-column-name'].forEach(id => {
-            const value = document.getElementById(id).value;
-            renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
-        });
-
-        // Update the graph title based on the current column headings:
-        updateGraphTitle();
-
-        // Trigger MathJax typesetting for the graph title (if necessary)
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('graph-title')]);
-
-        updateBasicFitEquation();
-        const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
-        changeAdvancedFitMethod();
-    });
-
     function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
         if (!errorEnabled) {
             return valueStr;
@@ -2615,7 +2552,6 @@
         }
     }
 
-
     /**
      * Formats labels for LaTeX by replacing spaces with \space.
      * @param {string} label - The label to format.
@@ -2624,7 +2560,6 @@
     function formatLabelForLatex(label) {
         return label ? label.replace(/ /g, '\\space ') : '';
     }
-
 
     /**
      * Counts the number of decimal places in a number string.
@@ -2677,7 +2612,6 @@
         let numStr = num.toExponential(sigFigs - 1);
         return numStr;
     }
-
 
     /**
      * Formats data values based on the uncertainty type.
@@ -2917,7 +2851,6 @@
             alert('An error occurred while exporting the Markdown file. Please check the console for details.');
         }
     }
-
 
     function exportCSV() {
         try {
@@ -3617,8 +3550,50 @@
         plotAllDatasets();
     }
 
+    window.onload = function () {
+        initializeTable();
+        ['x-column-name', 'y-column-name'].forEach(id => {
+            const value = document.getElementById(id).value;
+            renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
+        });
+
+        clearRows();
+
+        // Update the graph title based on the current column headings:
+        updateGraphTitle();
+
+        // Trigger typesetting for the new graph title if necessary.
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('graph-title')]);
+
+        updateBasicFitEquation();
+        const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
+        changeAdvancedFitMethod();
+    };
+
     document.addEventListener("DOMContentLoaded", function () {
-        // Your other initialization code...
+        // Render LaTeX for column headings.
+        ['x-column-name', 'y-column-name'].forEach(id => {
+            const value = document.getElementById(id).value;
+            renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
+        });
+
+        // Update the graph title based on the current column headings.
+        updateGraphTitle();
+
+        // Trigger MathJax typesetting for the graph title.
+        if (typeof MathJax !== 'undefined') {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('graph-title')]);
+        }
+
+        // Update the basic fit equation and advanced fit method.
+        updateBasicFitEquation();
+        const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
+        changeAdvancedFitMethod();
+
+        // Initialize the dataset tabs bar.
+        initializeDatasetTabsBar();
+
+        // Initialize the combined plot inputs.
         initCombinedPlotInputs();
     });
 
