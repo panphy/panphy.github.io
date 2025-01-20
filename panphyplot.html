@@ -1844,6 +1844,7 @@
     function updateLabels(type) {
         if (isSyncing) return;
         isSyncing = true;
+
         const value = document.getElementById(`${type}-column-name`).value;
         renderLatex(`#${type}-column-latex`, formatLabelForLatex(value));
 
@@ -1861,6 +1862,10 @@
 
         // Update initial parameters based on the selected advanced fit method
         setInitialParameters(getCurrentAdvancedFitMethod());
+
+        // *** ADD THIS LINE ***
+        // Sync the combined-plot inputs with new headings:
+        updateCombinedPlotInputsToActive();
     }
 
     function renderLatex(elementId, latexString) {
@@ -1950,7 +1955,14 @@
                 y: y,
                 mode: 'markers',
                 name: 'Data',
-                marker: { color: '#ff6c61' },
+                marker: {
+                    color: '#ff6c61',
+                    symbol: 'circle',
+                    size: 5,
+                    line: {
+                        width: 0  // No border around markers
+                    },
+                },
                 error_x: {
                     type: 'data',
                     array: convertedXError,
@@ -2052,7 +2064,14 @@
                 y: y,
                 mode: 'markers',
                 name: `Dataset ${index + 1}`,
-                marker: { size: 8, color: datasetColors[index % datasetColors.length] }, // Use dataset color
+                marker: {
+                    color: datasetColors[index % datasetColors.length], // Use dataset color
+                    symbol: 'circle',
+                    size: 5,
+                    line: {
+                        width: 0  // No border around markers
+                    },
+                },
                 error_x: {
                     type: 'data',
                     array: xErrors,
