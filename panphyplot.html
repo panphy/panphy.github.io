@@ -1570,29 +1570,6 @@
         datasetFitResults = newFitResults;
     }
 
-    // Helper function to reindex dataset-specific global objects.
-    function reindexDatasets() {
-        const newHeaders = {};
-        const newToggles = {};
-        const newErrorTypes = {};
-        const newFitResults = {};
-
-        rawData.forEach((data, newIndex) => {
-            // Use existing values if available; otherwise, set defaults.
-            newHeaders[newIndex] = datasetHeaders[newIndex] || { x: 'x', y: 'y' };
-            newToggles[newIndex] = datasetToggles[newIndex] || { x: false, y: false };
-            newErrorTypes[newIndex] = datasetErrorTypes[newIndex] || { x: 'absolute', y: 'absolute' };
-            if (datasetFitResults[newIndex]) {
-                newFitResults[newIndex] = datasetFitResults[newIndex];
-            }
-        });
-
-        datasetHeaders = newHeaders;
-        datasetToggles = newToggles;
-        datasetErrorTypes = newErrorTypes;
-        datasetFitResults = newFitResults;
-    }
-
     // Updated removeDataset function.
     function removeDataset(index) {
         if (rawData.length <= 1) {
@@ -1616,16 +1593,6 @@
         // Refresh UI using the data from the new active dataset.
         updateData();
         updatePlotAndRenderLatex();
-    }
-
-    // Attach the Add Dataset button click event.
-    function initializeDatasetTabsBar() {
-        const addBtn = document.querySelector('.add-dataset-btn');
-        if (addBtn) {
-            addBtn.addEventListener('click', addDataset);
-        }
-        // Build the initial tabs UI.
-        updateDatasetTabsBar();
     }
 
     function updateUncertaintyHeaders(axis) {
@@ -3541,31 +3508,6 @@
             console.error('Error performing Gaussian fit:', error);
             alert('An error occurred during Gaussian fitting. Please check the console for details.');
         }
-    }
-
-    function initCombinedPlotInputs() {
-        // Select the input elements by their IDs.
-        const titleInput = document.getElementById('combined-title');
-        const xLabelInput = document.getElementById('combined-x-label');
-        const yLabelInput = document.getElementById('combined-y-label');
-
-        if (!titleInput || !xLabelInput || !yLabelInput) {
-            console.error('Combined plot input elements not found.');
-            return;
-        }
-
-        // Set initial values.
-        // For the title, we use the value from the active dataset's 'graph-title' input.
-        titleInput.value = document.getElementById('graph-title').value ||
-            `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
-        // For the axis labels, we use the processed values from the active dataset’s inputs.
-        xLabelInput.value = processLabel(document.getElementById('x-column-name').value || 'x');
-        yLabelInput.value = processLabel(document.getElementById('y-column-name').value || 'y');
-
-        // Attach event listeners so that when the user changes any value, the combined plot is updated.
-        titleInput.addEventListener('input', updateCombinedPlotFromInputs);
-        xLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
-        yLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
     }
 
     function updateCombinedPlotFromInputs() {
