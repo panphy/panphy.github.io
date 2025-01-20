@@ -2,9 +2,9 @@
 <html>
 
 <head>
-  <title>Exported Document</title>
+  <title>Manual</title>
   <meta charset="UTF-8">
-  <title>Exported Document</title>
+  <title>Manual</title>
   <style>
     :root {
       --background-color: #ffffff;
@@ -356,41 +356,28 @@
     <tbody>
       <tr>
         <td align="left">Certainty levels (absolute or percentage uncertainties) play a crucial role in determining how
-          data is formatted in the exported <code>.csv</code> and <code>.md</code> files.</td>
+          data is formatted in the exported <code>.csv</code> and <code>.md</code> files. <p> Formatting rules are
+            applied to ensure that the data maintains consistency and aligns with the provided uncertainties for precise
+            representation in exported files.</p>
+        </td>
       </tr>
       <tr>
-        <td align="left">Formatting rules are applied to ensure that the data maintains consistency and aligns with the
-          provided uncertainties for precise representation in exported files.</td>
+        <td align="left">1. <strong>Absolute Uncertainties</strong>: <p> The number of decimal places (d.p.) in the
+            exported values matches the precision of the absolute uncertainty. </p>
+          <p> For example, if the uncertainty is <code>±0.05</code>, the corresponding data value will be exported with
+            two decimal places, e.g., <code>5.25 ± 0.05</code>.</p>
+        </td>
       </tr>
       <tr>
-        <td align="left">1. <strong>Absolute Uncertainties</strong>:</td>
-      </tr>
-      <tr>
-        <td align="left">The number of decimal places (d.p.) in the exported values matches the precision of the
-          absolute uncertainty.</td>
-      </tr>
-      <tr>
-        <td align="left">- For example, if the uncertainty is <code>±0.05</code>, the corresponding data value will be
-          exported with two decimal places, e.g., <code>5.25 ± 0.05</code>.</td>
-      </tr>
-      <tr>
-        <td align="left">2. <strong>Percentage Uncertainties</strong>:</td>
-      </tr>
-      <tr>
-        <td align="left">The precision of exported values is adjusted to significant figures (s.f.) based on the
-          percentage uncertainty:</td>
-      </tr>
-      <tr>
-        <td align="left">- <strong>Small uncertainties (≤ 10%)</strong>: Values are exported with <strong>3 significant
-            figures</strong>.</td>
-      </tr>
-      <tr>
-        <td align="left">- <strong>Medium uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2
-            significant figures</strong>.</td>
-      </tr>
-      <tr>
-        <td align="left">- <strong>Large uncertainties (≥ 50%)</strong>: Values are exported with <strong>1 significant
-            figure</strong>.</td>
+        <td align="left">2. <strong>Percentage Uncertainties</strong>: <p> The precision of exported values is adjusted
+            to significant figures (s.f.) based on the percentage uncertainty: </p>
+          <p> - <strong>Small uncertainties (≤ 10%)</strong>: Values are exported with <strong>3 significant
+              figures</strong>. </p>
+          <p> - <strong>Medium uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2 significant
+              figures</strong>. </p>
+          <p> - <strong>Large uncertainties (≥ 50%)</strong>: Values are exported with <strong>1 significant
+              figure</strong>.</p>
+        </td>
       </tr>
     </tbody>
   </table>
