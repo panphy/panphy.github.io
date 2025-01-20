@@ -1338,6 +1338,9 @@
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = '';
 
+        // Also clear out the active dataset array
+        rawData[activeSet] = [];
+
         if (resetHeaders) {
             isSyncing = true;
             // Reset header inputs to defaults.
@@ -1348,20 +1351,21 @@
             renderLatex('#y-column-latex', formatLabelForLatex('y'));
             updateGraphTitle();
             isSyncing = false;
+
+            // Only re-initialize default rows if fully clearing everything
+            initializeTable();
         }
 
-        initializeTable();
-
-        // Uncheck uncertainty toggles and hide error columns.
+        // Turn off uncertainties and hide their columns:
         document.getElementById('toggle-x-error').checked = false;
         toggleErrorColumn('x');
         document.getElementById('toggle-y-error').checked = false;
         toggleErrorColumn('y');
 
-        // Reset fitting parameters.
+        // Reset advanced-fit parameters:
         setInitialParameters(getCurrentAdvancedFitMethod());
 
-        // Clear the fitting result from the UI.
+        // Clear the fitting results in the UI:
         const fitEquationElement = document.getElementById('fit-equation');
         const rSquaredElement = document.getElementById('r-squared-container');
         if (fitEquationElement) {
@@ -1373,13 +1377,25 @@
             rSquaredElement.innerHTML = '';
         }
 
-        // Also clear the stored fitting result for the current dataset.
+        // Clear the stored fitting results for this dataset:
         if (datasetFitResults.hasOwnProperty(activeSet)) {
             delete datasetFitResults[activeSet];
         }
 
-        // Update the combined plot input boxes to reflect default header values.
+        // Clear any fitted curve for this dataset:
+        if (fittedCurves.hasOwnProperty(activeSet)) {
+            delete fittedCurves[activeSet];
+        }
+
+        // *** Force Plotly to see a change in state so it re-draws:
+        lastPlotState.data = null;
+        lastPlotState.layout = null;
+
+        // Update the combined-plot inputs to default headings
         updateCombinedPlotInputsToActive();
+
+        // Finally, re-plot (now it sees a changed state, so the old fit line is gone):
+        updatePlotAndRenderLatex();
     }
 
     function updateCombinedPlotInputsToActive() {
@@ -1958,7 +1974,7 @@
                 marker: {
                     color: '#ff6c61',
                     symbol: 'circle',
-                    size: 5,
+                    size: 6,
                     line: {
                         width: 0  // No border around markers
                     },
@@ -2039,8 +2055,8 @@
     function plotAllDatasets() {
         const traces = [];
         // Define an array of colors for datasets and fitted curves.
-        const datasetColors = ['#264653', '#287271', '#2a9d8f', '#e9c46a', '#f4a261', '#ee8959', '#e76f51'];
-        const fitColors = ['#84e3c8', '#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5', '#ff8b94', '#ff7480'];
+        const datasetColors = ['#50514f', '#f25f5c', '#ffe066', '#247ba0', '#70c1b3'];
+        const fitColors = ['#c36272', '#347dab', '#5a9374', '#9086ba', '#f4cc86'];
 
         // Process each dataset.
         rawData.forEach((dataset, index) => {
@@ -2067,7 +2083,7 @@
                 marker: {
                     color: datasetColors[index % datasetColors.length], // Use dataset color
                     symbol: 'circle',
-                    size: 5,
+                    size: 6,
                     line: {
                         width: 0  // No border around markers
                     },
