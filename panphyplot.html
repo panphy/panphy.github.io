@@ -377,9 +377,8 @@
             filter: brightness(90%);
         }
 
-        /* Clear Fit button (pink), same size */
         .clear-fit-button {
-            background-color: #f06292;
+            background-color: #da609a;
             width: 100%;
             height: 40px;
             padding: 0;
@@ -394,7 +393,7 @@
         }
 
         .clear-fit-button:hover {
-            background-color: #ec527f;
+            background-color: #da609a;
             filter: brightness(90%);
         }
 
@@ -713,12 +712,13 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            width: 65%;
+            width: 100%;
             max-width: 800px;
             height: auto;
             max-height: 90vh;
             overflow: auto;
             position: relative;
+            margin: 0, auto;
         }
 
         #popup-title {
@@ -729,7 +729,7 @@
         }
 
         #popup-plot {
-            width: auto;
+            width: 100%;
             height: auto;
             min-width: 600px;
             min-height: 400px;
@@ -746,6 +746,7 @@
             border-radius: 2px;
             padding: 4px 8px;
             cursor: pointer;
+            z-index: 1100; /* Ensure it sits above the content */
         }
 
         #popup-close:hover {
@@ -1045,15 +1046,15 @@
             <div id="combined-plot-controls" class="combined-plot-controls">
                 <div class="control-row-horizontal">
                     <label for="combined-title">Title:</label>
-                    <input type="text" id="combined-title" placeholder="Enter a new Title if needed" />
+                    <input type="text" id="combined-title" placeholder="Enter a new Title here" />
                 </div>
                 <div class="control-row-horizontal">
                     <label for="combined-x-label">x-axis Label:</label>
-                    <input type="text" id="combined-x-label" placeholder="Overide x-axis label if needed" />
+                    <input type="text" id="combined-x-label" placeholder="Enter a new x-axis label here" />
                 </div>
                 <div class="control-row-horizontal">
                     <label for="combined-y-label">y-axis Label:</label>
-                    <input type="text" id="combined-y-label" placeholder="Overide x-axis label if needed" />
+                    <input type="text" id="combined-y-label" placeholder="Enter a new y-axis label here" />
                 </div>
             </div>
         </div>
@@ -1397,23 +1398,27 @@
         updatePlotAndRenderLatex();
     }
 
+    /**
+     * Synchronize the combined-plot input boxes (Title, x-label, y-label)
+     * with the current active dataset's raw headings. No extra '$'.
+     */
     function updateCombinedPlotInputsToActive() {
-        const title = document.getElementById('graph-title').value || 'y vs x';
-        const xLabel = processLabel(document.getElementById('x-column-name').value || 'x');
-        const yLabel = processLabel(document.getElementById('y-column-name').value || 'y');
+        const rawTitle = document.getElementById('graph-title').value || 'y vs x';
+        const rawXLabel = document.getElementById('x-column-name').value || 'x';
+        const rawYLabel = document.getElementById('y-column-name').value || 'y';
 
         const titleInput = document.getElementById('combined-title');
         const xLabelInput = document.getElementById('combined-x-label');
         const yLabelInput = document.getElementById('combined-y-label');
 
         if (titleInput) {
-            titleInput.value = title;
+            titleInput.value = rawTitle;
         }
         if (xLabelInput) {
-            xLabelInput.value = xLabel;
+            xLabelInput.value = rawXLabel;
         }
         if (yLabelInput) {
-            yLabelInput.value = yLabel;
+            yLabelInput.value = rawYLabel;
         }
     }
 
@@ -2016,7 +2021,7 @@
             yaxis: {
                 title: {
                     text: processLabel(document.getElementById('y-column-name').value || 'y'),
-                    standoff: 20 // Increase space between y-axis label and values
+                    standoff: 25 // Increase space between y-axis label and values
                 },
                 titlefont: { size: 14 },
                 automargin: true
@@ -2054,39 +2059,41 @@
     function plotAllDatasets() {
         const traces = [];
 
-        // Define arrays of colors for datasets and fitted curves
+        // Define some colors for datasets and their fitted curves (customize as desired):
         const datasetColors = ['#264653', '#287271', '#2a9d8f', '#e9c46a', '#f4a261', '#ee8959', '#e76f51'];
         const fitColors = ['#84e3c8', '#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5', '#ff8b94', '#ff7480'];
 
-        // Build one or more traces per dataset
+        // Build a trace (markers + optional error bars + optional fit line) for each dataset
         rawData.forEach((dataset, index) => {
-            const x = dataset.map(point => point.x);
-            const y = dataset.map(point => point.y);
+            const xVals = dataset.map(point => point.x);
+            const yVals = dataset.map(point => point.y);
+
+            // Convert raw errors based on the stored error types
             const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
             const yErrorsRaw = dataset.map(point => point.yErrorRaw || 0);
+            const errorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
 
-            // Get error types for this dataset (default to absolute)
-            const currentErrorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
-            const xErrors = x.map((xi, i) =>
-                currentErrorTypes.x === 'percentage' ? (xErrorsRaw[i] / 100) * (xi || 0) : xErrorsRaw[i]
+            // Convert errors if they are percentages
+            const xErrorsConverted = xVals.map((xVal, i) =>
+                (errorTypes.x === 'percentage') ? (xErrorsRaw[i] / 100) * (xVal || 0) : xErrorsRaw[i]
             );
-            const yErrors = y.map((yi, i) =>
-                currentErrorTypes.y === 'percentage' ? (yErrorsRaw[i] / 100) * (yi || 0) : yErrorsRaw[i]
+            const yErrorsConverted = yVals.map((yVal, i) =>
+                (errorTypes.y === 'percentage') ? (yErrorsRaw[i] / 100) * (yVal || 0) : yErrorsRaw[i]
             );
 
-            // Data trace for this dataset
+            // Marker trace for the dataset
             traces.push({
-                x: x,
-                y: y,
+                x: xVals,
+                y: yVals,
                 mode: 'markers',
                 name: `Dataset ${index + 1}`,
                 marker: {
-                    size: 8,
+                    size: 6.5,
                     color: datasetColors[index % datasetColors.length]
                 },
                 error_x: {
                     type: 'data',
-                    array: xErrors,
+                    array: xErrorsConverted,
                     visible: true,
                     color: datasetColors[index % datasetColors.length],
                     thickness: 0.8,
@@ -2094,7 +2101,7 @@
                 },
                 error_y: {
                     type: 'data',
-                    array: yErrors,
+                    array: yErrorsConverted,
                     visible: true,
                     color: datasetColors[index % datasetColors.length],
                     thickness: 0.8,
@@ -2102,7 +2109,7 @@
                 }
             });
 
-            // If a fitted curve exists for this dataset, add it
+            // If a fitted curve exists for this dataset, add a line trace
             if (fittedCurves.hasOwnProperty(index)) {
                 const fitColor = fitColors[index % fitColors.length];
                 traces.push({
@@ -2115,21 +2122,22 @@
             }
         });
 
-        // Retrieve the text fields from the combined-plot input boxes
+        // Retrieve raw user input (no extra $...$ in these text fields!)
         const titleInput = document.getElementById('combined-title');
         const xLabelInput = document.getElementById('combined-x-label');
         const yLabelInput = document.getElementById('combined-y-label');
 
+        // Fallback to blank if nothing is found
         const rawTitle = titleInput ? titleInput.value : '';
         const rawXLabel = xLabelInput ? xLabelInput.value : '';
         const rawYLabel = yLabelInput ? yLabelInput.value : '';
 
-        // Use processLabel (or equivalent) to auto-render LaTeX 
+        // Use processLabel(...) to wrap them in $...$ for LaTeX rendering on the final chart:
         const processedTitle = processLabel(rawTitle);
         const processedXLabel = processLabel(rawXLabel);
         const processedYLabel = processLabel(rawYLabel);
 
-        // Build the layout for the combined plot
+        // Build the Plotly layout
         const layout = {
             title: {
                 text: processedTitle,
@@ -2141,19 +2149,19 @@
             yaxis: {
                 title: {
                     text: processedYLabel,
-                    standoff: 40
+                    standoff: 25
                 }
             },
-            margin: { t: 100, b: 70, l: 85, r: 30 }
+            margin: { t: 100, b: 70, l: 140, r: 0 }
         };
 
-        // Only update if there's a change
+        // If you use the caching mechanism to skip redundant plots, check it here:
         if (isPlotStateEqual(traces, layout)) {
             console.log("No changes detected in combined plot; skipping update.");
             return;
         }
 
-        // Render the combined plot in the popup
+        // Render the combined plot in your popup element, e.g. #popup-plot
         Plotly.newPlot('popup-plot', traces, layout, {
             toImageButtonOptions: {
                 format: 'svg',
@@ -2162,14 +2170,14 @@
             }
         });
 
-        // Update the cached state
+        // Update the global "last plot" state
         lastPlotState.data = traces;
         lastPlotState.layout = layout;
 
-        // Show the popup if it's not already visible
+        // Show the popup overlay
         showPopup();
 
-        // Trigger MathJax if available
+        // If MathJax is present, re-render the LaTeX elements inside the chart
         if (typeof MathJax !== 'undefined') {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('popup-plot')]);
         }
@@ -3596,7 +3604,6 @@
         // Initialize the combined plot inputs.
         initCombinedPlotInputs();
     });
-
 </script>
 
 </html>
