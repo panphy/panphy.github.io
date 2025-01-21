@@ -3,9 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PanPhyPlot</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
     <!-- Plotly.js for graphing -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- Math.js for computations -->
@@ -94,16 +92,15 @@
             background-color: #f4f4f4;
             gap: 0;
             flex-wrap: nowrap;
-            /* Don't wrap tabs; keep them in one row */
             overflow-x: auto;
-            /* Enable horizontal scrolling if necessary */
+            /* If many tabs, horizontal scrolling */
             -webkit-overflow-scrolling: touch;
-            /* For smoother scrolling on touch devices */
+            /* smoother scrolling on touch */
             scrollbar-width: thin;
-            /* For Firefox (optional) */
+            /* For Firefox */
         }
 
-        /* Optional: Customize scrollbar for WebKit browsers */
+        /* Customize scrollbar for WebKit browsers */
         .dataset-tabs-bar::-webkit-scrollbar {
             height: 6px;
         }
@@ -121,35 +118,41 @@
             background: #999;
         }
 
+        /* Regular dataset tab styling */
+        /* Dataset Tab */
         .dataset-tab {
-            position: relative;
+            display: inline-flex;
+            /* use inline-flex for consistent sizing */
+            align-items: center;
+            /* vertically center text */
+            justify-content: center;
+            /* horizontally center text if needed */
             padding: 8px 16px;
+            margin-right: 2px;
+            /* uniform gap to next element */
+            line-height: 1.2;
+            /* override default browser line-height */
+
             background-color: #ddd;
+            color: #333;
             border: 1px solid transparent;
             border-bottom: none;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
-            margin-right: 2px;
             cursor: pointer;
             transition: background-color 0.2s;
             font-size: 14px;
-            color: #333;
-        }
-
-        .dataset-tab:hover {
-            background-color: #ccc;
         }
 
         /* Active tab is highlighted and appears attached to the content below */
         .dataset-tab.active {
             background-color: #ffba3b;
             border-color: #aaa;
-            border-bottom: 1px solid #ffba3b;
-            /* Hide the border on the bottom so it appears attached */
+            border-bottom: none;
             font-weight: bold;
         }
 
-        /* Tab label and close button styling */
+        /* Label and close button inside the tab */
         .dataset-tab .tab-label {
             margin-right: 5px;
             white-space: nowrap;
@@ -167,29 +170,42 @@
             color: #e06666;
         }
 
-        /* "Add Dataset" button styled as a tab */
+        /* Add Dataset Button: same shape on top, but sharp bottom corners, fixed width, different color */
         .add-dataset-btn {
-            flex: 0 0 auto;
-            padding: 8px 16px;
+            display: inline-flex;
+            /* match dataset tab's display mode */
+            align-items: center;
+            justify-content: center;
+            padding: 8px 10px;
+            margin-left: 0px;
+            line-height: 1.2;
+            /* match dataset tab’s line-height */
+
             background-color: #16537e;
+            /* keep original color */
+            color: #fff;
             border: 1px solid transparent;
-            border-bottom: none;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
-            margin-right: 2px;
+            /* Sharp bottom corners: */
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-bottom: none;
             cursor: pointer;
             transition: background-color 0.2s;
-            display: inline-flex;
-            align-items: center;
             font-size: 14px;
-            color: #fff;
+
+            /* Fixed width so it does not fill leftover space: */
+            flex: none;
+            width: 110px;
+            /* or whatever size you need to match the tab width */
         }
 
-        /* Hover state for the Add button */
         .add-dataset-btn:hover {
             background-color: #113d5c;
         }
 
+        /* Container for input-section (left) and graph-section (right) */
         .container {
             display: flex;
             flex-direction: row;
@@ -208,7 +224,7 @@
             height: 80vh;
             /* fixed height for scrolling */
             overflow-y: auto;
-            /* adds vertical scroll when needed */
+            /* vertical scroll if needed */
         }
 
         .input-section {
@@ -340,6 +356,7 @@
             background-color: var(--export-md-btn-color);
         }
 
+        /* Fit Curve button (teal) */
         .fit-button {
             background-color: #17a2b8;
             width: 100%;
@@ -357,6 +374,27 @@
 
         .fit-button:hover {
             background-color: #138496;
+            filter: brightness(90%);
+        }
+
+        /* Clear Fit button (pink), same size */
+        .clear-fit-button {
+            background-color: #f06292;
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, filter 0.3s;
+        }
+
+        .clear-fit-button:hover {
+            background-color: #ec527f;
             filter: brightness(90%);
         }
 
@@ -495,28 +533,6 @@
             outline: none;
         }
 
-        .advanced-fit-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .advanced-fit-buttons button {
-            background-color: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 8px 12px;
-            transition: background-color 0.3s, filter 0.3s;
-        }
-
-        .advanced-fit-buttons button:hover {
-            background-color: #138496;
-            filter: brightness(90%);
-        }
-
         .parameter-section {
             display: none;
         }
@@ -621,6 +637,7 @@
             filter: brightness(90%);
         }
 
+        /* Responsive tweak for smaller screens */
         @media (max-width: 900px) {
             .container {
                 flex-direction: column;
@@ -663,7 +680,7 @@
             outline: none;
         }
 
-        /* Full-screen semi-transparent background */
+        /* Full-screen semi-transparent background for popup */
         #popup-background {
             position: fixed;
             top: 0;
@@ -671,12 +688,10 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            /* 50% transparent black */
             z-index: 1000;
-            /* Ensure it's behind the popup */
         }
 
-        /* Full-screen overlay container */
+        /* Popup container overlay */
         #popup-container {
             position: fixed;
             top: 2%;
@@ -686,7 +701,7 @@
             background: rgba(0, 0, 0, 0);
             z-index: 1001;
 
-            /* Center the content using flexbox */
+            /* Center the popup */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -699,20 +714,13 @@
             border-radius: 5px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             width: 65%;
-            /* Set the popup width to 65% of the viewport */
             max-width: 800px;
-            /* Optionally set a maximum width */
             height: auto;
-            /* Height auto */
             max-height: 90vh;
-            /* Limit height so it doesn’t overflow the viewport */
             overflow: auto;
-            /* Scroll if content overflows */
             position: relative;
-            /* Ensure normal positioning so flex-centering applies */
         }
 
-        /* Popup title area */
         #popup-title {
             font-size: 18px;
             font-weight: bold;
@@ -720,17 +728,14 @@
             text-align: center;
         }
 
-        /* Container for the Plotly graph */
         #popup-plot {
             width: auto;
             height: auto;
             min-width: 600px;
             min-height: 400px;
             margin-top: 5px;
-            /* Add a top margin to separate from the title */
         }
 
-        /* Close button for the popup */
         #popup-close {
             position: absolute;
             top: 10px;
@@ -747,7 +752,6 @@
             background: #cc5555;
         }
 
-        /* Container for the combined plot controls */
         .combined-plot-controls {
             margin-top: 10px;
             padding: 10px;
@@ -755,25 +759,20 @@
             border: 1px solid #ddd;
             display: flex;
             flex-direction: column;
-            /* Stack rows vertically */
             gap: 10px;
-            /* Space between each row */
         }
 
-        /* Each row for label and input arranged horizontally */
         .control-row-horizontal {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        /* Label styling */
         .control-row-horizontal label {
             width: 120px;
             font-weight: bold;
         }
 
-        /* Input styling */
         .control-row-horizontal input[type="text"] {
             padding: 5px;
             font-size: 1rem;
@@ -800,6 +799,14 @@
         footer a {
             color: #ff5f1f;
         }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            /* Hide any tiny horizontal overflow */
+        }
     </style>
 </head>
 
@@ -818,14 +825,18 @@
         </p>
     </div>
 
+    <!-- Dataset Tabs Bar with "Add Dataset" button -->
     <div class="dataset-tabs-bar">
+        <!-- Example initial tab -->
         <div class="dataset-tab active">
             <span class="tab-label">Dataset 1</span>
             <span class="tab-close" title="Remove dataset">×</span>
         </div>
+        <!-- The Add Dataset button looks just like a tab except it keeps its own color -->
         <button class="add-dataset-btn">Add Dataset</button>
     </div>
 
+    <!-- Main container: left = Input section, right = Graph section -->
     <div class="container">
         <!-- Input section -->
         <div class="input-section">
@@ -851,7 +862,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Rows initialized in JS -->
+                        <!-- Rows inserted by JS -->
                     </tbody>
                 </table>
             </div>
@@ -862,8 +873,9 @@
                     <button class="btn-clear-all" onclick="clearRows()">Clear All</button>
                 </div>
                 <div class="button-row">
-                    <button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()">Import
-                        .csv</button>
+                    <button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()">
+                        Import .csv
+                    </button>
                     <button class="btn-export-csv" onclick="exportCSV()">Export .csv</button>
                     <button class="btn-export-md" onclick="exportPlainText()">Export .md</button>
                 </div>
@@ -914,6 +926,7 @@
                     <button class="tablink" onclick="openTab(event, 'AdvancedFit')">Advanced Fit</button>
                 </div>
 
+                <!-- Basic Fit -->
                 <div id="BasicFit" class="tab-content active">
                     <label for="fit-method">Fit Method:</label>
                     <select id="fit-method" onchange="updateBasicFitEquation()">
@@ -927,9 +940,13 @@
                     <div id="basic-fit-equation" class="general-equation">
                         \( y = mx + c \)
                     </div>
-                    <button class="fit-button" onclick="fitCurve()">Fit Curve</button>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="fit-button" onclick="fitCurve()">Fit Curve</button>
+                        <button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
+                    </div>
                 </div>
 
+                <!-- Advanced Fit -->
                 <div id="AdvancedFit" class="tab-content">
                     <label for="advanced-fit-method">Advanced Fit Method:</label>
                     <select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
@@ -941,7 +958,7 @@
                     </div>
                     <p class="table-prompt">Enter initial fitting parameters below.</p><br>
 
-                    <!-- Sinusoidal Parameters -->
+                    <!-- Sinusoidal -->
                     <div id="Sinusoidal-parameters" class="parameter-section active">
                         <div class="advanced-fit-item">
                             <label for="initial-A">A:</label>
@@ -965,7 +982,7 @@
                         </div>
                     </div>
 
-                    <!-- Gaussian Parameters -->
+                    <!-- Gaussian -->
                     <div id="Gaussian-parameters" class="parameter-section">
                         <div class="advanced-fit-item">
                             <label for="initial-A-gaussian">A:</label>
@@ -985,12 +1002,13 @@
                         </div>
                     </div>
 
-                    <div class="advanced-fit-buttons">
+                    <div style="display: flex; gap: 6px;">
                         <button class="fit-button" onclick="fitAdvancedCurve()">Fit Curve</button>
+                        <button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
                     </div>
                 </div>
             </div>
-        </div>
+        </div><!-- end input-section -->
 
         <!-- Graph section -->
         <div class="graph-section">
@@ -1011,43 +1029,39 @@
             <div class="plot-all-container">
                 <button class="plot-all-btn" onclick="plotAllDatasets()">Plot ALL Datasets</button>
             </div>
-        </div>
+        </div><!-- end graph-section -->
+    </div><!-- end container -->
 
-        <!-- Transparent Background -->
-        <div id="popup-background" style="display: none;"></div>
+    <!-- Transparent background for the popup -->
+    <div id="popup-background" style="display: none;"></div>
 
-        <div id="popup-container" style="display: none;">
-            <div id="popup-content">
-                <button id="popup-close" onclick="closePopup()">Close</button>
-                <div id="popup-title">Combined Plot of All Datasets</div>
-                <!-- Wrap the Plotly div in its own container -->
-                <div id="popup-plot-container">
-                    <div id="popup-plot"></div>
+    <div id="popup-container" style="display: none;">
+        <div id="popup-content">
+            <button id="popup-close" onclick="closePopup()">Close</button>
+            <div id="popup-title">Combined Plot of All Datasets</div>
+            <div id="popup-plot-container">
+                <div id="popup-plot"></div>
+            </div>
+            <div id="combined-plot-controls" class="combined-plot-controls">
+                <div class="control-row-horizontal">
+                    <label for="combined-title">Title:</label>
+                    <input type="text" id="combined-title" placeholder="Enter a new Title if needed" />
                 </div>
-                <!-- Container for input boxes arranged in separate rows -->
-                <div id="combined-plot-controls" class="combined-plot-controls">
-                    <div class="control-row-horizontal">
-                        <label for="combined-title">Title:</label>
-                        <input type="text" id="combined-title" placeholder="Combined Plot Title" />
-                    </div>
-                    <div class="control-row-horizontal">
-                        <label for="combined-x-label">x-axis Label:</label>
-                        <input type="text" id="combined-x-label" placeholder="x-axis Label" />
-                    </div>
-                    <div class="control-row-horizontal">
-                        <label for="combined-y-label">y-axis Label:</label>
-                        <input type="text" id="combined-y-label" placeholder="y-axis Label" />
-                    </div>
+                <div class="control-row-horizontal">
+                    <label for="combined-x-label">x-axis Label:</label>
+                    <input type="text" id="combined-x-label" placeholder="Overide x-axis label if needed" />
                 </div>
-
+                <div class="control-row-horizontal">
+                    <label for="combined-y-label">y-axis Label:</label>
+                    <input type="text" id="combined-y-label" placeholder="Overide x-axis label if needed" />
+                </div>
             </div>
         </div>
-
     </div>
 
     <footer>
-        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
-            My Projects</a>
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> |
+        <a href="https://buymeacoffee.com/panphy">Support My Projects</a>
     </footer>
 </body>
 
@@ -1207,26 +1221,6 @@
         }
     }
 
-    function updateCombinedPlotInputsToActive() {
-        const title = document.getElementById('graph-title').value || 'y vs x';
-        const xLabel = processLabel(document.getElementById('x-column-name').value || 'x');
-        const yLabel = processLabel(document.getElementById('y-column-name').value || 'y');
-
-        const titleInput = document.getElementById('combined-title');
-        const xLabelInput = document.getElementById('combined-x-label');
-        const yLabelInput = document.getElementById('combined-y-label');
-
-        if (titleInput) {
-            titleInput.value = title;
-        }
-        if (xLabelInput) {
-            xLabelInput.value = xLabel;
-        }
-        if (yLabelInput) {
-            yLabelInput.value = yLabel;
-        }
-    }
-
     function populateTableFromActiveDataset() {
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = ''; // Clear current table
@@ -1338,12 +1332,12 @@
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = '';
 
-        // Also clear out the active dataset array
+        // Empty out the active dataset’s raw data
         rawData[activeSet] = [];
 
         if (resetHeaders) {
             isSyncing = true;
-            // Reset header inputs to defaults.
+            // Reset header inputs to defaults
             document.getElementById('x-column-name').value = 'x';
             document.getElementById('y-column-name').value = 'y';
             document.getElementById('graph-title').value = 'y vs x';
@@ -1352,20 +1346,38 @@
             updateGraphTitle();
             isSyncing = false;
 
-            // Only re-initialize default rows if fully clearing everything
+            // Only re-initialize default rows if we truly want a full reset
             initializeTable();
         }
 
-        // Turn off uncertainties and hide their columns:
+        // Turn off uncertainties and hide their columns
         document.getElementById('toggle-x-error').checked = false;
         toggleErrorColumn('x');
         document.getElementById('toggle-y-error').checked = false;
         toggleErrorColumn('y');
 
-        // Reset advanced-fit parameters:
+        // Reset advanced-fit parameters
         setInitialParameters(getCurrentAdvancedFitMethod());
 
-        // Clear the fitting results in the UI:
+        // Update the combined-plot inputs to default headings
+        updateCombinedPlotInputsToActive();
+
+        // Re-draw the plot (with no data points). The old fit may still appear
+        updatePlotAndRenderLatex();
+    }
+
+    function clearFittedCurve() {
+        // Remove any stored fit results from datasetFitResults
+        if (datasetFitResults.hasOwnProperty(activeSet)) {
+            delete datasetFitResults[activeSet];
+        }
+
+        // Remove the fitted curve from fittedCurves
+        if (fittedCurves.hasOwnProperty(activeSet)) {
+            delete fittedCurves[activeSet];
+        }
+
+        // Clear any displayed equation/R² from the UI
         const fitEquationElement = document.getElementById('fit-equation');
         const rSquaredElement = document.getElementById('r-squared-container');
         if (fitEquationElement) {
@@ -1377,24 +1389,11 @@
             rSquaredElement.innerHTML = '';
         }
 
-        // Clear the stored fitting results for this dataset:
-        if (datasetFitResults.hasOwnProperty(activeSet)) {
-            delete datasetFitResults[activeSet];
-        }
-
-        // Clear any fitted curve for this dataset:
-        if (fittedCurves.hasOwnProperty(activeSet)) {
-            delete fittedCurves[activeSet];
-        }
-
-        // *** Force Plotly to see a change in state so it re-draws:
+        // Force a re-plot so that the old line is removed
         lastPlotState.data = null;
         lastPlotState.layout = null;
 
-        // Update the combined-plot inputs to default headings
-        updateCombinedPlotInputsToActive();
-
-        // Finally, re-plot (now it sees a changed state, so the old fit line is gone):
+        // Now re-draw with no line but the same data
         updatePlotAndRenderLatex();
     }
 
@@ -2054,45 +2053,42 @@
 
     function plotAllDatasets() {
         const traces = [];
-        // Define an array of colors for datasets and fitted curves.
-        const datasetColors = ['#50514f', '#f25f5c', '#ffe066', '#247ba0', '#70c1b3'];
-        const fitColors = ['#c36272', '#347dab', '#5a9374', '#9086ba', '#f4cc86'];
 
-        // Process each dataset.
+        // Define arrays of colors for datasets and fitted curves
+        const datasetColors = ['#264653', '#287271', '#2a9d8f', '#e9c46a', '#f4a261', '#ee8959', '#e76f51'];
+        const fitColors = ['#84e3c8', '#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5', '#ff8b94', '#ff7480'];
+
+        // Build one or more traces per dataset
         rawData.forEach((dataset, index) => {
             const x = dataset.map(point => point.x);
             const y = dataset.map(point => point.y);
             const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
             const yErrorsRaw = dataset.map(point => point.yErrorRaw || 0);
 
-            // Get the error types for this dataset (default to absolute if not set).
+            // Get error types for this dataset (default to absolute)
             const currentErrorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
-            const xErrors = x.map((xi, idx) =>
-                currentErrorTypes.x === 'percentage' ? (xErrorsRaw[idx] / 100) * (xi || 0) : xErrorsRaw[idx]
+            const xErrors = x.map((xi, i) =>
+                currentErrorTypes.x === 'percentage' ? (xErrorsRaw[i] / 100) * (xi || 0) : xErrorsRaw[i]
             );
-            const yErrors = y.map((yi, idx) =>
-                currentErrorTypes.y === 'percentage' ? (yErrorsRaw[idx] / 100) * (yi || 0) : yErrorsRaw[idx]
+            const yErrors = y.map((yi, i) =>
+                currentErrorTypes.y === 'percentage' ? (yErrorsRaw[i] / 100) * (yi || 0) : yErrorsRaw[i]
             );
 
-            // Add the data trace for this dataset.
+            // Data trace for this dataset
             traces.push({
                 x: x,
                 y: y,
                 mode: 'markers',
                 name: `Dataset ${index + 1}`,
                 marker: {
-                    color: datasetColors[index % datasetColors.length], // Use dataset color
-                    symbol: 'circle',
-                    size: 6.5,
-                    line: {
-                        width: 0  // No border around markers
-                    },
+                    size: 8,
+                    color: datasetColors[index % datasetColors.length]
                 },
                 error_x: {
                     type: 'data',
                     array: xErrors,
                     visible: true,
-                    color: datasetColors[index % datasetColors.length], // Match dataset color
+                    color: datasetColors[index % datasetColors.length],
                     thickness: 0.8,
                     width: 2
                 },
@@ -2100,57 +2096,64 @@
                     type: 'data',
                     array: yErrors,
                     visible: true,
-                    color: datasetColors[index % datasetColors.length], // Match dataset color
+                    color: datasetColors[index % datasetColors.length],
                     thickness: 0.8,
                     width: 2
                 }
             });
 
-            // If a fitted curve exists for this dataset, add it.
+            // If a fitted curve exists for this dataset, add it
             if (fittedCurves.hasOwnProperty(index)) {
-                const color = fitColors[index % fitColors.length];
+                const fitColor = fitColors[index % fitColors.length];
                 traces.push({
                     x: fittedCurves[index].x,
                     y: fittedCurves[index].y,
                     mode: 'lines',
                     name: `Fit ${index + 1}`,
-                    line: { color: color }
+                    line: { color: fitColor }
                 });
             }
         });
 
-        // Retrieve header settings from the combined plot input boxes
-        let titleValue = document.getElementById('combined-title')
-            ? document.getElementById('combined-title').value
-            : null;
-        let xLabelValue = document.getElementById('combined-x-label')
-            ? document.getElementById('combined-x-label').value
-            : null;
-        let yLabelValue = document.getElementById('combined-y-label')
-            ? document.getElementById('combined-y-label').value
-            : null;
+        // Retrieve the text fields from the combined-plot input boxes
+        const titleInput = document.getElementById('combined-title');
+        const xLabelInput = document.getElementById('combined-x-label');
+        const yLabelInput = document.getElementById('combined-y-label');
 
-        // Wrap the title in $ signs to enable LaTeX rendering.
-        titleValue = '$' + titleValue + '$';
+        const rawTitle = titleInput ? titleInput.value : '';
+        const rawXLabel = xLabelInput ? xLabelInput.value : '';
+        const rawYLabel = yLabelInput ? yLabelInput.value : '';
 
+        // Use processLabel (or equivalent) to auto-render LaTeX 
+        const processedTitle = processLabel(rawTitle);
+        const processedXLabel = processLabel(rawXLabel);
+        const processedYLabel = processLabel(rawYLabel);
+
+        // Build the layout for the combined plot
         const layout = {
-            title: { text: titleValue, font: { size: 16 } },
-            xaxis: { title: xLabelValue },
+            title: {
+                text: processedTitle,
+                font: { size: 16 }
+            },
+            xaxis: {
+                title: processedXLabel
+            },
             yaxis: {
                 title: {
-                    text: yLabelValue,
-                    standoff: 40 // Increase spacing between y-axis label and values
+                    text: processedYLabel,
+                    standoff: 40
                 }
             },
             margin: { t: 100, b: 70, l: 85, r: 30 }
         };
 
-        // Only update if there's a change.
+        // Only update if there's a change
         if (isPlotStateEqual(traces, layout)) {
             console.log("No changes detected in combined plot; skipping update.");
             return;
         }
 
+        // Render the combined plot in the popup
         Plotly.newPlot('popup-plot', traces, layout, {
             toImageButtonOptions: {
                 format: 'svg',
@@ -2159,12 +2162,14 @@
             }
         });
 
-        // Update the global cache.
+        // Update the cached state
         lastPlotState.data = traces;
         lastPlotState.layout = layout;
 
+        // Show the popup if it's not already visible
         showPopup();
 
+        // Trigger MathJax if available
         if (typeof MathJax !== 'undefined') {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('popup-plot')]);
         }
@@ -3543,11 +3548,6 @@
             console.error('Error performing Gaussian fit:', error);
             alert('An error occurred during Gaussian fitting. Please check the console for details.');
         }
-    }
-
-    function updateCombinedPlotFromInputs() {
-        // Call the function that re-plots the combined plot using these new values.
-        plotAllDatasets();
     }
 
     window.onload = function () {
