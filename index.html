@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,7 +79,8 @@
     }
 
     header {
-      position: relative; /* needed for absolute positioning of the center section */
+      position: relative;
+      /* needed for absolute positioning of the center section */
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -86,6 +88,7 @@
       color: var(--header-text);
       padding: 1.5rem;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin: -0.5rem 0;
     }
 
     /* Left Section (Logo) */
@@ -116,17 +119,37 @@
       transform: translateX(-50%);
       text-align: center;
       z-index: 1;
-      padding: 0 70px; /* Adjust to avoid overlapping with left/right items */
+      padding: 0 70px;
+      /* Adjust to avoid overlapping with left/right items */
     }
 
     .header-center h1 {
       margin: 0;
-      font-size: 2.3rem;
+      font-size: 2.4rem;
     }
 
     .header-center p {
       margin: 0.5rem 0 0 0;
       font-size: 1.1rem;
+    }
+
+    footer {
+      background: var(--footer-bg);
+      color: var(--footer-text);
+      text-align: center;
+      padding: 1.5rem 0;
+      margin-top: 3rem;
+      border-top: 1px solid var(--card-border);
+    }
+
+    footer a {
+      color: var(--footer-link);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    footer a:hover {
+      color: var(--nav-hover);
     }
 
     /* Navigation Styling */
@@ -224,25 +247,6 @@
       background: var(--card-link-hover);
     }
 
-    footer {
-      background: var(--footer-bg);
-      color: var(--footer-text);
-      text-align: center;
-      padding: 1.5rem 0;
-      margin-top: 3rem;
-      border-top: 1px solid var(--card-border);
-    }
-
-    footer a {
-      color: var(--footer-link);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    footer a:hover {
-      color: var(--nav-hover);
-    }
-
     .theme-toggle button {
       background: var(--button-bg);
       border: var(--button-border);
@@ -272,14 +276,14 @@
         flex-direction: column;
         padding: 1rem;
       }
-      
+
       .header-center {
         position: static;
         transform: none;
         padding: 0;
         margin-top: 1rem;
       }
-      
+
       .logo {
         height: 40px;
       }
@@ -313,6 +317,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <div class="header-left">
@@ -320,7 +325,6 @@
     </div>
     <div class="header-center">
       <h1>PanPhy Projects Hub</h1>
-      <p>Tools, simulations, and games I made with AI.</p>
     </div>
     <div class="header-right">
       <div class="theme-toggle">
@@ -416,14 +420,16 @@
   <div class="section" id="about">
     <h2>About</h2>
     <p>
-      Welcome to the PanPhy Projects Hub. Each project here is the result of a collaborative effort between myself and ChatGPT. 
+      Welcome to the PanPhy Projects Hub. Each project here is the result of a collaborative effort between myself and
+      ChatGPT.
       These tools and simulations are designed to provide interactive and educational experiences.
       Click on any project above to explore and enjoy!
     </p>
   </div>
 
   <footer>
-    <p>&copy; 2025 PanPhy Projects Hub | <a href="mailto:panphyhub@icloud.com">Contact Me</a> | <a href="https://buymeacoffee.com/panphy">Support My Projects</a></p>
+    <p>&copy; 2025 PanPhy Projects Hub | <a href="mailto:panphyhub@icloud.com">Contact Me</a> | <a
+        href="https://buymeacoffee.com/panphy">Support My Projects</a></p>
   </footer>
 
   <script>
@@ -453,4 +459,5 @@
     });
   </script>
 </body>
+
 </html>
