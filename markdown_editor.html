@@ -1109,7 +1109,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
    */
   function initializeTheme() {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    if (savedTheme === 'markdown-dark') {
       document.body.classList.add('dark-mode');
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
     } else {
@@ -1130,13 +1130,13 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
       themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
       themeToggleButton.setAttribute('title', 'Switch to Light Mode');
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      localStorage.setItem('theme', 'dark');
+      localStorage.setItem('theme', 'markdown-dark');
     } else {
       themeToggleButton.textContent = '☀️';
       themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
       themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      localStorage.setItem('theme', 'light');
+      localStorage.setItem('theme', 'markdown-light');
     }
   }
 
