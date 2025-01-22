@@ -10,14 +10,27 @@
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
-      background-color: #1e1e1e;
+      background: url('dodge_bkgrd.webp') no-repeat center center fixed;
+      background-size: cover;
       color: #f5f5f5;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       overflow: hidden;
-      /* Prevent scrolling */
+    }
+
+    /* Overlay for dimming the background */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.65);
+      /* Adjust the alpha for more or less dimming */
+      pointer-events: none;
+      z-index: -1;
     }
 
     /* Main Container */
@@ -28,6 +41,8 @@
       align-items: flex-start;
       max-width: 800px;
       width: 100%;
+      position: relative;
+      z-index: 1;
     }
 
     /* Top Scores Section */
@@ -102,6 +117,8 @@
 </head>
 
 <body>
+  <!-- Background overlay (for dimming) -->
+  <div id="overlay"></div>
 
   <div id="container">
     <!-- Top Scores Section -->
@@ -117,8 +134,9 @@
       <p>Use <span>Arrow Keys</span> or <span>Drag</span> the spaceship to move. Avoid the <span>asteroids</span>.</p>
       <p>Press <span>Enter</span> or tap the game area to restart after Game Over.</p>
       <br>
-      <p>&copy; 2025 <a href="https://panphy.github.io/" style="color: #e1b400;">PanPhy</a> | 
-      <a href="https://buymeacoffee.com/panphy" style="color: #e1b400;">Support My Projects</a></p>
+      <p>&copy; 2025 <a href="https://panphy.github.io/" style="color: #e1b400;">PanPhy</a> |
+        <a href="https://buymeacoffee.com/panphy" style="color: #e1b400;">Support My Projects</a>
+      </p>
     </div>
   </div>
 
@@ -133,9 +151,9 @@
     const SCREEN_WIDTH = canvas.width;
     const SCREEN_HEIGHT = canvas.height;
 
-    // Images (Animated WebP, spaceship, asteroid)
+    // Images
     const backgroundImg = new Image();
-    backgroundImg.src = 'background.png';
+    backgroundImg.src = 'dodge_canvas.png';
     const spaceshipImg = new Image();
     spaceshipImg.src = 'spaceship.png';
     const asteroidImg = new Image();
