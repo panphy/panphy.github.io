@@ -6,22 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tetris</title>
   <link rel="icon" type="image/png" href="/favicon.png">
+
   <style>
-    /* General body styling */
+    /* Hide the body initially to prevent "flashing" before background image loads */
+    body.hidden {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      /* Fade-in effect */
+    }
+
+    /* General body styling (background is set dynamically after preload) */
     body {
       margin: 0;
       height: 100vh;
       font-family: 'Arial', sans-serif;
       color: #fff;
-      /* Use the image as the background */
-      background: url("\tetris_bkgrd.webp") no-repeat center center fixed;
-      background-size: cover;
-
       display: flex;
       justify-content: center;
       align-items: flex-start;
     }
 
+    /* Optional overlay (set to transparent here) */
     body::before {
       content: "";
       position: absolute;
@@ -30,9 +35,7 @@
       right: 0;
       bottom: 0;
       background-color: rgba(0, 0, 0, 0);
-      /* Change the last number to make the background looks dimmer. e.g. 0.3 means 30% dimmer */
       z-index: 0;
-      /* Place it behind the rest of your content */
     }
 
     /* Container for the entire game layout */
@@ -72,18 +75,15 @@
 
     /*
      * Next piece container: fixed 80×40 px
-     * We do absolute positioning of the piece cells inside it.
+     * We use absolute positioning for the piece cells inside it.
      */
     .next-piece-container {
       position: relative;
       width: 80px;
-      /* 4 blocks × 20 px = 80 px wide */
+      /* 4 blocks × 20 px */
       height: 40px;
-      /* 2 blocks × 20 px = 40 px tall */
+      /* 2 blocks × 20 px */
       margin: 0 auto;
-      /* Uncomment if you want a debug background:
-         background-color: rgba(255, 255, 255, 0.1);
-      */
     }
 
     /* Each cell of the next piece is a 20×20 absolutely positioned block */
@@ -172,14 +172,13 @@
   </style>
 </head>
 
-<body>
+<body class="hidden">
   <div class="game-container">
     <!-- Info panel -->
     <div class="info-panel">
       <!-- Next piece box -->
       <div class="info-box">
         <h3>Next Piece</h3>
-        <!-- We use a fixed-size container for absolute-positioned cells -->
         <div class="next-piece-container" id="next-piece-container"></div>
       </div>
       <!-- Lines cleared box -->
@@ -226,6 +225,23 @@
   </div>
 
   <script>
+    /**
+     * Preload the background image and only then show the page.
+     * This prevents any flash of an unstyled background.
+     */
+    const bgImage = new Image();
+    bgImage.src = 'tetris_bkgrd.webp';
+    bgImage.onload = () => {
+      // Set the background once loaded
+      document.body.style.backgroundImage = "url('tetris_bkgrd.webp')";
+      document.body.style.backgroundRepeat = "no-repeat";
+      document.body.style.backgroundPosition = "center center";
+      document.body.style.backgroundAttachment = "fixed";
+      document.body.style.backgroundSize = "cover";
+      // Remove the 'hidden' class to reveal the page
+      document.body.classList.remove('hidden');
+    };
+
     const canvas = document.getElementById("tetris");
     const context = canvas.getContext("2d");
     const nextPieceContainer = document.getElementById("next-piece-container");
@@ -236,14 +252,6 @@
     const grid = 30;
     const columns = canvas.width / grid;
     const rows = canvas.height / grid;
-
-    // Preload the background image
-    const preloadedBkgrd = new Image();
-    preloadedBkgrd.src = '\tetris_bkgrd.webp';
-    preloadedBkgrd.onload = () => {
-      // Once the background image is loaded, set it as the background
-      document.body.style.backgroundImage = "url('\tetris_bkgrd.webp')";
-    };
 
     let linesCleared = 0;
     let topScores = [];
@@ -313,8 +321,7 @@
 
     /*
      * Draw the "Next piece" using an absolutely positioned container of size 80×40 px.
-     * Each cell is 20×20 px. We can apply partial or forced offsets to center the shape horizontally
-     * and to place the "I" piece on the second row if desired.
+     * Each cell is 20×20 px. We center the shape horizontally and vertically.
      */
     function drawNextPiece(piece) {
       // Clear out any old cells in the container
@@ -323,12 +330,12 @@
       const pieceRows = piece.length;
       const pieceCols = piece[0].length;
 
-      // We have 4 columns wide and 2 rows tall in "block units" (4×2).
+      // We have 4 columns wide and 2 rows tall in "block" units.
       // Each block is 20 px => total 80 px wide, 40 px tall.
 
-      // Default offsets for center
-      let offsetX = (4 - pieceCols) / 2;  // in "block" units
-      let offsetY = (2 - pieceRows) / 2;  // in "block" units
+      // Default offsets to center
+      let offsetX = (4 - pieceCols) / 2;
+      let offsetY = (2 - pieceRows) / 2;
 
       // If it is the "I" piece (1×4), place it on the second row
       if (pieceRows === 1 && pieceCols === 4) {
@@ -340,11 +347,9 @@
       piece.forEach((row, rowIndex) => {
         row.forEach((val, colIndex) => {
           if (val) {
-            // Make a div for this cell
             const cell = document.createElement('div');
             cell.classList.add('next-piece-cell', 'filled');
 
-            // Convert "block" offsets to px (20 px each)
             const leftPx = (colIndex + offsetX) * 20;
             const topPx = (rowIndex + offsetY) * 20;
 
@@ -356,7 +361,7 @@
       });
     }
 
-    // Clear full rows on the board
+    // Clear full rows on the board (with a brief "flash" effect)
     async function clearRows() {
       let lines = 0;
       for (let y = board.length - 1; y >= 0; y--) {
