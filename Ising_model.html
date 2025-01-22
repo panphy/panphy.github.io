@@ -108,6 +108,8 @@
       border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      width: 150px;
+      /* Fixed width */
     }
 
     .button-group button:hover {
@@ -151,8 +153,7 @@
       <div id="grid"></div>
     </div>
     <div class="button-group">
-      <button onclick="startSimulation()">Run</button>
-      <button onclick="pauseSimulation()">Pause</button>
+      <button id="toggleButton" onclick="toggleSimulation()">Run</button>
     </div>
   </div>
   <script>
@@ -168,7 +169,7 @@
     const largeGridSizeValue = document.getElementById('largeGridSizeValue');
     const largeGridSizeValue2 = document.getElementById('largeGridSizeValue2');
     const temperatureValue = document.getElementById('temperatureValue');
-
+    const toggleButton = document.getElementById('toggleButton');
     const totalGridSize = 500; // Fixed simulation area size in pixels
 
     function initializeGrid() {
@@ -217,7 +218,7 @@
         [(i - 1 + size) % size, j],
         [(i + 1) % size, j],
         [i, (j - 1 + size) % size],
-        [i, (j + 1) % size],
+        [i, (j + 1) % size]
       ];
       for (const [ni, nj] of neighbors) {
         sumNeighbors += grid[ni][nj];
@@ -225,20 +226,29 @@
       return -J * spin * sumNeighbors;
     }
 
-    function startSimulation() {
-      if (!simulationInterval) {
-        simulationInterval = setInterval(() => {
-          monteCarloStep();
-          renderGrid();
-        }, 100);
-      }
+    function runSimulation() {
+      simulationInterval = setInterval(() => {
+        monteCarloStep();
+        renderGrid();
+      }, 100);
+      toggleButton.textContent = "Pause";
     }
 
     function pauseSimulation() {
       clearInterval(simulationInterval);
       simulationInterval = null;
+      toggleButton.textContent = "Run";
     }
 
+    function toggleSimulation() {
+      if (simulationInterval) {
+        pauseSimulation();
+      } else {
+        runSimulation();
+      }
+    }
+
+    // Update functions for the controls
     function updateSmallGridSize(newSize) {
       size = parseInt(newSize, 10);
       smallGridSizeValue.textContent = size;
@@ -258,11 +268,21 @@
       temperatureValue.innerHTML = `${(T / T_c).toFixed(1)} T<sub>c</sub>`;
     }
 
+    // Allow spacebar press to toggle simulation state
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Space') {
+        event.preventDefault(); // Prevent scrolling when space is pressed
+        toggleSimulation();
+      }
+    });
+
+    // Initialize the grid at the start
     initializeGrid();
   </script>
 
   <footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support My Projects</a>
+    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support My
+      Projects</a>
   </footer>
 
 </body>
