@@ -746,7 +746,8 @@
             border-radius: 2px;
             padding: 4px 8px;
             cursor: pointer;
-            z-index: 1100; /* Ensure it sits above the content */
+            z-index: 1100;
+            /* Ensure it sits above the content */
         }
 
         #popup-close:hover {
@@ -1285,25 +1286,27 @@
         updatePlotAndRenderLatex();
     }
 
-    // Function to remove an existing dataset given its index
     function removeDataset(index) {
         if (rawData.length <= 1) {
             alert("You must keep at least one dataset.");
             return;
         }
 
-        // Remove the dataset from rawData.
+        // Remove this dataset from rawData.
         rawData.splice(index, 1);
 
-        // Adjust activeSet: if we removed an earlier dataset or the active set was the last one, update accordingly.
+        // Reindex the global objects so they match the new rawData order.
+        // IMPORTANT: Pass the removed index.
+        reindexDatasets(index);
+
+        // Fix activeSet if it's now out of range
         if (activeSet >= rawData.length) {
             activeSet = rawData.length - 1;
         }
 
+        // Rebuild UI and re-plot
         updateDatasetTabsBar();
-
-        // Refresh UI based on the new active dataset.
-        updateData();
+        switchDataset(activeSet);
         updatePlotAndRenderLatex();
     }
 
@@ -1564,55 +1567,53 @@
         }
     }
 
-    // Function to reindex all dataset-specific objects to match the new ordering in rawData.
-    function reindexDatasets() {
-        const newHeaders = {};
-        const newToggles = {};
-        const newErrorTypes = {};
-        const newFitResults = {};
+    function reindexDatasets(removedIndex) {
+        // SHIFT each object from j+1 to j, for all j >= removedIndex
+        for (let j = removedIndex; j < rawData.length; j++) {
 
-        // rawData is assumed to be an array. Loop over it and assign new keys (0, 1, 2, ...).
-        rawData.forEach((data, newIndex) => {
-            // If a header exists for this newIndex (it might have shifted from its old key), copy it.
-            // Otherwise, set a default.
-            newHeaders[newIndex] = datasetHeaders[newIndex] || { x: 'x', y: 'y' };
-            newToggles[newIndex] = datasetToggles[newIndex] || { x: false, y: false };
-            newErrorTypes[newIndex] = datasetErrorTypes[newIndex] || { x: 'absolute', y: 'absolute' };
-            if (datasetFitResults[newIndex]) {
-                newFitResults[newIndex] = datasetFitResults[newIndex];
+            // datasetHeaders
+            if (datasetHeaders.hasOwnProperty(j + 1)) {
+                datasetHeaders[j] = datasetHeaders[j + 1];
+            } else {
+                delete datasetHeaders[j];
             }
-        });
 
-        // Replace the original objects with the re-indexed ones.
-        datasetHeaders = newHeaders;
-        datasetToggles = newToggles;
-        datasetErrorTypes = newErrorTypes;
-        datasetFitResults = newFitResults;
-    }
+            // datasetToggles
+            if (datasetToggles.hasOwnProperty(j + 1)) {
+                datasetToggles[j] = datasetToggles[j + 1];
+            } else {
+                delete datasetToggles[j];
+            }
 
-    // Updated removeDataset function.
-    function removeDataset(index) {
-        if (rawData.length <= 1) {
-            alert("You must keep at least one dataset.");
-            return;
+            // datasetErrorTypes
+            if (datasetErrorTypes.hasOwnProperty(j + 1)) {
+                datasetErrorTypes[j] = datasetErrorTypes[j + 1];
+            } else {
+                delete datasetErrorTypes[j];
+            }
+
+            // datasetFitResults
+            if (datasetFitResults.hasOwnProperty(j + 1)) {
+                datasetFitResults[j] = datasetFitResults[j + 1];
+            } else {
+                delete datasetFitResults[j];
+            }
+
+            // fittedCurves
+            if (fittedCurves.hasOwnProperty(j + 1)) {
+                fittedCurves[j] = fittedCurves[j + 1];
+            } else {
+                delete fittedCurves[j];
+            }
         }
 
-        // Remove the dataset from rawData.
-        rawData.splice(index, 1);
-
-        // Reindex the global objects so that keys match rawData order.
-        reindexDatasets();
-
-        // Adjust activeSet if needed.
-        if (activeSet >= rawData.length) {
-            activeSet = rawData.length - 1;
-        }
-
-        updateDatasetTabsBar();
-
-        // Refresh UI using the data from the new active dataset.
-        updateData();
-        updatePlotAndRenderLatex();
+        // Then delete the old "last" index which no longer corresponds to a dataset
+        const lastIndex = rawData.length;
+        delete datasetHeaders[lastIndex];
+        delete datasetToggles[lastIndex];
+        delete datasetErrorTypes[lastIndex];
+        delete datasetFitResults[lastIndex];
+        delete fittedCurves[lastIndex];
     }
 
     function updateUncertaintyHeaders(axis) {
@@ -1713,7 +1714,14 @@
         const reader = new FileReader();
         reader.onload = function (e) {
             const text = e.target.result;
-            // Pass the CSV text to the parser so that it writes data into rawData[activeSet]
+
+            // **Clear the fitted curve for the active dataset**
+            if (fittedCurves.hasOwnProperty(activeSet)) {
+                delete fittedCurves[activeSet];
+                console.log(`Fitted curve for Dataset ${activeSet + 1} has been cleared.`);
+            }
+
+            // **Parse the CSV and update the data**
             parseCSV(text);
         };
         reader.onerror = function () {
