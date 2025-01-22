@@ -579,7 +579,7 @@
     for (let x = 0; x < canvas.width; x++) {
       const fraction = x / (canvas.width - 1);
       // time offset plus fraction of the time window
-      const t = accumulatedTime + fraction * timeWindow;
+      const t = accumulatedTime - fraction * timeWindow;
       const val = Math.sin(2 * Math.PI * channel.frequency * t);
 
       const y = (val * 0.5 + 0.5) * canvas.height;
@@ -602,7 +602,7 @@
     const timeWindow = BASE_WINDOW * zoomScale;
     for (let x = 0; x < canvas.width; x++) {
       const fraction = x / (canvas.width - 1);
-      const t = accumulatedTime + fraction * timeWindow;
+      const t = accumulatedTime - fraction * timeWindow;
 
       let sumVal = 0;
       channels.forEach(ch => {
