@@ -11,9 +11,12 @@
     body {
       margin: 0;
       height: 100vh;
-      background-color: #082235;
       font-family: 'Arial', sans-serif;
       color: #fff;
+      /* Use the image as the background */
+      background: url("tetris_bkgrd.webp") no-repeat center center fixed;
+      background-size: cover;
+
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -64,9 +67,9 @@
       height: 40px;
       /* 2 blocks × 20 px = 40 px tall */
       margin: 0 auto;
-      /* Optional: you can set a background color for debugging
+      /* Uncomment if you want a debug background:
          background-color: rgba(255, 255, 255, 0.1);
-       */
+      */
     }
 
     /* Each cell of the next piece is a 20×20 absolutely positioned block */
@@ -75,7 +78,6 @@
       width: 20px;
       height: 20px;
       box-sizing: border-box;
-      /* By default, let's leave it blank so you can see debugging background color if you set it */
     }
 
     /* Filled cells in the preview have a solid color */
@@ -113,6 +115,7 @@
       align-items: center;
       margin-bottom: 10px;
       user-select: none;
+      /* Prevent text selection on long-press */
     }
 
     .arrow-row {
@@ -128,8 +131,8 @@
       font-size: 24px;
       border: 2px solid #444;
       border-radius: 8px;
-      background-color: #282a36;
-      color: #fff;
+      background-color: #f1c232;
+      color: #000;
       cursor: pointer;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
@@ -162,7 +165,7 @@
       <!-- Next piece box -->
       <div class="info-box">
         <h3>Next Piece</h3>
-        <!-- We no longer use a grid; we have a fixed-size container for absolute-positioned cells -->
+        <!-- We use a fixed-size container for absolute-positioned cells -->
         <div class="next-piece-container" id="next-piece-container"></div>
       </div>
       <!-- Lines cleared box -->
@@ -175,10 +178,12 @@
         <h3>Top Scores</h3>
         <div id="top-scores" style="text-align: center; font-size: 16px;"></div>
       </div>
-      <center>
-        <p>&copy; 2025 <a href="https://panphy.github.io/" style="color: #e1b400;">PanPhy</a>.</p>
-        <p><a href="https://buymeacoffee.com/panphy" style="color: #e1b400;">Support My Projects</a></p>
-      </center>
+      <div class="info-box">
+        <center>
+          <p>&copy; 2025 <a href="https://panphy.github.io/" style="color: #e1b400;">PanPhy</a>.</p>
+          <p><a href="https://buymeacoffee.com/panphy" style="color: #e1b400;">Support My Projects</a></p>
+        </center>
+      </div>
     </div>
 
     <!-- Canvas and arrow keys side by side, aligned at the bottom -->
@@ -188,7 +193,7 @@
         <canvas id="tetris" width="300" height="600"></canvas>
         <div id="game-over" class="game-over">
           <strong>Game Over</strong><br><br>
-          Press <strong>Enter</strong> or <strong>Tap the Canvas</strong> to restart
+          Press <strong>Enter</strong> or <strong>Tap the Gaming Canvas</strong> to restart
         </div>
       </div>
 
@@ -246,6 +251,7 @@
       'T': '#05ffa1'
     };
 
+    // Initialize empty board
     let board = Array.from({ length: rows }, () => Array(columns).fill(0));
 
     // Randomize the first piece
@@ -295,32 +301,31 @@
       const pieceRows = piece.length;
       const pieceCols = piece[0].length;
 
-      // We consider we have 4 columns wide and 2 rows tall in "block units",
-      // each block is 20 px. So total is 80 px wide, 40 px tall.
+      // We have 4 columns wide and 2 rows tall in "block units" (4×2).
+      // Each block is 20 px => total 80 px wide, 40 px tall.
 
-      // Default offsets to center the shape
-      // e.g. if the piece is 3 wide, offsetX => (4 - 3)/2 = 0.5 => 0.5*20 = 10 px from the left
-      let offsetX = (4 - pieceCols) / 2;   // in "block" units
-      let offsetY = (2 - pieceRows) / 2;   // in "block" units
+      // Default offsets for center
+      let offsetX = (4 - pieceCols) / 2;  // in "block" units
+      let offsetY = (2 - pieceRows) / 2;  // in "block" units
 
-      // If it is the "I" piece (1x4), we put it on the second row
+      // If it is the "I" piece (1×4), place it on the second row
       if (pieceRows === 1 && pieceCols === 4) {
         offsetY = 1;  // Force it onto the second row
-        // That means top = 1*20 = 20 px
-        // For horizontal centering, offsetX could be 0 if it's exactly 4 blocks wide
         offsetX = 0;
       }
 
-      // Now create absolutely positioned cells for each filled block
+      // Create absolutely positioned cells for each filled block
       piece.forEach((row, rowIndex) => {
         row.forEach((val, colIndex) => {
           if (val) {
             // Make a div for this cell
             const cell = document.createElement('div');
             cell.classList.add('next-piece-cell', 'filled');
-            // Compute absolute left/top in px:
+
+            // Convert "block" offsets to px (20 px each)
             const leftPx = (colIndex + offsetX) * 20;
             const topPx = (rowIndex + offsetY) * 20;
+
             cell.style.left = leftPx + 'px';
             cell.style.top = topPx + 'px';
             nextPieceContainer.appendChild(cell);
@@ -492,28 +497,34 @@
       const startPress = (e) => {
         e.preventDefault();
         if (gameOver) return;
+        // Immediate action on press
         pressAction();
+        // Repeated action if still held
         pressInterval = setInterval(() => {
           pressAction();
         }, 150);
       };
+
       const endPress = () => {
         if (pressInterval) {
           clearInterval(pressInterval);
           pressInterval = null;
         }
       };
+
+      // For both mouse and touch
       button.addEventListener('mousedown', startPress);
       button.addEventListener('touchstart', startPress, { passive: false });
       button.addEventListener('mouseup', endPress);
       button.addEventListener('mouseleave', endPress);
       button.addEventListener('touchend', endPress);
       button.addEventListener('touchcancel', endPress);
+
       // Prevent context menu if the user tries to right-click or long press
-      button.addEventListener('contextmenu', e => e.preventDefault());
+      button.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
-    // Register arrow buttons
+    // Register arrow buttons for long-press
     registerLongPressButton('btn-up', rotatePiece);
     registerLongPressButton('btn-left', () => move(-1));
     registerLongPressButton('btn-right', () => move(1));
