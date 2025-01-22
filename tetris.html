@@ -14,12 +14,25 @@
       font-family: 'Arial', sans-serif;
       color: #fff;
       /* Use the image as the background */
-      background: url("tetris_bkgrd.webp") no-repeat center center fixed;
+      background: url("\tetris_bkgrd.webp") no-repeat center center fixed;
       background-size: cover;
 
       display: flex;
       justify-content: center;
       align-items: flex-start;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0);
+      /* Change the last number to make the background looks dimmer. e.g. 0.3 means 30% dimmer */
+      z-index: 0;
+      /* Place it behind the rest of your content */
     }
 
     /* Container for the entire game layout */
@@ -30,6 +43,7 @@
       margin-top: 20px;
       margin-bottom: 20px;
       position: relative;
+      z-index: 1;
     }
 
     /* Info panel styling */
