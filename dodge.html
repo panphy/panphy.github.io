@@ -10,7 +10,7 @@
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
-      background: url('dodge_bkgrd.webp') no-repeat center center fixed;
+      background: url('\dodge_bkgrd.webp') no-repeat center center fixed;
       background-size: cover;
       color: #f5f5f5;
       display: flex;
@@ -158,6 +158,14 @@
     spaceshipImg.src = 'spaceship.png';
     const asteroidImg = new Image();
     asteroidImg.src = 'asteroid.png';
+
+    // Preload the background image
+    const preloadedBkgrd = new Image();
+    preloadedBkgrd.src = '\dodge_bkgrd.webp';
+    preloadedBkgrd.onload = () => {
+      // Once the background image is loaded, set it as the background
+      document.body.style.backgroundImage = "url('\dodge_bkgrd.webp')";
+    };
 
     let gameOver = false;
     let score = 0;

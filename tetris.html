@@ -143,7 +143,7 @@
       width: 60px;
       height: 60px;
       font-size: 24px;
-      border: 2px solid #444;
+      border: 5px solid #000;
       border-radius: 8px;
       background-color: #f1c232;
       color: #000;
@@ -236,6 +236,14 @@
     const grid = 30;
     const columns = canvas.width / grid;
     const rows = canvas.height / grid;
+
+    // Preload the background image
+    const preloadedBkgrd = new Image();
+    preloadedBkgrd.src = '\tetris_bkgrd.webp';
+    preloadedBkgrd.onload = () => {
+      // Once the background image is loaded, set it as the background
+      document.body.style.backgroundImage = "url('\tetris_bkgrd.webp')";
+    };
 
     let linesCleared = 0;
     let topScores = [];
