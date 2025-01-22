@@ -435,12 +435,23 @@
   <script>
     // Theme Toggle Functionality
     const themeButton = document.getElementById('theme-button');
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : 'light';
+
+    // Use new keys for dark and light theme
+    const DARK_THEME_KEY = "panphy-dark";
+    const LIGHT_THEME_KEY = "panphy-light";
+
+    // Determine current theme based on localStorage
+    const currentTheme = localStorage.getItem(DARK_THEME_KEY)
+      ? "dark"
+      : localStorage.getItem(LIGHT_THEME_KEY)
+        ? "light"
+        : "light"; // Default to light if none is set
 
     // Apply the saved theme on load
     document.documentElement.setAttribute('data-theme', currentTheme);
     updateButtonEmoji(currentTheme);
 
+    // Update the button emoji based on current theme
     function updateButtonEmoji(theme) {
       themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
     }
@@ -449,11 +460,13 @@
       let theme = document.documentElement.getAttribute('data-theme');
       if (theme === 'light') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
+        localStorage.setItem(DARK_THEME_KEY, 'true');
+        localStorage.removeItem(LIGHT_THEME_KEY);
         updateButtonEmoji('dark');
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
+        localStorage.setItem(LIGHT_THEME_KEY, 'true');
+        localStorage.removeItem(DARK_THEME_KEY);
         updateButtonEmoji('light');
       }
     });
