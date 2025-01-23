@@ -527,10 +527,10 @@
         <h2 class="pane-heading">Markdown Input</h2>
       </div>
       <div class="buttonContainer">
-        <button id="loadFileButton">Load .md File</button>
-        <button id="saveMDButton">Save as .md</button>
+        <button id="loadFileButton">Open .md File</button>
+        <button id="saveMDButton">Save .md</button>
         <button id="clearButton">Clear Input</button>
-        <button id="loadSampleButton">Load Sample Document</button>
+        <button id="loadSampleButton">Sample Document</button>
       </div>
       <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
     </div>
@@ -756,7 +756,7 @@ $$
 - Let's insert a picture below...
 
 <p align="center">
-    <img src="https://panphy.github.io/sample_pic.webp" width="250" alt="Made with ChatGPT">
+    <img src="https://panphy.github.io/mkdwn_sample_pic.webp" width="250" alt="Made with ChatGPT">
 </p>
 
 <p align="center">
@@ -1191,7 +1191,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
       isSyncingOutputScroll = false;
     });
-  }, 16);
+  }, 2);
 
   const syncOutputToInput = throttle(() => {
     if (!syncScrollSwitch.checked) return;
@@ -1215,7 +1215,7 @@ A whimsical tour through **Markdown**, **LaTeX**, and **HTML**. May your documen
 
       isSyncingInputScroll = false;
     });
-  }, 16);
+  }, 2);
 
   let isSyncingInputScroll = false;
   let isSyncingOutputScroll = false;
