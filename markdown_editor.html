@@ -93,6 +93,20 @@
       transition: background-color 0.3s, color 0.3s;
     }
 
+    a {
+      color: #ff5f1f;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #ff5f1f;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #ff5f1f;
+    }
+
     #editorContainer {
       display: flex;
       flex: 1;
@@ -232,7 +246,7 @@
       padding: 20px;
       border: none;
       resize: none;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.5;
       box-sizing: border-box;
       overflow-y: auto;
@@ -243,7 +257,7 @@
     #renderedOutput {
       flex: 1;
       padding: 20px;
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.5;
       box-sizing: border-box;
       overflow-y: auto;
@@ -723,6 +737,20 @@
         body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
           background-color: var(--background-color);
           color: var(--text-color);
+        }
+
+        a {
+          color: #ff5f1f;
+          text-decoration: none;
+        }
+
+        a:hover {
+          color: #ff5f1f;
+          text-decoration: underline;
+        }
+
+        a:visited {
+          color: #ff5f1f;
         }
 
         table {
