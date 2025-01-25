@@ -843,6 +843,7 @@
       `;
     head.appendChild(style);
 
+    const isDarkMode = document.body.classList.contains('dark-mode');
     const highlightLink = document.createElement('link');
     highlightLink.rel = 'stylesheet';
     if (isDarkMode) {
