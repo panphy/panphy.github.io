@@ -9,7 +9,7 @@ With integrated LaTeX support, you can effortlessly include professional-looking
 
 ---
 
-# Here is a demo of...
+# This document is a demo of...
 
 1. a bit of **Markdown**,  
 2. a tiny little bit of **LaTeX**, and  
