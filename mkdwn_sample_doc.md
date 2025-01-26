@@ -190,7 +190,7 @@ $$
 
 **And there you have it! 🏆**
 
-A brief tour through **Markdown**, **LaTeX**, and **HTML**. May your documents be ever stylish!
+A brief tour through **Markdown**, **LaTeX**, and **HTML**. Happy writing and editing! May your documents be ever stylish!
 
 [1]: https://en.wikipedia.org/wiki/Markdown "Markdown"  
 [2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
