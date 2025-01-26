@@ -52,43 +52,49 @@
       display: flex;
       flex-direction: row;
       justify-content: center;
+      /* Centers the items horizontally */
       align-items: flex-start;
-      max-width: 800px;
-      width: 100%;
+      max-width: 1200px;
+      /* Maintains a maximum width for larger screens */
+      width: 90%;
+      /* Responsive width */
       position: relative;
       z-index: 1;
     }
 
     /* Top Scores Section */
     #topScores {
-      flex: 1;
-      margin-right: 20px;
-      text-align: left;
+      flex: 0 0 200px;
+      /* Fixed width of 200px */
+      margin-right: 10px;
+      text-align: center;
     }
 
-    #topScores h2 {
+    #topScores h1 {
       font-size: 1.5em;
       color: #ff9800;
       border-bottom: 2px solid #ff9800;
       padding-bottom: 5px;
       margin-bottom: 10px;
-      text-align: center;
     }
 
     #topScores ol {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
 
     #topScores li {
-      font-size: 1.2em;
-      padding: 5px 0;
+      font-size: 1.3em;
+      text-align: center;
+      padding: 10px 0;
       border-bottom: 1px solid #555;
     }
 
     /* Game Section */
     #gameContainer {
-      flex: 2;
+      flex: 1;
+      /* Takes up the remaining space */
       text-align: center;
     }
 
@@ -98,20 +104,26 @@
       margin-bottom: 10px;
     }
 
-    canvas {
+    /* Responsive Canvas Styling */
+    #gameContainer canvas {
+      width: 70%;
+      max-width: 700px;
+      /* Maintains maximum width */
+      height: auto;
+      aspect-ratio: 3 / 2;
+      /* 600x400 aspect ratio */
       border: 3px solid #4caf50;
       border-radius: 10px;
       display: block;
       margin: 0 auto;
       touch-action: none;
       -ms-touch-action: none;
-      /* For older IE versions */
     }
 
     p {
       font-size: 1em;
-      margin: 10px 0;
-      line-height: 1.5;
+      margin: 8px 0;
+      line-height: 1.4;
     }
 
     p span {
@@ -128,14 +140,15 @@
   <div id="container">
     <!-- Top Scores Section -->
     <div id="topScores">
-      <h2>Top Scores</h2>
-      <ol id="scoreList"></ol>
+      <h1>Top Scores</h1>
+      <ol id="scoreList">
+      </ol>
     </div>
 
     <!-- Game Section -->
     <div id="gameContainer">
       <h1>Dodge the Asteroids</h1>
-      <canvas id="gameCanvas" width="600" height="400"></canvas>
+      <canvas id="gameCanvas"></canvas>
       <p>Use <span>Arrow Keys</span> or <span>Drag</span> the spaceship to move. Avoid the <span>asteroids</span>.</p>
       <p>Press <span>Enter</span> or <span>Tap</span> the Game Canvas to restart after Game Over.</p>
       <br>
@@ -147,14 +160,76 @@
 
   <script>
     /* -----------------------------------------------------------
-     * Global Variables
+     * Base Canvas Size and Scaling Factors
+     * -----------------------------------------------------------
+     */
+    const BASE_WIDTH = 600;
+    const BASE_HEIGHT = 400;
+    let scaleX = 1;
+    let scaleY = 1;
+
+    function updateScaleFactors() {
+      scaleX = SCREEN_WIDTH / BASE_WIDTH;
+      scaleY = SCREEN_HEIGHT / BASE_HEIGHT;
+    }
+
+    /* -----------------------------------------------------------
+     * Responsive Canvas Setup
      * -----------------------------------------------------------
      */
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    const SCREEN_WIDTH = canvas.width;
-    const SCREEN_HEIGHT = canvas.height;
+    // Initial dimensions (will be updated)
+    let SCREEN_WIDTH = 600;
+    let SCREEN_HEIGHT = 400;
+
+    function resizeCanvas() {
+      // Get the device pixel ratio, falling back to 1.
+      const dpr = window.devicePixelRatio || 1;
+
+      // Get the size the canvas is being displayed.
+      const rect = canvas.getBoundingClientRect();
+
+      // Set the internal size of the canvas to match the displayed size * device pixel ratio.
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      // Scale the drawing context to account for the device pixel ratio.
+      ctx.scale(dpr, dpr);
+
+      // Update game variables based on the new size
+      SCREEN_WIDTH = rect.width;
+      SCREEN_HEIGHT = rect.height;
+
+      // Update scaling factors
+      updateScaleFactors();
+
+      // Update existing game elements
+      if (player) player.updateScale();
+      updateAsteroidsScale();
+
+      // Optionally, reset the game
+      // resetGame(); // Uncomment if you want to reset on resize
+    }
+
+    // Initial resize
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      if (assetsLoaded === 3) {
+        resetGame();
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+    });
+
+    /* -----------------------------------------------------------
+     * Global Variables
+     * -----------------------------------------------------------
+     */
 
     // Images
     const backgroundImg = new Image();
@@ -166,10 +241,10 @@
 
     // Preload the background image
     const preloadedBkgrd = new Image();
-    preloadedBkgrd.src = '\dodge_bkgrd.webp';
+    preloadedBkgrd.src = 'dodge_bkgrd.webp';
     preloadedBkgrd.onload = () => {
       // Once the background image is loaded, set it as the background
-      document.body.style.backgroundImage = "url('\dodge_bkgrd.webp')";
+      document.body.style.backgroundImage = "url('dodge_bkgrd.webp')";
     };
 
     let gameOver = false;
@@ -212,12 +287,28 @@
      */
     class Spaceship {
       constructor() {
+        // Base dimensions based on BASE_WIDTH and BASE_HEIGHT
+        this.baseWidth = 50;
+        this.baseHeight = 50;
+        this.baseRadius = 15;
+        this.baseSpeed = 5;
+
+        // Apply scaling
+        this.width = this.baseWidth * scaleX;
+        this.height = this.baseHeight * scaleY;
+        this.radius = this.baseRadius * ((scaleX + scaleY) / 2); // Average scaling
+        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2); // Average scaling
+
+        // Start at center
         this.x = SCREEN_WIDTH / 2;
         this.y = SCREEN_HEIGHT / 2;
-        this.width = 50;
-        this.height = 50;
-        this.radius = 15;
-        this.speed = 5;
+      }
+
+      updateScale() {
+        this.width = this.baseWidth * scaleX;
+        this.height = this.baseHeight * scaleY;
+        this.radius = this.baseRadius * ((scaleX + scaleY) / 2);
+        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
       }
 
       move() {
@@ -280,21 +371,32 @@
      */
     class Asteroid {
       constructor() {
+        // Base dimensions
+        this.baseSize = 32; // Base width and height
+        this.baseRadius = (this.baseSize + this.baseSize) / 4; // As per original calculation
         this.spawn();
-        // Random speed between MIN and MAX
+        // Random speed between MIN and MAX, scaled
         this.speed =
-          Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) +
-          MIN_ASTEROID_SPEED;
+          (Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) + MIN_ASTEROID_SPEED) *
+          ((scaleX + scaleY) / 2);
 
         // Random rotation angle + spin speed
         this.angle = Math.random() * 2 * Math.PI;
         this.rotationSpeed = (Math.random() - 0.5) * 0.05;
 
-        // Random scale for the asteroid (0.5x to 2x)
-        this.scale = 0.5 + Math.random() * 1.5;
-        this.width = 32 * this.scale;
-        this.height = 32 * this.scale;
+        // Random scale for the asteroid (0.5x to 2x) based on current scaling
+        this.scale = (0.5 + Math.random() * 1.5) * ((scaleX + scaleY) / 2);
+        this.width = this.baseSize * this.scale;
+        this.height = this.baseSize * this.scale;
         this.radius = (this.width + this.height) / 4;
+      }
+
+      updateScale() {
+        this.scale = (0.5 + Math.random() * 1.5) * ((scaleX + scaleY) / 2);
+        this.width = this.baseSize * this.scale;
+        this.height = this.baseSize * this.scale;
+        this.radius = (this.width + this.height) / 4;
+        this.speed *= ((scaleX + scaleY) / 2); // Adjust speed based on scaling
       }
 
       spawn() {
@@ -302,18 +404,18 @@
         switch (edge) {
           case 0: // Top
             this.x = Math.random() * SCREEN_WIDTH;
-            this.y = -40;
+            this.y = -40 * scaleY;
             break;
           case 1: // Bottom
             this.x = Math.random() * SCREEN_WIDTH;
-            this.y = SCREEN_HEIGHT + 40;
+            this.y = SCREEN_HEIGHT + 40 * scaleY;
             break;
           case 2: // Left
-            this.x = -40;
+            this.x = -40 * scaleX;
             this.y = Math.random() * SCREEN_HEIGHT;
             break;
           case 3: // Right
-            this.x = SCREEN_WIDTH + 40;
+            this.x = SCREEN_WIDTH + 40 * scaleX;
             this.y = Math.random() * SCREEN_HEIGHT;
             break;
         }
@@ -344,10 +446,10 @@
 
       isOffScreen() {
         return (
-          this.x < -100 ||
-          this.x > SCREEN_WIDTH + 100 ||
-          this.y < -100 ||
-          this.y > SCREEN_HEIGHT + 100
+          this.x < -100 * scaleX ||
+          this.x > SCREEN_WIDTH + 100 * scaleX ||
+          this.y < -100 * scaleY ||
+          this.y > SCREEN_HEIGHT + 100 * scaleY
         );
       }
     }
@@ -474,6 +576,16 @@
     }
 
     /* -----------------------------------------------------------
+     * Update Existing Asteroids on Resize
+     * -----------------------------------------------------------
+     */
+    function updateAsteroidsScale() {
+      asteroids.forEach((asteroid) => {
+        asteroid.updateScale();
+      });
+    }
+
+    /* -----------------------------------------------------------
      * Rolling Background Function
      * -----------------------------------------------------------
      * We shift the background image down by backgroundOffsetY
@@ -482,7 +594,7 @@
      */
     function drawRollingBackground() {
       // Increase the offset to "scroll" the background
-      backgroundOffsetY += backgroundScrollSpeed;
+      backgroundOffsetY += backgroundScrollSpeed * ((scaleX + scaleY) / 2);
 
       // Once it passes the image's height, wrap around
       if (backgroundOffsetY >= backgroundImg.height) {
@@ -492,7 +604,7 @@
       // Draw the tiled background in vertical strips
       for (let y = -backgroundImg.height; y < SCREEN_HEIGHT; y += backgroundImg.height) {
         for (let x = 0; x < SCREEN_WIDTH; x += backgroundImg.width) {
-          ctx.drawImage(backgroundImg, x, y + backgroundOffsetY);
+          ctx.drawImage(backgroundImg, x, y + backgroundOffsetY, backgroundImg.width, backgroundImg.height);
         }
       }
     }
@@ -509,7 +621,7 @@
         // 2) Increase and display score
         score++;
         ctx.fillStyle = '#f5f5f5';
-        ctx.font = '18px Arial';
+        ctx.font = `${18 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.fillText('Score: ' + score, 10, 20);
 
         // 3) Move and draw the spaceship
@@ -551,17 +663,17 @@
 
         // Game Over text
         ctx.fillStyle = '#f5f5f5';
-        ctx.font = '40px Arial';
+        ctx.font = `${40 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40);
+        ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40 * ((scaleX + scaleY) / 2));
 
         // Final score
-        ctx.font = '30px Arial';
+        ctx.font = `${30 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.fillText('Score: ' + score, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
         // Restart instruction
-        ctx.font = '20px Arial';
-        ctx.fillText('Press Enter or Tap the Game Canvas to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40);
+        ctx.font = `${20 * ((scaleX + scaleY) / 2)}px Arial`;
+        ctx.fillText('Press Enter or Tap the Game Canvas to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40 * ((scaleX + scaleY) / 2));
         ctx.textAlign = 'start';
       }
     }
