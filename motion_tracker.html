@@ -13,7 +13,7 @@
     <style>
         :root {
             --btn-upload-color: #0079b1;
-            --btn-play-color: #17c5a3;
+            --btn-play-color: #3ec786;
             --btn-calibration-color: #f0bd37;
             --btn-set-origin-color: #f0bd37;
             --btn-export-color: #23a5d0;
@@ -24,9 +24,9 @@
             --hover-confirm-color: #1e7e34;
             --btn-cancel-color: #dc3545;
             --hover-cancel-color: #c82333;
-            --btn-plot-vx-color: #86b671;
-            --btn-plot-vy-color: #86b671;
-            --btn-backToPosition-color: #86b671;
+            --btn-plot-vx-color: #48c8a8;
+            --btn-plot-vy-color: #48c8a8;
+            --btn-backToPosition-color: #48c8a8;
         }
 
         body {
@@ -53,20 +53,21 @@
 
         h1 {
             text-align: center;
-            font-size: 2.2em;
+            font-size: 1.8em;
             font-weight: bold;
             margin: 0;
-            padding: 10px 0;
+            padding: 5px 0;
             background-color: #333;
             color: white;
         }
 
         #warningBanner {
+            font-size: 0.9em;
             background-color: #fff8e3;
             color: #856404;
-            padding: 10px;
+            padding: 5px;
             text-align: center;
-            border-bottom: 1px solid #ffeeba;
+            border-bottom: 0px;
         }
 
         #message {
@@ -74,7 +75,7 @@
             font-weight: bold;
             text-align: center;
             margin: 15px auto;
-            color: #666;
+            color: #333;
             max-width: 800px;
             line-height: 1.5;
         }
@@ -301,7 +302,7 @@
             flex: 1;
         }
 
-        \  #calibrationPrompt,
+        #calibrationPrompt,
         #exportPrompt,
         #frameRatePrompt {
             position: fixed;
@@ -465,7 +466,7 @@
     <!-- Calibration Prompt -->
     <div id="calibrationPrompt">
         <h2>Calibration</h2>
-        <p>Drag on the video to draw a line with a known length.</p>
+        <p>Enter the Length and its Unit:</p>
         <form autocomplete="off">
             <input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001"
                 step="any" autocomplete="off">
@@ -496,7 +497,7 @@
     <div id="frameRatePrompt">
         <h2>Set Frame Rate</h2>
         <p>
-            Please enter the correct frame rate. Typical values are 24, 30, 60, 240 fps:
+            Enter the correct frame rate: <br>(e.g. 24, 30, 60, 240 fps)
         </p>
         <form autocomplete="off">
             <input type="number" id="userFrameRate" name="userFrameRate" placeholder="Enter FPS" value="30" min="1"
@@ -1345,7 +1346,7 @@
         overlayCanvas.style.pointerEvents = "auto";
         frameCanvas.style.cursor = "crosshair";
         crosshair.style.display = "block";
-        message.innerHTML = "<p>Origin Mode: Click on the video to set the new origin.</p>";
+        message.innerHTML = "<p>Click on the video to set the new origin.</p>";
     });
 
     // Draw current frame
