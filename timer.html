@@ -26,6 +26,20 @@
             /* Space from the top */
         }
 
+        a {
+            color: #ff5f1f;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #ff5f1f;
+            text-decoration: underline;
+        }
+
+        a:visited {
+            color: #ff5f1f;
+        }
+
         /* Timer Container */
         .timer-container {
             background: #34495E;
@@ -237,6 +251,11 @@
     <!-- Separate audio elements for original and extra timers with preload -->
     <audio id="alarm-sound-original" src="/timer_beep.mp3" preload="auto"></audio>
     <audio id="alarm-sound-extra" src="/timer_beep.mp3" preload="auto"></audio>
+
+    <footer>
+        <p>&copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a
+                href="https://buymeacoffee.com/panphy">Support My Projects</a></p>
+    </footer>
 
     <script>
         let originalTimerInterval;
