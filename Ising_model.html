@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>2D Ising Model Simulation</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
@@ -34,7 +34,7 @@
       background-color: #333;
       color: #fff;
       text-align: center;
-      padding: 3px 0;
+      padding: 2px 0;
     }
 
     footer {
@@ -76,6 +76,31 @@
       width: 100%;
     }
 
+    /* Styles for Grid Size Box */
+    .grid-size-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      background-color: #e7f3ff;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #007bff;
+      box-sizing: border-box;
+      /* Include padding and border in width */
+      transition: width 0.3s ease;
+      /* Smooth transition for width changes */
+    }
+
+    /* CSS for simulation-wrapper */
+    .simulation-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Center child elements horizontally */
+    }
+
     .simulation-area {
       display: flex;
       flex-direction: column;
@@ -110,7 +135,7 @@
 
     .button-group button {
       margin: 5px;
-      padding: 10px 20px;
+      padding: 5px 10px;
       font-size: 16px;
       color: #fff;
       background-color: #007bff;
@@ -119,7 +144,6 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
       width: 150px;
-      /* Fixed width */
     }
 
     .button-group button:hover {
@@ -129,7 +153,7 @@
     #warning {
       color: red;
       font-weight: bold;
-      margin-top: 10px;
+      margin-top: 0px;
       text-align: center;
     }
   </style>
@@ -149,8 +173,8 @@
       </div>
       <div class="control-group">
         <label for="largeGridSize">Large Grid Size:</label>
-        <input id="largeGridSize" type="range" min="50" max="200" value="50" oninput="updateLargeGridSize(this.value)">
-        <p><span id="largeGridSizeValue">50</span> x <span id="largeGridSizeValue2">50</span></p>
+        <input id="largeGridSize" type="range" min="51" max="200" value="51" oninput="updateLargeGridSize(this.value)">
+        <p><span id="largeGridSizeValue">51</span> x <span id="largeGridSizeValue2">51</span></p>
       </div>
       <div class="control-group">
         <label for="temperature">Temperature:</label>
@@ -159,9 +183,20 @@
         <p><span id="temperatureValue">2.5 T<sub>c</sub></span></p>
       </div>
     </div>
-    <div class="simulation-area">
-      <div id="grid"></div>
+
+    <!-- Wrap Grid Size Box and Simulation Area in a single div -->
+    <div class="simulation-wrapper">
+      <!-- Grid Size Display Box -->
+      <div class="grid-size-box">
+        Current Grid Size: <span id="currentGridSize">30 x 30</span>
+      </div>
+
+      <!-- Simulation Area -->
+      <div class="simulation-area">
+        <div id="grid"></div>
+      </div>
     </div>
+
     <div class="button-group">
       <button id="toggleButton" onclick="toggleSimulation()">Run</button>
     </div>
@@ -180,6 +215,8 @@
     const largeGridSizeValue2 = document.getElementById('largeGridSizeValue2');
     const temperatureValue = document.getElementById('temperatureValue');
     const toggleButton = document.getElementById('toggleButton');
+    const currentGridSize = document.getElementById('currentGridSize'); // Grid Size Display
+    const gridSizeBox = document.querySelector('.grid-size-box'); // Grid Size Box Element
     const totalGridSize = 500; // Fixed simulation area size in pixels
 
     function initializeGrid() {
@@ -191,6 +228,8 @@
         }
       }
       renderGrid();
+      updateGridSizeBox(); // Update the grid size box on initialization
+      synchronizeGridSizeBoxWidth(); // Synchronize widths
     }
 
     function renderGrid() {
@@ -198,6 +237,8 @@
       const cellSize = totalGridSize / size; // Dynamically calculate cell size
       container.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
       container.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
+      container.style.width = `${totalGridSize}px`; // Set grid width
+      container.style.height = `${totalGridSize}px`; // Set grid height
 
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
@@ -208,6 +249,9 @@
           container.appendChild(cell);
         }
       }
+
+      // After rendering the grid, synchronize the grid-size box's width
+      synchronizeGridSizeBoxWidth();
     }
 
     function monteCarloStep() {
@@ -278,6 +322,20 @@
       temperatureValue.innerHTML = `${(T / T_c).toFixed(1)} T<sub>c</sub>`;
     }
 
+    // Function to update the Grid Size Box
+    function updateGridSizeBox() {
+      currentGridSize.textContent = `${size} x ${size}`;
+    }
+
+    // Function to synchronize Grid Size Box's width with Simulation Area's width
+    function synchronizeGridSizeBoxWidth() {
+      // Get the computed width of the grid
+      const gridWidth = container.offsetWidth;
+
+      // Set the grid-size box's width to match
+      gridSizeBox.style.width = `${gridWidth}px`;
+    }
+
     // Allow spacebar press to toggle simulation state
     document.addEventListener('keydown', (event) => {
       if (event.code === 'Space') {
@@ -288,6 +346,11 @@
 
     // Initialize the grid at the start
     initializeGrid();
+
+    // Optional: Handle window resize to keep the grid-size box in sync
+    window.addEventListener('resize', () => {
+      synchronizeGridSizeBoxWidth();
+    });
   </script>
 
   <footer>
