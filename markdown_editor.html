@@ -43,6 +43,12 @@
   </script>
 
   <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     :root {
       --background-color: #ffffff;
       --text-color: #000000;
@@ -91,6 +97,11 @@
       background-color: var(--background-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
+    }
+
+    html,
+    body {
+      overflow-x: hidden;
     }
 
     a {
@@ -501,11 +512,10 @@
 
     footer {
       text-align: center;
-      padding: 10px;
+      padding: 6px;
       background: #f4f4f4;
       color: #555;
-      margin: 10px auto 0;
-      margin-bottom: 10px;
+      margin: 5px 0;
       width: 100%;
     }
 
