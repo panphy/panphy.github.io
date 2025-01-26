@@ -24,6 +24,8 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      position: relative;
+      overflow: hidden;
     }
 
     a {
@@ -40,7 +42,7 @@
       color: #ff5f1f;
     }
 
-    /* Optional overlay (set to transparent here) */
+    /* Overlay for dimming the background */
     body::before {
       content: "";
       position: absolute;
@@ -56,19 +58,21 @@
     .game-container {
       display: flex;
       flex-direction: row;
-      gap: 30px;
-      margin-top: 20px;
-      margin-bottom: 20px;
+      gap: 20px;
+      margin: 20px;
       position: relative;
       z-index: 1;
+      flex-wrap: wrap;
+      /* Allow wrapping on smaller screens */
     }
 
     /* Info panel styling */
     .info-panel {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      width: 200px;
+      gap: 15px;
+      width: 180px;
+      /* Reduced width */
     }
 
     /* Individual boxes in the info panel */
@@ -76,61 +80,58 @@
       background-color: #282a36;
       border: 2px solid #444;
       border-radius: 8px;
-      padding: 15px;
+      padding: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
 
     .info-box h3 {
-      margin: 0 0 10px 0;
-      font-size: 18px;
+      margin: 0 0 8px 0;
+      font-size: 16px;
       color: #f8f8f2;
       text-align: center;
     }
 
-    /*
-     * Next piece container: fixed 80×40 px
-     * We use absolute positioning for the piece cells inside it.
-     */
-    .next-piece-container {
-      position: relative;
-      width: 80px;
-      /* 4 blocks × 20 px */
-      height: 40px;
-      /* 2 blocks × 20 px */
-      margin: 0 auto;
+    .info-box ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
-    /* Each cell of the next piece is a 20×20 absolutely positioned block */
-    .next-piece-cell {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      box-sizing: border-box;
+    .info-box li {
+      font-size: 14px;
+      padding: 3px 0;
+      border-bottom: 1px solid #555;
     }
 
-    /* Filled cells in the preview have a solid color */
-    .filled {
-      background-color: #f8f8f2;
-      border: 1px solid #555;
+    .info-box p {
+      font-size: 14px;
+      margin: 5px 0;
+      text-align: center;
     }
 
-    /* Canvas and buttons grouped together so they align at the bottom */
-    .canvas-and-buttons {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-end;
-      gap: 20px;
+    .info-box a {
+      color: #ff5f1f;
     }
 
-    /* Game area (holds the canvas) */
+    /* Game Section */
     .game-area {
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
+      flex: 1;
+      /* Take up remaining space */
     }
 
+    /* Responsive Canvas Styling */
     canvas {
+      width: 100%;
+      max-width: 300px;
+      /* Maintains maximum width */
+      height: auto;
+      /* Maintains aspect ratio */
+      aspect-ratio: 1 / 2;
+      /* 300x600 aspect ratio */
       border: 3px solid #444;
       background-color: #000;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
@@ -141,28 +142,67 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 10px;
+      margin-top: 15px;
       user-select: none;
       /* Prevent text selection on long-press */
+    }
+
+    /* Arrow buttons styling */
+    .arrow {
+      width: 52.5px;
+      /* Increased by 5% from 50px */
+      height: 52.5px;
+      /* Increased by 5% from 50px */
+      font-size: 20px;
+      border: 4px solid #000;
+      border-radius: 6px;
+      background-color: #f1c232;
+      color: #000;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.1s;
+    }
+
+    .arrow:active {
+      transform: scale(0.95);
+      /* Slightly shrink on click for feedback */
     }
 
     .arrow-row {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 3px;
+      /* Changed gap to 3px */
       margin: 5px 0;
     }
 
-    .arrow {
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
-      border: 5px solid #000;
-      border-radius: 8px;
-      background-color: #f1c232;
-      color: #000;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    /* Next Piece Container */
+    .next-piece-container {
+      position: relative;
+      width: 80px;
+      /* Fixed width to ensure uniform grid sizes */
+      height: 80px;
+      /* Fixed height to ensure uniform grid sizes */
+      margin: 0 auto;
+    }
+
+    /* Each cell of the next piece is a fixed size absolutely positioned block */
+    .next-piece-cell {
+      position: absolute;
+      width: 20px;
+      /* Fixed cell size */
+      height: 20px;
+      /* Fixed cell size */
+      box-sizing: border-box;
+    }
+
+    /* Filled cells in the preview have a solid color */
+    .filled {
+      background-color: #f8f8f2;
+      border: 1px solid #555;
     }
 
     /* Game over overlay */
@@ -176,12 +216,100 @@
       border-radius: 8px;
       border: 2px solid #333;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-      font-size: 20px;
+      font-size: 18px;
       color: #333;
       text-align: center;
       display: none;
       min-width: 200px;
       z-index: 999;
+    }
+
+    /* Canvas and buttons grouped together so they align at the bottom */
+    .canvas-and-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Rearranged Arrow keys into an inverted "T" */
+    .arrow-keys {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .arrow-row.up {
+      margin-bottom: 3px;
+      /* Adjusted margin for consistent spacing */
+    }
+
+    .arrow-row.bottom {
+      flex-direction: row;
+      gap: 3px;
+      /* Changed gap to 3px */
+    }
+
+    /* Arrow keys repositioned to the right of the canvas near the bottom */
+    @media (min-width: 600px) {
+      .canvas-and-buttons {
+        flex-direction: row;
+        align-items: flex-end;
+      }
+
+      .arrow-keys {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .arrow-row.up {
+        margin-bottom: 3px;
+        /* Consistent margin */
+      }
+
+      .arrow-row.bottom {
+        flex-direction: row;
+        gap: 3px;
+        /* Changed gap to 3px */
+      }
+    }
+
+    /* Responsive Adjustments for Smaller Screens */
+    @media (max-width: 600px) {
+      .game-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .info-panel {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      /* Adjust next piece container for smaller screens */
+      .next-piece-container {
+        width: 60px;
+        height: 60px;
+      }
+
+      .next-piece-cell {
+        width: 15px;
+        height: 15px;
+      }
+
+      /* Adjust arrow button sizes for smaller screens */
+      .arrow {
+        width: 42.5px;
+        /* 5% increase from 40px */
+        height: 42.5px;
+        /* 5% increase from 40px */
+        font-size: 16px;
+      }
+
+      .arrow-row.bottom {
+        gap: 3px;
+        /* Changed gap to 3px */
+      }
     }
   </style>
 </head>
@@ -217,19 +345,19 @@
     <div class="canvas-and-buttons">
       <!-- Game area -->
       <div class="game-area">
-        <canvas id="tetris" width="300" height="600"></canvas>
+        <canvas id="tetris"></canvas>
         <div id="game-over" class="game-over">
           <strong>Game Over</strong><br><br>
           Press <strong>Enter</strong> or <strong>Tap the Game Canvas</strong> to restart
         </div>
       </div>
 
-      <!-- Arrow keys: Up, Left, Down, Right -->
+      <!-- Arrow keys: Up, Left, Down, Right arranged in an inverted "T" -->
       <div class="arrow-keys">
-        <div class="arrow-row">
+        <div class="arrow-row up">
           <button id="btn-up" class="arrow">↑</button>
         </div>
-        <div class="arrow-row">
+        <div class="arrow-row bottom">
           <button id="btn-left" class="arrow">←</button>
           <button id="btn-down" class="arrow">↓</button>
           <button id="btn-right" class="arrow">→</button>
@@ -263,15 +391,22 @@
     const topScoresElement = document.getElementById("top-scores");
     const gameOverElement = document.getElementById("game-over");
 
-    const grid = 30;
-    const columns = canvas.width / grid;
-    const rows = canvas.height / grid;
+    // Fixed number of columns and rows
+    const COLS = 10;
+    const ROWS = 20;
+    let grid = 0; // Will be calculated based on canvas width
 
+    // Initialize empty board
+    let board = [];
+
+    // Game state variables
     let linesCleared = 0;
     let topScores = [];
     let gameOver = false;
     let linesClearedForSpeedIncrease = 0;
-    let dropInterval = 1000;
+    let dropInterval = 1000; // Initial drop interval in ms
+    let dropCounter = 0;
+    let lastTime = 0;
 
     // Shapes
     const shapes = {
@@ -295,29 +430,73 @@
       'T': '#05ffa1'
     };
 
-    // Initialize empty board
-    let board = Array.from({ length: rows }, () => Array(columns).fill(0));
-
-    // Randomize the first piece
-    let nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
-    let nextPiece = createPiece(nextPieceType);
-
-    // Current piece
+    // Current and next pieces
     let currentPiece = {
-      piece: nextPiece,
-      color: colors[nextPieceType]
+      piece: null,
+      color: null
     };
-
-    // Prepare the next random piece
-    nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
-    nextPiece = createPiece(nextPieceType);
+    let nextPieceType = getRandomShape();
+    let nextPiece = createPiece(nextPieceType);
 
     // Position of the current piece
     let piecePos = { x: 5, y: 0 };
 
+    // Handle device pixel ratio and canvas resizing
+    function resizeCanvas() {
+      // Get the size the canvas is being displayed.
+      const rect = canvas.getBoundingClientRect();
+
+      // Get the device pixel ratio, falling back to 1.
+      const dpr = window.devicePixelRatio || 1;
+
+      // Calculate grid size based on canvas width and fixed number of columns
+      grid = rect.width / COLS;
+
+      // Set the internal size of the canvas to match the displayed size * device pixel ratio.
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      // Scale the drawing context to account for the device pixel ratio.
+      context.scale(dpr, dpr);
+
+      // Ensure canvas height matches the grid size times number of rows
+      const expectedHeight = grid * ROWS;
+      if (rect.height !== expectedHeight) {
+        canvas.style.height = expectedHeight + 'px';
+      }
+
+      // Initialize the board based on new grid size
+      board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+
+      // Reset piece positions
+      piecePos = { x: Math.floor(COLS / 2) - Math.floor(nextPiece[0].length / 2), y: 0 };
+
+      // Redraw next piece
+      drawNextPiece(nextPiece);
+      draw(); // Redraw the board
+    }
+
+    // Initialize on load and resize
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      resetGame();
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      // Optionally, reset the game on resize to prevent inconsistencies
+      // resetGame();
+    });
+
     // Creates a piece from shapes
     function createPiece(type) {
       return shapes[type].map(row => [...row]);
+    }
+
+    // Get a random shape
+    function getRandomShape() {
+      const keys = Object.keys(shapes);
+      return keys[Math.floor(Math.random() * keys.length)];
     }
 
     // Draws the piece onto the main Tetris canvas
@@ -327,6 +506,7 @@
           if (value) {
             context.fillStyle = color;
             context.fillRect((x + offset.x) * grid, (y + offset.y) * grid, grid, grid);
+            context.strokeStyle = '#555';
             context.strokeRect((x + offset.x) * grid, (y + offset.y) * grid, grid, grid);
           }
         });
@@ -334,8 +514,8 @@
     }
 
     /*
-     * Draw the "Next piece" using an absolutely positioned container of size 80×40 px.
-     * Each cell is 20×20 px. We center the shape horizontally and vertically.
+     * Draw the "Next piece" using an absolutely positioned container.
+     * Ensure uniform grid sizes and centering.
      */
     function drawNextPiece(piece) {
       // Clear out any old cells in the container
@@ -344,18 +524,18 @@
       const pieceRows = piece.length;
       const pieceCols = piece[0].length;
 
-      // We have 4 columns wide and 2 rows tall in "block" units.
-      // Each block is 20 px => total 80 px wide, 40 px tall.
+      // Define the container size
+      const containerWidth = nextPieceContainer.clientWidth;
+      const containerHeight = nextPieceContainer.clientHeight;
 
-      // Default offsets to center
-      let offsetX = (4 - pieceCols) / 2;
-      let offsetY = (2 - pieceRows) / 2;
+      // Fixed cell size for uniformity
+      const cellSize = 20; // Must match the CSS width/height of .next-piece-cell
 
-      // If it is the "I" piece (1×4), place it on the second row
-      if (pieceRows === 1 && pieceCols === 4) {
-        offsetY = 1;  // Force it onto the second row
-        offsetX = 0;
-      }
+      // Calculate offsets to center the piece
+      const totalWidth = pieceCols * cellSize;
+      const totalHeight = pieceRows * cellSize;
+      const offsetX = (containerWidth - totalWidth) / 2;
+      const offsetY = (containerHeight - totalHeight) / 2;
 
       // Create absolutely positioned cells for each filled block
       piece.forEach((row, rowIndex) => {
@@ -364,11 +544,14 @@
             const cell = document.createElement('div');
             cell.classList.add('next-piece-cell', 'filled');
 
-            const leftPx = (colIndex + offsetX) * 20;
-            const topPx = (rowIndex + offsetY) * 20;
+            const leftPx = offsetX + (colIndex * cellSize);
+            const topPx = offsetY + (rowIndex * cellSize);
 
-            cell.style.left = leftPx + 'px';
-            cell.style.top = topPx + 'px';
+            cell.style.left = `${leftPx}px`;
+            cell.style.top = `${topPx}px`;
+            cell.style.backgroundColor = colors[nextPieceType];
+            cell.style.border = `1px solid #555`;
+
             nextPieceContainer.appendChild(cell);
           }
         });
@@ -378,33 +561,50 @@
     // Clear full rows on the board (with a brief "flash" effect)
     async function clearRows() {
       let lines = 0;
+      const clearedRows = [];
+
+      // Identify all cleared rows
       for (let y = board.length - 1; y >= 0; y--) {
         if (board[y].every(cell => cell !== 0)) {
           lines++;
-          board[y].forEach((_, x) => {
-            board[y][x] = '#FFFFFF';  // flash the row white
-          });
-          draw();
-          // tiny pause for visual effect
-          await new Promise(resolve => setTimeout(resolve, 50));
-          board.splice(y, 1);
-          board.unshift(Array(columns).fill(0));
-          y++;
+          clearedRows.push(y);
         }
       }
-      linesCleared += lines;
-      linesClearedForSpeedIncrease += lines;
 
-      if (linesClearedForSpeedIncrease >= 2) {
-        increaseSpeed();
-        linesClearedForSpeedIncrease = 0;
+      if (lines > 0) {
+        // Flash all cleared rows at once
+        clearedRows.forEach(y => {
+          board[y].forEach((_, x) => {
+            board[y][x] = '#FFFFFF'; // Set to white for flashing
+          });
+        });
+        draw();
+
+        // Wait for a brief moment to show the flash
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Rebuild the board by removing all cleared rows
+        const newBoard = board.filter((_, y) => !clearedRows.includes(y));
+        const numCleared = clearedRows.length;
+        for (let i = 0; i < numCleared; i++) {
+          newBoard.unshift(Array(COLS).fill(0));
+        }
+        board = newBoard;
+
+        linesCleared += lines;
+        linesClearedForSpeedIncrease += lines;
+
+        if (linesClearedForSpeedIncrease >= 2) {
+          increaseSpeed();
+          linesClearedForSpeedIncrease = 0;
+        }
+        linesClearedElement.textContent = linesCleared;
       }
-      linesClearedElement.textContent = linesCleared;
     }
 
     // Speed up after every few lines
     function increaseSpeed() {
-      dropInterval *= 0.8;  // 20% faster
+      dropInterval *= 0.8; // 20% faster
       console.log(`Speed increased! New drop interval: ${dropInterval}ms`);
     }
 
@@ -417,16 +617,17 @@
         clearRows();
         resetPiece();
       }
+      draw();
     }
 
     // Reset the piece to the next piece
     function resetPiece() {
       currentPiece.piece = nextPiece;
       currentPiece.color = colors[nextPieceType];
-      piecePos = { x: 5, y: 0 };
+      piecePos = { x: Math.floor(COLS / 2) - Math.floor(nextPiece[0].length / 2), y: 0 };
 
       // Pick the next random piece
-      nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
+      nextPieceType = getRandomShape();
       nextPiece = createPiece(nextPieceType);
       drawNextPiece(nextPiece);
 
@@ -436,6 +637,7 @@
         addScoreToTopScores(linesCleared);
         showGameOver();
       }
+      draw();
     }
 
     // Merge piece into the board
@@ -455,7 +657,12 @@
         for (let x = 0; x < piece[y].length; x++) {
           if (
             piece[y][x] &&
-            (board[y + offset.y] && board[y + offset.y][x + offset.x]) !== 0
+            (
+              y + offset.y >= ROWS || // Bottom boundary
+              x + offset.x < 0 || // Left boundary
+              x + offset.x >= COLS || // Right boundary
+              board[y + offset.y][x + offset.x] !== 0 // Collision with existing blocks
+            )
           ) {
             return true;
           }
@@ -480,6 +687,7 @@
     function showGameOver() {
       gameOverElement.style.display = 'block';
     }
+
     function hideGameOver() {
       gameOverElement.style.display = 'none';
     }
@@ -487,18 +695,21 @@
     // Redraw the board & current piece
     function draw() {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw current falling piece
-      drawPiece(currentPiece.piece, piecePos, currentPiece.color);
       // Draw board
       board.forEach((row, y) => {
         row.forEach((value, x) => {
-          if (value) {
+          if (value !== 0) {
             context.fillStyle = value;
             context.fillRect(x * grid, y * grid, grid, grid);
+            context.strokeStyle = '#555';
             context.strokeRect(x * grid, y * grid, grid, grid);
           }
         });
       });
+      // Draw current falling piece
+      if (currentPiece.piece) {
+        drawPiece(currentPiece.piece, piecePos, currentPiece.color);
+      }
     }
 
     // Key controls
@@ -512,10 +723,18 @@
         return;
       }
       switch (event.key) {
-        case 'ArrowLeft': move(-1); break;
-        case 'ArrowRight': move(1); break;
-        case 'ArrowUp': rotatePiece(); break;
-        case 'ArrowDown': drop(); break;
+        case 'ArrowLeft':
+          move(-1);
+          break;
+        case 'ArrowRight':
+          move(1);
+          break;
+        case 'ArrowUp':
+          rotatePiece();
+          break;
+        case 'ArrowDown':
+          drop();
+          break;
       }
     });
 
@@ -577,6 +796,7 @@
       if (collide(board, currentPiece.piece, piecePos)) {
         piecePos.x -= direction;
       }
+      draw();
     }
 
     // Rotate piece clockwise
@@ -593,6 +813,7 @@
         }
       }
       currentPiece.piece = rotatedPiece;
+      draw();
     }
 
     // Matrix transpose + reverse => clockwise rotation
@@ -602,20 +823,24 @@
 
     // Restart the game
     function restartGame() {
-      board = Array.from({ length: rows }, () => Array(columns).fill(0));
+      board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
       linesCleared = 0;
       linesClearedForSpeedIncrease = 0;
       dropInterval = 1000;
       linesClearedElement.textContent = linesCleared;
       gameOver = false;
       hideGameOver();
+      currentPiece = {
+        piece: nextPiece,
+        color: colors[nextPieceType]
+      };
+      piecePos = { x: Math.floor(COLS / 2) - Math.floor(nextPiece[0].length / 2), y: 0 };
       resetPiece();
+      draw();
       update();
     }
 
     // Main game loop
-    let lastTime = 0;
-    let dropCounter = 0;
     function update(time = 0) {
       if (gameOver) return;
       const deltaTime = time - lastTime;
@@ -632,9 +857,26 @@
       }
     }
 
-    // Start
-    resetPiece();
-    update();
+    // Start the game
+    function resetGame() {
+      board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+      linesCleared = 0;
+      linesClearedForSpeedIncrease = 0;
+      dropInterval = 1000;
+      linesClearedElement.textContent = linesCleared;
+      topScores = [];
+      updateTopScores();
+      gameOver = false;
+      hideGameOver();
+      currentPiece = {
+        piece: nextPiece,
+        color: colors[nextPieceType]
+      };
+      piecePos = { x: Math.floor(COLS / 2) - Math.floor(nextPiece[0].length / 2), y: 0 };
+      resetPiece();
+      draw();
+      update();
+    }
   </script>
 </body>
 
