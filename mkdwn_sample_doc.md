@@ -117,7 +117,7 @@ x^{\prime} & \bar{x} & \hat{x} & \ge & \le \\
 \end{array}
 $$
 
-> Here also shows the LaTeX way to create a table. Note the mysterious <code>{|l|l|c|r|r|}</code> which occurs immediately after <code>\begin{array}</code>. Each of the letters in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries of the column should be aligned (left, left, center, right, right). The <code>|</code> represents a verticle line between columns.
+> Here also shows a LaTeX way to create a table. Note the mysterious <code>{|l|l|c|r|r|}</code> which occurs immediately after <code>\begin{array}</code>. Each of the letters in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries of the column should be aligned (left, left, center, right, right). The <code>|</code> represents a verticle line between columns.
 
 - 2.2.4 **Matrices**
 $$
