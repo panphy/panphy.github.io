@@ -118,6 +118,9 @@
       color: #ff5f1f;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* The main container that holds both the input and output panes          */
+    /* ---------------------------------------------------------------------- */
     #editorContainer {
       display: flex;
       flex: 1;
@@ -131,6 +134,11 @@
       background-color: var(--pane-background);
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Left Pane = Markdown Input                                             */
+    /* Right Pane = Rendered Output                                           */
+    /* Each is 50% width, with separate borders (optional)                    */
+    /* ---------------------------------------------------------------------- */
     #inputPane,
     #outputPane {
       width: 50%;
@@ -147,26 +155,59 @@
       border-right: 1px solid var(--border-color);
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* .pane-heading-container: a 3-column grid to place                      */
+    /* logo on the left (Input pane), heading in the center, toggle (Output)  */
+    /* on the right. Both headings share the same min-height.                 */
+    /* ---------------------------------------------------------------------- */
     .pane-heading-container {
-      display: flex;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      /* Instead of min-height, set a strict height: */
+      height: 45px;
       align-items: center;
-      position: relative;
       background-color: var(--pane-heading-background);
       color: var(--pane-heading-color);
       margin: 0;
-      padding: 1px;
+      padding: 0 10px;
+      /* Use horizontal padding only if needed */
+      /* If your text or logo is too big, they may get clipped, so be sure
+     to resize them if you see overflow issues. */
+    }
+
+    /* Ensure the logo fits inside that 45px container: */
+    .logo-container img {
+      max-height: 80%;
+      /* or 100%, depending on your preference */
+      /* This ensures the image will not exceed the parent container’s height. */
+    }
+
+    /* Scale the PanPhy logo so it fits nicely in the heading row */
+    .logo-container img {
+      max-height: 30px;
+      margin-top: 5px;
+      margin-left: 8px;
+    }
+
+    /* For the Output pane (and input pane if needed), if there's no content: 
+       a placeholder on left or right to keep alignment. */
+    .heading-placeholder,
+    .theme-toggle-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    /* The text heading itself is centered in the grid cell. */
+    .pane-heading {
       text-align: center;
-    }
-
-    .pane-heading-container h2 {
       margin: 0;
-      flex: 1;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* The dark/light theme toggle button (Output Pane heading, right side)   */
+    /* ---------------------------------------------------------------------- */
     .theme-toggle-button {
-      position: absolute;
-      right: 10px;
       background: none;
       border: none;
       cursor: pointer;
@@ -174,6 +215,13 @@
       color: var(--pane-heading-color);
     }
 
+    .theme-toggle-button:hover {
+      opacity: 0.8;
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* Button container under each pane heading                               */
+    /* ---------------------------------------------------------------------- */
     .buttonContainer {
       margin: 10px 0;
       text-align: center;
@@ -189,6 +237,9 @@
       border: none;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Additional container for the sync scroll toggle on the Output pane     */
+    /* ---------------------------------------------------------------------- */
     .toggle-container {
       position: absolute;
       right: 15px;
@@ -196,6 +247,9 @@
       align-items: center;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* The switch (checkbox) for sync scroll                                  */
+    /* ---------------------------------------------------------------------- */
     .switch {
       position: relative;
       display: inline-block;
@@ -251,6 +305,9 @@
       margin-right: 5px;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Textarea for Markdown Input                                            */
+    /* ---------------------------------------------------------------------- */
     textarea {
       flex: 1;
       width: 100%;
@@ -265,6 +322,9 @@
       color: var(--text-color);
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Rendered output area                                                   */
+    /* ---------------------------------------------------------------------- */
     #renderedOutput {
       flex: 1;
       padding: 20px;
@@ -276,6 +336,9 @@
       color: var(--text-color);
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Code block and syntax highlighting                                     */
+    /* ---------------------------------------------------------------------- */
     code {
       background-color: var(--code-background);
       padding: 0.1em 0.2em;
@@ -359,6 +422,9 @@
       color: #e6db74 !important;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Table styling                                                          */
+    /* ---------------------------------------------------------------------- */
     table {
       max-width: 100%;
       margin: 20px auto;
@@ -392,6 +458,9 @@
       text-align: left;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Printing styles                                                        */
+    /* ---------------------------------------------------------------------- */
     @media print {
       :root {
         --background-color: #ffffff !important;
@@ -411,27 +480,36 @@
         --switch-label-font-size: 18px !important;
       }
 
+      /* Override the body’s flex layout and fixed height */
       body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        line-height: 1.5 !important;
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        /* any other resets you want, e.g. background-color, color, etc. */
       }
 
+      /* Make sure the container does not stay flex or keep 100% height. */
       #editorContainer {
-        display: block;
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
       }
 
+      /* Hide input pane, toolbars, etc. */
       #inputPane {
-        display: none;
+        display: none !important;
       }
 
+      /* If necessary, override anything that might still cause a scroll bar. */
       #outputPane {
+        display: block !important;
         width: auto !important;
+        height: auto !important;
+        overflow: visible !important;
         padding: 15mm !important;
-        background-color: #ffffff !important;
-        color: #000000 !important;
         border: none !important;
-        line-height: 1.5 !important;
+        /* etc. */
       }
 
       .pane-heading-container {
@@ -450,9 +528,10 @@
         line-height: 1.5 !important;
       }
 
+      /* Also override #renderedOutput if it has any fixed heights or scroll. */
       #renderedOutput {
-        font-size: 14pt !important;
-        line-height: 1.5 !important;
+        height: auto !important;
+        overflow: visible !important;
       }
 
       footer {
@@ -510,6 +589,9 @@
       }
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* Buttons and footer                                                     */
+    /* ---------------------------------------------------------------------- */
     footer {
       text-align: center;
       padding: 8px;
@@ -543,11 +625,39 @@
 </head>
 
 <body>
+  <!--
+      The main container with two panes:
+      - Left = Markdown Input
+      - Right = Rendered Output
+  -->
   <div id="editorContainer">
+    <!-- ============================================= -->
+    <!-- =========== Markdown Input Pane ============= -->
+    <!-- ============================================= -->
     <div id="inputPane">
+      <!--
+          New 3-column heading container:
+          1) Logo on the left
+          2) "Markdown Input" in the center
+          3) placeholder on the right
+      -->
       <div class="pane-heading-container">
+        <!-- Logo Container (Left) -->
+        <div class="logo-container">
+          <!-- Link the logo to PanPhy website -->
+          <a href="https://panphy.github.io/">
+            <img src="panphy.png" alt="PanPhy logo" />
+          </a>
+        </div>
+
+        <!-- The heading in the Center -->
         <h2 class="pane-heading">Markdown Input</h2>
+
+        <!-- Placeholder on the Right (keeps grid layout consistent) -->
+        <div class="heading-placeholder"></div>
       </div>
+
+      <!-- Buttons and the markdown input textarea below -->
       <div class="buttonContainer">
         <button id="loadFileButton">Open .md File</button>
         <button id="saveMDButton">Save .md</button>
@@ -556,12 +666,34 @@
       </div>
       <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
     </div>
+
+    <!-- ============================================= -->
+    <!-- ========== Rendered Output Pane ============= -->
+    <!-- ============================================= -->
     <div id="outputPane">
+      <!--
+          New 3-column heading container:
+          1) placeholder on the left
+          2) "Rendered Output" in the center
+          3) theme toggle on the right
+      -->
       <div class="pane-heading-container">
+        <!-- Placeholder on the Left -->
+        <div class="heading-placeholder"></div>
+
+        <!-- The heading in the Center -->
         <h2 class="pane-heading">Rendered Output</h2>
-        <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
-          title="Switch to Dark Mode">☀️</button>
+
+        <!-- Theme toggle button on the Right -->
+        <div class="theme-toggle-wrapper">
+          <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
+            title="Switch to Dark Mode">
+            ☀️
+          </button>
+        </div>
       </div>
+
+      <!-- Buttons and rendered output below -->
       <div class="buttonContainer no-print">
         <button id="printButton" title="Prints in light mode">Print to PDF</button>
         <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
@@ -580,10 +712,11 @@
   </div>
 
   <footer>
-    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
-      My Projects</a>
+    &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> |
+    <a href="https://buymeacoffee.com/panphy">Support My Projects</a>
   </footer>
 </body>
+
 
 <script>
   const markdownInput = document.getElementById('markdownInput');
