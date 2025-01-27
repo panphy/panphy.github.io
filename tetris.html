@@ -24,6 +24,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      position: relative;
     }
 
     a {
@@ -32,7 +33,6 @@
     }
 
     a:hover {
-      color: #ff5f1f;
       text-decoration: underline;
     }
 
@@ -56,19 +56,24 @@
     .game-container {
       display: flex;
       flex-direction: row;
-      gap: 30px;
-      margin-top: 20px;
-      margin-bottom: 20px;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2vw;
+      margin-top: 2vh;
+      margin-bottom: 2vh;
       position: relative;
       z-index: 1;
+      width: 90vw;
+      max-width: 1200px;
     }
 
     /* Info panel styling */
     .info-panel {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      width: 200px;
+      gap: 2vh;
+      width: 20vw;
+      max-width: 200px;
     }
 
     /* Individual boxes in the info panel */
@@ -76,35 +81,51 @@
       background-color: #282a36;
       border: 2px solid #444;
       border-radius: 8px;
-      padding: 15px;
+      padding: 1.5vh;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
 
+    /* Increase font size for the info-box headings */
     .info-box h3 {
-      margin: 0 0 10px 0;
-      font-size: 18px;
+      margin: 0 0 1vh 0;
+      font-size: 3vh;
+      /* increased from 2vh */
       color: #f8f8f2;
       text-align: center;
     }
 
-    /*
-     * Next piece container: fixed 80×40 px
-     * We use absolute positioning for the piece cells inside it.
-     */
+    .info-box div {
+      color: #f8f8f2;
+      font-size: 2vh;
+      text-align: center;
+    }
+
+    /* The container for the main canvas & arrow keys (placed side by side). */
+    .canvas-and-buttons {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      /* arrow keys near the bottom of the canvas */
+      gap: 2vw;
+    }
+
+    /* Next piece container: 80×80 px total (4×4 blocks of size 20×20). */
     .next-piece-container {
       position: relative;
-      width: 80px;
-      /* 4 blocks × 20 px */
-      height: 40px;
-      /* 2 blocks × 20 px */
+      width: 8vw;
+      max-width: 80px;
+      height: 8vw;
+      max-height: 80px;
       margin: 0 auto;
     }
 
     /* Each cell of the next piece is a 20×20 absolutely positioned block */
     .next-piece-cell {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 2vw;
+      max-width: 20px;
+      height: 2vw;
+      max-height: 20px;
       box-sizing: border-box;
     }
 
@@ -112,14 +133,6 @@
     .filled {
       background-color: #f8f8f2;
       border: 1px solid #555;
-    }
-
-    /* Canvas and buttons grouped together so they align at the bottom */
-    .canvas-and-buttons {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-end;
-      gap: 20px;
     }
 
     /* Game area (holds the canvas) */
@@ -134,6 +147,10 @@
       border: 3px solid #444;
       background-color: #000;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+      width: 60vw;
+      max-width: 300px;
+      height: 120vw;
+      max-height: 600px;
     }
 
     /* Arrow keys container */
@@ -141,7 +158,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 1vh;
       user-select: none;
       /* Prevent text selection on long-press */
     }
@@ -149,20 +166,25 @@
     .arrow-row {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin: 5px 0;
+      gap: 1vw;
+      margin: 0.5vh 0;
     }
 
     .arrow {
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
+      width: 6vw;
+      max-width: 60px;
+      height: 6vw;
+      max-height: 60px;
+      font-size: 3vh;
       border: 5px solid #000;
       border-radius: 8px;
       background-color: #f1c232;
       color: #000;
       cursor: pointer;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     /* Game over overlay */
@@ -172,15 +194,15 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background-color: rgba(255, 255, 255, 0.85);
-      padding: 15px;
+      padding: 1.5vh;
       border-radius: 8px;
       border: 2px solid #333;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-      font-size: 20px;
+      font-size: 2vh;
       color: #333;
       text-align: center;
       display: none;
-      min-width: 200px;
+      min-width: 20vw;
       z-index: 999;
     }
   </style>
@@ -195,16 +217,19 @@
         <h3>Next Piece</h3>
         <div class="next-piece-container" id="next-piece-container"></div>
       </div>
+
       <!-- Lines cleared box -->
       <div class="info-box">
         <h3>Lines Cleared</h3>
-        <div id="lines-cleared" style="text-align: center; font-size: 20px;">0</div>
+        <div id="lines-cleared" style="font-size: 3.1vh;">0</div>
       </div>
+
       <!-- Top scores box -->
       <div class="info-box">
         <h3>Top Scores</h3>
-        <div id="top-scores" style="text-align: center; font-size: 16px;"></div>
+        <div id="top-scores" style="font-size: 3.1vh;"></div>
       </div>
+
       <div class="info-box">
         <center>
           <p>&copy; 2025 <a href="https://panphy.github.io/">PanPhy</a>.</p>
@@ -213,11 +238,11 @@
       </div>
     </div>
 
-    <!-- Canvas and arrow keys side by side, aligned at the bottom -->
+    <!-- Canvas and arrow keys side by side -->
     <div class="canvas-and-buttons">
       <!-- Game area -->
       <div class="game-area">
-        <canvas id="tetris" width="300" height="600"></canvas>
+        <canvas id="tetris"></canvas>
         <div id="game-over" class="game-over">
           <strong>Game Over</strong><br><br>
           Press <strong>Enter</strong> or <strong>Tap the Game Canvas</strong> to restart
@@ -263,9 +288,9 @@
     const topScoresElement = document.getElementById("top-scores");
     const gameOverElement = document.getElementById("game-over");
 
-    const grid = 30;
-    const columns = canvas.width / grid;
-    const rows = canvas.height / grid;
+    let grid;
+    let columns;
+    let rows;
 
     let linesCleared = 0;
     let topScores = [];
@@ -296,7 +321,7 @@
     };
 
     // Initialize empty board
-    let board = Array.from({ length: rows }, () => Array(columns).fill(0));
+    let board;
 
     // Randomize the first piece
     let nextPieceType = 'IJLOSTZ'[Math.floor(Math.random() * 7)];
@@ -334,8 +359,8 @@
     }
 
     /*
-     * Draw the "Next piece" using an absolutely positioned container of size 80×40 px.
-     * Each cell is 20×20 px. We center the shape horizontally and vertically.
+     * Draw the "Next piece" in a 4×4 region (80×80 px).
+     * We'll simply center the piece in that 4×4 box.
      */
     function drawNextPiece(piece) {
       // Clear out any old cells in the container
@@ -344,20 +369,11 @@
       const pieceRows = piece.length;
       const pieceCols = piece[0].length;
 
-      // We have 4 columns wide and 2 rows tall in "block" units.
-      // Each block is 20 px => total 80 px wide, 40 px tall.
+      // We'll define a 4×4 bounding box for simplicity
+      // so each block is 20px. Center the piece in that box.
+      let offsetX = Math.floor((4 - pieceCols) / 2);
+      let offsetY = Math.floor((4 - pieceRows) / 2);
 
-      // Default offsets to center
-      let offsetX = (4 - pieceCols) / 2;
-      let offsetY = (2 - pieceRows) / 2;
-
-      // If it is the "I" piece (1×4), place it on the second row
-      if (pieceRows === 1 && pieceCols === 4) {
-        offsetY = 1;  // Force it onto the second row
-        offsetX = 0;
-      }
-
-      // Create absolutely positioned cells for each filled block
       piece.forEach((row, rowIndex) => {
         row.forEach((val, colIndex) => {
           if (val) {
@@ -375,25 +391,66 @@
       });
     }
 
-    // Clear full rows on the board (with a brief "flash" effect)
+    /*
+     * Rebuild-the-board row-clearing approach:
+     * 1) Find the full rows (store indices in an array).
+     * 2) Flash them white on the existing board.
+     * 3) Wait a bit for the flash to appear.
+     * 4) Build a brand-new board that excludes those rows,
+     *    and unshift empty rows for each cleared row.
+     * 5) This avoids splicing in-place and skipping rows.
+     */
     async function clearRows() {
-      let lines = 0;
-      for (let y = board.length - 1; y >= 0; y--) {
+      // 1) Gather indices of full rows
+      let fullRows = [];
+      for (let y = 0; y < rows; y++) {
         if (board[y].every(cell => cell !== 0)) {
-          lines++;
-          board[y].forEach((_, x) => {
-            board[y][x] = '#FFFFFF';  // flash the row white
-          });
-          draw();
-          // tiny pause for visual effect
-          await new Promise(resolve => setTimeout(resolve, 50));
-          board.splice(y, 1);
-          board.unshift(Array(columns).fill(0));
-          y++;
+          fullRows.push(y);
         }
       }
-      linesCleared += lines;
-      linesClearedForSpeedIncrease += lines;
+
+      if (!fullRows.length) return; // no full rows
+
+      // 2) Flash those rows white
+      fullRows.forEach(y => {
+        for (let x = 0; x < columns; x++) {
+          board[y][x] = '#FFFFFF';
+        }
+      });
+      draw();
+      // 3) Pause for the flash
+      await new Promise(r => setTimeout(r, 100));
+
+      // 4) Build a new board
+      // Start from an empty array:
+      let newBoard = [];
+      let clearedCount = fullRows.length;
+
+      // For each row from top to bottom:
+      for (let y = 0; y < rows; y++) {
+        // If this row is NOT fully filled, add it to newBoard
+        if (!fullRows.includes(y)) {
+          newBoard.push([...board[y]]);
+        }
+      }
+
+      // Now unshift "clearedCount" empty rows on top
+      while (clearedCount > 0) {
+        newBoard.unshift(Array(columns).fill(0));
+        clearedCount--;
+      }
+
+      // Ensure newBoard still has the same total row count
+      // (just in case; it should, but as a sanity check):
+      newBoard = newBoard.slice(-rows);
+
+      // Replace the old board with the new board
+      board = newBoard;
+      draw();
+
+      // 5) Tally up lines
+      linesCleared += fullRows.length;
+      linesClearedForSpeedIncrease += fullRows.length;
 
       if (linesClearedForSpeedIncrease >= 2) {
         increaseSpeed();
@@ -412,6 +469,7 @@
     function drop() {
       piecePos.y++;
       if (collide(board, currentPiece.piece, piecePos)) {
+        // Revert the drop
         piecePos.y--;
         merge(board, currentPiece.piece, piecePos, currentPiece.color);
         clearRows();
@@ -430,7 +488,7 @@
       nextPiece = createPiece(nextPieceType);
       drawNextPiece(nextPiece);
 
-      // Check if new piece collides immediately => game over
+      // Check if new piece collides => game over
       if (collide(board, currentPiece.piece, piecePos)) {
         gameOver = true;
         addScoreToTopScores(linesCleared);
@@ -484,12 +542,12 @@
       gameOverElement.style.display = 'none';
     }
 
-    // Redraw the board & current piece
+    // Draw board + current piece
     function draw() {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw current falling piece
+      // Draw the falling piece
       drawPiece(currentPiece.piece, piecePos, currentPiece.color);
-      // Draw board
+      // Draw the board
       board.forEach((row, y) => {
         row.forEach((value, x) => {
           if (value) {
@@ -501,7 +559,7 @@
       });
     }
 
-    // Key controls
+    // Keyboard
     document.addEventListener('keydown', event => {
       // Prevent arrow keys from scrolling
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -519,7 +577,7 @@
       }
     });
 
-    // Also allow clicking/touching canvas to restart
+    // Mouse/touch to restart
     canvas.addEventListener('click', () => {
       if (gameOver) restartGame();
     });
@@ -538,12 +596,10 @@
       const startPress = (e) => {
         e.preventDefault();
         if (gameOver) return;
-        // Immediate action on press
+        // Immediate action
         pressAction();
-        // Repeated action if still held
-        pressInterval = setInterval(() => {
-          pressAction();
-        }, 150);
+        // Repeated if still held
+        pressInterval = setInterval(pressAction, 150);
       };
 
       const endPress = () => {
@@ -553,7 +609,7 @@
         }
       };
 
-      // For both mouse and touch
+      // Mouse and touch
       button.addEventListener('mousedown', startPress);
       button.addEventListener('touchstart', startPress, { passive: false });
       button.addEventListener('mouseup', endPress);
@@ -561,11 +617,11 @@
       button.addEventListener('touchend', endPress);
       button.addEventListener('touchcancel', endPress);
 
-      // Prevent context menu if the user tries to right-click or long press
-      button.addEventListener('contextmenu', (e) => e.preventDefault());
+      // Prevent context menu
+      button.addEventListener('contextmenu', e => e.preventDefault());
     }
 
-    // Register arrow buttons for long-press
+    // Register arrow buttons
     registerLongPressButton('btn-up', rotatePiece);
     registerLongPressButton('btn-left', () => move(-1));
     registerLongPressButton('btn-right', () => move(1));
@@ -581,23 +637,23 @@
 
     // Rotate piece clockwise
     function rotatePiece() {
-      const rotatedPiece = rotate(currentPiece.piece);
+      const rotated = rotate(currentPiece.piece);
       const oldX = piecePos.x;
       let offset = 1;
-      while (collide(board, rotatedPiece, piecePos)) {
+      while (collide(board, rotated, piecePos)) {
         piecePos.x += offset;
         offset = -(offset + (offset > 0 ? 1 : -1));
-        if (offset > rotatedPiece[0].length) {
+        if (offset > rotated[0].length) {
           piecePos.x = oldX;
           return;
         }
       }
-      currentPiece.piece = rotatedPiece;
+      currentPiece.piece = rotated;
     }
 
-    // Matrix transpose + reverse => clockwise rotation
-    function rotate(piece) {
-      return piece[0].map((_, i) => piece.map(row => row[i])).reverse();
+    // Standard Tetris rotation (matrix transpose + reverse each row)
+    function rotate(matrix) {
+      return matrix[0].map((_, i) => matrix.map(row => row[i])).reverse();
     }
 
     // Restart the game
@@ -632,7 +688,21 @@
       }
     }
 
+    // Adjust canvas size and grid based on screen size
+    function adjustCanvasSize() {
+      const canvasWidth = Math.min(window.innerWidth * 0.6, 300);
+      const canvasHeight = canvasWidth * 2;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      grid = canvasWidth / 10;
+      columns = canvas.width / grid;
+      rows = canvas.height / grid;
+      board = Array.from({ length: rows }, () => Array(columns).fill(0));
+    }
+
     // Start
+    window.addEventListener('resize', adjustCanvasSize);
+    adjustCanvasSize();
     resetPiece();
     update();
   </script>
