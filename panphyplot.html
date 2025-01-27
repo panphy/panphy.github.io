@@ -39,27 +39,43 @@
             align-items: center;
             background-color: #333;
             color: white;
-            padding: 8px;
+            padding: 3px;
             font-size: 22px;
             font-weight: bold;
             position: relative;
         }
 
-        .banner-left {
-            width: 70px;
-            /* Spacer for centering */
+        /* Logo container on the left */
+        .banner-logo {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
         }
 
+        /* Scale the image so it fits nicely in the banner */
+        .banner-logo img {
+            max-height: 35px;
+            /* Adjust as needed */
+            height: auto;
+            width: auto;
+            margin: 0;
+        }
+
+        /* Title in the center */
         .banner-title {
             flex: 1;
             text-align: center;
+            font-size: 1.5rem;
         }
 
+        /* Buttons on the right */
         .banner-buttons {
             display: flex;
             gap: 0px;
             width: 60px;
-            /* Fixed width to match banner-left */
+            /* or auto, if preferred */
+            justify-content: flex-end;
+            margin-right: 15px;
         }
 
         .banner-button {
@@ -823,12 +839,22 @@
 
 <body>
     <div class="banner">
-        <div class="banner-left"></div> <!-- Spacer for centering -->
+        <!-- Logo on the Left -->
+        <div class="banner-logo">
+            <a href="https://panphy.github.io/">
+                <img src="panphy.png" alt="PanPhy logo" />
+            </a>
+        </div>
+
+        <!-- Title in the Center -->
         <div class="banner-title">PanPhyPlot</div>
+
+        <!-- Buttons on the Right -->
         <div class="banner-buttons">
             <a href="/panphyplot_manual.html" class="banner-button">Manual</a>
         </div>
     </div>
+
 
     <div class="reminder">
         <p align="center">
