@@ -37,6 +37,51 @@
             color: #333;
         }
 
+        /* Title banner container: 3-column grid */
+        #titleBanner {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            /* Left, middle(1fr), right */
+            align-items: center;
+            /* Vertically center items */
+            background-color: #333;
+            /* Same background as your old <h1> */
+            color: #fff;
+            /* White text */
+            margin: 0;
+            /* Remove default margins */
+            padding: 5px 0;
+            /* Slight vertical padding */
+        }
+
+        /* Logo container: ensure the image fits nicely in the banner */
+        .banner-logo img {
+            max-height: 40px;
+            /* Adjust if you want a bigger/smaller logo */
+            height: auto;
+            width: auto;
+            margin-left: 10px;
+            /* Left padding for visual space */
+            margin-right: 10px;
+            /* Space between logo and title */
+        }
+
+        /* The title in the center column, centered text */
+        .banner-title {
+            text-align: center;
+            margin: 0;
+            /* Remove default heading margin */
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        /* Empty placeholder on the right to balance out the grid */
+        .banner-placeholder {
+            /* Make it about as wide as the logo + margins, so the heading is truly centered across the banner. */
+            width: 70px;
+            /* Adjust to match the approximate space the logo occupies */
+        }
+
         a {
             color: #ff5f1f;
             text-decoration: none;
@@ -433,7 +478,21 @@
 </head>
 
 <body>
-    <h1>Motion Tracker</h1>
+    <!-- Title Banner with Logo (Left), Title (Center), Placeholder (Right) -->
+    <div id="titleBanner">
+        <!-- Logo on the Left -->
+        <div class="banner-logo">
+            <a href="https://panphy.github.io/">
+                <img src="panphy.png" alt="PanPhy logo" />
+            </a>
+        </div>
+
+        <!-- Motion Tracker Title in the Middle -->
+        <h1 class="banner-title">Motion Tracker</h1>
+
+        <!-- Empty placeholder to keep the heading centered -->
+        <div class="banner-placeholder"></div>
+    </div>
 
     <div id="warningBanner">
         <strong>Note:</strong> This app is optimized for desktop. On iOS, use the latest version for best performance.
