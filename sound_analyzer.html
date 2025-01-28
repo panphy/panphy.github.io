@@ -29,9 +29,6 @@
       color: #ff5f1f;
     }
 
-    /* Let the canvases grow/shrink dynamically with the window,
-       while keeping a ratio. The frequency canvas is 800×300 => ~8:3 ratio,
-       the waveform is 800×200 => ~8:2 ratio. */
     canvas {
       display: block;
       margin: 0 auto;
@@ -45,6 +42,42 @@
       text-align: center;
       color: #98c616;
       margin: 1rem 0 0.4rem 0;
+    }
+
+    /* --- Title Banner: a 3-column grid --- */
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      /* Left, middle(1fr), right */
+      align-items: center;
+      /* vertically center items */
+      background-color: #121212;
+    }
+
+    /* Logo container (left column). Controls image size. */
+    .banner-logo img {
+      max-height: 40px;
+      /* Adjust if you want bigger/smaller logo */
+      height: auto;
+      width: auto;
+      margin-left: 10px;
+      /* Spacing on left if desired */
+      margin-top: 10px;
+    }
+
+    /* Title in the center column. Matches your desired color & style. */
+    .banner-title {
+      text-align: center;
+      margin: 1rem 0 0.4rem 0;
+      color: #98c616;
+      font-size: 1.8em;
+    }
+
+    /* Placeholder (right column) keeps the heading centered
+   by matching the approximate space of the logo on the left. */
+    .banner-placeholder {
+      width: 70px;
+      /* Adjust to match your logo’s width + margins */
     }
 
     #peak-frequency {
@@ -145,13 +178,26 @@
 </head>
 
 <body>
-  <h1>Audio Spectrum & Waveform Analyzer</h1>
+  <!-- Title Banner: Logo (Left), Heading (Center), Placeholder (Right) -->
+  <div id="titleBanner">
+    <div class="banner-logo">
+      <a href="https://panphy.github.io/">
+        <img src="panphy.png" alt="PanPhy logo" />
+      </a>
+    </div>
+
+    <h1 class="banner-title">Audio Spectrum & Waveform Analyzer</h1>
+
+    <div class="banner-placeholder"></div>
+  </div>
+  <br>
+
   <!-- Peak Frequency Display -->
   <div id="peak-frequency">Peak Frequency: -- Hz</div>
 
   <!-- Frequency Spectrum & Tooltip -->
   <div id="visualizer-container">
-    <canvas id="visualizer" width="800" height="300"></canvas>
+    <canvas id="visualizer" width="800" height="200"></canvas>
     <div id="tooltip"></div>
   </div>
 
