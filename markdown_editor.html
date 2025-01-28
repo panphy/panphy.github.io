@@ -162,8 +162,8 @@
     /* ---------------------------------------------------------------------- */
     .pane-heading-container {
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      /* Instead of min-height, set a strict height: */
+      grid-template-columns: 50px 1fr 50px;
+      /* Fixed widths for symmetry */
       height: 45px;
       align-items: center;
       background-color: var(--pane-heading-background);
@@ -172,36 +172,46 @@
       padding: 0 10px;
       /* Use horizontal padding only if needed */
       /* If your text or logo is too big, they may get clipped, so be sure
-     to resize them if you see overflow issues. */
+       to resize them if you see overflow issues. */
     }
 
     /* Ensure the logo fits inside that 45px container: */
     .logo-container img {
-      max-height: 80%;
-      /* or 100%, depending on your preference */
-      /* This ensures the image will not exceed the parent container’s height. */
+      max-height: 30px;
+      /* Fits within 45px container */
+      margin: 0;
+      /* Remove extra margins */
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     /* Scale the PanPhy logo so it fits nicely in the heading row */
+    /* Removed extra margins to prevent pushing the heading */
     .logo-container img {
       max-height: 30px;
-      margin-top: 5px;
-      margin-left: 8px;
+      margin: 0;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     /* For the Output pane (and input pane if needed), if there's no content: 
-       a placeholder on left or right to keep alignment. */
+     a placeholder on left or right to keep alignment. */
     .heading-placeholder,
     .theme-toggle-wrapper {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
+      /* Center content within fixed width */
     }
 
     /* The text heading itself is centered in the grid cell. */
     .pane-heading {
       text-align: center;
       margin: 0;
+      font-size: 1.2em;
+      /* Adjust for better visibility */
     }
 
     /* ---------------------------------------------------------------------- */
@@ -213,6 +223,11 @@
       cursor: pointer;
       font-size: 18px;
       color: var(--pane-heading-color);
+      margin: 0;
+      /* Remove extra margins */
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .theme-toggle-button:hover {
@@ -622,6 +637,8 @@
       opacity: 0.8;
     }
   </style>
+
+
 </head>
 
 <body>
