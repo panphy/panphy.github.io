@@ -2,9 +2,9 @@
 <html>
 
 <head>
-  <title>PanPhyPlot - User Manual</title>
+  <title>PanPhyPlot Manual</title>
   <meta charset="UTF-8">
-  <title>PanPhyPlot - User Manual</title>
+  <title>PanPhyPlot Manual</title>
   <style>
     :root {
       --background-color: #ffffff;
@@ -71,8 +71,22 @@
       color: var(--text-color);
     }
 
+    a {
+      color: #ff5f1f;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #ff5f1f;
+      text-decoration: underline;
+    }
+
+    a:visited {
+      color: #ff5f1f;
+    }
+
     table {
-      max-width: 90%;
+      max-width: 100%;
       margin: 20px auto;
       border-collapse: collapse;
       border: 1px solid var(--table-border-color);
@@ -223,8 +237,10 @@
     students with minimal experience in using spreadsheet software, such as Microsoft Excel or Google Sheets.</p>
   <p>While this app serves as a helpful introduction, it is neither a substitute for sophisticated spreadsheet software
     nor a replacement for professional data analysis tools. Students are strongly encouraged to learn and master basic
-    spreadsheet skills. Additionally, they are invited to explore advanced software, such as OriginPro for professional
-    use or free alternatives like SciDAVis and LabPlot, to further enhance their data analysis capabilities.</p>
+    spreadsheet skills. Additionally, they are invited to explore advanced software, such as <a
+      href="https://www.originlab.com/origin">OriginPro</a> for professional use or free alternatives like <a
+      href="https://scidavis.sourceforge.net/">SciDAVis</a> and <a href="https://labplot.org/">LabPlot</a>, to further
+    enhance their data analysis capabilities.</p>
   <hr>
   <h2>Features</h2>
   <p>This app allows you to input data, visualize it through interactive graphs, and perform various curve fitting
@@ -236,7 +252,7 @@
         <li>Enter your data points manually in the table.</li>
         <li><strong>Add Dataset:</strong> Create and manage multiple datasets. Each dataset retains its own data,
           uncertainty settings, and fitting results.</li>
-        <li>Add or remove individual data rows as needed.</li>
+        <li>Add individual data rows as needed.</li>
         <li>Toggle uncertainties (Δx and Δy) with options for absolute or percentage uncertainties.</li>
         <li>Apply global uncertainties across all data points.</li>
       </ul>
@@ -284,7 +300,7 @@
     <li>
       <p><strong>Removing Data Points:</strong></p>
       <ul>
-        <li>Click the <strong>"Clear All"</strong> button to remove all data rows.</li>
+        <li>Click the <strong>"Clear Data"</strong> button to remove all data rows.</li>
       </ul>
     </li>
     <li>
