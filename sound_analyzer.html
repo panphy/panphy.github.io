@@ -81,9 +81,16 @@
     }
 
     #peak-frequency {
-      text-align: center;
-      margin: 0.5rem 0;
+      width: 200px;
+      /* Fixed width wide enough for your largest number */
+      margin: 0 auto;
+      /* Center the entire container on the page */
+      text-align: left;
+      /* So the text grows to the right, no re-centering */
+      white-space: nowrap;
+      /* Keeps the label on one line */
       font-weight: bold;
+      margin-bottom: 10px;
     }
 
     /* Container for the frequency spectrum canvas */
@@ -192,7 +199,6 @@
   </div>
   <br>
 
-  <!-- Peak Frequency Display -->
   <div id="peak-frequency">Peak Frequency: -- Hz</div>
 
   <!-- Frequency Spectrum & Tooltip -->
