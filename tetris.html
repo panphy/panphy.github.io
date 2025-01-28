@@ -8,8 +8,6 @@
   <link rel="icon" type="image/png" href="/favicon.png">
 
   <style>
-    /* Your original styling, plus a black background colour on the body */
-
     html,
     body {
       margin: 0;
@@ -33,7 +31,6 @@
       align-items: flex-start;
       position: relative;
       background-color: #000;
-      /* Added to mask any ‘white band’ */
     }
 
     a {
@@ -56,7 +53,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(0, 0, 0, 0.25);
+      background-color: rgba(0, 0, 0, 0.1);
+      /* An overlay to dim the background */
       z-index: 0;
     }
 
@@ -84,7 +82,7 @@
 
     .info-box {
       background-color: #282a36;
-      font-size: 2.2vh;
+      font-size: 2.3vh;
       border: 2px solid #444;
       border-radius: 8px;
       padding: 1.5vh;
@@ -93,14 +91,13 @@
 
     .info-box h3 {
       margin: 0 0 1vh 0;
-      font-size: 3vh;
+      font-size: 2.5vh;
       color: #f8f8f2;
       text-align: center;
     }
 
     .info-box div {
       color: #f8f8f2;
-      font-size: 2vh;
       text-align: center;
     }
 
@@ -168,10 +165,11 @@
 
     .arrow {
       width: 6vw;
-      max-width: 70px;
+      max-width: 65px;
       height: 6vw;
-      max-height: 70px;
-      font-size: 3.6vh;
+      max-height: 65px;
+      font-size: 4vh;
+      font-weight: bold;
       border: 5px solid #000;
       border-radius: 8px;
       background-color: #f1c232;
