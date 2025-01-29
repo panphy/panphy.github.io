@@ -37,6 +37,41 @@
       flex-direction: column;
     }
 
+    /* Title banner container: 3-column grid */
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      background-color: #1e1e1e;
+      /* match the app's background */
+      margin: 0;
+      padding: 0;
+      /* remove extra spacing if desired */
+    }
+
+    /* The logo container (left column): control the image size */
+    .banner-logo img {
+      max-height: 40px;
+      width: auto;
+      height: auto;
+      margin-left: 10px;
+    }
+
+    /* The heading in the center column */
+    .banner-title {
+      color: #7ae7b3;
+      margin: 15px 0;
+      text-align: center;
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+
+    /* Empty placeholder in the right column to keep the heading truly centered */
+    .banner-placeholder {
+      width: 70px;
+      /* approximate the same width as the logo area */
+    }
+
     a {
       color: #ff5f1f;
       text-decoration: none;
@@ -305,7 +340,18 @@
 
 <body>
 
-  <h1>Multi-Channel Tone Generator</h1>
+  <!-- Title Banner: Logo (Left), Heading (Center), Placeholder (Right) -->
+  <div id="titleBanner">
+    <div class="banner-logo">
+      <a href="https://panphy.github.io/">
+        <img src="panphy.png" alt="PanPhy logo" />
+      </a>
+    </div>
+
+    <h1 class="banner-title">Multi-Channel Tone Generator</h1>
+
+    <div class="banner-placeholder"></div>
+  </div>
 
   <div id="content">
     <!-- LEFT COLUMN: Channels -->
