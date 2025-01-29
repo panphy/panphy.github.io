@@ -26,6 +26,24 @@
             /* Space from the top */
         }
 
+        .logo-container {
+            position: fixed;
+            /* or absolute if you prefer scrolling with the page */
+            top: 10px;
+            /* 10px from the top edge */
+            left: 10px;
+            /* 10px from the left edge */
+            z-index: 999;
+            /* ensure it appears above other elements */
+        }
+
+        .logo-container img {
+            max-height: 40px;
+            /* adjust as desired for a bigger/smaller logo */
+            width: auto;
+            height: auto;
+        }
+
         a {
             color: #ff5f1f;
             text-decoration: none;
@@ -219,6 +237,14 @@
 </head>
 
 <body>
+
+    <!-- Logo Container: pinned top-left -->
+    <div class="logo-container">
+        <a href="https://panphy.github.io/">
+            <img src="panphy.png" alt="PanPhy logo" />
+        </a>
+    </div>
+
     <!-- Timer Area -->
     <div class="timer-container">
         <h1>Timer</h1>
