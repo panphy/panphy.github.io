@@ -3387,7 +3387,7 @@
                 : ` + ${Math.abs(c).toFixed(3)}`;
 
             // 7.2. Construct the equation string
-            const equation = `y = ${A.toFixed(3)}(x${x0Sign})^{${b.toFixed(3)}} + ${c.toFixed(3)}`;
+            const equation = `y = ${A.toFixed(3)}(x${x0Sign})^{${b.toFixed(3)}}${cSign}`;
 
             // 8. Store the fitted curve
             fittedCurves[activeSet] = {
