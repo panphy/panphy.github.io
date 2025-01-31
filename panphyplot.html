@@ -2353,7 +2353,7 @@
         } else if (fitMethod === 'Exponential') {
             equation = 'y = A e^{b(x-x_0)} + c';
         } else if (fitMethod === 'Power') {
-            equation = 'y = A x^{b}';
+            equation = 'y = A (x-x_0)^{b} + c';
         }
 
         const equationElement = document.getElementById('basic-fit-equation');
@@ -3262,40 +3262,394 @@
         }
     }
 
+    /**
+    * Perform a power-law fit of the form:
+    *   y = A (x - x0)^b + c
+    * 
+    * This version attempts multiple initial guesses for (x0, c)
+    * and runs a Levenberg–Marquardt optimization from each guess.
+    * The best result (lowest sum of squared residuals) is retained.
+    */
     function performPowerFit() {
         try {
-            // Ensure all y and x values are positive
-            const validData = rawData[activeSet].filter(point => point.y > 0 && point.x > 0);
-            if (validData.length < 2) {
-                alert('Power fit requires all x and y values to be positive.');
+            // 1. Filter and validate input data
+            const validData = rawData[activeSet].filter(point =>
+                Number.isFinite(point.x) && Number.isFinite(point.y)
+            );
+            if (validData.length < 4) {
+                alert("Power fit requires at least 4 data points.");
                 return;
             }
 
-            const x = validData.map(p => Math.log(p.x));
-            const y = validData.map(p => Math.log(p.y));
+            const xValues = validData.map(p => p.x);
+            const yValues = validData.map(p => p.y);
 
-            const { slope, intercept } = computeLinearFit(x, y);
+            // 2. Generate multiple initial guesses for x0 and c
+            //    We'll sample around (xMin - a bit, yMin - a bit) and also near medians.
+            const xMin = Math.min(...xValues);
+            const xMed = median(xValues);
+            const yMin = Math.min(...yValues);
+            const yMed = median(yValues);
 
-            const b = slope;
-            const A = Math.exp(intercept);
+            const guessPairs = [
+                // Minimal offset guess
+                [xMin - 1e-3, yMin - 1e-3],
+                // Slightly bigger offset
+                [xMed - 0.01, yMed - 0.01],
+                // Another guess further
+                [xMin - 0.1, yMin - 0.1],
+            ];
 
-            const xOriginal = validData.map(p => p.x);
-            const xFitOriginal = Array.from({ length: 100 }, (_, i) => Math.min(...xOriginal) + i * (Math.max(...xOriginal) - Math.min(...xOriginal)) / 99);
-            const yFit = xFitOriginal.map(xi => A * Math.pow(xi, b));
+            let bestParams = null;
+            let bestCost = Infinity;
 
-            const fitFunction = xi => A * Math.pow(xi, b);
+            // 3. Try each (x0, c) guess
+            for (const [x0Guess, cGuess] of guessPairs) {
+                // 3a. Shift x0 or c if needed so that all (x - x0) > 0 and (y - c) > 0 for the log approach
+                let shiftedX0 = x0Guess;
+                let shiftedC = cGuess;
 
-            let equation = `y = ${A.toFixed(3)} x^{${b.toFixed(3)}}`;
+                // Ensure (x - x0) > 0 for all x if we want to do an initial log transform
+                let z = xValues.map(x => x - shiftedX0);
+                while (z.some(zi => zi <= 0)) {
+                    shiftedX0 -= 1e-3;
+                    z = xValues.map(x => x - shiftedX0);
+                }
 
-            // Store the fitted curve for this dataset.
-            fittedCurves[activeSet] = { x: xFitOriginal, y: yFit, equation: equation };
+                // Ensure (y - c) > 0 for initial log transform
+                let w = yValues.map(y => y - shiftedC);
+                while (w.some(wi => wi <= 0)) {
+                    shiftedC -= 1e-3;
+                    w = yValues.map(y => y - shiftedC);
+                }
 
-            updateResults(equation, validData.map(p => p.x), validData.map(p => p.y), fitFunction);
-            plotGraph(xFitOriginal, yFit);
+                // 3b. Compute initial A, b via linear regression on log-log
+                const lnZ = z.map(zi => Math.log(zi));
+                const lnW = w.map(wi => Math.log(wi));
+                const { slope: bInitial, intercept: lnAInitial } = computeLinearFit(lnZ, lnW);
+                const AInitial = Math.exp(lnAInitial);
+
+                const initialParams = [AInitial, bInitial, shiftedX0, shiftedC];
+
+                // 3c. Run LM from this initial guess
+                const { params, cost } = levenbergMarquardt(validData, initialParams);
+
+                // 3d. Check if it's the best so far
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestParams = params;
+                }
+            }
+
+            // 4. Use the best parameters found
+            if (!bestParams) {
+                alert("Unable to find a suitable power-law fit.");
+                return;
+            }
+            const [A, b, x0, c] = bestParams;
+
+            // 5. Generate fitted curve
+            const xMinFit = Math.min(...xValues);
+            const xMaxFit = Math.max(...xValues);
+            const N = 100;
+            const xFit = Array.from({ length: N }, (_, i) => {
+                return xMinFit + (i * (xMaxFit - xMinFit)) / (N - 1);
+            });
+
+            // Build y-fit, but skip invalid points if (x - x0) is negative and b non-integer
+            const yFit = xFit.map(xi => {
+                const term = xi - x0;
+                try {
+                    if (term <= 0 && !Number.isInteger(b)) {
+                        // for non-integer b, (x - x0) <= 0 is invalid
+                        return NaN;
+                    }
+                    return A * Math.pow(term, b) + c;
+                } catch {
+                    return NaN;
+                }
+            });
+
+            // 6. Define a fit function for interactive queries
+            const fitFunction = xi => {
+                const term = xi - x0;
+                if (term <= 0 && !Number.isInteger(b)) return NaN;
+                return A * Math.pow(term, b) + c;
+            };
+
+            // 7. Construct the equation string
+            // 7.1. Determine sign for x0
+            const x0Sign = (x0 >= 0)
+                ? ` - ${x0.toFixed(3)}`     // Example: (x - 2.500)
+                : ` + ${Math.abs(x0).toFixed(3)}`; // Example: (x + 0.004) if x0 is -0.004
+
+            // 7.2. Construct the equation string
+            const equation = `y = ${A.toFixed(3)}(x${x0Sign})^{${b.toFixed(3)}} + ${c.toFixed(3)}`;
+
+            // 8. Store the fitted curve
+            fittedCurves[activeSet] = {
+                x: xFit,
+                y: yFit,
+                equation: equation
+            };
+
+            // 9. Update results and plot
+            updateResults(equation, xValues, yValues, fitFunction);
+            plotGraph(xFit, yFit);
         } catch (error) {
-            console.error('Error performing power fit:', error);
-            alert('An error occurred during power fitting. Please check the console for details.');
+            console.error("Error performing power fit:", error);
+            alert("An error occurred during power fitting. Please check the console for details.");
         }
+    }
+
+    /**
+     * Enhanced Levenberg–Marquardt Implementation.
+     * Returns the optimized params and final cost.
+     *
+     * @param {Array} data - array of points {x, y}
+     * @param {Array} initialParams - [A, b, x0, c]
+     * @param {number} maxIterations
+     * @param {number} tolerance
+     */
+    function levenbergMarquardt(data, initialParams, maxIterations = 200, tolerance = 1e-8) {
+        let params = initialParams.slice();
+        let lambda = 1e-3;   // initial damping
+        let nu = 2;         // factor to adjust lambda
+        let prevCost = Infinity;
+
+        let bestParams = params.slice();
+        let bestCost = Infinity;
+
+        for (let iter = 0; iter < maxIterations; iter++) {
+            // 1. Compute residuals & cost
+            const residuals = computeResiduals(params, data);
+            const cost = residuals.reduce((sum, r) => sum + r * r, 0);
+
+            // 2. Convergence check
+            if (Math.abs(prevCost - cost) < tolerance) {
+                return { params, cost };
+            }
+            prevCost = cost;
+
+            // 3. Jacobian
+            const J = computeJacobian(params, data);
+            const JT = transpose(J);
+            const JTJ = multiply(JT, J);
+            const JTr = multiplyMatrixVector(JT, residuals);
+
+            // 4. Build damped matrix
+            const n = JTJ.length;
+            let A_lm = new Array(n).fill(null).map(() => new Array(n).fill(0));
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    A_lm[i][j] = JTJ[i][j];
+                    if (i === j) {
+                        A_lm[i][j] += lambda * (A_lm[i][j] || 1);
+                    }
+                }
+            }
+
+            // 5. Solve for delta
+            let delta;
+            try {
+                const negJTr = JTr.map(v => -v);
+                delta = solve(A_lm, negJTr);
+            } catch (err) {
+                // If solve fails, increase lambda and continue
+                lambda *= nu;
+                continue;
+            }
+
+            // 6. Check new parameters
+            const newParams = params.map((p, i) => p + delta[i]);
+            const newRes = computeResiduals(newParams, data);
+            const newCost = newRes.reduce((s, r) => s + r * r, 0);
+
+            if (newCost < cost) {
+                // Improvement
+                params = newParams;
+                if (newCost < bestCost) {
+                    bestCost = newCost;
+                    bestParams = params.slice();
+                }
+                lambda *= 0.3;   // reduce damping
+                if (lambda < 1e-20) lambda = 1e-20;
+            } else {
+                // No improvement, increase damping
+                lambda *= nu;
+                if (lambda > 1e20) {
+                    // If lambda is huge, bail out
+                    return { params: bestParams, cost: bestCost };
+                }
+            }
+        }
+
+        return { params: bestParams, cost: bestCost };
+    }
+
+    /**
+     * Compute the residuals array for the current parameters.
+     * If (x - x0) <= 0 and b not integer, we penalize heavily (return large residual).
+     */
+    function computeResiduals(params, data) {
+        const [A, b, x0, c] = params;
+        return data.map(({ x, y }) => {
+            const term = x - x0;
+            if (term <= 0 && !Number.isInteger(b)) {
+                // For non-integer b, negative base is invalid -> large penalty
+                return 1e6;
+            }
+            let yPred;
+            try {
+                yPred = A * Math.pow(term, b) + c;
+                if (!Number.isFinite(yPred)) {
+                    return 1e6;
+                }
+            } catch {
+                return 1e6;
+            }
+            return yPred - y;
+        });
+    }
+
+    /**
+     * Compute the Jacobian for [A, b, x0, c].
+     * J[i][k] = derivative of residual_i w.r.t. param_k
+     */
+    function computeJacobian(params, data) {
+        const [A, b, x0, c] = params;
+        return data.map(({ x, y }) => {
+            const term = x - x0;
+            // Default partial derivatives
+            let dA = 0, db = 0, dx0 = 0, dc = 0;
+
+            if (term <= 0 && !Number.isInteger(b)) {
+                // invalid region -> residual ~ 1e6 w.r.t. everything
+                // For continuity, let's set derivatives near zero (or 0.0)
+                return [0, 0, 0, 0];
+            }
+
+            // yPred = A * term^b + c
+            // residual = yPred - y
+            // => partial residual / partial param = partial yPred / partial param
+            // partial wrt A = term^b
+            // partial wrt b = A * term^b * ln(term)
+            // partial wrt x0 = -A * b * term^(b-1)
+            // partial wrt c = 1
+
+            try {
+                // term^b
+                const basePow = Math.pow(term, b);
+                const lnTerm = Math.log(term);
+
+                dA = basePow;
+                db = A * basePow * lnTerm;
+                dx0 = -A * b * Math.pow(term, b - 1);
+                dc = 1;
+
+                // If any are NaN or infinite, set to 0
+                if (!Number.isFinite(dA)) dA = 0;
+                if (!Number.isFinite(db)) db = 0;
+                if (!Number.isFinite(dx0)) dx0 = 0;
+            } catch {
+                // In case of domain errors
+                dA = dA = dx0 = dc = 0;
+            }
+
+            return [dA, db, dx0, dc];
+        });
+    }
+
+    // ---------- Matrix Helpers ----------
+
+    function transpose(matrix) {
+        return matrix[0].map((_, i) => matrix.map(row => row[i]));
+    }
+
+    function multiply(a, b) {
+        // matrix x matrix
+        const m = a.length;
+        const n = b[0].length;
+        const result = new Array(m).fill(null).map(() => new Array(n).fill(0));
+        for (let i = 0; i < m; i++) {
+            for (let j = 0; j < n; j++) {
+                let sum = 0;
+                for (let k = 0; k < b.length; k++) {
+                    sum += a[i][k] * b[k][j];
+                }
+                result[i][j] = sum;
+            }
+        }
+        return result;
+    }
+
+    function multiplyMatrixVector(matrix, vector) {
+        return matrix.map(row => {
+            let sum = 0;
+            for (let i = 0; i < row.length; i++) {
+                sum += row[i] * vector[i];
+            }
+            return sum;
+        });
+    }
+
+    /**
+     * Solve a system Ax = b using Gaussian elimination
+     * 
+     * @param {Array<Array<number>>} matrix - 2D array (A)
+     * @param {Array<number>} vector - 1D array (b)
+     */
+    function solve(matrix, vector) {
+        const n = matrix.length;
+        const augmented = matrix.map((row, i) => row.concat([vector[i]]));
+
+        for (let i = 0; i < n; i++) {
+            // Find pivot
+            let maxRow = i;
+            for (let r = i + 1; r < n; r++) {
+                if (Math.abs(augmented[r][i]) > Math.abs(augmented[maxRow][i])) {
+                    maxRow = r;
+                }
+            }
+            if (maxRow !== i) {
+                [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+            }
+
+            const pivot = augmented[i][i];
+            if (Math.abs(pivot) < 1e-14) {
+                throw new Error("Singular matrix");
+            }
+
+            // Normalize pivot row
+            for (let c = i; c <= n; c++) {
+                augmented[i][c] /= pivot;
+            }
+
+            // Eliminate in other rows
+            for (let r = 0; r < n; r++) {
+                if (r !== i) {
+                    const factor = augmented[r][i];
+                    for (let c = i; c <= n; c++) {
+                        augmented[r][c] -= factor * augmented[i][c];
+                    }
+                }
+            }
+        }
+
+        return augmented.map(row => row[n]);
+    }
+
+    /**
+     * Simple median function
+     */
+    function median(arr) {
+        if (!arr.length) return NaN;
+        const sorted = [...arr].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) {
+            return 0.5 * (sorted[mid - 1] + sorted[mid]);
+        }
+        return sorted[mid];
     }
 
     function estimateKFromData() {
