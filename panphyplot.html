@@ -3377,10 +3377,14 @@
             };
 
             // 7. Construct the equation string
-            // 7.1. Determine sign for x0
+            // 7.1. Determine sign for x0 and c
             const x0Sign = (x0 >= 0)
                 ? ` - ${x0.toFixed(3)}`     // Example: (x - 2.500)
                 : ` + ${Math.abs(x0).toFixed(3)}`; // Example: (x + 0.004) if x0 is -0.004
+				
+			const cSign = (c >= 0)
+                ? ` - ${c.toFixed(3)}`
+                : ` + ${Math.abs(c).toFixed(3)}`;
 
             // 7.2. Construct the equation string
             const equation = `y = ${A.toFixed(3)}(x${x0Sign})^{${b.toFixed(3)}} + ${c.toFixed(3)}`;
