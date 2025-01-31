@@ -2351,7 +2351,7 @@
             }
             equation = 'y = ' + terms.join(' + ');
         } else if (fitMethod === 'Exponential') {
-            equation = 'y = A e^{bx}';
+            equation = 'y = A e^{b(x-x_0)} + c';
         } else if (fitMethod === 'Power') {
             equation = 'y = A x^{b}';
         }
@@ -3132,33 +3132,130 @@
 
     function performExponentialFit() {
         try {
-            // Ensure all y values are positive
-            const validData = rawData[activeSet].filter(point => point.y > 0);
-            if (validData.length < 2) {
-                alert('Exponential fit requires all y values to be positive.');
+            // Access and filter the active dataset to ensure positive y-values
+            const data = rawData[activeSet].filter(point => point.y > 0);
+            if (data.length < 4) { // Minimum points needed for four parameters
+                alert('Exponential fit requires at least four data points with positive y-values.');
                 return;
             }
 
-            const x = validData.map(p => p.x);
-            const y = validData.map(p => Math.log(p.y));
+            const xData = data.map(p => p.x);
+            const yData = data.map(p => p.y);
 
-            const { slope, intercept } = computeLinearFit(x, y);
+            // Step 1: Estimate c as the minimum y-value
+            const c = Math.min(...yData);
 
-            const b = slope;
-            const A = Math.exp(intercept);
+            // Define the range for x0 based on the data
+            const xMin = Math.min(...xData);
+            const xMax = Math.max(...xData);
+            const gridSteps = 100; // Number of grid points for x0
+            const x0Candidates = Array.from({ length: gridSteps }, (_, i) => xMin + i * (xMax - xMin) / (gridSteps - 1));
 
-            const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-            const yFit = xFit.map(xi => A * Math.exp(b * xi));
+            let bestX0 = x0Candidates[0];
+            let bestA = 1;
+            let bestB = 1;
+            let lowestMSE = Infinity;
 
-            const fitFunction = xi => A * Math.exp(b * xi);
+            // Function to perform linear fit and compute MSE
+            const evaluateFit = (xValid, logYValid, slope, intercept) => {
+                const predictions = xValid.map(x => slope * x + intercept);
+                const residuals = logYValid.map((y, idx) => y - predictions[idx]);
+                const mse = residuals.reduce((sum, res) => sum + res * res, 0) / residuals.length;
+                return mse;
+            };
 
-            let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x}`;
+            // Step 2: Grid Search for x0
+            for (let i = 0; i < x0Candidates.length; i++) {
+                const x0 = x0Candidates[i];
 
-            // Store the fitted curve for this dataset.
-            fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
+                // Adjust y-values by subtracting c
+                const yAdjusted = yData.map(y => y - c);
 
-            updateResults(equation, x, validData.map(p => p.y), fitFunction);
-            plotGraph(xFit, yFit);
+                // Ensure all adjusted y-values are positive
+                const xValid = [];
+                const yValid = [];
+                for (let j = 0; j < yAdjusted.length; j++) {
+                    if (yAdjusted[j] > 0) {
+                        xValid.push(xData[j]);
+                        yValid.push(yAdjusted[j]);
+                    }
+                }
+
+                if (xValid.length < 2) {
+                    // Not enough points for this x0
+                    continue;
+                }
+
+                // Linearize the model by taking the natural log of adjusted y-values
+                const logY = yValid.map(y => Math.log(y));
+
+                // Perform linear regression to find slope (b) and intercept (lnA)
+                const { slope, intercept } = computeLinearFit(xValid, logY);
+
+                // Compute MSE for this fit
+                const mse = evaluateFit(xValid, logY, slope, intercept);
+
+                // Update best parameters if this fit is better
+                if (mse < lowestMSE) {
+                    lowestMSE = mse;
+                    bestX0 = x0;
+                    bestB = slope;
+                    bestA = Math.exp(intercept);
+                }
+
+                // Optional: Early termination if MSE is below a threshold
+                // const mseThreshold = 0.001;
+                // if (mse < mseThreshold) break;
+            }
+
+            // Step 3: Final Fit with best parameters
+            // Adjust y-values by subtracting c
+            const finalYAdjusted = yData.map(y => y - c);
+            const finalXValid = [];
+            const finalYValid = [];
+            for (let i = 0; i < finalYAdjusted.length; i++) {
+                if (finalYAdjusted[i] > 0) {
+                    finalXValid.push(xData[i]);
+                    finalYValid.push(finalYAdjusted[i]);
+                }
+            }
+
+            // Linearize and perform linear regression with best x0
+            const finalLogY = finalYValid.map(y => Math.log(y));
+            const { slope: finalB, intercept: finalIntercept } = computeLinearFit(finalXValid, finalLogY);
+            const finalA = Math.exp(finalIntercept);
+
+            // Calculate MSE for the final fit (optional)
+            const finalPredictionsLog = finalXValid.map(x => finalB * x + finalIntercept);
+            const finalResiduals = finalLogY.map((y, idx) => y - finalPredictionsLog[idx]);
+            const finalMSE = finalResiduals.reduce((sum, res) => sum + res * res, 0) / finalResiduals.length;
+
+            // Step 4: Generate fitted curve data
+            const fittedX = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
+            const fittedY = fittedX.map(xi => finalA * Math.exp(finalB * (xi - bestX0)) + c);
+
+            const fitFunction = xi => finalA * Math.exp(finalB * (xi - bestX0)) + c;
+
+            // Construct the equation string
+            const equation = `y = ${finalA.toFixed(3)} e^{${finalB.toFixed(3)}(x - ${bestX0.toFixed(3)})} + ${c.toFixed(3)}`;
+
+            // Step 5: Compute R² for fit quality
+            const meanY = finalYValid.reduce((sum, y) => sum + y, 0) / finalYValid.length;
+            const ssTot = finalYValid.reduce((sum, y) => sum + Math.pow(y - meanY, 2), 0);
+            const ssRes = finalYValid.reduce((sum, y, idx) => {
+                const predictedY = finalA * Math.exp(finalB * (finalXValid[idx] - bestX0)) + c;
+                return sum + Math.pow(y - predictedY, 2);
+            }, 0);
+            const rSquared = 1 - (ssRes / ssTot);
+
+            console.log(`R²: ${rSquared.toFixed(3)}`);
+
+            // Step 6: Store the fitted curve for this dataset
+            fittedCurves[activeSet] = { x: fittedX, y: fittedY, equation: equation };
+
+            // Step 7: Update results and plot
+            updateResults(equation, finalXValid, finalYValid.map((y, idx) => y + c), fitFunction, rSquared);
+            plotGraph(fittedX, fittedY);
         } catch (error) {
             console.error('Error performing exponential fit:', error);
             alert('An error occurred during exponential fitting. Please check the console for details.');
