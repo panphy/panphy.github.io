@@ -65,10 +65,10 @@
       --switch-height: 18px;
       --slider-size: 13px;
       --slider-transform: 23px;
-      --switch-active-color: #009688;
       --switch-background-color: #ccc;
       --switch-knob-color: white;
       --switch-label-font-size: 14px;
+      --switch-active-color: #009688;
     }
 
     body.dark-mode {
@@ -84,7 +84,6 @@
       --table-border-color: #555555;
       --table-header-background: #333333;
       --code-text-color: #f8f8f2;
-      --switch-active-color: #009688;
     }
 
     body {
@@ -130,9 +129,6 @@
       border-bottom: 0px solid var(--border-color);
     }
 
-    body.dark-mode #editorContainer {
-      background-color: var(--pane-background);
-    }
 
     /* ---------------------------------------------------------------------- */
     /* Left Pane = Markdown Input                                             */
@@ -175,25 +171,13 @@
        to resize them if you see overflow issues. */
     }
 
-    /* Ensure the logo fits inside that 45px container: */
-    .logo-container img {
-      max-height: 30px;
-      /* Fits within 45px container */
-      margin: 0;
-      /* Remove extra margins */
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
     /* Scale the PanPhy logo so it fits nicely in the heading row */
     /* Removed extra margins to prevent pushing the heading */
     .logo-container img {
       max-height: 30px;
-      margin: 0;
+      margin: 0 auto 0 0;
+      /* top: 0, right: auto, bottom: 0, left: 0 */
       display: block;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     /* For the Output pane (and input pane if needed), if there's no content: 
@@ -501,10 +485,9 @@
         height: auto !important;
         overflow: visible !important;
         margin: 0 !important;
-        /* any other resets you want, e.g. background-color, color, etc. */
       }
 
-      /* Make sure the container does not stay flex or keep 100% height. */
+      /* Make sure the container does not stay flex or keep 100% height */
       #editorContainer {
         display: block !important;
         height: auto !important;
@@ -516,7 +499,7 @@
         display: none !important;
       }
 
-      /* If necessary, override anything that might still cause a scroll bar. */
+      /* Override any fixed dimensions in the output pane */
       #outputPane {
         display: block !important;
         width: auto !important;
@@ -524,7 +507,6 @@
         overflow: visible !important;
         padding: 15mm !important;
         border: none !important;
-        /* etc. */
       }
 
       .pane-heading-container {
@@ -543,7 +525,7 @@
         line-height: 1.5 !important;
       }
 
-      /* Also override #renderedOutput if it has any fixed heights or scroll. */
+      /* Also override #renderedOutput if it has any fixed heights or scroll */
       #renderedOutput {
         height: auto !important;
         overflow: visible !important;
@@ -566,7 +548,6 @@
 
       pre {
         background-color: #f0f0f0 !important;
-        line-height: 1.5 !important;
         font-size: 0.95em !important;
         margin: 2px 0 !important;
       }
@@ -583,11 +564,7 @@
         color: #008000 !important;
       }
 
-      th[align="left"],
-      td[align="left"] {
-        text-align: left !important;
-      }
-
+      /* Only need attribute selectors for center/right; left is covered by the fallback */
       th[align="center"],
       td[align="center"] {
         text-align: center !important;
