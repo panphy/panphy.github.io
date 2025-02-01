@@ -17,7 +17,6 @@
             --clear-all-btn-color: #e06666;
             --import-csv-btn-color: #45818e;
             --export-csv-btn-color: #80c1c5;
-            --export-md-btn-color: #80c1c5;
             --tab-bg-color: #f3f3f3;
             --tab-active-bg-color: #ffd966;
             --tab-border-color: #ccc;
@@ -25,10 +24,12 @@
             --tab-close-hover-color: #e06666;
         }
 
+        html,
         body {
-            font-family: Helvetica, sans-serif;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
+            font-family: Helvetica, sans-serif;
             background-color: #f4f4f4;
             color: #333;
         }
@@ -85,7 +86,7 @@
             text-decoration: none;
             cursor: pointer;
             font-size: 14px;
-            padding: 0px 0px;
+            padding: 0;
             transition: color 0.3s;
         }
 
@@ -148,7 +149,6 @@
             /* uniform gap to next element */
             line-height: 1.2;
             /* override default browser line-height */
-
             background-color: #ddd;
             color: #333;
             border: 1px solid transparent;
@@ -193,10 +193,9 @@
             align-items: center;
             justify-content: center;
             padding: 8px 10px;
-            margin-left: 0px;
+            margin-left: 0;
             line-height: 1.2;
             /* match dataset tab’s line-height */
-
             background-color: #16537e;
             /* keep original color */
             color: #fff;
@@ -210,7 +209,6 @@
             cursor: pointer;
             transition: background-color 0.2s;
             font-size: 14px;
-
             /* Fixed width so it does not fill leftover space: */
             flex: none;
             width: 110px;
@@ -225,7 +223,7 @@
         .container {
             display: flex;
             flex-direction: row;
-            padding: 0px;
+            padding: 0;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -369,7 +367,7 @@
         }
 
         .btn-export-md {
-            background-color: var(--export-md-btn-color);
+            background-color: var(--export-csv-btn-color);
         }
 
         /* Fit Curve button (teal) */
@@ -576,7 +574,6 @@
 
         .tabs button {
             background-color: #f3f3f3;
-            float: left;
             border: none;
             outline: none;
             cursor: pointer;
@@ -664,7 +661,7 @@
                 flex: none;
             }
 
-            .banner-left,
+            .banner-logo,
             .banner-buttons {
                 width: auto;
             }
@@ -715,7 +712,6 @@
             height: 100%;
             background: rgba(0, 0, 0, 0);
             z-index: 1001;
-
             /* Center the popup */
             display: flex;
             justify-content: center;
@@ -734,7 +730,7 @@
             max-height: 90vh;
             overflow: auto;
             position: relative;
-            margin: 0, auto;
+            margin: 0 auto;
         }
 
         #popup-title {
@@ -811,14 +807,6 @@
             color: #555;
             margin: 5px 0;
             width: 100%;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            /* Hide any tiny horizontal overflow */
         }
 
         footer a {
@@ -1438,7 +1426,7 @@
 
     /**
      * Synchronize the combined-plot input boxes (Title, x-label, y-label)
-     * with the current active dataset's raw headings. No extra '$'.
+     * with the current active dataset's raw headings. No extra '$' delimiter.
      */
     function updateCombinedPlotInputsToActive() {
         const rawTitle = document.getElementById('graph-title').value || 'y vs x';
