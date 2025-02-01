@@ -2,12 +2,11 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Standing Wave Simulation</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
-        /* Reset some default styles */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -19,9 +18,6 @@
             background-color: #252525;
             color: #e0e0e0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 20px;
         }
 
@@ -39,47 +35,89 @@
             color: #ff5f1f;
         }
 
-        footer {
-            text-align: center;
-            padding: 5px;
-            background: #25252500;
-            color: #888;
-            margin-top: 5px;
+        /* Title Banner: three-column grid for logo, title, and placeholder */
+        #titleBanner {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
-        h1 {
+        /* Logo container (left column) */
+        .banner-logo img {
+            max-height: 35px;
+            /* Adjust as needed */
+            width: auto;
+            height: auto;
+            /* No fixed positioning—logo scrolls with content */
+        }
+
+        /* Centered title in the middle column */
+        .banner-title {
             text-align: center;
-            background-color: #25252500;
+            margin: 0;
             color: #ffc21b;
-            font-size: 2.0em;
-            padding: 10px 0px;
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            font-size: 2em;
+            background-color: transparent;
+        }
+
+        /* Empty placeholder (right column) to balance the grid */
+        .banner-placeholder {
+            width: 35px;
+            /* Roughly match the logo's width */
+        }
+
+        p.instructions {
+            font-size: 0.90em;
+            color: #bbbbbb;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .container {
             background-color: #505050;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-            max-width: 1000px;
-            width: 100%;
+            width: 95%;
             padding: 30px;
+            display: flex;
+            gap: 20px;
             overflow: hidden;
-            /* Prevent child elements from overflowing */
+            margin: 0 auto;
+            align-items: flex-start;
         }
 
-        /* Control Boxes Layout */
-        .controls {
-            display: grid;
-            /* 3 columns and 2 rows */
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, auto);
+        .left-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-container {
+            flex: 0.7;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin-bottom: 15px;
         }
 
-        /* Control Box Styling */
+        .simulation-area {
+            background: #1e1e1e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: none;
+            border-radius: 10px;
+            background: #1e1e1e;
+        }
+
         .control-group {
             background: #3a3a3a;
             padding: 10px 15px;
@@ -89,21 +127,18 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            /* Center-align all text */
         }
 
-        /* Bold all text within control boxes */
         .control-group * {
-            font-weight: bold;
+            font-weight: normal;
         }
 
         .control-label {
-            font-size: 1em;
+            font-size: 0.9em;
             margin-bottom: 10px;
             color: #ffffff;
         }
 
-        /* Slider and Dropdown Styling */
         input[type="range"],
         select {
             width: 100%;
@@ -121,7 +156,6 @@
             outline: none;
         }
 
-        /* Slider Thumb Styling */
         input[type="range"]::-webkit-slider-thumb {
             appearance: none;
             width: 16px;
@@ -150,61 +184,82 @@
             background: #ffcc42;
         }
 
-        /* Canvas Styling */
-        canvas {
-            width: 100%;
-            /* Ensure canvas does not exceed container's width */
-            height: auto;
-            /* Maintain aspect ratio */
-            border: none;
-            border-radius: 10px;
-            background: #1e1e1e;
-            display: block;
-            margin: 0 auto;
+        .particle-positions {
+            display: flex;
+            gap: 20px;
         }
 
-        /* Instructions Styling */
-        p.instructions {
-            margin-top: 15px;
-            font-size: 0.90em;
-            color: #bbbbbb;
+        .particle-positions .control-group {
+            flex: 1;
+        }
+
+        footer {
             text-align: center;
-            font-weight: normal;
-            /* Keep instructions normal weight */
+            padding: 5px;
+            margin-top: 20px;
+            background: transparent;
+            color: #888;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 800px) {
-            .controls {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(3, auto);
+            .container {
+                flex-direction: column;
             }
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .control-group {
-                padding: 10px 15px;
-            }
-
-            /* Canvas will maintain aspect ratio via JS */
         }
     </style>
 </head>
 
 <body>
-    <h1>Standing Wave Simulation</h1>
+    <!-- Title Banner: Logo on the left, Title in the center -->
+    <div id="titleBanner">
+        <div class="banner-logo">
+            <a href="https://panphy.github.io/">
+                <img src="panphy.png" alt="PanPhy logo" />
+            </a>
+        </div>
+        <h1 class="banner-title">Standing Wave Simulation</h1>
+        <div class="banner-placeholder"></div>
+    </div>
+
+    <p class="instructions">Press the SPACE BAR to pause or resume the animation.</p>
+
     <div class="container">
-        <div class="controls">
-            <!-- Top Row: Boundary Conditions, Amplitude, Frequency -->
+        <!-- Left Container: Simulation area and particle positions -->
+        <div class="left-container">
+            <div class="simulation-area">
+                <canvas id="oscillationCanvas"></canvas>
+            </div>
+            <div class="particle-positions">
+                <div class="control-group">
+                    <label class="control-label" for="positionSlider"
+                        title="Adjust the position of the red particle along the string.">
+                        Red Particle Position: <span id="positionValue">0.50</span>
+                    </label>
+                    <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5"
+                        aria-label="Red Particle Position Slider">
+                    <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="greenPositionSlider"
+                        title="Adjust the position of the green particle along the string.">
+                        Green Particle Position: <span id="greenPositionValue">0.80</span>
+                    </label>
+                    <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8"
+                        aria-label="Green Particle Position Slider">
+                    <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
+                </div>
+            </div>
+        </div>
+        <!-- Right Container: Control boxes -->
+        <div class="right-container">
+            <!-- Boundary Conditions -->
             <div class="control-group">
                 <label class="control-label">Boundary Conditions</label>
                 <div style="width: 100%; margin-bottom: 10px;">
                     <label for="leftBoundary" style="color: #ffcc3f;"
-                        title="Select the boundary condition for the left end of the string.">Left Boundary:</label>
+                        title="Select the boundary condition for the left end of the string.">
+                        Left Boundary:
+                    </label>
                     <select id="leftBoundary" aria-label="Left Boundary Condition">
                         <option value="fixed">Fixed</option>
                         <option value="free">Free</option>
@@ -212,338 +267,294 @@
                 </div>
                 <div style="width: 100%;">
                     <label for="rightBoundary" style="color: #ffcc3f;"
-                        title="Select the boundary condition for the right end of the string.">Right Boundary:</label>
+                        title="Select the boundary condition for the right end of the string.">
+                        Right Boundary:
+                    </label>
                     <select id="rightBoundary" aria-label="Right Boundary Condition">
                         <option value="fixed">Fixed</option>
                         <option value="free">Free</option>
                     </select>
                 </div>
             </div>
-
+            <!-- Harmonics -->
             <div class="control-group">
-                <label class="control-label" for="amplitudeSlider"
-                    title="Adjust the maximum displacement of the wave.">Amplitude: <span
-                        id="amplitudeValue">6.0</span></label>
-                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0"
-                    aria-label="Amplitude Slider">
+                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">
+                    Harmonic: <span id="harmonicValue">1st</span>
+                </label>
+                <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
             </div>
-
+            <!-- Frequency -->
             <div class="control-group">
-                <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">Angular
-                    Frequency: <span id="omegaValue">6.28</span> rad/s</label>
-                <label class="control-label">Frequency: <span id="frequencyValue">1.00</span> Hz</label>
+                <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">
+                    Angular Frequency: <span id="omegaValue">6.28</span> rad/s
+                </label>
+                <label class="control-label">
+                    Frequency: <span id="frequencyValue">1.00</span> Hz
+                </label>
                 <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28"
                     aria-label="Angular Frequency Slider">
             </div>
-
-            <!-- Bottom Row: Red Particle Position, Green Particle Position, Harmonic -->
+            <!-- Amplitude -->
             <div class="control-group">
-                <label class="control-label" for="positionSlider"
-                    title="Adjust the position of the red particle along the string.">Red Particle Position: <span
-                        id="positionValue">0.50</span></label>
-                <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5"
-                    aria-label="Red Particle Position Slider">
-                <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="greenPositionSlider"
-                    title="Adjust the position of the green particle along the string.">Green Particle Position: <span
-                        id="greenPositionValue">0.80</span></label>
-                <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8"
-                    aria-label="Green Particle Position Slider">
-                <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">Harmonic:
-                    <span id="harmonicValue">1st</span></label>
-                <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
+                <label class="control-label" for="amplitudeSlider" title="Adjust the maximum displacement of the wave.">
+                    Amplitude: <span id="amplitudeValue">6.0</span>
+                </label>
+                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0"
+                    aria-label="Amplitude Slider">
             </div>
         </div>
-
-        <p class="instructions">Press the SPACE BAR to pause or resume the animation.</p>
-        <br>
-        <canvas id="oscillationCanvas"></canvas>
     </div>
 
     <footer>
         &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
             My Projects</a>
     </footer>
-</body>
 
-<script>
-    // Helper function to convert numbers to ordinal strings
-    function getOrdinal(n) {
-        const s = ["th", "st", "nd", "rd"],
-            v = n % 100;
-        return n + (s[(v - 20) % 10] || s[v] || s[0]);
-    }
-
-    const canvas = document.getElementById("oscillationCanvas");
-    const ctx = canvas.getContext("2d");
-
-    const amplitudeSlider = document.getElementById("amplitudeSlider");
-    const modeSlider = document.getElementById("modeSlider");
-    const positionSlider = document.getElementById("positionSlider");
-    const greenPositionSlider = document.getElementById("greenPositionSlider");
-    const omegaSlider = document.getElementById("omegaSlider");
-    const leftBoundarySelect = document.getElementById("leftBoundary");
-    const rightBoundarySelect = document.getElementById("rightBoundary");
-
-    const amplitudeValue = document.getElementById("amplitudeValue");
-    const harmonicValue = document.getElementById("harmonicValue");
-    const positionValue = document.getElementById("positionValue");
-    const greenPositionValue = document.getElementById("greenPositionValue");
-    const omegaValue = document.getElementById("omegaValue");
-    const frequencyValue = document.getElementById("frequencyValue");
-    const redParticleAmplitude = document.getElementById("redParticleAmplitude");
-    const greenParticleAmplitude = document.getElementById("greenParticleAmplitude");
-
-    let A = parseFloat(amplitudeSlider.value);
-    let modeIndex = parseInt(modeSlider.value); // Mode index (1-6)
-    let xRed = parseFloat(positionSlider.value);
-    let xGreen = parseFloat(greenPositionSlider.value);
-    let omega = parseFloat(omegaSlider.value);
-    let leftBoundary = leftBoundarySelect.value;
-    let rightBoundary = rightBoundarySelect.value;
-
-    // Set initial display values
-    amplitudeValue.textContent = A.toFixed(1);
-    omegaValue.textContent = omega.toFixed(2);
-    frequencyValue.textContent = (omega / (2 * Math.PI)).toFixed(2);
-    harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
-
-    let isPaused = false;
-    let time = 0; // Total elapsed time in seconds
-    let lastTimestamp = null; // To track elapsed time between frames
-
-    let allowedHarmonics = []; // To store allowed harmonic numbers
-
-    // Function to determine allowed harmonics based on boundary conditions
-    function getAllowedHarmonics() {
-        if (
-            (leftBoundary === "fixed" && rightBoundary === "free") ||
-            (leftBoundary === "free" && rightBoundary === "fixed")
-        ) {
-            // Only odd harmonics allowed
-            return [1, 3, 5, 7, 9, 11];
-        } else {
-            // All harmonics allowed
-            return [1, 2, 3, 4, 5, 6];
+    <script>
+        // Helper function to convert numbers to ordinal strings
+        function getOrdinal(n) {
+            const s = ["th", "st", "nd", "rd"],
+                v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
         }
-    }
 
-    // Function to get harmonic number based on mode index and boundary conditions
-    function getHarmonicNumber(mode) {
-        if (
-            (leftBoundary === "fixed" && rightBoundary === "free") ||
-            (leftBoundary === "free" && rightBoundary === "fixed")
-        ) {
-            return 2 * mode - 1; // Odd harmonics
-        } else {
-            return mode; // All harmonics
+        const canvas = document.getElementById("oscillationCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Left container particle controls
+        const positionSlider = document.getElementById("positionSlider");
+        const greenPositionSlider = document.getElementById("greenPositionSlider");
+        const positionValue = document.getElementById("positionValue");
+        const greenPositionValue = document.getElementById("greenPositionValue");
+        const redParticleAmplitude = document.getElementById("redParticleAmplitude");
+        const greenParticleAmplitude = document.getElementById("greenParticleAmplitude");
+
+        // Right container controls
+        const amplitudeSlider = document.getElementById("amplitudeSlider");
+        const modeSlider = document.getElementById("modeSlider");
+        const omegaSlider = document.getElementById("omegaSlider");
+        const leftBoundarySelect = document.getElementById("leftBoundary");
+        const rightBoundarySelect = document.getElementById("rightBoundary");
+
+        const amplitudeValueDisplay = document.getElementById("amplitudeValue");
+        const harmonicValueDisplay = document.getElementById("harmonicValue");
+        const omegaValueDisplay = document.getElementById("omegaValue");
+        const frequencyValueDisplay = document.getElementById("frequencyValue");
+
+        let A = parseFloat(amplitudeSlider.value);
+        let modeIndex = parseInt(modeSlider.value);
+        let xRed = parseFloat(positionSlider.value);
+        let xGreen = parseFloat(greenPositionSlider.value);
+        let omega = parseFloat(omegaSlider.value);
+        let leftBoundary = leftBoundarySelect.value;
+        let rightBoundary = rightBoundarySelect.value;
+
+        // Set initial display values
+        amplitudeValueDisplay.textContent = A.toFixed(1);
+        omegaValueDisplay.textContent = omega.toFixed(2);
+        frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
+        harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+
+        let isPaused = false;
+        let time = 0;
+        let lastTimestamp = null;
+        let allowedHarmonics = [];
+
+        function getAllowedHarmonics() {
+            if (
+                (leftBoundary === "fixed" && rightBoundary === "free") ||
+                (leftBoundary === "free" && rightBoundary === "fixed")
+            ) {
+                return [1, 3, 5, 7, 9, 11];
+            } else {
+                return [1, 2, 3, 4, 5, 6];
+            }
         }
-    }
 
-    // Function to update allowed harmonics and harmonic number display
-    function updateAllowedHarmonics() {
-        allowedHarmonics = getAllowedHarmonics();
-        // Adjust mode index if it exceeds allowed harmonics
-        if (modeIndex > allowedHarmonics.length) {
-            modeIndex = allowedHarmonics.length;
-            modeSlider.value = modeIndex;
+        function getHarmonicNumber(mode) {
+            if (
+                (leftBoundary === "fixed" && rightBoundary === "free") ||
+                (leftBoundary === "free" && rightBoundary === "fixed")
+            ) {
+                return 2 * mode - 1;
+            } else {
+                return mode;
+            }
         }
-        harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
-        updateAmplitudes();
-    }
 
-    // Function to update amplitude displays
-    const updateAmplitudes = () => {
-        const k = getHarmonicNumber(modeIndex);
-        const redAmplitude = A * getWaveFunction(k, xRed);
-        const greenAmplitude = A * getWaveFunction(k, xGreen);
-        redParticleAmplitude.textContent = Math.abs(redAmplitude).toFixed(2);
-        greenParticleAmplitude.textContent = Math.abs(greenAmplitude).toFixed(2);
-    };
-
-    // Correct wave functions based on boundary conditions
-    function getWaveFunction(k, x) {
-        if (leftBoundary === "fixed" && rightBoundary === "fixed") {
-            // Fixed-Fixed: sin(kπx)
-            return Math.sin(k * Math.PI * x);
-        } else if (leftBoundary === "fixed" && rightBoundary === "free") {
-            // Fixed-Free: sin(kπx/2)
-            return Math.sin((k * Math.PI * x) / 2);
-        } else if (leftBoundary === "free" && rightBoundary === "fixed") {
-            // Free-Fixed: cos(kπx/2)
-            return Math.cos((k * Math.PI * x) / 2);
-        } else if (leftBoundary === "free" && rightBoundary === "free") {
-            // Free-Free: cos(kπx)
-            return Math.cos(k * Math.PI * x);
+        function updateAllowedHarmonics() {
+            allowedHarmonics = getAllowedHarmonics();
+            if (modeIndex > allowedHarmonics.length) {
+                modeIndex = allowedHarmonics.length;
+                modeSlider.value = modeIndex;
+            }
+            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            updateAmplitudes();
         }
-        return 0;
-    }
 
-    // Function to update the harmonic slider based on allowed harmonics
-    function updateHarmonicSlider() {
-        // No changes needed since harmonic number is based on mode index
-        // Just update the harmonic display
-        harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
-        updateAmplitudes();
-    }
+        function updateAmplitudes() {
+            const k = getHarmonicNumber(modeIndex);
+            const redAmp = A * getWaveFunction(k, xRed);
+            const greenAmp = A * getWaveFunction(k, xGreen);
+            redParticleAmplitude.textContent = Math.abs(redAmp).toFixed(2);
+            greenParticleAmplitude.textContent = Math.abs(greenAmp).toFixed(2);
+        }
 
-    // Event listeners for controls
-    amplitudeSlider.addEventListener("input", () => {
-        A = parseFloat(amplitudeSlider.value);
-        amplitudeValue.textContent = A.toFixed(1);
-        updateAmplitudes();
-    });
+        function getWaveFunction(k, x) {
+            if (leftBoundary === "fixed" && rightBoundary === "fixed") {
+                return Math.sin(k * Math.PI * x);
+            } else if (leftBoundary === "fixed" && rightBoundary === "free") {
+                return Math.sin((k * Math.PI * x) / 2);
+            } else if (leftBoundary === "free" && rightBoundary === "fixed") {
+                return Math.cos((k * Math.PI * x) / 2);
+            } else if (leftBoundary === "free" && rightBoundary === "free") {
+                return Math.cos(k * Math.PI * x);
+            }
+            return 0;
+        }
 
-    modeSlider.addEventListener("input", () => {
-        modeIndex = parseInt(modeSlider.value);
-        harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
-        updateAmplitudes();
-    });
+        function updateHarmonicSlider() {
+            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            updateAmplitudes();
+        }
 
-    positionSlider.addEventListener("input", () => {
-        xRed = parseFloat(positionSlider.value);
-        positionValue.textContent = xRed.toFixed(2);
-        updateAmplitudes();
-    });
+        amplitudeSlider.addEventListener("input", () => {
+            A = parseFloat(amplitudeSlider.value);
+            amplitudeValueDisplay.textContent = A.toFixed(1);
+            updateAmplitudes();
+        });
 
-    greenPositionSlider.addEventListener("input", () => {
-        xGreen = parseFloat(greenPositionSlider.value);
-        greenPositionValue.textContent = xGreen.toFixed(2);
-        updateAmplitudes();
-    });
+        modeSlider.addEventListener("input", () => {
+            modeIndex = parseInt(modeSlider.value);
+            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            updateAmplitudes();
+        });
 
-    omegaSlider.addEventListener("input", () => {
-        omega = parseFloat(omegaSlider.value);
-        omegaValue.textContent = omega.toFixed(2);
-        frequencyValue.textContent = (omega / (2 * Math.PI)).toFixed(2);
-    });
+        omegaSlider.addEventListener("input", () => {
+            omega = parseFloat(omegaSlider.value);
+            omegaValueDisplay.textContent = omega.toFixed(2);
+            frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
+        });
 
-    leftBoundarySelect.addEventListener("change", () => {
-        leftBoundary = leftBoundarySelect.value;
-        updateAllowedHarmonics();
-        updateHarmonicSlider();
-    });
+        leftBoundarySelect.addEventListener("change", () => {
+            leftBoundary = leftBoundarySelect.value;
+            updateAllowedHarmonics();
+            updateHarmonicSlider();
+        });
 
-    rightBoundarySelect.addEventListener("change", () => {
-        rightBoundary = rightBoundarySelect.value;
-        updateAllowedHarmonics();
-        updateHarmonicSlider();
-    });
+        rightBoundarySelect.addEventListener("change", () => {
+            rightBoundary = rightBoundarySelect.value;
+            updateAllowedHarmonics();
+            updateHarmonicSlider();
+        });
 
-    // Function to resize the canvas while maintaining aspect ratio
-    function resizeCanvas() {
-        const aspectRatio = 2; // Width:Height ratio (e.g., 800:400 => 2:1)
-        const width = canvas.clientWidth;
-        const height = width / aspectRatio;
+        positionSlider.addEventListener("input", () => {
+            xRed = parseFloat(positionSlider.value);
+            positionValue.textContent = xRed.toFixed(2);
+            updateAmplitudes();
+        });
 
-        // Set the canvas size
-        canvas.width = width;
-        canvas.height = height;
-    }
+        greenPositionSlider.addEventListener("input", () => {
+            xGreen = parseFloat(greenPositionSlider.value);
+            greenPositionValue.textContent = xGreen.toFixed(2);
+            updateAmplitudes();
+        });
 
-    // Drawing function with real elapsed time and relative amplitude scaling
-    function draw(timestamp) {
-        if (!lastTimestamp) {
+        function resizeCanvas() {
+            const aspectRatio = 2; // e.g., 2:1 ratio
+            const width = canvas.clientWidth;
+            const height = width / aspectRatio;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        function draw(timestamp) {
+            if (!lastTimestamp) {
+                lastTimestamp = timestamp;
+            }
+            const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
+
+            if (!isPaused) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const desiredFraction = 0.8;
+                const amplitudeScale = (canvas.height / 2 * desiredFraction) / 10;
+
+                // Draw equilibrium line
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(0, canvas.height / 2);
+                ctx.lineTo(canvas.width, canvas.height / 2);
+                ctx.strokeStyle = "#9e9eaa";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const k = getHarmonicNumber(modeIndex);
+
+                // Draw the oscillating string
+                ctx.beginPath();
+                for (let i = 0; i <= canvas.width; i++) {
+                    const normalizedX = i / canvas.width;
+                    const waveFunc = getWaveFunction(k, normalizedX);
+                    const y = A * Math.cos(omega * time) * waveFunc;
+                    const screenY = canvas.height / 2 - y * amplitudeScale;
+                    if (i === 0) {
+                        ctx.moveTo(i, screenY);
+                    } else {
+                        ctx.lineTo(i, screenY);
+                    }
+                }
+                ctx.strokeStyle = "#00bcd4";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Red particle
+                const redX = xRed * canvas.width;
+                const redY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xRed) * amplitudeScale;
+                drawParticle(redX, redY, "#ff4081");
+
+                // Green particle
+                const greenX = xGreen * canvas.width;
+                const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xGreen) * amplitudeScale;
+                drawParticle(greenX, greenY, "#00e676");
+
+                time += deltaTime;
+            }
+            requestAnimationFrame(draw);
         }
-        const deltaTime = (timestamp - lastTimestamp) / 1000; // Convert ms to seconds
-        lastTimestamp = timestamp;
 
-        if (!isPaused) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Calculate scaling factor based on canvas height and max amplitude
-            const desiredFraction = 0.8; // Wave occupies 80% of half the canvas height
-            const amplitudeScale = (canvas.height / 2 * desiredFraction) / 10; // A_max = 10
-
-            // Draw the equilibrium line with #9e9eaa
+        function drawParticle(x, y, color) {
+            const particleRadius = Math.min(canvas.width, canvas.height) * 0.015;
             ctx.beginPath();
-            ctx.setLineDash([5, 5]);
-            ctx.moveTo(0, canvas.height / 2);
-            ctx.lineTo(canvas.width, canvas.height / 2);
-            ctx.strokeStyle = "#9e9eaa";
+            ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 1;
             ctx.stroke();
-            ctx.setLineDash([]);
+        }
 
-            // Calculate harmonic number based on mode index
-            const k = getHarmonicNumber(modeIndex);
-
-            // Draw the oscillating string
-            ctx.beginPath();
-            for (let i = 0; i <= canvas.width; i++) {
-                const normalizedX = i / canvas.width;
-                let waveFunc = getWaveFunction(k, normalizedX);
-                let y = A * Math.cos(omega * time) * waveFunc;
-                let screenY = canvas.height / 2 - y * amplitudeScale; // Scale y relative to canvas height
-                if (i === 0) {
-                    ctx.moveTo(i, screenY);
-                } else {
-                    ctx.lineTo(i, screenY);
-                }
+        // Pause/resume with SPACE
+        document.addEventListener("keydown", (event) => {
+            if (event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                isPaused = !isPaused;
             }
-            ctx.strokeStyle = "#00bcd4";
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        });
 
-            // Draw the red particle
-            const redX = xRed * canvas.width;
-            const redY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xRed) * amplitudeScale;
-            drawParticle(redX, redY, "#ff4081");
+        window.addEventListener("load", () => {
+            resizeCanvas();
+            updateAllowedHarmonics();
+            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            updateAmplitudes();
+            requestAnimationFrame(draw);
+        });
 
-            // Draw the green particle
-            const greenX = xGreen * canvas.width;
-            const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xGreen) * amplitudeScale;
-            drawParticle(greenX, greenY, "#00e676");
-
-            // Increment time based on actual elapsed time
-            time += deltaTime;
-        }
-
-        requestAnimationFrame(draw);
-    }
-
-    // Function to draw a particle ensuring it remains a perfect circle
-    function drawParticle(x, y, color) {
-        const particleRadius = Math.min(canvas.width, canvas.height) * 0.015; // 1.5% of the smaller dimension
-
-        ctx.beginPath();
-        ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
-        ctx.fillStyle = color; // Particle color
-        ctx.fill();
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
-
-    // Pause/Resume functionality on SPACE BAR key press
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Space" || event.key === ' ') {
-            event.preventDefault();
-            isPaused = !isPaused;
-        }
-    });
-
-    // Initialize the canvas size and harmonic slider on window load
-    window.addEventListener("load", () => {
-        resizeCanvas();
-        updateAllowedHarmonics();
-        harmonicValue.textContent = getOrdinal(getHarmonicNumber(modeIndex));
-        updateAmplitudes();
-        requestAnimationFrame(draw); // Start the animation
-    });
-
-    // Adjust the canvas size on window resize
-    window.addEventListener("resize", () => {
-        resizeCanvas();
-    });
-</script>
+        window.addEventListener("resize", () => {
+            resizeCanvas();
+        });
+    </script>
+</body>
 
 </html>
