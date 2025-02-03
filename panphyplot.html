@@ -1867,32 +1867,6 @@
         return currentDataStr === newDataStr && currentLayoutStr === newLayoutStr;
     }
 
-    function updatePlotEfficiently() {
-        // Build the new data and layout from your current rawData, settings, etc.
-        const newData = buildPlotData();   // Your function that returns an array of traces.
-        const newLayout = buildPlotLayout(); // Your function that returns the layout object.
-
-        // Check if the new state is different from what was last plotted.
-        if (isPlotStateEqual(newData, newLayout)) {
-            // No changes: skip replotting.
-            console.log("No changes in plot state; skipping update.");
-            return;
-        }
-
-        // Otherwise, perform an efficient update with Plotly.react.
-        Plotly.react('plot', newData, newLayout, {
-            toImageButtonOptions: {
-                format: 'svg',
-                filename: 'data_plot',
-                scale: 1
-            }
-        });
-
-        // Update the cache.
-        lastPlotState.data = newData;
-        lastPlotState.layout = newLayout;
-    }
-
     function handleCSVUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -2163,7 +2137,7 @@
             fittedY = fittedCurves[activeSet].y;
         }
 
-        // Build data arrays based on the active dataset.
+        // Build the data arrays based on the active dataset.
         const x = rawData[activeSet].map(point => point.x);
         const y = rawData[activeSet].map(point => point.y);
         const xErrorRaw = rawData[activeSet].map(point => point.xErrorRaw || 0);
@@ -2175,7 +2149,7 @@
             ? document.getElementById('y-error-type').value
             : 'absolute';
 
-        // Convert error values if using percentage uncertainties.
+        // Convert errors if using percentage uncertainties.
         const convertedXError = x.map((xi, idx) =>
             xErrorType === 'percentage' ? (xErrorRaw[idx] / 100) * (xi || 0) : xErrorRaw[idx]
         );
@@ -2183,7 +2157,7 @@
             yErrorType === 'percentage' ? (yErrorRaw[idx] / 100) * (yi || 0) : yErrorRaw[idx]
         );
 
-        // Build the trace array.
+        // Build the primary data trace.
         const data = [
             {
                 x: x,
@@ -2194,9 +2168,7 @@
                     color: '#ff6c61',
                     symbol: 'circle',
                     size: 6.5,
-                    line: {
-                        width: 0  // No border around markers
-                    },
+                    line: { width: 0 }
                 },
                 error_x: {
                     type: 'data',
@@ -2217,7 +2189,7 @@
             }
         ];
 
-        // If fitted data is available, add its trace.
+        // Add fitted curve trace if available.
         if (fittedX && fittedY) {
             data.push({
                 x: fittedX,
@@ -2228,7 +2200,11 @@
             });
         }
 
-        // Build the layout using the active dataset's header values.
+        // Retrieve the title from the input; if blank, use an empty string.
+        const rawTitle = document.getElementById('graph-title').value.trim();
+        const titleText = rawTitle === '' ? '' : processLabel(rawTitle);
+
+        // Build the layout.
         const layout = {
             xaxis: {
                 title: processLabel(document.getElementById('x-column-name').value || 'x')
@@ -2236,17 +2212,16 @@
             yaxis: {
                 title: {
                     text: processLabel(document.getElementById('y-column-name').value || 'y'),
-                    standoff: 25 // Increase space between y-axis label and values
+                    standoff: 25
                 },
                 titlefont: { size: 14 },
                 automargin: true
             },
-            title: processLabel(document.getElementById('graph-title').value ||
-                `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`),
+            title: titleText,
             margin: {
-                t: 100,
+                t: rawTitle === '' ? 50 : 100, // Optionally reduce top margin when title is blank.
                 b: 80,
-                l: 85,  // increased left margin for extra spacing
+                l: 85,
                 r: 30
             }
         };
@@ -2257,7 +2232,7 @@
             return;
         }
 
-        // Update the plot using Plotly.react.
+        // Update the plot.
         Plotly.react('plot', data, layout, {
             toImageButtonOptions: {
                 format: 'svg',
@@ -2266,7 +2241,7 @@
             }
         });
 
-        // Update the global cache.
+        // Cache the current state.
         lastPlotState.data = data;
         lastPlotState.layout = layout;
     }
@@ -2274,29 +2249,28 @@
     function plotAllDatasets() {
         const traces = [];
 
-        // Define some colors for datasets and their fitted curves (customize as desired):
+        // Define colors for datasets and fitted curves.
         const datasetColors = ['#264653', '#287271', '#2a9d8f', '#e9c46a', '#f4a261', '#ee8959', '#e76f51'];
         const fitColors = ['#84e3c8', '#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5', '#ff8b94', '#ff7480'];
 
-        // Build a trace (markers + optional error bars + optional fit line) for each dataset
+        // Build traces for each dataset.
         rawData.forEach((dataset, index) => {
             const xVals = dataset.map(point => point.x);
             const yVals = dataset.map(point => point.y);
 
-            // Convert raw errors based on the stored error types
+            // Convert uncertainties.
             const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
             const yErrorsRaw = dataset.map(point => point.yErrorRaw || 0);
             const errorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
 
-            // Convert errors if they are percentages
             const xErrorsConverted = xVals.map((xVal, i) =>
-                (errorTypes.x === 'percentage') ? (xErrorsRaw[i] / 100) * (xVal || 0) : xErrorsRaw[i]
+                errorTypes.x === 'percentage' ? (xErrorsRaw[i] / 100) * (xVal || 0) : xErrorsRaw[i]
             );
             const yErrorsConverted = yVals.map((yVal, i) =>
-                (errorTypes.y === 'percentage') ? (yErrorsRaw[i] / 100) * (yVal || 0) : yErrorsRaw[i]
+                errorTypes.y === 'percentage' ? (yErrorsRaw[i] / 100) * (yVal || 0) : yErrorsRaw[i]
             );
 
-            // Marker trace for the dataset
+            // Marker trace.
             traces.push({
                 x: xVals,
                 y: yVals,
@@ -2324,7 +2298,7 @@
                 }
             });
 
-            // If a fitted curve exists for this dataset, add a line trace
+            // Fitted curve trace, if available.
             if (fittedCurves.hasOwnProperty(index)) {
                 const fitColor = fitColors[index % fitColors.length];
                 traces.push({
@@ -2337,22 +2311,20 @@
             }
         });
 
-        // Retrieve raw user input (no extra $...$ in these text fields!)
+        // Retrieve and process input for combined plot title and axis labels.
         const titleInput = document.getElementById('combined-title');
         const xLabelInput = document.getElementById('combined-x-label');
         const yLabelInput = document.getElementById('combined-y-label');
 
-        // Fallback to blank if nothing is found
-        const rawTitle = titleInput ? titleInput.value : '';
-        const rawXLabel = xLabelInput ? xLabelInput.value : '';
-        const rawYLabel = yLabelInput ? yLabelInput.value : '';
+        const rawTitle = titleInput ? titleInput.value.trim() : '';
+        const rawXLabel = xLabelInput ? xLabelInput.value.trim() : '';
+        const rawYLabel = yLabelInput ? yLabelInput.value.trim() : '';
 
-        // Use processLabel(...) to wrap them in $...$ for LaTeX rendering on the final chart:
-        const processedTitle = processLabel(rawTitle);
-        const processedXLabel = processLabel(rawXLabel);
-        const processedYLabel = processLabel(rawYLabel);
+        const processedTitle = rawTitle === '' ? '' : processLabel(rawTitle);
+        const processedXLabel = rawXLabel === '' ? '' : processLabel(rawXLabel);
+        const processedYLabel = rawYLabel === '' ? '' : processLabel(rawYLabel);
 
-        // Build the Plotly layout
+        // Build the layout using the processed labels.
         const layout = {
             title: {
                 text: processedTitle,
@@ -2367,16 +2339,20 @@
                     standoff: 25
                 }
             },
-            margin: { t: 100, b: 70, l: 140, r: 0 }
+            margin: {
+                t: rawTitle === '' ? 50 : 100,  // Reduce top margin when title is blank.
+                b: 70,
+                l: 140,
+                r: 0
+            }
         };
 
-        // If you use the caching mechanism to skip redundant plots, check it here:
         if (isPlotStateEqual(traces, layout)) {
             console.log("No changes detected in combined plot; skipping update.");
             return;
         }
 
-        // Render the combined plot in your popup element, e.g. #popup-plot
+        // Render the combined plot.
         Plotly.newPlot('popup-plot', traces, layout, {
             toImageButtonOptions: {
                 format: 'svg',
@@ -2385,15 +2361,12 @@
             }
         });
 
-        // Update the global "last plot" state
         lastPlotState.data = traces;
         lastPlotState.layout = layout;
 
-        // Show the popup overlay
         showPopup();
 
-        // If MathJax is present, re-render the LaTeX elements inside the chart
-        if (typeof MathJax !== 'undefined') {
+        if (typeof MathJax !== 'undefined' && latexMode) {
             MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('popup-plot')]);
         }
     }
