@@ -94,12 +94,85 @@
             color: #ddd;
         }
 
+        /* --- Toggle Switch CSS --- */
         .reminder {
             color: #999999;
             margin: 3px 0;
             font-size: 12px;
+            position: relative;
+            /* Enables absolute positioning of the toggle */
             text-align: center;
+            /* Centers the reminder text */
+            padding: 3px 10px;
         }
+
+        .latex-toggle-container {
+            position: absolute;
+            right: 10px;
+            /* Adjust as needed */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* The switch container */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 19px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider (background) */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 24px;
+        }
+
+        /* The slider knob */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 15px;
+            width: 15px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        /* When checked, change background and move the knob */
+        .switch input:checked+.slider {
+            background-color: #67c399;
+        }
+
+        .switch input:checked+.slider:before {
+            transform: translateX(21px);
+        }
+
+        /* Optional: Label for the toggle */
+        .toggle-label {
+            font-size: 14px;
+            color: #333;
+        }
+
 
         /* Dataset Tabs Bar */
         .dataset-tabs-bar {
@@ -252,14 +325,18 @@
         }
 
         .input-section h2,
-        .graph-section h2 {
-            text-align: center;
-            background-color: #fff2cc;
-            padding: 10px;
+        .graph-section h2,
+        .global-uncertainty h2,
+        .advanced-fit-section h2 {
+            font-family: 'Arial', sans-serif;
+            font-size: 20px;
+            background-color: #ffad7a;
+            color: #000;
+            padding: 5px;
             border-radius: 4px;
             margin-top: 0;
             margin-bottom: 15px;
-            font-size: 20px;
+            text-align: center;
         }
 
         .table-container {
@@ -454,11 +531,6 @@
             margin-bottom: 20px;
         }
 
-        .global-uncertainty h2 {
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
         .uncertainty-controls {
             display: flex;
             flex-direction: row;
@@ -512,16 +584,6 @@
             margin-top: 20px;
             padding: 10px;
             border-top: 1px solid #ccc;
-        }
-
-        .advanced-fit-section h2 {
-            text-align: center;
-            background-color: #fff2cc;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 20px;
         }
 
         .advanced-fit-section select,
@@ -587,7 +649,7 @@
             display: flex;
             justify-content: flex-start;
             border-radius: 4px;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
         .tabs button {
@@ -595,7 +657,7 @@
             border: none;
             outline: none;
             cursor: pointer;
-            padding: 14px 16px;
+            padding: 8px 8px;
             transition: background-color 0.3s, filter 0.3s;
             font-size: 16px;
             border-radius: 4px;
@@ -860,11 +922,16 @@
         </div>
     </div>
 
-
     <div class="reminder">
-        <p align="center">
-            Note: Headings and Title accept LaTeX input.
-        </p>
+        <span>Note: Headings and Title accept LaTeX input when LaTeX mode is ON.</span>
+        <div class="latex-toggle-container">
+            <!-- Toggle switch -->
+            <label class="switch">
+                <input type="checkbox" id="latex-mode-toggle">
+                <span class="slider"></span>
+            </label>
+            <span class="toggle-label">LaTeX mode</span>
+        </div>
     </div>
 
     <!-- Dataset Tabs Bar with "Add Dataset" button -->
@@ -1117,7 +1184,7 @@
     let fittedCurves = {};
     let datasetFitResults = {};  // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
     let dataset1XValues = [];
-
+    let latexMode = false;  // false by default: plain text mode
 
     let lastPlotState = {
         data: null,
@@ -1146,7 +1213,13 @@
     const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 
     function processLabel(label) {
-        return label ? `$${formatLabelForLatex(label)}$` : '';
+        if (!label) return '';
+        // If LaTeX mode is off, return the plain label.
+        if (!latexMode) {
+            return label;
+        }
+        // Otherwise, format it for LaTeX.
+        return `$${formatLabelForLatex(label)}$`;
     }
 
     function initializeTable(initialRows = 7) {
@@ -1987,30 +2060,41 @@
         isSyncing = true;
 
         const value = document.getElementById(`${type}-column-name`).value;
-        renderLatex(`#${type}-column-latex`, formatLabelForLatex(value));
 
-        if (document.getElementById(`toggle-${type}-error`).checked) {
-            updateUncertaintyHeaders(type);
+        // Update the label element based on the latexMode.
+        if (latexMode) {
+            renderLatex(`#${type}-column-latex`, formatLabelForLatex(value));
+        } else {
+            document.querySelector(`#${type}-column-latex`).textContent = value;
         }
 
+        // Debounced update of the plot (if applicable).
         debouncedUpdatePlotAndRenderLatex();
         isSyncing = false;
 
-        // Update the graph title dynamically based on both headers
+        // Dynamically update the graph title.
         const xColumn = document.getElementById('x-column-name').value || 'x';
         const yColumn = document.getElementById('y-column-name').value || 'y';
-        document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
+        if (latexMode) {
+            document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
+        } else {
+            document.getElementById('graph-title').value = `${yColumn} vs ${xColumn}`;
+        }
 
-        // Update initial parameters based on the selected advanced fit method
+        // Update any other elements that depend on the headers.
         setInitialParameters(getCurrentAdvancedFitMethod());
-
-        // Sync the combined-plot inputs with new headings:
         updateCombinedPlotInputsToActive();
     }
 
     function renderLatex(elementId, latexString) {
         const element = document.querySelector(elementId);
         if (!element) return;
+        if (!latexMode) {
+            // If LaTeX mode is off, just set the plain text.
+            element.textContent = latexString;
+            return;
+        }
+        // Otherwise, render using MathJax.
         element.innerHTML = `\\(${latexString}\\)`;
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
     }
@@ -2019,15 +2103,21 @@
         if (isSyncing) return;
         isSyncing = true;
 
-        // Assumes plotGraph() uses rawData[activeSet] internally.
+        // Replot the graph as usual.
         plotGraph();
 
+        // Retrieve current column names.
         const xColumnName = document.getElementById('x-column-name').value || 'x';
-        renderLatex('#x-column-latex', formatLabelForLatex(xColumnName));
-
         const yColumnName = document.getElementById('y-column-name').value || 'y';
-        renderLatex('#y-column-latex', formatLabelForLatex(yColumnName));
 
+        // Update the axis label elements conditionally.
+        if (latexMode) {
+            renderLatex('#x-column-latex', formatLabelForLatex(xColumnName));
+            renderLatex('#y-column-latex', formatLabelForLatex(yColumnName));
+        } else {
+            document.querySelector('#x-column-latex').textContent = xColumnName;
+            document.querySelector('#y-column-latex').textContent = yColumnName;
+        }
         isSyncing = false;
     }
 
@@ -2057,8 +2147,13 @@
     function updateGraphTitle() {
         const xColumn = document.getElementById('x-column-name').value || 'x';
         const yColumn = document.getElementById('y-column-name').value || 'y';
-        // Set the title as "y vs x"
-        document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
+        const titleText = `${yColumn} vs ${xColumn}`;
+
+        if (latexMode) {
+            document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
+        } else {
+            document.getElementById('graph-title').value = titleText;
+        }
     }
 
     function plotGraph(fittedX = null, fittedY = null) {
@@ -4190,6 +4285,21 @@
 
         // Initialize the combined plot inputs.
         initCombinedPlotInputs();
+
+        // Set up the LaTeX mode toggle
+        const latexToggle = document.getElementById('latex-mode-toggle');
+        if (latexToggle) {
+            latexToggle.checked = false; // default off
+            latexToggle.addEventListener('change', function () {
+                latexMode = this.checked;
+                // Optionally, re-run update routines so that headings, labels, and titles re-render
+                updatePlotAndRenderLatex();
+                updateLabels('x');
+                updateLabels('y');
+                updateGraphTitle();
+            });
+        }
+
     });
 </script>
 
