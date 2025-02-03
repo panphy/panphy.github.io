@@ -232,9 +232,9 @@
 <body>
   <h1>PanPhyPlot - User Manual</h1>
   <h2>Introduction</h2>
-  <p>This application is developed with pre-university physics students in mind. It aims to provide a simple tool for
-    plotting graphs with error bars and determining the best fit line for their data. It is particularly designed for
-    students with minimal experience in using spreadsheet software, such as Microsoft Excel or Google Sheets.</p>
+  <p>This application is developed with pre-university physics students in mind. It provides a simple tool for plotting
+    graphs with error bars and determining the best fit line for their data. It is particularly designed for students
+    with minimal experience using spreadsheet software such as Microsoft Excel or Google Sheets.</p>
   <p>While this app serves as a helpful introduction, it is neither a substitute for sophisticated spreadsheet software
     nor a replacement for professional data analysis tools. Students are strongly encouraged to learn and master basic
     spreadsheet skills. Additionally, they are invited to explore advanced software, such as <a
@@ -252,9 +252,11 @@
         <li>Enter your data points manually in the table.</li>
         <li><strong>Add Dataset:</strong> Create and manage multiple datasets. Each dataset retains its own data,
           uncertainty settings, and fitting results.</li>
-        <li>Add individual data rows as needed.</li>
-        <li>Toggle uncertainties (Δx and Δy) with options for absolute or percentage uncertainties.</li>
-        <li>Apply global uncertainties across all data points.</li>
+        <li><strong>Add Row:</strong> Click the <strong>"Add Row"</strong> button to add an individual data row.</li>
+        <li><strong>Clear Data:</strong> Remove all data from the active dataset with a single click.</li>
+        <li><strong>Copy X₁:</strong> Use the new <strong>"Copy X₁"</strong> button to copy all x-values from Dataset 1
+          into the active dataset. This feature simplifies workflows when comparing multiple datasets—even if Dataset 1
+          has no y values entered.</li>
       </ul>
     </li>
     <li>
@@ -267,21 +269,24 @@
     <li>
       <p><strong>Curve Fitting:</strong></p>
       <ul>
-        <li>Perform basic fits such as Linear, Polynomial, Exponential, and Power.</li>
+        <li>Perform basic fits such as Linear, Polynomial (2nd–4th degree), Exponential, and Power.</li>
         <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
         <li>Customize initial parameters for advanced fitting methods.</li>
-        <li>View fitting equations and R² values. </li>
+        <li>View fitting equations and R² values.</li>
         <li>Each dataset maintains its own fitting result until a new fit is performed.</li>
       </ul>
     </li>
     <li>
       <p><strong>Graph Visualization:</strong></p>
       <ul>
-        <li>Interactive plots using Plotly.js.</li>
-        <li>Customize the graph title and axis labels with LaTeX formatting.</li>
+        <li>Interactive plots powered by Plotly.js.</li>
+        <li>Customize the graph title and axis labels.</li>
+        <li><strong>LaTeX Mode:</strong> A toggle allows you to activate or deactivate LaTeX rendering for all headings,
+          labels, and titles. When off (default), all text is displayed as plain text. When on, mathematical expressions
+          are rendered using LaTeX syntax.</li>
         <li><strong>Plot All Datasets:</strong> In the combined plot popup you can visualize all datasets
           simultaneously. In this view, each dataset’s fitted curve is rendered with its own color, and the header
-          values (graph title, x-axis, and y-axis labels) correspond to the active dataset and can be further customized
+          values (graph title, x-axis, and y-axis labels) correspond to the active dataset but can be further customized
           via input boxes.</li>
       </ul>
     </li>
@@ -300,7 +305,14 @@
     <li>
       <p><strong>Removing Data Points:</strong></p>
       <ul>
-        <li>Click the <strong>"Clear Data"</strong> button to remove all data.</li>
+        <li>Click the <strong>"Clear Data"</strong> button to remove all data in the active dataset.</li>
+      </ul>
+    </li>
+    <li>
+      <p><strong>Copying x-values from Dataset 1:</strong></p>
+      <ul>
+        <li>In the active dataset view, click the <strong>"Copy x₁"</strong> button to copy the x-values from Dataset 1
+          into the current dataset. This is useful when you want to compare data sets without re-entering x-values.</li>
       </ul>
     </li>
     <li>
@@ -365,33 +377,23 @@
   <table>
     <thead>
       <tr>
-        <th align="left">Note:</th>
+        <th align="left"><strong>Note:</strong></th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td align="left">Certainty levels (absolute or percentage uncertainties) play a crucial role in determining how
-          data is formatted in the exported <code>.csv</code> and <code>.md</code> files. <p> Formatting rules are
-            applied to ensure that the data maintains consistency and aligns with the provided uncertainties for precise
-            representation in exported files.</p>
-        </td>
-      </tr>
-      <tr>
-        <td align="left">1. <strong>Absolute Uncertainties</strong>: <p> The number of decimal places (d.p.) in the
-            exported values matches the precision of the absolute uncertainty. </p>
+          data is formatted in the exported <code>.csv</code> and <code>.md</code> files. <p> 1. <strong>Absolute
+              Uncertainties:</strong> </p>
+          <p> The number of decimal places in the exported values matches the precision of the absolute uncertainty.
+          </p>
           <p> For example, if the uncertainty is <code>±0.05</code>, the corresponding data value will be exported with
-            two decimal places, e.g., <code>5.25 ± 0.05</code>.</p>
-        </td>
-      </tr>
-      <tr>
-        <td align="left">2. <strong>Percentage Uncertainties</strong>: <p> The precision of exported values is adjusted
-            to significant figures (s.f.) based on the percentage uncertainty: </p>
-          <p> - <strong>Small uncertainties (≤ 10%)</strong>: Values are exported with <strong>3 significant
-              figures</strong>. </p>
-          <p> - <strong>Medium uncertainties (&gt; 10%)</strong>: Values are exported with <strong>2 significant
-              figures</strong>. </p>
-          <p> - <strong>Large uncertainties (≥ 50%)</strong>: Values are exported with <strong>1 significant
-              figure</strong>.</p>
+            two decimal places (e.g., <code>5.25 ± 0.05</code>). </p>
+          <p> 2. <strong>Percentage Uncertainties:</strong> </p>
+          <p> The precision of exported values is adjusted based on the percentage uncertainty: </p>
+          <p> - <strong>Small uncertainties (≤ 10%):</strong> 3 significant figures </p>
+          <p> - <strong>Medium uncertainties (&gt; 10%):</strong> 2 significant figures </p>
+          <p> - <strong>Large uncertainties (≥ 50%):</strong> 1 significant figure</p>
         </td>
       </tr>
     </tbody>
@@ -402,7 +404,7 @@
       <p><strong>Basic Fit:</strong></p>
       <ul>
         <li>Navigate to the <strong>"Basic Fit"</strong> tab.</li>
-        <li>Select a fitting method (Linear, Polynomial 2nd–4th degree, Exponential, Power) from the dropdown.</li>
+        <li>Select a fitting method (Linear, Polynomial 2nd - 4th degree, Exponential, Power) from the dropdown.</li>
         <li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
         <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
         <li>Click the <strong>"Clear Fit"</strong> button to remove the fitted curve.</li>
@@ -430,11 +432,25 @@
         <li>In the combined plot:<ul>
             <li>All datasets are plotted together.</li>
             <li>Each dataset’s fitted curve is drawn in a different color.</li>
-            <li>The popup displays input boxes (with labels to the left) for the graph title and axis labels. By
-              default, these values are taken from the active dataset but can be edited.</li>
+            <li>The popup displays input boxes (with labels) for the graph title and axis labels. By default, these
+              values are taken from the active dataset but can be edited.</li>
             <li>Changes to the title or labels update the combined plot accordingly.</li>
           </ul>
         </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>6. LaTeX Mode</h3>
+  <ul>
+    <li><strong>LaTeX Toggle:</strong>
+      <ul>
+        <li>A <strong>LaTeX mode</strong> toggle is located at the top of the app.</li>
+        <li><strong>Default Behavior:</strong><br>When LaTeX mode is <strong>off</strong> (the default), all headings,
+          axis labels, and titles are displayed as plain text.</li>
+        <li><strong>Activating LaTeX Mode:</strong><br>Toggle the switch to <strong>on</strong> to have your text
+          rendered using LaTeX formatting (e.g., for complex mathematical expressions). This makes your graphs and
+          labels appear more professional.</li>
+        <li>This setting affects the entire app, including the combined plot view.</li>
       </ul>
     </li>
   </ul>
@@ -443,7 +459,7 @@
   <ul>
     <li>
       <p><strong>Data Quality:</strong><br>Ensure that your data points are accurate and representative of the
-        phenomenon you're modeling.</p>
+        phenomenon you are modeling.</p>
     </li>
     <li>
       <p><strong>Choosing Initial Parameters:</strong><br>For advanced fitting methods, selecting appropriate initial
@@ -454,8 +470,8 @@
         data. Choose between absolute and percentage uncertainties based on your data's nature.</p>
     </li>
     <li>
-      <p><strong>LaTeX Formatting:</strong><br>Utilize LaTeX syntax in labels and the title for clear and
-        professional-looking mathematical expressions.</p>
+      <p><strong>LaTeX Formatting:</strong><br>Enable LaTeX mode when you need high-quality mathematical expressions.
+        Otherwise, keep it off for improved performance.</p>
     </li>
   </ul>
   <hr>
@@ -470,8 +486,8 @@
         columns.</p>
     </li>
     <li>
-      <p><strong>LaTeX Rendering Issues:</strong><br>Verify that your LaTeX syntax is correct. Complex expressions might
-        require additional formatting.</p>
+      <p><strong>LaTeX Rendering Issues:</strong><br>Verify that your LaTeX syntax is correct. If you experience delays,
+        consider leaving LaTeX mode off.</p>
     </li>
     <li>
       <p><strong>Combined Plot Issues:</strong> </p>
@@ -484,6 +500,7 @@
     </li>
   </ul>
   <hr>
+  <p><strong>Happy plotting!</strong></p>
 </body>
 
 </html>
