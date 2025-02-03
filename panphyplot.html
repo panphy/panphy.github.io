@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
 
     <style>
+        /* Root Variables */
         :root {
             --add-row-btn-color: #6aa84f;
             --clear-all-btn-color: #e06666;
@@ -24,6 +25,7 @@
             --tab-close-hover-color: #e06666;
         }
 
+        /* Global Styles */
         html,
         body {
             margin: 0;
@@ -34,47 +36,39 @@
             color: #333;
         }
 
+        /* Banner */
         .banner {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background-color: #333;
-            color: white;
+            color: #fff;
             padding: 3px;
             font-size: 22px;
             font-weight: bold;
             position: relative;
         }
 
-        /* Logo container on the left */
         .banner-logo {
             display: flex;
             align-items: center;
         }
 
-        /* Scale the image so it fits nicely in the banner */
         .banner-logo img {
             max-height: 35px;
-            /* Adjust as needed */
-            height: auto;
-            width: auto;
             margin-left: 10px;
             margin-top: 4px;
         }
 
-        /* Title in the center */
         .banner-title {
             flex: 1;
             text-align: center;
             font-size: 1.5rem;
         }
 
-        /* Buttons on the right */
         .banner-buttons {
             display: flex;
-            gap: 0px;
             width: 60px;
-            /* or auto, if preferred */
             justify-content: flex-end;
             margin-right: 15px;
         }
@@ -94,22 +88,19 @@
             color: #ddd;
         }
 
-        /* --- Toggle Switch CSS --- */
+        /* Reminder and Toggle */
         .reminder {
-            color: #999999;
+            color: #999;
             margin: 3px 0;
             font-size: 12px;
             position: relative;
-            /* Enables absolute positioning of the toggle */
             text-align: center;
-            /* Centers the reminder text */
             padding: 3px 10px;
         }
 
         .latex-toggle-container {
             position: absolute;
             right: 10px;
-            /* Adjust as needed */
             top: 50%;
             transform: translateY(-50%);
             display: flex;
@@ -117,7 +108,7 @@
             gap: 5px;
         }
 
-        /* The switch container */
+        /* Toggle Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -125,14 +116,12 @@
             height: 19px;
         }
 
-        /* Hide default HTML checkbox */
         .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
 
-        /* The slider (background) */
         .slider {
             position: absolute;
             cursor: pointer;
@@ -145,7 +134,6 @@
             border-radius: 24px;
         }
 
-        /* The slider knob */
         .slider:before {
             position: absolute;
             content: "";
@@ -153,12 +141,11 @@
             width: 15px;
             left: 2px;
             bottom: 2px;
-            background-color: white;
+            background-color: #fff;
             transition: 0.4s;
             border-radius: 50%;
         }
 
-        /* When checked, change background and move the knob */
         .switch input:checked+.slider {
             background-color: #67c399;
         }
@@ -167,12 +154,10 @@
             transform: translateX(21px);
         }
 
-        /* Optional: Label for the toggle */
         .toggle-label {
             font-size: 14px;
             color: #333;
         }
-
 
         /* Dataset Tabs Bar */
         .dataset-tabs-bar {
@@ -180,17 +165,12 @@
             align-items: center;
             padding: 0 10px;
             background-color: #f4f4f4;
-            gap: 0;
             flex-wrap: nowrap;
             overflow-x: auto;
-            /* If many tabs, horizontal scrolling */
             -webkit-overflow-scrolling: touch;
-            /* smoother scrolling on touch */
             scrollbar-width: thin;
-            /* For Firefox */
         }
 
-        /* Customize scrollbar for WebKit browsers */
         .dataset-tabs-bar::-webkit-scrollbar {
             height: 6px;
         }
@@ -208,20 +188,14 @@
             background: #999;
         }
 
-        /* Regular dataset tab styling */
-        /* Dataset Tab */
+        /* Dataset Tabs */
         .dataset-tab {
             display: inline-flex;
-            /* use inline-flex for consistent sizing */
             align-items: center;
-            /* vertically center text */
             justify-content: center;
-            /* horizontally center text if needed */
             padding: 8px 16px;
             margin-right: 2px;
-            /* uniform gap to next element */
             line-height: 1.2;
-            /* override default browser line-height */
             background-color: #ddd;
             color: #333;
             border: 1px solid transparent;
@@ -233,15 +207,12 @@
             font-size: 14px;
         }
 
-        /* Active tab is highlighted and appears attached to the content below */
         .dataset-tab.active {
             background-color: #ffba3b;
             border-color: #aaa;
-            border-bottom: none;
             font-weight: bold;
         }
 
-        /* Label and close button inside the tab */
         .dataset-tab .tab-label {
             margin-right: 5px;
             white-space: nowrap;
@@ -259,59 +230,47 @@
             color: #e06666;
         }
 
-        /* Add Dataset Button: same shape on top, but sharp bottom corners, fixed width, different color */
         .add-dataset-btn {
             display: inline-flex;
-            /* match dataset tab's display mode */
             align-items: center;
             justify-content: center;
             padding: 8px 10px;
-            margin-left: 0;
             line-height: 1.2;
-            /* match dataset tab’s line-height */
             background-color: #16537e;
-            /* keep original color */
             color: #fff;
             border: 1px solid transparent;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
-            /* Sharp bottom corners: */
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
             border-bottom: none;
             cursor: pointer;
             transition: background-color 0.2s;
             font-size: 14px;
-            /* Fixed width so it does not fill leftover space: */
             flex: none;
             width: 110px;
-            /* or whatever size you need to match the tab width */
         }
 
         .add-dataset-btn:hover {
             background-color: #113d5c;
         }
 
-        /* Container for input-section (left) and graph-section (right) */
+        /* Layout Sections */
         .container {
             display: flex;
-            flex-direction: row;
-            padding: 0;
             gap: 10px;
             flex-wrap: wrap;
         }
 
         .input-section,
         .graph-section {
-            background-color: white;
+            background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
             box-sizing: border-box;
             height: 80vh;
-            /* fixed height for scrolling */
             overflow-y: auto;
-            /* vertical scroll if needed */
         }
 
         .input-section {
@@ -324,21 +283,22 @@
             min-width: 300px;
         }
 
+        /* Section Headings */
         .input-section h2,
         .graph-section h2,
         .global-uncertainty h2,
         .advanced-fit-section h2 {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 20px;
             background-color: #ffad7a;
             color: #222;
             padding: 5px;
             border-radius: 4px;
-            margin-top: 0;
-            margin-bottom: 15px;
+            margin: 0 0 15px;
             text-align: center;
         }
 
+        /* Data Table */
         .table-container {
             max-height: 300px;
             overflow-y: auto;
@@ -369,7 +329,6 @@
             font-size: 16px;
             text-align: center;
             background-color: transparent;
-            font-weight: normal;
             padding: 4px;
         }
 
@@ -408,12 +367,14 @@
         }
 
         .data-table tbody tr:nth-child(even) {
-            background-color: #ffffff;
+            background-color: #fff;
         }
 
+        /* Buttons */
+        /* Global button styles apply to all button elements */
         button {
             padding: 10px 15px;
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -427,6 +388,7 @@
             filter: brightness(90%);
         }
 
+        /* Specific button backgrounds */
         .btn-add-row {
             background-color: var(--add-row-btn-color);
         }
@@ -437,61 +399,24 @@
 
         .btn-copy-x {
             background-color: #6aa84f;
-            padding: 10px 15px;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 2px;
-            flex: 1;
-            transition: background-color 0.3s, filter 0.3s;
-        }
-
-        .btn-copy-x:hover {
-            background-color: #6aa84f;
-            filter: brightness(90%);
         }
 
         .btn-import-csv {
             background-color: var(--import-csv-btn-color);
         }
 
-        .btn-export-csv {
-            background-color: var(--export-csv-btn-color);
-        }
-
+        .btn-export-csv,
         .btn-export-md {
             background-color: var(--export-csv-btn-color);
         }
 
+        /* Fit Buttons (full width, fixed height) */
         .fit-button {
             background-color: #6fa8dc;
             width: 100%;
             height: 40px;
             padding: 0;
             margin: 0;
-            flex: 1;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s, filter 0.3s;
-        }
-
-        .fit-button:hover {
-            background-color: #6fa8dc;
-            filter: brightness(90%);
-        }
-
-        .clear-fit-button {
-            background-color: #e06666;
-            width: 100%;
-            height: 40px;
-            padding: 0;
-            margin: 0;
-            flex: 1;
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -500,39 +425,46 @@
             transition: background-color 0.3s, filter 0.3s;
         }
 
-        .clear-fit-button:hover {
+        .clear-fit-button {
             background-color: #e06666;
-            filter: brightness(90%);
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            margin: 0;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s, filter 0.3s;
         }
 
+        /* Button Containers */
         .button-container {
             display: flex;
             flex-direction: column;
             gap: 2px;
             justify-content: center;
             align-items: center;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin: 10px 0;
         }
 
         .button-row {
             display: flex;
-            flex-direction: row;
             gap: 2px;
             width: 100%;
         }
 
+        /* Global Uncertainty */
         .global-uncertainty {
-            margin-top: 20px;
+            margin: 20px 0;
             padding: 10px;
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
-            margin-bottom: 20px;
         }
 
         .uncertainty-controls {
             display: flex;
-            flex-direction: row;
             justify-content: center;
             gap: 20px;
         }
@@ -546,8 +478,8 @@
         .global-uncertainty-item {
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
             gap: 10px;
+            margin-bottom: 5px;
         }
 
         .global-uncertainty-item input {
@@ -566,7 +498,6 @@
         .global-uncertainty-item button {
             background-color: #80c1c5;
             color: #111;
-            border: none;
             padding: 8px 12px;
             border-radius: 4px;
             font-size: 14px;
@@ -575,10 +506,10 @@
         }
 
         .global-uncertainty-item button:hover {
-            background-color: #80c1c5;
             filter: brightness(90%);
         }
 
+        /* Advanced Fit Section */
         .advanced-fit-section {
             margin-top: 20px;
             padding: 10px;
@@ -587,7 +518,6 @@
 
         .advanced-fit-section select,
         .advanced-fit-section .fit-method-select {
-            width: auto;
             min-width: 150px;
             max-width: 300px;
             padding: 8px;
@@ -600,20 +530,15 @@
         .advanced-fit-item {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
             gap: 10px;
             margin-bottom: 10px;
         }
 
         .advanced-fit-item label {
-            flex: none;
-            text-align: left;
             white-space: nowrap;
         }
 
         .advanced-fit-item input {
-            flex: none;
-            width: auto;
             max-width: 200px;
             padding: 5px;
             border: 1px solid #ccc;
@@ -625,6 +550,7 @@
             outline: none;
         }
 
+        /* Parameter Section */
         .parameter-section {
             display: none;
         }
@@ -633,20 +559,20 @@
             display: block;
         }
 
+        /* General Equation */
         .general-equation {
-            margin-top: 20px;
+            margin: 20px 0 10px;
             background-color: #e9ecef;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
             text-align: center;
-            margin-bottom: 10px;
         }
 
+        /* Tabs */
         .tabs {
             display: flex;
-            justify-content: flex-start;
             border-radius: 4px;
             margin-bottom: 5px;
         }
@@ -654,36 +580,35 @@
         .tabs button {
             background-color: #f3f3f3;
             border: none;
-            outline: none;
             cursor: pointer;
-            padding: 8px 8px;
+            padding: 8px;
             transition: background-color 0.3s, filter 0.3s;
             font-size: 16px;
             border-radius: 4px;
-            color: #999999;
+            color: #999;
             width: 50%;
         }
 
         .tabs button:hover {
-            background-color: #eeeeee;
+            background-color: #eee;
             filter: brightness(95%);
         }
 
         .tabs button.active {
             background-color: #ffd966;
-            color: black;
+            color: #000;
         }
 
         .tab-content {
             display: none;
             padding: 15px 1px;
-            border-top: none;
         }
 
         .tab-content.active {
             display: block;
         }
 
+        /* Results */
         .result {
             margin-bottom: 20px;
             background-color: #f9f9f9;
@@ -700,6 +625,7 @@
             font-size: 16px;
         }
 
+        /* Plot */
         #plot {
             width: 100%;
             height: 500px;
@@ -715,7 +641,7 @@
         .plot-all-btn {
             padding: 8px 16px;
             background-color: #6fa8dc;
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -724,11 +650,10 @@
         }
 
         .plot-all-btn:hover {
-            background-color: #6fa8dc;
             filter: brightness(90%);
         }
 
-        /* Responsive tweak for smaller screens */
+        /* Responsive */
         @media (max-width: 900px) {
             .container {
                 flex-direction: column;
@@ -746,6 +671,7 @@
             }
         }
 
+        /* Graph Title */
         .graph-title-container {
             display: flex;
             align-items: center;
@@ -771,7 +697,7 @@
             outline: none;
         }
 
-        /* Full-screen semi-transparent background for popup */
+        /* Popup */
         #popup-background {
             position: fixed;
             top: 0;
@@ -782,15 +708,13 @@
             z-index: 1000;
         }
 
-        /* Popup container overlay */
         #popup-container {
             position: fixed;
             top: 2%;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0);
+            background: transparent;
             z-index: 1001;
-            /* Center the popup */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -804,7 +728,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             width: 100%;
             max-width: 800px;
-            height: auto;
             max-height: 90vh;
             overflow: auto;
             position: relative;
@@ -820,7 +743,6 @@
 
         #popup-plot {
             width: 100%;
-            height: auto;
             min-width: 600px;
             min-height: 400px;
             margin-top: 5px;
@@ -837,13 +759,13 @@
             padding: 4px 8px;
             cursor: pointer;
             z-index: 1100;
-            /* Ensure it sits above the content */
         }
 
         #popup-close:hover {
             background: #cc5555;
         }
 
+        /* Combined Plot Controls */
         .combined-plot-controls {
             margin-top: 10px;
             padding: 10px;
@@ -878,12 +800,15 @@
             margin-top: 15px;
         }
 
+        /* Footer */
         footer {
+            position: static;
+            font-size: 15px;
             text-align: center;
-            padding: 8px;
+            padding: 5px;
             background: #f4f4f4;
             color: #555;
-            margin: 5px 0;
+            margin: 3px 0;
             width: 100%;
         }
 
@@ -893,7 +818,6 @@
         }
 
         footer a:hover {
-            color: #ff5f1f;
             text-decoration: underline;
         }
 
@@ -2050,7 +1974,7 @@
         const xColumn = document.getElementById('x-column-name').value || 'x';
         const yColumn = document.getElementById('y-column-name').value || 'y';
         if (latexMode) {
-            document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
+            document.getElementById('graph-title').value = `${yColumn} \\text{vs} ${xColumn}`;
         } else {
             document.getElementById('graph-title').value = `${yColumn} vs ${xColumn}`;
         }
@@ -2124,7 +2048,7 @@
         const titleText = `${yColumn} vs ${xColumn}`;
 
         if (latexMode) {
-            document.getElementById('graph-title').value = `${yColumn} \\space \\text{vs} \\space ${xColumn}`;
+            document.getElementById('graph-title').value = `${yColumn} \\text{vs} ${xColumn}`;
         } else {
             document.getElementById('graph-title').value = titleText;
         }
@@ -2415,7 +2339,7 @@
 
         // Initialize the input boxes with the active dataset’s labels.
         // For title, take the value from the active graph title input.
-        titleInput.value = document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\space \\text{vs} \\space ${document.getElementById('x-column-name').value || 'x'}`;
+        titleInput.value = document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\text{vs} ${document.getElementById('x-column-name').value || 'x'}`;
         xLabelInput.value = processLabel(document.getElementById('x-column-name').value || 'x');
         yLabelInput.value = processLabel(document.getElementById('y-column-name').value || 'y');
 
@@ -2800,7 +2724,7 @@
     }
 
     /**
-     * Counts the number of decimal places in a number string.
+     * Counts the number of decimal places in a number string.s
      * @param {string} numStr - The number as a string.
      * @returns {number} - The number of decimal places.
      */
