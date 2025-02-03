@@ -358,6 +358,24 @@
             background-color: var(--clear-all-btn-color);
         }
 
+        .btn-copy-x {
+            background-color: #6aa84f;
+            padding: 10px 15px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 2px;
+            flex: 1;
+            transition: background-color 0.3s, filter 0.3s;
+        }
+
+        .btn-copy-x:hover {
+            background-color: #6aa84f;
+            filter: brightness(90%);
+        }
+
         .btn-import-csv {
             background-color: var(--import-csv-btn-color);
         }
@@ -894,6 +912,7 @@
             <div class="button-container">
                 <div class="button-row">
                     <button class="btn-add-row" onclick="addRow()">Add Row</button>
+                    <button class="btn-copy-x" onclick="copyXFromSet1()">Copy x₁</button>
                     <button class="btn-clear-all" onclick="clearRows()">Clear Data</button>
                 </div>
                 <div class="button-row">
@@ -1097,6 +1116,8 @@
     let datasetErrorTypes = {}; // stores the error type per axis per dataset, e.g. { 0: { x: 'absolute', y: 'absolute' }, 1: { x: 'percentage', y: 'percentage' } }
     let fittedCurves = {};
     let datasetFitResults = {};  // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
+    let dataset1XValues = [];
+
 
     let lastPlotState = {
         data: null,
@@ -1249,7 +1270,48 @@
         const tableBody = document.querySelector('#data-table tbody');
         tableBody.innerHTML = ''; // Clear current table
 
-        const dataset = rawData[activeSet] || [];
+        // For the active dataset, get its stored raw data.
+        let dataset = rawData[activeSet] || [];
+
+        // For Dataset 1: if rawData is empty but we have stored x-values, rebuild the table from them.
+        if (activeSet === 0 && dataset.length === 0 && dataset1XValues && dataset1XValues.length > 0) {
+            dataset1XValues.forEach(xVal => {
+                const newRow = tableBody.insertRow();
+                newRow.innerHTML = `
+                <td>
+                    <input type="text" class="x-input"
+                           onkeydown="navigateTable(event)"
+                           oninput="updateData()"
+                           placeholder="0"
+                           value="${xVal}">
+                </td>
+                <td>
+                    <input type="text" class="y-input"
+                           onkeydown="navigateTable(event)"
+                           oninput="updateData()"
+                           placeholder="0"
+                           value="">
+                </td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
+                    <input type="text" class="x-error-input"
+                           onkeydown="navigateTable(event)"
+                           placeholder="±0"
+                           oninput="updateData()"
+                           value="">
+                </td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
+                    <input type="text" class="y-error-input"
+                           onkeydown="navigateTable(event)"
+                           placeholder="±0"
+                           oninput="updateData()"
+                           value="">
+                </td>
+            `;
+            });
+            return;
+        }
+
+        // For other datasets (or if set 1 already has valid data), build rows from rawData.
         if (dataset.length > 0) {
             dataset.forEach(point => {
                 const newRow = tableBody.insertRow();
@@ -1266,7 +1328,7 @@
                            onkeydown="navigateTable(event)"
                            oninput="updateData()"
                            placeholder="0"
-                           value="${point.y}">
+                           value="${point.y !== null ? point.y : ''}">
                 </td>
                 <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
                     <input type="text" class="x-error-input"
@@ -1389,6 +1451,35 @@
         updateCombinedPlotInputsToActive();
 
         // Re-draw the plot (with no data points). The old fit may still appear
+        updatePlotAndRenderLatex();
+    }
+
+    function copyXFromSet1() {
+        // Use dataset1XValues, which may contain x values even if y is missing.
+        if (!dataset1XValues || dataset1XValues.length === 0) {
+            alert("Dataset 1 does not contain any valid x values yet.");
+            return;
+        }
+        const sourceX = dataset1XValues;
+        const tableBody = document.querySelector('#data-table tbody');
+        let rows = tableBody.querySelectorAll('tr');
+
+        // Ensure there are enough rows in the active dataset.
+        while (rows.length < sourceX.length) {
+            addRow();
+            rows = tableBody.querySelectorAll('tr');
+        }
+
+        // Copy the x values from Dataset 1 to the active dataset's x-inputs.
+        for (let i = 0; i < sourceX.length; i++) {
+            const xInput = rows[i].querySelector('.x-input');
+            if (xInput) {
+                xInput.value = sourceX[i];
+            }
+        }
+
+        // Update the active dataset and re-plot.
+        updateData();
         updatePlotAndRenderLatex();
     }
 
@@ -2561,6 +2652,17 @@
             const xErrorInputs = document.querySelectorAll('.x-error-input');
             const yErrorInputs = document.querySelectorAll('.y-error-input');
 
+            // For Dataset 1, store all x-values even if y is missing.
+            if (activeSet === 0) {
+                dataset1XValues = [];
+                for (let i = 0; i < xInputs.length; i++) {
+                    const xVal = parseFloat(xInputs[i].value);
+                    if (!isNaN(xVal)) {
+                        dataset1XValues.push(xVal);
+                    }
+                }
+            }
+
             // Clear the current active dataset and repopulate it from the table inputs.
             rawData[activeSet] = [];
             for (let i = 0; i < xInputs.length; i++) {
@@ -2569,10 +2671,11 @@
                 const xErrorRaw = parseFloat(xErrorInputs[i]?.value) || 0;
                 const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
 
-                if (!isNaN(x) && !isNaN(y)) {
+                // Save the row if x is a valid number, regardless of y.
+                if (!isNaN(x)) {
                     rawData[activeSet].push({
                         x: x,
-                        y: y,
+                        y: (!isNaN(y) ? y : null), // If y is not valid, store it as null.
                         xErrorRaw: xErrorRaw,
                         yErrorRaw: yErrorRaw
                     });
