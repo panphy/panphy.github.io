@@ -374,7 +374,7 @@
         }
 
         .data-table th input:focus {
-            border-bottom: 2px solid #007bff;
+            border-bottom: 2px solid #6fa8dc;
         }
 
         .data-table .latex-display {
@@ -400,7 +400,7 @@
         }
 
         .data-table td input:focus {
-            outline: 1px solid #007bff;
+            outline: 1px solid #6fa8dc;
         }
 
         .data-table tbody tr:nth-child(odd) {
@@ -466,7 +466,7 @@
         }
 
         .fit-button {
-            background-color: #17a2b8;
+            background-color: #6fa8dc;
             width: 100%;
             height: 40px;
             padding: 0;
@@ -481,12 +481,12 @@
         }
 
         .fit-button:hover {
-            background-color: #138496;
+            background-color: #6fa8dc;
             filter: brightness(90%);
         }
 
         .clear-fit-button {
-            background-color: #e87eb0;
+            background-color: #e06666;
             width: 100%;
             height: 40px;
             padding: 0;
@@ -501,7 +501,7 @@
         }
 
         .clear-fit-button:hover {
-            background-color: #e87eb0;
+            background-color: #e06666;
             filter: brightness(90%);
         }
 
@@ -559,7 +559,7 @@
         }
 
         .global-uncertainty-item input:focus {
-            border-color: #007bff;
+            border-color: #6fa8dc;
             outline: none;
         }
 
@@ -621,7 +621,7 @@
         }
 
         .advanced-fit-item input:focus {
-            border-color: #007bff;
+            border-color: #6fa8dc;
             outline: none;
         }
 
@@ -714,7 +714,7 @@
 
         .plot-all-btn {
             padding: 8px 16px;
-            background-color: #a64d79;
+            background-color: #6fa8dc;
             color: white;
             border: none;
             border-radius: 4px;
@@ -724,7 +724,7 @@
         }
 
         .plot-all-btn:hover {
-            background-color: #741b47;
+            background-color: #6fa8dc;
             filter: brightness(90%);
         }
 
@@ -767,7 +767,7 @@
         }
 
         .graph-title-container input:focus {
-            border-color: #007bff;
+            border-color: #6fa8dc;
             outline: none;
         }
 
@@ -1040,9 +1040,10 @@
                     <label for="fit-method">Fit Method:</label>
                     <select id="fit-method" onchange="updateBasicFitEquation()">
                         <option value="Linear">Linear</option>
-                        <option value="Polynomial-2">Polynomial (2nd Degree)</option>
-                        <option value="Polynomial-3">Polynomial (3rd Degree)</option>
-                        <option value="Polynomial-4">Polynomial (4th Degree)</option>
+                        <option value="Polynomial-2">Quadratic</option>
+                        <option value="Polynomial-3">Cubic</option>
+                        <!-- <option value="Polynomial-4">Polynomial (4th Degree)</option> -->
+                        <!-- Disabled 4th Degree Polynomial due to lack of applications -->
                         <option value="Exponential">Exponential</option>
                         <option value="Power">Power</option>
                     </select>
@@ -2195,7 +2196,7 @@
                 y: fittedY,
                 mode: 'lines',
                 name: 'Fit',
-                line: { color: '#43d4ff' }
+                line: { color: '#6fa8dc' }
             });
         }
 
