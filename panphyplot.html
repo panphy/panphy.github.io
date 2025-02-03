@@ -1452,7 +1452,6 @@
     }
 
     function copyXFromSet1() {
-        // Use dataset1XValues, which may contain x values even if y is missing.
         if (!dataset1XValues || dataset1XValues.length === 0) {
             alert("Dataset 1 does not contain any valid x values yet.");
             return;
@@ -1460,22 +1459,47 @@
         const sourceX = dataset1XValues;
         const tableBody = document.querySelector('#data-table tbody');
         let rows = tableBody.querySelectorAll('tr');
+        const missingCount = sourceX.length - rows.length;
 
-        // Ensure there are enough rows in the active dataset.
-        while (rows.length < sourceX.length) {
-            addRow();
+        // If there are missing rows, create them in one batch.
+        if (missingCount > 0) {
+            let newRowsHTML = '';
+            const toggleXError = document.getElementById('toggle-x-error').checked;
+            const toggleYError = document.getElementById('toggle-y-error').checked;
+            // Build the HTML string for the missing rows.
+            for (let i = 0; i < missingCount; i++) {
+                newRowsHTML += `
+                <tr>
+                    <td>
+                        <input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0">
+                    </td>
+                    <td>
+                        <input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0">
+                    </td>
+                    <td class="error-column" style="display: ${toggleXError ? 'table-cell' : 'none'};">
+                        <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()">
+                    </td>
+                    <td class="error-column" style="display: ${toggleYError ? 'table-cell' : 'none'};">
+                        <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()">
+                    </td>
+                </tr>
+            `;
+            }
+            // Insert all missing rows at once.
+            tableBody.insertAdjacentHTML('beforeend', newRowsHTML);
+            // Requery the rows after insertion.
             rows = tableBody.querySelectorAll('tr');
         }
 
-        // Copy the x values from Dataset 1 to the active dataset's x-inputs.
+        // Update all x-inputs in one go.
+        const xInputs = tableBody.querySelectorAll('.x-input');
         for (let i = 0; i < sourceX.length; i++) {
-            const xInput = rows[i].querySelector('.x-input');
-            if (xInput) {
-                xInput.value = sourceX[i];
+            if (xInputs[i]) {
+                xInputs[i].value = sourceX[i];
             }
         }
 
-        // Update the active dataset and re-plot.
+        // Update the underlying data and replot.
         updateData();
         updatePlotAndRenderLatex();
     }
