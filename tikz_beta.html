@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TikZ Code Editor (MathJax + TikZJax)</title>
+
+  <!-- 1) Load MathJax 3 (Required by TikZJax) -->
+  <!--    No async/defer, so it loads in order. -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- 2) Load TikZJax v1 (from tikzjax.com) -->
+  <!--    No async/defer so that it initializes properly before we call it. -->
+  <script src="https://tikzjax.com/v1/tikzjax.js"></script>
+
+  <style>
+    /* Basic reset & styling */
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: sans-serif;
+    }
+    /* Two-pane layout using flex */
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .pane {
+      flex: 1; 
+      padding: 10px; 
+      box-sizing: border-box; 
+      overflow: auto;
+    }
+    textarea {
+      width: 100%;
+      height: calc(100% - 40px);
+      font-family: monospace;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    #render-btn {
+      margin-top: 10px;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+    #tikz-output {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Left pane: Code Editor -->
+    <div class="pane">
+      <textarea id="tikz-input">
+\begin{tikzpicture}
+  % A minimal example. 
+  % Try changing the coordinates or shape & click "Render".
+  \draw (0,0) rectangle (3,2);
+  \draw (0,0) -- (3,2);
+\end{tikzpicture}
+      </textarea>
+      <button id="render-btn">Render</button>
+    </div>
+
+    <!-- Right pane: Rendered Diagram -->
+    <div class="pane">
+      <div id="tikz-output"></div>
+    </div>
+  </div>
+
+  <script>
+    // Renders the TikZ code from the textarea into #tikz-output using TikZJax
+    function renderTikz() {
+      const input = document.getElementById('tikz-input').value.trim();
+      const output = document.getElementById('tikz-output');
+
+      // Clear any previous diagram
+      output.innerHTML = '';
+
+      // Insert a new <script> tag with the user TikZ
+      const script = document.createElement('script');
+      script.type = 'text/tikz';
+      script.text = input;
+      output.appendChild(script);
+
+      // Add a short delay before calling tikzjax.load(), ensuring the script is recognized
+      setTimeout(() => {
+        if (typeof tikzjax !== 'undefined' && typeof tikzjax.load === 'function') {
+          tikzjax.load();
+        } else {
+          console.error('TikZJax not loaded or .load() method not found.');
+        }
+      }, 50);  // 50ms delay
+    }
+
+    // On "Render" button click, re‐render
+    document.getElementById('render-btn').addEventListener('click', renderTikz);
+
+    // Optionally, render once on page load
+    window.addEventListener('DOMContentLoaded', renderTikz);
+  </script>
+</body>
+</html>
