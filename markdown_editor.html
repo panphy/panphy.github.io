@@ -130,7 +130,6 @@
       border-bottom: 0px solid var(--border-color);
     }
 
-
     /* ---------------------------------------------------------------------- */
     /* Left Pane = Markdown Input                                             */
     /* Right Pane = Rendered Output                                           */
@@ -168,35 +167,26 @@
       margin: 0;
       padding: 0 10px;
       /* Use horizontal padding only if needed */
-      /* If your text or logo is too big, they may get clipped, so be sure
-       to resize them if you see overflow issues. */
     }
 
     /* Scale the PanPhy logo so it fits nicely in the heading row */
-    /* Removed extra margins to prevent pushing the heading */
     .logo-container img {
       max-height: 30px;
       margin: 0 auto 0 0;
-      /* top: 0, right: auto, bottom: 0, left: 0 */
       display: block;
     }
 
-    /* For the Output pane (and input pane if needed), if there's no content: 
-     a placeholder on left or right to keep alignment. */
     .heading-placeholder,
     .theme-toggle-wrapper {
       display: flex;
       align-items: center;
       justify-content: center;
-      /* Center content within fixed width */
     }
 
-    /* The text heading itself is centered in the grid cell. */
     .pane-heading {
       text-align: center;
       margin: 0;
       font-size: 1.2em;
-      /* Adjust for better visibility */
     }
 
     /* ---------------------------------------------------------------------- */
@@ -209,7 +199,6 @@
       font-size: 18px;
       color: var(--pane-heading-color);
       margin: 0;
-      /* Remove extra margins */
       display: block;
       margin-left: auto;
       margin-right: auto;
@@ -480,7 +469,6 @@
         --switch-label-font-size: 18px !important;
       }
 
-      /* Override the body’s flex layout and fixed height */
       body {
         display: block !important;
         height: auto !important;
@@ -488,19 +476,16 @@
         margin: 0 !important;
       }
 
-      /* Make sure the container does not stay flex or keep 100% height */
       #editorContainer {
         display: block !important;
         height: auto !important;
         overflow: visible !important;
       }
 
-      /* Hide input pane, toolbars, etc. */
       #inputPane {
         display: none !important;
       }
 
-      /* Override any fixed dimensions in the output pane */
       #outputPane {
         display: block !important;
         width: auto !important;
@@ -526,7 +511,6 @@
         line-height: 1.5 !important;
       }
 
-      /* Also override #renderedOutput if it has any fixed heights or scroll */
       #renderedOutput {
         height: auto !important;
         overflow: visible !important;
@@ -565,7 +549,6 @@
         color: #008000 !important;
       }
 
-      /* Only need attribute selectors for center/right; left is covered by the fallback */
       th[align="center"],
       td[align="center"] {
         text-align: center !important;
@@ -614,9 +597,50 @@
     button:hover {
       opacity: 0.8;
     }
+
+    /* ==========================================================================
+     RESPONSIVE RULES
+     ========================================================================== */
+
+    /* 1) Stack the two panes vertically on narrow screens */
+    @media (max-width: 900px) {
+      #editorContainer {
+        flex-direction: column;
+      }
+
+      #inputPane,
+      #outputPane {
+        width: 100%;
+        border-right: none;
+      }
+    }
+
+    /* 2) Wrap and resize the buttons when space is too narrow */
+    @media (max-width: 600px) {
+      .buttonContainer {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .buttonContainer button {
+        flex: 1 0 auto;
+        margin: 5px 2px;
+        min-width: 110px;
+        /* You can tweak this to control button shrink */
+      }
+
+      /* Move toggle below the buttons if there isn't enough space */
+      .toggle-container {
+        position: static;
+        margin-top: 5px;
+      }
+
+      .switch-label {
+        font-size: 12px;
+        /* Slightly smaller label if you want more room */
+      }
+    }
   </style>
-
-
 </head>
 
 <body>
