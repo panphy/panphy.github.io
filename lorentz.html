@@ -48,18 +48,15 @@
          * HEADER / BANNER
          *******************************************************/
         header {
-            /* Remove fixed heights; allow the header to grow as needed */
             width: 100%;
             background-color: #333;
             position: relative;
-            /* Add enough padding so the absolutely-positioned items aren’t cut off */
             padding: 20px 0;
-            /* top/bottom padding */
+            /* top/bottom padding so children aren't cut off */
             box-sizing: border-box;
         }
 
         .header-container {
-            /* The container is still positioned relative so child elements can be absolute */
             position: relative;
             width: 100%;
         }
@@ -70,13 +67,11 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            /* Vertically center the logo inside the header */
         }
 
         .logo img {
             height: auto;
             max-height: 30px;
-            /* Example limit so it won't get too tall */
         }
 
         /* Title pinned to the center (absolutely positioned) */
@@ -92,10 +87,9 @@
             margin: 0;
             color: #ffffff;
             font-size: 22px;
-            text-align: center;
         }
 
-        /* Spacer on the right (optional) */
+        /* Optional spacer on the right */
         .spacer {
             position: absolute;
             right: 10px;
@@ -117,15 +111,15 @@
          *******************************************************/
         #mainContainer {
             display: grid;
-            /* Default: side by side for large screens */
             grid-template-columns: 800px 250px;
+            /* side-by-side on wide screens */
             grid-gap: 15px;
             justify-content: center;
             width: 100%;
             box-sizing: border-box;
         }
 
-        /* On narrower screens (e.g. iPad portrait <= 900px), stack vertically */
+        /* Stack vertically on narrower screens (e.g. iPad portrait <= 900px) */
         @media (max-width: 900px) {
             #mainContainer {
                 grid-template-columns: 1fr;
@@ -139,15 +133,10 @@
         #diagramContainer {
             width: 100%;
             overflow: auto;
-            /* let it scroll if needed */
+            /* allow scroll if needed */
         }
 
-        /*
-         * Make canvas flexible:
-         * width: 100% => fill container
-         * max-width: 800px => do not exceed native width
-         * height: auto => preserve aspect ratio if JS allows
-         */
+        /* Responsive canvas */
         #minkowskiCanvas {
             border: 1px solid var(--canvas-border);
             background-color: var(--bg-color);
@@ -164,7 +153,6 @@
         #controlsContainer {
             width: 100%;
             max-width: 400px;
-            /* limit the panel width on large screens */
             background-color: var(--control-bg-color);
             border: 1px solid var(--control-border-color);
             border-radius: 5px;
@@ -394,7 +382,9 @@
         // Add one sample particle
         particles.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
 
-        /* Convert Minkowski coords to/from canvas coords */
+        /*******************************************************
+         * Coordinate conversions
+         *******************************************************/
         function toCanvasCoords(x, t) {
             return {
                 x: origin.x + x * scale,
@@ -408,7 +398,9 @@
             };
         }
 
-        /* Lorentz transform from rest to moving frame */
+        /*******************************************************
+         * Lorentz transform
+         *******************************************************/
         function lorentzTransform(pt, v) {
             const gamma = 1 / Math.sqrt(1 - v * v);
             return {
@@ -417,7 +409,9 @@
             };
         }
 
-        /* Draw rest frame grid lines (if toggled) */
+        /*******************************************************
+         * Drawing the rest-frame grid
+         *******************************************************/
         function drawRestFrameGrid() {
             const xMin = -origin.x / scale;
             const xMax = (canvas.width - origin.x) / scale;
@@ -450,9 +444,9 @@
             ctx.setLineDash([]);
         }
 
-        /**
-         * Draw lines of constant x' and t' if the user enables the moving grid toggle.
-         */
+        /*******************************************************
+         * Drawing lines for the moving-frame grid (x', t')
+         *******************************************************/
         function drawMovingGridLines(v) {
             const xPrimeMin = -5, xPrimeMax = 5;
             const tPrimeMin = -5, tPrimeMax = 5;
@@ -464,7 +458,7 @@
 
             const paramSteps = 60;
 
-            // lines x' = n => gamma(x - v t) = n => x - v t = n/gamma => x = v t + n/gamma
+            // lines x' = n => x - v t = n/gamma => x = v t + n/gamma
             let tRange = 6;
             for (let n = xPrimeMin; n <= xPrimeMax; n += step) {
                 let linePoints = [];
@@ -483,7 +477,7 @@
                 ctx.stroke();
             }
 
-            // lines t' = n => gamma(t - v x) = n => t - v x = n/gamma => t = v x + n/gamma
+            // lines t' = n => t - v x = n/gamma => t = v x + n/gamma
             let xRange = 6;
             for (let n = tPrimeMin; n <= tPrimeMax; n += step) {
                 let linePoints = [];
@@ -505,32 +499,32 @@
             ctx.setLineDash([]);
         }
 
-        /**
-         * Compute bounding-box intersections for the line x = m*t (for velocity lines).
-         */
+        /*******************************************************
+         * Compute the bounding-box intersections for a line
+         *******************************************************/
         function computeLineBoxEndpoints(m) {
             const W = canvas.width / (2 * scale);
             const T = canvas.height / (2 * scale);
             let candidates = [];
 
-            // t = +T => x=m*T
+            // t = +T => x = m*T
             let xPt = m * T;
             if (Math.abs(xPt) <= W) {
                 candidates.push({ x: xPt, t: T });
             }
-            // t = -T => x=m*(-T)
+            // t = -T => x = m*(-T)
             let xPt2 = m * (-T);
             if (Math.abs(xPt2) <= W) {
                 candidates.push({ x: xPt2, t: -T });
             }
-            // x=+W => W=m*t => t=W/m
+            // x=+W => W = m*t => t = W/m
             if (Math.abs(m) > 1e-10) {
                 let tW = W / m;
                 if (Math.abs(tW) <= T) {
                     candidates.push({ x: W, t: tW });
                 }
             }
-            // x=-W => -W=m*t => t=-W/m
+            // x=-W => -W = m*t => t=-W/m
             if (Math.abs(m) > 1e-10) {
                 let tNegW = -W / m;
                 if (Math.abs(tNegW) <= T) {
@@ -538,7 +532,8 @@
                 }
             }
             if (candidates.length < 2) return [];
-            // pick farthest pair
+
+            // We pick the two that are farthest apart
             let maxDistSq = -1;
             let bestPair = [candidates[0], candidates[0]];
             for (let i = 0; i < candidates.length; i++) {
@@ -556,37 +551,81 @@
         }
 
         /**
-         * Draw the green (rest slope=v_line) and orange (slope=v_eff) velocity lines, if toggled.
+         * Helper to parametric-interpolate along a line from p0 to p1, at fraction s
+         * E(s) = p0 + s*(p1 - p0)
+         */
+        function interpolate(p0, p1, s) {
+            return {
+                x: p0.x + s * (p1.x - p0.x),
+                t: p0.t + s * (p1.t - p0.t)
+            };
+        }
+
+        /**
+         * Draw velocity lines, placing:
+         *   - green line label ("v=...") at bottom 1/4
+         *   - orange line label ("v'=...") at top 1/4
          */
         function drawVelocityLines(v_line, relSpeed) {
-            // Green line
+            // 1) Green line => slope = v_line
             let endG = computeLineBoxEndpoints(v_line);
             if (endG.length === 2) {
+                // reorder so G0 has smaller t
+                let G0 = endG[0], G1 = endG[1];
+                if (G1.t < G0.t) {
+                    [G0, G1] = [G1, G0]; // swap so G0 is bottom
+                }
+
+                // Draw the line
                 ctx.strokeStyle = "green";
                 ctx.lineWidth = 2;
-                let c1 = toCanvasCoords(endG[0].x, endG[0].t);
-                let c2 = toCanvasCoords(endG[1].x, endG[1].t);
+                let c1 = toCanvasCoords(G0.x, G0.t);
+                let c2 = toCanvasCoords(G1.x, G1.t);
                 ctx.beginPath();
                 ctx.moveTo(c1.x, c1.y);
                 ctx.lineTo(c2.x, c2.y);
                 ctx.stroke();
+
+                // Mark the line near bottom quarter => param=0.25
+                let Gpoint = interpolate(G0, G1, 0.25);
+                let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
+                ctx.fillStyle = "green";
+                ctx.font = "14px Arial";
+                ctx.fillText(`v = ${v_line.toFixed(2)}c`, Gc.x + 5, Gc.y - 5);
             }
-            // Orange line => slope=(v_line+relSpeed)/(1+v_line*relSpeed)
+
+            // 2) Orange line => slope = v_eff
             let v_eff = (v_line + relSpeed) / (1 + v_line * relSpeed);
             let endO = computeLineBoxEndpoints(v_eff);
             if (endO.length === 2) {
+                // reorder so O0 has smaller t
+                let O0 = endO[0], O1 = endO[1];
+                if (O1.t < O0.t) {
+                    [O0, O1] = [O1, O0];
+                }
+
+                // Draw the line
                 ctx.strokeStyle = "orange";
                 ctx.lineWidth = 2;
-                let c1o = toCanvasCoords(endO[0].x, endO[0].t);
-                let c2o = toCanvasCoords(endO[1].x, endO[1].t);
+                let c1o = toCanvasCoords(O0.x, O0.t);
+                let c2o = toCanvasCoords(O1.x, O1.t);
                 ctx.beginPath();
                 ctx.moveTo(c1o.x, c1o.y);
                 ctx.lineTo(c2o.x, c2o.y);
                 ctx.stroke();
+
+                // Mark the line near top quarter => param=0.75
+                let Opoint = interpolate(O0, O1, 0.75);
+                let Oc = toCanvasCoords(Opoint.x, Opoint.t);
+                ctx.fillStyle = "orange";
+                ctx.font = "14px Arial";
+                ctx.fillText(`v' = ${v_eff.toFixed(2)}c`, Oc.x + 5, Oc.y - 5);
             }
         }
 
-        /* Main draw routine */
+        /*******************************************************
+         * Main draw routine
+         *******************************************************/
         function draw() {
             const relSpeed = parseFloat(speedSlider.value);
             speedValueDisplay.textContent = relSpeed.toFixed(2);
@@ -597,7 +636,7 @@
             // Clear
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Rest frame grid
+            // Rest frame grid if toggled
             if (gridToggle.checked) {
                 drawRestFrameGrid();
             }
@@ -622,7 +661,7 @@
             ctx.fillText("x", canvas.width - 20, origin.y - 10);
             ctx.fillText("t", origin.x + 10, 20);
 
-            // Moving grid lines
+            // Moving grid lines if toggled
             if (movingGridToggle.checked) {
                 drawMovingGridLines(relSpeed);
             }
@@ -660,7 +699,7 @@
                 ctx.fillText("x'", xB.x - 30, xB.y - 5);
             }
 
-            // Velocity lines
+            // Velocity lines if toggled
             if (velocityToggle.checked) {
                 drawVelocityLines(v_line, relSpeed);
             }
@@ -709,31 +748,31 @@
 
             // Update coordinates in a table
             let html = `
-                    <h3>Particle Coordinates</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Particle</th>
-                                <th>Rest Frame (x,t)</th>
-                                <th>Moving Frame (x',t')</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
+                <h3>Particle Coordinates</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Particle</th>
+                            <th>Rest Frame (x,t)</th>
+                            <th>Moving Frame (x',t')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             particles.forEach(p => {
                 let pm = lorentzTransform(p, relSpeed);
                 html += `
-                        <tr>
-                            <td>${p.label}</td>
-                            <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
-                            <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
-                        </tr>
-                    `;
+                    <tr>
+                        <td>${p.label}</td>
+                        <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
+                        <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
+                    </tr>
+                `;
             });
             html += `
-                        </tbody>
-                    </table>
-                `;
+                    </tbody>
+                </table>
+            `;
             coordinatesDiv.innerHTML = html;
         }
 
