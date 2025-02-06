@@ -357,8 +357,13 @@
         let contextParticle = null;
         let longPressTimeout = null;
 
-        // Minkowski diagram geometry
-        const origin = { x: canvas.width / 2, y: canvas.height / 2 };
+        // For panning the axes
+        let draggingCanvas = false;
+        let canvasDragStart = { x: 0, y: 0 };
+        let originStart = { x: 0, y: 0 };
+
+        // Minkowski diagram geometry (origin in the middle initially)
+        let origin = { x: canvas.width / 2, y: canvas.height / 2 };
         const scale = 80;  // pixels per Minkowski unit
 
         // Particle storage
@@ -407,14 +412,26 @@
             };
         }
 
+        /**
+         * Returns current Minkowski bounding box:
+         * x in [xMin, xMax],  t in [tMin, tMax].
+         * This reflects the entire visible canvas area
+         * given our current origin & scale.
+         */
+        function getBoundingBox() {
+            return {
+                xMin: (0 - origin.x) / scale,
+                xMax: (canvas.width - origin.x) / scale,
+                tMin: (origin.y - canvas.height) / scale,
+                tMax: (origin.y - 0) / scale
+            };
+        }
+
         /*******************************************************
          * Drawing the rest-frame grid
          *******************************************************/
         function drawRestFrameGrid() {
-            const xMin = -origin.x / scale;
-            const xMax = (canvas.width - origin.x) / scale;
-            const tMin = -(canvas.height - origin.y) / scale;
-            const tMax = origin.y / scale;
+            const { xMin, xMax, tMin, tMax } = getBoundingBox();
 
             ctx.strokeStyle = "#dddddd";
             ctx.lineWidth = 1;
@@ -446,26 +463,30 @@
          * Drawing lines for the moving-frame grid (x', t')
          *******************************************************/
         function drawMovingGridLines(v) {
-            const xPrimeMin = -5, xPrimeMax = 5;
-            const tPrimeMin = -5, tPrimeMax = 5;
-            const step = 1;
+            // Use the current bounding box
+            const { xMin, xMax, tMin, tMax } = getBoundingBox();
             const gamma = 1 / Math.sqrt(1 - v * v);
+
             ctx.strokeStyle = "#800080";
             ctx.lineWidth = 1;
             ctx.setLineDash([2, 4]);
 
-            const paramSteps = 60;
+            // We'll draw lines x' = n and t' = n for n in integer range.
+            // The question is: what range of n? We can pick, for example, from -10 to +10,
+            // or dynamically pick based on the bounding box size.
+            // Let's do -10..+10 to ensure coverage, but you can refine as needed:
+            const nMin = -10, nMax = 10;
+            const steps = 200; // resolution for param
 
-            // lines x' = n => x - v t = n/gamma => x = v t + n/gamma
-            let tRange = 6;
-            for (let n = xPrimeMin; n <= xPrimeMax; n += step) {
-                let linePoints = [];
+            // lines x' = n => x - v t = n / gamma => x = v t + (n/gamma)
+            for (let n = nMin; n <= nMax; n++) {
                 let cst = n / gamma;
-                for (let i = 0; i <= paramSteps; i++) {
-                    let frac = i / paramSteps;
-                    let tVal = -tRange + frac * (2 * tRange);
-                    let xVal = v * tVal + cst;
-                    linePoints.push(toCanvasCoords(xVal, tVal));
+                // param with t from tMin..tMax
+                let linePoints = [];
+                for (let i = 0; i <= steps; i++) {
+                    let ft = tMin + (i / steps) * (tMax - tMin);
+                    let fx = v * ft + cst;
+                    linePoints.push(toCanvasCoords(fx, ft));
                 }
                 ctx.beginPath();
                 ctx.moveTo(linePoints[0].x, linePoints[0].y);
@@ -475,16 +496,15 @@
                 ctx.stroke();
             }
 
-            // lines t' = n => t - v x = n/gamma => t = v x + n/gamma
-            let xRange = 6;
-            for (let n = tPrimeMin; n <= tPrimeMax; n += step) {
-                let linePoints = [];
+            // lines t' = n => t - v x = n / gamma => t = v x + (n/gamma)
+            for (let n = nMin; n <= nMax; n++) {
                 let cst = n / gamma;
-                for (let i = 0; i <= paramSteps; i++) {
-                    let frac = i / paramSteps;
-                    let xVal = -xRange + frac * (2 * xRange);
-                    let tVal = v * xVal + cst;
-                    linePoints.push(toCanvasCoords(xVal, tVal));
+                // param with x from xMin..xMax
+                let linePoints = [];
+                for (let i = 0; i <= steps; i++) {
+                    let fx = xMin + (i / steps) * (xMax - xMin);
+                    let ft = v * fx + cst;
+                    linePoints.push(toCanvasCoords(fx, ft));
                 }
                 ctx.beginPath();
                 ctx.moveTo(linePoints[0].x, linePoints[0].y);
@@ -499,39 +519,43 @@
 
         /*******************************************************
          * Compute the bounding-box intersections for a line
+         * of the form x = m * t  (slope = m).
          *******************************************************/
         function computeLineBoxEndpoints(m) {
-            const W = canvas.width / (2 * scale);
-            const T = canvas.height / (2 * scale);
+            const { xMin, xMax, tMin, tMax } = getBoundingBox();
             let candidates = [];
 
-            // t = +T => x = m*T
-            let xPt = m * T;
-            if (Math.abs(xPt) <= W) {
-                candidates.push({ x: xPt, t: T });
+            // If line is x = m t, that means t = x / m if m != 0
+            // Intersect with t = tMin => x = m * tMin
+            let x_tMin = m * tMin;
+            if (x_tMin >= xMin && x_tMin <= xMax) {
+                candidates.push({ x: x_tMin, t: tMin });
             }
-            // t = -T => x = m*(-T)
-            let xPt2 = m * (-T);
-            if (Math.abs(xPt2) <= W) {
-                candidates.push({ x: xPt2, t: -T });
+            // Intersect with t = tMax => x = m * tMax
+            let x_tMax = m * tMax;
+            if (x_tMax >= xMin && x_tMax <= xMax) {
+                candidates.push({ x: x_tMax, t: tMax });
             }
-            // x=+W => W = m*t => t = W/m
+            // Intersect with x = xMin => t = xMin / m if m != 0
             if (Math.abs(m) > 1e-10) {
-                let tW = W / m;
-                if (Math.abs(tW) <= T) {
-                    candidates.push({ x: W, t: tW });
+                let t_xMin = xMin / m;
+                if (t_xMin >= tMin && t_xMin <= tMax) {
+                    candidates.push({ x: xMin, t: t_xMin });
                 }
             }
-            // x=-W => -W = m*t => t=-W/m
+            // Intersect with x = xMax => t = xMax / m
             if (Math.abs(m) > 1e-10) {
-                let tNegW = -W / m;
-                if (Math.abs(tNegW) <= T) {
-                    candidates.push({ x: -W, t: tNegW });
+                let t_xMax = xMax / m;
+                if (t_xMax >= tMin && t_xMax <= tMax) {
+                    candidates.push({ x: xMax, t: t_xMax });
                 }
             }
+
+            // We might end up with fewer than 2 points if the line doesn't intersect.
+            // Or we can have multiple valid intersection points, from which we pick the farthest pair.
             if (candidates.length < 2) return [];
 
-            // We pick the two that are farthest apart
+            // Pick the pair of points that are farthest apart
             let maxDistSq = -1;
             let bestPair = [candidates[0], candidates[0]];
             for (let i = 0; i < candidates.length; i++) {
@@ -549,8 +573,7 @@
         }
 
         /**
-         * Helper to parametric-interpolate along a line from p0 to p1, at fraction s
-         * E(s) = p0 + s*(p1 - p0)
+         * Parametric interpolation for convenience
          */
         function interpolate(p0, p1, s) {
             return {
@@ -560,19 +583,20 @@
         }
 
         /**
-         * Draw velocity lines
+         * Draw two velocity lines:
+         * 1) slope = v_line (green)
+         * 2) slope = (v_line + relSpeed)/(1 + v_line*relSpeed) (orange)
          */
         function drawVelocityLines(v_line, relSpeed) {
-            // 1) Green line => slope = v_line
+            // First line: slope = v_line => x = v_line * t
             let endG = computeLineBoxEndpoints(v_line);
             if (endG.length === 2) {
+                let G0 = endG[0];
+                let G1 = endG[1];
                 // reorder so G0 has smaller t
-                let G0 = endG[0], G1 = endG[1];
-                if (G1.t < G0.t) {
-                    [G0, G1] = [G1, G0]; // swap so G0 is bottom
-                }
+                if (G1.t < G0.t) [G0, G1] = [G1, G0];
 
-                // Draw the line
+                // Draw
                 ctx.strokeStyle = "#5f8a35";
                 ctx.lineWidth = 2;
                 let c1 = toCanvasCoords(G0.x, G0.t);
@@ -582,7 +606,7 @@
                 ctx.lineTo(c2.x, c2.y);
                 ctx.stroke();
 
-                // Mark the line near top quarter => param=0.67
+                // Label
                 let Gpoint = interpolate(G0, G1, 0.67);
                 let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
                 ctx.fillStyle = "#5f8a35";
@@ -590,17 +614,16 @@
                 ctx.fillText(`v = ${v_line.toFixed(2)}c`, Gc.x + 5, Gc.y - 5);
             }
 
-            // 2) Orange line => slope = v_eff
+            // Second line: slope = v_eff
             let v_eff = (v_line + relSpeed) / (1 + v_line * relSpeed);
             let endO = computeLineBoxEndpoints(v_eff);
             if (endO.length === 2) {
+                let O0 = endO[0];
+                let O1 = endO[1];
                 // reorder so O0 has smaller t
-                let O0 = endO[0], O1 = endO[1];
-                if (O1.t < O0.t) {
-                    [O0, O1] = [O1, O0];
-                }
+                if (O1.t < O0.t) [O0, O1] = [O1, O0];
 
-                // Draw the line
+                // Draw
                 ctx.strokeStyle = "#ff5f1f";
                 ctx.lineWidth = 2;
                 let c1o = toCanvasCoords(O0.x, O0.t);
@@ -610,7 +633,7 @@
                 ctx.lineTo(c2o.x, c2o.y);
                 ctx.stroke();
 
-                // Mark the line near top quarter => param=0.79
+                // Label
                 let Opoint = interpolate(O0, O1, 0.79);
                 let Oc = toCanvasCoords(Opoint.x, Opoint.t);
                 ctx.fillStyle = "#ff5f1f";
@@ -667,22 +690,20 @@
             ctx.strokeStyle = "#1E90FF";
             ctx.lineWidth = 1.5;
 
-            const xMinVal = -origin.x / scale;
-            const xMaxVal = (canvas.width - origin.x) / scale;
-            const tMinVal = -(canvas.height - origin.y) / scale;
-            const tMaxVal = origin.y / scale;
+            const { xMin, xMax, tMin, tMax } = getBoundingBox();
 
-            // t' axis => slope = relSpeed
-            let tA = toCanvasCoords(relSpeed * tMinVal, tMinVal);
-            let tB = toCanvasCoords(relSpeed * tMaxVal, tMaxVal);
+            // For the moving axes, param from tMin..tMax for t'-axis, xMin..xMax for x'-axis
+            // t' axis => slope = relSpeed => x = v t
+            let tA = toCanvasCoords(relSpeed * tMin, tMin);
+            let tB = toCanvasCoords(relSpeed * tMax, tMax);
             ctx.beginPath();
             ctx.moveTo(tA.x, tA.y);
             ctx.lineTo(tB.x, tB.y);
             ctx.stroke();
 
-            // x' axis => param approach
-            let xA = toCanvasCoords(xMinVal, relSpeed * xMinVal);
-            let xB = toCanvasCoords(xMaxVal, relSpeed * xMaxVal);
+            // x' axis => param approach => if x' axis in Minkowski: t = v x => slope = v
+            let xA = toCanvasCoords(xMin, relSpeed * xMin);
+            let xB = toCanvasCoords(xMax, relSpeed * xMax);
             ctx.beginPath();
             ctx.moveTo(xA.x, xA.y);
             ctx.lineTo(xB.x, xB.y);
@@ -708,16 +729,26 @@
             ctx.strokeStyle = "#5b5b5b";
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            let lcS = toCanvasCoords(-canvas.width / (2 * scale), -canvas.width / (2 * scale));
-            let lcE = toCanvasCoords(canvas.width / (2 * scale), canvas.width / (2 * scale));
-            ctx.moveTo(lcS.x, lcS.y);
-            ctx.lineTo(lcE.x, lcE.y);
-            lcS = toCanvasCoords(-canvas.width / (2 * scale), canvas.width / (2 * scale));
-            lcE = toCanvasCoords(canvas.width / (2 * scale), -canvas.width / (2 * scale));
-            ctx.moveTo(lcS.x, lcS.y);
-            ctx.lineTo(lcE.x, lcE.y);
-            ctx.stroke();
+            // We'll just param for the bounding box corners
+            // Lines: x = ± t  => slope = ±1
+            let endPlus = computeLineBoxEndpoints(1);
+            let endMinus = computeLineBoxEndpoints(-1);
+            if (endPlus.length === 2) {
+                let c1 = toCanvasCoords(endPlus[0].x, endPlus[0].t);
+                let c2 = toCanvasCoords(endPlus[1].x, endPlus[1].t);
+                ctx.beginPath();
+                ctx.moveTo(c1.x, c1.y);
+                ctx.lineTo(c2.x, c2.y);
+                ctx.stroke();
+            }
+            if (endMinus.length === 2) {
+                let c1 = toCanvasCoords(endMinus[0].x, endMinus[0].t);
+                let c2 = toCanvasCoords(endMinus[1].x, endMinus[1].t);
+                ctx.beginPath();
+                ctx.moveTo(c1.x, c1.y);
+                ctx.lineTo(c2.x, c2.y);
+                ctx.stroke();
+            }
             ctx.setLineDash([]);
 
             // Particles
@@ -780,43 +811,81 @@
         /*******************************************************
          * EVENT HANDLERS (MOUSE, TOUCH, CONTEXT MENU, BUTTONS)
          *******************************************************/
+
+        // Mouse down
         canvas.addEventListener("mousedown", e => {
             if (e.button !== 0) return;
             const r = canvas.getBoundingClientRect();
             const mx = e.clientX - r.left, my = e.clientY - r.top;
+
+            // Check if clicked on a particle
+            let foundParticle = false;
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 const cp = toCanvasCoords(p.x, p.t);
                 if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
                     draggingParticle = p;
+                    foundParticle = true;
                     break;
                 }
             }
+
+            if (!foundParticle) {
+                // Start dragging the entire canvas
+                draggingCanvas = true;
+                canvasDragStart.x = mx;
+                canvasDragStart.y = my;
+                originStart.x = origin.x;
+                originStart.y = origin.y;
+            }
         });
+
+        // Mouse move
         canvas.addEventListener("mousemove", e => {
+            const r = canvas.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+
             if (draggingParticle) {
-                const r = canvas.getBoundingClientRect();
-                const mx = e.clientX - r.left, my = e.clientY - r.top;
+                // Move the particle
                 const coords = toMinkowskiCoords(mx, my);
                 draggingParticle.x = coords.x;
                 draggingParticle.t = coords.t;
                 draw();
+            } else if (draggingCanvas) {
+                // Pan the canvas
+                origin.x = originStart.x + (mx - canvasDragStart.x);
+                origin.y = originStart.y + (my - canvasDragStart.y);
+                draw();
             }
         });
-        canvas.addEventListener("mouseup", () => { draggingParticle = null; });
-        canvas.addEventListener("mouseleave", () => { draggingParticle = null; });
 
+        // Mouse up
+        canvas.addEventListener("mouseup", () => {
+            draggingParticle = null;
+            draggingCanvas = false;
+        });
+
+        // Mouse leaves canvas
+        canvas.addEventListener("mouseleave", () => {
+            draggingParticle = null;
+            draggingCanvas = false;
+        });
+
+        // Touch start
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
             const t = e.touches[0];
             const r = canvas.getBoundingClientRect();
             const tx = t.clientX - r.left, ty = t.clientY - r.top;
+
+            let found = false;
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 const cp = toCanvasCoords(p.x, p.t);
                 if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
                     draggingParticle = p;
-                    // Set a long-press to show context menu
+                    found = true;
+                    // Set a long-press to show context menu for particle
                     longPressTimeout = setTimeout(() => {
                         contextParticle = p;
                         contextMenu.style.display = "block";
@@ -826,27 +895,56 @@
                     break;
                 }
             }
+
+            if (!found) {
+                // Drag canvas
+                draggingCanvas = true;
+                canvasDragStart.x = tx;
+                canvasDragStart.y = ty;
+                originStart.x = origin.x;
+                originStart.y = origin.y;
+            }
         });
+
+        // Touch move
         canvas.addEventListener("touchmove", e => {
             e.preventDefault();
+            const t = e.touches[0];
+            const r = canvas.getBoundingClientRect();
+            const tx = t.clientX - r.left, ty = t.clientY - r.top;
+
             if (draggingParticle) {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
-                const t = e.touches[0];
-                const r = canvas.getBoundingClientRect();
-                const tx = t.clientX - r.left, ty = t.clientY - r.top;
+                // If we move while the long-press timer is set, cancel it
+                if (longPressTimeout) {
+                    clearTimeout(longPressTimeout);
+                    longPressTimeout = null;
+                }
+
+                // Drag the particle
                 const coords = toMinkowskiCoords(tx, ty);
                 draggingParticle.x = coords.x;
                 draggingParticle.t = coords.t;
                 draw();
+            } else if (draggingCanvas) {
+                // Drag the canvas
+                origin.x = originStart.x + (tx - canvasDragStart.x);
+                origin.y = originStart.y + (ty - canvasDragStart.y);
+                draw();
             }
         });
+
+        // Touch end
         canvas.addEventListener("touchend", () => {
             if (longPressTimeout) clearTimeout(longPressTimeout);
             draggingParticle = null;
+            draggingCanvas = false;
         });
+
+        // Touch cancel
         canvas.addEventListener("touchcancel", () => {
             if (longPressTimeout) clearTimeout(longPressTimeout);
             draggingParticle = null;
+            draggingCanvas = false;
         });
 
         // Right-click context menu to remove a particle
@@ -872,6 +970,8 @@
                 contextMenu.style.display = "none";
             }
         });
+
+        // Click on context menu => remove particle
         contextMenu.addEventListener("click", () => {
             if (contextParticle) {
                 const idx = particles.indexOf(contextParticle);
@@ -884,6 +984,8 @@
                 draw();
             }
         });
+
+        // Click anywhere else => hide context menu
         document.addEventListener("click", e => {
             if (e.target !== contextMenu) {
                 contextMenu.style.display = "none";
