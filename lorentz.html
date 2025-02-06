@@ -17,8 +17,8 @@
             --grid-color: #dddddd;
             --moving-grid-color: #800080;
             --rest-axis-color: #333333;
-            --particle-rest-color: #006400;
-            --particle-moving-color: #c00;
+            --event-rest-color: #006400;
+            --event-moving-color: #c00;
             --control-bg-color: #f5f5f5;
             --control-border-color: #cccccc;
         }
@@ -100,7 +100,7 @@
          *******************************************************/
         #contentWrapper {
             width: 100%;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
         }
 
@@ -190,7 +190,7 @@
          *******************************************************/
         #coordinates {
             margin-top: 10px;
-            font-size: 14px;
+            font-size: 13px;
             overflow-y: auto;
             max-height: 200px;
             border-top: 1px solid var(--control-border-color);
@@ -205,7 +205,7 @@
         #coordinates th,
         #coordinates td {
             border: 1px solid var(--control-border-color);
-            padding: 4px 6px;
+            padding: 5px 3px;
             text-align: center;
         }
 
@@ -306,10 +306,10 @@
                     <span id="velocityValue">0.30</span>
                 </div>
                 <div class="controlItem">
-                    <button id="addParticleBtn">Add Particle</button>
+                    <button id="addEventBtn">Add Event</button>
                 </div>
                 <div class="controlItem">
-                    <button id="removeAllParticlesBtn">Remove All Particles</button>
+                    <button id="removeAllEventsBtn">Remove All Events</button>
                 </div>
                 <div class="controlItem">
                     <button id="alignFramesBtn">Align Frames</button>
@@ -324,8 +324,8 @@
         <a href="https://buymeacoffee.com/panphy">Support My Projects</a>
     </footer>
 
-    <!-- Context Menu for removing a particle -->
-    <div id="contextMenu">Remove Particle</div>
+    <!-- Context Menu for removing a event -->
+    <div id="contextMenu">Remove Event</div>
 </body>
 
 <script>
@@ -343,18 +343,18 @@
         const velocityValueDisplay = document.getElementById("velocityValue");
 
         // Buttons
-        const addParticleBtn = document.getElementById("addParticleBtn");
-        const removeAllParticlesBtn = document.getElementById("removeAllParticlesBtn");
+        const addEventBtn = document.getElementById("addEventBtn");
+        const removeAllEventsBtn = document.getElementById("removeAllEventsBtn");
         const alignFramesBtn = document.getElementById("alignFramesBtn");
 
-        // Display for particle coordinates
+        // Display for event coordinates
         const coordinatesDiv = document.getElementById("coordinates");
-        // Context menu for removing particles
+        // Context menu for removing events
         const contextMenu = document.getElementById("contextMenu");
 
         // For dragging & long-press
-        let draggingParticle = null;
-        let contextParticle = null;
+        let draggingEvent = null;
+        let contextEvent = null;
         let longPressTimeout = null;
 
         // For panning the axes
@@ -366,9 +366,9 @@
         let origin = { x: canvas.width / 2, y: canvas.height / 2 };
         const scale = 80;  // pixels per Minkowski unit
 
-        // Particle storage
-        let particles = [];
-        let nextParticleLabelCode = "A".charCodeAt(0);
+        // Event storage
+        let events = [];
+        let nextEventLabelCode = "A".charCodeAt(0);
         let availableLabels = [];
 
         function getNextLabel() {
@@ -376,14 +376,14 @@
                 availableLabels.sort();
                 return availableLabels.shift();
             } else {
-                let label = String.fromCharCode(nextParticleLabelCode);
-                nextParticleLabelCode++;
+                let label = String.fromCharCode(nextEventLabelCode);
+                nextEventLabelCode++;
                 return label;
             }
         }
 
-        // Add one sample particle
-        particles.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
+        // Add one sample event
+        events.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
 
         /*******************************************************
          * Coordinate conversions
@@ -751,9 +751,9 @@
             }
             ctx.setLineDash([]);
 
-            // Particles
-            particles.forEach(p => {
-                // Particle in rest frame (green)
+            // Events
+            events.forEach(p => {
+                // Event in rest frame (green)
                 let cp = toCanvasCoords(p.x, p.t);
                 ctx.fillStyle = "#16a085";
                 ctx.beginPath();
@@ -767,7 +767,7 @@
                 ctx.font = "14px Arial";
                 ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
 
-                // The same particle in the moving frame (red)
+                // The same event in the moving frame (red)
                 let pm = lorentzTransform(p, relSpeed);
                 let cpm = toCanvasCoords(pm.x, pm.t);
                 ctx.fillStyle = "#ff3c73";
@@ -780,18 +780,18 @@
 
             // Update coordinates in a table
             let html = `
-        <h3>Particle Coordinates</h3>
+        <h3>Event Coordinates</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Particle</th>
+                    <th>Event</th>
                     <th>Rest Frame (x,t)</th>
                     <th>Moving Frame (x',t')</th>
                 </tr>
             </thead>
             <tbody>
     `;
-            particles.forEach(p => {
+            events.forEach(p => {
                 let pm = lorentzTransform(p, relSpeed);
                 html += `
             <tr>
@@ -818,19 +818,19 @@
             const r = canvas.getBoundingClientRect();
             const mx = e.clientX - r.left, my = e.clientY - r.top;
 
-            // Check if clicked on a particle
-            let foundParticle = false;
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
+            // Check if clicked on a event
+            let foundEvent = false;
+            for (let i = events.length - 1; i >= 0; i--) {
+                const p = events[i];
                 const cp = toCanvasCoords(p.x, p.t);
                 if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                    draggingParticle = p;
-                    foundParticle = true;
+                    draggingEvent = p;
+                    foundEvent = true;
                     break;
                 }
             }
 
-            if (!foundParticle) {
+            if (!foundEvent) {
                 // Start dragging the entire canvas
                 draggingCanvas = true;
                 canvasDragStart.x = mx;
@@ -845,11 +845,11 @@
             const r = canvas.getBoundingClientRect();
             const mx = e.clientX - r.left, my = e.clientY - r.top;
 
-            if (draggingParticle) {
-                // Move the particle
+            if (draggingEvent) {
+                // Move the event
                 const coords = toMinkowskiCoords(mx, my);
-                draggingParticle.x = coords.x;
-                draggingParticle.t = coords.t;
+                draggingEvent.x = coords.x;
+                draggingEvent.t = coords.t;
                 draw();
             } else if (draggingCanvas) {
                 // Pan the canvas
@@ -861,13 +861,13 @@
 
         // Mouse up
         canvas.addEventListener("mouseup", () => {
-            draggingParticle = null;
+            draggingEvent = null;
             draggingCanvas = false;
         });
 
         // Mouse leaves canvas
         canvas.addEventListener("mouseleave", () => {
-            draggingParticle = null;
+            draggingEvent = null;
             draggingCanvas = false;
         });
 
@@ -879,15 +879,15 @@
             const tx = t.clientX - r.left, ty = t.clientY - r.top;
 
             let found = false;
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
+            for (let i = events.length - 1; i >= 0; i--) {
+                const p = events[i];
                 const cp = toCanvasCoords(p.x, p.t);
                 if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
-                    draggingParticle = p;
+                    draggingEvent = p;
                     found = true;
-                    // Set a long-press to show context menu for particle
+                    // Set a long-press to show context menu for event
                     longPressTimeout = setTimeout(() => {
-                        contextParticle = p;
+                        contextEvent = p;
                         contextMenu.style.display = "block";
                         contextMenu.style.left = t.pageX + "px";
                         contextMenu.style.top = t.pageY + "px";
@@ -913,17 +913,17 @@
             const r = canvas.getBoundingClientRect();
             const tx = t.clientX - r.left, ty = t.clientY - r.top;
 
-            if (draggingParticle) {
+            if (draggingEvent) {
                 // If we move while the long-press timer is set, cancel it
                 if (longPressTimeout) {
                     clearTimeout(longPressTimeout);
                     longPressTimeout = null;
                 }
 
-                // Drag the particle
+                // Drag the event
                 const coords = toMinkowskiCoords(tx, ty);
-                draggingParticle.x = coords.x;
-                draggingParticle.t = coords.t;
+                draggingEvent.x = coords.x;
+                draggingEvent.t = coords.t;
                 draw();
             } else if (draggingCanvas) {
                 // Drag the canvas
@@ -936,33 +936,33 @@
         // Touch end
         canvas.addEventListener("touchend", () => {
             if (longPressTimeout) clearTimeout(longPressTimeout);
-            draggingParticle = null;
+            draggingEvent = null;
             draggingCanvas = false;
         });
 
         // Touch cancel
         canvas.addEventListener("touchcancel", () => {
             if (longPressTimeout) clearTimeout(longPressTimeout);
-            draggingParticle = null;
+            draggingEvent = null;
             draggingCanvas = false;
         });
 
-        // Right-click context menu to remove a particle
+        // Right-click context menu to remove a event
         canvas.addEventListener("contextmenu", e => {
             e.preventDefault();
             const r = canvas.getBoundingClientRect();
             const mx = e.clientX - r.left, my = e.clientY - r.top;
             let found = false;
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
+            for (let i = events.length - 1; i >= 0; i--) {
+                const p = events[i];
                 const cp = toCanvasCoords(p.x, p.t);
                 if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
                     found = true;
-                    contextParticle = p;
+                    contextEvent = p;
                     break;
                 }
             }
-            if (found && contextParticle) {
+            if (found && contextEvent) {
                 contextMenu.style.display = "block";
                 contextMenu.style.left = e.pageX + "px";
                 contextMenu.style.top = e.pageY + "px";
@@ -971,15 +971,15 @@
             }
         });
 
-        // Click on context menu => remove particle
+        // Click on context menu => remove event
         contextMenu.addEventListener("click", () => {
-            if (contextParticle) {
-                const idx = particles.indexOf(contextParticle);
+            if (contextEvent) {
+                const idx = events.indexOf(contextEvent);
                 if (idx !== -1) {
-                    availableLabels.push(contextParticle.label);
-                    particles.splice(idx, 1);
+                    availableLabels.push(contextEvent.label);
+                    events.splice(idx, 1);
                 }
-                contextParticle = null;
+                contextEvent = null;
                 contextMenu.style.display = "none";
                 draw();
             }
@@ -993,15 +993,15 @@
         });
 
         // Buttons
-        addParticleBtn.addEventListener("click", () => {
+        addEventBtn.addEventListener("click", () => {
             const newX = (Math.random() * 6) - 3;
             const newT = (Math.random() * 6) - 3;
-            particles.push({ label: getNextLabel(), x: newX, t: newT, radius: 8 });
+            events.push({ label: getNextLabel(), x: newX, t: newT, radius: 8 });
             draw();
         });
-        removeAllParticlesBtn.addEventListener("click", () => {
-            particles.forEach(p => availableLabels.push(p.label));
-            particles = [];
+        removeAllEventsBtn.addEventListener("click", () => {
+            events.forEach(p => availableLabels.push(p.label));
+            events = [];
             draw();
         });
         alignFramesBtn.addEventListener("click", () => {
