@@ -590,7 +590,7 @@
                 let Gpoint = interpolate(G0, G1, 0.25);
                 let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
                 ctx.fillStyle = "green";
-                ctx.font = "14px Arial";
+                ctx.font = "16px Arial";
                 ctx.fillText(`v = ${v_line.toFixed(2)}c`, Gc.x + 5, Gc.y - 5);
             }
 
@@ -605,7 +605,7 @@
                 }
 
                 // Draw the line
-                ctx.strokeStyle = "orange";
+                ctx.strokeStyle = "#ff5f1f";
                 ctx.lineWidth = 2;
                 let c1o = toCanvasCoords(O0.x, O0.t);
                 let c2o = toCanvasCoords(O1.x, O1.t);
@@ -617,8 +617,8 @@
                 // Mark the line near top quarter => param=0.75
                 let Opoint = interpolate(O0, O1, 0.75);
                 let Oc = toCanvasCoords(Opoint.x, Opoint.t);
-                ctx.fillStyle = "orange";
-                ctx.font = "14px Arial";
+                ctx.fillStyle = "#ff5f1f";
+                ctx.font = "16px Arial";
                 ctx.fillText(`v' = ${v_eff.toFixed(2)}c`, Oc.x + 5, Oc.y - 5);
             }
         }
