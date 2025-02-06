@@ -11,14 +11,12 @@
         :root {
             --bg-color: #ffffff;
             --primary-text-color: #333333;
-            --accent-blue: #1E90FF;
+            --accent-blue: #113d5c;
             --accent-orange: #FFA500;
             --canvas-border: #cccccc;
             --grid-color: #dddddd;
             --moving-grid-color: #800080;
             --rest-axis-color: #333333;
-            --moving-axis-color: var(--accent-blue);
-            --light-cone-color: #00aaff;
             --particle-rest-color: #006400;
             --particle-moving-color: #c00;
             --control-bg-color: #f5f5f5;
@@ -575,7 +573,7 @@
                 }
 
                 // Draw the line
-                ctx.strokeStyle = "green";
+                ctx.strokeStyle = "#5f8a35";
                 ctx.lineWidth = 2;
                 let c1 = toCanvasCoords(G0.x, G0.t);
                 let c2 = toCanvasCoords(G1.x, G1.t);
@@ -587,7 +585,7 @@
                 // Mark the line near top quarter => param=0.67
                 let Gpoint = interpolate(G0, G1, 0.67);
                 let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
-                ctx.fillStyle = "green";
+                ctx.fillStyle = "#5f8a35";
                 ctx.font = "16px Arial";
                 ctx.fillText(`v = ${v_line.toFixed(2)}c`, Gc.x + 5, Gc.y - 5);
             }
@@ -707,7 +705,7 @@
             }
 
             // Light cone
-            ctx.strokeStyle = "#00aaff";
+            ctx.strokeStyle = "#5b5b5b";
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
@@ -726,7 +724,7 @@
             particles.forEach(p => {
                 // Particle in rest frame (green)
                 let cp = toCanvasCoords(p.x, p.t);
-                ctx.fillStyle = "#006400";
+                ctx.fillStyle = "#16a085";
                 ctx.beginPath();
                 ctx.arc(cp.x, cp.y, p.radius, 0, 2 * Math.PI);
                 ctx.fill();
@@ -741,7 +739,7 @@
                 // The same particle in the moving frame (red)
                 let pm = lorentzTransform(p, relSpeed);
                 let cpm = toCanvasCoords(pm.x, pm.t);
-                ctx.fillStyle = "#c00";
+                ctx.fillStyle = "#ff3c73";
                 ctx.beginPath();
                 ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
                 ctx.fill();
