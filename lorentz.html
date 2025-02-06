@@ -562,9 +562,7 @@
         }
 
         /**
-         * Draw velocity lines, placing:
-         *   - green line label ("v=...") at bottom 1/4
-         *   - orange line label ("v'=...") at top 1/4
+         * Draw velocity lines
          */
         function drawVelocityLines(v_line, relSpeed) {
             // 1) Green line => slope = v_line
@@ -586,8 +584,8 @@
                 ctx.lineTo(c2.x, c2.y);
                 ctx.stroke();
 
-                // Mark the line near bottom quarter => param=0.25
-                let Gpoint = interpolate(G0, G1, 0.25);
+                // Mark the line near top quarter => param=0.67
+                let Gpoint = interpolate(G0, G1, 0.67);
                 let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
                 ctx.fillStyle = "green";
                 ctx.font = "16px Arial";
@@ -614,8 +612,8 @@
                 ctx.lineTo(c2o.x, c2o.y);
                 ctx.stroke();
 
-                // Mark the line near top quarter => param=0.75
-                let Opoint = interpolate(O0, O1, 0.75);
+                // Mark the line near top quarter => param=0.79
+                let Opoint = interpolate(O0, O1, 0.79);
                 let Oc = toCanvasCoords(Opoint.x, Opoint.t);
                 ctx.fillStyle = "#ff5f1f";
                 ctx.font = "16px Arial";
@@ -633,10 +631,10 @@
             const v_line = parseFloat(velocitySlider.value);
             velocityValueDisplay.textContent = v_line.toFixed(2);
 
-            // Clear
+            // Clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Rest frame grid if toggled
+            // Draw the rest-frame grid if toggled
             if (gridToggle.checked) {
                 drawRestFrameGrid();
             }
@@ -649,13 +647,14 @@
             ctx.moveTo(0, origin.y);
             ctx.lineTo(canvas.width, origin.y);
             ctx.stroke();
+
             // t-axis
             ctx.beginPath();
             ctx.moveTo(origin.x, 0);
             ctx.lineTo(origin.x, canvas.height);
             ctx.stroke();
 
-            // Axis labels
+            // Axis labels (rest frame)
             ctx.fillStyle = "#333333";
             ctx.font = "16px Arial";
             ctx.fillText("x", canvas.width - 20, origin.y - 10);
@@ -666,15 +665,16 @@
                 drawMovingGridLines(relSpeed);
             }
 
-            // Moving frame axes (blue)
+            // Moving frame axes (draw in blue)
             ctx.strokeStyle = "#1E90FF";
             ctx.lineWidth = 1.5;
+
             const xMinVal = -origin.x / scale;
             const xMaxVal = (canvas.width - origin.x) / scale;
             const tMinVal = -(canvas.height - origin.y) / scale;
             const tMaxVal = origin.y / scale;
 
-            // t' axis => slope=relSpeed
+            // t' axis => slope = relSpeed
             let tA = toCanvasCoords(relSpeed * tMinVal, tMinVal);
             let tB = toCanvasCoords(relSpeed * tMaxVal, tMaxVal);
             ctx.beginPath();
@@ -690,8 +690,10 @@
             ctx.lineTo(xB.x, xB.y);
             ctx.stroke();
 
+            // Label the moving axes in the same blue color
+            ctx.fillStyle = "#1E90FF";
             if (Math.abs(relSpeed) < 0.001) {
-                // Overlaps the rest frame
+                // Overlaps the rest frame if speed ~ 0
                 ctx.fillText("t'", origin.x + 10, 20);
                 ctx.fillText("x'", canvas.width - 20, origin.y - 10);
             } else {
@@ -722,7 +724,7 @@
 
             // Particles
             particles.forEach(p => {
-                // rest frame (green)
+                // Particle in rest frame (green)
                 let cp = toCanvasCoords(p.x, p.t);
                 ctx.fillStyle = "#006400";
                 ctx.beginPath();
@@ -731,11 +733,12 @@
                 ctx.strokeStyle = "#000";
                 ctx.stroke();
 
+                // Label in rest frame
                 ctx.fillStyle = "#333333";
                 ctx.font = "14px Arial";
                 ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
 
-                // moving frame (red)
+                // The same particle in the moving frame (red)
                 let pm = lorentzTransform(p, relSpeed);
                 let cpm = toCanvasCoords(pm.x, pm.t);
                 ctx.fillStyle = "#c00";
@@ -748,31 +751,31 @@
 
             // Update coordinates in a table
             let html = `
-                <h3>Particle Coordinates</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Particle</th>
-                            <th>Rest Frame (x,t)</th>
-                            <th>Moving Frame (x',t')</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+        <h3>Particle Coordinates</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Particle</th>
+                    <th>Rest Frame (x,t)</th>
+                    <th>Moving Frame (x',t')</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
             particles.forEach(p => {
                 let pm = lorentzTransform(p, relSpeed);
                 html += `
-                    <tr>
-                        <td>${p.label}</td>
-                        <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
-                        <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
-                    </tr>
-                `;
+            <tr>
+                <td>${p.label}</td>
+                <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
+                <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
+            </tr>
+        `;
             });
             html += `
-                    </tbody>
-                </table>
-            `;
+            </tbody>
+        </table>
+    `;
             coordinatesDiv.innerHTML = html;
         }
 
