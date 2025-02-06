@@ -29,33 +29,64 @@
             color: var(--primary-text-color);
         }
 
+        /* 
+           Header with absolutely positioned logo and title, 
+           so the title remains centered regardless of logo size.
+        */
         header {
             background-color: #333333;
-            padding: 5px;
+            position: relative;
+            height: 45px;
+            /* fixed height for demonstration */
         }
 
         .header-container {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
+            position: relative;
+            width: 100%;
+            height: 100%;
         }
 
-        .header-container .logo img {
+        /* Logo on the left */
+        .logo {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .logo img {
             height: 30px;
-            margin: 0px;
         }
 
-        .header-container .title h1 {
-            margin: 0;
+        /* Title pinned to the center */
+        .title {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             text-align: center;
+        }
+
+        .title h1 {
+            margin: 0;
             color: #ffffff;
             font-size: 22px;
         }
 
+        /* Optional spacer or other content on the right */
+        .spacer {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Main content wrapper */
         #contentWrapper {
             padding: 20px;
         }
 
+        /* Main container: Minkowski diagram + control panel */
         #mainContainer {
             display: grid;
             grid-template-columns: 800px 250px;
@@ -74,6 +105,7 @@
             cursor: pointer;
         }
 
+        /* Control panel styling */
         #controlsContainer {
             width: 250px;
             background-color: var(--control-bg-color);
@@ -109,6 +141,7 @@
             background-color: #187bcd;
         }
 
+        /* Particle coordinate display area, now a table */
         #coordinates {
             margin-top: 10px;
             font-size: 14px;
@@ -118,6 +151,20 @@
             padding-top: 10px;
         }
 
+        /* Table styling for coordinates */
+        #coordinates table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #coordinates th,
+        #coordinates td {
+            border: 1px solid var(--control-border-color);
+            padding: 4px 6px;
+            text-align: center;
+        }
+
+        /* Context menu */
         #contextMenu {
             position: absolute;
             background: var(--bg-color);
@@ -132,6 +179,31 @@
 
         #contextMenu:hover {
             background: #eeeeee;
+        }
+
+        /* Footer */
+        footer {
+            position: static;
+            font-size: 15px;
+            text-align: center;
+            padding: 7px;
+            background: #f4f4f4;
+            color: #555;
+            margin: 4px 0;
+            width: 100%;
+        }
+
+        footer a {
+            color: #ff5f1f;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        footer a:visited {
+            color: #ff5f1f;
         }
     </style>
 </head>
@@ -153,12 +225,12 @@
 
     <div id="contentWrapper">
         <div id="mainContainer">
-            <!-- Minkowski Diagram -->
+            <!-- The Minkowski Diagram Canvas -->
             <div id="diagramContainer">
                 <canvas id="minkowskiCanvas" width="800" height="600"></canvas>
             </div>
 
-            <!-- Control Panel -->
+            <!-- Control panel on the right -->
             <div id="controlsContainer">
                 <div class="controlItem">
                     <label class="controlLabel" for="speedSlider">Relative Speed (c):</label>
@@ -196,539 +268,577 @@
         </div>
     </div>
 
-    <!-- Context menu to remove a particle -->
+    <!-- Context menu to remove a specific particle -->
     <div id="contextMenu">Remove Particle</div>
 
-    <script>
-        window.addEventListener("load", function () {
-            const canvas = document.getElementById("minkowskiCanvas");
-            const ctx = canvas.getContext("2d");
+    <footer>
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> |
+        <a href="https://buymeacoffee.com/panphy">Support My Projects</a>
+    </footer>
+</body>
 
-            // Sliders and toggles
-            const speedSlider = document.getElementById("speedSlider");
-            const speedValueDisplay = document.getElementById("speedValue");
-            const gridToggle = document.getElementById("gridToggle");
-            const movingGridToggle = document.getElementById("movingGridToggle");
-            const velocityToggle = document.getElementById("velocityToggle");
-            const velocitySlider = document.getElementById("velocitySlider");
-            const velocityValueDisplay = document.getElementById("velocityValue");
+<script>
+    window.addEventListener("load", function () {
+        const canvas = document.getElementById("minkowskiCanvas");
+        const ctx = canvas.getContext("2d");
 
-            // Buttons
-            const addParticleBtn = document.getElementById("addParticleBtn");
-            const removeAllParticlesBtn = document.getElementById("removeAllParticlesBtn");
-            const alignFramesBtn = document.getElementById("alignFramesBtn");
+        // Sliders & toggles
+        const speedSlider = document.getElementById("speedSlider");
+        const speedValueDisplay = document.getElementById("speedValue");
+        const gridToggle = document.getElementById("gridToggle");
+        const movingGridToggle = document.getElementById("movingGridToggle");
+        const velocityToggle = document.getElementById("velocityToggle");
+        const velocitySlider = document.getElementById("velocitySlider");
+        const velocityValueDisplay = document.getElementById("velocityValue");
 
-            // Misc. UI
-            const coordinatesDiv = document.getElementById("coordinates");
-            const contextMenu = document.getElementById("contextMenu");
+        // Buttons
+        const addParticleBtn = document.getElementById("addParticleBtn");
+        const removeAllParticlesBtn = document.getElementById("removeAllParticlesBtn");
+        const alignFramesBtn = document.getElementById("alignFramesBtn");
 
-            // Used for drag + long-press detection
-            let draggingParticle = null;
-            let contextParticle = null;
-            let longPressTimeout = null;
+        // Coordinates display & context menu
+        const coordinatesDiv = document.getElementById("coordinates");
+        const contextMenu = document.getElementById("contextMenu");
 
-            // Diagram parameters
-            const origin = { x: canvas.width / 2, y: canvas.height / 2 };
-            const scale = 80;   // Pixels per Minkowski unit
+        // For dragging & long-press
+        let draggingParticle = null;
+        let contextParticle = null;
+        let longPressTimeout = null;
 
-            // Particle storage + labeling
-            let particles = [];
-            let nextParticleLabelCode = "A".charCodeAt(0);
-            let availableLabels = [];
+        // Minkowski diagram parameters
+        const origin = { x: canvas.width / 2, y: canvas.height / 2 };
+        const scale = 80;  // pixels per Minkowski unit
 
-            function getNextLabel() {
-                if (availableLabels.length > 0) {
-                    availableLabels.sort();
-                    return availableLabels.shift();
-                } else {
-                    let label = String.fromCharCode(nextParticleLabelCode);
-                    nextParticleLabelCode++;
-                    return label;
+        // Particle storage
+        let particles = [];
+        let nextParticleLabelCode = "A".charCodeAt(0);
+        let availableLabels = [];
+
+        function getNextLabel() {
+            if (availableLabels.length > 0) {
+                availableLabels.sort();
+                return availableLabels.shift();
+            } else {
+                let label = String.fromCharCode(nextParticleLabelCode);
+                nextParticleLabelCode++;
+                return label;
+            }
+        }
+
+        // Add a sample particle
+        particles.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
+
+        /**
+         * Convert Minkowski coords (x, t) to canvas coords (pixel x,y).
+         */
+        function toCanvasCoords(x, t) {
+            return {
+                x: origin.x + x * scale,
+                y: origin.y - t * scale
+            };
+        }
+
+        /**
+         * Convert canvas coords to Minkowski coords.
+         */
+        function toMinkowskiCoords(cx, cy) {
+            return {
+                x: (cx - origin.x) / scale,
+                t: (origin.y - cy) / scale
+            };
+        }
+
+        /**
+         * Lorentz transform from rest frame to moving frame:
+         *  t' = gamma*(t - v*x)
+         *  x' = gamma*(x - v*t)
+         */
+        function lorentzTransform(pt, v) {
+            const gamma = 1 / Math.sqrt(1 - v * v);
+            return {
+                t: gamma * (pt.t - v * pt.x),
+                x: gamma * (pt.x - v * pt.t)
+            };
+        }
+
+        /**
+         * Draw the rest-frame grid lines if toggled.
+         */
+        function drawRestFrameGrid() {
+            const xMinVal = -origin.x / scale;
+            const xMaxVal = (canvas.width - origin.x) / scale;
+            const tMinVal = -(canvas.height - origin.y) / scale;
+            const tMaxVal = origin.y / scale;
+
+            ctx.strokeStyle = "#dddddd";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+
+            // vertical lines
+            for (let x = Math.floor(xMinVal); x <= Math.ceil(xMaxVal); x++) {
+                let start = toCanvasCoords(x, tMinVal);
+                let end = toCanvasCoords(x, tMaxVal);
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+            }
+
+            // horizontal lines
+            for (let t = Math.floor(tMinVal); t <= Math.ceil(tMaxVal); t++) {
+                let start = toCanvasCoords(xMinVal, t);
+                let end = toCanvasCoords(xMaxVal, t);
+                ctx.beginPath();
+                ctx.moveTo(start.x, start.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.stroke();
+            }
+
+            ctx.setLineDash([]);
+        }
+
+        /**
+         * Draw lines of constant x' and constant t' to visualize the moving frame grid lines.
+         */
+        function drawMovingGridLines(v) {
+            // We'll pick some range for x' and t' and draw lines:
+            const xPrimeMin = -5, xPrimeMax = 5;
+            const tPrimeMin = -5, tPrimeMax = 5;
+            const step = 1;   // grid spacing in the moving frame
+            const gamma = 1 / Math.sqrt(1 - v * v);
+            ctx.strokeStyle = "#800080";  // purple
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 4]);      // dashed lines
+
+            const paramSteps = 60;  // # of segments for drawing each line
+
+            // --- lines of constant x' = n ---
+            // x' = gamma*(x - v*t) = n => x - v*t = n / gamma
+            // We'll param t in some range, solve x = v*t + n/gamma
+            let tRange = 6;  // you can tweak as desired
+            for (let n = xPrimeMin; n <= xPrimeMax; n += step) {
+                let linePoints = [];
+                let cst = n / gamma; // (x - v*t)
+                for (let i = 0; i <= paramSteps; i++) {
+                    let fraction = i / paramSteps;
+                    // param t from -tRange to +tRange
+                    let tVal = -tRange + fraction * (2 * tRange);
+                    let xVal = v * tVal + cst;
+                    let cc = toCanvasCoords(xVal, tVal);
+                    linePoints.push(cc);
+                }
+                // draw polyline
+                ctx.beginPath();
+                ctx.moveTo(linePoints[0].x, linePoints[0].y);
+                for (let i = 1; i < linePoints.length; i++) {
+                    ctx.lineTo(linePoints[i].x, linePoints[i].y);
+                }
+                ctx.stroke();
+            }
+
+            // --- lines of constant t' = n ---
+            // t' = gamma*(t - v*x) = n => t - v*x = n / gamma => t = v*x + n/gamma
+            // We'll param x from some range, solve t = v*x + cst
+            let xRange = 6; // tweak as needed
+            for (let n = tPrimeMin; n <= tPrimeMax; n += step) {
+                let linePoints = [];
+                let cst = n / gamma;
+                for (let i = 0; i <= paramSteps; i++) {
+                    let fraction = i / paramSteps;
+                    // param x from -xRange to +xRange
+                    let xVal = -xRange + fraction * (2 * xRange);
+                    let tVal = v * xVal + cst;
+                    let cc = toCanvasCoords(xVal, tVal);
+                    linePoints.push(cc);
+                }
+                // draw polyline
+                ctx.beginPath();
+                ctx.moveTo(linePoints[0].x, linePoints[0].y);
+                for (let i = 1; i < linePoints.length; i++) {
+                    ctx.lineTo(linePoints[i].x, linePoints[i].y);
+                }
+                ctx.stroke();
+            }
+
+            // reset dash pattern
+            ctx.setLineDash([]);
+        }
+
+        /**
+         * Computes the bounding-box intersections for a line x = m * t. 
+         * Returns 2 endpoints that define the line across the entire canvas.
+         */
+        function computeLineBoxEndpoints(m) {
+            const W = canvas.width / (2 * scale);
+            const T = canvas.height / (2 * scale);
+            let candidates = [];
+
+            // 1) t = +T => x = m*T
+            let xAtPlusT = m * T;
+            if (Math.abs(xAtPlusT) <= W) {
+                candidates.push({ x: xAtPlusT, t: T });
+            }
+            // 2) t = -T => x = m*(-T)
+            let xAtMinusT = m * (-T);
+            if (Math.abs(xAtMinusT) <= W) {
+                candidates.push({ x: xAtMinusT, t: -T });
+            }
+            // 3) x = +W => W = m*t => t = W/m
+            if (Math.abs(m) > 1e-10) {
+                let tAtPlusW = W / m;
+                if (Math.abs(tAtPlusW) <= T) {
+                    candidates.push({ x: W, t: tAtPlusW });
                 }
             }
-
-            // Add one sample particle by default
-            particles.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
-
-            // Coordinate transforms
-            function toCanvasCoords(x, t) {
-                return {
-                    x: origin.x + x * scale,
-                    y: origin.y - t * scale
-                };
-            }
-            function toMinkowskiCoords(cx, cy) {
-                return {
-                    x: (cx - origin.x) / scale,
-                    t: (origin.y - cy) / scale
-                };
-            }
-
-            // Lorentz transform: from rest frame to moving frame
-            function lorentzTransform(pt, v) {
-                const gamma = 1 / Math.sqrt(1 - v * v);
-                return {
-                    t: gamma * (pt.t - v * pt.x),
-                    x: gamma * (pt.x - v * pt.t)
-                };
-            }
-
-            // --- Draw the "rest frame" style grid if toggled ---
-            function drawRestFrameGrid() {
-                const xMinVal = -origin.x / scale;
-                const xMaxVal = (canvas.width - origin.x) / scale;
-                const tMinVal = -(canvas.height - origin.y) / scale;
-                const tMaxVal = origin.y / scale;
-
-                ctx.strokeStyle = "#dddddd";
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-
-                // Vertical lines (constant x)
-                for (let x = Math.floor(xMinVal); x <= Math.ceil(xMaxVal); x++) {
-                    let startPt = toCanvasCoords(x, tMinVal);
-                    let endPt = toCanvasCoords(x, tMaxVal);
-                    ctx.beginPath();
-                    ctx.moveTo(startPt.x, startPt.y);
-                    ctx.lineTo(endPt.x, endPt.y);
-                    ctx.stroke();
+            // 4) x = -W => -W = m*t => t = -W/m
+            if (Math.abs(m) > 1e-10) {
+                let tAtMinusW = -W / m;
+                if (Math.abs(tAtMinusW) <= T) {
+                    candidates.push({ x: -W, t: tAtMinusW });
                 }
-                // Horizontal lines (constant t)
-                for (let t = Math.floor(tMinVal); t <= Math.ceil(tMaxVal); t++) {
-                    let startPt = toCanvasCoords(xMinVal, t);
-                    let endPt = toCanvasCoords(xMaxVal, t);
-                    ctx.beginPath();
-                    ctx.moveTo(startPt.x, startPt.y);
-                    ctx.lineTo(endPt.x, endPt.y);
-                    ctx.stroke();
-                }
-
-                ctx.setLineDash([]);
             }
-
-            /**
-             * Draw lines of constant x' and constant t' to visualize the moving frame grid.
-             */
-            function drawMovingGridLines(v) {
-                // We'll draw lines of x' = n and t' = n, for n in some integer range.
-                // You can adjust the range/step to your preference.
-                const xPrimeMin = -5, xPrimeMax = 5;
-                const tPrimeMin = -5, tPrimeMax = 5;
-                const step = 1; // Grid spacing in the moving frame
-
-                const gamma = 1 / Math.sqrt(1 - v * v);
-
-                // We'll use a small parametric step for drawing each line
-                const paramSteps = 60;  // the number of segments for each line
-
-                ctx.strokeStyle = "#800080"; // a purple color for the moving grid
-                ctx.lineWidth = 1;
-                ctx.setLineDash([2, 4]); // dashed lines for the moving grid
-
-                // --- Lines of constant x' = n ---
-                // x' = gamma*( x - v t ) = n => x - v t = n / gamma.
-                // We'll param t from tMin to tMax in small steps, solve x = v t + (n / gamma).
-                let tRange = 5; // you can pick bigger if you want
-                // We'll pick a region so that it is large enough to see them in the rest diagram
-                for (let n = xPrimeMin; n <= xPrimeMax; n += step) {
-                    let linePoints = [];
-                    let cst = n / gamma; // the constant (x - v t)
-                    for (let i = 0; i <= paramSteps; i++) {
-                        // param t from -tRange to +tRange
-                        let tVal = -tRange + (2 * tRange * i / paramSteps);
-                        let xVal = v * tVal + cst;
-                        linePoints.push(toCanvasCoords(xVal, tVal));
+            if (candidates.length < 2) return [];
+            // pick the two that are farthest apart
+            let maxDistSq = -1;
+            let bestPair = [candidates[0], candidates[0]];
+            for (let i = 0; i < candidates.length; i++) {
+                for (let j = i + 1; j < candidates.length; j++) {
+                    let dx = candidates[j].x - candidates[i].x;
+                    let dt = candidates[j].t - candidates[i].t;
+                    let distSq = dx * dx + dt * dt;
+                    if (distSq > maxDistSq) {
+                        maxDistSq = distSq;
+                        bestPair = [candidates[i], candidates[j]];
                     }
-                    // Draw the polyline
-                    ctx.beginPath();
-                    ctx.moveTo(linePoints[0].x, linePoints[0].y);
-                    for (let i = 1; i < linePoints.length; i++) {
-                        ctx.lineTo(linePoints[i].x, linePoints[i].y);
-                    }
-                    ctx.stroke();
-                }
-
-                // --- Lines of constant t' = n ---
-                // t' = gamma*( t - v x ) = n => t - v x = n / gamma => t = v x + (n / gamma).
-                // We'll param x from xMin to xMax in small steps, solve t = v x + (n / gamma).
-                let xRange = 5;
-                for (let n = tPrimeMin; n <= tPrimeMax; n += step) {
-                    let linePoints = [];
-                    let cst = n / gamma; // the constant (t - v x)
-                    for (let i = 0; i <= paramSteps; i++) {
-                        // param x from -xRange to +xRange
-                        let xVal = -xRange + (2 * xRange * i / paramSteps);
-                        let tVal = v * xVal + cst;
-                        linePoints.push(toCanvasCoords(xVal, tVal));
-                    }
-                    // Draw the polyline
-                    ctx.beginPath();
-                    ctx.moveTo(linePoints[0].x, linePoints[0].y);
-                    for (let i = 1; i < linePoints.length; i++) {
-                        ctx.lineTo(linePoints[i].x, linePoints[i].y);
-                    }
-                    ctx.stroke();
-                }
-
-                // Reset dash for subsequent drawings
-                ctx.setLineDash([]);
-            }
-
-            // Simple bounding-box line approach for velocity lines:
-            function computeLineBoxEndpoints(m) {
-                const W = canvas.width / (2 * scale);
-                const T = canvas.height / (2 * scale);
-
-                let candidates = [];
-
-                // t = +T => x = m*T
-                let xAtPlusT = m * T;
-                if (Math.abs(xAtPlusT) <= W) {
-                    candidates.push({ x: xAtPlusT, t: T });
-                }
-                // t = -T => x = m*(-T)
-                let xAtMinusT = m * (-T);
-                if (Math.abs(xAtMinusT) <= W) {
-                    candidates.push({ x: xAtMinusT, t: -T });
-                }
-                // x = +W => W = m*t => t = W/m
-                if (Math.abs(m) > 1e-10) {
-                    let tAtPlusW = W / m;
-                    if (Math.abs(tAtPlusW) <= T) {
-                        candidates.push({ x: W, t: tAtPlusW });
-                    }
-                }
-                // x = -W => -W = m*t => t = -W/m
-                if (Math.abs(m) > 1e-10) {
-                    let tAtMinusW = -W / m;
-                    if (Math.abs(tAtMinusW) <= T) {
-                        candidates.push({ x: -W, t: tAtMinusW });
-                    }
-                }
-
-                if (candidates.length < 2) return [];
-
-                // Pick the two points that are farthest apart
-                let maxDistSq = -1;
-                let bestPair = [candidates[0], candidates[0]];
-                for (let i = 0; i < candidates.length; i++) {
-                    for (let j = i + 1; j < candidates.length; j++) {
-                        let dx = candidates[j].x - candidates[i].x;
-                        let dt = candidates[j].t - candidates[i].t;
-                        let distSq = dx * dx + dt * dt;
-                        if (distSq > maxDistSq) {
-                            maxDistSq = distSq;
-                            bestPair = [candidates[i], candidates[j]];
-                        }
-                    }
-                }
-                return bestPair;
-            }
-
-            function drawVelocityLines(v_line, relSpeed) {
-                // Green line
-                let endpointsGreen = computeLineBoxEndpoints(v_line);
-                if (endpointsGreen.length === 2) {
-                    ctx.strokeStyle = "green";
-                    ctx.lineWidth = 2;
-                    let cp1 = toCanvasCoords(endpointsGreen[0].x, endpointsGreen[0].t);
-                    let cp2 = toCanvasCoords(endpointsGreen[1].x, endpointsGreen[1].t);
-                    ctx.beginPath();
-                    ctx.moveTo(cp1.x, cp1.y);
-                    ctx.lineTo(cp2.x, cp2.y);
-                    ctx.stroke();
-                }
-
-                // Orange line => slope (v_line + relSpeed) / (1 + v_line*relSpeed)
-                let v_eff = (v_line + relSpeed) / (1 + v_line * relSpeed);
-                let endpointsOrange = computeLineBoxEndpoints(v_eff);
-                if (endpointsOrange.length === 2) {
-                    ctx.strokeStyle = "orange";
-                    ctx.lineWidth = 2;
-                    let cp1o = toCanvasCoords(endpointsOrange[0].x, endpointsOrange[0].t);
-                    let cp2o = toCanvasCoords(endpointsOrange[1].x, endpointsOrange[1].t);
-                    ctx.beginPath();
-                    ctx.moveTo(cp1o.x, cp1o.y);
-                    ctx.lineTo(cp2o.x, cp2o.y);
-                    ctx.stroke();
                 }
             }
+            return bestPair;
+        }
 
-            function draw() {
-                const relSpeed = parseFloat(speedSlider.value);
-                speedValueDisplay.textContent = relSpeed.toFixed(2);
-
-                const v_line = parseFloat(velocitySlider.value);
-                velocityValueDisplay.textContent = v_line.toFixed(2);
-
-                // Clear the canvas
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Draw the rest frame grid if toggled
-                if (gridToggle.checked) {
-                    drawRestFrameGrid();
-                }
-
-                // REST FRAME AXES
-                ctx.strokeStyle = "#333333";
+        /**
+         * Draw velocity lines if toggled:
+         * 1) Green line => slope = v_line
+         * 2) Orange line => slope = v_eff = (v_line + relSpeed)/(1 + v_line*relSpeed)
+         */
+        function drawVelocityLines(v_line, relSpeed) {
+            // Green line
+            let endpointsGreen = computeLineBoxEndpoints(v_line);
+            if (endpointsGreen.length === 2) {
+                ctx.strokeStyle = "green";
                 ctx.lineWidth = 2;
-                // x-axis
+                let cp1 = toCanvasCoords(endpointsGreen[0].x, endpointsGreen[0].t);
+                let cp2 = toCanvasCoords(endpointsGreen[1].x, endpointsGreen[1].t);
                 ctx.beginPath();
-                ctx.moveTo(0, origin.y);
-                ctx.lineTo(canvas.width, origin.y);
+                ctx.moveTo(cp1.x, cp1.y);
+                ctx.lineTo(cp2.x, cp2.y);
                 ctx.stroke();
-                // t-axis
+            }
+            // Orange line
+            let v_eff = (v_line + relSpeed) / (1 + v_line * relSpeed);
+            let endpointsOrange = computeLineBoxEndpoints(v_eff);
+            if (endpointsOrange.length === 2) {
+                ctx.strokeStyle = "orange";
+                ctx.lineWidth = 2;
+                let cp1o = toCanvasCoords(endpointsOrange[0].x, endpointsOrange[0].t);
+                let cp2o = toCanvasCoords(endpointsOrange[1].x, endpointsOrange[1].t);
                 ctx.beginPath();
-                ctx.moveTo(origin.x, 0);
-                ctx.lineTo(origin.x, canvas.height);
+                ctx.moveTo(cp1o.x, cp1o.y);
+                ctx.lineTo(cp2o.x, cp2o.y);
                 ctx.stroke();
-                // axis labels
-                ctx.fillStyle = "#333333";
-                ctx.font = "16px Arial";
-                ctx.fillText("x", canvas.width - 20, origin.y - 10);
-                ctx.fillText("t", origin.x + 10, 20);
+            }
+        }
 
-                // MOVING FRAME GRID + AXES
-                if (movingGridToggle.checked) {
-                    // 1) Draw the moving-frame grid lines
-                    drawMovingGridLines(relSpeed);
-                }
-                // 2) Draw the moving axes (blue lines)
-                ctx.strokeStyle = "#1E90FF";
-                ctx.lineWidth = 1.5;
-                let xMinVal = -origin.x / scale;
-                let xMaxVal = (canvas.width - origin.x) / scale;
-                let tMinVal = -(canvas.height - origin.y) / scale;
-                let tMaxVal = origin.y / scale;
+        /**
+         * Main draw function: grids, axes, light cone, particles, coordinate table, etc.
+         */
+        function draw() {
+            const relSpeed = parseFloat(speedSlider.value);
+            speedValueDisplay.textContent = relSpeed.toFixed(2);
 
-                // t' axis => x = v t => slope = v
-                let tA = toCanvasCoords(relSpeed * tMinVal, tMinVal);
-                let tB = toCanvasCoords(relSpeed * tMaxVal, tMaxVal);
-                ctx.beginPath();
-                ctx.moveTo(tA.x, tA.y);
-                ctx.lineTo(tB.x, tB.y);
-                ctx.stroke();
+            const v_line = parseFloat(velocitySlider.value);
+            velocityValueDisplay.textContent = v_line.toFixed(2);
 
-                // x' axis => t = v x => slope = 1/v => a bit trickier, but we do the param approach:
-                let xA = toCanvasCoords(xMinVal, relSpeed * xMinVal);
-                let xB = toCanvasCoords(xMaxVal, relSpeed * xMaxVal);
-                ctx.beginPath();
-                ctx.moveTo(xA.x, xA.y);
-                ctx.lineTo(xB.x, xB.y);
-                ctx.stroke();
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // label them
-                ctx.fillStyle = "#1E90FF";
-                ctx.font = "16px Arial";
-                if (Math.abs(relSpeed) < 0.001) {
-                    // almost overlap with rest frame
-                    ctx.fillText("t'", origin.x + 10, 20);
-                    ctx.fillText("x'", canvas.width - 20, origin.y - 10);
-                } else {
-                    ctx.fillText("t'", tB.x + 10, tB.y + 20);
-                    ctx.fillText("x'", xB.x - 30, xB.y - 5);
-                }
-
-                // velocity lines if toggled
-                if (velocityToggle.checked) {
-                    drawVelocityLines(v_line, relSpeed);
-                }
-
-                // LIGHT CONE
-                ctx.strokeStyle = "#00aaff";
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                let lcS = toCanvasCoords(-canvas.width / (2 * scale), -canvas.width / (2 * scale));
-                let lcE = toCanvasCoords(canvas.width / (2 * scale), canvas.width / (2 * scale));
-                ctx.moveTo(lcS.x, lcS.y);
-                ctx.lineTo(lcE.x, lcE.y);
-                lcS = toCanvasCoords(-canvas.width / (2 * scale), canvas.width / (2 * scale));
-                lcE = toCanvasCoords(canvas.width / (2 * scale), -canvas.width / (2 * scale));
-                ctx.moveTo(lcS.x, lcS.y);
-                ctx.lineTo(lcE.x, lcE.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // PARTICLES
-                particles.forEach(p => {
-                    // rest frame (green)
-                    let cp = toCanvasCoords(p.x, p.t);
-                    ctx.fillStyle = "#006400";
-                    ctx.beginPath();
-                    ctx.arc(cp.x, cp.y, p.radius, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.strokeStyle = "#000";
-                    ctx.stroke();
-
-                    ctx.fillStyle = "#333333";
-                    ctx.font = "14px Arial";
-                    ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
-
-                    // moving frame (red)
-                    let pm = lorentzTransform(p, relSpeed);
-                    let cpm = toCanvasCoords(pm.x, pm.t);
-                    ctx.fillStyle = "#c00";
-                    ctx.beginPath();
-                    ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.stroke();
-                    ctx.fillText(p.label + "'", cpm.x + p.radius + 2, cpm.y - p.radius - 2);
-                });
-
-                // Update the coordinates list
-                let html = "<h3>Particle Coordinates</h3><ul>";
-                particles.forEach(p => {
-                    let pm = lorentzTransform(p, relSpeed);
-                    html += `<li>${p.label} (rest): x=${p.x.toFixed(2)}, t=${p.t.toFixed(2)}; 
-                             ${p.label}' (moving): x'=${pm.x.toFixed(2)}, t'=${pm.t.toFixed(2)}</li>`;
-                });
-                html += "</ul>";
-                coordinatesDiv.innerHTML = html;
+            // Rest frame grid if toggled
+            if (gridToggle.checked) {
+                drawRestFrameGrid();
             }
 
-            // MOUSE
-            canvas.addEventListener("mousedown", e => {
-                if (e.button !== 0) return;
+            // Rest frame axes
+            ctx.strokeStyle = "#333333";
+            ctx.lineWidth = 2;
+            // x-axis
+            ctx.beginPath();
+            ctx.moveTo(0, origin.y);
+            ctx.lineTo(canvas.width, origin.y);
+            ctx.stroke();
+            // t-axis
+            ctx.beginPath();
+            ctx.moveTo(origin.x, 0);
+            ctx.lineTo(origin.x, canvas.height);
+            ctx.stroke();
+
+            ctx.fillStyle = "#333333";
+            ctx.font = "16px Arial";
+            ctx.fillText("x", canvas.width - 20, origin.y - 10);
+            ctx.fillText("t", origin.x + 10, 20);
+
+            // If user wants moving grid, draw lines of x'=const, t'=const
+            if (movingGridToggle.checked) {
+                drawMovingGridLines(relSpeed);
+            }
+
+            // Draw the moving frame axes in blue
+            ctx.strokeStyle = "#1E90FF";
+            ctx.lineWidth = 1.5;
+            const xMinVal = -origin.x / scale;
+            const xMaxVal = (canvas.width - origin.x) / scale;
+            const tMinVal = -(canvas.height - origin.y) / scale;
+            const tMaxVal = origin.y / scale;
+
+            // t' axis => slope = relSpeed
+            let tA = toCanvasCoords(relSpeed * tMinVal, tMinVal);
+            let tB = toCanvasCoords(relSpeed * tMaxVal, tMaxVal);
+            ctx.beginPath();
+            ctx.moveTo(tA.x, tA.y);
+            ctx.lineTo(tB.x, tB.y);
+            ctx.stroke();
+
+            // x' axis => param approach
+            let xA = toCanvasCoords(xMinVal, relSpeed * xMinVal);
+            let xB = toCanvasCoords(xMaxVal, relSpeed * xMaxVal);
+            ctx.beginPath();
+            ctx.moveTo(xA.x, xA.y);
+            ctx.lineTo(xB.x, xB.y);
+            ctx.stroke();
+
+            // Label the moving axes
+            ctx.fillStyle = "#1E90FF";
+            ctx.font = "16px Arial";
+            if (Math.abs(relSpeed) < 0.001) {
+                ctx.fillText("t'", origin.x + 10, 20);
+                ctx.fillText("x'", canvas.width - 20, origin.y - 10);
+            } else {
+                ctx.fillText("t'", tB.x + 10, tB.y + 20);
+                ctx.fillText("x'", xB.x - 30, xB.y - 5);
+            }
+
+            // Velocity lines if toggled
+            if (velocityToggle.checked) {
+                drawVelocityLines(v_line, relSpeed);
+            }
+
+            // Light cone
+            ctx.strokeStyle = "#00aaff";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            let lcS = toCanvasCoords(-canvas.width / (2 * scale), -canvas.width / (2 * scale));
+            let lcE = toCanvasCoords(canvas.width / (2 * scale), canvas.width / (2 * scale));
+            ctx.moveTo(lcS.x, lcS.y);
+            ctx.lineTo(lcE.x, lcE.y);
+            lcS = toCanvasCoords(-canvas.width / (2 * scale), canvas.width / (2 * scale));
+            lcE = toCanvasCoords(canvas.width / (2 * scale), -canvas.width / (2 * scale));
+            ctx.moveTo(lcS.x, lcS.y);
+            ctx.lineTo(lcE.x, lcE.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Particles: draw in rest frame (green) & moving frame (red)
+            particles.forEach(p => {
+                // rest frame
+                let cp = toCanvasCoords(p.x, p.t);
+                ctx.fillStyle = "#006400";
+                ctx.beginPath();
+                ctx.arc(cp.x, cp.y, p.radius, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = "#000";
+                ctx.stroke();
+                // label
+                ctx.fillStyle = "#333";
+                ctx.font = "14px Arial";
+                ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
+
+                // moving frame
+                let pm = lorentzTransform(p, relSpeed);
+                let cpm = toCanvasCoords(pm.x, pm.t);
+                ctx.fillStyle = "#c00";
+                ctx.beginPath();
+                ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillText(p.label + "'", cpm.x + p.radius + 2, cpm.y - p.radius - 2);
+            });
+
+            // Update coordinates in a table
+            let html = `
+                    <h3>Particle Coordinates</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Particle</th>
+                                <th>Rest Frame (x,t)</th>
+                                <th>Moving Frame (x',t')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+            particles.forEach(p => {
+                let pm = lorentzTransform(p, relSpeed);
+                html += `
+                        <tr>
+                            <td>${p.label}</td>
+                            <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
+                            <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
+                        </tr>
+                    `;
+            });
+            html += `
+                        </tbody>
+                    </table>
+                `;
+            coordinatesDiv.innerHTML = html;
+        }
+
+        // MOUSE & TOUCH HANDLERS
+        canvas.addEventListener("mousedown", e => {
+            if (e.button !== 0) return;
+            const r = canvas.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                const cp = toCanvasCoords(p.x, p.t);
+                if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
+                    draggingParticle = p;
+                    break;
+                }
+            }
+        });
+        canvas.addEventListener("mousemove", e => {
+            if (draggingParticle) {
                 const r = canvas.getBoundingClientRect();
                 const mx = e.clientX - r.left, my = e.clientY - r.top;
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    let p = particles[i];
-                    let cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                        draggingParticle = p;
-                        break;
-                    }
+                let coords = toMinkowskiCoords(mx, my);
+                draggingParticle.x = coords.x;
+                draggingParticle.t = coords.t;
+                draw();
+            }
+        });
+        canvas.addEventListener("mouseup", () => { draggingParticle = null; });
+        canvas.addEventListener("mouseleave", () => { draggingParticle = null; });
+
+        canvas.addEventListener("touchstart", e => {
+            e.preventDefault();
+            const t = e.touches[0];
+            const r = canvas.getBoundingClientRect();
+            const tx = t.clientX - r.left, ty = t.clientY - r.top;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                const cp = toCanvasCoords(p.x, p.t);
+                if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
+                    draggingParticle = p;
+                    longPressTimeout = setTimeout(() => {
+                        contextParticle = p;
+                        contextMenu.style.display = "block";
+                        contextMenu.style.left = t.pageX + "px";
+                        contextMenu.style.top = t.pageY + "px";
+                    }, 800);
+                    break;
                 }
-            });
-
-            canvas.addEventListener("mousemove", e => {
-                if (draggingParticle) {
-                    const r = canvas.getBoundingClientRect();
-                    const mx = e.clientX - r.left, my = e.clientY - r.top;
-                    let coords = toMinkowskiCoords(mx, my);
-                    draggingParticle.x = coords.x;
-                    draggingParticle.t = coords.t;
-                    draw();
-                }
-            });
-
-            canvas.addEventListener("mouseup", () => { draggingParticle = null; });
-            canvas.addEventListener("mouseleave", () => { draggingParticle = null; });
-
-            // TOUCH
-            canvas.addEventListener("touchstart", e => {
-                e.preventDefault();
+            }
+        });
+        canvas.addEventListener("touchmove", e => {
+            e.preventDefault();
+            if (draggingParticle) {
+                if (longPressTimeout) clearTimeout(longPressTimeout);
                 const t = e.touches[0];
                 const r = canvas.getBoundingClientRect();
                 const tx = t.clientX - r.left, ty = t.clientY - r.top;
-
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    let p = particles[i];
-                    let cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
-                        draggingParticle = p;
-                        longPressTimeout = setTimeout(() => {
-                            contextParticle = p;
-                            contextMenu.style.display = "block";
-                            contextMenu.style.left = t.pageX + "px";
-                            contextMenu.style.top = t.pageY + "px";
-                        }, 800);
-                        break;
-                    }
-                }
-            });
-            canvas.addEventListener("touchmove", e => {
-                e.preventDefault();
-                if (draggingParticle) {
-                    if (longPressTimeout) clearTimeout(longPressTimeout);
-                    const t = e.touches[0];
-                    const r = canvas.getBoundingClientRect();
-                    const tx = t.clientX - r.left, ty = t.clientY - r.top;
-                    let coords = toMinkowskiCoords(tx, ty);
-                    draggingParticle.x = coords.x;
-                    draggingParticle.t = coords.t;
-                    draw();
-                }
-            });
-            canvas.addEventListener("touchend", () => {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
-                draggingParticle = null;
-            });
-            canvas.addEventListener("touchcancel", () => {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
-                draggingParticle = null;
-            });
-
-            // CONTEXT MENU
-            canvas.addEventListener("contextmenu", e => {
-                e.preventDefault();
-                const r = canvas.getBoundingClientRect();
-                const mx = e.clientX - r.left, my = e.clientY - r.top;
-                let found = false;
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    const cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                        found = true;
-                        contextParticle = p;
-                        break;
-                    }
-                }
-                if (found && contextParticle) {
-                    contextMenu.style.display = "block";
-                    contextMenu.style.left = e.pageX + "px";
-                    contextMenu.style.top = e.pageY + "px";
-                } else {
-                    contextMenu.style.display = "none";
-                }
-            });
-            contextMenu.addEventListener("click", () => {
-                if (contextParticle) {
-                    const idx = particles.indexOf(contextParticle);
-                    if (idx !== -1) {
-                        availableLabels.push(contextParticle.label);
-                        particles.splice(idx, 1);
-                    }
-                    contextParticle = null;
-                    contextMenu.style.display = "none";
-                    draw();
-                }
-            });
-            document.addEventListener("click", e => {
-                if (e.target !== contextMenu) {
-                    contextMenu.style.display = "none";
-                }
-            });
-
-            // BUTTONS
-            addParticleBtn.addEventListener("click", () => {
-                const newX = (Math.random() * 6) - 3;
-                const newT = (Math.random() * 6) - 3;
-                particles.push({ label: getNextLabel(), x: newX, t: newT, radius: 8 });
+                let coords = toMinkowskiCoords(tx, ty);
+                draggingParticle.x = coords.x;
+                draggingParticle.t = coords.t;
                 draw();
-            });
-            removeAllParticlesBtn.addEventListener("click", () => {
-                particles.forEach(p => availableLabels.push(p.label));
-                particles = [];
-                draw();
-            });
-            alignFramesBtn.addEventListener("click", () => {
-                speedSlider.value = 0;
-                draw();
-            });
+            }
+        });
+        canvas.addEventListener("touchend", () => {
+            if (longPressTimeout) clearTimeout(longPressTimeout);
+            draggingParticle = null;
+        });
+        canvas.addEventListener("touchcancel", () => {
+            if (longPressTimeout) clearTimeout(longPressTimeout);
+            draggingParticle = null;
+        });
 
-            // SLIDERS
-            speedSlider.addEventListener("input", draw);
-            gridToggle.addEventListener("change", draw);
-            movingGridToggle.addEventListener("change", draw);
-            velocitySlider.addEventListener("input", draw);
-            velocityToggle.addEventListener("change", draw);
+        // Right-click context menu to remove particle
+        canvas.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            const r = canvas.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            let found = false;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                const cp = toCanvasCoords(p.x, p.t);
+                if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
+                    found = true;
+                    contextParticle = p;
+                    break;
+                }
+            }
+            if (found && contextParticle) {
+                contextMenu.style.display = "block";
+                contextMenu.style.left = e.pageX + "px";
+                contextMenu.style.top = e.pageY + "px";
+            } else {
+                contextMenu.style.display = "none";
+            }
+        });
+        contextMenu.addEventListener("click", () => {
+            if (contextParticle) {
+                const idx = particles.indexOf(contextParticle);
+                if (idx !== -1) {
+                    availableLabels.push(contextParticle.label);
+                    particles.splice(idx, 1);
+                }
+                contextParticle = null;
+                contextMenu.style.display = "none";
+                draw();
+            }
+        });
+        document.addEventListener("click", e => {
+            if (e.target !== contextMenu) {
+                contextMenu.style.display = "none";
+            }
+        });
 
-            // Initial draw
+        // Button actions
+        addParticleBtn.addEventListener("click", () => {
+            const newX = (Math.random() * 6) - 3;
+            const newT = (Math.random() * 6) - 3;
+            particles.push({ label: getNextLabel(), x: newX, t: newT, radius: 8 });
             draw();
         });
-    </script>
-</body>
+        removeAllParticlesBtn.addEventListener("click", () => {
+            particles.forEach(p => availableLabels.push(p.label));
+            particles = [];
+            draw();
+        });
+        alignFramesBtn.addEventListener("click", () => {
+            speedSlider.value = 0;
+            draw();
+        });
+
+        // Slider & toggle events
+        speedSlider.addEventListener("input", draw);
+        gridToggle.addEventListener("change", draw);
+        movingGridToggle.addEventListener("change", draw);
+        velocitySlider.addEventListener("input", draw);
+        velocityToggle.addEventListener("change", draw);
+
+        // Initial draw
+        draw();
+    });
+</script>
 
 </html>
