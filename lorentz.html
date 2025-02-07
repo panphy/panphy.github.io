@@ -284,7 +284,7 @@
             <!-- Control Panel -->
             <div id="controlsContainer">
                 <div class="controlItem">
-                    <label class="controlLabel" for="speedSlider">Relative Speed (c):</label>
+                    <label class="controlLabel" for="speedSlider">Relative Velocity, v (unit: c):</label>
                     <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
                     <span id="speedValue">0.00</span>
                 </div>
@@ -297,11 +297,11 @@
                     <input type="checkbox" id="movingGridToggle" checked>
                 </div>
                 <div class="controlItem">
-                    <label class="controlLabel" for="velocityToggle">Show Velocity Line</label>
+                    <label class="controlLabel" for="velocityToggle">Velocity Transformation</label>
                     <input type="checkbox" id="velocityToggle">
                 </div>
                 <div class="controlItem">
-                    <label class="controlLabel" for="velocitySlider">Velocity (c):</label>
+                    <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, u (unit: c):</label>
                     <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
                     <span id="velocityValue">0.30</span>
                 </div>
@@ -585,7 +585,7 @@
         /**
          * Draw two velocity lines:
          * 1) slope = v_line (green)
-         * 2) slope = (v_line + relSpeed)/(1 + v_line*relSpeed) (orange)
+         * 2) slope = (v_line - relSpeed)/(1 - v_line*relSpeed) (orange)
          */
         function drawVelocityLines(v_line, relSpeed) {
             // First line: slope = v_line => x = v_line * t
@@ -611,11 +611,11 @@
                 let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
                 ctx.fillStyle = "#5f8a35";
                 ctx.font = "16px Arial";
-                ctx.fillText(`v = ${v_line.toFixed(2)}c`, Gc.x + 5, Gc.y - 5);
+                ctx.fillText(`u = ${v_line.toFixed(2)}c`, Gc.x + 35, Gc.y - 15);
             }
 
-            // Second line: slope = v_eff
-            let v_eff = (v_line + relSpeed) / (1 + v_line * relSpeed);
+            // Second line: slope = v_eff = (v_line - relSpeed)/(1 - v_line*relSpeed)
+            let v_eff = (v_line - relSpeed) / (1 - v_line * relSpeed);
             let endO = computeLineBoxEndpoints(v_eff);
             if (endO.length === 2) {
                 let O0 = endO[0];
@@ -638,7 +638,7 @@
                 let Oc = toCanvasCoords(Opoint.x, Opoint.t);
                 ctx.fillStyle = "#ff5f1f";
                 ctx.font = "16px Arial";
-                ctx.fillText(`v' = ${v_eff.toFixed(2)}c`, Oc.x + 5, Oc.y - 5);
+                ctx.fillText(`u' = ${v_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
             }
         }
 
