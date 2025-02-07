@@ -584,12 +584,12 @@
 
         /**
          * Draw two velocity lines:
-         * 1) slope = v_line (green)
-         * 2) slope = (v_line - relSpeed)/(1 - v_line*relSpeed) (orange)
+         * 1) slope = u_line (green)
+         * 2) slope = (u_line - relSpeed)/(1 - u_line*relSpeed) (orange)
          */
-        function drawVelocityLines(v_line, relSpeed) {
-            // First line: slope = v_line => x = v_line * t
-            let endG = computeLineBoxEndpoints(v_line);
+        function drawVelocityLines(u_line, relSpeed) {
+            // First line: slope = u_line => x = u_line * t
+            let endG = computeLineBoxEndpoints(u_line);
             if (endG.length === 2) {
                 let G0 = endG[0];
                 let G1 = endG[1];
@@ -611,12 +611,12 @@
                 let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
                 ctx.fillStyle = "#5f8a35";
                 ctx.font = "16px Arial";
-                ctx.fillText(`u = ${v_line.toFixed(2)}c`, Gc.x + 35, Gc.y - 15);
+                ctx.fillText(`u = ${u_line.toFixed(2)}c`, Gc.x + 35, Gc.y - 15);
             }
 
-            // Second line: slope = v_eff = (v_line - relSpeed)/(1 - v_line*relSpeed)
-            let v_eff = (v_line - relSpeed) / (1 - v_line * relSpeed);
-            let endO = computeLineBoxEndpoints(v_eff);
+            // Second line: slope = u_eff = (u_line - relSpeed)/(1 - u_line*relSpeed)
+            let u_eff = (u_line - relSpeed) / (1 - u_line * relSpeed);
+            let endO = computeLineBoxEndpoints(u_eff);
             if (endO.length === 2) {
                 let O0 = endO[0];
                 let O1 = endO[1];
@@ -638,7 +638,7 @@
                 let Oc = toCanvasCoords(Opoint.x, Opoint.t);
                 ctx.fillStyle = "#ff5f1f";
                 ctx.font = "16px Arial";
-                ctx.fillText(`u' = ${v_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
+                ctx.fillText(`u' = ${u_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
             }
         }
 
@@ -649,8 +649,8 @@
             const relSpeed = parseFloat(speedSlider.value);
             speedValueDisplay.textContent = relSpeed.toFixed(2);
 
-            const v_line = parseFloat(velocitySlider.value);
-            velocityValueDisplay.textContent = v_line.toFixed(2);
+            const u_line = parseFloat(velocitySlider.value);
+            velocityValueDisplay.textContent = u_line.toFixed(2);
 
             // Clear the canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -722,7 +722,7 @@
 
             // Velocity lines if toggled
             if (velocityToggle.checked) {
-                drawVelocityLines(v_line, relSpeed);
+                drawVelocityLines(u_line, relSpeed);
             }
 
             // Light cone
