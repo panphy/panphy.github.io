@@ -996,9 +996,24 @@
 
         // Buttons
         addEventBtn.addEventListener("click", () => {
-            const newX = (Math.random() * 6) - 3;
-            const newT = (Math.random() * 6) - 3;
-            events.push({ label: getNextLabel(), x: newX, t: newT, radius: 8 });
+            // Choose a small range so events appear near the origin
+            const minT = 0.1;    // smallest positive time
+            const maxT = 3.6;    // largest positive time
+
+            // 1) Pick a random t in [minT, maxT]
+            const newT = minT + Math.random() * (maxT - minT);
+
+            // 2) |x| < t ensures it's within the future light cone
+            //    so x is in [-newT, +newT]
+            const newX = (Math.random() * 2 - 1) * newT;
+
+            events.push({
+                label: getNextLabel(),
+                x: newX,
+                t: newT,
+                radius: 8
+            });
+
             draw();
         });
         removeAllEventsBtn.addEventListener("click", () => {
