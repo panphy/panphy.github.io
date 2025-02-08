@@ -119,7 +119,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* The main container that holds both the input and output panes          */
+    /* Main container for both the input and output panes                     */
     /* ---------------------------------------------------------------------- */
     #editorContainer {
       display: flex;
@@ -131,9 +131,8 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* Left Pane = Markdown Input                                             */
-    /* Right Pane = Rendered Output                                           */
-    /* Each is 50% width, with separate borders (optional)                    */
+    /* Left Pane = Markdown Input; Right Pane = Rendered Output               */
+    /* Each is 50% width on larger screens                                   */
     /* ---------------------------------------------------------------------- */
     #inputPane,
     #outputPane {
@@ -152,24 +151,19 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* .pane-heading-container: a 3-column grid to place                      */
-    /* logo on the left (Input pane), heading in the center, toggle (Output)  */
-    /* on the right. Both headings share the same min-height.                 */
+    /* Header container for each pane                                         */
     /* ---------------------------------------------------------------------- */
     .pane-heading-container {
       display: grid;
       grid-template-columns: 50px 1fr 50px;
-      /* Fixed widths for symmetry */
       height: 45px;
       align-items: center;
       background-color: var(--pane-heading-background);
       color: var(--pane-heading-color);
       margin: 0;
       padding: 0 10px;
-      /* Use horizontal padding only if needed */
     }
 
-    /* Scale the PanPhy logo so it fits nicely in the heading row */
     .logo-container img {
       max-height: 30px;
       margin: 0 auto 0 0;
@@ -190,7 +184,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* The dark/light theme toggle button (Output Pane heading, right side)   */
+    /* Theme toggle button                                                    */
     /* ---------------------------------------------------------------------- */
     .theme-toggle-button {
       background: none;
@@ -209,7 +203,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* Button container under each pane heading                               */
+    /* Button container under pane headers                                    */
     /* ---------------------------------------------------------------------- */
     .buttonContainer {
       margin: 10px 0;
@@ -227,7 +221,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* Additional container for the sync scroll toggle on the Output pane     */
+    /* Toggle container for the sync scroll switch                            */
     /* ---------------------------------------------------------------------- */
     .toggle-container {
       position: absolute;
@@ -237,7 +231,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* The switch (checkbox) for sync scroll                                  */
+    /* The switch for sync scroll                                             */
     /* ---------------------------------------------------------------------- */
     .switch {
       position: relative;
@@ -295,7 +289,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* Textarea for Markdown Input                                            */
+    /* Markdown input textarea                                                */
     /* ---------------------------------------------------------------------- */
     textarea {
       flex: 1;
@@ -326,7 +320,7 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* Code block and syntax highlighting                                     */
+    /* Code blocks and syntax highlighting                                    */
     /* ---------------------------------------------------------------------- */
     code {
       background-color: var(--code-background);
@@ -602,7 +596,8 @@
      RESPONSIVE RULES
      ========================================================================== */
 
-    /* 1) Stack the two panes vertically on narrow screens */
+    /* 1) For narrow screens, stack the two panes vertically and have each fill
+        available height equally */
     @media (max-width: 900px) {
       #editorContainer {
         flex-direction: column;
@@ -612,6 +607,8 @@
       #outputPane {
         width: 100%;
         border-right: none;
+        flex: 1;
+        /* Ensures both panes share the available height equally */
       }
     }
 
@@ -626,10 +623,9 @@
         flex: 1 0 auto;
         margin: 5px 2px;
         min-width: 110px;
-        /* You can tweak this to control button shrink */
       }
 
-      /* Move toggle below the buttons if there isn't enough space */
+      /* Move toggle below the buttons if needed */
       .toggle-container {
         position: static;
         margin-top: 5px;
@@ -637,7 +633,6 @@
 
       .switch-label {
         font-size: 12px;
-        /* Slightly smaller label if you want more room */
       }
     }
   </style>
