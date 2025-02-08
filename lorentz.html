@@ -364,8 +364,8 @@
         let canvasDragStart = { x: 0, y: 0 };
         let originStart = { x: 0, y: 0 };
 
-        // Minkowski diagram geometry (origin in the middle initially)
-        let origin = { x: canvas.width / 2, y: canvas.height / 2 };
+        // Minkowski diagram geometry (origin in the lower half)
+        let origin = { x: canvas.width * 0.5, y: canvas.height * 0.9 };
         const scale = 80;  // pixels per Minkowski unit
 
         // Event storage
@@ -996,15 +996,18 @@
 
         // Buttons
         addEventBtn.addEventListener("click", () => {
-            // Choose a small range so events appear near the origin
-            const minT = 0.1;    // smallest positive time
-            const maxT = 3.6;    // largest positive time
+            // Limit the number of events to 15
+            if (events.length >= 15) {
+                console.log("Maximum number of events reached.");
+                return; // Do not add any more events
+            }
 
-            // 1) Pick a random t in [minT, maxT]
+            // Choose a random time in the future (t > 0)
+            const minT = 0.1;
+            const maxT = 6.5;
             const newT = minT + Math.random() * (maxT - minT);
 
-            // 2) |x| < t ensures it's within the future light cone
-            //    so x is in [-newT, +newT]
+            // Choose x such that |x| < t (inside the light cone)
             const newX = (Math.random() * 2 - 1) * newT;
 
             events.push({
