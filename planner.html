@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson Planner</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --navbar-bg-color: #343a40;
+            --navbar-title-font-size: 1.5rem;
+            --navbar-title-color: #ffffff;
+            --body-font-size: 0.9rem;
+            --body-bg-color: #f8f9fa;
+            --banner-margin: 0;
+            --table-header-bg: #e9ecef;
+        }
+
+        /* Ensure the navbar stays fixed at the top */
+        .navbar.fixed-top {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+        }
+
+        /* Add enough padding-top so content isn't hidden behind the fixed navbar */
+        body {
+            padding-top: 70px;
+            font-size: var(--body-font-size);
+            background-color: var(--body-bg-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .navbar {
+            background-color: var(--navbar-bg-color) !important;
+            margin: var(--banner-margin);
+        }
+
+        /* Absolutely center the title in the navbar */
+        .navbar-text.center-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: Helvetica, sans-serif;
+            font-size: var(--navbar-title-font-size);
+            color: var(--navbar-title-color);
+        }
+
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .fc-button-group .fc-button {
+            flex: 1 1 auto;
+            text-align: center;
+        }
+
+        /* Disable FullCalendar's default event time display */
+        .fc .fc-event-time {
+            display: none;
+        }
+
+        /* Hover effect for calendar events */
+        .fc-event:hover {
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        table colgroup col.note-col {
+            width: 30%;
+        }
+
+        table colgroup col.other-col {
+            width: 14%;
+        }
+
+        #lessonTableBody tr {
+            cursor: pointer;
+        }
+
+        footer {
+            position: static;
+            font-size: 15px;
+            text-align: center;
+            padding: 7px;
+            background: transparent;
+            color: #555;
+            margin: 4px 0;
+            width: 100%;
+        }
+
+        footer a {
+            color: #ff5f1f;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        footer a:visited {
+            color: #ff5f1f;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="https://panphy.github.io/">
+                <img src="/panphy.png" alt="PanPhy logo" style="height:35px;" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="btn-group me-auto" role="group">
+                    <button type="button" class="btn btn-secondary" id="navCalendar">Calendar</button>
+                    <button type="button" class="btn btn-secondary" id="navList">List</button>
+                </div>
+                <span class="navbar-text center-title">Lesson Planner</span>
+                <div class="d-flex">
+                    <button class="btn btn-primary me-2" id="saveCSVBtn">Backup</button>
+                    <button class="btn btn-secondary me-2" id="importCSVBtn">Import Backup</button>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none">
+                    <button class="btn btn-success" id="addLessonBtn" data-bs-toggle="modal"
+                        data-bs-target="#lessonModal">
+                        Add Lesson
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div id="calendarView">
+            <div id="calendar"></div>
+        </div>
+        <div id="listView" class="hidden">
+            <h3 class="mt-4">Lesson List</h3>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <input type="text" id="filterSubject" class="form-control" placeholder="Filter by Subject">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" id="filterClass" class="form-control" placeholder="Filter by Class">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" id="filterLesson" class="form-control" placeholder="Filter by Lesson #">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" id="filterDate" class="form-control" placeholder="Filter by Date">
+                </div>
+                <div class="col-md-2">
+                    <input type="time" id="filterTime" class="form-control" placeholder="Filter by Time">
+                </div>
+                <div class="col-md-2">
+                    <select id="sortField" class="form-select">
+                        <option value="">Sort by...</option>
+                        <option value="subject">Subject</option>
+                        <option value="className">Class</option>
+                        <option value="lessonNumber">Lesson #</option>
+                        <option value="date">Date</option>
+                        <option value="time">Time</option>
+                    </select>
+                </div>
+            </div>
+            <table class="table table-striped">
+                <colgroup>
+                    <col class="other-col">
+                    <col class="other-col">
+                    <col class="other-col">
+                    <col class="other-col">
+                    <col class="other-col">
+                    <col class="note-col">
+                </colgroup>
+                <thead style="background-color: var(--table-header-bg);">
+                    <tr>
+                        <th>Subject</th>
+                        <th>Class</th>
+                        <th>Lesson #</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody id="lessonTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Lesson Modal -->
+    <div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="lessonForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="lessonModalLabel">Add New Lesson</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="subjectInput" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subjectInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="classNameInput" class="form-label">Class Name</label>
+                            <input type="text" class="form-control" id="classNameInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lessonNumberInput" class="form-label">Lesson #</label>
+                            <input type="number" class="form-control" id="lessonNumberInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="colorInput" class="form-label">Class Color</label>
+                            <input type="color" class="form-control form-control-color" id="colorInput" value="#3788d8"
+                                title="Choose your color">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dateInput" class="form-label">Date (optional)</label>
+                            <input type="date" class="form-control" id="dateInput">
+                        </div>
+                        <div class="mb-3">
+                            <label for="timeInput" class="form-label">Time (optional)</label>
+                            <input type="time" class="form-control" id="timeInput">
+                        </div>
+                        <div class="mb-3">
+                            <label for="noteInput" class="form-label">Note</label>
+                            <textarea class="form-control" id="noteInput" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lesson Details Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Lesson Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" id="editLessonBtn">Edit</button>
+                    <button type="button" class="btn btn-danger" id="deleteLessonBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
+            My Projects</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+        let lessons = [];
+        let calendar;
+        let currentLessonId = null;
+        let editingLessonId = null;
+
+        function findLessonById(id) {
+            return lessons.find(lesson => lesson.id == id);
+        }
+
+        function showLessonDetail(lesson) {
+            currentLessonId = lesson.id;
+            const content = `
+        <p><strong>Subject:</strong> ${lesson.subject}</p>
+        <p><strong>Class Name:</strong> ${lesson.className}</p>
+        <p><strong>Lesson #:</strong> ${lesson.lessonNumber}</p>
+        ${lesson.date ? `<p><strong>Date:</strong> ${lesson.date}</p>` : ''}
+        ${lesson.time ? `<p><strong>Time:</strong> ${lesson.time}</p>` : ''}
+        <p><strong>Note:</strong> ${lesson.note}</p>
+        <p><strong>Class Color:</strong> <span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};"></span></p>
+      `;
+            document.getElementById('detailModalBody').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+
+        function saveLessonsToLocalStorage() {
+            localStorage.setItem('lessons', JSON.stringify(lessons));
+        }
+
+        function loadLessonsFromLocalStorage() {
+            const savedData = localStorage.getItem('lessons');
+            if (savedData) {
+                lessons = JSON.parse(savedData);
+                refreshCalendar();
+                renderListView();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth',
+                firstDay: 1,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                displayEventTime: false,
+                events: [],
+                eventDidMount: function (info) {
+                    info.el.style.backgroundColor = "var(--body-bg-color)";
+                    info.el.style.borderColor = info.event.extendedProps.color;
+                    info.el.style.color = info.event.extendedProps.color;
+                },
+                eventClick: function (info) {
+                    showLessonDetail(info.event.extendedProps);
+                }
+            });
+            calendar.render();
+
+            document.getElementById('navCalendar').addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('calendarView').classList.remove('hidden');
+                document.getElementById('listView').classList.add('hidden');
+                this.classList.add('active');
+                document.getElementById('navList').classList.remove('active');
+                calendar.updateSize();
+            });
+            document.getElementById('navList').addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('listView').classList.remove('hidden');
+                document.getElementById('calendarView').classList.add('hidden');
+                this.classList.add('active');
+                document.getElementById('navCalendar').classList.remove('active');
+                renderListView();
+            });
+
+            document.getElementById('lessonForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const lessonData = {
+                    subject: document.getElementById('subjectInput').value.trim(),
+                    className: document.getElementById('classNameInput').value.trim(),
+                    lessonNumber: document.getElementById('lessonNumberInput').value.trim(),
+                    color: document.getElementById('colorInput').value,
+                    date: document.getElementById('dateInput').value,
+                    time: document.getElementById('timeInput').value,
+                    note: document.getElementById('noteInput').value.trim()
+                };
+                if (editingLessonId) {
+                    const index = lessons.findIndex(lesson => lesson.id == editingLessonId);
+                    if (index !== -1) { lessons[index] = { id: editingLessonId, ...lessonData }; }
+                    editingLessonId = null;
+                } else {
+                    lessonData.id = Date.now();
+                    lessons.push(lessonData);
+                }
+                refreshCalendar();
+                renderListView();
+                saveLessonsToLocalStorage();
+                this.reset();
+                bootstrap.Modal.getInstance(document.getElementById('lessonModal')).hide();
+            });
+
+            document.getElementById('saveCSVBtn').addEventListener('click', saveAsCSV);
+            document.getElementById('importCSVBtn').addEventListener('click', function () {
+                document.getElementById('csvFileInput').click();
+            });
+            document.getElementById('csvFileInput').addEventListener('change', importCSV);
+
+            document.getElementById('editLessonBtn').addEventListener('click', function () {
+                const lesson = findLessonById(currentLessonId);
+                if (lesson) {
+                    document.getElementById('subjectInput').value = lesson.subject;
+                    document.getElementById('classNameInput').value = lesson.className;
+                    document.getElementById('lessonNumberInput').value = lesson.lessonNumber;
+                    document.getElementById('colorInput').value = lesson.color;
+                    document.getElementById('dateInput').value = lesson.date;
+                    document.getElementById('timeInput').value = lesson.time;
+                    document.getElementById('noteInput').value = lesson.note;
+                    editingLessonId = lesson.id;
+                    let detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
+                    if (detailModal) { detailModal.hide(); }
+                    new bootstrap.Modal(document.getElementById('lessonModal')).show();
+                }
+            });
+
+            document.getElementById('deleteLessonBtn').addEventListener('click', function () {
+                if (confirm("Are you sure you want to delete this lesson?")) {
+                    lessons = lessons.filter(lesson => lesson.id != currentLessonId);
+                    refreshCalendar();
+                    renderListView();
+                    saveLessonsToLocalStorage();
+                    bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+                }
+            });
+
+            document.getElementById('filterSubject').addEventListener('input', renderListView);
+            document.getElementById('filterClass').addEventListener('input', renderListView);
+            document.getElementById('filterLesson').addEventListener('input', renderListView);
+            document.getElementById('filterDate').addEventListener('input', renderListView);
+            document.getElementById('filterTime').addEventListener('input', renderListView);
+            document.getElementById('sortField').addEventListener('change', renderListView);
+
+            loadLessonsFromLocalStorage();
+        });
+
+        function addLessonToCalendar(lesson) {
+            if (!lesson.date) return;
+            const eventData = {
+                title: lesson.time ? lesson.time + " " + lesson.className : lesson.className,
+                start: lesson.time ? lesson.date + 'T' + lesson.time : lesson.date,
+                allDay: lesson.time ? false : true,
+                extendedProps: lesson,
+                backgroundColor: "var(--body-bg-color)",
+                borderColor: lesson.color,
+                textColor: lesson.color
+            };
+            calendar.addEvent(eventData);
+        }
+
+        function refreshCalendar() {
+            calendar.removeAllEvents();
+            lessons.forEach(lesson => addLessonToCalendar(lesson));
+        }
+
+        function renderListView() {
+            const filterSubject = document.getElementById('filterSubject').value.trim().toLowerCase();
+            const filterClass = document.getElementById('filterClass').value.trim().toLowerCase();
+            const filterLesson = document.getElementById('filterLesson').value.trim();
+            const filterDate = document.getElementById('filterDate').value;
+            const filterTime = document.getElementById('filterTime').value;
+            const sortField = document.getElementById('sortField').value;
+            let filteredLessons = lessons.filter(lesson => {
+                return (
+                    (filterSubject === '' || lesson.subject.toLowerCase().includes(filterSubject)) &&
+                    (filterClass === '' || lesson.className.toLowerCase().includes(filterClass)) &&
+                    (filterLesson === '' || lesson.lessonNumber.toString() === filterLesson) &&
+                    (filterDate === '' || lesson.date === filterDate) &&
+                    (filterTime === '' || lesson.time === filterTime)
+                );
+            });
+            if (sortField) {
+                filteredLessons.sort((a, b) => {
+                    if (sortField === 'lessonNumber') {
+                        return parseInt(a[sortField]) - parseInt(b[sortField]);
+                    }
+                    return a[sortField].localeCompare(b[sortField]);
+                });
+            }
+            const tbody = document.getElementById('lessonTableBody');
+            tbody.innerHTML = '';
+            filteredLessons.forEach(lesson => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td><span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};margin-right:5px;"></span>${lesson.subject}</td>
+          <td>${lesson.className}</td>
+          <td>${lesson.lessonNumber}</td>
+          <td>${lesson.date || ''}</td>
+          <td>${lesson.time || ''}</td>
+          <td>${lesson.note}</td>
+        `;
+                tr.addEventListener('click', function () {
+                    showLessonDetail(lesson);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function saveCSVFile(csvContent, suggestedFileName = "lessons_backup.csv") {
+            if (window.showSaveFilePicker) {
+                try {
+                    const options = {
+                        suggestedName: suggestedFileName,
+                        types: [{ description: 'CSV Files', accept: { 'text/csv': ['.csv'] } }]
+                    };
+                    const handle = await window.showSaveFilePicker(options);
+                    const writable = await handle.createWritable();
+                    await writable.write(csvContent);
+                    await writable.close();
+                } catch (err) {
+                    console.error("Save cancelled or failed", err);
+                }
+            } else {
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", suggestedFileName);
+                link.style.visibility = "hidden";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function saveAsCSV() {
+            if (lessons.length === 0) {
+                alert("No lessons to save!");
+                return;
+            }
+            const header = ["Subject", "Class Name", "Lesson #", "Date", "Time", "Note", "Color"];
+            const rows = lessons.map(lesson => [
+                lesson.subject,
+                lesson.className,
+                lesson.lessonNumber,
+                lesson.date,
+                lesson.time,
+                lesson.note,
+                lesson.color
+            ]);
+            const csvContent = header.join(",") + "\n" +
+                rows.map(row => row.join(",")).join("\n");
+            saveCSVFile(csvContent, "lessons_backup.csv");
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                parseCSV(e.target.result);
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split("\n");
+            if (lines.length < 2) {
+                alert("CSV file does not contain valid data.");
+                return;
+            }
+            const newLessons = [];
+            for (let i = 1; i < lines.length; i++) {
+                const parts = lines[i].split(",");
+                if (parts.length < 6) continue;
+                const lesson = {
+                    subject: parts[0].trim(),
+                    className: parts[1].trim(),
+                    lessonNumber: parts[2].trim(),
+                    date: parts[3].trim(),
+                    time: parts[4].trim(),
+                    note: parts[5].trim(),
+                    color: parts.length >= 7 ? parts[6].trim() : "#3788d8"
+                };
+                lesson.id = Date.now() + i;
+                newLessons.push(lesson);
+            }
+            lessons = newLessons;
+            refreshCalendar();
+            renderListView();
+            saveLessonsToLocalStorage();
+        }
+    </script>
+</body>
+
+</html>
