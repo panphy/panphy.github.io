@@ -21,7 +21,7 @@
       --table-header-bg: #e9ecef;
     }
 
-    /* Ensure the navbar stays fixed at the top */
+    /* Navbar fixed at top */
     .navbar.fixed-top {
       position: fixed;
       top: 0;
@@ -29,7 +29,7 @@
       z-index: 1030;
     }
 
-    /* Add enough padding-top so content isn't hidden behind the fixed navbar */
+    /* Padding so content is not hidden behind navbar */
     body {
       padding-top: 70px;
       font-size: var(--body-font-size);
@@ -45,7 +45,6 @@
       margin: var(--banner-margin);
     }
 
-    /* Absolutely center the title in the navbar */
     .navbar-text.center-title {
       position: absolute;
       left: 50%;
@@ -65,23 +64,71 @@
       text-align: center;
     }
 
-    /* Disable FullCalendar's default event time display */
-    .fc .fc-event-time {
-      display: none;
+    /*
+     * Calendar events: force background transparent,
+     * border and text color use the user-selected color (set via JS).
+     */
+    .fc-event-main,
+    .fc-daygrid-event .fc-event-main,
+    .fc-timegrid-event .fc-event-main {
+      background-color: transparent !important;
+      border: 1px solid currentColor !important;
+      color: inherit !important;
     }
 
-    /* Hover effect for calendar events */
+    /* Remove the dot in month view */
+    .fc-daygrid-event-dot {
+      display: none !important;
+    }
+
+    /* In week/day views, remove any default border/box-shadow from the outer container */
+    .fc-timegrid-event {
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
     .fc-event:hover {
-      opacity: 0.8;
       cursor: pointer;
+      opacity: 0.8;
     }
 
-    table colgroup col.note-col {
-      width: 30%;
+    /* Fixed column widths for the list view table */
+    .col-subject {
+      width: 10ch;
     }
 
-    table colgroup col.other-col {
-      width: 14%;
+    .col-class {
+      width: 10ch;
+    }
+
+    .col-lesson {
+      width: 8ch;
+    }
+
+    .col-date {
+      width: 12ch;
+    }
+
+    .col-time {
+      width: 6ch;
+    }
+
+    .col-note {
+      width: 50ch;
+    }
+
+    /* Force table layout to fixed */
+    table.table-striped {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    /* Ensure header cells do not wrap */
+    th {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     #lessonTableBody tr {
@@ -112,12 +159,32 @@
       color: #ff5f1f;
     }
 
-    /* Preserve line breaks in note content */
-    .note-display {
-      white-space: pre-line;
+    /* Modal popups: 50% screen width */
+    .modal-dialog.custom-modal-width {
+      max-width: 50% !important;
     }
 
-    /* Override Bootstrap tooltip styles so that tooltip text is left-aligned and preserves line breaks */
+    /* Modal layout: top section (two columns) and bottom note area with scrolling */
+    .scrolling-note-area {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 5px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      margin-top: 10px;
+    }
+
+    /* In the list view, force the note cell to a single line with ellipsis */
+    .one-line-ellipsis {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      width: 100%;
+      vertical-align: middle;
+    }
+
+    /* Tooltip for note cells: allow multiline with preserved newlines */
     .tooltip-inner {
       text-align: left;
       white-space: pre-line;
@@ -146,8 +213,9 @@
           <button class="btn btn-primary me-2" id="saveCSVBtn">Backup</button>
           <button class="btn btn-secondary me-2" id="importCSVBtn">Import Backup</button>
           <input type="file" id="csvFileInput" accept=".csv" style="display: none">
-          <button class="btn btn-success" id="addLessonBtn" data-bs-toggle="modal" data-bs-target="#lessonModal">Add
-            Lesson</button>
+          <button class="btn btn-success" id="addLessonBtn" data-bs-toggle="modal" data-bs-target="#lessonModal">
+            Add Lesson
+          </button>
         </div>
       </div>
     </div>
@@ -161,22 +229,16 @@
     <div id="listView" class="hidden">
       <h3 class="mt-4">Lesson List</h3>
       <div class="row mb-3">
-        <div class="col-md-2">
+        <div class="col-md-3">
           <input type="text" id="filterSubject" class="form-control" placeholder="Filter by Subject">
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <input type="text" id="filterClass" class="form-control" placeholder="Filter by Class">
         </div>
-        <div class="col-md-2">
-          <input type="number" id="filterLesson" class="form-control" placeholder="Filter by Lesson #">
-        </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <input type="date" id="filterDate" class="form-control" placeholder="Filter by Date">
         </div>
-        <div class="col-md-2">
-          <input type="time" id="filterTime" class="form-control" placeholder="Filter by Time">
-        </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
           <select id="sortField" class="form-select">
             <option value="">Sort by...</option>
             <option value="subject">Subject</option>
@@ -189,12 +251,12 @@
       </div>
       <table class="table table-striped">
         <colgroup>
-          <col class="other-col">
-          <col class="other-col">
-          <col class="other-col">
-          <col class="other-col">
-          <col class="other-col">
-          <col class="note-col">
+          <col class="col-subject">
+          <col class="col-class">
+          <col class="col-lesson">
+          <col class="col-date">
+          <col class="col-time">
+          <col class="col-note">
         </colgroup>
         <thead style="background-color: var(--table-header-bg);">
           <tr>
@@ -203,7 +265,7 @@
             <th>Lesson #</th>
             <th>Date</th>
             <th>Time</th>
-            <th>Note</th>
+            <th>Note Preview</th>
           </tr>
         </thead>
         <tbody id="lessonTableBody"></tbody>
@@ -211,44 +273,62 @@
     </div>
   </div>
 
-  <!-- Add/Edit Lesson Modal -->
+  <!-- Add/Edit Lesson Modal (50% width, two sections) -->
   <div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered custom-modal-width">
       <div class="modal-content">
         <form id="lessonForm">
           <div class="modal-header">
             <h5 class="modal-title" id="lessonModalLabel">Add New Lesson</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+          <!-- Top Section -->
           <div class="modal-body">
-            <div class="mb-3">
-              <label for="subjectInput" class="form-label">Subject</label>
-              <input type="text" class="form-control" id="subjectInput" required>
+            <div class="row">
+              <!-- Left Column -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="subjectInput" class="form-label">Subject</label>
+                  <input type="text" class="form-control" id="subjectInput" required>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="classNameInput" class="form-label">Class Name</label>
+                    <input type="text" class="form-control" id="classNameInput" required>
+                  </div>
+                  <div class="col">
+                    <label for="colorInput" class="form-label">Class Color</label>
+                    <input type="color" class="form-control form-control-color" id="colorInput" value="#3788d8"
+                      title="Choose your color">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="lessonNumberInput" class="form-label">Lesson #</label>
+                  <input type="number" class="form-control" id="lessonNumberInput" required>
+                </div>
+              </div>
+              <!-- Right Column -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="dateInput" class="form-label">Date</label>
+                  <input type="date" class="form-control" id="dateInput">
+                </div>
+                <div class="mb-3">
+                  <label for="timeInput" class="form-label">Start Time</label>
+                  <input type="time" class="form-control" id="timeInput">
+                </div>
+                <div class="mb-3">
+                  <label for="endTimeInput" class="form-label">End Time</label>
+                  <input type="time" class="form-control" id="endTimeInput">
+                </div>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="classNameInput" class="form-label">Class Name</label>
-              <input type="text" class="form-control" id="classNameInput" required>
-            </div>
-            <div class="mb-3">
-              <label for="lessonNumberInput" class="form-label">Lesson #</label>
-              <input type="number" class="form-control" id="lessonNumberInput" required>
-            </div>
-            <div class="mb-3">
-              <label for="colorInput" class="form-label">Class Color</label>
-              <input type="color" class="form-control form-control-color" id="colorInput" value="#3788d8"
-                title="Choose your color">
-            </div>
-            <div class="mb-3">
-              <label for="dateInput" class="form-label">Date (optional)</label>
-              <input type="date" class="form-control" id="dateInput">
-            </div>
-            <div class="mb-3">
-              <label for="timeInput" class="form-label">Time (optional)</label>
-              <input type="time" class="form-control" id="timeInput">
-            </div>
-            <div class="mb-3">
-              <label for="noteInput" class="form-label">Note</label>
-              <textarea class="form-control" id="noteInput" rows="3"></textarea>
+            <!-- Bottom Section: Note -->
+            <div class="row">
+              <div class="col-12">
+                <label for="noteInput" class="form-label">Note</label>
+                <textarea class="form-control" id="noteInput" rows="6" style="overflow:auto;"></textarea>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
@@ -259,9 +339,9 @@
     </div>
   </div>
 
-  <!-- Lesson Details Modal -->
+  <!-- Lesson Details Modal (50% width, two sections) -->
   <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered custom-modal-width">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="detailModalLabel">Lesson Details</h5>
@@ -285,87 +365,48 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script>
-    /********************************************************
-     * HELPER FUNCTIONS
-     ********************************************************/
-
-    /**
-     * removeLeadingBlankLines:
-     *  Removes lines at the top that are blank/whitespace,
-     *  preserving the user's actual first typed line.
-     *  Also removes leftover indentation on that line if needed.
-     */
-    function removeLeadingBlankLines(text) {
-      // Split the text into lines
-      let lines = text.split(/\r?\n/);
-
-      // 1) Remove blank lines at the top
-      while (lines.length && lines[0].trim().length === 0) {
-        lines.shift();
-      }
-
-      // 2) If there's a first line, remove indentation on it
-      if (lines.length > 0) {
-        lines[0] = lines[0].replace(/^[ \t]+/, "");
-      }
-
-      // Reassemble
-      return lines.join("\n");
+    // Helper: add one hour to a HH:MM string.
+    function addOneHour(timeStr) {
+      const parts = timeStr.split(":");
+      if (parts.length < 2) return timeStr;
+      let hour = parseInt(parts[0], 10);
+      const minute = parts[1];
+      hour = (hour + 1) % 24;
+      return String(hour).padStart(2, "0") + ":" + minute;
     }
-
-    /**
-     * formatDateYYYYMMDD:
-     *   Takes a date string or empty,
-     *   returns a string in YYYY-MM-DD format
-     *   if valid, or "" if invalid/empty.
-     */
-    function formatDateYYYYMMDD(dateStr) {
-      if (!dateStr) return "";
-      // Attempt to parse
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) {
-        // It's not a valid date
-        return "";
-      }
-      // Build YYYY-MM-DD
+    // Helper: generate backup filename as "lessons_bkup_yyyymmdd.csv"
+    function getCurrentDateFormatted() {
+      const d = new Date();
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, "0");
       const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      return `${year}${month}${day}`;
     }
-
-    // Escape HTML special characters.
+    // Helper: convert note text into HTML for tooltip (preserving newlines)
+    function getNoteTooltip(note) {
+      const div = document.createElement("div");
+      div.innerText = note;
+      return div.innerHTML.replace(/\r?\n/g, "<br>");
+    }
+    let lessons = [];
+    let calendar;
+    let currentLessonId = null;
+    let editingLessonId = null;
     function escapeHTML(str) {
       const div = document.createElement("div");
       div.innerText = str;
       return div.innerHTML;
     }
-
-    // Converts newlines to <br>, removing leading blank lines first.
-    function convertNewlines(text) {
-      const cleaned = removeLeadingBlankLines(text);
-      return escapeHTML(cleaned).replace(/\r?\n/g, "<br>");
+    function multilineToHtml(text) {
+      const div = document.createElement("div");
+      div.innerText = text;
+      return div.innerHTML.replace(/\r?\n/g, "<br>");
     }
-
-    // Limit to maxLines, removing leading blank lines first.
-    function getLimitedText(text, maxLines) {
-      const cleaned = removeLeadingBlankLines(text);
-      const lines = cleaned.split(/\r?\n/);
-      const limited = lines.slice(0, maxLines).map(line => escapeHTML(line));
-      let result = limited.join("<br>");
-      if (lines.length > maxLines) {
-        result += "<br>...";
-      }
-      return result;
-    }
-
-    // CSV quoting/unquoting
     function csvQuote(field) {
       let safe = field.replace(/\r?\n/g, "\\n");
       safe = safe.replace(/"/g, '""');
       return `"${safe}"`;
     }
-
     function parseCsvLine(line) {
       const result = [];
       let cur = "";
@@ -393,52 +434,52 @@
       result.push(cur);
       return result;
     }
-
     function csvFieldToText(field) {
       const trimmed = field.trim();
       return trimmed.replace(/\\n/g, "\n");
     }
-
-    /********************************************************
-     * APP DATA
-     ********************************************************/
-    let lessons = [];
-    let calendar;
-    let currentLessonId = null;
-    let editingLessonId = null;
-
     function findLessonById(id) {
       return lessons.find(lesson => lesson.id == id);
     }
-
     /********************************************************
-     * DISPLAYING LESSON DETAILS, ETC.
+     * SHOW LESSON DETAILS (POPUP)
      ********************************************************/
     function showLessonDetail(lesson) {
       currentLessonId = lesson.id;
-      // Format date in YYYY-MM-DD
-      const dateString = formatDateYYYYMMDD(lesson.date);
-      // If time is set, just use it as typed or from the input
       const content = `
-        <p><strong>Subject:</strong> ${escapeHTML(lesson.subject)}</p>
-        <p><strong>Class Name:</strong> ${escapeHTML(lesson.className)}</p>
-        <p><strong>Lesson #:</strong> ${escapeHTML(lesson.lessonNumber)}</p>
-        ${dateString ? `<p><strong>Date:</strong> ${dateString}</p>` : ""}
-        ${lesson.time ? `<p><strong>Time:</strong> ${escapeHTML(lesson.time)}</p>` : ""}
-        <p><strong>Note:</strong></p>
-        <div class="note-display">${convertNewlines(lesson.note)}</div>
-        <p><strong>Class Color:</strong>
-          <span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};"></span>
-        </p>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Subject:</strong> ${escapeHTML(lesson.subject)}</p>
+            <p><strong>Class Name:</strong> ${escapeHTML(lesson.className)}</p>
+            <p><strong>Lesson #:</strong> ${escapeHTML(lesson.lessonNumber)}</p>
+          </div>
+          <div class="col-md-6">
+            ${lesson.date ? `<p><strong>Date:</strong> ${escapeHTML(lesson.date)}</p>` : ""}
+            ${lesson.time ? `<p><strong>Start Time:</strong> ${escapeHTML(lesson.time)}</p>` : ""}
+            ${lesson.endTime ? `<p><strong>End Time:</strong> ${escapeHTML(lesson.endTime)}</p>` : ""}
+            <p><strong>Class Color:</strong>
+              <span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};"></span>
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p><strong>Note:</strong></p>
+            <div style="max-height:200px; overflow-y:auto; border:1px solid #ccc; padding:5px;">
+              ${multilineToHtml(lesson.note)}
+            </div>
+          </div>
+        </div>
       `;
       document.getElementById("detailModalBody").innerHTML = content;
       new bootstrap.Modal(document.getElementById("detailModal")).show();
     }
-
+    /********************************************************
+     * LOCAL STORAGE
+     ********************************************************/
     function saveLessonsToLocalStorage() {
       localStorage.setItem("lessons", JSON.stringify(lessons));
     }
-
     function loadLessonsFromLocalStorage() {
       const savedData = localStorage.getItem("lessons");
       if (savedData) {
@@ -447,12 +488,10 @@
         renderListView();
       }
     }
-
     /********************************************************
-     * MAIN START
+     * DOM READY
      ********************************************************/
     document.addEventListener("DOMContentLoaded", function () {
-      // Initialize FullCalendar
       calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         initialView: "dayGridMonth",
         firstDay: 1,
@@ -464,8 +503,7 @@
         displayEventTime: false,
         events: [],
         eventDidMount: function (info) {
-          info.el.style.backgroundColor = "var(--body-bg-color)";
-          info.el.style.borderColor = info.event.extendedProps.color;
+          // Set event text and border to user-selected color.
           info.el.style.color = info.event.extendedProps.color;
         },
         eventClick: function (info) {
@@ -473,8 +511,6 @@
         }
       });
       calendar.render();
-
-      // Nav event
       document.getElementById("navCalendar").addEventListener("click", function (e) {
         e.preventDefault();
         document.getElementById("calendarView").classList.remove("hidden");
@@ -483,7 +519,6 @@
         document.getElementById("navList").classList.remove("active");
         calendar.updateSize();
       });
-
       document.getElementById("navList").addEventListener("click", function (e) {
         e.preventDefault();
         document.getElementById("listView").classList.remove("hidden");
@@ -492,8 +527,11 @@
         document.getElementById("navCalendar").classList.remove("active");
         renderListView();
       });
-
-      // Add/Edit Lesson
+      // Clear form on Add Lesson click
+      document.getElementById("addLessonBtn").addEventListener("click", function () {
+        editingLessonId = null;
+        document.getElementById("lessonForm").reset();
+      });
       document.getElementById("lessonForm").addEventListener("submit", function (e) {
         e.preventDefault();
         const lessonData = {
@@ -503,12 +541,17 @@
           color: document.getElementById("colorInput").value,
           date: document.getElementById("dateInput").value,
           time: document.getElementById("timeInput").value,
+          endTime: document.getElementById("endTimeInput").value.trim(),
           note: document.getElementById("noteInput").value
         };
+        // Default end time if not provided and start time exists.
+        if (!lessonData.endTime && lessonData.time) {
+          lessonData.endTime = addOneHour(lessonData.time);
+        }
         if (editingLessonId) {
-          const index = lessons.findIndex(lesson => lesson.id == editingLessonId);
-          if (index !== -1) {
-            lessons[index] = { id: editingLessonId, ...lessonData };
+          const idx = lessons.findIndex(lesson => lesson.id == editingLessonId);
+          if (idx !== -1) {
+            lessons[idx] = { id: editingLessonId, ...lessonData };
           }
           editingLessonId = null;
         } else {
@@ -521,69 +564,61 @@
         this.reset();
         bootstrap.Modal.getInstance(document.getElementById("lessonModal")).hide();
       });
-
-      // Backup, Import
       document.getElementById("saveCSVBtn").addEventListener("click", saveAsCSV);
       document.getElementById("importCSVBtn").addEventListener("click", function () {
         document.getElementById("csvFileInput").click();
       });
       document.getElementById("csvFileInput").addEventListener("change", importCSV);
-
-      // Edit, Delete in detail
       document.getElementById("editLessonBtn").addEventListener("click", function () {
         const lesson = findLessonById(currentLessonId);
         if (lesson) {
+          document.getElementById("lessonForm").reset();
           document.getElementById("subjectInput").value = lesson.subject;
           document.getElementById("classNameInput").value = lesson.className;
           document.getElementById("lessonNumberInput").value = lesson.lessonNumber;
           document.getElementById("colorInput").value = lesson.color;
           document.getElementById("dateInput").value = lesson.date;
           document.getElementById("timeInput").value = lesson.time;
+          document.getElementById("endTimeInput").value = lesson.endTime || "";
           document.getElementById("noteInput").value = lesson.note;
           editingLessonId = lesson.id;
           const detailModal = bootstrap.Modal.getInstance(document.getElementById("detailModal"));
-          if (detailModal) {
-            detailModal.hide();
-          }
+          if (detailModal) detailModal.hide();
           new bootstrap.Modal(document.getElementById("lessonModal")).show();
         }
       });
-
       document.getElementById("deleteLessonBtn").addEventListener("click", function () {
         if (confirm("Are you sure you want to delete this lesson?")) {
           lessons = lessons.filter(lesson => lesson.id != currentLessonId);
           refreshCalendar();
           renderListView();
           saveLessonsToLocalStorage();
-          bootstrap.Modal.getInstance(document.getElementById("detailModal")).hide();
+          const detailModal = bootstrap.Modal.getInstance(document.getElementById("detailModal"));
+          if (detailModal) detailModal.hide();
         }
       });
-
-      // Filtering & Sorting
       document.getElementById("filterSubject").addEventListener("input", renderListView);
       document.getElementById("filterClass").addEventListener("input", renderListView);
-      document.getElementById("filterLesson").addEventListener("input", renderListView);
       document.getElementById("filterDate").addEventListener("input", renderListView);
-      document.getElementById("filterTime").addEventListener("input", renderListView);
       document.getElementById("sortField").addEventListener("change", renderListView);
-
-      // Load from local storage
       loadLessonsFromLocalStorage();
     });
 
     function addLessonToCalendar(lesson) {
       if (!lesson.date) return;
-      // Force date in the calendar events to be consistent: we store internally as YYYY-MM-DD
-      const dateString = formatDateYYYYMMDD(lesson.date);
       const eventData = {
         title: lesson.time ? lesson.time + " " + lesson.className : lesson.className,
-        start: lesson.time ? dateString + "T" + lesson.time : dateString,
+        start: lesson.time ? lesson.date + "T" + lesson.time : lesson.date,
         allDay: lesson.time ? false : true,
-        extendedProps: lesson,
-        backgroundColor: "var(--body-bg-color)",
-        borderColor: lesson.color,
-        textColor: lesson.color
+        extendedProps: lesson
       };
+      if (lesson.time) {
+        let endT = lesson.endTime;
+        if (!endT) {
+          endT = addOneHour(lesson.time);
+        }
+        eventData.end = lesson.date + "T" + endT;
+      }
       calendar.addEvent(eventData);
     }
 
@@ -592,101 +627,69 @@
       lessons.forEach(lesson => addLessonToCalendar(lesson));
     }
 
-    /**
-     * Render the lessons in the list view.
-     * We remove leading blank lines from the note, 
-     * and format the date always as YYYY-MM-DD when displayed.
-     */
     function renderListView() {
       const filterSubject = document.getElementById("filterSubject").value.trim().toLowerCase();
       const filterClass = document.getElementById("filterClass").value.trim().toLowerCase();
-      const filterLesson = document.getElementById("filterLesson").value.trim();
       const filterDate = document.getElementById("filterDate").value;
-      const filterTime = document.getElementById("filterTime").value;
       const sortField = document.getElementById("sortField").value;
-
-      let filteredLessons = lessons.filter(lesson => {
+      let filtered = lessons.filter(lesson => {
         return (
-          (filterSubject === "" ||
-            lesson.subject.toLowerCase().includes(filterSubject)) &&
-          (filterClass === "" ||
-            lesson.className.toLowerCase().includes(filterClass)) &&
-          (filterLesson === "" ||
-            lesson.lessonNumber.toString() === filterLesson) &&
-          (filterDate === "" || lesson.date === filterDate) &&
-          (filterTime === "" || lesson.time === filterTime)
+          (filterSubject === "" || lesson.subject.toLowerCase().includes(filterSubject)) &&
+          (filterClass === "" || lesson.className.toLowerCase().includes(filterClass)) &&
+          (filterDate === "" || lesson.date === filterDate)
         );
       });
-
       if (sortField) {
-        filteredLessons.sort((a, b) => {
+        filtered.sort((a, b) => {
           if (sortField === "lessonNumber") {
             return parseInt(a[sortField]) - parseInt(b[sortField]);
           }
           return a[sortField].localeCompare(b[sortField]);
         });
       }
-
       const tbody = document.getElementById("lessonTableBody");
       tbody.innerHTML = "";
-      filteredLessons.forEach(lesson => {
-        // Force date for display in list
-        const dateOut = formatDateYYYYMMDD(lesson.date);
-        // Show only the first 2 lines of the note
-        const displayNote = getLimitedText(lesson.note, 2);
-        // Up to 10 lines in the tooltip
-        const tooltipNote = getLimitedText(lesson.note, 10);
-
+      filtered.forEach(lesson => {
+        const colorSquare = `<span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};margin-right:5px;"></span>`;
+        let lines = lesson.note.split(/\r?\n/);
+        while (lines.length && lines[0].trim().length === 0) {
+          lines.shift();
+        }
+        if (lines.length) {
+          lines[0] = lines[0].replace(/^\s+/, "");
+        }
+        let noteOneLine = lines.join(" ").replace(/\s+/g, " ").trim();
+        const noteCellHTML = `<div class="one-line-ellipsis" data-bs-toggle="tooltip" data-bs-html="true" title="${getNoteTooltip(lesson.note)}">${escapeHTML(noteOneLine)}</div>`;
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>
-            <span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};margin-right:5px;"></span>
-            ${escapeHTML(lesson.subject)}
-          </td>
+          <td>${colorSquare}${escapeHTML(lesson.subject)}</td>
           <td>${escapeHTML(lesson.className)}</td>
           <td>${escapeHTML(lesson.lessonNumber)}</td>
-          <td>${escapeHTML(dateOut)}</td>
+          <td>${escapeHTML(lesson.date || "")}</td>
           <td>${escapeHTML(lesson.time || "")}</td>
-          <td>
-            <span
-              class="note-display"
-              data-bs-toggle="tooltip"
-              data-bs-html="true"
-              data-bs-placement="top"
-              data-bs-trigger="hover focus"
-              onclick="event.stopPropagation();"
-              title="${tooltipNote}"
-            >
-              ${displayNote}
-            </span>
-          </td>
+          <td>${noteCellHTML}</td>
         `;
         tr.addEventListener("click", function () {
           showLessonDetail(lesson);
         });
         tbody.appendChild(tr);
       });
-
-      // Initialize tooltips
       const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       tooltipTriggerList.forEach(function (tooltipTriggerEl) {
         new bootstrap.Tooltip(tooltipTriggerEl);
       });
     }
 
-    /********************************************************
-     * CSV EXPORT & IMPORT
-     ********************************************************/
-    async function saveCSVFile(csvContent, suggestedFileName = "lessons_backup.csv") {
+    async function saveCSVFile(csvContent, suggestedFileName = "") {
+      if (!suggestedFileName) {
+        suggestedFileName = "lessons_bkup_" + getCurrentDateFormatted() + ".csv";
+      }
       if (window.showSaveFilePicker) {
         try {
           const options = {
             suggestedName: suggestedFileName,
             types: [
-              {
-                description: "CSV Files",
-                accept: { "text/csv": [".csv"] }
-              }
+              { description: "CSV Files", accept: { "text/csv": [".csv"] } }
             ]
           };
           const handle = await window.showSaveFilePicker(options);
@@ -709,17 +712,22 @@
       }
     }
 
+    function getCurrentDateFormatted() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}${month}${day}`;
+    }
+
     function saveAsCSV() {
       if (lessons.length === 0) {
         alert("No lessons to save!");
         return;
       }
-      const header = ["Subject", "Class Name", "Lesson #", "Date", "Time", "Note", "Color"];
+      const header = ["Subject", "Class Name", "Lesson #", "Date", "Time", "End Time", "Note", "Color"];
       const lines = [];
-      // Quoted header
       lines.push(header.map(csvQuote).join(","));
-
-      // Each row
       lessons.forEach(lesson => {
         const row = [
           csvQuote(lesson.subject),
@@ -727,14 +735,14 @@
           csvQuote(lesson.lessonNumber),
           csvQuote(lesson.date),
           csvQuote(lesson.time),
+          csvQuote(lesson.endTime || ""),
           csvQuote(lesson.note),
           csvQuote(lesson.color)
         ];
         lines.push(row.join(","));
       });
-
       const csvContent = lines.join("\n");
-      saveCSVFile(csvContent, "lessons_backup.csv");
+      saveCSVFile(csvContent);
     }
 
     function importCSV(event) {
@@ -758,17 +766,16 @@
       for (let i = 1; i < lines.length; i++) {
         const rawLine = lines[i];
         const fields = parseCsvLine(rawLine);
-        if (fields.length < 7) {
-          continue;
-        }
+        if (fields.length < 8) continue;
         const lesson = {
           subject: csvFieldToText(fields[0]),
           className: csvFieldToText(fields[1]),
           lessonNumber: csvFieldToText(fields[2]),
           date: csvFieldToText(fields[3]),
           time: csvFieldToText(fields[4]),
-          note: csvFieldToText(fields[5]),
-          color: csvFieldToText(fields[6])
+          endTime: csvFieldToText(fields[5]),
+          note: csvFieldToText(fields[6]),
+          color: csvFieldToText(fields[7])
         };
         lesson.id = Date.now() + i;
         newLessons.push(lesson);
