@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <title>Snake</title>
     <style>
+        /* Prevent scrolling and disable default touch actions */
+        html,
+        body {
+            overflow: hidden;
+            touch-action: none;
+        }
+
         body {
             background-color: #121212;
             color: #e0e0e0;
@@ -87,7 +94,7 @@
 
 <body>
     <div>
-        <h1>Snake</h1>
+        <h1>Snake (beta)</h1>
         <div id="container">
             <!-- Scoreboard on the left -->
             <div id="scoreBoard">
@@ -359,23 +366,30 @@
 
         // Keyboard controls.
         document.addEventListener('keydown', function (e) {
-            const key = e.keyCode;
-            if (key === 37 && direction !== 'RIGHT') direction = 'LEFT';
-            if (key === 38 && direction !== 'DOWN') direction = 'UP';
-            if (key === 39 && direction !== 'LEFT') direction = 'RIGHT';
-            if (key === 40 && direction !== 'UP') direction = 'DOWN';
-            if (key === 13 && gameOverFlag) resetGame();
+            // Prevent arrow keys from scrolling the page.
+            if ([37, 38, 39, 40].includes(e.keyCode)) {
+                e.preventDefault();
+            }
+            if (e.keyCode === 37 && direction !== 'RIGHT') direction = 'LEFT';
+            if (e.keyCode === 38 && direction !== 'DOWN') direction = 'UP';
+            if (e.keyCode === 39 && direction !== 'LEFT') direction = 'RIGHT';
+            if (e.keyCode === 40 && direction !== 'UP') direction = 'DOWN';
+            if (e.keyCode === 13 && gameOverFlag) resetGame();
         });
 
         // Touch controls for swiping (only process touches outside the canvas).
         let touchStartX = null, touchStartY = null;
         document.addEventListener('touchstart', function (e) {
+            // Prevent default behavior to avoid scrolling.
+            e.preventDefault();
             if (e.target.id === 'gameCanvas') return; // Only accept touches outside the canvas.
             touchStartX = e.changedTouches[0].clientX;
             touchStartY = e.changedTouches[0].clientY;
         }, false);
 
         document.addEventListener('touchend', function (e) {
+            // Prevent default behavior.
+            e.preventDefault();
             if (touchStartX === null || touchStartY === null) return;
             let touchEndX = e.changedTouches[0].clientX;
             let touchEndY = e.changedTouches[0].clientY;
