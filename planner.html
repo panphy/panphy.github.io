@@ -101,7 +101,7 @@
     }
 
     .col-class {
-      width: 10ch;
+      width: 12ch;
     }
 
     .col-lesson {
@@ -316,11 +316,11 @@
                   <input type="date" class="form-control" id="dateInput">
                 </div>
                 <div class="mb-3">
-                  <label for="timeInput" class="form-label">Start Time</label>
+                  <label for="timeInput" class="form-label">Start Time (optional)</label>
                   <input type="time" class="form-control" id="timeInput">
                 </div>
                 <div class="mb-3">
-                  <label for="endTimeInput" class="form-label">End Time</label>
+                  <label for="endTimeInput" class="form-label">End Time (optional)</label>
                   <input type="time" class="form-control" id="endTimeInput">
                 </div>
               </div>
@@ -342,9 +342,10 @@
   </div>
 
   <!-- Lesson Details Modal (50% width, two sections) -->
+  <!-- The modal-content now has fixed height (600px) with extra bottom padding so the edit and delete buttons are not flush with the bottom -->
   <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered custom-modal-width">
-      <div class="modal-content">
+      <div class="modal-content" style="height:610px; padding-bottom:8px; box-sizing:border-box;">
         <div class="modal-header">
           <h5 class="modal-title" id="detailModalLabel">Lesson Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -449,26 +450,24 @@
    ********************************************************/
   function showLessonDetail(lesson) {
     currentLessonId = lesson.id;
+    const colorSquare = `<span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};margin-right:5px;"></span>`;
     const content = `
         <div class="row">
           <div class="col-md-6">
             <p><strong>Subject:</strong> ${escapeHTML(lesson.subject)}</p>
-            <p><strong>Class Name:</strong> ${escapeHTML(lesson.className)}</p>
+            <p><strong>Class Name:</strong> ${colorSquare}${escapeHTML(lesson.className)}</p>
             <p><strong>Lesson #:</strong> ${escapeHTML(lesson.lessonNumber)}</p>
           </div>
           <div class="col-md-6">
             ${lesson.date ? `<p><strong>Date:</strong> ${escapeHTML(lesson.date)}</p>` : ""}
             ${lesson.time ? `<p><strong>Start Time:</strong> ${escapeHTML(lesson.time)}</p>` : ""}
             ${lesson.endTime ? `<p><strong>End Time:</strong> ${escapeHTML(lesson.endTime)}</p>` : ""}
-            <p><strong>Class Color:</strong>
-              <span style="display:inline-block;width:15px;height:15px;background-color:${lesson.color};"></span>
-            </p>
           </div>
         </div>
         <div class="row">
           <div class="col-12">
             <p><strong>Note:</strong></p>
-            <div style="max-height:200px; overflow-y:auto; border:1px solid #ccc; padding:5px;">
+            <div style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:5px;">
               ${multilineToHtml(lesson.note)}
             </div>
           </div>
@@ -665,8 +664,8 @@
       const noteCellHTML = `<div class="one-line-ellipsis" data-bs-toggle="tooltip" data-bs-html="true" title="${getNoteTooltip(lesson.note)}">${escapeHTML(noteOneLine)}</div>`;
       const tr = document.createElement("tr");
       tr.innerHTML = `
-          <td>${colorSquare}${escapeHTML(lesson.subject)}</td>
-          <td>${escapeHTML(lesson.className)}</td>
+          <td>${escapeHTML(lesson.subject)}</td>
+          <td>${colorSquare}${escapeHTML(lesson.className)}</td>
           <td>${escapeHTML(lesson.lessonNumber)}</td>
           <td>${escapeHTML(lesson.date || "")}</td>
           <td>${escapeHTML(lesson.time || "")}</td>
@@ -713,14 +712,6 @@
       link.click();
       document.body.removeChild(link);
     }
-  }
-
-  function getCurrentDateFormatted() {
-    const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}${month}${day}`;
   }
 
   function saveAsCSV() {
