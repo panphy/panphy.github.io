@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Snake</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        /* Container holds the scoreboard and the game area */
+        #container {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        /* Scoreboard on the left */
+        #scoreBoard {
+            background-color: #1e1e1e;
+            border: 2px solid #333333;
+            padding: 10px;
+            width: 150px;
+            /* fixed width to prevent jumping */
+            margin-right: 20px;
+            box-shadow: 0 0 10px #000;
+            text-align: center;
+            /* center-align the text */
+            color: orange;
+            /* set the text color to orange */
+        }
+
+        #scoreBoard h2 {
+            margin-top: 0;
+            color: orange;
+        }
+
+        #scoreBoard ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        #scoreBoard li {
+            margin: 5px 0;
+        }
+
+        /* Game area (canvas, score, game over message) */
+        #gameArea {
+            text-align: center;
+        }
+
+        canvas {
+            background-color: #1e1e1e;
+            border: 2px solid #333333;
+            box-shadow: 0 0 10px #000;
+            display: block;
+            margin: 0 auto 20px;
+        }
+
+        #score {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #gameOver {
+            display: none;
+            font-size: 32px;
+            color: #ff5252;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1>Snake</h1>
+        <div id="container">
+            <!-- Scoreboard on the left -->
+            <div id="scoreBoard">
+                <!-- High scores will be rendered here by JavaScript -->
+            </div>
+            <!-- Game area on the right -->
+            <div id="gameArea">
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+                <div id="score">Score: 0</div>
+                <div id="gameOver">Game Over! Press Enter to Restart</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get the canvas and its context.
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const grid = 20; // Size of each grid square
+
+        // Game state variables.
+        let snake = [{ x: 160, y: 160 }]; // Initial snake position.
+        let direction = 'RIGHT';          // Initial movement direction.
+        let score = 0;
+        let gameOverFlag = false;
+        let speed = 100;                  // Game update interval (ms).
+
+        // Walls: each wall is an object with a starting x, y, a size (2 or 3 boxes),
+        // and an orientation: 'H' for horizontal or 'V' for vertical.
+        let walls = [];
+        const maxWalls = 10;              // Maximum number of walls.
+        let lastWallScore = 0;            // To ensure one wall per 5 foods eaten.
+
+        // ===== High Scores Management =====
+        function loadHighScores() {
+            const scores = localStorage.getItem('snakeHighScores');
+            return scores ? JSON.parse(scores) : [];
+        }
+
+        function saveHighScores(scores) {
+            localStorage.setItem('snakeHighScores', JSON.stringify(scores));
+        }
+
+        function updateHighScores(newScore) {
+            let scores = loadHighScores();
+            scores.push(newScore);
+            scores.sort((a, b) => b - a);
+            scores = scores.slice(0, 5);
+            saveHighScores(scores);
+        }
+
+        function renderHighScores() {
+            const scores = loadHighScores();
+            let html = '<h2>Top Scores</h2><ul>';
+            scores.forEach(s => {
+                html += `<li>${s}</li>`;
+            });
+            html += '</ul>';
+            document.getElementById('scoreBoard').innerHTML = html;
+        }
+
+        // Render the scoreboard initially.
+        renderHighScores();
+
+        // ===== Wall Functions =====
+
+        // Given a wall object, return an array of all its grid segments.
+        function getWallSegments(wall) {
+            let segments = [];
+            for (let i = 0; i < wall.size; i++) {
+                if (wall.orientation === 'H') {
+                    segments.push({ x: wall.x + i * grid, y: wall.y });
+                } else { // 'V'
+                    segments.push({ x: wall.x, y: wall.y + i * grid });
+                }
+            }
+            return segments;
+        }
+
+        // ===== Food Functions =====
+
+        // Generate a random food position that is not on the snake or on any wall.
+        function getRandomFood() {
+            let newFood;
+            let valid = false;
+            let attempts = 0;
+            while (!valid && attempts < 100) {
+                attempts++;
+                newFood = {
+                    x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
+                    y: Math.floor(Math.random() * (canvas.height / grid)) * grid
+                };
+                const collisionWithSnake = snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
+                // Check collision with walls.
+                let collisionWithWall = false;
+                for (let i = 0; i < walls.length; i++) {
+                    const segments = getWallSegments(walls[i]);
+                    if (segments.some(seg => seg.x === newFood.x && seg.y === newFood.y)) {
+                        collisionWithWall = true;
+                        break;
+                    }
+                }
+                if (!collisionWithSnake && !collisionWithWall) {
+                    valid = true;
+                }
+            }
+            return newFood;
+        }
+
+        let food = getRandomFood();
+
+        // ===== Add a New Wall =====
+        // Every 5 food items eaten, add a wall (if not reached maxWalls)
+        // The wall is randomly 2 or 3 boxes long and randomly horizontal or vertical.
+        // All segments of the wall must be at least 3 grid steps (Manhattan distance) from the snake's head.
+        function addWall() {
+            const snakeHead = snake[0];
+            let valid = false;
+            let wall;
+            let attempts = 0;
+            while (!valid && attempts < 100) {
+                attempts++;
+                const orientation = Math.random() < 0.5 ? 'H' : 'V';
+                const size = Math.random() < 0.5 ? 2 : 3;
+                const maxCols = canvas.width / grid;
+                const maxRows = canvas.height / grid;
+                let startX, startY;
+                if (orientation === 'H') {
+                    startX = Math.floor(Math.random() * (maxCols - size + 1)) * grid;
+                    startY = Math.floor(Math.random() * maxRows) * grid;
+                } else {
+                    startX = Math.floor(Math.random() * maxCols) * grid;
+                    startY = Math.floor(Math.random() * (maxRows - size + 1)) * grid;
+                }
+                wall = { x: startX, y: startY, size: size, orientation: orientation };
+                const segments = getWallSegments(wall);
+
+                // Ensure every wall segment is at least 3 grid steps away from the snake's head.
+                let tooClose = segments.some(seg => {
+                    const dx = Math.abs((seg.x - snakeHead.x) / grid);
+                    const dy = Math.abs((seg.y - snakeHead.y) / grid);
+                    return (dx + dy) < 3;
+                });
+                if (tooClose) continue;
+
+                // Ensure wall segments do not overlap with the snake.
+                if (segments.some(seg => snake.some(s => s.x === seg.x && s.y === seg.y))) continue;
+                // Ensure wall segments do not overlap with the food.
+                if (segments.some(seg => seg.x === food.x && seg.y === food.y)) continue;
+                // Ensure the new wall does not overlap with existing walls.
+                let collisionWithExistingWall = false;
+                for (let i = 0; i < walls.length; i++) {
+                    const existingSegments = getWallSegments(walls[i]);
+                    if (segments.some(seg => existingSegments.some(es => es.x === seg.x && es.y === seg.y))) {
+                        collisionWithExistingWall = true;
+                        break;
+                    }
+                }
+                if (collisionWithExistingWall) continue;
+
+                valid = true;
+            }
+            if (valid) {
+                walls.push(wall);
+            }
+        }
+
+        // ===== Drawing Function =====
+        function draw() {
+            // Clear the canvas.
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the food.
+            ctx.fillStyle = '#ff4081';
+            ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
+
+            // Draw the walls.
+            ctx.fillStyle = '#616161';
+            walls.forEach(wall => {
+                const segments = getWallSegments(wall);
+                segments.forEach(seg => {
+                    ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1);
+                });
+            });
+
+            // Draw the snake.
+            ctx.fillStyle = '#4caf50';
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
+            });
+
+            // Update the score display.
+            document.getElementById('score').innerText = 'Score: ' + score;
+        }
+
+        // ===== Update Game State =====
+        function update() {
+            // Create a new head based on the current direction.
+            const head = { ...snake[0] };
+            switch (direction) {
+                case 'LEFT': head.x -= grid; break;
+                case 'UP': head.y -= grid; break;
+                case 'RIGHT': head.x += grid; break;
+                case 'DOWN': head.y += grid; break;
+            }
+
+            // Wrap around the canvas edges.
+            if (head.x < 0) head.x = canvas.width - grid;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = canvas.height - grid;
+            if (head.y >= canvas.height) head.y = 0;
+
+            // Check collision with the snake's own body.
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                endGame();
+                return;
+            }
+
+            // Check collision with any wall.
+            for (let i = 0; i < walls.length; i++) {
+                const segments = getWallSegments(walls[i]);
+                if (segments.some(seg => seg.x === head.x && seg.y === head.y)) {
+                    endGame();
+                    return;
+                }
+            }
+
+            // Add the new head to the snake.
+            snake.unshift(head);
+
+            // If food is eaten, update score and generate new food.
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+
+                // Every 5 food items (and if we haven’t reached max walls) add a new wall.
+                if (score % 5 === 0 && walls.length < maxWalls && score !== lastWallScore) {
+                    addWall();
+                    lastWallScore = score;
+                }
+                food = getRandomFood();
+            } else {
+                // Remove the tail segment if no food is eaten.
+                snake.pop();
+            }
+        }
+
+        // ===== Game Over and Reset =====
+        function endGame() {
+            gameOverFlag = true;
+            document.getElementById('gameOver').style.display = 'block';
+            updateHighScores(score);
+            renderHighScores();
+        }
+
+        function resetGame() {
+            snake = [{ x: 160, y: 160 }];
+            direction = 'RIGHT';
+            food = getRandomFood();
+            score = 0;
+            gameOverFlag = false;
+            walls = [];
+            lastWallScore = 0;
+            document.getElementById('gameOver').style.display = 'none';
+            loop();
+        }
+
+        // ===== Controls =====
+
+        // Keyboard controls.
+        document.addEventListener('keydown', function (e) {
+            const key = e.keyCode;
+            if (key === 37 && direction !== 'RIGHT') direction = 'LEFT';
+            if (key === 38 && direction !== 'DOWN') direction = 'UP';
+            if (key === 39 && direction !== 'LEFT') direction = 'RIGHT';
+            if (key === 40 && direction !== 'UP') direction = 'DOWN';
+            if (key === 13 && gameOverFlag) resetGame();
+        });
+
+        // Touch controls for swiping (only process touches outside the canvas).
+        let touchStartX = null, touchStartY = null;
+        document.addEventListener('touchstart', function (e) {
+            if (e.target.id === 'gameCanvas') return; // Only accept touches outside the canvas.
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
+        }, false);
+
+        document.addEventListener('touchend', function (e) {
+            if (touchStartX === null || touchStartY === null) return;
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            let dx = touchEndX - touchStartX;
+            let dy = touchEndY - touchStartY;
+            // Require a minimum swipe distance (e.g. 30 pixels).
+            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
+                touchStartX = touchStartY = null;
+                return;
+            }
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Horizontal swipe.
+                if (dx > 0 && direction !== 'LEFT') {
+                    direction = 'RIGHT';
+                } else if (dx < 0 && direction !== 'RIGHT') {
+                    direction = 'LEFT';
+                }
+            } else {
+                // Vertical swipe.
+                if (dy > 0 && direction !== 'UP') {
+                    direction = 'DOWN';
+                } else if (dy < 0 && direction !== 'DOWN') {
+                    direction = 'UP';
+                }
+            }
+            touchStartX = touchStartY = null;
+        }, false);
+
+        // ===== Main Game Loop =====
+        function loop() {
+            if (gameOverFlag) return;
+            update();
+            draw();
+            setTimeout(loop, speed);
+        }
+
+        // Start the game.
+        loop();
+    </script>
+</body>
+
+</html>
