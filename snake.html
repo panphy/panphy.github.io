@@ -18,39 +18,42 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
+            text-align: center;
         }
 
         h1 {
-            text-align: center;
             color: #ffffff;
             margin-bottom: 20px;
         }
 
-        /* Container holds the scoreboard and the game area */
-        #container {
-            display: flex;
-            align-items: flex-start;
+        /* Main container holds both scoreboard and game area */
+        #mainContainer {
+            display: inline-block;
+            text-align: left;
         }
 
-        /* Scoreboard on the left */
+        /* Scoreboard container with fixed width */
+        #scoreboardContainer {
+            display: inline-block;
+            vertical-align: top;
+            width: 170px;
+            /* fixed outer width to include padding and border */
+            margin-right: 20px;
+        }
+
+        /* Scoreboard styles */
         #scoreBoard {
             background-color: #1e1e1e;
             border: 2px solid #333333;
             padding: 10px;
             width: 150px;
-            /* fixed width */
-            min-width: 150px;
-            /* ensure it never shrinks */
+            /* fixed width for content */
             box-sizing: border-box;
-            /* include padding and border in width */
-            margin-right: 20px;
             box-shadow: 0 0 10px #000;
             text-align: center;
-            /* center-align the text */
             color: orange;
-            /* set the text color to orange */
+            min-height: 150px;
+            /* reserve space for 5 list items */
         }
 
         #scoreBoard h2 {
@@ -69,9 +72,12 @@
             margin: 5px 0;
         }
 
-        /* Game area (canvas, score, game over message) */
-        #gameArea {
-            text-align: center;
+        /* Game container */
+        #gameContainer {
+            display: inline-block;
+            vertical-align: top;
+            position: relative;
+            /* so that absolute children are positioned relative to this */
         }
 
         canvas {
@@ -79,42 +85,53 @@
             border: 2px solid #333333;
             box-shadow: 0 0 10px #000;
             display: block;
-            margin: 0 auto 20px;
+            margin-bottom: 20px;
         }
 
         #score {
             font-size: 24px;
             margin-bottom: 20px;
+            text-align: center;
         }
 
+        /* Game over message is absolutely positioned so it doesn't affect layout */
         #gameOver {
             display: none;
-            font-size: 32px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 22px;
             color: #ff5252;
-            margin-top: 20px;
+            text-align: center;
+            margin: 0;
+            z-index: 1;
+            background-color: rgba(18, 18, 18, 0.8);
+            padding: 10px;
+            border-radius: 8px;
         }
     </style>
 </head>
 
 <body>
-    <div>
-        <h1>Snake (beta)</h1>
-        <div id="container">
-            <!-- Scoreboard on the left -->
+    <h1>Snake (beta)</h1>
+    <div id="mainContainer">
+        <!-- Scoreboard Container -->
+        <div id="scoreboardContainer">
             <div id="scoreBoard">
                 <!-- High scores will be rendered here by JavaScript -->
             </div>
-            <!-- Game area on the right -->
-            <div id="gameArea">
-                <canvas id="gameCanvas" width="400" height="400"></canvas>
-                <div id="score">Score: 0</div>
-                <div id="gameOver">Game Over! Press Enter to Restart</div>
-            </div>
+        </div>
+        <!-- Game Container -->
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div id="score">Score: 0</div>
+            <div id="gameOver">Game Over! Press Enter to Restart</div>
         </div>
     </div>
 
     <script>
-        // Get the canvas and its context.
+        // Get canvas and context.
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const grid = 20; // Size of each grid square
@@ -129,8 +146,8 @@
         // Walls: each wall is an object with a starting x, y, a size (2 or 3 boxes),
         // and an orientation: 'H' for horizontal or 'V' for vertical.
         let walls = [];
-        const maxWalls = 10;              // Maximum number of walls.
-        let lastWallScore = 0;            // To ensure one wall per 5 foods eaten.
+        const maxWalls = 10;
+        let lastWallScore = 0;
 
         // ===== High Scores Management =====
         function loadHighScores() {
@@ -150,15 +167,16 @@
             saveHighScores(scores);
         }
 
+        // Always render exactly 5 list items for a consistent scoreboard layout.
         function renderHighScores() {
             const scores = loadHighScores();
-            let html = '<h2>Top Scores</h2><ul>';
-            if (scores.length === 0) {
-                html += '<li>No scores yet</li>';
-            } else {
-                scores.forEach(s => {
-                    html += `<li>${s}</li>`;
-                });
+            let html = '<h3>Top Scores</h3><ul>';
+            for (let i = 0; i < 5; i++) {
+                if (i < scores.length) {
+                    html += `<li>${scores[i]}</li>`;
+                } else {
+                    html += `<li>&nbsp;</li>`;
+                }
             }
             html += '</ul>';
             document.getElementById('scoreBoard').innerHTML = html;
@@ -168,8 +186,6 @@
         renderHighScores();
 
         // ===== Wall Functions =====
-
-        // Given a wall object, return an array of all its grid segments.
         function getWallSegments(wall) {
             let segments = [];
             for (let i = 0; i < wall.size; i++) {
@@ -183,8 +199,6 @@
         }
 
         // ===== Food Functions =====
-
-        // Generate a random food position that is not on the snake or on any wall.
         function getRandomFood() {
             let newFood;
             let valid = false;
@@ -196,7 +210,6 @@
                     y: Math.floor(Math.random() * (canvas.height / grid)) * grid
                 };
                 const collisionWithSnake = snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
-                // Check collision with walls.
                 let collisionWithWall = false;
                 for (let i = 0; i < walls.length; i++) {
                     const segments = getWallSegments(walls[i]);
@@ -215,9 +228,6 @@
         let food = getRandomFood();
 
         // ===== Add a New Wall =====
-        // Every 5 food items eaten, add a wall (if not reached maxWalls)
-        // The wall is randomly 2 or 3 boxes long and randomly horizontal or vertical.
-        // All segments of the wall must be at least 3 grid steps (Manhattan distance) from the snake's head.
         function addWall() {
             const snakeHead = snake[0];
             let valid = false;
@@ -239,20 +249,14 @@
                 }
                 wall = { x: startX, y: startY, size: size, orientation: orientation };
                 const segments = getWallSegments(wall);
-
-                // Ensure every wall segment is at least 3 grid steps away from the snake's head.
                 let tooClose = segments.some(seg => {
                     const dx = Math.abs((seg.x - snakeHead.x) / grid);
                     const dy = Math.abs((seg.y - snakeHead.y) / grid);
                     return (dx + dy) < 3;
                 });
                 if (tooClose) continue;
-
-                // Ensure wall segments do not overlap with the snake.
                 if (segments.some(seg => snake.some(s => s.x === seg.x && s.y === seg.y))) continue;
-                // Ensure wall segments do not overlap with the food.
                 if (segments.some(seg => seg.x === food.x && seg.y === food.y)) continue;
-                // Ensure the new wall does not overlap with existing walls.
                 let collisionWithExistingWall = false;
                 for (let i = 0; i < walls.length; i++) {
                     const existingSegments = getWallSegments(walls[i]);
@@ -262,7 +266,6 @@
                     }
                 }
                 if (collisionWithExistingWall) continue;
-
                 valid = true;
             }
             if (valid) {
@@ -272,15 +275,10 @@
 
         // ===== Drawing Function =====
         function draw() {
-            // Clear the canvas.
             ctx.fillStyle = '#1e1e1e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the food.
             ctx.fillStyle = '#ff4081';
             ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
-
-            // Draw the walls.
             ctx.fillStyle = '#616161';
             walls.forEach(wall => {
                 const segments = getWallSegments(wall);
@@ -288,20 +286,15 @@
                     ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1);
                 });
             });
-
-            // Draw the snake.
             ctx.fillStyle = '#4caf50';
             snake.forEach(segment => {
                 ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
             });
-
-            // Update the score display.
             document.getElementById('score').innerText = 'Score: ' + score;
         }
 
         // ===== Update Game State =====
         function update() {
-            // Create a new head based on the current direction.
             const head = { ...snake[0] };
             switch (direction) {
                 case 'LEFT': head.x -= grid; break;
@@ -309,20 +302,14 @@
                 case 'RIGHT': head.x += grid; break;
                 case 'DOWN': head.y += grid; break;
             }
-
-            // Wrap around the canvas edges.
             if (head.x < 0) head.x = canvas.width - grid;
             if (head.x >= canvas.width) head.x = 0;
             if (head.y < 0) head.y = canvas.height - grid;
             if (head.y >= canvas.height) head.y = 0;
-
-            // Check collision with the snake's own body.
             if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
                 endGame();
                 return;
             }
-
-            // Check collision with any wall.
             for (let i = 0; i < walls.length; i++) {
                 const segments = getWallSegments(walls[i]);
                 if (segments.some(seg => seg.x === head.x && seg.y === head.y)) {
@@ -330,22 +317,15 @@
                     return;
                 }
             }
-
-            // Add the new head to the snake.
             snake.unshift(head);
-
-            // If food is eaten, update score and generate new food.
             if (head.x === food.x && head.y === food.y) {
                 score++;
-
-                // Every 5 food items (and if we haven’t reached max walls) add a new wall.
                 if (score % 5 === 0 && walls.length < maxWalls && score !== lastWallScore) {
                     addWall();
                     lastWallScore = score;
                 }
                 food = getRandomFood();
             } else {
-                // Remove the tail segment if no food is eaten.
                 snake.pop();
             }
         }
@@ -371,10 +351,7 @@
         }
 
         // ===== Controls =====
-
-        // Keyboard controls.
         document.addEventListener('keydown', function (e) {
-            // Prevent arrow keys from scrolling the page.
             if ([37, 38, 39, 40].includes(e.keyCode)) {
                 e.preventDefault();
             }
@@ -385,38 +362,32 @@
             if (e.keyCode === 13 && gameOverFlag) resetGame();
         });
 
-        // Touch controls for swiping (only process touches outside the canvas).
         let touchStartX = null, touchStartY = null;
         document.addEventListener('touchstart', function (e) {
-            // Prevent default behavior to avoid scrolling.
             e.preventDefault();
-            if (e.target.id === 'gameCanvas') return; // Only accept touches outside the canvas.
+            if (e.target.id === 'gameCanvas') return;
             touchStartX = e.changedTouches[0].clientX;
             touchStartY = e.changedTouches[0].clientY;
         }, false);
 
         document.addEventListener('touchend', function (e) {
-            // Prevent default behavior.
             e.preventDefault();
             if (touchStartX === null || touchStartY === null) return;
             let touchEndX = e.changedTouches[0].clientX;
             let touchEndY = e.changedTouches[0].clientY;
             let dx = touchEndX - touchStartX;
             let dy = touchEndY - touchStartY;
-            // Require a minimum swipe distance (e.g. 30 pixels).
             if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
                 touchStartX = touchStartY = null;
                 return;
             }
             if (Math.abs(dx) > Math.abs(dy)) {
-                // Horizontal swipe.
                 if (dx > 0 && direction !== 'LEFT') {
                     direction = 'RIGHT';
                 } else if (dx < 0 && direction !== 'RIGHT') {
                     direction = 'LEFT';
                 }
             } else {
-                // Vertical swipe.
                 if (dy > 0 && direction !== 'UP') {
                     direction = 'DOWN';
                 } else if (dy < 0 && direction !== 'DOWN') {
@@ -433,8 +404,6 @@
             draw();
             setTimeout(loop, speed);
         }
-
-        // Start the game.
         loop();
     </script>
 </body>
