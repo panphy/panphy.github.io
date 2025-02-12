@@ -213,9 +213,10 @@
       // resetGame(); // Uncomment if you want to reset on resize
     }
 
-    // Initial resize
+    // Initial resize and render top scores from local storage
     window.addEventListener('load', () => {
       resizeCanvas();
+      renderTopScores();
       if (assetsLoaded === 3) {
         resetGame();
       }
@@ -253,7 +254,8 @@
     let player;
     let keys = {};
     let animationId;
-    let topScores = [];
+    // Use localStorage for top scores with a game-specific key
+    let topScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
 
     // Asteroid spawn & speed parameters
     let MIN_ASTEROID_SPEED = 2;
@@ -565,7 +567,11 @@
       topScores.push(newScore);
       topScores.sort((a, b) => b - a);
       topScores = topScores.slice(0, 5);
+      localStorage.setItem("dodgeTheAsteroids_topScores", JSON.stringify(topScores));
+      renderTopScores();
+    }
 
+    function renderTopScores() {
       const scoreList = document.getElementById('scoreList');
       scoreList.innerHTML = '';
       topScores.forEach((sc) => {
