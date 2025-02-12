@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tetris</title>
   <link rel="icon" type="image/png" href="/favicon.png">
-
   <style>
     html,
     body {
@@ -427,15 +426,26 @@
       return false;
     }
 
+    // Modified function: store top scores locally using a game-specific key
     function addScoreToTopScores(score) {
       topScores.push(score);
       topScores.sort((a, b) => b - a);
       topScores = topScores.slice(0, 5);
+      localStorage.setItem('tetris_top_scores', JSON.stringify(topScores));
       updateTopScores();
     }
 
     function updateTopScores() {
       topScoresElement.innerHTML = topScores.map(s => `${s} lines cleared`).join('<br>');
+    }
+
+    // New function to load top scores from localStorage on startup
+    function loadTopScores() {
+      const storedScores = localStorage.getItem('tetris_top_scores');
+      if (storedScores) {
+        topScores = JSON.parse(storedScores);
+        updateTopScores();
+      }
     }
 
     function showGameOver() {
@@ -583,6 +593,7 @@
 
     window.addEventListener('resize', adjustCanvasSize);
     adjustCanvasSize();
+    loadTopScores();  // Load stored top scores on startup
     resetPiece();
     update();
   </script>
