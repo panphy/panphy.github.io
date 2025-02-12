@@ -126,7 +126,7 @@
         <div id="gameContainer">
             <canvas id="gameCanvas" width="400" height="400"></canvas>
             <div id="score">Score: 0</div>
-            <div id="gameOver">Game Over! Press Enter to Restart</div>
+            <div id="gameOver">Game Over! Press Enter or Tap to Restart</div>
         </div>
     </div>
 
@@ -362,6 +362,13 @@
             if (e.keyCode === 13 && gameOverFlag) resetGame();
         });
 
+        // Global click listener to restart the game when it's over.
+        document.addEventListener('click', function (e) {
+            if (gameOverFlag) {
+                resetGame();
+            }
+        });
+
         let touchStartX = null, touchStartY = null;
         document.addEventListener('touchstart', function (e) {
             e.preventDefault();
@@ -372,6 +379,11 @@
 
         document.addEventListener('touchend', function (e) {
             e.preventDefault();
+            // If the game is over, a tap (touchend) will restart the game.
+            if (gameOverFlag) {
+                resetGame();
+                return;
+            }
             if (touchStartX === null || touchStartY === null) return;
             let touchEndX = e.changedTouches[0].clientX;
             let touchEndY = e.changedTouches[0].clientY;
