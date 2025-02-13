@@ -3,19 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <!-- Added viewport meta tag for proper scaling on mobile -->
+    <!-- Viewport tag ensures proper scaling on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
-        /* Prevent scrolling and disable default touch actions */
+        /* Removed touch-action: none from html and body */
         html,
         body {
             overflow: hidden;
-            touch-action: none;
-            /* Tile the background image */
             background-image: url('snake_bkgrd.jpg');
-            /* Image downloaded from https://img.freepik.com/free-photo/abstract-bright-green-square-pixel-tile-mosaic-wall-background-texture_1258-72160.jpg */
             background-repeat: repeat;
             background-size: 700px 700px;
         }
@@ -28,16 +25,14 @@
             text-align: center;
         }
 
-        /* This overlay will sit above the tiled background to dim it.
-           Adjust the background-color’s alpha value to change the dim level. */
+        /* Dim the tiled background */
         #bgOverlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
-            /* Change 0.55 to desired opacity */
+            background-color: rgba(0, 0, 0, 0.6);
             pointer-events: none;
             z-index: 1;
         }
@@ -53,16 +48,15 @@
             color: #ffffff;
         }
 
-        /* Main container holds both the scoreboard and game area */
+        /* Container for scoreboard and game area */
         #mainContainer {
             display: inline-block;
             text-align: left;
             position: relative;
             z-index: 2;
-            /* Place above the overlay */
         }
 
-        /* Scoreboard container with fixed width */
+        /* Scoreboard container */
         #scoreboardContainer {
             display: inline-block;
             vertical-align: top;
@@ -108,12 +102,13 @@
         }
 
         canvas {
-            /* The canvas has its own dark background */
+            /* The canvas has its own dark background and disabled touch actions */
             background-color: #1e1e1e;
-            border: 0px;
+            border: 0;
             box-shadow: 0 0 10px #000;
             display: block;
             margin-bottom: 20px;
+            touch-action: none;
         }
 
         #score {
@@ -140,24 +135,20 @@
             border-radius: 8px;
         }
 
-        /* Footer */
+        /* Footer styling */
         footer {
             position: fixed;
-            /* Changed to fixed positioning */
             bottom: 0;
-            /* Pin to the bottom */
             left: 0;
             right: 0;
             width: 100%;
-            /* Full width */
             font-size: 15px;
             font-weight: bold;
             text-align: center;
-            padding: 15px;
+            padding: 12px;
             background: #222;
             margin: 0;
             z-index: 3;
-            touch-action: auto;
         }
 
         footer a {
@@ -176,326 +167,313 @@
 </head>
 
 <body>
-    <!-- The overlay div sits over the tiled background to enable dimming -->
+    <!-- Overlay for background dimming -->
     <div id="bgOverlay"></div>
 
     <h1>Snake</h1>
     <div id="mainContainer">
-        <!-- Scoreboard Container -->
+        <!-- Scoreboard -->
         <div id="scoreboardContainer">
             <div id="scoreBoard">
-                <!-- High scores will be rendered here by JavaScript -->
+                <!-- High scores will be rendered here -->
             </div>
         </div>
-        <!-- Game Container -->
+        <!-- Game area -->
         <div id="gameContainer">
             <canvas id="gameCanvas" width="400" height="400"></canvas>
             <div id="score">Score: 0</div>
-            <div id="gameOver"><strong>Game Over!</strong> <br><br> Press Enter or Tap to Restart</div>
+            <div id="gameOver"><strong>Game Over!</strong><br><br>Press Enter or Tap to Restart</div>
         </div>
     </div>
     <footer>
         &copy; 2025 <a href="https://panphy.github.io/">PanPhy</a> | <a href="https://buymeacoffee.com/panphy">Support
             My Projects</a>
     </footer>
-</body>
 
-<script>
-    // Get canvas and context.
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const grid = 20; // Size of each grid square
+    <script>
+        // Get canvas and context.
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const grid = 20; // Size of each grid square
 
-    // Game state variables.
-    let snake = [{ x: 160, y: 160 }]; // Initial snake position.
-    let direction = 'RIGHT';          // Initial movement direction.
-    let score = 0;
-    let gameOverFlag = false;
-    let speed = 100;                  // Game update interval (ms).
+        // Game state variables.
+        let snake = [{ x: 160, y: 160 }];
+        let direction = 'RIGHT';
+        let score = 0;
+        let gameOverFlag = false;
+        let speed = 100;
+        let walls = [];
+        const maxWalls = 10;
+        let lastWallScore = 0;
 
-    // Walls: each wall is an object with a starting x, y, a size (2 or 3 boxes),
-    // and an orientation: 'H' for horizontal or 'V' for vertical.
-    let walls = [];
-    const maxWalls = 10;
-    let lastWallScore = 0;
-
-    // ===== High Scores Management =====
-    function loadHighScores() {
-        const scores = localStorage.getItem('snakeHighScores');
-        return scores ? JSON.parse(scores) : [];
-    }
-
-    function saveHighScores(scores) {
-        localStorage.setItem('snakeHighScores', JSON.stringify(scores));
-    }
-
-    function updateHighScores(newScore) {
-        let scores = loadHighScores();
-        scores.push(newScore);
-        scores.sort((a, b) => b - a);
-        scores = scores.slice(0, 5);
-        saveHighScores(scores);
-    }
-
-    // Always render exactly 5 list items for a consistent scoreboard layout.
-    function renderHighScores() {
-        const scores = loadHighScores();
-        let html = '<h3>Top Scores</h3><ul>';
-        for (let i = 0; i < 5; i++) {
-            if (i < scores.length) {
-                html += `<li>${scores[i]}</li>`;
-            } else {
-                html += `<li>&nbsp;</li>`;
-            }
+        // ===== High Scores Management =====
+        function loadHighScores() {
+            const scores = localStorage.getItem('snakeHighScores');
+            return scores ? JSON.parse(scores) : [];
         }
-        html += '</ul>';
-        document.getElementById('scoreBoard').innerHTML = html;
-    }
 
-    // Render the scoreboard initially.
-    renderHighScores();
-
-    // ===== Wall Functions =====
-    function getWallSegments(wall) {
-        let segments = [];
-        for (let i = 0; i < wall.size; i++) {
-            if (wall.orientation === 'H') {
-                segments.push({ x: wall.x + i * grid, y: wall.y });
-            } else { // 'V'
-                segments.push({ x: wall.x, y: wall.y + i * grid });
-            }
+        function saveHighScores(scores) {
+            localStorage.setItem('snakeHighScores', JSON.stringify(scores));
         }
-        return segments;
-    }
 
-    // ===== Food Functions =====
-    function getRandomFood() {
-        let newFood;
-        let valid = false;
-        let attempts = 0;
-        while (!valid && attempts < 100) {
-            attempts++;
-            newFood = {
-                x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
-                y: Math.floor(Math.random() * (canvas.height / grid)) * grid
-            };
-            const collisionWithSnake = snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
-            let collisionWithWall = false;
-            for (let i = 0; i < walls.length; i++) {
-                const segments = getWallSegments(walls[i]);
-                if (segments.some(seg => seg.x === newFood.x && seg.y === newFood.y)) {
-                    collisionWithWall = true;
-                    break;
+        function updateHighScores(newScore) {
+            let scores = loadHighScores();
+            scores.push(newScore);
+            scores.sort((a, b) => b - a);
+            scores = scores.slice(0, 5);
+            saveHighScores(scores);
+        }
+
+        function renderHighScores() {
+            const scores = loadHighScores();
+            let html = '<h3>Top Scores</h3><ul>';
+            for (let i = 0; i < 5; i++) {
+                html += i < scores.length ? `<li>${scores[i]}</li>` : `<li>&nbsp;</li>`;
+            }
+            html += '</ul>';
+            document.getElementById('scoreBoard').innerHTML = html;
+        }
+
+        // Render initial high scores.
+        renderHighScores();
+
+        // ===== Wall Functions =====
+        function getWallSegments(wall) {
+            let segments = [];
+            for (let i = 0; i < wall.size; i++) {
+                segments.push(wall.orientation === 'H' ?
+                    { x: wall.x + i * grid, y: wall.y } :
+                    { x: wall.x, y: wall.y + i * grid }
+                );
+            }
+            return segments;
+        }
+
+        // ===== Food Functions =====
+        function getRandomFood() {
+            let newFood;
+            let valid = false;
+            let attempts = 0;
+            while (!valid && attempts < 100) {
+                attempts++;
+                newFood = {
+                    x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
+                    y: Math.floor(Math.random() * (canvas.height / grid)) * grid
+                };
+                const collisionWithSnake = snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
+                let collisionWithWall = false;
+                for (let i = 0; i < walls.length; i++) {
+                    const segments = getWallSegments(walls[i]);
+                    if (segments.some(seg => seg.x === newFood.x && seg.y === newFood.y)) {
+                        collisionWithWall = true;
+                        break;
+                    }
+                }
+                if (!collisionWithSnake && !collisionWithWall) {
+                    valid = true;
                 }
             }
-            if (!collisionWithSnake && !collisionWithWall) {
+            return newFood;
+        }
+
+        let food = getRandomFood();
+
+        // ===== Add a New Wall =====
+        function addWall() {
+            const snakeHead = snake[0];
+            let valid = false;
+            let wall;
+            let attempts = 0;
+            while (!valid && attempts < 100) {
+                attempts++;
+                const orientation = Math.random() < 0.5 ? 'H' : 'V';
+                const size = Math.random() < 0.5 ? 2 : 3;
+                const maxCols = canvas.width / grid;
+                const maxRows = canvas.height / grid;
+                let startX, startY;
+                if (orientation === 'H') {
+                    startX = Math.floor(Math.random() * (maxCols - size + 1)) * grid;
+                    startY = Math.floor(Math.random() * maxRows) * grid;
+                } else {
+                    startX = Math.floor(Math.random() * maxCols) * grid;
+                    startY = Math.floor(Math.random() * (maxRows - size + 1)) * grid;
+                }
+                wall = { x: startX, y: startY, size: size, orientation: orientation };
+                const segments = getWallSegments(wall);
+                let tooClose = segments.some(seg => {
+                    const dx = Math.abs((seg.x - snakeHead.x) / grid);
+                    const dy = Math.abs((seg.y - snakeHead.y) / grid);
+                    return (dx + dy) < 3;
+                });
+                if (tooClose) continue;
+                if (segments.some(seg => snake.some(s => s.x === seg.x && s.y === seg.y))) continue;
+                if (segments.some(seg => seg.x === food.x && seg.y === food.y)) continue;
+                let collisionWithExistingWall = false;
+                for (let i = 0; i < walls.length; i++) {
+                    const existingSegments = getWallSegments(walls[i]);
+                    if (segments.some(seg => existingSegments.some(es => es.x === seg.x && es.y === seg.y))) {
+                        collisionWithExistingWall = true;
+                        break;
+                    }
+                }
+                if (collisionWithExistingWall) continue;
                 valid = true;
             }
-        }
-        return newFood;
-    }
-
-    let food = getRandomFood();
-
-    // ===== Add a New Wall =====
-    function addWall() {
-        const snakeHead = snake[0];
-        let valid = false;
-        let wall;
-        let attempts = 0;
-        while (!valid && attempts < 100) {
-            attempts++;
-            const orientation = Math.random() < 0.5 ? 'H' : 'V';
-            const size = Math.random() < 0.5 ? 2 : 3;
-            const maxCols = canvas.width / grid;
-            const maxRows = canvas.height / grid;
-            let startX, startY;
-            if (orientation === 'H') {
-                startX = Math.floor(Math.random() * (maxCols - size + 1)) * grid;
-                startY = Math.floor(Math.random() * maxRows) * grid;
-            } else {
-                startX = Math.floor(Math.random() * maxCols) * grid;
-                startY = Math.floor(Math.random() * (maxRows - size + 1)) * grid;
+            if (valid) {
+                walls.push(wall);
             }
-            wall = { x: startX, y: startY, size: size, orientation: orientation };
-            const segments = getWallSegments(wall);
-            let tooClose = segments.some(seg => {
-                const dx = Math.abs((seg.x - snakeHead.x) / grid);
-                const dy = Math.abs((seg.y - snakeHead.y) / grid);
-                return (dx + dy) < 3;
+        }
+
+        // ===== Drawing Function =====
+        function draw() {
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#ff4081';
+            ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
+
+            ctx.fillStyle = '#d0d0d0';
+            walls.forEach(wall => {
+                const segments = getWallSegments(wall);
+                segments.forEach(seg => {
+                    ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1);
+                });
             });
-            if (tooClose) continue;
-            if (segments.some(seg => snake.some(s => s.x === seg.x && s.y === seg.y))) continue;
-            if (segments.some(seg => seg.x === food.x && seg.y === food.y)) continue;
-            let collisionWithExistingWall = false;
-            for (let i = 0; i < walls.length; i++) {
-                const existingSegments = getWallSegments(walls[i]);
-                if (segments.some(seg => existingSegments.some(es => es.x === seg.x && es.y === seg.y))) {
-                    collisionWithExistingWall = true;
-                    break;
-                }
+
+            ctx.fillStyle = '#20c997';
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
+            });
+
+            document.getElementById('score').innerText = 'Score: ' + score;
+        }
+
+        // ===== Update Game State =====
+        function update() {
+            const head = { ...snake[0] };
+            switch (direction) {
+                case 'LEFT': head.x -= grid; break;
+                case 'UP': head.y -= grid; break;
+                case 'RIGHT': head.x += grid; break;
+                case 'DOWN': head.y += grid; break;
             }
-            if (collisionWithExistingWall) continue;
-            valid = true;
-        }
-        if (valid) {
-            walls.push(wall);
-        }
-    }
-
-    // ===== Drawing Function =====
-    function draw() {
-        // Draw a dark background for the canvas.
-        ctx.fillStyle = '#1e1e1e';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the food.
-        ctx.fillStyle = '#ff4081';
-        ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
-
-        // Draw the walls.
-        ctx.fillStyle = '#d0d0d0';
-        walls.forEach(wall => {
-            const segments = getWallSegments(wall);
-            segments.forEach(seg => {
-                ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1);
-            });
-        });
-
-        // Draw the snake.
-        ctx.fillStyle = '#20c997';
-        snake.forEach(segment => {
-            ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
-        });
-
-        document.getElementById('score').innerText = 'Score: ' + score;
-    }
-
-    // ===== Update Game State =====
-    function update() {
-        const head = { ...snake[0] };
-        switch (direction) {
-            case 'LEFT': head.x -= grid; break;
-            case 'UP': head.y -= grid; break;
-            case 'RIGHT': head.x += grid; break;
-            case 'DOWN': head.y += grid; break;
-        }
-        if (head.x < 0) head.x = canvas.width - grid;
-        if (head.x >= canvas.width) head.x = 0;
-        if (head.y < 0) head.y = canvas.height - grid;
-        if (head.y >= canvas.height) head.y = 0;
-        if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-            endGame();
-            return;
-        }
-        for (let i = 0; i < walls.length; i++) {
-            const segments = getWallSegments(walls[i]);
-            if (segments.some(seg => seg.x === head.x && seg.y === head.y)) {
+            if (head.x < 0) head.x = canvas.width - grid;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = canvas.height - grid;
+            if (head.y >= canvas.height) head.y = 0;
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
                 endGame();
                 return;
             }
-        }
-        snake.unshift(head);
-        if (head.x === food.x && head.y === food.y) {
-            score++;
-            if (score % 5 === 0 && walls.length < maxWalls && score !== lastWallScore) {
-                addWall();
-                lastWallScore = score;
+            for (let i = 0; i < walls.length; i++) {
+                const segments = getWallSegments(walls[i]);
+                if (segments.some(seg => seg.x === head.x && seg.y === head.y)) {
+                    endGame();
+                    return;
+                }
             }
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                if (score % 5 === 0 && walls.length < maxWalls && score !== lastWallScore) {
+                    addWall();
+                    lastWallScore = score;
+                }
+                food = getRandomFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        // ===== Game Over and Reset =====
+        function endGame() {
+            gameOverFlag = true;
+            document.getElementById('gameOver').style.display = 'block';
+            updateHighScores(score);
+            renderHighScores();
+        }
+
+        function resetGame() {
+            snake = [{ x: 160, y: 160 }];
+            direction = 'RIGHT';
             food = getRandomFood();
-        } else {
-            snake.pop();
+            score = 0;
+            gameOverFlag = false;
+            walls = [];
+            lastWallScore = 0;
+            document.getElementById('gameOver').style.display = 'none';
+            loop();
         }
-    }
 
-    // ===== Game Over and Reset =====
-    function endGame() {
-        gameOverFlag = true;
-        document.getElementById('gameOver').style.display = 'block';
-        updateHighScores(score);
-        renderHighScores();
-    }
+        // ===== Controls =====
+        document.addEventListener('keydown', function (e) {
+            if ([37, 38, 39, 40].includes(e.keyCode)) {
+                e.preventDefault();
+            }
+            if (e.keyCode === 37 && direction !== 'RIGHT') direction = 'LEFT';
+            if (e.keyCode === 38 && direction !== 'DOWN') direction = 'UP';
+            if (e.keyCode === 39 && direction !== 'LEFT') direction = 'RIGHT';
+            if (e.keyCode === 40 && direction !== 'UP') direction = 'DOWN';
+            if (e.keyCode === 13 && gameOverFlag) resetGame();
+        });
 
-    function resetGame() {
-        snake = [{ x: 160, y: 160 }];
-        direction = 'RIGHT';
-        food = getRandomFood();
-        score = 0;
-        gameOverFlag = false;
-        walls = [];
-        lastWallScore = 0;
-        document.getElementById('gameOver').style.display = 'none';
-        loop();
-    }
+        // Global click listener to restart game when over.
+        document.addEventListener('click', function (e) {
+            if (gameOverFlag) {
+                resetGame();
+            }
+        });
 
-    // ===== Controls =====
-    document.addEventListener('keydown', function (e) {
-        if ([37, 38, 39, 40].includes(e.keyCode)) {
+        // ===== Touch Events: Now attached to the canvas only =====
+        let touchStartX = null, touchStartY = null;
+        canvas.addEventListener('touchstart', function (e) {
             e.preventDefault();
-        }
-        if (e.keyCode === 37 && direction !== 'RIGHT') direction = 'LEFT';
-        if (e.keyCode === 38 && direction !== 'DOWN') direction = 'UP';
-        if (e.keyCode === 39 && direction !== 'LEFT') direction = 'RIGHT';
-        if (e.keyCode === 40 && direction !== 'UP') direction = 'DOWN';
-        if (e.keyCode === 13 && gameOverFlag) resetGame();
-    });
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
+        }, false);
 
-    // Global click listener to restart the game when it's over.
-    document.addEventListener('click', function (e) {
-        if (gameOverFlag) {
-            resetGame();
-        }
-    });
-
-    let touchStartX = null, touchStartY = null;
-    document.addEventListener('touchstart', function (e) {
-        e.preventDefault();
-        if (e.target.id === 'gameCanvas') return;
-        touchStartX = e.changedTouches[0].clientX;
-        touchStartY = e.changedTouches[0].clientY;
-    }, false);
-
-    document.addEventListener('touchend', function (e) {
-        e.preventDefault();
-        if (gameOverFlag) {
-            resetGame();
-            return;
-        }
-        if (touchStartX === null || touchStartY === null) return;
-        let touchEndX = e.changedTouches[0].clientX;
-        let touchEndY = e.changedTouches[0].clientY;
-        let dx = touchEndX - touchStartX;
-        let dy = touchEndY - touchStartY;
-        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
+        canvas.addEventListener('touchend', function (e) {
+            e.preventDefault();
+            if (gameOverFlag) {
+                resetGame();
+                return;
+            }
+            if (touchStartX === null || touchStartY === null) return;
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            let dx = touchEndX - touchStartX;
+            let dy = touchEndY - touchStartY;
+            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
+                touchStartX = touchStartY = null;
+                return;
+            }
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0 && direction !== 'LEFT') {
+                    direction = 'RIGHT';
+                } else if (dx < 0 && direction !== 'RIGHT') {
+                    direction = 'LEFT';
+                }
+            } else {
+                if (dy > 0 && direction !== 'UP') {
+                    direction = 'DOWN';
+                } else if (dy < 0 && direction !== 'DOWN') {
+                    direction = 'UP';
+                }
+            }
             touchStartX = touchStartY = null;
-            return;
-        }
-        if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0 && direction !== 'LEFT') {
-                direction = 'RIGHT';
-            } else if (dx < 0 && direction !== 'RIGHT') {
-                direction = 'LEFT';
-            }
-        } else {
-            if (dy > 0 && direction !== 'UP') {
-                direction = 'DOWN';
-            } else if (dy < 0 && direction !== 'DOWN') {
-                direction = 'UP';
-            }
-        }
-        touchStartX = touchStartY = null;
-    }, false);
+        }, false);
 
-    // ===== Main Game Loop =====
-    function loop() {
-        if (gameOverFlag) return;
-        update();
-        draw();
-        setTimeout(loop, speed);
-    }
+        // ===== Main Game Loop =====
+        function loop() {
+            if (gameOverFlag) return;
+            update();
+            draw();
+            setTimeout(loop, speed);
+        }
 
-    // Start the game loop.
-    loop();
-</script>
+        // Start the game loop.
+        loop();
+    </script>
+</body>
 
 </html>
