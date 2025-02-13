@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <!-- Added viewport meta tag for proper scaling on mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snake</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
@@ -140,14 +142,20 @@
 
         /* Footer */
         footer {
-            position: relative;
+            position: fixed;
+            /* Changed to fixed positioning */
+            bottom: 0;
+            /* Pin to the bottom */
+            left: 0;
+            right: 0;
+            width: 100%;
+            /* Full width */
             font-size: 15px;
             font-weight: bold;
             text-align: center;
             padding: 7px;
             background: #222;
-            margin: 4px 0;
-            width: 30%;
+            margin: 0;
             z-index: 3;
         }
 
