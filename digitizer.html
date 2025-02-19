@@ -265,6 +265,29 @@
       display: none;
       transition: left 0.1s ease, top 0.1s ease;
     }
+
+    /* Modal styles for selecting plot type */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      border-radius: 8px;
+      text-align: left;
+    }
   </style>
 </head>
 
@@ -306,26 +329,52 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>X</th>
-            <th>Y</th>
+            <th>x</th>
+            <th>y</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
+
   <footer>
     &copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
     <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
   </footer>
+
 </body>
 
+<!-- Modal for selecting plot type -->
+<div id="plotTypeModal" class="modal">
+  <div class="modal-content">
+    <h3>Select Plot Type</h3>
+    <form id="plotTypeForm">
+      <label><input type="radio" name="plotType" value="1" checked> Linear-Linear</label><br>
+      <label><input type="radio" name="plotType" value="2"> Log-Linear</label><br>
+      <label><input type="radio" name="plotType" value="3"> Linear-Log</label><br>
+      <label><input type="radio" name="plotType" value="4"> Log-Log</label><br><br>
+    </form>
+    <button id="plotTypeConfirm" class="btn">Confirm</button>
+  </div>
+</div>
+
 <script>
-  let mode = "none", calibrationPhase = "";
-  let calibrationX = [], calibrationY = [];
-  let slopeX = null, interceptX = null, slopeY = null, interceptY = null;
-  let digitizedPoints = [], activeCalibration = null;
-  let actionHistory = [], redoHistory = [];
+  let mode = "none",
+    calibrationPhase = "";
+  let calibrationX = [],
+    calibrationY = [];
+  let slopeX = null,
+    interceptX = null,
+    slopeY = null,
+    interceptY = null;
+  // New variables to store the type for each axis. Options: "linear" or "log".
+  let xAxisType = "linear",
+    yAxisType = "linear";
+  let digitizedPoints = [],
+    activeCalibration = null;
+  let actionHistory = [],
+    redoHistory = [];
   const image = new Image();
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
@@ -334,7 +383,9 @@
   const magnifierContainer = document.getElementById('magnifierContainer');
   const magnifierCanvas = document.getElementById('magnifierCanvas');
   const mCtx = magnifierCanvas.getContext('2d');
-  const magnification = 4, magnifierSize = magnifierCanvas.width, margin = 10;
+  const magnification = 4,
+    magnifierSize = magnifierCanvas.width,
+    margin = 10;
   const btnCalibrate = document.getElementById('calibrateAxesButton'),
     btnDigitize = document.getElementById('digitizeButton'),
     btnUndo = document.getElementById('undoButton'),
@@ -368,13 +419,27 @@
 
   function updateCalibrationParameters() {
     if (calibrationX.length >= 2) {
-      slopeX = (calibrationX[1].data - calibrationX[0].data) / (calibrationX[1].x - calibrationX[0].x);
-      interceptX = calibrationX[0].data - slopeX * calibrationX[0].x;
-    } else { slopeX = interceptX = null; }
+      if (xAxisType === "linear") {
+        slopeX = (calibrationX[1].data - calibrationX[0].data) / (calibrationX[1].x - calibrationX[0].x);
+        interceptX = calibrationX[0].data - slopeX * calibrationX[0].x;
+      } else {
+        slopeX = (Math.log(calibrationX[1].data) - Math.log(calibrationX[0].data)) / (calibrationX[1].x - calibrationX[0].x);
+        interceptX = Math.log(calibrationX[0].data) - slopeX * calibrationX[0].x;
+      }
+    } else {
+      slopeX = interceptX = null;
+    }
     if (calibrationY.length >= 2) {
-      slopeY = (calibrationY[1].data - calibrationY[0].data) / (calibrationY[1].y - calibrationY[0].y);
-      interceptY = calibrationY[0].data - slopeY * calibrationY[0].y;
-    } else { slopeY = interceptY = null; }
+      if (yAxisType === "linear") {
+        slopeY = (calibrationY[1].data - calibrationY[0].data) / (calibrationY[1].y - calibrationY[0].y);
+        interceptY = calibrationY[0].data - slopeY * calibrationY[0].y;
+      } else {
+        slopeY = (Math.log(calibrationY[1].data) - Math.log(calibrationY[0].data)) / (calibrationY[1].y - calibrationY[0].y);
+        interceptY = Math.log(calibrationY[0].data) - slopeY * calibrationY[0].y;
+      }
+    } else {
+      slopeY = interceptY = null;
+    }
   }
 
   function updateDataTable() {
@@ -397,6 +462,7 @@
   function updateStatus(message) { statusDiv.textContent = message; }
 
   document.getElementById('imageLoader').addEventListener('change', handleImage, false);
+
   function handleImage(e) {
     const reader = new FileReader();
     reader.onload = function (event) {
@@ -426,18 +492,46 @@
     reader.readAsDataURL(e.target.files[0]);
   }
 
+  // Show modal with a list of plot types (using radio buttons)
+  function showPlotTypeModal() {
+    const modal = document.getElementById("plotTypeModal");
+    modal.style.display = "block";
+    const confirmButton = document.getElementById("plotTypeConfirm");
+    confirmButton.onclick = function () {
+      const selectedValue = document.querySelector('input[name="plotType"]:checked').value;
+      if (selectedValue === "2") {
+        xAxisType = "log";
+        yAxisType = "linear";
+      } else if (selectedValue === "3") {
+        xAxisType = "linear";
+        yAxisType = "log";
+      } else if (selectedValue === "4") {
+        xAxisType = "log";
+        yAxisType = "log";
+      } else {
+        xAxisType = "linear";
+        yAxisType = "linear";
+      }
+      modal.style.display = "none";
+      updateStatus("Calibration (" + (xAxisType === "log" ? "log" : "linear") + " x, " + (yAxisType === "log" ? "log" : "linear") + " y): Click first point for x axis (x₁).");
+      mode = "calibrateAxes";
+      calibrationPhase = "x1";
+      activeCalibration = null;
+      updateMagnifierVisibility();
+    }
+  }
+
   document.getElementById('calibrateAxesButton').addEventListener('click', function () {
     if (calibrationX.length === 2 && calibrationY.length === 2) {
       if (!confirm("Calibration already done. Recalibrate?")) {
         updateStatus("Using previous calibration.");
         return;
-      } else { calibrationX = []; calibrationY = []; }
+      } else {
+        calibrationX = [];
+        calibrationY = [];
+      }
     }
-    mode = "calibrateAxes";
-    calibrationPhase = "x1";
-    activeCalibration = null;
-    updateStatus("Calibration: Click first point for X axis (X1).");
-    updateMagnifierVisibility();
+    showPlotTypeModal();
   });
 
   document.getElementById('digitizeButton').addEventListener('click', function () {
@@ -456,10 +550,13 @@
 
   function promptForCalibrationValue() {
     let promptText = "";
+    let isLog = false;
     if (calibrationPhase.startsWith("x")) {
       promptText = "Enter actual value for X (" + (calibrationPhase === "x1" ? "first" : "second") + " point):";
+      if (xAxisType === "log") { isLog = true; }
     } else if (calibrationPhase.startsWith("y")) {
       promptText = "Enter actual value for Y (" + (calibrationPhase === "y1" ? "first" : "second") + " point):";
+      if (yAxisType === "log") { isLog = true; }
     }
     let input = window.prompt(promptText);
     if (input === null || input.trim() === "") {
@@ -467,8 +564,8 @@
       return null;
     }
     let val = parseFloat(input);
-    if (isNaN(val)) {
-      alert("Invalid number. Please try again.");
+    if (isNaN(val) || (isLog && val <= 0)) {
+      alert(isLog ? "Invalid number. Please enter a positive number for logarithmic scale." : "Invalid number. Please try again.");
       return promptForCalibrationValue();
     }
     return val;
@@ -487,17 +584,17 @@
           updateStatus("Saved X point " + calibrationX.length + " of 2.");
           if (calibrationPhase === "x1") {
             calibrationPhase = "x2";
-            updateStatus("Calibration: Click second point for X axis (X2).");
+            updateStatus("Calibration: Click second point for x axis (x₂).");
           } else {
             calibrationPhase = "y1";
-            updateStatus("Calibration: Click first point for Y axis (Y1).");
+            updateStatus("Calibration: Click first point for y axis (y₁).");
           }
         } else if (calibrationPhase.startsWith("y")) {
           calibrationY.push({ x: activeCalibration.x, y: activeCalibration.y, data: actualValue });
           updateStatus("Saved Y point " + calibrationY.length + " of 2.");
           if (calibrationPhase === "y1") {
             calibrationPhase = "y2";
-            updateStatus("Calibration: Click second point for Y axis (Y2).");
+            updateStatus("Calibration: Click second point for Y axis (y₂).");
           } else {
             updateCalibrationParameters();
             mode = "none";
@@ -515,11 +612,19 @@
         alert("Calibration incomplete.");
         return;
       }
-      const dataX = slopeX * x + interceptX;
-      const dataY = slopeY * y + interceptY;
+      let dataX, dataY;
+      if (xAxisType === "log") {
+        dataX = Math.exp(slopeX * x + interceptX);
+      } else {
+        dataX = slopeX * x + interceptX;
+      }
+      if (yAxisType === "log") {
+        dataY = Math.exp(slopeY * y + interceptY);
+      } else {
+        dataY = slopeY * y + interceptY;
+      }
       digitizedPoints.push({ pixelX: x, pixelY: y, dataX: dataX, dataY: dataY });
       actionHistory.push({ type: "digitized", point: { pixelX: x, pixelY: y, dataX: dataX, dataY: dataY } });
-      redoHistory = [];
       updateStatus("Digitized point (" + dataX.toFixed(4) + ", " + dataY.toFixed(4) + "). Total: " + digitizedPoints.length);
       updateDataTable();
       redrawCanvas();
@@ -553,6 +658,7 @@
     updateMagnifier(e);
   });
 
+  // Modified updateMagnifier so that the magnifier is always positioned on the side of the cursor.
   function updateMagnifier(e) {
     if (magnifierContainer.style.display === "none") return;
     const rect = canvas.getBoundingClientRect();
@@ -583,16 +689,14 @@
     const cursorX = e.clientX - mainRect.left;
     const cursorY = e.clientY - mainRect.top;
 
-    let candidateX, candidateY;
-    if (cursorX < (magnifierContainer.offsetWidth + margin) || cursorY < (magnifierContainer.offsetHeight + margin)) {
-      candidateX = cursorX + margin;
-      candidateY = cursorY + margin;
-    } else {
-      candidateX = cursorX - margin - magnifierContainer.offsetWidth;
-      candidateY = cursorY - margin - magnifierContainer.offsetHeight;
-    }
-    candidateX = Math.max(canvasLeft, candidateX);
-    candidateY = Math.max(canvasTop, candidateY);
+    // Position the magnifier so it is on the side opposite to the center of the main container.
+    let candidateX = (cursorX < mainRect.width / 2 ? cursorX + margin : cursorX - margin - magnifierContainer.offsetWidth);
+    let candidateY = (cursorY < mainRect.height / 2 ? cursorY + margin : cursorY - margin - magnifierContainer.offsetHeight);
+
+    // Ensure the magnifier does not go out of the canvas bounds.
+    candidateX = Math.max(canvasLeft, Math.min(candidateX, canvasLeft + canvas.offsetWidth - magnifierContainer.offsetWidth));
+    candidateY = Math.max(canvasTop, Math.min(candidateY, canvasTop + canvas.offsetHeight - magnifierContainer.offsetHeight));
+
     magnifierContainer.style.left = candidateX + "px";
     magnifierContainer.style.top = candidateY + "px";
   }
@@ -608,7 +712,9 @@
 
   function redrawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (image.src) { ctx.drawImage(image, 0, 0, canvas.width, canvas.height); }
+    if (image.src) {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
     if (calibrationX.length < 2 || calibrationY.length < 2) {
       calibrationX.forEach(pt => drawMarker(pt.x, pt.y, "blue"));
       calibrationY.forEach(pt => drawMarker(pt.x, pt.y, "green"));
@@ -664,7 +770,9 @@
 
   function exportCSV() {
     let csvContent = "dataX,dataY\n";
-    digitizedPoints.forEach(pt => { csvContent += pt.dataX + "," + pt.dataY + "\n"; });
+    digitizedPoints.forEach(pt => {
+      csvContent += pt.dataX + "," + pt.dataY + "\n";
+    });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
