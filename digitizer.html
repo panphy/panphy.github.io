@@ -29,7 +29,7 @@
       --export-text: #ffffff;
     }
 
-    /* Base button style */
+    /* Base button style for all buttons */
     .btn {
       border: none;
       border-radius: 4px;
@@ -154,7 +154,7 @@
       box-sizing: border-box;
     }
 
-    /* Fixed height for both containers */
+    /* Fixed height for containers */
     #main,
     #sidebar {
       height: 600px;
@@ -339,6 +339,9 @@
     btnUndo = document.getElementById('undoButton'),
     btnRedo = document.getElementById('redoButton'),
     btnReset = document.getElementById('resetButton');
+
+  // Add export button event listener
+  document.getElementById('exportButton').addEventListener('click', exportCSV);
 
   function updateMagnifierVisibility() {
     magnifierContainer.style.display = (mode === "calibrateAxes" || mode === "digitize") ? "block" : "none";
