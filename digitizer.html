@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+
+  <title>Graph Digitizer</title>
+
+  <style>
+    :root {
+      --btn-bg: #ff5f1f;
+      --btn-text: #ffffff;
+      --btn-hover-brightness: 90%;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #fafafa;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
+      position: relative;
+      text-align: center;
+    }
+
+    header .logo {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+    }
+
+    header .logo img {
+      height: 30px;
+      margin-right: 5px;
+    }
+
+    header .title {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    footer {
+      font-size: 15px;
+      text-align: center;
+      padding: 7px;
+      background: #f4f4f400;
+      color: #555;
+      margin: 4px 0;
+      width: 100%;
+    }
+
+    footer a {
+      color: #ff5f1f;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    footer a:visited {
+      color: #ff5f1f;
+    }
+
+    #content {
+      flex: 1;
+      display: flex;
+      gap: 5px;
+      overflow: hidden;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    /* Main App Container (left) */
+    #main {
+      flex: 1;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      overflow: auto;
+      position: relative;
+    }
+
+    /* Sidebar Container (right) */
+    #sidebar {
+      flex: 0 0 250px;
+      background: #fff;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      max-height: 100%;
+      text-align: center;
+    }
+
+    /* Data Table */
+    #dataTable {
+      width: auto;
+      border-collapse: collapse;
+      margin: 10px auto 0;
+    }
+
+    #dataTable th,
+    #dataTable td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+
+    #dataTable th:nth-child(1) {
+      width: 40px;
+    }
+
+    #dataTable th:nth-child(2),
+    #dataTable th:nth-child(3) {
+      width: 60px;
+    }
+
+    #dataTable tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    #dataTable tr:nth-child(even) {
+      background-color: #cfcfcf;
+    }
+
+    /* Controls in Main App */
+    #controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* Top row: Upload and control buttons */
+    #controlRow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Hide native file input */
+    #imageLoader {
+      display: none;
+    }
+
+    /* Custom styled upload button */
+    #uploadLabel {
+      background-color: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: filter 0.3s ease;
+      font-size: 14px;
+    }
+
+    #uploadLabel:hover {
+      filter: brightness(90%);
+    }
+
+    /* Button row */
+    #buttonRow {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #buttonRow button,
+    #exportButton {
+      background-color: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: filter 0.3s ease;
+      font-size: 14px;
+    }
+
+    #buttonRow button:hover,
+    #exportButton:hover {
+      filter: brightness(90%);
+    }
+
+    #buttonRow button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    /* Prompt / Status area */
+    #status {
+      display: block;
+      width: 100%;
+      min-height: 24px;
+      font-weight: bold;
+    }
+
+    /* Canvas */
+    #canvas {
+      border: 1px solid #ccc;
+      cursor: crosshair;
+      max-width: 100%;
+      height: auto;
+      display: none;
+      margin-top: 10px;
+    }
+
+    /* Magnifier */
+    #magnifierContainer {
+      position: absolute;
+      border: 1px solid #ccc;
+      background: #fff;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      overflow: hidden;
+      pointer-events: none;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+        <img src="panphy.png" alt="PanPhy logo" />
+      </a>
+    </div>
+    <div class="title">Graph Digitizer</div>
+  </header>
+  <div id="content">
+    <div id="main">
+      <div id="controls">
+        <div id="controlRow">
+          <label for="imageLoader" id="uploadLabel" class="btn">Upload a Graph</label>
+          <input type="file" id="imageLoader" accept="image/*">
+          <div id="buttonRow">
+            <button id="calibrateAxesButton" class="btn" disabled>Calibrate Axes</button>
+            <button id="digitizeButton" class="btn" disabled>Digitize Points</button>
+            <button id="undoButton" class="btn" disabled>Undo</button>
+            <button id="redoButton" class="btn" disabled>Redo</button>
+            <button id="resetButton" class="btn" disabled>Reset</button>
+          </div>
+        </div>
+        <div id="status"></div>
+      </div>
+      <canvas id="canvas"></canvas>
+      <div id="magnifierContainer">
+        <canvas id="magnifierCanvas" width="150" height="150"></canvas>
+        <div style="text-align:center; font-size:12px;">Magnifier (x4)</div>
+      </div>
+    </div>
+    <div id="sidebar">
+      <h2>Data Points</h2>
+      <button id="exportButton" class="btn">Export CSV</button>
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>X</th>
+            <th>Y</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+  </footer>
+
+</body>
+
+<script>
+  let mode = "none", calibrationPhase = "";
+  let calibrationX = [], calibrationY = [];
+  let slopeX = null, interceptX = null, slopeY = null, interceptY = null;
+  let digitizedPoints = [], activeCalibration = null;
+  let actionHistory = [], redoHistory = [];
+  const image = new Image();
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const statusDiv = document.getElementById('status');
+  const dataTableBody = document.querySelector("#dataTable tbody");
+  const magnifierContainer = document.getElementById('magnifierContainer');
+  const magnifierCanvas = document.getElementById('magnifierCanvas');
+  const mCtx = magnifierCanvas.getContext('2d');
+  const magnification = 4, magnifierSize = magnifierCanvas.width, offset = -5;
+  const btnCalibrate = document.getElementById('calibrateAxesButton'),
+    btnDigitize = document.getElementById('digitizeButton'),
+    btnUndo = document.getElementById('undoButton'),
+    btnRedo = document.getElementById('redoButton'),
+    btnReset = document.getElementById('resetButton');
+
+  function updateMagnifierVisibility() {
+    magnifierContainer.style.display = (mode === "calibrateAxes" || mode === "digitize") ? "block" : "none";
+  }
+
+  function setDefaultMagnifierPosition() {
+    const mainRect = document.getElementById("main").getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+    const canvasLeft = canvasRect.left - mainRect.left;
+    const canvasTop = canvasRect.top - mainRect.top;
+    magnifierContainer.style.left = (canvasLeft + offset) + "px";
+    magnifierContainer.style.top = (canvasTop + offset) + "px";
+  }
+
+  function getCanvasCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / canvas.offsetWidth;
+    const scaleY = canvas.height / canvas.offsetHeight;
+    const x = Math.round((e.clientX - rect.left) * scaleX) + 0.5;
+    const y = (e.clientY - rect.top) * scaleY;
+    return { x, y };
+  }
+
+  function updateCalibrationParameters() {
+    if (calibrationX.length >= 2) {
+      slopeX = (calibrationX[1].data - calibrationX[0].data) / (calibrationX[1].x - calibrationX[0].x);
+      interceptX = calibrationX[0].data - slopeX * calibrationX[0].x;
+    } else { slopeX = interceptX = null; }
+    if (calibrationY.length >= 2) {
+      slopeY = (calibrationY[1].data - calibrationY[0].data) / (calibrationY[1].y - calibrationY[0].y);
+      interceptY = calibrationY[0].data - slopeY * calibrationY[0].y;
+    } else { slopeY = interceptY = null; }
+  }
+
+  function updateDataTable() {
+    dataTableBody.innerHTML = "";
+    digitizedPoints.forEach((pt, index) => {
+      const row = document.createElement("tr");
+      const cellIndex = document.createElement("td");
+      const cellX = document.createElement("td");
+      const cellY = document.createElement("td");
+      cellIndex.textContent = index + 1;
+      cellX.textContent = pt.dataX.toFixed(4);
+      cellY.textContent = pt.dataY.toFixed(4);
+      row.appendChild(cellIndex);
+      row.appendChild(cellX);
+      row.appendChild(cellY);
+      dataTableBody.appendChild(row);
+    });
+  }
+
+  function updateStatus(message) { statusDiv.textContent = message; }
+
+  document.getElementById('imageLoader').addEventListener('change', handleImage, false);
+  function handleImage(e) {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      image.onload = function () {
+        const maxSize = 800;
+        let newWidth = image.width;
+        let newHeight = image.height;
+        if (newWidth > maxSize || newHeight > maxSize) {
+          const scale = Math.min(maxSize / newWidth, maxSize / newHeight);
+          newWidth *= scale;
+          newHeight *= scale;
+        }
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        canvas.style.display = "block";
+        redrawCanvas();
+        updateStatus("Image loaded. Ready for calibration.");
+        setDefaultMagnifierPosition();
+        btnCalibrate.disabled = false;
+        btnDigitize.disabled = false;
+        btnUndo.disabled = false;
+        btnRedo.disabled = false;
+        btnReset.disabled = false;
+      }
+      image.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+  }
+
+  document.getElementById('calibrateAxesButton').addEventListener('click', function () {
+    mode = "calibrateAxes";
+    calibrationPhase = "x1";
+    activeCalibration = null;
+    updateStatus("Calibration: Click first point for X axis (X1).");
+    updateMagnifierVisibility();
+  });
+
+  document.getElementById('digitizeButton').addEventListener('click', function () {
+    if (calibrationX.length < 2 || calibrationY.length < 2) {
+      alert("Please complete calibration (4 points) before digitizing.");
+      return;
+    }
+    mode = "digitize";
+    updateStatus("Digitize Mode: Click points on the graph to record data.");
+    updateMagnifierVisibility();
+  });
+
+  document.getElementById('resetButton').addEventListener('click', function () { resetAll(); });
+  document.getElementById('undoButton').addEventListener('click', function () { undoAction(); });
+  document.getElementById('redoButton').addEventListener('click', function () { redoAction(); });
+
+  function promptForCalibrationValue() {
+    let promptText = "";
+    if (calibrationPhase.startsWith("x")) {
+      promptText = "Enter actual value for X (" + (calibrationPhase === "x1" ? "first" : "second") + " point):";
+    } else if (calibrationPhase.startsWith("y")) {
+      promptText = "Enter actual value for Y (" + (calibrationPhase === "y1" ? "first" : "second") + " point):";
+    }
+    let input = window.prompt(promptText);
+    if (input === null || input.trim() === "") {
+      updateStatus("Calibration point cancelled.");
+      return null;
+    }
+    let val = parseFloat(input);
+    if (isNaN(val)) {
+      alert("Invalid number. Please try again.");
+      return promptForCalibrationValue();
+    }
+    return val;
+  }
+
+  function handleCanvasInteraction(x, y) {
+    if (mode === "calibrateAxes") {
+      activeCalibration = { x: x, y: y };
+      redrawCanvas();
+      let markerColor = calibrationPhase.startsWith("x") ? "blue" : "green";
+      drawMarker(x, y, markerColor);
+      let actualValue = promptForCalibrationValue();
+      if (actualValue !== null) {
+        if (calibrationPhase.startsWith("x")) {
+          calibrationX.push({ x: activeCalibration.x, y: activeCalibration.y, data: actualValue });
+          updateStatus("Saved X point " + calibrationX.length + " of 2.");
+          if (calibrationPhase === "x1") {
+            calibrationPhase = "x2";
+            updateStatus("Calibration: Click second point for X axis (X2).");
+          } else {
+            calibrationPhase = "y1";
+            updateStatus("Calibration: Click first point for Y axis (Y1).");
+          }
+        } else if (calibrationPhase.startsWith("y")) {
+          calibrationY.push({ x: activeCalibration.x, y: activeCalibration.y, data: actualValue });
+          updateStatus("Saved Y point " + calibrationY.length + " of 2.");
+          if (calibrationPhase === "y1") {
+            calibrationPhase = "y2";
+            updateStatus("Calibration: Click second point for Y axis (Y2).");
+          } else {
+            updateCalibrationParameters();
+            mode = "none";
+            calibrationPhase = "";
+            updateStatus("Calibration complete.");
+            updateMagnifierVisibility();
+          }
+        }
+      }
+      activeCalibration = null;
+      redrawCanvas();
+      updateMagnifier(lastEvent);
+    } else if (mode === "digitize") {
+      if (slopeX === null || slopeY === null) {
+        alert("Calibration incomplete.");
+        return;
+      }
+      const dataX = slopeX * x + interceptX;
+      const dataY = slopeY * y + interceptY;
+      digitizedPoints.push({ pixelX: x, pixelY: y, dataX: dataX, dataY: dataY });
+      actionHistory.push({ type: "digitized", point: { pixelX: x, pixelY: y, dataX: dataX, dataY: dataY } });
+      redoHistory = [];
+      updateStatus("Digitized point (" + dataX.toFixed(4) + ", " + dataY.toFixed(4) + "). Total: " + digitizedPoints.length);
+      updateDataTable();
+      redrawCanvas();
+      updateMagnifier(lastEvent);
+    }
+  }
+
+  let lastEvent = null;
+  canvas.addEventListener('click', function (e) {
+    lastEvent = e;
+    const coords = getCanvasCoordinates(e);
+    handleCanvasInteraction(coords.x, coords.y);
+  });
+  canvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    lastEvent = e.changedTouches[0];
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / canvas.offsetWidth;
+    const scaleY = canvas.height / canvas.offsetHeight;
+    const x = Math.round((e.changedTouches[0].clientX - rect.left) * scaleX) + 0.5;
+    const y = (e.changedTouches[0].clientY - rect.top) * scaleY;
+    handleCanvasInteraction(x, y);
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+    lastEvent = e.touches[0];
+    updateMagnifier(e.touches[0]);
+  }, { passive: false });
+  canvas.addEventListener('mousemove', function (e) {
+    lastEvent = e;
+    updateMagnifier(e);
+  });
+
+  function updateMagnifier(e) {
+    if (magnifierContainer.style.display === "none") return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / canvas.offsetWidth;
+    const scaleY = canvas.height / canvas.offsetHeight;
+    const x = Math.round((e.clientX - rect.left) * scaleX) + 0.5;
+    const y = (e.clientY - rect.top) * scaleY;
+    const regionSize = magnifierSize / magnification;
+    let sx = x - regionSize / 2;
+    let sy = y - regionSize / 2;
+    if (sx < 0) sx = 0;
+    if (sy < 0) sy = 0;
+    if (sx + regionSize > canvas.width) sx = canvas.width - regionSize;
+    if (sy + regionSize > canvas.height) sy = canvas.height - regionSize;
+    mCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
+    mCtx.drawImage(canvas, sx, sy, regionSize, regionSize, 0, 0, magnifierCanvas.width, magnifierCanvas.height);
+    mCtx.beginPath();
+    mCtx.moveTo(Math.round(magnifierCanvas.width / 2) + 0.5, 0);
+    mCtx.lineTo(Math.round(magnifierCanvas.width / 2) + 0.5, magnifierCanvas.height);
+    mCtx.moveTo(0, magnifierCanvas.height / 2);
+    mCtx.lineTo(magnifierCanvas.width, magnifierCanvas.height / 2);
+    mCtx.strokeStyle = "rgba(255,0,0,0.5)";
+    mCtx.lineWidth = 2;
+    mCtx.stroke();
+    const mainRect = document.getElementById("main").getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+    const canvasLeft = canvasRect.left - mainRect.left;
+    const canvasTop = canvasRect.top - mainRect.top;
+    const canvasDisplayWidth = canvas.offsetWidth;
+    const canvasDisplayHeight = canvas.offsetHeight;
+    const containerWidth = magnifierContainer.offsetWidth;
+    const containerHeight = magnifierContainer.offsetHeight;
+    let candidateX = e.clientX - mainRect.left + offset;
+    let candidateY = e.clientY - mainRect.top + offset;
+    if (candidateX + containerWidth > canvasLeft + canvasDisplayWidth) {
+      candidateX = e.clientX - mainRect.left - offset - containerWidth;
+    }
+    if (candidateY + containerHeight > canvasTop + canvasDisplayHeight) {
+      candidateY = e.clientY - mainRect.top - offset - containerHeight;
+    }
+    if (candidateX < canvasLeft) candidateX = canvasLeft;
+    if (candidateY < canvasTop) candidateY = canvasTop;
+    magnifierContainer.style.left = candidateX + "px";
+    magnifierContainer.style.top = candidateY + "px";
+  }
+
+  function drawMarker(x, y, color) {
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+  }
+
+  function redrawCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (image.src) { ctx.drawImage(image, 0, 0, canvas.width, canvas.height); }
+    if (calibrationX.length < 2 || calibrationY.length < 2) {
+      calibrationX.forEach(pt => drawMarker(pt.x, pt.y, "blue"));
+      calibrationY.forEach(pt => drawMarker(pt.x, pt.y, "green"));
+    }
+    digitizedPoints.forEach(pt => drawMarker(pt.pixelX, pt.pixelY, "red"));
+    if (activeCalibration) {
+      let col = calibrationPhase.startsWith("x") ? "blue" : "green";
+      drawMarker(activeCalibration.x, activeCalibration.y, col);
+    }
+  }
+
+  function undoAction() {
+    if (activeCalibration) {
+      activeCalibration = null;
+      redrawCanvas();
+      updateStatus("Cleared active calibration marker.");
+      return;
+    }
+    if (actionHistory.length === 0) return;
+    const lastAction = actionHistory.pop();
+    redoHistory.push(lastAction);
+    if (lastAction.type === "calibrationX") {
+      calibrationX.pop();
+      updateCalibrationParameters();
+    } else if (lastAction.type === "calibrationY") {
+      calibrationY.pop();
+      updateCalibrationParameters();
+    } else if (lastAction.type === "digitized") {
+      digitizedPoints.pop();
+      updateDataTable();
+    }
+    redrawCanvas();
+    updateStatus("Undid action: " + lastAction.type);
+  }
+
+  function redoAction() {
+    if (redoHistory.length === 0) return;
+    const action = redoHistory.pop();
+    actionHistory.push(action);
+    if (action.type === "calibrationX") {
+      calibrationX.push(action.point);
+      updateCalibrationParameters();
+    } else if (action.type === "calibrationY") {
+      calibrationY.push(action.point);
+      updateCalibrationParameters();
+    } else if (action.type === "digitized") {
+      digitizedPoints.push(action.point);
+      updateDataTable();
+    }
+    redrawCanvas();
+    updateStatus("Redid action: " + action.type);
+  }
+
+  function exportCSV() {
+    let csvContent = "dataX,dataY\n";
+    digitizedPoints.forEach(pt => { csvContent += pt.dataX + "," + pt.dataY + "\n"; });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'digitized_data.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function resetAll() {
+    mode = "none";
+    calibrationPhase = "";
+    calibrationX = [];
+    calibrationY = [];
+    slopeX = interceptX = null;
+    slopeY = interceptY = null;
+    digitizedPoints = [];
+    actionHistory = [];
+    redoHistory = [];
+    activeCalibration = null;
+    updateStatus("Upload a graph and start calibration.");
+    updateDataTable();
+    redrawCanvas();
+    updateMagnifierVisibility();
+    setDefaultMagnifierPosition();
+    document.getElementById('imageLoader').value = "";
+    canvas.style.display = "none";
+    btnCalibrate.disabled = true;
+    btnDigitize.disabled = true;
+    btnUndo.disabled = true;
+    btnRedo.disabled = true;
+    btnReset.disabled = true;
+  }
+
+  window.addEventListener("load", function () { resetAll(); });
+</script>
+
+</html>
