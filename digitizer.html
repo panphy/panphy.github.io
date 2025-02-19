@@ -3,14 +3,86 @@
 
 <head>
   <meta charset="UTF-8">
-
   <title>Graph Digitizer</title>
-
   <style>
     :root {
-      --btn-bg: #ff5f1f;
-      --btn-text: #ffffff;
-      --btn-hover-brightness: 90%;
+      /* Customize each button's colors */
+      --upload-bg: #ff5f1f;
+      --upload-text: #ffffff;
+
+      --calibrate-bg: #007bff;
+      --calibrate-text: #ffffff;
+
+      --digitize-bg: #28a745;
+      --digitize-text: #ffffff;
+
+      --undo-bg: #6c757d;
+      --undo-text: #ffffff;
+
+      --redo-bg: #6c757d;
+      --redo-text: #ffffff;
+
+      --reset-bg: #dc3545;
+      --reset-text: #ffffff;
+
+      --export-bg: #17a2b8;
+      --export-text: #ffffff;
+    }
+
+    /* Base button style */
+    .btn {
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: filter 0.3s ease;
+    }
+
+    .btn:hover {
+      filter: brightness(90%);
+    }
+
+    .btn:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+    }
+
+    /* Specific button classes */
+    .btn-upload {
+      background-color: var(--upload-bg);
+      color: var(--upload-text);
+    }
+
+    .btn-calibrate {
+      background-color: var(--calibrate-bg);
+      color: var(--calibrate-text);
+    }
+
+    .btn-digitize {
+      background-color: var(--digitize-bg);
+      color: var(--digitize-text);
+    }
+
+    .btn-undo {
+      background-color: var(--undo-bg);
+      color: var(--undo-text);
+    }
+
+    .btn-redo {
+      background-color: var(--redo-bg);
+      color: var(--redo-text);
+    }
+
+    .btn-reset {
+      background-color: var(--reset-bg);
+      color: var(--reset-text);
+    }
+
+    .btn-export {
+      background-color: var(--export-bg);
+      color: var(--export-text);
+      width: 100%;
     }
 
     html,
@@ -74,12 +146,7 @@
       text-decoration: underline;
     }
 
-    footer a:visited {
-      color: #ff5f1f;
-    }
-
     #content {
-      flex: 1;
       display: flex;
       gap: 5px;
       overflow: hidden;
@@ -87,7 +154,12 @@
       box-sizing: border-box;
     }
 
-    /* Main App Container (left) */
+    /* Fixed height for both containers */
+    #main,
+    #sidebar {
+      height: 600px;
+    }
+
     #main {
       flex: 1;
       background: #fff;
@@ -99,7 +171,6 @@
       position: relative;
     }
 
-    /* Sidebar Container (right) */
     #sidebar {
       flex: 0 0 250px;
       background: #fff;
@@ -108,11 +179,9 @@
       border-radius: 8px;
       box-sizing: border-box;
       overflow-y: auto;
-      max-height: 100%;
       text-align: center;
     }
 
-    /* Data Table */
     #dataTable {
       width: auto;
       border-collapse: collapse;
@@ -143,7 +212,6 @@
       background-color: #cfcfcf;
     }
 
-    /* Controls in Main App */
     #controls {
       display: flex;
       flex-direction: column;
@@ -151,7 +219,6 @@
       margin-bottom: 10px;
     }
 
-    /* Top row: Upload and control buttons */
     #controlRow {
       display: flex;
       align-items: center;
@@ -159,57 +226,16 @@
       flex-wrap: wrap;
     }
 
-    /* Hide native file input */
     #imageLoader {
       display: none;
     }
 
-    /* Custom styled upload button */
-    #uploadLabel {
-      background-color: var(--btn-bg);
-      color: var(--btn-text);
-      border: none;
-      border-radius: 4px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: filter 0.3s ease;
-      font-size: 14px;
-    }
-
-    #uploadLabel:hover {
-      filter: brightness(90%);
-    }
-
-    /* Button row */
     #buttonRow {
       display: flex;
       gap: 8px;
       align-items: center;
     }
 
-    #buttonRow button,
-    #exportButton {
-      background-color: var(--btn-bg);
-      color: var(--btn-text);
-      border: none;
-      border-radius: 4px;
-      padding: 8px 12px;
-      cursor: pointer;
-      transition: filter 0.3s ease;
-      font-size: 14px;
-    }
-
-    #buttonRow button:hover,
-    #exportButton:hover {
-      filter: brightness(90%);
-    }
-
-    #buttonRow button:disabled {
-      background-color: #aaa;
-      cursor: not-allowed;
-    }
-
-    /* Prompt / Status area */
     #status {
       display: block;
       width: 100%;
@@ -217,7 +243,6 @@
       font-weight: bold;
     }
 
-    /* Canvas */
     #canvas {
       border: 1px solid #ccc;
       cursor: crosshair;
@@ -227,7 +252,6 @@
       margin-top: 10px;
     }
 
-    /* Magnifier */
     #magnifierContainer {
       position: absolute;
       border: 1px solid #ccc;
@@ -238,6 +262,7 @@
       overflow: hidden;
       pointer-events: none;
       display: none;
+      transition: left 0.1s ease, top 0.1s ease;
     }
   </style>
 </head>
@@ -246,7 +271,7 @@
   <header>
     <div class="logo">
       <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-        <img src="panphy.png" alt="PanPhy logo" />
+        <img src="panphy.png" alt="PanPhy logo">
       </a>
     </div>
     <div class="title">Graph Digitizer</div>
@@ -255,14 +280,14 @@
     <div id="main">
       <div id="controls">
         <div id="controlRow">
-          <label for="imageLoader" id="uploadLabel" class="btn">Upload a Graph</label>
+          <label for="imageLoader" class="btn btn-upload">Upload a Graph</label>
           <input type="file" id="imageLoader" accept="image/*">
           <div id="buttonRow">
-            <button id="calibrateAxesButton" class="btn" disabled>Calibrate Axes</button>
-            <button id="digitizeButton" class="btn" disabled>Digitize Points</button>
-            <button id="undoButton" class="btn" disabled>Undo</button>
-            <button id="redoButton" class="btn" disabled>Redo</button>
-            <button id="resetButton" class="btn" disabled>Reset</button>
+            <button id="calibrateAxesButton" class="btn btn-calibrate" disabled>Calibrate Axes</button>
+            <button id="digitizeButton" class="btn btn-digitize" disabled>Digitize Points</button>
+            <button id="undoButton" class="btn btn-undo" disabled>Undo</button>
+            <button id="redoButton" class="btn btn-redo" disabled>Redo</button>
+            <button id="resetButton" class="btn btn-reset" disabled>Reset</button>
           </div>
         </div>
         <div id="status"></div>
@@ -275,7 +300,7 @@
     </div>
     <div id="sidebar">
       <h2>Data Points</h2>
-      <button id="exportButton" class="btn">Export CSV</button>
+      <button id="exportButton" class="btn btn-export">Export CSV</button>
       <table id="dataTable">
         <thead>
           <tr>
@@ -288,12 +313,10 @@
       </table>
     </div>
   </div>
-
   <footer>
     &copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
     <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
   </footer>
-
 </body>
 
 <script>
@@ -310,7 +333,7 @@
   const magnifierContainer = document.getElementById('magnifierContainer');
   const magnifierCanvas = document.getElementById('magnifierCanvas');
   const mCtx = magnifierCanvas.getContext('2d');
-  const magnification = 4, magnifierSize = magnifierCanvas.width, offset = -5;
+  const magnification = 4, magnifierSize = magnifierCanvas.width, margin = 10;
   const btnCalibrate = document.getElementById('calibrateAxesButton'),
     btnDigitize = document.getElementById('digitizeButton'),
     btnUndo = document.getElementById('undoButton'),
@@ -326,8 +349,8 @@
     const canvasRect = canvas.getBoundingClientRect();
     const canvasLeft = canvasRect.left - mainRect.left;
     const canvasTop = canvasRect.top - mainRect.top;
-    magnifierContainer.style.left = (canvasLeft + offset) + "px";
-    magnifierContainer.style.top = (canvasTop + offset) + "px";
+    magnifierContainer.style.left = (canvasLeft + margin) + "px";
+    magnifierContainer.style.top = (canvasTop + margin) + "px";
   }
 
   function getCanvasCoordinates(e) {
@@ -400,6 +423,12 @@
   }
 
   document.getElementById('calibrateAxesButton').addEventListener('click', function () {
+    if (calibrationX.length === 2 && calibrationY.length === 2) {
+      if (!confirm("Calibration already done. Recalibrate?")) {
+        updateStatus("Using previous calibration.");
+        return;
+      } else { calibrationX = []; calibrationY = []; }
+    }
     mode = "calibrateAxes";
     calibrationPhase = "x1";
     activeCalibration = null;
@@ -530,10 +559,8 @@
     const regionSize = magnifierSize / magnification;
     let sx = x - regionSize / 2;
     let sy = y - regionSize / 2;
-    if (sx < 0) sx = 0;
-    if (sy < 0) sy = 0;
-    if (sx + regionSize > canvas.width) sx = canvas.width - regionSize;
-    if (sy + regionSize > canvas.height) sy = canvas.height - regionSize;
+    sx = Math.max(0, Math.min(sx, canvas.width - regionSize));
+    sy = Math.max(0, Math.min(sy, canvas.height - regionSize));
     mCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
     mCtx.drawImage(canvas, sx, sy, regionSize, regionSize, 0, 0, magnifierCanvas.width, magnifierCanvas.height);
     mCtx.beginPath();
@@ -544,24 +571,24 @@
     mCtx.strokeStyle = "rgba(255,0,0,0.5)";
     mCtx.lineWidth = 2;
     mCtx.stroke();
+
     const mainRect = document.getElementById("main").getBoundingClientRect();
     const canvasRect = canvas.getBoundingClientRect();
     const canvasLeft = canvasRect.left - mainRect.left;
     const canvasTop = canvasRect.top - mainRect.top;
-    const canvasDisplayWidth = canvas.offsetWidth;
-    const canvasDisplayHeight = canvas.offsetHeight;
-    const containerWidth = magnifierContainer.offsetWidth;
-    const containerHeight = magnifierContainer.offsetHeight;
-    let candidateX = e.clientX - mainRect.left + offset;
-    let candidateY = e.clientY - mainRect.top + offset;
-    if (candidateX + containerWidth > canvasLeft + canvasDisplayWidth) {
-      candidateX = e.clientX - mainRect.left - offset - containerWidth;
+    const cursorX = e.clientX - mainRect.left;
+    const cursorY = e.clientY - mainRect.top;
+
+    let candidateX, candidateY;
+    if (cursorX < (magnifierContainer.offsetWidth + margin) || cursorY < (magnifierContainer.offsetHeight + margin)) {
+      candidateX = cursorX + margin;
+      candidateY = cursorY + margin;
+    } else {
+      candidateX = cursorX - margin - magnifierContainer.offsetWidth;
+      candidateY = cursorY - margin - magnifierContainer.offsetHeight;
     }
-    if (candidateY + containerHeight > canvasTop + canvasDisplayHeight) {
-      candidateY = e.clientY - mainRect.top - offset - containerHeight;
-    }
-    if (candidateX < canvasLeft) candidateX = canvasLeft;
-    if (candidateY < canvasTop) candidateY = canvasTop;
+    candidateX = Math.max(canvasLeft, candidateX);
+    candidateY = Math.max(canvasTop, candidateY);
     magnifierContainer.style.left = candidateX + "px";
     magnifierContainer.style.top = candidateY + "px";
   }
