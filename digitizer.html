@@ -182,6 +182,10 @@
       text-align: center;
     }
 
+    #sidebar h2 {
+      margin-top: 0;
+    }
+
     #dataTable {
       width: auto;
       border-collapse: collapse;
@@ -253,17 +257,15 @@
       display: none;
     }
 
-    #magnifierContainer {
-      position: absolute;
+    /* Stationary magnifier in the sidebar */
+    #magnifierCanvas {
+      width: 200px;
+      height: 200px;
       border: 1px solid #ccc;
-      background: #fff;
-      width: 150px;
-      height: 150px;
       border-radius: 50%;
-      overflow: hidden;
+      background: #fff;
       pointer-events: none;
-      display: none;
-      transition: left 0.1s ease, top 0.1s ease;
+      /* So clicks pass through if needed */
     }
 
     /* Modal styles for selecting plot type */
@@ -300,6 +302,7 @@
     </div>
     <div class="title">Graph Digitizer</div>
   </header>
+
   <div id="content">
     <div id="main">
       <div id="controls">
@@ -317,12 +320,12 @@
         <div id="status"></div>
       </div>
       <canvas id="canvas"></canvas>
-      <div id="magnifierContainer">
-        <canvas id="magnifierCanvas" width="150" height="150"></canvas>
-        <div style="text-align:center; font-size:12px;">Magnifier (x4)</div>
-      </div>
     </div>
+
     <div id="sidebar">
+      <h2>Magnifier</h2>
+      <!-- The stationary magnifier in the sidebar -->
+      <canvas id="magnifierCanvas" width="200" height="200"></canvas><br><br>
       <h2>Data Points</h2>
       <button id="exportButton" class="btn btn-export">Export CSV</button>
       <table id="dataTable">
@@ -343,21 +346,21 @@
     <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
   </footer>
 
-</body>
-
-<!-- Modal for selecting plot type -->
-<div id="plotTypeModal" class="modal">
-  <div class="modal-content">
-    <h3>Select Plot Type (y-x)</h3>
-    <form id="plotTypeForm">
-      <label><input type="radio" name="plotType" value="1" checked> Linear-Linear</label><br>
-      <label><input type="radio" name="plotType" value="2"> Log-Linear</label><br>
-      <label><input type="radio" name="plotType" value="3"> Linear-Log</label><br>
-      <label><input type="radio" name="plotType" value="4"> Log-Log</label><br><br>
-    </form>
-    <button id="plotTypeConfirm" class="btn">Confirm</button>
+  <!-- Modal for selecting plot type -->
+  <div id="plotTypeModal" class="modal">
+    <div class="modal-content">
+      <h3>Select Plot Type</h3>
+      <form id="plotTypeForm">
+        <label><input type="radio" name="plotType" value="1" checked> Linear-Linear</label><br>
+        <label><input type="radio" name="plotType" value="2"> Log-Linear</label><br>
+        <label><input type="radio" name="plotType" value="3"> Linear-Log</label><br>
+        <label><input type="radio" name="plotType" value="4"> Log-Log</label><br><br>
+      </form>
+      <button id="plotTypeConfirm" class="btn">Confirm</button>
+    </div>
   </div>
-</div>
+
+</body>
 
 <script>
   let mode = "none",
@@ -368,7 +371,7 @@
     interceptX = null,
     slopeY = null,
     interceptY = null;
-  // New variables to store the type for each axis. Options: "linear" or "log".
+  // Variables to store the axis types ("linear" or "log")
   let xAxisType = "linear",
     yAxisType = "linear";
   let digitizedPoints = [],
@@ -380,12 +383,12 @@
   const ctx = canvas.getContext('2d');
   const statusDiv = document.getElementById('status');
   const dataTableBody = document.querySelector("#dataTable tbody");
-  const magnifierContainer = document.getElementById('magnifierContainer');
+
+  // Stationary magnifier in the sidebar
   const magnifierCanvas = document.getElementById('magnifierCanvas');
   const mCtx = magnifierCanvas.getContext('2d');
-  const magnification = 4,
-    magnifierSize = magnifierCanvas.width,
-    margin = 10;
+  const magnification = 4;
+
   const btnCalibrate = document.getElementById('calibrateAxesButton'),
     btnDigitize = document.getElementById('digitizeButton'),
     btnUndo = document.getElementById('undoButton'),
@@ -395,17 +398,60 @@
   // Add export button event listener
   document.getElementById('exportButton').addEventListener('click', exportCSV);
 
-  function updateMagnifierVisibility() {
-    magnifierContainer.style.display = (mode === "calibrateAxes" || mode === "digitize") ? "block" : "none";
+  // Function to handle magnifier drawing in the sidebar canvas
+  function updateMagnifier(e) {
+    // We only show/draw the magnified region if in calibrate or digitize mode
+    if (mode !== "calibrateAxes" && mode !== "digitize") {
+      mCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
+      return;
+    }
+
+    // Get canvas's bounding rect to convert client coords -> canvas coords
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    // Cursor position in canvas coordinates
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    // The portion of the main canvas we want to draw
+    // Our magnifier is 150x150, so the region size in the main canvas is 150 / magnification
+    const regionSize = magnifierCanvas.width / magnification;
+    let sx = x - regionSize / 2;
+    let sy = y - regionSize / 2;
+
+    // Clamp so we don't sample outside the image
+    sx = Math.max(0, Math.min(sx, canvas.width - regionSize));
+    sy = Math.max(0, Math.min(sy, canvas.height - regionSize));
+
+    // Clear the sidebar magnifier canvas
+    mCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
+
+    // Draw the magnified region from the main canvas into the sidebar magnifier
+    mCtx.drawImage(
+      canvas,
+      sx, sy, regionSize, regionSize,
+      0, 0, magnifierCanvas.width, magnifierCanvas.height
+    );
+
+    // Optionally, draw crosshairs in the magnifier
+    mCtx.beginPath();
+    mCtx.moveTo(magnifierCanvas.width / 2, 0);
+    mCtx.lineTo(magnifierCanvas.width / 2, magnifierCanvas.height);
+    mCtx.moveTo(0, magnifierCanvas.height / 2);
+    mCtx.lineTo(magnifierCanvas.width, magnifierCanvas.height / 2);
+    mCtx.strokeStyle = "rgba(255,0,0,0.5)";
+    mCtx.lineWidth = 2;
+    mCtx.stroke();
   }
 
   function setDefaultMagnifierPosition() {
-    const mainRect = document.getElementById("main").getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
-    const canvasLeft = canvasRect.left - mainRect.left;
-    const canvasTop = canvasRect.top - mainRect.top;
-    magnifierContainer.style.left = (canvasLeft + margin) + "px";
-    magnifierContainer.style.top = (canvasTop + margin) + "px";
+    // No-op now, because the magnifier is stationary in the sidebar
+  }
+
+  function updateMagnifierVisibility() {
+    // No-op in this version; the magnifier is always shown in the sidebar
   }
 
   function getCanvasCoordinates(e) {
@@ -420,21 +466,26 @@
   function updateCalibrationParameters() {
     if (calibrationX.length >= 2) {
       if (xAxisType === "linear") {
-        slopeX = (calibrationX[1].data - calibrationX[0].data) / (calibrationX[1].x - calibrationX[0].x);
+        slopeX = (calibrationX[1].data - calibrationX[0].data) /
+          (calibrationX[1].x - calibrationX[0].x);
         interceptX = calibrationX[0].data - slopeX * calibrationX[0].x;
       } else {
-        slopeX = (Math.log(calibrationX[1].data) - Math.log(calibrationX[0].data)) / (calibrationX[1].x - calibrationX[0].x);
+        slopeX = (Math.log(calibrationX[1].data) - Math.log(calibrationX[0].data)) /
+          (calibrationX[1].x - calibrationX[0].x);
         interceptX = Math.log(calibrationX[0].data) - slopeX * calibrationX[0].x;
       }
     } else {
       slopeX = interceptX = null;
     }
+
     if (calibrationY.length >= 2) {
       if (yAxisType === "linear") {
-        slopeY = (calibrationY[1].data - calibrationY[0].data) / (calibrationY[1].y - calibrationY[0].y);
+        slopeY = (calibrationY[1].data - calibrationY[0].data) /
+          (calibrationY[1].y - calibrationY[0].y);
         interceptY = calibrationY[0].data - slopeY * calibrationY[0].y;
       } else {
-        slopeY = (Math.log(calibrationY[1].data) - Math.log(calibrationY[0].data)) / (calibrationY[1].y - calibrationY[0].y);
+        slopeY = (Math.log(calibrationY[1].data) - Math.log(calibrationY[0].data)) /
+          (calibrationY[1].y - calibrationY[0].y);
         interceptY = Math.log(calibrationY[0].data) - slopeY * calibrationY[0].y;
       }
     } else {
@@ -459,7 +510,9 @@
     });
   }
 
-  function updateStatus(message) { statusDiv.textContent = message; }
+  function updateStatus(message) {
+    statusDiv.textContent = message;
+  }
 
   document.getElementById('imageLoader').addEventListener('change', handleImage, false);
 
@@ -467,6 +520,9 @@
     const reader = new FileReader();
     reader.onload = function (event) {
       image.onload = function () {
+        // Now that the image is loaded, we reset the state:
+        resetAll();
+
         const maxSize = 800;
         let newWidth = image.width;
         let newHeight = image.height;
@@ -477,18 +533,19 @@
         }
         canvas.width = newWidth;
         canvas.height = newHeight;
-        canvas.style.display = "block";
+        canvas.style.display = "block";  // Make sure the canvas is visible
+
         redrawCanvas();
         updateStatus("Image loaded. Ready for calibration.");
-        setDefaultMagnifierPosition();
+
         btnCalibrate.disabled = false;
         btnDigitize.disabled = false;
         btnUndo.disabled = false;
         btnRedo.disabled = false;
         btnReset.disabled = false;
-      }
+      };
       image.src = event.target.result;
-    }
+    };
     reader.readAsDataURL(e.target.files[0]);
   }
 
@@ -513,12 +570,14 @@
         yAxisType = "linear";
       }
       modal.style.display = "none";
-      updateStatus("Calibration (" + (xAxisType === "log" ? "log" : "linear") + " x, " + (yAxisType === "log" ? "log" : "linear") + " y): Click first point for x axis (x₁).");
+      updateStatus("Calibration (" +
+        (xAxisType === "log" ? "log" : "linear") + " x, " +
+        (yAxisType === "log" ? "log" : "linear") + " y): Click first point for X axis (x₁).");
       mode = "calibrateAxes";
       calibrationPhase = "x1";
       activeCalibration = null;
       updateMagnifierVisibility();
-    }
+    };
   }
 
   document.getElementById('calibrateAxesButton').addEventListener('click', function () {
@@ -544,9 +603,17 @@
     updateMagnifierVisibility();
   });
 
-  document.getElementById('resetButton').addEventListener('click', function () { resetAll(); });
-  document.getElementById('undoButton').addEventListener('click', function () { undoAction(); });
-  document.getElementById('redoButton').addEventListener('click', function () { redoAction(); });
+  document.getElementById('resetButton').addEventListener('click', function () {
+    resetAll();
+  });
+
+  document.getElementById('undoButton').addEventListener('click', function () {
+    undoAction();
+  });
+
+  document.getElementById('redoButton').addEventListener('click', function () {
+    redoAction();
+  });
 
   function promptForCalibrationValue() {
     let promptText = "";
@@ -594,7 +661,7 @@
           updateStatus("Saved Y point " + calibrationY.length + " of 2.");
           if (calibrationPhase === "y1") {
             calibrationPhase = "y2";
-            updateStatus("Calibration: Click second point for Y axis (y₂).");
+            updateStatus("Calibration: Click second point for y axis (y₂).");
           } else {
             updateCalibrationParameters();
             mode = "none";
@@ -606,7 +673,6 @@
       }
       activeCalibration = null;
       redrawCanvas();
-      updateMagnifier(lastEvent);
     } else if (mode === "digitize") {
       if (slopeX === null || slopeY === null) {
         alert("Calibration incomplete.");
@@ -628,7 +694,6 @@
       updateStatus("Digitized point (" + dataX.toFixed(4) + ", " + dataY.toFixed(4) + "). Total: " + digitizedPoints.length);
       updateDataTable();
       redrawCanvas();
-      updateMagnifier(lastEvent);
     }
   }
 
@@ -658,49 +723,6 @@
     updateMagnifier(e);
   });
 
-  // Modified updateMagnifier so that the magnifier is always positioned on the side of the cursor.
-  function updateMagnifier(e) {
-    if (magnifierContainer.style.display === "none") return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / canvas.offsetWidth;
-    const scaleY = canvas.height / canvas.offsetHeight;
-    const x = Math.round((e.clientX - rect.left) * scaleX) + 0.5;
-    const y = (e.clientY - rect.top) * scaleY;
-    const regionSize = magnifierSize / magnification;
-    let sx = x - regionSize / 2;
-    let sy = y - regionSize / 2;
-    sx = Math.max(0, Math.min(sx, canvas.width - regionSize));
-    sy = Math.max(0, Math.min(sy, canvas.height - regionSize));
-    mCtx.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
-    mCtx.drawImage(canvas, sx, sy, regionSize, regionSize, 0, 0, magnifierCanvas.width, magnifierCanvas.height);
-    mCtx.beginPath();
-    mCtx.moveTo(Math.round(magnifierCanvas.width / 2) + 0.5, 0);
-    mCtx.lineTo(Math.round(magnifierCanvas.width / 2) + 0.5, magnifierCanvas.height);
-    mCtx.moveTo(0, magnifierCanvas.height / 2);
-    mCtx.lineTo(magnifierCanvas.width, magnifierCanvas.height / 2);
-    mCtx.strokeStyle = "rgba(255,0,0,0.5)";
-    mCtx.lineWidth = 2;
-    mCtx.stroke();
-
-    const mainRect = document.getElementById("main").getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
-    const canvasLeft = canvasRect.left - mainRect.left;
-    const canvasTop = canvasRect.top - mainRect.top;
-    const cursorX = e.clientX - mainRect.left;
-    const cursorY = e.clientY - mainRect.top;
-
-    // Position the magnifier so it is on the side opposite to the center of the main container.
-    let candidateX = (cursorX < mainRect.width / 2 ? cursorX + margin : cursorX - margin - magnifierContainer.offsetWidth);
-    let candidateY = (cursorY < mainRect.height / 2 ? cursorY + margin : cursorY - margin - magnifierContainer.offsetHeight);
-
-    // Ensure the magnifier does not go out of the canvas bounds.
-    candidateX = Math.max(canvasLeft, Math.min(candidateX, canvasLeft + canvas.offsetWidth - magnifierContainer.offsetWidth));
-    candidateY = Math.max(canvasTop, Math.min(candidateY, canvasTop + canvas.offsetHeight - magnifierContainer.offsetHeight));
-
-    magnifierContainer.style.left = candidateX + "px";
-    magnifierContainer.style.top = candidateY + "px";
-  }
-
   function drawMarker(x, y, color) {
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, 2 * Math.PI);
@@ -723,6 +745,10 @@
     if (activeCalibration) {
       let col = calibrationPhase.startsWith("x") ? "blue" : "green";
       drawMarker(activeCalibration.x, activeCalibration.y, col);
+    }
+    // If the user is moving the cursor, also update the magnifier
+    if (lastEvent) {
+      updateMagnifier(lastEvent);
     }
   }
 
@@ -808,7 +834,9 @@
     btnReset.disabled = true;
   }
 
-  window.addEventListener("load", function () { resetAll(); });
+  window.addEventListener("load", function () {
+    resetAll();
+  });
 </script>
 
 </html>
