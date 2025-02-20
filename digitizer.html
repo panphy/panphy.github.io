@@ -82,7 +82,7 @@
     .btn-export {
       background-color: var(--export-bg);
       color: var(--export-text);
-      width: 100%;
+      width: 65%;
     }
 
     html,
@@ -182,8 +182,15 @@
       text-align: center;
     }
 
-    #sidebar h2 {
-      margin-top: 0;
+    #sidebar h3 {
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      background-color: #ffad7a;
+      color: #222;
+      padding: 5px;
+      border-radius: 4px;
+      margin: 0 0 10px;
+      text-align: center;
     }
 
     #dataTable {
@@ -195,17 +202,17 @@
     #dataTable th,
     #dataTable td {
       border: 1px solid #999;
-      padding: 8px;
+      padding: 5px;
       text-align: center;
     }
 
     #dataTable th:nth-child(1) {
-      width: 40px;
+      width: 50px;
     }
 
     #dataTable th:nth-child(2),
     #dataTable th:nth-child(3) {
-      width: 60px;
+      width: 70px;
     }
 
     #dataTable tr:nth-child(odd) {
@@ -323,11 +330,11 @@
     </div>
 
     <div id="sidebar">
-      <h2>Magnifier</h2>
+      <h3>Magnifier</h3>
       <!-- The stationary magnifier in the sidebar -->
       <canvas id="magnifierCanvas" width="200" height="200"></canvas><br><br>
-      <h2>Data Points</h2>
-      <button id="exportButton" class="btn btn-export">Export CSV</button>
+      <h3>Data Points</h3>
+      <button id="exportButton" class="btn btn-export">Export Data (.csv)</button>
       <table id="dataTable">
         <thead>
           <tr>
@@ -572,7 +579,7 @@
       modal.style.display = "none";
       updateStatus("Calibration (" +
         (xAxisType === "log" ? "log" : "linear") + " x, " +
-        (yAxisType === "log" ? "log" : "linear") + " y): Click first point for X axis (x₁).");
+        (yAxisType === "log" ? "log" : "linear") + " y): Click first point for x axis (x₁).");
       mode = "calibrateAxes";
       calibrationPhase = "x1";
       activeCalibration = null;
@@ -619,10 +626,10 @@
     let promptText = "";
     let isLog = false;
     if (calibrationPhase.startsWith("x")) {
-      promptText = "Enter actual value for X (" + (calibrationPhase === "x1" ? "first" : "second") + " point):";
+      promptText = "Enter actual value for x (" + (calibrationPhase === "x1" ? "first" : "second") + " point):";
       if (xAxisType === "log") { isLog = true; }
     } else if (calibrationPhase.startsWith("y")) {
-      promptText = "Enter actual value for Y (" + (calibrationPhase === "y1" ? "first" : "second") + " point):";
+      promptText = "Enter actual value for y (" + (calibrationPhase === "y1" ? "first" : "second") + " point):";
       if (yAxisType === "log") { isLog = true; }
     }
     let input = window.prompt(promptText);
