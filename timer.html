@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+
     <style>
-        /* Apply box-sizing to all elements for consistent sizing */
+        /* ===== Global ===== */
         *,
         *::before,
         *::after {
@@ -15,34 +16,15 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
             margin: 0;
-            min-height: 100vh;
-            background-color: #2c3e50;
+            font-family: Arial, sans-serif;
+            background: #2c3e50;
             color: #ecf0f1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 0.8rem;
-            /* Space from the top */
-        }
-
-        .logo-container {
-            position: fixed;
-            /* or absolute if you prefer scrolling with the page */
-            top: 10px;
-            /* 10px from the top edge */
-            left: 10px;
-            /* 10px from the left edge */
-            z-index: 999;
-            /* ensure it appears above other elements */
-        }
-
-        .logo-container img {
-            max-height: 40px;
-            /* adjust as desired for a bigger/smaller logo */
-            width: auto;
-            height: auto;
+            min-height: 100vh;
+            padding-top: .8rem;
         }
 
         a {
@@ -50,39 +32,54 @@
             text-decoration: none;
         }
 
-        a:hover {
-            color: #ff5f1f;
-            text-decoration: underline;
-        }
-
+        a:hover,
         a:visited {
             color: #ff5f1f;
         }
 
-        /* Timer Container */
+        /* ===== Logo ===== */
+        .logo-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+        }
+
+        .logo-container img {
+            max-height: 40px;
+        }
+
+        /* ===== Layout ===== */
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        /* ===== Timer panel ===== */
         .timer-container {
             background: #34495E;
             border-radius: 15px;
             padding: 1.5rem;
-            width: 80vw;
+            flex: 1 1 500px;
+            max-width: 900px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
         }
 
-        /* Timer banner fully rounded corners */
-        .timer-container h1 {
-            font-size: 3.5vw;
+        #current-clock {
+            font-size: 4vw;
             margin: 0;
-            padding: 0.2rem 0;
-            background-color: #333333;
-            color: #ffffff;
+            padding: .25rem 0;
+            background: #333;
             border-radius: 10px;
         }
 
-        /* Increased clock size for better visibility */
         .time {
             font-size: 12vw;
-            /* Bigger clock display */
             font-weight: bold;
             margin: 1rem 0;
         }
@@ -91,37 +88,36 @@
             color: #e74c3c;
         }
 
-        .label {
+        .label,
+        .info {
             font-size: 1.5vw;
+            margin-top: .5rem;
+        }
+
+        .label {
             color: #e74c3c;
-            margin-top: 0.5rem;
         }
 
         .info {
-            font-size: 1.5vw;
             color: #95a5a6;
-            margin: 1rem 0;
         }
 
         .inputs {
             display: flex;
             justify-content: center;
-            /* Center the inputs */
             gap: 1rem;
             margin: 1.5rem 0;
         }
 
         input {
-            padding: 0.8rem;
+            width: 12%;
+            padding: .8rem;
             font-size: 1.2rem;
             border: 1px solid #7f8c8d;
             border-radius: 10px;
-            width: 12%;
-            /* Smaller set time boxes */
             background: #2c3e50;
             color: #ecf0f1;
             text-align: center;
-            /* Center placeholder and typed text */
         }
 
         input:focus {
@@ -129,71 +125,66 @@
             outline: none;
         }
 
-        /* Control Container (Separate from timer container) */
+        /* ===== Control panel ===== */
         .control-container {
             background: #3c597a;
-            /* Slightly different shade for visual differentiation */
             border-radius: 15px;
             padding: 1rem;
-            width: 80vw;
-            max-width: 800px;
-            margin-top: 2rem;
+            flex: 0 1 140px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
         }
 
         .control-area {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-            /* Closely arranged buttons */
-            margin: 0 auto;
-            max-width: 300px;
-            /* Limit width for a neat, focused look */
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
         }
 
         button {
-            padding: 10px 15px;
+            width: 100%;
+            padding: 10px 12px;
             font-size: 1rem;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
+            transition: background .3s, transform .2s;
             color: #ecf0f1;
-            width: 100%;
-            text-align: center;
         }
 
         button:hover {
             transform: translateY(-3px);
-            opacity: 0.9;
+            opacity: .9;
         }
 
-        /* Distinct colors for different buttons */
-        button.set {
-            background-color: #f39c12;
+        /* Dynamic colour classes */
+        .btn-set {
+            background: #f39c12;
         }
 
-        button.clear {
-            background-color: #c0392b;
+        /* orange */
+        .btn-reset {
+            background: #c0392b;
         }
 
-        button.start {
-            background-color: #27ae60;
+        /* red    */
+        .btn-start {
+            background: #27ae60;
         }
 
-        button.pause {
-            background-color: #2980b9;
+        /* green  */
+        .btn-pause {
+            background: #2980b9;
         }
 
-        button.resume {
-            background-color: #27ae60;
+        /* blue   */
+        .btn-clear {
+            background: #7f8c8d;
         }
 
-        button.reset {
-            background-color: #2980b9;
-        }
+        /* grey   */
 
+        /* Blink animation when finished */
         .blink {
             animation: blinker 1s linear infinite;
         }
@@ -204,14 +195,14 @@
             }
         }
 
-        @media (max-width: 600px) {
-            .timer-container h1 {
+        /* ===== Responsive tweaks ===== */
+        @media(max-width:600px) {
+            #current-clock {
                 font-size: 6vw;
             }
 
             .time {
                 font-size: 14vw;
-                /* Even larger on small screens if needed */
             }
 
             .label,
@@ -221,269 +212,245 @@
 
             input {
                 width: 20%;
-                /* Slightly larger on mobile for easier tapping */
-            }
-
-            button {
-                padding: 8px 10px;
-                font-size: 0.9rem;
             }
 
             .control-area {
-                max-width: 250px;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: .5rem;
             }
         }
     </style>
 </head>
 
 <body>
-
-    <!-- Logo Container: pinned top-left -->
+    <!-- Logo -->
     <div class="logo-container">
         <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-            <img src="panphy.png" alt="PanPhy logo" />
+            <img src="panphy.png" alt="PanPhy logo">
         </a>
     </div>
 
-    <!-- Timer Area -->
-    <div class="timer-container">
-        <h1>Timer</h1>
-        <div class="time" id="original-time">00:00:00</div>
-        <div class="label">25% Extra Time</div>
-        <div class="time extra-time" id="extra-time">00:00:00</div>
-        <div class="info" id="start-end-times"></div>
-        <div class="inputs">
-            <input type="number" id="hours" placeholder="Hrs" min="0">
-            <input type="number" id="minutes" placeholder="Min" min="0" max="59">
-            <input type="number" id="seconds" placeholder="Sec" min="0" max="59">
-        </div>
-    </div>
+    <!-- ===== Main app ===== -->
+    <div class="app-container">
 
-    <!-- Control Area (Separate Container) -->
-    <div class="control-container">
-        <div class="control-area">
-            <!-- Top row -->
-            <button class="set" onclick="setTimer()">Set Timer</button>
-            <button class="clear" onclick="clearTimer()">Clear</button>
-            <!-- Middle row -->
-            <button class="start" onclick="startTimer()">Start</button>
-            <button class="pause" onclick="pauseTimer()">Pause</button>
-            <!-- Bottom row -->
-            <button class="resume" onclick="resumeTimer()">Resume</button>
-            <button class="reset" onclick="resetTimer()">Reset</button>
-        </div>
-    </div>
+        <!-- Timer panel -->
+        <div class="timer-container">
+            <h1 id="current-clock">Current Time: --:--</h1>
 
-    <!-- Separate audio elements for original and extra timers with preload -->
+            <div class="time" id="original-time">00:00:00</div>
+            <div class="label">25% Extra Time</div>
+            <div class="time extra-time" id="extra-time">00:00:00</div>
+
+            <div class="info" id="start-end-times"></div>
+
+            <div class="inputs">
+                <input type="number" id="hours" placeholder="Hrs" min="0">
+                <input type="number" id="minutes" placeholder="Min" min="0" max="59">
+                <input type="number" id="seconds" placeholder="Sec" min="0" max="59">
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="control-container">
+            <div class="control-area">
+                <button id="setResetBtn" class="btn-set">Set&nbsp;Timer</button>
+                <button id="toggleBtn" class="btn-start">Start</button>
+                <button id="clearBtn" class="btn-clear">Clear</button>
+            </div>
+        </div>
+
+    </div><!-- /app-container -->
+
+    <!-- Audio -->
     <audio id="alarm-sound-original" src="/timer_beep.mp3" preload="auto"></audio>
     <audio id="alarm-sound-extra" src="/timer_beep.mp3" preload="auto"></audio>
 
+    <!-- Footer -->
     <footer>
-        <p>&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> | <a
-                href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        <p>&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
         </p>
     </footer>
 
+    <!-- ===== Scripts ===== -->
     <script>
-        let originalTimerInterval;
-        let extraTimerInterval;
-        let remainingTime = 0;
-        let extraRemainingTime = 0;
+        /* === Live clock (HH:MM) === */
+        function updateCurrentClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB',
+                { hour: '2-digit', minute: '2-digit', hour12: false });
+            document.getElementById('current-clock').textContent = `Current Time: ${timeStr}`;
+        }
+        setInterval(updateCurrentClock, 1000);
+        updateCurrentClock();
+
+        /* === Timer state === */
+        let originalTimerInterval, extraTimerInterval;
+        let remainingTime = 0, extraRemainingTime = 0;
         let paused = false;
-        let originalEndTimeObj = null;
-        let extraEndTimeObj = null;
 
-        function formatTime(hours, minutes, seconds) {
-            return String(hours).padStart(2, '0') + ':' +
-                String(minutes).padStart(2, '0') + ':' +
-                String(seconds).padStart(2, '0');
+        /* Store last-set time so Reset can recall it */
+        let initialHours = 0, initialMinutes = 0, initialSeconds = 0;
+        let initialTotalSeconds = 0;
+
+        /* === Helpers === */
+        const two = d => String(d).padStart(2, '0');
+        const formatTime = (h, m, s) => `${two(h)}:${two(m)}:${two(s)}`;
+        const formatClock = d => `${two(d.getHours())}:${two(d.getMinutes())}`;
+
+        function updateDisplays() {
+            document.getElementById('original-time').textContent =
+                formatTime(Math.floor(remainingTime / 3600),
+                    Math.floor((remainingTime % 3600) / 60),
+                    remainingTime % 60);
+
+            document.getElementById('extra-time').textContent =
+                formatTime(Math.floor(extraRemainingTime / 3600),
+                    Math.floor((extraRemainingTime % 3600) / 60),
+                    extraRemainingTime % 60);
         }
 
-        function format24HourTime(date) {
-            return String(date.getHours()).padStart(2, '0') + ':' +
-                String(date.getMinutes()).padStart(2, '0');
-        }
-
+        /* === Core actions === */
         function setTimer() {
-            const hours = parseInt(document.getElementById('hours').value) || 0;
-            const minutes = parseInt(document.getElementById('minutes').value) || 0;
-            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            initialHours = parseInt(document.getElementById('hours').value) || 0;
+            initialMinutes = parseInt(document.getElementById('minutes').value) || 0;
+            initialSeconds = parseInt(document.getElementById('seconds').value) || 0;
 
-            remainingTime = hours * 3600 + minutes * 60 + seconds;
-            extraRemainingTime = Math.round(remainingTime * 1.25);
+            initialTotalSeconds = initialHours * 3600 + initialMinutes * 60 + initialSeconds;
 
-            document.getElementById('original-time').textContent = formatTime(
-                Math.floor(remainingTime / 3600),
-                Math.floor((remainingTime % 3600) / 60),
-                remainingTime % 60
-            );
+            remainingTime = initialTotalSeconds;
+            extraRemainingTime = Math.round(initialTotalSeconds * 1.25);
 
-            document.getElementById('extra-time').textContent = formatTime(
-                Math.floor(extraRemainingTime / 3600),
-                Math.floor((extraRemainingTime % 3600) / 60),
-                extraRemainingTime % 60
-            );
-
+            updateDisplays();
             document.getElementById('start-end-times').innerHTML = "";
-            paused = false;
-            stopBlinking(); /* Ensure blinking is stopped */
+            paused = false; stopBlinking();
+        }
+
+        function resetTimer() {
+            clearInterval(originalTimerInterval); clearInterval(extraTimerInterval);
+            remainingTime = initialTotalSeconds;
+            extraRemainingTime = Math.round(initialTotalSeconds * 1.25);
+            updateDisplays();
+            document.getElementById('start-end-times').innerHTML = "";
+            paused = false; stopBlinking();
+
+            /* restore inputs */
+            document.getElementById('hours').value = initialHours;
+            document.getElementById('minutes').value = initialMinutes;
+            document.getElementById('seconds').value = initialSeconds;
+        }
+
+        function clearTimer() {
+            clearInterval(originalTimerInterval); clearInterval(extraTimerInterval);
+            remainingTime = extraRemainingTime = 0;
+            updateDisplays();
+            document.getElementById('start-end-times').innerHTML = "";
+            ['hours', 'minutes', 'seconds'].forEach(id => document.getElementById(id).value = "");
+            paused = false; stopBlinking();
+
+            /* Return buttons to initial states */
+            setResetBtn.dataset.state = 'set';
+            setResetBtn.textContent = 'Set Timer';
+            setResetBtn.classList.remove('btn-reset'); setResetBtn.classList.add('btn-set');
+
+            toggleBtn.dataset.state = 'start';
+            toggleBtn.textContent = 'Start';
+            toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
         }
 
         function startTimer() {
             if (remainingTime <= 0) return;
 
             const now = new Date();
-            const startTime = format24HourTime(now);
-            originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
-            extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
+            const originalEnd = new Date(now.getTime() + remainingTime * 1000);
+            const extraEnd = new Date(now.getTime() + extraRemainingTime * 1000);
 
             document.getElementById('start-end-times').innerHTML =
-                `Start: ${startTime} | End: ${format24HourTime(originalEndTimeObj)} ` +
-                `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
+                `Start: ${formatClock(now)} | End: ${formatClock(originalEnd)}
+         <span class="extra-time">| Extra End: ${formatClock(extraEnd)}</span>`;
 
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
+            clearInterval(originalTimerInterval); clearInterval(extraTimerInterval);
 
             originalTimerInterval = setInterval(() => {
                 if (remainingTime > 0) {
-                    remainingTime--;
-                    document.getElementById('original-time').textContent = formatTime(
-                        Math.floor(remainingTime / 3600),
-                        Math.floor((remainingTime % 3600) / 60),
-                        remainingTime % 60
-                    );
+                    remainingTime--; updateDisplays();
                 } else {
                     clearInterval(originalTimerInterval);
-                    playAlarm('alarm-sound-original');
-                    blinkTimer('original-time');
+                    playAlarm('alarm-sound-original'); blinkTimer('original-time');
                 }
             }, 1000);
 
             extraTimerInterval = setInterval(() => {
                 if (extraRemainingTime > 0) {
-                    extraRemainingTime--;
-                    document.getElementById('extra-time').textContent = formatTime(
-                        Math.floor(extraRemainingTime / 3600),
-                        Math.floor((extraRemainingTime % 3600) / 60),
-                        extraRemainingTime % 60
-                    );
+                    extraRemainingTime--; updateDisplays();
                 } else {
                     clearInterval(extraTimerInterval);
-                    playAlarm('alarm-sound-extra');
-                    blinkTimer('extra-time');
+                    playAlarm('alarm-sound-extra'); blinkTimer('extra-time');
                 }
             }, 1000);
         }
 
-        function pauseTimer() {
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-            paused = true;
-        }
+        function pauseTimer() { clearInterval(originalTimerInterval); clearInterval(extraTimerInterval); paused = true; }
+        function resumeTimer() { if (!paused) return; paused = false; startTimer(); }
 
-        function resumeTimer() {
-            if (!paused) return;
-            paused = false;
-            const now = new Date();
-            originalEndTimeObj = new Date(now.getTime() + remainingTime * 1000);
-            extraEndTimeObj = new Date(now.getTime() + extraRemainingTime * 1000);
+        /* === Visual helpers === */
+        function blinkTimer(id) { document.getElementById(id).classList.add('blink'); }
+        function stopBlinking() { document.querySelectorAll('.blink').forEach(el => el.classList.remove('blink')); }
+        function playAlarm(id) { const a = document.getElementById(id); a.currentTime = 0; a.play().catch(() => { }); }
 
-            document.getElementById('start-end-times').innerHTML =
-                `Start: ${format24HourTime(now)} | End: ${format24HourTime(originalEndTimeObj)} ` +
-                `<span class="extra-time">| Extra Time End: ${format24HourTime(extraEndTimeObj)}</span>`;
+        /* === Button wiring === */
+        const setResetBtn = document.getElementById('setResetBtn');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
-            originalTimerInterval = setInterval(() => {
-                if (remainingTime > 0) {
-                    remainingTime--;
-                    document.getElementById('original-time').textContent = formatTime(
-                        Math.floor(remainingTime / 3600),
-                        Math.floor((remainingTime % 3600) / 60),
-                        remainingTime % 60
-                    );
-                } else {
-                    clearInterval(originalTimerInterval);
-                    playAlarm('alarm-sound-original');
-                    blinkTimer('original-time');
-                }
-            }, 1000);
+        setResetBtn.dataset.state = 'set';
+        toggleBtn.dataset.state = 'start';
 
-            extraTimerInterval = setInterval(() => {
-                if (extraRemainingTime > 0) {
-                    extraRemainingTime--;
-                    document.getElementById('extra-time').textContent = formatTime(
-                        Math.floor(extraRemainingTime / 3600),
-                        Math.floor((extraRemainingTime % 3600) / 60),
-                        extraRemainingTime % 60
-                    );
-                } else {
-                    clearInterval(extraTimerInterval);
-                    playAlarm('alarm-sound-extra');
-                    blinkTimer('extra-time');
-                }
-            }, 1000);
-        }
+        setResetBtn.addEventListener('click', () => {
+            if (setResetBtn.dataset.state === 'set') {
+                setTimer();
+                setResetBtn.dataset.state = 'reset';
+                setResetBtn.textContent = 'Reset';
+                setResetBtn.classList.remove('btn-set'); setResetBtn.classList.add('btn-reset');
+            } else {
+                resetTimer();
+            }
+        });
 
-        function resetTimer() {
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-            setTimer();
-        }
+        toggleBtn.addEventListener('click', () => {
+            switch (toggleBtn.dataset.state) {
+                case 'start':
+                    startTimer();
+                    toggleBtn.dataset.state = 'pause';
+                    toggleBtn.textContent = 'Pause';
+                    toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
+                    break;
+                case 'pause':
+                    pauseTimer();
+                    toggleBtn.dataset.state = 'resume';
+                    toggleBtn.textContent = 'Resume';
+                    toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+                    break;
+                case 'resume':
+                    resumeTimer();
+                    toggleBtn.dataset.state = 'pause';
+                    toggleBtn.textContent = 'Pause';
+                    toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
+                    break;
+            }
+        });
 
-        function clearTimer() {
-            clearInterval(originalTimerInterval);
-            clearInterval(extraTimerInterval);
-            remainingTime = 0;
-            extraRemainingTime = 0;
-            document.getElementById('original-time').textContent = "00:00:00";
-            document.getElementById('extra-time').textContent = "00:00:00";
-            document.getElementById('start-end-times').innerHTML = "";
-            document.getElementById('hours').value = "";
-            document.getElementById('minutes').value = "";
-            document.getElementById('seconds').value = "";
-            paused = false;
-            stopBlinking();
-        }
+        clearBtn.addEventListener('click', clearTimer);
 
-        function blinkTimer(timerId) {
-            const timerElement = document.getElementById(timerId);
-            timerElement.classList.add('blink');
-        }
-
-        function stopBlinking() {
-            const blinkElements = document.querySelectorAll('.blink');
-            blinkElements.forEach(element => {
-                element.classList.remove('blink');
-            });
-        }
-
-        function playAlarm(alarmId) {
-            const alarmSound = document.getElementById(alarmId);
-            alarmSound.currentTime = 0; // Reset to start
-            alarmSound.play().catch(error => {
-                console.error("Audio playback failed:", error);
-            });
-        }
-
-        // Unlock audio on user interaction (Set Timer button)
-        function unlockAudio() {
-            const originalAlarm = document.getElementById('alarm-sound-original');
-            const extraAlarm = document.getElementById('alarm-sound-extra');
-
-            // Play and pause to unlock audio in Chrome
-            originalAlarm.play().then(() => originalAlarm.pause()).catch(error => {
-                console.error("Audio unlock failed:", error);
-            });
-            extraAlarm.play().then(() => extraAlarm.pause()).catch(error => {
-                console.error("Audio unlock failed:", error);
-            });
-
-            console.log("Audio unlocked for Chrome");
-        }
-
-        // Attach unlockAudio to "Set Timer" button
+        /* Unlock audio on first interaction */
         document.addEventListener('DOMContentLoaded', () => {
-            const setButton = document.querySelector('.set');
-            setButton.addEventListener('click', unlockAudio);
+            setResetBtn.addEventListener('click', () => {
+                ['alarm-sound-original', 'alarm-sound-extra'].forEach(id => {
+                    const a = document.getElementById(id);
+                    a.play().then(() => a.pause()).catch(() => { });
+                });
+            }, { once: true });
         });
     </script>
 </body>
