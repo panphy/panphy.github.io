@@ -169,11 +169,11 @@
         }
 
         .btn-pause {
-            background: #2980b9
+            background: #3467eb
         }
 
         .btn-clear {
-            background: #7f8c8d
+            background: #b2977c
         }
 
         .blink {
@@ -218,19 +218,24 @@
 </head>
 
 <body>
+    <!-- logo -->
     <div class="logo-container">
-        <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"><img src="panphy.png"
-                alt="logo"></a>
+        <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+            <img src="panphy.png" alt="logo">
+        </a>
     </div>
 
     <div class="app-container">
         <!-- timer -->
         <div class="timer-container">
             <h1 id="current-clock">Current Time: --:--</h1>
+
             <div class="time" id="original-time">00:00:00</div>
             <div class="label">25% Extra Time</div>
             <div class="time extra-time" id="extra-time">00:00:00</div>
+
             <div class="info" id="start-end-times"></div>
+
             <div class="inputs">
                 <input id="hours" type="number" placeholder="Hrs" min="0">
                 <input id="minutes" type="number" placeholder="Min" min="0" max="59">
@@ -253,9 +258,9 @@
     <audio id="alarm-sound-extra" src="/timer_beep.mp3" preload="auto"></audio>
 
     <footer>
-        <p>&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a>
-            | <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My
-                Projects</a></p>
+        <p>&copy; 2025&nbsp;<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        </p>
     </footer>
 
     <script>
@@ -263,37 +268,38 @@
         const hoursInput = document.getElementById('hours');
         const minutesInput = document.getElementById('minutes');
         const secondsInput = document.getElementById('seconds');
-        const originalTimeEl = document.getElementById('original-time');
-        const extraTimeEl = document.getElementById('extra-time');
+        const originalEl = document.getElementById('original-time');
+        const extraEl = document.getElementById('extra-time');
         const infoEl = document.getElementById('start-end-times');
 
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
         const clearBtn = document.getElementById('clearBtn');
 
-        /* ------------- live HH:MM clock -------------- */
-        const updateClock = () =>
+        /* ------------- live HH:MM clock ------------- */
+        const updateClock = () => {
             document.getElementById('current-clock').textContent =
-            'Current Time: ' +
-            new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+                'Current Time: ' + new Date().toLocaleTimeString(
+                    'en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+        };
         setInterval(updateClock, 1000); updateClock();
 
-        /* ---------- timer state & helpers ------------ */
-        let origInterval, extraInterval, remaining = 0, extraRemaining = 0, paused = false;
+        /* ---------- timer state & helpers ----------- */
+        let origInt, extraInt, remaining = 0, extraRemaining = 0, paused = false;
         let initH = 0, initM = 0, initS = 0, initTotal = 0;
 
         const two = d => String(d).padStart(2, '0');
         const fmt = (h, m, s) => `${two(h)}:${two(m)}:${two(s)}`;
-        const fmtClock = d => `${two(d.getHours())}:${two(d.getMinutes())}`;
+        const fClock = d => `${two(d.getHours())}:${two(d.getMinutes())}`;
         const blink = id => document.getElementById(id).classList.add('blink');
-        const stopBlink = () => document.querySelectorAll('.blink').forEach(el => el.classList.remove('blink'));
+        const stopBlink = () => document.querySelectorAll('.blink').forEach(e => e.classList.remove('blink'));
         const playAlarm = id => { const a = document.getElementById(id); a.currentTime = 0; a.play().catch(() => { }); };
 
         const updateDisplays = () => {
-            originalTimeEl.textContent = fmt(Math.floor(remaining / 3600),
+            originalEl.textContent = fmt(Math.floor(remaining / 3600),
                 Math.floor((remaining % 3600) / 60),
                 remaining % 60);
-            extraTimeEl.textContent = fmt(Math.floor(extraRemaining / 3600),
+            extraEl.textContent = fmt(Math.floor(extraRemaining / 3600),
                 Math.floor((extraRemaining % 3600) / 60),
                 extraRemaining % 60);
         };
@@ -308,21 +314,29 @@
             remaining = initTotal;
             extraRemaining = Math.round(initTotal * 1.25);
 
-            updateDisplays(); infoEl.textContent = ''; paused = false; stopBlink();
+            /* clear inputs immediately */
+            hoursInput.value = minutesInput.value = secondsInput.value = '';
+
+            updateDisplays();
+            infoEl.textContent = ''; paused = false; stopBlink();
         }
 
         function resetTimer() {
-            clearInterval(origInterval); clearInterval(extraInterval);
+            clearInterval(origInt); clearInterval(extraInt);
             remaining = initTotal; extraRemaining = Math.round(initTotal * 1.25);
             updateDisplays(); infoEl.textContent = ''; paused = false; stopBlink();
 
-            hoursInput.value = initH;
-            minutesInput.value = initM;
-            secondsInput.value = initS;
+            /* keep input boxes empty */
+            hoursInput.value = minutesInput.value = secondsInput.value = '';
+
+            /* NEW: return toggle button to initial START state */
+            toggleBtn.dataset.state = 'start';
+            toggleBtn.textContent = 'Start';
+            toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
         }
 
         function clearTimer() {
-            clearInterval(origInterval); clearInterval(extraInterval);
+            clearInterval(origInt); clearInterval(extraInt);
             remaining = extraRemaining = 0; paused = false; stopBlink();
             updateDisplays(); infoEl.textContent = '';
 
@@ -346,25 +360,26 @@
             const xEnd = new Date(now.getTime() + extraRemaining * 1000);
 
             infoEl.innerHTML =
-                `Start: ${fmtClock(now)} | End: ${fmtClock(end)} <span class="extra-time">| Extra End: ${fmtClock(xEnd)}</span>`;
+                `Start: ${fClock(now)} | End: ${fClock(end)}
+     <span class="extra-time">| Extra End: ${fClock(xEnd)}</span>`;
 
-            clearInterval(origInterval); clearInterval(extraInterval);
+            clearInterval(origInt); clearInterval(extraInt);
 
-            origInterval = setInterval(() => {
+            origInt = setInterval(() => {
                 if (remaining > 0) { remaining--; updateDisplays(); }
-                else { clearInterval(origInterval); playAlarm('alarm-sound-original'); blink('original-time'); }
+                else { clearInterval(origInt); playAlarm('alarm-sound-original'); blink('original-time'); }
             }, 1000);
 
-            extraInterval = setInterval(() => {
+            extraInt = setInterval(() => {
                 if (extraRemaining > 0) { extraRemaining--; updateDisplays(); }
-                else { clearInterval(extraInterval); playAlarm('alarm-sound-extra'); blink('extra-time'); }
+                else { clearInterval(extraInt); playAlarm('alarm-sound-extra'); blink('extra-time'); }
             }, 1000);
         }
 
-        const pauseTimer = () => { clearInterval(origInterval); clearInterval(extraInterval); paused = true; };
+        const pauseTimer = () => { clearInterval(origInt); clearInterval(extraInt); paused = true; };
         const resumeTimer = () => { if (!paused) return; paused = false; startTimer(); };
 
-        /* -------------- button wiring ------------- */
+        /* ------------ button wiring ------------ */
         setResetBtn.dataset.state = 'set';
         toggleBtn.dataset.state = 'start';
 
