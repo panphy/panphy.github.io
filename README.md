@@ -1,1 +1,1 @@
-Welcome to the PanPhy Projects Hub. Each project here is the result of a collaborative effort between me and AI. These tools and simulations are designed to provide interactive and educational experiences. Click on any project above to explore and enjoy!
+Welcome to the PanPhy Projects. The tools and simulations here are designed to provide interactive and educational experiences. Click on any project above to explore and enjoy!
