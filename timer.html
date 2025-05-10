@@ -6,13 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/favicon.png">
-
     <style>
-        /* ===== Global ===== */
         *,
         *::before,
         *::after {
-            box-sizing: border-box;
+            box-sizing: border-box
         }
 
         body {
@@ -24,31 +22,31 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-top: .8rem;
+            padding-top: .8rem
         }
 
         a {
             color: #ff5f1f;
-            text-decoration: none;
+            text-decoration: none
         }
 
         a:hover,
         a:visited {
-            color: #ff5f1f;
+            color: #ff5f1f
         }
 
-        /* ===== Logo ===== */
+        /* logo */
         .logo-container {
             position: fixed;
             top: 10px;
-            left: 10px;
+            left: 10px
         }
 
         .logo-container img {
-            max-height: 40px;
+            max-height: 40px
         }
 
-        /* ===== Layout ===== */
+        /* layout wrapper */
         .app-container {
             display: flex;
             flex-wrap: wrap;
@@ -56,10 +54,10 @@
             justify-content: center;
             align-items: flex-start;
             width: 100%;
-            max-width: 1400px;
+            max-width: 1400px
         }
 
-        /* ===== Timer panel ===== */
+        /* timer panel */
         .timer-container {
             background: #34495E;
             border-radius: 15px;
@@ -67,46 +65,46 @@
             flex: 1 1 500px;
             max-width: 900px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .2)
         }
 
         #current-clock {
-            font-size: 4vw;
+            font-size: 3vw;
             margin: 0;
             padding: .25rem 0;
             background: #333;
-            border-radius: 10px;
+            border-radius: 10px
         }
 
         .time {
-            font-size: 12vw;
+            font-size: 11vw;
             font-weight: bold;
-            margin: 1rem 0;
+            margin: 1rem 0
         }
 
         .extra-time {
-            color: #e74c3c;
+            color: #e74c3c
         }
 
         .label,
         .info {
             font-size: 1.5vw;
-            margin-top: .5rem;
+            margin-top: .5rem
         }
 
         .label {
-            color: #e74c3c;
+            color: #e74c3c
         }
 
         .info {
-            color: #95a5a6;
+            color: #95a5a6
         }
 
         .inputs {
             display: flex;
             justify-content: center;
             gap: 1rem;
-            margin: 1.5rem 0;
+            margin: 1.5rem 0
         }
 
         input {
@@ -117,15 +115,15 @@
             border-radius: 10px;
             background: #2c3e50;
             color: #ecf0f1;
-            text-align: center;
+            text-align: center
         }
 
         input:focus {
             border-color: #f39c12;
-            outline: none;
+            outline: none
         }
 
-        /* ===== Control panel ===== */
+        /* control panel */
         .control-container {
             background: #3c597a;
             border-radius: 15px;
@@ -133,12 +131,13 @@
             flex: 0 1 140px;
             text-align: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
+            align-self: flex-end
         }
 
         .control-area {
             display: flex;
             flex-direction: column;
-            gap: .6rem;
+            gap: .6rem
         }
 
         button {
@@ -149,109 +148,97 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background .3s, transform .2s;
-            color: #ecf0f1;
+            color: #ecf0f1
         }
 
         button:hover {
             transform: translateY(-3px);
-            opacity: .9;
+            opacity: .9
         }
 
-        /* Dynamic colour classes */
         .btn-set {
-            background: #f39c12;
+            background: #f39c12
         }
 
-        /* orange */
         .btn-reset {
-            background: #c0392b;
+            background: #c0392b
         }
 
-        /* red    */
         .btn-start {
-            background: #27ae60;
+            background: #27ae60
         }
 
-        /* green  */
         .btn-pause {
-            background: #2980b9;
+            background: #2980b9
         }
 
-        /* blue   */
         .btn-clear {
-            background: #7f8c8d;
+            background: #7f8c8d
         }
 
-        /* grey   */
-
-        /* Blink animation when finished */
         .blink {
-            animation: blinker 1s linear infinite;
+            animation: blinker 1s linear infinite
         }
 
         @keyframes blinker {
             50% {
-                opacity: 0;
+                opacity: 0
             }
         }
 
-        /* ===== Responsive tweaks ===== */
         @media(max-width:600px) {
             #current-clock {
-                font-size: 6vw;
+                font-size: 6vw
             }
 
             .time {
-                font-size: 14vw;
+                font-size: 14vw
             }
 
             .label,
             .info {
-                font-size: 3vw;
+                font-size: 3vw
             }
 
             input {
-                width: 20%;
+                width: 20%
             }
 
             .control-area {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: .5rem;
+                gap: .5rem
+            }
+
+            .control-container {
+                align-self: auto
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- Logo -->
     <div class="logo-container">
-        <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-            <img src="panphy.png" alt="PanPhy logo">
-        </a>
+        <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"><img src="panphy.png"
+                alt="logo"></a>
     </div>
 
-    <!-- ===== Main app ===== -->
     <div class="app-container">
-
-        <!-- Timer panel -->
+        <!-- timer -->
         <div class="timer-container">
             <h1 id="current-clock">Current Time: --:--</h1>
-
             <div class="time" id="original-time">00:00:00</div>
             <div class="label">25% Extra Time</div>
             <div class="time extra-time" id="extra-time">00:00:00</div>
-
             <div class="info" id="start-end-times"></div>
-
             <div class="inputs">
-                <input type="number" id="hours" placeholder="Hrs" min="0">
-                <input type="number" id="minutes" placeholder="Min" min="0" max="59">
-                <input type="number" id="seconds" placeholder="Sec" min="0" max="59">
+                <input id="hours" type="number" placeholder="Hrs" min="0">
+                <input id="minutes" type="number" placeholder="Min" min="0" max="59">
+                <input id="seconds" type="number" placeholder="Sec" min="0" max="59">
             </div>
         </div>
 
-        <!-- Controls -->
+        <!-- controls -->
         <div class="control-container">
             <div class="control-area">
                 <button id="setResetBtn" class="btn-set">Set&nbsp;Timer</button>
@@ -259,97 +246,89 @@
                 <button id="clearBtn" class="btn-clear">Clear</button>
             </div>
         </div>
-
     </div><!-- /app-container -->
 
-    <!-- Audio -->
+    <!-- audio -->
     <audio id="alarm-sound-original" src="/timer_beep.mp3" preload="auto"></audio>
     <audio id="alarm-sound-extra" src="/timer_beep.mp3" preload="auto"></audio>
 
-    <!-- Footer -->
     <footer>
-        <p>&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
-            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-        </p>
+        <p>&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a>
+            | <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My
+                Projects</a></p>
     </footer>
 
-    <!-- ===== Scripts ===== -->
     <script>
-        /* === Live clock (HH:MM) === */
-        function updateCurrentClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-GB',
-                { hour: '2-digit', minute: '2-digit', hour12: false });
-            document.getElementById('current-clock').textContent = `Current Time: ${timeStr}`;
-        }
-        setInterval(updateCurrentClock, 1000);
-        updateCurrentClock();
+        /* ------------ grab DOM nodes once ------------ */
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+        const originalTimeEl = document.getElementById('original-time');
+        const extraTimeEl = document.getElementById('extra-time');
+        const infoEl = document.getElementById('start-end-times');
 
-        /* === Timer state === */
-        let originalTimerInterval, extraTimerInterval;
-        let remainingTime = 0, extraRemainingTime = 0;
-        let paused = false;
+        const setResetBtn = document.getElementById('setResetBtn');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
-        /* Store last-set time so Reset can recall it */
-        let initialHours = 0, initialMinutes = 0, initialSeconds = 0;
-        let initialTotalSeconds = 0;
+        /* ------------- live HH:MM clock -------------- */
+        const updateClock = () =>
+            document.getElementById('current-clock').textContent =
+            'Current Time: ' +
+            new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+        setInterval(updateClock, 1000); updateClock();
 
-        /* === Helpers === */
+        /* ---------- timer state & helpers ------------ */
+        let origInterval, extraInterval, remaining = 0, extraRemaining = 0, paused = false;
+        let initH = 0, initM = 0, initS = 0, initTotal = 0;
+
         const two = d => String(d).padStart(2, '0');
-        const formatTime = (h, m, s) => `${two(h)}:${two(m)}:${two(s)}`;
-        const formatClock = d => `${two(d.getHours())}:${two(d.getMinutes())}`;
+        const fmt = (h, m, s) => `${two(h)}:${two(m)}:${two(s)}`;
+        const fmtClock = d => `${two(d.getHours())}:${two(d.getMinutes())}`;
+        const blink = id => document.getElementById(id).classList.add('blink');
+        const stopBlink = () => document.querySelectorAll('.blink').forEach(el => el.classList.remove('blink'));
+        const playAlarm = id => { const a = document.getElementById(id); a.currentTime = 0; a.play().catch(() => { }); };
 
-        function updateDisplays() {
-            document.getElementById('original-time').textContent =
-                formatTime(Math.floor(remainingTime / 3600),
-                    Math.floor((remainingTime % 3600) / 60),
-                    remainingTime % 60);
+        const updateDisplays = () => {
+            originalTimeEl.textContent = fmt(Math.floor(remaining / 3600),
+                Math.floor((remaining % 3600) / 60),
+                remaining % 60);
+            extraTimeEl.textContent = fmt(Math.floor(extraRemaining / 3600),
+                Math.floor((extraRemaining % 3600) / 60),
+                extraRemaining % 60);
+        };
 
-            document.getElementById('extra-time').textContent =
-                formatTime(Math.floor(extraRemainingTime / 3600),
-                    Math.floor((extraRemainingTime % 3600) / 60),
-                    extraRemainingTime % 60);
-        }
-
-        /* === Core actions === */
+        /* --------------- actions ---------------- */
         function setTimer() {
-            initialHours = parseInt(document.getElementById('hours').value) || 0;
-            initialMinutes = parseInt(document.getElementById('minutes').value) || 0;
-            initialSeconds = parseInt(document.getElementById('seconds').value) || 0;
+            initH = parseInt(hoursInput.value) || 0;
+            initM = parseInt(minutesInput.value) || 0;
+            initS = parseInt(secondsInput.value) || 0;
+            initTotal = initH * 3600 + initM * 60 + initS;
 
-            initialTotalSeconds = initialHours * 3600 + initialMinutes * 60 + initialSeconds;
+            remaining = initTotal;
+            extraRemaining = Math.round(initTotal * 1.25);
 
-            remainingTime = initialTotalSeconds;
-            extraRemainingTime = Math.round(initialTotalSeconds * 1.25);
-
-            updateDisplays();
-            document.getElementById('start-end-times').innerHTML = "";
-            paused = false; stopBlinking();
+            updateDisplays(); infoEl.textContent = ''; paused = false; stopBlink();
         }
 
         function resetTimer() {
-            clearInterval(originalTimerInterval); clearInterval(extraTimerInterval);
-            remainingTime = initialTotalSeconds;
-            extraRemainingTime = Math.round(initialTotalSeconds * 1.25);
-            updateDisplays();
-            document.getElementById('start-end-times').innerHTML = "";
-            paused = false; stopBlinking();
+            clearInterval(origInterval); clearInterval(extraInterval);
+            remaining = initTotal; extraRemaining = Math.round(initTotal * 1.25);
+            updateDisplays(); infoEl.textContent = ''; paused = false; stopBlink();
 
-            /* restore inputs */
-            document.getElementById('hours').value = initialHours;
-            document.getElementById('minutes').value = initialMinutes;
-            document.getElementById('seconds').value = initialSeconds;
+            hoursInput.value = initH;
+            minutesInput.value = initM;
+            secondsInput.value = initS;
         }
 
         function clearTimer() {
-            clearInterval(originalTimerInterval); clearInterval(extraTimerInterval);
-            remainingTime = extraRemainingTime = 0;
-            updateDisplays();
-            document.getElementById('start-end-times').innerHTML = "";
-            ['hours', 'minutes', 'seconds'].forEach(id => document.getElementById(id).value = "");
-            paused = false; stopBlinking();
+            clearInterval(origInterval); clearInterval(extraInterval);
+            remaining = extraRemaining = 0; paused = false; stopBlink();
+            updateDisplays(); infoEl.textContent = '';
 
-            /* Return buttons to initial states */
+            hoursInput.value = minutesInput.value = secondsInput.value = '';
+
+            /* reset button states */
             setResetBtn.dataset.state = 'set';
             setResetBtn.textContent = 'Set Timer';
             setResetBtn.classList.remove('btn-reset'); setResetBtn.classList.add('btn-set');
@@ -360,54 +339,36 @@
         }
 
         function startTimer() {
-            if (remainingTime <= 0) return;
+            if (remaining <= 0) return;
 
             const now = new Date();
-            const originalEnd = new Date(now.getTime() + remainingTime * 1000);
-            const extraEnd = new Date(now.getTime() + extraRemainingTime * 1000);
+            const end = new Date(now.getTime() + remaining * 1000);
+            const xEnd = new Date(now.getTime() + extraRemaining * 1000);
 
-            document.getElementById('start-end-times').innerHTML =
-                `Start: ${formatClock(now)} | End: ${formatClock(originalEnd)}
-         <span class="extra-time">| Extra End: ${formatClock(extraEnd)}</span>`;
+            infoEl.innerHTML =
+                `Start: ${fmtClock(now)} | End: ${fmtClock(end)} <span class="extra-time">| Extra End: ${fmtClock(xEnd)}</span>`;
 
-            clearInterval(originalTimerInterval); clearInterval(extraTimerInterval);
+            clearInterval(origInterval); clearInterval(extraInterval);
 
-            originalTimerInterval = setInterval(() => {
-                if (remainingTime > 0) {
-                    remainingTime--; updateDisplays();
-                } else {
-                    clearInterval(originalTimerInterval);
-                    playAlarm('alarm-sound-original'); blinkTimer('original-time');
-                }
+            origInterval = setInterval(() => {
+                if (remaining > 0) { remaining--; updateDisplays(); }
+                else { clearInterval(origInterval); playAlarm('alarm-sound-original'); blink('original-time'); }
             }, 1000);
 
-            extraTimerInterval = setInterval(() => {
-                if (extraRemainingTime > 0) {
-                    extraRemainingTime--; updateDisplays();
-                } else {
-                    clearInterval(extraTimerInterval);
-                    playAlarm('alarm-sound-extra'); blinkTimer('extra-time');
-                }
+            extraInterval = setInterval(() => {
+                if (extraRemaining > 0) { extraRemaining--; updateDisplays(); }
+                else { clearInterval(extraInterval); playAlarm('alarm-sound-extra'); blink('extra-time'); }
             }, 1000);
         }
 
-        function pauseTimer() { clearInterval(originalTimerInterval); clearInterval(extraTimerInterval); paused = true; }
-        function resumeTimer() { if (!paused) return; paused = false; startTimer(); }
+        const pauseTimer = () => { clearInterval(origInterval); clearInterval(extraInterval); paused = true; };
+        const resumeTimer = () => { if (!paused) return; paused = false; startTimer(); };
 
-        /* === Visual helpers === */
-        function blinkTimer(id) { document.getElementById(id).classList.add('blink'); }
-        function stopBlinking() { document.querySelectorAll('.blink').forEach(el => el.classList.remove('blink')); }
-        function playAlarm(id) { const a = document.getElementById(id); a.currentTime = 0; a.play().catch(() => { }); }
-
-        /* === Button wiring === */
-        const setResetBtn = document.getElementById('setResetBtn');
-        const toggleBtn = document.getElementById('toggleBtn');
-        const clearBtn = document.getElementById('clearBtn');
-
+        /* -------------- button wiring ------------- */
         setResetBtn.dataset.state = 'set';
         toggleBtn.dataset.state = 'start';
 
-        setResetBtn.addEventListener('click', () => {
+        setResetBtn.onclick = () => {
             if (setResetBtn.dataset.state === 'set') {
                 setTimer();
                 setResetBtn.dataset.state = 'reset';
@@ -416,9 +377,9 @@
             } else {
                 resetTimer();
             }
-        });
+        };
 
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.onclick = () => {
             switch (toggleBtn.dataset.state) {
                 case 'start':
                     startTimer();
@@ -439,19 +400,16 @@
                     toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
                     break;
             }
-        });
+        };
 
-        clearBtn.addEventListener('click', clearTimer);
+        clearBtn.onclick = clearTimer;
 
-        /* Unlock audio on first interaction */
-        document.addEventListener('DOMContentLoaded', () => {
-            setResetBtn.addEventListener('click', () => {
-                ['alarm-sound-original', 'alarm-sound-extra'].forEach(id => {
-                    const a = document.getElementById(id);
-                    a.play().then(() => a.pause()).catch(() => { });
-                });
-            }, { once: true });
-        });
+        /* unlock audio once */
+        setResetBtn.addEventListener('click', () => {
+            ['alarm-sound-original', 'alarm-sound-extra'].forEach(id => {
+                const a = document.getElementById(id); a.play().then(() => a.pause()).catch(() => { });
+            });
+        }, { once: true });
     </script>
 </body>
 
