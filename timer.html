@@ -7,6 +7,7 @@
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
+        /* ... [unchanged CSS from your file] ... */
         *,
         *::before,
         *::after {
@@ -35,7 +36,6 @@
             color: #ff5f1f
         }
 
-        /* logo */
         .logo-container {
             position: fixed;
             top: 10px;
@@ -46,7 +46,6 @@
             max-height: 40px
         }
 
-        /* layout wrapper */
         .app-container {
             display: flex;
             flex-wrap: wrap;
@@ -57,7 +56,6 @@
             max-width: 1400px
         }
 
-        /* timer panel */
         .timer-container {
             background: #34495E;
             border-radius: 15px;
@@ -123,7 +121,6 @@
             outline: none
         }
 
-        /* control panel */
         .control-container {
             background: #3c597a;
             border-radius: 15px;
@@ -218,7 +215,6 @@
 </head>
 
 <body>
-    <!-- logo -->
     <div class="logo-container">
         <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
             <img src="panphy.png" alt="logo">
@@ -226,24 +222,18 @@
     </div>
 
     <div class="app-container">
-        <!-- timer -->
         <div class="timer-container">
             <h1 id="current-clock">Current Time: --:--</h1>
-
             <div class="time" id="original-time">00:00:00</div>
             <div class="label">25% Extra Time</div>
             <div class="time extra-time" id="extra-time">00:00:00</div>
-
             <div class="info" id="start-end-times"></div>
-
             <div class="inputs">
                 <input id="hours" type="number" placeholder="Hrs" min="0">
                 <input id="minutes" type="number" placeholder="Min" min="0" max="59">
                 <input id="seconds" type="number" placeholder="Sec" min="0" max="59">
             </div>
         </div>
-
-        <!-- controls -->
         <div class="control-container">
             <div class="control-area">
                 <button id="setResetBtn" class="btn-set">Set&nbsp;Timer</button>
@@ -251,18 +241,14 @@
                 <button id="clearBtn" class="btn-clear">Clear</button>
             </div>
         </div>
-    </div><!-- /app-container -->
-
-    <!-- audio -->
+    </div>
     <audio id="alarm-sound-original" src="/timer_beep.mp3" preload="auto"></audio>
     <audio id="alarm-sound-extra" src="/timer_beep.mp3" preload="auto"></audio>
-
     <footer>
         <p>&copy; 2025&nbsp;<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
         </p>
     </footer>
-
     <script>
         /* ------------ grab DOM nodes once ------------ */
         const hoursInput = document.getElementById('hours');
@@ -287,6 +273,9 @@
         /* ---------- timer state & helpers ----------- */
         let origInt, extraInt, remaining = 0, extraRemaining = 0, paused = false;
         let initH = 0, initM = 0, initS = 0, initTotal = 0;
+
+        // --- new variables for pause/resume timing ---
+        let endTime = null, extraEndTime = null; // stores Date objects
 
         const two = d => String(d).padStart(2, '0');
         const fmt = (h, m, s) => `${two(h)}:${two(m)}:${two(s)}`;
@@ -319,6 +308,9 @@
 
             updateDisplays();
             infoEl.textContent = ''; paused = false; stopBlink();
+
+            // clear timing markers
+            endTime = null; extraEndTime = null;
         }
 
         function resetTimer() {
@@ -333,6 +325,8 @@
             toggleBtn.dataset.state = 'start';
             toggleBtn.textContent = 'Start';
             toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+
+            endTime = null; extraEndTime = null;
         }
 
         function clearTimer() {
@@ -350,18 +344,23 @@
             toggleBtn.dataset.state = 'start';
             toggleBtn.textContent = 'Start';
             toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+
+            endTime = null; extraEndTime = null;
         }
 
-        function startTimer() {
+        // Accepts "freshStart" (true when first started) or not
+        function startTimer(freshStart = true) {
             if (remaining <= 0) return;
 
             const now = new Date();
-            const end = new Date(now.getTime() + remaining * 1000);
-            const xEnd = new Date(now.getTime() + extraRemaining * 1000);
+
+            // (Key change) Set end time relative to now + what remains, every time timer is started/resumed
+            endTime = new Date(now.getTime() + remaining * 1000);
+            extraEndTime = new Date(now.getTime() + extraRemaining * 1000);
 
             infoEl.innerHTML =
-                `Start: ${fClock(now)} | End: ${fClock(end)}
-     <span class="extra-time">| Extra End: ${fClock(xEnd)}</span>`;
+                `Start: ${fClock(now)} | End: ${fClock(endTime)}
+     <span class="extra-time">| Extra End: ${fClock(extraEndTime)}</span>`;
 
             clearInterval(origInt); clearInterval(extraInt);
 
@@ -376,8 +375,17 @@
             }, 1000);
         }
 
-        const pauseTimer = () => { clearInterval(origInt); clearInterval(extraInt); paused = true; };
-        const resumeTimer = () => { if (!paused) return; paused = false; startTimer(); };
+        const pauseTimer = () => {
+            clearInterval(origInt); clearInterval(extraInt); paused = true;
+            // On pause, we do not clear the endTime/extraEndTime,
+            // but on resume we'll recalculate them from the resume moment.
+        };
+
+        const resumeTimer = () => {
+            if (!paused) return; paused = false;
+            // On resume, startTimer() will update end times based on current remaining.
+            startTimer(false);
+        };
 
         /* ------------ button wiring ------------ */
         setResetBtn.dataset.state = 'set';
@@ -397,7 +405,7 @@
         toggleBtn.onclick = () => {
             switch (toggleBtn.dataset.state) {
                 case 'start':
-                    startTimer();
+                    startTimer(true);
                     toggleBtn.dataset.state = 'pause';
                     toggleBtn.textContent = 'Pause';
                     toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
