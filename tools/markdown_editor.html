@@ -753,7 +753,7 @@
    * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
    */
   function loadSampleDocument() {
-    fetch('https://panphy.github.io/mkdwn_sample_doc.md')
+    fetch('mkdwn_sample_doc.md')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -1264,4 +1264,5 @@
 </script>
 
 </html>
+
 
