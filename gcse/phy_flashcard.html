@@ -240,7 +240,8 @@
         }
 
         .counter {
-            opacity: .85;
+            opacity: .95;
+            font-weight: 600;
         }
 
         .card3d {
@@ -257,6 +258,7 @@
             cursor: pointer;
         }
 
+        /* OPAQUE faces with distinct backgrounds for Q and A */
         .fc-face {
             position: absolute;
             inset: 0;
@@ -266,8 +268,6 @@
             text-align: center;
             padding: 22px;
             border-radius: 16px;
-            background: #0f172a;
-            /* OPAQUE, not transparent */
             color: #e9eefc;
             border: 1px solid rgba(255, 255, 255, .12);
             box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
@@ -276,6 +276,16 @@
             line-height: 1.6;
         }
 
+        .fc-front {
+            background: #0f1b33;
+        }
+
+        /* Question side: deep navy */
+        .fc-back {
+            background: #152a1f;
+        }
+
+        /* Answer side: deep green */
         .fc-back {
             transform: rotateY(180deg);
         }
@@ -290,10 +300,26 @@
             justify-content: center;
         }
 
+        /* High-contrast solid buttons around the card */
         .btn-secondary {
-            background: rgba(255, 255, 255, .08);
-            color: #e9eefc;
-            border: 1px solid rgba(255, 255, 255, .14);
+            background: linear-gradient(180deg, #1f2b4a, #18243e);
+            /* solid, dark blue */
+            color: #f1f5ff;
+            border: 1px solid #2f3e63;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
+        }
+
+        .btn-secondary:hover {
+            filter: brightness(1.08);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-secondary:focus {
+            outline: 2px solid #60a5fa;
+            outline-offset: 2px;
         }
     </style>
 </head>
@@ -419,7 +445,6 @@ Matches: 0</pre>
                 const row = rows[r];
                 const get = i => (i >= 0 && i < row.length) ? canon(row[i]) : '';
                 let tNo = get(idx.topicNo); let cNo = get(idx.chapterNo);
-                // If "Topic 3" style, strip text to digits
                 const dig = s => (s.match(/\d+/)?.[0] ?? s);
                 if (tNo) tNo = dig(tNo);
                 if (cNo) cNo = dig(cNo);
@@ -439,11 +464,7 @@ Matches: 0</pre>
         /* ========================= State ========================= */
         let ALL = [];           // all cards from CSV
         let FILTERED = [];      // filtered subset for the session
-        const SELECTED = {
-            papers: new Set(),
-            topics: new Set(),
-            chapters: new Set(),
-        };
+        const SELECTED = { papers: new Set(), topics: new Set(), chapters: new Set() };
         let SHUFFLE = false;
         let SEARCH = '';
         let iCard = 0;
@@ -522,16 +543,14 @@ Matches: 0</pre>
                 }
                 return true;
             });
-            if (SHUFFLE) { // Fisher-Yates
+            if (SHUFFLE) {
                 for (let i = FILTERED.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[FILTERED[i], FILTERED[j]] = [FILTERED[j], FILTERED[i]]; }
             }
             iCard = 0;
             $('#start').disabled = FILTERED.length === 0;
         }
-
         function labelForSelectedTopics() {
             if (!SELECTED.topics.size) return 'All';
-            // Build from map/dictionaries rather than DOM (prevents "undefined")
             return [...SELECTED.topics].sort(sortNumAware).map(no => {
                 const name = TOPIC_NAME[no] ?? (ALL.find(r => canon(r.topicNo) === no)?.topicName || '');
                 return `• Topic ${no}${name ? ' • ' + name : ''}`;
@@ -544,7 +563,6 @@ Matches: 0</pre>
                 return `• Chapter ${no}${name ? ' • ' + name : ''}`;
             }).join('\n');
         }
-
         function updateSummaryAndCount() {
             applyFilters();
             const paperText = SELECTED.papers.size ? [...SELECTED.papers].join(', ') : 'All';
@@ -610,8 +628,8 @@ Matches: ${FILTERED.length}`;
             } catch (e) {
                 ALL = []; // empty -> no cards until CSV present
             }
-            buildLists();                // build chips (with dictionary fallback if names missing)
-            updateSummaryAndCount();     // compute counts & enable button
+            buildLists();
+            updateSummaryAndCount();
         })();
     </script>
 </body>
