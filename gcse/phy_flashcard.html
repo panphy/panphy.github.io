@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Physics Flashcards — Landing</title>
+    <title>GCSE Physics Flashcards</title>
     <style>
         html,
         body {
@@ -100,7 +100,7 @@
             border-radius: 10px;
             padding: 4px 8px;
             cursor: pointer;
-            z-index: 10;
+            z-index: 20;
             pointer-events: auto;
         }
 
@@ -124,6 +124,7 @@
             padding: 10px 6px;
             scroll-padding-top: 10px;
             scroll-padding-bottom: 10px;
+            position: relative;
         }
 
         .chip {
@@ -150,6 +151,7 @@
             box-shadow: 0 0 0 2px rgba(48, 132, 255, .9), 0 0 0 5px rgba(255, 255, 255, .9);
         }
 
+        /* Locking (can’t mix sections). The overlay is now inert to clicks */
         .group.disabled {
             opacity: .45;
             filter: grayscale(.06);
@@ -163,6 +165,8 @@
             margin-top: 6px;
             font-size: 12px;
             color: #a6b6d9;
+            pointer-events: none;
+            /* <— important: never block clicks on the Clear button */
         }
 
         .search {
@@ -407,8 +411,8 @@
     <div class="wrap">
         <header>
             <div class="logo" aria-hidden="true"></div>
-            <h1>Physics Flashcards</h1>
-            <div class="crumbs">Landing • Select content → Start</div>
+            <h1>GCSE Physics Flashcards</h1>
+            <div class="crumbs">Select content → Start</div>
         </header>
 
         <div class="grid">
@@ -543,24 +547,26 @@ Matches: 0</pre>
             [...chapMap.keys()].sort(sortNumAware).forEach(no => chBox.appendChild(makeChip(`Chapter ${no} • ${(chapMap.get(no) || '').trim() || '—'}`, no, 'chapters')));
         }
 
-        /* CLEAR (robust) */
+        /* Robust CLEAR */
         function clearGroup(key) {
-            // wipe data
-            if (SELECTED[key]) SELECTED[key].clear();
-            // remove visuals
-            const list = document.getElementById(key);
-            if (list) { list.querySelectorAll('.chip.active').forEach(ch => ch.classList.remove('active')); }
+            // reset the Set completely (avoids any lingering references)
+            SELECTED[key] = new Set();
+            // remove visuals in both possible containers (id="papers" vs "paper")
+            const containers = [document.getElementById(key), document.getElementById(key.replace(/s$/, ''))].filter(Boolean);
+            containers.forEach(list => list.querySelectorAll('.chip.active').forEach(ch => ch.classList.remove('active')));
             // unlock everything
             document.querySelectorAll('.group').forEach(g => g.classList.remove('disabled'));
+            // refresh
             updateSummaryAndCount();
             applyGroupLockUI();
         }
-        /* event delegation so Clear always works, even when layers change */
+
+        /* Event delegation so Clear always works, regardless of lock/overlays */
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.clearlink');
             if (!btn) return;
             const key = btn.getAttribute('data-target');
-            if (key) clearGroup(key);
+            if (key) { e.preventDefault(); e.stopPropagation(); clearGroup(key); }
         });
 
         /* Filtering & summary */
