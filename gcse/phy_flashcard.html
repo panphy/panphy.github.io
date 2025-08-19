@@ -461,18 +461,17 @@
 
                 <div class="card" style="margin-top:12px">
                     <h2>Selection Summary</h2>
-                    <pre id="summary">
-                        Paper:
+                    <pre id="summary">Paper:
                         None
                         
                         Topic(s):
                         None
-
+                        
                         Chapter(s):
                         None
-
-Search: —
-Matches: 0</pre>
+                        
+                        Search: —
+                        Matches: 0</pre>
                     <button id="start" class="btn" disabled>Start Revising</button>
                 </div>
             </div>
@@ -619,18 +618,17 @@ Matches: 0</pre>
             const topicText = labelForSet('topics', TOPIC_NAME);
             const chapText = labelForSet('chapters', CHAPTER_NAME);
             const searchText = SEARCH || '—';
-            $('#summary').textContent =
-                `Paper:
-                ${paperText}
-
-                Topic(s):
-                ${topicText}
-
-                Chapter(s):
-                ${chapText}
-
-                Search: ${searchText}
-                Matches: ${FILTERED.length}`;
+            $('#summary').textContent =`Paper:
+            ${paperText}
+            
+            Topic(s):
+            ${topicText}
+            
+            Chapter(s):
+            ${chapText}
+            
+            Search: ${searchText}
+            Matches: ${FILTERED.length}`;
         }
 
         /* ---------- Progress + cards ---------- */
