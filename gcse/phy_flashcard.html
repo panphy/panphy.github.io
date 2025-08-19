@@ -129,7 +129,6 @@
             max-height: 320px;
             overflow: auto;
             padding: 10px 6px;
-            /* padding prevents highlight cut-off */
             scroll-padding-top: 10px;
             scroll-padding-bottom: 10px;
         }
@@ -427,7 +426,7 @@
             <!-- Left: Papers + search + chapters -->
             <div class="card">
                 <h2>Papers & Search</h2>
-                <button id="clearPapers" class="clearlink" type="button">Clear</button>
+                <button class="clearlink" type="button" data-target="papers">Clear</button>
                 <div class="row" style="margin-bottom:8px">
                     <div id="papers" class="chips group" style="max-height:none"></div>
                     <div class="row" style="margin-left:auto; gap:12px">
@@ -448,7 +447,7 @@
                 </div>
 
                 <h2 style="margin-top:14px">Chapters</h2>
-                <button id="clearChapters" class="clearlink" type="button">Clear</button>
+                <button class="clearlink" type="button" data-target="chapters">Clear</button>
                 <div id="chapters" class="chips group" aria-live="polite"></div>
                 <div class="muted" style="margin-top:6px">Click to toggle. Selecting here disables Topics & Papers until
                     cleared.</div>
@@ -457,7 +456,7 @@
             <!-- Right: Topics + Summary -->
             <div class="card">
                 <h2>Topics</h2>
-                <button id="clearTopics" class="clearlink" type="button">Clear</button>
+                <button class="clearlink" type="button" data-target="topics">Clear</button>
                 <div id="topics" class="chips group" aria-live="polite"></div>
 
                 <div class="card" style="margin-top:12px">
@@ -663,12 +662,26 @@ Matches: 0</pre>
             });
         }
 
-        /* Clear buttons */
+        /* Clear buttons (robust, data-target driven) */
         function clearGroup(key) {
-            SELECTED[key].clear();
-            document.querySelectorAll(`#${key} .chip.active`).forEach(ch => ch.classList.remove('active'));
-            applyGroupLockUI();           // unlock others
+            // empty the Set
+            if (SELECTED[key]) SELECTED[key].clear();
+            // remove any visual selection
+            const list = document.getElementById(key);
+            if (list) list.querySelectorAll('.chip.active').forEach(ch => ch.classList.remove('active'));
+            // always unlock all groups
+            document.querySelectorAll('.group').forEach(g => g.classList.remove('disabled'));
             updateSummaryAndCount();
+        }
+        function wireClearButtons() {
+            document.querySelectorAll('.clearlink').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const target = btn.dataset.target; // "papers" | "topics" | "chapters"
+                    if (target) clearGroup(target);
+                    e.stopPropagation();
+                    applyGroupLockUI(); // re-evaluate lock state after clearing
+                });
+            });
         }
 
         /* ========================= Filtering & summary ========================= */
@@ -794,10 +807,8 @@ Matches: ${FILTERED.length}`;
         $('#btnCorrect').addEventListener('click', () => mark(true));
         $('#btnWrong').addEventListener('click', () => mark(false));
 
-        /* clear links (ALL THREE, including PAPERS) */
-        $('#clearPapers').addEventListener('click', () => clearGroup('papers'));
-        $('#clearTopics').addEventListener('click', () => clearGroup('topics'));
-        $('#clearChapters').addEventListener('click', () => clearGroup('chapters'));
+        /* wire all Clear buttons (including PAPERS) */
+        wireClearButtons();
 
         window.addEventListener('keydown', e => {
             if (!$('#overlay').classList.contains('show')) return;
