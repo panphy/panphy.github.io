@@ -1,20 +1,20 @@
 Chapter number,Topic number,Topic,Paper number,Questions,Answers
-Chapter 5,Topic 2,Domestic electricity,Paper 1,Why is the current provided by a cell called a direct current (d.c.)?,only flows in one direction
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What is an alternating current (a.c.)?,current that repeatedly reverses direction
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What kind of current is supplied by mains electricity?,alternating current
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What is the frequency and voltage of mains electricity?,"50 Hz, 230 V"
-Chapter 5,Topic 2,Domestic electricity,Paper 1,"What colours are the live, neutral, and earth wires in a three-core cable?","live = brown, neutral = blue, earth = green and yellow stripes"
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What is the function of the live wire in a three-core cable?,carries the alternating potential difference from the supply
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What is the function of the neutral wire in a three-core cable?,completes the circuit
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What is the function of the earth wire in a three-core cable?,safety wire to stop the appliance becoming live
-Chapter 5,Topic 2,Domestic electricity,Paper 1,When is there a current in the earth wire?,when there is a fault
-Chapter 5,Topic 2,Domestic electricity,Paper 1,Why is the live wire dangerous?,provides a large p.d. that would cause a large current to flow through a person if they touched it
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What is the National Grid?,nationwide network of cables and transformers that link power stations to customers
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What are step-up transformers used for in the National Grid?,increase the p.d. from the power station to the transmission cables
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What are step-down transformers used for in the National Grid?,decrease the p.d. from the transmission cables to the mains supply in buildings so that it is safe to use
-Chapter 5,Topic 2,Domestic electricity,Paper 1,How does having a large potential difference in the transmission cables help to make the National Grid an efficient way to transfer energy?,large p.d. means a small current is needed to transfer the same amount of power; smaller current means less power wasted as heating
-Chapter 5,Topic 2,Domestic electricity,Paper 1,What two things does energy transfer to an appliance depend on?,power of appliance; time it is switched on for
-Chapter 5,Topic 2,Domestic electricity,Paper 1,"What are the units for power, current, potential difference, and resistance?","watts (W), amps (A), volts (V), ohms (Ω)"
+Chapter 5,Topic 2,Electricity in the home,Paper 1,Why is the current provided by a cell called a direct current (d.c.)?,only flows in one direction
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is an alternating current (a.c.)?,current that repeatedly reverses direction
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What kind of current is supplied by mains electricity?,alternating current
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the frequency and voltage of mains electricity?,"50 Hz, 230 V"
+Chapter 5,Topic 2,Electricity in the home,Paper 1,"What colours are the live, neutral, and earth wires in a three-core cable?","live = brown, neutral = blue, earth = green and yellow stripes"
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the function of the live wire in a three-core cable?,carries the alternating potential difference from the supply
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the function of the neutral wire in a three-core cable?,completes the circuit
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the function of the earth wire in a three-core cable?,safety wire to stop the appliance becoming live
+Chapter 5,Topic 2,Electricity in the home,Paper 1,When is there a current in the earth wire?,when there is a fault
+Chapter 5,Topic 2,Electricity in the home,Paper 1,Why is the live wire dangerous?,provides a large p.d. that would cause a large current to flow through a person if they touched it
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the National Grid?,nationwide network of cables and transformers that link power stations to customers
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What are step-up transformers used for in the National Grid?,increase the p.d. from the power station to the transmission cables
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What are step-down transformers used for in the National Grid?,decrease the p.d. from the transmission cables to the mains supply in buildings so that it is safe to use
+Chapter 5,Topic 2,Electricity in the home,Paper 1,How does having a large potential difference in the transmission cables help to make the National Grid an efficient way to transfer energy?,large p.d. means a small current is needed to transfer the same amount of power; smaller current means less power wasted as heating
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What two things does energy transfer to an appliance depend on?,power of appliance; time it is switched on for
+Chapter 5,Topic 2,Electricity in the home,Paper 1,"What are the units for power, current, potential difference, and resistance?","watts (W), amps (A), volts (V), ohms (Ω)"
 Chapter 6,Topic 3,Molecules and matter,Paper 1,Which two quantities do you need to measure to find the density of a solid or liquid?,mass and volume
 Chapter 6,Topic 3,Molecules and matter,Paper 1,What happens to the particles in a substance if its temperature is increased?,they move faster and the energy in their kinetic energy store increases
 Chapter 6,Topic 3,Molecules and matter,Paper 1,Why are changes of state physical changes?,no new substances are produced and the substance will have the same properties as before if the change is reversed
