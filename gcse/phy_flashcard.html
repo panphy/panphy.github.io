@@ -230,7 +230,7 @@
             width: min(920px, 100%);
             display: grid;
             gap: 12px;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: auto auto 1fr auto auto;
         }
 
         .deck-top {
@@ -242,6 +242,37 @@
         .counter {
             opacity: .95;
             font-weight: 600;
+        }
+
+        /* Progress bar */
+        .bar-wrap {
+            position: relative;
+            height: 14px;
+            border-radius: 999px;
+            background: #0c1529;
+            border: 1px solid rgba(255, 255, 255, .14);
+            overflow: hidden;
+        }
+
+        .bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0%;
+            background: linear-gradient(90deg, #34d399, #60a5fa);
+        }
+
+        .bar-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #ecfeff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
         }
 
         .card3d {
@@ -294,16 +325,16 @@
             transform: rotateY(180deg);
         }
 
-        .nav {
+        /* Solid, high-contrast controls */
+        .controls {
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
-        /* High-contrast solid buttons around the card */
         .btn-secondary {
             background: linear-gradient(180deg, #1f2b4a, #18243e);
-            /* solid, dark blue */
             color: #f1f5ff;
             border: 1px solid #2f3e63;
             box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
@@ -320,6 +351,26 @@
         .btn-secondary:focus {
             outline: 2px solid #60a5fa;
             outline-offset: 2px;
+        }
+
+        .btn-good {
+            background: linear-gradient(180deg, #1b4d2c, #174225);
+            color: #d8ffde;
+            border: 1px solid #2e7b46;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
+        }
+
+        .btn-bad {
+            background: linear-gradient(180deg, #5b1b1b, #421414);
+            color: #ffd7d7;
+            border: 1px solid #813232;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
+        }
+
+        .btn-good:disabled,
+        .btn-bad:disabled {
+            opacity: .6;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -390,8 +441,21 @@ Matches: 0</pre>
                 <div id="counter" class="counter">Card 0 of 0</div>
                 <button id="close" class="btn btn-secondary">Exit</button>
             </div>
+
+            <!-- Progress bar -->
+            <div class="bar-wrap" aria-hidden="false">
+                <div id="bar" class="bar"></div>
+                <div id="barText" class="bar-text">0% • 0 / 0 correct</div>
+            </div>
+
             <div id="cardArea" class="card3d"></div>
-            <div class="nav">
+
+            <!-- Self-check + navigation -->
+            <div class="controls">
+                <button id="btnCorrect" class="btn btn-good" disabled>✓ Correct</button>
+                <button id="btnWrong" class="btn btn-bad" disabled>✗ Wrong</button>
+            </div>
+            <div class="controls" style="margin-top:-4px">
                 <button id="prev" class="btn btn-secondary">◀ Prev</button>
                 <button id="next" class="btn btn-secondary">Next ▶</button>
             </div>
@@ -468,6 +532,8 @@ Matches: 0</pre>
         let SHUFFLE = false;
         let SEARCH = '';
         let iCard = 0;
+        let revealed = false;
+        let correctCount = 0;
 
         /* ========================= UI: chips ========================= */
         function makeChip(label, value, group) {
@@ -581,12 +647,24 @@ Search: ${searchText}
 Matches: ${FILTERED.length}`;
         }
 
-        /* ========================= Flashcards (flip on click) ========================= */
+        /* ========================= Progress bar ========================= */
+        function updateProgress() {
+            const total = FILTERED.length || 0;
+            const pct = total ? Math.round((correctCount / total) * 100) : 0;
+            $('#bar').style.width = pct + '%';
+            $('#barText').textContent = `${pct}% • ${correctCount} / ${total} correct`;
+        }
+
+        /* ========================= Flashcards (flip on click + self-check) ========================= */
         function renderCard() {
             const area = $('#cardArea');
             area.classList.remove('flipped');
             const card = FILTERED[iCard];
-            if (!card) { area.innerHTML = ''; $('#counter').textContent = 'Card 0 of 0'; return; }
+            revealed = false;
+            $('#btnCorrect').disabled = true;
+            $('#btnWrong').disabled = true;
+
+            if (!card) { area.innerHTML = ''; $('#counter').textContent = 'Card 0 of 0'; updateProgress(); return; }
             $('#counter').textContent = `Card ${iCard + 1} of ${FILTERED.length}`;
             area.innerHTML = `
     <div class="flipper" id="flipper">
@@ -594,7 +672,25 @@ Matches: ${FILTERED.length}`;
       <div class="fc-face fc-back">${escapeHTML(card.answer)}</div>
     </div>
   `;
-            area.onclick = () => area.classList.toggle('flipped');
+            area.onclick = () => {
+                area.classList.toggle('flipped');
+                revealed = !revealed;
+                $('#btnCorrect').disabled = !revealed;
+                $('#btnWrong').disabled = !revealed;
+            };
+        }
+        function mark(correct) {
+            if (!revealed) return; // guard
+            if (correct) correctCount++;
+            if (iCard < FILTERED.length - 1) {
+                iCard++;
+                renderCard();
+            } else {
+                // End of deck – keep last card shown, disable self-check
+                $('#btnCorrect').disabled = true;
+                $('#btnWrong').disabled = true;
+            }
+            updateProgress();
         }
         function escapeHTML(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])); }
 
@@ -606,16 +702,35 @@ Matches: ${FILTERED.length}`;
             updateSummaryAndCount();
         });
         $('#search').addEventListener('input', (e) => { SEARCH = e.target.value.trim(); updateSummaryAndCount(); });
-        $('#start').addEventListener('click', () => { if (FILTERED.length) { $('#overlay').classList.add('show'); renderCard(); } });
+
+        $('#start').addEventListener('click', () => {
+            if (!FILTERED.length) return;
+            // reset session stats
+            iCard = 0; correctCount = 0; revealed = false;
+            updateProgress();
+            $('#overlay').classList.add('show');
+            renderCard();
+        });
         $('#close').addEventListener('click', () => $('#overlay').classList.remove('show'));
-        $('#prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
-        $('#next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
+
+        $('#prev').addEventListener('click', () => {
+            if (iCard > 0) { iCard--; renderCard(); }
+        });
+        $('#next').addEventListener('click', () => {
+            if (iCard < FILTERED.length - 1) { iCard++; renderCard(); }
+        });
+
+        $('#btnCorrect').addEventListener('click', () => mark(true));
+        $('#btnWrong').addEventListener('click', () => mark(false));
+
         window.addEventListener('keydown', e => {
             if (!$('#overlay').classList.contains('show')) return;
             if (e.key === 'Escape') $('#overlay').classList.remove('show');
             if (e.key === 'ArrowLeft') { e.preventDefault(); if (iCard > 0) { iCard--; renderCard(); } }
             if (e.key === 'ArrowRight') { e.preventDefault(); if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } }
-            if (e.key === ' ') { e.preventDefault(); $('#cardArea').classList.toggle('flipped'); }
+            if (e.key === ' ') { e.preventDefault(); $('#cardArea').classList.toggle('flipped'); revealed = !revealed; $('#btnCorrect').disabled = !revealed; $('#btnWrong').disabled = !revealed; }
+            if (e.key.toLowerCase() === 'c') { if (!$('#btnCorrect').disabled) mark(true); }
+            if (e.key.toLowerCase() === 'w') { if (!$('#btnWrong').disabled) mark(false); }
         });
 
         /* ========================= Init (load CSV, then build) ========================= */
