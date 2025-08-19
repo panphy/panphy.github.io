@@ -84,6 +84,7 @@
             backdrop-filter: blur(4px);
             overflow: visible;
             /* never clip chip effects */
+            position: relative;
         }
 
         .card h2 {
@@ -94,6 +95,23 @@
             color: #b8c7df;
         }
 
+        .clearlink {
+            position: absolute;
+            right: 18px;
+            top: 18px;
+            font-size: 12px;
+            color: #a9badc;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 10px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .clearlink:hover {
+            filter: brightness(1.1);
+        }
+
         .row {
             display: flex;
             align-items: center;
@@ -102,7 +120,6 @@
         }
 
         /* ---------- Chips (one per line; highlight on select) ---------- */
-        /* padding-block ensures highlights near edges never get cut off */
         .chips {
             display: flex;
             flex-direction: column;
@@ -110,10 +127,9 @@
             max-height: 320px;
             overflow: auto;
             padding: 10px 6px;
-            /* <-- padding top/btm added */
+            /* padding prevents highlight cut-off */
             scroll-padding-top: 10px;
             scroll-padding-bottom: 10px;
-            /* safe scrolling for focus ring */
         }
 
         .chip {
@@ -137,8 +153,23 @@
         .chip.active {
             background: linear-gradient(135deg, rgba(96, 165, 250, .35), rgba(52, 211, 153, .35));
             border-color: rgba(110, 231, 183, .6);
-            /* soft outer glow that used to get clipped */
             box-shadow: 0 0 0 2px rgba(48, 132, 255, .9), 0 0 0 5px rgba(255, 255, 255, .9);
+        }
+
+        /* Section locking (don’t mix papers/topics/chapters) */
+        .group.disabled {
+            opacity: .45;
+            filter: grayscale(.06);
+            pointer-events: none;
+        }
+
+        .group.disabled::after {
+            content: "Locked — clear other selection to switch";
+            display: block;
+            text-align: center;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #a6b6d9;
         }
 
         /* search + shuffle */
@@ -221,7 +252,7 @@
             cursor: not-allowed;
         }
 
-        /* ---------- Flashcard overlay (flip + gradients + progress) ---------- */
+        /* ---------- Flashcard overlay (gradients + progress) ---------- */
         .overlay {
             position: fixed;
             inset: 0;
@@ -394,8 +425,9 @@
             <!-- Left: Papers + search + chapters -->
             <div class="card">
                 <h2>Papers & Search</h2>
+                <button id="clearPapers" class="clearlink" type="button">Clear</button>
                 <div class="row" style="margin-bottom:8px">
-                    <div id="papers" class="chips" style="max-height:none"></div>
+                    <div id="papers" class="chips group" style="max-height:none"></div>
                     <div class="row" style="margin-left:auto; gap:12px">
                         <div>
                             <div class="muted" style="margin-bottom:6px">Shuffle</div>
@@ -414,15 +446,17 @@
                 </div>
 
                 <h2 style="margin-top:14px">Chapters</h2>
-                <div id="chapters" class="chips" aria-live="polite"></div>
-                <div class="muted" style="margin-top:6px">Each item sits on its own line; click to toggle selection.
-                </div>
+                <button id="clearChapters" class="clearlink" type="button">Clear</button>
+                <div id="chapters" class="chips group" aria-live="polite"></div>
+                <div class="muted" style="margin-top:6px">Click to toggle. Selecting here disables Topics & Papers until
+                    cleared.</div>
             </div>
 
             <!-- Right: Topics + Summary -->
             <div class="card">
                 <h2>Topics</h2>
-                <div id="topics" class="chips" aria-live="polite"></div>
+                <button id="clearTopics" class="clearlink" type="button">Clear</button>
+                <div id="topics" class="chips group" aria-live="polite"></div>
 
                 <div class="card" style="margin-top:12px">
                     <h2>Summary</h2>
@@ -542,32 +576,48 @@ Matches: 0</pre>
         let revealed = false;
         let correctCount = 0;
 
-        /* ========================= UI: chips (now mutually exclusive per group) ========================= */
-        function makeChip(label, value, group) {
+        /* track which section is active (only one non-empty set allowed) */
+        function activeGroup() {
+            const groups = ['papers', 'topics', 'chapters'];
+            const filled = groups.filter(g => SELECTED[g].size > 0);
+            return filled.length === 1 ? filled[0] : null; // if none or (by accident) >1, treat as unlocked
+        }
+        function applyGroupLockUI() {
+            const active = activeGroup();
+            const groups = { papers: $('#papers'), topics: $('#topics'), chapters: $('#chapters') };
+            Object.entries(groups).forEach(([name, el]) => {
+                const disabled = !!active && name !== active;
+                el.classList.toggle('disabled', disabled);
+            });
+        }
+
+        /* ========================= UI: chips (multi-select inside one active section) ========================= */
+        function makeChip(label, value, groupKey) {
             const el = document.createElement('button');
             el.className = 'chip';
             el.textContent = label;
             el.dataset.value = value;
-            el.dataset.group = group;
+            el.dataset.group = groupKey;
+
             el.addEventListener('click', () => {
-                const set = group === 'paper' ? SELECTED.papers : group === 'topic' ? SELECTED.topics : SELECTED.chapters;
-                const container = group === 'paper' ? document.getElementById('papers')
-                    : group === 'topic' ? document.getElementById('topics')
-                        : document.getElementById('chapters');
+                // If another group is currently active, ignore clicks here (UI is also disabled via CSS)
+                const current = activeGroup();
+                if (current && current !== groupKey) return;
 
-                // MUTUALLY EXCLUSIVE: deselect siblings first
-                container.querySelectorAll('.chip.active').forEach(ch => ch.classList.remove('active'));
-                set.clear();
-
-                // Toggle off if clicking the same active chip
-                if (!el.classList.contains('active')) {
+                const set = SELECTED[groupKey];
+                if (el.classList.contains('active')) {
+                    el.classList.remove('active');
+                    set.delete(value);
+                } else {
                     el.classList.add('active');
                     set.add(value);
-                } else {
-                    el.classList.remove('active');
                 }
+
+                // If the group becomes empty, unlock all; otherwise lock others
+                applyGroupLockUI();
                 updateSummaryAndCount();
             });
+
             return el;
         }
         function unique(arr) { return [...new Set(arr.filter(Boolean).map(canon))]; }
@@ -580,9 +630,9 @@ Matches: 0</pre>
         function buildLists() {
             // Papers
             const papers = unique(ALL.map(r => r.paper));
-            const papersBox = document.getElementById('papers'); papersBox.innerHTML = '';
+            const papersBox = $('#papers'); papersBox.innerHTML = '';
             (papers.length ? papers : ['Paper 1', 'Paper 2']).forEach(p => {
-                papersBox.appendChild(makeChip(p, p, 'paper'));
+                papersBox.appendChild(makeChip(p, p, 'papers'));
             });
 
             // Topics with names
@@ -593,10 +643,10 @@ Matches: 0</pre>
                 if (!topicMap.has(no)) topicMap.set(no, nm);
             });
             if (!topicMap.size) { Object.entries(TOPIC_NAME).forEach(([no, name]) => topicMap.set(no, name)); }
-            const topicsBox = document.getElementById('topics'); topicsBox.innerHTML = '';
+            const topicsBox = $('#topics'); topicsBox.innerHTML = '';
             [...topicMap.keys()].sort(sortNumAware).forEach(no => {
                 const label = `Topic ${no} • ${(topicMap.get(no) || '').trim() || '—'}`;
-                topicsBox.appendChild(makeChip(label, no, 'topic'));
+                topicsBox.appendChild(makeChip(label, no, 'topics'));
             });
 
             // Chapters with names
@@ -607,11 +657,19 @@ Matches: 0</pre>
                 if (!chapMap.has(no)) chapMap.set(no, nm);
             });
             if (!chapMap.size) { Object.entries(CHAPTER_NAME).forEach(([no, name]) => chapMap.set(no, name)); }
-            const chBox = document.getElementById('chapters'); chBox.innerHTML = '';
+            const chBox = $('#chapters'); chBox.innerHTML = '';
             [...chapMap.keys()].sort(sortNumAware).forEach(no => {
                 const label = `Chapter ${no} • ${(chapMap.get(no) || '').trim() || '—'}`;
-                chBox.appendChild(makeChip(label, no, 'chapter'));
+                chBox.appendChild(makeChip(label, no, 'chapters'));
             });
+        }
+
+        /* Clear buttons */
+        function clearGroup(key) {
+            SELECTED[key].clear();
+            document.querySelectorAll(`#${key} .chip.active`).forEach(ch => ch.classList.remove('active'));
+            applyGroupLockUI();           // unlock others
+            updateSummaryAndCount();
         }
 
         /* ========================= Filtering & summary ========================= */
@@ -633,27 +691,28 @@ Matches: 0</pre>
                 for (let i = FILTERED.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[FILTERED[i], FILTERED[j]] = [FILTERED[j], FILTERED[i]]; }
             }
             iCard = 0;
-            document.getElementById('start').disabled = FILTERED.length === 0;
+            $('#start').disabled = FILTERED.length === 0;
         }
-        function labelForSelectedTopics() {
-            if (!SELECTED.topics.size) return 'All';
-            const no = [...SELECTED.topics][0];
-            const name = TOPIC_NAME[no] ?? (ALL.find(r => canon(r.topicNo) === no)?.topicName || '');
-            return `• Topic ${no}${name ? ' • ' + name : ''}`;
-        }
-        function labelForSelectedChapters() {
-            if (!SELECTED.chapters.size) return 'All';
-            const no = [...SELECTED.chapters][0];
-            const name = CHAPTER_NAME[no] ?? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || '');
-            return `• Chapter ${no}${name ? ' • ' + name : ''}`;
+        function labelForSet(setKey, dict) {
+            const set = SELECTED[setKey];
+            if (!set.size) return 'All';
+            return [...set].sort(sortNumAware).map(no => {
+                const name = (dict?.[no]) ?? (setKey === 'topics'
+                    ? (ALL.find(r => canon(r.topicNo) === no)?.topicName || '')
+                    : setKey === 'chapters'
+                        ? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || '')
+                        : '');
+                const prefix = setKey === 'topics' ? '• Topic ' : setKey === 'chapters' ? '• Chapter ' : '• ';
+                return `${prefix}${no}${name ? ' • ' + name : ''}`;
+            }).join('\n');
         }
         function updateSummaryAndCount() {
             applyFilters();
-            const paperText = SELECTED.papers.size ? [...SELECTED.papers][0] : 'All';
-            const topicText = labelForSelectedTopics();
-            const chapText = labelForSelectedChapters();
+            const paperText = labelForSet('papers');
+            const topicText = labelForSet('topics', TOPIC_NAME);
+            const chapText = labelForSet('chapters', CHAPTER_NAME);
             const searchText = SEARCH || '—';
-            document.getElementById('summary').textContent =
+            $('#summary').textContent =
                 `Paper: ${paperText}
 Topic(s):
 ${topicText}
@@ -669,21 +728,21 @@ Matches: ${FILTERED.length}`;
         function updateProgress() {
             const total = FILTERED.length || 0;
             const pct = total ? Math.round((correctCount / total) * 100) : 0;
-            document.getElementById('bar').style.width = pct + '%';
-            document.getElementById('barText').textContent = `${pct}% • ${correctCount} / ${total} correct`;
+            $('#bar').style.width = pct + '%';
+            $('#barText').textContent = `${pct}% • ${correctCount} / ${total} correct`;
         }
 
         /* ========================= Flashcards (flip on click + self-check) ========================= */
         function renderCard() {
-            const area = document.getElementById('cardArea');
+            const area = $('#cardArea');
             area.classList.remove('flipped');
             const card = FILTERED[iCard];
             revealed = false;
-            document.getElementById('btnCorrect').disabled = true;
-            document.getElementById('btnWrong').disabled = true;
+            $('#btnCorrect').disabled = true;
+            $('#btnWrong').disabled = true;
 
-            if (!card) { area.innerHTML = ''; document.getElementById('counter').textContent = 'Card 0 of 0'; updateProgress(); return; }
-            document.getElementById('counter').textContent = `Card ${iCard + 1} of ${FILTERED.length}`;
+            if (!card) { area.innerHTML = ''; $('#counter').textContent = 'Card 0 of 0'; updateProgress(); return; }
+            $('#counter').textContent = `Card ${iCard + 1} of ${FILTERED.length}`;
             area.innerHTML = `
     <div class="flipper" id="flipper">
       <div class="fc-face fc-front">${escapeHTML(card.question)}</div>
@@ -693,8 +752,8 @@ Matches: ${FILTERED.length}`;
             area.onclick = () => {
                 area.classList.toggle('flipped');
                 revealed = !revealed;
-                document.getElementById('btnCorrect').disabled = !revealed;
-                document.getElementById('btnWrong').disabled = !revealed;
+                $('#btnCorrect').disabled = !revealed;
+                $('#btnWrong').disabled = !revealed;
             };
         }
         function mark(correct) {
@@ -704,46 +763,51 @@ Matches: ${FILTERED.length}`;
                 iCard++;
                 renderCard();
             } else {
-                document.getElementById('btnCorrect').disabled = true;
-                document.getElementById('btnWrong').disabled = true;
+                $('#btnCorrect').disabled = true;
+                $('#btnWrong').disabled = true;
             }
             updateProgress();
         }
         function escapeHTML(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])); }
 
         /* ========================= Events ========================= */
-        document.getElementById('shuffle').addEventListener('click', () => {
+        $('#shuffle').addEventListener('click', () => {
             SHUFFLE = !SHUFFLE;
-            const sh = document.getElementById('shuffle');
+            const sh = $('#shuffle');
             sh.classList.toggle('on', SHUFFLE);
             sh.setAttribute('aria-checked', SHUFFLE ? 'true' : 'false');
             updateSummaryAndCount();
         });
-        document.getElementById('search').addEventListener('input', (e) => { SEARCH = e.target.value.trim(); updateSummaryAndCount(); });
+        $('#search').addEventListener('input', (e) => { SEARCH = e.target.value.trim(); updateSummaryAndCount(); });
 
-        document.getElementById('start').addEventListener('click', () => {
+        $('#start').addEventListener('click', () => {
             if (!FILTERED.length) return;
             iCard = 0; correctCount = 0; revealed = false;
             updateProgress();
-            document.getElementById('overlay').classList.add('show');
+            $('#overlay').classList.add('show');
             renderCard();
         });
-        document.getElementById('close').addEventListener('click', () => document.getElementById('overlay').classList.remove('show'));
+        $('#close').addEventListener('click', () => $('#overlay').classList.remove('show'));
 
-        document.getElementById('prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
-        document.getElementById('next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
+        $('#prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
+        $('#next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
 
-        document.getElementById('btnCorrect').addEventListener('click', () => mark(true));
-        document.getElementById('btnWrong').addEventListener('click', () => mark(false));
+        $('#btnCorrect').addEventListener('click', () => mark(true));
+        $('#btnWrong').addEventListener('click', () => mark(false));
+
+        /* clear links */
+        $('#clearPapers').addEventListener('click', () => clearGroup('papers'));
+        $('#clearTopics').addEventListener('click', () => clearGroup('topics'));
+        $('#clearChapters').addEventListener('click', () => clearGroup('chapters'));
 
         window.addEventListener('keydown', e => {
-            if (!document.getElementById('overlay').classList.contains('show')) return;
-            if (e.key === 'Escape') document.getElementById('overlay').classList.remove('show');
+            if (!$('#overlay').classList.contains('show')) return;
+            if (e.key === 'Escape') $('#overlay').classList.remove('show');
             if (e.key === 'ArrowLeft') { e.preventDefault(); if (iCard > 0) { iCard--; renderCard(); } }
             if (e.key === 'ArrowRight') { e.preventDefault(); if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } }
-            if (e.key === ' ') { e.preventDefault(); const area = document.getElementById('cardArea'); area.classList.toggle('flipped'); revealed = !revealed; document.getElementById('btnCorrect').disabled = !revealed; document.getElementById('btnWrong').disabled = !revealed; }
-            if (e.key.toLowerCase() === 'c') { if (!document.getElementById('btnCorrect').disabled) mark(true); }
-            if (e.key.toLowerCase() === 'w') { if (!document.getElementById('btnWrong').disabled) mark(false); }
+            if (e.key === ' ') { e.preventDefault(); const area = $('#cardArea'); area.classList.toggle('flipped'); revealed = !revealed; $('#btnCorrect').disabled = !revealed; $('#btnWrong').disabled = !revealed; }
+            if (e.key.toLowerCase() === 'c') { if (!$('#btnCorrect').disabled) mark(true); }
+            if (e.key.toLowerCase() === 'w') { if (!$('#btnWrong').disabled) mark(false); }
         });
 
         /* ========================= Init (load CSV, then build) ========================= */
@@ -757,6 +821,7 @@ Matches: ${FILTERED.length}`;
                 ALL = []; // empty -> no cards until CSV present
             }
             buildLists();
+            applyGroupLockUI();   // ensure unlocked to begin with
             updateSummaryAndCount();
         })();
     </script>
