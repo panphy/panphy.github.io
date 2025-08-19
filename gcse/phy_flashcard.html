@@ -82,6 +82,8 @@
             padding: 18px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
             backdrop-filter: blur(4px);
+            overflow: visible;
+            /* never clip chip effects */
         }
 
         .card h2 {
@@ -100,26 +102,32 @@
         }
 
         /* ---------- Chips (one per line; highlight on select) ---------- */
+        /* padding-block ensures highlights near edges never get cut off */
         .chips {
             display: flex;
             flex-direction: column;
             gap: 8px;
             max-height: 320px;
             overflow: auto;
-            padding-right: 6px;
+            padding: 10px 6px;
+            /* <-- padding top/btm added */
+            scroll-padding-top: 10px;
+            scroll-padding-bottom: 10px;
+            /* safe scrolling for focus ring */
         }
 
         .chip {
             display: block;
             width: 100%;
-            padding: 10px 12px;
-            border-radius: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
             text-align: left;
             cursor: pointer;
             background: #14233c;
             border: 1px solid rgba(255, 255, 255, .08);
             color: #dbe8ff;
-            transition: transform .1s ease, background .15s ease, border-color .15s ease;
+            transition: transform .1s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+            position: relative;
         }
 
         .chip:hover {
@@ -129,6 +137,8 @@
         .chip.active {
             background: linear-gradient(135deg, rgba(96, 165, 250, .35), rgba(52, 211, 153, .35));
             border-color: rgba(110, 231, 183, .6);
+            /* soft outer glow that used to get clipped */
+            box-shadow: 0 0 0 2px rgba(48, 132, 255, .9), 0 0 0 5px rgba(255, 255, 255, .9);
         }
 
         /* search + shuffle */
@@ -211,7 +221,7 @@
             cursor: not-allowed;
         }
 
-        /* ---------- Flashcard overlay (opaque card, flip on click) ---------- */
+        /* ---------- Flashcard overlay (flip + gradients + progress) ---------- */
         .overlay {
             position: fixed;
             inset: 0;
@@ -244,7 +254,6 @@
             font-weight: 600;
         }
 
-        /* Progress bar */
         .bar-wrap {
             position: relative;
             height: 14px;
@@ -289,7 +298,6 @@
             cursor: pointer;
         }
 
-        /* OPAQUE gradient faces with distinct looks for Q and A */
         .fc-face {
             position: absolute;
             inset: 0;
@@ -308,14 +316,12 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
         }
 
-        /* Question: deep navy gradient with a subtle radial glow */
         .fc-front {
             background:
                 radial-gradient(120% 100% at 20% 15%, rgba(64, 117, 240, .28) 0%, rgba(64, 117, 240, 0) 40%),
                 linear-gradient(180deg, #17233f 0%, #0f1b33 60%, #0b1427 100%);
         }
 
-        /* Answer: deep green-teal gradient with subtle glow */
         .fc-back {
             background:
                 radial-gradient(120% 100% at 80% 15%, rgba(56, 178, 172, .25) 0%, rgba(56, 178, 172, 0) 42%),
@@ -327,7 +333,6 @@
             transform: rotateY(180deg);
         }
 
-        /* Solid, high-contrast controls */
         .controls {
             display: flex;
             gap: 10px;
@@ -537,7 +542,7 @@ Matches: 0</pre>
         let revealed = false;
         let correctCount = 0;
 
-        /* ========================= UI: chips ========================= */
+        /* ========================= UI: chips (now mutually exclusive per group) ========================= */
         function makeChip(label, value, group) {
             const el = document.createElement('button');
             el.className = 'chip';
@@ -546,8 +551,21 @@ Matches: 0</pre>
             el.dataset.group = group;
             el.addEventListener('click', () => {
                 const set = group === 'paper' ? SELECTED.papers : group === 'topic' ? SELECTED.topics : SELECTED.chapters;
-                if (set.has(value)) { set.delete(value); el.classList.remove('active'); }
-                else { set.add(value); el.classList.add('active'); }
+                const container = group === 'paper' ? document.getElementById('papers')
+                    : group === 'topic' ? document.getElementById('topics')
+                        : document.getElementById('chapters');
+
+                // MUTUALLY EXCLUSIVE: deselect siblings first
+                container.querySelectorAll('.chip.active').forEach(ch => ch.classList.remove('active'));
+                set.clear();
+
+                // Toggle off if clicking the same active chip
+                if (!el.classList.contains('active')) {
+                    el.classList.add('active');
+                    set.add(value);
+                } else {
+                    el.classList.remove('active');
+                }
                 updateSummaryAndCount();
             });
             return el;
@@ -562,20 +580,20 @@ Matches: 0</pre>
         function buildLists() {
             // Papers
             const papers = unique(ALL.map(r => r.paper));
-            const papersBox = $('#papers'); papersBox.innerHTML = '';
+            const papersBox = document.getElementById('papers'); papersBox.innerHTML = '';
             (papers.length ? papers : ['Paper 1', 'Paper 2']).forEach(p => {
                 papersBox.appendChild(makeChip(p, p, 'paper'));
             });
 
             // Topics with names
-            const topicMap = new Map(); // no -> name
+            const topicMap = new Map();
             ALL.forEach(r => {
                 const no = canon(r.topicNo); if (!no) return;
                 const nm = canon(r.topicName) || TOPIC_NAME[no] || '';
                 if (!topicMap.has(no)) topicMap.set(no, nm);
             });
             if (!topicMap.size) { Object.entries(TOPIC_NAME).forEach(([no, name]) => topicMap.set(no, name)); }
-            const topicsBox = $('#topics'); topicsBox.innerHTML = '';
+            const topicsBox = document.getElementById('topics'); topicsBox.innerHTML = '';
             [...topicMap.keys()].sort(sortNumAware).forEach(no => {
                 const label = `Topic ${no} • ${(topicMap.get(no) || '').trim() || '—'}`;
                 topicsBox.appendChild(makeChip(label, no, 'topic'));
@@ -589,7 +607,7 @@ Matches: 0</pre>
                 if (!chapMap.has(no)) chapMap.set(no, nm);
             });
             if (!chapMap.size) { Object.entries(CHAPTER_NAME).forEach(([no, name]) => chapMap.set(no, name)); }
-            const chBox = $('#chapters'); chBox.innerHTML = '';
+            const chBox = document.getElementById('chapters'); chBox.innerHTML = '';
             [...chapMap.keys()].sort(sortNumAware).forEach(no => {
                 const label = `Chapter ${no} • ${(chapMap.get(no) || '').trim() || '—'}`;
                 chBox.appendChild(makeChip(label, no, 'chapter'));
@@ -615,29 +633,27 @@ Matches: 0</pre>
                 for (let i = FILTERED.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[FILTERED[i], FILTERED[j]] = [FILTERED[j], FILTERED[i]]; }
             }
             iCard = 0;
-            $('#start').disabled = FILTERED.length === 0;
+            document.getElementById('start').disabled = FILTERED.length === 0;
         }
         function labelForSelectedTopics() {
             if (!SELECTED.topics.size) return 'All';
-            return [...SELECTED.topics].sort(sortNumAware).map(no => {
-                const name = TOPIC_NAME[no] ?? (ALL.find(r => canon(r.topicNo) === no)?.topicName || '');
-                return `• Topic ${no}${name ? ' • ' + name : ''}`;
-            }).join('\n');
+            const no = [...SELECTED.topics][0];
+            const name = TOPIC_NAME[no] ?? (ALL.find(r => canon(r.topicNo) === no)?.topicName || '');
+            return `• Topic ${no}${name ? ' • ' + name : ''}`;
         }
         function labelForSelectedChapters() {
             if (!SELECTED.chapters.size) return 'All';
-            return [...SELECTED.chapters].sort(sortNumAware).map(no => {
-                const name = CHAPTER_NAME[no] ?? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || '');
-                return `• Chapter ${no}${name ? ' • ' + name : ''}`;
-            }).join('\n');
+            const no = [...SELECTED.chapters][0];
+            const name = CHAPTER_NAME[no] ?? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || '');
+            return `• Chapter ${no}${name ? ' • ' + name : ''}`;
         }
         function updateSummaryAndCount() {
             applyFilters();
-            const paperText = SELECTED.papers.size ? [...SELECTED.papers].join(', ') : 'All';
+            const paperText = SELECTED.papers.size ? [...SELECTED.papers][0] : 'All';
             const topicText = labelForSelectedTopics();
             const chapText = labelForSelectedChapters();
             const searchText = SEARCH || '—';
-            $('#summary').textContent =
+            document.getElementById('summary').textContent =
                 `Paper: ${paperText}
 Topic(s):
 ${topicText}
@@ -653,21 +669,21 @@ Matches: ${FILTERED.length}`;
         function updateProgress() {
             const total = FILTERED.length || 0;
             const pct = total ? Math.round((correctCount / total) * 100) : 0;
-            $('#bar').style.width = pct + '%';
-            $('#barText').textContent = `${pct}% • ${correctCount} / ${total} correct`;
+            document.getElementById('bar').style.width = pct + '%';
+            document.getElementById('barText').textContent = `${pct}% • ${correctCount} / ${total} correct`;
         }
 
         /* ========================= Flashcards (flip on click + self-check) ========================= */
         function renderCard() {
-            const area = $('#cardArea');
+            const area = document.getElementById('cardArea');
             area.classList.remove('flipped');
             const card = FILTERED[iCard];
             revealed = false;
-            $('#btnCorrect').disabled = true;
-            $('#btnWrong').disabled = true;
+            document.getElementById('btnCorrect').disabled = true;
+            document.getElementById('btnWrong').disabled = true;
 
-            if (!card) { area.innerHTML = ''; $('#counter').textContent = 'Card 0 of 0'; updateProgress(); return; }
-            $('#counter').textContent = `Card ${iCard + 1} of ${FILTERED.length}`;
+            if (!card) { area.innerHTML = ''; document.getElementById('counter').textContent = 'Card 0 of 0'; updateProgress(); return; }
+            document.getElementById('counter').textContent = `Card ${iCard + 1} of ${FILTERED.length}`;
             area.innerHTML = `
     <div class="flipper" id="flipper">
       <div class="fc-face fc-front">${escapeHTML(card.question)}</div>
@@ -677,8 +693,8 @@ Matches: ${FILTERED.length}`;
             area.onclick = () => {
                 area.classList.toggle('flipped');
                 revealed = !revealed;
-                $('#btnCorrect').disabled = !revealed;
-                $('#btnWrong').disabled = !revealed;
+                document.getElementById('btnCorrect').disabled = !revealed;
+                document.getElementById('btnWrong').disabled = !revealed;
             };
         }
         function mark(correct) {
@@ -688,45 +704,46 @@ Matches: ${FILTERED.length}`;
                 iCard++;
                 renderCard();
             } else {
-                $('#btnCorrect').disabled = true;
-                $('#btnWrong').disabled = true;
+                document.getElementById('btnCorrect').disabled = true;
+                document.getElementById('btnWrong').disabled = true;
             }
             updateProgress();
         }
         function escapeHTML(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])); }
 
         /* ========================= Events ========================= */
-        $('#shuffle').addEventListener('click', () => {
+        document.getElementById('shuffle').addEventListener('click', () => {
             SHUFFLE = !SHUFFLE;
-            $('#shuffle').classList.toggle('on', SHUFFLE);
-            $('#shuffle').setAttribute('aria-checked', SHUFFLE ? 'true' : 'false');
+            const sh = document.getElementById('shuffle');
+            sh.classList.toggle('on', SHUFFLE);
+            sh.setAttribute('aria-checked', SHUFFLE ? 'true' : 'false');
             updateSummaryAndCount();
         });
-        $('#search').addEventListener('input', (e) => { SEARCH = e.target.value.trim(); updateSummaryAndCount(); });
+        document.getElementById('search').addEventListener('input', (e) => { SEARCH = e.target.value.trim(); updateSummaryAndCount(); });
 
-        $('#start').addEventListener('click', () => {
+        document.getElementById('start').addEventListener('click', () => {
             if (!FILTERED.length) return;
             iCard = 0; correctCount = 0; revealed = false;
             updateProgress();
-            $('#overlay').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
             renderCard();
         });
-        $('#close').addEventListener('click', () => $('#overlay').classList.remove('show'));
+        document.getElementById('close').addEventListener('click', () => document.getElementById('overlay').classList.remove('show'));
 
-        $('#prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
-        $('#next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
+        document.getElementById('prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
+        document.getElementById('next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
 
-        $('#btnCorrect').addEventListener('click', () => mark(true));
-        $('#btnWrong').addEventListener('click', () => mark(false));
+        document.getElementById('btnCorrect').addEventListener('click', () => mark(true));
+        document.getElementById('btnWrong').addEventListener('click', () => mark(false));
 
         window.addEventListener('keydown', e => {
-            if (!$('#overlay').classList.contains('show')) return;
-            if (e.key === 'Escape') $('#overlay').classList.remove('show');
+            if (!document.getElementById('overlay').classList.contains('show')) return;
+            if (e.key === 'Escape') document.getElementById('overlay').classList.remove('show');
             if (e.key === 'ArrowLeft') { e.preventDefault(); if (iCard > 0) { iCard--; renderCard(); } }
             if (e.key === 'ArrowRight') { e.preventDefault(); if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } }
-            if (e.key === ' ') { e.preventDefault(); $('#cardArea').classList.toggle('flipped'); revealed = !revealed; $('#btnCorrect').disabled = !revealed; $('#btnWrong').disabled = !revealed; }
-            if (e.key.toLowerCase() === 'c') { if (!$('#btnCorrect').disabled) mark(true); }
-            if (e.key.toLowerCase() === 'w') { if (!$('#btnWrong').disabled) mark(false); }
+            if (e.key === ' ') { e.preventDefault(); const area = document.getElementById('cardArea'); area.classList.toggle('flipped'); revealed = !revealed; document.getElementById('btnCorrect').disabled = !revealed; document.getElementById('btnWrong').disabled = !revealed; }
+            if (e.key.toLowerCase() === 'c') { if (!document.getElementById('btnCorrect').disabled) mark(true); }
+            if (e.key.toLowerCase() === 'w') { if (!document.getElementById('btnWrong').disabled) mark(false); }
         });
 
         /* ========================= Init (load CSV, then build) ========================= */
