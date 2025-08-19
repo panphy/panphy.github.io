@@ -289,7 +289,7 @@
             cursor: pointer;
         }
 
-        /* OPAQUE faces with distinct backgrounds for Q and A */
+        /* OPAQUE gradient faces with distinct looks for Q and A */
         .fc-face {
             position: absolute;
             inset: 0;
@@ -305,19 +305,21 @@
             backface-visibility: hidden;
             font-size: 20px;
             line-height: 1.6;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
         }
 
+        /* Question: deep navy gradient with a subtle radial glow */
         .fc-front {
-            background: #0f1b33;
+            background:
+                radial-gradient(120% 100% at 20% 15%, rgba(64, 117, 240, .28) 0%, rgba(64, 117, 240, 0) 40%),
+                linear-gradient(180deg, #17233f 0%, #0f1b33 60%, #0b1427 100%);
         }
 
-        /* Question side: deep navy */
+        /* Answer: deep green-teal gradient with subtle glow */
         .fc-back {
-            background: #152a1f;
-        }
-
-        /* Answer side: deep green */
-        .fc-back {
+            background:
+                radial-gradient(120% 100% at 80% 15%, rgba(56, 178, 172, .25) 0%, rgba(56, 178, 172, 0) 42%),
+                linear-gradient(180deg, #1a3a2e 0%, #152a1f 62%, #0f2119 100%);
             transform: rotateY(180deg);
         }
 
@@ -680,13 +682,12 @@ Matches: ${FILTERED.length}`;
             };
         }
         function mark(correct) {
-            if (!revealed) return; // guard
+            if (!revealed) return;
             if (correct) correctCount++;
             if (iCard < FILTERED.length - 1) {
                 iCard++;
                 renderCard();
             } else {
-                // End of deck – keep last card shown, disable self-check
                 $('#btnCorrect').disabled = true;
                 $('#btnWrong').disabled = true;
             }
@@ -705,7 +706,6 @@ Matches: ${FILTERED.length}`;
 
         $('#start').addEventListener('click', () => {
             if (!FILTERED.length) return;
-            // reset session stats
             iCard = 0; correctCount = 0; revealed = false;
             updateProgress();
             $('#overlay').classList.add('show');
@@ -713,12 +713,8 @@ Matches: ${FILTERED.length}`;
         });
         $('#close').addEventListener('click', () => $('#overlay').classList.remove('show'));
 
-        $('#prev').addEventListener('click', () => {
-            if (iCard > 0) { iCard--; renderCard(); }
-        });
-        $('#next').addEventListener('click', () => {
-            if (iCard < FILTERED.length - 1) { iCard++; renderCard(); }
-        });
+        $('#prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
+        $('#next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
 
         $('#btnCorrect').addEventListener('click', () => mark(true));
         $('#btnWrong').addEventListener('click', () => mark(false));
