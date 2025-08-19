@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Physics Flashcards – Landing</title>
+    <title>Physics Flashcards — Landing</title>
     <style>
-        /* ==== Background (no more cut-off on ultra-wide) ==== */
+        /* ---------- Full-viewport background (no cut-off) ---------- */
         html,
         body {
             height: 100%;
@@ -14,51 +14,59 @@
 
         body {
             margin: 0;
-            color: #e8eefc;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+            color: #e9eefc;
+            font: 16px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
             background:
-                radial-gradient(1400px 900px at -10% -20%, #1b2a59 0%, rgba(27, 42, 89, 0) 60%),
-                radial-gradient(1200px 700px at 110% -10%, #0a4b6f 0%, rgba(10, 75, 111, 0) 60%),
-                linear-gradient(180deg, #0b1220 0%, #0b1220 100%);
+                radial-gradient(1400px 900px at -15% -20%, #16325b 0%, rgba(22, 50, 91, 0) 60%),
+                radial-gradient(1200px 700px at 115% -10%, #0b5a81 0%, rgba(11, 90, 129, 0) 60%),
+                linear-gradient(180deg, #0b1220, #0b1220);
             background-attachment: fixed, fixed, fixed;
-            /* stretch with viewport */
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* ==== Layout ==== */
-        .wrap {
-            max-width: 1200px;
-            margin: 48px auto;
-            padding: 0 24px;
+        a {
+            color: inherit;
         }
 
-        .appbar {
+        .wrap {
+            max-width: 1200px;
+            margin: 40px auto 56px;
+            padding: 0 22px;
+        }
+
+        header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
         .logo {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #93f, #6ef);
-            box-shadow: 0 8px 24px rgba(146, 51, 255, .25);
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            box-shadow: 0 8px 24px rgba(96, 165, 250, .25);
         }
 
-        .appbar h1 {
-            font-size: 20px;
+        header h1 {
             margin: 0;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             letter-spacing: .2px;
+        }
+
+        .crumbs {
+            margin-left: auto;
+            opacity: .75;
+            font-size: 13px;
         }
 
         .grid {
             display: grid;
             grid-template-columns: 1.25fr 1fr;
-            gap: 24px;
+            gap: 18px;
         }
 
         @media (max-width: 980px) {
@@ -68,127 +76,87 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .08);
             border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .03);
-            backdrop-filter: blur(6px);
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
+            backdrop-filter: blur(4px);
         }
 
         .card h2 {
-            margin: 0 0 12px;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: .3px;
-            color: #cfe1ff;
-            text-transform: uppercase;
-        }
-
-        .subgrid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 980px) {
-            .subgrid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ==== Controls (one item per line) ==== */
-        .vlist {
-            display: block;
-            max-height: 300px;
-            overflow: auto;
-            padding-right: 8px;
-        }
-
-        .vlist label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            margin: 6px 0;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            cursor: pointer;
-            user-select: none;
-            transition: background .2s, border-color .2s, transform .05s;
-        }
-
-        .vlist label:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .vlist input[type="checkbox"] {
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #9bb3ff;
-            border-radius: 6px;
-            display: inline-block;
-            position: relative;
-        }
-
-        .vlist input[type="checkbox"]:checked {
-            background: linear-gradient(135deg, #93f, #6ef);
-            border-color: transparent;
-        }
-
-        .vlist input[type="checkbox"]:checked::after {
-            content: "";
-            position: absolute;
-            left: 4px;
-            top: 1px;
-            width: 6px;
-            height: 10px;
-            border: 2px solid #0b1220;
-            border-top: none;
-            border-left: none;
-            transform: rotate(45deg);
-        }
-
-        .muted {
-            color: #9fb1d7;
-            font-size: 12px;
-        }
-
-        .searchbar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 10px 12px;
-            border-radius: 12px;
-        }
-
-        .searchbar input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #e8eefc;
+            margin: 0 0 10px;
             font-size: 14px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #b8c7df;
         }
 
-        /* Shuffle switch */
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ---------- Chips (one per line; highlight on select) ---------- */
+        .chips {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 320px;
+            overflow: auto;
+            padding-right: 6px;
+        }
+
+        .chip {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            background: #14233c;
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: #dbe8ff;
+            transition: transform .1s ease, background .15s ease, border-color .15s ease;
+        }
+
+        .chip:hover {
+            transform: translateY(-1px);
+        }
+
+        .chip.active {
+            background: linear-gradient(135deg, rgba(96, 165, 250, .35), rgba(52, 211, 153, .35));
+            border-color: rgba(110, 231, 183, .6);
+        }
+
+        /* search + shuffle */
+        .search {
+            flex: 1 1 320px;
+            min-width: 240px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            padding: 10px 12px;
+            border-radius: 12px;
+        }
+
+        .search input {
+            all: unset;
+            flex: 1;
+        }
+
         .switch {
             position: relative;
             width: 50px;
             height: 28px;
-            background: #2a365e;
             border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #2a365e;
+            border: 1px solid rgba(255, 255, 255, .12);
             cursor: pointer;
-        }
-
-        .switch input {
-            display: none;
         }
 
         .switch .knob {
@@ -197,62 +165,61 @@
             left: 2px;
             width: 24px;
             height: 24px;
-            background: white;
             border-radius: 50%;
+            background: #fff;
             transition: left .2s;
         }
 
-        .switch input:checked+.knob {
+        .switch.on {
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+        }
+
+        .switch.on .knob {
             left: 24px;
-            background: linear-gradient(135deg, #93f, #6ef);
         }
 
-        .row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
+        .muted {
+            color: #9fb1d7;
+            font-size: 12px;
         }
 
-        /* Summary */
-        .summary p {
-            margin: 6px 0;
+        /* summary */
+        .summary pre {
+            white-space: pre-wrap;
+            margin: 8px 0 0;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .08);
+            padding: 10px 12px;
+            border-radius: 12px;
+            color: #c9daf6;
+            font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
         }
 
-        .summary .lines {
-            white-space: pre-line;
-        }
-
-        /* each selected topic on its own line */
-
-        .cta {
-            display: inline-block;
-            margin-top: 14px;
-            padding: 12px 18px;
+        .btn {
+            border: none;
+            cursor: pointer;
             border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(135deg, #2b395e, #1d2a49);
-            color: #e8eefc;
-            text-decoration: none;
+            padding: 12px 16px;
             font-weight: 700;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .05);
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            color: #07121f;
+            box-shadow: 0 10px 24px rgba(96, 165, 250, .25);
         }
 
-        .cta.primary {
-            background: linear-gradient(135deg, #93f, #6ef);
-            color: #0b1220;
+        .btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
         }
 
-        /* ==== Flashcard overlay ==== */
+        /* ---------- Flashcard overlay (opaque card, flip on click) ---------- */
         .overlay {
             position: fixed;
             inset: 0;
             display: none;
-            background: rgba(9, 14, 25, .75);
-            backdrop-filter: blur(6px);
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 22px;
+            background: rgba(7, 12, 22, .8);
         }
 
         .overlay.show {
@@ -261,16 +228,19 @@
 
         .deck {
             width: min(920px, 100%);
-            max-width: 920px;
             display: grid;
-            gap: 16px;
+            gap: 12px;
             grid-template-rows: auto 1fr auto;
         }
 
-        .progress {
+        .deck-top {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+        }
+
+        .counter {
+            opacity: .85;
         }
 
         .card3d {
@@ -279,483 +249,370 @@
             height: min(58vh, 520px);
         }
 
-        .cardface {
-            position: absolute;
-            inset: 0;
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
-            border: 1px solid rgba(255, 255, 255, .1);
-            backface-visibility: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .06);
-        }
-
-        .cardface h3 {
-            margin: 0;
-            line-height: 1.4;
-        }
-
         .flipper {
             position: absolute;
             inset: 0;
             transform-style: preserve-3d;
-            transition: transform .5s ease;
+            transition: transform .55s cubic-bezier(.2, .8, .2, 1);
             cursor: pointer;
+        }
+
+        .fc-face {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 22px;
+            border-radius: 16px;
+            background: #0f172a;
+            /* OPAQUE, not transparent */
+            color: #e9eefc;
+            border: 1px solid rgba(255, 255, 255, .12);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+            backface-visibility: hidden;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        .fc-back {
+            transform: rotateY(180deg);
         }
 
         .flipped .flipper {
             transform: rotateY(180deg);
         }
 
-        .back {
-            transform: rotateY(180deg);
-        }
-
-        .controls {
+        .nav {
             display: flex;
             gap: 10px;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .btn {
-            padding: 10px 14px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, .1);
-            background: rgba(255, 255, 255, .06);
-            color: #e8eefc;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, .09);
-        }
-
-        .error {
-            background: #3b1d2a;
-            border: 1px solid rgba(255, 0, 74, .35);
-            color: #ffd2dc;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-top: 10px;
+        .btn-secondary {
+            background: rgba(255, 255, 255, .08);
+            color: #e9eefc;
+            border: 1px solid rgba(255, 255, 255, .14);
         }
     </style>
 </head>
 
 <body>
     <div class="wrap">
-        <div class="appbar">
-            <div class="logo"></div>
+        <header>
+            <div class="logo" aria-hidden="true"></div>
             <h1>Physics Flashcards</h1>
-        </div>
+            <div class="crumbs">Landing • Select content → Start</div>
+        </header>
 
         <div class="grid">
+            <!-- Left: Papers + search + chapters -->
             <div class="card">
-                <h2>Choose Paper(s)</h2>
-                <div id="paperList" class="vlist" aria-live="polite"></div>
-
-                <div class="row" style="margin-top:12px;">
-                    <span class="muted">Shuffle</span>
-                    <label class="switch">
-                        <input type="checkbox" id="shuffleToggle" />
-                        <span class="knob"></span>
-                    </label>
-                    <div class="searchbar" style="flex:1; min-width:240px;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="#9fb1d7"
-                                stroke-width="2" stroke-linecap="round" />
-                        </svg>
-                        <input id="q" placeholder="Search questions or answers…" />
+                <h2>Papers & Search</h2>
+                <div class="row" style="margin-bottom:8px">
+                    <div id="papers" class="chips" style="max-height:none"></div>
+                    <div class="row" style="margin-left:auto; gap:12px">
+                        <div>
+                            <div class="muted" style="margin-bottom:6px">Shuffle</div>
+                            <div id="shuffle" class="switch" role="switch" aria-checked="false">
+                                <div class="knob"></div>
+                            </div>
+                        </div>
+                        <div class="search" title="Search questions/answers">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <path d="M21 21l-3.5-3.5M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+                                    stroke="#9fb1d7" stroke-width="2" stroke-linecap="round" />
+                            </svg>
+                            <input id="search" placeholder="Search…" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card">
-                <h2>Choose Topic Number(s)</h2>
-                <div id="topicList" class="vlist"></div>
-            </div>
-
-            <div class="card">
-                <h2>Choose Chapter(s)</h2>
-                <div id="chapterList" class="vlist"></div>
-                <p class="muted">Tip: click to select multiple; click again to unselect.</p>
-            </div>
-
-            <div class="card">
-                <h2>Live Summary</h2>
-                <div class="summary">
-                    <p><strong>Paper:</strong> <span id="sumPaper">All</span></p>
-                    <p><strong>Topic No.:</strong><br><span id="sumTopic" class="lines">All</span></p>
-                    <p><strong>Chapter:</strong> <span id="sumChapter">All</span></p>
-                    <p><strong>Search:</strong> <span id="sumSearch">—</span></p>
-                    <p><strong>Matches:</strong> <span id="sumCount">0</span></p>
+                <h2 style="margin-top:14px">Chapters</h2>
+                <div id="chapters" class="chips" aria-live="polite"></div>
+                <div class="muted" style="margin-top:6px">Each item sits on its own line; click to toggle selection.
                 </div>
-                <a class="cta primary" id="startBtn" href="#">Start Revising</a>
-                <div id="loadErr" class="error" style="display:none;"></div>
+            </div>
+
+            <!-- Right: Topics + Summary -->
+            <div class="card">
+                <h2>Topics</h2>
+                <div id="topics" class="chips" aria-live="polite"></div>
+
+                <div class="card" style="margin-top:12px">
+                    <h2>Summary</h2>
+                    <pre id="summary">Paper: All
+Topic(s):
+All
+
+Chapter(s):
+All
+
+Search: —
+Matches: 0</pre>
+                    <button id="start" class="btn" disabled>Start Revising</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Flashcard overlay -->
-    <div class="overlay" id="overlay">
+    <!-- Study overlay -->
+    <div id="overlay" class="overlay" aria-hidden="true">
         <div class="deck">
-            <div class="progress">
-                <div id="counter" class="muted">Card 0 of 0</div>
-                <button class="btn" id="closeBtn">Exit</button>
+            <div class="deck-top">
+                <div id="counter" class="counter">Card 0 of 0</div>
+                <button id="close" class="btn btn-secondary">Exit</button>
             </div>
-
-            <div class="card3d" id="cardArea" aria-live="polite">
-                <!-- flip card injected here -->
-            </div>
-
-            <div class="controls">
-                <div style="display:flex; gap:10px;">
-                    <button class="btn" id="prevBtn">Prev</button>
-                    <button class="btn" id="nextBtn">Next</button>
-                </div>
-                <div class="muted">Click anywhere on the card to flip.</div>
+            <div id="cardArea" class="card3d"></div>
+            <div class="nav">
+                <button id="prev" class="btn btn-secondary">◀ Prev</button>
+                <button id="next" class="btn btn-secondary">Next ▶</button>
             </div>
         </div>
     </div>
 
     <script>
-        /* ================== Resilient CSV loader + flexible schema ================== */
-
-        /* Fallback names so Topic/Chapter lists are never “gone” */
-        const FALLBACK = {
-            topics: [
-                { no: '1', name: 'Energy' },
-                { no: '2', name: 'Electricity' },
-                { no: '3', name: 'Particle Model of Matter' },
-                { no: '4', name: 'Atomic Structure' },
-                { no: '5', name: 'Forces' },
-                { no: '6', name: 'Waves' },
-                { no: '7', name: 'Electromagnetism' },
-                { no: '8', name: 'Space' }
-            ],
-            chapters: [
-                { no: '1', name: 'Conservation & Dissipation of Energy' },
-                { no: '2', name: 'Energy Transfer by Heating' },
-                { no: '3', name: 'Energy Resources' },
-                { no: '4', name: 'Electric Circuits' },
-                { no: '5', name: 'Electricity in the Home' },
-                { no: '6', name: 'Molecules & Matter' },
-                { no: '7', name: 'Radioactivity' },
-                { no: '8', name: 'Forces in Balance' },
-                { no: '9', name: 'Motion' },
-                { no: '10', name: 'Forces & Motion' },
-                { no: '11', name: 'Force & Pressure' },
-                { no: '12', name: 'Wave Properties' },
-                { no: '13', name: 'Electromagnetic Spectrum' },
-                { no: '14', name: 'Light' },
-                { no: '15', name: 'Electromagnetism' },
-                { no: '16', name: 'Space' }
-            ],
-            papers: ['Paper 1', 'Paper 2']
+        /* ========================= Helpers & constants ========================= */
+        const TOPIC_NAME = {
+            '1': 'Energy', '2': 'Electricity', '3': 'Particle Model of Matter', '4': 'Atomic Structure',
+            '5': 'Forces', '6': 'Waves', '7': 'Electromagnetism', '8': 'Space'
         };
-
-        const state = {
-            allRows: [],         // full data from CSV
-            cards: [],           // filtered cards
-            idx: 0,              // current card index
-            selectedPapers: new Set(),
-            selectedTopics: new Set(),
-            selectedChapters: new Set(),
-            shuffle: false,
-            search: ''
+        const CHAPTER_NAME = {
+            '1': 'Conservation and dissipation of energy', '2': 'Energy transfer by heating', '3': 'Energy resources',
+            '4': 'Electric circuits', '5': 'Domestic electricity', '6': 'Molecules and matter', '7': 'Radioactivity',
+            '8': 'Forces in balance', '9': 'Motion', '10': 'Forces and motion', '11': 'Force and pressure',
+            '12': 'Wave properties', '13': 'Electromagnetic spectrum', '14': 'Light', '15': 'Electromagnetism', '16': 'Space'
         };
+        const $ = s => document.querySelector(s);
+        const canon = v => String(v ?? '').trim();
 
-        const el = (id) => document.getElementById(id);
-
-        /* Minimal CSV parser (handles quotes/commas/newlines) */
+        /* ========================= CSV parsing (robust) ========================= */
         function parseCSV(text) {
-            const rows = []; let cur = '', row = [], q = false;
+            const rows = []; let row = [], field = '', q = false;
             for (let i = 0; i < text.length; i++) {
                 const c = text[i], n = text[i + 1];
-                if (c === '\"') {
-                    if (q && n === '\"') { cur += '\"'; i++; }
-                    else q = !q;
-                } else if (c === ',' && !q) { row.push(cur); cur = ''; }
-                else if ((c === '\n' || c === '\r') && !q) {
-                    if (cur !== '' || row.length) { row.push(cur); rows.push(row); row = []; cur = ''; }
-                } else cur += c;
+                if (c === '"') { if (q && n === '"') { field += '"'; i++; } else { q = !q; } }
+                else if (c === ',' && !q) { row.push(field); field = ''; }
+                else if ((c === '\n' || c === '\r') && !q) { if (c === '\r' && n === '\n') i++; row.push(field); field = ''; rows.push(row); row = []; }
+                else { field += c; }
             }
-            if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
-            return rows.filter(r => r.length && r.join('').trim() !== '');
+            if (field.length || row.length) { row.push(field); rows.push(row); }
+            return rows;
+        }
+        function normHeader(h) { return h.toLowerCase().replace(/\s+/g, ' ').trim(); }
+        function readCSV(text) {
+            const rows = parseCSV(text);
+            if (!rows.length) return [];
+            const head = rows[0].map(normHeader);
+            const idx = {
+                paper: head.findIndex(h => h.includes('paper')),
+                topicNo: head.findIndex(h => h.includes('topic') && (h.includes('number') || h.endsWith('no') || h.includes('topic_no'))),
+                topicName: head.findIndex(h => h.includes('topic') && (h.includes('name') || h.includes('title')) && !h.includes('number')),
+                chapterNo: head.findIndex(h => h.includes('chapter') && (h.includes('number') || h.endsWith('no') || h.includes('chapter_no'))),
+                chapterName: head.findIndex(h => h.includes('chapter') && (h.includes('name') || h.includes('title')) && !h.includes('number')),
+                question: head.findIndex(h => h.includes('question') || h === 'q' || h === 'prompt'),
+                answer: head.findIndex(h => h.includes('answer') || h === 'a' || h === 'response')
+            };
+            const out = [];
+            for (let r = 1; r < rows.length; r++) {
+                const row = rows[r];
+                const get = i => (i >= 0 && i < row.length) ? canon(row[i]) : '';
+                let tNo = get(idx.topicNo); let cNo = get(idx.chapterNo);
+                // If "Topic 3" style, strip text to digits
+                const dig = s => (s.match(/\d+/)?.[0] ?? s);
+                if (tNo) tNo = dig(tNo);
+                if (cNo) cNo = dig(cNo);
+                out.push({
+                    paper: get(idx.paper) || '',
+                    topicNo: tNo || '',
+                    topicName: get(idx.topicName) || '',
+                    chapterNo: cNo || '',
+                    chapterName: get(idx.chapterName) || '',
+                    question: get(idx.question),
+                    answer: get(idx.answer)
+                });
+            }
+            return out.filter(x => x.question && x.answer);
         }
 
-        /* Try to find column index by fuzzy keywords */
-        function findCol(headers, includesAny = [], includesAll = []) {
-            const H = headers.map(h => h.toLowerCase().trim());
-            const match = (h) => (includesAll.every(k => h.includes(k)) && (includesAny.length ? includesAny.some(k => h.includes(k)) : true));
-            let idx = H.findIndex(h => match(h));
-            return idx >= 0 ? idx : -1;
-        }
+        /* ========================= State ========================= */
+        let ALL = [];           // all cards from CSV
+        let FILTERED = [];      // filtered subset for the session
+        const SELECTED = {
+            papers: new Set(),
+            topics: new Set(),
+            chapters: new Set(),
+        };
+        let SHUFFLE = false;
+        let SEARCH = '';
+        let iCard = 0;
 
-        /* Build records with flexible header names */
-        function normalize(rows) {
-            const head = rows[0].map(h => h.trim());
-            const body = rows.slice(1);
-
-            // Guess columns
-            const paperI = findCol(head, ['paper'], []);
-            const topicNoI = (() => {
-                let i = findCol(head, ['topic'], ['no']); if (i < 0) i = findCol(head, ['topic'], ['number']); return i;
-            })();
-            const topicNmI = (() => {
-                let i = findCol(head, ['topic'], ['name']); if (i < 0) i = findCol(head, ['topic'], ['title']); return i;
-            })();
-            const chapNoI = findCol(head, ['chapter'], ['no']) >= 0 ? findCol(head, ['chapter'], ['no']) : findCol(head, ['chapter'], ['number']);
-            const chapNmI = findCol(head, ['chapter'], ['name']) >= 0 ? findCol(head, ['chapter'], ['name']) : findCol(head, ['chapter'], ['title']);
-            const qI = findCol(head, ['question'], []) >= 0 ? findCol(head, ['question'], []) : findCol(head, ['prompt'], []);
-            const aI = findCol(head, ['answer'], []) >= 0 ? findCol(head, ['answer'], []) : findCol(head, ['solution'], []);
-
-            const recs = body.map(r => {
-                let paper = paperI >= 0 ? r[paperI] : '';
-                let tNo = topicNoI >= 0 ? r[topicNoI] : '';
-                let tName = topicNmI >= 0 ? r[topicNmI] : '';
-                let cNo = chapNoI >= 0 ? r[chapNoI] : '';
-                let cName = chapNmI >= 0 ? r[chapNmI] : '';
-                const qa = {
-                    question: qI >= 0 ? r[qI] : '',
-                    answer: aI >= 0 ? r[aI] : ''
-                };
-
-                // If topic or chapter comes as "Topic 3 - Waves" style
-                if (!tNo && !tName && topicNmI < 0 && topicNoI < 0) {
-                    const t = (r.find(x => /topic/i.test(x)) || '').toString();
-                    if (t) {
-                        const m = t.match(/topic\s*(\d+)\s*[-–•]\s*(.*)/i);
-                        if (m) { tNo = m[1]; tName = m[2]; }
-                    }
-                }
-                if (!cNo && !cName && chapNmI < 0 && chapNoI < 0) {
-                    const c = (r.find(x => /chapter/i.test(x)) || '').toString();
-                    if (c) {
-                        const m = c.match(/chapter\s*(\d+)\s*[-–•]\s*(.*)/i);
-                        if (m) { cNo = m[1]; cName = m[2]; }
-                    }
-                }
-                return {
-                    paper: (paper || '').trim() || '',
-                    topicNo: (tNo || '').toString().trim(),
-                    topicName: (tName || '').trim(),
-                    chapterNo: (cNo || '').toString().trim(),
-                    chapterName: (cName || '').trim(),
-                    ...qa
-                };
+        /* ========================= UI: chips ========================= */
+        function makeChip(label, value, group) {
+            const el = document.createElement('button');
+            el.className = 'chip';
+            el.textContent = label;
+            el.dataset.value = value;
+            el.dataset.group = group;
+            el.addEventListener('click', () => {
+                const set = group === 'paper' ? SELECTED.papers : group === 'topic' ? SELECTED.topics : SELECTED.chapters;
+                if (set.has(value)) { set.delete(value); el.classList.remove('active'); }
+                else { set.add(value); el.classList.add('active'); }
+                updateSummaryAndCount();
             });
-
-            return recs;
+            return el;
+        }
+        function unique(arr) { return [...new Set(arr.filter(Boolean).map(canon))]; }
+        function sortNumAware(a, b) {
+            const na = Number(a), nb = Number(b);
+            if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+            return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
         }
 
-        /* Populate lists (always show something) */
-        function renderLists(rows) {
-            const papers = new Set(FALLBACK.papers);
-            const topics = new Map(FALLBACK.topics.map(t => [String(t.no), t.name]));
-            const chaps = new Map(FALLBACK.chapters.map(c => [String(c.no), c.name]));
-
-            // Enrich with CSV data if present
-            rows.forEach(r => {
-                if (r.paper) papers.add(r.paper);
-                if (r.topicNo) {
-                    const cleanNo = String(r.topicNo).replace(/\D+/g, '') || r.topicNo;
-                    if (r.topicName && !topics.get(cleanNo)) topics.set(cleanNo, r.topicName);
-                    else if (!topics.get(cleanNo)) topics.set(cleanNo, `Topic ${cleanNo}`);
-                }
-                if (r.chapterNo) {
-                    const cleanNo = String(r.chapterNo).replace(/\D+/g, '') || r.chapterNo;
-                    if (r.chapterName && !chaps.get(cleanNo)) chaps.set(cleanNo, r.chapterName);
-                    else if (!chaps.get(cleanNo)) chaps.set(cleanNo, `Chapter ${cleanNo}`);
-                }
-            });
-
-            // Sort numeric-like keys
-            const nSort = (a, b) => (Number(a[0]) || 999) - (Number(b[0]) || 999);
-
+        function buildLists() {
             // Papers
-            const paperList = el('paperList');
-            paperList.innerHTML = '';
-            [...papers].sort().forEach(p => {
-                const id = 'paper_' + p.replace(/\s+/g, '_');
-                const lab = document.createElement('label');
-                lab.innerHTML = `<input type="checkbox" id="${id}" data-type="paper" value="${p}">
-      <span>${p}</span>`;
-                paperList.appendChild(lab);
+            const papers = unique(ALL.map(r => r.paper));
+            const papersBox = $('#papers'); papersBox.innerHTML = '';
+            (papers.length ? papers : ['Paper 1', 'Paper 2']).forEach(p => {
+                papersBox.appendChild(makeChip(p, p, 'paper'));
             });
 
-            // Topics (each on new line; show names)
-            const topicList = el('topicList');
-            topicList.innerHTML = '';
-            [...topics.entries()].sort(nSort).forEach(([no, name]) => {
-                const id = `topic_${no}`;
-                const lab = document.createElement('label');
-                lab.title = `Topic ${no} • ${name}`;
-                lab.innerHTML = `<input type="checkbox" id="${id}" data-type="topic" value="${no}">
-      <span>Topic ${no} • ${name}</span>`;
-                topicList.appendChild(lab);
+            // Topics with names
+            const topicMap = new Map(); // no -> name
+            ALL.forEach(r => {
+                const no = canon(r.topicNo); if (!no) return;
+                const nm = canon(r.topicName) || TOPIC_NAME[no] || '';
+                if (!topicMap.has(no)) topicMap.set(no, nm);
+            });
+            if (!topicMap.size) { Object.entries(TOPIC_NAME).forEach(([no, name]) => topicMap.set(no, name)); }
+            const topicsBox = $('#topics'); topicsBox.innerHTML = '';
+            [...topicMap.keys()].sort(sortNumAware).forEach(no => {
+                const label = `Topic ${no} • ${(topicMap.get(no) || '').trim() || '—'}`;
+                topicsBox.appendChild(makeChip(label, no, 'topic'));
             });
 
-            // Chapters (each on new line; show names)
-            const chapterList = el('chapterList');
-            chapterList.innerHTML = '';
-            [...chaps.entries()].sort(nSort).forEach(([no, name]) => {
-                const id = `chap_${no}`;
-                const lab = document.createElement('label');
-                lab.title = `Chapter ${no} • ${name}`;
-                lab.innerHTML = `<input type="checkbox" id="${id}" data-type="chapter" value="${no}">
-      <span>Chapter ${no} • ${name}</span>`;
-                chapterList.appendChild(lab);
+            // Chapters with names
+            const chapMap = new Map();
+            ALL.forEach(r => {
+                const no = canon(r.chapterNo); if (!no) return;
+                const nm = canon(r.chapterName) || CHAPTER_NAME[no] || '';
+                if (!chapMap.has(no)) chapMap.set(no, nm);
             });
-
-            // Hook up change handlers (delegate)
-            [paperList, topicList, chapterList].forEach(list => {
-                list.addEventListener('change', onFilterChange, false);
+            if (!chapMap.size) { Object.entries(CHAPTER_NAME).forEach(([no, name]) => chapMap.set(no, name)); }
+            const chBox = $('#chapters'); chBox.innerHTML = '';
+            [...chapMap.keys()].sort(sortNumAware).forEach(no => {
+                const label = `Chapter ${no} • ${(chapMap.get(no) || '').trim() || '—'}`;
+                chBox.appendChild(makeChip(label, no, 'chapter'));
             });
         }
 
-        /* Load CSV, but render lists immediately from fallback */
-        async function loadAll() {
-            renderLists([]); // show lists immediately
-
-            try {
-                const res = await fetch('phys_ss.csv', { cache: 'no-store' });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const text = await res.text();
-                const rows = parseCSV(text);
-                const recs = normalize(rows).filter(r => (r.question?.trim() || '') && (r.answer?.trim() || ''));
-                state.allRows = recs;
-
-                // Re-render lists using real names found in CSV
-                renderLists(recs);
-                updateSummary();
-            } catch (err) {
-                state.allRows = []; // no data yet
-                const box = el('loadErr');
-                box.style.display = 'block';
-                box.textContent = `Couldn’t load phys_ss.csv (${err.message}). The selectors use built-in topic/chapter names so you can still build filters. Place this HTML and phys_ss.csv in the same folder if you haven’t already.`;
-            }
-        }
-
-        /* ================== Filtering & Summary ================== */
-        function onFilterChange(e) {
-            const input = e.target;
-            if (!(input instanceof HTMLInputElement)) return;
-            const { type, value } = input.dataset;
-            const checked = input.checked;
-            const set = type === 'paper' ? state.selectedPapers : type === 'topic' ? state.selectedTopics : state.selectedChapters;
-            if (checked) set.add(value); else set.delete(value);
-            updateSummary();
-        }
-
-        function updateSummary() {
-            el('sumPaper').textContent = state.selectedPapers.size ? [...state.selectedPapers].join(', ') : 'All';
-            el('sumTopic').textContent = state.selectedTopics.size ? [...state.selectedTopics].map(n => {
-                const t = document.querySelector(`#topic_${CSS.escape(n)} + span`)?.textContent || `Topic ${n}`;
-                return t;
-            }).join('\n') : 'All';
-            el('sumChapter').textContent = state.selectedChapters.size ? [...state.selectedChapters].map(n => {
-                const c = document.querySelector(`#chap_${CSS.escape(n)} + span`)?.textContent || `Chapter ${n}`;
-                return c;
-            }).join(', ') : 'All';
-            el('sumSearch').textContent = state.search || '—';
-
-            const count = filterCards(false).length;
-            el('sumCount').textContent = count;
-        }
-
-        function filterCards(applyShuffle = true) {
-            const q = (state.search || '').toLowerCase().trim();
-            const inSet = (set, val) => set.size === 0 || set.has(String(val));
-
-            const base = (state.allRows.length ? state.allRows : []).filter(r => {
-                const okPaper = inSet(state.selectedPapers, r.paper || '');
-                const okTopic = inSet(state.selectedTopics, (r.topicNo || '').replace(/\D+/g, '') || r.topicNo);
-                const okChap = inSet(state.selectedChapters, (r.chapterNo || '').replace(/\D+/g, '') || r.chapterNo);
-                const okQ = !q || r.question.toLowerCase().includes(q) || r.answer.toLowerCase().includes(q);
-                return okPaper && okTopic && okChap && okQ;
-            });
-
-            // If no CSV loaded yet, create empty set
-            let cards = base;
-            if (applyShuffle && state.shuffle) {
-                cards = [...cards];
-                for (let i = cards.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [cards[i], cards[j]] = [cards[j], cards[i]];
+        /* ========================= Filtering & summary ========================= */
+        function applyFilters() {
+            const P = SELECTED.papers, T = SELECTED.topics, C = SELECTED.chapters;
+            const term = SEARCH.toLowerCase();
+            const allow = (set, val) => set.size === 0 || set.has(canon(val));
+            FILTERED = ALL.filter(r => {
+                if (!allow(P, r.paper)) return false;
+                if (!allow(T, r.topicNo)) return false;
+                if (!allow(C, r.chapterNo)) return false;
+                if (term) {
+                    const blob = `${r.question} ${r.answer}`.toLowerCase();
+                    if (!blob.includes(term)) return false;
                 }
+                return true;
+            });
+            if (SHUFFLE) { // Fisher-Yates
+                for (let i = FILTERED.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[FILTERED[i], FILTERED[j]] = [FILTERED[j], FILTERED[i]]; }
             }
-            return cards;
+            iCard = 0;
+            $('#start').disabled = FILTERED.length === 0;
         }
 
-        /* ================== Flashcard Deck (flip on click) ================== */
-        function showDeck() {
-            state.cards = filterCards(true);
-            state.idx = 0;
-            if (state.cards.length === 0) {
-                alert('No cards match your current filters.');
-                return;
-            }
-            renderCard();
-            el('overlay').classList.add('show');
+        function labelForSelectedTopics() {
+            if (!SELECTED.topics.size) return 'All';
+            // Build from map/dictionaries rather than DOM (prevents "undefined")
+            return [...SELECTED.topics].sort(sortNumAware).map(no => {
+                const name = TOPIC_NAME[no] ?? (ALL.find(r => canon(r.topicNo) === no)?.topicName || '');
+                return `• Topic ${no}${name ? ' • ' + name : ''}`;
+            }).join('\n');
+        }
+        function labelForSelectedChapters() {
+            if (!SELECTED.chapters.size) return 'All';
+            return [...SELECTED.chapters].sort(sortNumAware).map(no => {
+                const name = CHAPTER_NAME[no] ?? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || '');
+                return `• Chapter ${no}${name ? ' • ' + name : ''}`;
+            }).join('\n');
         }
 
+        function updateSummaryAndCount() {
+            applyFilters();
+            const paperText = SELECTED.papers.size ? [...SELECTED.papers].join(', ') : 'All';
+            const topicText = labelForSelectedTopics();
+            const chapText = labelForSelectedChapters();
+            const searchText = SEARCH || '—';
+            $('#summary').textContent =
+                `Paper: ${paperText}
+Topic(s):
+${topicText}
+
+Chapter(s):
+${chapText}
+
+Search: ${searchText}
+Matches: ${FILTERED.length}`;
+        }
+
+        /* ========================= Flashcards (flip on click) ========================= */
         function renderCard() {
-            const { cards, idx } = state;
-            const cur = cards[idx];
-
-            el('counter').textContent = `Card ${idx + 1} of ${cards.length}`;
-
-            const area = el('cardArea');
+            const area = $('#cardArea');
             area.classList.remove('flipped');
+            const card = FILTERED[iCard];
+            if (!card) { area.innerHTML = ''; $('#counter').textContent = 'Card 0 of 0'; return; }
+            $('#counter').textContent = `Card ${iCard + 1} of ${FILTERED.length}`;
             area.innerHTML = `
     <div class="flipper" id="flipper">
-      <div class="cardface front"><h3>${escapeHTML(cur.question)}</h3></div>
-      <div class="cardface back"><h3>${escapeHTML(cur.answer)}</h3></div>
+      <div class="fc-face fc-front">${escapeHTML(card.question)}</div>
+      <div class="fc-face fc-back">${escapeHTML(card.answer)}</div>
     </div>
   `;
-            // click to flip
             area.onclick = () => area.classList.toggle('flipped');
         }
+        function escapeHTML(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])); }
 
-        function nextCard() { if (state.idx < state.cards.length - 1) { state.idx++; renderCard(); } }
-        function prevCard() { if (state.idx > 0) { state.idx--; renderCard(); } }
-
-        /* ================== Helpers / Events ================== */
-        function escapeHTML(s) { return (s || '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])); }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initial lists and attempt CSV load
-            loadAll();
-
-            // Search
-            el('q').addEventListener('input', (e) => { state.search = e.target.value || ''; updateSummary(); });
-
-            // Shuffle toggle
-            el('shuffleToggle').addEventListener('change', (e) => { state.shuffle = e.target.checked; });
-
-            // Start
-            el('startBtn').addEventListener('click', (e) => { e.preventDefault(); showDeck(); });
-
-            // Overlay controls
-            el('closeBtn').addEventListener('click', () => el('overlay').classList.remove('show'));
-            el('nextBtn').addEventListener('click', nextCard);
-            el('prevBtn').addEventListener('click', prevCard);
-
-            // Keyboard helpers
-            window.addEventListener('keydown', (e) => {
-                if (!el('overlay').classList.contains('show')) return;
-                if (e.key === 'ArrowRight') nextCard();
-                if (e.key === 'ArrowLeft') prevCard();
-                if (e.key === 'Escape') el('overlay').classList.remove('show');
-                if (e.key === ' ') { e.preventDefault(); el('cardArea').classList.toggle('flipped'); }
-            });
+        /* ========================= Events ========================= */
+        $('#shuffle').addEventListener('click', () => {
+            SHUFFLE = !SHUFFLE;
+            $('#shuffle').classList.toggle('on', SHUFFLE);
+            $('#shuffle').setAttribute('aria-checked', SHUFFLE ? 'true' : 'false');
+            updateSummaryAndCount();
         });
+        $('#search').addEventListener('input', (e) => { SEARCH = e.target.value.trim(); updateSummaryAndCount(); });
+        $('#start').addEventListener('click', () => { if (FILTERED.length) { $('#overlay').classList.add('show'); renderCard(); } });
+        $('#close').addEventListener('click', () => $('#overlay').classList.remove('show'));
+        $('#prev').addEventListener('click', () => { if (iCard > 0) { iCard--; renderCard(); } });
+        $('#next').addEventListener('click', () => { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } });
+        window.addEventListener('keydown', e => {
+            if (!$('#overlay').classList.contains('show')) return;
+            if (e.key === 'Escape') $('#overlay').classList.remove('show');
+            if (e.key === 'ArrowLeft') { e.preventDefault(); if (iCard > 0) { iCard--; renderCard(); } }
+            if (e.key === 'ArrowRight') { e.preventDefault(); if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } }
+            if (e.key === ' ') { e.preventDefault(); $('#cardArea').classList.toggle('flipped'); }
+        });
+
+        /* ========================= Init (load CSV, then build) ========================= */
+        (async function init() {
+            try {
+                const res = await fetch('phys_ss.csv', { cache: 'no-store' });
+                if (!res.ok) throw new Error('CSV not found');
+                const text = await res.text();
+                ALL = readCSV(text);
+            } catch (e) {
+                ALL = []; // empty -> no cards until CSV present
+            }
+            buildLists();                // build chips (with dictionary fallback if names missing)
+            updateSummaryAndCount();     // compute counts & enable button
+        })();
     </script>
 </body>
 
