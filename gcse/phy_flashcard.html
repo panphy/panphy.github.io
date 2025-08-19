@@ -461,12 +461,15 @@
 
                 <div class="card" style="margin-top:12px">
                     <h2>Selection Summary</h2>
-                    <pre id="summary">Paper: None
-Topic(s):
-None
+                    <pre id="summary">
+                        Paper:
+                        None
+                        
+                        Topic(s):
+                        None
 
-Chapter(s):
-None
+                        Chapter(s):
+                        None
 
 Search: —
 Matches: 0</pre>
@@ -617,15 +620,17 @@ Matches: 0</pre>
             const chapText = labelForSet('chapters', CHAPTER_NAME);
             const searchText = SEARCH || '—';
             $('#summary').textContent =
-                `Paper: ${paperText}
-Topic(s):
-${topicText}
+                `Paper:
+                ${paperText}
 
-Chapter(s):
-${chapText}
+                Topic(s):
+                ${topicText}
 
-Search: ${searchText}
-Matches: ${FILTERED.length}`;
+                Chapter(s):
+                ${chapText}
+
+                Search: ${searchText}
+                Matches: ${FILTERED.length}`;
         }
 
         /* ---------- Progress + cards ---------- */
