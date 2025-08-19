@@ -106,6 +106,8 @@
             border-radius: 10px;
             padding: 4px 8px;
             cursor: pointer;
+            z-index: 2;
+            pointer-events: auto;
         }
 
         .clearlink:hover {
@@ -580,7 +582,7 @@ Matches: 0</pre>
         function activeGroup() {
             const groups = ['papers', 'topics', 'chapters'];
             const filled = groups.filter(g => SELECTED[g].size > 0);
-            return filled.length === 1 ? filled[0] : null; // if none or (by accident) >1, treat as unlocked
+            return filled.length === 1 ? filled[0] : null;
         }
         function applyGroupLockUI() {
             const active = activeGroup();
@@ -600,7 +602,6 @@ Matches: 0</pre>
             el.dataset.group = groupKey;
 
             el.addEventListener('click', () => {
-                // If another group is currently active, ignore clicks here (UI is also disabled via CSS)
                 const current = activeGroup();
                 if (current && current !== groupKey) return;
 
@@ -612,8 +613,6 @@ Matches: 0</pre>
                     el.classList.add('active');
                     set.add(value);
                 }
-
-                // If the group becomes empty, unlock all; otherwise lock others
                 applyGroupLockUI();
                 updateSummaryAndCount();
             });
@@ -795,7 +794,7 @@ Matches: ${FILTERED.length}`;
         $('#btnCorrect').addEventListener('click', () => mark(true));
         $('#btnWrong').addEventListener('click', () => mark(false));
 
-        /* clear links */
+        /* clear links (ALL THREE, including PAPERS) */
         $('#clearPapers').addEventListener('click', () => clearGroup('papers'));
         $('#clearTopics').addEventListener('click', () => clearGroup('topics'));
         $('#clearChapters').addEventListener('click', () => clearGroup('chapters'));
