@@ -413,7 +413,7 @@
     <div class="wrap">
         <header>
             <div class="logo" aria-hidden="true"></div>
-            <h1>GCSE Physics Retrieval Questions Flashcards</h1>
+            <h1>Physics Retrieval Questions Flashcards</h1>
             <div class="crumbs">Select content → Start</div>
         </header>
 
@@ -449,6 +449,7 @@
                     <button class="clearlink" type="button" data-target="chapters">Clear</button>
                 </div>
                 <div id="chapters" class="chips group" aria-live="polite"></div>
+                <div class="group-note">Selecting a section (Paper, Chapter or Topic) disables other sections until cleared.</div>
             </div>
 
             <!-- RIGHT CARD -->
@@ -460,18 +461,16 @@
                 <div id="topics" class="chips group" aria-live="polite"></div>
 
                 <div class="card" style="margin-top:12px">
-                    <h2>Selection Summary</h2>
-                    <pre id="summary">Paper:
-                        None
-                        
-                        Topic(s):
-                        None
-                        
-                        Chapter(s):
-                        None
-                        
-                        Search: —
-                        Matches: 0</pre>
+                    <h2>Summary</h2>
+                    <pre id="summary">Paper: All
+Topic(s):
+All
+
+Chapter(s):
+All
+
+Search: —
+Matches: 0</pre>
                     <button id="start" class="btn" disabled>Start Revising</button>
                 </div>
             </div>
@@ -507,7 +506,7 @@
     <script>
         /* ---------- Helpers & constants ---------- */
         const TOPIC_NAME = { '1': 'Energy', '2': 'Electricity', '3': 'Particle Model of Matter', '4': 'Atomic Structure', '5': 'Forces', '6': 'Waves', '7': 'Electromagnetism', '8': 'Space' };
-        const CHAPTER_NAME = { '1': 'Conservation and dissipation of energy', '2': 'Energy transfer by heating', '3': 'Energy resources', '4': 'Electric circuits', '5': 'Electricity in the home', '6': 'Molecules and matter', '7': 'Radioactivity', '8': 'Forces in balance', '9': 'Motion', '10': 'Forces and motion', '11': 'Force and pressure', '12': 'Wave properties', '13': 'Electromagnetic spectrum', '14': 'Light', '15': 'Electromagnetism', '16': 'Space' };
+        const CHAPTER_NAME = { '1': 'Conservation and dissipation of energy', '2': 'Energy transfer by heating', '3': 'Energy resources', '4': 'Electric circuits', '5': 'Domestic electricity', '6': 'Molecules and matter', '7': 'Radioactivity', '8': 'Forces in balance', '9': 'Motion', '10': 'Forces and motion', '11': 'Force and pressure', '12': 'Wave properties', '13': 'Electromagnetic spectrum', '14': 'Light', '15': 'Electromagnetism', '16': 'Space' };
         const $ = s => document.querySelector(s); const canon = v => String(v ?? '').trim();
 
         /* ---------- CSV parsing ---------- */
@@ -618,17 +617,16 @@
             const topicText = labelForSet('topics', TOPIC_NAME);
             const chapText = labelForSet('chapters', CHAPTER_NAME);
             const searchText = SEARCH || '—';
-            $('#summary').textContent =`Paper:
-            ${paperText}
-            
-            Topic(s):
-            ${topicText}
-            
-            Chapter(s):
-            ${chapText}
-            
-            Search: ${searchText}
-            Matches: ${FILTERED.length}`;
+            $('#summary').textContent =
+                `Paper: ${paperText}
+Topic(s):
+${topicText}
+
+Chapter(s):
+${chapText}
+
+Search: ${searchText}
+Matches: ${FILTERED.length}`;
         }
 
         /* ---------- Progress + cards ---------- */
