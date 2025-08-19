@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Physics Flashcards • Landing & Study</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #121a2b;
+      --muted: #8aa0c6;
+      --accent: #6ee7b7;
+      --accent2: #60a5fa;
+      --chip: #1a2440;
+      --danger: #ef4444;
+      --ok: #22c55e;
+      --card: #0f172a;
+      --cardHi: #0b1220;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 20% -10%, #1b2a4b 0%, #0b1220 35%, #070b14 100%);
+      color: #e5edff;
+      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial
+    }
+
+    a {
+      color: inherit
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px
+    }
+
+    header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, .06), var(--shadow)
+    }
+
+    h1 {
+      font-size: 20px;
+      letter-spacing: .2px;
+      margin: 0
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 16px;
+      box-shadow: var(--shadow)
+    }
+
+    .landing {
+      padding: 18px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px
+    }
+
+    .section {
+      padding: 18px;
+      background: var(--panel);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, .06)
+    }
+
+    .section h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted)
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: #cfe1ff;
+      border: 1px solid rgba(255, 255, 255, .08);
+      cursor: pointer;
+      transition: .15s transform, .15s background
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, rgba(96, 165, 250, .25), rgba(110, 231, 183, .25));
+      border-color: rgba(110, 231, 183, .5)
+    }
+
+    .chip:hover {
+      transform: translateY(-2px)
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px
+    }
+
+    .input {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0c1426;
+      border: 1px solid rgba(255, 255, 255, .1);
+      padding: 10px 12px;
+      border-radius: 10px
+    }
+
+    .input input {
+      all: unset;
+      flex: 1;
+      color: #e5edff
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none
+    }
+
+    .switch {
+      width: 44px;
+      height: 26px;
+      border-radius: 999px;
+      background: #223055;
+      border: 1px solid rgba(255, 255, 255, .14);
+      position: relative;
+      transition: .2s
+    }
+
+    .knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #cde6ff;
+      transition: .2s
+    }
+
+    .switch.on {
+      background: linear-gradient(135deg, #60a5fa66, #6ee7b766)
+    }
+
+    .switch.on .knob {
+      left: 22px;
+      background: white
+    }
+
+    .footerRow {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #60a5fa, #6ee7b7);
+      color: #041023;
+      border: none;
+      font-weight: 700;
+      letter-spacing: .3px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(96, 165, 250, .25);
+      transition: .15s transform, .15s filter
+    }
+
+    .btn:hover {
+      transform: translateY(-1px)
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .count {
+      font-weight: 700;
+      color: #9ae6b4
+    }
+
+    .warning {
+      color: #ffb4b4
+    }
+
+    /* Study view */
+    .study {
+      display: none
+    }
+
+    .back {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, .18);
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #cfe1ff;
+      cursor: pointer
+    }
+
+    .row {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      flex-wrap: wrap
+    }
+
+    .card {
+      flex: 1;
+      min-width: 300px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      border: 1px solid rgba(255, 255, 255, .09);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: .15s transform, .15s box-shadow
+    }
+
+    .card:hover {
+      transform: translateY(-2px)
+    }
+
+    .card h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .12em
+    }
+
+    .qa {
+      font-size: 20px;
+      line-height: 1.45
+    }
+
+    .answer {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, .15);
+      display: none;
+      color: #c7ffd9
+    }
+
+    .answer.show {
+      display: block
+    }
+
+    .barWrap {
+      height: 12px;
+      border-radius: 999px;
+      background: #0e162a;
+      border: 1px solid rgba(255, 255, 255, .1);
+      position: relative;
+      overflow: hidden
+    }
+
+    .bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      background: linear-gradient(90deg, #6ee7b7, #60a5fa)
+    }
+
+    .barText {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .pill {
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer
+    }
+
+    .ok {
+      background: #0c2515;
+      color: #aef3c7;
+      border-color: #195c35
+    }
+
+    .ng {
+      background: #2a1010;
+      color: #ffb4b4;
+      border-color: #7a2323
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>Physics Flashcards</h1>
+      </div>
+      <div class="muted">Landing • Select content → Start</div>
+    </header>
+
+    <!-- LANDING -->
+    <section id="landing" class="panel landing">
+      <div class="grid">
+        <div class="section">
+          <h3>Choose Paper(s)</h3>
+          <div id="chips-paper" class="chips"></div>
+          <div class="controls">
+            <label class="toggle">
+              <span>Shuffle</span>
+              <div id="shuffleSwitch" class="switch" role="switch" aria-checked="false">
+                <div class="knob"></div>
+              </div>
+            </label>
+            <div class="input" title="Search within Questions">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M21 21l-3.5-3.5M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#9fb4d9"
+                  stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <input id="searchBox" placeholder="Search questions..." />
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <h3>Choose Topic Number(s)</h3>
+          <div id="chips-topicnum" class="chips"></div>
+        </div>
+        <div class="section">
+          <h3>Choose Chapter(s)</h3>
+          <div id="chips-chapter" class="chips"></div>
+        </div>
+        <div class="section">
+          <h3>Live Summary</h3>
+          <div class="muted" id="summary">Loading CSV…</div>
+          <div class="footerRow">
+            <div><span class="count" id="matchCount">0</span> cards match</div>
+            <button id="startBtn" class="btn" disabled>Start Revising</button>
+          </div>
+          <div id="warn" class="warning" style="display:none;margin-top:8px;"></div>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:10px">Tip: click chips to select multiple; click again to unselect.</div>
+    </section>
+
+    <!-- STUDY -->
+    <section id="study" class="panel study" aria-hidden="true">
+      <div style="padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px">
+        <button class="back" id="backBtn">← Back to selection</button>
+        <div class="meta" id="studyMeta"></div>
+      </div>
+      <div style="padding:0 18px 18px">
+        <div class="barWrap">
+          <div class="bar" id="bar"></div>
+          <div class="barText" id="barText">0% • 0 / 0 correct</div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <div class="card" id="flashcard">
+            <h4 id="cardHeader">Question</h4>
+            <div class="qa" id="question">—</div>
+            <div class="answer" id="answer"></div>
+          </div>
+          <div class="section" style="min-width:280px">
+            <h3>Controls</h3>
+            <div class="actions" style="margin:8px 0 12px">
+              <button class="pill ok" id="btnCorrect">✓ Correct</button>
+              <button class="pill ng" id="btnWrong">✗ Wrong</button>
+            </div>
+            <div class="muted" id="progressText">Card 0 of 0</div>
+            <div class="muted" id="sessionFilters" style="margin-top:8px"></div>
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+              <button class="pill" id="btnPrev">⟵ Prev</button>
+              <button class="pill" id="btnNext">Next ⟶</button>
+              <button class="pill" id="btnReveal">Reveal</button>
+              <button class="pill" id="btnShuffle">Shuffle</button>
+              <button class="pill" id="btnRestart">Restart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* -------------------- CSV LOADING & PARSING -------------------- */
+    const CSV_URL = 'phys_ss.csv'; // keep this HTML and the CSV in the same folder
+    let ALL = []; // full dataset
+    let FILTERED = []; // filtered dataset (landing)
+    let SESSION = []; // working copy for study session
+
+    // Basic CSV parser supporting quoted fields with commas & newlines
+    function parseCSV(text) {
+      const rows = [];
+      let i = 0, field = '', row = [], inQuotes = false;
+      while (i < text.length) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (text[i + 1] === '"') { field += '"'; i++; }
+            else inQuotes = false;
+          } else field += c;
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ',') { row.push(field); field = ''; }
+          else if (c === '\n' || c === '\r') {
+            // handle Windows \r\n or stray \r
+            // finish row only if we have content or non-empty row
+            if (c === '\r' && text[i + 1] === '\n') i++;
+            row.push(field); field = '';
+            if (row.some(x => x !== '')) rows.push(row);
+            row = [];
+          } else field += c;
+        }
+        i++;
+      }
+      // last field
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    function normaliseHeader(h) {
+      return h.trim().toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/[^a-z0-9 ]/g, '')
+        .replace(/\s/g, '_');
+    }
+
+    function loadCSV() {
+      return fetch(CSV_URL, { cache: 'no-store' })
+        .then(r => {
+          if (!r.ok) throw new Error('CSV not found. Place "phys_ss.csv" next to this HTML.');
+          return r.text();
+        })
+        .then(text => {
+          const rows = parseCSV(text);
+          if (!rows.length) throw new Error('CSV is empty.');
+          const header = rows[0].map(normaliseHeader);
+          const idx = {
+            chapter: header.findIndex(h => h.includes('chapter')),
+            topicnum: header.findIndex(h => h.includes('topic') && h.includes('number') || h === 'topic_number' || h === 'topicno'),
+            topic: header.findIndex(h => h === 'topic' || h.includes('topic') && !h.includes('number')),
+            paper: header.findIndex(h => h.includes('paper')),
+            question: header.findIndex(h => h.includes('question')),
+            answer: header.findIndex(h => h.includes('answer')),
+          };
+          for (const k in idx) if (idx[k] === -1) console.warn('Missing column:', k);
+
+          const out = [];
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            const get = (i) => (i >= 0 && i < row.length ? row[i].trim() : '');
+            out.push({
+              chapter: get(idx.chapter),
+              topicnum: get(idx.topicnum),
+              topic: get(idx.topic),
+              paper: get(idx.paper),
+              question: get(idx.question),
+              answer: get(idx.answer),
+            });
+          }
+          return out.filter(x => x.question && x.answer);
+        });
+    }
+
+    /* -------------------- UI HELPERS -------------------- */
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function chip(label, value, groupId) {
+      const el = document.createElement('button');
+      el.className = 'chip';
+      el.textContent = label;
+      el.dataset.value = value;
+      el.dataset.group = groupId;
+      el.addEventListener('click', () => {
+        el.classList.toggle('active');
+        updateFilters();
+      });
+      return el;
+    }
+
+    function uniqueSorted(arr) {
+      return [...new Set(arr.filter(Boolean).map(s => s.trim()))].sort((a, b) => {
+        // numeric-aware sort for strings like "1", "2", "10"
+        const na = Number(a), nb = Number(b);
+        if (!isNaN(na) && !isNaN(nb)) return na - nb;
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      });
+    }
+
+    /* -------------------- LANDING LOGIC -------------------- */
+    const chipsPaper = $('#chips-paper');
+    const chipsTopicNum = $('#chips-topicnum');
+    const chipsChapter = $('#chips-chapter');
+    const matchCount = $('#matchCount');
+    const summary = $('#summary');
+    const warn = $('#warn');
+    const searchBox = $('#searchBox');
+    const shuffleSwitch = $('#shuffleSwitch');
+    const startBtn = $('#startBtn');
+
+    let selected = { paper: new Set(), topicnum: new Set(), chapter: new Set(), search: '' };
+    let shuffle = false;
+
+    searchBox.addEventListener('input', () => {
+      selected.search = searchBox.value.trim().toLowerCase();
+      updateFilters();
+    });
+
+    shuffleSwitch.addEventListener('click', () => {
+      shuffleSwitch.classList.toggle('on');
+      shuffle = shuffleSwitch.classList.contains('on');
+      shuffleSwitch.setAttribute('aria-checked', shuffle ? 'true' : 'false');
+    });
+
+    function populateChips() {
+      // Papers
+      uniqueSorted(ALL.map(x => x.paper)).forEach(v => {
+        chipsPaper.appendChild(chip(v || '—', v, 'paper'));
+      });
+      // Topic numbers
+      uniqueSorted(ALL.map(x => x.topicnum)).forEach(v => {
+        chipsTopicNum.appendChild(chip(v || '—', v, 'topicnum'));
+      });
+      // Chapters
+      uniqueSorted(ALL.map(x => x.chapter)).forEach(v => {
+        chipsChapter.appendChild(chip(v || '—', v, 'chapter'));
+      });
+    }
+
+    function getActiveValues(group) {
+      return new Set($$('#chips-' + group + ' .chip.active').map(c => c.dataset.value));
+    }
+
+    function updateFilters() {
+      selected.paper = getActiveValues('paper');
+      selected.topicnum = getActiveValues('topicnum');
+      selected.chapter = getActiveValues('chapter');
+
+      FILTERED = ALL.filter(x => {
+        if (selected.paper.size && !selected.paper.has(x.paper)) return false;
+        if (selected.topicnum.size && !selected.topicnum.has(x.topicnum)) return false;
+        if (selected.chapter.size && !selected.chapter.has(x.chapter)) return false;
+        if (selected.search) {
+          const q = (x.question || '').toLowerCase();
+          if (!q.includes(selected.search)) return false;
+        }
+        return true;
+      });
+
+      matchCount.textContent = FILTERED.length;
+      startBtn.disabled = FILTERED.length === 0;
+
+      const paperList = [...selected.paper].join(', ') || 'All';
+      const topicList = [...selected.topicnum].join(', ') || 'All';
+      const chList = [...selected.chapter].join(', ') || 'All';
+      summary.innerHTML = `
+    <div>Paper: <strong>${paperList}</strong></div>
+    <div>Topic No.: <strong>${topicList}</strong></div>
+    <div>Chapter: <strong>${chList}</strong></div>
+    <div class="muted" style="margin-top:6px">Search: ${selected.search ? '“' + selected.search + '”' : '—'}</div>
+  `;
+
+      warn.style.display = 'none';
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (!FILTERED.length) { warn.style.display = 'block'; warn.textContent = 'No cards selected.'; return; }
+      startStudy();
+    });
+
+    /* -------------------- STUDY SESSION -------------------- */
+    const landing = $('#landing');
+    const study = $('#study');
+    const backBtn = $('#backBtn');
+    const studyMeta = $('#studyMeta');
+    const bar = $('#bar');
+    const barText = $('#barText');
+    const flashcard = $('#flashcard');
+    const qEl = $('#question');
+    const aEl = $('#answer');
+    const cardHeader = $('#cardHeader');
+    const btnCorrect = $('#btnCorrect');
+    const btnWrong = $('#btnWrong');
+    const btnPrev = $('#btnPrev');
+    const btnNext = $('#btnNext');
+    const btnReveal = $('#btnReveal');
+    const btnShuffle = $('#btnShuffle');
+    const btnRestart = $('#btnRestart');
+    const progressText = $('#progressText');
+    const sessionFilters = $('#sessionFilters');
+
+    let iCard = 0, correct = 0, revealed = false;
+
+    function startStudy() {
+      SESSION = FILTERED.slice();
+      if (shuffle) shuffleArray(SESSION);
+      iCard = 0; correct = 0; revealed = false;
+      updateStudyMeta();
+      showCard();
+      landing.style.display = 'none';
+      study.style.display = 'block';
+      study.setAttribute('aria-hidden', 'false');
+    }
+
+    backBtn.addEventListener('click', () => {
+      study.style.display = 'none';
+      study.setAttribute('aria-hidden', 'true');
+      landing.style.display = 'block';
+    });
+
+    function updateStudyMeta() {
+      const total = SESSION.length;
+      const pct = total ? Math.round((correct / total) * 100) : 0;
+      bar.style.width = pct + '%';
+      barText.textContent = `${pct}% • ${correct} / ${total} correct`;
+      progressText.textContent = `Card ${Math.min(iCard + 1, total)} of ${total}`;
+      const paperList = [...selected.paper].join(', ') || 'All';
+      const topicList = [...selected.topicnum].join(', ') || 'All';
+      const chList = [...selected.chapter].join(', ') || 'All';
+      studyMeta.textContent = `Paper: ${paperList} • Topic No.: ${topicList} • Chapter: ${chList} • ${shuffle ? 'Shuffled' : 'In order'}`;
+      sessionFilters.innerHTML = `<div>Filters → Paper: <strong>${paperList}</strong>, Topic No.: <strong>${topicList}</strong>, Chapter: <strong>${chList}</strong></div>`;
+    }
+
+    function showCard() {
+      const n = SESSION.length;
+      if (!n) { qEl.textContent = 'No cards selected.'; aEl.textContent = ''; return; }
+      if (iCard < 0) iCard = 0;
+      if (iCard >= n) iCard = n - 1;
+      const card = SESSION[iCard];
+      cardHeader.textContent = `Question`;
+      qEl.textContent = card.question || '—';
+      aEl.textContent = card.answer || '';
+      aEl.classList.remove('show');
+      revealed = false;
+    }
+
+    flashcard.addEventListener('click', toggleReveal);
+    btnReveal.addEventListener('click', toggleReveal);
+    function toggleReveal() {
+      if (!SESSION.length) return;
+      revealed = !revealed;
+      aEl.classList.toggle('show', revealed);
+    }
+
+    btnCorrect.addEventListener('click', () => {
+      if (!SESSION.length) return;
+      if (!revealed) toggleReveal();
+      correct++;
+      iCard++;
+      updateStudyMeta();
+      showCard();
+    });
+    btnWrong.addEventListener('click', () => {
+      if (!SESSION.length) return;
+      if (!revealed) toggleReveal();
+      iCard++;
+      updateStudyMeta();
+      showCard();
+    });
+    btnPrev.addEventListener('click', () => { iCard--; updateStudyMeta(); showCard(); });
+    btnNext.addEventListener('click', () => { iCard++; updateStudyMeta(); showCard(); });
+    btnShuffle.addEventListener('click', () => {
+      shuffleArray(SESSION);
+      iCard = 0;
+      updateStudyMeta(); showCard();
+    });
+    btnRestart.addEventListener('click', () => {
+      iCard = 0; correct = 0; revealed = false;
+      updateStudyMeta(); showCard();
+    });
+
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    /* -------------------- INIT -------------------- */
+    (async function init() {
+      try {
+        const data = await loadCSV();
+        ALL = data;
+        populateChips();
+        updateFilters();
+        summary.insertAdjacentHTML('beforeend',
+          `<div class="muted" style="margin-top:6px">${ALL.length} total cards available.</div>`);
+      } catch (err) {
+        console.error(err);
+        warn.style.display = 'block';
+        warn.textContent = err.message;
+        summary.textContent = 'Failed to load CSV.';
+      }
+    })();
+  </script>
+</body>
+
+</html>
