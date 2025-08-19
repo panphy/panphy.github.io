@@ -4,774 +4,683 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Physics Flashcards • Landing & Study</title>
+    <title>Physics Flashcards — Landing</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <style>
-        :root {
-            --bg: #0b1220;
-            --panel: #121a2b;
-            --muted: #8aa0c6;
-            --accent: #6ee7b7;
-            --accent2: #60a5fa;
-            --chip: #1a2440;
-            --danger: #ef4444;
-            --ok: #22c55e;
-            --card: #0f172a;
-            --shadow: 0 10px 30px rgba(0, 0, 0, .35);
-        }
-
-        * {
-            box-sizing: border-box
-        }
-
+        /* --- Background (no cut-off) --- */
         html,
         body {
-            height: 100%
+            height: 100%;
         }
 
         body {
             margin: 0;
-            color: #e5edff;
-            font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
-            min-height: 100svh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Full-viewport, fixed background to avoid any “cut-off” on large windows */
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: -1;
+            color: #e6edf3;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             background:
-                radial-gradient(1400px 900px at 20% -10%, #1b2a4b 0%, #0b1220 35%, #070b14 100%);
-        }
-
-        a {
-            color: inherit
+                radial-gradient(1200px 800px at 20% -10%, #0ea5e9 0%, rgba(14, 165, 233, 0) 60%),
+                radial-gradient(1000px 700px at 120% 20%, #22c55e 0%, rgba(34, 197, 94, 0) 50%),
+                linear-gradient(180deg, #0b1220 0%, #0a0f1a 60%, #0a0f19 100%);
+            min-height: 100svh;
+            /* covers large windows too */
+            background-attachment: fixed, fixed, fixed;
+            /* keep gradients pinned */
         }
 
         .wrap {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 24px 24px 40px
+            max-width: 1200px;
+            margin: 32px auto 64px;
+            padding: 0 20px;
         }
 
-        header {
+        header.brand {
             display: flex;
-            gap: 16px;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px
-        }
-
-        .brand {
-            display: flex;
-            gap: 12px;
-            align-items: center
+            gap: 14px;
+            margin-bottom: 20px;
         }
 
         .logo {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent2), var(--accent));
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, .06), var(--shadow)
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            box-shadow: 0 10px 25px rgba(52, 211, 153, .25), inset 0 0 14px rgba(255, 255, 255, .35);
         }
 
-        h1 {
-            font-size: 20px;
+        .brand h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
             letter-spacing: .2px;
-            margin: 0
         }
 
-        .panel {
-            background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 16px;
-            box-shadow: var(--shadow)
+        .crumbs {
+            opacity: .7;
+            font-size: 13px;
+            margin-left: auto;
         }
 
-        .landing {
-            padding: 18px
-        }
-
-        .grid {
+        .panel-grid {
             display: grid;
             grid-template-columns: 1.2fr 1fr;
-            gap: 18px
-        }
-
-        .section {
-            padding: 18px;
-            background: var(--panel);
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, .06)
-        }
-
-        .section h3 {
-            margin: 0 0 10px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: .12em;
-            color: var(--muted)
-        }
-
-        .chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px
-        }
-
-        .chip {
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: var(--chip);
-            color: #cfe1ff;
-            border: 1px solid rgba(255, 255, 255, .08);
-            cursor: pointer;
-            transition: .15s transform, .15s background;
-            text-align: left
-        }
-
-        .chip.active {
-            background: linear-gradient(135deg, rgba(96, 165, 250, .25), rgba(110, 231, 183, .25));
-            border-color: rgba(110, 231, 183, .5)
-        }
-
-        .chip:hover {
-            transform: translateY(-2px)
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-top: 10px
-        }
-
-        .input {
-            flex: 1;
-            min-width: 200px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #0c1426;
-            border: 1px solid rgba(255, 255, 255, .1);
-            padding: 10px 12px;
-            border-radius: 10px
-        }
-
-        .input input {
-            all: unset;
-            flex: 1;
-            color: #e5edff
-        }
-
-        .toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            user-select: none
-        }
-
-        .switch {
-            width: 44px;
-            height: 26px;
-            border-radius: 999px;
-            background: #223055;
-            border: 1px solid rgba(255, 255, 255, .14);
-            position: relative;
-            transition: .2s
-        }
-
-        .knob {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #cde6ff;
-            transition: .2s
-        }
-
-        .switch.on {
-            background: linear-gradient(135deg, #60a5fa66, #6ee7b766)
-        }
-
-        .switch.on .knob {
-            left: 22px;
-            background: white
-        }
-
-        .footerRow {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 14px
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #60a5fa, #6ee7b7);
-            color: #041023;
-            border: none;
-            font-weight: 700;
-            letter-spacing: .3px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(96, 165, 250, .25);
-            transition: .15s transform, .15s filter
-        }
-
-        .btn:hover {
-            transform: translateY(-1px)
-        }
-
-        .muted {
-            color: var(--muted)
-        }
-
-        .count {
-            font-weight: 700;
-            color: #9ae6b4
-        }
-
-        .warning {
-            color: #ffb4b4
-        }
-
-        /* Study view */
-        .study {
-            display: none
-        }
-
-        .back {
-            background: none;
-            border: 1px solid rgba(255, 255, 255, .18);
-            padding: 10px 12px;
-            border-radius: 10px;
-            color: #cfe1ff;
-            cursor: pointer
-        }
-
-        .row {
-            display: flex;
             gap: 18px;
-            align-items: flex-start;
-            flex-wrap: wrap
+        }
+
+        @media (max-width: 1000px) {
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .card {
-            flex: 1;
-            min-width: 300px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
-            border: 1px solid rgba(255, 255, 255, .09);
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .08);
             border-radius: 16px;
-            padding: 22px;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: .15s transform, .15s box-shadow
+            padding: 18px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+            backdrop-filter: blur(6px);
         }
 
-        .card:hover {
-            transform: translateY(-2px)
-        }
-
-        .card h4 {
-            margin: 0 0 8px;
+        .card h3 {
+            margin: 0 0 12px;
             font-size: 14px;
-            color: var(--muted);
+            letter-spacing: .06em;
             text-transform: uppercase;
-            letter-spacing: .12em
+            color: #93a4b8;
         }
 
-        .qa {
-            font-size: 20px;
-            line-height: 1.45
+        /* filter lines stack items vertically (one per line) */
+        .filter-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .answer {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed rgba(255, 255, 255, .15);
-            display: none;
-            color: #c7ffd9
-        }
-
-        .answer.show {
-            display: block
-        }
-
-        .barWrap {
-            height: 12px;
-            border-radius: 999px;
-            background: #0e162a;
-            border: 1px solid rgba(255, 255, 255, .1);
-            position: relative;
-            overflow: hidden
-        }
-
-        .bar {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 0%;
-            background: linear-gradient(90deg, #6ee7b7, #60a5fa)
-        }
-
-        .barText {
-            position: absolute;
-            inset: 0;
+        .line-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700
-        }
-
-        .actions {
-            display: flex;
             gap: 10px;
-            flex-wrap: wrap
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 12px;
+            padding: 10px 12px;
         }
 
-        .pill {
-            padding: 10px 12px;
-            border-radius: 10px;
+        .line-item input[type="checkbox"] {
+            accent-color: #22c55e;
+            width: 18px;
+            height: 18px;
+        }
+
+        .line-item label {
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .hint {
+            color: #93a4b8;
+            font-size: 12px;
+            margin-top: 8px;
+            opacity: .85;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 6px 0 10px;
+            flex-wrap: wrap;
+        }
+
+        .searchbar {
+            position: relative;
+            flex: 1 1 360px;
+            max-width: 650px;
+        }
+
+        .searchbar input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(8, 12, 20, .6);
+            color: #e6edf3;
+            outline: none;
+        }
+
+        .searchbar svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: .6;
+        }
+
+        /* toggle switch */
+        .switch {
+            position: relative;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-weight: 700;
-            border: 1px solid transparent;
-            cursor: pointer
+            font-size: 14px;
         }
 
-        .ok {
-            background: #0c2515;
-            color: #aef3c7;
-            border-color: #195c35
+        .switch input {
+            display: none;
         }
 
-        .ng {
-            background: #2a1010;
-            color: #ffb4b4;
-            border-color: #7a2323
+        .slider {
+            width: 48px;
+            height: 28px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .15);
+            border: 1px solid rgba(255, 255, 255, .1);
+            position: relative;
+            transition: .25s ease;
         }
 
-        .meta {
-            color: var(--muted);
-            font-size: 13px
+        .slider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            transform: translateY(-50%);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+            transition: .25s ease;
         }
 
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr
-            }
+        .switch input:checked+.slider {
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+        }
+
+        .switch input:checked+.slider::after {
+            left: 24px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .summary pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 13px;
+            color: #b8c6d6;
+        }
+
+        .btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            color: #07121f;
+            box-shadow: 0 10px 24px rgba(96, 165, 250, .25), 0 8px 20px rgba(52, 211, 153, .18);
+        }
+
+        .btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        /* --- Flashcard view --- */
+        .stage {
+            margin-top: 18px;
+            display: none;
+        }
+
+        .stage.active {
+            display: block;
+        }
+
+        .fc-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .counter {
+            opacity: .8;
+            font-size: 14px;
+        }
+
+        .deck {
+            perspective: 1200px;
+            max-width: 860px;
+            margin: 0 auto 14px;
+        }
+
+        .flashcard {
+            position: relative;
+            width: 100%;
+            min-height: 200px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .flip {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform .6s cubic-bezier(.2, .8, .2, 1);
+        }
+
+        .card-face {
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
+            backdrop-filter: blur(6px);
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            line-height: 1.6;
+            position: absolute;
+            inset: 0;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+        .back {
+            transform: rotateY(180deg);
+        }
+
+        .flipped .flip {
+            transform: rotateY(180deg);
+        }
+
+        .fc-meta {
+            text-align: center;
+            margin: 8px 0 2px;
+            color: #9eb1c7;
+            font-size: 13px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, .06);
+            color: #e6edf3;
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .btn-wide {
+            min-width: 120px;
+        }
+
+        .footer-pad {
+            height: 32px;
+        }
+
+        /* ensure no cut-off look near the end */
+
+        a.source {
+            color: #9acdff;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(154, 205, 255, .6);
         }
     </style>
 </head>
 
 <body>
     <div class="wrap">
-        <header>
-            <div class="brand">
-                <div class="logo" aria-hidden="true"></div>
-                <h1>Physics Flashcards</h1>
-            </div>
-            <div class="muted">Landing • Select content → Start</div>
+        <header class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <h1>Physics Flashcards</h1>
+            <div class="crumbs">Landing • Select content → Start</div>
         </header>
 
-        <!-- LANDING -->
-        <section id="landing" class="panel landing">
-            <div class="grid">
-                <div class="section">
-                    <h3>Choose Paper(s)</h3>
-                    <div id="chips-paper" class="chips"></div>
-                    <div class="controls">
-                        <label class="toggle">
-                            <span>Shuffle</span>
-                            <div id="shuffleSwitch" class="switch" role="switch" aria-checked="false">
-                                <div class="knob"></div>
-                            </div>
-                        </label>
-                        <div class="input" title="Search within Questions">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M21 21l-3.5-3.5M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-                                    stroke="#9fb4d9" stroke-width="2" stroke-linecap="round" />
-                            </svg>
-                            <input id="searchBox" placeholder="Search questions..." />
-                        </div>
+        <div class="panel-grid">
+            <!-- Left: Paper + Search + Chapters -->
+            <div class="card">
+                <h3>Choose Paper(s)</h3>
+                <div class="controls-row">
+                    <label class="line-item" style="width:max-content">
+                        <input type="checkbox" name="paper" value="Paper 1" />
+                        <label>Paper 1</label>
+                    </label>
+                    <label class="line-item" style="width:max-content">
+                        <input type="checkbox" name="paper" value="Paper 2" />
+                        <label>Paper 2</label>
+                    </label>
+
+                    <label class="switch" title="Shuffle cards">
+                        <input id="shuffleToggle" type="checkbox" />
+                        <span class="slider" aria-hidden="true"></span>
+                        <span>Shuffle</span>
+                    </label>
+
+                    <div class="searchbar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="11" cy="11" r="8" stroke-width="2" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" />
+                        </svg>
+                        <input id="search" placeholder="Search questions..." />
                     </div>
                 </div>
 
-                <div class="section">
-                    <h3>Choose Topic Number(s)</h3>
-                    <div id="chips-topicnum" class="chips"></div>
-                </div>
+                <h3 style="margin-top:18px">Choose Chapter(s)</h3>
+                <div id="chapters" class="filter-block" aria-live="polite"></div>
+                <div class="hint">Tip: click items to toggle; each chapter is shown on its own line.</div>
+            </div>
 
-                <div class="section">
-                    <h3>Choose Chapter(s)</h3>
-                    <div id="chips-chapter" class="chips"></div>
-                </div>
+            <!-- Right: Topics + Summary -->
+            <div class="card">
+                <h3>Choose Topic Number(s)</h3>
+                <div id="topics" class="filter-block" aria-live="polite"></div>
 
-                <div class="section">
+                <div class="card" style="margin-top:14px">
                     <h3>Live Summary</h3>
-                    <div class="muted" id="summary">Loading CSV…</div>
-                    <div class="footerRow">
-                        <div><span class="count" id="matchCount">0</span> cards match</div>
-                        <button id="startBtn" class="btn" disabled>Start Revising</button>
+                    <div class="summary">
+                        <pre id="summaryText">Paper: All
+Topic(s):
+—
+Chapter(s):
+— 
+
+Search: — 
+
+Matches: 0</pre>
+                        <button id="startBtn" class="btn btn-wide" disabled>Start Revising</button>
                     </div>
-                    <div id="warn" class="warning" style="display:none;margin-top:8px;"></div>
                 </div>
             </div>
-            <div class="muted" style="margin-top:10px">Tip: click chips to select multiple; click again to unselect.
+        </div>
+
+        <!-- Flashcard Stage -->
+        <section id="stage" class="stage">
+            <div class="card">
+                <div class="fc-top">
+                    <div class="counter" id="counter">Card 0 of 0</div>
+                    <div class="counter" id="deckInfo"></div>
+                </div>
+
+                <div class="deck">
+                    <button id="flashcard" class="flashcard" aria-live="polite">
+                        <div class="flip">
+                            <div class="card-face front" id="qText">Question</div>
+                            <div class="card-face back" id="aText">Answer</div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="fc-meta" id="meta"></div>
+
+                <div class="nav">
+                    <button id="prev" class="btn btn-secondary">◀ Prev</button>
+                    <button id="next" class="btn btn-secondary">Next ▶</button>
+                </div>
             </div>
         </section>
 
-        <!-- STUDY -->
-        <section id="study" class="panel study" aria-hidden="true">
-            <div style="padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px">
-                <button class="back" id="backBtn">← Back to selection</button>
-                <div class="meta" id="studyMeta"></div>
-            </div>
-            <div style="padding:0 18px 18px">
-                <div class="barWrap">
-                    <div class="bar" id="bar"></div>
-                    <div class="barText" id="barText">0% • 0 / 0 correct</div>
-                </div>
-                <div class="row" style="margin-top:16px">
-                    <div class="card" id="flashcard">
-                        <h4 id="cardHeader">Question</h4>
-                        <div class="qa" id="question">—</div>
-                        <div class="answer" id="answer"></div>
-                    </div>
-                    <div class="section" style="min-width:280px">
-                        <h3>Controls</h3>
-                        <div class="actions" style="margin:8px 0 12px">
-                            <button class="pill ok" id="btnCorrect">✓ Correct</button>
-                            <button class="pill ng" id="btnWrong">✗ Wrong</button>
-                        </div>
-                        <div class="muted" id="progressText">Card 0 of 0</div>
-                        <div class="muted" id="sessionFilters" style="margin-top:8px"></div>
-                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
-                            <button class="pill" id="btnPrev">⟵ Prev</button>
-                            <button class="pill" id="btnNext">Next ⟶</button>
-                            <button class="pill" id="btnReveal">Reveal</button>
-                            <button class="pill" id="btnShuffle">Shuffle</button>
-                            <button class="pill" id="btnRestart">Restart</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <div class="footer-pad"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script>
-        /* -------------------- CONFIG: names for Topics & Chapters -------------------- */
-        const TOPIC_NAME = {
-            '1': 'Energy',
-            '2': 'Electricity',
-            '3': 'Particle Model of Matter',
-            '4': 'Atomic Structure',
-            '5': 'Forces',
-            '6': 'Waves',
-            '7': 'Electromagnetism',
-            '8': 'Space'
-        };
-        const CHAPTER_NAME = {
-            '1': 'Conservation and dissipation of energy',
-            '2': 'Energy transfer by heating',
-            '3': 'Energy resources',
-            '4': 'Electric circuits',
-            '5': 'Electricity in the home',
-            '6': 'Molecules and matter',
-            '7': 'Radioactivity',
-            '8': 'Forces in balance',
-            '9': 'Motion',
-            '10': 'Force and motion',
-            '11': 'Force and pressure',
-            '12': 'Wave properties',
-            '13': 'Electromagnetic waves',
-            '14': 'Light',
-            '15': 'Electromagnetism',
-            '16': 'Space'
+        /* ==============================
+           Data + Parsing
+        ================================= */
+        const state = {
+            allCards: [],               // {paper, topicNo, topicName, chapterNo, chapterName, question, answer, source}
+            filtered: [],
+            idx: 0,
+            flipped: false,
+            selectedPapers: new Set(),
+            selectedTopicNos: new Set(),
+            selectedChapterNos: new Set(),
+            shuffle: false,
+            search: ''
         };
 
-        /* -------------------- CSV LOADING & PARSING -------------------- */
-        const CSV_URL = 'phys_ss.csv'; // keep this HTML and the CSV in the same folder
-        let ALL = []; // full dataset
-        let FILTERED = []; // filtered dataset (landing)
-        let SESSION = []; // working copy for study session
-
-        // Basic CSV parser supporting quoted fields with commas & newlines
-        function parseCSV(text) {
-            const rows = [];
-            let i = 0, field = '', row = [], inQuotes = false;
-            while (i < text.length) {
-                const c = text[i];
-                if (inQuotes) {
-                    if (c === '"') {
-                        if (text[i + 1] === '"') { field += '"'; i++; }
-                        else inQuotes = false;
-                    } else field += c;
-                } else {
-                    if (c === '"') inQuotes = true;
-                    else if (c === ',') { row.push(field); field = ''; }
-                    else if (c === '\n' || c === '\r') {
-                        if (c === '\r' && text[i + 1] === '\n') i++;
-                        row.push(field); field = '';
-                        if (row.some(x => x !== '')) rows.push(row);
-                        row = [];
-                    } else field += c;
+        // Try a few likely column name variants
+        function normalizeRow(row) {
+            const get = (...keys) => {
+                for (const k of keys) {
+                    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim();
                 }
-                i++;
-            }
-            if (field.length || row.length) { row.push(field); rows.push(row); }
-            return rows;
+                return '';
+            };
+            return {
+                paper: get('Paper', 'paper'),
+                topicNo: get('TopicNo', 'Topic', 'Topic Number', 'Topic_Num', 'Topic_No'),
+                topicName: get('TopicName', 'Topic Name', 'Topic_Title', 'Topic Title', 'Topic Label'),
+                chapterNo: get('ChapterNo', 'Chapter', 'Chapter Number', 'Chapter_Num', 'Chapter_No'),
+                chapterName: get('ChapterName', 'Chapter Name', 'Chapter_Title', 'Chapter Title', 'Chapter Label'),
+                question: get('Question', 'Q', 'Prompt'),
+                answer: get('Answer', 'A', 'Response'),
+                source: get('Source', 'PDF', 'Ref', 'Reference')
+            };
         }
-        function normaliseHeader(h) {
-            return h.trim().toLowerCase()
-                .replace(/\s+/g, ' ')
-                .replace(/[^a-z0-9 ]/g, '')
-                .replace(/\s/g, '_');
-        }
+
         function loadCSV() {
-            return fetch(CSV_URL, { cache: 'no-store' })
-                .then(r => { if (!r.ok) throw new Error('CSV not found. Place "phys_ss.csv" next to this HTML.'); return r.text(); })
-                .then(text => {
-                    const rows = parseCSV(text);
-                    if (!rows.length) throw new Error('CSV is empty.');
-                    const header = rows[0].map(normaliseHeader);
-                    const idx = {
-                        chapter: header.findIndex(h => h.includes('chapter')),
-                        topicnum: header.findIndex(h => h.includes('topic') && h.includes('number') || h === 'topic_number' || h === 'topicno' || h === 'topic_no'),
-                        topic: header.findIndex(h => h === 'topic' || (h.includes('topic') && !h.includes('number'))),
-                        paper: header.findIndex(h => h.includes('paper')),
-                        question: header.findIndex(h => h.includes('question')),
-                        answer: header.findIndex(h => h.includes('answer')),
-                    };
-                    const out = [];
-                    for (let r = 1; r < rows.length; r++) {
-                        const row = rows[r];
-                        const get = (i) => (i >= 0 && i < row.length ? String(row[i]).trim() : '');
-                        out.push({
-                            chapter: get(idx.chapter),
-                            topicnum: get(idx.topicnum),
-                            topic: get(idx.topic),
-                            paper: get(idx.paper),
-                            question: get(idx.question),
-                            answer: get(idx.answer),
-                        });
-                    }
-                    return out.filter(x => x.question && x.answer);
+            return new Promise((resolve, reject) => {
+                Papa.parse('phys_ss.csv', {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (res) => {
+                        const rows = res.data.map(normalizeRow).filter(r => r.question && r.answer);
+                        state.allCards = rows;
+                        resolve(rows);
+                    },
+                    error: reject
                 });
+            });
         }
 
-        /* -------------------- UI HELPERS -------------------- */
-        const $ = sel => document.querySelector(sel);
-        const $$ = sel => Array.from(document.querySelectorAll(sel));
-        function chip(label, value, groupId) {
-            const el = document.createElement('button');
-            el.className = 'chip';
-            el.textContent = label;
-            el.title = label;
-            el.dataset.value = value;
-            el.dataset.group = groupId;
-            el.addEventListener('click', () => { el.classList.toggle('active'); updateFilters(); });
-            return el;
-        }
+        /* ==============================
+           UI Builders
+        ================================= */
+        const topicsEl = document.getElementById('topics');
+        const chaptersEl = document.getElementById('chapters');
+        const summaryEl = document.getElementById('summaryText');
+        const startBtn = document.getElementById('startBtn');
+
         function uniqueSorted(arr) {
-            return [...new Set(arr.filter(Boolean).map(s => String(s).trim()))].sort((a, b) => {
-                const na = Number(a), nb = Number(b);
+            return Array.from(new Set(arr)).sort((a, b) => {
+                // numeric if possible otherwise alpha
+                const na = +a, nb = +b;
                 if (!isNaN(na) && !isNaN(nb)) return na - nb;
-                return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
-            });
-        }
-        const toIntStr = v => {
-            const n = parseInt(String(v).replace(/[^\d]/g, ''), 10);
-            return isNaN(n) ? String(v) : String(n);
-        };
-        const labelTopic = v => {
-            const key = toIntStr(v);
-            const name = TOPIC_NAME[key];
-            return name ? `Topic ${key} • ${name}` : `Topic ${v}`;
-        };
-        const labelChapter = v => {
-            const key = toIntStr(v);
-            const name = CHAPTER_NAME[key];
-            return name ? `Chapter ${key} • ${name}` : `Chapter ${v}`;
-        };
-
-        /* -------------------- LANDING LOGIC -------------------- */
-        const chipsPaper = $('#chips-paper');
-        const chipsTopicNum = $('#chips-topicnum');
-        const chipsChapter = $('#chips-chapter');
-        const matchCount = $('#matchCount');
-        const summary = $('#summary');
-        const warn = $('#warn');
-        const searchBox = $('#searchBox');
-        const shuffleSwitch = $('#shuffleSwitch');
-        const startBtn = $('#startBtn');
-
-        let selected = { paper: new Set(), topicnum: new Set(), chapter: new Set(), search: '' };
-        let shuffle = false;
-
-        searchBox.addEventListener('input', () => {
-            selected.search = searchBox.value.trim().toLowerCase();
-            updateFilters();
-        });
-        shuffleSwitch.addEventListener('click', () => {
-            shuffleSwitch.classList.toggle('on');
-            shuffle = shuffleSwitch.classList.contains('on');
-            shuffleSwitch.setAttribute('aria-checked', shuffle ? 'true' : 'false');
-        });
-
-        function populateChips() {
-            // Papers
-            uniqueSorted(ALL.map(x => x.paper)).forEach(v => {
-                const lab = (String(v).trim() || '—');
-                chipsPaper.appendChild(chip(lab, v, 'paper'));
-            });
-            // Topic numbers (with names)
-            uniqueSorted(ALL.map(x => x.topicnum)).forEach(v => {
-                chipsTopicNum.appendChild(chip(labelTopic(v), v, 'topicnum'));
-            });
-            // Chapters (with names)
-            uniqueSorted(ALL.map(x => x.chapter)).forEach(v => {
-                chipsChapter.appendChild(chip(labelChapter(v), v, 'chapter'));
+                return String(a).localeCompare(String(b));
             });
         }
 
-        function getActiveValues(group) {
-            return new Set($$('#chips-' + group + ' .chip.active').map(c => c.dataset.value));
+        function rebuildFilters() {
+            // Topics list (one per line with name)
+            const topicsMap = new Map(); // topicNo -> name
+            state.allCards.forEach(r => {
+                const no = r.topicNo || '—';
+                const nm = r.topicName || '';
+                if (!topicsMap.has(no) && no !== '—') topicsMap.set(no, nm);
+            });
+            const topicLines = uniqueSorted([...topicsMap.keys()]);
+            topicsEl.innerHTML = '';
+            topicLines.forEach(no => {
+                const name = topicsMap.get(no) || '';
+                const id = `topic_${no}`;
+                const label = `Topic ${no}${name ? ' • ' + name : ''}`;
+                const line = document.createElement('label');
+                line.className = 'line-item';
+                line.innerHTML = `
+      <input type="checkbox" id="${id}" value="${no}">
+      <label for="${id}">${label}</label>
+    `;
+                const input = line.querySelector('input');
+                input.checked = state.selectedTopicNos.has(no);
+                input.addEventListener('change', () => {
+                    input.checked ? state.selectedTopicNos.add(no) : state.selectedTopicNos.delete(no);
+                    updateSummary();
+                    applyFilters();
+                });
+                topicsEl.appendChild(line);
+            });
+
+            // Chapters list
+            const chapMap = new Map(); // chapterNo -> name
+            state.allCards.forEach(r => {
+                const no = r.chapterNo || '—';
+                const nm = r.chapterName || '';
+                if (!chapMap.has(no) && no !== '—') chapMap.set(no, nm);
+            });
+            const chapLines = uniqueSorted([...chapMap.keys()]);
+            chaptersEl.innerHTML = '';
+            chapLines.forEach(no => {
+                const name = chapMap.get(no) || '';
+                const id = `chap_${no}`;
+                const label = `Chapter ${no}${name ? ' • ' + name : ''}`;
+                const line = document.createElement('label');
+                line.className = 'line-item';
+                line.innerHTML = `
+      <input type="checkbox" id="${id}" value="${no}">
+      <label for="${id}">${label}</label>
+    `;
+                const input = line.querySelector('input');
+                input.checked = state.selectedChapterNos.has(no);
+                input.addEventListener('change', () => {
+                    input.checked ? state.selectedChapterNos.add(no) : state.selectedChapterNos.delete(no);
+                    updateSummary();
+                    applyFilters();
+                });
+                chaptersEl.appendChild(line);
+            });
         }
 
-        function updateFilters() {
-            selected.paper = getActiveValues('paper');
-            selected.topicnum = getActiveValues('topicnum');
-            selected.chapter = getActiveValues('chapter');
+        /* ==============================
+           Filtering + Summary
+        ================================= */
+        function applyFilters() {
+            const papers = state.selectedPapers.size ? state.selectedPapers : new Set(['Paper 1', 'Paper 2']);
+            const topics = state.selectedTopicNos;
+            const chaps = state.selectedChapterNos;
+            const term = state.search.trim().toLowerCase();
 
-            FILTERED = ALL.filter(x => {
-                if (selected.paper.size && !selected.paper.has(x.paper)) return false;
-                if (selected.topicnum.size && !selected.topicnum.has(x.topicnum)) return false;
-                if (selected.chapter.size && !selected.chapter.has(x.chapter)) return false;
-                if (selected.search) {
-                    const q = (x.question || '').toLowerCase();
-                    if (!q.includes(selected.search)) return false;
+            state.filtered = state.allCards.filter(r => {
+                if (!papers.has(r.paper)) return false;
+                if (topics.size && !topics.has(r.topicNo)) return false;
+                if (chaps.size && !chaps.has(r.chapterNo)) return false;
+                if (term) {
+                    const blob = (r.question + ' ' + r.answer + ' ' + r.topicName + ' ' + r.chapterName).toLowerCase();
+                    if (!blob.includes(term)) return false;
                 }
                 return true;
             });
 
-            matchCount.textContent = FILTERED.length;
-            startBtn.disabled = FILTERED.length === 0;
-
-            const paperList = [...selected.paper].join(', ') || 'All';
-            const topicList = [...selected.topicnum].map(v => labelTopic(v)).join(', ') || 'All';
-            const chList = [...selected.chapter].map(v => labelChapter(v)).join(', ') || 'All';
-            summary.innerHTML = `
-    <div>Paper: <strong>${paperList}</strong></div>
-    <div>Topic No.: <strong>${topicList}</strong></div>
-    <div>Chapter: <strong>${chList}</strong></div>
-    <div class="muted" style="margin-top:6px">Search: ${selected.search ? '“' + selected.search + '”' : '—'}</div>
-  `;
-
-            warn.style.display = 'none';
+            if (state.shuffle) shuffleArray(state.filtered);
+            state.idx = 0;
+            refreshDeckMeta();
+            startBtn.disabled = state.filtered.length === 0;
         }
 
-        startBtn.addEventListener('click', () => {
-            if (!FILTERED.length) { warn.style.display = 'block'; warn.textContent = 'No cards selected.'; return; }
-            startStudy();
-        });
+        function updateSummary() {
+            const paperTxt = state.selectedPapers.size ? [...state.selectedPapers].join(', ') : 'All';
 
-        /* -------------------- STUDY SESSION -------------------- */
-        const landing = $('#landing');
-        const study = $('#study');
-        const backBtn = $('#backBtn');
-        const studyMeta = $('#studyMeta');
-        const bar = $('#bar');
-        const barText = $('#barText');
-        const flashcard = $('#flashcard');
-        const qEl = $('#question');
-        const aEl = $('#answer');
-        const cardHeader = $('#cardHeader');
-        const btnCorrect = $('#btnCorrect');
-        const btnWrong = $('#btnWrong');
-        const btnPrev = $('#btnPrev');
-        const btnNext = $('#btnNext');
-        const btnReveal = $('#btnReveal');
-        const btnShuffle = $('#btnShuffle');
-        const btnRestart = $('#btnRestart');
-        const progressText = $('#progressText');
-        const sessionFilters = $('#sessionFilters');
+            // topics: each on new line
+            const topicsChosen = [...state.selectedTopicNos].sort((a, b) => +a - +b).map(no => {
+                const entry = state.allCards.find(r => r.topicNo === no);
+                const nm = entry ? (entry.topicName || '') : '';
+                return `• Topic ${no}${nm ? ' • ' + nm : ''}`;
+            }).join('\n') || '—';
 
-        let iCard = 0, correct = 0, revealed = false;
+            // chapters: lines too
+            const chaptersChosen = [...state.selectedChapterNos].sort((a, b) => +a - +b).map(no => {
+                const entry = state.allCards.find(r => r.chapterNo === no);
+                const nm = entry ? (entry.chapterName || '') : '';
+                return `• Chapter ${no}${nm ? ' • ' + nm : ''}`;
+            }).join('\n') || '—';
 
-        function startStudy() {
-            SESSION = FILTERED.slice();
-            if (shuffle) shuffleArray(SESSION);
-            iCard = 0; correct = 0; revealed = false;
-            updateStudyMeta();
-            showCard();
-            landing.style.display = 'none';
-            study.style.display = 'block';
-            study.setAttribute('aria-hidden', 'false');
-        }
-        backBtn.addEventListener('click', () => {
-            study.style.display = 'none';
-            study.setAttribute('aria-hidden', 'true');
-            landing.style.display = 'block';
-        });
+            const searchTxt = state.search.trim() ? state.search.trim() : '—';
+            const matches = state.filtered.length ?? 0;
 
-        function updateStudyMeta() {
-            const total = SESSION.length;
-            const pct = total ? Math.round((correct / total) * 100) : 0;
-            bar.style.width = pct + '%';
-            barText.textContent = `${pct}% • ${correct} / ${total} correct`;
-            progressText.textContent = `Card ${Math.min(iCard + 1, total)} of ${total}`;
-            const paperList = [...selected.paper].join(', ') || 'All';
-            const topicList = [...selected.topicnum].map(v => labelTopic(v)).join(', ') || 'All';
-            const chList = [...selected.chapter].map(v => labelChapter(v)).join(', ') || 'All';
-            studyMeta.textContent = `Paper: ${paperList} • ${topicList} • ${chList} • ${shuffle ? 'Shuffled' : 'In order'}`;
-            sessionFilters.innerHTML = `<div>Filters → Paper: <strong>${paperList}</strong>, Topic: <strong>${topicList}</strong>, Chapter: <strong>${chList}</strong></div>`;
+            summaryEl.textContent =
+                `Paper: ${paperTxt}
+Topic(s):
+${topicsChosen}
+
+Chapter(s):
+${chaptersChosen}
+
+Search: ${searchTxt}
+
+Matches: ${matches}`;
         }
 
-        function showCard() {
-            const n = SESSION.length;
-            if (!n) { qEl.textContent = 'No cards selected.'; aEl.textContent = ''; return; }
-            if (iCard < 0) iCard = 0;
-            if (iCard >= n) iCard = n - 1;
-            const card = SESSION[iCard];
-            cardHeader.textContent = `Question`;
-            qEl.textContent = card.question || '—';
-            aEl.textContent = card.answer || '';
-            aEl.classList.remove('show');
-            revealed = false;
+        /* ==============================
+           Flashcards — Flip on click
+        ================================= */
+        const stage = document.getElementById('stage');
+        const qText = document.getElementById('qText');
+        const aText = document.getElementById('aText');
+        const flashcardBtn = document.getElementById('flashcard');
+        const counterEl = document.getElementById('counter');
+        const metaEl = document.getElementById('meta');
+        const deckInfoEl = document.getElementById('deckInfo');
+
+        flashcardBtn.addEventListener('click', () => {
+            state.flipped = !state.flipped;
+            flashcardBtn.classList.toggle('flipped', state.flipped);
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            if (!state.filtered.length) return;
+            state.idx = (state.idx - 1 + state.filtered.length) % state.filtered.length;
+            state.flipped = false;
+            flashcardBtn.classList.remove('flipped');
+            renderCard();
+        });
+        document.getElementById('next').addEventListener('click', () => {
+            if (!state.filtered.length) return;
+            state.idx = (state.idx + 1) % state.filtered.length;
+            state.flipped = false;
+            flashcardBtn.classList.remove('flipped');
+            renderCard();
+        });
+
+        function renderCard() {
+            const card = state.filtered[state.idx];
+            if (!card) return;
+            qText.textContent = card.question;
+            aText.textContent = card.answer;
+            counterEl.textContent = `Card ${state.idx + 1} of ${state.filtered.length}`;
+            metaEl.innerHTML = `${escapeHtml(card.paper)} • Topic ${escapeHtml(card.topicNo)}${card.topicName ? ' • ' + escapeHtml(card.topicName) : ''} • Chapter ${escapeHtml(card.chapterNo)}${card.chapterName ? ' • ' + escapeHtml(card.chapterName) : ''}${card.source ? ' • <a class="source" target="_blank" href="#" onclick="return false;">' + escapeHtml(card.source) + '</a>' : ''}`;
         }
-        function toggleReveal() { if (!SESSION.length) return; revealed = !revealed; aEl.classList.toggle('show', revealed); }
 
-        flashcard.addEventListener('click', toggleReveal);
-        btnReveal.addEventListener('click', toggleReveal);
-        btnCorrect.addEventListener('click', () => {
-            if (!SESSION.length) return;
-            if (!revealed) toggleReveal();
-            correct++; iCard++; updateStudyMeta(); showCard();
-        });
-        btnWrong.addEventListener('click', () => {
-            if (!SESSION.length) return;
-            if (!revealed) toggleReveal();
-            iCard++; updateStudyMeta(); showCard();
-        });
-        btnPrev.addEventListener('click', () => { iCard--; updateStudyMeta(); showCard(); });
-        btnNext.addEventListener('click', () => { iCard++; updateStudyMeta(); showCard(); });
-        btnShuffle.addEventListener('click', () => { shuffleArray(SESSION); iCard = 0; updateStudyMeta(); showCard(); });
-        btnRestart.addEventListener('click', () => { iCard = 0; correct = 0; revealed = false; updateStudyMeta(); showCard(); });
+        function refreshDeckMeta() {
+            deckInfoEl.textContent = state.shuffle ? 'Shuffled' : 'In order';
+            updateSummary();
+            renderCard();
+        }
 
+        /* ==============================
+           Utilities
+        ================================= */
+        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -779,20 +688,45 @@
             }
         }
 
-        /* -------------------- INIT -------------------- */
+        /* ==============================
+           Event wiring
+        ================================= */
+        document.getElementById('shuffleToggle').addEventListener('change', (e) => {
+            state.shuffle = e.target.checked;
+            applyFilters();
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            state.search = e.target.value || '';
+            applyFilters();
+        });
+
+        document.querySelectorAll('input[name="paper"]').forEach(cb => {
+            cb.addEventListener('change', () => {
+                if (cb.checked) state.selectedPapers.add(cb.value);
+                else state.selectedPapers.delete(cb.value);
+                updateSummary();
+                applyFilters();
+            });
+        });
+
+        startBtn.addEventListener('click', () => {
+            stage.classList.add('active');
+            window.scrollTo({ top: stage.offsetTop - 12, behavior: 'smooth' });
+        });
+
+        /* ==============================
+           Boot
+        ================================= */
         (async function init() {
             try {
-                const data = await loadCSV();
-                ALL = data;
-                populateChips();
-                updateFilters();
-                summary.insertAdjacentHTML('beforeend',
-                    `<div class="muted" style="margin-top:6px">${ALL.length} total cards available.</div>`);
+                await loadCSV();
+                rebuildFilters();
+                applyFilters();
+                updateSummary();
             } catch (err) {
                 console.error(err);
-                warn.style.display = 'block';
-                warn.textContent = err.message;
-                summary.textContent = 'Failed to load CSV.';
+                alert('Failed to load phys_ss.csv. Please place it next to this HTML file.');
             }
         })();
     </script>
