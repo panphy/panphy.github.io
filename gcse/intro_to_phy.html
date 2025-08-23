@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Relationship Discovery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            width: 90%;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .main-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #4a5568;
+            min-width: 80px;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .output-box {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #234e52;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .graph-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            display: none;
+        }
+
+        #graph {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .data-table {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #cbd5e0;
+        }
+
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .reveal-btn {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .reveal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(240, 147, 251, 0.3);
+        }
+
+        .new-btn {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .new-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #fa709a, #fee140);
+            color: white;
+        }
+
+        .toggle-btn {
+            background: linear-gradient(45deg, #38b2ac, #4fd1c7);
+            color: white;
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(56, 178, 172, 0.3);
+        }
+
+        .relationship {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+            display: none;
+        }
+
+        .hint {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .main-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Physics Relationship Discovery</h1>
+        <p class="subtitle">Discover the hidden relationship between physical quantities!</p>
+        
+        <div class="hint">
+            <strong>Your Mission:</strong> Input different values of x and observe the output y. 
+            Can you figure out the relationship between them?
+        </div>
+
+        <div class="main-section graph-hidden" id="mainSection">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="xInput">Input (x):</label>
+                    <input type="number" id="xInput" step="0.1" placeholder="Enter a number">
+                </div>
+                
+                <button class="process-btn" onclick="processInput()">
+                    🚀 PROCESS
+                </button>
+                
+                <div class="output-box" id="output">
+                    Output will appear here...
+                </div>
+            </div>
+
+            <div class="graph-section">
+                <h3 style="text-align: center; margin-bottom: 15px; color: #4a5568;">Data Visualization</h3>
+                <canvas id="graph"></canvas>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <h3 style="text-align: center; margin-bottom: 15px; color: #4a5568;">📊 Your Experimental Data</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Input (x)</th>
+                        <th>Output (y)</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody">
+                    <tr>
+                        <td colspan="2" style="color: #718096; font-style: italic;">No data yet - start experimenting!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="relationship" id="relationship">
+            The hidden relationship is: <span id="relationshipText"></span>
+        </div>
+
+        <div class="controls">
+            <button class="btn toggle-btn" onclick="toggleGraph()">📊 Show Graph</button>
+            <button class="btn reveal-btn" onclick="revealRelationship()">🔍 Reveal Relationship</button>
+            <button class="btn new-btn" onclick="newRelationship()">🎲 New Challenge</button>
+            <button class="btn clear-btn" onclick="clearData()">🗑️ Clear Data</button>
+        </div>
+    </div>
+
+    <script>
+        let slope, intercept;
+        let dataPoints = [];
+        let canvas, ctx;
+        let graphVisible = false;
+
+        function initializeApp() {
+            canvas = document.getElementById('graph');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            generateNewRelationship();
+            setupGraph();
+        }
+
+        function generateNewRelationship() {
+            // Generate random integers for slope (m) and intercept (c)
+            slope = Math.floor(Math.random() * 10) - 5; // -5 to 4
+            if (slope === 0) slope = 1; // Avoid zero slope
+            intercept = Math.floor(Math.random() * 21) - 10; // -10 to 10
+            
+            console.log(`Hidden relationship: y = ${slope}x + ${intercept}`);
+        }
+
+        function setupGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let i = 0; i <= 10; i++) {
+                const x = (canvas.width / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let i = 0; i <= 6; i++) {
+                const y = (canvas.height / 6) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#4a5568';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '12px Arial';
+            ctx.fillText('x', canvas.width - 20, canvas.height / 2 - 10);
+            ctx.fillText('y', canvas.width / 2 + 10, 15);
+        }
+
+        function processInput() {
+            const xInput = document.getElementById('xInput');
+            const outputDiv = document.getElementById('output');
+            const x = parseFloat(xInput.value);
+            
+            if (isNaN(x)) {
+                outputDiv.textContent = 'Please enter a valid number!';
+                outputDiv.style.background = '#fed7d7';
+                outputDiv.style.borderColor = '#fc8181';
+                outputDiv.style.color = '#c53030';
+                return;
+            }
+            
+            // Calculate output using hidden relationship
+            const y = slope * x + intercept;
+            
+            // Display result
+            outputDiv.textContent = `y = ${y.toFixed(2)}`;
+            outputDiv.style.background = '#e6fffa';
+            outputDiv.style.borderColor = '#38b2ac';
+            outputDiv.style.color = '#234e52';
+            
+            // Add to data points
+            dataPoints.push({x, y});
+            updateDataTable();
+            updateGraph();
+            
+            // Clear input
+            xInput.value = '';
+            
+            // Add some visual feedback
+            outputDiv.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                outputDiv.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function updateDataTable() {
+            const tbody = document.getElementById('dataBody');
+            tbody.innerHTML = '';
+            
+            dataPoints.forEach(point => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = point.x.toFixed(1);
+                row.insertCell(1).textContent = point.y.toFixed(2);
+            });
+        }
+
+        function updateGraph() {
+            setupGraph();
+            
+            if (dataPoints.length === 0) return;
+            
+            // Find bounds
+            const xValues = dataPoints.map(p => p.x);
+            const yValues = dataPoints.map(p => p.y);
+            const xMin = Math.min(...xValues, -10);
+            const xMax = Math.max(...xValues, 10);
+            const yMin = Math.min(...yValues, -10);
+            const yMax = Math.max(...yValues, 10);
+            
+            // Plot points
+            ctx.fillStyle = '#667eea';
+            dataPoints.forEach(point => {
+                const canvasX = ((point.x - xMin) / (xMax - xMin)) * canvas.width;
+                const canvasY = canvas.height - ((point.y - yMin) / (yMax - yMin)) * canvas.height;
+                
+                ctx.beginPath();
+                ctx.arc(canvasX, canvasY, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Add point label
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '10px Arial';
+                ctx.fillText(`(${point.x.toFixed(1)}, ${point.y.toFixed(1)})`, canvasX + 8, canvasY - 8);
+                ctx.fillStyle = '#667eea';
+            });
+        }
+
+        function revealRelationship() {
+            const relationshipDiv = document.getElementById('relationship');
+            const relationshipText = document.getElementById('relationshipText');
+            
+            let equation = 'y = ';
+            if (slope === 1) {
+                equation += 'x';
+            } else if (slope === -1) {
+                equation += '-x';
+            } else {
+                equation += `${slope}x`;
+            }
+            
+            if (intercept > 0) {
+                equation += ` + ${intercept}`;
+            } else if (intercept < 0) {
+                equation += ` - ${Math.abs(intercept)}`;
+            }
+            
+            relationshipText.textContent = equation;
+            relationshipDiv.style.display = 'block';
+            
+            // Add animation
+            relationshipDiv.style.transform = 'scale(0.8)';
+            relationshipDiv.style.opacity = '0';
+            setTimeout(() => {
+                relationshipDiv.style.transition = 'all 0.5s ease';
+                relationshipDiv.style.transform = 'scale(1)';
+                relationshipDiv.style.opacity = '1';
+            }, 100);
+        }
+
+        function newRelationship() {
+            generateNewRelationship();
+            clearData();
+            document.getElementById('relationship').style.display = 'none';
+            document.getElementById('output').textContent = 'Output will appear here...';
+            document.getElementById('output').style.background = '#e6fffa';
+            document.getElementById('output').style.borderColor = '#38b2ac';
+            document.getElementById('output').style.color = '#234e52';
+        }
+
+        function toggleGraph() {
+            const graphSection = document.querySelector('.graph-section');
+            const mainSection = document.getElementById('mainSection');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            
+            graphVisible = !graphVisible;
+            
+            if (graphVisible) {
+                graphSection.style.display = 'block';
+                mainSection.className = 'main-section graph-visible';
+                toggleBtn.textContent = '📊 Hide Graph';
+                
+                // Re-initialize canvas after showing
+                setTimeout(() => {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                    setupGraph();
+                    updateGraph();
+                }, 100);
+            } else {
+                graphSection.style.display = 'none';
+                mainSection.className = 'main-section graph-hidden';
+                toggleBtn.textContent = '📊 Show Graph';
+            }
+        }
+
+        function clearData() {
+            dataPoints = [];
+            document.getElementById('dataBody').innerHTML = '<tr><td colspan="2" style="color: #718096; font-style: italic;">No data yet - start experimenting!</td></tr>';
+            setupGraph();
+        }
+
+        // Allow Enter key to process input
+        document.getElementById('xInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processInput();
+            }
+        });
+
+        // Initialize the app when page loads
+        window.onload = initializeApp;
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            setupGraph();
+            updateGraph();
+        });
+    </script>
+</body>
+</html>
