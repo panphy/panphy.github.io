@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live ASCII Camera with 8-bit Color</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #111;
+      color: #eee;
+      font-family: monospace;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* font-size & line-height are set dynamically in JS */
+    #ascii {
+      margin-top: 1rem;
+    }
+
+    #controls {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      flex-wrap: wrap
+    }
+
+    label {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+    }
+
+    input[type=range] {
+      width: 200px;
+    }
+
+    video,
+    canvas {
+      display: none;
+    }
+
+    /* each ASCII “pixel” lives in a span so we can colour it */
+    span {
+      display: inline-block;
+      width: .65em;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Live ASCII Camera with 8-bit Color</h1>
+
+  <div id="controls">
+    <label for="resolutionRange">Resolution:
+      <input type="range" id="resolutionRange" min="2" max="20" value="10" />
+    </label>
+
+    <label for="mirrorToggle">
+      <input type="checkbox" id="mirrorToggle" checked />
+      Mirror
+    </label>
+
+    <button id="captureBtn">Capture ASCII</button>
+  </div>
+
+  <div id="ascii"></div>
+
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    /* ---------- DOM handles ---------- */
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const asciiDiv = document.getElementById('ascii');
+    const resolutionRange = document.getElementById('resolutionRange');
+    const captureBtn = document.getElementById('captureBtn');
+    const mirrorToggle = document.getElementById('mirrorToggle');
+
+    /* ---------- constants ---------- */
+    const charRamp = "@$B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+    const MIN_CELL = 2;    // smallest block (highest detail)
+    const MAX_CELL = 20;   // largest block  (lowest detail)
+
+    /* Map slider value (2–20) so that 20→2, 2→20 */
+    function getCellSize() {
+      const val = +resolutionRange.value;
+      return MAX_CELL - (val - MIN_CELL);
+    }
+
+    /* Keep the panel’s footprint fixed by resizing font/line-height */
+    function updateFont() {
+      const sz = getCellSize();
+      asciiDiv.style.fontSize = sz + 'px';
+      asciiDiv.style.lineHeight = sz + 'px';
+    }
+
+    /* Start webcam */
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (err) { console.error('Camera error:', err); }
+    }
+
+    /* Quantise (r,g,b) into 6×6×6 colour cube */
+    function quantizeTo8bit(r, g, b) {
+      const r6 = Math.round(r / 255 * 5), g6 = Math.round(g / 255 * 5), b6 = Math.round(b / 255 * 5);
+      return {
+        r: Math.floor(r6 * 255 / 5),
+        g: Math.floor(g6 * 255 / 5),
+        b: Math.floor(b6 * 255 / 5)
+      };
+    }
+
+    /* Main render loop */
+    function drawAscii() {
+      const cell = getCellSize();
+      const w = Math.floor(video.videoWidth / cell);
+      const h = Math.floor(video.videoHeight / cell);
+      if (w <= 0 || h <= 0) { requestAnimationFrame(drawAscii); return; }
+
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+
+      // Draw the video frame into the canvas (mirrored or not)
+      ctx.save();
+      if (mirrorToggle.checked) {
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1); // horizontal flip
+      }
+      ctx.drawImage(video, 0, 0, w, h);
+      ctx.restore();
+
+      const data = ctx.getImageData(0, 0, w, h).data;
+
+      let html = '';
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4,
+            r = data[i], g = data[i + 1], b = data[i + 2],
+            brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255,
+            char = charRamp.charAt(Math.floor((charRamp.length - 1) * (1 - brightness))),
+            { r: rq, g: gq, b: bq } = quantizeTo8bit(r, g, b);
+          html += `<span style="color:rgb(${rq},${gq},${bq})">${char}</span>`;
+        }
+        html += '<br/>';
+      }
+      asciiDiv.innerHTML = html;
+      requestAnimationFrame(drawAscii);
+    }
+
+    /* ---------- events ---------- */
+    video.addEventListener('playing', drawAscii);
+    resolutionRange.addEventListener('input', updateFont);
+
+    captureBtn.addEventListener('click', () => {
+      const txt = asciiDiv.innerText;                       // plain ASCII
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ascii_capture.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Optional: remember mirror preference
+    (function initMirrorPref() {
+      const key = 'asciiCam-mirror';
+      const saved = localStorage.getItem(key);
+      if (saved !== null) mirrorToggle.checked = saved === '1';
+      mirrorToggle.addEventListener('change', () => {
+        localStorage.setItem(key, mirrorToggle.checked ? '1' : '0');
+      });
+    })();
+
+    /* ---------- kick-off ---------- */
+    updateFont();   // set initial font size
+    startCamera();  // request webcam
+  </script>
+</body>
+
+</html>
