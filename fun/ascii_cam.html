@@ -68,7 +68,7 @@
 
 	<div id="controls">
 		<label for="resolutionRange">Resolution:
-			<input type="range" id="resolutionRange" min="2" max="15" value="10" />
+			<input type="range" id="resolutionRange" min="6" max="20" value="12" />
 		</label>
 
 		<label for="mirrorToggle">
@@ -103,7 +103,7 @@
 
 		/* ---------- constants ---------- */
 		const charRamp = "@$B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-		const MIN_CELL = 2; // smallest block (highest detail)
+		const MIN_CELL = 6; // smallest block (highest detail)
 		const MAX_CELL = 20; // largest block  (lowest detail)
 		const LS_KEYS = {
 			mirror: 'asciiCam-mirror',
@@ -113,7 +113,7 @@
 		let currentStream = null;
 		let hasPopulated = false;
 
-		/* Map slider value (2–20) so that 20→2, 2→20 */
+		/* Map slider value (6–20) so that 20→6, 6→20 */
 		function getCellSize() {
 			const val = +resolutionRange.value;
 			return MAX_CELL - (val - MIN_CELL);
