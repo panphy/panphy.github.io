@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Physics Club — Sim Showcase</title>
+	<style>
+		:root {
+			--bg: #0a0d12;
+			--fg: #e7f0ff;
+			--accent: #58e1ff;
+			--accent2: #a0ff6a;
+			--accent3: #ff7ad9;
+		}
+
+		html,
+		body {
+			height: 100%;
+			margin: 0;
+			background: #0a0d12;
+			color: var(--fg);
+			font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+			overflow: hidden
+		}
+
+		#wrap {
+			position: fixed;
+			inset: 0;
+			display: flex;
+			flex-direction: column
+		}
+
+		header {
+			height: 44px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			letter-spacing: .06em;
+			font-weight: 700;
+			color: #cfe6ff
+		}
+
+		#stage {
+			flex: 1;
+			position: relative
+		}
+
+		canvas {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%
+		}
+
+		#hud {
+			position: absolute;
+			left: 12px;
+			top: 12px;
+			font-size: 12px;
+			opacity: .85;
+			padding: 6px 8px;
+			border-radius: 8px;
+			background: rgba(10, 13, 18, .35);
+			backdrop-filter: blur(6px);
+			border: 1px solid rgba(255, 255, 255, .07)
+		}
+
+		#sceneName {
+			font-weight: 700;
+			color: #d7f9ff
+		}
+
+		#timer {
+			font-variant-numeric: tabular-nums;
+			opacity: .85
+		}
+
+		#controls {
+			height: 56px;
+			display: flex;
+			gap: 10px;
+			align-items: center;
+			justify-content: center;
+			border-top: 1px solid rgba(255, 255, 255, .05);
+			background: linear-gradient(to top, rgba(10, 13, 18, .7), rgba(10, 13, 18, .35));
+			backdrop-filter: blur(6px)
+		}
+
+		button {
+			appearance: none;
+			border: 1px solid rgba(255, 255, 255, .12);
+			background: rgba(255, 255, 255, .05);
+			color: var(--fg);
+			padding: 10px 14px;
+			border-radius: 10px;
+			font-weight: 700;
+			letter-spacing: .04em;
+			cursor: pointer
+		}
+
+		button:hover {
+			border-color: rgba(255, 255, 255, .25)
+		}
+
+		.pill {
+			font-size: 12px;
+			padding: 6px 10px;
+			opacity: .9
+		}
+
+		#hint {
+			position: absolute;
+			left: 12px;
+			bottom: 62px;
+			font-size: 12px;
+			opacity: .6
+		}
+
+		/* Interstitial cover element just for a fade; drawing happens on titleCanvas */
+		#titleCover {
+			position: absolute;
+			inset: 0;
+			pointer-events: none;
+			opacity: 0;
+			transition: opacity .2s ease
+		}
+	</style>
+</head>
+
+<body>
+	<div id="wrap">
+		<header>Physics Club — Sim Showcase</header>
+		<div id="stage">
+			<canvas id="simCanvas"></canvas>
+			<canvas id="titleCanvas"></canvas>
+			<div id="titleCover"></div>
+			<div id="hud">
+				<div id="sceneName">Loading…</div>
+				<div id="timer">00:00</div>
+			</div>
+			<div id="hint">Tap to Pause/Play. Swipe for Next/Prev.</div>
+		</div>
+		<div id="controls">
+			<button id="prev">Prev ◀</button>
+			<button id="toggle">Pause ⏸</button>
+			<button id="next">Next ▶</button>
+			<button id="fs" class="pill">Fullscreen ⛶</button>
+		</div>
+	</div>
+
+	<script>
+		(() => {
+			// Elements and canvases
+			const sim = document.getElementById('simCanvas');
+			const sctx = sim.getContext('2d');
+			const tit = document.getElementById('titleCanvas');
+			const tctx = tit.getContext('2d');
+			const titleCover = document.getElementById('titleCover');
+			const hudName = document.getElementById('sceneName');
+			const timerEl = document.getElementById('timer');
+			const btnPrev = document.getElementById('prev');
+			const btnNext = document.getElementById('next');
+			const btnToggle = document.getElementById('toggle');
+			const btnFS = document.getElementById('fs');
+			const stage = document.getElementById('stage');
+
+			let W = 0,
+				H = 0,
+				D = 1;
+
+			function resize() {
+				D = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+				W = stage.clientWidth;
+				H = stage.clientHeight;
+				for (const c of [sim, tit]) {
+					c.width = Math.floor(W * D);
+					c.height = Math.floor(H * D);
+					c.style.width = W + 'px';
+					c.style.height = H + 'px';
+				}
+				sctx.setTransform(D, 0, 0, D, 0, 0);
+				tctx.setTransform(D, 0, 0, D, 0, 0);
+				current?.onResize?.(W, H, D);
+			}
+			addEventListener('resize', resize, { passive: true });
+
+			// Timing
+			const dwellSeconds = 7;
+			const interstitialSeconds = 2.2;
+			let interstitialUntil = 0;
+			let inInterstitial = false; // NEW: prevents sim draw during title
+			let lastSwitch = 0;
+			let playing = true;
+			let startBase = performance.now() / 1000;
+			let elapsed = 0;
+
+			// Interactions
+			let touchStartX = null;
+			sim.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
+			sim.addEventListener('touchend', e => {
+				if (touchStartX == null) return;
+				const dx = e.changedTouches[0].clientX - touchStartX;
+				if (Math.abs(dx) > 50) { dx < 0 ? nextScene() : prevScene(); } else togglePlay();
+				touchStartX = null;
+			}, { passive: true });
+			sim.addEventListener('click', togglePlay);
+			btnPrev.onclick = prevScene;
+			btnNext.onclick = nextScene;
+			btnToggle.onclick = togglePlay;
+			btnFS.onclick = () => {
+				const el = document.documentElement;
+				if (!document.fullscreenElement) el.requestFullscreen?.();
+				else document.exitFullscreen?.();
+			};
+
+			function togglePlay() {
+				playing = !playing;
+				btnToggle.textContent = playing ? 'Pause ⏸' : 'Play ▶';
+				if (playing) startBase = performance.now() / 1000 - elapsed;
+			}
+
+			// Helpers
+			const TAU = Math.PI * 2;
+			const now = () => performance.now() / 1000;
+
+			function drawGrid(ctx, step = 28, alpha = 0.22) {
+				ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				for (let x = 0; x < W; x += step) { ctx.moveTo(x, 0);
+					ctx.lineTo(x, H); }
+				for (let y = 0; y < H; y += step) { ctx.moveTo(0, y);
+					ctx.lineTo(W, y); }
+				ctx.stroke();
+			}
+
+			function glowCircle(ctx, x, y, r, color) {
+				const g = ctx.createRadialGradient(x, y, 0, x, y, r * 1.6);
+				g.addColorStop(0, color);
+				g.addColorStop(1, 'rgba(0,0,0,0)');
+				ctx.fillStyle = g;
+				ctx.beginPath();
+				ctx.arc(x, y, r * 1.6, 0, TAU);
+				ctx.fill();
+				ctx.fillStyle = color;
+				ctx.beginPath();
+				ctx.arc(x, y, r, 0, TAU);
+				ctx.fill();
+			}
+
+			function drawArrow(ctx, x1, y1, x2, y2, color) {
+				ctx.strokeStyle = color;
+				ctx.fillStyle = color;
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(x1, y1);
+				ctx.lineTo(x2, y2);
+				ctx.stroke();
+				const a = Math.atan2(y2 - y1, x2 - x1),
+					ah = 8;
+				ctx.beginPath();
+				ctx.moveTo(x2, y2);
+				ctx.lineTo(x2 - ah * Math.cos(a - 0.45), y2 - ah * Math.sin(a - 0.45));
+				ctx.lineTo(x2 - ah * Math.cos(a + 0.45), y2 - ah * Math.sin(a + 0.45));
+				ctx.closePath();
+				ctx.fill();
+			}
+
+			function spring(ctx, x1, y1, x2, y2, coils = 14, amp = 10, color = '#58e1ff') {
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 2;
+				const dx = x2 - x1,
+					dy = y2 - y1,
+					len = Math.hypot(dx, dy);
+				const nx = dx / len,
+					ny = dy / len,
+					px = -ny,
+					py = nx,
+					seg = (len - 30) / coils;
+				ctx.beginPath();
+				ctx.moveTo(x1, y1);
+				ctx.lineTo(x1 + nx * 10, y1 + ny * 10);
+				let cx = x1 + nx * 10,
+					cy = y1 + ny * 10;
+				for (let i = 0; i < coils; i++) {
+					const dir = (i % 2 ? -1 : 1),
+						ox = px * amp * dir,
+						oy = py * amp * dir;
+					cx += nx * seg;
+					cy += ny * seg;
+					ctx.lineTo(cx + ox, cy + oy);
+				}
+				ctx.lineTo(x2, y2);
+				ctx.stroke();
+			}
+
+			// INTERSTITIAL — brighter neon glow version
+			function startInterstitial() {
+				inInterstitial = true;
+				interstitialUntil = now() + interstitialSeconds;
+				titleCover.style.opacity = 1; // quick fade veil
+				sctx.clearRect(0, 0, W, H); // IMPORTANT: prevent last-frame flash
+			}
+
+			function endInterstitial() {
+				inInterstitial = false;
+				titleCover.style.opacity = 0;
+				tctx.clearRect(0, 0, W, H);
+			}
+
+			function drawInterstitial(t) {
+				tctx.clearRect(0, 0, W, H);
+
+				// Deep space background with soft nebula
+				const bg = tctx.createRadialGradient(W * 0.5, H * 0.45, 0, W * 0.5, H * 0.45, Math.max(W, H) * 0.9);
+				bg.addColorStop(0, '#0b1220');
+				bg.addColorStop(1, '#070a12');
+				tctx.fillStyle = bg;
+				tctx.fillRect(0, 0, W, H);
+
+				// Sparkles
+				const n = Math.floor(W * H / 14000);
+				for (let i = 0; i < n; i++) {
+					const x = (i * 71) % W,
+						y = (i * 199) % H;
+					const twinkle = 0.35 + 0.65 * Math.abs(Math.sin(t * 3 + i));
+					tctx.fillStyle = `rgba(255,255,255,${twinkle*0.6})`;
+					tctx.fillRect(x, y, 1, 1);
+				}
+
+				// Radial energy burst
+				for (let i = 0; i < 24; i++) {
+					const a = (i / 24) * TAU + t * 0.6;
+					const r0 = Math.min(W, H) * 0.08;
+					const r1 = Math.min(W, H) * 0.48;
+					tctx.strokeStyle = 'rgba(155,234,255,0.08)';
+					tctx.lineWidth = 2;
+					tctx.beginPath();
+					tctx.moveTo(W / 2 + Math.cos(a) * r0, H / 2 + Math.sin(a) * r0);
+					tctx.lineTo(W / 2 + Math.cos(a) * r1, H / 2 + Math.sin(a) * r1);
+					tctx.stroke();
+				}
+
+				// Title — layered neon glow
+				const title = "Physics Club";
+				tctx.save();
+				tctx.translate(W / 2, H / 2);
+				const pulse = 1 + 0.04 * Math.sin(t * 6);
+				tctx.scale(pulse, pulse);
+				tctx.textAlign = 'center';
+				tctx.textBaseline = 'middle';
+				const fontSize = Math.floor(Math.min(W, H) * 0.14);
+				tctx.font = `800 ${fontSize}px system-ui, -apple-system, Segoe UI, Roboto, Arial Black, sans-serif`;
+
+				// Outer glow layers
+				const layers = [
+					{ blur: 50, color: 'rgba(88,225,255,0.35)' },
+					{ blur: 80, color: 'rgba(88,225,255,0.25)' },
+					{ blur: 110, color: 'rgba(160,255,106,0.18)' }
+				];
+				layers.forEach(L => {
+					tctx.save();
+					tctx.shadowColor = L.color;
+					tctx.shadowBlur = L.blur;
+					tctx.fillStyle = 'rgba(0,0,0,0)'; // glow via shadow
+					tctx.strokeStyle = 'rgba(0,0,0,0)';
+					tctx.lineWidth = 0;
+					tctx.fillText(title, 0, 0);
+					tctx.restore();
+				});
+
+				// Bright stroke + fill
+				tctx.lineWidth = 3;
+				tctx.strokeStyle = '#9beaff';
+				tctx.strokeText(title, 0, 0);
+
+				tctx.shadowColor = '#9beaff';
+				tctx.shadowBlur = 28;
+				tctx.fillStyle = '#c8f2ff';
+				tctx.fillText(title, 0, 0);
+
+				tctx.restore();
+			}
+
+			// Scenes
+			function makeScene(name, init, draw, resize) { return { name, init, draw, onResize: resize || null }; }
+
+			// 1) SHM spring-mass
+			const sceneSpring = makeScene("SHM — Mass on a Spring", function() {
+				this.t0 = now();
+				this.k = 12;
+				this.m = 1;
+				this.A = Math.min(W, H) * 0.18;
+				this.omega = Math.sqrt(this.k / this.m);
+				this.bobR = 18;
+				this.anchor = { x: W * 0.5, y: H * 0.16 };
+			}, function(t) {
+				const local = t - this.t0;
+				const x = this.A * Math.cos(this.omega * local);
+				const v = -this.A * this.omega * Math.sin(this.omega * local);
+				const bob = { x: this.anchor.x, y: this.anchor.y + 120 + x };
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 30, 0.18);
+				spring(sctx, this.anchor.x, this.anchor.y, bob.x, bob.y - this.bobR, 13, 12, '#58e1ff');
+				glowCircle(sctx, this.anchor.x, this.anchor.y, 6, '#8fd9ff');
+				glowCircle(sctx, bob.x, bob.y, this.bobR, '#a0ff6a');
+				const KE = .5 * this.m * v * v,
+					PE = .5 * this.k * (x * x),
+					E = KE + PE;
+				const barW = 14,
+					gap = 8,
+					baseX = 20,
+					baseY = H - 24,
+					scale = 0.00002 * Math.min(W, H);
+				[
+					['#a0ff6a', 'KE', -KE * scale],
+					['#58e1ff', 'PE', -PE * scale],
+					['#ff7ad9', 'E', -E * scale]
+				].forEach((b, i) => {
+					sctx.fillStyle = 'rgba(255,255,255,.35)';
+					sctx.fillRect(baseX - 3 + i * (barW + gap), baseY - 100, 1, 100);
+					sctx.fillStyle = b[0];
+					sctx.fillRect(baseX + i * (barW + gap), baseY, barW, b[2]);
+					sctx.fillStyle = 'rgba(255,255,255,.85)';
+					sctx.fillText(b[1], baseX - 2 + i * (barW + gap), baseY + 14);
+				});
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.fillText('x(t) = A cos(ωt),  ω = √(k/m)', 16, 24);
+			}, function(w, h) { this.A = Math.min(w, h) * 0.18;
+				this.anchor = { x: w * 0.5, y: h * 0.16 }; });
+
+			// 2) Solar system — 2D, larger, starry background (from previous version)
+			const sceneSolar = makeScene("Solar System — 2D Orbits", function() {
+				this.cx = W / 2;
+				this.cy = H / 2;
+				this.planets = [];
+				const baseR = Math.min(W, H) * 0.18;
+				const gap = baseR * 0.42;
+				const cols = ['#58e1ff', '#a0ff6a', '#ffcc66', '#ff7ad9', '#9bb0ff'];
+				for (let i = 0; i < 5; i++) {
+					this.planets.push({
+						r: baseR + i * gap,
+						a: Math.random() * TAU,
+						w: 0.45 / (i + 1),
+						color: cols[i % cols.length],
+						size: 10 + i * 3
+					});
+				}
+				this.stars = [];
+				const n = Math.floor(W * H / 9000);
+				for (let i = 0; i < n; i++) {
+					this.stars.push({
+						x: Math.random() * W,
+						y: Math.random() * H,
+						a: 0.2 + Math.random() * 0.6,
+						s: Math.random() < 0.06 ? 2 : 1
+					});
+				}
+			}, function(t) {
+				sctx.clearRect(0, 0, W, H);
+				sctx.fillStyle = '#070b12';
+				sctx.fillRect(0, 0, W, H);
+				for (const s of this.stars) {
+					sctx.globalAlpha = s.a * (0.8 + 0.2 * Math.sin(t * 2 + s.x * 0.01));
+					sctx.fillStyle = 'white';
+					sctx.fillRect(s.x, s.y, s.s, s.s);
+				}
+				sctx.globalAlpha = 1;
+				glowCircle(sctx, this.cx, this.cy, 40, '#ffd36b');
+				sctx.strokeStyle = 'rgba(255,255,255,.12)';
+				sctx.lineWidth = 1;
+				for (const p of this.planets) { sctx.beginPath();
+					sctx.arc(this.cx, this.cy, p.r, 0, TAU);
+					sctx.stroke(); }
+				for (const p of this.planets) {
+					p.a += p.w * 0.016;
+					const x = this.cx + Math.cos(p.a) * p.r;
+					const y = this.cy + Math.sin(p.a) * p.r;
+					glowCircle(sctx, x, y, p.size, p.color);
+				}
+			}, function(w, h) { this.cx = w / 2;
+				this.cy = h / 2; });
+
+			// 3) Doppler effect
+			const sceneDoppler = makeScene("Doppler Effect — Moving Source", function() {
+				this.t0 = now();
+				this.wave = [];
+				this.c = 260;
+				this.v = 160;
+				this.y = H * 0.5;
+				this.x = W * 0.15;
+				this.dir = 1;
+				this.emitEvery = 0.16;
+				this.lastEmit = 0;
+				this.hFront = 200;
+				this.hBack = 350;
+			}, function(t) {
+				const dt = 1 / 60;
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 32, 0.2);
+				this.x += this.v * this.dir * dt;
+				if (this.x > W * 0.85) this.dir = -1;
+				if (this.x < W * 0.15) this.dir = 1;
+				if (t - this.lastEmit > this.emitEvery) { this.wave.push({ x: this.x, y: this.y, t });
+					this.lastEmit = t; }
+				for (let i = this.wave.length - 1; i >= 0; i--) {
+					const w = this.wave[i];
+					const r = (t - w.t) * this.c;
+					if (r > Math.max(W, H)) { this.wave.splice(i, 1); continue; }
+					const ahead = (this.dir > 0 && w.x < this.x) || (this.dir < 0 && w.x > this.x);
+					sctx.strokeStyle = ahead ? `hsla(${this.hFront},100%,70%,.65)` : `hsla(${this.hBack},100%,70%,.45)`;
+					sctx.lineWidth = 2;
+					sctx.beginPath();
+					sctx.arc(w.x, w.y, r, 0, TAU);
+					sctx.stroke();
+				}
+				glowCircle(sctx, this.x, this.y, 12, '#a0ff6a');
+				drawArrow(sctx, this.x, this.y, this.x + this.dir * 54, this.y, '#a0ff6a');
+			}, function(w, h) { this.y = h * 0.5; });
+
+			// 4) Pendulum
+			const scenePendulum = makeScene("SHM — Simple Pendulum", function() {
+				this.t0 = now();
+				this.L = Math.min(W, H) * 0.32;
+				this.g = 9.8 * 200;
+				this.theta0 = 0.48;
+				this.omega = Math.sqrt(this.g / this.L);
+				this.pivot = { x: W * 0.5, y: H * 0.18 };
+				this.bobR = 16;
+			}, function(t) {
+				const local = t - this.t0,
+					theta = this.theta0 * Math.cos(this.omega * local);
+				const x = this.pivot.x + this.L * Math.sin(theta),
+					y = this.pivot.y + this.L * Math.cos(theta);
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 36, 0.18);
+				sctx.strokeStyle = 'rgba(255,255,255,.75)';
+				sctx.lineWidth = 1;
+				sctx.beginPath();
+				sctx.moveTo(this.pivot.x, this.pivot.y);
+				sctx.lineTo(x, y);
+				sctx.stroke();
+				glowCircle(sctx, this.pivot.x, this.pivot.y, 6, '#58e1ff');
+				glowCircle(sctx, x, y, this.bobR, '#ff7ad9');
+				const midx = this.pivot.x + (this.L * 0.5) * Math.sin(theta);
+				const midy = this.pivot.y + (this.L * 0.5) * Math.cos(theta);
+				drawArrow(sctx, midx, midy, midx - 60 * Math.sin(theta), midy + 60 * Math.cos(theta), '#a0ff6a');
+			}, function(w, h) { this.L = Math.min(w, h) * 0.32;
+				this.pivot = { x: w * 0.5, y: h * 0.18 }; });
+
+			// 5) Ripple tank — two-source interference
+			const sceneRipple = makeScene("Wave Interference — Ripple Tank", function() {
+				this.t0 = now();
+				this.c = 220;
+				this.emitEvery = 0.22;
+				this.lastEmit = 0;
+				const cx = W * 0.4,
+					cy = H * 0.55,
+					sep = Math.min(W, H) * 0.18;
+				this.sources = [{ x: cx - sep / 2, y: cy }, { x: cx + sep / 2, y: cy }];
+				this.fronts = [];
+			}, function(t) {
+				sctx.clearRect(0, 0, W, H);
+				const g = sctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
+				g.addColorStop(0, '#0b1220');
+				g.addColorStop(1, '#070a12');
+				sctx.fillStyle = g;
+				sctx.fillRect(0, 0, W, H);
+				if (t - this.lastEmit > this.emitEvery) {
+					for (const s of this.sources) this.fronts.push({ x: s.x, y: s.y, t });
+					this.lastEmit = t;
+				}
+				sctx.lineWidth = 1.2;
+				for (let i = this.fronts.length - 1; i >= 0; i--) {
+					const f = this.fronts[i];
+					const r = (t - f.t) * this.c;
+					if (r > Math.max(W, H)) { this.fronts.splice(i, 1); continue; }
+					sctx.strokeStyle = 'rgba(88,225,255,.22)';
+					sctx.beginPath();
+					sctx.arc(f.x, f.y, r, 0, TAU);
+					sctx.stroke();
+				}
+				for (const s of this.sources) glowCircle(sctx, s.x, s.y, 7, '#58e1ff');
+			}, function() {});
+
+			// 6) Double pendulum — chaotic motion with trail
+			const sceneDoublePendulum = makeScene("Chaos — Double Pendulum", function() {
+				this.m1 = 1;
+				this.m2 = 1;
+				this.L1 = Math.min(W, H) * 0.22;
+				this.L2 = Math.min(W, H) * 0.22;
+				this.g = 9.8 * 220;
+				this.theta1 = Math.PI * 0.6;
+				this.theta2 = Math.PI * 0.45;
+				this.w1 = 0;
+				this.w2 = 0;
+				this.pivot = { x: W * 0.5, y: H * 0.16 };
+				this.trail = [];
+			}, function(t) {
+				const dt = 1 / 60;
+				for (let k = 0; k < 2; k++) {
+					const { m1, m2, L1, L2, g, theta1, theta2, w1, w2 } = this;
+					const d = theta1 - theta2;
+					const den = (2 * m1 + m2 - m2 * Math.cos(2 * d));
+					const a1 = (-g * (2 * m1 + m2) * Math.sin(theta1) - m2 * g * Math.sin(theta1 - 2 * theta2) -
+						2 * Math.sin(d) * m2 * (w2 * w2 * L2 + w1 * w1 * L1 * Math.cos(d))) / (L1 * den);
+					const a2 = (2 * Math.sin(d) * (w1 * w1 * L1 * (m1 + m2) + g * (m1 + m2) * Math.cos(theta1) + w2 * w2 * L2 * m2 * Math.cos(d))) / (L2 * den);
+					this.w1 += a1 * dt;
+					this.w2 += a2 * dt;
+					this.theta1 += this.w1 * dt;
+					this.theta2 += this.w2 * dt;
+				}
+				const x1 = this.pivot.x + this.L1 * Math.sin(this.theta1);
+				const y1 = this.pivot.y + this.L1 * Math.cos(this.theta1);
+				const x2 = x1 + this.L2 * Math.sin(this.theta2);
+				const y2 = y1 + this.L2 * Math.cos(this.theta2);
+
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 34, 0.16);
+				sctx.strokeStyle = 'rgba(255,255,255,.8)';
+				sctx.lineWidth = 2;
+				sctx.beginPath();
+				sctx.moveTo(this.pivot.x, this.pivot.y);
+				sctx.lineTo(x1, y1);
+				sctx.lineTo(x2, y2);
+				sctx.stroke();
+				glowCircle(sctx, this.pivot.x, this.pivot.y, 5, '#58e1ff');
+				glowCircle(sctx, x1, y1, 10, '#a0ff6a');
+				glowCircle(sctx, x2, y2, 10, '#ff7ad9');
+				this.trail.push({ x: x2, y: y2 });
+				if (this.trail.length > 220) this.trail.shift();
+				for (let i = 1; i < this.trail.length; i++) {
+					const a = i / this.trail.length;
+					sctx.strokeStyle = `rgba(255,122,217,${a*0.5})`;
+					sctx.beginPath();
+					sctx.moveTo(this.trail[i - 1].x, this.trail[i - 1].y);
+					sctx.lineTo(this.trail[i].x, this.trail[i].y);
+					sctx.stroke();
+				}
+			}, function(w, h) { this.L1 = Math.min(w, h) * 0.22;
+				this.L2 = Math.min(w, h) * 0.22;
+				this.pivot = { x: w * 0.5, y: h * 0.16 }; });
+
+			const scenes = [sceneSpring, sceneSolar, sceneDoppler, scenePendulum, sceneRipple, sceneDoublePendulum];
+			let index = 0,
+				current = null;
+
+			function setScene(i, showTitle = true) {
+				index = (i + scenes.length) % scenes.length;
+				current = scenes[index];
+				hudName.textContent = current.name;
+				current.init();
+				lastSwitch = now();
+				if (showTitle) { startInterstitial(); }
+			}
+
+			function nextScene() { setScene(index + 1); }
+
+			function prevScene() { setScene(index - 1); }
+
+			// Main loop — with flash fix
+			function loop() {
+				const t = now();
+				if (playing) {
+					elapsed = t - startBase;
+					const age = t - lastSwitch;
+
+					// Trigger interstitial as soon as dwell ends (before any sim draw)
+					if (!inInterstitial && age > dwellSeconds) {
+						startInterstitial();
+					}
+
+					if (inInterstitial) {
+						// Only draw the glowing title; sim stays cleared
+						drawInterstitial(t);
+						if (t >= interstitialUntil) {
+							endInterstitial();
+						}
+					} else {
+						// Normal scene draw
+						current?.draw(t);
+					}
+
+					// Auto-advance after scene dwell + interstitial
+					if (age > dwellSeconds + interstitialSeconds) {
+						setScene(index + 1);
+					}
+
+					// HUD timer
+					const secs = Math.floor(age);
+					const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+					const ss = String(secs % 60).padStart(2, '0');
+					timerEl.textContent = `${mm}:${ss}`;
+				}
+				requestAnimationFrame(loop);
+			}
+
+			// Init
+			resize();
+			setScene(0, true);
+			startBase = now();
+			requestAnimationFrame(loop);
+		})();
+	</script>
+</body>
+
+</html>
