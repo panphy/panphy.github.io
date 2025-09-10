@@ -8,12 +8,10 @@
     <title>Snake</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
-        /* Removed touch-action: none from html and body */
         html,
         body {
             overflow: hidden;
             background-image: url('snake_bkgrd.jpg');
-            /* Image downloaded from: https://img.freepik.com/free-photo/abstract-bright-green-square-pixel-tile-mosaic-wall-background-texture_1258-72160.jpg */
             background-repeat: repeat;
             background-size: 700px 700px;
         }
@@ -26,30 +24,25 @@
             text-align: center;
         }
 
-        /* Dim the tiled background */
         #bgOverlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
+            inset: 0;
+            background-color: rgba(0, 0, 0, .3);
             pointer-events: none;
             z-index: 1;
         }
 
         h1 {
-            color: #ffffff;
+            color: #fff;
             margin-bottom: 20px;
             position: relative;
             z-index: 2;
         }
 
         h3 {
-            color: #ffffff;
+            color: #fff;
         }
 
-        /* Container for scoreboard and game area */
         #mainContainer {
             display: inline-block;
             text-align: left;
@@ -57,7 +50,6 @@
             z-index: 2;
         }
 
-        /* Scoreboard container */
         #scoreboardContainer {
             display: inline-block;
             vertical-align: top;
@@ -65,9 +57,8 @@
             margin-right: 20px;
         }
 
-        /* Scoreboard styles */
         #scoreBoard {
-            background-color: #1e1e1e;
+            background: #1e1e1e;
             border: 1px solid #ff4081;
             padding: 5px;
             width: 150px;
@@ -95,7 +86,6 @@
             margin: 5px 0;
         }
 
-        /* Game container */
         #gameContainer {
             display: inline-block;
             vertical-align: top;
@@ -103,8 +93,7 @@
         }
 
         canvas {
-            /* The canvas has its own dark background and disabled touch actions */
-            background-color: #1e1e1e;
+            background: #1e1e1e;
             border: 0;
             box-shadow: 0 0 10px #000;
             display: block;
@@ -119,7 +108,6 @@
             text-align: center;
         }
 
-        /* Game over message */
         #gameOver {
             display: none;
             position: absolute;
@@ -131,12 +119,11 @@
             text-align: center;
             margin: 0;
             z-index: 3;
-            background-color: rgba(18, 18, 18, 0.8);
+            background: rgba(18, 18, 18, .8);
             padding: 10px;
             border-radius: 8px;
         }
 
-        /* Footer styling */
         footer {
             position: fixed;
             bottom: 0;
@@ -168,18 +155,12 @@
 </head>
 
 <body>
-    <!-- Overlay for background dimming -->
     <div id="bgOverlay"></div>
-
     <h1>Snake</h1>
     <div id="mainContainer">
-        <!-- Scoreboard -->
         <div id="scoreboardContainer">
-            <div id="scoreBoard">
-                <!-- High scores will be rendered here -->
-            </div>
+            <div id="scoreBoard"></div>
         </div>
-        <!-- Game area -->
         <div id="gameContainer">
             <canvas id="gameCanvas" width="400" height="400"></canvas>
             <div id="score">Score: 0</div>
@@ -187,20 +168,21 @@
         </div>
     </div>
     <footer>
-        &copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> | <a
-            href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support
-            My Projects</a>
+        &copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
     </footer>
 
     <script>
-        // Get canvas and context.
+        // Canvas & grid
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const grid = 20; // Size of each grid square
+        const grid = 20;
 
-        // Game state variables.
+        // Game state
         let snake = [{ x: 160, y: 160 }];
-        let direction = 'RIGHT';
+        let direction = 'RIGHT';          // actual movement direction this tick
+        let nextDirection = 'RIGHT';      // buffered input to apply at start of next tick
+        let hasBufferedTurn = false;      // allow only one direction change per tick
         let score = 0;
         let gameOverFlag = false;
         let speed = 100;
@@ -208,84 +190,56 @@
         const maxWalls = 10;
         let lastWallScore = 0;
 
-        // ===== High Scores Management =====
-        function loadHighScores() {
-            const scores = localStorage.getItem('snakeHighScores');
-            return scores ? JSON.parse(scores) : [];
-        }
-
-        function saveHighScores(scores) {
-            localStorage.setItem('snakeHighScores', JSON.stringify(scores));
-        }
-
+        // ===== High Scores =====
+        function loadHighScores() { const s = localStorage.getItem('snakeHighScores'); return s ? JSON.parse(s) : []; }
+        function saveHighScores(scores) { localStorage.setItem('snakeHighScores', JSON.stringify(scores)); }
         function updateHighScores(newScore) {
             let scores = loadHighScores();
             scores.push(newScore);
             scores.sort((a, b) => b - a);
-            scores = scores.slice(0, 5);
-            saveHighScores(scores);
+            saveHighScores(scores.slice(0, 5));
         }
-
         function renderHighScores() {
             const scores = loadHighScores();
             let html = '<h3>Top Scores</h3><ul>';
-            for (let i = 0; i < 5; i++) {
-                html += i < scores.length ? `<li>${scores[i]}</li>` : `<li>&nbsp;</li>`;
-            }
+            for (let i = 0; i < 5; i++) { html += i < scores.length ? `<li>${scores[i]}</li>` : `<li>&nbsp;</li>`; }
             html += '</ul>';
             document.getElementById('scoreBoard').innerHTML = html;
         }
-
-        // Render initial high scores.
         renderHighScores();
 
-        // ===== Wall Functions =====
+        // ===== Walls / Food =====
         function getWallSegments(wall) {
-            let segments = [];
+            const segs = [];
             for (let i = 0; i < wall.size; i++) {
-                segments.push(wall.orientation === 'H' ?
-                    { x: wall.x + i * grid, y: wall.y } :
-                    { x: wall.x, y: wall.y + i * grid }
-                );
+                segs.push(wall.orientation === 'H' ? { x: wall.x + i * grid, y: wall.y } : { x: wall.x, y: wall.y + i * grid });
             }
-            return segments;
+            return segs;
         }
 
-        // ===== Food Functions =====
         function getRandomFood() {
-            let newFood;
-            let valid = false;
-            let attempts = 0;
+            let newFood, valid = false, attempts = 0;
             while (!valid && attempts < 100) {
                 attempts++;
                 newFood = {
                     x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
                     y: Math.floor(Math.random() * (canvas.height / grid)) * grid
                 };
-                const collisionWithSnake = snake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
-                let collisionWithWall = false;
+                const collSnake = snake.some(s => s.x === newFood.x && s.y === newFood.y);
+                let collWall = false;
                 for (let i = 0; i < walls.length; i++) {
-                    const segments = getWallSegments(walls[i]);
-                    if (segments.some(seg => seg.x === newFood.x && seg.y === newFood.y)) {
-                        collisionWithWall = true;
-                        break;
-                    }
+                    const segs = getWallSegments(walls[i]);
+                    if (segs.some(seg => seg.x === newFood.x && seg.y === newFood.y)) { collWall = true; break; }
                 }
-                if (!collisionWithSnake && !collisionWithWall) {
-                    valid = true;
-                }
+                if (!collSnake && !collWall) valid = true;
             }
             return newFood;
         }
-
         let food = getRandomFood();
 
-        // ===== Add a New Wall =====
         function addWall() {
             const snakeHead = snake[0];
-            let valid = false;
-            let wall;
-            let attempts = 0;
+            let valid = false, wall, attempts = 0;
             while (!valid && attempts < 100) {
                 attempts++;
                 const orientation = Math.random() < 0.5 ? 'H' : 'V';
@@ -300,33 +254,32 @@
                     startX = Math.floor(Math.random() * maxCols) * grid;
                     startY = Math.floor(Math.random() * (maxRows - size + 1)) * grid;
                 }
-                wall = { x: startX, y: startY, size: size, orientation: orientation };
-                const segments = getWallSegments(wall);
-                let tooClose = segments.some(seg => {
+                wall = { x: startX, y: startY, size, orientation };
+                const segs = getWallSegments(wall);
+
+                // keep a Manhattan buffer of 3 away from head
+                if (segs.some(seg => {
                     const dx = Math.abs((seg.x - snakeHead.x) / grid);
                     const dy = Math.abs((seg.y - snakeHead.y) / grid);
                     return (dx + dy) < 3;
-                });
-                if (tooClose) continue;
-                if (segments.some(seg => snake.some(s => s.x === seg.x && s.y === seg.y))) continue;
-                if (segments.some(seg => seg.x === food.x && seg.y === food.y)) continue;
-                let collisionWithExistingWall = false;
+                })) continue;
+
+                // avoid snake, food, existing walls
+                if (segs.some(seg => snake.some(s => s.x === seg.x && s.y === seg.y))) continue;
+                if (segs.some(seg => seg.x === food.x && seg.y === food.y)) continue;
+                let collExisting = false;
                 for (let i = 0; i < walls.length; i++) {
-                    const existingSegments = getWallSegments(walls[i]);
-                    if (segments.some(seg => existingSegments.some(es => es.x === seg.x && es.y === seg.y))) {
-                        collisionWithExistingWall = true;
-                        break;
-                    }
+                    const esegs = getWallSegments(walls[i]);
+                    if (segs.some(seg => esegs.some(es => es.x === seg.x && es.y === seg.y))) { collExisting = true; break; }
                 }
-                if (collisionWithExistingWall) continue;
+                if (collExisting) continue;
+
                 valid = true;
             }
-            if (valid) {
-                walls.push(wall);
-            }
+            if (valid) walls.push(wall);
         }
 
-        // ===== Drawing Function =====
+        // ===== Drawing =====
         function draw() {
             ctx.fillStyle = '#1e1e1e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -335,23 +288,41 @@
             ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
 
             ctx.fillStyle = '#d0d0d0';
-            walls.forEach(wall => {
-                const segments = getWallSegments(wall);
-                segments.forEach(seg => {
-                    ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1);
-                });
+            walls.forEach(w => {
+                getWallSegments(w).forEach(seg => ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1));
             });
 
             ctx.fillStyle = '#20c997';
-            snake.forEach(segment => {
-                ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
-            });
+            snake.forEach(seg => ctx.fillRect(seg.x, seg.y, grid - 1, grid - 1));
 
             document.getElementById('score').innerText = 'Score: ' + score;
         }
 
-        // ===== Update Game State =====
+        // ===== Direction helpers (bug fix core) =====
+        function isOpposite(a, b) {
+            return (a === 'LEFT' && b === 'RIGHT') ||
+                (a === 'RIGHT' && b === 'LEFT') ||
+                (a === 'UP' && b === 'DOWN') ||
+                (a === 'DOWN' && b === 'UP');
+        }
+        function bufferDirection(desired) {
+            // Only one buffered change per tick, and never allow 180° vs the *current* direction
+            if (hasBufferedTurn) return;
+            if (desired === direction) return;
+            if (isOpposite(desired, direction)) return;
+            nextDirection = desired;
+            hasBufferedTurn = true;
+        }
+        function applyNextDirection() {
+            // Apply once per tick, then allow buffering again
+            direction = nextDirection;
+            hasBufferedTurn = false;
+        }
+
+        // ===== Update =====
         function update() {
+            applyNextDirection(); // <— apply buffered turn at the start of the tick
+
             const head = { ...snake[0] };
             switch (direction) {
                 case 'LEFT': head.x -= grid; break;
@@ -359,22 +330,22 @@
                 case 'RIGHT': head.x += grid; break;
                 case 'DOWN': head.y += grid; break;
             }
+
+            // wrap
             if (head.x < 0) head.x = canvas.width - grid;
             if (head.x >= canvas.width) head.x = 0;
             if (head.y < 0) head.y = canvas.height - grid;
             if (head.y >= canvas.height) head.y = 0;
-            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                endGame();
-                return;
-            }
+
+            // self / wall collision
+            if (snake.some(seg => seg.x === head.x && seg.y === head.y)) { endGame(); return; }
             for (let i = 0; i < walls.length; i++) {
-                const segments = getWallSegments(walls[i]);
-                if (segments.some(seg => seg.x === head.x && seg.y === head.y)) {
-                    endGame();
-                    return;
-                }
+                const segs = getWallSegments(walls[i]);
+                if (segs.some(seg => seg.x === head.x && seg.y === head.y)) { endGame(); return; }
             }
+
             snake.unshift(head);
+
             if (head.x === food.x && head.y === food.y) {
                 score++;
                 if (score % 5 === 0 && walls.length < maxWalls && score !== lastWallScore) {
@@ -387,17 +358,18 @@
             }
         }
 
-        // ===== Game Over and Reset =====
+        // ===== Game Over / Reset =====
         function endGame() {
             gameOverFlag = true;
             document.getElementById('gameOver').style.display = 'block';
             updateHighScores(score);
             renderHighScores();
         }
-
         function resetGame() {
             snake = [{ x: 160, y: 160 }];
             direction = 'RIGHT';
+            nextDirection = 'RIGHT';
+            hasBufferedTurn = false;
             food = getRandomFood();
             score = 0;
             gameOverFlag = false;
@@ -409,24 +381,20 @@
 
         // ===== Controls =====
         document.addEventListener('keydown', function (e) {
-            if ([37, 38, 39, 40].includes(e.keyCode)) {
-                e.preventDefault();
-            }
-            if (e.keyCode === 37 && direction !== 'RIGHT') direction = 'LEFT';
-            if (e.keyCode === 38 && direction !== 'DOWN') direction = 'UP';
-            if (e.keyCode === 39 && direction !== 'LEFT') direction = 'RIGHT';
-            if (e.keyCode === 40 && direction !== 'UP') direction = 'DOWN';
+            if ([37, 38, 39, 40].includes(e.keyCode)) e.preventDefault();
+            if (e.keyCode === 37) bufferDirection('LEFT');
+            if (e.keyCode === 38) bufferDirection('UP');
+            if (e.keyCode === 39) bufferDirection('RIGHT');
+            if (e.keyCode === 40) bufferDirection('DOWN');
             if (e.keyCode === 13 && gameOverFlag) resetGame();
         });
 
-        // Global click listener to restart game when over.
-        document.addEventListener('click', function (e) {
-            if (gameOverFlag) {
-                resetGame();
-            }
+        // Restart on click when over
+        document.addEventListener('click', function () {
+            if (gameOverFlag) resetGame();
         });
 
-        // ===== Touch Events: Now attached to the canvas only =====
+        // Touch controls (use same buffering rules)
         let touchStartX = null, touchStartY = null;
         canvas.addEventListener('touchstart', function (e) {
             e.preventDefault();
@@ -436,47 +404,32 @@
 
         canvas.addEventListener('touchend', function (e) {
             e.preventDefault();
-            if (gameOverFlag) {
-                resetGame();
-                return;
-            }
+            if (gameOverFlag) { resetGame(); return; }
             if (touchStartX === null || touchStartY === null) return;
-            let touchEndX = e.changedTouches[0].clientX;
-            let touchEndY = e.changedTouches[0].clientY;
-            let dx = touchEndX - touchStartX;
-            let dy = touchEndY - touchStartY;
-            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
-                touchStartX = touchStartY = null;
-                return;
-            }
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+
+            if (Math.abs(dx) < 30 && Math.abs(dy) < 30) { touchStartX = touchStartY = null; return; }
+
             if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 0 && direction !== 'LEFT') {
-                    direction = 'RIGHT';
-                } else if (dx < 0 && direction !== 'RIGHT') {
-                    direction = 'LEFT';
-                }
+                bufferDirection(dx > 0 ? 'RIGHT' : 'LEFT');
             } else {
-                if (dy > 0 && direction !== 'UP') {
-                    direction = 'DOWN';
-                } else if (dy < 0 && direction !== 'DOWN') {
-                    direction = 'UP';
-                }
+                bufferDirection(dy > 0 ? 'DOWN' : 'UP');
             }
             touchStartX = touchStartY = null;
         }, false);
 
-        // ===== Main Game Loop =====
+        // ===== Main loop =====
         function loop() {
             if (gameOverFlag) return;
             update();
             draw();
             setTimeout(loop, speed);
         }
-
-        // Start the game loop.
         loop();
     </script>
 </body>
 
 </html>
-
