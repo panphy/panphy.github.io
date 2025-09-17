@@ -33,7 +33,7 @@
       gap: .8rem;
     }
 
-    /* ===== PanPhy top banner (matches your other apps) ===== */
+    /* ===== PanPhy top banner ===== */
     .topbar {
       background: #333;
       color: #fff;
@@ -397,7 +397,6 @@
 
     <div class="spacer"></div>
     <div class="group">
-      <!-- Snapshot/Mirror/Fit + Record -->
       <button id="screenshotBtn" title="Save snapshot with annotations">Snapshot</button>
       <button id="recordBtn" title="Record/Stop recording the view">Record</button>
       <button id="mirrorBtn" title="Toggle mirror">Mirror</button>
@@ -577,7 +576,7 @@
           drawFreezeFromFrozen();
         } else {
           hasFrozen = false;
-          hideTextOverlay();
+          hideTextOverlay(); // fully exit text mode when resuming live
           freezeCanvas.classList.add('hidden');
         }
       }
@@ -855,10 +854,21 @@
         textOverlay.style.left = `${x}px`; textOverlay.style.top = `${y}px`; textOverlay.style.display = 'block';
         overlayVisible = true; textInput.value = ''; textInput.focus();
       }
-      function hideTextOverlay() {
-        textOverlay.style.display = 'none'; overlayVisible = false; pendingTextXY = null; textModeOn = false;
-        textBtn.classList.toggle('active', false); textBtn.classList.toggle('primary', false); textBtn.classList.toggle('muted', true); updateInteractionMode();
+
+      // CHANGED: allow hiding overlay without turning text mode off
+      function hideTextOverlay(keepMode = false) {
+        textOverlay.style.display = 'none';
+        overlayVisible = false;
+        pendingTextXY = null;
+        if (!keepMode) {
+          textModeOn = false;
+          textBtn.classList.toggle('active', false);
+          textBtn.classList.toggle('primary', false);
+          textBtn.classList.toggle('muted', true);
+          updateInteractionMode();
+        }
       }
+
       function placeTextObject(text, x, y) {
         if (!text) return;
         const fontPx = Math.round(10 + annotSize * 2);
@@ -904,10 +914,11 @@
         if (eraserOn) setPaused(true);
       });
 
+      // CHANGED: keep text mode active when hiding the overlay
       textBtn.addEventListener('click', () => {
         annotationOn = true; eraserOn = false;
         textModeOn = !textModeOn;
-        hideTextOverlay();
+        hideTextOverlay(textModeOn); // keep mode if we just turned it on
         annotationBtn.classList.toggle('active', true);
         annotationBtn.classList.toggle('primary', true);
         annotationBtn.classList.toggle('muted', false);
@@ -958,7 +969,7 @@
       target.addEventListener('pointerleave', endDraw);
 
       textAdd.addEventListener('click', () => { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y); hideTextOverlay(); });
-      textCancel.addEventListener('click', hideTextOverlay);
+      textCancel.addEventListener('click', () => hideTextOverlay());
       textInput.addEventListener('keydown', e => {
         if (e.key === 'Escape') { e.preventDefault(); hideTextOverlay(); }
         if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y); hideTextOverlay(); }
@@ -1035,7 +1046,7 @@
           'video/webm;codecs=vp9',
           'video/webm;codecs=vp8',
           'video/webm',
-          'video/mp4;codecs=avc1.42E01E,mp4a.40.2' // may not be supported in most browsers without flags
+          'video/mp4;codecs=avc1.42E01E,mp4a.40.2'
         ];
         for (const m of prefs) { if (MediaRecorder.isTypeSupported(m)) return m; }
         return '';
