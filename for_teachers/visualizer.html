@@ -179,10 +179,10 @@
 			min-width: 98px;
 			text-align: center;
 			cursor: pointer;
-			user-select: none
+			user-select: none;
 		}
 
-		/* Visually hidden but interactive */
+		/* Visually hidden but interactive (not display:none; iOS-friendly) */
 		.srOnly {
 			position: absolute !important;
 			width: 1px;
@@ -193,7 +193,7 @@
 			clip: rect(0 0 0 0);
 			clip-path: inset(50%);
 			overflow: hidden;
-			white-space: nowrap
+			white-space: nowrap;
 		}
 
 		.status {
@@ -382,7 +382,7 @@
 			height: var(--dot);
 			aspect-ratio: 1/1;
 			border-radius: 50%;
-			background: var(--dot-color)
+			background: var(--dot-color);
 		}
 
 		.dotBtn.active {
@@ -409,11 +409,6 @@
 		#toast.show {
 			opacity: 1
 		}
-
-		/* Fullscreen tweaks: remove page margins & keep safe-area padding */
-		:fullscreen body {
-			padding-bottom: env(safe-area-inset-bottom)
-		}
 	</style>
 </head>
 
@@ -422,7 +417,7 @@
 	<div class="topbar">
 		<div class="bar">
 			<a class="brand" href="https://panphy.github.io" aria-label="panphy home">
-				<img src="/panphy.png" alt="panphy logo" />
+				<img src="panphy.png" alt="panphy logo" />
 			</a>
 			<div class="title">Camera Visualizer</div>
 		</div>
@@ -458,7 +453,6 @@
 				<button id="recordBtn">Record</button>
 				<button id="mirrorBtn">Mirror</button>
 				<button id="fitBtn" class="fixed-width-btn">Fill</button>
-				<button id="fsBtn" class="fixed-width-btn">Full</button>
 			</div>
 		</div>
 
@@ -528,7 +522,6 @@
 			var recordBtn = document.getElementById('recordBtn');
 			var mirrorBtn = document.getElementById('mirrorBtn');
 			var fitBtn = document.getElementById('fitBtn');
-			var fsBtn = document.getElementById('fsBtn');
 			var hudText = document.getElementById('hudText');
 			var stage = document.getElementById('stage');
 			var toast = document.getElementById('toast');
@@ -574,8 +567,10 @@
 				textModeOn = false,
 				overlayVisible = false;
 
+			var currentDeviceId = loadStr('lastDeviceId', null);
 			var facingPref = loadStr('lastFacing', 'environment');
 			var stream = null,
+				lastGoodConstraint = null,
 				switching = false;
 
 			var tail = [];
@@ -595,17 +590,13 @@
 				recChunks = [];
 
 			/* ===== Utils ===== */
-			function showToast(msg, ms) {
-				ms = ms || 1600;
+			function showToast(msg, ms) { ms = ms || 1600;
 				toast.textContent = msg;
 				toast.classList.add('show');
-				setTimeout(function() { toast.classList.remove('show'); }, ms);
-			}
+				setTimeout(function() { toast.classList.remove('show'); }, ms); }
 
-			function applyVideoStyle() {
-				video.style.objectFit = (fitMode === 'cover') ? 'cover' : 'contain';
-				video.style.transform = isMirrored ? 'scaleX(-1)' : 'none';
-			}
+			function applyVideoStyle() { video.style.objectFit = (fitMode === 'cover') ? 'cover' : 'contain';
+				video.style.transform = isMirrored ? 'scaleX(-1)' : 'none'; }
 
 			function contrastOn(hex) {
 				var h = hex.replace('#', '');
@@ -625,10 +616,8 @@
 
 			function resizeCanvases() {
 				var r = stage.getBoundingClientRect();
-				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(function(c) {
-					c.width = Math.floor(r.width);
-					c.height = Math.floor(r.height);
-				});
+				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(function(c) { c.width = Math.floor(r.width);
+					c.height = Math.floor(r.height); });
 				applyVideoStyle();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				renderAnnotations();
@@ -657,33 +646,17 @@
 				var cr = w / h,
 					vr = vw / vh;
 				var dw, dh, dx, dy;
-				if (fitMode === 'cover') {
-					if (vr > cr) {
-						dh = h;
-						dw = h * vr;
-					} else {
-						dw = w;
-						dh = w / vr;
-					}
-					dx = (w - dw) / 2;
-					dy = (h - dh) / 2;
-				} else {
-					if (vr > cr) {
-						dw = w;
-						dh = w / vr;
-					} else {
-						dh = h;
-						dw = h * vr;
-					}
-					dx = (w - dw) / 2;
-					dy = (h - dh) / 2;
-				}
+				if (fitMode === 'cover') { if (vr > cr) { dh = h;
+						dw = h * vr; } else { dw = w;
+						dh = w / vr; } dx = (w - dw) / 2;
+					dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
+						dh = w / vr; } else { dh = h;
+						dw = h * vr; } dx = (w - dw) / 2;
+					dy = (h - dh) / 2; }
 				frozenCtx.save();
-				if (isMirrored) {
-					frozenCtx.translate(w, 0);
+				if (isMirrored) { frozenCtx.translate(w, 0);
 					frozenCtx.scale(-1, 1);
-					dx = w - dx - dw;
-				}
+					dx = w - dx - dw; }
 				frozenCtx.clearRect(0, 0, w, h);
 				frozenCtx.drawImage(video, dx, dy, dw, dh);
 				frozenCtx.restore();
@@ -702,24 +675,18 @@
 			function setPaused(state) {
 				if (state === isPaused) return;
 				isPaused = state;
-				if (isPaused) {
-					captureFrozenFromVideo();
-					drawFreezeFromFrozen();
-				} else {
-					hasFrozen = false;
-					freezeCanvas.classList.add('hidden');
-				}
+				if (isPaused) { captureFrozenFromVideo();
+					drawFreezeFromFrozen(); } else { hasFrozen = false;
+					freezeCanvas.classList.add('hidden'); }
 				updateStatusUI();
 			}
 
-			/* --- Tools ↔ pointer interaction --- */
+			/* --- Tools ↔ pointer interaction (independent of pause) --- */
 			function updateInteractionMode() {
 				var toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
-				if (!laserActive) {
-					ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
-					tail.length = 0;
-				}
+				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
+					tail.length = 0; }
 			}
 
 			/* ===== Camera ===== */
@@ -732,17 +699,20 @@
 					stream = await navigator.mediaDevices.getUserMedia(constraints);
 					video.srcObject = stream;
 					await video.play();
+					lastGoodConstraint = constraint;
 				} catch (e1) {
 					try {
 						var fb1 = { facingMode: facingPref };
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb1) });
 						video.srcObject = stream;
 						await video.play();
+						lastGoodConstraint = fb1;
 					} catch (e2) {
 						var fb2 = {};
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb2) });
 						video.srcObject = stream;
 						await video.play();
+						lastGoodConstraint = fb2;
 					}
 				} finally {
 					await enumerate();
@@ -772,17 +742,13 @@
 				cameraSelect.disabled = cameraSelect.options.length <= 1;
 			}
 
-			function debounced(fn, ms) {
-				var t;
-				ms = ms || 250;
-				return function() {
-					var a = arguments;
+			function debounced(fn, ms) { var t;
+				ms = ms || 250; return function() { var a = arguments;
 					clearTimeout(t);
-					t = setTimeout(function() { fn.apply(null, a); }, ms);
-				};
-			}
+					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
 			var onCameraChange = debounced(async function() {
 				var val = cameraSelect.value || '';
+				saveStr('lastDeviceId', val);
 				if (val.indexOf('facing:') === 0) {
 					var facing = val.split(':')[1] || facingPref;
 					facingPref = facing;
@@ -791,10 +757,8 @@
 				} else {
 					await startCamera({ deviceId: { exact: val } });
 					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
-					if (opt && opt.dataset && opt.dataset.facing) {
-						facingPref = opt.dataset.facing;
-						saveStr('lastFacing', facingPref);
-					}
+					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
+						saveStr('lastFacing', facingPref); }
 				}
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
@@ -830,11 +794,9 @@
 						ctxDraw.lineWidth = Math.max(2, obj.fontPx * 0.12);
 						ctxDraw.strokeStyle = 'rgba(0,0,0,0.55)';
 						var lines = obj.text.split(/\r?\n/);
-						lines.forEach(function(ln, li) {
-							var yy = obj.y + li * obj.lh;
+						lines.forEach(function(ln, li) { var yy = obj.y + li * obj.lh;
 							ctxDraw.strokeText(ln, obj.x, yy);
-							ctxDraw.fillText(ln, obj.x, yy);
-						});
+							ctxDraw.fillText(ln, obj.x, yy); });
 						ctxDraw.restore();
 					}
 				}
@@ -873,15 +835,13 @@
 						if (px >= obj.x && px <= obj.x + obj.width && py >= obj.y && py <= obj.y + obj.height) return i;
 					} else if (obj.type === 'stroke') {
 						var pts = obj.points;
-						for (var j = 1; j < pts.length; j++) {
-							if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i;
-						}
+						for (var j = 1; j < pts.length; j++) { if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i; }
 					}
 				}
 				return -1;
 			}
 
-			/* ===== Interaction ===== */
+			/* ===== Interaction (works Live or Paused) ===== */
 			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
 
 			function normPressure(p) { var v = isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
@@ -907,10 +867,8 @@
 				if (eraserOn) {
 					var tol = Math.max(8, annotSize * 1.1);
 					var idx = hitTestObject(x, y, tol);
-					if (idx >= 0) {
-						objects.splice(idx, 1);
-						renderAnnotations();
-					}
+					if (idx >= 0) { objects.splice(idx, 1);
+						renderAnnotations(); }
 					return;
 				}
 				if (annotationOn && !textModeOn) {
@@ -929,14 +887,13 @@
 					var ptL = canvasToCtxXY(p.x, p.y, laserCanvas);
 					addTailPoint(ptL.x, ptL.y);
 				}
+
 				if (eraserOn && p.id === pointerIdActive) {
 					var ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
 					var tol = Math.max(8, annotSize * 1.1);
 					var idx = hitTestObject(ptE.x, ptE.y, tol);
-					if (idx >= 0) {
-						objects.splice(idx, 1);
-						renderAnnotations();
-					}
+					if (idx >= 0) { objects.splice(idx, 1);
+						renderAnnotations(); }
 					return;
 				}
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
@@ -947,10 +904,8 @@
 				}
 			}
 
-			function endDraw() {
-				pointerIdActive = null;
-				currentStroke = null;
-			}
+			function endDraw() { pointerIdActive = null;
+				currentStroke = null; }
 
 			/* Laser trail */
 			function addTailPoint(x, y) { tail.push({ x: x, y: y, life: 1 }); if (tail.length > 220) tail.shift(); }
@@ -1028,14 +983,80 @@
 				renderAnnotations();
 			}
 
-			/* === Size pickers === */
+			/* ===== UI wiring ===== */
+			liveToggle.addEventListener('change', function() { setPaused(!liveToggle.checked); });
+
+			annotationBtn.addEventListener('click', function() {
+				annotationOn = !annotationOn;
+				eraserOn = false;
+				textModeOn = false;
+				hideTextOverlay();
+				annotationBtn.classList.toggle('active', annotationOn);
+				annotationBtn.classList.toggle('primary', annotationOn);
+				annotationBtn.classList.toggle('muted', !annotationOn);
+				eraserBtn.classList.remove('active', 'primary');
+				eraserBtn.classList.add('muted');
+				textBtn.classList.remove('active', 'primary');
+				textBtn.classList.add('muted');
+				updateInteractionMode();
+			});
+			eraserBtn.addEventListener('click', function() {
+				eraserOn = !eraserOn;
+				annotationOn = eraserOn ? true : annotationOn;
+				textModeOn = false;
+				hideTextOverlay();
+				eraserBtn.classList.toggle('active', eraserOn);
+				eraserBtn.classList.toggle('primary', eraserOn);
+				eraserBtn.classList.toggle('muted', !eraserOn);
+				annotationBtn.classList.toggle('active', annotationOn);
+				annotationBtn.classList.toggle('primary', annotationOn);
+				annotationBtn.classList.toggle('muted', !annotationOn);
+				textBtn.classList.remove('active', 'primary');
+				textBtn.classList.add('muted');
+				updateInteractionMode();
+			});
+			textBtn.addEventListener('click', function() {
+				annotationOn = true;
+				eraserOn = false;
+				textModeOn = !textModeOn;
+				hideTextOverlay(textModeOn);
+				annotationBtn.classList.add('active', 'primary');
+				annotationBtn.classList.remove('muted');
+				eraserBtn.classList.remove('active', 'primary');
+				eraserBtn.classList.add('muted');
+				textBtn.classList.toggle('active', textModeOn);
+				textBtn.classList.toggle('primary', textModeOn);
+				textBtn.classList.toggle('muted', !textModeOn);
+				if (textModeOn) showToast('Tap where you want the text.');
+				updateInteractionMode();
+			});
+			clearBtn.addEventListener('click', function() { objects.length = 0;
+				renderAnnotations(); });
+
+			/* Color input handlers (labels open pickers natively via for=) */
+			function refreshPickerColors() {
+				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
+				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
+			}
+			pointerColorInput.addEventListener('input', function(e) {
+				pointerColor = e.target.value;
+				paintLabelBtn(pointerLabelBtn, pointerColor);
+				refreshPickerColors();
+			});
+			annotColorInput.addEventListener('input', function(e) {
+				annotColor = e.target.value;
+				paintLabelBtn(annotLabelBtn, annotColor);
+				refreshPickerColors();
+			});
+
+			/* === Size pickers (true brush sizes) === */
 			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
 				container.innerHTML = '';
 				sizes.forEach(function(sz) {
 					var btn = document.createElement('button');
 					btn.type = 'button';
 					btn.className = 'dotBtn';
-					btn.style.setProperty('--dot', sz + 'px');
+					btn.style.setProperty('--dot', sz + 'px'); // actual brush size
 					btn.style.setProperty('--dot-color', getColor());
 					if (currentSize === sz) btn.classList.add('active');
 					var dot = document.createElement('span');
@@ -1052,11 +1073,9 @@
 
 			/* Mirror / Fit */
 			function applyVideoAndMaybeFreeze() { applyVideoStyle(); if (isPaused && hasFrozen) drawFreezeFromFrozen(); }
-			mirrorBtn.addEventListener('click', function() {
-				isMirrored = !isMirrored;
+			mirrorBtn.addEventListener('click', function() { isMirrored = !isMirrored;
 				applyVideoAndMaybeFreeze();
-				showToast(isMirrored ? 'Mirrored' : 'Unmirrored');
-			});
+				showToast(isMirrored ? 'Mirrored' : 'Unmirrored'); });
 			fitBtn.addEventListener('click', function() {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
 				fitBtn.textContent = (fitMode === 'cover') ? 'Fill' : 'Fit';
@@ -1065,50 +1084,11 @@
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
 
-			/* ===== Fullscreen for ENTIRE APP ===== */
-			function isFullscreen() {
-				return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-			}
-
-			function enterFullscreen(el) {
-				// Main change: request fullscreen on the whole document
-				el = el || document.documentElement;
-				if (el.requestFullscreen) return el.requestFullscreen();
-				if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari/iPad
-				if (el.msRequestFullscreen) return el.msRequestFullscreen();
-			}
-
-			function exitFullscreen() {
-				if (document.exitFullscreen) return document.exitFullscreen();
-				if (document.webkitExitFullscreen) return document.webkitExitFullscreen(); // Safari/iPad
-				if (document.msExitFullscreen) return document.msExitFullscreen();
-			}
-
-			function syncFsButton() {
-				var on = !!isFullscreen();
-				fsBtn.textContent = on ? 'Exit' : 'Full';
-				fsBtn.classList.toggle('primary', on);
-				// Resize canvases when the viewport changes due to fullscreen
-				setTimeout(resizeCanvases, 50);
-			}
-			fsBtn.addEventListener('click', function() {
-				if (!isFullscreen()) {
-					// Request fullscreen for the entire app (html root).
-					enterFullscreen(document.documentElement);
-				} else {
-					exitFullscreen();
-				}
-			});
-			document.addEventListener('fullscreenchange', syncFsButton);
-			document.addEventListener('webkitfullscreenchange', syncFsButton);
-
 			/* Stage events */
 			var target = stage;
 
-			function touchGuard(e) {
-				if (overlayVisible && e.target.closest('#textOverlay')) return;
-				e.preventDefault();
-			}
+			function touchGuard(e) { if (overlayVisible && e.target.closest('#textOverlay')) return;
+				e.preventDefault(); }
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function(ev) { target.addEventListener(ev, touchGuard, { passive: false }); });
 			target.addEventListener('pointerdown', function(e) {
 				if (annotationOn && textModeOn && !overlayVisible) {
@@ -1126,21 +1106,14 @@
 			target.addEventListener('pointerleave', endDraw);
 
 			/* Text overlay actions */
-			textAdd.addEventListener('click', function() {
-				if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-				hideTextOverlay();
-			});
+			textAdd.addEventListener('click', function() { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+				hideTextOverlay(); });
 			textCancel.addEventListener('click', function() { hideTextOverlay(); });
 			textInput.addEventListener('keydown', function(e) {
-				if (e.key === 'Escape') {
-					e.preventDefault();
-					hideTextOverlay();
-				}
-				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-					e.preventDefault();
-					if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-					hideTextOverlay();
-				}
+				if (e.key === 'Escape') { e.preventDefault();
+					hideTextOverlay(); }
+				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+					hideTextOverlay(); }
 			});
 
 			/* Snapshot */
@@ -1153,42 +1126,24 @@
 				out.height = h;
 				var octx = out.getContext('2d');
 
-				if (isPaused && hasFrozen) {
-					octx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
-				} else {
+				if (isPaused && hasFrozen) { octx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h); } else {
 					var vw = video.videoWidth,
 						vh = video.videoHeight;
 					if (vw && vh) {
 						var cr = w / h,
 							vr = vw / vh;
 						var dw, dh, dx, dy;
-						if (fitMode === 'cover') {
-							if (vr > cr) {
-								dh = h;
-								dw = h * vr;
-							} else {
-								dw = w;
-								dh = w / vr;
-							}
-							dx = (w - dw) / 2;
-							dy = (h - dh) / 2;
-						} else {
-							if (vr > cr) {
-								dw = w;
-								dh = w / vr;
-							} else {
-								dh = h;
-								dw = h * vr;
-							}
-							dx = (w - dw) / 2;
-							dy = (h - dh) / 2;
-						}
+						if (fitMode === 'cover') { if (vr > cr) { dh = h;
+								dw = h * vr; } else { dw = w;
+								dh = w / vr; } dx = (w - dw) / 2;
+							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
+								dh = w / vr; } else { dh = h;
+								dw = h * vr; } dx = (w - dw) / 2;
+							dy = (h - dh) / 2; }
 						octx.save();
-						if (isMirrored) {
-							octx.translate(w, 0);
+						if (isMirrored) { octx.translate(w, 0);
 							octx.scale(-1, 1);
-							dx = w - dx - dw;
-						}
+							dx = w - dx - dw; }
 						octx.drawImage(video, dx, dy, dw, dh);
 						octx.restore();
 					}
@@ -1222,33 +1177,17 @@
 						var cr = w / h,
 							vr = vw / vh;
 						var dw, dh, dx, dy;
-						if (fitMode === 'cover') {
-							if (vr > cr) {
-								dh = h;
-								dw = h * vr;
-							} else {
-								dw = w;
-								dh = w / vr;
-							}
-							dx = (w - dw) / 2;
-							dy = (h - dh) / 2;
-						} else {
-							if (vr > cr) {
-								dw = w;
-								dh = w / vr;
-							} else {
-								dh = h;
-								dw = h * vr;
-							}
-							dx = (w - dw) / 2;
-							dy = (h - dh) / 2;
-						}
+						if (fitMode === 'cover') { if (vr > cr) { dh = h;
+								dw = h * vr; } else { dw = w;
+								dh = w / vr; } dx = (w - dw) / 2;
+							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
+								dh = w / vr; } else { dh = h;
+								dw = h * vr; } dx = (w - dw) / 2;
+							dy = (h - dh) / 2; }
 						compositeCtx.save();
-						if (isMirrored) {
-							compositeCtx.translate(w, 0);
+						if (isMirrored) { compositeCtx.translate(w, 0);
 							compositeCtx.scale(-1, 1);
-							dx = w - dx - dw;
-						}
+							dx = w - dx - dw; }
 						compositeCtx.drawImage(video, dx, dy, dw, dh);
 						compositeCtx.restore();
 					}
@@ -1269,7 +1208,7 @@
 					composite.height = freezeCanvas.height;
 					var mime = getSupportedMime();
 					var s = composite.captureStream(30);
-					try { mediaRecorder = new MediaRecorder(s, mime ? { mimeType: mime } : {}); } catch (e) { showToast('Recording not supported'); return; }
+					try { mediaRecorder = new MediaRecorder(s, mime ? { mimeType: mime } : {}) } catch (e) { showToast('Recording not supported'); return; }
 					recChunks = [];
 					mediaRecorder.ondataavailable = function(e) { if (e.data && e.data.size > 0) recChunks.push(e.data); };
 					mediaRecorder.onstop = function() {
@@ -1309,27 +1248,20 @@
 				await startCamera({ facingMode: facingPref });
 				await enumerate();
 
+				// Start Live; toggle mirrors this
 				isPaused = false;
 				updateStatusUI();
 
-				buildSizePicker(sizeUI.pointer, [6, 12, 20], function() { return pointerColor; }, pointerSize, function(sz) {
-					pointerSize = sz;
-					saveNum('pointerSize', sz);
-				});
-				buildSizePicker(sizeUI.annot, [6, 12, 20], function() { return annotColor; }, annotSize, function(sz) {
-					annotSize = sz;
-					saveNum('annotSize', sz);
-				});
+				// Build size pickers & colors
+				buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
+					saveNum('pointerSize', sz); });
+				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
+					saveNum('annotSize', sz); });
+				refreshPickerColors();
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
 
 				resizeCanvases();
-				// Ensure the FS button text matches initial state
-				(function() {
-					var on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
-					fsBtn.textContent = on ? 'Exit' : 'Full';
-					fsBtn.classList.toggle('primary', on);
-				})();
 			})();
 		})();
 	</script>
