@@ -30,9 +30,7 @@
 		body {
 			margin: 0;
 			min-height: 100svh;
-			/* fixes iPad address bar shrink/expand */
 			padding-bottom: env(safe-area-inset-bottom);
-			/* remove “white bar” on iPad */
 			background: linear-gradient(180deg, #0d0f14, #0f1117 60%, #0b0d12);
 			color: var(--text);
 			font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
@@ -40,37 +38,19 @@
 			flex-direction: column
 		}
 
-		/* ===== PanPhy banner ===== */
 		.topbar {
 			background: #2a2f3b;
 			color: #fff;
-			position: relative;
 			text-align: center;
 			padding: 10px 20px;
 			border-bottom: 1px solid #000
 		}
 
-		.topbar .logo {
-			position: absolute;
-			left: 16px;
-			top: 50%;
-			transform: translateY(-50%);
-			display: flex;
-			align-items: center;
-			gap: 6px
-		}
-
-		.topbar .logo img {
-			height: 28px
-		}
-
 		.topbar .title {
 			font-size: 20px;
-			font-weight: 700;
-			letter-spacing: .2px
+			font-weight: 700
 		}
 
-		/* ===== Toolbar (2 clean rows) ===== */
 		header {
 			padding: .6rem .9rem .5rem;
 			display: grid;
@@ -111,9 +91,8 @@
 		}
 
 		select,
-		input[type=color],
-		input[type=range],
-		button {
+		button,
+		input[type=color] {
 			background: #0e121a;
 			color: var(--text);
 			border: 1px solid var(--ring);
@@ -123,18 +102,9 @@
 			outline: none
 		}
 
-		select {
-			max-width: 40vw
-		}
-
-		label {
-			font-size: .9rem;
-			color: var(--muted)
-		}
-
 		button {
 			cursor: pointer;
-			transition: transform .06s ease, background .2s ease, border-color .2s ease
+			transition: transform .06s ease
 		}
 
 		button:hover {
@@ -161,7 +131,7 @@
 
 		.muted {
 			background: #0e121a;
-			color: var(--muted)
+			color: #adb3c4
 		}
 
 		.active {
@@ -173,7 +143,10 @@
 			text-align: center
 		}
 
-		/* Live/Paused light */
+		.hidden {
+			display: none !important
+		}
+
 		.status {
 			display: flex;
 			align-items: center;
@@ -185,8 +158,7 @@
 			width: 14px;
 			height: 14px;
 			border-radius: 50%;
-			border: 2px solid rgba(255, 255, 255, .15);
-			box-shadow: 0 0 10px rgba(0, 0, 0, .3) inset, 0 0 8px rgba(0, 0, 0, .15)
+			border: 2px solid rgba(255, 255, 255, .15)
 		}
 
 		.live {
@@ -251,13 +223,12 @@
 			margin: 0 .25rem
 		}
 
-		/* ===== Stage ===== */
+		/* Stage */
 		#stage {
 			position: relative;
 			flex: 1;
 			min-height: 45vh;
 			margin: .5rem .9rem calc(.5rem + env(safe-area-inset-bottom));
-			/* bottom accounts for iPad safe-area */
 			border: 1px solid var(--ring);
 			border-radius: 12px;
 			overflow: hidden;
@@ -279,7 +250,6 @@
 			background: #000
 		}
 
-		/* HUD */
 		#hud {
 			position: absolute;
 			right: .6rem;
@@ -313,8 +283,7 @@
 			background: rgba(20, 22, 28, .2);
 			border: 1px dashed rgba(255, 255, 255, .5);
 			border-radius: .6rem;
-			padding: .5rem;
-			box-shadow: 0 6px 18px rgba(0, 0, 0, .15)
+			padding: .5rem
 		}
 
 		#textOverlay textarea {
@@ -337,6 +306,41 @@
 			margin-top: .5rem
 		}
 
+		/* Size pickers */
+		.sizePicker {
+			display: flex;
+			align-items: center;
+			gap: .35rem
+		}
+
+		.dotBtn {
+			--dot: 12px;
+			--dot-color: #fff;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 34px;
+			height: 28px;
+			border: 1px solid var(--ring);
+			border-radius: .45rem;
+			background: #0e121a;
+			cursor: pointer
+		}
+
+		.dotBtn .dot {
+			display: block;
+			width: var(--dot);
+			height: var(--dot);
+			aspect-ratio: 1/1;
+			/* perfect circle */
+			border-radius: 50%;
+			background: var(--dot-color);
+		}
+
+		.dotBtn.active {
+			outline: 2px solid #9acbff
+		}
+
 		/* Toast */
 		#toast {
 			position: fixed;
@@ -357,81 +361,55 @@
 		#toast.show {
 			opacity: 1
 		}
-
-		@media (min-width:900px) {
-			header {
-				grid-template-columns: 1fr
-			}
-
-			.row:first-child .group {
-				flex-wrap: nowrap
-			}
-		}
 	</style>
 </head>
 
 <body>
-	<!-- Banner -->
 	<div class="topbar">
-		<div class="logo">
-			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer" title="PanPhy">
-				<img src="/panphy.png" alt="PanPhy logo">
-			</a>
-		</div>
 		<div class="title">Camera Visualizer</div>
 	</div>
 
 	<!-- Toolbar -->
 	<header>
-		<!-- Row 1: setup & status -->
+		<!-- Row 1 -->
 		<div class="row">
 			<div class="group">
 				<h4>Camera</h4>
-				<select id="cameraSelect" title="Choose camera"></select>
-				<button id="refreshBtn" title="Refresh device list">Refresh</button>
+				<select id="cameraSelect"></select>
+				<button id="refreshBtn">Refresh</button>
 			</div>
-
 			<div class="group">
 				<h4>Stream</h4>
-				<label class="switch" title="Toggle Live / Paused">
+				<label class="switch">
 					<input id="liveToggle" type="checkbox" checked />
 					<span class="slider"></span>
 				</label>
 				<span class="vsep"></span>
-				<div class="status" aria-live="polite" aria-atomic="true">
-					<span id="statusLight" class="light live"></span>
-					<span id="statusLabel" class="statusText">Live</span>
-				</div>
+				<div class="status"><span id="statusLight" class="light live"></span><span id="statusLabel" class="statusText">Live</span></div>
 			</div>
-
 			<div class="spacer"></div>
-
 			<div class="group">
-				<button id="screenshotBtn" title="Save snapshot with annotations">Snapshot</button>
-				<button id="recordBtn" title="Record/Stop recording the view">Record</button>
-				<button id="mirrorBtn" title="Toggle mirror">Mirror</button>
-				<button id="fitBtn" class="fixed-width-btn" title="Fit or Fill">Fill</button>
+				<button id="screenshotBtn">Snapshot</button>
+				<button id="recordBtn">Record</button>
+				<button id="mirrorBtn">Mirror</button>
+				<button id="fitBtn" class="fixed-width-btn">Fill</button>
 			</div>
 		</div>
-
-		<!-- Row 2: interact -->
+		<!-- Row 2 -->
 		<div class="row">
 			<div class="group">
 				<h4>Pointer</h4>
 				<input id="pointerColor" type="color" value="#ff3b3b" title="Pointer color" />
-				<label for="pointerSize">Size</label>
-				<input id="pointerSize" type="range" min="2" max="30" step="1" value="10" title="Pointer size" />
+				<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
 			</div>
-
 			<div class="group" id="annotGroup">
 				<h4>Annotate</h4>
 				<input id="annotColor" type="color" value="#33d17a" title="Annotation color" />
-				<label for="annotSize">Size</label>
-				<input id="annotSize" type="range" min="2" max="30" step="1" value="8" title="Annotation size" />
-				<button id="annotationBtn" class="muted" title="Freehand drawing">Annotation</button>
-				<button id="eraserBtn" class="muted" title="Object eraser">Eraser</button>
-				<button id="textBtn" class="muted" title="Typed text">Text</button>
-				<button id="clearBtn" class="danger" title="Clear annotations">Clear</button>
+				<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
+				<button id="annotationBtn" class="muted">Annotation</button>
+				<button id="eraserBtn" class="muted">Eraser</button>
+				<button id="textBtn" class="muted">Text</button>
+				<button id="clearBtn" class="danger">Clear</button>
 			</div>
 		</div>
 	</header>
@@ -439,19 +417,15 @@
 	<!-- Stage -->
 	<main id="stage">
 		<video id="video" playsinline autoplay muted></video>
-		<canvas id="freezeCanvas"></canvas>
+		<canvas id="freezeCanvas" class="hidden"></canvas>
 		<canvas id="drawCanvas"></canvas>
 		<canvas id="laserCanvas"></canvas>
-
 		<div id="hud"><span id="statusDot"></span><span id="hudText">Live</span></div>
 
 		<!-- Text overlay -->
 		<div id="textOverlay">
 			<textarea id="textInput" placeholder="Type your note..."></textarea>
-			<div id="textActions">
-				<button id="textCancel">Cancel</button>
-				<button id="textAdd" class="primary">Add</button>
-			</div>
+			<div id="textActions"><button id="textCancel">Cancel</button><button id="textAdd" class="primary">Add</button></div>
 		</div>
 	</main>
 
@@ -460,141 +434,134 @@
 	<script>
 		(() => {
 			/* ===== DOM refs ===== */
-			const video = document.getElementById('video');
-			const freezeCanvas = document.getElementById('freezeCanvas');
-			const drawCanvas = document.getElementById('drawCanvas');
-			const laserCanvas = document.getElementById('laserCanvas');
-			const ctxFreeze = freezeCanvas.getContext('2d');
-			const ctxDraw = drawCanvas.getContext('2d');
-			const ctxLaser = laserCanvas.getContext('2d');
+			var video = document.getElementById('video');
+			var freezeCanvas = document.getElementById('freezeCanvas');
+			var drawCanvas = document.getElementById('drawCanvas');
+			var laserCanvas = document.getElementById('laserCanvas');
+			var ctxFreeze = freezeCanvas.getContext('2d');
+			var ctxDraw = drawCanvas.getContext('2d');
+			var ctxLaser = laserCanvas.getContext('2d');
 
-			const cameraSelect = document.getElementById('cameraSelect');
-			const refreshBtn = document.getElementById('refreshBtn');
-			const liveToggle = document.getElementById('liveToggle');
+			var cameraSelect = document.getElementById('cameraSelect');
+			var refreshBtn = document.getElementById('refreshBtn');
+			var liveToggle = document.getElementById('liveToggle');
 
-			const annotationBtn = document.getElementById('annotationBtn');
-			const eraserBtn = document.getElementById('eraserBtn');
-			const textBtn = document.getElementById('textBtn');
+			var annotationBtn = document.getElementById('annotationBtn');
+			var eraserBtn = document.getElementById('eraserBtn');
+			var textBtn = document.getElementById('textBtn');
 
-			const statusLight = document.getElementById('statusLight');
-			const statusLabel = document.getElementById('statusLabel');
+			var statusLight = document.getElementById('statusLight');
+			var statusLabel = document.getElementById('statusLabel');
 
-			const clearBtn = document.getElementById('clearBtn');
-			const pointerColorEl = document.getElementById('pointerColor');
-			const pointerSizeEl = document.getElementById('pointerSize');
-			const annotColorEl = document.getElementById('annotColor');
-			const annotSizeEl = document.getElementById('annotSize');
-			const screenshotBtn = document.getElementById('screenshotBtn');
-			const recordBtn = document.getElementById('recordBtn');
-			const mirrorBtn = document.getElementById('mirrorBtn');
-			const fitBtn = document.getElementById('fitBtn');
-			const hudText = document.getElementById('hudText');
-			const stage = document.getElementById('stage');
-			const toast = document.getElementById('toast');
+			var clearBtn = document.getElementById('clearBtn');
+			var pointerColorEl = document.getElementById('pointerColor');
+			var annotColorEl = document.getElementById('annotColor');
+			var screenshotBtn = document.getElementById('screenshotBtn');
+			var recordBtn = document.getElementById('recordBtn');
+			var mirrorBtn = document.getElementById('mirrorBtn');
+			var fitBtn = document.getElementById('fitBtn');
+			var hudText = document.getElementById('hudText');
+			var stage = document.getElementById('stage');
+			var toast = document.getElementById('toast');
 
-			const textOverlay = document.getElementById('textOverlay');
-			const textInput = document.getElementById('textInput');
-			const textAdd = document.getElementById('textAdd');
-			const textCancel = document.getElementById('textCancel');
+			var sizeUI = {
+				pointer: document.getElementById('pointerSizes'),
+				annot: document.getElementById('annotSizes')
+			};
 
-			/* ===== Persistence helpers ===== */
-			function saveStr(k, v) { try { localStorage.setItem(k, v == null ? '' : String(v)); } catch {} }
+			var textOverlay = document.getElementById('textOverlay');
+			var textInput = document.getElementById('textInput');
+			var textAdd = document.getElementById('textAdd');
+			var textCancel = document.getElementById('textCancel');
 
-			function loadStr(k, f) { try { const v = localStorage.getItem(k); return v === null ? f : v; } catch { return f; } }
+			/* ===== Persistence ===== */
+			function saveStr(k, v) { try { localStorage.setItem(k, v == null ? '' : String(v)); } catch (e) {} }
 
-			function saveNum(k, v) { try { localStorage.setItem(k, String(v)); } catch {} }
+			function loadStr(k, f) { try { var v = localStorage.getItem(k); return v === null ? f : v; } catch (e) { return f; } }
 
-			function loadNum(k, f) { try { const v = localStorage.getItem(k); const n = v !== null ? Number(v) : NaN; return Number.isFinite(n) ? n : f; } catch { return f; } }
+			function saveNum(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
+
+			function loadNum(k, f) { try { var v = localStorage.getItem(k); var n = v !== null ? Number(v) : NaN; return isFinite(n) ? n : f; } catch (e) { return f; } }
 
 			/* ===== State ===== */
-			let pointerColor = pointerColorEl.value;
-			let pointerSize = loadNum('pointerSize', parseInt(pointerSizeEl.value, 10));
-			pointerSizeEl.value = pointerSize;
-			let annotColor = annotColorEl.value;
-			let annotSize = loadNum('annotSize', parseInt(annotSizeEl.value, 10));
-			annotSizeEl.value = annotSize;
+			var pointerColor = pointerColorEl.value;
+			var annotColor = annotColorEl.value;
+			var SIZESET = [6, 12, 20]; // thin, medium, thick
+			var pointerSize = loadNum('pointerSize', 12);
+			var annotSize = loadNum('annotSize', 12);
 
-			let isPaused = false,
-				isMirrored = false,
+			var isPaused = false; // pause state (user controlled)
+			var isMirrored = false,
 				fitMode = 'contain';
-			let annotationOn = false,
+
+			var annotationOn = false,
 				eraserOn = false,
 				textModeOn = false,
 				overlayVisible = false;
 
-			let devicesCache = [],
-				currentDeviceId = loadStr('lastDeviceId', null);
-			let facingPref = loadStr('lastFacing', 'environment');
-			let stream = null,
+			var currentDeviceId = loadStr('lastDeviceId', null);
+			var facingPref = loadStr('lastFacing', 'environment');
+			var stream = null,
 				lastGoodConstraint = null,
 				switching = false;
 
-			const tail = [];
-			let laserActive = true;
+			var tail = [];
+			var laserActive = true;
 
-			const frozen = document.createElement('canvas');
-			const frozenCtx = frozen.getContext('2d');
-			let hasFrozen = false;
+			var frozen = document.createElement('canvas');
+			var frozenCtx = frozen.getContext('2d');
+			var hasFrozen = false;
 
-			const objects = [];
-			let currentStroke = null;
+			var objects = [];
+			var currentStroke = null;
 
-			const composite = document.createElement('canvas');
-			const compositeCtx = composite.getContext('2d');
-			let recording = false,
+			var composite = document.createElement('canvas');
+			var compositeCtx = composite.getContext('2d');
+			var recording = false,
 				mediaRecorder = null,
 				recChunks = [];
 
-			/* ===== Utilities ===== */
-			function showToast(msg, ms = 1600) { toast.textContent = msg;
+			/* ===== Utils ===== */
+			function showToast(msg, ms) { ms = ms || 1600;
+				toast.textContent = msg;
 				toast.classList.add('show');
-				setTimeout(() => toast.classList.remove('show'), ms); }
-
-			function humanizeError(e) { if (!e) return 'Unknown error'; if (e.name) return e.name + (e.message ? `: ${e.message}` : ''); try { return JSON.stringify(e) } catch { return String(e) } }
-
-			function logError(p, e) { console.warn(p + ': ' + humanizeError(e)); }
-
-			function stopStream() { if (stream) { try { stream.getTracks().forEach(t => t.stop()); } catch {} stream = null; } }
+				setTimeout(function() { toast.classList.remove('show'); }, ms); }
 
 			function applyVideoStyle() { video.style.objectFit = (fitMode === 'cover') ? 'cover' : 'contain';
 				video.style.transform = isMirrored ? 'scaleX(-1)' : 'none'; }
 
 			function resizeCanvases() {
-				const r = stage.getBoundingClientRect();
-				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(c => { c.width = Math.floor(r.width);
+				var r = stage.getBoundingClientRect();
+				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(function(c) { c.width = Math.floor(r.width);
 					c.height = Math.floor(r.height); });
 				applyVideoStyle();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				renderAnnotations();
 			}
 
+			/* --- UI sync --- */
+			function syncToggleUI() { liveToggle.checked = !isPaused; }
+
 			function updateStatusUI() {
 				stage.classList.toggle('pausedVideo', isPaused);
 				hudText.textContent = isPaused ? 'Paused' : 'Live';
 				statusLabel.textContent = isPaused ? 'Paused' : 'Live';
-				statusLight.classList.toggle('paused', isPaused);
-				statusLight.classList.toggle('live', !isPaused);
-				fitBtn.disabled = isPaused; // Fit/Fill only in Live
+				statusLight.className = 'light ' + (isPaused ? 'paused' : 'live');
+				syncToggleUI();
 			}
 
-			function updateInteractionMode() {
-				const any = annotationOn || eraserOn || textModeOn;
-				laserActive = !any;
-				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
-					tail.length = 0; }
-			}
-
+			/* --- Pause / freeze --- */
 			function captureFrozenFromVideo() {
-				const w = freezeCanvas.width,
+				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
 				if (!video.videoWidth || w === 0 || h === 0) return;
 				frozen.width = w;
 				frozen.height = h;
-				const vw = video.videoWidth,
+				var vw = video.videoWidth,
 					vh = video.videoHeight;
-				const cr = w / h,
+				var cr = w / h,
 					vr = vw / vh;
-				let dw, dh, dx, dy;
+				var dw, dh, dx, dy;
 				if (fitMode === 'cover') { if (vr > cr) { dh = h;
 						dw = h * vr; } else { dw = w;
 						dh = w / vr; } dx = (w - dw) / 2;
@@ -614,160 +581,117 @@
 
 			function drawFreezeFromFrozen() {
 				if (!hasFrozen) return;
-				const w = freezeCanvas.width,
+				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
-				ctxFreeze.clearRect(0, 0, w, h);
-				ctxFreeze.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
+				var ctx = ctxFreeze;
+				ctx.clearRect(0, 0, w, h);
+				ctx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
 				freezeCanvas.classList.remove('hidden');
 			}
 
 			function setPaused(state) {
-				const prev = isPaused;
+				if (state === isPaused) return;
 				isPaused = state;
-				if (liveToggle.checked === isPaused) liveToggle.checked = !isPaused; // checked means Live
+				if (isPaused) { captureFrozenFromVideo();
+					drawFreezeFromFrozen(); } else { hasFrozen = false;
+					freezeCanvas.classList.add('hidden'); }
 				updateStatusUI();
-				if (isPaused) {
-					if (!prev) captureFrozenFromVideo();
-					drawFreezeFromFrozen();
-				} else {
-					hasFrozen = false;
-					hideTextOverlay(); // exit text overlay
-					freezeCanvas.classList.add('hidden');
-				}
 			}
 
-			/* ===== Camera start with fallbacks ===== */
+			/* --- Tools ↔ pointer interaction (independent of pause) --- */
+			function updateInteractionMode() {
+				var toolActive = annotationOn || eraserOn || textModeOn;
+				laserActive = !toolActive;
+				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
+					tail.length = 0; }
+			}
+
+			/* ===== Camera ===== */
 			async function startCamera(constraint) {
 				if (switching) return;
 				switching = true;
-				const prevStream = stream,
-					prevConstraint = lastGoodConstraint;
 				try {
-					stopStream();
-					const constraints = { audio: false, video: { ...constraint, width: { ideal: 1280 }, height: { ideal: 720 } } };
+					if (stream) { stream.getTracks().forEach(function(t) { t.stop(); }); }
+					var constraints = { audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, constraint || {}) };
 					stream = await navigator.mediaDevices.getUserMedia(constraints);
 					video.srcObject = stream;
 					await video.play();
 					lastGoodConstraint = constraint;
-					await enumerate();
-					resizeCanvases();
-					switching = false;
-					return true;
 				} catch (e1) {
-					logError('getUserMedia failed (primary)', e1);
 					try {
-						const facing = (constraint && constraint.deviceId) ? (cameraSelect.selectedOptions[0]?.dataset?.facing || facingPref || 'environment') : facingPref;
-						const fb1 = { facingMode: facing };
-						const c2 = { audio: false, video: { ...fb1, width: { ideal: 1280 }, height: { ideal: 720 } } };
-						stream = await navigator.mediaDevices.getUserMedia(c2);
+						var fb1 = { facingMode: facingPref };
+						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb1) });
 						video.srcObject = stream;
 						await video.play();
 						lastGoodConstraint = fb1;
-						await enumerate();
-						resizeCanvases();
-						switching = false;
-						return true;
 					} catch (e2) {
-						logError('getUserMedia failed (fallback facingMode)', e2);
-						try {
-							const fb2 = {};
-							const c3 = { audio: false, video: { ...fb2, width: { ideal: 1280 }, height: { ideal: 720 } } };
-							stream = await navigator.mediaDevices.getUserMedia(c3);
-							video.srcObject = stream;
-							await video.play();
-							lastGoodConstraint = fb2;
-							await enumerate();
-							resizeCanvases();
-							switching = false;
-							return true;
-						} catch (e3) {
-							logError('getUserMedia failed (generic)', e3);
-							switching = false;
-							if (prevStream) {
-								try { stream = prevStream;
-									video.srcObject = stream;
-									await video.play();
-									lastGoodConstraint = prevConstraint;
-									resizeCanvases();
-									showToast('Reverted to previous camera.'); return false; } catch {}
-							}
-							showToast('Camera start failed: ' + humanizeError(e3));
-							return false;
-						}
+						var fb2 = {};
+						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb2) });
+						video.srcObject = stream;
+						await video.play();
+						lastGoodConstraint = fb2;
 					}
+				} finally {
+					await enumerate();
+					resizeCanvases();
+					switching = false;
 				}
 			}
 			async function enumerate() {
-				const devs = await navigator.mediaDevices.enumerateDevices();
-				const cams = devs.filter(d => d.kind === 'videoinput');
-				const facingGuess = (label = '') => {
-					const L = (label || '').toLowerCase();
+				var devs = await navigator.mediaDevices.enumerateDevices();
+				var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
+
+				function facingGuess(label) {
+					var L = (label || '').toLowerCase();
 					if (/(back|rear|environment)/.test(L)) return 'environment';
 					if (/(front|user|face)/.test(L)) return 'user';
 					return 'environment';
-				};
-				devicesCache = cams.map((d, i) => ({ deviceId: d.deviceId || '', label: d.label || `Camera ${i+1}`, facingGuess: facingGuess(d.label || '') }));
+				}
 				cameraSelect.innerHTML = '';
-				devicesCache.forEach((cam, i) => {
-					const opt = document.createElement('option');
-					opt.value = cam.deviceId || `facing:${cam.facingGuess}:${i}`;
-					opt.textContent = cam.label;
-					opt.dataset.facing = cam.facingGuess;
+				cams.forEach(function(d, i) {
+					var opt = document.createElement('option');
+					var fg = facingGuess(d.label || '');
+					opt.value = d.deviceId || ('facing:' + fg + ':' + i);
+					opt.textContent = d.label || ('Camera ' + (i + 1));
+					opt.dataset.facing = fg;
 					cameraSelect.appendChild(opt);
 				});
-				let selected = null;
-				if (currentDeviceId) selected = [...cameraSelect.options].find(o => o.value === currentDeviceId);
-				if (!selected) selected = [...cameraSelect.options].find(o => (o.dataset.facing || '') === facingPref) || cameraSelect.options[0];
-				if (selected) cameraSelect.value = selected.value;
 				cameraSelect.disabled = cameraSelect.options.length <= 1;
 			}
-			async function listCameras() { try { await enumerate(); } catch (e) { logError('enumerateDevices', e);
-					showToast('Could not list cameras'); } }
 
-			function debounced(fn, ms = 250) { let t = null; return (...a) => { clearTimeout(t);
-					t = setTimeout(() => fn(...a), ms); }; }
-			const onCameraChange = debounced(async () => {
-				const val = cameraSelect.value || '';
-				currentDeviceId = val;
-				saveStr('lastDeviceId', currentDeviceId);
-				if (val.startsWith('facing:')) {
-					const facing = val.split(':')[1] || facingPref;
+			function debounced(fn, ms) { var t;
+				ms = ms || 250; return function() { var a = arguments;
+					clearTimeout(t);
+					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
+			var onCameraChange = debounced(async function() {
+				var val = cameraSelect.value || '';
+				saveStr('lastDeviceId', val);
+				if (val.indexOf('facing:') === 0) {
+					var facing = val.split(':')[1] || facingPref;
 					facingPref = facing;
-					saveStr('lastFacing', facingPref);
-					await startCamera({ facingMode: facingPref });
+					saveStr('lastFacing', facing);
+					await startCamera({ facingMode: facing });
 				} else {
 					await startCamera({ deviceId: { exact: val } });
-					const opt = [...cameraSelect.options].find(o => o.value === val);
-					if (opt?.dataset?.facing) { facingPref = opt.dataset.facing;
+					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
+					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
 						saveStr('lastFacing', facingPref); }
 				}
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
 			cameraSelect.addEventListener('change', onCameraChange);
 			cameraSelect.addEventListener('input', onCameraChange);
-			refreshBtn.addEventListener('click', listCameras);
-			navigator.mediaDevices?.addEventListener?.('devicechange', async () => {
-				await listCameras();
-				if (!stream || stream.getVideoTracks().every(t => t.readyState !== 'live')) {
-					await startCamera(lastGoodConstraint || { facingMode: facingPref });
-					if (isPaused && hasFrozen) drawFreezeFromFrozen();
-				}
-			});
-			document.addEventListener('visibilitychange', async () => {
-				if (document.visibilityState === 'visible' && (!video.srcObject || video.readyState < 2)) {
-					await startCamera(lastGoodConstraint || { facingMode: facingPref });
-					if (isPaused && hasFrozen) drawFreezeFromFrozen();
-				}
-			});
+			refreshBtn.addEventListener('click', function() { enumerate(); });
 
-			/* ===== Annotations (object-based) ===== */
+			/* ===== Annotations ===== */
 			function renderAnnotations() {
-				const w = drawCanvas.width,
+				var w = drawCanvas.width,
 					h = drawCanvas.height;
 				ctxDraw.clearRect(0, 0, w, h);
-				for (const obj of objects) {
+				for (var i = 0; i < objects.length; i++) {
+					var obj = objects[i];
 					if (obj.type === 'stroke') {
-						const pts = obj.points;
+						var pts = obj.points;
 						if (pts.length < 2) continue;
 						ctxDraw.save();
 						ctxDraw.strokeStyle = obj.color;
@@ -776,18 +700,18 @@
 						ctxDraw.lineJoin = 'round';
 						ctxDraw.beginPath();
 						ctxDraw.moveTo(pts[0].x, pts[0].y);
-						for (let i = 1; i < pts.length; i++) ctxDraw.lineTo(pts[i].x, pts[i].y);
+						for (var j = 1; j < pts.length; j++) ctxDraw.lineTo(pts[j].x, pts[j].y);
 						ctxDraw.stroke();
 						ctxDraw.restore();
 					} else if (obj.type === 'text') {
 						ctxDraw.save();
-						ctxDraw.font = `bold ${obj.fontPx}px system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif`;
+						ctxDraw.font = 'bold ' + obj.fontPx + 'px system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif';
 						ctxDraw.textBaseline = 'top';
 						ctxDraw.fillStyle = obj.color;
 						ctxDraw.lineWidth = Math.max(2, obj.fontPx * 0.12);
 						ctxDraw.strokeStyle = 'rgba(0,0,0,0.55)';
-						const lines = obj.text.split(/\r?\n/);
-						lines.forEach((ln, i) => { const yy = obj.y + i * obj.lh;
+						var lines = obj.text.split(/\r?\n/);
+						lines.forEach(function(ln, li) { var yy = obj.y + li * obj.lh;
 							ctxDraw.strokeText(ln, obj.x, yy);
 							ctxDraw.fillText(ln, obj.x, yy); });
 						ctxDraw.restore();
@@ -796,73 +720,74 @@
 			}
 
 			function measureTextBlock(text, fontPx) {
-				const lines = String(text).split(/\r?\n/);
+				var lines = String(text).split(/\r?\n/);
 				ctxDraw.save();
-				ctxDraw.font = `bold ${fontPx}px system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif`;
-				const widths = lines.map(ln => ctxDraw.measureText(ln).width);
+				ctxDraw.font = 'bold ' + fontPx + 'px system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif';
+				var widths = lines.map(function(ln) { return ctxDraw.measureText(ln).width; });
 				ctxDraw.restore();
-				const lh = Math.round(fontPx * 1.25);
-				return { width: Math.max(1, ...widths, 1), height: lines.length * lh, lh };
+				var lh = Math.round(fontPx * 1.25);
+				return { width: Math.max.apply(Math, [1].concat(widths, [1])), height: lines.length * lh, lh: lh };
 			}
 
 			function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
-				const A = px - x1,
+				var A = px - x1,
 					B = py - y1,
 					C = x2 - x1,
 					D = y2 - y1;
-				const dot = A * C + B * D;
-				const lenSq = C * C + D * D || 1e-6;
-				let t = dot / lenSq;
+				var dot = A * C + B * D;
+				var lenSq = C * C + D * D || 1e-6;
+				var t = dot / lenSq;
 				t = Math.max(0, Math.min(1, t));
-				const xx = x1 + t * C,
+				var xx = x1 + t * C,
 					yy = y1 + t * D;
 				return Math.hypot(px - xx, py - yy);
 			}
 
 			function hitTestObject(px, py, tol) {
-				for (let i = objects.length - 1; i >= 0; i--) {
-					const obj = objects[i];
+				for (var i = objects.length - 1; i >= 0; i--) {
+					var obj = objects[i];
 					if (obj.type === 'text') {
 						if (px >= obj.x && px <= obj.x + obj.width && py >= obj.y && py <= obj.y + obj.height) return i;
 					} else if (obj.type === 'stroke') {
-						const pts = obj.points;
-						for (let j = 1; j < pts.length; j++) { if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i; }
+						var pts = obj.points;
+						for (var j = 1; j < pts.length; j++) { if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i; }
 					}
 				}
 				return -1;
 			}
 
-			/* ===== Interaction & drawing ===== */
-			function canvasToCtxXY(clientX, clientY, canvas) { const r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
+			/* ===== Interaction (works Live or Paused) ===== */
+			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
 
-			function normPressure(p) { const v = Number.isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
+			function normPressure(p) { var v = isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
 
 			function getPrimaryPoint(e) {
-				if (e instanceof PointerEvent) return { x: e.clientX, y: e.clientY, id: e.pointerId, pressure: e.pressure };
-				if (e.touches && e.touches[0]) { const t = e.touches[0]; return { x: t.clientX, y: t.clientY, id: 1, pressure: 1 }; }
-				if (e.changedTouches && e.changedTouches[0]) { const t = e.changedTouches[0]; return { x: t.clientX, y: t.clientY, id: 1, pressure: 1 }; }
+				if (window.PointerEvent && e instanceof PointerEvent) return { x: e.clientX, y: e.clientY, id: e.pointerId, pressure: e.pressure };
+				if (e.touches && e.touches[0]) { var t = e.touches[0]; return { x: t.clientX, y: t.clientY, id: 1, pressure: 1 }; }
+				if (e.changedTouches && e.changedTouches[0]) { var t2 = e.changedTouches[0]; return { x: t2.clientX, y: t2.clientY, id: 1, pressure: 1 }; }
 				if (e.clientX !== undefined) return { x: e.clientX, y: e.clientY, id: 1, pressure: 1 };
 				return null;
 			}
-			let pointerIdActive = null;
+			var pointerIdActive = null;
 
 			function startDraw(e) {
 				if (overlayVisible) return;
-				if (!isPaused) return;
-				const p = getPrimaryPoint(e);
+				var p = getPrimaryPoint(e);
 				if (!p) return;
-				const { x, y } = canvasToCtxXY(p.x, p.y, drawCanvas);
+				var pt = canvasToCtxXY(p.x, p.y, drawCanvas);
+				var x = pt.x,
+					y = pt.y;
 				pointerIdActive = p.id;
 
 				if (eraserOn) {
-					const tol = Math.max(8, annotSize * 1.1);
-					const idx = hitTestObject(x, y, tol);
+					var tol = Math.max(8, annotSize * 1.1);
+					var idx = hitTestObject(x, y, tol);
 					if (idx >= 0) { objects.splice(idx, 1);
 						renderAnnotations(); }
 					return;
 				}
 				if (annotationOn && !textModeOn) {
-					currentStroke = { type: 'stroke', color: annotColor, size: annotSize * normPressure(p.pressure), points: [{ x, y }] };
+					currentStroke = { type: 'stroke', color: annotColor, size: annotSize * normPressure(p.pressure), points: [{ x: x, y: y }] };
 					objects.push(currentStroke);
 					renderAnnotations();
 				}
@@ -870,26 +795,29 @@
 
 			function moveDraw(e) {
 				if (overlayVisible) return;
-				const p = getPrimaryPoint(e);
+				var p = getPrimaryPoint(e);
 				if (!p) return;
 
 				if (laserActive) {
-					const { x, y } = canvasToCtxXY(p.x, p.y, laserCanvas);
-					addTailPoint(x, y);
+					var ptL = canvasToCtxXY(p.x, p.y, laserCanvas);
+					addTailPoint(ptL.x, ptL.y);
 				}
-				if (!isPaused) return;
 
 				if (eraserOn && p.id === pointerIdActive) {
-					const { x, y } = canvasToCtxXY(p.x, p.y, drawCanvas);
-					const tol = Math.max(8, annotSize * 1.1);
-					const idx = hitTestObject(x, y, tol);
+					var ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
+					var xE = ptE.x,
+						yE = ptE.y;
+					var tol = Math.max(8, annotSize * 1.1);
+					var idx = hitTestObject(xE, yE, tol);
 					if (idx >= 0) { objects.splice(idx, 1);
 						renderAnnotations(); }
 					return;
 				}
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
-					const { x, y } = canvasToCtxXY(p.x, p.y, drawCanvas);
-					currentStroke.points.push({ x, y });
+					var ptA = canvasToCtxXY(p.x, p.y, drawCanvas);
+					var xA = ptA.x,
+						yA = ptA.y;
+					currentStroke.points.push({ x: xA, y: yA });
 					currentStroke.size = Math.max(1, annotSize * normPressure(p.pressure));
 					renderAnnotations();
 				}
@@ -899,57 +827,60 @@
 				currentStroke = null; }
 
 			/* Laser trail */
-			function addTailPoint(x, y) { tail.push({ x, y, life: 1 }); if (tail.length > 220) tail.shift(); }
+			function addTailPoint(x, y) { tail.push({ x: x, y: y, life: 1 }); if (tail.length > 220) tail.shift(); }
 
 			function renderLaser() {
-				const w = laserCanvas.width,
+				var w = laserCanvas.width,
 					h = laserCanvas.height;
 				ctxLaser.clearRect(0, 0, w, h);
 				if (laserActive) {
-					const { r, g, b } = hexToRgb(pointerColor);
-					ctxLaser.globalCompositeOperation = 'source-over';
-					for (let i = 0; i < tail.length; i++) {
-						const t = tail[i];
+					var rgb = hexToRgb(pointerColor);
+					var r = rgb.r,
+						g = rgb.g,
+						b = rgb.b;
+					for (var i = 0; i < tail.length; i++) {
+						var t = tail[i];
 						t.life *= 0.96;
 						if (t.life < 0.02) continue;
-						const a = t.life,
+						var a = t.life,
 							radius = pointerSize * (0.9 + 1.2 * a),
 							glow = radius * 2.2;
-						const grad = ctxLaser.createRadialGradient(t.x, t.y, 0, t.x, t.y, glow);
-						grad.addColorStop(0, `rgba(${r},${g},${b},${0.25*a})`);
+						var grad = ctxLaser.createRadialGradient(t.x, t.y, 0, t.x, t.y, glow);
+						grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + (0.25 * a) + ')');
 						grad.addColorStop(1, 'rgba(0,0,0,0)');
 						ctxLaser.fillStyle = grad;
 						ctxLaser.beginPath();
 						ctxLaser.arc(t.x, t.y, glow, 0, Math.PI * 2);
 						ctxLaser.fill();
-						ctxLaser.fillStyle = `rgba(${r},${g},${b},${0.85*a})`;
+						ctxLaser.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.85 * a) + ')';
 						ctxLaser.beginPath();
 						ctxLaser.arc(t.x, t.y, radius, 0, Math.PI * 2);
 						ctxLaser.fill();
 					}
 				}
-				for (let i = tail.length - 1; i >= 0; i--) { if (tail[i].life < 0.02) tail.splice(i, 1); }
+				for (var j = tail.length - 1; j >= 0; j--) { if (tail[j].life < 0.02) tail.splice(j, 1); }
 				requestAnimationFrame(renderLaser);
 			}
 
-			function hexToRgb(hex) { const h = hex.replace('#', ''); const b = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16); return { r: (b >> 16) & 255, g: (b >> 8) & 255, b: b & 255 }; }
+			function hexToRgb(hex) { var h = hex.replace('#', ''); var b = parseInt(h.length === 3 ? h.split('').map(function(c) { return c + c; }).join('') : h, 16); return { r: (b >> 16) & 255, g: (b >> 8) & 255, b: b & 255 }; }
 
 			/* Text overlay */
-			let pendingTextXY = null;
+			var pendingTextXY = null;
 
 			function showTextOverlayAt(clientX, clientY) {
-				const rect = stage.getBoundingClientRect();
-				const x = Math.min(Math.max(clientX - rect.left, 8), rect.width - 300);
-				const y = Math.min(Math.max(clientY - rect.top, 8), rect.height - 140);
-				textOverlay.style.left = `${x}px`;
-				textOverlay.style.top = `${y}px`;
+				var rect = stage.getBoundingClientRect();
+				var x = Math.min(Math.max(clientX - rect.left, 8), rect.width - 300);
+				var y = Math.min(Math.max(clientY - rect.top, 8), rect.height - 140);
+				textOverlay.style.left = x + 'px';
+				textOverlay.style.top = y + 'px';
 				textOverlay.style.display = 'block';
 				overlayVisible = true;
 				textInput.value = '';
 				textInput.focus();
 			}
 
-			function hideTextOverlay(keepMode = false) {
+			function hideTextOverlay(keepMode) {
+				keepMode = !!keepMode;
 				textOverlay.style.display = 'none';
 				overlayVisible = false;
 				pendingTextXY = null;
@@ -964,17 +895,17 @@
 
 			function placeTextObject(text, x, y) {
 				if (!text) return;
-				const fontPx = Math.round(10 + annotSize * 2);
-				const m = measureTextBlock(text, fontPx);
-				const obj = { type: 'text', x, y, text: String(text), color: annotColor, fontPx, lh: m.lh, width: m.width, height: m.height };
+				var fontPx = Math.round(10 + annotSize * 2);
+				var m = measureTextBlock(text, fontPx);
+				var obj = { type: 'text', x: x, y: y, text: String(text), color: annotColor, fontPx: fontPx, lh: m.lh, width: m.width, height: m.height };
 				objects.push(obj);
 				renderAnnotations();
 			}
 
 			/* ===== UI wiring ===== */
-			liveToggle.addEventListener('change', () => setPaused(!liveToggle.checked));
+			liveToggle.addEventListener('change', function() { setPaused(!liveToggle.checked); });
 
-			annotationBtn.addEventListener('click', () => {
+			annotationBtn.addEventListener('click', function() {
 				annotationOn = !annotationOn;
 				eraserOn = false;
 				textModeOn = false;
@@ -982,16 +913,13 @@
 				annotationBtn.classList.toggle('active', annotationOn);
 				annotationBtn.classList.toggle('primary', annotationOn);
 				annotationBtn.classList.toggle('muted', !annotationOn);
-				eraserBtn.classList.toggle('active', false);
-				eraserBtn.classList.toggle('primary', false);
-				eraserBtn.classList.toggle('muted', true);
-				textBtn.classList.toggle('active', false);
-				textBtn.classList.toggle('primary', false);
-				textBtn.classList.toggle('muted', true);
+				eraserBtn.classList.remove('active', 'primary');
+				eraserBtn.classList.add('muted');
+				textBtn.classList.remove('active', 'primary');
+				textBtn.classList.add('muted');
 				updateInteractionMode();
-				if (annotationOn) setPaused(true);
 			});
-			eraserBtn.addEventListener('click', () => {
+			eraserBtn.addEventListener('click', function() {
 				eraserOn = !eraserOn;
 				annotationOn = eraserOn ? true : annotationOn;
 				textModeOn = false;
@@ -1002,63 +930,86 @@
 				annotationBtn.classList.toggle('active', annotationOn);
 				annotationBtn.classList.toggle('primary', annotationOn);
 				annotationBtn.classList.toggle('muted', !annotationOn);
-				textBtn.classList.toggle('active', false);
-				textBtn.classList.toggle('primary', false);
-				textBtn.classList.toggle('muted', true);
+				textBtn.classList.remove('active', 'primary');
+				textBtn.classList.add('muted');
 				updateInteractionMode();
-				if (eraserOn) setPaused(true);
 			});
-			textBtn.addEventListener('click', () => {
+			textBtn.addEventListener('click', function() {
 				annotationOn = true;
 				eraserOn = false;
 				textModeOn = !textModeOn;
 				hideTextOverlay(textModeOn);
-				annotationBtn.classList.toggle('active', true);
-				annotationBtn.classList.toggle('primary', true);
-				annotationBtn.classList.toggle('muted', false);
-				eraserBtn.classList.toggle('active', false);
-				eraserBtn.classList.toggle('primary', false);
-				eraserBtn.classList.toggle('muted', true);
+				annotationBtn.classList.add('active', 'primary');
+				annotationBtn.classList.remove('muted');
+				eraserBtn.classList.remove('active', 'primary');
+				eraserBtn.classList.add('muted');
 				textBtn.classList.toggle('active', textModeOn);
 				textBtn.classList.toggle('primary', textModeOn);
 				textBtn.classList.toggle('muted', !textModeOn);
+				if (textModeOn) showToast('Tap where you want the text.');
 				updateInteractionMode();
-				if (textModeOn) { setPaused(true);
-					showToast('Tap where you want the text.'); }
 			});
-
-			clearBtn.addEventListener('click', () => { objects.length = 0;
+			clearBtn.addEventListener('click', function() { objects.length = 0;
 				renderAnnotations(); });
 
-			pointerColorEl.addEventListener('input', e => { pointerColor = e.target.value; });
-			pointerSizeEl.addEventListener('input', e => { pointerSize = parseInt(e.target.value, 10);
-				saveNum('pointerSize', pointerSize); });
-			annotColorEl.addEventListener('input', e => { annotColor = e.target.value; });
-			annotSizeEl.addEventListener('input', e => { annotSize = parseInt(e.target.value, 10);
-				saveNum('annotSize', annotSize); });
+			/* === Size pickers (true brush sizes) === */
+			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
+				container.innerHTML = '';
+				sizes.forEach(function(sz) {
+					var btn = document.createElement('button');
+					btn.type = 'button';
+					btn.className = 'dotBtn';
+					btn.style.setProperty('--dot', sz + 'px'); // actual brush size
+					btn.style.setProperty('--dot-color', getColor());
+					if (currentSize === sz) btn.classList.add('active');
+					var dot = document.createElement('span');
+					dot.className = 'dot';
+					btn.appendChild(dot);
+					btn.addEventListener('click', function() {
+						[].slice.call(container.children).forEach(function(c) { c.classList.remove('active'); });
+						btn.classList.add('active');
+						onPick(sz);
+					});
+					container.appendChild(btn);
+				});
+			}
 
-			mirrorBtn.addEventListener('click', () => { isMirrored = !isMirrored;
-				applyVideoStyle(); if (isPaused && hasFrozen) drawFreezeFromFrozen();
+			function refreshPickerColors() {
+				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
+				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
+			}
+			buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
+				saveNum('pointerSize', sz); });
+			buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
+				saveNum('annotSize', sz); });
+			pointerColorEl.addEventListener('input', function(e) { pointerColor = e.target.value;
+				refreshPickerColors(); });
+			annotColorEl.addEventListener('input', function(e) { annotColor = e.target.value;
+				refreshPickerColors(); });
+
+			/* Mirror / Fit */
+			function applyVideoAndMaybeFreeze() { applyVideoStyle(); if (isPaused && hasFrozen) drawFreezeFromFrozen(); }
+			mirrorBtn.addEventListener('click', function() { isMirrored = !isMirrored;
+				applyVideoAndMaybeFreeze();
 				showToast(isMirrored ? 'Mirrored' : 'Unmirrored'); });
-			fitBtn.addEventListener('click', () => {
-				if (isPaused) return;
+			fitBtn.addEventListener('click', function() {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
 				fitBtn.textContent = (fitMode === 'cover') ? 'Fill' : 'Fit';
 				resizeCanvases();
-				if (isPaused && hasFrozen) drawFreezeFromFrozen();
+				applyVideoAndMaybeFreeze();
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
 
 			/* Stage events */
-			const target = stage;
+			var target = stage;
 
 			function touchGuard(e) { if (overlayVisible && e.target.closest('#textOverlay')) return;
 				e.preventDefault(); }
-			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(ev => target.addEventListener(ev, touchGuard, { passive: false }));
-			target.addEventListener('pointerdown', (e) => {
-				if (isPaused && annotationOn && textModeOn && !overlayVisible) {
-					const { x, y } = canvasToCtxXY(e.clientX, e.clientY, drawCanvas);
-					pendingTextXY = { x, y };
+			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function(ev) { target.addEventListener(ev, touchGuard, { passive: false }); });
+			target.addEventListener('pointerdown', function(e) {
+				if (annotationOn && textModeOn && !overlayVisible) {
+					var pt = canvasToCtxXY(e.clientX, e.clientY, drawCanvas);
+					pendingTextXY = { x: pt.x, y: pt.y };
 					showTextOverlayAt(e.clientX, e.clientY);
 					return;
 				}
@@ -1070,10 +1021,11 @@
 			target.addEventListener('pointerout', endDraw);
 			target.addEventListener('pointerleave', endDraw);
 
-			textAdd.addEventListener('click', () => { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+			/* Text overlay actions */
+			textAdd.addEventListener('click', function() { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
 				hideTextOverlay(); });
-			textCancel.addEventListener('click', () => hideTextOverlay());
-			textInput.addEventListener('keydown', e => {
+			textCancel.addEventListener('click', function() { hideTextOverlay(); });
+			textInput.addEventListener('keydown', function(e) {
 				if (e.key === 'Escape') { e.preventDefault();
 					hideTextOverlay(); }
 				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
@@ -1081,24 +1033,22 @@
 			});
 
 			/* Snapshot */
-			screenshotBtn.addEventListener('click', () => {
-				const w = freezeCanvas.width,
+			screenshotBtn.addEventListener('click', function() {
+				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
 				if (w === 0 || h === 0) { showToast('Snapshot failed: canvas not ready'); return; }
-				const out = document.createElement('canvas');
+				var out = document.createElement('canvas');
 				out.width = w;
 				out.height = h;
-				const octx = out.getContext('2d');
+				var octx = out.getContext('2d');
 
-				if (isPaused && hasFrozen) {
-					octx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
-				} else {
-					const vw = video.videoWidth,
+				if (isPaused && hasFrozen) { octx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h); } else {
+					var vw = video.videoWidth,
 						vh = video.videoHeight;
 					if (vw && vh) {
-						const cr = w / h,
+						var cr = w / h,
 							vr = vw / vh;
-						let dw, dh, dx, dy;
+						var dw, dh, dx, dy;
 						if (fitMode === 'cover') { if (vr > cr) { dh = h;
 								dw = h * vr; } else { dw = w;
 								dh = w / vr; } dx = (w - dw) / 2;
@@ -1116,13 +1066,12 @@
 				}
 				octx.drawImage(drawCanvas, 0, 0);
 				octx.drawImage(laserCanvas, 0, 0);
-
-				out.toBlob(blob => {
+				out.toBlob(function(blob) {
 					if (!blob) { showToast('Snapshot failed'); return; }
-					const url = URL.createObjectURL(blob);
-					const a = document.createElement('a');
+					var url = URL.createObjectURL(blob);
+					var a = document.createElement('a');
 					a.href = url;
-					a.download = `snapshot_${new Date().toISOString().replace(/[:.]/g,'-')}.png`;
+					a.download = 'snapshot_' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
 					document.body.appendChild(a);
 					a.click();
 					a.remove();
@@ -1131,21 +1080,19 @@
 				});
 			});
 
-			/* Recording the composite view */
+			/* Recording */
 			function drawCompositeFrame() {
-				const w = composite.width,
+				var w = composite.width,
 					h = composite.height;
 				compositeCtx.clearRect(0, 0, w, h);
-
-				if (isPaused && hasFrozen) {
-					compositeCtx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
-				} else {
-					const vw = video.videoWidth,
+				if (isPaused && hasFrozen) compositeCtx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
+				else {
+					var vw = video.videoWidth,
 						vh = video.videoHeight;
 					if (vw && vh) {
-						const cr = w / h,
+						var cr = w / h,
 							vr = vw / vh;
-						let dw, dh, dx, dy;
+						var dw, dh, dx, dy;
 						if (fitMode === 'cover') { if (vr > cr) { dh = h;
 								dw = h * vr; } else { dw = w;
 								dh = w / vr; } dx = (w - dw) / 2;
@@ -1167,25 +1114,25 @@
 			}
 
 			function getSupportedMime() {
-				const prefs = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'];
-				for (const m of prefs) { if (MediaRecorder.isTypeSupported(m)) return m; }
+				var prefs = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'];
+				for (var i = 0; i < prefs.length; i++) { if (MediaRecorder.isTypeSupported(prefs[i])) return prefs[i]; }
 				return '';
 			}
-			recordBtn.addEventListener('click', () => {
+			recordBtn.addEventListener('click', function() {
 				if (!recording) {
 					composite.width = freezeCanvas.width;
 					composite.height = freezeCanvas.height;
-					const mime = getSupportedMime();
-					const s = composite.captureStream(30);
+					var mime = getSupportedMime();
+					var s = composite.captureStream(30);
 					try { mediaRecorder = new MediaRecorder(s, mime ? { mimeType: mime } : {}) } catch (e) { showToast('Recording not supported'); return; }
 					recChunks = [];
-					mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) recChunks.push(e.data); };
-					mediaRecorder.onstop = () => {
-						const blob = new Blob(recChunks, { type: mediaRecorder.mimeType || 'video/webm' });
-						const url = URL.createObjectURL(blob);
-						const a = document.createElement('a');
+					mediaRecorder.ondataavailable = function(e) { if (e.data && e.data.size > 0) recChunks.push(e.data); };
+					mediaRecorder.onstop = function() {
+						var blob = new Blob(recChunks, { type: mediaRecorder.mimeType || 'video/webm' });
+						var url = URL.createObjectURL(blob);
+						var a = document.createElement('a');
 						a.href = url;
-						a.download = `recording_${new Date().toISOString().replace(/[:.]/g,'-')}.webm`;
+						a.download = 'recording_' + new Date().toISOString().replace(/[:.]/g, '-') + '.webm';
 						document.body.appendChild(a);
 						a.click();
 						a.remove();
@@ -1200,34 +1147,34 @@
 					showToast('Recording started');
 				} else {
 					recording = false;
-					try { mediaRecorder.stop(); } catch {}
+					try { mediaRecorder.stop(); } catch (e) {}
 					recordBtn.textContent = 'Record';
 					recordBtn.classList.remove('danger');
 				}
 			});
 
 			/* ===== Init ===== */
-			const ro = new ResizeObserver(() => resizeCanvases());
+			var ro = new ResizeObserver(function() { resizeCanvases(); });
 			ro.observe(stage);
-			window.addEventListener('orientationchange', () => setTimeout(resizeCanvases, 200));
+			window.addEventListener('orientationchange', function() { setTimeout(resizeCanvases, 200); });
 			requestAnimationFrame(renderLaser);
 
 			(async function init() {
 				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('getUserMedia not supported'); return; }
-				try {
-					if (currentDeviceId) { await startCamera({ deviceId: { exact: currentDeviceId } }); } else { await startCamera({ facingMode: facingPref }); }
-				} catch (e) { logError('initial start', e);
-					await startCamera({ facingMode: facingPref }); }
-				await listCameras();
-				liveToggle.checked = true;
-				setPaused(false);
-				freezeCanvas.classList.add('hidden');
-				annotationBtn.classList.toggle('muted', true);
-				eraserBtn.classList.toggle('muted', true);
-				textBtn.classList.toggle('muted', true);
-				updateInteractionMode();
+				await startCamera({ facingMode: facingPref });
+				await enumerate();
+
+				// Start Live; toggle mirrors this
+				isPaused = false;
 				updateStatusUI();
-				fitBtn.textContent = (fitMode === 'cover') ? 'Fill' : 'Fit';
+
+				// Build size pickers & colors
+				buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
+					saveNum('pointerSize', sz); });
+				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
+					saveNum('annotSize', sz); });
+				refreshPickerColors();
+
 				resizeCanvases();
 			})();
 		})();
