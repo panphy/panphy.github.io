@@ -91,8 +91,7 @@
 		}
 
 		select,
-		button,
-		input[type=color] {
+		button {
 			background: #0e121a;
 			color: var(--text);
 			border: 1px solid var(--ring);
@@ -145,6 +144,32 @@
 
 		.hidden {
 			display: none !important
+		}
+
+		/* Label-as-color button */
+		.labelBtn {
+			font-weight: 700;
+			padding: .35rem .6rem;
+			border-radius: .45rem;
+			border: 1px solid var(--ring);
+			min-width: 98px;
+			text-align: center;
+			cursor: pointer;
+			user-select: none;
+		}
+
+		/* Visually hidden but still interactive (not display:none) */
+		.srOnly {
+			position: absolute !important;
+			width: 1px;
+			height: 1px;
+			margin: -1px;
+			padding: 0;
+			border: 0;
+			clip: rect(0 0 0 0);
+			clip-path: inset(50%);
+			overflow: hidden;
+			white-space: nowrap;
 		}
 
 		.status {
@@ -332,7 +357,6 @@
 			width: var(--dot);
 			height: var(--dot);
 			aspect-ratio: 1/1;
-			/* perfect circle */
 			border-radius: 50%;
 			background: var(--dot-color);
 		}
@@ -373,11 +397,14 @@
 	<header>
 		<!-- Row 1 -->
 		<div class="row">
+			<!-- Camera group (restored) -->
 			<div class="group">
 				<h4>Camera</h4>
 				<select id="cameraSelect"></select>
 				<button id="refreshBtn">Refresh</button>
 			</div>
+
+			<!-- Stream group -->
 			<div class="group">
 				<h4>Stream</h4>
 				<label class="switch">
@@ -387,7 +414,10 @@
 				<span class="vsep"></span>
 				<div class="status"><span id="statusLight" class="light live"></span><span id="statusLabel" class="statusText">Live</span></div>
 			</div>
+
 			<div class="spacer"></div>
+
+			<!-- Capture/Display group -->
 			<div class="group">
 				<button id="screenshotBtn">Snapshot</button>
 				<button id="recordBtn">Record</button>
@@ -395,16 +425,20 @@
 				<button id="fitBtn" class="fixed-width-btn">Fill</button>
 			</div>
 		</div>
+
 		<!-- Row 2 -->
 		<div class="row">
+			<!-- Pointer color & size -->
 			<div class="group">
-				<h4>Pointer</h4>
-				<input id="pointerColor" type="color" value="#ff3b3b" title="Pointer color" />
+				<label for="pointerColorInput" id="pointerLabelBtn" class="labelBtn">Pointer</label>
+				<input id="pointerColorInput" type="color" class="srOnly" value="#ff3b3b" />
 				<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
 			</div>
+
+			<!-- Annotation tools -->
 			<div class="group" id="annotGroup">
-				<h4>Annotate</h4>
-				<input id="annotColor" type="color" value="#33d17a" title="Annotation color" />
+				<label for="annotColorInput" id="annotLabelBtn" class="labelBtn">Annotate</label>
+				<input id="annotColorInput" type="color" class="srOnly" value="#33d17a" />
 				<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
 				<button id="annotationBtn" class="muted">Annotation</button>
 				<button id="eraserBtn" class="muted">Eraser</button>
@@ -454,8 +488,6 @@
 			var statusLabel = document.getElementById('statusLabel');
 
 			var clearBtn = document.getElementById('clearBtn');
-			var pointerColorEl = document.getElementById('pointerColor');
-			var annotColorEl = document.getElementById('annotColor');
 			var screenshotBtn = document.getElementById('screenshotBtn');
 			var recordBtn = document.getElementById('recordBtn');
 			var mirrorBtn = document.getElementById('mirrorBtn');
@@ -463,6 +495,12 @@
 			var hudText = document.getElementById('hudText');
 			var stage = document.getElementById('stage');
 			var toast = document.getElementById('toast');
+
+			/* Color inputs + label buttons */
+			var pointerColorInput = document.getElementById('pointerColorInput');
+			var annotColorInput = document.getElementById('annotColorInput');
+			var pointerLabelBtn = document.getElementById('pointerLabelBtn');
+			var annotLabelBtn = document.getElementById('annotLabelBtn');
 
 			var sizeUI = {
 				pointer: document.getElementById('pointerSizes'),
@@ -484,13 +522,13 @@
 			function loadNum(k, f) { try { var v = localStorage.getItem(k); var n = v !== null ? Number(v) : NaN; return isFinite(n) ? n : f; } catch (e) { return f; } }
 
 			/* ===== State ===== */
-			var pointerColor = pointerColorEl.value;
-			var annotColor = annotColorEl.value;
-			var SIZESET = [6, 12, 20]; // thin, medium, thick
+			var pointerColor = pointerColorInput.value;
+			var annotColor = annotColorInput.value;
+			var SIZESET = [6, 12, 20];
 			var pointerSize = loadNum('pointerSize', 12);
 			var annotSize = loadNum('annotSize', 12);
 
-			var isPaused = false; // pause state (user controlled)
+			var isPaused = false;
 			var isMirrored = false,
 				fitMode = 'contain';
 
@@ -499,10 +537,8 @@
 				textModeOn = false,
 				overlayVisible = false;
 
-			var currentDeviceId = loadStr('lastDeviceId', null);
 			var facingPref = loadStr('lastFacing', 'environment');
 			var stream = null,
-				lastGoodConstraint = null,
 				switching = false;
 
 			var tail = [];
@@ -529,6 +565,22 @@
 
 			function applyVideoStyle() { video.style.objectFit = (fitMode === 'cover') ? 'cover' : 'contain';
 				video.style.transform = isMirrored ? 'scaleX(-1)' : 'none'; }
+
+			function contrastOn(hex) {
+				var h = hex.replace('#', '');
+				if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+				var r = parseInt(h.slice(0, 2), 16),
+					g = parseInt(h.slice(2, 4), 16),
+					b = parseInt(h.slice(4, 6), 16);
+				var yiq = (r * 299 + g * 587 + b * 114) / 1000;
+				return yiq >= 160 ? '#111' : '#fff';
+			}
+
+			function paintLabelBtn(btn, color) {
+				btn.style.background = color;
+				btn.style.borderColor = 'rgba(255,255,255,.25)';
+				btn.style.color = contrastOn(color);
+			}
 
 			function resizeCanvases() {
 				var r = stage.getBoundingClientRect();
@@ -583,9 +635,8 @@
 				if (!hasFrozen) return;
 				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
-				var ctx = ctxFreeze;
-				ctx.clearRect(0, 0, w, h);
-				ctx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
+				ctxFreeze.clearRect(0, 0, w, h);
+				ctxFreeze.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
 				freezeCanvas.classList.remove('hidden');
 			}
 
@@ -598,7 +649,7 @@
 				updateStatusUI();
 			}
 
-			/* --- Tools ↔ pointer interaction (independent of pause) --- */
+			/* --- Tools ↔ pointer (independent of pause) --- */
 			function updateInteractionMode() {
 				var toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
@@ -616,20 +667,17 @@
 					stream = await navigator.mediaDevices.getUserMedia(constraints);
 					video.srcObject = stream;
 					await video.play();
-					lastGoodConstraint = constraint;
-				} catch (e1) {
+				} catch (e) {
 					try {
 						var fb1 = { facingMode: facingPref };
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb1) });
 						video.srcObject = stream;
 						await video.play();
-						lastGoodConstraint = fb1;
 					} catch (e2) {
 						var fb2 = {};
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb2) });
 						video.srcObject = stream;
 						await video.play();
-						lastGoodConstraint = fb2;
 					}
 				} finally {
 					await enumerate();
@@ -640,20 +688,11 @@
 			async function enumerate() {
 				var devs = await navigator.mediaDevices.enumerateDevices();
 				var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
-
-				function facingGuess(label) {
-					var L = (label || '').toLowerCase();
-					if (/(back|rear|environment)/.test(L)) return 'environment';
-					if (/(front|user|face)/.test(L)) return 'user';
-					return 'environment';
-				}
 				cameraSelect.innerHTML = '';
 				cams.forEach(function(d, i) {
 					var opt = document.createElement('option');
-					var fg = facingGuess(d.label || '');
-					opt.value = d.deviceId || ('facing:' + fg + ':' + i);
+					opt.value = d.deviceId || ('cam_' + i);
 					opt.textContent = d.label || ('Camera ' + (i + 1));
-					opt.dataset.facing = fg;
 					cameraSelect.appendChild(opt);
 				});
 				cameraSelect.disabled = cameraSelect.options.length <= 1;
@@ -665,18 +704,7 @@
 					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
 			var onCameraChange = debounced(async function() {
 				var val = cameraSelect.value || '';
-				saveStr('lastDeviceId', val);
-				if (val.indexOf('facing:') === 0) {
-					var facing = val.split(':')[1] || facingPref;
-					facingPref = facing;
-					saveStr('lastFacing', facing);
-					await startCamera({ facingMode: facing });
-				} else {
-					await startCamera({ deviceId: { exact: val } });
-					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
-					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
-						saveStr('lastFacing', facingPref); }
-				}
+				if (val) { await startCamera({ deviceId: { exact: val } }); }
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
 			cameraSelect.addEventListener('change', onCameraChange);
@@ -711,9 +739,9 @@
 						ctxDraw.lineWidth = Math.max(2, obj.fontPx * 0.12);
 						ctxDraw.strokeStyle = 'rgba(0,0,0,0.55)';
 						var lines = obj.text.split(/\r?\n/);
-						lines.forEach(function(ln, li) { var yy = obj.y + li * obj.lh;
-							ctxDraw.strokeText(ln, obj.x, yy);
-							ctxDraw.fillText(ln, obj.x, yy); });
+						for (var li = 0; li < lines.length; li++) { var yy = obj.y + li * obj.lh;
+							ctxDraw.strokeText(lines[li], obj.x, yy);
+							ctxDraw.fillText(lines[li], obj.x, yy); }
 						ctxDraw.restore();
 					}
 				}
@@ -726,7 +754,9 @@
 				var widths = lines.map(function(ln) { return ctxDraw.measureText(ln).width; });
 				ctxDraw.restore();
 				var lh = Math.round(fontPx * 1.25);
-				return { width: Math.max.apply(Math, [1].concat(widths, [1])), height: lines.length * lh, lh: lh };
+				var maxW = 1;
+				for (var i = 0; i < widths.length; i++) { if (widths[i] > maxW) maxW = widths[i]; }
+				return { width: maxW, height: lines.length * lh, lh: lh };
 			}
 
 			function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
@@ -756,7 +786,7 @@
 				return -1;
 			}
 
-			/* ===== Interaction (works Live or Paused) ===== */
+			/* ===== Interaction (works live or paused) ===== */
 			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
 
 			function normPressure(p) { var v = isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
@@ -805,19 +835,15 @@
 
 				if (eraserOn && p.id === pointerIdActive) {
 					var ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
-					var xE = ptE.x,
-						yE = ptE.y;
 					var tol = Math.max(8, annotSize * 1.1);
-					var idx = hitTestObject(xE, yE, tol);
+					var idx = hitTestObject(ptE.x, ptE.y, tol);
 					if (idx >= 0) { objects.splice(idx, 1);
 						renderAnnotations(); }
 					return;
 				}
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
 					var ptA = canvasToCtxXY(p.x, p.y, drawCanvas);
-					var xA = ptA.x,
-						yA = ptA.y;
-					currentStroke.points.push({ x: xA, y: yA });
+					currentStroke.points.push({ x: ptA.x, y: ptA.y });
 					currentStroke.size = Math.max(1, annotSize * normPressure(p.pressure));
 					renderAnnotations();
 				}
@@ -952,6 +978,22 @@
 			clearBtn.addEventListener('click', function() { objects.length = 0;
 				renderAnnotations(); });
 
+			/* Color input handlers (labels open pickers natively) */
+			function refreshPickerColors() {
+				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
+				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
+			}
+			pointerColorInput.addEventListener('input', function(e) {
+				pointerColor = e.target.value;
+				paintLabelBtn(pointerLabelBtn, pointerColor);
+				refreshPickerColors();
+			});
+			annotColorInput.addEventListener('input', function(e) {
+				annotColor = e.target.value;
+				paintLabelBtn(annotLabelBtn, annotColor);
+				refreshPickerColors();
+			});
+
 			/* === Size pickers (true brush sizes) === */
 			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
 				container.innerHTML = '';
@@ -959,7 +1001,7 @@
 					var btn = document.createElement('button');
 					btn.type = 'button';
 					btn.className = 'dotBtn';
-					btn.style.setProperty('--dot', sz + 'px'); // actual brush size
+					btn.style.setProperty('--dot', sz + 'px');
 					btn.style.setProperty('--dot-color', getColor());
 					if (currentSize === sz) btn.classList.add('active');
 					var dot = document.createElement('span');
@@ -973,19 +1015,6 @@
 					container.appendChild(btn);
 				});
 			}
-
-			function refreshPickerColors() {
-				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
-				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
-			}
-			buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
-				saveNum('pointerSize', sz); });
-			buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
-				saveNum('annotSize', sz); });
-			pointerColorEl.addEventListener('input', function(e) { pointerColor = e.target.value;
-				refreshPickerColors(); });
-			annotColorEl.addEventListener('input', function(e) { annotColor = e.target.value;
-				refreshPickerColors(); });
 
 			/* Mirror / Fit */
 			function applyVideoAndMaybeFreeze() { applyVideoStyle(); if (isPaused && hasFrozen) drawFreezeFromFrozen(); }
@@ -1021,18 +1050,9 @@
 			target.addEventListener('pointerout', endDraw);
 			target.addEventListener('pointerleave', endDraw);
 
-			/* Text overlay actions */
-			textAdd.addEventListener('click', function() { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-				hideTextOverlay(); });
-			textCancel.addEventListener('click', function() { hideTextOverlay(); });
-			textInput.addEventListener('keydown', function(e) {
-				if (e.key === 'Escape') { e.preventDefault();
-					hideTextOverlay(); }
-				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-					hideTextOverlay(); }
-			});
+			/* Snapshot & Recording */
+			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
 
-			/* Snapshot */
 			screenshotBtn.addEventListener('click', function() {
 				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
@@ -1080,7 +1100,6 @@
 				});
 			});
 
-			/* Recording */
 			function drawCompositeFrame() {
 				var w = composite.width,
 					h = composite.height;
@@ -1162,9 +1181,8 @@
 			(async function init() {
 				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('getUserMedia not supported'); return; }
 				await startCamera({ facingMode: facingPref });
-				await enumerate();
 
-				// Start Live; toggle mirrors this
+				// Start Live
 				isPaused = false;
 				updateStatusUI();
 
@@ -1174,7 +1192,10 @@
 				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
 					saveNum('annotSize', sz); });
 				refreshPickerColors();
+				paintLabelBtn(pointerLabelBtn, pointerColor);
+				paintLabelBtn(annotLabelBtn, annotColor);
 
+				await enumerate();
 				resizeCanvases();
 			})();
 		})();
