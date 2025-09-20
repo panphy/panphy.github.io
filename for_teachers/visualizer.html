@@ -409,6 +409,11 @@
 		#toast.show {
 			opacity: 1
 		}
+
+		/* Fullscreen tweaks: remove page margins & keep safe-area padding */
+		:fullscreen body {
+			padding-bottom: env(safe-area-inset-bottom)
+		}
 	</style>
 </head>
 
@@ -612,9 +617,11 @@
 				return yiq >= 160 ? '#111' : '#fff';
 			}
 
-			function paintLabelBtn(btn, color) { btn.style.background = color;
+			function paintLabelBtn(btn, color) {
+				btn.style.background = color;
 				btn.style.borderColor = 'rgba(255,255,255,.25)';
-				btn.style.color = contrastOn(color); }
+				btn.style.color = contrastOn(color);
+			}
 
 			function resizeCanvases() {
 				var r = stage.getBoundingClientRect();
@@ -651,22 +658,32 @@
 					vr = vw / vh;
 				var dw, dh, dx, dy;
 				if (fitMode === 'cover') {
-					if (vr > cr) { dh = h;
-						dw = h * vr; } else { dw = w;
-						dh = w / vr; }
+					if (vr > cr) {
+						dh = h;
+						dw = h * vr;
+					} else {
+						dw = w;
+						dh = w / vr;
+					}
 					dx = (w - dw) / 2;
 					dy = (h - dh) / 2;
 				} else {
-					if (vr > cr) { dw = w;
-						dh = w / vr; } else { dh = h;
-						dw = h * vr; }
+					if (vr > cr) {
+						dw = w;
+						dh = w / vr;
+					} else {
+						dh = h;
+						dw = h * vr;
+					}
 					dx = (w - dw) / 2;
 					dy = (h - dh) / 2;
 				}
 				frozenCtx.save();
-				if (isMirrored) { frozenCtx.translate(w, 0);
+				if (isMirrored) {
+					frozenCtx.translate(w, 0);
 					frozenCtx.scale(-1, 1);
-					dx = w - dx - dw; }
+					dx = w - dx - dw;
+				}
 				frozenCtx.clearRect(0, 0, w, h);
 				frozenCtx.drawImage(video, dx, dy, dw, dh);
 				frozenCtx.restore();
@@ -685,9 +702,13 @@
 			function setPaused(state) {
 				if (state === isPaused) return;
 				isPaused = state;
-				if (isPaused) { captureFrozenFromVideo();
-					drawFreezeFromFrozen(); } else { hasFrozen = false;
-					freezeCanvas.classList.add('hidden'); }
+				if (isPaused) {
+					captureFrozenFromVideo();
+					drawFreezeFromFrozen();
+				} else {
+					hasFrozen = false;
+					freezeCanvas.classList.add('hidden');
+				}
 				updateStatusUI();
 			}
 
@@ -695,8 +716,10 @@
 			function updateInteractionMode() {
 				var toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
-				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
-					tail.length = 0; }
+				if (!laserActive) {
+					ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
+					tail.length = 0;
+				}
 			}
 
 			/* ===== Camera ===== */
@@ -749,10 +772,15 @@
 				cameraSelect.disabled = cameraSelect.options.length <= 1;
 			}
 
-			function debounced(fn, ms) { var t;
-				ms = ms || 250; return function() { var a = arguments;
+			function debounced(fn, ms) {
+				var t;
+				ms = ms || 250;
+				return function() {
+					var a = arguments;
 					clearTimeout(t);
-					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
+					t = setTimeout(function() { fn.apply(null, a); }, ms);
+				};
+			}
 			var onCameraChange = debounced(async function() {
 				var val = cameraSelect.value || '';
 				if (val.indexOf('facing:') === 0) {
@@ -763,8 +791,10 @@
 				} else {
 					await startCamera({ deviceId: { exact: val } });
 					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
-					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
-						saveStr('lastFacing', facingPref); }
+					if (opt && opt.dataset && opt.dataset.facing) {
+						facingPref = opt.dataset.facing;
+						saveStr('lastFacing', facingPref);
+					}
 				}
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
@@ -877,8 +907,10 @@
 				if (eraserOn) {
 					var tol = Math.max(8, annotSize * 1.1);
 					var idx = hitTestObject(x, y, tol);
-					if (idx >= 0) { objects.splice(idx, 1);
-						renderAnnotations(); }
+					if (idx >= 0) {
+						objects.splice(idx, 1);
+						renderAnnotations();
+					}
 					return;
 				}
 				if (annotationOn && !textModeOn) {
@@ -901,8 +933,10 @@
 					var ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
 					var tol = Math.max(8, annotSize * 1.1);
 					var idx = hitTestObject(ptE.x, ptE.y, tol);
-					if (idx >= 0) { objects.splice(idx, 1);
-						renderAnnotations(); }
+					if (idx >= 0) {
+						objects.splice(idx, 1);
+						renderAnnotations();
+					}
 					return;
 				}
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
@@ -913,8 +947,10 @@
 				}
 			}
 
-			function endDraw() { pointerIdActive = null;
-				currentStroke = null; }
+			function endDraw() {
+				pointerIdActive = null;
+				currentStroke = null;
+			}
 
 			/* Laser trail */
 			function addTailPoint(x, y) { tail.push({ x: x, y: y, life: 1 }); if (tail.length > 220) tail.shift(); }
@@ -992,68 +1028,6 @@
 				renderAnnotations();
 			}
 
-			/* ===== UI wiring ===== */
-			liveToggle.addEventListener('change', function() { setPaused(!liveToggle.checked); });
-
-			annotationBtn.addEventListener('click', function() {
-				annotationOn = !annotationOn;
-				eraserOn = false;
-				textModeOn = false;
-				hideTextOverlay();
-				annotationBtn.classList.toggle('active', annotationOn);
-				annotationBtn.classList.toggle('primary', annotationOn);
-				annotationBtn.classList.toggle('muted', !annotationOn);
-				eraserBtn.classList.remove('active', 'primary');
-				eraserBtn.classList.add('muted');
-				textBtn.classList.remove('active', 'primary');
-				textBtn.classList.add('muted');
-				updateInteractionMode();
-			});
-			eraserBtn.addEventListener('click', function() {
-				eraserOn = !eraserOn;
-				annotationOn = eraserOn ? true : annotationOn;
-				textModeOn = false;
-				hideTextOverlay();
-				eraserBtn.classList.toggle('active', eraserOn);
-				eraserBtn.classList.toggle('primary', eraserOn);
-				eraserBtn.classList.toggle('muted', !eraserOn);
-				annotationBtn.classList.toggle('active', annotationOn);
-				annotationBtn.classList.toggle('primary', annotationOn);
-				annotationBtn.classList.toggle('muted', !annotationOn);
-				textBtn.classList.remove('active', 'primary');
-				textBtn.classList.add('muted');
-				updateInteractionMode();
-			});
-			textBtn.addEventListener('click', function() {
-				annotationOn = true;
-				eraserOn = false;
-				textModeOn = !textModeOn;
-				hideTextOverlay(textModeOn);
-				annotationBtn.classList.add('active', 'primary');
-				annotationBtn.classList.remove('muted');
-				eraserBtn.classList.remove('active', 'primary');
-				eraserBtn.classList.add('muted');
-				textBtn.classList.toggle('active', textModeOn);
-				textBtn.classList.toggle('primary', textModeOn);
-				textBtn.classList.toggle('muted', !textModeOn);
-				if (textModeOn) showToast('Tap where you want the text.');
-				updateInteractionMode();
-			});
-			clearBtn.addEventListener('click', function() { objects.length = 0;
-				renderAnnotations(); });
-
-			/* Color input handlers */
-			function refreshPickerColors() {
-				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
-				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
-			}
-			pointerColorInput.addEventListener('input', function(e) { pointerColor = e.target.value;
-				paintLabelBtn(pointerLabelBtn, pointerColor);
-				refreshPickerColors(); });
-			annotColorInput.addEventListener('input', function(e) { annotColor = e.target.value;
-				paintLabelBtn(annotLabelBtn, annotColor);
-				refreshPickerColors(); });
-
 			/* === Size pickers === */
 			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
 				container.innerHTML = '';
@@ -1091,20 +1065,22 @@
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
 
-			/* ===== Fullscreen support ===== */
+			/* ===== Fullscreen for ENTIRE APP ===== */
 			function isFullscreen() {
 				return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
 			}
 
 			function enterFullscreen(el) {
+				// Main change: request fullscreen on the whole document
+				el = el || document.documentElement;
 				if (el.requestFullscreen) return el.requestFullscreen();
-				if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari
+				if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); // Safari/iPad
 				if (el.msRequestFullscreen) return el.msRequestFullscreen();
 			}
 
 			function exitFullscreen() {
 				if (document.exitFullscreen) return document.exitFullscreen();
-				if (document.webkitExitFullscreen) return document.webkitExitFullscreen(); // Safari
+				if (document.webkitExitFullscreen) return document.webkitExitFullscreen(); // Safari/iPad
 				if (document.msExitFullscreen) return document.msExitFullscreen();
 			}
 
@@ -1112,12 +1088,13 @@
 				var on = !!isFullscreen();
 				fsBtn.textContent = on ? 'Exit' : 'Full';
 				fsBtn.classList.toggle('primary', on);
+				// Resize canvases when the viewport changes due to fullscreen
+				setTimeout(resizeCanvases, 50);
 			}
 			fsBtn.addEventListener('click', function() {
 				if (!isFullscreen()) {
-					// Use the stage element so the toolbars stay visible only if desired.
-					// If you prefer everything, replace "stage" with "document.documentElement".
-					enterFullscreen(stage);
+					// Request fullscreen for the entire app (html root).
+					enterFullscreen(document.documentElement);
 				} else {
 					exitFullscreen();
 				}
@@ -1128,8 +1105,10 @@
 			/* Stage events */
 			var target = stage;
 
-			function touchGuard(e) { if (overlayVisible && e.target.closest('#textOverlay')) return;
-				e.preventDefault(); }
+			function touchGuard(e) {
+				if (overlayVisible && e.target.closest('#textOverlay')) return;
+				e.preventDefault();
+			}
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function(ev) { target.addEventListener(ev, touchGuard, { passive: false }); });
 			target.addEventListener('pointerdown', function(e) {
 				if (annotationOn && textModeOn && !overlayVisible) {
@@ -1153,8 +1132,10 @@
 			});
 			textCancel.addEventListener('click', function() { hideTextOverlay(); });
 			textInput.addEventListener('keydown', function(e) {
-				if (e.key === 'Escape') { e.preventDefault();
-					hideTextOverlay(); }
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					hideTextOverlay();
+				}
 				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
 					e.preventDefault();
 					if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
@@ -1181,17 +1162,33 @@
 						var cr = w / h,
 							vr = vw / vh;
 						var dw, dh, dx, dy;
-						if (fitMode === 'cover') { if (vr > cr) { dh = h;
-								dw = h * vr; } else { dw = w;
-								dh = w / vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-								dh = w / vr; } else { dh = h;
-								dw = h * vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; }
+						if (fitMode === 'cover') {
+							if (vr > cr) {
+								dh = h;
+								dw = h * vr;
+							} else {
+								dw = w;
+								dh = w / vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						} else {
+							if (vr > cr) {
+								dw = w;
+								dh = w / vr;
+							} else {
+								dh = h;
+								dw = h * vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						}
 						octx.save();
-						if (isMirrored) { octx.translate(w, 0);
+						if (isMirrored) {
+							octx.translate(w, 0);
 							octx.scale(-1, 1);
-							dx = w - dx - dw; }
+							dx = w - dx - dw;
+						}
 						octx.drawImage(video, dx, dy, dw, dh);
 						octx.restore();
 					}
@@ -1225,17 +1222,33 @@
 						var cr = w / h,
 							vr = vw / vh;
 						var dw, dh, dx, dy;
-						if (fitMode === 'cover') { if (vr > cr) { dh = h;
-								dw = h * vr; } else { dw = w;
-								dh = w / vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-								dh = w / vr; } else { dh = h;
-								dw = h * vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; }
+						if (fitMode === 'cover') {
+							if (vr > cr) {
+								dh = h;
+								dw = h * vr;
+							} else {
+								dw = w;
+								dh = w / vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						} else {
+							if (vr > cr) {
+								dw = w;
+								dh = w / vr;
+							} else {
+								dh = h;
+								dw = h * vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						}
 						compositeCtx.save();
-						if (isMirrored) { compositeCtx.translate(w, 0);
+						if (isMirrored) {
+							compositeCtx.translate(w, 0);
 							compositeCtx.scale(-1, 1);
-							dx = w - dx - dw; }
+							dx = w - dx - dw;
+						}
 						compositeCtx.drawImage(video, dx, dy, dw, dh);
 						compositeCtx.restore();
 					}
@@ -1299,15 +1312,24 @@
 				isPaused = false;
 				updateStatusUI();
 
-				buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
-					saveNum('pointerSize', sz); });
-				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
-					saveNum('annotSize', sz); });
+				buildSizePicker(sizeUI.pointer, [6, 12, 20], function() { return pointerColor; }, pointerSize, function(sz) {
+					pointerSize = sz;
+					saveNum('pointerSize', sz);
+				});
+				buildSizePicker(sizeUI.annot, [6, 12, 20], function() { return annotColor; }, annotSize, function(sz) {
+					annotSize = sz;
+					saveNum('annotSize', sz);
+				});
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
 
 				resizeCanvases();
-				syncFsButton();
+				// Ensure the FS button text matches initial state
+				(function() {
+					var on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+					fsBtn.textContent = on ? 'Exit' : 'Full';
+					fsBtn.classList.toggle('primary', on);
+				})();
 			})();
 		})();
 	</script>
