@@ -38,12 +38,35 @@
 			flex-direction: column
 		}
 
+		/* --- Topbar with logo + title --- */
 		.topbar {
 			background: #2a2f3b;
 			color: #fff;
-			text-align: center;
-			padding: 10px 20px;
 			border-bottom: 1px solid #000
+		}
+
+		.topbar .bar {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 10px 20px
+		}
+
+		.topbar .brand {
+			position: absolute;
+			left: 12px;
+			display: inline-flex;
+			align-items: center;
+			gap: .4rem;
+			text-decoration: none;
+			color: #fff
+		}
+
+		.topbar .brand img {
+			height: 28px;
+			width: auto;
+			display: block
 		}
 
 		.topbar .title {
@@ -51,6 +74,7 @@
 			font-weight: 700
 		}
 
+		/* --- Toolbar layout --- */
 		header {
 			padding: .6rem .9rem .5rem;
 			display: grid;
@@ -158,7 +182,7 @@
 			user-select: none;
 		}
 
-		/* Visually hidden but still interactive (not display:none) */
+		/* Visually hidden but interactive (not display:none; iOS-friendly) */
 		.srOnly {
 			position: absolute !important;
 			width: 1px;
@@ -389,15 +413,21 @@
 </head>
 
 <body>
+	<!-- Topbar with PanPhy logo -->
 	<div class="topbar">
-		<div class="title">Camera Visualizer</div>
+		<div class="bar">
+			<a class="brand" href="https://panphy.github.io" aria-label="panphy home">
+				<img src="panphy.png" alt="panphy logo" />
+			</a>
+			<div class="title">Camera Visualizer</div>
+		</div>
 	</div>
 
 	<!-- Toolbar -->
 	<header>
 		<!-- Row 1 -->
 		<div class="row">
-			<!-- Camera group (restored) -->
+			<!-- Camera group -->
 			<div class="group">
 				<h4>Camera</h4>
 				<select id="cameraSelect"></select>
@@ -524,7 +554,7 @@
 			/* ===== State ===== */
 			var pointerColor = pointerColorInput.value;
 			var annotColor = annotColorInput.value;
-			var SIZESET = [6, 12, 20];
+			var SIZESET = [6, 12, 20]; // thin, medium, thick
 			var pointerSize = loadNum('pointerSize', 12);
 			var annotSize = loadNum('annotSize', 12);
 
@@ -537,8 +567,10 @@
 				textModeOn = false,
 				overlayVisible = false;
 
+			var currentDeviceId = loadStr('lastDeviceId', null);
 			var facingPref = loadStr('lastFacing', 'environment');
 			var stream = null,
+				lastGoodConstraint = null,
 				switching = false;
 
 			var tail = [];
@@ -649,7 +681,7 @@
 				updateStatusUI();
 			}
 
-			/* --- Tools ↔ pointer (independent of pause) --- */
+			/* --- Tools ↔ pointer interaction (independent of pause) --- */
 			function updateInteractionMode() {
 				var toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
@@ -667,17 +699,20 @@
 					stream = await navigator.mediaDevices.getUserMedia(constraints);
 					video.srcObject = stream;
 					await video.play();
-				} catch (e) {
+					lastGoodConstraint = constraint;
+				} catch (e1) {
 					try {
 						var fb1 = { facingMode: facingPref };
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb1) });
 						video.srcObject = stream;
 						await video.play();
+						lastGoodConstraint = fb1;
 					} catch (e2) {
 						var fb2 = {};
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb2) });
 						video.srcObject = stream;
 						await video.play();
+						lastGoodConstraint = fb2;
 					}
 				} finally {
 					await enumerate();
@@ -688,11 +723,20 @@
 			async function enumerate() {
 				var devs = await navigator.mediaDevices.enumerateDevices();
 				var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
+
+				function facingGuess(label) {
+					var L = (label || '').toLowerCase();
+					if (/(back|rear|environment)/.test(L)) return 'environment';
+					if (/(front|user|face)/.test(L)) return 'user';
+					return 'environment';
+				}
 				cameraSelect.innerHTML = '';
 				cams.forEach(function(d, i) {
 					var opt = document.createElement('option');
-					opt.value = d.deviceId || ('cam_' + i);
+					var fg = facingGuess(d.label || '');
+					opt.value = d.deviceId || ('facing:' + fg + ':' + i);
 					opt.textContent = d.label || ('Camera ' + (i + 1));
+					opt.dataset.facing = fg;
 					cameraSelect.appendChild(opt);
 				});
 				cameraSelect.disabled = cameraSelect.options.length <= 1;
@@ -704,7 +748,18 @@
 					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
 			var onCameraChange = debounced(async function() {
 				var val = cameraSelect.value || '';
-				if (val) { await startCamera({ deviceId: { exact: val } }); }
+				saveStr('lastDeviceId', val);
+				if (val.indexOf('facing:') === 0) {
+					var facing = val.split(':')[1] || facingPref;
+					facingPref = facing;
+					saveStr('lastFacing', facing);
+					await startCamera({ facingMode: facing });
+				} else {
+					await startCamera({ deviceId: { exact: val } });
+					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
+					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
+						saveStr('lastFacing', facingPref); }
+				}
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
 			cameraSelect.addEventListener('change', onCameraChange);
@@ -739,9 +794,9 @@
 						ctxDraw.lineWidth = Math.max(2, obj.fontPx * 0.12);
 						ctxDraw.strokeStyle = 'rgba(0,0,0,0.55)';
 						var lines = obj.text.split(/\r?\n/);
-						for (var li = 0; li < lines.length; li++) { var yy = obj.y + li * obj.lh;
-							ctxDraw.strokeText(lines[li], obj.x, yy);
-							ctxDraw.fillText(lines[li], obj.x, yy); }
+						lines.forEach(function(ln, li) { var yy = obj.y + li * obj.lh;
+							ctxDraw.strokeText(ln, obj.x, yy);
+							ctxDraw.fillText(ln, obj.x, yy); });
 						ctxDraw.restore();
 					}
 				}
@@ -786,7 +841,7 @@
 				return -1;
 			}
 
-			/* ===== Interaction (works live or paused) ===== */
+			/* ===== Interaction (works Live or Paused) ===== */
 			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
 
 			function normPressure(p) { var v = isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
@@ -978,7 +1033,7 @@
 			clearBtn.addEventListener('click', function() { objects.length = 0;
 				renderAnnotations(); });
 
-			/* Color input handlers (labels open pickers natively) */
+			/* Color input handlers (labels open pickers natively via for=) */
 			function refreshPickerColors() {
 				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
 				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
@@ -1001,7 +1056,7 @@
 					var btn = document.createElement('button');
 					btn.type = 'button';
 					btn.className = 'dotBtn';
-					btn.style.setProperty('--dot', sz + 'px');
+					btn.style.setProperty('--dot', sz + 'px'); // actual brush size
 					btn.style.setProperty('--dot-color', getColor());
 					if (currentSize === sz) btn.classList.add('active');
 					var dot = document.createElement('span');
@@ -1050,9 +1105,18 @@
 			target.addEventListener('pointerout', endDraw);
 			target.addEventListener('pointerleave', endDraw);
 
-			/* Snapshot & Recording */
-			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
+			/* Text overlay actions */
+			textAdd.addEventListener('click', function() { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+				hideTextOverlay(); });
+			textCancel.addEventListener('click', function() { hideTextOverlay(); });
+			textInput.addEventListener('keydown', function(e) {
+				if (e.key === 'Escape') { e.preventDefault();
+					hideTextOverlay(); }
+				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+					hideTextOverlay(); }
+			});
 
+			/* Snapshot */
 			screenshotBtn.addEventListener('click', function() {
 				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
@@ -1100,6 +1164,7 @@
 				});
 			});
 
+			/* Recording */
 			function drawCompositeFrame() {
 				var w = composite.width,
 					h = composite.height;
@@ -1181,8 +1246,9 @@
 			(async function init() {
 				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('getUserMedia not supported'); return; }
 				await startCamera({ facingMode: facingPref });
+				await enumerate();
 
-				// Start Live
+				// Start Live; toggle mirrors this
 				isPaused = false;
 				updateStatusUI();
 
@@ -1195,7 +1261,6 @@
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
 
-				await enumerate();
 				resizeCanvases();
 			})();
 		})();
