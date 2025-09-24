@@ -424,6 +424,26 @@
 		#toast.show {
 			opacity: 1
 		}
+
+		footer {
+			position: static;
+			font-size: 15px;
+			text-align: center;
+			padding: 7px;
+			background: transparent;
+			color: #555;
+			margin: 4px 0;
+			width: 100%;
+		}
+
+		footer a {
+			color: #ff5f1f;
+			text-decoration: none;
+		}
+
+		footer a:hover {
+			text-decoration: underline;
+		}
 	</style>
 </head>
 
@@ -609,10 +629,12 @@
 			var zoomLevel = loadNum('zoomLevel', 1);
 
 			/* ===== Utils ===== */
-			function showToast(msg, ms) { ms = ms || 1600;
+			function showToast(msg, ms) {
+				ms = ms || 1600;
 				toast.textContent = msg;
 				toast.classList.add('show');
-				setTimeout(function() { toast.classList.remove('show'); }, ms); }
+				setTimeout(function() { toast.classList.remove('show'); }, ms);
+			}
 
 			function contrastOn(hex) {
 				var h = hex.replace('#', '');
@@ -624,9 +646,11 @@
 				return yiq >= 160 ? '#111' : '#fff';
 			}
 
-			function paintLabelBtn(btn, color) { btn.style.background = color;
+			function paintLabelBtn(btn, color) {
+				btn.style.background = color;
 				btn.style.borderColor = 'rgba(255,255,255,.25)';
-				btn.style.color = contrastOn(color); }
+				btn.style.color = contrastOn(color);
+			}
 
 			function resizeCanvases() {
 				var r = stage.getBoundingClientRect();
@@ -662,17 +686,33 @@
 				var cr = w / h,
 					vr = vw / vh;
 				var dw, dh, dx, dy;
-				if (fitMode === 'cover') { if (vr > cr) { dh = h;
-						dw = h * vr; } else { dw = w;
-						dh = w / vr; } dx = (w - dw) / 2;
-					dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-						dh = w / vr; } else { dh = h;
-						dw = h * vr; } dx = (w - dw) / 2;
-					dy = (h - dh) / 2; }
+				if (fitMode === 'cover') {
+					if (vr > cr) {
+						dh = h;
+						dw = h * vr;
+					} else {
+						dw = w;
+						dh = w / vr;
+					}
+					dx = (w - dw) / 2;
+					dy = (h - dh) / 2;
+				} else {
+					if (vr > cr) {
+						dw = w;
+						dh = w / vr;
+					} else {
+						dh = h;
+						dw = h * vr;
+					}
+					dx = (w - dw) / 2;
+					dy = (h - dh) / 2;
+				}
 				frozenCtx.save();
-				if (isMirrored) { frozenCtx.translate(w, 0);
+				if (isMirrored) {
+					frozenCtx.translate(w, 0);
 					frozenCtx.scale(-1, 1);
-					dx = w - dx - dw; }
+					dx = w - dx - dw;
+				}
 				frozenCtx.clearRect(0, 0, w, h);
 				frozenCtx.drawImage(video, dx, dy, dw, dh);
 				frozenCtx.restore();
@@ -691,9 +731,13 @@
 			function setPaused(state) {
 				if (state === isPaused) return;
 				isPaused = state;
-				if (isPaused) { captureFrozenFromVideo();
-					drawFreezeFromFrozen(); } else { hasFrozen = false;
-					freezeCanvas.classList.add('hidden'); }
+				if (isPaused) {
+					captureFrozenFromVideo();
+					drawFreezeFromFrozen();
+				} else {
+					hasFrozen = false;
+					freezeCanvas.classList.add('hidden');
+				}
 				updateStatusUI();
 			}
 
@@ -701,8 +745,10 @@
 			function updateInteractionMode() {
 				var toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
-				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
-					tail.length = 0; }
+				if (!laserActive) {
+					ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
+					tail.length = 0;
+				}
 			}
 
 			/* Camera */
@@ -755,10 +801,15 @@
 				cameraSelect.disabled = cameraSelect.options.length <= 1;
 			}
 
-			function debounced(fn, ms) { var t;
-				ms = ms || 250; return function() { var a = arguments;
+			function debounced(fn, ms) {
+				var t;
+				ms = ms || 250;
+				return function() {
+					var a = arguments;
 					clearTimeout(t);
-					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
+					t = setTimeout(function() { fn.apply(null, a); }, ms);
+				};
+			}
 			var onCameraChange = debounced(async function() {
 				var val = cameraSelect.value || '';
 				if (val.indexOf('facing:') === 0) {
@@ -769,8 +820,10 @@
 				} else {
 					await startCamera({ deviceId: { exact: val } });
 					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
-					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
-						saveStr('lastFacing', facingPref); }
+					if (opt && opt.dataset && opt.dataset.facing) {
+						facingPref = opt.dataset.facing;
+						saveStr('lastFacing', facingPref);
+					}
 				}
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
@@ -892,8 +945,10 @@
 				if (eraserOn) {
 					var tol = Math.max(8, annotSize * 1.1);
 					var idx = hitTestObject(x, y, tol);
-					if (idx >= 0) { objects.splice(idx, 1);
-						renderAnnotations(); }
+					if (idx >= 0) {
+						objects.splice(idx, 1);
+						renderAnnotations();
+					}
 					return;
 				}
 				if (annotationOn && !textModeOn) {
@@ -916,8 +971,10 @@
 					var ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
 					var tol = Math.max(8, annotSize * 1.1);
 					var idx = hitTestObject(ptE.x, ptE.y, tol);
-					if (idx >= 0) { objects.splice(idx, 1);
-						renderAnnotations(); }
+					if (idx >= 0) {
+						objects.splice(idx, 1);
+						renderAnnotations();
+					}
 					return;
 				}
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
@@ -928,8 +985,10 @@
 				}
 			}
 
-			function endDraw() { pointerIdActive = null;
-				currentStroke = null; }
+			function endDraw() {
+				pointerIdActive = null;
+				currentStroke = null;
+			}
 
 			/* Laser trail */
 			function addTailPoint(x, y) { tail.push({ x: x, y: y, life: 1 }); if (tail.length > 220) tail.shift(); }
@@ -1054,19 +1113,25 @@
 				if (textModeOn) showToast('Tap where you want the text.');
 				updateInteractionMode();
 			});
-			clearBtn.addEventListener('click', function() { objects.length = 0;
-				renderAnnotations(); });
+			clearBtn.addEventListener('click', function() {
+				objects.length = 0;
+				renderAnnotations();
+			});
 
 			function refreshPickerColors() {
 				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
 				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
 			}
-			pointerColorInput.addEventListener('input', function(e) { pointerColor = e.target.value;
+			pointerColorInput.addEventListener('input', function(e) {
+				pointerColor = e.target.value;
 				paintLabelBtn(pointerLabelBtn, pointerColor);
-				refreshPickerColors(); });
-			annotColorInput.addEventListener('input', function(e) { annotColor = e.target.value;
+				refreshPickerColors();
+			});
+			annotColorInput.addEventListener('input', function(e) {
+				annotColor = e.target.value;
 				paintLabelBtn(annotLabelBtn, annotColor);
-				refreshPickerColors(); });
+				refreshPickerColors();
+			});
 
 			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
 				container.innerHTML = '';
@@ -1125,8 +1190,10 @@
 			/* Stage events */
 			var target = stage;
 
-			function touchGuard(e) { if (overlayVisible && e.target.closest('#textOverlay')) return;
-				e.preventDefault(); }
+			function touchGuard(e) {
+				if (overlayVisible && e.target.closest('#textOverlay')) return;
+				e.preventDefault();
+			}
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function(ev) { target.addEventListener(ev, touchGuard, { passive: false }); });
 			target.addEventListener('pointerdown', function(e) {
 				if (annotationOn && textModeOn && !overlayVisible) {
@@ -1144,14 +1211,21 @@
 			target.addEventListener('pointerleave', endDraw);
 
 			/* Text overlay actions */
-			textAdd.addEventListener('click', function() { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-				hideTextOverlay(); });
+			textAdd.addEventListener('click', function() {
+				if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+				hideTextOverlay();
+			});
 			textCancel.addEventListener('click', function() { hideTextOverlay(); });
 			textInput.addEventListener('keydown', function(e) {
-				if (e.key === 'Escape') { e.preventDefault();
-					hideTextOverlay(); }
-				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-					hideTextOverlay(); }
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					hideTextOverlay();
+				}
+				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+					e.preventDefault();
+					if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+					hideTextOverlay();
+				}
 			});
 
 			/* Snapshot */
@@ -1173,17 +1247,33 @@
 						var cr = w / h,
 							vr = vw / vh;
 						var dw, dh, dx, dy;
-						if (fitMode === 'cover') { if (vr > cr) { dh = h;
-								dw = h * vr; } else { dw = w;
-								dh = w / vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-								dh = w / vr; } else { dh = h;
-								dw = h * vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; }
+						if (fitMode === 'cover') {
+							if (vr > cr) {
+								dh = h;
+								dw = h * vr;
+							} else {
+								dw = w;
+								dh = w / vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						} else {
+							if (vr > cr) {
+								dw = w;
+								dh = w / vr;
+							} else {
+								dh = h;
+								dw = h * vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						}
 						octx.save();
-						if (isMirrored) { octx.translate(w, 0);
+						if (isMirrored) {
+							octx.translate(w, 0);
 							octx.scale(-1, 1);
-							dx = w - dx - dw; }
+							dx = w - dx - dw;
+						}
 						octx.drawImage(video, dx, dy, dw, dh);
 						octx.restore();
 					}
@@ -1218,17 +1308,33 @@
 						var cr = w / h,
 							vr = vw / vh;
 						var dw, dh, dx, dy;
-						if (fitMode === 'cover') { if (vr > cr) { dh = h;
-								dw = h * vr; } else { dw = w;
-								dh = w / vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-								dh = w / vr; } else { dh = h;
-								dw = h * vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; }
+						if (fitMode === 'cover') {
+							if (vr > cr) {
+								dh = h;
+								dw = h * vr;
+							} else {
+								dw = w;
+								dh = w / vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						} else {
+							if (vr > cr) {
+								dw = w;
+								dh = w / vr;
+							} else {
+								dh = h;
+								dw = h * vr;
+							}
+							dx = (w - dw) / 2;
+							dy = (h - dh) / 2;
+						}
 						compositeCtx.save();
-						if (isMirrored) { compositeCtx.translate(w, 0);
+						if (isMirrored) {
+							compositeCtx.translate(w, 0);
 							compositeCtx.scale(-1, 1);
-							dx = w - dx - dw; }
+							dx = w - dx - dw;
+						}
 						compositeCtx.drawImage(video, dx, dy, dw, dh);
 						compositeCtx.restore();
 					}
@@ -1292,10 +1398,14 @@
 				isPaused = false;
 				updateStatusUI();
 
-				buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
-					saveNum('pointerSize', sz); });
-				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
-					saveNum('annotSize', sz); });
+				buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) {
+					pointerSize = sz;
+					saveNum('pointerSize', sz);
+				});
+				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) {
+					annotSize = sz;
+					saveNum('annotSize', sz);
+				});
 				refreshPickerColors();
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
@@ -1305,6 +1415,11 @@
 			})();
 		})();
 	</script>
+
+	<footer>
+		&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+	</footer>
 </body>
 
 </html>
