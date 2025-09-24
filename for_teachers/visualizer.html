@@ -31,14 +31,14 @@
 			margin: 0;
 			min-height: 100svh;
 			padding-bottom: env(safe-area-inset-bottom);
-			background: linear-gradient(180deg, #0d0f14, #0f1117 60%, #0b0d12);
+			background: #0f1117;
 			color: var(--text);
 			font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
 			display: flex;
 			flex-direction: column
 		}
 
-		/* --- Topbar with logo + title --- */
+		/* Topbar */
 		.topbar {
 			background: #2a2f3b;
 			color: #fff;
@@ -50,78 +50,74 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			padding: 10px 20px
+			padding: 8px 14px
 		}
 
 		.topbar .brand {
 			position: absolute;
-			left: 12px;
+			left: 10px;
 			display: inline-flex;
 			align-items: center;
-			gap: .4rem;
+			gap: .35rem;
 			text-decoration: none;
 			color: #fff
 		}
 
 		.topbar .brand img {
-			height: 28px;
+			height: 22px;
 			width: auto;
 			display: block
 		}
 
 		.topbar .title {
-			font-size: 20px;
+			font-size: 17px;
 			font-weight: 700
 		}
 
-		/* --- Toolbar layout --- */
+		/* Toolbar container – compact, no forced full width */
 		header {
-			padding: .6rem .9rem .5rem;
-			display: grid;
-			gap: .5rem;
-			grid-template-columns: 1fr;
-			background: rgba(0, 0, 0, .25);
-			backdrop-filter: saturate(1.2) blur(6px);
+			padding: .35rem .6rem .3rem;
+			background: rgba(0, 0, 0, .18);
 			border-bottom: 1px solid rgba(255, 255, 255, .06)
 		}
 
 		.row {
 			display: flex;
-			gap: .5rem;
 			flex-wrap: wrap;
-			align-items: center
+			gap: .4rem .5rem;
+			align-items: center;
+			/* groups size to content, row won’t stretch them */
 		}
 
+		/* Group boxes – very compact */
 		.group {
 			display: flex;
 			align-items: center;
-			gap: .5rem;
-			flex-wrap: wrap;
+			gap: .4rem;
+			flex-wrap: nowrap;
 			background: var(--panel);
 			border: 1px solid var(--ring);
-			padding: .45rem .55rem;
-			border-radius: .6rem
+			padding: .26rem .38rem;
+			border-radius: .5rem
 		}
 
-		.group h4 {
-			margin: 0 .35rem 0 0;
-			font-size: .85rem;
+		.title-mini {
+			font-size: .78rem;
 			font-weight: 600;
-			color: #cfd5e4
+			opacity: .9;
+			margin-right: .3rem;
+			white-space: nowrap
 		}
 
-		.spacer {
-			flex: 1
-		}
-
+		/* Controls – compact */
 		select,
 		button {
 			background: #0e121a;
 			color: var(--text);
 			border: 1px solid var(--ring);
-			border-radius: .45rem;
-			padding: .35rem .5rem;
-			font-size: .95rem;
+			border-radius: .4rem;
+			padding: .22rem .42rem;
+			font-size: .9rem;
 			outline: none
 		}
 
@@ -162,7 +158,7 @@
 		}
 
 		.fixed-width-btn {
-			width: 72px;
+			width: 60px;
 			text-align: center
 		}
 
@@ -170,19 +166,20 @@
 			display: none !important
 		}
 
-		/* Label-as-color button */
+		/* Label-as-color buttons */
 		.labelBtn {
 			font-weight: 700;
-			padding: .35rem .6rem;
-			border-radius: .45rem;
+			padding: .22rem .42rem;
+			border-radius: .4rem;
 			border: 1px solid var(--ring);
-			min-width: 98px;
+			min-width: 84px;
 			text-align: center;
 			cursor: pointer;
 			user-select: none;
+			font-size: .9rem;
+			white-space: nowrap
 		}
 
-		/* Visually hidden but interactive (not display:none; iOS-friendly) */
 		.srOnly {
 			position: absolute !important;
 			width: 1px;
@@ -196,16 +193,16 @@
 			white-space: nowrap;
 		}
 
+		/* Stream status */
 		.status {
 			display: flex;
 			align-items: center;
-			gap: .45rem;
-			padding: .15rem .4rem
+			gap: .3rem
 		}
 
 		.light {
-			width: 14px;
-			height: 14px;
+			width: 11px;
+			height: 11px;
 			border-radius: 50%;
 			border: 2px solid rgba(255, 255, 255, .15)
 		}
@@ -219,15 +216,15 @@
 		}
 
 		.statusText {
-			min-width: 52px;
+			min-width: 44px;
 			color: #cfd5e4;
-			font-size: .9rem
+			font-size: .82rem
 		}
 
 		.switch {
 			position: relative;
-			width: 56px;
-			height: 30px;
+			width: 46px;
+			height: 24px;
 			display: inline-block
 		}
 
@@ -248,8 +245,8 @@
 		.slider:before {
 			content: "";
 			position: absolute;
-			height: 24px;
-			width: 24px;
+			height: 18px;
+			width: 18px;
 			left: 3px;
 			top: 2px;
 			background: #fff;
@@ -262,22 +259,74 @@
 		}
 
 		input:checked+.slider:before {
-			transform: translateX(26px)
+			transform: translateX(22px)
 		}
 
 		.vsep {
 			width: 1px;
-			height: 24px;
-			background: rgba(255, 255, 255, .08);
-			margin: 0 .25rem
+			height: 16px;
+			background: rgba(255, 255, 255, .08)
+		}
+
+		/* Size pickers – tiny dots, single line */
+		.sizePicker {
+			display: flex;
+			align-items: center;
+			gap: .25rem
+		}
+
+		.dotBtn {
+			--dot: 9px;
+			--dot-color: #fff;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 28px;
+			height: 22px;
+			border: 1px solid var(--ring);
+			border-radius: .35rem;
+			background: #0e121a;
+			cursor: pointer
+		}
+
+		.dotBtn .dot {
+			display: block;
+			width: var(--dot);
+			height: var(--dot);
+			aspect-ratio: 1/1;
+			border-radius: 50%;
+			background: var(--dot-color)
+		}
+
+		.dotBtn.active {
+			outline: 2px solid #9acbff
+		}
+
+		/* Zoom – single line */
+		#zoomGroup {
+			white-space: nowrap
+		}
+
+		#zoomSlider {
+			width: 160px;
+			height: 22px;
+			vertical-align: middle
+		}
+
+		#zoomVal {
+			display: inline-block;
+			min-width: 2.6ch;
+			text-align: right;
+			color: #cfd5e4;
+			font-size: .9rem
 		}
 
 		/* Stage */
 		#stage {
 			position: relative;
 			flex: 1;
-			min-height: 45vh;
-			margin: .5rem .9rem calc(.5rem + env(safe-area-inset-bottom));
+			min-height: 50vh;
+			margin: .4rem .6rem calc(.5rem + env(safe-area-inset-bottom));
 			border: 1px solid var(--ring);
 			border-radius: 12px;
 			overflow: hidden;
@@ -301,23 +350,23 @@
 
 		#hud {
 			position: absolute;
-			right: .6rem;
-			bottom: .6rem;
-			font-size: .85rem;
+			right: .5rem;
+			bottom: .5rem;
+			font-size: .8rem;
 			color: #cfd5e4;
 			background: rgba(0, 0, 0, .4);
-			padding: .25rem .5rem;
-			border-radius: .4rem;
+			padding: .2rem .4rem;
+			border-radius: .35rem;
 			border: 1px solid var(--ring)
 		}
 
 		#statusDot {
 			display: inline-block;
-			width: .55rem;
-			height: .55rem;
+			width: .5rem;
+			height: .5rem;
 			border-radius: 50%;
 			background: var(--good);
-			margin-right: .4rem
+			margin-right: .35rem
 		}
 
 		.pausedVideo #statusDot {
@@ -331,62 +380,28 @@
 			z-index: 20;
 			background: rgba(20, 22, 28, .2);
 			border: 1px dashed rgba(255, 255, 255, .5);
-			border-radius: .6rem;
-			padding: .5rem
+			border-radius: .45rem;
+			padding: .35rem
 		}
 
 		#textOverlay textarea {
-			width: 280px;
+			width: 250px;
 			max-width: 60vw;
-			min-height: 80px;
+			min-height: 72px;
 			background: transparent;
 			color: #fff;
 			border: 1px dashed rgba(255, 255, 255, .35);
-			border-radius: .4rem;
-			padding: .45rem;
-			font-size: 16px;
+			border-radius: .35rem;
+			padding: .35rem;
+			font-size: 15px;
 			outline: none
 		}
 
 		#textActions {
 			display: flex;
-			gap: .5rem;
+			gap: .35rem;
 			justify-content: flex-end;
-			margin-top: .5rem
-		}
-
-		/* Size pickers */
-		.sizePicker {
-			display: flex;
-			align-items: center;
-			gap: .35rem
-		}
-
-		.dotBtn {
-			--dot: 12px;
-			--dot-color: #fff;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 34px;
-			height: 28px;
-			border: 1px solid var(--ring);
-			border-radius: .45rem;
-			background: #0e121a;
-			cursor: pointer
-		}
-
-		.dotBtn .dot {
-			display: block;
-			width: var(--dot);
-			height: var(--dot);
-			aspect-ratio: 1/1;
-			border-radius: 50%;
-			background: var(--dot-color);
-		}
-
-		.dotBtn.active {
-			outline: 2px solid #9acbff
+			margin-top: .35rem
 		}
 
 		/* Toast */
@@ -394,13 +409,13 @@
 			position: fixed;
 			left: 50%;
 			transform: translateX(-50%);
-			bottom: calc(8px + env(safe-area-inset-bottom));
+			bottom: calc(6px + env(safe-area-inset-bottom));
 			background: rgba(0, 0, 0, .75);
 			color: #fff;
-			padding: .5rem .75rem;
-			border-radius: .5rem;
+			padding: .4rem .6rem;
+			border-radius: .45rem;
 			border: 1px solid rgba(255, 255, 255, .12);
-			font-size: .9rem;
+			font-size: .85rem;
 			opacity: 0;
 			pointer-events: none;
 			transition: opacity .25s
@@ -413,7 +428,7 @@
 </head>
 
 <body>
-	<!-- Topbar with PanPhy logo -->
+	<!-- Topbar -->
 	<div class="topbar">
 		<div class="bar">
 			<a class="brand" href="https://panphy.github.io" aria-label="panphy home">
@@ -423,49 +438,42 @@
 		</div>
 	</div>
 
-	<!-- Toolbar -->
+	<!-- Toolbar: compact, wraps naturally (typically 2 rows) -->
 	<header>
-		<!-- Row 1 -->
 		<div class="row">
-			<!-- Camera group -->
 			<div class="group">
-				<h4>Camera</h4>
+				<span class="title-mini">Camera</span>
 				<select id="cameraSelect"></select>
 				<button id="refreshBtn">Refresh</button>
 			</div>
 
-			<!-- Stream group -->
 			<div class="group">
-				<h4>Stream</h4>
+				<span class="title-mini">Stream</span>
 				<label class="switch">
 					<input id="liveToggle" type="checkbox" checked />
 					<span class="slider"></span>
 				</label>
 				<span class="vsep"></span>
-				<div class="status"><span id="statusLight" class="light live"></span><span id="statusLabel" class="statusText">Live</span></div>
+				<div class="status">
+					<span id="statusLight" class="light live"></span>
+					<span id="statusLabel" class="statusText">Live</span>
+				</div>
 			</div>
 
-			<div class="spacer"></div>
-
-			<!-- Capture/Display group -->
 			<div class="group">
+				<span class="title-mini">Display</span>
 				<button id="screenshotBtn">Snapshot</button>
 				<button id="recordBtn">Record</button>
 				<button id="mirrorBtn">Mirror</button>
 				<button id="fitBtn" class="fixed-width-btn">Fill</button>
 			</div>
-		</div>
 
-		<!-- Row 2 -->
-		<div class="row">
-			<!-- Pointer color & size -->
 			<div class="group">
 				<label for="pointerColorInput" id="pointerLabelBtn" class="labelBtn">Pointer</label>
 				<input id="pointerColorInput" type="color" class="srOnly" value="#ff3b3b" />
 				<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
 			</div>
 
-			<!-- Annotation tools -->
 			<div class="group" id="annotGroup">
 				<label for="annotColorInput" id="annotLabelBtn" class="labelBtn">Annotate</label>
 				<input id="annotColorInput" type="color" class="srOnly" value="#33d17a" />
@@ -474,6 +482,12 @@
 				<button id="eraserBtn" class="muted">Eraser</button>
 				<button id="textBtn" class="muted">Text</button>
 				<button id="clearBtn" class="danger">Clear</button>
+			</div>
+
+			<div class="group" id="zoomGroup">
+				<span class="title-mini">Zoom</span>
+				<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
+				<span id="zoomVal">1.0×</span>
 			</div>
 		</div>
 	</header>
@@ -542,6 +556,10 @@
 			var textAdd = document.getElementById('textAdd');
 			var textCancel = document.getElementById('textCancel');
 
+			/* Zoom controls */
+			var zoomSlider = document.getElementById('zoomSlider');
+			var zoomVal = document.getElementById('zoomVal');
+
 			/* ===== Persistence ===== */
 			function saveStr(k, v) { try { localStorage.setItem(k, v == null ? '' : String(v)); } catch (e) {} }
 
@@ -554,7 +572,7 @@
 			/* ===== State ===== */
 			var pointerColor = pointerColorInput.value;
 			var annotColor = annotColorInput.value;
-			var SIZESET = [6, 12, 20]; // thin, medium, thick
+			var SIZESET = [6, 12, 20];
 			var pointerSize = loadNum('pointerSize', 12);
 			var annotSize = loadNum('annotSize', 12);
 
@@ -567,10 +585,8 @@
 				textModeOn = false,
 				overlayVisible = false;
 
-			var currentDeviceId = loadStr('lastDeviceId', null);
 			var facingPref = loadStr('lastFacing', 'environment');
 			var stream = null,
-				lastGoodConstraint = null,
 				switching = false;
 
 			var tail = [];
@@ -589,14 +605,14 @@
 				mediaRecorder = null,
 				recChunks = [];
 
+			/* Zoom state */
+			var zoomLevel = loadNum('zoomLevel', 1);
+
 			/* ===== Utils ===== */
 			function showToast(msg, ms) { ms = ms || 1600;
 				toast.textContent = msg;
 				toast.classList.add('show');
 				setTimeout(function() { toast.classList.remove('show'); }, ms); }
-
-			function applyVideoStyle() { video.style.objectFit = (fitMode === 'cover') ? 'cover' : 'contain';
-				video.style.transform = isMirrored ? 'scaleX(-1)' : 'none'; }
 
 			function contrastOn(hex) {
 				var h = hex.replace('#', '');
@@ -608,22 +624,22 @@
 				return yiq >= 160 ? '#111' : '#fff';
 			}
 
-			function paintLabelBtn(btn, color) {
-				btn.style.background = color;
+			function paintLabelBtn(btn, color) { btn.style.background = color;
 				btn.style.borderColor = 'rgba(255,255,255,.25)';
-				btn.style.color = contrastOn(color);
-			}
+				btn.style.color = contrastOn(color); }
 
 			function resizeCanvases() {
 				var r = stage.getBoundingClientRect();
-				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(function(c) { c.width = Math.floor(r.width);
-					c.height = Math.floor(r.height); });
-				applyVideoStyle();
+				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(function(c) {
+					c.width = Math.floor(r.width);
+					c.height = Math.floor(r.height);
+				});
+				applyTransforms();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				renderAnnotations();
 			}
 
-			/* --- UI sync --- */
+			/* UI sync */
 			function syncToggleUI() { liveToggle.checked = !isPaused; }
 
 			function updateStatusUI() {
@@ -634,7 +650,7 @@
 				syncToggleUI();
 			}
 
-			/* --- Pause / freeze --- */
+			/* Freeze handling */
 			function captureFrozenFromVideo() {
 				var w = freezeCanvas.width,
 					h = freezeCanvas.height;
@@ -681,7 +697,7 @@
 				updateStatusUI();
 			}
 
-			/* --- Tools ↔ pointer interaction (independent of pause) --- */
+			/* Tools ↔ pointer */
 			function updateInteractionMode() {
 				var toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
@@ -689,7 +705,7 @@
 					tail.length = 0; }
 			}
 
-			/* ===== Camera ===== */
+			/* Camera */
 			async function startCamera(constraint) {
 				if (switching) return;
 				switching = true;
@@ -699,20 +715,17 @@
 					stream = await navigator.mediaDevices.getUserMedia(constraints);
 					video.srcObject = stream;
 					await video.play();
-					lastGoodConstraint = constraint;
 				} catch (e1) {
 					try {
 						var fb1 = { facingMode: facingPref };
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb1) });
 						video.srcObject = stream;
 						await video.play();
-						lastGoodConstraint = fb1;
 					} catch (e2) {
 						var fb2 = {};
 						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb2) });
 						video.srcObject = stream;
 						await video.play();
-						lastGoodConstraint = fb2;
 					}
 				} finally {
 					await enumerate();
@@ -748,7 +761,6 @@
 					t = setTimeout(function() { fn.apply(null, a); }, ms); }; }
 			var onCameraChange = debounced(async function() {
 				var val = cameraSelect.value || '';
-				saveStr('lastDeviceId', val);
 				if (val.indexOf('facing:') === 0) {
 					var facing = val.split(':')[1] || facingPref;
 					facingPref = facing;
@@ -766,7 +778,7 @@
 			cameraSelect.addEventListener('input', onCameraChange);
 			refreshBtn.addEventListener('click', function() { enumerate(); });
 
-			/* ===== Annotations ===== */
+			/* Annotations */
 			function renderAnnotations() {
 				var w = drawCanvas.width,
 					h = drawCanvas.height;
@@ -794,9 +806,11 @@
 						ctxDraw.lineWidth = Math.max(2, obj.fontPx * 0.12);
 						ctxDraw.strokeStyle = 'rgba(0,0,0,0.55)';
 						var lines = obj.text.split(/\r?\n/);
-						lines.forEach(function(ln, li) { var yy = obj.y + li * obj.lh;
+						lines.forEach(function(ln, li) {
+							var yy = obj.y + li * obj.lh;
 							ctxDraw.strokeText(ln, obj.x, yy);
-							ctxDraw.fillText(ln, obj.x, yy); });
+							ctxDraw.fillText(ln, obj.x, yy);
+						});
 						ctxDraw.restore();
 					}
 				}
@@ -835,14 +849,25 @@
 						if (px >= obj.x && px <= obj.x + obj.width && py >= obj.y && py <= obj.y + obj.height) return i;
 					} else if (obj.type === 'stroke') {
 						var pts = obj.points;
-						for (var j = 1; j < pts.length; j++) { if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i; }
+						for (var j = 1; j < pts.length; j++) {
+							if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i;
+						}
 					}
 				}
 				return -1;
 			}
 
-			/* ===== Interaction (works Live or Paused) ===== */
-			function canvasToCtxXY(clientX, clientY, canvas) { var r = canvas.getBoundingClientRect(); return { x: clientX - r.left, y: clientY - r.top }; }
+			/* Pointer / drawing – zoom-aware */
+			function canvasToCtxXY(clientX, clientY, canvas) {
+				var rect = canvas.getBoundingClientRect();
+				var baseW = canvas.width,
+					baseH = canvas.height;
+				var s = zoomLevel || 1;
+				var x = (clientX - rect.left - rect.width / 2) / s + baseW / 2;
+				var y = (clientY - rect.top - rect.height / 2) / s + baseH / 2;
+				if (!isFinite(x) || !isFinite(y)) return { x: 0, y: 0 };
+				return { x: x, y: y };
+			}
 
 			function normPressure(p) { var v = isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
 
@@ -887,7 +912,6 @@
 					var ptL = canvasToCtxXY(p.x, p.y, laserCanvas);
 					addTailPoint(ptL.x, ptL.y);
 				}
-
 				if (eraserOn && p.id === pointerIdActive) {
 					var ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
 					var tol = Math.max(8, annotSize * 1.1);
@@ -950,8 +974,8 @@
 
 			function showTextOverlayAt(clientX, clientY) {
 				var rect = stage.getBoundingClientRect();
-				var x = Math.min(Math.max(clientX - rect.left, 8), rect.width - 300);
-				var y = Math.min(Math.max(clientY - rect.top, 8), rect.height - 140);
+				var x = Math.min(Math.max(clientX - rect.left, 8), rect.width - 260);
+				var y = Math.min(Math.max(clientY - rect.top, 8), rect.height - 126);
 				textOverlay.style.left = x + 'px';
 				textOverlay.style.top = y + 'px';
 				textOverlay.style.display = 'block';
@@ -983,7 +1007,7 @@
 				renderAnnotations();
 			}
 
-			/* ===== UI wiring ===== */
+			/* Wiring */
 			liveToggle.addEventListener('change', function() { setPaused(!liveToggle.checked); });
 
 			annotationBtn.addEventListener('click', function() {
@@ -1033,30 +1057,24 @@
 			clearBtn.addEventListener('click', function() { objects.length = 0;
 				renderAnnotations(); });
 
-			/* Color input handlers (labels open pickers natively via for=) */
 			function refreshPickerColors() {
 				[].slice.call(sizeUI.pointer.children).forEach(function(btn) { btn.style.setProperty('--dot-color', pointerColor); });
 				[].slice.call(sizeUI.annot.children).forEach(function(btn) { btn.style.setProperty('--dot-color', annotColor); });
 			}
-			pointerColorInput.addEventListener('input', function(e) {
-				pointerColor = e.target.value;
+			pointerColorInput.addEventListener('input', function(e) { pointerColor = e.target.value;
 				paintLabelBtn(pointerLabelBtn, pointerColor);
-				refreshPickerColors();
-			});
-			annotColorInput.addEventListener('input', function(e) {
-				annotColor = e.target.value;
+				refreshPickerColors(); });
+			annotColorInput.addEventListener('input', function(e) { annotColor = e.target.value;
 				paintLabelBtn(annotLabelBtn, annotColor);
-				refreshPickerColors();
-			});
+				refreshPickerColors(); });
 
-			/* === Size pickers (true brush sizes) === */
 			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
 				container.innerHTML = '';
 				sizes.forEach(function(sz) {
 					var btn = document.createElement('button');
 					btn.type = 'button';
 					btn.className = 'dotBtn';
-					btn.style.setProperty('--dot', sz + 'px'); // actual brush size
+					btn.style.setProperty('--dot', sz + 'px');
 					btn.style.setProperty('--dot-color', getColor());
 					if (currentSize === sz) btn.classList.add('active');
 					var dot = document.createElement('span');
@@ -1071,18 +1089,38 @@
 				});
 			}
 
-			/* Mirror / Fit */
-			function applyVideoAndMaybeFreeze() { applyVideoStyle(); if (isPaused && hasFrozen) drawFreezeFromFrozen(); }
-			mirrorBtn.addEventListener('click', function() { isMirrored = !isMirrored;
-				applyVideoAndMaybeFreeze();
-				showToast(isMirrored ? 'Mirrored' : 'Unmirrored'); });
-			fitBtn.addEventListener('click', function() {
+			/* Zoom + mirror + fit */
+			function applyTransforms() {
+				var s = zoomLevel || 1;
+				[drawCanvas, laserCanvas, freezeCanvas].forEach(function(el) {
+					el.style.transformOrigin = 'center center';
+					el.style.transform = 'scale(' + s + ')';
+				});
+				video.style.transformOrigin = 'center center';
+				video.style.transform = (isMirrored ? 'scaleX(-1) ' : '') + 'scale(' + s + ')';
+			}
+			document.getElementById('mirrorBtn').addEventListener('click', function() {
+				isMirrored = !isMirrored;
+				applyTransforms();
+				if (isPaused && hasFrozen) drawFreezeFromFrozen();
+				showToast(isMirrored ? 'Mirrored' : 'Unmirrored');
+			});
+			document.getElementById('fitBtn').addEventListener('click', function() {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
 				fitBtn.textContent = (fitMode === 'cover') ? 'Fill' : 'Fit';
 				resizeCanvases();
-				applyVideoAndMaybeFreeze();
+				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
+
+			function setZoom(v) {
+				zoomLevel = Math.max(1, Math.min(3, v || 1));
+				saveNum('zoomLevel', zoomLevel);
+				zoomSlider.value = String(zoomLevel);
+				zoomVal.textContent = zoomLevel.toFixed(1) + '×';
+				applyTransforms();
+			}
+			zoomSlider.addEventListener('input', function(e) { setZoom(parseFloat(e.target.value)); });
 
 			/* Stage events */
 			var target = stage;
@@ -1126,7 +1164,9 @@
 				out.height = h;
 				var octx = out.getContext('2d');
 
-				if (isPaused && hasFrozen) { octx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h); } else {
+				if (isPaused && hasFrozen) {
+					octx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
+				} else {
 					var vw = video.videoWidth,
 						vh = video.videoHeight;
 					if (vw && vh) {
@@ -1169,8 +1209,9 @@
 				var w = composite.width,
 					h = composite.height;
 				compositeCtx.clearRect(0, 0, w, h);
-				if (isPaused && hasFrozen) compositeCtx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
-				else {
+				if (isPaused && hasFrozen) {
+					compositeCtx.drawImage(frozen, 0, 0, frozen.width, frozen.height, 0, 0, w, h);
+				} else {
 					var vw = video.videoWidth,
 						vh = video.videoHeight;
 					if (vw && vh) {
@@ -1237,7 +1278,7 @@
 				}
 			});
 
-			/* ===== Init ===== */
+			/* Init */
 			var ro = new ResizeObserver(function() { resizeCanvases(); });
 			ro.observe(stage);
 			window.addEventListener('orientationchange', function() { setTimeout(resizeCanvases, 200); });
@@ -1248,11 +1289,9 @@
 				await startCamera({ facingMode: facingPref });
 				await enumerate();
 
-				// Start Live; toggle mirrors this
 				isPaused = false;
 				updateStatusUI();
 
-				// Build size pickers & colors
 				buildSizePicker(sizeUI.pointer, SIZESET, function() { return pointerColor; }, pointerSize, function(sz) { pointerSize = sz;
 					saveNum('pointerSize', sz); });
 				buildSizePicker(sizeUI.annot, SIZESET, function() { return annotColor; }, annotSize, function(sz) { annotSize = sz;
@@ -1261,6 +1300,7 @@
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
 
+				setZoom(zoomLevel);
 				resizeCanvases();
 			})();
 		})();
