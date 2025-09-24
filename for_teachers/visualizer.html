@@ -606,6 +606,8 @@
 				overlayVisible = false;
 
 			var facingPref = loadStr('lastFacing', 'environment');
+
+			var lastDeviceId = loadStr('lastDeviceId', '');
 			var stream = null,
 				switching = false;
 
@@ -779,31 +781,63 @@
 					switching = false;
 				}
 			}
-			async function enumerate() {
-				var devs = await navigator.mediaDevices.enumerateDevices();
-				var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
 
-				function facingGuess(label) {
-					var L = (label || '').toLowerCase();
-					if (/(back|rear|environment)/.test(L)) return 'environment';
-					if (/(front|user|face)/.test(L)) return 'user';
-					return 'environment';
+			async function enumerate() {
+				try {
+					var devs = await navigator.mediaDevices.enumerateDevices();
+					var cams = devs.filter(function(d) { return d.kind === 'videoinput'; });
+
+					function facingGuess(label) {
+						var L = (label || '').toLowerCase();
+						if (/(back|rear|environment)/.test(L)) return 'environment';
+						if (/(front|user|face)/.test(L)) return 'user';
+						return 'environment';
+					}
+
+					cameraSelect.innerHTML = '';
+					cams.forEach(function(d, i) {
+						var opt = document.createElement('option');
+						var fg = facingGuess(d.label || '');
+						opt.value = d.deviceId || ('facing:' + fg + ':' + i);
+						opt.textContent = d.label || ('Camera ' + (i + 1));
+						opt.dataset.facing = fg;
+						cameraSelect.appendChild(opt);
+					});
+					cameraSelect.disabled = cameraSelect.options.length <= 1;
+
+					// Sync selection with active stream or memory
+					var activeId = '';
+					try {
+						if (stream) {
+							var tracks = stream.getVideoTracks();
+							if (tracks && tracks[0]) {
+								var s = tracks[0].getSettings && tracks[0].getSettings();
+								if (s && s.deviceId) activeId = s.deviceId;
+							}
+						}
+					} catch (e) {}
+
+					var targetValue = '';
+					var hasVal = function(v) { return [].some.call(cameraSelect.options, function(o) { return o.value === v; }); };
+
+					if (activeId && hasVal(activeId)) {
+						targetValue = activeId;
+					} else if (lastDeviceId && hasVal(lastDeviceId)) {
+						targetValue = lastDeviceId;
+					} else {
+						var optByFacing = [].find.call(cameraSelect.options, function(o) { return o.dataset && o.dataset.facing === facingPref; });
+						if (optByFacing) targetValue = optByFacing.value;
+						else if (cameraSelect.options[0]) targetValue = cameraSelect.options[0].value;
+					}
+					if (targetValue) cameraSelect.value = targetValue;
+				} catch (err) {
+					console.error(err);
+					showToast('Could not list cameras');
 				}
-				cameraSelect.innerHTML = '';
-				cams.forEach(function(d, i) {
-					var opt = document.createElement('option');
-					var fg = facingGuess(d.label || '');
-					opt.value = d.deviceId || ('facing:' + fg + ':' + i);
-					opt.textContent = d.label || ('Camera ' + (i + 1));
-					opt.dataset.facing = fg;
-					cameraSelect.appendChild(opt);
-				});
-				cameraSelect.disabled = cameraSelect.options.length <= 1;
 			}
 
 			function debounced(fn, ms) {
-				var t;
-				ms = ms || 250;
+				var t = 0;
 				return function() {
 					var a = arguments;
 					clearTimeout(t);
@@ -816,8 +850,10 @@
 					var facing = val.split(':')[1] || facingPref;
 					facingPref = facing;
 					saveStr('lastFacing', facing);
+					saveStr('lastDeviceId', ''); // cleared
 					await startCamera({ facingMode: facing });
 				} else {
+					saveStr('lastDeviceId', val);
 					await startCamera({ deviceId: { exact: val } });
 					var opt = [].slice.call(cameraSelect.options).find(function(o) { return o.value === val; });
 					if (opt && opt.dataset && opt.dataset.facing) {
@@ -829,7 +865,27 @@
 			}, 250);
 			cameraSelect.addEventListener('change', onCameraChange);
 			cameraSelect.addEventListener('input', onCameraChange);
-			refreshBtn.addEventListener('click', function() { enumerate(); });
+
+			refreshBtn.addEventListener('click', async function() {
+				if (switching) return;
+				switching = true;
+				try {
+					try { if (stream) stream.getTracks().forEach(function(t) { t.stop(); }); } catch (e) {}
+					await enumerate();
+					var val = cameraSelect.value || '';
+					if (val && val.indexOf('facing:') !== 0) {
+						saveStr('lastDeviceId', val);
+						await startCamera({ deviceId: { exact: val } });
+					} else {
+						await startCamera({ facingMode: facingPref });
+					}
+				} catch (e) {
+					console.error(e);
+					showToast('Refresh failed');
+				} finally {
+					switching = false;
+				}
+			});
 
 			/* Annotations */
 			function renderAnnotations() {
@@ -1392,8 +1448,11 @@
 
 			(async function init() {
 				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('getUserMedia not supported'); return; }
-				await startCamera({ facingMode: facingPref });
 				await enumerate();
+
+				var chosen = '';
+				if (lastDeviceId && [].some.call(cameraSelect.options, function(o) { return o.value === lastDeviceId; })) { chosen = lastDeviceId; }
+				if (chosen) { await startCamera({ deviceId: { exact: chosen } }); } else { await startCamera({ facingMode: facingPref }); }
 
 				isPaused = false;
 				updateStatusUI();
