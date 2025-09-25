@@ -2,513 +2,510 @@
 <html lang="en" data-theme="light">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PanPhy Projects</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/path-to-your/apple-touch-icon.png">
-  <style>
-    /* CSS Variables for Light and Dark Themes */
-    :root {
-      --background-color: #f4f4f9;
-      --text-color: #333;
-      --header-bg: #34495e;
-      --header-text: #fff;
-      --nav-bg: #2c3e50;
-      --nav-text: #fff;
-      --nav-hover: #ffcc00;
-      --section-title: #2c3e50;
-      --section-border: #ffcc00;
-      --card-bg: #fff;
-      --card-border: #ddd;
-      --card-shadow: rgba(0, 0, 0, 0.1);
-      --card-title: #34495e;
-      --card-text: #666;
-      --card-link-bg: #ffcc00;
-      --card-link-hover: #e6b800;
-      --footer-bg: #2c3e50;
-      --footer-text: #fff;
-      --footer-link: #ffcc00;
-      --button-bg: #474747;
-      --button-hover-bg: #e74c3c;
-      --button-bg-checked: #1abc9c;
-      --button-hover-bg-checked: #16a085;
-      --button-color: #fff;
-      --button-border: none;
-      --button-border-radius: 50%;
-      --button-size: 40px;
-      --button-font-size: 1.2rem;
-      --button-transition: background 0.3s, transform 0.3s;
-    }
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PanPhy Projects</title>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+	<link rel="icon" type="image/png" href="/favicon.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/path-to-your/apple-touch-icon.png">
+	<style>
+		/* CSS Variables for Light and Dark Themes */
+		:root {
+			--background-color: #f4f4f9;
+			--text-color: #333;
+			--header-bg: #34495e;
+			--header-text: #fff;
+			--nav-bg: #2c3e50;
+			--nav-text: #fff;
+			--nav-hover: #ffcc00;
+			--section-title: #2c3e50;
+			--section-border: #ffcc00;
+			--card-bg: #fff;
+			--card-border: #ddd;
+			--card-shadow: rgba(0, 0, 0, 0.1);
+			--card-title: #34495e;
+			--card-text: #666;
+			--card-link-bg: #ffcc00;
+			--card-link-hover: #e6b800;
+			--footer-bg: #2c3e50;
+			--footer-text: #fff;
+			--footer-link: #ffcc00;
+			--button-bg: #474747;
+			--button-hover-bg: #e74c3c;
+			--button-bg-checked: #1abc9c;
+			--button-hover-bg-checked: #16a085;
+			--button-color: #fff;
+			--button-border: none;
+			--button-border-radius: 50%;
+			--button-size: 40px;
+			--button-font-size: 1.2rem;
+			--button-transition: background 0.3s, transform 0.3s;
+		}
 
-    [data-theme="dark"] {
-      --background-color: #121212;
-      --text-color: #e0e0e0;
-      --header-bg: #1f1f1f;
-      --header-text: #e0e0e0;
-      --nav-bg: #2b2b2b;
-      --nav-text: #e0e0e0;
-      --nav-hover: #1abc9c;
-      --section-title: #1abc9c;
-      --section-border: #1abc9c;
-      --card-bg: #1e1e1e;
-      --card-border: #333;
-      --card-shadow: rgba(0, 0, 0, 0.7);
-      --card-title: #1abc9c;
-      --card-text: #b0b0b0;
-      --card-link-bg: #e74c3c;
-      --card-link-hover: #c0392b;
-      --footer-bg: #1f1f1f;
-      --footer-text: #e0e0e0;
-      --footer-link: #1abc9c;
-      --button-bg: #555;
-      --button-hover-bg: #444;
-      --button-bg-checked: #1abc9c;
-      --button-hover-bg-checked: #16a085;
-      --button-color: #fff;
-    }
+		[data-theme="dark"] {
+			--background-color: #121212;
+			--text-color: #e0e0e0;
+			--header-bg: #1f1f1f;
+			--header-text: #e0e0e0;
+			--nav-bg: #2b2b2b;
+			--nav-text: #e0e0e0;
+			--nav-hover: #1abc9c;
+			--section-title: #1abc9c;
+			--section-border: #1abc9c;
+			--card-bg: #1e1e1e;
+			--card-border: #333;
+			--card-shadow: rgba(0, 0, 0, 0.7);
+			--card-title: #1abc9c;
+			--card-text: #b0b0b0;
+			--card-link-bg: #e74c3c;
+			--card-link-hover: #c0392b;
+			--footer-bg: #1f1f1f;
+			--footer-text: #e0e0e0;
+			--footer-link: #1abc9c;
+			--button-bg: #555;
+			--button-hover-bg: #444;
+			--button-bg-checked: #1abc9c;
+			--button-hover-bg-checked: #16a085;
+			--button-color: #fff;
+		}
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: var(--background-color);
-      color: var(--text-color);
-      transition: background 0.3s, color 0.3s;
-    }
+		body {
+			font-family: 'Roboto', sans-serif;
+			margin: 0;
+			padding: 0;
+			background: var(--background-color);
+			color: var(--text-color);
+			transition: background 0.3s, color 0.3s;
+		}
 
-    header {
-      position: relative;
-      /* needed for absolute positioning of the center section */
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background-color: var(--header-bg);
-      color: var(--header-text);
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin: -0.5rem 0;
-    }
+		header {
+			position: relative;
+			/* needed for absolute positioning of the center section */
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			background-color: var(--header-bg);
+			color: var(--header-text);
+			padding: 1.5rem;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			margin: -0.5rem 0;
+		}
 
-    /* Left Section (Logo) */
-    .header-left {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-    }
+		/* Left Section (Logo) */
+		.header-left {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 2;
+		}
 
-    .logo {
-      height: 60px;
-      width: auto;
-    }
+		.logo {
+			height: 60px;
+			width: auto;
+		}
 
-    /* Right Section (Theme Toggle) */
-    .header-right {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-    }
+		/* Right Section (Theme Toggle) */
+		.header-right {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 2;
+		}
 
-    /* Center Section (Title and Subtitle) - Absolute Centering */
-    .header-center {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      z-index: 1;
-      padding: 0 70px;
-      /* Adjust to avoid overlapping with left/right items */
-    }
+		/* Center Section (Title and Subtitle) - Absolute Centering */
+		.header-center {
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			text-align: center;
+			z-index: 1;
+			padding: 0 70px;
+			/* Adjust to avoid overlapping with left/right items */
+		}
 
-    .header-center h1 {
-      margin: 0;
-      font-size: 2.4rem;
-    }
+		.header-center h1 {
+			margin: 0;
+			font-size: 2.4rem;
+		}
 
-    .header-center p {
-      margin: 0.5rem 0 0 0;
-      font-size: 1.1rem;
-    }
+		.header-center p {
+			margin: 0.5rem 0 0 0;
+			font-size: 1.1rem;
+		}
 
-    footer {
-      background: var(--footer-bg);
-      color: var(--footer-text);
-      text-align: center;
-      padding: 1.5rem 0;
-      margin-top: 3rem;
-      border-top: 1px solid var(--card-border);
-    }
+		footer {
+			background: var(--footer-bg);
+			color: var(--footer-text);
+			text-align: center;
+			padding: 1.5rem 0;
+			margin-top: 3rem;
+			border-top: 1px solid var(--card-border);
+		}
 
-    footer a {
-      color: var(--footer-link);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
+		footer a {
+			color: var(--footer-link);
+			text-decoration: none;
+			transition: color 0.3s;
+		}
 
-    footer a:hover {
-      color: var(--nav-hover);
-    }
+		footer a:hover {
+			color: var(--nav-hover);
+		}
 
-    /* Navigation Styling */
-    nav {
-      background-color: var(--nav-bg);
-      display: flex;
-      justify-content: center;
-      padding: 0.5rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+		/* Navigation Styling */
+		nav {
+			background-color: var(--nav-bg);
+			display: flex;
+			justify-content: center;
+			padding: 0.5rem 0;
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
 
-    nav a {
-      color: var(--nav-text);
-      text-decoration: none;
-      margin: 0 1rem;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: color 0.3s;
-    }
+		nav a {
+			color: var(--nav-text);
+			text-decoration: none;
+			margin: 0 1rem;
+			font-size: 1rem;
+			font-weight: bold;
+			transition: color 0.3s;
+		}
 
-    nav a:hover {
-      color: var(--nav-hover);
-    }
+		nav a:hover {
+			color: var(--nav-hover);
+		}
 
-    /* ----------------------- */
-    /* Section Styling */
-    /* ----------------------- */
-    .section {
-      max-width: 1200px;
-      margin: 2.5rem auto;
-      padding: 0 1.5rem;
-    }
+		/* ----------------------- */
+		/* Section Styling */
+		/* ----------------------- */
+		.section {
+			max-width: 1200px;
+			margin: 2.5rem auto;
+			padding: 0 1.5rem;
+		}
 
-    .section h2 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: var(--section-title);
-      border-bottom: 2px solid var(--section-border);
-      display: inline-block;
-      padding-bottom: 0.3rem;
-    }
+		.section h2 {
+			font-size: 2rem;
+			margin-bottom: 1.5rem;
+			color: var(--section-title);
+			border-bottom: 2px solid var(--section-border);
+			display: inline-block;
+			padding-bottom: 0.3rem;
+		}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-    }
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 2rem;
+		}
 
-    .card {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      box-shadow: 0 4px 8px var(--card-shadow);
-      transition: transform 0.3s, box-shadow 0.3s;
-      height: 100%;
-    }
+		.card {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			background: var(--card-bg);
+			border: 1px solid var(--card-border);
+			border-radius: 10px;
+			box-shadow: 0 4px 8px var(--card-shadow);
+			transition: transform 0.3s, box-shadow 0.3s;
+			height: 100%;
+		}
 
-    .card:hover {
-      transform: translateY(-7px);
-      box-shadow: 0 8px 16px var(--card-shadow);
-    }
+		.card:hover {
+			transform: translateY(-7px);
+			box-shadow: 0 8px 16px var(--card-shadow);
+		}
 
-    .card h3 {
-      font-size: 1.5rem;
-      margin: 1.2rem;
-      color: var(--card-title);
-    }
+		.card h3 {
+			font-size: 1.5rem;
+			margin: 1.2rem;
+			color: var(--card-title);
+		}
 
-    .card p {
-      font-size: 1rem;
-      margin: 0 1.2rem 1.2rem;
-      color: var(--card-text);
-      flex-grow: 1;
-    }
+		.card p {
+			font-size: 1rem;
+			margin: 0 1.2rem 1.2rem;
+			color: var(--card-text);
+			flex-grow: 1;
+		}
 
-    .card a {
-      display: block;
-      text-align: center;
-      background: var(--card-link-bg);
-      color: #fff;
-      text-decoration: none;
-      padding: 0.9rem;
-      font-weight: bold;
-      border-radius: 0 0 10px 10px;
-      transition: background 0.3s;
-    }
+		.card a {
+			display: block;
+			text-align: center;
+			background: var(--card-link-bg);
+			color: #fff;
+			text-decoration: none;
+			padding: 0.9rem;
+			font-weight: bold;
+			border-radius: 0 0 10px 10px;
+			transition: background 0.3s;
+		}
 
-    .card a:hover {
-      background: var(--card-link-hover);
-    }
+		.card a:hover {
+			background: var(--card-link-hover);
+		}
 
-    .theme-toggle button {
-      background: var(--button-bg);
-      border: var(--button-border);
-      border-radius: var(--button-border-radius);
-      width: var(--button-size);
-      height: var(--button-size);
-      font-size: var(--button-font-size);
-      color: var(--button-color);
-      cursor: pointer;
-      transition: var(--button-transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+		.theme-toggle button {
+			background: var(--button-bg);
+			border: var(--button-border);
+			border-radius: var(--button-border-radius);
+			width: var(--button-size);
+			height: var(--button-size);
+			font-size: var(--button-font-size);
+			color: var(--button-color);
+			cursor: pointer;
+			transition: var(--button-transition);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 
-    .theme-toggle button:hover {
-      background: var(--button-hover-bg);
-      transform: scale(1.1);
-    }
+		.theme-toggle button:hover {
+			background: var(--button-hover-bg);
+			transform: scale(1.1);
+		}
 
-    [data-theme="dark"] .theme-toggle button:hover {
-      background: var(--button-hover-bg-checked);
-    }
+		[data-theme="dark"] .theme-toggle button:hover {
+			background: var(--button-hover-bg-checked);
+		}
 
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        padding: 1rem;
-      }
+		@media (max-width: 600px) {
+			header {
+				flex-direction: column;
+				padding: 1rem;
+			}
 
-      .header-center {
-        position: static;
-        transform: none;
-        padding: 0;
-        margin-top: 1rem;
-      }
+			.header-center {
+				position: static;
+				transform: none;
+				padding: 0;
+				margin-top: 1rem;
+			}
 
-      .logo {
-        height: 40px;
-      }
+			.logo {
+				height: 40px;
+			}
 
-      nav a {
-        margin: 0 0.75rem;
-        font-size: 1rem;
-      }
+			nav a {
+				margin: 0 0.75rem;
+				font-size: 1rem;
+			}
 
-      .section h2 {
-        font-size: 1.75rem;
-      }
+			.section h2 {
+				font-size: 1.75rem;
+			}
 
-      .card h3 {
-        font-size: 1.3rem;
-      }
+			.card h3 {
+				font-size: 1.3rem;
+			}
 
-      .card p {
-        font-size: 0.95rem;
-      }
+			.card p {
+				font-size: 0.95rem;
+			}
 
-      .card a {
-        padding: 0.7rem;
-        font-size: 0.95rem;
-      }
-    }
+			.card a {
+				padding: 0.7rem;
+				font-size: 0.95rem;
+			}
+		}
 
-    /* Smooth transition for theme change */
-    * {
-      transition: background 0.3s, color 0.3s;
-    }
-  </style>
+		/* Smooth transition for theme change */
+		* {
+			transition: background 0.3s, color 0.3s;
+		}
+	</style>
 </head>
 
 <body>
-  <header>
-    <div class="header-left">
-      <img src="panphy.png" alt="PanPhy Logo" class="logo">
-    </div>
-    <div class="header-center">
-      <h1>PanPhy Projects</h1>
-    </div>
-    <div class="header-right">
-      <div class="theme-toggle">
-        <button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
-      </div>
-    </div>
-  </header>
+	<header>
+		<div class="header-left">
+			<img src="panphy.png" alt="PanPhy Logo" class="logo">
+		</div>
+		<div class="header-center">
+			<h1>PanPhy Projects</h1>
+		</div>
+		<div class="header-right">
+			<div class="theme-toggle">
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+			</div>
+		</div>
+	</header>
 
-  <nav>
-    <a href="#tools">Tools</a>
-    <a href="#simulations">Simulations</a>
-    <a href="#for_teachers">For Teachers</a>
-    <a href="#fun">For Fun</a>
-    <a href="#about">About</a>
-  </nav>
+	<nav>
+		<a href="#tools">Tools</a>
+		<a href="#simulations">Simulations</a>
+		<a href="#for_teachers">For Teachers</a>
+		<a href="#fun">For Fun</a>
+		<a href="#about">About</a>
+	</nav>
 
-  <!-- Tools Section -->
-  <div class="section" id="tools">
-    <h2>Tools</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Markdown + LaTeX Editor</h3>
-        <p>Create beautiful documents with Markdown and LaTeX.</p>
-        <a href="/tools/markdown_editor.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Graph Plotting + Curve Fitting</h3>
-        <p>Visualize data with curve fitting tools.</p>
-        <a href="/tools/panphyplot.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Graph Digitizer</h3>
-        <p>Snap it, click it, data!</p>
-        <a href="/tools/digitizer.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Motion Tracker</h3>
-        <p>Analyze and track motion with ease.</p>
-        <a href="/tools/motion_tracker.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Sound Analyzer</h3>
-        <p>Analyze sound waves live — zoom, inspect, and export data.</p>
-        <a href="/tools/sound_analyzer.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Tone Generator</h3>
-        <p>Let's make some annoying noise with this tone generator!</p>
-        <a href="/tools/tone_generator.html">Explore</a>
-      </div>
-    </div>
-  </div>
+	<!-- Tools Section -->
+	<div class="section" id="tools">
+		<h2>Tools</h2>
+		<div class="grid">
+			<div class="card">
+				<h3>Markdown + LaTeX Editor</h3>
+				<p>Create beautiful documents with Markdown and LaTeX.</p>
+				<a href="/tools/markdown_editor.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Graph Plotting + Curve Fitting</h3>
+				<p>Visualize data with curve fitting tools.</p>
+				<a href="/tools/panphyplot.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Graph Digitizer</h3>
+				<p>Snap it, click it, data!</p>
+				<a href="/tools/digitizer.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Motion Tracker</h3>
+				<p>Analyze and track motion with ease.</p>
+				<a href="/tools/motion_tracker.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Sound Analyzer</h3>
+				<p>Analyze sound waves live — zoom, inspect, and export data.</p>
+				<a href="/tools/sound_analyzer.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Tone Generator</h3>
+				<p>Let's make some annoying noise with this tone generator!</p>
+				<a href="/tools/tone_generator.html">Explore</a>
+			</div>
+		</div>
+	</div>
 
-  <!-- Simulations Section -->
-  <div class="section" id="simulations">
-    <h2>Simulations</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Wave Superposition</h3>
-        <p>Explore wave interactions and superposition in real-time simulation.</p>
-        <a href="/simulations/superposition.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Standing Wave</h3>
-        <p>Visualize standing wave with different boundary conditions.</p>
-        <a href="/simulations/standing_wave.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Lorentz Transformation</h3>
-        <p>
-          Interactive Minkowski diagram visualizing Lorentz transformations.</p>
-        <a href="/simulations/lorentz.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Ising Model</h3>
-        <p>Visualize a 2D phase transition.</p>
-        <a href="/simulations/Ising_model.html">Explore</a>
-      </div>
-    </div>
-  </div>
+	<!-- Simulations Section -->
+	<div class="section" id="simulations">
+		<h2>Simulations</h2>
+		<div class="grid">
+			<div class="card">
+				<h3>Wave Superposition</h3>
+				<p>Explore wave interactions and superposition in real-time simulation.</p>
+				<a href="/simulations/superposition.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Standing Wave</h3>
+				<p>Visualize standing wave with different boundary conditions.</p>
+				<a href="/simulations/standing_wave.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Lorentz Transformation</h3>
+				<p>
+					Interactive Minkowski diagram visualizing Lorentz transformations.</p>
+				<a href="/simulations/lorentz.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Ising Model</h3>
+				<p>Visualize a 2D phase transition.</p>
+				<a href="/simulations/Ising_model.html">Explore</a>
+			</div>
+		</div>
+	</div>
 
-  <!-- For Teachers Section -->
-  <div class="section" id="for_teachers">
-    <h2>For Teachers</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Lesson Planner</h3>
-        <p>Plan, organize, and track your lessons easily.</p>
-        <a href="/for_teachers/planner.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Exam Timer</h3>
-        <p>Automatically add extra time for those who need it.</p>
-        <a href="/for_teachers/timer.html">Explore</a>
-      </div>
-      <div class="card">
-        <h3>Camera Visualizer</h3>
-        <p>Snap, sketch, and save your scene.</p>
-        <a href="/for_teachers/visualizer.html">Explore</a>
-      </div>
-    </div>
-  </div>
+	<!-- For Teachers Section -->
+	<div class="section" id="for_teachers">
+		<h2>For Teachers</h2>
+		<div class="grid">
+			<div class="card">
+				<h3>Lesson Planner</h3>
+				<p>Plan, organize, and track your lessons easily.</p>
+				<a href="/for_teachers/planner.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Exam Timer</h3>
+				<p>Automatically add extra time for those who need it.</p>
+				<a href="/for_teachers/timer.html">Explore</a>
+			</div>
+			<div class="card">
+				<h3>Camera Visualizer</h3>
+				<p>Snap, sketch, and save your scene.</p>
+				<a href="/for_teachers/visualizer.html">Explore</a>
+			</div>
+		</div>
+	</div>
 
-  <!-- Fun Section -->
-  <div class="section" id="fun">
-    <h2>For Fun</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Dodge the Asteroids</h3>
-        <p>Can you survive this asteroid storm?!</p>
-        <a href="/fun/dodge.html">Play</a>
-      </div>
-      <div class="card">
-        <h3>Tetris</h3>
-        <p>Enjoy the classic Tetris game.</p>
-        <a href="/fun/tetris.html">Play</a>
-      </div>
-      <div class="card">
-        <h3>Snake</h3>
-        <p>Do you miss your Nokia game?</p>
-        <a href="/fun/snake.html">Play</a>
-      </div>
-      <div class="card">
-        <h3>ASCII Camera</h3>
-        <p>Take a selfie with ASCII characters and 8 bit colors!</p>
-        <a href="/fun/ascii_cam.html">Play</a>
-      </div>
-    </div>
-  </div>
+	<!-- Fun Section -->
+	<div class="section" id="fun">
+		<h2>For Fun</h2>
+		<div class="grid">
+			<div class="card">
+				<h3>Dodge the Asteroids</h3>
+				<p>Can you survive this asteroid storm?!</p>
+				<a href="/fun/dodge.html">Play</a>
+			</div>
+			<div class="card">
+				<h3>Tetris</h3>
+				<p>Enjoy the classic Tetris game.</p>
+				<a href="/fun/tetris.html">Play</a>
+			</div>
+			<div class="card">
+				<h3>Snake</h3>
+				<p>Do you miss your Nokia game?</p>
+				<a href="/fun/snake.html">Play</a>
+			</div>
+			<div class="card">
+				<h3>ASCII Camera</h3>
+				<p>Take a selfie with ASCII characters and 8 bit colors!</p>
+				<a href="/fun/ascii_cam.html">Play</a>
+			</div>
+		</div>
+	</div>
 
-  <!-- About Section -->
-  <div class="section" id="about">
-    <h2>About</h2>
-    <p>
-      Welcome to the PanPhy Projects. The tools and simulations here are designed to provide interactive and educational
-      experiences.
-      Click on any project above to explore and enjoy!
-    </p>
-  </div>
+	<!-- About Section -->
+	<div class="section" id="about">
+		<h2>About</h2>
+		<p>
+			Welcome to the PanPhy Projects. The tools and simulations here are built to be interactive, educational, and actually fit my teaching goals. There are loads of great physics sims online, but they never quite match what I need. And with school devices locked down, installing software is a pain. So… I started making my own web apps — simple, browser-based, and ready for everyone to explore and enjoy!
+		</p>
+	</div>
 
-  <footer>
-    <p>&copy; 2025 PanPhy Projects | <a href="mailto:panphyprojects@icloud.com">Contact Me</a> | <a
-        href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></p>
-  </footer>
+	<footer>
+		<p>&copy; 2025 PanPhy Projects | <a href="mailto:panphyprojects@icloud.com">Contact Me</a> | <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></p>
+	</footer>
 
-  <script>
-    // Theme Toggle Functionality
-    const themeButton = document.getElementById('theme-button');
+	<script>
+		// Theme Toggle Functionality
+		const themeButton = document.getElementById('theme-button');
 
-    // Use new keys for dark and light theme
-    const DARK_THEME_KEY = "panphy-dark";
-    const LIGHT_THEME_KEY = "panphy-light";
+		// Use new keys for dark and light theme
+		const DARK_THEME_KEY = "panphy-dark";
+		const LIGHT_THEME_KEY = "panphy-light";
 
-    // Determine current theme based on localStorage
-    const currentTheme = localStorage.getItem(DARK_THEME_KEY)
-      ? "dark"
-      : localStorage.getItem(LIGHT_THEME_KEY)
-        ? "light"
-        : "light"; // Default to light if none is set
+		// Determine current theme based on localStorage
+		const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+			"dark" :
+			localStorage.getItem(LIGHT_THEME_KEY) ?
+			"light" :
+			"light"; // Default to light if none is set
 
-    // Apply the saved theme on load
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateButtonEmoji(currentTheme);
+		// Apply the saved theme on load
+		document.documentElement.setAttribute('data-theme', currentTheme);
+		updateButtonEmoji(currentTheme);
 
-    // Update the button emoji based on current theme
-    function updateButtonEmoji(theme) {
-      themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-    }
+		// Update the button emoji based on current theme
+		function updateButtonEmoji(theme) {
+			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+		}
 
-    themeButton.addEventListener('click', function () {
-      let theme = document.documentElement.getAttribute('data-theme');
-      if (theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem(DARK_THEME_KEY, 'true');
-        localStorage.removeItem(LIGHT_THEME_KEY);
-        updateButtonEmoji('dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem(LIGHT_THEME_KEY, 'true');
-        localStorage.removeItem(DARK_THEME_KEY);
-        updateButtonEmoji('light');
-      }
-    });
-  </script>
+		themeButton.addEventListener('click', function() {
+			let theme = document.documentElement.getAttribute('data-theme');
+			if (theme === 'light') {
+				document.documentElement.setAttribute('data-theme', 'dark');
+				localStorage.setItem(DARK_THEME_KEY, 'true');
+				localStorage.removeItem(LIGHT_THEME_KEY);
+				updateButtonEmoji('dark');
+			} else {
+				document.documentElement.setAttribute('data-theme', 'light');
+				localStorage.setItem(LIGHT_THEME_KEY, 'true');
+				localStorage.removeItem(DARK_THEME_KEY);
+				updateButtonEmoji('light');
+			}
+		});
+	</script>
 </body>
 
 </html>
