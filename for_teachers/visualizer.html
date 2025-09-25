@@ -336,7 +336,8 @@
 
 		video {
 			object-fit: contain;
-			background: #000
+			background: #000;
+			object-position: center center
 		}
 
 		#hud {
@@ -868,7 +869,6 @@
 						if (pts.length < 2) continue;
 						ctxDraw.save();
 						ctxDraw.strokeStyle = obj.color;
-						// obj.size is a desired on-screen px; divide by zoom to keep constant when canvas is scaled by s
 						ctxDraw.lineWidth = Math.max(1, obj.size / s);
 						ctxDraw.lineCap = 'round';
 						ctxDraw.lineJoin = 'round';
@@ -878,7 +878,7 @@
 						ctxDraw.stroke();
 						ctxDraw.restore();
 					} else if (obj.type === 'text') {
-						const effFontPx = Math.max(8, obj.baseFontPx / s); // keep on-screen constant
+						const effFontPx = Math.max(8, obj.baseFontPx / s);
 						const m = measureTextBlock(obj.text, effFontPx);
 						ctxDraw.save();
 						ctxDraw.font = 'bold ' + effFontPx + 'px system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif';
@@ -893,7 +893,6 @@
 							ctxDraw.fillText(ln, obj.x, yy);
 						});
 						ctxDraw.restore();
-						// Store latest measured box for hit-testing assist (optional)
 						obj._lastMeasured = { w: m.width, h: m.height, lh: m.lh, effFontPx };
 					}
 				}
@@ -925,10 +924,9 @@
 				return Math.hypot(px - xx, py - yy);
 			}
 
-			// Hit-testing that respects zoom for tolerances and text boxes
 			function hitTestObject(px, py, tolScreenPx) {
 				const s = Z();
-				const tol = tolScreenPx / s; // canvas-space tolerance
+				const tol = tolScreenPx / s;
 				for (let i = objects.length - 1; i >= 0; i--) {
 					const obj = objects[i];
 					if (obj.type === 'text') {
@@ -940,14 +938,13 @@
 					} else if (obj.type === 'stroke') {
 						const pts = obj.points;
 						for (let j = 1; j < pts.length; j++) {
-							if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y) <= tol) return i;
+							if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j].x ? pts[j - 1].y : pts[j - 1].y, pts[j].x ? pts[j].y : pts[j].y) <= tol) return i;
 						}
 					}
 				}
 				return -1;
 			}
 
-			/* Drawing flow */
 			function startDraw(e) {
 				if (overlayVisible) return;
 				const p = getPrimaryPoint(e);
@@ -963,7 +960,6 @@
 					return;
 				}
 				if (annotationOn && !textModeOn) {
-					// store desired on-screen size; rendering divides by zoom
 					currentStroke = { type: 'stroke', color: annotColor, size: Math.max(1, annotSize * normPressure(p.pressure)), points: [{ x, y }] };
 					objects.push(currentStroke);
 					renderAnnotations();
@@ -989,7 +985,7 @@
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
 					const ptA = canvasToCtxXY(p.x, p.y, drawCanvas);
 					currentStroke.points.push({ x: ptA.x, y: ptA.y });
-					currentStroke.size = Math.max(1, annotSize * normPressure(p.pressure)); // screen size
+					currentStroke.size = Math.max(1, annotSize * normPressure(p.pressure));
 					renderAnnotations();
 				}
 			}
@@ -997,7 +993,7 @@
 			function endDraw() { pointerIdActive = null;
 				currentStroke = null; }
 
-			/* Laser trail (sizes independent of zoom) */
+			/* Laser trail */
 			function addTailPoint(x, y) { tail.push({ x, y, life: 1 }); if (tail.length > 220) tail.shift(); }
 
 			function renderLaser() {
@@ -1015,7 +1011,7 @@
 						t.life *= 0.96;
 						if (t.life < 0.02) continue;
 						const a = t.life;
-						const radius = (pointerSize / s) * (0.9 + 1.2 * a); // compensate by zoom
+						const radius = (pointerSize / s) * (0.9 + 1.2 * a);
 						const glow = radius * 2.2;
 						const grad = ctxLaser.createRadialGradient(t.x, t.y, 0, t.x, t.y, glow);
 						grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + (0.25 * a) + ')');
@@ -1071,7 +1067,7 @@
 
 			function placeTextObject(text, x, y) {
 				if (!text) return;
-				const baseFontPx = Math.round(10 + annotSize * 2); // desired on-screen px
+				const baseFontPx = Math.round(10 + annotSize * 2);
 				const obj = { type: 'text', x, y, text: String(text), color: annotColor, baseFontPx };
 				objects.push(obj);
 				renderAnnotations();
@@ -1159,7 +1155,7 @@
 				});
 			}
 
-			/* Zoom + mirror + fit (we scale elements; tools compensate sizes) */
+			/* Zoom + mirror + fit */
 			function applyTransforms() {
 				const s = Z();
 				[drawCanvas, laserCanvas, freezeCanvas].forEach(el => {
@@ -1168,7 +1164,14 @@
 				});
 				video.style.transformOrigin = 'center center';
 				video.style.transform = (isMirrored ? 'scaleX(-1) ' : '') + 'scale(' + s + ')';
+				applyFitMode(); // ensure objectFit is applied whenever transforms update
 			}
+
+			function applyFitMode() {
+				// This is the fix: apply the chosen mode to the live video element
+				video.style.objectFit = fitMode; // 'contain' or 'cover'
+			}
+
 			document.getElementById('mirrorBtn').addEventListener('click', () => {
 				isMirrored = !isMirrored;
 				applyTransforms();
@@ -1177,9 +1180,11 @@
 			});
 			document.getElementById('fitBtn').addEventListener('click', () => {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
-				fitBtn.textContent = (fitMode === 'cover') ? 'Fill' : 'Fit';
-				resizeCanvases();
-				if (isPaused && hasFrozen) drawFreezeFromFrozen();
+				fitBtn.textContent = (fitMode === 'cover') ? 'Fit' : 'Fill';
+				applyFitMode();
+				// Redraw paused frame to match the new mode
+				if (isPaused) { captureFrozenFromVideo();
+					drawFreezeFromFrozen(); }
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
 
@@ -1189,7 +1194,6 @@
 				zoomSlider.value = String(zoomLevel);
 				zoomVal.textContent = zoomLevel.toFixed(1) + '×';
 				applyTransforms();
-				// Re-render so text hitboxes/metrics update with new zoom
 				renderAnnotations();
 			}
 			zoomSlider.addEventListener('input', e => setZoom(parseFloat(e.target.value)));
@@ -1373,11 +1377,25 @@
 					saveNum('pointerSize', sz); });
 				buildSizePicker(sizeUI.annot, SIZESET, () => annotColor, annotSize, (sz) => { annotSize = sz;
 					saveNum('annotSize', sz); });
-				refreshPickerColors();
+				[].slice.call(sizeUI.pointer.children).forEach(btn => btn.style.setProperty('--dot-color', pointerColor));
+				[].slice.call(sizeUI.annot.children).forEach(btn => btn.style.setProperty('--dot-color', annotColor));
+
+				function paintLabelBtn(btn, color) {
+					let h = color.replace('#', '');
+					if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+					const r = parseInt(h.slice(0, 2), 16),
+						g = parseInt(h.slice(2, 4), 16),
+						b = parseInt(h.slice(4, 6), 16);
+					const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+					btn.style.background = color;
+					btn.style.borderColor = 'rgba(255,255,255,.25)';
+					btn.style.color = (yiq >= 160 ? '#111' : '#fff');
+				}
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
 
 				setZoom(zoomLevel);
+				applyFitMode(); // ensure initial live mode matches fitMode
 				resizeCanvases();
 			})();
 		})();
