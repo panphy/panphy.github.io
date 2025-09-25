@@ -1,1 +1,1 @@
-Welcome to the PanPhy Projects. The tools and simulations here are designed to provide interactive and educational experiences. Click on any project above to explore and enjoy!
+Welcome to the PanPhy Projects. The tools and simulations here are built to be interactive, educational, and actually fit my teaching goals. There are loads of great physics sims online, but they never quite match what I need. And with school devices locked down, installing software is a pain. So… I started making my own web apps — simple, browser-based, and ready for everyone to explore and enjoy!
