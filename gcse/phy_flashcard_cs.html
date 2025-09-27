@@ -2,460 +2,566 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Physics Flashcards • Combined Science</title>
-  <meta name="color-scheme" content="dark light" />
-  <style>
-    :root {
-      /* Combined Science palette: purple + amber */
-      --accent-a: #a78bfa;
-      --accent-b: #f59e0b;
-      --bg-1: #0f0a1a;
-      --ink: #ecebff;
-      --ink-muted: #cfd1ff;
-      --ink-dim: #aeb3df;
-      --chip-bg: #1b1631;
-      --border: rgba(255, 255, 255, .10);
-      --border-strong: rgba(255, 255, 255, .18);
-      --glass: rgba(255, 255, 255, .045);
-      --glass-2: rgba(255, 255, 255, .06);
-      --bar-track: #120e20;
-    }
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Physics Flashcards • Combined Science</title>
+	<meta name="color-scheme" content="dark light" />
+	<style>
+		:root {
+			/* Combined Science palette: purple + amber */
+			--accent-a: #a78bfa;
+			--accent-b: #f59e0b;
+			--bg-1: #0f0a1a;
+			--ink: #ecebff;
+			--ink-muted: #cfd1ff;
+			--ink-dim: #aeb3df;
+			--chip-bg: #1b1631;
+			--border: rgba(255, 255, 255, .10);
+			--border-strong: rgba(255, 255, 255, .18);
+			--glass: rgba(255, 255, 255, .045);
+			--glass-2: rgba(255, 255, 255, .06);
+			--bar-track: #120e20;
+		}
 
-    html,
-    body {
-      height: 100%
-    }
+		html,
+		body {
+			height: 100%
+		}
 
-    body {
-      margin: 0;
-      color: var(--ink);
-      font: 16px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
-      background:
-        radial-gradient(1400px 900px at -15% -20%, #3b1a63 0%, rgba(59, 26, 99, 0) 60%),
-        radial-gradient(1200px 700px at 115% -10%, #4a214f 0%, rgba(74, 33, 79, 0) 60%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-1));
-      background-attachment: fixed, fixed, fixed;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+		body {
+			margin: 0;
+			color: var(--ink);
+			font: 16px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+			background:
+				radial-gradient(1400px 900px at -15% -20%, #3b1a63 0%, rgba(59, 26, 99, 0) 60%),
+				radial-gradient(1200px 700px at 115% -10%, #4a214f 0%, rgba(74, 33, 79, 0) 60%),
+				linear-gradient(180deg, var(--bg-1), var(--bg-1));
+			background-attachment: fixed, fixed, fixed;
+			min-height: 100vh;
+			overflow-x: hidden;
+		}
 
-    .wrap {
-      max-width: 1200px;
-      margin: 40px auto 56px;
-      padding: 0 22px
-    }
+		.wrap {
+			max-width: 1200px;
+			margin: 40px auto 56px;
+			padding: 0 22px
+		}
 
-    header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px
-    }
+		header {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 18px
+		}
 
-    .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
-      box-shadow: 0 8px 24px rgba(167, 139, 250, .25);
-    }
+		.logo {
+			width: 40px;
+			height: 40px;
+			border-radius: 10px;
+			background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+			box-shadow: 0 8px 24px rgba(167, 139, 250, .25)
+		}
 
-    .badge {
-      margin-left: 6px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      padding: 4px 8px;
-      border-radius: 999px;
-      color: #1a102b;
-      background: linear-gradient(135deg, var(--accent-b), var(--accent-a));
-      box-shadow: 0 4px 14px rgba(245, 158, 11, .25);
-    }
+		.badge {
+			margin-left: 6px;
+			font-size: 12px;
+			font-weight: 800;
+			letter-spacing: .08em;
+			padding: 4px 8px;
+			border-radius: 999px;
+			color: #1a102b;
+			background: linear-gradient(135deg, var(--accent-b), var(--accent-a));
+			box-shadow: 0 4px 14px rgba(245, 158, 11, .25)
+		}
 
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: .2px
-    }
+		header h1 {
+			margin: 0;
+			font-size: 22px;
+			font-weight: 800;
+			letter-spacing: .2px
+		}
 
-    .crumbs {
-      margin-left: auto;
-      opacity: .75;
-      font-size: 13px
-    }
+		.crumbs {
+			margin-left: auto;
+			opacity: .75;
+			font-size: 13px
+		}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.25fr 1fr;
-      gap: 18px
-    }
+		.grid {
+			display: grid;
+			grid-template-columns: 1.25fr 1fr;
+			gap: 18px
+		}
 
-    @media (max-width:980px) {
-      .grid {
-        grid-template-columns: 1fr
-      }
-    }
+		@media (max-width:980px) {
+			.grid {
+				grid-template-columns: 1fr
+			}
+		}
 
-    .card {
-      background: var(--glass);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
-      backdrop-filter: blur(4px);
-    }
+		.card {
+			background: var(--glass);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 18px;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, .24);
+			backdrop-filter: blur(4px)
+		}
 
-    .card h2 {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--ink-dim)
-    }
+		.card h2 {
+			margin: 0 0 8px 0;
+			font-size: 14px;
+			letter-spacing: .12em;
+			text-transform: uppercase;
+			color: var(--ink-dim)
+		}
 
-    .sectionbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0 0 10px
-    }
+		.sectionbar {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin: 0 0 10px
+		}
 
-    .clearlink {
-      margin-left: auto;
-      font-size: 12px;
-      color: var(--ink);
-      background: transparent;
-      border: 1px solid var(--border-strong);
-      border-radius: 10px;
-      padding: 4px 8px;
-      cursor: pointer
-    }
+		.clearlink {
+			margin-left: auto;
+			font-size: 12px;
+			color: var(--ink);
+			background: transparent;
+			border: 1px solid var(--border-strong);
+			border-radius: 10px;
+			padding: 4px 8px;
+			cursor: pointer
+		}
 
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap
-    }
+		.row {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			flex-wrap: wrap
+		}
 
-    .chips {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 320px;
-      overflow: auto;
-      padding: 10px 6px
-    }
+		.chips {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			max-height: 320px;
+			overflow: auto;
+			padding: 10px 6px
+		}
 
-    .chip {
-      display: block;
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 14px;
-      text-align: left;
-      cursor: pointer;
-      background: var(--chip-bg);
-      border: 1px solid var(--border);
-      color: #f4f3ff;
-      transition: transform .1s, background .15s, border-color .15s, box-shadow .15s;
-    }
+		.chip {
+			display: block;
+			width: 100%;
+			padding: 12px 14px;
+			border-radius: 14px;
+			text-align: left;
+			cursor: pointer;
+			background: var(--chip-bg);
+			border: 1px solid var(--border);
+			color: #f4f3ff;
+			transition: transform .1s, background .15s, border-color .15s, box-shadow .15s
+		}
 
-    .chip:hover {
-      transform: translateY(-1px)
-    }
+		.chip:hover {
+			transform: translateY(-1px)
+		}
 
-    .chip.active {
-      background: linear-gradient(135deg, rgba(167, 139, 250, .35), rgba(245, 158, 11, .35));
-      border-color: rgba(245, 158, 11, .6);
-      box-shadow: 0 0 0 2px rgba(167, 139, 250, .9), 0 0 0 5px rgba(255, 255, 255, .09);
-    }
+		.chip.active {
+			background: linear-gradient(135deg, rgba(167, 139, 250, .35), rgba(245, 158, 11, .35));
+			border-color: rgba(245, 158, 11, .6);
+			box-shadow: 0 0 0 2px rgba(167, 139, 250, .9), 0 0 0 5px rgba(255, 255, 255, .09)
+		}
 
-    .group.disabled {
-      opacity: .45;
-      filter: grayscale(.06);
-      pointer-events: none
-    }
+		.group.disabled {
+			opacity: .45;
+			filter: grayscale(.06);
+			pointer-events: none
+		}
 
-    .group-note {
-      color: var(--ink-dim);
-      font-size: 12px;
-      margin-top: 6px
-    }
+		.group-note {
+			color: var(--ink-dim);
+			font-size: 12px;
+			margin-top: 6px
+		}
 
-    .search {
-      flex: 1 1 320px;
-      min-width: 240px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--glass-2);
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: 12px;
-    }
+		.search {
+			flex: 1 1 320px;
+			min-width: 240px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			background: var(--glass-2);
+			border: 1px solid var(--border);
+			padding: 10px 12px;
+			border-radius: 12px
+		}
 
-    .search input {
-      all: unset;
-      flex: 1
-    }
+		.search input {
+			all: unset;
+			flex: 1
+		}
 
-    .switch {
-      position: relative;
-      width: 50px;
-      height: 28px;
-      border-radius: 999px;
-      background: #342b55;
-      border: 1px solid var(--border-strong);
-      cursor: pointer
-    }
+		.switch {
+			position: relative;
+			width: 50px;
+			height: 28px;
+			border-radius: 999px;
+			background: #342b55;
+			border: 1px solid var(--border-strong);
+			cursor: pointer
+		}
 
-    .switch .knob {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #fff;
-      transition: left .2s
-    }
+		.switch .knob {
+			position: absolute;
+			top: 2px;
+			left: 2px;
+			width: 24px;
+			height: 24px;
+			border-radius: 50%;
+			background: #fff;
+			transition: left .2s
+		}
 
-    .switch.on {
-      background: linear-gradient(135deg, var(--accent-a), var(--accent-b))
-    }
+		.switch.on {
+			background: linear-gradient(135deg, var(--accent-a), var(--accent-b))
+		}
 
-    .switch.on .knob {
-      left: 24px
-    }
+		.switch.on .knob {
+			left: 24px
+		}
 
-    .muted {
-      color: var(--ink-dim);
-      font-size: 12px
-    }
+		.muted {
+			color: var(--ink-dim);
+			font-size: 12px
+		}
 
-    .btn {
-      border: none;
-      cursor: pointer;
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
-      color: #1a102b;
-      box-shadow: 0 10px 24px rgba(167, 139, 250, .25);
-    }
+		.btn {
+			border: none;
+			cursor: pointer;
+			border-radius: 14px;
+			padding: 12px 16px;
+			font-weight: 700;
+			background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+			color: #1a102b;
+			box-shadow: 0 10px 24px rgba(167, 139, 250, .25)
+		}
 
-    .btn:disabled {
-      opacity: .6;
-      cursor: not-allowed
-    }
+		.btn:disabled {
+			opacity: .6;
+			cursor: not-allowed
+		}
 
-    .overlay {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 22px;
-      background: rgba(10, 8, 20, .82)
-    }
+		.btn-secondary {
+			background: linear-gradient(180deg, #241d3d, #1d1732);
+			color: #f1f5ff;
+			border: 1px solid #3a2e64;
+			box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06)
+		}
 
-    .overlay.show {
-      display: flex
-    }
+		.btn-secondary:hover {
+			filter: brightness(1.05)
+		}
 
-    .deck {
-      width: min(920px, 100%);
-      display: grid;
-      gap: 12px;
-      grid-template-rows: auto auto 1fr auto auto
-    }
+		.btn-good {
+			background: linear-gradient(180deg, #234d2b, #1b3f23);
+			color: #d8ffde;
+			border: 1px solid #2b7a3f;
+			box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06)
+		}
 
-    .deck-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between
-    }
+		.btn-bad {
+			background: linear-gradient(180deg, #5b1b1b, #421414);
+			color: #ffd7d7;
+			border: 1px solid #813232;
+			box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06)
+		}
 
-    .counter {
-      opacity: .95;
-      font-weight: 600
-    }
+		pre {
+			white-space: pre-wrap
+		}
 
-    .bar-wrap {
-      position: relative;
-      height: 14px;
-      border-radius: 999px;
-      background: var(--bar-track);
-      border: 1px solid var(--border-strong);
-      overflow: hidden
-    }
+		/* Overlay shells */
+		.overlay {
+			position: fixed;
+			inset: 0;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 22px;
+			background: rgba(10, 8, 20, .82)
+		}
 
-    .bar {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent-b), var(--accent-a))
-    }
+		.overlay.show {
+			display: flex
+		}
 
-    .bar-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 800;
-      color: #141022
-    }
+		/* Study deck */
+		.deck {
+			width: min(920px, 100%);
+			display: grid;
+			gap: 12px;
+			grid-template-rows: auto auto 1fr auto auto
+		}
 
-    .card3d {
-      perspective: 1400px;
-      position: relative;
-      height: min(58vh, 520px)
-    }
+		.deck-top {
+			display: flex;
+			align-items: center;
+			justify-content: space-between
+		}
 
-    .flipper {
-      position: absolute;
-      inset: 0;
-      transform-style: preserve-3d;
-      transition: transform .55s cubic-bezier(.2, .8, .2, 1);
-      cursor: pointer
-    }
+		.counter {
+			opacity: .95;
+			font-weight: 600
+		}
 
-    .fc-face {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 22px;
-      border-radius: 16px;
-      color: var(--ink);
-      border: 1px solid var(--border-strong);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
-      backface-visibility: hidden;
-      font-size: 20px;
-      line-height: 1.6;
-    }
+		.bar-wrap {
+			position: relative;
+			height: 14px;
+			border-radius: 999px;
+			background: var(--bar-track);
+			border: 1px solid var(--border-strong);
+			overflow: hidden
+		}
 
-    .fc-front {
-      background:
-        radial-gradient(120% 100% at 20% 15%, rgba(167, 139, 250, .28) 0%, rgba(167, 139, 250, 0) 40%),
-        linear-gradient(180deg, #221a3e 0%, #1b1433 60%, #140f25 100%);
-    }
+		.bar {
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 0%;
+			background: linear-gradient(90deg, var(--accent-b), var(--accent-a))
+		}
 
-    .fc-back {
-      background:
-        radial-gradient(120% 100% at 80% 15%, rgba(245, 158, 11, .25) 0%, rgba(245, 158, 11, 0) 42%),
-        linear-gradient(180deg, #3a2916 0%, #2a1f12 62%, #1f180e 100%);
-      transform: rotateY(180deg);
-    }
+		.bar-text {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 12px;
+			font-weight: 800;
+			color: #141022
+		}
 
-    .flipped .flipper {
-      transform: rotateY(180deg)
-    }
+		.card3d {
+			perspective: 1400px;
+			position: relative;
+			height: min(58vh, 520px)
+		}
 
-    .controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap
-    }
+		.flipper {
+			position: absolute;
+			inset: 0;
+			transform-style: preserve-3d;
+			transition: transform .55s cubic-bezier(.2, .8, .2, 1);
+			cursor: pointer
+		}
 
-    .btn-secondary {
-      background: linear-gradient(180deg, #241d3d, #1d1732);
-      color: #f1f5ff;
-      border: 1px solid #3a2e64;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
-    }
+		.fc-face {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			padding: 22px;
+			border-radius: 16px;
+			color: var(--ink);
+			border: 1px solid var(--border-strong);
+			box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+			backface-visibility: hidden;
+			font-size: 20px;
+			line-height: 1.6
+		}
 
-    .btn-secondary:hover {
-      filter: brightness(1.05)
-    }
+		.fc-front {
+			background: radial-gradient(120% 100% at 20% 15%, rgba(167, 139, 250, .28) 0%, rgba(167, 139, 250, 0) 40%), linear-gradient(180deg, #221a3e 0%, #1b1433 60%, #140f25 100%)
+		}
 
-    .btn-good {
-      background: linear-gradient(180deg, #234d2b, #1b3f23);
-      color: #d8ffde;
-      border: 1px solid #2b7a3f;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
-    }
+		.fc-back {
+			background: radial-gradient(120% 100% at 80% 15%, rgba(245, 158, 11, .25) 0%, rgba(245, 158, 11, 0) 42%), linear-gradient(180deg, #3a2916 0%, #2a1f12 62%, #1f180e 100%);
+			transform: rotateY(180deg)
+		}
 
-    .btn-bad {
-      background: linear-gradient(180deg, #5b1b1b, #421414);
-      color: #ffd7d7;
-      border: 1px solid #813232;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06);
-    }
+		.flipped .flipper {
+			transform: rotateY(180deg)
+		}
 
-    pre {
-      white-space: pre-wrap
-    }
-  </style>
+		.controls {
+			display: flex;
+			gap: 10px;
+			justify-content: center;
+			flex-wrap: wrap
+		}
+
+		/* MCQ UI */
+		.mcq {
+			width: min(1000px, 100%);
+			display: grid;
+			gap: 16px;
+			grid-template-rows: auto auto 1fr auto
+		}
+
+		.mcq-top {
+			display: flex;
+			align-items: center;
+			justify-content: space-between
+		}
+
+		.mcq-meta {
+			display: flex;
+			gap: 12px;
+			flex-wrap: wrap;
+			align-items: center;
+			font-weight: 700
+		}
+
+		.meter {
+			position: relative;
+			height: 14px;
+			border-radius: 999px;
+			background: var(--bar-track);
+			border: 1px solid var(--border-strong);
+			overflow: hidden
+		}
+
+		.meter>.mbar {
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 0%;
+			background: linear-gradient(90deg, var(--accent-b), var(--accent-a))
+		}
+
+		.qbox {
+			background: var(--glass-2);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 16px
+		}
+
+		.qtext {
+			margin: 0;
+			font-size: 18px;
+			line-height: 1.5
+		}
+
+		.fullQ {
+			margin-top: 8px;
+			font-size: 14px;
+			color: var(--ink-muted);
+			display: none
+		}
+
+		.toggleFull {
+			margin-top: 10px
+		}
+
+		.opts {
+			display: grid;
+			gap: 12px
+		}
+
+		.opt {
+			border: 1px solid #3a2e64;
+			background: linear-gradient(180deg, #241d3d, #1d1732);
+			color: #f1f5ff;
+			border-radius: 14px;
+			padding: 16px;
+			text-align: left;
+			cursor: pointer;
+			font-size: 17px;
+			box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .06)
+		}
+
+		.opt.kbd::before {
+			content: attr(data-key) " ";
+			opacity: .7
+		}
+
+		.opt.correct {
+			border-color: #2b7a3f;
+			background: linear-gradient(180deg, #234d2b, #1b3f23);
+			color: #d8ffde
+		}
+
+		.opt.wrong {
+			border-color: #813232;
+			background: linear-gradient(180deg, #5b1b1b, #421414);
+			color: #ffd7d7
+		}
+
+		.mcq-foot {
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			align-items: center
+		}
+
+		.small {
+			font-size: 12px;
+			color: var(--ink-dim)
+		}
+	</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo" aria-hidden="true"></div>
-      <h1>Physics Retrieval Questions Flashcards</h1>
-      <span class="badge" aria-label="Combined Science badge">COMBINED SCIENCE</span>
-      <div class="crumbs">Select content → Start</div>
-    </header>
+	<div class="wrap">
+		<header>
+			<div class="logo" aria-hidden="true"></div>
+			<h1>Physics Retrieval Questions Flashcards</h1>
+			<span class="badge" aria-label="Combined Science badge">COMBINED SCIENCE</span>
+			<div class="crumbs">Select content → Start • MCQ</div>
+		</header>
 
-    <div class="grid">
-      <!-- LEFT -->
-      <div class="card">
-        <div class="sectionbar">
-          <h2>Papers &amp; Search</h2>
-          <button class="clearlink" type="button" data-target="papers">Clear</button>
-        </div>
+		<div class="grid">
+			<!-- LEFT -->
+			<div class="card">
+				<div class="sectionbar">
+					<h2>Papers &amp; Search</h2>
+					<button class="clearlink" type="button" data-target="papers">Clear</button>
+				</div>
 
-        <div class="row" style="margin-bottom:24px">
-          <div id="papers" class="chips group" style="max-height:none"></div>
-          <div class="row" style="margin-left:auto; gap:12px">
-            <div>
-              <div class="muted" style="margin-bottom:6px">Shuffle</div>
-              <div id="shuffle" class="switch" role="switch" aria-checked="false">
-                <div class="knob"></div>
-              </div>
-            </div>
-            <div class="search" title="Search questions or answers">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 21l-3.5-3.5M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#cfd1ff"
-                  stroke-width="2" stroke-linecap="round" />
-              </svg>
-              <input id="search" placeholder="Search..." />
-            </div>
-          </div>
-        </div>
+				<div class="row" style="margin-bottom:24px">
+					<div id="papers" class="chips group" style="max-height:none"></div>
+					<div class="row" style="margin-left:auto; gap:12px">
+						<div>
+							<div class="muted" style="margin-bottom:6px">Shuffle</div>
+							<div id="shuffle" class="switch" role="switch" aria-checked="false">
+								<div class="knob"></div>
+							</div>
+						</div>
+						<div class="search" title="Search questions or answers">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path d="M21 21l-3.5-3.5M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#cfd1ff" stroke-width="2" stroke-linecap="round" />
+							</svg>
+							<input id="search" placeholder="Search..." />
+						</div>
+					</div>
+				</div>
 
-        <div class="sectionbar">
-          <h2>Chapters</h2>
-          <button class="clearlink" type="button" data-target="chapters">Clear</button>
-        </div>
-        <div id="chapters" class="chips group" aria-live="polite"></div>
-        <div class="group-note">Selecting a section (Paper, Chapter or Topic) disables other sections until cleared.
-        </div>
-      </div>
+				<div class="sectionbar">
+					<h2>Chapters</h2>
+					<button class="clearlink" type="button" data-target="chapters">Clear</button>
+				</div>
+				<div id="chapters" class="chips group" aria-live="polite"></div>
+				<div class="group-note">Selecting a section (Paper, Chapter or Topic) disables other sections until cleared.</div>
+			</div>
 
-      <!-- RIGHT -->
-      <div class="card">
-        <div class="sectionbar">
-          <h2>Topics</h2>
-          <button class="clearlink" type="button" data-target="topics">Clear</button>
-        </div>
-        <div id="topics" class="chips group" aria-live="polite"></div>
+			<!-- RIGHT -->
+			<div class="card">
+				<div class="sectionbar">
+					<h2>Topics</h2>
+					<button class="clearlink" type="button" data-target="topics">Clear</button>
+				</div>
+				<div id="topics" class="chips group" aria-live="polite"></div>
 
-        <div class="card" style="margin-top:12px">
-          <h2>Summary</h2>
-          <pre id="summary">Paper:
+				<div class="card" style="margin-top:12px">
+					<h2>Summary</h2>
+					<pre id="summary">Paper:
 All
 
 Topic(s):
@@ -466,358 +572,528 @@ All
 
 Search: -
 Matches: 0</pre>
-          <button id="start" class="btn" disabled>Start Revising</button>
-        </div>
-      </div>
-    </div>
-  </div>
+					<div class="row" style="gap:10px;flex-wrap:wrap">
+						<button id="start" class="btn" disabled>Start Revising</button>
+						<button id="mcqBtn" class="btn btn-secondary" disabled title="Need at least 4 items after filtering">Lightning MCQ</button>
+					</div>
+					<div class="small">MCQ uses your current filter and builds short, high-tempo questions with 4 choices.</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
-  <!-- Study overlay -->
-  <div id="overlay" class="overlay" aria-hidden="true">
-    <div class="deck">
-      <div class="deck-top">
-        <div id="counter" class="counter">Card 0 of 0</div>
-        <button id="close" class="btn btn-secondary" type="button">Exit</button>
-      </div>
+	<!-- Study overlay -->
+	<div id="overlay" class="overlay" aria-hidden="true">
+		<div class="deck">
+			<div class="deck-top">
+				<div id="counter" class="counter">Card 0 of 0</div>
+				<button id="close" class="btn btn-secondary" type="button">Exit</button>
+			</div>
+			<div class="bar-wrap">
+				<div id="bar" class="bar"></div>
+				<div id="barText" class="bar-text">0% • 0 / 0 correct</div>
+			</div>
+			<div id="cardArea" class="card3d"></div>
+			<div class="controls">
+				<button id="btnCorrect" class="btn btn-good" type="button" disabled>✓ Correct</button>
+				<button id="btnWrong" class="btn btn-bad" type="button" disabled>✗ Wrong</button>
+			</div>
+			<div class="controls" style="margin-top:-4px">
+				<button id="prev" class="btn btn-secondary" type="button">◀ Prev</button>
+				<button id="next" class="btn btn-secondary" type="button">Next ▶</button>
+			</div>
+		</div>
+	</div>
 
-      <div class="bar-wrap">
-        <div id="bar" class="bar"></div>
-        <div id="barText" class="bar-text">0% • 0 / 0 correct</div>
-      </div>
+	<!-- MCQ overlay -->
+	<div id="mcqOverlay" class="overlay" aria-hidden="true">
+		<div class="mcq">
+			<div class="mcq-top">
+				<div class="mcq-meta">
+					<span id="mcqRound" class="badge">Q 0/0</span>
+					<span id="mcqScore" class="badge">Score: 0</span>
+					<span id="mcqStreak" class="badge">Streak: 0</span>
+					<span id="mcqAcc" class="badge">Accuracy: 0%</span>
+				</div>
+				<div style="display:flex;gap:8px">
+					<button id="mcqSkip" class="btn btn-secondary" title="S">Skip</button>
+					<button id="mcqExit" class="btn btn-secondary" title="Esc">Exit</button>
+				</div>
+			</div>
+			<div class="meter">
+				<div id="mcqTimerBar" class="mbar"></div>
+			</div>
+			<div class="qbox">
+				<p id="mcqQ" class="qtext">Question</p>
+				<button id="toggleFullQ" class="btn btn-secondary toggleFull" style="display:none">Show full</button>
+				<div id="fullQ" class="fullQ"></div>
+			</div>
+			<div id="mcqOpts" class="opts"></div>
+			<div class="mcq-foot">
+				<span id="mcqStatus" class="small">Press 1–4 to answer, N for next.</span>
+				<div>
+					<button id="mcqNext" class="btn btn-secondary" disabled title="N">Next</button>
+					<button id="mcqRestart" class="btn btn-secondary" title="Restart round">Restart</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
-      <div id="cardArea" class="card3d"></div>
+	<script>
+		// ---------- Helpers & constants ----------
+		const TOPIC_NAME = { "1": "Energy", "2": "Electricity", "3": "Particle Model of Matter", "4": "Atomic Structure", "5": "Forces", "6": "Waves", "7": "Electromagnetism", "8": "Space" };
+		const CHAPTER_NAME = { "1": "Conservation and dissipation of energy", "2": "Energy transfer by heating", "3": "Energy resources", "4": "Electric circuits", "5": "Electricity in the home", "6": "Molecules and matter", "7": "Radioactivity", "8": "Forces in balance", "9": "Motion", "10": "Forces and motion", "11": "Force and pressure", "12": "Wave properties", "13": "Electromagnetic spectrum", "14": "Light", "15": "Electromagnetism", "16": "Space" };
+		const $ = s => document.querySelector(s),
+			canon = v => String(v ?? "").trim();
+		const escapeHTML = s => String(s || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" } [m]));
 
-      <div class="controls">
-        <button id="btnCorrect" class="btn btn-good" type="button" disabled>✓ Correct</button>
-        <button id="btnWrong" class="btn btn-bad" type="button" disabled>✗ Wrong</button>
-      </div>
-      <div class="controls" style="margin-top:-4px">
-        <button id="prev" class="btn btn-secondary" type="button">◀ Prev</button>
-        <button id="next" class="btn btn-secondary" type="button">Next ▶</button>
-      </div>
-    </div>
-  </div>
+		// ---------- CSV parsing ----------
+		function parseCSV(t) { const rows = []; let cur = [],
+				field = "",
+				q = false; for (let i = 0; i < t.length; i++) { const c = t[i],
+					n = t[i + 1]; if (c == '"') { if (q && n == '"') { field += '"';
+						i++; } else { q = !q } } else if (c == ',' && !q) { cur.push(field);
+					field = ""; } else if ((c == '\n' || c == '\r') && !q) { if (c == '\r' && n == '\n') i++;
+					cur.push(field);
+					field = "";
+					rows.push(cur);
+					cur = []; } else { field += c } } if (field.length || cur.length) { cur.push(field);
+				rows.push(cur) } return rows }
+		const normHeader = h => h.toLowerCase().replace(/\s+/g, " ").trim();
 
-  <script>
-    // ---------- Helpers & constants ----------
-    const TOPIC_NAME = {
-      "1": "Energy", "2": "Electricity", "3": "Particle Model of Matter", "4": "Atomic Structure",
-      "5": "Forces", "6": "Waves", "7": "Electromagnetism", "8": "Space"
-    };
-    const CHAPTER_NAME = {
-      "1": "Conservation and dissipation of energy", "2": "Energy transfer by heating", "3": "Energy resources",
-      "4": "Electric circuits", "5": "Electricity in the home", "6": "Molecules and matter", "7": "Radioactivity",
-      "8": "Forces in balance", "9": "Motion", "10": "Forces and motion", "11": "Force and pressure",
-      "12": "Wave properties", "13": "Electromagnetic spectrum", "14": "Light", "15": "Electromagnetism", "16": "Space"
-    };
-    const $ = s => document.querySelector(s);
-    const canon = v => String(v == null ? "" : v).trim();
+		function readCSV(text) {
+			const rows = parseCSV(text);
+			if (!rows.length) return [];
+			const head = rows[0].map(normHeader);
+			const idx = {
+				paper: head.findIndex(h => h.includes("paper")),
+				topicNo: head.findIndex(h => h.includes("topic") && (h.includes("number") || h.endsWith("no") || h.includes("topic_no"))),
+				topicName: head.findIndex(h => h.includes("topic") && (h.includes("name") || h.includes("title")) && !h.includes("number")),
+				chapterNo: head.findIndex(h => h.includes("chapter") && (h.includes("number") || h.endsWith("no") || h.includes("chapter_no"))),
+				chapterName: head.findIndex(h => h.includes("chapter") && (h.includes("name") || h.includes("title")) && !h.includes("number")),
+				question: head.findIndex(h => h.includes("question") || h === "q" || h === "prompt"),
+				answer: head.findIndex(h => h.includes("answer") || h === "a" || h === "response")
+			};
+			const out = [];
+			for (let r = 1; r < rows.length; r++) {
+				const row = rows[r],
+					get = i => (i >= 0 && i < row.length) ? canon(row[i]) : "";
+				let tNo = get(idx.topicNo),
+					cNo = get(idx.chapterNo);
+				const dig = s => (String(s).match(/\d+/)?.[0] ?? String(s));
+				if (tNo) tNo = dig(tNo);
+				if (cNo) cNo = dig(cNo);
+				const q = get(idx.question),
+					a = get(idx.answer);
+				if (!q || !a) continue;
+				out.push({ paper: get(idx.paper), topicNo: tNo, topicName: get(idx.topicName), chapterNo: cNo, chapterName: get(idx.chapterName), question: q, answer: a });
+			}
+			return out;
+		}
 
-    // ---------- CSV parsing ----------
-    function parseCSV(t) {
-      const rows = []; let cur = [], field = "", q = false;
-      for (let i = 0; i < t.length; i++) {
-        const c = t[i], n = t[i + 1];
-        if (c === '"') {
-          if (q && n === '"') { field += '"'; i++; }
-          else { q = !q; }
-        } else if (c === ',' && !q) {
-          cur.push(field); field = "";
-        } else if ((c === '\n' || c === '\r') && !q) {
-          if (c === '\r' && n === '\n') i++;
-          cur.push(field); field = "";
-          rows.push(cur); cur = [];
-        } else {
-          field += c;
-        }
-      }
-      if (field.length || cur.length) { cur.push(field); rows.push(cur); }
-      return rows;
-    }
-    function normHeader(h) { return h.toLowerCase().replace(/\s+/g, " ").trim(); }
-    function readCSV(text) {
-      const rows = parseCSV(text); if (!rows.length) return [];
-      const head = rows[0].map(normHeader);
-      const idx = {
-        paper: head.findIndex(h => h.includes("paper")),
-        topicNo: head.findIndex(h => h.includes("topic") && (h.includes("number") || h.endsWith("no") || h.includes("topic_no"))),
-        topicName: head.findIndex(h => h.includes("topic") && (h.includes("name") || h.includes("title")) && !h.includes("number")),
-        chapterNo: head.findIndex(h => h.includes("chapter") && (h.includes("number") || h.endsWith("no") || h.includes("chapter_no"))),
-        chapterName: head.findIndex(h => h.includes("chapter") && (h.includes("name") || h.includes("title")) && !h.includes("number")),
-        question: head.findIndex(h => h.includes("question") || h === "q" || h === "prompt"),
-        answer: head.findIndex(h => h.includes("answer") || h === "a" || h === "response")
-      };
-      const out = [];
-      for (let r = 1; r < rows.length; r++) {
-        const row = rows[r];
-        const get = i => (i >= 0 && i < row.length) ? canon(row[i]) : "";
-        let tNo = get(idx.topicNo), cNo = get(idx.chapterNo);
-        const dig = s => { const m = String(s).match(/\d+/); return m ? m[0] : String(s); };
-        if (tNo) tNo = dig(tNo);
-        if (cNo) cNo = dig(cNo);
-        const q = get(idx.question), a = get(idx.answer);
-        if (!q || !a) continue;
-        out.push({
-          paper: get(idx.paper),
-          topicNo: tNo,
-          topicName: get(idx.topicName),
-          chapterNo: cNo,
-          chapterName: get(idx.chapterName),
-          question: q,
-          answer: a
-        });
-      }
-      return out;
-    }
+		// ---------- State ----------
+		let ALL = [],
+			FILTERED = [];
+		const SELECTED = { papers: new Set(), topics: new Set(), chapters: new Set() };
+		let SHUFFLE = false,
+			SEARCH = "",
+			iCard = 0,
+			revealed = false,
+			correctCount = 0;
 
-    // ---------- State ----------
-    let ALL = [], FILTERED = [];
-    const SELECTED = { papers: new Set(), topics: new Set(), chapters: new Set() };
-    let SHUFFLE = false, SEARCH = "", iCard = 0, revealed = false, correctCount = 0;
+		function activeGroup() { const g = ["papers", "topics", "chapters"]; const f = g.filter(k => SELECTED[k].size > 0); return f.length === 1 ? f[0] : null }
 
-    function activeGroup() {
-      const g = ["papers", "topics", "chapters"];
-      const f = g.filter(k => SELECTED[k].size > 0);
-      return f.length === 1 ? f[0] : null;
-    }
-    function applyGroupLockUI() {
-      const a = activeGroup();
-      const groups = { papers: $("#papers"), topics: $("#topics"), chapters: $("#chapters") };
-      Object.entries(groups).forEach(([n, el]) => {
-        if (!el) return;
-        el.classList.toggle("disabled", !!a && n !== a);
-      });
-    }
+		function applyGroupLockUI() { const a = activeGroup(); const groups = { papers: $("#papers"), topics: $("#topics"), chapters: $("#chapters") };
+			Object.entries(groups).forEach(([n, el]) => { if (!el) return;
+				el.classList.toggle("disabled", !!a && n !== a); }); }
 
-    // ---------- Chips ----------
-    function makeChip(label, value, key) {
-      const el = document.createElement("button");
-      el.className = "chip"; el.textContent = label; el.dataset.value = value; el.dataset.group = key; el.type = "button";
-      el.addEventListener("click", () => {
-        const current = activeGroup(); if (current && current !== key) return;
-        const set = SELECTED[key];
-        if (el.classList.contains("active")) { el.classList.remove("active"); set.delete(value); }
-        else { el.classList.add("active"); set.add(value); }
-        applyGroupLockUI(); updateSummaryAndCount();
-      });
-      return el;
-    }
-    function unique(a) { return [...new Set(a.filter(Boolean).map(canon))]; }
-    function sortNumAware(a, b) {
-      const na = Number(a), nb = Number(b);
-      if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
-      return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
-    }
+		// ---------- Chips ----------
+		function makeChip(label, value, key) {
+			const el = document.createElement("button");
+			el.className = "chip";
+			el.textContent = label;
+			el.dataset.value = value;
+			el.dataset.group = key;
+			el.type = "button";
+			el.addEventListener("click", () => {
+				const current = activeGroup();
+				if (current && current !== key) return;
+				const set = SELECTED[key];
+				if (el.classList.contains("active")) { el.classList.remove("active");
+					set.delete(value); } else { el.classList.add("active");
+					set.add(value); }
+				applyGroupLockUI();
+				updateSummaryAndCount();
+			});
+			return el;
+		}
+		const unique = a => [...new Set(a.filter(Boolean).map(canon))];
 
-    // ---------- Build lists ----------
-    function buildLists() {
-      // Papers
-      const papers = unique(ALL.map(r => r.paper));
-      const papersBox = $("#papers"); if (papersBox) papersBox.innerHTML = "";
-      (papers.length ? papers : ["Paper 1", "Paper 2"]).forEach(p => {
-        if (papersBox) papersBox.appendChild(makeChip(p, p, "papers"));
-      });
+		function sortNumAware(a, b) { const na = Number(a),
+				nb = Number(b); if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb; return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" }) }
 
-      // Topics
-      const topicMap = new Map();
-      ALL.forEach(r => {
-        const no = canon(r.topicNo); if (!no) return;
-        const nm = canon(r.topicName) || TOPIC_NAME[no] || "";
-        if (!topicMap.has(no)) topicMap.set(no, nm);
-      });
-      if (!topicMap.size) { Object.entries(TOPIC_NAME).forEach(([no, name]) => topicMap.set(no, name)); }
-      const topicsBox = $("#topics"); if (topicsBox) topicsBox.innerHTML = "";
-      [...topicMap.keys()].sort(sortNumAware).forEach(no => {
-        if (topicsBox) topicsBox.appendChild(makeChip("Topic " + no + " • " + (topicMap.get(no) || ""), no, "topics"));
-      });
+		// ---------- Build lists ----------
+		function buildLists() {
+			const papers = unique(ALL.map(r => r.paper));
+			const papersBox = $("#papers");
+			if (papersBox) papersBox.innerHTML = "";
+			(papers.length ? papers : ["Paper 1", "Paper 2"]).forEach(p => { if (papersBox) papersBox.appendChild(makeChip(p, p, "papers")); });
+			const topicMap = new Map();
+			ALL.forEach(r => { const no = canon(r.topicNo); if (!no) return; const nm = canon(r.topicName) || TOPIC_NAME[no] || ""; if (!topicMap.has(no)) topicMap.set(no, nm); });
+			if (!topicMap.size) { Object.entries(TOPIC_NAME).forEach(([no, name]) => topicMap.set(no, name)); }
+			const topicsBox = $("#topics");
+			if (topicsBox) topicsBox.innerHTML = "";
+			[...topicMap.keys()].sort(sortNumAware).forEach(no => { if (topicsBox) topicsBox.appendChild(makeChip("Topic " + no + " • " + (topicMap.get(no) || ""), no, "topics")); });
+			const chapMap = new Map();
+			ALL.forEach(r => { const no = canon(r.chapterNo); if (!no) return; const nm = canon(r.chapterName) || CHAPTER_NAME[no] || ""; if (!chapMap.has(no)) chapMap.set(no, nm); });
+			if (!chapMap.size) { Object.entries(CHAPTER_NAME).forEach(([no, name]) => chapMap.set(no, name)); }
+			const chBox = $("#chapters");
+			if (chBox) chBox.innerHTML = "";
+			[...chapMap.keys()].sort(sortNumAware).forEach(no => { if (chBox) chBox.appendChild(makeChip("Chapter " + no + " • " + (chapMap.get(no) || ""), no, "chapters")); });
+		}
 
-      // Chapters
-      const chapMap = new Map();
-      ALL.forEach(r => {
-        const no = canon(r.chapterNo); if (!no) return;
-        const nm = canon(r.chapterName) || CHAPTER_NAME[no] || "";
-        if (!chapMap.has(no)) chapMap.set(no, nm);
-      });
-      if (!chapMap.size) { Object.entries(CHAPTER_NAME).forEach(([no, name]) => chapMap.set(no, name)); }
-      const chBox = $("#chapters"); if (chBox) chBox.innerHTML = "";
-      [...chapMap.keys()].sort(sortNumAware).forEach(no => {
-        if (chBox) chBox.appendChild(makeChip("Chapter " + no + " • " + (chapMap.get(no) || ""), no, "chapters"));
-      });
-    }
+		// ---------- Clear ----------
+		function clearGroup(key) {
+			const set = SELECTED[key];
+			if (set) set.clear();
+			const list = document.getElementById(key);
+			if (list) { list.querySelectorAll(".chip.active").forEach(ch => ch.classList.remove("active")); }
+			document.querySelectorAll(".group").forEach(g => g.classList.remove("disabled"));
+			updateSummaryAndCount();
+			applyGroupLockUI();
+		}
+		document.addEventListener("click", (e) => { const btn = e.target.closest(".clearlink"); if (!btn) return; const key = btn.getAttribute("data-target"); if (!key) return;
+			e.preventDefault();
+			clearGroup(key); });
 
-    // ---------- Clear (per section) ----------
-    function clearGroup(key) {
-      const set = SELECTED[key]; if (set) set.clear();
-      const list = document.getElementById(key);
-      if (list) { list.querySelectorAll(".chip.active").forEach(ch => ch.classList.remove("active")); }
-      document.querySelectorAll(".group").forEach(g => g.classList.remove("disabled"));
-      updateSummaryAndCount(); applyGroupLockUI();
-    }
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".clearlink"); if (!btn) return;
-      const key = btn.getAttribute("data-target"); if (!key) return;
-      e.preventDefault(); clearGroup(key);
-    });
+		// ---------- Filter & summary ----------
+		function applyFilters() {
+			const P = SELECTED.papers,
+				T = SELECTED.topics,
+				C = SELECTED.chapters,
+				term = SEARCH.toLowerCase();
+			const allow = (set, val) => set.size === 0 || set.has(canon(val));
+			FILTERED = ALL.filter(r => {
+				if (!allow(P, r.paper)) return false;
+				if (!allow(T, r.topicNo)) return false;
+				if (!allow(C, r.chapterNo)) return false;
+				if (term) { const blob = (String(r.question) + " " + String(r.answer)).toLowerCase(); if (!blob.includes(term)) return false; }
+				return true;
+			});
+			if (SHUFFLE) { for (let i = FILTERED.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));
+					[FILTERED[i], FILTERED[j]] = [FILTERED[j], FILTERED[i]]; } }
+			$("#start").disabled = FILTERED.length === 0;
+			const canMCQ = FILTERED.length >= 4;
+			const mcqBtn = $("#mcqBtn");
+			if (mcqBtn) { mcqBtn.disabled = !canMCQ;
+				mcqBtn.title = canMCQ ? 'Start Lightning MCQ' : 'Need at least 4 items after filtering'; }
+		}
 
-    // ---------- Filter & summary ----------
-    function applyFilters() {
-      const P = SELECTED.papers, T = SELECTED.topics, C = SELECTED.chapters, term = SEARCH.toLowerCase();
-      const allow = (set, val) => set.size === 0 || set.has(canon(val));
-      FILTERED = ALL.filter(r => {
-        if (!allow(P, r.paper)) return false;
-        if (!allow(T, r.topicNo)) return false;
-        if (!allow(C, r.chapterNo)) return false;
-        if (term) {
-          const blob = (String(r.question) + " " + String(r.answer)).toLowerCase();
-          if (!blob.includes(term)) return false;
-        }
-        return true;
-      });
-      if (SHUFFLE) {
-        for (let i = FILTERED.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          const tmp = FILTERED[i]; FILTERED[i] = FILTERED[j]; FILTERED[j] = tmp;
-        }
-      }
-      const startBtn = $("#start"); if (startBtn) startBtn.disabled = FILTERED.length === 0;
-    }
-    function labelForSet(key, dict) {
-      const set = SELECTED[key]; if (!set.size) return "All";
-      return [...set].sort(sortNumAware).map(no => {
-        const name = (dict && dict[no]) ||
-          (key === "topics" ? (ALL.find(r => canon(r.topicNo) === no)?.topicName || "") :
-            key === "chapters" ? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || "") : "");
-        const prefix = key === "topics" ? "• Topic " : key === "chapters" ? "• Chapter " : "• ";
-        return prefix + no + (name ? " • " + name : "");
-      }).join("\n");
-    }
-    function updateSummaryAndCount() {
-      applyFilters();
-      const paperText = labelForSet("papers");
-      const topicText = labelForSet("topics", TOPIC_NAME);
-      const chapText = labelForSet("chapters", CHAPTER_NAME);
-      const searchText = SEARCH || "-";
-      const summaryEl = $("#summary");
-      if (summaryEl) {
-        summaryEl.textContent =
-          "Paper:\n" + paperText +
-          "\n\nTopic(s):\n" + topicText +
-          "\n\nChapter(s):\n" + chapText +
-          "\n\nSearch: " + searchText +
-          "\nMatches: " + FILTERED.length;
-      }
-    }
+		function labelForSet(key, dict) {
+			const set = SELECTED[key];
+			if (!set.size) return "All";
+			return [...set].sort(sortNumAware).map(no => {
+				const name = (dict && dict[no]) || (key === "topics" ? (ALL.find(r => canon(r.topicNo) === no)?.topicName || "") : key === "chapters" ? (ALL.find(r => canon(r.chapterNo) === no)?.chapterName || "") : "");
+				const prefix = key === "topics" ? "• Topic " : key === "chapters" ? "• Chapter " : "• ";
+				return prefix + no + (name ? " • " + name : "");
+			}).join("\n");
+		}
 
-    // ---------- Progress + cards ----------
-    function updateProgress() {
-      const total = FILTERED.length || 0;
-      const pct = total ? Math.round((correctCount / total) * 100) : 0;
-      const bar = $("#bar"), bt = $("#barText");
-      if (bar) bar.style.width = pct + "%";
-      if (bt) bt.textContent = pct + "% • " + correctCount + " / " + total + " correct";
-    }
-    function escapeHTML(s) {
-      return String(s || "").replace(/[&<>"']/g, function (m) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[m];
-      });
-    }
-    function renderCard() {
-      const area = $("#cardArea"); if (!area) return;
-      area.classList.remove("flipped");
-      const card = FILTERED[iCard]; revealed = false;
-      const btnC = $("#btnCorrect"), btnW = $("#btnWrong");
-      if (btnC) btnC.disabled = true;
-      if (btnW) btnW.disabled = true;
-      if (!card) {
-        area.innerHTML = ""; const c = $("#counter"); if (c) c.textContent = "Card 0 of 0"; updateProgress(); return;
-      }
-      const c = $("#counter"); if (c) c.textContent = "Card " + (iCard + 1) + " of " + FILTERED.length;
-      area.innerHTML =
-        '<div class="flipper" id="flipper">' +
-        '<div class="fc-face fc-front">' + escapeHTML(card.question) + '</div>' +
-        '<div class="fc-face fc-back">' + escapeHTML(card.answer) + '</div>' +
-        '</div>';
-      area.onclick = function () {
-        area.classList.toggle("flipped");
-        revealed = !revealed;
-        if (btnC) btnC.disabled = !revealed;
-        if (btnW) btnW.disabled = !revealed;
-      };
-    }
-    function mark(ok) {
-      if (!revealed) return;
-      if (ok) correctCount++;
-      if (iCard < FILTERED.length - 1) { iCard++; renderCard(); }
-      else {
-        const btnC = $("#btnCorrect"), btnW = $("#btnWrong");
-        if (btnC) btnC.disabled = true;
-        if (btnW) btnW.disabled = true;
-      }
-      updateProgress();
-    }
+		function updateSummaryAndCount() {
+			applyFilters();
+			const paperText = labelForSet("papers"),
+				topicText = labelForSet("topics", TOPIC_NAME),
+				chapText = labelForSet("chapters", CHAPTER_NAME),
+				searchText = SEARCH || "-";
+			const summaryEl = $("#summary");
+			if (summaryEl) { summaryEl.textContent = "Paper:\n" + paperText + "\n\nTopic(s):\n" + topicText + "\n\nChapter(s):\n" + chapText + "\n\nSearch: " + searchText + "\nMatches: " + FILTERED.length; }
+		}
 
-    // ---------- Events ----------
-    (function bindEvents() {
-      const sh = $("#shuffle");
-      if (sh) {
-        sh.addEventListener("click", function () {
-          SHUFFLE = !SHUFFLE;
-          sh.classList.toggle("on", SHUFFLE);
-          sh.setAttribute("aria-checked", SHUFFLE ? "true" : "false");
-          updateSummaryAndCount();
-        });
-      }
-      const s = $("#search");
-      if (s) { s.addEventListener("input", function (e) { SEARCH = e.target.value.trim(); updateSummaryAndCount(); }); }
-      const start = $("#start");
-      if (start) {
-        start.addEventListener("click", function () {
-          if (!FILTERED.length) return;
-          iCard = 0; correctCount = 0; revealed = false; updateProgress();
-          const ov = $("#overlay"); if (ov) ov.classList.add("show"); renderCard();
-        });
-      }
-      const close = $("#close");
-      if (close) { close.addEventListener("click", function () { const ov = $("#overlay"); if (ov) ov.classList.remove("show"); }); }
-      const prev = $("#prev"), next = $("#next");
-      if (prev) { prev.addEventListener("click", function () { if (iCard > 0) { iCard--; renderCard(); } }); }
-      if (next) { next.addEventListener("click", function () { if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } }); }
-      const btnC = $("#btnCorrect"), btnW = $("#btnWrong");
-      if (btnC) btnC.addEventListener("click", function () { mark(true); });
-      if (btnW) btnW.addEventListener("click", function () { mark(false); });
+		// ---------- Study deck ----------
+		function updateProgress() { const total = FILTERED.length || 0; const pct = total ? Math.round((correctCount / total) * 100) : 0;
+			$("#bar").style.width = pct + "%";
+			$("#barText").textContent = pct + "% • " + correctCount + " / " + total + " correct"; }
 
-      window.addEventListener("keydown", function (e) {
-        const ov = $("#overlay"); if (!ov || !ov.classList.contains("show")) return;
-        if (e.key === "Escape") { ov.classList.remove("show"); }
-        if (e.key === "ArrowLeft") { e.preventDefault(); if (iCard > 0) { iCard--; renderCard(); } }
-        if (e.key === "ArrowRight") { e.preventDefault(); if (iCard < FILTERED.length - 1) { iCard++; renderCard(); } }
-        if (e.key === " ") {
-          e.preventDefault();
-          const area = $("#cardArea"); if (!area) return;
-          area.classList.toggle("flipped");
-          revealed = !revealed;
-          if (btnC) btnC.disabled = !revealed;
-          if (btnW) btnW.disabled = !revealed;
-        }
-        if (e.key.toLowerCase() === "c") { if (btnC && !btnC.disabled) mark(true); }
-        if (e.key.toLowerCase() === "w") { if (btnW && !btnW.disabled) mark(false); }
-      });
-    })();
+		function renderCard() {
+			const area = $("#cardArea");
+			area.classList.remove("flipped");
+			const card = FILTERED[iCard];
+			revealed = false;
+			$("#btnCorrect").disabled = true;
+			$("#btnWrong").disabled = true;
+			if (!card) { area.innerHTML = "";
+				$("#counter").textContent = "Card 0 of 0";
+				updateProgress(); return; }
+			$("#counter").textContent = "Card " + (iCard + 1) + " of " + FILTERED.length;
+			area.innerHTML = '<div class="flipper" id="flipper"><div class="fc-face fc-front">' + escapeHTML(card.question) + '</div><div class="fc-face fc-back">' + escapeHTML(card.answer) + '</div></div>';
+			area.onclick = () => { area.classList.toggle("flipped");
+				revealed = !revealed;
+				$("#btnCorrect").disabled = !revealed;
+				$("#btnWrong").disabled = !revealed; }
+		}
 
-    // ---------- Init: load Combined Science CSV ----------
-    (async function init() {
-      try {
-        const res = await fetch("phy_cs.csv", { cache: "no-store" });
-        if (!res.ok) throw new Error("Cannot load phy_cs.csv");
-        const text = await res.text();
-        ALL = readCSV(text);
-      } catch (e) {
-        console.error(e);
-        ALL = [];
-      }
-      buildLists(); applyGroupLockUI(); updateSummaryAndCount();
-    })();
-  </script>
+		function mark(ok) { if (!revealed) return; if (ok) correctCount++; if (iCard < FILTERED.length - 1) { iCard++;
+				renderCard(); } else { $("#btnCorrect").disabled = true;
+				$("#btnWrong").disabled = true; } updateProgress(); }
+
+		(function bindStudyEvents() {
+			$("#shuffle").addEventListener("click", () => { SHUFFLE = !SHUFFLE; const sh = $("#shuffle");
+				sh.classList.toggle("on", SHUFFLE);
+				sh.setAttribute("aria-checked", SHUFFLE ? "true" : "false");
+				updateSummaryAndCount(); });
+			$("#search").addEventListener("input", e => { SEARCH = e.target.value.trim();
+				updateSummaryAndCount(); });
+			$("#start").addEventListener("click", () => { if (!FILTERED.length) return;
+				iCard = 0;
+				correctCount = 0;
+				revealed = false;
+				updateProgress();
+				$("#overlay").classList.add("show");
+				renderCard(); });
+			$("#close").addEventListener("click", () => $("#overlay").classList.remove("show"));
+			$("#prev").addEventListener("click", () => { if (iCard > 0) { iCard--;
+					renderCard(); } });
+			$("#next").addEventListener("click", () => { if (iCard < FILTERED.length - 1) { iCard++;
+					renderCard(); } });
+			$("#btnCorrect").addEventListener("click", () => mark(true));
+			$("#btnWrong").addEventListener("click", () => mark(false));
+			window.addEventListener("keydown", e => {
+				if (!$("#overlay").classList.contains("show")) return;
+				if (e.key === "Escape") $("#overlay").classList.remove("show");
+				if (e.key === "ArrowLeft") { e.preventDefault(); if (iCard > 0) { iCard--;
+						renderCard(); } }
+				if (e.key === "ArrowRight") { e.preventDefault(); if (iCard < FILTERED.length - 1) { iCard++;
+						renderCard(); } }
+				if (e.key === " ") { e.preventDefault(); const area = $("#cardArea");
+					area.classList.toggle("flipped");
+					revealed = !revealed;
+					$("#btnCorrect").disabled = !revealed;
+					$("#btnWrong").disabled = !revealed; }
+				if (e.key.toLowerCase() === "c") { if (!$("#btnCorrect").disabled) mark(true); }
+				if (e.key.toLowerCase() === "w") { if (!$("#btnWrong").disabled) mark(false); }
+			});
+		})();
+
+		// ---------- Lightning MCQ ----------
+		const MCQ_ROUND_LEN = 12,
+			MCQ_TIME_MS = 12000;
+		let MCQ = [],
+			qi = 0,
+			score = 0,
+			streak = 0,
+			correctN = 0,
+			answeredN = 0,
+			timerId = null,
+			tStart = 0,
+			allowAnswer = true;
+
+		function clamp(n, min, max) { return Math.max(min, Math.min(max, n)) }
+
+		function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));
+				[arr[i], arr[j]] = [arr[j], arr[i]] } return arr }
+
+		function pickDistractors(pool, correct, ctx) {
+			const MAXLEN1 = 38,
+				MAXLEN2 = 55;
+			const base = pool.filter(r => r.answer && r.answer !== correct);
+			const byCtx = base.filter(r => (ctx.chapterNo && r.chapterNo === ctx.chapterNo) || (ctx.topicNo && r.topicNo === ctx.topicNo));
+			const lenSort = (a, b) => a.answer.length - b.answer.length;
+			const shortlist = [...byCtx].sort(lenSort).concat([...base].sort(lenSort));
+			const uniq = [],
+				seen = new Set();
+			for (const r of shortlist) {
+				const ans = r.answer.trim();
+				if (seen.has(ans)) continue;
+				if (uniq.length < 2 && ans.length <= MAXLEN1) { uniq.push(ans);
+					seen.add(ans); } else if (uniq.length < 3 && ans.length <= MAXLEN2) { uniq.push(ans);
+					seen.add(ans); }
+				if (uniq.length === 3) break;
+			}
+			while (uniq.length < 3 && base.length) {
+				const r = base[Math.floor(Math.random() * base.length)].answer.trim();
+				if (r !== correct && !seen.has(r)) { uniq.push(r);
+					seen.add(r); }
+			}
+			return uniq.slice(0, 3);
+		}
+
+		function truncate(s, n) { return s.length > n ? s.slice(0, n - 1) + '…' : s }
+
+		function buildMCQRound() {
+			const pool = FILTERED.slice();
+			const roundLen = clamp(MCQ_ROUND_LEN, 4, Math.min(20, pool.length));
+			const byAnswer = new Map();
+			pool.forEach(r => { const key = r.answer.trim().toLowerCase(); if (!byAnswer.has(key)) byAnswer.set(key, r); });
+			const base = [...byAnswer.values()].sort((a, b) => a.answer.length - b.answer.length);
+			const chosen = base.slice(0, Math.max(roundLen, 4));
+			const out = [];
+			for (const row of chosen) {
+				const correct = row.answer.trim();
+				const distractors = pickDistractors(pool, correct, row);
+				if (distractors.length < 3) continue;
+				const options = shuffle([correct, ...distractors]);
+				out.push({ q: row.question, qFull: row.question, a: correct, opts: options, meta: { topicNo: row.topicNo, chapterNo: row.chapterNo } });
+				if (out.length === roundLen) break;
+			}
+			return out;
+		}
+
+		function updateHUD() {
+			$("#mcqRound").textContent = `Q ${qi+1}/${MCQ.length}`;
+			$("#mcqScore").textContent = `Score: ${score}`;
+			$("#mcqStreak").textContent = `Streak: ${streak}`;
+			const acc = answeredN ? Math.round((correctN / answeredN) * 100) : 0;
+			$("#mcqAcc").textContent = `Accuracy: ${acc}%`;
+		}
+
+		function setTimer(p = 0) { $("#mcqTimerBar").style.width = (p * 100) + "%"; }
+
+		function startTimer() {
+			clearInterval(timerId);
+			tStart = Date.now();
+			setTimer(1);
+			timerId = setInterval(() => {
+				const dt = Date.now() - tStart,
+					prog = clamp(1 - dt / MCQ_TIME_MS, 0, 1);
+				setTimer(prog);
+				if (dt >= MCQ_TIME_MS) { clearInterval(timerId);
+					lockOptions();
+					showCorrect(null, 'Time up'); }
+			}, 50);
+		}
+
+		function renderQuestion() {
+			const item = MCQ[qi];
+			if (!item) { endRound(); return; }
+			updateHUD();
+			const showToggle = item.q.length > 150;
+			$("#toggleFullQ").style.display = showToggle ? 'inline-block' : 'none';
+			$("#fullQ").style.display = 'none';
+			$("#toggleFullQ").textContent = 'Show full';
+			$("#mcqQ").textContent = truncate(item.q, 150);
+			$("#fullQ").textContent = item.qFull;
+			const opts = $("#mcqOpts");
+			opts.innerHTML = '';
+			const labels = ['1)', '2)', '3)', '4)'];
+			item.opts.forEach((opt, i) => { const b = document.createElement('button');
+				b.className = 'opt kbd';
+				b.dataset.key = labels[i];
+				b.textContent = opt;
+				b.addEventListener('click', () => onAnswer(b, opt));
+				opts.appendChild(b); });
+			$("#mcqStatus").textContent = 'Press 1–4 to answer, N for next.';
+			$("#mcqNext").disabled = true;
+			allowAnswer = true;
+			startTimer();
+		}
+
+		function lockOptions() { allowAnswer = false;
+			document.querySelectorAll('#mcqOpts .opt').forEach(b => b.disabled = true); }
+
+		function showCorrect(btn, reason = '') {
+			const item = MCQ[qi];
+			document.querySelectorAll('#mcqOpts .opt').forEach(b => { if (b.textContent === item.a) b.classList.add('correct'); });
+			if (btn && btn.textContent !== item.a) btn.classList.add('wrong');
+			$("#mcqNext").disabled = false;
+			$("#mcqStatus").textContent = reason ? reason : 'Check and press Next (N).';
+		}
+
+		function onAnswer(btn, choice) {
+			if (!allowAnswer) return;
+			lockOptions();
+			clearInterval(timerId);
+			answeredN++;
+			const item = MCQ[qi];
+			if (choice === item.a) {
+				streak++;
+				correctN++;
+				const add = 10 + 5 * (streak - 1);
+				score += add;
+				$("#mcqStatus").textContent = `Correct +${add} (streak ${streak})`;
+				btn.classList.add('correct');
+				$("#mcqNext").disabled = false;
+			} else {
+				$("#mcqStatus").textContent = 'Wrong';
+				streak = 0;
+				showCorrect(btn);
+			}
+			updateHUD();
+		}
+
+		function nextQuestion() { qi++; if (qi >= MCQ.length) { endRound(); return; } renderQuestion(); }
+
+		function endRound() {
+			clearInterval(timerId);
+			const acc = answeredN ? Math.round((correctN / answeredN) * 100) : 0;
+			$("#mcqQ").textContent = `Round finished. Score ${score}, Accuracy ${acc}%`;
+			$("#fullQ").style.display = 'none';
+			$("#toggleFullQ").style.display = 'none';
+			const box = $("#mcqOpts");
+			box.innerHTML = '';
+			const bt = document.createElement('button');
+			bt.className = 'btn';
+			bt.textContent = 'Play again';
+			bt.onclick = restartMCQ;
+			box.appendChild(bt);
+			$("#mcqNext").disabled = true;
+			$("#mcqSkip").disabled = true;
+		}
+
+		function restartMCQ() { if (!FILTERED.length) return;
+			MCQ = buildMCQRound();
+			qi = 0;
+			score = 0;
+			streak = 0;
+			correctN = 0;
+			answeredN = 0;
+			$("#mcqSkip").disabled = false;
+			renderQuestion(); }
+
+		// MCQ events
+		$("#mcqBtn").addEventListener('click', () => { MCQ = buildMCQRound(); if (!MCQ || !MCQ.length) { alert('Not enough short answers in this filter. Try adding more items or another topic.'); return; } qi = 0;
+			score = 0;
+			streak = 0;
+			correctN = 0;
+			answeredN = 0;
+			$("#mcqOverlay").classList.add('show');
+			renderQuestion(); });
+		$("#mcqExit").addEventListener('click', () => { clearInterval(timerId);
+			$("#mcqOverlay").classList.remove('show'); });
+		$("#mcqNext").addEventListener('click', nextQuestion);
+		$("#mcqRestart").addEventListener('click', restartMCQ);
+		$("#mcqSkip").addEventListener('click', () => { streak = 0;
+			answeredN++;
+			updateHUD();
+			clearInterval(timerId);
+			nextQuestion(); });
+		$("#toggleFullQ").addEventListener('click', () => { const full = $("#fullQ"),
+				btn = $("#toggleFullQ"); const show = full.style.display === 'none';
+			full.style.display = show ? 'block' : 'none';
+			btn.textContent = show ? 'Hide full' : 'Show full'; });
+		window.addEventListener('keydown', e => {
+			if (!$("#mcqOverlay").classList.contains('show')) return;
+			const k = e.key.toLowerCase();
+			if (k === 'escape') { e.preventDefault();
+				$("#mcqExit").click(); return; }
+			if (k === 'n') { e.preventDefault(); if (!$("#mcqNext").disabled) $("#mcqNext").click(); return; }
+			if (k === 's') { e.preventDefault(); if (!$("#mcqSkip").disabled) $("#mcqSkip").click(); return; }
+			if (['1', '2', '3', '4'].includes(k)) { const idx = Number(k) - 1; const btn = document.querySelectorAll('#mcqOpts .opt')[idx]; if (btn) btn.click(); }
+		});
+
+		// ---------- Init (load CSV) ----------
+		(async function init() {
+			try {
+				const res = await fetch("phy_cs.csv", { cache: "no-store" });
+				if (!res.ok) throw new Error("Cannot load phy_cs.csv");
+				const text = await res.text();
+				ALL = readCSV(text);
+			} catch (e) { console.error(e);
+				ALL = []; }
+			buildLists();
+			applyGroupLockUI();
+			updateSummaryAndCount();
+		})();
+	</script>
 </body>
 
 </html>
