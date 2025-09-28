@@ -6,10 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Motion Tracker</title>
 	<link rel="icon" type="image/png" href="/favicon.png">
-
-	<!-- 1) Include Chart.js for plotting -->
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 	<style>
 		:root {
 			--btn-upload-color: #0079b1;
@@ -21,98 +18,65 @@
 			--btn-clear-calibration-color: #ec7070;
 			--btn-clear-origin-color: #ec7070;
 			--btn-confirm-color: #28a745;
-			--hover-confirm-color: #1e7e34;
 			--btn-cancel-color: #dc3545;
-			--hover-cancel-color: #c82333;
 			--btn-plot-vx-color: #48c8a8;
 			--btn-plot-vy-color: #48c8a8;
 			--btn-backToPosition-color: #48c8a8;
 		}
 
 		body {
-			font-family: 'Arial', sans-serif;
-			padding: 0;
+			font-family: Arial, sans-serif;
 			margin: 0;
-			background-color: #f9f9f9;
-			color: #333;
+			background: #f9f9f9;
+			color: #333
 		}
 
-		/* Title banner container: 3-column grid */
 		#titleBanner {
 			display: grid;
 			grid-template-columns: auto 1fr auto;
-			/* Left, middle(1fr), right */
 			align-items: center;
-			/* Vertically center items */
-			background-color: #333;
-			/* Same background as your old <h1> */
+			background: #333;
 			color: #fff;
-			/* White text */
-			margin: 0;
-			/* Remove default margins */
-			padding: 5px 0;
-			/* Slight vertical padding */
+			padding: 5px 0
 		}
 
-		/* Logo container: ensure the image fits nicely in the banner */
 		.banner-logo img {
 			max-height: 38px;
-			/* Adjust if you want a bigger/smaller logo */
 			height: auto;
 			width: auto;
-			margin-left: 10px;
-			/* Left padding for visual space */
-			margin-right: 10px;
-			margin-top: 3px;
+			margin: 3px 10px
 		}
 
-		/* The title in the center column, centered text */
 		.banner-title {
-			text-align: center;
 			margin: 0;
-			/* Remove default heading margin */
+			text-align: center;
 			font-size: 1.8em;
-			font-weight: bold;
+			font-weight: bold
 		}
 
-		/* Empty placeholder on the right to balance out the grid */
 		.banner-placeholder {
-			/* Make it about as wide as the logo + margins, so the heading is truly centered across the banner. */
-			width: 70px;
-			/* Adjust to match the approximate space the logo occupies */
+			width: 70px
 		}
 
 		a {
 			color: #ff5f1f;
-			text-decoration: none;
+			text-decoration: none
 		}
 
 		a:hover {
-			color: #ff5f1f;
-			text-decoration: underline;
-		}
-
-		a:visited {
-			color: #ff5f1f;
+			text-decoration: underline
 		}
 
 		h1 {
-			text-align: center;
-			font-size: 1.8em;
-			font-weight: bold;
-			margin: 0;
-			padding: 5px 0;
-			background-color: #333;
-			color: white;
+			display: none
 		}
 
 		#warningBanner {
-			font-size: 0.9em;
-			background-color: #fff8e3;
+			font-size: .9em;
+			background: #fff8e3;
 			color: #856404;
 			padding: 5px;
-			text-align: center;
-			border-bottom: 0px;
+			text-align: center
 		}
 
 		#message {
@@ -122,7 +86,7 @@
 			margin: 15px auto;
 			color: #333;
 			max-width: 800px;
-			line-height: 1.5;
+			line-height: 1.5
 		}
 
 		#topControls {
@@ -131,107 +95,73 @@
 			grid-template-rows: repeat(2, auto);
 			gap: 10px;
 			padding: 20px;
-			background-color: #f9f9f9;
 			max-width: 800px;
-			margin: 0 auto;
+			margin: 0 auto
 		}
 
 		.control-button {
 			padding: 10px 20px;
 			border: none;
 			border-radius: 5px;
-			color: white;
+			color: #fff;
 			font-size: 1em;
 			font-weight: bold;
 			cursor: pointer;
-			transition: filter 0.3s ease;
-			width: 100%;
+			transition: filter .3s ease;
+			width: 100%
 		}
 
 		.btn-upload {
-			background-color: var(--btn-upload-color);
+			background: var(--btn-upload-color)
 		}
 
 		.btn-play {
-			background-color: var(--btn-play-color);
+			background: var(--btn-play-color)
 		}
 
 		.btn-calibration {
-			background-color: var(--btn-calibration-color);
+			background: var(--btn-calibration-color)
 		}
 
 		.btn-set-origin {
-			background-color: var(--btn-set-origin-color);
+			background: var(--btn-set-origin-color)
 		}
 
 		.btn-export {
-			background-color: var(--btn-export-color);
+			background: var(--btn-export-color)
 		}
 
 		.btn-clear-data {
-			background-color: var(--btn-clear-data-color);
+			background: var(--btn-clear-data-color)
 		}
 
 		.btn-clear-calibration {
-			background-color: var(--btn-clear-calibration-color);
+			background: var(--btn-clear-calibration-color)
 		}
 
 		.btn-clear-origin {
-			background-color: var(--btn-clear-origin-color);
+			background: var(--btn-clear-origin-color)
 		}
 
 		.btn-plot-vx {
-			background-color: var(--btn-plot-vx-color);
+			background: var(--btn-plot-vx-color)
 		}
 
 		.btn-plot-vy {
-			background-color: var(--btn-plot-vy-color);
+			background: var(--btn-plot-vy-color)
 		}
 
 		.btn-backToPosition {
-			background-color: var(--btn-backToPosition-color);
+			background: var(--btn-backToPosition-color)
 		}
 
 		.control-button:hover:not(:disabled) {
-			filter: brightness(90%);
+			filter: brightness(90%)
 		}
 
-		/* Disabled Buttons Appear Gray */
 		.control-button:disabled {
-			background-color: #a9a9a9 !important;
-			cursor: not-allowed;
-		}
-
-		/* Range Slider */
-		#slider {
-			appearance: none;
-			background: #007bff;
-			height: 5px;
-			border-radius: 5px;
-			outline: none;
-			margin: 0 10px;
-			cursor: pointer;
-			width: 100%;
-		}
-
-		#slider::-webkit-slider-thumb {
-			appearance: none;
-			width: 15px;
-			height: 15px;
-			border-radius: 50%;
-			background: #fff;
-			border: 2px solid #007bff;
-			cursor: pointer;
-			margin-top: -5px;
-		}
-
-		#slider::-moz-range-thumb {
-			width: 15px;
-			height: 15px;
-			border-radius: 50%;
-			background: #fff;
-			border: 2px solid #007bff;
-			cursor: pointer;
+			background: #a9a9a9 !important;
+			cursor: not-allowed
 		}
 
 		#analysisContainer {
@@ -242,7 +172,7 @@
 			margin: 20px auto;
 			padding: 20px;
 			gap: 20px;
-			max-width: 1200px;
+			max-width: 1200px
 		}
 
 		#videoSection {
@@ -251,70 +181,87 @@
 			align-items: center;
 			width: 48%;
 			max-width: 600px;
-			min-width: 300px;
+			min-width: 300px
 		}
 
 		#videoWrapper {
 			position: relative;
 			width: 100%;
-			min-height: 200px;
+			min-height: 200px
 		}
 
-		/*
-         * Use max-width:100%; height:auto; to maintain aspect ratio.
-         * This prevents distortions that move the axis upward.
-         */
 		video,
 		canvas {
 			border: 2px solid #ddd;
 			border-radius: 8px;
 			max-width: 100%;
 			height: auto;
-			/* keep aspect ratio */
-			background-color: #f5f5f5;
-			display: block;
+			background: #f5f5f5;
+			display: block
+		}
+
+		#hiddenVideo {
+			display: none
 		}
 
 		#overlayCanvas {
 			position: absolute;
 			top: 0;
 			left: 0;
-			/* We'll match the actual size in JS, but visually it scales with the container. */
-			background-color: transparent;
+			background: transparent;
 			z-index: 2;
-			pointer-events: none;
+			pointer-events: none
 		}
 
 		#frameCanvas {
-			display: none;
+			display: none
 		}
 
-		/* Video Control Bar */
 		#controlsContainer {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			width: 100%;
 			max-width: 800px;
-			margin-top: 10px;
+			margin-top: 10px
 		}
 
 		#videoControls {
 			display: flex;
 			align-items: center;
 			gap: 15px;
-			width: 100%;
+			width: 100%
 		}
 
-		#videoControls .control-button {
-			padding: 8px 16px;
-			font-size: 0.9em;
-			flex: 1;
-			/* Ensure uniform width */
+		#slider {
+			appearance: none;
+			background: #007bff;
+			height: 5px;
+			border-radius: 5px;
+			outline: none;
+			margin: 0 10px;
+			cursor: pointer;
+			width: 100%
 		}
 
-		#videoControls #slider {
-			width: 800px;
+		#slider::-webkit-slider-thumb {
+			appearance: none;
+			width: 15px;
+			height: 15px;
+			border-radius: 50%;
+			background: #fff;
+			border: 2px solid #007bff;
+			cursor: pointer;
+			margin-top: -5px
+		}
+
+		#slider::-moz-range-thumb {
+			width: 15px;
+			height: 15px;
+			border-radius: 50%;
+			background: #fff;
+			border: 2px solid #007bff;
+			cursor: pointer
 		}
 
 		#plotSection {
@@ -323,28 +270,24 @@
 			align-items: center;
 			width: 48%;
 			min-width: 300px;
-			max-width: 600px;
+			max-width: 600px
 		}
 
 		#chartCanvasContainer {
 			width: 100%;
-			height: 400px;
+			height: 400px
 		}
 
 		#chartCanvasContainer canvas {
 			width: 100%;
-			height: 100%;
+			height: 100%
 		}
 
 		#plotButtons {
 			display: flex;
 			gap: 10px;
 			margin-top: 10px;
-			width: 100%;
-		}
-
-		#plotButtons .control-button {
-			flex: 1;
+			width: 100%
 		}
 
 		#calibrationPrompt,
@@ -354,76 +297,15 @@
 			top: 50%;
 			left: 50%;
 			transform: translate(-50%, -50%);
-			background-color: white;
+			background: #fff;
 			border: 2px solid #333;
 			padding: 20px;
 			border-radius: 8px;
 			display: none;
 			z-index: 10;
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
 			width: 300px;
-			box-sizing: border-box;
-		}
-
-		#calibrationPrompt h2,
-		#exportPrompt h2,
-		#frameRatePrompt h2 {
-			margin-top: 0;
-			text-align: center;
-		}
-
-		#calibrationPrompt p,
-		#exportPrompt p,
-		#frameRatePrompt p {
-			text-align: center;
-		}
-
-		#calibrationPrompt form,
-		#exportPrompt form,
-		#frameRatePrompt form {
-			display: flex;
-			flex-direction: column;
-		}
-
-		#calibrationPrompt input,
-		#exportPrompt input,
-		#frameRatePrompt input {
-			width: 100%;
-			padding: 8px;
-			margin: 10px 0;
-			box-sizing: border-box;
-		}
-
-		#calibrationPrompt button,
-		#exportPrompt button,
-		#frameRatePrompt button {
-			padding: 10px 20px;
-			border: none;
-			border-radius: 5px;
-			cursor: pointer;
-			width: 48%;
-			font-size: 1em;
-			color: white;
-			transition: filter 0.3s ease;
-		}
-
-		#calibrationPrompt #confirmCalibration,
-		#exportPrompt #confirmExport,
-		#frameRatePrompt #confirmFrameRate {
-			background-color: var(--btn-confirm-color);
-		}
-
-		#calibrationPrompt #cancelCalibration,
-		#exportPrompt #cancelExport,
-		#frameRatePrompt #cancelFrameRate {
-			background-color: var(--btn-cancel-color);
-		}
-
-		.control-button:hover:not(:disabled),
-		#calibrationPrompt button:hover:not(:disabled),
-		#exportPrompt button:hover:not(:disabled),
-		#frameRatePrompt button:hover:not(:disabled) {
-			filter: brightness(90%);
+			box-sizing: border-box
 		}
 
 		.crosshair {
@@ -432,14 +314,14 @@
 			height: 20px;
 			pointer-events: none;
 			z-index: 3;
-			display: none;
+			display: none
 		}
 
 		.crosshair::before,
 		.crosshair::after {
 			content: '';
 			position: absolute;
-			background-color: red;
+			background: red
 		}
 
 		.crosshair::before {
@@ -447,7 +329,7 @@
 			left: 0;
 			width: 100%;
 			height: 1px;
-			transform: translateY(-50%);
+			transform: translateY(-50%)
 		}
 
 		.crosshair::after {
@@ -455,16 +337,7 @@
 			top: 0;
 			width: 1px;
 			height: 100%;
-			transform: translateX(-50%);
-		}
-
-		input:-webkit-autofill,
-		input:-webkit-autofill:hover,
-		input:-webkit-autofill:focus,
-		input:-webkit-autofill:active {
-			transition: background-color 5000s ease-in-out 0s;
-			-webkit-text-fill-color: #000 !important;
-			background-color: #fff !important;
+			transform: translateX(-50%)
 		}
 
 		footer {
@@ -474,33 +347,22 @@
 			padding: 10px;
 			background: #f9f9f900;
 			color: #555;
-			margin-top: 10px;
+			margin-top: 10px
 		}
 	</style>
 </head>
 
 <body>
-	<!-- Title Banner with Logo (Left), Title (Center), Placeholder (Right) -->
 	<div id="titleBanner">
-		<!-- Logo on the Left -->
 		<div class="banner-logo">
-			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-				<img src="/panphy.png" alt="PanPhy logo" />
-			</a>
+			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"><img src="/panphy.png" alt="PanPhy logo" /></a>
 		</div>
-
-		<!-- Motion Tracker Title in the Middle -->
 		<h1 class="banner-title">Motion Tracker</h1>
-
-		<!-- Empty placeholder to keep the heading centered -->
 		<div class="banner-placeholder"></div>
 	</div>
 
-	<div id="warningBanner">
-		<strong>Note:</strong> This app is optimized for desktop. On iOS, use the latest version for best performance.
-	</div>
+	<div id="warningBanner"><strong>Note:</strong> This app is optimized for desktop. On iOS, use the latest version for best performance.</div>
 
-	<!-- Top Controls Section -->
 	<div id="topControls">
 		<button id="uploadVideo" class="control-button btn-upload" aria-label="Upload Video">Upload Video</button>
 		<button id="playPause" class="control-button btn-play" disabled>Play</button>
@@ -510,89 +372,74 @@
 		<button id="clearDataPoints" class="control-button btn-clear-data" disabled>Clear Data</button>
 		<button id="clearCalibration" class="control-button btn-clear-calibration" disabled>Clear Calibration</button>
 		<button id="clearOrigin" class="control-button btn-clear-origin" disabled>Clear Origin</button>
-		<!-- Hidden Video Upload Input -->
-		<input type="file" id="videoUploadInput" accept="video/*" style="display: none;">
+		<input type="file" id="videoUploadInput" accept="video/*" style="display:none">
 	</div>
 
-	<!-- Frame Rate Button -->
-	<div id="frameRateContainer" style="text-align: center; margin-top: 10px;">
-		<button id="frameRateButton" class="control-button" style="width: auto; padding: 10px 15px; background-color: #a75908;" title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120, 240)" disabled>
+	<div id="frameRateContainer" style="text-align:center;margin-top:10px;">
+		<button id="frameRateButton" class="control-button" style="width:auto;padding:10px 15px;background:#a75908;" title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120)" disabled>
 			Frame Rate: 30 fps
 		</button>
 	</div>
 
-	<!-- Prompts -->
-	<!-- Calibration Prompt -->
 	<div id="calibrationPrompt">
 		<h2>Calibration</h2>
 		<p>Enter the Length and its Unit:</p>
 		<form autocomplete="off">
-			<input type="number" id="actualLength" name="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
-			<input type="text" id="actualUnit" name="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
-			<div style="display: flex; gap: 10px; justify-content: center;">
+			<input type="number" id="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
+			<input type="text" id="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
+			<div style="display:flex;gap:10px;justify-content:center;">
 				<button type="button" id="confirmCalibration">Confirm</button>
 				<button type="button" id="cancelCalibration">Cancel</button>
 			</div>
 		</form>
 	</div>
 
-	<!-- Export Prompt -->
 	<div id="exportPrompt">
 		<h2>Export Data</h2>
 		<p>Enter the desired filename for the exported data:</p>
 		<form autocomplete="off">
-			<input type="text" id="exportFilename" name="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
-			<div style="display: flex; gap: 10px; justify-content: center;">
+			<input type="text" id="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
+			<div style="display:flex;gap:10px;justify-content:center;">
 				<button type="button" id="confirmExport">Export</button>
 				<button type="button" id="cancelExport">Cancel</button>
 			</div>
 		</form>
 	</div>
 
-	<!-- Frame Rate Prompt -->
 	<div id="frameRatePrompt">
 		<h2>Set Frame Rate</h2>
-		<p>
-			Enter the correct frame rate: <br>(e.g. 24, 30, 60, 240 fps)
-		</p>
+		<p>Enter the correct frame rate: <br>(e.g. 24, 30, 60, 240 fps)</p>
 		<form autocomplete="off">
-			<input type="number" id="userFrameRate" name="userFrameRate" placeholder="Enter FPS" value="30" min="1" step="any" autocomplete="off" />
-			<div style="display: flex; gap: 10px; justify-content: center;">
+			<input type="number" id="userFrameRate" value="30" min="1" step="any" autocomplete="off" />
+			<div style="display:flex;gap:10px;justify-content:center;">
 				<button type="button" id="confirmFrameRate">Confirm</button>
 				<button type="button" id="cancelFrameRate">Cancel</button>
 			</div>
 		</form>
 	</div>
 
-	<!-- Instruction Message -->
 	<div id="message">
 		<p>Upload a video to start analysis.</p>
 	</div>
 
-	<!-- Analysis Container -->
 	<div id="analysisContainer">
-		<!-- Video Section -->
 		<div id="videoSection">
 			<div id="videoWrapper">
-				<canvas id="frameCanvas" style="display: none;"></canvas>
+				<!-- Keep the real video in DOM for iPad Safari -->
+				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
+				<canvas id="frameCanvas" style="display:none"></canvas>
 				<canvas id="overlayCanvas"></canvas>
 				<div class="crosshair" id="crosshair"></div>
 			</div>
-			<!-- Controls Container -->
 			<div id="controlsContainer">
-				<!-- Video Control Bar -->
 				<div id="videoControls">
-					<input type="range" id="slider" min="0" max="1" step="0.001" value="0" disabled>
+					<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 					<span id="timeDisplay">0:00.000</span>
 				</div>
 			</div>
 		</div>
-		<!-- Plot Section -->
 		<div id="plotSection">
-			<div id="chartCanvasContainer">
-				<canvas id="positionChart"></canvas>
-			</div>
-			<!-- Plot Buttons -->
+			<div id="chartCanvasContainer"><canvas id="positionChart"></canvas></div>
 			<div id="plotButtons">
 				<button id="plotVx" class="control-button btn-plot-vx" disabled>vₓ vs t</button>
 				<button id="plotVy" class="control-button btn-plot-vy" disabled>vᵧ vs t</button>
@@ -602,962 +449,677 @@
 	</div>
 
 	<footer>
-		&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> | <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support
-			My Projects</a>
+		&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
 	</footer>
-</body>
 
-<script>
-	// Default Frame Rate
-	let frameRate = 30;
+	<script>
+		// ===== State =====
+		let frameRate = 30;
+		const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
+		let frameData = [];
+		let isPlaying = false;
+		let positionChart;
+		let skippingFrame = false;
+		let recordedBlob = null;
 
-	// Create a hidden video element
-	let videoElement = document.createElement('video');
-	videoElement.autoplay = false;
-	videoElement.controls = true;
-	videoElement.muted = true;
-	videoElement.playsinline = true;
-	videoElement.webkitPlaysinline = true;
+		let calibrationMode = false;
+		let calibrationStart = null;
+		let calibrationEnd = null;
+		let scaleFactor = 1;
+		let scaleUnit = "pixels";
+		let isDrawingCalibration = false;
 
-	// Data Point Colors Configuration
-	const dataPointColors = {
-		x: '#ac57fb',
-		y: '#ff7331',
-		vx: '#2e9cff',
-		vy: '#ff75f9'
-	};
+		let originMode = false;
+		let originSet = false;
+		let originPoint = { x: 0, y: 0 };
 
-	// Application state variables
-	let frameData = [];
-	let isPlaying = false;
-	let positionChart;
-	let skippingFrame = false;
-	let recordedBlob = null;
+		const gridSizeDisplay = 40;
+		const originDotRadiusDisplay = 5;
+		const axisLineWidthDisplay = 2;
 
-	let calibrationMode = false;
-	let calibrationStart = null;
-	let calibrationEnd = null;
-	let scaleFactor = 1;
-	let scaleUnit = "pixels";
-	let isDrawingCalibration = false;
+		// ===== DOM =====
+		const hiddenVideo = document.getElementById('hiddenVideo'); // our decoder
+		const uploadVideoButton = document.getElementById('uploadVideo');
+		const videoUploadInput = document.getElementById('videoUploadInput');
+		const playPauseButton = document.getElementById('playPause');
+		const calibrateButton = document.getElementById('calibrate');
+		const setOriginButton = document.getElementById('setOrigin');
+		const exportDataButton = document.getElementById('exportData');
+		const clearDataPointsButton = document.getElementById('clearDataPoints');
+		const clearCalibrationButton = document.getElementById('clearCalibration');
+		const clearOriginButton = document.getElementById('clearOrigin');
+		const plotVxButton = document.getElementById('plotVx');
+		const plotVyButton = document.getElementById('plotVy');
+		const backToPositionButton = document.getElementById('backToPosition');
 
-	let originMode = false;
-	let originSet = false;
-	let originPoint = { x: 0, y: 0 };
+		const slider = document.getElementById('slider');
+		const timeDisplay = document.getElementById('timeDisplay');
+		const frameCanvas = document.getElementById('frameCanvas');
+		const overlayCanvas = document.getElementById('overlayCanvas');
+		const ctx = frameCanvas.getContext('2d');
+		const overlayCtx = overlayCanvas.getContext('2d');
 
-	// Define a fixed grid size in display pixels
-	const gridSizeDisplay = 40;
-	// Define fixed sizes for overlay elements in display pixels
-	const originDotRadiusDisplay = 5;
-	const axisLineWidthDisplay = 2;
+		const calibrationPrompt = document.getElementById('calibrationPrompt');
+		const actualLengthInput = document.getElementById('actualLength');
+		const actualUnitInput = document.getElementById('actualUnit');
+		const confirmCalibrationButton = document.getElementById('confirmCalibration');
+		const cancelCalibrationButton = document.getElementById('cancelCalibration');
 
-	/*
-	 * Since we want the bottom-left to be cartesian (0,0),
-	 * we define the "canvasYToCartesianY" function so that:
-	 *  cartesianY = y   =>  if y=0 is at the bottom visually,
-	 * but in standard HTML canvas, y=0 is at the TOP.
-	 * Therefore we do: cartesianY = (frameCanvas.height - y).
-	 * This inverts so that y=0 in cartesian is the bottom edge.
-	 */
-	function canvasYToCartesianY(y) {
-		return frameCanvas.height - y;
-	}
+		const exportPrompt = document.getElementById('exportPrompt');
+		const exportFilenameInput = document.getElementById('exportFilename');
+		const confirmExportButton = document.getElementById('confirmExport');
+		const cancelExportButton = document.getElementById('cancelExport');
 
-	/*
-	 * Similarly, cartesianYToCanvasY: 
-	 *   canvasY = frameCanvas.height - cartesianY
-	 */
-	function cartesianYToCanvasY(y) {
-		return frameCanvas.height - y;
-	}
+		const frameRatePrompt = document.getElementById('frameRatePrompt');
+		const userFrameRateInput = document.getElementById('userFrameRate');
+		const confirmFrameRateButton = document.getElementById('confirmFrameRate');
+		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
+		const frameRateButton = document.getElementById('frameRateButton');
 
-	function formatTime(time) {
-		const minutes = Math.floor(time / 60);
-		const seconds = Math.floor(time % 60);
-		const milliseconds = Math.floor((time - Math.floor(time)) * 1000);
-		return `${minutes}:${seconds.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
-	}
+		// Utility
+		function canvasYToCartesianY(y) { return frameCanvas.height - y; }
 
-	// DOM References
-	const uploadVideoButton = document.getElementById('uploadVideo');
-	const videoUploadInput = document.getElementById('videoUploadInput');
-	const playPauseButton = document.getElementById('playPause');
-	const calibrateButton = document.getElementById('calibrate');
-	const setOriginButton = document.getElementById('setOrigin');
-	const slider = document.getElementById('slider');
-	const timeDisplay = document.getElementById('timeDisplay');
-	const frameCanvas = document.getElementById('frameCanvas');
-	const overlayCanvas = document.getElementById('overlayCanvas');
-	const ctx = frameCanvas.getContext('2d');
-	const overlayCtx = overlayCanvas.getContext('2d');
+		function cartesianYToCanvasY(y) { return frameCanvas.height - y; }
 
-	const plotVxButton = document.getElementById('plotVx');
-	const plotVyButton = document.getElementById('plotVy');
-	const backToPositionButton = document.getElementById('backToPosition');
-	const clearDataPointsButton = document.getElementById('clearDataPoints');
-	const clearCalibrationButton = document.getElementById('clearCalibration');
-	const clearOriginButton = document.getElementById('clearOrigin');
-	const exportDataButton = document.getElementById('exportData');
+		function formatTime(t) { const m = Math.floor(t / 60),
+				s = Math.floor(t % 60),
+				ms = Math.floor((t - Math.floor(t)) * 1000); return `${m}:${s.toString().padStart(2,"0")}.${ms.toString().padStart(3,"0")}`; }
 
-	const calibrationPrompt = document.getElementById('calibrationPrompt');
-	const actualLengthInput = document.getElementById('actualLength');
-	const actualUnitInput = document.getElementById('actualUnit');
-	const confirmCalibrationButton = document.getElementById('confirmCalibration');
-	const cancelCalibrationButton = document.getElementById('cancelCalibration');
-
-	const exportPrompt = document.getElementById('exportPrompt');
-	const exportFilenameInput = document.getElementById('exportFilename');
-	const confirmExportButton = document.getElementById('confirmExport');
-	const cancelExportButton = document.getElementById('cancelExport');
-
-	const frameRatePrompt = document.getElementById('frameRatePrompt');
-	const userFrameRateInput = document.getElementById('userFrameRate');
-	const confirmFrameRateButton = document.getElementById('confirmFrameRate');
-	const cancelFrameRateButton = document.getElementById('cancelFrameRate');
-
-	const crosshair = document.getElementById('crosshair');
-	const message = document.getElementById('message');
-	const chartCanvasContainer = document.getElementById('chartCanvasContainer');
-	const positionChartCanvas = document.getElementById('positionChart');
-
-	const frameRateButton = document.getElementById('frameRateButton');
-
-	// Initialize button states on page load
-	document.addEventListener('DOMContentLoaded', () => {
-		// All non-upload buttons are disabled (and thus grey) by default
-		playPauseButton.disabled = true;
-		calibrateButton.disabled = true;
-		setOriginButton.disabled = true;
-		slider.disabled = true;
-		plotVxButton.disabled = true;
-		plotVyButton.disabled = true;
-		backToPositionButton.disabled = true;
-		clearDataPointsButton.disabled = true;
-		clearCalibrationButton.disabled = true;
-		clearOriginButton.disabled = true;
-		exportDataButton.disabled = true;
-		frameRateButton.disabled = true;
-
-		document.getElementById('analysisContainer').style.display = "none";
-		chartCanvasContainer.style.display = "none";
-		frameCanvas.style.display = "none";
-
-		calibrationPrompt.style.display = "none";
-		exportPrompt.style.display = "none";
-		frameRatePrompt.style.display = "none";
-
-		// Default text on the frame rate button
-		frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
-	});
-
-	// Open file dialog
-	uploadVideoButton.addEventListener('click', () => {
-		videoUploadInput.click();
-	});
-
-	// Video selected
-	videoUploadInput.addEventListener('change', (event) => {
-		const file = event.target.files[0];
-		if (file) {
-			recordedBlob = URL.createObjectURL(file);
-			loadVideo();
-		}
-	});
-
-	// Load video
-	function loadVideo() {
-		videoElement.src = recordedBlob;
-		// Once the metadata is loaded, set time=0
-		videoElement.addEventListener('loadedmetadata', onVideoMetadata);
-	}
-
-	function onVideoMetadata() {
-		videoElement.removeEventListener('loadedmetadata', onVideoMetadata);
-		slider.max = videoElement.duration;
-		slider.value = 0;
-		videoElement.currentTime = 0;
-		videoElement.pause();
-
-		// Wait for the video to have decoded at least one frame
-		videoElement.addEventListener('loadeddata', onVideoFirstFrame, { once: true });
-	}
-
-	// Called once the first frame is decoded
-	function onVideoFirstFrame() {
-		/*
-		 * Reset origin to the bottom-left corner
-		 * so the x-axis is visually at the bottom.
-		 */
-		originSet = false;
-		originPoint = { x: 0, y: 0 };
-
-		/*
-		 * Let the frameCanvas match the video's natural width/height (pixel size).
-		 */
-		frameCanvas.width = videoElement.videoWidth;
-		frameCanvas.height = videoElement.videoHeight;
-		frameCanvas.style.display = "block";
-
-		// Show analysis container and the chart area
-		chartCanvasContainer.style.display = "flex";
-		document.getElementById('analysisContainer').style.display = "flex";
-
-		// Enable controls
-		playPauseButton.disabled = false;
-		calibrateButton.disabled = false;
-		setOriginButton.disabled = false;
-		slider.disabled = false;
-		plotVxButton.disabled = false;
-		plotVyButton.disabled = false;
-		backToPositionButton.disabled = false;
-		clearDataPointsButton.disabled = false;
-		clearCalibrationButton.disabled = false;
-		clearOriginButton.disabled = false;
-		exportDataButton.disabled = false;
-		frameRateButton.disabled = false;
-
-		// Force the first draw
-		drawFrame();
-
-		/*
-		 * Make sure overlayCanvas matches frameCanvas size (the actual size).
-		 * This way, the bottom in overlayCanvas is the bottom in the actual displayed area.
-		 */
-		resizeOverlay();
-		drawOverlay();
-
-		// Plot initial data (none so far)
-		plotPosition();
-
-		message.innerHTML =
-			"<ul style='text-align: left; padding-left: 20px;'>" +
-			"<li>Use the brown button above to enter the frame rate (default is 30 fps).</li>" +
-			"<li>Use the control bar beneath the video to select the starting frame.</li>" +
-			"<li>Select a point to track motion, and the video will skip to the next frame.</li>" +
-			"</ul>";
-	}
-
-	// Play/Pause
-	playPauseButton.addEventListener('click', () => {
-		if (isPlaying) {
-			videoElement.pause();
-			playPauseButton.textContent = "Play";
-		} else {
-			videoElement.play();
-			playPauseButton.textContent = "Pause";
-		}
-		isPlaying = !isPlaying;
-	});
-
-	// Time update
-	videoElement.addEventListener("timeupdate", () => {
-		slider.value = videoElement.currentTime;
-		timeDisplay.textContent = formatTime(videoElement.currentTime);
-		if (!skippingFrame) drawFrame();
-	});
-
-	// Slider input
-	slider.addEventListener("input", () => {
-		videoElement.currentTime = parseFloat(slider.value);
-	});
-
-	// Frame Canvas Click
-	frameCanvas.addEventListener('click', (event) => {
-		if (!calibrationMode && !originMode && !skippingFrame) {
-			const rect = frameCanvas.getBoundingClientRect();
-			const scaleX = frameCanvas.width / rect.width;
-			const scaleY = frameCanvas.height / rect.height;
-			const canvasX = (event.clientX - rect.left) * scaleX;
-			const canvasY = (event.clientY - rect.top) * scaleY;
-			const cartesianY = canvasYToCartesianY(canvasY);
-
-			frameData.push({ x: canvasX, y: cartesianY, time: videoElement.currentTime });
-			plotPosition();
-			skipToNextFrame();
-		}
-	});
-
-	// Overlay Canvas Click - Set Origin
-	overlayCanvas.addEventListener('click', (event) => {
-		if (originMode && !calibrationMode) {
-			const rect = overlayCanvas.getBoundingClientRect();
-			const scaleX = overlayCanvas.width / rect.width;
-			const scaleY = overlayCanvas.height / rect.height;
-			const x = (event.clientX - rect.left) * scaleX;
-			const y = (event.clientY - rect.top) * scaleY;
-			const cartesianY = canvasYToCartesianY(y);
-			originPoint = { x, y: cartesianY };
-			originSet = true;
-			originMode = false;
-			frameCanvas.style.cursor = "default";
-			crosshair.style.display = "none";
-			overlayCanvas.style.pointerEvents = "none";
-			drawOverlay();
-			plotPosition();
-			message.innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
-		}
-	});
-
-	// Frame Rate Button -> open prompt
-	frameRateButton.addEventListener('click', () => {
-		userFrameRateInput.value = frameRate;
-		frameRatePrompt.style.display = "block";
-	});
-
-	// Confirm new frame rate
-	confirmFrameRateButton.addEventListener('click', () => {
-		const userInput = parseFloat(userFrameRateInput.value);
-		if (!isNaN(userInput) && userInput > 0) {
-			frameRate = userInput;
-		} else {
-			alert("Invalid frame rate entered. Keeping the old value.");
-		}
-		frameRatePrompt.style.display = "none";
-		frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
-	});
-
-	// Cancel new frame rate
-	cancelFrameRateButton.addEventListener('click', () => {
-		frameRatePrompt.style.display = "none";
-	});
-
-	// Skip to next frame
-	function skipToNextFrame() {
-		if (!Number.isFinite(frameRate) || frameRate <= 0) return;
-
-		// Prevent overlapping seeks
-		if (skippingFrame) return;
-		skippingFrame = true;
-
-		// Pause to avoid racing with playback
-		if (isPlaying) {
-			videoElement.pause();
-			isPlaying = false;
-			playPauseButton.textContent = "Play";
+		// Compute the best known end time
+		function getSeekableEnd() {
+			const s = hiddenVideo.seekable;
+			if (s && s.length > 0) return s.end(s.length - 1);
+			const d = hiddenVideo.duration;
+			if (Number.isFinite(d) && d > 0) return d;
+			return 0;
 		}
 
-		const eps = 1e-6;
-		const t = videoElement.currentTime;
-		// Compute the next frame index on the chosen FPS grid
-		const currentIndex = Math.round(t * frameRate);
-		const nextIndex = currentIndex + 1;
-		let target = nextIndex / frameRate;
-
-		// Clamp so we don't seek past the duration (leave a tiny margin)
-		const maxSeek = Math.max(0, videoElement.duration - 1 / frameRate - eps);
-		if (!Number.isFinite(maxSeek)) {
-			// Fallback if duration isn't ready
-			target = t + 1 / frameRate;
-		} else {
-			target = Math.min(target, maxSeek);
-		}
-
-		const onSeeked = () => {
-			skippingFrame = false;
-			drawFrame();
-			drawOverlay();
-			videoElement.removeEventListener('seeked', onSeeked);
-		};
-
-		videoElement.addEventListener('seeked', onSeeked, { once: true });
-		videoElement.currentTime = target;
-	}
-
-
-
-	// Plot Position
-	function plotPosition() {
-		const xData = frameData.map((p) => parseFloat(p.time.toFixed(3)));
-		const yDataX = frameData.map((p) => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
-		const yDataY = frameData.map((p) => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
-
-		if (!positionChart) {
-			positionChart = new Chart(positionChartCanvas.getContext("2d"), {
-				type: "scatter",
-				data: {
-					datasets: [{
-							label: "x-position",
-							data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-							borderColor: dataPointColors.x,
-							backgroundColor: dataPointColors.x,
-							showLine: false,
-							pointRadius: 4,
-						},
-						{
-							label: "y-position",
-							data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-							borderColor: dataPointColors.y,
-							backgroundColor: dataPointColors.y,
-							showLine: false,
-							pointRadius: 4,
-						},
-					],
-				},
-				options: {
-					responsive: true,
-					maintainAspectRatio: false,
-					scales: {
-						x: {
-							type: "linear",
-							position: "bottom",
-							title: {
-								display: true,
-								text: "Time (s)",
-							},
-							grid: {
-								color: (context) =>
-									context.tick.value === 0 ?
-									'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-							},
-						},
-						y: {
-							type: "linear",
-							position: "left",
-							title: {
-								display: true,
-								text: `Position (${scaleUnit})`,
-							},
-							grid: {
-								color: (context) =>
-									context.tick.value === 0 ?
-									'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)',
-							},
-						},
-					},
-					plugins: {
-						legend: {
-							display: true,
-							position: 'top',
-						}
-					}
-				},
-			});
-		} else {
-			positionChart.data.datasets = [{
-					label: "x-position",
-					data: xData.map((t, i) => ({ x: t, y: yDataX[i] })),
-					borderColor: dataPointColors.x,
-					backgroundColor: dataPointColors.x,
-					showLine: false,
-					pointRadius: 4,
-				},
-				{
-					label: "y-position",
-					data: xData.map((t, i) => ({ x: t, y: yDataY[i] })),
-					borderColor: dataPointColors.y,
-					backgroundColor: dataPointColors.y,
-					showLine: false,
-					pointRadius: 4,
-				},
-			];
-			positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-			positionChart.update();
-		}
-	}
-
-	// Plot Velocity
-	function plotVelocity(axis) {
-		const windowSize = 3;
-		if (frameData.length < windowSize) {
-			alert(`Insufficient data to calculate velocity. At least ${windowSize} points are needed.`);
-			return;
-		}
-
-		const velocityEstimates = [];
-		const velocityTimes = [];
-		for (let i = 1; i < frameData.length; i++) {
-			const deltaTime = frameData[i].time - frameData[i - 1].time;
-			const p1 = {
-				x: frameData[i - 1].x - (originSet ? originPoint.x : 0),
-				y: frameData[i - 1].y - (originSet ? originPoint.y : 0)
-			};
-			const p2 = {
-				x: frameData[i].x - (originSet ? originPoint.x : 0),
-				y: frameData[i].y - (originSet ? originPoint.y : 0)
-			};
-
-			const deltaX = p2.x - p1.x;
-			const deltaY = p2.y - p1.y;
-			const deltaPos = axis === 'x' ? deltaX : deltaY;
-			const velocity = deltaTime > 0 ? (deltaPos * scaleFactor) / deltaTime : 0;
-
-			if (deltaTime > 0) {
-				velocityEstimates.push(velocity);
-				velocityTimes.push(frameData[i].time);
+		// Keep slider domain in sync with media
+		function updateSliderDomain() {
+			const end = getSeekableEnd();
+			if (end > 0) {
+				// Only update if it grows or if max is still 0
+				const currentMax = parseFloat(slider.max) || 0;
+				if (end > currentMax - 1e-3) {
+					slider.max = end.toString();
+					slider.disabled = false;
+				}
 			}
 		}
 
-		// Simple moving average
-		const smoothedVelocities = [];
-		const smoothedTimes = [];
-		for (let i = 0; i < velocityEstimates.length; i++) {
-			if (i < windowSize - 1) continue;
-			const window = velocityEstimates.slice(i - windowSize + 1, i + 1);
-			const averageVelocity = window.reduce((sum, val) => sum + val, 0) / windowSize;
-			smoothedVelocities.push(parseFloat(averageVelocity.toFixed(3)));
-			const timeWindow = velocityTimes.slice(i - windowSize + 1, i + 1);
-			const midpointTime = (timeWindow[0] + timeWindow[windowSize - 1]) / 2;
-			smoothedTimes.push(parseFloat(midpointTime.toFixed(3)));
+		// ===== Init =====
+		document.addEventListener('DOMContentLoaded', () => {
+			disableControls(true);
+			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
+			document.getElementById('analysisContainer').style.display = "none";
+			document.getElementById('chartCanvasContainer').style.display = "none";
+			frameCanvas.style.display = "none";
+		});
+
+		function disableControls(state) {
+			playPauseButton.disabled = state;
+			calibrateButton.disabled = state;
+			setOriginButton.disabled = state;
+			plotVxButton.disabled = state;
+			plotVyButton.disabled = state;
+			backToPositionButton.disabled = state;
+			clearDataPointsButton.disabled = state;
+			clearCalibrationButton.disabled = state;
+			clearOriginButton.disabled = state;
+			exportDataButton.disabled = state;
+			frameRateButton.disabled = state;
+			slider.disabled = state;
 		}
 
-		if (!positionChart) return;
+		// ===== Upload & load =====
+		uploadVideoButton.addEventListener('click', () => videoUploadInput.click());
+		videoUploadInput.addEventListener('change', (e) => {
+			const file = e.target.files[0];
+			if (!file) return;
+			recordedBlob = URL.createObjectURL(file);
+			loadVideo();
+		});
 
-		positionChart.data.datasets = [{
-			label: axis === "x" ? "x-velocity" : "y-velocity",
-			data: smoothedTimes.map((t, i) => ({ x: t, y: smoothedVelocities[i] })),
-			borderColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
-			backgroundColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
-			showLine: false,
-			pointRadius: 4,
-		}, ];
-		positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
-		positionChart.update();
-	}
+		function loadVideo() {
+			hiddenVideo.src = recordedBlob;
+			hiddenVideo.load();
+		}
 
-	// Plot Buttons
-	plotVxButton.addEventListener("click", () => plotVelocity("x"));
-	plotVyButton.addEventListener("click", () => plotVelocity("y"));
-	backToPositionButton.addEventListener("click", () => {
-		plotPosition();
-	});
+		// Metadata and readiness events
+		hiddenVideo.addEventListener('loadedmetadata', () => {
+			// Initial domain
+			slider.min = "0";
+			slider.max = "0";
+			slider.step = Math.max(1 / frameRate / 2, 0.001).toString();
+			slider.value = "0";
+			hiddenVideo.currentTime = 0;
+			updateSliderDomain();
+		});
 
-	// Clear Data
-	clearDataPointsButton.addEventListener("click", () => {
-		frameData = [];
-		if (positionChart) {
-			positionChart.data.datasets.forEach((dataset) => {
-				dataset.data = [];
-			});
+		hiddenVideo.addEventListener('durationchange', updateSliderDomain);
+		hiddenVideo.addEventListener('loadeddata', updateSliderDomain);
+		hiddenVideo.addEventListener('canplay', updateSliderDomain);
+		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
+		hiddenVideo.addEventListener('timeupdate', () => {
+			if (!skippingFrame) {
+				updateSliderDomain();
+				slider.value = hiddenVideo.currentTime.toString();
+				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				drawFrame();
+			}
+		});
+
+		hiddenVideo.addEventListener('seeked', () => {
+			if (!skippingFrame) {
+				updateSliderDomain();
+				slider.value = hiddenVideo.currentTime.toString();
+				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				drawFrame();
+				drawOverlay();
+			}
+		});
+
+		// First frame ready
+		hiddenVideo.addEventListener('loadeddata', () => {
+			// show UI
+			frameCanvas.width = hiddenVideo.videoWidth || 1280;
+			frameCanvas.height = hiddenVideo.videoHeight || 720;
+			frameCanvas.style.display = "block";
+			document.getElementById('analysisContainer').style.display = "flex";
+			document.getElementById('chartCanvasContainer').style.display = "flex";
+			disableControls(false);
+			drawFrame();
+			resizeOverlay();
+			drawOverlay();
+			plotPosition();
+			document.getElementById('message').innerHTML =
+				"<ul style='text-align:left;padding-left:20px;'>" +
+				"<li>Set frame rate if needed. Default is 30 fps.</li>" +
+				"<li>Use the slider to scrub. It follows the seekable range.</li>" +
+				"<li>Click to record a point. It will advance one frame.</li>" +
+				"</ul>";
+		}, { once: true });
+
+		// ===== Slider scrubbing =====
+		function scrubToSlider() {
+			// Pause to avoid a race
+			if (isPlaying) {
+				hiddenVideo.pause();
+				isPlaying = false;
+				playPauseButton.textContent = "Play";
+			}
+			const end = getSeekableEnd();
+			let t = parseFloat(slider.value);
+			if (!Number.isFinite(t)) return;
+			// Do not seek beyond seekable end
+			if (end > 0) t = Math.min(t, end - 0.02); // small margin
+			if (t < 0) t = 0;
+			// Force a real move even if same decode point
+			const EPS = Math.max(1e-3, (1 / frameRate) * 0.15);
+			if (Math.abs(hiddenVideo.currentTime - t) < EPS) t += EPS;
+			hiddenVideo.currentTime = t;
+			timeDisplay.textContent = formatTime(t);
+		}
+		slider.addEventListener('input', scrubToSlider);
+		slider.addEventListener('change', scrubToSlider);
+
+		// ===== Play/Pause =====
+		playPauseButton.addEventListener('click', () => {
+			if (isPlaying) { hiddenVideo.pause();
+				playPauseButton.textContent = "Play"; } else { hiddenVideo.play().catch(() => {});
+				playPauseButton.textContent = "Pause"; }
+			isPlaying = !isPlaying;
+		});
+
+		// ===== Click to add point and step =====
+		frameCanvas.addEventListener('click', (event) => {
+			if (!calibrationMode && !originMode && !skippingFrame) {
+				const rect = frameCanvas.getBoundingClientRect();
+				const scaleX = frameCanvas.width / rect.width;
+				const scaleY = frameCanvas.height / rect.height;
+				const canvasX = (event.clientX - rect.left) * scaleX;
+				const canvasY = (event.clientY - rect.top) * scaleY;
+				const cartesianY = canvasYToCartesianY(canvasY);
+
+				frameData.push({ x: canvasX, y: cartesianY, time: hiddenVideo.currentTime });
+				plotPosition();
+				skipToNextFrame();
+			}
+		});
+
+		// ===== Origin selection =====
+		overlayCanvas.addEventListener('click', (event) => {
+			if (originMode && !calibrationMode) {
+				const rect = overlayCanvas.getBoundingClientRect();
+				const scaleX = overlayCanvas.width / rect.width;
+				const scaleY = overlayCanvas.height / rect.height;
+				const x = (event.clientX - rect.left) * scaleX;
+				const y = (event.clientY - rect.top) * scaleY;
+				const cartesianY = canvasYToCartesianY(y);
+				originPoint = { x, y: cartesianY };
+				originSet = true;
+				originMode = false;
+				frameCanvas.style.cursor = "default";
+				document.getElementById('crosshair').style.display = "none";
+				overlayCanvas.style.pointerEvents = "none";
+				drawOverlay();
+				plotPosition();
+				document.getElementById('message').innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
+			}
+		});
+
+		// ===== Frame rate dialog =====
+		frameRateButton.addEventListener('click', () => {
+			userFrameRateInput.value = frameRate;
+			frameRatePrompt.style.display = "block";
+		});
+		confirmFrameRateButton.addEventListener('click', () => {
+			const v = parseFloat(userFrameRateInput.value);
+			if (Number.isFinite(v) && v > 0) frameRate = v;
+			frameRatePrompt.style.display = "none";
+			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
+			slider.step = Math.max(1 / frameRate / 2, 0.001).toString();
+		});
+		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
+
+		// ===== Robust frame step for WEBM =====
+		function skipToNextFrame() {
+			if (!Number.isFinite(frameRate) || frameRate <= 0) return;
+			if (skippingFrame) return;
+			skippingFrame = true;
+
+			if (isPlaying) {
+				hiddenVideo.pause();
+				isPlaying = false;
+				playPauseButton.textContent = "Play";
+			}
+
+			const dt = 1 / frameRate;
+			const EPS = Math.max(1e-3, dt * 0.15);
+			const now = hiddenVideo.currentTime;
+
+			const end = getSeekableEnd();
+			const maxTarget = Math.max(0, (end || now + dt) - dt - 1e-3);
+			let target = Math.min(now + dt + EPS, maxTarget);
+
+			let done = false;
+			const finish = () => {
+				if (done) return;
+				done = true;
+				skippingFrame = false;
+				updateSliderDomain();
+				slider.value = hiddenVideo.currentTime.toString();
+				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				drawFrame();
+				drawOverlay();
+				hiddenVideo.removeEventListener('seeked', onSeeked);
+				hiddenVideo.removeEventListener('timeupdate', onTU);
+				if (fallbackTimer) clearTimeout(fallbackTimer);
+			};
+
+			const onSeeked = () => finish();
+			const onTU = () => { if (hiddenVideo.currentTime >= now + dt * 0.5) finish(); };
+			const fallbackTimer = setTimeout(finish, 250);
+
+			hiddenVideo.addEventListener('seeked', onSeeked, { once: true });
+			hiddenVideo.addEventListener('timeupdate', onTU);
+			try { hiddenVideo.currentTime = target; } catch (e) { finish(); }
+		}
+
+		// ===== Plotting =====
+		const positionChartCanvas = document.getElementById('positionChart');
+
+		function plotPosition() {
+			const xData = frameData.map(p => parseFloat(p.time.toFixed(3)));
+			const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
+			const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
+
+			if (!positionChart) {
+				positionChart = new Chart(positionChartCanvas.getContext("2d"), {
+					type: "scatter",
+					data: {
+						datasets: [
+							{ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 },
+							{ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 }
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						scales: {
+							x: {
+								type: "linear",
+								position: "bottom",
+								title: { display: true, text: "Time (s)" },
+								grid: { color: (c) => c.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)' }
+							},
+							y: {
+								type: "linear",
+								position: "left",
+								title: { display: true, text: `Position (${scaleUnit})` },
+								grid: { color: (c) => c.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)' }
+							}
+						},
+						plugins: { legend: { display: true, position: 'top' } }
+					},
+				});
+			} else {
+				positionChart.data.datasets = [
+					{ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 },
+					{ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 }
+				];
+				positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
+				positionChart.update();
+			}
+		}
+
+		function plotVelocity(axis) {
+			const windowSize = 3;
+			if (frameData.length < windowSize) { alert(`Insufficient data. At least ${windowSize} points are needed.`); return; }
+			const velocityEstimates = [];
+			const velocityTimes = [];
+			for (let i = 1; i < frameData.length; i++) {
+				const dt = frameData[i].time - frameData[i - 1].time;
+				const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
+				const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
+				const d = axis === 'x' ? (p2.x - p1.x) : (p2.y - p1.y);
+				const v = dt > 0 ? (d * scaleFactor) / dt : 0;
+				if (dt > 0) { velocityEstimates.push(v);
+					velocityTimes.push(frameData[i].time); }
+			}
+			const smoothed = [];
+			const times = [];
+			for (let i = 2; i < velocityEstimates.length; i++) {
+				const avg = (velocityEstimates[i - 2] + velocityEstimates[i - 1] + velocityEstimates[i]) / 3;
+				smoothed.push(parseFloat(avg.toFixed(3)));
+				times.push(parseFloat(((velocityTimes[i - 2] + velocityTimes[i]) / 2).toFixed(3)));
+			}
+			if (!positionChart) return;
+			positionChart.data.datasets = [{
+				label: axis === "x" ? "x-velocity" : "y-velocity",
+				data: times.map((t, i) => ({ x: t, y: smoothed[i] })),
+				borderColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
+				backgroundColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
+				showLine: false,
+				pointRadius: 4
+			}];
+			positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
 			positionChart.update();
 		}
-		drawFrame();
-		drawOverlay();
-		message.innerHTML = "<p>Data points cleared.</p>";
-	});
 
-	// Clear Calibration
-	clearCalibrationButton.addEventListener("click", () => {
-		scaleFactor = 1;
-		scaleUnit = "pixels";
-		calibrationStart = null;
-		calibrationEnd = null;
+		plotVxButton.addEventListener("click", () => plotVelocity("x"));
+		plotVyButton.addEventListener("click", () => plotVelocity("y"));
+		backToPositionButton.addEventListener("click", plotPosition);
 
-		drawOverlay();
-		drawFrame();
-
-		if (positionChart) {
-			positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-			plotPosition();
-		}
-
-		message.innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
-	});
-
-	// Clear Origin
-	clearOriginButton.addEventListener("click", () => {
-		originSet = false;
-		originPoint = { x: 0, y: 0 };
-		drawOverlay();
-		plotPosition();
-		message.innerHTML = "<p>Origin cleared. Default origin (lower-left) is used.</p>";
-	});
-
-	// Export
-	exportDataButton.addEventListener("click", () => {
-		if (frameData.length === 0) {
-			alert("No data to export.");
-			return;
-		}
-		showExportPrompt();
-	});
-
-	function showExportPrompt() {
-		exportFilenameInput.value = "motion_tracker_data";
-		exportPrompt.style.display = "block";
-	}
-
-	function hideExportPrompt() {
-		exportPrompt.style.display = "none";
-		exportFilenameInput.value = "";
-	}
-
-	confirmExportButton.addEventListener('click', () => {
-		const desiredFilename = exportFilenameInput.value.trim();
-		if (desiredFilename === "") {
-			alert("Please enter a valid filename.");
-			return;
-		}
-
-		const sanitizedFilename = desiredFilename.replace(/[^a-zA-Z0-9-_.]/g, "_");
-		let finalFilename = sanitizedFilename;
-		if (!finalFilename.toLowerCase().endsWith(".csv")) {
-			finalFilename += ".csv";
-		}
-
-		exportCSV(finalFilename);
-		hideExportPrompt();
-		message.innerHTML = `<p>Data exported as ${finalFilename}.</p>`;
-	});
-
-	cancelExportButton.addEventListener('click', () => {
-		hideExportPrompt();
-		message.innerHTML = "<p>Export cancelled.</p>";
-	});
-
-	function exportCSV(filename) {
-		const velocityData = [];
-		for (let i = 1; i < frameData.length; i++) {
-			const deltaTime = frameData[i].time - frameData[i - 1].time;
-			const p1 = {
-				x: frameData[i - 1].x - (originSet ? originPoint.x : 0),
-				y: frameData[i - 1].y - (originSet ? originPoint.y : 0)
-			};
-			const p2 = {
-				x: frameData[i].x - (originSet ? originPoint.x : 0),
-				y: frameData[i].y - (originSet ? originPoint.y : 0)
-			};
-
-			const deltaX = p2.x - p1.x;
-			const deltaY = p2.y - p1.y;
-			const v_x = deltaTime > 0 ? (deltaX * scaleFactor) / deltaTime : 0;
-			const v_y = deltaTime > 0 ? (deltaY * scaleFactor) / deltaTime : 0;
-			velocityData.push({ v_x, v_y });
-		}
-
-		let csvContent = `Time (s),x (${scaleUnit}),y (${scaleUnit}),v_x (${scaleUnit}/s),v_y (${scaleUnit}/s)\n`;
-
-		for (let i = 0; i < frameData.length; i++) {
-			const xAdj = (frameData[i].x - (originSet ? originPoint.x : 0)) * scaleFactor;
-			const yAdj = (frameData[i].y - (originSet ? originPoint.y : 0)) * scaleFactor;
-
-			const time = frameData[i].time.toFixed(3);
-			const x = xAdj.toFixed(3);
-			const y = yAdj.toFixed(3);
-			const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
-			const v_y = i > 0 ? velocityData[i - 1].v_y.toFixed(3) : "";
-			csvContent += `${time},${x},${y},${v_x},${v_y}\n`;
-		}
-
-		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.setAttribute("href", url);
-		link.setAttribute("download", filename);
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-	}
-
-	// Calibration
-	calibrateButton.addEventListener('click', () => {
-		crosshair.style.display = "none";
-		overlayCanvas.style.pointerEvents = "auto";
-		calibrationMode = true;
-		isDrawingCalibration = false;
-		calibrationStart = null;
-		calibrationEnd = null;
-		frameCanvas.style.cursor = "crosshair";
-		message.innerHTML = "<p>Drag on the video to draw a line with a known length.</p>";
-	});
-
-	// Mouse + Touch events for calibration
-	function startCalibrationDraw(x, y) {
-		isDrawingCalibration = true;
-		calibrationStart = { x, y };
-		calibrationEnd = { x, y };
-	}
-
-	function updateCalibrationDraw(x, y) {
-		if (isDrawingCalibration) {
-			calibrationEnd = { x, y };
+		// ===== Clear / Export =====
+		clearDataPointsButton.addEventListener("click", () => {
+			frameData = [];
+			if (positionChart) { positionChart.data.datasets.forEach(d => d.data = []);
+				positionChart.update(); }
+			drawFrame();
 			drawOverlay();
-		}
-	}
+			document.getElementById('message').innerHTML = "<p>Data points cleared.</p>";
+		});
 
-	function endCalibrationDraw() {
-		if (!isDrawingCalibration) return;
-		isDrawingCalibration = false;
-		calibrationMode = false;
-		overlayCanvas.style.pointerEvents = "none";
-		frameCanvas.style.cursor = "default";
-		message.innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
-		showCalibrationPrompt();
-	}
+		clearCalibrationButton.addEventListener("click", () => {
+			scaleFactor = 1;
+			scaleUnit = "pixels";
+			calibrationStart = null;
+			calibrationEnd = null;
+			drawOverlay();
+			drawFrame();
+			if (positionChart) { positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
+				plotPosition(); }
+			document.getElementById('message').innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
+		});
 
-	overlayCanvas.addEventListener('mousedown', (event) => {
-		if (calibrationMode) {
-			const rect = overlayCanvas.getBoundingClientRect();
-			const scaleX = overlayCanvas.width / rect.width;
-			const scaleY = overlayCanvas.height / rect.height;
-			const x = (event.clientX - rect.left) * scaleX;
-			const y = (event.clientY - rect.top) * scaleY;
-			startCalibrationDraw(x, y);
-		}
-	});
+		clearOriginButton.addEventListener("click", () => {
+			originSet = false;
+			originPoint = { x: 0, y: 0 };
+			drawOverlay();
+			plotPosition();
+			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
+		});
 
-	overlayCanvas.addEventListener('mousemove', (event) => {
-		if (calibrationMode && isDrawingCalibration) {
-			const rect = overlayCanvas.getBoundingClientRect();
-			const scaleX = overlayCanvas.width / rect.width;
-			const scaleY = overlayCanvas.height / rect.height;
-			const x = (event.clientX - rect.left) * scaleX;
-			const y = (event.clientY - rect.top) * scaleY;
-			updateCalibrationDraw(x, y);
-		}
-	});
+		exportDataButton.addEventListener("click", () => {
+			if (frameData.length === 0) { alert("No data to export."); return; }
+			exportFilenameInput.value = "motion_tracker_data";
+			exportPrompt.style.display = "block";
+		});
 
-	overlayCanvas.addEventListener('mouseup', () => {
-		if (calibrationMode) {
-			endCalibrationDraw();
-		}
-	});
+		confirmExportButton.addEventListener("click", () => {
+			const desired = exportFilenameInput.value.trim();
+			if (!desired) { alert("Please enter a valid filename."); return; }
+			const sanitized = desired.replace(/[^a-zA-Z0-9-_.]/g, "_");
+			const finalName = sanitized.toLowerCase().endsWith(".csv") ? sanitized : sanitized + ".csv";
+			exportCSV(finalName);
+			exportPrompt.style.display = "none";
+			document.getElementById('message').innerHTML = `<p>Data exported as ${finalName}.</p>`;
+		});
+		cancelExportButton.addEventListener("click", () => { exportPrompt.style.display = "none";
+			document.getElementById('message').innerHTML = "<p>Export cancelled.</p>"; });
 
-	overlayCanvas.addEventListener('touchstart', (event) => {
-		if (calibrationMode && event.touches.length === 1) {
-			event.preventDefault();
-			const touch = event.touches[0];
-			const rect = overlayCanvas.getBoundingClientRect();
-			const scaleX = overlayCanvas.width / rect.width;
-			const scaleY = overlayCanvas.height / rect.height;
-			const x = (touch.clientX - rect.left) * scaleX;
-			const y = (touch.clientY - rect.top) * scaleY;
-			startCalibrationDraw(x, y);
-		}
-	}, { passive: false });
-
-	overlayCanvas.addEventListener('touchmove', (event) => {
-		if (calibrationMode && isDrawingCalibration && event.touches.length === 1) {
-			event.preventDefault();
-			const touch = event.touches[0];
-			const rect = overlayCanvas.getBoundingClientRect();
-			const scaleX = overlayCanvas.width / rect.width;
-			const scaleY = overlayCanvas.height / rect.height;
-			const x = (touch.clientX - rect.left) * scaleX;
-			const y = (touch.clientY - rect.top) * scaleY;
-			updateCalibrationDraw(x, y);
-		}
-	}, { passive: false });
-
-	overlayCanvas.addEventListener('touchend', (event) => {
-		if (calibrationMode) {
-			event.preventDefault();
-			endCalibrationDraw();
-		}
-	}, { passive: false });
-
-	// Show/Hide Calibration Prompt
-	function showCalibrationPrompt() {
-		calibrationPrompt.style.display = "block";
-	}
-
-	function hideCalibrationPrompt() {
-		calibrationPrompt.style.display = "none";
-		actualLengthInput.value = "";
-		actualUnitInput.value = "";
-	}
-
-	confirmCalibrationButton.addEventListener('click', () => {
-		const actualLength = parseFloat(actualLengthInput.value);
-		const actualUnit = actualUnitInput.value.trim();
-
-		if (isNaN(actualLength) || actualLength <= 0 || actualUnit === "") {
-			alert("Please enter a valid actual length (positive number) and unit.");
-			return;
+		function exportCSV(filename) {
+			const velocityData = [];
+			for (let i = 1; i < frameData.length; i++) {
+				const dt = frameData[i].time - frameData[i - 1].time;
+				const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
+				const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
+				const dX = p2.x - p1.x,
+					dY = p2.y - p1.y;
+				const v_x = dt > 0 ? (dX * scaleFactor) / dt : 0;
+				const v_y = dt > 0 ? (dY * scaleFactor) / dt : 0;
+				velocityData.push({ v_x, v_y });
+			}
+			let csv = `Time (s),x (${scaleUnit}),y (${scaleUnit}),v_x (${scaleUnit}/s),v_y (${scaleUnit}/s)\n`;
+			for (let i = 0; i < frameData.length; i++) {
+				const xAdj = (frameData[i].x - (originSet ? originPoint.x : 0)) * scaleFactor;
+				const yAdj = (frameData[i].y - (originSet ? originPoint.y : 0)) * scaleFactor;
+				const time = frameData[i].time.toFixed(3);
+				const x = xAdj.toFixed(3);
+				const y = yAdj.toFixed(3);
+				const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
+				const v_y = i > 0 ? velocityData[i - 1].v_y.toFixed(3) : "";
+				csv += `${time},${x},${y},${v_x},${v_y}\n`;
+			}
+			const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
 		}
 
-		const deltaX = calibrationEnd.x - calibrationStart.x;
-		const deltaY = calibrationEnd.y - calibrationStart.y;
-		const pixelLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		// ===== Drawing =====
+		function resizeOverlay() { overlayCanvas.width = frameCanvas.width;
+			overlayCanvas.height = frameCanvas.height; }
 
-		if (pixelLength === 0) {
-			alert("Calibration line length cannot be zero.");
-			return;
+		function drawFrame() {
+			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
+			ctx.drawImage(hiddenVideo, 0, 0, frameCanvas.width, frameCanvas.height);
+			frameData.forEach((p) => {
+				const x = p.x,
+					y = cartesianYToCanvasY(p.y);
+				drawDataPoint(x, y);
+			});
 		}
 
-		scaleFactor = actualLength / pixelLength;
-		scaleUnit = actualUnit;
+		function drawDataPoint(x, y) {
+			const circleRadius = originDotRadiusDisplay,
+				crossSize = 10;
+			ctx.fillStyle = 'rgba(255,0,0,.3)';
+			ctx.beginPath();
+			ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
+			ctx.fill();
+			ctx.strokeStyle = 'red';
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(x - crossSize, y);
+			ctx.lineTo(x + crossSize, y);
+			ctx.moveTo(x, y - crossSize);
+			ctx.lineTo(x, y + crossSize);
+			ctx.stroke();
+		}
 
-		hideCalibrationPrompt();
-		drawOverlay();
-		drawFrame();
-		plotPosition();
-		message.innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
-		crosshair.style.display = "none";
-	});
+		function drawOverlay() {
+			resizeOverlay();
+			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+			// grid
+			overlayCtx.save();
+			overlayCtx.shadowColor = "black";
+			overlayCtx.shadowBlur = 2;
+			overlayCtx.strokeStyle = "white";
+			overlayCtx.lineWidth = .5;
+			for (let x = 0; x <= overlayCanvas.width; x += gridSizeDisplay) { overlayCtx.beginPath();
+				overlayCtx.moveTo(x, 0);
+				overlayCtx.lineTo(x, overlayCanvas.height);
+				overlayCtx.stroke(); }
+			for (let y = 0; y <= overlayCanvas.height; y += gridSizeDisplay) { overlayCtx.beginPath();
+				overlayCtx.moveTo(0, y);
+				overlayCtx.lineTo(overlayCanvas.width, y);
+				overlayCtx.stroke(); }
+			overlayCtx.restore();
+			// axes
+			const ox = originSet ? originPoint.x : 0;
+			const oy = originSet ? originPoint.y : 0;
+			const originCanvasX = ox;
+			const originCanvasY = cartesianYToCanvasY(oy);
+			overlayCtx.save();
+			overlayCtx.lineWidth = axisLineWidthDisplay;
+			overlayCtx.shadowColor = "black";
+			overlayCtx.shadowBlur = 2;
+			overlayCtx.strokeStyle = 'white';
+			overlayCtx.beginPath();
+			overlayCtx.moveTo(0, originCanvasY);
+			overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
+			overlayCtx.stroke();
+			overlayCtx.beginPath();
+			overlayCtx.moveTo(originCanvasX, 0);
+			overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
+			overlayCtx.stroke();
+			overlayCtx.restore();
+			overlayCtx.fillStyle = "cyan";
+			overlayCtx.beginPath();
+			overlayCtx.arc(originCanvasX, originCanvasY, originDotRadiusDisplay, 0, 2 * Math.PI);
+			overlayCtx.fill();
+			// calibration line
+			if (calibrationStart && calibrationEnd) {
+				overlayCtx.save();
+				overlayCtx.lineWidth = 2;
+				overlayCtx.strokeStyle = "orange";
+				overlayCtx.shadowColor = "black";
+				overlayCtx.shadowBlur = 2;
+				overlayCtx.setLineDash([5, 5]);
+				overlayCtx.beginPath();
+				overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
+				overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
+				overlayCtx.stroke();
+				overlayCtx.setLineDash([]);
+				overlayCtx.restore();
+			}
+		}
+		window.addEventListener('resize', () => { drawOverlay();
+			drawFrame(); });
 
-	cancelCalibrationButton.addEventListener('click', () => {
-		hideCalibrationPrompt();
-		calibrationMode = false;
-		isDrawingCalibration = false;
-		calibrationStart = null;
-		calibrationEnd = null;
-		drawOverlay();
-		drawFrame();
-		crosshair.style.display = "none";
-		message.innerHTML = "<p>Calibration cancelled.</p>";
-	});
+		// ===== Calibration UI =====
+		calibrateButton.addEventListener('click', () => {
+			document.getElementById('crosshair').style.display = "none";
+			overlayCanvas.style.pointerEvents = "auto";
+			calibrationMode = true;
+			isDrawingCalibration = false;
+			calibrationStart = null;
+			calibrationEnd = null;
+			frameCanvas.style.cursor = "crosshair";
+			document.getElementById('message').innerHTML = "<p>Drag on the video to draw a line with a known length.</p>";
+		});
 
-	// Hide prompts if clicked outside
-	window.addEventListener('click', (event) => {
-		if (event.target == calibrationPrompt) {
-			hideCalibrationPrompt();
+		function startCalibrationDraw(x, y) { isDrawingCalibration = true;
+			calibrationStart = { x, y };
+			calibrationEnd = { x, y }; }
+
+		function updateCalibrationDraw(x, y) { if (isDrawingCalibration) { calibrationEnd = { x, y };
+				drawOverlay(); } }
+
+		function endCalibrationDraw() {
+			if (!isDrawingCalibration) return;
+			isDrawingCalibration = false;
+			calibrationMode = false;
+			overlayCanvas.style.pointerEvents = "none";
+			frameCanvas.style.cursor = "default";
+			document.getElementById('message').innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
+			calibrationPrompt.style.display = "block";
+		}
+
+		overlayCanvas.addEventListener('mousedown', (e) => {
+			if (!calibrationMode) return;
+			const r = overlayCanvas.getBoundingClientRect();
+			startCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
+		});
+		overlayCanvas.addEventListener('mousemove', (e) => {
+			if (!calibrationMode || !isDrawingCalibration) return;
+			const r = overlayCanvas.getBoundingClientRect();
+			updateCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
+		});
+		overlayCanvas.addEventListener('mouseup', () => { if (calibrationMode) endCalibrationDraw(); });
+
+		overlayCanvas.addEventListener('touchstart', (e) => {
+			if (!calibrationMode || e.touches.length !== 1) return;
+			e.preventDefault();
+			const t = e.touches[0],
+				r = overlayCanvas.getBoundingClientRect();
+			startCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height));
+		}, { passive: false });
+		overlayCanvas.addEventListener('touchmove', (e) => {
+			if (!calibrationMode || !isDrawingCalibration || e.touches.length !== 1) return;
+			e.preventDefault();
+			const t = e.touches[0],
+				r = overlayCanvas.getBoundingClientRect();
+			updateCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height));
+		}, { passive: false });
+		overlayCanvas.addEventListener('touchend', (e) => { if (calibrationMode) { e.preventDefault();
+				endCalibrationDraw(); } }, { passive: false });
+
+		confirmCalibrationButton.addEventListener('click', () => {
+			const actualLength = parseFloat(actualLengthInput.value);
+			const actualUnit = actualUnitInput.value.trim();
+			if (!Number.isFinite(actualLength) || actualLength <= 0 || !actualUnit) { alert("Enter a positive length and a unit."); return; }
+			const dx = calibrationEnd.x - calibrationStart.x,
+				dy = calibrationEnd.y - calibrationStart.y;
+			const pxLen = Math.hypot(dx, dy);
+			if (pxLen === 0) { alert("Calibration line length cannot be zero."); return; }
+			scaleFactor = actualLength / pxLen;
+			scaleUnit = actualUnit;
+			calibrationPrompt.style.display = "none";
+			drawOverlay();
+			drawFrame();
+			plotPosition();
+			document.getElementById('message').innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
+		});
+		cancelCalibrationButton.addEventListener('click', () => {
+			calibrationPrompt.style.display = "none";
 			calibrationMode = false;
 			isDrawingCalibration = false;
 			calibrationStart = null;
 			calibrationEnd = null;
 			drawOverlay();
 			drawFrame();
-			crosshair.style.display = "none";
-			overlayCanvas.style.pointerEvents = "none";
-			message.innerHTML = "<p>Calibration cancelled.</p>";
-		}
-		if (event.target == exportPrompt) {
-			hideExportPrompt();
-			message.innerHTML = "<p>Export cancelled.</p>";
-		}
-		if (event.target == frameRatePrompt) {
-			frameRatePrompt.style.display = "none";
-		}
-	});
-
-	// Set Origin
-	setOriginButton.addEventListener('click', () => {
-		calibrationMode = false;
-		isDrawingCalibration = false;
-		originMode = true;
-		overlayCanvas.style.pointerEvents = "auto";
-		frameCanvas.style.cursor = "crosshair";
-		crosshair.style.display = "block";
-		message.innerHTML = "<p>Click on the video to set the new origin.</p>";
-	});
-
-	// Draw current frame
-	function drawFrame() {
-		// We already set frameCanvas.width, frameCanvas.height to the video's natural size
-		ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-
-		// Draw the video scaled to the same size
-		ctx.drawImage(videoElement, 0, 0, frameCanvas.width, frameCanvas.height);
-
-		frameData.forEach((point) => {
-			const x = point.x;
-			const y = cartesianYToCanvasY(point.y);
-			drawDataPoint(x, y);
+			document.getElementById('message').innerHTML = "<p>Calibration cancelled.</p>";
 		});
-	}
 
-	// Draw single data point
-	function drawDataPoint(x, y) {
-		const circleRadius = originDotRadiusDisplay;
-		const crossSize = 10;
-
-		ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-		ctx.beginPath();
-		ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
-		ctx.fill();
-
-		ctx.strokeStyle = 'red';
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-		ctx.moveTo(x - crossSize, y);
-		ctx.lineTo(x + crossSize, y);
-		ctx.moveTo(x, y - crossSize);
-		ctx.lineTo(x, y + crossSize);
-		ctx.stroke();
-	}
-
-	/*
-	 * Force overlayCanvas to match frameCanvas's size so that bottom in overlayCanvas 
-	 * is indeed at the bottom visually.
-	 */
-	function resizeOverlay() {
-		overlayCanvas.width = frameCanvas.width;
-		overlayCanvas.height = frameCanvas.height;
-	}
-
-	function drawOverlay() {
-		resizeOverlay();
-		overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-
-		// Grid
-		const gridStepX = gridSizeDisplay;
-		const gridStepY = gridSizeDisplay;
-
-		overlayCtx.save();
-		overlayCtx.shadowColor = "black";
-		overlayCtx.shadowBlur = 2;
-		overlayCtx.strokeStyle = "white";
-		overlayCtx.lineWidth = 0.5;
-
-		for (let x = 0; x <= overlayCanvas.width; x += gridStepX) {
-			overlayCtx.beginPath();
-			overlayCtx.moveTo(x, 0);
-			overlayCtx.lineTo(x, overlayCanvas.height);
-			overlayCtx.stroke();
-		}
-		for (let y = 0; y <= overlayCanvas.height; y += gridStepY) {
-			overlayCtx.beginPath();
-			overlayCtx.moveTo(0, y);
-			overlayCtx.lineTo(overlayCanvas.width, y);
-			overlayCtx.stroke();
-		}
-		overlayCtx.restore();
-
-		// Axes if origin is set
-		let ox = originSet ? originPoint.x : 0;
-		let oy = originSet ? originPoint.y : 0;
-		const originCanvasX = ox;
-		const originCanvasY = cartesianYToCanvasY(oy);
-
-		overlayCtx.save();
-		const axisLineWidth = axisLineWidthDisplay;
-		overlayCtx.lineWidth = axisLineWidth;
-		overlayCtx.shadowColor = "black";
-		overlayCtx.shadowBlur = 2;
-
-		// X axis
-		overlayCtx.strokeStyle = 'white';
-		overlayCtx.beginPath();
-		overlayCtx.moveTo(0, originCanvasY);
-		overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-		overlayCtx.stroke();
-
-		// Y axis
-		overlayCtx.beginPath();
-		overlayCtx.moveTo(originCanvasX, 0);
-		overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-		overlayCtx.stroke();
-		overlayCtx.restore();
-
-		// Origin dot
-		const originDotRadius = originDotRadiusDisplay;
-		overlayCtx.fillStyle = "cyan";
-		overlayCtx.beginPath();
-		overlayCtx.arc(originCanvasX, originCanvasY, originDotRadius, 0, 2 * Math.PI);
-		overlayCtx.fill();
-
-		// Calibration line
-		if (calibrationStart && calibrationEnd) {
-			overlayCtx.save();
-			overlayCtx.lineWidth = 2;
-			overlayCtx.strokeStyle = "orange";
-			overlayCtx.shadowColor = "black";
-			overlayCtx.shadowBlur = 2;
-			overlayCtx.setLineDash([5, 5]);
-			overlayCtx.beginPath();
-			overlayCtx.moveTo(calibrationStart.x, calibrationStart.y);
-			overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
-			overlayCtx.stroke();
-			overlayCtx.setLineDash([]);
-			overlayCtx.restore();
-		}
-	}
-
-	// Redraw on window resize
-	window.addEventListener('resize', () => {
-		drawOverlay();
-		drawFrame();
-	});
-</script>
+		// ===== Origin button =====
+		setOriginButton.addEventListener('click', () => {
+			calibrationMode = false;
+			isDrawingCalibration = false;
+			originMode = true;
+			overlayCanvas.style.pointerEvents = "auto";
+			frameCanvas.style.cursor = "crosshair";
+			document.getElementById('crosshair').style.display = "block";
+			document.getElementById('message').innerHTML = "<p>Click on the video to set the new origin.</p>";
+		});
+	</script>
+</body>
 
 </html>
