@@ -9,7 +9,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
 		:root {
-			--btn-upload-color: #0079b1;
+			--btn-open-color: #0079b1;
 			--btn-play-color: #3ec786;
 			--btn-calibration-color: #f0bd37;
 			--btn-set-origin-color: #f0bd37;
@@ -111,8 +111,8 @@
 			width: 100%
 		}
 
-		.btn-upload {
-			background: var(--btn-upload-color)
+		.btn-open {
+			background: var(--btn-open-color)
 		}
 
 		.btn-play {
@@ -361,10 +361,10 @@
 		<div class="banner-placeholder"></div>
 	</div>
 
-	<div id="warningBanner"><strong>Note:</strong> This app is optimized for desktop. On iOS, use the latest version for best performance.</div>
+	<div id="warningBanner"><strong>Note:</strong> Files are opened locally. Nothing is uploaded.</div>
 
 	<div id="topControls">
-		<button id="uploadVideo" class="control-button btn-upload" aria-label="Upload Video">Upload Video</button>
+		<button id="openVideo" class="control-button btn-open" aria-label="Open Video">Open Video</button>
 		<button id="playPause" class="control-button btn-play" disabled>Play</button>
 		<button id="calibrate" class="control-button btn-calibration" disabled>Calibration</button>
 		<button id="setOrigin" class="control-button btn-set-origin" disabled>Set Origin</button>
@@ -419,13 +419,13 @@
 	</div>
 
 	<div id="message">
-		<p>Upload a video to start analysis.</p>
+		<p>Open a video to start analysis.</p>
 	</div>
 
 	<div id="analysisContainer">
 		<div id="videoSection">
 			<div id="videoWrapper">
-				<!-- Keep the real video in DOM for iPad Safari -->
+				<!-- Keep the real video in DOM for Safari -->
 				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
 				<canvas id="frameCanvas" style="display:none"></canvas>
 				<canvas id="overlayCanvas"></canvas>
@@ -461,7 +461,7 @@
 		let isPlaying = false;
 		let positionChart;
 		let skippingFrame = false;
-		let recordedBlob = null;
+		let blobUrl = null;
 
 		let calibrationMode = false;
 		let calibrationStart = null;
@@ -479,8 +479,8 @@
 		const axisLineWidthDisplay = 2;
 
 		// ===== DOM =====
-		const hiddenVideo = document.getElementById('hiddenVideo'); // our decoder
-		const uploadVideoButton = document.getElementById('uploadVideo');
+		const hiddenVideo = document.getElementById('hiddenVideo');
+		const openVideoButton = document.getElementById('openVideo');
 		const videoUploadInput = document.getElementById('videoUploadInput');
 		const playPauseButton = document.getElementById('playPause');
 		const calibrateButton = document.getElementById('calibrate');
@@ -517,7 +517,6 @@
 		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
 		const frameRateButton = document.getElementById('frameRateButton');
 
-		// Utility
 		function canvasYToCartesianY(y) { return frameCanvas.height - y; }
 
 		function cartesianYToCanvasY(y) { return frameCanvas.height - y; }
@@ -526,7 +525,7 @@
 				s = Math.floor(t % 60),
 				ms = Math.floor((t - Math.floor(t)) * 1000); return `${m}:${s.toString().padStart(2,"0")}.${ms.toString().padStart(3,"0")}`; }
 
-		// Compute the best known end time
+		// Seekable helpers
 		function getSeekableEnd() {
 			const s = hiddenVideo.seekable;
 			if (s && s.length > 0) return s.end(s.length - 1);
@@ -535,11 +534,9 @@
 			return 0;
 		}
 
-		// Keep slider domain in sync with media
 		function updateSliderDomain() {
 			const end = getSeekableEnd();
 			if (end > 0) {
-				// Only update if it grows or if max is still 0
 				const currentMax = parseFloat(slider.max) || 0;
 				if (end > currentMax - 1e-3) {
 					slider.max = end.toString();
@@ -547,15 +544,6 @@
 				}
 			}
 		}
-
-		// ===== Init =====
-		document.addEventListener('DOMContentLoaded', () => {
-			disableControls(true);
-			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
-			document.getElementById('analysisContainer').style.display = "none";
-			document.getElementById('chartCanvasContainer').style.display = "none";
-			frameCanvas.style.display = "none";
-		});
 
 		function disableControls(state) {
 			playPauseButton.disabled = state;
@@ -572,23 +560,32 @@
 			slider.disabled = state;
 		}
 
-		// ===== Upload & load =====
-		uploadVideoButton.addEventListener('click', () => videoUploadInput.click());
-		videoUploadInput.addEventListener('change', (e) => {
-			const file = e.target.files[0];
-			if (!file) return;
-			recordedBlob = URL.createObjectURL(file);
-			loadVideo();
+		// Init
+		document.addEventListener('DOMContentLoaded', () => {
+			disableControls(true);
+			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
+			document.getElementById('analysisContainer').style.display = "none";
+			document.getElementById('chartCanvasContainer').style.display = "none";
+			frameCanvas.style.display = "none";
 		});
 
-		function loadVideo() {
-			hiddenVideo.src = recordedBlob;
-			hiddenVideo.load();
-		}
+		// Open video (local only)
+		openVideoButton.addEventListener('click', () => videoUploadInput.click());
+		videoUploadInput.addEventListener('change', (e) => {
+			const file = e.target.files?.[0];
+			if (!file) return;
 
-		// Metadata and readiness events
+			if (blobUrl) URL.revokeObjectURL(blobUrl);
+			blobUrl = URL.createObjectURL(file);
+			hiddenVideo.src = blobUrl;
+			hiddenVideo.load();
+
+			// allow selecting the same file again
+			e.target.value = '';
+		});
+
+		// Metadata
 		hiddenVideo.addEventListener('loadedmetadata', () => {
-			// Initial domain
 			slider.min = "0";
 			slider.max = "0";
 			slider.step = Math.max(1 / frameRate / 2, 0.001).toString();
@@ -597,32 +594,14 @@
 			updateSliderDomain();
 		});
 
+		// Keep domain fresh as the browser reveals it
 		hiddenVideo.addEventListener('durationchange', updateSliderDomain);
 		hiddenVideo.addEventListener('loadeddata', updateSliderDomain);
 		hiddenVideo.addEventListener('canplay', updateSliderDomain);
 		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
-		hiddenVideo.addEventListener('timeupdate', () => {
-			if (!skippingFrame) {
-				updateSliderDomain();
-				slider.value = hiddenVideo.currentTime.toString();
-				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
-				drawFrame();
-			}
-		});
-
-		hiddenVideo.addEventListener('seeked', () => {
-			if (!skippingFrame) {
-				updateSliderDomain();
-				slider.value = hiddenVideo.currentTime.toString();
-				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
-				drawFrame();
-				drawOverlay();
-			}
-		});
 
 		// First frame ready
 		hiddenVideo.addEventListener('loadeddata', () => {
-			// show UI
 			frameCanvas.width = hiddenVideo.videoWidth || 1280;
 			frameCanvas.height = hiddenVideo.videoHeight || 720;
 			frameCanvas.style.display = "block";
@@ -641,9 +620,29 @@
 				"</ul>";
 		}, { once: true });
 
-		// ===== Slider scrubbing =====
+		// Playback sync
+		hiddenVideo.addEventListener('timeupdate', () => {
+			if (!skippingFrame) {
+				updateSliderDomain();
+				slider.value = hiddenVideo.currentTime.toString();
+				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				drawFrame();
+			}
+		});
+
+		// Redraw on seek completion
+		hiddenVideo.addEventListener('seeked', () => {
+			if (!skippingFrame) {
+				updateSliderDomain();
+				slider.value = hiddenVideo.currentTime.toString();
+				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				drawFrame();
+				drawOverlay();
+			}
+		});
+
+		// Scrubbing
 		function scrubToSlider() {
-			// Pause to avoid a race
 			if (isPlaying) {
 				hiddenVideo.pause();
 				isPlaying = false;
@@ -652,10 +651,8 @@
 			const end = getSeekableEnd();
 			let t = parseFloat(slider.value);
 			if (!Number.isFinite(t)) return;
-			// Do not seek beyond seekable end
-			if (end > 0) t = Math.min(t, end - 0.02); // small margin
+			if (end > 0) t = Math.min(t, end - 0.02);
 			if (t < 0) t = 0;
-			// Force a real move even if same decode point
 			const EPS = Math.max(1e-3, (1 / frameRate) * 0.15);
 			if (Math.abs(hiddenVideo.currentTime - t) < EPS) t += EPS;
 			hiddenVideo.currentTime = t;
@@ -664,7 +661,7 @@
 		slider.addEventListener('input', scrubToSlider);
 		slider.addEventListener('change', scrubToSlider);
 
-		// ===== Play/Pause =====
+		// Play/Pause
 		playPauseButton.addEventListener('click', () => {
 			if (isPlaying) { hiddenVideo.pause();
 				playPauseButton.textContent = "Play"; } else { hiddenVideo.play().catch(() => {});
@@ -672,7 +669,7 @@
 			isPlaying = !isPlaying;
 		});
 
-		// ===== Click to add point and step =====
+		// Click to add point and step
 		frameCanvas.addEventListener('click', (event) => {
 			if (!calibrationMode && !originMode && !skippingFrame) {
 				const rect = frameCanvas.getBoundingClientRect();
@@ -688,7 +685,7 @@
 			}
 		});
 
-		// ===== Origin selection =====
+		// Origin selection
 		overlayCanvas.addEventListener('click', (event) => {
 			if (originMode && !calibrationMode) {
 				const rect = overlayCanvas.getBoundingClientRect();
@@ -709,7 +706,7 @@
 			}
 		});
 
-		// ===== Frame rate dialog =====
+		// Frame rate dialog
 		frameRateButton.addEventListener('click', () => {
 			userFrameRateInput.value = frameRate;
 			frameRatePrompt.style.display = "block";
@@ -723,7 +720,7 @@
 		});
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
 
-		// ===== Robust frame step for WEBM =====
+		// Robust frame step for WebM
 		function skipToNextFrame() {
 			if (!Number.isFinite(frameRate) || frameRate <= 0) return;
 			if (skippingFrame) return;
@@ -767,7 +764,7 @@
 			try { hiddenVideo.currentTime = target; } catch (e) { finish(); }
 		}
 
-		// ===== Plotting =====
+		// Plotting
 		const positionChartCanvas = document.getElementById('positionChart');
 
 		function plotPosition() {
@@ -852,7 +849,7 @@
 		plotVyButton.addEventListener("click", () => plotVelocity("y"));
 		backToPositionButton.addEventListener("click", plotPosition);
 
-		// ===== Clear / Export =====
+		// Clear / Export
 		clearDataPointsButton.addEventListener("click", () => {
 			frameData = [];
 			if (positionChart) { positionChart.data.datasets.forEach(d => d.data = []);
@@ -931,9 +928,10 @@
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
 		}
 
-		// ===== Drawing =====
+		// Drawing
 		function resizeOverlay() { overlayCanvas.width = frameCanvas.width;
 			overlayCanvas.height = frameCanvas.height; }
 
@@ -967,7 +965,6 @@
 		function drawOverlay() {
 			resizeOverlay();
 			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-			// grid
 			overlayCtx.save();
 			overlayCtx.shadowColor = "black";
 			overlayCtx.shadowBlur = 2;
@@ -982,7 +979,6 @@
 				overlayCtx.lineTo(overlayCanvas.width, y);
 				overlayCtx.stroke(); }
 			overlayCtx.restore();
-			// axes
 			const ox = originSet ? originPoint.x : 0;
 			const oy = originSet ? originPoint.y : 0;
 			const originCanvasX = ox;
@@ -1005,7 +1001,6 @@
 			overlayCtx.beginPath();
 			overlayCtx.arc(originCanvasX, originCanvasY, originDotRadiusDisplay, 0, 2 * Math.PI);
 			overlayCtx.fill();
-			// calibration line
 			if (calibrationStart && calibrationEnd) {
 				overlayCtx.save();
 				overlayCtx.lineWidth = 2;
@@ -1024,7 +1019,7 @@
 		window.addEventListener('resize', () => { drawOverlay();
 			drawFrame(); });
 
-		// ===== Calibration UI =====
+		// Calibration
 		calibrateButton.addEventListener('click', () => {
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "auto";
@@ -1109,7 +1104,7 @@
 			document.getElementById('message').innerHTML = "<p>Calibration cancelled.</p>";
 		});
 
-		// ===== Origin button =====
+		// Origin button
 		setOriginButton.addEventListener('click', () => {
 			calibrationMode = false;
 			isDrawingCalibration = false;
@@ -1118,6 +1113,11 @@
 			frameCanvas.style.cursor = "crosshair";
 			document.getElementById('crosshair').style.display = "block";
 			document.getElementById('message').innerHTML = "<p>Click on the video to set the new origin.</p>";
+		});
+
+		// Cleanup blob URL on exit
+		window.addEventListener('beforeunload', () => {
+			if (blobUrl) URL.revokeObjectURL(blobUrl);
 		});
 	</script>
 </body>
