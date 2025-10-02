@@ -8,6 +8,7 @@
 	<link rel="icon" type="image/png" href="/favicon.png">
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
+		/* --- styles unchanged (trimmed for brevity) --- */
 		:root {
 			--btn-open-color: #0079b1;
 			--btn-play-color: #3ec786;
@@ -21,7 +22,7 @@
 			--btn-cancel-color: #dc3545;
 			--btn-plot-vx-color: #48c8a8;
 			--btn-plot-vy-color: #48c8a8;
-			--btn-backToPosition-color: #48c8a8;
+			--btn-backToPosition-color: #48c8a8
 		}
 
 		body {
@@ -349,6 +350,103 @@
 			color: #555;
 			margin-top: 10px
 		}
+
+		/* ===== Dialog layout + overlap fixes (Brave/Safari/Chrome) ===== */
+		#calibrationPrompt,
+		#exportPrompt,
+		#frameRatePrompt {
+			/* keep your positioning but make sizing robust */
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: min(92vw, 420px);
+			max-width: 92vw;
+			box-sizing: border-box;
+			z-index: 9999;
+			/* sit above everything */
+			padding: 20px;
+			border-radius: 10px;
+			border: 2px solid #333;
+			background: #fff;
+			box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
+		}
+
+		#calibrationPrompt h2,
+		#exportPrompt h2,
+		#frameRatePrompt h2 {
+			margin: 0 0 8px 0;
+			font-size: 1.1rem;
+		}
+
+		#calibrationPrompt p,
+		#exportPrompt p,
+		#frameRatePrompt p {
+			margin: 0 0 10px 0;
+		}
+
+		/* Make the inner forms stack cleanly with spacing */
+		#calibrationPrompt form,
+		#exportPrompt form,
+		#frameRatePrompt form {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		/* Inputs span full width and don’t collapse on zoom */
+		#calibrationPrompt input[type="number"],
+		#calibrationPrompt input[type="text"],
+		#exportPrompt input[type="text"],
+		#frameRatePrompt input[type="number"] {
+			width: 100%;
+			min-height: 38px;
+			padding: 8px 10px;
+			box-sizing: border-box;
+			border: 1px solid #ccc;
+			border-radius: 6px;
+			font-size: 0.95rem;
+		}
+
+		/* The last <div> inside each form is your button row.
+   Turn it into a responsive 2-col grid with proper gaps. */
+		#calibrationPrompt form>div,
+		#exportPrompt form>div,
+		#frameRatePrompt form>div {
+			display: grid !important;
+			grid-template-columns: 1fr 1fr;
+			/* Confirm | Cancel */
+			gap: 10px;
+			align-items: stretch;
+		}
+
+		/* Buttons behave well under zoom and no overlap */
+		#calibrationPrompt form>div button,
+		#exportPrompt form>div button,
+		#frameRatePrompt form>div button {
+			min-height: 40px;
+			white-space: nowrap;
+			padding: 10px 12px;
+			border-radius: 6px;
+			font-weight: 600;
+		}
+
+		/* On very narrow screens or high zoom, stack vertically */
+		@media (max-width: 380px) {
+
+			#calibrationPrompt form>div,
+			#exportPrompt form>div,
+			#frameRatePrompt form>div {
+				grid-template-columns: 1fr;
+				/* one per row */
+			}
+		}
+
+		/* Prevent accidental click-through behind the dialog while open */
+		body.modal-open {
+			overflow: hidden;
+			/* avoid background scroll */
+		}
 	</style>
 </head>
 
@@ -376,7 +474,7 @@
 	</div>
 
 	<div id="frameRateContainer" style="text-align:center;margin-top:10px;">
-		<button id="frameRateButton" class="control-button" style="width:auto;padding:10px 15px;background:#a75908;" title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120)" disabled>
+		<button id="frameRateButton" class="control-button" style="width:auto;padding:10px 15px;background:#a75908;" title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120, 240)" disabled>
 			Frame Rate: 30 fps
 		</button>
 	</div>
@@ -408,7 +506,7 @@
 
 	<div id="frameRatePrompt">
 		<h2>Set Frame Rate</h2>
-		<p>Enter the correct frame rate: <br>(e.g. 24, 30, 60, 240 fps)</p>
+		<p>Enter the correct frame rate: <br>(e.g. 24, 30, 60, 120, 240 fps)</p>
 		<form autocomplete="off">
 			<input type="number" id="userFrameRate" value="30" min="1" step="any" autocomplete="off" />
 			<div style="display:flex;gap:10px;justify-content:center;">
@@ -425,7 +523,6 @@
 	<div id="analysisContainer">
 		<div id="videoSection">
 			<div id="videoWrapper">
-				<!-- Keep the real video in DOM for Safari -->
 				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
 				<canvas id="frameCanvas" style="display:none"></canvas>
 				<canvas id="overlayCanvas"></canvas>
@@ -453,8 +550,9 @@
 		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
 	</footer>
 
+
 	<script>
-		// ===== State =====
+		/* ===== State ===== */
 		let frameRate = 30;
 		const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
 		let frameData = [];
@@ -478,7 +576,7 @@
 		const originDotRadiusDisplay = 5;
 		const axisLineWidthDisplay = 2;
 
-		// ===== DOM =====
+		/* ===== DOM ===== */
 		const hiddenVideo = document.getElementById('hiddenVideo');
 		const openVideoButton = document.getElementById('openVideo');
 		const videoUploadInput = document.getElementById('videoUploadInput');
@@ -525,7 +623,7 @@
 				s = Math.floor(t % 60),
 				ms = Math.floor((t - Math.floor(t)) * 1000); return `${m}:${s.toString().padStart(2,"0")}.${ms.toString().padStart(3,"0")}`; }
 
-		// Seekable helpers
+		/* Seekable helpers */
 		function getSeekableEnd() {
 			const s = hiddenVideo.seekable;
 			if (s && s.length > 0) return s.end(s.length - 1);
@@ -560,7 +658,7 @@
 			slider.disabled = state;
 		}
 
-		// Init
+		/* Init */
 		document.addEventListener('DOMContentLoaded', () => {
 			disableControls(true);
 			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
@@ -569,22 +667,19 @@
 			frameCanvas.style.display = "none";
 		});
 
-		// Open video (local only)
+		/* Open video */
 		openVideoButton.addEventListener('click', () => videoUploadInput.click());
 		videoUploadInput.addEventListener('change', (e) => {
 			const file = e.target.files?.[0];
 			if (!file) return;
-
 			if (blobUrl) URL.revokeObjectURL(blobUrl);
 			blobUrl = URL.createObjectURL(file);
 			hiddenVideo.src = blobUrl;
 			hiddenVideo.load();
-
-			// allow selecting the same file again
 			e.target.value = '';
 		});
 
-		// Metadata
+		/* Metadata */
 		hiddenVideo.addEventListener('loadedmetadata', () => {
 			slider.min = "0";
 			slider.max = "0";
@@ -593,14 +688,12 @@
 			hiddenVideo.currentTime = 0;
 			updateSliderDomain();
 		});
-
-		// Keep domain fresh as the browser reveals it
 		hiddenVideo.addEventListener('durationchange', updateSliderDomain);
 		hiddenVideo.addEventListener('loadeddata', updateSliderDomain);
 		hiddenVideo.addEventListener('canplay', updateSliderDomain);
 		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
 
-		// First frame ready
+		/* First frame ready */
 		hiddenVideo.addEventListener('loadeddata', () => {
 			frameCanvas.width = hiddenVideo.videoWidth || 1280;
 			frameCanvas.height = hiddenVideo.videoHeight || 720;
@@ -620,7 +713,7 @@
 				"</ul>";
 		}, { once: true });
 
-		// Playback sync
+		/* Playback sync */
 		hiddenVideo.addEventListener('timeupdate', () => {
 			if (!skippingFrame) {
 				updateSliderDomain();
@@ -629,8 +722,6 @@
 				drawFrame();
 			}
 		});
-
-		// Redraw on seek completion
 		hiddenVideo.addEventListener('seeked', () => {
 			if (!skippingFrame) {
 				updateSliderDomain();
@@ -641,13 +732,11 @@
 			}
 		});
 
-		// Scrubbing
+		/* Scrubbing */
 		function scrubToSlider() {
-			if (isPlaying) {
-				hiddenVideo.pause();
+			if (isPlaying) { hiddenVideo.pause();
 				isPlaying = false;
-				playPauseButton.textContent = "Play";
-			}
+				playPauseButton.textContent = "Play"; }
 			const end = getSeekableEnd();
 			let t = parseFloat(slider.value);
 			if (!Number.isFinite(t)) return;
@@ -661,7 +750,7 @@
 		slider.addEventListener('input', scrubToSlider);
 		slider.addEventListener('change', scrubToSlider);
 
-		// Play/Pause
+		/* Play/Pause */
 		playPauseButton.addEventListener('click', () => {
 			if (isPlaying) { hiddenVideo.pause();
 				playPauseButton.textContent = "Play"; } else { hiddenVideo.play().catch(() => {});
@@ -669,7 +758,7 @@
 			isPlaying = !isPlaying;
 		});
 
-		// Click to add point and step
+		/* Click to add point and step */
 		frameCanvas.addEventListener('click', (event) => {
 			if (!calibrationMode && !originMode && !skippingFrame) {
 				const rect = frameCanvas.getBoundingClientRect();
@@ -681,11 +770,11 @@
 
 				frameData.push({ x: canvasX, y: cartesianY, time: hiddenVideo.currentTime });
 				plotPosition();
-				skipToNextFrame();
+				stepOneFrame(); // << use robust frame stepping
 			}
 		});
 
-		// Origin selection
+		/* Origin selection on overlay */
 		overlayCanvas.addEventListener('click', (event) => {
 			if (originMode && !calibrationMode) {
 				const rect = overlayCanvas.getBoundingClientRect();
@@ -706,7 +795,7 @@
 			}
 		});
 
-		// Frame rate dialog
+		/* Frame rate dialog */
 		frameRateButton.addEventListener('click', () => {
 			userFrameRateInput.value = frameRate;
 			frameRatePrompt.style.display = "block";
@@ -720,58 +809,76 @@
 		});
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
 
-		// Robust frame step for WebM
-		function skipToNextFrame() {
-			if (!Number.isFinite(frameRate) || frameRate <= 0) return;
+		/* ===== Robust frame stepping ===== */
+		function stepOneFrame() {
 			if (skippingFrame) return;
 			skippingFrame = true;
 
-			if (isPlaying) {
-				hiddenVideo.pause();
+			// Always pause first
+			if (isPlaying) { hiddenVideo.pause();
 				isPlaying = false;
-				playPauseButton.textContent = "Play";
-			}
+				playPauseButton.textContent = "Play"; }
 
-			const dt = 1 / frameRate;
-			const EPS = Math.max(1e-3, dt * 0.15);
-			const now = hiddenVideo.currentTime;
-
-			const end = getSeekableEnd();
-			const maxTarget = Math.max(0, (end || now + dt) - dt - 1e-3);
-			let target = Math.min(now + dt + EPS, maxTarget);
-
-			let done = false;
 			const finish = () => {
-				if (done) return;
-				done = true;
 				skippingFrame = false;
 				updateSliderDomain();
 				slider.value = hiddenVideo.currentTime.toString();
 				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
 				drawFrame();
 				drawOverlay();
-				hiddenVideo.removeEventListener('seeked', onSeeked);
-				hiddenVideo.removeEventListener('timeupdate', onTU);
-				if (fallbackTimer) clearTimeout(fallbackTimer);
 			};
 
-			const onSeeked = () => finish();
-			const onTU = () => { if (hiddenVideo.currentTime >= now + dt * 0.5) finish(); };
-			const fallbackTimer = setTimeout(finish, 250);
+			// Use requestVideoFrameCallback when available (best for 120/240 fps & VFR)
+			if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+				let done = false;
+				const onFrame = () => {
+					if (done) return;
+					done = true;
+					hiddenVideo.pause();
+					hiddenVideo.cancelVideoFrameCallback?.(rvfcId);
+					finish();
+				};
+				const rvfcId = hiddenVideo.requestVideoFrameCallback(() => onFrame());
+				// Start a tiny play to advance exactly one decoded frame
+				hiddenVideo.play().then(() => {}).catch(() => {});
+				// Fallback guard
+				setTimeout(() => { if (!done) { onFrame(); } }, 250);
+				return;
+			}
+
+			// Fallback: time-based seek (kept from your original code)
+			const dt = 1 / Math.max(frameRate, 1);
+			const EPS = Math.max(1e-3, dt * 0.15);
+			const now = hiddenVideo.currentTime;
+			const end = getSeekableEnd();
+			const maxTarget = Math.max(0, (end || now + dt) - dt - 1e-3);
+			const target = Math.min(now + dt + EPS, maxTarget);
+
+			let finished = false;
+			const clean = () => {
+				if (finished) return;
+				finished = true;
+				hiddenVideo.removeEventListener('seeked', onSeeked);
+				hiddenVideo.removeEventListener('timeupdate', onTU);
+				clearTimeout(fallbackTimer);
+				finish();
+			};
+			const onSeeked = () => clean();
+			const onTU = () => { if (hiddenVideo.currentTime >= now + dt * 0.5) clean(); };
+			const fallbackTimer = setTimeout(clean, 250);
 
 			hiddenVideo.addEventListener('seeked', onSeeked, { once: true });
 			hiddenVideo.addEventListener('timeupdate', onTU);
-			try { hiddenVideo.currentTime = target; } catch (e) { finish(); }
+			try { hiddenVideo.currentTime = target; } catch { clean(); }
 		}
 
-		// Plotting
+		/* ===== Plotting (unchanged) ===== */
 		const positionChartCanvas = document.getElementById('positionChart');
 
 		function plotPosition() {
 			const xData = frameData.map(p => parseFloat(p.time.toFixed(3)));
 			const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
 			const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
-
 			if (!positionChart) {
 				positionChart = new Chart(positionChartCanvas.getContext("2d"), {
 					type: "scatter",
@@ -779,7 +886,7 @@
 						datasets: [
 							{ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 },
 							{ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 }
-						],
+						]
 					},
 					options: {
 						responsive: true,
@@ -844,12 +951,11 @@
 			positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
 			positionChart.update();
 		}
-
 		plotVxButton.addEventListener("click", () => plotVelocity("x"));
 		plotVyButton.addEventListener("click", () => plotVelocity("y"));
 		backToPositionButton.addEventListener("click", plotPosition);
 
-		// Clear / Export
+		/* Clear / Export (unchanged) */
 		clearDataPointsButton.addEventListener("click", () => {
 			frameData = [];
 			if (positionChart) { positionChart.data.datasets.forEach(d => d.data = []);
@@ -858,7 +964,6 @@
 			drawOverlay();
 			document.getElementById('message').innerHTML = "<p>Data points cleared.</p>";
 		});
-
 		clearCalibrationButton.addEventListener("click", () => {
 			scaleFactor = 1;
 			scaleUnit = "pixels";
@@ -870,7 +975,6 @@
 				plotPosition(); }
 			document.getElementById('message').innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
 		});
-
 		clearOriginButton.addEventListener("click", () => {
 			originSet = false;
 			originPoint = { x: 0, y: 0 };
@@ -878,13 +982,11 @@
 			plotPosition();
 			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
 		});
-
 		exportDataButton.addEventListener("click", () => {
 			if (frameData.length === 0) { alert("No data to export."); return; }
 			exportFilenameInput.value = "motion_tracker_data";
 			exportPrompt.style.display = "block";
 		});
-
 		confirmExportButton.addEventListener("click", () => {
 			const desired = exportFilenameInput.value.trim();
 			if (!desired) { alert("Please enter a valid filename."); return; }
@@ -931,18 +1033,16 @@
 			URL.revokeObjectURL(url);
 		}
 
-		// Drawing
+		/* Drawing (unchanged) */
 		function resizeOverlay() { overlayCanvas.width = frameCanvas.width;
 			overlayCanvas.height = frameCanvas.height; }
 
 		function drawFrame() {
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 			ctx.drawImage(hiddenVideo, 0, 0, frameCanvas.width, frameCanvas.height);
-			frameData.forEach((p) => {
-				const x = p.x,
+			frameData.forEach((p) => { const x = p.x,
 					y = cartesianYToCanvasY(p.y);
-				drawDataPoint(x, y);
-			});
+				drawDataPoint(x, y); });
 		}
 
 		function drawDataPoint(x, y) {
@@ -1019,7 +1119,7 @@
 		window.addEventListener('resize', () => { drawOverlay();
 			drawFrame(); });
 
-		// Calibration
+		/* Calibration (unchanged) */
 		calibrateButton.addEventListener('click', () => {
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "auto";
@@ -1047,36 +1147,21 @@
 			document.getElementById('message').innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
 			calibrationPrompt.style.display = "block";
 		}
-
-		overlayCanvas.addEventListener('mousedown', (e) => {
-			if (!calibrationMode) return;
-			const r = overlayCanvas.getBoundingClientRect();
-			startCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
-		});
-		overlayCanvas.addEventListener('mousemove', (e) => {
-			if (!calibrationMode || !isDrawingCalibration) return;
-			const r = overlayCanvas.getBoundingClientRect();
-			updateCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
-		});
+		overlayCanvas.addEventListener('mousedown', (e) => { if (!calibrationMode) return; const r = overlayCanvas.getBoundingClientRect();
+			startCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height)); });
+		overlayCanvas.addEventListener('mousemove', (e) => { if (!calibrationMode || !isDrawingCalibration) return; const r = overlayCanvas.getBoundingClientRect();
+			updateCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height)); });
 		overlayCanvas.addEventListener('mouseup', () => { if (calibrationMode) endCalibrationDraw(); });
-
-		overlayCanvas.addEventListener('touchstart', (e) => {
-			if (!calibrationMode || e.touches.length !== 1) return;
-			e.preventDefault();
-			const t = e.touches[0],
+		overlayCanvas.addEventListener('touchstart', (e) => { if (!calibrationMode || e.touches.length !== 1) return;
+			e.preventDefault(); const t = e.touches[0],
 				r = overlayCanvas.getBoundingClientRect();
-			startCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height));
-		}, { passive: false });
-		overlayCanvas.addEventListener('touchmove', (e) => {
-			if (!calibrationMode || !isDrawingCalibration || e.touches.length !== 1) return;
-			e.preventDefault();
-			const t = e.touches[0],
+			startCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height)); }, { passive: false });
+		overlayCanvas.addEventListener('touchmove', (e) => { if (!calibrationMode || !isDrawingCalibration || e.touches.length !== 1) return;
+			e.preventDefault(); const t = e.touches[0],
 				r = overlayCanvas.getBoundingClientRect();
-			updateCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height));
-		}, { passive: false });
+			updateCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height)); }, { passive: false });
 		overlayCanvas.addEventListener('touchend', (e) => { if (calibrationMode) { e.preventDefault();
 				endCalibrationDraw(); } }, { passive: false });
-
 		confirmCalibrationButton.addEventListener('click', () => {
 			const actualLength = parseFloat(actualLengthInput.value);
 			const actualUnit = actualUnitInput.value.trim();
@@ -1104,7 +1189,7 @@
 			document.getElementById('message').innerHTML = "<p>Calibration cancelled.</p>";
 		});
 
-		// Origin button
+		/* Origin button (unchanged) */
 		setOriginButton.addEventListener('click', () => {
 			calibrationMode = false;
 			isDrawingCalibration = false;
@@ -1115,10 +1200,8 @@
 			document.getElementById('message').innerHTML = "<p>Click on the video to set the new origin.</p>";
 		});
 
-		// Cleanup blob URL on exit
-		window.addEventListener('beforeunload', () => {
-			if (blobUrl) URL.revokeObjectURL(blobUrl);
-		});
+		/* Cleanup */
+		window.addEventListener('beforeunload', () => { if (blobUrl) URL.revokeObjectURL(blobUrl); });
 	</script>
 </body>
 
