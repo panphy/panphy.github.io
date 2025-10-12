@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Quadratic Solver</title>
+	<link rel="icon" type="image/png" href="/favicon.png">
+
+	<style>
+		/* Keep box-sizing consistent like the markdown editor */
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+		:root {
+			--bg: #fafafa;
+			--fg: #222;
+			--accent: #0078d4;
+			--accent-light: #e0f0ff;
+			--border: #ccc;
+			--panel: #fff;
+			--error-bg: #ffecec;
+			--error-border: #e57373;
+
+			/* Curve + markers */
+			--curve: #0066cc;
+
+			/* ROOTS (orange) */
+			--root-point: #ff9800;
+			/* plot circle color */
+			--root-glow: #ffd180;
+			/* soft orange halo */
+
+			/* Y-INTERCEPT (green) + VERTEX (gold) */
+			--yint: #43a047;
+			--vertex: #ffb300;
+
+			/* Grid/axes */
+			--grid: #e0e0e0;
+			--axis: #888;
+			--tick: #555;
+
+			/* Root value boxes in the answer area */
+			--root-bg: #ff9800;
+			/* real roots (orange) */
+			--root-complex-bg: #ffb74d;
+			/* complex roots (lighter orange) */
+			--root-text: #ffffff;
+			/* text inside boxes */
+		}
+
+		html,
+		body {
+			margin: 0;
+			height: 100%;
+			font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			background: var(--bg);
+			color: var(--fg);
+		}
+
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 0;
+			/* we'll give page padding to main content, not header/footer */
+			gap: 0;
+		}
+
+		/* ===========================
+       Top banner (matches editor)
+       =========================== */
+		.pane-heading-container {
+			display: grid;
+			grid-template-columns: 50px 1fr 50px;
+			height: 56px;
+			align-items: center;
+			background-color: #333333;
+			color: #ffffff;
+			width: 100%;
+			padding: 0 10px;
+		}
+
+		.logo-container img {
+			max-height: 34px;
+			display: block;
+		}
+
+		.pane-heading {
+			text-align: center;
+			margin: 0;
+			font-size: 1.2rem;
+			font-weight: 600;
+		}
+
+		.heading-placeholder {
+			/* keeps grid symmetrical */
+			width: 100%;
+			height: 100%;
+		}
+
+		/* ===========================
+       Main Solver UI
+       =========================== */
+		.page {
+			width: 100%;
+			max-width: 1000px;
+			padding: 24px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 16px;
+		}
+
+		.bar {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 16px;
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 12px 20px;
+			width: 100%;
+			max-width: 900px;
+		}
+
+		.box {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 1.1rem;
+		}
+
+		input[type="number"] {
+			width: 120px;
+			padding: 8px 10px;
+			font-size: 1.1rem;
+			border: 1px solid var(--border);
+			border-radius: 6px;
+			text-align: right;
+		}
+
+		input.error {
+			background: var(--error-bg);
+			border-color: var(--error-border);
+		}
+
+		button {
+			padding: 8px 16px;
+			font-size: 1rem;
+			border: 1px solid var(--border);
+			border-radius: 6px;
+			background: var(--accent-light);
+			color: var(--accent);
+			font-weight: 600;
+			cursor: pointer;
+			transition: background 0.15s;
+		}
+
+		button:hover {
+			background: #cce4ff;
+		}
+
+		#out {
+			width: 100%;
+			max-width: 900px;
+			font-size: 1.1rem;
+			line-height: 1.6;
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 16px 20px;
+		}
+
+		#canvasWrap {
+			width: 100%;
+			max-width: 900px;
+			aspect-ratio: 3/2;
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			background: #fff;
+		}
+
+		#plot {
+			width: 100%;
+			height: 100%;
+			display: block;
+		}
+
+		strong {
+			color: var(--accent);
+		}
+
+		.mono {
+			font-family: ui-monospace, Menlo, Consolas, monospace;
+		}
+
+		.muted {
+			color: #555;
+		}
+
+		.warning {
+			color: #d32f2f;
+			font-weight: 500;
+		}
+
+		.row {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 24px;
+		}
+
+		/* Boxed roots in the answer row */
+		.root-box {
+			display: inline-block;
+			padding: 4px 10px;
+			margin: 2px 4px;
+			border-radius: 6px;
+			font-weight: 700;
+			background: var(--root-bg);
+			color: var(--root-text);
+			font-family: ui-monospace, Menlo, Consolas, monospace;
+			white-space: nowrap;
+		}
+
+		.root-box.complex {
+			background: var(--root-complex-bg);
+		}
+
+		/* ===========================
+       Footer (same as editor)
+       =========================== */
+		footer {
+			text-align: center;
+			padding: 5px;
+			background: #f4f4f4;
+			color: #555;
+			margin: 5px 0 0 0;
+			width: 100%;
+		}
+
+		@media (max-width: 900px) {
+			.page {
+				padding: 16px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<!-- Top Banner (with PanPhy icon and centered title) -->
+	<div class="pane-heading-container">
+		<div class="logo-container">
+			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+				<img src="/panphy.png" alt="PanPhy logo" />
+			</a>
+		</div>
+		<h2 class="pane-heading">Quadratic Solver</h2>
+		<div class="heading-placeholder"></div>
+	</div>
+
+	<!-- Main content -->
+	<main class="page">
+		<div class="bar">
+			<div class="box">a = <input id="a" type="number" step="any" value="1"></div>
+			<div class="box">b = <input id="b" type="number" step="any" value="0"></div>
+			<div class="box">c = <input id="c" type="number" step="any" value="0"></div>
+			<button id="reset">Reset</button>
+		</div>
+
+		<div id="out">
+			<div><strong>Roots:</strong> <span id="roots"></span></div>
+			<div class="row">
+				<div><strong>Discriminant:</strong> <span id="disc" class="mono"></span></div>
+				<div><strong>Vertex:</strong> <span id="vertex" class="mono"></span></div>
+				<div><strong>y-intercept:</strong> <span id="yint" class="mono"></span></div>
+			</div>
+			<div class="muted" id="note"></div>
+			<div class="warning" id="warn"></div>
+		</div>
+
+		<div id="canvasWrap"><canvas id="plot"></canvas></div>
+	</main>
+
+	<!-- Footer (same content as Markdown editor) -->
+	<footer>
+		&copy; 2025 <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+	</footer>
+
+	<script>
+		(function() {
+			const $ = id => document.getElementById(id);
+			const aEl = $("a"),
+				bEl = $("b"),
+				cEl = $("c"),
+				resetBtn = $("reset");
+			const discEl = $("disc"),
+				rootsEl = $("roots"),
+				vertexEl = $("vertex"),
+				yintEl = $("yint");
+			const noteEl = $("note"),
+				warnEl = $("warn");
+			const canvas = $("plot"),
+				wrap = $("canvasWrap");
+			const ctx = canvas.getContext("2d", { alpha: false });
+
+			const state = { a: 1, b: 0, c: 0 };
+
+			const fmt = (x, dp = 5) => {
+				if (!isFinite(x)) return String(x);
+				const v = Math.abs(x) < 1e-12 ? 0 : x;
+				const s = (Math.abs(v) >= 1e6 || (Math.abs(v) > 0 && Math.abs(v) < 1e-4)) ? v.toExponential(3) : v.toFixed(dp);
+				return s.replace(/(?:\.0+|(\.\d+?)0+)$/, "$1");
+			};
+
+			function getNumbers() {
+				const vals = [aEl, bEl, cEl];
+				let valid = true;
+				vals.forEach(el => {
+					if (el.value.trim() === "" || isNaN(parseFloat(el.value))) {
+						el.classList.add("error");
+						valid = false;
+					} else {
+						el.classList.remove("error");
+					}
+				});
+				if (!valid) return false;
+				state.a = parseFloat(aEl.value);
+				state.b = parseFloat(bEl.value);
+				state.c = parseFloat(cEl.value);
+				return true;
+			}
+
+			function solveAndRender() {
+				warnEl.textContent = "";
+				const valid = getNumbers();
+				if (!valid) {
+					warnEl.textContent = "⚠ Please enter valid numbers for a, b, and c.";
+					rootsEl.innerHTML = discEl.textContent = vertexEl.textContent = yintEl.textContent = "";
+					noteEl.textContent = "";
+					clearCanvas();
+					return;
+				}
+
+				const { a, b, c } = state;
+				const eps = 1e-12;
+
+				// Resize canvas crisply
+				const rect = wrap.getBoundingClientRect();
+				const dpr = window.devicePixelRatio || 1;
+				canvas.width = Math.max(300, Math.floor(rect.width * dpr));
+				canvas.height = Math.max(200, Math.floor(rect.height * dpr));
+				canvas.style.width = Math.floor(rect.width) + "px";
+				canvas.style.height = Math.floor(rect.height) + "px";
+				ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+				// Compute outputs
+				let D, rootsHTML, vertex, yint = c;
+
+				if (Math.abs(a) < eps) {
+					if (Math.abs(b) < eps) {
+						D = NaN;
+						rootsHTML = "<span class='root-box'>none</span>";
+						noteEl.textContent = "This is a constant function.";
+						vertex = { x: NaN, y: NaN };
+					} else {
+						const x = -c / b;
+						D = "n/a (linear)";
+						rootsHTML = `<span class='root-box'>x = ${fmt(x)}</span>`;
+						noteEl.textContent = "Linear equation (a = 0).";
+						vertex = { x: NaN, y: NaN };
+					}
+				} else {
+					D = b * b - 4 * a * c;
+					const axis = -b / (2 * a);
+					vertex = { x: axis, y: a * axis * axis + b * axis + c };
+					noteEl.textContent = (D > eps) ? "Two distinct real roots." :
+						(Math.abs(D) <= eps) ? "One repeated real root." :
+						"Complex roots — not plotted.";
+
+					if (D > eps) {
+						const s = Math.sqrt(D);
+						const x1 = (-b - s) / (2 * a);
+						const x2 = (-b + s) / (2 * a);
+						rootsHTML = `<span class='root-box'>x₁ = ${fmt(x1)}</span><span class='root-box'>x₂ = ${fmt(x2)}</span>`;
+					} else if (Math.abs(D) <= eps) {
+						const x = -b / (2 * a);
+						rootsHTML = `<span class='root-box'>x = ${fmt(x)} (double)</span>`;
+					} else {
+						const re = -b / (2 * a);
+						const im = Math.sqrt(-D) / (2 * Math.abs(a));
+						rootsHTML = `<span class='root-box complex'>${fmt(re)} ± ${fmt(im)}i</span>`;
+					}
+				}
+
+				discEl.textContent = (typeof D === "number") ? fmt(D) : String(D);
+				rootsEl.innerHTML = rootsHTML;
+				vertexEl.textContent = isFinite(vertex.x) ? `(${fmt(vertex.x)}, ${fmt(vertex.y)})` : "n/a";
+				yintEl.textContent = fmt(yint);
+
+				drawPlot(a, b, c, D, vertex);
+			}
+
+			function clearCanvas() {
+				const W = canvas.width,
+					H = canvas.height;
+				ctx.fillStyle = "#fff";
+				ctx.fillRect(0, 0, W, H);
+			}
+
+			/* ---------- Robust plotting with axes, ticks, and markers ---------- */
+			function drawPlot(a, b, c, D, vertex) {
+				const styles = getComputedStyle(document.documentElement);
+				const COLOR_CURVE = (styles.getPropertyValue('--curve') || '#0066cc').trim();
+				const COLOR_ROOT = (styles.getPropertyValue('--root-point') || '#ff9800').trim();
+				const COLOR_ROOT_G = (styles.getPropertyValue('--root-glow') || '#ffd180').trim();
+				const COLOR_YINT = (styles.getPropertyValue('--yint') || '#43a047').trim();
+				const COLOR_VERTEX = (styles.getPropertyValue('--vertex') || '#ffb300').trim();
+				const COLOR_GRID = (styles.getPropertyValue('--grid') || '#e0e0e0').trim();
+				const COLOR_AXIS = (styles.getPropertyValue('--axis') || '#888').trim();
+				const COLOR_TICK = (styles.getPropertyValue('--tick') || '#555').trim();
+
+				const W = canvas.width,
+					H = canvas.height;
+				const pad = 40 * (window.devicePixelRatio || 1);
+				const eps = 1e-12;
+
+				// Choose x-range to include interesting points
+				const include = [0];
+				if (isFinite(vertex.x)) include.push(vertex.x);
+				if (typeof D === "number" && isFinite(D) && D >= 0 && Math.abs(a) > eps) {
+					const s = Math.sqrt(D);
+					include.push((-b - s) / (2 * a), (-b + s) / (2 * a));
+				}
+				const minInc = include.reduce((m, v) => Math.min(m, v), Infinity);
+				const maxInc = include.reduce((m, v) => Math.max(m, v), -Infinity);
+				let xmin, xmax;
+				if (!isFinite(minInc) || !isFinite(maxInc)) { xmin = -10;
+					xmax = 10; } else {
+					const span = Math.max(2, (maxInc - minInc) || 2);
+					xmin = minInc - 0.5 * span - 1;
+					xmax = maxInc + 0.5 * span + 1;
+				}
+
+				const f = x => a * x * x + b * x + c;
+
+				// Sample to get y-range
+				let ymin = Infinity,
+					ymax = -Infinity;
+				for (let i = 0; i <= 300; i++) {
+					const x = xmin + (xmax - xmin) * i / 300;
+					const y = f(x);
+					if (isFinite(y)) { ymin = Math.min(ymin, y);
+						ymax = Math.max(ymax, y); }
+				}
+				if (!isFinite(ymin) || !isFinite(ymax)) { ymin = -10;
+					ymax = 10; }
+				if (ymax - ymin < 1e-6) { ymin -= 1;
+					ymax += 1; }
+
+				// Margins
+				const xMargin = 0.1 * (xmax - xmin);
+				const yMargin = 0.15 * (ymax - ymin);
+				xmin -= xMargin;
+				xmax += xMargin;
+				ymin -= yMargin;
+				ymax += yMargin;
+
+				// World -> screen
+				const sx = (W - 2 * pad) / (xmax - xmin);
+				const sy = (H - 2 * pad) / (ymax - ymin);
+				const toScreen = (x, y) => ({ X: pad + (x - xmin) * sx, Y: H - pad - (y - ymin) * sy });
+
+				// Clear
+				ctx.fillStyle = "#fff";
+				ctx.fillRect(0, 0, W, H);
+
+				// Axes & grid
+				drawAxes(ctx, W, H, pad, xmin, xmax, ymin, ymax, toScreen, COLOR_GRID, COLOR_AXIS, COLOR_TICK);
+
+				// Curve
+				ctx.strokeStyle = COLOR_CURVE;
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+				const N = 400;
+				for (let i = 0; i <= N; i++) {
+					const x = xmin + (xmax - xmin) * i / N;
+					const y = f(x);
+					const { X, Y } = toScreen(x, y);
+					if (i === 0) ctx.moveTo(X, Y);
+					else ctx.lineTo(X, Y);
+				}
+				ctx.stroke();
+
+				// Roots (real)
+				if (typeof D === "number" && isFinite(D) && D >= 0 && Math.abs(a) > eps) {
+					const s = Math.sqrt(D);
+					const x1 = (-b - s) / (2 * a),
+						x2 = (-b + s) / (2 * a);
+					[x1, x2].forEach(x => {
+						const { X, Y } = toScreen(x, 0);
+						drawGlowingPoint(ctx, X, Y, 10, COLOR_ROOT, COLOR_ROOT_G);
+					});
+				}
+
+				// y-intercept
+				const { X: X0, Y: Y0 } = toScreen(0, c);
+				drawGlowingPoint(ctx, X0, Y0, 8, COLOR_YINT, "#b9f6ca");
+
+				// Vertex
+				if (isFinite(vertex.x) && isFinite(vertex.y) && Math.abs(a) > eps) {
+					const { X, Y } = toScreen(vertex.x, vertex.y);
+					drawCross(ctx, X, Y, 10, COLOR_VERTEX);
+				}
+			}
+
+			function drawAxes(ctx, W, H, pad, xmin, xmax, ymin, ymax, toScreen, GRID, AXIS, TICK) {
+				// Grid
+				ctx.strokeStyle = GRID;
+				ctx.lineWidth = 1;
+				const xticks = niceTicks(xmin, xmax, 6);
+				const yticks = niceTicks(ymin, ymax, 6);
+				ctx.beginPath();
+				xticks.forEach(t => { const { X } = toScreen(t, 0);
+					ctx.moveTo(X, pad);
+					ctx.lineTo(X, H - pad); });
+				yticks.forEach(t => { const { Y } = toScreen(0, t);
+					ctx.moveTo(pad, Y);
+					ctx.lineTo(W - pad, Y); });
+				ctx.stroke();
+
+				// Axes
+				ctx.strokeStyle = AXIS;
+				ctx.lineWidth = 2;
+				if (ymin <= 0 && ymax >= 0) {
+					const { Y } = toScreen(0, 0);
+					ctx.beginPath();
+					ctx.moveTo(pad, Y);
+					ctx.lineTo(W - pad, Y);
+					ctx.stroke();
+				}
+				if (xmin <= 0 && xmax >= 0) {
+					const { X } = toScreen(0, 0);
+					ctx.beginPath();
+					ctx.moveTo(X, pad);
+					ctx.lineTo(X, H - pad);
+					ctx.stroke();
+				}
+
+				// Tick labels
+				ctx.fillStyle = TICK;
+				ctx.font = `${Math.max(10, Math.floor(12*(window.devicePixelRatio||1)))}px Segoe UI, sans-serif`;
+				ctx.textAlign = "center";
+				ctx.textBaseline = "top";
+				xticks.forEach(t => { const { X } = toScreen(t, 0);
+					ctx.fillText(stripZero(t), X, H - pad + 6); });
+				ctx.textAlign = "right";
+				ctx.textBaseline = "middle";
+				yticks.forEach(t => { const { Y } = toScreen(0, t);
+					ctx.fillText(stripZero(t), pad - 6, Y); });
+			}
+
+			function stripZero(v) {
+				const s = (Math.abs(v) >= 1e6 || (Math.abs(v) > 0 && Math.abs(v) < 1e-4)) ? v.toExponential(2) : v.toFixed(2);
+				return s.replace(/(?:\.0+|(\.\d+?)0+)$/, "$1");
+			}
+
+			function niceTicks(min, max, n) {
+				const span = max - min;
+				if (!isFinite(span) || span <= 0) return [min, max];
+				const raw = span / Math.max(2, n);
+				const base = Math.pow(10, Math.floor(Math.log10(raw)));
+				const mults = [1, 2, 2.5, 5, 10];
+				let step = mults[0] * base;
+				for (let m of mults) { if (raw <= m * base) { step = m * base; break; } }
+				const start = Math.ceil(min / step) * step;
+				const ticks = [];
+				for (let t = start; t <= max + 1e-9; t += step) ticks.push(+t.toFixed(12));
+				return ticks;
+			}
+
+			function drawCross(ctx, x, y, r, color) {
+				ctx.strokeStyle = color;
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+				ctx.moveTo(x - r, y - r);
+				ctx.lineTo(x + r, y + r);
+				ctx.moveTo(x - r, y + r);
+				ctx.lineTo(x + r, y - r);
+				ctx.stroke();
+			}
+
+			function drawGlowingPoint(ctx, x, y, r, color, glow) {
+				ctx.save();
+				ctx.shadowBlur = 25;
+				ctx.shadowColor = glow;
+				ctx.fillStyle = color;
+				ctx.beginPath();
+				ctx.arc(x, y, r, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.restore();
+			}
+
+			/* ----------------- Events ----------------- */
+			[aEl, bEl, cEl].forEach(el => el.addEventListener("input", solveAndRender));
+			resetBtn.addEventListener("click", () => { aEl.value = 1;
+				bEl.value = 0;
+				cEl.value = 0;
+				solveAndRender(); });
+			window.addEventListener("resize", solveAndRender);
+
+			// init
+			solveAndRender();
+		})();
+	</script>
+</body>
+
+</html>
