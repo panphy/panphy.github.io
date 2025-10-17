@@ -7,11 +7,10 @@
 	<title>Quadratic Solver</title>
 	<link rel="icon" type="image/png" href="/favicon.png" />
 	<style>
-		/* Keep box-sizing consistent */
 		*,
 		*::before,
 		*::after {
-			box-sizing: border-box;
+			box-sizing: border-box
 		}
 
 		:root {
@@ -23,33 +22,18 @@
 			--panel: #fff;
 			--error-bg: #ffecec;
 			--error-border: #e57373;
-
-			/* Curve + markers */
 			--curve: #0066cc;
-
-			/* ROOTS (orange) */
 			--root-point: #ff9800;
-			/* plot circle color */
 			--root-glow: #ffd180;
-			/* soft orange halo */
-
-			/* Y-INTERCEPT (green) + VERTEX (RED per request) */
 			--yint: #43a047;
 			--vertex: #d32f2f;
 			/* red vertex cross */
-
-			/* Grid/axes */
 			--grid: #e0e0e0;
 			--axis: #888;
 			--tick: #555;
-
-			/* Root value boxes in the answer area */
 			--root-bg: #ff9800;
-			/* real roots (orange) */
 			--root-complex-bg: #ffb74d;
-			/* complex roots (lighter orange) */
-			--root-text: #ffffff;
-			/* text inside boxes */
+			--root-text: #fff;
 		}
 
 		html,
@@ -58,49 +42,45 @@
 			height: 100%;
 			font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 			background: var(--bg);
-			color: var(--fg);
+			color: var(--fg)
 		}
 
 		body {
 			display: flex;
 			flex-direction: column;
-			align-items: center;
+			align-items: center
 		}
 
-		/* ===========================
-     Top banner (PanPhy style)
-     =========================== */
+		/* Top banner (PanPhy style) */
 		.pane-heading-container {
 			display: grid;
 			grid-template-columns: 50px 1fr 50px;
 			height: 56px;
 			align-items: center;
-			background-color: #333333;
-			color: #ffffff;
+			background: #333;
+			color: #fff;
 			width: 100%;
 			padding: 0 10px;
 		}
 
 		.logo-container img {
 			max-height: 34px;
-			display: block;
+			display: block
 		}
 
 		.pane-heading {
-			text-align: center;
 			margin: 0;
+			text-align: center;
 			font-size: 1.2rem;
-			font-weight: 600;
+			font-weight: 600
 		}
 
 		.heading-placeholder {
 			width: 100%;
-			height: 100%;
+			height: 100%
 		}
 
-		/* ===========================
-     Main Solver UI
-     =========================== */
+		/* Main */
 		.page {
 			width: 100%;
 			max-width: 1000px;
@@ -108,7 +88,7 @@
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			gap: 16px;
+			gap: 16px
 		}
 
 		.bar {
@@ -128,10 +108,10 @@
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			font-size: 1.1rem;
+			font-size: 1.1rem
 		}
 
-		input[type="number"] {
+		input[type="text"] {
 			width: 120px;
 			padding: 8px 10px;
 			font-size: 1.1rem;
@@ -142,7 +122,7 @@
 
 		input.error {
 			background: var(--error-bg);
-			border-color: var(--error-border);
+			border-color: var(--error-border)
 		}
 
 		button {
@@ -154,11 +134,11 @@
 			color: var(--accent);
 			font-weight: 600;
 			cursor: pointer;
-			transition: background 0.15s;
+			transition: background .15s;
 		}
 
 		button:hover {
-			background: #cce4ff;
+			background: #cce4ff
 		}
 
 		#out {
@@ -184,33 +164,32 @@
 		#plot {
 			width: 100%;
 			height: 100%;
-			display: block;
+			display: block
 		}
 
 		strong {
-			color: var(--accent);
+			color: var(--accent)
 		}
 
 		.mono {
-			font-family: ui-monospace, Menlo, Consolas, monospace;
+			font-family: ui-monospace, Menlo, Consolas, monospace
 		}
 
 		.muted {
-			color: #555;
+			color: #555
 		}
 
 		.warning {
 			color: #d32f2f;
-			font-weight: 500;
+			font-weight: 500
 		}
 
 		.row {
 			display: flex;
 			flex-wrap: wrap;
-			gap: 24px;
+			gap: 24px
 		}
 
-		/* Boxed roots in the answer row */
 		.root-box {
 			display: inline-block;
 			padding: 4px 10px;
@@ -224,31 +203,28 @@
 		}
 
 		.root-box.complex {
-			background: var(--root-complex-bg);
+			background: var(--root-complex-bg)
 		}
 
-		/* ===========================
-     Footer (PanPhy style)
-     =========================== */
 		footer {
 			text-align: center;
 			padding: 5px;
 			background: #f4f4f4;
 			color: #555;
 			margin: 5px 0 0 0;
-			width: 100%;
+			width: 100%
 		}
 
-		@media (max-width: 900px) {
+		@media (max-width:900px) {
 			.page {
-				padding: 16px;
+				padding: 16px
 			}
 		}
 	</style>
 </head>
 
 <body>
-	<!-- Top Banner (with PanPhy icon and centered title) -->
+	<!-- Header -->
 	<div class="pane-heading-container">
 		<div class="logo-container">
 			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
@@ -262,9 +238,15 @@
 	<!-- Main content -->
 	<main class="page">
 		<div class="bar">
-			<div class="box">a = <input id="a" type="number" step="any" value="1" inputmode="decimal"></div>
-			<div class="box">b = <input id="b" type="number" step="any" value="0" inputmode="decimal"></div>
-			<div class="box">c = <input id="c" type="number" step="any" value="0" inputmode="decimal"></div>
+			<div class="box">a =
+				<input id="a" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" value="1">
+			</div>
+			<div class="box">b =
+				<input id="b" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" value="0">
+			</div>
+			<div class="box">c =
+				<input id="c" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" value="0">
+			</div>
 			<button id="reset">Reset</button>
 		</div>
 
@@ -304,24 +286,13 @@
 			const canvas = $("plot"),
 				wrap = $("canvasWrap");
 			const ctx = canvas.getContext("2d", { alpha: false });
-
 			const state = { a: 1, b: 0, c: 0 };
 
-			/* ======= UX: auto-select on focus/click for easy overwrite ======= */
+			/* Auto-select on focus (safe for iOS because inputs are type="text") */
 			[aEl, bEl, cEl].forEach(input => {
-				// Select entire value on focus
-				input.addEventListener('focus', (e) => { e.target.select(); });
-
-				// Prevent the mouseup from clearing our selection on desktop browsers
-				input.addEventListener('mouseup', (e) => {
-					e.preventDefault(); // keeps the text selected so typing replaces it
-				});
-
-				// Also handle touch devices: select on first tap
-				input.addEventListener('touchend', (e) => {
-					// small timeout to ensure focus is applied, then select
-					setTimeout(() => { e.target.select(); }, 0);
-				});
+				input.addEventListener('focus', e => e.target.select());
+				// keep the selection after click/tap
+				input.addEventListener('mouseup', e => e.preventDefault());
 			});
 
 			const fmt = (x, dp = 5) => {
@@ -331,11 +302,19 @@
 				return s.replace(/(?:\.0+|(\.\d+?)0+)$/, "$1");
 			};
 
+			function parseNum(str) {
+				// Allow commas as decimal separators (replace first comma with dot if any)
+				const s = (str || "").trim().replace(',', '.');
+				const v = parseFloat(s);
+				return v;
+			}
+
 			function getNumbers() {
 				const vals = [aEl, bEl, cEl];
 				let valid = true;
 				vals.forEach(el => {
-					if (el.value.trim() === "" || isNaN(parseFloat(el.value))) {
+					const v = parseNum(el.value);
+					if (el.value.trim() === "" || Number.isNaN(v)) {
 						el.classList.add("error");
 						valid = false;
 					} else {
@@ -343,9 +322,9 @@
 					}
 				});
 				if (!valid) return false;
-				state.a = parseFloat(aEl.value);
-				state.b = parseFloat(bEl.value);
-				state.c = parseFloat(cEl.value);
+				state.a = parseNum(aEl.value);
+				state.b = parseNum(bEl.value);
+				state.c = parseNum(cEl.value);
 				return true;
 			}
 
@@ -426,7 +405,6 @@
 				ctx.fillRect(0, 0, W, H);
 			}
 
-			/* ---------- Robust plotting with axes, ticks, and markers ---------- */
 			function drawPlot(a, b, c, D, vertex) {
 				const styles = getComputedStyle(document.documentElement);
 				const COLOR_CURVE = (styles.getPropertyValue('--curve') || '#0066cc').trim();
@@ -443,7 +421,6 @@
 				const pad = 40 * (window.devicePixelRatio || 1);
 				const eps = 1e-12;
 
-				// Choose x-range to include interesting points
 				const include = [0];
 				if (isFinite(vertex.x)) include.push(vertex.x);
 				if (typeof D === "number" && isFinite(D) && D >= 0 && Math.abs(a) > eps) {
@@ -462,7 +439,6 @@
 
 				const f = x => a * x * x + b * x + c;
 
-				// Sample to get y-range
 				let ymin = Infinity,
 					ymax = -Infinity;
 				for (let i = 0; i <= 300; i++) {
@@ -476,7 +452,6 @@
 				if (ymax - ymin < 1e-6) { ymin -= 1;
 					ymax += 1; }
 
-				// Margins
 				const xMargin = 0.1 * (xmax - xmin);
 				const yMargin = 0.15 * (ymax - ymin);
 				xmin -= xMargin;
@@ -484,19 +459,15 @@
 				ymin -= yMargin;
 				ymax += yMargin;
 
-				// World -> screen
 				const sx = (W - 2 * pad) / (xmax - xmin);
 				const sy = (H - 2 * pad) / (ymax - ymin);
 				const toScreen = (x, y) => ({ X: pad + (x - xmin) * sx, Y: H - pad - (y - ymin) * sy });
 
-				// Clear
 				ctx.fillStyle = "#fff";
 				ctx.fillRect(0, 0, W, H);
 
-				// Axes & grid
 				drawAxes(ctx, W, H, pad, xmin, xmax, ymin, ymax, toScreen, COLOR_GRID, COLOR_AXIS, COLOR_TICK);
 
-				// Curve
 				ctx.strokeStyle = COLOR_CURVE;
 				ctx.lineWidth = 3;
 				ctx.beginPath();
@@ -510,7 +481,6 @@
 				}
 				ctx.stroke();
 
-				// Roots (real)
 				if (typeof D === "number" && isFinite(D) && D >= 0 && Math.abs(a) > eps) {
 					const s = Math.sqrt(D);
 					const x1 = (-b - s) / (2 * a),
@@ -521,19 +491,16 @@
 					});
 				}
 
-				// y-intercept
 				const { X: X0, Y: Y0 } = toScreen(0, c);
 				drawGlowingPoint(ctx, X0, Y0, 8, COLOR_YINT, "#b9f6ca");
 
-				// Vertex (thicker and red)
 				if (isFinite(vertex.x) && isFinite(vertex.y) && Math.abs(a) > eps) {
 					const { X, Y } = toScreen(vertex.x, vertex.y);
-					drawCross(ctx, X, Y, 12, COLOR_VERTEX, 5); // size 12, thickness 5
+					drawCross(ctx, X, Y, 12, COLOR_VERTEX, 5); // thicker red cross
 				}
 			}
 
 			function drawAxes(ctx, W, H, pad, xmin, xmax, ymin, ymax, toScreen, GRID, AXIS, TICK) {
-				// Grid
 				ctx.strokeStyle = GRID;
 				ctx.lineWidth = 1;
 				const xticks = niceTicks(xmin, xmax, 6);
@@ -547,25 +514,19 @@
 					ctx.lineTo(W - pad, Y); });
 				ctx.stroke();
 
-				// Axes
 				ctx.strokeStyle = AXIS;
 				ctx.lineWidth = 2;
-				if (ymin <= 0 && ymax >= 0) {
-					const { Y } = toScreen(0, 0);
+				if (ymin <= 0 && ymax >= 0) { const { Y } = toScreen(0, 0);
 					ctx.beginPath();
 					ctx.moveTo(pad, Y);
 					ctx.lineTo(W - pad, Y);
-					ctx.stroke();
-				}
-				if (xmin <= 0 && xmax >= 0) {
-					const { X } = toScreen(0, 0);
+					ctx.stroke(); }
+				if (xmin <= 0 && xmax >= 0) { const { X } = toScreen(0, 0);
 					ctx.beginPath();
 					ctx.moveTo(X, pad);
 					ctx.lineTo(X, H - pad);
-					ctx.stroke();
-				}
+					ctx.stroke(); }
 
-				// Tick labels
 				ctx.fillStyle = TICK;
 				ctx.font = `${Math.max(10, Math.floor(12*(window.devicePixelRatio||1)))}px Segoe UI, sans-serif`;
 				ctx.textAlign = "center";
@@ -597,10 +558,9 @@
 				return ticks;
 			}
 
-			/* Thicker, configurable cross */
 			function drawCross(ctx, x, y, r, color, thickness = 3) {
 				ctx.strokeStyle = color;
-				ctx.lineWidth = thickness; /* thicker per request */
+				ctx.lineWidth = thickness;
 				ctx.beginPath();
 				ctx.moveTo(x - r, y - r);
 				ctx.lineTo(x + r, y + r);
@@ -620,15 +580,13 @@
 				ctx.restore();
 			}
 
-			/* ----------------- Events ----------------- */
 			[aEl, bEl, cEl].forEach(el => el.addEventListener("input", solveAndRender));
-			resetBtn.addEventListener("click", () => { aEl.value = 1;
-				bEl.value = 0;
-				cEl.value = 0;
+			resetBtn.addEventListener("click", () => { aEl.value = "1";
+				bEl.value = "0";
+				cEl.value = "0";
 				solveAndRender(); });
 			window.addEventListener("resize", solveAndRender);
 
-			// init
 			solveAndRender();
 		})();
 	</script>
