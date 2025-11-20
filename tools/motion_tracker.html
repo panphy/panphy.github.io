@@ -8,201 +8,230 @@
 	<link rel="icon" type="image/png" href="/favicon.png">
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
-		/* --- styles unchanged --- */
 		:root {
-			--btn-open-color: #0079b1;
-			--btn-play-color: #3ec786;
-			--btn-calibration-color: #f0bd37;
-			--btn-set-origin-color: #f0bd37;
-			--btn-export-color: #23a5d0;
-			--btn-clear-data-color: #ee4c4c;
-			--btn-clear-calibration-color: #ec7070;
-			--btn-clear-origin-color: #ec7070;
-			--btn-confirm-color: #28a745;
-			--btn-cancel-color: #dc3545;
-			--btn-plot-vx-color: #48c8a8;
-			--btn-plot-vy-color: #48c8a8;
-			--btn-backToPosition-color: #48c8a8
+			--primary: #2563eb;
+			/* Modern Blue */
+			--primary-hover: #1d4ed8;
+			--success: #10b981;
+			/* Soft Green */
+			--warning: #f59e0b;
+			/* Amber */
+			--danger: #ef4444;
+			/* Red */
+			--bg-color: #f3f4f6;
+			/* Light Gray */
+			--card-bg: #ffffff;
+			--text-main: #1f2937;
+			--text-muted: #6b7280;
+			--border-radius: 8px;
+			--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		}
 
 		body {
-			font-family: Arial, sans-serif;
+			font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 			margin: 0;
-			background: #f9f9f9;
-			color: #333
+			background: var(--bg-color);
+			color: var(--text-main);
+			line-height: 1.5;
 		}
 
+		/* --- Header (Dark Grey) --- */
 		#titleBanner {
-			display: grid;
-			grid-template-columns: auto 1fr auto;
+			background: #1f2937;
+			/* Dark Grey */
+			color: #ffffff;
+			border-bottom: 1px solid #111827;
+			padding: 15px 20px;
+			display: flex;
 			align-items: center;
-			background: #333;
-			color: #fff;
-			padding: 5px 0
-		}
-
-		.banner-logo img {
-			max-height: 38px;
-			height: auto;
-			width: auto;
-			margin: 3px 10px
+			justify-content: space-between;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 		}
 
 		.banner-title {
+			font-size: 1.5rem;
+			color: #ffffff;
 			margin: 0;
-			text-align: center;
-			font-size: 1.8em;
-			font-weight: bold
+			font-weight: 700;
+		}
+
+		.banner-logo img {
+			height: 32px;
+			width: auto;
 		}
 
 		.banner-placeholder {
-			width: 70px
-		}
-
-		a {
-			color: #ff5f1f;
-			text-decoration: none
-		}
-
-		a:hover {
-			text-decoration: underline
-		}
-
-		h1 {
-			display: none
+			width: 50px;
 		}
 
 		#warningBanner {
-			font-size: .9em;
-			background: #fff8e3;
-			color: #856404;
-			padding: 5px;
-			text-align: center
-		}
-
-		#message {
-			font-size: 1.2em;
-			font-weight: bold;
+			background: #fffbeb;
+			color: #92400e;
 			text-align: center;
-			margin: 15px auto;
-			color: #333;
-			max-width: 800px;
-			line-height: 1.5
+			padding: 8px;
+			font-size: 0.85rem;
+			border-bottom: 1px solid #fcd34d;
 		}
 
-		#topControls {
-			display: grid;
-			grid-template-columns: repeat(4, 1fr);
-			grid-template-rows: repeat(2, auto);
+		/* --- Main Toolbar (File & Data Ops) --- */
+		.toolbar {
+			display: flex;
 			gap: 10px;
 			padding: 20px;
-			max-width: 800px;
-			margin: 0 auto
-		}
-
-		.control-button {
-			padding: 10px 20px;
-			border: none;
-			border-radius: 5px;
-			color: #fff;
-			font-size: 1em;
-			font-weight: bold;
-			cursor: pointer;
-			transition: filter .3s ease;
-			width: 100%
-		}
-
-		.btn-open {
-			background: var(--btn-open-color)
-		}
-
-		.btn-play {
-			background: var(--btn-play-color)
-		}
-
-		.btn-calibration {
-			background: var(--btn-calibration-color)
-		}
-
-		.btn-set-origin {
-			background: var(--btn-set-origin-color)
-		}
-
-		.btn-export {
-			background: var(--btn-export-color)
-		}
-
-		.btn-clear-data {
-			background: var(--btn-clear-data-color)
-		}
-
-		.btn-clear-calibration {
-			background: var(--btn-clear-calibration-color)
-		}
-
-		.btn-clear-origin {
-			background: var(--btn-clear-origin-color)
-		}
-
-		.btn-plot-vx {
-			background: var(--btn-plot-vx-color)
-		}
-
-		.btn-plot-vy {
-			background: var(--btn-plot-vy-color)
-		}
-
-		.btn-backToPosition {
-			background: var(--btn-backToPosition-color)
-		}
-
-		.control-button:hover:not(:disabled) {
-			filter: brightness(90%)
-		}
-
-		.control-button:disabled {
-			background: #a9a9a9 !important;
-			cursor: not-allowed
-		}
-
-		#analysisContainer {
-			display: flex;
-			justify-content: space-evenly;
-			align-items: flex-start;
+			max-width: 1200px;
+			margin: 0 auto;
 			flex-wrap: wrap;
-			margin: 20px auto;
-			padding: 20px;
-			gap: 20px;
-			max-width: 1200px
+			justify-content: center;
+			align-items: center;
 		}
 
-		#videoSection {
+		/* --- Buttons --- */
+		button {
+			padding: 8px 16px;
+			border-radius: var(--border-radius);
+			border: 1px solid transparent;
+			font-weight: 600;
+			cursor: pointer;
+			font-size: 0.9rem;
+			transition: all 0.2s;
+			background: white;
+			color: var(--text-main);
+			border-color: #d1d5db;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+		}
+
+		button:hover:not(:disabled) {
+			transform: translateY(-1px);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			filter: brightness(95%);
+		}
+
+		button:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			background: #f3f4f6;
+			border-color: #e5e7eb;
+			color: #9ca3af;
+			box-shadow: none;
+			transform: none;
+		}
+
+		/* Button Variants */
+		.btn-primary {
+			background: var(--primary);
+			color: white;
+			border: none;
+		}
+
+		.btn-primary:hover:not(:disabled) {
+			background: var(--primary-hover);
+		}
+
+		.btn-danger {
+			color: var(--danger);
+			border-color: #fecaca;
+			background: #fef2f2;
+		}
+
+		.btn-danger:hover:not(:disabled) {
+			background: #fee2e2;
+		}
+
+		.btn-tool {
+			color: var(--primary);
+			border-color: #bfdbfe;
+			background: #eff6ff;
+		}
+
+		.btn-tool:hover:not(:disabled) {
+			background: #dbeafe;
+		}
+
+		/* --- Plot Buttons (Colorful) --- */
+		#backToPosition {
+			background-color: #10b981;
+			/* Green */
+			color: white;
+			border: none;
+		}
+
+		#backToPosition:hover:not(:disabled) {
+			background-color: #059669;
+		}
+
+		#plotVx {
+			background-color: #3b82f6;
+			/* Blue */
+			color: white;
+			border: none;
+		}
+
+		#plotVx:hover:not(:disabled) {
+			background-color: #2563eb;
+		}
+
+		#plotVy {
+			background-color: #d946ef;
+			/* Pink/Purple */
+			color: white;
+			border: none;
+		}
+
+		#plotVy:hover:not(:disabled) {
+			background-color: #c026d3;
+		}
+
+
+		/* --- Layout Grid --- */
+		#analysisContainer {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 20px;
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 20px 40px 20px;
+		}
+
+		/* --- Cards (Video & Plot) --- */
+		.card {
+			background: var(--card-bg);
+			border-radius: var(--border-radius);
+			box-shadow: var(--shadow);
+			padding: 15px;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			width: 48%;
-			max-width: 600px;
-			min-width: 300px
 		}
 
+		/* --- Video Section --- */
 		#videoWrapper {
 			position: relative;
 			width: 100%;
-			min-height: 200px
+			background: #000;
+			border-radius: 4px;
+			overflow: hidden;
+			margin-bottom: 15px;
+			/* Enforce aspect ratio or limits */
+			max-height: 500px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 300px;
 		}
 
 		video,
 		canvas {
-			border: 2px solid #ddd;
-			border-radius: 8px;
+			display: block;
 			max-width: 100%;
 			height: auto;
-			background: #f5f5f5;
-			display: block
 		}
 
 		#hiddenVideo {
-			display: none
+			display: none;
+		}
+
+		#frameCanvas {
+			display: none;
 		}
 
 		#overlayCanvas {
@@ -211,102 +240,7 @@
 			left: 0;
 			background: transparent;
 			z-index: 2;
-			pointer-events: none
-		}
-
-		#frameCanvas {
-			display: none
-		}
-
-		#controlsContainer {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			width: 100%;
-			max-width: 800px;
-			margin-top: 10px
-		}
-
-		#videoControls {
-			display: flex;
-			align-items: center;
-			gap: 15px;
-			width: 100%
-		}
-
-		#slider {
-			appearance: none;
-			background: #007bff;
-			height: 5px;
-			border-radius: 5px;
-			outline: none;
-			margin: 0 10px;
-			cursor: pointer;
-			width: 100%
-		}
-
-		#slider::-webkit-slider-thumb {
-			appearance: none;
-			width: 15px;
-			height: 15px;
-			border-radius: 50%;
-			background: #fff;
-			border: 2px solid #007bff;
-			cursor: pointer;
-			margin-top: -5px
-		}
-
-		#slider::-moz-range-thumb {
-			width: 15px;
-			height: 15px;
-			border-radius: 50%;
-			background: #fff;
-			border: 2px solid #007bff;
-			cursor: pointer
-		}
-
-		#plotSection {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			width: 48%;
-			min-width: 300px;
-			max-width: 600px
-		}
-
-		#chartCanvasContainer {
-			width: 100%;
-			height: 400px
-		}
-
-		#chartCanvasContainer canvas {
-			width: 100%;
-			height: 100%
-		}
-
-		#plotButtons {
-			display: flex;
-			gap: 10px;
-			margin-top: 10px;
-			width: 100%
-		}
-
-		#calibrationPrompt,
-		#exportPrompt,
-		#frameRatePrompt {
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background: #fff;
-			border: 2px solid #333;
-			padding: 20px;
-			border-radius: 8px;
-			display: none;
-			z-index: 10;
-			box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
-			width: 300px;
-			box-sizing: border-box
+			pointer-events: none;
 		}
 
 		.crosshair {
@@ -315,14 +249,14 @@
 			height: 20px;
 			pointer-events: none;
 			z-index: 3;
-			display: none
+			display: none;
 		}
 
 		.crosshair::before,
 		.crosshair::after {
 			content: '';
 			position: absolute;
-			background: red
+			background: red;
 		}
 
 		.crosshair::before {
@@ -330,7 +264,7 @@
 			left: 0;
 			width: 100%;
 			height: 1px;
-			transform: translateY(-50%)
+			transform: translateY(-50%);
 		}
 
 		.crosshair::after {
@@ -338,20 +272,84 @@
 			top: 0;
 			width: 1px;
 			height: 100%;
-			transform: translateX(-50%)
+			transform: translateX(-50%);
 		}
 
-		footer {
-			position: static;
-			bottom: 0;
-			text-align: center;
+
+		/* Playback Controls (Under Video) */
+		.playback-controls {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+			width: 100%;
+			background: #f9fafb;
 			padding: 10px;
-			background: #f9f9f900;
-			color: #555;
-			margin-top: 10px
+			border-radius: var(--border-radius);
+			border: 1px solid #e5e7eb;
+			box-sizing: border-box;
 		}
 
-		/* ===== Dialog layout + overlap fixes ===== */
+		#slider {
+			flex-grow: 1;
+			cursor: pointer;
+			appearance: none;
+			background: #bfdbfe;
+			height: 6px;
+			border-radius: 3px;
+		}
+
+		#slider::-webkit-slider-thumb {
+			appearance: none;
+			width: 16px;
+			height: 16px;
+			background: var(--primary);
+			border-radius: 50%;
+			cursor: pointer;
+		}
+
+		#timeDisplay {
+			font-variant-numeric: tabular-nums;
+			font-size: 0.9rem;
+			color: var(--text-muted);
+			width: 80px;
+			text-align: right;
+		}
+
+		/* --- Chart Section --- */
+		#chartCanvasContainer {
+			width: 100%;
+			height: 400px;
+			position: relative;
+		}
+
+		.chart-controls {
+			display: flex;
+			gap: 10px;
+			margin-top: 15px;
+			width: 100%;
+			justify-content: center;
+		}
+
+		/* --- Message Box --- */
+		#message {
+			background: #e0f2fe;
+			color: #0369a1;
+			padding: 10px 15px;
+			border-radius: var(--border-radius);
+			margin: 0 auto 20px auto;
+			max-width: 1160px;
+			text-align: center;
+			border: 1px solid #bae6fd;
+		}
+
+		/* --- Responsive --- */
+		@media (max-width: 900px) {
+			#analysisContainer {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		/* --- Dialogs --- */
 		#calibrationPrompt,
 		#exportPrompt,
 		#frameRatePrompt {
@@ -365,9 +363,10 @@
 			z-index: 9999;
 			padding: 20px;
 			border-radius: 10px;
-			border: 2px solid #333;
+			border: 1px solid #d1d5db;
 			background: #fff;
-			box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
+			box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+			display: none;
 		}
 
 		#calibrationPrompt h2,
@@ -375,12 +374,14 @@
 		#frameRatePrompt h2 {
 			margin: 0 0 8px 0;
 			font-size: 1.1rem;
+			color: var(--text-main);
 		}
 
 		#calibrationPrompt p,
 		#exportPrompt p,
 		#frameRatePrompt p {
-			margin: 0 0 10px 0;
+			margin: 0 0 15px 0;
+			color: var(--text-muted);
 		}
 
 		#calibrationPrompt form,
@@ -399,7 +400,7 @@
 			min-height: 38px;
 			padding: 8px 10px;
 			box-sizing: border-box;
-			border: 1px solid #ccc;
+			border: 1px solid #d1d5db;
 			border-radius: 6px;
 			font-size: 0.95rem;
 		}
@@ -410,26 +411,14 @@
 			display: grid !important;
 			grid-template-columns: 1fr 1fr;
 			gap: 10px;
-			align-items: stretch;
 		}
 
-		#calibrationPrompt form>div button,
-		#exportPrompt form>div button,
-		#frameRatePrompt form>div button {
-			min-height: 40px;
-			white-space: nowrap;
-			padding: 10px 12px;
-			border-radius: 6px;
-			font-weight: 600;
-		}
-
-		@media (max-width: 380px) {
-
-			#calibrationPrompt form>div,
-			#exportPrompt form>div,
-			#frameRatePrompt form>div {
-				grid-template-columns: 1fr;
-			}
+		footer {
+			color: var(--text-muted);
+			font-size: 0.85rem;
+			margin-top: 40px;
+			padding-bottom: 20px;
+			text-align: center;
 		}
 
 		body.modal-open {
@@ -449,22 +438,71 @@
 
 	<div id="warningBanner"><strong>Note:</strong> Files are opened locally. Nothing is uploaded.</div>
 
-	<div id="topControls">
-		<button id="openVideo" class="control-button btn-open" aria-label="Open Video">Open Video</button>
-		<button id="playPause" class="control-button btn-play" disabled>Play</button>
-		<button id="calibrate" class="control-button btn-calibration" disabled>Calibration</button>
-		<button id="setOrigin" class="control-button btn-set-origin" disabled>Set Origin</button>
-		<button id="exportData" class="control-button btn-export" disabled>Export .csv</button>
-		<button id="clearDataPoints" class="control-button btn-clear-data" disabled>Clear Data</button>
-		<button id="clearCalibration" class="control-button btn-clear-calibration" disabled>Clear Calibration</button>
-		<button id="clearOrigin" class="control-button btn-clear-origin" disabled>Clear Origin</button>
+	<div class="toolbar">
+		<div style="display:flex; gap:10px;">
+			<button id="openVideo" class="btn-primary">📂 Open Video</button>
+			<button id="exportData" disabled>📥 Export CSV</button>
+		</div>
+
+		<div style="width:1px; height: 30px; background:#d1d5db; margin:0 10px;"></div>
+
+		<div style="display:flex; gap:10px;">
+			<button id="calibrate" class="btn-tool" disabled>📏 Calibrate</button>
+			<button id="setOrigin" class="btn-tool" disabled>🎯 Set Origin</button>
+		</div>
+
+		<div style="width:1px; height: 30px; background:#d1d5db; margin:0 10px;"></div>
+
+		<div style="display:flex; gap:10px;">
+			<button id="clearDataPoints" class="btn-danger" disabled>Clear Data</button>
+			<button id="clearCalibration" class="btn-danger" disabled>Clear Calib</button>
+			<button id="clearOrigin" class="btn-danger" disabled>Clear Origin</button>
+		</div>
+
 		<input type="file" id="videoUploadInput" accept="video/*" style="display:none">
 	</div>
 
-	<div id="frameRateContainer" style="text-align:center;margin-top:10px;">
-		<button id="frameRateButton" class="control-button" style="width:auto;padding:10px 15px;background:#a75908;" title="Click to change the frame rate (typical: 24, 25, 30, 50, 60, 120, 240)" disabled>
-			Frame Rate: 30 fps
-		</button>
+	<div id="message">
+		<p>Open a video to start analysis.</p>
+	</div>
+
+	<div id="analysisContainer">
+
+		<div class="card">
+			<div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+				<h3 style="margin:0; font-size:1.1rem;">Video Source</h3>
+				<button id="frameRateButton" style="font-size:0.8rem; padding:4px 8px; background:#e5e7eb; color:#374151; border:1px solid #d1d5db;" disabled>FPS: 30</button>
+			</div>
+
+			<div id="videoWrapper">
+				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
+				<canvas id="frameCanvas" style="display:none"></canvas>
+				<canvas id="overlayCanvas"></canvas>
+				<div class="crosshair" id="crosshair"></div>
+			</div>
+
+			<div class="playback-controls">
+				<button id="playPause" class="btn-primary" style="min-width: 80px;" disabled>▶ Play</button>
+				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
+				<span id="timeDisplay">0:00.000</span>
+			</div>
+		</div>
+
+		<div class="card">
+			<div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+				<h3 style="margin:0; font-size:1.1rem;">Data Analysis</h3>
+			</div>
+
+			<div id="chartCanvasContainer">
+				<canvas id="positionChart"></canvas>
+			</div>
+
+			<div class="chart-controls">
+				<button id="backToPosition" disabled>Position (x,y)</button>
+				<button id="plotVx" disabled>Velocity (vₓ)</button>
+				<button id="plotVy" disabled>Velocity (vᵧ)</button>
+			</div>
+		</div>
 	</div>
 
 	<div id="calibrationPrompt">
@@ -473,8 +511,8 @@
 		<form autocomplete="off">
 			<input type="number" id="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
 			<input type="text" id="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
-			<div style="display:flex;gap:10px;justify-content:center;">
-				<button type="button" id="confirmCalibration">Confirm</button>
+			<div>
+				<button type="button" id="confirmCalibration" class="btn-primary">Confirm</button>
 				<button type="button" id="cancelCalibration">Cancel</button>
 			</div>
 		</form>
@@ -485,8 +523,8 @@
 		<p>Enter the desired filename for the exported data:</p>
 		<form autocomplete="off">
 			<input type="text" id="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
-			<div style="display:flex;gap:10px;justify-content:center;">
-				<button type="button" id="confirmExport">Export</button>
+			<div>
+				<button type="button" id="confirmExport" class="btn-primary">Export</button>
 				<button type="button" id="cancelExport">Cancel</button>
 			</div>
 		</form>
@@ -497,40 +535,11 @@
 		<p>Enter the correct frame rate: <br>(e.g. 24, 30, 60, 120, 240 fps)</p>
 		<form autocomplete="off">
 			<input type="number" id="userFrameRate" value="30" min="1" step="any" autocomplete="off" />
-			<div style="display:flex;gap:10px;justify-content:center;">
-				<button type="button" id="confirmFrameRate">Confirm</button>
+			<div>
+				<button type="button" id="confirmFrameRate" class="btn-primary">Confirm</button>
 				<button type="button" id="cancelFrameRate">Cancel</button>
 			</div>
 		</form>
-	</div>
-
-	<div id="message">
-		<p>Open a video to start analysis.</p>
-	</div>
-
-	<div id="analysisContainer">
-		<div id="videoSection">
-			<div id="videoWrapper">
-				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
-				<canvas id="frameCanvas" style="display:none"></canvas>
-				<canvas id="overlayCanvas"></canvas>
-				<div class="crosshair" id="crosshair"></div>
-			</div>
-			<div id="controlsContainer">
-				<div id="videoControls">
-					<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
-					<span id="timeDisplay">0:00.000</span>
-				</div>
-			</div>
-		</div>
-		<div id="plotSection">
-			<div id="chartCanvasContainer"><canvas id="positionChart"></canvas></div>
-			<div id="plotButtons">
-				<button id="plotVx" class="control-button btn-plot-vx" disabled>vₓ vs t</button>
-				<button id="plotVy" class="control-button btn-plot-vy" disabled>vᵧ vs t</button>
-				<button id="backToPosition" class="control-button btn-backToPosition" disabled>x-t and y-t</button>
-			</div>
-		</div>
 	</div>
 
 	<footer>
@@ -683,7 +692,7 @@
 			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
 			// 5. Reset UI elements
-			playPauseButton.textContent = "Play";
+			playPauseButton.textContent = "▶ Play";
 			frameCanvas.style.cursor = "default";
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "none";
@@ -701,9 +710,8 @@
 		/* Init */
 		document.addEventListener('DOMContentLoaded', () => {
 			disableControls(true);
-			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
-			document.getElementById('analysisContainer').style.display = "none";
-			document.getElementById('chartCanvasContainer').style.display = "none";
+			frameRateButton.textContent = `FPS: ${frameRate}`;
+			document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
 			frameCanvas.style.display = "none";
 		});
 
@@ -743,50 +751,21 @@
 			frameCanvas.width = hiddenVideo.videoWidth || 1280;
 			frameCanvas.height = hiddenVideo.videoHeight || 720;
 			frameCanvas.style.display = "block";
-			document.getElementById('analysisContainer').style.display = "flex";
-			document.getElementById('chartCanvasContainer').style.display = "flex";
-			disableControls(false);
-			drawFrame();
-			resizeOverlay();
-			drawOverlay();
-			plotPosition();
-			document.getElementById('message').innerHTML =
-				"<ul style='text-align:left;padding-left:20px;'>" +
-				"<li>Set frame rate if needed. Default is 30 fps.</li>" +
-				"<li>Use the slider to scrub. It follows the seekable range.</li>" +
-				"<li>Click to record a point. It will advance one frame.</li>" +
-				"</ul>";
-		}, { once: true }); // Note: This 'once' only applies to the initial load. 
-		// However, since we reset src, 'loadeddata' fires again. 
-		// We need to ensure we re-attach or handle it correctly.
-		// The simple 'addEventListener' above persists. The {once: true} might be an issue for re-opening.
-		// FIX: Let's use a standard listener for 'loadeddata' that handles both first and subsequent loads.
-
-		// Removing the {once:true} listener logic and replacing with a persistent one
-		hiddenVideo.addEventListener('loadeddata', () => {
-			// This runs every time a new video is loaded
-			frameCanvas.width = hiddenVideo.videoWidth || 1280;
-			frameCanvas.height = hiddenVideo.videoHeight || 720;
-			frameCanvas.style.display = "block";
-			document.getElementById('analysisContainer').style.display = "flex";
-			document.getElementById('chartCanvasContainer').style.display = "flex";
+			document.getElementById('analysisContainer').style.display = "grid"; // Show grid
 			disableControls(false);
 			drawFrame();
 			resizeOverlay();
 			drawOverlay();
 			plotPosition();
 
-			// Ensure message is updated only if we are in a "clean" state (not mid-analysis)
 			if (frameData.length === 0) {
 				document.getElementById('message').innerHTML =
-					"<ul style='text-align:left;padding-left:20px;'>" +
+					"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
 					"<li>Set frame rate if needed. Default is 30 fps.</li>" +
-					"<li>Use the slider to scrub. It follows the seekable range.</li>" +
-					"<li>Click to record a point. It will advance one frame.</li>" +
+					"<li>Click the video to record a data point.</li>" +
 					"</ul>";
 			}
 		});
-
 
 		/* Playback sync */
 		hiddenVideo.addEventListener('timeupdate', () => {
@@ -809,7 +788,7 @@
 		// Reset play button if video ends naturally
 		hiddenVideo.addEventListener('ended', () => {
 			isPlaying = false;
-			playPauseButton.textContent = "Play";
+			playPauseButton.textContent = "▶ Play";
 		});
 
 		/* Scrubbing */
@@ -817,7 +796,7 @@
 			if (isPlaying) {
 				hiddenVideo.pause();
 				isPlaying = false;
-				playPauseButton.textContent = "Play";
+				playPauseButton.textContent = "▶ Play";
 			}
 			const end = getSeekableEnd();
 			let t = parseFloat(slider.value);
@@ -836,10 +815,10 @@
 		playPauseButton.addEventListener('click', () => {
 			if (isPlaying) {
 				hiddenVideo.pause();
-				playPauseButton.textContent = "Play";
+				playPauseButton.textContent = "▶ Play";
 			} else {
 				hiddenVideo.play().catch(() => {});
-				playPauseButton.textContent = "Pause";
+				playPauseButton.textContent = "⏸ Pause";
 			}
 			isPlaying = !isPlaying;
 		});
@@ -899,7 +878,7 @@
 			const v = parseFloat(userFrameRateInput.value);
 			if (Number.isFinite(v) && v > 0) frameRate = v;
 			frameRatePrompt.style.display = "none";
-			frameRateButton.textContent = `Frame Rate: ${frameRate} fps`;
+			frameRateButton.textContent = `FPS: ${frameRate}`;
 			slider.step = Math.max(1 / frameRate / 2, 0.001).toString();
 		});
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
@@ -913,7 +892,7 @@
 			if (isPlaying) {
 				hiddenVideo.pause();
 				isPlaying = false;
-				playPauseButton.textContent = "Play";
+				playPauseButton.textContent = "▶ Play";
 			}
 
 			const finish = () => {
