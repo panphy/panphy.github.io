@@ -48,6 +48,20 @@
 			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 		}
 
+		a {
+			color: #ff5f1f;
+			text-decoration: none;
+		}
+
+		a:hover {
+			color: #ff5f1f;
+			text-decoration: underline;
+		}
+
+		a:visited {
+			color: #ff5f1f;
+		}
+
 		.banner-title {
 			font-size: 1.5rem;
 			color: #ffffff;
@@ -430,7 +444,8 @@
 <body>
 	<div id="titleBanner">
 		<div class="banner-logo">
-			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"><img src="/panphy.png" alt="PanPhy logo" /></a>
+			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"><img src="/panphy.png"
+					alt="PanPhy logo" /></a>
 		</div>
 		<h1 class="banner-title">Motion Tracker</h1>
 		<div class="banner-placeholder"></div>
@@ -469,13 +484,17 @@
 	<div id="analysisContainer">
 
 		<div class="card">
-			<div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+			<div
+				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 				<h3 style="margin:0; font-size:1.1rem;">Video Source</h3>
-				<button id="frameRateButton" style="font-size:0.8rem; padding:4px 8px; background:#e5e7eb; color:#374151; border:1px solid #d1d5db;" disabled>FPS: 30</button>
+				<button id="frameRateButton"
+					style="font-size:0.8rem; padding:4px 8px; background:#e5e7eb; color:#374151; border:1px solid #d1d5db;"
+					disabled>FPS: 30</button>
 			</div>
 
 			<div id="videoWrapper">
-				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
+				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto"
+					crossorigin="anonymous"></video>
 				<canvas id="frameCanvas" style="display:none"></canvas>
 				<canvas id="overlayCanvas"></canvas>
 				<div class="crosshair" id="crosshair"></div>
@@ -489,7 +508,8 @@
 		</div>
 
 		<div class="card">
-			<div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+			<div
+				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 				<h3 style="margin:0; font-size:1.1rem;">Data Analysis</h3>
 			</div>
 
@@ -509,7 +529,8 @@
 		<h2>Calibration</h2>
 		<p>Enter the Length and its Unit:</p>
 		<form autocomplete="off">
-			<input type="number" id="actualLength" placeholder="Actual Length" min="0.0001" step="any" autocomplete="off">
+			<input type="number" id="actualLength" placeholder="Actual Length" min="0.0001" step="any"
+				autocomplete="off">
 			<input type="text" id="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
 			<div>
 				<button type="button" id="confirmCalibration" class="btn-primary">Confirm</button>
@@ -522,7 +543,8 @@
 		<h2>Export Data</h2>
 		<p>Enter the desired filename for the exported data:</p>
 		<form autocomplete="off">
-			<input type="text" id="exportFilename" placeholder="Filename" value="motion_tracker_data" autocomplete="off">
+			<input type="text" id="exportFilename" placeholder="Filename" value="motion_tracker_data"
+				autocomplete="off">
 			<div>
 				<button type="button" id="confirmExport" class="btn-primary">Export</button>
 				<button type="button" id="cancelExport">Cancel</button>
@@ -817,7 +839,7 @@
 				hiddenVideo.pause();
 				playPauseButton.textContent = "▶ Play";
 			} else {
-				hiddenVideo.play().catch(() => {});
+				hiddenVideo.play().catch(() => { });
 				playPauseButton.textContent = "⏸ Pause";
 			}
 			isPlaying = !isPlaying;
