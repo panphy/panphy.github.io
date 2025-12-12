@@ -627,6 +627,8 @@
 		.result p {
 			margin: 10px 0;
 			font-size: 16px;
+			overflow-x: auto;
+			white-space: nowrap;
 		}
 
 		/* Plot */
@@ -1111,6 +1113,7 @@
 	let datasetFitResults = {}; // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
 	let dataset1XValues = [];
 	let latexMode = false; // false by default: plain text mode
+	let titleWasAuto = true; // track whether graph title should auto-update
 
 	let lastPlotState = {
 		data: null,
@@ -1137,16 +1140,16 @@
 	}
 
 	const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
+	const debouncedUpdateData = debounce(updateData, 300);
+
 
 	function processLabel(label) {
 		if (!label) return '';
-		// If LaTeX mode is off, return the plain label.
-		if (!latexMode) {
-			return label;
-		}
-		// Otherwise, format it for LaTeX.
-		return `$${formatLabelForLatex(label)}$`;
+		if (!latexMode) return label;
+		// Plotly/MathJax rendering uses $...$ delimiters.
+		return '$' + formatLabelForLatex(label) + '$';
 	}
+
 
 	function initializeTable(initialRows = 7) {
 		const tableBody = document.querySelector('#data-table tbody');
@@ -1154,13 +1157,13 @@
 		for (let i = 0; i < initialRows; i++) {
 			const newRow = tableBody.insertRow();
 			newRow.innerHTML = `
-            <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
-            <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
+            <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
+            <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
             <td class="error-column" style="display: none;">
-                <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" />
+                <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" />
             </td>
             <td class="error-column" style="display: none;">
-                <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" />
+                <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" />
             </td>
         `;
 		}
@@ -1222,6 +1225,7 @@
 			return;
 		}
 		activeSet = index;
+		titleWasAuto = true;
 		updateDatasetTabsBar();
 
 		// Repopulate the table UI with data from the active dataset.
@@ -1253,10 +1257,8 @@
 			fitEquationElement.style.display = 'block';
 			rSquaredElement.innerHTML = `\\( R^2 = ${result.rSquared} \\)`;
 			rSquaredElement.style.display = 'block';
-			if (typeof MathJax !== 'undefined') {
-				MathJax.Hub.Queue(["Typeset", MathJax.Hub, fitEquationElement]);
-				MathJax.Hub.Queue(["Typeset", MathJax.Hub, rSquaredElement]);
-			}
+			safeTypeset(fitEquationElement);
+			safeTypeset(rSquaredElement);
 		} else {
 			fitEquationElement.style.display = 'none';
 			fitEquationElement.innerHTML = '';
@@ -1280,14 +1282,14 @@
                 <td>
                     <input type="text" class="x-input"
                            onkeydown="navigateTable(event)"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            placeholder="0"
                            value="${xVal}">
                 </td>
                 <td>
                     <input type="text" class="y-input"
                            onkeydown="navigateTable(event)"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            placeholder="0"
                            value="">
                 </td>
@@ -1295,14 +1297,14 @@
                     <input type="text" class="x-error-input"
                            onkeydown="navigateTable(event)"
                            placeholder="±0"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            value="">
                 </td>
                 <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
                     <input type="text" class="y-error-input"
                            onkeydown="navigateTable(event)"
                            placeholder="±0"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            value="">
                 </td>
             `;
@@ -1318,14 +1320,14 @@
                 <td>
                     <input type="text" class="x-input"
                            onkeydown="navigateTable(event)"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            placeholder="0"
                            value="${point.x}">
                 </td>
                 <td>
                     <input type="text" class="y-input"
                            onkeydown="navigateTable(event)"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            placeholder="0"
                            value="${point.y !== null ? point.y : ''}">
                 </td>
@@ -1333,14 +1335,14 @@
                     <input type="text" class="x-error-input"
                            onkeydown="navigateTable(event)"
                            placeholder="±0"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            value="${point.xErrorRaw || ''}">
                 </td>
                 <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
                     <input type="text" class="y-error-input"
                            onkeydown="navigateTable(event)"
                            placeholder="±0"
-                           oninput="updateData()"
+                           oninput="debouncedUpdateData()"
                            value="${point.yErrorRaw || ''}">
                 </td>
             `;
@@ -1407,10 +1409,10 @@
 		const tableBody = document.querySelector('#data-table tbody');
 		const newRow = tableBody.insertRow();
 		newRow.innerHTML = `
-                <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
-                <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0"></td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};"><input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" /></td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};"><input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()" /></td>
+                <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
+                <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};"><input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" /></td>
+                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};"><input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" /></td>
             `;
 		updateData();
 	}
@@ -1427,9 +1429,14 @@
 			// Reset header inputs to defaults
 			document.getElementById('x-column-name').value = 'x';
 			document.getElementById('y-column-name').value = 'y';
+			// Keep per-dataset headers in sync
+			if (!datasetHeaders[activeSet]) datasetHeaders[activeSet] = { x: 'x', y: 'y' };
+			datasetHeaders[activeSet].x = 'x';
+			datasetHeaders[activeSet].y = 'y';
 			document.getElementById('graph-title').value = 'y vs x';
-			renderLatex('#x-column-latex', formatLabelForLatex('x'));
-			renderLatex('#y-column-latex', formatLabelForLatex('y'));
+			titleWasAuto = true;
+			renderLatex('#x-column-latex', 'x');
+			renderLatex('#y-column-latex', 'y');
 			updateGraphTitle();
 			isSyncing = false;
 
@@ -1473,16 +1480,16 @@
 				newRowsHTML += `
                 <tr>
                     <td>
-                        <input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0">
+                        <input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0">
                     </td>
                     <td>
-                        <input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="updateData()" placeholder="0">
+                        <input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0">
                     </td>
                     <td class="error-column" style="display: ${toggleXError ? 'table-cell' : 'none'};">
-                        <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()">
+                        <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()">
                     </td>
                     <td class="error-column" style="display: ${toggleYError ? 'table-cell' : 'none'};">
-                        <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="updateData()">
+                        <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()">
                     </td>
                 </tr>
             `;
@@ -1755,18 +1762,20 @@
 	function updateUncertaintyHeaders(axis) {
 		const columnName = document.getElementById(`${axis}-column-name`).value.trim() || (axis === 'x' ? 'x' : 'y');
 		const errorType = document.getElementById(`${axis}-error-type`).value;
+
 		let headerLatex = `\\pm \\Delta ${formatLabelForLatex(columnName)}`;
-		let headerFull = `\\( ${headerLatex} \\)`;
+		let headerText = `\\( ${headerLatex} \\)`;
 		if (errorType === 'percentage') {
-			headerFull += ' (%)';
+			headerText += ' (%)';
 		}
 
 		const headerElement = document.getElementById(`${axis}-error-header-latex`);
 		if (headerElement) {
-			headerElement.innerHTML = headerFull;
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, headerElement]);
+			headerElement.textContent = headerText;
+			safeTypeset(headerElement);
 		}
 	}
+
 
 	function updateErrorType(axis) {
 		// Get the selected error type from the dropdown.
@@ -1861,7 +1870,7 @@
 	}
 
 	function parseCSV(text) {
-		const lines = text.trim().split('\n');
+		const lines = text.trim().split(/\r?\n/).filter(l => l.trim() !== '');
 		if (lines.length < 2) {
 			alert('CSV file must contain at least two rows (headers and one data row).');
 			return;
@@ -1873,17 +1882,17 @@
 			alert('CSV file must have at least two columns.');
 			return;
 		}
-		// Determine if the CSV initially has X and Y errors
+
+		// Determine if the CSV has X and Y errors
 		const hasXError = headers.length >= 3;
 		const hasYError = headers.length >= 4;
 
-		// 2) Store headers for the active dataset and update the UI via loadHeaders()
+		// 2) Store headers for the active dataset and update the UI
 		isSyncing = true;
-		datasetHeaders[activeSet] = {
-			x: headers[0],
-			y: headers[1]
-		};
-		loadHeaders(); // This function sets the header input values and renders LaTeX.
+		if (!datasetHeaders[activeSet]) datasetHeaders[activeSet] = { x: 'x', y: 'y' };
+		datasetHeaders[activeSet].x = headers[0];
+		datasetHeaders[activeSet].y = headers[1];
+		loadHeaders();
 		isSyncing = false;
 
 		// Clear existing rows for this dataset without resetting headers
@@ -1893,10 +1902,25 @@
 		document.getElementById('toggle-x-error').checked = hasXError;
 		document.getElementById('toggle-y-error').checked = hasYError;
 
-		// 3) Build the new rows in memory based on the CSV data.
+		if (!datasetToggles[activeSet]) datasetToggles[activeSet] = { x: false, y: false };
+		datasetToggles[activeSet].x = hasXError;
+		datasetToggles[activeSet].y = hasYError;
+
+		// 3) Build the new rows
 		const dataRows = lines.slice(1);
 		const tableBody = document.querySelector('#data-table tbody');
 		const fragment = document.createDocumentFragment();
+
+		const makeInput = (className, value, placeholder) => {
+			const input = document.createElement('input');
+			input.type = 'text';
+			input.className = className;
+			input.placeholder = placeholder;
+			input.value = value || '';
+			input.addEventListener('keydown', navigateTable);
+			input.addEventListener('input', debouncedUpdateData);
+			return input;
+		};
 
 		for (let i = 0; i < dataRows.length; i++) {
 			const rowData = parseCSVLine(dataRows[i]);
@@ -1904,50 +1928,26 @@
 
 			// x cell
 			const tdX = document.createElement('td');
-			tdX.innerHTML = `
-            <input type="text" class="x-input"
-                   onkeydown="navigateTable(event)"
-                   oninput="updateData()"
-                   placeholder="0"
-                   value="${rowData[0] || ''}">
-        `;
+			tdX.appendChild(makeInput('x-input', rowData[0], '0'));
 			tr.appendChild(tdX);
 
 			// y cell
 			const tdY = document.createElement('td');
-			tdY.innerHTML = `
-            <input type="text" class="y-input"
-                   onkeydown="navigateTable(event)"
-                   oninput="updateData()"
-                   placeholder="0"
-                   value="${rowData[1] || ''}">
-        `;
+			tdY.appendChild(makeInput('y-input', rowData[1], '0'));
 			tr.appendChild(tdY);
 
 			// X-error cell
 			const tdXErr = document.createElement('td');
 			tdXErr.className = 'error-column x-error-td';
-			tdXErr.innerHTML = `
-            <input type="text" class="x-error-input"
-                   onkeydown="navigateTable(event)"
-                   placeholder="±0"
-                   oninput="updateData()"
-                   value="${rowData[2] || ''}">
-        `;
 			if (!hasXError) tdXErr.style.display = 'none';
+			tdXErr.appendChild(makeInput('x-error-input', rowData[2], '±0'));
 			tr.appendChild(tdXErr);
 
 			// Y-error cell
 			const tdYErr = document.createElement('td');
 			tdYErr.className = 'error-column y-error-td';
-			tdYErr.innerHTML = `
-            <input type="text" class="y-error-input"
-                   onkeydown="navigateTable(event)"
-                   placeholder="±0"
-                   oninput="updateData()"
-                   value="${rowData[3] || ''}">
-        `;
 			if (!hasYError) tdYErr.style.display = 'none';
+			tdYErr.appendChild(makeInput('y-error-input', rowData[3], '±0'));
 			tr.appendChild(tdYErr);
 
 			fragment.appendChild(tr);
@@ -1957,27 +1957,28 @@
 		tableBody.innerHTML = '';
 		tableBody.appendChild(fragment);
 
-		// 5) Update data in the active dataset, re-plot, etc.
-		updateData();
-		updatePlotAndRenderLatex();
-		setInitialParameters(getCurrentAdvancedFitMethod());
-
-		// Re-apply uncertainty toggle display logic.
+		// 5) Re-apply uncertainty toggle display logic and update plot
 		toggleErrorColumn('x');
 		toggleErrorColumn('y');
+		updateData();
+		setInitialParameters(getCurrentAdvancedFitMethod());
 	}
 
+
 	function loadHeaders() {
-		// Use stored headers for the active dataset if available;
-		// otherwise, use defaults.
+		// Use stored headers for the active dataset if available; otherwise, use defaults.
 		const headers = datasetHeaders[activeSet] || { x: 'x', y: 'y' };
 
 		document.getElementById('x-column-name').value = headers.x;
 		document.getElementById('y-column-name').value = headers.y;
-		renderLatex('#x-column-latex', formatLabelForLatex(headers.x));
-		renderLatex('#y-column-latex', formatLabelForLatex(headers.y));
+
+		// Render headings according to current LaTeX mode.
+		renderLatex('#x-column-latex', headers.x);
+		renderLatex('#y-column-latex', headers.y);
+
 		updateGraphTitle();
 	}
+
 
 	function updateLabels(type) {
 		if (isSyncing) return;
@@ -1985,65 +1986,74 @@
 
 		const value = document.getElementById(`${type}-column-name`).value;
 
-		// Update the label element based on the latexMode.
-		if (latexMode) {
-			renderLatex(`#${type}-column-latex`, formatLabelForLatex(value));
-		} else {
-			document.querySelector(`#${type}-column-latex`).textContent = value;
-		}
+		// Persist headers per dataset.
+		if (!datasetHeaders[activeSet]) datasetHeaders[activeSet] = { x: 'x', y: 'y' };
+		datasetHeaders[activeSet][type] = value;
 
-		// Debounced update of the plot (if applicable).
+		// Update the displayed label (plain or LaTeX).
+		renderLatex(`#${type}-column-latex`, value);
+
+		// Debounced update of the plot.
 		debouncedUpdatePlotAndRenderLatex();
 		isSyncing = false;
 
-		// Dynamically update the graph title.
-		const xColumn = document.getElementById('x-column-name').value || 'x';
-		const yColumn = document.getElementById('y-column-name').value || 'y';
-		if (latexMode) {
-			document.getElementById('graph-title').value = `${yColumn} \\text{vs} ${xColumn}`;
-		} else {
-			document.getElementById('graph-title').value = `${yColumn} vs ${xColumn}`;
-		}
+		// Dynamically update the graph title, but do not override a user-edited title.
+		updateGraphTitle();
 
 		// Update any other elements that depend on the headers.
 		setInitialParameters(getCurrentAdvancedFitMethod());
 		updateCombinedPlotInputsToActive();
 	}
 
-	function renderLatex(elementId, latexString) {
+
+	function safeTypeset(target) {
+		try {
+			if (typeof MathJax === 'undefined' || !MathJax.Hub || !MathJax.Hub.Queue) return;
+			const el = (typeof target === 'string') ? document.querySelector(target) : target;
+			if (!el) return;
+			MathJax.Hub.Queue(["Typeset", MathJax.Hub, el]);
+		} catch (e) {
+			console.warn('MathJax typeset skipped:', e);
+		}
+	}
+
+	function renderLatex(elementId, rawString) {
 		const element = document.querySelector(elementId);
 		if (!element) return;
+
+		const str = (rawString === undefined || rawString === null) ? '' : String(rawString);
+
 		if (!latexMode) {
-			// If LaTeX mode is off, just set the plain text.
-			element.textContent = latexString;
+			// Plain mode: show raw text exactly.
+			element.textContent = str;
 			return;
 		}
-		// Otherwise, render using MathJax.
-		element.innerHTML = `\\(${latexString}\\)`;
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
+
+		// LaTeX mode: format spacing and typeset.
+		const latex = formatLabelForLatex(str);
+		element.textContent = `\\(${latex}\\)`;
+		safeTypeset(element);
 	}
+
 
 	function updatePlotAndRenderLatex() {
 		if (isSyncing) return;
 		isSyncing = true;
 
-		// Replot the graph as usual.
+		// Replot the graph.
 		plotGraph();
 
 		// Retrieve current column names.
 		const xColumnName = document.getElementById('x-column-name').value || 'x';
 		const yColumnName = document.getElementById('y-column-name').value || 'y';
 
-		// Update the axis label elements conditionally.
-		if (latexMode) {
-			renderLatex('#x-column-latex', formatLabelForLatex(xColumnName));
-			renderLatex('#y-column-latex', formatLabelForLatex(yColumnName));
-		} else {
-			document.querySelector('#x-column-latex').textContent = xColumnName;
-			document.querySelector('#y-column-latex').textContent = yColumnName;
-		}
+		// Update the axis label elements according to current mode.
+		renderLatex('#x-column-latex', xColumnName);
+		renderLatex('#y-column-latex', yColumnName);
+
 		isSyncing = false;
 	}
+
 
 	function openTab(evt, tabName) {
 		const tablinks = document.getElementsByClassName("tablink");
@@ -2061,24 +2071,29 @@
 		evt.currentTarget.classList.add("active");
 
 		if (tabName === 'BasicFit') {
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('basic-fit-equation')]);
+			safeTypeset(document.getElementById('basic-fit-equation'));
 		} else if (tabName === 'AdvancedFit') {
 			changeAdvancedFitMethod();
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('advanced-fit-general-equation')]);
+			safeTypeset(document.getElementById('advanced-fit-general-equation'));
 		}
 	}
 
-	function updateGraphTitle() {
+
+	function updateGraphTitle(force = false) {
 		const xColumn = document.getElementById('x-column-name').value || 'x';
 		const yColumn = document.getElementById('y-column-name').value || 'y';
-		const titleText = `${yColumn} vs ${xColumn}`;
+		const autoTitle = latexMode ? `${yColumn} \\text{vs} ${xColumn}` : `${yColumn} vs ${xColumn}`;
 
-		if (latexMode) {
-			document.getElementById('graph-title').value = `${yColumn} \\text{vs} ${xColumn}`;
-		} else {
-			document.getElementById('graph-title').value = titleText;
+		const titleInput = document.getElementById('graph-title');
+		if (!titleInput) return;
+
+		const current = (titleInput.value || '').trim();
+		if (force || titleWasAuto || current === '') {
+			titleInput.value = autoTitle;
+			titleWasAuto = true;
 		}
 	}
+
 
 	function plotGraph(fittedX = null, fittedY = null) {
 		// If fitted data is not provided and a fit exists, use that.
@@ -2203,8 +2218,8 @@
 
 		// Build traces for each dataset.
 		rawData.forEach((dataset, index) => {
-			const xVals = dataset.map(point => point.x);
-			const yVals = dataset.map(point => point.y);
+			const xVals = dataset.map(point => point.x).filter(v => Number.isFinite(v));
+			const yVals = dataset.map(point => point.y).filter(v => Number.isFinite(v));
 
 			// Convert uncertainties.
 			const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
@@ -2217,6 +2232,8 @@
 			const yErrorsConverted = yVals.map((yVal, i) =>
 				errorTypes.y === 'percentage' ? (yErrorsRaw[i] / 100) * (yVal || 0) : yErrorsRaw[i]
 			);
+
+			const toggles = datasetToggles[index] || { x: false, y: false };
 
 			// Marker trace.
 			traces.push({
@@ -2231,7 +2248,7 @@
 				error_x: {
 					type: 'data',
 					array: xErrorsConverted,
-					visible: true,
+					visible: !!toggles.x,
 					color: datasetColors[index % datasetColors.length],
 					thickness: 0.8,
 					width: 2
@@ -2239,7 +2256,7 @@
 				error_y: {
 					type: 'data',
 					array: yErrorsConverted,
-					visible: true,
+					visible: !!toggles.y,
 					color: datasetColors[index % datasetColors.length],
 					thickness: 0.8,
 					width: 2
@@ -2278,17 +2295,12 @@
 				text: processedTitle,
 				font: { size: 16 }
 			},
-			xaxis: {
-				title: processedXLabel
-			},
+			xaxis: { title: processedXLabel },
 			yaxis: {
-				title: {
-					text: processedYLabel,
-					standoff: 25
-				}
+				title: { text: processedYLabel, standoff: 25 }
 			},
 			margin: {
-				t: rawTitle === '' ? 50 : 100, // Reduce top margin when title is blank.
+				t: rawTitle === '' ? 50 : 100,
 				b: 70,
 				l: 140,
 				r: 0
@@ -2297,10 +2309,10 @@
 
 		if (isPlotStateEqual(traces, layout)) {
 			console.log("No changes detected in combined plot; skipping update.");
+			showPopup();
 			return;
 		}
 
-		// Render the combined plot.
 		Plotly.newPlot('popup-plot', traces, layout, {
 			toImageButtonOptions: {
 				format: 'svg',
@@ -2313,25 +2325,19 @@
 		lastPlotState.layout = layout;
 
 		showPopup();
-
-		if (typeof MathJax !== 'undefined' && latexMode) {
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('popup-plot')]);
-		}
+		safeTypeset(document.getElementById('popup-plot'));
 	}
+
 
 	// Function to initialize the combined plot input boxes.
 	function initCombinedPlotInputs() {
-		// Assume there is a container element in your HTML with id "combined-plot-controls"
-		// If it doesn't exist yet, create and append it below the combined plot container.
 		let controlsContainer = document.getElementById('combined-plot-controls');
 		if (!controlsContainer) {
 			controlsContainer = document.createElement('div');
 			controlsContainer.id = 'combined-plot-controls';
-			// Optionally style the container here.
 			document.body.appendChild(controlsContainer);
 		}
 
-		// Create or select the title input.
 		let titleInput = document.getElementById('combined-title');
 		if (!titleInput) {
 			titleInput = document.createElement('input');
@@ -2341,7 +2347,6 @@
 			controlsContainer.appendChild(titleInput);
 		}
 
-		// Create or select the x-axis label input.
 		let xLabelInput = document.getElementById('combined-x-label');
 		if (!xLabelInput) {
 			xLabelInput = document.createElement('input');
@@ -2351,7 +2356,6 @@
 			controlsContainer.appendChild(xLabelInput);
 		}
 
-		// Create or select the y-axis label input.
 		let yLabelInput = document.getElementById('combined-y-label');
 		if (!yLabelInput) {
 			yLabelInput = document.createElement('input');
@@ -2361,17 +2365,21 @@
 			controlsContainer.appendChild(yLabelInput);
 		}
 
-		// Initialize the input boxes with the active dataset’s labels.
-		// For title, take the value from the active graph title input.
-		titleInput.value = document.getElementById('graph-title').value || `${document.getElementById('y-column-name').value || 'y'} \\text{vs} ${document.getElementById('x-column-name').value || 'x'}`;
-		xLabelInput.value = processLabel(document.getElementById('x-column-name').value || 'x');
-		yLabelInput.value = processLabel(document.getElementById('y-column-name').value || 'y');
+		// Initialise with raw text (no extra $ delimiters).
+		titleInput.value = document.getElementById('graph-title').value || '';
+		xLabelInput.value = document.getElementById('x-column-name').value || 'x';
+		yLabelInput.value = document.getElementById('y-column-name').value || 'y';
 
 		// Add event listeners: whenever any input value changes, update the combined plot.
-		titleInput.addEventListener('input', updateCombinedPlotFromInputs);
-		xLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
-		yLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+		// Avoid adding duplicates.
+		if (!titleInput.dataset.listenerAdded) {
+			titleInput.addEventListener('input', updateCombinedPlotFromInputs);
+			xLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+			yLabelInput.addEventListener('input', updateCombinedPlotFromInputs);
+			titleInput.dataset.listenerAdded = '1';
+		}
 	}
+
 
 	// Function to update the combined plot using the values from the new input boxes.
 	function updateCombinedPlotFromInputs() {
@@ -2451,10 +2459,11 @@
 
 		const equationElement = document.getElementById('basic-fit-equation');
 		if (equationElement) {
-			equationElement.innerHTML = `\\( ${equation} \\)`;
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, equationElement]);
+			equationElement.textContent = `\\( ${equation} \\)`;
+			safeTypeset(equationElement);
 		}
 	}
+
 
 	function changeAdvancedFitMethod() {
 		const selectedMethod = document.getElementById('advanced-fit-method').value;
@@ -2476,17 +2485,18 @@
 	function updateAdvancedFitEquation(selectedMethod) {
 		let equation = '';
 		if (selectedMethod === 'Sinusoidal') {
-			equation = 'y = A e^{bx} \\sin(kx - \\phi) + c';
+			equation = 'y = A e^{bx} \sin(kx - \\phi) + c';
 		} else if (selectedMethod === 'Gaussian') {
-			equation = 'y = A e^{-\\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
+			equation = 'y = A e^{-\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
 		}
 
 		const equationElement = document.getElementById('advanced-fit-general-equation');
 		if (equationElement) {
-			equationElement.innerHTML = `\\(${equation}\\)`;
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, equationElement]);
+			equationElement.textContent = `\\(${equation}\\)`;
+			safeTypeset(equationElement);
 		}
 	}
+
 
 	// Helper function to calculate FWHM for Gaussian Fit (optional, not used here)
 	function calculateFWHM(x, y, maxY) {
@@ -2494,8 +2504,15 @@
 		let left = null,
 			right = null;
 
-		// Sort data by x
-		const sortedData = rawData[activeSet].slice().sort((a, b) => a.x - b.x);
+		// Sort data by x (use only finite x and y)
+		const sortedData = rawData[activeSet]
+			.slice()
+			.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+			.sort((a, b) => a.x - b.x);
+
+		if (sortedData.length < 2) {
+			return 1; // fallback
+		}
 
 		// Find left crossing
 		for (let i = 1; i < sortedData.length; i++) {
@@ -2524,53 +2541,67 @@
 		if (left !== null && right !== null && right > left) {
 			return right - left;
 		} else {
-			const minX = Math.min(...x);
-			const maxX = Math.max(...x);
+			const xs = sortedData.map(p => p.x);
+			const minX = Math.min(...xs);
+			const maxX = Math.max(...xs);
 			return (maxX - minX) / 4;
 		}
 	}
 
+
 	// Function to set initial parameters based on selected method and data
 	function setInitialParameters(method) {
-		if (!method) return; // If method is undefined, do nothing
+		if (!method) return;
+		if (!rawData[activeSet] || rawData[activeSet].length === 0) return;
 
-		if (rawData[activeSet].length === 0) return;
+		// Use only finite points (avoid null/blank cells corrupting guesses)
+		const pts = rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+		if (pts.length < 4) return;
 
-		const x = rawData[activeSet].map(p => p.x);
-		const y = rawData[activeSet].map(p => p.y);
+		const x = pts.map(p => p.x);
+		const y = pts.map(p => p.y);
+
 		const meanX = x.reduce((sum, val) => sum + val, 0) / x.length;
-		const stdX = Math.sqrt(x.reduce((sum, val) => sum + Math.pow(val - meanX, 2), 0) / x.length);
+		const meanY = y.reduce((sum, val) => sum + val, 0) / y.length;
+
 		const maxY = Math.max(...y);
+		const minY = Math.min(...y);
+
+		// For Gaussian
 		const FWHM = calculateFWHM(x, y, maxY);
 
 		if (method === 'Gaussian') {
 			document.getElementById('initial-A-gaussian').value = maxY.toFixed(3);
 			document.getElementById('initial-mu').value = meanX.toFixed(3);
-			document.getElementById('initial-sigma').value = (FWHM / (2 * Math.sqrt(2 * Math.log(2)))).toFixed(3);
+			document.getElementById('initial-sigma').value = (FWHM / (2 * Math.sqrt(2 * Math.log(2))) || 1).toFixed(3);
 			document.getElementById('initial-c-gaussian').value = '0';
-		} else if (method === 'Sinusoidal') {
-			// Set A to maxY, b to slope from linear fit, phi to 0, c to meanY
-			const meanY = y.reduce((sum, val) => sum + val, 0) / y.length;
-			const linearFit = computeLinearFit(x, y);
-			const A = maxY - meanY;
-			const b = linearFit.slope;
-			const phi = 0;
-			const c = meanY;
+			return;
+		}
 
-			// Estimate k from data and set it
-			const estimatedK = estimateKFromData();
-			if (estimatedK !== null) {
-				document.getElementById('initial-k').value = estimatedK.toFixed(3);
-			} else {
-				document.getElementById('initial-k').value = '1'; // Default value if estimation fails
+		if (method === 'Sinusoidal') {
+			// Heuristic guesses that work well for ordinary (non-damped) sinusoids:
+			//   y ≈ A * sin(kx - phi) + c   (with b ≈ 0)
+			// Note: Our model includes exp(bx); setting b=0 is the safe default.
+			const Aguess = (maxY - minY) / 2;
+			const cguess = meanY;
+			const bguess = 0;
+			const phiguess = 0;
+
+			let kguess = estimateKFromData();
+			if (kguess === null || !isFinite(kguess) || kguess <= 0) {
+				const span = Math.max(...x) - Math.min(...x);
+				// fallback: assume ~1 cycle across the span
+				kguess = span > 0 ? (2 * Math.PI) / span : 1;
 			}
 
-			document.getElementById('initial-A').value = A.toFixed(3);
-			document.getElementById('initial-b').value = b.toFixed(3);
-			document.getElementById('initial-phi').value = phi.toFixed(3);
-			document.getElementById('initial-c').value = c.toFixed(3);
+			document.getElementById('initial-A').value = (isFinite(Aguess) && Aguess !== 0 ? Aguess : 1).toFixed(3);
+			document.getElementById('initial-b').value = bguess.toFixed(3);
+			document.getElementById('initial-k').value = kguess.toFixed(3);
+			document.getElementById('initial-phi').value = phiguess.toFixed(3);
+			document.getElementById('initial-c').value = cguess.toFixed(3);
 		}
 	}
+
 
 	function getCurrentAdvancedFitMethod() {
 		return document.getElementById('advanced-fit-method').value;
@@ -2588,6 +2619,11 @@
 				denominator += (x[i] - xMean) ** 2;
 			}
 
+			// If all x values are identical, fall back to a constant model.
+			if (Math.abs(denominator) < 1e-15) {
+				return { slope: 0, intercept: yMean };
+			}
+
 			const slope = numerator / denominator;
 			const intercept = yMean - slope * xMean;
 
@@ -2597,6 +2633,7 @@
 			throw error;
 		}
 	}
+
 
 
 	// ===== Exponential helpers (auto-pick) =====
@@ -2650,8 +2687,10 @@
 		const X = [],
 			L = [];
 		for (let i = 0; i < z.length; i++)
-			if (Math.abs(z[i]) > 1e-12) { X.push(x[i]);
-				L.push(Math.log(Math.abs(z[i]))); }
+			if (Math.abs(z[i]) > 1e-12) {
+				X.push(x[i]);
+				L.push(Math.log(Math.abs(z[i])));
+			}
 		let A0 = signZ * 1,
 			b0 = -1;
 		if (X.length >= 2) {
@@ -2711,8 +2750,10 @@
 				const rNew = residuals(trial);
 				const oldCost = r.reduce((s, v) => s + v * v, 0);
 				const newCost = rNew.reduce((s, v) => s + v * v, 0);
-				if (newCost < oldCost) { p = trial;
-					lam *= 0.3; } else { lam *= nu; }
+				if (newCost < oldCost) {
+					p = trial;
+					lam *= 0.3;
+				} else { lam *= nu; }
 			}
 			return p;
 		}
@@ -2808,10 +2849,8 @@
 			}
 
 			// Trigger MathJax typesetting if available.
-			if (typeof MathJax !== 'undefined') {
-				MathJax.Hub.Queue(["Typeset", MathJax.Hub, fitEquationElement]);
-				MathJax.Hub.Queue(["Typeset", MathJax.Hub, rSquaredElement]);
-			}
+			safeTypeset(fitEquationElement);
+			safeTypeset(rSquaredElement);
 
 			// Store this result for the current dataset.
 			datasetFitResults[activeSet] = {
@@ -3497,18 +3536,15 @@
 				let shiftedC = cGuess;
 
 				// Ensure (x - x0) > 0 for all x if we want to do an initial log transform
+				// (Avoid potentially huge while-loops for large domains.)
+				const minX = Math.min(...xValues);
+				if (!(minX - shiftedX0 > 0)) shiftedX0 = minX - 1e-6;
 				let z = xValues.map(x => x - shiftedX0);
-				while (z.some(zi => zi <= 0)) {
-					shiftedX0 -= 1e-3;
-					z = xValues.map(x => x - shiftedX0);
-				}
 
 				// Ensure (y - c) > 0 for initial log transform
+				const minY = Math.min(...yValues);
+				if (!(minY - shiftedC > 0)) shiftedC = minY - 1e-6;
 				let w = yValues.map(y => y - shiftedC);
-				while (w.some(wi => wi <= 0)) {
-					shiftedC -= 1e-3;
-					w = yValues.map(y => y - shiftedC);
-				}
 
 				// 3b. Compute initial A, b via linear regression on log-log
 				const lnZ = z.map(zi => Math.log(zi));
@@ -3519,7 +3555,7 @@
 				const initialParams = [AInitial, bInitial, shiftedX0, shiftedC];
 
 				// 3c. Run LM from this initial guess
-				const { params, cost } = levenbergMarquardt(validData, initialParams);
+				const { params, cost } = levenbergMarquardt(validData, initialParams, computeResiduals, computeJacobian);
 
 				// 3d. Check if it's the best so far
 				if (cost < bestCost) {
@@ -3603,19 +3639,76 @@
 	 * @param {number} maxIterations
 	 * @param {number} tolerance
 	 */
-	function levenbergMarquardt(data, initialParams, maxIterations = 200, tolerance = 1e-8) {
+	function levenbergMarquardt(data, initialParams, residualFn, jacobianFn, options = {}) {
+		// Generic Levenberg-Marquardt solver.
+		// residualFn(params, data) -> Array<number> of residuals (y_pred - y)
+		// jacobianFn(params, data) -> Array<Array<number>> Jacobian rows matching residuals
+		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 200;
+		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-8;
+
 		let params = initialParams.slice();
-		let lambda = 1e-3; // initial damping
+		let lambda = Number.isFinite(options.initialLambda) ? options.initialLambda : 1e-3; // initial damping
 		let nu = 2; // factor to adjust lambda
 		let prevCost = Infinity;
 
 		let bestParams = params.slice();
 		let bestCost = Infinity;
 
+		const PENALTY = 1e6;
+
+		function safeResiduals(p) {
+			let r;
+			try {
+				r = residualFn(p, data);
+			} catch {
+				r = null;
+			}
+			if (!Array.isArray(r) || r.length !== data.length) {
+				r = new Array(data.length).fill(PENALTY);
+			}
+			for (let i = 0; i < r.length; i++) {
+				if (!Number.isFinite(r[i])) r[i] = PENALTY;
+			}
+			return r;
+		}
+
+		function safeJacobian(p, nParams) {
+			let J;
+			try {
+				J = jacobianFn(p, data);
+			} catch {
+				J = null;
+			}
+			if (!Array.isArray(J) || J.length !== data.length) {
+				J = new Array(data.length).fill(null).map(() => new Array(nParams).fill(0));
+			}
+			for (let i = 0; i < J.length; i++) {
+				const row = Array.isArray(J[i]) ? J[i] : [];
+				if (row.length !== nParams) {
+					J[i] = new Array(nParams).fill(0);
+					continue;
+				}
+				for (let j = 0; j < nParams; j++) {
+					if (!Number.isFinite(J[i][j])) J[i][j] = 0;
+				}
+			}
+			return J;
+		}
+
+		function costFromResiduals(r) {
+			let s = 0;
+			for (let i = 0; i < r.length; i++) {
+				const v = r[i];
+				s += v * v;
+				if (!Number.isFinite(s)) return Number.MAX_VALUE;
+			}
+			return s;
+		}
+
 		for (let iter = 0; iter < maxIterations; iter++) {
 			// 1. Compute residuals & cost
-			const residuals = computeResiduals(params, data);
-			const cost = residuals.reduce((sum, r) => sum + r * r, 0);
+			const residuals = safeResiduals(params);
+			const cost = costFromResiduals(residuals);
 
 			// 2. Convergence check
 			if (Math.abs(prevCost - cost) < tolerance) {
@@ -3624,7 +3717,7 @@
 			prevCost = cost;
 
 			// 3. Jacobian
-			const J = computeJacobian(params, data);
+			const J = safeJacobian(params, params.length);
 			const JT = transpose(J);
 			const JTJ = multiply(JT, J);
 			const JTr = multiplyMatrixVector(JT, residuals);
@@ -3636,7 +3729,8 @@
 				for (let j = 0; j < n; j++) {
 					A_lm[i][j] = JTJ[i][j];
 					if (i === j) {
-						A_lm[i][j] += lambda * (A_lm[i][j] || 1);
+						const diag = (Number.isFinite(A_lm[i][j]) && Math.abs(A_lm[i][j]) > 0) ? Math.abs(A_lm[i][j]) : 1;
+						A_lm[i][j] += lambda * diag;
 					}
 				}
 			}
@@ -3646,31 +3740,32 @@
 			try {
 				const negJTr = JTr.map(v => -v);
 				delta = solve(A_lm, negJTr);
-			} catch (err) {
-				// If solve fails, increase lambda and continue
+			} catch {
+				lambda *= nu;
+				continue;
+			}
+
+			if (!Array.isArray(delta) || delta.length !== params.length || delta.some(v => !Number.isFinite(v))) {
 				lambda *= nu;
 				continue;
 			}
 
 			// 6. Check new parameters
 			const newParams = params.map((p, i) => p + delta[i]);
-			const newRes = computeResiduals(newParams, data);
-			const newCost = newRes.reduce((s, r) => s + r * r, 0);
+			const newRes = safeResiduals(newParams);
+			const newCost = costFromResiduals(newRes);
 
 			if (newCost < cost) {
-				// Improvement
 				params = newParams;
 				if (newCost < bestCost) {
 					bestCost = newCost;
 					bestParams = params.slice();
 				}
-				lambda *= 0.3; // reduce damping
+				lambda *= 0.3;
 				if (lambda < 1e-20) lambda = 1e-20;
 			} else {
-				// No improvement, increase damping
 				lambda *= nu;
 				if (lambda > 1e20) {
-					// If lambda is huge, bail out
 					return { params: bestParams, cost: bestCost };
 				}
 			}
@@ -4018,123 +4113,100 @@
 
 	function performSinusoidalFit() {
 		try {
-			let A = parseFloat(document.getElementById('initial-A').value);
-			let b = parseFloat(document.getElementById('initial-b').value);
-			let k = parseFloat(document.getElementById('initial-k').value);
-			let phi = parseFloat(document.getElementById('initial-phi').value);
-			let c = parseFloat(document.getElementById('initial-c').value);
+			let A0 = parseFloat(document.getElementById('initial-A').value);
+			let b0 = parseFloat(document.getElementById('initial-b').value);
+			let k0 = parseFloat(document.getElementById('initial-k').value);
+			let phi0 = parseFloat(document.getElementById('initial-phi').value);
+			let c0 = parseFloat(document.getElementById('initial-c').value);
 
-			if (isNaN(k) || k <= 0) {
+			if (!Number.isFinite(k0) || k0 <= 0) {
 				const estimatedK = estimateKFromData();
-				if (estimatedK !== null) {
-					k = estimatedK;
-					console.log(`Using estimated k: ${k}`);
-					document.getElementById('initial-k').value = k.toFixed(3);
+				if (estimatedK !== null && Number.isFinite(estimatedK) && estimatedK > 0) {
+					k0 = estimatedK;
+					document.getElementById('initial-k').value = k0.toFixed(3);
+					console.log(`Using estimated k: ${k0}`);
 				} else {
 					alert('Failed to estimate k. Please provide an initial value.');
 					return;
 				}
 			}
 
-			if (isNaN(A) || isNaN(b) || isNaN(phi) || isNaN(c)) {
+			if (!Number.isFinite(A0) || !Number.isFinite(b0) || !Number.isFinite(phi0) || !Number.isFinite(c0)) {
 				alert('Please provide valid initial parameters for Sinusoidal fit.');
 				return;
 			}
 
-			let params = { A: A, b: b, k: k, phi: phi, c: c };
-
-			let learningRate = 1e-5;
-			const maxIterations = 100000;
-			const tolerance = 1e-6;
-			let previousError = Infinity;
-			let iterationsCount = 0;
-
-			const decayRate = 0.99995;
-			const delta = 1.0;
-
-			while (iterationsCount < maxIterations) {
-				let totalLoss = 0;
-				let dA = 0,
-					db = 0,
-					dk = 0,
-					dphi = 0,
-					dc = 0;
-
-				for (let i = 0; i < rawData[activeSet].length; i++) {
-					const xi = rawData[activeSet][i].x;
-					const yi = rawData[activeSet][i].y;
-
-					const expTerm = Math.exp(params.b * xi);
-					const sinTerm = Math.sin(params.k * xi - params.phi);
-					const cosTerm = Math.cos(params.k * xi - params.phi);
-
-					const prediction = params.A * expTerm * sinTerm + params.c;
-					const error = yi - prediction;
-
-					let huberGrad;
-					if (Math.abs(error) <= delta) {
-						totalLoss += error ** 2;
-						huberGrad = 2 * error;
-					} else {
-						totalLoss += 2 * delta * Math.abs(error) - delta ** 2;
-						huberGrad = 2 * delta * Math.sign(error);
-					}
-
-					dA += -huberGrad * expTerm * sinTerm;
-					db += -huberGrad * params.A * xi * expTerm * sinTerm;
-					dk += -huberGrad * params.A * expTerm * xi * cosTerm;
-					dphi += huberGrad * params.A * expTerm * cosTerm;
-					dc += -huberGrad;
-				}
-
-				const mse = totalLoss / rawData[activeSet].length;
-				if (Math.abs(previousError - mse) < tolerance) {
-					console.log(`Convergence reached after ${iterationsCount} iterations.`);
-					break;
-				}
-				previousError = mse;
-
-				params.A -= learningRate * dA;
-				params.b -= learningRate * db;
-				params.k -= learningRate * dk;
-				params.phi -= learningRate * dphi;
-				params.c -= learningRate * dc;
-				learningRate *= decayRate;
-				iterationsCount++;
-			}
-
-			if (iterationsCount === maxIterations) {
-				alert('Sinusoidal fitting did not converge. Please try different initial parameters.');
+			const data = rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+			if (data.length < 4) {
+				alert('Sinusoidal fit requires at least four valid data points.');
 				return;
 			}
 
-			const xMin = Math.min(...rawData[activeSet].map(p => p.x));
-			const xMax = Math.max(...rawData[activeSet].map(p => p.x));
-			const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
-			const yFit = xFit.map(xi =>
-				params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c
-			);
-
-			const fitFunction = xi =>
-				params.A * Math.exp(params.b * xi) * Math.sin(params.k * xi - params.phi) + params.c;
-
-			let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x} \\sin(${params.k.toFixed(3)}x`;
-			if (params.phi > 0) {
-				equation += ` - ${params.phi.toFixed(3)}`;
-			} else if (params.phi < 0) {
-				equation += ` + ${Math.abs(params.phi).toFixed(3)}`;
+			// Model: y = A e^{b x} sin(k x - phi) + c
+			function residualFn(params, pts) {
+				const [A, b, k, phi, c] = params;
+				const PEN = 1e6;
+				return pts.map(({ x, y }) => {
+					try {
+						const expTerm = Math.exp(b * x);
+						const ang = k * x - phi;
+						const yPred = A * expTerm * Math.sin(ang) + c;
+						if (!Number.isFinite(yPred)) return PEN;
+						return yPred - y;
+					} catch {
+						return PEN;
+					}
+				});
 			}
+
+			function jacobianFn(params, pts) {
+				const [A, b, k, phi, c] = params;
+				return pts.map(({ x, y }) => {
+					let expTerm, sinTerm, cosTerm;
+					try {
+						expTerm = Math.exp(b * x);
+						const ang = k * x - phi;
+						sinTerm = Math.sin(ang);
+						cosTerm = Math.cos(ang);
+					} catch {
+						return [0, 0, 0, 0, 0];
+					}
+					let dA = expTerm * sinTerm;
+					let db = A * x * expTerm * sinTerm;
+					let dk = A * expTerm * x * cosTerm;
+					let dphi = -A * expTerm * cosTerm;
+					let dc = 1;
+
+					if (!Number.isFinite(dA)) dA = 0;
+					if (!Number.isFinite(db)) db = 0;
+					if (!Number.isFinite(dk)) dk = 0;
+					if (!Number.isFinite(dphi)) dphi = 0;
+
+					return [dA, db, dk, dphi, dc];
+				});
+			}
+
+			const initialParams = [A0, b0, k0, phi0, c0];
+			const { params } = levenbergMarquardt(data, initialParams, residualFn, jacobianFn, { maxIterations: 300, tolerance: 1e-10 });
+
+			const [A, b, k, phi, c] = params;
+
+			const xMin = Math.min(...data.map(p => p.x));
+			const xMax = Math.max(...data.map(p => p.x));
+			const xFit = Array.from({ length: 300 }, (_, i) => xMin + i * (xMax - xMin) / 299);
+			const fitFunction = xi => A * Math.exp(b * xi) * Math.sin(k * xi - phi) + c;
+			const yFit = xFit.map(fitFunction);
+
+			let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x} \sin(${k.toFixed(3)}x`;
+			if (phi > 0) equation += ` - ${phi.toFixed(3)}`;
+			else if (phi < 0) equation += ` + ${Math.abs(phi).toFixed(3)}`;
 			equation += `)`;
-			if (params.c > 0) {
-				equation += ` + ${params.c.toFixed(3)}`;
-			} else if (params.c < 0) {
-				equation += ` - ${Math.abs(params.c).toFixed(3)}`;
-			}
+			if (c > 0) equation += ` + ${c.toFixed(3)}`;
+			else if (c < 0) equation += ` - ${Math.abs(c).toFixed(3)}`;
 
-			// Store the fitted curve for this dataset.
 			fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
 
-			updateResults(equation, rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y), fitFunction);
+			updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction);
 			plotGraph(xFit, yFit);
 		} catch (error) {
 			console.error('Error performing sinusoidal fit:', error);
@@ -4142,111 +4214,98 @@
 		}
 	}
 
+
 	function performGaussianFit() {
 		try {
-			let A = parseFloat(document.getElementById('initial-A-gaussian').value);
-			let mu = parseFloat(document.getElementById('initial-mu').value);
-			let sigma = parseFloat(document.getElementById('initial-sigma').value);
-			let c = parseFloat(document.getElementById('initial-c-gaussian').value);
+			let A0 = parseFloat(document.getElementById('initial-A-gaussian').value);
+			let mu0 = parseFloat(document.getElementById('initial-mu').value);
+			let sigma0 = parseFloat(document.getElementById('initial-sigma').value);
+			let c0 = parseFloat(document.getElementById('initial-c-gaussian').value);
 
-			if (isNaN(A) || isNaN(mu) || isNaN(sigma) || isNaN(c)) {
+			if (!Number.isFinite(A0) || !Number.isFinite(mu0) || !Number.isFinite(sigma0) || !Number.isFinite(c0)) {
 				alert('Please provide valid initial parameters for Gaussian fit.');
 				return;
 			}
 
-			const params = { A, mu, sigma, c };
+			if (sigma0 === 0) sigma0 = 1e-6;
+			if (sigma0 < 0) sigma0 = Math.abs(sigma0);
 
-			const learningRateA = 1e-7;
-			const learningRateMu = 1e-7;
-			const learningRateSigma = 1e-7;
-			const learningRateC = 1e-7;
-
-			const maxIterations = 50000;
-			const tolerance = 1e-8;
-
-			function gaussian(x, p) {
-				return p.A * Math.exp(-((x - p.mu) ** 2) / (2 * p.sigma ** 2)) + p.c;
+			const data = rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+			if (data.length < 4) {
+				alert('Gaussian fit requires at least four valid data points.');
+				return;
 			}
 
-			function computeMSE(p) {
-				let mseSum = 0;
-				for (let i = 0; i < rawData[activeSet].length; i++) {
-					const { x, y } = rawData[activeSet][i];
-					const prediction = gaussian(x, p);
-					const error = y - prediction;
-					mseSum += error * error;
+			// Model: y = A exp(- (x-mu)^2 / (2 sigma^2)) + c
+			function residualFn(params, pts) {
+				const [A, mu, sigma, c] = params;
+				const PEN = 1e6;
+				if (!Number.isFinite(sigma) || sigma <= 0) {
+					return new Array(pts.length).fill(PEN);
 				}
-				return mseSum / rawData[activeSet].length;
+				const s2 = sigma * sigma;
+				return pts.map(({ x, y }) => {
+					try {
+						const d = x - mu;
+						const expo = -(d * d) / (2 * s2);
+						const e = Math.exp(expo);
+						const yPred = A * e + c;
+						if (!Number.isFinite(yPred)) return PEN;
+						return yPred - y;
+					} catch {
+						return PEN;
+					}
+				});
 			}
 
-			let previousError = computeMSE(params);
-
-			for (let iteration = 0; iteration < maxIterations; iteration++) {
-				let dA = 0,
-					dMu = 0,
-					dSigma = 0,
-					dC = 0;
-
-				for (let i = 0; i < rawData[activeSet].length; i++) {
-					const { x, y } = rawData[activeSet][i];
-					const expTerm = Math.exp(-((x - params.mu) ** 2) / (2 * params.sigma ** 2));
-					const prediction = params.A * expTerm + params.c;
-					const error = y - prediction;
-
-					dA += error * expTerm;
-					dMu += error * params.A * expTerm * ((x - params.mu) / (params.sigma ** 2));
-					dSigma += error * params.A * expTerm * ((x - params.mu) ** 2) / (params.sigma ** 3);
-					dC += error;
+			function jacobianFn(params, pts) {
+				const [A, mu, sigma, c] = params;
+				if (!Number.isFinite(sigma) || sigma <= 0) {
+					return pts.map(() => [0, 0, 0, 0]);
 				}
+				const s2 = sigma * sigma;
+				const s3 = s2 * sigma;
+				return pts.map(({ x, y }) => {
+					const d = x - mu;
+					let e;
+					try {
+						e = Math.exp(-(d * d) / (2 * s2));
+					} catch {
+						return [0, 0, 0, 0];
+					}
+					let dA = e;
+					let dMu = A * e * (d / s2);
+					let dSigma = A * e * ((d * d) / s3);
+					let dC = 1;
 
-				const N = rawData[activeSet].length;
-				dA = -2 * dA / N;
-				dMu = -2 * dMu / N;
-				dSigma = -2 * dSigma / N;
-				dC = -2 * dC / N;
+					if (!Number.isFinite(dA)) dA = 0;
+					if (!Number.isFinite(dMu)) dMu = 0;
+					if (!Number.isFinite(dSigma)) dSigma = 0;
 
-				params.A -= learningRateA * dA;
-				params.mu -= learningRateMu * dMu;
-				params.sigma -= learningRateSigma * dSigma;
-				params.c -= learningRateC * dC;
-
-				if (params.sigma <= 0) {
-					params.sigma = Math.abs(params.sigma) || 1e-6;
-				}
-
-				const currentError = computeMSE(params);
-				if (Math.abs(previousError - currentError) < tolerance) {
-					break;
-				}
-				previousError = currentError;
+					return [dA, dMu, dSigma, dC];
+				});
 			}
 
-			const xValues = rawData[activeSet].map(p => p.x);
-			const yValues = rawData[activeSet].map(p => p.y);
-			const xMin = Math.min(...xValues);
-			const xMax = Math.max(...xValues);
-			const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
-			const yFit = xFit.map(xi => gaussian(xi, params));
+			const initialParams = [A0, mu0, sigma0, c0];
+			const { params } = levenbergMarquardt(data, initialParams, residualFn, jacobianFn, { maxIterations: 300, tolerance: 1e-10 });
 
-			let muTerm;
-			if (params.mu < 0) {
-				muTerm = `(x + ${Math.abs(params.mu).toFixed(3)})`;
-			} else {
-				muTerm = `(x - ${params.mu.toFixed(3)})`;
-			}
-			let equation = `y = ${params.A.toFixed(3)} \\; e^{-\\frac{${muTerm}^2}{2 \\; (${params.sigma.toFixed(3)})^2}}`;
-			if (params.c > 0) {
-				equation += ` \\; + \\; ${params.c.toFixed(3)}`;
-			} else if (params.c < 0) {
-				equation += ` \\; - \\; ${Math.abs(params.c).toFixed(3)}`;
-			};
+			let [A, mu, sigma, c] = params;
+			if (!Number.isFinite(sigma) || sigma <= 0) sigma = Math.max(1e-6, Math.abs(sigma0));
 
-			const fitFunction = xi => gaussian(xi, params);
+			const xMin = Math.min(...data.map(p => p.x));
+			const xMax = Math.max(...data.map(p => p.x));
+			const xFit = Array.from({ length: 300 }, (_, i) => xMin + i * (xMax - xMin) / 299);
 
-			// Store the fitted curve for this dataset.
+			const fitFunction = xi => A * Math.exp(-((xi - mu) ** 2) / (2 * sigma * sigma)) + c;
+			const yFit = xFit.map(fitFunction);
+
+			let equation = `y = ${A.toFixed(3)} e^{-\frac{(x - ${mu.toFixed(3)})^2}{2(${sigma.toFixed(3)})^2}}`;
+			if (c > 0) equation += ` + ${c.toFixed(3)}`;
+			else if (c < 0) equation += ` - ${Math.abs(c).toFixed(3)}`;
+
 			fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
 
-			updateResults(equation, xValues, yValues, fitFunction);
+			updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction);
 			plotGraph(xFit, yFit);
 		} catch (error) {
 			console.error('Error performing Gaussian fit:', error);
@@ -4254,66 +4313,55 @@
 		}
 	}
 
-	window.onload = function() {
-		initializeTable();
-		['x-column-name', 'y-column-name'].forEach(id => {
-			const value = document.getElementById(id).value;
-			renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
-		});
-
-		clearRows();
-
-		// Update the graph title based on the current column headings:
-		updateGraphTitle();
-
-		// Trigger typesetting for the new graph title if necessary.
-		MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('graph-title')]);
-
-		updateBasicFitEquation();
-		const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
-		changeAdvancedFitMethod();
-	};
 
 	document.addEventListener("DOMContentLoaded", function() {
-		// Render LaTeX for column headings.
-		['x-column-name', 'y-column-name'].forEach(id => {
-			const value = document.getElementById(id).value;
-			renderLatex(`#${id}-column-latex`, formatLabelForLatex(value));
-		});
+		// Ensure base dataset structures exist.
+		if (!datasetHeaders[0]) datasetHeaders[0] = { x: 'x', y: 'y' };
+		if (!datasetToggles[0]) datasetToggles[0] = { x: false, y: false };
+		if (!datasetErrorTypes[0]) datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
 
-		// Update the graph title based on the current column headings.
-		updateGraphTitle();
+		// Initialise a clean table with defaults.
+		clearRows(true);
 
-		// Trigger MathJax typesetting for the graph title.
-		if (typeof MathJax !== 'undefined') {
-			MathJax.Hub.Queue(["Typeset", MathJax.Hub, document.getElementById('graph-title')]);
+		// Persist initial headers.
+		datasetHeaders[0].x = document.getElementById('x-column-name').value || 'x';
+		datasetHeaders[0].y = document.getElementById('y-column-name').value || 'y';
+
+		// If the user edits the title manually, stop auto-updating it.
+		const titleInput = document.getElementById('graph-title');
+		if (titleInput) {
+			titleInput.addEventListener('input', function() {
+				titleWasAuto = false;
+			});
 		}
 
-		// Update the basic fit equation and advanced fit method.
+		// Fit UI initialisation.
 		updateBasicFitEquation();
 		const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
 		changeAdvancedFitMethod();
+		setInitialParameters(initialAdvancedFitMethod);
 
-		// Initialize the dataset tabs bar.
+		// Dataset tabs.
 		initializeDatasetTabsBar();
 
-		// Initialize the combined plot inputs.
+		// Combined plot inputs.
 		initCombinedPlotInputs();
 
-		// Set up the LaTeX mode toggle
+		// LaTeX mode toggle.
 		const latexToggle = document.getElementById('latex-mode-toggle');
 		if (latexToggle) {
 			latexToggle.checked = false; // default off
 			latexToggle.addEventListener('change', function() {
 				latexMode = this.checked;
-				// Optionally, re-run update routines so that headings, labels, and titles re-render
 				updatePlotAndRenderLatex();
-				updateLabels('x');
-				updateLabels('y');
+				// Re-render headers and uncertainty headings.
+				loadHeaders();
+				updateUncertaintyHeaders('x');
+				updateUncertaintyHeaders('y');
+				// Convert auto-title formatting if it has not been manually edited.
 				updateGraphTitle();
 			});
 		}
-
 	});
 </script>
 
