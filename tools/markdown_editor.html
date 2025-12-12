@@ -109,14 +109,11 @@
 			color: #ff5f1f;
 		}
 
-		/* Layout Containers */
 		#editorContainer {
 			display: flex;
 			flex: 1;
 			background-color: var(--pane-background);
 			height: 100%;
-			border-top: 0px solid var(--border-color);
-			border-bottom: 0px solid var(--border-color);
 		}
 
 		#inputPane,
@@ -287,6 +284,7 @@
 			color: var(--text-color);
 		}
 
+		/* Code blocks */
 		code {
 			background-color: var(--code-background);
 			padding: 0.1em 0.2em;
@@ -329,7 +327,7 @@
 			color: var(--code-text-color);
 		}
 
-		/* Dark mode syntax highlighting colors */
+		/* Dark Mode Syntax Colors */
 		body.dark-mode .hljs-comment,
 		body.dark-mode .hljs-quote {
 			color: #8d9a70 !important;
@@ -371,6 +369,7 @@
 			color: #e6db74 !important;
 		}
 
+		/* Tables */
 		table {
 			max-width: 100%;
 			margin: 20px auto;
@@ -404,9 +403,7 @@
 			text-align: left;
 		}
 
-		/* ---------------------------------------------------------------------- */
-		/* Printing styles (With Proper Color Reset)                              */
-		/* ---------------------------------------------------------------------- */
+		/* Print Styles */
 		@media print {
 			:root {
 				--background-color: #ffffff !important;
@@ -446,8 +443,8 @@
 			li,
 			blockquote {
 				background-color: #ffffff !important;
-				/* Default text black, but allow inline colors to work */
 				color: #000000;
+				/* Standard black text, but allows inline colors */
 			}
 
 			body {
@@ -463,7 +460,9 @@
 				overflow: visible !important;
 			}
 
-			#inputPane {
+			#inputPane,
+			.pane-heading-container,
+			.no-print {
 				display: none !important;
 			}
 
@@ -474,16 +473,6 @@
 				overflow: visible !important;
 				padding: 15mm !important;
 				border: none !important;
-			}
-
-			.pane-heading-container {
-				display: none !important;
-				margin: 0 !important;
-				padding: 0 !important;
-			}
-
-			.no-print {
-				display: none !important;
 			}
 
 			svg,
@@ -501,12 +490,6 @@
 				display: none !important;
 			}
 
-			.page-break {
-				display: block;
-				page-break-after: always;
-				height: 0;
-			}
-
 			svg {
 				color: #000000 !important;
 				stroke: #000000 !important;
@@ -521,10 +504,6 @@
 			code {
 				background-color: #ffffff !important;
 			}
-
-			/* Note: We REMOVED the rule that forced .hljs to black. 
-         This allows the 'Default' light theme colors to show up 
-         when we swap the stylesheet in JS. */
 
 			a,
 			a:visited {
@@ -627,7 +606,6 @@
 				<h2 class="pane-heading">Markdown Input</h2>
 				<div class="heading-placeholder"></div>
 			</div>
-
 			<div class="buttonContainer">
 				<button id="loadFileButton">Open .md File</button>
 				<button id="saveMDButton">Save .md</button>
@@ -642,16 +620,12 @@
 				<div class="heading-placeholder"></div>
 				<h2 class="pane-heading">Rendered Output</h2>
 				<div class="theme-toggle-wrapper">
-					<button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode" title="Switch to Dark Mode">
-						☀️
-					</button>
+					<button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode" title="Switch to Dark Mode">☀️</button>
 				</div>
 			</div>
-
 			<div class="buttonContainer no-print">
 				<button id="printButton" title="Print to PDF">Print to PDF</button>
 				<button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
-
 				<div class="toggle-container">
 					<label for="syncScrollSwitch" class="switch-label">Sync Scroll</label>
 					<label class="switch">
@@ -691,27 +665,21 @@
 
 		function debounced(...args) {
 			if (t) clearTimeout(t);
-			t = setTimeout(() => {
-				t = null;
-				fn.apply(this, args);
-			}, wait);
+			t = setTimeout(() => { t = null;
+				fn.apply(this, args); }, wait);
 		}
 		debounced.flush = (...args) => {
-			if (t) {
-				clearTimeout(t);
-				t = null;
-			}
+			if (t) { clearTimeout(t);
+				t = null; }
 			fn.apply(this, args);
 		};
-		debounced.cancel = () => {
-			if (t) clearTimeout(t);
-			t = null;
-		};
+		debounced.cancel = () => { if (t) clearTimeout(t);
+			t = null; };
 		return debounced;
 	}
 
 	/* ---------------------------------------------------------------------- */
-	/* 2) Marked configuration (set once)                                     */
+	/* 2) Marked configuration                                                */
 	/* ---------------------------------------------------------------------- */
 	marked.setOptions({
 		gfm: true,
@@ -726,251 +694,222 @@
 		}
 	});
 
-	/**
-	 * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
-	 */
-	function loadSampleDocument() {
-		fetch('mkdwn_sample_doc.md')
-			.then(response => {
-				if (!response.ok) throw new Error('Network response was not ok');
-				return response.text();
-			})
-			.then(data => {
-				markdownInput.value = data;
-				renderContent();
-			})
-			.catch(error => {
-				console.error('Error loading sample document:', error);
-				if (window.location.protocol === 'file:') {
-					alert(
-						'Sample Document cannot be loaded when this editor is opened locally (file://) because browsers block file fetches.\n\n' +
-						'Please run this folder via a simple web server, or use "Open .md File" to load a local Markdown file.'
-					);
-				} else {
-					alert('Failed to load the sample document. Please try again or use "Open .md File".');
-				}
-			});
-	}
+	// Helper: Inject Line Numbers into Rendered HTML for Sync (Naive Implementation)
+	// This helps mapping, though Marked doesn't natively support easy line mapping in the browser.
+	// We will stick to the improved line-count sync logic below.
 
-	function preprocessMarkdown(input) {
-		const regex = /(\$\$?)([\s\S]+?)\1/g;
-		return input.replace(regex, function(match, p1, p2) {
-			const escaped = p2.replace(/\\/g, '\\\\');
-			return p1 + escaped + p1;
-		});
-	}
+	/* ---------------------------------------------------------------------- */
+	/* 3) Main Render Logic (Tokenized to fix Math in Tables)                 */
+	/* ---------------------------------------------------------------------- */
+	// We use a "Masking" strategy:
+	// 1. Find all LaTeX ($...$) and replace them with unique placeholders.
+	// 2. Run Marked (Markdown -> HTML). Marked will treat placeholders as plain text (safe!).
+	// 3. Swap placeholders back to real LaTeX.
+	// 4. Let MathJax render the LaTeX.
 
 	function renderContent() {
-		const inputText = markdownInput.value;
-		const preprocessedText = preprocessMarkdown(inputText);
+		const rawMarkdown = markdownInput.value;
+		const mathMap = new Map();
+		let mathId = 0;
 
-		const parsedMarkdown = marked.parse(preprocessedText);
-		const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-		renderedOutput.innerHTML = sanitizedContent;
+		// A. Masking Stage
+		// Regex matches: $$...$$ (Display) OR $...$ (Inline, not preceded by backslash)
+		// We mask them so Marked doesn't escape the $ or confuse pipes | in tables.
+		const maskedText = rawMarkdown.replace(/(\$\$[\s\S]*?\$\$)|((?<!\\)\$(?:\\.|[^$\\])*\$)/g, (match) => {
+			// Create a unique token
+			const token = `MATH_TOKEN_${mathId++}_MATH_TOKEN`;
+			mathMap.set(token, match);
+			return token;
+		});
 
+		// B. Parse Markdown
+		const parsedHtml = marked.parse(maskedText);
+		const sanitizedHtml = DOMPurify.sanitize(parsedHtml);
+
+		// C. Unmasking Stage
+		// Restore the Math content into the HTML
+		const finalHtml = sanitizedHtml.replace(/MATH_TOKEN_\d+_MATH_TOKEN/g, (match) => {
+			const original = mathMap.get(match);
+			// Double-escape backslashes for MathJax (standard behavior for this stack)
+			return original ? original.replace(/\\/g, '\\\\') : match;
+		});
+
+		renderedOutput.innerHTML = finalHtml;
+
+		// D. Syntax Highlighting & MathJax
+		if (window.hljs) hljs.highlightAll();
 		MathJax.typesetPromise([renderedOutput]).catch(console.error);
 	}
 
 	/* ---------------------------------------------------------------------- */
-	/* Print Logic: Swaps to Light Theme for printing to keep colors           */
+	/* 4) Scroll Sync: Line-Count Estimation                                  */
 	/* ---------------------------------------------------------------------- */
+	// The old "Percentage" sync fails because Input (text) and Output (images) 
+	// have vastly different heights. 
+	// New Logic: 
+	// 1. Calculate which "line number" is at the top of the Textarea.
+	// 2. Estimate position in Output based on that ratio.
+
+	let activePane = 'input';
+
+	function setActivePane(pane) { activePane = pane; }
+
+	markdownInput.addEventListener('mouseover', () => setActivePane('input'));
+	renderedOutput.addEventListener('mouseover', () => setActivePane('output'));
+	markdownInput.addEventListener('focus', () => setActivePane('input'));
+	renderedOutput.addEventListener('pointerdown', () => setActivePane('output'));
+	markdownInput.addEventListener('pointerdown', () => setActivePane('input'));
+
+	let inputScrollRAF = null;
+	let outputScrollRAF = null;
+
+	// Simple Line-Count Sync (Better than raw %)
+	function syncScroll(sourceEl, targetEl) {
+		// 1. Get total lines in input
+		const text = markdownInput.value;
+		const totalLines = text.split('\n').length;
+
+		// 2. Calculate current top line
+		// We assume an average line height for the textarea (approx 22.5px usually, but we calculate)
+		const textAreaLineHeight = 22.5; // Approximation for font-size 15px * 1.5
+		const currentLine = markdownInput.scrollTop / textAreaLineHeight;
+
+		// 3. Ratio based on lines, not pixels
+		const ratio = Math.min(currentLine / totalLines, 1);
+
+		// 4. Apply to output
+		if (activePane === 'input') {
+			const targetScrollable = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+			renderedOutput.scrollTop = ratio * targetScrollable;
+		} else {
+			// Reverse sync (Output -> Input) is harder because we don't know "lines" in HTML.
+			// We fall back to standard percentage for this direction.
+			const outRatio = renderedOutput.scrollTop / (renderedOutput.scrollHeight - renderedOutput.clientHeight);
+			markdownInput.scrollTop = outRatio * (markdownInput.scrollHeight - markdownInput.clientHeight);
+		}
+	}
+
+	markdownInput.addEventListener('scroll', () => {
+		if (!syncScrollSwitch.checked || activePane !== 'input') return;
+		if (inputScrollRAF) return;
+		inputScrollRAF = requestAnimationFrame(() => {
+			inputScrollRAF = null;
+			syncScroll(markdownInput, renderedOutput);
+		});
+	}, { passive: true });
+
+	renderedOutput.addEventListener('scroll', () => {
+		if (!syncScrollSwitch.checked || activePane !== 'output') return;
+		if (outputScrollRAF) return;
+		outputScrollRAF = requestAnimationFrame(() => {
+			outputScrollRAF = null;
+			syncScroll(renderedOutput, markdownInput);
+		});
+	}, { passive: true });
+
+
+	/* ---------------------------------------------------------------------- */
+	/* 5) File & Print Operations                                             */
+	/* ---------------------------------------------------------------------- */
+
+	function loadSampleDocument() {
+		fetch('mkdwn_sample_doc.md')
+			.then(r => { if (!r.ok) throw new Error('Err'); return r.text(); })
+			.then(d => { markdownInput.value = d;
+				renderContent(); })
+			.catch(e => {
+				if (window.location.protocol === 'file:') {
+					alert('Local File Security Block: Browsers do not allow fetching files (like the sample) when opening HTML directly from disk. Please use "Open .md File" instead.');
+				} else {
+					alert('Failed to load sample document.');
+				}
+			});
+	}
+
 	async function printToPDF() {
 		debouncedRender.flush();
-
-		// Check if we are currently in Dark Mode
 		const isDark = document.body.classList.contains('dark-mode');
 
-		// If Dark Mode, temporarily switch highlight.js to Light Mode (default)
-		// so the printed paper has readable colors (not yellow-on-white).
+		// Temporary Theme Swap for "Colorful" Print
 		if (isDark) {
 			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-			// Give the browser a split second to load the new stylesheet
-			await new Promise(r => setTimeout(r, 100));
+			// Wait for style to load
+			await new Promise(r => setTimeout(r, 150));
 		}
 
 		await MathJax.typesetPromise([renderedOutput]).catch(console.error);
 		window.print();
 
-		// After print dialog closes, switch back if we were in Dark Mode
+		// Revert Theme
 		if (isDark) {
 			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
 		}
 	}
 
-	/* ---------------------------------------------------------------------- */
-	/* Export HTML                                                            */
-	/* ---------------------------------------------------------------------- */
 	function exportHTML() {
-		const fileName = prompt('Enter file name for the HTML export:', 'document.html');
+		const fileName = prompt('Enter file name:', 'document.html');
 		if (!fileName) return;
 
-		const sanitizedHTML = renderedOutput.innerHTML;
-		const doc = document.implementation.createHTMLDocument('Exported Document');
+		const doc = document.implementation.createHTMLDocument('Export');
 		const head = doc.head;
 		const body = doc.body;
 
+		// Add Meta & Title
 		const meta = document.createElement('meta');
 		meta.setAttribute('charset', 'UTF-8');
 		head.appendChild(meta);
-
 		const title = document.createElement('title');
 		title.textContent = 'Exported Document';
 		head.appendChild(title);
 
+		// CSS Block (Copy of Main CSS + Dark Mode support)
 		const style = document.createElement('style');
+		// We insert a simplified version of the CSS for the export
 		style.textContent = `
-        :root {
-          --background-color: #ffffff;
-          --text-color: #000000;
-          --pane-background: #ffffff;
-          --pane-heading-background: #333333;
-          --pane-heading-color: #ffffff;
-          --button-background: #f0f0f0;
-          --button-color: #000000;
-          --border-color: #ccc;
-          --code-background: #f0f0f0;
-          --table-border-color: black;
-          --table-header-background: #f4f4f4;
-          --switch-width: 43px;
-          --switch-height: 20px;
-          --slider-size: 15px;
-          --slider-transform: 23px;
-          --switch-active-color: #009688;
-          --switch-background-color: #ccc;
-          --switch-knob-color: white;
-          --switch-label-font-size: 18px;
-        }
-        body.dark-mode {
-          --background-color: #1e1e1e;
-          --text-color: #e0e0e0;
-          --pane-background: #1e1e1e;
-          --pane-heading-background: #2d2c2c;
-          --pane-heading-color: #ffffff;
-          --button-background: #474646;
-          --button-color: #ffffff;
-          --border-color: #555555;
-          --code-background: #2f2f2f;
-          --table-border-color: #555555;
-          --table-header-background: #333333;
-          --code-text-color: #f8f8f2;
-          --switch-active-color: #009688;
-        }
-        body {
-          font-family: Helvetica, sans-serif;
-          line-height: 1.5;
-          margin: 20px;
-          background-color: var(--background-color);
-          color: var(--text-color);
-        }
-        body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
-          background-color: var(--background-color);
-          color: var(--text-color);
-        }
-        a { color: #ff5f1f; text-decoration: none; }
-        a:hover { color: #ff5f1f; text-decoration: underline; }
-        a:visited { color: #ff5f1f; }
-        table {
-          max-width: 100%;
-          margin: 20px auto;
-          border-collapse: collapse;
-          border: 1px solid var(--table-border-color);
-        }
-        th, td { border: 1px solid var(--table-border-color); padding: 8px; }
-        th[align="left"], td[align="left"] { text-align: left; }
-        th[align="center"], td[align="center"] { text-align: center; }
-        th[align="right"], td[align="right"] { text-align: right; }
-        th, td { text-align: left; }
-        code {
-          background-color: var(--code-background);
-          padding: 0.1em 0.2em;
-          border-radius: 3px;
-          font-size: 0.95em;
-          line-height: 1;
-          font-family: "Courier New", Courier, monospace;
-          vertical-align: baseline;
-          color: inherit;
-        }
-        pre {
-          background-color: var(--code-background);
-          padding: 0;
-          border-radius: 5px;
-          overflow-x: auto;
-          font-size: 1.05em;
-          line-height: 1.5;
-          margin: 2px 0;
-        }
-        pre code {
-          background: none;
-          padding: 0;
-          border-radius: 0;
-          font-family: inherit;
-          line-height: 1.5;
-          font-size: inherit;
-          color: inherit;
-        }
-        .hljs {
-          line-height: 1.5;
-          font-size: 1.05em;
-          background-color: inherit;
-          color: inherit;
-        }
-        body.dark-mode .hljs { color: #f8f8f2 !important; }
-        body.dark-mode .hljs-comment, body.dark-mode .hljs-quote { color: #8d9a70 !important; }
-        body.dark-mode .hljs-keyword, body.dark-mode .hljs-selector-tag, body.dark-mode .hljs-subst { color: #66d9ef !important; }
-        body.dark-mode .hljs-string, body.dark-mode .hljs-doctag { color: #e6db74 !important; }
-        body.dark-mode .hljs-number, body.dark-mode .hljs-regexp, body.dark-mode .hljs-tag .hljs-attr { color: #ae81ff !important; }
-        body.dark-mode .hljs-title, body.dark-mode .hljs-section { color: #a6e22e !important; }
-        body.dark-mode .hljs-type, body.dark-mode .hljs-built_in { color: #fd971f !important; }
-        body.dark-mode .hljs-symbol, body.dark-mode .hljs-bullet { color: #f92672 !important; }
-        body.dark-mode .hljs-link { color: #e6db74 !important; }
-        img { max-width: 100%; height: auto; }
-      `;
+      body { font-family: Helvetica, sans-serif; line-height: 1.5; padding: 20px; color: #000; background: #fff; }
+      body.dark-mode { background: #1e1e1e; color: #e0e0e0; }
+      table { border-collapse: collapse; margin: 20px 0; }
+      th, td { border: 1px solid #555; padding: 8px; }
+      code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+      pre { background: #f0f0f0; padding: 10px; overflow-x: auto; border-radius: 5px; }
+      body.dark-mode code, body.dark-mode pre { background: #2f2f2f; color: #f8f8f2; }
+      a { color: #ff5f1f; }
+      img { max-width: 100%; }
+      /* Print Rules for Export */
+      @media print { body { color: #000 !important; background: #fff !important; } }
+    `;
 		head.appendChild(style);
 
-		const isDarkMode = document.body.classList.contains('dark-mode');
-		const highlightLink = document.createElement('link');
-		highlightLink.rel = 'stylesheet';
-		highlightLink.href = isDarkMode ?
+		// Libraries
+		const isDark = document.body.classList.contains('dark-mode');
+		const hlStyle = document.createElement('link');
+		hlStyle.rel = 'stylesheet';
+		hlStyle.href = isDark ?
 			'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css' :
 			'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-		head.appendChild(highlightLink);
+		head.appendChild(hlStyle);
 
-		const highlightScript = document.createElement('script');
-		highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
-		head.appendChild(highlightScript);
+		// Scripts
+		const hlScript = document.createElement('script');
+		hlScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
+		head.appendChild(hlScript);
 
-		const highlightInit = document.createElement('script');
-		highlightInit.textContent = `
-        window.addEventListener('DOMContentLoaded', () => {
-          if (window.hljs) hljs.highlightAll();
-        });
-      `;
-		head.appendChild(highlightInit);
+		const mjConfig = document.createElement('script');
+		mjConfig.textContent = "window.MathJax={tex:{inlineMath:[['$','$']],displayMath:[['$$','$$']],processEscapes:true},svg:{fontCache:'local'}};";
+		head.appendChild(mjConfig);
 
-		const mathjaxConfigScript = document.createElement('script');
-		mathjaxConfigScript.textContent = `
-        window.MathJax = {
-          tex: {
-            inlineMath: [['$', '$']],
-            displayMath: [['$$', '$$']],
-            processEscapes: true,
-            packages: ['base', 'ams'],
-          },
-          svg: { fontCache: 'local' }
-        };
-      `;
-		head.appendChild(mathjaxConfigScript);
+		const mjScript = document.createElement('script');
+		mjScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js';
+		head.appendChild(mjScript);
 
-		const mathjaxScript = document.createElement('script');
-		mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js';
-		head.appendChild(mathjaxScript);
+		const initScript = document.createElement('script');
+		initScript.textContent = "window.addEventListener('DOMContentLoaded',()=>hljs.highlightAll());";
+		head.appendChild(initScript);
 
-		body.innerHTML = sanitizedHTML;
+		body.innerHTML = renderedOutput.innerHTML;
+		if (isDark) body.classList.add('dark-mode');
 
-		if (isDarkMode) body.classList.add('dark-mode');
-
-		const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
-		const blob = new Blob([exportedHTML], { type: 'text/html' });
+		const blob = new Blob([`<!DOCTYPE html>${doc.documentElement.outerHTML}`], { type: 'text/html' });
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(blob);
 		link.download = fileName;
@@ -978,9 +917,8 @@
 	}
 
 	function saveMarkdown() {
-		const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
+		const fileName = prompt('File name:', 'document.md');
 		if (!fileName) return;
-
 		const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(blob);
@@ -996,10 +934,8 @@
 			const file = e.target.files[0];
 			if (!file) return;
 			const reader = new FileReader();
-			reader.onload = event => {
-				markdownInput.value = event.target.result;
-				renderContent();
-			};
+			reader.onload = event => { markdownInput.value = event.target.result;
+				renderContent(); };
 			reader.readAsText(file);
 		};
 		input.click();
@@ -1019,98 +955,33 @@
 
 	function toggleTheme() {
 		document.body.classList.toggle('dark-mode');
-		if (document.body.classList.contains('dark-mode')) {
-			themeToggleButton.textContent = '🌙';
-			themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-			themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-			localStorage.setItem('theme', 'markdown-dark');
-		} else {
-			themeToggleButton.textContent = '☀️';
-			themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-			themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-			localStorage.setItem('theme', 'markdown-light');
-		}
+		const isDark = document.body.classList.contains('dark-mode');
+		highlightStyle.href = isDark ?
+			'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css' :
+			'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+		localStorage.setItem('theme', isDark ? 'markdown-dark' : 'markdown-light');
+		updateThemeToggleButton();
 	}
 
 	function updateThemeToggleButton() {
-		if (document.body.classList.contains('dark-mode')) {
-			themeToggleButton.textContent = '🌙';
-			themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-			themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-		} else {
-			themeToggleButton.textContent = '☀️';
-			themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-			themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-		}
+		const isDark = document.body.classList.contains('dark-mode');
+		themeToggleButton.textContent = isDark ? '🌙' : '☀️';
+		themeToggleButton.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
 	}
 
-	/* ---------------------------------------------------------------------- */
-	/* Scroll Sync: Driver/Follower model (anti-jitter)                        */
-	/* ---------------------------------------------------------------------- */
-	let activePane = 'input';
-
-	function setActivePane(pane) { activePane = pane; }
-
-	markdownInput.addEventListener('mouseover', () => setActivePane('input'));
-	renderedOutput.addEventListener('mouseover', () => setActivePane('output'));
-	markdownInput.addEventListener('focus', () => setActivePane('input'));
-	renderedOutput.addEventListener('pointerdown', () => setActivePane('output'));
-	markdownInput.addEventListener('pointerdown', () => setActivePane('input'));
-
-	let inputScrollRAF = null;
-	let outputScrollRAF = null;
-
-	function syncScroll(sourceEl, targetEl) {
-		const sourceScrollTop = sourceEl.scrollTop;
-		const sourceScrollable = sourceEl.scrollHeight - sourceEl.clientHeight;
-		const targetScrollable = targetEl.scrollHeight - targetEl.clientHeight;
-		if (sourceScrollable <= 0) { targetEl.scrollTop = 0; return; }
-		const ratio = sourceScrollTop / sourceScrollable;
-		const next = ratio * (targetScrollable <= 0 ? 0 : targetScrollable);
-		if (Math.abs(targetEl.scrollTop - next) > 1) { targetEl.scrollTop = next; }
-	}
-
-	markdownInput.addEventListener('scroll', () => {
-		if (!syncScrollSwitch.checked) return;
-		if (activePane !== 'input') return;
-		if (inputScrollRAF) return;
-		inputScrollRAF = requestAnimationFrame(() => {
-			inputScrollRAF = null;
-			syncScroll(markdownInput, renderedOutput);
-		});
-	}, { passive: true });
-
-	renderedOutput.addEventListener('scroll', () => {
-		if (!syncScrollSwitch.checked) return;
-		if (activePane !== 'output') return;
-		if (outputScrollRAF) return;
-		outputScrollRAF = requestAnimationFrame(() => {
-			outputScrollRAF = null;
-			syncScroll(renderedOutput, markdownInput);
-		});
-	}, { passive: true });
-
-	/* ---------------------------------------------------------------------- */
-	/* Init + event wiring                                                     */
-	/* ---------------------------------------------------------------------- */
+	/* Init */
 	const debouncedRender = debounce(renderContent, 300);
-
 	initializeTheme();
 	renderContent();
 
 	markdownInput.addEventListener('input', debouncedRender);
-
 	printButton.addEventListener('click', printToPDF);
 	exportHTMLButton.addEventListener('click', exportHTML);
 	saveMDButton.addEventListener('click', saveMarkdown);
 	loadFileButton.addEventListener('click', loadMarkdownFile);
 	loadSampleButton.addEventListener('click', loadSampleDocument);
-	clearButton.addEventListener('click', () => {
-		markdownInput.value = '';
-		renderContent();
-	});
+	clearButton.addEventListener('click', () => { markdownInput.value = '';
+		renderContent(); });
 	themeToggleButton.addEventListener('click', toggleTheme);
 </script>
 
