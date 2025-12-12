@@ -2,851 +2,823 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Markdown Editor with LaTeX</title>
-  <link rel="icon" type="image/png" href="/favicon.png">
-
-  <!-- MathJax Configuration -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$']],
-        displayMath: [['$$', '$$']],
-        processEscapes: true,
-        packages: ['base', 'ams'],
-      },
-      svg: {
-        fontCache: 'local',
-      }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-
-  <!-- Marked.js -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-  <!-- DOMPurify -->
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
-
-  <!-- Highlight.js Stylesheets -->
-  <link id="highlightStyle" rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
-
-  <!-- Highlight.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-
-  <!-- Initialize Highlight.js after DOM content is loaded -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      hljs.highlightAll();
-    });
-  </script>
-
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    :root {
-      --background-color: #ffffff;
-      --text-color: #000000;
-      --pane-background: #ffffff;
-      --pane-heading-background: #333333;
-      --pane-heading-color: #ffffff;
-      --button-background: #f0f0f0;
-      --button-color: #000000;
-      --border-color: #ccc;
-      --code-background: #f0f0f0;
-      --table-border-color: black;
-      --table-header-background: #f4f4f4;
-      --switch-width: 42px;
-      --switch-height: 18px;
-      --slider-size: 13px;
-      --slider-transform: 23px;
-      --switch-background-color: #ccc;
-      --switch-knob-color: white;
-      --switch-label-font-size: 14px;
-      --switch-active-color: #009688;
-    }
-
-    body.dark-mode {
-      --background-color: #1e1e1e;
-      --text-color: #e0e0e0;
-      --pane-background: #1e1e1e;
-      --pane-heading-background: #2d2c2c;
-      --pane-heading-color: #ffffff;
-      --button-background: #474646;
-      --button-color: #ffffff;
-      --border-color: #555555;
-      --code-background: #2f2f2f;
-      --table-border-color: #555555;
-      --table-header-background: #333333;
-      --code-text-color: #f8f8f2;
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      margin: 0;
-      font-family: Helvetica, sans-serif;
-      line-height: 1.5;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    html,
-    body {
-      overflow-x: hidden;
-    }
-
-    a {
-      color: #ff5f1f;
-      text-decoration: none;
-    }
-
-    a:hover {
-      color: #ff5f1f;
-      text-decoration: underline;
-    }
-
-    a:visited {
-      color: #ff5f1f;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Main container for both the input and output panes                     */
-    /* ---------------------------------------------------------------------- */
-    #editorContainer {
-      display: flex;
-      flex: 1;
-      background-color: var(--pane-background);
-      height: 100%;
-      border-top: 0px solid var(--border-color);
-      border-bottom: 0px solid var(--border-color);
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Left Pane = Markdown Input; Right Pane = Rendered Output               */
-    /* Each is 50% width on larger screens                                   */
-    /* ---------------------------------------------------------------------- */
-    #inputPane,
-    #outputPane {
-      width: 50%;
-      padding: 0;
-      box-sizing: border-box;
-      background-color: var(--pane-background);
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      border: none;
-    }
-
-    #inputPane {
-      border-right: 1px solid var(--border-color);
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Header container for each pane                                         */
-    /* ---------------------------------------------------------------------- */
-    .pane-heading-container {
-      display: grid;
-      grid-template-columns: 50px 1fr 50px;
-      height: 45px;
-      align-items: center;
-      background-color: var(--pane-heading-background);
-      color: var(--pane-heading-color);
-      margin: 0;
-      padding: 0 10px;
-    }
-
-    textarea:focus {
-      outline: none;
-    }
-
-    .logo-container img {
-      max-height: 30px;
-      margin: 0 auto 0 0;
-      display: block;
-    }
-
-    .heading-placeholder,
-    .theme-toggle-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pane-heading {
-      text-align: center;
-      margin: 0;
-      font-size: 1.2em;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Theme toggle button                                                    */
-    /* ---------------------------------------------------------------------- */
-    .theme-toggle-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      color: var(--pane-heading-color);
-      margin: 0;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .theme-toggle-button:hover {
-      opacity: 0.8;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Button container under pane headers                                    */
-    /* ---------------------------------------------------------------------- */
-    .buttonContainer {
-      margin: 10px 0;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
-
-    body.dark-mode .buttonContainer button {
-      background-color: var(--button-background);
-      color: var(--button-color);
-      border: none;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Toggle container for the sync scroll switch                            */
-    /* ---------------------------------------------------------------------- */
-    .toggle-container {
-      position: absolute;
-      right: 15px;
-      display: flex;
-      align-items: center;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* The switch for sync scroll                                             */
-    /* ---------------------------------------------------------------------- */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: var(--switch-width);
-      height: var(--switch-height);
-      margin-left: 2px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--switch-background-color);
-      transition: 0.4s;
-      border-radius: calc(var(--switch-height) / 2);
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: var(--slider-size);
-      width: var(--slider-size);
-      left: 2.5px;
-      bottom: 2.5px;
-      background-color: var(--switch-knob-color);
-      transition: 0.4s;
-      border-radius: 50%;
-    }
-
-    input:checked+.slider {
-      background-color: var(--switch-active-color);
-    }
-
-    input:focus+.slider {
-      box-shadow: 0 0 1px var(--switch-active-color);
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(var(--slider-transform));
-    }
-
-    .switch-label {
-      font-size: var(--switch-label-font-size);
-      margin-right: 5px;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Markdown input textarea                                                */
-    /* ---------------------------------------------------------------------- */
-    textarea {
-      flex: 1;
-      width: 100%;
-      padding: 20px;
-      border: none;
-      resize: none;
-      font-size: 15px;
-      line-height: 1.5;
-      box-sizing: border-box;
-      overflow-y: auto;
-      background-color: var(--pane-background);
-      color: var(--text-color);
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Rendered output area                                                   */
-    /* ---------------------------------------------------------------------- */
-    #renderedOutput {
-      flex: 1;
-      padding: 20px;
-      font-size: 15px;
-      line-height: 1.5;
-      box-sizing: border-box;
-      overflow-y: auto;
-      background-color: var(--pane-background);
-      color: var(--text-color);
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Code blocks and syntax highlighting                                    */
-    /* ---------------------------------------------------------------------- */
-    code {
-      background-color: var(--code-background);
-      padding: 0.1em 0.2em;
-      border-radius: 3px;
-      font-size: 0.95em;
-      line-height: 1;
-      font-family: "Courier New", Courier, monospace;
-      vertical-align: baseline;
-      color: inherit;
-    }
-
-    pre {
-      background-color: var(--code-background);
-      padding: 0;
-      border-radius: 5px;
-      overflow-x: auto;
-      font-size: 0.95em;
-      line-height: 1.5;
-      margin: 2px 0;
-    }
-
-    pre code {
-      background: none;
-      padding: 0;
-      border-radius: 0;
-      font-family: inherit;
-      line-height: 1.5;
-      font-size: inherit;
-      color: inherit;
-    }
-
-    .hljs {
-      line-height: 1.5;
-      font-size: 0.95em;
-      background-color: inherit;
-      color: inherit;
-    }
-
-    body.dark-mode .hljs {
-      color: var(--code-text-color);
-    }
-
-    body.dark-mode .hljs-comment,
-    body.dark-mode .hljs-quote {
-      color: #8d9a70 !important;
-    }
-
-    body.dark-mode .hljs-keyword,
-    body.dark-mode .hljs-selector-tag,
-    body.dark-mode .hljs-subst {
-      color: #66d9ef !important;
-    }
-
-    body.dark-mode .hljs-string,
-    body.dark-mode .hljs-doctag {
-      color: #e6db74 !important;
-    }
-
-    body.dark-mode .hljs-number,
-    body.dark-mode .hljs-regexp,
-    body.dark-mode .hljs-tag .hljs-attr {
-      color: #ae81ff !important;
-    }
-
-    body.dark-mode .hljs-title,
-    body.dark-mode .hljs-section {
-      color: #a6e22e !important;
-    }
-
-    body.dark-mode .hljs-type,
-    body.dark-mode .hljs-built_in {
-      color: #fd971f !important;
-    }
-
-    body.dark-mode .hljs-symbol,
-    body.dark-mode .hljs-bullet {
-      color: #f92672 !important;
-    }
-
-    body.dark-mode .hljs-link {
-      color: #e6db74 !important;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Table styling                                                          */
-    /* ---------------------------------------------------------------------- */
-    table {
-      max-width: 100%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      border: 1px solid var(--table-border-color);
-    }
-
-    th,
-    td {
-      border: 1px solid var(--table-border-color);
-      padding: 8px 10px;
-    }
-
-    th[align="left"],
-    td[align="left"] {
-      text-align: left;
-    }
-
-    th[align="center"],
-    td[align="center"] {
-      text-align: center;
-    }
-
-    th[align="right"],
-    td[align="right"] {
-      text-align: right;
-    }
-
-    th,
-    td {
-      text-align: left;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Printing styles                                                        */
-    /* ---------------------------------------------------------------------- */
-    @media print {
-      :root {
-        --background-color: #ffffff !important;
-        --text-color: #000000 !important;
-        --pane-background: #ffffff !important;
-        --pane-heading-background: #333333 !important;
-        --pane-heading-color: #ffffff !important;
-        --button-background: #f0f0f0 !important;
-        --button-color: #000000 !important;
-        --border-color: #ccc !important;
-        --code-background: #f0f0f0 !important;
-        --table-border-color: black !important;
-        --table-header-background: #f4f4f4 !important;
-        --switch-active-color: #009688 !important;
-        --switch-background-color: #ccc !important;
-        --switch-knob-color: white !important;
-        --switch-label-font-size: 18px !important;
-      }
-
-      body {
-        display: block !important;
-        height: auto !important;
-        overflow: visible !important;
-        margin: 0 !important;
-      }
-
-      #editorContainer {
-        display: block !important;
-        height: auto !important;
-        overflow: visible !important;
-      }
-
-      #inputPane {
-        display: none !important;
-      }
-
-      #outputPane {
-        display: block !important;
-        width: auto !important;
-        height: auto !important;
-        overflow: visible !important;
-        padding: 15mm !important;
-        border: none !important;
-      }
-
-      .pane-heading-container {
-        display: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-
-      .no-print {
-        display: none !important;
-      }
-
-      svg,
-      pre {
-        page-break-inside: avoid !important;
-        line-height: 1.5 !important;
-      }
-
-      #renderedOutput {
-        height: auto !important;
-        overflow: visible !important;
-      }
-
-      footer {
-        display: none !important;
-      }
-
-      .page-break {
-        display: block;
-        page-break-after: always;
-        height: 0;
-      }
-
-      svg {
-        color: #000000 !important;
-        stroke: #000000 !important;
-      }
-
-      pre {
-        background-color: #f0f0f0 !important;
-        font-size: 0.95em !important;
-        margin: 2px 0 !important;
-      }
-
-      .hljs {
-        color: #000000 !important;
-        line-height: 1.5 !important;
-        font-size: 0.95em !important;
-        background-color: inherit !important;
-      }
-
-      .hljs-comment,
-      .hljs-quote {
-        color: #008000 !important;
-      }
-
-      th[align="center"],
-      td[align="center"] {
-        text-align: center !important;
-      }
-
-      th[align="right"],
-      td[align="right"] {
-        text-align: right !important;
-      }
-
-      th,
-      td {
-        text-align: left !important;
-      }
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* Buttons and footer                                                     */
-    /* ---------------------------------------------------------------------- */
-    footer {
-      text-align: center;
-      padding: 5px;
-      background: #f4f4f4;
-      color: #555;
-      margin: 5px 0;
-      width: 100%;
-    }
-
-    body.dark-mode footer {
-      background: #2d2c2c;
-      color: #ccc;
-    }
-
-    button {
-      margin: 5px;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      background-color: var(--button-background);
-      color: var(--button-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    /* ==========================================================================
-     RESPONSIVE RULES
-     ========================================================================== */
-
-    /* 1) For narrow screens, stack the two panes vertically and have each fill
-        available height equally */
-    @media (max-width: 900px) {
-      #editorContainer {
-        flex-direction: column;
-      }
-
-      #inputPane,
-      #outputPane {
-        width: 100%;
-        border-right: none;
-        flex: 1;
-        /* Ensures both panes share the available height equally */
-      }
-    }
-
-    /* 2) Wrap and resize the buttons when space is too narrow */
-    @media (max-width: 600px) {
-      .buttonContainer {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
-      .buttonContainer button {
-        flex: 1 0 auto;
-        margin: 5px 2px;
-        min-width: 110px;
-      }
-
-      /* Move toggle below the buttons if needed */
-      .toggle-container {
-        position: static;
-        margin-top: 5px;
-      }
-
-      .switch-label {
-        font-size: 12px;
-      }
-    }
-  </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Markdown Editor with LaTeX</title>
+	<link rel="icon" type="image/png" href="/favicon.png">
+
+	<script>
+		window.MathJax = {
+			tex: {
+				inlineMath: [
+					['$', '$']
+				],
+				displayMath: [
+					['$$', '$$']
+				],
+				processEscapes: true,
+				packages: ['base', 'ams'],
+			},
+			svg: {
+				fontCache: 'local',
+			}
+		};
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+	<link id="highlightStyle" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+	<style>
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+		:root {
+			--background-color: #ffffff;
+			--text-color: #000000;
+			--pane-background: #ffffff;
+			--pane-heading-background: #333333;
+			--pane-heading-color: #ffffff;
+			--button-background: #f0f0f0;
+			--button-color: #000000;
+			--border-color: #ccc;
+			--code-background: #f0f0f0;
+			--table-border-color: black;
+			--table-header-background: #f4f4f4;
+			--switch-width: 42px;
+			--switch-height: 18px;
+			--slider-size: 13px;
+			--slider-transform: 23px;
+			--switch-background-color: #ccc;
+			--switch-knob-color: white;
+			--switch-label-font-size: 14px;
+			--switch-active-color: #009688;
+		}
+
+		body.dark-mode {
+			--background-color: #1e1e1e;
+			--text-color: #e0e0e0;
+			--pane-background: #1e1e1e;
+			--pane-heading-background: #2d2c2c;
+			--pane-heading-color: #ffffff;
+			--button-background: #474646;
+			--button-color: #ffffff;
+			--border-color: #555555;
+			--code-background: #2f2f2f;
+			--table-border-color: #555555;
+			--table-header-background: #333333;
+			--code-text-color: #f8f8f2;
+		}
+
+		body {
+			display: flex;
+			flex-direction: column;
+			height: 100vh;
+			margin: 0;
+			font-family: Helvetica, sans-serif;
+			line-height: 1.5;
+			background-color: var(--background-color);
+			color: var(--text-color);
+			transition: background-color 0.3s, color 0.3s;
+		}
+
+		html,
+		body {
+			overflow-x: hidden;
+		}
+
+		a {
+			color: #ff5f1f;
+			text-decoration: none;
+		}
+
+		a:hover {
+			color: #ff5f1f;
+			text-decoration: underline;
+		}
+
+		a:visited {
+			color: #ff5f1f;
+		}
+
+		/* Layout Containers */
+		#editorContainer {
+			display: flex;
+			flex: 1;
+			background-color: var(--pane-background);
+			height: 100%;
+			border-top: 0px solid var(--border-color);
+			border-bottom: 0px solid var(--border-color);
+		}
+
+		#inputPane,
+		#outputPane {
+			width: 50%;
+			padding: 0;
+			box-sizing: border-box;
+			background-color: var(--pane-background);
+			display: flex;
+			flex-direction: column;
+			min-height: 0;
+			border: none;
+		}
+
+		#inputPane {
+			border-right: 1px solid var(--border-color);
+		}
+
+		.pane-heading-container {
+			display: grid;
+			grid-template-columns: 50px 1fr 50px;
+			height: 45px;
+			align-items: center;
+			background-color: var(--pane-heading-background);
+			color: var(--pane-heading-color);
+			margin: 0;
+			padding: 0 10px;
+		}
+
+		textarea:focus {
+			outline: none;
+		}
+
+		.logo-container img {
+			max-height: 30px;
+			margin: 0 auto 0 0;
+			display: block;
+		}
+
+		.heading-placeholder,
+		.theme-toggle-wrapper {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.pane-heading {
+			text-align: center;
+			margin: 0;
+			font-size: 1.2em;
+		}
+
+		.theme-toggle-button {
+			background: none;
+			border: none;
+			cursor: pointer;
+			font-size: 18px;
+			color: var(--pane-heading-color);
+			margin: 0;
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.theme-toggle-button:hover {
+			opacity: 0.8;
+		}
+
+		.buttonContainer {
+			margin: 10px 0;
+			text-align: center;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+		}
+
+		body.dark-mode .buttonContainer button {
+			background-color: var(--button-background);
+			color: var(--button-color);
+			border: none;
+		}
+
+		.toggle-container {
+			position: absolute;
+			right: 15px;
+			display: flex;
+			align-items: center;
+		}
+
+		.switch {
+			position: relative;
+			display: inline-block;
+			width: var(--switch-width);
+			height: var(--switch-height);
+			margin-left: 2px;
+		}
+
+		.switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+
+		.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: var(--switch-background-color);
+			transition: 0.4s;
+			border-radius: calc(var(--switch-height) / 2);
+		}
+
+		.slider:before {
+			position: absolute;
+			content: "";
+			height: var(--slider-size);
+			width: var(--slider-size);
+			left: 2.5px;
+			bottom: 2.5px;
+			background-color: var(--switch-knob-color);
+			transition: 0.4s;
+			border-radius: 50%;
+		}
+
+		input:checked+.slider {
+			background-color: var(--switch-active-color);
+		}
+
+		input:focus+.slider {
+			box-shadow: 0 0 1px var(--switch-active-color);
+		}
+
+		input:checked+.slider:before {
+			transform: translateX(var(--slider-transform));
+		}
+
+		.switch-label {
+			font-size: var(--switch-label-font-size);
+			margin-right: 5px;
+		}
+
+		textarea {
+			flex: 1;
+			width: 100%;
+			padding: 20px;
+			border: none;
+			resize: none;
+			font-size: 15px;
+			line-height: 1.5;
+			box-sizing: border-box;
+			overflow-y: auto;
+			background-color: var(--pane-background);
+			color: var(--text-color);
+		}
+
+		#renderedOutput {
+			flex: 1;
+			padding: 20px;
+			font-size: 15px;
+			line-height: 1.5;
+			box-sizing: border-box;
+			overflow-y: auto;
+			background-color: var(--pane-background);
+			color: var(--text-color);
+		}
+
+		code {
+			background-color: var(--code-background);
+			padding: 0.1em 0.2em;
+			border-radius: 3px;
+			font-size: 0.95em;
+			line-height: 1;
+			font-family: "Courier New", Courier, monospace;
+			vertical-align: baseline;
+			color: inherit;
+		}
+
+		pre {
+			background-color: var(--code-background);
+			padding: 0;
+			border-radius: 5px;
+			overflow-x: auto;
+			font-size: 0.95em;
+			line-height: 1.5;
+			margin: 2px 0;
+		}
+
+		pre code {
+			background: none;
+			padding: 0;
+			border-radius: 0;
+			font-family: inherit;
+			line-height: 1.5;
+			font-size: inherit;
+			color: inherit;
+		}
+
+		.hljs {
+			line-height: 1.5;
+			font-size: 0.95em;
+			background-color: inherit;
+			color: inherit;
+		}
+
+		body.dark-mode .hljs {
+			color: var(--code-text-color);
+		}
+
+		/* Dark mode syntax highlighting colors */
+		body.dark-mode .hljs-comment,
+		body.dark-mode .hljs-quote {
+			color: #8d9a70 !important;
+		}
+
+		body.dark-mode .hljs-keyword,
+		body.dark-mode .hljs-selector-tag,
+		body.dark-mode .hljs-subst {
+			color: #66d9ef !important;
+		}
+
+		body.dark-mode .hljs-string,
+		body.dark-mode .hljs-doctag {
+			color: #e6db74 !important;
+		}
+
+		body.dark-mode .hljs-number,
+		body.dark-mode .hljs-regexp,
+		body.dark-mode .hljs-tag .hljs-attr {
+			color: #ae81ff !important;
+		}
+
+		body.dark-mode .hljs-title,
+		body.dark-mode .hljs-section {
+			color: #a6e22e !important;
+		}
+
+		body.dark-mode .hljs-type,
+		body.dark-mode .hljs-built_in {
+			color: #fd971f !important;
+		}
+
+		body.dark-mode .hljs-symbol,
+		body.dark-mode .hljs-bullet {
+			color: #f92672 !important;
+		}
+
+		body.dark-mode .hljs-link {
+			color: #e6db74 !important;
+		}
+
+		table {
+			max-width: 100%;
+			margin: 20px auto;
+			border-collapse: collapse;
+			border: 1px solid var(--table-border-color);
+		}
+
+		th,
+		td {
+			border: 1px solid var(--table-border-color);
+			padding: 8px 10px;
+		}
+
+		th[align="left"],
+		td[align="left"] {
+			text-align: left;
+		}
+
+		th[align="center"],
+		td[align="center"] {
+			text-align: center;
+		}
+
+		th[align="right"],
+		td[align="right"] {
+			text-align: right;
+		}
+
+		th,
+		td {
+			text-align: left;
+		}
+
+		/* ---------------------------------------------------------------------- */
+		/* Printing styles (With Proper Color Reset)                              */
+		/* ---------------------------------------------------------------------- */
+		@media print {
+			:root {
+				--background-color: #ffffff !important;
+				--text-color: #000000 !important;
+				--pane-background: #ffffff !important;
+				--pane-heading-background: #ffffff !important;
+				--pane-heading-color: #000000 !important;
+				--button-background: #ffffff !important;
+				--button-color: #000000 !important;
+				--border-color: #cccccc !important;
+				--code-background: #ffffff !important;
+				--table-border-color: #000000 !important;
+				--table-header-background: #ffffff !important;
+			}
+
+			* {
+				-webkit-print-color-adjust: exact !important;
+				print-color-adjust: exact !important;
+			}
+
+			body,
+			#editorContainer,
+			#outputPane,
+			#renderedOutput,
+			table,
+			th,
+			td,
+			pre,
+			code,
+			p,
+			h1,
+			h2,
+			h3,
+			h4,
+			h5,
+			h6,
+			li,
+			blockquote {
+				background-color: #ffffff !important;
+				/* Default text black, but allow inline colors to work */
+				color: #000000;
+			}
+
+			body {
+				display: block !important;
+				height: auto !important;
+				overflow: visible !important;
+				margin: 0 !important;
+			}
+
+			#editorContainer {
+				display: block !important;
+				height: auto !important;
+				overflow: visible !important;
+			}
+
+			#inputPane {
+				display: none !important;
+			}
+
+			#outputPane {
+				display: block !important;
+				width: auto !important;
+				height: auto !important;
+				overflow: visible !important;
+				padding: 15mm !important;
+				border: none !important;
+			}
+
+			.pane-heading-container {
+				display: none !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+
+			.no-print {
+				display: none !important;
+			}
+
+			svg,
+			pre {
+				page-break-inside: avoid !important;
+				line-height: 1.5 !important;
+			}
+
+			#renderedOutput {
+				height: auto !important;
+				overflow: visible !important;
+			}
+
+			footer {
+				display: none !important;
+			}
+
+			.page-break {
+				display: block;
+				page-break-after: always;
+				height: 0;
+			}
+
+			svg {
+				color: #000000 !important;
+				stroke: #000000 !important;
+			}
+
+			pre {
+				border: 1px solid #dddddd !important;
+				font-size: 0.95em !important;
+				margin: 2px 0 !important;
+			}
+
+			code {
+				background-color: #ffffff !important;
+			}
+
+			/* Note: We REMOVED the rule that forced .hljs to black. 
+         This allows the 'Default' light theme colors to show up 
+         when we swap the stylesheet in JS. */
+
+			a,
+			a:visited {
+				color: #000000 !important;
+				text-decoration: underline !important;
+			}
+
+			th[align="center"],
+			td[align="center"] {
+				text-align: center !important;
+			}
+
+			th[align="right"],
+			td[align="right"] {
+				text-align: right !important;
+			}
+
+			th,
+			td {
+				text-align: left !important;
+			}
+		}
+
+		footer {
+			text-align: center;
+			padding: 5px;
+			background: #f4f4f4;
+			color: #555;
+			margin: 5px 0;
+			width: 100%;
+		}
+
+		body.dark-mode footer {
+			background: #2d2c2c;
+			color: #ccc;
+		}
+
+		button {
+			margin: 5px;
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			background-color: var(--button-background);
+			color: var(--button-color);
+			border: 1px solid var(--border-color);
+			border-radius: 4px;
+			transition: background-color 0.3s, color 0.3s;
+		}
+
+		button:hover {
+			opacity: 0.8;
+		}
+
+		@media (max-width: 900px) {
+			#editorContainer {
+				flex-direction: column;
+			}
+
+			#inputPane,
+			#outputPane {
+				width: 100%;
+				border-right: none;
+				flex: 1;
+			}
+		}
+
+		@media (max-width: 600px) {
+			.buttonContainer {
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+
+			.buttonContainer button {
+				flex: 1 0 auto;
+				margin: 5px 2px;
+				min-width: 110px;
+			}
+
+			.toggle-container {
+				position: static;
+				margin-top: 5px;
+			}
+
+			.switch-label {
+				font-size: 12px;
+			}
+		}
+	</style>
 </head>
 
 <body>
-  <!--
-      The main container with two panes:
-      - Left = Markdown Input
-      - Right = Rendered Output
-  -->
-  <div id="editorContainer">
-    <!-- ============================================= -->
-    <!-- =========== Markdown Input Pane ============= -->
-    <!-- ============================================= -->
-    <div id="inputPane">
-      <!--
-          New 3-column heading container:
-          1) Logo on the left
-          2) "Markdown Input" in the center
-          3) placeholder on the right
-      -->
-      <div class="pane-heading-container">
-        <!-- Logo Container (Left) -->
-        <div class="logo-container">
-          <!-- Link the logo to PanPhy website -->
-          <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-            <img src="/panphy.png" alt="PanPhy logo" />
-          </a>
-        </div>
+	<div id="editorContainer">
+		<div id="inputPane">
+			<div class="pane-heading-container">
+				<div class="logo-container">
+					<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+						<img src="/panphy.png" alt="PanPhy logo" />
+					</a>
+				</div>
+				<h2 class="pane-heading">Markdown Input</h2>
+				<div class="heading-placeholder"></div>
+			</div>
 
-        <!-- The heading in the Center -->
-        <h2 class="pane-heading">Markdown Input</h2>
+			<div class="buttonContainer">
+				<button id="loadFileButton">Open .md File</button>
+				<button id="saveMDButton">Save .md</button>
+				<button id="clearButton">Clear Input</button>
+				<button id="loadSampleButton">Sample Document</button>
+			</div>
+			<textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
+		</div>
 
-        <!-- Placeholder on the Right (keeps grid layout consistent) -->
-        <div class="heading-placeholder"></div>
-      </div>
+		<div id="outputPane">
+			<div class="pane-heading-container">
+				<div class="heading-placeholder"></div>
+				<h2 class="pane-heading">Rendered Output</h2>
+				<div class="theme-toggle-wrapper">
+					<button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode" title="Switch to Dark Mode">
+						☀️
+					</button>
+				</div>
+			</div>
 
-      <!-- Buttons and the markdown input textarea below -->
-      <div class="buttonContainer">
-        <button id="loadFileButton">Open .md File</button>
-        <button id="saveMDButton">Save .md</button>
-        <button id="clearButton">Clear Input</button>
-        <button id="loadSampleButton">Sample Document</button>
-      </div>
-      <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
-    </div>
+			<div class="buttonContainer no-print">
+				<button id="printButton" title="Print to PDF">Print to PDF</button>
+				<button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
 
-    <!-- ============================================= -->
-    <!-- ========== Rendered Output Pane ============= -->
-    <!-- ============================================= -->
-    <div id="outputPane">
-      <!--
-          New 3-column heading container:
-          1) placeholder on the left
-          2) "Rendered Output" in the center
-          3) theme toggle on the right
-      -->
-      <div class="pane-heading-container">
-        <!-- Placeholder on the Left -->
-        <div class="heading-placeholder"></div>
+				<div class="toggle-container">
+					<label for="syncScrollSwitch" class="switch-label">Sync Scroll</label>
+					<label class="switch">
+						<input type="checkbox" id="syncScrollSwitch">
+						<span class="slider"></span>
+					</label>
+				</div>
+			</div>
+			<div id="renderedOutput"></div>
+		</div>
+	</div>
 
-        <!-- The heading in the Center -->
-        <h2 class="pane-heading">Rendered Output</h2>
-
-        <!-- Theme toggle button on the Right -->
-        <div class="theme-toggle-wrapper">
-          <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
-            title="Switch to Dark Mode">
-            ☀️
-          </button>
-        </div>
-      </div>
-
-      <!-- Buttons and rendered output below -->
-      <div class="buttonContainer no-print">
-        <button id="printButton" title="Prints in light mode">Print to PDF</button>
-        <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
-
-        <!-- Toggle Switch for Sync Scroll -->
-        <div class="toggle-container">
-          <label for="syncScrollSwitch" class="switch-label">Sync Scroll</label>
-          <label class="switch">
-            <input type="checkbox" id="syncScrollSwitch">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-      <div id="renderedOutput"></div>
-    </div>
-  </div>
-
-  <footer>
-    &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
-    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-  </footer>
+	<footer>
+		&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+	</footer>
 </body>
 
-
 <script>
-  const markdownInput = document.getElementById('markdownInput');
-  const renderedOutput = document.getElementById('renderedOutput');
-  const clearButton = document.getElementById('clearButton');
-  const loadSampleButton = document.getElementById('loadSampleButton');
-  const exportHTMLButton = document.getElementById('exportHTMLButton');
-  const printButton = document.getElementById('printButton');
-  const saveMDButton = document.getElementById('saveMDButton');
-  const loadFileButton = document.getElementById('loadFileButton');
-  const themeToggleButton = document.getElementById('themeToggleButton');
-  const highlightStyle = document.getElementById('highlightStyle');
-  const syncScrollSwitch = document.getElementById('syncScrollSwitch');
+	const markdownInput = document.getElementById('markdownInput');
+	const renderedOutput = document.getElementById('renderedOutput');
+	const clearButton = document.getElementById('clearButton');
+	const loadSampleButton = document.getElementById('loadSampleButton');
+	const exportHTMLButton = document.getElementById('exportHTMLButton');
+	const printButton = document.getElementById('printButton');
+	const saveMDButton = document.getElementById('saveMDButton');
+	const loadFileButton = document.getElementById('loadFileButton');
+	const themeToggleButton = document.getElementById('themeToggleButton');
+	const highlightStyle = document.getElementById('highlightStyle');
+	const syncScrollSwitch = document.getElementById('syncScrollSwitch');
 
-  /**
-   * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
-   */
-  function loadSampleDocument() {
-    fetch('mkdwn_sample_doc.md')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.text();
-      })
-      .then(data => {
-        markdownInput.value = data;
-        renderContent();
-      })
-      .catch(error => {
-        console.error('Error loading sample document:', error);
-        alert('Failed to load the sample document.');
-      });
-  }
+	/* ---------------------------------------------------------------------- */
+	/* 1) Utility: debounce                                                   */
+	/* ---------------------------------------------------------------------- */
+	function debounce(fn, wait) {
+		let t = null;
 
-  /**
-   * Preprocess the input Markdown by replacing all single backslashes with double backslashes
-   * within LaTeX math blocks.
-   * 
-   * @param {string} input - The raw Markdown input.
-   * @returns {string} - The processed Markdown with escaped backslashes.
-   */
-  function preprocessMarkdown(input) {
-    const regex = /(\$\$?)([\s\S]+?)\1/g;
-    return input.replace(regex, function (match, p1, p2) {
-      const escaped = p2.replace(/\\/g, '\\\\');
-      return p1 + escaped + p1;
-    });
-  }
+		function debounced(...args) {
+			if (t) clearTimeout(t);
+			t = setTimeout(() => {
+				t = null;
+				fn.apply(this, args);
+			}, wait);
+		}
+		debounced.flush = (...args) => {
+			if (t) {
+				clearTimeout(t);
+				t = null;
+			}
+			fn.apply(this, args);
+		};
+		debounced.cancel = () => {
+			if (t) clearTimeout(t);
+			t = null;
+		};
+		return debounced;
+	}
 
-  function renderContent() {
-    const inputText = markdownInput.value;
-    const preprocessedText = preprocessMarkdown(inputText);
+	/* ---------------------------------------------------------------------- */
+	/* 2) Marked configuration (set once)                                     */
+	/* ---------------------------------------------------------------------- */
+	marked.setOptions({
+		gfm: true,
+		headerIds: true,
+		tables: true,
+		langPrefix: 'hljs language-',
+		highlight: function(code, lang) {
+			if (lang && hljs.getLanguage(lang)) {
+				return hljs.highlight(code, { language: lang }).value;
+			}
+			return hljs.highlightAuto(code).value;
+		}
+	});
 
-    marked.setOptions({
-      gfm: true,
-      headerIds: true,
-      tables: true,
-      langPrefix: 'hljs language-',
-      highlight: function (code, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-          return hljs.highlight(code, { language: lang }).value;
-        } else {
-          return hljs.highlightAuto(code).value;
-        }
-      }
-    });
+	/**
+	 * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
+	 */
+	function loadSampleDocument() {
+		fetch('mkdwn_sample_doc.md')
+			.then(response => {
+				if (!response.ok) throw new Error('Network response was not ok');
+				return response.text();
+			})
+			.then(data => {
+				markdownInput.value = data;
+				renderContent();
+			})
+			.catch(error => {
+				console.error('Error loading sample document:', error);
+				if (window.location.protocol === 'file:') {
+					alert(
+						'Sample Document cannot be loaded when this editor is opened locally (file://) because browsers block file fetches.\n\n' +
+						'Please run this folder via a simple web server, or use "Open .md File" to load a local Markdown file.'
+					);
+				} else {
+					alert('Failed to load the sample document. Please try again or use "Open .md File".');
+				}
+			});
+	}
 
-    const parsedMarkdown = marked.parse(preprocessedText);
-    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-    renderedOutput.innerHTML = sanitizedContent;
+	function preprocessMarkdown(input) {
+		const regex = /(\$\$?)([\s\S]+?)\1/g;
+		return input.replace(regex, function(match, p1, p2) {
+			const escaped = p2.replace(/\\/g, '\\\\');
+			return p1 + escaped + p1;
+		});
+	}
 
-    hljs.highlightAll();
-    MathJax.typesetPromise([renderedOutput]).catch(console.error);
-  }
+	function renderContent() {
+		const inputText = markdownInput.value;
+		const preprocessedText = preprocessMarkdown(inputText);
 
-  async function printToPDF() {
-    const body = document.body;
-    const hadDarkMode = body.classList.contains('dark-mode');
-    if (hadDarkMode) {
-      body.classList.remove('dark-mode');
-    }
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    await MathJax.typesetPromise([renderedOutput]);
-    hljs.highlightAll();
-    window.print();
-    if (hadDarkMode) {
-      body.classList.add('dark-mode');
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      updateThemeToggleButton();
-    }
-  }
+		const parsedMarkdown = marked.parse(preprocessedText);
+		const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+		renderedOutput.innerHTML = sanitizedContent;
 
-  function exportHTML() {
-    const fileName = prompt('Enter file name for the HTML export:', 'document.html');
-    if (!fileName) return;
+		MathJax.typesetPromise([renderedOutput]).catch(console.error);
+	}
 
-    const sanitizedHTML = renderedOutput.innerHTML;
-    const doc = document.implementation.createHTMLDocument('Exported Document');
-    const head = doc.head;
-    const body = doc.body;
+	/* ---------------------------------------------------------------------- */
+	/* Print Logic: Swaps to Light Theme for printing to keep colors           */
+	/* ---------------------------------------------------------------------- */
+	async function printToPDF() {
+		debouncedRender.flush();
 
-    const meta = document.createElement('meta');
-    meta.setAttribute('charset', 'UTF-8');
-    head.appendChild(meta);
+		// Check if we are currently in Dark Mode
+		const isDark = document.body.classList.contains('dark-mode');
 
-    const title = document.createElement('title');
-    title.textContent = 'Exported Document';
-    head.appendChild(title);
+		// If Dark Mode, temporarily switch highlight.js to Light Mode (default)
+		// so the printed paper has readable colors (not yellow-on-white).
+		if (isDark) {
+			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+			// Give the browser a split second to load the new stylesheet
+			await new Promise(r => setTimeout(r, 100));
+		}
 
-    const style = document.createElement('style');
-    style.textContent = `
+		await MathJax.typesetPromise([renderedOutput]).catch(console.error);
+		window.print();
+
+		// After print dialog closes, switch back if we were in Dark Mode
+		if (isDark) {
+			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+		}
+	}
+
+	/* ---------------------------------------------------------------------- */
+	/* Export HTML                                                            */
+	/* ---------------------------------------------------------------------- */
+	function exportHTML() {
+		const fileName = prompt('Enter file name for the HTML export:', 'document.html');
+		if (!fileName) return;
+
+		const sanitizedHTML = renderedOutput.innerHTML;
+		const doc = document.implementation.createHTMLDocument('Exported Document');
+		const head = doc.head;
+		const body = doc.body;
+
+		const meta = document.createElement('meta');
+		meta.setAttribute('charset', 'UTF-8');
+		head.appendChild(meta);
+
+		const title = document.createElement('title');
+		title.textContent = 'Exported Document';
+		head.appendChild(title);
+
+		const style = document.createElement('style');
+		style.textContent = `
         :root {
           --background-color: #ffffff;
           --text-color: #000000;
@@ -868,7 +840,6 @@
           --switch-knob-color: white;
           --switch-label-font-size: 18px;
         }
-
         body.dark-mode {
           --background-color: #1e1e1e;
           --text-color: #e0e0e0;
@@ -884,7 +855,6 @@
           --code-text-color: #f8f8f2;
           --switch-active-color: #009688;
         }
-
         body {
           font-family: Helvetica, sans-serif;
           line-height: 1.5;
@@ -892,54 +862,24 @@
           background-color: var(--background-color);
           color: var(--text-color);
         }
-
         body, div, p, h1, h2, h3, h4, h5, h6, pre, code, table, th, td, blockquote {
           background-color: var(--background-color);
           color: var(--text-color);
         }
-
-        a {
-          color: #ff5f1f;
-          text-decoration: none;
-        }
-
-        a:hover {
-          color: #ff5f1f;
-          text-decoration: underline;
-        }
-
-        a:visited {
-          color: #ff5f1f;
-        }
-
+        a { color: #ff5f1f; text-decoration: none; }
+        a:hover { color: #ff5f1f; text-decoration: underline; }
+        a:visited { color: #ff5f1f; }
         table {
           max-width: 100%;
           margin: 20px auto;
           border-collapse: collapse;
           border: 1px solid var(--table-border-color);
         }
-
-        th, td {
-          border: 1px solid var(--table-border-color);
-          padding: 8px;
-        }
-
-        th[align="left"], td[align="left"] {
-          text-align: left;
-        }
-
-        th[align="center"], td[align="center"] {
-          text-align: center;
-        }
-
-        th[align="right"], td[align="right"] {
-          text-align: right;
-        }
-
-        th, td {
-          text-align: left;
-        }
-
+        th, td { border: 1px solid var(--table-border-color); padding: 8px; }
+        th[align="left"], td[align="left"] { text-align: left; }
+        th[align="center"], td[align="center"] { text-align: center; }
+        th[align="right"], td[align="right"] { text-align: right; }
+        th, td { text-align: left; }
         code {
           background-color: var(--code-background);
           padding: 0.1em 0.2em;
@@ -950,7 +890,6 @@
           vertical-align: baseline;
           color: inherit;
         }
-
         pre {
           background-color: var(--code-background);
           padding: 0;
@@ -960,7 +899,6 @@
           line-height: 1.5;
           margin: 2px 0;
         }
-
         pre code {
           background: none;
           padding: 0;
@@ -970,90 +908,47 @@
           font-size: inherit;
           color: inherit;
         }
-
         .hljs {
           line-height: 1.5;
           font-size: 1.05em;
           background-color: inherit;
           color: inherit;
         }
-
-        body.dark-mode .hljs {
-          color: #f8f8f2 !important;
-        }
-
-        body.dark-mode .hljs-comment,
-        body.dark-mode .hljs-quote {
-          color: #8d9a70 !important;
-        }
-
-        body.dark-mode .hljs-keyword,
-        body.dark-mode .hljs-selector-tag,
-        body.dark-mode .hljs-subst {
-          color: #66d9ef !important;
-        }
-
-        body.dark-mode .hljs-string,
-        body.dark-mode .hljs-doctag {
-          color: #e6db74 !important;
-        }
-
-        body.dark-mode .hljs-number,
-        body.dark-mode .hljs-regexp,
-        body.dark-mode .hljs-tag .hljs-attr {
-          color: #ae81ff !important;
-        }
-
-        body.dark-mode .hljs-title,
-        body.dark-mode .hljs-section {
-          color: #a6e22e !important;
-        }
-
-        body.dark-mode .hljs-type,
-        body.dark-mode .hljs-built_in {
-          color: #fd971f !important;
-        }
-
-        body.dark-mode .hljs-symbol,
-        body.dark-mode .hljs-bullet {
-          color: #f92672 !important;
-        }
-
-        body.dark-mode .hljs-link {
-          color: #e6db74 !important;
-        }
-
-        img {
-          max-width: 100%;
-          height: auto;
-        }
+        body.dark-mode .hljs { color: #f8f8f2 !important; }
+        body.dark-mode .hljs-comment, body.dark-mode .hljs-quote { color: #8d9a70 !important; }
+        body.dark-mode .hljs-keyword, body.dark-mode .hljs-selector-tag, body.dark-mode .hljs-subst { color: #66d9ef !important; }
+        body.dark-mode .hljs-string, body.dark-mode .hljs-doctag { color: #e6db74 !important; }
+        body.dark-mode .hljs-number, body.dark-mode .hljs-regexp, body.dark-mode .hljs-tag .hljs-attr { color: #ae81ff !important; }
+        body.dark-mode .hljs-title, body.dark-mode .hljs-section { color: #a6e22e !important; }
+        body.dark-mode .hljs-type, body.dark-mode .hljs-built_in { color: #fd971f !important; }
+        body.dark-mode .hljs-symbol, body.dark-mode .hljs-bullet { color: #f92672 !important; }
+        body.dark-mode .hljs-link { color: #e6db74 !important; }
+        img { max-width: 100%; height: auto; }
       `;
-    head.appendChild(style);
+		head.appendChild(style);
 
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const highlightLink = document.createElement('link');
-    highlightLink.rel = 'stylesheet';
-    if (isDarkMode) {
-      highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    } else {
-      highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-    head.appendChild(highlightLink);
+		const isDarkMode = document.body.classList.contains('dark-mode');
+		const highlightLink = document.createElement('link');
+		highlightLink.rel = 'stylesheet';
+		highlightLink.href = isDarkMode ?
+			'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css' :
+			'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+		head.appendChild(highlightLink);
 
-    const highlightScript = document.createElement('script');
-    highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
-    head.appendChild(highlightScript);
+		const highlightScript = document.createElement('script');
+		highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
+		head.appendChild(highlightScript);
 
-    const highlightInit = document.createElement('script');
-    highlightInit.textContent = `
+		const highlightInit = document.createElement('script');
+		highlightInit.textContent = `
         window.addEventListener('DOMContentLoaded', () => {
-          hljs.highlightAll();
+          if (window.hljs) hljs.highlightAll();
         });
       `;
-    head.appendChild(highlightInit);
+		head.appendChild(highlightInit);
 
-    const mathjaxConfigScript = document.createElement('script');
-    mathjaxConfigScript.textContent = `
+		const mathjaxConfigScript = document.createElement('script');
+		mathjaxConfigScript.textContent = `
         window.MathJax = {
           tex: {
             inlineMath: [['$', '$']],
@@ -1061,208 +956,162 @@
             processEscapes: true,
             packages: ['base', 'ams'],
           },
-          svg: {
-            fontCache: 'local',
-          }
+          svg: { fontCache: 'local' }
         };
       `;
-    head.appendChild(mathjaxConfigScript);
+		head.appendChild(mathjaxConfigScript);
 
-    const mathjaxScript = document.createElement('script');
-    mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
-    head.appendChild(mathjaxScript);
+		const mathjaxScript = document.createElement('script');
+		mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js';
+		head.appendChild(mathjaxScript);
 
-    body.innerHTML = sanitizedHTML;
+		body.innerHTML = sanitizedHTML;
 
-    if (isDarkMode) {
-      body.classList.add('dark-mode');
-    }
+		if (isDarkMode) body.classList.add('dark-mode');
 
-    const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
-    const blob = new Blob([exportedHTML], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-  }
+		const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
+		const blob = new Blob([exportedHTML], { type: 'text/html' });
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = fileName;
+		link.click();
+	}
 
-  function saveMarkdown() {
-    const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
-    if (!fileName) return;
+	function saveMarkdown() {
+		const fileName = prompt('Enter file name for the Markdown file:', 'document.md');
+		if (!fileName) return;
 
-    const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-  }
+		const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = fileName;
+		link.click();
+	}
 
-  function loadMarkdownFile() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.md,text/markdown';
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = event => {
-          markdownInput.value = event.target.result;
-          renderContent();
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  }
+	function loadMarkdownFile() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = '.md,text/markdown';
+		input.onchange = e => {
+			const file = e.target.files[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = event => {
+				markdownInput.value = event.target.result;
+				renderContent();
+			};
+			reader.readAsText(file);
+		};
+		input.click();
+	}
 
-  /**
-   * Initialize the theme based on saved preference.
-   */
-  function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'markdown-dark') {
-      document.body.classList.add('dark-mode');
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    } else {
-      document.body.classList.remove('dark-mode');
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-    updateThemeToggleButton();
-  }
+	function initializeTheme() {
+		const savedTheme = localStorage.getItem('theme');
+		if (savedTheme === 'markdown-dark') {
+			document.body.classList.add('dark-mode');
+			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+		} else {
+			document.body.classList.remove('dark-mode');
+			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+		}
+		updateThemeToggleButton();
+	}
 
-  /**
-   * Toggle between dark and light themes and save the preference.
-   */
-  function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
+	function toggleTheme() {
+		document.body.classList.toggle('dark-mode');
+		if (document.body.classList.contains('dark-mode')) {
+			themeToggleButton.textContent = '🌙';
+			themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+			themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+			localStorage.setItem('theme', 'markdown-dark');
+		} else {
+			themeToggleButton.textContent = '☀️';
+			themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+			themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+			localStorage.setItem('theme', 'markdown-light');
+		}
+	}
 
-    if (document.body.classList.contains('dark-mode')) {
-      themeToggleButton.textContent = '🌙';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-      localStorage.setItem('theme', 'markdown-dark');
-    } else {
-      themeToggleButton.textContent = '☀️';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-      localStorage.setItem('theme', 'markdown-light');
-    }
-  }
+	function updateThemeToggleButton() {
+		if (document.body.classList.contains('dark-mode')) {
+			themeToggleButton.textContent = '🌙';
+			themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+			themeToggleButton.setAttribute('title', 'Switch to Light Mode');
+		} else {
+			themeToggleButton.textContent = '☀️';
+			themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+			themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+		}
+	}
 
-  /**
-   * Update the theme toggle button's icon and attributes.
-   */
-  function updateThemeToggleButton() {
-    if (document.body.classList.contains('dark-mode')) {
-      themeToggleButton.textContent = '🌙';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-    } else {
-      themeToggleButton.textContent = '☀️';
-      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-    }
-  }
+	/* ---------------------------------------------------------------------- */
+	/* Scroll Sync: Driver/Follower model (anti-jitter)                        */
+	/* ---------------------------------------------------------------------- */
+	let activePane = 'input';
 
-  // Throttle function for scroll syncing
-  function throttle(func, limit) {
-    let inThrottle;
-    return function () {
-      const args = arguments;
-      const context = this;
-      if (!inThrottle) {
-        func.apply(context, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    }
-  }
+	function setActivePane(pane) { activePane = pane; }
 
-  const syncInputToOutput = throttle(() => {
-    if (!syncScrollSwitch.checked) return;
+	markdownInput.addEventListener('mouseover', () => setActivePane('input'));
+	renderedOutput.addEventListener('mouseover', () => setActivePane('output'));
+	markdownInput.addEventListener('focus', () => setActivePane('input'));
+	renderedOutput.addEventListener('pointerdown', () => setActivePane('output'));
+	markdownInput.addEventListener('pointerdown', () => setActivePane('input'));
 
-    isSyncingOutputScroll = true;
+	let inputScrollRAF = null;
+	let outputScrollRAF = null;
 
-    requestAnimationFrame(() => {
-      const inputScrollTop = markdownInput.scrollTop;
-      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+	function syncScroll(sourceEl, targetEl) {
+		const sourceScrollTop = sourceEl.scrollTop;
+		const sourceScrollable = sourceEl.scrollHeight - sourceEl.clientHeight;
+		const targetScrollable = targetEl.scrollHeight - targetEl.clientHeight;
+		if (sourceScrollable <= 0) { targetEl.scrollTop = 0; return; }
+		const ratio = sourceScrollTop / sourceScrollable;
+		const next = ratio * (targetScrollable <= 0 ? 0 : targetScrollable);
+		if (Math.abs(targetEl.scrollTop - next) > 1) { targetEl.scrollTop = next; }
+	}
 
-      if (inputScrollHeight === 0) {
-        renderedOutput.scrollTop = 0;
-      } else {
-        const scrollRatio = inputScrollTop / inputScrollHeight;
-        const newOutputScrollTop = scrollRatio * outputScrollHeight;
-        if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
-          renderedOutput.scrollTop = newOutputScrollTop;
-        }
-      }
+	markdownInput.addEventListener('scroll', () => {
+		if (!syncScrollSwitch.checked) return;
+		if (activePane !== 'input') return;
+		if (inputScrollRAF) return;
+		inputScrollRAF = requestAnimationFrame(() => {
+			inputScrollRAF = null;
+			syncScroll(markdownInput, renderedOutput);
+		});
+	}, { passive: true });
 
-      isSyncingOutputScroll = false;
-    });
-  }, 2);
+	renderedOutput.addEventListener('scroll', () => {
+		if (!syncScrollSwitch.checked) return;
+		if (activePane !== 'output') return;
+		if (outputScrollRAF) return;
+		outputScrollRAF = requestAnimationFrame(() => {
+			outputScrollRAF = null;
+			syncScroll(renderedOutput, markdownInput);
+		});
+	}, { passive: true });
 
-  const syncOutputToInput = throttle(() => {
-    if (!syncScrollSwitch.checked) return;
+	/* ---------------------------------------------------------------------- */
+	/* Init + event wiring                                                     */
+	/* ---------------------------------------------------------------------- */
+	const debouncedRender = debounce(renderContent, 300);
 
-    isSyncingInputScroll = true;
+	initializeTheme();
+	renderContent();
 
-    requestAnimationFrame(() => {
-      const outputScrollTop = renderedOutput.scrollTop;
-      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+	markdownInput.addEventListener('input', debouncedRender);
 
-      if (outputScrollHeight === 0) {
-        markdownInput.scrollTop = 0;
-      } else {
-        const scrollRatio = outputScrollTop / outputScrollHeight;
-        const newInputScrollTop = scrollRatio * inputScrollHeight;
-        if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
-          markdownInput.scrollTop = newInputScrollTop;
-        }
-      }
-
-      isSyncingInputScroll = false;
-    });
-  }, 2);
-
-  let isSyncingInputScroll = false;
-  let isSyncingOutputScroll = false;
-
-  markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
-  renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
-
-  window.addEventListener('beforeprint', () => {
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-  });
-
-  window.addEventListener('afterprint', () => {
-    if (document.body.classList.contains('dark-mode')) {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    } else {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-  });
-
-  // Initialize theme and render content on load
-  initializeTheme();
-  renderContent();
-
-  markdownInput.addEventListener('input', renderContent);
-  printButton.addEventListener('click', printToPDF);
-  exportHTMLButton.addEventListener('click', exportHTML);
-  saveMDButton.addEventListener('click', saveMarkdown);
-  loadFileButton.addEventListener('click', loadMarkdownFile);
-  loadSampleButton.addEventListener('click', loadSampleDocument); // Updated event listener
-  clearButton.addEventListener('click', () => {
-    markdownInput.value = '';
-    renderContent();
-  });
-  themeToggleButton.addEventListener('click', toggleTheme);
+	printButton.addEventListener('click', printToPDF);
+	exportHTMLButton.addEventListener('click', exportHTML);
+	saveMDButton.addEventListener('click', saveMarkdown);
+	loadFileButton.addEventListener('click', loadMarkdownFile);
+	loadSampleButton.addEventListener('click', loadSampleDocument);
+	clearButton.addEventListener('click', () => {
+		markdownInput.value = '';
+		renderContent();
+	});
+	themeToggleButton.addEventListener('click', toggleTheme);
 </script>
 
 </html>
-
-
