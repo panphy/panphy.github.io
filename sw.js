@@ -3,8 +3,6 @@ const CACHE_NAME = 'panphy-v2'; // <--- I changed this to v2 to force an update!
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/style.css',
-  '/script.js',
   '/favicon.png',
   '/panphy.png',
   '/manifest.json',
