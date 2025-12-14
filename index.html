@@ -2,19 +2,19 @@
 <html lang="en" data-theme="light">
 
 <head>
-	
-	
-<link rel="manifest" href="/manifest.json">
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then((reg) => console.log('Service Worker registered!', reg))
-        .catch((err) => console.log('Service Worker registration failed', err));
-    });
-  }
-</script>
+
+	<link rel="manifest" href="/manifest.json">
+
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js')
+					.then((reg) => console.log('Service Worker registered!', reg))
+					.catch((err) => console.log('Service Worker registration failed', err));
+			});
+		}
+	</script>
 
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -463,15 +463,22 @@
 	<div class="section" id="about">
 		<h2>About</h2>
 		<p>
-		Welcome to PanPhy Projects. The tools, simulations, and games here are built with AI and designed to be interactive, educational, and aligned with my teaching goals. While there are many great physics simulations online, not all meet my needs. Additionally, with school devices locked down, installing software has become a hassle. So, I decided to create my own web apps: simple, browser-based, and ready for everyone to explore and enjoy.
-    </p>
-    <p>
-    Most importantly, the site is now offline-friendly. Once you have opened it in a browser, you can keep using the tools, simulations, and games even without an internet connection.
+			Welcome to PanPhy Projects. The tools, simulations, and games here are built with AI and designed to be
+			interactive, educational, and aligned with my teaching goals. While there are many great physics simulations
+			online, not all meet my needs. Additionally, with school devices locked down, installing software has become
+			a hassle. So, I decided to create my own web apps: simple, browser-based, and ready for everyone to explore
+			and enjoy.
+		</p>
+		<p>
+			Most importantly, the site is now offline-friendly. Once you have opened it in a browser, you can keep using
+			the tools, simulations, and games even without an internet connection.
 		</p>
 	</div>
 
 	<footer>
-		<p>&copy; 2026 PanPhy Projects | <a href="mailto:panphyprojects@icloud.com">Contact Me</a> | <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></p>
+		<p>&copy; 2026 PanPhy Projects | <a href="mailto:panphyprojects@icloud.com">Contact Me</a> | <a
+				href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+		</p>
 	</footer>
 
 	<script>
@@ -486,8 +493,8 @@
 		const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
 			"dark" :
 			localStorage.getItem(LIGHT_THEME_KEY) ?
-			"light" :
-			"light"; // Default to light if none is set
+				"light" :
+				"light"; // Default to light if none is set
 
 		// Apply the saved theme on load
 		document.documentElement.setAttribute('data-theme', currentTheme);
@@ -498,7 +505,7 @@
 			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
 		}
 
-		themeButton.addEventListener('click', function() {
+		themeButton.addEventListener('click', function () {
 			let theme = document.documentElement.getAttribute('data-theme');
 			if (theme === 'light') {
 				document.documentElement.setAttribute('data-theme', 'dark');
