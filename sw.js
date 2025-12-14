@@ -1,30 +1,33 @@
-const CACHE_NAME = 'panphy-v1';
 const ASSETS_TO_CACHE = [
+  // Core Site Files
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
+  '/favicon.png',
   '/panphy.png',
-  '/panphy.png',
-  // Add paths to your critical tools/simulations below
+  '/manifest.json', // Good practice to cache this too
+
+  // Tools
   '/tools/markdown_editor.html',
-  '/simulations/superposition.html'
+  '/tools/panphyplot.html',
+  '/tools/digitizer.html',
+  '/tools/motion_tracker.html',
+  '/tools/sound_analyzer.html',
+  '/tools/tone_generator.html',
+  '/tools/quadratic.html',
+
+  // Simulations
+  '/simulations/superposition.html',
+  '/simulations/standing_wave.html',
+  '/simulations/lorentz.html',
+  '/simulations/Ising_model.html',
+
+  // For Teachers
+  '/for_teachers/timer.html',
+  '/for_teachers/visualizer.html',
+
+  // Fun
+  '/fun/dodge.html',
+  '/fun/ascii_cam.html'
 ];
-
-// Install Event: Cache files
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-});
-
-// Fetch Event: Serve from cache if offline
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
-});
