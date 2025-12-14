@@ -1,4 +1,5 @@
-const CACHE_NAME = 'panphy-v2'; // <--- I changed this to v2 to force an update!
+const CACHE_NAME = 'panphy-v3';
+const RUNTIME_CACHE = 'panphy-runtime-v3';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -6,7 +7,7 @@ const ASSETS_TO_CACHE = [
   '/favicon.png',
   '/panphy.png',
   '/manifest.json',
-  
+
   // Tools
   '/tools/markdown_editor.html',
   '/tools/panphyplot.html',
@@ -31,53 +32,71 @@ const ASSETS_TO_CACHE = [
   '/fun/ascii_cam.html'
 ];
 
-// 1. Install Event: The "Safe" Caching Strategy
+// Install: pre-cache your core pages
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
-  
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      // We try to cache files one by one.
-      // If one fails, we log it but don't stop the others!
-      for (const url of ASSETS_TO_CACHE) {
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-             throw new Error(`Failed to fetch ${url} (Status: ${response.status})`);
-          }
-          await cache.put(url, response);
-        } catch (error) {
-          console.error(`⚠️ Could not cache: ${url}`, error);
-        }
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    for (const url of ASSETS_TO_CACHE) {
+      try {
+        const res = await fetch(url, { cache: 'reload' });
+        if (res.ok) await cache.put(url, res);
+      } catch (e) {
+        // keep going even if one file fails
+        console.warn('Precache failed:', url, e);
       }
-    })
-  );
-  // Force this new service worker to become active immediately
+    }
+  })());
   self.skipWaiting();
 });
 
-// 2. Activate Event: Clean up old caches (v1)
+// Activate: clear old caches
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Clearing old cache');
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => {
+      if (k !== CACHE_NAME && k !== RUNTIME_CACHE) return caches.delete(k);
+    }));
+  })());
   self.clients.claim();
 });
 
-// 3. Fetch Event: Serve from cache, fall back to network
+// Fetch: cache-first + save to runtime cache (works for CDN libs too)
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  const req = event.request;
+
+  // Don’t try to cache non-GET (POST, etc.)
+  if (req.method !== 'GET') return;
+
+  // Navigations: serve cached page if available, fallback to index.html offline
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+
+      try {
+        const fresh = await fetch(req);
+        const cache = await caches.open(RUNTIME_CACHE);
+        cache.put(req, fresh.clone());
+        return fresh;
+      } catch {
+        return (await caches.match('/index.html')) || Response.error();
+      }
+    })());
+    return;
+  }
+
+  // Assets (same-origin and cross-origin): cache-first, then fetch and store
+  event.respondWith((async () => {
+    const cached = await caches.match(req);
+    if (cached) return cached;
+
+    try {
+      const fresh = await fetch(req);
+      const cache = await caches.open(RUNTIME_CACHE);
+      cache.put(req, fresh.clone());
+      return fresh;
+    } catch {
+      return Response.error();
+    }
+  })());
 });
