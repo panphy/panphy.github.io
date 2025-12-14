@@ -1,5 +1,5 @@
-const CACHE_NAME = 'panphy-v3';
-const RUNTIME_CACHE = 'panphy-runtime-v3';
+const CACHE_NAME = 'panphy';
+const RUNTIME_CACHE = 'panphy-runtime';
 
 const ASSETS_TO_CACHE = [
   '/',
