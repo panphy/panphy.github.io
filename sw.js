@@ -10,7 +10,10 @@ const ASSETS_TO_CACHE = [
 
   // Tools
   '/tools/markdown_editor.html',
+  '/tools/mkdwn_sample_doc.md',
+  '/tools/mkdwn_sample_pic.webp',
   '/tools/panphyplot.html',
+  '/tools/panphyplot_manual.html',
   '/tools/digitizer.html',
   '/tools/motion_tracker.html',
   '/tools/sound_analyzer.html',
