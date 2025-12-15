@@ -38,7 +38,7 @@ With integrated LaTeX support, you can effortlessly include professional-looking
 **1.4 Code Blocks**
 
 ~~~python
-# Type your codes here. By the way, do you the colors?
+# Type your codes here. By the way, do you like the colors?
 
 for i in range(5):
     print(i)
