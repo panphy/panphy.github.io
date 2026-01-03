@@ -686,6 +686,8 @@
 			<div class="buttonContainer no-print">
 				<button id="printButton" title="Print to PDF">Print to PDF</button>
 				<button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
+				<button id="copyMarkdownButton" title="Copy Markdown to clipboard">Copy Markdown</button>
+				<button id="copyHTMLButton" title="Copy rendered HTML to clipboard">Copy HTML</button>
 
 				<div class="toggle-container">
 					<label for="syncScrollSwitch" class="switch-label">Sync Scroll</label>
@@ -717,6 +719,8 @@
 	const themeToggleButton = document.getElementById('themeToggleButton');
 	const highlightStyle = document.getElementById('highlightStyle');
 	const syncScrollSwitch = document.getElementById('syncScrollSwitch');
+	const copyMarkdownButton = document.getElementById('copyMarkdownButton');
+	const copyHTMLButton = document.getElementById('copyHTMLButton');
 	const syncScrollStorageKey = 'syncScrollEnabled';
 	const markdownDraftStorageKey = 'markdownDraft';
 
@@ -1098,6 +1102,31 @@
 		input.click();
 	}
 
+	function showTemporaryButtonLabel(button, label, duration = 1500) {
+		const originalLabel = button.textContent;
+		button.textContent = label;
+		button.disabled = true;
+		setTimeout(() => {
+			button.textContent = originalLabel;
+			button.disabled = false;
+		}, duration);
+	}
+
+	async function copyTextToClipboard(text, button, successLabel) {
+		if (!navigator.clipboard) {
+			alert('Clipboard access is not available in this browser.');
+			return;
+		}
+
+		try {
+			await navigator.clipboard.writeText(text);
+			showTemporaryButtonLabel(button, successLabel);
+		} catch (error) {
+			console.error('Failed to copy text:', error);
+			alert('Failed to copy to clipboard. Please try again.');
+		}
+	}
+
 	/**
 	 * Initialize the theme based on saved preference.
 	 */
@@ -1235,6 +1264,14 @@
 	exportHTMLButton.addEventListener('click', exportHTML);
 	saveMDButton.addEventListener('click', saveMarkdown);
 	loadFileButton.addEventListener('click', loadMarkdownFile);
+	copyMarkdownButton.addEventListener('click', () => {
+		copyTextToClipboard(markdownInput.value, copyMarkdownButton, 'Markdown Copied!');
+	});
+	copyHTMLButton.addEventListener('click', async () => {
+		debouncedRender.flush();
+		await MathJax.typesetPromise([renderedOutput]).catch(console.error);
+		copyTextToClipboard(renderedOutput.innerHTML, copyHTMLButton, 'HTML Copied!');
+	});
 	loadSampleButton.addEventListener('click', loadSampleDocument);
 	clearButton.addEventListener('click', () => {
 		markdownInput.value = '';
