@@ -1151,12 +1151,14 @@
 		if (document.body.classList.contains('dark-mode')) {
 			themeToggleButton.textContent = '🌙';
 			themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+			themeToggleButton.setAttribute('aria-pressed', 'true');
 			themeToggleButton.setAttribute('title', 'Switch to Light Mode');
 			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
 			localStorage.setItem('theme', 'markdown-dark');
 		} else {
 			themeToggleButton.textContent = '☀️';
 			themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+			themeToggleButton.setAttribute('aria-pressed', 'false');
 			themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
 			highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
 			localStorage.setItem('theme', 'markdown-light');
@@ -1170,10 +1172,12 @@
 		if (document.body.classList.contains('dark-mode')) {
 			themeToggleButton.textContent = '🌙';
 			themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
+			themeToggleButton.setAttribute('aria-pressed', 'true');
 			themeToggleButton.setAttribute('title', 'Switch to Light Mode');
 		} else {
 			themeToggleButton.textContent = '☀️';
 			themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
+			themeToggleButton.setAttribute('aria-pressed', 'false');
 			themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
 		}
 	}
