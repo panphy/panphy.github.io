@@ -933,10 +933,6 @@
 				drawOverlay();
 			};
 
-			// Time-based seek for deterministic 1-frame stepping
-			const dt = 1 / frameRate;
-			const target = Math.min(hiddenVideo.currentTime + dt, hiddenVideo.duration);
-
 			let finished = false;
 			const clean = () => {
 				if (finished) return;
@@ -946,6 +942,18 @@
 				finish();
 			};
 			const onSeeked = () => clean();
+
+			// Time-based seek for deterministic 1-frame stepping
+			const dt = 1 / frameRate;
+			const end = getSeekableEnd();
+			const candidate = hiddenVideo.currentTime + dt;
+			let target = candidate;
+			if (end > 0) {
+				target = Math.min(candidate, end);
+			} else if (!Number.isFinite(candidate)) {
+				clean();
+				return;
+			}
 
 			const fallbackTimer = setTimeout(clean, 500);
 			hiddenVideo.addEventListener('seeked', onSeeked, { once: true });
