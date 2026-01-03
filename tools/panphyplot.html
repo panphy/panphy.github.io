@@ -2421,21 +2421,29 @@
 	}
 
 	function fitCurve() {
-		// Ensure there are at least two data points in the active dataset.
-		if (rawData[activeSet].length < 2) {
-			alert('Please enter at least two data points.');
-			return;
-		}
-
+		const filteredData = rawData[activeSet].filter(
+			point => Number.isFinite(point.x) && Number.isFinite(point.y)
+		);
+		const xValues = filteredData.map(point => point.x);
+		const yValues = filteredData.map(point => point.y);
 		const fitMethod = document.getElementById('fit-method').value;
 
 		// For fitting methods where you need x and y arrays,
-		// we are mapping rawData[activeSet] to extract the x and y values.
+		// we are mapping the filtered dataset to extract the x and y values.
 		if (fitMethod === 'Linear') {
-			performLinearFit(rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y));
+			if (filteredData.length < 2) {
+				alert('Please enter at least two data points.');
+				return;
+			}
+			performLinearFit(xValues, yValues);
 		} else if (fitMethod.startsWith('Polynomial')) {
 			const degree = parseInt(fitMethod.split('-')[1]);
-			performPolynomialFit(rawData[activeSet].map(p => p.x), rawData[activeSet].map(p => p.y), degree);
+			const minimumPoints = degree + 1;
+			if (filteredData.length < minimumPoints) {
+				alert(`Please enter at least ${minimumPoints} data points for a degree ${degree} polynomial fit.`);
+				return;
+			}
+			performPolynomialFit(xValues, yValues, degree);
 		} else if (fitMethod === 'Exponential') {
 			performExponentialFit();
 		} else if (fitMethod === 'Power') {
