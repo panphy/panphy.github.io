@@ -2846,7 +2846,21 @@
 				ssResidual += Math.pow(y[i] - yPredicted[i], 2);
 			}
 
-			const rSquared = 1 - ssResidual / ssTotal;
+			const zeroTolerance = 1e-12;
+			let rSquared = 1 - ssResidual / ssTotal;
+			let rSquaredDisplay = rSquared.toFixed(5);
+
+			if (Math.abs(ssTotal) < zeroTolerance) {
+				if (Math.abs(ssResidual) < zeroTolerance) {
+					rSquared = 1;
+					rSquaredDisplay = '1.00000';
+				} else {
+					rSquared = 0;
+					rSquaredDisplay = '0.00000';
+				}
+			} else if (!Number.isFinite(rSquared)) {
+				rSquaredDisplay = 'N/A';
+			}
 
 			// Update the UI (fitting result container)
 			const fitEquationElement = document.getElementById('fit-equation');
@@ -2857,7 +2871,7 @@
 
 			const rSquaredElement = document.getElementById('r-squared-container');
 			if (rSquaredElement) {
-				rSquaredElement.innerHTML = `\\( R^2 = ${rSquared.toFixed(5)} \\)`;
+				rSquaredElement.innerHTML = `\\( R^2 = ${rSquaredDisplay} \\)`;
 				rSquaredElement.style.display = 'block';
 			}
 
@@ -2868,7 +2882,7 @@
 			// Store this result for the current dataset.
 			datasetFitResults[activeSet] = {
 				equation: equation,
-				rSquared: rSquared.toFixed(5)
+				rSquared: rSquaredDisplay
 			};
 		} catch (error) {
 			console.error('Error updating results:', error);
