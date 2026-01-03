@@ -718,6 +718,7 @@
 	const highlightStyle = document.getElementById('highlightStyle');
 	const syncScrollSwitch = document.getElementById('syncScrollSwitch');
 	const syncScrollStorageKey = 'syncScrollEnabled';
+	const markdownDraftStorageKey = 'markdownDraft';
 
 	/* ---------------------------------------------------------------------- */
 	/* 1) Utility: debounce                                                   */
@@ -1211,12 +1212,19 @@
 	/* ---------------------------------------------------------------------- */
 	/* Init + event wiring                                                     */
 	/* ---------------------------------------------------------------------- */
-	const debouncedRender = debounce(renderContent, 300);
+	const debouncedRender = debounce(() => {
+		renderContent();
+		localStorage.setItem(markdownDraftStorageKey, markdownInput.value);
+	}, 300);
 
 	initializeTheme();
 	const storedSyncScroll = localStorage.getItem(syncScrollStorageKey);
 	if (storedSyncScroll !== null) {
 		syncScrollSwitch.checked = storedSyncScroll === 'true';
+	}
+	const savedDraft = localStorage.getItem(markdownDraftStorageKey);
+	if (savedDraft !== null) {
+		markdownInput.value = savedDraft;
 	}
 	renderContent();
 
@@ -1230,6 +1238,7 @@
 	loadSampleButton.addEventListener('click', loadSampleDocument);
 	clearButton.addEventListener('click', () => {
 		markdownInput.value = '';
+		localStorage.removeItem(markdownDraftStorageKey);
 		renderContent();
 	});
 	themeToggleButton.addEventListener('click', toggleTheme);
