@@ -762,11 +762,11 @@
 	});
 
 	/**
-	 * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
+	 * Fetch and load the sample Markdown document from 'tools/mkdwn_sample_doc.md'
 	 * Handles local file:// CORS errors with a friendly alert.
 	 */
 	function loadSampleDocument() {
-		fetch('mkdwn_sample_doc.md')
+		fetch('tools/mkdwn_sample_doc.md')
 			.then(response => {
 				if (!response.ok) throw new Error('Network response was not ok');
 				return response.text();
