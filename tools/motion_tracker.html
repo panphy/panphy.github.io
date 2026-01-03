@@ -877,26 +877,48 @@
 			}
 		});
 
+		function finalizeOriginSelection(canvasX, canvasY) {
+			const cartesianY = canvasYToCartesianY(canvasY);
+			originPoint = { x: canvasX, y: cartesianY };
+			originSet = true;
+			originMode = false;
+			frameCanvas.style.cursor = "default";
+			document.getElementById('crosshair').style.display = "none";
+			overlayCanvas.style.pointerEvents = "none";
+			drawOverlay();
+			plotPosition(); // Resets to position view on new origin
+			document.getElementById('message').innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
+		}
+
 		/* Origin selection on overlay */
 		overlayCanvas.addEventListener('click', (event) => {
 			if (originMode && !calibrationMode) {
 				const rect = overlayCanvas.getBoundingClientRect();
 				const scaleX = overlayCanvas.width / rect.width;
 				const scaleY = overlayCanvas.height / rect.height;
-				const x = (event.clientX - rect.left) * scaleX;
-				const y = (event.clientY - rect.top) * scaleY;
-				const cartesianY = canvasYToCartesianY(y);
-				originPoint = { x, y: cartesianY };
-				originSet = true;
-				originMode = false;
-				frameCanvas.style.cursor = "default";
-				document.getElementById('crosshair').style.display = "none";
-				overlayCanvas.style.pointerEvents = "none";
-				drawOverlay();
-				plotPosition(); // Resets to position view on new origin
-				document.getElementById('message').innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
+				finalizeOriginSelection(
+					(event.clientX - rect.left) * scaleX,
+					(event.clientY - rect.top) * scaleY
+				);
 			}
 		});
+		overlayCanvas.addEventListener('touchstart', (event) => {
+			if (!originMode || calibrationMode || event.touches.length !== 1) return;
+			event.preventDefault();
+			const touch = event.touches[0];
+			const rect = overlayCanvas.getBoundingClientRect();
+			const scaleX = overlayCanvas.width / rect.width;
+			const scaleY = overlayCanvas.height / rect.height;
+			finalizeOriginSelection(
+				(touch.clientX - rect.left) * scaleX,
+				(touch.clientY - rect.top) * scaleY
+			);
+		}, { passive: false });
+		overlayCanvas.addEventListener('touchend', (event) => {
+			if (originMode && !calibrationMode) {
+				event.preventDefault();
+			}
+		}, { passive: false });
 
 		/* Frame rate dialog */
 		frameRateButton.addEventListener('click', () => {
