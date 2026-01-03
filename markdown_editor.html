@@ -794,11 +794,27 @@
 	 * within LaTeX math blocks.
 	 */
 	function preprocessMarkdown(input) {
-		const regex = /(\$\$?)([\s\S]+?)\1/g;
-		return input.replace(regex, function(match, p1, p2) {
-			const escaped = p2.replace(/\\/g, '\\\\');
-			return p1 + escaped + p1;
-		});
+		const mathRegex = /(\$\$?)([\s\S]+?)\1/g;
+		const codeRegex = /(```[\s\S]*?```|`[^`\n]*`)/g;
+		let result = '';
+		let lastIndex = 0;
+
+		function escapeMath(segment) {
+			return segment.replace(mathRegex, function(match, p1, p2) {
+				const escaped = p2.replace(/\\/g, '\\\\');
+				return p1 + escaped + p1;
+			});
+		}
+
+		for (const match of input.matchAll(codeRegex)) {
+			const matchIndex = match.index;
+			result += escapeMath(input.slice(lastIndex, matchIndex));
+			result += match[0];
+			lastIndex = matchIndex + match[0].length;
+		}
+
+		result += escapeMath(input.slice(lastIndex));
+		return result;
 	}
 
 	function renderContent() {
