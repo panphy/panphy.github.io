@@ -717,6 +717,7 @@
 	const themeToggleButton = document.getElementById('themeToggleButton');
 	const highlightStyle = document.getElementById('highlightStyle');
 	const syncScrollSwitch = document.getElementById('syncScrollSwitch');
+	const syncScrollStorageKey = 'syncScrollEnabled';
 
 	/* ---------------------------------------------------------------------- */
 	/* 1) Utility: debounce                                                   */
@@ -1213,6 +1214,10 @@
 	const debouncedRender = debounce(renderContent, 300);
 
 	initializeTheme();
+	const storedSyncScroll = localStorage.getItem(syncScrollStorageKey);
+	if (storedSyncScroll !== null) {
+		syncScrollSwitch.checked = storedSyncScroll === 'true';
+	}
 	renderContent();
 
 	// Debounced input rendering (300ms)
@@ -1228,6 +1233,9 @@
 		renderContent();
 	});
 	themeToggleButton.addEventListener('click', toggleTheme);
+	syncScrollSwitch.addEventListener('change', () => {
+		localStorage.setItem(syncScrollStorageKey, syncScrollSwitch.checked);
+	});
 </script>
 
 </html>
