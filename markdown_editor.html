@@ -823,9 +823,12 @@
 		window.print();
 	}
 
-	function exportHTML() {
+	async function exportHTML() {
 		const fileName = prompt('Enter file name for the HTML export:', 'document.html');
 		if (!fileName) return;
+
+		debouncedRender.flush();
+		await MathJax.typesetPromise([renderedOutput]).catch(console.error);
 
 		const sanitizedHTML = renderedOutput.innerHTML;
 		const doc = document.implementation.createHTMLDocument('Exported Document');
