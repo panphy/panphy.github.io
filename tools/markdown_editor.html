@@ -62,14 +62,6 @@
       --code-background: #f0f0f0;
       --table-border-color: black;
       --table-header-background: #f4f4f4;
-      --switch-width: 42px;
-      --switch-height: 18px;
-      --slider-size: 13px;
-      --slider-transform: 23px;
-      --switch-background-color: #ccc;
-      --switch-knob-color: white;
-      --switch-label-font-size: 14px;
-      --switch-active-color: #009688;
     }
 
     body.dark-mode {
@@ -253,74 +245,6 @@
     }
 
     /* ---------------------------------------------------------------------- */
-    /* Toggle container for the sync scroll switch                            */
-    /* ---------------------------------------------------------------------- */
-    .toggle-container {
-      position: absolute;
-      right: 15px;
-      display: flex;
-      align-items: center;
-    }
-
-    /* ---------------------------------------------------------------------- */
-    /* The switch for sync scroll                                             */
-    /* ---------------------------------------------------------------------- */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: var(--switch-width);
-      height: var(--switch-height);
-      margin-left: 2px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--switch-background-color);
-      transition: 0.4s;
-      border-radius: calc(var(--switch-height) / 2);
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: var(--slider-size);
-      width: var(--slider-size);
-      left: 2.5px;
-      bottom: 2.5px;
-      background-color: var(--switch-knob-color);
-      transition: 0.4s;
-      border-radius: 50%;
-    }
-
-    input:checked+.slider {
-      background-color: var(--switch-active-color);
-    }
-
-    input:focus+.slider {
-      box-shadow: 0 0 1px var(--switch-active-color);
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(var(--slider-transform));
-    }
-
-    .switch-label {
-      font-size: var(--switch-label-font-size);
-      margin-right: 5px;
-    }
-
-    /* ---------------------------------------------------------------------- */
     /* Markdown input textarea                                                */
     /* ---------------------------------------------------------------------- */
     textarea {
@@ -349,6 +273,12 @@
       overflow-y: auto;
       background-color: var(--pane-background);
       color: var(--text-color);
+    }
+
+    .highlighted-block {
+      outline: 2px solid #ff5f1f;
+      background-color: rgba(255, 95, 31, 0.12);
+      border-radius: 4px;
     }
 
     /* ---------------------------------------------------------------------- */
@@ -489,10 +419,6 @@
         --code-background: #f0f0f0 !important;
         --table-border-color: black !important;
         --table-header-background: #f4f4f4 !important;
-        --switch-active-color: #009688 !important;
-        --switch-background-color: #ccc !important;
-        --switch-knob-color: white !important;
-        --switch-label-font-size: 18px !important;
       }
 
       body {
@@ -661,15 +587,6 @@
         min-width: 110px;
       }
 
-      /* Move toggle below the buttons if needed */
-      .toggle-container {
-        position: static;
-        margin-top: 5px;
-      }
-
-      .switch-label {
-        font-size: 12px;
-      }
     }
   </style>
 </head>
@@ -749,15 +666,6 @@
       <div class="buttonContainer no-print">
         <button id="printButton" title="Prints in light mode">Print to PDF</button>
         <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
-
-        <!-- Toggle Switch for Sync Scroll -->
-        <div class="toggle-container">
-          <label for="syncScrollSwitch" class="switch-label">Sync Scroll</label>
-          <label class="switch">
-            <input type="checkbox" id="syncScrollSwitch">
-            <span class="slider"></span>
-          </label>
-        </div>
       </div>
       <div id="renderedOutput"></div>
     </div>
@@ -781,7 +689,6 @@
   const loadFileButton = document.getElementById('loadFileButton');
   const themeToggleButton = document.getElementById('themeToggleButton');
   const highlightStyle = document.getElementById('highlightStyle');
-  const syncScrollSwitch = document.getElementById('syncScrollSwitch');
   const editorContainer = document.getElementById('editorContainer');
   const inputPane = document.getElementById('inputPane');
   const outputPane = document.getElementById('outputPane');
@@ -824,9 +731,100 @@
     });
   }
 
+  function countNewLines(text) {
+    return (text.match(/\n/g) || []).length;
+  }
+
+  function annotateTokens(tokens, startingLine = 1) {
+    let line = startingLine;
+    tokens.forEach(token => {
+      const raw = token.raw || '';
+      token.lineStart = line;
+      const newLines = countNewLines(raw);
+      const lineEnd = line + newLines;
+      token.lineEnd = Math.max(lineEnd, line);
+      if (token.tokens) {
+        annotateTokens(token.tokens, token.lineStart);
+      }
+      if (token.items) {
+        token.items.forEach(item => {
+          if (item.tokens) {
+            annotateTokens(item.tokens, token.lineStart);
+          }
+        });
+      }
+      line = lineEnd + (raw.endsWith('\n') ? 1 : 0);
+    });
+  }
+
+  function wrapBlock(html, token) {
+    if (!token || token.lineStart == null || token.lineEnd == null) {
+      return html;
+    }
+    return `<div class="md-block" data-src-start="${token.lineStart}" data-src-end="${token.lineEnd}">${html}</div>`;
+  }
+
   function renderContent() {
     const inputText = markdownInput.value;
     const preprocessedText = preprocessMarkdown(inputText);
+
+    const renderer = {
+      heading(token) {
+        const id = token.id ? ` id="${token.id}"` : '';
+        const text = this.parser.parseInline(token.tokens);
+        return wrapBlock(`<h${token.depth}${id}>${text}</h${token.depth}>`, token);
+      },
+      paragraph(token) {
+        const text = this.parser.parseInline(token.tokens);
+        return wrapBlock(`<p>${text}</p>`, token);
+      },
+      blockquote(token) {
+        const body = this.parser.parse(token.tokens);
+        return wrapBlock(`<blockquote>${body}</blockquote>`, token);
+      },
+      list(token) {
+        const start = token.start ? ` start="${token.start}"` : '';
+        const tag = token.ordered ? 'ol' : 'ul';
+        const body = token.items.map(item => this.listitem(item)).join('');
+        return wrapBlock(`<${tag}${start}>${body}</${tag}>`, token);
+      },
+      listitem(token) {
+        let checkbox = '';
+        if (token.task) {
+          checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
+        }
+        const body = this.parser.parse(token.tokens);
+        return `<li>${checkbox}${body}</li>`;
+      },
+      code(token) {
+        const language = token.lang ? ` ${this.options.langPrefix}${token.lang}` : '';
+        const highlighted = this.options.highlight ? this.options.highlight(token.text, token.lang) : token.text;
+        const escaped = token.escaped ? highlighted : marked.escape(highlighted, true);
+        const html = `<pre><code class="${language.trim()}">${escaped}</code></pre>`;
+        return wrapBlock(html, token);
+      },
+      table(token) {
+        const header = token.header.map((cell, index) => {
+          const content = this.parser.parseInline(cell.tokens);
+          const align = token.align[index];
+          const alignAttr = align ? ` align="${align}"` : '';
+          return `<th${alignAttr}>${content}</th>`;
+        }).join('');
+        const body = token.rows.map(row => {
+          const cells = row.map((cell, index) => {
+            const content = this.parser.parseInline(cell.tokens);
+            const align = token.align[index];
+            const alignAttr = align ? ` align="${align}"` : '';
+            return `<td${alignAttr}>${content}</td>`;
+          }).join('');
+          return `<tr>${cells}</tr>`;
+        }).join('');
+        return wrapBlock(`<table><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table>`, token);
+      },
+      hr(token) {
+        return wrapBlock('<hr>', token);
+      }
+    };
 
     marked.setOptions({
       gfm: true,
@@ -836,18 +834,93 @@
       highlight: function (code, lang) {
         if (lang && hljs.getLanguage(lang)) {
           return hljs.highlight(code, { language: lang }).value;
-        } else {
-          return hljs.highlightAuto(code).value;
         }
+        return hljs.highlightAuto(code).value;
       }
     });
+    marked.use({ renderer });
 
-    const parsedMarkdown = marked.parse(preprocessedText);
-    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+    const tokens = marked.lexer(preprocessedText);
+    annotateTokens(tokens);
+    const parsedMarkdown = marked.parser(tokens);
+    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown, {
+      ADD_ATTR: ['data-src-start', 'data-src-end']
+    });
     renderedOutput.innerHTML = sanitizedContent;
 
     hljs.highlightAll();
     MathJax.typesetPromise([renderedOutput]).catch(console.error);
+    updateHighlightedBlockFromCaret();
+  }
+
+  function getLineNumberFromOffset(text, offset) {
+    if (offset <= 0) {
+      return 1;
+    }
+    return text.slice(0, offset).split('\n').length;
+  }
+
+  function getOffsetsForLineRange(text, startLine, endLine) {
+    const lines = text.split('\n');
+    let startOffset = 0;
+    let endOffset = text.length;
+
+    for (let i = 0; i < lines.length; i += 1) {
+      if (i + 1 < startLine) {
+        startOffset += lines[i].length + 1;
+      }
+    }
+
+    let cursor = 0;
+    for (let i = 0; i < lines.length; i += 1) {
+      if (i + 1 <= endLine) {
+        cursor += lines[i].length;
+        if (i + 1 < lines.length) {
+          cursor += 1;
+        }
+      }
+    }
+    endOffset = cursor;
+
+    return { startOffset, endOffset };
+  }
+
+  function updateHighlightedBlockFromCaret() {
+    const lineNumber = getLineNumberFromOffset(markdownInput.value, markdownInput.selectionStart || 0);
+    const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
+    const matchingBlock = blocks.find(block => {
+      const start = Number(block.dataset.srcStart);
+      const end = Number(block.dataset.srcEnd);
+      return lineNumber >= start && lineNumber <= end;
+    });
+
+    const current = renderedOutput.querySelector('.highlighted-block');
+    if (current && current !== matchingBlock) {
+      current.classList.remove('highlighted-block');
+    }
+
+    if (matchingBlock) {
+      matchingBlock.classList.add('highlighted-block');
+      matchingBlock.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+
+  function syncCaretFromOutputClick(event) {
+    const targetBlock = event.target.closest('[data-src-start][data-src-end]');
+    if (!targetBlock) return;
+
+    const startLine = Number(targetBlock.dataset.srcStart);
+    const endLine = Number(targetBlock.dataset.srcEnd);
+    if (Number.isNaN(startLine) || Number.isNaN(endLine)) return;
+
+    const text = markdownInput.value;
+    const offsets = getOffsetsForLineRange(text, startLine, endLine);
+    markdownInput.focus();
+    markdownInput.setSelectionRange(offsets.startOffset, offsets.endOffset);
+
+    const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
+    markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
+    updateHighlightedBlockFromCaret();
   }
 
   async function printToPDF() {
@@ -898,14 +971,6 @@
           --code-background: #f0f0f0;
           --table-border-color: black;
           --table-header-background: #f4f4f4;
-          --switch-width: 43px;
-          --switch-height: 20px;
-          --slider-size: 15px;
-          --slider-transform: 23px;
-          --switch-active-color: #009688;
-          --switch-background-color: #ccc;
-          --switch-knob-color: white;
-          --switch-label-font-size: 18px;
         }
 
         body.dark-mode {
@@ -921,7 +986,6 @@
           --table-border-color: #555555;
           --table-header-background: #333333;
           --code-text-color: #f8f8f2;
-          --switch-active-color: #009688;
         }
 
         body {
@@ -1205,74 +1269,6 @@
     }
   }
 
-  // Throttle function for scroll syncing
-  function throttle(func, limit) {
-    let inThrottle;
-    return function () {
-      const args = arguments;
-      const context = this;
-      if (!inThrottle) {
-        func.apply(context, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    }
-  }
-
-  const syncInputToOutput = throttle(() => {
-    if (!syncScrollSwitch.checked) return;
-
-    isSyncingOutputScroll = true;
-
-    requestAnimationFrame(() => {
-      const inputScrollTop = markdownInput.scrollTop;
-      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-      if (inputScrollHeight === 0) {
-        renderedOutput.scrollTop = 0;
-      } else {
-        const scrollRatio = inputScrollTop / inputScrollHeight;
-        const newOutputScrollTop = scrollRatio * outputScrollHeight;
-        if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
-          renderedOutput.scrollTop = newOutputScrollTop;
-        }
-      }
-
-      isSyncingOutputScroll = false;
-    });
-  }, 2);
-
-  const syncOutputToInput = throttle(() => {
-    if (!syncScrollSwitch.checked) return;
-
-    isSyncingInputScroll = true;
-
-    requestAnimationFrame(() => {
-      const outputScrollTop = renderedOutput.scrollTop;
-      const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-      const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-
-      if (outputScrollHeight === 0) {
-        markdownInput.scrollTop = 0;
-      } else {
-        const scrollRatio = outputScrollTop / outputScrollHeight;
-        const newInputScrollTop = scrollRatio * inputScrollHeight;
-        if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
-          markdownInput.scrollTop = newInputScrollTop;
-        }
-      }
-
-      isSyncingInputScroll = false;
-    });
-  }, 2);
-
-  let isSyncingInputScroll = false;
-  let isSyncingOutputScroll = false;
-
-  markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
-  renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
-
   window.addEventListener('beforeprint', () => {
     highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
   });
@@ -1342,7 +1338,13 @@
     window.addEventListener('pointerup', onPointerUp);
   });
 
+  const handleCaretChange = () => updateHighlightedBlockFromCaret();
+
   markdownInput.addEventListener('input', renderContent);
+  markdownInput.addEventListener('keyup', handleCaretChange);
+  markdownInput.addEventListener('click', handleCaretChange);
+  markdownInput.addEventListener('select', handleCaretChange);
+  renderedOutput.addEventListener('click', syncCaretFromOutputClick);
   printButton.addEventListener('click', printToPDF);
   exportHTMLButton.addEventListener('click', exportHTML);
   saveMDButton.addEventListener('click', saveMarkdown);
@@ -1356,5 +1358,3 @@
 </script>
 
 </html>
-
-
