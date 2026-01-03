@@ -834,15 +834,22 @@
 		slider.addEventListener('change', scrubToSlider);
 
 		/* Play/Pause */
-		playPauseButton.addEventListener('click', () => {
+		playPauseButton.addEventListener('click', async () => {
 			if (isPlaying) {
 				hiddenVideo.pause();
 				playPauseButton.textContent = "▶ Play";
 			} else {
-				hiddenVideo.play().catch(() => { });
-				playPauseButton.textContent = "⏸ Pause";
+				try {
+					await hiddenVideo.play();
+					isPlaying = true;
+					playPauseButton.textContent = "⏸ Pause";
+				} catch {
+					isPlaying = false;
+					playPauseButton.textContent = "▶ Play";
+				}
+				return;
 			}
-			isPlaying = !isPlaying;
+			isPlaying = false;
 		});
 
 		/* Click to add point and step */
