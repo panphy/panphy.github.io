@@ -735,37 +735,95 @@
     });
   }
 
-  function countNewLines(text) {
-    return (text.match(/\n/g) || []).length;
-  }
+  function buildLineBlocks(text) {
+    const lines = text.split('\n');
+    const blocks = [];
+    let i = 0;
 
-  function annotateTokens(tokens, startingLine = 1) {
-    let line = startingLine;
-    tokens.forEach(token => {
-      const raw = token.raw || '';
-      token.lineStart = line;
-      const newLines = countNewLines(raw);
-      const lineEnd = line + newLines;
-      token.lineEnd = Math.max(lineEnd, line);
-      if (token.tokens) {
-        annotateTokens(token.tokens, token.lineStart);
+    const isBlank = line => line.trim() === '';
+    const isHeading = line => /^\s{0,3}#{1,6}\s+/.test(line);
+    const isFence = line => /^\s{0,3}(```|~~~)/.test(line);
+    const isListItem = line => /^\s*(?:[-+*]|\d+\.)\s+/.test(line);
+    const isBlockquote = line => /^\s*>/.test(line);
+    const isHorizontalRule = line => /^\s{0,3}([-*_])(\s*\1){2,}\s*$/.test(line);
+
+    while (i < lines.length) {
+      if (isBlank(lines[i])) {
+        i += 1;
+        continue;
       }
-      if (token.items) {
-        token.items.forEach(item => {
-          if (item.tokens) {
-            annotateTokens(item.tokens, token.lineStart);
+
+      const start = i + 1;
+
+      if (isFence(lines[i])) {
+        const fenceMatch = lines[i].match(/^\s{0,3}(```|~~~)/);
+        const fence = fenceMatch ? fenceMatch[1] : '```';
+        i += 1;
+        while (i < lines.length && !new RegExp(`^\\s{0,3}${fence}`).test(lines[i])) {
+          i += 1;
+        }
+        if (i < lines.length) {
+          i += 1;
+        }
+        blocks.push({ start, end: i });
+        continue;
+      }
+
+      if (isHeading(lines[i]) || isHorizontalRule(lines[i])) {
+        blocks.push({ start, end: start });
+        i += 1;
+        continue;
+      }
+
+      if (isListItem(lines[i])) {
+        i += 1;
+        while (i < lines.length && !isBlank(lines[i])) {
+          if (!isListItem(lines[i]) && !/^\s+/.test(lines[i])) {
+            break;
           }
-        });
+          i += 1;
+        }
+        blocks.push({ start, end: i });
+        continue;
       }
-      line = lineEnd + (raw.endsWith('\n') ? 1 : 0);
-    });
+
+      if (isBlockquote(lines[i])) {
+        i += 1;
+        while (i < lines.length && !isBlank(lines[i]) && isBlockquote(lines[i])) {
+          i += 1;
+        }
+        blocks.push({ start, end: i });
+        continue;
+      }
+
+      i += 1;
+      while (i < lines.length && !isBlank(lines[i])) {
+        i += 1;
+      }
+      blocks.push({ start, end: i });
+    }
+
+    return blocks;
   }
 
-  function wrapBlock(html, token) {
-    if (!token || token.lineStart == null || token.lineEnd == null) {
-      return html;
+  function wrapRenderedBlocks(html, lineBlocks) {
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const blockElements = container.querySelectorAll('h1,h2,h3,h4,h5,h6,p,ul,ol,blockquote,pre,table,hr');
+    const count = Math.min(blockElements.length, lineBlocks.length);
+
+    for (let index = 0; index < count; index += 1) {
+      const block = lineBlocks[index];
+      const element = blockElements[index];
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('md-block');
+      wrapper.dataset.srcStart = String(block.start);
+      wrapper.dataset.srcEnd = String(block.end);
+      element.replaceWith(wrapper);
+      wrapper.appendChild(element);
     }
-    return `<div class="md-block" data-src-start="${token.lineStart}" data-src-end="${token.lineEnd}">${html}</div>`;
+
+    return container.innerHTML;
   }
 
   function renderContent() {
@@ -773,25 +831,6 @@
     const preprocessedText = preprocessMarkdown(inputText);
 
     const renderer = {
-      heading(token) {
-        const id = token.id ? ` id="${token.id}"` : '';
-        const text = this.parser.parseInline(token.tokens);
-        return wrapBlock(`<h${token.depth}${id}>${text}</h${token.depth}>`, token);
-      },
-      paragraph(token) {
-        const text = this.parser.parseInline(token.tokens);
-        return wrapBlock(`<p>${text}</p>`, token);
-      },
-      blockquote(token) {
-        const body = this.parser.parse(token.tokens);
-        return wrapBlock(`<blockquote>${body}</blockquote>`, token);
-      },
-      list(token) {
-        const start = token.start ? ` start="${token.start}"` : '';
-        const tag = token.ordered ? 'ol' : 'ul';
-        const body = token.items.map(item => this.listitem(item)).join('');
-        return wrapBlock(`<${tag}${start}>${body}</${tag}>`, token);
-      },
       listitem(token) {
         let checkbox = '';
         if (token.task) {
@@ -799,34 +838,6 @@
         }
         const body = this.parser.parse(token.tokens);
         return `<li>${checkbox}${body}</li>`;
-      },
-      code(token) {
-        const language = token.lang ? ` ${this.options.langPrefix}${token.lang}` : '';
-        const highlighted = this.options.highlight ? this.options.highlight(token.text, token.lang) : token.text;
-        const escaped = token.escaped ? highlighted : marked.escape(highlighted, true);
-        const html = `<pre><code class="${language.trim()}">${escaped}</code></pre>`;
-        return wrapBlock(html, token);
-      },
-      table(token) {
-        const header = token.header.map((cell, index) => {
-          const content = this.parser.parseInline(cell.tokens);
-          const align = token.align[index];
-          const alignAttr = align ? ` align="${align}"` : '';
-          return `<th${alignAttr}>${content}</th>`;
-        }).join('');
-        const body = token.rows.map(row => {
-          const cells = row.map((cell, index) => {
-            const content = this.parser.parseInline(cell.tokens);
-            const align = token.align[index];
-            const alignAttr = align ? ` align="${align}"` : '';
-            return `<td${alignAttr}>${content}</td>`;
-          }).join('');
-          return `<tr>${cells}</tr>`;
-        }).join('');
-        return wrapBlock(`<table><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table>`, token);
-      },
-      hr(token) {
-        return wrapBlock('<hr>', token);
       }
     };
 
@@ -844,13 +855,10 @@
     });
     marked.use({ renderer });
 
-    const tokens = marked.lexer(preprocessedText);
-    annotateTokens(tokens);
-    const parsedMarkdown = marked.parser(tokens);
-    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown, {
-      ADD_ATTR: ['data-src-start', 'data-src-end']
-    });
-    renderedOutput.innerHTML = sanitizedContent;
+    const lineBlocks = buildLineBlocks(inputText);
+    const parsedMarkdown = marked.parse(preprocessedText);
+    const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+    renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
     hljs.highlightAll();
     MathJax.typesetPromise([renderedOutput]).catch(console.error);
