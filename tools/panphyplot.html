@@ -2231,12 +2231,13 @@
 
 		// Build traces for each dataset.
 		rawData.forEach((dataset, index) => {
-			const xVals = dataset.map(point => point.x).filter(v => Number.isFinite(v));
-			const yVals = dataset.map(point => point.y).filter(v => Number.isFinite(v));
+			const valid = dataset.filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
+			const xVals = valid.map(point => point.x);
+			const yVals = valid.map(point => point.y);
 
 			// Convert uncertainties.
-			const xErrorsRaw = dataset.map(point => point.xErrorRaw || 0);
-			const yErrorsRaw = dataset.map(point => point.yErrorRaw || 0);
+			const xErrorsRaw = valid.map(point => point.xErrorRaw || 0);
+			const yErrorsRaw = valid.map(point => point.yErrorRaw || 0);
 			const errorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
 
 			const xErrorsConverted = xVals.map((xVal, i) =>
