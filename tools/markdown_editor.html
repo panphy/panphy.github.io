@@ -275,6 +275,10 @@
       color: var(--text-color);
     }
 
+    .md-block {
+      scroll-margin-top: 20px;
+    }
+
     .highlighted-block {
       outline: 2px solid #ff5f1f;
       background-color: rgba(255, 95, 31, 0.12);
@@ -899,10 +903,12 @@
       current.classList.remove('highlighted-block');
     }
 
-    if (matchingBlock) {
-      matchingBlock.classList.add('highlighted-block');
-      matchingBlock.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (!matchingBlock) {
+      return;
     }
+
+    matchingBlock.classList.add('highlighted-block');
+    matchingBlock.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   function syncCaretFromOutputClick(event) {
