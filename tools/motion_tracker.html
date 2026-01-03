@@ -956,10 +956,14 @@
 			};
 
 			let finished = false;
+			let frameCallbackId = null;
 			const clean = () => {
 				if (finished) return;
 				finished = true;
 				hiddenVideo.removeEventListener('seeked', onSeeked);
+				if (frameCallbackId !== null && typeof hiddenVideo.cancelVideoFrameCallback === "function") {
+					hiddenVideo.cancelVideoFrameCallback(frameCallbackId);
+				}
 				clearTimeout(fallbackTimer);
 				finish();
 			};
@@ -979,6 +983,9 @@
 
 			const fallbackTimer = setTimeout(clean, 500);
 			hiddenVideo.addEventListener('seeked', onSeeked, { once: true });
+			if (typeof hiddenVideo.requestVideoFrameCallback === "function") {
+				frameCallbackId = hiddenVideo.requestVideoFrameCallback(() => clean());
+			}
 
 			try {
 				hiddenVideo.currentTime = target + 0.00001;
