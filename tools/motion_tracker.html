@@ -1045,14 +1045,6 @@
 
 		function plotVelocity(axis) {
 			currentPlotMode = axis === 'x' ? 'vx' : 'vy';
-			const windowSize = 3;
-			if (frameData.length <= windowSize) {
-				if (frameData.length > 1) {
-					alert(`Insufficient data. At least ${windowSize + 1} points are needed for smoothed velocity.`);
-				}
-				return;
-			}
-
 			const velocityEstimates = [];
 			const velocityTimes = [];
 			for (let i = 1; i < frameData.length; i++) {
@@ -1065,6 +1057,11 @@
 					velocityEstimates.push(v);
 					velocityTimes.push((frameData[i].time + frameData[i - 1].time) / 2);
 				}
+			}
+
+			if (velocityEstimates.length < 3) {
+				document.getElementById('message').innerHTML = "<p>Velocity smoothing requires multiple distinct timestamps. Add more points with different times to plot velocity.</p>";
+				return;
 			}
 
 			const smoothed = [];
