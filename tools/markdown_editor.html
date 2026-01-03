@@ -136,18 +136,46 @@
     /* ---------------------------------------------------------------------- */
     #inputPane,
     #outputPane {
-      width: 50%;
+      flex: 0 0 50%;
       padding: 0;
       box-sizing: border-box;
       background-color: var(--pane-background);
       display: flex;
       flex-direction: column;
       min-height: 0;
+      min-width: 240px;
       border: none;
     }
 
     #inputPane {
       border-right: 1px solid var(--border-color);
+    }
+
+    /* ---------------------------------------------------------------------- */
+    /* Draggable resizer between panes                                       */
+    /* ---------------------------------------------------------------------- */
+    #paneResizer {
+      width: 8px;
+      cursor: col-resize;
+      background: transparent;
+      position: relative;
+      flex: 0 0 8px;
+      z-index: 2;
+    }
+
+    #paneResizer::before {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: var(--border-color);
+    }
+
+    body.resizing {
+      cursor: col-resize;
+      user-select: none;
     }
 
     /* ---------------------------------------------------------------------- */
@@ -611,8 +639,12 @@
       #outputPane {
         width: 100%;
         border-right: none;
-        flex: 1;
+        flex: 1 1 auto;
         /* Ensures both panes share the available height equally */
+      }
+
+      #paneResizer {
+        display: none;
       }
     }
 
@@ -685,6 +717,8 @@
       <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
     </div>
 
+    <div id="paneResizer" aria-label="Resize panes" role="separator"></div>
+
     <!-- ============================================= -->
     <!-- ========== Rendered Output Pane ============= -->
     <!-- ============================================= -->
@@ -748,6 +782,11 @@
   const themeToggleButton = document.getElementById('themeToggleButton');
   const highlightStyle = document.getElementById('highlightStyle');
   const syncScrollSwitch = document.getElementById('syncScrollSwitch');
+  const editorContainer = document.getElementById('editorContainer');
+  const inputPane = document.getElementById('inputPane');
+  const outputPane = document.getElementById('outputPane');
+  const paneResizer = document.getElementById('paneResizer');
+  const paneSplitStorageKey = 'markdownPaneSplit';
 
   /**
    * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
@@ -1249,6 +1288,59 @@
   // Initialize theme and render content on load
   initializeTheme();
   renderContent();
+
+  function setPaneSplit(percent, shouldPersist = true) {
+    const clamped = Math.min(85, Math.max(15, percent));
+    inputPane.style.flex = `0 0 ${clamped}%`;
+    outputPane.style.flex = `0 0 ${100 - clamped}%`;
+    if (shouldPersist) {
+      localStorage.setItem(paneSplitStorageKey, clamped.toString());
+    }
+  }
+
+  function resetPaneSplit() {
+    inputPane.style.flex = '1 1 auto';
+    outputPane.style.flex = '1 1 auto';
+  }
+
+  const splitMediaQuery = window.matchMedia('(max-width: 900px)');
+  const storedSplit = parseFloat(localStorage.getItem(paneSplitStorageKey));
+  if (!Number.isNaN(storedSplit) && !splitMediaQuery.matches) {
+    setPaneSplit(storedSplit, false);
+  }
+
+  splitMediaQuery.addEventListener('change', event => {
+    if (event.matches) {
+      resetPaneSplit();
+    } else {
+      const savedSplit = parseFloat(localStorage.getItem(paneSplitStorageKey));
+      setPaneSplit(Number.isNaN(savedSplit) ? 50 : savedSplit, false);
+    }
+  });
+
+  paneResizer.addEventListener('pointerdown', event => {
+    if (splitMediaQuery.matches) return;
+    event.preventDefault();
+    paneResizer.setPointerCapture(event.pointerId);
+    document.body.classList.add('resizing');
+
+    const onPointerMove = moveEvent => {
+      const rect = editorContainer.getBoundingClientRect();
+      const offsetX = moveEvent.clientX - rect.left;
+      const percent = (offsetX / rect.width) * 100;
+      setPaneSplit(percent);
+    };
+
+    const onPointerUp = upEvent => {
+      paneResizer.releasePointerCapture(upEvent.pointerId);
+      document.body.classList.remove('resizing');
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+  });
 
   markdownInput.addEventListener('input', renderContent);
   printButton.addEventListener('click', printToPDF);
