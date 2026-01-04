@@ -783,7 +783,13 @@
    * @returns {string} - The processed Markdown with TeX preserved.
    */
   function preprocessMarkdown(input) {
-    const isEscaped = index => index > 0 && input[index - 1] === '\\';
+    const isEscaped = index => {
+      let backslashCount = 0;
+      for (let i = index - 1; i >= 0 && input[i] === '\\'; i -= 1) {
+        backslashCount += 1;
+      }
+      return backslashCount % 2 === 1;
+    };
     const isCurrencyLike = content => /^\d/.test(content) && /\s/.test(content);
 
     let output = '';
@@ -821,7 +827,8 @@
           continue;
         }
 
-        output += delimiter + content + delimiter;
+        const escapedContent = content.replace(/\\/g, '\\\\');
+        output += delimiter + escapedContent + delimiter;
         i = closingIndex + delimiter.length;
         continue;
       }
