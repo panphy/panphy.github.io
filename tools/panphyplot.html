@@ -2198,7 +2198,7 @@
 		// Update the plot.
 		Plotly.react('plot', data, layout, {
 			toImageButtonOptions: {
-				format: 'png',
+				format: 'svg',
 				filename: 'data_plot',
 				scale: 1
 			}
@@ -2324,7 +2324,7 @@
 		}
 
 		Plotly.newPlot('popup-plot', traces, layout, {
-			toImageButtonOptions: { format: 'png', filename: 'combined_plot', scale: 1 }
+			toImageButtonOptions: { format: 'svg', filename: 'combined_plot', scale: 1 }
 		});
 
 		lastPlotState.data = traces;
