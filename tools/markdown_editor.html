@@ -235,6 +235,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 12px;
       position: relative;
     }
 
@@ -242,6 +243,20 @@
       background-color: var(--button-background);
       color: var(--button-color);
       border: none;
+    }
+
+    .scroll-sync-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9em;
+      color: var(--pane-heading-color);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .scroll-sync-toggle input {
+      cursor: pointer;
     }
 
     /* ---------------------------------------------------------------------- */
@@ -670,6 +685,10 @@
       <div class="buttonContainer no-print">
         <button id="printButton" title="Prints in light mode">Print to PDF</button>
         <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
+        <label class="scroll-sync-toggle" for="scrollSyncToggle">
+          <input type="checkbox" id="scrollSyncToggle" />
+          Scroll sync preview
+        </label>
       </div>
       <div id="renderedOutput"></div>
     </div>
@@ -692,12 +711,14 @@
   const saveMDButton = document.getElementById('saveMDButton');
   const loadFileButton = document.getElementById('loadFileButton');
   const themeToggleButton = document.getElementById('themeToggleButton');
+  const scrollSyncToggle = document.getElementById('scrollSyncToggle');
   const highlightStyle = document.getElementById('highlightStyle');
   const editorContainer = document.getElementById('editorContainer');
   const inputPane = document.getElementById('inputPane');
   const outputPane = document.getElementById('outputPane');
   const paneResizer = document.getElementById('paneResizer');
   const paneSplitStorageKey = 'markdownPaneSplit';
+  let isScrollSyncEnabled = false;
 
   /**
    * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
@@ -953,7 +974,7 @@
     return { startOffset, endOffset };
   }
 
-  function updateHighlightedBlockFromCaret() {
+  function updateHighlightedBlockFromCaret({ forceScroll = false } = {}) {
     const lineNumber = getLineNumberFromOffset(markdownInput.value, markdownInput.selectionStart || 0);
     const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
     const matchingBlocks = blocks.filter(block => {
@@ -980,7 +1001,9 @@
     }
 
     matchingBlock.classList.add('highlighted-block');
-    matchingBlock.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (isScrollSyncEnabled || forceScroll) {
+      matchingBlock.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
   }
 
   function syncCaretFromOutputClick(event) {
@@ -998,7 +1021,7 @@
 
     const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
     markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
-    updateHighlightedBlockFromCaret();
+    updateHighlightedBlockFromCaret({ forceScroll: true });
   }
 
   async function printToPDF() {
@@ -1433,6 +1456,12 @@
     renderContent();
   });
   themeToggleButton.addEventListener('click', toggleTheme);
+  scrollSyncToggle.addEventListener('change', event => {
+    isScrollSyncEnabled = event.target.checked;
+    if (isScrollSyncEnabled) {
+      updateHighlightedBlockFromCaret({ forceScroll: true });
+    }
+  });
 </script>
 
 </html>
