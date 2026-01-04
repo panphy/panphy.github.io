@@ -618,10 +618,10 @@
       maxSamples = lastWaveFrame.length;
     }
 
-    let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (a.u.)\n";
+    let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (normalized)\n";
     for (let i = 0; i < maxSamples; i++) {
       const timeMs = (i / sampleRate) * 1000;
-      const amplitude = lastWaveFrame[i];
+      const amplitude = (lastWaveFrame[i] - 128) / 128;
       csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
     }
 
