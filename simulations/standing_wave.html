@@ -381,6 +381,8 @@
         let time = 0;
         let lastTimestamp = null;
         let allowedHarmonics = [];
+        let waveCache = [];
+        let waveCacheResolution = 0;
 
         function getAllowedHarmonics() {
             if (
@@ -417,6 +419,7 @@
             }
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateNodeAntinodeDisplay();
+            updateWaveCache();
             updateAmplitudes();
         }
 
@@ -464,6 +467,7 @@
         function updateHarmonicSlider() {
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateNodeAntinodeDisplay();
+            updateWaveCache();
             updateAmplitudes();
         }
 
@@ -477,6 +481,7 @@
             modeIndex = parseInt(modeSlider.value);
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateNodeAntinodeDisplay();
+            updateWaveCache();
             updateAmplitudes();
         });
 
@@ -524,6 +529,28 @@
             canvas.width = Math.round(width * dpr);
             canvas.height = Math.round(height * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            updateWaveCache();
+        }
+
+        function updateWaveCache() {
+            const k = getHarmonicNumber(modeIndex);
+            waveCacheResolution = Math.max(1, Math.round(canvasWidth));
+            waveCache = new Array(waveCacheResolution + 1);
+            for (let i = 0; i <= waveCacheResolution; i++) {
+                const normalizedX = i / waveCacheResolution;
+                waveCache[i] = getWaveFunction(k, normalizedX);
+            }
+        }
+
+        function getCachedWaveValue(normalizedX) {
+            if (!waveCache.length || waveCacheResolution === 0) {
+                return getWaveFunction(getHarmonicNumber(modeIndex), normalizedX);
+            }
+            const index = Math.min(
+                waveCacheResolution,
+                Math.round(normalizedX * waveCacheResolution)
+            );
+            return waveCache[index];
         }
 
         function draw(timestamp) {
@@ -554,7 +581,7 @@
                 ctx.beginPath();
                 for (let i = 0; i <= canvasWidth; i++) {
                     const normalizedX = i / canvasWidth;
-                    const waveFunc = getWaveFunction(k, normalizedX);
+                    const waveFunc = getCachedWaveValue(normalizedX);
                     const y = A * Math.cos(omega * time) * waveFunc;
                     const screenY = canvasHeight / 2 - y * amplitudeScale;
                     if (i === 0) {
@@ -569,12 +596,12 @@
 
                 // Red particle
                 const redX = xRed * canvasWidth;
-                const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xRed) * amplitudeScale;
+                const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xRed) * amplitudeScale;
                 drawParticle(redX, redY, "#ff4081");
 
                 // Green particle
                 const greenX = xGreen * canvasWidth;
-                const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xGreen) * amplitudeScale;
+                const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xGreen) * amplitudeScale;
                 drawParticle(greenX, greenY, "#00e676");
 
                 time += deltaTime;
