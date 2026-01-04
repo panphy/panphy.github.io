@@ -365,6 +365,28 @@
 			background: var(--warn)
 		}
 
+		#recordIndicator {
+			display: none;
+			align-items: center;
+			gap: .2rem;
+			margin-left: .4rem;
+			font-size: .7rem;
+			letter-spacing: .04em;
+			color: #f3b0b0
+		}
+
+		#hud.recording #recordIndicator {
+			display: inline-flex
+		}
+
+		#recordDot {
+			width: .38rem;
+			height: .38rem;
+			border-radius: 50%;
+			background: #ff4d4d;
+			box-shadow: 0 0 4px rgba(255, 77, 77, .6)
+		}
+
 		#textOverlay {
 			position: absolute;
 			display: none;
@@ -508,7 +530,11 @@
 		<canvas id="freezeCanvas" class="hidden"></canvas>
 		<canvas id="drawCanvas"></canvas>
 		<canvas id="laserCanvas"></canvas>
-		<div id="hud"><span id="statusDot"></span><span id="hudText">Live</span></div>
+		<div id="hud">
+			<span id="statusDot"></span>
+			<span id="hudText">Live</span>
+			<span id="recordIndicator"><span id="recordDot"></span>REC</span>
+		</div>
 
 		<!-- Text overlay -->
 		<div id="textOverlay">
@@ -546,6 +572,7 @@
 			const recordBtn = document.getElementById('recordBtn');
 			const mirrorBtn = document.getElementById('mirrorBtn');
 			const fitBtn = document.getElementById('fitBtn');
+			const hud = document.getElementById('hud');
 			const hudText = document.getElementById('hudText');
 			const stage = document.getElementById('stage');
 			const toast = document.getElementById('toast');
@@ -1379,6 +1406,7 @@
 					recording = true;
 					recordBtn.textContent = 'Stop';
 					recordBtn.classList.add('danger');
+					hud.classList.add('recording');
 					drawCompositeFrame();
 					showToast('Recording started');
 				} else {
@@ -1386,6 +1414,7 @@
 					try { mediaRecorder.stop(); } catch (e) {}
 					recordBtn.textContent = 'Record';
 					recordBtn.classList.remove('danger');
+					hud.classList.remove('recording');
 				}
 			});
 
