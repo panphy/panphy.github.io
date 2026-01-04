@@ -942,6 +942,16 @@
     updateHighlightedBlockFromCaret();
   }
 
+  function debounce(fn, delay) {
+    let timerId;
+    return (...args) => {
+      window.clearTimeout(timerId);
+      timerId = window.setTimeout(() => {
+        fn(...args);
+      }, delay);
+    };
+  }
+
   function getLineNumberFromOffset(text, offset) {
     if (offset <= 0) {
       return 1;
@@ -1441,7 +1451,8 @@
 
   const handleCaretChange = () => updateHighlightedBlockFromCaret();
 
-  markdownInput.addEventListener('input', renderContent);
+  const debouncedRenderContent = debounce(renderContent, 200);
+  markdownInput.addEventListener('input', debouncedRenderContent);
   markdownInput.addEventListener('keyup', handleCaretChange);
   markdownInput.addEventListener('click', handleCaretChange);
   markdownInput.addEventListener('select', handleCaretChange);
