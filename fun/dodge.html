@@ -257,6 +257,7 @@
     let player;
     let keys = {};
     let animationId;
+    let speedIntervalId;
     // Use localStorage for top scores with a game-specific key
     let topScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
 
@@ -574,6 +575,13 @@
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
+      if (speedIntervalId) {
+        clearInterval(speedIntervalId);
+      }
+      speedIntervalId = setInterval(() => {
+        MIN_ASTEROID_SPEED += 0.1;
+        MAX_ASTEROID_SPEED += 0.2;
+      }, speedIncreaseInterval);
       gameLoop();
     }
 
@@ -667,6 +675,10 @@
           if (checkCollision(player, m)) {
             gameOver = true;
             updateTopScores(score);
+            if (speedIntervalId) {
+              clearInterval(speedIntervalId);
+              speedIntervalId = null;
+            }
           }
 
           // Remove if off screen
@@ -701,12 +713,6 @@
         ctx.textAlign = 'start';
       }
     }
-
-    // Periodically increase the asteroid speed
-    setInterval(() => {
-      MIN_ASTEROID_SPEED += 0.1;
-      MAX_ASTEROID_SPEED += 0.2;
-    }, speedIncreaseInterval);
   </script>
 
 </body>
