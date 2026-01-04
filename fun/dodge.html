@@ -471,7 +471,12 @@
       }
     }
 
-    backgroundImg.onload = startIfReady;
+    backgroundImg.onload = () => {
+      startIfReady();
+      if (animationId) {
+        drawRollingBackground();
+      }
+    };
     spaceshipImg.onload = startIfReady;
     asteroidImg.onload = startIfReady;
 
@@ -608,6 +613,9 @@
      * to 0 to create a seamless rolling effect.
      */
     function drawRollingBackground() {
+      if (!backgroundImg.complete || backgroundImg.width === 0) {
+        return;
+      }
       // Increase the offset to "scroll" the background
       backgroundOffsetY += backgroundScrollSpeed * ((scaleX + scaleY) / 2);
 
