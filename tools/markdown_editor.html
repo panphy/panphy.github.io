@@ -1117,24 +1117,60 @@
 
   function getLineNumberFromInputScroll() {
     const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
-    return Math.max(1, Math.floor(markdownInput.scrollTop / lineHeight) + 1);
+    return Math.max(1, markdownInput.scrollTop / lineHeight + 1);
   }
 
   function getBlockClosestToTop() {
     const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
     if (!blocks.length) return null;
-    const containerRect = renderedOutput.getBoundingClientRect();
+    const scrollTop = renderedOutput.scrollTop;
     let closest = blocks[0];
-    let closestDelta = Infinity;
     blocks.forEach(block => {
-      const rect = block.getBoundingClientRect();
-      const delta = Math.abs(rect.top - containerRect.top);
-      if (delta < closestDelta) {
+      if (block.offsetTop <= scrollTop) {
         closest = block;
-        closestDelta = delta;
       }
     });
     return closest;
+  }
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function getDesiredOutputScrollTop(lineNumber) {
+    const matchingBlock = getMatchingBlockForLine(lineNumber);
+    if (!matchingBlock) return null;
+    const startLine = Number(matchingBlock.dataset.srcStart);
+    const endLine = Number(matchingBlock.dataset.srcEnd);
+    if (Number.isNaN(startLine) || Number.isNaN(endLine)) return null;
+    const span = Math.max(1, endLine - startLine + 1);
+    const progress = clamp((lineNumber - startLine) / span, 0, 1);
+    return matchingBlock.offsetTop + matchingBlock.offsetHeight * progress;
+  }
+
+  function getDesiredInputScrollTop() {
+    const closestBlock = getBlockClosestToTop();
+    if (!closestBlock) return null;
+    const startLine = Number(closestBlock.dataset.srcStart);
+    const endLine = Number(closestBlock.dataset.srcEnd);
+    if (Number.isNaN(startLine) || Number.isNaN(endLine)) return null;
+    const span = Math.max(1, endLine - startLine + 1);
+    const blockHeight = Math.max(1, closestBlock.offsetHeight);
+    const progress = clamp((renderedOutput.scrollTop - closestBlock.offsetTop) / blockHeight, 0, 1);
+    const lineNumber = startLine + progress * span;
+    const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
+    return Math.max(0, (lineNumber - 1) * lineHeight);
+  }
+
+  function applyScrollTop(target, desiredTop) {
+    const maxTop = Math.max(0, target.scrollHeight - target.clientHeight);
+    const clampedTop = clamp(desiredTop, 0, maxTop);
+    const distance = clampedTop - target.scrollTop;
+    if (Math.abs(distance) < 0.5) {
+      target.scrollTop = clampedTop;
+      return;
+    }
+    target.scrollTop = target.scrollTop + distance * 0.35;
   }
 
   let isSyncingScroll = false;
@@ -1151,27 +1187,18 @@
 
       if (source === markdownInput && target === renderedOutput) {
         const lineNumber = getLineNumberFromInputScroll();
-        const matchingBlock = getMatchingBlockForLine(lineNumber);
-        if (matchingBlock) {
-          const containerRect = target.getBoundingClientRect();
-          const blockRect = matchingBlock.getBoundingClientRect();
-          const delta = blockRect.top - containerRect.top;
-          const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
-          target.scrollTop = Math.min(targetMax, Math.max(0, target.scrollTop + delta));
+        const desiredTop = getDesiredOutputScrollTop(lineNumber);
+        if (desiredTop !== null) {
+          applyScrollTop(target, desiredTop);
           applied = true;
         }
       }
 
       if (source === renderedOutput && target === markdownInput) {
-        const closestBlock = getBlockClosestToTop();
-        if (closestBlock) {
-          const startLine = Number(closestBlock.dataset.srcStart);
-          if (!Number.isNaN(startLine)) {
-            const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
-            const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
-            target.scrollTop = Math.min(targetMax, Math.max(0, (startLine - 1) * lineHeight));
-            applied = true;
-          }
+        const desiredTop = getDesiredInputScrollTop();
+        if (desiredTop !== null) {
+          applyScrollTop(target, desiredTop);
+          applied = true;
         }
       }
 
@@ -1179,7 +1206,7 @@
         const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
         const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
         const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
-        target.scrollTop = targetMax * ratio;
+        applyScrollTop(target, targetMax * ratio);
       }
       isSyncingScroll = false;
     });
