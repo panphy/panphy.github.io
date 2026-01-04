@@ -212,6 +212,22 @@
       position: relative;
     }
 
+    .buttonContainer.output-controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .buttonContainer.output-controls .output-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .buttonContainer.output-controls .scroll-sync-toggle {
+      margin-left: auto;
+    }
+
     body.dark-mode .buttonContainer button {
       background-color: var(--button-background);
       color: var(--button-color);
@@ -719,9 +735,11 @@
       </div>
 
       <!-- Buttons and rendered output below -->
-      <div class="buttonContainer no-print">
-        <button id="printButton" title="Prints in light mode">Print to PDF</button>
-        <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
+      <div class="buttonContainer output-controls no-print">
+        <div class="output-actions">
+          <button id="printButton" title="Prints in light mode">Print to PDF</button>
+          <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
+        </div>
         <label class="scroll-sync-toggle" for="scrollSyncToggle">
           <input type="checkbox" id="scrollSyncToggle" />
           <span class="toggle-slider" aria-hidden="true"></span>
