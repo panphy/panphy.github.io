@@ -198,7 +198,8 @@
       canvas.height = rect.height * dpr;
 
       // Scale the drawing context to account for the device pixel ratio.
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // Update game variables based on the new size
       SCREEN_WIDTH = rect.width;
