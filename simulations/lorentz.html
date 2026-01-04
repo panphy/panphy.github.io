@@ -12,7 +12,7 @@
         :root {
             --bg-color: #f7f8fb;
             --primary-text-color: #1f2937;
-            --accent-blue: #1f4fd7;
+            --accent-blue: #0384fc;
             --accent-orange: #f97316;
             --canvas-border: #cbd5f5;
             --grid-color: #d9deee;
@@ -49,7 +49,7 @@
          *******************************************************/
         header {
             width: 100%;
-            background: linear-gradient(120deg, #0f172a, #1f4fd7);
+            background: linear-gradient(120deg, #0f172a, #0384fc);
             position: relative;
             padding: 20px 0;
             /* top/bottom padding so children aren't cut off */
@@ -204,7 +204,7 @@
 
         .valueBadge {
             background: rgba(31, 79, 215, 0.12);
-            color: #1f4fd7;
+            color: #0384fc;
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 999px;
@@ -226,7 +226,7 @@
         }
 
         button:hover {
-            background-color: #2b5bda;
+            background-color: #0384fc;
         }
 
         /*******************************************************
@@ -736,7 +736,7 @@
             }
 
             // Moving frame axes (draw in blue)
-            ctx.strokeStyle = "#1E90FF";
+            ctx.strokeStyle = "#0384fc";
             ctx.lineWidth = 1.5;
 
             const { xMin, xMax, tMin, tMax } = getBoundingBox();
@@ -759,7 +759,7 @@
             ctx.stroke();
 
             // Label the moving axes in the same blue color
-            ctx.fillStyle = "#1E90FF";
+            ctx.fillStyle = "#0384fc";
             if (Math.abs(relSpeed) < 0.001) {
                 // Overlaps the rest frame if speed ~ 0
                 ctx.fillText("t'", origin.x + 10, 20);
