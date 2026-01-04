@@ -380,10 +380,10 @@
         this.baseSize = 32; // Base width and height
         this.baseRadius = (this.baseSize + this.baseSize) / 4; // As per original calculation
         this.spawn();
+        this.baseSpeed =
+          Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) + MIN_ASTEROID_SPEED;
         // Random speed between MIN and MAX, scaled
-        this.speed =
-          (Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) + MIN_ASTEROID_SPEED) *
-          ((scaleX + scaleY) / 2);
+        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
 
         // Random rotation angle + spin speed
         this.angle = Math.random() * 2 * Math.PI;
@@ -401,7 +401,7 @@
         this.width = this.baseSize * this.scale;
         this.height = this.baseSize * this.scale;
         this.radius = (this.width + this.height) / 4;
-        this.speed *= ((scaleX + scaleY) / 2); // Adjust speed based on scaling
+        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
       }
 
       spawn() {
