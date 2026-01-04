@@ -461,12 +461,20 @@
             updateAmplitudes();
         });
 
+        let canvasWidth = 0;
+        let canvasHeight = 0;
+
         function resizeCanvas() {
             const aspectRatio = 2; // e.g., 2:1 ratio
             const width = canvas.clientWidth;
             const height = width / aspectRatio;
-            canvas.width = width;
-            canvas.height = height;
+            const dpr = window.devicePixelRatio || 1;
+            canvasWidth = width;
+            canvasHeight = height;
+            canvas.style.height = `${height}px`;
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
         function draw(timestamp) {
@@ -477,15 +485,15 @@
             lastTimestamp = timestamp;
 
             if (!isPaused) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
                 const desiredFraction = 0.8;
-                const amplitudeScale = (canvas.height / 2 * desiredFraction) / 10;
+                const amplitudeScale = (canvasHeight / 2 * desiredFraction) / 10;
 
                 // Draw equilibrium line
                 ctx.beginPath();
                 ctx.setLineDash([5, 5]);
-                ctx.moveTo(0, canvas.height / 2);
-                ctx.lineTo(canvas.width, canvas.height / 2);
+                ctx.moveTo(0, canvasHeight / 2);
+                ctx.lineTo(canvasWidth, canvasHeight / 2);
                 ctx.strokeStyle = "#9e9eaa";
                 ctx.lineWidth = 1;
                 ctx.stroke();
@@ -495,11 +503,11 @@
 
                 // Draw the oscillating string
                 ctx.beginPath();
-                for (let i = 0; i <= canvas.width; i++) {
-                    const normalizedX = i / canvas.width;
+                for (let i = 0; i <= canvasWidth; i++) {
+                    const normalizedX = i / canvasWidth;
                     const waveFunc = getWaveFunction(k, normalizedX);
                     const y = A * Math.cos(omega * time) * waveFunc;
-                    const screenY = canvas.height / 2 - y * amplitudeScale;
+                    const screenY = canvasHeight / 2 - y * amplitudeScale;
                     if (i === 0) {
                         ctx.moveTo(i, screenY);
                     } else {
@@ -511,13 +519,13 @@
                 ctx.stroke();
 
                 // Red particle
-                const redX = xRed * canvas.width;
-                const redY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xRed) * amplitudeScale;
+                const redX = xRed * canvasWidth;
+                const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xRed) * amplitudeScale;
                 drawParticle(redX, redY, "#ff4081");
 
                 // Green particle
-                const greenX = xGreen * canvas.width;
-                const greenY = canvas.height / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xGreen) * amplitudeScale;
+                const greenX = xGreen * canvasWidth;
+                const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getWaveFunction(k, xGreen) * amplitudeScale;
                 drawParticle(greenX, greenY, "#00e676");
 
                 time += deltaTime;
@@ -526,7 +534,7 @@
         }
 
         function drawParticle(x, y, color) {
-            const particleRadius = Math.min(canvas.width, canvas.height) * 0.015;
+            const particleRadius = Math.min(canvasWidth, canvasHeight) * 0.015;
             ctx.beginPath();
             ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
             ctx.fillStyle = color;
