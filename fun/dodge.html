@@ -488,8 +488,8 @@
     document.addEventListener('keydown', (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault(); // Prevent scrolling
+        keys[e.key] = true;
       }
-      keys[e.key] = true;
 
       if (gameOver && e.key === 'Enter') {
         resetGame();
@@ -497,7 +497,9 @@
     });
 
     document.addEventListener('keyup', (e) => {
-      keys[e.key] = false;
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        keys[e.key] = false;
+      }
     });
 
     canvas.addEventListener('pointerdown', (e) => {
