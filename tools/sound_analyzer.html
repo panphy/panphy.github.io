@@ -255,9 +255,6 @@
   // Waveform data
   let timeDomainData;
 
-  // We store frames while running, but only the last one at pause
-  let freqDataHistory = [];
-
   // Final paused frames
   let lastFreqFrame;
   let lastWaveFrame;
@@ -321,8 +318,6 @@
     // Exports disabled until pause
     exportSpectrumBtn.disabled = true;
     exportWaveformBtn.disabled = true;
-    freqDataHistory = [];
-
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       sampleRate = audioContext.sampleRate;
@@ -391,7 +386,6 @@
 
     if (isRunning) {
       analyzer.getByteFrequencyData(dataArray);
-      freqDataHistory.push(Array.from(dataArray));
     } else if (lastFreqFrame) {
       dataArray.set(lastFreqFrame);
     }
