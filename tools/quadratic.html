@@ -357,9 +357,15 @@
 				if (Math.abs(a) < eps) {
 					if (Math.abs(b) < eps) {
 						D = NaN;
-						rootsHTML = "<span class='root-box'>none</span>";
-						noteEl.textContent = "This is a constant function.";
-						vertex = { x: NaN, y: NaN };
+						if (Math.abs(c) < eps) {
+							rootsHTML = "<span class='root-box'>all real numbers</span>";
+							noteEl.textContent = "Identity: 0 = 0.";
+							vertex = { x: NaN, y: NaN };
+						} else {
+							rootsHTML = "<span class='root-box'>none</span>";
+							noteEl.textContent = "This is a constant function with no solutions.";
+							vertex = { x: NaN, y: NaN };
+						}
 					} else {
 						const x = -c / b;
 						D = "n/a (linear)";
