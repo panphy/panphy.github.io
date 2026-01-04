@@ -63,25 +63,24 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: cache-first + save to runtime cache (works for CDN libs too)
+// Fetch: network-first for navigations, cache-first for other assets
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
   // Don’t try to cache non-GET (POST, etc.)
   if (req.method !== 'GET') return;
 
-  // Navigations: serve cached page if available, fallback to index.html offline
+  // Navigations: fetch fresh when online, fall back to cache/offline
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
-      const cached = await caches.match(req);
-      if (cached) return cached;
-
       try {
         const fresh = await fetch(req);
         const cache = await caches.open(RUNTIME_CACHE);
         cache.put(req, fresh.clone());
         return fresh;
       } catch {
+        const cached = await caches.match(req);
+        if (cached) return cached;
         return (await caches.match('/index.html')) || Response.error();
       }
     })());
