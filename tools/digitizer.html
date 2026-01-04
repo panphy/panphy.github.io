@@ -524,6 +524,9 @@
   document.getElementById('imageLoader').addEventListener('change', handleImage, false);
 
   function handleImage(e) {
+    if (!e.target.files || !e.target.files[0]) {
+      return;
+    }
     const reader = new FileReader();
     reader.onload = function (event) {
       image.onload = function () {
