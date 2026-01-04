@@ -654,7 +654,10 @@
       let actualValue = promptForCalibrationValue();
       if (actualValue !== null) {
         if (calibrationPhase.startsWith("x")) {
-          calibrationX.push({ x: activeCalibration.x, y: activeCalibration.y, data: actualValue });
+          const point = { x: activeCalibration.x, y: activeCalibration.y, data: actualValue };
+          calibrationX.push(point);
+          actionHistory.push({ type: "calibrationX", point: point });
+          redoHistory = [];
           updateStatus("Saved X point " + calibrationX.length + " of 2.");
           if (calibrationPhase === "x1") {
             calibrationPhase = "x2";
@@ -664,7 +667,10 @@
             updateStatus("Calibration: Click first point for y axis (y₁).");
           }
         } else if (calibrationPhase.startsWith("y")) {
-          calibrationY.push({ x: activeCalibration.x, y: activeCalibration.y, data: actualValue });
+          const point = { x: activeCalibration.x, y: activeCalibration.y, data: actualValue };
+          calibrationY.push(point);
+          actionHistory.push({ type: "calibrationY", point: point });
+          redoHistory = [];
           updateStatus("Saved Y point " + calibrationY.length + " of 2.");
           if (calibrationPhase === "y1") {
             calibrationPhase = "y2";
@@ -698,6 +704,7 @@
       }
       digitizedPoints.push({ pixelX: x, pixelY: y, dataX: dataX, dataY: dataY });
       actionHistory.push({ type: "digitized", point: { pixelX: x, pixelY: y, dataX: dataX, dataY: dataY } });
+      redoHistory = [];
       updateStatus("Digitized point (" + dataX.toFixed(4) + ", " + dataY.toFixed(4) + "). Total: " + digitizedPoints.length);
       updateDataTable();
       redrawCanvas();
