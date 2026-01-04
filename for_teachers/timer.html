@@ -348,6 +348,13 @@
             endTime = null; extraEndTime = null;
         }
 
+        const resetToggleButton = () => {
+            toggleBtn.dataset.state = 'start';
+            toggleBtn.textContent = 'Start';
+            toggleBtn.classList.remove('btn-pause');
+            toggleBtn.classList.add('btn-start');
+        };
+
         // Accepts "freshStart" (true when first started) or not
         function startTimer(freshStart = true) {
             if (remaining <= 0) return false;
@@ -366,12 +373,22 @@
 
             origInt = setInterval(() => {
                 if (remaining > 0) { remaining--; updateDisplays(); }
-                else { clearInterval(origInt); playAlarm('alarm-sound-original'); blink('original-time'); }
+                else {
+                    clearInterval(origInt);
+                    playAlarm('alarm-sound-original');
+                    blink('original-time');
+                    resetToggleButton();
+                }
             }, 1000);
 
             extraInt = setInterval(() => {
                 if (extraRemaining > 0) { extraRemaining--; updateDisplays(); }
-                else { clearInterval(extraInt); playAlarm('alarm-sound-extra'); blink('extra-time'); }
+                else {
+                    clearInterval(extraInt);
+                    playAlarm('alarm-sound-extra');
+                    blink('extra-time');
+                    if (remaining <= 0) resetToggleButton();
+                }
             }, 1000);
 
             return true;
