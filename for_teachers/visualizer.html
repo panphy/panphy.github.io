@@ -535,7 +535,7 @@
 				<button id="screenshotBtn">Snapshot</button>
 				<button id="recordBtn">Record</button>
 				<button id="mirrorBtn">Mirror</button>
-				<button id="fitBtn" class="fixed-width-btn">Fill</button>
+				<button id="fitBtn" class="fixed-width-btn" aria-label="Full View (Fit)" title="Full View (Fit)">Fit</button>
 			</div>
 
 			<div class="group">
@@ -1299,9 +1299,18 @@
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				showToast(isMirrored ? 'Mirrored' : 'Unmirrored');
 			});
+			function updateFitButton() {
+				const isCover = fitMode === 'cover';
+				const label = isCover ? 'Fill' : 'Fit';
+				const detail = isCover ? 'Crop (Fill)' : 'Full View (Fit)';
+				fitBtn.textContent = label;
+				fitBtn.setAttribute('aria-label', detail);
+				fitBtn.setAttribute('title', detail);
+			}
+
 			document.getElementById('fitBtn').addEventListener('click', () => {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
-				fitBtn.textContent = (fitMode === 'cover') ? 'Fit' : 'Fill';
+				updateFitButton();
 				applyFitMode();
 				// Redraw paused frame to match the new mode
 				if (isPaused) { captureFrozenFromVideo();
@@ -1538,6 +1547,7 @@
 				updateInteractionMode();
 				setZoom(zoomLevel);
 				applyFitMode(); // ensure initial live mode matches fitMode
+				updateFitButton();
 				resizeCanvases();
 			})();
 		})();
