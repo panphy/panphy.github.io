@@ -323,6 +323,10 @@
       sampleRate = audioContext.sampleRate;
     }
 
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+
     if (!microphoneStream) {
       try {
         microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -364,6 +368,20 @@
 
     lastFreqFrame = dataArray.slice();
     lastWaveFrame = timeDomainData.slice();
+
+    if (audioContext && audioContext.state === 'running') {
+      audioContext.suspend();
+    }
+
+    if (source) {
+      source.disconnect();
+      source = null;
+    }
+
+    if (microphoneStream) {
+      microphoneStream.getTracks().forEach((track) => track.stop());
+      microphoneStream = null;
+    }
   }
 
   // ------------------ The Continuous Draw Loop ------------------
