@@ -253,7 +253,7 @@
 		<div id="out">
 			<div><strong>Roots:</strong> <span id="roots"></span></div>
 			<div class="row">
-				<div><strong>Discriminant:</strong> <span id="disc" class="mono"></span></div>
+				<div><strong>Discriminant (quadratic):</strong> <span id="disc" class="mono"></span></div>
 				<div><strong>Vertex:</strong> <span id="vertex" class="mono"></span></div>
 				<div><strong>y-intercept:</strong> <span id="yint" class="mono"></span></div>
 			</div>
@@ -362,7 +362,7 @@
 
 				if (Math.abs(a) < eps) {
 					if (Math.abs(b) < eps) {
-						D = NaN;
+						D = null;
 						if (Math.abs(c) < eps) {
 							rootsHTML = "<span class='root-box'>all real numbers</span>";
 							noteEl.textContent = "Identity: 0 = 0.";
@@ -374,7 +374,7 @@
 						}
 					} else {
 						const x = -c / b;
-						D = "n/a (linear)";
+						D = null;
 						rootsHTML = `<span class='root-box'>x = ${fmt(x)}</span>`;
 						noteEl.textContent = "Linear equation (a = 0).";
 						vertex = { x: NaN, y: NaN };
@@ -402,7 +402,7 @@
 					}
 				}
 
-				discEl.textContent = (typeof D === "number") ? fmt(D) : String(D);
+				discEl.textContent = (typeof D === "number") ? fmt(D) : "n/a";
 				rootsEl.innerHTML = rootsHTML;
 				vertexEl.textContent = isFinite(vertex.x) ? `(${fmt(vertex.x)}, ${fmt(vertex.y)})` : "n/a";
 				yintEl.textContent = fmt(yint);
