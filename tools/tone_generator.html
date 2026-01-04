@@ -454,6 +454,7 @@
   const sumCtx = sumCanvas.getContext('2d');
 
   const channels = [];
+  let nextChannelId = 1;
 
   /* States */
   let combinedPlaying = false;
@@ -484,6 +485,7 @@
   /* ========== CREATE & REMOVE CHANNELS ========== */
   function addChannel() {
     const channelIndex = channels.length + 1;
+    const channelId = nextChannelId++;
 
     const oscillator = audioCtx.createOscillator();
     oscillator.type = 'sine';
@@ -497,6 +499,16 @@
 
     const channelDiv = document.createElement('div');
     channelDiv.className = 'channel';
+    channelDiv.dataset.channelId = channelId;
+
+    const channelObj = {
+      channelId,
+      oscillator,
+      channelGain,
+      canvas: null,
+      ctx: null,
+      frequency: 440
+    };
 
     // Header
     const headerDiv = document.createElement('div');
@@ -507,7 +519,7 @@
     const removeBtn = document.createElement('button');
     removeBtn.textContent = 'Remove';
     removeBtn.className = 'btn';
-    removeBtn.onclick = () => removeChannel(channelIndex - 1);
+    removeBtn.onclick = () => removeChannel(channelDiv);
 
     headerDiv.appendChild(title);
     headerDiv.appendChild(removeBtn);
@@ -539,7 +551,7 @@
       freqNumber.value = freq;
       freqLabel.textContent = `${freq} Hz`;
       oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      channels[channelIndex - 1].frequency = freq;
+      channelObj.frequency = freq;
     };
     freqNumber.onchange = () => {
       let val = parseFloat(freqNumber.value);
@@ -550,7 +562,7 @@
       freqSlider.value = val;
       freqLabel.textContent = `${val} Hz`;
       oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
-      channels[channelIndex - 1].frequency = val;
+      channelObj.frequency = val;
     };
 
     controlsDiv.appendChild(freqSlider);
@@ -573,6 +585,8 @@
     const canvas = document.createElement('canvas');
     canvas.className = 'channel-canvas';
     const ctx = canvas.getContext('2d');
+    channelObj.canvas = canvas;
+    channelObj.ctx = ctx;
 
     channelDiv.appendChild(headerDiv);
     channelDiv.appendChild(controlsDiv);
@@ -581,27 +595,43 @@
 
     channelsScrollContainer.appendChild(channelDiv);
 
-    const channelObj = {
-      oscillator,
-      channelGain,
-      canvas,
-      ctx,
-      frequency: 440
-    };
     channels.push(channelObj);
 
     resizeCanvas(canvas);
   }
 
-  function removeChannel(index) {
-    const ch = channels[index];
-    if (!ch) return;
+  function removeChannel(channelRef) {
+    let channelId = null;
+    let channelElement = null;
+
+    if (channelRef instanceof HTMLElement) {
+      channelElement = channelRef;
+      channelId = parseInt(channelElement.dataset.channelId, 10);
+    } else if (channelRef && typeof channelRef === 'object' && channelRef.dataset) {
+      channelElement = channelRef;
+      channelId = parseInt(channelRef.dataset.channelId, 10);
+    } else {
+      channelId = parseInt(channelRef, 10);
+    }
+
+    if (!Number.isFinite(channelId)) return;
+
+    const channelIndex = channels.findIndex(ch => ch.channelId === channelId);
+    if (channelIndex === -1) return;
+
+    const ch = channels[channelIndex];
     ch.oscillator.stop();
     ch.oscillator.disconnect();
     ch.channelGain.disconnect();
 
-    channels.splice(index, 1);
-    channelsScrollContainer.removeChild(channelsScrollContainer.children[index]);
+    channels.splice(channelIndex, 1);
+
+    if (!channelElement) {
+      channelElement = channelsScrollContainer.querySelector(`[data-channel-id="${channelId}"]`);
+    }
+    if (channelElement && channelElement.parentNode === channelsScrollContainer) {
+      channelsScrollContainer.removeChild(channelElement);
+    }
 
     Array.from(channelsScrollContainer.children).forEach((child, i) => {
       const title = child.querySelector('h3');
