@@ -294,10 +294,31 @@
         };
 
         /* --------------- actions ---------------- */
+        const normalizeHMS = (hours, minutes, seconds) => {
+            let h = Math.max(0, hours);
+            let m = Math.max(0, minutes);
+            let s = Math.max(0, seconds);
+
+            if (s >= 60) {
+                m += Math.floor(s / 60);
+                s %= 60;
+            }
+            if (m >= 60) {
+                h += Math.floor(m / 60);
+                m %= 60;
+            }
+
+            return { h, m, s };
+        };
+
         function setTimer() {
-            initH = parseInt(hoursInput.value) || 0;
-            initM = parseInt(minutesInput.value) || 0;
-            initS = parseInt(secondsInput.value) || 0;
+            const rawH = parseInt(hoursInput.value) || 0;
+            const rawM = parseInt(minutesInput.value) || 0;
+            const rawS = parseInt(secondsInput.value) || 0;
+            const normalized = normalizeHMS(rawH, rawM, rawS);
+            initH = normalized.h;
+            initM = normalized.m;
+            initS = normalized.s;
             initTotal = initH * 3600 + initM * 60 + initS;
 
             remaining = initTotal;
