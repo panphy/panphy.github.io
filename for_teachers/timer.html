@@ -121,6 +121,18 @@
             outline: none
         }
 
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0
+        }
+
         .control-container {
             background: #3c597a;
             border-radius: 15px;
@@ -229,8 +241,11 @@
             <div class="time extra-time" id="extra-time">00:00:00</div>
             <div class="info" id="start-end-times"></div>
             <div class="inputs">
+                <label class="visually-hidden" for="hours">Hours</label>
                 <input id="hours" type="number" placeholder="Hrs" min="0">
+                <label class="visually-hidden" for="minutes">Minutes</label>
                 <input id="minutes" type="number" placeholder="Min" min="0" max="59">
+                <label class="visually-hidden" for="seconds">Seconds</label>
                 <input id="seconds" type="number" placeholder="Sec" min="0" max="59">
             </div>
         </div>
