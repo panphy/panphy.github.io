@@ -638,6 +638,7 @@
      */
     function gameLoop() {
       if (!gameOver) {
+        ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         // 1) Draw the rolling background
         drawRollingBackground();
 
