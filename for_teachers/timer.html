@@ -417,6 +417,9 @@
                     playAlarm('alarm-sound-original');
                     blink('original-time');
                     resetToggleButton();
+                    infoEl.textContent = 'Original timer complete.';
+                    paused = false;
+                    endTime = null;
                 }
             }, 1000);
 
@@ -427,6 +430,9 @@
                     playAlarm('alarm-sound-extra');
                     blink('extra-time');
                     if (remaining <= 0) resetToggleButton();
+                    infoEl.textContent = 'Extra time complete.';
+                    paused = false;
+                    extraEndTime = null;
                 }
             }, 1000);
 
