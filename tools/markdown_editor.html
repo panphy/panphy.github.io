@@ -1072,7 +1072,10 @@
     }
 
     matchingBlock.classList.add('highlighted-block');
-    matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
+    const shouldScroll = forceScroll || !isScrollSyncEnabled;
+    if (shouldScroll) {
+      matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
+    }
   }
 
   function syncCaretFromOutputClick(event) {
