@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Lorentz Transformation – Interactive Minkowski Diagram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
         :root {
@@ -33,7 +37,8 @@
             box-sizing: border-box;
             width: 100%;
             min-height: 100%;
-            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: "Source Sans 3", "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+            font-weight: 400;
             background-color: var(--bg-color);
             color: var(--primary-text-color);
         }
@@ -180,7 +185,7 @@
 
         .controlLabel {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             color: #1f2937;
         }
 
@@ -251,6 +256,10 @@
             border: 1px solid var(--control-border-color);
             padding: 5px 3px;
             text-align: center;
+        }
+
+        #coordinates th {
+            font-weight: 600;
         }
 
         /*******************************************************
