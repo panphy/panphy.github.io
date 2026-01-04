@@ -508,16 +508,20 @@
     pendingUserGestureStart = true;
     toggleBtn.textContent = 'Start';
 
-    const resumeOnGesture = async () => {
+    const resumeOnGesture = async (event) => {
       pendingUserGestureStart = false;
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       if (audioContext && audioContext.state !== 'running') {
         await resetAudioSession();
       }
       await startSpectrum();
     };
 
-    window.addEventListener('pointerdown', resumeOnGesture, { once: true });
-    window.addEventListener('keydown', resumeOnGesture, { once: true });
+    window.addEventListener('click', resumeOnGesture, { once: true, capture: true });
+    window.addEventListener('keydown', resumeOnGesture, { once: true, capture: true });
   }
 
   // ------------------ The Continuous Draw Loop ------------------
