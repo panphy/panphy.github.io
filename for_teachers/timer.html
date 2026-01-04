@@ -350,7 +350,7 @@
 
         // Accepts "freshStart" (true when first started) or not
         function startTimer(freshStart = true) {
-            if (remaining <= 0) return;
+            if (remaining <= 0) return false;
 
             const now = new Date();
 
@@ -373,6 +373,8 @@
                 if (extraRemaining > 0) { extraRemaining--; updateDisplays(); }
                 else { clearInterval(extraInt); playAlarm('alarm-sound-extra'); blink('extra-time'); }
             }, 1000);
+
+            return true;
         }
 
         const pauseTimer = () => {
@@ -382,9 +384,9 @@
         };
 
         const resumeTimer = () => {
-            if (!paused) return; paused = false;
+            if (!paused) return false; paused = false;
             // On resume, startTimer() will update end times based on current remaining.
-            startTimer(false);
+            return startTimer(false);
         };
 
         /* ------------ button wiring ------------ */
@@ -405,10 +407,15 @@
         toggleBtn.onclick = () => {
             switch (toggleBtn.dataset.state) {
                 case 'start':
-                    startTimer(true);
-                    toggleBtn.dataset.state = 'pause';
-                    toggleBtn.textContent = 'Pause';
-                    toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
+                    if (startTimer(true)) {
+                        toggleBtn.dataset.state = 'pause';
+                        toggleBtn.textContent = 'Pause';
+                        toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
+                    } else {
+                        toggleBtn.dataset.state = 'start';
+                        toggleBtn.textContent = 'Start';
+                        toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+                    }
                     break;
                 case 'pause':
                     pauseTimer();
@@ -417,10 +424,15 @@
                     toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
                     break;
                 case 'resume':
-                    resumeTimer();
-                    toggleBtn.dataset.state = 'pause';
-                    toggleBtn.textContent = 'Pause';
-                    toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
+                    if (resumeTimer()) {
+                        toggleBtn.dataset.state = 'pause';
+                        toggleBtn.textContent = 'Pause';
+                        toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
+                    } else {
+                        toggleBtn.dataset.state = 'start';
+                        toggleBtn.textContent = 'Start';
+                        toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+                    }
                     break;
             }
         };
