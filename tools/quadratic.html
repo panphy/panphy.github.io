@@ -303,10 +303,16 @@
 			};
 
 			function parseNum(str) {
-				// Allow commas as decimal separators (replace first comma with dot if any)
-				const s = (str || "").trim().replace(',', '.');
-				const v = parseFloat(s);
-				return v;
+				const s = (str || "").trim();
+				if (!s) return NaN;
+				const hasComma = s.includes(",");
+				const hasDot = s.includes(".");
+				if (hasComma && hasDot) return NaN;
+				if (hasComma && (s.match(/,/g) || []).length > 1) return NaN;
+				const normalized = hasComma ? s.replace(",", ".") : s;
+				if (!/^[-+]?(\d+(\.\d*)?|\.\d+)$/.test(normalized)) return NaN;
+				const v = Number(normalized);
+				return Number.isFinite(v) ? v : NaN;
 			}
 
 			function getNumbers() {
