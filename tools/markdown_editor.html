@@ -1035,15 +1035,14 @@
     return { startOffset, endOffset };
   }
 
-  function updateHighlightedBlockFromCaret({ forceScroll = false } = {}) {
-    const lineNumber = getLineNumberFromOffset(markdownInput.value, markdownInput.selectionStart || 0);
+  function getMatchingBlockForLine(lineNumber) {
     const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
     const matchingBlocks = blocks.filter(block => {
       const start = Number(block.dataset.srcStart);
       const end = Number(block.dataset.srcEnd);
       return lineNumber >= start && lineNumber <= end;
     });
-    const matchingBlock = matchingBlocks.reduce((best, block) => {
+    return matchingBlocks.reduce((best, block) => {
       if (!best) {
         return block;
       }
@@ -1051,6 +1050,11 @@
       const currentSpan = Number(block.dataset.srcEnd) - Number(block.dataset.srcStart);
       return currentSpan < bestSpan ? block : best;
     }, null);
+  }
+
+  function updateHighlightedBlockFromCaret({ forceScroll = false } = {}) {
+    const lineNumber = getLineNumberFromOffset(markdownInput.value, markdownInput.selectionStart || 0);
+    const matchingBlock = getMatchingBlockForLine(lineNumber);
 
     const current = renderedOutput.querySelector('.highlighted-block');
     if (current && current !== matchingBlock) {
@@ -1062,9 +1066,7 @@
     }
 
     matchingBlock.classList.add('highlighted-block');
-    if (isScrollSyncEnabled || forceScroll) {
-      matchingBlock.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }
+    matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
   }
 
   function syncCaretFromOutputClick(event) {
@@ -1083,6 +1085,57 @@
     const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
     markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
     updateHighlightedBlockFromCaret({ forceScroll: true });
+  }
+
+  function getLineNumberFromInputScroll() {
+    const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
+    return Math.max(1, Math.floor(markdownInput.scrollTop / lineHeight) + 1);
+  }
+
+  function getBlockClosestToTop() {
+    const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
+    if (!blocks.length) return null;
+    const containerRect = renderedOutput.getBoundingClientRect();
+    let closest = blocks[0];
+    let closestDelta = Infinity;
+    blocks.forEach(block => {
+      const rect = block.getBoundingClientRect();
+      const delta = Math.abs(rect.top - containerRect.top);
+      if (delta < closestDelta) {
+        closest = block;
+        closestDelta = delta;
+      }
+    });
+    return closest;
+  }
+
+  let isSyncingScroll = false;
+
+  function syncOutputToInputScroll() {
+    if (!isScrollSyncEnabled || isSyncingScroll) return;
+    isSyncingScroll = true;
+    const lineNumber = getLineNumberFromInputScroll();
+    const matchingBlock = getMatchingBlockForLine(lineNumber);
+    if (matchingBlock) {
+      renderedOutput.scrollTo({ top: matchingBlock.offsetTop, behavior: 'auto' });
+    }
+    window.setTimeout(() => {
+      isSyncingScroll = false;
+    }, 0);
+  }
+
+  function syncInputToOutputScroll() {
+    if (!isScrollSyncEnabled || isSyncingScroll) return;
+    isSyncingScroll = true;
+    const block = getBlockClosestToTop();
+    if (block) {
+      const startLine = Number(block.dataset.srcStart);
+      const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
+      markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
+    }
+    window.setTimeout(() => {
+      isSyncingScroll = false;
+    }, 0);
   }
 
   async function printToPDF() {
@@ -1459,7 +1512,9 @@
   markdownInput.addEventListener('keyup', handleCaretChange);
   markdownInput.addEventListener('click', handleCaretChange);
   markdownInput.addEventListener('select', handleCaretChange);
+  markdownInput.addEventListener('scroll', syncOutputToInputScroll);
   renderedOutput.addEventListener('click', syncCaretFromOutputClick);
+  renderedOutput.addEventListener('scroll', syncInputToOutputScroll);
   printButton.addEventListener('click', printToPDF);
   exportHTMLButton.addEventListener('click', exportHTML);
   saveMDButton.addEventListener('click', saveMarkdown);
