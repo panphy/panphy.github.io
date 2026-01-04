@@ -93,6 +93,15 @@
       margin-bottom: 10px;
     }
 
+    #time-delta {
+      width: 260px;
+      margin: 0 auto;
+      text-align: left;
+      white-space: nowrap;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
     /* Container for the frequency spectrum canvas */
     #visualizer-container {
       position: relative;
@@ -200,6 +209,7 @@
   <br>
 
   <div id="peak-frequency">Peak Frequency: -- Hz</div>
+  <div id="time-delta">Time between markers: -- ms</div>
 
   <!-- Frequency Spectrum & Tooltip -->
   <div id="visualizer-container">
@@ -272,6 +282,7 @@
 
   const tooltip = document.getElementById('tooltip');
   const peakFreqDisplay = document.getElementById('peak-frequency');
+  const timeDeltaDisplay = document.getElementById('time-delta');
 
   const toggleBtn = document.getElementById('toggleBtn');
   const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
@@ -279,6 +290,12 @@
 
   const yScaleSlider = document.getElementById('yScale');
   const xScaleSlider = document.getElementById('xScale');
+
+  const markerColor = '#ff5f1f';
+  const markerGrabTolerance = 8;
+  let markerA = 0.3;
+  let markerB = 0.7;
+  let activeMarker = null;
 
   let canvasDpr = 1;
   let freqCanvasSize = { width: 0, height: 0 };
@@ -307,12 +324,22 @@
   }
 
   // ------------------ Main Entry ------------------
-  window.addEventListener('load', () => {
+  window.addEventListener('load', async () => {
     setupCanvasResolution();
     requestAnimationFrame(drawLoop); // always running
+    await resetAudioSession();
     startSpectrum();                 // start mic
   });
   window.addEventListener('resize', setupCanvasResolution);
+  window.addEventListener('pageshow', async (event) => {
+    if (event.persisted) {
+      await resetAudioSession();
+      startSpectrum();
+    }
+  });
+  window.addEventListener('beforeunload', () => {
+    teardownAudioSession();
+  });
 
   // ------------------ Button & Keyboard Listeners ------------------
   toggleBtn.addEventListener('click', toggleRunPause);
@@ -329,6 +356,13 @@
 
   freqCanvas.addEventListener('mousemove', onCanvasHover);
   freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
+
+  waveCanvas.addEventListener('mousedown', onWaveformPointerDown);
+  waveCanvas.addEventListener('mousemove', onWaveformPointerMove);
+  window.addEventListener('mouseup', onWaveformPointerUp);
+  waveCanvas.addEventListener('touchstart', onWaveformTouchStart, { passive: false });
+  waveCanvas.addEventListener('touchmove', onWaveformTouchMove, { passive: false });
+  window.addEventListener('touchend', onWaveformPointerUp);
 
   yScaleSlider.addEventListener('input', () => {
     waveAmplitudeScale = parseFloat(yScaleSlider.value);
@@ -380,6 +414,43 @@
     }
   }
 
+  async function resetAudioSession() {
+    teardownAudioSession();
+    if (audioContext && audioContext.state !== 'closed') {
+      try {
+        await audioContext.close();
+      } catch (err) {
+        console.warn('Unable to close audio context cleanly:', err);
+      }
+    }
+    audioContext = null;
+    analyzer = null;
+    source = null;
+    microphoneStream = null;
+    sampleRate = null;
+    dataArray = null;
+    timeDomainData = null;
+    lastFreqFrame = null;
+    lastWaveFrame = null;
+    isRunning = false;
+    toggleBtn.textContent = 'Resume';
+    exportSpectrumBtn.disabled = true;
+    exportWaveformBtn.disabled = true;
+    peakFreqDisplay.textContent = 'Peak Frequency: --';
+    timeDeltaDisplay.textContent = 'Time between markers: -- ms';
+  }
+
+  function teardownAudioSession() {
+    if (source) {
+      source.disconnect();
+      source = null;
+    }
+    if (microphoneStream) {
+      microphoneStream.getTracks().forEach((track) => track.stop());
+      microphoneStream = null;
+    }
+  }
+
   function toggleRunPause() {
     if (isRunning) {
       pauseSpectrum();
@@ -401,15 +472,7 @@
       audioContext.suspend();
     }
 
-    if (source) {
-      source.disconnect();
-      source = null;
-    }
-
-    if (microphoneStream) {
-      microphoneStream.getTracks().forEach((track) => track.stop());
-      microphoneStream = null;
-    }
+    teardownAudioSession();
   }
 
   // ------------------ The Continuous Draw Loop ------------------
@@ -488,6 +551,8 @@
       x += sliceWidth;
     }
     waveCtx.stroke();
+
+    drawWaveformMarkers();
   }
 
   // ------------------ Draw the Frequency Axis ------------------
@@ -582,6 +647,102 @@
     }
 
     waveCtx.restore();
+  }
+
+  function drawWaveformMarkers() {
+    const width = waveCanvasSize.width;
+    if (!width) return;
+
+    const markerX1 = markerA * width;
+    const markerX2 = markerB * width;
+
+    waveCtx.save();
+    waveCtx.lineWidth = 1;
+    waveCtx.strokeStyle = markerColor;
+    waveCtx.beginPath();
+    waveCtx.moveTo(markerX1, 0);
+    waveCtx.lineTo(markerX1, waveCanvasSize.height);
+    waveCtx.stroke();
+    waveCtx.beginPath();
+    waveCtx.moveTo(markerX2, 0);
+    waveCtx.lineTo(markerX2, waveCanvasSize.height);
+    waveCtx.stroke();
+    waveCtx.restore();
+
+    updateTimeDeltaDisplay(markerX1, markerX2);
+  }
+
+  function updateTimeDeltaDisplay(markerX1, markerX2) {
+    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
+    let windowSize = totalSamples / waveTimeScale;
+    if (windowSize > totalSamples) windowSize = totalSamples;
+    windowSize = Math.max(1, Math.floor(windowSize));
+    const totalTimeSec = windowSize / (sampleRate || 44100);
+    const deltaMs = Math.abs(markerX2 - markerX1) / waveCanvasSize.width * totalTimeSec * 1000;
+
+    timeDeltaDisplay.textContent = `Time between markers: ${deltaMs.toFixed(2)} ms`;
+  }
+
+  function pickActiveMarker(cursorX) {
+    const width = waveCanvasSize.width;
+    const markerX1 = markerA * width;
+    const markerX2 = markerB * width;
+
+    if (Math.abs(cursorX - markerX1) <= markerGrabTolerance) return 'A';
+    if (Math.abs(cursorX - markerX2) <= markerGrabTolerance) return 'B';
+    return null;
+  }
+
+  function updateMarkerPosition(cursorX) {
+    const width = waveCanvasSize.width;
+    if (!width) return;
+    const clamped = Math.min(Math.max(cursorX / width, 0), 1);
+    if (activeMarker === 'A') {
+      markerA = clamped;
+    } else if (activeMarker === 'B') {
+      markerB = clamped;
+    }
+  }
+
+  function onWaveformPointerDown(event) {
+    const rect = waveCanvas.getBoundingClientRect();
+    const cursorX = event.clientX - rect.left;
+    activeMarker = pickActiveMarker(cursorX);
+    if (activeMarker) {
+      event.preventDefault();
+      updateMarkerPosition(cursorX);
+    }
+  }
+
+  function onWaveformPointerMove(event) {
+    if (!activeMarker) return;
+    const rect = waveCanvas.getBoundingClientRect();
+    const cursorX = event.clientX - rect.left;
+    updateMarkerPosition(cursorX);
+  }
+
+  function onWaveformPointerUp() {
+    activeMarker = null;
+  }
+
+  function onWaveformTouchStart(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = waveCanvas.getBoundingClientRect();
+    const cursorX = touch.clientX - rect.left;
+    activeMarker = pickActiveMarker(cursorX);
+    if (activeMarker) {
+      updateMarkerPosition(cursorX);
+    }
+  }
+
+  function onWaveformTouchMove(event) {
+    if (!activeMarker) return;
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = waveCanvas.getBoundingClientRect();
+    const cursorX = touch.clientX - rect.left;
+    updateMarkerPosition(cursorX);
   }
 
   // ------------------ Export Spectrum (remove zero-amplitude) ------------------
