@@ -280,11 +280,39 @@
   const yScaleSlider = document.getElementById('yScale');
   const xScaleSlider = document.getElementById('xScale');
 
+  let canvasDpr = 1;
+  let freqCanvasSize = { width: 0, height: 0 };
+  let waveCanvasSize = { width: 0, height: 0 };
+
+  function setupCanvasResolution() {
+    canvasDpr = window.devicePixelRatio || 1;
+
+    const freqRect = freqCanvas.getBoundingClientRect();
+    freqCanvasSize = {
+      width: freqRect.width,
+      height: freqRect.height
+    };
+    freqCanvas.width = Math.round(freqCanvasSize.width * canvasDpr);
+    freqCanvas.height = Math.round(freqCanvasSize.height * canvasDpr);
+    freqCtx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
+
+    const waveRect = waveCanvas.getBoundingClientRect();
+    waveCanvasSize = {
+      width: waveRect.width,
+      height: waveRect.height
+    };
+    waveCanvas.width = Math.round(waveCanvasSize.width * canvasDpr);
+    waveCanvas.height = Math.round(waveCanvasSize.height * canvasDpr);
+    waveCtx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
+  }
+
   // ------------------ Main Entry ------------------
   window.addEventListener('load', () => {
+    setupCanvasResolution();
     requestAnimationFrame(drawLoop); // always running
     startSpectrum();                 // start mic
   });
+  window.addEventListener('resize', setupCanvasResolution);
 
   // ------------------ Button & Keyboard Listeners ------------------
   toggleBtn.addEventListener('click', toggleRunPause);
@@ -390,11 +418,11 @@
 
     // Frequency Spectrum
     freqCtx.fillStyle = '#1e1e1e';
-    freqCtx.fillRect(0, 0, freqCanvas.width, freqCanvas.height);
+    freqCtx.fillRect(0, 0, freqCanvasSize.width, freqCanvasSize.height);
 
     // Waveform
     waveCtx.fillStyle = '#1e1e1e';
-    waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+    waveCtx.fillRect(0, 0, waveCanvasSize.width, waveCanvasSize.height);
     drawSquareGridWithTime();
 
     if (!analyzer || !dataArray || !timeDomainData) {
@@ -421,17 +449,17 @@
 
     // freq bars
     const barCount = dataArray.length;
-    const barWidth = freqCanvas.width / barCount;
+    const barWidth = freqCanvasSize.width / barCount;
     for (let i = 0; i < barCount; i++) {
-      const barHeight = (dataArray[i] / 255) * freqCanvas.height * 0.8;
+      const barHeight = (dataArray[i] / 255) * freqCanvasSize.height * 0.8;
       const x = i * barWidth;
-      const y = freqCanvas.height - barHeight;
+      const y = freqCanvasSize.height - barHeight;
       freqCtx.fillStyle = `rgb(${barHeight + 50}, 50, 50)`;
       freqCtx.fillRect(x, y, barWidth, barHeight);
     }
 
     // Draw frequency axis
-    drawFrequencyAxis(freqCtx, freqCanvas.width, freqCanvas.height);
+    drawFrequencyAxis(freqCtx, freqCanvasSize.width, freqCanvasSize.height);
 
     if (isRunning) {
       analyzer.getByteTimeDomainData(timeDomainData);
@@ -449,12 +477,12 @@
     let windowSize = totalSamples / waveTimeScale;
     if (windowSize > totalSamples) windowSize = totalSamples;
     windowSize = Math.max(2, Math.floor(windowSize));
-    const sliceWidth = waveCanvas.width / (windowSize - 1);
+    const sliceWidth = waveCanvasSize.width / (windowSize - 1);
 
     let x = 0;
     for (let i = 0; i < windowSize; i++) {
       const v = (timeDomainData[i] - 128) / 128.0;
-      const y = (waveCanvas.height / 2) + v * (waveCanvas.height / 2) * waveAmplitudeScale;
+      const y = (waveCanvasSize.height / 2) + v * (waveCanvasSize.height / 2) * waveAmplitudeScale;
       if (i === 0) waveCtx.moveTo(x, y);
       else waveCtx.lineTo(x, y);
       x += sliceWidth;
@@ -505,10 +533,8 @@
     waveCtx.font = '12px sans-serif';
 
     // 1) Vertical lines in "screen" coordinates => for time labeling
-    const dispW = waveCanvas.offsetWidth;
-    const dispH = waveCanvas.offsetHeight;
-    const scaleX = waveCanvas.width / dispW;
-    const scaleY = waveCanvas.height / dispH;
+    const dispW = waveCanvasSize.width;
+    const dispH = waveCanvasSize.height;
 
     // Time info for labeling
     const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
@@ -520,38 +546,38 @@
     const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
     for (let i = 0; i <= numVertLines; i++) {
       const screenX = i * SQUARE_GRID_SPACING;
-      const canvasX = screenX * scaleX;
+      const canvasX = screenX;
 
       waveCtx.beginPath();
       waveCtx.moveTo(canvasX, 0);
-      waveCtx.lineTo(canvasX, waveCanvas.height);
+      waveCtx.lineTo(canvasX, waveCanvasSize.height);
       waveCtx.stroke();
 
       // Label every other vertical line
       if (i % 2 === 0) {
         const frac = screenX / dispW;
         const ms = frac * totalTimeSec * 1000;
-        waveCtx.fillText(ms.toFixed(1) + ' ms', canvasX + 2, waveCanvas.height - 4);
+        waveCtx.fillText(ms.toFixed(1) + ' ms', canvasX + 2, waveCanvasSize.height - 4);
       }
     }
 
     // 2) Horizontal lines in *canvas* coordinates => ensure center line is included
-    const centerY = waveCanvas.height / 2;
-    const spacingY = SQUARE_GRID_SPACING * scaleY;
+    const centerY = waveCanvasSize.height / 2;
+    const spacingY = SQUARE_GRID_SPACING;
 
     // lines from center upward
     for (let y = centerY; y >= 0; y -= spacingY) {
       waveCtx.beginPath();
       waveCtx.moveTo(0, y);
-      waveCtx.lineTo(waveCanvas.width, y);
+      waveCtx.lineTo(waveCanvasSize.width, y);
       waveCtx.stroke();
     }
 
     // lines from center downward
-    for (let y = centerY + spacingY; y <= waveCanvas.height; y += spacingY) {
+    for (let y = centerY + spacingY; y <= waveCanvasSize.height; y += spacingY) {
       waveCtx.beginPath();
       waveCtx.moveTo(0, y);
-      waveCtx.lineTo(waveCanvas.width, y);
+      waveCtx.lineTo(waveCanvasSize.width, y);
       waveCtx.stroke();
     }
 
@@ -650,7 +676,7 @@
 
   function showTooltip(x, y) {
     const binCount = analyzer.frequencyBinCount;
-    const barWidth = freqCanvas.width / binCount;
+    const barWidth = freqCanvasSize.width / binCount;
     const binIndex = Math.floor(x / barWidth);
 
     if (binIndex < 0 || binIndex >= binCount) {
