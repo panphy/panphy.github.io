@@ -303,6 +303,10 @@
   let freqCanvasSize = { width: 0, height: 0 };
   let waveCanvasSize = { width: 0, height: 0 };
 
+  function isUserGestureActive() {
+    return navigator.userActivation && navigator.userActivation.isActive;
+  }
+
   function setupCanvasResolution() {
     canvasDpr = window.devicePixelRatio || 1;
 
@@ -379,6 +383,11 @@
     isStarting = true;
 
     if (!audioContext) {
+      if (!isUserGestureActive()) {
+        isStarting = false;
+        requestUserGestureStart();
+        return;
+      }
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       sampleRate = audioContext.sampleRate;
     }
@@ -393,6 +402,9 @@
 
     if (audioContext.state !== 'running') {
       isStarting = false;
+      if (!isUserGestureActive()) {
+        await resetAudioSession();
+      }
       requestUserGestureStart();
       return;
     }
@@ -498,6 +510,9 @@
 
     const resumeOnGesture = async () => {
       pendingUserGestureStart = false;
+      if (audioContext && audioContext.state !== 'running') {
+        await resetAudioSession();
+      }
       await startSpectrum();
     };
 
