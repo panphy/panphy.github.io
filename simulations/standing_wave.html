@@ -279,7 +279,7 @@
             <!-- Harmonics -->
             <div class="control-group">
                 <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">
-                    Harmonic: <span id="harmonicValue">1st</span>
+                    Mode / Harmonic: <span id="harmonicValue">Mode 1 (1st harmonic)</span>
                 </label>
                 <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
             </div>
@@ -354,7 +354,7 @@
         amplitudeValueDisplay.textContent = A.toFixed(1);
         omegaValueDisplay.textContent = omega.toFixed(2);
         frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
-        harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+        harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
 
         let isPaused = false;
         let time = 0;
@@ -383,13 +383,18 @@
             }
         }
 
+        function getModeHarmonicLabel(mode) {
+            const harmonicNumber = getHarmonicNumber(mode);
+            return `Mode ${mode} (${getOrdinal(harmonicNumber)} harmonic)`;
+        }
+
         function updateAllowedHarmonics() {
             allowedHarmonics = getAllowedHarmonics();
             if (modeIndex > allowedHarmonics.length) {
                 modeIndex = allowedHarmonics.length;
                 modeSlider.value = modeIndex;
             }
-            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateAmplitudes();
         }
 
@@ -415,7 +420,7 @@
         }
 
         function updateHarmonicSlider() {
-            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateAmplitudes();
         }
 
@@ -427,7 +432,7 @@
 
         modeSlider.addEventListener("input", () => {
             modeIndex = parseInt(modeSlider.value);
-            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateAmplitudes();
         });
 
@@ -559,7 +564,7 @@
         window.addEventListener("load", () => {
             resizeCanvas();
             updateAllowedHarmonics();
-            harmonicValueDisplay.textContent = getOrdinal(getHarmonicNumber(modeIndex));
+            harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
             updateAmplitudes();
             requestAnimationFrame(draw);
         });
