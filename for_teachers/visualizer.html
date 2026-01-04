@@ -1042,11 +1042,16 @@
 
 			function showTextOverlayAt(clientX, clientY) {
 				const rect = stage.getBoundingClientRect();
-				const x = Math.min(Math.max(clientX - rect.left, 8), rect.width - 260);
-				const y = Math.min(Math.max(clientY - rect.top, 8), rect.height - 126);
+				textOverlay.style.display = 'block';
+				const padding = 8;
+				const overlayWidth = textOverlay.offsetWidth;
+				const overlayHeight = textOverlay.offsetHeight;
+				const maxX = Math.max(padding, rect.width - overlayWidth - padding);
+				const maxY = Math.max(padding, rect.height - overlayHeight - padding);
+				const x = Math.min(Math.max(clientX - rect.left, padding), maxX);
+				const y = Math.min(Math.max(clientY - rect.top, padding), maxY);
 				textOverlay.style.left = x + 'px';
 				textOverlay.style.top = y + 'px';
-				textOverlay.style.display = 'block';
 				overlayVisible = true;
 				textInput.value = '';
 				textInput.focus();
