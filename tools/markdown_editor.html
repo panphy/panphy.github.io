@@ -1128,10 +1128,40 @@
       cancelAnimationFrame(scrollSyncFrame);
     }
     scrollSyncFrame = requestAnimationFrame(() => {
-      const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
-      const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
-      const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
-      target.scrollTop = targetMax * ratio;
+      let applied = false;
+
+      if (source === markdownInput && target === renderedOutput) {
+        const lineNumber = getLineNumberFromInputScroll();
+        const matchingBlock = getMatchingBlockForLine(lineNumber);
+        if (matchingBlock) {
+          const containerRect = target.getBoundingClientRect();
+          const blockRect = matchingBlock.getBoundingClientRect();
+          const delta = blockRect.top - containerRect.top;
+          const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
+          target.scrollTop = Math.min(targetMax, Math.max(0, target.scrollTop + delta));
+          applied = true;
+        }
+      }
+
+      if (source === renderedOutput && target === markdownInput) {
+        const closestBlock = getBlockClosestToTop();
+        if (closestBlock) {
+          const startLine = Number(closestBlock.dataset.srcStart);
+          if (!Number.isNaN(startLine)) {
+            const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
+            const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
+            target.scrollTop = Math.min(targetMax, Math.max(0, (startLine - 1) * lineHeight));
+            applied = true;
+          }
+        }
+      }
+
+      if (!applied) {
+        const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
+        const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
+        const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
+        target.scrollTop = targetMax * ratio;
+      }
       isSyncingScroll = false;
     });
   }
