@@ -546,6 +546,10 @@
 
         // Pause/resume with SPACE
         document.addEventListener("keydown", (event) => {
+            const targetTag = event.target?.tagName?.toLowerCase();
+            if (targetTag === "input" || targetTag === "select" || targetTag === "textarea") {
+                return;
+            }
             if (event.key === " " || event.key === "Spacebar") {
                 event.preventDefault();
                 isPaused = !isPaused;
