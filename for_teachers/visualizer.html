@@ -482,6 +482,17 @@
 		footer a:hover {
 			text-decoration: underline
 		}
+
+		.helperText {
+			font-size: 12px;
+			color: #b45309;
+			margin-top: 6px;
+			display: none
+		}
+
+		.helperText.visible {
+			display: block
+		}
 	</style>
 </head>
 
@@ -502,6 +513,7 @@
 			<div class="group">
 				<span class="title-mini">Camera</span>
 				<select id="cameraSelect"></select>
+				<div id="cameraHelper" class="helperText" aria-live="polite"></div>
 				<button id="refreshBtn">Refresh</button>
 			</div>
 
@@ -588,6 +600,7 @@
 			const ctxLaser = laserCanvas.getContext('2d');
 
 			const cameraSelect = document.getElementById('cameraSelect');
+			const cameraHelper = document.getElementById('cameraHelper');
 			const refreshBtn = document.getElementById('refreshBtn');
 			const liveToggle = document.getElementById('liveToggle');
 
@@ -687,6 +700,12 @@
 				toast.textContent = msg;
 				toast.classList.add('show');
 				setTimeout(() => toast.classList.remove('show'), ms); }
+
+			let permissionBlocked = false;
+			function setCameraHelper(message) {
+				cameraHelper.textContent = message || '';
+				cameraHelper.classList.toggle('visible', !!message);
+			}
 
 			function contrastOn(hex) {
 				let h = hex.replace('#', '');
@@ -803,22 +822,30 @@
 				switching = true;
 				try {
 					if (stream) { stream.getTracks().forEach(t => t.stop()); }
-					const constraints = { audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, constraint || {}) };
-					stream = await navigator.mediaDevices.getUserMedia(constraints);
-					video.srcObject = stream;
-					await video.play();
-				} catch (e1) {
-					try {
-						const fb1 = { facingMode: facingPref };
-						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb1) });
-						video.srcObject = stream;
-						await video.play();
-					} catch (e2) {
-						const fb2 = {};
-						stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: Object.assign({ width: { ideal: 1280 }, height: { ideal: 720 } }, fb2) });
-						video.srcObject = stream;
-						await video.play();
+					const base = { width: { ideal: 1280 }, height: { ideal: 720 } };
+					const attempts = [constraint || {}, { facingMode: facingPref }, {}];
+					let lastError = null;
+					for (let i = 0; i < attempts.length; i++) {
+						try {
+							const constraints = { audio: false, video: Object.assign({}, base, attempts[i]) };
+							stream = await navigator.mediaDevices.getUserMedia(constraints);
+							video.srcObject = stream;
+							await video.play();
+							permissionBlocked = false;
+							setCameraHelper('');
+							lastError = null;
+							break;
+						} catch (err) {
+							lastError = err;
+							if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+								permissionBlocked = true;
+								setCameraHelper('Camera access is blocked. Allow permission to see cameras.');
+								showToast('Camera permission blocked');
+								break;
+							}
+						}
 					}
+					if (lastError) throw lastError;
 				} finally {
 					await enumerate();
 					resizeCanvases();
@@ -837,6 +864,13 @@
 						return 'environment';
 					}
 					cameraSelect.innerHTML = '';
+					if (cams.length === 0) {
+						const opt = document.createElement('option');
+						opt.textContent = 'No cameras found';
+						opt.disabled = true;
+						opt.selected = true;
+						cameraSelect.appendChild(opt);
+					}
 					cams.forEach((d, i) => {
 						const opt = document.createElement('option');
 						const fg = facingGuess(d.label || '');
@@ -845,7 +879,7 @@
 						opt.dataset.facing = fg;
 						cameraSelect.appendChild(opt);
 					});
-					cameraSelect.disabled = cameraSelect.options.length <= 1;
+					cameraSelect.disabled = permissionBlocked || cameraSelect.options.length <= 1;
 					let activeId = '';
 					try {
 						if (stream) {
@@ -903,7 +937,7 @@
 					if (val && val.indexOf('facing:') !== 0) { saveStr('lastDeviceId', val);
 						await startCamera({ deviceId: { exact: val } }); } else { await startCamera({ facingMode: facingPref }); }
 				} catch (e) { console.error(e);
-					showToast('Refresh failed'); } finally { switching = false; }
+					if (!permissionBlocked) showToast('Refresh failed'); } finally { switching = false; }
 			});
 
 			/* ===== Coordinate helpers (zoom-aware positions) ===== */
