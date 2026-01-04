@@ -323,6 +323,7 @@
 
             remaining = initTotal;
             extraRemaining = Math.round(initTotal * 1.25);
+            toggleBtn.disabled = initTotal === 0;
 
             /* clear inputs immediately */
             hoursInput.value = minutesInput.value = secondsInput.value = '';
@@ -353,6 +354,7 @@
         function clearTimer() {
             clearInterval(origInt); clearInterval(extraInt);
             remaining = extraRemaining = 0; paused = false; stopBlink();
+            initH = 0; initM = 0; initS = 0; initTotal = 0;
             updateDisplays(); infoEl.textContent = '';
 
             hoursInput.value = minutesInput.value = secondsInput.value = '';
@@ -365,6 +367,7 @@
             toggleBtn.dataset.state = 'start';
             toggleBtn.textContent = 'Start';
             toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+            toggleBtn.disabled = initTotal === 0;
 
             endTime = null; extraEndTime = null;
         }
@@ -443,6 +446,10 @@
         };
 
         toggleBtn.onclick = () => {
+            if (initTotal === 0) {
+                infoEl.textContent = 'Set a time before starting.';
+                return;
+            }
             switch (toggleBtn.dataset.state) {
                 case 'start':
                     if (startTimer(true)) {
