@@ -175,6 +175,32 @@
 			white-space: nowrap
 		}
 
+		.laserIndicator {
+			display: inline-flex;
+			align-items: center;
+			gap: .3rem;
+			padding: .12rem .4rem;
+			border-radius: .4rem;
+			border: 1px solid var(--ring);
+			color: #adb3c4;
+			font-size: .75rem;
+			letter-spacing: .02em;
+			text-transform: uppercase
+		}
+
+		.laserIndicator.active {
+			background: rgba(77, 163, 255, .2);
+			border-color: rgba(154, 203, 255, .6);
+			color: #dcecff
+		}
+
+		.laserIndicator .dot {
+			width: .45rem;
+			height: .45rem;
+			border-radius: 50%;
+			background: currentColor
+		}
+
 		.srOnly {
 			position: absolute !important;
 			width: 1px;
@@ -504,6 +530,10 @@
 				<label for="pointerColorInput" id="pointerLabelBtn" class="labelBtn">Pointer</label>
 				<input id="pointerColorInput" type="color" class="srOnly" value="#ff3b3b" />
 				<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
+				<span id="laserIndicator" class="laserIndicator" aria-live="polite">
+					<span class="dot" aria-hidden="true"></span>
+					Laser
+				</span>
 			</div>
 
 			<div class="group" id="annotGroup">
@@ -582,6 +612,7 @@
 			const annotColorInput = document.getElementById('annotColorInput');
 			const pointerLabelBtn = document.getElementById('pointerLabelBtn');
 			const annotLabelBtn = document.getElementById('annotLabelBtn');
+			const laserIndicator = document.getElementById('laserIndicator');
 
 			const sizeUI = {
 				pointer: document.getElementById('pointerSizes'),
@@ -755,6 +786,7 @@
 			function updateInteractionMode() {
 				const toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
+				laserIndicator.classList.toggle('active', laserActive);
 				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
 					tail.length = 0; }
 			}
@@ -1457,6 +1489,7 @@
 				paintLabelBtn(pointerLabelBtn, pointerColor);
 				paintLabelBtn(annotLabelBtn, annotColor);
 
+				updateInteractionMode();
 				setZoom(zoomLevel);
 				applyFitMode(); // ensure initial live mode matches fitMode
 				resizeCanvases();
