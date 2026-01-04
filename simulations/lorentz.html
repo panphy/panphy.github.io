@@ -10,18 +10,19 @@
     <link rel="icon" type="image/png" href="/favicon.png">
     <style>
         :root {
-            --bg-color: #ffffff;
-            --primary-text-color: #333333;
-            --accent-blue: #113d5c;
-            --accent-orange: #FFA500;
-            --canvas-border: #cccccc;
-            --grid-color: #dddddd;
-            --moving-grid-color: #800080;
-            --rest-axis-color: #333333;
-            --event-rest-color: #006400;
-            --event-moving-color: #c00;
-            --control-bg-color: #f5f5f5;
-            --control-border-color: #cccccc;
+            --bg-color: #f7f8fb;
+            --primary-text-color: #1f2937;
+            --accent-blue: #1f4fd7;
+            --accent-orange: #f97316;
+            --canvas-border: #cbd5f5;
+            --grid-color: #d9deee;
+            --moving-grid-color: #7c3aed;
+            --rest-axis-color: #1f2937;
+            --event-rest-color: #0f766e;
+            --event-moving-color: #dc2626;
+            --control-bg-color: #ffffff;
+            --control-border-color: #e2e8f0;
+            --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.12);
         }
 
         /* Basic resets for a responsive layout */
@@ -32,7 +33,7 @@
             box-sizing: border-box;
             width: 100%;
             min-height: 100%;
-            font-family: sans-serif;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--primary-text-color);
         }
@@ -48,7 +49,7 @@
          *******************************************************/
         header {
             width: 100%;
-            background-color: #333;
+            background: linear-gradient(120deg, #0f172a, #1f4fd7);
             position: relative;
             padding: 20px 0;
             /* top/bottom padding so children aren't cut off */
@@ -86,7 +87,9 @@
         .title h1 {
             margin: 0;
             color: #ffffff;
-            font-size: 22px;
+            font-size: clamp(18px, 2.2vw, 24px);
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         /* Optional spacer on the right */
@@ -111,12 +114,13 @@
          *******************************************************/
         #mainContainer {
             display: grid;
-            grid-template-columns: 800px 250px;
+            grid-template-columns: minmax(0, 820px) minmax(0, 320px);
             /* side-by-side on wide screens */
-            grid-gap: 15px;
+            grid-gap: 20px;
             justify-content: center;
             width: 100%;
             box-sizing: border-box;
+            align-items: start;
         }
 
         /* Stack vertically on narrower screens (e.g. iPad portrait <= 900px) */
@@ -134,6 +138,10 @@
             width: 100%;
             overflow: auto;
             /* allow scroll if needed */
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: var(--shadow-soft);
         }
 
         /* Responsive canvas */
@@ -145,6 +153,7 @@
             width: 100%;
             height: auto;
             max-width: 800px;
+            border-radius: 8px;
         }
 
         /*******************************************************
@@ -152,46 +161,79 @@
          *******************************************************/
         #controlsContainer {
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
             background-color: var(--control-bg-color);
             border: 1px solid var(--control-border-color);
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 12px;
             box-sizing: border-box;
         }
 
         .controlItem {
-            margin-bottom: 5px;
+            display: grid;
+            gap: 6px;
         }
 
         .controlLabel {
-            margin-right: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .controlInline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-blue);
+        }
+
+        .valueBadge {
+            background: rgba(31, 79, 215, 0.12);
+            color: #1f4fd7;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            width: fit-content;
         }
 
         button {
             width: 100%;
             padding: 8px 12px;
-            border: 1px solid var(--control-border-color);
-            border-radius: 3px;
+            border: none;
+            border-radius: 8px;
             background-color: var(--accent-blue);
             color: #fff;
             font-size: 15px;
             cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 6px 16px rgba(31, 79, 215, 0.2);
         }
 
         button:hover {
-            background-color: #187bcd;
+            background-color: #2b5bda;
         }
 
         /*******************************************************
          * COORDINATE DISPLAY
          *******************************************************/
         #coordinates {
-            margin-top: 10px;
+            margin-top: 6px;
             font-size: 13px;
             overflow-y: auto;
             max-height: 200px;
@@ -222,8 +264,9 @@
             display: none;
             z-index: 1000;
             cursor: pointer;
-            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow-soft);
             font-size: 14px;
+            border-radius: 6px;
         }
 
         #contextMenu:hover {
@@ -245,6 +288,7 @@
         footer a {
             color: #ff5f1f;
             text-decoration: none;
+            font-weight: 600;
         }
 
         footer a:hover {
@@ -288,27 +332,27 @@
             <div id="controlsContainer">
                 <div class="controlItem">
                     <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong> (unit:
-                        c):</label>
+                        c)</label>
                     <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
-                    <span id="speedValue">0.00</span>
+                    <span id="speedValue" class="valueBadge">0.00</span>
                 </div>
-                <div class="controlItem">
+                <div class="controlItem controlInline">
                     <label class="controlLabel" for="gridToggle">Rest Frame Grid</label>
                     <input type="checkbox" id="gridToggle" checked>
                 </div>
-                <div class="controlItem">
+                <div class="controlItem controlInline">
                     <label class="controlLabel" for="movingGridToggle">Moving Frame Grid</label>
                     <input type="checkbox" id="movingGridToggle" checked>
                 </div>
-                <div class="controlItem">
+                <div class="controlItem controlInline">
                     <label class="controlLabel" for="velocityToggle">Velocity Transformation</label>
                     <input type="checkbox" id="velocityToggle">
                 </div>
                 <div class="controlItem">
                     <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong> (unit:
-                        c):</label>
+                        c)</label>
                     <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
-                    <span id="velocityValue">0.30</span>
+                    <span id="velocityValue" class="valueBadge">0.30</span>
                 </div>
                 <div class="controlItem">
                     <button id="addEventBtn">Add Event</button>
