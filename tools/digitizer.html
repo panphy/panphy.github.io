@@ -472,7 +472,10 @@
 
   function updateCalibrationParameters() {
     if (calibrationX.length >= 2) {
-      if (xAxisType === "linear") {
+      if (calibrationX[1].x === calibrationX[0].x) {
+        slopeX = interceptX = null;
+        alert("Calibration points for the X axis must have different x positions.");
+      } else if (xAxisType === "linear") {
         slopeX = (calibrationX[1].data - calibrationX[0].data) /
           (calibrationX[1].x - calibrationX[0].x);
         interceptX = calibrationX[0].data - slopeX * calibrationX[0].x;
@@ -486,7 +489,10 @@
     }
 
     if (calibrationY.length >= 2) {
-      if (yAxisType === "linear") {
+      if (calibrationY[1].y === calibrationY[0].y) {
+        slopeY = interceptY = null;
+        alert("Calibration points for the Y axis must have different y positions.");
+      } else if (yAxisType === "linear") {
         slopeY = (calibrationY[1].data - calibrationY[0].data) /
           (calibrationY[1].y - calibrationY[0].y);
         interceptY = calibrationY[0].data - slopeY * calibrationY[0].y;
