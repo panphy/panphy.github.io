@@ -412,24 +412,36 @@
 <script>
   /* ========== AUDIO CONTEXT & NODES ========== */
   const AudioContext = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = new AudioContext({ latencyHint: 'interactive' });
+  let audioCtx = null;
+  let masterGain = null;
+  let volumeGain = null;
+  let combinedGain = null;
+  let stereoPanner = null;
 
-  // Gains: channels -> masterGain -> volumeGain -> combinedGain -> panner -> destination
-  const masterGain = audioCtx.createGain();
-  masterGain.gain.value = 1;
+  function getAudioContext() {
+    if (audioCtx) return audioCtx;
 
-  const volumeGain = audioCtx.createGain();
-  volumeGain.gain.value = 1;
+    audioCtx = new AudioContext({ latencyHint: 'interactive' });
 
-  const combinedGain = audioCtx.createGain();
-  combinedGain.gain.value = 0; // start off
+    // Gains: channels -> masterGain -> volumeGain -> combinedGain -> panner -> destination
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
 
-  masterGain.connect(volumeGain);
-  volumeGain.connect(combinedGain);
+    volumeGain = audioCtx.createGain();
+    volumeGain.gain.value = 1;
 
-  const stereoPanner = audioCtx.createStereoPanner();
-  combinedGain.connect(stereoPanner);
-  stereoPanner.connect(audioCtx.destination);
+    combinedGain = audioCtx.createGain();
+    combinedGain.gain.value = 0; // start off
+
+    masterGain.connect(volumeGain);
+    volumeGain.connect(combinedGain);
+
+    stereoPanner = audioCtx.createStereoPanner();
+    combinedGain.connect(stereoPanner);
+    stereoPanner.connect(audioCtx.destination);
+
+    return audioCtx;
+  }
 
   /* DOM Elements */
   const addChannelBtn = document.getElementById('addChannelBtn');
@@ -484,15 +496,16 @@
 
   /* ========== CREATE & REMOVE CHANNELS ========== */
   function addChannel() {
+    const ctx = getAudioContext();
     const channelIndex = channels.length + 1;
     const channelId = nextChannelId++;
 
-    const oscillator = audioCtx.createOscillator();
+    const oscillator = ctx.createOscillator();
     oscillator.type = 'sine';
     oscillator.frequency.value = 440;
     oscillator.start();
 
-    const channelGain = audioCtx.createGain();
+    const channelGain = ctx.createGain();
     channelGain.gain.value = 0; // start silent
     oscillator.connect(channelGain);
     channelGain.connect(masterGain);
@@ -547,13 +560,15 @@
     freqLabel.textContent = '440 Hz';
 
     freqSlider.oninput = () => {
+      const currentCtx = getAudioContext();
       const freq = parseFloat(freqSlider.value);
       freqNumber.value = freq;
       freqLabel.textContent = `${freq} Hz`;
-      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      oscillator.frequency.setValueAtTime(freq, currentCtx.currentTime);
       channelObj.frequency = freq;
     };
     freqNumber.onchange = () => {
+      const currentCtx = getAudioContext();
       let val = parseFloat(freqNumber.value);
       if (isNaN(val)) val = 440;
       if (val < 15) val = 15;
@@ -561,7 +576,7 @@
       freqNumber.value = val;
       freqSlider.value = val;
       freqLabel.textContent = `${val} Hz`;
-      oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
+      oscillator.frequency.setValueAtTime(val, currentCtx.currentTime);
       channelObj.frequency = val;
     };
 
@@ -575,9 +590,10 @@
     playPauseBtn.className = 'btn';
     let playing = false;
     playPauseBtn.onclick = () => {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const currentCtx = getAudioContext();
+      if (currentCtx.state === 'suspended') currentCtx.resume();
       playing = !playing;
-      channelGain.gain.setValueAtTime(playing ? 1 : 0, audioCtx.currentTime);
+      channelGain.gain.setValueAtTime(playing ? 1 : 0, currentCtx.currentTime);
       playPauseBtn.textContent = playing ? 'Pause' : 'Play';
     };
 
@@ -711,14 +727,16 @@
 
   // ========== CONTROLS ==========
   addChannelBtn.addEventListener('click', () => {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
     addChannel();
   });
 
   toggleCombinedBtn.addEventListener('click', () => {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
     combinedPlaying = !combinedPlaying;
-    combinedGain.gain.setValueAtTime(combinedPlaying ? 1 : 0, audioCtx.currentTime);
+    combinedGain.gain.setValueAtTime(combinedPlaying ? 1 : 0, ctx.currentTime);
     toggleCombinedBtn.textContent = combinedPlaying ? 'Pause Combined' : 'Play Combined';
   });
 
@@ -732,22 +750,24 @@
     }
   });
   function toggleFreeze() {
+    const ctx = getAudioContext();
     isFrozen = !isFrozen;
     freezeBtn.textContent = isFrozen ? 'Unfreeze' : 'Freeze';
     if (isFrozen) {
-      masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      masterGain.gain.setValueAtTime(0, ctx.currentTime);
     } else {
-      masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
+      masterGain.gain.setValueAtTime(1, ctx.currentTime);
     }
   }
 
   panningSlider.addEventListener('input', () => {
+    const ctx = getAudioContext();
     let panVal = parseFloat(panningSlider.value);
     if (Math.abs(panVal) < 0.05) {
       panVal = 0;
       panningSlider.value = '0';
     }
-    stereoPanner.pan.setValueAtTime(panVal, audioCtx.currentTime);
+    stereoPanner.pan.setValueAtTime(panVal, ctx.currentTime);
     panningValue.textContent = panVal.toFixed(2);
   });
 
@@ -765,13 +785,13 @@
   });
 
   volumeSlider.addEventListener('input', () => {
+    const ctx = getAudioContext();
     const volVal = parseFloat(volumeSlider.value);
-    volumeGain.gain.setValueAtTime(volVal, audioCtx.currentTime);
+    volumeGain.gain.setValueAtTime(volVal, ctx.currentTime);
   });
 
   // ========== INIT ==========
   requestAnimationFrame(draw);
-  addChannel();
 
   // ========== RESIZE ==========
   function resizeCanvas(canvas) {
