@@ -721,18 +721,66 @@
   }
 
   /**
-   * Preprocess the input Markdown by replacing all single backslashes with double backslashes
-   * within LaTeX math blocks.
-   * 
+   * Preprocess the input Markdown by preserving valid TeX inside math blocks.
+   *
+   * Quick manual checks:
+   * - Inline TeX: $\\frac{1}{2}$ should render correctly.
+   * - Escaped backslashes: $\\\\$ should remain as a literal double backslash.
+   * - Currency: $5/day should stay as plain text.
+   * - Literal dollar: \\$ should stay as plain text.
+   *
    * @param {string} input - The raw Markdown input.
-   * @returns {string} - The processed Markdown with escaped backslashes.
+   * @returns {string} - The processed Markdown with TeX preserved.
    */
   function preprocessMarkdown(input) {
-    const regex = /(\$\$?)([\s\S]+?)\1/g;
-    return input.replace(regex, function (match, p1, p2) {
-      const escaped = p2.replace(/\\/g, '\\\\');
-      return p1 + escaped + p1;
-    });
+    const isEscaped = index => index > 0 && input[index - 1] === '\\';
+    const isCurrencyLike = content => /^\d/.test(content) && /\s/.test(content);
+
+    let output = '';
+    let i = 0;
+
+    while (i < input.length) {
+      const char = input[i];
+
+      if (char === '$' && !isEscaped(i)) {
+        const isDisplay = input[i + 1] === '$' && !isEscaped(i + 1);
+        const delimiter = isDisplay ? '$$' : '$';
+        const start = i;
+        let searchIndex = i + delimiter.length;
+        let closingIndex = -1;
+
+        while (searchIndex < input.length) {
+          if (input.startsWith(delimiter, searchIndex) && !isEscaped(searchIndex)) {
+            closingIndex = searchIndex;
+            break;
+          }
+          searchIndex += 1;
+        }
+
+        if (closingIndex === -1) {
+          output += delimiter;
+          i += delimiter.length;
+          continue;
+        }
+
+        const content = input.slice(i + delimiter.length, closingIndex);
+
+        if (!isDisplay && isCurrencyLike(content)) {
+          output += '$';
+          i = start + 1;
+          continue;
+        }
+
+        output += delimiter + content + delimiter;
+        i = closingIndex + delimiter.length;
+        continue;
+      }
+
+      output += char;
+      i += 1;
+    }
+
+    return output;
   }
 
   function buildLineBlocks(text) {
