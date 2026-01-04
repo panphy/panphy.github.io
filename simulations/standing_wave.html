@@ -201,6 +201,17 @@
             color: #888;
         }
 
+        .info-block {
+            font-size: 0.85em;
+            color: #d7d7d7;
+            line-height: 1.4;
+        }
+
+        .info-block strong {
+            color: #ffcc3f;
+            font-weight: 600;
+        }
+
         @media (max-width: 800px) {
             .container {
                 flex-direction: column;
@@ -283,6 +294,14 @@
                 </label>
                 <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
             </div>
+            <div class="control-group">
+                <label class="control-label">Nodes &amp; Antinodes</label>
+                <div class="info-block">
+                    <p>Nodes: <strong><span id="nodeCount">2</span></strong></p>
+                    <p>Antinodes: <strong><span id="antinodeCount">1</span></strong></p>
+                    <p>Counts reflect the selected boundaries and harmonic.</p>
+                </div>
+            </div>
             <!-- Frequency -->
             <div class="control-group">
                 <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">
@@ -341,6 +360,8 @@
         const harmonicValueDisplay = document.getElementById("harmonicValue");
         const omegaValueDisplay = document.getElementById("omegaValue");
         const frequencyValueDisplay = document.getElementById("frequencyValue");
+        const nodeCountDisplay = document.getElementById("nodeCount");
+        const antinodeCountDisplay = document.getElementById("antinodeCount");
 
         let A = parseFloat(amplitudeSlider.value);
         let modeIndex = parseInt(modeSlider.value);
@@ -395,6 +416,7 @@
                 modeSlider.value = modeIndex;
             }
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
+            updateNodeAntinodeDisplay();
             updateAmplitudes();
         }
 
@@ -419,8 +441,29 @@
             return 0;
         }
 
+        function updateNodeAntinodeDisplay() {
+            const harmonicNumber = getHarmonicNumber(modeIndex);
+            let nodes = 0;
+            let antinodes = 0;
+
+            if (leftBoundary === "fixed" && rightBoundary === "fixed") {
+                nodes = harmonicNumber + 1;
+                antinodes = harmonicNumber;
+            } else if (leftBoundary === "free" && rightBoundary === "free") {
+                nodes = harmonicNumber;
+                antinodes = harmonicNumber + 1;
+            } else {
+                nodes = (harmonicNumber + 1) / 2;
+                antinodes = (harmonicNumber + 1) / 2;
+            }
+
+            nodeCountDisplay.textContent = nodes;
+            antinodeCountDisplay.textContent = antinodes;
+        }
+
         function updateHarmonicSlider() {
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
+            updateNodeAntinodeDisplay();
             updateAmplitudes();
         }
 
@@ -433,6 +476,7 @@
         modeSlider.addEventListener("input", () => {
             modeIndex = parseInt(modeSlider.value);
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
+            updateNodeAntinodeDisplay();
             updateAmplitudes();
         });
 
@@ -565,6 +609,7 @@
             resizeCanvas();
             updateAllowedHarmonics();
             harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
+            updateNodeAntinodeDisplay();
             updateAmplitudes();
             requestAnimationFrame(draw);
         });
