@@ -462,12 +462,12 @@
     // No-op in this version; the magnifier is always shown in the sidebar
   }
 
-  function getCanvasCoordinates(e) {
+  function getCanvasCoordinates(pointer) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / canvas.offsetWidth;
-    const scaleY = canvas.height / canvas.offsetHeight;
-    const x = Math.round((e.clientX - rect.left) * scaleX) + 0.5;
-    const y = (e.clientY - rect.top) * scaleY;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = Math.round((pointer.clientX - rect.left) * scaleX) + 0.5;
+    const y = (pointer.clientY - rect.top) * scaleY;
     return { x, y };
   }
 
@@ -731,13 +731,10 @@
   });
   canvas.addEventListener('touchend', function (e) {
     e.preventDefault();
-    lastEvent = e.changedTouches[0];
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / canvas.offsetWidth;
-    const scaleY = canvas.height / canvas.offsetHeight;
-    const x = Math.round((e.changedTouches[0].clientX - rect.left) * scaleX) + 0.5;
-    const y = (e.changedTouches[0].clientY - rect.top) * scaleY;
-    handleCanvasInteraction(x, y);
+    const touch = e.changedTouches[0];
+    lastEvent = touch;
+    const coords = getCanvasCoordinates(touch);
+    handleCanvasInteraction(coords.x, coords.y);
   }, { passive: false });
   canvas.addEventListener('touchmove', function (e) {
     e.preventDefault();
