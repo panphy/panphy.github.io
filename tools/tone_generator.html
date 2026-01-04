@@ -709,6 +709,13 @@
     ctx.beginPath();
 
     const timeWindow = BASE_WINDOW * zoomScale;
+    if (!combinedPlaying) {
+      const y = canvas.height / 2;
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+      return;
+    }
     for (let x = 0; x < canvas.width; x++) {
       const fraction = x / (canvas.width - 1);
       const t = accumulatedTime - fraction * timeWindow;
