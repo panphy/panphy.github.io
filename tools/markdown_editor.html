@@ -1110,32 +1110,29 @@
   }
 
   let isSyncingScroll = false;
+  let scrollSyncFrame = null;
 
-  function syncOutputToInputScroll() {
+  function syncScrollPositions(source, target) {
     if (!isScrollSyncEnabled || isSyncingScroll) return;
     isSyncingScroll = true;
-    const lineNumber = getLineNumberFromInputScroll();
-    const matchingBlock = getMatchingBlockForLine(lineNumber);
-    if (matchingBlock) {
-      renderedOutput.scrollTo({ top: matchingBlock.offsetTop, behavior: 'auto' });
+    if (scrollSyncFrame) {
+      cancelAnimationFrame(scrollSyncFrame);
     }
-    window.setTimeout(() => {
+    scrollSyncFrame = requestAnimationFrame(() => {
+      const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
+      const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
+      const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
+      target.scrollTop = targetMax * ratio;
       isSyncingScroll = false;
-    }, 0);
+    });
+  }
+
+  function syncOutputToInputScroll() {
+    syncScrollPositions(markdownInput, renderedOutput);
   }
 
   function syncInputToOutputScroll() {
-    if (!isScrollSyncEnabled || isSyncingScroll) return;
-    isSyncingScroll = true;
-    const block = getBlockClosestToTop();
-    if (block) {
-      const startLine = Number(block.dataset.srcStart);
-      const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
-      markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
-    }
-    window.setTimeout(() => {
-      isSyncingScroll = false;
-    }, 0);
+    syncScrollPositions(renderedOutput, markdownInput);
   }
 
   async function printToPDF() {
