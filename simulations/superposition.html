@@ -690,6 +690,13 @@
          *   SPACE BAR: Pause/Resume
          *******************************************************/
         window.addEventListener('keydown', (e) => {
+            const target = e.target;
+            if (target instanceof HTMLElement) {
+                const tagName = target.tagName;
+                if (target.isContentEditable || tagName === 'INPUT' || tagName === 'BUTTON' || tagName === 'LABEL') {
+                    return;
+                }
+            }
             if (e.code === 'Space' || e.key === ' ') {
                 e.preventDefault();
                 running = !running;
