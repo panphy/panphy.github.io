@@ -763,10 +763,8 @@
     if (image.src) {
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
     }
-    if (calibrationX.length < 2 || calibrationY.length < 2) {
-      calibrationX.forEach(pt => drawMarker(pt.x, pt.y, "blue"));
-      calibrationY.forEach(pt => drawMarker(pt.x, pt.y, "green"));
-    }
+    calibrationX.forEach(pt => drawMarker(pt.x, pt.y, "blue"));
+    calibrationY.forEach(pt => drawMarker(pt.x, pt.y, "green"));
     digitizedPoints.forEach(pt => drawMarker(pt.pixelX, pt.pixelY, "red"));
     if (activeCalibration) {
       let col = calibrationPhase.startsWith("x") ? "blue" : "green";
