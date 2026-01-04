@@ -3,7 +3,7 @@ Welcome to PanPhy Projects. The tools, simulations, and games here are built wit
 Most importantly, the site is now offline-friendly. Once you have opened it in a browser, you can keep using the tools, simulations, and games even without an internet connection.
 
 ## Tech Stack
-- **HTML/CSS:** Lightweight, fast-loading UI with a consistent PanPhy look and feel  
+- **HTML/CSS:** Lightweight, fast-loading UI with a consistent look and feel  
 - **Vanilla JavaScript:** Framework-free interactive logic (simulations, controls, rendering, state)  
 - **Offline support:** Service Worker caching for offline use after the first visit (ideal for locked-down school devices)
 
