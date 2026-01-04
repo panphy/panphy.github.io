@@ -359,9 +359,9 @@
       <h3>Select Plot Type</h3>
       <form id="plotTypeForm">
         <label><input type="radio" name="plotType" value="1" checked> Linear-Linear</label><br>
-        <label><input type="radio" name="plotType" value="2"> Log-Linear</label><br>
-        <label><input type="radio" name="plotType" value="3"> Linear-Log</label><br>
-        <label><input type="radio" name="plotType" value="4"> Log-Log</label><br><br>
+        <label><input type="radio" name="plotType" value="2"> Log (base 10)-Linear</label><br>
+        <label><input type="radio" name="plotType" value="3"> Linear-Log (base 10)</label><br>
+        <label><input type="radio" name="plotType" value="4"> Log (base 10)-Log (base 10)</label><br><br>
       </form>
       <button id="plotTypeConfirm" class="btn">Confirm</button>
     </div>
@@ -480,9 +480,9 @@
           (calibrationX[1].x - calibrationX[0].x);
         interceptX = calibrationX[0].data - slopeX * calibrationX[0].x;
       } else {
-        slopeX = (Math.log(calibrationX[1].data) - Math.log(calibrationX[0].data)) /
+        slopeX = (Math.log10(calibrationX[1].data) - Math.log10(calibrationX[0].data)) /
           (calibrationX[1].x - calibrationX[0].x);
-        interceptX = Math.log(calibrationX[0].data) - slopeX * calibrationX[0].x;
+        interceptX = Math.log10(calibrationX[0].data) - slopeX * calibrationX[0].x;
       }
     } else {
       slopeX = interceptX = null;
@@ -497,9 +497,9 @@
           (calibrationY[1].y - calibrationY[0].y);
         interceptY = calibrationY[0].data - slopeY * calibrationY[0].y;
       } else {
-        slopeY = (Math.log(calibrationY[1].data) - Math.log(calibrationY[0].data)) /
+        slopeY = (Math.log10(calibrationY[1].data) - Math.log10(calibrationY[0].data)) /
           (calibrationY[1].y - calibrationY[0].y);
-        interceptY = Math.log(calibrationY[0].data) - slopeY * calibrationY[0].y;
+        interceptY = Math.log10(calibrationY[0].data) - slopeY * calibrationY[0].y;
       }
     } else {
       slopeY = interceptY = null;
@@ -703,12 +703,12 @@
       }
       let dataX, dataY;
       if (xAxisType === "log") {
-        dataX = Math.exp(slopeX * x + interceptX);
+        dataX = Math.pow(10, slopeX * x + interceptX);
       } else {
         dataX = slopeX * x + interceptX;
       }
       if (yAxisType === "log") {
-        dataY = Math.exp(slopeY * y + interceptY);
+        dataY = Math.pow(10, slopeY * y + interceptY);
       } else {
         dataY = slopeY * y + interceptY;
       }
