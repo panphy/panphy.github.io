@@ -400,10 +400,11 @@
     btnDigitize = document.getElementById('digitizeButton'),
     btnUndo = document.getElementById('undoButton'),
     btnRedo = document.getElementById('redoButton'),
-    btnReset = document.getElementById('resetButton');
+    btnReset = document.getElementById('resetButton'),
+    exportButton = document.getElementById('exportButton');
 
   // Add export button event listener
-  document.getElementById('exportButton').addEventListener('click', exportCSV);
+  exportButton.addEventListener('click', exportCSV);
 
   // Function to handle magnifier drawing in the sidebar canvas
   function updateMagnifier(e) {
@@ -521,6 +522,7 @@
       row.appendChild(cellY);
       dataTableBody.appendChild(row);
     });
+    exportButton.disabled = digitizedPoints.length === 0;
   }
 
   function updateStatus(message) {
@@ -856,6 +858,7 @@
     btnUndo.disabled = true;
     btnRedo.disabled = true;
     btnReset.disabled = true;
+    exportButton.disabled = true;
   }
 
   window.addEventListener("load", function () {
