@@ -718,6 +718,7 @@
   const outputPane = document.getElementById('outputPane');
   const paneResizer = document.getElementById('paneResizer');
   const paneSplitStorageKey = 'markdownPaneSplit';
+  const draftStorageKey = 'markdownEditorDraft';
   let isScrollSyncEnabled = false;
 
   /**
@@ -734,6 +735,7 @@
       .then(data => {
         markdownInput.value = data;
         renderContent();
+        saveDraft();
       })
       .catch(error => {
         console.error('Error loading sample document:', error);
@@ -940,6 +942,21 @@
     hljs.highlightAll();
     MathJax.typesetPromise([renderedOutput]).catch(console.error);
     updateHighlightedBlockFromCaret();
+  }
+
+  function saveDraft() {
+    localStorage.setItem(draftStorageKey, markdownInput.value);
+  }
+
+  function clearDraft() {
+    localStorage.removeItem(draftStorageKey);
+  }
+
+  function restoreDraft() {
+    const savedDraft = localStorage.getItem(draftStorageKey);
+    if (savedDraft !== null) {
+      markdownInput.value = savedDraft;
+    }
   }
 
   function debounce(fn, delay) {
@@ -1322,6 +1339,7 @@
         reader.onload = event => {
           markdownInput.value = event.target.result;
           renderContent();
+          saveDraft();
         };
         reader.readAsText(file);
       }
@@ -1394,6 +1412,7 @@
 
   // Initialize theme and render content on load
   initializeTheme();
+  restoreDraft();
   renderContent();
 
   function setPaneSplit(percent, shouldPersist = true) {
@@ -1451,8 +1470,11 @@
 
   const handleCaretChange = () => updateHighlightedBlockFromCaret();
 
-  const debouncedRenderContent = debounce(renderContent, 200);
-  markdownInput.addEventListener('input', debouncedRenderContent);
+  const debouncedRenderAndSave = debounce(() => {
+    renderContent();
+    saveDraft();
+  }, 200);
+  markdownInput.addEventListener('input', debouncedRenderAndSave);
   markdownInput.addEventListener('keyup', handleCaretChange);
   markdownInput.addEventListener('click', handleCaretChange);
   markdownInput.addEventListener('select', handleCaretChange);
@@ -1464,6 +1486,7 @@
   loadSampleButton.addEventListener('click', loadSampleDocument); // Updated event listener
   clearButton.addEventListener('click', () => {
     markdownInput.value = '';
+    clearDraft();
     renderContent();
   });
   themeToggleButton.addEventListener('click', toggleTheme);
