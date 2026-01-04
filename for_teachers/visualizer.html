@@ -706,12 +706,21 @@
 				freezeCanvas.classList.remove('hidden');
 			}
 
-			function setPaused(state) {
+			async function setPaused(state) {
 				if (state === isPaused) return;
-				isPaused = state;
-				if (isPaused) { captureFrozenFromVideo();
-					drawFreezeFromFrozen(); } else { hasFrozen = false;
-					freezeCanvas.classList.add('hidden'); }
+				if (state) {
+					isPaused = true;
+					captureFrozenFromVideo();
+					drawFreezeFromFrozen();
+					if (stream) { stream.getTracks().forEach(t => t.stop()); }
+					updateStatusUI();
+					return;
+				}
+				const val = cameraSelect.value || '';
+				if (val && val.indexOf('facing:') !== 0) { await startCamera({ deviceId: { exact: val } }); } else { await startCamera({ facingMode: facingPref }); }
+				hasFrozen = false;
+				freezeCanvas.classList.add('hidden');
+				isPaused = false;
 				updateStatusUI();
 			}
 
