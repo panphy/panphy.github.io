@@ -929,7 +929,6 @@
 
 			refreshBtn.addEventListener('click', async function() {
 				if (switching) return;
-				switching = true;
 				try {
 					try { if (stream) stream.getTracks().forEach(t => t.stop()); } catch (e) {}
 					await enumerate();
@@ -937,7 +936,7 @@
 					if (val && val.indexOf('facing:') !== 0) { saveStr('lastDeviceId', val);
 						await startCamera({ deviceId: { exact: val } }); } else { await startCamera({ facingMode: facingPref }); }
 				} catch (e) { console.error(e);
-					if (!permissionBlocked) showToast('Refresh failed'); } finally { switching = false; }
+					if (!permissionBlocked) showToast('Refresh failed'); }
 			});
 
 			/* ===== Coordinate helpers (zoom-aware positions) ===== */
