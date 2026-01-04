@@ -36,6 +36,10 @@
       height: auto;
     }
 
+    #waveform {
+      touch-action: none;
+    }
+
     h1 {
       text-align: center;
       color: #98c616;
@@ -264,7 +268,7 @@
   const xScaleSlider = document.getElementById('xScale');
 
   const markerColor = '#ff5f1f';
-  const markerGrabTolerance = 8;
+  const markerGrabTolerance = 14;
   let markerA = 0.3;
   let markerB = 0.7;
   let activeMarker = null;
@@ -332,12 +336,10 @@
   freqCanvas.addEventListener('mousemove', onCanvasHover);
   freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
 
-  waveCanvas.addEventListener('mousedown', onWaveformPointerDown);
-  waveCanvas.addEventListener('mousemove', onWaveformPointerMove);
-  window.addEventListener('mouseup', onWaveformPointerUp);
-  waveCanvas.addEventListener('touchstart', onWaveformTouchStart, { passive: false });
-  waveCanvas.addEventListener('touchmove', onWaveformTouchMove, { passive: false });
-  window.addEventListener('touchend', onWaveformPointerUp);
+  waveCanvas.addEventListener('pointerdown', onWaveformPointerDown);
+  waveCanvas.addEventListener('pointermove', onWaveformPointerMove);
+  window.addEventListener('pointerup', onWaveformPointerUp);
+  window.addEventListener('pointercancel', onWaveformPointerUp);
 
   yScaleSlider.addEventListener('input', () => {
     waveAmplitudeScale = parseFloat(yScaleSlider.value);
@@ -662,14 +664,25 @@
     timeDeltaDisplay.textContent = `Time between markers: ${deltaMs.toFixed(2)} ms`;
   }
 
-  function pickActiveMarker(cursorX) {
+  function pickActiveMarker(cursorX, allowNearest = false) {
     const width = waveCanvasSize.width;
     const markerX1 = markerA * width;
     const markerX2 = markerB * width;
 
     if (Math.abs(cursorX - markerX1) <= markerGrabTolerance) return 'A';
     if (Math.abs(cursorX - markerX2) <= markerGrabTolerance) return 'B';
-    return null;
+    if (!allowNearest) return null;
+    return Math.abs(cursorX - markerX1) <= Math.abs(cursorX - markerX2) ? 'A' : 'B';
+  }
+
+  function getCursorXFromEvent(event) {
+    const rect = waveCanvas.getBoundingClientRect();
+    return event.clientX - rect.left;
+  }
+
+  function updateWaveformCursor(cursorX) {
+    const marker = pickActiveMarker(cursorX);
+    waveCanvas.style.cursor = marker ? 'ew-resize' : 'crosshair';
   }
 
   function updateMarkerPosition(cursorX) {
@@ -682,42 +695,28 @@
   }
 
   function onWaveformPointerDown(event) {
-    const rect = waveCanvas.getBoundingClientRect();
-    const cursorX = event.clientX - rect.left;
-    activeMarker = pickActiveMarker(cursorX);
-    if (activeMarker) {
-      event.preventDefault();
-      updateMarkerPosition(cursorX);
-    }
+    const cursorX = getCursorXFromEvent(event);
+    activeMarker = pickActiveMarker(cursorX, true);
+    if (!activeMarker) return;
+    waveCanvas.setPointerCapture(event.pointerId);
+    updateMarkerPosition(cursorX);
+    updateWaveformCursor(cursorX);
+    event.preventDefault();
   }
 
   function onWaveformPointerMove(event) {
-    if (!activeMarker) return;
-    const rect = waveCanvas.getBoundingClientRect();
-    const cursorX = event.clientX - rect.left;
+    const cursorX = getCursorXFromEvent(event);
+    if (!activeMarker) {
+      updateWaveformCursor(cursorX);
+      return;
+    }
     updateMarkerPosition(cursorX);
+    updateWaveformCursor(cursorX);
   }
 
   function onWaveformPointerUp() {
     activeMarker = null;
-  }
-
-  function onWaveformTouchStart(event) {
-    event.preventDefault();
-    const touch = event.touches[0];
-    const rect = waveCanvas.getBoundingClientRect();
-    const cursorX = touch.clientX - rect.left;
-    activeMarker = pickActiveMarker(cursorX);
-    if (activeMarker) updateMarkerPosition(cursorX);
-  }
-
-  function onWaveformTouchMove(event) {
-    if (!activeMarker) return;
-    event.preventDefault();
-    const touch = event.touches[0];
-    const rect = waveCanvas.getBoundingClientRect();
-    const cursorX = touch.clientX - rect.left;
-    updateMarkerPosition(cursorX);
+    waveCanvas.style.cursor = 'crosshair';
   }
 
   // ------------------ Export Spectrum (remove zero-amplitude) ------------------
