@@ -257,6 +257,8 @@
   // ------------------ Global Variables ------------------
   let audioContext, analyzer, source, microphoneStream;
   let isRunning = false;
+  let isStarting = false;
+  let pendingUserGestureStart = false;
   let sampleRate;
   const fftSize = 2048;
 
@@ -373,20 +375,26 @@
 
   // ------------------ Microphone + Analyzer Setup ------------------
   async function startSpectrum() {
-    if (isRunning) return;
-    isRunning = true;
-    toggleBtn.textContent = 'Pause';
+    if (isRunning || isStarting) return;
+    isStarting = true;
 
-    // Exports disabled until pause
-    exportSpectrumBtn.disabled = true;
-    exportWaveformBtn.disabled = true;
     if (!audioContext) {
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       sampleRate = audioContext.sampleRate;
     }
 
     if (audioContext.state === 'suspended') {
-      await audioContext.resume();
+      try {
+        await audioContext.resume();
+      } catch (err) {
+        console.warn('Audio context resume blocked:', err);
+      }
+    }
+
+    if (audioContext.state !== 'running') {
+      isStarting = false;
+      requestUserGestureStart();
+      return;
     }
 
     if (!microphoneStream) {
@@ -394,8 +402,8 @@
         microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       } catch (err) {
         alert('Error accessing microphone: ' + err.message);
-        isRunning = false;
-        toggleBtn.textContent = 'Resume';
+        isStarting = false;
+        requestUserGestureStart();
         dataArray = dataArray || new Uint8Array(0);
         timeDomainData = timeDomainData || new Uint8Array(0);
         return;
@@ -412,6 +420,12 @@
       source = audioContext.createMediaStreamSource(microphoneStream);
       source.connect(analyzer);
     }
+
+    isRunning = true;
+    isStarting = false;
+    toggleBtn.textContent = 'Pause';
+    exportSpectrumBtn.disabled = true;
+    exportWaveformBtn.disabled = true;
   }
 
   async function resetAudioSession() {
@@ -433,7 +447,9 @@
     lastFreqFrame = null;
     lastWaveFrame = null;
     isRunning = false;
-    toggleBtn.textContent = 'Resume';
+    isStarting = false;
+    pendingUserGestureStart = false;
+    toggleBtn.textContent = 'Start';
     exportSpectrumBtn.disabled = true;
     exportWaveformBtn.disabled = true;
     peakFreqDisplay.textContent = 'Peak Frequency: --';
@@ -473,6 +489,20 @@
     }
 
     teardownAudioSession();
+  }
+
+  function requestUserGestureStart() {
+    if (pendingUserGestureStart) return;
+    pendingUserGestureStart = true;
+    toggleBtn.textContent = 'Start';
+
+    const resumeOnGesture = async () => {
+      pendingUserGestureStart = false;
+      await startSpectrum();
+    };
+
+    window.addEventListener('pointerdown', resumeOnGesture, { once: true });
+    window.addEventListener('keydown', resumeOnGesture, { once: true });
   }
 
   // ------------------ The Continuous Draw Loop ------------------
