@@ -1188,53 +1188,68 @@
 				renderAnnotations();
 			}
 
-			/* Wiring */
-			liveToggle.addEventListener('change', () => setPaused(!liveToggle.checked));
+			function syncToolButtons() {
+				annotationBtn.classList.toggle('active', annotationOn);
+				annotationBtn.classList.toggle('primary', annotationOn);
+				annotationBtn.classList.toggle('muted', !annotationOn);
+				eraserBtn.classList.toggle('active', eraserOn);
+				eraserBtn.classList.toggle('primary', eraserOn);
+				eraserBtn.classList.toggle('muted', !eraserOn);
+				textBtn.classList.toggle('active', textModeOn);
+				textBtn.classList.toggle('primary', textModeOn);
+				textBtn.classList.toggle('muted', !textModeOn);
+			}
 
-			annotationBtn.addEventListener('click', () => {
+			function toggleAnnotation(showFeedback) {
 				annotationOn = !annotationOn;
 				eraserOn = false;
 				textModeOn = false;
 				hideTextOverlay();
-				annotationBtn.classList.toggle('active', annotationOn);
-				annotationBtn.classList.toggle('primary', annotationOn);
-				annotationBtn.classList.toggle('muted', !annotationOn);
-				eraserBtn.classList.remove('active', 'primary');
-				eraserBtn.classList.add('muted');
-				textBtn.classList.remove('active', 'primary');
-				textBtn.classList.add('muted');
+				syncToolButtons();
 				updateInteractionMode();
-			});
-			eraserBtn.addEventListener('click', () => {
+				if (showFeedback) showToast(annotationOn ? 'Annotation on' : 'Annotation off');
+			}
+
+			function toggleEraser(showFeedback) {
 				eraserOn = !eraserOn;
 				annotationOn = eraserOn ? true : annotationOn;
 				textModeOn = false;
 				hideTextOverlay();
-				eraserBtn.classList.toggle('active', eraserOn);
-				eraserBtn.classList.toggle('primary', eraserOn);
-				eraserBtn.classList.toggle('muted', !eraserOn);
-				annotationBtn.classList.toggle('active', annotationOn);
-				annotationBtn.classList.toggle('primary', annotationOn);
-				annotationBtn.classList.toggle('muted', !annotationOn);
-				textBtn.classList.remove('active', 'primary');
-				textBtn.classList.add('muted');
+				syncToolButtons();
 				updateInteractionMode();
-			});
-			textBtn.addEventListener('click', () => {
+				if (showFeedback) showToast(eraserOn ? 'Eraser on' : 'Eraser off');
+			}
+
+			function toggleTextMode(showFeedback) {
 				annotationOn = true;
 				eraserOn = false;
 				textModeOn = !textModeOn;
 				hideTextOverlay(textModeOn);
-				annotationBtn.classList.add('active', 'primary');
-				annotationBtn.classList.remove('muted');
-				eraserBtn.classList.remove('active', 'primary');
-				eraserBtn.classList.add('muted');
-				textBtn.classList.toggle('active', textModeOn);
-				textBtn.classList.toggle('primary', textModeOn);
-				textBtn.classList.toggle('muted', !textModeOn);
-				if (textModeOn) showToast('Tap where you want the text.');
+				syncToolButtons();
+				if (textModeOn) {
+					showToast(showFeedback ? 'Text on' : 'Tap where you want the text.');
+				} else if (showFeedback) {
+					showToast('Text off');
+				}
 				updateInteractionMode();
-			});
+			}
+
+			function setLaserMode(showFeedback) {
+				annotationOn = false;
+				eraserOn = false;
+				textModeOn = false;
+				hideTextOverlay();
+				syncToolButtons();
+				updateInteractionMode();
+				if (showFeedback) showToast('Laser on');
+			}
+
+			/* Wiring */
+			liveToggle.addEventListener('change', () => setPaused(!liveToggle.checked));
+
+			annotationBtn.addEventListener('click', () => toggleAnnotation(false));
+			eraserBtn.addEventListener('click', () => toggleEraser(false));
+			textBtn.addEventListener('click', () => toggleTextMode(false));
 			undoBtn.addEventListener('click', () => {
 				if (!objects.length) return;
 				objects.pop();
@@ -1327,6 +1342,34 @@
 				renderAnnotations();
 			}
 			zoomSlider.addEventListener('input', e => setZoom(parseFloat(e.target.value)));
+
+			document.addEventListener('keydown', async e => {
+				if (document.activeElement === textInput) return;
+				if (e.code === 'Space') {
+					e.preventDefault();
+					await setPaused(!isPaused);
+					showToast(isPaused ? 'Paused' : 'Live');
+					return;
+				}
+				if (e.key === undefined) return;
+				const key = e.key.toLowerCase();
+				if (key === 'm') {
+					e.preventDefault();
+					mirrorBtn.click();
+				} else if (key === 'a') {
+					e.preventDefault();
+					toggleAnnotation(true);
+				} else if (key === 'e') {
+					e.preventDefault();
+					toggleEraser(true);
+				} else if (key === 't') {
+					e.preventDefault();
+					toggleTextMode(true);
+				} else if (key === 'l') {
+					e.preventDefault();
+					setLaserMode(true);
+				}
+			});
 
 			/* Stage events */
 			const target = stage;
