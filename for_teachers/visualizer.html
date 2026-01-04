@@ -838,8 +838,9 @@
 				const baseW = canvas.width,
 					baseH = canvas.height;
 				const s = Z();
-				const x = (clientX - rect.left - rect.width / 2) / s + baseW / 2;
+				let x = (clientX - rect.left - rect.width / 2) / s + baseW / 2;
 				const y = (clientY - rect.top - rect.height / 2) / s + baseH / 2;
+				if (isMirrored) x = baseW - x;
 				if (!isFinite(x) || !isFinite(y)) return { x: 0, y: 0 };
 				return { x, y };
 			}
@@ -1158,12 +1159,13 @@
 			/* Zoom + mirror + fit */
 			function applyTransforms() {
 				const s = Z();
+				const mirror = isMirrored ? 'scaleX(-1) ' : '';
 				[drawCanvas, laserCanvas, freezeCanvas].forEach(el => {
 					el.style.transformOrigin = 'center center';
-					el.style.transform = 'scale(' + s + ')';
+					el.style.transform = mirror + 'scale(' + s + ')';
 				});
 				video.style.transformOrigin = 'center center';
-				video.style.transform = (isMirrored ? 'scaleX(-1) ' : '') + 'scale(' + s + ')';
+				video.style.transform = mirror + 'scale(' + s + ')';
 				applyFitMode(); // ensure objectFit is applied whenever transforms update
 			}
 
@@ -1265,8 +1267,17 @@
 						octx.restore();
 					}
 				}
-				octx.drawImage(drawCanvas, 0, 0);
-				octx.drawImage(laserCanvas, 0, 0);
+				if (isMirrored) {
+					octx.save();
+					octx.translate(w, 0);
+					octx.scale(-1, 1);
+					octx.drawImage(drawCanvas, 0, 0);
+					octx.drawImage(laserCanvas, 0, 0);
+					octx.restore();
+				} else {
+					octx.drawImage(drawCanvas, 0, 0);
+					octx.drawImage(laserCanvas, 0, 0);
+				}
 				out.toBlob(blob => {
 					if (!blob) { showToast('Snapshot failed'); return; }
 					const url = URL.createObjectURL(blob);
@@ -1310,8 +1321,17 @@
 						compositeCtx.restore();
 					}
 				}
-				compositeCtx.drawImage(drawCanvas, 0, 0);
-				compositeCtx.drawImage(laserCanvas, 0, 0);
+				if (isMirrored) {
+					compositeCtx.save();
+					compositeCtx.translate(w, 0);
+					compositeCtx.scale(-1, 1);
+					compositeCtx.drawImage(drawCanvas, 0, 0);
+					compositeCtx.drawImage(laserCanvas, 0, 0);
+					compositeCtx.restore();
+				} else {
+					compositeCtx.drawImage(drawCanvas, 0, 0);
+					compositeCtx.drawImage(laserCanvas, 0, 0);
+				}
 				if (recording) requestAnimationFrame(drawCompositeFrame);
 			}
 
