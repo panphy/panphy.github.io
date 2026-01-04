@@ -543,6 +543,7 @@
 				<button id="annotationBtn" class="muted">Annotation</button>
 				<button id="eraserBtn" class="muted">Eraser</button>
 				<button id="textBtn" class="muted">Text</button>
+				<button id="undoBtn" class="muted">Undo</button>
 				<button id="clearBtn" class="danger">Clear</button>
 			</div>
 
@@ -597,6 +598,7 @@
 			const statusLight = document.getElementById('statusLight');
 			const statusLabel = document.getElementById('statusLabel');
 
+			const undoBtn = document.getElementById('undoBtn');
 			const clearBtn = document.getElementById('clearBtn');
 			const screenshotBtn = document.getElementById('screenshotBtn');
 			const recordBtn = document.getElementById('recordBtn');
@@ -718,6 +720,10 @@
 				statusLabel.textContent = isPaused ? 'Paused' : 'Live';
 				statusLight.className = 'light ' + (isPaused ? 'paused' : 'live');
 				syncToggleUI();
+			}
+
+			function updateUndoState() {
+				undoBtn.disabled = objects.length === 0;
 			}
 
 			/* Freeze handling */
@@ -965,6 +971,7 @@
 						obj._lastMeasured = { w: m.width, h: m.height, lh: m.lh, effFontPx };
 					}
 				}
+				updateUndoState();
 			}
 
 			function measureTextBlock(text, fontPx) {
@@ -1193,6 +1200,11 @@
 				textBtn.classList.toggle('muted', !textModeOn);
 				if (textModeOn) showToast('Tap where you want the text.');
 				updateInteractionMode();
+			});
+			undoBtn.addEventListener('click', () => {
+				if (!objects.length) return;
+				objects.pop();
+				renderAnnotations();
 			});
 			clearBtn.addEventListener('click', () => { objects.length = 0;
 				renderAnnotations(); });
