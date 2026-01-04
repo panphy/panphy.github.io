@@ -335,6 +335,8 @@
         alert('Error accessing microphone: ' + err.message);
         isRunning = false;
         toggleBtn.textContent = 'Resume';
+        dataArray = dataArray || new Uint8Array(0);
+        timeDomainData = timeDomainData || new Uint8Array(0);
         return;
       }
     }
@@ -377,7 +379,17 @@
     freqCtx.fillStyle = '#1e1e1e';
     freqCtx.fillRect(0, 0, freqCanvas.width, freqCanvas.height);
 
-    if (isRunning && analyzer) {
+    // Waveform
+    waveCtx.fillStyle = '#1e1e1e';
+    waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+    drawSquareGridWithTime();
+
+    if (!analyzer || !dataArray || !timeDomainData) {
+      peakFreqDisplay.textContent = 'Peak Frequency: --';
+      return;
+    }
+
+    if (isRunning) {
       analyzer.getByteFrequencyData(dataArray);
       freqDataHistory.push(Array.from(dataArray));
     } else if (lastFreqFrame) {
@@ -409,18 +421,12 @@
     // Draw frequency axis
     drawFrequencyAxis(freqCtx, freqCanvas.width, freqCanvas.height);
 
-    // Waveform
-    waveCtx.fillStyle = '#1e1e1e';
-    waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
-
-    if (isRunning && analyzer) {
+    if (isRunning) {
       analyzer.getByteTimeDomainData(timeDomainData);
       lastWaveFrame = timeDomainData.slice();
     } else if (lastWaveFrame) {
       timeDomainData.set(lastWaveFrame);
     }
-
-    drawSquareGridWithTime();
 
     // waveform trace
     waveCtx.lineWidth = 2;
