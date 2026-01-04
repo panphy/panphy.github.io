@@ -332,7 +332,7 @@
     <div id="sidebar">
       <h3>Magnifier</h3>
       <!-- The stationary magnifier in the sidebar -->
-      <canvas id="magnifierCanvas"></canvas><br><br>
+      <canvas id="magnifierCanvas" width="220" height="220"></canvas><br><br>
       <h3>Data Points</h3>
       <button id="exportButton" class="btn btn-export">Export Data (.csv)</button>
       <table id="dataTable">
@@ -423,7 +423,7 @@
     const y = (e.clientY - rect.top) * scaleY;
 
     // The portion of the main canvas we want to draw
-    // Our magnifier is 150x150, so the region size in the main canvas is 150 / magnification
+    // Our magnifier is 220x220, so the region size in the main canvas is 220 / magnification
     const regionSize = magnifierCanvas.width / magnification;
     let sx = x - regionSize / 2;
     let sy = y - regionSize / 2;
