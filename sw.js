@@ -24,7 +24,6 @@ const ASSETS_TO_CACHE = [
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',
   '/simulations/lorentz.html',
-  '/misc/ising_model.html',
 
   // For Teachers
   '/for_teachers/timer.html',
