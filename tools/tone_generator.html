@@ -428,7 +428,34 @@
   volumeGain.connect(combinedGain);
 
   const stereoPanner = audioCtx.createStereoPanner();
-  combinedGain.connect(stereoPanner);
+
+  const saturation = audioCtx.createWaveShaper();
+  saturation.curve = makeSoftClipCurve(0.9);
+  saturation.oversample = '4x';
+
+  const compressor = audioCtx.createDynamicsCompressor();
+  compressor.threshold.value = -24;
+  compressor.knee.value = 20;
+  compressor.ratio.value = 4;
+  compressor.attack.value = 0.003;
+  compressor.release.value = 0.25;
+
+  const convolver = audioCtx.createConvolver();
+  convolver.buffer = makeImpulseResponse(0.6, 2.5);
+
+  const dryGain = audioCtx.createGain();
+  dryGain.gain.value = 0.85;
+
+  const wetGain = audioCtx.createGain();
+  wetGain.gain.value = 0.15;
+
+  combinedGain.connect(saturation);
+  saturation.connect(compressor);
+  compressor.connect(dryGain);
+  compressor.connect(convolver);
+  convolver.connect(wetGain);
+  dryGain.connect(stereoPanner);
+  wetGain.connect(stereoPanner);
   stereoPanner.connect(audioCtx.destination);
 
   /* DOM Elements */
@@ -677,6 +704,29 @@
       else ctx.lineTo(x, y);
     }
     ctx.stroke();
+  }
+
+  function makeSoftClipCurve(amount) {
+    const curve = new Float32Array(44100);
+    const k = typeof amount === 'number' ? amount * 30 : 30;
+    for (let i = 0; i < curve.length; i++) {
+      const x = (i * 2) / curve.length - 1;
+      curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  function makeImpulseResponse(duration, decay) {
+    const rate = audioCtx.sampleRate;
+    const length = rate * duration;
+    const impulse = audioCtx.createBuffer(2, length, rate);
+    for (let channel = 0; channel < impulse.numberOfChannels; channel++) {
+      const channelData = impulse.getChannelData(channel);
+      for (let i = 0; i < length; i++) {
+        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+      }
+    }
+    return impulse;
   }
 
   // ========== CONTROLS ==========
