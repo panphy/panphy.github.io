@@ -136,6 +136,7 @@
 
 		let currentStream = null;
 		let hasPopulated = false;
+		let hasStartedDraw = false;
 
 		/* Map slider value (2–20) so that 20→2, 2→20 */
 		function getCellSize() {
@@ -169,6 +170,14 @@
 				const stream = await navigator.mediaDevices.getUserMedia(constraints);
 				currentStream = stream;
 				video.srcObject = stream;
+				video.muted = true;
+				video.playsInline = true;
+				try {
+					await video.play();
+				} catch (playErr) {
+					console.warn('Video play was blocked:', playErr);
+				}
+				startDrawLoop();
 
 				// On first successful start, populate device list (labels need permission)
 				if (!hasPopulated) {
@@ -183,6 +192,14 @@
 						const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 						currentStream = stream;
 						video.srcObject = stream;
+						video.muted = true;
+						video.playsInline = true;
+						try {
+							await video.play();
+						} catch (playErr) {
+							console.warn('Video play was blocked:', playErr);
+						}
+						startDrawLoop();
 						if (!hasPopulated) {
 							await populateCameras();
 							hasPopulated = true;
@@ -311,8 +328,16 @@
 			requestAnimationFrame(drawAscii);
 		}
 
+		function startDrawLoop() {
+			if (hasStartedDraw) return;
+			hasStartedDraw = true;
+			requestAnimationFrame(drawAscii);
+		}
+
 		/* ---------- events ---------- */
-		video.addEventListener('playing', drawAscii);
+		video.addEventListener('playing', startDrawLoop);
+		video.addEventListener('loadedmetadata', startDrawLoop);
+		video.addEventListener('canplay', startDrawLoop);
 		resolutionRange.addEventListener('input', updateFont);
 
 		captureBtn.addEventListener('click', () => {
