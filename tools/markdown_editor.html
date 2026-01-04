@@ -744,7 +744,7 @@
         <label class="scroll-sync-toggle" for="scrollSyncToggle">
           <input type="checkbox" id="scrollSyncToggle" />
           <span class="toggle-slider" aria-hidden="true"></span>
-          <span class="toggle-label">Sync Scroll</span>
+          <span class="toggle-label">Link Scroll</span>
         </label>
       </div>
       <div id="renderedOutput"></div>
@@ -771,7 +771,7 @@
   const scrollSyncToggle = document.getElementById('scrollSyncToggle');
   const highlightStyle = document.getElementById('highlightStyle');
   const draftStorageKey = 'markdownEditorDraft';
-  let isScrollSyncEnabled = false;
+  let isLinkScrollEnabled = false;
 
   /**
    * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
@@ -1091,7 +1091,7 @@
     }
 
     matchingBlock.classList.add('highlighted-block');
-    const shouldScroll = forceScroll || !isScrollSyncEnabled;
+    const shouldScroll = forceScroll || !isLinkScrollEnabled;
     if (shouldScroll) {
       matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
     }
@@ -1115,51 +1115,8 @@
     updateHighlightedBlockFromCaret({ forceScroll: true });
   }
 
-  function getLineNumberFromInputScroll() {
-    const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
-    return Math.max(1, markdownInput.scrollTop / lineHeight + 1);
-  }
-
-  function getBlockClosestToTop() {
-    const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
-    if (!blocks.length) return null;
-    const scrollTop = renderedOutput.scrollTop;
-    let closest = blocks[0];
-    blocks.forEach(block => {
-      if (block.offsetTop <= scrollTop) {
-        closest = block;
-      }
-    });
-    return closest;
-  }
-
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
-  }
-
-  function getDesiredOutputScrollTop(lineNumber) {
-    const matchingBlock = getMatchingBlockForLine(lineNumber);
-    if (!matchingBlock) return null;
-    const startLine = Number(matchingBlock.dataset.srcStart);
-    const endLine = Number(matchingBlock.dataset.srcEnd);
-    if (Number.isNaN(startLine) || Number.isNaN(endLine)) return null;
-    const span = Math.max(1, endLine - startLine + 1);
-    const progress = clamp((lineNumber - startLine) / span, 0, 1);
-    return matchingBlock.offsetTop + matchingBlock.offsetHeight * progress;
-  }
-
-  function getDesiredInputScrollTop() {
-    const closestBlock = getBlockClosestToTop();
-    if (!closestBlock) return null;
-    const startLine = Number(closestBlock.dataset.srcStart);
-    const endLine = Number(closestBlock.dataset.srcEnd);
-    if (Number.isNaN(startLine) || Number.isNaN(endLine)) return null;
-    const span = Math.max(1, endLine - startLine + 1);
-    const blockHeight = Math.max(1, closestBlock.offsetHeight);
-    const progress = clamp((renderedOutput.scrollTop - closestBlock.offsetTop) / blockHeight, 0, 1);
-    const lineNumber = startLine + progress * span;
-    const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
-    return Math.max(0, (lineNumber - 1) * lineHeight);
   }
 
   function applyScrollTop(target, desiredTop) {
@@ -1173,51 +1130,30 @@
     target.scrollTop = target.scrollTop + distance * 0.35;
   }
 
-  let isSyncingScroll = false;
-  let scrollSyncFrame = null;
+  let isLinkingScroll = false;
+  let linkScrollFrame = null;
 
-  function syncScrollPositions(source, target) {
-    if (!isScrollSyncEnabled || isSyncingScroll) return;
-    isSyncingScroll = true;
-    if (scrollSyncFrame) {
-      cancelAnimationFrame(scrollSyncFrame);
+  function syncLinkedScroll(source, target) {
+    if (!isLinkScrollEnabled || isLinkingScroll) return;
+    isLinkingScroll = true;
+    if (linkScrollFrame) {
+      cancelAnimationFrame(linkScrollFrame);
     }
-    scrollSyncFrame = requestAnimationFrame(() => {
-      let applied = false;
-
-      if (source === markdownInput && target === renderedOutput) {
-        const lineNumber = getLineNumberFromInputScroll();
-        const desiredTop = getDesiredOutputScrollTop(lineNumber);
-        if (desiredTop !== null) {
-          applyScrollTop(target, desiredTop);
-          applied = true;
-        }
-      }
-
-      if (source === renderedOutput && target === markdownInput) {
-        const desiredTop = getDesiredInputScrollTop();
-        if (desiredTop !== null) {
-          applyScrollTop(target, desiredTop);
-          applied = true;
-        }
-      }
-
-      if (!applied) {
-        const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
-        const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
-        const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
-        applyScrollTop(target, targetMax * ratio);
-      }
-      isSyncingScroll = false;
+    linkScrollFrame = requestAnimationFrame(() => {
+      const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
+      const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
+      const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
+      applyScrollTop(target, targetMax * ratio);
+      isLinkingScroll = false;
     });
   }
 
-  function syncOutputToInputScroll() {
-    syncScrollPositions(markdownInput, renderedOutput);
+  function linkOutputToInputScroll() {
+    syncLinkedScroll(markdownInput, renderedOutput);
   }
 
-  function syncInputToOutputScroll() {
-    syncScrollPositions(renderedOutput, markdownInput);
+  function linkInputToOutputScroll() {
+    syncLinkedScroll(renderedOutput, markdownInput);
   }
 
   async function printToPDF() {
@@ -1594,9 +1530,9 @@
   markdownInput.addEventListener('keyup', handleCaretChange);
   markdownInput.addEventListener('click', handleCaretChange);
   markdownInput.addEventListener('select', handleCaretChange);
-  markdownInput.addEventListener('scroll', syncOutputToInputScroll);
+  markdownInput.addEventListener('scroll', linkOutputToInputScroll);
   renderedOutput.addEventListener('click', syncCaretFromOutputClick);
-  renderedOutput.addEventListener('scroll', syncInputToOutputScroll);
+  renderedOutput.addEventListener('scroll', linkInputToOutputScroll);
   printButton.addEventListener('click', printToPDF);
   exportHTMLButton.addEventListener('click', exportHTML);
   saveMDButton.addEventListener('click', saveMarkdown);
@@ -1609,8 +1545,8 @@
   });
   themeToggleButton.addEventListener('click', toggleTheme);
   scrollSyncToggle.addEventListener('change', event => {
-    isScrollSyncEnabled = event.target.checked;
-    if (isScrollSyncEnabled) {
+    isLinkScrollEnabled = event.target.checked;
+    if (isLinkScrollEnabled) {
       updateHighlightedBlockFromCaret({ forceScroll: true });
     }
   });
