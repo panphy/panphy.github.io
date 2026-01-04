@@ -570,6 +570,7 @@
          *   Canvas Setup (High DPI)
          *******************************************************/
         function setupCanvas() {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             const ratio = window.devicePixelRatio || 1;
             const computedStyle = getComputedStyle(canvas);
             width = parseInt(computedStyle.getPropertyValue('width'));
@@ -583,7 +584,6 @@
         // Initial setup
         setupCanvas();
         window.addEventListener('resize', () => {
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
             setupCanvas();
             drawWaves();
         });
