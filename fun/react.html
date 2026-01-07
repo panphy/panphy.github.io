@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Super Reflex Game</title>
+    <style>
+        /* General Page Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* Prevent scrolling on spacebar */
+            user-select: none; /* Prevent text highlighting */
+            -webkit-user-select: none;
+        }
+
+        /* The Game Container */
+        #game-container {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            background-color: #4A90E2; /* Initial Blue */
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            touch-action: manipulation; /* Improves touch response */
+        }
+
+        /* Text Elements */
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        p {
+            font-size: 1.5rem;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        /* Icon/Emoji Styling */
+        .icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Instructions at the bottom */
+        .instructions {
+            position: absolute;
+            bottom: 30px;
+            font-size: 1rem;
+            opacity: 0.7;
+            padding: 0 20px;
+        }
+
+        /* High Score Badge */
+        .high-score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        /* Classes for State Changes */
+        .state-waiting {
+            background-color: #FF6B6B !important; /* Red */
+        }
+        
+        .state-go {
+            background-color: #51CF66 !important; /* Green */
+        }
+
+        .state-result {
+            background-color: #ffffff !important; /* White */
+            color: #333 !important;
+            border: 5px solid #4A90E2;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="high-score">🏆 Best: <span id="best-time">--</span></div>
+        
+        <div id="content">
+            <span class="icon">🚀</span>
+            <h1 id="main-text">Super Reflex</h1>
+            <p id="sub-text">Press Space or Tap to Start</p>
+        </div>
+
+        <div class="instructions">
+            Wait for green, then click fast!
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const container = document.getElementById('game-container');
+        const mainText = document.getElementById('main-text');
+        const subText = document.getElementById('sub-text');
+        const icon = document.querySelector('.icon');
+        const bestTimeDisplay = document.getElementById('best-time');
+
+        // Game Variables
+        let gameState = 'idle'; // Options: idle, waiting, go, result, early
+        let startTime = 0;
+        let timeoutId = null;
+        let bestTime = null;
+
+        // Sound Effects (Optional simple beeps using AudioContext could go here, keeping it silent for safety)
+
+        // --- Core Logic ---
+
+        function handleInput(e) {
+            // Prevent default spacebar scrolling
+            if(e.type === 'keydown' && e.code === 'Space') {
+                e.preventDefault();
+            }
+
+            // Logic Switch based on current State
+            switch (gameState) {
+                case 'idle':
+                case 'result':
+                case 'early':
+                    prepareGame();
+                    break;
+                
+                case 'waiting':
+                    triggerEarly();
+                    break;
+                
+                case 'go':
+                    finishGame();
+                    break;
+            }
+        }
+
+        function prepareGame() {
+            gameState = 'waiting';
+            container.className = 'state-waiting'; // Turns Red
+            icon.textContent = '🛑';
+            mainText.textContent = "Wait for it...";
+            subText.textContent = "Hold steady...";
+            
+            // Random delay between 1.5 seconds (1500ms) and 4 seconds (4000ms)
+            const randomDelay = Math.floor(Math.random() * 2500) + 1500;
+            
+            timeoutId = setTimeout(startGame, randomDelay);
+        }
+
+        function startGame() {
+            gameState = 'go';
+            container.className = 'state-go'; // Turns Green
+            icon.textContent = '⚡️';
+            mainText.textContent = "CLICK NOW!";
+            subText.textContent = "Go! Go! Go!";
+            
+            // Record the exact time the green screen appeared
+            startTime = Date.now();
+        }
+
+        function triggerEarly() {
+            // Player clicked while screen was red
+            clearTimeout(timeoutId); // Cancel the pending green screen
+            gameState = 'early';
+            container.className = ''; // Reset color (Blue)
+            icon.textContent = '😅';
+            mainText.textContent = "Too Early!";
+            subText.textContent = "Tap to try again.";
+        }
+
+        function finishGame() {
+            const endTime = Date.now();
+            const reactionTime = endTime - startTime;
+            
+            gameState = 'result';
+            container.className = 'state-result'; // Turns White
+            
+            icon.textContent = '🎉';
+            mainText.textContent = reactionTime + " ms";
+            
+            // Rank the result
+            let comment = "";
+            if(reactionTime < 200) comment = "Super Human! 🦸";
+            else if(reactionTime < 300) comment = "Very Fast! 🏎️";
+            else if(reactionTime < 450) comment = "Nice Job! 👍";
+            else comment = "Keep Practicing! 🐢";
+
+            subText.textContent = comment + " Tap to restart.";
+
+            // Handle High Score
+            if (bestTime === null || reactionTime < bestTime) {
+                bestTime = reactionTime;
+                bestTimeDisplay.textContent = bestTime + " ms";
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // 1. Mouse/Touch Click on the container
+        container.addEventListener('mousedown', handleInput);
+        container.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevents double-firing on some touch devices
+            handleInput(e);
+        }, { passive: false });
+
+        // 2. Spacebar Keydown
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                handleInput(e);
+            }
+        });
+
+    </script>
+</body>
+</html>
