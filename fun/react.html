@@ -127,6 +127,15 @@
         let startTime = 0;
         let timeoutId = null;
         let bestTime = null;
+        const savedBestTime = localStorage.getItem('bestTime');
+        if (savedBestTime !== null) {
+            bestTime = Number(savedBestTime);
+            if (!Number.isNaN(bestTime)) {
+                bestTimeDisplay.textContent = bestTime + " ms";
+            } else {
+                bestTime = null;
+            }
+        }
 
         // Sound Effects (Optional simple beeps using AudioContext could go here, keeping it silent for safety)
 
@@ -215,6 +224,7 @@
             if (bestTime === null || reactionTime < bestTime) {
                 bestTime = reactionTime;
                 bestTimeDisplay.textContent = bestTime + " ms";
+                localStorage.setItem('bestTime', bestTime);
             }
         }
 
