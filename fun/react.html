@@ -105,13 +105,16 @@
         }
 
         footer {
-            position: absolute;
-            bottom: 20px;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: calc(16px + env(safe-area-inset-bottom));
             width: 100%;
             text-align: center;
             color: #2f3b4a;
             font-size: 0.95rem;
-            z-index: 1;
+            z-index: 2;
+            pointer-events: auto;
         }
 
         footer a {
