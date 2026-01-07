@@ -406,6 +406,24 @@
 			gap: 12px;
 		}
 
+		.frame-rate-field {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+		}
+
+		.frame-rate-field label {
+			font-size: 0.9rem;
+			font-weight: 600;
+			color: var(--text-main);
+		}
+
+		.frame-rate-hint {
+			font-size: 0.82rem;
+			color: var(--text-muted);
+			margin: 0;
+		}
+
 		#calibrationPrompt input[type="number"],
 		#calibrationPrompt input[type="text"],
 		#exportPrompt input[type="text"],
@@ -557,10 +575,18 @@
 		<p>Playback FPS is the rate encoded in the file (seek/step rate). Capture FPS is the real-world rate you
 			want for analysis (e.g. 240 fps slow motion).</p>
 		<form autocomplete="off">
-			<input type="number" id="userPlaybackFrameRate" value="30" min="1" step="any" autocomplete="off"
-				placeholder="Playback FPS" />
-			<input type="number" id="userCaptureFrameRate" value="30" min="1" step="any" autocomplete="off"
-				placeholder="Capture FPS" />
+			<div class="frame-rate-field">
+				<label for="userPlaybackFrameRate">Playback FPS (file rate)</label>
+				<input type="number" id="userPlaybackFrameRate" value="30" min="1" step="any" autocomplete="off"
+					placeholder="e.g. 30" />
+				<p class="frame-rate-hint">Matches the encoded FPS for stepping/seek accuracy.</p>
+			</div>
+			<div class="frame-rate-field">
+				<label for="userCaptureFrameRate">Capture FPS (real-world rate)</label>
+				<input type="number" id="userCaptureFrameRate" value="30" min="1" step="any" autocomplete="off"
+					placeholder="e.g. 240 for slow motion" />
+				<p class="frame-rate-hint">Use the actual recording speed for velocity/acceleration.</p>
+			</div>
 			<div>
 				<button type="button" id="confirmFrameRate" class="btn-primary">Confirm</button>
 				<button type="button" id="cancelFrameRate">Cancel</button>
