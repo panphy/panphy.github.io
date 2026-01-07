@@ -18,6 +18,9 @@
             overflow: hidden; /* Prevent scrolling on spacebar */
             user-select: none; /* Prevent text highlighting */
             -webkit-user-select: none;
+            position: relative;
+            padding-bottom: 80px;
+            box-sizing: border-box;
         }
 
         /* The Game Container */
@@ -101,6 +104,24 @@
             border: 5px solid #4A90E2;
         }
 
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #ffffff;
+            font-size: 0.95rem;
+        }
+
+        footer a {
+            color: #e1b400;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 <body>
@@ -118,6 +139,12 @@
             Wait for green, then click fast!
         </div>
     </div>
+
+    <footer>
+        <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        </p>
+    </footer>
 
     <script>
         // DOM Elements
