@@ -226,6 +226,7 @@
         // 2. Spacebar Keydown
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
+                if (e.repeat) return;
                 handleInput(e);
             }
         });
