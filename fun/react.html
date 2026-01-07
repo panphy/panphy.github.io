@@ -170,6 +170,8 @@
         }
 
         function startGame() {
+            if (gameState !== 'waiting') return;
+            clearTimeout(timeoutId);
             gameState = 'go';
             container.className = 'state-go'; // Turns Green
             icon.textContent = '⚡️';
