@@ -220,12 +220,8 @@
 
         // --- Event Listeners ---
 
-        // 1. Mouse/Touch Click on the container
-        container.addEventListener('mousedown', handleInput);
-        container.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevents double-firing on some touch devices
-            handleInput(e);
-        }, { passive: false });
+        // 1. Pointer input on the container
+        container.addEventListener('pointerdown', handleInput);
 
         // 2. Spacebar Keydown
         document.addEventListener('keydown', (e) => {
