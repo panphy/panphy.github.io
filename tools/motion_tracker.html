@@ -1219,30 +1219,8 @@
 
 			// Dynamic scaling factors
 			const s = getVisualScale();
-			const gridSize = 40 * s;
-			const gridLineWidth = Math.max(0.5, 1 * s);
 			const axisWidth = 2 * s;
 			const originRadius = 6 * s;
-
-			overlayCtx.save();
-			overlayCtx.shadowColor = "black";
-			overlayCtx.shadowBlur = 2;
-			overlayCtx.strokeStyle = "white";
-			overlayCtx.lineWidth = gridLineWidth;
-
-			for (let x = 0; x <= overlayCanvas.width; x += gridSize) {
-				overlayCtx.beginPath();
-				overlayCtx.moveTo(x, 0);
-				overlayCtx.lineTo(x, overlayCanvas.height);
-				overlayCtx.stroke();
-			}
-			for (let y = 0; y <= overlayCanvas.height; y += gridSize) {
-				overlayCtx.beginPath();
-				overlayCtx.moveTo(0, y);
-				overlayCtx.lineTo(overlayCanvas.width, y);
-				overlayCtx.stroke();
-			}
-			overlayCtx.restore();
 
 			const ox = originSet ? originPoint.x : 0;
 			const oy = originSet ? originPoint.y : 0;
