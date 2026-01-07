@@ -40,6 +40,11 @@
             touch-action: manipulation; /* Improves touch response */
         }
 
+        #game-container:focus-visible {
+            outline: 4px solid #ffffff;
+            outline-offset: 6px;
+        }
+
         /* Text Elements */
         h1 {
             font-size: 3rem;
@@ -100,12 +105,12 @@
 </head>
 <body>
 
-    <div id="game-container">
+    <div id="game-container" role="button" tabindex="0" aria-label="Super Reflex game">
         <div class="high-score">🏆 Best: <span id="best-time">--</span></div>
         
         <div id="content">
             <span class="icon">🚀</span>
-            <h1 id="main-text">Super Reflex</h1>
+            <h1 id="main-text" aria-live="polite" aria-atomic="true">Super Reflex</h1>
             <p id="sub-text">Press Space or Tap to Start</p>
         </div>
 
@@ -142,8 +147,7 @@
         // --- Core Logic ---
 
         function handleInput(e) {
-            // Prevent default spacebar scrolling
-            if(e.type === 'keydown' && e.code === 'Space') {
+            if (e.type === 'keydown' && (e.code === 'Space' || e.code === 'Enter')) {
                 e.preventDefault();
             }
 
@@ -233,9 +237,9 @@
         // 1. Pointer input on the container
         container.addEventListener('pointerdown', handleInput);
 
-        // 2. Spacebar Keydown
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
+        // 2. Keyboard input on the container
+        container.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'Enter') {
                 if (e.repeat) return;
                 handleInput(e);
             }
