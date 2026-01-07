@@ -553,10 +553,14 @@
 	</div>
 
 	<div id="frameRatePrompt">
-		<h2>Set Frame Rate</h2>
-		<p>Enter the correct frame rate: <br>(e.g. 24, 30, 60, 120, 240 fps)</p>
+		<h2>Set Frame Rates</h2>
+		<p>Playback FPS is the rate encoded in the file (seek/step rate). Capture FPS is the real-world rate you
+			want for analysis (e.g. 240 fps slow motion).</p>
 		<form autocomplete="off">
-			<input type="number" id="userFrameRate" value="30" min="1" step="any" autocomplete="off" />
+			<input type="number" id="userPlaybackFrameRate" value="30" min="1" step="any" autocomplete="off"
+				placeholder="Playback FPS" />
+			<input type="number" id="userCaptureFrameRate" value="30" min="1" step="any" autocomplete="off"
+				placeholder="Capture FPS" />
 			<div>
 				<button type="button" id="confirmFrameRate" class="btn-primary">Confirm</button>
 				<button type="button" id="cancelFrameRate">Cancel</button>
@@ -572,7 +576,8 @@
 
 	<script>
 		/* ===== State ===== */
-		let frameRate = 30;
+		let playbackFrameRate = 30;
+		let captureFrameRate = 30;
 		const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
 		let frameData = [];
 		let isPlaying = false;
@@ -628,7 +633,8 @@
 		const cancelExportButton = document.getElementById('cancelExport');
 
 		const frameRatePrompt = document.getElementById('frameRatePrompt');
-		const userFrameRateInput = document.getElementById('userFrameRate');
+		const userPlaybackFrameRateInput = document.getElementById('userPlaybackFrameRate');
+		const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
 		const confirmFrameRateButton = document.getElementById('confirmFrameRate');
 		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
 		const frameRateButton = document.getElementById('frameRateButton');
@@ -642,6 +648,16 @@
 				s = Math.floor(t % 60),
 				ms = Math.floor((t - Math.floor(t)) * 1000);
 			return `${m}:${s.toString().padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+		}
+
+		function getAnalysisTime(playbackTime) {
+			if (!Number.isFinite(playbackTime)) return 0;
+			const frameIndex = Math.round(playbackTime * playbackFrameRate);
+			return frameIndex / captureFrameRate;
+		}
+
+		function updateTimeDisplay(playbackTime) {
+			timeDisplay.textContent = formatTime(getAnalysisTime(playbackTime));
 		}
 
 		// Scale helper
@@ -732,7 +748,7 @@
 		/* Init */
 		document.addEventListener('DOMContentLoaded', () => {
 			disableControls(true);
-			frameRateButton.textContent = `FPS: ${frameRate}`;
+			frameRateButton.textContent = `FPS: ${playbackFrameRate}/${captureFrameRate}`;
 			document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
 			frameCanvas.style.display = "none";
 		});
@@ -758,7 +774,7 @@
 		hiddenVideo.addEventListener('loadedmetadata', () => {
 			slider.min = "0";
 			slider.max = "0";
-			slider.step = Math.max(1 / frameRate / 2, 0.001).toString();
+			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
 			slider.value = "0";
 			hiddenVideo.currentTime = 0;
 			updateSliderDomain();
@@ -780,21 +796,21 @@
 			drawOverlay();
 			plotPosition();
 
-			if (frameData.length === 0) {
-				document.getElementById('message').innerHTML =
-					"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
-					"<li>Set frame rate if needed. Default is 30 fps.</li>" +
-					"<li>Click the video to record a data point.</li>" +
-					"</ul>";
-			}
-		});
+				if (frameData.length === 0) {
+					document.getElementById('message').innerHTML =
+						"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
+						"<li>Set playback/capture frame rates if needed. Default is 30/30 fps.</li>" +
+						"<li>Click the video to record a data point.</li>" +
+						"</ul>";
+				}
+			});
 
 		/* Playback sync */
 		hiddenVideo.addEventListener('timeupdate', () => {
 			if (!skippingFrame) {
 				updateSliderDomain();
 				slider.value = hiddenVideo.currentTime.toString();
-				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				updateTimeDisplay(hiddenVideo.currentTime);
 				drawFrame();
 			}
 		});
@@ -802,7 +818,7 @@
 			if (!skippingFrame) {
 				updateSliderDomain();
 				slider.value = hiddenVideo.currentTime.toString();
-				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				updateTimeDisplay(hiddenVideo.currentTime);
 				drawFrame();
 				drawOverlay();
 			}
@@ -825,10 +841,10 @@
 			if (!Number.isFinite(t)) return;
 			if (end > 0) t = Math.min(t, end - 0.02);
 			if (t < 0) t = 0;
-			const EPS = Math.max(1e-3, (1 / frameRate) * 0.15);
+			const EPS = Math.max(1e-3, (1 / playbackFrameRate) * 0.15);
 			if (Math.abs(hiddenVideo.currentTime - t) < EPS) t += EPS;
 			hiddenVideo.currentTime = t;
-			timeDisplay.textContent = formatTime(t);
+			updateTimeDisplay(t);
 		}
 		slider.addEventListener('input', scrubToSlider);
 		slider.addEventListener('change', scrubToSlider);
@@ -862,7 +878,7 @@
 				const canvasY = (event.clientY - rect.top) * scaleY;
 				const cartesianY = canvasYToCartesianY(canvasY);
 
-				frameData.push({ x: canvasX, y: cartesianY, time: hiddenVideo.currentTime });
+				frameData.push({ x: canvasX, y: cartesianY, time: getAnalysisTime(hiddenVideo.currentTime) });
 
 				// Update the specific plot user is viewing
 				if (currentPlotMode === 'vx') {
@@ -922,15 +938,19 @@
 
 		/* Frame rate dialog */
 		frameRateButton.addEventListener('click', () => {
-			userFrameRateInput.value = frameRate;
+			userPlaybackFrameRateInput.value = playbackFrameRate;
+			userCaptureFrameRateInput.value = captureFrameRate;
 			frameRatePrompt.style.display = "block";
 		});
 		confirmFrameRateButton.addEventListener('click', () => {
-			const v = parseFloat(userFrameRateInput.value);
-			if (Number.isFinite(v) && v > 0) frameRate = v;
+			const playbackValue = parseFloat(userPlaybackFrameRateInput.value);
+			const captureValue = parseFloat(userCaptureFrameRateInput.value);
+			if (Number.isFinite(playbackValue) && playbackValue > 0) playbackFrameRate = playbackValue;
+			if (Number.isFinite(captureValue) && captureValue > 0) captureFrameRate = captureValue;
 			frameRatePrompt.style.display = "none";
-			frameRateButton.textContent = `FPS: ${frameRate}`;
-			slider.step = Math.max(1 / frameRate / 2, 0.001).toString();
+			frameRateButton.textContent = `FPS: ${playbackFrameRate}/${captureFrameRate}`;
+			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
+			updateTimeDisplay(hiddenVideo.currentTime);
 		});
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
 
@@ -950,7 +970,7 @@
 				skippingFrame = false;
 				updateSliderDomain();
 				slider.value = hiddenVideo.currentTime.toString();
-				timeDisplay.textContent = formatTime(hiddenVideo.currentTime);
+				updateTimeDisplay(hiddenVideo.currentTime);
 				drawFrame();
 				drawOverlay();
 			};
@@ -970,7 +990,7 @@
 			const onSeeked = () => clean();
 
 			// Time-based seek for deterministic 1-frame stepping
-			const dt = 1 / frameRate;
+			const dt = 1 / playbackFrameRate;
 			const end = getSeekableEnd();
 			const candidate = hiddenVideo.currentTime + dt;
 			let target = candidate;
