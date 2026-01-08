@@ -282,7 +282,7 @@
             subText.textContent = "Go! Go! Go!";
             
             // Record the exact time the green screen appeared
-            startTime = Date.now();
+            startTime = performance.now();
         }
 
         function triggerEarly() {
@@ -296,7 +296,7 @@
         }
 
         function finishGame() {
-            const endTime = Date.now();
+            const endTime = performance.now();
             const reactionTime = (endTime - startTime) / 1000;
             
             gameState = 'result';
