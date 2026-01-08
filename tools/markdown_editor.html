@@ -947,6 +947,7 @@
     const tokens = marked.lexer(text);
 
     const countNewlines = value => (value.match(/\n/g) || []).length;
+    const normalizeMatchText = value => value.replace(/\s+/g, ' ').trim();
 
     const getBlockTag = token => {
       switch (token.type) {
@@ -979,6 +980,20 @@
       return [];
     };
 
+    const getTokenMatchText = token => {
+      if (!token.raw || token.type === 'hr') {
+        return '';
+      }
+
+      try {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = marked.parse(token.raw);
+        return normalizeMatchText(wrapper.textContent || '');
+      } catch (error) {
+        return normalizeMatchText(token.text || token.raw);
+      }
+    };
+
     const collectBlocksFromTokens = (tokenList, sourceText, baseLine) => {
       const blocks = [];
       let cursor = 0;
@@ -998,7 +1013,12 @@
         const tag = getBlockTag(token);
 
         if (tag) {
-          blocks.push({ start: startLine, end: endLine, tag });
+          blocks.push({
+            start: startLine,
+            end: endLine,
+            tag,
+            matchText: getTokenMatchText(token)
+          });
         }
 
         const childTokens = getChildTokens(token);
@@ -1021,23 +1041,51 @@
     const blockElements = Array.from(
       container.querySelectorAll('h1,h2,h3,h4,h5,h6,p,ul,ol,blockquote,pre,table,hr')
     );
+    const normalizeMatchText = value => value.replace(/\s+/g, ' ').trim();
     let elementIndex = 0;
 
     lineBlocks.forEach(block => {
-      while (elementIndex < blockElements.length) {
-        const element = blockElements[elementIndex];
-        if (element.tagName.toLowerCase() === block.tag) {
-          const wrapper = document.createElement('div');
-          wrapper.classList.add('md-block');
-          wrapper.dataset.srcStart = String(block.start);
-          wrapper.dataset.srcEnd = String(block.end);
-          element.replaceWith(wrapper);
-          wrapper.appendChild(element);
-          elementIndex += 1;
-          return;
+      let matchIndex = -1;
+      const expectedText = normalizeMatchText(block.matchText || '');
+
+      for (let i = elementIndex; i < blockElements.length; i += 1) {
+        const element = blockElements[i];
+        if (element.tagName.toLowerCase() !== block.tag) {
+          continue;
         }
-        elementIndex += 1;
+        if (!expectedText) {
+          matchIndex = i;
+          break;
+        }
+
+        const elementText = normalizeMatchText(element.textContent || '');
+        if (elementText && (elementText.includes(expectedText) || expectedText.includes(elementText))) {
+          matchIndex = i;
+          break;
+        }
       }
+
+      if (matchIndex === -1 && block.tag) {
+        for (let i = elementIndex; i < blockElements.length; i += 1) {
+          if (blockElements[i].tagName.toLowerCase() === block.tag) {
+            matchIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (matchIndex === -1) {
+        return;
+      }
+
+      const element = blockElements[matchIndex];
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('md-block');
+      wrapper.dataset.srcStart = String(block.start);
+      wrapper.dataset.srcEnd = String(block.end);
+      element.replaceWith(wrapper);
+      wrapper.appendChild(element);
+      elementIndex = matchIndex + 1;
     });
     return container.innerHTML;
   }
