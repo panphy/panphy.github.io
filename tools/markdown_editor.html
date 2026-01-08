@@ -1573,7 +1573,9 @@
     const fileName = prompt('Enter file name for the SVG export:', 'document.svg');
     if (!fileName) return;
 
-    const sanitizedHTML = getCleanRenderedOutputHTML();
+    const sanitizedHTML = getCleanRenderedOutputHTML()
+      .replace(/&nbsp;/g, '&#160;')
+      .replace(/\u00a0/g, '&#160;');
     const isDarkMode = document.body.classList.contains('dark-mode');
     const padding = 20;
     const outputWidth = Math.max(300, renderedOutput.clientWidth);
