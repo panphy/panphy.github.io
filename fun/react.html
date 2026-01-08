@@ -271,14 +271,7 @@
             handleInput(event);
         });
 
-        // 2. Keyboard input on the container
-        container.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.code === 'Enter') {
-                if (e.repeat) return;
-                handleInput(e);
-            }
-        });
-
+        // 2. Keyboard input on the document
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space' || e.code === 'Enter') {
                 if (e.repeat) return;
