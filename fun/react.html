@@ -164,7 +164,10 @@
         if (savedBestTime !== null) {
             bestTime = Number(savedBestTime);
             if (!Number.isNaN(bestTime)) {
-                bestTimeDisplay.textContent = bestTime + " ms";
+                if (bestTime > 10) {
+                    bestTime = bestTime / 1000;
+                }
+                bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
             } else {
                 bestTime = null;
             }
@@ -204,7 +207,7 @@
             mainText.textContent = "Wait for it...";
             subText.textContent = "Hold steady...";
             
-            // Random delay between 1.5 seconds (1500ms) and 4 seconds (4000ms)
+            // Random delay between 1.5 seconds and 4 seconds
             const randomDelay = Math.floor(Math.random() * 2500) + 1500;
             
             timeoutId = setTimeout(startGame, randomDelay);
@@ -235,19 +238,19 @@
 
         function finishGame() {
             const endTime = Date.now();
-            const reactionTime = endTime - startTime;
+            const reactionTime = (endTime - startTime) / 1000;
             
             gameState = 'result';
             container.className = 'state-result'; // Turns White
             
             icon.textContent = '🎉';
-            mainText.textContent = reactionTime + " ms";
+            mainText.textContent = reactionTime.toFixed(3) + " s";
             
             // Rank the result
             let comment = "";
-            if(reactionTime < 200) comment = "Super Human! 🦸";
-            else if(reactionTime < 300) comment = "Very Fast! 🏎️";
-            else if(reactionTime < 450) comment = "Nice Job! 👍";
+            if(reactionTime < 0.2) comment = "Super Human! 🦸";
+            else if(reactionTime < 0.3) comment = "Very Fast! 🏎️";
+            else if(reactionTime < 0.45) comment = "Nice Job! 👍";
             else comment = "Keep Practicing! 🐢";
 
             subText.textContent = comment + " Tap to restart.";
@@ -255,7 +258,7 @@
             // Handle High Score
             if (bestTime === null || reactionTime < bestTime) {
                 bestTime = reactionTime;
-                bestTimeDisplay.textContent = bestTime + " ms";
+                bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
                 localStorage.setItem('bestTime', bestTime);
             }
         }
