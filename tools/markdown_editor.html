@@ -821,9 +821,41 @@
 
     let output = '';
     let i = 0;
+    let inFencedCodeBlock = false;
+    let fencedDelimiter = null;
+    let inInlineCodeSpan = false;
 
     while (i < input.length) {
       const char = input[i];
+
+      const lineStart = i === 0 || input[i - 1] === '\n';
+
+      if (lineStart && (input.startsWith('```', i) || input.startsWith('~~~', i))) {
+        const delimiter = input.startsWith('```', i) ? '```' : '~~~';
+        if (!inFencedCodeBlock) {
+          inFencedCodeBlock = true;
+          fencedDelimiter = delimiter;
+        } else if (fencedDelimiter === delimiter) {
+          inFencedCodeBlock = false;
+          fencedDelimiter = null;
+        }
+        output += delimiter;
+        i += delimiter.length;
+        continue;
+      }
+
+      if (!inFencedCodeBlock && char === '`' && !isEscaped(i) && input[i + 1] !== '`') {
+        inInlineCodeSpan = !inInlineCodeSpan;
+        output += char;
+        i += 1;
+        continue;
+      }
+
+      if (inFencedCodeBlock || inInlineCodeSpan) {
+        output += char;
+        i += 1;
+        continue;
+      }
 
       if (char === '$' && !isEscaped(i)) {
         const isDisplay = input[i + 1] === '$' && !isEscaped(i + 1);
@@ -855,6 +887,7 @@
         }
 
         const escapedContent = content.replace(/\\/g, '\\\\');
+        // Preserve TeX backslashes only for math blocks outside code spans/blocks.
         output += delimiter + escapedContent + delimiter;
         i = closingIndex + delimiter.length;
         continue;
