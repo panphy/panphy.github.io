@@ -1576,6 +1576,15 @@
     const sanitizedHTML = getCleanRenderedOutputHTML()
       .replace(/&nbsp;/g, '&#160;')
       .replace(/\u00a0/g, '&#160;');
+    const svgSafeHTML = sanitizedHTML.replace(
+      /<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b([^>]*)>/gi,
+      (match, tagName, attributes) => {
+        if (match.endsWith('/>')) {
+          return match;
+        }
+        return `<${tagName}${attributes} />`;
+      }
+    );
     const isDarkMode = document.body.classList.contains('dark-mode');
     const padding = 20;
     const outputWidth = Math.max(300, renderedOutput.clientWidth);
@@ -1798,7 +1807,7 @@
       <div xmlns="http://www.w3.org/1999/xhtml">
         <style>${styleContent}</style>
         <div class="svg-export-body${isDarkMode ? ' dark-mode' : ''}">
-          ${sanitizedHTML}
+          ${svgSafeHTML}
         </div>
       </div>
     `;
