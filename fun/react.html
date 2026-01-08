@@ -160,18 +160,64 @@
         let startTime = 0;
         let timeoutId = null;
         let bestTime = null;
+        let memoryBestTime = null;
+        let storageAvailable = true;
         const BEST_TIME_KEY = 'bestTimeSeconds';
         const LEGACY_BEST_TIME_KEY = 'bestTime';
-        const savedBestTime = localStorage.getItem(BEST_TIME_KEY);
+
+        function safeGetItem(key) {
+            if (!storageAvailable) {
+                return key === BEST_TIME_KEY ? memoryBestTime : null;
+            }
+            try {
+                return localStorage.getItem(key);
+            } catch (error) {
+                storageAvailable = false;
+                return key === BEST_TIME_KEY ? memoryBestTime : null;
+            }
+        }
+
+        function safeSetItem(key, value) {
+            if (!storageAvailable) {
+                if (key === BEST_TIME_KEY) {
+                    memoryBestTime = String(value);
+                }
+                return false;
+            }
+            try {
+                localStorage.setItem(key, value);
+                return true;
+            } catch (error) {
+                storageAvailable = false;
+                if (key === BEST_TIME_KEY) {
+                    memoryBestTime = String(value);
+                }
+                return false;
+            }
+        }
+
+        function safeRemoveItem(key) {
+            if (!storageAvailable) {
+                return;
+            }
+            try {
+                localStorage.removeItem(key);
+            } catch (error) {
+                storageAvailable = false;
+            }
+        }
+
+        const savedBestTime = safeGetItem(BEST_TIME_KEY);
         if (savedBestTime !== null) {
             bestTime = Number(savedBestTime);
             if (!Number.isNaN(bestTime)) {
                 bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
+                memoryBestTime = String(bestTime);
             } else {
                 bestTime = null;
             }
         } else {
-            const legacyBestTime = localStorage.getItem(LEGACY_BEST_TIME_KEY);
+            const legacyBestTime = safeGetItem(LEGACY_BEST_TIME_KEY);
             if (legacyBestTime !== null) {
                 bestTime = Number(legacyBestTime);
                 if (!Number.isNaN(bestTime)) {
@@ -179,9 +225,10 @@
                         bestTime = bestTime / 1000;
                     }
                     bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
-                    localStorage.setItem(BEST_TIME_KEY, bestTime);
+                    safeSetItem(BEST_TIME_KEY, bestTime);
+                    memoryBestTime = String(bestTime);
                 }
-                localStorage.removeItem(LEGACY_BEST_TIME_KEY);
+                safeRemoveItem(LEGACY_BEST_TIME_KEY);
             }
         }
 
@@ -271,7 +318,8 @@
             if (bestTime === null || reactionTime < bestTime) {
                 bestTime = reactionTime;
                 bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
-                localStorage.setItem(BEST_TIME_KEY, bestTime);
+                safeSetItem(BEST_TIME_KEY, bestTime);
+                memoryBestTime = String(bestTime);
             }
         }
 
