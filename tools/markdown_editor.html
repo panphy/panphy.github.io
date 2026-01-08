@@ -804,6 +804,7 @@
    * - Inline TeX: $\\frac{1}{2}$ should render correctly.
    * - Escaped backslashes: $\\\\$ should remain as a literal double backslash.
    * - Currency: $5/day should stay as plain text.
+   * - Currency punctuation: $5-month and $5 per day should stay as plain text.
    * - Literal dollar: \\$ should stay as plain text.
    *
    * @param {string} input - The raw Markdown input.
@@ -817,7 +818,24 @@
       }
       return backslashCount % 2 === 1;
     };
-    const isCurrencyLike = content => /^\d/.test(content) && /\s/.test(content);
+    const isCurrencyLike = content => {
+      const trimmed = content.trim();
+      if (!/^\d/.test(trimmed)) {
+        return false;
+      }
+
+      const currencyAbbreviation = /\b(?:aud|brl|cad|chf|cny|dkk|eur|gbp|hkd|inr|jpy|krw|mxn|nok|sek|sgd|usd|zar)\b/i;
+
+      if (currencyAbbreviation.test(trimmed)) {
+        return true;
+      }
+
+      if (/^\d+(?:[.,]\d+)?\s+[A-Za-z]/.test(trimmed)) {
+        return true;
+      }
+
+      return /^\d+(?:[.,]\d+)?\s*[\/-]\s*[A-Za-z]/.test(trimmed);
+    };
 
     let output = '';
     let i = 0;
@@ -899,6 +917,30 @@
 
     return output;
   }
+
+  function runPreprocessMarkdownTests() {
+    const cases = [
+      { input: '$5/day', expected: '$5/day', label: 'currency slash' },
+      { input: '$5-month', expected: '$5-month', label: 'currency hyphen' },
+      { input: '$5 per day', expected: '$5 per day', label: 'currency spaced' },
+      { input: '$\\frac{1}{2}$', expected: '$\\\\frac{1}{2}$', label: 'inline fraction' },
+      {
+        input: '$\\begin{matrix}a&b\\\\c&d\\end{matrix}$',
+        expected: '$\\\\begin{matrix}a&b\\\\\\\\c&d\\\\end{matrix}$',
+        label: 'matrix commands'
+      }
+    ];
+
+    cases.forEach(({ input, expected, label }) => {
+      const actual = preprocessMarkdown(input);
+      console.assert(
+        actual === expected,
+        `preprocessMarkdown test failed (${label}): expected "${expected}", got "${actual}"`
+      );
+    });
+  }
+
+  runPreprocessMarkdownTests();
 
   function buildLineBlocks(text) {
     const tokens = marked.lexer(text);
