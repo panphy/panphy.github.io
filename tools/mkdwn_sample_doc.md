@@ -171,9 +171,9 @@ $$
 <div class="page-break"></div>
 
 **3.2 Line Break**
-- Can you find the line breaks I made with <code>\<br\></code> in this doc?
+- Can you find the line breaks I made with <code>\<br\/></code> in this doc?
 
-<br />
+<br/>
 
 **3.3 Inserting Pictures** (and their alignment)
 - Let's insert a picture below...
