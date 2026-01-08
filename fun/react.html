@@ -47,7 +47,7 @@
 
         #game-container:focus-visible {
             outline: none;
-            box-shadow: 0 0 0 4px #ffffff inset, 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
         /* Text Elements */
@@ -266,7 +266,10 @@
         // --- Event Listeners ---
 
         // 1. Pointer input on the container
-        container.addEventListener('pointerdown', handleInput);
+        container.addEventListener('pointerdown', (event) => {
+            container.focus();
+            handleInput(event);
+        });
 
         // 2. Keyboard input on the container
         container.addEventListener('keydown', (e) => {
@@ -274,6 +277,18 @@
                 if (e.repeat) return;
                 handleInput(e);
             }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'Enter') {
+                if (e.repeat) return;
+                container.focus();
+                handleInput(e);
+            }
+        });
+
+        window.addEventListener('load', () => {
+            container.focus();
         });
 
     </script>
