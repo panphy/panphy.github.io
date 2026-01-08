@@ -5,7 +5,7 @@ This lightweight and user-friendly app is designed to help you easily create sim
 
 With integrated LaTeX support, you can effortlessly include professional-looking math equations and symbols, making it an ideal tool for students and educators. Its clean and intuitive interface lets you concentrate on your writing without distractions.
 
-<br>
+<br />
 
 ---
 
@@ -173,13 +173,13 @@ $$
 **3.2 Line Break**
 - Can you find the line breaks I made with <code>\<br\></code> in this doc?
 
-<br>
+<br />
 
 **3.3 Inserting Pictures** (and their alignment)
 - Let's insert a picture below...
 
 <p align="center">
-    <img src="https://panphy.github.io/tools/mkdwn_sample_pic.webp" width="250" alt="Made with ChatGPT">
+    <img src="https://panphy.github.io/tools/mkdwn_sample_pic.webp" width="250" alt="Made with ChatGPT" />
 </p>
 
 <p align="center">
