@@ -773,6 +773,7 @@
   const scrollSyncToggle = document.getElementById('scrollSyncToggle');
   const highlightStyle = document.getElementById('highlightStyle');
   const draftStorageKey = 'markdownEditorDraft';
+  const scrollSyncStorageKey = 'markdownScrollSync';
   let isLinkScrollEnabled = false;
 
   /**
@@ -1814,6 +1815,15 @@
   }
 
   /**
+   * Initialize scroll sync toggle based on saved preference.
+   */
+  function initializeScrollSyncToggle() {
+    const savedScrollSync = localStorage.getItem(scrollSyncStorageKey);
+    isLinkScrollEnabled = savedScrollSync === 'true';
+    scrollSyncToggle.checked = isLinkScrollEnabled;
+  }
+
+  /**
    * Toggle between dark and light themes and save the preference.
    */
   function toggleTheme() {
@@ -1863,6 +1873,7 @@
 
   // Initialize theme and render content on load
   initializeTheme();
+  initializeScrollSyncToggle();
   restoreDraft();
   renderContent();
 
@@ -1893,6 +1904,7 @@
   themeToggleButton.addEventListener('click', toggleTheme);
   scrollSyncToggle.addEventListener('change', event => {
     isLinkScrollEnabled = event.target.checked;
+    localStorage.setItem(scrollSyncStorageKey, isLinkScrollEnabled);
     if (isLinkScrollEnabled) {
       updateHighlightedBlockFromCaret({ forceScroll: true });
     }
