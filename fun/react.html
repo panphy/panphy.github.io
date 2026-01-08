@@ -160,16 +160,28 @@
         let startTime = 0;
         let timeoutId = null;
         let bestTime = null;
-        const savedBestTime = localStorage.getItem('bestTime');
+        const BEST_TIME_KEY = 'bestTimeSeconds';
+        const LEGACY_BEST_TIME_KEY = 'bestTime';
+        const savedBestTime = localStorage.getItem(BEST_TIME_KEY);
         if (savedBestTime !== null) {
             bestTime = Number(savedBestTime);
             if (!Number.isNaN(bestTime)) {
-                if (bestTime > 10) {
-                    bestTime = bestTime / 1000;
-                }
                 bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
             } else {
                 bestTime = null;
+            }
+        } else {
+            const legacyBestTime = localStorage.getItem(LEGACY_BEST_TIME_KEY);
+            if (legacyBestTime !== null) {
+                bestTime = Number(legacyBestTime);
+                if (!Number.isNaN(bestTime)) {
+                    if (bestTime > 10) {
+                        bestTime = bestTime / 1000;
+                    }
+                    bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
+                    localStorage.setItem(BEST_TIME_KEY, bestTime);
+                }
+                localStorage.removeItem(LEGACY_BEST_TIME_KEY);
             }
         }
 
@@ -259,7 +271,7 @@
             if (bestTime === null || reactionTime < bestTime) {
                 bestTime = reactionTime;
                 bestTimeDisplay.textContent = bestTime.toFixed(3) + " s";
-                localStorage.setItem('bestTime', bestTime);
+                localStorage.setItem(BEST_TIME_KEY, bestTime);
             }
         }
 
