@@ -567,12 +567,10 @@
     if (!e.target.files || !e.target.files[0]) {
       return;
     }
+    resetAllState();
     const reader = new FileReader();
     reader.onload = function (event) {
       image.onload = function () {
-        // Now that the image is loaded, we reset the state:
-        resetAllState();
-
         const maxSize = 800;
         let newWidth = image.width;
         let newHeight = image.height;
