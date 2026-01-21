@@ -690,7 +690,7 @@
   });
 
   document.getElementById('resetButton').addEventListener('click', function () {
-    resetAllState(true);
+    resetDigitizedData();
   });
 
   document.getElementById('undoButton').addEventListener('click', function () {
@@ -939,6 +939,21 @@
       btnReset.disabled = false;
       exportButton.disabled = true;
     }
+  }
+
+  function resetDigitizedData() {
+    digitizedPoints = [];
+    actionHistory = actionHistory.filter(action => action.type !== "digitized");
+    redoHistory = [];
+    updateDataTable();
+    redrawCanvas();
+    updateMagnifierVisibility();
+    setDefaultMagnifierPosition();
+    btnDigitize.disabled = !(calibrationX.length === 2 && calibrationY.length === 2);
+    btnUndo.disabled = actionHistory.length === 0;
+    btnRedo.disabled = true;
+    exportButton.disabled = true;
+    updateStatus("Data cleared. Calibration preserved. Ready to digitize.");
   }
 
   window.addEventListener("load", function () {
