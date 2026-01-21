@@ -572,6 +572,11 @@
     statusDiv.textContent = message;
   }
 
+  function updateUndoRedoButtons() {
+    btnUndo.disabled = actionHistory.length === 0 && !activeCalibration;
+    btnRedo.disabled = redoHistory.length === 0;
+  }
+
   document.getElementById('imageLoader').addEventListener('change', handleImage, false);
 
   function handleImage(e) {
@@ -607,8 +612,7 @@
 
         btnCalibrate.disabled = false;
         btnDigitize.disabled = true;
-        btnUndo.disabled = false;
-        btnRedo.disabled = false;
+        updateUndoRedoButtons();
         btnRecalibrate.disabled = false;
         btnReset.disabled = false;
       };
@@ -737,6 +741,7 @@
           calibrationX.push(point);
           actionHistory.push({ type: "calibrationX", point: point });
           redoHistory = [];
+          updateUndoRedoButtons();
           updateStatus("Saved X point " + calibrationX.length + " of 2.");
           if (calibrationPhase === "x1") {
             calibrationPhase = "x2";
@@ -750,6 +755,7 @@
           calibrationY.push(point);
           actionHistory.push({ type: "calibrationY", point: point });
           redoHistory = [];
+          updateUndoRedoButtons();
           updateStatus("Saved Y point " + calibrationY.length + " of 2.");
           if (calibrationPhase === "y1") {
             calibrationPhase = "y2";
@@ -786,6 +792,7 @@
       digitizedPoints.push({ pixelX: x, pixelY: y, dataX: dataX, dataY: dataY });
       actionHistory.push({ type: "digitized", point: { pixelX: x, pixelY: y, dataX: dataX, dataY: dataY } });
       redoHistory = [];
+      updateUndoRedoButtons();
       updateStatus("Digitized point (" + dataX.toFixed(4) + ", " + dataY.toFixed(4) + "). Total: " + digitizedPoints.length);
       updateDataTable();
       redrawCanvas();
@@ -846,6 +853,7 @@
     if (activeCalibration) {
       activeCalibration = null;
       redrawCanvas();
+      updateUndoRedoButtons();
       updateStatus("Cleared active calibration marker.");
       return;
     }
@@ -865,6 +873,7 @@
       updateDataTable();
     }
     redrawCanvas();
+    updateUndoRedoButtons();
     updateStatus("Undid action: " + lastAction.type);
   }
 
@@ -885,6 +894,7 @@
       updateDataTable();
     }
     redrawCanvas();
+    updateUndoRedoButtons();
     updateStatus("Redid action: " + action.type);
   }
 
@@ -924,21 +934,18 @@
       canvas.style.display = "none";
       btnCalibrate.disabled = true;
       btnDigitize.disabled = true;
-      btnUndo.disabled = true;
-      btnRedo.disabled = true;
       btnRecalibrate.disabled = true;
       btnReset.disabled = true;
       exportButton.disabled = true;
       image.src = "";
     } else {
       btnDigitize.disabled = true;
-      btnUndo.disabled = false;
-      btnRedo.disabled = false;
       btnRecalibrate.disabled = false;
       btnCalibrate.disabled = false;
       btnReset.disabled = false;
       exportButton.disabled = true;
     }
+    updateUndoRedoButtons();
   }
 
   function resetDigitizedData() {
@@ -950,8 +957,7 @@
     updateMagnifierVisibility();
     setDefaultMagnifierPosition();
     btnDigitize.disabled = !(calibrationX.length === 2 && calibrationY.length === 2);
-    btnUndo.disabled = actionHistory.length === 0;
-    btnRedo.disabled = true;
+    updateUndoRedoButtons();
     exportButton.disabled = true;
     updateStatus("Data cleared. Calibration preserved. Ready to digitize.");
   }
