@@ -22,6 +22,9 @@
       --redo-bg: #6c757d;
       --redo-text: #ffffff;
 
+      --recalibrate-bg: #007bff;
+      --recalibrate-text: #ffffff;
+
       --reset-bg: #dc3545;
       --reset-text: #ffffff;
 
@@ -72,6 +75,11 @@
     .btn-redo {
       background-color: var(--redo-bg);
       color: var(--redo-text);
+    }
+
+    .btn-recalibrate {
+      background-color: var(--recalibrate-bg);
+      color: var(--recalibrate-text);
     }
 
     .btn-reset {
@@ -321,7 +329,8 @@
             <button id="digitizeButton" class="btn btn-digitize" disabled>Digitize Points</button>
             <button id="undoButton" class="btn btn-undo" disabled>Undo</button>
             <button id="redoButton" class="btn btn-redo" disabled>Redo</button>
-            <button id="resetButton" class="btn btn-reset" disabled>Reset</button>
+            <button id="recalibrateButton" class="btn btn-recalibrate" disabled>Recalibrate Axes</button>
+            <button id="resetButton" class="btn btn-reset" disabled>Reset All Data</button>
           </div>
         </div>
         <div id="status"></div>
@@ -400,6 +409,7 @@
     btnDigitize = document.getElementById('digitizeButton'),
     btnUndo = document.getElementById('undoButton'),
     btnRedo = document.getElementById('redoButton'),
+    btnRecalibrate = document.getElementById('recalibrateButton'),
     btnReset = document.getElementById('resetButton'),
     exportButton = document.getElementById('exportButton');
 
@@ -525,6 +535,28 @@
     exportButton.disabled = digitizedPoints.length === 0;
   }
 
+  function updateDigitizedPointsFromCalibration() {
+    if (slopeX === null || slopeY === null) {
+      return;
+    }
+    digitizedPoints = digitizedPoints.map(pt => {
+      let dataX;
+      let dataY;
+      if (xAxisType === "log") {
+        dataX = Math.pow(10, slopeX * pt.pixelX + interceptX);
+      } else {
+        dataX = slopeX * pt.pixelX + interceptX;
+      }
+      if (yAxisType === "log") {
+        dataY = Math.pow(10, slopeY * pt.pixelY + interceptY);
+      } else {
+        dataY = slopeY * pt.pixelY + interceptY;
+      }
+      return { ...pt, dataX, dataY };
+    });
+    updateDataTable();
+  }
+
   function updateStatus(message) {
     statusDiv.textContent = message;
   }
@@ -539,7 +571,7 @@
     reader.onload = function (event) {
       image.onload = function () {
         // Now that the image is loaded, we reset the state:
-        resetAll();
+        resetAllState();
 
         const maxSize = 800;
         let newWidth = image.width;
@@ -560,6 +592,7 @@
         btnDigitize.disabled = true;
         btnUndo.disabled = false;
         btnRedo.disabled = false;
+        btnRecalibrate.disabled = false;
         btnReset.disabled = false;
       };
       image.src = event.target.result;
@@ -598,17 +631,31 @@
     };
   }
 
+  function startCalibration() {
+    calibrationX = [];
+    calibrationY = [];
+    slopeX = interceptX = null;
+    slopeY = interceptY = null;
+    calibrationPhase = "";
+    updateStatus("Starting calibration.");
+    showPlotTypeModal();
+  }
+
   document.getElementById('calibrateAxesButton').addEventListener('click', function () {
     if (calibrationX.length === 2 && calibrationY.length === 2) {
       if (!confirm("Calibration already done. Recalibrate?")) {
         updateStatus("Using previous calibration.");
         return;
-      } else {
-        calibrationX = [];
-        calibrationY = [];
       }
     }
-    showPlotTypeModal();
+    startCalibration();
+  });
+
+  btnRecalibrate.addEventListener('click', function () {
+    if (!image.src) {
+      return;
+    }
+    startCalibration();
   });
 
   document.getElementById('digitizeButton').addEventListener('click', function () {
@@ -622,7 +669,7 @@
   });
 
   document.getElementById('resetButton').addEventListener('click', function () {
-    resetAll();
+    resetAllState(true);
   });
 
   document.getElementById('undoButton').addEventListener('click', function () {
@@ -688,9 +735,10 @@
             updateStatus("Calibration: Click second point for y axis (y₂).");
           } else {
             updateCalibrationParameters();
-            mode = "none";
+            updateDigitizedPointsFromCalibration();
+            mode = "digitize";
             calibrationPhase = "";
-            updateStatus("Calibration complete.");
+            updateStatus("Calibration complete. Digitize Mode: Click points on the graph to record data.");
             btnDigitize.disabled = false;
             updateMagnifierVisibility();
           }
@@ -786,9 +834,11 @@
     if (lastAction.type === "calibrationX") {
       calibrationX.pop();
       updateCalibrationParameters();
+      updateDigitizedPointsFromCalibration();
     } else if (lastAction.type === "calibrationY") {
       calibrationY.pop();
       updateCalibrationParameters();
+      updateDigitizedPointsFromCalibration();
     } else if (lastAction.type === "digitized") {
       digitizedPoints.pop();
       updateDataTable();
@@ -804,9 +854,11 @@
     if (action.type === "calibrationX") {
       calibrationX.push(action.point);
       updateCalibrationParameters();
+      updateDigitizedPointsFromCalibration();
     } else if (action.type === "calibrationY") {
       calibrationY.push(action.point);
       updateCalibrationParameters();
+      updateDigitizedPointsFromCalibration();
     } else if (action.type === "digitized") {
       digitizedPoints.push(action.point);
       updateDataTable();
@@ -830,7 +882,7 @@
     document.body.removeChild(a);
   }
 
-  function resetAll() {
+  function resetAllState(keepImage = false) {
     mode = "none";
     calibrationPhase = "";
     calibrationX = [];
@@ -841,23 +893,35 @@
     actionHistory = [];
     redoHistory = [];
     activeCalibration = null;
-    updateStatus("Upload a graph and start calibration.");
+    updateStatus(keepImage ? "Data cleared. Ready to recalibrate." : "Upload a graph and start calibration.");
     updateDataTable();
     redrawCanvas();
     updateMagnifierVisibility();
     setDefaultMagnifierPosition();
-    document.getElementById('imageLoader').value = "";
-    canvas.style.display = "none";
-    btnCalibrate.disabled = true;
-    btnDigitize.disabled = true;
-    btnUndo.disabled = true;
-    btnRedo.disabled = true;
-    btnReset.disabled = true;
-    exportButton.disabled = true;
+    if (!keepImage) {
+      document.getElementById('imageLoader').value = "";
+      canvas.style.display = "none";
+      btnCalibrate.disabled = true;
+      btnDigitize.disabled = true;
+      btnUndo.disabled = true;
+      btnRedo.disabled = true;
+      btnRecalibrate.disabled = true;
+      btnReset.disabled = true;
+      exportButton.disabled = true;
+      image.src = "";
+    } else {
+      btnDigitize.disabled = true;
+      btnUndo.disabled = false;
+      btnRedo.disabled = false;
+      btnRecalibrate.disabled = false;
+      btnCalibrate.disabled = false;
+      btnReset.disabled = false;
+      exportButton.disabled = true;
+    }
   }
 
   window.addEventListener("load", function () {
-    resetAll();
+    resetAllState();
   });
 </script>
 
