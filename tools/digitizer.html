@@ -246,7 +246,20 @@
     }
 
     #imageLoader {
-      display: none;
+      /*
+        Hide the native file input but keep it "clickable" via the label.
+        Using display:none can break label-triggered file dialogs on some browsers.
+      */
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+      opacity: 0;
     }
 
     #buttonRow {
@@ -562,11 +575,19 @@
   document.getElementById('imageLoader').addEventListener('change', handleImage, false);
 
   function handleImage(e) {
-    if (!e.target.files || !e.target.files[0]) {
-      return;
-    }
+    const file = (e.target.files && e.target.files[0]) ? e.target.files[0] : null;
+    if (!file) return;
+
+    // IMPORTANT:
+    // resetAllState() clears the <input type="file"> value.
+    // If we read from e.target.files[0] AFTER resetting, it can become undefined on some browsers.
     resetAllState();
+
     const reader = new FileReader();
+    reader.onerror = function () {
+      updateStatus("Failed to read the selected file. Please try a different image.");
+      console.error("FileReader error:", reader.error);
+    };
     reader.onload = function (event) {
       image.onload = function () {
         const maxSize = 800;
@@ -577,8 +598,8 @@
           newWidth *= scale;
           newHeight *= scale;
         }
-        canvas.width = newWidth;
-        canvas.height = newHeight;
+        canvas.width = Math.round(newWidth);
+        canvas.height = Math.round(newHeight);
         canvas.style.display = "block";  // Make sure the canvas is visible
 
         redrawCanvas();
@@ -591,9 +612,13 @@
         btnRecalibrate.disabled = false;
         btnReset.disabled = false;
       };
+      image.onerror = function () {
+        updateStatus("Could not load that image. Please try a PNG/JPG screenshot of the graph.");
+        console.error("Image decode error");
+      };
       image.src = event.target.result;
     };
-    reader.readAsDataURL(e.target.files[0]);
+    reader.readAsDataURL(file);
   }
 
   // Show modal with a list of plot types (using radio buttons)
