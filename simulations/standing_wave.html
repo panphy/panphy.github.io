@@ -625,7 +625,7 @@
             if (targetTag === "input" || targetTag === "select" || targetTag === "textarea") {
                 return;
             }
-            if (event.key === " " || event.key === "Spacebar") {
+            if (event.code === "Space" || event.key === " " || event.key === "Spacebar") {
                 event.preventDefault();
                 isPaused = !isPaused;
             }
