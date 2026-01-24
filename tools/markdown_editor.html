@@ -71,6 +71,7 @@
       --table-border-color: rgba(45, 52, 54, 0.4);
       --table-header-background: #f4f6f8;
       --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
+      --base-font-size: 16px;
     }
 
     body.dark-mode {
@@ -317,6 +318,39 @@
       font-weight: 600;
     }
 
+    .font-size-selector {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background-color: var(--button-background);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      font-size: 0.8rem;
+      color: var(--text-color);
+    }
+
+    .font-size-selector label {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .font-size-selector select {
+      border: none;
+      background: transparent;
+      font-size: 0.8rem;
+      color: var(--text-color);
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+
+    body.dark-mode .font-size-selector {
+      background-color: var(--button-background);
+      border-color: transparent;
+    }
+
     /* ---------------------------------------------------------------------- */
     /* Markdown input textarea                                                */
     /* ---------------------------------------------------------------------- */
@@ -326,7 +360,7 @@
       padding: 18px;
       border: none;
       resize: none;
-      font-size: 14px;
+      font-size: var(--base-font-size);
       line-height: 1.5;
       box-sizing: border-box;
       overflow-y: auto;
@@ -340,7 +374,7 @@
     #renderedOutput {
       flex: 1;
       padding: 18px;
-      font-size: 14px;
+      font-size: var(--base-font-size);
       line-height: 1.5;
       box-sizing: border-box;
       overflow-y: auto;
@@ -521,6 +555,7 @@
         height: auto !important;
         overflow: visible !important;
         margin: 0 !important;
+        font-size: var(--base-font-size) !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -737,6 +772,15 @@
           <span class="toggle-slider" aria-hidden="true"></span>
           <span class="toggle-label">Link Highlight</span>
         </label>
+        <div class="font-size-selector">
+          <label for="fontSizeSelect">Font Size</label>
+          <select id="fontSizeSelect">
+            <option value="14px">Small</option>
+            <option value="16px">Medium</option>
+            <option value="18px">Large</option>
+            <option value="20px">XL</option>
+          </select>
+        </div>
       </div>
       <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
     </div>
@@ -804,10 +848,12 @@
   const themeToggleButton = document.getElementById('themeToggleButton');
   const scrollSyncToggle = document.getElementById('scrollSyncToggle');
   const highlightSyncToggle = document.getElementById('highlightSyncToggle');
+  const fontSizeSelect = document.getElementById('fontSizeSelect');
   const highlightStyle = document.getElementById('highlightStyle');
   const draftStorageKey = 'markdownEditorDraft';
   const scrollSyncStorageKey = 'markdownScrollSync';
   const highlightSyncStorageKey = 'markdownHighlightSync';
+  const fontSizeStorageKey = 'markdownFontSize';
   let isLinkScrollEnabled = false;
   let isHighlightSyncEnabled = true;
 
@@ -1346,6 +1392,7 @@
     if (!fileName) return;
 
     const sanitizedHTML = getCleanRenderedOutputHTML();
+    const currentFontSize = getCurrentFontSize();
     const doc = document.implementation.createHTMLDocument('Exported Document');
     const head = doc.head;
     const body = doc.body;
@@ -1392,6 +1439,7 @@
         body {
           font-family: Helvetica, sans-serif;
           line-height: 1.5;
+          font-size: ${currentFontSize};
           margin: 20px;
           background-color: var(--background-color);
           color: var(--text-color);
@@ -1627,6 +1675,7 @@
         return `<${tagName}${attributes} />`;
       }
     );
+    const currentFontSize = getCurrentFontSize();
     const isDarkMode = document.body.classList.contains('dark-mode');
     const padding = 20;
     const outputWidth = Math.max(300, renderedOutput.clientWidth);
@@ -1648,6 +1697,7 @@
         --table-header-background: #f4f4f4;
         font-family: Helvetica, sans-serif;
         line-height: 1.5;
+        font-size: ${currentFontSize};
         background-color: var(--background-color);
         color: var(--text-color);
         padding: ${padding}px;
@@ -1937,6 +1987,27 @@
     highlightSyncToggle.checked = isHighlightSyncEnabled;
   }
 
+  function getCurrentFontSize() {
+    const currentValue = getComputedStyle(document.documentElement)
+      .getPropertyValue('--base-font-size')
+      .trim();
+    return currentValue || '16px';
+  }
+
+  function applyFontSize(value) {
+    document.documentElement.style.setProperty('--base-font-size', value);
+    localStorage.setItem(fontSizeStorageKey, value);
+  }
+
+  function initializeFontSize() {
+    const savedFontSize = localStorage.getItem(fontSizeStorageKey);
+    const initialFontSize = savedFontSize || getCurrentFontSize();
+    applyFontSize(initialFontSize);
+    if (fontSizeSelect) {
+      fontSizeSelect.value = initialFontSize;
+    }
+  }
+
   /**
    * Toggle between dark and light themes and save the preference.
    */
@@ -1989,6 +2060,7 @@
   initializeTheme();
   initializeScrollSyncToggle();
   initializeHighlightSyncToggle();
+  initializeFontSize();
   restoreDraft();
   renderContent();
 
@@ -2033,6 +2105,11 @@
       updateHighlightedBlockFromCaret();
     }
   });
+  if (fontSizeSelect) {
+    fontSizeSelect.addEventListener('change', event => {
+      applyFontSize(event.target.value);
+    });
+  }
 </script>
 
 </html>
