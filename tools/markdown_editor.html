@@ -236,11 +236,29 @@
       flex-wrap: wrap;
     }
 
+    .buttonContainer.floating-toolbar {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      margin: 8px 12px;
+      padding: 8px 12px;
+      background: var(--pane-heading-background);
+      border: 1px solid var(--border-color);
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+    }
+
     .buttonContainer.output-controls {
       width: 100%;
       justify-content: space-between;
       flex-wrap: nowrap;
       padding: 0 12px;
+    }
+
+    .buttonContainer.floating-toolbar.output-controls {
+      width: calc(100% - 24px);
+      padding: 8px 12px;
     }
 
     .buttonContainer.output-controls .output-actions {
@@ -722,6 +740,10 @@
         justify-content: center;
       }
 
+      .buttonContainer.floating-toolbar {
+        border-radius: 24px;
+      }
+
       .buttonContainer.output-controls {
         flex-wrap: wrap;
       }
@@ -774,7 +796,7 @@
       </div>
 
       <!-- Buttons and the markdown input textarea below -->
-      <div class="buttonContainer">
+      <div class="buttonContainer floating-toolbar">
         <button id="loadFileButton">Open .md File</button>
         <button id="saveMDButton">Save .md</button>
         <button id="clearButton">Clear Input</button>
@@ -819,7 +841,7 @@
       </div>
 
       <!-- Buttons and rendered output below -->
-      <div class="buttonContainer output-controls no-print">
+      <div class="buttonContainer floating-toolbar output-controls no-print">
         <div class="output-actions">
           <button id="printButton" title="Prints in light mode">Print to PDF</button>
           <button id="exportSVGButton" title="Exports in current theme">Export to SVG</button>
