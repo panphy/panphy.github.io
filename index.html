@@ -2,529 +2,515 @@
 <html lang="en" data-theme="light">
 
 <head>
+    <link rel="manifest" href="/manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => console.log('Service Worker registered!', reg))
+                    .catch((err) => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PanPhy Projects</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-	<link rel="manifest" href="/manifest.json">
+    <style>
+        /* CSS Variables */
+        :root {
+            /* Light Theme */
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+            
+            --brand-primary: #6c5ce7; /* Indigo */
+            --brand-secondary: #a29bfe;
+            --brand-accent: #00cec9; /* Teal */
+            
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.5);
+            
+            --card-bg: #ffffff;
+            --card-border: transparent;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
+            
+            --btn-bg: #2d3436;
+            --btn-text: #fff;
+        }
 
-	<script>
-		if ('serviceWorker' in navigator) {
-			window.addEventListener('load', () => {
-				navigator.serviceWorker.register('/sw.js')
-					.then((reg) => console.log('Service Worker registered!', reg))
-					.catch((err) => console.log('Service Worker registration failed', err));
-			});
-		}
-	</script>
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg-color: #0f1014;
+            --bg-pattern: #181a20;
+            --text-main: #dfe6e9;
+            --text-secondary: #b2bec3;
+            
+            --brand-primary: #a29bfe;
+            --brand-secondary: #6c5ce7;
+            --brand-accent: #81ecec;
+            
+            --nav-bg: rgba(22, 24, 29, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.05);
+            
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.2);
+            
+            --btn-bg: #6c5ce7;
+            --btn-text: #fff;
+        }
 
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>PanPhy Projects</title>
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-	<link rel="icon" type="image/png" href="/favicon.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<style>
-		/* CSS Variables for Light and Dark Themes */
-		:root {
-			--background-color: #f4f4f9;
-			--text-color: #333;
-			--header-bg: #34495e;
-			--header-text: #fff;
-			--nav-bg: #2c3e50;
-			--nav-text: #fff;
-			--nav-hover: #ffcc00;
-			--section-title: #2c3e50;
-			--section-border: #ffcc00;
-			--card-bg: #fff;
-			--card-border: #ddd;
-			--card-shadow: rgba(0, 0, 0, 0.1);
-			--card-title: #34495e;
-			--card-text: #666;
-			--card-link-bg: #ffcc00;
-			--card-link-hover: #e6b800;
-			--footer-bg: #2c3e50;
-			--footer-text: #fff;
-			--footer-link: #ffcc00;
-			--button-bg: #474747;
-			--button-hover-bg: #e74c3c;
-			--button-bg-checked: #1abc9c;
-			--button-hover-bg-checked: #16a085;
-			--button-color: #fff;
-			--button-border: none;
-			--button-border-radius: 50%;
-			--button-size: 40px;
-			--button-font-size: 1.2rem;
-			--button-transition: background 0.3s, transform 0.3s;
-		}
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
 
-		[data-theme="dark"] {
-			--background-color: #121212;
-			--text-color: #e0e0e0;
-			--header-bg: #1f1f1f;
-			--header-text: #e0e0e0;
-			--nav-bg: #2b2b2b;
-			--nav-text: #e0e0e0;
-			--nav-hover: #1abc9c;
-			--section-title: #1abc9c;
-			--section-border: #1abc9c;
-			--card-bg: #1e1e1e;
-			--card-border: #333;
-			--card-shadow: rgba(0, 0, 0, 0.7);
-			--card-title: #1abc9c;
-			--card-text: #b0b0b0;
-			--card-link-bg: #e74c3c;
-			--card-link-hover: #c0392b;
-			--footer-bg: #1f1f1f;
-			--footer-text: #e0e0e0;
-			--footer-link: #1abc9c;
-			--button-bg: #555;
-			--button-hover-bg: #444;
-			--button-bg-checked: #1abc9c;
-			--button-hover-bg-checked: #16a085;
-			--button-color: #fff;
-		}
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px; /* Dot pattern */
+            color: var(--text-main);
+            line-height: 1.6;
+        }
 
-		body {
-			font-family: 'Roboto', sans-serif;
-			margin: 0;
-			padding: 0;
-			background: var(--background-color);
-			color: var(--text-color);
-			transition: background 0.3s, color 0.3s;
-		}
+        /* Hero Header */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+        }
 
-		header {
-			position: relative;
-			/* needed for absolute positioning of the center section */
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			background-color: var(--header-bg);
-			color: var(--header-text);
-			padding: 1.5rem;
-			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-			margin: -0.5rem 0;
-		}
+        .logo {
+            height: 80px;
+            width: auto;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
 
-		/* Left Section (Logo) */
-		.header-left {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			z-index: 2;
-		}
+        header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-		.logo {
-			height: 60px;
-			width: auto;
-		}
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-top: 1rem;
+        }
 
-		/* Right Section (Theme Toggle) */
-		.header-right {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			z-index: 2;
-		}
+        /* Floating Navigation */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.5rem 0.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--nav-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: max-content;
+            max-width: 90%;
+        }
 
-		/* Center Section (Title and Subtitle) - Absolute Centering */
-		.header-center {
-			position: absolute;
-			left: 50%;
-			transform: translateX(-50%);
-			text-align: center;
-			z-index: 1;
-			padding: 0 70px;
-			/* Adjust to avoid overlapping with left/right items */
-		}
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
 
-		.header-center h1 {
-			margin: 0;
-			font-size: 2.4rem;
-		}
+        nav a:hover {
+            background-color: var(--brand-primary);
+            color: #fff;
+        }
 
-		.header-center p {
-			margin: 0.5rem 0 0 0;
-			font-size: 1.1rem;
-		}
+        /* Theme Toggle Inside Nav */
+        .theme-toggle button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+        }
 
-		footer {
-			background: var(--footer-bg);
-			color: var(--footer-text);
-			text-align: center;
-			padding: 1.5rem 0;
-			margin-top: 3rem;
-			border-top: 1px solid var(--card-border);
-		}
+        .theme-toggle button:hover {
+            background-color: rgba(128, 128, 128, 0.2);
+            transform: rotate(15deg);
+        }
 
-		footer a {
-			color: var(--footer-link);
-			text-decoration: none;
-			transition: color 0.3s;
-		}
+        /* Sections */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto 5rem;
+            padding: 0 1.5rem;
+        }
 
-		footer a:hover {
-			color: var(--nav-hover);
-		}
+        .section h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 32px;
+            background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
+            border-radius: 4px;
+        }
 
-		/* Navigation Styling */
-		nav {
-			background-color: var(--nav-bg);
-			display: flex;
-			justify-content: center;
-			padding: 0.5rem 0;
-			position: sticky;
-			top: 0;
-			z-index: 1000;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		}
+        /* Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
 
-		nav a {
-			color: var(--nav-text);
-			text-decoration: none;
-			margin: 0 1rem;
-			font-size: 1rem;
-			font-weight: bold;
-			transition: color 0.3s;
-		}
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
 
-		nav a:hover {
-			color: var(--nav-hover);
-		}
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--brand-primary);
+        }
 
-		/* ----------------------- */
-		/* Section Styling */
-		/* ----------------------- */
-		.section {
-			max-width: 1200px;
-			margin: 2.5rem auto;
-			padding: 0 1.5rem;
-		}
+        /* Modern Card Decoration */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
 
-		.section h2 {
-			font-size: 2rem;
-			margin-bottom: 1.5rem;
-			color: var(--section-title);
-			border-bottom: 2px solid var(--section-border);
-			display: inline-block;
-			padding-bottom: 0.3rem;
-		}
+        .card:hover::before {
+            opacity: 1;
+        }
 
-		.grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-			gap: 2rem;
-		}
+        .card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            margin: 0 0 0.8rem 0;
+            color: var(--text-main);
+        }
 
-		.card {
-			display: flex;
-			flex-direction: column;
-			justify-content: space-between;
-			background: var(--card-bg);
-			border: 1px solid var(--card-border);
-			border-radius: 10px;
-			box-shadow: 0 4px 8px var(--card-shadow);
-			transition: transform 0.3s, box-shadow 0.3s;
-			height: 100%;
-		}
+        .card p {
+            font-size: 1rem;
+            margin: 0 0 1.5rem 0;
+            color: var(--text-secondary);
+            flex-grow: 1;
+        }
 
-		.card:hover {
-			transform: translateY(-7px);
-			box-shadow: 0 8px 16px var(--card-shadow);
-		}
+        .card a {
+            display: inline-block;
+            text-align: center;
+            background: transparent;
+            color: var(--brand-primary);
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 2px solid var(--brand-primary);
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
 
-		.card h3 {
-			font-size: 1.5rem;
-			margin: 1.2rem;
-			color: var(--card-title);
-		}
+        .card a:hover {
+            background: var(--brand-primary);
+            color: #fff;
+            transform: translateY(-2px);
+        }
 
-		.card p {
-			font-size: 1rem;
-			margin: 0 1.2rem 1.2rem;
-			color: var(--card-text);
-			flex-grow: 1;
-		}
+        /* About Section Enhancement */
+        #about p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            color: var(--text-secondary);
+        }
 
-		.card a {
-			display: block;
-			text-align: center;
-			background: var(--card-link-bg);
-			color: #fff;
-			text-decoration: none;
-			padding: 0.9rem;
-			font-weight: bold;
-			border-radius: 0 0 10px 10px;
-			transition: background 0.3s;
-		}
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 3rem 1.5rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--card-border);
+        }
 
-		.card a:hover {
-			background: var(--card-link-hover);
-		}
+        footer p {
+            margin-bottom: 0.5rem;
+        }
 
-		.theme-toggle button {
-			background: var(--button-bg);
-			border: var(--button-border);
-			border-radius: var(--button-border-radius);
-			width: var(--button-size);
-			height: var(--button-size);
-			font-size: var(--button-font-size);
-			color: var(--button-color);
-			cursor: pointer;
-			transition: var(--button-transition);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
+        footer a {
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
 
-		.theme-toggle button:hover {
-			background: var(--button-hover-bg);
-			transform: scale(1.1);
-		}
+        footer a:hover {
+            text-decoration: underline;
+        }
 
-		[data-theme="dark"] .theme-toggle button:hover {
-			background: var(--button-hover-bg-checked);
-		}
+        /* Responsive Tweaks */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            nav {
+                width: 90%;
+                justify-content: space-between;
+                overflow-x: auto; /* Allow scroll on very small screens */
+                white-space: nowrap;
+            }
 
-		@media (max-width: 600px) {
-			header {
-				flex-direction: column;
-				padding: 1rem;
-			}
-
-			.header-center {
-				position: static;
-				transform: none;
-				padding: 0;
-				margin-top: 1rem;
-			}
-
-			.logo {
-				height: 40px;
-			}
-
-			nav a {
-				margin: 0 0.75rem;
-				font-size: 1rem;
-			}
-
-			.section h2 {
-				font-size: 1.75rem;
-			}
-
-			.card h3 {
-				font-size: 1.3rem;
-			}
-
-			.card p {
-				font-size: 0.95rem;
-			}
-
-			.card a {
-				padding: 0.7rem;
-				font-size: 0.95rem;
-			}
-		}
-
-		/* Smooth transition for theme change */
-		* {
-			transition: background 0.3s, color 0.3s;
-		}
-	</style>
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
-	<header>
-		<div class="header-left">
-			<img src="panphy.png" alt="PanPhy Logo" class="logo">
-		</div>
-		<div class="header-center">
-			<h1>PanPhy Projects</h1>
-		</div>
-		<div class="header-right">
-			<div class="theme-toggle">
-				<button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
-			</div>
-		</div>
-	</header>
+    <nav>
+        <a href="#tools">Tools</a>
+        <a href="#simulations">Sims</a>
+        <a href="#for_teachers">Teachers</a>
+        <a href="#fun">Fun</a>
+        <a href="#about">About</a>
+        <div class="theme-toggle">
+            <button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+        </div>
+    </nav>
 
-	<nav>
-		<a href="#tools">Tools</a>
-		<a href="#simulations">Simulations</a>
-		<a href="#for_teachers">For Teachers</a>
-		<a href="#fun">For Fun</a>
-		<a href="#about">About</a>
-	</nav>
+    <header>
+        <img src="panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
+        <h1>PanPhy Projects</h1>
+        <p>Interactive Physics Tools, Simulations & Games. <br>Built with AI. Designed for Learning.</p>
+    </header>
 
-	<!-- Tools Section -->
-	<div class="section" id="tools">
-		<h2>Tools</h2>
-		<div class="grid">
-			<div class="card">
-				<h3>Markdown + LaTeX Editor</h3>
-				<p>Create beautiful documents with Markdown and LaTeX.</p>
-				<a href="/tools/markdown_editor.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Graph Plotting + Curve Fitting</h3>
-				<p>Visualize data with curve fitting tools.</p>
-				<a href="/tools/panphyplot.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Graph Digitizer</h3>
-				<p>Snap it, click it, data!</p>
-				<a href="/tools/digitizer.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Motion Tracker</h3>
-				<p>Analyze and track motion with ease.</p>
-				<a href="/tools/motion_tracker.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Sound Analyzer</h3>
-				<p>Analyze sound waves live — zoom, inspect, and export data.</p>
-				<a href="/tools/sound_analyzer.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Tone Generator</h3>
-				<p>Let's make some annoying noise with this tone generator!</p>
-				<a href="/tools/tone_generator.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Quadratic Equation Solver</h3>
-				<p>Enter a, b and c - problem solved!</p>
-				<a href="/tools/quadratic.html">Explore</a>
-			</div>
-		</div>
-	</div>
+    <div class="section" id="tools">
+        <h2>Tools</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Markdown + LaTeX</h3>
+                <p>Create beautiful scientific documents instantly.</p>
+                <a href="/tools/markdown_editor.html">Open Editor</a>
+            </div>
+            <div class="card">
+                <h3>Curve Fitting</h3>
+                <p>Visualize data and analyze trends with PanPhyPlot.</p>
+                <a href="/tools/panphyplot.html">Plot Data</a>
+            </div>
+            <div class="card">
+                <h3>Graph Digitizer</h3>
+                <p>Snap a photo of a graph and extract the raw data points.</p>
+                <a href="/tools/digitizer.html">Digitize</a>
+            </div>
+            <div class="card">
+                <h3>Motion Tracker</h3>
+                <p>Analyze video motion and track physics objects.</p>
+                <a href="/tools/motion_tracker.html">Track Motion</a>
+            </div>
+            <div class="card">
+                <h3>Sound Analyzer</h3>
+                <p>Real-time sound wave analysis, zooming, and exporting.</p>
+                <a href="/tools/sound_analyzer.html">Analyze Sound</a>
+            </div>
+            <div class="card">
+                <h3>Tone Generator</h3>
+                <p>Generate specific frequencies for physics experiments.</p>
+                <a href="/tools/tone_generator.html">Generate Tone</a>
+            </div>
+            <div class="card">
+                <h3>Quadratic Solver</h3>
+                <p>Instant solutions for ax² + bx + c = 0.</p>
+                <a href="/tools/quadratic.html">Calculate</a>
+            </div>
+        </div>
+    </div>
 
-	<!-- Simulations Section -->
-	<div class="section" id="simulations">
-		<h2>Simulations</h2>
-		<div class="grid">
-			<div class="card">
-				<h3>Wave Superposition</h3>
-				<p>Explore wave interactions and superposition in real-time simulation.</p>
-				<a href="/simulations/superposition.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Standing Wave</h3>
-				<p>Visualize standing wave with different boundary conditions.</p>
-				<a href="/simulations/standing_wave.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Lorentz Transformation</h3>
-				<p>
-					Interactive Minkowski diagram visualizing Lorentz transformations.</p>
-				<a href="/simulations/lorentz.html">Explore</a>
-			</div>
-		</div>
-	</div>
+    <div class="section" id="simulations">
+        <h2>Simulations</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Wave Superposition</h3>
+                <p>Interactive real-time simulation of wave interference.</p>
+                <a href="/simulations/superposition.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>Standing Wave</h3>
+                <p>Visualize nodes and antinodes with boundary conditions.</p>
+                <a href="/simulations/standing_wave.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>Lorentz Transform</h3>
+                <p>Minkowski diagrams for Special Relativity visualization.</p>
+                <a href="/simulations/lorentz.html">Launch Sim</a>
+            </div>
+        </div>
+    </div>
 
-	<!-- For Teachers Section -->
-	<div class="section" id="for_teachers">
-		<h2>For Teachers</h2>
-		<div class="grid">
-			<div class="card">
-				<h3>Exam Timer</h3>
-				<p>Automatically add extra time for those who need it.</p>
-				<a href="/for_teachers/timer.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>Camera Visualizer</h3>
-				<p>Snap, sketch, and save your scene.</p>
-				<a href="/for_teachers/visualizer.html">Explore</a>
-			</div>
-			<div class="card">
-				<h3>EAL Learning Companion</h3>
-				<p>AI-powered tools for supporting EAL learners.</p>
-				<a href="https://panphy-eal.streamlit.app/" target="_blank" rel="noopener noreferrer">Explore</a>
-			</div>
-		</div>
-	</div>
+    <div class="section" id="for_teachers">
+        <h2>For Teachers</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Exam Timer</h3>
+                <p>Manage exam times with automatic extra-time calculation.</p>
+                <a href="/for_teachers/timer.html">Open Timer</a>
+            </div>
+            <div class="card">
+                <h3>Camera Visualizer</h3>
+                <p>Turn your device into a document camera. Snap & sketch.</p>
+                <a href="/for_teachers/visualizer.html">Use Camera</a>
+            </div>
+            <div class="card">
+                <h3>EAL Companion</h3>
+                <p>AI-powered physics support for EAL learners.</p>
+                <a href="https://panphy-eal.streamlit.app/" target="_blank" rel="noopener noreferrer">Open App</a>
+            </div>
+        </div>
+    </div>
 
-	<!-- Fun Section -->
-	<div class="section" id="fun">
-		<h2>For Fun</h2>
-		<div class="grid">
-			<div class="card">
-				<h3>Dodge the Asteroids</h3>
-				<p>Can you survive this asteroid storm?!</p>
-				<a href="/fun/dodge.html">Play</a>
-			</div>
-			<div class="card">
-				<h3>Hit Me!</h3>
-				<p>Test your reflexes and click the moment it turns green.</p>
-				<a href="/fun/react.html">Play</a>
-			</div>
-			<div class="card">
-				<h3>ASCII Camera</h3>
-				<p>Take a selfie with ASCII characters and 8 bit colors!</p>
-				<a href="/fun/ascii_cam.html">Play</a>
-			</div>
-		</div>
-	</div>
+    <div class="section" id="fun">
+        <h2>For Fun</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Dodge Asteroids</h3>
+                <p>Survive the asteroid storm in this arcade game.</p>
+                <a href="/fun/dodge.html">Play Now</a>
+            </div>
+            <div class="card">
+                <h3>Hit Me!</h3>
+                <p>Test your reaction speeds. Click when green!</p>
+                <a href="/fun/react.html">Play Now</a>
+            </div>
+            <div class="card">
+                <h3>ASCII Camera</h3>
+                <p>See yourself in 8-bit color ASCII characters.</p>
+                <a href="/fun/ascii_cam.html">Open Camera</a>
+            </div>
+        </div>
+    </div>
 
-	<!-- About Section -->
-	<div class="section" id="about">
-		<h2>About</h2>
-		<p>
-			Welcome to PanPhy Projects. The tools, simulations, and games here are built with AI and designed to be
-			interactive, educational, and aligned with my teaching goals. While there are many great physics simulations
-			online, not all meet my needs. Additionally, with school devices locked down, installing software has become
-			a hassle. So, I decided to create my own web apps: simple, browser-based, and ready for everyone to explore
-			and enjoy.
-		</p>
-		<p>
-			Most importantly, the site is now offline-friendly (apart from EAL Learning Companion). Once you have opened it in a browser, you can keep using
-			the tools, simulations, and games even without an internet connection.
-		</p>
-	</div>
+    <div class="section" id="about">
+        <h2>About</h2>
+        <p>
+            Welcome to <strong>PanPhy Projects</strong>. The tools, simulations, and games here are designed to be
+            interactive, educational, and aligned with modern teaching goals. 
+            <br><br>
+            While there are many physics simulations online, these are built to be lightweight and accessible.
+            Most importantly, the site is <strong>offline-friendly</strong>. Once loaded, you can use the tools 
+            without an internet connection.
+        </p>
+    </div>
 
-	<footer>
-		<p>&copy; 2026 PanPhy Projects | <a href="mailto:panphyprojects@icloud.com">Contact Me</a> | <a
-				href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-		</p>
-	</footer>
+    <footer>
+        <p>&copy; 2026 PanPhy Projects</p>
+        <p>
+            <a href="mailto:panphyprojects@icloud.com">Contact Me</a> • 
+            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        </p>
+    </footer>
 
-	<script>
-		// Theme Toggle Functionality
-		const themeButton = document.getElementById('theme-button');
+    <script>
+        // Theme Toggle Functionality
+        const themeButton = document.getElementById('theme-button');
+        const DARK_THEME_KEY = "panphy-dark";
+        const LIGHT_THEME_KEY = "panphy-light";
 
-		// Use new keys for dark and light theme
-		const DARK_THEME_KEY = "panphy-dark";
-		const LIGHT_THEME_KEY = "panphy-light";
+        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+            "dark" :
+            localStorage.getItem(LIGHT_THEME_KEY) ?
+                "light" :
+                "light";
 
-		// Determine current theme based on localStorage
-		const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-			"dark" :
-			localStorage.getItem(LIGHT_THEME_KEY) ?
-				"light" :
-				"light"; // Default to light if none is set
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateButtonEmoji(currentTheme);
 
-		// Apply the saved theme on load
-		document.documentElement.setAttribute('data-theme', currentTheme);
-		updateButtonEmoji(currentTheme);
+        function updateButtonEmoji(theme) {
+            themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
 
-		// Update the button emoji based on current theme
-		function updateButtonEmoji(theme) {
-			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-		}
-
-		themeButton.addEventListener('click', function () {
-			let theme = document.documentElement.getAttribute('data-theme');
-			if (theme === 'light') {
-				document.documentElement.setAttribute('data-theme', 'dark');
-				localStorage.setItem(DARK_THEME_KEY, 'true');
-				localStorage.removeItem(LIGHT_THEME_KEY);
-				updateButtonEmoji('dark');
-			} else {
-				document.documentElement.setAttribute('data-theme', 'light');
-				localStorage.setItem(LIGHT_THEME_KEY, 'true');
-				localStorage.removeItem(DARK_THEME_KEY);
-				updateButtonEmoji('light');
-			}
-		});
-	</script>
+        themeButton.addEventListener('click', function () {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem(DARK_THEME_KEY, 'true');
+                localStorage.removeItem(LIGHT_THEME_KEY);
+                updateButtonEmoji('dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                localStorage.removeItem(DARK_THEME_KEY);
+                updateButtonEmoji('light');
+            }
+        });
+    </script>
 </body>
 
 </html>
