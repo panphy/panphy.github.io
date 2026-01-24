@@ -6,96 +6,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         /* ... [unchanged CSS from your file] ... */
+        :root {
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+            --brand-primary: #6c5ce7;
+            --brand-secondary: #a29bfe;
+            --brand-accent: #00cec9;
+            --card-bg: #ffffff;
+            --card-border: transparent;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
+            --btn-text: #ffffff;
+        }
+
         *,
         *::before,
         *::after {
-            box-sizing: border-box
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease
         }
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #2c3e50;
-            color: #ecf0f1;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-top: .5rem
+            padding: 4.5rem 1.5rem 2rem
         }
 
         a {
-            color: #ff5f1f;
+            color: var(--brand-primary);
             text-decoration: none
         }
 
         a:hover,
         a:visited {
-            color: #ff5f1f
+            color: var(--brand-primary)
         }
 
         .logo-container {
             position: fixed;
-            top: 10px;
-            left: 10px
+            top: 20px;
+            left: 20px
         }
 
         .logo-container img {
-            max-height: 40px
+            max-height: 46px;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12))
         }
 
         .app-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 2rem;
+            gap: 2.5rem;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
-            max-width: 1400px
+            max-width: 1200px
         }
 
         .timer-container {
-            background: #34495E;
-            border-radius: 15px;
-            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
             flex: 1 1 500px;
             max-width: 900px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, .2)
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden
+        }
+
+        .timer-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            opacity: 0.9
         }
 
         #current-clock {
-            font-size: clamp(1.6rem, 2.6vw, 3rem);
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1.4rem, 2.2vw, 2.4rem);
             margin: 0;
-            padding: .25rem 0;
-            background: #333;
-            border-radius: 10px
+            padding: 0.6rem 1rem;
+            background: rgba(108, 92, 231, 0.1);
+            border-radius: 14px;
+            color: var(--text-main)
         }
 
         .time {
-            font-size: clamp(3.5rem, 9vw, 9rem);
-            font-weight: bold;
-            margin: .7rem 0
+            font-size: clamp(3rem, 9vw, 8rem);
+            font-weight: 700;
+            margin: 1rem 0;
+            letter-spacing: 1px
         }
 
         .extra-time {
-            color: #e74c3c
+            color: #e17055
         }
 
         .label,
         .info {
-            font-size: clamp(1rem, 1.6vw, 1.4rem);
-            margin-top: .35rem
+            font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+            margin-top: 0.35rem
         }
 
         .label {
-            color: #e74c3c
+            color: var(--brand-primary);
+            font-weight: 600
         }
 
         .info {
-            color: #95a5a6;
+            color: var(--text-secondary);
             min-height: 1.6em;
         }
 
@@ -103,23 +143,26 @@
             display: flex;
             justify-content: center;
             gap: 1rem;
-            margin: 1rem 0
+            margin: 1.5rem 0 0.5rem;
+            flex-wrap: wrap
         }
 
         input {
-            width: 12%;
-            padding: .8rem;
-            font-size: 1.2rem;
-            border: 1px solid #7f8c8d;
-            border-radius: 10px;
-            background: #2c3e50;
-            color: #ecf0f1;
-            text-align: center
+            width: 110px;
+            padding: 0.75rem 0.6rem;
+            font-size: 1.1rem;
+            border: 1px solid rgba(108, 92, 231, 0.25);
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--text-main);
+            text-align: center;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06)
         }
 
         input:focus {
-            border-color: #f39c12;
-            outline: none
+            border-color: var(--brand-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2)
         }
 
         .visually-hidden {
@@ -135,55 +178,69 @@
         }
 
         .control-container {
-            background: #3c597a;
-            border-radius: 15px;
-            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
             flex: 0 1 140px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
             align-self: flex-end
+        }
+
+        .control-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            opacity: 0.9
         }
 
         .control-area {
             display: flex;
             flex-direction: column;
-            gap: .6rem
+            gap: 0.8rem
         }
 
         button {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 14px;
             font-size: 1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             transition: background .3s, transform .2s;
-            color: #ecf0f1
+            color: var(--btn-text);
+            font-weight: 600
         }
 
         button:hover {
-            transform: translateY(-3px);
-            opacity: .9
+            transform: translateY(-3px)
         }
 
         .btn-set {
-            background: #f39c12
+            background: var(--brand-primary)
         }
 
         .btn-reset {
-            background: #c0392b
+            background: #e17055
         }
 
         .btn-start {
-            background: #27ae60
+            background: #00b894
         }
 
         .btn-pause {
-            background: #3467eb
+            background: #0984e3
         }
 
         .btn-clear {
-            background: #b2977c
+            background: #636e72
         }
 
         .blink {
@@ -211,7 +268,7 @@
             }
 
             input {
-                width: 20%
+                width: 90px
             }
 
             .control-area {
@@ -223,6 +280,13 @@
             .control-container {
                 align-self: auto
             }
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem
         }
     </style>
 </head>
