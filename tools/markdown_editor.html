@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown Editor with LaTeX</title>
   <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
 
   <!-- MathJax Configuration -->
   <script>
@@ -51,32 +55,42 @@
     }
 
     :root {
-      --background-color: #ffffff;
-      --text-color: #000000;
+      --background-color: #f8f9fa;
+      --background-pattern: #e9ecef;
+      --text-color: #2d3436;
+      --text-muted: #636e72;
+      --brand-primary: #6c5ce7;
+      --brand-accent: #00cec9;
       --pane-background: #ffffff;
-      --pane-heading-background: #333333;
-      --pane-heading-color: #ffffff;
-      --button-background: #f0f0f0;
-      --button-color: #000000;
-      --border-color: #ccc;
-      --code-background: #f0f0f0;
-      --table-border-color: black;
-      --table-header-background: #f4f4f4;
+      --pane-heading-background: rgba(255, 255, 255, 0.85);
+      --pane-heading-color: #2d3436;
+      --button-background: #ffffff;
+      --button-color: #2d3436;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --code-background: #f1f3f5;
+      --table-border-color: rgba(45, 52, 54, 0.4);
+      --table-header-background: #f4f6f8;
+      --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
     }
 
     body.dark-mode {
-      --background-color: #1e1e1e;
-      --text-color: #e0e0e0;
-      --pane-background: #1e1e1e;
-      --pane-heading-background: #2d2c2c;
-      --pane-heading-color: #ffffff;
-      --button-background: #474646;
-      --button-color: #ffffff;
-      --border-color: #555555;
-      --code-background: #2f2f2f;
-      --table-border-color: #555555;
-      --table-header-background: #333333;
+      --background-color: #0f1014;
+      --background-pattern: #181a20;
+      --text-color: #dfe6e9;
+      --text-muted: #b2bec3;
+      --brand-primary: #a29bfe;
+      --brand-accent: #81ecec;
+      --pane-background: #1e2129;
+      --pane-heading-background: rgba(22, 24, 29, 0.85);
+      --pane-heading-color: #dfe6e9;
+      --button-background: #1e2129;
+      --button-color: #dfe6e9;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --code-background: #2b3038;
+      --table-border-color: rgba(255, 255, 255, 0.2);
+      --table-header-background: #252a33;
       --code-text-color: #f8f8f2;
+      --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
     body {
@@ -84,9 +98,11 @@
       flex-direction: column;
       height: 100vh;
       margin: 0;
-      font-family: Helvetica, sans-serif;
+      font-family: 'Inter', sans-serif;
       line-height: 1.5;
       background-color: var(--background-color);
+      background-image: radial-gradient(var(--background-pattern) 1px, transparent 1px);
+      background-size: 28px 28px;
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
     }
@@ -118,8 +134,9 @@
       flex: 1;
       background-color: var(--pane-background);
       height: 100%;
-      border-top: 0px solid var(--border-color);
-      border-bottom: 0px solid var(--border-color);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft);
     }
 
     /* ---------------------------------------------------------------------- */
@@ -149,12 +166,14 @@
     .pane-heading-container {
       display: grid;
       grid-template-columns: 50px 1fr 50px;
-      height: 45px;
+      height: 44px;
       align-items: center;
       background-color: var(--pane-heading-background);
       color: var(--pane-heading-color);
       margin: 0;
-      padding: 0 10px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
     }
 
     textarea:focus {
@@ -177,7 +196,10 @@
     .pane-heading {
       text-align: center;
       margin: 0;
-      font-size: 1.2em;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 0.2px;
     }
 
     /* ---------------------------------------------------------------------- */
@@ -203,13 +225,14 @@
     /* Button container under pane headers                                    */
     /* ---------------------------------------------------------------------- */
     .buttonContainer {
-      margin: 10px 0;
+      margin: 8px 0;
       text-align: center;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       position: relative;
+      flex-wrap: wrap;
     }
 
     .buttonContainer.output-controls {
@@ -226,7 +249,7 @@
 
     .buttonContainer.output-controls .scroll-sync-toggle {
       position: absolute;
-      right: 24px;
+      right: 18px;
     }
 
     body.dark-mode .buttonContainer button {
@@ -239,7 +262,7 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      font-size: 0.9em;
+      font-size: 0.8rem;
       color: var(--text-color);
       cursor: pointer;
       user-select: none;
@@ -255,8 +278,8 @@
 
     .scroll-sync-toggle .toggle-slider {
       position: relative;
-      width: 42px;
-      height: 22px;
+      width: 38px;
+      height: 20px;
       border-radius: 999px;
       background: #b8c7d2;
       transition: background-color 0.2s ease;
@@ -273,8 +296,8 @@
 
     .scroll-sync-toggle .toggle-slider::after {
       content: "";
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #ffffff;
       transition: transform 0.2s ease;
@@ -282,12 +305,12 @@
     }
 
     .scroll-sync-toggle input:checked + .toggle-slider {
-      background: #22c7c7;
+      background: var(--brand-accent);
       box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
     }
 
     .scroll-sync-toggle input:checked + .toggle-slider::after {
-      transform: translateX(20px);
+      transform: translateX(18px);
     }
 
     .scroll-sync-toggle .toggle-label {
@@ -300,10 +323,10 @@
     textarea {
       flex: 1;
       width: 100%;
-      padding: 20px;
+      padding: 18px;
       border: none;
       resize: none;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1.5;
       box-sizing: border-box;
       overflow-y: auto;
@@ -316,8 +339,8 @@
     /* ---------------------------------------------------------------------- */
     #renderedOutput {
       flex: 1;
-      padding: 20px;
-      font-size: 15px;
+      padding: 18px;
+      font-size: 14px;
       line-height: 1.5;
       box-sizing: border-box;
       overflow-y: auto;
@@ -600,32 +623,36 @@
     /* ---------------------------------------------------------------------- */
     footer {
       text-align: center;
-      padding: 5px;
-      background: #f4f4f4;
-      color: #555;
-      margin: 5px 0;
+      padding: 6px;
+      background: var(--pane-heading-background);
+      color: var(--text-muted);
+      margin: 0;
       width: 100%;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.75rem;
     }
 
     body.dark-mode footer {
-      background: #2d2c2c;
-      color: #ccc;
+      background: var(--pane-heading-background);
+      color: var(--text-muted);
     }
 
     button {
-      margin: 5px;
-      padding: 8px 12px;
-      font-size: 14px;
+      margin: 2px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
       cursor: pointer;
       background-color: var(--button-background);
       color: var(--button-color);
       border: 1px solid var(--border-color);
-      border-radius: 4px;
+      border-radius: 999px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       transition: background-color 0.3s, color 0.3s;
     }
 
     button:hover {
-      opacity: 0.8;
+      opacity: 0.85;
+      transform: translateY(-1px);
     }
 
     /* ==========================================================================
@@ -658,8 +685,8 @@
 
       .buttonContainer button {
         flex: 1 0 auto;
-        margin: 5px 2px;
-        min-width: 110px;
+        margin: 4px 2px;
+        min-width: 100px;
       }
 
     }
@@ -704,7 +731,12 @@
         <button id="loadFileButton">Open .md File</button>
         <button id="saveMDButton">Save .md</button>
         <button id="clearButton">Clear Input</button>
-        <button id="loadSampleButton">Sample Document</button>
+        <button id="loadSampleButton">Sample Doc</button>
+        <label class="scroll-sync-toggle" for="highlightSyncToggle">
+          <input type="checkbox" id="highlightSyncToggle" />
+          <span class="toggle-slider" aria-hidden="true"></span>
+          <span class="toggle-label">Link Highlight</span>
+        </label>
       </div>
       <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
     </div>
@@ -771,10 +803,13 @@
   const loadFileButton = document.getElementById('loadFileButton');
   const themeToggleButton = document.getElementById('themeToggleButton');
   const scrollSyncToggle = document.getElementById('scrollSyncToggle');
+  const highlightSyncToggle = document.getElementById('highlightSyncToggle');
   const highlightStyle = document.getElementById('highlightStyle');
   const draftStorageKey = 'markdownEditorDraft';
   const scrollSyncStorageKey = 'markdownScrollSync';
+  const highlightSyncStorageKey = 'markdownHighlightSync';
   let isLinkScrollEnabled = false;
+  let isHighlightSyncEnabled = true;
 
   /**
    * Fetch and load the sample Markdown document from 'mkdwn_sample_doc.md'
@@ -1204,10 +1239,17 @@
   }
 
   function updateHighlightedBlockFromCaret({ forceScroll = false } = {}) {
+    const current = renderedOutput.querySelector('.highlighted-block');
+    if (!isHighlightSyncEnabled) {
+      if (current) {
+        current.classList.remove('highlighted-block');
+      }
+      return;
+    }
+
     const lineNumber = getLineNumberFromOffset(markdownInput.value, markdownInput.selectionStart || 0);
     const matchingBlock = getMatchingBlockForLine(lineNumber);
 
-    const current = renderedOutput.querySelector('.highlighted-block');
     if (current && current !== matchingBlock) {
       current.classList.remove('highlighted-block');
     }
@@ -1883,6 +1925,19 @@
   }
 
   /**
+   * Initialize highlight sync toggle based on saved preference.
+   */
+  function initializeHighlightSyncToggle() {
+    const savedHighlightSync = localStorage.getItem(highlightSyncStorageKey);
+    if (savedHighlightSync === null) {
+      isHighlightSyncEnabled = true;
+    } else {
+      isHighlightSyncEnabled = savedHighlightSync === 'true';
+    }
+    highlightSyncToggle.checked = isHighlightSyncEnabled;
+  }
+
+  /**
    * Toggle between dark and light themes and save the preference.
    */
   function toggleTheme() {
@@ -1933,6 +1988,7 @@
   // Initialize theme and render content on load
   initializeTheme();
   initializeScrollSyncToggle();
+  initializeHighlightSyncToggle();
   restoreDraft();
   renderContent();
 
@@ -1966,6 +2022,15 @@
     localStorage.setItem(scrollSyncStorageKey, isLinkScrollEnabled);
     if (isLinkScrollEnabled) {
       updateHighlightedBlockFromCaret({ forceScroll: true });
+    }
+  });
+  highlightSyncToggle.addEventListener('change', event => {
+    isHighlightSyncEnabled = event.target.checked;
+    localStorage.setItem(highlightSyncStorageKey, isHighlightSyncEnabled);
+    if (isHighlightSyncEnabled) {
+      updateHighlightedBlockFromCaret({ forceScroll: true });
+    } else {
+      updateHighlightedBlockFromCaret();
     }
   });
 </script>
