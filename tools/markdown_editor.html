@@ -238,7 +238,9 @@
 
     .buttonContainer.output-controls {
       width: 100%;
-      justify-content: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      padding: 0 12px;
     }
 
     .buttonContainer.output-controls .output-actions {
@@ -248,9 +250,11 @@
       margin: 0 auto;
     }
 
-    .buttonContainer.output-controls .scroll-sync-toggle {
-      position: absolute;
-      right: 18px;
+    .buttonContainer.output-controls .output-toggles {
+      display: inline-flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     body.dark-mode .buttonContainer button {
@@ -718,6 +722,14 @@
         justify-content: center;
       }
 
+      .buttonContainer.output-controls {
+        flex-wrap: wrap;
+      }
+
+      .buttonContainer.output-controls .output-actions {
+        margin: 0;
+      }
+
       .buttonContainer button {
         flex: 1 0 auto;
         margin: 4px 2px;
@@ -767,11 +779,6 @@
         <button id="saveMDButton">Save .md</button>
         <button id="clearButton">Clear Input</button>
         <button id="loadSampleButton">Sample Doc</button>
-        <label class="scroll-sync-toggle" for="highlightSyncToggle">
-          <input type="checkbox" id="highlightSyncToggle" />
-          <span class="toggle-slider" aria-hidden="true"></span>
-          <span class="toggle-label">Link Highlight</span>
-        </label>
         <div class="font-size-selector">
           <label for="fontSizeSelect">Font Size</label>
           <select id="fontSizeSelect">
@@ -818,11 +825,18 @@
           <button id="exportSVGButton" title="Exports in current theme">Export to SVG</button>
           <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
         </div>
-        <label class="scroll-sync-toggle" for="scrollSyncToggle">
-          <input type="checkbox" id="scrollSyncToggle" />
-          <span class="toggle-slider" aria-hidden="true"></span>
-          <span class="toggle-label">Link Scroll</span>
-        </label>
+        <div class="output-toggles">
+          <label class="scroll-sync-toggle" for="scrollSyncToggle">
+            <input type="checkbox" id="scrollSyncToggle" />
+            <span class="toggle-slider" aria-hidden="true"></span>
+            <span class="toggle-label">Link Scroll</span>
+          </label>
+          <label class="scroll-sync-toggle" for="highlightSyncToggle">
+            <input type="checkbox" id="highlightSyncToggle" />
+            <span class="toggle-slider" aria-hidden="true"></span>
+            <span class="toggle-label">Link Highlight</span>
+          </label>
+        </div>
       </div>
       <div id="renderedOutput"></div>
     </div>
