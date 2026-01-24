@@ -12,18 +12,18 @@
     <style>
         /* ... [unchanged CSS from your file] ... */
         :root {
-            --bg-color: #f8f9fa;
-            --bg-pattern: #e9ecef;
-            --text-main: #2d3436;
-            --text-secondary: #636e72;
+            --bg-color: #0f1117;
+            --bg-pattern: rgba(108, 92, 231, 0.2);
+            --text-main: #f5f6fa;
+            --text-secondary: #b2bec3;
             --brand-primary: #6c5ce7;
             --brand-secondary: #a29bfe;
             --brand-accent: #00cec9;
-            --card-bg: #ffffff;
-            --card-border: transparent;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
-            --btn-text: #ffffff;
+            --card-bg: #1b1f2a;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.25);
+            --btn-text: #fdfbff;
         }
 
         *,
@@ -38,13 +38,13 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-size: 28px 28px;
             color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 4.5rem 1.5rem 2rem
+            padding: 3.5rem 1.5rem 1.5rem
         }
 
         a {
@@ -65,13 +65,13 @@
 
         .logo-container img {
             max-height: 46px;
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12))
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5))
         }
 
         .app-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 2.5rem;
+            gap: 2rem;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
@@ -81,7 +81,7 @@
         .timer-container {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 2.5rem 2rem;
+            padding: 2rem 2rem 1.5rem;
             flex: 1 1 500px;
             max-width: 900px;
             text-align: center;
@@ -107,7 +107,7 @@
             font-size: clamp(1.4rem, 2.2vw, 2.4rem);
             margin: 0;
             padding: 0.6rem 1rem;
-            background: rgba(108, 92, 231, 0.1);
+            background: rgba(108, 92, 231, 0.2);
             border-radius: 14px;
             color: var(--text-main)
         }
@@ -151,12 +151,12 @@
             width: 110px;
             padding: 0.75rem 0.6rem;
             font-size: 1.1rem;
-            border: 1px solid rgba(108, 92, 231, 0.25);
+            border: 1px solid rgba(108, 92, 231, 0.4);
             border-radius: 12px;
-            background: #ffffff;
+            background: #151825;
             color: var(--text-main);
             text-align: center;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06)
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35)
         }
 
         input:focus {
@@ -180,7 +180,7 @@
         .control-container {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.5rem 1.5rem;
             flex: 0 1 140px;
             text-align: center;
             box-shadow: var(--card-shadow);
@@ -209,6 +209,7 @@
 
         button {
             width: 100%;
+            min-height: 44px;
             padding: 12px 14px;
             font-size: 1rem;
             border: none;
@@ -228,7 +229,7 @@
         }
 
         .btn-reset {
-            background: #e17055
+            background: #d63031
         }
 
         .btn-start {
@@ -240,7 +241,7 @@
         }
 
         .btn-clear {
-            background: #636e72
+            background: #2d3436
         }
 
         .blink {
@@ -283,7 +284,7 @@
         }
 
         footer {
-            margin-top: 3rem;
+            margin-top: 2rem;
             text-align: center;
             color: var(--text-secondary);
             font-size: 0.95rem
@@ -316,9 +317,9 @@
         </div>
         <div class="control-container">
             <div class="control-area">
-                <button id="setResetBtn" class="btn-set">Set&nbsp;Timer</button>
+                <button id="setResetBtn" class="btn-set">Set&nbsp;Time</button>
                 <button id="toggleBtn" class="btn-start">Start</button>
-                <button id="clearBtn" class="btn-clear">Clear</button>
+                <button id="clearBtn" class="btn-clear">Clear&nbsp;All</button>
             </div>
         </div>
     </div>
@@ -441,7 +442,7 @@
 
             /* reset button states */
             setResetBtn.dataset.state = 'set';
-            setResetBtn.textContent = 'Set Timer';
+            setResetBtn.textContent = 'Set Time';
             setResetBtn.classList.remove('btn-reset'); setResetBtn.classList.add('btn-set');
 
             toggleBtn.dataset.state = 'start';
@@ -524,7 +525,7 @@
             if (setResetBtn.dataset.state === 'set') {
                 setTimer();
                 setResetBtn.dataset.state = 'reset';
-                setResetBtn.textContent = 'Reset';
+                setResetBtn.textContent = 'Reset Timer';
                 setResetBtn.classList.remove('btn-set'); setResetBtn.classList.add('btn-reset');
             } else {
                 resetTimer();
