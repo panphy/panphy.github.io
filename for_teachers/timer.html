@@ -1149,6 +1149,12 @@
             }
         });
 
+        /* ------------ Clear state on page close ------------ */
+        // Reset timer when page/tab is closed so it doesn't run in background
+        window.addEventListener('pagehide', () => {
+            clearState();
+        });
+
         /* ------------ Initialize ------------ */
         const initialized = loadState();
         if (!initialized) {
