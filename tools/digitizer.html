@@ -823,13 +823,27 @@
   }
 
   let lastEvent = null;
+  let touchStartHandled = false;
   canvas.addEventListener('click', function (e) {
     lastEvent = e;
     const coords = getCanvasCoordinates(e);
     handleCanvasInteraction(coords.x, coords.y);
   });
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    const touch = e.changedTouches[0];
+    lastEvent = touch;
+    const coords = getCanvasCoordinates(touch);
+    touchStartHandled = true;
+    handleCanvasInteraction(coords.x, coords.y);
+    updateMagnifier(touch);
+  }, { passive: false });
   canvas.addEventListener('touchend', function (e) {
     e.preventDefault();
+    if (touchStartHandled) {
+      touchStartHandled = false;
+      return;
+    }
     const touch = e.changedTouches[0];
     lastEvent = touch;
     const coords = getCanvasCoordinates(touch);
