@@ -294,36 +294,6 @@
             }
         }
 
-        /* Progress bar styles */
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            margin: 1rem 0;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .progress-original {
-            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
-            z-index: 2;
-        }
-
-        .progress-extra {
-            background: rgba(225, 112, 85, 0.5);
-            z-index: 1;
-        }
-
         /* Keyboard shortcut hints */
         .shortcut-hint {
             font-size: 0.75rem;
@@ -457,11 +427,6 @@
         <div class="timer-container">
             <h1 id="current-clock" aria-live="off">Current Time: --:--</h1>
 
-            <div class="progress-container" aria-hidden="true">
-                <div class="progress-bar progress-extra" id="progress-extra" style="width: 0%"></div>
-                <div class="progress-bar progress-original" id="progress-original" style="width: 0%"></div>
-            </div>
-
             <div class="time" id="original-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
             <div class="label" id="extra-label">25% Extra Time</div>
             <div class="time extra-time" id="extra-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
@@ -515,8 +480,6 @@
         const extraEl = document.getElementById('extra-time');
         const extraLabel = document.getElementById('extra-label');
         const infoEl = document.getElementById('start-end-times');
-        const progressOriginal = document.getElementById('progress-original');
-        const progressExtra = document.getElementById('progress-extra');
 
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
@@ -579,19 +542,6 @@
 
             originalEl.textContent = fmt(orig.h, orig.m, orig.s);
             extraEl.textContent = fmt(extra.h, extra.m, extra.s);
-
-            // Update progress bars
-            if (initTotal > 0) {
-                const origProgress = Math.max(0, Math.min(100, (remaining / initTotal) * 100));
-                const extraTotal = Math.round(initTotal * (1 + extraPercent / 100));
-                const extraProgress = Math.max(0, Math.min(100, (extraRemaining / extraTotal) * 100));
-
-                progressOriginal.style.width = origProgress + '%';
-                progressExtra.style.width = extraProgress + '%';
-            } else {
-                progressOriginal.style.width = '0%';
-                progressExtra.style.width = '0%';
-            }
         };
 
         const updateInfoDisplay = () => {
