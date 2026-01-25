@@ -787,7 +787,10 @@
 
 			/* Fullscreen */
 			function isFullscreen() {
-				return document.fullscreenElement === stage;
+				return document.fullscreenElement === stage ||
+					document.fullscreenElement === video ||
+					document.webkitFullscreenElement === stage ||
+					document.webkitFullscreenElement === video;
 			}
 
 			function updateFullscreenUI() {
@@ -798,18 +801,26 @@
 			}
 
 			fullscreenBtn.addEventListener('click', () => {
-				if (!document.fullscreenEnabled) {
-					showToast('Fullscreen not supported');
+				const requestFullscreen = stage.requestFullscreen || stage.webkitRequestFullscreen || stage.webkitRequestFullScreen;
+				const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
+
+				if (isFullscreen()) {
+					if (exitFullscreen) { exitFullscreen.call(document); }
 					return;
 				}
-				if (isFullscreen()) {
-					document.exitFullscreen();
-				} else {
-					stage.requestFullscreen();
+				if (requestFullscreen) {
+					requestFullscreen.call(stage);
+					return;
 				}
+				if (video.webkitEnterFullscreen) {
+					video.webkitEnterFullscreen();
+					return;
+				}
+				showToast('Fullscreen not supported');
 			});
 
 			document.addEventListener('fullscreenchange', updateFullscreenUI);
+			document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 			updateFullscreenUI();
 
 			/* ===== Utils ===== */
@@ -1490,8 +1501,11 @@
 			/* Stage events */
 			const target = stage;
 
-			function touchGuard(e) { if (overlayVisible && e.target.closest('#textOverlay')) return;
-				e.preventDefault(); }
+			function touchGuard(e) {
+				if (overlayVisible && e.target.closest('#textOverlay')) return;
+				if (e.target.closest('.controls') || e.target.closest('#fullscreenBtn')) return;
+				e.preventDefault();
+			}
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(ev => target.addEventListener(ev, touchGuard, { passive: false }));
 
 			target.addEventListener('pointerdown', e => {
