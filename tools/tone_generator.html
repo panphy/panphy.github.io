@@ -7,14 +7,24 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <style>
     :root {
-      --background-color: #1e1e1e;
-      --text-color: #ffffff;
-      --btn-bg-color: #444;
-      --btn-bg-hover: #555;
+      --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+      --surface: #1e2129;
+      --surface-alt: #17191f;
+      --border: #2d3436;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      --btn-bg-color: #2b2f39;
+      --btn-bg-hover: #3a3f4b;
       --btn-text-color: #ffffff;
-      --btn-border-color: #666;
-      --slider-bg: #444;
-      --slider-thumb: #8fce00;
+      --btn-border-color: #3a3f4b;
+      --slider-bg: #3a3f4b;
+      --slider-thumb: #a29bfe;
     }
 
     html,
@@ -30,9 +40,11 @@
     }
 
     body {
-      background-color: var(--background-color);
-      color: var(--text-color);
-      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
     }
@@ -42,28 +54,35 @@
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      background-color: #1e1e1e;
-      /* match the app's background */
-      margin: 0;
-      padding: 0;
-      /* remove extra spacing if desired */
+      background: rgba(22, 24, 29, 0.85);
+      margin: 1.5rem auto 1rem;
+      padding: 0.85rem 1.5rem;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      max-width: 1200px;
+      width: calc(100% - 3rem);
+      backdrop-filter: blur(10px);
     }
 
     /* The logo container (left column): control the image size */
     .banner-logo img {
-      max-height: 35px;
+      max-height: 40px;
       width: auto;
       height: auto;
-      margin-left: 10px;
     }
 
     /* The heading in the center column */
     .banner-title {
-      color: #7ae7b3;
-      margin: 15px 0;
+      margin: 0;
       text-align: center;
-      font-size: 1.8em;
-      font-weight: bold;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     /* Empty placeholder in the right column to keep the heading truly centered */
@@ -73,24 +92,12 @@
     }
 
     a {
-      color: #ff5f1f;
+      color: var(--brand-accent);
       text-decoration: none;
     }
 
     a:hover {
-      color: #ff5f1f;
       text-decoration: underline;
-    }
-
-    a:visited {
-      color: #ff5f1f;
-    }
-
-    h1 {
-      text-align: center;
-      margin: 30px 0;
-      flex: 0 0 auto;
-      color: #7ae7b3;
     }
 
     #content {
@@ -100,6 +107,7 @@
       max-width: 1300px;
       margin: 0 auto;
       gap: 20px;
+      padding: 0 1.5rem 1.5rem;
       overflow: hidden;
     }
 
@@ -116,12 +124,12 @@
       max-width: 40%;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid #444;
-      padding: 10px;
+      border-right: 1px solid var(--border);
+      padding: 16px;
       overflow: hidden;
-      background-color: #2a2a2a;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+      background-color: var(--surface);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
     }
 
     #channelsScrollContainer {
@@ -135,20 +143,20 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 10px;
+      padding: 16px;
       overflow: hidden;
-      background-color: #2a2a2a;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+      background-color: var(--surface);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
     }
 
     /* CHANNEL UI */
     .channel {
-      background-color: #3a3a3a;
-      border: 1px solid #444;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 8px;
+      background-color: var(--surface-alt);
+      border: 1px solid var(--border);
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 12px;
       width: 100%;
     }
 
@@ -163,6 +171,7 @@
       margin: 0;
       font-size: 1rem;
       margin-right: 10px;
+      color: var(--text-main);
     }
 
     .slider-container {
@@ -188,30 +197,31 @@
     .channel-canvas {
       width: 100%;
       height: 80px;
-      background-color: #1e1e1e;
-      border: 1px solid #666;
-      border-radius: 4px;
-      margin-top: 5px;
+      background-color: #111318;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 8px;
     }
 
     /* BUTTONS */
     .btn {
       display: inline-block;
-      padding: 8px 16px;
+      padding: 8px 18px;
       font-size: 0.9rem;
       color: var(--btn-text-color);
       background-color: var(--btn-bg-color);
       border: 1px solid var(--btn-border-color);
-      border-radius: 4px;
+      border-radius: 999px;
       margin-right: 5px;
       text-decoration: none;
       min-width: 80px;
       text-align: center;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
     }
 
     .btn:hover {
       background-color: var(--btn-bg-hover);
+      transform: translateY(-1px);
     }
 
     #freezeBtn {
@@ -228,6 +238,7 @@
       border-radius: 2px;
       border: none;
       transition: background 0.3s;
+      accent-color: var(--brand-primary);
     }
 
     input[type="range"]:hover {
@@ -265,14 +276,18 @@
       align-items: center;
       margin-top: 20px;
       flex: 1 1 auto;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
     }
 
     #sumCanvas {
       width: 95%;
       height: 160px;
-      background-color: #1e1e1e;
-      border: 2px solid #666;
-      border-radius: 8px;
+      background-color: #111318;
+      border: 2px solid var(--border);
+      border-radius: 12px;
     }
 
     #combinedWaveButtons {
@@ -292,6 +307,10 @@
       justify-content: space-between;
       margin-bottom: 15px;
       gap: 20px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
     }
 
     .controlRow {
@@ -307,6 +326,7 @@
       font-size: 0.85rem;
       white-space: nowrap;
       text-align: center;
+      color: var(--text-secondary);
     }
 
     .controlRow span {
@@ -314,6 +334,7 @@
       width: 60px;
       text-align: center;
       margin-top: 5px;
+      color: var(--text-main);
     }
 
     /* VOLUME SLIDER + LABEL */
@@ -329,6 +350,7 @@
       margin-bottom: 5px;
       white-space: nowrap;
       text-align: center;
+      color: var(--text-secondary);
     }
 
     #volumeSlider {
@@ -340,8 +362,8 @@
     footer {
       text-align: center;
       font-size: 0.9rem;
-      color: #888;
-      margin: 10px 0;
+      color: var(--text-secondary);
+      margin: 10px 0 20px;
       flex: 0 0 auto;
     }
   </style>
