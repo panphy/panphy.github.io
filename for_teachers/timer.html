@@ -15,7 +15,6 @@
         }
     </script>
     <style>
-        /* ... [unchanged CSS from your file] ... */
         :root {
             --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
             --bg-color: #0f1117;
@@ -36,7 +35,7 @@
         *::before,
         *::after {
             box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
         }
 
         body {
@@ -50,28 +49,28 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 3.5rem 1.5rem 1.5rem
+            padding: 3.5rem 1.5rem 1.5rem;
         }
 
         a {
             color: var(--brand-primary);
-            text-decoration: none
+            text-decoration: none;
         }
 
         a:hover,
         a:visited {
-            color: var(--brand-primary)
+            color: var(--brand-primary);
         }
 
         .logo-container {
             position: fixed;
             top: 20px;
-            left: 20px
+            left: 20px;
         }
 
         .logo-container img {
             max-height: 46px;
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5))
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
         }
 
         .app-container {
@@ -81,7 +80,7 @@
             justify-content: center;
             align-items: flex-start;
             width: 100%;
-            max-width: 1200px
+            max-width: 1200px;
         }
 
         .timer-container {
@@ -94,7 +93,7 @@
             box-shadow: var(--card-shadow);
             border: 1px solid var(--card-border);
             position: relative;
-            overflow: hidden
+            overflow: hidden;
         }
 
         .timer-container::before {
@@ -105,7 +104,7 @@
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
-            opacity: 0.9
+            opacity: 0.9;
         }
 
         #current-clock {
@@ -115,29 +114,29 @@
             padding: 0.6rem 1rem;
             background: rgba(108, 92, 231, 0.2);
             border-radius: 14px;
-            color: var(--text-main)
+            color: var(--text-main);
         }
 
         .time {
             font-size: clamp(3rem, 9vw, 8rem);
             font-weight: 700;
             margin: 1rem 0;
-            letter-spacing: 1px
+            letter-spacing: 1px;
         }
 
         .extra-time {
-            color: #e17055
+            color: #e17055;
         }
 
         .label,
         .info {
             font-size: clamp(0.95rem, 1.3vw, 1.2rem);
-            margin-top: 0.35rem
+            margin-top: 0.35rem;
         }
 
         .label {
             color: var(--brand-primary);
-            font-weight: 600
+            font-weight: 600;
         }
 
         .info {
@@ -145,16 +144,21 @@
             min-height: 1.6em;
         }
 
+        .info-line {
+            display: block;
+            margin: 0.2rem 0;
+        }
+
         .inputs {
             display: flex;
             justify-content: center;
             gap: 1rem;
             margin: 1.5rem 0 0.5rem;
-            flex-wrap: wrap
+            flex-wrap: wrap;
         }
 
-        input {
-            width: 110px;
+        input,
+        select {
             padding: 0.75rem 0.6rem;
             font-size: 1.1rem;
             border: 1px solid rgba(108, 92, 231, 0.4);
@@ -162,13 +166,28 @@
             background: #151825;
             color: var(--text-main);
             text-align: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35)
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
         }
 
-        input:focus {
+        input {
+            width: 110px;
+        }
+
+        select {
+            width: 130px;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #151825;
+            color: var(--text-main);
+        }
+
+        input:focus,
+        select:focus {
             border-color: var(--brand-primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2)
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
         }
 
         .visually-hidden {
@@ -180,7 +199,7 @@
             overflow: hidden;
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
-            border: 0
+            border: 0;
         }
 
         .control-container {
@@ -193,7 +212,7 @@
             border: 1px solid var(--card-border);
             position: relative;
             overflow: hidden;
-            align-self: flex-end
+            align-self: flex-end;
         }
 
         .control-container::before {
@@ -204,13 +223,13 @@
             width: 100%;
             height: 4px;
             background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
-            opacity: 0.9
+            opacity: 0.9;
         }
 
         .control-area {
             display: flex;
             flex-direction: column;
-            gap: 0.8rem
+            gap: 0.8rem;
         }
 
         button {
@@ -228,69 +247,125 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            line-height: 1.1
+            line-height: 1.1;
         }
 
         button:hover {
-            transform: translateY(-3px)
+            transform: translateY(-3px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-set {
-            background: var(--brand-primary)
+            background: var(--brand-primary);
         }
 
         .btn-reset {
-            background: #d63031
+            background: #d63031;
         }
 
         .btn-start {
-            background: #00b894
+            background: #00b894;
         }
 
         .btn-pause {
-            background: #0984e3
+            background: #0984e3;
         }
 
         .btn-clear {
-            background: #2d3436
+            background: #2d3436;
+        }
+
+        .btn-fullscreen {
+            background: #636e72;
         }
 
         .blink {
-            animation: blinker 1s linear infinite
+            animation: blinker 1s linear infinite;
         }
 
         @keyframes blinker {
             50% {
-                opacity: 0
+                opacity: 0;
             }
+        }
+
+        /* Progress bar styles */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .progress-original {
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            z-index: 2;
+        }
+
+        .progress-extra {
+            background: rgba(225, 112, 85, 0.5);
+            z-index: 1;
+        }
+
+        /* Keyboard shortcut hints */
+        .shortcut-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            opacity: 0.7;
         }
 
         @media(max-width:600px) {
             #current-clock {
-                font-size: 6vw
+                font-size: 6vw;
             }
 
             .time {
-                font-size: 14vw
+                font-size: 14vw;
             }
 
             .label,
             .info {
-                font-size: 3vw
+                font-size: 3vw;
             }
 
             input {
-                width: 90px
+                width: 90px;
+            }
+
+            select {
+                width: 110px;
             }
 
             .control-area {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: .5rem
+                gap: .5rem;
             }
 
             .control-container {
-                align-self: auto
+                align-self: auto;
+            }
+
+            .shortcut-hint {
+                display: none;
             }
         }
 
@@ -298,7 +373,7 @@
             margin-top: 2rem;
             text-align: center;
             color: var(--text-secondary);
-            font-size: 0.95rem
+            font-size: 0.95rem;
         }
 
         @media (pointer: coarse) {
@@ -314,6 +389,58 @@
         .offline-font {
             --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
         }
+
+        /* Fullscreen styles */
+        .fullscreen-active .logo-container,
+        .fullscreen-active footer,
+        .fullscreen-active .control-container {
+            display: none;
+        }
+
+        .fullscreen-active .app-container {
+            max-width: none;
+            height: 100vh;
+            align-items: center;
+        }
+
+        .fullscreen-active .timer-container {
+            max-width: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-radius: 0;
+            height: 100%;
+        }
+
+        .fullscreen-active .time {
+            font-size: clamp(5rem, 20vw, 15rem);
+        }
+
+        .fullscreen-active .label {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+
+        .fullscreen-active .inputs {
+            display: none;
+        }
+
+        .fullscreen-exit-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            height: auto;
+            padding: 0.75rem 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .fullscreen-active .fullscreen-exit-btn {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -324,28 +451,47 @@
         </a>
     </div>
 
+    <button id="fullscreenExitBtn" class="fullscreen-exit-btn">Exit Fullscreen (Esc)</button>
+
     <div class="app-container">
         <div class="timer-container">
-            <h1 id="current-clock">Current Time: --:--</h1>
-            <div class="time" id="original-time">00:00:00</div>
-            <div class="label">25% Extra Time</div>
-            <div class="time extra-time" id="extra-time">00:00:00</div>
-            <div class="info" id="start-end-times"></div>
+            <h1 id="current-clock" aria-live="off">Current Time: --:--</h1>
+
+            <div class="progress-container" aria-hidden="true">
+                <div class="progress-bar progress-extra" id="progress-extra" style="width: 0%"></div>
+                <div class="progress-bar progress-original" id="progress-original" style="width: 0%"></div>
+            </div>
+
+            <div class="time" id="original-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
+            <div class="label" id="extra-label">25% Extra Time</div>
+            <div class="time extra-time" id="extra-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
+            <div class="info" id="start-end-times" aria-live="polite"></div>
             <div class="inputs">
                 <label class="visually-hidden" for="hours">Hours</label>
-                <input id="hours" type="number" placeholder="Hrs" min="0">
+                <input id="hours" type="number" placeholder="Hrs" min="0" max="23" aria-describedby="time-input-hint">
                 <label class="visually-hidden" for="minutes">Minutes</label>
                 <input id="minutes" type="number" placeholder="Min" min="0" max="59">
                 <label class="visually-hidden" for="seconds">Seconds</label>
                 <input id="seconds" type="number" placeholder="Sec" min="0" max="59">
+                <label class="visually-hidden" for="extra-percent">Extra Time Percentage</label>
+                <select id="extra-percent" aria-label="Extra time percentage">
+                    <option value="0">No Extra</option>
+                    <option value="10">10% Extra</option>
+                    <option value="25" selected>25% Extra</option>
+                    <option value="50">50% Extra</option>
+                    <option value="100">100% Extra</option>
+                </select>
             </div>
+            <span id="time-input-hint" class="visually-hidden">Enter hours (0-23), minutes (0-59), and seconds (0-59)</span>
         </div>
         <div class="control-container">
             <div class="control-area">
                 <button id="setResetBtn" class="btn-set">Set&nbsp;Time</button>
                 <button id="toggleBtn" class="btn-start">Start</button>
                 <button id="clearBtn" class="btn-clear">Clear&nbsp;All</button>
+                <button id="fullscreenBtn" class="btn-fullscreen">Fullscreen</button>
             </div>
+            <div class="shortcut-hint">Space: Start/Pause | Esc: Reset</div>
         </div>
     </div>
     <audio id="alarm-sound-original" src="timer_beep.mp3" preload="auto"></audio>
@@ -356,50 +502,279 @@
         </p>
     </footer>
     <script>
-        /* ------------ grab DOM nodes once ------------ */
+        /* ------------ Constants ------------ */
+        const STORAGE_KEY = 'panphy_timer_state';
+        const TICK_INTERVAL = 100; // More frequent updates for accuracy
+
+        /* ------------ Grab DOM nodes once ------------ */
         const hoursInput = document.getElementById('hours');
         const minutesInput = document.getElementById('minutes');
         const secondsInput = document.getElementById('seconds');
+        const extraPercentSelect = document.getElementById('extra-percent');
         const originalEl = document.getElementById('original-time');
         const extraEl = document.getElementById('extra-time');
+        const extraLabel = document.getElementById('extra-label');
         const infoEl = document.getElementById('start-end-times');
+        const progressOriginal = document.getElementById('progress-original');
+        const progressExtra = document.getElementById('progress-extra');
 
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
         const clearBtn = document.getElementById('clearBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenExitBtn = document.getElementById('fullscreenExitBtn');
 
-        /* ------------- live HH:MM clock ------------- */
+        /* ------------- Live HH:MM clock ------------- */
         const updateClock = () => {
             document.getElementById('current-clock').textContent =
                 'Current Time: ' + new Date().toLocaleTimeString(
                     'en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
         };
-        setInterval(updateClock, 1000); updateClock();
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        /* ---------- timer state & helpers ----------- */
-        let origInt, extraInt, remaining = 0, extraRemaining = 0, paused = false;
-        let initH = 0, initM = 0, initS = 0, initTotal = 0;
+        /* ---------- Timer state & helpers ----------- */
+        let timerInterval = null;
+        let remaining = 0;
+        let extraRemaining = 0;
+        let paused = false;
+        let initH = 0;
+        let initM = 0;
+        let initS = 0;
+        let initTotal = 0;
+        let extraPercent = 25;
 
-        // --- new variables for pause/resume timing ---
-        let endTime = null, extraEndTime = null; // stores Date objects
+        // Timestamp-based timing
+        let endTime = null;
+        let extraEndTime = null;
+        let startTimestamp = null;
+
+        // Track completion states separately
+        let originalComplete = false;
+        let extraComplete = false;
 
         const two = d => String(d).padStart(2, '0');
         const fmt = (h, m, s) => `${two(h)}:${two(m)}:${two(s)}`;
         const fClock = d => `${two(d.getHours())}:${two(d.getMinutes())}`;
+
         const blink = id => document.getElementById(id).classList.add('blink');
         const stopBlink = () => document.querySelectorAll('.blink').forEach(e => e.classList.remove('blink'));
-        const playAlarm = id => { const a = document.getElementById(id); a.currentTime = 0; a.play().catch(() => { }); };
 
-        const updateDisplays = () => {
-            originalEl.textContent = fmt(Math.floor(remaining / 3600),
-                Math.floor((remaining % 3600) / 60),
-                remaining % 60);
-            extraEl.textContent = fmt(Math.floor(extraRemaining / 3600),
-                Math.floor((extraRemaining % 3600) / 60),
-                extraRemaining % 60);
+        const playAlarm = id => {
+            const a = document.getElementById(id);
+            a.currentTime = 0;
+            a.play().catch(err => console.log('Audio play failed:', err));
         };
 
-        /* --------------- actions ---------------- */
+        const secondsToHMS = (totalSeconds) => {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return { h, m, s };
+        };
+
+        const updateDisplays = () => {
+            const orig = secondsToHMS(Math.max(0, remaining));
+            const extra = secondsToHMS(Math.max(0, extraRemaining));
+
+            originalEl.textContent = fmt(orig.h, orig.m, orig.s);
+            extraEl.textContent = fmt(extra.h, extra.m, extra.s);
+
+            // Update progress bars
+            if (initTotal > 0) {
+                const origProgress = Math.max(0, Math.min(100, (remaining / initTotal) * 100));
+                const extraTotal = Math.round(initTotal * (1 + extraPercent / 100));
+                const extraProgress = Math.max(0, Math.min(100, (extraRemaining / extraTotal) * 100));
+
+                progressOriginal.style.width = origProgress + '%';
+                progressExtra.style.width = extraProgress + '%';
+            } else {
+                progressOriginal.style.width = '0%';
+                progressExtra.style.width = '0%';
+            }
+        };
+
+        const updateInfoDisplay = () => {
+            if (!startTimestamp) {
+                infoEl.innerHTML = '';
+                return;
+            }
+
+            let html = `<span class="info-line">Start: ${fClock(startTimestamp)}`;
+
+            if (endTime && !originalComplete) {
+                html += ` | End: ${fClock(endTime)}`;
+            }
+            html += '</span>';
+
+            if (extraPercent > 0) {
+                html += `<span class="info-line extra-time">`;
+                if (extraEndTime && !extraComplete) {
+                    html += `Extra End: ${fClock(extraEndTime)}`;
+                }
+                if (originalComplete && !extraComplete) {
+                    html += ' | Original complete';
+                }
+                if (extraComplete) {
+                    html += 'Extra time complete';
+                }
+                html += '</span>';
+            }
+
+            if (originalComplete && (extraPercent === 0 || extraComplete)) {
+                html = '<span class="info-line">Timer complete!</span>';
+            }
+
+            infoEl.innerHTML = html;
+        };
+
+        /* ----------- Notification API ----------- */
+        const requestNotificationPermission = () => {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        };
+
+        const sendNotification = (title, body) => {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body: body,
+                        icon: '/favicon.png',
+                        tag: 'timer-notification'
+                    });
+                } catch (err) {
+                    console.log('Notification failed:', err);
+                }
+            }
+        };
+
+        /* ----------- localStorage persistence ----------- */
+        const saveState = () => {
+            const state = {
+                remaining,
+                extraRemaining,
+                initH,
+                initM,
+                initS,
+                initTotal,
+                extraPercent,
+                paused,
+                endTime: endTime ? endTime.getTime() : null,
+                extraEndTime: extraEndTime ? extraEndTime.getTime() : null,
+                startTimestamp: startTimestamp ? startTimestamp.getTime() : null,
+                originalComplete,
+                extraComplete,
+                setResetState: setResetBtn.dataset.state,
+                toggleState: toggleBtn.dataset.state,
+                savedAt: Date.now()
+            };
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (err) {
+                console.log('Failed to save state:', err);
+            }
+        };
+
+        const loadState = () => {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return false;
+
+                const state = JSON.parse(saved);
+                const elapsed = Math.floor((Date.now() - state.savedAt) / 1000);
+
+                // Don't restore if too old (over 24 hours)
+                if (elapsed > 86400) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    return false;
+                }
+
+                initH = state.initH || 0;
+                initM = state.initM || 0;
+                initS = state.initS || 0;
+                initTotal = state.initTotal || 0;
+                extraPercent = state.extraPercent ?? 25;
+                originalComplete = state.originalComplete || false;
+                extraComplete = state.extraComplete || false;
+
+                extraPercentSelect.value = extraPercent;
+                updateExtraLabel();
+
+                // If timer was running, calculate current remaining time
+                if (state.endTime && !state.paused && !originalComplete) {
+                    const now = Date.now();
+                    remaining = Math.max(0, Math.floor((state.endTime - now) / 1000));
+                    extraRemaining = Math.max(0, Math.floor((state.extraEndTime - now) / 1000));
+                    endTime = new Date(state.endTime);
+                    extraEndTime = new Date(state.extraEndTime);
+                    startTimestamp = state.startTimestamp ? new Date(state.startTimestamp) : null;
+
+                    if (remaining > 0 || extraRemaining > 0) {
+                        paused = false;
+                        updateDisplays();
+                        updateInfoDisplay();
+                        restoreButtonStates(state);
+                        startTimerTick();
+                        return true;
+                    }
+                } else if (state.paused && state.remaining > 0) {
+                    // Timer was paused
+                    remaining = state.remaining;
+                    extraRemaining = state.extraRemaining;
+                    paused = true;
+                    startTimestamp = state.startTimestamp ? new Date(state.startTimestamp) : null;
+                    updateDisplays();
+                    restoreButtonStates(state);
+                    return true;
+                } else if (initTotal > 0 && !originalComplete) {
+                    // Timer was set but not started
+                    remaining = initTotal;
+                    extraRemaining = Math.round(initTotal * (1 + extraPercent / 100));
+                    updateDisplays();
+                    restoreButtonStates(state);
+                    return true;
+                }
+
+                return false;
+            } catch (err) {
+                console.log('Failed to load state:', err);
+                return false;
+            }
+        };
+
+        const restoreButtonStates = (state) => {
+            if (state.setResetState === 'reset') {
+                setResetBtn.dataset.state = 'reset';
+                setResetBtn.textContent = 'Reset Timer';
+                setResetBtn.classList.remove('btn-set');
+                setResetBtn.classList.add('btn-reset');
+            }
+
+            if (state.toggleState === 'pause') {
+                toggleBtn.dataset.state = 'pause';
+                toggleBtn.textContent = 'Pause';
+                toggleBtn.classList.remove('btn-start');
+                toggleBtn.classList.add('btn-pause');
+            } else if (state.toggleState === 'resume') {
+                toggleBtn.dataset.state = 'resume';
+                toggleBtn.textContent = 'Resume';
+                toggleBtn.classList.remove('btn-pause');
+                toggleBtn.classList.add('btn-start');
+            }
+
+            toggleBtn.disabled = initTotal === 0;
+        };
+
+        const clearState = () => {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (err) {
+                console.log('Failed to clear state:', err);
+            }
+        };
+
+        /* --------------- Actions ---------------- */
         const normalizeHMS = (hours, minutes, seconds) => {
             let h = Math.max(0, hours);
             let m = Math.max(0, minutes);
@@ -414,7 +789,20 @@
                 m %= 60;
             }
 
+            // Cap hours at 23 for reasonable timer duration
+            h = Math.min(23, h);
+
             return { h, m, s };
+        };
+
+        const updateExtraLabel = () => {
+            if (extraPercent === 0) {
+                extraLabel.textContent = 'No Extra Time';
+                extraEl.style.opacity = '0.3';
+            } else {
+                extraLabel.textContent = `${extraPercent}% Extra Time`;
+                extraEl.style.opacity = '1';
+            }
         };
 
         function setTimer() {
@@ -427,55 +815,112 @@
             initS = normalized.s;
             initTotal = initH * 3600 + initM * 60 + initS;
 
-            remaining = initTotal;
-            extraRemaining = Math.round(initTotal * 1.25);
-            toggleBtn.disabled = initTotal === 0;
+            extraPercent = parseInt(extraPercentSelect.value) || 0;
+            updateExtraLabel();
 
-            /* clear inputs immediately */
-            hoursInput.value = minutesInput.value = secondsInput.value = '';
+            remaining = initTotal;
+            extraRemaining = Math.round(initTotal * (1 + extraPercent / 100));
+
+            const isValidTime = initTotal > 0;
+            toggleBtn.disabled = !isValidTime;
+
+            // Clear inputs immediately
+            hoursInput.value = '';
+            minutesInput.value = '';
+            secondsInput.value = '';
 
             updateDisplays();
-            infoEl.textContent = ''; paused = false; stopBlink();
+            infoEl.textContent = '';
+            paused = false;
+            stopBlink();
+            originalComplete = false;
+            extraComplete = false;
 
-            // clear timing markers
-            endTime = null; extraEndTime = null;
+            // Clear timing markers
+            endTime = null;
+            extraEndTime = null;
+            startTimestamp = null;
+
+            // Focus the start button for better UX
+            if (isValidTime) {
+                toggleBtn.focus();
+            }
+
+            saveState();
+
+            // Request notification permission on first interaction
+            requestNotificationPermission();
         }
 
         function resetTimer() {
-            clearInterval(origInt); clearInterval(extraInt);
-            remaining = initTotal; extraRemaining = Math.round(initTotal * 1.25);
-            updateDisplays(); infoEl.textContent = ''; paused = false; stopBlink();
+            stopTimerTick();
 
-            /* keep input boxes empty */
-            hoursInput.value = minutesInput.value = secondsInput.value = '';
+            remaining = initTotal;
+            extraRemaining = Math.round(initTotal * (1 + extraPercent / 100));
+            updateDisplays();
+            infoEl.textContent = '';
+            paused = false;
+            stopBlink();
+            originalComplete = false;
+            extraComplete = false;
 
-            /* NEW: return toggle button to initial START state */
+            // Keep input boxes empty
+            hoursInput.value = '';
+            minutesInput.value = '';
+            secondsInput.value = '';
+
+            // Return toggle button to initial START state
             toggleBtn.dataset.state = 'start';
             toggleBtn.textContent = 'Start';
-            toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+            toggleBtn.classList.remove('btn-pause');
+            toggleBtn.classList.add('btn-start');
+            toggleBtn.disabled = initTotal === 0;
 
-            endTime = null; extraEndTime = null;
+            endTime = null;
+            extraEndTime = null;
+            startTimestamp = null;
+
+            saveState();
         }
 
         function clearTimer() {
-            clearInterval(origInt); clearInterval(extraInt);
-            remaining = extraRemaining = 0; paused = false; stopBlink();
-            initH = 0; initM = 0; initS = 0; initTotal = 0;
-            updateDisplays(); infoEl.textContent = '';
+            stopTimerTick();
 
-            hoursInput.value = minutesInput.value = secondsInput.value = '';
+            remaining = 0;
+            extraRemaining = 0;
+            paused = false;
+            stopBlink();
+            initH = 0;
+            initM = 0;
+            initS = 0;
+            initTotal = 0;
+            originalComplete = false;
+            extraComplete = false;
 
-            /* reset button states */
+            updateDisplays();
+            infoEl.textContent = '';
+
+            hoursInput.value = '';
+            minutesInput.value = '';
+            secondsInput.value = '';
+
+            // Reset button states
             setResetBtn.dataset.state = 'set';
             setResetBtn.textContent = 'Set Time';
-            setResetBtn.classList.remove('btn-reset'); setResetBtn.classList.add('btn-set');
+            setResetBtn.classList.remove('btn-reset');
+            setResetBtn.classList.add('btn-set');
 
             toggleBtn.dataset.state = 'start';
             toggleBtn.textContent = 'Start';
-            toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
-            toggleBtn.disabled = initTotal === 0;
+            toggleBtn.classList.remove('btn-pause');
+            toggleBtn.classList.add('btn-start');
+            toggleBtn.disabled = true;
 
-            endTime = null; extraEndTime = null;
+            endTime = null;
+            extraEndTime = null;
+            startTimestamp = null;
+
+            clearState();
         }
 
         const resetToggleButton = () => {
@@ -485,73 +930,127 @@
             toggleBtn.classList.add('btn-start');
         };
 
-        // Accepts "freshStart" (true when first started) or not
-        function startTimer(freshStart = true) {
+        /* ------------ Timestamp-based timer tick ------------ */
+        function startTimerTick() {
+            stopTimerTick();
+
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+
+                // Calculate remaining from actual timestamps (prevents drift)
+                if (endTime && !originalComplete) {
+                    remaining = Math.max(0, Math.ceil((endTime.getTime() - now) / 1000));
+                }
+                if (extraEndTime && !extraComplete) {
+                    extraRemaining = Math.max(0, Math.ceil((extraEndTime.getTime() - now) / 1000));
+                }
+
+                updateDisplays();
+
+                // Check original timer completion
+                if (!originalComplete && remaining <= 0) {
+                    originalComplete = true;
+                    playAlarm('alarm-sound-original');
+                    blink('original-time');
+                    sendNotification('Timer Complete', 'Original time has ended!');
+
+                    if (extraPercent === 0 || extraComplete) {
+                        resetToggleButton();
+                        stopTimerTick();
+                    }
+                    updateInfoDisplay();
+                    saveState();
+                }
+
+                // Check extra timer completion
+                if (!extraComplete && extraRemaining <= 0 && extraPercent > 0) {
+                    extraComplete = true;
+                    playAlarm('alarm-sound-extra');
+                    blink('extra-time');
+                    sendNotification('Extra Time Complete', 'Extra time has ended!');
+
+                    if (originalComplete) {
+                        resetToggleButton();
+                        stopTimerTick();
+                    }
+                    updateInfoDisplay();
+                    saveState();
+                }
+
+                // Stop if both complete
+                if (originalComplete && (extraPercent === 0 || extraComplete)) {
+                    stopTimerTick();
+                }
+            }, TICK_INTERVAL);
+        }
+
+        function stopTimerTick() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function startTimer() {
             if (remaining <= 0) return false;
 
             const now = new Date();
+            startTimestamp = now;
 
-            // (Key change) Set end time relative to now + what remains, every time timer is started/resumed
+            // Set end times based on current remaining
             endTime = new Date(now.getTime() + remaining * 1000);
             extraEndTime = new Date(now.getTime() + extraRemaining * 1000);
 
-            infoEl.innerHTML =
-                `Start: ${fClock(now)} | End: ${fClock(endTime)}
-     <span class="extra-time">| Extra End: ${fClock(extraEndTime)}</span>`;
+            originalComplete = false;
+            extraComplete = false;
 
-            clearInterval(origInt); clearInterval(extraInt);
-
-            origInt = setInterval(() => {
-                if (remaining > 0) { remaining--; updateDisplays(); }
-                else {
-                    clearInterval(origInt);
-                    playAlarm('alarm-sound-original');
-                    blink('original-time');
-                    resetToggleButton();
-                    infoEl.textContent = 'Original timer complete.';
-                    paused = false;
-                    endTime = null;
-                }
-            }, 1000);
-
-            extraInt = setInterval(() => {
-                if (extraRemaining > 0) { extraRemaining--; updateDisplays(); }
-                else {
-                    clearInterval(extraInt);
-                    playAlarm('alarm-sound-extra');
-                    blink('extra-time');
-                    if (remaining <= 0) resetToggleButton();
-                    infoEl.textContent = 'Extra time complete.';
-                    paused = false;
-                    extraEndTime = null;
-                }
-            }, 1000);
+            updateInfoDisplay();
+            startTimerTick();
+            saveState();
 
             return true;
         }
 
         const pauseTimer = () => {
-            clearInterval(origInt); clearInterval(extraInt); paused = true;
-            // On pause, we do not clear the endTime/extraEndTime,
-            // but on resume we'll recalculate them from the resume moment.
+            stopTimerTick();
+            paused = true;
+            saveState();
         };
 
         const resumeTimer = () => {
-            if (!paused) return false; paused = false;
-            // On resume, startTimer() will update end times based on current remaining.
-            return startTimer(false);
+            if (!paused) return false;
+            paused = false;
+
+            const now = new Date();
+
+            // Recalculate end times from current remaining
+            if (!originalComplete && remaining > 0) {
+                endTime = new Date(now.getTime() + remaining * 1000);
+            }
+            if (!extraComplete && extraRemaining > 0) {
+                extraEndTime = new Date(now.getTime() + extraRemaining * 1000);
+            }
+
+            updateInfoDisplay();
+            startTimerTick();
+            saveState();
+
+            return true;
         };
 
-        /* ------------ button wiring ------------ */
+        /* ------------ Button wiring ------------ */
         setResetBtn.dataset.state = 'set';
         toggleBtn.dataset.state = 'start';
 
         setResetBtn.onclick = () => {
             if (setResetBtn.dataset.state === 'set') {
                 setTimer();
-                setResetBtn.dataset.state = 'reset';
-                setResetBtn.textContent = 'Reset Timer';
-                setResetBtn.classList.remove('btn-set'); setResetBtn.classList.add('btn-reset');
+                if (initTotal > 0) {
+                    setResetBtn.dataset.state = 'reset';
+                    setResetBtn.textContent = 'Reset Timer';
+                    setResetBtn.classList.remove('btn-set');
+                    setResetBtn.classList.add('btn-reset');
+                }
             } else {
                 resetTimer();
             }
@@ -562,33 +1061,29 @@
                 infoEl.textContent = 'Set a time before starting.';
                 return;
             }
+
             switch (toggleBtn.dataset.state) {
                 case 'start':
-                    if (startTimer(true)) {
+                    if (startTimer()) {
                         toggleBtn.dataset.state = 'pause';
                         toggleBtn.textContent = 'Pause';
-                        toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
-                    } else {
-                        toggleBtn.dataset.state = 'start';
-                        toggleBtn.textContent = 'Start';
-                        toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+                        toggleBtn.classList.remove('btn-start');
+                        toggleBtn.classList.add('btn-pause');
                     }
                     break;
                 case 'pause':
                     pauseTimer();
                     toggleBtn.dataset.state = 'resume';
                     toggleBtn.textContent = 'Resume';
-                    toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+                    toggleBtn.classList.remove('btn-pause');
+                    toggleBtn.classList.add('btn-start');
                     break;
                 case 'resume':
                     if (resumeTimer()) {
                         toggleBtn.dataset.state = 'pause';
                         toggleBtn.textContent = 'Pause';
-                        toggleBtn.classList.remove('btn-start'); toggleBtn.classList.add('btn-pause');
-                    } else {
-                        toggleBtn.dataset.state = 'start';
-                        toggleBtn.textContent = 'Start';
-                        toggleBtn.classList.remove('btn-pause'); toggleBtn.classList.add('btn-start');
+                        toggleBtn.classList.remove('btn-start');
+                        toggleBtn.classList.add('btn-pause');
                     }
                     break;
             }
@@ -596,13 +1091,75 @@
 
         clearBtn.onclick = clearTimer;
 
-        /* unlock audio once */
-        setResetBtn.addEventListener('click', () => {
-            ['alarm-sound-original', 'alarm-sound-extra'].forEach(id => {
-                const a = document.getElementById(id); a.play().then(() => a.pause()).catch(() => { });
-            });
-        }, { once: true });
+        /* ------------ Extra percent change ------------ */
+        extraPercentSelect.onchange = () => {
+            if (setResetBtn.dataset.state === 'set') {
+                extraPercent = parseInt(extraPercentSelect.value) || 0;
+                updateExtraLabel();
+            }
+        };
 
+        /* ------------ Fullscreen functionality ------------ */
+        const enterFullscreen = () => {
+            document.body.classList.add('fullscreen-active');
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        };
+
+        const exitFullscreen = () => {
+            document.body.classList.remove('fullscreen-active');
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
+        };
+
+        fullscreenBtn.onclick = enterFullscreen;
+        fullscreenExitBtn.onclick = exitFullscreen;
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                document.body.classList.remove('fullscreen-active');
+            }
+        });
+
+        /* ------------ Keyboard shortcuts ------------ */
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleBtn.click();
+            } else if (e.code === 'Escape') {
+                e.preventDefault();
+                if (document.body.classList.contains('fullscreen-active')) {
+                    exitFullscreen();
+                } else if (setResetBtn.dataset.state === 'reset') {
+                    resetTimer();
+                }
+            }
+        });
+
+        /* ------------ Unlock audio once ------------ */
+        const unlockAudio = () => {
+            ['alarm-sound-original', 'alarm-sound-extra'].forEach(id => {
+                const a = document.getElementById(id);
+                a.muted = true;
+                a.play().then(() => {
+                    a.pause();
+                    a.muted = false;
+                    a.currentTime = 0;
+                }).catch(() => {});
+            });
+        };
+
+        setResetBtn.addEventListener('click', unlockAudio, { once: true });
+        toggleBtn.addEventListener('click', unlockAudio, { once: true });
+
+        /* ------------ Offline font handling ------------ */
         function updateOfflineFontState() {
             document.documentElement.classList.toggle('offline-font', !navigator.onLine);
         }
@@ -610,8 +1167,24 @@
         window.addEventListener('online', updateOfflineFontState);
         window.addEventListener('offline', updateOfflineFontState);
         updateOfflineFontState();
+
+        /* ------------ Page visibility handling ------------ */
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && timerInterval) {
+                // Force immediate update when tab becomes visible
+                updateDisplays();
+                updateInfoDisplay();
+            }
+        });
+
+        /* ------------ Initialize ------------ */
+        const initialized = loadState();
+        if (!initialized) {
+            updateDisplays();
+            toggleBtn.disabled = true;
+        }
+        updateExtraLabel();
     </script>
 </body>
-
 
 </html>
