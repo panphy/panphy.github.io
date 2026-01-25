@@ -280,10 +280,6 @@
             background: #2d3436;
         }
 
-        .btn-fullscreen {
-            background: #636e72;
-        }
-
         .blink {
             animation: blinker 1s linear infinite;
         }
@@ -292,14 +288,6 @@
             50% {
                 opacity: 0;
             }
-        }
-
-        /* Keyboard shortcut hints */
-        .shortcut-hint {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-            opacity: 0.7;
         }
 
         @media(max-width:600px) {
@@ -332,10 +320,6 @@
 
             .control-container {
                 align-self: auto;
-            }
-
-            .shortcut-hint {
-                display: none;
             }
         }
 
@@ -454,9 +438,7 @@
                 <button id="setResetBtn" class="btn-set">Set&nbsp;Time</button>
                 <button id="toggleBtn" class="btn-start">Start</button>
                 <button id="clearBtn" class="btn-clear">Clear&nbsp;All</button>
-                <button id="fullscreenBtn" class="btn-fullscreen">Fullscreen</button>
             </div>
-            <div class="shortcut-hint">Space: Start/Pause | Esc: Reset</div>
         </div>
     </div>
     <audio id="alarm-sound-original" src="timer_beep.mp3" preload="auto"></audio>
@@ -484,7 +466,6 @@
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
         const clearBtn = document.getElementById('clearBtn');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
         const fullscreenExitBtn = document.getElementById('fullscreenExitBtn');
 
         /* ------------- Live HH:MM clock ------------- */
@@ -1064,7 +1045,6 @@
             }
         };
 
-        fullscreenBtn.onclick = enterFullscreen;
         fullscreenExitBtn.onclick = exitFullscreen;
 
         document.addEventListener('fullscreenchange', () => {
