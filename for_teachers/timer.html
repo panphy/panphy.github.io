@@ -525,8 +525,17 @@
         };
 
         const updateInfoDisplay = () => {
+            // Show placeholder content when timer is set but not started (prevents layout jump)
             if (!startTimestamp) {
-                infoEl.innerHTML = '';
+                if (initTotal > 0) {
+                    let html = '<span class="info-line" style="visibility: hidden;">Start: --:-- | End: --:--</span>';
+                    if (extraPercent > 0) {
+                        html += '<span class="info-line extra-time" style="visibility: hidden;">Extra End: --:--</span>';
+                    }
+                    infoEl.innerHTML = html;
+                } else {
+                    infoEl.innerHTML = '';
+                }
                 return;
             }
 
@@ -760,7 +769,6 @@
             secondsInput.value = '';
 
             updateDisplays();
-            infoEl.textContent = '';
             paused = false;
             stopBlink();
             originalComplete = false;
@@ -770,6 +778,9 @@
             endTime = null;
             extraEndTime = null;
             startTimestamp = null;
+
+            // Show placeholder content to reserve space
+            updateInfoDisplay();
 
             // Focus the start button for better UX
             if (isValidTime) {
@@ -788,7 +799,6 @@
             remaining = initTotal;
             extraRemaining = Math.round(initTotal * (1 + extraPercent / 100));
             updateDisplays();
-            infoEl.textContent = '';
             paused = false;
             stopBlink();
             originalComplete = false;
@@ -810,6 +820,9 @@
             extraEndTime = null;
             startTimestamp = null;
 
+            // Show placeholder content to reserve space
+            updateInfoDisplay();
+
             saveState();
         }
 
@@ -828,7 +841,7 @@
             extraComplete = false;
 
             updateDisplays();
-            infoEl.textContent = '';
+            updateInfoDisplay();
 
             hoursInput.value = '';
             minutesInput.value = '';
