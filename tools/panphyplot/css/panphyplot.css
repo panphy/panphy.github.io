@@ -327,7 +327,7 @@ body {
 	display: flex;
 	gap: 20px;
 	flex-wrap: wrap;
-	padding: 12px 20px 40px;
+	padding: 4px 20px 40px;
 }
 
 .input-section,
