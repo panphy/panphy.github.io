@@ -194,17 +194,17 @@
     canvas {
       display: block;
       width: 100%;
-      height: clamp(140px, 18vh, 180px);
+      height: clamp(180px, 24vh, 240px);
       border-radius: 12px;
     }
 
     #visualizer {
-      height: clamp(120px, 16vh, 150px);
+      height: clamp(200px, 28vh, 280px);
     }
 
     #waveform {
-      height: clamp(200px, 28vh, 260px);
-      touch-action: none;
+      height: clamp(280px, 42vh, 420px);
+      touch-action: pan-y;
     }
 
     #tooltip {
@@ -407,6 +407,8 @@
   const tooltip = document.getElementById('tooltip');
   const peakFreqDisplay = document.getElementById('peak-frequency-value');
   const timeDeltaDisplay = document.getElementById('time-delta-value');
+  const spectrumPanel = document.getElementById('spectrum-panel');
+  const waveformPanel = document.getElementById('waveform-panel');
 
   const toggleBtn = document.getElementById('toggleBtn');
   const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
@@ -482,12 +484,25 @@
   });
 
   freqCanvas.addEventListener('mousemove', onCanvasHover);
+  freqCanvas.addEventListener('touchstart', onCanvasTouch, { passive: false });
   freqCanvas.addEventListener('touchmove', onCanvasTouch, { passive: false });
+  freqCanvas.addEventListener('touchend', hideTooltip);
+  freqCanvas.addEventListener('touchcancel', hideTooltip);
 
   waveCanvas.addEventListener('pointerdown', onWaveformPointerDown);
   waveCanvas.addEventListener('pointermove', onWaveformPointerMove);
   window.addEventListener('pointerup', onWaveformPointerUp);
   window.addEventListener('pointercancel', onWaveformPointerUp);
+  waveCanvas.addEventListener('touchstart', onWaveformTouchStart, { passive: false });
+  waveCanvas.addEventListener('touchmove', onWaveformTouchMove, { passive: false });
+  waveCanvas.addEventListener('touchend', onWaveformTouchEnd);
+  waveCanvas.addEventListener('touchcancel', onWaveformTouchEnd);
+
+  [spectrumPanel, waveformPanel].forEach((panel) => {
+    panel.addEventListener('toggle', () => {
+      requestAnimationFrame(setupCanvasResolution);
+    });
+  });
 
   yScaleSlider.addEventListener('input', () => {
     waveAmplitudeScale = parseFloat(yScaleSlider.value);
@@ -867,6 +882,33 @@
     waveCanvas.style.cursor = 'crosshair';
   }
 
+  function onWaveformTouchStart(event) {
+    if (!event.touches.length) return;
+    const rect = waveCanvas.getBoundingClientRect();
+    const touch = event.touches[0];
+    const cursorX = touch.clientX - rect.left;
+    activeMarker = pickActiveMarker(cursorX, true);
+    if (!activeMarker) return;
+    updateMarkerPosition(cursorX);
+    updateWaveformCursor(cursorX);
+    event.preventDefault();
+  }
+
+  function onWaveformTouchMove(event) {
+    if (!event.touches.length || !activeMarker) return;
+    const rect = waveCanvas.getBoundingClientRect();
+    const touch = event.touches[0];
+    const cursorX = touch.clientX - rect.left;
+    updateMarkerPosition(cursorX);
+    updateWaveformCursor(cursorX);
+    event.preventDefault();
+  }
+
+  function onWaveformTouchEnd() {
+    activeMarker = null;
+    waveCanvas.style.cursor = 'crosshair';
+  }
+
   // ------------------ Export Spectrum (remove zero-amplitude) ------------------
   function exportSpectrumAsCSV() {
     if (!analyzer || !lastFreqFrame) {
@@ -952,6 +994,10 @@
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
     showTooltip(x, y);
+  }
+
+  function hideTooltip() {
+    tooltip.style.display = 'none';
   }
 
   function showTooltip(x, y) {
