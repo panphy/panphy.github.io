@@ -1,24 +1,67 @@
 // App bootstrap
 
 document.addEventListener("DOMContentLoaded", function() {
-	// Ensure base dataset structures exist.
-	if (!datasetHeaders[0]) datasetHeaders[0] = { x: 'x', y: 'y' };
-	if (!datasetToggles[0]) datasetToggles[0] = { x: false, y: false };
-	if (!datasetErrorTypes[0]) datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
+	const savedState = loadState();
+	const themeButton = document.getElementById('theme-button');
 
-	// Initialise a clean table with defaults.
-	clearRows(true);
+	const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+	const storedTheme = localStorage.getItem(THEME_KEY);
+	const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
+	document.documentElement.setAttribute('data-theme', initialTheme);
 
-	// Persist initial headers.
-	datasetHeaders[0].x = document.getElementById('x-column-name').value || 'x';
-	datasetHeaders[0].y = document.getElementById('y-column-name').value || 'y';
+	function updateThemeButton(theme) {
+		if (themeButton) {
+			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+		}
+	}
 
-	// If the user edits the title manually, stop auto-updating it.
-	const titleInput = document.getElementById('graph-title');
-	if (titleInput) {
-		titleInput.addEventListener('input', function() {
-			titleWasAuto = false;
+	updateThemeButton(initialTheme);
+
+	if (themeButton) {
+		themeButton.addEventListener('click', function() {
+			const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+			const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+			document.documentElement.setAttribute('data-theme', nextTheme);
+			localStorage.setItem(THEME_KEY, nextTheme);
+			updateThemeButton(nextTheme);
+			lastPlotState.data = null;
+			lastPlotState.layout = null;
+			updatePlotAndRenderLatex();
+			const popupContainer = document.getElementById('popup-container');
+			if (popupContainer && popupContainer.style.display === 'block') {
+				plotAllDatasets();
+			}
 		});
+	}
+
+	if (savedState) {
+		rawData = Array.isArray(savedState.rawData) && savedState.rawData.length ? savedState.rawData : [[]];
+		activeSet = Math.min(savedState.activeSet ?? 0, rawData.length - 1);
+		datasetHeaders = savedState.datasetHeaders || {};
+		datasetToggles = savedState.datasetToggles || {};
+		datasetErrorTypes = savedState.datasetErrorTypes || {};
+		dataset1XValues = savedState.dataset1XValues || [];
+		latexMode = !!savedState.latexMode;
+		titleWasAuto = savedState.titleWasAuto ?? true;
+
+		rawData.forEach((dataset, index) => {
+			if (!Array.isArray(dataset)) rawData[index] = [];
+			if (!datasetHeaders[index]) datasetHeaders[index] = { x: 'x', y: 'y' };
+			if (!datasetToggles[index]) datasetToggles[index] = { x: false, y: false };
+			if (!datasetErrorTypes[index]) datasetErrorTypes[index] = { x: 'absolute', y: 'absolute' };
+		});
+	} else {
+		// Ensure base dataset structures exist.
+		if (!datasetHeaders[0]) datasetHeaders[0] = { x: 'x', y: 'y' };
+		if (!datasetToggles[0]) datasetToggles[0] = { x: false, y: false };
+		if (!datasetErrorTypes[0]) datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
+
+		// Initialise a clean table with defaults.
+		clearRows(true);
+
+		// Persist initial headers.
+		datasetHeaders[0].x = document.getElementById('x-column-name').value || 'x';
+		datasetHeaders[0].y = document.getElementById('y-column-name').value || 'y';
 	}
 
 	// Fit UI initialisation.
@@ -30,13 +73,51 @@ document.addEventListener("DOMContentLoaded", function() {
 	// Dataset tabs.
 	initializeDatasetTabsBar();
 
+	// Populate UI from saved state when available.
+	if (savedState) {
+		populateTableFromActiveDataset();
+		loadHeaders();
+		loadToggles();
+		loadErrorTypes();
+	}
+
 	// Combined plot inputs.
 	initCombinedPlotInputs();
+
+	if (savedState && savedState.combinedPlot) {
+		const combinedTitleInput = document.getElementById('combined-title');
+		const combinedXInput = document.getElementById('combined-x-label');
+		const combinedYInput = document.getElementById('combined-y-label');
+		if (combinedTitleInput && typeof savedState.combinedPlot.title === 'string') {
+			combinedTitleInput.value = savedState.combinedPlot.title;
+		}
+		if (combinedXInput && typeof savedState.combinedPlot.xLabel === 'string') {
+			combinedXInput.value = savedState.combinedPlot.xLabel;
+		}
+		if (combinedYInput && typeof savedState.combinedPlot.yLabel === 'string') {
+			combinedYInput.value = savedState.combinedPlot.yLabel;
+		}
+	}
+
+	const titleInput = document.getElementById('graph-title');
+	if (titleInput) {
+		if (savedState && typeof savedState.graphTitle === 'string') {
+			titleInput.value = savedState.graphTitle;
+		}
+		titleInput.addEventListener('input', function() {
+			titleWasAuto = false;
+			scheduleSaveState();
+		});
+	}
+
+	if (titleWasAuto) {
+		updateGraphTitle(true);
+	}
 
 	// LaTeX mode toggle.
 	const latexToggle = document.getElementById('latex-mode-toggle');
 	if (latexToggle) {
-		latexToggle.checked = false; // default off
+		latexToggle.checked = latexMode;
 		latexToggle.addEventListener('change', function() {
 			latexMode = this.checked;
 			updatePlotAndRenderLatex();
@@ -46,6 +127,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			updateUncertaintyHeaders('y');
 			// Convert auto-title formatting if it has not been manually edited.
 			updateGraphTitle();
+			scheduleSaveState();
 		});
 	}
+
+	updatePlotAndRenderLatex();
+	scheduleSaveState();
 });

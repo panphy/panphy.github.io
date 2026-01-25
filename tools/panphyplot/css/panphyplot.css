@@ -21,6 +21,32 @@
 	--danger: #e0565b;
 	--info: #3f7bbf;
 	--warning: #f4b860;
+	--nav-bg: rgba(255, 255, 255, 0.9);
+	--nav-border: #dfe3ea;
+}
+
+[data-theme="dark"] {
+	--bg-color: #0f1014;
+	--bg-pattern: #181a20;
+	--text-main: #dfe6e9;
+	--text-secondary: #b2bec3;
+	--brand-primary: #a29bfe;
+	--brand-secondary: #6c5ce7;
+	--brand-accent: #81ecec;
+	--card-bg: #1e2129;
+	--card-border: #2d3436;
+	--card-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+	--soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+	--tab-bg: #262b35;
+	--tab-active-bg: rgba(162, 155, 254, 0.2);
+	--tab-active-border: rgba(162, 155, 254, 0.4);
+	--muted-bg: #252b34;
+	--border-color: #2d3436;
+	--input-border: #3c4654;
+	--input-focus: rgba(162, 155, 254, 0.35);
+	--warning: #f0b758;
+	--nav-bg: rgba(22, 24, 29, 0.85);
+	--nav-border: rgba(255, 255, 255, 0.08);
 }
 
 * {
@@ -44,7 +70,7 @@ body {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	background-color: rgba(255, 255, 255, 0.9);
+	background-color: var(--nav-bg);
 	color: var(--text-main);
 	padding: 10px 20px;
 	font-size: 22px;
@@ -53,7 +79,7 @@ body {
 	top: 0;
 	z-index: 10;
 	backdrop-filter: blur(10px);
-	border-bottom: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--nav-border);
 	box-shadow: var(--soft-shadow);
 }
 
@@ -80,6 +106,8 @@ body {
 	display: flex;
 	justify-content: flex-end;
 	margin-right: 5px;
+	gap: 10px;
+	align-items: center;
 }
 
 .banner-button {
@@ -98,6 +126,29 @@ body {
 	background: #ffffff;
 	transform: translateY(-1px);
 	border-color: var(--brand-primary);
+}
+
+[data-theme="dark"] .banner-button:hover {
+	background: #2a303a;
+}
+
+.theme-toggle button {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	font-size: 1.1rem;
+	padding: 6px;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-main);
+	box-shadow: none;
+}
+
+.theme-toggle button:hover {
+	background-color: rgba(128, 128, 128, 0.2);
+	transform: rotate(15deg);
 }
 
 /* Reminder and Toggle */
@@ -397,6 +448,11 @@ body {
 	word-wrap: break-word;
 }
 
+[data-theme="dark"] .data-table .latex-display {
+	background-color: #252b34;
+	border-color: rgba(162, 155, 254, 0.3);
+}
+
 .data-table td input {
 	width: 100%;
 	border: none;
@@ -419,6 +475,14 @@ body {
 
 .data-table tbody tr:nth-child(even) {
 	background-color: #ffffff;
+}
+
+[data-theme="dark"] .data-table tbody tr:nth-child(odd) {
+	background-color: #1b1f27;
+}
+
+[data-theme="dark"] .data-table tbody tr:nth-child(even) {
+	background-color: #151920;
 }
 
 /* Buttons */
@@ -498,10 +562,10 @@ button:hover {
 /* Global Uncertainty */
 .global-uncertainty {
 	margin: 20px 0;
-	padding: 16px;
-	border-radius: 12px;
-	background: var(--muted-bg);
-	border: 1px solid var(--border-color);
+	padding: 0;
+	border-radius: 0;
+	background: transparent;
+	border: none;
 }
 
 .uncertainty-controls {
@@ -531,6 +595,8 @@ button:hover {
 	font-size: 0.9rem;
 	border: 1px solid var(--input-border);
 	border-radius: 10px;
+	background-color: var(--card-bg);
+	color: var(--text-main);
 }
 
 .global-uncertainty-item input:focus {
@@ -566,7 +632,7 @@ select {
 	border: 1px solid var(--input-border);
 	border-radius: 10px;
 	margin-bottom: 15px;
-	background: #fff;
+	background: var(--card-bg);
 	color: var(--text-main);
 }
 
@@ -588,6 +654,8 @@ select {
 	padding: 8px 10px;
 	border: 1px solid var(--input-border);
 	border-radius: 10px;
+	background-color: var(--card-bg);
+	color: var(--text-main);
 }
 
 .advanced-fit-item input:focus {
@@ -615,6 +683,11 @@ select {
 	font-size: 1rem;
 	text-align: center;
 	color: var(--text-main);
+}
+
+[data-theme="dark"] .general-equation {
+	background-color: #252b34;
+	border-color: rgba(162, 155, 254, 0.3);
 }
 
 /* Tabs */
@@ -667,6 +740,10 @@ select {
 	padding: 15px;
 	border-radius: 12px;
 	border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .result {
+	background-color: #1b1f27;
 }
 
 .result h3 {
@@ -762,6 +839,8 @@ select {
 	font-size: 0.9rem;
 	border: 1px solid var(--input-border);
 	border-radius: 10px;
+	background-color: var(--card-bg);
+	color: var(--text-main);
 }
 
 .graph-title-container input:focus {
@@ -795,7 +874,7 @@ select {
 }
 
 #popup-content {
-	background: #fff;
+	background: var(--card-bg);
 	padding: 24px;
 	border-radius: 16px;
 	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -813,6 +892,7 @@ select {
 	margin-bottom: 6px;
 	text-align: center;
 	font-family: 'Poppins', sans-serif;
+	color: var(--text-main);
 }
 
 #popup-plot {
@@ -871,6 +951,8 @@ select {
 	border-radius: 10px;
 	flex-grow: 1;
 	box-sizing: border-box;
+	background-color: var(--card-bg);
+	color: var(--text-main);
 }
 
 #popup-plot-container {

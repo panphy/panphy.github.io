@@ -224,6 +224,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 		// Update the rest of the UI to reflect the new active dataset.
 		updateData();
 		updatePlotAndRenderLatex();
+		scheduleSaveState();
 	}
 
 
@@ -249,6 +250,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 		updateDatasetTabsBar();
 		switchDataset(activeSet);
 		updatePlotAndRenderLatex();
+		scheduleSaveState();
 	}
 
 
@@ -316,6 +318,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 		// Re-draw the plot (with no data points). The old fit may still appear
 		updatePlotAndRenderLatex();
+		scheduleSaveState();
 	}
 
 
@@ -531,6 +534,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 		updateData();
 		setInitialParameters(getCurrentAdvancedFitMethod());
+		scheduleSaveState();
 	}
 
 
@@ -669,6 +673,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 		updateData();
 		setInitialParameters(getCurrentAdvancedFitMethod());
+		scheduleSaveState();
 	}
 
 
@@ -872,6 +877,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 		// Update any other elements that depend on the headers.
 		setInitialParameters(getCurrentAdvancedFitMethod());
 		updateCombinedPlotInputsToActive();
+		scheduleSaveState();
 	}
 
 
@@ -953,6 +959,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 	function updateCombinedPlotFromInputs() {
 		// Simply call plotAllDatasets; the updated version will check the input box values.
 		plotAllDatasets();
+		scheduleSaveState();
 	}
 
 
@@ -1023,6 +1030,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 			// Update the plot using only the active dataset.
 			plotGraph();
+			scheduleSaveState();
 		} catch (error) {
 			console.error('Error updating data:', error);
 		}
