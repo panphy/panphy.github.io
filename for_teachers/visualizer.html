@@ -6,13 +6,26 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Camera Visualizer</title>
 	<link rel="icon" type="image/png" href="/favicon.png">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 	<style>
 		:root {
-			--bg: #0f1117;
-			--panel: #161a22;
-			--text: #e6e6e6;
+			--bg-color: #0f1014;
+			--bg-pattern: #181a20;
+			--text-main: #dfe6e9;
+			--text-secondary: #b2bec3;
+			--brand-primary: #a29bfe;
+			--brand-secondary: #6c5ce7;
+			--brand-accent: #81ecec;
+			--nav-bg: rgba(22, 24, 29, 0.85);
+			--nav-border: rgba(255, 255, 255, 0.05);
+			--panel: #1e2129;
+			--panel-border: #2d3436;
+			--panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+			--text: var(--text-main);
 			--muted: #8b93a7;
-			--accent: #4da3ff;
+			--accent: var(--brand-primary);
 			--danger: #ff5d5d;
 			--good: #00d27a;
 			--warn: #ffb020;
@@ -20,7 +33,8 @@
 		}
 
 		* {
-			box-sizing: border-box
+			box-sizing: border-box;
+			transition: background-color .3s ease, color .3s ease, border-color .3s ease
 		}
 
 		html,
@@ -32,18 +46,22 @@
 			margin: 0;
 			min-height: 100svh;
 			padding-bottom: env(safe-area-inset-bottom);
-			background: #0f1117;
+			background-color: var(--bg-color);
+			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+			background-size: 30px 30px;
 			color: var(--text);
-			font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
+			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 			display: flex;
 			flex-direction: column
 		}
 
 		/* Top bar */
 		.topbar {
-			background: #2a2f3b;
-			color: #fff;
-			border-bottom: 1px solid #000
+			background: var(--nav-bg);
+			color: var(--text);
+			border-bottom: 1px solid var(--nav-border);
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px)
 		}
 
 		.topbar .bar {
@@ -61,7 +79,7 @@
 			align-items: center;
 			gap: .35rem;
 			text-decoration: none;
-			color: #fff
+			color: var(--text-main)
 		}
 
 		.topbar .brand img {
@@ -71,14 +89,55 @@
 		}
 
 		.topbar .title {
+			font-family: 'Poppins', sans-serif;
 			font-size: 17px;
-			font-weight: 700
+			font-weight: 700;
+			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text
 		}
 
 		header {
-			padding: .35rem .6rem .3rem;
-			background: rgba(0, 0, 0, .18);
-			border-bottom: 1px solid rgba(255, 255, 255, .06)
+			padding: .35rem .6rem .3rem
+		}
+
+		.controls {
+			background: transparent
+		}
+
+		.controls summary {
+			list-style: none;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: .5rem;
+			padding: .5rem .7rem;
+			background: var(--panel);
+			border: 1px solid var(--panel-border);
+			border-radius: .65rem;
+			color: var(--text-main);
+			font-weight: 600;
+			box-shadow: var(--panel-shadow)
+		}
+
+		.controls summary::-webkit-details-marker {
+			display: none
+		}
+
+		.controls summary::after {
+			content: '+';
+			font-size: 1.1rem;
+			color: var(--text-secondary)
+		}
+
+		.controls[open] summary::after {
+			content: '–'
+		}
+
+		.controls .row {
+			margin-top: .5rem
 		}
 
 		.row {
@@ -94,9 +153,10 @@
 			gap: .4rem;
 			flex-wrap: nowrap;
 			background: var(--panel);
-			border: 1px solid var(--ring);
+			border: 1px solid var(--panel-border);
 			padding: .26rem .38rem;
-			border-radius: .5rem
+			border-radius: .55rem;
+			box-shadow: var(--panel-shadow)
 		}
 
 		.title-mini {
@@ -109,9 +169,9 @@
 
 		select,
 		button {
-			background: #0e121a;
+			background: #151820;
 			color: var(--text);
-			border: 1px solid var(--ring);
+			border: 1px solid var(--panel-border);
 			border-radius: .4rem;
 			padding: .22rem .42rem;
 			font-size: .9rem;
@@ -134,9 +194,9 @@
 		}
 
 		.primary {
-			background: var(--accent);
-			border-color: #9acbff;
-			color: #061423
+			background: var(--brand-primary);
+			border-color: var(--brand-accent);
+			color: #11131a
 		}
 
 		.danger {
@@ -146,12 +206,12 @@
 		}
 
 		.muted {
-			background: #0e121a;
+			background: #151820;
 			color: #adb3c4
 		}
 
 		.active {
-			box-shadow: 0 0 0 2px #9acbff inset
+			box-shadow: 0 0 0 2px rgba(162, 155, 254, .55) inset
 		}
 
 		.fixed-width-btn {
@@ -167,7 +227,7 @@
 			font-weight: 700;
 			padding: .22rem .42rem;
 			border-radius: .4rem;
-			border: 1px solid var(--ring);
+			border: 1px solid var(--panel-border);
 			min-width: 84px;
 			text-align: center;
 			cursor: pointer;
@@ -182,7 +242,7 @@
 			gap: .3rem;
 			padding: .12rem .4rem;
 			border-radius: .4rem;
-			border: 1px solid var(--ring);
+			border: 1px solid var(--panel-border);
 			color: #adb3c4;
 			font-size: .75rem;
 			letter-spacing: .02em;
@@ -190,8 +250,8 @@
 		}
 
 		.laserIndicator.active {
-			background: rgba(77, 163, 255, .2);
-			border-color: rgba(154, 203, 255, .6);
+			background: rgba(162, 155, 254, .2);
+			border-color: rgba(162, 155, 254, .6);
 			color: #dcecff
 		}
 
@@ -257,7 +317,7 @@
 			position: absolute;
 			inset: 0;
 			cursor: pointer;
-			background: #293040;
+			background: #262b35;
 			border-radius: 999px;
 			border: 1px solid rgba(255, 255, 255, .12);
 			transition: .2s
@@ -276,7 +336,7 @@
 		}
 
 		input:checked+.slider {
-			background: #1f6bff
+			background: var(--brand-secondary)
 		}
 
 		input:checked+.slider:before {
@@ -303,9 +363,9 @@
 			justify-content: center;
 			width: 28px;
 			height: 22px;
-			border: 1px solid var(--ring);
+			border: 1px solid var(--panel-border);
 			border-radius: .35rem;
-			background: #0e121a;
+			background: #151820;
 			cursor: pointer
 		}
 
@@ -319,7 +379,7 @@
 		}
 
 		.dotBtn.active {
-			outline: 2px solid #9acbff
+			outline: 2px solid rgba(162, 155, 254, .75)
 		}
 
 		#zoomGroup {
@@ -345,7 +405,7 @@
 			flex: 1;
 			min-height: 50vh;
 			margin: .4rem .6rem calc(.5rem + env(safe-area-inset-bottom));
-			border: 1px solid var(--ring);
+			border: 1px solid var(--panel-border);
 			border-radius: 12px;
 			overflow: hidden;
 			background: #000
@@ -376,7 +436,7 @@
 			background: rgba(0, 0, 0, .4);
 			padding: .2rem .4rem;
 			border-radius: .35rem;
-			border: 1px solid var(--ring)
+			border: 1px solid var(--panel-border)
 		}
 
 		#statusDot {
@@ -418,8 +478,8 @@
 			position: absolute;
 			display: none;
 			z-index: 20;
-			background: rgba(20, 22, 28, .2);
-			border: 1px dashed rgba(255, 255, 255, .5);
+			background: rgba(20, 22, 28, .35);
+			border: 1px dashed rgba(255, 255, 255, .35);
 			border-radius: .45rem;
 			padding: .35rem
 		}
@@ -510,62 +570,65 @@
 
 	<!-- Toolbar -->
 	<header>
-		<div class="row">
-			<div class="group">
-				<span class="title-mini">Camera</span>
-				<select id="cameraSelect"></select>
-				<div id="cameraHelper" class="helperText" aria-live="polite"></div>
-				<button id="refreshBtn">Refresh</button>
-			</div>
+		<details class="controls">
+			<summary>Controls</summary>
+			<div class="row">
+				<div class="group">
+					<span class="title-mini">Camera</span>
+					<select id="cameraSelect"></select>
+					<div id="cameraHelper" class="helperText" aria-live="polite"></div>
+					<button id="refreshBtn">Refresh</button>
+				</div>
 
-			<div class="group">
-				<span class="title-mini">Stream</span>
-				<label class="switch">
-					<input id="liveToggle" type="checkbox" checked />
-					<span class="slider"></span>
-				</label>
-				<span class="vsep"></span>
-				<div class="status">
-					<span id="statusLight" class="light live"></span>
-					<span id="statusLabel" class="statusText">Live</span>
+				<div class="group">
+					<span class="title-mini">Stream</span>
+					<label class="switch">
+						<input id="liveToggle" type="checkbox" checked />
+						<span class="slider"></span>
+					</label>
+					<span class="vsep"></span>
+					<div class="status">
+						<span id="statusLight" class="light live"></span>
+						<span id="statusLabel" class="statusText">Live</span>
+					</div>
+				</div>
+
+				<div class="group">
+					<span class="title-mini">Display</span>
+					<button id="screenshotBtn">Snapshot</button>
+					<button id="recordBtn">Record</button>
+					<button id="mirrorBtn">Mirror</button>
+					<button id="fitBtn" class="fixed-width-btn" aria-label="Full View (Fit)" title="Full View (Fit)">Fit</button>
+				</div>
+
+				<div class="group">
+					<label for="pointerColorInput" id="pointerLabelBtn" class="labelBtn">Pointer</label>
+					<input id="pointerColorInput" type="color" class="srOnly" value="#ff3b3b" />
+					<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
+					<span id="laserIndicator" class="laserIndicator" aria-live="polite">
+						<span class="dot" aria-hidden="true"></span>
+						Laser
+					</span>
+				</div>
+
+				<div class="group" id="annotGroup">
+					<label for="annotColorInput" id="annotLabelBtn" class="labelBtn">Annotate</label>
+					<input id="annotColorInput" type="color" class="srOnly" value="#33d17a" />
+					<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
+					<button id="annotationBtn" class="muted">Annotation</button>
+					<button id="eraserBtn" class="muted">Eraser</button>
+					<button id="textBtn" class="muted">Text</button>
+					<button id="undoBtn" class="muted">Undo</button>
+					<button id="clearBtn" class="danger">Clear</button>
+				</div>
+
+				<div class="group" id="zoomGroup">
+					<span class="title-mini">Zoom</span>
+					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
+					<span id="zoomVal">1.0×</span>
 				</div>
 			</div>
-
-			<div class="group">
-				<span class="title-mini">Display</span>
-				<button id="screenshotBtn">Snapshot</button>
-				<button id="recordBtn">Record</button>
-				<button id="mirrorBtn">Mirror</button>
-				<button id="fitBtn" class="fixed-width-btn" aria-label="Full View (Fit)" title="Full View (Fit)">Fit</button>
-			</div>
-
-			<div class="group">
-				<label for="pointerColorInput" id="pointerLabelBtn" class="labelBtn">Pointer</label>
-				<input id="pointerColorInput" type="color" class="srOnly" value="#ff3b3b" />
-				<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
-				<span id="laserIndicator" class="laserIndicator" aria-live="polite">
-					<span class="dot" aria-hidden="true"></span>
-					Laser
-				</span>
-			</div>
-
-			<div class="group" id="annotGroup">
-				<label for="annotColorInput" id="annotLabelBtn" class="labelBtn">Annotate</label>
-				<input id="annotColorInput" type="color" class="srOnly" value="#33d17a" />
-				<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
-				<button id="annotationBtn" class="muted">Annotation</button>
-				<button id="eraserBtn" class="muted">Eraser</button>
-				<button id="textBtn" class="muted">Text</button>
-				<button id="undoBtn" class="muted">Undo</button>
-				<button id="clearBtn" class="danger">Clear</button>
-			</div>
-
-			<div class="group" id="zoomGroup">
-				<span class="title-mini">Zoom</span>
-				<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
-				<span id="zoomVal">1.0×</span>
-			</div>
-		</div>
+		</details>
 	</header>
 
 	<!-- Stage -->
