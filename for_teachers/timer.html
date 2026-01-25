@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .catch((err) => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
     <style>
         /* ... [unchanged CSS from your file] ... */
         :root {
@@ -101,7 +109,7 @@
         }
 
         #current-clock {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: clamp(1.4rem, 2.2vw, 2.4rem);
             margin: 0;
             padding: 0.6rem 1rem;
@@ -291,6 +299,16 @@
             text-align: center;
             color: var(--text-secondary);
             font-size: 0.95rem
+        }
+
+        @media (pointer: coarse) {
+            button,
+            input,
+            select,
+            .timer-button {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
         }
 
         .offline-font {

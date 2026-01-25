@@ -6,6 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown Editor with LaTeX</title>
   <link rel="icon" type="image/png" href="/favicon.png">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .catch((err) => console.log('Service Worker registration failed', err));
+      });
+    }
+  </script>
   <!-- MathJax Configuration -->
   <script>
     window.MathJax = {
@@ -198,7 +206,7 @@
       margin: 0;
       font-size: 0.95rem;
       font-weight: 600;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       letter-spacing: 0.2px;
     }
 
@@ -762,6 +770,20 @@
         min-width: 100px;
       }
 
+    }
+
+    @media (pointer: coarse) {
+      button,
+      input,
+      select,
+      textarea {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+
+      .buttonContainer button {
+        padding: 0.6rem 0.9rem;
+      }
     }
 
     .offline-font {

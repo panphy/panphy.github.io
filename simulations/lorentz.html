@@ -8,6 +8,14 @@
 
     <title>Lorentz Transformation – Interactive Minkowski Diagram</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .catch((err) => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
     <style>
         :root {
             --font-sans: "Poppins", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -308,6 +316,21 @@
 
         footer a:visited {
             color: #ff5f1f;
+        }
+
+        @media (pointer: coarse) {
+            button,
+            input,
+            select,
+            .controls button,
+            #contextMenu {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+
+            canvas {
+                touch-action: none;
+            }
         }
     </style>
 </head>

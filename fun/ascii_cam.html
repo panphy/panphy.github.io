@@ -6,6 +6,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Live ASCII Camera with 8-bit Color</title>
 	<link rel="icon" type="image/png" href="/favicon.png">
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js')
+					.catch((err) => console.log('Service Worker registration failed', err));
+			});
+		}
+	</script>
 	<style>
 		body {
 			display: flex;
@@ -80,6 +88,19 @@
 
 		footer a:hover {
 			text-decoration: underline;
+		}
+
+		@media (pointer: coarse) {
+			button,
+			input,
+			select {
+				min-height: 44px;
+				touch-action: manipulation;
+			}
+
+			input[type=range] {
+				min-height: 44px;
+			}
 		}
 	</style>
 </head>
