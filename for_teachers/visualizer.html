@@ -1516,7 +1516,12 @@
 			}
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(ev => target.addEventListener(ev, touchGuard, { passive: false }));
 
+			function isStageControlTarget(e) {
+				return !!(e.target.closest('.controls') || e.target.closest('#fullscreenBtn') || e.target.closest('#textOverlay'));
+			}
+
 			target.addEventListener('pointerdown', e => {
+				if (isStageControlTarget(e)) return;
 				if (annotationOn && textModeOn && !overlayVisible) {
 					const pt = canvasToCtxXY(e.clientX, e.clientY, drawCanvas);
 					pendingTextXY = { x: pt.x, y: pt.y };
@@ -1525,7 +1530,10 @@
 				}
 				startDraw(e);
 			});
-			target.addEventListener('pointermove', moveDraw);
+			target.addEventListener('pointermove', e => {
+				if (isStageControlTarget(e)) return;
+				moveDraw(e);
+			});
 			target.addEventListener('pointerup', endDraw);
 			target.addEventListener('pointercancel', endDraw);
 			target.addEventListener('pointerout', endDraw);
