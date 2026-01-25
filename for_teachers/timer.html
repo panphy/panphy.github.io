@@ -1022,11 +1022,37 @@
 
         clearBtn.onclick = clearTimer;
 
+        /* ------------ Input change handling ------------ */
+        const updateTimePreview = () => {
+            // Only update preview when timer is not set/running
+            if (setResetBtn.dataset.state !== 'set') return;
+
+            const rawH = parseInt(hoursInput.value) || 0;
+            const rawM = parseInt(minutesInput.value) || 0;
+            const rawS = parseInt(secondsInput.value) || 0;
+            const normalized = normalizeHMS(rawH, rawM, rawS);
+            const total = normalized.h * 3600 + normalized.m * 60 + normalized.s;
+
+            const extraPct = parseInt(extraPercentSelect.value) || 0;
+            const extraTotal = Math.round(total * (1 + extraPct / 100));
+
+            const orig = secondsToHMS(total);
+            const extra = secondsToHMS(extraTotal);
+
+            originalEl.textContent = fmt(orig.h, orig.m, orig.s);
+            extraEl.textContent = fmt(extra.h, extra.m, extra.s);
+        };
+
+        hoursInput.addEventListener('input', updateTimePreview);
+        minutesInput.addEventListener('input', updateTimePreview);
+        secondsInput.addEventListener('input', updateTimePreview);
+
         /* ------------ Extra percent change ------------ */
         extraPercentSelect.onchange = () => {
             if (setResetBtn.dataset.state === 'set') {
                 extraPercent = parseInt(extraPercentSelect.value) || 0;
                 updateExtraLabel();
+                updateTimePreview();
             }
         };
 
