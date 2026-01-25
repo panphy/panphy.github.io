@@ -1,5 +1,5 @@
-const CACHE_NAME = 'panphy-2025-12-18';
-const RUNTIME_CACHE = 'panphy-runtime-2025-12-18';
+const CACHE_NAME = 'panphy-2025-02-24';
+const RUNTIME_CACHE = 'panphy-runtime-2025-02-24';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -13,7 +13,17 @@ const ASSETS_TO_CACHE = [
   '/tools/mkdwn_sample_doc.md',
   '/tools/mkdwn_sample_pic.webp',
   '/tools/panphyplot.html',
+  '/tools/panphyplot/css/panphyplot.css',
   '/tools/panphyplot/panphyplot_manual.html',
+  '/tools/panphyplot/js/curve-fitting.js',
+  '/tools/panphyplot/js/latex-rendering.js',
+  '/tools/panphyplot/js/main.js',
+  '/tools/panphyplot/js/plotting.js',
+  '/tools/panphyplot/js/state.js',
+  '/tools/panphyplot/js/ui.js',
+  'https://cdn.plot.ly/plotly-2.29.1.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
   '/tools/digitizer.html',
   '/tools/motion_tracker.html',
   '/tools/sound_analyzer.html',
@@ -40,8 +50,17 @@ self.addEventListener('install', (event) => {
     const cache = await caches.open(CACHE_NAME);
     for (const url of ASSETS_TO_CACHE) {
       try {
-        const res = await fetch(url, { cache: 'reload' });
-        if (res.ok) await cache.put(url, res);
+        const resolvedUrl = new URL(url, self.location.origin);
+        const isSameOrigin = resolvedUrl.origin === self.location.origin;
+        const res = await fetch(
+          new Request(resolvedUrl.href, {
+            cache: 'reload',
+            mode: isSameOrigin ? 'same-origin' : 'no-cors'
+          })
+        );
+        if (res.ok || res.type === 'opaque') {
+          await cache.put(resolvedUrl.href, res);
+        }
       } catch (e) {
         // keep going even if one file fails
         console.warn('Precache failed:', url, e);
