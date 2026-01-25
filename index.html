@@ -27,6 +27,8 @@
     <style>
         /* CSS Variables */
         :root {
+            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
             /* Light Theme */
             --bg-color: #f8f9fa;
             --bg-pattern: #e9ecef;
@@ -77,8 +79,12 @@
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
         }
 
+        .offline-font {
+            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-sans);
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
@@ -510,6 +516,15 @@
                 updateButtonEmoji('light');
             }
         });
+    </script>
+    <script>
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
     </script>
 </body>
 

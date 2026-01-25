@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
     rel="stylesheet">
-
   <!-- MathJax Configuration -->
   <script>
     window.MathJax = {
@@ -55,6 +54,7 @@
     }
 
     :root {
+      --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
       --background-color: #f8f9fa;
       --background-pattern: #e9ecef;
       --text-color: #2d3436;
@@ -101,7 +101,7 @@
       flex-direction: column;
       height: 100vh;
       margin: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-sans);
       line-height: 1.5;
       background-color: var(--background-color);
       background-image: radial-gradient(var(--background-pattern) 1px, transparent 1px);
@@ -767,6 +767,10 @@
       }
 
     }
+
+    .offline-font {
+      --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    }
   </style>
 </head>
 
@@ -898,6 +902,14 @@
   const scrollSyncStorageKey = 'markdownScrollSync';
   const highlightSyncStorageKey = 'markdownHighlightSync';
   const fontSizeStorageKey = 'markdownFontSize';
+
+  function updateOfflineFontState() {
+    document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+  }
+
+  window.addEventListener('online', updateOfflineFontState);
+  window.addEventListener('offline', updateOfflineFontState);
+  updateOfflineFontState();
   let isLinkScrollEnabled = false;
   let isHighlightSyncEnabled = true;
 

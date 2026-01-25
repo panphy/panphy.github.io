@@ -11,6 +11,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 	<style>
 		:root {
+			--font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
 			--bg-color: #0f1014;
 			--bg-pattern: #181a20;
 			--text-main: #dfe6e9;
@@ -50,9 +51,13 @@
 			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
 			background-size: 30px 30px;
 			color: var(--text);
-			font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+			font-family: var(--font-sans);
 			display: flex;
 			flex-direction: column
+		}
+
+		.offline-font {
+			--font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 		}
 
 		/* Top bar */
@@ -1713,6 +1718,15 @@
 				resizeCanvases();
 			})();
 		})();
+	</script>
+	<script>
+		function updateOfflineFontState() {
+			document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+		}
+
+		window.addEventListener('online', updateOfflineFontState);
+		window.addEventListener('offline', updateOfflineFontState);
+		updateOfflineFontState();
 	</script>
 
 	<footer>

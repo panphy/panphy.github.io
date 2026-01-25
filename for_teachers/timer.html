@@ -12,6 +12,7 @@
     <style>
         /* ... [unchanged CSS from your file] ... */
         :root {
+            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
             --bg-color: #0f1117;
             --bg-pattern: rgba(108, 92, 231, 0.2);
             --text-main: #f5f6fa;
@@ -35,7 +36,7 @@
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-sans);
             background-color: var(--bg-color);
             background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
             background-size: 28px 28px;
@@ -293,6 +294,10 @@
             text-align: center;
             color: var(--text-secondary);
             font-size: 0.95rem
+        }
+
+        .offline-font {
+            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
         }
     </style>
 </head>
@@ -582,6 +587,14 @@
                 const a = document.getElementById(id); a.play().then(() => a.pause()).catch(() => { });
             });
         }, { once: true });
+
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
     </script>
 </body>
 

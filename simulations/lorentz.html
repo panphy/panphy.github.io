@@ -7,13 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Lorentz Transformation – Interactive Minkowski Diagram</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <link rel="icon" type="image/png" href="/favicon.png">
     <style>
         :root {
+            --font-sans: "Poppins", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
             --bg-color: #f7f8fb;
             --primary-text-color: #1f2937;
             --accent-blue: #0384fc;
@@ -37,10 +38,14 @@
             box-sizing: border-box;
             width: 100%;
             min-height: 100%;
-            font-family: "Poppins", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            font-family: var(--font-sans);
             font-weight: 400;
             background-color: var(--bg-color);
             color: var(--primary-text-color);
+        }
+
+        .offline-font {
+            --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
         }
 
         *,
@@ -1096,6 +1101,16 @@
         // Initial draw
         draw();
     });
+</script>
+
+<script>
+    function updateOfflineFontState() {
+        document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+    }
+
+    window.addEventListener('online', updateOfflineFontState);
+    window.addEventListener('offline', updateOfflineFontState);
+    updateOfflineFontState();
 </script>
 
 </html>
