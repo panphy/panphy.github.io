@@ -35,12 +35,14 @@
 			--danger: #ff5d5d;
 			--good: #00d27a;
 			--warn: #ffb020;
-			--ring: rgba(255, 255, 255, .08)
+			--ring: rgba(255, 255, 255, .08);
+			--tool-active-bg: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+			--tool-hover-bg: rgba(162, 155, 254, 0.15)
 		}
 
 		* {
 			box-sizing: border-box;
-			transition: background-color .3s ease, color .3s ease, border-color .3s ease
+			transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease, box-shadow .2s ease
 		}
 
 		html,
@@ -127,7 +129,7 @@
 			align-items: center;
 			justify-content: space-between;
 			gap: .5rem;
-			padding: .5rem .7rem;
+			padding: .5rem .85rem;
 			background: var(--panel);
 			border: 1px solid var(--panel-border);
 			border-radius: .65rem;
@@ -168,17 +170,26 @@
 			flex-wrap: nowrap;
 			background: var(--panel);
 			border: 1px solid var(--panel-border);
-			padding: .26rem .38rem;
-			border-radius: .55rem;
+			padding: .32rem .45rem;
+			border-radius: .6rem;
 			box-shadow: var(--panel-shadow)
 		}
 
-		.title-mini {
-			font-size: .78rem;
+		.group-label {
+			font-size: .72rem;
 			font-weight: 600;
-			opacity: .9;
-			margin-right: .3rem;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+			color: var(--text-secondary);
+			padding: 0 .25rem;
 			white-space: nowrap
+		}
+
+		.vsep {
+			width: 1px;
+			height: 20px;
+			background: rgba(255, 255, 255, .1);
+			margin: 0 .15rem
 		}
 
 		select,
@@ -186,37 +197,72 @@
 			background: #151820;
 			color: var(--text);
 			border: 1px solid var(--panel-border);
-			border-radius: .4rem;
-			padding: .22rem .42rem;
-			font-size: .9rem;
-			outline: none
+			border-radius: .45rem;
+			padding: .28rem .48rem;
+			font-size: .85rem;
+			outline: none;
+			font-weight: 500
 		}
 
 		button {
 			cursor: pointer;
-			transition: transform .06s ease
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: .35rem;
+			min-height: 32px
 		}
 
-		button:hover {
-			transform: translateY(-1px)
+		button:hover:not(:disabled) {
+			transform: translateY(-1px);
+			background: var(--tool-hover-bg)
+		}
+
+		button:active:not(:disabled) {
+			transform: translateY(0)
 		}
 
 		button:disabled {
-			opacity: .55;
+			opacity: .45;
 			cursor: not-allowed;
 			transform: none
 		}
 
+		.btn-icon {
+			font-size: 1rem;
+			line-height: 1
+		}
+
+		.btn-text {
+			font-size: .8rem
+		}
+
+		.kbd {
+			font-size: .65rem;
+			padding: .1rem .3rem;
+			background: rgba(255, 255, 255, .08);
+			border-radius: .25rem;
+			color: var(--text-secondary);
+			font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+			margin-left: .2rem
+		}
+
 		.primary {
-			background: var(--brand-primary);
-			border-color: var(--brand-accent);
-			color: #11131a
+			background: var(--tool-active-bg);
+			border-color: rgba(255, 255, 255, .2);
+			color: #fff;
+			box-shadow: 0 2px 8px rgba(108, 92, 231, .35)
+		}
+
+		.primary:hover:not(:disabled) {
+			background: var(--tool-active-bg);
+			box-shadow: 0 4px 12px rgba(108, 92, 231, .5)
 		}
 
 		.danger {
 			background: var(--danger);
-			border-color: #ffc4c4;
-			color: #2a0000
+			border-color: rgba(255, 255, 255, .2);
+			color: #fff
 		}
 
 		.muted {
@@ -224,56 +270,92 @@
 			color: #adb3c4
 		}
 
-		.active {
-			box-shadow: 0 0 0 2px rgba(162, 155, 254, .55) inset
+		.tool-btn {
+			min-width: 38px;
+			position: relative
 		}
 
-		.fixed-width-btn {
-			width: 60px;
-			text-align: center
+		.tool-btn.active::after {
+			content: '';
+			position: absolute;
+			bottom: -2px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 60%;
+			height: 2px;
+			background: var(--brand-accent);
+			border-radius: 1px
 		}
 
 		.hidden {
 			display: none !important
 		}
 
-		.labelBtn {
-			font-weight: 700;
-			padding: .22rem .42rem;
-			border-radius: .4rem;
-			border: 1px solid var(--panel-border);
-			min-width: 84px;
-			text-align: center;
+		/* Color picker button */
+		.color-btn {
+			width: 32px;
+			height: 32px;
+			border-radius: .45rem;
+			border: 2px solid rgba(255, 255, 255, .2);
 			cursor: pointer;
-			user-select: none;
-			font-size: .9rem;
-			white-space: nowrap
+			position: relative;
+			overflow: hidden;
+			padding: 0
+		}
+
+		.color-btn:hover {
+			border-color: rgba(255, 255, 255, .4);
+			transform: scale(1.05)
+		}
+
+		.color-btn input[type="color"] {
+			position: absolute;
+			width: 150%;
+			height: 150%;
+			top: -25%;
+			left: -25%;
+			cursor: pointer;
+			border: none;
+			padding: 0
 		}
 
 		.laserIndicator {
 			display: inline-flex;
 			align-items: center;
 			gap: .3rem;
-			padding: .12rem .4rem;
+			padding: .18rem .5rem;
 			border-radius: .4rem;
 			border: 1px solid var(--panel-border);
-			color: #adb3c4;
-			font-size: .75rem;
-			letter-spacing: .02em;
-			text-transform: uppercase
+			color: #8b93a7;
+			font-size: .72rem;
+			font-weight: 600;
+			letter-spacing: .03em;
+			text-transform: uppercase;
+			background: #151820
 		}
 
 		.laserIndicator.active {
-			background: rgba(162, 155, 254, .2);
-			border-color: rgba(162, 155, 254, .6);
-			color: #dcecff
+			background: linear-gradient(135deg, rgba(162, 155, 254, .25), rgba(129, 236, 236, .15));
+			border-color: rgba(162, 155, 254, .5);
+			color: #fff;
+			box-shadow: 0 0 12px rgba(162, 155, 254, .3)
 		}
 
 		.laserIndicator .dot {
-			width: .45rem;
-			height: .45rem;
+			width: .5rem;
+			height: .5rem;
 			border-radius: 50%;
-			background: currentColor
+			background: currentColor;
+			animation: pulse 1.5s ease-in-out infinite
+		}
+
+		.laserIndicator:not(.active) .dot {
+			animation: none
+		}
+
+		@keyframes pulse {
+			0%, 100% { opacity: 1; transform: scale(1); }
+			50% { opacity: .6; transform: scale(.85); }
 		}
 
 		.srOnly {
@@ -292,33 +374,36 @@
 		.status {
 			display: flex;
 			align-items: center;
-			gap: .3rem
+			gap: .35rem
 		}
 
 		.light {
-			width: 11px;
-			height: 11px;
+			width: 10px;
+			height: 10px;
 			border-radius: 50%;
 			border: 2px solid rgba(255, 255, 255, .15)
 		}
 
 		.live {
-			background: var(--good)
+			background: var(--good);
+			box-shadow: 0 0 6px rgba(0, 210, 122, .5)
 		}
 
 		.paused {
-			background: var(--warn)
+			background: var(--warn);
+			box-shadow: 0 0 6px rgba(255, 176, 32, .5)
 		}
 
 		.statusText {
-			min-width: 44px;
+			min-width: 48px;
 			color: #cfd5e4;
-			font-size: .82rem
+			font-size: .8rem;
+			font-weight: 500
 		}
 
 		.switch {
 			position: relative;
-			width: 46px;
+			width: 44px;
 			height: 24px;
 			display: inline-block
 		}
@@ -342,11 +427,12 @@
 			position: absolute;
 			height: 18px;
 			width: 18px;
-			left: 3px;
+			left: 2px;
 			top: 2px;
 			background: #fff;
 			border-radius: 50%;
-			transition: .2s
+			transition: .2s;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, .2)
 		}
 
 		input:checked+.slider {
@@ -354,13 +440,7 @@
 		}
 
 		input:checked+.slider:before {
-			transform: translateX(22px)
-		}
-
-		.vsep {
-			width: 1px;
-			height: 16px;
-			background: rgba(255, 255, 255, .08)
+			transform: translateX(20px)
 		}
 
 		.sizePicker {
@@ -370,17 +450,23 @@
 		}
 
 		.dotBtn {
-			--dot: 9px;
+			--dot: 8px;
 			--dot-color: #fff;
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			width: 28px;
-			height: 22px;
+			width: 26px;
+			height: 26px;
 			border: 1px solid var(--panel-border);
-			border-radius: .35rem;
+			border-radius: .4rem;
 			background: #151820;
-			cursor: pointer
+			cursor: pointer;
+			transition: all .15s ease
+		}
+
+		.dotBtn:hover {
+			background: var(--tool-hover-bg);
+			transform: scale(1.05)
 		}
 
 		.dotBtn .dot {
@@ -389,11 +475,17 @@
 			height: var(--dot);
 			aspect-ratio: 1/1;
 			border-radius: 50%;
-			background: var(--dot-color)
+			background: var(--dot-color);
+			transition: transform .15s ease
 		}
 
 		.dotBtn.active {
-			outline: 2px solid rgba(162, 155, 254, .75)
+			outline: 2px solid var(--brand-accent);
+			outline-offset: 1px
+		}
+
+		.dotBtn.active .dot {
+			transform: scale(1.15)
 		}
 
 		#zoomGroup {
@@ -401,17 +493,19 @@
 		}
 
 		#zoomSlider {
-			width: 160px;
+			width: 120px;
 			height: 22px;
-			vertical-align: middle
+			vertical-align: middle;
+			accent-color: var(--brand-primary)
 		}
 
 		#zoomVal {
 			display: inline-block;
-			min-width: 2.6ch;
+			min-width: 2.8ch;
 			text-align: right;
 			color: #cfd5e4;
-			font-size: .9rem
+			font-size: .85rem;
+			font-weight: 600
 		}
 
 		#stage {
@@ -420,9 +514,10 @@
 			min-height: 50vh;
 			margin: .4rem .6rem calc(.5rem + env(safe-area-inset-bottom));
 			border: 1px solid var(--panel-border);
-			border-radius: 12px;
+			border-radius: 14px;
 			overflow: hidden;
-			background: #000
+			background: #000;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, .4)
 		}
 
 		video,
@@ -445,12 +540,16 @@
 			position: absolute;
 			right: .5rem;
 			bottom: .5rem;
-			font-size: .8rem;
+			font-size: .78rem;
 			color: #cfd5e4;
-			background: rgba(0, 0, 0, .4);
-			padding: .2rem .4rem;
-			border-radius: .35rem;
-			border: 1px solid var(--panel-border)
+			background: rgba(0, 0, 0, .55);
+			padding: .25rem .5rem;
+			border-radius: .4rem;
+			border: 1px solid rgba(255, 255, 255, .1);
+			backdrop-filter: blur(4px);
+			display: flex;
+			align-items: center;
+			gap: .4rem
 		}
 
 		#fullscreenBtn {
@@ -461,14 +560,14 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			width: 36px;
-			height: 32px;
+			width: 38px;
+			height: 34px;
 			padding: 0;
-			background: rgba(20, 22, 28, .65);
-			border: 1px solid rgba(255, 255, 255, .18);
-			border-radius: .5rem;
+			background: rgba(20, 22, 28, .7);
+			border: 1px solid rgba(255, 255, 255, .15);
+			border-radius: .55rem;
 			color: #f0f4ff;
-			font-size: 1rem;
+			font-size: 1.1rem;
 			box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
 			backdrop-filter: blur(8px);
 			-webkit-backdrop-filter: blur(8px)
@@ -476,7 +575,7 @@
 
 		#fullscreenBtn:hover {
 			transform: translateY(-1px);
-			background: rgba(28, 30, 38, .75)
+			background: rgba(28, 30, 38, .8)
 		}
 
 		#fullscreenBtn:active {
@@ -488,8 +587,7 @@
 			width: .5rem;
 			height: .5rem;
 			border-radius: 50%;
-			background: var(--good);
-			margin-right: .35rem
+			background: var(--good)
 		}
 
 		.pausedVideo #statusDot {
@@ -500,10 +598,9 @@
 			display: none;
 			align-items: center;
 			gap: .2rem;
-			margin-left: .4rem;
 			font-size: .7rem;
 			letter-spacing: .04em;
-			color: #f3b0b0
+			color: #ffb0b0
 		}
 
 		#hud.recording #recordIndicator {
@@ -511,68 +608,85 @@
 		}
 
 		#recordDot {
-			width: .38rem;
-			height: .38rem;
+			width: .4rem;
+			height: .4rem;
 			border-radius: 50%;
 			background: #ff4d4d;
-			box-shadow: 0 0 4px rgba(255, 77, 77, .6)
+			box-shadow: 0 0 6px rgba(255, 77, 77, .7);
+			animation: recordPulse 1s ease-in-out infinite
+		}
+
+		@keyframes recordPulse {
+			0%, 100% { opacity: 1; }
+			50% { opacity: .4; }
 		}
 
 		#textOverlay {
 			position: absolute;
 			display: none;
 			z-index: 20;
-			background: rgba(20, 22, 28, .35);
-			border: 1px dashed rgba(255, 255, 255, .35);
-			border-radius: .45rem;
-			padding: .35rem
+			background: rgba(20, 22, 28, .9);
+			border: 1px solid rgba(162, 155, 254, .4);
+			border-radius: .6rem;
+			padding: .5rem;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+			backdrop-filter: blur(8px)
 		}
 
 		#textOverlay textarea {
-			width: 250px;
-			max-width: 60vw;
-			min-height: 72px;
-			background: transparent;
+			width: 260px;
+			max-width: 65vw;
+			min-height: 80px;
+			background: rgba(0, 0, 0, .3);
 			color: #fff;
-			border: 1px dashed rgba(255, 255, 255, .35);
-			border-radius: .35rem;
-			padding: .35rem;
+			border: 1px solid rgba(255, 255, 255, .15);
+			border-radius: .4rem;
+			padding: .4rem;
 			font-size: 15px;
-			outline: none
+			outline: none;
+			resize: vertical
+		}
+
+		#textOverlay textarea:focus {
+			border-color: var(--brand-primary)
 		}
 
 		#textActions {
 			display: flex;
-			gap: .35rem;
+			gap: .4rem;
 			justify-content: flex-end;
-			margin-top: .35rem
+			margin-top: .4rem
 		}
 
 		#toast {
 			position: fixed;
 			left: 50%;
-			transform: translateX(-50%);
-			bottom: calc(6px + env(safe-area-inset-bottom));
-			background: rgba(0, 0, 0, .75);
+			transform: translateX(-50%) translateY(10px);
+			bottom: calc(12px + env(safe-area-inset-bottom));
+			background: rgba(30, 33, 41, .95);
 			color: #fff;
-			padding: .4rem .6rem;
-			border-radius: .45rem;
-			border: 1px solid rgba(255, 255, 255, .12);
+			padding: .5rem .8rem;
+			border-radius: .5rem;
+			border: 1px solid rgba(255, 255, 255, .1);
 			font-size: .85rem;
+			font-weight: 500;
 			opacity: 0;
 			pointer-events: none;
-			transition: opacity .25s
+			transition: opacity .25s, transform .25s;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+			backdrop-filter: blur(8px)
 		}
 
 		#toast.show {
-			opacity: 1
+			opacity: 1;
+			transform: translateX(-50%) translateY(0)
 		}
 
 		footer {
 			position: static;
-			font-size: 15px;
+			font-size: 14px;
 			text-align: center;
-			padding: 7px;
+			padding: 8px;
 			background: transparent;
 			color: #555;
 			margin: 4px 0;
@@ -589,14 +703,48 @@
 		}
 
 		.helperText {
-			font-size: 12px;
+			font-size: 11px;
 			color: #b45309;
-			margin-top: 6px;
+			margin-top: 4px;
 			display: none
 		}
 
 		.helperText.visible {
 			display: block
+		}
+
+		/* Tool active cursor states */
+		.cursor-draw {
+			cursor: crosshair !important
+		}
+
+		.cursor-eraser {
+			cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff5d5d' stroke-width='2'%3E%3Cpath d='M20 20H7L3 16a1 1 0 0 1 0-1.4l10-10a1 1 0 0 1 1.4 0l7 7a1 1 0 0 1 0 1.4L16 19'/%3E%3Cpath d='M6.5 13.5L11 9'/%3E%3C/svg%3E") 12 12, crosshair !important
+		}
+
+		.cursor-text {
+			cursor: text !important
+		}
+
+		/* Tooltip for shortcuts */
+		[data-tooltip] {
+			position: relative
+		}
+
+		[data-tooltip]:hover::after {
+			content: attr(data-tooltip);
+			position: absolute;
+			bottom: calc(100% + 6px);
+			left: 50%;
+			transform: translateX(-50%);
+			padding: .3rem .5rem;
+			background: rgba(0, 0, 0, .9);
+			color: #fff;
+			font-size: .7rem;
+			white-space: nowrap;
+			border-radius: .3rem;
+			pointer-events: none;
+			z-index: 100
 		}
 
 		@media (pointer: coarse) {
@@ -611,6 +759,28 @@
 
 			canvas {
 				touch-action: none;
+			}
+
+			[data-tooltip]:hover::after {
+				display: none
+			}
+		}
+
+		@media (max-width: 600px) {
+			.btn-text {
+				display: none
+			}
+
+			.tool-btn {
+				min-width: 36px
+			}
+
+			.kbd {
+				display: none
+			}
+
+			#zoomSlider {
+				width: 80px
 			}
 		}
 	</style>
@@ -629,66 +799,123 @@
 
 	<!-- Stage -->
 	<main id="stage">
-		<details class="controls">
+		<details class="controls" open>
 			<summary>Controls</summary>
 			<div class="row">
+				<!-- Camera & Stream -->
 				<div class="group">
-					<span class="title-mini">Camera</span>
+					<span class="group-label">Camera</span>
 					<select id="cameraSelect"></select>
 					<div id="cameraHelper" class="helperText" aria-live="polite"></div>
-					<button id="refreshBtn">Refresh</button>
+					<button id="refreshBtn" data-tooltip="Refresh camera list">
+						<span class="btn-icon">&#x21bb;</span>
+					</button>
 				</div>
 
 				<div class="group">
-					<span class="title-mini">Stream</span>
+					<span class="group-label">Stream</span>
 					<label class="switch">
 						<input id="liveToggle" type="checkbox" checked />
 						<span class="slider"></span>
 					</label>
-					<span class="vsep"></span>
 					<div class="status">
 						<span id="statusLight" class="light live"></span>
 						<span id="statusLabel" class="statusText">Live</span>
 					</div>
 				</div>
 
+				<!-- Tools -->
 				<div class="group">
-					<span class="title-mini">Display</span>
-					<button id="screenshotBtn">Snapshot</button>
-					<button id="recordBtn">Record</button>
-					<button id="mirrorBtn">Mirror</button>
-					<button id="fitBtn" class="fixed-width-btn" aria-label="Full View (Fit)" title="Full View (Fit)">Fit</button>
+					<span class="group-label">Tools</span>
+					<button id="laserBtn" class="tool-btn primary" data-tooltip="Laser pointer (L)">
+						<span class="btn-icon">&#x2739;</span>
+						<span class="btn-text">Laser</span>
+						<span class="kbd">L</span>
+					</button>
+					<button id="annotationBtn" class="tool-btn muted" data-tooltip="Draw annotation (A)">
+						<span class="btn-icon">&#x270E;</span>
+						<span class="btn-text">Draw</span>
+						<span class="kbd">A</span>
+					</button>
+					<button id="eraserBtn" class="tool-btn muted" data-tooltip="Eraser (E)">
+						<span class="btn-icon">&#x232B;</span>
+						<span class="btn-text">Erase</span>
+						<span class="kbd">E</span>
+					</button>
+					<button id="textBtn" class="tool-btn muted" data-tooltip="Add text (T)">
+						<span class="btn-icon">T</span>
+						<span class="btn-text">Text</span>
+						<span class="kbd">T</span>
+					</button>
 				</div>
 
-				<div class="group">
-					<label for="pointerColorInput" id="pointerLabelBtn" class="labelBtn">Pointer</label>
-					<input id="pointerColorInput" type="color" class="srOnly" value="#ff3b3b" />
+				<!-- Pointer settings -->
+				<div class="group" id="pointerGroup">
+					<span class="group-label">Pointer</span>
+					<button class="color-btn" id="pointerColorBtn" title="Pointer color">
+						<input id="pointerColorInput" type="color" value="#ff3b3b" />
+					</button>
 					<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
-					<span id="laserIndicator" class="laserIndicator" aria-live="polite">
+					<span id="laserIndicator" class="laserIndicator active" aria-live="polite">
 						<span class="dot" aria-hidden="true"></span>
-						Laser
+						Active
 					</span>
 				</div>
 
+				<!-- Annotation settings -->
 				<div class="group" id="annotGroup">
-					<label for="annotColorInput" id="annotLabelBtn" class="labelBtn">Annotate</label>
-					<input id="annotColorInput" type="color" class="srOnly" value="#33d17a" />
+					<span class="group-label">Annotate</span>
+					<button class="color-btn" id="annotColorBtn" title="Annotation color">
+						<input id="annotColorInput" type="color" value="#33d17a" />
+					</button>
 					<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
-					<button id="annotationBtn" class="muted">Annotation</button>
-					<button id="eraserBtn" class="muted">Eraser</button>
-					<button id="textBtn" class="muted">Text</button>
-					<button id="undoBtn" class="muted">Undo</button>
-					<button id="clearBtn" class="danger">Clear</button>
+					<span class="vsep"></span>
+					<button id="undoBtn" class="muted" data-tooltip="Undo last (Ctrl+Z)" disabled>
+						<span class="btn-icon">&#x21B6;</span>
+						<span class="btn-text">Undo</span>
+					</button>
+					<button id="clearBtn" class="danger" data-tooltip="Clear all">
+						<span class="btn-icon">&#x2715;</span>
+						<span class="btn-text">Clear</span>
+					</button>
 				</div>
 
+				<!-- Display controls -->
+				<div class="group">
+					<span class="group-label">Display</span>
+					<button id="mirrorBtn" data-tooltip="Mirror view (M)">
+						<span class="btn-icon">&#x21C4;</span>
+						<span class="btn-text">Mirror</span>
+						<span class="kbd">M</span>
+					</button>
+					<button id="fitBtn" data-tooltip="Toggle fit/fill mode">
+						<span class="btn-icon">&#x26F6;</span>
+						<span class="btn-text">Fit</span>
+					</button>
+				</div>
+
+				<!-- Zoom -->
 				<div class="group" id="zoomGroup">
-					<span class="title-mini">Zoom</span>
+					<span class="group-label">Zoom</span>
 					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
 					<span id="zoomVal">1.0×</span>
 				</div>
+
+				<!-- Capture -->
+				<div class="group">
+					<span class="group-label">Capture</span>
+					<button id="screenshotBtn" data-tooltip="Take snapshot">
+						<span class="btn-icon">&#x1F4F7;</span>
+						<span class="btn-text">Snapshot</span>
+					</button>
+					<button id="recordBtn" data-tooltip="Start recording">
+						<span class="btn-icon">&#x23FA;</span>
+						<span class="btn-text">Record</span>
+					</button>
+				</div>
 			</div>
 		</details>
-		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">⤢</button>
+		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
 		<video id="video" playsinline autoplay muted></video>
 		<canvas id="freezeCanvas" class="hidden"></canvas>
 		<canvas id="drawCanvas"></canvas>
@@ -701,8 +928,11 @@
 
 		<!-- Text overlay -->
 		<div id="textOverlay">
-			<textarea id="textInput" placeholder="Type your note..."></textarea>
-			<div id="textActions"><button id="textCancel">Cancel</button><button id="textAdd" class="primary">Add</button></div>
+			<textarea id="textInput" placeholder="Type your note..." aria-label="Text annotation"></textarea>
+			<div id="textActions">
+				<button id="textCancel" class="muted">Cancel</button>
+				<button id="textAdd" class="primary">Add Text</button>
+			</div>
 		</div>
 	</main>
 
@@ -724,6 +954,7 @@
 			const refreshBtn = document.getElementById('refreshBtn');
 			const liveToggle = document.getElementById('liveToggle');
 
+			const laserBtn = document.getElementById('laserBtn');
 			const annotationBtn = document.getElementById('annotationBtn');
 			const eraserBtn = document.getElementById('eraserBtn');
 			const textBtn = document.getElementById('textBtn');
@@ -743,11 +974,11 @@
 			const fullscreenBtn = document.getElementById('fullscreenBtn');
 			const toast = document.getElementById('toast');
 
-			/* Color inputs + label buttons */
+			/* Color inputs */
 			const pointerColorInput = document.getElementById('pointerColorInput');
 			const annotColorInput = document.getElementById('annotColorInput');
-			const pointerLabelBtn = document.getElementById('pointerLabelBtn');
-			const annotLabelBtn = document.getElementById('annotLabelBtn');
+			const pointerColorBtn = document.getElementById('pointerColorBtn');
+			const annotColorBtn = document.getElementById('annotColorBtn');
 			const laserIndicator = document.getElementById('laserIndicator');
 
 			const sizeUI = {
@@ -766,19 +997,16 @@
 
 			/* ===== Persistence ===== */
 			function saveStr(k, v) { try { localStorage.setItem(k, v == null ? '' : String(v)); } catch (e) {} }
-
 			function loadStr(k, f) { try { const v = localStorage.getItem(k); return v === null ? f : v; } catch (e) { return f; } }
-
 			function saveNum(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
-
 			function loadNum(k, f) { try { const v = localStorage.getItem(k); const n = v !== null ? Number(v) : NaN; return isFinite(n) ? n : f; } catch (e) { return f; } }
 
 			/* ===== State ===== */
-			let pointerColor = pointerColorInput.value;
-			let annotColor = annotColorInput.value;
+			let pointerColor = loadStr('pointerColor', '#ff3b3b');
+			let annotColor = loadStr('annotColor', '#33d17a');
 			const SIZESET = [6, 12, 20];
-			let pointerSize = loadNum('pointerSize', 12); // logical screen px
-			let annotSize = loadNum('annotSize', 12); // logical screen px
+			let pointerSize = loadNum('pointerSize', 12);
+			let annotSize = loadNum('annotSize', 12);
 
 			let isPaused = false;
 			let isMirrored = false,
@@ -794,16 +1022,18 @@
 			let stream = null,
 				switching = false;
 
-			let tail = []; // laser trail
+			let tail = [];
 			let laserActive = true;
 
 			const frozen = document.createElement('canvas');
 			const frozenCtx = frozen.getContext('2d');
 			let hasFrozen = false;
 
-			// Drawing model
-			let objects = []; // {type:'stroke'|'text', ...}
-			let currentStroke = null; // active stroke
+			// Drawing model with smoothing
+			let objects = [];
+			let currentStroke = null;
+			let undoStack = [];
+			const MAX_UNDO = 50;
 
 			// Recording composite
 			const composite = document.createElement('canvas');
@@ -814,9 +1044,13 @@
 
 			/* Zoom state */
 			let zoomLevel = loadNum('zoomLevel', 1);
-			const Z = () => (zoomLevel || 1); // helper
+			const Z = () => (zoomLevel || 1);
 
-			/* Fullscreen */
+			/* Initialize color inputs from saved values */
+			pointerColorInput.value = pointerColor;
+			annotColorInput.value = annotColor;
+
+			/* ===== Fullscreen ===== */
 			function isFullscreen() {
 				return document.fullscreenElement === stage ||
 					document.fullscreenElement === video ||
@@ -826,7 +1060,7 @@
 
 			function updateFullscreenUI() {
 				const active = isFullscreen();
-				fullscreenBtn.textContent = active ? '⤡' : '⤢';
+				fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
 				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
 				fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
 			}
@@ -855,10 +1089,11 @@
 			updateFullscreenUI();
 
 			/* ===== Utils ===== */
-			function showToast(msg, ms) { ms = ms || 1600;
+			function showToast(msg, ms = 1800) {
 				toast.textContent = msg;
 				toast.classList.add('show');
-				setTimeout(() => toast.classList.remove('show'), ms); }
+				setTimeout(() => toast.classList.remove('show'), ms);
+			}
 
 			let permissionBlocked = false;
 			function setCameraHelper(message) {
@@ -866,24 +1101,16 @@
 				cameraHelper.classList.toggle('visible', !!message);
 			}
 
-			function contrastOn(hex) {
-				let h = hex.replace('#', '');
-				if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-				const r = parseInt(h.slice(0, 2), 16),
-					g = parseInt(h.slice(2, 4), 16),
-					b = parseInt(h.slice(4, 6), 16);
-				const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-				return yiq >= 160 ? '#111' : '#fff';
+			function updateColorBtn(btn, color) {
+				btn.style.background = color;
 			}
-
-			function paintLabelBtn(btn, color) { btn.style.background = color;
-				btn.style.borderColor = 'rgba(255,255,255,.25)';
-				btn.style.color = contrastOn(color); }
 
 			function resizeCanvases() {
 				const r = stage.getBoundingClientRect();
-				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(c => { c.width = Math.floor(r.width);
-					c.height = Math.floor(r.height); });
+				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(c => {
+					c.width = Math.floor(r.width);
+					c.height = Math.floor(r.height);
+				});
 				applyTransforms();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				renderAnnotations();
@@ -904,6 +1131,18 @@
 				undoBtn.disabled = objects.length === 0;
 			}
 
+			/* Update cursor based on active tool */
+			function updateCursor() {
+				stage.classList.remove('cursor-draw', 'cursor-eraser', 'cursor-text');
+				if (eraserOn) {
+					stage.classList.add('cursor-eraser');
+				} else if (textModeOn) {
+					stage.classList.add('cursor-text');
+				} else if (annotationOn) {
+					stage.classList.add('cursor-draw');
+				}
+			}
+
 			/* Freeze handling */
 			function captureFrozenFromVideo() {
 				const w = freezeCanvas.width,
@@ -917,22 +1156,20 @@
 					vr = vw / vh;
 				let dw, dh, dx, dy;
 				if (fitMode === 'cover') {
-					if (vr > cr) { dh = h;
-						dw = h * vr; } else { dw = w;
-						dh = w / vr; }
-					dx = (w - dw) / 2;
-					dy = (h - dh) / 2;
+					if (vr > cr) { dh = h; dw = h * vr; }
+					else { dw = w; dh = w / vr; }
 				} else {
-					if (vr > cr) { dw = w;
-						dh = w / vr; } else { dh = h;
-						dw = h * vr; }
-					dx = (w - dw) / 2;
-					dy = (h - dh) / 2;
+					if (vr > cr) { dw = w; dh = w / vr; }
+					else { dh = h; dw = h * vr; }
 				}
+				dx = (w - dw) / 2;
+				dy = (h - dh) / 2;
 				frozenCtx.save();
-				if (isMirrored) { frozenCtx.translate(w, 0);
+				if (isMirrored) {
+					frozenCtx.translate(w, 0);
 					frozenCtx.scale(-1, 1);
-					dx = w - dx - dw; }
+					dx = w - dx - dw;
+				}
 				frozenCtx.clearRect(0, 0, w, h);
 				frozenCtx.drawImage(video, dx, dy, dw, dh);
 				frozenCtx.restore();
@@ -959,7 +1196,11 @@
 					return;
 				}
 				const val = cameraSelect.value || '';
-				if (val && val.indexOf('facing:') !== 0) { await startCamera({ deviceId: { exact: val } }); } else { await startCamera({ facingMode: facingPref }); }
+				if (val && val.indexOf('facing:') !== 0) {
+					await startCamera({ deviceId: { exact: val } });
+				} else {
+					await startCamera({ facingMode: facingPref });
+				}
 				hasFrozen = false;
 				freezeCanvas.classList.add('hidden');
 				isPaused = false;
@@ -971,8 +1212,11 @@
 				const toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
 				laserIndicator.classList.toggle('active', laserActive);
-				if (!laserActive) { ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
-					tail.length = 0; }
+				if (!laserActive) {
+					ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
+					tail.length = 0;
+				}
+				updateCursor();
 			}
 
 			/* Camera */
@@ -1011,6 +1255,7 @@
 					switching = false;
 				}
 			}
+
 			async function enumerate() {
 				try {
 					const devs = await navigator.mediaDevices.enumerateDevices();
@@ -1051,7 +1296,9 @@
 					} catch (e) {}
 					const hasVal = v => [].some.call(cameraSelect.options, o => o.value === v);
 					let targetValue = '';
-					if (activeId && hasVal(activeId)) { targetValue = activeId; } else if (lastDeviceId && hasVal(lastDeviceId)) { targetValue = lastDeviceId; } else {
+					if (activeId && hasVal(activeId)) { targetValue = activeId; }
+					else if (lastDeviceId && hasVal(lastDeviceId)) { targetValue = lastDeviceId; }
+					else {
 						const optByFacing = [].find.call(cameraSelect.options, o => o.dataset && o.dataset.facing === facingPref);
 						if (optByFacing) targetValue = optByFacing.value;
 						else if (cameraSelect.options[0]) targetValue = cameraSelect.options[0].value;
@@ -1063,9 +1310,15 @@
 				}
 			}
 
-			function debounced(fn, ms) { let t = 0; return function() { const a = arguments;
+			function debounced(fn, ms) {
+				let t = 0;
+				return function() {
+					const a = arguments;
 					clearTimeout(t);
-					t = setTimeout(() => fn.apply(null, a), ms); }; }
+					t = setTimeout(() => fn.apply(null, a), ms);
+				};
+			}
+
 			const onCameraChange = debounced(async function() {
 				const val = cameraSelect.value || '';
 				if (val.indexOf('facing:') === 0) {
@@ -1078,11 +1331,14 @@
 					saveStr('lastDeviceId', val);
 					await startCamera({ deviceId: { exact: val } });
 					const opt = [].slice.call(cameraSelect.options).find(o => o.value === val);
-					if (opt && opt.dataset && opt.dataset.facing) { facingPref = opt.dataset.facing;
-						saveStr('lastFacing', facingPref); }
+					if (opt && opt.dataset && opt.dataset.facing) {
+						facingPref = opt.dataset.facing;
+						saveStr('lastFacing', facingPref);
+					}
 				}
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 			}, 250);
+
 			cameraSelect.addEventListener('change', onCameraChange);
 			cameraSelect.addEventListener('input', onCameraChange);
 
@@ -1092,10 +1348,16 @@
 					try { if (stream) stream.getTracks().forEach(t => t.stop()); } catch (e) {}
 					await enumerate();
 					const val = cameraSelect.value || '';
-					if (val && val.indexOf('facing:') !== 0) { saveStr('lastDeviceId', val);
-						await startCamera({ deviceId: { exact: val } }); } else { await startCamera({ facingMode: facingPref }); }
-				} catch (e) { console.error(e);
-					if (!permissionBlocked) showToast('Refresh failed'); }
+					if (val && val.indexOf('facing:') !== 0) {
+						saveStr('lastDeviceId', val);
+						await startCamera({ deviceId: { exact: val } });
+					} else {
+						await startCamera({ facingMode: facingPref });
+					}
+				} catch (e) {
+					console.error(e);
+					if (!permissionBlocked) showToast('Refresh failed');
+				}
 			});
 
 			/* ===== Coordinate helpers (zoom-aware positions) ===== */
@@ -1111,18 +1373,63 @@
 				return { x, y };
 			}
 
-			function normPressure(p) { const v = isFinite(p) ? p : 1; return Math.max(0.2, Math.min(1, v)); }
+			function normPressure(p) {
+				const v = isFinite(p) ? p : 1;
+				return Math.max(0.3, Math.min(1, v));
+			}
 
 			function getPrimaryPoint(e) {
-				if (window.PointerEvent && e instanceof PointerEvent) return { x: e.clientX, y: e.clientY, id: e.pointerId, pressure: e.pressure };
-				if (e.touches && e.touches[0]) { const t = e.touches[0]; return { x: t.clientX, y: t.clientY, id: 1, pressure: 1 }; }
-				if (e.changedTouches && e.changedTouches[0]) { const t2 = e.changedTouches[0]; return { x: t2.clientX, y: t2.clientY, id: 1, pressure: 1 }; }
-				if (e.clientX !== undefined) return { x: e.clientX, y: e.clientY, id: 1, pressure: 1 };
+				if (window.PointerEvent && e instanceof PointerEvent) {
+					return { x: e.clientX, y: e.clientY, id: e.pointerId, pressure: e.pressure };
+				}
+				if (e.touches && e.touches[0]) {
+					const t = e.touches[0];
+					return { x: t.clientX, y: t.clientY, id: 1, pressure: 1 };
+				}
+				if (e.changedTouches && e.changedTouches[0]) {
+					const t2 = e.changedTouches[0];
+					return { x: t2.clientX, y: t2.clientY, id: 1, pressure: 1 };
+				}
+				if (e.clientX !== undefined) {
+					return { x: e.clientX, y: e.clientY, id: 1, pressure: 1 };
+				}
 				return null;
 			}
 			let pointerIdActive = null;
 
-			/* ===== Rendering annotations (sizes independent of zoom) ===== */
+			/* ===== Smooth line drawing with quadratic curves ===== */
+			function drawSmoothLine(ctx, points, color, size, scale) {
+				if (points.length < 2) return;
+
+				ctx.save();
+				ctx.strokeStyle = color;
+				ctx.lineWidth = Math.max(1, size / scale);
+				ctx.lineCap = 'round';
+				ctx.lineJoin = 'round';
+				ctx.beginPath();
+
+				ctx.moveTo(points[0].x, points[0].y);
+
+				if (points.length === 2) {
+					ctx.lineTo(points[1].x, points[1].y);
+				} else {
+					// Use quadratic curves for smoother lines
+					for (let i = 1; i < points.length - 1; i++) {
+						const xc = (points[i].x + points[i + 1].x) / 2;
+						const yc = (points[i].y + points[i + 1].y) / 2;
+						ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+					}
+					// Connect to last point
+					const last = points[points.length - 1];
+					const secondLast = points[points.length - 2];
+					ctx.quadraticCurveTo(secondLast.x, secondLast.y, last.x, last.y);
+				}
+
+				ctx.stroke();
+				ctx.restore();
+			}
+
+			/* ===== Rendering annotations ===== */
 			function renderAnnotations() {
 				const w = drawCanvas.width,
 					h = drawCanvas.height;
@@ -1132,18 +1439,7 @@
 				for (let i = 0; i < objects.length; i++) {
 					const obj = objects[i];
 					if (obj.type === 'stroke') {
-						const pts = obj.points;
-						if (pts.length < 2) continue;
-						ctxDraw.save();
-						ctxDraw.strokeStyle = obj.color;
-						ctxDraw.lineWidth = Math.max(1, obj.size / s);
-						ctxDraw.lineCap = 'round';
-						ctxDraw.lineJoin = 'round';
-						ctxDraw.beginPath();
-						ctxDraw.moveTo(pts[0].x, pts[0].y);
-						for (let j = 1; j < pts.length; j++) ctxDraw.lineTo(pts[j].x, pts[j].y);
-						ctxDraw.stroke();
-						ctxDraw.restore();
+						drawSmoothLine(ctxDraw, obj.points, obj.color, obj.size, s);
 					} else if (obj.type === 'text') {
 						const effFontPx = Math.max(8, obj.baseFontPx / s);
 						const m = measureTextBlock(obj.text, effFontPx);
@@ -1174,7 +1470,9 @@
 				ctxDraw.restore();
 				const lh = Math.round(fontPx * 1.25);
 				let maxW = 1;
-				for (let i = 0; i < widths.length; i++) { if (widths[i] > maxW) maxW = widths[i]; }
+				for (let i = 0; i < widths.length; i++) {
+					if (widths[i] > maxW) maxW = widths[i];
+				}
 				return { width: maxW, height: lines.length * lh, lh };
 			}
 
@@ -1205,8 +1503,10 @@
 						if (px >= obj.x && px <= obj.x + m.width && py >= obj.y && py <= obj.y + m.height) return i;
 					} else if (obj.type === 'stroke') {
 						const pts = obj.points;
+						const strokeTol = tol + (obj.size / s) / 2;
 						for (let j = 1; j < pts.length; j++) {
-							if (pointToSegmentDistance(px, py, pts[j - 1].x, pts[j].x ? pts[j - 1].y : pts[j - 1].y, pts[j].x ? pts[j].y : pts[j].y) <= tol) return i;
+							const dist = pointToSegmentDistance(px, py, pts[j - 1].x, pts[j - 1].y, pts[j].x, pts[j].y);
+							if (dist <= strokeTol) return i;
 						}
 					}
 				}
@@ -1222,13 +1522,20 @@
 				pointerIdActive = p.id;
 
 				if (eraserOn) {
-					const idx = hitTestObject(x, y, Math.max(8, annotSize * 1.1));
-					if (idx >= 0) { objects.splice(idx, 1);
-						renderAnnotations(); }
+					const idx = hitTestObject(x, y, Math.max(12, annotSize * 1.5));
+					if (idx >= 0) {
+						objects.splice(idx, 1);
+						renderAnnotations();
+					}
 					return;
 				}
 				if (annotationOn && !textModeOn) {
-					currentStroke = { type: 'stroke', color: annotColor, size: Math.max(1, annotSize * normPressure(p.pressure)), points: [{ x, y }] };
+					currentStroke = {
+						type: 'stroke',
+						color: annotColor,
+						size: Math.max(1, annotSize * normPressure(p.pressure)),
+						points: [{ x, y }]
+					};
 					objects.push(currentStroke);
 					renderAnnotations();
 				}
@@ -1245,56 +1552,82 @@
 				}
 				if (eraserOn && p.id === pointerIdActive) {
 					const ptE = canvasToCtxXY(p.x, p.y, drawCanvas);
-					const idx = hitTestObject(ptE.x, ptE.y, Math.max(8, annotSize * 1.1));
-					if (idx >= 0) { objects.splice(idx, 1);
-						renderAnnotations(); }
+					const idx = hitTestObject(ptE.x, ptE.y, Math.max(12, annotSize * 1.5));
+					if (idx >= 0) {
+						objects.splice(idx, 1);
+						renderAnnotations();
+					}
 					return;
 				}
 				if (annotationOn && !textModeOn && p.id === pointerIdActive && currentStroke) {
 					const ptA = canvasToCtxXY(p.x, p.y, drawCanvas);
-					currentStroke.points.push({ x: ptA.x, y: ptA.y });
-					currentStroke.size = Math.max(1, annotSize * normPressure(p.pressure));
-					renderAnnotations();
+					// Only add point if it's far enough from the last one (reduces jaggedness)
+					const last = currentStroke.points[currentStroke.points.length - 1];
+					const dist = Math.hypot(ptA.x - last.x, ptA.y - last.y);
+					if (dist > 2) {
+						currentStroke.points.push({ x: ptA.x, y: ptA.y });
+						currentStroke.size = Math.max(1, annotSize * normPressure(p.pressure));
+						renderAnnotations();
+					}
 				}
 			}
 
-			function endDraw() { pointerIdActive = null;
-				currentStroke = null; }
+			function endDraw() {
+				pointerIdActive = null;
+				currentStroke = null;
+			}
 
 			/* Laser trail */
-			function addTailPoint(x, y) { tail.push({ x, y, life: 1 }); if (tail.length > 220) tail.shift(); }
+			function addTailPoint(x, y) {
+				tail.push({ x, y, life: 1 });
+				if (tail.length > 180) tail.shift();
+			}
 
 			function renderLaser() {
 				const w = laserCanvas.width,
 					h = laserCanvas.height;
 				ctxLaser.clearRect(0, 0, w, h);
-				if (laserActive) {
+				if (laserActive && tail.length > 0) {
 					const rgb = hexToRgb(pointerColor);
 					const r = rgb.r,
 						g = rgb.g,
 						b = rgb.b;
 					const s = Z();
+
 					for (let i = 0; i < tail.length; i++) {
 						const t = tail[i];
-						t.life *= 0.96;
+						t.life *= 0.94;
 						if (t.life < 0.02) continue;
 						const a = t.life;
-						const radius = (pointerSize / s) * (0.9 + 1.2 * a);
-						const glow = radius * 2.2;
+						const radius = (pointerSize / s) * (0.8 + 1.0 * a);
+						const glow = radius * 2.5;
+
+						// Outer glow
 						const grad = ctxLaser.createRadialGradient(t.x, t.y, 0, t.x, t.y, glow);
-						grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + (0.25 * a) + ')');
+						grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + (0.3 * a) + ')');
+						grad.addColorStop(0.5, 'rgba(' + r + ',' + g + ',' + b + ',' + (0.1 * a) + ')');
 						grad.addColorStop(1, 'rgba(0,0,0,0)');
 						ctxLaser.fillStyle = grad;
 						ctxLaser.beginPath();
 						ctxLaser.arc(t.x, t.y, glow, 0, Math.PI * 2);
 						ctxLaser.fill();
-						ctxLaser.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.85 * a) + ')';
+
+						// Inner bright core
+						ctxLaser.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.9 * a) + ')';
 						ctxLaser.beginPath();
 						ctxLaser.arc(t.x, t.y, radius, 0, Math.PI * 2);
 						ctxLaser.fill();
+
+						// White center for brightness
+						ctxLaser.fillStyle = 'rgba(255,255,255,' + (0.5 * a) + ')';
+						ctxLaser.beginPath();
+						ctxLaser.arc(t.x, t.y, radius * 0.4, 0, Math.PI * 2);
+						ctxLaser.fill();
 					}
 				}
-				for (let j = tail.length - 1; j >= 0; j--) { if (tail[j].life < 0.02) tail.splice(j, 1); }
+				for (let j = tail.length - 1; j >= 0; j--) {
+					if (tail[j].life < 0.02) tail.splice(j, 1);
+				}
 				requestAnimationFrame(renderLaser);
 			}
 
@@ -1331,65 +1664,41 @@
 				pendingTextXY = null;
 				if (!keepMode) {
 					textModeOn = false;
-					textBtn.classList.toggle('active', false);
-					textBtn.classList.toggle('primary', false);
-					textBtn.classList.toggle('muted', true);
+					syncToolButtons();
 					updateInteractionMode();
 				}
 			}
 
 			function placeTextObject(text, x, y) {
 				if (!text) return;
-				const baseFontPx = Math.round(10 + annotSize * 2);
+				const baseFontPx = Math.round(12 + annotSize * 1.8);
 				const obj = { type: 'text', x, y, text: String(text), color: annotColor, baseFontPx };
 				objects.push(obj);
 				renderAnnotations();
 			}
 
 			function syncToolButtons() {
-				annotationBtn.classList.toggle('active', annotationOn);
-				annotationBtn.classList.toggle('primary', annotationOn);
-				annotationBtn.classList.toggle('muted', !annotationOn);
-				eraserBtn.classList.toggle('active', eraserOn);
-				eraserBtn.classList.toggle('primary', eraserOn);
-				eraserBtn.classList.toggle('muted', !eraserOn);
-				textBtn.classList.toggle('active', textModeOn);
-				textBtn.classList.toggle('primary', textModeOn);
-				textBtn.classList.toggle('muted', !textModeOn);
-			}
+				// Remove active state from all tool buttons
+				[laserBtn, annotationBtn, eraserBtn, textBtn].forEach(btn => {
+					btn.classList.remove('active', 'primary');
+					btn.classList.add('muted');
+				});
 
-			function toggleAnnotation(showFeedback) {
-				annotationOn = !annotationOn;
-				eraserOn = false;
-				textModeOn = false;
-				hideTextOverlay();
-				syncToolButtons();
-				updateInteractionMode();
-				if (showFeedback) showToast(annotationOn ? 'Annotation on' : 'Annotation off');
-			}
-
-			function toggleEraser(showFeedback) {
-				eraserOn = !eraserOn;
-				annotationOn = eraserOn ? true : annotationOn;
-				textModeOn = false;
-				hideTextOverlay();
-				syncToolButtons();
-				updateInteractionMode();
-				if (showFeedback) showToast(eraserOn ? 'Eraser on' : 'Eraser off');
-			}
-
-			function toggleTextMode(showFeedback) {
-				annotationOn = true;
-				eraserOn = false;
-				textModeOn = !textModeOn;
-				hideTextOverlay(textModeOn);
-				syncToolButtons();
-				if (textModeOn) {
-					showToast(showFeedback ? 'Text on' : 'Tap where you want the text.');
-				} else if (showFeedback) {
-					showToast('Text off');
+				// Set active state
+				if (eraserOn) {
+					eraserBtn.classList.remove('muted');
+					eraserBtn.classList.add('active', 'primary');
+				} else if (textModeOn) {
+					textBtn.classList.remove('muted');
+					textBtn.classList.add('active', 'primary');
+				} else if (annotationOn) {
+					annotationBtn.classList.remove('muted');
+					annotationBtn.classList.add('active', 'primary');
+				} else {
+					// Laser mode (default)
+					laserBtn.classList.remove('muted');
+					laserBtn.classList.add('active', 'primary');
 				}
-				updateInteractionMode();
 			}
 
 			function setLaserMode(showFeedback) {
@@ -1399,33 +1708,81 @@
 				hideTextOverlay();
 				syncToolButtons();
 				updateInteractionMode();
-				if (showFeedback) showToast('Laser on');
+				if (showFeedback) showToast('Laser pointer active');
+			}
+
+			function toggleAnnotation(showFeedback) {
+				annotationOn = !annotationOn;
+				eraserOn = false;
+				textModeOn = false;
+				hideTextOverlay();
+				syncToolButtons();
+				updateInteractionMode();
+				if (showFeedback) showToast(annotationOn ? 'Draw mode' : 'Laser pointer');
+			}
+
+			function toggleEraser(showFeedback) {
+				eraserOn = !eraserOn;
+				annotationOn = eraserOn;
+				textModeOn = false;
+				hideTextOverlay();
+				syncToolButtons();
+				updateInteractionMode();
+				if (showFeedback) showToast(eraserOn ? 'Eraser mode' : 'Laser pointer');
+			}
+
+			function toggleTextMode(showFeedback) {
+				textModeOn = !textModeOn;
+				annotationOn = textModeOn;
+				eraserOn = false;
+				hideTextOverlay(textModeOn);
+				syncToolButtons();
+				updateInteractionMode();
+				if (showFeedback) {
+					showToast(textModeOn ? 'Text mode - tap to place' : 'Laser pointer');
+				}
 			}
 
 			/* Wiring */
 			liveToggle.addEventListener('change', () => setPaused(!liveToggle.checked));
 
-			annotationBtn.addEventListener('click', () => toggleAnnotation(false));
-			eraserBtn.addEventListener('click', () => toggleEraser(false));
-			textBtn.addEventListener('click', () => toggleTextMode(false));
+			laserBtn.addEventListener('click', () => setLaserMode(true));
+			annotationBtn.addEventListener('click', () => toggleAnnotation(true));
+			eraserBtn.addEventListener('click', () => toggleEraser(true));
+			textBtn.addEventListener('click', () => toggleTextMode(true));
+
 			undoBtn.addEventListener('click', () => {
 				if (!objects.length) return;
 				objects.pop();
 				renderAnnotations();
+				showToast('Undone');
 			});
-			clearBtn.addEventListener('click', () => { objects.length = 0;
-				renderAnnotations(); });
+
+			clearBtn.addEventListener('click', () => {
+				if (!objects.length) return;
+				objects.length = 0;
+				renderAnnotations();
+				showToast('Cleared all');
+			});
 
 			function refreshPickerColors() {
 				[].slice.call(sizeUI.pointer.children).forEach(btn => btn.style.setProperty('--dot-color', pointerColor));
 				[].slice.call(sizeUI.annot.children).forEach(btn => btn.style.setProperty('--dot-color', annotColor));
 			}
-			pointerColorInput.addEventListener('input', (e) => { pointerColor = e.target.value;
-				paintLabelBtn(pointerLabelBtn, pointerColor);
-				refreshPickerColors(); });
-			annotColorInput.addEventListener('input', (e) => { annotColor = e.target.value;
-				paintLabelBtn(annotLabelBtn, annotColor);
-				refreshPickerColors(); });
+
+			pointerColorInput.addEventListener('input', (e) => {
+				pointerColor = e.target.value;
+				saveStr('pointerColor', pointerColor);
+				updateColorBtn(pointerColorBtn, pointerColor);
+				refreshPickerColors();
+			});
+
+			annotColorInput.addEventListener('input', (e) => {
+				annotColor = e.target.value;
+				saveStr('annotColor', annotColor);
+				updateColorBtn(annotColorBtn, annotColor);
+				refreshPickerColors();
+			});
 
 			function buildSizePicker(container, sizes, getColor, currentSize, onPick) {
 				container.innerHTML = '';
@@ -1458,36 +1815,34 @@
 				});
 				video.style.transformOrigin = 'center center';
 				video.style.transform = mirror + 'scale(' + s + ')';
-				applyFitMode(); // ensure objectFit is applied whenever transforms update
+				applyFitMode();
 			}
 
 			function applyFitMode() {
-				// This is the fix: apply the chosen mode to the live video element
-				video.style.objectFit = fitMode; // 'contain' or 'cover'
+				video.style.objectFit = fitMode;
 			}
 
-			document.getElementById('mirrorBtn').addEventListener('click', () => {
+			mirrorBtn.addEventListener('click', () => {
 				isMirrored = !isMirrored;
 				applyTransforms();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				showToast(isMirrored ? 'Mirrored' : 'Unmirrored');
 			});
+
 			function updateFitButton() {
 				const isCover = fitMode === 'cover';
-				const label = isCover ? 'Fill' : 'Fit';
-				const detail = isCover ? 'Crop (Fill)' : 'Full View (Fit)';
-				fitBtn.textContent = label;
-				fitBtn.setAttribute('aria-label', detail);
-				fitBtn.setAttribute('title', detail);
+				fitBtn.querySelector('.btn-text').textContent = isCover ? 'Fill' : 'Fit';
+				fitBtn.setAttribute('title', isCover ? 'Crop to fill (Fill)' : 'Show full view (Fit)');
 			}
 
-			document.getElementById('fitBtn').addEventListener('click', () => {
+			fitBtn.addEventListener('click', () => {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
 				updateFitButton();
 				applyFitMode();
-				// Redraw paused frame to match the new mode
-				if (isPaused) { captureFrozenFromVideo();
-					drawFreezeFromFrozen(); }
+				if (isPaused) {
+					captureFrozenFromVideo();
+					drawFreezeFromFrozen();
+				}
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
 
@@ -1501,8 +1856,21 @@
 			}
 			zoomSlider.addEventListener('input', e => setZoom(parseFloat(e.target.value)));
 
+			/* Keyboard shortcuts */
 			document.addEventListener('keydown', async e => {
 				if (document.activeElement === textInput) return;
+
+				// Ctrl/Cmd + Z for undo
+				if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+					e.preventDefault();
+					if (objects.length) {
+						objects.pop();
+						renderAnnotations();
+						showToast('Undone');
+					}
+					return;
+				}
+
 				if (e.code === 'Space') {
 					e.preventDefault();
 					await setPaused(!isPaused);
@@ -1514,6 +1882,9 @@
 				if (key === 'm') {
 					e.preventDefault();
 					mirrorBtn.click();
+				} else if (key === 'l') {
+					e.preventDefault();
+					setLaserMode(true);
 				} else if (key === 'a') {
 					e.preventDefault();
 					toggleAnnotation(true);
@@ -1523,9 +1894,14 @@
 				} else if (key === 't') {
 					e.preventDefault();
 					toggleTextMode(true);
-				} else if (key === 'l') {
-					e.preventDefault();
-					setLaserMode(true);
+				} else if (key === 'escape') {
+					if (overlayVisible) {
+						e.preventDefault();
+						hideTextOverlay();
+					} else if (annotationOn || eraserOn || textModeOn) {
+						e.preventDefault();
+						setLaserMode(true);
+					}
 				}
 			});
 
@@ -1563,21 +1939,31 @@
 			target.addEventListener('pointerleave', endDraw);
 
 			/* Text overlay actions */
-			textAdd.addEventListener('click', () => { if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-				hideTextOverlay(); });
-			textCancel.addEventListener('click', () => { hideTextOverlay(); });
+			textAdd.addEventListener('click', () => {
+				if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+				hideTextOverlay();
+			});
+			textCancel.addEventListener('click', () => hideTextOverlay());
 			textInput.addEventListener('keydown', e => {
-				if (e.key === 'Escape') { e.preventDefault();
-					hideTextOverlay(); }
-				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
-					hideTextOverlay(); }
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					hideTextOverlay();
+				}
+				if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+					e.preventDefault();
+					if (pendingTextXY) placeTextObject(textInput.value, pendingTextXY.x, pendingTextXY.y);
+					hideTextOverlay();
+				}
 			});
 
 			/* Snapshot */
 			screenshotBtn.addEventListener('click', () => {
 				const w = freezeCanvas.width,
 					h = freezeCanvas.height;
-				if (w === 0 || h === 0) { showToast('Snapshot failed: canvas not ready'); return; }
+				if (w === 0 || h === 0) {
+					showToast('Snapshot failed: canvas not ready');
+					return;
+				}
 				const out = document.createElement('canvas');
 				out.width = w;
 				out.height = h;
@@ -1592,17 +1978,21 @@
 						const cr = w / h,
 							vr = vw / vh;
 						let dw, dh, dx, dy;
-						if (fitMode === 'cover') { if (vr > cr) { dh = h;
-								dw = h * vr; } else { dw = w;
-								dh = w / vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-								dh = w / vr; } else { dh = h;
-								dw = h * vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; }
+						if (fitMode === 'cover') {
+							if (vr > cr) { dh = h; dw = h * vr; }
+							else { dw = w; dh = w / vr; }
+						} else {
+							if (vr > cr) { dw = w; dh = w / vr; }
+							else { dh = h; dw = h * vr; }
+						}
+						dx = (w - dw) / 2;
+						dy = (h - dh) / 2;
 						octx.save();
-						if (isMirrored) { octx.translate(w, 0);
+						if (isMirrored) {
+							octx.translate(w, 0);
 							octx.scale(-1, 1);
-							dx = w - dx - dw; }
+							dx = w - dx - dw;
+						}
 						octx.drawImage(video, dx, dy, dw, dh);
 						octx.restore();
 					}
@@ -1619,7 +2009,10 @@
 					octx.drawImage(laserCanvas, 0, 0);
 				}
 				out.toBlob(blob => {
-					if (!blob) { showToast('Snapshot failed'); return; }
+					if (!blob) {
+						showToast('Snapshot failed');
+						return;
+					}
 					const url = URL.createObjectURL(blob);
 					const a = document.createElement('a');
 					a.href = url;
@@ -1646,17 +2039,21 @@
 						const cr = w / h,
 							vr = vw / vh;
 						let dw, dh, dx, dy;
-						if (fitMode === 'cover') { if (vr > cr) { dh = h;
-								dw = h * vr; } else { dw = w;
-								dh = w / vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; } else { if (vr > cr) { dw = w;
-								dh = w / vr; } else { dh = h;
-								dw = h * vr; } dx = (w - dw) / 2;
-							dy = (h - dh) / 2; }
+						if (fitMode === 'cover') {
+							if (vr > cr) { dh = h; dw = h * vr; }
+							else { dw = w; dh = w / vr; }
+						} else {
+							if (vr > cr) { dw = w; dh = w / vr; }
+							else { dh = h; dw = h * vr; }
+						}
+						dx = (w - dw) / 2;
+						dy = (h - dh) / 2;
 						compositeCtx.save();
-						if (isMirrored) { compositeCtx.translate(w, 0);
+						if (isMirrored) {
+							compositeCtx.translate(w, 0);
 							compositeCtx.scale(-1, 1);
-							dx = w - dx - dw; }
+							dx = w - dx - dw;
+						}
 						compositeCtx.drawImage(video, dx, dy, dw, dh);
 						compositeCtx.restore();
 					}
@@ -1677,18 +2074,28 @@
 
 			function getSupportedMime() {
 				const prefs = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'];
-				for (let i = 0; i < prefs.length; i++) { if (MediaRecorder.isTypeSupported(prefs[i])) return prefs[i]; }
+				for (let i = 0; i < prefs.length; i++) {
+					if (MediaRecorder.isTypeSupported(prefs[i])) return prefs[i];
+				}
 				return '';
 			}
+
 			recordBtn.addEventListener('click', () => {
 				if (!recording) {
 					composite.width = freezeCanvas.width;
 					composite.height = freezeCanvas.height;
 					const mime = getSupportedMime();
 					const s = composite.captureStream(30);
-					try { mediaRecorder = new MediaRecorder(s, mime ? { mimeType: mime } : {}) } catch (e) { showToast('Recording not supported'); return; }
+					try {
+						mediaRecorder = new MediaRecorder(s, mime ? { mimeType: mime } : {});
+					} catch (e) {
+						showToast('Recording not supported');
+						return;
+					}
 					recChunks = [];
-					mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) recChunks.push(e.data); };
+					mediaRecorder.ondataavailable = e => {
+						if (e.data && e.data.size > 0) recChunks.push(e.data);
+					};
 					mediaRecorder.onstop = () => {
 						const blob = new Blob(recChunks, { type: mediaRecorder.mimeType || 'video/webm' });
 						const url = URL.createObjectURL(blob);
@@ -1703,7 +2110,7 @@
 					};
 					mediaRecorder.start(120);
 					recording = true;
-					recordBtn.textContent = 'Stop';
+					recordBtn.innerHTML = '<span class="btn-icon">&#x23F9;</span><span class="btn-text">Stop</span>';
 					recordBtn.classList.add('danger');
 					hud.classList.add('recording');
 					drawCompositeFrame();
@@ -1711,54 +2118,52 @@
 				} else {
 					recording = false;
 					try { mediaRecorder.stop(); } catch (e) {}
-					recordBtn.textContent = 'Record';
+					recordBtn.innerHTML = '<span class="btn-icon">&#x23FA;</span><span class="btn-text">Record</span>';
 					recordBtn.classList.remove('danger');
 					hud.classList.remove('recording');
 				}
 			});
 
 			/* Init */
-			const ro = new ResizeObserver(() => { resizeCanvases(); });
+			const ro = new ResizeObserver(() => resizeCanvases());
 			ro.observe(stage);
-			window.addEventListener('orientationchange', () => { setTimeout(resizeCanvases, 200); });
+			window.addEventListener('orientationchange', () => setTimeout(resizeCanvases, 200));
 			requestAnimationFrame(renderLaser);
 
 			(async function init() {
-				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { showToast('getUserMedia not supported'); return; }
+				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+					showToast('getUserMedia not supported');
+					return;
+				}
 				await enumerate();
 
 				let chosen = '';
-				if (lastDeviceId && [].some.call(cameraSelect.options, o => o.value === lastDeviceId)) chosen = lastDeviceId;
+				if (lastDeviceId && [].some.call(cameraSelect.options, o => o.value === lastDeviceId)) {
+					chosen = lastDeviceId;
+				}
 				if (chosen) await startCamera({ deviceId: { exact: chosen } });
 				else await startCamera({ facingMode: facingPref });
 
 				isPaused = false;
 				updateStatusUI();
 
-				buildSizePicker(sizeUI.pointer, SIZESET, () => pointerColor, pointerSize, (sz) => { pointerSize = sz;
-					saveNum('pointerSize', sz); });
-				buildSizePicker(sizeUI.annot, SIZESET, () => annotColor, annotSize, (sz) => { annotSize = sz;
-					saveNum('annotSize', sz); });
-				[].slice.call(sizeUI.pointer.children).forEach(btn => btn.style.setProperty('--dot-color', pointerColor));
-				[].slice.call(sizeUI.annot.children).forEach(btn => btn.style.setProperty('--dot-color', annotColor));
+				buildSizePicker(sizeUI.pointer, SIZESET, () => pointerColor, pointerSize, (sz) => {
+					pointerSize = sz;
+					saveNum('pointerSize', sz);
+				});
+				buildSizePicker(sizeUI.annot, SIZESET, () => annotColor, annotSize, (sz) => {
+					annotSize = sz;
+					saveNum('annotSize', sz);
+				});
 
-				function paintLabelBtn(btn, color) {
-					let h = color.replace('#', '');
-					if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-					const r = parseInt(h.slice(0, 2), 16),
-						g = parseInt(h.slice(2, 4), 16),
-						b = parseInt(h.slice(4, 6), 16);
-					const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-					btn.style.background = color;
-					btn.style.borderColor = 'rgba(255,255,255,.25)';
-					btn.style.color = (yiq >= 160 ? '#111' : '#fff');
-				}
-				paintLabelBtn(pointerLabelBtn, pointerColor);
-				paintLabelBtn(annotLabelBtn, annotColor);
+				updateColorBtn(pointerColorBtn, pointerColor);
+				updateColorBtn(annotColorBtn, annotColor);
+				refreshPickerColors();
 
+				syncToolButtons();
 				updateInteractionMode();
 				setZoom(zoomLevel);
-				applyFitMode(); // ensure initial live mode matches fitMode
+				applyFitMode();
 				updateFitButton();
 				resizeCanvases();
 			})();
