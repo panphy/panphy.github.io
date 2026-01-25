@@ -74,7 +74,7 @@ body {
 	align-items: center;
 	background-color: var(--nav-bg);
 	color: var(--text-main);
-	padding: 10px 20px;
+	padding: 6px 20px;
 	font-size: 22px;
 	font-weight: 600;
 	position: sticky;
