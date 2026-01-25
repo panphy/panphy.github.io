@@ -562,6 +562,9 @@
 
             if (originalComplete && (extraPercent === 0 || extraComplete)) {
                 html = '<span class="info-line">Timer complete!</span>';
+                if (extraPercent > 0) {
+                    html += '<span class="info-line" style="visibility: hidden;">&nbsp;</span>';
+                }
             }
 
             infoEl.innerHTML = html;
