@@ -6,222 +6,313 @@
   <title>Audio Spectrum & Waveform Analyzer</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <style>
+    :root {
+      --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+      --surface: #1e2129;
+      --surface-alt: #17191f;
+      --border: #2d3436;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5849d6;
+      --btn-secondary: #00cec9;
+      --btn-secondary-hover: #00b3ad;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html,
     body {
       margin: 0;
       padding: 0;
-      background: #121212;
-      color: #ffffff;
-      font-family: sans-serif;
+      min-height: 100%;
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
     }
 
     a {
-      color: #ff5f1f;
+      color: var(--brand-accent);
       text-decoration: none;
     }
 
     a:hover {
-      color: #ff5f1f;
       text-decoration: underline;
     }
 
-    a:visited {
-      color: #ff5f1f;
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    canvas {
-      display: block;
-      margin: 0 auto;
-      max-width: 100%;
-      height: auto;
-    }
-
-    #waveform {
-      touch-action: none;
-    }
-
-    h1 {
-      text-align: center;
-      color: #98c616;
-      margin: 1rem 0 0.4rem 0;
+    header {
+      padding: 1.5rem 1.5rem 1rem;
     }
 
     #titleBanner {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      background-color: #121212;
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(22, 24, 29, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 0.85rem 1.5rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
     .banner-logo img {
-      max-height: 35px;
-      height: auto;
+      max-height: 40px;
       width: auto;
-      margin-left: 10px;
-      margin-top: 10px;
+      height: auto;
     }
 
     .banner-title {
       text-align: center;
-      margin: 1rem 0 0.4rem 0;
-      color: #98c616;
-      font-size: 1.8em;
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .banner-placeholder {
       width: 70px;
     }
 
-    #peak-frequency {
-      width: 200px;
-      margin: 0 auto;
-      text-align: left;
-      white-space: nowrap;
-      font-weight: bold;
-      margin-bottom: 10px;
+    main {
+      flex: 1;
+      padding: 0 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
     }
 
-    #time-delta {
-      width: 260px;
+    .info-bar {
+      max-width: 1200px;
       margin: 0 auto;
-      text-align: left;
-      white-space: nowrap;
-      font-weight: bold;
-      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
     }
 
-    #visualizer-container {
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0.9rem 1.1rem;
+      box-shadow: var(--shadow);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .info-card span {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    #visualizer-container,
+    #waveform-container {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
       position: relative;
-      width: 80%;
-      max-width: 1000px;
-      margin: 0 auto;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+
+    #waveform {
+      touch-action: none;
     }
 
     #tooltip {
       position: absolute;
       display: none;
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(15, 16, 20, 0.9);
       color: #fff;
-      padding: 4px 8px;
-      border-radius: 3px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
       pointer-events: none;
       font-size: 0.8rem;
     }
 
-    #waveform-container {
-      width: 80%;
-      max-width: 1000px;
-      margin: 1rem auto;
-    }
-
     #sliders {
-      width: 80%;
-      max-width: 1000px;
-      margin: 0.5rem auto 1rem auto;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      flex-wrap: wrap;
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
     }
 
     #sliders label {
-      margin: 0 0.5rem 0 0;
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
     }
 
     input[type="range"] {
+      width: 100%;
       cursor: pointer;
+      accent-color: var(--brand-primary);
     }
 
     #controls {
-      text-align: center;
-      margin: 1rem auto;
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
     }
 
     button {
-      margin: 0.5rem;
-      padding: 0.5rem 1rem;
+      margin: 0;
+      padding: 0.6rem 1.4rem;
       font-size: 1rem;
       cursor: pointer;
       border: none;
-      border-radius: 5px;
-      color: #ffffff;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
     }
 
     .toggle-button {
-      background-color: #ff8207;
-      min-width: 100px;
+      background: linear-gradient(135deg, var(--btn-primary), var(--brand-accent));
+      min-width: 140px;
       text-align: center;
     }
 
     .toggle-button:hover {
-      background-color: #e87503;
+      background: linear-gradient(135deg, var(--btn-primary-hover), var(--brand-accent));
     }
 
     .export-button {
-      background-color: #17a2b8;
+      background: linear-gradient(135deg, var(--btn-secondary), #0fb9b1);
     }
 
     .export-button:hover {
-      background-color: #138496;
+      background: linear-gradient(135deg, var(--btn-secondary-hover), #0ba39d);
     }
 
     footer {
       text-align: center;
-      padding: 10px;
-      background: #f4f4f400;
-      color: #888;
-      margin-top: 10px;
+      padding: 1.5rem 1rem 2rem;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
     }
   </style>
 </head>
 
 <body>
-  <div id="titleBanner">
-    <div class="banner-logo">
-      <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-        <img src="/panphy.png" alt="PanPhy logo" />
-      </a>
-    </div>
+  <div class="page">
+    <header>
+      <div id="titleBanner">
+        <div class="banner-logo">
+          <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+            <img src="/panphy.png" alt="PanPhy logo" />
+          </a>
+        </div>
 
-    <h1 class="banner-title">Audio Spectrum & Waveform Analyzer</h1>
+        <h1 class="banner-title">Audio Spectrum & Waveform Analyzer</h1>
 
-    <div class="banner-placeholder"></div>
+        <div class="banner-placeholder"></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="info-bar">
+        <div id="peak-frequency" class="info-card">
+          <span>Peak Frequency</span>
+          <strong id="peak-frequency-value">-- Hz</strong>
+        </div>
+        <div id="time-delta" class="info-card">
+          <span>Marker Delta</span>
+          <strong id="time-delta-value">-- ms</strong>
+        </div>
+      </div>
+
+      <div id="visualizer-container">
+        <canvas id="visualizer" width="800" height="200"></canvas>
+        <div id="tooltip"></div>
+      </div>
+
+      <div id="waveform-container">
+        <canvas id="waveform" width="800" height="200"></canvas>
+      </div>
+
+      <div id="sliders">
+        <div>
+          <label for="yScale">Amplitude Scale</label>
+          <input type="range" id="yScale" min="0.5" max="20" step="0.5" value="5">
+        </div>
+        <div>
+          <label for="xScale">Time Scale</label>
+          <input type="range" id="xScale" min="0.5" max="10" step="0.5" value="1">
+        </div>
+      </div>
+
+      <div id="controls">
+        <button id="toggleBtn" class="toggle-button">Start</button>
+        <button id="exportSpectrumBtn" class="export-button" disabled>Export Spectrum (.csv)</button>
+        <button id="exportWaveformBtn" class="export-button" disabled>Export Waveform (.csv)</button>
+      </div>
+    </main>
+
+    <footer>
+      &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+    </footer>
   </div>
-  <br>
-
-  <div id="peak-frequency">Peak Frequency: -- Hz</div>
-  <div id="time-delta">Time between markers: -- ms</div>
-
-  <div id="visualizer-container">
-    <canvas id="visualizer" width="800" height="200"></canvas>
-    <div id="tooltip"></div>
-  </div>
-
-  <div id="waveform-container">
-    <canvas id="waveform" width="800" height="200"></canvas>
-  </div>
-
-  <div id="sliders">
-    <div>
-      <label for="yScale">Amplitude Scale:</label>
-      <input type="range" id="yScale" min="0.5" max="20" step="0.5" value="5">
-    </div>
-    <div>
-      <label for="xScale">Time Scale:</label>
-      <input type="range" id="xScale" min="0.5" max="10" step="0.5" value="1">
-    </div>
-  </div>
-
-  <div id="controls">
-    <button id="toggleBtn" class="toggle-button">Start</button>
-    <button id="exportSpectrumBtn" class="export-button" disabled>Export Spectrum (.csv)</button>
-    <button id="exportWaveformBtn" class="export-button" disabled>Export Waveform (.csv)</button>
-  </div>
-
-  <footer>
-    &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
-    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-  </footer>
 </body>
 
 <script>
@@ -257,8 +348,8 @@
   const waveCtx = waveCanvas.getContext('2d');
 
   const tooltip = document.getElementById('tooltip');
-  const peakFreqDisplay = document.getElementById('peak-frequency');
-  const timeDeltaDisplay = document.getElementById('time-delta');
+  const peakFreqDisplay = document.getElementById('peak-frequency-value');
+  const timeDeltaDisplay = document.getElementById('time-delta-value');
 
   const toggleBtn = document.getElementById('toggleBtn');
   const exportSpectrumBtn = document.getElementById('exportSpectrumBtn');
@@ -424,8 +515,8 @@
     toggleBtn.textContent = 'Start';
     exportSpectrumBtn.disabled = true;
     exportWaveformBtn.disabled = true;
-    peakFreqDisplay.textContent = 'Peak Frequency: -- Hz';
-    timeDeltaDisplay.textContent = 'Time between markers: -- ms';
+    peakFreqDisplay.textContent = '-- Hz';
+    timeDeltaDisplay.textContent = '-- ms';
   }
 
   function teardownAudioSession() {
@@ -477,7 +568,7 @@
     drawSquareGridWithTime();
 
     if (!analyzer || !dataArray || !timeDomainData) {
-      peakFreqDisplay.textContent = 'Peak Frequency: -- Hz';
+      peakFreqDisplay.textContent = '-- Hz';
       return;
     }
 
@@ -497,7 +588,7 @@
       }
     }
     const peakFreq = indexToFrequency(peakIndex);
-    peakFreqDisplay.textContent = `Peak Frequency: ${peakFreq.toFixed(1)} Hz`;
+    peakFreqDisplay.textContent = `${peakFreq.toFixed(1)} Hz`;
 
     // Frequency bars
     const barCount = dataArray.length;
@@ -661,7 +752,7 @@
     const totalTimeSec = windowSize / (sampleRate || 44100);
     const deltaMs = Math.abs(markerX2 - markerX1) / waveCanvasSize.width * totalTimeSec * 1000;
 
-    timeDeltaDisplay.textContent = `Time between markers: ${deltaMs.toFixed(2)} ms`;
+    timeDeltaDisplay.textContent = `${deltaMs.toFixed(2)} ms`;
   }
 
   function pickActiveMarker(cursorX, allowNearest = false) {
