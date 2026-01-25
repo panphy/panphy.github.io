@@ -571,27 +571,6 @@
             infoEl.innerHTML = html;
         };
 
-        /* ----------- Notification API ----------- */
-        const requestNotificationPermission = () => {
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-        };
-
-        const sendNotification = (title, body) => {
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    new Notification(title, {
-                        body: body,
-                        icon: '/favicon.png',
-                        tag: 'timer-notification'
-                    });
-                } catch (err) {
-                    console.log('Notification failed:', err);
-                }
-            }
-        };
-
         /* ----------- localStorage persistence ----------- */
         const saveState = () => {
             const state = {
@@ -792,9 +771,6 @@
             }
 
             saveState();
-
-            // Request notification permission on first interaction
-            requestNotificationPermission();
         }
 
         function resetTimer() {
@@ -844,6 +820,11 @@
             originalComplete = false;
             extraComplete = false;
 
+            // Clear timestamps before updating display
+            endTime = null;
+            extraEndTime = null;
+            startTimestamp = null;
+
             updateDisplays();
             updateInfoDisplay();
 
@@ -862,10 +843,6 @@
             toggleBtn.classList.remove('btn-pause');
             toggleBtn.classList.add('btn-start');
             toggleBtn.disabled = true;
-
-            endTime = null;
-            extraEndTime = null;
-            startTimestamp = null;
 
             clearState();
         }
@@ -899,7 +876,6 @@
                     originalComplete = true;
                     playAlarm('alarm-sound-original');
                     blink('original-time');
-                    sendNotification('Timer Complete', 'Original time has ended!');
 
                     if (extraPercent === 0 || extraComplete) {
                         resetToggleButton();
@@ -914,7 +890,6 @@
                     extraComplete = true;
                     playAlarm('alarm-sound-extra');
                     blink('extra-time');
-                    sendNotification('Extra Time Complete', 'Extra time has ended!');
 
                     if (originalComplete) {
                         resetToggleButton();
