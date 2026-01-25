@@ -291,7 +291,8 @@
 		.input-section h2,
 		.graph-section h2,
 		.global-uncertainty h2,
-		.advanced-fit-section h2 {
+		.advanced-fit-section h2,
+		.section-toggle {
 			font-family: Arial, sans-serif;
 			font-size: 20px;
 			background-color: #ffad7a;
@@ -300,6 +301,21 @@
 			border-radius: 4px;
 			margin: 0 0 15px;
 			text-align: center;
+		}
+
+		.section-toggle {
+			border: none;
+			width: 100%;
+			cursor: pointer;
+		}
+
+		.collapsible-content {
+			display: none;
+			margin-top: 15px;
+		}
+
+		.collapsible-content.is-open {
+			display: block;
 		}
 
 		/* Data Table */
@@ -922,128 +938,148 @@
 			<input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)" />
 
 			<div class="global-uncertainty">
-				<h2>Uncertainties</h2>
-				<div class="uncertainty-controls">
-					<div>
-						<label>
-							<input type="checkbox" id="toggle-x-error" onclick="toggleErrorColumn('x')" />
-							Δx
-						</label>
-						<select id="x-error-type" onchange="updateErrorType('x')">
-							<option value="absolute">absolute</option>
-							<option value="percentage">%</option>
-						</select>
+				<button
+					class="section-toggle"
+					type="button"
+					aria-expanded="false"
+					aria-controls="uncertainties-content"
+					onclick="toggleSection('uncertainties-content', this)"
+				>
+					Add Uncertainties
+				</button>
+				<div id="uncertainties-content" class="collapsible-content">
+					<div class="uncertainty-controls">
+						<div>
+							<label>
+								<input type="checkbox" id="toggle-x-error" onclick="toggleErrorColumn('x')" />
+								Δx
+							</label>
+							<select id="x-error-type" onchange="updateErrorType('x')">
+								<option value="absolute">absolute</option>
+								<option value="percentage">%</option>
+							</select>
+						</div>
+						<div>
+							<label>
+								<input type="checkbox" id="toggle-y-error" onclick="toggleErrorColumn('y')" />
+								Δy
+							</label>
+							<select id="y-error-type" onchange="updateErrorType('y')">
+								<option value="absolute">absolute</option>
+								<option value="percentage">%</option>
+							</select>
+						</div>
 					</div>
-					<div>
-						<label>
-							<input type="checkbox" id="toggle-y-error" onclick="toggleErrorColumn('y')" />
-							Δy
-						</label>
-						<select id="y-error-type" onchange="updateErrorType('y')">
-							<option value="absolute">absolute</option>
-							<option value="percentage">%</option>
-						</select>
-					</div>
-				</div>
 
-				<h3>Apply Global Uncertainty</h3>
-				<div class="global-uncertainty-item">
-					<input type="text" id="global-x-uncertainty" placeholder="Enter Δx" />
-					<button onclick="applyGlobalUncertainties('x')">Apply Δx</button>
-				</div>
-				<div class="global-uncertainty-item">
-					<input type="text" id="global-y-uncertainty" placeholder="Enter Δy" />
-					<button onclick="applyGlobalUncertainties('y')">Apply Δy</button>
+					<h3>Apply Global Uncertainty</h3>
+					<div class="global-uncertainty-item">
+						<input type="text" id="global-x-uncertainty" placeholder="Enter Δx" />
+						<button onclick="applyGlobalUncertainties('x')">Apply Δx</button>
+					</div>
+					<div class="global-uncertainty-item">
+						<input type="text" id="global-y-uncertainty" placeholder="Enter Δy" />
+						<button onclick="applyGlobalUncertainties('y')">Apply Δy</button>
+					</div>
 				</div>
 			</div>
 
 			<div class="fit-method-section">
-				<h2>Best Fit Line</h2>
-				<div class="tabs">
-					<button class="tablink active" onclick="openTab(event, 'BasicFit')">Basic Fit</button>
-					<button class="tablink" onclick="openTab(event, 'AdvancedFit')">Advanced Fit</button>
-				</div>
-
-				<!-- Basic Fit -->
-				<div id="BasicFit" class="tab-content active">
-					<label for="fit-method">Fit Method:</label>
-					<select id="fit-method" onchange="updateBasicFitEquation()">
-						<option value="Linear">Linear</option>
-						<option value="Polynomial-2">Quadratic</option>
-						<option value="Polynomial-3">Cubic</option>
-						<!-- <option value="Polynomial-4">Polynomial (4th Degree)</option> -->
-						<!-- Disabled 4th Degree Polynomial due to lack of applications -->
-						<option value="Exponential">Exponential</option>
-						<option value="Power">Power</option>
-					</select>
-					<div id="basic-fit-equation" class="general-equation">
-						\( y = mx + c \)
+				<button
+					class="section-toggle"
+					type="button"
+					aria-expanded="false"
+					aria-controls="best-fit-content"
+					onclick="toggleSection('best-fit-content', this)"
+				>
+					Add Best Fit Line
+				</button>
+				<div id="best-fit-content" class="collapsible-content">
+					<div class="tabs">
+						<button class="tablink active" onclick="openTab(event, 'BasicFit')">Basic Fit</button>
+						<button class="tablink" onclick="openTab(event, 'AdvancedFit')">Advanced Fit</button>
 					</div>
-					<div style="display: flex; gap: 6px;">
-						<button class="fit-button" onclick="fitCurve()">Fit Curve</button>
-						<button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
-					</div>
-				</div>
 
-				<!-- Advanced Fit -->
-				<div id="AdvancedFit" class="tab-content">
-					<label for="advanced-fit-method">Advanced Fit Method:</label>
-					<select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
-						<option value="Sinusoidal">Sinusoidal</option>
-						<option value="Gaussian">Gaussian</option>
-					</select>
-					<div id="advanced-fit-general-equation" class="general-equation">
-						\( y = A e^{bx} \sin(kx - \phi) + c \)
-					</div>
-					<p class="table-prompt">Enter initial fitting parameters below.</p>
-
-					<!-- Sinusoidal -->
-					<div id="Sinusoidal-parameters" class="parameter-section active">
-						<div class="advanced-fit-item">
-							<label for="initial-A">A:</label>
-							<input type="number" id="initial-A" value="1" step="any" />
+					<!-- Basic Fit -->
+					<div id="BasicFit" class="tab-content active">
+						<label for="fit-method">Fit Method:</label>
+						<select id="fit-method" onchange="updateBasicFitEquation()">
+							<option value="Linear">Linear</option>
+							<option value="Polynomial-2">Quadratic</option>
+							<option value="Polynomial-3">Cubic</option>
+							<!-- <option value="Polynomial-4">Polynomial (4th Degree)</option> -->
+							<!-- Disabled 4th Degree Polynomial due to lack of applications -->
+							<option value="Exponential">Exponential</option>
+							<option value="Power">Power</option>
+						</select>
+						<div id="basic-fit-equation" class="general-equation">
+							\( y = mx + c \)
 						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-b">b:</label>
-							<input type="number" id="initial-b" value="0" step="any" />
-						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-k">k:</label>
-							<input type="number" id="initial-k" value="1" step="any" />
-						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-phi">φ:</label>
-							<input type="number" id="initial-phi" value="0" step="any" />
-						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-c">c:</label>
-							<input type="number" id="initial-c" value="0" step="any" />
+						<div style="display: flex; gap: 6px;">
+							<button class="fit-button" onclick="fitCurve()">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
 						</div>
 					</div>
 
-					<!-- Gaussian -->
-					<div id="Gaussian-parameters" class="parameter-section">
-						<div class="advanced-fit-item">
-							<label for="initial-A-gaussian">A:</label>
-							<input type="number" id="initial-A-gaussian" value="1" step="any" />
+					<!-- Advanced Fit -->
+					<div id="AdvancedFit" class="tab-content">
+						<label for="advanced-fit-method">Advanced Fit Method:</label>
+						<select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
+							<option value="Sinusoidal">Sinusoidal</option>
+							<option value="Gaussian">Gaussian</option>
+						</select>
+						<div id="advanced-fit-general-equation" class="general-equation">
+							\( y = A e^{bx} \sin(kx - \phi) + c \)
 						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-mu">μ:</label>
-							<input type="number" id="initial-mu" value="0" step="any" />
-						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-sigma">σ:</label>
-							<input type="number" id="initial-sigma" value="1" step="any" />
-						</div>
-						<div class="advanced-fit-item">
-							<label for="initial-c-gaussian">c:</label>
-							<input type="number" id="initial-c-gaussian" value="0" step="any" />
-						</div>
-					</div>
+						<p class="table-prompt">Enter initial fitting parameters below.</p>
 
-					<div style="display: flex; gap: 6px;">
-						<button class="fit-button" onclick="fitAdvancedCurve()">Fit Curve</button>
-						<button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
+						<!-- Sinusoidal -->
+						<div id="Sinusoidal-parameters" class="parameter-section active">
+							<div class="advanced-fit-item">
+								<label for="initial-A">A:</label>
+								<input type="number" id="initial-A" value="1" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-b">b:</label>
+								<input type="number" id="initial-b" value="0" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-k">k:</label>
+								<input type="number" id="initial-k" value="1" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-phi">φ:</label>
+								<input type="number" id="initial-phi" value="0" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-c">c:</label>
+								<input type="number" id="initial-c" value="0" step="any" />
+							</div>
+						</div>
+
+						<!-- Gaussian -->
+						<div id="Gaussian-parameters" class="parameter-section">
+							<div class="advanced-fit-item">
+								<label for="initial-A-gaussian">A:</label>
+								<input type="number" id="initial-A-gaussian" value="1" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-mu">μ:</label>
+								<input type="number" id="initial-mu" value="0" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-sigma">σ:</label>
+								<input type="number" id="initial-sigma" value="1" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-c-gaussian">c:</label>
+								<input type="number" id="initial-c-gaussian" value="0" step="any" />
+							</div>
+						</div>
+
+						<div style="display: flex; gap: 6px;">
+							<button class="fit-button" onclick="fitAdvancedCurve()">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -1619,6 +1655,18 @@
 
 		if (targetInput && targetInput.offsetParent !== null) {
 			targetInput.focus();
+		}
+	}
+
+	function toggleSection(sectionId, button) {
+		const section = document.getElementById(sectionId);
+		if (!section) {
+			return;
+		}
+
+		const isOpen = section.classList.toggle('is-open');
+		if (button) {
+			button.setAttribute('aria-expanded', isOpen);
 		}
 	}
 
