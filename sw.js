@@ -1,10 +1,11 @@
-const CACHE_NAME = 'panphy-2025-02-24';
-const RUNTIME_CACHE = 'panphy-runtime-2025-02-24';
+const CACHE_NAME = 'panphy-2026-01-25';
+const RUNTIME_CACHE = 'panphy-runtime-2026-01-25';
 
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/favicon.png',
+  '/apple-touch-icon.png',
   '/panphy.png',
   '/manifest.json',
 
@@ -24,8 +25,16 @@ const ASSETS_TO_CACHE = [
   'https://cdn.plot.ly/plotly-2.29.1.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
+  '/tools/panphyplot/panphyplot_manual.html',
+  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css',
+  'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js',
+  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+  'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
   '/tools/digitizer.html',
   '/tools/motion_tracker.html',
+  'https://cdn.jsdelivr.net/npm/chart.js',
   '/tools/sound_analyzer.html',
   '/tools/tone_generator.html',
   '/tools/quadratic.html',
@@ -41,6 +50,7 @@ const ASSETS_TO_CACHE = [
 
   // Fun
   '/fun/dodge.html',
+  '/fun/react.html',
   '/fun/ascii_cam.html'
 ];
 
