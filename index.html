@@ -109,7 +109,7 @@
         }
 
         header h1 {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: 3.5rem;
             font-weight: 800;
             margin: 0;
@@ -163,6 +163,12 @@
             color: #fff;
         }
 
+        nav a,
+        .card a,
+        .theme-toggle button {
+            touch-action: manipulation;
+        }
+
         /* Theme Toggle Inside Nav */
         .theme-toggle button {
             background: transparent;
@@ -190,7 +196,7 @@
         }
 
         .section h2 {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: 2rem;
             margin-bottom: 2rem;
             color: var(--text-main);
@@ -253,7 +259,7 @@
         }
 
         .card h3 {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: 1.4rem;
             margin: 0 0 0.8rem 0;
             color: var(--text-main);
@@ -332,6 +338,14 @@
 
             .grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (pointer: coarse) {
+            nav a,
+            .card a,
+            .theme-toggle button {
+                min-height: 44px;
             }
         }
     </style>

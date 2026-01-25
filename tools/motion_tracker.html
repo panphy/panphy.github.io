@@ -6,6 +6,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Motion Tracker</title>
 	<link rel="icon" type="image/png" href="/favicon.png">
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js')
+					.catch((err) => console.log('Service Worker registration failed', err));
+			});
+		}
+	</script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
 		:root {
@@ -349,7 +357,8 @@
 			left: 0;
 			background: transparent;
 			z-index: 2;
-			pointer-events: none;
+			pointer-events: auto;
+			touch-action: none;
 		}
 
 		.crosshair {
@@ -554,6 +563,22 @@
 
 		body.modal-open {
 			overflow: hidden;
+		}
+
+		@media (pointer: coarse) {
+			button,
+			input,
+			select,
+			.control-button,
+			.primary-button,
+			.secondary-button {
+				min-height: 44px;
+				touch-action: manipulation;
+			}
+
+			#slider {
+				min-height: 44px;
+			}
 		}
 	</style>
 </head>

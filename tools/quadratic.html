@@ -6,6 +6,14 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Quadratic Solver</title>
 	<link rel="icon" type="image/png" href="/favicon.png" />
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js')
+					.catch((err) => console.log('Service Worker registration failed', err));
+			});
+		}
+	</script>
 	<style>
 		*,
 		*::before,
@@ -225,6 +233,16 @@
 		@media (max-width:900px) {
 			.page {
 				padding: 16px
+			}
+		}
+
+		@media (pointer: coarse) {
+			button,
+			input,
+			select,
+			.calc-button {
+				min-height: 44px;
+				touch-action: manipulation;
 			}
 		}
 	</style>

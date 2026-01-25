@@ -3,8 +3,17 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audio Spectrum & Waveform Analyzer</title>
   <link rel="icon" type="image/png" href="/favicon.png">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .catch((err) => console.log('Service Worker registration failed', err));
+      });
+    }
+  </script>
   <style>
     :root {
       --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -300,6 +309,24 @@
       padding: 1rem 1rem 1.4rem;
       color: var(--text-secondary);
       font-size: 0.95rem;
+    }
+
+    @media (pointer: coarse) {
+      button,
+      input,
+      select,
+      .control-row button {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+
+      input[type="range"] {
+        min-height: 44px;
+      }
+
+      canvas {
+        touch-action: none;
+      }
     }
   </style>
 </head>

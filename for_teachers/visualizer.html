@@ -6,6 +6,14 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Camera Visualizer</title>
 	<link rel="icon" type="image/png" href="/favicon.png">
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js')
+					.catch((err) => console.log('Service Worker registration failed', err));
+			});
+		}
+	</script>
 	<style>
 		:root {
 			--font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -91,7 +99,7 @@
 		}
 
 		.topbar .title {
-			font-family: 'Poppins', sans-serif;
+			font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 			font-size: 17px;
 			font-weight: 700;
 			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
@@ -589,6 +597,21 @@
 
 		.helperText.visible {
 			display: block
+		}
+
+		@media (pointer: coarse) {
+			button,
+			input,
+			select,
+			.toolbar-btn,
+			.tool-button {
+				min-height: 44px;
+				touch-action: manipulation;
+			}
+
+			canvas {
+				touch-action: none;
+			}
 		}
 	</style>
 </head>

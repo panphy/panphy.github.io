@@ -360,7 +360,7 @@ body {
 .global-uncertainty h2,
 .advanced-fit-section h2,
 .section-toggle {
-	font-family: 'Poppins', sans-serif;
+	font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 	font-size: 1.1rem;
 	color: var(--text-main);
 	padding: 8px 12px;
@@ -750,7 +750,7 @@ select {
 
 .result h3 {
 	margin-top: 0;
-	font-family: 'Poppins', sans-serif;
+	font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 .result p {
@@ -893,7 +893,7 @@ select {
 	font-weight: 600;
 	margin-bottom: 6px;
 	text-align: center;
-	font-family: 'Poppins', sans-serif;
+	font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 	color: var(--text-main);
 }
 
@@ -984,4 +984,20 @@ footer a:hover {
 
 footer a:visited {
 	color: var(--brand-primary);
+}
+
+@media (pointer: coarse) {
+	button,
+	.banner-button,
+	.action-button,
+	.tab,
+	select,
+	input[type="button"],
+	input[type="submit"],
+	input[type="reset"],
+	input[type="text"],
+	input[type="number"] {
+		min-height: 44px;
+		touch-action: manipulation;
+	}
 }

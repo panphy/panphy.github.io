@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Standing Wave Simulation</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .catch((err) => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
     <style>
         * {
             box-sizing: border-box;
@@ -215,6 +223,23 @@
         @media (max-width: 800px) {
             .container {
                 flex-direction: column;
+            }
+        }
+
+        @media (pointer: coarse) {
+            button,
+            input,
+            select {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+
+            input[type="range"] {
+                min-height: 44px;
+            }
+
+            canvas {
+                touch-action: none;
             }
         }
     </style>
