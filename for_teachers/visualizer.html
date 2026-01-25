@@ -98,11 +98,12 @@
 			background-clip: text
 		}
 
-		header {
-			padding: .35rem .6rem .3rem
-		}
-
 		.controls {
+			position: absolute;
+			top: .55rem;
+			left: .55rem;
+			z-index: 6;
+			max-width: calc(100% - 1.1rem);
 			background: transparent
 		}
 
@@ -598,8 +599,8 @@
 		</div>
 	</div>
 
-	<!-- Toolbar -->
-	<header>
+	<!-- Stage -->
+	<main id="stage">
 		<details class="controls">
 			<summary>Controls</summary>
 			<div class="row">
@@ -659,10 +660,6 @@
 				</div>
 			</div>
 		</details>
-	</header>
-
-	<!-- Stage -->
-	<main id="stage">
 		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">⤢</button>
 		<video id="video" playsinline autoplay muted></video>
 		<canvas id="freezeCanvas" class="hidden"></canvas>
