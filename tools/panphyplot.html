@@ -40,9 +40,9 @@
 
 		<!-- Buttons on the Right -->
 		<div class="banner-buttons">
-			<a href="/tools/panphyplot/panphyplot_manual.html" class="banner-button" target="_blank" rel="noopener noreferrer">Manual</a>
+			<a href="/tools/panphyplot/panphyplot_manual.html" class="banner-button" target="_blank" rel="noopener noreferrer" title="Open the PanPhyPlot manual in a new tab">Manual</a>
 			<div class="theme-toggle">
-				<button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
 			</div>
 		</div>
 	</div>
@@ -67,7 +67,7 @@
 			<span class="tab-close" title="Remove dataset">×</span>
 		</div>
 		<!-- The Add Dataset button looks just like a tab except it keeps its own color -->
-		<button class="add-dataset-btn">Add Dataset</button>
+		<button class="add-dataset-btn" title="Add a new dataset tab">Add Dataset</button>
 	</div>
 
 	<!-- Main container: left = Input section, right = Graph section -->
@@ -103,16 +103,16 @@
 
 			<div class="button-container">
 				<div class="button-row">
-					<button class="btn-add-row" onclick="addRow()">Add Row</button>
-					<button class="btn-copy-x" onclick="copyXFromSet1()">Copy x₁</button>
-					<button class="btn-clear-all" onclick="clearRows()">Clear Data</button>
+					<button class="btn-add-row" onclick="addRow()" title="Add a new data row to this dataset">Add Row</button>
+					<button class="btn-copy-x" onclick="copyXFromSet1()" title="Copy x-values from Dataset 1 into this dataset">Copy x₁</button>
+					<button class="btn-clear-all" onclick="clearRows()" title="Clear all data rows in this dataset">Clear Data</button>
 				</div>
 				<div class="button-row">
-					<button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()">
+					<button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()" title="Import data from a CSV file">
 						Import .csv
 					</button>
-					<button class="btn-export-csv" onclick="exportCSV()">Export .csv</button>
-					<button class="btn-export-md" onclick="exportPlainText()">Export .md</button>
+					<button class="btn-export-csv" onclick="exportCSV()" title="Export this dataset to a CSV file">Export .csv</button>
+					<button class="btn-export-md" onclick="exportPlainText()" title="Export this dataset as Markdown table text">Export .md</button>
 				</div>
 			</div>
 			<input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)" />
@@ -124,6 +124,7 @@
 					aria-expanded="false"
 					aria-controls="uncertainties-content"
 					onclick="toggleSection('uncertainties-content', this)"
+					title="Show or hide uncertainty controls"
 				>
 					Add Uncertainties
 				</button>
@@ -154,11 +155,11 @@
 					<h3>Apply Global Uncertainty</h3>
 					<div class="global-uncertainty-item">
 						<input type="text" id="global-x-uncertainty" placeholder="Enter Δx" />
-						<button onclick="applyGlobalUncertainties('x')">Apply Δx</button>
+						<button onclick="applyGlobalUncertainties('x')" title="Apply this Δx to all rows in the current dataset">Apply Δx</button>
 					</div>
 					<div class="global-uncertainty-item">
 						<input type="text" id="global-y-uncertainty" placeholder="Enter Δy" />
-						<button onclick="applyGlobalUncertainties('y')">Apply Δy</button>
+						<button onclick="applyGlobalUncertainties('y')" title="Apply this Δy to all rows in the current dataset">Apply Δy</button>
 					</div>
 				</div>
 			</div>
@@ -170,13 +171,14 @@
 					aria-expanded="false"
 					aria-controls="best-fit-content"
 					onclick="toggleSection('best-fit-content', this)"
+					title="Show or hide best-fit line options"
 				>
 					Add Best Fit Line
 				</button>
 				<div id="best-fit-content" class="collapsible-content">
 					<div class="tabs">
-						<button class="tablink active" onclick="openTab(event, 'BasicFit')">Basic Fit</button>
-						<button class="tablink" onclick="openTab(event, 'AdvancedFit')">Advanced Fit</button>
+						<button class="tablink active" onclick="openTab(event, 'BasicFit')" title="Show basic best-fit options">Basic Fit</button>
+						<button class="tablink" onclick="openTab(event, 'AdvancedFit')" title="Show advanced best-fit options">Advanced Fit</button>
 					</div>
 
 					<!-- Basic Fit -->
@@ -195,8 +197,8 @@
 							\( y = mx + c \)
 						</div>
 						<div style="display: flex; gap: 6px;">
-							<button class="fit-button" onclick="fitCurve()">Fit Curve</button>
-							<button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
+							<button class="fit-button" onclick="fitCurve()" title="Fit a curve to the selected dataset">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the current fitted curve">Clear Fit</button>
 						</div>
 					</div>
 
@@ -257,8 +259,8 @@
 						</div>
 
 						<div style="display: flex; gap: 6px;">
-							<button class="fit-button" onclick="fitAdvancedCurve()">Fit Curve</button>
-							<button class="clear-fit-button" onclick="clearFittedCurve()">Clear Fit</button>
+							<button class="fit-button" onclick="fitAdvancedCurve()" title="Fit an advanced curve using the chosen parameters">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the current fitted curve">Clear Fit</button>
 						</div>
 					</div>
 				</div>
@@ -281,7 +283,7 @@
 			</div>
 
 			<div class="plot-all-container">
-				<button class="plot-all-btn" onclick="plotAllDatasets()">Plot ALL Datasets</button>
+				<button class="plot-all-btn" onclick="plotAllDatasets()" title="Plot all datasets together in a combined view">Plot ALL Datasets</button>
 			</div>
 		</div><!-- end graph-section -->
 	</div><!-- end container -->
@@ -291,7 +293,7 @@
 
 	<div id="popup-container" style="display: none;">
 		<div id="popup-content">
-			<button id="popup-close" onclick="closePopup()">Close</button>
+			<button id="popup-close" onclick="closePopup()" title="Close the combined plot window">Close</button>
 			<div id="popup-title">Combined Plot of All Datasets</div>
 			<div id="popup-plot-container">
 				<div id="popup-plot"></div>
