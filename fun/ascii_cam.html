@@ -268,22 +268,6 @@
 			position: relative;
 		}
 
-		#ascii.paused::after {
-			content: 'PAUSED';
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			background: rgba(0, 0, 0, 0.8);
-			color: var(--brand-accent);
-			padding: 1rem 2rem;
-			border-radius: 12px;
-			font-size: 1.5rem;
-			font-weight: 700;
-			letter-spacing: 2px;
-			pointer-events: none;
-		}
-
 		.pause-hint {
 			font-size: 0.75rem;
 			color: var(--text-secondary);
@@ -640,7 +624,6 @@
 		/* Toggle pause state */
 		function togglePause() {
 			isPaused = !isPaused;
-			asciiDiv.classList.toggle('paused', isPaused);
 		}
 
 		/* Main render loop */
