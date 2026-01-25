@@ -260,12 +260,12 @@
 		/* ASCII display area */
 		#ascii-frame {
 			margin-top: 0.5rem;
-			padding: 0.5rem;
+			padding: 0.25rem;
 			border-radius: 12px;
 			background: var(--card-bg);
 			border: 1px solid var(--card-border);
 			box-shadow: var(--card-shadow);
-			width: min(85vw, 720px);
+			max-width: 95vw;
 			height: min(55vh, 480px);
 			position: relative;
 			overflow: hidden;
@@ -385,10 +385,10 @@
 			}
 
 			#ascii-frame {
-				width: 95vw;
+				max-width: 98vw;
 				height: min(50vh, 360px);
 				margin-top: 0.25rem;
-				padding: 0.25rem;
+				padding: 0.15rem;
 			}
 
 			.pause-hint {
@@ -552,11 +552,14 @@
 			const charWidth = fontSize * 0.65;
 			const contentWidth = cols * charWidth;
 			const contentHeight = rows * fontSize;
-			const viewportWidth = asciiViewport.clientWidth;
-			const viewportHeight = asciiViewport.clientHeight;
-			if (!contentWidth || !contentHeight || !viewportWidth || !viewportHeight) return;
-			// Scale to fill the viewport completely (use max to fill, not min to fit)
-			const scale = Math.min(viewportWidth / contentWidth, viewportHeight / contentHeight);
+			const frameHeight = asciiFrame.clientHeight;
+			const framePadding = parseFloat(getComputedStyle(asciiFrame).paddingLeft) * 2;
+			if (!contentWidth || !contentHeight || !frameHeight) return;
+			// Scale based on available height
+			const scale = (frameHeight - framePadding) / contentHeight;
+			const scaledWidth = contentWidth * scale + framePadding;
+			// Set frame width to fit content with minimal dead space
+			asciiFrame.style.width = scaledWidth + 'px';
 			asciiDiv.style.transform = `scale(${scale})`;
 		}
 
