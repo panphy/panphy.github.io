@@ -57,7 +57,7 @@
     }
 
     header {
-      padding: 1rem 1.5rem 0.6rem;
+      padding: 0.6rem 1.25rem 0.4rem;
     }
 
     #titleBanner {
@@ -70,13 +70,13 @@
       background: rgba(22, 24, 29, 0.85);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 0.85rem 1.5rem;
+      padding: 0.6rem 1.1rem;
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
     }
 
     .banner-logo img {
-      max-height: 40px;
+      max-height: 28px;
       width: auto;
       height: auto;
     }
@@ -84,7 +84,7 @@
     .banner-title {
       text-align: center;
       margin: 0;
-      font-size: 1.55rem;
+      font-size: 1.2rem;
       font-weight: 700;
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
@@ -94,7 +94,7 @@
     }
 
     .banner-placeholder {
-      width: 70px;
+      width: 40px;
     }
 
     main {
@@ -109,7 +109,7 @@
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1rem;
     }
 
@@ -117,31 +117,77 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 1rem;
       box-shadow: var(--shadow);
       font-weight: 600;
       color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
     }
 
     .info-card span {
-      display: block;
+      display: inline-flex;
       font-size: 0.8rem;
       font-weight: 500;
       color: var(--text-secondary);
-      margin-bottom: 0.2rem;
+      margin-bottom: 0;
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      white-space: nowrap;
     }
 
-    #visualizer-container,
-    #waveform-container {
+    .info-card strong {
+      white-space: nowrap;
+    }
+
+    details.panel {
       width: min(1100px, 100%);
       margin: 0 auto;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 1rem;
       box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    details.panel summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    details.panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.panel summary::after {
+      content: "▾";
+      font-size: 1rem;
+      color: var(--text-secondary);
+      transition: transform 0.2s ease;
+    }
+
+    details.panel[open] summary::after {
+      transform: rotate(180deg);
+    }
+
+    details.panel[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+
+    details.panel:not([open]) summary {
+      border-bottom: none;
+    }
+
+    .panel-body {
+      padding: 1rem;
       position: relative;
     }
 
@@ -152,7 +198,12 @@
       border-radius: 12px;
     }
 
+    #visualizer {
+      height: clamp(120px, 16vh, 150px);
+    }
+
     #waveform {
+      height: clamp(200px, 28vh, 260px);
       touch-action: none;
     }
 
@@ -281,14 +332,20 @@
         </div>
       </div>
 
-      <div id="visualizer-container">
-        <canvas id="visualizer" width="800" height="200"></canvas>
-        <div id="tooltip"></div>
-      </div>
+      <details class="panel" id="spectrum-panel">
+        <summary>Spectrum</summary>
+        <div id="visualizer-container" class="panel-body">
+          <canvas id="visualizer" width="800" height="200"></canvas>
+          <div id="tooltip"></div>
+        </div>
+      </details>
 
-      <div id="waveform-container">
-        <canvas id="waveform" width="800" height="200"></canvas>
-      </div>
+      <details class="panel" id="waveform-panel" open>
+        <summary>Oscilloscope</summary>
+        <div id="waveform-container" class="panel-body">
+          <canvas id="waveform" width="800" height="200"></canvas>
+        </div>
+      </details>
 
       <div id="sliders">
         <div>
