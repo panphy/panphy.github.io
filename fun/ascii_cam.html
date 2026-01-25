@@ -256,16 +256,33 @@
 		}
 
 		/* ASCII display area */
-		#ascii {
+		#ascii-frame {
 			margin-top: 1rem;
 			padding: 0.75rem;
 			border-radius: 12px;
 			background: var(--card-bg);
 			border: 1px solid var(--card-border);
 			box-shadow: var(--card-shadow);
-			font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-			cursor: pointer;
+			width: min(90vw, 900px);
+			aspect-ratio: var(--ascii-aspect, 4 / 3);
 			position: relative;
+			overflow: hidden;
+			cursor: pointer;
+		}
+
+		#ascii-viewport {
+			position: relative;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		#ascii {
+			font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+			position: absolute;
+			top: 0;
+			left: 0;
+			transform-origin: top left;
 		}
 
 		.pause-hint {
@@ -436,7 +453,11 @@
 		</button>
 	</div>
 
-	<div id="ascii"></div>
+	<div id="ascii-frame">
+		<div id="ascii-viewport">
+			<div id="ascii"></div>
+		</div>
+	</div>
 	<p class="pause-hint">Press <kbd>Space</kbd> to pause/resume (or tap the image)</p>
 
 	<video id="video" autoplay playsinline></video>
@@ -451,6 +472,8 @@
 		/* ---------- DOM handles ---------- */
 		const video = document.getElementById('video');
 		const canvas = document.getElementById('canvas');
+		const asciiFrame = document.getElementById('ascii-frame');
+		const asciiViewport = document.getElementById('ascii-viewport');
 		const asciiDiv = document.getElementById('ascii');
 		const resolutionRange = document.getElementById('resolutionRange');
 		const captureBtn = document.getElementById('captureBtn');
@@ -470,6 +493,7 @@
 		let hasPopulated = false;
 		let hasStartedDraw = false;
 		let isPaused = false;
+		let lastGridSize = { w: 0, h: 0 };
 
 		/* Map slider value (2–20) so that 20→2, 2→20 */
 		function getCellSize() {
@@ -482,6 +506,28 @@
 			const sz = getCellSize();
 			asciiDiv.style.fontSize = sz + 'px';
 			asciiDiv.style.lineHeight = sz + 'px';
+			updateAsciiScale(lastGridSize.w, lastGridSize.h);
+		}
+
+		function updateAspectRatio() {
+			if (video.videoWidth && video.videoHeight) {
+				asciiFrame.style.setProperty('--ascii-aspect', `${video.videoWidth} / ${video.videoHeight}`);
+				updateAsciiScale(lastGridSize.w, lastGridSize.h);
+			}
+		}
+
+		function updateAsciiScale(cols, rows) {
+			if (!cols || !rows) return;
+			const fontSize = parseFloat(getComputedStyle(asciiDiv).fontSize);
+			if (!fontSize) return;
+			const charWidth = fontSize * 0.65;
+			const contentWidth = cols * charWidth;
+			const contentHeight = rows * fontSize;
+			const viewportWidth = asciiViewport.clientWidth;
+			const viewportHeight = asciiViewport.clientHeight;
+			if (!contentWidth || !contentHeight || !viewportWidth || !viewportHeight) return;
+			const scale = Math.min(viewportWidth / contentWidth, viewportHeight / contentHeight);
+			asciiDiv.style.transform = `scale(${scale})`;
 		}
 
 		/* Stop any existing stream tracks */
@@ -638,6 +684,10 @@
 			const w = Math.floor(video.videoWidth / cell);
 			const h = Math.floor(video.videoHeight / cell);
 			if (w <= 0 || h <= 0) { requestAnimationFrame(drawAscii); return; }
+			if (w !== lastGridSize.w || h !== lastGridSize.h) {
+				lastGridSize = { w, h };
+				updateAsciiScale(w, h);
+			}
 
 			canvas.width = w;
 			canvas.height = h;
@@ -679,9 +729,18 @@
 		}
 
 		/* ---------- events ---------- */
-		video.addEventListener('playing', startDrawLoop);
-		video.addEventListener('loadedmetadata', startDrawLoop);
-		video.addEventListener('canplay', startDrawLoop);
+		video.addEventListener('playing', () => {
+			updateAspectRatio();
+			startDrawLoop();
+		});
+		video.addEventListener('loadedmetadata', () => {
+			updateAspectRatio();
+			startDrawLoop();
+		});
+		video.addEventListener('canplay', () => {
+			updateAspectRatio();
+			startDrawLoop();
+		});
 		resolutionRange.addEventListener('input', updateFont);
 
 		// Spacebar to pause/resume
@@ -693,7 +752,11 @@
 		});
 
 		// Tap on ASCII area to pause/resume (for touchscreen)
-		asciiDiv.addEventListener('click', togglePause);
+		asciiFrame.addEventListener('click', togglePause);
+
+		window.addEventListener('resize', () => {
+			updateAsciiScale(lastGridSize.w, lastGridSize.h);
+		});
 
 		captureBtn.addEventListener('click', () => {
 			const txt = asciiDiv.innerText; // plain ASCII
