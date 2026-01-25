@@ -439,6 +439,36 @@
 			border: 1px solid var(--panel-border)
 		}
 
+		#fullscreenBtn {
+			position: absolute;
+			top: .55rem;
+			right: .55rem;
+			z-index: 5;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 36px;
+			height: 32px;
+			padding: 0;
+			background: rgba(20, 22, 28, .65);
+			border: 1px solid rgba(255, 255, 255, .18);
+			border-radius: .5rem;
+			color: #f0f4ff;
+			font-size: 1rem;
+			box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+			backdrop-filter: blur(8px);
+			-webkit-backdrop-filter: blur(8px)
+		}
+
+		#fullscreenBtn:hover {
+			transform: translateY(-1px);
+			background: rgba(28, 30, 38, .75)
+		}
+
+		#fullscreenBtn:active {
+			transform: translateY(0)
+		}
+
 		#statusDot {
 			display: inline-block;
 			width: .5rem;
@@ -633,6 +663,7 @@
 
 	<!-- Stage -->
 	<main id="stage">
+		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">⤢</button>
 		<video id="video" playsinline autoplay muted></video>
 		<canvas id="freezeCanvas" class="hidden"></canvas>
 		<canvas id="drawCanvas"></canvas>
@@ -684,6 +715,7 @@
 			const hud = document.getElementById('hud');
 			const hudText = document.getElementById('hudText');
 			const stage = document.getElementById('stage');
+			const fullscreenBtn = document.getElementById('fullscreenBtn');
 			const toast = document.getElementById('toast');
 
 			/* Color inputs + label buttons */
@@ -758,6 +790,33 @@
 			/* Zoom state */
 			let zoomLevel = loadNum('zoomLevel', 1);
 			const Z = () => (zoomLevel || 1); // helper
+
+			/* Fullscreen */
+			function isFullscreen() {
+				return document.fullscreenElement === stage;
+			}
+
+			function updateFullscreenUI() {
+				const active = isFullscreen();
+				fullscreenBtn.textContent = active ? '⤡' : '⤢';
+				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
+				fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
+			}
+
+			fullscreenBtn.addEventListener('click', () => {
+				if (!document.fullscreenEnabled) {
+					showToast('Fullscreen not supported');
+					return;
+				}
+				if (isFullscreen()) {
+					document.exitFullscreen();
+				} else {
+					stage.requestFullscreen();
+				}
+			});
+
+			document.addEventListener('fullscreenchange', updateFullscreenUI);
+			updateFullscreenUI();
 
 			/* ===== Utils ===== */
 			function showToast(msg, ms) { ms = ms || 1600;
