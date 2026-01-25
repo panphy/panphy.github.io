@@ -1,5 +1,5 @@
-const CACHE_NAME = 'panphy-2025-12-14';
-const RUNTIME_CACHE = 'panphy-runtime-2025-12-14';
+const CACHE_NAME = 'panphy-2025-12-18';
+const RUNTIME_CACHE = 'panphy-runtime-2025-12-18';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -13,7 +13,7 @@ const ASSETS_TO_CACHE = [
   '/tools/mkdwn_sample_doc.md',
   '/tools/mkdwn_sample_pic.webp',
   '/tools/panphyplot.html',
-  '/tools/panphyplot_manual.html',
+  '/tools/panphyplot/panphyplot_manual.html',
   '/tools/digitizer.html',
   '/tools/motion_tracker.html',
   '/tools/sound_analyzer.html',

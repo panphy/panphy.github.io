@@ -21,6 +21,8 @@ datasetToggles[0] = { x: false, y: false };
 datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
 
 let isSyncing = false;
+const STORAGE_KEY = 'panphyplot-state-v1';
+const THEME_KEY = 'panphyplot-theme';
 
 function debounce(func, wait) {
 	let timeout;
@@ -32,4 +34,55 @@ function debounce(func, wait) {
 		clearTimeout(timeout);
 		timeout = setTimeout(later, wait);
 	};
+}
+
+let saveTimeout;
+
+function buildPersistedState() {
+	const graphTitleInput = document.getElementById('graph-title');
+	const combinedTitleInput = document.getElementById('combined-title');
+	const combinedXInput = document.getElementById('combined-x-label');
+	const combinedYInput = document.getElementById('combined-y-label');
+
+	return {
+		rawData,
+		activeSet,
+		datasetHeaders,
+		datasetToggles,
+		datasetErrorTypes,
+		dataset1XValues,
+		latexMode,
+		titleWasAuto,
+		graphTitle: graphTitleInput ? graphTitleInput.value : '',
+		combinedPlot: {
+			title: combinedTitleInput ? combinedTitleInput.value : '',
+			xLabel: combinedXInput ? combinedXInput.value : '',
+			yLabel: combinedYInput ? combinedYInput.value : ''
+		}
+	};
+}
+
+function saveState() {
+	try {
+		const state = buildPersistedState();
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+	} catch (error) {
+		console.warn('Unable to save state:', error);
+	}
+}
+
+function scheduleSaveState(delay = 200) {
+	clearTimeout(saveTimeout);
+	saveTimeout = setTimeout(saveState, delay);
+}
+
+function loadState() {
+	try {
+		const saved = localStorage.getItem(STORAGE_KEY);
+		if (!saved) return null;
+		return JSON.parse(saved);
+	} catch (error) {
+		console.warn('Unable to load state:', error);
+		return null;
+	}
 }

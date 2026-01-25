@@ -1,5 +1,38 @@
 // Plotting helpers
 
+	function getPlotThemeSettings() {
+		const theme = document.documentElement.getAttribute('data-theme') || 'light';
+		if (theme !== 'dark') {
+			return {
+				errorColor: '#5b5b5b',
+				layout: {}
+			};
+		}
+
+		return {
+			errorColor: '#9aa0a6',
+			layout: {
+				paper_bgcolor: '#1e2129',
+				plot_bgcolor: '#1e2129',
+				font: { color: '#dfe6e9' },
+				xaxis: {
+					gridcolor: '#2d3436',
+					zerolinecolor: '#2d3436',
+					linecolor: '#3a414d',
+					tickcolor: '#cdd9df',
+					titlefont: { color: '#dfe6e9' }
+				},
+				yaxis: {
+					gridcolor: '#2d3436',
+					zerolinecolor: '#2d3436',
+					linecolor: '#3a414d',
+					tickcolor: '#cdd9df',
+					titlefont: { color: '#dfe6e9' }
+				}
+			}
+		};
+	}
+
 	function isPlotStateEqual(newData, newLayout) {
 		// Simple approach: compare JSON strings.
 		// Note: This works fine for small to moderate data sets.
@@ -31,6 +64,7 @@
 
 
 	function plotGraph(fittedX = null, fittedY = null) {
+		const themeSettings = getPlotThemeSettings();
 		// If fitted data is not provided and a fit exists, use that.
 		if ((fittedX === null || fittedY === null) && fittedCurves.hasOwnProperty(activeSet)) {
 			fittedX = fittedCurves[activeSet].x;
@@ -73,7 +107,7 @@
 				type: 'data',
 				array: convertedXError,
 				visible: document.getElementById('toggle-x-error').checked,
-				color: '#5b5b5b',
+				color: themeSettings.errorColor,
 				thickness: 0.8,
 				width: 2
 			},
@@ -81,7 +115,7 @@
 				type: 'data',
 				array: convertedYError,
 				visible: document.getElementById('toggle-y-error').checked,
-				color: '#5b5b5b',
+				color: themeSettings.errorColor,
 				thickness: 0.8,
 				width: 2
 			}
@@ -123,6 +157,27 @@
 				r: 30
 			}
 		};
+		if (themeSettings.layout.xaxis) {
+			layout.xaxis = { ...layout.xaxis, ...themeSettings.layout.xaxis };
+			if (themeSettings.layout.xaxis.titlefont) {
+				layout.xaxis.titlefont = { ...(layout.xaxis.titlefont || {}), ...themeSettings.layout.xaxis.titlefont };
+			}
+		}
+		if (themeSettings.layout.yaxis) {
+			layout.yaxis = { ...layout.yaxis, ...themeSettings.layout.yaxis };
+			if (themeSettings.layout.yaxis.titlefont) {
+				layout.yaxis.titlefont = { ...(layout.yaxis.titlefont || {}), ...themeSettings.layout.yaxis.titlefont };
+			}
+		}
+		if (themeSettings.layout.font) {
+			layout.font = themeSettings.layout.font;
+		}
+		if (themeSettings.layout.paper_bgcolor) {
+			layout.paper_bgcolor = themeSettings.layout.paper_bgcolor;
+		}
+		if (themeSettings.layout.plot_bgcolor) {
+			layout.plot_bgcolor = themeSettings.layout.plot_bgcolor;
+		}
 
 		// Only replot if the new state is different.
 		if (isPlotStateEqual(data, layout)) {
@@ -147,6 +202,7 @@
 
 	function plotAllDatasets() {
 		const traces = [];
+		const themeSettings = getPlotThemeSettings();
 
 		// Define colors for datasets and fitted curves.
 		const datasetColors = ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c', '#1abc9c'];
@@ -252,6 +308,27 @@
 			yaxis: { title: { text: processedYLabel, standoff: 25 } },
 			margin: { t: rawTitle === '' ? 50 : 100, b: 70, l: 140, r: 0 }
 		};
+		if (themeSettings.layout.xaxis) {
+			layout.xaxis = { ...layout.xaxis, ...themeSettings.layout.xaxis };
+			if (themeSettings.layout.xaxis.titlefont) {
+				layout.xaxis.titlefont = { ...(layout.xaxis.titlefont || {}), ...themeSettings.layout.xaxis.titlefont };
+			}
+		}
+		if (themeSettings.layout.yaxis) {
+			layout.yaxis = { ...layout.yaxis, ...themeSettings.layout.yaxis };
+			if (themeSettings.layout.yaxis.titlefont) {
+				layout.yaxis.titlefont = { ...(layout.yaxis.titlefont || {}), ...themeSettings.layout.yaxis.titlefont };
+			}
+		}
+		if (themeSettings.layout.font) {
+			layout.font = themeSettings.layout.font;
+		}
+		if (themeSettings.layout.paper_bgcolor) {
+			layout.paper_bgcolor = themeSettings.layout.paper_bgcolor;
+		}
+		if (themeSettings.layout.plot_bgcolor) {
+			layout.plot_bgcolor = themeSettings.layout.plot_bgcolor;
+		}
 
 		if (isPlotStateEqual(traces, layout)) {
 			console.log("No changes detected in combined plot; skipping update.");
