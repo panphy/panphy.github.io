@@ -270,81 +270,6 @@
             font-weight: 700;
         }
 
-        .history-container {
-            width: 100%;
-            max-width: 480px;
-            margin-top: 12px;
-            z-index: 1;
-        }
-
-        .history-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .history-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-            height: 50px;
-            padding: 8px 12px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-        }
-
-        .history-bar {
-            flex: 1;
-            min-height: 4px;
-            background: linear-gradient(to top, var(--accent-blue), var(--accent-purple));
-            border-radius: 2px;
-            transition: height 0.3s ease;
-            position: relative;
-        }
-
-        .history-bar.fast {
-            background: linear-gradient(to top, #11998e, #38ef7d);
-        }
-
-        .history-bar.medium {
-            background: linear-gradient(to top, #f093fb, #f5576c);
-        }
-
-        .history-bar.slow {
-            background: linear-gradient(to top, #ff6b6b, #ee5a5a);
-        }
-
-        .history-bar::after {
-            content: attr(data-time);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.2s;
-            padding-bottom: 2px;
-        }
-
-        .history-bar:hover::after {
-            opacity: 1;
-        }
-
-        .empty-history {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            text-align: center;
-            padding: 12px;
-        }
-
         footer {
             margin-top: 24px;
             text-align: center;
@@ -459,13 +384,6 @@
         </div>
     </div>
 
-    <div class="history-container">
-        <div class="history-label">Recent Results</div>
-        <div class="history-bars" id="history-bars">
-            <div class="empty-history">Complete some rounds to see your history</div>
-        </div>
-    </div>
-
     <footer>
         <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy</a> |
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
@@ -482,7 +400,6 @@
         const attemptsDisplay = document.getElementById('attempts-count');
         const averageDisplay = document.getElementById('average-time');
         const lastTimeDisplay = document.getElementById('last-time');
-        const historyBars = document.getElementById('history-bars');
         const confettiCanvas = document.getElementById('confetti-canvas');
         const ctx = confettiCanvas.getContext('2d');
 
@@ -495,8 +412,6 @@
         let storageAvailable = true;
         let attempts = 0;
         let totalTime = 0;
-        let history = [];
-        const MAX_HISTORY = 10;
         const BEST_TIME_KEY = 'bestTimeSeconds';
         const LEGACY_BEST_TIME_KEY = 'bestTime';
 
@@ -632,23 +547,6 @@
             }
         }
 
-        function updateHistory(time) {
-            history.push(time);
-            if (history.length > MAX_HISTORY) history.shift();
-
-            const maxTime = 0.6;
-            const minTime = 0.15;
-
-            historyBars.innerHTML = history.map((t, i) => {
-                const normalizedHeight = Math.max(10, Math.min(100, ((maxTime - t) / (maxTime - minTime)) * 100));
-                let speedClass = 'slow';
-                if (t < 0.25) speedClass = 'fast';
-                else if (t < 0.4) speedClass = 'medium';
-
-                return `<div class="history-bar ${speedClass}" style="height: ${normalizedHeight}%" data-time="${t.toFixed(3)}s"></div>`;
-            }).join('');
-        }
-
         function updateStats(time) {
             attempts++;
             totalTime += time;
@@ -656,8 +554,6 @@
             attemptsDisplay.textContent = attempts;
             averageDisplay.textContent = (totalTime / attempts).toFixed(3) + 's';
             lastTimeDisplay.textContent = time.toFixed(3) + 's';
-
-            updateHistory(time);
         }
 
         // Core Logic
