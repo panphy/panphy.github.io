@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
 	<meta charset="UTF-8" />
@@ -9,64 +9,119 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
 		:root {
-			--primary: #2563eb;
-			/* Modern Blue */
-			--primary-hover: #1d4ed8;
-			--success: #10b981;
-			/* Soft Green */
-			--warning: #f59e0b;
-			/* Amber */
-			--danger: #ef4444;
-			/* Red */
-			--bg-color: #f3f4f6;
-			/* Light Gray */
-			--card-bg: #ffffff;
-			--text-main: #1f2937;
-			--text-muted: #6b7280;
-			--border-radius: 8px;
-			--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+			--font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+			--bg-color: #f8f9fa;
+			--bg-pattern: #e9ecef;
+			--text-main: #2d3436;
+			--text-muted: #636e72;
+
+			--brand-primary: #6c5ce7;
+			--brand-secondary: #a29bfe;
+			--brand-accent: #00cec9;
+
+			--surface: #ffffff;
+			--surface-muted: #f4f6f8;
+			--surface-strong: #1f2937;
+			--border-color: rgba(45, 52, 54, 0.12);
+			--shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+			--border-radius: 12px;
+
+			--primary: #6c5ce7;
+			--primary-hover: #5a4fd6;
+			--danger: #ff7675;
+			--warning: #fdcb6e;
+			--success: #2ecc71;
+
+			--chart-grid: rgba(45, 52, 54, 0.18);
+			--chart-axis: rgba(45, 52, 54, 0.9);
+			--chart-text: rgba(45, 52, 54, 0.95);
+			--overlay-axis: rgba(255, 255, 255, 0.9);
+			--overlay-shadow: rgba(0, 0, 0, 0.35);
+		}
+
+		[data-theme="dark"] {
+			--bg-color: #0f1014;
+			--bg-pattern: #181a20;
+			--text-main: #dfe6e9;
+			--text-muted: #b2bec3;
+
+			--brand-primary: #a29bfe;
+			--brand-secondary: #6c5ce7;
+			--brand-accent: #81ecec;
+
+			--surface: #1e2129;
+			--surface-muted: #171a21;
+			--surface-strong: #111318;
+			--border-color: rgba(255, 255, 255, 0.08);
+			--shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+
+			--primary: #6c5ce7;
+			--primary-hover: #7f74f1;
+			--danger: #ff6b6b;
+			--warning: #f9ca24;
+			--success: #55efc4;
+
+			--chart-grid: rgba(255, 255, 255, 0.16);
+			--chart-axis: rgba(223, 230, 233, 0.92);
+			--chart-text: rgba(223, 230, 233, 0.95);
+			--overlay-axis: rgba(255, 255, 255, 0.75);
+			--overlay-shadow: rgba(0, 0, 0, 0.7);
+		}
+
+		* {
+			box-sizing: border-box;
+			transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
 		}
 
 		body {
-			font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+			font-family: var(--font-sans);
 			margin: 0;
-			background: var(--bg-color);
+			background-color: var(--bg-color);
+			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+			background-size: 30px 30px;
 			color: var(--text-main);
-			line-height: 1.5;
+			line-height: 1.6;
 		}
 
-		/* --- Header (Dark Grey) --- */
+		/* --- Header --- */
 		#titleBanner {
-			background: #1f2937;
-			/* Dark Grey */
-			color: #ffffff;
-			border-bottom: 1px solid #111827;
-			padding: 15px 20px;
+			background: var(--surface);
+			border-bottom: 1px solid var(--border-color);
+			padding: 16px 24px;
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+			box-shadow: var(--shadow);
+			position: sticky;
+			top: 0;
+			z-index: 10;
 		}
 
 		a {
-			color: #ff5f1f;
+			color: var(--brand-primary);
 			text-decoration: none;
 		}
 
 		a:hover {
-			color: #ff5f1f;
+			color: var(--brand-secondary);
 			text-decoration: underline;
 		}
 
 		a:visited {
-			color: #ff5f1f;
+			color: var(--brand-primary);
 		}
 
 		.banner-title {
-			font-size: 1.5rem;
-			color: #ffffff;
+			font-size: 1.75rem;
+			color: var(--text-main);
 			margin: 0;
-			font-weight: 700;
+			font-weight: 800;
+			letter-spacing: -0.5px;
+			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
 		}
 
 		.banner-logo img {
@@ -74,17 +129,51 @@
 			width: auto;
 		}
 
-		.banner-placeholder {
-			width: 50px;
+		.banner-actions {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.theme-toggle button {
+			background: transparent;
+			border: none;
+			cursor: pointer;
+			font-size: 1.2rem;
+			padding: 0.4rem;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.theme-toggle button:hover {
+			background-color: rgba(128, 128, 128, 0.2);
+			transform: rotate(12deg);
+		}
+
+		.toolbar-divider {
+			width: 1px;
+			height: 30px;
+			background: var(--border-color);
+			margin: 0 10px;
+		}
+
+		.frame-rate-button {
+			font-size: 0.8rem;
+			padding: 4px 8px;
+			background: var(--surface-muted);
+			color: var(--text-main);
+			border: 1px solid var(--border-color);
 		}
 
 		#warningBanner {
-			background: #fffbeb;
-			color: #92400e;
+			background: rgba(0, 206, 201, 0.12);
+			color: var(--text-main);
 			text-align: center;
 			padding: 8px;
 			font-size: 0.85rem;
-			border-bottom: 1px solid #fcd34d;
+			border-bottom: 1px solid var(--border-color);
 		}
 
 		/* --- Main Toolbar (File & Data Ops) --- */
@@ -97,6 +186,11 @@
 			flex-wrap: wrap;
 			justify-content: center;
 			align-items: center;
+			background: var(--surface);
+			border-radius: var(--border-radius);
+			box-shadow: var(--shadow);
+			border: 1px solid var(--border-color);
+			margin-top: 24px;
 		}
 
 		/* --- Buttons --- */
@@ -108,9 +202,9 @@
 			cursor: pointer;
 			font-size: 0.9rem;
 			transition: all 0.2s;
-			background: white;
+			background: var(--surface);
 			color: var(--text-main);
-			border-color: #d1d5db;
+			border-color: var(--border-color);
 			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 		}
 
@@ -123,9 +217,9 @@
 		button:disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
-			background: #f3f4f6;
-			border-color: #e5e7eb;
-			color: #9ca3af;
+			background: var(--surface-muted);
+			border-color: var(--border-color);
+			color: var(--text-muted);
 			box-shadow: none;
 			transform: none;
 		}
@@ -143,45 +237,45 @@
 
 		.btn-danger {
 			color: var(--danger);
-			border-color: #fecaca;
-			background: #fef2f2;
+			border-color: rgba(255, 107, 107, 0.3);
+			background: rgba(255, 107, 107, 0.12);
 		}
 
 		.btn-danger:hover:not(:disabled) {
-			background: #fee2e2;
+			background: rgba(255, 107, 107, 0.2);
 		}
 
 		.btn-tool {
-			color: var(--primary);
-			border-color: #bfdbfe;
-			background: #eff6ff;
+			color: var(--brand-primary);
+			border-color: rgba(108, 92, 231, 0.3);
+			background: rgba(108, 92, 231, 0.12);
 		}
 
 		.btn-tool:hover:not(:disabled) {
-			background: #dbeafe;
+			background: rgba(108, 92, 231, 0.2);
 		}
 
 		/* --- Plot Buttons (Colorful) --- */
 		#backToPosition {
-			background-color: #10b981;
+			background-color: var(--success);
 			/* Green */
 			color: white;
 			border: none;
 		}
 
 		#backToPosition:hover:not(:disabled) {
-			background-color: #059669;
+			filter: brightness(0.95);
 		}
 
 		#plotVx {
-			background-color: #3b82f6;
+			background-color: var(--brand-primary);
 			/* Blue */
 			color: white;
 			border: none;
 		}
 
 		#plotVx:hover:not(:disabled) {
-			background-color: #2563eb;
+			filter: brightness(0.95);
 		}
 
 		#plotVy {
@@ -192,7 +286,7 @@
 		}
 
 		#plotVy:hover:not(:disabled) {
-			background-color: #c026d3;
+			filter: brightness(0.95);
 		}
 
 
@@ -208,13 +302,14 @@
 
 		/* --- Cards (Video & Plot) --- */
 		.card {
-			background: var(--card-bg);
+			background: var(--surface);
 			border-radius: var(--border-radius);
 			box-shadow: var(--shadow);
 			padding: 15px;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
+			border: 1px solid var(--border-color);
 		}
 
 		/* --- Video Section --- */
@@ -296,10 +391,10 @@
 			align-items: center;
 			gap: 15px;
 			width: 100%;
-			background: #f9fafb;
+			background: var(--surface-muted);
 			padding: 10px;
 			border-radius: var(--border-radius);
-			border: 1px solid #e5e7eb;
+			border: 1px solid var(--border-color);
 			box-sizing: border-box;
 		}
 
@@ -307,7 +402,7 @@
 			flex-grow: 1;
 			cursor: pointer;
 			appearance: none;
-			background: #bfdbfe;
+			background: rgba(108, 92, 231, 0.3);
 			height: 6px;
 			border-radius: 3px;
 		}
@@ -316,7 +411,7 @@
 			appearance: none;
 			width: 16px;
 			height: 16px;
-			background: var(--primary);
+			background: var(--brand-primary);
 			border-radius: 50%;
 			cursor: pointer;
 		}
@@ -334,6 +429,10 @@
 			width: 100%;
 			height: 400px;
 			position: relative;
+			background: var(--surface);
+			border-radius: var(--border-radius);
+			border: 1px solid var(--border-color);
+			padding: 10px;
 		}
 
 		.chart-controls {
@@ -346,14 +445,14 @@
 
 		/* --- Message Box --- */
 		#message {
-			background: #e0f2fe;
-			color: #0369a1;
+			background: rgba(0, 206, 201, 0.12);
+			color: var(--text-main);
 			padding: 10px 15px;
 			border-radius: var(--border-radius);
 			margin: 0 auto 20px auto;
 			max-width: 1160px;
 			text-align: center;
-			border: 1px solid #bae6fd;
+			border: 1px solid rgba(0, 206, 201, 0.3);
 		}
 
 		/* --- Responsive --- */
@@ -377,8 +476,8 @@
 			z-index: 9999;
 			padding: 24px;
 			border-radius: 10px;
-			border: 1px solid #d1d5db;
-			background: #fff;
+			border: 1px solid var(--border-color);
+			background: var(--surface);
 			box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 			display: none;
 		}
@@ -438,9 +537,11 @@
 			min-height: 38px;
 			padding: 8px 10px;
 			box-sizing: border-box;
-			border: 1px solid #d1d5db;
+			border: 1px solid var(--border-color);
 			border-radius: 6px;
 			font-size: 0.95rem;
+			background: var(--surface-muted);
+			color: var(--text-main);
 		}
 
 		footer {
@@ -464,7 +565,11 @@
 					alt="PanPhy logo" /></a>
 		</div>
 		<h1 class="banner-title">Motion Tracker</h1>
-		<div class="banner-placeholder"></div>
+		<div class="banner-actions">
+			<div class="theme-toggle">
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+			</div>
+		</div>
 	</div>
 
 	<div id="warningBanner"><strong>Note:</strong> Files are opened locally. Nothing is uploaded.</div>
@@ -475,14 +580,14 @@
 			<button id="exportData" disabled>📥 Export CSV</button>
 		</div>
 
-		<div style="width:1px; height: 30px; background:#d1d5db; margin:0 10px;"></div>
+		<div class="toolbar-divider"></div>
 
 		<div style="display:flex; gap:10px;">
 			<button id="calibrate" class="btn-tool" disabled>📏 Calibrate</button>
 			<button id="setOrigin" class="btn-tool" disabled>🎯 Set Origin</button>
 		</div>
 
-		<div style="width:1px; height: 30px; background:#d1d5db; margin:0 10px;"></div>
+		<div class="toolbar-divider"></div>
 
 		<div style="display:flex; gap:10px;">
 			<button id="clearDataPoints" class="btn-danger" disabled>Clear Data</button>
@@ -503,9 +608,7 @@
 			<div
 				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 				<h3 style="margin:0; font-size:1.1rem;">Video Source</h3>
-				<button id="frameRateButton"
-					style="font-size:0.8rem; padding:4px 8px; background:#e5e7eb; color:#374151; border:1px solid #d1d5db;"
-					disabled>FPS: 30</button>
+				<button id="frameRateButton" class="frame-rate-button" disabled>FPS: 30</button>
 			</div>
 
 			<div id="videoWrapper">
@@ -622,6 +725,69 @@
 		let originPoint = { x: 0, y: 0 };
 
 		const baseResolutionWidth = 1280; // Reference width (720p)
+
+		/* ===== Theme ===== */
+		const themeButton = document.getElementById('theme-button');
+		const DARK_THEME_KEY = "panphy-dark";
+		const LIGHT_THEME_KEY = "panphy-light";
+
+		const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+			"dark" :
+			localStorage.getItem(LIGHT_THEME_KEY) ?
+				"light" :
+				"light";
+
+		document.documentElement.setAttribute('data-theme', currentTheme);
+		updateButtonEmoji(currentTheme);
+
+		function updateButtonEmoji(theme) {
+			if (!themeButton) return;
+			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+		}
+
+		function getCssVar(name) {
+			return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+		}
+
+		function getChartTheme() {
+			return {
+				gridColor: getCssVar('--chart-grid'),
+				axisColor: getCssVar('--chart-axis'),
+				textColor: getCssVar('--chart-text')
+			};
+		}
+
+		function applyThemeToChart() {
+			if (!positionChart) return;
+			const theme = getChartTheme();
+			positionChart.options.scales.x.grid.color = (c) => c.tick.value === 0 ? theme.axisColor : theme.gridColor;
+			positionChart.options.scales.y.grid.color = (c) => c.tick.value === 0 ? theme.axisColor : theme.gridColor;
+			positionChart.options.scales.x.ticks.color = theme.textColor;
+			positionChart.options.scales.y.ticks.color = theme.textColor;
+			positionChart.options.scales.x.title.color = theme.textColor;
+			positionChart.options.scales.y.title.color = theme.textColor;
+			positionChart.options.plugins.legend.labels.color = theme.textColor;
+			positionChart.update();
+		}
+
+		if (themeButton) {
+			themeButton.addEventListener('click', function () {
+				let theme = document.documentElement.getAttribute('data-theme');
+				if (theme === 'light') {
+					document.documentElement.setAttribute('data-theme', 'dark');
+					localStorage.setItem(DARK_THEME_KEY, 'true');
+					localStorage.removeItem(LIGHT_THEME_KEY);
+					updateButtonEmoji('dark');
+				} else {
+					document.documentElement.setAttribute('data-theme', 'light');
+					localStorage.setItem(LIGHT_THEME_KEY, 'true');
+					localStorage.removeItem(DARK_THEME_KEY);
+					updateButtonEmoji('light');
+				}
+				applyThemeToChart();
+				drawOverlay();
+			});
+		}
 
 		/* ===== DOM ===== */
 		const hiddenVideo = document.getElementById('hiddenVideo');
@@ -1046,6 +1212,7 @@
 			const xData = frameData.map(p => parseFloat(p.time.toFixed(3)));
 			const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
 			const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
+			const theme = getChartTheme();
 
 			if (!positionChart) {
 				positionChart = new Chart(positionChartCanvas.getContext("2d"), {
@@ -1063,18 +1230,20 @@
 							x: {
 								type: "linear",
 								position: "bottom",
-								title: { display: true, text: "Time (s)" },
-								grid: { color: (c) => c.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)' }
+								title: { display: true, text: "Time (s)", color: theme.textColor },
+								grid: { color: (c) => c.tick.value === 0 ? theme.axisColor : theme.gridColor },
+								ticks: { color: theme.textColor }
 							},
 							y: {
 								type: "linear",
 								position: "left",
 								beginAtZero: true,
-								title: { display: true, text: `Position (${scaleUnit})` },
-								grid: { color: (c) => c.tick.value === 0 ? 'rgba(0,0,0,1)' : 'rgba(200,200,200,0.7)' }
+								title: { display: true, text: `Position (${scaleUnit})`, color: theme.textColor },
+								grid: { color: (c) => c.tick.value === 0 ? theme.axisColor : theme.gridColor },
+								ticks: { color: theme.textColor }
 							}
 						},
-						plugins: { legend: { display: true, position: 'top' } }
+						plugins: { legend: { display: true, position: 'top', labels: { color: theme.textColor } } }
 					},
 				});
 			} else {
@@ -1085,6 +1254,7 @@
 				positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
 				positionChart.update();
 			}
+			applyThemeToChart();
 		}
 
 		function plotVelocity(axis) {
@@ -1128,6 +1298,7 @@
 			}];
 			positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
 			positionChart.update();
+			applyThemeToChart();
 		}
 
 		plotVxButton.addEventListener("click", () => plotVelocity("x"));
@@ -1265,6 +1436,8 @@
 			const s = getVisualScale();
 			const axisWidth = 2 * s;
 			const originRadius = 6 * s;
+			const axisColor = getCssVar('--overlay-axis') || 'white';
+			const shadowColor = getCssVar('--overlay-shadow') || 'black';
 
 			const ox = originSet ? originPoint.x : 0;
 			const oy = originSet ? originPoint.y : 0;
@@ -1273,9 +1446,9 @@
 
 			overlayCtx.save();
 			overlayCtx.lineWidth = axisWidth;
-			overlayCtx.shadowColor = "black";
+			overlayCtx.shadowColor = shadowColor;
 			overlayCtx.shadowBlur = 2;
-			overlayCtx.strokeStyle = 'white';
+			overlayCtx.strokeStyle = axisColor;
 			overlayCtx.beginPath();
 			overlayCtx.moveTo(0, originCanvasY);
 			overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
