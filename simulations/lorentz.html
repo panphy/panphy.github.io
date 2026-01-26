@@ -288,8 +288,22 @@
             appearance: none;
             height: 6px;
             border-radius: 5px;
-            background: var(--slider-track);
+            background: transparent;
             outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: var(--slider-track);
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: var(--slider-track);
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -302,6 +316,7 @@
             cursor: pointer;
             border: none;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            margin-top: -6px;
         }
 
         input[type="range"]::-moz-range-thumb {
@@ -457,12 +472,32 @@
 
         @media (pointer: coarse) {
             button,
-            input,
+            input:not([type="range"]),
             select,
             .theme-toggle,
             #contextMenu {
                 min-height: 44px;
                 touch-action: manipulation;
+            }
+
+            input[type="range"] {
+                padding: 19px 0;
+                touch-action: manipulation;
+            }
+
+            input[type="range"]::-webkit-slider-runnable-track {
+                height: 6px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 28px;
+                height: 28px;
+                margin-top: -11px;
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 28px;
+                height: 28px;
             }
 
             canvas {
