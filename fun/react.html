@@ -54,6 +54,18 @@
             position: relative;
         }
 
+        .logo-container {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 100;
+        }
+
+        .logo-container img {
+            max-height: 40px;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+        }
+
         body::before {
             content: '';
             position: fixed;
@@ -349,6 +361,11 @@
     </style>
 </head>
 <body>
+    <div class="logo-container">
+        <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+            <img src="/panphy.png" alt="PanPhy logo">
+        </a>
+    </div>
 
     <canvas id="confetti-canvas"></canvas>
 
