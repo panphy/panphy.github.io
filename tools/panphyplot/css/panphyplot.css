@@ -281,6 +281,10 @@ body {
 	color: #fff;
 }
 
+[data-theme="dark"] .dataset-tab.active {
+	color: #000;
+}
+
 .dataset-tab .tab-label {
 	margin-right: 5px;
 	white-space: nowrap;
@@ -296,6 +300,10 @@ body {
 
 .dataset-tab.active .tab-close {
 	color: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="dark"] .dataset-tab.active .tab-close {
+	color: rgba(0, 0, 0, 0.7);
 }
 
 .dataset-tab .tab-close:hover {
@@ -325,6 +333,10 @@ body {
 	font-size: 0.9rem;
 	flex: none;
 	width: 120px;
+}
+
+[data-theme="dark"] .add-dataset-btn {
+	color: #000;
 }
 
 .add-dataset-btn:hover {
