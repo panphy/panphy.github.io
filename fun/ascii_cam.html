@@ -286,6 +286,11 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			visibility: hidden;
+		}
+
+		#ascii-frame.ready {
+			visibility: visible;
 		}
 
 		#ascii-viewport {
@@ -768,6 +773,11 @@
 			const w = Math.floor(video.videoWidth / cell);
 			const h = Math.floor(video.videoHeight / cell);
 			if (w <= 0 || h <= 0) return;
+
+			// Show the frame once we have valid video dimensions
+			if (!asciiFrame.classList.contains('ready')) {
+				asciiFrame.classList.add('ready');
+			}
 
 			const gridChanged = w !== lastGridSize.w || h !== lastGridSize.h;
 			if (gridChanged) {
