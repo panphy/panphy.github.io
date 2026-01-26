@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
@@ -16,33 +16,67 @@
   </script>
   <style>
     :root {
+      --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.5);
+      --card-bg: #ffffff;
+      --card-border: rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --table-row-odd: #ffffff;
+      --table-row-even: #eef1f5;
+      --modal-bg: #ffffff;
+
       /* Customize each button's colors */
       --upload-bg: #ff5f1f;
       --upload-text: #ffffff;
-
       --calibrate-bg: #007bff;
       --calibrate-text: #ffffff;
-
       --digitize-bg: #28a745;
       --digitize-text: #ffffff;
-
       --undo-bg: #6c757d;
       --undo-text: #ffffff;
-
       --redo-bg: #6c757d;
       --redo-text: #ffffff;
-
       --recalibrate-bg: #007bff;
       --recalibrate-text: #ffffff;
-
       --reset-bg: #dc3545;
       --reset-text: #ffffff;
-
       --export-bg: #17a2b8;
       --export-text: #ffffff;
     }
 
+    [data-theme="dark"] {
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+      --card-bg: #1e2129;
+      --card-border: #2d3436;
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --table-row-odd: #1f222b;
+      --table-row-even: #2a2e38;
+      --modal-bg: #1e2129;
+    }
+
     /* Base button style for all buttons */
+    * {
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
     .btn {
       border: none;
       border-radius: 4px;
@@ -103,60 +137,97 @@
       width: 65%;
     }
 
-    html,
     body {
       margin: 0;
       padding: 0;
       overflow-x: hidden;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
+      font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: #fafafa;
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text-main);
     }
 
-    header {
-      background-color: #333;
-      color: #fff;
-      padding: 10px 20px;
-      position: relative;
-      text-align: center;
-    }
-
-    header .logo {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
+    header.banner {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 20px;
+      margin: 16px auto 0;
+      width: min(1100px, calc(100% - 40px));
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
-    header .logo img {
-      height: 30px;
-      margin-right: 5px;
+    .banner-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    header .title {
-      font-size: 24px;
-      font-weight: bold;
+    .banner-logo img {
+      height: 36px;
+      width: auto;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .banner-title {
+      font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-align: center;
+      flex: 1;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .banner-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+    }
+
+    .theme-toggle button:hover {
+      background-color: rgba(128, 128, 128, 0.2);
+      transform: rotate(15deg);
     }
 
     footer {
       font-size: 15px;
       text-align: center;
       padding: 7px;
-      background: #f4f4f400;
-      color: #555;
+      background: transparent;
+      color: var(--text-secondary);
       margin: 4px 0;
       width: 100%;
     }
 
     footer a {
-      color: #ff5f1f;
+      color: var(--brand-primary);
       text-decoration: none;
     }
 
@@ -170,6 +241,8 @@
       overflow: hidden;
       padding: 15px;
       box-sizing: border-box;
+      width: min(1200px, calc(100% - 30px));
+      margin: 10px auto 0;
     }
 
     /* Fixed height for containers */
@@ -180,31 +253,33 @@
 
     #main {
       flex: 1;
-      background: #fff;
+      background: var(--card-bg);
       padding: 20px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--card-border);
       border-radius: 8px;
       box-sizing: border-box;
       overflow: auto;
       position: relative;
+      box-shadow: var(--card-shadow);
     }
 
     #sidebar {
       flex: 0 0 250px;
-      background: #fff;
+      background: var(--card-bg);
       padding: 10px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--card-border);
       border-radius: 8px;
       box-sizing: border-box;
       overflow-y: auto;
       text-align: center;
+      box-shadow: var(--card-shadow);
     }
 
     #sidebar h3 {
-      font-family: Arial, sans-serif;
+      font-family: var(--font-sans);
       font-size: 20px;
-      background-color: #ffad7a;
-      color: #222;
+      background-color: rgba(255, 173, 122, 0.35);
+      color: var(--text-main);
       padding: 5px;
       border-radius: 4px;
       margin: 0 0 10px;
@@ -219,7 +294,7 @@
 
     #dataTable th,
     #dataTable td {
-      border: 1px solid #999;
+      border: 1px solid rgba(0, 0, 0, 0.2);
       padding: 5px;
       text-align: center;
     }
@@ -234,11 +309,11 @@
     }
 
     #dataTable tr:nth-child(odd) {
-      background-color: #ffffff;
+      background-color: var(--table-row-odd);
     }
 
     #dataTable tr:nth-child(even) {
-      background-color: #cfcfcf;
+      background-color: var(--table-row-even);
     }
 
     #controls {
@@ -283,12 +358,13 @@
       width: 100%;
       min-height: 24px;
       font-weight: bold;
+      color: var(--text-secondary);
     }
 
     #canvas {
       display: block;
       margin: 10px auto;
-      border: 1px solid #ccc;
+      border: 1px solid var(--card-border);
       cursor: crosshair;
       max-width: 100%;
       height: auto;
@@ -299,9 +375,9 @@
     #magnifierCanvas {
       width: 220px;
       height: 220px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--card-border);
       border-radius: 50%;
-      background: #fff;
+      background: var(--card-bg);
       pointer-events: none;
       /* So clicks pass through if needed */
     }
@@ -320,13 +396,38 @@
     }
 
     .modal-content {
-      background-color: #fff;
+      background-color: var(--modal-bg);
       margin: 15% auto;
       padding: 20px;
-      border: 1px solid #888;
+      border: 1px solid var(--card-border);
       width: 300px;
       border-radius: 8px;
       text-align: left;
+      color: var(--text-main);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+    }
+
+    @media (max-width: 900px) {
+      #content {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        flex: 1;
+      }
+
+      header.banner {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .banner-actions {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     @media (pointer: coarse) {
@@ -345,13 +446,18 @@
 </head>
 
 <body>
-  <header>
-    <div class="logo">
+  <header class="banner">
+    <div class="banner-logo">
       <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
         <img src="/panphy.png" alt="PanPhy logo">
       </a>
     </div>
-    <div class="title">Graph Digitizer</div>
+    <div class="banner-title">Graph Digitizer</div>
+    <div class="banner-actions">
+      <div class="theme-toggle">
+        <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+      </div>
+    </div>
   </header>
 
   <div id="content">
@@ -413,6 +519,22 @@
   </div>
 
   <script>
+  const themeButton = document.getElementById('theme-button');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const storedTheme = localStorage.getItem('digitizer-theme');
+  const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', initialTheme);
+  if (themeButton) {
+    themeButton.textContent = initialTheme === 'dark' ? '🌙' : '☀️';
+    themeButton.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      localStorage.setItem('digitizer-theme', nextTheme);
+      themeButton.textContent = nextTheme === 'dark' ? '🌙' : '☀️';
+    });
+  }
+
   let mode = "none",
     calibrationPhase = "";
   let calibrationX = [],
