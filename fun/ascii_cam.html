@@ -567,6 +567,11 @@
 		let hasStartedDraw = false;
 		let isPaused = false;
 		let lastGridSize = { w: 0, h: 0 };
+		let canvasCtx = null;
+		let lastFrameTime = 0;
+		const TARGET_FPS = 15; // Throttle to 15 FPS to reduce memory pressure
+		const FRAME_INTERVAL = 1000 / TARGET_FPS;
+		let spanPool = []; // Reusable span elements
 
 		/* Map slider value (2–20) so that 20→2, 2→20 */
 		function getCellSize() {
@@ -748,54 +753,86 @@
 			isPaused = !isPaused;
 		}
 
-		/* Main render loop */
-		function drawAscii() {
-			// Skip rendering when paused but keep the loop running
-			if (isPaused) {
-				requestAnimationFrame(drawAscii);
-				return;
-			}
+		/* Main render loop - throttled and memory-optimized */
+		function drawAscii(timestamp) {
+			requestAnimationFrame(drawAscii);
+
+			// Skip rendering when paused
+			if (isPaused) return;
+
+			// Throttle frame rate to reduce memory pressure on mobile Safari
+			if (timestamp - lastFrameTime < FRAME_INTERVAL) return;
+			lastFrameTime = timestamp;
 
 			const cell = getCellSize();
 			const w = Math.floor(video.videoWidth / cell);
 			const h = Math.floor(video.videoHeight / cell);
-			if (w <= 0 || h <= 0) { requestAnimationFrame(drawAscii); return; }
-			if (w !== lastGridSize.w || h !== lastGridSize.h) {
+			if (w <= 0 || h <= 0) return;
+
+			const gridChanged = w !== lastGridSize.w || h !== lastGridSize.h;
+			if (gridChanged) {
 				lastGridSize = { w, h };
 				updateAsciiScale(w, h);
 			}
 
-			canvas.width = w;
-			canvas.height = h;
-			const ctx = canvas.getContext('2d');
+			// Resize canvas only when dimensions change
+			if (canvas.width !== w || canvas.height !== h) {
+				canvas.width = w;
+				canvas.height = h;
+				canvasCtx = null; // Reset context after resize
+			}
+
+			// Cache canvas context
+			if (!canvasCtx) {
+				canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+			}
 
 			// Draw the video frame into the canvas (mirrored or not)
-			ctx.save();
+			canvasCtx.save();
 			if (mirrorToggle.checked) {
-				ctx.translate(w, 0);
-				ctx.scale(-1, 1); // horizontal flip
+				canvasCtx.translate(w, 0);
+				canvasCtx.scale(-1, 1); // horizontal flip
 			}
-			ctx.drawImage(video, 0, 0, w, h);
-			ctx.restore();
+			canvasCtx.drawImage(video, 0, 0, w, h);
+			canvasCtx.restore();
 
-			const data = ctx.getImageData(0, 0, w, h).data;
+			const data = canvasCtx.getImageData(0, 0, w, h).data;
+			const totalCells = w * h;
 
-			let html = '';
+			// Rebuild DOM structure only when grid size changes
+			if (gridChanged || spanPool.length !== totalCells) {
+				// Clear and rebuild the span pool
+				asciiDiv.innerHTML = '';
+				spanPool = [];
+				const fragment = document.createDocumentFragment();
+				for (let y = 0; y < h; y++) {
+					for (let x = 0; x < w; x++) {
+						const span = document.createElement('span');
+						spanPool.push(span);
+						fragment.appendChild(span);
+					}
+					fragment.appendChild(document.createElement('br'));
+				}
+				asciiDiv.appendChild(fragment);
+			}
+
+			// Update existing spans (no DOM churn)
 			for (let y = 0; y < h; y++) {
 				for (let x = 0; x < w; x++) {
-					const i = (y * w + x) * 4,
-						r = data[i],
+					const idx = y * w + x;
+					const i = idx * 4;
+					const r = data[i],
 						g = data[i + 1],
 						b = data[i + 2],
 						brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255,
 						char = charRamp.charAt(Math.floor((charRamp.length - 1) * (1 - brightness))),
 						{ r: rq, g: gq, b: bq } = quantizeTo8bit(r, g, b);
-					html += `<span style="color:rgb(${rq},${gq},${bq})">${char}</span>`;
+
+					const span = spanPool[idx];
+					span.textContent = char;
+					span.style.color = `rgb(${rq},${gq},${bq})`;
 				}
-				html += '<br/>';
 			}
-			asciiDiv.innerHTML = html;
-			requestAnimationFrame(drawAscii);
 		}
 
 		function startDrawLoop() {
