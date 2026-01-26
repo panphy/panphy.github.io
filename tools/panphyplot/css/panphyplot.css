@@ -313,7 +313,7 @@ body {
 	padding: 10px 14px;
 	margin-left: 0;
 	line-height: 1.2;
-	background-color: var(--brand-primary);
+	background-color: var(--brand-accent);
 	color: #fff;
 	border: none;
 	border-top-left-radius: 10px;
@@ -328,7 +328,7 @@ body {
 }
 
 .add-dataset-btn:hover {
-	background-color: #5b4ad6;
+	background-color: #00b6b1;
 	transform: translateY(-1px);
 }
 
