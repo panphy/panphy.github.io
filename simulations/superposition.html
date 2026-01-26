@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -15,106 +15,179 @@
         }
     </script>
     <style>
-        /* Reset & Base Styles */
+        :root {
+            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+            /* Light Theme */
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+
+            --brand-primary: #6c5ce7;
+            --brand-secondary: #a29bfe;
+            --brand-accent: #00cec9;
+
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+            --canvas-bg: #ffffff;
+            --canvas-baseline: #cbd5e1;
+
+            --btn-bg: #6c5ce7;
+            --btn-text: #ffffff;
+            --btn-hover: #5b4cdb;
+
+            --slider-track: #e2e8f0;
+            --slider-thumb: #6c5ce7;
+
+            --switch-off: #cbd5e1;
+            --switch-on: #6c5ce7;
+
+            --header-bg: rgba(255, 255, 255, 0.9);
+            --header-border: rgba(108, 92, 231, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f1014;
+            --bg-pattern: #181a20;
+            --text-main: #dfe6e9;
+            --text-secondary: #b2bec3;
+
+            --brand-primary: #a29bfe;
+            --brand-secondary: #6c5ce7;
+            --brand-accent: #81ecec;
+
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+            --canvas-bg: #16181d;
+            --canvas-baseline: #4a5568;
+
+            --btn-bg: #6c5ce7;
+            --btn-text: #ffffff;
+            --btn-hover: #7c6ef0;
+
+            --slider-track: #4a5568;
+            --slider-thumb: #a29bfe;
+
+            --switch-off: #4a5568;
+            --switch-on: #a29bfe;
+
+            --header-bg: rgba(30, 33, 41, 0.95);
+            --header-border: rgba(162, 155, 254, 0.1);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .offline-font {
+            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #252525;
-            color: #f0f0f0;
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Compact Header */
+        .header {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 20px;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--header-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        a {
-            color: #ff5f1f;
-            text-decoration: none;
-        }
-
-        a:hover {
-            color: #ff5f1f;
-            text-decoration: underline;
-        }
-
-        a:visited {
-            color: #ff5f1f;
-        }
-
-        footer {
-            text-align: center;
-            padding: 5px;
-            background: #2c2c2c00;
-            color: #888;
-            margin-top: 5px;
-        }
-
-        /* Title Banner: Three-column grid for logo, title, and placeholder */
-        #titleBanner {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
+        .header-left {
+            display: flex;
             align-items: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 20px;
+            gap: 12px;
         }
 
-        /* Logo container (left column) */
-        .banner-logo img {
-            max-height: 35px;
-            /* Adjust the logo size as desired */
+        .header-logo img {
+            height: 28px;
             width: auto;
-            height: auto;
         }
 
-        /* Centered title */
-        .banner-title {
-            text-align: center;
-            color: #20c997;
-            /* You can adjust the title color as desired */
-            font-size: 2em;
-            margin: 0;
+        .header-title {
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        /* Empty placeholder to balance the grid */
-        .banner-placeholder {
-            width: 35px;
-            /* Roughly match the logo’s width */
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
         }
 
-        p.instructions {
+        .theme-toggle:hover {
+            background-color: rgba(128, 128, 128, 0.15);
+            transform: rotate(15deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .instructions {
             font-size: 0.9rem;
-            color: #bbbbbb;
+            color: var(--text-secondary);
             text-align: center;
             margin-bottom: 20px;
         }
 
-        /* Main Layout Wrappers */
         #mainWrapper {
             display: flex;
             gap: 20px;
             width: 100%;
-            max-width: 1300px;
         }
 
-        /* Canvas Container & Zoom/Motion Sliders */
+        /* Canvas Container */
         #canvasContainer {
             flex: 3;
-            background-color: #3a3a3a;
+            background: var(--card-bg);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* Zoom & Motion Sliders at the Top of the Canvas */
         #zoomMotionControls {
             display: flex;
             flex-wrap: wrap;
@@ -127,37 +200,44 @@
             flex-direction: column;
         }
 
+        .zoomMotion-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
         #waveCanvas {
             width: 100%;
             height: 400px;
-            border-radius: 8px;
-            background-color: #1e1e1e;
+            border-radius: 12px;
+            background-color: var(--canvas-bg);
+            border: 1px solid var(--card-border);
         }
 
-        /* Play/Pause Button */
         #playPauseBtn {
             width: 120px;
-            height: 40px;
+            height: 44px;
             margin: 0 auto;
             font-size: 1rem;
             cursor: pointer;
             border: none;
-            border-radius: 8px;
-            background-color: #20c997;
-            color: #3a3a3a;
+            border-radius: 12px;
+            background: var(--btn-bg);
+            color: var(--btn-text);
             font-weight: 600;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, transform 0.2s;
         }
 
         #playPauseBtn:hover {
-            background-color: #17a188;
+            background: var(--btn-hover);
+            transform: translateY(-2px);
         }
 
-        /* Note under the canvas */
         #note {
             text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.8;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
         /* Side Controls */
@@ -165,15 +245,17 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
+            min-width: 280px;
         }
 
         .wave-controls,
         .toggle-controls {
-            background-color: #3a3a3a;
+            background: var(--card-bg);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -181,9 +263,11 @@
 
         .wave-controls h3,
         .toggle-controls h3 {
-            margin-bottom: 10px;
-            color: #f0f0f0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--brand-primary);
             text-align: center;
+            margin-bottom: 5px;
         }
 
         .control-group {
@@ -192,51 +276,47 @@
         }
 
         .control-group label {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-main);
         }
 
         .control-group input[type=range] {
             width: 100%;
             cursor: pointer;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
         }
 
         /* Range Slider Styling */
         input[type=range] {
-            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
             border-radius: 5px;
-            background: #888;
+            background: var(--slider-track);
             outline: none;
-            transition: background 0.3s;
-        }
-
-        input[type=range]:hover {
-            background: #a0a0a0;
         }
 
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: #20c997;
+            background: var(--slider-thumb);
             cursor: pointer;
             border: none;
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
         input[type=range]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: #20c997;
+            background: var(--slider-thumb);
             cursor: pointer;
             border: none;
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
         /* Toggle Switch Styles */
@@ -248,14 +328,15 @@
 
         .toggle-group label {
             font-weight: 500;
-            color: #f0f0f0;
+            font-size: 0.9rem;
+            color: var(--text-main);
             cursor: pointer;
         }
 
         .switch {
             position: relative;
             display: inline-block;
-            width: 50px;
+            width: 48px;
             height: 26px;
         }
 
@@ -272,8 +353,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
+            background-color: var(--switch-off);
+            transition: 0.3s;
             border-radius: 26px;
         }
 
@@ -284,47 +365,80 @@
             width: 20px;
             left: 3px;
             bottom: 3px;
-            background-color: #f0f0f0;
-            transition: 0.4s;
+            background-color: #fff;
+            transition: 0.3s;
             border-radius: 50%;
         }
 
         .switch input:checked+.slider-switch {
-            background-color: #20c997;
+            background-color: var(--switch-on);
         }
 
         .switch input:checked+.slider-switch:before {
-            transform: translateX(24px);
+            transform: translateX(22px);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             #mainWrapper {
-                flex-direction: column;
-                max-width: 100%;
-            }
-
-            #canvasContainer {
-                width: 100%;
-            }
-
-            #zoomMotionControls {
                 flex-direction: column;
             }
 
             #sideControls {
                 width: 100%;
+                min-width: unset;
             }
 
             #waveCanvas {
                 height: 300px;
+            }
+
+            .header-title {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 8px 12px;
+            }
+
+            .header-logo img {
+                height: 24px;
+            }
+
+            .header-title {
+                font-size: 0.85rem;
+            }
+
+            .main-content {
+                padding: 12px;
             }
         }
 
         @media (pointer: coarse) {
             button,
             input,
-            select {
+            select,
+            .theme-toggle {
                 min-height: 44px;
                 touch-action: manipulation;
             }
@@ -341,135 +455,167 @@
 </head>
 
 <body>
-
-    <!-- Title Banner: Logo on the left, Title in the center, and placeholder on the right -->
-    <div id="titleBanner">
-        <div class="banner-logo">
-            <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-                <img src="/panphy.png" alt="PanPhy logo" />
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="header-logo">
+                <img src="/panphy.png" alt="PanPhy logo" onerror="this.style.display='none'" />
             </a>
+            <span class="header-title">Wave Superposition</span>
         </div>
-        <h1 class="banner-title">Wave Superposition Simulation</h1>
-        <div class="banner-placeholder"></div>
-    </div>
+        <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">&#9728;&#65039;</button>
+    </header>
 
-    <div id="mainWrapper">
-        <!-- Canvas Container & Zoom/Motion Controls -->
-        <div id="canvasContainer">
-            <div id="zoomMotionControls">
-                <div class="zoomMotion-group">
-                    <label for="timeZoom">
-                        Horizontal scale: <span id="timeZoomValue">1.0</span>x
-                    </label>
-                    <input type="range" id="timeZoom" min="0.1" max="5" step="0.1" value="1">
-                </div>
-                <div class="zoomMotion-group">
-                    <label for="timeMotion">
-                        Motion Speed: <span id="timeMotionValue">1.00</span>x
-                    </label>
-                    <input type="range" id="timeMotion" min="0.01" max="2" step="0.01" value="1">
-                </div>
-            </div>
-            <canvas id="waveCanvas"></canvas>
-            <button id="playPauseBtn">Pause</button>
-            <div id="note">
-                Press the SPACE BAR to Pause/Resume the Simulation
-            </div>
-        </div>
+    <div class="main-content">
+        <p class="instructions">Press SPACE to Pause/Resume the Simulation</p>
 
-        <!-- Side Controls -->
-        <div id="sideControls">
-            <!-- Wave 1 Controls -->
-            <div class="wave-controls">
-                <h3>Wave 1 (Left to Right)</h3>
-                <div class="control-group">
-                    <label for="amplitude1">
-                        Amplitude: <span id="amplitude1Value">60</span> px
-                    </label>
-                    <input type="range" id="amplitude1" min="10" max="100" value="60">
+        <div id="mainWrapper">
+            <div id="canvasContainer">
+                <div id="zoomMotionControls">
+                    <div class="zoomMotion-group">
+                        <label for="timeZoom">
+                            Horizontal Scale: <span id="timeZoomValue">1.0</span>x
+                        </label>
+                        <input type="range" id="timeZoom" min="0.1" max="5" step="0.1" value="1">
+                    </div>
+                    <div class="zoomMotion-group">
+                        <label for="timeMotion">
+                            Motion Speed: <span id="timeMotionValue">1.00</span>x
+                        </label>
+                        <input type="range" id="timeMotion" min="0.01" max="2" step="0.01" value="1">
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label for="frequency1">
-                        Frequency: <span id="frequency1Value">1.0</span> Hz
-                    </label>
-                    <input type="range" id="frequency1" min="0.1" max="5" step="0.1" value="1">
-                </div>
-                <div class="control-group">
-                    <label for="speed1">
-                        Wave Speed: <span id="speed1Value">200</span> px/s
-                    </label>
-                    <input type="range" id="speed1" min="50" max="500" step="10" value="200">
+                <canvas id="waveCanvas"></canvas>
+                <button id="playPauseBtn">Pause</button>
+                <div id="note">
+                    Press SPACE to Pause/Resume
                 </div>
             </div>
 
-            <!-- Wave 2 Controls -->
-            <div class="wave-controls">
-                <h3>Wave 2 (Right to Left)</h3>
-                <div class="control-group">
-                    <label for="amplitude2">
-                        Amplitude: <span id="amplitude2Value">60</span> px
-                    </label>
-                    <input type="range" id="amplitude2" min="10" max="100" value="60">
+            <div id="sideControls">
+                <div class="wave-controls">
+                    <h3>Wave 1 (Left to Right)</h3>
+                    <div class="control-group">
+                        <label for="amplitude1">
+                            Amplitude: <span id="amplitude1Value">60</span> px
+                        </label>
+                        <input type="range" id="amplitude1" min="10" max="100" value="60">
+                    </div>
+                    <div class="control-group">
+                        <label for="frequency1">
+                            Frequency: <span id="frequency1Value">1.0</span> Hz
+                        </label>
+                        <input type="range" id="frequency1" min="0.1" max="5" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label for="speed1">
+                            Wave Speed: <span id="speed1Value">200</span> px/s
+                        </label>
+                        <input type="range" id="speed1" min="50" max="500" step="10" value="200">
+                    </div>
                 </div>
-                <div class="control-group">
-                    <label for="frequency2">
-                        Frequency: <span id="frequency2Value">1.0</span> Hz
-                    </label>
-                    <input type="range" id="frequency2" min="0.1" max="5" step="0.1" value="1.0">
-                </div>
-                <div class="control-group">
-                    <label for="speed2">
-                        Wave Speed: <span id="speed2Value">200</span> px/s
-                    </label>
-                    <input type="range" id="speed2" min="50" max="500" step="10" value="200">
-                </div>
-            </div>
 
-            <!-- Toggle Controls -->
-            <div class="toggle-controls">
-                <h3>Toggle Waves</h3>
-                <div class="toggle-group">
-                    <label for="toggleWave1">Show Wave 1 (Blue)</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggleWave1" checked>
-                        <span class="slider-switch"></span>
-                    </label>
+                <div class="wave-controls">
+                    <h3>Wave 2 (Right to Left)</h3>
+                    <div class="control-group">
+                        <label for="amplitude2">
+                            Amplitude: <span id="amplitude2Value">60</span> px
+                        </label>
+                        <input type="range" id="amplitude2" min="10" max="100" value="60">
+                    </div>
+                    <div class="control-group">
+                        <label for="frequency2">
+                            Frequency: <span id="frequency2Value">1.0</span> Hz
+                        </label>
+                        <input type="range" id="frequency2" min="0.1" max="5" step="0.1" value="1.0">
+                    </div>
+                    <div class="control-group">
+                        <label for="speed2">
+                            Wave Speed: <span id="speed2Value">200</span> px/s
+                        </label>
+                        <input type="range" id="speed2" min="50" max="500" step="10" value="200">
+                    </div>
                 </div>
-                <div class="toggle-group">
-                    <label for="toggleWave2">Show Wave 2 (Orange)</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggleWave2">
-                        <span class="slider-switch"></span>
-                    </label>
-                </div>
-                <div class="toggle-group">
-                    <label for="toggleSuperposition">Show Superposition (Green)</label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggleSuperposition">
-                        <span class="slider-switch"></span>
-                    </label>
+
+                <div class="toggle-controls">
+                    <h3>Toggle Waves</h3>
+                    <div class="toggle-group">
+                        <label for="toggleWave1">Show Wave 1 (Blue)</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleWave1" checked>
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-group">
+                        <label for="toggleWave2">Show Wave 2 (Orange)</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleWave2">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-group">
+                        <label for="toggleSuperposition">Show Superposition (Green)</label>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleSuperposition">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <footer>
-        &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Projects</a> | <a
-            href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support
-            My Projects</a>
+        &copy; <a href="/">PanPhy Projects</a> |
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
     </footer>
 
     <script>
-        /*******************************************************
-         *   Grab References
-         *******************************************************/
+        // Theme Toggle
+        const themeButton = document.getElementById('theme-button');
+        const DARK_THEME_KEY = "panphy-dark";
+        const LIGHT_THEME_KEY = "panphy-light";
+
+        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+            "dark" :
+            localStorage.getItem(LIGHT_THEME_KEY) ?
+                "light" :
+                "light";
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateButtonEmoji(currentTheme);
+
+        function updateButtonEmoji(theme) {
+            themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+        }
+
+        themeButton.addEventListener('click', function () {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem(DARK_THEME_KEY, 'true');
+                localStorage.removeItem(LIGHT_THEME_KEY);
+                updateButtonEmoji('dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                localStorage.removeItem(DARK_THEME_KEY);
+                updateButtonEmoji('light');
+            }
+        });
+
+        // Offline font fallback
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
+
+        // Canvas & Controls
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
-
-        // Button
         const playPauseBtn = document.getElementById('playPauseBtn');
 
-        // Wave 1 controls
         const amplitude1Slider = document.getElementById('amplitude1');
         const frequency1Slider = document.getElementById('frequency1');
         const speed1Slider = document.getElementById('speed1');
@@ -477,7 +623,6 @@
         const frequency1Value = document.getElementById('frequency1Value');
         const speed1Value = document.getElementById('speed1Value');
 
-        // Wave 2 controls
         const amplitude2Slider = document.getElementById('amplitude2');
         const frequency2Slider = document.getElementById('frequency2');
         const speed2Slider = document.getElementById('speed2');
@@ -485,23 +630,17 @@
         const frequency2Value = document.getElementById('frequency2Value');
         const speed2Value = document.getElementById('speed2Value');
 
-        // Zoom & Motion
         const timeZoomSlider = document.getElementById('timeZoom');
         const timeZoomValue = document.getElementById('timeZoomValue');
         const timeMotionSlider = document.getElementById('timeMotion');
         const timeMotionValue = document.getElementById('timeMotionValue');
 
-        // Toggles
         const toggleWave1 = document.getElementById('toggleWave1');
         const toggleWave2 = document.getElementById('toggleWave2');
         const toggleSuperposition = document.getElementById('toggleSuperposition');
 
-        // Canvas size
         let width, height;
 
-        /*******************************************************
-         *   Initialize Parameters
-         *******************************************************/
         let amplitude1 = parseFloat(amplitude1Slider.value);
         let frequency1 = parseFloat(frequency1Slider.value);
         let speed1 = parseFloat(speed1Slider.value);
@@ -527,10 +666,6 @@
         }
         updateSliderValues();
 
-        /*******************************************************
-         *   Event Listeners
-         *******************************************************/
-        // Sliders
         amplitude1Slider.addEventListener('input', () => {
             amplitude1 = parseFloat(amplitude1Slider.value);
             updateSliderValues();
@@ -574,12 +709,10 @@
             drawWaves();
         });
 
-        // Toggles
         toggleWave1.addEventListener('change', () => { drawWaves(); });
         toggleWave2.addEventListener('change', () => { drawWaves(); });
         toggleSuperposition.addEventListener('change', () => { drawWaves(); });
 
-        // Play/Pause Button
         playPauseBtn.addEventListener('click', () => {
             running = !running;
             if (running) {
@@ -592,9 +725,6 @@
             }
         });
 
-        /*******************************************************
-         *   Canvas Setup (High DPI)
-         *******************************************************/
         function setupCanvas() {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             const ratio = window.devicePixelRatio || 1;
@@ -607,37 +737,34 @@
             ctx.scale(ratio, ratio);
         }
 
-        // Initial setup
         setupCanvas();
         window.addEventListener('resize', () => {
             setupCanvas();
             drawWaves();
         });
 
-        /*******************************************************
-         *   Animation
-         *******************************************************/
         let animationId;
         let running = true;
         let lastTimestamp = null;
         let accumulatedTime = 0;
 
-        function drawWaves() {
-            const t = accumulatedTime / 1000; // seconds
+        function getBaselineColor() {
+            return getComputedStyle(document.documentElement).getPropertyValue('--canvas-baseline').trim() || '#cbd5e1';
+        }
 
-            // Clear canvas
+        function drawWaves() {
+            const t = accumulatedTime / 1000;
+
             ctx.clearRect(0, 0, width, height);
 
-            // Draw baseline
             const baseline = height / 2;
             ctx.beginPath();
             ctx.moveTo(0, baseline);
             ctx.lineTo(width, baseline);
-            ctx.strokeStyle = '#555';
+            ctx.strokeStyle = getBaselineColor();
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Precompute angular frequencies and wave numbers
             const omega1 = 2 * Math.PI * frequency1;
             const omega2 = 2 * Math.PI * frequency2;
 
@@ -647,7 +774,6 @@
             const k1 = omega1 / actualSpeed1;
             const k2 = omega2 / actualSpeed2;
 
-            // Draw Wave 1 if toggled on
             if (toggleWave1.checked) {
                 ctx.beginPath();
                 for (let x = 0; x <= width; x++) {
@@ -657,12 +783,11 @@
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
-                ctx.strokeStyle = '#99ceff';
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
                 ctx.stroke();
             }
 
-            // Draw Wave 2 if toggled on
             if (toggleWave2.checked) {
                 ctx.beginPath();
                 for (let x = 0; x <= width; x++) {
@@ -672,12 +797,11 @@
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
-                ctx.strokeStyle = '#ff9649';
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#f97316';
+                ctx.lineWidth = 2;
                 ctx.stroke();
             }
 
-            // Draw Superposition if toggled on
             if (toggleSuperposition.checked) {
                 ctx.beginPath();
                 for (let x = 0; x <= width; x++) {
@@ -689,7 +813,7 @@
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
-                ctx.strokeStyle = '#54f372';
+                ctx.strokeStyle = '#22c55e';
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
             }
@@ -709,12 +833,8 @@
             animationId = requestAnimationFrame(animate);
         }
 
-        // Start animation
         animationId = requestAnimationFrame(animate);
 
-        /*******************************************************
-         *   SPACE BAR: Pause/Resume
-         *******************************************************/
         window.addEventListener('keydown', (e) => {
             const target = e.target;
             if (target instanceof HTMLElement) {
@@ -738,6 +858,5 @@
         });
     </script>
 </body>
-
 
 </html>
