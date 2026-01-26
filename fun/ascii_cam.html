@@ -110,6 +110,11 @@
 			min-width: auto;
 		}
 
+		.control-group.resolution-control {
+			flex: 1 1 200px;
+			justify-content: space-between;
+		}
+
 		.control-label {
 			font-size: 0.7rem;
 			color: var(--text-secondary);
@@ -123,7 +128,7 @@
 		input[type=range] {
 			-webkit-appearance: none;
 			appearance: none;
-			width: 70px;
+			width: clamp(90px, 16vw, 180px);
 			height: 4px;
 			background: var(--card-border);
 			border-radius: 2px;
@@ -391,7 +396,7 @@
 			}
 
 			input[type=range] {
-				width: 50px;
+				width: 70px;
 			}
 
 			select {
@@ -504,7 +509,7 @@
 	</div>
 
 	<div id="controls">
-		<div class="control-group">
+		<div class="control-group resolution-control">
 			<span class="control-label">Resolution</span>
 			<input type="range" id="resolutionRange" min="2" max="14" value="10" />
 		</div>
