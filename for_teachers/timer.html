@@ -15,8 +15,12 @@
         }
     </script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
         :root {
-            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --font-display: 'Poppins', 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
             --bg-color: #0f1117;
             --bg-pattern: rgba(108, 92, 231, 0.2);
             --text-main: #f5f6fa;
@@ -108,7 +112,7 @@
         }
 
         #current-clock {
-            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: var(--font-display);
             font-size: clamp(1.4rem, 2.2vw, 2.4rem);
             margin: 0;
             padding: 0.6rem 1rem;

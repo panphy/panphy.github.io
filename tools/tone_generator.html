@@ -15,8 +15,12 @@
     }
   </script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
     :root {
-      --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Inter', sans-serif;
+      --font-display: 'Poppins', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
       --bg-color: #0f1014;
       --bg-pattern: #181a20;
       --text-main: #dfe6e9;
@@ -88,6 +92,7 @@
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.5px;
+      font-family: var(--font-display);
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;

@@ -51,6 +51,8 @@
   </script>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
     *,
     *::before,
     *::after {
@@ -58,7 +60,9 @@
     }
 
     :root {
-      --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Inter', sans-serif;
+      --font-display: 'Poppins', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
       --background-color: #f8f9fa;
       --background-pattern: #e9ecef;
       --text-color: #2d3436;
@@ -206,7 +210,7 @@
       margin: 0;
       font-size: 0.95rem;
       font-weight: 600;
-      font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: var(--font-display);
       letter-spacing: 0.2px;
       color: var(--pane-heading-color);
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
@@ -436,7 +440,7 @@
       border-radius: 3px;
       font-size: 0.95em;
       line-height: 1;
-      font-family: "Courier New", Courier, monospace;
+      font-family: var(--font-mono);
       vertical-align: baseline;
       color: inherit;
     }
@@ -1486,6 +1490,8 @@
 
     const style = document.createElement('style');
     style.textContent = `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
         :root {
           --background-color: #ffffff;
           --text-color: #000000;
@@ -1516,7 +1522,7 @@
         }
 
         body {
-          font-family: Helvetica, sans-serif;
+          font-family: 'Inter', sans-serif;
           line-height: 1.5;
           font-size: ${currentFontSize};
           margin: 20px;
@@ -1577,7 +1583,7 @@
           border-radius: 3px;
           font-size: 0.95em;
           line-height: 1;
-          font-family: "Courier New", Courier, monospace;
+          font-family: 'JetBrains Mono', monospace;
           vertical-align: baseline;
           color: inherit;
         }
@@ -1762,6 +1768,8 @@
     const backgroundColor = isDarkMode ? '#1e1e1e' : '#ffffff';
 
     const styleContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
       .svg-export-body {
         --background-color: #ffffff;
         --text-color: #000000;
@@ -1774,7 +1782,7 @@
         --code-background: #f0f0f0;
         --table-border-color: black;
         --table-header-background: #f4f4f4;
-        font-family: Helvetica, sans-serif;
+        font-family: 'Inter', sans-serif;
         line-height: 1.5;
         font-size: ${currentFontSize};
         background-color: var(--background-color);
@@ -1871,7 +1879,7 @@
         border-radius: 3px;
         font-size: 0.95em;
         line-height: 1;
-        font-family: "Courier New", Courier, monospace;
+        font-family: 'JetBrains Mono', monospace;
         vertical-align: baseline;
         color: inherit;
       }
