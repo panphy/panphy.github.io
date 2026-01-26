@@ -436,9 +436,33 @@
 			}
 
 			input[type=range] {
-				height: 4px;
-				padding: 8px 0;
-				background: transparent;
+				height: 8px;
+				padding: 0;
+				background: var(--card-border);
+				border-radius: 999px;
+			}
+
+			input[type=range]::-webkit-slider-runnable-track {
+				height: 8px;
+				background: var(--card-border);
+				border-radius: 999px;
+			}
+
+			input[type=range]::-webkit-slider-thumb {
+				width: 18px;
+				height: 18px;
+				margin-top: -5px;
+			}
+
+			input[type=range]::-moz-range-track {
+				height: 8px;
+				background: var(--card-border);
+				border-radius: 999px;
+			}
+
+			input[type=range]::-moz-range-thumb {
+				width: 18px;
+				height: 18px;
 			}
 
 			input[type=checkbox] {
