@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8" />
@@ -15,85 +15,162 @@
         }
     </script>
     <style>
+        :root {
+            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+            /* Light Theme */
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+
+            --brand-primary: #6c5ce7;
+            --brand-secondary: #a29bfe;
+            --brand-accent: #00cec9;
+
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+            --canvas-bg: #ffffff;
+            --canvas-line: #00bcd4;
+            --canvas-equilibrium: #cbd5e1;
+
+            --slider-track: #e2e8f0;
+            --slider-thumb: #6c5ce7;
+
+            --select-bg: #ffffff;
+            --select-border: #e2e8f0;
+
+            --accent-gold: #f59e0b;
+
+            --header-bg: rgba(255, 255, 255, 0.9);
+            --header-border: rgba(108, 92, 231, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f1014;
+            --bg-pattern: #181a20;
+            --text-main: #dfe6e9;
+            --text-secondary: #b2bec3;
+
+            --brand-primary: #a29bfe;
+            --brand-secondary: #6c5ce7;
+            --brand-accent: #81ecec;
+
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+            --canvas-bg: #16181d;
+            --canvas-line: #22d3ee;
+            --canvas-equilibrium: #4a5568;
+
+            --slider-track: #4a5568;
+            --slider-thumb: #a29bfe;
+
+            --select-bg: #2d3436;
+            --select-border: #4a5568;
+
+            --accent-gold: #fbbf24;
+
+            --header-bg: rgba(30, 33, 41, 0.95);
+            --header-border: rgba(162, 155, 254, 0.1);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .offline-font {
+            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #252525;
-            color: #e0e0e0;
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
 
-        a {
-            color: #ff5f1f;
-            text-decoration: none;
-        }
-
-        a:hover {
-            color: #ff5f1f;
-            text-decoration: underline;
-        }
-
-        a:visited {
-            color: #ff5f1f;
-        }
-
-        /* Title Banner: three-column grid for logo, title, and placeholder */
-        #titleBanner {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
+        /* Compact Header */
+        .header {
+            display: flex;
             align-items: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 10px;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--header-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        /* Logo container (left column) */
-        .banner-logo img {
-            max-height: 35px;
-            /* Adjust as needed */
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo img {
+            height: 28px;
             width: auto;
-            height: auto;
-            /* No fixed positioning—logo scrolls with content */
         }
 
-        /* Centered title in the middle column */
-        .banner-title {
-            text-align: center;
-            margin: 0;
-            color: #ffc21b;
-            font-size: 2em;
-            background-color: transparent;
+        .header-title {
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        /* Empty placeholder (right column) to balance the grid */
-        .banner-placeholder {
-            width: 35px;
-            /* Roughly match the logo's width */
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
         }
 
-        p.instructions {
-            font-size: 0.90em;
-            color: #bbbbbb;
+        .theme-toggle:hover {
+            background-color: rgba(128, 128, 128, 0.15);
+            transform: rotate(15deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .instructions {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
             text-align: center;
             margin-bottom: 20px;
         }
 
         .container {
-            background-color: #505050;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-            width: 95%;
-            padding: 30px;
             display: flex;
             gap: 20px;
-            overflow: hidden;
-            margin: 0 auto;
+            width: 100%;
             align-items: flex-start;
         }
 
@@ -101,20 +178,24 @@
             flex: 2;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .right-container {
-            flex: 0.7;
+            flex: 0.8;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            min-width: 280px;
         }
 
         .simulation-area {
-            background: #1e1e1e;
-            border-radius: 10px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
             overflow: hidden;
+            padding: 16px;
         }
 
         canvas {
@@ -122,29 +203,42 @@
             height: auto;
             display: block;
             border: none;
-            border-radius: 10px;
-            background: #1e1e1e;
+            border-radius: 12px;
+            background: var(--canvas-bg);
+        }
+
+        .particle-positions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .particle-positions .control-group {
+            flex: 1;
         }
 
         .control-group {
-            background: #3a3a3a;
-            padding: 10px 15px;
-            border-radius: 10px;
-            box-shadow: 0 0px 5px rgba(0, 0, 0, 0.5);
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
 
-        .control-group * {
-            font-weight: normal;
+        .control-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--text-main);
         }
 
-        .control-label {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            color: #ffffff;
+        .control-group p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
         }
 
         input[type="range"],
@@ -152,84 +246,150 @@
             width: 100%;
             padding: 3px;
             margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid var(--select-border);
+            background: var(--select-bg);
+            color: var(--text-main);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
             border-radius: 5px;
-            border: 0px solid #555555;
-            background: #454545;
-            color: #e0e0e0;
+            background: var(--slider-track);
+            outline: none;
+            border: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
         input[type="range"]:focus,
         select:focus {
-            border: 1px solid #ffcc3f;
+            border-color: var(--brand-primary);
             outline: none;
         }
 
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #ffc21b;
+        select {
             cursor: pointer;
-            transition: background 0.3s;
-            border: none;
+            font-size: 0.9rem;
         }
 
-        input[type="range"]::-webkit-slider-thumb:hover {
-            background: #ffc21b;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #ffc21b;
-            cursor: pointer;
-            border: none;
-        }
-
-        input[type="range"]::-moz-range-thumb:hover {
-            background: #ffcc42;
-        }
-
-        .particle-positions {
+        .boundary-select {
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
         }
 
-        .particle-positions .control-group {
-            flex: 1;
+        .boundary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        footer {
-            text-align: center;
-            padding: 5px;
-            margin-top: 20px;
-            background: transparent;
-            color: #888;
+        .boundary-item label {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            font-weight: 500;
         }
 
         .info-block {
-            font-size: 0.85em;
-            color: #d7d7d7;
-            line-height: 1.4;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         .info-block strong {
-            color: #ffcc3f;
+            color: var(--accent-gold);
             font-weight: 600;
         }
 
-        @media (max-width: 800px) {
+        .info-block p {
+            margin: 4px 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
             .container {
                 flex-direction: column;
+            }
+
+            .right-container {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .header-title {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .particle-positions {
+                flex-direction: column;
+            }
+
+            .header {
+                padding: 8px 12px;
+            }
+
+            .header-logo img {
+                height: 24px;
+            }
+
+            .header-title {
+                font-size: 0.85rem;
+            }
+
+            .main-content {
+                padding: 12px;
             }
         }
 
         @media (pointer: coarse) {
             button,
             input,
-            select {
+            select,
+            .theme-toggle {
                 min-height: 44px;
                 touch-action: manipulation;
             }
@@ -246,115 +406,151 @@
 </head>
 
 <body>
-    <!-- Title Banner: Logo on the left, Title in the center -->
-    <div id="titleBanner">
-        <div class="banner-logo">
-            <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-                <img src="/panphy.png" alt="PanPhy logo" />
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="header-logo">
+                <img src="/panphy.png" alt="PanPhy logo" onerror="this.style.display='none'" />
             </a>
+            <span class="header-title">Standing Wave</span>
         </div>
-        <h1 class="banner-title">Standing Wave Simulation</h1>
-        <div class="banner-placeholder"></div>
-    </div>
+        <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">&#9728;&#65039;</button>
+    </header>
 
-    <p class="instructions">Press the SPACE BAR to pause or resume the animation.</p>
+    <div class="main-content">
+        <p class="instructions">Press SPACE to pause or resume the animation</p>
 
-    <div class="container">
-        <!-- Left Container: Simulation area and particle positions -->
-        <div class="left-container">
-            <div class="simulation-area">
-                <canvas id="oscillationCanvas"></canvas>
+        <div class="container">
+            <div class="left-container">
+                <div class="simulation-area">
+                    <canvas id="oscillationCanvas"></canvas>
+                </div>
+                <div class="particle-positions">
+                    <div class="control-group">
+                        <label class="control-label" for="positionSlider"
+                            title="Adjust the position of the red particle along the string.">
+                            Red Particle Position: <span id="positionValue">0.50</span>
+                        </label>
+                        <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5"
+                            aria-label="Red Particle Position Slider">
+                        <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="greenPositionSlider"
+                            title="Adjust the position of the green particle along the string.">
+                            Green Particle Position: <span id="greenPositionValue">0.80</span>
+                        </label>
+                        <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8"
+                            aria-label="Green Particle Position Slider">
+                        <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
+                    </div>
+                </div>
             </div>
-            <div class="particle-positions">
+
+            <div class="right-container">
                 <div class="control-group">
-                    <label class="control-label" for="positionSlider"
-                        title="Adjust the position of the red particle along the string.">
-                        Red Particle Position: <span id="positionValue">0.50</span>
-                    </label>
-                    <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5"
-                        aria-label="Red Particle Position Slider">
-                    <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
+                    <label class="control-label">Boundary Conditions</label>
+                    <div class="boundary-select">
+                        <div class="boundary-item">
+                            <label for="leftBoundary">Left Boundary:</label>
+                            <select id="leftBoundary" aria-label="Left Boundary Condition">
+                                <option value="fixed">Fixed</option>
+                                <option value="free">Free</option>
+                            </select>
+                        </div>
+                        <div class="boundary-item">
+                            <label for="rightBoundary">Right Boundary:</label>
+                            <select id="rightBoundary" aria-label="Right Boundary Condition">
+                                <option value="fixed">Fixed</option>
+                                <option value="free">Free</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="control-group">
-                    <label class="control-label" for="greenPositionSlider"
-                        title="Adjust the position of the green particle along the string.">
-                        Green Particle Position: <span id="greenPositionValue">0.80</span>
+                    <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">
+                        Mode / Harmonic: <span id="harmonicValue">Mode 1 (1st harmonic)</span>
                     </label>
-                    <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8"
-                        aria-label="Green Particle Position Slider">
-                    <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
+                    <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
                 </div>
-            </div>
-        </div>
-        <!-- Right Container: Control boxes -->
-        <div class="right-container">
-            <!-- Boundary Conditions -->
-            <div class="control-group">
-                <label class="control-label">Boundary Conditions</label>
-                <div style="width: 100%; margin-bottom: 10px;">
-                    <label for="leftBoundary" style="color: #ffcc3f;"
-                        title="Select the boundary condition for the left end of the string.">
-                        Left Boundary:
+
+                <div class="control-group">
+                    <label class="control-label">Nodes & Antinodes</label>
+                    <div class="info-block">
+                        <p>Nodes: <strong><span id="nodeCount">2</span></strong></p>
+                        <p>Antinodes: <strong><span id="antinodeCount">1</span></strong></p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">
+                        Angular Frequency: <span id="omegaValue">6.28</span> rad/s
                     </label>
-                    <select id="leftBoundary" aria-label="Left Boundary Condition">
-                        <option value="fixed">Fixed</option>
-                        <option value="free">Free</option>
-                    </select>
-                </div>
-                <div style="width: 100%;">
-                    <label for="rightBoundary" style="color: #ffcc3f;"
-                        title="Select the boundary condition for the right end of the string.">
-                        Right Boundary:
+                    <label class="control-label">
+                        Frequency: <span id="frequencyValue">1.00</span> Hz
                     </label>
-                    <select id="rightBoundary" aria-label="Right Boundary Condition">
-                        <option value="fixed">Fixed</option>
-                        <option value="free">Free</option>
-                    </select>
+                    <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28"
+                        aria-label="Angular Frequency Slider">
                 </div>
-            </div>
-            <!-- Harmonics -->
-            <div class="control-group">
-                <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">
-                    Mode / Harmonic: <span id="harmonicValue">Mode 1 (1st harmonic)</span>
-                </label>
-                <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
-            </div>
-            <div class="control-group">
-                <label class="control-label">Nodes &amp; Antinodes</label>
-                <div class="info-block">
-                    <p>Nodes: <strong><span id="nodeCount">2</span></strong></p>
-                    <p>Antinodes: <strong><span id="antinodeCount">1</span></strong></p>
+
+                <div class="control-group">
+                    <label class="control-label" for="amplitudeSlider" title="Adjust the maximum displacement of the wave.">
+                        Amplitude: <span id="amplitudeValue">6.0</span>
+                    </label>
+                    <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0"
+                        aria-label="Amplitude Slider">
                 </div>
-            </div>
-            <!-- Frequency -->
-            <div class="control-group">
-                <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">
-                    Angular Frequency: <span id="omegaValue">6.28</span> rad/s
-                </label>
-                <label class="control-label">
-                    Frequency: <span id="frequencyValue">1.00</span> Hz
-                </label>
-                <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28"
-                    aria-label="Angular Frequency Slider">
-            </div>
-            <!-- Amplitude -->
-            <div class="control-group">
-                <label class="control-label" for="amplitudeSlider" title="Adjust the maximum displacement of the wave.">
-                    Amplitude: <span id="amplitudeValue">6.0</span>
-                </label>
-                <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0"
-                    aria-label="Amplitude Slider">
             </div>
         </div>
     </div>
 
     <footer>
-        &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Projects</a> | <a
-            href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support
-            My Projects</a>
+        &copy; <a href="/">PanPhy Projects</a> |
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
     </footer>
 
     <script>
+        // Theme Toggle
+        const themeButton = document.getElementById('theme-button');
+        const DARK_THEME_KEY = "panphy-dark";
+        const LIGHT_THEME_KEY = "panphy-light";
+
+        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+            "dark" :
+            localStorage.getItem(LIGHT_THEME_KEY) ?
+                "light" :
+                "light";
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateButtonEmoji(currentTheme);
+
+        function updateButtonEmoji(theme) {
+            themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+        }
+
+        themeButton.addEventListener('click', function () {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem(DARK_THEME_KEY, 'true');
+                localStorage.removeItem(LIGHT_THEME_KEY);
+                updateButtonEmoji('dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                localStorage.removeItem(DARK_THEME_KEY);
+                updateButtonEmoji('light');
+            }
+        });
+
+        // Offline font fallback
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
+
         // Helper function to convert numbers to ordinal strings
         function getOrdinal(n) {
             const s = ["th", "st", "nd", "rd"],
@@ -365,7 +561,6 @@
         const canvas = document.getElementById("oscillationCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Left container particle controls
         const positionSlider = document.getElementById("positionSlider");
         const greenPositionSlider = document.getElementById("greenPositionSlider");
         const positionValue = document.getElementById("positionValue");
@@ -373,7 +568,6 @@
         const redParticleAmplitude = document.getElementById("redParticleAmplitude");
         const greenParticleAmplitude = document.getElementById("greenParticleAmplitude");
 
-        // Right container controls
         const amplitudeSlider = document.getElementById("amplitudeSlider");
         const modeSlider = document.getElementById("modeSlider");
         const omegaSlider = document.getElementById("omegaSlider");
@@ -395,7 +589,6 @@
         let leftBoundary = leftBoundarySelect.value;
         let rightBoundary = rightBoundarySelect.value;
 
-        // Set initial display values
         amplitudeValueDisplay.textContent = A.toFixed(1);
         omegaValueDisplay.textContent = omega.toFixed(2);
         frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
@@ -543,7 +736,7 @@
         let canvasHeight = 0;
 
         function resizeCanvas() {
-            const aspectRatio = 2; // e.g., 2:1 ratio
+            const aspectRatio = 2;
             const width = canvas.clientWidth;
             const height = width / aspectRatio;
             const dpr = window.devicePixelRatio || 1;
@@ -577,6 +770,14 @@
             return waveCache[index];
         }
 
+        function getCanvasLineColor() {
+            return getComputedStyle(document.documentElement).getPropertyValue('--canvas-line').trim() || '#00bcd4';
+        }
+
+        function getEquilibriumColor() {
+            return getComputedStyle(document.documentElement).getPropertyValue('--canvas-equilibrium').trim() || '#cbd5e1';
+        }
+
         function draw(timestamp) {
             if (!lastTimestamp) {
                 lastTimestamp = timestamp;
@@ -594,12 +795,10 @@
                 ctx.setLineDash([5, 5]);
                 ctx.moveTo(0, canvasHeight / 2);
                 ctx.lineTo(canvasWidth, canvasHeight / 2);
-                ctx.strokeStyle = "#9e9eaa";
+                ctx.strokeStyle = getEquilibriumColor();
                 ctx.lineWidth = 1;
                 ctx.stroke();
                 ctx.setLineDash([]);
-
-                const k = getHarmonicNumber(modeIndex);
 
                 // Draw the oscillating string
                 ctx.beginPath();
@@ -614,19 +813,19 @@
                         ctx.lineTo(i, screenY);
                     }
                 }
-                ctx.strokeStyle = "#00bcd4";
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = getCanvasLineColor();
+                ctx.lineWidth = 2.5;
                 ctx.stroke();
 
                 // Red particle
                 const redX = xRed * canvasWidth;
                 const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xRed) * amplitudeScale;
-                drawParticle(redX, redY, "#ff4081");
+                drawParticle(redX, redY, "#ef4444");
 
                 // Green particle
                 const greenX = xGreen * canvasWidth;
                 const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xGreen) * amplitudeScale;
-                drawParticle(greenX, greenY, "#00e676");
+                drawParticle(greenX, greenY, "#22c55e");
 
                 time += deltaTime;
             }
@@ -634,13 +833,13 @@
         }
 
         function drawParticle(x, y, color) {
-            const particleRadius = Math.min(canvasWidth, canvasHeight) * 0.015;
+            const particleRadius = Math.min(canvasWidth, canvasHeight) * 0.018;
             ctx.beginPath();
             ctx.arc(x, y, particleRadius, 0, 2 * Math.PI);
             ctx.fillStyle = color;
             ctx.fill();
             ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.5;
             ctx.stroke();
         }
 
@@ -671,6 +870,4 @@
     </script>
 </body>
 
-
 </html>
-

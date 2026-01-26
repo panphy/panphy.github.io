@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
-    <!-- Ensures the layout scales properly on mobile/iPad -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Lorentz Transformation – Interactive Minkowski Diagram</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <script>
@@ -18,127 +16,189 @@
     </script>
     <style>
         :root {
-            --font-sans: "Poppins", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-            --bg-color: #f7f8fb;
-            --primary-text-color: #1f2937;
-            --accent-blue: #0384fc;
-            --accent-orange: #f97316;
-            --canvas-border: #cbd5f5;
-            --grid-color: #d9deee;
-            --moving-grid-color: #7c3aed;
-            --rest-axis-color: #1f2937;
-            --event-rest-color: #0f766e;
-            --event-moving-color: #dc2626;
-            --control-bg-color: #ffffff;
-            --control-border-color: #e2e8f0;
-            --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.12);
+            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+            /* Light Theme */
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+
+            --brand-primary: #6c5ce7;
+            --brand-secondary: #a29bfe;
+            --brand-accent: #00cec9;
+
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+            --canvas-bg: #ffffff;
+            --canvas-border: #e2e8f0;
+
+            --btn-bg: #6c5ce7;
+            --btn-text: #ffffff;
+            --btn-hover: #5b4cdb;
+
+            --slider-track: #e2e8f0;
+            --slider-thumb: #6c5ce7;
+
+            --header-bg: rgba(255, 255, 255, 0.9);
+            --header-border: rgba(108, 92, 231, 0.1);
+
+            --grid-rest: #e2e8f0;
+            --grid-moving: #a29bfe;
+            --axis-rest: #2d3436;
+            --axis-moving: #3b82f6;
+            --light-cone: #94a3b8;
+            --event-rest: #10b981;
+            --event-moving: #f43f5e;
+            --velocity-line-u: #22c55e;
+            --velocity-line-u-prime: #f97316;
+
+            --table-border: #e2e8f0;
+            --table-header-bg: #f8fafc;
+
+            --context-menu-bg: #ffffff;
+            --context-menu-border: #e2e8f0;
+            --context-menu-hover: #f1f5f9;
         }
 
-        /* Basic resets for a responsive layout */
-        html,
-        body {
+        [data-theme="dark"] {
+            --bg-color: #0f1014;
+            --bg-pattern: #181a20;
+            --text-main: #dfe6e9;
+            --text-secondary: #b2bec3;
+
+            --brand-primary: #a29bfe;
+            --brand-secondary: #6c5ce7;
+            --brand-accent: #81ecec;
+
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+            --canvas-bg: #16181d;
+            --canvas-border: #2d3436;
+
+            --btn-bg: #6c5ce7;
+            --btn-text: #ffffff;
+            --btn-hover: #7c6ef0;
+
+            --slider-track: #4a5568;
+            --slider-thumb: #a29bfe;
+
+            --header-bg: rgba(30, 33, 41, 0.95);
+            --header-border: rgba(162, 155, 254, 0.1);
+
+            --grid-rest: #374151;
+            --grid-moving: #7c3aed;
+            --axis-rest: #dfe6e9;
+            --axis-moving: #60a5fa;
+            --light-cone: #64748b;
+            --event-rest: #34d399;
+            --event-moving: #fb7185;
+            --velocity-line-u: #4ade80;
+            --velocity-line-u-prime: #fb923c;
+
+            --table-border: #374151;
+            --table-header-bg: #1e2129;
+
+            --context-menu-bg: #1e2129;
+            --context-menu-border: #374151;
+            --context-menu-hover: #2d3436;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            width: 100%;
-            min-height: 100%;
-            font-family: var(--font-sans);
-            font-weight: 400;
-            background-color: var(--bg-color);
-            color: var(--primary-text-color);
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         .offline-font {
-            --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
         }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: inherit;
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 0;
         }
 
-        /*******************************************************
-         * HEADER / BANNER
-         *******************************************************/
-        header {
-            width: 100%;
-            background: #2f2f2f;
-            position: relative;
-            padding: 26px 0;
-            /* extra top/bottom padding so children aren't cut off */
-            box-sizing: border-box;
+        /* Compact Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--header-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .header-container {
-            position: relative;
-            width: 100%;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* Logo on the left (absolutely positioned) */
-        .logo {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+        .header-logo img {
+            height: 28px;
+            width: auto;
         }
 
-        .logo img {
-            height: auto;
-            max-height: 30px;
-            margin-top: 3px;
-        }
-
-        /* Title pinned to the center (absolutely positioned) */
-        .title {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-
-        .title h1 {
-            margin: 0;
-            color: #ffffff;
-            font-size: clamp(16px, 2vw, 22px);
+        .header-title {
+            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-size: 1.1rem;
             font-weight: 600;
-            letter-spacing: 0.3px;
-            line-height: 1.2;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        /* Optional spacer on the right */
-        .spacer {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
         }
 
-        /*******************************************************
-         * MAIN CONTENT WRAPPER
-         *******************************************************/
-        #contentWrapper {
-            width: 100%;
-            padding: 15px;
-            box-sizing: border-box;
+        .theme-toggle:hover {
+            background-color: rgba(128, 128, 128, 0.15);
+            transform: rotate(15deg);
         }
 
-        /*******************************************************
-         * MAIN CONTAINER: Diagram + Control Panel (responsive)
-         *******************************************************/
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         #mainContainer {
             display: grid;
             grid-template-columns: minmax(0, 820px) minmax(0, 320px);
-            /* side-by-side on wide screens */
             grid-gap: 20px;
             justify-content: center;
             width: 100%;
-            box-sizing: border-box;
             align-items: start;
         }
 
-        /* Stack vertically on narrower screens (e.g. iPad portrait <= 900px) */
         @media (max-width: 900px) {
             #mainContainer {
                 grid-template-columns: 1fr;
@@ -146,46 +206,39 @@
             }
         }
 
-        /*******************************************************
-         * DIAGRAM CONTAINER
-         *******************************************************/
+        /* Diagram Container */
         #diagramContainer {
             width: 100%;
-            overflow: auto;
-            /* allow scroll if needed */
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 10px;
-            box-shadow: var(--shadow-soft);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
         }
 
-        /* Responsive canvas */
         #minkowskiCanvas {
             border: 1px solid var(--canvas-border);
-            background-color: var(--bg-color);
+            background-color: var(--canvas-bg);
             display: block;
             cursor: pointer;
             width: 100%;
             height: auto;
             max-width: 800px;
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
-        /*******************************************************
-         * CONTROL PANEL
-         *******************************************************/
+        /* Control Panel */
         #controlsContainer {
             width: 100%;
             max-width: 360px;
-            background-color: var(--control-bg-color);
-            border: 1px solid var(--control-border-color);
-            border-radius: 14px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
             padding: 16px;
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
             gap: 12px;
-            box-sizing: border-box;
         }
 
         .controlItem {
@@ -194,9 +247,9 @@
         }
 
         .controlLabel {
-            font-size: 14px;
+            font-size: 0.9rem;
             font-weight: 500;
-            color: #1f2937;
+            color: var(--text-main);
         }
 
         .controlInline {
@@ -208,52 +261,86 @@
 
         input[type="range"] {
             width: 100%;
-            accent-color: var(--accent-blue);
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 5px;
+            background: var(--slider-track);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--slider-thumb);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
         input[type="checkbox"] {
             width: 18px;
             height: 18px;
-            accent-color: var(--accent-blue);
+            accent-color: var(--brand-primary);
         }
 
         .valueBadge {
-            background: rgba(31, 79, 215, 0.12);
-            color: #0384fc;
+            background: rgba(108, 92, 231, 0.15);
+            color: var(--brand-primary);
             font-weight: 600;
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 999px;
-            font-size: 12px;
+            font-size: 0.8rem;
             width: fit-content;
         }
 
         button {
             width: 100%;
-            padding: 8px 12px;
+            padding: 10px 12px;
             border: none;
-            border-radius: 8px;
-            background-color: var(--accent-blue);
-            color: #fff;
-            font-size: 15px;
+            border-radius: 12px;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            font-size: 0.95rem;
             cursor: pointer;
             font-weight: 600;
-            box-shadow: 0 6px 16px rgba(31, 79, 215, 0.2);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+            transition: background-color 0.2s, transform 0.2s;
         }
 
         button:hover {
-            background-color: #0384fc;
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
         }
 
-        /*******************************************************
-         * COORDINATE DISPLAY
-         *******************************************************/
+        /* Coordinate Display */
         #coordinates {
-            margin-top: 6px;
-            font-size: 13px;
+            margin-top: 8px;
+            font-size: 0.85rem;
             overflow-y: auto;
             max-height: 200px;
-            border-top: 1px solid var(--control-border-color);
-            padding-top: 10px;
+            border-top: 1px solid var(--card-border);
+            padding-top: 12px;
+        }
+
+        #coordinates h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--brand-primary);
         }
 
         #coordinates table {
@@ -263,49 +350,46 @@
 
         #coordinates th,
         #coordinates td {
-            border: 1px solid var(--control-border-color);
-            padding: 5px 3px;
+            border: 1px solid var(--table-border);
+            padding: 6px 4px;
             text-align: center;
+            font-size: 0.8rem;
         }
 
         #coordinates th {
             font-weight: 600;
+            background: var(--table-header-bg);
         }
 
-        /*******************************************************
-         * CONTEXT MENU
-         *******************************************************/
+        /* Context Menu */
         #contextMenu {
             position: absolute;
-            background: var(--bg-color);
-            border: 1px solid var(--control-border-color);
-            padding: 5px 10px;
+            background: var(--context-menu-bg);
+            border: 1px solid var(--context-menu-border);
+            padding: 8px 16px;
             display: none;
             z-index: 1000;
             cursor: pointer;
-            box-shadow: var(--shadow-soft);
-            font-size: 14px;
-            border-radius: 6px;
+            box-shadow: var(--card-shadow);
+            font-size: 0.9rem;
+            border-radius: 10px;
+            color: var(--text-main);
         }
 
         #contextMenu:hover {
-            background: #eeeeee;
+            background: var(--context-menu-hover);
         }
 
+        /* Footer */
         footer {
-            position: static;
-            bottom: 0;
-            font-size: 15px;
             text-align: center;
-            padding: 7px;
-            background: #f4f4f400;
-            color: #555;
-            margin: 4px 0;
-            width: 100%;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
         footer a {
-            color: #ff5f1f;
+            color: var(--brand-primary);
             text-decoration: none;
             font-weight: 600;
         }
@@ -314,15 +398,40 @@
             text-decoration: underline;
         }
 
-        footer a:visited {
-            color: #ff5f1f;
+        /* Responsive */
+        @media (max-width: 900px) {
+            #controlsContainer {
+                max-width: 100%;
+            }
+
+            .header-title {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 8px 12px;
+            }
+
+            .header-logo img {
+                height: 24px;
+            }
+
+            .header-title {
+                font-size: 0.85rem;
+            }
+
+            .main-content {
+                padding: 12px;
+            }
         }
 
         @media (pointer: coarse) {
             button,
             input,
             select,
-            .controls button,
+            .theme-toggle,
             #contextMenu {
                 min-height: 44px;
                 touch-action: manipulation;
@@ -336,37 +445,25 @@
 </head>
 
 <body>
-    <header>
-        <div class="header-container">
-            <!-- Logo on the left -->
-            <div class="logo">
-                <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
-                    <img src="/panphy.png" alt="PanPhy Logo">
-                </a>
-            </div>
-
-            <!-- Title centered, absolutely positioned -->
-            <div class="title">
-                <h1>Lorentz Transformation – Interactive Minkowski Diagram</h1>
-            </div>
-
-            <!-- Optional spacer or other content on the right -->
-            <div class="spacer"></div>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="header-logo">
+                <img src="/panphy.png" alt="PanPhy logo" onerror="this.style.display='none'" />
+            </a>
+            <span class="header-title">Lorentz Transformation</span>
         </div>
+        <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">&#9728;&#65039;</button>
     </header>
 
-    <div id="contentWrapper">
+    <div class="main-content">
         <div id="mainContainer">
-            <!-- Minkowski Diagram -->
             <div id="diagramContainer">
                 <canvas id="minkowskiCanvas" width="800" height="600"></canvas>
             </div>
 
-            <!-- Control Panel -->
             <div id="controlsContainer">
                 <div class="controlItem">
-                    <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong> (unit:
-                        c)</label>
+                    <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong> (unit: c)</label>
                     <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
                     <span id="speedValue" class="valueBadge">0.00</span>
                 </div>
@@ -383,8 +480,7 @@
                     <input type="checkbox" id="velocityToggle">
                 </div>
                 <div class="controlItem">
-                    <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong> (unit:
-                        c)</label>
+                    <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong> (unit: c)</label>
                     <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
                     <span id="velocityValue" class="valueBadge">0.30</span>
                 </div>
@@ -403,733 +499,656 @@
     </div>
 
     <footer>
-        &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Projects</a> |
+        &copy; <a href="/">PanPhy Projects</a> |
         <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
     </footer>
 
-    <!-- Context Menu for removing a event -->
     <div id="contextMenu">Remove Event</div>
-</body>
 
-<script>
-    window.addEventListener("load", function () {
-        const canvas = document.getElementById("minkowskiCanvas");
-        const ctx = canvas.getContext("2d");
+    <script>
+        // Theme Toggle
+        const themeButton = document.getElementById('theme-button');
+        const DARK_THEME_KEY = "panphy-dark";
+        const LIGHT_THEME_KEY = "panphy-light";
 
-        // Sliders & toggles
-        const speedSlider = document.getElementById("speedSlider");
-        const speedValueDisplay = document.getElementById("speedValue");
-        const gridToggle = document.getElementById("gridToggle");
-        const movingGridToggle = document.getElementById("movingGridToggle");
-        const velocityToggle = document.getElementById("velocityToggle");
-        const velocitySlider = document.getElementById("velocitySlider");
-        const velocityValueDisplay = document.getElementById("velocityValue");
+        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+            "dark" :
+            localStorage.getItem(LIGHT_THEME_KEY) ?
+                "light" :
+                "light";
 
-        // Buttons
-        const addEventBtn = document.getElementById("addEventBtn");
-        const removeAllEventsBtn = document.getElementById("removeAllEventsBtn");
-        const alignFramesBtn = document.getElementById("alignFramesBtn");
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateButtonEmoji(currentTheme);
 
-        // Display for event coordinates
-        const coordinatesDiv = document.getElementById("coordinates");
-        // Context menu for removing events
-        const contextMenu = document.getElementById("contextMenu");
+        function updateButtonEmoji(theme) {
+            themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+        }
 
-        // For dragging & long-press
-        let draggingEvent = null;
-        let contextEvent = null;
-        let longPressTimeout = null;
-
-        // For panning the axes
-        let draggingCanvas = false;
-        let canvasDragStart = { x: 0, y: 0 };
-        let originStart = { x: 0, y: 0 };
-
-        // Minkowski diagram geometry (origin in the lower half)
-        let origin = { x: canvas.width * 0.5, y: canvas.height * 0.9 };
-        const scale = 80;  // pixels per Minkowski unit
-
-        // Event storage
-        let events = [];
-        let nextEventLabelCode = "A".charCodeAt(0);
-        let availableLabels = [];
-
-        function getNextLabel() {
-            if (availableLabels.length > 0) {
-                availableLabels.sort();
-                return availableLabels.shift();
+        themeButton.addEventListener('click', function () {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem(DARK_THEME_KEY, 'true');
+                localStorage.removeItem(LIGHT_THEME_KEY);
+                updateButtonEmoji('dark');
             } else {
-                let label = String.fromCharCode(nextEventLabelCode);
-                nextEventLabelCode++;
-                return label;
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                localStorage.removeItem(DARK_THEME_KEY);
+                updateButtonEmoji('light');
             }
+            draw();
+        });
+
+        // Offline font fallback
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
+
+        // Helper to get CSS variable colors
+        function getCssVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         }
 
-        // Add one sample event
-        events.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
+        window.addEventListener("load", function () {
+            const canvas = document.getElementById("minkowskiCanvas");
+            const ctx = canvas.getContext("2d");
 
-        /*******************************************************
-         * Coordinate conversions
-         *******************************************************/
-        function toCanvasCoords(x, t) {
-            return {
-                x: origin.x + x * scale,
-                y: origin.y - t * scale
-            };
-        }
-        function toMinkowskiCoords(cx, cy) {
-            return {
-                x: (cx - origin.x) / scale,
-                t: (origin.y - cy) / scale
-            };
-        }
+            const speedSlider = document.getElementById("speedSlider");
+            const speedValueDisplay = document.getElementById("speedValue");
+            const gridToggle = document.getElementById("gridToggle");
+            const movingGridToggle = document.getElementById("movingGridToggle");
+            const velocityToggle = document.getElementById("velocityToggle");
+            const velocitySlider = document.getElementById("velocitySlider");
+            const velocityValueDisplay = document.getElementById("velocityValue");
 
-        /*******************************************************
-         * Lorentz transform
-         *******************************************************/
-        function lorentzTransform(pt, v) {
-            const gamma = 1 / Math.sqrt(1 - v * v);
-            return {
-                t: gamma * (pt.t - v * pt.x),
-                x: gamma * (pt.x - v * pt.t)
-            };
-        }
+            const addEventBtn = document.getElementById("addEventBtn");
+            const removeAllEventsBtn = document.getElementById("removeAllEventsBtn");
+            const alignFramesBtn = document.getElementById("alignFramesBtn");
 
-        /**
-         * Returns current Minkowski bounding box:
-         * x in [xMin, xMax],  t in [tMin, tMax].
-         * This reflects the entire visible canvas area
-         * given our current origin & scale.
-         */
-        function getBoundingBox() {
-            return {
-                xMin: (0 - origin.x) / scale,
-                xMax: (canvas.width - origin.x) / scale,
-                tMin: (origin.y - canvas.height) / scale,
-                tMax: (origin.y - 0) / scale
-            };
-        }
+            const coordinatesDiv = document.getElementById("coordinates");
+            const contextMenu = document.getElementById("contextMenu");
 
-        /*******************************************************
-         * Drawing the rest-frame grid
-         *******************************************************/
-        function drawRestFrameGrid() {
-            const { xMin, xMax, tMin, tMax } = getBoundingBox();
+            let draggingEvent = null;
+            let contextEvent = null;
+            let longPressTimeout = null;
 
-            ctx.strokeStyle = "#dddddd";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
+            let draggingCanvas = false;
+            let canvasDragStart = { x: 0, y: 0 };
+            let originStart = { x: 0, y: 0 };
 
-            // vertical lines
-            for (let x = Math.floor(xMin); x <= Math.ceil(xMax); x++) {
-                let start = toCanvasCoords(x, tMin);
-                let end = toCanvasCoords(x, tMax);
-                ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.stroke();
-            }
-            // horizontal lines
-            for (let t = Math.floor(tMin); t <= Math.ceil(tMax); t++) {
-                let start = toCanvasCoords(xMin, t);
-                let end = toCanvasCoords(xMax, t);
-                ctx.beginPath();
-                ctx.moveTo(start.x, start.y);
-                ctx.lineTo(end.x, end.y);
-                ctx.stroke();
-            }
+            let origin = { x: canvas.width * 0.5, y: canvas.height * 0.9 };
+            const scale = 80;
 
-            ctx.setLineDash([]);
-        }
+            let events = [];
+            let nextEventLabelCode = "A".charCodeAt(0);
+            let availableLabels = [];
 
-        /*******************************************************
-         * Drawing lines for the moving-frame grid (x', t')
-         *******************************************************/
-        function drawMovingGridLines(v) {
-            // Use the current bounding box
-            const { xMin, xMax, tMin, tMax } = getBoundingBox();
-            const gamma = 1 / Math.sqrt(1 - v * v);
-
-            ctx.strokeStyle = "#800080";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([2, 4]);
-
-            // We'll draw lines x' = n and t' = n for n in integer range.
-            // The question is: what range of n? We can pick, for example, from -10 to +10,
-            // or dynamically pick based on the bounding box size.
-            // Let's do -10..+10 to ensure coverage, but you can refine as needed:
-            const nMin = -10, nMax = 10;
-            const steps = 200; // resolution for param
-
-            // lines x' = n => x - v t = n / gamma => x = v t + (n/gamma)
-            for (let n = nMin; n <= nMax; n++) {
-                let cst = n / gamma;
-                // param with t from tMin..tMax
-                let linePoints = [];
-                for (let i = 0; i <= steps; i++) {
-                    let ft = tMin + (i / steps) * (tMax - tMin);
-                    let fx = v * ft + cst;
-                    linePoints.push(toCanvasCoords(fx, ft));
-                }
-                ctx.beginPath();
-                ctx.moveTo(linePoints[0].x, linePoints[0].y);
-                for (let i = 1; i < linePoints.length; i++) {
-                    ctx.lineTo(linePoints[i].x, linePoints[i].y);
-                }
-                ctx.stroke();
-            }
-
-            // lines t' = n => t - v x = n / gamma => t = v x + (n/gamma)
-            for (let n = nMin; n <= nMax; n++) {
-                let cst = n / gamma;
-                // param with x from xMin..xMax
-                let linePoints = [];
-                for (let i = 0; i <= steps; i++) {
-                    let fx = xMin + (i / steps) * (xMax - xMin);
-                    let ft = v * fx + cst;
-                    linePoints.push(toCanvasCoords(fx, ft));
-                }
-                ctx.beginPath();
-                ctx.moveTo(linePoints[0].x, linePoints[0].y);
-                for (let i = 1; i < linePoints.length; i++) {
-                    ctx.lineTo(linePoints[i].x, linePoints[i].y);
-                }
-                ctx.stroke();
-            }
-
-            ctx.setLineDash([]);
-        }
-
-        /*******************************************************
-         * Compute the bounding-box intersections for a line
-         * of the form x = m * t  (slope = m).
-         *******************************************************/
-        function computeLineBoxEndpoints(m) {
-            const { xMin, xMax, tMin, tMax } = getBoundingBox();
-            let candidates = [];
-
-            // If line is x = m t, that means t = x / m if m != 0
-            // Intersect with t = tMin => x = m * tMin
-            let x_tMin = m * tMin;
-            if (x_tMin >= xMin && x_tMin <= xMax) {
-                candidates.push({ x: x_tMin, t: tMin });
-            }
-            // Intersect with t = tMax => x = m * tMax
-            let x_tMax = m * tMax;
-            if (x_tMax >= xMin && x_tMax <= xMax) {
-                candidates.push({ x: x_tMax, t: tMax });
-            }
-            // Intersect with x = xMin => t = xMin / m if m != 0
-            if (Math.abs(m) > 1e-10) {
-                let t_xMin = xMin / m;
-                if (t_xMin >= tMin && t_xMin <= tMax) {
-                    candidates.push({ x: xMin, t: t_xMin });
-                }
-            }
-            // Intersect with x = xMax => t = xMax / m
-            if (Math.abs(m) > 1e-10) {
-                let t_xMax = xMax / m;
-                if (t_xMax >= tMin && t_xMax <= tMax) {
-                    candidates.push({ x: xMax, t: t_xMax });
+            function getNextLabel() {
+                if (availableLabels.length > 0) {
+                    availableLabels.sort();
+                    return availableLabels.shift();
+                } else {
+                    let label = String.fromCharCode(nextEventLabelCode);
+                    nextEventLabelCode++;
+                    return label;
                 }
             }
 
-            // We might end up with fewer than 2 points if the line doesn't intersect.
-            // Or we can have multiple valid intersection points, from which we pick the farthest pair.
-            if (candidates.length < 2) return [];
+            events.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
 
-            // Pick the pair of points that are farthest apart
-            let maxDistSq = -1;
-            let bestPair = [candidates[0], candidates[0]];
-            for (let i = 0; i < candidates.length; i++) {
-                for (let j = i + 1; j < candidates.length; j++) {
-                    let dx = candidates[j].x - candidates[i].x;
-                    let dt = candidates[j].t - candidates[i].t;
-                    let distSq = dx * dx + dt * dt;
-                    if (distSq > maxDistSq) {
-                        maxDistSq = distSq;
-                        bestPair = [candidates[i], candidates[j]];
+            function toCanvasCoords(x, t) {
+                return {
+                    x: origin.x + x * scale,
+                    y: origin.y - t * scale
+                };
+            }
+            function toMinkowskiCoords(cx, cy) {
+                return {
+                    x: (cx - origin.x) / scale,
+                    t: (origin.y - cy) / scale
+                };
+            }
+
+            function lorentzTransform(pt, v) {
+                const gamma = 1 / Math.sqrt(1 - v * v);
+                return {
+                    t: gamma * (pt.t - v * pt.x),
+                    x: gamma * (pt.x - v * pt.t)
+                };
+            }
+
+            function getBoundingBox() {
+                return {
+                    xMin: (0 - origin.x) / scale,
+                    xMax: (canvas.width - origin.x) / scale,
+                    tMin: (origin.y - canvas.height) / scale,
+                    tMax: (origin.y - 0) / scale
+                };
+            }
+
+            function drawRestFrameGrid() {
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+
+                ctx.strokeStyle = getCssVar('--grid-rest');
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+
+                for (let x = Math.floor(xMin); x <= Math.ceil(xMax); x++) {
+                    let start = toCanvasCoords(x, tMin);
+                    let end = toCanvasCoords(x, tMax);
+                    ctx.beginPath();
+                    ctx.moveTo(start.x, start.y);
+                    ctx.lineTo(end.x, end.y);
+                    ctx.stroke();
+                }
+                for (let t = Math.floor(tMin); t <= Math.ceil(tMax); t++) {
+                    let start = toCanvasCoords(xMin, t);
+                    let end = toCanvasCoords(xMax, t);
+                    ctx.beginPath();
+                    ctx.moveTo(start.x, start.y);
+                    ctx.lineTo(end.x, end.y);
+                    ctx.stroke();
+                }
+
+                ctx.setLineDash([]);
+            }
+
+            function drawMovingGridLines(v) {
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+                const gamma = 1 / Math.sqrt(1 - v * v);
+
+                ctx.strokeStyle = getCssVar('--grid-moving');
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 4]);
+
+                const nMin = -10, nMax = 10;
+                const steps = 200;
+
+                for (let n = nMin; n <= nMax; n++) {
+                    let cst = n / gamma;
+                    let linePoints = [];
+                    for (let i = 0; i <= steps; i++) {
+                        let ft = tMin + (i / steps) * (tMax - tMin);
+                        let fx = v * ft + cst;
+                        linePoints.push(toCanvasCoords(fx, ft));
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(linePoints[0].x, linePoints[0].y);
+                    for (let i = 1; i < linePoints.length; i++) {
+                        ctx.lineTo(linePoints[i].x, linePoints[i].y);
+                    }
+                    ctx.stroke();
+                }
+
+                for (let n = nMin; n <= nMax; n++) {
+                    let cst = n / gamma;
+                    let linePoints = [];
+                    for (let i = 0; i <= steps; i++) {
+                        let fx = xMin + (i / steps) * (xMax - xMin);
+                        let ft = v * fx + cst;
+                        linePoints.push(toCanvasCoords(fx, ft));
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(linePoints[0].x, linePoints[0].y);
+                    for (let i = 1; i < linePoints.length; i++) {
+                        ctx.lineTo(linePoints[i].x, linePoints[i].y);
+                    }
+                    ctx.stroke();
+                }
+
+                ctx.setLineDash([]);
+            }
+
+            function computeLineBoxEndpoints(m) {
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+                let candidates = [];
+
+                let x_tMin = m * tMin;
+                if (x_tMin >= xMin && x_tMin <= xMax) {
+                    candidates.push({ x: x_tMin, t: tMin });
+                }
+                let x_tMax = m * tMax;
+                if (x_tMax >= xMin && x_tMax <= xMax) {
+                    candidates.push({ x: x_tMax, t: tMax });
+                }
+                if (Math.abs(m) > 1e-10) {
+                    let t_xMin = xMin / m;
+                    if (t_xMin >= tMin && t_xMin <= tMax) {
+                        candidates.push({ x: xMin, t: t_xMin });
                     }
                 }
+                if (Math.abs(m) > 1e-10) {
+                    let t_xMax = xMax / m;
+                    if (t_xMax >= tMin && t_xMax <= tMax) {
+                        candidates.push({ x: xMax, t: t_xMax });
+                    }
+                }
+
+                if (candidates.length < 2) return [];
+
+                let maxDistSq = -1;
+                let bestPair = [candidates[0], candidates[0]];
+                for (let i = 0; i < candidates.length; i++) {
+                    for (let j = i + 1; j < candidates.length; j++) {
+                        let dx = candidates[j].x - candidates[i].x;
+                        let dt = candidates[j].t - candidates[i].t;
+                        let distSq = dx * dx + dt * dt;
+                        if (distSq > maxDistSq) {
+                            maxDistSq = distSq;
+                            bestPair = [candidates[i], candidates[j]];
+                        }
+                    }
+                }
+                return bestPair;
             }
-            return bestPair;
-        }
 
-        /**
-         * Parametric interpolation for convenience
-         */
-        function interpolate(p0, p1, s) {
-            return {
-                x: p0.x + s * (p1.x - p0.x),
-                t: p0.t + s * (p1.t - p0.t)
-            };
-        }
+            function interpolate(p0, p1, s) {
+                return {
+                    x: p0.x + s * (p1.x - p0.x),
+                    t: p0.t + s * (p1.t - p0.t)
+                };
+            }
 
-        /**
-         * Draw two velocity lines:
-         * 1) slope = u_line (green)
-         * 2) slope = (u_line - relSpeed)/(1 - u_line*relSpeed) (orange)
-         */
-        function drawVelocityLines(u_line, relSpeed) {
-            // First line: slope = u_line => x = u_line * t
-            let endG = computeLineBoxEndpoints(u_line);
-            if (endG.length === 2) {
-                let G0 = endG[0];
-                let G1 = endG[1];
-                // reorder so G0 has smaller t
-                if (G1.t < G0.t) [G0, G1] = [G1, G0];
+            function drawVelocityLines(u_line, relSpeed) {
+                let endG = computeLineBoxEndpoints(u_line);
+                if (endG.length === 2) {
+                    let G0 = endG[0];
+                    let G1 = endG[1];
+                    if (G1.t < G0.t) [G0, G1] = [G1, G0];
 
-                // Draw
-                ctx.strokeStyle = "#5f8a35";
+                    ctx.strokeStyle = getCssVar('--velocity-line-u');
+                    ctx.lineWidth = 2;
+                    let c1 = toCanvasCoords(G0.x, G0.t);
+                    let c2 = toCanvasCoords(G1.x, G1.t);
+                    ctx.beginPath();
+                    ctx.moveTo(c1.x, c1.y);
+                    ctx.lineTo(c2.x, c2.y);
+                    ctx.stroke();
+
+                    let Gpoint = interpolate(G0, G1, 0.67);
+                    let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
+                    ctx.fillStyle = getCssVar('--velocity-line-u');
+                    ctx.font = "14px Arial";
+                    ctx.fillText(`u = ${u_line.toFixed(2)}c`, Gc.x + 35, Gc.y - 15);
+                }
+
+                let u_eff = (u_line - relSpeed) / (1 - u_line * relSpeed);
+                let endO = computeLineBoxEndpoints(u_eff);
+                if (endO.length === 2) {
+                    let O0 = endO[0];
+                    let O1 = endO[1];
+                    if (O1.t < O0.t) [O0, O1] = [O1, O0];
+
+                    ctx.strokeStyle = getCssVar('--velocity-line-u-prime');
+                    ctx.lineWidth = 2;
+                    let c1o = toCanvasCoords(O0.x, O0.t);
+                    let c2o = toCanvasCoords(O1.x, O1.t);
+                    ctx.beginPath();
+                    ctx.moveTo(c1o.x, c1o.y);
+                    ctx.lineTo(c2o.x, c2o.y);
+                    ctx.stroke();
+
+                    let Opoint = interpolate(O0, O1, 0.79);
+                    let Oc = toCanvasCoords(Opoint.x, Opoint.t);
+                    ctx.fillStyle = getCssVar('--velocity-line-u-prime');
+                    ctx.font = "14px Arial";
+                    ctx.fillText(`u' = ${u_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
+                }
+            }
+
+            function draw() {
+                const relSpeed = parseFloat(speedSlider.value);
+                speedValueDisplay.textContent = relSpeed.toFixed(2);
+
+                const u_line = parseFloat(velocitySlider.value);
+                velocityValueDisplay.textContent = u_line.toFixed(2);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (gridToggle.checked) {
+                    drawRestFrameGrid();
+                }
+
+                // Rest frame axes
+                ctx.strokeStyle = getCssVar('--axis-rest');
                 ctx.lineWidth = 2;
-                let c1 = toCanvasCoords(G0.x, G0.t);
-                let c2 = toCanvasCoords(G1.x, G1.t);
                 ctx.beginPath();
-                ctx.moveTo(c1.x, c1.y);
-                ctx.lineTo(c2.x, c2.y);
+                ctx.moveTo(0, origin.y);
+                ctx.lineTo(canvas.width, origin.y);
                 ctx.stroke();
 
-                // Label
-                let Gpoint = interpolate(G0, G1, 0.67);
-                let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
-                ctx.fillStyle = "#5f8a35";
+                ctx.beginPath();
+                ctx.moveTo(origin.x, 0);
+                ctx.lineTo(origin.x, canvas.height);
+                ctx.stroke();
+
+                ctx.fillStyle = getCssVar('--axis-rest');
                 ctx.font = "16px Arial";
-                ctx.fillText(`u = ${u_line.toFixed(2)}c`, Gc.x + 35, Gc.y - 15);
-            }
+                ctx.fillText("x", canvas.width - 20, origin.y - 10);
+                ctx.fillText("t", origin.x + 10, 20);
 
-            // Second line: slope = u_eff = (u_line - relSpeed)/(1 - u_line*relSpeed)
-            let u_eff = (u_line - relSpeed) / (1 - u_line * relSpeed);
-            let endO = computeLineBoxEndpoints(u_eff);
-            if (endO.length === 2) {
-                let O0 = endO[0];
-                let O1 = endO[1];
-                // reorder so O0 has smaller t
-                if (O1.t < O0.t) [O0, O1] = [O1, O0];
+                if (movingGridToggle.checked) {
+                    drawMovingGridLines(relSpeed);
+                }
 
-                // Draw
-                ctx.strokeStyle = "#ff5f1f";
-                ctx.lineWidth = 2;
-                let c1o = toCanvasCoords(O0.x, O0.t);
-                let c2o = toCanvasCoords(O1.x, O1.t);
+                // Moving frame axes
+                ctx.strokeStyle = getCssVar('--axis-moving');
+                ctx.lineWidth = 1.5;
+
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+
+                let tA = toCanvasCoords(relSpeed * tMin, tMin);
+                let tB = toCanvasCoords(relSpeed * tMax, tMax);
                 ctx.beginPath();
-                ctx.moveTo(c1o.x, c1o.y);
-                ctx.lineTo(c2o.x, c2o.y);
+                ctx.moveTo(tA.x, tA.y);
+                ctx.lineTo(tB.x, tB.y);
                 ctx.stroke();
 
-                // Label
-                let Opoint = interpolate(O0, O1, 0.79);
-                let Oc = toCanvasCoords(Opoint.x, Opoint.t);
-                ctx.fillStyle = "#ff5f1f";
-                ctx.font = "16px Arial";
-                ctx.fillText(`u' = ${u_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
-            }
-        }
-
-        /*******************************************************
-         * Main draw routine
-         *******************************************************/
-        function draw() {
-            const relSpeed = parseFloat(speedSlider.value);
-            speedValueDisplay.textContent = relSpeed.toFixed(2);
-
-            const u_line = parseFloat(velocitySlider.value);
-            velocityValueDisplay.textContent = u_line.toFixed(2);
-
-            // Clear the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the rest-frame grid if toggled
-            if (gridToggle.checked) {
-                drawRestFrameGrid();
-            }
-
-            // Rest frame axes
-            ctx.strokeStyle = "#333333";
-            ctx.lineWidth = 2;
-            // x-axis
-            ctx.beginPath();
-            ctx.moveTo(0, origin.y);
-            ctx.lineTo(canvas.width, origin.y);
-            ctx.stroke();
-
-            // t-axis
-            ctx.beginPath();
-            ctx.moveTo(origin.x, 0);
-            ctx.lineTo(origin.x, canvas.height);
-            ctx.stroke();
-
-            // Axis labels (rest frame)
-            ctx.fillStyle = "#333333";
-            ctx.font = "16px Arial";
-            ctx.fillText("x", canvas.width - 20, origin.y - 10);
-            ctx.fillText("t", origin.x + 10, 20);
-
-            // Moving grid lines if toggled
-            if (movingGridToggle.checked) {
-                drawMovingGridLines(relSpeed);
-            }
-
-            // Moving frame axes (draw in blue)
-            ctx.strokeStyle = "#0384fc";
-            ctx.lineWidth = 1.5;
-
-            const { xMin, xMax, tMin, tMax } = getBoundingBox();
-
-            // For the moving axes, param from tMin..tMax for t'-axis, xMin..xMax for x'-axis
-            // t' axis => slope = relSpeed => x = v t
-            let tA = toCanvasCoords(relSpeed * tMin, tMin);
-            let tB = toCanvasCoords(relSpeed * tMax, tMax);
-            ctx.beginPath();
-            ctx.moveTo(tA.x, tA.y);
-            ctx.lineTo(tB.x, tB.y);
-            ctx.stroke();
-
-            // x' axis => param approach => if x' axis in Minkowski: t = v x => slope = v
-            let xA = toCanvasCoords(xMin, relSpeed * xMin);
-            let xB = toCanvasCoords(xMax, relSpeed * xMax);
-            ctx.beginPath();
-            ctx.moveTo(xA.x, xA.y);
-            ctx.lineTo(xB.x, xB.y);
-            ctx.stroke();
-
-            // Label the moving axes in the same blue color
-            ctx.fillStyle = "#0384fc";
-            if (Math.abs(relSpeed) < 0.001) {
-                // Overlaps the rest frame if speed ~ 0
-                ctx.fillText("t'", origin.x + 10, 20);
-                ctx.fillText("x'", canvas.width - 20, origin.y - 10);
-            } else {
-                ctx.fillText("t'", tB.x + 10, tB.y + 20);
-                ctx.fillText("x'", xB.x - 30, xB.y - 5);
-            }
-
-            // Velocity lines if toggled
-            if (velocityToggle.checked) {
-                drawVelocityLines(u_line, relSpeed);
-            }
-
-            // Light cone
-            ctx.strokeStyle = "#5b5b5b";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
-            // We'll just param for the bounding box corners
-            // Lines: x = ± t  => slope = ±1
-            let endPlus = computeLineBoxEndpoints(1);
-            let endMinus = computeLineBoxEndpoints(-1);
-            if (endPlus.length === 2) {
-                let c1 = toCanvasCoords(endPlus[0].x, endPlus[0].t);
-                let c2 = toCanvasCoords(endPlus[1].x, endPlus[1].t);
+                let xA = toCanvasCoords(xMin, relSpeed * xMin);
+                let xB = toCanvasCoords(xMax, relSpeed * xMax);
                 ctx.beginPath();
-                ctx.moveTo(c1.x, c1.y);
-                ctx.lineTo(c2.x, c2.y);
-                ctx.stroke();
-            }
-            if (endMinus.length === 2) {
-                let c1 = toCanvasCoords(endMinus[0].x, endMinus[0].t);
-                let c2 = toCanvasCoords(endMinus[1].x, endMinus[1].t);
-                ctx.beginPath();
-                ctx.moveTo(c1.x, c1.y);
-                ctx.lineTo(c2.x, c2.y);
-                ctx.stroke();
-            }
-            ctx.setLineDash([]);
-
-            // Events
-            events.forEach(p => {
-                // Event in rest frame (green)
-                let cp = toCanvasCoords(p.x, p.t);
-                ctx.fillStyle = "#16a085";
-                ctx.beginPath();
-                ctx.arc(cp.x, cp.y, p.radius, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.strokeStyle = "#000";
+                ctx.moveTo(xA.x, xA.y);
+                ctx.lineTo(xB.x, xB.y);
                 ctx.stroke();
 
-                // Label in rest frame
-                ctx.fillStyle = "#333333";
-                ctx.font = "14px Arial";
-                ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
+                ctx.fillStyle = getCssVar('--axis-moving');
+                if (Math.abs(relSpeed) < 0.001) {
+                    ctx.fillText("t'", origin.x + 10, 20);
+                    ctx.fillText("x'", canvas.width - 20, origin.y - 10);
+                } else {
+                    ctx.fillText("t'", tB.x + 10, tB.y + 20);
+                    ctx.fillText("x'", xB.x - 30, xB.y - 5);
+                }
 
-                // The same event in the moving frame (red)
-                let pm = lorentzTransform(p, relSpeed);
-                let cpm = toCanvasCoords(pm.x, pm.t);
-                ctx.fillStyle = "#ff3c73";
-                ctx.beginPath();
-                ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillText(p.label + "'", cpm.x + p.radius + 2, cpm.y - p.radius - 2);
-            });
+                if (velocityToggle.checked) {
+                    drawVelocityLines(u_line, relSpeed);
+                }
 
-            // Update coordinates in a table
-            let html = `
-        <h3>Event Coordinates</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Event</th>
-                    <th>Rest Frame (x,t)</th>
-                    <th>Moving Frame (x',t')</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-            events.forEach(p => {
-                let pm = lorentzTransform(p, relSpeed);
+                // Light cone
+                ctx.strokeStyle = getCssVar('--light-cone');
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                let endPlus = computeLineBoxEndpoints(1);
+                let endMinus = computeLineBoxEndpoints(-1);
+                if (endPlus.length === 2) {
+                    let c1 = toCanvasCoords(endPlus[0].x, endPlus[0].t);
+                    let c2 = toCanvasCoords(endPlus[1].x, endPlus[1].t);
+                    ctx.beginPath();
+                    ctx.moveTo(c1.x, c1.y);
+                    ctx.lineTo(c2.x, c2.y);
+                    ctx.stroke();
+                }
+                if (endMinus.length === 2) {
+                    let c1 = toCanvasCoords(endMinus[0].x, endMinus[0].t);
+                    let c2 = toCanvasCoords(endMinus[1].x, endMinus[1].t);
+                    ctx.beginPath();
+                    ctx.moveTo(c1.x, c1.y);
+                    ctx.lineTo(c2.x, c2.y);
+                    ctx.stroke();
+                }
+                ctx.setLineDash([]);
+
+                // Events
+                events.forEach(p => {
+                    let cp = toCanvasCoords(p.x, p.t);
+                    ctx.fillStyle = getCssVar('--event-rest');
+                    ctx.beginPath();
+                    ctx.arc(cp.x, cp.y, p.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = "#000";
+                    ctx.stroke();
+
+                    ctx.fillStyle = getCssVar('--axis-rest');
+                    ctx.font = "14px Arial";
+                    ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
+
+                    let pm = lorentzTransform(p, relSpeed);
+                    let cpm = toCanvasCoords(pm.x, pm.t);
+                    ctx.fillStyle = getCssVar('--event-moving');
+                    ctx.beginPath();
+                    ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.fillText(p.label + "'", cpm.x + p.radius + 2, cpm.y - p.radius - 2);
+                });
+
+                let html = `
+                    <h3>Event Coordinates</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Rest (x,t)</th>
+                                <th>Moving (x',t')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                events.forEach(p => {
+                    let pm = lorentzTransform(p, relSpeed);
+                    html += `
+                        <tr>
+                            <td>${p.label}</td>
+                            <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
+                            <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
+                        </tr>
+                    `;
+                });
                 html += `
-            <tr>
-                <td>${p.label}</td>
-                <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
-                <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
-            </tr>
-        `;
-            });
-            html += `
-            </tbody>
-        </table>
-    `;
-            coordinatesDiv.innerHTML = html;
-        }
+                        </tbody>
+                    </table>
+                `;
+                coordinatesDiv.innerHTML = html;
+            }
 
-        /*******************************************************
-         * EVENT HANDLERS (MOUSE, TOUCH, CONTEXT MENU, BUTTONS)
-         *******************************************************/
+            // Make draw globally accessible for theme toggle
+            window.draw = draw;
 
-        // Mouse down
-        canvas.addEventListener("mousedown", e => {
-            if (e.button !== 0) return;
-            const r = canvas.getBoundingClientRect();
-            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            canvas.addEventListener("mousedown", e => {
+                if (e.button !== 0) return;
+                const r = canvas.getBoundingClientRect();
+                const mx = e.clientX - r.left, my = e.clientY - r.top;
 
-            // Check if clicked on a event
-            let foundEvent = false;
-            for (let i = events.length - 1; i >= 0; i--) {
-                const p = events[i];
-                const cp = toCanvasCoords(p.x, p.t);
-                if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                    draggingEvent = p;
-                    foundEvent = true;
-                    break;
+                let foundEvent = false;
+                for (let i = events.length - 1; i >= 0; i--) {
+                    const p = events[i];
+                    const cp = toCanvasCoords(p.x, p.t);
+                    if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
+                        draggingEvent = p;
+                        foundEvent = true;
+                        break;
+                    }
                 }
-            }
 
-            if (!foundEvent) {
-                // Start dragging the entire canvas
-                draggingCanvas = true;
-                canvasDragStart.x = mx;
-                canvasDragStart.y = my;
-                originStart.x = origin.x;
-                originStart.y = origin.y;
-            }
-        });
+                if (!foundEvent) {
+                    draggingCanvas = true;
+                    canvasDragStart.x = mx;
+                    canvasDragStart.y = my;
+                    originStart.x = origin.x;
+                    originStart.y = origin.y;
+                }
+            });
 
-        // Mouse move
-        canvas.addEventListener("mousemove", e => {
-            const r = canvas.getBoundingClientRect();
-            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            canvas.addEventListener("mousemove", e => {
+                const r = canvas.getBoundingClientRect();
+                const mx = e.clientX - r.left, my = e.clientY - r.top;
 
-            if (draggingEvent) {
-                // Move the event
-                const coords = toMinkowskiCoords(mx, my);
-                draggingEvent.x = coords.x;
-                draggingEvent.t = coords.t;
-                draw();
-            } else if (draggingCanvas) {
-                // Pan the canvas
-                origin.x = originStart.x + (mx - canvasDragStart.x);
-                origin.y = originStart.y + (my - canvasDragStart.y);
-                draw();
-            }
-        });
+                if (draggingEvent) {
+                    const coords = toMinkowskiCoords(mx, my);
+                    draggingEvent.x = coords.x;
+                    draggingEvent.t = coords.t;
+                    draw();
+                } else if (draggingCanvas) {
+                    origin.x = originStart.x + (mx - canvasDragStart.x);
+                    origin.y = originStart.y + (my - canvasDragStart.y);
+                    draw();
+                }
+            });
 
-        // Mouse up
-        canvas.addEventListener("mouseup", () => {
-            draggingEvent = null;
-            draggingCanvas = false;
-        });
+            canvas.addEventListener("mouseup", () => {
+                draggingEvent = null;
+                draggingCanvas = false;
+            });
 
-        // Mouse leaves canvas
-        canvas.addEventListener("mouseleave", () => {
-            draggingEvent = null;
-            draggingCanvas = false;
-        });
+            canvas.addEventListener("mouseleave", () => {
+                draggingEvent = null;
+                draggingCanvas = false;
+            });
 
-        // Touch start
-        canvas.addEventListener("touchstart", e => {
-            e.preventDefault();
-            const t = e.touches[0];
-            const r = canvas.getBoundingClientRect();
-            const tx = t.clientX - r.left, ty = t.clientY - r.top;
+            canvas.addEventListener("touchstart", e => {
+                e.preventDefault();
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                const tx = t.clientX - r.left, ty = t.clientY - r.top;
 
-            let found = false;
-            for (let i = events.length - 1; i >= 0; i--) {
-                const p = events[i];
-                const cp = toCanvasCoords(p.x, p.t);
-                if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
-                    draggingEvent = p;
-                    found = true;
-                    // Set a long-press to show context menu for event
-                    longPressTimeout = setTimeout(() => {
+                let found = false;
+                for (let i = events.length - 1; i >= 0; i--) {
+                    const p = events[i];
+                    const cp = toCanvasCoords(p.x, p.t);
+                    if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
+                        draggingEvent = p;
+                        found = true;
+                        longPressTimeout = setTimeout(() => {
+                            contextEvent = p;
+                            contextMenu.style.display = "block";
+                            contextMenu.style.left = t.pageX + "px";
+                            contextMenu.style.top = t.pageY + "px";
+                        }, 800);
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    draggingCanvas = true;
+                    canvasDragStart.x = tx;
+                    canvasDragStart.y = ty;
+                    originStart.x = origin.x;
+                    originStart.y = origin.y;
+                }
+            });
+
+            canvas.addEventListener("touchmove", e => {
+                e.preventDefault();
+                const t = e.touches[0];
+                const r = canvas.getBoundingClientRect();
+                const tx = t.clientX - r.left, ty = t.clientY - r.top;
+
+                if (draggingEvent) {
+                    if (longPressTimeout) {
+                        clearTimeout(longPressTimeout);
+                        longPressTimeout = null;
+                    }
+
+                    const coords = toMinkowskiCoords(tx, ty);
+                    draggingEvent.x = coords.x;
+                    draggingEvent.t = coords.t;
+                    draw();
+                } else if (draggingCanvas) {
+                    origin.x = originStart.x + (tx - canvasDragStart.x);
+                    origin.y = originStart.y + (ty - canvasDragStart.y);
+                    draw();
+                }
+            });
+
+            canvas.addEventListener("touchend", () => {
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                draggingEvent = null;
+                draggingCanvas = false;
+            });
+
+            canvas.addEventListener("touchcancel", () => {
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                draggingEvent = null;
+                draggingCanvas = false;
+            });
+
+            canvas.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                const r = canvas.getBoundingClientRect();
+                const mx = e.clientX - r.left, my = e.clientY - r.top;
+                let found = false;
+                for (let i = events.length - 1; i >= 0; i--) {
+                    const p = events[i];
+                    const cp = toCanvasCoords(p.x, p.t);
+                    if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
+                        found = true;
                         contextEvent = p;
-                        contextMenu.style.display = "block";
-                        contextMenu.style.left = t.pageX + "px";
-                        contextMenu.style.top = t.pageY + "px";
-                    }, 800);
-                    break;
+                        break;
+                    }
                 }
-            }
-
-            if (!found) {
-                // Drag canvas
-                draggingCanvas = true;
-                canvasDragStart.x = tx;
-                canvasDragStart.y = ty;
-                originStart.x = origin.x;
-                originStart.y = origin.y;
-            }
-        });
-
-        // Touch move
-        canvas.addEventListener("touchmove", e => {
-            e.preventDefault();
-            const t = e.touches[0];
-            const r = canvas.getBoundingClientRect();
-            const tx = t.clientX - r.left, ty = t.clientY - r.top;
-
-            if (draggingEvent) {
-                // If we move while the long-press timer is set, cancel it
-                if (longPressTimeout) {
-                    clearTimeout(longPressTimeout);
-                    longPressTimeout = null;
+                if (found && contextEvent) {
+                    contextMenu.style.display = "block";
+                    contextMenu.style.left = e.pageX + "px";
+                    contextMenu.style.top = e.pageY + "px";
+                } else {
+                    contextMenu.style.display = "none";
                 }
-
-                // Drag the event
-                const coords = toMinkowskiCoords(tx, ty);
-                draggingEvent.x = coords.x;
-                draggingEvent.t = coords.t;
-                draw();
-            } else if (draggingCanvas) {
-                // Drag the canvas
-                origin.x = originStart.x + (tx - canvasDragStart.x);
-                origin.y = originStart.y + (ty - canvasDragStart.y);
-                draw();
-            }
-        });
-
-        // Touch end
-        canvas.addEventListener("touchend", () => {
-            if (longPressTimeout) clearTimeout(longPressTimeout);
-            draggingEvent = null;
-            draggingCanvas = false;
-        });
-
-        // Touch cancel
-        canvas.addEventListener("touchcancel", () => {
-            if (longPressTimeout) clearTimeout(longPressTimeout);
-            draggingEvent = null;
-            draggingCanvas = false;
-        });
-
-        // Right-click context menu to remove a event
-        canvas.addEventListener("contextmenu", e => {
-            e.preventDefault();
-            const r = canvas.getBoundingClientRect();
-            const mx = e.clientX - r.left, my = e.clientY - r.top;
-            let found = false;
-            for (let i = events.length - 1; i >= 0; i--) {
-                const p = events[i];
-                const cp = toCanvasCoords(p.x, p.t);
-                if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                    found = true;
-                    contextEvent = p;
-                    break;
-                }
-            }
-            if (found && contextEvent) {
-                contextMenu.style.display = "block";
-                contextMenu.style.left = e.pageX + "px";
-                contextMenu.style.top = e.pageY + "px";
-            } else {
-                contextMenu.style.display = "none";
-            }
-        });
-
-        // Click on context menu => remove event
-        contextMenu.addEventListener("click", () => {
-            if (contextEvent) {
-                const idx = events.indexOf(contextEvent);
-                if (idx !== -1) {
-                    availableLabels.push(contextEvent.label);
-                    events.splice(idx, 1);
-                }
-                contextEvent = null;
-                contextMenu.style.display = "none";
-                draw();
-            }
-        });
-
-        // Click anywhere else => hide context menu
-        document.addEventListener("click", e => {
-            if (e.target !== contextMenu) {
-                contextMenu.style.display = "none";
-            }
-        });
-
-        // Buttons
-        addEventBtn.addEventListener("click", () => {
-            // Limit the number of events to 15
-            if (events.length >= 15) {
-                console.log("Maximum number of events reached.");
-                return; // Do not add any more events
-            }
-
-            // Choose a random time in the future (t > 0)
-            const minT = 0.1;
-            const maxT = 6.5;
-            const newT = minT + Math.random() * (maxT - minT);
-
-            // Choose x such that |x| < t (inside the light cone)
-            const newX = (Math.random() * 2 - 1) * newT;
-
-            events.push({
-                label: getNextLabel(),
-                x: newX,
-                t: newT,
-                radius: 8
             });
 
+            contextMenu.addEventListener("click", () => {
+                if (contextEvent) {
+                    const idx = events.indexOf(contextEvent);
+                    if (idx !== -1) {
+                        availableLabels.push(contextEvent.label);
+                        events.splice(idx, 1);
+                    }
+                    contextEvent = null;
+                    contextMenu.style.display = "none";
+                    draw();
+                }
+            });
+
+            document.addEventListener("click", e => {
+                if (e.target !== contextMenu) {
+                    contextMenu.style.display = "none";
+                }
+            });
+
+            addEventBtn.addEventListener("click", () => {
+                if (events.length >= 15) {
+                    console.log("Maximum number of events reached.");
+                    return;
+                }
+
+                const minT = 0.1;
+                const maxT = 6.5;
+                const newT = minT + Math.random() * (maxT - minT);
+                const newX = (Math.random() * 2 - 1) * newT;
+
+                events.push({
+                    label: getNextLabel(),
+                    x: newX,
+                    t: newT,
+                    radius: 8
+                });
+
+                draw();
+            });
+
+            removeAllEventsBtn.addEventListener("click", () => {
+                events.forEach(p => availableLabels.push(p.label));
+                events = [];
+                draw();
+            });
+
+            alignFramesBtn.addEventListener("click", () => {
+                speedSlider.value = 0;
+                draw();
+            });
+
+            speedSlider.addEventListener("input", draw);
+            gridToggle.addEventListener("change", draw);
+            movingGridToggle.addEventListener("change", draw);
+            velocitySlider.addEventListener("input", draw);
+            velocityToggle.addEventListener("change", draw);
+
             draw();
         });
-        removeAllEventsBtn.addEventListener("click", () => {
-            events.forEach(p => availableLabels.push(p.label));
-            events = [];
-            draw();
-        });
-        alignFramesBtn.addEventListener("click", () => {
-            speedSlider.value = 0;
-            draw();
-        });
-
-        // Slider & checkbox events
-        speedSlider.addEventListener("input", draw);
-        gridToggle.addEventListener("change", draw);
-        movingGridToggle.addEventListener("change", draw);
-        velocitySlider.addEventListener("input", draw);
-        velocityToggle.addEventListener("change", draw);
-
-        // Initial draw
-        draw();
-    });
-</script>
-
-<script>
-    function updateOfflineFontState() {
-        document.documentElement.classList.toggle('offline-font', !navigator.onLine);
-    }
-
-    window.addEventListener('online', updateOfflineFontState);
-    window.addEventListener('offline', updateOfflineFontState);
-    updateOfflineFontState();
-</script>
+    </script>
+</body>
 
 </html>
