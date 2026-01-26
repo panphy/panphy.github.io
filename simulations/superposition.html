@@ -119,35 +119,52 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: flex-start;
+            width: 50px;
         }
 
         .header-logo img {
-            height: 28px;
+            height: 32px;
             width: auto;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
         }
 
         .header-title {
             font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             font-weight: 600;
             background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-align: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 50px;
         }
 
         .theme-toggle {
             background: transparent;
             border: none;
             cursor: pointer;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             padding: 8px;
             border-radius: 50%;
+            width: auto;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background-color 0.2s, transform 0.2s;
+            box-shadow: none;
         }
 
         .theme-toggle:hover {
@@ -412,7 +429,7 @@
             }
 
             .header-title {
-                font-size: 0.95rem;
+                font-size: 1.2rem;
             }
         }
 
@@ -422,11 +439,16 @@
             }
 
             .header-logo img {
-                height: 24px;
+                height: 28px;
             }
 
             .header-title {
-                font-size: 0.85rem;
+                font-size: 1rem;
+            }
+
+            .header-left,
+            .header-right {
+                width: 40px;
             }
 
             .main-content {
@@ -460,9 +482,13 @@
             <a href="/" class="header-logo">
                 <img src="/panphy.png" alt="PanPhy logo" onerror="this.style.display='none'" />
             </a>
+        </div>
+        <div class="header-center">
             <span class="header-title">Wave Superposition</span>
         </div>
-        <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">&#9728;&#65039;</button>
+        <div class="header-right">
+            <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">&#9728;&#65039;</button>
+        </div>
     </header>
 
     <div class="main-content">
