@@ -34,22 +34,22 @@
       --table-row-even: #eef1f5;
       --modal-bg: #ffffff;
 
-      /* Customize each button's colors */
-      --upload-bg: #ff5f1f;
+      /* Customize each button's colors - using brand palette */
+      --upload-bg: #6c5ce7;
       --upload-text: #ffffff;
-      --calibrate-bg: #007bff;
+      --calibrate-bg: #00cec9;
       --calibrate-text: #ffffff;
-      --digitize-bg: #28a745;
+      --digitize-bg: #00b894;
       --digitize-text: #ffffff;
-      --undo-bg: #6c757d;
+      --undo-bg: #636e72;
       --undo-text: #ffffff;
-      --redo-bg: #6c757d;
+      --redo-bg: #636e72;
       --redo-text: #ffffff;
-      --recalibrate-bg: #007bff;
-      --recalibrate-text: #ffffff;
-      --reset-bg: #dc3545;
-      --reset-text: #ffffff;
-      --export-bg: #17a2b8;
+      --reset-bg: #fdcb6e;
+      --reset-text: #2d3436;
+      --remove-bg: #d63031;
+      --remove-text: #ffffff;
+      --export-bg: #6c5ce7;
       --export-text: #ffffff;
     }
 
@@ -121,20 +121,34 @@
       color: var(--redo-text);
     }
 
-    .btn-recalibrate {
-      background-color: var(--recalibrate-bg);
-      color: var(--recalibrate-text);
-    }
-
     .btn-reset {
       background-color: var(--reset-bg);
       color: var(--reset-text);
+    }
+
+    .btn-remove {
+      background-color: var(--remove-bg);
+      color: var(--remove-text);
     }
 
     .btn-export {
       background-color: var(--export-bg);
       color: var(--export-text);
       width: 65%;
+    }
+
+    /* Button group styling for organized layout */
+    .button-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .button-group-separator {
+      width: 1px;
+      height: 24px;
+      background-color: var(--card-border);
+      margin: 0 6px;
     }
 
     body {
@@ -326,7 +340,7 @@
     #controlRow {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -345,12 +359,6 @@
       white-space: nowrap;
       border: 0;
       opacity: 0;
-    }
-
-    #buttonRow {
-      display: flex;
-      gap: 8px;
-      align-items: center;
     }
 
     #status {
@@ -464,16 +472,35 @@
     <div id="main">
       <div id="controls">
         <div id="controlRow">
-          <label for="imageLoader" class="btn btn-upload" title="Import a graph image from your device">Import a Graph</label>
-          <input type="file" id="imageLoader" accept="image/*">
-          <div id="buttonRow">
-            <button id="calibrateAxesButton" class="btn btn-calibrate" title="Set axis reference points for the graph" disabled>Calibrate Axes</button>
-            <button id="digitizeButton" class="btn btn-digitize" title="Start capturing data points on the graph" disabled>Digitize Points</button>
+          <!-- Group 1: Import -->
+          <div class="button-group">
+            <label for="imageLoader" class="btn btn-upload" title="Import a graph image from your device">Import Graph</label>
+            <input type="file" id="imageLoader" accept="image/*">
+          </div>
+
+          <div class="button-group-separator"></div>
+
+          <!-- Group 2: Workflow (Calibrate → Digitize) -->
+          <div class="button-group">
+            <button id="calibrateAxesButton" class="btn btn-calibrate" title="Set axis reference points for the graph" disabled>Calibrate</button>
+            <button id="digitizeButton" class="btn btn-digitize" title="Start capturing data points on the graph" disabled>Digitize</button>
+          </div>
+
+          <div class="button-group-separator"></div>
+
+          <!-- Group 3: History -->
+          <div class="button-group">
             <button id="undoButton" class="btn btn-undo" title="Undo the last action" disabled>Undo</button>
             <button id="redoButton" class="btn btn-redo" title="Redo the last undone action" disabled>Redo</button>
-            <button id="recalibrateButton" class="btn btn-recalibrate" title="Recalibrate axes while keeping the graph" disabled>Recalibrate Axes</button>
-            <button id="resetButton" class="btn btn-reset" title="Clear digitized points while keeping calibration" disabled>Reset All Data</button>
-            <button id="removeGraphButton" class="btn btn-reset" title="Remove the current graph image and reset everything" disabled>Remove Graph</button>
+          </div>
+
+          <div class="button-group-separator"></div>
+
+          <!-- Group 4: Reset/Clear -->
+          <div class="button-group">
+            <button id="recalibrateButton" class="btn btn-calibrate" title="Start fresh calibration (keeps digitized points)" disabled>Recalibrate</button>
+            <button id="resetButton" class="btn btn-reset" title="Clear digitized points (keeps calibration)" disabled>Reset Points</button>
+            <button id="removeGraphButton" class="btn btn-remove" title="Remove the graph and reset everything" disabled>Remove Graph</button>
           </div>
         </div>
         <div id="status"></div>
