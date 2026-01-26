@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /gcse/
+Disallow: /misc/
+Sitemap: https://panphy.github.io/sitemap.xml
