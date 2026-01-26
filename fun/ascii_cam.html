@@ -131,6 +131,12 @@
 			cursor: pointer;
 		}
 
+		input[type=range]::-webkit-slider-runnable-track {
+			height: 4px;
+			background: var(--card-border);
+			border-radius: 2px;
+		}
+
 		input[type=range]::-webkit-slider-thumb {
 			-webkit-appearance: none;
 			appearance: none;
@@ -156,6 +162,12 @@
 			cursor: pointer;
 			border: none;
 			box-shadow: 0 2px 6px rgba(162, 155, 254, 0.4);
+		}
+
+		input[type=range]::-moz-range-track {
+			height: 4px;
+			background: var(--card-border);
+			border-radius: 2px;
 		}
 
 		/* Custom checkbox */
@@ -424,7 +436,9 @@
 			}
 
 			input[type=range] {
-				height: 36px;
+				height: 4px;
+				padding: 8px 0;
+				background: transparent;
 			}
 
 			input[type=checkbox] {
