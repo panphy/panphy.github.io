@@ -13,8 +13,8 @@
 	--card-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 	--soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 	--tab-bg: #eef1f5;
-	--tab-active-bg: rgba(108, 92, 231, 0.12);
-	--tab-active-border: rgba(108, 92, 231, 0.35);
+	--tab-active-bg: #6c5ce7;
+	--tab-active-border: #6c5ce7;
 	--muted-bg: #f2f4f8;
 	--border-color: #dfe3ea;
 	--input-border: #d6dbe4;
@@ -40,8 +40,8 @@
 	--card-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 	--soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 	--tab-bg: #262b35;
-	--tab-active-bg: rgba(162, 155, 254, 0.2);
-	--tab-active-border: rgba(162, 155, 254, 0.4);
+	--tab-active-bg: #a29bfe;
+	--tab-active-border: #a29bfe;
 	--muted-bg: #252b34;
 	--border-color: #2d3436;
 	--input-border: #3c4654;
@@ -278,7 +278,7 @@ body {
 	background-color: var(--tab-active-bg);
 	border-color: var(--tab-active-border);
 	font-weight: 600;
-	color: var(--brand-primary);
+	color: #fff;
 }
 
 .dataset-tab .tab-label {
@@ -294,8 +294,16 @@ body {
 	user-select: none;
 }
 
+.dataset-tab.active .tab-close {
+	color: rgba(255, 255, 255, 0.7);
+}
+
 .dataset-tab .tab-close:hover {
 	color: var(--danger);
+}
+
+.dataset-tab.active .tab-close:hover {
+	color: #ffcccc;
 }
 
 .add-dataset-btn {
