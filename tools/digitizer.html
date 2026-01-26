@@ -464,15 +464,16 @@
     <div id="main">
       <div id="controls">
         <div id="controlRow">
-          <label for="imageLoader" class="btn btn-upload">Upload a Graph</label>
+          <label for="imageLoader" class="btn btn-upload" title="Import a graph image from your device">Import a Graph</label>
           <input type="file" id="imageLoader" accept="image/*">
           <div id="buttonRow">
-            <button id="calibrateAxesButton" class="btn btn-calibrate" disabled>Calibrate Axes</button>
-            <button id="digitizeButton" class="btn btn-digitize" disabled>Digitize Points</button>
-            <button id="undoButton" class="btn btn-undo" disabled>Undo</button>
-            <button id="redoButton" class="btn btn-redo" disabled>Redo</button>
-            <button id="recalibrateButton" class="btn btn-recalibrate" disabled>Recalibrate Axes</button>
-            <button id="resetButton" class="btn btn-reset" disabled>Reset All Data</button>
+            <button id="calibrateAxesButton" class="btn btn-calibrate" title="Set axis reference points for the graph" disabled>Calibrate Axes</button>
+            <button id="digitizeButton" class="btn btn-digitize" title="Start capturing data points on the graph" disabled>Digitize Points</button>
+            <button id="undoButton" class="btn btn-undo" title="Undo the last action" disabled>Undo</button>
+            <button id="redoButton" class="btn btn-redo" title="Redo the last undone action" disabled>Redo</button>
+            <button id="recalibrateButton" class="btn btn-recalibrate" title="Recalibrate axes while keeping the graph" disabled>Recalibrate Axes</button>
+            <button id="resetButton" class="btn btn-reset" title="Clear digitized points while keeping calibration" disabled>Reset All Data</button>
+            <button id="removeGraphButton" class="btn btn-reset" title="Remove the current graph image and reset everything" disabled>Remove Graph</button>
           </div>
         </div>
         <div id="status"></div>
@@ -485,7 +486,7 @@
       <!-- The stationary magnifier in the sidebar -->
       <canvas id="magnifierCanvas" width="220" height="220"></canvas><br><br>
       <h3>Data Points</h3>
-      <button id="exportButton" class="btn btn-export">Export Data (.csv)</button>
+      <button id="exportButton" class="btn btn-export" title="Download the digitized points as a CSV file">Export Data (.csv)</button>
       <table id="dataTable">
         <thead>
           <tr>
@@ -514,7 +515,7 @@
         <label><input type="radio" name="plotType" value="3"> Linear-Log (base 10)</label><br>
         <label><input type="radio" name="plotType" value="4"> Log (base 10)-Log (base 10)</label><br><br>
       </form>
-      <button id="plotTypeConfirm" class="btn">Confirm</button>
+        <button id="plotTypeConfirm" class="btn" title="Confirm the selected plot type">Confirm</button>
     </div>
   </div>
 
@@ -569,6 +570,7 @@
     btnRedo = document.getElementById('redoButton'),
     btnRecalibrate = document.getElementById('recalibrateButton'),
     btnReset = document.getElementById('resetButton'),
+    btnRemoveGraph = document.getElementById('removeGraphButton'),
     exportButton = document.getElementById('exportButton');
 
   // Add export button event listener
@@ -783,6 +785,7 @@
           btnCalibrate.disabled = false;
           btnRecalibrate.disabled = false;
           btnReset.disabled = false;
+          btnRemoveGraph.disabled = false;
           btnDigitize.disabled = !(calibrationX.length === 2 && calibrationY.length === 2);
           exportButton.disabled = digitizedPoints.length === 0;
           updateUndoRedoButtons();
@@ -836,6 +839,7 @@
         updateUndoRedoButtons();
         btnRecalibrate.disabled = false;
         btnReset.disabled = false;
+        btnRemoveGraph.disabled = false;
         saveState();
       };
       image.onerror = function () {
@@ -917,6 +921,10 @@
 
   document.getElementById('resetButton').addEventListener('click', function () {
     resetDigitizedData();
+  });
+
+  document.getElementById('removeGraphButton').addEventListener('click', function () {
+    resetAllState();
   });
 
   document.getElementById('undoButton').addEventListener('click', function () {
@@ -1174,6 +1182,7 @@
       btnDigitize.disabled = true;
       btnRecalibrate.disabled = true;
       btnReset.disabled = true;
+      btnRemoveGraph.disabled = true;
       exportButton.disabled = true;
       image.src = "";
       clearSavedState();
@@ -1182,6 +1191,7 @@
       btnRecalibrate.disabled = false;
       btnCalibrate.disabled = false;
       btnReset.disabled = false;
+      btnRemoveGraph.disabled = false;
       exportButton.disabled = true;
       saveState();
     }
