@@ -15,8 +15,12 @@
         }
     </script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
         :root {
-            --font-sans: 'Inter', 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --font-display: 'Poppins', 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
 
             /* Light Theme */
             --bg-color: #f8f9fa;
@@ -116,7 +120,9 @@
         }
 
         .offline-font {
-            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+            --font-sans: 'Inter', 'Poppins', sans-serif;
+            --font-display: 'Poppins', 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         body {
@@ -163,7 +169,7 @@
         }
 
         .header-title {
-            font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: var(--font-display);
             font-size: 1.4rem;
             font-weight: 600;
             background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
