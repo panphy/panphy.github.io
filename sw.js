@@ -37,7 +37,6 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/chart.js',
   '/tools/sound_analyzer.html',
   '/tools/tone_generator.html',
-  '/tools/quadratic.html',
 
   // Simulations
   '/simulations/superposition.html',
