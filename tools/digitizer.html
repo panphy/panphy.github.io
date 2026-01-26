@@ -156,7 +156,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 14px 20px;
+      padding: 8px 20px;
       margin: 16px auto 0;
       width: min(1100px, calc(100% - 40px));
       background: var(--nav-bg);
@@ -535,6 +535,7 @@
     });
   }
 
+  const STORAGE_KEY = "digitizer-saved-state";
   let mode = "none",
     calibrationPhase = "";
   let calibrationX = [],
@@ -550,6 +551,7 @@
     activeCalibration = null;
   let actionHistory = [],
     redoHistory = [];
+  let pendingRestoreState = null;
   const image = new Image();
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
@@ -689,6 +691,7 @@
       dataTableBody.appendChild(row);
     });
     exportButton.disabled = digitizedPoints.length === 0;
+    saveState();
   }
 
   function updateDigitizedPointsFromCalibration() {
@@ -717,6 +720,89 @@
     statusDiv.textContent = message;
   }
 
+  function saveState() {
+    if (!image.src) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    const state = {
+      imageSrc: image.src,
+      digitizedPoints,
+      calibrationX,
+      calibrationY,
+      xAxisType,
+      yAxisType
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function clearSavedState() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  function applyImageToCanvas() {
+    const maxSize = 800;
+    let newWidth = image.width;
+    let newHeight = image.height;
+    if (newWidth > maxSize || newHeight > maxSize) {
+      const scale = Math.min(maxSize / newWidth, maxSize / newHeight);
+      newWidth *= scale;
+      newHeight *= scale;
+    }
+    canvas.width = Math.round(newWidth);
+    canvas.height = Math.round(newHeight);
+    canvas.style.display = "block";
+  }
+
+  function loadSavedState() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      return false;
+    }
+    try {
+      const parsed = JSON.parse(saved);
+      if (!parsed.imageSrc) {
+        return false;
+      }
+      pendingRestoreState = parsed;
+      image.onload = function () {
+        applyImageToCanvas();
+        if (pendingRestoreState) {
+          calibrationX = pendingRestoreState.calibrationX || [];
+          calibrationY = pendingRestoreState.calibrationY || [];
+          digitizedPoints = pendingRestoreState.digitizedPoints || [];
+          xAxisType = pendingRestoreState.xAxisType || "linear";
+          yAxisType = pendingRestoreState.yAxisType || "linear";
+          updateCalibrationParameters();
+          if (slopeX !== null && slopeY !== null) {
+            updateDigitizedPointsFromCalibration();
+          } else {
+            updateDataTable();
+          }
+          redrawCanvas();
+          btnCalibrate.disabled = false;
+          btnRecalibrate.disabled = false;
+          btnReset.disabled = false;
+          btnDigitize.disabled = !(calibrationX.length === 2 && calibrationY.length === 2);
+          exportButton.disabled = digitizedPoints.length === 0;
+          updateUndoRedoButtons();
+          updateStatus("Restored previous session. Remember to export your data.");
+          pendingRestoreState = null;
+        }
+      };
+      image.onerror = function () {
+        clearSavedState();
+        updateStatus("Saved graph could not be loaded. Please upload again.");
+      };
+      image.src = parsed.imageSrc;
+      return true;
+    } catch (error) {
+      console.error("Failed to restore saved state:", error);
+      clearSavedState();
+      return false;
+    }
+  }
+
   function updateUndoRedoButtons() {
     btnUndo.disabled = actionHistory.length === 0 && !activeCalibration;
     btnRedo.disabled = redoHistory.length === 0;
@@ -740,17 +826,7 @@
     };
     reader.onload = function (event) {
       image.onload = function () {
-        const maxSize = 800;
-        let newWidth = image.width;
-        let newHeight = image.height;
-        if (newWidth > maxSize || newHeight > maxSize) {
-          const scale = Math.min(maxSize / newWidth, maxSize / newHeight);
-          newWidth *= scale;
-          newHeight *= scale;
-        }
-        canvas.width = Math.round(newWidth);
-        canvas.height = Math.round(newHeight);
-        canvas.style.display = "block";  // Make sure the canvas is visible
+        applyImageToCanvas();
 
         redrawCanvas();
         updateStatus("Image loaded. Ready for calibration.");
@@ -760,6 +836,7 @@
         updateUndoRedoButtons();
         btnRecalibrate.disabled = false;
         btnReset.disabled = false;
+        saveState();
       };
       image.onerror = function () {
         updateStatus("Could not load that image. Please try a PNG/JPG screenshot of the graph.");
@@ -918,6 +995,7 @@
       }
       activeCalibration = null;
       redrawCanvas();
+      saveState();
     } else if (mode === "digitize") {
       if (slopeX === null || slopeY === null) {
         alert("Calibration incomplete.");
@@ -941,6 +1019,7 @@
       updateStatus("Digitized point (" + dataX.toFixed(4) + ", " + dataY.toFixed(4) + "). Total: " + digitizedPoints.length);
       updateDataTable();
       redrawCanvas();
+      saveState();
     }
   }
 
@@ -1097,12 +1176,14 @@
       btnReset.disabled = true;
       exportButton.disabled = true;
       image.src = "";
+      clearSavedState();
     } else {
       btnDigitize.disabled = true;
       btnRecalibrate.disabled = false;
       btnCalibrate.disabled = false;
       btnReset.disabled = false;
       exportButton.disabled = true;
+      saveState();
     }
     updateUndoRedoButtons();
   }
@@ -1122,7 +1203,9 @@
   }
 
   window.addEventListener("load", function () {
-    resetAllState();
+    if (!loadSavedState()) {
+      resetAllState();
+    }
   });
   </script>
 
