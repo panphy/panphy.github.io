@@ -310,8 +310,10 @@
 		.hide-crosses-toggle {
 			display: flex;
 			align-items: center;
-			gap: 6px;
+			justify-content: center;
+			gap: 4px;
 			padding: 6px 10px;
+			min-width: 72px;
 			font-size: 0.85rem;
 			background: var(--surface-muted);
 			color: var(--text-muted);
@@ -334,12 +336,15 @@
 			background: rgba(253, 203, 110, 0.1);
 		}
 
-		.hide-crosses-toggle .toggle-icon {
-			font-size: 1rem;
+		.hide-crosses-toggle .toggle-text {
+			font-size: 0.8rem;
 		}
 
-		.hide-crosses-toggle .toggle-text {
-			font-size: 0.75rem;
+		.hide-crosses-toggle .toggle-cross {
+			color: #ff4444;
+			font-weight: 700;
+			font-size: 1rem;
+			line-height: 1;
 		}
 
 		/* --- Layout Grid --- */
@@ -691,8 +696,8 @@
 				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 				<span id="timeDisplay">0:00.000</span>
 				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
-					<span class="toggle-icon">👁</span>
-					<span class="toggle-text">Crosses</span>
+					<span class="toggle-text">Hide</span>
+					<span class="toggle-cross">+</span>
 				</button>
 			</div>
 		</div>
@@ -1001,7 +1006,7 @@
 			overlayCanvas.style.pointerEvents = "none";
 			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
 			hideCrossesToggle.classList.remove('crosses-hidden');
-			hideCrossesToggle.querySelector('.toggle-icon').textContent = '👁';
+			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
 
 			// 6. Hide any open prompts
 			calibrationPrompt.style.display = 'none';
@@ -1674,10 +1679,10 @@
 			crossesVisible = !crossesVisible;
 			if (crossesVisible) {
 				hideCrossesToggle.classList.remove('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-icon').textContent = '👁';
+				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
 			} else {
 				hideCrossesToggle.classList.add('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-icon').textContent = '👁‍🗨';
+				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Show';
 			}
 			drawFrame();
 		}
