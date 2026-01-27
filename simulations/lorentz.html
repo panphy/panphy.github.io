@@ -49,6 +49,9 @@
             --header-bg: rgba(255, 255, 255, 0.9);
             --header-border: rgba(108, 92, 231, 0.1);
 
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.5);
+
             --grid-rest: #e2e8f0;
             --grid-moving: #a29bfe;
             --axis-rest: #2d3436;
@@ -94,6 +97,9 @@
             --header-bg: rgba(30, 33, 41, 0.95);
             --header-border: rgba(162, 155, 254, 0.1);
 
+            --nav-bg: rgba(22, 24, 29, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.08);
+
             --grid-rest: #374151;
             --grid-moving: #7c3aed;
             --axis-rest: #dfe6e9;
@@ -136,73 +142,68 @@
         }
 
         /* Compact Header */
-        .header {
+        header.banner {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 20px;
-            background: var(--header-bg);
+            gap: 16px;
+            padding: 8px 20px;
+            margin: 16px auto 0;
+            width: min(1100px, calc(100% - 40px));
+            background: var(--nav-bg);
+            border: 1px solid var(--nav-border);
+            border-radius: 20px;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--header-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .header-left {
+        .banner-logo {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            width: 50px;
+            gap: 10px;
         }
 
-        .header-logo img {
-            height: 32px;
+        .banner-logo img {
+            height: 36px;
             width: auto;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
         }
 
-        .header-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .header-title {
+        .banner-title {
             font-family: var(--font-display);
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 1.6rem;
+            font-weight: 800;
+            text-align: center;
+            flex: 1;
+            letter-spacing: -0.5px;
             background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-align: center;
         }
 
-        .header-right {
+        .banner-actions {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            width: 50px;
+            gap: 12px;
         }
 
-        .theme-toggle {
+        .theme-toggle button {
             background: transparent;
             border: none;
             cursor: pointer;
-            font-size: 1.4rem;
-            padding: 8px;
+            font-size: 1.2rem;
+            padding: 0.5rem;
             border-radius: 50%;
-            width: auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s, transform 0.2s;
-            box-shadow: none;
+            color: var(--text-main);
         }
 
-        .theme-toggle:hover {
-            background-color: rgba(128, 128, 128, 0.15);
+        .theme-toggle button:hover {
+            background-color: rgba(128, 128, 128, 0.2);
             transform: rotate(15deg);
         }
 
@@ -442,27 +443,32 @@
                 max-width: 100%;
             }
 
-            .header-title {
+            header.banner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .banner-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .banner-title {
                 font-size: 1.2rem;
             }
         }
 
         @media (max-width: 480px) {
-            .header {
+            header.banner {
                 padding: 8px 12px;
             }
 
-            .header-logo img {
+            .banner-logo img {
                 height: 28px;
             }
 
-            .header-title {
+            .banner-title {
                 font-size: 1rem;
-            }
-
-            .header-left,
-            .header-right {
-                width: 40px;
             }
 
             .main-content {
@@ -508,17 +514,17 @@
 </head>
 
 <body>
-    <header class="header">
-        <div class="header-left">
-            <a href="/" class="header-logo">
-                <img src="/panphy.png" alt="PanPhy logo" onerror="this.style.display='none'" />
+    <header class="banner">
+        <div class="banner-logo">
+            <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+                <img src="/panphy.png" alt="PanPhy logo">
             </a>
         </div>
-        <div class="header-center">
-            <span class="header-title">Lorentz Transformation</span>
-        </div>
-        <div class="header-right">
-            <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">&#9728;&#65039;</button>
+        <div class="banner-title">Lorentz Transformation</div>
+        <div class="banner-actions">
+            <div class="theme-toggle">
+                <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+            </div>
         </div>
     </header>
 
