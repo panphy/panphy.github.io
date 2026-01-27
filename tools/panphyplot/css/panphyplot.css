@@ -301,6 +301,16 @@ body {
 	color: #000;
 }
 
+.dataset-tab.active:hover {
+	background-color: #5b4cdb;
+	border-color: #5b4cdb;
+}
+
+[data-theme="dark"] .dataset-tab.active:hover {
+	background-color: #b8b0ff;
+	border-color: #b8b0ff;
+}
+
 .dataset-tab .tab-label {
 	margin-right: 5px;
 	white-space: nowrap;
