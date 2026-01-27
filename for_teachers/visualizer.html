@@ -774,7 +774,31 @@
 			.toolbar-btn,
 			.tool-button {
 				min-height: 44px;
+				height: 44px;
 				touch-action: manipulation;
+			}
+
+			select {
+				height: 44px;
+				padding-top: 0;
+				padding-bottom: 0;
+				line-height: 42px;
+			}
+
+			button {
+				height: 44px;
+				padding-top: 0;
+				padding-bottom: 0;
+			}
+
+			.color-btn {
+				width: 44px;
+				height: 44px;
+			}
+
+			.dotBtn {
+				width: 36px;
+				height: 36px;
 			}
 
 			canvas {
@@ -912,6 +936,10 @@
 						<span class="btn-icon">&#x26F6;</span>
 						<span class="btn-text">Fit</span>
 					</button>
+					<button id="defaultsBtn" data-tooltip="Reset to default settings">
+						<span class="btn-icon">&#x21BA;</span>
+						<span class="btn-text">Defaults</span>
+					</button>
 				</div>
 
 				<!-- Zoom -->
@@ -988,6 +1016,7 @@
 			const recordBtn = document.getElementById('recordBtn');
 			const mirrorBtn = document.getElementById('mirrorBtn');
 			const fitBtn = document.getElementById('fitBtn');
+			const defaultsBtn = document.getElementById('defaultsBtn');
 			const hud = document.getElementById('hud');
 			const hudText = document.getElementById('hudText');
 			const stage = document.getElementById('stage');
@@ -1029,8 +1058,8 @@
 			let annotSize = loadNum('annotSize', 12);
 
 			let isPaused = false;
-			let isMirrored = false,
-				fitMode = 'contain';
+			let isMirrored = loadStr('isMirrored', 'false') === 'true',
+				fitMode = loadStr('fitMode', 'contain');
 
 			let annotationOn = false,
 				eraserOn = false,
@@ -1844,6 +1873,7 @@
 
 			mirrorBtn.addEventListener('click', () => {
 				isMirrored = !isMirrored;
+				saveStr('isMirrored', String(isMirrored));
 				applyTransforms();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				showToast(isMirrored ? 'Mirrored' : 'Unmirrored');
@@ -1857,6 +1887,7 @@
 
 			fitBtn.addEventListener('click', () => {
 				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
+				saveStr('fitMode', fitMode);
 				updateFitButton();
 				applyFitMode();
 				if (isPaused) {
@@ -1865,6 +1896,64 @@
 				}
 				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
 			});
+
+			/* Default settings */
+			const DEFAULTS = {
+				pointerColor: '#ff3b3b',
+				annotColor: '#33d17a',
+				pointerSize: 12,
+				annotSize: 12,
+				zoomLevel: 1,
+				isMirrored: false,
+				fitMode: 'contain'
+			};
+
+			function resetToDefaults() {
+				// Reset state variables
+				pointerColor = DEFAULTS.pointerColor;
+				annotColor = DEFAULTS.annotColor;
+				pointerSize = DEFAULTS.pointerSize;
+				annotSize = DEFAULTS.annotSize;
+				zoomLevel = DEFAULTS.zoomLevel;
+				isMirrored = DEFAULTS.isMirrored;
+				fitMode = DEFAULTS.fitMode;
+
+				// Save to localStorage
+				saveStr('pointerColor', pointerColor);
+				saveStr('annotColor', annotColor);
+				saveNum('pointerSize', pointerSize);
+				saveNum('annotSize', annotSize);
+				saveNum('zoomLevel', zoomLevel);
+				saveStr('isMirrored', String(isMirrored));
+				saveStr('fitMode', fitMode);
+
+				// Update UI
+				pointerColorInput.value = pointerColor;
+				annotColorInput.value = annotColor;
+				updateColorBtn(pointerColorBtn, pointerColor);
+				updateColorBtn(annotColorBtn, annotColor);
+
+				// Rebuild size pickers
+				buildSizePicker(sizeUI.pointer, SIZESET, () => pointerColor, pointerSize, (sz) => {
+					pointerSize = sz;
+					saveNum('pointerSize', sz);
+				});
+				buildSizePicker(sizeUI.annot, SIZESET, () => annotColor, annotSize, (sz) => {
+					annotSize = sz;
+					saveNum('annotSize', sz);
+				});
+				refreshPickerColors();
+
+				// Apply zoom and transforms
+				setZoom(zoomLevel);
+				updateFitButton();
+				applyTransforms();
+				if (isPaused && hasFrozen) drawFreezeFromFrozen();
+
+				showToast('Settings reset to defaults');
+			}
+
+			defaultsBtn.addEventListener('click', resetToDefaults);
 
 			function setZoom(v) {
 				zoomLevel = Math.max(1, Math.min(3, v || 1));
