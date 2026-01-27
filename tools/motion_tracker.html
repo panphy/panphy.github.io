@@ -289,8 +289,8 @@
 		}
 
 		#plotVx {
-			background-color: var(--brand-primary);
-			/* Blue */
+			background-color: #2e9cff;
+			/* Light blue to match v_x data points */
 			color: white;
 			border: none;
 		}
@@ -316,7 +316,7 @@
 		}
 
 		[data-theme="dark"] #plotVx {
-			background-color: #6c5ce7;
+			background-color: #2e9cff;
 		}
 
 		[data-theme="dark"] #plotVy {
@@ -473,6 +473,11 @@
 			box-sizing: border-box;
 		}
 
+		#playPause {
+			min-width: 96px;
+			text-align: center;
+		}
+
 		#slider {
 			flex-grow: 1;
 			cursor: pointer;
@@ -566,6 +571,7 @@
 		}
 
 		[data-theme="dark"] .btn-export {
+			color: #000000;
 			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 		}
 
@@ -780,7 +786,7 @@
 			</div>
 
 			<div class="playback-controls">
-				<button id="playPause" class="btn-primary" style="min-width: 80px;" disabled>▶ Play</button>
+				<button id="playPause" class="btn-primary" disabled>▶ Play</button>
 				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 				<span id="timeDisplay">0:00.000</span>
 				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
