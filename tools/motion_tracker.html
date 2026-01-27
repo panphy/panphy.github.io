@@ -45,6 +45,9 @@
 			--warning: #fdcb6e;
 			--success: #2ecc71;
 
+			--nav-bg: rgba(255, 255, 255, 0.85);
+			--nav-border: rgba(255, 255, 255, 0.5);
+
 			--chart-grid: rgba(45, 52, 54, 0.18);
 			--chart-axis: rgba(45, 52, 54, 0.9);
 			--chart-text: rgba(45, 52, 54, 0.95);
@@ -74,6 +77,9 @@
 			--warning: #f9ca24;
 			--success: #55efc4;
 
+			--nav-bg: rgba(22, 24, 29, 0.85);
+			--nav-border: rgba(255, 255, 255, 0.08);
+
 			--chart-grid: rgba(255, 255, 255, 0.16);
 			--chart-axis: rgba(223, 230, 233, 0.92);
 			--chart-text: rgba(223, 230, 233, 0.95);
@@ -97,17 +103,20 @@
 		}
 
 		/* --- Header --- */
-		#titleBanner {
-			background: var(--surface);
-			border-bottom: 1px solid var(--border-color);
-			padding: 10px 24px;
+		header.banner {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			box-shadow: var(--shadow);
-			position: sticky;
-			top: 0;
-			z-index: 10;
+			gap: 16px;
+			padding: 8px 20px;
+			margin: 16px auto 0;
+			width: min(1100px, calc(100% - 40px));
+			background: var(--nav-bg);
+			border: 1px solid var(--nav-border);
+			border-radius: 20px;
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 		}
 
 		a {
@@ -124,22 +133,29 @@
 			color: var(--brand-primary);
 		}
 
+		.banner-logo {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.banner-logo img {
+			height: 36px;
+			width: auto;
+			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+		}
+
 		.banner-title {
-			font-size: 1.75rem;
-			color: var(--text-main);
-			margin: 0;
-			font-weight: 800;
-			letter-spacing: -0.5px;
 			font-family: var(--font-display);
+			font-size: 1.6rem;
+			font-weight: 800;
+			text-align: center;
+			flex: 1;
+			letter-spacing: -0.5px;
 			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
 			-webkit-background-clip: text;
 			-webkit-text-fill-color: transparent;
 			background-clip: text;
-		}
-
-		.banner-logo img {
-			height: 32px;
-			width: auto;
 		}
 
 		.banner-actions {
@@ -153,16 +169,17 @@
 			border: none;
 			cursor: pointer;
 			font-size: 1.2rem;
-			padding: 0.4rem;
+			padding: 0.5rem;
 			border-radius: 50%;
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			color: var(--text-main);
 		}
 
 		.theme-toggle button:hover {
 			background-color: rgba(128, 128, 128, 0.2);
-			transform: rotate(12deg);
+			transform: rotate(15deg);
 		}
 
 		.toolbar-divider {
@@ -633,18 +650,19 @@
 </head>
 
 <body>
-	<div id="titleBanner">
+	<header class="banner">
 		<div class="banner-logo">
-			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"><img src="/panphy.png"
-					alt="PanPhy logo" /></a>
+			<a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+				<img src="/panphy.png" alt="PanPhy logo">
+			</a>
 		</div>
-		<h1 class="banner-title">Motion Tracker</h1>
+		<div class="banner-title">Motion Tracker</div>
 		<div class="banner-actions">
 			<div class="theme-toggle">
-				<button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
 			</div>
 		</div>
-	</div>
+	</header>
 
 	<div class="toolbar">
 		<div style="display:flex; gap:10px;">
