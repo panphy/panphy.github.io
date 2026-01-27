@@ -281,6 +281,15 @@ body {
 	font-weight: 500;
 }
 
+.dataset-tab:not(.active):hover {
+	background-color: #dde1e8;
+	border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dataset-tab:not(.active):hover {
+	background-color: #333a47;
+}
+
 .dataset-tab.active {
 	background-color: var(--tab-active-bg);
 	border-color: var(--tab-active-border);
@@ -405,6 +414,15 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	transition: background-color 0.2s ease;
+}
+
+.section-toggle:hover {
+	background-color: #e4e8ef;
+}
+
+[data-theme="dark"] .section-toggle:hover {
+	background-color: #2d323c;
 }
 
 .section-toggle::after {
@@ -547,21 +565,42 @@ button:hover {
 	background-color: var(--success);
 }
 
+.btn-add-row:hover {
+	background-color: #178a64;
+}
+
 .btn-clear-all {
 	background-color: var(--danger);
+}
+
+.btn-clear-all:hover {
+	background-color: #c94549;
 }
 
 .btn-copy-x {
 	background-color: var(--success);
 }
 
+.btn-copy-x:hover {
+	background-color: #178a64;
+}
+
 .btn-import-csv {
 	background-color: var(--info);
+}
+
+.btn-import-csv:hover {
+	background-color: #356ba6;
 }
 
 .btn-export-csv,
 .btn-export-md {
 	background-color: var(--brand-secondary);
+}
+
+.btn-export-csv:hover,
+.btn-export-md:hover {
+	background-color: #8b82e8;
 }
 
 .fit-button {
@@ -573,6 +612,10 @@ button:hover {
 	border-radius: 10px;
 }
 
+.fit-button:hover {
+	background-color: #356ba6;
+}
+
 .clear-fit-button {
 	background-color: var(--danger);
 	width: 100%;
@@ -580,6 +623,10 @@ button:hover {
 	padding: 0;
 	margin: 0;
 	border-radius: 10px;
+}
+
+.clear-fit-button:hover {
+	background-color: #c94549;
 }
 
 /* Button Containers */
@@ -650,6 +697,10 @@ button:hover {
 	padding: 10px 14px;
 	border-radius: 10px;
 	font-size: 0.9rem;
+}
+
+.global-uncertainty-item button:hover {
+	background-color: #d9a44e;
 }
 
 /* Advanced Fit Section */
@@ -833,8 +884,13 @@ select {
 }
 
 .plot-all-btn:hover {
+	background-color: #5b4bd6;
 	transform: translateY(-1px);
 	box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+}
+
+[data-theme="dark"] .plot-all-btn:hover {
+	background-color: #8b82e8;
 }
 
 /* Responsive */
@@ -965,7 +1021,7 @@ select {
 }
 
 #popup-close:hover {
-	filter: brightness(0.95);
+	background-color: #c94549;
 }
 
 /* Combined Plot Controls */
