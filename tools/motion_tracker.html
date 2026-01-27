@@ -306,6 +306,41 @@
 			background-color: #be2edd;
 		}
 
+		/* Hide Crosses Toggle Button */
+		.hide-crosses-toggle {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			padding: 6px 10px;
+			font-size: 0.85rem;
+			background: var(--surface-muted);
+			color: var(--text-muted);
+			border: 1px solid var(--border-color);
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all 0.2s;
+			opacity: 0.8;
+		}
+
+		.hide-crosses-toggle:hover:not(:disabled) {
+			opacity: 1;
+			background: var(--surface);
+			color: var(--text-main);
+		}
+
+		.hide-crosses-toggle.crosses-hidden {
+			color: var(--warning);
+			border-color: rgba(253, 203, 110, 0.4);
+			background: rgba(253, 203, 110, 0.1);
+		}
+
+		.hide-crosses-toggle .toggle-icon {
+			font-size: 1rem;
+		}
+
+		.hide-crosses-toggle .toggle-text {
+			font-size: 0.75rem;
+		}
 
 		/* --- Layout Grid --- */
 		#analysisContainer {
@@ -655,6 +690,10 @@
 				<button id="playPause" class="btn-primary" style="min-width: 80px;" disabled>▶ Play</button>
 				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 				<span id="timeDisplay">0:00.000</span>
+				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
+					<span class="toggle-icon">👁</span>
+					<span class="toggle-text">Crosses</span>
+				</button>
 			</div>
 		</div>
 
@@ -744,6 +783,7 @@
 		let skippingFrame = false;
 		let blobUrl = null;
 		let currentPlotMode = 'pos'; // Tracks 'pos', 'vx', or 'vy'
+		let crossesVisible = true; // Toggle for hiding crosses on video
 
 		let calibrationMode = false;
 		let calibrationStart = null;
@@ -835,6 +875,7 @@
 		const plotVxButton = document.getElementById('plotVx');
 		const plotVyButton = document.getElementById('plotVy');
 		const backToPositionButton = document.getElementById('backToPosition');
+		const hideCrossesToggle = document.getElementById('hideCrossesToggle');
 
 		const slider = document.getElementById('slider');
 		const timeDisplay = document.getElementById('timeDisplay');
@@ -921,6 +962,7 @@
 			exportDataButton.disabled = state;
 			frameRateButton.disabled = state;
 			slider.disabled = state;
+			hideCrossesToggle.disabled = state;
 		}
 
 		/* ===== RESET FUNCTION ===== */
@@ -932,6 +974,7 @@
 			isDrawingCalibration = false;
 			skippingFrame = false;
 			isPlaying = false;
+			crossesVisible = true;
 
 			// 2. Reset Calibration/Origin defaults
 			scaleFactor = 1;
@@ -957,6 +1000,8 @@
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "none";
 			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
+			hideCrossesToggle.classList.remove('crosses-hidden');
+			hideCrossesToggle.querySelector('.toggle-icon').textContent = '👁';
 
 			// 6. Hide any open prompts
 			calibrationPrompt.style.display = 'none';
@@ -1431,13 +1476,15 @@
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 			ctx.drawImage(hiddenVideo, 0, 0, frameCanvas.width, frameCanvas.height);
 
-			// Scale data points based on resolution
-			const s = getVisualScale();
-			frameData.forEach((p) => {
-				const x = p.x,
-					y = cartesianYToCanvasY(p.y);
-				drawDataPoint(x, y, s);
-			});
+			// Only draw data points if crosses are visible
+			if (crossesVisible) {
+				const s = getVisualScale();
+				frameData.forEach((p) => {
+					const x = p.x,
+						y = cartesianYToCanvasY(p.y);
+					drawDataPoint(x, y, s);
+				});
+			}
 		}
 
 		function drawDataPoint(x, y, s = 1) {
@@ -1621,6 +1668,33 @@
 
 		/* Cleanup */
 		window.addEventListener('beforeunload', () => { if (blobUrl) URL.revokeObjectURL(blobUrl); });
+
+		/* ===== Hide Crosses Toggle ===== */
+		function toggleCrossesVisibility() {
+			crossesVisible = !crossesVisible;
+			if (crossesVisible) {
+				hideCrossesToggle.classList.remove('crosses-hidden');
+				hideCrossesToggle.querySelector('.toggle-icon').textContent = '👁';
+			} else {
+				hideCrossesToggle.classList.add('crosses-hidden');
+				hideCrossesToggle.querySelector('.toggle-icon').textContent = '👁‍🗨';
+			}
+			drawFrame();
+		}
+
+		hideCrossesToggle.addEventListener('click', toggleCrossesVisibility);
+
+		/* Keyboard shortcut: H to toggle crosses */
+		document.addEventListener('keydown', (e) => {
+			// Ignore if typing in input fields or if video not loaded
+			if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+			if (hideCrossesToggle.disabled) return;
+
+			if (e.key === 'h' || e.key === 'H') {
+				e.preventDefault();
+				toggleCrossesVisibility();
+			}
+		});
 	</script>
 </body>
 
