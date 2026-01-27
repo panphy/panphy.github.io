@@ -278,6 +278,7 @@ body {
 	cursor: pointer;
 	transition: background-color 0.2s ease, border-color 0.2s ease;
 	font-size: 0.9rem;
+	font-weight: 500;
 }
 
 .dataset-tab.active {
@@ -337,6 +338,7 @@ body {
 	cursor: pointer;
 	transition: background-color 0.2s ease, transform 0.2s ease;
 	font-size: 0.9rem;
+	font-weight: 500;
 	flex: none;
 	width: 120px;
 }
@@ -1044,5 +1046,20 @@ footer a:visited {
 	input[type="number"] {
 		min-height: 44px;
 		touch-action: manipulation;
+	}
+
+	/* Ensure dataset tabs and add-dataset-btn have consistent height on touch devices */
+	.dataset-tab,
+	.add-dataset-btn {
+		min-height: 44px;
+		box-sizing: border-box;
+	}
+
+	/* Ensure Manual button text is vertically centered on touch devices */
+	.banner-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
 	}
 }
