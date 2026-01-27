@@ -164,9 +164,9 @@
 
 		.row {
 			display: flex;
-			flex-wrap: wrap;
-			gap: .4rem .5rem;
-			align-items: center
+			flex-direction: column;
+			gap: .4rem;
+			align-items: flex-start
 		}
 
 		.group {
@@ -317,44 +317,6 @@
 			padding: 0
 		}
 
-		.laserIndicator {
-			display: inline-flex;
-			align-items: center;
-			gap: .3rem;
-			padding: .18rem .5rem;
-			border-radius: .4rem;
-			border: 1px solid var(--panel-border);
-			color: #8b93a7;
-			font-size: .72rem;
-			font-weight: 600;
-			letter-spacing: .03em;
-			text-transform: uppercase;
-			background: #151820
-		}
-
-		.laserIndicator.active {
-			background: linear-gradient(135deg, rgba(162, 155, 254, .25), rgba(129, 236, 236, .15));
-			border-color: rgba(162, 155, 254, .5);
-			color: #fff;
-			box-shadow: 0 0 12px rgba(162, 155, 254, .3)
-		}
-
-		.laserIndicator .dot {
-			width: .5rem;
-			height: .5rem;
-			border-radius: 50%;
-			background: currentColor;
-			animation: pulse 1.5s ease-in-out infinite
-		}
-
-		.laserIndicator:not(.active) .dot {
-			animation: none
-		}
-
-		@keyframes pulse {
-			0%, 100% { opacity: 1; transform: scale(1); }
-			50% { opacity: .6; transform: scale(.85); }
-		}
 
 		.srOnly {
 			position: absolute !important;
@@ -820,7 +782,7 @@
 		<details class="controls">
 			<summary>Controls</summary>
 			<div class="row">
-				<!-- Camera & Stream -->
+				<!-- Camera -->
 				<div class="group">
 					<span class="group-label">Camera</span>
 					<select id="cameraSelect"></select>
@@ -830,6 +792,7 @@
 					</button>
 				</div>
 
+				<!-- Stream -->
 				<div class="group">
 					<span class="group-label">Stream</span>
 					<label class="switch">
@@ -840,6 +803,29 @@
 						<span id="statusLight" class="light live"></span>
 						<span id="statusLabel" class="statusText">Live</span>
 					</div>
+				</div>
+
+				<!-- Zoom -->
+				<div class="group" id="zoomGroup">
+					<span class="group-label">Zoom</span>
+					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
+					<span id="zoomVal">1.0×</span>
+				</div>
+
+				<!-- Display -->
+				<div class="group">
+					<span class="group-label">Display</span>
+					<button id="mirrorBtn" data-tooltip="Mirror view">
+						<span class="btn-icon">&#x21C4;</span>
+						<span class="btn-text">Mirror</span>
+					</button>
+					<button id="fitBtn" data-tooltip="Toggle fit/fill mode">
+						<span class="btn-icon">&#x26F6;</span>
+						<span class="btn-text">Fit</span>
+					</button>
+					<button id="defaultsBtn" data-tooltip="Reset to default settings">
+						<span class="btn-text">Defaults</span>
+					</button>
 				</div>
 
 				<!-- Tools -->
@@ -870,9 +856,6 @@
 						<input id="pointerColorInput" type="color" value="#ff3b3b" />
 					</button>
 					<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
-					<span id="laserIndicator" class="laserIndicator active" aria-live="polite">
-						<span class="dot" aria-hidden="true"></span>
-					</span>
 				</div>
 
 				<!-- Annotation settings -->
@@ -890,29 +873,6 @@
 						<span class="btn-icon">&#x2715;</span>
 						<span class="btn-text">Clear</span>
 					</button>
-				</div>
-
-				<!-- Display controls -->
-				<div class="group">
-					<span class="group-label">Display</span>
-					<button id="mirrorBtn" data-tooltip="Mirror view">
-						<span class="btn-icon">&#x21C4;</span>
-						<span class="btn-text">Mirror</span>
-					</button>
-					<button id="fitBtn" data-tooltip="Toggle fit/fill mode">
-						<span class="btn-icon">&#x26F6;</span>
-						<span class="btn-text">Fit</span>
-					</button>
-					<button id="defaultsBtn" data-tooltip="Reset to default settings">
-						<span class="btn-text">Defaults</span>
-					</button>
-				</div>
-
-				<!-- Zoom -->
-				<div class="group" id="zoomGroup">
-					<span class="group-label">Zoom</span>
-					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
-					<span id="zoomVal">1.0×</span>
 				</div>
 
 				<!-- Capture -->
@@ -994,7 +954,6 @@
 			const annotColorInput = document.getElementById('annotColorInput');
 			const pointerColorBtn = document.getElementById('pointerColorBtn');
 			const annotColorBtn = document.getElementById('annotColorBtn');
-			const laserIndicator = document.getElementById('laserIndicator');
 
 			const sizeUI = {
 				pointer: document.getElementById('pointerSizes'),
@@ -1236,7 +1195,6 @@
 			function updateInteractionMode() {
 				const toolActive = annotationOn || eraserOn || textModeOn;
 				laserActive = !toolActive;
-				laserIndicator.classList.toggle('active', laserActive);
 				if (!laserActive) {
 					ctxLaser.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
 					tail.length = 0;
