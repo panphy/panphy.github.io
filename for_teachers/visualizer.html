@@ -285,18 +285,6 @@
 			position: relative
 		}
 
-		.tool-btn.active::after {
-			content: '';
-			position: absolute;
-			bottom: -2px;
-			left: 50%;
-			transform: translateX(-50%);
-			width: 60%;
-			height: 2px;
-			background: var(--brand-accent);
-			border-radius: 1px
-		}
-
 		.hidden {
 			display: none !important
 		}
@@ -884,7 +872,6 @@
 					<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
 					<span id="laserIndicator" class="laserIndicator active" aria-live="polite">
 						<span class="dot" aria-hidden="true"></span>
-						Active
 					</span>
 				</div>
 
@@ -897,7 +884,6 @@
 					<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
 					<span class="vsep"></span>
 					<button id="undoBtn" class="muted" data-tooltip="Undo last" disabled>
-						<span class="btn-icon">&#x21B6;</span>
 						<span class="btn-text">Undo</span>
 					</button>
 					<button id="clearBtn" class="danger" data-tooltip="Clear all">
@@ -918,7 +904,6 @@
 						<span class="btn-text">Fit</span>
 					</button>
 					<button id="defaultsBtn" data-tooltip="Reset to default settings">
-						<span class="btn-icon">&#x21BA;</span>
 						<span class="btn-text">Defaults</span>
 					</button>
 				</div>
@@ -1159,6 +1144,16 @@
 
 			function updateUndoState() {
 				undoBtn.disabled = objects.length === 0;
+			}
+
+			function updateMirrorButton() {
+				if (isMirrored) {
+					mirrorBtn.classList.remove('muted');
+					mirrorBtn.classList.add('primary');
+				} else {
+					mirrorBtn.classList.remove('primary');
+					mirrorBtn.classList.add('muted');
+				}
 			}
 
 			/* Update cursor based on active tool */
@@ -1855,6 +1850,7 @@
 			mirrorBtn.addEventListener('click', () => {
 				isMirrored = !isMirrored;
 				saveStr('isMirrored', String(isMirrored));
+				updateMirrorButton();
 				applyTransforms();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 				showToast(isMirrored ? 'Mirrored' : 'Unmirrored');
@@ -1928,6 +1924,7 @@
 				// Apply zoom and transforms
 				setZoom(zoomLevel);
 				updateFitButton();
+				updateMirrorButton();
 				applyTransforms();
 				if (isPaused && hasFrozen) drawFreezeFromFrozen();
 
@@ -2220,6 +2217,7 @@
 
 				syncToolButtons();
 				updateInteractionMode();
+				updateMirrorButton();
 				setZoom(zoomLevel);
 				applyFitMode();
 				updateFitButton();
