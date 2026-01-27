@@ -257,16 +257,6 @@
 			font-size: .8rem
 		}
 
-		.kbd {
-			font-size: .65rem;
-			padding: .1rem .3rem;
-			background: rgba(255, 255, 255, .08);
-			border-radius: .25rem;
-			color: var(--text-secondary);
-			font-family: var(--font-mono);
-			margin-left: .2rem
-		}
-
 		.primary {
 			background: var(--tool-active-bg);
 			border-color: rgba(255, 255, 255, .2);
@@ -819,10 +809,6 @@
 				min-width: 36px
 			}
 
-			.kbd {
-				display: none
-			}
-
 			#zoomSlider {
 				width: 80px
 			}
@@ -871,25 +857,21 @@
 				<!-- Tools -->
 				<div class="group">
 					<span class="group-label">Tools</span>
-					<button id="laserBtn" class="tool-btn primary" data-tooltip="Laser pointer (L)">
+					<button id="laserBtn" class="tool-btn primary" data-tooltip="Laser pointer">
 						<span class="btn-icon">&#x2739;</span>
 						<span class="btn-text">Laser</span>
-						<span class="kbd">L</span>
 					</button>
-					<button id="annotationBtn" class="tool-btn muted" data-tooltip="Draw annotation (A)">
+					<button id="annotationBtn" class="tool-btn muted" data-tooltip="Draw annotation">
 						<span class="btn-icon">&#x270E;</span>
 						<span class="btn-text">Draw</span>
-						<span class="kbd">A</span>
 					</button>
-					<button id="eraserBtn" class="tool-btn muted" data-tooltip="Eraser (E)">
+					<button id="eraserBtn" class="tool-btn muted" data-tooltip="Eraser">
 						<span class="btn-icon">&#x232B;</span>
 						<span class="btn-text">Erase</span>
-						<span class="kbd">E</span>
 					</button>
-					<button id="textBtn" class="tool-btn muted" data-tooltip="Add text (T)">
+					<button id="textBtn" class="tool-btn muted" data-tooltip="Add text">
 						<span class="btn-icon">T</span>
 						<span class="btn-text">Text</span>
-						<span class="kbd">T</span>
 					</button>
 				</div>
 
@@ -914,7 +896,7 @@
 					</button>
 					<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
 					<span class="vsep"></span>
-					<button id="undoBtn" class="muted" data-tooltip="Undo last (Ctrl+Z)" disabled>
+					<button id="undoBtn" class="muted" data-tooltip="Undo last" disabled>
 						<span class="btn-icon">&#x21B6;</span>
 						<span class="btn-text">Undo</span>
 					</button>
@@ -927,10 +909,9 @@
 				<!-- Display controls -->
 				<div class="group">
 					<span class="group-label">Display</span>
-					<button id="mirrorBtn" data-tooltip="Mirror view (M)">
+					<button id="mirrorBtn" data-tooltip="Mirror view">
 						<span class="btn-icon">&#x21C4;</span>
 						<span class="btn-text">Mirror</span>
-						<span class="kbd">M</span>
 					</button>
 					<button id="fitBtn" data-tooltip="Toggle fit/fill mode">
 						<span class="btn-icon">&#x26F6;</span>
@@ -1969,48 +1950,16 @@
 			document.addEventListener('keydown', async e => {
 				if (document.activeElement === textInput) return;
 
-				// Ctrl/Cmd + Z for undo
-				if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-					e.preventDefault();
-					if (objects.length) {
-						objects.pop();
-						renderAnnotations();
-						showToast('Undone');
-					}
-					return;
-				}
-
 				if (e.code === 'Space') {
 					e.preventDefault();
 					await setPaused(!isPaused);
 					showToast(isPaused ? 'Paused' : 'Live');
 					return;
 				}
-				if (e.key === undefined) return;
-				const key = e.key.toLowerCase();
-				if (key === 'm') {
+
+				if (e.key === 'Escape' && overlayVisible) {
 					e.preventDefault();
-					mirrorBtn.click();
-				} else if (key === 'l') {
-					e.preventDefault();
-					setLaserMode(true);
-				} else if (key === 'a') {
-					e.preventDefault();
-					toggleAnnotation(true);
-				} else if (key === 'e') {
-					e.preventDefault();
-					toggleEraser(true);
-				} else if (key === 't') {
-					e.preventDefault();
-					toggleTextMode(true);
-				} else if (key === 'escape') {
-					if (overlayVisible) {
-						e.preventDefault();
-						hideTextOverlay();
-					} else if (annotationOn || eraserOn || textModeOn) {
-						e.preventDefault();
-						setLaserMode(true);
-					}
+					hideTextOverlay();
 				}
 			});
 
