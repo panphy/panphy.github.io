@@ -1186,7 +1186,21 @@
 
 			// Update slider step size
 			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
-			updateTimeDisplay(hiddenVideo.currentTime);
+
+			// Reset video to frame 0 and ensure it's paused for manual playback
+			hiddenVideo.pause();
+			isPlaying = false;
+			playPauseButton.textContent = "▶ Play";
+			hiddenVideo.currentTime = 0;
+			slider.value = "0";
+			updateTimeDisplay(0);
+
+			// Redraw frame after seeking completes
+			const redrawOnSeek = () => {
+				drawFrame();
+				drawOverlay();
+			};
+			hiddenVideo.addEventListener('seeked', redrawOnSeek, { once: true });
 		}
 
 		function updateFpsButtonText() {
