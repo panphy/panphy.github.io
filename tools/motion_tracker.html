@@ -843,23 +843,29 @@
 	</div>
 
 	<div id="frameRatePrompt">
-		<h2>Set Frame Rates</h2>
-		<p>Playback FPS is the rate encoded in the file (seek/step rate). Capture FPS is the real-world rate you
-			want for analysis (e.g. 240 fps slow motion).</p>
+		<h2>Frame Rate Settings</h2>
 		<form autocomplete="off">
-			<div class="frame-rate-field">
-				<label for="userPlaybackFrameRate">Playback FPS (file rate)</label>
-				<input type="number" id="userPlaybackFrameRate" value="30" min="1" step="any" autocomplete="off"
-					placeholder="e.g. 30" />
-				<p class="frame-rate-hint">Matches the encoded FPS for stepping/seek accuracy.</p>
+			<div class="frame-rate-field" id="detectedFpsSection">
+				<label>Detected FPS</label>
+				<div id="detectedFpsDisplay" style="padding: 8px 10px; background: var(--surface-muted); border-radius: 6px; font-weight: 600; color: var(--brand-primary);">
+					Detecting...
+				</div>
+				<p class="frame-rate-hint">Auto-detected from video. Used for frame stepping and time calculation.</p>
 			</div>
-			<div class="frame-rate-field">
-				<label for="userCaptureFrameRate">Capture FPS (real-world rate)</label>
-				<input type="number" id="userCaptureFrameRate" value="30" min="1" step="any" autocomplete="off"
+			<div class="frame-rate-field" style="margin-top: 16px;">
+				<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+					<input type="checkbox" id="specialRecordingMode" style="width: 18px; height: 18px; cursor: pointer;" />
+					<span>Special recording (slow-motion / time-lapse)</span>
+				</label>
+				<p class="frame-rate-hint">Enable if video was recorded at a different rate than playback (e.g., 240fps slow-mo played at 30fps).</p>
+			</div>
+			<div class="frame-rate-field" id="captureRateSection" style="display: none; margin-top: 12px;">
+				<label for="userCaptureFrameRate">Original capture FPS</label>
+				<input type="number" id="userCaptureFrameRate" value="240" min="1" step="any" autocomplete="off"
 					placeholder="e.g. 240 for slow motion" />
-				<p class="frame-rate-hint">Use the actual recording speed for velocity/acceleration.</p>
+				<p class="frame-rate-hint">The actual recording speed for accurate physics calculations.</p>
 			</div>
-			<div class="dialog-actions">
+			<div class="dialog-actions" style="margin-top: 16px;">
 				<button type="button" id="confirmFrameRate" class="btn-primary">Confirm</button>
 				<button type="button" id="cancelFrameRate">Cancel</button>
 			</div>
@@ -876,6 +882,9 @@
 		/* ===== State ===== */
 		let playbackFrameRate = 30;
 		let captureFrameRate = 30;
+		let detectedFps = null;  // Auto-detected FPS from video
+		let isSpecialRecording = false;  // Whether user has slow-mo/time-lapse video
+		let fpsDetectionPending = false;  // Whether FPS detection is in progress
 		const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
 		let frameData = [];
 		let isPlaying = false;
@@ -996,11 +1005,13 @@
 		const cancelExportButton = document.getElementById('cancelExport');
 
 		const frameRatePrompt = document.getElementById('frameRatePrompt');
-		const userPlaybackFrameRateInput = document.getElementById('userPlaybackFrameRate');
 		const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
 		const confirmFrameRateButton = document.getElementById('confirmFrameRate');
 		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
 		const frameRateButton = document.getElementById('frameRateButton');
+		const specialRecordingCheckbox = document.getElementById('specialRecordingMode');
+		const captureRateSection = document.getElementById('captureRateSection');
+		const detectedFpsDisplay = document.getElementById('detectedFpsDisplay');
 
 		function canvasYToCartesianY(y) { return frameCanvas.height - y; }
 
@@ -1036,6 +1047,154 @@
 			const d = hiddenVideo.duration;
 			if (Number.isFinite(d) && d > 0) return d;
 			return 0;
+		}
+
+		/* ===== Auto FPS Detection ===== */
+		function detectFrameRate() {
+			if (typeof hiddenVideo.requestVideoFrameCallback !== 'function') {
+				// Browser doesn't support requestVideoFrameCallback, use fallback
+				console.log('requestVideoFrameCallback not supported, using fallback FPS');
+				applyDetectedFps(30);
+				return;
+			}
+
+			fpsDetectionPending = true;
+			detectedFpsDisplay.textContent = 'Detecting...';
+			frameRateButton.textContent = 'FPS: ...';
+
+			const frameTimes = [];
+			const maxSamples = 10;
+			let lastMediaTime = null;
+			let callbackId = null;
+			let timeoutId = null;
+
+			const cleanup = () => {
+				fpsDetectionPending = false;
+				if (callbackId !== null && typeof hiddenVideo.cancelVideoFrameCallback === 'function') {
+					hiddenVideo.cancelVideoFrameCallback(callbackId);
+				}
+				if (timeoutId !== null) {
+					clearTimeout(timeoutId);
+				}
+			};
+
+			const calculateFps = () => {
+				cleanup();
+
+				if (frameTimes.length < 2) {
+					// Not enough samples, use fallback
+					console.log('Not enough frame samples, using fallback FPS');
+					applyDetectedFps(30);
+					return;
+				}
+
+				// Calculate average frame duration
+				const durations = [];
+				for (let i = 1; i < frameTimes.length; i++) {
+					const dt = frameTimes[i] - frameTimes[i - 1];
+					if (dt > 0 && dt < 1) {  // Filter out invalid durations
+						durations.push(dt);
+					}
+				}
+
+				if (durations.length === 0) {
+					console.log('No valid frame durations, using fallback FPS');
+					applyDetectedFps(30);
+					return;
+				}
+
+				const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+				const fps = 1 / avgDuration;
+
+				// Round to common frame rates for cleaner display
+				const commonRates = [15, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 120, 240];
+				let roundedFps = fps;
+				for (const rate of commonRates) {
+					if (Math.abs(fps - rate) < 1) {
+						roundedFps = rate;
+						break;
+					}
+				}
+
+				console.log(`Detected FPS: ${fps.toFixed(2)}, rounded to: ${roundedFps}`);
+				applyDetectedFps(roundedFps);
+			};
+
+			const onFrame = (now, metadata) => {
+				if (!fpsDetectionPending) return;
+
+				const mediaTime = metadata.mediaTime;
+
+				if (lastMediaTime !== null && mediaTime > lastMediaTime) {
+					frameTimes.push(mediaTime);
+				}
+				lastMediaTime = mediaTime;
+
+				if (frameTimes.length >= maxSamples) {
+					calculateFps();
+					return;
+				}
+
+				// Request next frame
+				callbackId = hiddenVideo.requestVideoFrameCallback(onFrame);
+			};
+
+			// Start detection by playing briefly
+			const wasPlaying = isPlaying;
+			const startTime = hiddenVideo.currentTime;
+
+			// Set timeout for detection (max 2 seconds)
+			timeoutId = setTimeout(() => {
+				hiddenVideo.pause();
+				hiddenVideo.currentTime = startTime;
+				calculateFps();
+			}, 2000);
+
+			// Start capturing frames
+			callbackId = hiddenVideo.requestVideoFrameCallback(onFrame);
+
+			// Play video to get frames
+			hiddenVideo.play().then(() => {
+				// Wait for enough samples, then stop
+				setTimeout(() => {
+					if (fpsDetectionPending && frameTimes.length >= 3) {
+						hiddenVideo.pause();
+						hiddenVideo.currentTime = startTime;
+						calculateFps();
+					}
+				}, 500);
+			}).catch(() => {
+				// Autoplay blocked, use fallback
+				cleanup();
+				console.log('Autoplay blocked, using fallback FPS');
+				applyDetectedFps(30);
+			});
+		}
+
+		function applyDetectedFps(fps) {
+			detectedFps = fps;
+			playbackFrameRate = fps;
+
+			// If not in special recording mode, capture rate = playback rate
+			if (!isSpecialRecording) {
+				captureFrameRate = fps;
+			}
+
+			// Update UI
+			detectedFpsDisplay.textContent = `${fps} fps`;
+			updateFpsButtonText();
+
+			// Update slider step size
+			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
+			updateTimeDisplay(hiddenVideo.currentTime);
+		}
+
+		function updateFpsButtonText() {
+			if (isSpecialRecording) {
+				frameRateButton.textContent = `FPS: ${playbackFrameRate}/${captureFrameRate}`;
+			} else {
+				frameRateButton.textContent = `FPS: ${playbackFrameRate}`;
+			}
 		}
 
 		function updateSliderDomain() {
@@ -1076,7 +1235,14 @@
 			isPlaying = false;
 			crossesVisible = true;
 
-			// 2. Reset Calibration/Origin defaults
+			// 2. Reset FPS detection state
+			detectedFps = null;
+			isSpecialRecording = false;
+			fpsDetectionPending = false;
+			playbackFrameRate = 30;
+			captureFrameRate = 30;
+
+			// 3. Reset Calibration/Origin defaults
 			scaleFactor = 1;
 			scaleUnit = "pixels";
 			calibrationStart = null;
@@ -1084,17 +1250,17 @@
 			originSet = false;
 			originPoint = { x: 0, y: 0 };
 
-			// 3. Reset Chart
+			// 4. Reset Chart
 			if (positionChart) {
 				positionChart.destroy();
 				positionChart = null;
 			}
 
-			// 4. Clear Canvases
+			// 5. Clear Canvases
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-			// 5. Reset UI elements
+			// 6. Reset UI elements
 			playPauseButton.textContent = "▶ Play";
 			frameCanvas.style.cursor = "default";
 			document.getElementById('crosshair').style.display = "none";
@@ -1102,22 +1268,31 @@
 			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
 			hideCrossesToggle.classList.remove('crosses-hidden');
 			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
+			specialRecordingCheckbox.checked = false;
+			captureRateSection.style.display = 'none';
+			detectedFpsDisplay.textContent = 'Detecting...';
+			frameRateButton.textContent = 'FPS: 30';
 
-			// 6. Hide any open prompts
+			// 7. Hide any open prompts
 			calibrationPrompt.style.display = 'none';
 			exportPrompt.style.display = 'none';
 			frameRatePrompt.style.display = 'none';
 
-			// 7. Disable controls until loaded
+			// 8. Disable controls until loaded
 			disableControls(true);
 		}
 
 		/* Init */
 		document.addEventListener('DOMContentLoaded', () => {
 			disableControls(true);
-			frameRateButton.textContent = `FPS: ${playbackFrameRate}/${captureFrameRate}`;
+			updateFpsButtonText();
 			document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
 			frameCanvas.style.display = "none";
+
+			// Toggle capture rate section visibility based on checkbox
+			specialRecordingCheckbox.addEventListener('change', () => {
+				captureRateSection.style.display = specialRecordingCheckbox.checked ? 'block' : 'none';
+			});
 		});
 
 		/* Import video */
@@ -1163,14 +1338,17 @@
 			drawOverlay();
 			plotPosition();
 
-				if (frameData.length === 0) {
-					document.getElementById('message').innerHTML =
-						"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
-						"<li>Set playback/capture frame rates if needed. Default is 30/30 fps.</li>" +
-						"<li>Click the video to record a data point.</li>" +
-						"</ul>";
-				}
-			});
+			// Trigger automatic FPS detection
+			detectFrameRate();
+
+			if (frameData.length === 0) {
+				document.getElementById('message').innerHTML =
+					"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
+					"<li>Frame rate auto-detected. Click FPS button for special recordings (slow-mo/time-lapse).</li>" +
+					"<li>Click the video to record a data point.</li>" +
+					"</ul>";
+			}
+		});
 
 		/* Playback sync */
 		hiddenVideo.addEventListener('timeupdate', () => {
@@ -1245,7 +1423,8 @@
 				const canvasY = (event.clientY - rect.top) * scaleY;
 				const cartesianY = canvasYToCartesianY(canvasY);
 
-				frameData.push({ x: canvasX, y: cartesianY, time: getAnalysisTime(hiddenVideo.currentTime) });
+				// Store playbackTime so analysis time can be recalculated if FPS changes
+				frameData.push({ x: canvasX, y: cartesianY, playbackTime: hiddenVideo.currentTime });
 
 				// Update the specific plot user is viewing
 				if (currentPlotMode === 'vx') {
@@ -1305,19 +1484,45 @@
 
 		/* Frame rate dialog */
 		frameRateButton.addEventListener('click', () => {
-			userPlaybackFrameRateInput.value = playbackFrameRate;
-			userCaptureFrameRateInput.value = captureFrameRate;
+			// Set up dialog state
+			specialRecordingCheckbox.checked = isSpecialRecording;
+			captureRateSection.style.display = isSpecialRecording ? 'block' : 'none';
+			userCaptureFrameRateInput.value = isSpecialRecording ? captureFrameRate : 240;
+			detectedFpsDisplay.textContent = detectedFps ? `${detectedFps} fps` : 'Not detected';
 			frameRatePrompt.style.display = "block";
 		});
 		confirmFrameRateButton.addEventListener('click', () => {
-			const playbackValue = parseFloat(userPlaybackFrameRateInput.value);
-			const captureValue = parseFloat(userCaptureFrameRateInput.value);
-			if (Number.isFinite(playbackValue) && playbackValue > 0) playbackFrameRate = playbackValue;
-			if (Number.isFinite(captureValue) && captureValue > 0) captureFrameRate = captureValue;
+			isSpecialRecording = specialRecordingCheckbox.checked;
+
+			if (isSpecialRecording) {
+				const captureValue = parseFloat(userCaptureFrameRateInput.value);
+				if (Number.isFinite(captureValue) && captureValue > 0) {
+					captureFrameRate = captureValue;
+				}
+			} else {
+				// Normal mode: capture rate = playback rate
+				captureFrameRate = playbackFrameRate;
+			}
+
 			frameRatePrompt.style.display = "none";
-			frameRateButton.textContent = `FPS: ${playbackFrameRate}/${captureFrameRate}`;
+			updateFpsButtonText();
 			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
 			updateTimeDisplay(hiddenVideo.currentTime);
+
+			// Re-plot if we have data (times are recalculated automatically from playbackTime)
+			if (frameData.length > 0) {
+				if (currentPlotMode === 'vx') {
+					plotVelocity('x');
+				} else if (currentPlotMode === 'vy') {
+					plotVelocity('y');
+				} else {
+					plotPosition();
+				}
+			}
+
+			document.getElementById('message').innerHTML = isSpecialRecording
+				? `<p>Special recording mode enabled. Analysis time = frame × (1/${captureFrameRate}s)</p>`
+				: `<p>Standard recording mode. Analysis time = frame × (1/${playbackFrameRate}s)</p>`;
 		});
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
 
@@ -1386,7 +1591,8 @@
 
 		function plotPosition() {
 			currentPlotMode = 'pos';
-			const xData = frameData.map(p => parseFloat(p.time.toFixed(3)));
+			// Calculate analysis time on-the-fly from playbackTime
+			const xData = frameData.map(p => parseFloat(getAnalysisTime(p.playbackTime).toFixed(3)));
 			const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
 			const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
 			const theme = getChartTheme();
@@ -1439,14 +1645,17 @@
 			const velocityEstimates = [];
 			const velocityTimes = [];
 			for (let i = 1; i < frameData.length; i++) {
-				const dt = frameData[i].time - frameData[i - 1].time;
+				// Calculate analysis times on-the-fly
+				const t1 = getAnalysisTime(frameData[i - 1].playbackTime);
+				const t2 = getAnalysisTime(frameData[i].playbackTime);
+				const dt = t2 - t1;
 				const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
 				const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
 				const d = axis === 'x' ? (p2.x - p1.x) : (p2.y - p1.y);
 				const v = dt > 0 ? (d * scaleFactor) / dt : 0;
 				if (dt > 0) {
 					velocityEstimates.push(v);
-					velocityTimes.push((frameData[i].time + frameData[i - 1].time) / 2);
+					velocityTimes.push((t2 + t1) / 2);
 				}
 			}
 
@@ -1533,9 +1742,12 @@
 		});
 
 		function exportCSV(filename) {
+			// Calculate analysis times for all points
+			const analysisTimes = frameData.map(p => getAnalysisTime(p.playbackTime));
+
 			const velocityData = [];
 			for (let i = 1; i < frameData.length; i++) {
-				const dt = frameData[i].time - frameData[i - 1].time;
+				const dt = analysisTimes[i] - analysisTimes[i - 1];
 				const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
 				const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
 				const dX = p2.x - p1.x,
@@ -1548,7 +1760,7 @@
 			for (let i = 0; i < frameData.length; i++) {
 				const xAdj = (frameData[i].x - (originSet ? originPoint.x : 0)) * scaleFactor;
 				const yAdj = (frameData[i].y - (originSet ? originPoint.y : 0)) * scaleFactor;
-				const time = frameData[i].time.toFixed(3);
+				const time = analysisTimes[i].toFixed(3);
 				const x = xAdj.toFixed(3);
 				const y = yAdj.toFixed(3);
 				const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
