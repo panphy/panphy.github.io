@@ -291,6 +291,12 @@
 			background: #151820
 		}
 
+		#mirrorBtn.active {
+			outline: 2px solid var(--brand-accent);
+			outline-offset: 1px;
+			background: #151820
+		}
+
 		.hidden {
 			display: none !important
 		}
@@ -872,8 +878,12 @@
 						<span class="btn-icon">&#x26F6;</span>
 						<span class="btn-text">Fit</span>
 					</button>
+				</div>
+
+				<!-- Default Settings -->
+				<div class="group">
 					<button id="defaultsBtn" data-tooltip="Reset to default settings">
-						<span class="btn-text">Defaults</span>
+						<span class="btn-text">Default Settings</span>
 					</button>
 				</div>
 
@@ -1174,13 +1184,7 @@
 			}
 
 			function updateMirrorButton() {
-				if (isMirrored) {
-					mirrorBtn.classList.remove('muted');
-					mirrorBtn.classList.add('primary');
-				} else {
-					mirrorBtn.classList.remove('primary');
-					mirrorBtn.classList.add('muted');
-				}
+				mirrorBtn.classList.toggle('active', isMirrored);
 			}
 
 			/* Update cursor based on active tool */
