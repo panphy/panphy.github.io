@@ -285,6 +285,12 @@
 			position: relative
 		}
 
+		.tool-btn.active {
+			outline: 2px solid var(--brand-accent);
+			outline-offset: 1px;
+			background: #151820
+		}
+
 		.hidden {
 			display: none !important
 		}
@@ -874,19 +880,19 @@
 				<!-- Tools -->
 				<div class="group">
 					<span class="group-label">Tools</span>
-					<button id="laserBtn" class="tool-btn primary" data-tooltip="Laser pointer">
+					<button id="laserBtn" class="tool-btn" data-tooltip="Laser pointer">
 						<span class="btn-icon">&#x2739;</span>
 						<span class="btn-text">Laser</span>
 					</button>
-					<button id="annotationBtn" class="tool-btn muted" data-tooltip="Draw annotation">
+					<button id="annotationBtn" class="tool-btn" data-tooltip="Draw annotation">
 						<span class="btn-icon">&#x270E;</span>
 						<span class="btn-text">Draw</span>
 					</button>
-					<button id="eraserBtn" class="tool-btn muted" data-tooltip="Eraser">
+					<button id="eraserBtn" class="tool-btn" data-tooltip="Eraser">
 						<span class="btn-icon">&#x232B;</span>
 						<span class="btn-text">Erase</span>
 					</button>
-					<button id="textBtn" class="tool-btn muted" data-tooltip="Add text">
+					<button id="textBtn" class="tool-btn" data-tooltip="Add text">
 						<span class="btn-icon">T</span>
 						<span class="btn-text">Text</span>
 					</button>
@@ -1725,24 +1731,19 @@
 			function syncToolButtons() {
 				// Remove active state from all tool buttons
 				[laserBtn, annotationBtn, eraserBtn, textBtn].forEach(btn => {
-					btn.classList.remove('active', 'primary');
-					btn.classList.add('muted');
+					btn.classList.remove('active');
 				});
 
-				// Set active state
+				// Set active state (border indicator)
 				if (eraserOn) {
-					eraserBtn.classList.remove('muted');
-					eraserBtn.classList.add('active', 'primary');
+					eraserBtn.classList.add('active');
 				} else if (textModeOn) {
-					textBtn.classList.remove('muted');
-					textBtn.classList.add('active', 'primary');
+					textBtn.classList.add('active');
 				} else if (annotationOn) {
-					annotationBtn.classList.remove('muted');
-					annotationBtn.classList.add('active', 'primary');
+					annotationBtn.classList.add('active');
 				} else {
 					// Laser mode (default)
-					laserBtn.classList.remove('muted');
-					laserBtn.classList.add('active', 'primary');
+					laserBtn.classList.add('active');
 				}
 			}
 
