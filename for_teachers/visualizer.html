@@ -317,6 +317,44 @@
 			padding: 0
 		}
 
+		/* Color label button - combines label and color picker */
+		.color-label-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: .35rem;
+			padding: .28rem .6rem;
+			border-radius: .45rem;
+			border: 2px solid rgba(255, 255, 255, .2);
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+			font-size: .72rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: .04em;
+			white-space: nowrap;
+			min-height: 32px;
+			transition: border-color .2s ease, transform .15s ease
+		}
+
+		.color-label-btn:hover {
+			border-color: rgba(255, 255, 255, .4);
+			transform: scale(1.02)
+		}
+
+		.color-label-btn input[type="color"] {
+			position: absolute;
+			width: 150%;
+			height: 150%;
+			top: -25%;
+			left: -25%;
+			cursor: pointer;
+			border: none;
+			padding: 0;
+			opacity: 0
+		}
+
 
 		.srOnly {
 			position: absolute !important;
@@ -736,6 +774,11 @@
 				height: 44px;
 			}
 
+			.color-label-btn {
+				min-height: 44px;
+				padding: .35rem .75rem;
+			}
+
 			.dotBtn {
 				width: 36px;
 				height: 36px;
@@ -851,8 +894,8 @@
 
 				<!-- Pointer settings -->
 				<div class="group" id="pointerGroup">
-					<span class="group-label">Pointer</span>
-					<button class="color-btn" id="pointerColorBtn" title="Pointer color">
+					<button class="color-label-btn" id="pointerColorBtn" title="Click to change laser color">
+						<span class="color-label-text">Laser</span>
 						<input id="pointerColorInput" type="color" value="#ff3b3b" />
 					</button>
 					<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
@@ -860,8 +903,8 @@
 
 				<!-- Annotation settings -->
 				<div class="group" id="annotGroup">
-					<span class="group-label">Annotate</span>
-					<button class="color-btn" id="annotColorBtn" title="Annotation color">
+					<button class="color-label-btn" id="annotColorBtn" title="Click to change annotation color">
+						<span class="color-label-text">Annotate</span>
 						<input id="annotColorInput" type="color" value="#33d17a" />
 					</button>
 					<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
@@ -1075,8 +1118,27 @@
 				cameraHelper.classList.toggle('visible', !!message);
 			}
 
+			function getContrastTextColor(hexColor) {
+				// Calculate relative luminance and return black or white for best contrast
+				const hex = hexColor.replace('#', '');
+				const r = parseInt(hex.substr(0, 2), 16) / 255;
+				const g = parseInt(hex.substr(2, 2), 16) / 255;
+				const b = parseInt(hex.substr(4, 2), 16) / 255;
+				// Apply sRGB gamma correction
+				const rLin = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+				const gLin = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+				const bLin = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+				const luminance = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+				return luminance > 0.179 ? '#000000' : '#ffffff';
+			}
+
 			function updateColorBtn(btn, color) {
 				btn.style.background = color;
+				const textColor = getContrastTextColor(color);
+				const textEl = btn.querySelector('.color-label-text');
+				if (textEl) {
+					textEl.style.color = textColor;
+				}
 			}
 
 			function resizeCanvases() {
