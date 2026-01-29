@@ -834,6 +834,11 @@ select {
 	box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
+[data-theme="dark"] .tabs button.active {
+	background-color: var(--brand-primary);
+	color: #000;
+}
+
 .tab-content {
 	display: none;
 	padding: 15px 1px;
