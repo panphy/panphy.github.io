@@ -675,16 +675,19 @@
 			left: 0;
 			right: 0;
 			bottom: 0;
+			width: 100vw;
+			height: 100vh;
 			background: rgba(0, 0, 0, .6);
 			display: none;
 			align-items: center;
 			justify-content: center;
-			z-index: 100;
-			backdrop-filter: blur(4px)
+			z-index: 9999;
+			backdrop-filter: blur(4px);
+			-webkit-backdrop-filter: blur(4px)
 		}
 
 		#filenameOverlay.show {
-			display: flex
+			display: flex !important
 		}
 
 		#filenameDialog {
@@ -945,13 +948,6 @@
 					</button>
 				</div>
 
-				<!-- Default Settings -->
-				<div class="group">
-					<button id="defaultsBtn" data-tooltip="Reset to default settings">
-						<span class="btn-text">Default Settings</span>
-					</button>
-				</div>
-
 				<!-- Tools -->
 				<div class="group">
 					<span class="group-label">Tools</span>
@@ -1009,6 +1005,13 @@
 					<button id="recordBtn" data-tooltip="Start recording">
 						<span class="btn-icon">&#x23FA;</span>
 						<span class="btn-text">Record</span>
+					</button>
+				</div>
+
+				<!-- Default Settings -->
+				<div class="group">
+					<button id="defaultsBtn" data-tooltip="Reset to default settings">
+						<span class="btn-text">Default Settings</span>
 					</button>
 				</div>
 			</div>
