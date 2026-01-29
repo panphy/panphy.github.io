@@ -5,12 +5,16 @@
 		if (theme !== 'dark') {
 			return {
 				errorColor: '#5b5b5b',
+				fitColor: '#35a8ff',
+				fitColors: ['#a7d7f2', '#a2e4b8', '#d5a4e2', '#f9e79f', '#f5a4a4', '#a0e7d1'],
 				layout: {}
 			};
 		}
 
 		return {
 			errorColor: '#9aa0a6',
+			fitColor: '#00e5ff',
+			fitColors: ['#00e5ff', '#69f0ae', '#ea80fc', '#ffeb3b', '#ff8a80', '#64ffda'],
 			layout: {
 				paper_bgcolor: '#1e2129',
 				plot_bgcolor: '#1e2129',
@@ -128,7 +132,7 @@
 				y: fittedY,
 				mode: 'lines',
 				name: 'Fit',
-				line: { color: '#35a8ff' }
+				line: { color: themeSettings.fitColor }
 			});
 		}
 
@@ -206,7 +210,7 @@
 
 		// Define colors for datasets and fitted curves.
 		const datasetColors = ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c', '#1abc9c'];
-		const fitColors = ['#a7d7f2', '#a2e4b8', '#d5a4e2', '#f9e79f', '#f5a4a4', '#a0e7d1'];
+		const fitColors = themeSettings.fitColors;
 
 		// Helper: get the per-dataset y label (raw), with a sensible fallback.
 		function getDatasetYLabelRaw(i) {
