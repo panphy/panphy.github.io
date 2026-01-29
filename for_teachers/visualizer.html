@@ -668,6 +668,74 @@
 			margin-top: .4rem
 		}
 
+		/* Filename popup */
+		#filenameOverlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			width: 100vw;
+			height: 100vh;
+			background: rgba(0, 0, 0, .6);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 9999;
+			backdrop-filter: blur(4px);
+			-webkit-backdrop-filter: blur(4px)
+		}
+
+		#filenameOverlay.show {
+			display: flex !important
+		}
+
+		#filenameDialog {
+			background: var(--panel);
+			border: 1px solid var(--panel-border);
+			border-radius: .8rem;
+			padding: 1rem;
+			box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+			min-width: 300px;
+			max-width: 90vw
+		}
+
+		#filenameDialog h3 {
+			margin: 0 0 .75rem;
+			font-size: 1rem;
+			font-weight: 600;
+			color: var(--text-main)
+		}
+
+		#filenameDialog input[type="text"] {
+			width: 100%;
+			background: rgba(0, 0, 0, .3);
+			color: #fff;
+			border: 1px solid rgba(255, 255, 255, .15);
+			border-radius: .4rem;
+			padding: .5rem .6rem;
+			font-size: .9rem;
+			outline: none;
+			font-family: inherit
+		}
+
+		#filenameDialog input[type="text"]:focus {
+			border-color: var(--brand-primary)
+		}
+
+		#filenameDialog .file-ext {
+			font-size: .8rem;
+			color: var(--text-secondary);
+			margin-top: .3rem
+		}
+
+		#filenameActions {
+			display: flex;
+			gap: .4rem;
+			justify-content: flex-end;
+			margin-top: .75rem
+		}
+
 		#toast {
 			position: fixed;
 			left: 50%;
@@ -880,13 +948,6 @@
 					</button>
 				</div>
 
-				<!-- Default Settings -->
-				<div class="group">
-					<button id="defaultsBtn" data-tooltip="Reset to default settings">
-						<span class="btn-text">Default Settings</span>
-					</button>
-				</div>
-
 				<!-- Tools -->
 				<div class="group">
 					<span class="group-label">Tools</span>
@@ -946,6 +1007,13 @@
 						<span class="btn-text">Record</span>
 					</button>
 				</div>
+
+				<!-- Default Settings -->
+				<div class="group">
+					<button id="defaultsBtn" data-tooltip="Reset to default settings">
+						<span class="btn-text">Default Settings</span>
+					</button>
+				</div>
 			</div>
 		</details>
 		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
@@ -970,6 +1038,19 @@
 	</main>
 
 	<div id="toast" role="status" aria-live="polite"></div>
+
+	<!-- Filename popup -->
+	<div id="filenameOverlay">
+		<div id="filenameDialog">
+			<h3 id="filenameTitle">Save File</h3>
+			<input type="text" id="filenameInput" placeholder="Enter filename" aria-label="Filename">
+			<div class="file-ext" id="filenameExt">.png</div>
+			<div id="filenameActions">
+				<button id="filenameCancel" class="muted">Cancel</button>
+				<button id="filenameSave" class="primary">Save</button>
+			</div>
+		</div>
+	</div>
 
 	<script>
 		(() => {
@@ -1007,6 +1088,15 @@
 			const stage = document.getElementById('stage');
 			const fullscreenBtn = document.getElementById('fullscreenBtn');
 			const toast = document.getElementById('toast');
+
+			/* Filename popup refs */
+			const filenameOverlay = document.getElementById('filenameOverlay');
+			const filenameDialog = document.getElementById('filenameDialog');
+			const filenameTitle = document.getElementById('filenameTitle');
+			const filenameInput = document.getElementById('filenameInput');
+			const filenameExt = document.getElementById('filenameExt');
+			const filenameCancel = document.getElementById('filenameCancel');
+			const filenameSave = document.getElementById('filenameSave');
 
 			/* Color inputs */
 			const pointerColorInput = document.getElementById('pointerColorInput');
@@ -1127,6 +1217,48 @@
 				toast.classList.add('show');
 				setTimeout(() => toast.classList.remove('show'), ms);
 			}
+
+			/* Filename popup */
+			let pendingFileSave = null;
+
+			function showFilenamePopup(title, defaultName, ext, onSave) {
+				filenameTitle.textContent = title;
+				filenameInput.value = defaultName;
+				filenameExt.textContent = ext;
+				pendingFileSave = onSave;
+				filenameOverlay.classList.add('show');
+				filenameInput.focus();
+				filenameInput.select();
+			}
+
+			function hideFilenamePopup() {
+				filenameOverlay.classList.remove('show');
+				pendingFileSave = null;
+			}
+
+			function doFileSave() {
+				const name = filenameInput.value.trim() || 'untitled';
+				if (pendingFileSave) {
+					pendingFileSave(name);
+				}
+				hideFilenamePopup();
+			}
+
+			filenameCancel.addEventListener('click', hideFilenamePopup);
+			filenameSave.addEventListener('click', doFileSave);
+			filenameInput.addEventListener('keydown', e => {
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					hideFilenamePopup();
+				}
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					doFileSave();
+				}
+			});
+			filenameOverlay.addEventListener('click', e => {
+				if (e.target === filenameOverlay) hideFilenamePopup();
+			});
 
 			let permissionBlocked = false;
 			function setCameraHelper(message) {
@@ -2093,15 +2225,18 @@
 						showToast('Snapshot failed');
 						return;
 					}
-					const url = URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.href = url;
-					a.download = 'snapshot_' + new Date().toISOString().replace(/[:.]/g, '-') + '.png';
-					document.body.appendChild(a);
-					a.click();
-					a.remove();
-					URL.revokeObjectURL(url);
-					showToast('Snapshot saved');
+					const defaultName = 'snapshot_' + new Date().toISOString().replace(/[:.]/g, '-');
+					showFilenamePopup('Save Snapshot', defaultName, '.png', (filename) => {
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement('a');
+						a.href = url;
+						a.download = filename + '.png';
+						document.body.appendChild(a);
+						a.click();
+						a.remove();
+						URL.revokeObjectURL(url);
+						showToast('Snapshot saved');
+					});
 				});
 			});
 
@@ -2178,15 +2313,18 @@
 					};
 					mediaRecorder.onstop = () => {
 						const blob = new Blob(recChunks, { type: mediaRecorder.mimeType || 'video/webm' });
-						const url = URL.createObjectURL(blob);
-						const a = document.createElement('a');
-						a.href = url;
-						a.download = 'recording_' + new Date().toISOString().replace(/[:.]/g, '-') + '.webm';
-						document.body.appendChild(a);
-						a.click();
-						a.remove();
-						URL.revokeObjectURL(url);
-						showToast('Recording saved');
+						const defaultName = 'recording_' + new Date().toISOString().replace(/[:.]/g, '-');
+						showFilenamePopup('Save Recording', defaultName, '.webm', (filename) => {
+							const url = URL.createObjectURL(blob);
+							const a = document.createElement('a');
+							a.href = url;
+							a.download = filename + '.webm';
+							document.body.appendChild(a);
+							a.click();
+							a.remove();
+							URL.revokeObjectURL(url);
+							showToast('Recording saved');
+						});
 					};
 					mediaRecorder.start(120);
 					recording = true;
