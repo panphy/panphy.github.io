@@ -15,157 +15,300 @@
     }
   </script>
   <style>
-    /* Reset and Body Styling */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: 'Arial', sans-serif;
+      font-family: 'Inter', sans-serif;
       background: url('') no-repeat center center fixed;
       background-size: cover;
       color: #f5f5f5;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .logo-container {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+    }
+
+    .logo-container img {
+      max-height: 40px;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
     }
 
     a {
-      color: #ff5f1f;
+      color: #ffc107;
       text-decoration: none;
+      transition: color 0.2s ease, text-shadow 0.2s ease;
     }
 
     a:hover {
-      color: #ff5f1f;
-      text-decoration: underline;
+      color: #ffeb3b;
+      text-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
     }
 
-    a:visited {
-      color: #ff5f1f;
-    }
+    a:visited { color: #ffc107; }
 
-    /* Overlay for dimming the background */
     #overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.65);
-      /* Adjust the alpha for more or less dimming */
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(10, 15, 30, 0.8) 100%);
       pointer-events: none;
       z-index: -1;
     }
 
-    /* Main Container */
     #container {
       display: flex;
       flex-direction: row;
       justify-content: center;
-      /* Centers the items horizontally */
       align-items: flex-start;
-      max-width: 1200px;
-      /* Maintains a maximum width for larger screens */
-      width: 90%;
-      /* Responsive width */
+      max-width: 1100px;
+      width: 100%;
       position: relative;
       z-index: 1;
+      gap: 24px;
     }
 
-    /* Top Scores Section */
     #topScores {
-      flex: 0 0 200px;
-      /* Fixed width of 200px */
-      margin-right: 10px;
+      flex: 0 0 180px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px 16px;
       text-align: center;
     }
 
     #topScores h1 {
-      font-size: 1.5em;
-      color: #ff9800;
-      border-bottom: 2px solid #ff9800;
-      padding-bottom: 5px;
-      margin-bottom: 10px;
+      font-size: 1.1em;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffc107;
+      text-shadow: 0 0 12px rgba(255, 193, 7, 0.4);
+      border-bottom: none;
+      padding-bottom: 12px;
+      margin: 0 0 12px 0;
+      position: relative;
+    }
+
+    #topScores h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffc107, transparent);
     }
 
     #topScores ol {
       list-style: none;
       padding: 0;
       margin: 0;
+      counter-reset: score-counter;
     }
 
     #topScores li {
-      font-size: 1.3em;
+      font-size: 1.1em;
       text-align: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #555;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      counter-increment: score-counter;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease;
     }
 
-    /* Game Section */
+    #topScores li:hover { background: rgba(255, 255, 255, 0.05); }
+
+    #topScores li::before {
+      content: counter(score-counter) ".";
+      color: rgba(255, 193, 7, 0.7);
+      font-weight: 600;
+      min-width: 24px;
+    }
+
+    #topScores li:last-child { border-bottom: none; }
+    #topScores li:first-child { color: #ffd54f; font-weight: 600; }
+
     #gameContainer {
       flex: 1;
-      /* Takes up the remaining space */
+      max-width: 750px;
       text-align: center;
     }
 
     #gameContainer h1 {
-      font-size: 2em;
-      color: #2dd034;
-      margin-bottom: 10px;
+      font-size: 2.2em;
+      font-weight: 700;
+      color: #4ade80;
+      text-shadow: 0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(74, 222, 128, 0.2);
+      margin: 0 0 16px 0;
+      letter-spacing: 1px;
     }
 
-    /* Responsive Canvas Styling */
-    #gameContainer canvas {
-      width: 70%;
+    .canvas-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
       max-width: 700px;
-      /* Maintains maximum width */
+      border-radius: 14px;
+      padding: 3px;
+      background: linear-gradient(135deg, #4ade80, #22c55e, #16a34a);
+    }
+
+    .canvas-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, #4ade80, #22c55e, #16a34a);
+      border-radius: 16px;
+      z-index: -1;
+      filter: blur(12px);
+      opacity: 0.6;
+    }
+
+    #gameContainer canvas {
+      width: 100%;
       height: auto;
       aspect-ratio: 3 / 2;
-      /* 600x400 aspect ratio */
-      border: 3px solid #4caf50;
-      border-radius: 10px;
+      border-radius: 12px;
       display: block;
-      margin: 0 auto;
       touch-action: none;
       -ms-touch-action: none;
+      background: #0a0f1e;
     }
 
-    p {
-      font-size: 1em;
-      margin: 8px 0;
-      line-height: 1.4;
+    .instructions {
+      margin-top: 20px;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    p span {
-      color: #ff9800;
-      font-weight: bold;
+    .instructions p {
+      font-size: 0.95em;
+      margin: 6px 0;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .instructions .key {
+      display: inline-block;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.9em;
+      font-weight: 500;
+      color: #ffc107;
+      margin: 0 2px;
+    }
+
+    .instructions .highlight { color: #f87171; font-weight: 500; }
+
+    .footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .footer p {
+      font-size: 0.9em;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0;
+    }
+
+    @media (max-width: 900px) {
+      #container { flex-direction: column; align-items: center; }
+
+      #topScores {
+        flex: none;
+        width: 100%;
+        max-width: 400px;
+        order: 2;
+        margin-top: 24px;
+      }
+
+      #topScores ol {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      #topScores li {
+        flex: 0 0 auto;
+        padding: 8px 16px;
+        border-bottom: none;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+      }
+
+      #topScores li:hover { background: rgba(255, 255, 255, 0.1); }
+
+      #gameContainer { order: 1; width: 100%; }
+      #gameContainer h1 { font-size: 1.8em; }
+    }
+
+    @media (max-width: 500px) {
+      body { padding: 12px; }
+      #gameContainer h1 { font-size: 1.5em; margin-bottom: 12px; }
+      .instructions { padding: 12px 14px; }
+      .instructions p { font-size: 0.85em; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Background overlay (for dimming) -->
+  <div class="logo-container">
+    <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">
+      <img src="/panphy.png" alt="PanPhy logo">
+    </a>
+  </div>
+
   <div id="overlay"></div>
 
   <div id="container">
-    <!-- Top Scores Section -->
     <div id="topScores">
-      <h1>Top Scores</h1>
-      <ol id="scoreList">
-      </ol>
+      <h1>Leaderboard</h1>
+      <ol id="scoreList"></ol>
     </div>
 
-    <!-- Game Section -->
     <div id="gameContainer">
       <h1>Dodge the Asteroids</h1>
-      <canvas id="gameCanvas"></canvas>
-      <p>Use <span>Arrow Keys</span> or <span>Drag</span> the spaceship to move. Avoid the <span>asteroids</span>.</p>
-      <p>Press <span>Enter</span> or <span>Tap</span> the Game Canvas to restart after Game Over.</p>
-      <br>
-      <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer"
-          style="color: #e1b400;">PanPhy</a> |
-        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer"
-          style="color: #e1b400;">Support My Projects</a>
-      </p>
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas"></canvas>
+      </div>
+      <div class="instructions">
+        <p>Use <span class="key">Arrow Keys</span> or <span class="key">Drag</span> the spaceship to move. Avoid the <span class="highlight">asteroids</span>!</p>
+        <p>Press <span class="key">Enter</span> or <span class="key">Tap</span> the canvas to restart after Game Over.</p>
+      </div>
+      <div class="footer">
+        <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Projects</a> |
+          <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        </p>
+      </div>
     </div>
   </div>
 
