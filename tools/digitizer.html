@@ -88,13 +88,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       border: none;
-      border-radius: 8px;
-      padding: 0 16px;
-      height: 36px;
-      min-width: 80px;
-      font-size: 14px;
+      border-radius: 6px;
+      padding: 0 10px;
+      height: 32px;
+      min-width: auto;
+      font-size: 13px;
       font-weight: 500;
       font-family: inherit;
       line-height: 1;
@@ -171,8 +171,6 @@
     .btn-export {
       background-color: var(--export-bg);
       color: var(--export-text);
-      width: 100%;
-      max-width: 200px;
     }
 
     /* Modal button styling */
@@ -190,19 +188,19 @@
 
     .button-group-separator {
       width: 1px;
-      height: 24px;
+      height: 20px;
       background-color: var(--card-border);
-      margin: 0 6px;
+      margin: 0 4px;
     }
 
     body {
       margin: 0;
       padding: 0;
-      overflow-x: hidden;
+      overflow: hidden;
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      height: 100vh;
       background-color: var(--bg-color);
       background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
       background-size: 30px 30px;
@@ -214,15 +212,16 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 8px 20px;
-      margin: 16px auto 0;
-      width: min(1100px, calc(100% - 40px));
+      padding: 6px 20px;
+      margin: 10px auto 0;
+      width: min(1200px, calc(100% - 40px));
       background: var(--nav-bg);
       border: 1px solid var(--nav-border);
-      border-radius: 20px;
+      border-radius: 16px;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
     }
 
     .banner-logo {
@@ -275,13 +274,12 @@
     }
 
     footer {
-      font-size: 15px;
+      font-size: 13px;
       text-align: center;
-      padding: 7px;
+      padding: 6px;
       background: transparent;
       color: var(--text-secondary);
-      margin: 4px 0;
-      width: 100%;
+      flex-shrink: 0;
     }
 
     footer a {
@@ -295,34 +293,33 @@
 
     #content {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       overflow: hidden;
-      padding: 15px;
+      padding: 10px 15px;
       box-sizing: border-box;
       width: min(1200px, calc(100% - 30px));
-      margin: 10px auto 0;
-    }
-
-    /* Fixed height for containers */
-    #main,
-    #sidebar {
-      height: 600px;
+      margin: 0 auto;
+      flex: 1;
+      min-height: 0;
     }
 
     #main {
       flex: 1;
       background: var(--card-bg);
-      padding: 20px;
+      padding: 12px;
       border: 1px solid var(--card-border);
       border-radius: 8px;
       box-sizing: border-box;
       overflow: auto;
       position: relative;
       box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     #sidebar {
-      flex: 0 0 250px;
+      flex: 0 0 220px;
       background: var(--card-bg);
       padding: 10px;
       border: 1px solid var(--card-border);
@@ -377,15 +374,16 @@
     #controls {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
     }
 
     #controlRow {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-wrap: nowrap;
     }
 
     #imageLoader {
@@ -414,13 +412,22 @@
     }
 
     #canvas {
-      display: block;
-      margin: 10px auto;
+      display: none;
+      margin: 0 auto;
       border: 1px solid var(--card-border);
       cursor: crosshair;
       max-width: 100%;
-      height: auto;
-      display: none;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    #canvasContainer {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      overflow: auto;
     }
 
     /* Stationary magnifier in the sidebar */
@@ -462,13 +469,31 @@
       margin-top: 0;
     }
 
+    @media (max-width: 1000px) {
+      #controlRow {
+        flex-wrap: wrap;
+      }
+    }
+
     @media (max-width: 900px) {
+      body {
+        height: auto;
+        min-height: 100vh;
+        overflow: auto;
+      }
+
       #content {
         flex-direction: column;
+        flex: none;
       }
 
       #sidebar {
-        flex: 1;
+        flex: none;
+        height: auto;
+      }
+
+      #main {
+        min-height: 500px;
       }
 
       header.banner {
@@ -484,10 +509,10 @@
 
     @media (pointer: coarse) {
       .btn {
-        height: 44px;
-        min-height: 44px;
-        font-size: 15px;
-        padding: 0 18px;
+        height: 38px;
+        min-height: 38px;
+        font-size: 14px;
+        padding: 0 14px;
       }
 
       input,
@@ -524,7 +549,7 @@
         <div id="controlRow">
           <!-- Group 1: Import -->
           <div class="button-group">
-            <label for="imageLoader" class="btn btn-upload" title="Import a graph image from your device">Import Graph</label>
+            <label for="imageLoader" class="btn btn-upload" title="Import a graph image from your device">Import</label>
             <input type="file" id="imageLoader" accept="image/*">
           </div>
 
@@ -548,14 +573,15 @@
 
           <!-- Group 4: Reset/Clear -->
           <div class="button-group">
-            <button id="recalibrateButton" class="btn btn-calibrate" title="Start fresh calibration (keeps digitized points)" disabled>Recalibrate</button>
-            <button id="resetButton" class="btn btn-reset" title="Clear digitized points (keeps calibration)" disabled>Reset Points</button>
-            <button id="removeGraphButton" class="btn btn-remove" title="Remove the graph and reset everything" disabled>Remove Graph</button>
+            <button id="resetButton" class="btn btn-reset" title="Clear digitized points (keeps calibration)" disabled>Reset</button>
+            <button id="removeGraphButton" class="btn btn-remove" title="Remove the graph and reset everything" disabled>Remove</button>
           </div>
         </div>
         <div id="status"></div>
       </div>
-      <canvas id="canvas"></canvas>
+      <div id="canvasContainer">
+        <canvas id="canvas"></canvas>
+      </div>
     </div>
 
     <div id="sidebar">
@@ -645,7 +671,6 @@
     btnDigitize = document.getElementById('digitizeButton'),
     btnUndo = document.getElementById('undoButton'),
     btnRedo = document.getElementById('redoButton'),
-    btnRecalibrate = document.getElementById('recalibrateButton'),
     btnReset = document.getElementById('resetButton'),
     btnRemoveGraph = document.getElementById('removeGraphButton'),
     exportButton = document.getElementById('exportButton');
@@ -820,7 +845,7 @@
   }
 
   function applyImageToCanvas() {
-    const maxSize = 800;
+    const maxSize = 1000;
     let newWidth = image.width;
     let newHeight = image.height;
     if (newWidth > maxSize || newHeight > maxSize) {
@@ -860,7 +885,6 @@
           }
           redrawCanvas();
           btnCalibrate.disabled = false;
-          btnRecalibrate.disabled = false;
           btnReset.disabled = false;
           btnRemoveGraph.disabled = false;
           btnDigitize.disabled = !(calibrationX.length === 2 && calibrationY.length === 2);
@@ -914,7 +938,6 @@
         btnCalibrate.disabled = false;
         btnDigitize.disabled = true;
         updateUndoRedoButtons();
-        btnRecalibrate.disabled = false;
         btnReset.disabled = false;
         btnRemoveGraph.disabled = false;
         saveState();
@@ -975,13 +998,6 @@
         updateStatus("Using previous calibration.");
         return;
       }
-    }
-    startCalibration();
-  });
-
-  btnRecalibrate.addEventListener('click', function () {
-    if (!image.src) {
-      return;
     }
     startCalibration();
   });
@@ -1257,7 +1273,6 @@
       canvas.style.display = "none";
       btnCalibrate.disabled = true;
       btnDigitize.disabled = true;
-      btnRecalibrate.disabled = true;
       btnReset.disabled = true;
       btnRemoveGraph.disabled = true;
       exportButton.disabled = true;
@@ -1265,7 +1280,6 @@
       clearSavedState();
     } else {
       btnDigitize.disabled = true;
-      btnRecalibrate.disabled = false;
       btnCalibrate.disabled = false;
       btnReset.disabled = false;
       btnRemoveGraph.disabled = false;
