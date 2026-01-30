@@ -555,6 +555,7 @@
     const SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
     const SCORE_FIELD = 'survival_time';
+    const LEADERBOARD_CACHE_KEY = 'dodgeLeaderboardCacheV1';
 
     let supabase = null;
 
@@ -637,6 +638,39 @@
         Authorization: `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
       };
+    }
+
+    function loadLeaderboardCache() {
+      try {
+        const raw = localStorage.getItem(LEADERBOARD_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.scores)) return null;
+        return parsed;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveLeaderboardCache(scores) {
+      try {
+        const payload = { scores: scores || [], savedAt: Date.now() };
+        localStorage.setItem(LEADERBOARD_CACHE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        // ignore storage errors
+      }
+    }
+
+    function isSameLeaderboard(a, b) {
+      if (!Array.isArray(a) || !Array.isArray(b)) return false;
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i += 1) {
+        const left = a[i] || {};
+        const right = b[i] || {};
+        if (left.initials !== right.initials) return false;
+        if (Number(left.score) !== Number(right.score)) return false;
+      }
+      return true;
     }
 
     async function fetchTopScoresRest() {
@@ -741,7 +775,14 @@
       }
       updateSoundToggle();
       initSupabaseClient();
-      fetchTopScores({ preferRemote: true });
+      const cachedLeaderboard = loadLeaderboardCache();
+      if (cachedLeaderboard && cachedLeaderboard.scores.length > 0) {
+        topScores = mergeRecentSubmission(cachedLeaderboard.scores);
+        renderTopScores();
+      } else {
+        renderLoadingScores();
+      }
+      fetchTopScores({ preferRemote: true, showLoading: false });
       tryStartGame();
     });
 
@@ -1211,9 +1252,9 @@
       }
     }
 
-    async function fetchTopScores({ preferRemote = false } = {}) {
-      const scoreList = document.getElementById('scoreList');
-      scoreList.innerHTML = '<li class="loading">Loading...</li>';
+    async function fetchTopScores({ preferRemote = false, showLoading = true } = {}) {
+      if (showLoading) renderLoadingScores();
+      const cachedScores = loadLeaderboardCache()?.scores || [];
 
       let client = initSupabaseClient();
       if (!client && preferRemote) {
@@ -1221,6 +1262,7 @@
       }
 
       try {
+        let fetchedScores = [];
         if (client) {
           const { data, error } = await client
             .from('dodge_leaderboard')
@@ -1229,20 +1271,33 @@
             .limit(10);
 
           if (error) throw error;
-          topScores = mergeRecentSubmission(normalizeScores(data || []));
+          fetchedScores = normalizeScores(data || []);
         } else {
-          topScores = mergeRecentSubmission(normalizeScores(await fetchTopScoresRest()));
+          fetchedScores = normalizeScores(await fetchTopScoresRest());
         }
-        renderTopScores();
+        const mergedScores = mergeRecentSubmission(fetchedScores);
+        if (!isSameLeaderboard(fetchedScores, cachedScores) || topScores.length === 0) {
+          topScores = mergedScores;
+          renderTopScores();
+          saveLeaderboardCache(fetchedScores);
+        }
       } catch (e) {
         console.warn('Supabase client fetch failed, retrying with REST fallback.', e);
         try {
-          topScores = mergeRecentSubmission(normalizeScores(await fetchTopScoresRest()));
-          renderTopScores();
+          const fetchedScores = normalizeScores(await fetchTopScoresRest());
+          const mergedScores = mergeRecentSubmission(fetchedScores);
+          if (!isSameLeaderboard(fetchedScores, cachedScores) || topScores.length === 0) {
+            topScores = mergedScores;
+            renderTopScores();
+            saveLeaderboardCache(fetchedScores);
+          }
           return;
         } catch (restError) {
           console.error('Failed to fetch scores:', restError);
-          scoreList.innerHTML = '<li class="loading">Unable to load scores. Check Supabase URL/key and RLS policies.</li>';
+          if (topScores.length === 0) {
+            const scoreList = document.getElementById('scoreList');
+            scoreList.innerHTML = '<li class="loading">Unable to load scores. Check Supabase URL/key and RLS policies.</li>';
+          }
         }
       }
     }
@@ -1250,7 +1305,7 @@
     const supabaseScript = document.getElementById('supabaseScript');
     if (supabaseScript) {
       supabaseScript.addEventListener('load', () => {
-        fetchTopScores({ preferRemote: true });
+        fetchTopScores({ preferRemote: true, showLoading: false });
       });
     }
 
@@ -1276,7 +1331,8 @@
         registerRecentSubmission(initials, scoreValue);
         topScores = mergeRecentSubmission(topScores);
         renderTopScores();
-        setTimeout(() => fetchTopScores({ preferRemote: true }), 800);
+        saveLeaderboardCache(topScores);
+        setTimeout(() => fetchTopScores({ preferRemote: true, showLoading: false }), 800);
         return true;
       } catch (e) {
         console.warn('Supabase client insert failed, retrying with REST fallback.', e);
@@ -1285,7 +1341,8 @@
           registerRecentSubmission(initials, scoreValue);
           topScores = mergeRecentSubmission(topScores);
           renderTopScores();
-          setTimeout(() => fetchTopScores({ preferRemote: true }), 800);
+          saveLeaderboardCache(topScores);
+          setTimeout(() => fetchTopScores({ preferRemote: true, showLoading: false }), 800);
           return true;
         } catch (restError) {
           console.error('Failed to submit score:', restError);
@@ -1439,6 +1496,11 @@
         li.innerHTML = `<span class="initials">${initials}</span><span class="score-value">${formatSurvivalTime(scoreValue)}</span>`;
         scoreList.appendChild(li);
       });
+    }
+
+    function renderLoadingScores() {
+      const scoreList = document.getElementById('scoreList');
+      scoreList.innerHTML = '<li class="loading">Loading...</li>';
     }
 
     /* -----------------------------------------------------------
