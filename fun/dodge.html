@@ -513,10 +513,10 @@
       return supabase;
     }
 
-    function getSupabaseRestHeaders() {
+    function getSupabaseRestHeaders(accessToken = null) {
       return {
         apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Authorization: `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
       };
     }
@@ -536,11 +536,11 @@
       return response.json();
     }
 
-    async function submitScoreRest(initials, scoreValue) {
+    async function submitScoreRest(initials, scoreValue, accessToken = null) {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/dodge_leaderboard`, {
         method: 'POST',
         headers: {
-          ...getSupabaseRestHeaders(),
+          ...getSupabaseRestHeaders(accessToken),
           Prefer: 'return=minimal',
         },
         body: JSON.stringify([{ initials: initials.toUpperCase(), score: scoreValue }]),
@@ -1060,6 +1060,23 @@
       });
     }
 
+    async function ensureSupabaseSession(client) {
+      if (!client || !client.auth) return null;
+      try {
+        const { data } = await client.auth.getSession();
+        if (data && data.session) return data.session;
+        const { data: authData, error } = await client.auth.signInAnonymously();
+        if (error) {
+          console.warn('Supabase anonymous auth failed:', error);
+          return null;
+        }
+        return authData ? authData.session : null;
+      } catch (e) {
+        console.warn('Supabase session check failed:', e);
+        return null;
+      }
+    }
+
     async function fetchTopScores({ preferRemote = false } = {}) {
       const scoreList = document.getElementById('scoreList');
       scoreList.innerHTML = '<li class="loading">Loading...</li>';
@@ -1108,6 +1125,8 @@
       if (!client) {
         client = await waitForSupabaseClient();
       }
+      const session = await ensureSupabaseSession(client);
+      const accessToken = session ? session.access_token : null;
 
       try {
         if (client) {
@@ -1117,7 +1136,7 @@
 
           if (error) throw error;
         } else {
-          await submitScoreRest(initials, scoreValue);
+          await submitScoreRest(initials, scoreValue, accessToken);
         }
 
         registerRecentSubmission(initials, scoreValue);
@@ -1128,7 +1147,7 @@
       } catch (e) {
         console.warn('Supabase client insert failed, retrying with REST fallback.', e);
         try {
-          await submitScoreRest(initials, scoreValue);
+          await submitScoreRest(initials, scoreValue, accessToken);
           registerRecentSubmission(initials, scoreValue);
           topScores = mergeRecentSubmission(topScores);
           renderTopScores();
