@@ -5,7 +5,7 @@ Most importantly, the site is now offline-friendly (apart from EAL Learning Comp
 ## Tech Stack
 - **HTML/CSS:** Lightweight, fast-loading UI with a consistent look and feel  
 - **Vanilla JavaScript:** Framework-free interactive logic (simulations, controls, rendering, state)  
-- **Offline support:** Service Worker caching for offline use after the first visit (ideal for locked-down school devices)
+- **Offline support:** Service Worker caching for offline use after the first visit
 
 ## Offline & App Behavior
 - `manifest.json` defines the Progressive Web App (PWA) metadata: app name, icons, start URL, and display mode. It lets browsers offer “install to home screen” and ensures the app launches with the correct branding and colors.
