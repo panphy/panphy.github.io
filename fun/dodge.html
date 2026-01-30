@@ -973,7 +973,9 @@
      * -----------------------------------------------------------
      */
     document.addEventListener('keydown', (e) => {
-      startBackgroundMusic();
+      if (!gameOver && !initialsModal.classList.contains('show')) {
+        startBackgroundMusic();
+      }
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
         keys[e.key] = true;
@@ -990,7 +992,9 @@
     });
 
     canvas.addEventListener('pointerdown', (e) => {
-      startBackgroundMusic();
+      if (!gameOver && !initialsModal.classList.contains('show')) {
+        startBackgroundMusic();
+      }
       if (!player) return;
 
       if (gameOver && !initialsModal.classList.contains('show')) {
