@@ -282,6 +282,45 @@
             font-weight: 700;
         }
 
+        .record-actions {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .record-actions button {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .record-actions button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.5);
+        }
+
+        .record-actions button:active {
+            transform: translateY(0);
+        }
+
+        .record-actions button:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+        }
+
         footer {
             margin-top: 24px;
             text-align: center;
@@ -349,6 +388,10 @@
             .stat-value {
                 font-size: 1.1rem;
             }
+
+            .record-actions button {
+                width: 100%;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -401,6 +444,10 @@
         </div>
     </div>
 
+    <div class="record-actions">
+        <button type="button" id="clear-records">Clear Record</button>
+    </div>
+
     <footer>
         <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Projects</a> |
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
@@ -417,6 +464,7 @@
         const attemptsDisplay = document.getElementById('attempts-count');
         const averageDisplay = document.getElementById('average-time');
         const lastTimeDisplay = document.getElementById('last-time');
+        const clearRecordsButton = document.getElementById('clear-records');
         const confettiCanvas = document.getElementById('confetti-canvas');
         const ctx = confettiCanvas.getContext('2d');
 
@@ -573,6 +621,21 @@
             lastTimeDisplay.textContent = time.toFixed(3) + 's';
         }
 
+        function resetRecords() {
+            attempts = 0;
+            totalTime = 0;
+            bestTime = null;
+            memoryBestTime = null;
+
+            attemptsDisplay.textContent = '0';
+            averageDisplay.textContent = '--';
+            lastTimeDisplay.textContent = '--';
+            bestTimeDisplay.textContent = '--';
+
+            safeRemoveItem(BEST_TIME_KEY);
+            safeRemoveItem(LEGACY_BEST_TIME_KEY);
+        }
+
         // Core Logic
         function handleInput(e) {
             if (e.type === 'keydown' && (e.code === 'Space' || e.code === 'Enter')) {
@@ -680,6 +743,11 @@
                 container.focus();
                 handleInput(e);
             }
+        });
+
+        clearRecordsButton.addEventListener('click', () => {
+            resetRecords();
+            container.focus();
         });
 
         window.addEventListener('load', () => {
