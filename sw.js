@@ -48,7 +48,6 @@ const ASSETS_TO_CACHE = [
   '/for_teachers/visualizer.html',
 
   // Fun
-  '/fun/dodge.html',
   '/fun/react.html',
   '/fun/ascii_cam.html'
 ];
@@ -96,6 +95,15 @@ self.addEventListener('fetch', (event) => {
 
   // Don’t try to cache non-GET (POST, etc.)
   if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+  const isSameOrigin = url.origin === self.location.origin;
+
+  // Never cache the dodge game or provide offline fallback for it.
+  if (isSameOrigin && url.pathname === '/fun/dodge.html') {
+    event.respondWith(fetch(req));
+    return;
+  }
 
   // Navigations: fetch fresh when online, fall back to cache/offline
   if (req.mode === 'navigate') {
