@@ -607,6 +607,8 @@
       // Update existing game elements
       if (player) player.updateScale();
       updateAsteroidsScale();
+      canvasReady = true;
+      tryStartGame();
 
       // Optionally, reset the game
       // resetGame(); // Uncomment if you want to reset on resize
@@ -616,9 +618,7 @@
     window.addEventListener('load', () => {
       resizeCanvas();
       fetchTopScores();
-      if (assetsLoaded === 3) {
-        resetGame();
-      }
+      tryStartGame();
     });
 
     // Handle window resize
@@ -636,12 +636,15 @@
     const spaceshipImg = new Image();
     const asteroidImg = new Image();
 
+    const assetBase = new URL('.', window.location.href);
+    const resolveAsset = (fileName) => new URL(fileName, assetBase).toString();
+
     // Preload the background image
     const preloadedBkgrd = new Image();
-    preloadedBkgrd.src = 'dodge_bkgrd.webp';
+    preloadedBkgrd.src = resolveAsset('dodge_bkgrd.webp');
     preloadedBkgrd.onload = () => {
       // Once the background image is loaded, set it as the background
-      document.body.style.backgroundImage = "url('dodge_bkgrd.webp')";
+      document.body.style.backgroundImage = `url('${resolveAsset('dodge_bkgrd.webp')}')`;
     };
 
     let gameOver = false;
@@ -671,6 +674,8 @@
 
     // We track when all images are loaded
     let assetsLoaded = 0;
+    let assetsReady = false;
+    let canvasReady = false;
     const loadedImages = new Set();
 
     // Modal elements (needed by input handlers)
@@ -875,7 +880,8 @@
       assetsLoaded++;
       if (assetsLoaded === 3) {
         // Once all images are loaded, start the game
-        resetGame();
+        assetsReady = true;
+        tryStartGame();
       }
     }
 
@@ -904,13 +910,20 @@
       }
     }
 
-    initGameImage(backgroundImg, 'dodge_canvas.png', () => {
+    function tryStartGame() {
+      if (!assetsReady || !canvasReady) {
+        return;
+      }
+      resetGame();
+    }
+
+    initGameImage(backgroundImg, resolveAsset('dodge_canvas.png'), () => {
       if (animationId) {
         drawRollingBackground();
       }
     });
-    initGameImage(spaceshipImg, 'dodge_spaceship.png');
-    initGameImage(asteroidImg, 'dodge_asteroid.png');
+    initGameImage(spaceshipImg, resolveAsset('dodge_spaceship.png'));
+    initGameImage(asteroidImg, resolveAsset('dodge_asteroid.png'));
 
     /* -----------------------------------------------------------
      * Input Handlers
