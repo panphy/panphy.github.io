@@ -16,13 +16,11 @@
       });
     }
   </script>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    /* Reset and Body Styling */
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -61,11 +59,8 @@
       text-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
     }
 
-    a:visited {
-      color: #ffc107;
-    }
+    a:visited { color: #ffc107; }
 
-    /* Overlay for dimming the background */
     #overlay {
       position: fixed;
       top: 0;
@@ -77,7 +72,6 @@
       z-index: -1;
     }
 
-    /* Main Container */
     #container {
       display: flex;
       flex-direction: row;
@@ -90,7 +84,6 @@
       gap: 24px;
     }
 
-    /* Top Scores Section */
     #topScores {
       flex: 0 0 180px;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -146,9 +139,7 @@
       transition: background 0.2s ease;
     }
 
-    #topScores li:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
+    #topScores li:hover { background: rgba(255, 255, 255, 0.05); }
 
     #topScores li::before {
       content: counter(score-counter) ".";
@@ -157,16 +148,9 @@
       min-width: 24px;
     }
 
-    #topScores li:last-child {
-      border-bottom: none;
-    }
+    #topScores li:last-child { border-bottom: none; }
+    #topScores li:first-child { color: #ffd54f; font-weight: 600; }
 
-    #topScores li:first-child {
-      color: #ffd54f;
-      font-weight: 600;
-    }
-
-    /* Game Section */
     #gameContainer {
       flex: 1;
       max-width: 750px;
@@ -182,7 +166,6 @@
       letter-spacing: 1px;
     }
 
-    /* Canvas Wrapper for glow effect */
     .canvas-wrapper {
       position: relative;
       display: inline-block;
@@ -207,7 +190,6 @@
       opacity: 0.6;
     }
 
-    /* Responsive Canvas Styling */
     #gameContainer canvas {
       width: 100%;
       height: auto;
@@ -219,7 +201,6 @@
       background: #0a0f1e;
     }
 
-    /* Instructions */
     .instructions {
       margin-top: 20px;
       padding: 16px 20px;
@@ -235,14 +216,6 @@
       color: rgba(255, 255, 255, 0.8);
     }
 
-    .instructions p:first-child {
-      margin-top: 0;
-    }
-
-    .instructions p:last-child {
-      margin-bottom: 0;
-    }
-
     .instructions .key {
       display: inline-block;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
@@ -255,12 +228,8 @@
       margin: 0 2px;
     }
 
-    .instructions .highlight {
-      color: #f87171;
-      font-weight: 500;
-    }
+    .instructions .highlight { color: #f87171; font-weight: 500; }
 
-    /* Footer */
     .footer {
       margin-top: 20px;
       padding-top: 16px;
@@ -273,12 +242,8 @@
       margin: 0;
     }
 
-    /* Responsive Design */
     @media (max-width: 900px) {
-      #container {
-        flex-direction: column;
-        align-items: center;
-      }
+      #container { flex-direction: column; align-items: center; }
 
       #topScores {
         flex: none;
@@ -303,40 +268,19 @@
         border-radius: 8px;
       }
 
-      #topScores li:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
+      #topScores li:hover { background: rgba(255, 255, 255, 0.1); }
 
-      #gameContainer {
-        order: 1;
-        width: 100%;
-      }
-
-      #gameContainer h1 {
-        font-size: 1.8em;
-      }
+      #gameContainer { order: 1; width: 100%; }
+      #gameContainer h1 { font-size: 1.8em; }
     }
 
     @media (max-width: 500px) {
-      body {
-        padding: 12px;
-      }
-
-      #gameContainer h1 {
-        font-size: 1.5em;
-        margin-bottom: 12px;
-      }
-
-      .instructions {
-        padding: 12px 14px;
-      }
-
-      .instructions p {
-        font-size: 0.85em;
-      }
+      body { padding: 12px; }
+      #gameContainer h1 { font-size: 1.5em; margin-bottom: 12px; }
+      .instructions { padding: 12px 14px; }
+      .instructions p { font-size: 0.85em; }
     }
 
-    /* Initials Input Modal */
     #initialsModal {
       display: none;
       position: fixed;
@@ -350,9 +294,7 @@
       align-items: center;
     }
 
-    #initialsModal.show {
-      display: flex;
-    }
+    #initialsModal.show { display: flex; }
 
     .modal-content {
       background: linear-gradient(135deg, rgba(30, 40, 60, 0.95) 0%, rgba(20, 30, 50, 0.98) 100%);
@@ -365,14 +307,8 @@
     }
 
     @keyframes modalPop {
-      from {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .modal-content h2 {
@@ -450,9 +386,7 @@
       box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
     }
 
-    .modal-content .submit-btn:active {
-      transform: translateY(0);
-    }
+    .modal-content .submit-btn:active { transform: translateY(0); }
 
     .modal-content .submit-btn:disabled {
       opacity: 0.5;
@@ -467,7 +401,6 @@
       min-height: 20px;
     }
 
-    /* Updated Top Scores for initials display */
     #topScores li .initials {
       font-family: 'Inter', monospace;
       font-weight: 600;
@@ -481,7 +414,6 @@
       font-weight: 500;
     }
 
-    /* Loading state for leaderboard */
     #topScores .loading {
       color: rgba(255, 255, 255, 0.5);
       font-style: italic;
@@ -496,10 +428,9 @@
       <img src="/panphy.png" alt="PanPhy logo">
     </a>
   </div>
-  <!-- Background overlay (for dimming) -->
+
   <div id="overlay"></div>
 
-  <!-- Initials Input Modal -->
   <div id="initialsModal">
     <div class="modal-content">
       <h2>New High Score!</h2>
@@ -513,18 +444,16 @@
   </div>
 
   <div id="container">
-    <!-- Leaderboard Section -->
     <div id="topScores">
       <h1>Leaderboard</h1>
-      <ol id="scoreList">
-      </ol>
+      <ol id="scoreList"></ol>
     </div>
 
-    <!-- Game Section -->
     <div id="gameContainer">
       <h1>Dodge the Asteroids</h1>
       <div class="canvas-wrapper">
-        <canvas id="gameCanvas"></canvas>
+        <!-- give a safe default intrinsic size -->
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
       </div>
       <div class="instructions">
         <p>Use <span class="key">Arrow Keys</span> or <span class="key">Drag</span> the spaceship to move. Avoid the <span class="highlight">asteroids</span>!</p>
@@ -539,19 +468,20 @@
   </div>
 
   <script>
+    'use strict';
+
     /* -----------------------------------------------------------
      * Supabase Configuration
      * -----------------------------------------------------------
-     * IMPORTANT: Replace these with your actual Supabase project credentials
      */
-    const SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';  // e.g., 'https://xxxxx.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';  // Your project's anon/public key
+    const SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
 
-    // Initialize Supabase client
     let supabase = null;
     try {
-      if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const sb = window.supabase || window.Supabase || null;
+      if (sb && typeof sb.createClient === 'function' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+        supabase = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       }
     } catch (e) {
       console.warn('Supabase initialization failed:', e);
@@ -566,6 +496,10 @@
     let scaleX = 1;
     let scaleY = 1;
 
+    // Initial dimensions (will be updated)
+    let SCREEN_WIDTH = BASE_WIDTH;
+    let SCREEN_HEIGHT = BASE_HEIGHT;
+
     function updateScaleFactors() {
       scaleX = SCREEN_WIDTH / BASE_WIDTH;
       scaleY = SCREEN_HEIGHT / BASE_HEIGHT;
@@ -578,107 +512,142 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Initial dimensions (will be updated)
-    let SCREEN_WIDTH = 600;
-    let SCREEN_HEIGHT = 400;
+    let canvasReady = false;
 
     function resizeCanvas() {
-      // Get the device pixel ratio, falling back to 1.
       const dpr = window.devicePixelRatio || 1;
 
-      // Get the size the canvas is being displayed.
+      // Sometimes first layout can report 0x0. Fall back to wrapper width.
       const rect = canvas.getBoundingClientRect();
+      let cssW = rect.width;
+      let cssH = rect.height;
 
-      // Set the internal size of the canvas to match the displayed size * device pixel ratio.
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      if (!cssW || !cssH) {
+        const parent = canvas.parentElement;
+        const parentRect = parent ? parent.getBoundingClientRect() : { width: BASE_WIDTH, height: BASE_HEIGHT };
+        cssW = parentRect.width ? Math.max(200, parentRect.width) : BASE_WIDTH;
+        cssH = cssW * (2 / 3); // keep 3:2 aspect ratio
+      }
 
-      // Scale the drawing context to account for the device pixel ratio.
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+
+      // Make 1 unit in code = 1 CSS pixel (crisp due to dpr scaling)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Update game variables based on the new size
-      SCREEN_WIDTH = rect.width;
-      SCREEN_HEIGHT = rect.height;
+      SCREEN_WIDTH = cssW;
+      SCREEN_HEIGHT = cssH;
 
-      // Update scaling factors
       updateScaleFactors();
 
-      // Update existing game elements
       if (player) player.updateScale();
       updateAsteroidsScale();
+
       canvasReady = true;
       tryStartGame();
-
-      // Optionally, reset the game
-      // resetGame(); // Uncomment if you want to reset on resize
     }
 
-    // Initial resize and fetch top scores from Supabase
     window.addEventListener('load', () => {
       resizeCanvas();
       fetchTopScores();
       tryStartGame();
     });
 
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      resizeCanvas();
+    window.addEventListener('resize', () => resizeCanvas());
+
+    /* -----------------------------------------------------------
+     * Assets (robust loading: never crash on broken images)
+     * -----------------------------------------------------------
+     */
+    const assetBase = new URL('.', window.location.href);
+    const resolveAsset = (fileName) => new URL(fileName, assetBase).toString();
+
+    const assets = {
+      background: { img: new Image(), src: resolveAsset('dodge_canvas.png'), ok: false },
+      ship: { img: new Image(), src: resolveAsset('dodge_spaceship.png'), ok: false },
+      asteroid: { img: new Image(), src: resolveAsset('dodge_asteroid.png'), ok: false },
+    };
+
+    let assetsReady = false;
+    let bgPattern = null;
+
+    function loadImageAsset(a) {
+      return new Promise((resolve) => {
+        const img = a.img;
+
+        const done = (ok) => {
+          a.ok = ok;
+          resolve(ok);
+        };
+
+        img.addEventListener('load', () => done(true), { once: true });
+        img.addEventListener('error', () => {
+          console.warn(`Failed to load game asset: ${a.src}`);
+          done(false);
+        }, { once: true });
+
+        img.src = a.src;
+
+        // Handle cache-hit edge cases
+        if (img.complete) {
+          if (img.naturalWidth > 0) done(true);
+          else done(false);
+        }
+      });
+    }
+
+    Promise.all([
+      loadImageAsset(assets.background),
+      loadImageAsset(assets.ship),
+      loadImageAsset(assets.asteroid),
+    ]).then(() => {
+      assetsReady = true;
+      // create background pattern if possible (after first resize so ctx exists)
+      if (assets.background.ok) {
+        try { bgPattern = ctx.createPattern(assets.background.img, 'repeat'); } catch (_) { bgPattern = null; }
+      }
+      tryStartGame();
     });
+
+    // Preload the page background image (cosmetic)
+    const preloadedBkgrd = new Image();
+    preloadedBkgrd.src = resolveAsset('dodge_bkgrd.webp');
+    preloadedBkgrd.onload = () => {
+      document.body.style.backgroundImage = `url('${resolveAsset('dodge_bkgrd.webp')}')`;
+    };
+
+    function tryStartGame() {
+      if (!assetsReady || !canvasReady) return;
+      resetGame();
+    }
 
     /* -----------------------------------------------------------
      * Global Variables
      * -----------------------------------------------------------
      */
-
-    // Images
-    const backgroundImg = new Image();
-    const spaceshipImg = new Image();
-    const asteroidImg = new Image();
-
-    const assetBase = new URL('.', window.location.href);
-    const resolveAsset = (fileName) => new URL(fileName, assetBase).toString();
-
-    // Preload the background image
-    const preloadedBkgrd = new Image();
-    preloadedBkgrd.src = resolveAsset('dodge_bkgrd.webp');
-    preloadedBkgrd.onload = () => {
-      // Once the background image is loaded, set it as the background
-      document.body.style.backgroundImage = `url('${resolveAsset('dodge_bkgrd.webp')}')`;
-    };
-
     let gameOver = false;
     let score = 0;
     let asteroids = [];
-    let player;
+    let player = null;
     let keys = {};
-    let animationId;
-    let speedIntervalId;
-    // Top scores from Supabase (array of {initials, score} objects)
-    let topScores = [];
-    let pendingScore = 0;  // Score waiting to be submitted with initials
-    let isSubmittingScore = false;  // Prevent double submissions
+    let animationId = null;
+    let speedIntervalId = null;
 
-    // Asteroid spawn & speed parameters
+    let topScores = [];
+    let pendingScore = 0;
+    let isSubmittingScore = false;
+
     let MIN_ASTEROID_SPEED = 2;
     let MAX_ASTEROID_SPEED = 6;
     let asteroidSpawnRate = 3;
-    const speedIncreaseInterval = 1500; // 1.5 seconds
+    const speedIncreaseInterval = 1500;
 
-    // Pointer control variables
     let isPointerDown = false;
     let pointerStartX = 0;
     let pointerStartY = 0;
     let spaceshipStartX = 0;
     let spaceshipStartY = 0;
 
-    // We track when all images are loaded
-    let assetsLoaded = 0;
-    let assetsReady = false;
-    let canvasReady = false;
-    const loadedImages = new Set();
-
-    // Modal elements (needed by input handlers)
     const initialsModal = document.getElementById('initialsModal');
     const initialsInput = document.getElementById('initialsInput');
     const initialsError = document.getElementById('initialsError');
@@ -688,12 +657,70 @@
     /* -----------------------------------------------------------
      * Background Scrolling Variables
      * -----------------------------------------------------------
-     * backgroundOffsetY: the vertical offset
-     * backgroundScrollSpeed: how fast the background scrolls.
-     * Adjust backgroundScrollSpeed to make the rolling faster or slower.
      */
     let backgroundOffsetY = 0;
-    let backgroundScrollSpeed = 2; // <-- Adjust this value to control background rolling speed
+    let backgroundScrollSpeed = 2;
+
+    /* -----------------------------------------------------------
+     * Simple fallback drawings (used if images fail to load)
+     * -----------------------------------------------------------
+     */
+    function drawFallbackStars() {
+      // cheap starfield
+      ctx.save();
+      ctx.fillStyle = '#0a0f1e';
+      ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      const n = Math.floor(80 * ((scaleX + scaleY) / 2));
+      for (let i = 0; i < n; i++) {
+        const x = (Math.sin(i * 999) * 0.5 + 0.5) * SCREEN_WIDTH;
+        const y = ((Math.cos(i * 777) * 0.5 + 0.5) * SCREEN_HEIGHT + backgroundOffsetY * 0.5) % SCREEN_HEIGHT;
+        ctx.fillRect(x, y, 1, 1);
+      }
+      ctx.restore();
+    }
+
+    function drawFallbackShip(x, y, w, h) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.beginPath();
+      ctx.moveTo(0, -h * 0.55);
+      ctx.lineTo(w * 0.45, h * 0.45);
+      ctx.lineTo(0, h * 0.2);
+      ctx.lineTo(-w * 0.45, h * 0.45);
+      ctx.closePath();
+      ctx.fillStyle = '#4ade80';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = Math.max(1, 2 * ((scaleX + scaleY) / 2));
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawFallbackAsteroid(x, y, r, angle) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#9ca3af';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.lineWidth = Math.max(1, 2 * ((scaleX + scaleY) / 2));
+      ctx.stroke();
+
+      // craters
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let i = 0; i < 4; i++) {
+        const cx = (Math.sin(i * 3.1) * 0.35) * r;
+        const cy = (Math.cos(i * 2.7) * 0.35) * r;
+        const cr = (0.12 + i * 0.03) * r;
+        ctx.beginPath();
+        ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
 
     /* -----------------------------------------------------------
      * Spaceship Class
@@ -701,19 +728,13 @@
      */
     class Spaceship {
       constructor() {
-        // Base dimensions based on BASE_WIDTH and BASE_HEIGHT
         this.baseWidth = 50;
         this.baseHeight = 50;
         this.baseRadius = 15;
         this.baseSpeed = 5;
 
-        // Apply scaling
-        this.width = this.baseWidth * scaleX;
-        this.height = this.baseHeight * scaleY;
-        this.radius = this.baseRadius * ((scaleX + scaleY) / 2); // Average scaling
-        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2); // Average scaling
+        this.updateScale();
 
-        // Start at center
         this.x = SCREEN_WIDTH / 2;
         this.y = SCREEN_HEIGHT / 2;
       }
@@ -729,18 +750,10 @@
         let deltaX = 0;
         let deltaY = 0;
 
-        if (keys['ArrowLeft']) {
-          deltaX -= 1;
-        }
-        if (keys['ArrowRight']) {
-          deltaX += 1;
-        }
-        if (keys['ArrowUp']) {
-          deltaY -= 1;
-        }
-        if (keys['ArrowDown']) {
-          deltaY += 1;
-        }
+        if (keys['ArrowLeft']) deltaX -= 1;
+        if (keys['ArrowRight']) deltaX += 1;
+        if (keys['ArrowUp']) deltaY -= 1;
+        if (keys['ArrowDown']) deltaY += 1;
 
         if (deltaX !== 0 || deltaY !== 0) {
           const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -750,32 +763,22 @@
           const newX = this.x + normX;
           const newY = this.y + normY;
 
-          // Boundary checks
-          if (newX - this.radius >= 0 && newX + this.radius <= SCREEN_WIDTH) {
-            this.x = newX;
-          }
-          if (newY - this.radius >= 0 && newY + this.radius <= SCREEN_HEIGHT) {
-            this.y = newY;
-          }
+          if (newX - this.radius >= 0 && newX + this.radius <= SCREEN_WIDTH) this.x = newX;
+          if (newY - this.radius >= 0 && newY + this.radius <= SCREEN_HEIGHT) this.y = newY;
         }
       }
 
-      setPosition(newX, newY) {
-        this.x = newX;
-        this.y = newY;
-      }
+      setPosition(newX, newY) { this.x = newX; this.y = newY; }
 
       draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.drawImage(
-          spaceshipImg,
-          -this.width / 2,
-          -this.height / 2,
-          this.width,
-          this.height
-        );
-        ctx.restore();
+        if (assets.ship.ok) {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.drawImage(assets.ship.img, -this.width / 2, -this.height / 2, this.width, this.height);
+          ctx.restore();
+        } else {
+          drawFallbackShip(this.x, this.y, this.width, this.height);
+        }
       }
     }
 
@@ -785,20 +788,15 @@
      */
     class Asteroid {
       constructor() {
-        // Base dimensions
-        this.baseSize = 32; // Base width and height
-        this.baseRadius = (this.baseSize + this.baseSize) / 4; // As per original calculation
+        this.baseSize = 32;
         this.spawn();
-        this.baseSpeed =
-          Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) + MIN_ASTEROID_SPEED;
-        // Random speed between MIN and MAX, scaled
+
+        this.baseSpeed = Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) + MIN_ASTEROID_SPEED;
         this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
 
-        // Random rotation angle + spin speed
         this.angle = Math.random() * 2 * Math.PI;
         this.rotationSpeed = (Math.random() - 0.5) * 0.05;
 
-        // Random scale for the asteroid (0.5x to 2x) based on current scaling
         this.scale = (0.5 + Math.random() * 1.5) * ((scaleX + scaleY) / 2);
         this.width = this.baseSize * this.scale;
         this.height = this.baseSize * this.scale;
@@ -806,36 +804,37 @@
       }
 
       updateScale() {
-        this.scale = (0.5 + Math.random() * 1.5) * ((scaleX + scaleY) / 2);
+        // preserve relative size without re-randomising too aggressively
+        const avg = ((scaleX + scaleY) / 2);
         this.width = this.baseSize * this.scale;
         this.height = this.baseSize * this.scale;
         this.radius = (this.width + this.height) / 4;
-        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
+        this.speed = this.baseSpeed * avg;
       }
 
       spawn() {
         const edge = Math.floor(Math.random() * 4);
         switch (edge) {
-          case 0: // Top
+          case 0:
             this.x = Math.random() * SCREEN_WIDTH;
             this.y = -40 * scaleY;
             break;
-          case 1: // Bottom
+          case 1:
             this.x = Math.random() * SCREEN_WIDTH;
             this.y = SCREEN_HEIGHT + 40 * scaleY;
             break;
-          case 2: // Left
+          case 2:
             this.x = -40 * scaleX;
             this.y = Math.random() * SCREEN_HEIGHT;
             break;
-          case 3: // Right
+          default:
             this.x = SCREEN_WIDTH + 40 * scaleX;
             this.y = Math.random() * SCREEN_HEIGHT;
             break;
         }
-        const angle = Math.random() * 2 * Math.PI;
-        this.dx = Math.cos(angle);
-        this.dy = Math.sin(angle);
+        const a = Math.random() * 2 * Math.PI;
+        this.dx = Math.cos(a);
+        this.dy = Math.sin(a);
       }
 
       move() {
@@ -845,17 +844,15 @@
       }
 
       draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-        ctx.drawImage(
-          asteroidImg,
-          -this.width / 2,
-          -this.height / 2,
-          this.width,
-          this.height
-        );
-        ctx.restore();
+        if (assets.asteroid.ok) {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.drawImage(assets.asteroid.img, -this.width / 2, -this.height / 2, this.width, this.height);
+          ctx.restore();
+        } else {
+          drawFallbackAsteroid(this.x, this.y, this.radius, this.angle);
+        }
       }
 
       isOffScreen() {
@@ -869,73 +866,14 @@
     }
 
     /* -----------------------------------------------------------
-     * Asset Loading
-     * -----------------------------------------------------------
-     */
-    function startIfReady(img) {
-      if (loadedImages.has(img)) {
-        return;
-      }
-      loadedImages.add(img);
-      assetsLoaded++;
-      if (assetsLoaded === 3) {
-        // Once all images are loaded, start the game
-        assetsReady = true;
-        tryStartGame();
-      }
-    }
-
-    function initGameImage(img, src, onLoad) {
-      const handleLoad = () => {
-        if (onLoad) {
-          onLoad();
-        }
-        startIfReady(img);
-      };
-      const handleError = () => {
-        console.warn(`Failed to load game asset: ${src}`);
-        startIfReady(img);
-      };
-
-      img.addEventListener('load', handleLoad, { once: true });
-      img.addEventListener('error', handleError, { once: true });
-      img.src = src;
-
-      if (img.complete) {
-        if (img.naturalWidth !== 0) {
-          handleLoad();
-        } else {
-          handleError();
-        }
-      }
-    }
-
-    function tryStartGame() {
-      if (!assetsReady || !canvasReady) {
-        return;
-      }
-      resetGame();
-    }
-
-    initGameImage(backgroundImg, resolveAsset('dodge_canvas.png'), () => {
-      if (animationId) {
-        drawRollingBackground();
-      }
-    });
-    initGameImage(spaceshipImg, resolveAsset('dodge_spaceship.png'));
-    initGameImage(asteroidImg, resolveAsset('dodge_asteroid.png'));
-
-    /* -----------------------------------------------------------
      * Input Handlers
      * -----------------------------------------------------------
      */
     document.addEventListener('keydown', (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        e.preventDefault(); // Prevent scrolling
+        e.preventDefault();
         keys[e.key] = true;
       }
-
-      // Don't restart if modal is showing
       if (gameOver && e.key === 'Enter' && !initialsModal.classList.contains('show')) {
         resetGame();
       }
@@ -948,18 +886,15 @@
     });
 
     canvas.addEventListener('pointerdown', (e) => {
-      if (!player) {
-        return;
-      }
-      // Don't restart if modal is showing
+      if (!player) return;
+
       if (gameOver && !initialsModal.classList.contains('show')) {
         e.preventDefault();
         resetGame();
         return;
       }
-      if (gameOver) {
-        return;
-      }
+      if (gameOver) return;
+
       e.preventDefault();
       isPointerDown = true;
       pointerStartX = e.clientX;
@@ -969,13 +904,12 @@
     }, { passive: false });
 
     canvas.addEventListener('pointermove', (e) => {
-      if (!player) {
-        return;
-      }
+      if (!player) return;
       if (isPointerDown && !gameOver) {
         e.preventDefault();
         const deltaX = e.clientX - pointerStartX;
         const deltaY = e.clientY - pointerStartY;
+
         let newX = spaceshipStartX + deltaX;
         let newY = spaceshipStartY + deltaY;
 
@@ -986,17 +920,11 @@
     }, { passive: false });
 
     canvas.addEventListener('pointerup', (e) => {
-      if (isPointerDown) {
-        e.preventDefault();
-        isPointerDown = false;
-      }
+      if (isPointerDown) { e.preventDefault(); isPointerDown = false; }
     }, { passive: false });
 
     canvas.addEventListener('pointercancel', (e) => {
-      if (isPointerDown) {
-        e.preventDefault();
-        isPointerDown = false;
-      }
+      if (isPointerDown) { e.preventDefault(); isPointerDown = false; }
     }, { passive: false });
 
     /* -----------------------------------------------------------
@@ -1023,16 +951,14 @@
       MAX_ASTEROID_SPEED = 7;
       gameOver = false;
 
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-      if (speedIntervalId) {
-        clearInterval(speedIntervalId);
-      }
+      if (animationId) cancelAnimationFrame(animationId);
+      if (speedIntervalId) clearInterval(speedIntervalId);
+
       speedIntervalId = setInterval(() => {
         MIN_ASTEROID_SPEED += 0.1;
         MAX_ASTEROID_SPEED += 0.2;
       }, speedIncreaseInterval);
+
       gameLoop();
     }
 
@@ -1045,7 +971,6 @@
       scoreList.innerHTML = '<li class="loading">Loading...</li>';
 
       if (!supabase) {
-        // Fallback to localStorage if Supabase is not configured
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
         renderTopScores();
@@ -1060,12 +985,10 @@
           .limit(10);
 
         if (error) throw error;
-
         topScores = data || [];
         renderTopScores();
       } catch (e) {
         console.error('Failed to fetch scores:', e);
-        // Fallback to localStorage
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
         renderTopScores();
@@ -1074,7 +997,6 @@
 
     async function submitScore(initials, scoreValue) {
       if (!supabase) {
-        // Fallback to localStorage
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         localScores.push({ initials, score: scoreValue });
         localScores.sort((a, b) => (b.score || b) - (a.score || a));
@@ -1101,16 +1023,13 @@
     }
 
     function checkIfHighScore(newScore) {
-      // Score qualifies if there are less than 10 scores or it beats the lowest
       if (topScores.length < 10) return true;
       const lowestScore = topScores[topScores.length - 1]?.score || 0;
       return newScore > lowestScore;
     }
 
     function handleGameOver(finalScore) {
-      if (checkIfHighScore(finalScore)) {
-        showInitialsModal(finalScore);
-      }
+      if (checkIfHighScore(finalScore)) showInitialsModal(finalScore);
     }
 
     /* -----------------------------------------------------------
@@ -1134,19 +1053,15 @@
     }
 
     function validateInitials(value) {
-      // Only allow letters and numbers, exactly 3 characters
       const pattern = /^[A-Za-z0-9]{3}$/;
       return pattern.test(value);
     }
 
-    // Handle input validation (only letters and numbers)
     initialsInput.addEventListener('input', (e) => {
-      // Remove any invalid characters
       e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
       initialsError.textContent = '';
     });
 
-    // Handle Enter key in input
     initialsInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -1154,14 +1069,12 @@
       }
     });
 
-    // Handle submit button click
     submitBtn.addEventListener('click', handleSubmitInitials);
 
     async function handleSubmitInitials() {
       if (isSubmittingScore) return;
 
       const initials = initialsInput.value.trim().toUpperCase();
-
       if (!validateInitials(initials)) {
         initialsError.textContent = 'Please enter exactly 3 letters or numbers';
         initialsInput.focus();
@@ -1185,11 +1098,8 @@
       submitBtn.textContent = 'Submit Score';
     }
 
-    // Close modal on background click (but not on content click)
     initialsModal.addEventListener('click', (e) => {
-      if (e.target === initialsModal && !isSubmittingScore) {
-        hideInitialsModal();
-      }
+      if (e.target === initialsModal && !isSubmittingScore) hideInitialsModal();
     });
 
     function renderTopScores() {
@@ -1208,7 +1118,6 @@
         const li = document.createElement('li');
         const initials = typeof entry === 'object' ? entry.initials : '???';
         const scoreValue = typeof entry === 'object' ? entry.score : entry;
-
         li.innerHTML = `<span class="initials">${initials}</span><span class="score-value">${scoreValue}</span>`;
         scoreList.appendChild(li);
       });
@@ -1219,70 +1128,60 @@
      * -----------------------------------------------------------
      */
     function updateAsteroidsScale() {
-      asteroids.forEach((asteroid) => {
-        asteroid.updateScale();
-      });
+      asteroids.forEach((asteroid) => asteroid.updateScale());
     }
 
     /* -----------------------------------------------------------
-     * Rolling Background Function
+     * Rolling Background
      * -----------------------------------------------------------
-     * We shift the background image down by backgroundOffsetY
-     * each frame. Once offset >= backgroundImg.height, reset it
-     * to 0 to create a seamless rolling effect.
      */
     function drawRollingBackground() {
-      if (!backgroundImg.complete || backgroundImg.width === 0) {
-        return;
-      }
-      // Increase the offset to "scroll" the background
       backgroundOffsetY += backgroundScrollSpeed * ((scaleX + scaleY) / 2);
 
-      // Once it passes the image's height, wrap around
-      if (backgroundOffsetY >= backgroundImg.height) {
-        backgroundOffsetY = 0;
-      }
-
-      // Draw the tiled background in vertical strips
-      for (let y = -backgroundImg.height; y < SCREEN_HEIGHT; y += backgroundImg.height) {
-        for (let x = 0; x < SCREEN_WIDTH; x += backgroundImg.width) {
-          ctx.drawImage(backgroundImg, x, y + backgroundOffsetY, backgroundImg.width, backgroundImg.height);
-        }
+      if (assets.background.ok && bgPattern) {
+        // pattern scroll: translate, then fill
+        ctx.save();
+        const tileH = assets.background.img.height || 256;
+        if (backgroundOffsetY >= tileH) backgroundOffsetY = 0;
+        ctx.translate(0, backgroundOffsetY);
+        ctx.fillStyle = bgPattern;
+        ctx.fillRect(0, -backgroundOffsetY, SCREEN_WIDTH, SCREEN_HEIGHT + tileH);
+        ctx.restore();
+      } else {
+        // fallback starfield scroll
+        if (backgroundOffsetY >= SCREEN_HEIGHT) backgroundOffsetY = 0;
+        drawFallbackStars();
       }
     }
 
     /* -----------------------------------------------------------
-     * The main game loop
+     * Main game loop
      * -----------------------------------------------------------
      */
     function gameLoop() {
       if (!gameOver) {
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        // 1) Draw the rolling background
+
         drawRollingBackground();
 
-        // 2) Increase and display score
         score++;
         ctx.fillStyle = '#f5f5f5';
         ctx.font = `${18 * ((scaleX + scaleY) / 2)}px Arial`;
+        ctx.textAlign = 'start';
         ctx.fillText('Score: ' + score, 10, 20);
 
-        // 3) Move and draw the spaceship
         player.move();
         player.draw();
 
-        // 4) Spawn asteroids
         if (Math.random() * 100 < asteroidSpawnRate) {
           asteroids.push(new Asteroid());
         }
 
-        // 5) Update and draw asteroids
         for (let i = asteroids.length - 1; i >= 0; i--) {
           const m = asteroids[i];
           m.move();
           m.draw();
 
-          // Collision?
           if (checkCollision(player, m)) {
             gameOver = true;
             handleGameOver(score);
@@ -1292,40 +1191,30 @@
             }
           }
 
-          // Remove if off screen
-          if (m.isOffScreen()) {
-            asteroids.splice(i, 1);
-          }
+          if (m.isOffScreen()) asteroids.splice(i, 1);
         }
 
-        // 6) Gradually increase difficulty (spawn rate)
         asteroidSpawnRate += 0.02;
 
-        // Request the next frame
         animationId = requestAnimationFrame(gameLoop);
       } else {
-        // Slightly darken the screen
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        // Game Over text
         ctx.fillStyle = '#f5f5f5';
         ctx.font = `${40 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.textAlign = 'center';
         ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40 * ((scaleX + scaleY) / 2));
 
-        // Final score
         ctx.font = `${30 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.fillText('Score: ' + score, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
-        // Restart instruction
         ctx.font = `${20 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.fillText('Press Enter or Tap the Game Canvas to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40 * ((scaleX + scaleY) / 2));
         ctx.textAlign = 'start';
       }
     }
   </script>
-
 </body>
 
 </html>
