@@ -497,6 +497,7 @@
      */
     const SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
+    const SCORE_FIELD = 'survival_time';
 
     let supabase = null;
 
@@ -523,8 +524,8 @@
 
     async function fetchTopScoresRest() {
       const url = new URL(`${SUPABASE_URL}/rest/v1/dodge_leaderboard`);
-      url.searchParams.set('select', 'initials,score');
-      url.searchParams.set('order', 'score.desc');
+      url.searchParams.set('select', `initials,${SCORE_FIELD}`);
+      url.searchParams.set('order', `${SCORE_FIELD}.desc`);
       url.searchParams.set('limit', '10');
       const response = await fetch(url.toString(), {
         method: 'GET',
@@ -543,7 +544,7 @@
           ...getSupabaseRestHeaders(accessToken),
           Prefer: 'return=minimal',
         },
-        body: JSON.stringify([{ initials: initials.toUpperCase(), score: scoreValue }]),
+        body: JSON.stringify([{ initials: initials.toUpperCase(), [SCORE_FIELD]: scoreValue }]),
       });
       if (!response.ok) {
         throw new Error(`Supabase REST insert failed: ${response.status}`);
@@ -1090,20 +1091,20 @@
         if (client) {
           const { data, error } = await client
             .from('dodge_leaderboard')
-            .select('initials, score')
-            .order('score', { ascending: false })
+            .select(`initials, ${SCORE_FIELD}`)
+            .order(SCORE_FIELD, { ascending: false })
             .limit(10);
 
           if (error) throw error;
-          topScores = mergeRecentSubmission(data || []);
+          topScores = mergeRecentSubmission(normalizeScores(data || []));
         } else {
-          topScores = mergeRecentSubmission(await fetchTopScoresRest());
+          topScores = mergeRecentSubmission(normalizeScores(await fetchTopScoresRest()));
         }
         renderTopScores();
       } catch (e) {
         console.warn('Supabase client fetch failed, retrying with REST fallback.', e);
         try {
-          topScores = mergeRecentSubmission(await fetchTopScoresRest());
+          topScores = mergeRecentSubmission(normalizeScores(await fetchTopScoresRest()));
           renderTopScores();
           return;
         } catch (restError) {
@@ -1132,7 +1133,7 @@
         if (client) {
           const { error } = await client
             .from('dodge_leaderboard')
-            .insert([{ initials: initials.toUpperCase(), score: scoreValue }]);
+            .insert([{ initials: initials.toUpperCase(), [SCORE_FIELD]: scoreValue }]);
 
           if (error) throw error;
         } else {
@@ -1158,6 +1159,13 @@
           return false;
         }
       }
+    }
+
+    function normalizeScores(entries) {
+      return (entries || []).map((entry) => ({
+        initials: entry.initials,
+        score: entry[SCORE_FIELD],
+      }));
     }
 
     function registerRecentSubmission(initials, scoreValue) {
