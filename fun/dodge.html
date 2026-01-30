@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dodge the Asteroids</title>
   <link rel="icon" type="image/png" href="/favicon.png">
+  <!-- Supabase Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -333,6 +335,158 @@
         font-size: 0.85em;
       }
     }
+
+    /* Initials Input Modal */
+    #initialsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #initialsModal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(30, 40, 60, 0.95) 0%, rgba(20, 30, 50, 0.98) 100%);
+      border: 2px solid #ffc107;
+      border-radius: 16px;
+      padding: 32px 40px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 193, 7, 0.3), 0 0 80px rgba(255, 193, 7, 0.1);
+      animation: modalPop 0.3s ease-out;
+    }
+
+    @keyframes modalPop {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-content h2 {
+      color: #4ade80;
+      font-size: 1.8em;
+      margin: 0 0 8px 0;
+      text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+    }
+
+    .modal-content .high-score-text {
+      color: #ffc107;
+      font-size: 1.2em;
+      margin: 0 0 24px 0;
+    }
+
+    .modal-content .score-display {
+      font-size: 2.5em;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 24px 0;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .modal-content label {
+      display: block;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95em;
+      margin-bottom: 12px;
+    }
+
+    #initialsInput {
+      width: 120px;
+      padding: 12px 16px;
+      font-size: 2em;
+      font-family: 'Inter', monospace;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255, 193, 7, 0.5);
+      border-radius: 8px;
+      color: #ffc107;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #initialsInput:focus {
+      border-color: #ffc107;
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    }
+
+    #initialsInput::placeholder {
+      color: rgba(255, 193, 7, 0.3);
+      letter-spacing: 4px;
+    }
+
+    .modal-content .submit-btn {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px 32px;
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #0a0f1e;
+      background: linear-gradient(135deg, #ffc107 0%, #ffca28 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .modal-content .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+    }
+
+    .modal-content .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .modal-content .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .modal-content .error-text {
+      color: #f87171;
+      font-size: 0.85em;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+
+    /* Updated Top Scores for initials display */
+    #topScores li .initials {
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      color: #ffc107;
+      letter-spacing: 2px;
+      min-width: 48px;
+    }
+
+    #topScores li .score-value {
+      color: #f5f5f5;
+      font-weight: 500;
+    }
+
+    /* Loading state for leaderboard */
+    #topScores .loading {
+      color: rgba(255, 255, 255, 0.5);
+      font-style: italic;
+      padding: 20px;
+    }
   </style>
 </head>
 
@@ -345,10 +499,23 @@
   <!-- Background overlay (for dimming) -->
   <div id="overlay"></div>
 
+  <!-- Initials Input Modal -->
+  <div id="initialsModal">
+    <div class="modal-content">
+      <h2>New High Score!</h2>
+      <p class="high-score-text">You made the leaderboard!</p>
+      <p class="score-display" id="modalScore">0</p>
+      <label for="initialsInput">Enter your initials (3 characters)</label>
+      <input type="text" id="initialsInput" maxlength="3" placeholder="AAA" autocomplete="off" />
+      <p class="error-text" id="initialsError"></p>
+      <button class="submit-btn" id="submitInitials">Submit Score</button>
+    </div>
+  </div>
+
   <div id="container">
-    <!-- Top Scores Section -->
+    <!-- Leaderboard Section -->
     <div id="topScores">
-      <h1>Top Scores</h1>
+      <h1>Leaderboard</h1>
       <ol id="scoreList">
       </ol>
     </div>
@@ -372,6 +539,24 @@
   </div>
 
   <script>
+    /* -----------------------------------------------------------
+     * Supabase Configuration
+     * -----------------------------------------------------------
+     * IMPORTANT: Replace these with your actual Supabase project credentials
+     */
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';  // e.g., 'https://xxxxx.supabase.co'
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';  // Your project's anon/public key
+
+    // Initialize Supabase client
+    let supabase = null;
+    try {
+      if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch (e) {
+      console.warn('Supabase initialization failed:', e);
+    }
+
     /* -----------------------------------------------------------
      * Base Canvas Size and Scaling Factors
      * -----------------------------------------------------------
@@ -427,10 +612,10 @@
       // resetGame(); // Uncomment if you want to reset on resize
     }
 
-    // Initial resize and render top scores from local storage
+    // Initial resize and fetch top scores from Supabase
     window.addEventListener('load', () => {
       resizeCanvas();
-      renderTopScores();
+      fetchTopScores();
       if (assetsLoaded === 3) {
         resetGame();
       }
@@ -469,8 +654,10 @@
     let keys = {};
     let animationId;
     let speedIntervalId;
-    // Use localStorage for top scores with a game-specific key
-    let topScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
+    // Top scores from Supabase (array of {initials, score} objects)
+    let topScores = [];
+    let pendingScore = 0;  // Score waiting to be submitted with initials
+    let isSubmittingScore = false;  // Prevent double submissions
 
     // Asteroid spawn & speed parameters
     let MIN_ASTEROID_SPEED = 2;
@@ -702,7 +889,8 @@
         keys[e.key] = true;
       }
 
-      if (gameOver && e.key === 'Enter') {
+      // Don't restart if modal is showing
+      if (gameOver && e.key === 'Enter' && !initialsModal.classList.contains('show')) {
         resetGame();
       }
     });
@@ -717,9 +905,13 @@
       if (!player) {
         return;
       }
-      if (gameOver) {
+      // Don't restart if modal is showing
+      if (gameOver && !initialsModal.classList.contains('show')) {
         e.preventDefault();
         resetGame();
+        return;
+      }
+      if (gameOver) {
         return;
       }
       e.preventDefault();
@@ -798,20 +990,186 @@
       gameLoop();
     }
 
-    function updateTopScores(newScore) {
-      topScores.push(newScore);
-      topScores.sort((a, b) => b - a);
-      topScores = topScores.slice(0, 5);
-      localStorage.setItem("dodgeTheAsteroids_topScores", JSON.stringify(topScores));
-      renderTopScores();
+    /* -----------------------------------------------------------
+     * Supabase Score Functions
+     * -----------------------------------------------------------
+     */
+    async function fetchTopScores() {
+      const scoreList = document.getElementById('scoreList');
+      scoreList.innerHTML = '<li class="loading">Loading...</li>';
+
+      if (!supabase) {
+        // Fallback to localStorage if Supabase is not configured
+        const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
+        topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
+        renderTopScores();
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('dodge_leaderboard')
+          .select('initials, score')
+          .order('score', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        topScores = data || [];
+        renderTopScores();
+      } catch (e) {
+        console.error('Failed to fetch scores:', e);
+        // Fallback to localStorage
+        const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
+        topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
+        renderTopScores();
+      }
     }
+
+    async function submitScore(initials, scoreValue) {
+      if (!supabase) {
+        // Fallback to localStorage
+        const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
+        localScores.push({ initials, score: scoreValue });
+        localScores.sort((a, b) => (b.score || b) - (a.score || a));
+        const trimmed = localScores.slice(0, 10);
+        localStorage.setItem("dodgeTheAsteroids_topScores", JSON.stringify(trimmed));
+        topScores = trimmed;
+        renderTopScores();
+        return true;
+      }
+
+      try {
+        const { error } = await supabase
+          .from('dodge_leaderboard')
+          .insert([{ initials: initials.toUpperCase(), score: scoreValue }]);
+
+        if (error) throw error;
+
+        await fetchTopScores();
+        return true;
+      } catch (e) {
+        console.error('Failed to submit score:', e);
+        return false;
+      }
+    }
+
+    function checkIfHighScore(newScore) {
+      // Score qualifies if there are less than 10 scores or it beats the lowest
+      if (topScores.length < 10) return true;
+      const lowestScore = topScores[topScores.length - 1]?.score || 0;
+      return newScore > lowestScore;
+    }
+
+    function handleGameOver(finalScore) {
+      if (checkIfHighScore(finalScore)) {
+        showInitialsModal(finalScore);
+      }
+    }
+
+    /* -----------------------------------------------------------
+     * Initials Modal Functions
+     * -----------------------------------------------------------
+     */
+    const initialsModal = document.getElementById('initialsModal');
+    const initialsInput = document.getElementById('initialsInput');
+    const initialsError = document.getElementById('initialsError');
+    const submitBtn = document.getElementById('submitInitials');
+    const modalScoreDisplay = document.getElementById('modalScore');
+
+    function showInitialsModal(scoreValue) {
+      pendingScore = scoreValue;
+      modalScoreDisplay.textContent = scoreValue;
+      initialsInput.value = '';
+      initialsError.textContent = '';
+      submitBtn.disabled = false;
+      initialsModal.classList.add('show');
+      setTimeout(() => initialsInput.focus(), 100);
+    }
+
+    function hideInitialsModal() {
+      initialsModal.classList.remove('show');
+      pendingScore = 0;
+      isSubmittingScore = false;
+    }
+
+    function validateInitials(value) {
+      // Only allow letters and numbers, exactly 3 characters
+      const pattern = /^[A-Za-z0-9]{3}$/;
+      return pattern.test(value);
+    }
+
+    // Handle input validation (only letters and numbers)
+    initialsInput.addEventListener('input', (e) => {
+      // Remove any invalid characters
+      e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      initialsError.textContent = '';
+    });
+
+    // Handle Enter key in input
+    initialsInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSubmitInitials();
+      }
+    });
+
+    // Handle submit button click
+    submitBtn.addEventListener('click', handleSubmitInitials);
+
+    async function handleSubmitInitials() {
+      if (isSubmittingScore) return;
+
+      const initials = initialsInput.value.trim().toUpperCase();
+
+      if (!validateInitials(initials)) {
+        initialsError.textContent = 'Please enter exactly 3 letters or numbers';
+        initialsInput.focus();
+        return;
+      }
+
+      isSubmittingScore = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      const success = await submitScore(initials, pendingScore);
+
+      if (success) {
+        hideInitialsModal();
+      } else {
+        initialsError.textContent = 'Failed to submit score. Please try again.';
+        isSubmittingScore = false;
+        submitBtn.disabled = false;
+      }
+
+      submitBtn.textContent = 'Submit Score';
+    }
+
+    // Close modal on background click (but not on content click)
+    initialsModal.addEventListener('click', (e) => {
+      if (e.target === initialsModal && !isSubmittingScore) {
+        hideInitialsModal();
+      }
+    });
 
     function renderTopScores() {
       const scoreList = document.getElementById('scoreList');
       scoreList.innerHTML = '';
-      topScores.forEach((sc) => {
+
+      if (topScores.length === 0) {
         const li = document.createElement('li');
-        li.textContent = sc;
+        li.className = 'loading';
+        li.textContent = 'No scores yet!';
+        scoreList.appendChild(li);
+        return;
+      }
+
+      topScores.forEach((entry) => {
+        const li = document.createElement('li');
+        const initials = typeof entry === 'object' ? entry.initials : '???';
+        const scoreValue = typeof entry === 'object' ? entry.score : entry;
+
+        li.innerHTML = `<span class="initials">${initials}</span><span class="score-value">${scoreValue}</span>`;
         scoreList.appendChild(li);
       });
     }
@@ -887,7 +1245,7 @@
           // Collision?
           if (checkCollision(player, m)) {
             gameOver = true;
-            updateTopScores(score);
+            handleGameOver(score);
             if (speedIntervalId) {
               clearInterval(speedIntervalId);
               speedIntervalId = null;
