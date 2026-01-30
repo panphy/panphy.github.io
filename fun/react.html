@@ -593,6 +593,7 @@
         if (savedBestTime !== null) {
             bestTime = Number(savedBestTime);
             if (!Number.isNaN(bestTime)) {
+                bestTime = Number(bestTime.toFixed(3));
                 bestTimeDisplay.textContent = bestTime.toFixed(3) + "s";
                 memoryBestTime = String(bestTime);
             } else {
@@ -604,6 +605,7 @@
                 bestTime = Number(legacyBestTime);
                 if (!Number.isNaN(bestTime)) {
                     if (bestTime > 10) bestTime = bestTime / 1000;
+                    bestTime = Number(bestTime.toFixed(3));
                     bestTimeDisplay.textContent = bestTime.toFixed(3) + "s";
                     safeSetItem(BEST_TIME_KEY, bestTime);
                     memoryBestTime = String(bestTime);
@@ -691,19 +693,20 @@
         function finishGame() {
             const endTime = performance.now();
             const reactionTime = (endTime - startTime) / 1000;
+            const roundedReactionTime = Number(reactionTime.toFixed(3));
 
             gameState = 'result';
             container.className = 'state-result';
 
             icon.textContent = '🎉';
-            mainText.textContent = reactionTime.toFixed(3) + "s";
+            mainText.textContent = roundedReactionTime.toFixed(3) + "s";
 
             let comment = "";
             let isNewBest = false;
 
-            if (bestTime === null || reactionTime < bestTime) {
+            if (bestTime === null || roundedReactionTime < bestTime) {
                 isNewBest = true;
-                bestTime = reactionTime;
+                bestTime = roundedReactionTime;
                 bestTimeDisplay.textContent = bestTime.toFixed(3) + "s";
                 safeSetItem(BEST_TIME_KEY, bestTime);
                 memoryBestTime = String(bestTime);
