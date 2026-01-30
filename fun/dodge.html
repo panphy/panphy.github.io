@@ -52,6 +52,50 @@
       filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
     }
 
+    .sound-toggle {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      z-index: 120;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 193, 7, 0.5);
+      background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(255, 213, 79, 0.85));
+      color: #0a0f1e;
+      font-size: 0.9em;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(255, 193, 7, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+
+    .sound-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(255, 193, 7, 0.35);
+      filter: brightness(1.05);
+    }
+
+    .sound-toggle:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 16px rgba(255, 193, 7, 0.25);
+    }
+
+    .sound-toggle.muted {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+      border-color: rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.6);
+    }
+
+    .sound-toggle .icon {
+      font-size: 1em;
+      line-height: 1;
+    }
+
     a {
       color: #ffc107;
       text-decoration: none;
@@ -456,6 +500,11 @@
     </a>
   </div>
 
+  <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false">
+    <span class="icon" aria-hidden="true">🔊</span>
+    <span class="label">Sound On</span>
+  </button>
+
   <div id="overlay"></div>
   <audio id="bgm" src="/fun/dodge_bgm.mp3" loop preload="auto"></audio>
 
@@ -510,9 +559,26 @@
 
     const bgm = document.getElementById('bgm');
     let bgmStarted = false;
+    let isMuted = false;
+
+    const soundToggle = document.getElementById('soundToggle');
+    const soundToggleLabel = soundToggle ? soundToggle.querySelector('.label') : null;
+    const soundToggleIcon = soundToggle ? soundToggle.querySelector('.icon') : null;
+
+    function updateSoundToggle() {
+      if (!soundToggle) return;
+      soundToggle.classList.toggle('muted', isMuted);
+      soundToggle.setAttribute('aria-pressed', String(isMuted));
+      const labelText = isMuted ? 'Sound Off' : 'Sound On';
+      const iconText = isMuted ? '🔇' : '🔊';
+      if (soundToggleLabel) soundToggleLabel.textContent = labelText;
+      if (soundToggleIcon) soundToggleIcon.textContent = iconText;
+      soundToggle.setAttribute('aria-label', isMuted ? 'Enable sound' : 'Mute sound');
+      if (bgm) bgm.muted = isMuted;
+    }
 
     function startBackgroundMusic() {
-      if (bgmStarted || !bgm) return;
+      if (bgmStarted || !bgm || isMuted) return;
       bgmStarted = true;
       const playPromise = bgm.play();
       if (playPromise && typeof playPromise.catch === 'function') {
@@ -527,6 +593,28 @@
       bgm.pause();
       bgm.currentTime = 0;
       bgmStarted = false;
+    }
+
+    function setMutedState(nextMuted) {
+      isMuted = Boolean(nextMuted);
+      if (isMuted) {
+        stopBackgroundMusic();
+      }
+      updateSoundToggle();
+      try {
+        localStorage.setItem('dodgeMuted', isMuted ? '1' : '0');
+      } catch (e) {
+        // ignore storage errors
+      }
+    }
+
+    if (soundToggle) {
+      soundToggle.addEventListener('click', () => {
+        setMutedState(!isMuted);
+        if (!isMuted) {
+          startBackgroundMusic();
+        }
+      });
     }
 
     function initSupabaseClient() {
@@ -642,6 +730,15 @@
 
     window.addEventListener('load', () => {
       resizeCanvas();
+      try {
+        const storedMuted = localStorage.getItem('dodgeMuted');
+        if (storedMuted !== null) {
+          isMuted = storedMuted === '1';
+        }
+      } catch (e) {
+        // ignore storage errors
+      }
+      updateSoundToggle();
       initSupabaseClient();
       fetchTopScores({ preferRemote: true });
       tryStartGame();
