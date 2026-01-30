@@ -1005,9 +1005,7 @@
       }
 
       if (!client) {
-        const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
-        topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
-        renderTopScores();
+        scoreList.innerHTML = '<li class="loading">Leaderboard unavailable.</li>';
         return;
       }
 
@@ -1023,9 +1021,7 @@
         renderTopScores();
       } catch (e) {
         console.error('Failed to fetch scores:', e);
-        const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
-        topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
-        renderTopScores();
+        scoreList.innerHTML = '<li class="loading">Unable to load scores.</li>';
       }
     }
 
@@ -1042,14 +1038,7 @@
         client = await waitForSupabaseClient();
       }
       if (!client) {
-        const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
-        localScores.push({ initials, score: scoreValue });
-        localScores.sort((a, b) => (b.score || b) - (a.score || a));
-        const trimmed = localScores.slice(0, 10);
-        localStorage.setItem("dodgeTheAsteroids_topScores", JSON.stringify(trimmed));
-        topScores = trimmed;
-        renderTopScores();
-        return true;
+        return false;
       }
 
       try {
