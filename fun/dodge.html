@@ -522,6 +522,13 @@
       }
     }
 
+    function stopBackgroundMusic() {
+      if (!bgm) return;
+      bgm.pause();
+      bgm.currentTime = 0;
+      bgmStarted = false;
+    }
+
     function initSupabaseClient() {
       if (supabase) return supabase;
       try {
@@ -1058,6 +1065,7 @@
         MAX_ASTEROID_SPEED += 0.2;
       }, speedIncreaseInterval);
 
+      startBackgroundMusic();
       gameLoop();
     }
 
@@ -1395,6 +1403,7 @@
           if (checkCollision(player, m)) {
             gameOver = true;
             handleGameOver(score);
+            stopBackgroundMusic();
             if (speedIntervalId) {
               clearInterval(speedIntervalId);
               speedIntervalId = null;
