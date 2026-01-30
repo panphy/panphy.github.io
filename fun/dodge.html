@@ -496,6 +496,44 @@
       return supabase;
     }
 
+    function getSupabaseRestHeaders() {
+      return {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      };
+    }
+
+    async function fetchTopScoresRest() {
+      const url = new URL(`${SUPABASE_URL}/rest/v1/dodge_leaderboard`);
+      url.searchParams.set('select', 'initials,score');
+      url.searchParams.set('order', 'score.desc');
+      url.searchParams.set('limit', '10');
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: getSupabaseRestHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error(`Supabase REST fetch failed: ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function submitScoreRest(initials, scoreValue) {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/dodge_leaderboard`, {
+        method: 'POST',
+        headers: {
+          ...getSupabaseRestHeaders(),
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify([{ initials: initials.toUpperCase(), score: scoreValue }]),
+      });
+      if (!response.ok) {
+        throw new Error(`Supabase REST insert failed: ${response.status}`);
+      }
+      return true;
+    }
+
     /* -----------------------------------------------------------
      * Base Canvas Size and Scaling Factors
      * -----------------------------------------------------------
@@ -1004,20 +1042,19 @@
         client = await waitForSupabaseClient();
       }
 
-      if (!client) {
-        scoreList.innerHTML = '<li class="loading">Leaderboard unavailable.</li>';
-        return;
-      }
-
       try {
-        const { data, error } = await client
-          .from('dodge_leaderboard')
-          .select('initials, score')
-          .order('score', { ascending: false })
-          .limit(10);
+        if (client) {
+          const { data, error } = await client
+            .from('dodge_leaderboard')
+            .select('initials, score')
+            .order('score', { ascending: false })
+            .limit(10);
 
-        if (error) throw error;
-        topScores = data || [];
+          if (error) throw error;
+          topScores = data || [];
+        } else {
+          topScores = await fetchTopScoresRest();
+        }
         renderTopScores();
       } catch (e) {
         console.error('Failed to fetch scores:', e);
@@ -1037,16 +1074,17 @@
       if (!client) {
         client = await waitForSupabaseClient();
       }
-      if (!client) {
-        return false;
-      }
 
       try {
-        const { error } = await client
-          .from('dodge_leaderboard')
-          .insert([{ initials: initials.toUpperCase(), score: scoreValue }]);
+        if (client) {
+          const { error } = await client
+            .from('dodge_leaderboard')
+            .insert([{ initials: initials.toUpperCase(), score: scoreValue }]);
 
-        if (error) throw error;
+          if (error) throw error;
+        } else {
+          await submitScoreRest(initials, scoreValue);
+        }
 
         await fetchTopScores();
         return true;
