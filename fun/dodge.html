@@ -457,6 +457,7 @@
   </div>
 
   <div id="overlay"></div>
+  <audio id="bgm" src="/fun/dodge_bgm.mp3" loop preload="auto"></audio>
 
   <div id="initialsModal">
     <div class="modal-content">
@@ -506,6 +507,20 @@
     const SCORE_FIELD = 'survival_time';
 
     let supabase = null;
+
+    const bgm = document.getElementById('bgm');
+    let bgmStarted = false;
+
+    function startBackgroundMusic() {
+      if (bgmStarted || !bgm) return;
+      bgmStarted = true;
+      const playPromise = bgm.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+          bgmStarted = false;
+        });
+      }
+    }
 
     function initSupabaseClient() {
       if (supabase) return supabase;
@@ -951,6 +966,7 @@
      * -----------------------------------------------------------
      */
     document.addEventListener('keydown', (e) => {
+      startBackgroundMusic();
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
         keys[e.key] = true;
@@ -967,6 +983,7 @@
     });
 
     canvas.addEventListener('pointerdown', (e) => {
+      startBackgroundMusic();
       if (!player) return;
 
       if (gameOver && !initialsModal.classList.contains('show')) {
