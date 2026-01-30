@@ -508,6 +508,7 @@
 
   <div id="overlay"></div>
   <audio id="bgm" src="dodge_assets/dodge_bgm.mp3" loop preload="auto"></audio>
+  <audio id="gameOverSfx" src="dodge_assets/dodge_gameover.mp3" preload="auto"></audio>
 
   <div id="initialsModal">
     <div class="modal-content">
@@ -560,6 +561,7 @@
     let supabase = null;
 
     const bgm = document.getElementById('bgm');
+    const gameOverSfx = document.getElementById('gameOverSfx');
     let bgmStarted = false;
     let isMuted = false;
 
@@ -577,6 +579,7 @@
       if (soundToggleIcon) soundToggleIcon.textContent = iconText;
       soundToggle.setAttribute('aria-label', isMuted ? 'Enable sound' : 'Mute sound');
       if (bgm) bgm.muted = isMuted;
+      if (gameOverSfx) gameOverSfx.muted = isMuted;
     }
 
     function startBackgroundMusic() {
@@ -597,10 +600,28 @@
       bgmStarted = false;
     }
 
+    function playGameOverSound() {
+      if (!gameOverSfx || isMuted) return;
+      gameOverSfx.currentTime = 0;
+      const playPromise = gameOverSfx.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+          // ignore play errors
+        });
+      }
+    }
+
+    function stopGameOverSound() {
+      if (!gameOverSfx) return;
+      gameOverSfx.pause();
+      gameOverSfx.currentTime = 0;
+    }
+
     function setMutedState(nextMuted) {
       isMuted = Boolean(nextMuted);
       if (isMuted) {
         stopBackgroundMusic();
+        stopGameOverSound();
       }
       updateSoundToggle();
       try {
@@ -1202,6 +1223,7 @@
 
       if (animationId) cancelAnimationFrame(animationId);
       if (speedIntervalId) clearInterval(speedIntervalId);
+      stopGameOverSound();
 
       speedIntervalId = setInterval(() => {
         MIN_ASTEROID_SPEED += 0.1;
@@ -1564,8 +1586,9 @@
           m.move();
           m.draw();
 
-          if (checkCollision(player, m)) {
+          if (!gameOver && checkCollision(player, m)) {
             gameOver = true;
+            playGameOverSound();
             handleGameOver(score);
             stopBackgroundMusic();
             if (speedIntervalId) {
