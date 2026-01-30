@@ -675,6 +675,13 @@
     // We track when all images are loaded
     let assetsLoaded = 0;
 
+    // Modal elements (needed by input handlers)
+    const initialsModal = document.getElementById('initialsModal');
+    const initialsInput = document.getElementById('initialsInput');
+    const initialsError = document.getElementById('initialsError');
+    const submitBtn = document.getElementById('submitInitials');
+    const modalScoreDisplay = document.getElementById('modalScore');
+
     /* -----------------------------------------------------------
      * Background Scrolling Variables
      * -----------------------------------------------------------
@@ -1071,12 +1078,6 @@
      * Initials Modal Functions
      * -----------------------------------------------------------
      */
-    const initialsModal = document.getElementById('initialsModal');
-    const initialsInput = document.getElementById('initialsInput');
-    const initialsError = document.getElementById('initialsError');
-    const submitBtn = document.getElementById('submitInitials');
-    const modalScoreDisplay = document.getElementById('modalScore');
-
     function showInitialsModal(scoreValue) {
       pendingScore = scoreValue;
       modalScoreDisplay.textContent = scoreValue;
