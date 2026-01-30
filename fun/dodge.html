@@ -132,14 +132,15 @@
 
     #topScores li {
       font-size: 1.1em;
-      text-align: center;
+      text-align: left;
       padding: 10px 8px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       counter-increment: score-counter;
-      display: flex;
+      display: grid;
+      grid-template-columns: 32px minmax(56px, 1fr) minmax(90px, 1fr);
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      justify-items: start;
+      column-gap: 12px;
       white-space: nowrap;
       transition: background 0.2s ease;
     }
@@ -151,6 +152,7 @@
       color: rgba(255, 193, 7, 0.7);
       font-weight: 600;
       min-width: 24px;
+      justify-self: start;
     }
 
     #topScores li:last-child { border-bottom: none; }
@@ -429,11 +431,14 @@
       color: #ffc107;
       letter-spacing: 2px;
       min-width: 48px;
+      justify-self: start;
     }
 
     #topScores li .score-value {
       color: #f5f5f5;
       font-weight: 500;
+      justify-self: start;
+      text-align: left;
     }
 
     #topScores .loading {
