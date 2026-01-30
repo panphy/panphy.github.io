@@ -88,24 +88,48 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 6px;
       border: none;
-      border-radius: 4px;
-      padding: 8px 12px;
+      border-radius: 8px;
+      padding: 0 16px;
+      height: 36px;
+      min-width: 80px;
       font-size: 14px;
+      font-weight: 500;
       font-family: inherit;
-      line-height: 1.2;
+      line-height: 1;
+      letter-spacing: 0.01em;
       box-sizing: border-box;
       cursor: pointer;
-      transition: filter 0.3s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     }
 
-    .btn:hover {
-      filter: brightness(90%);
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
     }
 
     .btn:disabled {
-      background-color: #aaa;
+      background-color: #9ca3af;
+      color: #f3f4f6;
       cursor: not-allowed;
+      opacity: 0.7;
+      box-shadow: none;
     }
 
     /* Specific button classes */
@@ -147,7 +171,14 @@
     .btn-export {
       background-color: var(--export-bg);
       color: var(--export-text);
-      width: 65%;
+      width: 100%;
+      max-width: 200px;
+    }
+
+    /* Modal button styling */
+    .btn-confirm {
+      background-color: var(--brand-primary);
+      color: #ffffff;
     }
 
     /* Button group styling for organized layout */
@@ -452,7 +483,13 @@
     }
 
     @media (pointer: coarse) {
-      button,
+      .btn {
+        height: 44px;
+        min-height: 44px;
+        font-size: 15px;
+        padding: 0 18px;
+      }
+
       input,
       select {
         min-height: 44px;
@@ -555,7 +592,7 @@
         <label><input type="radio" name="plotType" value="3"> Linear-Log (base 10)</label><br>
         <label><input type="radio" name="plotType" value="4"> Log (base 10)-Log (base 10)</label><br><br>
       </form>
-        <button id="plotTypeConfirm" class="btn" title="Confirm the selected plot type">Confirm</button>
+        <button id="plotTypeConfirm" class="btn btn-confirm" title="Confirm the selected plot type">Confirm</button>
     </div>
   </div>
 
