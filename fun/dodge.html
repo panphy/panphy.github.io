@@ -559,7 +559,7 @@
     window.addEventListener('load', () => {
       resizeCanvas();
       initSupabaseClient();
-      fetchTopScores();
+      fetchTopScores({ preferRemote: true });
       tryStartGame();
     });
 
@@ -976,11 +976,35 @@
      * Supabase Score Functions
      * -----------------------------------------------------------
      */
-    async function fetchTopScores() {
+    function waitForSupabaseClient({ timeoutMs = 4000, intervalMs = 200 } = {}) {
+      return new Promise((resolve) => {
+        const start = Date.now();
+        const check = () => {
+          const client = initSupabaseClient();
+          if (client) {
+            resolve(client);
+            return;
+          }
+          if (Date.now() - start >= timeoutMs) {
+            resolve(null);
+            return;
+          }
+          setTimeout(check, intervalMs);
+        };
+        check();
+      });
+    }
+
+    async function fetchTopScores({ preferRemote = false } = {}) {
       const scoreList = document.getElementById('scoreList');
       scoreList.innerHTML = '<li class="loading">Loading...</li>';
 
-      if (!initSupabaseClient()) {
+      let client = initSupabaseClient();
+      if (!client && preferRemote) {
+        client = await waitForSupabaseClient();
+      }
+
+      if (!client) {
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
         renderTopScores();
@@ -988,7 +1012,7 @@
       }
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await client
           .from('dodge_leaderboard')
           .select('initials, score')
           .order('score', { ascending: false })
@@ -1008,14 +1032,16 @@
     const supabaseScript = document.getElementById('supabaseScript');
     if (supabaseScript) {
       supabaseScript.addEventListener('load', () => {
-        if (initSupabaseClient()) {
-          fetchTopScores();
-        }
+        fetchTopScores({ preferRemote: true });
       });
     }
 
     async function submitScore(initials, scoreValue) {
-      if (!initSupabaseClient()) {
+      let client = initSupabaseClient();
+      if (!client) {
+        client = await waitForSupabaseClient();
+      }
+      if (!client) {
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         localScores.push({ initials, score: scoreValue });
         localScores.sort((a, b) => (b.score || b) - (a.score || a));
@@ -1027,7 +1053,7 @@
       }
 
       try {
-        const { error } = await supabase
+        const { error } = await client
           .from('dodge_leaderboard')
           .insert([{ initials: initials.toUpperCase(), score: scoreValue }]);
 
