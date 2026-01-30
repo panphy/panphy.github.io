@@ -102,7 +102,7 @@ self.addEventListener('fetch', (event) => {
   const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
 
   // Never cache the dodge game or provide offline fallback for it.
-  if (isSameOrigin && url.pathname === '/fun/dodge.html') {
+  if (isSameOrigin && (url.pathname === '/fun/dodge.html' || url.pathname.startsWith('/fun/dodge_assets/'))) {
     event.respondWith(fetch(req));
     return;
   }
