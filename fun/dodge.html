@@ -1133,12 +1133,16 @@
      * -----------------------------------------------------------
      */
     document.addEventListener('keydown', (e) => {
+      const isTextInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
       if (!gameOver && !initialsModal.classList.contains('show')) {
         startBackgroundMusic();
       }
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
         keys[e.key] = true;
+      }
+      if ((e.key === ' ' || e.key === 'Spacebar') && !isTextInput) {
+        e.preventDefault();
       }
       if (gameOver && e.key === 'Enter' && !initialsModal.classList.contains('show')) {
         resetGame();
