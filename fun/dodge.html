@@ -1057,8 +1057,15 @@
         }
         renderTopScores();
       } catch (e) {
-        console.error('Failed to fetch scores:', e);
-        scoreList.innerHTML = '<li class="loading">Unable to load scores.</li>';
+        console.warn('Supabase client fetch failed, retrying with REST fallback.', e);
+        try {
+          topScores = await fetchTopScoresRest();
+          renderTopScores();
+          return;
+        } catch (restError) {
+          console.error('Failed to fetch scores:', restError);
+          scoreList.innerHTML = '<li class="loading">Unable to load scores. Check Supabase URL/key and RLS policies.</li>';
+        }
       }
     }
 
@@ -1089,8 +1096,15 @@
         await fetchTopScores();
         return true;
       } catch (e) {
-        console.error('Failed to submit score:', e);
-        return false;
+        console.warn('Supabase client insert failed, retrying with REST fallback.', e);
+        try {
+          await submitScoreRest(initials, scoreValue);
+          await fetchTopScores();
+          return true;
+        } catch (restError) {
+          console.error('Failed to submit score:', restError);
+          return false;
+        }
       }
     }
 
