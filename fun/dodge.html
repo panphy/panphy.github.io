@@ -7,7 +7,11 @@
   <title>Dodge the Asteroids</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <!-- Supabase Client Library (UMD bundle for browser) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script
+    id="supabaseScript"
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+    defer
+  ></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -478,13 +482,18 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
 
     let supabase = null;
-    try {
-      const sb = window.supabase || window.Supabase || null;
-      if (sb && typeof sb.createClient === 'function' && SUPABASE_URL && SUPABASE_ANON_KEY) {
-        supabase = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function initSupabaseClient() {
+      if (supabase) return supabase;
+      try {
+        const sb = window.supabase || window.Supabase || null;
+        if (sb && typeof sb.createClient === 'function' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+          supabase = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+      } catch (e) {
+        console.warn('Supabase initialization failed:', e);
       }
-    } catch (e) {
-      console.warn('Supabase initialization failed:', e);
+      return supabase;
     }
 
     /* -----------------------------------------------------------
@@ -549,6 +558,7 @@
 
     window.addEventListener('load', () => {
       resizeCanvas();
+      initSupabaseClient();
       fetchTopScores();
       tryStartGame();
     });
@@ -970,7 +980,7 @@
       const scoreList = document.getElementById('scoreList');
       scoreList.innerHTML = '<li class="loading">Loading...</li>';
 
-      if (!supabase) {
+      if (!initSupabaseClient()) {
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         topScores = localScores.map(s => typeof s === 'object' ? s : { initials: '???', score: s });
         renderTopScores();
@@ -995,8 +1005,17 @@
       }
     }
 
+    const supabaseScript = document.getElementById('supabaseScript');
+    if (supabaseScript) {
+      supabaseScript.addEventListener('load', () => {
+        if (initSupabaseClient()) {
+          fetchTopScores();
+        }
+      });
+    }
+
     async function submitScore(initials, scoreValue) {
-      if (!supabase) {
+      if (!initSupabaseClient()) {
         const localScores = JSON.parse(localStorage.getItem("dodgeTheAsteroids_topScores") || "[]");
         localScores.push({ initials, score: scoreValue });
         localScores.sort((a, b) => (b.score || b) - (a.score || a));
