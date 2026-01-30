@@ -692,6 +692,7 @@
      */
     let gameOver = false;
     let score = 0;
+    let gameStartTime = 0;
     let asteroids = [];
     let player = null;
     let keys = {};
@@ -1013,6 +1014,7 @@
       player = new Spaceship();
       asteroids = [];
       score = 0;
+      gameStartTime = performance.now();
       asteroidSpawnRate = 3;
       MIN_ASTEROID_SPEED = 2;
       MAX_ASTEROID_SPEED = 7;
@@ -1314,11 +1316,13 @@
 
         drawRollingBackground();
 
-        score++;
+        const elapsedMs = performance.now() - gameStartTime;
+        score = Math.floor(elapsedMs / 100) / 10;
+        const scoreDisplay = score.toFixed(1);
         ctx.fillStyle = '#f5f5f5';
         ctx.font = `${18 * ((scaleX + scaleY) / 2)}px Arial`;
         ctx.textAlign = 'start';
-        ctx.fillText('Score: ' + score, 10, 20);
+        ctx.fillText('Score: ' + scoreDisplay, 10, 20);
 
         player.move();
         player.draw();
