@@ -633,11 +633,8 @@
 
     // Images
     const backgroundImg = new Image();
-    backgroundImg.src = 'dodge_canvas.png';
     const spaceshipImg = new Image();
-    spaceshipImg.src = 'dodge_spaceship.png';
     const asteroidImg = new Image();
-    asteroidImg.src = 'dodge_asteroid.png';
 
     // Preload the background image
     const preloadedBkgrd = new Image();
@@ -674,6 +671,7 @@
 
     // We track when all images are loaded
     let assetsLoaded = 0;
+    const loadedImages = new Set();
 
     // Modal elements (needed by input handlers)
     const initialsModal = document.getElementById('initialsModal');
@@ -869,7 +867,11 @@
      * Asset Loading
      * -----------------------------------------------------------
      */
-    function startIfReady() {
+    function startIfReady(img) {
+      if (loadedImages.has(img)) {
+        return;
+      }
+      loadedImages.add(img);
       assetsLoaded++;
       if (assetsLoaded === 3) {
         // Once all images are loaded, start the game
@@ -877,14 +879,29 @@
       }
     }
 
-    backgroundImg.onload = () => {
-      startIfReady();
+    function initGameImage(img, src, onLoad) {
+      const handleLoad = () => {
+        if (onLoad) {
+          onLoad();
+        }
+        startIfReady(img);
+      };
+
+      img.addEventListener('load', handleLoad, { once: true });
+      img.src = src;
+
+      if (img.complete && img.naturalWidth !== 0) {
+        handleLoad();
+      }
+    }
+
+    initGameImage(backgroundImg, 'dodge_canvas.png', () => {
       if (animationId) {
         drawRollingBackground();
       }
-    };
-    spaceshipImg.onload = startIfReady;
-    asteroidImg.onload = startIfReady;
+    });
+    initGameImage(spaceshipImg, 'dodge_spaceship.png');
+    initGameImage(asteroidImg, 'dodge_asteroid.png');
 
     /* -----------------------------------------------------------
      * Input Handlers
