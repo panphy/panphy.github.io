@@ -1,5 +1,5 @@
-const CACHE_NAME = 'panphy-2026-01-25';
-const RUNTIME_CACHE = 'panphy-runtime-2026-01-25';
+const CACHE_NAME = 'panphy-2026-02-08';
+const RUNTIME_CACHE = 'panphy-runtime-2026-02-08';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -81,6 +81,7 @@ self.addEventListener('install', (event) => {
 // Activate: clear old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    await caches.delete(RUNTIME_CACHE);
     const keys = await caches.keys();
     await Promise.all(keys.map((k) => {
       if (k !== CACHE_NAME && k !== RUNTIME_CACHE) return caches.delete(k);
@@ -98,9 +99,15 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
+  const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
 
   // Never cache the dodge game or provide offline fallback for it.
   if (isSameOrigin && url.pathname === '/fun/dodge.html') {
+    event.respondWith(fetch(req));
+    return;
+  }
+  // Ensure leaderboards and other Supabase API calls stay fresh.
+  if (isSupabaseApi) {
     event.respondWith(fetch(req));
     return;
   }
