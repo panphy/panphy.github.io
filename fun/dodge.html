@@ -886,12 +886,21 @@
         }
         startIfReady(img);
       };
+      const handleError = () => {
+        console.warn(`Failed to load game asset: ${src}`);
+        startIfReady(img);
+      };
 
       img.addEventListener('load', handleLoad, { once: true });
+      img.addEventListener('error', handleError, { once: true });
       img.src = src;
 
-      if (img.complete && img.naturalWidth !== 0) {
-        handleLoad();
+      if (img.complete) {
+        if (img.naturalWidth !== 0) {
+          handleLoad();
+        } else {
+          handleError();
+        }
       }
     }
 
