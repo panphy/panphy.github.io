@@ -1050,23 +1050,26 @@
     class Asteroid {
       constructor() {
         this.baseSize = 32;
+        this.baseScale = 0.5 + Math.random() * 1.5;
         this.spawn();
 
         this.baseSpeed = Math.random() * (MAX_ASTEROID_SPEED - MIN_ASTEROID_SPEED) + MIN_ASTEROID_SPEED;
-        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
+        this.speed = 0;
 
         this.angle = Math.random() * 2 * Math.PI;
         this.rotationSpeed = (Math.random() - 0.5) * 0.05;
 
-        this.scale = (0.5 + Math.random() * 1.5) * ((scaleX + scaleY) / 2);
-        this.width = this.baseSize * this.scale;
-        this.height = this.baseSize * this.scale;
-        this.radius = (this.width + this.height) / 4;
+        this.scale = 1;
+        this.width = 0;
+        this.height = 0;
+        this.radius = 0;
+        this.updateScale();
       }
 
       updateScale() {
         // preserve relative size without re-randomising too aggressively
         const avg = ((scaleX + scaleY) / 2);
+        this.scale = this.baseScale * avg;
         this.width = this.baseSize * this.scale;
         this.height = this.baseSize * this.scale;
         this.radius = (this.width + this.height) / 4;
@@ -1518,7 +1521,13 @@
         if (hasRecentSubmission({ initials, score: scoreValue })) {
           li.classList.add('highlight');
         }
-        li.innerHTML = `<span class="initials">${initials}</span><span class="score-value">${formatSurvivalTime(scoreValue)}</span>`;
+        const initialsSpan = document.createElement('span');
+        initialsSpan.className = 'initials';
+        initialsSpan.textContent = initials;
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'score-value';
+        scoreSpan.textContent = formatSurvivalTime(scoreValue);
+        li.append(initialsSpan, scoreSpan);
         scoreList.appendChild(li);
       });
     }
