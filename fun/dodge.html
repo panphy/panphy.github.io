@@ -953,6 +953,8 @@
     let keys = {};
     let animationId = null;
     let speedIntervalId = null;
+    let isPaused = false;
+    let pauseStartTime = 0;
 
     let topScores = [];
     let pendingScore = 0;
@@ -1227,6 +1229,8 @@
       asteroids = [];
       score = 0;
       gameStartTime = performance.now();
+      isPaused = false;
+      pauseStartTime = 0;
       asteroidSpawnRate = 3;
       MIN_ASTEROID_SPEED = 2;
       MAX_ASTEROID_SPEED = 7;
@@ -1236,11 +1240,38 @@
       if (speedIntervalId) clearInterval(speedIntervalId);
       stopGameOverSound();
 
+      startSpeedInterval();
+
+      startBackgroundMusic();
+      gameLoop();
+    }
+
+    function startSpeedInterval() {
+      if (speedIntervalId) clearInterval(speedIntervalId);
       speedIntervalId = setInterval(() => {
         MIN_ASTEROID_SPEED += 0.1;
         MAX_ASTEROID_SPEED += 0.2;
       }, speedIncreaseInterval);
+    }
 
+    function pauseGame() {
+      if (gameOver || isPaused) return;
+      isPaused = true;
+      pauseStartTime = performance.now();
+      if (animationId) cancelAnimationFrame(animationId);
+      if (speedIntervalId) {
+        clearInterval(speedIntervalId);
+        speedIntervalId = null;
+      }
+      stopBackgroundMusic();
+    }
+
+    function resumeGame() {
+      if (gameOver || !isPaused) return;
+      const now = performance.now();
+      gameStartTime += now - pauseStartTime;
+      isPaused = false;
+      startSpeedInterval();
       startBackgroundMusic();
       gameLoop();
     }
@@ -1616,6 +1647,7 @@
      * -----------------------------------------------------------
      */
     function gameLoop() {
+      if (isPaused) return;
       if (!gameOver) {
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -1675,6 +1707,14 @@
         ctx.textAlign = 'start';
       }
     }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        pauseGame();
+      } else {
+        resumeGame();
+      }
+    });
   </script>
 </body>
 
