@@ -582,6 +582,8 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
     const SCORE_FIELD = 'survival_time';
     const LEADERBOARD_CACHE_KEY = 'dodgeLeaderboardCacheV1';
+    const MIN_SUBMISSION_SCORE = 0;
+    const MAX_SUBMISSION_SCORE = 600;
 
     let supabase = null;
 
@@ -854,7 +856,7 @@
       initSupabaseClient();
       const cachedLeaderboard = loadLeaderboardCache();
       if (cachedLeaderboard && cachedLeaderboard.scores.length > 0) {
-        topScores = mergeRecentSubmission(cachedLeaderboard.scores);
+        topScores = mergeRecentSubmission(normalizeCachedScores(cachedLeaderboard.scores));
         renderTopScores();
       } else {
         renderLoadingScores();
@@ -1282,7 +1284,7 @@
 
     async function fetchTopScores({ preferRemote = false, showLoading = true } = {}) {
       if (showLoading) renderLoadingScores();
-      const cachedScores = loadLeaderboardCache()?.scores || [];
+      const cachedScores = normalizeCachedScores(loadLeaderboardCache()?.scores || []);
 
       let client = initSupabaseClient();
       if (!client && preferRemote) {
@@ -1380,10 +1382,29 @@
     }
 
     function normalizeScores(entries) {
-      return (entries || []).map((entry) => ({
-        initials: entry.initials,
-        score: entry[SCORE_FIELD],
-      }));
+      return (entries || [])
+        .map((entry) => {
+          const scoreValue = sanitizeScoreValue(entry[SCORE_FIELD]);
+          if (scoreValue === null) return null;
+          return {
+            initials: entry.initials,
+            score: scoreValue,
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function normalizeCachedScores(entries) {
+      return (entries || [])
+        .map((entry) => {
+          const scoreValue = sanitizeScoreValue(entry.score);
+          if (scoreValue === null) return null;
+          return {
+            initials: entry.initials,
+            score: scoreValue,
+          };
+        })
+        .filter(Boolean);
     }
 
     function registerRecentSubmission(initials, scoreValue) {
@@ -1428,8 +1449,21 @@
       return newScore > lowestScore;
     }
 
+    function sanitizeScoreValue(scoreValue) {
+      const numeric = Number(scoreValue);
+      if (!Number.isFinite(numeric)) return null;
+      if (numeric < MIN_SUBMISSION_SCORE) return null;
+      if (numeric > MAX_SUBMISSION_SCORE) return null;
+      return Math.round(numeric * 100) / 100;
+    }
+
     function handleGameOver(finalScore) {
-      if (checkIfHighScore(finalScore)) showInitialsModal(finalScore);
+      const sanitizedScore = sanitizeScoreValue(finalScore);
+      if (sanitizedScore === null) {
+        console.warn('Score out of allowed range, ignoring submission.', finalScore);
+        return;
+      }
+      if (checkIfHighScore(sanitizedScore)) showInitialsModal(sanitizedScore);
     }
 
     /* -----------------------------------------------------------
@@ -1485,7 +1519,16 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting...';
 
-      const success = await submitScore(initials, pendingScore);
+      const sanitizedScore = sanitizeScoreValue(pendingScore);
+      if (sanitizedScore === null) {
+        initialsError.textContent = 'Score was out of range and could not be submitted.';
+        isSubmittingScore = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Survival Time';
+        return;
+      }
+
+      const success = await submitScore(initials, sanitizedScore);
 
       if (success) {
         hideInitialsModal();
