@@ -270,6 +270,20 @@
       background: #0a0f1e;
     }
 
+    .asset-error {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(248, 113, 113, 0.45);
+      background: rgba(248, 113, 113, 0.12);
+      color: #fecaca;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      display: none;
+    }
+
+    .asset-error.show { display: block; }
+
     .instructions {
       margin-top: 20px;
       padding: 16px 20px;
@@ -546,6 +560,9 @@
         <!-- give a safe default intrinsic size -->
         <canvas id="gameCanvas" width="600" height="400"></canvas>
       </div>
+      <p id="assetError" class="asset-error" role="status" aria-live="polite">
+        Game assets failed to load. Please refresh or check your connection.
+      </p>
       <div class="instructions">
         <p>Use <span class="key">Arrow Keys</span> or <span class="key">Drag</span> the spaceship to move. Avoid the <span class="highlight">asteroids</span>!</p>
         <p>Press <span class="key">Enter</span> or <span class="key">Tap</span> the canvas to restart after Game Over.</p>
@@ -893,8 +910,13 @@
       loadImageAsset(assets.background),
       loadImageAsset(assets.ship),
       loadImageAsset(assets.asteroid),
-    ]).then(() => {
-      assetsReady = true;
+    ]).then((results) => {
+      const allOk = results.every(Boolean);
+      assetsReady = allOk;
+      if (!allOk) {
+        if (assetError) assetError.classList.add('show');
+        return;
+      }
       // create background pattern if possible (after first resize so ctx exists)
       if (assets.background.ok) {
         try { bgPattern = ctx.createPattern(assets.background.img, 'repeat'); } catch (_) { bgPattern = null; }
@@ -943,6 +965,7 @@
     let pointerStartY = 0;
     let spaceshipStartX = 0;
     let spaceshipStartY = 0;
+    const assetError = document.getElementById('assetError');
 
     const initialsModal = document.getElementById('initialsModal');
     const initialsInput = document.getElementById('initialsInput');
@@ -961,67 +984,6 @@
       const numericValue = Number(value);
       if (!Number.isFinite(numericValue)) return '0.00 s';
       return `${numericValue.toFixed(2)} s`;
-    }
-
-    /* -----------------------------------------------------------
-     * Simple fallback drawings (used if images fail to load)
-     * -----------------------------------------------------------
-     */
-    function drawFallbackStars() {
-      // cheap starfield
-      ctx.save();
-      ctx.fillStyle = '#0a0f1e';
-      ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      const n = Math.floor(80 * ((scaleX + scaleY) / 2));
-      for (let i = 0; i < n; i++) {
-        const x = (Math.sin(i * 999) * 0.5 + 0.5) * SCREEN_WIDTH;
-        const y = ((Math.cos(i * 777) * 0.5 + 0.5) * SCREEN_HEIGHT + backgroundOffsetY * 0.5) % SCREEN_HEIGHT;
-        ctx.fillRect(x, y, 1, 1);
-      }
-      ctx.restore();
-    }
-
-    function drawFallbackShip(x, y, w, h) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.beginPath();
-      ctx.moveTo(0, -h * 0.55);
-      ctx.lineTo(w * 0.45, h * 0.45);
-      ctx.lineTo(0, h * 0.2);
-      ctx.lineTo(-w * 0.45, h * 0.45);
-      ctx.closePath();
-      ctx.fillStyle = '#4ade80';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-      ctx.lineWidth = Math.max(1, 2 * ((scaleX + scaleY) / 2));
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawFallbackAsteroid(x, y, r, angle) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(angle);
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fillStyle = '#9ca3af';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-      ctx.lineWidth = Math.max(1, 2 * ((scaleX + scaleY) / 2));
-      ctx.stroke();
-
-      // craters
-      ctx.fillStyle = 'rgba(0,0,0,0.18)';
-      for (let i = 0; i < 4; i++) {
-        const cx = (Math.sin(i * 3.1) * 0.35) * r;
-        const cy = (Math.cos(i * 2.7) * 0.35) * r;
-        const cr = (0.12 + i * 0.03) * r;
-        ctx.beginPath();
-        ctx.arc(cx, cy, cr, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
     }
 
     /* -----------------------------------------------------------
@@ -1073,14 +1035,11 @@
       setPosition(newX, newY) { this.x = newX; this.y = newY; }
 
       draw() {
-        if (assets.ship.ok) {
-          ctx.save();
-          ctx.translate(this.x, this.y);
-          ctx.drawImage(assets.ship.img, -this.width / 2, -this.height / 2, this.width, this.height);
-          ctx.restore();
-        } else {
-          drawFallbackShip(this.x, this.y, this.width, this.height);
-        }
+        if (!assets.ship.ok) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.drawImage(assets.ship.img, -this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore();
       }
     }
 
@@ -1146,15 +1105,12 @@
       }
 
       draw() {
-        if (assets.asteroid.ok) {
-          ctx.save();
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.angle);
-          ctx.drawImage(assets.asteroid.img, -this.width / 2, -this.height / 2, this.width, this.height);
-          ctx.restore();
-        } else {
-          drawFallbackAsteroid(this.x, this.y, this.radius, this.angle);
-        }
+        if (!assets.asteroid.ok) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.drawImage(assets.asteroid.img, -this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.restore();
       }
 
       isOffScreen() {
@@ -1596,10 +1552,6 @@
         ctx.fillStyle = bgPattern;
         ctx.fillRect(0, -backgroundOffsetY, SCREEN_WIDTH, SCREEN_HEIGHT + tileH);
         ctx.restore();
-      } else {
-        // fallback starfield scroll
-        if (backgroundOffsetY >= SCREEN_HEIGHT) backgroundOffsetY = 0;
-        drawFallbackStars();
       }
     }
 
