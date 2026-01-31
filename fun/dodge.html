@@ -572,6 +572,7 @@
     const gameOverSfx = document.getElementById('gameOverSfx');
     let bgmStarted = false;
     let isMuted = false;
+    let gameOverSfxPrimed = false;
 
     const soundToggle = document.getElementById('soundToggle');
     const soundToggleLabel = soundToggle ? soundToggle.querySelector('.label') : null;
@@ -599,6 +600,7 @@
           bgmStarted = false;
         });
       }
+      primeGameOverSound();
     }
 
     function stopBackgroundMusic() {
@@ -625,6 +627,30 @@
       gameOverSfx.currentTime = 0;
     }
 
+    function primeGameOverSound() {
+      if (!gameOverSfx || isMuted || gameOverSfxPrimed) return;
+      gameOverSfxPrimed = true;
+      const originalVolume = gameOverSfx.volume;
+      gameOverSfx.volume = 0;
+      const playPromise = gameOverSfx.play();
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise
+          .then(() => {
+            gameOverSfx.pause();
+            gameOverSfx.currentTime = 0;
+            gameOverSfx.volume = originalVolume;
+          })
+          .catch(() => {
+            gameOverSfxPrimed = false;
+            gameOverSfx.volume = originalVolume;
+          });
+      } else {
+        gameOverSfx.pause();
+        gameOverSfx.currentTime = 0;
+        gameOverSfx.volume = originalVolume;
+      }
+    }
+
     function setMutedState(nextMuted) {
       isMuted = Boolean(nextMuted);
       if (isMuted) {
@@ -644,8 +670,13 @@
         setMutedState(!isMuted);
         if (!isMuted) {
           startBackgroundMusic();
+          primeGameOverSound();
         }
       });
+    }
+
+    if (gameOverSfx) {
+      gameOverSfx.load();
     }
 
     function initSupabaseClient() {
