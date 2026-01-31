@@ -5,6 +5,7 @@ Most importantly, the site is now offline-friendly (apart from the game "Asteroi
 ## Tech Stack
 - **HTML/CSS:** Lightweight, fast-loading UI with a consistent look and feel  
 - **Vanilla JavaScript:** Framework-free interactive logic (simulations, controls, rendering, state)  
+- **Supabase:** Powers the online leaderboard for the game "Asteroid Storm"  
 - **Offline support:** Service Worker caching for offline use after the first visit
 
 ## Offline & App Behavior
