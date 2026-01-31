@@ -583,7 +583,7 @@
     const SCORE_FIELD = 'survival_time';
     const LEADERBOARD_CACHE_KEY = 'dodgeLeaderboardCacheV1';
     const MIN_SUBMISSION_SCORE = 0;
-    const MAX_SUBMISSION_SCORE = 600;
+    const MAX_SUBMISSION_SCORE = Number.POSITIVE_INFINITY;
 
     let supabase = null;
 
@@ -768,16 +768,19 @@
     }
 
     async function submitScoreRest(initials, scoreValue, accessToken = null) {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/dodge_leaderboard`, {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_dodge_score`, {
         method: 'POST',
         headers: {
           ...getSupabaseRestHeaders(accessToken),
           Prefer: 'return=minimal',
         },
-        body: JSON.stringify([{ initials: initials.toUpperCase(), [SCORE_FIELD]: scoreValue }]),
+        body: JSON.stringify({
+          initials: initials.toUpperCase(),
+          survival_time: scoreValue,
+        }),
       });
       if (!response.ok) {
-        throw new Error(`Supabase REST insert failed: ${response.status}`);
+        throw new Error(`Supabase RPC insert failed: ${response.status}`);
       }
       return true;
     }
@@ -1349,9 +1352,10 @@
 
       try {
         if (client) {
-          const { error } = await client
-            .from('dodge_leaderboard')
-            .insert([{ initials: initials.toUpperCase(), [SCORE_FIELD]: scoreValue }]);
+          const { error } = await client.rpc('submit_dodge_score', {
+            initials: initials.toUpperCase(),
+            survival_time: scoreValue,
+          });
 
           if (error) throw error;
         } else {
