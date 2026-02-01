@@ -29,6 +29,17 @@
       }
       lastTouchEnd = now;
     }, { passive: false });
+
+    // Prevent pinch-zoom and double-tap zoom on iOS/iPad
+    document.addEventListener('gesturestart', (event) => {
+      event.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', (event) => {
+      event.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', (event) => {
+      event.preventDefault();
+    }, { passive: false });
   </script>
 
   <style>
