@@ -3,18 +3,26 @@
 	function getPlotThemeSettings() {
 		const theme = document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
+			// Light theme: darker data points, contrasting fit line colors
 			return {
 				errorColor: '#5b5b5b',
 				fitColor: '#35a8ff',
-				fitColors: ['#a7d7f2', '#a2e4b8', '#d5a4e2', '#f9e79f', '#f5a4a4', '#a0e7d1'],
+				// Data point colors: saturated, dark enough to see on white background
+				datasetColors: ['#1e40af', '#15803d', '#7e22ce', '#c2410c', '#b91c1c', '#0e7490'],
+				// Fit line colors: contrasting hues from corresponding data points
+				fitColors: ['#be185d', '#a16207', '#0891b2', '#16a34a', '#6366f1', '#ea580c'],
 				layout: {}
 			};
 		}
 
+		// Dark theme: bright data points, contrasting bright fit line colors
 		return {
 			errorColor: '#9aa0a6',
 			fitColor: '#00e5ff',
-			fitColors: ['#00e5ff', '#69f0ae', '#ea80fc', '#ffeb3b', '#ff8a80', '#64ffda'],
+			// Data point colors: bright and vivid for dark background
+			datasetColors: ['#3b82f6', '#22c55e', '#a855f7', '#f97316', '#ef4444', '#14b8a6'],
+			// Fit line colors: contrasting bright hues from corresponding data points
+			fitColors: ['#ec4899', '#eab308', '#06b6d4', '#84cc16', '#8b5cf6', '#f43f5e'],
 			layout: {
 				paper_bgcolor: '#1e2129',
 				plot_bgcolor: '#1e2129',
@@ -208,8 +216,8 @@
 		const traces = [];
 		const themeSettings = getPlotThemeSettings();
 
-		// Define colors for datasets and fitted curves.
-		const datasetColors = ['#3498db', '#2ecc71', '#9b59b6', '#f1c40f', '#e74c3c', '#1abc9c'];
+		// Get theme-specific colors for datasets and fitted curves.
+		const datasetColors = themeSettings.datasetColors;
 		const fitColors = themeSettings.fitColors;
 
 		// Helper: get the per-dataset y label (raw), with a sensible fallback.
