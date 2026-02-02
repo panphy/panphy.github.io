@@ -9,12 +9,20 @@
     {
       "src": "favicon.png",
       "sizes": "48x48",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "apple-touch-icon.png",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "panphy.png",
+      "sizes": "579x556",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
