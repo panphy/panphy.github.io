@@ -831,6 +831,13 @@
       scaleY = SCREEN_HEIGHT / BASE_HEIGHT;
     }
 
+    // Area ratio for consistent asteroid density across screen sizes
+    function getAreaRatio() {
+      const baseArea = BASE_WIDTH * BASE_HEIGHT;
+      const currentArea = SCREEN_WIDTH * SCREEN_HEIGHT;
+      return currentArea / baseArea;
+    }
+
     /* -----------------------------------------------------------
      * Responsive Canvas Setup
      * -----------------------------------------------------------
@@ -1692,7 +1699,9 @@
         player.move();
         player.draw();
 
-        if (Math.random() * 100 < asteroidSpawnRate) {
+        // Scale spawn rate by area ratio to maintain consistent asteroid density
+        const scaledSpawnRate = asteroidSpawnRate * getAreaRatio();
+        if (Math.random() * 100 < scaledSpawnRate) {
           asteroids.push(new Asteroid());
         }
 
