@@ -20,7 +20,7 @@
     },
     {
       "src": "panphy.png",
-      "sizes": "579x556",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
