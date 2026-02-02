@@ -12,8 +12,8 @@
       "type": "image/png"
     },
     {
-      "src": "panphy.png",
-      "sizes": "579x556",
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png"
     }
   ]
