@@ -1,6 +1,6 @@
-Welcome to PanPhy Labs. The tools, simulations, and games here are built with AI and designed to be interactive, educational, and aligned with my teaching goals. While there are many great physics simulations online, not all meet my needs. Additionally, with school devices locked down, installing software has become a hassle. So, I decided to create my own web apps: simple, browser-based, and ready for everyone to explore and enjoy.
+Welcome to PanPhy Labs. The tools, simulations, and games here are built with AI and designed to be interactive, educational, and aligned with my teaching goals. While there are many great web tools and physics simulations online, not all meet my needs. With school devices locked down, installing software is a hassle, so I build my own web apps: simple, browser-based, and ready for everyone to explore and enjoy.
 
-Most importantly, the site is now offline-friendly (apart from the game "Asteroid Storm" and "EAL Learning Companion", which is a Streamlit app). Once you have opened it in a browser, you can keep using the tools, simulations, and games even without an internet connection.
+Most importantly, the site is offline-friendly (apart from the game "Asteroid Storm" and "EAL Learning Companion," which is a Streamlit app). Once you open it in a browser, you can keep using the tools, simulations, and games even without an internet connection.
 
 ## Tech Stack
 - **HTML/CSS:** Lightweight, fast-loading UI with a consistent look and feel  
