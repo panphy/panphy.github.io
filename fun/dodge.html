@@ -613,7 +613,7 @@
     const MIN_SUBMISSION_SCORE = 0;
     const MAX_SUBMISSION_SCORE = Number.POSITIVE_INFINITY;
 
-    let supabase = null;
+    let supabaseClient = null;
 
     const bgm = document.getElementById('bgm');
     const gameOverSfx = document.getElementById('gameOverSfx');
@@ -729,16 +729,16 @@
     }
 
     function initSupabaseClient() {
-      if (supabase) return supabase;
+      if (supabaseClient) return supabaseClient;
       try {
         const sb = window.supabase || window.Supabase || null;
         if (sb && typeof sb.createClient === 'function' && SUPABASE_URL && SUPABASE_ANON_KEY) {
-          supabase = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          supabaseClient = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
       } catch (e) {
         console.warn('Supabase initialization failed:', e);
       }
-      return supabase;
+      return supabaseClient;
     }
 
     function getSupabaseRestHeaders(accessToken = null) {
