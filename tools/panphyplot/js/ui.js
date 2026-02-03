@@ -1460,25 +1460,22 @@ const debouncedUpdateData = debounce(updateData, 300);
 	async function copyExportedTableToClipboard(table) {
 		const tableClone = table.cloneNode(true);
 
-		tableClone.style.borderCollapse = 'collapse';
-		tableClone.style.fontFamily = 'Arial, sans-serif';
-		tableClone.style.fontSize = '12pt';
+		tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
 
-		// Copy computed styles from original cells to preserve formatting
-		const originalCells = table.querySelectorAll('th, td');
-		const clonedCells = tableClone.querySelectorAll('th, td');
-		originalCells.forEach((cell, index) => {
-			const cloneCell = clonedCells[index];
-			if (!cloneCell) return;
-			const computed = getComputedStyle(cell);
-			cloneCell.style.border = '1px solid black';
-			cloneCell.style.padding = '8px';
-			cloneCell.style.textAlign = computed.textAlign;
-			cloneCell.style.fontWeight = computed.fontWeight;
-			cloneCell.style.verticalAlign = computed.verticalAlign;
+		// Style header cells (th) - use setAttribute for reliable serialization
+		tableClone.querySelectorAll('th').forEach(cell => {
+			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
+			cell.setAttribute('align', 'center');
 		});
 
-		const htmlString = tableClone.outerHTML;
+		// Style data cells (td)
+		tableClone.querySelectorAll('td').forEach(cell => {
+			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
+			cell.setAttribute('align', 'center');
+		});
+
+		// Wrap in HTML structure for better Word/Google Docs compatibility
+		const htmlString = `<html><body>${tableClone.outerHTML}</body></html>`;
 
 		try {
 			const htmlBlob = new Blob([htmlString], { type: 'text/html' });
