@@ -1216,7 +1216,9 @@ footer a:visited {
 
 #export-table-rendered {
 	overflow-x: auto;
+	overflow-y: visible;
 	margin-bottom: 16px;
+	padding-top: 28px;
 }
 
 #export-table-rendered table {
@@ -1232,7 +1234,7 @@ footer a:visited {
 #export-table-rendered table::before {
 	content: "Click to copy table";
 	position: absolute;
-	top: -28px;
+	top: -24px;
 	left: 50%;
 	transform: translateX(-50%);
 	background: var(--text-main);
