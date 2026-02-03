@@ -1992,11 +1992,13 @@
       // Create an image from SVG
       const img = new Image();
 
-      // Add XML declaration and proper encoding for better compatibility
-      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+      // Use a Blob URL to avoid data-URL size limits for complex equations.
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+      const svgObjectUrl = URL.createObjectURL(svgBlob);
 
       return new Promise((resolve) => {
         img.onload = async () => {
+          URL.revokeObjectURL(svgObjectUrl);
           // Draw with transparent background
           ctx.clearRect(0, 0, pxWidth, pxHeight);
           ctx.drawImage(img, 0, 0, pxWidth, pxHeight);
@@ -2026,6 +2028,7 @@
         };
 
         img.onerror = async (err) => {
+          URL.revokeObjectURL(svgObjectUrl);
           console.error('Image load failed:', err);
           // Fallback: copy SVG as text
           try {
@@ -2037,7 +2040,7 @@
           }
         };
 
-        img.src = svgDataUrl;
+        img.src = svgObjectUrl;
       });
     } catch (err) {
       console.error('Failed to copy equation:', err);
