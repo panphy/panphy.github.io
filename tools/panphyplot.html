@@ -22,6 +22,10 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
 	<!-- MathJax v2 for LaTeX rendering -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
+	<!-- Marked.js for Markdown parsing (used in Export Table) -->
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<!-- DOMPurify for sanitizing HTML (used in Export Table) -->
+	<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
 
 	<link rel="stylesheet" href="/tools/panphyplot/css/panphyplot.css">
 </head>
@@ -112,7 +116,7 @@
 						Import .csv
 					</button>
 					<button class="btn-export-csv" onclick="exportCSV()" title="Export this dataset to a CSV file">Export .csv</button>
-					<button class="btn-export-md" onclick="exportPlainText()" title="Export this dataset as Markdown table text">Export .md</button>
+					<button class="btn-export-md" onclick="showExportTablePopup()" title="Export this dataset as a formatted table">Export Table</button>
 				</div>
 			</div>
 			<input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)" />
@@ -311,6 +315,20 @@
 					<label for="combined-y-label">y-axis Label:</label>
 					<input type="text" id="combined-y-label" placeholder="Enter a new y-axis label here" />
 				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Export Table Popup -->
+	<div id="export-table-background" style="display: none;"></div>
+	<div id="export-table-container" style="display: none;">
+		<div id="export-table-content">
+			<button id="export-table-close" onclick="closeExportTablePopup()" title="Close the export table window">Close</button>
+			<div id="export-table-title">Export Table</div>
+			<p id="export-table-hint">Click the table to copy it to clipboard (works with Word, Google Docs, etc.)</p>
+			<div id="export-table-rendered"></div>
+			<div id="export-table-controls">
+				<button id="export-table-save-md" onclick="saveExportedMarkdown()" title="Save the raw Markdown file">Save .md File</button>
 			</div>
 		</div>
 	</div>
