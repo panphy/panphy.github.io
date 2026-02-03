@@ -1893,22 +1893,44 @@
   }
 
   /**
-   * Copy an equation (MathJax SVG) to clipboard as PNG image.
-   * Creates a tight-bounded PNG that can be pasted into Word, PowerPoint, etc.
-   * PNG format is used because it has better compatibility with most applications.
+   * Copy an equation (MathJax SVG) to clipboard as a vector image (SVG).
+   * SVG format preserves resolution and transparency when pasting into apps like Word.
    */
   async function copyEquationToClipboard(mjxContainer) {
     const svg = mjxContainer.querySelector('svg');
     if (!svg) return false;
 
+    const preparedSvg = prepareEquationSvg(svg);
+    if (!preparedSvg) return false;
+
+    const { svgString, widthPx, heightPx } = preparedSvg;
+
+    try {
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+      const clipboardPayload = {
+        'image/svg+xml': svgBlob
+      };
+
+      const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
+      if (pngBlob) {
+        clipboardPayload['image/png'] = pngBlob;
+      }
+
+      await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy equation:', err);
+      return false;
+    }
+  }
+
+  function prepareEquationSvg(svg) {
     // Clone the SVG to avoid modifying the original
     const svgClone = svg.cloneNode(true);
 
     // MathJax uses a global defs cache - we need to inline all referenced glyphs
     // For complex equations (integrals, matrices, boxed, etc.), definitions can
     // reference other definitions, so we need to recursively resolve all references.
-
-    // Helper function to extract referenced IDs from an element
     const getReferencedIds = (element) => {
       const ids = new Set();
       const useElements = element.querySelectorAll('use');
@@ -1921,15 +1943,12 @@
       return ids;
     };
 
-    // Create or get the defs element in our clone
     let defsClone = svgClone.querySelector('defs');
     if (!defsClone) {
       defsClone = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
       svgClone.insertBefore(defsClone, svgClone.firstChild);
     }
 
-    // Recursively collect and clone all referenced definitions
-    // This handles nested references where defs reference other defs
     const processedIds = new Set();
     const pendingIds = getReferencedIds(svgClone);
 
@@ -1937,20 +1956,16 @@
       const id = pendingIds.values().next().value;
       pendingIds.delete(id);
 
-      // Skip if already processed
       if (processedIds.has(id)) continue;
       processedIds.add(id);
 
-      // Skip if already in our defs
       if (defsClone.querySelector(`#${CSS.escape(id)}`)) continue;
 
-      // Look for the element in the document (MathJax global cache)
       const original = document.getElementById(id);
       if (original) {
         const clonedDef = original.cloneNode(true);
         defsClone.appendChild(clonedDef);
 
-        // Check if this cloned def has its own <use> references (nested references)
         const nestedIds = getReferencedIds(clonedDef);
         nestedIds.forEach(nestedId => {
           if (!processedIds.has(nestedId)) {
@@ -1960,43 +1975,69 @@
       }
     }
 
-    // Get computed dimensions - use getBoundingClientRect for more reliability
-    const bbox = svg.getBBox();
-    const padding = 8;
+    const paddingPx = 8;
+    const rect = svg.getBoundingClientRect();
+    const hasRectSize = rect.width > 0 && rect.height > 0;
 
-    // Handle edge case where bbox might be zero or invalid
-    let width = bbox.width + padding * 2;
-    let height = bbox.height + padding * 2;
+    const viewBox = parseViewBox(svg);
+    let viewBoxX = 0;
+    let viewBoxY = 0;
+    let viewBoxWidth = rect.width || 0;
+    let viewBoxHeight = rect.height || 0;
 
-    // Fallback to container dimensions if bbox is invalid
-    if (width <= padding * 2 || height <= padding * 2) {
-      const rect = svg.getBoundingClientRect();
-      width = rect.width + padding * 2;
-      height = rect.height + padding * 2;
+    if (viewBox) {
+      ({ x: viewBoxX, y: viewBoxY, width: viewBoxWidth, height: viewBoxHeight } = viewBox);
+    } else {
+      try {
+        const bbox = svg.getBBox();
+        if (Number.isFinite(bbox.width) && Number.isFinite(bbox.height)) {
+          viewBoxX = bbox.x;
+          viewBoxY = bbox.y;
+          viewBoxWidth = bbox.width;
+          viewBoxHeight = bbox.height;
+        }
+      } catch (err) {
+        console.warn('getBBox failed for SVG:', err);
+      }
     }
 
-    // Ensure minimum dimensions
-    width = Math.max(width, 20);
-    height = Math.max(height, 20);
+    if (!viewBoxWidth || !viewBoxHeight) {
+      console.warn('Unable to determine equation bounds.');
+      return null;
+    }
+
+    const scaleX = hasRectSize ? viewBoxWidth / rect.width : 1;
+    const scaleY = hasRectSize ? viewBoxHeight / rect.height : 1;
+    const paddingX = paddingPx * scaleX;
+    const paddingY = paddingPx * scaleY;
+
+    const outputViewBox = {
+      x: viewBoxX - paddingX,
+      y: viewBoxY - paddingY,
+      width: viewBoxWidth + paddingX * 2,
+      height: viewBoxHeight + paddingY * 2
+    };
+
+    const widthPx = Math.max((hasRectSize ? rect.width : viewBoxWidth) + paddingPx * 2, 20);
+    const heightPx = Math.max((hasRectSize ? rect.height : viewBoxHeight) + paddingPx * 2, 20);
 
     svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svgClone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-    svgClone.setAttribute('width', `${width}pt`);
-    svgClone.setAttribute('height', `${height}pt`);
-    svgClone.setAttribute('viewBox', `${bbox.x - padding} ${bbox.y - padding} ${width} ${height}`);
+    svgClone.setAttribute('width', `${widthPx}px`);
+    svgClone.setAttribute('height', `${heightPx}px`);
+    svgClone.setAttribute(
+      'viewBox',
+      `${outputViewBox.x} ${outputViewBox.y} ${outputViewBox.width} ${outputViewBox.height}`
+    );
+    svgClone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
-    // Remove any background, ensure transparency
     svgClone.style.backgroundColor = 'transparent';
     svgClone.removeAttribute('style');
 
-    // Set fill color to black for all elements (better for documents)
     const fillColor = '#000000';
-
-    // Apply fill to all relevant elements
     const applyFill = (el) => {
       const currentFill = el.getAttribute('fill');
       if (!currentFill || currentFill === 'currentColor' || currentFill === 'none') {
-        // Don't override 'none' fills as they're intentional
         if (currentFill !== 'none') {
           el.setAttribute('fill', fillColor);
         }
@@ -2004,71 +2045,82 @@
     };
 
     svgClone.querySelectorAll('g, path, rect, use, text, tspan').forEach(applyFill);
-
-    // Also set the SVG's color property for currentColor inheritance
     svgClone.setAttribute('color', fillColor);
     svgClone.setAttribute('fill', fillColor);
 
     const svgString = new XMLSerializer().serializeToString(svgClone);
 
-    // Convert SVG to PNG using canvas for better clipboard compatibility
+    return {
+      svgString,
+      widthPx,
+      heightPx
+    };
+  }
+
+  function parseViewBox(svg) {
+    const attr = svg.getAttribute('viewBox');
+    if (attr) {
+      const parts = attr.trim().split(/[\s,]+/).map(Number);
+      if (parts.length === 4 && parts.every(Number.isFinite)) {
+        return {
+          x: parts[0],
+          y: parts[1],
+          width: parts[2],
+          height: parts[3]
+        };
+      }
+    }
+
+    if (svg.viewBox && svg.viewBox.baseVal) {
+      const vb = svg.viewBox.baseVal;
+      if ([vb.x, vb.y, vb.width, vb.height].every(Number.isFinite)) {
+        return {
+          x: vb.x,
+          y: vb.y,
+          width: vb.width,
+          height: vb.height
+        };
+      }
+    }
+
+    return null;
+  }
+
+  async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
     try {
-      const scale = 4; // Higher resolution for better quality
+      const scale = 2;
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
 
-      // Convert pt to px (1pt = 1.333px approximately)
-      const pxWidth = Math.ceil(width * 1.333 * scale);
-      const pxHeight = Math.ceil(height * 1.333 * scale);
+      canvas.width = Math.ceil(widthPx * scale);
+      canvas.height = Math.ceil(heightPx * scale);
 
-      canvas.width = pxWidth;
-      canvas.height = pxHeight;
-
-      // Create an image from SVG
       const img = new Image();
-
-      // Use a Blob URL to avoid data-URL size limits for complex equations.
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
       const svgObjectUrl = URL.createObjectURL(svgBlob);
 
-      return new Promise((resolve) => {
-        img.onload = async () => {
+      const pngBlob = await new Promise(resolve => {
+        img.onload = () => {
           URL.revokeObjectURL(svgObjectUrl);
-          // Draw with transparent background
-          ctx.clearRect(0, 0, pxWidth, pxHeight);
-          ctx.drawImage(img, 0, 0, pxWidth, pxHeight);
-
-          try {
-            // Convert canvas to blob and copy to clipboard
-            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-            if (blob) {
-              await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-              ]);
-              resolve(true);
-            } else {
-              throw new Error('Failed to create blob');
-            }
-          } catch (clipErr) {
-            console.error('Clipboard write failed:', clipErr);
-            // Don't fall back to copying raw SVG text as it's not useful for users.
-            resolve(false);
-          }
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => resolve(blob), 'image/png');
         };
 
-        img.onerror = async (err) => {
+        img.onerror = err => {
           URL.revokeObjectURL(svgObjectUrl);
-          console.error('Image load failed:', err);
-          // Don't fall back to copying raw SVG text as it's not useful for users.
-          // Instead, indicate failure so the UI can show appropriate feedback.
-          resolve(false);
+          console.warn('SVG rasterization failed:', err);
+          resolve(null);
         };
 
         img.src = svgObjectUrl;
       });
+
+      return pngBlob || null;
     } catch (err) {
-      console.error('Failed to copy equation:', err);
-      return false;
+      console.warn('Failed to rasterize SVG:', err);
+      return null;
     }
   }
 
