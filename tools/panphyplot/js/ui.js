@@ -1499,7 +1499,8 @@ const debouncedUpdateData = debounce(updateData, 300);
 				await navigator.clipboard.writeText(table.innerText);
 				showExportTableCopyFeedback(table);
 			} catch (fallbackError) {
-				alert('Failed to copy table. Please try selecting and copying manually.');
+				console.error('Fallback copy also failed:', fallbackError);
+				showExportTableCopyFailedFeedback(table);
 			}
 		}
 	}
@@ -1510,6 +1511,14 @@ const debouncedUpdateData = debounce(updateData, 300);
 		setTimeout(() => {
 			table.classList.remove('copied');
 		}, 1500);
+	}
+
+
+	function showExportTableCopyFailedFeedback(table) {
+		table.classList.add('copy-failed');
+		setTimeout(() => {
+			table.classList.remove('copy-failed');
+		}, 2000);
 	}
 
 

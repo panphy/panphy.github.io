@@ -1223,23 +1223,58 @@ footer a:visited {
 	width: 100%;
 	border-collapse: collapse;
 	cursor: pointer;
-	transition: box-shadow 0.2s ease, transform 0.1s ease;
+	transition: outline 0.15s ease;
 	background: var(--card-bg);
+	position: relative;
+}
+
+/* Tooltip for click-to-copy */
+#export-table-rendered table::before {
+	content: "Click to copy table";
+	position: absolute;
+	top: -28px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--text-main);
+	color: var(--card-bg);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 11px;
+	font-family: var(--font-body);
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s ease;
+	z-index: 100;
 }
 
 #export-table-rendered table:hover {
-	box-shadow: 0 4px 12px rgba(108, 92, 231, 0.15);
+	outline: 2px solid var(--brand-accent);
+	outline-offset: 4px;
+}
+
+#export-table-rendered table:hover::before {
+	opacity: 1;
 }
 
 #export-table-rendered table.copied {
-	box-shadow: 0 0 0 3px var(--success);
-	animation: copy-flash 0.3s ease;
+	outline: 2px solid #22c55e !important;
 }
 
-@keyframes copy-flash {
-	0% { transform: scale(1); }
-	50% { transform: scale(1.01); }
-	100% { transform: scale(1); }
+#export-table-rendered table.copied::before {
+	content: "Copied!" !important;
+	background: #22c55e !important;
+	opacity: 1 !important;
+}
+
+#export-table-rendered table.copy-failed {
+	outline: 2px solid #ef4444 !important;
+}
+
+#export-table-rendered table.copy-failed::before {
+	content: "Copy failed" !important;
+	background: #ef4444 !important;
+	opacity: 1 !important;
 }
 
 #export-table-rendered th,

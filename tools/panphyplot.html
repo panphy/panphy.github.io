@@ -20,6 +20,16 @@
 	<script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
 	<!-- Math.js for computations -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+	<!-- MathJax v2 Configuration (must be before MathJax script) -->
+	<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+			tex2jax: {
+				inlineMath: [['$','$'], ['\\(','\\)']],
+				displayMath: [['$$','$$'], ['\\[','\\]']],
+				processEscapes: true
+			}
+		});
+	</script>
 	<!-- MathJax v2 for LaTeX rendering -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
 	<!-- Marked.js for Markdown parsing (used in Export Table) -->
