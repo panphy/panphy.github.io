@@ -772,7 +772,7 @@ mjx-container::after {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--copy-hint-bg);
+  background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
   border-radius: 999px;
@@ -793,7 +793,7 @@ mjx-container::after {
   top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--copy-hint-bg);
+  background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
   border-radius: 999px;
@@ -889,7 +889,7 @@ mjx-container.copy-failed::after {
   top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--copy-hint-bg);
+  background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
   border-radius: 999px;

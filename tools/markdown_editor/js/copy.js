@@ -384,14 +384,6 @@ export async function copyCodeBlockToClipboard(preElement) {
   const widthPx = Math.max(Math.ceil(snapshotRect.width), preElement.scrollWidth, 20);
   const heightPx = Math.max(Math.ceil(snapshotRect.height), preElement.scrollHeight, 20);
 
-  const snapshotSvg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}px" height="${heightPx}px">
-      <foreignObject width="100%" height="100%">
-        ${snapshotWrapper.outerHTML}
-      </foreignObject>
-    </svg>
-  `.trim();
-
   // Create a table structure - tables preserve background colors in most rich text editors
   const table = document.createElement('table');
   table.style.borderCollapse = 'collapse';
@@ -440,6 +432,10 @@ export async function copyCodeBlockToClipboard(preElement) {
   const htmlString = table.outerHTML;
 
   try {
+    if (typeof ClipboardItem === 'undefined') {
+      throw new Error('ClipboardItem not supported');
+    }
+
     // Copy as HTML for syntax highlighting + plain text fallback
     const htmlBlob = new Blob([htmlString], { type: 'text/html' });
     const textBlob = new Blob([plainText], { type: 'text/plain' });
@@ -448,21 +444,25 @@ export async function copyCodeBlockToClipboard(preElement) {
       'text/plain': textBlob
     };
 
-    const svgBlob = new Blob([snapshotSvg], { type: 'image/svg+xml' });
-    clipboardPayload['image/svg+xml'] = svgBlob;
-
-    const pngBlob = await rasterizeSvgToPng(snapshotSvg, widthPx, heightPx);
-    if (pngBlob) {
-      clipboardPayload['image/png'] = pngBlob;
-    }
-
     const clipboardItem = new ClipboardItem(clipboardPayload);
     await navigator.clipboard.write([clipboardItem]);
     return true;
   } catch (err) {
     // Fallback to plain text copy
     try {
-      await navigator.clipboard.writeText(plainText);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(plainText);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = plainText;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
       return true;
     } catch (fallbackErr) {
       console.error('Failed to copy code:', fallbackErr);
