@@ -1261,11 +1261,7 @@ footer a:visited {
 }
 
 #export-table-rendered table:hover {
-	box-shadow: none;
-}
-
-#export-table-rendered table:hover::after {
-	opacity: 1;
+	box-shadow: 0 0 0 2px var(--brand-accent);
 }
 
 #export-table-rendered table:hover::before {
@@ -1273,12 +1269,7 @@ footer a:visited {
 }
 
 #export-table-rendered table.copied {
-	box-shadow: none;
-}
-
-#export-table-rendered table.copied::after {
-	border-color: #22c55e;
-	opacity: 1;
+	box-shadow: 0 0 0 2px #22c55e !important;
 }
 
 #export-table-rendered table.copied::before {
@@ -1288,12 +1279,7 @@ footer a:visited {
 }
 
 #export-table-rendered table.copy-failed {
-	box-shadow: none;
-}
-
-#export-table-rendered table.copy-failed::after {
-	border-color: #ef4444;
-	opacity: 1;
+	box-shadow: 0 0 0 2px #ef4444 !important;
 }
 
 #export-table-rendered table.copy-failed::before {
