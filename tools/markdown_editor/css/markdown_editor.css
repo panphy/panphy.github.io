@@ -30,6 +30,7 @@
   --base-font-size: 16px;
   --copy-hint-outline: #93c5fd;
   --copy-hint-bg: #dbeafe;
+  --copy-hint-chip-bg: #e0f2fe;
   --copy-hint-text: #1e3a8a;
 }
 
@@ -54,6 +55,7 @@ body.dark-mode {
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
   --copy-hint-outline: #7dd3fc;
   --copy-hint-bg: #1e3a8a;
+  --copy-hint-chip-bg: #111827;
   --copy-hint-text: #e0f2fe;
 }
 
