@@ -835,16 +835,15 @@ mjx-container.copy-failed::after {
 /* Table click-to-copy */
 #renderedOutput table {
   cursor: pointer;
-  transition: outline 0.15s ease;
+  transition: box-shadow 0.15s ease;
 }
 
 #renderedOutput table:hover {
-  outline: 2px solid var(--brand-accent);
-  outline-offset: 4px;
+  box-shadow: 0 0 0 2px var(--brand-accent);
 }
 
 #renderedOutput table.copied {
-  outline: 2px solid #22c55e !important;
+  box-shadow: 0 0 0 2px #22c55e !important;
 }
 
 #renderedOutput table.copied::before {
@@ -917,7 +916,7 @@ mjx-container.copy-failed::after {
 }
 
 #renderedOutput table.copy-failed {
-  outline: 2px solid #ef4444 !important;
+  box-shadow: 0 0 0 2px #ef4444 !important;
 }
 
 #renderedOutput table.copy-failed::before {
