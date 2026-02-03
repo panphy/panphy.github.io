@@ -10,6 +10,7 @@
 	--brand-primary: #6c5ce7;
 	--brand-secondary: #a29bfe;
 	--brand-accent: #00cec9;
+	--brand-accent-strong: #00b5b1;
 	--card-bg: #ffffff;
 	--card-border: #e6e9ef;
 	--card-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
@@ -37,6 +38,7 @@
 	--brand-primary: #a29bfe;
 	--brand-secondary: #6c5ce7;
 	--brand-accent: #81ecec;
+	--brand-accent-strong: #5fd8d8;
 	--card-bg: #1e2129;
 	--card-border: #2d3436;
 	--card-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
@@ -612,14 +614,21 @@ button:hover {
 	background-color: #356ba6;
 }
 
-.btn-export-csv,
-.btn-export-md {
+.btn-export-csv {
 	background-color: var(--brand-secondary);
 }
 
-.btn-export-csv:hover,
-.btn-export-md:hover {
+.btn-export-csv:hover {
 	background-color: #8b82e8;
+}
+
+.btn-export-md {
+	background-color: var(--brand-accent);
+	color: #0f1014;
+}
+
+.btn-export-md:hover {
+	background-color: var(--brand-accent-strong);
 }
 
 .fit-button {
