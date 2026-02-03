@@ -1447,86 +1447,46 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 		event.preventDefault();
 		event.stopPropagation();
-		copyExportedTableToClipboard(table);
+		copyExportedTableToClipboard(table).then(success => {
+			if (success) {
+				showExportTableCopyFeedback(table);
+			} else {
+				showExportTableCopyFailedFeedback(table);
+			}
+		});
 	}
 
 
 	async function copyExportedTableToClipboard(table) {
+		const tableClone = table.cloneNode(true);
+
+		tableClone.style.borderCollapse = 'collapse';
+		tableClone.style.fontFamily = 'Arial, sans-serif';
+		tableClone.style.fontSize = '12pt';
+
+		tableClone.querySelectorAll('th, td').forEach(cell => {
+			cell.style.border = '1px solid black';
+			cell.style.padding = '8px';
+		});
+
+		const htmlString = tableClone.outerHTML;
+
 		try {
-			// Clone the table to add inline styles for Word compatibility
-			const tableClone = table.cloneNode(true);
-
-			const inlineStyles = (source, target, properties) => {
-				const computed = getComputedStyle(source);
-				properties.forEach(property => {
-					target.style[property] = computed.getPropertyValue(property);
-				});
-			};
-
-			inlineStyles(table, tableClone, [
-				'border-collapse',
-				'width',
-				'font-family',
-				'font-size',
-				'color',
-				'background-color'
-			]);
-
-			const originalRows = table.querySelectorAll('tr');
-			const clonedRows = tableClone.querySelectorAll('tr');
-			originalRows.forEach((row, rowIndex) => {
-				const cloneRow = clonedRows[rowIndex];
-				if (!cloneRow) return;
-				inlineStyles(row, cloneRow, ['background-color']);
-
-				const originalCells = row.querySelectorAll('th, td');
-				const clonedCells = cloneRow.querySelectorAll('th, td');
-				originalCells.forEach((cell, cellIndex) => {
-					const cloneCell = clonedCells[cellIndex];
-					if (!cloneCell) return;
-					inlineStyles(cell, cloneCell, [
-						'border',
-						'padding',
-						'text-align',
-						'font-weight',
-						'font-style',
-						'vertical-align',
-						'color',
-						'background-color',
-						'font-family',
-						'font-size'
-					]);
-				});
+			const htmlBlob = new Blob([htmlString], { type: 'text/html' });
+			const textBlob = new Blob([table.innerText], { type: 'text/plain' });
+			const clipboardItem = new ClipboardItem({
+				'text/html': htmlBlob,
+				'text/plain': textBlob
 			});
-
-			const htmlString = tableClone.outerHTML;
-
-			// Try to copy as both HTML and plain text
+			await navigator.clipboard.write([clipboardItem]);
+			return true;
+		} catch (clipboardError) {
 			try {
-				const htmlBlob = new Blob([htmlString], { type: 'text/html' });
-				const textBlob = new Blob([table.innerText], { type: 'text/plain' });
-				const clipboardItem = new ClipboardItem({
-					'text/html': htmlBlob,
-					'text/plain': textBlob
-				});
-				await navigator.clipboard.write([clipboardItem]);
-			} catch (clipboardError) {
-				// Fallback: copy as plain text
-				await navigator.clipboard.writeText(table.innerText);
-			}
-
-			// Show visual feedback
-			showExportTableCopyFeedback(table);
-
-		} catch (error) {
-			console.error('Failed to copy table:', error);
-			// Ultimate fallback: try basic clipboard API
-			try {
-				await navigator.clipboard.writeText(table.innerText);
-				showExportTableCopyFeedback(table);
+				await navigator.clipboard.writeText(htmlString);
+				return true;
 			} catch (fallbackError) {
-				console.error('Fallback copy also failed:', fallbackError);
-				showExportTableCopyFailedFeedback(table);
+				console.error('Failed to copy table:', fallbackError);
+				return false;
 			}
 		}
 	}
