@@ -874,6 +874,16 @@
       opacity: 1 !important;
     }
 
+    mjx-container.copy-failed {
+      outline: 2px solid #ef4444 !important;
+    }
+
+    mjx-container.copy-failed::after {
+      content: "Copy failed" !important;
+      background: #ef4444 !important;
+      opacity: 1 !important;
+    }
+
     /* Table click-to-copy */
     #renderedOutput table {
       cursor: pointer;
@@ -1895,16 +1905,21 @@
     const svgClone = svg.cloneNode(true);
 
     // MathJax uses a global defs cache - we need to inline all referenced glyphs
-    // Find all <use> elements and their referenced definitions
-    const useElements = svgClone.querySelectorAll('use');
-    const referencedIds = new Set();
+    // For complex equations (integrals, matrices, boxed, etc.), definitions can
+    // reference other definitions, so we need to recursively resolve all references.
 
-    useElements.forEach(use => {
-      const href = use.getAttribute('href') || use.getAttribute('xlink:href');
-      if (href && href.startsWith('#')) {
-        referencedIds.add(href.substring(1));
-      }
-    });
+    // Helper function to extract referenced IDs from an element
+    const getReferencedIds = (element) => {
+      const ids = new Set();
+      const useElements = element.querySelectorAll('use');
+      useElements.forEach(use => {
+        const href = use.getAttribute('href') || use.getAttribute('xlink:href');
+        if (href && href.startsWith('#')) {
+          ids.add(href.substring(1));
+        }
+      });
+      return ids;
+    };
 
     // Create or get the defs element in our clone
     let defsClone = svgClone.querySelector('defs');
@@ -1913,17 +1928,37 @@
       svgClone.insertBefore(defsClone, svgClone.firstChild);
     }
 
-    // Find and clone referenced elements from the global MathJax cache
-    referencedIds.forEach(id => {
-      // Check if already in our defs
-      if (defsClone.querySelector(`#${CSS.escape(id)}`)) return;
+    // Recursively collect and clone all referenced definitions
+    // This handles nested references where defs reference other defs
+    const processedIds = new Set();
+    const pendingIds = getReferencedIds(svgClone);
+
+    while (pendingIds.size > 0) {
+      const id = pendingIds.values().next().value;
+      pendingIds.delete(id);
+
+      // Skip if already processed
+      if (processedIds.has(id)) continue;
+      processedIds.add(id);
+
+      // Skip if already in our defs
+      if (defsClone.querySelector(`#${CSS.escape(id)}`)) continue;
 
       // Look for the element in the document (MathJax global cache)
       const original = document.getElementById(id);
       if (original) {
-        defsClone.appendChild(original.cloneNode(true));
+        const clonedDef = original.cloneNode(true);
+        defsClone.appendChild(clonedDef);
+
+        // Check if this cloned def has its own <use> references (nested references)
+        const nestedIds = getReferencedIds(clonedDef);
+        nestedIds.forEach(nestedId => {
+          if (!processedIds.has(nestedId)) {
+            pendingIds.add(nestedId);
+          }
+        });
       }
-    });
+    }
 
     // Get computed dimensions - use getBoundingClientRect for more reliability
     const bbox = svg.getBBox();
@@ -2016,28 +2051,17 @@
             }
           } catch (clipErr) {
             console.error('Clipboard write failed:', clipErr);
-            // Fallback: copy SVG as text
-            try {
-              await navigator.clipboard.writeText(svgString);
-              resolve(true);
-            } catch (textErr) {
-              console.error('Failed to copy equation:', textErr);
-              resolve(false);
-            }
+            // Don't fall back to copying raw SVG text as it's not useful for users.
+            resolve(false);
           }
         };
 
         img.onerror = async (err) => {
           URL.revokeObjectURL(svgObjectUrl);
           console.error('Image load failed:', err);
-          // Fallback: copy SVG as text
-          try {
-            await navigator.clipboard.writeText(svgString);
-            resolve(true);
-          } catch (copyErr) {
-            console.error('Failed to copy equation:', copyErr);
-            resolve(false);
-          }
+          // Don't fall back to copying raw SVG text as it's not useful for users.
+          // Instead, indicate failure so the UI can show appropriate feedback.
+          resolve(false);
         };
 
         img.src = svgObjectUrl;
@@ -2096,6 +2120,16 @@
     setTimeout(() => {
       element.classList.remove('copied');
     }, 1500);
+  }
+
+  /**
+   * Show copy failed feedback animation on an element.
+   */
+  function showCopyFailedFeedback(element) {
+    element.classList.add('copy-failed');
+    setTimeout(() => {
+      element.classList.remove('copy-failed');
+    }, 2000);
   }
 
   /**
@@ -2166,6 +2200,8 @@
       copyEquationToClipboard(mjxContainer).then(success => {
         if (success) {
           showCopyFeedback(mjxContainer);
+        } else {
+          showCopyFailedFeedback(mjxContainer);
         }
       });
       return;
