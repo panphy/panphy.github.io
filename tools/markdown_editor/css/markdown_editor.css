@@ -29,8 +29,9 @@
   --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
   --base-font-size: 16px;
   --copy-hint-outline: #93c5fd;
-  --copy-hint-bg: rgba(147, 197, 253, 0.2);
-  --copy-hint-text: #1e3a8a;
+  --copy-hint-bg: transparent;
+  --copy-hint-chip-bg: #2563eb;
+  --copy-hint-text: #f8fafc;
 }
 
 body.dark-mode {
@@ -53,8 +54,9 @@ body.dark-mode {
   --code-text-color: #f8f8f2;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
   --copy-hint-outline: #7dd3fc;
-  --copy-hint-bg: rgba(125, 211, 252, 0.18);
-  --copy-hint-text: #e0f2fe;
+  --copy-hint-bg: transparent;
+  --copy-hint-chip-bg: #38bdf8;
+  --copy-hint-text: #0f172a;
 }
 
 body {
@@ -772,7 +774,7 @@ mjx-container::after {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--copy-hint-bg);
+  background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
   border-radius: 999px;
@@ -793,7 +795,7 @@ mjx-container::after {
   top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--copy-hint-bg);
+  background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
   border-radius: 999px;
@@ -889,7 +891,7 @@ mjx-container.copy-failed::after {
   top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--copy-hint-bg);
+  background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
   border-radius: 999px;
