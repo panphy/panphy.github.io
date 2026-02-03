@@ -1346,19 +1346,170 @@ const debouncedUpdateData = debounce(updateData, 300);
 			});
 
 			console.log("Final Markdown Content:\n", markdown);
-			const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8;' });
-			const url = URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.setAttribute('href', url);
-			link.setAttribute('download', 'data.md');
-			link.style.visibility = 'hidden';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
+			return markdown;
 		} catch (error) {
-			console.error('Error exporting plain text:', error);
-			alert('An error occurred while exporting the Markdown file. Please check the console for details.');
+			console.error('Error generating markdown:', error);
+			return null;
 		}
+	}
+
+
+	// Store the current exported markdown for saving
+	let currentExportedMarkdown = '';
+
+
+	function showExportTablePopup() {
+		try {
+			// Generate the markdown table
+			const markdown = exportPlainText();
+			if (!markdown) {
+				alert('No data to export. Please add some data first.');
+				return;
+			}
+
+			// Store markdown for later saving
+			currentExportedMarkdown = markdown;
+
+			// Configure marked for GitHub Flavored Markdown with tables
+			marked.setOptions({
+				gfm: true,
+				tables: true,
+				breaks: false
+			});
+
+			// Parse markdown to HTML
+			const rawHtml = marked.parse(markdown);
+
+			// Sanitize the HTML
+			const sanitizedHtml = DOMPurify.sanitize(rawHtml);
+
+			// Render into the popup container
+			const renderedContainer = document.getElementById('export-table-rendered');
+			renderedContainer.innerHTML = sanitizedHtml;
+
+			// Add click listener to the table for copy functionality
+			const table = renderedContainer.querySelector('table');
+			if (table) {
+				table.addEventListener('click', handleExportTableClick);
+			}
+
+			// Show the popup
+			const background = document.getElementById('export-table-background');
+			const container = document.getElementById('export-table-container');
+			if (background) background.style.display = 'block';
+			if (container) container.style.display = 'flex';
+
+			// Trigger MathJax typesetting for LaTeX in the table
+			safeTypeset(renderedContainer);
+
+		} catch (error) {
+			console.error('Error showing export table popup:', error);
+			alert('An error occurred while preparing the table. Please check the console for details.');
+		}
+	}
+
+
+	function closeExportTablePopup() {
+		const background = document.getElementById('export-table-background');
+		const container = document.getElementById('export-table-container');
+
+		if (background) background.style.display = 'none';
+		if (container) container.style.display = 'none';
+
+		// Clear the stored markdown
+		currentExportedMarkdown = '';
+	}
+
+
+	function saveExportedMarkdown() {
+		if (!currentExportedMarkdown) {
+			alert('No markdown content to save.');
+			return;
+		}
+
+		const blob = new Blob([currentExportedMarkdown], { type: 'text/plain;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.setAttribute('href', url);
+		link.setAttribute('download', 'data.md');
+		link.style.visibility = 'hidden';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	}
+
+
+	function handleExportTableClick(event) {
+		// Don't copy if user is selecting text
+		if (window.getSelection().toString()) return;
+
+		const table = event.currentTarget;
+		copyExportedTableToClipboard(table);
+	}
+
+
+	async function copyExportedTableToClipboard(table) {
+		try {
+			// Clone the table to add inline styles for Word compatibility
+			const tableClone = table.cloneNode(true);
+
+			// Add inline styles for better compatibility with Word/Google Docs
+			tableClone.style.borderCollapse = 'collapse';
+			tableClone.style.fontFamily = 'Arial, sans-serif';
+			tableClone.style.fontSize = '12pt';
+
+			// Style headers
+			tableClone.querySelectorAll('th').forEach(cell => {
+				cell.style.border = '1px solid black';
+				cell.style.padding = '8px';
+				cell.style.backgroundColor = '#f0f0f0';
+				cell.style.fontWeight = 'bold';
+			});
+
+			// Style data cells
+			tableClone.querySelectorAll('td').forEach(cell => {
+				cell.style.border = '1px solid black';
+				cell.style.padding = '8px';
+			});
+
+			const htmlString = tableClone.outerHTML;
+
+			// Try to copy as both HTML and plain text
+			try {
+				const htmlBlob = new Blob([htmlString], { type: 'text/html' });
+				const textBlob = new Blob([table.innerText], { type: 'text/plain' });
+				const clipboardItem = new ClipboardItem({
+					'text/html': htmlBlob,
+					'text/plain': textBlob
+				});
+				await navigator.clipboard.write([clipboardItem]);
+			} catch (clipboardError) {
+				// Fallback: copy as plain text
+				await navigator.clipboard.writeText(table.innerText);
+			}
+
+			// Show visual feedback
+			showExportTableCopyFeedback(table);
+
+		} catch (error) {
+			console.error('Failed to copy table:', error);
+			// Ultimate fallback: try basic clipboard API
+			try {
+				await navigator.clipboard.writeText(table.innerText);
+				showExportTableCopyFeedback(table);
+			} catch (fallbackError) {
+				alert('Failed to copy table. Please try selecting and copying manually.');
+			}
+		}
+	}
+
+
+	function showExportTableCopyFeedback(table) {
+		table.classList.add('copied');
+		setTimeout(() => {
+			table.classList.remove('copied');
+		}, 1500);
 	}
 
 
