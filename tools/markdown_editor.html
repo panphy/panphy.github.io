@@ -450,6 +450,7 @@
       padding: 0;
       border-radius: 5px;
       overflow-x: auto;
+      overflow-y: visible;
       font-size: 0.95em;
       line-height: 1.5;
       margin: 2px 0;
@@ -946,6 +947,26 @@
     #renderedOutput pre.copied::before {
       content: "Copied!" !important;
       background: #22c55e !important;
+      opacity: 1 !important;
+    }
+
+    #renderedOutput pre.copy-failed {
+      outline: 2px solid #ef4444 !important;
+    }
+
+    #renderedOutput pre.copy-failed::before {
+      content: "Copy failed" !important;
+      background: #ef4444 !important;
+      opacity: 1 !important;
+    }
+
+    #renderedOutput table.copy-failed {
+      outline: 2px solid #ef4444 !important;
+    }
+
+    #renderedOutput table.copy-failed::before {
+      content: "Copy failed" !important;
+      background: #ef4444 !important;
       opacity: 1 !important;
     }
   </style>
@@ -2199,24 +2220,45 @@
     const textColor = computedStyle.color || '#000000';
 
     // Add inline styles for Word compatibility
-    preClone.style.backgroundColor = bgColor;
+    preClone.style.backgroundColor = 'transparent';
     preClone.style.color = textColor;
     preClone.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', monospace";
     preClone.style.fontSize = '10pt';
-    preClone.style.padding = '12px';
-    preClone.style.borderRadius = '5px';
     preClone.style.whiteSpace = 'pre-wrap';
     preClone.style.wordWrap = 'break-word';
+    preClone.style.margin = '0';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.backgroundColor = bgColor;
+    wrapper.style.color = textColor;
+    wrapper.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', monospace";
+    wrapper.style.fontSize = '10pt';
+    wrapper.style.padding = '12px';
+    wrapper.style.borderRadius = '5px';
+    wrapper.style.whiteSpace = 'pre-wrap';
+    wrapper.style.wordWrap = 'break-word';
+    wrapper.appendChild(preClone);
 
     // Inline the syntax highlighting colors from hljs spans
-    preClone.querySelectorAll('[class*="hljs"]').forEach(el => {
-      const elStyle = getComputedStyle(preElement.querySelector(`.${el.className.split(' ').find(c => c.startsWith('hljs'))}`) || el);
+    const originalHighlights = preElement.querySelectorAll('[class*="hljs"]');
+    const clonedHighlights = preClone.querySelectorAll('[class*="hljs"]');
+    clonedHighlights.forEach((el, index) => {
+      const original = originalHighlights[index];
+      if (!original) return;
+      const elStyle = getComputedStyle(original);
       if (elStyle.color) {
         el.style.color = elStyle.color;
       }
+      if (
+        elStyle.backgroundColor &&
+        elStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+        elStyle.backgroundColor !== 'transparent'
+      ) {
+        el.style.backgroundColor = elStyle.backgroundColor;
+      }
     });
 
-    const htmlString = preClone.outerHTML;
+    const htmlString = wrapper.outerHTML;
 
     try {
       // Copy as HTML for syntax highlighting + plain text fallback
@@ -2266,6 +2308,8 @@
       copyTableToClipboard(table).then(success => {
         if (success) {
           showCopyFeedback(table);
+        } else {
+          showCopyFailedFeedback(table);
         }
       });
       return;
@@ -2278,6 +2322,8 @@
       copyCodeBlockToClipboard(preElement).then(success => {
         if (success) {
           showCopyFeedback(preElement);
+        } else {
+          showCopyFailedFeedback(preElement);
         }
       });
       return;
