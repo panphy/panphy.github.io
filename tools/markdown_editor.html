@@ -894,6 +894,50 @@
       background: #22c55e !important;
       opacity: 1 !important;
     }
+
+    /* Code block click-to-copy */
+    #renderedOutput pre {
+      cursor: pointer;
+      position: relative;
+      transition: outline 0.15s ease;
+    }
+
+    #renderedOutput pre:hover {
+      outline: 2px solid var(--brand-accent);
+      outline-offset: 4px;
+    }
+
+    #renderedOutput pre::before {
+      content: "Click to copy code";
+      position: absolute;
+      top: -28px;
+      right: 8px;
+      background: var(--text-color);
+      color: var(--pane-background);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-sans);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 100;
+    }
+
+    #renderedOutput pre:hover::before {
+      opacity: 1;
+    }
+
+    #renderedOutput pre.copied {
+      outline: 2px solid #22c55e !important;
+    }
+
+    #renderedOutput pre.copied::before {
+      content: "Copied!" !important;
+      background: #22c55e !important;
+      opacity: 1 !important;
+    }
   </style>
 </head>
 
@@ -979,7 +1023,6 @@
       <div class="buttonContainer floating-toolbar output-controls no-print">
         <div class="output-actions">
           <button id="printButton" title="Prints in light mode">Print to PDF</button>
-          <button id="exportSVGButton" title="Export full document as SVG. Tip: Click any equation or table to copy it directly!">Export to SVG</button>
           <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
         </div>
         <div class="output-toggles">
@@ -1012,7 +1055,6 @@
   const clearButton = document.getElementById('clearButton');
   const loadSampleButton = document.getElementById('loadSampleButton');
   const exportHTMLButton = document.getElementById('exportHTMLButton');
-  const exportSVGButton = document.getElementById('exportSVGButton');
   const printButton = document.getElementById('printButton');
   const saveMDButton = document.getElementById('saveMDButton');
   const loadFileButton = document.getElementById('loadFileButton');
@@ -1994,6 +2036,23 @@
   }
 
   /**
+   * Copy a code block's text content to clipboard.
+   */
+  async function copyCodeBlockToClipboard(preElement) {
+    // Get the code element inside pre, or use pre's text directly
+    const codeElement = preElement.querySelector('code');
+    const codeText = codeElement ? codeElement.textContent : preElement.textContent;
+
+    try {
+      await navigator.clipboard.writeText(codeText);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+      return false;
+    }
+  }
+
+  /**
    * Handle clicks on the rendered output for copy-to-clipboard functionality.
    */
   function handleCopyClick(event) {
@@ -2021,272 +2080,18 @@
       });
       return;
     }
-  }
 
-  function exportSVG() {
-    const fileName = prompt('Enter file name for the SVG export:', 'document.svg');
-    if (!fileName) return;
-
-    const sanitizedHTML = getCleanRenderedOutputHTML()
-      .replace(/&nbsp;/g, '&#160;')
-      .replace(/\u00a0/g, '&#160;')
-      // Escape any & not part of a valid entity reference for XML compatibility
-      .replace(/&(?!(?:[a-zA-Z][a-zA-Z0-9]*|#[0-9]+|#x[0-9a-fA-F]+);)/g, '&amp;');
-    const svgSafeHTML = sanitizedHTML.replace(
-      /<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\b([^>]*)>/gi,
-      (match, tagName, attributes) => {
-        if (match.endsWith('/>')) {
-          return match;
+    // Check if clicked on a code block
+    const preElement = event.target.closest('pre');
+    if (preElement && !window.getSelection().toString()) {
+      event.preventDefault();
+      copyCodeBlockToClipboard(preElement).then(success => {
+        if (success) {
+          showCopyFeedback(preElement);
         }
-        return `<${tagName}${attributes} />`;
-      }
-    );
-    const currentFontSize = getCurrentFontSize();
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const padding = 20;
-    const outputWidth = Math.max(300, renderedOutput.clientWidth);
-    const outputHeight = Math.max(300, renderedOutput.scrollHeight + padding * 2);
-    const backgroundColor = isDarkMode ? '#1e1e1e' : '#ffffff';
-
-    const styleContent = `
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
-      .svg-export-body {
-        --background-color: #ffffff;
-        --text-color: #000000;
-        --pane-background: #ffffff;
-        --pane-heading-background: #333333;
-        --pane-heading-color: #ffffff;
-        --button-background: #f0f0f0;
-        --button-color: #000000;
-        --border-color: #ccc;
-        --code-background: #f0f0f0;
-        --table-border-color: black;
-        --table-header-background: #f4f4f4;
-        font-family: 'Inter', sans-serif;
-        line-height: 1.5;
-        font-size: ${currentFontSize};
-        background-color: var(--background-color);
-        color: var(--text-color);
-        padding: ${padding}px;
-        width: ${outputWidth}px;
-        box-sizing: border-box;
-      }
-
-      .svg-export-body.dark-mode {
-        --background-color: #1e1e1e;
-        --text-color: #e0e0e0;
-        --pane-background: #1e1e1e;
-        --pane-heading-background: #2d2c2c;
-        --pane-heading-color: #ffffff;
-        --button-background: #474646;
-        --button-color: #ffffff;
-        --border-color: #555555;
-        --code-background: #2f2f2f;
-        --table-border-color: #555555;
-        --table-header-background: #333333;
-        --code-text-color: #f8f8f2;
-      }
-
-      .svg-export-body,
-      .svg-export-body div,
-      .svg-export-body p,
-      .svg-export-body h1,
-      .svg-export-body h2,
-      .svg-export-body h3,
-      .svg-export-body h4,
-      .svg-export-body h5,
-      .svg-export-body h6,
-      .svg-export-body pre,
-      .svg-export-body code,
-      .svg-export-body table,
-      .svg-export-body th,
-      .svg-export-body td,
-      .svg-export-body blockquote {
-        background-color: var(--background-color);
-        color: var(--text-color);
-      }
-
-      .svg-export-body a {
-        color: #ff5f1f;
-        text-decoration: none;
-      }
-
-      .svg-export-body a:hover {
-        color: #ff5f1f;
-        text-decoration: underline;
-      }
-
-      .svg-export-body a:visited {
-        color: #ff5f1f;
-      }
-
-      .svg-export-body table {
-        max-width: 100%;
-        margin: 20px auto;
-        border-collapse: collapse;
-        border: 1px solid var(--table-border-color);
-      }
-
-      .svg-export-body th,
-      .svg-export-body td {
-        border: 1px solid var(--table-border-color);
-        padding: 8px;
-      }
-
-      .svg-export-body th[align="left"],
-      .svg-export-body td[align="left"] {
-        text-align: left;
-      }
-
-      .svg-export-body th[align="center"],
-      .svg-export-body td[align="center"] {
-        text-align: center;
-      }
-
-      .svg-export-body th[align="right"],
-      .svg-export-body td[align="right"] {
-        text-align: right;
-      }
-
-      .svg-export-body th,
-      .svg-export-body td {
-        text-align: left;
-      }
-
-      .svg-export-body code {
-        background-color: var(--code-background);
-        padding: 0.1em 0.2em;
-        border-radius: 3px;
-        font-size: 0.95em;
-        line-height: 1;
-        font-family: 'JetBrains Mono', monospace;
-        vertical-align: baseline;
-        color: inherit;
-      }
-
-      .svg-export-body pre {
-        background-color: var(--code-background);
-        padding: 0;
-        border-radius: 5px;
-        overflow-x: auto;
-        font-size: 1.05em;
-        line-height: 1.5;
-        margin: 2px 0;
-      }
-
-      .svg-export-body pre code {
-        background: none;
-        padding: 0;
-        border-radius: 0;
-        font-family: inherit;
-        line-height: 1.5;
-        font-size: inherit;
-        color: inherit;
-      }
-
-      .svg-export-body .hljs {
-        line-height: 1.5;
-        font-size: 1.05em;
-        background-color: inherit;
-        color: inherit;
-      }
-
-      .svg-export-body.dark-mode .hljs {
-        color: #f8f8f2 !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-comment,
-      .svg-export-body.dark-mode .hljs-quote {
-        color: #8d9a70 !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-keyword,
-      .svg-export-body.dark-mode .hljs-selector-tag,
-      .svg-export-body.dark-mode .hljs-subst {
-        color: #66d9ef !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-string,
-      .svg-export-body.dark-mode .hljs-doctag {
-        color: #e6db74 !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-number,
-      .svg-export-body.dark-mode .hljs-regexp,
-      .svg-export-body.dark-mode .hljs-tag .hljs-attr {
-        color: #ae81ff !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-title,
-      .svg-export-body.dark-mode .hljs-section {
-        color: #a6e22e !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-type,
-      .svg-export-body.dark-mode .hljs-built_in {
-        color: #fd971f !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-symbol,
-      .svg-export-body.dark-mode .hljs-bullet {
-        color: #f92672 !important;
-      }
-
-      .svg-export-body.dark-mode .hljs-link {
-        color: #e6db74 !important;
-      }
-
-      .svg-export-body img {
-        max-width: 100%;
-        height: auto;
-      }
-
-      .svg-export-body mjx-assistive-mml {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(1px, 1px, 1px, 1px);
-        white-space: nowrap;
-        border: 0;
-        padding: 0;
-        margin: 0;
-      }
-
-      .svg-export-body mjx-container[display="true"] {
-        display: block;
-        text-align: center;
-        margin: 1em 0;
-      }
-    `;
-    const styleContentSafe = styleContent.replace(/&/g, '&amp;');
-
-    const serializedHTML = `
-      <div xmlns="http://www.w3.org/1999/xhtml">
-        <style>${styleContentSafe}</style>
-        <div class="svg-export-body${isDarkMode ? ' dark-mode' : ''}">
-          ${svgSafeHTML}
-        </div>
-      </div>
-    `;
-
-    // Note: Background is now transparent for better compatibility
-    const svgContent = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${outputWidth}" height="${outputHeight}">
-        <foreignObject width="100%" height="100%">
-          ${serializedHTML}
-        </foreignObject>
-      </svg>
-    `.trim();
-
-    const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = fileName.endsWith('.svg') ? fileName : `${fileName}.svg`;
-    link.click();
+      });
+      return;
+    }
   }
 
   function saveMarkdown() {
@@ -2445,17 +2250,16 @@
   markdownInput.addEventListener('select', handleCaretChange);
   markdownInput.addEventListener('scroll', linkOutputToInputScroll);
   renderedOutput.addEventListener('click', event => {
-    // Handle copy clicks first (equations and tables)
+    // Handle copy clicks first (equations, tables, code blocks)
     handleCopyClick(event);
-    // Then handle caret sync (only if not clicking on equation/table)
-    if (!event.target.closest('mjx-container') && !event.target.closest('table')) {
+    // Then handle caret sync (only if not clicking on copyable elements)
+    if (!event.target.closest('mjx-container') && !event.target.closest('table') && !event.target.closest('pre')) {
       syncCaretFromOutputClick(event);
     }
   });
   renderedOutput.addEventListener('scroll', linkInputToOutputScroll);
   printButton.addEventListener('click', printToPDF);
   exportHTMLButton.addEventListener('click', exportHTML);
-  exportSVGButton.addEventListener('click', exportSVG);
   saveMDButton.addEventListener('click', saveMarkdown);
   loadFileButton.addEventListener('click', loadMarkdownFile);
   loadSampleButton.addEventListener('click', loadSampleDocument); // Updated event listener
