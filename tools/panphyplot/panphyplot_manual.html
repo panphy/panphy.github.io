@@ -1,221 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="light">
 
 <head>
-  <title>PanPhyPlot Manual</title>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PanPhyPlot Manual</title>
   <link rel="icon" type="image/png" href="/favicon.png">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
-    :root {
-      --background-color: #ffffff;
-      --text-color: #000000;
-      --pane-background: #ffffff;
-      --pane-heading-background: #333333;
-      --pane-heading-color: #ffffff;
-      --button-background: #f0f0f0;
-      --button-color: #000000;
-      --border-color: #ccc;
-      --code-background: #f0f0f0;
-      --table-border-color: black;
-      --table-header-background: #f4f4f4;
-      --switch-width: 43px;
-      --switch-height: 20px;
-      --slider-size: 15px;
-      --slider-transform: 23px;
-      --switch-active-color: #009688;
-      --switch-background-color: #ccc;
-      --switch-knob-color: white;
-      --switch-label-font-size: 18px;
-    }
-
-    body.dark-mode {
-      --background-color: #1e1e1e;
-      --text-color: #e0e0e0;
-      --pane-background: #1e1e1e;
-      --pane-heading-background: #2d2c2c;
-      --pane-heading-color: #ffffff;
-      --button-background: #474646;
-      --button-color: #ffffff;
-      --border-color: #555555;
-      --code-background: #2f2f2f;
-      --table-border-color: #555555;
-      --table-header-background: #333333;
-      --code-text-color: #f8f8f2;
-      --switch-active-color: #009688;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      line-height: 1.5;
-      margin: 20px;
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
-
-    body,
-    div,
-    p,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    pre,
-    code,
-    table,
-    th,
-    td,
-    blockquote {
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
-
-    a {
-      color: #ff5f1f;
-      text-decoration: none;
-    }
-
-    a:hover {
-      color: #ff5f1f;
-      text-decoration: underline;
-    }
-
-    a:visited {
-      color: #ff5f1f;
-    }
-
-    table {
-      max-width: 100%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      border: 1px solid var(--table-border-color);
-    }
-
-    th,
-    td {
-      border: 1px solid var(--table-border-color);
-      padding: 8px;
-    }
-
-    th[align="left"],
-    td[align="left"] {
-      text-align: left;
-    }
-
-    th[align="center"],
-    td[align="center"] {
-      text-align: center;
-    }
-
-    th[align="right"],
-    td[align="right"] {
-      text-align: right;
-    }
-
-    th,
-    td {
-      text-align: left;
-    }
-
-    code {
-      background-color: var(--code-background);
-      padding: 0.1em 0.2em;
-      border-radius: 3px;
-      font-size: 0.95em;
-      line-height: 1;
-      font-family: 'JetBrains Mono', monospace;
-      vertical-align: baseline;
-      color: inherit;
-    }
-
-    pre {
-      background-color: var(--code-background);
-      padding: 0;
-      border-radius: 5px;
-      overflow-x: auto;
-      font-size: 1.05em;
-      line-height: 1.5;
-      margin: 2px 0;
-    }
-
-    pre code {
-      background: none;
-      padding: 0;
-      border-radius: 0;
-      font-family: inherit;
-      line-height: 1.5;
-      font-size: inherit;
-      color: inherit;
-    }
-
-    .hljs {
-      line-height: 1.5;
-      font-size: 1.05em;
-      background-color: inherit;
-      color: inherit;
-    }
-
-    body.dark-mode .hljs {
-      color: #f8f8f2 !important;
-    }
-
-    body.dark-mode .hljs-comment,
-    body.dark-mode .hljs-quote {
-      color: #8d9a70 !important;
-    }
-
-    body.dark-mode .hljs-keyword,
-    body.dark-mode .hljs-selector-tag,
-    body.dark-mode .hljs-subst {
-      color: #66d9ef !important;
-    }
-
-    body.dark-mode .hljs-string,
-    body.dark-mode .hljs-doctag {
-      color: #e6db74 !important;
-    }
-
-    body.dark-mode .hljs-number,
-    body.dark-mode .hljs-regexp,
-    body.dark-mode .hljs-tag .hljs-attr {
-      color: #ae81ff !important;
-    }
-
-    body.dark-mode .hljs-title,
-    body.dark-mode .hljs-section {
-      color: #a6e22e !important;
-    }
-
-    body.dark-mode .hljs-type,
-    body.dark-mode .hljs-built_in {
-      color: #fd971f !important;
-    }
-
-    body.dark-mode .hljs-symbol,
-    body.dark-mode .hljs-bullet {
-      color: #f92672 !important;
-    }
-
-    body.dark-mode .hljs-link {
-      color: #e6db74 !important;
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-  </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      hljs.highlightAll();
-    });
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => console.log('Service Worker registered!', reg))
+          .catch((err) => console.log('Service Worker registration failed', err));
+      });
+    }
   </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" id="hljs-light">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
   <script>
     window.MathJax = {
       tex: {
@@ -230,288 +32,745 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Poppins', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+      --card-bg: #ffffff;
+      --card-border: #e6e9ef;
+      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      --soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      --muted-bg: #f2f4f8;
+      --border-color: #dfe3ea;
+      --input-border: #d6dbe4;
+      --code-bg: #f6f8fa;
+      --code-border: #e1e4e8;
+      --table-header-bg: #f6f8fa;
+      --table-border: #d0d7de;
+      --nav-bg: rgba(255, 255, 255, 0.9);
+      --nav-border: #dfe3ea;
+      --link-color: #6c5ce7;
+      --note-bg: #f0f7ff;
+      --note-border: #54a3ff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+      --card-bg: #1e2129;
+      --card-border: #2d3436;
+      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      --soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      --muted-bg: #252b34;
+      --border-color: #2d3436;
+      --input-border: #3c4654;
+      --code-bg: #161b22;
+      --code-border: #30363d;
+      --table-header-bg: #21262d;
+      --table-border: #30363d;
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+      --link-color: #a29bfe;
+      --note-bg: #1c2128;
+      --note-border: #388bfd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text-main);
+      line-height: 1.7;
+    }
+
+    /* Banner */
+    .banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--nav-bg);
+      color: var(--text-main);
+      padding: 6px 20px;
+      font-size: 22px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--nav-border);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .banner-logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .banner-logo img {
+      max-height: 38px;
+      margin-right: 8px;
+    }
+
+    .banner-title {
+      flex: 1;
+      text-align: center;
+      font-size: 1.5rem;
+      font-family: var(--font-display);
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .banner-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-right: 5px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .banner-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--muted-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .banner-button:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+      border-color: var(--brand-primary);
+    }
+
+    [data-theme="dark"] .banner-button:hover {
+      background: #2a303a;
+    }
+
+    .theme-toggle button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 6px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      box-shadow: none;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .theme-toggle button:hover {
+      background-color: rgba(128, 128, 128, 0.2);
+      transform: rotate(15deg);
+    }
+
+    /* Main Content */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    /* Typography */
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0 0 1.5rem 0;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem 0;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 28px;
+      background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
+      border-radius: 3px;
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem 0;
+      color: var(--text-main);
+    }
+
+    p {
+      margin: 0 0 1rem 0;
+      color: var(--text-main);
+    }
+
+    a {
+      color: var(--link-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Lists */
+    ul,
+    ol {
+      margin: 0 0 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    li > ul,
+    li > ol {
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    /* Code */
+    code {
+      font-family: var(--font-mono);
+      background-color: var(--code-bg);
+      border: 1px solid var(--code-border);
+      padding: 0.15em 0.4em;
+      border-radius: 6px;
+      font-size: 0.9em;
+      color: var(--text-main);
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 10px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--table-border);
+    }
+
+    th,
+    td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--table-border);
+    }
+
+    th {
+      background-color: var(--table-header-bg);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    td {
+      background-color: var(--card-bg);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Note Box */
+    .note-box {
+      background-color: var(--note-bg);
+      border-left: 4px solid var(--note-border);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin: 1.5rem 0;
+    }
+
+    .note-box strong {
+      color: var(--brand-primary);
+    }
+
+    .note-box p {
+      margin: 0.5rem 0;
+    }
+
+    .note-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Horizontal Rule */
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-color), transparent);
+      margin: 3rem 0;
+    }
+
+    /* Feature Cards */
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+    }
+
+    .feature-list > li {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--soft-shadow);
+    }
+
+    .feature-list > li > strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--brand-primary);
+    }
+
+    .feature-list > li > ul {
+      margin: 0.5rem 0 0 0;
+    }
+
+    /* Tips Section */
+    .tips-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips-list > li {
+      position: relative;
+      padding-left: 28px;
+      margin-bottom: 1rem;
+    }
+
+    .tips-list > li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--brand-accent);
+      font-weight: bold;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--brand-primary);
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .content {
+        padding: 24px 16px 40px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .banner-title {
+        font-size: 1.2rem;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (pointer: coarse) {
+      .banner-button,
+      .theme-toggle button {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <h1><a href="/tools/panphyplot.html" class="banner-button" target="_blank" rel="noopener noreferrer">PanPhyPlot</a> - User
-    Manual</h1>
-  <h2>Introduction</h2>
-  <p>This application is developed with pre-university physics students in mind. It provides a simple tool for plotting
-    graphs with error bars and determining the best fit line for their data. It is particularly designed for students
-    with minimal experience using spreadsheet software such as Microsoft Excel or Google Sheets.</p>
-  <p>While this app serves as a helpful introduction, it is neither a substitute for sophisticated spreadsheet software
-    nor a replacement for professional data analysis tools. Students are strongly encouraged to learn and master basic
-    spreadsheet skills. Additionally, they are invited to explore advanced software, such as <a
-      href="https://www.originlab.com/origin" target="_blank" rel="noopener noreferrer">OriginPro</a> for professional
-    use or free alternatives like <a href="https://scidavis.sourceforge.net/" target="_blank"
-      rel="noopener noreferrer">SciDAVis</a> and <a href="https://labplot.org/" target="_blank"
-      rel="noopener noreferrer">LabPlot</a>, to further
-    enhance their data analysis capabilities.</p>
-  <hr>
-  <h2>Features</h2>
-  <p>This app allows you to input data, visualize it through interactive graphs, and perform various curve fitting
-    analyses to model your data.</p>
-  <ul>
-    <li>
-      <p><strong>Data Input:</strong></p>
+  <div class="banner">
+    <div class="banner-logo">
+      <a href="https://panphy.github.io/">
+        <img src="/panphy.png" alt="PanPhy logo" />
+      </a>
+    </div>
+
+    <div class="banner-title">PanPhyPlot Manual</div>
+
+    <div class="banner-buttons">
+      <a href="/tools/panphyplot.html" class="banner-button" title="Open PanPhyPlot">Open App</a>
+      <div class="theme-toggle">
+        <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <h1>User Manual</h1>
+
+    <h2>Introduction</h2>
+    <p>
+      This application is developed with pre-university physics students in mind. It provides a simple tool for plotting
+      graphs with error bars and determining the best fit line for their data. It is particularly designed for students
+      with minimal experience using spreadsheet software such as Microsoft Excel or Google Sheets.
+    </p>
+    <p>
+      While this app serves as a helpful introduction, it is neither a substitute for sophisticated spreadsheet software
+      nor a replacement for professional data analysis tools. Students are strongly encouraged to learn and master basic
+      spreadsheet skills. Additionally, they are invited to explore advanced software, such as
+      <a href="https://www.originlab.com/origin" target="_blank" rel="noopener noreferrer">OriginPro</a> for professional
+      use or free alternatives like
+      <a href="https://scidavis.sourceforge.net/" target="_blank" rel="noopener noreferrer">SciDAVis</a> and
+      <a href="https://labplot.org/" target="_blank" rel="noopener noreferrer">LabPlot</a>, to further enhance their data
+      analysis capabilities.
+    </p>
+
+    <hr>
+
+    <h2>Features</h2>
+    <p>
+      This app allows you to input data, visualize it through interactive graphs, and perform various curve fitting
+      analyses to model your data.
+    </p>
+
+    <ul class="feature-list">
+      <li>
+        <strong>Data Input</strong>
+        <ul>
+          <li>Enter your data points manually in the table.</li>
+          <li><strong>Add Dataset:</strong> Create and manage multiple datasets. Each dataset retains its own data,
+            uncertainty settings, and fitting results.</li>
+          <li><strong>Add Row:</strong> Click the "Add Row" button to add an individual data row.</li>
+          <li><strong>Clear Data:</strong> Remove all data from the active dataset with a single click.</li>
+          <li><strong>Copy x₁:</strong> Use the "Copy x₁" button to copy all x-values from Dataset 1 into the active
+            dataset. This feature simplifies workflows when comparing multiple datasets.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Data Import/Export</strong>
+        <ul>
+          <li>Import data from a <code>.csv</code> file.</li>
+          <li>Export your data to <code>.csv</code> or <code>.md</code> (Markdown) formats.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Curve Fitting</strong>
+        <ul>
+          <li>Perform basic fits such as Linear, Quadratic, Cubic, Exponential, and Power.</li>
+          <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
+          <li>Customize initial parameters for advanced fitting methods.</li>
+          <li>View fitting equations and R² values.</li>
+          <li>Each dataset maintains its own fitting result until a new fit is performed.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Graph Visualization</strong>
+        <ul>
+          <li>Interactive plots powered by Plotly.js.</li>
+          <li>Customize the graph title and axis labels.</li>
+          <li><strong>LaTeX Mode:</strong> A toggle allows you to activate or deactivate LaTeX rendering for all
+            headings, labels, and titles.</li>
+          <li><strong>Plot All Datasets:</strong> Visualize all datasets simultaneously in a combined plot popup.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <hr>
+
+    <h2>Getting Started</h2>
+
+    <h3>1. Entering Data</h3>
+    <ul>
+      <li><strong>Adding Data Points:</strong> Click the "Add Row" button to add a new data row. Enter your
+        <code>x</code> and <code>y</code> values in the respective input fields.</li>
+      <li><strong>Removing Data Points:</strong> Click the "Clear Data" button to remove all data in the active
+        dataset.</li>
+      <li><strong>Copying x-values from Dataset 1:</strong> In the active dataset view, click the "Copy x₁" button to
+        copy the x-values from Dataset 1 into the current dataset.</li>
+      <li><strong>Adding a New Dataset:</strong> Click the "Add Dataset" button to create a new dataset. Each dataset is
+        stored independently and maintains its own header values, uncertainty settings, and fitting results.</li>
+    </ul>
+
+    <h3>2. Managing Uncertainties</h3>
+    <ul>
+      <li><strong>Toggling Uncertainties:</strong> Check the <strong>Δx</strong> or <strong>Δy</strong> checkboxes to
+        enable uncertainties for the respective axis.</li>
+      <li><strong>Selecting Uncertainty Type:</strong> Choose between <strong>absolute</strong> or
+        <strong>percentage</strong> uncertainties from the dropdown menus.</li>
+      <li><strong>Entering Uncertainties:</strong> Enter the uncertainty values in the input fields that appear once
+        uncertainties are enabled.</li>
+      <li><strong>Applying Global Uncertainties:</strong> Enter a value in the "Enter Δx" or "Enter Δy" fields and click
+        the corresponding "Apply Δx" or "Apply Δy" button to apply the uncertainty across all data points.</li>
+    </ul>
+
+    <h3>3. Importing and Exporting Data</h3>
+    <ul>
+      <li><strong>Importing from CSV:</strong> Click the "Import .csv" button and select a CSV file from your device.
+        Ensure that the CSV file has at least two columns for <code>x</code> and <code>y</code>. Additional columns can
+        represent uncertainties.</li>
+      <li><strong>Exporting Data:</strong> Click the "Export .csv" button to download your data in CSV format. Click the
+        "Export .md" button to download your data in Markdown format, suitable for documentation or reports.</li>
+    </ul>
+
+    <div class="note-box">
+      <p><strong>Note:</strong> Uncertainties (absolute or percentage) play a crucial role in determining how data is
+        formatted in the exported <code>.csv</code> and <code>.md</code> files.</p>
+      <p><strong>1. Absolute Uncertainties:</strong> The number of decimal places in the exported values matches the
+        precision of the absolute uncertainty. For example, if the uncertainty is <code>±0.05</code>, the corresponding
+        data value will be exported with two decimal places (e.g., <code>5.25 ± 0.05</code>).</p>
+      <p><strong>2. Percentage Uncertainties:</strong> The precision of exported values is adjusted based on the
+        percentage uncertainty:</p>
       <ul>
-        <li>Enter your data points manually in the table.</li>
-        <li><strong>Add Dataset:</strong> Create and manage multiple datasets. Each dataset retains its own data,
-          uncertainty settings, and fitting results.</li>
-        <li><strong>Add Row:</strong> Click the <strong>"Add Row"</strong> button to add an individual data row.</li>
-        <li><strong>Clear Data:</strong> Remove all data from the active dataset with a single click.</li>
-        <li><strong>Copy x₁:</strong> Use the <strong>"Copy x₁"</strong> button to copy all x-values from Dataset 1 into
-          the active dataset. This feature simplifies workflows when comparing multiple datasets—even if Dataset 1 has
-          no y values entered.</li>
+        <li>Small uncertainties (≤ 10%): 3 significant figures</li>
+        <li>Medium uncertainties (&gt; 10%): 2 significant figures</li>
+        <li>Large uncertainties (≥ 50%): 1 significant figure</li>
       </ul>
-    </li>
-    <li>
-      <p><strong>Data Import/Export:</strong></p>
-      <ul>
-        <li>Import data from a <code>.csv</code> file.</li>
-        <li>Export your data to <code>.csv</code> or <code>.md</code> (Markdown) formats.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Curve Fitting:</strong></p>
-      <ul>
-        <li>Perform basic fits such as Linear, Quadratic, Cubic, Exponential, and Power.</li>
-        <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
-        <li>Customize initial parameters for advanced fitting methods.</li>
-        <li>View fitting equations and R² values.</li>
-        <li>Each dataset maintains its own fitting result until a new fit is performed.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Graph Visualization:</strong></p>
-      <ul>
-        <li>Interactive plots powered by Plotly.js.</li>
-        <li>Customize the graph title and axis labels.</li>
-        <li><strong>LaTeX Mode:</strong> A toggle allows you to activate or deactivate LaTeX rendering for all headings,
-          labels, and titles. When off (default), all text is displayed as plain text. When on, mathematical expressions
-          are rendered using LaTeX syntax.</li>
-        <li><strong>Plot All Datasets:</strong> In the combined plot popup you can visualize all datasets
-          simultaneously. In this view, each dataset’s fitted curve is rendered with its own color, and the header
-          values (graph title, x-axis, and y-axis labels) correspond to the active dataset but can be further customized
-          via input boxes.</li>
-      </ul>
-    </li>
-  </ul>
-  <hr>
-  <h2>Getting Started</h2>
-  <h3>1. Entering Data</h3>
-  <ul>
-    <li>
-      <p><strong>Adding Data Points:</strong></p>
-      <ul>
-        <li>Click the <strong>"Add Row"</strong> button to add a new data row.</li>
-        <li>Enter your <code>x</code> and <code>y</code> values in the respective input fields.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Removing Data Points:</strong></p>
-      <ul>
-        <li>Click the <strong>"Clear Data"</strong> button to remove all data in the active dataset.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Copying x-values from Dataset 1:</strong></p>
-      <ul>
-        <li>In the active dataset view, click the <strong>"Copy x₁"</strong> button to copy the x-values from Dataset 1
-          into the current dataset. This is useful when you want to compare data sets without re-entering x-values.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Adding a New Dataset:</strong></p>
-      <ul>
-        <li>Click the <strong>"Add Dataset"</strong> button to create a new dataset.</li>
-        <li>Each dataset is stored independently and maintains its own header values, uncertainty settings, and fitting
-          results. When a new dataset is added, its fitting result area is initially blank.</li>
-      </ul>
-    </li>
-  </ul>
-  <h3>2. Managing Uncertainties</h3>
-  <ul>
-    <li>
-      <p><strong>Toggling Uncertainties:</strong></p>
-      <ul>
-        <li>Check the <strong>Δx</strong> or <strong>Δy</strong> checkboxes to enable uncertainties for the respective
-          axis.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Selecting Uncertainty Type:</strong></p>
-      <ul>
-        <li>Choose between <strong>absolute</strong> or <strong>percentage</strong> uncertainties from the dropdown
-          menus. (Each dataset stores its own uncertainty type.)</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Entering Uncertainties:</strong></p>
-      <ul>
-        <li>Enter the uncertainty values in the input fields that appear once uncertainties are enabled.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Applying Global Uncertainties:</strong></p>
-      <ul>
-        <li>Enter a value in the <strong>"Enter Δx"</strong> or <strong>"Enter Δy"</strong> fields and click the
-          corresponding <strong>"Apply Δx"</strong> or <strong>"Apply Δy"</strong> button to apply the uncertainty
-          across all data points.</li>
-      </ul>
-    </li>
-  </ul>
-  <h3>3. Importing and Exporting Data</h3>
-  <ul>
-    <li>
-      <p><strong>Importing from CSV:</strong></p>
-      <ul>
-        <li>Click the <strong>"Import .csv"</strong> button and select a CSV file from your device.</li>
-        <li>Ensure that the CSV file has at least two columns for <code>x</code> and <code>y</code>. Additional columns
-          can represent uncertainties.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Exporting Data:</strong></p>
-      <ul>
-        <li>Click the <strong>"Export .csv"</strong> button to download your data in CSV format.</li>
-        <li>Click the <strong>"Export .md"</strong> button to download your data in Markdown format, suitable for
-          documentation or reports.</li>
-      </ul>
-    </li>
-  </ul>
-  <table>
-    <thead>
-      <tr>
-        <th align="left"><strong>Note:</strong></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td align="left">Uncertainties (absolute or percentage) play a crucial role in determining how data is formatted
-          in the exported <code>.csv</code> and <code>.md</code> files.</td>
-      </tr>
-      <tr>
-        <td align="left">1. <strong>Absolute Uncertainties:</strong>
-          <p> The number of decimal places in the exported values matches the precision of the absolute uncertainty.
-          </p>
-          <p> For example, if the uncertainty is <code>±0.05</code>, the corresponding data value will be exported with
-            two decimal places (e.g., <code>5.25 ± 0.05</code>).</p>
-        </td>
-      </tr>
-      <tr>
-        <td align="left">2. <strong>Percentage Uncertainties:</strong>
-          <p> The precision of exported values is adjusted based on the percentage uncertainty: </p>
-          <p> - <strong>Small uncertainties (≤ 10%):</strong> 3 significant figures </p>
-          <p> - <strong>Medium uncertainties (&gt; 10%):</strong> 2 significant figures </p>
-          <p> - <strong>Large uncertainties (≥ 50%):</strong> 1 significant figure</p>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h3>4. Performing Curve Fitting</h3>
-  <ul>
-    <li>
-      <p><strong>Basic Fit:</strong></p>
-      <ul>
-        <li>Navigate to the <strong>"Basic Fit"</strong> tab.</li>
-        <li>Select a fitting method (Linear, Quadratic, Cubic, Exponential, Power) from the dropdown.</li>
-        <li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
-        <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
-        <li>Click the <strong>"Clear Fit"</strong> button to remove the fitted curve.</li>
-      </ul>
-    </li>
-    <li>
-      <p><strong>Advanced Fit:</strong></p>
-      <ul>
-        <li>Navigate to the <strong>"Advanced Fit"</strong> tab.</li>
-        <li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
-        <li>Some initial parameters are calculated based on the imported dataset. Change the initial parameters if
-          needed.</li>
-        <li>Click the <strong>"Fit Curve"</strong> button to perform the fitting.</li>
-        <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
-        <li>Click the <strong>"Clear Fit"</strong> button to remove the fitted curve.</li>
-      </ul>
-    </li>
-  </ul>
-  <h3>5. Visualizing All Datasets</h3>
-  <ul>
-    <li><strong>Plot All Datasets:</strong>
-      <ul>
-        <li>Click the <strong>"Plot All Datasets"</strong> button to open a popup displaying a combined plot of all
-          datasets.</li>
-        <li>In the combined plot:<ul>
-            <li>All datasets are plotted together.</li>
-            <li>Each dataset’s fitted curve is drawn in a different color.</li>
-            <li>The popup displays input boxes (with labels) for the graph title and axis labels. By default, these
-              values are taken from the active dataset but can be edited.</li>
-            <li>Changes to the title or labels update the combined plot accordingly.</li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-  </ul>
-  <h3>6. LaTeX Mode</h3>
-  <ul>
-    <li><strong>LaTeX Toggle:</strong>
-      <ul>
-        <li>A <strong>LaTeX mode</strong> toggle is located at the top of the app.</li>
-        <li><strong>Default Behavior:</strong><br>When LaTeX mode is <strong>off</strong> (the default), all headings,
-          axis labels, and titles are displayed as plain text.</li>
-        <li><strong>Activating LaTeX Mode:</strong><br>Toggle the switch to <strong>on</strong> to have your text
-          rendered using LaTeX formatting (e.g., for complex mathematical expressions). This makes your graphs and
-          labels appear more professional.</li>
-        <li>This setting affects the entire app, including the combined plot view.</li>
-      </ul>
-    </li>
-  </ul>
-  <hr>
-  <h2>Tips and Best Practices</h2>
-  <ul>
-    <li>
-      <p><strong>Data Quality:</strong><br>Ensure that your data points are accurate and representative of the
-        phenomenon you are modeling.</p>
-    </li>
-    <li>
-      <p><strong>Choosing Initial Parameters:</strong><br>For advanced fitting methods, selecting appropriate initial
-        parameters can significantly impact the convergence and accuracy of the fit.</p>
-    </li>
-    <li>
-      <p><strong>Uncertainties:</strong><br>Use uncertainties to account for measurement errors or variability in your
-        data. Choose between absolute and percentage uncertainties based on your data's nature.</p>
-    </li>
-    <li>
-      <p><strong>LaTeX Formatting:</strong><br>Enable LaTeX mode when you need high-quality mathematical expressions.
-        Otherwise, keep it off for improved performance.</p>
-    </li>
-  </ul>
-  <hr>
-  <h2>Troubleshooting</h2>
-  <ul>
-    <li>
-      <p><strong>Fitting Did Not Converge:</strong><br>If a fitting method fails to converge, try adjusting the initial
-        parameters or selecting a different fitting model.</p>
-    </li>
-    <li>
-      <p><strong>Import Errors:</strong><br>Ensure that your CSV file is properly formatted with headers and consistent
-        columns.</p>
-    </li>
-    <li>
-      <p><strong>LaTeX Rendering Issues:</strong><br>Verify that your LaTeX syntax is correct. If you experience delays,
-        consider leaving LaTeX mode off.</p>
-    </li>
-    <li>
-      <p><strong>Combined Plot Issues:</strong> </p>
-      <ul>
-        <li>If the combined plot title or axis labels do not match the active dataset, ensure that you switch datasets
-          and that the combined plot controls are updated accordingly.</li>
-        <li>If fitted curves or error bars do not appear as expected, double-check that each dataset's fitting and
-          uncertainty settings are stored and restored properly.</li>
-      </ul>
-    </li>
-  </ul>
-  <hr>
-  <p><strong>Happy plotting!</strong></p>
+    </div>
+
+    <h3>4. Performing Curve Fitting</h3>
+    <ul>
+      <li>
+        <strong>Basic Fit:</strong>
+        <ul>
+          <li>Navigate to the "Basic Fit" tab.</li>
+          <li>Select a fitting method (Linear, Quadratic, Cubic, Exponential, Power) from the dropdown.</li>
+          <li>Click the "Fit Curve" button to perform the fitting.</li>
+          <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
+          <li>Click the "Clear Fit" button to remove the fitted curve.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Advanced Fit:</strong>
+        <ul>
+          <li>Navigate to the "Advanced Fit" tab.</li>
+          <li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
+          <li>Some initial parameters are calculated based on the imported dataset. Change the initial parameters if
+            needed.</li>
+          <li>Click the "Fit Curve" button to perform the fitting.</li>
+          <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
+          <li>Click the "Clear Fit" button to remove the fitted curve.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>5. Visualizing All Datasets</h3>
+    <ul>
+      <li>
+        <strong>Plot All Datasets:</strong> Click the "Plot All Datasets" button to open a popup displaying a combined
+        plot of all datasets.
+        <ul>
+          <li>All datasets are plotted together.</li>
+          <li>Each dataset's fitted curve is drawn in a different color.</li>
+          <li>The popup displays input boxes for the graph title and axis labels. By default, these values are taken
+            from the active dataset but can be edited.</li>
+          <li>Changes to the title or labels update the combined plot accordingly.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>6. LaTeX Mode</h3>
+    <ul>
+      <li>
+        <strong>LaTeX Toggle:</strong> A LaTeX mode toggle is located at the top of the app.
+        <ul>
+          <li><strong>Default Behavior:</strong> When LaTeX mode is off (the default), all headings, axis labels, and
+            titles are displayed as plain text.</li>
+          <li><strong>Activating LaTeX Mode:</strong> Toggle the switch to on to have your text rendered using LaTeX
+            formatting (e.g., for complex mathematical expressions). This makes your graphs and labels appear more
+            professional.</li>
+          <li>This setting affects the entire app, including the combined plot view.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <hr>
+
+    <h2>Tips and Best Practices</h2>
+    <ul class="tips-list">
+      <li><strong>Data Quality:</strong> Ensure that your data points are accurate and representative of the phenomenon
+        you are modeling.</li>
+      <li><strong>Choosing Initial Parameters:</strong> For advanced fitting methods, selecting appropriate initial
+        parameters can significantly impact the convergence and accuracy of the fit.</li>
+      <li><strong>Uncertainties:</strong> Use uncertainties to account for measurement errors or variability in your
+        data. Choose between absolute and percentage uncertainties based on your data's nature.</li>
+      <li><strong>LaTeX Formatting:</strong> Enable LaTeX mode when you need high-quality mathematical expressions.
+        Otherwise, keep it off for improved performance.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+      <li><strong>Fitting Did Not Converge:</strong> If a fitting method fails to converge, try adjusting the initial
+        parameters or selecting a different fitting model.</li>
+      <li><strong>Import Errors:</strong> Ensure that your CSV file is properly formatted with headers and consistent
+        columns.</li>
+      <li><strong>LaTeX Rendering Issues:</strong> Verify that your LaTeX syntax is correct. If you experience delays,
+        consider leaving LaTeX mode off.</li>
+      <li>
+        <strong>Combined Plot Issues:</strong>
+        <ul>
+          <li>If the combined plot title or axis labels do not match the active dataset, ensure that you switch datasets
+            and that the combined plot controls are updated accordingly.</li>
+          <li>If fitted curves or error bars do not appear as expected, double-check that each dataset's fitting and
+            uncertainty settings are stored and restored properly.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <hr>
+
+    <p style="text-align: center; font-size: 1.1rem; color: var(--brand-primary); font-weight: 600;">
+      Happy plotting!
+    </p>
+  </div>
+
+  <footer>
+    &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
+    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+  </footer>
+
+  <script>
+    // Theme Toggle Functionality
+    const themeButton = document.getElementById('theme-button');
+    const DARK_THEME_KEY = "panphy-dark";
+    const LIGHT_THEME_KEY = "panphy-light";
+    const hljsLight = document.getElementById('hljs-light');
+    const hljsDark = document.getElementById('hljs-dark');
+
+    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+      "dark" :
+      localStorage.getItem(LIGHT_THEME_KEY) ?
+        "light" :
+        "light";
+
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateButtonEmoji(currentTheme);
+    updateHighlightTheme(currentTheme);
+
+    function updateButtonEmoji(theme) {
+      themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+
+    function updateHighlightTheme(theme) {
+      if (theme === 'dark') {
+        hljsLight.disabled = true;
+        hljsDark.disabled = false;
+      } else {
+        hljsLight.disabled = false;
+        hljsDark.disabled = true;
+      }
+    }
+
+    themeButton.addEventListener('click', function () {
+      let theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem(DARK_THEME_KEY, 'true');
+        localStorage.removeItem(LIGHT_THEME_KEY);
+        updateButtonEmoji('dark');
+        updateHighlightTheme('dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem(LIGHT_THEME_KEY, 'true');
+        localStorage.removeItem(DARK_THEME_KEY);
+        updateButtonEmoji('light');
+        updateHighlightTheme('light');
+      }
+    });
+
+    // Initialize highlight.js
+    window.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+  </script>
 </body>
 
 </html>
