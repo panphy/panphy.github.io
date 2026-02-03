@@ -1456,23 +1456,47 @@ const debouncedUpdateData = debounce(updateData, 300);
 			// Clone the table to add inline styles for Word compatibility
 			const tableClone = table.cloneNode(true);
 
-			// Add inline styles for better compatibility with Word/Google Docs
-			tableClone.style.borderCollapse = 'collapse';
-			tableClone.style.fontFamily = 'Arial, sans-serif';
-			tableClone.style.fontSize = '12pt';
+			const inlineStyles = (source, target, properties) => {
+				const computed = getComputedStyle(source);
+				properties.forEach(property => {
+					target.style[property] = computed.getPropertyValue(property);
+				});
+			};
 
-			// Style headers
-			tableClone.querySelectorAll('th').forEach(cell => {
-				cell.style.border = '1px solid black';
-				cell.style.padding = '8px';
-				cell.style.backgroundColor = '#f0f0f0';
-				cell.style.fontWeight = 'bold';
-			});
+			inlineStyles(table, tableClone, [
+				'border-collapse',
+				'width',
+				'font-family',
+				'font-size',
+				'color',
+				'background-color'
+			]);
 
-			// Style data cells
-			tableClone.querySelectorAll('td').forEach(cell => {
-				cell.style.border = '1px solid black';
-				cell.style.padding = '8px';
+			const originalRows = table.querySelectorAll('tr');
+			const clonedRows = tableClone.querySelectorAll('tr');
+			originalRows.forEach((row, rowIndex) => {
+				const cloneRow = clonedRows[rowIndex];
+				if (!cloneRow) return;
+				inlineStyles(row, cloneRow, ['background-color']);
+
+				const originalCells = row.querySelectorAll('th, td');
+				const clonedCells = cloneRow.querySelectorAll('th, td');
+				originalCells.forEach((cell, cellIndex) => {
+					const cloneCell = clonedCells[cellIndex];
+					if (!cloneCell) return;
+					inlineStyles(cell, cloneCell, [
+						'border',
+						'padding',
+						'text-align',
+						'font-weight',
+						'font-style',
+						'vertical-align',
+						'color',
+						'background-color',
+						'font-family',
+						'font-size'
+					]);
+				});
 			});
 
 			const htmlString = tableClone.outerHTML;
