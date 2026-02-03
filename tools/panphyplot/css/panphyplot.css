@@ -1233,7 +1233,7 @@ footer a:visited {
 #export-table-rendered table::after {
 	content: "";
 	position: absolute;
-	inset: 0;
+	inset: -2px;
 	border: 2px solid var(--brand-accent);
 	opacity: 0;
 	pointer-events: none;
@@ -1262,10 +1262,6 @@ footer a:visited {
 
 #export-table-rendered table:hover {
 	box-shadow: 0 0 0 2px var(--brand-accent);
-}
-
-#export-table-rendered table:hover::after {
-	opacity: 1;
 }
 
 #export-table-rendered table:hover::before {
