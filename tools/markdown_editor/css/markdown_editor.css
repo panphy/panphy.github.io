@@ -28,6 +28,9 @@
   --table-header-background: #f4f6f8;
   --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
   --base-font-size: 16px;
+  --copy-hint-outline: #93c5fd;
+  --copy-hint-bg: rgba(147, 197, 253, 0.2);
+  --copy-hint-text: #1e3a8a;
 }
 
 body.dark-mode {
@@ -49,6 +52,9 @@ body.dark-mode {
   --table-header-background: #252a33;
   --code-text-color: #f8f8f2;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --copy-hint-outline: #7dd3fc;
+  --copy-hint-bg: rgba(125, 211, 252, 0.18);
+  --copy-hint-text: #e0f2fe;
 }
 
 body {
@@ -751,13 +757,13 @@ button:hover {
 mjx-container {
   cursor: pointer;
   position: relative;
-  transition: outline 0.15s ease;
-  border-radius: 4px;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  border-radius: 8px;
 }
 
 mjx-container:hover {
-  outline: 2px solid var(--brand-accent);
-  outline-offset: 4px;
+  box-shadow: 0 0 0 2px var(--copy-hint-outline);
+  background-color: var(--copy-hint-bg);
 }
 
 mjx-container::after {
@@ -766,13 +772,14 @@ mjx-container::after {
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--text-color);
-  color: var(--pane-background);
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: var(--copy-hint-bg);
+  color: var(--copy-hint-text);
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 11px;
   font-family: var(--font-sans);
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -786,13 +793,14 @@ mjx-container::after {
   top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--text-color);
-  color: var(--pane-background);
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: var(--copy-hint-bg);
+  color: var(--copy-hint-text);
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 11px;
   font-family: var(--font-sans);
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -813,7 +821,7 @@ mjx-container:hover::after {
 
 /* Copy feedback animation */
 mjx-container.copied {
-  outline: 2px solid #22c55e !important;
+  box-shadow: 0 0 0 2px #22c55e !important;
 }
 
 mjx-container.copied::after {
@@ -823,7 +831,7 @@ mjx-container.copied::after {
 }
 
 mjx-container.copy-failed {
-  outline: 2px solid #ef4444 !important;
+  box-shadow: 0 0 0 2px #ef4444 !important;
 }
 
 mjx-container.copy-failed::after {
@@ -835,11 +843,13 @@ mjx-container.copy-failed::after {
 /* Table click-to-copy */
 #renderedOutput table {
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  border-radius: 8px;
 }
 
 #renderedOutput table:hover {
-  box-shadow: 0 0 0 2px var(--brand-accent);
+  box-shadow: 0 0 0 2px var(--copy-hint-outline);
+  background-color: var(--copy-hint-bg);
 }
 
 #renderedOutput table.copied {
@@ -856,9 +866,10 @@ mjx-container.copy-failed::after {
 #renderedOutput pre {
   cursor: pointer;
   position: relative;
-  transition: outline 0.15s ease;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
   margin-top: 20px;
   overflow: visible;
+  border-radius: 8px;
 }
 
 #renderedOutput pre code {
@@ -868,8 +879,8 @@ mjx-container.copy-failed::after {
 }
 
 #renderedOutput pre:hover {
-  outline: 2px solid var(--brand-accent);
-  outline-offset: 4px;
+  box-shadow: 0 0 0 2px var(--copy-hint-outline);
+  background-color: var(--copy-hint-bg);
 }
 
 #renderedOutput pre::before {
@@ -878,13 +889,14 @@ mjx-container.copy-failed::after {
   top: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--text-color);
-  color: var(--pane-background);
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: var(--copy-hint-bg);
+  color: var(--copy-hint-text);
+  padding: 4px 10px;
+  border-radius: 999px;
   font-size: 11px;
   font-family: var(--font-sans);
   white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease;
@@ -896,7 +908,7 @@ mjx-container.copy-failed::after {
 }
 
 #renderedOutput pre.copied {
-  outline: 2px solid #22c55e !important;
+  box-shadow: 0 0 0 2px #22c55e !important;
 }
 
 #renderedOutput pre.copied::before {
@@ -906,7 +918,7 @@ mjx-container.copy-failed::after {
 }
 
 #renderedOutput pre.copy-failed {
-  outline: 2px solid #ef4444 !important;
+  box-shadow: 0 0 0 2px #ef4444 !important;
 }
 
 #renderedOutput pre.copy-failed::before {
