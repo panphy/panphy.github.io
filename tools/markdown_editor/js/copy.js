@@ -325,6 +325,12 @@ export async function copyCodeBlockToClipboard(preElement) {
   const preTextColor = preStyle.color;
   const textColor = !isTransparentColor(codeTextColor) ? codeTextColor : (preTextColor || '#000000');
 
+  const codePadding = codeStyle?.padding || '12px';
+  const borderRadius = preStyle.borderRadius || '6px';
+  const fontFamily = codeStyle?.fontFamily || preStyle.fontFamily || "'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace";
+  const fontSize = codeStyle?.fontSize || preStyle.fontSize || '10pt';
+  const lineHeight = codeStyle?.lineHeight || preStyle.lineHeight || '1.5';
+
   // Build the code content with inlined syntax highlighting
   const codeClone = codeElement ? codeElement.cloneNode(true) : preElement.cloneNode(true);
 
@@ -346,6 +352,46 @@ export async function copyCodeBlockToClipboard(preElement) {
     }
   });
 
+  // Build an HTML snapshot for SVG rendering
+  const snapshotWrapper = document.createElement('div');
+  snapshotWrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  snapshotWrapper.style.backgroundColor = bgColor;
+  snapshotWrapper.style.color = textColor;
+  snapshotWrapper.style.fontFamily = fontFamily;
+  snapshotWrapper.style.fontSize = fontSize;
+  snapshotWrapper.style.lineHeight = lineHeight;
+  snapshotWrapper.style.padding = codePadding;
+  snapshotWrapper.style.borderRadius = borderRadius;
+  snapshotWrapper.style.display = 'inline-block';
+  snapshotWrapper.style.whiteSpace = 'pre';
+  snapshotWrapper.style.boxSizing = 'border-box';
+
+  const snapshotPre = document.createElement('pre');
+  snapshotPre.style.margin = '0';
+  snapshotPre.style.padding = '0';
+  snapshotPre.style.backgroundColor = 'transparent';
+  snapshotPre.style.color = 'inherit';
+  snapshotPre.style.fontFamily = 'inherit';
+  snapshotPre.style.fontSize = 'inherit';
+  snapshotPre.style.lineHeight = 'inherit';
+  snapshotPre.style.whiteSpace = 'pre';
+  snapshotPre.style.wordWrap = 'break-word';
+  snapshotPre.style.border = 'none';
+  snapshotPre.innerHTML = codeClone.innerHTML;
+  snapshotWrapper.appendChild(snapshotPre);
+
+  const snapshotRect = preElement.getBoundingClientRect();
+  const widthPx = Math.max(Math.ceil(snapshotRect.width), preElement.scrollWidth, 20);
+  const heightPx = Math.max(Math.ceil(snapshotRect.height), preElement.scrollHeight, 20);
+
+  const snapshotSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}px" height="${heightPx}px">
+      <foreignObject width="100%" height="100%">
+        ${snapshotWrapper.outerHTML}
+      </foreignObject>
+    </svg>
+  `.trim();
+
   // Create a table structure - tables preserve background colors in most rich text editors
   const table = document.createElement('table');
   table.style.borderCollapse = 'collapse';
@@ -362,11 +408,11 @@ export async function copyCodeBlockToClipboard(preElement) {
   // Apply background to the table cell - this is what gets preserved
   td.style.backgroundColor = bgColor;
   td.style.color = textColor;
-  td.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace";
-  td.style.fontSize = '10pt';
-  td.style.lineHeight = '1.5';
-  td.style.padding = '12px 16px';
-  td.style.borderRadius = '6px';
+  td.style.fontFamily = fontFamily;
+  td.style.fontSize = fontSize;
+  td.style.lineHeight = lineHeight;
+  td.style.padding = codePadding;
+  td.style.borderRadius = borderRadius;
   td.style.whiteSpace = 'pre';
   td.style.border = 'none';
   td.style.verticalAlign = 'top';
@@ -397,10 +443,20 @@ export async function copyCodeBlockToClipboard(preElement) {
     // Copy as HTML for syntax highlighting + plain text fallback
     const htmlBlob = new Blob([htmlString], { type: 'text/html' });
     const textBlob = new Blob([plainText], { type: 'text/plain' });
-    const clipboardItem = new ClipboardItem({
+    const clipboardPayload = {
       'text/html': htmlBlob,
       'text/plain': textBlob
-    });
+    };
+
+    const svgBlob = new Blob([snapshotSvg], { type: 'image/svg+xml' });
+    clipboardPayload['image/svg+xml'] = svgBlob;
+
+    const pngBlob = await rasterizeSvgToPng(snapshotSvg, widthPx, heightPx);
+    if (pngBlob) {
+      clipboardPayload['image/png'] = pngBlob;
+    }
+
+    const clipboardItem = new ClipboardItem(clipboardPayload);
     await navigator.clipboard.write([clipboardItem]);
     return true;
   } catch (err) {
