@@ -911,6 +911,7 @@
       cursor: pointer;
       position: relative;
       transition: outline 0.15s ease;
+      margin-top: 20px;
     }
 
     #renderedOutput pre:hover {
@@ -922,7 +923,8 @@
       content: "Click to copy code";
       position: absolute;
       top: -28px;
-      right: 8px;
+      left: 50%;
+      transform: translateX(-50%);
       background: var(--text-color);
       color: var(--pane-background);
       padding: 4px 8px;
@@ -2206,40 +2208,21 @@
   }
 
   /**
-   * Copy a code block as HTML with syntax highlighting to clipboard.
-   * HTML format preserves colors when pasting into Word/rich text editors.
+   * Copy a code block as HTML with syntax highlighting and background to clipboard.
+   * HTML format preserves colors and background when pasting into Word/rich text editors.
    */
   async function copyCodeBlockToClipboard(preElement) {
     const preClone = preElement.cloneNode(true);
     const codeElement = preClone.querySelector('code');
     const plainText = codeElement ? codeElement.textContent : preClone.textContent;
 
-    // Get computed styles for syntax highlighting colors
+    // Get computed styles for the code block
     const computedStyle = getComputedStyle(preElement);
     const bgColor = computedStyle.backgroundColor || '#f1f3f5';
     const textColor = computedStyle.color || '#000000';
+    const borderRadius = computedStyle.borderRadius || '5px';
 
-    // Add inline styles for Word compatibility
-    preClone.style.backgroundColor = 'transparent';
-    preClone.style.color = textColor;
-    preClone.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', monospace";
-    preClone.style.fontSize = '10pt';
-    preClone.style.whiteSpace = 'pre-wrap';
-    preClone.style.wordWrap = 'break-word';
-    preClone.style.margin = '0';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.backgroundColor = bgColor;
-    wrapper.style.color = textColor;
-    wrapper.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', monospace";
-    wrapper.style.fontSize = '10pt';
-    wrapper.style.padding = '12px';
-    wrapper.style.borderRadius = '5px';
-    wrapper.style.whiteSpace = 'pre-wrap';
-    wrapper.style.wordWrap = 'break-word';
-    wrapper.appendChild(preClone);
-
-    // Inline the syntax highlighting colors from hljs spans
+    // Inline the syntax highlighting colors from hljs spans before modifying structure
     const originalHighlights = preElement.querySelectorAll('[class*="hljs"]');
     const clonedHighlights = preClone.querySelectorAll('[class*="hljs"]');
     clonedHighlights.forEach((el, index) => {
@@ -2256,7 +2239,45 @@
       ) {
         el.style.backgroundColor = elStyle.backgroundColor;
       }
+      if (elStyle.fontWeight && elStyle.fontWeight !== 'normal' && elStyle.fontWeight !== '400') {
+        el.style.fontWeight = elStyle.fontWeight;
+      }
+      if (elStyle.fontStyle && elStyle.fontStyle !== 'normal') {
+        el.style.fontStyle = elStyle.fontStyle;
+      }
     });
+
+    // Style the pre element with background for proper formatting
+    preClone.style.backgroundColor = bgColor;
+    preClone.style.color = textColor;
+    preClone.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace";
+    preClone.style.fontSize = '10pt';
+    preClone.style.lineHeight = '1.5';
+    preClone.style.whiteSpace = 'pre-wrap';
+    preClone.style.wordWrap = 'break-word';
+    preClone.style.margin = '0';
+    preClone.style.padding = '12px';
+    preClone.style.borderRadius = borderRadius;
+    preClone.style.overflow = 'auto';
+
+    // Style inner code element if present
+    if (codeElement) {
+      codeElement.style.backgroundColor = 'transparent';
+      codeElement.style.fontFamily = 'inherit';
+      codeElement.style.fontSize = 'inherit';
+      codeElement.style.lineHeight = 'inherit';
+      codeElement.style.color = 'inherit';
+      codeElement.style.padding = '0';
+      codeElement.style.margin = '0';
+    }
+
+    // Create wrapper div for additional compatibility with some applications
+    const wrapper = document.createElement('div');
+    wrapper.style.backgroundColor = bgColor;
+    wrapper.style.borderRadius = borderRadius;
+    wrapper.style.padding = '0';
+    wrapper.style.margin = '0';
+    wrapper.appendChild(preClone);
 
     const htmlString = wrapper.outerHTML;
 
