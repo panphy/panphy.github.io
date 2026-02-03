@@ -1225,9 +1225,19 @@ footer a:visited {
 	width: 100%;
 	border-collapse: collapse;
 	cursor: pointer;
-	transition: outline 0.15s ease;
+	transition: box-shadow 0.15s ease;
 	background: var(--card-bg);
 	position: relative;
+}
+
+#export-table-rendered table::after {
+	content: "";
+	position: absolute;
+	inset: -2px;
+	border: 2px solid var(--brand-accent);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s ease;
 }
 
 /* Tooltip for click-to-copy */
