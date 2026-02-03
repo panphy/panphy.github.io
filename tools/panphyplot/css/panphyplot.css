@@ -1251,8 +1251,7 @@ footer a:visited {
 }
 
 #export-table-rendered table:hover {
-	outline: 2px solid var(--brand-accent);
-	outline-offset: 4px;
+	box-shadow: 0 0 0 2px var(--brand-accent);
 }
 
 #export-table-rendered table:hover::before {
@@ -1260,7 +1259,7 @@ footer a:visited {
 }
 
 #export-table-rendered table.copied {
-	outline: 2px solid #22c55e !important;
+	box-shadow: 0 0 0 2px #22c55e !important;
 }
 
 #export-table-rendered table.copied::before {
@@ -1270,7 +1269,7 @@ footer a:visited {
 }
 
 #export-table-rendered table.copy-failed {
-	outline: 2px solid #ef4444 !important;
+	box-shadow: 0 0 0 2px #ef4444 !important;
 }
 
 #export-table-rendered table.copy-failed::before {
