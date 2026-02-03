@@ -29,9 +29,8 @@
   --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
   --base-font-size: 16px;
   --copy-hint-outline: #93c5fd;
-  --copy-hint-bg: transparent;
-  --copy-hint-chip-bg: #2563eb;
-  --copy-hint-text: #f8fafc;
+  --copy-hint-bg: #dbeafe;
+  --copy-hint-text: #1e3a8a;
 }
 
 body.dark-mode {
@@ -54,9 +53,8 @@ body.dark-mode {
   --code-text-color: #f8f8f2;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
   --copy-hint-outline: #7dd3fc;
-  --copy-hint-bg: transparent;
-  --copy-hint-chip-bg: #38bdf8;
-  --copy-hint-text: #0f172a;
+  --copy-hint-bg: #1e3a8a;
+  --copy-hint-text: #e0f2fe;
 }
 
 body {
