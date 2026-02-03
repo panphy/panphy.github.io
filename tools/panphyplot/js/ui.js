@@ -1464,9 +1464,18 @@ const debouncedUpdateData = debounce(updateData, 300);
 		tableClone.style.fontFamily = 'Arial, sans-serif';
 		tableClone.style.fontSize = '12pt';
 
-		tableClone.querySelectorAll('th, td').forEach(cell => {
-			cell.style.border = '1px solid black';
-			cell.style.padding = '8px';
+		// Copy computed styles from original cells to preserve formatting
+		const originalCells = table.querySelectorAll('th, td');
+		const clonedCells = tableClone.querySelectorAll('th, td');
+		originalCells.forEach((cell, index) => {
+			const cloneCell = clonedCells[index];
+			if (!cloneCell) return;
+			const computed = getComputedStyle(cell);
+			cloneCell.style.border = '1px solid black';
+			cloneCell.style.padding = '8px';
+			cloneCell.style.textAlign = computed.textAlign;
+			cloneCell.style.fontWeight = computed.fontWeight;
+			cloneCell.style.verticalAlign = computed.verticalAlign;
 		});
 
 		const htmlString = tableClone.outerHTML;
