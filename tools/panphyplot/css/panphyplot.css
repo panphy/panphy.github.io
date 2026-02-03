@@ -1216,23 +1216,35 @@ footer a:visited {
 
 #export-table-rendered {
 	overflow-x: auto;
+	overflow-y: visible;
 	margin-bottom: 16px;
+	padding-top: 28px;
 }
 
 #export-table-rendered table {
 	width: 100%;
 	border-collapse: collapse;
 	cursor: pointer;
-	transition: outline 0.15s ease;
+	transition: box-shadow 0.15s ease;
 	background: var(--card-bg);
 	position: relative;
+}
+
+#export-table-rendered table::after {
+	content: "";
+	position: absolute;
+	inset: -2px;
+	border: 2px solid var(--brand-accent);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s ease;
 }
 
 /* Tooltip for click-to-copy */
 #export-table-rendered table::before {
 	content: "Click to copy table";
 	position: absolute;
-	top: -28px;
+	top: -24px;
 	left: 50%;
 	transform: translateX(-50%);
 	background: var(--text-main);
@@ -1249,8 +1261,11 @@ footer a:visited {
 }
 
 #export-table-rendered table:hover {
-	outline: 2px solid var(--brand-accent);
-	outline-offset: 4px;
+	box-shadow: none;
+}
+
+#export-table-rendered table:hover::after {
+	opacity: 1;
 }
 
 #export-table-rendered table:hover::before {
@@ -1258,7 +1273,12 @@ footer a:visited {
 }
 
 #export-table-rendered table.copied {
-	outline: 2px solid #22c55e !important;
+	box-shadow: none;
+}
+
+#export-table-rendered table.copied::after {
+	border-color: #22c55e;
+	opacity: 1;
 }
 
 #export-table-rendered table.copied::before {
@@ -1268,7 +1288,12 @@ footer a:visited {
 }
 
 #export-table-rendered table.copy-failed {
-	outline: 2px solid #ef4444 !important;
+	box-shadow: none;
+}
+
+#export-table-rendered table.copy-failed::after {
+	border-color: #ef4444;
+	opacity: 1;
 }
 
 #export-table-rendered table.copy-failed::before {
