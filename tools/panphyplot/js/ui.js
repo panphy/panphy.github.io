@@ -1070,10 +1070,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 	// Calculate significant figures from percentage uncertainty using logarithmic formula.
 	// This scales smoothly: 100% → 1 sf, 10% → 2 sf, 1% → 3 sf, 0.1% → 4 sf, etc.
+	// Capped at 10 sig figs to avoid toPrecision() errors (max 21) and unrealistic precision.
 	function getSigFigsFromPercentage(perc) {
 		if (perc <= 0 || isNaN(perc)) return 3; // fallback for invalid values
 		const sigFigs = Math.round(-Math.log10(perc / 100) + 1);
-		return Math.max(1, sigFigs);
+		return Math.max(1, Math.min(10, sigFigs));
 	}
 
 
