@@ -30,6 +30,7 @@
   --base-font-size: 16px;
   --copy-hint-outline: #93c5fd;
   --copy-hint-bg: #dbeafe;
+  --copy-hint-chip-bg: #e0f2fe;
   --copy-hint-text: #1e3a8a;
 }
 
@@ -54,6 +55,7 @@ body.dark-mode {
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
   --copy-hint-outline: #7dd3fc;
   --copy-hint-bg: #1e3a8a;
+  --copy-hint-chip-bg: #111827;
   --copy-hint-text: #e0f2fe;
 }
 
@@ -757,13 +759,12 @@ button:hover {
 mjx-container {
   cursor: pointer;
   position: relative;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: box-shadow 0.15s ease;
   border-radius: 8px;
 }
 
 mjx-container:hover {
   box-shadow: 0 0 0 2px var(--copy-hint-outline);
-  background-color: var(--copy-hint-bg);
 }
 
 mjx-container::after {
@@ -843,13 +844,12 @@ mjx-container.copy-failed::after {
 /* Table click-to-copy */
 #renderedOutput table {
   cursor: pointer;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: box-shadow 0.15s ease;
   border-radius: 8px;
 }
 
 #renderedOutput table:hover {
   box-shadow: 0 0 0 2px var(--copy-hint-outline);
-  background-color: var(--copy-hint-bg);
 }
 
 #renderedOutput table.copied {
@@ -866,7 +866,7 @@ mjx-container.copy-failed::after {
 #renderedOutput pre {
   cursor: pointer;
   position: relative;
-  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: box-shadow 0.15s ease;
   margin-top: 20px;
   overflow: visible;
   border-radius: 8px;
@@ -880,7 +880,6 @@ mjx-container.copy-failed::after {
 
 #renderedOutput pre:hover {
   box-shadow: 0 0 0 2px var(--copy-hint-outline);
-  background-color: var(--copy-hint-bg);
 }
 
 #renderedOutput pre::before {
