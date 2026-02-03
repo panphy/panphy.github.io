@@ -1464,20 +1464,21 @@ const debouncedUpdateData = debounce(updateData, 300);
 		tableClone.style.fontFamily = 'Arial, sans-serif';
 		tableClone.style.fontSize = '12pt';
 
-		// Copy computed styles from original cells to preserve formatting
-		const originalCells = table.querySelectorAll('th, td');
-		const clonedCells = tableClone.querySelectorAll('th, td');
-		originalCells.forEach((cell, index) => {
-			const cloneCell = clonedCells[index];
-			if (!cloneCell) return;
-			const computed = getComputedStyle(cell);
-			cloneCell.style.border = '1px solid black';
-			cloneCell.style.padding = '8px';
-			cloneCell.style.textAlign = computed.textAlign;
-			cloneCell.style.fontWeight = computed.fontWeight;
-			cloneCell.style.verticalAlign = computed.verticalAlign;
-			// Add align attribute for better Word/Google Docs compatibility
-			cloneCell.setAttribute('align', computed.textAlign);
+		// Style header cells (th)
+		tableClone.querySelectorAll('th').forEach(cell => {
+			cell.style.border = '1px solid black';
+			cell.style.padding = '8px';
+			cell.style.textAlign = 'center';
+			cell.style.fontWeight = 'bold';
+			cell.setAttribute('align', 'center');
+		});
+
+		// Style data cells (td)
+		tableClone.querySelectorAll('td').forEach(cell => {
+			cell.style.border = '1px solid black';
+			cell.style.padding = '8px';
+			cell.style.textAlign = 'center';
+			cell.setAttribute('align', 'center');
 		});
 
 		const htmlString = tableClone.outerHTML;
