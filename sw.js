@@ -1,5 +1,5 @@
-const CACHE_NAME = 'panphy-labs-2026-02-03';
-const RUNTIME_CACHE = 'panphy-labs-runtime-2026-02-03';
+const CACHE_NAME = 'panphy-labs-2026-02-03-v2';
+const RUNTIME_CACHE = 'panphy-labs-runtime-2026-02-03-v2';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -11,8 +11,14 @@ const ASSETS_TO_CACHE = [
 
   // Tools
   '/tools/markdown_editor.html',
-  '/tools/mkdwn_sample_doc.md',
-  '/tools/mkdwn_sample_pic.webp',
+  '/tools/markdown_editor/css/markdown_editor.css',
+  '/tools/markdown_editor/js/state.js',
+  '/tools/markdown_editor/js/rendering.js',
+  '/tools/markdown_editor/js/copy.js',
+  '/tools/markdown_editor/js/ui.js',
+  '/tools/markdown_editor/js/main.js',
+  '/tools/markdown_editor/sample_doc.md',
+  '/tools/markdown_editor/sample_pic.webp',
   '/tools/panphyplot.html',
   '/tools/panphyplot/css/panphyplot.css',
   '/tools/panphyplot/panphyplot_manual.html',

@@ -25,7 +25,12 @@
 │   ├── panphyplot/         # Modular JS/CSS for PanPhyPlot
 │   │   ├── css/panphyplot.css
 │   │   └── js/             # state.js, main.js, plotting.js, curve-fitting.js, etc.
-│   ├── markdown_editor.html
+│   ├── markdown_editor.html # Markdown & LaTeX editor (entry point)
+│   ├── markdown_editor/    # Modular JS/CSS for Markdown Editor
+│   │   ├── css/markdown_editor.css
+│   │   ├── js/             # state.js, main.js, rendering.js, copy.js, ui.js
+│   │   ├── sample_doc.md   # Sample markdown document
+│   │   └── sample_pic.webp # Sample image for documentation
 │   ├── digitizer.html
 │   ├── motion_tracker.html
 │   ├── sound_analyzer.html
@@ -122,9 +127,10 @@ Theme is toggled via `data-theme` attribute on `<html>` and persisted to localSt
 - **Constants**: UPPER_SNAKE_CASE (`CACHE_NAME`, `STORAGE_KEY`)
 - **State objects**: Centralized global objects
 
-### Modular Architecture (PanPhyPlot Example)
+### Modular Architecture
 For complex tools, code is split into modules:
 
+**PanPhyPlot:**
 ```
 panphyplot.html (imports scripts)
 ├── js/state.js          # State management & localStorage
@@ -134,6 +140,19 @@ panphyplot.html (imports scripts)
 ├── js/latex-rendering.js
 ├── js/ui.js            # UI interactions
 └── css/panphyplot.css  # Styling
+```
+
+**Markdown Editor:**
+```
+markdown_editor.html (imports scripts via ES modules)
+├── js/state.js          # State management & localStorage
+├── js/main.js           # App initialization & event handlers
+├── js/rendering.js      # Markdown preprocessing & rendering
+├── js/copy.js           # Copy-to-clipboard (equations, tables, code)
+├── js/ui.js             # Theme, scroll sync, modals
+├── css/markdown_editor.css  # Styling
+├── sample_doc.md        # Tutorial document
+└── sample_pic.webp      # Sample image
 ```
 
 ## Service Worker & Caching
@@ -213,7 +232,8 @@ The most complex tool has modular architecture:
 | `index.html` | Main landing page with links to all tools |
 | `sw.js` | Service Worker - update cache list when adding pages |
 | `manifest.json` | PWA metadata (name, icons, display mode) |
-| `tools/panphyplot/` | Most complex tool, good reference for patterns |
+| `tools/panphyplot/` | Complex plotting tool, good reference for modular patterns |
+| `tools/markdown_editor/` | Markdown/LaTeX editor with ES module architecture |
 
 ## Key Patterns
 
