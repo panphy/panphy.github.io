@@ -798,6 +798,102 @@
     .offline-font {
       --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
     }
+
+    /* Click-to-copy for equations */
+    mjx-container {
+      cursor: pointer;
+      position: relative;
+      transition: outline 0.15s ease;
+      border-radius: 4px;
+    }
+
+    mjx-container:hover {
+      outline: 2px solid var(--brand-accent);
+      outline-offset: 4px;
+    }
+
+    mjx-container::after {
+      content: "Click to copy image";
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-color);
+      color: var(--pane-background);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-sans);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 100;
+    }
+
+    /* Table tooltip */
+    #renderedOutput table::before {
+      content: "Click to copy table";
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-color);
+      color: var(--pane-background);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: var(--font-sans);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 100;
+    }
+
+    #renderedOutput table {
+      position: relative;
+    }
+
+    #renderedOutput table:hover::before {
+      opacity: 1;
+    }
+
+    mjx-container:hover::after {
+      opacity: 1;
+    }
+
+    /* Copy feedback animation */
+    mjx-container.copied {
+      outline: 2px solid #22c55e !important;
+    }
+
+    mjx-container.copied::after {
+      content: "Copied!" !important;
+      background: #22c55e !important;
+      opacity: 1 !important;
+    }
+
+    /* Table click-to-copy */
+    #renderedOutput table {
+      cursor: pointer;
+      transition: outline 0.15s ease;
+    }
+
+    #renderedOutput table:hover {
+      outline: 2px solid var(--brand-accent);
+      outline-offset: 4px;
+    }
+
+    #renderedOutput table.copied {
+      outline: 2px solid #22c55e !important;
+    }
+
+    #renderedOutput table.copied::before {
+      content: "Copied!" !important;
+      background: #22c55e !important;
+      opacity: 1 !important;
+    }
   </style>
 </head>
 
@@ -883,7 +979,7 @@
       <div class="buttonContainer floating-toolbar output-controls no-print">
         <div class="output-actions">
           <button id="printButton" title="Prints in light mode">Print to PDF</button>
-          <button id="exportSVGButton" title="Exports in current theme">Export to SVG</button>
+          <button id="exportSVGButton" title="Export full document as SVG. Tip: Click any equation or table to copy it directly!">Export to SVG</button>
           <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
         </div>
         <div class="output-toggles">
@@ -1744,6 +1840,189 @@
     return clonedOutput.innerHTML;
   }
 
+  /**
+   * Copy an equation (MathJax SVG) to clipboard as PNG image.
+   * Creates a tight-bounded PNG that can be pasted into Word, PowerPoint, etc.
+   * PNG format is used because it has better compatibility with most applications.
+   */
+  async function copyEquationToClipboard(mjxContainer) {
+    const svg = mjxContainer.querySelector('svg');
+    if (!svg) return false;
+
+    // Clone the SVG to avoid modifying the original
+    const svgClone = svg.cloneNode(true);
+
+    // Get computed dimensions
+    const bbox = svg.getBBox();
+    const padding = 8;
+
+    // Set explicit dimensions and viewBox for tight bounding
+    const width = bbox.width + padding * 2;
+    const height = bbox.height + padding * 2;
+
+    svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgClone.setAttribute('width', `${width}pt`);
+    svgClone.setAttribute('height', `${height}pt`);
+    svgClone.setAttribute('viewBox', `${bbox.x - padding} ${bbox.y - padding} ${width} ${height}`);
+
+    // Remove any background, ensure transparency
+    svgClone.style.backgroundColor = 'transparent';
+
+    // Always use black fill for equations (better for documents)
+    const fillColor = '#000000';
+    svgClone.querySelectorAll('g[data-mml-node], use, path, rect').forEach(el => {
+      if (!el.getAttribute('fill') || el.getAttribute('fill') === 'currentColor') {
+        el.setAttribute('fill', fillColor);
+      }
+    });
+    svgClone.style.color = fillColor;
+
+    const svgString = new XMLSerializer().serializeToString(svgClone);
+
+    // Convert SVG to PNG using canvas for better clipboard compatibility
+    try {
+      const scale = 3; // High resolution for print quality
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Convert pt to px (1pt = 1.333px approximately)
+      const pxWidth = Math.ceil(width * 1.333 * scale);
+      const pxHeight = Math.ceil(height * 1.333 * scale);
+
+      canvas.width = pxWidth;
+      canvas.height = pxHeight;
+
+      // Create an image from SVG
+      const img = new Image();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      return new Promise((resolve) => {
+        img.onload = async () => {
+          // Draw with transparent background
+          ctx.clearRect(0, 0, pxWidth, pxHeight);
+          ctx.drawImage(img, 0, 0, pxWidth, pxHeight);
+          URL.revokeObjectURL(url);
+
+          try {
+            // Convert canvas to blob and copy to clipboard
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob })
+            ]);
+            resolve(true);
+          } catch (clipErr) {
+            // Fallback: copy SVG as text
+            try {
+              await navigator.clipboard.writeText(svgString);
+              resolve(true);
+            } catch (textErr) {
+              console.error('Failed to copy equation:', textErr);
+              resolve(false);
+            }
+          }
+        };
+
+        img.onerror = async () => {
+          URL.revokeObjectURL(url);
+          // Fallback: copy SVG as text
+          try {
+            await navigator.clipboard.writeText(svgString);
+            resolve(true);
+          } catch (err) {
+            console.error('Failed to copy equation:', err);
+            resolve(false);
+          }
+        };
+
+        img.src = url;
+      });
+    } catch (err) {
+      console.error('Failed to copy equation:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Copy a table as HTML to clipboard.
+   * HTML format works well with MS Word.
+   */
+  async function copyTableToClipboard(table) {
+    const tableClone = table.cloneNode(true);
+
+    // Add inline styles for better Word compatibility
+    tableClone.style.borderCollapse = 'collapse';
+    tableClone.style.fontFamily = 'Arial, sans-serif';
+    tableClone.style.fontSize = '12pt';
+
+    tableClone.querySelectorAll('th, td').forEach(cell => {
+      cell.style.border = '1px solid black';
+      cell.style.padding = '8px';
+    });
+
+    const htmlString = tableClone.outerHTML;
+
+    try {
+      // Copy as HTML for better Word compatibility
+      const blob = new Blob([htmlString], { type: 'text/html' });
+      const clipboardItem = new ClipboardItem({
+        'text/html': blob,
+        'text/plain': new Blob([table.innerText], { type: 'text/plain' })
+      });
+      await navigator.clipboard.write([clipboardItem]);
+      return true;
+    } catch (err) {
+      // Fallback to text copy
+      try {
+        await navigator.clipboard.writeText(htmlString);
+        return true;
+      } catch (fallbackErr) {
+        console.error('Failed to copy table:', fallbackErr);
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Show copy feedback animation on an element.
+   */
+  function showCopyFeedback(element) {
+    element.classList.add('copied');
+    setTimeout(() => {
+      element.classList.remove('copied');
+    }, 1500);
+  }
+
+  /**
+   * Handle clicks on the rendered output for copy-to-clipboard functionality.
+   */
+  function handleCopyClick(event) {
+    // Check if clicked on a MathJax container
+    const mjxContainer = event.target.closest('mjx-container');
+    if (mjxContainer) {
+      event.preventDefault();
+      event.stopPropagation();
+      copyEquationToClipboard(mjxContainer).then(success => {
+        if (success) {
+          showCopyFeedback(mjxContainer);
+        }
+      });
+      return;
+    }
+
+    // Check if clicked on a table (but not inside a cell for text selection)
+    const table = event.target.closest('table');
+    if (table && !window.getSelection().toString()) {
+      event.preventDefault();
+      copyTableToClipboard(table).then(success => {
+        if (success) {
+          showCopyFeedback(table);
+        }
+      });
+      return;
+    }
+  }
+
   function exportSVG() {
     const fileName = prompt('Enter file name for the SVG export:', 'document.svg');
     if (!fileName) return;
@@ -1994,9 +2273,9 @@
       </div>
     `;
 
+    // Note: Background is now transparent for better compatibility
     const svgContent = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${outputWidth}" height="${outputHeight}">
-        <rect width="100%" height="100%" fill="${backgroundColor}"></rect>
         <foreignObject width="100%" height="100%">
           ${serializedHTML}
         </foreignObject>
@@ -2165,7 +2444,14 @@
   markdownInput.addEventListener('click', handleCaretChange);
   markdownInput.addEventListener('select', handleCaretChange);
   markdownInput.addEventListener('scroll', linkOutputToInputScroll);
-  renderedOutput.addEventListener('click', syncCaretFromOutputClick);
+  renderedOutput.addEventListener('click', event => {
+    // Handle copy clicks first (equations and tables)
+    handleCopyClick(event);
+    // Then handle caret sync (only if not clicking on equation/table)
+    if (!event.target.closest('mjx-container') && !event.target.closest('table')) {
+      syncCaretFromOutputClick(event);
+    }
+  });
   renderedOutput.addEventListener('scroll', linkInputToOutputScroll);
   printButton.addEventListener('click', printToPDF);
   exportHTMLButton.addEventListener('click', exportHTML);
