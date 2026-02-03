@@ -1894,36 +1894,91 @@
     // Clone the SVG to avoid modifying the original
     const svgClone = svg.cloneNode(true);
 
-    // Get computed dimensions
+    // MathJax uses a global defs cache - we need to inline all referenced glyphs
+    // Find all <use> elements and their referenced definitions
+    const useElements = svgClone.querySelectorAll('use');
+    const referencedIds = new Set();
+
+    useElements.forEach(use => {
+      const href = use.getAttribute('href') || use.getAttribute('xlink:href');
+      if (href && href.startsWith('#')) {
+        referencedIds.add(href.substring(1));
+      }
+    });
+
+    // Create or get the defs element in our clone
+    let defsClone = svgClone.querySelector('defs');
+    if (!defsClone) {
+      defsClone = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      svgClone.insertBefore(defsClone, svgClone.firstChild);
+    }
+
+    // Find and clone referenced elements from the global MathJax cache
+    referencedIds.forEach(id => {
+      // Check if already in our defs
+      if (defsClone.querySelector(`#${CSS.escape(id)}`)) return;
+
+      // Look for the element in the document (MathJax global cache)
+      const original = document.getElementById(id);
+      if (original) {
+        defsClone.appendChild(original.cloneNode(true));
+      }
+    });
+
+    // Get computed dimensions - use getBoundingClientRect for more reliability
     const bbox = svg.getBBox();
     const padding = 8;
 
-    // Set explicit dimensions and viewBox for tight bounding
-    const width = bbox.width + padding * 2;
-    const height = bbox.height + padding * 2;
+    // Handle edge case where bbox might be zero or invalid
+    let width = bbox.width + padding * 2;
+    let height = bbox.height + padding * 2;
+
+    // Fallback to container dimensions if bbox is invalid
+    if (width <= padding * 2 || height <= padding * 2) {
+      const rect = svg.getBoundingClientRect();
+      width = rect.width + padding * 2;
+      height = rect.height + padding * 2;
+    }
+
+    // Ensure minimum dimensions
+    width = Math.max(width, 20);
+    height = Math.max(height, 20);
 
     svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svgClone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     svgClone.setAttribute('width', `${width}pt`);
     svgClone.setAttribute('height', `${height}pt`);
     svgClone.setAttribute('viewBox', `${bbox.x - padding} ${bbox.y - padding} ${width} ${height}`);
 
     // Remove any background, ensure transparency
     svgClone.style.backgroundColor = 'transparent';
+    svgClone.removeAttribute('style');
 
-    // Always use black fill for equations (better for documents)
+    // Set fill color to black for all elements (better for documents)
     const fillColor = '#000000';
-    svgClone.querySelectorAll('g[data-mml-node], use, path, rect').forEach(el => {
-      if (!el.getAttribute('fill') || el.getAttribute('fill') === 'currentColor') {
-        el.setAttribute('fill', fillColor);
+
+    // Apply fill to all relevant elements
+    const applyFill = (el) => {
+      const currentFill = el.getAttribute('fill');
+      if (!currentFill || currentFill === 'currentColor' || currentFill === 'none') {
+        // Don't override 'none' fills as they're intentional
+        if (currentFill !== 'none') {
+          el.setAttribute('fill', fillColor);
+        }
       }
-    });
-    svgClone.style.color = fillColor;
+    };
+
+    svgClone.querySelectorAll('g, path, rect, use, text, tspan').forEach(applyFill);
+
+    // Also set the SVG's color property for currentColor inheritance
+    svgClone.setAttribute('color', fillColor);
+    svgClone.setAttribute('fill', fillColor);
 
     const svgString = new XMLSerializer().serializeToString(svgClone);
 
     // Convert SVG to PNG using canvas for better clipboard compatibility
     try {
-      const scale = 3; // High resolution for print quality
+      const scale = 4; // Higher resolution for better quality
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
@@ -1936,24 +1991,29 @@
 
       // Create an image from SVG
       const img = new Image();
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
+
+      // Add XML declaration and proper encoding for better compatibility
+      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
 
       return new Promise((resolve) => {
         img.onload = async () => {
           // Draw with transparent background
           ctx.clearRect(0, 0, pxWidth, pxHeight);
           ctx.drawImage(img, 0, 0, pxWidth, pxHeight);
-          URL.revokeObjectURL(url);
 
           try {
             // Convert canvas to blob and copy to clipboard
             const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-            await navigator.clipboard.write([
-              new ClipboardItem({ 'image/png': blob })
-            ]);
-            resolve(true);
+            if (blob) {
+              await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+              ]);
+              resolve(true);
+            } else {
+              throw new Error('Failed to create blob');
+            }
           } catch (clipErr) {
+            console.error('Clipboard write failed:', clipErr);
             // Fallback: copy SVG as text
             try {
               await navigator.clipboard.writeText(svgString);
@@ -1965,19 +2025,19 @@
           }
         };
 
-        img.onerror = async () => {
-          URL.revokeObjectURL(url);
+        img.onerror = async (err) => {
+          console.error('Image load failed:', err);
           // Fallback: copy SVG as text
           try {
             await navigator.clipboard.writeText(svgString);
             resolve(true);
-          } catch (err) {
-            console.error('Failed to copy equation:', err);
+          } catch (copyErr) {
+            console.error('Failed to copy equation:', copyErr);
             resolve(false);
           }
         };
 
-        img.src = url;
+        img.src = svgDataUrl;
       });
     } catch (err) {
       console.error('Failed to copy equation:', err);
