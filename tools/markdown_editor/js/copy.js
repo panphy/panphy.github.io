@@ -155,16 +155,33 @@ function prepareEquationSvg(svg) {
   const fillColor = '#000000';
   const applyFill = (el) => {
     const currentFill = el.getAttribute('fill');
-    if (!currentFill || currentFill === 'currentColor' || currentFill === 'none') {
-      if (currentFill !== 'none') {
-        el.setAttribute('fill', fillColor);
-      }
+    if (!currentFill || currentFill === 'currentColor') {
+      el.setAttribute('fill', fillColor);
     }
   };
 
-  svgClone.querySelectorAll('g, path, rect, use, text, tspan').forEach(applyFill);
+  const applyStroke = (el) => {
+    const currentStroke = el.getAttribute('stroke');
+    if (!currentStroke || currentStroke === 'currentColor') {
+      el.setAttribute('stroke', fillColor);
+    }
+  };
+
+  svgClone.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline').forEach(applyFill);
+  svgClone.querySelectorAll('line, polyline, polygon, path').forEach(applyStroke);
+
+  svgClone.querySelectorAll('rect').forEach(rect => {
+    const rectFill = rect.getAttribute('fill');
+    if (!rectFill || rectFill === 'currentColor') {
+      rect.setAttribute('fill', 'none');
+    }
+    const rectStroke = rect.getAttribute('stroke');
+    if (!rectStroke || rectStroke === 'currentColor') {
+      rect.setAttribute('stroke', fillColor);
+    }
+  });
+
   svgClone.setAttribute('color', fillColor);
-  svgClone.setAttribute('fill', fillColor);
 
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
