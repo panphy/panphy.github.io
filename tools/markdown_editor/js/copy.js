@@ -307,10 +307,23 @@ export async function copyCodeBlockToClipboard(preElement) {
   const codeElement = preElement.querySelector('code');
   const plainText = codeElement ? codeElement.textContent : preElement.textContent;
 
-  // Get computed styles for the code block
-  const computedStyle = getComputedStyle(preElement);
-  const bgColor = computedStyle.backgroundColor || '#f1f3f5';
-  const textColor = computedStyle.color || '#000000';
+  const isTransparentColor = (color) => {
+    if (!color) return true;
+    const normalized = color.trim().toLowerCase().replace(/\s+/g, '');
+    return normalized === 'transparent' || normalized === 'rgba(0,0,0,0)';
+  };
+
+  // Get computed styles for the code block (use code element when it defines theme colors)
+  const preStyle = getComputedStyle(preElement);
+  const codeStyle = codeElement ? getComputedStyle(codeElement) : null;
+
+  const codeBg = codeStyle?.backgroundColor;
+  const preBg = preStyle.backgroundColor;
+  const bgColor = !isTransparentColor(codeBg) ? codeBg : (!isTransparentColor(preBg) ? preBg : '#f1f3f5');
+
+  const codeTextColor = codeStyle?.color;
+  const preTextColor = preStyle.color;
+  const textColor = !isTransparentColor(codeTextColor) ? codeTextColor : (preTextColor || '#000000');
 
   // Build the code content with inlined syntax highlighting
   const codeClone = codeElement ? codeElement.cloneNode(true) : preElement.cloneNode(true);
