@@ -1390,11 +1390,9 @@ const debouncedUpdateData = debounce(updateData, 300);
 			const renderedContainer = document.getElementById('export-table-rendered');
 			renderedContainer.innerHTML = sanitizedHtml;
 
-			// Add click listener to the table for copy functionality
-			const table = renderedContainer.querySelector('table');
-			if (table) {
-				table.addEventListener('click', handleExportTableClick);
-			}
+			// Add click listener to the container for copy functionality
+			renderedContainer.removeEventListener('click', handleExportTableClick);
+			renderedContainer.addEventListener('click', handleExportTableClick);
 
 			// Show the popup
 			const background = document.getElementById('export-table-background');
@@ -1444,10 +1442,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 
 	function handleExportTableClick(event) {
-		// Don't copy if user is selecting text
-		if (window.getSelection().toString()) return;
+		const table = event.target.closest('table');
+		if (!table || window.getSelection().toString()) return;
 
-		const table = event.currentTarget;
+		event.preventDefault();
+		event.stopPropagation();
 		copyExportedTableToClipboard(table);
 	}
 
