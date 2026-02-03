@@ -530,6 +530,12 @@ body {
 	border-radius: 4px;
 }
 
+.data-table td input.invalid-input {
+	background-color: rgba(255, 107, 107, 0.15);
+	outline: 2px solid #ff6b6b;
+	border-radius: 4px;
+}
+
 .data-table tbody tr:nth-child(odd) {
 	background-color: #f9fafc;
 }

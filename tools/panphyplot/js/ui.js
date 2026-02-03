@@ -991,12 +991,63 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
+	// Validate percentage uncertainty inputs and apply visual feedback.
+	// Returns true if all inputs are valid, false otherwise.
+	function validatePercentageUncertaintyInputs() {
+		const xErrorType = document.getElementById('x-error-type')?.value;
+		const yErrorType = document.getElementById('y-error-type')?.value;
+		const xErrorInputs = document.querySelectorAll('.x-error-input');
+		const yErrorInputs = document.querySelectorAll('.y-error-input');
+
+		let allValid = true;
+
+		xErrorInputs.forEach(input => {
+			if (xErrorType === 'percentage' && input.value.trim() !== '') {
+				const val = parseFloat(input.value);
+				if (isNaN(val) || val <= 0) {
+					input.classList.add('invalid-input');
+					input.title = 'Percentage uncertainty must be greater than 0';
+					allValid = false;
+				} else {
+					input.classList.remove('invalid-input');
+					input.title = '';
+				}
+			} else {
+				input.classList.remove('invalid-input');
+				input.title = '';
+			}
+		});
+
+		yErrorInputs.forEach(input => {
+			if (yErrorType === 'percentage' && input.value.trim() !== '') {
+				const val = parseFloat(input.value);
+				if (isNaN(val) || val <= 0) {
+					input.classList.add('invalid-input');
+					input.title = 'Percentage uncertainty must be greater than 0';
+					allValid = false;
+				} else {
+					input.classList.remove('invalid-input');
+					input.title = '';
+				}
+			} else {
+				input.classList.remove('invalid-input');
+				input.title = '';
+			}
+		});
+
+		return allValid;
+	}
+
+
 	function updateData() {
 		try {
 			const xInputs = document.querySelectorAll('.x-input');
 			const yInputs = document.querySelectorAll('.y-input');
 			const xErrorInputs = document.querySelectorAll('.x-error-input');
 			const yErrorInputs = document.querySelectorAll('.y-error-input');
+
+			// Validate percentage uncertainty inputs
+			validatePercentageUncertaintyInputs();
 
 			// For Dataset 1, store all x-values even if y is missing.
 			if (activeSet === 0) {
@@ -1049,20 +1100,10 @@ const debouncedUpdateData = debounce(updateData, 300);
 			return val.toFixed(dp);
 		} else if (errorType === 'percentage') {
 			const perc = parseFloat(errorStr);
-			if (isNaN(perc)) {
-				return valueStr;
+			const sigFigs = getSigFigsFromPercentage(perc);
+			if (sigFigs === null) {
+				return valueStr; // invalid percentage, return unformatted
 			}
-
-			// Use 1 significant figure if percentage uncertainty is >= 50%
-			let sigFigs;
-			if (perc >= 50) {
-				sigFigs = 1;
-			} else if (perc <= 10) {
-				sigFigs = 3;
-			} else {
-				sigFigs = 2;
-			}
-
 			const sfVal = toSigFigs(val, sigFigs);
 			return sfVal;
 		} else {
@@ -1074,6 +1115,17 @@ const debouncedUpdateData = debounce(updateData, 300);
 	function countDecimalPlaces(numStr) {
 		if (!numStr.includes('.')) return 0;
 		return numStr.length - numStr.indexOf('.') - 1;
+	}
+
+
+	// Calculate significant figures from percentage uncertainty using logarithmic formula.
+	// This scales smoothly: 100% → 1 sf, 10% → 2 sf, 1% → 3 sf, 0.1% → 4 sf, etc.
+	// Capped at 10 sig figs to avoid toPrecision() errors (max 21) and unrealistic precision.
+	// Returns null for invalid inputs (≤0 or NaN) - callers should handle by returning unformatted value.
+	function getSigFigsFromPercentage(perc) {
+		if (perc <= 0 || isNaN(perc)) return null;
+		const sigFigs = Math.round(-Math.log10(perc / 100) + 1);
+		return Math.max(1, Math.min(10, sigFigs));
 	}
 
 
@@ -1123,9 +1175,8 @@ const debouncedUpdateData = debounce(updateData, 300);
 			}
 		} else if (uncertaintyType === 'percentage') {
 			const perc = parseFloat(uncertaintyVal);
-			if (isNaN(perc)) return dataVal.toString();
-			// Use 1 s.f. if percentage uncertainty is >= 50, else use 3 s.f. if error < 10, otherwise 2 s.f.
-			const sigFigs = perc >= 50 ? 1 : (perc < 10 ? 3 : 2);
+			const sigFigs = getSigFigsFromPercentage(perc);
+			if (sigFigs === null) return dataVal.toString(); // invalid percentage, return unformatted
 			if (useSciNotation) {
 				return formatScientificNotation(dataVal, sigFigs);
 			} else {
@@ -1246,13 +1297,12 @@ const debouncedUpdateData = debounce(updateData, 300);
 				// Format X value
 				let xFormatted = xValStr;
 				if (!isNaN(xVal)) {
-					if (xUseSciNotation && xErrorEnabledThisRow && xErrorType === 'percentage') {
-						const sigFigs = xErrVal >= 50 ? 1 : (xErrVal < 10 ? 3 : 2);
-						const sciFormatted = formatScientificNotation(xVal, sigFigs);
+					const xSigFigs = xErrorEnabledThisRow && xErrorType === 'percentage' ? getSigFigsFromPercentage(xErrVal) : null;
+					if (xUseSciNotation && xSigFigs !== null) {
+						const sciFormatted = formatScientificNotation(xVal, xSigFigs);
 						xFormatted = `$${sciFormatted}$`;
-					} else if (xErrorEnabledThisRow && xErrorType === 'percentage') {
-						const sigFigs = xErrVal >= 50 ? 1 : (xErrVal < 10 ? 3 : 2);
-						const sigFormatted = toSigFigs(xVal, sigFigs);
+					} else if (xSigFigs !== null) {
+						const sigFormatted = toSigFigs(xVal, xSigFigs);
 						xFormatted = `$${sigFormatted}$`;
 					} else if (xErrorEnabledThisRow && xErrorType === 'absolute') {
 						const formattedData = formatDataValue(xVal, xErrVal, 'absolute', false);
@@ -1265,13 +1315,12 @@ const debouncedUpdateData = debounce(updateData, 300);
 				// Format Y value
 				let yFormatted = yValStr;
 				if (!isNaN(yVal)) {
-					if (yUseSciNotation && yErrorEnabledThisRow && yErrorType === 'percentage') {
-						const sigFigs = yErrVal >= 50 ? 1 : (yErrVal < 10 ? 3 : 2);
-						const sciFormatted = formatScientificNotation(yVal, sigFigs);
+					const ySigFigs = yErrorEnabledThisRow && yErrorType === 'percentage' ? getSigFigsFromPercentage(yErrVal) : null;
+					if (yUseSciNotation && ySigFigs !== null) {
+						const sciFormatted = formatScientificNotation(yVal, ySigFigs);
 						yFormatted = `$${sciFormatted}$`;
-					} else if (yErrorEnabledThisRow && yErrorType === 'percentage') {
-						const sigFigs = yErrVal >= 50 ? 1 : (yErrVal < 10 ? 3 : 2);
-						const sigFormatted = toSigFigs(yVal, sigFigs);
+					} else if (ySigFigs !== null) {
+						const sigFormatted = toSigFigs(yVal, ySigFigs);
 						yFormatted = `$${sigFormatted}$`;
 					} else if (yErrorEnabledThisRow && yErrorType === 'absolute') {
 						const formattedData = formatDataValue(yVal, yErrVal, 'absolute', false);

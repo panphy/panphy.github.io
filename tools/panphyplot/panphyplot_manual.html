@@ -633,13 +633,16 @@
       <p><strong>1. Absolute Uncertainties:</strong> The number of decimal places in the exported values matches the
         precision of the absolute uncertainty. For example, if the uncertainty is <code>±0.05</code>, the corresponding
         data value will be exported with two decimal places (e.g., <code>5.25 ± 0.05</code>).</p>
-      <p><strong>2. Percentage Uncertainties:</strong> The precision of exported values is adjusted based on the
-        percentage uncertainty:</p>
+      <p><strong>2. Percentage Uncertainties:</strong> The precision of exported values is determined using a
+        logarithmic formula that scales smoothly with the uncertainty magnitude:</p>
       <ul>
-        <li>Small uncertainties (≤ 10%): 3 significant figures</li>
-        <li>Medium uncertainties (&gt; 10%): 2 significant figures</li>
-        <li>Large uncertainties (≥ 50%): 1 significant figure</li>
+        <li>~100% uncertainty: 1 significant figure</li>
+        <li>~10% uncertainty: 2 significant figures</li>
+        <li>~1% uncertainty: 3 significant figures</li>
+        <li>~0.1% uncertainty: 4 significant figures</li>
       </ul>
+      <p>This approach ensures that each order of magnitude improvement in precision adds one meaningful digit to the
+        reported value.</p>
     </div>
 
     <h3>4. Performing Curve Fitting</h3>
