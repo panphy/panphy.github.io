@@ -1983,10 +1983,11 @@
         margin: 1em 0;
       }
     `;
+    const styleContentSafe = styleContent.replace(/&/g, '&amp;');
 
     const serializedHTML = `
       <div xmlns="http://www.w3.org/1999/xhtml">
-        <style>${styleContent}</style>
+        <style>${styleContentSafe}</style>
         <div class="svg-export-body${isDarkMode ? ' dark-mode' : ''}">
           ${svgSafeHTML}
         </div>
