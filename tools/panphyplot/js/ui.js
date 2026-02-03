@@ -1377,8 +1377,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 				breaks: false
 			});
 
+			// Ensure escaped percent signs survive Markdown parsing for MathJax.
+			const markdownForRender = markdown.replace(/\\%/g, '\\\\%');
+
 			// Parse markdown to HTML
-			const rawHtml = marked.parse(markdown);
+			const rawHtml = marked.parse(markdownForRender);
 
 			// Sanitize the HTML
 			const sanitizedHtml = DOMPurify.sanitize(rawHtml);
