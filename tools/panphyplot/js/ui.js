@@ -1053,16 +1053,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 				return valueStr;
 			}
 
-			// Use 1 significant figure if percentage uncertainty is >= 50%
-			let sigFigs;
-			if (perc >= 50) {
-				sigFigs = 1;
-			} else if (perc <= 10) {
-				sigFigs = 3;
-			} else {
-				sigFigs = 2;
-			}
-
+			const sigFigs = getSigFigsFromPercentage(perc);
 			const sfVal = toSigFigs(val, sigFigs);
 			return sfVal;
 		} else {
@@ -1074,6 +1065,15 @@ const debouncedUpdateData = debounce(updateData, 300);
 	function countDecimalPlaces(numStr) {
 		if (!numStr.includes('.')) return 0;
 		return numStr.length - numStr.indexOf('.') - 1;
+	}
+
+
+	// Calculate significant figures from percentage uncertainty using logarithmic formula.
+	// This scales smoothly: 100% → 1 sf, 10% → 2 sf, 1% → 3 sf, 0.1% → 4 sf, etc.
+	function getSigFigsFromPercentage(perc) {
+		if (perc <= 0 || isNaN(perc)) return 3; // fallback for invalid values
+		const sigFigs = Math.round(-Math.log10(perc / 100) + 1);
+		return Math.max(1, sigFigs);
 	}
 
 
@@ -1124,8 +1124,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 		} else if (uncertaintyType === 'percentage') {
 			const perc = parseFloat(uncertaintyVal);
 			if (isNaN(perc)) return dataVal.toString();
-			// Use 1 s.f. if percentage uncertainty is >= 50, else use 3 s.f. if error < 10, otherwise 2 s.f.
-			const sigFigs = perc >= 50 ? 1 : (perc < 10 ? 3 : 2);
+			const sigFigs = getSigFigsFromPercentage(perc);
 			if (useSciNotation) {
 				return formatScientificNotation(dataVal, sigFigs);
 			} else {
@@ -1247,11 +1246,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 				let xFormatted = xValStr;
 				if (!isNaN(xVal)) {
 					if (xUseSciNotation && xErrorEnabledThisRow && xErrorType === 'percentage') {
-						const sigFigs = xErrVal >= 50 ? 1 : (xErrVal < 10 ? 3 : 2);
+						const sigFigs = getSigFigsFromPercentage(xErrVal);
 						const sciFormatted = formatScientificNotation(xVal, sigFigs);
 						xFormatted = `$${sciFormatted}$`;
 					} else if (xErrorEnabledThisRow && xErrorType === 'percentage') {
-						const sigFigs = xErrVal >= 50 ? 1 : (xErrVal < 10 ? 3 : 2);
+						const sigFigs = getSigFigsFromPercentage(xErrVal);
 						const sigFormatted = toSigFigs(xVal, sigFigs);
 						xFormatted = `$${sigFormatted}$`;
 					} else if (xErrorEnabledThisRow && xErrorType === 'absolute') {
@@ -1266,11 +1265,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 				let yFormatted = yValStr;
 				if (!isNaN(yVal)) {
 					if (yUseSciNotation && yErrorEnabledThisRow && yErrorType === 'percentage') {
-						const sigFigs = yErrVal >= 50 ? 1 : (yErrVal < 10 ? 3 : 2);
+						const sigFigs = getSigFigsFromPercentage(yErrVal);
 						const sciFormatted = formatScientificNotation(yVal, sigFigs);
 						yFormatted = `$${sciFormatted}$`;
 					} else if (yErrorEnabledThisRow && yErrorType === 'percentage') {
-						const sigFigs = yErrVal >= 50 ? 1 : (yErrVal < 10 ? 3 : 2);
+						const sigFigs = getSigFigsFromPercentage(yErrVal);
 						const sigFormatted = toSigFigs(yVal, sigFigs);
 						yFormatted = `$${sigFormatted}$`;
 					} else if (yErrorEnabledThisRow && yErrorType === 'absolute') {
