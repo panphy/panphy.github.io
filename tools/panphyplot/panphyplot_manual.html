@@ -548,6 +548,16 @@
           <li>Customize initial parameters for advanced fitting methods.</li>
           <li>View fitting equations and R² values.</li>
           <li>Each dataset maintains its own fitting result until a new fit is performed.</li>
+          <li><strong>Model equations:</strong>
+            <ul>
+              <li>Linear: $y = mx + c$</li>
+              <li>Quadratic/Cubic: $y = a_n x^n + a_{n-1} x^{n-1} + \ldots + a_0$</li>
+              <li>Exponential: $y = A e^{b(x - x_0)} + c$</li>
+              <li>Power: $y = A(x - x_0)^b + c$</li>
+              <li>Sinusoidal: $y = A e^{bx} \sin(kx - \phi) + c$</li>
+              <li>Gaussian: $y = A e^{-\frac{(x - \mu)^2}{2\sigma^2}} + c$</li>
+            </ul>
+          </li>
         </ul>
       </li>
       <li>
@@ -558,6 +568,20 @@
           <li><strong>LaTeX Mode:</strong> A toggle allows you to activate or deactivate LaTeX rendering for all
             headings, labels, and titles.</li>
           <li><strong>Plot All Datasets:</strong> Visualize all datasets simultaneously in a combined plot popup.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Theme Toggle</strong>
+        <ul>
+          <li>Switch between light and dark themes using the theme toggle button in the banner.</li>
+          <li>Your theme preference is saved and persists across sessions.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Auto-Save</strong>
+        <ul>
+          <li>Your data, settings, and fitted curves are automatically saved to your browser's local storage.</li>
+          <li>When you return to the app, your previous session is restored automatically.</li>
         </ul>
       </li>
     </ul>
@@ -576,6 +600,10 @@
         copy the x-values from Dataset 1 into the current dataset.</li>
       <li><strong>Adding a New Dataset:</strong> Click the "Add Dataset" button to create a new dataset. Each dataset is
         stored independently and maintains its own header values, uncertainty settings, and fitting results.</li>
+      <li><strong>Removing a Dataset:</strong> Click the × button on a dataset tab to remove that dataset. You must keep
+        at least one dataset.</li>
+      <li><strong>Keyboard Navigation:</strong> Use the arrow keys to navigate between cells in the data table. Press
+        Enter to move to the cell below.</li>
     </ul>
 
     <h3>2. Managing Uncertainties</h3>
@@ -670,6 +698,19 @@
       </li>
     </ul>
 
+    <h3>7. Theme Toggle</h3>
+    <ul>
+      <li>
+        <strong>Light/Dark Mode:</strong> Click the theme toggle button (sun/moon icon) in the top-right corner of the
+        banner to switch between light and dark themes.
+        <ul>
+          <li>The dark theme is optimized for low-light environments and reduces eye strain.</li>
+          <li>Your theme preference is automatically saved and will persist across browser sessions.</li>
+          <li>Graphs and plots automatically adjust their colors to match the selected theme.</li>
+        </ul>
+      </li>
+    </ul>
+
     <hr>
 
     <h2>Tips and Best Practices</h2>
@@ -682,6 +723,10 @@
         data. Choose between absolute and percentage uncertainties based on your data's nature.</li>
       <li><strong>LaTeX Formatting:</strong> Enable LaTeX mode when you need high-quality mathematical expressions.
         Otherwise, keep it off for improved performance.</li>
+      <li><strong>Auto-Save:</strong> Your work is automatically saved to your browser's local storage. You can safely
+        close the browser and return later to continue where you left off.</li>
+      <li><strong>Keyboard Shortcuts:</strong> Use arrow keys to quickly navigate between cells in the data table, and
+        press Enter to move down to the next row.</li>
     </ul>
 
     <hr>
