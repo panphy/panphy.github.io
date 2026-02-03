@@ -32,9 +32,9 @@
 	</script>
 	<!-- MathJax v2 for LaTeX rendering -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
-	<!-- Marked.js for Markdown parsing (used in Export Table) -->
+	<!-- Marked.js for Markdown parsing (used in View Table) -->
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-	<!-- DOMPurify for sanitizing HTML (used in Export Table) -->
+	<!-- DOMPurify for sanitizing HTML (used in View Table) -->
 	<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
 
 	<link rel="stylesheet" href="/tools/panphyplot/css/panphyplot.css">
@@ -329,12 +329,12 @@
 		</div>
 	</div>
 
-	<!-- Export Table Popup -->
+	<!-- View Table Popup -->
 	<div id="export-table-background" style="display: none;"></div>
 	<div id="export-table-container" style="display: none;">
 		<div id="export-table-content">
-			<button id="export-table-close" onclick="closeExportTablePopup()" title="Close the export table window">Close</button>
-			<div id="export-table-title">Export Table</div>
+			<button id="export-table-close" onclick="closeExportTablePopup()" title="Close the view table window">Close</button>
+			<div id="export-table-title">View Table</div>
 			<p id="export-table-hint">Click the table to copy it to clipboard (works with Word, Google Docs, etc.)</p>
 			<div id="export-table-rendered"></div>
 			<div id="export-table-controls">
