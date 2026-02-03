@@ -2036,19 +2036,58 @@
   }
 
   /**
-   * Copy a code block's text content to clipboard.
+   * Copy a code block as HTML with syntax highlighting to clipboard.
+   * HTML format preserves colors when pasting into Word/rich text editors.
    */
   async function copyCodeBlockToClipboard(preElement) {
-    // Get the code element inside pre, or use pre's text directly
-    const codeElement = preElement.querySelector('code');
-    const codeText = codeElement ? codeElement.textContent : preElement.textContent;
+    const preClone = preElement.cloneNode(true);
+    const codeElement = preClone.querySelector('code');
+    const plainText = codeElement ? codeElement.textContent : preClone.textContent;
+
+    // Get computed styles for syntax highlighting colors
+    const computedStyle = getComputedStyle(preElement);
+    const bgColor = computedStyle.backgroundColor || '#f1f3f5';
+    const textColor = computedStyle.color || '#000000';
+
+    // Add inline styles for Word compatibility
+    preClone.style.backgroundColor = bgColor;
+    preClone.style.color = textColor;
+    preClone.style.fontFamily = "'JetBrains Mono', 'Consolas', 'Monaco', monospace";
+    preClone.style.fontSize = '10pt';
+    preClone.style.padding = '12px';
+    preClone.style.borderRadius = '5px';
+    preClone.style.whiteSpace = 'pre-wrap';
+    preClone.style.wordWrap = 'break-word';
+
+    // Inline the syntax highlighting colors from hljs spans
+    preClone.querySelectorAll('[class*="hljs"]').forEach(el => {
+      const elStyle = getComputedStyle(preElement.querySelector(`.${el.className.split(' ').find(c => c.startsWith('hljs'))}`) || el);
+      if (elStyle.color) {
+        el.style.color = elStyle.color;
+      }
+    });
+
+    const htmlString = preClone.outerHTML;
 
     try {
-      await navigator.clipboard.writeText(codeText);
+      // Copy as HTML for syntax highlighting + plain text fallback
+      const htmlBlob = new Blob([htmlString], { type: 'text/html' });
+      const textBlob = new Blob([plainText], { type: 'text/plain' });
+      const clipboardItem = new ClipboardItem({
+        'text/html': htmlBlob,
+        'text/plain': textBlob
+      });
+      await navigator.clipboard.write([clipboardItem]);
       return true;
     } catch (err) {
-      console.error('Failed to copy code:', err);
-      return false;
+      // Fallback to plain text copy
+      try {
+        await navigator.clipboard.writeText(plainText);
+        return true;
+      } catch (fallbackErr) {
+        console.error('Failed to copy code:', fallbackErr);
+        return false;
+      }
     }
   }
 
