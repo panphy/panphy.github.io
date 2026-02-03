@@ -537,7 +537,10 @@
         <strong>Data Import/Export</strong>
         <ul>
           <li>Import data from a <code>.csv</code> file.</li>
-          <li>Export your data to <code>.csv</code> or <code>.md</code> (Markdown) formats.</li>
+          <li>Export your data to <code>.csv</code> format.</li>
+          <li><strong>Export Table:</strong> Opens a popup showing a formatted table preview with rendered LaTeX.
+            Click the table to copy it to your clipboard (works with Word, Google Docs, etc.), or save as a
+            <code>.md</code> file.</li>
         </ul>
       </li>
       <li>
@@ -623,8 +626,19 @@
       <li><strong>Importing from CSV:</strong> Click the "Import .csv" button and select a CSV file from your device.
         Ensure that the CSV file has at least two columns for <code>x</code> and <code>y</code>. Additional columns can
         represent uncertainties.</li>
-      <li><strong>Exporting Data:</strong> Click the "Export .csv" button to download your data in CSV format. Click the
-        "Export .md" button to download your data in Markdown format, suitable for documentation or reports.</li>
+      <li><strong>Export .csv:</strong> Click the "Export .csv" button to download your data in CSV format.</li>
+      <li>
+        <strong>Export Table:</strong> Click the "Export Table" button to open a popup with your data displayed as a
+        formatted table.
+        <ul>
+          <li>LaTeX expressions in headers and values are rendered as proper mathematical notation.</li>
+          <li><strong>Click to Copy:</strong> Hover over the table to see the "Click to copy table" tooltip. Click
+            anywhere on the table to copy it to your clipboard. The table can be pasted directly into Word, Google
+            Docs, or other rich text editors.</li>
+          <li><strong>Save .md File:</strong> Click the "Save .md File" button to download the raw Markdown source,
+            suitable for documentation or use in the Markdown Editor.</li>
+        </ul>
+      </li>
     </ul>
 
     <div class="note-box">
