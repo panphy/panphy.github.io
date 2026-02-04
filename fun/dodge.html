@@ -1011,6 +1011,10 @@
     let spaceshipStartY = 0;
     const assetError = document.getElementById('assetError');
 
+    // Delta time tracking for frame-rate independent movement
+    const TARGET_FRAME_MS = 1000 / 60; // Target 60fps (16.67ms per frame)
+    let lastFrameTime = 0;
+
     const initialsModal = document.getElementById('initialsModal');
     const initialsInput = document.getElementById('initialsInput');
     const initialsError = document.getElementById('initialsError');
@@ -1054,7 +1058,7 @@
         this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
       }
 
-      move() {
+      move(deltaMultiplier = 1) {
         let deltaX = 0;
         let deltaY = 0;
 
@@ -1065,8 +1069,8 @@
 
         if (deltaX !== 0 || deltaY !== 0) {
           const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-          const normX = (deltaX / magnitude) * this.speed;
-          const normY = (deltaY / magnitude) * this.speed;
+          const normX = (deltaX / magnitude) * this.speed * deltaMultiplier;
+          const normY = (deltaY / magnitude) * this.speed * deltaMultiplier;
 
           const newX = this.x + normX;
           const newY = this.y + normY;
@@ -1145,10 +1149,10 @@
         this.dy = Math.sin(a);
       }
 
-      move() {
-        this.x += this.dx * this.speed;
-        this.y += this.dy * this.speed;
-        this.angle += this.rotationSpeed;
+      move(deltaMultiplier = 1) {
+        this.x += this.dx * this.speed * deltaMultiplier;
+        this.y += this.dy * this.speed * deltaMultiplier;
+        this.angle += this.rotationSpeed * deltaMultiplier;
       }
 
       draw() {
@@ -1272,6 +1276,7 @@
       MIN_ASTEROID_SPEED = 2;
       MAX_ASTEROID_SPEED = 7;
       gameOver = false;
+      lastFrameTime = 0; // Reset to ensure first frame calculates delta correctly
 
       if (animationId) cancelAnimationFrame(animationId);
       if (speedIntervalId) clearInterval(speedIntervalId);
@@ -1280,7 +1285,7 @@
       startSpeedInterval();
 
       startBackgroundMusic();
-      gameLoop();
+      animationId = requestAnimationFrame(gameLoop);
     }
 
     function startSpeedInterval() {
@@ -1308,9 +1313,10 @@
       const now = performance.now();
       gameStartTime += now - pauseStartTime;
       isPaused = false;
+      lastFrameTime = 0; // Reset to avoid large delta after pause
       startSpeedInterval();
       startBackgroundMusic();
-      gameLoop();
+      animationId = requestAnimationFrame(gameLoop);
     }
 
     /* -----------------------------------------------------------
@@ -1664,8 +1670,8 @@
      * Rolling Background
      * -----------------------------------------------------------
      */
-    function drawRollingBackground() {
-      backgroundOffsetY += backgroundScrollSpeed * ((scaleX + scaleY) / 2);
+    function drawRollingBackground(deltaMultiplier = 1) {
+      backgroundOffsetY += backgroundScrollSpeed * ((scaleX + scaleY) / 2) * deltaMultiplier;
 
       if (assets.background.ok && bgPattern) {
         // pattern scroll: translate, then fill
@@ -1683,12 +1689,21 @@
      * Main game loop
      * -----------------------------------------------------------
      */
-    function gameLoop() {
+    function gameLoop(currentTime) {
       if (isPaused) return;
       if (!gameOver) {
+        // Calculate delta time for frame-rate independent movement
+        if (!lastFrameTime) lastFrameTime = currentTime;
+        const deltaTime = currentTime - lastFrameTime;
+        lastFrameTime = currentTime;
+
+        // Calculate multiplier: how much faster/slower this frame is compared to target 60fps
+        // Clamp to prevent huge jumps if tab was inactive briefly
+        const deltaMultiplier = Math.min(deltaTime / TARGET_FRAME_MS, 3);
+
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        drawRollingBackground();
+        drawRollingBackground(deltaMultiplier);
 
         const elapsedMs = performance.now() - gameStartTime;
         score = Math.floor(elapsedMs / 10) / 100;
@@ -1698,18 +1713,19 @@
         ctx.textAlign = 'start';
         ctx.fillText('Survival Time: ' + scoreDisplay, 10, 20);
 
-        player.move();
+        player.move(deltaMultiplier);
         player.draw();
 
         // Scale spawn rate by area ratio to maintain consistent asteroid density
-        const scaledSpawnRate = asteroidSpawnRate * getAreaRatio();
+        // Also scale by deltaMultiplier to keep spawning consistent across frame rates
+        const scaledSpawnRate = asteroidSpawnRate * getAreaRatio() * deltaMultiplier;
         if (Math.random() * 100 < scaledSpawnRate) {
           asteroids.push(new Asteroid());
         }
 
         for (let i = asteroids.length - 1; i >= 0; i--) {
           const m = asteroids[i];
-          m.move();
+          m.move(deltaMultiplier);
           m.draw();
 
           if (!gameOver && checkCollision(player, m)) {
@@ -1726,7 +1742,8 @@
           if (m.isOffScreen()) asteroids.splice(i, 1);
         }
 
-        asteroidSpawnRate += 0.02;
+        // Scale spawn rate increase by delta multiplier for consistent ramping
+        asteroidSpawnRate += 0.02 * deltaMultiplier;
 
         animationId = requestAnimationFrame(gameLoop);
       } else {
