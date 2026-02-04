@@ -1422,7 +1422,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	function saveExportedMarkdown() {
+	function saveExportedMarkdown(filename = 'data') {
 		if (!currentExportedMarkdown) {
 			alert('No markdown content to save.');
 			return;
@@ -1432,7 +1432,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 		const url = URL.createObjectURL(blob);
 		const link = document.createElement('a');
 		link.setAttribute('href', url);
-		link.setAttribute('download', 'data.md');
+		link.setAttribute('download', `${filename}.md`);
 		link.style.visibility = 'hidden';
 		document.body.appendChild(link);
 		link.click();
@@ -1514,7 +1514,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	function exportCSV() {
+	function exportCSV(filename = 'data') {
 		try {
 			const table = document.getElementById('data-table');
 			const rows = table.querySelectorAll('tr');
@@ -1597,7 +1597,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 			const url = URL.createObjectURL(blob);
 			const link = document.createElement('a');
 			link.setAttribute('href', url);
-			link.setAttribute('download', 'data.csv');
+			link.setAttribute('download', `${filename}.csv`);
 			link.style.visibility = 'hidden';
 			document.body.appendChild(link);
 			link.click();
@@ -1631,4 +1631,78 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 		// Update initial parameters based on the selected advanced fit method
 		setInitialParameters(getCurrentAdvancedFitMethod());
+	}
+
+
+	// Filename prompt state
+	let filenamePromptType = null;
+
+
+	function showFilenamePrompt(type) {
+		filenamePromptType = type;
+		const background = document.getElementById('filename-prompt-background');
+		const container = document.getElementById('filename-prompt-container');
+		const input = document.getElementById('filename-prompt-input');
+		const extension = document.getElementById('filename-prompt-extension');
+
+		// Set the extension display
+		extension.textContent = `.${type}`;
+
+		// Set default filename
+		input.value = 'data';
+
+		// Show the modal
+		if (background) background.style.display = 'block';
+		if (container) container.style.display = 'flex';
+
+		// Focus the input and select the text
+		setTimeout(() => {
+			input.focus();
+			input.select();
+		}, 50);
+
+		// Add keyboard listener for Enter key
+		input.onkeydown = function(e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				confirmFilename();
+			} else if (e.key === 'Escape') {
+				e.preventDefault();
+				closeFilenamePrompt();
+			}
+		};
+	}
+
+
+	function closeFilenamePrompt() {
+		const background = document.getElementById('filename-prompt-background');
+		const container = document.getElementById('filename-prompt-container');
+
+		if (background) background.style.display = 'none';
+		if (container) container.style.display = 'none';
+
+		filenamePromptType = null;
+	}
+
+
+	function confirmFilename() {
+		const input = document.getElementById('filename-prompt-input');
+		let filename = input.value.trim();
+
+		// Use default if empty
+		if (!filename) {
+			filename = 'data';
+		}
+
+		// Sanitize filename (remove invalid characters)
+		filename = filename.replace(/[<>:"/\\|?*]/g, '_');
+
+		// Call the appropriate export function
+		if (filenamePromptType === 'csv') {
+			closeFilenamePrompt();
+			exportCSV(filename);
+		} else if (filenamePromptType === 'md') {
+			closeFilenamePrompt();
+			saveExportedMarkdown(filename);
+		}
 	}

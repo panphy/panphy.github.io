@@ -125,7 +125,7 @@
 					<button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()" title="Import data from a CSV file">
 						Import .csv
 					</button>
-					<button class="btn-export-csv" onclick="exportCSV()" title="Export this dataset to a CSV file">Export .csv</button>
+					<button class="btn-export-csv" onclick="showFilenamePrompt('csv')" title="Export this dataset to a CSV file">Export .csv</button>
 					<button class="btn-export-md" onclick="showExportTablePopup()" title="View this dataset as a formatted table">View Table</button>
 				</div>
 			</div>
@@ -338,7 +338,23 @@
 			<p id="export-table-hint">Click the table to copy it to clipboard (works with Word, Google Docs, etc.)</p>
 			<div id="export-table-rendered"></div>
 			<div id="export-table-controls">
-				<button id="export-table-save-md" onclick="saveExportedMarkdown()" title="Save the raw Markdown file">Save .md File</button>
+				<button id="export-table-save-md" onclick="showFilenamePrompt('md')" title="Save the raw Markdown file">Save .md File</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Filename Prompt Modal -->
+	<div id="filename-prompt-background" style="display: none;"></div>
+	<div id="filename-prompt-container" style="display: none;">
+		<div id="filename-prompt-content">
+			<div id="filename-prompt-title">Enter Filename</div>
+			<div id="filename-prompt-input-row">
+				<input type="text" id="filename-prompt-input" placeholder="data" />
+				<span id="filename-prompt-extension">.csv</span>
+			</div>
+			<div id="filename-prompt-buttons">
+				<button id="filename-prompt-cancel" onclick="closeFilenamePrompt()">Cancel</button>
+				<button id="filename-prompt-save" onclick="confirmFilename()">Save</button>
 			</div>
 		</div>
 	</div>
