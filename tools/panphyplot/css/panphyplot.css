@@ -25,21 +25,27 @@
 	--nav-bg: rgba(255, 255, 255, 0.9);
 	--nav-border: #dfe3ea;
 
-	/* Semantic button colors - Light theme */
-	--btn-create: #22c55e;
-	--btn-create-hover: #16a34a;
-	--btn-analyze: #3b82f6;
-	--btn-analyze-hover: #2563eb;
-	--btn-export: #8b5cf6;
-	--btn-export-hover: #7c3aed;
-	--btn-import: #f59e0b;
-	--btn-import-hover: #d97706;
-	--btn-danger: #ef4444;
-	--btn-danger-hover: #dc2626;
-	--btn-utility: #06b6d4;
-	--btn-utility-hover: #0891b2;
-	--btn-neutral: #64748b;
-	--btn-neutral-hover: #475569;
+	/* Semantic button colors - Light theme (vibrant & modern) */
+	--btn-create: #00d68f;
+	--btn-create-hover: #00b377;
+	--btn-create-gradient: linear-gradient(135deg, #00d68f 0%, #00c9a7 100%);
+	--btn-analyze: #6366f1;
+	--btn-analyze-hover: #4f46e5;
+	--btn-analyze-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+	--btn-export: #d946ef;
+	--btn-export-hover: #c026d3;
+	--btn-export-gradient: linear-gradient(135deg, #d946ef 0%, #a855f7 100%);
+	--btn-import: #fb923c;
+	--btn-import-hover: #f97316;
+	--btn-import-gradient: linear-gradient(135deg, #fb923c 0%, #f472b6 100%);
+	--btn-danger: #f43f5e;
+	--btn-danger-hover: #e11d48;
+	--btn-danger-gradient: linear-gradient(135deg, #f43f5e 0%, #ef4444 100%);
+	--btn-utility: #0ea5e9;
+	--btn-utility-hover: #0284c7;
+	--btn-utility-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+	--btn-neutral: #6b7280;
+	--btn-neutral-hover: #4b5563;
 }
 
 [data-theme="dark"] {
@@ -65,21 +71,27 @@
 	--nav-bg: rgba(22, 24, 29, 0.85);
 	--nav-border: rgba(255, 255, 255, 0.08);
 
-	/* Semantic button colors - Dark theme (slightly brighter for visibility) */
-	--btn-create: #4ade80;
-	--btn-create-hover: #22c55e;
-	--btn-analyze: #60a5fa;
-	--btn-analyze-hover: #3b82f6;
-	--btn-export: #a78bfa;
-	--btn-export-hover: #8b5cf6;
-	--btn-import: #fbbf24;
-	--btn-import-hover: #f59e0b;
-	--btn-danger: #f87171;
-	--btn-danger-hover: #ef4444;
-	--btn-utility: #22d3ee;
-	--btn-utility-hover: #06b6d4;
-	--btn-neutral: #94a3b8;
-	--btn-neutral-hover: #64748b;
+	/* Semantic button colors - Dark theme (vibrant & glowing) */
+	--btn-create: #34d399;
+	--btn-create-hover: #10b981;
+	--btn-create-gradient: linear-gradient(135deg, #34d399 0%, #2dd4bf 100%);
+	--btn-analyze: #818cf8;
+	--btn-analyze-hover: #6366f1;
+	--btn-analyze-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+	--btn-export: #e879f9;
+	--btn-export-hover: #d946ef;
+	--btn-export-gradient: linear-gradient(135deg, #e879f9 0%, #c084fc 100%);
+	--btn-import: #fdba74;
+	--btn-import-hover: #fb923c;
+	--btn-import-gradient: linear-gradient(135deg, #fdba74 0%, #f9a8d4 100%);
+	--btn-danger: #fb7185;
+	--btn-danger-hover: #f43f5e;
+	--btn-danger-gradient: linear-gradient(135deg, #fb7185 0%, #f87171 100%);
+	--btn-utility: #38bdf8;
+	--btn-utility-hover: #0ea5e9;
+	--btn-utility-gradient: linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%);
+	--btn-neutral: #9ca3af;
+	--btn-neutral-hover: #6b7280;
 }
 
 * {
@@ -163,16 +175,18 @@ body {
 }
 
 .banner-button:hover {
-	background: rgba(59, 130, 246, 0.1);
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
 	transform: translateY(-1px);
 	border-color: var(--btn-analyze);
 	color: var(--btn-analyze);
+	box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
 }
 
 [data-theme="dark"] .banner-button:hover {
-	background: rgba(96, 165, 250, 0.15);
+	background: linear-gradient(135deg, rgba(129, 140, 248, 0.15) 0%, rgba(167, 139, 250, 0.12) 100%);
 	border-color: var(--btn-analyze);
 	color: var(--btn-analyze);
+	box-shadow: 0 4px 12px rgba(129, 140, 248, 0.2);
 }
 
 .theme-toggle button {
@@ -317,37 +331,35 @@ body {
 }
 
 .dataset-tab:not(.active):hover {
-	background-color: rgba(59, 130, 246, 0.1);
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.06) 100%);
 	color: var(--text-main);
-	border-color: rgba(59, 130, 246, 0.2);
+	border-color: rgba(99, 102, 241, 0.25);
 }
 
 [data-theme="dark"] .dataset-tab:not(.active):hover {
-	background-color: rgba(96, 165, 250, 0.15);
-	border-color: rgba(96, 165, 250, 0.25);
+	background: linear-gradient(135deg, rgba(129, 140, 248, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%);
+	border-color: rgba(129, 140, 248, 0.3);
 }
 
 .dataset-tab.active {
-	background-color: var(--btn-analyze);
-	border-color: var(--btn-analyze);
+	background: var(--btn-analyze-gradient);
+	border-color: transparent;
 	font-weight: 600;
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+	box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
 }
 
 [data-theme="dark"] .dataset-tab.active {
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+	box-shadow: 0 4px 15px rgba(129, 140, 248, 0.4);
 }
 
 .dataset-tab.active:hover {
-	background-color: var(--btn-analyze-hover);
-	border-color: var(--btn-analyze-hover);
+	filter: brightness(1.1);
 }
 
 [data-theme="dark"] .dataset-tab.active:hover {
-	background-color: var(--btn-analyze-hover);
-	border-color: var(--btn-analyze-hover);
+	filter: brightness(1.1);
 }
 
 .dataset-tab .tab-label {
@@ -380,7 +392,7 @@ body {
 	color: #fecaca;
 }
 
-/* Add Dataset - Green (Create action) */
+/* Add Dataset - Green gradient (Create action) */
 .add-dataset-btn {
 	display: inline-flex;
 	align-items: center;
@@ -388,7 +400,7 @@ body {
 	padding: 10px 14px;
 	margin-left: 0;
 	line-height: 1.2;
-	background-color: var(--btn-create);
+	background: var(--btn-create-gradient);
 	color: #fff;
 	border: none;
 	border-top-left-radius: 10px;
@@ -396,20 +408,23 @@ body {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 	cursor: pointer;
-	transition: background-color 0.2s ease, transform 0.2s ease;
+	transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 	font-size: 0.9rem;
-	font-weight: 500;
+	font-weight: 600;
 	flex: none;
 	width: 120px;
+	box-shadow: 0 4px 15px rgba(0, 214, 143, 0.3);
 }
 
 [data-theme="dark"] .add-dataset-btn {
-	color: #1a1a1a;
+	color: #0f1014;
+	box-shadow: 0 4px 15px rgba(52, 211, 153, 0.35);
 }
 
 .add-dataset-btn:hover {
-	background-color: var(--btn-create-hover);
-	transform: translateY(-1px);
+	filter: brightness(1.1);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(0, 214, 143, 0.4);
 }
 
 /* Layout Sections */
@@ -469,30 +484,30 @@ body {
 }
 
 .section-toggle:hover {
-	background-color: rgba(59, 130, 246, 0.08);
-	border-color: rgba(59, 130, 246, 0.3);
+	background-color: rgba(99, 102, 241, 0.08);
+	border-color: rgba(99, 102, 241, 0.3);
 }
 
 [data-theme="dark"] .section-toggle:hover {
-	background-color: rgba(96, 165, 250, 0.1);
-	border-color: rgba(96, 165, 250, 0.25);
+	background-color: rgba(129, 140, 248, 0.1);
+	border-color: rgba(129, 140, 248, 0.25);
 }
 
 .section-toggle[aria-expanded="true"] {
-	background-color: rgba(59, 130, 246, 0.1);
-	border-color: rgba(59, 130, 246, 0.25);
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
+	border-color: rgba(99, 102, 241, 0.3);
 }
 
 [data-theme="dark"] .section-toggle[aria-expanded="true"] {
-	background-color: rgba(96, 165, 250, 0.12);
-	border-color: rgba(96, 165, 250, 0.3);
+	background: linear-gradient(135deg, rgba(129, 140, 248, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%);
+	border-color: rgba(129, 140, 248, 0.35);
 }
 
 .section-toggle::after {
 	content: "▾";
 	color: var(--btn-analyze);
 	font-size: 0.9rem;
-	transition: transform 0.2s ease;
+	transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .section-toggle[aria-expanded="true"]::after {
@@ -631,87 +646,113 @@ button:hover {
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Add Row - Green (Create action) */
+/* Add Row - Emerald (Create action) */
 .btn-add-row {
-	background-color: var(--btn-create);
+	background: var(--btn-create-gradient);
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(0, 214, 143, 0.25);
 }
 
 .btn-add-row:hover {
-	background-color: var(--btn-create-hover);
+	filter: brightness(1.1);
+	box-shadow: 0 4px 15px rgba(0, 214, 143, 0.35);
 }
 
-/* Clear Data - Red (Destructive action) */
+/* Clear Data - Rose (Destructive action) */
 .btn-clear-all {
-	background-color: var(--btn-danger);
+	background: var(--btn-danger-gradient);
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(244, 63, 94, 0.25);
 }
 
 .btn-clear-all:hover {
-	background-color: var(--btn-danger-hover);
+	filter: brightness(1.1);
+	box-shadow: 0 4px 15px rgba(244, 63, 94, 0.35);
 }
 
-/* Copy x₁ - Cyan (Utility action) */
+/* Copy x₁ - Sky (Utility action) */
 .btn-copy-x {
-	background-color: var(--btn-utility);
+	background: var(--btn-utility-gradient);
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(14, 165, 233, 0.25);
 }
 
 .btn-copy-x:hover {
-	background-color: var(--btn-utility-hover);
+	filter: brightness(1.1);
+	box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35);
 }
 
-/* Import CSV - Orange (Import action) */
+/* Import CSV - Orange-Pink gradient (Import action) */
 .btn-import-csv {
-	background-color: var(--btn-import);
+	background: var(--btn-import-gradient);
 	color: #1a1a1a;
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(251, 146, 60, 0.25);
 }
 
 .btn-import-csv:hover {
-	background-color: var(--btn-import-hover);
+	filter: brightness(1.05);
+	box-shadow: 0 4px 15px rgba(251, 146, 60, 0.35);
 }
 
-/* Export CSV - Purple (Export action) */
+/* Export CSV - Fuchsia (Export action) */
 .btn-export-csv {
-	background-color: var(--btn-export);
+	background: var(--btn-export-gradient);
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(217, 70, 239, 0.25);
 }
 
 .btn-export-csv:hover {
-	background-color: var(--btn-export-hover);
+	filter: brightness(1.1);
+	box-shadow: 0 4px 15px rgba(217, 70, 239, 0.35);
 }
 
-/* View Table - Gray (View/Neutral action) */
+/* View Table - Slate (View/Neutral action) */
 .btn-export-md {
 	background-color: var(--btn-neutral);
+	font-weight: 600;
 }
 
 .btn-export-md:hover {
 	background-color: var(--btn-neutral-hover);
 }
 
-/* Fit Curve - Blue (Analysis action) */
+/* Fit Curve - Indigo gradient (Analysis action) */
 .fit-button {
-	background-color: var(--btn-analyze);
+	background: var(--btn-analyze-gradient);
 	width: 100%;
 	height: 40px;
 	padding: 0;
 	margin: 0;
 	border-radius: 10px;
+	font-weight: 600;
+	box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+	transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fit-button:hover {
-	background-color: var(--btn-analyze-hover);
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
 }
 
-/* Clear Fit - Red (Destructive action) */
+/* Clear Fit - Rose gradient (Destructive action) */
 .clear-fit-button {
-	background-color: var(--btn-danger);
+	background: var(--btn-danger-gradient);
 	width: 100%;
 	height: 40px;
 	padding: 0;
 	margin: 0;
 	border-radius: 10px;
+	font-weight: 600;
+	box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+	transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .clear-fit-button:hover {
-	background-color: var(--btn-danger-hover);
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
 }
 
 /* Button Containers */
@@ -810,20 +851,24 @@ button:hover {
 	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
 }
 
-/* Apply to All - Cyan (Utility action) */
+/* Apply to All - Sky gradient (Utility action) */
 .uncertainty-card-body button {
-	background-color: var(--btn-utility);
-	color: #1a1a1a;
+	background: var(--btn-utility-gradient);
+	color: #0f1014;
 	padding: 10px 16px;
 	border-radius: 10px;
 	font-size: 0.9rem;
-	font-weight: 500;
+	font-weight: 600;
 	white-space: nowrap;
 	flex-shrink: 0;
+	box-shadow: 0 3px 10px rgba(14, 165, 233, 0.25);
+	transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .uncertainty-card-body button:hover {
-	background-color: var(--btn-utility-hover);
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35);
 }
 
 /* Advanced Fit Section */
@@ -938,24 +983,24 @@ select {
 }
 
 .tabs button:hover {
-	background-color: rgba(59, 130, 246, 0.1);
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.06) 100%);
 	color: var(--text-main);
 }
 
 .tabs button.active {
-	background-color: var(--btn-analyze);
+	background: var(--btn-analyze-gradient);
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+	box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 [data-theme="dark"] .tabs button:hover {
-	background-color: rgba(96, 165, 250, 0.15);
+	background-color: rgba(129, 140, 248, 0.15);
 }
 
 [data-theme="dark"] .tabs button.active {
-	background-color: var(--btn-analyze);
+	background: var(--btn-analyze-gradient);
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+	box-shadow: 0 4px 12px rgba(129, 140, 248, 0.35);
 }
 
 .tab-content {
@@ -1006,27 +1051,32 @@ select {
 	margin-top: 10px;
 }
 
-/* Plot ALL Datasets - Blue (Analysis action) */
+/* Plot ALL Datasets - Indigo gradient (Analysis action) */
 .plot-all-btn {
-	padding: 10px 18px;
-	background-color: var(--btn-analyze);
+	padding: 12px 24px;
+	background: var(--btn-analyze-gradient);
 	color: #fff;
 	border: none;
-	border-radius: 10px;
+	border-radius: 12px;
 	cursor: pointer;
-	font-size: 0.9rem;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	font-size: 0.95rem;
+	font-weight: 600;
+	box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+	transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .plot-all-btn:hover {
-	background-color: var(--btn-analyze-hover);
-	transform: translateY(-1px);
-	box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+	filter: brightness(1.1);
+	transform: translateY(-2px);
+	box-shadow: 0 8px 25px rgba(99, 102, 241, 0.45);
+}
+
+[data-theme="dark"] .plot-all-btn {
+	box-shadow: 0 4px 15px rgba(129, 140, 248, 0.4);
 }
 
 [data-theme="dark"] .plot-all-btn:hover {
-	background-color: var(--btn-analyze-hover);
-	box-shadow: 0 8px 20px rgba(96, 165, 250, 0.3);
+	box-shadow: 0 8px 25px rgba(129, 140, 248, 0.5);
 }
 
 /* Responsive */
@@ -1441,14 +1491,17 @@ footer a:visited {
 	gap: 10px;
 }
 
-/* Save .md - Purple (Export action) */
+/* Save .md - Fuchsia gradient (Export action) */
 #export-table-save-md {
-	background-color: var(--btn-export);
+	background: var(--btn-export-gradient);
 	padding: 10px 20px;
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(217, 70, 239, 0.25);
 }
 
 #export-table-save-md:hover {
-	background-color: var(--btn-export-hover);
+	filter: brightness(1.1);
+	box-shadow: 0 4px 15px rgba(217, 70, 239, 0.35);
 }
 
 /* Filename Prompt Modal */
@@ -1546,12 +1599,15 @@ footer a:visited {
 	background-color: var(--btn-neutral-hover);
 }
 
-/* Save - Purple (Export action) */
+/* Save - Fuchsia gradient (Export action) */
 #filename-prompt-save {
-	background-color: var(--btn-export);
+	background: var(--btn-export-gradient);
 	padding: 10px 20px;
+	font-weight: 600;
+	box-shadow: 0 3px 10px rgba(217, 70, 239, 0.25);
 }
 
 #filename-prompt-save:hover {
-	background-color: var(--btn-export-hover);
+	filter: brightness(1.1);
+	box-shadow: 0 4px 15px rgba(217, 70, 239, 0.35);
 }
