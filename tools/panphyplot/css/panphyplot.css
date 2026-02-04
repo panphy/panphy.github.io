@@ -1344,3 +1344,114 @@ footer a:visited {
 #export-table-save-md:hover {
 	background-color: #8b82e8;
 }
+
+/* Filename Prompt Modal */
+#filename-prompt-background {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(15, 16, 20, 0.5);
+	z-index: 2000;
+}
+
+#filename-prompt-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 2001;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#filename-prompt-content {
+	background: var(--card-bg);
+	padding: 24px;
+	border-radius: 16px;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+	width: 100%;
+	max-width: 360px;
+	text-align: center;
+}
+
+#filename-prompt-title {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin-bottom: 16px;
+	font-family: var(--font-display);
+	color: var(--text-main);
+}
+
+#filename-prompt-input-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
+	margin-bottom: 20px;
+}
+
+#filename-prompt-input {
+	flex: 1;
+	padding: 10px 12px;
+	font-size: 0.95rem;
+	border: 1px solid var(--input-border);
+	border-right: none;
+	border-radius: 10px 0 0 10px;
+	background-color: var(--card-bg);
+	color: var(--text-main);
+	outline: none;
+}
+
+#filename-prompt-input:focus {
+	border-color: var(--brand-primary);
+	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+#filename-prompt-extension {
+	padding: 10px 12px;
+	font-size: 0.95rem;
+	background-color: var(--muted-bg);
+	border: 1px solid var(--input-border);
+	border-left: none;
+	border-radius: 0 10px 10px 0;
+	color: var(--text-secondary);
+	font-weight: 500;
+}
+
+#filename-prompt-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+#filename-prompt-cancel {
+	background-color: var(--muted-bg);
+	color: var(--text-main);
+	border: 1px solid var(--border-color);
+	padding: 10px 20px;
+}
+
+#filename-prompt-cancel:hover {
+	background-color: #e4e8ef;
+}
+
+[data-theme="dark"] #filename-prompt-cancel:hover {
+	background-color: #2d323c;
+}
+
+#filename-prompt-save {
+	background-color: var(--brand-primary);
+	padding: 10px 20px;
+}
+
+#filename-prompt-save:hover {
+	background-color: #5b4bd6;
+}
+
+[data-theme="dark"] #filename-prompt-save:hover {
+	background-color: #8b82e8;
+}
