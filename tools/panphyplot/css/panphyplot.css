@@ -682,30 +682,64 @@ button:hover {
 	border: none;
 }
 
-.uncertainty-controls {
-	display: flex;
-	justify-content: center;
-	gap: 20px;
-	flex-wrap: wrap;
+/* Uncertainty Cards */
+.uncertainty-card {
+	background: var(--muted-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	padding: 14px;
+	margin-bottom: 12px;
 }
 
-.uncertainty-controls div {
+.uncertainty-card:last-child {
+	margin-bottom: 0;
+}
+
+.uncertainty-card-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.uncertainty-toggle-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--text-main);
+}
+
+.uncertainty-toggle-label input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	accent-color: var(--brand-primary);
+	cursor: pointer;
+}
+
+.uncertainty-type-select {
+	min-width: 130px;
+	padding: 6px 28px 6px 10px;
+	font-size: 0.85rem;
+	border: 1px solid var(--input-border);
+	border-radius: 8px;
+	background: var(--card-bg);
+	color: var(--text-main);
+	margin-bottom: 0;
+}
+
+.uncertainty-card-body {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	color: var(--text-secondary);
 }
 
-.global-uncertainty-item {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin-bottom: 8px;
-}
-
-.global-uncertainty-item input {
+.uncertainty-card-body input {
 	flex: 1;
-	padding: 10px;
+	padding: 10px 12px;
 	font-size: 0.9rem;
 	border: 1px solid var(--input-border);
 	border-radius: 10px;
@@ -713,22 +747,25 @@ button:hover {
 	color: var(--text-main);
 }
 
-.global-uncertainty-item input:focus {
+.uncertainty-card-body input:focus {
 	border-color: var(--brand-primary);
 	outline: none;
 	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
 }
 
-.global-uncertainty-item button {
-	background-color: var(--warning);
-	color: #1f1f1f;
-	padding: 10px 14px;
+.uncertainty-card-body button {
+	background-color: var(--brand-accent);
+	color: #0f1014;
+	padding: 10px 16px;
 	border-radius: 10px;
 	font-size: 0.9rem;
+	font-weight: 500;
+	white-space: nowrap;
+	flex-shrink: 0;
 }
 
-.global-uncertainty-item button:hover {
-	background-color: #d9a44e;
+.uncertainty-card-body button:hover {
+	background-color: var(--brand-accent-strong);
 }
 
 /* Advanced Fit Section */
