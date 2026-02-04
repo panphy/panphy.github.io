@@ -160,6 +160,85 @@
       margin-top: 0px;
       text-align: center;
     }
+
+    /* Touch target sizing for mobile */
+    @media (pointer: coarse) {
+      .button-group button,
+      .control-group input[type="range"] {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+
+      .button-group button {
+        padding: 12px 20px;
+      }
+    }
+
+    /* Tablet responsive */
+    @media (max-width: 900px) {
+      .container {
+        width: 92%;
+        padding: 15px;
+      }
+
+      .control-group {
+        min-width: 200px;
+      }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      header h2 {
+        font-size: 1.25rem;
+        padding: 0 10px;
+      }
+
+      .container {
+        width: 95%;
+        margin: 10px auto;
+        padding: 12px;
+      }
+
+      .controls {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .control-group {
+        min-width: 100%;
+      }
+
+      .grid-size-box {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .button-group button {
+        width: 120px;
+        font-size: 14px;
+      }
+
+      #warning {
+        font-size: 13px;
+        padding: 0 10px;
+      }
+
+      footer {
+        font-size: 13px;
+      }
+    }
+
+    /* Small mobile - constrain grid size */
+    @media (max-width: 520px) {
+      .simulation-area {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      #grid {
+        max-width: calc(100vw - 40px);
+      }
+    }
   </style>
 </head>
 

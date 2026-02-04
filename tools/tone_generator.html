@@ -435,6 +435,96 @@
         height: 28px;
       }
     }
+
+    /* Mobile responsive layout */
+    @media (max-width: 768px) {
+      html, body {
+        overflow: auto;
+      }
+
+      #titleBanner {
+        width: calc(100% - 1.5rem);
+        margin: 0.75rem auto;
+        padding: 0.4rem 0.75rem;
+      }
+
+      .banner-title {
+        font-size: 1.1rem;
+      }
+
+      .banner-logo img {
+        max-height: 26px;
+      }
+
+      .banner-placeholder {
+        width: 50px;
+      }
+
+      #content {
+        flex-direction: column;
+        padding: 0 0.75rem 1rem;
+        gap: 12px;
+        overflow: visible;
+      }
+
+      #leftColumn {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        max-height: 50vh;
+        overflow-y: auto;
+      }
+
+      #rightColumn {
+        flex: none;
+        width: 100%;
+        padding: 12px;
+        min-height: 300px;
+      }
+
+      .channel {
+        padding: 10px;
+      }
+
+      .channel-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .slider-container {
+        flex-wrap: wrap;
+      }
+
+      #globalControlsArea {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      #chartContainer {
+        min-height: 250px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .banner-title {
+        font-size: 0.95rem;
+      }
+
+      .banner-logo img {
+        max-height: 22px;
+      }
+
+      #leftColumn {
+        max-height: 45vh;
+      }
+
+      .channel-header h3 {
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 
