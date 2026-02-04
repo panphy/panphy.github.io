@@ -795,11 +795,17 @@ button:hover {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
 	gap: 10px;
 	margin-bottom: 12px;
 	padding-bottom: 10px;
 	border-bottom: 1px solid var(--border-color);
+}
+
+.uncertainty-toggle-group {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
 .uncertainty-label {
