@@ -40,6 +40,14 @@
 	--btn-utility-hover: #2d8a9d;
 	--btn-neutral: #6b7a8c;
 	--btn-neutral-hover: #566476;
+
+	/* Special yellow buttons for Uncertainties */
+	--btn-apply: #f1c40f;
+	/* Sunflower yellow (Light) */
+	--btn-apply-hover: #d4ac0d;
+	/* Darker yellow */
+	--btn-apply-text: #2d3436;
+	/* Dark text for contrast */
 }
 
 [data-theme="dark"] {
@@ -80,6 +88,14 @@
 	--btn-utility-hover: #3ca4b8;
 	--btn-neutral: #8a96a8;
 	--btn-neutral-hover: #788496;
+
+	/* Special yellow buttons for Uncertainties */
+	--btn-apply: #ffeaa7;
+	/* Sour Lemon yellow (Dark) */
+	--btn-apply-hover: #e0d08e;
+	/* Slightly darker/muted */
+	--btn-apply-text: #2d3436;
+	/* Dark text for contrast */
 }
 
 * {
@@ -254,12 +270,18 @@ body {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.switch input:checked + .slider {
+.switch input:checked+.slider {
 	background-color: var(--brand-accent);
 }
 
-.switch input:checked + .slider:before {
+.switch input:checked+.slider:before {
 	transform: translateX(22px);
+}
+
+/* Specific yellow color for Uncertainty Toggles */
+#toggle-x-error:checked+.slider,
+#toggle-y-error:checked+.slider {
+	background-color: var(--btn-apply);
 }
 
 .toggle-label {
@@ -851,9 +873,10 @@ button:hover {
 }
 
 /* Apply to All - Teal (Utility action) */
+/* Apply to All - Yellow (Special action) */
 .uncertainty-card-body button {
-	background-color: var(--btn-utility);
-	color: #fff;
+	background-color: var(--btn-apply);
+	color: var(--btn-apply-text);
 	padding: 10px 12px;
 	border-radius: 10px;
 	font-size: 0.85rem;
@@ -863,11 +886,11 @@ button:hover {
 }
 
 .uncertainty-card-body button:hover {
-	background-color: var(--btn-utility-hover);
+	background-color: var(--btn-apply-hover);
 }
 
 [data-theme="dark"] .uncertainty-card-body button {
-	color: #1a1a1a;
+	color: var(--btn-apply-text);
 }
 
 /* Advanced Fit Section */
@@ -1275,6 +1298,7 @@ footer a:visited {
 }
 
 @media (pointer: coarse) {
+
 	button,
 	.banner-button,
 	.action-button,

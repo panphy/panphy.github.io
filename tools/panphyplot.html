@@ -54,9 +54,11 @@
 
 		<!-- Buttons on the Right -->
 		<div class="banner-buttons">
-			<a href="/tools/panphyplot/panphyplot_manual.html" class="banner-button" title="Open the PanPhyPlot manual">Manual</a>
+			<a href="/tools/panphyplot/panphyplot_manual.html" class="banner-button"
+				title="Open the PanPhyPlot manual">Manual</a>
 			<div class="theme-toggle">
-				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme"
+					title="Toggle between light and dark themes">☀️</button>
 			</div>
 		</div>
 	</div>
@@ -117,29 +119,30 @@
 
 			<div class="button-container">
 				<div class="button-row">
-					<button class="btn-add-row" onclick="addRow()" title="Add a new data row to this dataset">Add Row</button>
-					<button class="btn-copy-x" onclick="copyXFromSet1()" title="Copy x-values from Dataset 1 into this dataset">Copy x₁</button>
-					<button class="btn-clear-all" onclick="clearRows()" title="Clear all data rows in this dataset">Clear Data</button>
+					<button class="btn-add-row" onclick="addRow()" title="Add a new data row to this dataset">Add
+						Row</button>
+					<button class="btn-copy-x" onclick="copyXFromSet1()"
+						title="Copy x-values from Dataset 1 into this dataset">Copy x₁</button>
+					<button class="btn-clear-all" onclick="clearRows()"
+						title="Clear all data rows in this dataset">Clear Data</button>
 				</div>
 				<div class="button-row">
-					<button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()" title="Import data from a CSV file">
+					<button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()"
+						title="Import data from a CSV file">
 						Import .csv
 					</button>
-					<button class="btn-export-csv" onclick="showFilenamePrompt('csv')" title="Export this dataset to a CSV file">Export .csv</button>
-					<button class="btn-export-md" onclick="showExportTablePopup()" title="View this dataset as a formatted table">View Table</button>
+					<button class="btn-export-csv" onclick="showFilenamePrompt('csv')"
+						title="Export this dataset to a CSV file">Export .csv</button>
+					<button class="btn-export-md" onclick="showExportTablePopup()"
+						title="View this dataset as a formatted table">View Table</button>
 				</div>
 			</div>
-			<input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)" />
+			<input type="file" id="csv-file-input" accept=".csv" style="display: none;"
+				onchange="handleCSVUpload(event)" />
 
 			<div class="global-uncertainty">
-				<button
-					class="section-toggle"
-					type="button"
-					aria-expanded="false"
-					aria-controls="uncertainties-content"
-					onclick="toggleSection('uncertainties-content', this)"
-					title="Show or hide uncertainty controls"
-				>
+				<button class="section-toggle" type="button" aria-expanded="false" aria-controls="uncertainties-content"
+					onclick="toggleSection('uncertainties-content', this)" title="Show or hide uncertainty controls">
 					Add Uncertainties
 				</button>
 				<div id="uncertainties-content" class="collapsible-content">
@@ -159,7 +162,8 @@
 						</div>
 						<div class="uncertainty-card-body">
 							<input type="text" id="global-x-uncertainty" placeholder="Value for all rows" />
-							<button onclick="applyGlobalUncertainties('x')" title="Apply this Δx to all rows in the current dataset">Apply to All</button>
+							<button onclick="applyGlobalUncertainties('x')"
+								title="Apply this Δx to all rows in the current dataset">Apply to All</button>
 						</div>
 					</div>
 					<div class="uncertainty-card">
@@ -178,27 +182,24 @@
 						</div>
 						<div class="uncertainty-card-body">
 							<input type="text" id="global-y-uncertainty" placeholder="Value for all rows" />
-							<button onclick="applyGlobalUncertainties('y')" title="Apply this Δy to all rows in the current dataset">Apply to All</button>
+							<button onclick="applyGlobalUncertainties('y')"
+								title="Apply this Δy to all rows in the current dataset">Apply to All</button>
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<div class="fit-method-section">
-				<button
-					class="section-toggle"
-					type="button"
-					aria-expanded="false"
-					aria-controls="best-fit-content"
-					onclick="toggleSection('best-fit-content', this)"
-					title="Show or hide best-fit line options"
-				>
+				<button class="section-toggle" type="button" aria-expanded="false" aria-controls="best-fit-content"
+					onclick="toggleSection('best-fit-content', this)" title="Show or hide best-fit line options">
 					Add Best Fit Line
 				</button>
 				<div id="best-fit-content" class="collapsible-content">
 					<div class="tabs">
-						<button class="tablink active" onclick="openTab(event, 'BasicFit')" title="Show basic best-fit options">Basic Fit</button>
-						<button class="tablink" onclick="openTab(event, 'AdvancedFit')" title="Show advanced best-fit options">Advanced Fit</button>
+						<button class="tablink active" onclick="openTab(event, 'BasicFit')"
+							title="Show basic best-fit options">Basic Fit</button>
+						<button class="tablink" onclick="openTab(event, 'AdvancedFit')"
+							title="Show advanced best-fit options">Advanced Fit</button>
 					</div>
 
 					<!-- Basic Fit -->
@@ -217,8 +218,10 @@
 							\( y = mx + c \)
 						</div>
 						<div style="display: flex; gap: 6px;">
-							<button class="fit-button" onclick="fitCurve()" title="Fit a curve to the selected dataset">Fit Curve</button>
-							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the current fitted curve">Clear Fit</button>
+							<button class="fit-button" onclick="fitCurve()"
+								title="Fit a curve to the selected dataset">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()"
+								title="Remove the current fitted curve">Clear Fit</button>
 						</div>
 					</div>
 
@@ -279,8 +282,10 @@
 						</div>
 
 						<div style="display: flex; gap: 6px;">
-							<button class="fit-button" onclick="fitAdvancedCurve()" title="Fit an advanced curve using the chosen parameters">Fit Curve</button>
-							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the current fitted curve">Clear Fit</button>
+							<button class="fit-button" onclick="fitAdvancedCurve()"
+								title="Fit an advanced curve using the chosen parameters">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()"
+								title="Remove the current fitted curve">Clear Fit</button>
 						</div>
 					</div>
 				</div>
@@ -292,7 +297,8 @@
 			<h2>Graph</h2>
 			<div class="graph-title-container">
 				<label for="graph-title">Title:</label>
-				<input type="text" id="graph-title" placeholder="Enter graph title" oninput="debouncedUpdatePlotAndRenderLatex()">
+				<input type="text" id="graph-title" placeholder="Enter graph title"
+					oninput="debouncedUpdatePlotAndRenderLatex()">
 			</div>
 			<div id="plot"></div>
 
@@ -303,7 +309,8 @@
 			</div>
 
 			<div class="plot-all-container">
-				<button class="plot-all-btn" onclick="plotAllDatasets()" title="Plot all datasets together in a combined view">Plot ALL Datasets</button>
+				<button class="plot-all-btn" onclick="plotAllDatasets()"
+					title="Plot all datasets together in a combined view">Plot ALL Datasets</button>
 			</div>
 		</div><!-- end graph-section -->
 	</div><!-- end container -->
@@ -339,12 +346,14 @@
 	<div id="export-table-background" style="display: none;"></div>
 	<div id="export-table-container" style="display: none;">
 		<div id="export-table-content">
-			<button id="export-table-close" onclick="closeExportTablePopup()" title="Close the view table window">Close</button>
+			<button id="export-table-close" onclick="closeExportTablePopup()"
+				title="Close the view table window">Close</button>
 			<div id="export-table-title">View Table</div>
 			<p id="export-table-hint">Click the table to copy it to clipboard (works with Word, Google Docs, etc.)</p>
 			<div id="export-table-rendered"></div>
 			<div id="export-table-controls">
-				<button id="export-table-save-md" onclick="showFilenamePrompt('md')" title="Save the raw Markdown file">Save .md File</button>
+				<button id="export-table-save-md" onclick="showFilenamePrompt('md')"
+					title="Save the raw Markdown file">Save .md File</button>
 			</div>
 		</div>
 	</div>
