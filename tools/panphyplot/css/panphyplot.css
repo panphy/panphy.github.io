@@ -25,21 +25,21 @@
 	--nav-bg: rgba(255, 255, 255, 0.9);
 	--nav-border: #dfe3ea;
 
-	/* Semantic button colors - Light theme */
-	--btn-create: #22c55e;
-	--btn-create-hover: #16a34a;
-	--btn-analyze: #3b82f6;
-	--btn-analyze-hover: #2563eb;
-	--btn-export: #8b5cf6;
-	--btn-export-hover: #7c3aed;
-	--btn-import: #f59e0b;
-	--btn-import-hover: #d97706;
-	--btn-danger: #ef4444;
-	--btn-danger-hover: #dc2626;
-	--btn-utility: #06b6d4;
-	--btn-utility-hover: #0891b2;
-	--btn-neutral: #64748b;
-	--btn-neutral-hover: #475569;
+	/* Semantic button colors - Light theme (soft & elegant) */
+	--btn-create: #4eba8c;
+	--btn-create-hover: #3da577;
+	--btn-analyze: #7c8bd4;
+	--btn-analyze-hover: #6977c5;
+	--btn-export: #a98cc4;
+	--btn-export-hover: #9579b5;
+	--btn-import: #e8a87c;
+	--btn-import-hover: #dc9566;
+	--btn-danger: #d97878;
+	--btn-danger-hover: #c96262;
+	--btn-utility: #6aabb8;
+	--btn-utility-hover: #579aa8;
+	--btn-neutral: #8892a2;
+	--btn-neutral-hover: #6e7788;
 }
 
 [data-theme="dark"] {
@@ -65,21 +65,21 @@
 	--nav-bg: rgba(22, 24, 29, 0.85);
 	--nav-border: rgba(255, 255, 255, 0.08);
 
-	/* Semantic button colors - Dark theme (slightly brighter for visibility) */
-	--btn-create: #4ade80;
-	--btn-create-hover: #22c55e;
-	--btn-analyze: #60a5fa;
-	--btn-analyze-hover: #3b82f6;
-	--btn-export: #a78bfa;
-	--btn-export-hover: #8b5cf6;
-	--btn-import: #fbbf24;
-	--btn-import-hover: #f59e0b;
-	--btn-danger: #f87171;
-	--btn-danger-hover: #ef4444;
-	--btn-utility: #22d3ee;
-	--btn-utility-hover: #06b6d4;
-	--btn-neutral: #94a3b8;
-	--btn-neutral-hover: #64748b;
+	/* Semantic button colors - Dark theme (soft & readable) */
+	--btn-create: #5ec99e;
+	--btn-create-hover: #4dba8d;
+	--btn-analyze: #9aa6e0;
+	--btn-analyze-hover: #8895d5;
+	--btn-export: #bda3d4;
+	--btn-export-hover: #ab8fc6;
+	--btn-import: #f0bc96;
+	--btn-import-hover: #e8a97d;
+	--btn-danger: #e69595;
+	--btn-danger-hover: #db8080;
+	--btn-utility: #7fc0cc;
+	--btn-utility-hover: #6bb2bf;
+	--btn-neutral: #a1a9b8;
+	--btn-neutral-hover: #8891a2;
 }
 
 * {
@@ -163,14 +163,14 @@ body {
 }
 
 .banner-button:hover {
-	background: rgba(59, 130, 246, 0.1);
+	background-color: rgba(124, 139, 212, 0.1);
 	transform: translateY(-1px);
 	border-color: var(--btn-analyze);
 	color: var(--btn-analyze);
 }
 
 [data-theme="dark"] .banner-button:hover {
-	background: rgba(96, 165, 250, 0.15);
+	background-color: rgba(154, 166, 224, 0.15);
 	border-color: var(--btn-analyze);
 	color: var(--btn-analyze);
 }
@@ -317,37 +317,33 @@ body {
 }
 
 .dataset-tab:not(.active):hover {
-	background-color: rgba(59, 130, 246, 0.1);
+	background-color: rgba(124, 139, 212, 0.12);
 	color: var(--text-main);
-	border-color: rgba(59, 130, 246, 0.2);
+	border-color: rgba(124, 139, 212, 0.25);
 }
 
 [data-theme="dark"] .dataset-tab:not(.active):hover {
-	background-color: rgba(96, 165, 250, 0.15);
-	border-color: rgba(96, 165, 250, 0.25);
+	background-color: rgba(154, 166, 224, 0.15);
+	border-color: rgba(154, 166, 224, 0.3);
 }
 
 .dataset-tab.active {
 	background-color: var(--btn-analyze);
-	border-color: var(--btn-analyze);
+	border-color: transparent;
 	font-weight: 600;
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
 [data-theme="dark"] .dataset-tab.active {
-	color: #fff;
-	box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+	color: #1a1a1a;
 }
 
 .dataset-tab.active:hover {
 	background-color: var(--btn-analyze-hover);
-	border-color: var(--btn-analyze-hover);
 }
 
 [data-theme="dark"] .dataset-tab.active:hover {
 	background-color: var(--btn-analyze-hover);
-	border-color: var(--btn-analyze-hover);
 }
 
 .dataset-tab .tab-label {
@@ -380,7 +376,7 @@ body {
 	color: #fecaca;
 }
 
-/* Add Dataset - Green (Create action) */
+/* Add Dataset - Sage green (Create action) */
 .add-dataset-btn {
 	display: inline-flex;
 	align-items: center;
@@ -398,7 +394,7 @@ body {
 	cursor: pointer;
 	transition: background-color 0.2s ease, transform 0.2s ease;
 	font-size: 0.9rem;
-	font-weight: 500;
+	font-weight: 600;
 	flex: none;
 	width: 120px;
 }
@@ -469,30 +465,30 @@ body {
 }
 
 .section-toggle:hover {
-	background-color: rgba(59, 130, 246, 0.08);
-	border-color: rgba(59, 130, 246, 0.3);
+	background-color: rgba(124, 139, 212, 0.08);
+	border-color: rgba(124, 139, 212, 0.25);
 }
 
 [data-theme="dark"] .section-toggle:hover {
-	background-color: rgba(96, 165, 250, 0.1);
-	border-color: rgba(96, 165, 250, 0.25);
+	background-color: rgba(154, 166, 224, 0.1);
+	border-color: rgba(154, 166, 224, 0.2);
 }
 
 .section-toggle[aria-expanded="true"] {
-	background-color: rgba(59, 130, 246, 0.1);
-	border-color: rgba(59, 130, 246, 0.25);
+	background-color: rgba(124, 139, 212, 0.1);
+	border-color: rgba(124, 139, 212, 0.25);
 }
 
 [data-theme="dark"] .section-toggle[aria-expanded="true"] {
-	background-color: rgba(96, 165, 250, 0.12);
-	border-color: rgba(96, 165, 250, 0.3);
+	background-color: rgba(154, 166, 224, 0.12);
+	border-color: rgba(154, 166, 224, 0.25);
 }
 
 .section-toggle::after {
 	content: "▾";
 	color: var(--btn-analyze);
 	font-size: 0.9rem;
-	transition: transform 0.2s ease;
+	transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .section-toggle[aria-expanded="true"]::after {
@@ -631,87 +627,130 @@ button:hover {
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Add Row - Green (Create action) */
+/* Add Row - Sage green (Create action) */
 .btn-add-row {
 	background-color: var(--btn-create);
+	color: #fff;
+	font-weight: 600;
 }
 
 .btn-add-row:hover {
 	background-color: var(--btn-create-hover);
 }
 
-/* Clear Data - Red (Destructive action) */
+[data-theme="dark"] .btn-add-row {
+	color: #1a1a1a;
+}
+
+/* Clear Data - Coral (Destructive action) */
 .btn-clear-all {
 	background-color: var(--btn-danger);
+	color: #fff;
+	font-weight: 600;
 }
 
 .btn-clear-all:hover {
 	background-color: var(--btn-danger-hover);
 }
 
-/* Copy x₁ - Cyan (Utility action) */
+[data-theme="dark"] .btn-clear-all {
+	color: #1a1a1a;
+}
+
+/* Copy x₁ - Teal (Utility action) */
 .btn-copy-x {
 	background-color: var(--btn-utility);
+	color: #fff;
+	font-weight: 600;
 }
 
 .btn-copy-x:hover {
 	background-color: var(--btn-utility-hover);
 }
 
-/* Import CSV - Orange (Import action) */
+[data-theme="dark"] .btn-copy-x {
+	color: #1a1a1a;
+}
+
+/* Import CSV - Peach (Import action) */
 .btn-import-csv {
 	background-color: var(--btn-import);
 	color: #1a1a1a;
+	font-weight: 600;
 }
 
 .btn-import-csv:hover {
 	background-color: var(--btn-import-hover);
 }
 
-/* Export CSV - Purple (Export action) */
+/* Export CSV - Lavender (Export action) */
 .btn-export-csv {
 	background-color: var(--btn-export);
+	color: #fff;
+	font-weight: 600;
 }
 
 .btn-export-csv:hover {
 	background-color: var(--btn-export-hover);
 }
 
-/* View Table - Gray (View/Neutral action) */
+[data-theme="dark"] .btn-export-csv {
+	color: #1a1a1a;
+}
+
+/* View Table - Slate (View/Neutral action) */
 .btn-export-md {
 	background-color: var(--btn-neutral);
+	color: #fff;
+	font-weight: 600;
 }
 
 .btn-export-md:hover {
 	background-color: var(--btn-neutral-hover);
 }
 
-/* Fit Curve - Blue (Analysis action) */
+[data-theme="dark"] .btn-export-md {
+	color: #1a1a1a;
+}
+
+/* Fit Curve - Periwinkle (Analysis action) */
 .fit-button {
 	background-color: var(--btn-analyze);
+	color: #fff;
 	width: 100%;
 	height: 40px;
 	padding: 0;
 	margin: 0;
 	border-radius: 10px;
+	font-weight: 600;
 }
 
 .fit-button:hover {
 	background-color: var(--btn-analyze-hover);
 }
 
-/* Clear Fit - Red (Destructive action) */
+[data-theme="dark"] .fit-button {
+	color: #1a1a1a;
+}
+
+/* Clear Fit - Coral (Destructive action) */
 .clear-fit-button {
 	background-color: var(--btn-danger);
+	color: #fff;
 	width: 100%;
 	height: 40px;
 	padding: 0;
 	margin: 0;
 	border-radius: 10px;
+	font-weight: 600;
 }
 
 .clear-fit-button:hover {
 	background-color: var(--btn-danger-hover);
+}
+
+[data-theme="dark"] .clear-fit-button {
+	color: #1a1a1a;
 }
 
 /* Button Containers */
@@ -810,20 +849,24 @@ button:hover {
 	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
 }
 
-/* Apply to All - Cyan (Utility action) */
+/* Apply to All - Teal (Utility action) */
 .uncertainty-card-body button {
 	background-color: var(--btn-utility);
-	color: #1a1a1a;
+	color: #fff;
 	padding: 10px 16px;
 	border-radius: 10px;
 	font-size: 0.9rem;
-	font-weight: 500;
+	font-weight: 600;
 	white-space: nowrap;
 	flex-shrink: 0;
 }
 
 .uncertainty-card-body button:hover {
 	background-color: var(--btn-utility-hover);
+}
+
+[data-theme="dark"] .uncertainty-card-body button {
+	color: #1a1a1a;
 }
 
 /* Advanced Fit Section */
@@ -938,24 +981,24 @@ select {
 }
 
 .tabs button:hover {
-	background-color: rgba(59, 130, 246, 0.1);
+	background-color: rgba(124, 139, 212, 0.15);
 	color: var(--text-main);
 }
 
 .tabs button.active {
 	background-color: var(--btn-analyze);
 	color: #fff;
-	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+	box-shadow: 0 2px 8px rgba(124, 139, 212, 0.25);
 }
 
 [data-theme="dark"] .tabs button:hover {
-	background-color: rgba(96, 165, 250, 0.15);
+	background-color: rgba(154, 166, 224, 0.15);
 }
 
 [data-theme="dark"] .tabs button.active {
 	background-color: var(--btn-analyze);
-	color: #fff;
-	box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+	color: #1a1a1a;
+	box-shadow: 0 2px 8px rgba(154, 166, 224, 0.3);
 }
 
 .tab-content {
@@ -1006,27 +1049,26 @@ select {
 	margin-top: 10px;
 }
 
-/* Plot ALL Datasets - Blue (Analysis action) */
+/* Plot ALL Datasets - Periwinkle (Analysis action) */
 .plot-all-btn {
-	padding: 10px 18px;
+	padding: 12px 24px;
 	background-color: var(--btn-analyze);
 	color: #fff;
 	border: none;
-	border-radius: 10px;
+	border-radius: 12px;
 	cursor: pointer;
-	font-size: 0.9rem;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	font-size: 0.95rem;
+	font-weight: 600;
+	transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .plot-all-btn:hover {
 	background-color: var(--btn-analyze-hover);
 	transform: translateY(-1px);
-	box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
-[data-theme="dark"] .plot-all-btn:hover {
-	background-color: var(--btn-analyze-hover);
-	box-shadow: 0 8px 20px rgba(96, 165, 250, 0.3);
+[data-theme="dark"] .plot-all-btn {
+	color: #1a1a1a;
 }
 
 /* Responsive */
@@ -1441,14 +1483,20 @@ footer a:visited {
 	gap: 10px;
 }
 
-/* Save .md - Purple (Export action) */
+/* Save .md - Lavender (Export action) */
 #export-table-save-md {
 	background-color: var(--btn-export);
+	color: #fff;
 	padding: 10px 20px;
+	font-weight: 600;
 }
 
 #export-table-save-md:hover {
 	background-color: var(--btn-export-hover);
+}
+
+[data-theme="dark"] #export-table-save-md {
+	color: #1a1a1a;
 }
 
 /* Filename Prompt Modal */
@@ -1534,24 +1582,35 @@ footer a:visited {
 	gap: 10px;
 }
 
-/* Cancel - Gray (Neutral action) */
+/* Cancel - Slate (Neutral action) */
 #filename-prompt-cancel {
 	background-color: var(--btn-neutral);
 	color: #fff;
 	border: none;
 	padding: 10px 20px;
+	font-weight: 600;
 }
 
 #filename-prompt-cancel:hover {
 	background-color: var(--btn-neutral-hover);
 }
 
-/* Save - Purple (Export action) */
+[data-theme="dark"] #filename-prompt-cancel {
+	color: #1a1a1a;
+}
+
+/* Save - Lavender (Export action) */
 #filename-prompt-save {
 	background-color: var(--btn-export);
+	color: #fff;
 	padding: 10px 20px;
+	font-weight: 600;
 }
 
 #filename-prompt-save:hover {
 	background-color: var(--btn-export-hover);
+}
+
+[data-theme="dark"] #filename-prompt-save {
+	color: #1a1a1a;
 }
