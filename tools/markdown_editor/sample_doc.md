@@ -1,5 +1,5 @@
-
-# Welcome to PanPhy Labs Markdown & LaTeX Editor! 🎉
+# PanPhy Labs - Markdown & LaTeX Editor
+# Welcome! 🎉
 
 This lightweight and user-friendly app is designed to help you easily create simple yet stunning documents.
 
