@@ -143,37 +143,37 @@
 					Add Uncertainties
 				</button>
 				<div id="uncertainties-content" class="collapsible-content">
-					<div class="uncertainty-controls">
-						<div>
-							<label>
+					<div class="uncertainty-card">
+						<div class="uncertainty-card-header">
+							<label class="uncertainty-toggle-label">
 								<input type="checkbox" id="toggle-x-error" onclick="toggleErrorColumn('x')" />
-								Δx
+								<span>Δx</span>
 							</label>
-							<select id="x-error-type" onchange="updateErrorType('x')">
-								<option value="absolute">absolute</option>
-								<option value="percentage">%</option>
+							<select id="x-error-type" onchange="updateErrorType('x')" class="uncertainty-type-select">
+								<option value="absolute">Absolute</option>
+								<option value="percentage">Percentage (%)</option>
 							</select>
 						</div>
-						<div>
-							<label>
+						<div class="uncertainty-card-body">
+							<input type="text" id="global-x-uncertainty" placeholder="Value for all rows" />
+							<button onclick="applyGlobalUncertainties('x')" title="Apply this Δx to all rows in the current dataset">Apply to All</button>
+						</div>
+					</div>
+					<div class="uncertainty-card">
+						<div class="uncertainty-card-header">
+							<label class="uncertainty-toggle-label">
 								<input type="checkbox" id="toggle-y-error" onclick="toggleErrorColumn('y')" />
-								Δy
+								<span>Δy</span>
 							</label>
-							<select id="y-error-type" onchange="updateErrorType('y')">
-								<option value="absolute">absolute</option>
-								<option value="percentage">%</option>
+							<select id="y-error-type" onchange="updateErrorType('y')" class="uncertainty-type-select">
+								<option value="absolute">Absolute</option>
+								<option value="percentage">Percentage (%)</option>
 							</select>
 						</div>
-					</div>
-
-					<h3>Apply Global Uncertainty</h3>
-					<div class="global-uncertainty-item">
-						<input type="text" id="global-x-uncertainty" placeholder="Enter Δx" />
-						<button onclick="applyGlobalUncertainties('x')" title="Apply this Δx to all rows in the current dataset">Apply Δx</button>
-					</div>
-					<div class="global-uncertainty-item">
-						<input type="text" id="global-y-uncertainty" placeholder="Enter Δy" />
-						<button onclick="applyGlobalUncertainties('y')" title="Apply this Δy to all rows in the current dataset">Apply Δy</button>
+						<div class="uncertainty-card-body">
+							<input type="text" id="global-y-uncertainty" placeholder="Value for all rows" />
+							<button onclick="applyGlobalUncertainties('y')" title="Apply this Δy to all rows in the current dataset">Apply to All</button>
+						</div>
 					</div>
 				</div>
 			</div>
