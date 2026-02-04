@@ -793,11 +793,13 @@ button:hover {
 
 .uncertainty-card-toggle {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	gap: 6px;
+	gap: 10px;
 	margin-bottom: 12px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid var(--border-color);
 }
 
 .uncertainty-label {
@@ -807,7 +809,8 @@ button:hover {
 }
 
 .uncertainty-type-select {
-	min-width: 110px;
+	width: auto;
+	min-width: 0;
 	padding: 8px 28px 8px 10px;
 	font-size: 0.85rem;
 	border: 1px solid var(--input-border);
@@ -815,18 +818,18 @@ button:hover {
 	background: var(--card-bg);
 	color: var(--text-main);
 	flex-shrink: 0;
+	margin-bottom: 0;
 }
 
 .uncertainty-card-body {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	flex-wrap: wrap;
 }
 
 .uncertainty-card-body input[type="text"] {
 	flex: 1;
-	min-width: 100px;
+	min-width: 60px;
 	padding: 10px 12px;
 	font-size: 0.9rem;
 	border: 1px solid var(--input-border);
@@ -845,12 +848,12 @@ button:hover {
 .uncertainty-card-body button {
 	background-color: var(--btn-utility);
 	color: #fff;
-	padding: 10px 16px;
+	padding: 10px 12px;
 	border-radius: 10px;
-	font-size: 0.9rem;
+	font-size: 0.85rem;
 	font-weight: 600;
 	white-space: nowrap;
-	flex-shrink: 0;
+	flex: 0 0 auto;
 }
 
 .uncertainty-card-body button:hover {
