@@ -250,8 +250,12 @@ function isSafari() {
 
 /**
  * Copy an equation (MathJax SVG) to clipboard as an image.
- * Uses PNG format for Safari (which doesn't support SVG in clipboard).
- * Uses SVG+PNG for other browsers for best quality.
+ *
+ * Safari/iOS has strict clipboard requirements:
+ * 1. Only supports image/png (not image/svg+xml)
+ * 2. ClipboardItem must be created synchronously within user gesture
+ * 3. Blob values can be Promises that resolve later
+ *
  * @param {Element} mjxContainer - The MathJax container element
  * @returns {Promise<boolean>} Success status
  */
@@ -267,30 +271,39 @@ export async function copyEquationToClipboard(mjxContainer) {
   try {
     // Safari only supports text/plain, text/html, and image/png in ClipboardItem
     // Including image/svg+xml causes the entire clipboard write to fail on Safari
+    // Additionally, Safari requires ClipboardItem to be created synchronously
+    // within the user gesture, with blob values provided as Promises
     const useSafariCompatMode = isSafari();
 
-    const clipboardPayload = {};
+    if (useSafariCompatMode) {
+      // Safari: Create ClipboardItem synchronously with Promise-based blob
+      // This maintains the user gesture context required by Safari
+      const pngPromise = rasterizeSvgToPng(svgString, widthPx, heightPx).then(blob => {
+        if (!blob) throw new Error('PNG rasterization failed');
+        return blob;
+      });
 
-    // Only include SVG for non-Safari browsers
-    if (!useSafariCompatMode) {
+      const clipboardItem = new ClipboardItem({
+        'image/png': pngPromise
+      });
+
+      await navigator.clipboard.write([clipboardItem]);
+      return true;
+    } else {
+      // Non-Safari: Use direct blobs with both SVG and PNG formats
+      const clipboardPayload = {};
+
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
       clipboardPayload['image/svg+xml'] = svgBlob;
-    }
 
-    // Always try to include PNG (works on all browsers)
-    const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
-    if (pngBlob) {
-      clipboardPayload['image/png'] = pngBlob;
-    }
+      const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
+      if (pngBlob) {
+        clipboardPayload['image/png'] = pngBlob;
+      }
 
-    // Ensure we have at least one format to copy
-    if (Object.keys(clipboardPayload).length === 0) {
-      console.warn('No valid clipboard formats available');
-      return false;
+      await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
+      return true;
     }
-
-    await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
-    return true;
   } catch (err) {
     console.error('Failed to copy equation:', err);
     return false;

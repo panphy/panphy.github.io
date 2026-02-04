@@ -1,5 +1,5 @@
-const CACHE_NAME = 'panphy-labs-2026-02-04';
-const RUNTIME_CACHE = 'panphy-labs-runtime-2026-02-04';
+const CACHE_NAME = 'panphy-labs-2026-02-04-v2';
+const RUNTIME_CACHE = 'panphy-labs-runtime-2026-02-04-v2';
 
 const ASSETS_TO_CACHE = [
   '/',
