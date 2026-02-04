@@ -238,8 +238,20 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
 }
 
 /**
- * Copy an equation (MathJax SVG) to clipboard as a vector image (SVG).
- * SVG format preserves resolution and transparency when pasting into apps like Word.
+ * Detect if running on Safari browser.
+ * Safari has limited clipboard MIME type support (no image/svg+xml).
+ * @returns {boolean} True if Safari
+ */
+function isSafari() {
+  const ua = navigator.userAgent;
+  // Safari has 'Safari' in UA but Chrome also has it, so exclude Chrome/Chromium
+  return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
+}
+
+/**
+ * Copy an equation (MathJax SVG) to clipboard as an image.
+ * Uses PNG format for Safari (which doesn't support SVG in clipboard).
+ * Uses SVG+PNG for other browsers for best quality.
  * @param {Element} mjxContainer - The MathJax container element
  * @returns {Promise<boolean>} Success status
  */
@@ -253,14 +265,28 @@ export async function copyEquationToClipboard(mjxContainer) {
   const { svgString, widthPx, heightPx } = preparedSvg;
 
   try {
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-    const clipboardPayload = {
-      'image/svg+xml': svgBlob
-    };
+    // Safari only supports text/plain, text/html, and image/png in ClipboardItem
+    // Including image/svg+xml causes the entire clipboard write to fail on Safari
+    const useSafariCompatMode = isSafari();
 
+    const clipboardPayload = {};
+
+    // Only include SVG for non-Safari browsers
+    if (!useSafariCompatMode) {
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+      clipboardPayload['image/svg+xml'] = svgBlob;
+    }
+
+    // Always try to include PNG (works on all browsers)
     const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
     if (pngBlob) {
       clipboardPayload['image/png'] = pngBlob;
+    }
+
+    // Ensure we have at least one format to copy
+    if (Object.keys(clipboardPayload).length === 0) {
+      console.warn('No valid clipboard formats available');
+      return false;
     }
 
     await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
