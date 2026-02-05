@@ -15,7 +15,7 @@ export const STORAGE_KEYS = {
 // Application state
 export const state = {
   isLinkScrollEnabled: false,
-  isHighlightSyncEnabled: true
+  isHighlightSyncEnabled: false
 };
 
 /**
@@ -56,7 +56,11 @@ export function saveScrollSyncPreference(enabled) {
  */
 export function loadScrollSyncPreference() {
   const saved = localStorage.getItem(STORAGE_KEYS.SCROLL_SYNC);
-  state.isLinkScrollEnabled = saved === 'true';
+  if (saved === null) {
+    state.isLinkScrollEnabled = false;
+  } else {
+    state.isLinkScrollEnabled = saved === 'true';
+  }
   return state.isLinkScrollEnabled;
 }
 
@@ -76,7 +80,7 @@ export function saveHighlightSyncPreference(enabled) {
 export function loadHighlightSyncPreference() {
   const saved = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_SYNC);
   if (saved === null) {
-    state.isHighlightSyncEnabled = true;
+    state.isHighlightSyncEnabled = false;
   } else {
     state.isHighlightSyncEnabled = saved === 'true';
   }
