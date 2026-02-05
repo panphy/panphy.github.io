@@ -260,6 +260,11 @@ a:visited {
 /* ---------------------------------------------------------------------- */
 /* Laser pointer dot                                                       */
 /* ---------------------------------------------------------------------- */
+.laser-cursor-hidden,
+.laser-cursor-hidden * {
+  cursor: none !important;
+}
+
 .laser-pointer {
   display: none;
   position: fixed;

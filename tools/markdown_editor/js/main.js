@@ -290,6 +290,7 @@ function enableLaser() {
   laserEnabled = true;
   laserPointer.style.display = 'block';
   presentLaserToggle.classList.add('laser-active');
+  document.documentElement.classList.add('laser-cursor-hidden');
   document.addEventListener('mousemove', onLaserMove);
 }
 
@@ -297,6 +298,7 @@ function disableLaser() {
   laserEnabled = false;
   laserPointer.style.display = 'none';
   presentLaserToggle.classList.remove('laser-active');
+  document.documentElement.classList.remove('laser-cursor-hidden');
   document.removeEventListener('mousemove', onLaserMove);
 }
 
