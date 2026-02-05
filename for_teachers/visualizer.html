@@ -110,10 +110,14 @@
 			font-family: var(--font-display);
 			font-size: 17px;
 			font-weight: 700;
+			color: var(--brand-primary);
+		}
+
+		.topbar .title.gradient-text {
 			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
 			-webkit-background-clip: text;
+			background-clip: text;
 			-webkit-text-fill-color: transparent;
-			background-clip: text
 		}
 
 		.controls {
@@ -2402,6 +2406,13 @@
 		&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
 		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
 	</footer>
+	<script>
+		// Gradient text: skip on Brave iOS where background-clip:text is broken
+		(function() {
+			if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
+			document.querySelectorAll('.topbar .title').forEach(function(el) { el.classList.add('gradient-text'); });
+		})();
+	</script>
 </body>
 
 </html>

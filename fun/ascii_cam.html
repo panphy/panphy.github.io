@@ -65,12 +65,16 @@
 			font-family: var(--font-display);
 			font-size: clamp(1.2rem, 4vw, 1.8rem);
 			font-weight: 800;
-			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
+			color: var(--brand-primary);
 			margin: 0 0 0.25rem 0;
 			letter-spacing: -1px;
+		}
+
+		h1.gradient-text {
+			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+			-webkit-background-clip: text;
+			background-clip: text;
+			-webkit-text-fill-color: transparent;
 		}
 
 		.subtitle {
@@ -926,6 +930,13 @@
 
 			// After permission, ensure device labels are populated
 			await populateCameras(preferred);
+		})();
+	</script>
+	<script>
+		// Gradient text: skip on Brave iOS where background-clip:text is broken
+		(function() {
+			if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
+			document.querySelectorAll('h1').forEach(function(el) { el.classList.add('gradient-text'); });
 		})();
 	</script>
 </body>

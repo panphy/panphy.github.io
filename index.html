@@ -130,14 +130,11 @@
             color: var(--brand-primary);
         }
 
-        @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-            header h1 {
-                background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                -webkit-text-fill-color: transparent;
-            }
+        header h1.gradient-text {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         header p {
@@ -565,6 +562,18 @@
                 updateButtonEmoji('light');
             }
         });
+    </script>
+    <script>
+        // Apply gradient text effect, skip on Brave iOS where background-clip:text is broken
+        (function() {
+            var h1 = document.querySelector('header h1');
+            if (!h1) return;
+            var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+            var isBrave = !!navigator.brave;
+            if (!(isIOS && isBrave)) {
+                h1.classList.add('gradient-text');
+            }
+        })();
     </script>
     <script>
         function updateOfflineFontState() {

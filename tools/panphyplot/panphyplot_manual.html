@@ -140,10 +140,14 @@
       font-size: 1.5rem;
       font-family: var(--font-display);
       letter-spacing: -0.5px;
+      color: var(--brand-primary);
+    }
+
+    .banner-title.gradient-text {
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .banner-buttons {
@@ -214,10 +218,14 @@
       font-weight: 800;
       margin: 0 0 1.5rem 0;
       letter-spacing: -1px;
+      color: var(--brand-primary);
+    }
+
+    h1.gradient-text {
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     h2 {
@@ -832,6 +840,13 @@
     window.addEventListener('DOMContentLoaded', () => {
       hljs.highlightAll();
     });
+  </script>
+  <script>
+    // Gradient text: skip on Brave iOS where background-clip:text is broken
+    (function() {
+      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
+      document.querySelectorAll('.banner-title, h1').forEach(function(el) { el.classList.add('gradient-text'); });
+    })();
   </script>
 </body>
 
