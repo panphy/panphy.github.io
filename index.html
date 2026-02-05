@@ -14,7 +14,7 @@
     </script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>PanPhy Labs | Physics Tools & Simulations</title>
     <meta name="description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta property="og:title" content="PanPhy Labs">
@@ -100,6 +100,7 @@
             background-size: 30px 30px; /* Dot pattern */
             color: var(--text-main);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Hero Header */
@@ -126,10 +127,17 @@
             font-weight: 800;
             margin: 0;
             letter-spacing: -1px;
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--brand-primary);
+        }
+
+        @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+            header h1 {
+                background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                -webkit-text-fill-color: transparent;
+            }
         }
 
         header p {
@@ -142,7 +150,7 @@
         /* Floating Navigation */
         nav {
             position: fixed;
-            top: 20px;
+            top: calc(12px + env(safe-area-inset-top, 0px));
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -342,10 +350,32 @@
             }
             
             nav {
-                width: 90%;
-                justify-content: space-between;
-                overflow-x: auto; /* Allow scroll on very small screens */
+                width: calc(100vw - 16px);
+                max-width: 760px;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+                align-items: center;
+                gap: 0.15rem;
+                padding: 0.35rem 0.4rem;
+                overflow: hidden;
                 white-space: nowrap;
+            }
+
+            nav a {
+                margin: 0;
+                padding: 0.4rem 0.3rem;
+                font-size: 0.78rem;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                display: flex;
+                justify-content: center;
+            }
+
+            .theme-toggle button {
+                margin-left: 0;
+                padding: 0.35rem;
             }
 
             .grid {
