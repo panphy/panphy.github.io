@@ -330,23 +330,16 @@ function toggleLaser() {
 }
 
 /**
- * Print the document to PDF
+ * Print the document to PDF.
+ *
+ * Must be synchronous so that window.print() runs inside the original
+ * user-gesture context (Safari/iOS block it otherwise).  The @media print
+ * CSS already forces light-mode colours, and the beforeprint / afterprint
+ * handlers swap the highlight.js stylesheet, so we only need to call
+ * window.print() here.
  */
-async function printToPDF() {
-  const body = document.body;
-  const hadDarkMode = body.classList.contains('dark-mode');
-  if (hadDarkMode) {
-    body.classList.remove('dark-mode');
-  }
-  highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-  await MathJax.typesetPromise([renderedOutput]);
-  hljs.highlightAll();
+function printToPDF() {
   window.print();
-  if (hadDarkMode) {
-    body.classList.add('dark-mode');
-    highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    updateThemeToggleButton();
-  }
 }
 
 /**
