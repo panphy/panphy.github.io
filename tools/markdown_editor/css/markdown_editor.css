@@ -54,9 +54,9 @@ body.dark-mode {
   --code-text-color: #f8f8f2;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
   --copy-hint-outline: #7dd3fc;
-  --copy-hint-bg: #1e3a8a;
-  --copy-hint-chip-bg: #111827;
-  --copy-hint-text: #e0f2fe;
+  --copy-hint-bg: #dbeafe;
+  --copy-hint-chip-bg: #e0f2fe;
+  --copy-hint-text: #1e3a8a;
 }
 
 body {
