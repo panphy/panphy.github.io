@@ -1,1 +1,12 @@
+# OS artifacts
 .DS_Store
+Thumbs.db
+
+# Editor/IDE settings
+.vscode/
+.idea/
+
+# Temporary and log files
+*.log
+*.tmp
+*~
