@@ -243,10 +243,14 @@
       text-align: center;
       flex: 1;
       letter-spacing: -0.5px;
+      color: var(--brand-primary);
+    }
+
+    .banner-title.gradient-text {
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .banner-actions {
@@ -1309,6 +1313,13 @@
       resetAllState();
     }
   });
+  </script>
+  <script>
+    // Gradient text: skip on Brave iOS where background-clip:text is broken
+    (function() {
+      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
+      document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
+    })();
   </script>
 
 </body>
