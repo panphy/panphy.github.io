@@ -261,7 +261,11 @@ a:visited {
 /* Laser pointer dot                                                       */
 /* ---------------------------------------------------------------------- */
 .laser-cursor-hidden,
-.laser-cursor-hidden * {
+.laser-cursor-hidden *,
+body.laser-cursor-hidden,
+body.laser-cursor-hidden *,
+#outputPane.laser-cursor-hidden,
+#outputPane.laser-cursor-hidden * {
   cursor: none !important;
 }
 
