@@ -138,13 +138,47 @@ a:visited {
 
 #outputPane:fullscreen .pane-heading-container,
 #outputPane:fullscreen .buttonContainer.floating-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
+  display: none;
 }
 
 #outputPane:fullscreen #renderedOutput {
   padding: 24px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Fullscreen present controls (floating buttons)                          */
+/* ---------------------------------------------------------------------- */
+.present-controls {
+  display: none;
+}
+
+#outputPane:fullscreen .present-controls {
+  display: flex;
+  gap: 8px;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#outputPane:fullscreen:hover .present-controls,
+#outputPane:fullscreen .present-controls:focus-within {
+  opacity: 1;
+}
+
+.present-btn {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: var(--toolbar-background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s, color 0.3s, opacity 0.25s ease;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -408,6 +442,7 @@ textarea {
 
 #renderedOutput .task-list-item {
   list-style: none;
+  margin-left: -1.5em;
 }
 
 #renderedOutput .task-list-item input[type="checkbox"] {
