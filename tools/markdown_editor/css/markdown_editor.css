@@ -740,11 +740,13 @@ td {
     box-shadow: none !important;
   }
 
-  #inputPane {
+  #inputPane,
+  #inputPane.mobile-hidden {
     display: none !important;
   }
 
-  #outputPane {
+  #outputPane,
+  #outputPane.mobile-hidden {
     display: block !important;
     width: auto !important;
     height: auto !important;
@@ -752,6 +754,10 @@ td {
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
+  }
+
+  .mobile-tab-bar {
+    display: none !important;
   }
 
   #renderedOutput {
