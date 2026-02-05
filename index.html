@@ -14,7 +14,7 @@
     </script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>PanPhy Labs | Physics Tools & Simulations</title>
     <meta name="description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta property="og:title" content="PanPhy Labs">
@@ -350,20 +350,32 @@
             }
             
             nav {
-                width: min(94vw, 760px);
-                justify-content: space-between;
-                overflow-x: auto; /* Allow scroll on very small screens */
+                width: calc(100vw - 16px);
+                max-width: 760px;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+                align-items: center;
+                gap: 0.15rem;
+                padding: 0.35rem 0.4rem;
+                overflow: hidden;
                 white-space: nowrap;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
             }
 
-            nav::-webkit-scrollbar { display: none; }
-
             nav a {
-                margin: 0 0.2rem;
-                padding: 0.5rem 0.8rem;
-                font-size: 0.9rem;
+                margin: 0;
+                padding: 0.4rem 0.3rem;
+                font-size: 0.78rem;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                display: flex;
+                justify-content: center;
+            }
+
+            .theme-toggle button {
+                margin-left: 0;
+                padding: 0.35rem;
             }
 
             .grid {
