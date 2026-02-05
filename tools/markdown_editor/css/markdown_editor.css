@@ -575,6 +575,11 @@ td {
 /* ---------------------------------------------------------------------- */
 /* Printing styles                                                        */
 /* ---------------------------------------------------------------------- */
+@page {
+  size: A4;
+  margin: 20mm 15mm;
+}
+
 @media print {
   :root {
     --background-color: #ffffff !important;
@@ -613,7 +618,6 @@ td {
     height: auto !important;
     overflow: visible !important;
     margin: 0 !important;
-    font-size: var(--base-font-size) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     background-image: none !important;
@@ -636,9 +640,18 @@ td {
     width: auto !important;
     height: auto !important;
     overflow: visible !important;
-    padding: 15mm !important;
+    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
+  }
+
+  #renderedOutput {
+    max-width: 180mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    font-size: var(--print-font-size, 11pt) !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .pane-heading-container {
@@ -655,11 +668,6 @@ td {
   pre {
     page-break-inside: avoid !important;
     line-height: 1.5 !important;
-  }
-
-  #renderedOutput {
-    height: auto !important;
-    overflow: visible !important;
   }
 
   footer {
