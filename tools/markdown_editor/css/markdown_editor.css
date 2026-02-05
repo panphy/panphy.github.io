@@ -534,6 +534,11 @@ textarea {
   z-index: 0;
 }
 
+#renderedOutput img {
+  max-width: 100%;
+  height: auto;
+}
+
 .md-block {
   scroll-margin-top: 20px;
 }
@@ -927,24 +932,34 @@ body.dark-mode .mobile-tab.active {
 
   /* Hide individual pane headings — tab bar replaces them */
   .pane-heading-container {
-    display: none;
+    display: none !important;
   }
 
   #editorContainer {
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
   }
 
   #inputPane,
   #outputPane {
     width: 100%;
     border-right: none;
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
   }
 
   /* Hide inactive pane on mobile */
   #inputPane.mobile-hidden,
   #outputPane.mobile-hidden {
     display: none !important;
+  }
+
+  .buttonContainer.floating-toolbar {
+    margin: 6px 8px;
+    padding: 6px 8px;
+    gap: 6px;
   }
 }
 
@@ -956,7 +971,7 @@ body.dark-mode .mobile-tab.active {
   }
 
   .buttonContainer.floating-toolbar {
-    border-radius: 24px;
+    border-radius: 16px;
   }
 
   .buttonContainer.output-controls {
@@ -969,27 +984,56 @@ body.dark-mode .mobile-tab.active {
 
   .buttonContainer button {
     flex: 1 0 auto;
-    margin: 4px 2px;
-    min-width: 100px;
+    margin: 2px;
+    min-width: 80px;
+    font-size: 0.75rem;
   }
 
+  .scroll-sync-toggle {
+    gap: 6px;
+    font-size: 0.7rem;
+  }
+
+  .scroll-sync-toggle .toggle-slider {
+    width: 32px;
+    height: 18px;
+  }
+
+  .scroll-sync-toggle .toggle-slider::after {
+    width: 14px;
+    height: 14px;
+  }
+
+  .scroll-sync-toggle input:checked + .toggle-slider::after {
+    transform: translateX(14px);
+  }
 }
 
 @media (pointer: coarse) {
   button,
   input,
-  select,
-  textarea {
+  select {
     min-height: 44px;
     touch-action: manipulation;
   }
 
+  textarea {
+    touch-action: manipulation;
+  }
+
   .buttonContainer button {
-    padding: 0.6rem 0.9rem;
+    padding: 0.5rem 0.7rem;
   }
 
   .mobile-tab {
     min-height: 36px;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 600px) {
+  .buttonContainer button {
+    min-height: 38px;
+    padding: 0.4rem 0.6rem;
   }
 }
 
