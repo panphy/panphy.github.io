@@ -123,11 +123,25 @@ export function getCurrentFontSize() {
 }
 
 /**
+ * Map screen font size to a print-appropriate font size.
+ * Screen sizes are designed for a half-width pane; print fills the full page,
+ * so we scale down to produce a typical document appearance.
+ */
+const PRINT_FONT_SIZE_MAP = {
+  '14px': '10pt',
+  '16px': '11pt',
+  '18px': '12pt',
+  '20px': '13pt'
+};
+
+/**
  * Apply font size and save preference
  * @param {string} value - The font size value (e.g., '16px')
  */
 export function applyFontSize(value) {
   document.documentElement.style.setProperty('--base-font-size', value);
+  const printSize = PRINT_FONT_SIZE_MAP[value] || '11pt';
+  document.documentElement.style.setProperty('--print-font-size', printSize);
   saveFontSizePreference(value);
 }
 
