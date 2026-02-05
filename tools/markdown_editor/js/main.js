@@ -57,6 +57,8 @@ const scrollSyncToggle = document.getElementById('scrollSyncToggle');
 const highlightSyncToggle = document.getElementById('highlightSyncToggle');
 const fontSizeSelect = document.getElementById('fontSizeSelect');
 const highlightStyle = document.getElementById('highlightStyle');
+const presentExitButton = document.getElementById('presentExitButton');
+const presentThemeToggle = document.getElementById('presentThemeToggle');
 
 // Initialize UI module with DOM references
 initUI({
@@ -96,16 +98,21 @@ function renderContent() {
   const renderer = {
     listitem(token) {
       let checkbox = '';
+      let bodyTokens = token.tokens;
       if (token.task) {
         checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
+        // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
+        bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
       }
       const isSingleParagraph =
-        token.tokens.length === 1 && token.tokens[0].type === 'paragraph' && Array.isArray(token.tokens[0].tokens);
-      const body = isSingleParagraph
-        ? this.parser.parseInline(token.tokens[0].tokens)
-        : this.parser.parse(token.tokens);
+        bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
+      const isSingleText =
+        bodyTokens.length === 1 && bodyTokens[0].type === 'text' && Array.isArray(bodyTokens[0].tokens);
+      const body = (isSingleParagraph || isSingleText)
+        ? this.parser.parseInline(bodyTokens[0].tokens)
+        : this.parser.parse(bodyTokens);
       const taskClass = token.task ? ' class="task-list-item"' : '';
-      return `<li${taskClass}>${checkbox}${body}</li>`;
+      return `<li${taskClass}>${checkbox}${body}</li>\n`;
     }
   };
 
@@ -629,7 +636,27 @@ function updatePresentButtonLabel() {
     : 'Show rendered output in fullscreen');
 }
 
-document.addEventListener('fullscreenchange', updatePresentButtonLabel);
+function updatePresentThemeIcon() {
+  if (!presentThemeToggle) return;
+  if (document.body.classList.contains('dark-mode')) {
+    presentThemeToggle.textContent = '\u{1F319}';
+    presentThemeToggle.setAttribute('title', 'Switch to Light Mode');
+  } else {
+    presentThemeToggle.textContent = '\u{2600}\u{FE0F}';
+    presentThemeToggle.setAttribute('title', 'Switch to Dark Mode');
+  }
+}
+
+document.addEventListener('fullscreenchange', () => {
+  updatePresentButtonLabel();
+  updatePresentThemeIcon();
+});
+
+presentExitButton.addEventListener('click', togglePresentMode);
+presentThemeToggle.addEventListener('click', () => {
+  toggleTheme();
+  updatePresentThemeIcon();
+});
 // Initialize the application
 updateOfflineFontState();
 initializeTheme();
@@ -637,6 +664,7 @@ initializeScrollSyncToggle(scrollSyncToggle);
 initializeHighlightSyncToggle(highlightSyncToggle);
 initializeFontSize(fontSizeSelect);
 updatePresentButtonLabel();
+updatePresentThemeIcon();
 
 // Restore draft and render
 const savedDraft = restoreDraft();
