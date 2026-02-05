@@ -97,8 +97,13 @@ function renderContent() {
       if (token.task) {
         checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
       }
-      const body = this.parser.parse(token.tokens);
-      return `<li>${checkbox}${body}</li>`;
+      const isSingleParagraph =
+        token.tokens.length === 1 && token.tokens[0].type === 'paragraph' && Array.isArray(token.tokens[0].tokens);
+      const body = isSingleParagraph
+        ? this.parser.parseInline(token.tokens[0].tokens)
+        : this.parser.parse(token.tokens);
+      const taskClass = token.task ? ' class="task-list-item"' : '';
+      return `<li${taskClass}>${checkbox}${body}</li>`;
     }
   };
 

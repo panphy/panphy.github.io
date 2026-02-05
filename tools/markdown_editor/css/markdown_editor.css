@@ -386,6 +386,14 @@ textarea {
   border-radius: 4px;
 }
 
+#renderedOutput .task-list-item {
+  list-style: none;
+}
+
+#renderedOutput .task-list-item input[type="checkbox"] {
+  margin-right: 0.45em;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Code blocks and syntax highlighting                                    */
 /* ---------------------------------------------------------------------- */
