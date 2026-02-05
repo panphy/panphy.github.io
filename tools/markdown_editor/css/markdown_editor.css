@@ -128,6 +128,7 @@ a:visited {
 }
 
 
+/* Native fullscreen (standard) */
 #outputPane:fullscreen {
   width: 100%;
   height: 100%;
@@ -142,6 +143,48 @@ a:visited {
 }
 
 #outputPane:fullscreen #renderedOutput {
+  padding: 24px;
+}
+
+/* Native fullscreen (webkit prefix for older Safari / iPadOS) */
+#outputPane:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: none;
+}
+
+#outputPane:-webkit-full-screen .pane-heading-container,
+#outputPane:-webkit-full-screen .buttonContainer.floating-toolbar {
+  display: none;
+}
+
+#outputPane:-webkit-full-screen #renderedOutput {
+  padding: 24px;
+}
+
+/* Pseudo-fullscreen fallback (iPadOS without Fullscreen API) */
+#outputPane.pseudo-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border: none;
+  z-index: 9999;
+  background: var(--background-color);
+  overflow-y: auto;
+}
+
+#outputPane.pseudo-fullscreen .pane-heading-container,
+#outputPane.pseudo-fullscreen .buttonContainer.floating-toolbar {
+  display: none;
+}
+
+#outputPane.pseudo-fullscreen #renderedOutput {
   padding: 24px;
 }
 
@@ -165,6 +208,34 @@ a:visited {
 
 #outputPane:fullscreen:hover .present-controls,
 #outputPane:fullscreen .present-controls:focus-within {
+  opacity: 1;
+}
+
+/* webkit prefix present controls */
+#outputPane:-webkit-full-screen .present-controls {
+  display: flex;
+  gap: 8px;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#outputPane:-webkit-full-screen:hover .present-controls,
+#outputPane:-webkit-full-screen .present-controls:focus-within {
+  opacity: 1;
+}
+
+/* Pseudo-fullscreen present controls (always visible on touch devices) */
+#outputPane.pseudo-fullscreen .present-controls {
+  display: flex;
+  gap: 8px;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
   opacity: 1;
 }
 
