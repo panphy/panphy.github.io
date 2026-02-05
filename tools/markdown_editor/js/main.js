@@ -59,6 +59,8 @@ const fontSizeSelect = document.getElementById('fontSizeSelect');
 const highlightStyle = document.getElementById('highlightStyle');
 const presentExitButton = document.getElementById('presentExitButton');
 const presentThemeToggle = document.getElementById('presentThemeToggle');
+const presentLaserToggle = document.getElementById('presentLaserToggle');
+const laserPointer = document.getElementById('laserPointer');
 
 // Initialize UI module with DOM references
 initUI({
@@ -269,9 +271,40 @@ async function togglePresentMode() {
       // Exit pseudo-fullscreen
       outputPane.classList.remove('pseudo-fullscreen');
       document.body.style.overflow = '';
+      disableLaser();
       updatePresentButtonLabel();
       updatePresentThemeIcon();
     }
+  }
+}
+
+// ---- Laser pointer ----
+let laserEnabled = false;
+
+function onLaserMove(e) {
+  laserPointer.style.left = e.clientX + 'px';
+  laserPointer.style.top = e.clientY + 'px';
+}
+
+function enableLaser() {
+  laserEnabled = true;
+  laserPointer.style.display = 'block';
+  presentLaserToggle.classList.add('laser-active');
+  document.addEventListener('mousemove', onLaserMove);
+}
+
+function disableLaser() {
+  laserEnabled = false;
+  laserPointer.style.display = 'none';
+  presentLaserToggle.classList.remove('laser-active');
+  document.removeEventListener('mousemove', onLaserMove);
+}
+
+function toggleLaser() {
+  if (laserEnabled) {
+    disableLaser();
+  } else {
+    enableLaser();
   }
 }
 
@@ -693,13 +726,16 @@ function updatePresentThemeIcon() {
 document.addEventListener('fullscreenchange', () => {
   updatePresentButtonLabel();
   updatePresentThemeIcon();
+  if (!isInFullscreen()) disableLaser();
 });
 document.addEventListener('webkitfullscreenchange', () => {
   updatePresentButtonLabel();
   updatePresentThemeIcon();
+  if (!isInFullscreen()) disableLaser();
 });
 
 presentExitButton.addEventListener('click', togglePresentMode);
+presentLaserToggle.addEventListener('click', toggleLaser);
 presentThemeToggle.addEventListener('click', () => {
   toggleTheme();
   updatePresentThemeIcon();

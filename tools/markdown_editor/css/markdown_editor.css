@@ -252,6 +252,30 @@ a:visited {
   transition: background-color 0.3s, color 0.3s, opacity 0.25s ease;
 }
 
+.present-btn.laser-active {
+  box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.6);
+  border-color: #22c55e;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Laser pointer dot                                                       */
+/* ---------------------------------------------------------------------- */
+.laser-pointer {
+  display: none;
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow:
+    0 0 6px 2px rgba(34, 197, 94, 0.8),
+    0 0 16px 6px rgba(34, 197, 94, 0.5),
+    0 0 30px 10px rgba(34, 197, 94, 0.25);
+  pointer-events: none;
+  z-index: 100000;
+  transform: translate(-50%, -50%);
+}
+
 /* ---------------------------------------------------------------------- */
 /* Header container for each pane                                         */
 /* ---------------------------------------------------------------------- */
