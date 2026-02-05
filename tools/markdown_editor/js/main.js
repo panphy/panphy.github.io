@@ -605,8 +605,8 @@ markdownInput.addEventListener('select', handleCaretChange);
 markdownInput.addEventListener('scroll', linkOutputToInputScroll);
 
 renderedOutput.addEventListener('click', event => {
-  // Handle copy clicks first (equations, tables, code blocks)
-  const handled = handleCopyClick(event);
+  // Disable click-to-copy while presenting
+  const handled = isInFullscreen() ? false : handleCopyClick(event);
   // Then handle caret sync (only if not clicking on copyable elements)
   if (!handled && !event.target.closest('mjx-container') && !event.target.closest('table') && !event.target.closest('pre')) {
     syncCaretFromOutputClick(event);
