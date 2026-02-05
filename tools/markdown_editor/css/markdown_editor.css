@@ -868,9 +868,68 @@ button:hover {
  RESPONSIVE RULES
  ========================================================================== */
 
-/* 1) For narrow screens, stack the two panes vertically and have each fill
-    available height equally */
+/* ---------------------------------------------------------------------- */
+/* Mobile tab bar                                                          */
+/* ---------------------------------------------------------------------- */
+.mobile-tab-bar {
+  display: none;
+}
+
+.mobile-tab-bar-logo img {
+  height: 28px;
+  display: block;
+}
+
+.mobile-tab-bar-tabs {
+  display: flex;
+  background: var(--button-background);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.mobile-tab {
+  padding: 6px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 999px;
+  cursor: pointer;
+  margin: 0;
+  box-shadow: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.mobile-tab.active {
+  background: var(--brand-primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(108, 92, 231, 0.3);
+}
+
+body.dark-mode .mobile-tab.active {
+  box-shadow: 0 2px 6px rgba(162, 155, 254, 0.3);
+}
+
+/* 1) For narrow screens, show tab bar and switch panes */
 @media (max-width: 900px) {
+  .mobile-tab-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background-color: var(--pane-heading-background);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Hide individual pane headings — tab bar replaces them */
+  .pane-heading-container {
+    display: none;
+  }
+
   #editorContainer {
     flex-direction: column;
   }
@@ -880,9 +939,13 @@ button:hover {
     width: 100%;
     border-right: none;
     flex: 1 1 auto;
-    /* Ensures both panes share the available height equally */
   }
 
+  /* Hide inactive pane on mobile */
+  #inputPane.mobile-hidden,
+  #outputPane.mobile-hidden {
+    display: none !important;
+  }
 }
 
 /* 2) Wrap and resize the buttons when space is too narrow */
@@ -923,6 +986,10 @@ button:hover {
 
   .buttonContainer button {
     padding: 0.6rem 0.9rem;
+  }
+
+  .mobile-tab {
+    min-height: 36px;
   }
 }
 

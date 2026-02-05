@@ -43,6 +43,7 @@ import {
 
 // DOM element references
 const markdownInput = document.getElementById('markdownInput');
+const inputPane = document.getElementById('inputPane');
 const outputPane = document.getElementById('outputPane');
 const renderedOutput = document.getElementById('renderedOutput');
 const clearButton = document.getElementById('clearButton');
@@ -680,7 +681,10 @@ clearButton.addEventListener('click', () => {
   renderContent();
 });
 
-themeToggleButton.addEventListener('click', toggleTheme);
+themeToggleButton.addEventListener('click', () => {
+  toggleTheme();
+  updateMobileThemeToggle();
+});
 
 scrollSyncToggle.addEventListener('change', event => {
   saveScrollSyncPreference(event.target.checked);
@@ -759,7 +763,74 @@ presentLaserToggle.addEventListener('click', toggleLaser);
 presentThemeToggle.addEventListener('click', () => {
   toggleTheme();
   updatePresentThemeIcon();
+  updateMobileThemeToggle();
 });
+// ---------------------------------------------------------------------- //
+// Mobile tab bar — switch between Edit / Preview on narrow screens        //
+// ---------------------------------------------------------------------- //
+const mobileTabBar = document.getElementById('mobileTabBar');
+const mobileTabs = mobileTabBar ? mobileTabBar.querySelectorAll('.mobile-tab') : [];
+const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+
+function updateMobileThemeToggle() {
+  if (!mobileThemeToggle) return;
+  mobileThemeToggle.textContent = document.body.classList.contains('dark-mode')
+    ? '\u{1F319}'   // Moon
+    : '\u{2600}\u{FE0F}'; // Sun
+}
+
+function switchMobilePane(targetPane) {
+  mobileTabs.forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.pane === targetPane);
+  });
+
+  if (targetPane === 'input') {
+    inputPane.classList.remove('mobile-hidden');
+    outputPane.classList.add('mobile-hidden');
+  } else {
+    inputPane.classList.add('mobile-hidden');
+    outputPane.classList.remove('mobile-hidden');
+    renderContent();
+  }
+}
+
+mobileTabs.forEach(tab => {
+  tab.addEventListener('click', () => switchMobilePane(tab.dataset.pane));
+});
+
+if (mobileThemeToggle) {
+  mobileThemeToggle.addEventListener('click', () => {
+    toggleTheme();
+    updateMobileThemeToggle();
+  });
+}
+
+function initMobileLayout() {
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  if (isMobile) {
+    outputPane.classList.add('mobile-hidden');
+    inputPane.classList.remove('mobile-hidden');
+  } else {
+    inputPane.classList.remove('mobile-hidden');
+    outputPane.classList.remove('mobile-hidden');
+  }
+  updateMobileThemeToggle();
+}
+
+const mobileQuery = window.matchMedia('(max-width: 900px)');
+mobileQuery.addEventListener('change', () => {
+  if (!mobileQuery.matches) {
+    inputPane.classList.remove('mobile-hidden');
+    outputPane.classList.remove('mobile-hidden');
+  } else {
+    // Restore to whichever tab is active
+    const activeTab = mobileTabBar
+      ? mobileTabBar.querySelector('.mobile-tab.active')
+      : null;
+    switchMobilePane(activeTab ? activeTab.dataset.pane : 'input');
+  }
+});
+
 // Initialize the application
 updateOfflineFontState();
 initializeTheme();
@@ -768,6 +839,7 @@ initializeHighlightSyncToggle(highlightSyncToggle);
 initializeFontSize(fontSizeSelect);
 updatePresentButtonLabel();
 updatePresentThemeIcon();
+initMobileLayout();
 
 // Restore draft and render
 const savedDraft = restoreDraft();

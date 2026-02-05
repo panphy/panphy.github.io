@@ -55,6 +55,18 @@
 </head>
 
 <body>
+  <!-- Mobile tab bar (visible only on narrow screens) -->
+  <div id="mobileTabBar" class="mobile-tab-bar no-print">
+    <a href="https://panphy.github.io/" class="mobile-tab-bar-logo">
+      <img src="/panphy.png" alt="PanPhy logo" />
+    </a>
+    <div class="mobile-tab-bar-tabs">
+      <button class="mobile-tab active" data-pane="input">Edit</button>
+      <button class="mobile-tab" data-pane="output">Preview</button>
+    </div>
+    <button id="mobileThemeToggle" class="theme-toggle-button" aria-label="Toggle theme">&#9728;&#65039;</button>
+  </div>
+
   <!--
       The main container with two panes:
       - Left = Markdown Input
