@@ -274,6 +274,10 @@ body {
 	background-color: var(--brand-accent);
 }
 
+[data-theme="dark"] .switch input:checked+.slider {
+	background-color: #53c7c8;
+}
+
 .switch input:checked+.slider:before {
 	transform: translateX(22px);
 }
@@ -282,6 +286,11 @@ body {
 #toggle-x-error:checked+.slider,
 #toggle-y-error:checked+.slider {
 	background-color: var(--btn-apply);
+}
+
+[data-theme="dark"] #toggle-x-error:checked+.slider,
+[data-theme="dark"] #toggle-y-error:checked+.slider {
+	background-color: #e3be5a;
 }
 
 .toggle-label {
