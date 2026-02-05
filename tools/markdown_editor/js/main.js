@@ -287,6 +287,9 @@ function onLaserMove(e) {
 }
 
 function onLaserTouch(e) {
+  if (e.target.closest('.present-controls')) {
+    return;
+  }
   e.preventDefault();
   const touch = e.touches[0];
   laserPointer.style.left = touch.clientX + 'px';
