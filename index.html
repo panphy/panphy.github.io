@@ -100,6 +100,7 @@
             background-size: 30px 30px; /* Dot pattern */
             color: var(--text-main);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Hero Header */
@@ -126,10 +127,17 @@
             font-weight: 800;
             margin: 0;
             letter-spacing: -1px;
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--brand-primary);
+        }
+
+        @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+            header h1 {
+                background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                -webkit-text-fill-color: transparent;
+            }
         }
 
         header p {
@@ -142,7 +150,7 @@
         /* Floating Navigation */
         nav {
             position: fixed;
-            top: 20px;
+            top: calc(12px + env(safe-area-inset-top, 0px));
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -342,10 +350,20 @@
             }
             
             nav {
-                width: 90%;
+                width: min(94vw, 760px);
                 justify-content: space-between;
                 overflow-x: auto; /* Allow scroll on very small screens */
                 white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            nav::-webkit-scrollbar { display: none; }
+
+            nav a {
+                margin: 0 0.2rem;
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
             }
 
             .grid {
