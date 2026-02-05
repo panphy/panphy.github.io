@@ -286,6 +286,13 @@ function onLaserMove(e) {
   laserPointer.style.top = e.clientY + 'px';
 }
 
+function onLaserTouch(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  laserPointer.style.left = touch.clientX + 'px';
+  laserPointer.style.top = touch.clientY + 'px';
+}
+
 function enableLaser() {
   laserEnabled = true;
   laserPointer.style.display = 'block';
@@ -294,6 +301,8 @@ function enableLaser() {
   document.body.classList.add('laser-cursor-hidden');
   outputPane.classList.add('laser-cursor-hidden');
   document.addEventListener('mousemove', onLaserMove);
+  document.addEventListener('touchstart', onLaserTouch, { passive: false });
+  document.addEventListener('touchmove', onLaserTouch, { passive: false });
 }
 
 function disableLaser() {
@@ -304,6 +313,8 @@ function disableLaser() {
   document.body.classList.remove('laser-cursor-hidden');
   outputPane.classList.remove('laser-cursor-hidden');
   document.removeEventListener('mousemove', onLaserMove);
+  document.removeEventListener('touchstart', onLaserTouch);
+  document.removeEventListener('touchmove', onLaserTouch);
 }
 
 function toggleLaser() {
