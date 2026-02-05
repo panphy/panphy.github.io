@@ -127,6 +127,26 @@ a:visited {
   border-right: 1px solid var(--border-color);
 }
 
+
+#outputPane:fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border: none;
+}
+
+#outputPane:fullscreen .pane-heading-container,
+#outputPane:fullscreen .buttonContainer.floating-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+#outputPane:fullscreen #renderedOutput {
+  padding: 24px;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Header container for each pane                                         */
 /* ---------------------------------------------------------------------- */

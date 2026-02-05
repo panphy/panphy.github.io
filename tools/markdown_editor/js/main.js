@@ -43,10 +43,12 @@ import {
 
 // DOM element references
 const markdownInput = document.getElementById('markdownInput');
+const outputPane = document.getElementById('outputPane');
 const renderedOutput = document.getElementById('renderedOutput');
 const clearButton = document.getElementById('clearButton');
 const loadSampleButton = document.getElementById('loadSampleButton');
 const exportHTMLButton = document.getElementById('exportHTMLButton');
+const presentButton = document.getElementById('presentButton');
 const printButton = document.getElementById('printButton');
 const saveMDButton = document.getElementById('saveMDButton');
 const loadFileButton = document.getElementById('loadFileButton');
@@ -197,6 +199,30 @@ function linkOutputToInputScroll() {
  */
 function linkInputToOutputScroll() {
   syncLinkedScroll(renderedOutput, markdownInput);
+}
+
+
+/**
+ * Toggle fullscreen presentation mode for rendered output pane
+ */
+async function togglePresentMode() {
+  const isFullscreen = Boolean(document.fullscreenElement);
+
+  if (!isFullscreen) {
+    try {
+      await outputPane.requestFullscreen();
+    } catch (error) {
+      console.error('Failed to enter fullscreen presentation mode:', error);
+      return;
+    }
+  } else if (document.fullscreenElement === outputPane) {
+    try {
+      await document.exitFullscreen();
+    } catch (error) {
+      console.error('Failed to exit fullscreen presentation mode:', error);
+      return;
+    }
+  }
 }
 
 /**
@@ -540,6 +566,7 @@ renderedOutput.addEventListener('click', event => {
 renderedOutput.addEventListener('scroll', linkInputToOutputScroll);
 printButton.addEventListener('click', printToPDF);
 exportHTMLButton.addEventListener('click', exportHTML);
+presentButton.addEventListener('click', togglePresentMode);
 saveMDButton.addEventListener('click', saveMarkdown);
 loadFileButton.addEventListener('click', loadMarkdownFile);
 loadSampleButton.addEventListener('click', loadSampleDocument);
@@ -591,12 +618,25 @@ window.addEventListener('afterprint', () => {
 window.addEventListener('online', updateOfflineFontState);
 window.addEventListener('offline', updateOfflineFontState);
 
+
+function updatePresentButtonLabel() {
+  if (!presentButton) return;
+
+  const isOutputFullscreen = document.fullscreenElement === outputPane;
+  presentButton.textContent = isOutputFullscreen ? 'Exit Present' : 'Present';
+  presentButton.setAttribute('title', isOutputFullscreen
+    ? 'Exit fullscreen presentation mode'
+    : 'Show rendered output in fullscreen');
+}
+
+document.addEventListener('fullscreenchange', updatePresentButtonLabel);
 // Initialize the application
 updateOfflineFontState();
 initializeTheme();
 initializeScrollSyncToggle(scrollSyncToggle);
 initializeHighlightSyncToggle(highlightSyncToggle);
 initializeFontSize(fontSizeSelect);
+updatePresentButtonLabel();
 
 // Restore draft and render
 const savedDraft = restoreDraft();
