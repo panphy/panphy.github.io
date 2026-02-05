@@ -210,24 +210,67 @@ function linkInputToOutputScroll() {
 
 
 /**
- * Toggle fullscreen presentation mode for rendered output pane
+ * Check if currently in fullscreen (native or pseudo)
+ */
+function isInFullscreen() {
+  return Boolean(document.fullscreenElement || document.webkitFullscreenElement)
+    || outputPane.classList.contains('pseudo-fullscreen');
+}
+
+/**
+ * Check if native fullscreen API is available
+ */
+function hasFullscreenSupport() {
+  return typeof outputPane.requestFullscreen === 'function'
+    || typeof outputPane.webkitRequestFullscreen === 'function';
+}
+
+/**
+ * Toggle fullscreen presentation mode for rendered output pane.
+ * Uses native Fullscreen API with webkit prefix fallback, and falls back
+ * to a CSS-based pseudo-fullscreen for environments (e.g. older iPadOS)
+ * where the API is unavailable.
  */
 async function togglePresentMode() {
-  const isFullscreen = Boolean(document.fullscreenElement);
+  const fullscreen = isInFullscreen();
 
-  if (!isFullscreen) {
-    try {
-      await outputPane.requestFullscreen();
-    } catch (error) {
-      console.error('Failed to enter fullscreen presentation mode:', error);
-      return;
+  if (!fullscreen) {
+    if (hasFullscreenSupport()) {
+      try {
+        if (typeof outputPane.requestFullscreen === 'function') {
+          await outputPane.requestFullscreen();
+        } else {
+          await outputPane.webkitRequestFullscreen();
+        }
+      } catch (error) {
+        console.error('Failed to enter fullscreen presentation mode:', error);
+        return;
+      }
+    } else {
+      // Pseudo-fullscreen fallback (iPad / older Safari)
+      outputPane.classList.add('pseudo-fullscreen');
+      document.body.style.overflow = 'hidden';
+      updatePresentButtonLabel();
+      updatePresentThemeIcon();
     }
-  } else if (document.fullscreenElement === outputPane) {
-    try {
-      await document.exitFullscreen();
-    } catch (error) {
-      console.error('Failed to exit fullscreen presentation mode:', error);
-      return;
+  } else {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      try {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        }
+      } catch (error) {
+        console.error('Failed to exit fullscreen presentation mode:', error);
+        return;
+      }
+    } else {
+      // Exit pseudo-fullscreen
+      outputPane.classList.remove('pseudo-fullscreen');
+      document.body.style.overflow = '';
+      updatePresentButtonLabel();
+      updatePresentThemeIcon();
     }
   }
 }
@@ -629,7 +672,7 @@ window.addEventListener('offline', updateOfflineFontState);
 function updatePresentButtonLabel() {
   if (!presentButton) return;
 
-  const isOutputFullscreen = document.fullscreenElement === outputPane;
+  const isOutputFullscreen = isInFullscreen();
   presentButton.textContent = isOutputFullscreen ? 'Exit Present' : 'Present';
   presentButton.setAttribute('title', isOutputFullscreen
     ? 'Exit fullscreen presentation mode'
@@ -648,6 +691,10 @@ function updatePresentThemeIcon() {
 }
 
 document.addEventListener('fullscreenchange', () => {
+  updatePresentButtonLabel();
+  updatePresentThemeIcon();
+});
+document.addEventListener('webkitfullscreenchange', () => {
   updatePresentButtonLabel();
   updatePresentThemeIcon();
 });
