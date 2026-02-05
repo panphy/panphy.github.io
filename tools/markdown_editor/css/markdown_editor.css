@@ -1079,6 +1079,67 @@ mjx-container.copy-failed::after {
 }
 
 /* ---------------------------------------------------------------------- */
+/* Disable click-to-copy visual cues in present mode                      */
+/* ---------------------------------------------------------------------- */
+
+/* Native fullscreen */
+#outputPane:fullscreen mjx-container,
+#outputPane:fullscreen #renderedOutput table,
+#outputPane:fullscreen #renderedOutput pre {
+  cursor: default;
+}
+
+#outputPane:fullscreen mjx-container:hover,
+#outputPane:fullscreen #renderedOutput table:hover,
+#outputPane:fullscreen #renderedOutput pre:hover {
+  box-shadow: none;
+}
+
+#outputPane:fullscreen mjx-container:hover::after,
+#outputPane:fullscreen #renderedOutput table:hover::before,
+#outputPane:fullscreen #renderedOutput pre:hover::before {
+  opacity: 0;
+}
+
+/* Webkit fullscreen */
+#outputPane:-webkit-full-screen mjx-container,
+#outputPane:-webkit-full-screen #renderedOutput table,
+#outputPane:-webkit-full-screen #renderedOutput pre {
+  cursor: default;
+}
+
+#outputPane:-webkit-full-screen mjx-container:hover,
+#outputPane:-webkit-full-screen #renderedOutput table:hover,
+#outputPane:-webkit-full-screen #renderedOutput pre:hover {
+  box-shadow: none;
+}
+
+#outputPane:-webkit-full-screen mjx-container:hover::after,
+#outputPane:-webkit-full-screen #renderedOutput table:hover::before,
+#outputPane:-webkit-full-screen #renderedOutput pre:hover::before {
+  opacity: 0;
+}
+
+/* Pseudo-fullscreen fallback */
+#outputPane.pseudo-fullscreen mjx-container,
+#outputPane.pseudo-fullscreen #renderedOutput table,
+#outputPane.pseudo-fullscreen #renderedOutput pre {
+  cursor: default;
+}
+
+#outputPane.pseudo-fullscreen mjx-container:hover,
+#outputPane.pseudo-fullscreen #renderedOutput table:hover,
+#outputPane.pseudo-fullscreen #renderedOutput pre:hover {
+  box-shadow: none;
+}
+
+#outputPane.pseudo-fullscreen mjx-container:hover::after,
+#outputPane.pseudo-fullscreen #renderedOutput table:hover::before,
+#outputPane.pseudo-fullscreen #renderedOutput pre:hover::before {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------------- */
 /* Export filename modal                                                  */
 /* ---------------------------------------------------------------------- */
 .modal-overlay {
