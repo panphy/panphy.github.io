@@ -257,6 +257,10 @@ body {
 	border-radius: 20px;
 }
 
+[data-theme="dark"] .slider {
+	background-color: #4b5563; /* Darker gray for OFF state in dark mode */
+}
+
 .slider:before {
 	position: absolute;
 	content: "";
@@ -275,7 +279,7 @@ body {
 }
 
 [data-theme="dark"] .switch input:checked+.slider {
-	background-color: #53c7c8;
+	background-color: #53c7c8; /* Teal-ish for LaTeX mode */
 }
 
 .switch input:checked+.slider:before {
@@ -290,7 +294,7 @@ body {
 
 [data-theme="dark"] #toggle-x-error:checked+.slider,
 [data-theme="dark"] #toggle-y-error:checked+.slider {
-	background-color: #e3be5a;
+	background-color: #f1c40f; /* Yellow-ish for Delta toggles - matching light mode brand yellow */
 }
 
 .toggle-label {
