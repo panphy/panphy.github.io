@@ -6,15 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown Editor with LaTeX</title>
   <link rel="icon" type="image/png" href="/favicon.png">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .catch((err) => console.log('Service Worker registration failed', err));
-      });
-    }
-  </script>
-  <!-- MathJax Configuration -->
+    <script src="/assets/sw-register.5e14aec4.js" defer></script>
+<!-- MathJax Configuration -->
   <script>
     window.MathJax = {
       tex: {
@@ -51,7 +44,7 @@
   </script>
 
   <!-- External CSS -->
-  <link rel="stylesheet" href="markdown_editor/css/markdown_editor.css">
+  <link rel="stylesheet" href="markdown_editor/css/markdown_editor.daaa136f.css">
 </head>
 
 <body>
@@ -183,6 +176,6 @@
 </body>
 
 <!-- Main Application Script (ES Module) -->
-<script type="module" src="markdown_editor/js/main.js"></script>
+<script type="module" src="markdown_editor/js/main.1b47f787.js"></script>
 
 </html>
