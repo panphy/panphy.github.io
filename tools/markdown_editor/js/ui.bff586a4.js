@@ -297,7 +297,7 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
     input.type = 'text';
     input.className = 'modal-input';
     input.value = defaultFilename;
-    input.placeholder = 'filename.html';
+    input.placeholder = defaultFilename;
 
     const buttons = document.createElement('div');
     buttons.className = 'modal-buttons';
@@ -342,8 +342,12 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
     const resolveFilename = (raw) => {
       let name = raw.trim();
       if (!name) return null;
-      if (expectedExt && !name.includes('.')) {
-        name += expectedExt;
+      if (expectedExt && !name.toLowerCase().endsWith(expectedExt.toLowerCase())) {
+        const lastSegment = name.split('.').pop() || '';
+        const isLikelyExtension = /^[a-z]{1,4}$/i.test(lastSegment);
+        if (!isLikelyExtension) {
+          name += expectedExt;
+        }
       }
       return name;
     };
