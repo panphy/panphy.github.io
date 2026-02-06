@@ -38,7 +38,7 @@ const ASSETS_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css',
   'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js',
-  'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+  'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
   'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
   '/tools/digitizer.html',
   '/tools/motion_tracker.html',
