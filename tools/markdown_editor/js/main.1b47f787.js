@@ -61,6 +61,7 @@ const highlightStyle = document.getElementById('highlightStyle');
 const presentExitButton = document.getElementById('presentExitButton');
 const presentThemeToggle = document.getElementById('presentThemeToggle');
 const presentLaserToggle = document.getElementById('presentLaserToggle');
+const presentZoomSelect = document.getElementById('presentZoomSelect');
 const laserPointer = document.getElementById('laserPointer');
 
 // Initialize UI module with DOM references
@@ -277,6 +278,19 @@ async function togglePresentMode() {
       updatePresentThemeIcon();
     }
   }
+}
+
+function applyPresentZoom(value) {
+  const zoomValue = Number(value);
+  if (!zoomValue || Number.isNaN(zoomValue) || zoomValue <= 0) {
+    return;
+  }
+  outputPane.style.setProperty('--present-zoom', (zoomValue / 100).toString());
+}
+
+function initializePresentZoom() {
+  if (!presentZoomSelect) return;
+  applyPresentZoom(presentZoomSelect.value);
 }
 
 // ---- Laser pointer ----
@@ -758,6 +772,12 @@ presentThemeToggle.addEventListener('click', () => {
   updatePresentThemeIcon();
   updateMobileThemeToggle();
 });
+if (presentZoomSelect) {
+  presentZoomSelect.addEventListener('change', event => {
+    applyPresentZoom(event.target.value);
+  });
+  initializePresentZoom();
+}
 // ---------------------------------------------------------------------- //
 // Mobile tab bar — switch between Edit / Preview on narrow screens        //
 // ---------------------------------------------------------------------- //

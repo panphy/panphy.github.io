@@ -121,6 +121,7 @@ a:visited {
   min-width: 240px;
   border: none;
   position: relative;
+  --present-zoom: 1;
 }
 
 #inputPane {
@@ -186,6 +187,14 @@ a:visited {
 
 #outputPane.pseudo-fullscreen #renderedOutput {
   padding: 24px;
+}
+
+#outputPane:fullscreen #renderedOutput,
+#outputPane:-webkit-full-screen #renderedOutput,
+#outputPane.pseudo-fullscreen #renderedOutput {
+  transform: scale(var(--present-zoom));
+  transform-origin: top left;
+  width: calc(100% / var(--present-zoom));
 }
 
 /* ---------------------------------------------------------------------- */
@@ -255,6 +264,16 @@ a:visited {
 .present-btn.laser-active {
   box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.6);
   border-color: #22c55e;
+}
+
+.present-controls .present-zoom-selector {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.present-controls .present-zoom-selector label,
+.present-controls .present-zoom-selector select {
+  font-size: 0.75rem;
 }
 
 /* ---------------------------------------------------------------------- */
