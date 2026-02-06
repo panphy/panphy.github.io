@@ -23,8 +23,8 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
-  <!-- Marked.js -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Marked.js (pinned to v4 — the highlight callback requires v4.x) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@4/marked.min.js"></script>
 
   <!-- DOMPurify -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
@@ -35,13 +35,6 @@
 
   <!-- Highlight.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-
-  <!-- Initialize Highlight.js after DOM content is loaded -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      hljs.highlightAll();
-    });
-  </script>
 
   <!-- External CSS -->
   <link rel="stylesheet" href="markdown_editor/css/markdown_editor.daaa136f.css">
@@ -183,9 +176,9 @@
     &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
     <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
   </footer>
-</body>
 
-<!-- Main Application Script (ES Module) -->
-<script type="module" src="markdown_editor/js/main.1b47f787.js"></script>
+  <!-- Main Application Script (ES Module) -->
+  <script type="module" src="markdown_editor/js/main.1b47f787.js"></script>
+</body>
 
 </html>

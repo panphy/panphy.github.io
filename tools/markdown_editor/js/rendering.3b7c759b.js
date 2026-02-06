@@ -49,31 +49,62 @@ export function preprocessMarkdown(input) {
   let inFencedCodeBlock = false;
   let fencedDelimiter = null;
   let inInlineCodeSpan = false;
+  let inlineCodeDelimiterLength = 0;
 
   while (i < input.length) {
     const char = input[i];
 
     const lineStart = i === 0 || input[i - 1] === '\n';
 
-    if (lineStart && (input.startsWith('```', i) || input.startsWith('~~~', i))) {
-      const delimiter = input.startsWith('```', i) ? '```' : '~~~';
-      if (!inFencedCodeBlock) {
-        inFencedCodeBlock = true;
-        fencedDelimiter = delimiter;
-      } else if (fencedDelimiter === delimiter) {
-        inFencedCodeBlock = false;
-        fencedDelimiter = null;
+    // Check for fenced code block (CommonMark allows up to 3 spaces of indentation)
+    if (lineStart && !inInlineCodeSpan) {
+      let fenceIndent = 0;
+      while (fenceIndent < 3 && i + fenceIndent < input.length && input[i + fenceIndent] === ' ') {
+        fenceIndent += 1;
       }
-      output += delimiter;
-      i += delimiter.length;
-      continue;
+      const fencePos = i + fenceIndent;
+      if (input.startsWith('```', fencePos) || input.startsWith('~~~', fencePos)) {
+        const delimiter = input.startsWith('```', fencePos) ? '```' : '~~~';
+        if (!inFencedCodeBlock) {
+          inFencedCodeBlock = true;
+          fencedDelimiter = delimiter;
+        } else if (fencedDelimiter === delimiter) {
+          inFencedCodeBlock = false;
+          fencedDelimiter = null;
+        }
+        const totalLength = fenceIndent + delimiter.length;
+        output += input.slice(i, i + totalLength);
+        i += totalLength;
+        continue;
+      }
     }
 
-    if (!inFencedCodeBlock && char === '`' && !isEscaped(i) && input[i + 1] !== '`') {
-      inInlineCodeSpan = !inInlineCodeSpan;
-      output += char;
-      i += 1;
-      continue;
+    // Handle multi-backtick inline code spans (`, ``, ```, etc.)
+    if (!inFencedCodeBlock && char === '`' && !isEscaped(i)) {
+      let backtickCount = 0;
+      let j = i;
+      while (j < input.length && input[j] === '`') {
+        backtickCount += 1;
+        j += 1;
+      }
+      if (!inInlineCodeSpan) {
+        inInlineCodeSpan = true;
+        inlineCodeDelimiterLength = backtickCount;
+        output += input.slice(i, j);
+        i = j;
+        continue;
+      } else if (backtickCount === inlineCodeDelimiterLength) {
+        inInlineCodeSpan = false;
+        inlineCodeDelimiterLength = 0;
+        output += input.slice(i, j);
+        i = j;
+        continue;
+      } else {
+        // Non-matching backticks inside code span — treat as literal
+        output += input.slice(i, j);
+        i = j;
+        continue;
+      }
     }
 
     if (inFencedCodeBlock || inInlineCodeSpan) {

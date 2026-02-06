@@ -195,14 +195,20 @@ function applyScrollTop(target, desiredTop) {
 // Scroll linking state
 let isLinkingScroll = false;
 let linkScrollFrame = null;
+let programmaticScrollTarget = null;
+let programmaticScrollTimer = null;
 
 /**
- * Sync scroll position between source and target elements
+ * Sync scroll position between source and target elements.
+ * Tracks the programmatically-scrolled target so that the scroll event
+ * it fires back does not trigger a reverse sync (feedback loop / jitter).
  * @param {Element} source - The source element being scrolled
  * @param {Element} target - The target element to sync
  */
 export function syncLinkedScroll(source, target) {
   if (!state.isLinkScrollEnabled || isLinkingScroll) return;
+  // Suppress scroll events fired by our own programmatic scroll
+  if (source === programmaticScrollTarget) return;
   isLinkingScroll = true;
   if (linkScrollFrame) {
     cancelAnimationFrame(linkScrollFrame);
@@ -211,6 +217,9 @@ export function syncLinkedScroll(source, target) {
     const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
     const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
     const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
+    programmaticScrollTarget = target;
+    clearTimeout(programmaticScrollTimer);
+    programmaticScrollTimer = setTimeout(() => { programmaticScrollTarget = null; }, 150);
     applyScrollTop(target, targetMax * ratio);
     isLinkingScroll = false;
   });

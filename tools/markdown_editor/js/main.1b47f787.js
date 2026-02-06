@@ -70,6 +70,48 @@ initUI({
   highlightStyle
 });
 
+// Configure marked once at initialization (not per-render)
+const customRenderer = {
+  listitem(token) {
+    let checkbox = '';
+    let bodyTokens = token.tokens;
+    if (token.task) {
+      checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
+      // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
+      bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
+      // Always inline-parse task items to prevent <p> wrapping that breaks
+      // the flex checkbox layout (marked token structure varies by version)
+      const inner = bodyTokens.length >= 1 && Array.isArray(bodyTokens[0].tokens)
+        ? bodyTokens[0].tokens
+        : bodyTokens;
+      const body = this.parser.parseInline(inner);
+      return `<li class="task-list-item">${checkbox}<span>${body}</span></li>\n`;
+    }
+    const isSingleParagraph =
+      bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
+    const isSingleText =
+      bodyTokens.length === 1 && bodyTokens[0].type === 'text' && Array.isArray(bodyTokens[0].tokens);
+    const body = (isSingleParagraph || isSingleText)
+      ? this.parser.parseInline(bodyTokens[0].tokens)
+      : this.parser.parse(bodyTokens);
+    return `<li>${body}</li>\n`;
+  }
+};
+
+marked.setOptions({
+  gfm: true,
+  headerIds: true,
+  tables: true,
+  langPrefix: 'hljs language-',
+  highlight: function (code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      return hljs.highlight(code, { language: lang }).value;
+    }
+    return hljs.highlightAuto(code).value;
+  }
+});
+marked.use({ renderer: customRenderer });
+
 /**
  * Fetch and load the sample Markdown document
  */
@@ -99,53 +141,11 @@ function renderContent() {
   const inputText = markdownInput.value;
   const preprocessedText = preprocessMarkdown(inputText);
 
-  const renderer = {
-    listitem(token) {
-      let checkbox = '';
-      let bodyTokens = token.tokens;
-      if (token.task) {
-        checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
-        // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
-        bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
-        // Always inline-parse task items to prevent <p> wrapping that breaks
-        // the flex checkbox layout (marked token structure varies by version)
-        const inner = bodyTokens.length >= 1 && Array.isArray(bodyTokens[0].tokens)
-          ? bodyTokens[0].tokens
-          : bodyTokens;
-        const body = this.parser.parseInline(inner);
-        return `<li class="task-list-item">${checkbox}<span>${body}</span></li>\n`;
-      }
-      const isSingleParagraph =
-        bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
-      const isSingleText =
-        bodyTokens.length === 1 && bodyTokens[0].type === 'text' && Array.isArray(bodyTokens[0].tokens);
-      const body = (isSingleParagraph || isSingleText)
-        ? this.parser.parseInline(bodyTokens[0].tokens)
-        : this.parser.parse(bodyTokens);
-      return `<li>${body}</li>\n`;
-    }
-  };
-
-  marked.setOptions({
-    gfm: true,
-    headerIds: true,
-    tables: true,
-    langPrefix: 'hljs language-',
-    highlight: function (code, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value;
-      }
-      return hljs.highlightAuto(code).value;
-    }
-  });
-  marked.use({ renderer });
-
   const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = marked.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
-  hljs.highlightAll();
   MathJax.typesetPromise([renderedOutput]).catch(console.error);
   updateHighlightedBlockFromCaret();
 }
@@ -615,10 +615,12 @@ async function exportHTML() {
 
   const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
   const blob = new Blob([exportedHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = fileName;
   link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 /**
@@ -629,10 +631,12 @@ async function saveMarkdown() {
   if (!fileName) return;
 
   const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = fileName;
   link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 /**
