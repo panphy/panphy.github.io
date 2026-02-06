@@ -16,9 +16,9 @@
 ├── index.html              # Main landing page
 ├── sw.js                   # Service Worker for offline support
 ├── manifest.json           # PWA configuration
-├── favicon.png             # Site favicon
-├── panphy.png              # App icon (512x512)
-├── apple-touch-icon.png    # iOS icon
+├── assets/favicon.png             # Site favicon
+├── assets/panphy.png              # App icon (512x512)
+├── assets/apple-touch-icon.png    # iOS icon
 │
 ├── tools/                  # Educational data analysis tools
 │   ├── panphyplot.html     # Advanced plotting tool (entry point)
