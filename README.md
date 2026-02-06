@@ -18,11 +18,7 @@ Most importantly, the site is offline-friendly (apart from the game "Asteroid St
 
 The site is deployed directly via **GitHub Pages** from the `main` branch -- every push to `main` goes live immediately.
 
-However, because the service worker serves assets **cache-first**, returning users won't see updates unless the service worker cache is invalidated. This is controlled by two mechanisms:
-
-1. **`BUILD_ID` in `sw.js`** -- A timestamp at the top of `sw.js` (e.g. `2026-02-06T12:00:00Z`) that is embedded into the cache name. When the browser detects that `sw.js` has changed, the new service worker installs, re-downloads all assets in `ASSETS_TO_CACHE` into a fresh cache, and deletes the old one on activation. **This must be bumped whenever any cached asset is modified**, otherwise users will keep getting stale files from the old cache.
-
-2. **Stable filenames** (e.g. `copy.js`) -- Module files for complex tools use stable filenames without hashes. Cache invalidation is handled entirely by the `BUILD_ID` in `sw.js`, which forces the service worker to refresh the cache for returning users when assets change.
+However, because the service worker serves assets **cache-first**, returning users won't see updates unless the service worker cache is invalidated. This is controlled by the `BUILD_ID` in `sw.js` -- a timestamp at the top of `sw.js` (e.g. `2026-02-06T12:00:00Z`) that is embedded into the cache name. When the browser detects that `sw.js` has changed, the new service worker installs, re-downloads all assets in `ASSETS_TO_CACHE` into a fresh cache, and deletes the old one on activation. **This must be bumped whenever any cached asset is modified**, otherwise users will keep getting stale files from the old cache.
 
 ### Update flow in practice
 
