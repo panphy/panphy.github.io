@@ -12,15 +12,8 @@
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
     defer
   ></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .catch((err) => console.log('Service Worker registration failed', err));
-      });
-    }
-  </script>
-  <script>
+    <script src="/assets/sw-register.5e14aec4.js" defer></script>
+<script>
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (event) => {
       const now = Date.now();
