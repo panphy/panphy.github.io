@@ -1374,3 +1374,15 @@ mjx-container.copy-failed::after {
   background: var(--button-background);
   color: var(--text-color);
 }
+
+/* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */
+@media print {
+  #inputPane.mobile-hidden {
+    display: none !important;
+  }
+
+  #outputPane,
+  #outputPane.mobile-hidden {
+    display: block !important;
+  }
+}
