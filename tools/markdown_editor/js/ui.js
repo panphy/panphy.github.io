@@ -13,7 +13,7 @@ import {
   saveHighlightSyncPreference,
   loadFontSizePreference,
   saveFontSizePreference
-} from './state.00667ec4.js';
+} from './state.js';
 
 // DOM element references (set during initialization)
 let themeToggleButton = null;
