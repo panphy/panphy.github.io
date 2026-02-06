@@ -19,8 +19,7 @@ import {
   wrapRenderedBlocks,
   getCleanRenderedOutputHTML,
   getLineNumberFromOffset,
-  getOffsetsForLineRange,
-  runPreprocessMarkdownTests
+  getOffsetsForLineRange
 } from './rendering.3b7c759b.js';
 
 import { handleCopyClick } from './copy.99554e82.js';
@@ -70,6 +69,48 @@ initUI({
   highlightStyle
 });
 
+// Configure marked once at initialization (not per-render)
+const customRenderer = {
+  listitem(token) {
+    let checkbox = '';
+    let bodyTokens = token.tokens;
+    if (token.task) {
+      checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
+      // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
+      bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
+      // Always inline-parse task items to prevent <p> wrapping that breaks
+      // the flex checkbox layout (marked token structure varies by version)
+      const inner = bodyTokens.length >= 1 && Array.isArray(bodyTokens[0].tokens)
+        ? bodyTokens[0].tokens
+        : bodyTokens;
+      const body = this.parser.parseInline(inner);
+      return `<li class="task-list-item">${checkbox}<span>${body}</span></li>\n`;
+    }
+    const isSingleParagraph =
+      bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
+    const isSingleText =
+      bodyTokens.length === 1 && bodyTokens[0].type === 'text' && Array.isArray(bodyTokens[0].tokens);
+    const body = (isSingleParagraph || isSingleText)
+      ? this.parser.parseInline(bodyTokens[0].tokens)
+      : this.parser.parse(bodyTokens);
+    return `<li>${body}</li>\n`;
+  }
+};
+
+marked.setOptions({
+  gfm: true,
+  headerIds: true,
+  tables: true,
+  langPrefix: 'hljs language-',
+  highlight: function (code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      return hljs.highlight(code, { language: lang }).value;
+    }
+    return hljs.highlightAuto(code).value;
+  }
+});
+marked.use({ renderer: customRenderer });
+
 /**
  * Fetch and load the sample Markdown document
  */
@@ -99,53 +140,11 @@ function renderContent() {
   const inputText = markdownInput.value;
   const preprocessedText = preprocessMarkdown(inputText);
 
-  const renderer = {
-    listitem(token) {
-      let checkbox = '';
-      let bodyTokens = token.tokens;
-      if (token.task) {
-        checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
-        // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
-        bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
-        // Always inline-parse task items to prevent <p> wrapping that breaks
-        // the flex checkbox layout (marked token structure varies by version)
-        const inner = bodyTokens.length >= 1 && Array.isArray(bodyTokens[0].tokens)
-          ? bodyTokens[0].tokens
-          : bodyTokens;
-        const body = this.parser.parseInline(inner);
-        return `<li class="task-list-item">${checkbox}<span>${body}</span></li>\n`;
-      }
-      const isSingleParagraph =
-        bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
-      const isSingleText =
-        bodyTokens.length === 1 && bodyTokens[0].type === 'text' && Array.isArray(bodyTokens[0].tokens);
-      const body = (isSingleParagraph || isSingleText)
-        ? this.parser.parseInline(bodyTokens[0].tokens)
-        : this.parser.parse(bodyTokens);
-      return `<li>${body}</li>\n`;
-    }
-  };
-
-  marked.setOptions({
-    gfm: true,
-    headerIds: true,
-    tables: true,
-    langPrefix: 'hljs language-',
-    highlight: function (code, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value;
-      }
-      return hljs.highlightAuto(code).value;
-    }
-  });
-  marked.use({ renderer });
-
   const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = marked.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
-  hljs.highlightAll();
   MathJax.typesetPromise([renderedOutput]).catch(console.error);
   updateHighlightedBlockFromCaret();
 }
@@ -404,7 +403,7 @@ async function exportHTML() {
       --table-header-background: #f4f4f4;
     }
 
-    body.dark-mode {
+    [data-theme="dark"] {
       --background-color: #1e1e1e;
       --text-color: #e0e0e0;
       --pane-background: #1e1e1e;
@@ -513,48 +512,48 @@ async function exportHTML() {
       color: inherit;
     }
 
-    body.dark-mode .hljs {
+    [data-theme="dark"] .hljs {
       color: #f8f8f2 !important;
     }
 
-    body.dark-mode .hljs-comment,
-    body.dark-mode .hljs-quote {
+    [data-theme="dark"] .hljs-comment,
+    [data-theme="dark"] .hljs-quote {
       color: #8d9a70 !important;
     }
 
-    body.dark-mode .hljs-keyword,
-    body.dark-mode .hljs-selector-tag,
-    body.dark-mode .hljs-subst {
+    [data-theme="dark"] .hljs-keyword,
+    [data-theme="dark"] .hljs-selector-tag,
+    [data-theme="dark"] .hljs-subst {
       color: #66d9ef !important;
     }
 
-    body.dark-mode .hljs-string,
-    body.dark-mode .hljs-doctag {
+    [data-theme="dark"] .hljs-string,
+    [data-theme="dark"] .hljs-doctag {
       color: #e6db74 !important;
     }
 
-    body.dark-mode .hljs-number,
-    body.dark-mode .hljs-regexp,
-    body.dark-mode .hljs-tag .hljs-attr {
+    [data-theme="dark"] .hljs-number,
+    [data-theme="dark"] .hljs-regexp,
+    [data-theme="dark"] .hljs-tag .hljs-attr {
       color: #ae81ff !important;
     }
 
-    body.dark-mode .hljs-title,
-    body.dark-mode .hljs-section {
+    [data-theme="dark"] .hljs-title,
+    [data-theme="dark"] .hljs-section {
       color: #a6e22e !important;
     }
 
-    body.dark-mode .hljs-type,
-    body.dark-mode .hljs-built_in {
+    [data-theme="dark"] .hljs-type,
+    [data-theme="dark"] .hljs-built_in {
       color: #fd971f !important;
     }
 
-    body.dark-mode .hljs-symbol,
-    body.dark-mode .hljs-bullet {
+    [data-theme="dark"] .hljs-symbol,
+    [data-theme="dark"] .hljs-bullet {
       color: #f92672 !important;
     }
 
-    body.dark-mode .hljs-link {
+    [data-theme="dark"] .hljs-link {
       color: #e6db74 !important;
     }
 
@@ -565,7 +564,7 @@ async function exportHTML() {
   `;
   head.appendChild(style);
 
-  const isDarkMode = document.body.classList.contains('dark-mode');
+  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
   const highlightLink = document.createElement('link');
   highlightLink.rel = 'stylesheet';
   if (isDarkMode) {
@@ -610,15 +609,17 @@ async function exportHTML() {
   body.innerHTML = sanitizedHTML;
 
   if (isDarkMode) {
-    body.classList.add('dark-mode');
+    doc.documentElement.setAttribute('data-theme', 'dark');
   }
 
   const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
   const blob = new Blob([exportedHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = fileName;
   link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 /**
@@ -629,10 +630,12 @@ async function saveMarkdown() {
   if (!fileName) return;
 
   const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = fileName;
   link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 /**
@@ -656,9 +659,6 @@ function loadMarkdownFile() {
   };
   input.click();
 }
-
-// Run tests
-runPreprocessMarkdownTests();
 
 // Setup event listeners
 const handleCaretChange = () => updateHighlightedBlockFromCaret();
@@ -730,7 +730,7 @@ window.addEventListener('beforeprint', () => {
 });
 
 window.addEventListener('afterprint', () => {
-  if (document.body.classList.contains('dark-mode')) {
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
     highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
   } else {
     highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
@@ -754,7 +754,7 @@ function updatePresentButtonLabel() {
 
 function updatePresentThemeIcon() {
   if (!presentThemeToggle) return;
-  if (document.body.classList.contains('dark-mode')) {
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
     presentThemeToggle.textContent = '\u{1F319}';
     presentThemeToggle.setAttribute('title', 'Switch to Light Mode');
   } else {
@@ -796,7 +796,7 @@ const mobileThemeToggle = document.getElementById('mobileThemeToggle');
 
 function updateMobileThemeToggle() {
   if (!mobileThemeToggle) return;
-  mobileThemeToggle.textContent = document.body.classList.contains('dark-mode')
+  mobileThemeToggle.textContent = document.documentElement.getAttribute('data-theme') === 'dark'
     ? '\u{1F319}'   // Moon
     : '\u{2600}\u{FE0F}'; // Sun
 }
