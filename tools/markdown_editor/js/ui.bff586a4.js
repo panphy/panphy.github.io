@@ -34,7 +34,7 @@ export function initUI(elements) {
 export function updateThemeToggleButton() {
   if (!themeToggleButton) return;
 
-  if (document.body.classList.contains('dark-mode')) {
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
     themeToggleButton.textContent = '\u{1F319}'; // Moon emoji
     themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
     themeToggleButton.setAttribute('title', 'Switch to Light Mode');
@@ -51,12 +51,12 @@ export function updateThemeToggleButton() {
 export function initializeTheme() {
   const savedTheme = loadThemePreference();
   if (savedTheme === 'markdown-dark') {
-    document.body.classList.add('dark-mode');
+    document.documentElement.setAttribute('data-theme', 'dark');
     if (highlightStyle) {
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
     }
   } else {
-    document.body.classList.remove('dark-mode');
+    document.documentElement.setAttribute('data-theme', 'light');
     if (highlightStyle) {
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
     }
@@ -68,9 +68,11 @@ export function initializeTheme() {
  * Toggle between dark and light themes and save the preference.
  */
 export function toggleTheme() {
-  document.body.classList.toggle('dark-mode');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
 
-  if (document.body.classList.contains('dark-mode')) {
+  if (next === 'dark') {
     if (themeToggleButton) {
       themeToggleButton.textContent = '\u{1F319}'; // Moon emoji
       themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
@@ -177,19 +179,40 @@ function clamp(value, min, max) {
 }
 
 /**
- * Apply scroll position with smooth interpolation
+ * Animation frame for scroll interpolation loop
+ */
+let scrollAnimFrame = null;
+
+/**
+ * Apply scroll position with smooth interpolation.
+ * Runs a continuous animation loop so the scroll position fully converges
+ * to the target, even when few scroll events are firing.
  * @param {Element} target - The target element
  * @param {number} desiredTop - The desired scroll position
+ * @param {Function} [onStep] - Optional callback invoked on each animation step
  */
-function applyScrollTop(target, desiredTop) {
+function applyScrollTop(target, desiredTop, onStep) {
   const maxTop = Math.max(0, target.scrollHeight - target.clientHeight);
   const clampedTop = clamp(desiredTop, 0, maxTop);
-  const distance = clampedTop - target.scrollTop;
-  if (Math.abs(distance) < 0.5) {
-    target.scrollTop = clampedTop;
-    return;
+
+  if (scrollAnimFrame) {
+    cancelAnimationFrame(scrollAnimFrame);
+    scrollAnimFrame = null;
   }
-  target.scrollTop = target.scrollTop + distance * 0.35;
+
+  const step = () => {
+    const distance = clampedTop - target.scrollTop;
+    if (Math.abs(distance) < 0.5) {
+      target.scrollTop = clampedTop;
+      scrollAnimFrame = null;
+      return;
+    }
+    target.scrollTop = target.scrollTop + distance * 0.35;
+    if (onStep) onStep();
+    scrollAnimFrame = requestAnimationFrame(step);
+  };
+
+  step();
 }
 
 // Scroll linking state
@@ -218,9 +241,12 @@ export function syncLinkedScroll(source, target) {
     const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
     const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
     programmaticScrollTarget = target;
-    clearTimeout(programmaticScrollTimer);
-    programmaticScrollTimer = setTimeout(() => { programmaticScrollTarget = null; }, 150);
-    applyScrollTop(target, targetMax * ratio);
+    const refreshSuppression = () => {
+      clearTimeout(programmaticScrollTimer);
+      programmaticScrollTimer = setTimeout(() => { programmaticScrollTarget = null; }, 150);
+    };
+    refreshSuppression();
+    applyScrollTop(target, targetMax * ratio, refreshSuppression);
     isLinkingScroll = false;
   });
 }
@@ -309,16 +335,27 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
       resolve(result);
     };
 
+    const expectedExt = defaultFilename.includes('.')
+      ? defaultFilename.substring(defaultFilename.lastIndexOf('.'))
+      : '';
+
+    const resolveFilename = (raw) => {
+      let name = raw.trim();
+      if (!name) return null;
+      if (expectedExt && !name.includes('.')) {
+        name += expectedExt;
+      }
+      return name;
+    };
+
     cancelBtn.addEventListener('click', () => closeModal(null));
     exportBtn.addEventListener('click', () => {
-      const filename = input.value.trim();
-      closeModal(filename || null);
+      closeModal(resolveFilename(input.value));
     });
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const filename = input.value.trim();
-        closeModal(filename || null);
+        closeModal(resolveFilename(input.value));
       } else if (e.key === 'Escape') {
         closeModal(null);
       }

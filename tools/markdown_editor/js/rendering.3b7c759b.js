@@ -364,16 +364,14 @@ export function getOffsetsForLineRange(text, startLine, endLine) {
   const lines = text.split('\n');
   let startOffset = 0;
   let endOffset = text.length;
-
-  for (let i = 0; i < lines.length; i += 1) {
-    if (i + 1 < startLine) {
-      startOffset += lines[i].length + 1;
-    }
-  }
-
   let cursor = 0;
+
   for (let i = 0; i < lines.length; i += 1) {
-    if (i + 1 <= endLine) {
+    const lineNum = i + 1;
+    if (lineNum < startLine) {
+      startOffset = cursor + lines[i].length + 1;
+    }
+    if (lineNum <= endLine) {
       cursor += lines[i].length;
       if (i + 1 < lines.length) {
         cursor += 1;
