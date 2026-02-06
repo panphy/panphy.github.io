@@ -107,6 +107,13 @@ function renderContent() {
         checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
         // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
         bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
+        // Always inline-parse task items to prevent <p> wrapping that breaks
+        // the flex checkbox layout (marked token structure varies by version)
+        const inner = bodyTokens.length >= 1 && Array.isArray(bodyTokens[0].tokens)
+          ? bodyTokens[0].tokens
+          : bodyTokens;
+        const body = this.parser.parseInline(inner);
+        return `<li class="task-list-item">${checkbox}<span>${body}</span></li>\n`;
       }
       const isSingleParagraph =
         bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
@@ -115,8 +122,7 @@ function renderContent() {
       const body = (isSingleParagraph || isSingleText)
         ? this.parser.parseInline(bodyTokens[0].tokens)
         : this.parser.parse(bodyTokens);
-      const taskClass = token.task ? ' class="task-list-item"' : '';
-      return `<li${taskClass}>${checkbox}${body}</li>\n`;
+      return `<li>${body}</li>\n`;
     }
   };
 
