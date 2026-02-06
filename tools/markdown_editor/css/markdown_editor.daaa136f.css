@@ -568,6 +568,11 @@ textarea {
   border-radius: 4px;
 }
 
+#renderedOutput ul:has(> .task-list-item) {
+  padding-left: 0;
+  list-style: none;
+}
+
 #renderedOutput .task-list-item {
   list-style: none;
   margin-left: 0;
