@@ -166,12 +166,18 @@ markdown_editor.html (imports scripts via ES modules)
 - **Assets**: Cache-first, then fetch and update
 - **Exclusions**: Dodge game and Supabase API calls (always fetch fresh)
 
-### When Adding New Pages
-1. Add the new page path to `ASSETS_TO_CACHE` array in `sw.js`
-2. Update the cache version date constant
+### When Modifying Any Cached Asset
+Any time you change a file listed in `ASSETS_TO_CACHE`, **bump the `BUILD_ID` timestamp** at the top of `sw.js`. Without this, returning users will keep getting the old cached version.
 
 ```javascript
-const CACHE_NAME = 'panphy-labs-YYYY-MM-DD';
+const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';  // Update this on every change
+```
+
+### When Adding New Pages
+1. Add the new page path to `ASSETS_TO_CACHE` array in `sw.js`
+2. Bump the `BUILD_ID` timestamp
+
+```javascript
 const ASSETS_TO_CACHE = [
   // ... existing assets ...
   '/tools/new_tool.html',  // Add new pages here
@@ -280,7 +286,7 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 
 1. **No build step**: Edit files directly, no npm/webpack/etc.
 2. **Self-contained pages**: Each HTML file is a complete application
-3. **Update sw.js**: When adding new pages, add them to the cache list
+3. **Update sw.js**: When adding or modifying cached assets, bump `BUILD_ID` and update the cache list
 4. **Theme awareness**: Always use CSS variables, not hardcoded colors
 5. **Mobile-first**: Consider touch interactions and responsive design
 6. **Offline-first**: Ensure new features work without network
