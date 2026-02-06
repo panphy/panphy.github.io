@@ -22,7 +22,7 @@ However, because the service worker serves assets **cache-first**, returning use
 
 1. **`BUILD_ID` in `sw.js`** -- A timestamp at the top of `sw.js` (e.g. `2026-02-06T12:00:00Z`) that is embedded into the cache name. When the browser detects that `sw.js` has changed, the new service worker installs, re-downloads all assets in `ASSETS_TO_CACHE` into a fresh cache, and deletes the old one on activation. **This must be bumped whenever any cached asset is modified**, otherwise users will keep getting stale files from the old cache.
 
-2. **Content-hashed filenames** (e.g. `copy.99554e82.js`) -- Module files for complex tools include a hash in their filename. This busts the browser's HTTP cache when a file's contents change and the filename is updated to a new hash. These hashes are managed manually (there is no build system). Note: even if the filename hash is updated, the `BUILD_ID` still needs to be bumped so the service worker re-caches the new file.
+2. **Stable filenames** (e.g. `copy.js`) -- Module files for complex tools use stable filenames without hashes. Cache invalidation is handled entirely by the `BUILD_ID` in `sw.js`, which forces the service worker to refresh the cache for returning users when assets change.
 
 ### Update flow in practice
 
@@ -41,4 +41,4 @@ Code changed on main
 When modifying the site:
 - **Changing an existing cached file**: Bump `BUILD_ID` in `sw.js`
 - **Adding a new page**: Add its path to `ASSETS_TO_CACHE` in `sw.js` and bump `BUILD_ID`
-- **Renaming a module file** (new hash): Update the `<script>` / `<link>` reference in the HTML entry point, update the path in `ASSETS_TO_CACHE`, and bump `BUILD_ID`
+- **Renaming a module file**: Update the `<script>` / `<link>` reference in the HTML entry point, update the path in `ASSETS_TO_CACHE`, and bump `BUILD_ID`

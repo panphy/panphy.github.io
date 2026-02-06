@@ -11,7 +11,7 @@ import {
   saveScrollSyncPreference,
   saveHighlightSyncPreference,
   debounce
-} from './state.00667ec4.js';
+} from './state.js';
 
 import {
   preprocessMarkdown,
@@ -20,9 +20,9 @@ import {
   getCleanRenderedOutputHTML,
   getLineNumberFromOffset,
   getOffsetsForLineRange
-} from './rendering.3b7c759b.js';
+} from './rendering.js';
 
-import { handleCopyClick } from './copy.99554e82.js';
+import { handleCopyClick } from './copy.js';
 
 import {
   initUI,
@@ -38,7 +38,7 @@ import {
   updateThemeToggleButton,
   getCurrentFontSize,
   showFilenameModal
-} from './ui.bff586a4.js';
+} from './ui.js';
 
 // DOM element references
 const markdownInput = document.getElementById('markdownInput');
@@ -112,7 +112,7 @@ if (markedLib) {
  * Fetch and load the sample Markdown document
  */
 function loadSampleDocument() {
-  fetch('/tools/markdown_editor/sample_doc.06c22ecd.md')
+  fetch('/tools/markdown_editor/sample_doc.md')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');

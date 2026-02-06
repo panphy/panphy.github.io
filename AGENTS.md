@@ -32,7 +32,7 @@ Each HTML file in the repo is a complete, standalone application. Complex tools 
 
 ### Filename Hashes
 
-Module files use content hashes in their filenames (e.g. `copy.99554e82.js`). These are for browser HTTP cache-busting. There is no automated tooling to generate them — they were set manually when the files were created.
+Module files use stable, unhashed filenames (e.g. `copy.js`). Cache busting is handled via the `BUILD_ID` in `sw.js`.
 
 ## Coding Conventions
 

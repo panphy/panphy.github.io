@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-07T03:46:00Z';
+const BUILD_ID = '2026-02-07T04:12:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -13,23 +13,23 @@ const ASSETS_TO_CACHE = [
 
   // Tools
   '/tools/markdown_editor.html',
-  '/assets/sw-register.5e14aec4.js',
-  '/tools/markdown_editor/css/markdown_editor.daaa136f.css',
-  '/tools/markdown_editor/js/state.00667ec4.js',
-  '/tools/markdown_editor/js/rendering.3b7c759b.js',
-  '/tools/markdown_editor/js/copy.99554e82.js',
-  '/tools/markdown_editor/js/ui.bff586a4.js',
-  '/tools/markdown_editor/js/main.1b47f787.js',
-  '/tools/markdown_editor/sample_doc.06c22ecd.md',
-  '/tools/markdown_editor/sample_pic.77ab7b76.webp',
+  '/assets/sw-register.js',
+  '/tools/markdown_editor/css/markdown_editor.css',
+  '/tools/markdown_editor/js/state.js',
+  '/tools/markdown_editor/js/rendering.js',
+  '/tools/markdown_editor/js/copy.js',
+  '/tools/markdown_editor/js/ui.js',
+  '/tools/markdown_editor/js/main.js',
+  '/tools/markdown_editor/sample_doc.md',
+  '/tools/markdown_editor/sample_pic.webp',
   '/tools/panphyplot.html',
-  '/tools/panphyplot/css/panphyplot.a3e91b09.css',
-  '/tools/panphyplot/js/curve-fitting.1c1ebc01.js',
-  '/tools/panphyplot/js/latex-rendering.28d8d3a1.js',
-  '/tools/panphyplot/js/main.685de4f9.js',
-  '/tools/panphyplot/js/plotting.eb0a9306.js',
-  '/tools/panphyplot/js/state.3987963c.js',
-  '/tools/panphyplot/js/ui.fc7a0df3.js',
+  '/tools/panphyplot/css/panphyplot.css',
+  '/tools/panphyplot/js/curve-fitting.js',
+  '/tools/panphyplot/js/latex-rendering.js',
+  '/tools/panphyplot/js/main.js',
+  '/tools/panphyplot/js/plotting.js',
+  '/tools/panphyplot/js/state.js',
+  '/tools/panphyplot/js/ui.js',
   'https://cdn.plot.ly/plotly-2.29.1.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',

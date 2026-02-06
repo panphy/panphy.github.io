@@ -180,7 +180,7 @@ $$
 - Let's insert a picture below...
 
 <p align="center">
-    <img src="/tools/markdown_editor/sample_pic.77ab7b76.webp" width="250" alt="Made with ChatGPT" />
+    <img src="/tools/markdown_editor/sample_pic.webp" width="250" alt="Made with ChatGPT" />
 </p>
 
 <p align="center">
