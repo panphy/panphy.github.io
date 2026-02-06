@@ -575,20 +575,22 @@ textarea {
 
 #renderedOutput .task-list-item {
   list-style: none;
-  margin-left: 0;
-  padding-left: 0;
+  margin: 0;
+  padding: 0;
   display: flex;
+  flex-direction: row;
   align-items: flex-start;
   gap: 0.5em;
 }
 
-#renderedOutput .task-list-item p {
-  margin: 0;
+#renderedOutput .task-list-item > * {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 #renderedOutput .task-list-item input[type="checkbox"] {
-  /* (line-height 1.5em - checkbox 1.1em) / 2 ≈ 0.2em centres with text */
-  margin: 0.2em 0 0;
+  /* (line-height 1.5em − checkbox 1.1em) / 2 ≈ 0.2em centres with first text line */
+  margin-top: 0.2em;
   flex-shrink: 0;
   width: 1.1em;
   height: 1.1em;
