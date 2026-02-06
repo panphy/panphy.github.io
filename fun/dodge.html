@@ -814,8 +814,11 @@
      */
     const BASE_WIDTH = 600;
     const BASE_HEIGHT = 400;
+    const MIN_GAME_SCALE = 0.85;
+    const MAX_GAME_SCALE = 1.2;
     let scaleX = 1;
     let scaleY = 1;
+    let gameScale = 1;
 
     // Initial dimensions (will be updated)
     let SCREEN_WIDTH = BASE_WIDTH;
@@ -824,6 +827,8 @@
     function updateScaleFactors() {
       scaleX = SCREEN_WIDTH / BASE_WIDTH;
       scaleY = SCREEN_HEIGHT / BASE_HEIGHT;
+      const uniformScale = Math.min(scaleX, scaleY);
+      gameScale = Math.min(Math.max(uniformScale, MIN_GAME_SCALE), MAX_GAME_SCALE);
     }
 
     // Area ratio for consistent asteroid density across screen sizes
@@ -1045,10 +1050,10 @@
       }
 
       updateScale() {
-        this.width = this.baseWidth * scaleX;
-        this.height = this.baseHeight * scaleY;
-        this.radius = this.baseRadius * ((scaleX + scaleY) / 2);
-        this.speed = this.baseSpeed * ((scaleX + scaleY) / 2);
+        this.width = this.baseWidth * gameScale;
+        this.height = this.baseHeight * gameScale;
+        this.radius = this.baseRadius * gameScale;
+        this.speed = this.baseSpeed * gameScale;
       }
 
       move(deltaMultiplier = 1) {
@@ -1109,31 +1114,31 @@
 
       updateScale() {
         // preserve relative size without re-randomising too aggressively
-        const avg = ((scaleX + scaleY) / 2);
-        this.scale = this.baseScale * avg;
+        this.scale = this.baseScale * gameScale;
         this.width = this.baseSize * this.scale;
         this.height = this.baseSize * this.scale;
         this.radius = (this.width + this.height) / 4;
-        this.speed = this.baseSpeed * avg;
+        this.speed = this.baseSpeed * gameScale;
       }
 
       spawn() {
+        const spawnBuffer = 40 * gameScale;
         const edge = Math.floor(Math.random() * 4);
         switch (edge) {
           case 0:
             this.x = Math.random() * SCREEN_WIDTH;
-            this.y = -40 * scaleY;
+            this.y = -spawnBuffer;
             break;
           case 1:
             this.x = Math.random() * SCREEN_WIDTH;
-            this.y = SCREEN_HEIGHT + 40 * scaleY;
+            this.y = SCREEN_HEIGHT + spawnBuffer;
             break;
           case 2:
-            this.x = -40 * scaleX;
+            this.x = -spawnBuffer;
             this.y = Math.random() * SCREEN_HEIGHT;
             break;
           default:
-            this.x = SCREEN_WIDTH + 40 * scaleX;
+            this.x = SCREEN_WIDTH + spawnBuffer;
             this.y = Math.random() * SCREEN_HEIGHT;
             break;
         }
@@ -1158,11 +1163,12 @@
       }
 
       isOffScreen() {
+        const offscreenBuffer = 100 * gameScale;
         return (
-          this.x < -100 * scaleX ||
-          this.x > SCREEN_WIDTH + 100 * scaleX ||
-          this.y < -100 * scaleY ||
-          this.y > SCREEN_HEIGHT + 100 * scaleY
+          this.x < -offscreenBuffer ||
+          this.x > SCREEN_WIDTH + offscreenBuffer ||
+          this.y < -offscreenBuffer ||
+          this.y > SCREEN_HEIGHT + offscreenBuffer
         );
       }
     }
@@ -1664,7 +1670,7 @@
      * -----------------------------------------------------------
      */
     function drawRollingBackground(deltaMultiplier = 1) {
-      backgroundOffsetY += backgroundScrollSpeed * ((scaleX + scaleY) / 2) * deltaMultiplier;
+      backgroundOffsetY += backgroundScrollSpeed * gameScale * deltaMultiplier;
 
       if (assets.background.ok && bgPattern) {
         // pattern scroll: translate, then fill
@@ -1702,7 +1708,7 @@
         score = Math.floor(elapsedMs / 10) / 100;
         const scoreDisplay = formatSurvivalTime(score);
         ctx.fillStyle = '#f5f5f5';
-        ctx.font = `${18 * ((scaleX + scaleY) / 2)}px Arial`;
+        ctx.font = `${18 * gameScale}px Arial`;
         ctx.textAlign = 'start';
         ctx.fillText('Survival Time: ' + scoreDisplay, 10, 20);
 
@@ -1744,15 +1750,15 @@
         ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         ctx.fillStyle = '#f5f5f5';
-        ctx.font = `${40 * ((scaleX + scaleY) / 2)}px Arial`;
+        ctx.font = `${40 * gameScale}px Arial`;
         ctx.textAlign = 'center';
-        ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40 * ((scaleX + scaleY) / 2));
+        ctx.fillText('Game Over', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 40 * gameScale);
 
-        ctx.font = `${30 * ((scaleX + scaleY) / 2)}px Arial`;
+        ctx.font = `${30 * gameScale}px Arial`;
         ctx.fillText('Survival Time: ' + formatSurvivalTime(score), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
-        ctx.font = `${20 * ((scaleX + scaleY) / 2)}px Arial`;
-        ctx.fillText('Press Enter or Tap the Game Canvas to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40 * ((scaleX + scaleY) / 2));
+        ctx.font = `${20 * gameScale}px Arial`;
+        ctx.fillText('Press Enter or Tap the Game Canvas to restart', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 40 * gameScale);
         ctx.textAlign = 'start';
       }
     }
