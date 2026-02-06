@@ -579,15 +579,21 @@ textarea {
   padding-left: 0;
   display: flex;
   align-items: flex-start;
-  gap: 0.6em;
+  gap: 0.5em;
+}
+
+#renderedOutput .task-list-item p {
+  margin: 0;
 }
 
 #renderedOutput .task-list-item input[type="checkbox"] {
+  /* (line-height 1.5em - checkbox 1.1em) / 2 ≈ 0.2em centres with text */
   margin: 0.2em 0 0;
   flex-shrink: 0;
-  width: 1.05em;
-  height: 1.05em;
+  width: 1.1em;
+  height: 1.1em;
   accent-color: var(--brand-primary);
+  cursor: default;
 }
 
 /* ---------------------------------------------------------------------- */
