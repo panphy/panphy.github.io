@@ -70,6 +70,7 @@ initUI({
 });
 
 // Configure marked once at initialization (not per-render)
+const markedLib = window.marked;
 const customRenderer = {
   listitem(token) {
     let checkbox = '';
@@ -97,25 +98,32 @@ const customRenderer = {
   }
 };
 
-marked.setOptions({
-  gfm: true,
-  headerIds: true,
-  tables: true,
-  langPrefix: 'hljs language-',
-  highlight: function (code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(code, { language: lang }).value;
+if (markedLib) {
+  markedLib.setOptions({
+    gfm: true,
+    headerIds: true,
+    tables: true,
+    langPrefix: 'hljs language-',
+    highlight: function (code, lang) {
+      if (typeof hljs === 'undefined') {
+        return code;
+      }
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(code, { language: lang }).value;
+      }
+      return hljs.highlightAuto(code).value;
     }
-    return hljs.highlightAuto(code).value;
-  }
-});
-marked.use({ renderer: customRenderer });
+  });
+  markedLib.use({ renderer: customRenderer });
+} else {
+  console.error('Marked.js failed to load. Preview rendering is unavailable.');
+}
 
 /**
  * Fetch and load the sample Markdown document
  */
 function loadSampleDocument() {
-  fetch('markdown_editor/sample_doc.06c22ecd.md')
+  fetch('/tools/markdown_editor/sample_doc.06c22ecd.md')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -138,14 +146,25 @@ function loadSampleDocument() {
  */
 function renderContent() {
   const inputText = markdownInput.value;
+  if (!markedLib || typeof DOMPurify === 'undefined') {
+    renderedOutput.innerHTML = `
+      <div class="md-block">
+        <p>Preview unavailable: required libraries failed to load.</p>
+      </div>
+    `;
+    return;
+  }
+
   const preprocessedText = preprocessMarkdown(inputText);
 
   const lineBlocks = buildLineBlocks(preprocessedText);
-  const parsedMarkdown = marked.parse(preprocessedText);
+  const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
-  MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  }
   updateHighlightedBlockFromCaret();
 }
 
