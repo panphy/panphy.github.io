@@ -70,10 +70,10 @@
 	<!-- Dataset Tabs Bar with "Add Dataset" button -->
 	<div class="dataset-tabs-bar">
 		<!-- Example initial tab -->
-		<div class="dataset-tab active">
-			<span class="tab-label">Dataset 1</span>
-			<span class="tab-close" title="Remove dataset">×</span>
-		</div>
+						<div class="dataset-tab active">
+							<span class="tab-label">Dataset 1</span>
+							<button class="tab-close" type="button" title="Remove dataset" aria-label="Remove dataset">×</button>
+						</div>
 		<!-- The Add Dataset button looks just like a tab except it keeps its own color -->
 		<button class="add-dataset-btn" title="Add a new dataset tab">Add Dataset</button>
 	</div>
@@ -88,11 +88,11 @@
 					<thead>
 						<tr>
 							<th>
-								<input type="text" id="x-column-name" value="x" oninput="updateLabels('x')" />
+								<input type="text" id="x-column-name" value="x" oninput="updateLabels('x')" aria-label="X column name" />
 								<div id="x-column-latex" class="latex-display">\( x \)</div>
 							</th>
 							<th>
-								<input type="text" id="y-column-name" value="y" oninput="updateLabels('y')" />
+								<input type="text" id="y-column-name" value="y" oninput="updateLabels('y')" aria-label="Y column name" />
 								<div id="y-column-latex" class="latex-display">\( y \)</div>
 							</th>
 							<th class="error-column" id="x-error-header" style="display: none;">
@@ -310,8 +310,8 @@
 	<!-- Transparent background for the popup -->
 	<div id="popup-background" style="display: none;"></div>
 
-	<div id="popup-container" style="display: none;">
-		<div id="popup-content">
+		<div id="popup-container" style="display: none;">
+			<div id="popup-content" role="dialog" aria-modal="true" aria-labelledby="popup-title">
 			<button id="popup-close" onclick="closePopup()" title="Close the combined plot window">Close</button>
 			<div id="popup-title">Combined Plot of All Datasets</div>
 			<div id="popup-plot-container">
@@ -336,8 +336,8 @@
 
 	<!-- View Table Popup -->
 	<div id="export-table-background" style="display: none;"></div>
-	<div id="export-table-container" style="display: none;">
-		<div id="export-table-content">
+		<div id="export-table-container" style="display: none;">
+			<div id="export-table-content" role="dialog" aria-modal="true" aria-labelledby="export-table-title">
 			<button id="export-table-close" onclick="closeExportTablePopup()"
 				title="Close the view table window">Close</button>
 			<div id="export-table-title">View Table</div>
@@ -352,8 +352,8 @@
 
 	<!-- Filename Prompt Modal -->
 	<div id="filename-prompt-background" style="display: none;"></div>
-	<div id="filename-prompt-container" style="display: none;">
-		<div id="filename-prompt-content">
+		<div id="filename-prompt-container" style="display: none;">
+			<div id="filename-prompt-content" role="dialog" aria-modal="true" aria-labelledby="filename-prompt-title">
 			<div id="filename-prompt-title">Enter Filename</div>
 			<div id="filename-prompt-input-row">
 				<input type="text" id="filename-prompt-input" placeholder="data" />
