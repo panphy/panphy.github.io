@@ -248,7 +248,10 @@ async function togglePresentMode() {
         }
       } catch (error) {
         console.error('Failed to enter fullscreen presentation mode:', error);
-        return;
+        outputPane.classList.add('pseudo-fullscreen');
+        document.body.style.overflow = 'hidden';
+        updatePresentButtonLabel();
+        updatePresentThemeIcon();
       }
     } else {
       // Pseudo-fullscreen fallback (iPad / older Safari)
