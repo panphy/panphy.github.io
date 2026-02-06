@@ -70,30 +70,21 @@ initUI({
 });
 
 // Configure marked once at initialization (not per-render)
+// NOTE: marked v4.x renderer API passes (text, task, checked) strings,
+// NOT token objects. The highlight callback also requires v4.x.
 const customRenderer = {
-  listitem(token) {
-    let checkbox = '';
-    let bodyTokens = token.tokens;
-    if (token.task) {
-      checkbox = `<input type="checkbox" disabled${token.checked ? ' checked' : ''}> `;
-      // Newer marked.js versions emit a 'checkbox' token — skip it to avoid duplicates
-      bodyTokens = token.tokens.filter(t => t.type !== 'checkbox');
-      // Always inline-parse task items to prevent <p> wrapping that breaks
-      // the flex checkbox layout (marked token structure varies by version)
-      const inner = bodyTokens.length >= 1 && Array.isArray(bodyTokens[0].tokens)
-        ? bodyTokens[0].tokens
-        : bodyTokens;
-      const body = this.parser.parseInline(inner);
-      return `<li class="task-list-item">${checkbox}<span>${body}</span></li>\n`;
+  listitem(text, task) {
+    if (task) {
+      // In marked v4, 'text' already includes the <input> checkbox HTML.
+      // Split checkbox from label so we can wrap the label in <span>
+      // for the flex layout (.task-list-item uses flex: input + span).
+      const match = text.match(/^(<input[^>]*>)\s*([\s\S]*)$/);
+      if (match) {
+        return `<li class="task-list-item">${match[1]} <span>${match[2]}</span></li>\n`;
+      }
+      return `<li class="task-list-item">${text}</li>\n`;
     }
-    const isSingleParagraph =
-      bodyTokens.length === 1 && bodyTokens[0].type === 'paragraph' && Array.isArray(bodyTokens[0].tokens);
-    const isSingleText =
-      bodyTokens.length === 1 && bodyTokens[0].type === 'text' && Array.isArray(bodyTokens[0].tokens);
-    const body = (isSingleParagraph || isSingleText)
-      ? this.parser.parseInline(bodyTokens[0].tokens)
-      : this.parser.parse(bodyTokens);
-    return `<li>${body}</li>\n`;
+    return `<li>${text}</li>\n`;
   }
 };
 
