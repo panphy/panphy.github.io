@@ -172,8 +172,13 @@ function prepareEquationSvg(svg) {
 
   svgClone.querySelectorAll('rect').forEach(rect => {
     const rectFill = rect.getAttribute('fill');
+    const width = parseFloat(rect.getAttribute('width') || '0');
+    const height = parseFloat(rect.getAttribute('height') || '0');
+    const isThinRect = (Number.isFinite(width) && width > 0 && width <= 2)
+      || (Number.isFinite(height) && height > 0 && height <= 2);
+
     if (!rectFill || rectFill === 'currentColor') {
-      rect.setAttribute('fill', 'none');
+      rect.setAttribute('fill', isThinRect ? fillColor : 'none');
     }
     const rectStroke = rect.getAttribute('stroke');
     if (!rectStroke || rectStroke === 'currentColor') {
