@@ -314,7 +314,7 @@ function initializePresentZoom() {
 // ---- Laser pointer ----
 let laserEnabled = false;
 const laserTail = [];
-const LASER_POINTER_SIZE = 18;
+const LASER_POINTER_SIZE = 12;
 const LASER_TAIL_MAX = 180;
 
 function resizeLaserCanvas() {
@@ -362,8 +362,8 @@ function renderLaserTail() {
       point.life *= 0.94;
       if (point.life < 0.02) continue;
       const alpha = point.life;
-      const radius = LASER_POINTER_SIZE * (0.8 + 1.0 * alpha);
-      const glow = radius * 2.5 * 0.85;
+      const radius = LASER_POINTER_SIZE * (0.65 + 0.55 * alpha);
+      const glow = radius * 2.2 * 0.7;
       const gradient = laserContext.createRadialGradient(point.x, point.y, 0, point.x, point.y, glow);
       gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.3 * alpha})`);
       gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${0.1 * alpha})`);
