@@ -733,7 +733,7 @@
 		<div class="banner-title">Motion Tracker</div>
 		<div class="banner-actions">
 			<div class="theme-toggle">
-				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">Light</button>
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
 			</div>
 		</div>
 	</header>
@@ -920,7 +920,7 @@
 
 		function updateButtonEmoji(theme) {
 			if (!themeButton) return;
-			themeButton.textContent = theme === 'dark' ? 'Dark' : 'Light';
+			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
 		}
 
 		function getCssVar(name) {
