@@ -733,21 +733,21 @@
 		<div class="banner-title">Motion Tracker</div>
 		<div class="banner-actions">
 			<div class="theme-toggle">
-				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+				<button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">Light</button>
 			</div>
 		</div>
 	</header>
 
 	<div class="toolbar">
 		<div style="display:flex; gap:10px;">
-			<button id="openVideo" class="btn-primary">📂 Import Video</button>
+			<button id="openVideo" class="btn-primary">Import Video</button>
 		</div>
 
 		<div class="toolbar-divider"></div>
 
 		<div style="display:flex; gap:10px;">
-			<button id="calibrate" class="btn-tool" disabled>📏 Calibrate</button>
-			<button id="setOrigin" class="btn-tool" disabled>🎯 Set Origin</button>
+			<button id="calibrate" class="btn-tool" disabled>Calibrate</button>
+			<button id="setOrigin" class="btn-tool" disabled>Set Origin</button>
 		</div>
 
 		<div class="toolbar-divider"></div>
@@ -783,7 +783,7 @@
 			</div>
 
 			<div class="playback-controls">
-				<button id="playPause" class="btn-primary" disabled>▶ Play</button>
+				<button id="playPause" class="btn-primary" disabled>Play</button>
 				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 				<span id="timeDisplay">0:00.000</span>
 				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
@@ -920,7 +920,7 @@
 
 		function updateButtonEmoji(theme) {
 			if (!themeButton) return;
-			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+			themeButton.textContent = theme === 'dark' ? 'Dark' : 'Light';
 		}
 
 		function getCssVar(name) {
@@ -1187,7 +1187,7 @@
 			// Reset video to frame 0 and ensure it's paused for manual playback
 			hiddenVideo.pause();
 			isPlaying = false;
-			playPauseButton.textContent = "▶ Play";
+			playPauseButton.textContent = "Play";
 			hiddenVideo.currentTime = 0;
 			slider.value = "0";
 			updateTimeDisplay(0);
@@ -1272,7 +1272,7 @@
 			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
 			// 6. Reset UI elements
-			playPauseButton.textContent = "▶ Play";
+			playPauseButton.textContent = "Play";
 			frameCanvas.style.cursor = "default";
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "none";
@@ -1382,7 +1382,7 @@
 		// Reset play button if video ends naturally
 		hiddenVideo.addEventListener('ended', () => {
 			isPlaying = false;
-			playPauseButton.textContent = "▶ Play";
+			playPauseButton.textContent = "Play";
 		});
 
 		/* Scrubbing */
@@ -1390,7 +1390,7 @@
 			if (isPlaying) {
 				hiddenVideo.pause();
 				isPlaying = false;
-				playPauseButton.textContent = "▶ Play";
+				playPauseButton.textContent = "Play";
 			}
 			const end = getSeekableEnd();
 			let t = parseFloat(slider.value);
@@ -1409,15 +1409,15 @@
 		playPauseButton.addEventListener('click', async () => {
 			if (isPlaying) {
 				hiddenVideo.pause();
-				playPauseButton.textContent = "▶ Play";
+				playPauseButton.textContent = "Play";
 			} else {
 				try {
 					await hiddenVideo.play();
 					isPlaying = true;
-					playPauseButton.textContent = "⏸ Pause";
+					playPauseButton.textContent = "Pause";
 				} catch {
 					isPlaying = false;
-					playPauseButton.textContent = "▶ Play";
+					playPauseButton.textContent = "Play";
 				}
 				return;
 			}
@@ -1546,7 +1546,7 @@
 			if (isPlaying) {
 				hiddenVideo.pause();
 				isPlaying = false;
-				playPauseButton.textContent = "▶ Play";
+				playPauseButton.textContent = "Play";
 			}
 
 			const finish = () => {
