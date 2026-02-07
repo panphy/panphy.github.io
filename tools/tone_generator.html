@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -14,84 +14,23 @@
       --font-sans: 'Inter', sans-serif;
       --font-display: 'Poppins', 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-
-      --bg-color: #f8f9fa;
-      --bg-pattern: #e9ecef;
-      --text-main: #2d3436;
-      --text-secondary: #636e72;
-
-      --brand-primary: #6c5ce7;
-      --brand-secondary: #a29bfe;
-      --brand-accent: #00cec9;
-
-      --nav-bg: rgba(255, 255, 255, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.5);
-
-      --card-bg: #ffffff;
-      --card-border: transparent;
-      --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-      --card-shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.06);
-      --image-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-      --pill-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.12);
-      --thumb-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-
-      --surface-strong: #f1f3f5;
-      --surface-muted: #e9ecef;
-
-      --border: rgba(45, 52, 54, 0.15);
-      --btn-bg-color: #2d3436;
-      --btn-bg-hover: #1b1f21;
-      --btn-text-color: #ffffff;
-      --btn-border-color: transparent;
-
-      --slider-bg: #dfe6e9;
-      --slider-bg-hover: #cfd8dc;
-      --slider-thumb: #6c5ce7;
-      --focus-ring: rgba(108, 92, 231, 0.25);
-
-      --wave-bg: #f1f3f5;
-      --wave-channel: #2d98da;
-      --wave-combined: #e84393;
-    }
-
-    [data-theme="dark"] {
       --bg-color: #0f1014;
       --bg-pattern: #181a20;
       --text-main: #dfe6e9;
       --text-secondary: #b2bec3;
-
       --brand-primary: #a29bfe;
       --brand-secondary: #6c5ce7;
       --brand-accent: #81ecec;
-
-      --nav-bg: rgba(22, 24, 29, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.05);
-
-      --card-bg: #1e2129;
-      --card-border: #2d3436;
-      --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
-      --card-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.25);
-      --image-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
-      --pill-shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.35);
-      --thumb-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-
-      --surface-strong: #111318;
-      --surface-muted: #17191f;
-
+      --surface: #1e2129;
+      --surface-alt: #17191f;
       --border: #2d3436;
-      --btn-bg-color: #6c5ce7;
-      --btn-bg-hover: #5b4ad8;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      --btn-bg-color: #2b2f39;
+      --btn-bg-hover: #3a3f4b;
       --btn-text-color: #ffffff;
-      --btn-border-color: transparent;
-
+      --btn-border-color: #3a3f4b;
       --slider-bg: #3a3f4b;
-      --slider-bg-hover: #4a4f5b;
       --slider-thumb: #a29bfe;
-      --focus-ring: rgba(162, 155, 254, 0.3);
-
-      --wave-bg: #111318;
-      --wave-channel: #57c7ff;
-      --wave-combined: #ff638f;
     }
 
     html,
@@ -104,114 +43,63 @@
 
     * {
       box-sizing: border-box;
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
     }
 
     body {
       background-color: var(--bg-color);
       background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-      background-size: 30px 30px;
+      background-size: 32px 32px;
       color: var(--text-main);
       font-family: var(--font-sans);
       display: flex;
       flex-direction: column;
     }
 
-    .page-header {
-      display: flex;
+    /* Title banner container: 3-column grid */
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      background: var(--nav-bg);
+      background: rgba(22, 24, 29, 0.85);
       margin: 1rem auto 0.75rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 20px;
-      border: 1px solid var(--nav-border);
-      box-shadow: var(--card-shadow);
+      padding: 0.5rem 1.25rem;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
       max-width: 1200px;
       width: calc(100% - 3rem);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(10px);
     }
 
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .header-brand img {
-      max-height: 38px;
+    /* The logo container (left column): control the image size */
+    .banner-logo img {
+      max-height: 32px;
       width: auto;
       height: auto;
-      filter: drop-shadow(var(--image-shadow));
     }
 
-    .header-title {
+    /* The heading in the center column */
+    .banner-title {
       margin: 0;
-      font-size: 1.6rem;
+      text-align: center;
+      font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.5px;
       font-family: var(--font-display);
       color: var(--brand-primary);
     }
 
-    .header-title.gradient-text {
+    .banner-title.gradient-text {
       background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .header-subtitle {
-      margin: 0.2rem 0 0;
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .pill-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.45rem 1rem;
-      border-radius: 999px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: var(--card-shadow-soft);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .pill-link:hover {
-      transform: translateY(-1px);
-      text-decoration: none;
-      box-shadow: var(--pill-shadow-hover);
-    }
-
-    .theme-toggle button {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      cursor: pointer;
-      box-shadow: var(--card-shadow-soft);
-    }
-
-    .theme-toggle button:hover {
-      transform: rotate(12deg);
+    /* Empty placeholder in the right column to keep the heading truly centered */
+    .banner-placeholder {
+      width: 70px;
+      /* approximate the same width as the logo area */
     }
 
     a {
@@ -247,30 +135,18 @@
       max-width: 40%;
       display: flex;
       flex-direction: column;
+      border-right: 1px solid var(--border);
       padding: 16px;
       overflow: hidden;
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--surface);
       border-radius: 18px;
-      box-shadow: var(--card-shadow);
+      box-shadow: var(--shadow);
     }
 
     #channelsScrollContainer {
       overflow-y: auto;
       flex: 1;
       padding-right: 10px;
-    }
-
-    .channels-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .channels-header .panel-title {
-      margin-bottom: 0;
     }
 
     /* RIGHT COLUMN */
@@ -280,56 +156,14 @@
       flex-direction: column;
       padding: 16px;
       overflow: hidden;
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background-color: var(--surface);
       border-radius: 18px;
-      box-shadow: var(--card-shadow);
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .panel-title {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-main);
-      font-family: var(--font-display);
-    }
-
-    .panel-subtitle {
-      margin: 0.25rem 0 0;
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-    }
-
-    .helper-text {
-      margin: 0.35rem 0 0;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      background: var(--surface-strong);
-      border: 1px solid var(--border);
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-main);
+      box-shadow: var(--shadow);
     }
 
     /* CHANNEL UI */
     .channel {
-      background-color: var(--surface-muted);
+      background-color: var(--surface-alt);
       border: 1px solid var(--border);
       padding: 12px;
       margin-bottom: 12px;
@@ -351,24 +185,6 @@
       color: var(--text-main);
     }
 
-    .channel-body {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .slider-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .slider-label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
     .slider-container {
       display: flex;
       align-items: center;
@@ -381,17 +197,6 @@
       white-space: nowrap;
       min-width: 60px;
       text-align: right;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-    }
-
-    input[type="number"] {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-family: var(--font-mono);
     }
 
     .freq-controls {
@@ -403,7 +208,7 @@
     .channel-canvas {
       width: 100%;
       height: 80px;
-      background-color: var(--surface-strong);
+      background-color: #111318;
       border: 1px solid var(--border);
       border-radius: 8px;
       margin-top: 8px;
@@ -428,13 +233,6 @@
     .btn:hover {
       background-color: var(--btn-bg-hover);
       transform: translateY(-1px);
-    }
-
-    .btn:focus-visible,
-    input[type="range"]:focus-visible,
-    input[type="number"]:focus-visible {
-      outline: 2px solid transparent;
-      box-shadow: 0 0 0 3px var(--focus-ring);
     }
 
     #freezeBtn {
@@ -462,7 +260,7 @@
     }
 
     input[type="range"]:hover::-webkit-slider-runnable-track {
-      background: var(--slider-bg-hover);
+      background: #4a4f5b;
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -475,7 +273,7 @@
       cursor: pointer;
       border: none;
       margin-top: -8px;
-      box-shadow: var(--thumb-shadow);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       transition: background 0.3s;
     }
 
@@ -489,7 +287,7 @@
     }
 
     input[type="range"]:hover::-moz-range-track {
-      background: var(--slider-bg-hover);
+      background: #4a4f5b;
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -499,7 +297,7 @@
       background: var(--slider-thumb);
       cursor: pointer;
       border: none;
-      box-shadow: var(--thumb-shadow);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       transition: background 0.3s;
     }
 
@@ -507,11 +305,10 @@
     #combinedWaveContainer {
       display: flex;
       flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
+      align-items: center;
       margin-top: 20px;
       flex: 1 1 auto;
-      background: var(--surface-muted);
+      background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 16px;
@@ -520,17 +317,15 @@
     #sumCanvas {
       width: 95%;
       height: 160px;
-      background-color: var(--surface-strong);
+      background-color: #111318;
       border: 2px solid var(--border);
       border-radius: 12px;
-      align-self: center;
     }
 
     #combinedWaveButtons {
+      margin-top: 10px;
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
     }
 
     #toggleCombinedBtn {
@@ -544,38 +339,17 @@
       justify-content: space-between;
       margin-bottom: 15px;
       gap: 20px;
-      flex-wrap: wrap;
-      background: var(--surface-muted);
+      background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 12px;
-    }
-
-    .info-card {
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: var(--card-shadow-soft);
-    }
-
-    .info-card ul {
-      margin: 10px 0 0;
-      padding-left: 1.2rem;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    .info-card li {
-      margin-bottom: 6px;
     }
 
     .controlRow {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
-      flex: 1 1 180px;
+      flex: 1;
       flex-direction: column;
     }
 
@@ -665,24 +439,22 @@
         overflow: auto;
       }
 
-      .page-header {
+      #titleBanner {
         width: calc(100% - 1.5rem);
         margin: 0.75rem auto;
-        padding: 0.6rem 0.9rem;
-        flex-direction: column;
-        align-items: flex-start;
+        padding: 0.4rem 0.75rem;
       }
 
-      .header-title {
-        font-size: 1.2rem;
+      .banner-title {
+        font-size: 1.1rem;
       }
 
-      .header-subtitle {
-        font-size: 0.85rem;
+      .banner-logo img {
+        max-height: 26px;
       }
 
-      .header-brand img {
-        max-height: 28px;
+      .banner-placeholder {
+        width: 50px;
       }
 
       #content {
@@ -734,8 +506,12 @@
     }
 
     @media (max-width: 480px) {
-      .header-title {
-        font-size: 1rem;
+      .banner-title {
+        font-size: 0.95rem;
+      }
+
+      .banner-logo img {
+        max-height: 22px;
       }
 
       #leftColumn {
@@ -751,57 +527,28 @@
 
 <body>
 
-  <header class="page-header">
-    <div class="header-brand">
-      <a href="https://panphy.github.io/" aria-label="PanPhy Labs home">
+  <!-- Title Banner: Logo (Left), Heading (Center), Placeholder (Right) -->
+  <div id="titleBanner">
+    <div class="banner-logo">
+      <a href="https://panphy.github.io/">
         <img src="/assets/panphy.png" alt="PanPhy logo" />
       </a>
-      <div>
-        <h1 class="header-title">Multi-Channel Tone Generator</h1>
-        <p class="header-subtitle">Mix multiple sine tones, visualize the wave, and explore superposition.</p>
-      </div>
     </div>
-    <div class="header-actions">
-      <a class="pill-link" href="/index.html">Back to Home</a>
-      <div class="theme-toggle">
-        <button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
-      </div>
-    </div>
-  </header>
+
+    <h1 class="banner-title">Multi-Channel Tone Generator</h1>
+
+    <div class="banner-placeholder"></div>
+  </div>
 
   <div id="content">
     <!-- LEFT COLUMN: Channels -->
     <div id="leftColumn">
-      <div class="channels-header">
-        <div>
-          <h2 class="panel-title">Channels</h2>
-          <p class="panel-subtitle">Add tones, tune their frequency, and toggle play.</p>
-          <span class="pill">Hearing range: 20 Hz – 20 kHz</span>
-        </div>
-        <button id="addChannelBtn" class="btn">Add Channel</button>
-      </div>
-      <p class="helper-text">Tip: Use the number box for precise Hz, then click Play to hear a single channel.</p>
+      <button id="addChannelBtn" class="btn" style="margin-bottom: 10px;">Add Channel</button>
       <div id="channelsScrollContainer"></div>
     </div>
 
     <!-- RIGHT COLUMN: Controls + Combined Wave -->
     <div id="rightColumn">
-      <div class="info-card">
-        <h2 class="panel-title">Quick Start</h2>
-        <p class="panel-subtitle">Build a mix in three steps.</p>
-        <ul>
-          <li>Add a channel and set its frequency in Hz.</li>
-          <li>Press Play on a channel to preview individual tones.</li>
-          <li>Use Play Combined to hear the full mix and see the summed wave.</li>
-        </ul>
-      </div>
-
-      <div class="panel-header">
-        <div>
-          <h2 class="panel-title">Master Controls</h2>
-          <p class="panel-subtitle">Shape how the mix sounds and how the animation moves.</p>
-        </div>
-      </div>
       <!-- Sliders: Panning, Log-Time Scale, Zoom In/Out -->
       <div id="controlsContainer">
         <div class="controlRow">
@@ -825,14 +572,7 @@
       </div>
 
       <div id="combinedWaveContainer">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Combined Output</h2>
-            <p class="panel-subtitle">Watch the total wave and set the global volume.</p>
-          </div>
-        </div>
         <canvas id="sumCanvas"></canvas>
-        <p class="helper-text">Freeze pauses the animation without stopping audio.</p>
         <div id="combinedWaveButtons">
           <div id="volumeWrapper">
             <label for="volumeSlider">Volume:</label>
@@ -851,47 +591,10 @@
       My Projects</a>
   </footer>
   <script>
-    const themeButton = document.getElementById('theme-button');
-    const DARK_THEME_KEY = "panphy-dark";
-    const LIGHT_THEME_KEY = "panphy-light";
-
-    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-      "dark" :
-      localStorage.getItem(LIGHT_THEME_KEY) ?
-        "light" :
-        "light";
-
-    document.documentElement.setAttribute('data-theme', currentTheme);
-
-    function updateButtonEmoji(theme) {
-      themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-    }
-
-    updateButtonEmoji(currentTheme);
-    window.dispatchEvent(new Event('themechange'));
-
-    themeButton.addEventListener('click', function () {
-      let theme = document.documentElement.getAttribute('data-theme');
-      if (theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem(DARK_THEME_KEY, 'true');
-        localStorage.removeItem(LIGHT_THEME_KEY);
-        updateButtonEmoji('dark');
-        window.dispatchEvent(new Event('themechange'));
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem(LIGHT_THEME_KEY, 'true');
-        localStorage.removeItem(DARK_THEME_KEY);
-        updateButtonEmoji('light');
-        window.dispatchEvent(new Event('themechange'));
-      }
-    });
-  </script>
-  <script>
     // Gradient text: skip on Brave iOS where background-clip:text is broken
     (function() {
       if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-      document.querySelectorAll('.header-title').forEach(function(el) { el.classList.add('gradient-text'); });
+      document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
     })();
   </script>
 </body>
@@ -973,20 +676,6 @@
   let combinedPlaying = false;
   let isFrozen = false;
 
-  let waveBackgroundColor = '';
-  let waveChannelColor = '';
-  let waveCombinedColor = '';
-
-  function updateWaveColors() {
-    const styles = getComputedStyle(document.documentElement);
-    waveBackgroundColor = styles.getPropertyValue('--wave-bg').trim();
-    waveChannelColor = styles.getPropertyValue('--wave-channel').trim();
-    waveCombinedColor = styles.getPropertyValue('--wave-combined').trim();
-  }
-
-  updateWaveColors();
-  window.addEventListener('themechange', updateWaveColors);
-
   // Zoom scale
   let zoomScale = parseFloat(zoomScaleSlider.value);
   zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
@@ -1041,13 +730,6 @@
     headerDiv.appendChild(removeBtn);
 
     // Frequency controls
-    const sliderGroup = document.createElement('div');
-    sliderGroup.className = 'slider-group';
-
-    const sliderLabel = document.createElement('label');
-    sliderLabel.className = 'slider-label';
-    sliderLabel.textContent = 'Frequency (Hz)';
-
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'slider-container freq-controls';
 
@@ -1057,7 +739,6 @@
     freqSlider.max = 23000;
     freqSlider.value = 440;
     freqSlider.step = 1;
-    freqSlider.setAttribute('aria-label', 'Frequency slider');
 
     const freqNumber = document.createElement('input');
     freqNumber.type = 'number';
@@ -1065,16 +746,15 @@
     freqNumber.max = 23000;
     freqNumber.value = 440;
     freqNumber.step = 1;
-    freqNumber.setAttribute('aria-label', 'Frequency input');
     freqNumber.style.width = '70px';
 
-    const freqValueLabel = document.createElement('span');
-    freqValueLabel.textContent = '440 Hz';
+    const freqLabel = document.createElement('span');
+    freqLabel.textContent = '440 Hz';
 
     freqSlider.oninput = () => {
       const freq = parseFloat(freqSlider.value);
       freqNumber.value = freq;
-      freqValueLabel.textContent = `${freq} Hz`;
+      freqLabel.textContent = `${freq} Hz`;
       oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
       channels[channelIndex - 1].frequency = freq;
     };
@@ -1085,17 +765,14 @@
       if (val > 23000) val = 23000;
       freqNumber.value = val;
       freqSlider.value = val;
-      freqValueLabel.textContent = `${val} Hz`;
+      freqLabel.textContent = `${val} Hz`;
       oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
       channels[channelIndex - 1].frequency = val;
     };
 
     controlsDiv.appendChild(freqSlider);
     controlsDiv.appendChild(freqNumber);
-    controlsDiv.appendChild(freqValueLabel);
-
-    sliderGroup.appendChild(sliderLabel);
-    sliderGroup.appendChild(controlsDiv);
+    controlsDiv.appendChild(freqLabel);
 
     // Play/Pause
     const playPauseBtn = document.createElement('button');
@@ -1114,15 +791,10 @@
     canvas.className = 'channel-canvas';
     const ctx = canvas.getContext('2d');
 
-    const channelBody = document.createElement('div');
-    channelBody.className = 'channel-body';
-
-    channelBody.appendChild(sliderGroup);
-    channelBody.appendChild(playPauseBtn);
-    channelBody.appendChild(canvas);
-
     channelDiv.appendChild(headerDiv);
-    channelDiv.appendChild(channelBody);
+    channelDiv.appendChild(controlsDiv);
+    channelDiv.appendChild(playPauseBtn);
+    channelDiv.appendChild(canvas);
 
     channelsScrollContainer.appendChild(channelDiv);
 
@@ -1175,11 +847,11 @@
   }
 
   function drawChannelWave(channel, ctx, canvas) {
-    ctx.fillStyle = waveBackgroundColor;
+    ctx.fillStyle = '#1e1e1e';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = waveChannelColor;
+    ctx.strokeStyle = '#57c7ff';
     ctx.beginPath();
 
     const timeWindow = BASE_WINDOW * zoomScale;
@@ -1197,13 +869,13 @@
   }
 
   function drawCombinedWave(ctx, canvas) {
-    ctx.fillStyle = waveBackgroundColor;
+    ctx.fillStyle = '#1e1e1e';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (channels.length === 0) return;
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = waveCombinedColor;
+    ctx.strokeStyle = '#ff638f';
     ctx.beginPath();
 
     const timeWindow = BASE_WINDOW * zoomScale;
