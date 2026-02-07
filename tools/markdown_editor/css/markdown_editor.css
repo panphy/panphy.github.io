@@ -295,14 +295,14 @@ body.laser-cursor-hidden *,
 .laser-pointer {
   display: none;
   position: fixed;
-  width: 9.6px;
-  height: 9.6px;
+  width: 6.7px;
+  height: 6.7px;
   border-radius: 50%;
   background: var(--laser-color);
   box-shadow:
-    0 0 4.8px 1.6px rgba(var(--laser-color-rgb), 0.8),
-    0 0 12.8px 4.8px rgba(var(--laser-color-rgb), 0.5),
-    0 0 24px 8px rgba(var(--laser-color-rgb), 0.25);
+    0 0 3.4px 1.1px rgba(var(--laser-color-rgb), 0.8),
+    0 0 9px 3.4px rgba(var(--laser-color-rgb), 0.5),
+    0 0 16.8px 5.6px rgba(var(--laser-color-rgb), 0.25);
   pointer-events: none;
   z-index: 100000;
   transform: translate(-50%, -50%);
