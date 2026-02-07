@@ -310,8 +310,8 @@ body.laser-cursor-hidden *,
 .laser-pointer {
   display: none;
   position: fixed;
-  width: 6.7px;
-  height: 6.7px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--laser-color);
   box-shadow:
