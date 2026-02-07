@@ -62,6 +62,8 @@ const presentThemeToggle = document.getElementById('presentThemeToggle');
 const presentLaserToggle = document.getElementById('presentLaserToggle');
 const presentZoomSelect = document.getElementById('presentZoomSelect');
 const laserPointer = document.getElementById('laserPointer');
+const laserCanvas = document.getElementById('laserCanvas');
+const laserContext = laserCanvas ? laserCanvas.getContext('2d') : null;
 
 // Initialize UI module with DOM references
 initUI({
@@ -311,10 +313,87 @@ function initializePresentZoom() {
 
 // ---- Laser pointer ----
 let laserEnabled = false;
+const laserTail = [];
+const LASER_POINTER_SIZE = 12;
+const LASER_TAIL_MAX = 180;
+
+function resizeLaserCanvas() {
+  if (!laserCanvas || !laserContext) return;
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.ceil(window.innerWidth * dpr);
+  const height = Math.ceil(window.innerHeight * dpr);
+  laserCanvas.width = width;
+  laserCanvas.height = height;
+  laserCanvas.style.width = `${window.innerWidth}px`;
+  laserCanvas.style.height = `${window.innerHeight}px`;
+  laserContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function getLaserRgb() {
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--laser-color')
+    .trim();
+  const hex = raw || '#22c55e';
+  const normalized = hex.replace('#', '');
+  const value = parseInt(normalized.length === 3
+    ? normalized.split('').map(c => c + c).join('')
+    : normalized, 16);
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255
+  };
+}
+
+function addTailPoint(x, y) {
+  laserTail.push({ x, y, life: 1 });
+  if (laserTail.length > LASER_TAIL_MAX) laserTail.shift();
+}
+
+function renderLaserTail() {
+  if (!laserCanvas || !laserContext) return;
+  const w = laserCanvas.width;
+  const h = laserCanvas.height;
+  laserContext.clearRect(0, 0, w, h);
+  if (laserEnabled && laserTail.length > 0) {
+    const { r, g, b } = getLaserRgb();
+    for (let i = 0; i < laserTail.length; i++) {
+      const point = laserTail[i];
+      point.life *= 0.94;
+      if (point.life < 0.02) continue;
+      const alpha = point.life;
+      const radius = LASER_POINTER_SIZE * (0.8 + 1.0 * alpha);
+      const glow = radius * 2.5;
+      const gradient = laserContext.createRadialGradient(point.x, point.y, 0, point.x, point.y, glow);
+      gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.3 * alpha})`);
+      gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${0.1 * alpha})`);
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      laserContext.fillStyle = gradient;
+      laserContext.beginPath();
+      laserContext.arc(point.x, point.y, glow, 0, Math.PI * 2);
+      laserContext.fill();
+
+      laserContext.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.9 * alpha})`;
+      laserContext.beginPath();
+      laserContext.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      laserContext.fill();
+
+      laserContext.fillStyle = `rgba(255, 255, 255, ${0.5 * alpha})`;
+      laserContext.beginPath();
+      laserContext.arc(point.x, point.y, radius * 0.4, 0, Math.PI * 2);
+      laserContext.fill();
+    }
+  }
+  for (let j = laserTail.length - 1; j >= 0; j--) {
+    if (laserTail[j].life < 0.02) laserTail.splice(j, 1);
+  }
+  requestAnimationFrame(renderLaserTail);
+}
 
 function onLaserMove(e) {
   laserPointer.style.left = e.clientX + 'px';
   laserPointer.style.top = e.clientY + 'px';
+  addTailPoint(e.clientX, e.clientY);
 }
 
 function onLaserTouch(e) {
@@ -325,11 +404,16 @@ function onLaserTouch(e) {
   const touch = e.touches[0];
   laserPointer.style.left = touch.clientX + 'px';
   laserPointer.style.top = touch.clientY + 'px';
+  addTailPoint(touch.clientX, touch.clientY);
 }
 
 function enableLaser() {
   laserEnabled = true;
   laserPointer.style.display = 'block';
+  if (laserCanvas) {
+    laserCanvas.style.display = 'block';
+    resizeLaserCanvas();
+  }
   presentLaserToggle.classList.add('laser-active');
   document.documentElement.classList.add('laser-cursor-hidden');
   document.body.classList.add('laser-cursor-hidden');
@@ -342,6 +426,10 @@ function enableLaser() {
 function disableLaser() {
   laserEnabled = false;
   laserPointer.style.display = 'none';
+  if (laserCanvas) {
+    laserCanvas.style.display = 'none';
+  }
+  laserTail.length = 0;
   presentLaserToggle.classList.remove('laser-active');
   document.documentElement.classList.remove('laser-cursor-hidden');
   document.body.classList.remove('laser-cursor-hidden');
@@ -870,6 +958,11 @@ initializeFontSize(fontSizeSelect);
 updatePresentButtonLabel();
 updatePresentThemeIcon();
 initMobileLayout();
+if (laserCanvas && laserContext) {
+  resizeLaserCanvas();
+  window.addEventListener('resize', resizeLaserCanvas);
+  requestAnimationFrame(renderLaserTail);
+}
 
 // Restore draft and render
 const savedDraft = restoreDraft();
