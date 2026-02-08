@@ -908,12 +908,16 @@
 		const SESSION_VIDEO_KEY = 'panphy-motion-tracker-session-video-v1';
 		const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 		const SESSION_SAVE_DEBOUNCE_MS = 300;
+		const RESTORE_LOAD_TIMEOUT_MS = 7000;
+		const RESTORE_SEEK_TIMEOUT_MS = 1000;
 
 		let currentVideoId = null;
 		let restoringSession = false;
 		let pendingRestoredCurrentTime = 0;
 		let stateSaveTimeoutId = null;
 		let recoveryWarningShown = false;
+		let restoreLoadTimeoutId = null;
+		let restoreSeekTimeoutId = null;
 
 		/* ===== Theme ===== */
 		const themeButton = document.getElementById('theme-button');
@@ -1093,11 +1097,43 @@
 			}
 		}
 
+		function clearRestoreLoadTimeout() {
+			if (restoreLoadTimeoutId !== null) {
+				clearTimeout(restoreLoadTimeoutId);
+				restoreLoadTimeoutId = null;
+			}
+		}
+
+		function clearRestoreSeekTimeout() {
+			if (restoreSeekTimeoutId !== null) {
+				clearTimeout(restoreSeekTimeoutId);
+				restoreSeekTimeoutId = null;
+			}
+		}
+
+		function clearRestoreTimeouts() {
+			clearRestoreLoadTimeout();
+			clearRestoreSeekTimeout();
+		}
+
+		function failSessionRestore(message, clearStoredSession = false) {
+			clearRestoreTimeouts();
+			restoringSession = false;
+			pendingRestoredCurrentTime = 0;
+			if (clearStoredSession) {
+				clearRecoveryStorage();
+			}
+			if (message) {
+				document.getElementById('message').innerHTML = `<p>${message}</p>`;
+			}
+		}
+
 		function clearRecoveryStorage() {
 			if (stateSaveTimeoutId !== null) {
 				clearTimeout(stateSaveTimeoutId);
 				stateSaveTimeoutId = null;
 			}
+			clearRestoreTimeouts();
 			try {
 				localStorage.removeItem(SESSION_STATE_KEY);
 				localStorage.removeItem(SESSION_VIDEO_KEY);
@@ -1261,6 +1297,7 @@
 		}
 
 		function finishRestoreAfterSeek() {
+			clearRestoreTimeouts();
 			updateSliderDomain();
 			slider.value = hiddenVideo.currentTime.toString();
 			updateTimeDisplay(hiddenVideo.currentTime);
@@ -1303,8 +1340,14 @@
 			restoringSession = true;
 			currentVideoId = savedVideo.videoId || `restored-${Date.now()}`;
 			applySavedState(savedState);
+			clearRestoreTimeouts();
 			hiddenVideo.src = savedVideo.dataUrl;
 			hiddenVideo.load();
+			restoreLoadTimeoutId = setTimeout(() => {
+				if (!restoringSession) return;
+				console.warn('Session restore timed out while loading saved video.');
+				failSessionRestore('Could not restore the saved session automatically. Please import the video again.', true);
+			}, RESTORE_LOAD_TIMEOUT_MS);
 			document.getElementById('message').innerHTML = "<p>Restoring previous session...</p>";
 		}
 
@@ -1612,6 +1655,11 @@
 		hiddenVideo.addEventListener('loadeddata', updateSliderDomain);
 		hiddenVideo.addEventListener('canplay', updateSliderDomain);
 		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
+		hiddenVideo.addEventListener('error', () => {
+			if (!restoringSession) return;
+			console.warn('Saved session video could not be loaded.');
+			failSessionRestore('Could not restore the saved video. Please import the video again.', true);
+		});
 
 		/* First frame ready */
 		hiddenVideo.addEventListener('loadeddata', () => {
@@ -1626,6 +1674,7 @@
 			plotPosition();
 
 			if (restoringSession) {
+				clearRestoreLoadTimeout();
 				slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
 				detectedFpsDisplay.textContent = detectedFps ? `${detectedFps} fps` : 'Not detected';
 				updateFpsButtonText();
@@ -1634,15 +1683,35 @@
 				updateCrossesToggleUi();
 
 				const end = getSeekableEnd();
+				const duration = Number.isFinite(hiddenVideo.duration) ? hiddenVideo.duration : 0;
 				let restoreTime = pendingRestoredCurrentTime;
 				if (!Number.isFinite(restoreTime) || restoreTime < 0) restoreTime = 0;
 				if (end > 0) restoreTime = Math.min(restoreTime, Math.max(0, end - 0.02));
+				if (duration > 0) restoreTime = Math.min(restoreTime, Math.max(0, duration - 0.02));
+
+				let restoreFinalized = false;
+				const finalizeRestore = () => {
+					if (restoreFinalized) return;
+					restoreFinalized = true;
+					clearRestoreSeekTimeout();
+					finishRestoreAfterSeek();
+				};
 
 				if (restoreTime > 0) {
-					hiddenVideo.addEventListener('seeked', finishRestoreAfterSeek, { once: true });
-					hiddenVideo.currentTime = restoreTime;
+					hiddenVideo.addEventListener('seeked', finalizeRestore, { once: true });
+					restoreSeekTimeoutId = setTimeout(() => {
+						if (!restoringSession) return;
+						console.warn('Session restore seek timeout; finishing restore at current frame.');
+						finalizeRestore();
+					}, RESTORE_SEEK_TIMEOUT_MS);
+					try {
+						hiddenVideo.currentTime = restoreTime;
+					} catch (err) {
+						console.warn('Failed to seek during session restore.', err);
+						finalizeRestore();
+					}
 				} else {
-					finishRestoreAfterSeek();
+					finalizeRestore();
 				}
 				return;
 			}
