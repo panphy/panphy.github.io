@@ -1727,6 +1727,7 @@
         player.draw();
 
         // Spawn budget is frame-rate independent and scales with canvas area.
+        // Carry over fractional budget so long-term spawn rate matches the target.
         const scaledSpawnRate = asteroidSpawnRate * getAreaRatio();
         spawnAccumulator += (scaledSpawnRate / 100) * deltaMultiplier;
         const guaranteedSpawns = Math.floor(spawnAccumulator);
@@ -1734,10 +1735,6 @@
           asteroids.push(new Asteroid());
         }
         spawnAccumulator -= guaranteedSpawns;
-        if (Math.random() < spawnAccumulator) {
-          asteroids.push(new Asteroid());
-          spawnAccumulator = 0;
-        }
 
         for (let i = asteroids.length - 1; i >= 0; i--) {
           const m = asteroids[i];
