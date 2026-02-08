@@ -903,21 +903,6 @@
 		let originPoint = { x: 0, y: 0 };
 
 		const baseResolutionWidth = 1280; // Reference width (720p)
-		const SESSION_VERSION = 1;
-		const SESSION_STATE_KEY = 'panphy-motion-tracker-session-state-v1';
-		const SESSION_VIDEO_KEY = 'panphy-motion-tracker-session-video-v1';
-		const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
-		const SESSION_SAVE_DEBOUNCE_MS = 300;
-		const RESTORE_LOAD_TIMEOUT_MS = 7000;
-		const RESTORE_SEEK_TIMEOUT_MS = 1000;
-
-		let currentVideoId = null;
-		let restoringSession = false;
-		let pendingRestoredCurrentTime = 0;
-		let stateSaveTimeoutId = null;
-		let recoveryWarningShown = false;
-		let restoreLoadTimeoutId = null;
-		let restoreSeekTimeoutId = null;
 
 		/* ===== Theme ===== */
 		const themeButton = document.getElementById('theme-button');
@@ -1059,296 +1044,6 @@
 			const d = hiddenVideo.duration;
 			if (Number.isFinite(d) && d > 0) return d;
 			return 0;
-		}
-
-		/* ===== Session Recovery ===== */
-		function revokeBlobUrl() {
-			if (blobUrl && blobUrl.startsWith('blob:')) {
-				URL.revokeObjectURL(blobUrl);
-			}
-			blobUrl = null;
-		}
-
-		function showRecoveryWarning(message) {
-			if (recoveryWarningShown) return;
-			recoveryWarningShown = true;
-			console.warn(message);
-			document.getElementById('message').innerHTML = `<p>${message}</p>`;
-		}
-
-		function readStorageJson(key) {
-			try {
-				const raw = localStorage.getItem(key);
-				if (!raw) return null;
-				return JSON.parse(raw);
-			} catch (err) {
-				console.warn(`Unable to read ${key}`, err);
-				return null;
-			}
-		}
-
-		function writeStorageJson(key, value) {
-			try {
-				localStorage.setItem(key, JSON.stringify(value));
-				return true;
-			} catch (err) {
-				console.warn(`Unable to write ${key}`, err);
-				return false;
-			}
-		}
-
-		function clearRestoreLoadTimeout() {
-			if (restoreLoadTimeoutId !== null) {
-				clearTimeout(restoreLoadTimeoutId);
-				restoreLoadTimeoutId = null;
-			}
-		}
-
-		function clearRestoreSeekTimeout() {
-			if (restoreSeekTimeoutId !== null) {
-				clearTimeout(restoreSeekTimeoutId);
-				restoreSeekTimeoutId = null;
-			}
-		}
-
-		function clearRestoreTimeouts() {
-			clearRestoreLoadTimeout();
-			clearRestoreSeekTimeout();
-		}
-
-		function failSessionRestore(message, clearStoredSession = false) {
-			clearRestoreTimeouts();
-			restoringSession = false;
-			pendingRestoredCurrentTime = 0;
-			if (clearStoredSession) {
-				clearRecoveryStorage();
-			}
-			if (message) {
-				document.getElementById('message').innerHTML = `<p>${message}</p>`;
-			}
-		}
-
-		function clearRecoveryStorage() {
-			if (stateSaveTimeoutId !== null) {
-				clearTimeout(stateSaveTimeoutId);
-				stateSaveTimeoutId = null;
-			}
-			clearRestoreTimeouts();
-			try {
-				localStorage.removeItem(SESSION_STATE_KEY);
-				localStorage.removeItem(SESSION_VIDEO_KEY);
-			} catch (err) {
-				console.warn('Unable to clear recovery storage', err);
-			}
-			currentVideoId = null;
-		}
-
-		function isSessionFresh(payload) {
-			if (!payload || typeof payload !== 'object' || typeof payload.savedAt !== 'string') return false;
-			const savedAtMs = Date.parse(payload.savedAt);
-			return Number.isFinite(savedAtMs) && (Date.now() - savedAtMs) <= SESSION_TTL_MS;
-		}
-
-		function normalizeFinite(value, fallback = 0) {
-			const num = Number(value);
-			return Number.isFinite(num) ? num : fallback;
-		}
-
-		function normalizePoint(point, fallback = null) {
-			if (!point || typeof point !== 'object') return fallback;
-			const x = Number(point.x);
-			const y = Number(point.y);
-			if (!Number.isFinite(x) || !Number.isFinite(y)) return fallback;
-			return { x, y };
-		}
-
-		function normalizeFrameData(points) {
-			if (!Array.isArray(points)) return [];
-			return points
-				.map((p) => {
-					if (!p || typeof p !== 'object') return null;
-					const x = Number(p.x);
-					const y = Number(p.y);
-					const playbackTime = Number(p.playbackTime);
-					if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(playbackTime)) return null;
-					return { x, y, playbackTime };
-				})
-				.filter(Boolean);
-		}
-
-		function buildStatePayload() {
-			if (!currentVideoId) return null;
-			return {
-				version: SESSION_VERSION,
-				savedAt: new Date().toISOString(),
-				videoId: currentVideoId,
-				frameData: frameData.map((p) => ({ x: p.x, y: p.y, playbackTime: p.playbackTime })),
-				scaleFactor,
-				scaleUnit,
-				calibrationStart,
-				calibrationEnd,
-				originSet,
-				originPoint,
-				playbackFrameRate,
-				captureFrameRate,
-				detectedFps,
-				isSpecialRecording,
-				currentPlotMode,
-				crossesVisible,
-				currentTime: Number.isFinite(hiddenVideo.currentTime) ? hiddenVideo.currentTime : 0
-			};
-		}
-
-		function persistTrackerStateNow() {
-			if (restoringSession) return;
-			const payload = buildStatePayload();
-			if (!payload) return;
-			if (!writeStorageJson(SESSION_STATE_KEY, payload)) {
-				showRecoveryWarning('Auto-recovery could not save tracker data in local storage.');
-			}
-		}
-
-		function scheduleTrackerStateSave() {
-			if (restoringSession || !currentVideoId) return;
-			if (stateSaveTimeoutId !== null) {
-				clearTimeout(stateSaveTimeoutId);
-			}
-			stateSaveTimeoutId = setTimeout(() => {
-				stateSaveTimeoutId = null;
-				persistTrackerStateNow();
-			}, SESSION_SAVE_DEBOUNCE_MS);
-		}
-
-		function persistVideoForRecovery(file, videoId) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				const dataUrl = typeof reader.result === 'string' ? reader.result : '';
-				if (!dataUrl) return;
-				const payload = {
-					version: SESSION_VERSION,
-					savedAt: new Date().toISOString(),
-					videoId,
-					metadata: {
-						name: file.name || 'imported_video',
-						type: file.type || '',
-						size: Number(file.size) || 0,
-						lastModified: Number(file.lastModified) || 0
-					},
-					dataUrl
-				};
-				if (!writeStorageJson(SESSION_VIDEO_KEY, payload)) {
-					showRecoveryWarning('Auto-recovery could not save this video (likely too large for local storage). This session may not be restorable after closing the tab.');
-					try { localStorage.removeItem(SESSION_VIDEO_KEY); } catch (err) { console.warn('Unable to clear saved video', err); }
-					return;
-				}
-				scheduleTrackerStateSave();
-			};
-			reader.onerror = () => {
-				console.warn('Unable to read video file for recovery');
-			};
-			reader.readAsDataURL(file);
-		}
-
-		function updateCrossesToggleUi() {
-			if (crossesVisible) {
-				hideCrossesToggle.classList.remove('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
-			} else {
-				hideCrossesToggle.classList.add('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Show';
-			}
-		}
-
-		function applySavedState(snapshot) {
-			frameData = normalizeFrameData(snapshot.frameData);
-			scaleFactor = normalizeFinite(snapshot.scaleFactor, 1);
-			if (!Number.isFinite(scaleFactor) || scaleFactor <= 0) scaleFactor = 1;
-			scaleUnit = typeof snapshot.scaleUnit === 'string' && snapshot.scaleUnit.trim() ? snapshot.scaleUnit.trim() : 'pixels';
-			calibrationStart = normalizePoint(snapshot.calibrationStart, null);
-			calibrationEnd = normalizePoint(snapshot.calibrationEnd, null);
-			originSet = Boolean(snapshot.originSet);
-			originPoint = normalizePoint(snapshot.originPoint, { x: 0, y: 0 }) || { x: 0, y: 0 };
-			if (!originSet) {
-				originPoint = { x: 0, y: 0 };
-			}
-			playbackFrameRate = normalizeFinite(snapshot.playbackFrameRate, 30);
-			if (!Number.isFinite(playbackFrameRate) || playbackFrameRate <= 0) playbackFrameRate = 30;
-			captureFrameRate = normalizeFinite(snapshot.captureFrameRate, playbackFrameRate);
-			if (!Number.isFinite(captureFrameRate) || captureFrameRate <= 0) captureFrameRate = playbackFrameRate;
-			detectedFps = normalizeFinite(snapshot.detectedFps, playbackFrameRate);
-			if (!Number.isFinite(detectedFps) || detectedFps <= 0) detectedFps = playbackFrameRate;
-			isSpecialRecording = Boolean(snapshot.isSpecialRecording);
-			currentPlotMode = ['pos', 'vx', 'vy'].includes(snapshot.currentPlotMode) ? snapshot.currentPlotMode : 'pos';
-			crossesVisible = snapshot.crossesVisible !== false;
-			pendingRestoredCurrentTime = Math.max(0, normalizeFinite(snapshot.currentTime, 0));
-			updateCrossesToggleUi();
-		}
-
-		function applyCurrentPlotMode() {
-			if (currentPlotMode === 'vx' && frameData.length >= 4) {
-				plotVelocity('x');
-				return;
-			}
-			if (currentPlotMode === 'vy' && frameData.length >= 4) {
-				plotVelocity('y');
-				return;
-			}
-			plotPosition();
-		}
-
-		function finishRestoreAfterSeek() {
-			clearRestoreTimeouts();
-			updateSliderDomain();
-			slider.value = hiddenVideo.currentTime.toString();
-			updateTimeDisplay(hiddenVideo.currentTime);
-			drawFrame();
-			drawOverlay();
-			applyCurrentPlotMode();
-			restoringSession = false;
-			pendingRestoredCurrentTime = 0;
-			scheduleTrackerStateSave();
-			document.getElementById('message').innerHTML = "<p>Recovered your previous session from local storage.</p>";
-		}
-
-		function attemptSessionRestore() {
-			const savedState = readStorageJson(SESSION_STATE_KEY);
-			const savedVideo = readStorageJson(SESSION_VIDEO_KEY);
-			if (!savedState || !savedVideo) {
-				if (savedState || savedVideo) {
-					clearRecoveryStorage();
-				}
-				return;
-			}
-
-			const idsMatch = !savedState.videoId || !savedVideo.videoId || savedState.videoId === savedVideo.videoId;
-			const validVideoData = typeof savedVideo.dataUrl === 'string' && savedVideo.dataUrl.startsWith('data:video');
-			const versionOk = savedState.version === SESSION_VERSION && savedVideo.version === SESSION_VERSION;
-			if (!idsMatch || !validVideoData || !versionOk || !isSessionFresh(savedState) || !isSessionFresh(savedVideo)) {
-				clearRecoveryStorage();
-				return;
-			}
-
-			const savedName = savedVideo.metadata && typeof savedVideo.metadata.name === 'string'
-				? savedVideo.metadata.name
-				: 'imported video';
-			const shouldRestore = window.confirm(`Restore previous session for "${savedName}"?`);
-			if (!shouldRestore) {
-				clearRecoveryStorage();
-				return;
-			}
-
-			restoringSession = true;
-			currentVideoId = savedVideo.videoId || `restored-${Date.now()}`;
-			applySavedState(savedState);
-			clearRestoreTimeouts();
-			hiddenVideo.src = savedVideo.dataUrl;
-			hiddenVideo.load();
-			restoreLoadTimeoutId = setTimeout(() => {
-				if (!restoringSession) return;
-				console.warn('Session restore timed out while loading saved video.');
-				failSessionRestore('Could not restore the saved session automatically. Please import the video again.', true);
-			}, RESTORE_LOAD_TIMEOUT_MS);
-			document.getElementById('message').innerHTML = "<p>Restoring previous session...</p>";
 		}
 
 		/* ===== Auto FPS Detection ===== */
@@ -1503,7 +1198,6 @@
 				drawOverlay();
 			};
 			hiddenVideo.addEventListener('seeked', redrawOnSeek, { once: true });
-			scheduleTrackerStateSave();
 		}
 
 		function updateFpsButtonText() {
@@ -1543,11 +1237,6 @@
 
 		/* ===== RESET FUNCTION ===== */
 		function resetApp() {
-			if (stateSaveTimeoutId !== null) {
-				clearTimeout(stateSaveTimeoutId);
-				stateSaveTimeoutId = null;
-			}
-
 			// 1. Clear data
 			frameData = [];
 			calibrationMode = false;
@@ -1556,7 +1245,6 @@
 			skippingFrame = false;
 			isPlaying = false;
 			crossesVisible = true;
-			currentPlotMode = 'pos';
 
 			// 2. Reset FPS detection state
 			detectedFps = null;
@@ -1589,7 +1277,8 @@
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "none";
 			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
-			updateCrossesToggleUi();
+			hideCrossesToggle.classList.remove('crosses-hidden');
+			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
 			specialRecordingCheckbox.checked = false;
 			captureRateSection.style.display = 'none';
 			detectedFpsDisplay.textContent = 'Detecting...';
@@ -1608,7 +1297,6 @@
 		document.addEventListener('DOMContentLoaded', () => {
 			disableControls(true);
 			updateFpsButtonText();
-			updateCrossesToggleUi();
 			document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
 			frameCanvas.style.display = "none";
 
@@ -1616,8 +1304,6 @@
 			specialRecordingCheckbox.addEventListener('change', () => {
 				captureRateSection.style.display = specialRecordingCheckbox.checked ? 'block' : 'none';
 			});
-
-			attemptSessionRestore();
 		});
 
 		/* Import video */
@@ -1628,17 +1314,12 @@
 			if (!file) return; // User cancelled
 
 			// Perform full reset before loading new file
-			clearRecoveryStorage();
-			revokeBlobUrl();
+			if (blobUrl) URL.revokeObjectURL(blobUrl);
 			resetApp();
-			restoringSession = false;
-			pendingRestoredCurrentTime = 0;
-			currentVideoId = `video-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 			blobUrl = URL.createObjectURL(file);
 			hiddenVideo.src = blobUrl;
 			hiddenVideo.load();
-			persistVideoForRecovery(file, currentVideoId);
 			e.target.value = '';
 		});
 
@@ -1655,11 +1336,6 @@
 		hiddenVideo.addEventListener('loadeddata', updateSliderDomain);
 		hiddenVideo.addEventListener('canplay', updateSliderDomain);
 		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
-		hiddenVideo.addEventListener('error', () => {
-			if (!restoringSession) return;
-			console.warn('Saved session video could not be loaded.');
-			failSessionRestore('Could not restore the saved video. Please import the video again.', true);
-		});
 
 		/* First frame ready */
 		hiddenVideo.addEventListener('loadeddata', () => {
@@ -1673,49 +1349,6 @@
 			drawOverlay();
 			plotPosition();
 
-			if (restoringSession) {
-				clearRestoreLoadTimeout();
-				slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
-				detectedFpsDisplay.textContent = detectedFps ? `${detectedFps} fps` : 'Not detected';
-				updateFpsButtonText();
-				specialRecordingCheckbox.checked = isSpecialRecording;
-				captureRateSection.style.display = isSpecialRecording ? 'block' : 'none';
-				updateCrossesToggleUi();
-
-				const end = getSeekableEnd();
-				const duration = Number.isFinite(hiddenVideo.duration) ? hiddenVideo.duration : 0;
-				let restoreTime = pendingRestoredCurrentTime;
-				if (!Number.isFinite(restoreTime) || restoreTime < 0) restoreTime = 0;
-				if (end > 0) restoreTime = Math.min(restoreTime, Math.max(0, end - 0.02));
-				if (duration > 0) restoreTime = Math.min(restoreTime, Math.max(0, duration - 0.02));
-
-				let restoreFinalized = false;
-				const finalizeRestore = () => {
-					if (restoreFinalized) return;
-					restoreFinalized = true;
-					clearRestoreSeekTimeout();
-					finishRestoreAfterSeek();
-				};
-
-				if (restoreTime > 0) {
-					hiddenVideo.addEventListener('seeked', finalizeRestore, { once: true });
-					restoreSeekTimeoutId = setTimeout(() => {
-						if (!restoringSession) return;
-						console.warn('Session restore seek timeout; finishing restore at current frame.');
-						finalizeRestore();
-					}, RESTORE_SEEK_TIMEOUT_MS);
-					try {
-						hiddenVideo.currentTime = restoreTime;
-					} catch (err) {
-						console.warn('Failed to seek during session restore.', err);
-						finalizeRestore();
-					}
-				} else {
-					finalizeRestore();
-				}
-				return;
-			}
-
 			// Trigger automatic FPS detection
 			detectFrameRate();
 
@@ -1726,7 +1359,6 @@
 					"<li>Click the video to record a data point.</li>" +
 					"</ul>";
 			}
-			scheduleTrackerStateSave();
 		});
 
 		/* Playback sync */
@@ -1745,14 +1377,12 @@
 				updateTimeDisplay(hiddenVideo.currentTime);
 				drawFrame();
 				drawOverlay();
-				scheduleTrackerStateSave();
 			}
 		});
 		// Reset play button if video ends naturally
 		hiddenVideo.addEventListener('ended', () => {
 			isPlaying = false;
 			playPauseButton.textContent = "Play";
-			scheduleTrackerStateSave();
 		});
 
 		/* Scrubbing */
@@ -1771,7 +1401,6 @@
 			if (Math.abs(hiddenVideo.currentTime - t) < EPS) t += EPS;
 			hiddenVideo.currentTime = t;
 			updateTimeDisplay(t);
-			scheduleTrackerStateSave();
 		}
 		slider.addEventListener('input', scrubToSlider);
 		slider.addEventListener('change', scrubToSlider);
@@ -1781,7 +1410,6 @@
 			if (isPlaying) {
 				hiddenVideo.pause();
 				playPauseButton.textContent = "Play";
-				scheduleTrackerStateSave();
 			} else {
 				try {
 					await hiddenVideo.play();
@@ -1791,11 +1419,9 @@
 					isPlaying = false;
 					playPauseButton.textContent = "Play";
 				}
-				scheduleTrackerStateSave();
 				return;
 			}
 			isPlaying = false;
-			scheduleTrackerStateSave();
 		});
 
 		/* Click to add point and step */
@@ -1810,7 +1436,6 @@
 
 				// Store playbackTime so analysis time can be recalculated if FPS changes
 				frameData.push({ x: canvasX, y: cartesianY, playbackTime: hiddenVideo.currentTime });
-				scheduleTrackerStateSave();
 
 				// Update the specific plot user is viewing
 				if (currentPlotMode === 'vx') {
@@ -1835,7 +1460,6 @@
 			overlayCanvas.style.pointerEvents = "none";
 			drawOverlay();
 			plotPosition(); // Resets to position view on new origin
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
 		}
 
@@ -1910,7 +1534,6 @@
 			document.getElementById('message').innerHTML = isSpecialRecording
 				? `<p>Special recording mode enabled. Analysis time = frame × (1/${captureFrameRate}s)</p>`
 				: `<p>Standard recording mode. Analysis time = frame × (1/${playbackFrameRate}s)</p>`;
-			scheduleTrackerStateSave();
 		});
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
 
@@ -1933,7 +1556,6 @@
 				updateTimeDisplay(hiddenVideo.currentTime);
 				drawFrame();
 				drawOverlay();
-				scheduleTrackerStateSave();
 			};
 
 			let finished = false;
@@ -2076,18 +1698,9 @@
 			applyThemeToChart();
 		}
 
-		plotVxButton.addEventListener("click", () => {
-			plotVelocity("x");
-			scheduleTrackerStateSave();
-		});
-		plotVyButton.addEventListener("click", () => {
-			plotVelocity("y");
-			scheduleTrackerStateSave();
-		});
-		backToPositionButton.addEventListener("click", () => {
-			plotPosition();
-			scheduleTrackerStateSave();
-		});
+		plotVxButton.addEventListener("click", () => plotVelocity("x"));
+		plotVyButton.addEventListener("click", () => plotVelocity("y"));
+		backToPositionButton.addEventListener("click", plotPosition);
 
 		/* Clear / Export */
 		clearDataPointsButton.addEventListener("click", () => {
@@ -2098,7 +1711,6 @@
 			}
 			drawFrame();
 			drawOverlay();
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = "<p>Data points cleared.</p>";
 		});
 		clearCalibrationButton.addEventListener("click", () => {
@@ -2112,7 +1724,6 @@
 				positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
 				plotPosition();
 			}
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
 		});
 		clearOriginButton.addEventListener("click", () => {
@@ -2120,7 +1731,6 @@
 			originPoint = { x: 0, y: 0 };
 			drawOverlay();
 			plotPosition();
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
 		});
 		exportDataButton.addEventListener("click", () => {
@@ -2307,7 +1917,6 @@
 			calibrationMode = false;
 			overlayCanvas.style.pointerEvents = "none";
 			frameCanvas.style.cursor = "default";
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
 			calibrationPrompt.style.display = "block";
 		}
@@ -2356,7 +1965,6 @@
 			drawOverlay();
 			drawFrame();
 			plotPosition();
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
 		});
 		cancelCalibrationButton.addEventListener('click', () => {
@@ -2367,7 +1975,6 @@
 			calibrationEnd = null;
 			drawOverlay();
 			drawFrame();
-			scheduleTrackerStateSave();
 			document.getElementById('message').innerHTML = "<p>Calibration cancelled.</p>";
 		});
 
@@ -2383,19 +1990,19 @@
 		});
 
 		/* Cleanup */
-		const cleanupOnExit = () => {
-			persistTrackerStateNow();
-			revokeBlobUrl();
-		};
-		window.addEventListener('pagehide', cleanupOnExit);
-		window.addEventListener('beforeunload', cleanupOnExit);
+		window.addEventListener('beforeunload', () => { if (blobUrl) URL.revokeObjectURL(blobUrl); });
 
 		/* ===== Hide Crosses Toggle ===== */
 		function toggleCrossesVisibility() {
 			crossesVisible = !crossesVisible;
-			updateCrossesToggleUi();
+			if (crossesVisible) {
+				hideCrossesToggle.classList.remove('crosses-hidden');
+				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
+			} else {
+				hideCrossesToggle.classList.add('crosses-hidden');
+				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Show';
+			}
 			drawFrame();
-			scheduleTrackerStateSave();
 		}
 
 		hideCrossesToggle.addEventListener('click', toggleCrossesVisibility);
