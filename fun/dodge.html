@@ -814,8 +814,6 @@
      */
     const BASE_WIDTH = 600;
     const BASE_HEIGHT = 400;
-    const MIN_GAME_SCALE = 0.85;
-    const MAX_GAME_SCALE = 1.2;
     let scaleX = 1;
     let scaleY = 1;
     let gameScale = 1;
@@ -824,11 +822,14 @@
     let SCREEN_WIDTH = BASE_WIDTH;
     let SCREEN_HEIGHT = BASE_HEIGHT;
 
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
     function updateScaleFactors() {
       scaleX = SCREEN_WIDTH / BASE_WIDTH;
       scaleY = SCREEN_HEIGHT / BASE_HEIGHT;
-      const uniformScale = Math.min(scaleX, scaleY);
-      gameScale = Math.min(Math.max(uniformScale, MIN_GAME_SCALE), MAX_GAME_SCALE);
+      gameScale = Math.min(scaleX, scaleY);
     }
 
     // Area ratio for consistent asteroid density across screen sizes
@@ -849,6 +850,8 @@
 
     function resizeCanvas() {
       const dpr = window.devicePixelRatio || 1;
+      const previousWidth = SCREEN_WIDTH;
+      const previousHeight = SCREEN_HEIGHT;
 
       // Sometimes first layout can report 0x0. Fall back to wrapper width.
       const rect = canvas.getBoundingClientRect();
@@ -873,8 +876,14 @@
 
       updateScaleFactors();
 
-      if (player) player.updateScale();
-      updateAsteroidsScale();
+      if (player) {
+        const relativeX = previousWidth > 0 ? player.x / previousWidth : 0.5;
+        const relativeY = previousHeight > 0 ? player.y / previousHeight : 0.5;
+        player.updateScale();
+        player.x = clamp(relativeX * SCREEN_WIDTH, player.radius, SCREEN_WIDTH - player.radius);
+        player.y = clamp(relativeY * SCREEN_HEIGHT, player.radius, SCREEN_HEIGHT - player.radius);
+      }
+      updateAsteroidsScale(previousWidth, previousHeight);
 
       canvasReady = true;
       tryStartGame();
@@ -987,7 +996,6 @@
     let player = null;
     let keys = {};
     let animationId = null;
-    let speedIntervalId = null;
     let isPaused = false;
     let pauseStartTime = 0;
 
@@ -997,10 +1005,21 @@
     let recentSubmission = null;
     const HIGHLIGHT_DURATION_MS = 6000;
 
-    let MIN_ASTEROID_SPEED = 2;
-    let MAX_ASTEROID_SPEED = 6;
-    let asteroidSpawnRate = 3;
-    const speedIncreaseInterval = 1500;
+    const BASE_MIN_ASTEROID_SPEED = 2;
+    const BASE_MAX_ASTEROID_SPEED = 7;
+    const BASE_ASTEROID_SPAWN_RATE = 3;
+    const SPEED_INCREASE_INTERVAL_MS = 1500;
+    const MIN_ASTEROID_SPEED_STEP = 0.1;
+    const MAX_ASTEROID_SPEED_STEP = 0.2;
+    const SPAWN_RATE_STEP_PER_FRAME = 0.02;
+    const MIN_ASTEROID_SPEED_GROWTH_PER_SECOND = MIN_ASTEROID_SPEED_STEP / (SPEED_INCREASE_INTERVAL_MS / 1000);
+    const MAX_ASTEROID_SPEED_GROWTH_PER_SECOND = MAX_ASTEROID_SPEED_STEP / (SPEED_INCREASE_INTERVAL_MS / 1000);
+    const SPAWN_RATE_GROWTH_PER_SECOND = SPAWN_RATE_STEP_PER_FRAME * 60;
+
+    let MIN_ASTEROID_SPEED = BASE_MIN_ASTEROID_SPEED;
+    let MAX_ASTEROID_SPEED = BASE_MAX_ASTEROID_SPEED;
+    let asteroidSpawnRate = BASE_ASTEROID_SPAWN_RATE;
+    let spawnAccumulator = 0;
 
     let isPointerDown = false;
     let pointerStartX = 0;
@@ -1271,28 +1290,18 @@
       gameStartTime = performance.now();
       isPaused = false;
       pauseStartTime = 0;
-      asteroidSpawnRate = 3;
-      MIN_ASTEROID_SPEED = 2;
-      MAX_ASTEROID_SPEED = 7;
+      asteroidSpawnRate = BASE_ASTEROID_SPAWN_RATE;
+      MIN_ASTEROID_SPEED = BASE_MIN_ASTEROID_SPEED;
+      MAX_ASTEROID_SPEED = BASE_MAX_ASTEROID_SPEED;
+      spawnAccumulator = 0;
       gameOver = false;
       lastFrameTime = 0; // Reset to ensure first frame calculates delta correctly
 
       if (animationId) cancelAnimationFrame(animationId);
-      if (speedIntervalId) clearInterval(speedIntervalId);
       stopGameOverSound();
-
-      startSpeedInterval();
 
       startBackgroundMusic();
       animationId = requestAnimationFrame(gameLoop);
-    }
-
-    function startSpeedInterval() {
-      if (speedIntervalId) clearInterval(speedIntervalId);
-      speedIntervalId = setInterval(() => {
-        MIN_ASTEROID_SPEED += 0.1;
-        MAX_ASTEROID_SPEED += 0.2;
-      }, speedIncreaseInterval);
     }
 
     function pauseGame() {
@@ -1300,10 +1309,6 @@
       isPaused = true;
       pauseStartTime = performance.now();
       if (animationId) cancelAnimationFrame(animationId);
-      if (speedIntervalId) {
-        clearInterval(speedIntervalId);
-        speedIntervalId = null;
-      }
       stopBackgroundMusic();
     }
 
@@ -1313,7 +1318,6 @@
       gameStartTime += now - pauseStartTime;
       isPaused = false;
       lastFrameTime = 0; // Reset to avoid large delta after pause
-      startSpeedInterval();
       startBackgroundMusic();
       animationId = requestAnimationFrame(gameLoop);
     }
@@ -1661,8 +1665,15 @@
      * Update Existing Asteroids on Resize
      * -----------------------------------------------------------
      */
-    function updateAsteroidsScale() {
-      asteroids.forEach((asteroid) => asteroid.updateScale());
+    function updateAsteroidsScale(previousWidth = SCREEN_WIDTH, previousHeight = SCREEN_HEIGHT) {
+      const canReposition = previousWidth > 0 && previousHeight > 0;
+      asteroids.forEach((asteroid) => {
+        if (canReposition) {
+          asteroid.x = (asteroid.x / previousWidth) * SCREEN_WIDTH;
+          asteroid.y = (asteroid.y / previousHeight) * SCREEN_HEIGHT;
+        }
+        asteroid.updateScale();
+      });
     }
 
     /* -----------------------------------------------------------
@@ -1696,9 +1707,9 @@
         const deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
 
-        // Calculate multiplier: how much faster/slower this frame is compared to target 60fps
-        // Clamp to prevent huge jumps if tab was inactive briefly
-        const deltaMultiplier = Math.min(deltaTime / TARGET_FRAME_MS, 3);
+        // Keep all gameplay progression tied to elapsed time, not frame count.
+        const deltaMultiplier = Math.max(deltaTime / TARGET_FRAME_MS, 0);
+        const deltaSeconds = Math.max(deltaTime / 1000, 0);
 
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -1715,11 +1726,17 @@
         player.move(deltaMultiplier);
         player.draw();
 
-        // Scale spawn rate by area ratio to maintain consistent asteroid density
-        // Also scale by deltaMultiplier to keep spawning consistent across frame rates
-        const scaledSpawnRate = asteroidSpawnRate * getAreaRatio() * deltaMultiplier;
-        if (Math.random() * 100 < scaledSpawnRate) {
+        // Spawn budget is frame-rate independent and scales with canvas area.
+        const scaledSpawnRate = asteroidSpawnRate * getAreaRatio();
+        spawnAccumulator += (scaledSpawnRate / 100) * deltaMultiplier;
+        const guaranteedSpawns = Math.floor(spawnAccumulator);
+        for (let i = 0; i < guaranteedSpawns; i += 1) {
           asteroids.push(new Asteroid());
+        }
+        spawnAccumulator -= guaranteedSpawns;
+        if (Math.random() < spawnAccumulator) {
+          asteroids.push(new Asteroid());
+          spawnAccumulator = 0;
         }
 
         for (let i = asteroids.length - 1; i >= 0; i--) {
@@ -1732,17 +1749,14 @@
             playGameOverSound();
             handleGameOver(score);
             stopBackgroundMusic();
-            if (speedIntervalId) {
-              clearInterval(speedIntervalId);
-              speedIntervalId = null;
-            }
           }
 
           if (m.isOffScreen()) asteroids.splice(i, 1);
         }
 
-        // Scale spawn rate increase by delta multiplier for consistent ramping
-        asteroidSpawnRate += 0.02 * deltaMultiplier;
+        MIN_ASTEROID_SPEED += MIN_ASTEROID_SPEED_GROWTH_PER_SECOND * deltaSeconds;
+        MAX_ASTEROID_SPEED += MAX_ASTEROID_SPEED_GROWTH_PER_SECOND * deltaSeconds;
+        asteroidSpawnRate += SPAWN_RATE_GROWTH_PER_SECOND * deltaSeconds;
 
         animationId = requestAnimationFrame(gameLoop);
       } else {
