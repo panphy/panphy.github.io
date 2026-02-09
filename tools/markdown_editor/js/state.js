@@ -6,14 +6,14 @@
 // Storage keys
 export const STORAGE_KEYS = {
   DRAFT: 'markdownEditorDraft',
-  SYNC_SCROLL: 'markdownSyncScroll',
+  HIGHLIGHT_SYNC: 'markdownHighlightSync',
   FONT_SIZE: 'markdownFontSize',
   THEME: 'theme'
 };
 
 // Application state
 export const state = {
-  isSyncScrollEnabled: false
+  isHighlightSyncEnabled: false
 };
 
 /**
@@ -40,26 +40,26 @@ export function restoreDraft() {
 }
 
 /**
- * Save sync scroll preference
- * @param {boolean} enabled - Whether sync scroll is enabled
+ * Save highlight sync preference
+ * @param {boolean} enabled - Whether highlight sync is enabled
  */
-export function saveSyncScrollPreference(enabled) {
-  localStorage.setItem(STORAGE_KEYS.SYNC_SCROLL, enabled);
-  state.isSyncScrollEnabled = enabled;
+export function saveHighlightSyncPreference(enabled) {
+  localStorage.setItem(STORAGE_KEYS.HIGHLIGHT_SYNC, enabled);
+  state.isHighlightSyncEnabled = enabled;
 }
 
 /**
- * Load sync scroll preference from localStorage
+ * Load highlight sync preference from localStorage
  * @returns {boolean} The saved preference
  */
-export function loadSyncScrollPreference() {
-  const saved = localStorage.getItem(STORAGE_KEYS.SYNC_SCROLL);
+export function loadHighlightSyncPreference() {
+  const saved = localStorage.getItem(STORAGE_KEYS.HIGHLIGHT_SYNC);
   if (saved === null) {
-    state.isSyncScrollEnabled = false;
+    state.isHighlightSyncEnabled = false;
   } else {
-    state.isSyncScrollEnabled = saved === 'true';
+    state.isHighlightSyncEnabled = saved === 'true';
   }
-  return state.isSyncScrollEnabled;
+  return state.isHighlightSyncEnabled;
 }
 
 /**
