@@ -144,15 +144,21 @@ function renderContent() {
 
   const preprocessedText = preprocessMarkdown(inputText);
 
-  const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-  renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
+  if (state.isHighlightSyncEnabled) {
+    const lineBlocks = buildLineBlocks(preprocessedText);
+    renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
+  } else {
+    renderedOutput.innerHTML = sanitizedContent;
+  }
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput]).catch(console.error);
   }
-  updateHighlightedBlockFromCaret();
+  if (state.isHighlightSyncEnabled) {
+    updateHighlightedBlockFromCaret();
+  }
 }
 
 /**
@@ -776,6 +782,7 @@ themeToggleButton.addEventListener('click', () => {
 
 highlightSyncToggle.addEventListener('change', event => {
   saveHighlightSyncPreference(event.target.checked);
+  renderContent();
   if (event.target.checked) {
     updateHighlightedBlockFromCaret({ forceScroll: true });
   } else {
