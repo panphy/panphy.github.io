@@ -436,7 +436,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 		const currentCell = currentInput.parentElement;
 		const currentRow = currentCell.parentElement;
 		const table = currentRow.parentElement.parentElement;
-		const rows = Array.from(table.querySelectorAll('tbody tr'));
+		let rows = Array.from(table.querySelectorAll('tbody tr'));
 		const rowIndex = rows.indexOf(currentRow);
 		const cells = Array.from(currentRow.children);
 		const colIndex = cells.indexOf(currentCell);
@@ -447,6 +447,10 @@ const debouncedUpdateData = debounce(updateData, 300);
 		switch (key) {
 			case 'Enter':
 				event.preventDefault();
+				if (rowIndex === rows.length - 1 && currentInput.value.trim() !== '') {
+					addRow();
+					rows = Array.from(table.querySelectorAll('tbody tr'));
+				}
 				targetRow = rowIndex + 1;
 				targetCol = colIndex;
 				break;
