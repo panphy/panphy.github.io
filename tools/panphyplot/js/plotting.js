@@ -11,7 +11,14 @@
 				datasetColors: ['#1e40af', '#15803d', '#7e22ce', '#c2410c', '#b91c1c', '#0e7490'],
 				// Fit line colors: contrasting hues from corresponding data points
 				fitColors: ['#be185d', '#a16207', '#0891b2', '#16a34a', '#6366f1', '#ea580c'],
-				layout: {}
+				layout: {
+					xaxis: {
+						zerolinecolor: '#1f2937'
+					},
+					yaxis: {
+						zerolinecolor: '#1f2937'
+					}
+				}
 			};
 		}
 
@@ -29,14 +36,14 @@
 				font: { color: '#dfe6e9' },
 				xaxis: {
 					gridcolor: '#2d3436',
-					zerolinecolor: '#2d3436',
+					zerolinecolor: '#8b98a7',
 					linecolor: '#3a414d',
 					tickcolor: '#cdd9df',
 					titlefont: { color: '#dfe6e9' }
 				},
 				yaxis: {
 					gridcolor: '#2d3436',
-					zerolinecolor: '#2d3436',
+					zerolinecolor: '#8b98a7',
 					linecolor: '#3a414d',
 					tickcolor: '#cdd9df',
 					titlefont: { color: '#dfe6e9' }
