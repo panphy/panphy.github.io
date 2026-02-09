@@ -151,7 +151,9 @@
 		// Build the layout.
 		const layout = {
 			xaxis: {
-				title: processLabel(document.getElementById('x-column-name').value || 'x')
+				title: processLabel(document.getElementById('x-column-name').value || 'x'),
+				showline: true,
+				linewidth: 2
 			},
 			yaxis: {
 				title: {
@@ -159,7 +161,9 @@
 					standoff: 25
 				},
 				titlefont: { size: 14 },
-				automargin: true
+				automargin: true,
+				showline: true,
+				linewidth: 2
 			},
 			title: titleText,
 			margin: {
@@ -316,8 +320,8 @@
 		// Build the layout using the processed labels.
 		const layout = {
 			title: { text: processedTitle, font: { size: 16 } },
-			xaxis: { title: processedXLabel },
-			yaxis: { title: { text: processedYLabel, standoff: 25 } },
+			xaxis: { title: processedXLabel, showline: true, linewidth: 2 },
+			yaxis: { title: { text: processedYLabel, standoff: 25 }, showline: true, linewidth: 2 },
 			margin: { t: rawTitle === '' ? 50 : 100, b: 70, l: 140, r: 0 }
 		};
 		if (themeSettings.layout.xaxis) {
