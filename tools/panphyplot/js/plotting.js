@@ -74,6 +74,9 @@
 		if (!Number.isFinite(min) || !Number.isFinite(max)) {
 			return [-1, 1];
 		}
+		// Always include zero so axes sit at the origin
+		min = Math.min(min, 0);
+		max = Math.max(max, 0);
 		if (min === max) {
 			return [min - 1, max + 1];
 		}
