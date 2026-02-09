@@ -7,8 +7,7 @@ import {
   state,
   loadThemePreference,
   saveThemePreference,
-  loadHighlightSyncPreference,
-  saveHighlightSyncPreference,
+  loadSyncScrollPreference,
   loadFontSizePreference,
   saveFontSizePreference
 } from './state.js';
@@ -94,12 +93,12 @@ export function toggleTheme() {
 }
 
 /**
- * Initialize highlight sync toggle based on saved preference.
- * @param {HTMLInputElement} highlightSyncToggle - The highlight sync toggle checkbox
+ * Initialize sync scroll toggle based on saved preference.
+ * @param {HTMLInputElement} syncScrollToggle - The sync scroll toggle checkbox
  */
-export function initializeHighlightSyncToggle(highlightSyncToggle) {
-  const enabled = loadHighlightSyncPreference();
-  highlightSyncToggle.checked = enabled;
+export function initializeSyncScrollToggle(syncScrollToggle) {
+  const enabled = loadSyncScrollPreference();
+  syncScrollToggle.checked = enabled;
 }
 
 /**
@@ -154,29 +153,6 @@ export function initializeFontSize(fontSizeSelect) {
  */
 export function updateOfflineFontState() {
   document.documentElement.classList.toggle('offline-font', !navigator.onLine);
-}
-
-/**
- * Get the matching block element for a given line number
- * @param {HTMLElement} renderedOutput - The rendered output element
- * @param {number} lineNumber - The source line number
- * @returns {Element|null} The matching block element or null
- */
-export function getMatchingBlockForLine(renderedOutput, lineNumber) {
-  const blocks = Array.from(renderedOutput.querySelectorAll('[data-src-start][data-src-end]'));
-  const matchingBlocks = blocks.filter(block => {
-    const start = Number(block.dataset.srcStart);
-    const end = Number(block.dataset.srcEnd);
-    return lineNumber >= start && lineNumber <= end;
-  });
-  return matchingBlocks.reduce((best, block) => {
-    if (!best) {
-      return block;
-    }
-    const bestSpan = Number(best.dataset.srcEnd) - Number(best.dataset.srcStart);
-    const currentSpan = Number(block.dataset.srcEnd) - Number(block.dataset.srcStart);
-    return currentSpan < bestSpan ? block : best;
-  }, null);
 }
 
 /**
