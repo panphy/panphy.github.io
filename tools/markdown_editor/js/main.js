@@ -132,10 +132,24 @@ function loadSampleDocument() {
     });
 }
 
+const mathPattern = /(\$\$[\s\S]+?\$\$)|(\$[^$]+\$)|\\\(|\\\[|\\begin\{)/;
+let lastRenderHadMath = false;
+
+function detectMath(text) {
+  return mathPattern.test(text);
+}
+
+const scheduleMathTypeset = debounce(() => {
+  if (!lastRenderHadMath) return;
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  }
+}, 300);
+
 /**
  * Render the markdown content to the output pane
  */
-function renderContent() {
+function renderContent({ typesetMath = true } = {}) {
   const inputText = markdownInput.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
     renderedOutput.innerHTML = `
@@ -147,14 +161,22 @@ function renderContent() {
   }
 
   const preprocessedText = preprocessMarkdown(inputText);
+  const hasMath = detectMath(preprocessedText);
+  lastRenderHadMath = hasMath;
 
   const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
-  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  if (hasMath) {
+    if (typesetMath) {
+      if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+        MathJax.typesetPromise([renderedOutput]).catch(console.error);
+      }
+    } else {
+      scheduleMathTypeset();
+    }
   }
   updateHighlightedBlockFromCaret();
 }
@@ -759,12 +781,22 @@ function loadMarkdownFile() {
 // Setup event listeners
 const handleCaretChange = () => updateHighlightedBlockFromCaret();
 
-const debouncedRenderAndSave = debounce(() => {
-  renderContent();
+let renderQueued = false;
+const debouncedSaveDraft = debounce(() => {
   saveDraft(markdownInput.value);
-}, 200);
+}, 300);
 
-markdownInput.addEventListener('input', debouncedRenderAndSave);
+const scheduleRender = () => {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(() => {
+    renderQueued = false;
+    renderContent({ typesetMath: false });
+    debouncedSaveDraft();
+  });
+};
+
+markdownInput.addEventListener('input', scheduleRender);
 markdownInput.addEventListener('keyup', handleCaretChange);
 markdownInput.addEventListener('click', handleCaretChange);
 markdownInput.addEventListener('select', handleCaretChange);
