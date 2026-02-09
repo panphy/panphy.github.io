@@ -1155,6 +1155,25 @@ mjx-container {
   border-radius: 8px;
 }
 
+mjx-container[display="true"] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+mjx-container[display="true"] svg {
+  max-width: 100%;
+  height: auto;
+}
+
+#renderedOutput > svg[aria-hidden="true"] {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 mjx-container:hover {
   box-shadow: 0 0 0 2px var(--copy-hint-outline);
 }
