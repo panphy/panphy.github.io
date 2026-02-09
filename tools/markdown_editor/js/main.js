@@ -132,7 +132,7 @@ function loadSampleDocument() {
     });
 }
 
-const mathPattern = /(\$\$[\s\S]+?\$\$)|(\$[^$]+\$)|\\\(|\\\[|\\begin\{)/;
+const mathPattern = /(\$\$[\s\S]+?\$\$)|(\$[^$]+\$)|\\\(|\\\[|\\begin\{/;
 let lastRenderHadMath = false;
 
 function detectMath(text) {
