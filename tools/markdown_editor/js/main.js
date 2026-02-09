@@ -132,13 +132,11 @@ function loadSampleDocument() {
     });
 }
 
+const mathPattern = /(\$\$[\s\S]+?\$\$)|(\$[^$]+\$)|\\\(|\\\[|\\begin\{)/;
 let lastRenderHadMath = false;
 
 function detectMath(text) {
-  if (text.includes('$$') || text.includes('\\(') || text.includes('\\[') || text.includes('\\begin{')) {
-    return true;
-  }
-  return /\$[^$\n]+\$/.test(text);
+  return mathPattern.test(text);
 }
 
 const scheduleMathTypeset = debounce(() => {
