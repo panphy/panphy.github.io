@@ -221,6 +221,7 @@
       white-space: nowrap;
     }
 
+    .panel,
     details.panel {
       width: min(1100px, 100%);
       margin: 0 auto;
@@ -229,6 +230,12 @@
       border-radius: 18px;
       box-shadow: var(--shadow);
       overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
     }
 
     details.panel summary {
@@ -468,8 +475,8 @@
         </div>
       </details>
 
-      <details class="panel" id="waveform-panel" open>
-        <summary>Oscilloscope</summary>
+      <section class="panel" id="waveform-panel">
+        <div class="panel-header">Oscilloscope</div>
         <div id="waveform-container" class="panel-body">
           <canvas id="waveform" width="800" height="200"></canvas>
           <div id="sliders">
@@ -483,7 +490,7 @@
             </div>
           </div>
         </div>
-      </details>
+      </section>
 
       <div id="controls">
         <button id="toggleBtn" class="toggle-button">Start</button>
@@ -576,7 +583,6 @@
   const peakFreqDisplay = document.getElementById('peak-frequency-value');
   const timeDeltaDisplay = document.getElementById('time-delta-value');
   const spectrumPanel = document.getElementById('spectrum-panel');
-  const waveformPanel = document.getElementById('waveform-panel');
   const resetZoomBtn = document.getElementById('resetZoomBtn');
 
   const toggleBtn = document.getElementById('toggleBtn');
@@ -677,10 +683,8 @@
   waveCanvas.addEventListener('touchend', onWaveformTouchEnd);
   waveCanvas.addEventListener('touchcancel', onWaveformTouchEnd);
 
-  [spectrumPanel, waveformPanel].forEach((panel) => {
-    panel.addEventListener('toggle', () => {
-      requestAnimationFrame(setupCanvasResolution);
-    });
+  spectrumPanel.addEventListener('toggle', () => {
+    requestAnimationFrame(setupCanvasResolution);
   });
 
   yScaleSlider.addEventListener('input', () => {
