@@ -184,7 +184,7 @@
 		const layout = {
 			xaxis: {
 				title: processLabel(document.getElementById('x-column-name').value || 'x'),
-				showline: true,
+				showline: false,
 				linewidth: 1,
 				range: xRange,
 				zeroline: true,
@@ -197,7 +197,7 @@
 				},
 				titlefont: { size: 14 },
 				automargin: true,
-				showline: true,
+				showline: false,
 				linewidth: 1,
 				range: yRange,
 				zeroline: true,
@@ -379,7 +379,7 @@
 			title: { text: processedTitle, font: { size: 16 } },
 			xaxis: {
 				title: processedXLabel,
-				showline: true,
+				showline: false,
 				linewidth: 1,
 				range: xRange,
 				zeroline: true,
@@ -387,7 +387,7 @@
 			},
 			yaxis: {
 				title: { text: processedYLabel, standoff: 25 },
-				showline: true,
+				showline: false,
 				linewidth: 1,
 				range: yRange,
 				zeroline: true,
