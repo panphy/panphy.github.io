@@ -888,11 +888,8 @@
   function drawSquareGridWithTime() {
     waveCtx.save();
     const gridColor = getCssVar('--grid-color');
-    const axisColor = getCssVar('--axis-color');
     waveCtx.globalAlpha = SQUARE_GRID_ALPHA;
     waveCtx.strokeStyle = gridColor;
-    waveCtx.fillStyle = axisColor;
-    waveCtx.font = '12px sans-serif';
 
     const dispW = waveCanvasSize.width;
 
@@ -900,8 +897,6 @@
     let windowSize = totalSamples / waveTimeScale;
     if (windowSize > totalSamples) windowSize = totalSamples;
     windowSize = Math.max(1, Math.floor(windowSize));
-
-    const totalTimeSec = windowSize / (sampleRate || 44100);
 
     const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
     for (let i = 0; i <= numVertLines; i++) {
@@ -911,12 +906,6 @@
       waveCtx.moveTo(screenX, 0);
       waveCtx.lineTo(screenX, waveCanvasSize.height);
       waveCtx.stroke();
-
-      if (i % 2 === 0) {
-        const frac = screenX / dispW;
-        const ms = frac * totalTimeSec * 1000;
-        waveCtx.fillText(ms.toFixed(1) + ' ms', screenX + 2, waveCanvasSize.height - 4);
-      }
     }
 
     const centerY = waveCanvasSize.height / 2;
