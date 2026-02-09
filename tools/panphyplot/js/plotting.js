@@ -84,12 +84,6 @@
 		return [min - padding, max + padding];
 	}
 
-	function getZeroPosition(min, max) {
-		if (max === min) return 0.5;
-		const position = (0 - min) / (max - min);
-		return Math.min(1, Math.max(0, position));
-	}
-
 
 	function updatePlotAndRenderLatex() {
 		if (isSyncing) return;
@@ -140,8 +134,6 @@
 
 		const xRange = getAxisRange(x, convertedXError);
 		const yRange = getAxisRange(y, convertedYError);
-		const zeroXPosition = getZeroPosition(xRange[0], xRange[1]);
-		const zeroYPosition = getZeroPosition(yRange[0], yRange[1]);
 
 		// Build the primary data trace.
 		const data = [{
@@ -194,8 +186,6 @@
 				title: processLabel(document.getElementById('x-column-name').value || 'x'),
 				showline: true,
 				linewidth: 1,
-				anchor: 'free',
-				position: zeroYPosition,
 				range: xRange,
 				zeroline: true,
 				zerolinewidth: 2
@@ -209,8 +199,6 @@
 				automargin: true,
 				showline: true,
 				linewidth: 1,
-				anchor: 'free',
-				position: zeroXPosition,
 				range: yRange,
 				zeroline: true,
 				zerolinewidth: 2
@@ -385,8 +373,6 @@
 
 		const xRange = Number.isFinite(minX) && Number.isFinite(maxX) ? getAxisRange([minX, maxX]) : [-1, 1];
 		const yRange = Number.isFinite(minY) && Number.isFinite(maxY) ? getAxisRange([minY, maxY]) : [-1, 1];
-		const zeroXPosition = getZeroPosition(xRange[0], xRange[1]);
-		const zeroYPosition = getZeroPosition(yRange[0], yRange[1]);
 
 		// Build the layout using the processed labels.
 		const layout = {
@@ -395,8 +381,6 @@
 				title: processedXLabel,
 				showline: true,
 				linewidth: 1,
-				anchor: 'free',
-				position: zeroYPosition,
 				range: xRange,
 				zeroline: true,
 				zerolinewidth: 2
@@ -405,8 +389,6 @@
 				title: { text: processedYLabel, standoff: 25 },
 				showline: true,
 				linewidth: 1,
-				anchor: 'free',
-				position: zeroXPosition,
 				range: yRange,
 				zeroline: true,
 				zerolinewidth: 2
