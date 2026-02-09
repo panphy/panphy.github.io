@@ -9,7 +9,8 @@ import {
   clearDraft,
   restoreDraft,
   saveScrollSyncPreference,
-  saveHighlightSyncPreference
+  saveHighlightSyncPreference,
+  debounce
 } from './state.js';
 
 import {
