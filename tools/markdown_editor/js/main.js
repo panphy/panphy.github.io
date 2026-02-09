@@ -133,17 +133,33 @@ function loadSampleDocument() {
 }
 
 const mathPattern = /(\$\$[\s\S]+?\$\$)|(\$[^$]+\$)|\\\(|\\\[|\\begin\{/;
-let lastRenderHadMath = false;
+let renderToken = 0;
+let pendingMathRender = null;
 
 function detectMath(text) {
   return mathPattern.test(text);
 }
 
 const scheduleMathTypeset = debounce(() => {
-  if (!lastRenderHadMath) return;
-  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+  if (!pendingMathRender) return;
+  const { token, tempDiv } = pendingMathRender;
+  pendingMathRender = null;
+
+  if (!window.MathJax || typeof MathJax.typesetPromise !== 'function') {
+    if (token === renderToken) {
+      renderedOutput.innerHTML = tempDiv.innerHTML;
+      updateHighlightedBlockFromCaret();
+    }
+    return;
   }
+
+  MathJax.typesetPromise([tempDiv])
+    .then(() => {
+      if (token !== renderToken) return;
+      renderedOutput.innerHTML = tempDiv.innerHTML;
+      updateHighlightedBlockFromCaret();
+    })
+    .catch(console.error);
 }, 300);
 
 /**
@@ -162,22 +178,34 @@ function renderContent({ typesetMath = true } = {}) {
 
   const preprocessedText = preprocessMarkdown(inputText);
   const hasMath = detectMath(preprocessedText);
-  lastRenderHadMath = hasMath;
+  const currentToken = (renderToken += 1);
 
   const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-  renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
+  const wrappedContent = wrapRenderedBlocks(sanitizedContent, lineBlocks);
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = wrappedContent;
 
   if (hasMath) {
-    if (typesetMath) {
-      if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-        MathJax.typesetPromise([renderedOutput]).catch(console.error);
+    if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+      if (typesetMath) {
+        MathJax.typesetPromise([tempDiv])
+          .then(() => {
+            if (currentToken !== renderToken) return;
+            renderedOutput.innerHTML = tempDiv.innerHTML;
+            updateHighlightedBlockFromCaret();
+          })
+          .catch(console.error);
+      } else {
+        pendingMathRender = { token: currentToken, tempDiv };
+        scheduleMathTypeset();
       }
-    } else {
-      scheduleMathTypeset();
+      return;
     }
   }
+
+  renderedOutput.innerHTML = tempDiv.innerHTML;
   updateHighlightedBlockFromCaret();
 }
 
