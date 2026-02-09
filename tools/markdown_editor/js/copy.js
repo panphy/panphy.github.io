@@ -149,8 +149,17 @@ function prepareEquationSvg(svg) {
   );
   svgClone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
-  svgClone.style.backgroundColor = 'transparent';
   svgClone.removeAttribute('style');
+
+  // Add a white background rect so the equation is visible when pasted
+  // into apps that render transparent backgrounds as black
+  const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bgRect.setAttribute('x', outputViewBox.x);
+  bgRect.setAttribute('y', outputViewBox.y);
+  bgRect.setAttribute('width', outputViewBox.width);
+  bgRect.setAttribute('height', outputViewBox.height);
+  bgRect.setAttribute('fill', '#ffffff');
+  svgClone.insertBefore(bgRect, defsClone.nextSibling);
 
   const fillColor = '#000000';
   const applyFill = (el) => {
@@ -216,7 +225,8 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
     const pngBlob = await new Promise(resolve => {
       img.onload = () => {
         URL.revokeObjectURL(svgObjectUrl);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(blob => resolve(blob), 'image/png');
       };
