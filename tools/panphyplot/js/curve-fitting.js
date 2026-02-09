@@ -178,7 +178,6 @@ function setInitialParameters(method) {
 		const Aguess = (maxY - minY) / 2;
 		const cguess = meanY;
 		const bguess = 0;
-		const phiguess = 0;
 
 		let kguess = estimateKFromData();
 		if (kguess === null || !isFinite(kguess) || kguess <= 0) {
@@ -186,6 +185,19 @@ function setInitialParameters(method) {
 			// fallback: assume ~1 cycle across the span
 			kguess = span > 0 ? (2 * Math.PI) / span : 1;
 		}
+
+		// Compute initial phase from the Fourier component at estimated k
+		// For y - c = A*sin(kx - phi), projecting onto sin(kx) and cos(kx):
+		//   sumSin ∝ A*cos(phi), sumCos ∝ -A*sin(phi)
+		//   => phi = atan2(-sumCos, sumSin)
+		let sumSin = 0, sumCos = 0;
+		for (let i = 0; i < x.length; i++) {
+			const val = y[i] - cguess;
+			sumSin += val * Math.sin(kguess * x[i]);
+			sumCos += val * Math.cos(kguess * x[i]);
+		}
+		let phiguess = Math.atan2(-sumCos, sumSin);
+		if (!isFinite(phiguess)) phiguess = 0;
 
 		document.getElementById('initial-A').value = (isFinite(Aguess) && Aguess !== 0 ? Aguess : 1).toFixed(3);
 		document.getElementById('initial-b').value = bguess.toFixed(3);
@@ -1010,7 +1022,14 @@ function estimateKFromData() {
 	}
 
 	// === 1. Sort & detrend ===
-	const sortedData = [...rawData[activeSet]].sort((a, b) => a.x - b.x);
+	// Filter out entries with non-finite x or y (e.g. null y from blank cells)
+	const sortedData = rawData[activeSet]
+		.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+		.sort((a, b) => a.x - b.x);
+	if (sortedData.length < 4) {
+		console.warn("Not enough valid data points to estimate k.");
+		return null;
+	}
 	const x = sortedData.map(p => p.x);
 	const y = sortedData.map(p => p.y);
 
@@ -1248,10 +1267,36 @@ function performSinusoidalFit() {
 			});
 		}
 
-		const initialParams = [A0, b0, k0, phi0, c0];
-		const { params } = levenbergMarquardt(data, initialParams, residualFn, jacobianFn, { maxIterations: 300, tolerance: 1e-10 });
+		// Multi-start: try several k values to avoid local minima
+		const kCandidates = [k0];
+		if (k0 > 0) {
+			kCandidates.push(k0 * 0.667, k0 * 1.5, k0 * 2.0);
+		}
 
-		const [A, b, k, phi, c] = params;
+		let bestResult = null;
+		let bestCost = Infinity;
+
+		for (const kCandidate of kCandidates) {
+			// Compute phase estimate for this k candidate
+			let sumS = 0, sumC = 0;
+			for (let j = 0; j < data.length; j++) {
+				const val = data[j].y - c0;
+				sumS += val * Math.sin(kCandidate * data[j].x);
+				sumC += val * Math.cos(kCandidate * data[j].x);
+			}
+			let phiCandidate = Math.atan2(-sumC, sumS);
+			if (!Number.isFinite(phiCandidate)) phiCandidate = phi0;
+
+			const candidateParams = [A0, b0, kCandidate, phiCandidate, c0];
+			const result = levenbergMarquardt(data, candidateParams, residualFn, jacobianFn, { maxIterations: 300, tolerance: 1e-10 });
+
+			if (result.cost < bestCost) {
+				bestCost = result.cost;
+				bestResult = result;
+			}
+		}
+
+		const [A, b, k, phi, c] = bestResult.params;
 
 		const xMin = Math.min(...data.map(p => p.x));
 		const xMax = Math.max(...data.map(p => p.x));
