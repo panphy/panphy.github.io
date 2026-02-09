@@ -567,40 +567,6 @@ textarea {
   color: var(--text-color);
 }
 
-textarea,
-#renderedOutput {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
-}
-
-[data-theme="dark"] textarea,
-[data-theme="dark"] #renderedOutput {
-  scrollbar-color: rgba(223, 230, 233, 0.35) transparent;
-}
-
-textarea::-webkit-scrollbar,
-#renderedOutput::-webkit-scrollbar {
-  width: 10px;
-}
-
-textarea::-webkit-scrollbar-track,
-#renderedOutput::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-textarea::-webkit-scrollbar-thumb,
-#renderedOutput::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.35);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-[data-theme="dark"] textarea::-webkit-scrollbar-thumb,
-[data-theme="dark"] #renderedOutput::-webkit-scrollbar-thumb {
-  background-color: rgba(223, 230, 233, 0.35);
-}
-
 /* ---------------------------------------------------------------------- */
 /* Rendered output area                                                   */
 /* ---------------------------------------------------------------------- */
@@ -1153,25 +1119,6 @@ mjx-container {
   position: relative;
   transition: box-shadow 0.15s ease;
   border-radius: 8px;
-}
-
-mjx-container[display="true"] {
-  display: block;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-mjx-container[display="true"] svg {
-  max-width: 100%;
-  height: auto;
-}
-
-#renderedOutput > svg[aria-hidden="true"] {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
 }
 
 mjx-container:hover {
