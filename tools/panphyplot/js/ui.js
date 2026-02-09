@@ -1615,6 +1615,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 	function applyGlobalUncertainties(axis) {
 		const globalVal = document.getElementById(`global-${axis}-uncertainty`).value.trim();
+		const toggleInput = document.getElementById(`toggle-${axis}-error`);
+		if (globalVal !== '' && toggleInput && !toggleInput.checked) {
+			toggleInput.checked = true;
+			toggleErrorColumn(axis);
+		}
 		const tableBody = document.querySelector('#data-table tbody');
 		const rows = tableBody.querySelectorAll('tr');
 
