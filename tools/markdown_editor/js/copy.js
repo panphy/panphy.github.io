@@ -153,6 +153,7 @@ function prepareEquationSvg(svg) {
 
   const fillColor = '#000000';
   const applyFill = (el) => {
+    if (el.tagName.toLowerCase() === 'use') return;
     const currentFill = el.getAttribute('fill');
     if (!currentFill || currentFill === 'currentColor') {
       el.setAttribute('fill', fillColor);
@@ -160,18 +161,39 @@ function prepareEquationSvg(svg) {
   };
 
   const applyStroke = (el) => {
+    if (el.tagName.toLowerCase() === 'use') return;
     const currentStroke = el.getAttribute('stroke');
     if (!currentStroke || currentStroke === 'currentColor') {
       el.setAttribute('stroke', fillColor);
     }
   };
 
-  svgClone.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline').forEach(applyFill);
+  svgClone.querySelectorAll('path, text, tspan, ellipse, circle, polygon, polyline').forEach(applyFill);
   svgClone.querySelectorAll('line, polyline, polygon, path').forEach(applyStroke);
+
+  const isPercent = value => value && value.trim().endsWith('%');
+  const isFullSizeRect = rect => {
+    const rectWidth = rect.getAttribute('width');
+    const rectHeight = rect.getAttribute('height');
+    if (isPercent(rectWidth) && isPercent(rectHeight)) {
+      return true;
+    }
+    const widthValue = rectWidth ? Number.parseFloat(rectWidth) : NaN;
+    const heightValue = rectHeight ? Number.parseFloat(rectHeight) : NaN;
+    if (!Number.isFinite(widthValue) || !Number.isFinite(heightValue)) {
+      return false;
+    }
+    return widthValue >= viewBoxWidth * 0.95 && heightValue >= viewBoxHeight * 0.95;
+  };
 
   svgClone.querySelectorAll('rect').forEach(rect => {
     const rectFill = rect.getAttribute('fill');
-    if (!rectFill || rectFill === 'currentColor') {
+    const inDefs = Boolean(rect.closest('defs'));
+    if (!inDefs && isFullSizeRect(rect)) {
+      if (!rectFill || rectFill === 'currentColor') {
+        rect.setAttribute('fill', 'none');
+      }
+    } else if (!rectFill || rectFill === 'currentColor') {
       rect.setAttribute('fill', fillColor);
     }
     const rectStroke = rect.getAttribute('stroke');
