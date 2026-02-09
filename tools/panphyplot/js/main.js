@@ -84,6 +84,27 @@ document.addEventListener("DOMContentLoaded", function() {
 	// Combined plot inputs.
 	initCombinedPlotInputs();
 
+	const setupGlobalUncertaintyAutoApply = (axis) => {
+		const input = document.getElementById(`global-${axis}-uncertainty`);
+		if (!input) return;
+
+		const applyIfReady = () => {
+			if (input.value.trim() === '') return;
+			applyGlobalUncertainties(axis);
+		};
+
+		input.addEventListener('change', applyIfReady);
+		input.addEventListener('keydown', function(event) {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyIfReady();
+			}
+		});
+	};
+
+	setupGlobalUncertaintyAutoApply('x');
+	setupGlobalUncertaintyAutoApply('y');
+
 	if (savedState && savedState.combinedPlot) {
 		const combinedTitleInput = document.getElementById('combined-title');
 		const combinedXInput = document.getElementById('combined-x-label');
