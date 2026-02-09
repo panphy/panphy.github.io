@@ -8,12 +8,17 @@ import {
   saveDraft,
   clearDraft,
   restoreDraft,
-  saveSyncScrollPreference,
+  saveHighlightSyncPreference,
   debounce
 } from './state.js';
 
 import {
-  preprocessMarkdown
+  preprocessMarkdown,
+  buildLineBlocks,
+  wrapRenderedBlocks,
+  getCleanRenderedOutputHTML,
+  getLineNumberFromOffset,
+  getOffsetsForLineRange
 } from './rendering.js';
 
 import { handleCopyClick } from './copy.js';
@@ -22,10 +27,11 @@ import {
   initUI,
   initializeTheme,
   toggleTheme,
-  initializeSyncScrollToggle,
+  initializeHighlightSyncToggle,
   initializeFontSize,
   applyFontSize,
   updateOfflineFontState,
+  getMatchingBlockForLine,
   updateThemeToggleButton,
   getCurrentFontSize,
   showFilenameModal
@@ -44,7 +50,7 @@ const printButton = document.getElementById('printButton');
 const saveMDButton = document.getElementById('saveMDButton');
 const loadFileButton = document.getElementById('loadFileButton');
 const themeToggleButton = document.getElementById('themeToggleButton');
-const syncScrollSwitch = document.getElementById('syncScrollSwitch');
+const highlightSyncToggle = document.getElementById('highlightSyncToggle');
 const fontSizeSelect = document.getElementById('fontSizeSelect');
 const highlightStyle = document.getElementById('highlightStyle');
 const presentExitButton = document.getElementById('presentExitButton');
@@ -129,7 +135,9 @@ function renderContent() {
   const inputText = markdownInput.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
     renderedOutput.innerHTML = `
-      <p>Preview unavailable: required libraries failed to load.</p>
+      <div class="md-block">
+        <p>Preview unavailable: required libraries failed to load.</p>
+      </div>
     `;
     return;
   }
@@ -138,11 +146,70 @@ function renderContent() {
 
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-  renderedOutput.innerHTML = sanitizedContent;
+  if (state.isHighlightSyncEnabled) {
+    const lineBlocks = buildLineBlocks(preprocessedText);
+    renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
+  } else {
+    renderedOutput.innerHTML = sanitizedContent;
+  }
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput]).catch(console.error);
   }
+  if (state.isHighlightSyncEnabled) {
+    updateHighlightedBlockFromCaret();
+  }
+}
+
+/**
+ * Update the highlighted block based on caret position
+ * @param {Object} options - Options object
+ * @param {boolean} options.forceScroll - Whether to force scroll into view
+ */
+function updateHighlightedBlockFromCaret({ forceScroll = false } = {}) {
+  const current = renderedOutput.querySelector('.highlighted-block');
+  if (!state.isHighlightSyncEnabled) {
+    if (current) {
+      current.classList.remove('highlighted-block');
+    }
+    return;
+  }
+
+  const lineNumber = getLineNumberFromOffset(markdownInput.value, markdownInput.selectionStart || 0);
+  const matchingBlock = getMatchingBlockForLine(renderedOutput, lineNumber);
+
+  if (current && current !== matchingBlock) {
+    current.classList.remove('highlighted-block');
+  }
+
+  if (!matchingBlock) {
+    return;
+  }
+
+  matchingBlock.classList.add('highlighted-block');
+  matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
+}
+
+/**
+ * Sync caret position from output click
+ * @param {MouseEvent} event - The click event
+ */
+function syncCaretFromOutputClick(event) {
+  const targetBlock = event.target.closest('[data-src-start][data-src-end]');
+  if (!targetBlock) return;
+
+  const startLine = Number(targetBlock.dataset.srcStart);
+  const endLine = Number(targetBlock.dataset.srcEnd);
+  if (Number.isNaN(startLine) || Number.isNaN(endLine)) return;
+
+  const text = markdownInput.value;
+  const offsets = getOffsetsForLineRange(text, startLine, endLine);
+  markdownInput.focus();
+  markdownInput.setSelectionRange(offsets.startOffset, offsets.endOffset);
+
+  const lineHeight = parseFloat(getComputedStyle(markdownInput).lineHeight) || 16;
+  markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
+  updateHighlightedBlockFromCaret({ forceScroll: true });
 }
 
 /**
@@ -384,7 +451,7 @@ async function exportHTML() {
   const fileName = await showFilenameModal('document.html', 'Export as HTML');
   if (!fileName) return;
 
-  const sanitizedHTML = renderedOutput.innerHTML;
+  const sanitizedHTML = getCleanRenderedOutputHTML(renderedOutput);
   const currentFontSize = getCurrentFontSize();
   const doc = document.implementation.createHTMLDocument('Exported Document');
   const head = doc.head;
@@ -674,87 +741,26 @@ function loadMarkdownFile() {
 }
 
 // Setup event listeners
+const handleCaretChange = () => updateHighlightedBlockFromCaret();
+
 const debouncedRenderAndSave = debounce(() => {
   renderContent();
   saveDraft(markdownInput.value);
 }, 200);
 
 markdownInput.addEventListener('input', debouncedRenderAndSave);
+markdownInput.addEventListener('keyup', handleCaretChange);
+markdownInput.addEventListener('click', handleCaretChange);
+markdownInput.addEventListener('select', handleCaretChange);
 
 renderedOutput.addEventListener('click', event => {
   // Disable click-to-copy while presenting
-  if (!isInFullscreen()) {
-    handleCopyClick(event);
+  const handled = isInFullscreen() ? false : handleCopyClick(event);
+  // Then handle caret sync (only if not clicking on copyable elements)
+  if (!handled && !event.target.closest('mjx-container') && !event.target.closest('table') && !event.target.closest('pre')) {
+    syncCaretFromOutputClick(event);
   }
 });
-
-// ---- Scroll sync ----
-function throttle(func, limit) {
-  let inThrottle;
-  return function () {
-    const args = arguments;
-    const context = this;
-    if (!inThrottle) {
-      func.apply(context, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
-  };
-}
-
-let isSyncingInputScroll = false;
-let isSyncingOutputScroll = false;
-
-const syncInputToOutput = throttle(() => {
-  if (!state.isSyncScrollEnabled || isSyncingOutputScroll) return;
-
-  isSyncingInputScroll = true;
-
-  requestAnimationFrame(() => {
-    const inputScrollTop = markdownInput.scrollTop;
-    const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-    const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-    if (inputScrollHeight === 0) {
-      renderedOutput.scrollTop = 0;
-    } else {
-      const scrollRatio = inputScrollTop / inputScrollHeight;
-      const newOutputScrollTop = scrollRatio * outputScrollHeight;
-      if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
-        renderedOutput.scrollTop = newOutputScrollTop;
-      }
-    }
-
-    isSyncingInputScroll = false;
-  });
-}, 2);
-
-const syncOutputToInput = throttle(() => {
-  if (!state.isSyncScrollEnabled || isSyncingInputScroll) return;
-
-  isSyncingOutputScroll = true;
-
-  requestAnimationFrame(() => {
-    const outputScrollTop = renderedOutput.scrollTop;
-    const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-    const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-
-    if (outputScrollHeight === 0) {
-      markdownInput.scrollTop = 0;
-    } else {
-      const scrollRatio = outputScrollTop / outputScrollHeight;
-      const newInputScrollTop = scrollRatio * inputScrollHeight;
-      if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
-        markdownInput.scrollTop = newInputScrollTop;
-      }
-    }
-
-    isSyncingOutputScroll = false;
-  });
-}, 2);
-
-markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
-renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
 
 printButton.addEventListener('click', printToPDF);
 exportHTMLButton.addEventListener('click', exportHTML);
@@ -774,8 +780,14 @@ themeToggleButton.addEventListener('click', () => {
   updateMobileThemeToggle();
 });
 
-syncScrollSwitch.addEventListener('change', event => {
-  saveSyncScrollPreference(event.target.checked);
+highlightSyncToggle.addEventListener('change', event => {
+  saveHighlightSyncPreference(event.target.checked);
+  renderContent();
+  if (event.target.checked) {
+    updateHighlightedBlockFromCaret({ forceScroll: true });
+  } else {
+    updateHighlightedBlockFromCaret();
+  }
 });
 
 if (fontSizeSelect) {
@@ -916,7 +928,7 @@ mobileQuery.addEventListener('change', () => {
 // Initialize the application
 updateOfflineFontState();
 initializeTheme();
-initializeSyncScrollToggle(syncScrollSwitch);
+initializeHighlightSyncToggle(highlightSyncToggle);
 initializeFontSize(fontSizeSelect);
 updatePresentButtonLabel();
 updatePresentThemeIcon();
