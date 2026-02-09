@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
@@ -14,6 +14,33 @@
       --font-sans: 'Inter', sans-serif;
       --font-display: 'Poppins', 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      --btn-bg-color: #6c5ce7;
+      --btn-bg-hover: #5b4cdb;
+      --btn-text-color: #ffffff;
+      --btn-border-color: rgba(108, 92, 231, 0.25);
+      --slider-bg: #dbe4f3;
+      --slider-hover: #c7d2fe;
+      --slider-thumb: #6c5ce7;
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.6);
+      --canvas-bg: #ffffff;
+      --channel-line: #0ea5e9;
+      --combined-line: #ef4444;
+      --toggle-hover: rgba(108, 92, 231, 0.15);
+    }
+
+    [data-theme="dark"] {
       --bg-color: #0f1014;
       --bg-pattern: #181a20;
       --text-main: #dfe6e9;
@@ -30,7 +57,14 @@
       --btn-text-color: #ffffff;
       --btn-border-color: #3a3f4b;
       --slider-bg: #3a3f4b;
+      --slider-hover: #4a4f5b;
       --slider-thumb: #a29bfe;
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+      --canvas-bg: #1e1e1e;
+      --channel-line: #57c7ff;
+      --combined-line: #ff638f;
+      --toggle-hover: rgba(162, 155, 254, 0.2);
     }
 
     html,
@@ -60,11 +94,11 @@
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      background: rgba(22, 24, 29, 0.85);
+      background: var(--nav-bg);
       margin: 1rem auto 0.75rem;
       padding: 0.5rem 1.25rem;
       border-radius: 18px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--nav-border);
       box-shadow: var(--shadow);
       width: calc(100% - 3rem);
       max-width: calc(1300px - 3rem);
@@ -97,9 +131,28 @@
     }
 
     /* Empty placeholder in the right column to keep the heading truly centered */
-    .banner-placeholder {
-      width: 70px;
-      /* approximate the same width as the logo area */
+    .theme-toggle {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .theme-toggle button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.5rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .theme-toggle button:hover {
+      background-color: var(--toggle-hover);
+      transform: translateY(-1px);
     }
 
     a {
@@ -208,7 +261,7 @@
     .channel-canvas {
       width: 100%;
       height: 80px;
-      background-color: #111318;
+      background-color: var(--canvas-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       margin-top: 8px;
@@ -260,7 +313,7 @@
     }
 
     input[type="range"]:hover::-webkit-slider-runnable-track {
-      background: #4a4f5b;
+      background: var(--slider-hover);
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -287,7 +340,7 @@
     }
 
     input[type="range"]:hover::-moz-range-track {
-      background: #4a4f5b;
+      background: var(--slider-hover);
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -317,7 +370,7 @@
     #sumCanvas {
       width: 95%;
       height: 160px;
-      background-color: #111318;
+      background-color: var(--canvas-bg);
       border: 2px solid var(--border);
       border-radius: 12px;
     }
@@ -453,8 +506,9 @@
         max-height: 26px;
       }
 
-      .banner-placeholder {
-        width: 50px;
+      .theme-toggle button {
+        font-size: 1.05rem;
+        padding: 0.4rem;
       }
 
       #content {
@@ -527,7 +581,7 @@
 
 <body>
 
-  <!-- Title Banner: Logo (Left), Heading (Center), Placeholder (Right) -->
+  <!-- Title Banner: Logo (Left), Heading (Center), Theme Toggle (Right) -->
   <div id="titleBanner">
     <div class="banner-logo">
       <a href="https://panphy.github.io/">
@@ -537,7 +591,9 @@
 
     <h1 class="banner-title">Multi-Channel Tone Generator</h1>
 
-    <div class="banner-placeholder"></div>
+    <div class="theme-toggle">
+      <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+    </div>
   </div>
 
   <div id="content">
@@ -596,6 +652,40 @@
       if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
       document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
     })();
+  </script>
+  <script>
+    // Theme Toggle
+    const themeButton = document.getElementById('theme-button');
+    const DARK_THEME_KEY = "panphy-dark";
+    const LIGHT_THEME_KEY = "panphy-light";
+
+    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+      "dark" :
+      localStorage.getItem(LIGHT_THEME_KEY) ?
+        "light" :
+        "light";
+
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateButtonEmoji(currentTheme);
+
+    function updateButtonEmoji(theme) {
+      themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+    }
+
+    themeButton.addEventListener('click', function () {
+      let theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem(DARK_THEME_KEY, 'true');
+        localStorage.removeItem(LIGHT_THEME_KEY);
+        updateButtonEmoji('dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem(LIGHT_THEME_KEY, 'true');
+        localStorage.removeItem(DARK_THEME_KEY);
+        updateButtonEmoji('light');
+      }
+    });
   </script>
 </body>
 
@@ -827,6 +917,18 @@
   }
 
   // ========== DRAW LOOP ==========
+  function getCssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function getThemeColors() {
+    return {
+      canvasBg: getCssVar('--canvas-bg'),
+      channelLine: getCssVar('--channel-line'),
+      combinedLine: getCssVar('--combined-line')
+    };
+  }
+
   function draw(time) {
     requestAnimationFrame(draw);
 
@@ -842,16 +944,17 @@
       accumulatedTime += (deltaTime * timeScale) / (SCALE);
     }
 
-    channels.forEach(ch => drawChannelWave(ch, ch.ctx, ch.canvas));
-    drawCombinedWave(sumCtx, sumCanvas);
+    const themeColors = getThemeColors();
+    channels.forEach(ch => drawChannelWave(ch, ch.ctx, ch.canvas, themeColors));
+    drawCombinedWave(sumCtx, sumCanvas, themeColors);
   }
 
-  function drawChannelWave(channel, ctx, canvas) {
-    ctx.fillStyle = '#1e1e1e';
+  function drawChannelWave(channel, ctx, canvas, themeColors) {
+    ctx.fillStyle = themeColors.canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#57c7ff';
+    ctx.strokeStyle = themeColors.channelLine;
     ctx.beginPath();
 
     const timeWindow = BASE_WINDOW * zoomScale;
@@ -868,14 +971,14 @@
     ctx.stroke();
   }
 
-  function drawCombinedWave(ctx, canvas) {
-    ctx.fillStyle = '#1e1e1e';
+  function drawCombinedWave(ctx, canvas, themeColors) {
+    ctx.fillStyle = themeColors.canvasBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (channels.length === 0) return;
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#ff638f';
+    ctx.strokeStyle = themeColors.combinedLine;
     ctx.beginPath();
 
     const timeWindow = BASE_WINDOW * zoomScale;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
@@ -14,6 +14,35 @@
       --font-sans: 'Inter', sans-serif;
       --font-display: 'Poppins', 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5b4cdb;
+      --btn-secondary: #00cec9;
+      --btn-secondary-hover: #00b3ad;
+      --btn-text: #ffffff;
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.6);
+      --canvas-bg: #ffffff;
+      --axis-color: #2d3436;
+      --grid-color: #94a3b8;
+      --wave-line: #16a34a;
+      --marker-color: #f97316;
+      --tooltip-bg: rgba(255, 255, 255, 0.95);
+      --tooltip-text: #1f2933;
+      --toggle-hover: rgba(108, 92, 231, 0.15);
+    }
+
+    [data-theme="dark"] {
       --bg-color: #0f1014;
       --bg-pattern: #181a20;
       --text-main: #dfe6e9;
@@ -29,6 +58,17 @@
       --btn-primary-hover: #5849d6;
       --btn-secondary: #00cec9;
       --btn-secondary-hover: #00b3ad;
+      --btn-text: #ffffff;
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+      --canvas-bg: #1e1e1e;
+      --axis-color: #ffffff;
+      --grid-color: #ffffff;
+      --wave-line: #98c616;
+      --marker-color: #ff5f1f;
+      --tooltip-bg: rgba(15, 16, 20, 0.9);
+      --tooltip-text: #ffffff;
+      --toggle-hover: rgba(162, 155, 254, 0.2);
     }
 
     * {
@@ -74,8 +114,8 @@
       max-width: 1100px;
       width: min(1100px, calc(100% - 3rem));
       margin: 0 auto;
-      background: rgba(22, 24, 29, 0.85);
-      border: 1px solid var(--border);
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
       border-radius: 18px;
       padding: 0.4rem 1.1rem;
       box-shadow: var(--shadow);
@@ -105,8 +145,28 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .banner-placeholder {
-      width: 40px;
+    .theme-toggle {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .theme-toggle button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.15rem;
+      padding: 0.45rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .theme-toggle button:hover {
+      background-color: var(--toggle-hover);
+      transform: translateY(-1px);
     }
 
     main {
@@ -215,6 +275,8 @@
       width: 100%;
       height: clamp(180px, 24vh, 240px);
       border-radius: 12px;
+      background-color: var(--canvas-bg);
+      border: 1px solid var(--border);
     }
 
     #visualizer {
@@ -229,8 +291,8 @@
     #tooltip {
       position: absolute;
       display: none;
-      background-color: rgba(15, 16, 20, 0.9);
-      color: #fff;
+      background-color: var(--tooltip-bg);
+      color: var(--tooltip-text);
       padding: 6px 10px;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -279,7 +341,7 @@
       cursor: pointer;
       border: none;
       border-radius: 999px;
-      color: #fff;
+      color: var(--btn-text);
       font-weight: 600;
       letter-spacing: 0.2px;
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -353,7 +415,9 @@
 
         <h1 class="banner-title">Audio Spectrum & Waveform Analyzer</h1>
 
-        <div class="banner-placeholder"></div>
+        <div class="theme-toggle">
+          <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+        </div>
       </div>
     </header>
 
@@ -414,6 +478,40 @@
       document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
     })();
   </script>
+  <script>
+    // Theme Toggle
+    const themeButton = document.getElementById('theme-button');
+    const DARK_THEME_KEY = "panphy-dark";
+    const LIGHT_THEME_KEY = "panphy-light";
+
+    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+      "dark" :
+      localStorage.getItem(LIGHT_THEME_KEY) ?
+        "light" :
+        "light";
+
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateButtonEmoji(currentTheme);
+
+    function updateButtonEmoji(theme) {
+      themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+    }
+
+    themeButton.addEventListener('click', function () {
+      let theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem(DARK_THEME_KEY, 'true');
+        localStorage.removeItem(LIGHT_THEME_KEY);
+        updateButtonEmoji('dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem(LIGHT_THEME_KEY, 'true');
+        localStorage.removeItem(DARK_THEME_KEY);
+        updateButtonEmoji('light');
+      }
+    });
+  </script>
 </body>
 
 <script>
@@ -461,7 +559,9 @@
   const yScaleSlider = document.getElementById('yScale');
   const xScaleSlider = document.getElementById('xScale');
 
-  const markerColor = '#ff5f1f';
+  function getCssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
   const markerGrabTolerance = 14;
   let markerA = 0.3;
   let markerB = 0.7;
@@ -674,12 +774,15 @@
   function drawLoop() {
     requestAnimationFrame(drawLoop);
 
+    const canvasBg = getCssVar('--canvas-bg');
+    const waveLine = getCssVar('--wave-line');
+
     // Frequency Spectrum background
-    freqCtx.fillStyle = '#1e1e1e';
+    freqCtx.fillStyle = canvasBg;
     freqCtx.fillRect(0, 0, freqCanvasSize.width, freqCanvasSize.height);
 
     // Waveform background
-    waveCtx.fillStyle = '#1e1e1e';
+    waveCtx.fillStyle = canvasBg;
     waveCtx.fillRect(0, 0, waveCanvasSize.width, waveCanvasSize.height);
     drawSquareGridWithTime();
 
@@ -729,7 +832,7 @@
     }
 
     waveCtx.lineWidth = 2;
-    waveCtx.strokeStyle = '#98c616';
+    waveCtx.strokeStyle = waveLine;
     waveCtx.beginPath();
 
     const totalSamples = timeDomainData.length;
@@ -756,7 +859,7 @@
   function drawFrequencyAxis(ctx, width, height) {
     if (!sampleRate || !analyzer) return;
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = getCssVar('--axis-color');
     ctx.font = '12px sans-serif';
 
     const maxFreq = sampleRate / 2;
@@ -770,7 +873,7 @@
       ctx.beginPath();
       ctx.moveTo(x, height - 5);
       ctx.lineTo(x, height);
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = getCssVar('--axis-color');
       ctx.stroke();
 
       let label;
@@ -784,8 +887,11 @@
   // ------------------ Square Grid & Time Axis ------------------
   function drawSquareGridWithTime() {
     waveCtx.save();
-    waveCtx.strokeStyle = `rgba(255,255,255,${SQUARE_GRID_ALPHA})`;
-    waveCtx.fillStyle = '#ffffff';
+    const gridColor = getCssVar('--grid-color');
+    const axisColor = getCssVar('--axis-color');
+    waveCtx.globalAlpha = SQUARE_GRID_ALPHA;
+    waveCtx.strokeStyle = gridColor;
+    waveCtx.fillStyle = axisColor;
     waveCtx.font = '12px sans-serif';
 
     const dispW = waveCanvasSize.width;
@@ -830,6 +936,7 @@
       waveCtx.stroke();
     }
 
+    waveCtx.globalAlpha = 1;
     waveCtx.restore();
   }
 
@@ -842,7 +949,7 @@
 
     waveCtx.save();
     waveCtx.lineWidth = 1;
-    waveCtx.strokeStyle = markerColor;
+    waveCtx.strokeStyle = getCssVar('--marker-color');
 
     waveCtx.beginPath();
     waveCtx.moveTo(markerX1, 0);
