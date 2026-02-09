@@ -151,16 +151,6 @@ function prepareEquationSvg(svg) {
 
   svgClone.removeAttribute('style');
 
-  // Add a white background rect so the equation is visible when pasted
-  // into apps that render transparent backgrounds as black
-  const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  bgRect.setAttribute('x', outputViewBox.x);
-  bgRect.setAttribute('y', outputViewBox.y);
-  bgRect.setAttribute('width', outputViewBox.width);
-  bgRect.setAttribute('height', outputViewBox.height);
-  bgRect.setAttribute('fill', '#ffffff');
-  svgClone.insertBefore(bgRect, defsClone.nextSibling);
-
   const fillColor = '#000000';
   const applyFill = (el) => {
     const currentFill = el.getAttribute('fill');
@@ -191,6 +181,18 @@ function prepareEquationSvg(svg) {
   });
 
   svgClone.setAttribute('color', fillColor);
+
+  // Add a white background rect AFTER color conversion so it doesn't
+  // get a black stroke applied. Inserted right after <defs> so it
+  // paints behind all equation content (SVG painters-model order).
+  const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bgRect.setAttribute('x', outputViewBox.x);
+  bgRect.setAttribute('y', outputViewBox.y);
+  bgRect.setAttribute('width', outputViewBox.width);
+  bgRect.setAttribute('height', outputViewBox.height);
+  bgRect.setAttribute('fill', '#ffffff');
+  bgRect.setAttribute('stroke', 'none');
+  svgClone.insertBefore(bgRect, defsClone.nextSibling);
 
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
@@ -279,41 +281,28 @@ export async function copyEquationToClipboard(mjxContainer) {
   const { svgString, widthPx, heightPx } = preparedSvg;
 
   try {
-    // Safari only supports text/plain, text/html, and image/png in ClipboardItem
-    // Including image/svg+xml causes the entire clipboard write to fail on Safari
-    // Additionally, Safari requires ClipboardItem to be created synchronously
-    // within the user gesture, with blob values provided as Promises
-    const useSafariCompatMode = isSafari();
-
-    if (useSafariCompatMode) {
-      // Safari: Create ClipboardItem synchronously with Promise-based blob
-      // This maintains the user gesture context required by Safari
+    // Only image/png is reliably supported across browsers.
+    // image/svg+xml is rejected by Chrome/Edge, causing the entire write to fail.
+    // Safari requires ClipboardItem to be created synchronously within the user
+    // gesture, with blob values provided as Promises.
+    if (isSafari()) {
       const pngPromise = rasterizeSvgToPng(svgString, widthPx, heightPx).then(blob => {
         if (!blob) throw new Error('PNG rasterization failed');
         return blob;
       });
 
-      const clipboardItem = new ClipboardItem({
-        'image/png': pngPromise
-      });
-
-      await navigator.clipboard.write([clipboardItem]);
-      return true;
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': pngPromise })
+      ]);
     } else {
-      // Non-Safari: Use direct blobs with both SVG and PNG formats
-      const clipboardPayload = {};
-
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
-      clipboardPayload['image/svg+xml'] = svgBlob;
-
       const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
-      if (pngBlob) {
-        clipboardPayload['image/png'] = pngBlob;
-      }
+      if (!pngBlob) throw new Error('PNG rasterization failed');
 
-      await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
-      return true;
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': pngBlob })
+      ]);
     }
+    return true;
   } catch (err) {
     console.error('Failed to copy equation:', err);
     return false;
