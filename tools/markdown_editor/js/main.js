@@ -132,8 +132,6 @@ function loadSampleDocument() {
     });
 }
 
-let renderToken = 0;
-
 /**
  * Render the markdown content to the output pane
  */
@@ -149,27 +147,15 @@ function renderContent() {
   }
 
   const preprocessedText = preprocessMarkdown(inputText);
-  const currentToken = (renderToken += 1);
 
   const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-  const wrappedContent = wrapRenderedBlocks(sanitizedContent, lineBlocks);
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = wrappedContent;
+  renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-    MathJax.typesetPromise([tempDiv])
-      .then(() => {
-        if (currentToken !== renderToken) return;
-        renderedOutput.innerHTML = tempDiv.innerHTML;
-        updateHighlightedBlockFromCaret();
-      })
-      .catch(console.error);
-    return;
+    MathJax.typesetPromise([renderedOutput]).catch(console.error);
   }
-
-  renderedOutput.innerHTML = tempDiv.innerHTML;
   updateHighlightedBlockFromCaret();
 }
 
@@ -773,22 +759,12 @@ function loadMarkdownFile() {
 // Setup event listeners
 const handleCaretChange = () => updateHighlightedBlockFromCaret();
 
-let renderQueued = false;
-const debouncedSaveDraft = debounce(() => {
+const debouncedRenderAndSave = debounce(() => {
+  renderContent();
   saveDraft(markdownInput.value);
-}, 300);
+}, 200);
 
-const scheduleRender = () => {
-  if (renderQueued) return;
-  renderQueued = true;
-  requestAnimationFrame(() => {
-    renderQueued = false;
-    renderContent({ typesetMath: false });
-    debouncedSaveDraft();
-  });
-};
-
-markdownInput.addEventListener('input', scheduleRender);
+markdownInput.addEventListener('input', debouncedRenderAndSave);
 markdownInput.addEventListener('keyup', handleCaretChange);
 markdownInput.addEventListener('click', handleCaretChange);
 markdownInput.addEventListener('select', handleCaretChange);
