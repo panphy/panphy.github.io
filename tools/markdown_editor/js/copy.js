@@ -188,7 +188,8 @@ function prepareEquationSvg(svg) {
 
   svgClone.querySelectorAll('rect').forEach(rect => {
     const rectFill = rect.getAttribute('fill');
-    if (isFullSizeRect(rect)) {
+    const inDefs = Boolean(rect.closest('defs'));
+    if (!inDefs && isFullSizeRect(rect)) {
       if (!rectFill || rectFill === 'currentColor') {
         rect.setAttribute('fill', 'none');
       }
