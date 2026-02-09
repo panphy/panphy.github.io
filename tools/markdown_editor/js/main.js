@@ -9,8 +9,7 @@ import {
   clearDraft,
   restoreDraft,
   saveScrollSyncPreference,
-  saveHighlightSyncPreference,
-  debounce
+  saveHighlightSyncPreference
 } from './state.js';
 
 import {
@@ -132,40 +131,12 @@ function loadSampleDocument() {
     });
 }
 
-const mathPattern = /(\$\$[\s\S]+?\$\$)|(\$[^$]+\$)|\\\(|\\\[|\\begin\{/;
 let renderToken = 0;
-let pendingMathRender = null;
-
-function detectMath(text) {
-  return mathPattern.test(text);
-}
-
-const scheduleMathTypeset = debounce(() => {
-  if (!pendingMathRender) return;
-  const { token, tempDiv } = pendingMathRender;
-  pendingMathRender = null;
-
-  if (!window.MathJax || typeof MathJax.typesetPromise !== 'function') {
-    if (token === renderToken) {
-      renderedOutput.innerHTML = tempDiv.innerHTML;
-      updateHighlightedBlockFromCaret();
-    }
-    return;
-  }
-
-  MathJax.typesetPromise([tempDiv])
-    .then(() => {
-      if (token !== renderToken) return;
-      renderedOutput.innerHTML = tempDiv.innerHTML;
-      updateHighlightedBlockFromCaret();
-    })
-    .catch(console.error);
-}, 300);
 
 /**
  * Render the markdown content to the output pane
  */
-function renderContent({ typesetMath = true } = {}) {
+function renderContent() {
   const inputText = markdownInput.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
     renderedOutput.innerHTML = `
@@ -177,7 +148,6 @@ function renderContent({ typesetMath = true } = {}) {
   }
 
   const preprocessedText = preprocessMarkdown(inputText);
-  const hasMath = detectMath(preprocessedText);
   const currentToken = (renderToken += 1);
 
   const lineBlocks = buildLineBlocks(preprocessedText);
@@ -187,22 +157,15 @@ function renderContent({ typesetMath = true } = {}) {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = wrappedContent;
 
-  if (hasMath) {
-    if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-      if (typesetMath) {
-        MathJax.typesetPromise([tempDiv])
-          .then(() => {
-            if (currentToken !== renderToken) return;
-            renderedOutput.innerHTML = tempDiv.innerHTML;
-            updateHighlightedBlockFromCaret();
-          })
-          .catch(console.error);
-      } else {
-        pendingMathRender = { token: currentToken, tempDiv };
-        scheduleMathTypeset();
-      }
-      return;
-    }
+  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+    MathJax.typesetPromise([tempDiv])
+      .then(() => {
+        if (currentToken !== renderToken) return;
+        renderedOutput.innerHTML = tempDiv.innerHTML;
+        updateHighlightedBlockFromCaret();
+      })
+      .catch(console.error);
+    return;
   }
 
   renderedOutput.innerHTML = tempDiv.innerHTML;
