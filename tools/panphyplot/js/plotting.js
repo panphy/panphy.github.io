@@ -62,6 +62,31 @@
 		return currentDataStr === newDataStr && currentLayoutStr === newLayoutStr;
 	}
 
+	function getAxisRange(values, errors = []) {
+		let min = Infinity;
+		let max = -Infinity;
+		values.forEach((value, index) => {
+			if (!Number.isFinite(value)) return;
+			const error = Math.abs(errors[index] || 0);
+			min = Math.min(min, value - error);
+			max = Math.max(max, value + error);
+		});
+		if (!Number.isFinite(min) || !Number.isFinite(max)) {
+			return [-1, 1];
+		}
+		if (min === max) {
+			return [min - 1, max + 1];
+		}
+		const padding = (max - min) * 0.05;
+		return [min - padding, max + padding];
+	}
+
+	function getZeroPosition(min, max) {
+		if (max === min) return 0.5;
+		const position = (0 - min) / (max - min);
+		return Math.min(1, Math.max(0, position));
+	}
+
 
 	function updatePlotAndRenderLatex() {
 		if (isSyncing) return;
@@ -109,6 +134,11 @@
 		const convertedYError = y.map((yi, idx) =>
 			yErrorType === 'percentage' ? (yErrorRaw[idx] / 100) * (yi || 0) : yErrorRaw[idx]
 		);
+
+		const xRange = getAxisRange(x, convertedXError);
+		const yRange = getAxisRange(y, convertedYError);
+		const zeroXPosition = getZeroPosition(xRange[0], xRange[1]);
+		const zeroYPosition = getZeroPosition(yRange[0], yRange[1]);
 
 		// Build the primary data trace.
 		const data = [{
@@ -161,6 +191,9 @@
 				title: processLabel(document.getElementById('x-column-name').value || 'x'),
 				showline: true,
 				linewidth: 1,
+				anchor: 'free',
+				position: zeroYPosition,
+				range: xRange,
 				zeroline: true,
 				zerolinewidth: 2
 			},
@@ -173,6 +206,9 @@
 				automargin: true,
 				showline: true,
 				linewidth: 1,
+				anchor: 'free',
+				position: zeroXPosition,
+				range: yRange,
 				zeroline: true,
 				zerolinewidth: 2
 			},
@@ -230,6 +266,10 @@
 	function plotAllDatasets() {
 		const traces = [];
 		const themeSettings = getPlotThemeSettings();
+		let minX = Infinity;
+		let maxX = -Infinity;
+		let minY = Infinity;
+		let maxY = -Infinity;
 
 		// Get theme-specific colors for datasets and fitted curves.
 		const datasetColors = themeSettings.datasetColors;
@@ -265,6 +305,18 @@
 			const yErrorsConverted = yVals.map((yVal, i) =>
 				errorTypes.y === 'percentage' ? (yErrorsRaw[i] / 100) * (yVal || 0) : yErrorsRaw[i]
 			);
+			xVals.forEach((xVal, i) => {
+				if (!Number.isFinite(xVal)) return;
+				const error = Math.abs(xErrorsConverted[i] || 0);
+				minX = Math.min(minX, xVal - error);
+				maxX = Math.max(maxX, xVal + error);
+			});
+			yVals.forEach((yVal, i) => {
+				if (!Number.isFinite(yVal)) return;
+				const error = Math.abs(yErrorsConverted[i] || 0);
+				minY = Math.min(minY, yVal - error);
+				maxY = Math.max(maxY, yVal + error);
+			});
 
 			const toggles = datasetToggles[index] || { x: false, y: false };
 
@@ -328,6 +380,11 @@
 		const processedXLabel = rawXLabel === '' ? '' : processLabel(rawXLabel);
 		const processedYLabel = rawYLabel === '' ? '' : processLabel(rawYLabel);
 
+		const xRange = Number.isFinite(minX) && Number.isFinite(maxX) ? getAxisRange([minX, maxX]) : [-1, 1];
+		const yRange = Number.isFinite(minY) && Number.isFinite(maxY) ? getAxisRange([minY, maxY]) : [-1, 1];
+		const zeroXPosition = getZeroPosition(xRange[0], xRange[1]);
+		const zeroYPosition = getZeroPosition(yRange[0], yRange[1]);
+
 		// Build the layout using the processed labels.
 		const layout = {
 			title: { text: processedTitle, font: { size: 16 } },
@@ -335,6 +392,9 @@
 				title: processedXLabel,
 				showline: true,
 				linewidth: 1,
+				anchor: 'free',
+				position: zeroYPosition,
+				range: xRange,
 				zeroline: true,
 				zerolinewidth: 2
 			},
@@ -342,6 +402,9 @@
 				title: { text: processedYLabel, standoff: 25 },
 				showline: true,
 				linewidth: 1,
+				anchor: 'free',
+				position: zeroXPosition,
+				range: yRange,
 				zeroline: true,
 				zerolinewidth: 2
 			},
