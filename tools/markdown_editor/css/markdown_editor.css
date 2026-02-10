@@ -1220,13 +1220,9 @@ mjx-container.copy-failed::after {
   opacity: 1 !important;
 }
 
-/* Code block click-to-copy */
+/* Code block styling */
 #renderedOutput pre {
-  cursor: pointer;
-  position: relative;
-  transition: box-shadow 0.15s ease;
   margin-top: 20px;
-  overflow: visible;
   border-radius: 8px;
 }
 
@@ -1234,54 +1230,6 @@ mjx-container.copy-failed::after {
   display: block;
   overflow-x: auto;
   padding: 12px;
-}
-
-#renderedOutput pre:hover {
-  box-shadow: 0 0 0 2px var(--copy-hint-outline);
-}
-
-#renderedOutput pre::before {
-  content: "Click to copy code";
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--copy-hint-chip-bg);
-  color: var(--copy-hint-text);
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-family: var(--font-sans);
-  white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 100;
-}
-
-#renderedOutput pre:hover::before {
-  opacity: 1;
-}
-
-#renderedOutput pre.copied {
-  box-shadow: 0 0 0 2px #22c55e !important;
-}
-
-#renderedOutput pre.copied::before {
-  content: "Copied!" !important;
-  background: #22c55e !important;
-  opacity: 1 !important;
-}
-
-#renderedOutput pre.copy-failed {
-  box-shadow: 0 0 0 2px #ef4444 !important;
-}
-
-#renderedOutput pre.copy-failed::before {
-  content: "Copy failed" !important;
-  background: #ef4444 !important;
-  opacity: 1 !important;
 }
 
 #renderedOutput table.copy-failed {
@@ -1300,58 +1248,49 @@ mjx-container.copy-failed::after {
 
 /* Native fullscreen */
 #outputPane:fullscreen mjx-container,
-#outputPane:fullscreen #renderedOutput table,
-#outputPane:fullscreen #renderedOutput pre {
+#outputPane:fullscreen #renderedOutput table {
   cursor: default;
 }
 
 #outputPane:fullscreen mjx-container:hover,
-#outputPane:fullscreen #renderedOutput table:hover,
-#outputPane:fullscreen #renderedOutput pre:hover {
+#outputPane:fullscreen #renderedOutput table:hover {
   box-shadow: none;
 }
 
 #outputPane:fullscreen mjx-container:hover::after,
-#outputPane:fullscreen #renderedOutput table:hover::before,
-#outputPane:fullscreen #renderedOutput pre:hover::before {
+#outputPane:fullscreen #renderedOutput table:hover::before {
   opacity: 0;
 }
 
 /* Webkit fullscreen */
 #outputPane:-webkit-full-screen mjx-container,
-#outputPane:-webkit-full-screen #renderedOutput table,
-#outputPane:-webkit-full-screen #renderedOutput pre {
+#outputPane:-webkit-full-screen #renderedOutput table {
   cursor: default;
 }
 
 #outputPane:-webkit-full-screen mjx-container:hover,
-#outputPane:-webkit-full-screen #renderedOutput table:hover,
-#outputPane:-webkit-full-screen #renderedOutput pre:hover {
+#outputPane:-webkit-full-screen #renderedOutput table:hover {
   box-shadow: none;
 }
 
 #outputPane:-webkit-full-screen mjx-container:hover::after,
-#outputPane:-webkit-full-screen #renderedOutput table:hover::before,
-#outputPane:-webkit-full-screen #renderedOutput pre:hover::before {
+#outputPane:-webkit-full-screen #renderedOutput table:hover::before {
   opacity: 0;
 }
 
 /* Pseudo-fullscreen fallback */
 #outputPane.pseudo-fullscreen mjx-container,
-#outputPane.pseudo-fullscreen #renderedOutput table,
-#outputPane.pseudo-fullscreen #renderedOutput pre {
+#outputPane.pseudo-fullscreen #renderedOutput table {
   cursor: default;
 }
 
 #outputPane.pseudo-fullscreen mjx-container:hover,
-#outputPane.pseudo-fullscreen #renderedOutput table:hover,
-#outputPane.pseudo-fullscreen #renderedOutput pre:hover {
+#outputPane.pseudo-fullscreen #renderedOutput table:hover {
   box-shadow: none;
 }
 
 #outputPane.pseudo-fullscreen mjx-container:hover::after,
-#outputPane.pseudo-fullscreen #renderedOutput table:hover::before,
-#outputPane.pseudo-fullscreen #renderedOutput pre:hover::before {
+#outputPane.pseudo-fullscreen #renderedOutput table:hover::before {
   opacity: 0;
 }
 

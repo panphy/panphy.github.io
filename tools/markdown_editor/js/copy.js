@@ -1,6 +1,6 @@
 /**
  * Copy-to-clipboard module for the Markdown Editor
- * Handles copying equations, tables, and code blocks
+ * Handles copying equations and tables
  */
 
 /**
@@ -172,6 +172,7 @@ function prepareEquationSvg(svg) {
     svgClone.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline, line, rect')
   ).filter(el => !el.closest('defs'));
 
+  // Always use black for non-none paint values so copies are light-theme
   clonedPaintElements.forEach((cloneEl, index) => {
     const originalEl = originalPaintElements[index];
     if (!originalEl) return;
@@ -180,12 +181,14 @@ function prepareEquationSvg(svg) {
     const fill = normalizePaintValue(computed.fill);
     const stroke = normalizePaintValue(computed.stroke);
 
-    if (fill) {
-      cloneEl.setAttribute('fill', fill);
+    if (fill && fill !== 'none') {
+      cloneEl.setAttribute('fill', fallbackColor);
+    } else if (fill === 'none') {
+      cloneEl.setAttribute('fill', 'none');
     }
 
-    if (stroke) {
-      cloneEl.setAttribute('stroke', stroke);
+    if (stroke && stroke !== 'none') {
+      cloneEl.setAttribute('stroke', fallbackColor);
       const strokeWidth = computed.strokeWidth;
       if (strokeWidth && strokeWidth !== '0px') {
         cloneEl.setAttribute('stroke-width', strokeWidth);
@@ -331,14 +334,16 @@ export async function copyEquationToClipboard(mjxContainer) {
 export async function copyTableToClipboard(table) {
   const tableClone = table.cloneNode(true);
 
-  // Add inline styles for better Word compatibility
+  // Add inline styles for better Word compatibility (always light theme)
   tableClone.style.borderCollapse = 'collapse';
   tableClone.style.fontFamily = 'Arial, sans-serif';
   tableClone.style.fontSize = '12pt';
+  tableClone.style.color = '#000000';
 
   tableClone.querySelectorAll('th, td').forEach(cell => {
     cell.style.border = '1px solid black';
     cell.style.padding = '8px';
+    cell.style.color = '#000000';
   });
 
   const htmlString = tableClone.outerHTML;
@@ -359,181 +364,6 @@ export async function copyTableToClipboard(table) {
       return true;
     } catch (fallbackErr) {
       console.error('Failed to copy table:', fallbackErr);
-      return false;
-    }
-  }
-}
-
-/**
- * Copy a code block as HTML with syntax highlighting and background to clipboard.
- * Uses a table structure to preserve background colors in rich text editors like
- * Word, Pages, Notes, etc. (tables preserve cell backgrounds better than divs).
- * @param {HTMLPreElement} preElement - The pre element containing the code
- * @returns {Promise<boolean>} Success status
- */
-export async function copyCodeBlockToClipboard(preElement) {
-  const codeElement = preElement.querySelector('code');
-  const plainText = codeElement ? codeElement.textContent : preElement.textContent;
-
-  const isTransparentColor = (color) => {
-    if (!color) return true;
-    const normalized = color.trim().toLowerCase().replace(/\s+/g, '');
-    return normalized === 'transparent' || normalized === 'rgba(0,0,0,0)';
-  };
-
-  // Get computed styles for the code block (use code element when it defines theme colors)
-  const preStyle = getComputedStyle(preElement);
-  const codeStyle = codeElement ? getComputedStyle(codeElement) : null;
-
-  const codeBg = codeStyle?.backgroundColor;
-  const preBg = preStyle.backgroundColor;
-  const bgColor = !isTransparentColor(codeBg) ? codeBg : (!isTransparentColor(preBg) ? preBg : '#f1f3f5');
-
-  const codeTextColor = codeStyle?.color;
-  const preTextColor = preStyle.color;
-  const textColor = !isTransparentColor(codeTextColor) ? codeTextColor : (preTextColor || '#000000');
-
-  const codePadding = codeStyle?.padding || '12px';
-  const borderRadius = preStyle.borderRadius || '6px';
-  const fontFamily = codeStyle?.fontFamily || preStyle.fontFamily || "'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace";
-  const fontSize = codeStyle?.fontSize || preStyle.fontSize || '10pt';
-  const lineHeight = codeStyle?.lineHeight || preStyle.lineHeight || '1.5';
-
-  // Build the code content with inlined syntax highlighting
-  const codeClone = codeElement ? codeElement.cloneNode(true) : preElement.cloneNode(true);
-
-  // Inline the syntax highlighting colors from hljs spans
-  const originalHighlights = (codeElement || preElement).querySelectorAll('[class*="hljs"]');
-  const clonedHighlights = codeClone.querySelectorAll('[class*="hljs"]');
-  clonedHighlights.forEach((el, index) => {
-    const original = originalHighlights[index];
-    if (!original) return;
-    const elStyle = getComputedStyle(original);
-    if (elStyle.color) {
-      el.style.color = elStyle.color;
-    }
-    if (elStyle.fontWeight && elStyle.fontWeight !== 'normal' && elStyle.fontWeight !== '400') {
-      el.style.fontWeight = elStyle.fontWeight;
-    }
-    if (elStyle.fontStyle && elStyle.fontStyle !== 'normal') {
-      el.style.fontStyle = elStyle.fontStyle;
-    }
-  });
-
-  // Build an HTML snapshot for SVG rendering
-  const snapshotWrapper = document.createElement('div');
-  snapshotWrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-  snapshotWrapper.style.backgroundColor = bgColor;
-  snapshotWrapper.style.color = textColor;
-  snapshotWrapper.style.fontFamily = fontFamily;
-  snapshotWrapper.style.fontSize = fontSize;
-  snapshotWrapper.style.lineHeight = lineHeight;
-  snapshotWrapper.style.padding = codePadding;
-  snapshotWrapper.style.borderRadius = borderRadius;
-  snapshotWrapper.style.display = 'inline-block';
-  snapshotWrapper.style.whiteSpace = 'pre';
-  snapshotWrapper.style.boxSizing = 'border-box';
-
-  const snapshotPre = document.createElement('pre');
-  snapshotPre.style.margin = '0';
-  snapshotPre.style.padding = '0';
-  snapshotPre.style.backgroundColor = 'transparent';
-  snapshotPre.style.color = 'inherit';
-  snapshotPre.style.fontFamily = 'inherit';
-  snapshotPre.style.fontSize = 'inherit';
-  snapshotPre.style.lineHeight = 'inherit';
-  snapshotPre.style.whiteSpace = 'pre';
-  snapshotPre.style.wordWrap = 'break-word';
-  snapshotPre.style.border = 'none';
-  snapshotPre.innerHTML = codeClone.innerHTML;
-  snapshotWrapper.appendChild(snapshotPre);
-
-  const snapshotRect = preElement.getBoundingClientRect();
-  const widthPx = Math.max(Math.ceil(snapshotRect.width), preElement.scrollWidth, 20);
-  const heightPx = Math.max(Math.ceil(snapshotRect.height), preElement.scrollHeight, 20);
-
-  // Create a table structure - tables preserve background colors in most rich text editors
-  const table = document.createElement('table');
-  table.style.borderCollapse = 'collapse';
-  table.style.border = 'none';
-  table.style.margin = '0';
-  table.style.padding = '0';
-  table.style.width = 'auto';
-  table.setAttribute('cellspacing', '0');
-  table.setAttribute('cellpadding', '0');
-
-  const tr = document.createElement('tr');
-  const td = document.createElement('td');
-
-  // Apply background to the table cell - this is what gets preserved
-  td.style.backgroundColor = bgColor;
-  td.style.color = textColor;
-  td.style.fontFamily = fontFamily;
-  td.style.fontSize = fontSize;
-  td.style.lineHeight = lineHeight;
-  td.style.padding = codePadding;
-  td.style.borderRadius = borderRadius;
-  td.style.whiteSpace = 'pre';
-  td.style.border = 'none';
-  td.style.verticalAlign = 'top';
-
-  // Create a pre element inside the cell for proper code formatting
-  const pre = document.createElement('pre');
-  pre.style.margin = '0';
-  pre.style.padding = '0';
-  pre.style.backgroundColor = 'transparent';
-  pre.style.color = 'inherit';
-  pre.style.fontFamily = 'inherit';
-  pre.style.fontSize = 'inherit';
-  pre.style.lineHeight = 'inherit';
-  pre.style.whiteSpace = 'pre-wrap';
-  pre.style.wordWrap = 'break-word';
-  pre.style.border = 'none';
-
-  // Transfer the highlighted content
-  pre.innerHTML = codeClone.innerHTML;
-
-  td.appendChild(pre);
-  tr.appendChild(td);
-  table.appendChild(tr);
-
-  const htmlString = table.outerHTML;
-
-  try {
-    if (typeof ClipboardItem === 'undefined') {
-      throw new Error('ClipboardItem not supported');
-    }
-
-    // Copy as HTML for syntax highlighting + plain text fallback
-    const htmlBlob = new Blob([htmlString], { type: 'text/html' });
-    const textBlob = new Blob([plainText], { type: 'text/plain' });
-    const clipboardPayload = {
-      'text/html': htmlBlob,
-      'text/plain': textBlob
-    };
-
-    const clipboardItem = new ClipboardItem(clipboardPayload);
-    await navigator.clipboard.write([clipboardItem]);
-    return true;
-  } catch (err) {
-    // Fallback to plain text copy
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(plainText);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = plainText;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
-      return true;
-    } catch (fallbackErr) {
-      console.error('Failed to copy code:', fallbackErr);
       return false;
     }
   }
@@ -590,20 +420,6 @@ export function handleCopyClick(event) {
         showCopyFeedback(table);
       } else {
         showCopyFailedFeedback(table);
-      }
-    });
-    return true;
-  }
-
-  // Check if clicked on a code block
-  const preElement = event.target.closest('pre');
-  if (preElement && !window.getSelection().toString()) {
-    event.preventDefault();
-    copyCodeBlockToClipboard(preElement).then(success => {
-      if (success) {
-        showCopyFeedback(preElement);
-      } else {
-        showCopyFailedFeedback(preElement);
       }
     });
     return true;
