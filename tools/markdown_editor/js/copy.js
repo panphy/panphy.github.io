@@ -139,6 +139,32 @@ function prepareEquationSvg(svg) {
   const widthPx = Math.max((hasRectSize ? rect.width : viewBoxWidth) + paddingPx * 2, 20);
   const heightPx = Math.max((hasRectSize ? rect.height : viewBoxHeight) + paddingPx * 2, 20);
 
+  const inlineComputedStyles = (selector, props) => {
+    const originalNodes = svg.querySelectorAll(selector);
+    const clonedNodes = svgClone.querySelectorAll(selector);
+    clonedNodes.forEach((cloneNode, index) => {
+      const originalNode = originalNodes[index];
+      if (!originalNode || cloneNode.tagName.toLowerCase() === 'use') return;
+      const computed = getComputedStyle(originalNode);
+      props.forEach(prop => {
+        const attrName = prop.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+        const existing = cloneNode.getAttribute(attrName);
+        if (existing && existing !== 'currentColor') return;
+        const value = computed[prop];
+        if (!value || value === 'none' || value === '0px' || value === '0') return;
+        cloneNode.setAttribute(attrName, value);
+      });
+    });
+  };
+
+  inlineComputedStyles('line, path, rect, polygon, polyline', [
+    'fill',
+    'stroke',
+    'strokeWidth',
+    'strokeLinecap',
+    'strokeLinejoin'
+  ]);
+
   svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   svgClone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
   svgClone.setAttribute('width', `${widthPx}px`);
