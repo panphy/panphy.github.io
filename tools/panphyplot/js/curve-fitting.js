@@ -276,32 +276,11 @@ function formatExpEquation(A, b, c, useShift = false, x0 = 0) {
 function exponentialFit_cAbx(raw) {
 	const data = raw.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
 	if (data.length < 3) return null;
-	// Exponential-specific: ignore non-positive y (noise) for fitting
-	const posData = data.filter(p => p.y > 0);
-	const pts = (posData.length >= 3 ? posData : data);
-	const x = pts.map(p => p.x);
-	const y = pts.map(p => p.y);
-
-	// Initial guesses: c0 from upper tail; A0,b0 from ln|y-c0| vs x
-	const ys = [...y].sort((a, b) => a - b);
-	const kTop = Math.max(1, Math.floor(0.2 * ys.length));
-	const c0 = ys.slice(-kTop)[Math.floor(kTop / 2)];
-	const z = y.map(v => v - c0);
-	const signZ = Math.sign(z.reduce((s, v) => s + v, 0)) || 1;
-	const X = [],
-		L = [];
-	for (let i = 0; i < z.length; i++)
-		if (Math.abs(z[i]) > 1e-12) {
-			X.push(x[i]);
-			L.push(Math.log(Math.abs(z[i])));
-		}
-	let A0 = signZ * 1,
-		b0 = -1;
-	if (X.length >= 2) {
-		const { slope, intercept } = computeLinearFit(X, L);
-		b0 = slope;
-		A0 = signZ * Math.exp(intercept);
-	}
+	const x = data.map(p => p.x);
+	const y = data.map(p => p.y);
+	const yMin = Math.min(...y);
+	const yMax = Math.max(...y);
+	const yRange = (yMax - yMin) || 1;
 
 	// Residuals and Jacobian for model: y = c + A * exp(b * x)
 	// params = [A, b, c]
@@ -316,16 +295,56 @@ function exponentialFit_cAbx(raw) {
 		});
 	}
 
-	// Use global Levenberg-Marquardt solver
-	const { params } = levenbergMarquardt(
-		data,
-		[A0, b0, c0],
-		fitResiduals,
-		fitJacobian,
-		{ maxIterations: 200 }
-	);
+	// Multi-start: try several c candidates covering decay and inverted cases.
+	// For y = c + A*exp(bx), the asymptote c is where y flattens out —
+	// near min(y) for standard decay/growth, near max(y) for inverted (A<0).
+	const cCandidates = [
+		yMin - 0.1 * yRange,
+		yMin,
+		(yMin + yMax) / 2,
+		yMax,
+		yMax + 0.1 * yRange,
+	];
 
-	const [A, b, c] = params;
+	let bestParams = null;
+	let bestCost = Infinity;
+
+	for (const c0 of cCandidates) {
+		// Estimate A0, b0 via log-linearization of y - c0
+		const z = y.map(v => v - c0);
+		const posCount = z.filter(v => v > 1e-12).length;
+		const negCount = z.filter(v => v < -1e-12).length;
+		const signZ = posCount >= negCount ? 1 : -1;
+
+		const X = [], L = [];
+		for (let i = 0; i < z.length; i++) {
+			if (signZ * z[i] > 1e-12) {
+				X.push(x[i]);
+				L.push(Math.log(signZ * z[i]));
+			}
+		}
+		let A0 = signZ, b0 = 0;
+		if (X.length >= 2) {
+			const { slope, intercept } = computeLinearFit(X, L);
+			b0 = slope;
+			A0 = signZ * Math.exp(intercept);
+		}
+
+		const { params, cost } = levenbergMarquardt(
+			data, [A0, b0, c0],
+			fitResiduals, fitJacobian,
+			{ maxIterations: 200 }
+		);
+
+		if (cost < bestCost) {
+			bestCost = cost;
+			bestParams = params;
+		}
+	}
+
+	if (!bestParams) return null;
+
+	const [A, b, c] = bestParams;
 	const xMin = Math.min(...x),
 		xMax = Math.max(...x);
 	const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
@@ -340,45 +359,76 @@ function exponentialFit_cAbx(raw) {
 function exponentialFit_logLinear(raw) {
 	const data = raw.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
 	if (data.length < 3) return null;
-	// Exponential-specific: ignore non-positive y (noise) for fitting
-	const posData = data.filter(p => p.y > 0);
-	const pts = (posData.length >= 3 ? posData : data);
-	const x = pts.map(p => p.x);
-	const y = pts.map(p => p.y);
+	const x = data.map(p => p.x);
+	const y = data.map(p => p.y);
 
-	// c from min(y) to keep original behaviour (works with negative noise)
-	const c = Math.min(...y);
-
+	const yMin = Math.min(...y);
+	const yMax = Math.max(...y);
+	const yRange = (yMax - yMin) || 1;
 	const xMin = Math.min(...x),
 		xMax = Math.max(...x);
-	const steps = 100;
-	const x0Cands = Array.from({ length: steps }, (_, i) => xMin + i * (xMax - xMin) / (steps - 1));
 
-	let best = { mse: Infinity, A: 1, b: 0, x0: 0 };
+	// Grid-search over c and x0 candidates for the best log-linear initial guess.
+	// c is now a free parameter: try values below, at, and slightly above yMin.
+	const cCandidates = [
+		yMin - 0.5 * yRange,
+		yMin - 0.1 * yRange,
+		yMin,
+		yMin + 0.1 * yRange,
+	];
 
-	for (const x0 of x0Cands) {
-		const yAdj = y.map(v => v - c);
-		const X = [],
-			L = [];
-		for (let i = 0; i < yAdj.length; i++) {
-			const val = yAdj[i];
-			if (val > 0) { // only log valid
-				X.push(x[i] - x0); // <-- critical: regress on (x - x0)
-				L.push(Math.log(val));
+	const x0Steps = 50;
+	const x0Cands = Array.from({ length: x0Steps }, (_, i) => xMin + i * (xMax - xMin) / (x0Steps - 1));
+
+	let best = { sse: Infinity, A: 1, b: 0, x0: 0, c: 0 };
+
+	for (const c of cCandidates) {
+		for (const x0 of x0Cands) {
+			const X = [], L = [];
+			for (let i = 0; i < y.length; i++) {
+				const val = y[i] - c;
+				if (val > 1e-12) {
+					X.push(x[i] - x0);
+					L.push(Math.log(val));
+				}
 			}
-		}
-		if (X.length < 2) continue;
+			if (X.length < 2) continue;
 
-		const { slope: b, intercept: lnA } = computeLinearFit(X, L);
-		const A = Math.exp(lnA);
-		// MSE in log space for this x0
-		const preds = X.map(xx => b * xx + lnA);
-		const mse = preds.reduce((s, p, i) => s + (L[i] - p) * (L[i] - p), 0) / preds.length;
-		if (mse < best.mse) best = { mse, A, b, x0 };
+			const { slope: b, intercept: lnA } = computeLinearFit(X, L);
+			const A = Math.exp(lnA);
+
+			// Rank by data-space SSE (not log-space MSE) to avoid bias
+			let sse = 0;
+			for (let i = 0; i < x.length; i++) {
+				const pred = A * Math.exp(b * (x[i] - x0)) + c;
+				const r = y[i] - pred;
+				sse += r * r;
+			}
+			if (sse < best.sse) best = { sse, A, b, x0, c };
+		}
 	}
 
-	if (!isFinite(best.mse)) return null;
-	const { A, b, x0 } = best;
+	if (!isFinite(best.sse)) return null;
+
+	// Refine the best log-linear guess with LM on all 4 parameters [A, b, x0, c]
+	function fitResiduals([A, b, x0, c], pts) {
+		return pts.map(({ x, y }) => (A * Math.exp(b * (x - x0)) + c) - y);
+	}
+
+	function fitJacobian([A, b, x0, c], pts) {
+		return pts.map(({ x }) => {
+			const e = Math.exp(b * (x - x0));
+			return [e, A * (x - x0) * e, -A * b * e, 1];
+		});
+	}
+
+	const { params } = levenbergMarquardt(
+		data, [best.A, best.b, best.x0, best.c],
+		fitResiduals, fitJacobian,
+		{ maxIterations: 200 }
+	);
+
+	const [A, b, x0, c] = params;
 	const fitFn = xi => A * Math.exp(b * (xi - x0)) + c;
 	const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
 	const yFit = xFit.map(fitFn);
