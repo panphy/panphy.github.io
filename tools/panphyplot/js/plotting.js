@@ -71,7 +71,8 @@
 
 	function createDownloadImageConfig(defaultFilename) {
 		return {
-			modeBarButtonsToRemove: ['toImage'],
+			displaylogo: false,
+			modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'resetScale2d'],
 			modeBarButtonsToAdd: [{
 				name: 'Download plot as png',
 				icon: Plotly.Icons.camera,
