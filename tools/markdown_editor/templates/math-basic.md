@@ -7,3 +7,5 @@ $$ \frac{1}{x} $$
 $$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
 
 $$ \left( \frac{1}{\sqrt[n]{2}} \right) $$
+
+$$ \vec{r} = 5 \hat{i} + 8 \hat{j} $$
