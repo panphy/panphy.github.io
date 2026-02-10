@@ -8,6 +8,7 @@ import {
   saveDraft,
   clearDraft,
   restoreDraft,
+  saveScrollSyncPreference,
   saveHighlightSyncPreference,
   debounce
 } from './state.js';
@@ -27,10 +28,12 @@ import {
   initUI,
   initializeTheme,
   toggleTheme,
+  initializeScrollSyncToggle,
   initializeHighlightSyncToggle,
   initializeFontSize,
   applyFontSize,
   updateOfflineFontState,
+  syncLinkedScroll,
   getMatchingBlockForLine,
   updateThemeToggleButton,
   getCurrentFontSize,
@@ -50,6 +53,7 @@ const printButton = document.getElementById('printButton');
 const saveMDButton = document.getElementById('saveMDButton');
 const loadFileButton = document.getElementById('loadFileButton');
 const themeToggleButton = document.getElementById('themeToggleButton');
+const scrollSyncToggle = document.getElementById('scrollSyncToggle');
 const highlightSyncToggle = document.getElementById('highlightSyncToggle');
 const fontSizeSelect = document.getElementById('fontSizeSelect');
 const highlightStyle = document.getElementById('highlightStyle');
@@ -144,21 +148,15 @@ function renderContent() {
 
   const preprocessedText = preprocessMarkdown(inputText);
 
+  const lineBlocks = buildLineBlocks(preprocessedText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
-  if (state.isHighlightSyncEnabled) {
-    const lineBlocks = buildLineBlocks(preprocessedText);
-    renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
-  } else {
-    renderedOutput.innerHTML = sanitizedContent;
-  }
+  renderedOutput.innerHTML = wrapRenderedBlocks(sanitizedContent, lineBlocks);
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput]).catch(console.error);
   }
-  if (state.isHighlightSyncEnabled) {
-    updateHighlightedBlockFromCaret();
-  }
+  updateHighlightedBlockFromCaret();
 }
 
 /**
@@ -187,7 +185,10 @@ function updateHighlightedBlockFromCaret({ forceScroll = false } = {}) {
   }
 
   matchingBlock.classList.add('highlighted-block');
-  matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
+  const shouldScroll = forceScroll || !state.isLinkScrollEnabled;
+  if (shouldScroll) {
+    matchingBlock.scrollIntoView({ block: 'center', behavior: forceScroll ? 'smooth' : 'auto' });
+  }
 }
 
 /**
@@ -211,6 +212,21 @@ function syncCaretFromOutputClick(event) {
   markdownInput.scrollTop = Math.max(0, (startLine - 1) * lineHeight);
   updateHighlightedBlockFromCaret({ forceScroll: true });
 }
+
+/**
+ * Link output scroll to input scroll
+ */
+function linkOutputToInputScroll() {
+  syncLinkedScroll(markdownInput, renderedOutput);
+}
+
+/**
+ * Link input scroll to output scroll
+ */
+function linkInputToOutputScroll() {
+  syncLinkedScroll(renderedOutput, markdownInput);
+}
+
 
 /**
  * Check if currently in fullscreen (native or pseudo)
@@ -752,6 +768,7 @@ markdownInput.addEventListener('input', debouncedRenderAndSave);
 markdownInput.addEventListener('keyup', handleCaretChange);
 markdownInput.addEventListener('click', handleCaretChange);
 markdownInput.addEventListener('select', handleCaretChange);
+markdownInput.addEventListener('scroll', linkOutputToInputScroll);
 
 renderedOutput.addEventListener('click', event => {
   // Disable click-to-copy while presenting
@@ -762,6 +779,7 @@ renderedOutput.addEventListener('click', event => {
   }
 });
 
+renderedOutput.addEventListener('scroll', linkInputToOutputScroll);
 printButton.addEventListener('click', printToPDF);
 exportHTMLButton.addEventListener('click', exportHTML);
 presentButton.addEventListener('click', togglePresentMode);
@@ -780,9 +798,15 @@ themeToggleButton.addEventListener('click', () => {
   updateMobileThemeToggle();
 });
 
+scrollSyncToggle.addEventListener('change', event => {
+  saveScrollSyncPreference(event.target.checked);
+  if (event.target.checked) {
+    updateHighlightedBlockFromCaret({ forceScroll: true });
+  }
+});
+
 highlightSyncToggle.addEventListener('change', event => {
   saveHighlightSyncPreference(event.target.checked);
-  renderContent();
   if (event.target.checked) {
     updateHighlightedBlockFromCaret({ forceScroll: true });
   } else {
@@ -928,6 +952,7 @@ mobileQuery.addEventListener('change', () => {
 // Initialize the application
 updateOfflineFontState();
 initializeTheme();
+initializeScrollSyncToggle(scrollSyncToggle);
 initializeHighlightSyncToggle(highlightSyncToggle);
 initializeFontSize(fontSizeSelect);
 updatePresentButtonLabel();
