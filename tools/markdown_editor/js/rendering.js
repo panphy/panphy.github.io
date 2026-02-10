@@ -113,6 +113,13 @@ export function preprocessMarkdown(input) {
       continue;
     }
 
+    if (char === '\\' && input[i + 1] === '$' && !isEscaped(i)) {
+      // Use a literal HTML entity so MathJax will not treat this as a delimiter.
+      output += '&#36;';
+      i += 2;
+      continue;
+    }
+
     if (char === '$' && !isEscaped(i)) {
       const isDisplay = input[i + 1] === '$' && !isEscaped(i + 1);
       const delimiter = isDisplay ? '$$' : '$';
@@ -173,6 +180,11 @@ export function runPreprocessMarkdownTests() {
     { input: '$5/day', expected: '$5/day', label: 'currency slash' },
     { input: '$5-month', expected: '$5-month', label: 'currency hyphen' },
     { input: '$5 per day', expected: '$5 per day', label: 'currency spaced' },
+    {
+      input: '\\$10, \\$20',
+      expected: '&#36;10, &#36;20',
+      label: 'escaped dollar literals'
+    },
     { input: '$\\frac{1}{2}$', expected: '$\\\\frac{1}{2}$', label: 'inline fraction' },
     {
       input: '$\\begin{matrix}a&b\\\\c&d\\end{matrix}$',
