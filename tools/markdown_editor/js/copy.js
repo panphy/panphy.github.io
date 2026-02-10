@@ -152,36 +152,48 @@ function prepareEquationSvg(svg) {
   svgClone.style.backgroundColor = 'transparent';
   svgClone.removeAttribute('style');
 
-  const fillColor = '#000000';
-  const applyFill = (el) => {
-    const currentFill = el.getAttribute('fill');
-    if (!currentFill || currentFill === 'currentColor') {
-      el.setAttribute('fill', fillColor);
+  const fallbackColor = '#000000';
+  const normalizePaintValue = (paint) => {
+    if (!paint) return null;
+    const normalized = paint.toLowerCase().replace(/\s+/g, '');
+    if (normalized === 'none' || normalized === 'transparent' || normalized === 'rgba(0,0,0,0)') {
+      return 'none';
     }
+    if (normalized === 'currentcolor') {
+      return fallbackColor;
+    }
+    return paint;
   };
 
-  const applyStroke = (el) => {
-    const currentStroke = el.getAttribute('stroke');
-    if (!currentStroke || currentStroke === 'currentColor') {
-      el.setAttribute('stroke', fillColor);
-    }
-  };
+  const originalPaintElements = Array.from(
+    svg.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline, line, rect')
+  ).filter(el => !el.closest('defs'));
+  const clonedPaintElements = Array.from(
+    svgClone.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline, line, rect')
+  ).filter(el => !el.closest('defs'));
 
-  svgClone.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline').forEach(applyFill);
-  svgClone.querySelectorAll('line, polyline, polygon, path').forEach(applyStroke);
+  clonedPaintElements.forEach((cloneEl, index) => {
+    const originalEl = originalPaintElements[index];
+    if (!originalEl) return;
 
-  svgClone.querySelectorAll('rect').forEach(rect => {
-    const rectFill = rect.getAttribute('fill');
-    if (!rectFill || rectFill === 'currentColor') {
-      rect.setAttribute('fill', fillColor);
+    const computed = getComputedStyle(originalEl);
+    const fill = normalizePaintValue(computed.fill);
+    const stroke = normalizePaintValue(computed.stroke);
+
+    if (fill) {
+      cloneEl.setAttribute('fill', fill);
     }
-    const rectStroke = rect.getAttribute('stroke');
-    if (!rectStroke || rectStroke === 'currentColor') {
-      rect.setAttribute('stroke', fillColor);
+
+    if (stroke) {
+      cloneEl.setAttribute('stroke', stroke);
+      const strokeWidth = computed.strokeWidth;
+      if (strokeWidth && strokeWidth !== '0px') {
+        cloneEl.setAttribute('stroke-width', strokeWidth);
+      }
     }
   });
 
-  svgClone.setAttribute('color', fillColor);
+  svgClone.setAttribute('color', fallbackColor);
 
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
