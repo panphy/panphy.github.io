@@ -514,6 +514,10 @@ body {
 .section-toggle[aria-expanded="true"] {
 	background-color: rgba(90, 111, 214, 0.1);
 	border-color: rgba(90, 111, 214, 0.25);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	border-bottom: none;
+	margin-bottom: 0;
 }
 
 [data-theme="dark"] .section-toggle[aria-expanded="true"] {
@@ -534,11 +538,19 @@ body {
 
 .collapsible-content {
 	display: none;
-	margin-top: 12px;
 }
 
 .collapsible-content.is-open {
 	display: block;
+	border: 1px solid rgba(90, 111, 214, 0.25);
+	border-top: none;
+	border-radius: 0 0 10px 10px;
+	background: var(--muted-bg);
+	padding: 14px;
+}
+
+[data-theme="dark"] .collapsible-content.is-open {
+	border-color: rgba(123, 139, 230, 0.25);
 }
 
 /* Data Table */
@@ -817,7 +829,7 @@ button:hover {
 
 /* Uncertainty Cards */
 .uncertainty-card {
-	background: var(--muted-bg);
+	background: var(--card-bg);
 	border: 1px solid var(--border-color);
 	border-radius: 12px;
 	padding: 14px;
