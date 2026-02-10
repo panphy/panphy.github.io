@@ -139,32 +139,6 @@ function prepareEquationSvg(svg) {
   const widthPx = Math.max((hasRectSize ? rect.width : viewBoxWidth) + paddingPx * 2, 20);
   const heightPx = Math.max((hasRectSize ? rect.height : viewBoxHeight) + paddingPx * 2, 20);
 
-  const inlineComputedStyles = (selector, props) => {
-    const originalNodes = svg.querySelectorAll(selector);
-    const clonedNodes = svgClone.querySelectorAll(selector);
-    clonedNodes.forEach((cloneNode, index) => {
-      const originalNode = originalNodes[index];
-      if (!originalNode || cloneNode.tagName.toLowerCase() === 'use') return;
-      const computed = getComputedStyle(originalNode);
-      props.forEach(prop => {
-        const attrName = prop.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
-        const existing = cloneNode.getAttribute(attrName);
-        if (existing && existing !== 'currentColor') return;
-        const value = computed[prop];
-        if (!value || value === 'none' || value === '0px' || value === '0') return;
-        cloneNode.setAttribute(attrName, value);
-      });
-    });
-  };
-
-  inlineComputedStyles('line, path, rect, polygon, polyline', [
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin'
-  ]);
-
   svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   svgClone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
   svgClone.setAttribute('width', `${widthPx}px`);
@@ -175,11 +149,11 @@ function prepareEquationSvg(svg) {
   );
   svgClone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
+  svgClone.style.backgroundColor = 'transparent';
   svgClone.removeAttribute('style');
 
   const fillColor = '#000000';
   const applyFill = (el) => {
-    if (el.tagName.toLowerCase() === 'use') return;
     const currentFill = el.getAttribute('fill');
     if (!currentFill || currentFill === 'currentColor') {
       el.setAttribute('fill', fillColor);
@@ -187,39 +161,18 @@ function prepareEquationSvg(svg) {
   };
 
   const applyStroke = (el) => {
-    if (el.tagName.toLowerCase() === 'use') return;
     const currentStroke = el.getAttribute('stroke');
     if (!currentStroke || currentStroke === 'currentColor') {
       el.setAttribute('stroke', fillColor);
     }
   };
 
-  svgClone.querySelectorAll('path, text, tspan, ellipse, circle, polygon, polyline').forEach(applyFill);
+  svgClone.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline').forEach(applyFill);
   svgClone.querySelectorAll('line, polyline, polygon, path').forEach(applyStroke);
-
-  const isPercent = value => value && value.trim().endsWith('%');
-  const isFullSizeRect = rect => {
-    const rectWidth = rect.getAttribute('width');
-    const rectHeight = rect.getAttribute('height');
-    if (isPercent(rectWidth) && isPercent(rectHeight)) {
-      return true;
-    }
-    const widthValue = rectWidth ? Number.parseFloat(rectWidth) : NaN;
-    const heightValue = rectHeight ? Number.parseFloat(rectHeight) : NaN;
-    if (!Number.isFinite(widthValue) || !Number.isFinite(heightValue)) {
-      return false;
-    }
-    return widthValue >= viewBoxWidth * 0.95 && heightValue >= viewBoxHeight * 0.95;
-  };
 
   svgClone.querySelectorAll('rect').forEach(rect => {
     const rectFill = rect.getAttribute('fill');
-    const inDefs = Boolean(rect.closest('defs'));
-    if (!inDefs && isFullSizeRect(rect)) {
-      if (!rectFill || rectFill === 'currentColor') {
-        rect.setAttribute('fill', 'none');
-      }
-    } else if (!rectFill || rectFill === 'currentColor') {
+    if (!rectFill || rectFill === 'currentColor') {
       rect.setAttribute('fill', fillColor);
     }
     const rectStroke = rect.getAttribute('stroke');
@@ -229,18 +182,6 @@ function prepareEquationSvg(svg) {
   });
 
   svgClone.setAttribute('color', fillColor);
-
-  // Add a white background rect AFTER color conversion so it doesn't
-  // get a black stroke applied. Inserted right after <defs> so it
-  // paints behind all equation content (SVG painters-model order).
-  const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  bgRect.setAttribute('x', outputViewBox.x);
-  bgRect.setAttribute('y', outputViewBox.y);
-  bgRect.setAttribute('width', outputViewBox.width);
-  bgRect.setAttribute('height', outputViewBox.height);
-  bgRect.setAttribute('fill', '#ffffff');
-  bgRect.setAttribute('stroke', 'none');
-  svgClone.insertBefore(bgRect, defsClone.nextSibling);
 
   const svgString = new XMLSerializer().serializeToString(svgClone);
 
@@ -275,8 +216,7 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
     const pngBlob = await new Promise(resolve => {
       img.onload = () => {
         URL.revokeObjectURL(svgObjectUrl);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(blob => resolve(blob), 'image/png');
       };
@@ -329,28 +269,41 @@ export async function copyEquationToClipboard(mjxContainer) {
   const { svgString, widthPx, heightPx } = preparedSvg;
 
   try {
-    // Only image/png is reliably supported across browsers.
-    // image/svg+xml is rejected by Chrome/Edge, causing the entire write to fail.
-    // Safari requires ClipboardItem to be created synchronously within the user
-    // gesture, with blob values provided as Promises.
-    if (isSafari()) {
+    // Safari only supports text/plain, text/html, and image/png in ClipboardItem
+    // Including image/svg+xml causes the entire clipboard write to fail on Safari
+    // Additionally, Safari requires ClipboardItem to be created synchronously
+    // within the user gesture, with blob values provided as Promises
+    const useSafariCompatMode = isSafari();
+
+    if (useSafariCompatMode) {
+      // Safari: Create ClipboardItem synchronously with Promise-based blob
+      // This maintains the user gesture context required by Safari
       const pngPromise = rasterizeSvgToPng(svgString, widthPx, heightPx).then(blob => {
         if (!blob) throw new Error('PNG rasterization failed');
         return blob;
       });
 
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': pngPromise })
-      ]);
-    } else {
-      const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
-      if (!pngBlob) throw new Error('PNG rasterization failed');
+      const clipboardItem = new ClipboardItem({
+        'image/png': pngPromise
+      });
 
-      await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': pngBlob })
-      ]);
+      await navigator.clipboard.write([clipboardItem]);
+      return true;
+    } else {
+      // Non-Safari: Use direct blobs with both SVG and PNG formats
+      const clipboardPayload = {};
+
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+      clipboardPayload['image/svg+xml'] = svgBlob;
+
+      const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
+      if (pngBlob) {
+        clipboardPayload['image/png'] = pngBlob;
+      }
+
+      await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
+      return true;
     }
-    return true;
   } catch (err) {
     console.error('Failed to copy equation:', err);
     return false;
