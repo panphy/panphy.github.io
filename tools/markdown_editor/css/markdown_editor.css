@@ -24,7 +24,8 @@
   --border-color: rgba(0, 0, 0, 0.08);
   --toolbar-background: rgba(255, 255, 255, 0.6);
   --code-background: #f1f3f5;
-  --table-border-color: rgba(45, 52, 54, 0.4);
+  --table-border-color: #000000;
+  --math-color: #000000;
   --table-header-background: #f4f6f8;
   --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
   --base-font-size: 16px;
@@ -51,7 +52,7 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --toolbar-background: rgba(22, 24, 29, 0.55);
   --code-background: #2b3038;
-  --table-border-color: rgba(255, 255, 255, 0.2);
+  --table-border-color: rgba(255, 255, 255, 0.7);
   --table-header-background: #252a33;
   --code-text-color: #f8f8f2;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -61,6 +62,7 @@
   --copy-hint-text: #1e3a8a;
   --laser-color: #22c55e;
   --laser-color-rgb: 34, 197, 94;
+  --math-color: #ffffff;
 }
 
 body {
@@ -1119,6 +1121,19 @@ mjx-container {
   position: relative;
   transition: box-shadow 0.15s ease;
   border-radius: 8px;
+  color: var(--math-color);
+}
+
+mjx-container svg {
+  color: var(--math-color);
+}
+
+mjx-container svg line,
+mjx-container svg path,
+mjx-container svg rect {
+  stroke: var(--math-color);
+  stroke-opacity: 1;
+  fill: var(--math-color);
 }
 
 mjx-container:hover {
