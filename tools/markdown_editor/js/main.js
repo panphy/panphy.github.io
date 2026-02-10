@@ -39,6 +39,10 @@ const inputPane = document.getElementById('inputPane');
 const outputPane = document.getElementById('outputPane');
 const renderedOutput = document.getElementById('renderedOutput');
 const clearButton = document.getElementById('clearButton');
+const mathMenu = document.getElementById('mathMenu');
+const mathButton = document.getElementById('mathButton');
+const mathPanel = document.getElementById('mathPanel');
+const mathTemplateSelect = document.getElementById('mathTemplateSelect');
 const loadSampleButton = document.getElementById('loadSampleButton');
 const exportHTMLButton = document.getElementById('exportHTMLButton');
 const presentButton = document.getElementById('presentButton');
@@ -121,6 +125,74 @@ function loadSampleDocument() {
     .catch(error => {
       console.error('Error loading sample document:', error);
       alert('Failed to load the sample document.');
+    });
+}
+
+
+const mathTemplatePaths = {
+  basic: '/tools/markdown_editor/templates/math-basic.md',
+  calculus: '/tools/markdown_editor/templates/math-calculus.md',
+  matrices: '/tools/markdown_editor/templates/math-matrices.md'
+};
+
+function openMathPanel() {
+  if (!mathPanel || !mathButton || !mathTemplateSelect) return;
+  mathTemplateSelect.value = 'basic';
+  mathPanel.hidden = false;
+  mathButton.setAttribute('aria-expanded', 'true');
+}
+
+function closeMathPanel() {
+  if (!mathPanel || !mathButton) return;
+  mathPanel.hidden = true;
+  mathButton.setAttribute('aria-expanded', 'false');
+}
+
+function toggleMathPanel() {
+  if (!mathPanel) return;
+  if (mathPanel.hidden) {
+    openMathPanel();
+    return;
+  }
+  closeMathPanel();
+}
+
+function insertTextAtCursor(textToInsert) {
+  const start = markdownInput.selectionStart;
+  const end = markdownInput.selectionEnd;
+  const inputValue = markdownInput.value;
+
+  markdownInput.value = `${inputValue.slice(0, start)}${textToInsert}${inputValue.slice(end)}`;
+
+  const cursorPosition = start + textToInsert.length;
+  markdownInput.focus();
+  markdownInput.selectionStart = cursorPosition;
+  markdownInput.selectionEnd = cursorPosition;
+
+  renderContent();
+  saveDraft(markdownInput.value);
+}
+
+function insertMathTemplate() {
+  if (!mathTemplateSelect) return;
+
+  const selectedTemplate = mathTemplateSelect.value || 'basic';
+  const templatePath = mathTemplatePaths[selectedTemplate] || mathTemplatePaths.basic;
+
+  fetch(templatePath)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text();
+    })
+    .then(data => {
+      insertTextAtCursor(data);
+      closeMathPanel();
+    })
+    .catch(error => {
+      console.error('Error loading math template:', error);
+      alert('Failed to load the selected math template.');
     });
 }
 
@@ -751,6 +823,29 @@ presentButton.addEventListener('click', togglePresentMode);
 saveMDButton.addEventListener('click', saveMarkdown);
 loadFileButton.addEventListener('click', loadMarkdownFile);
 loadSampleButton.addEventListener('click', loadSampleDocument);
+
+if (mathButton) {
+  mathButton.addEventListener('click', event => {
+    event.stopPropagation();
+    toggleMathPanel();
+  });
+}
+
+
+if (mathTemplateSelect) {
+  mathTemplateSelect.addEventListener('change', event => {
+    if (event.target.value) {
+      insertMathTemplate();
+    }
+  });
+}
+
+document.addEventListener('click', event => {
+  if (!mathMenu || !mathPanel || mathPanel.hidden) return;
+  if (!mathMenu.contains(event.target)) {
+    closeMathPanel();
+  }
+});
 
 clearButton.addEventListener('click', () => {
   markdownInput.value = '';

@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-10T19:05:00Z';
+const BUILD_ID = '2026-02-10T20:05:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -22,6 +22,9 @@ const ASSETS_TO_CACHE = [
   '/tools/markdown_editor/js/main.js',
   '/tools/markdown_editor/sample_doc.md',
   '/tools/markdown_editor/sample_pic.webp',
+  '/tools/markdown_editor/templates/math-basic.md',
+  '/tools/markdown_editor/templates/math-calculus.md',
+  '/tools/markdown_editor/templates/math-matrices.md',
   '/tools/panphyplot.html',
   '/tools/panphyplot/css/panphyplot.css',
   '/tools/panphyplot/js/curve-fitting.js',
