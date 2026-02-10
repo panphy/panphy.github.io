@@ -17,6 +17,7 @@
  * @returns {string} - The processed Markdown with TeX preserved.
  */
 export function preprocessMarkdown(input) {
+  const escapedDollarPlaceholder = '__PANPHY_ESCAPED_DOLLAR__';
   const isEscaped = index => {
     let backslashCount = 0;
     for (let i = index - 1; i >= 0 && input[i] === '\\'; i -= 1) {
@@ -113,6 +114,12 @@ export function preprocessMarkdown(input) {
       continue;
     }
 
+    if (char === '\\' && input[i + 1] === '$' && !isEscaped(i)) {
+      output += escapedDollarPlaceholder;
+      i += 2;
+      continue;
+    }
+
     if (char === '$' && !isEscaped(i)) {
       const isDisplay = input[i + 1] === '$' && !isEscaped(i + 1);
       const delimiter = isDisplay ? '$$' : '$';
@@ -157,6 +164,17 @@ export function preprocessMarkdown(input) {
 }
 
 /**
+ * Restore escaped dollar placeholders after markdown parsing.
+ * Uses HTML entity so MathJax does not interpret it as a math delimiter.
+ *
+ * @param {string} html - Parsed HTML string.
+ * @returns {string} HTML with escaped dollar placeholders restored.
+ */
+export function restoreEscapedDollarPlaceholders(html) {
+  return html.replaceAll('__PANPHY_ESCAPED_DOLLAR__', '&#36;');
+}
+
+/**
  * Get clean HTML from rendered output
  * @param {HTMLElement} renderedOutput - The rendered output element
  * @returns {string} Clean HTML string
@@ -173,6 +191,11 @@ export function runPreprocessMarkdownTests() {
     { input: '$5/day', expected: '$5/day', label: 'currency slash' },
     { input: '$5-month', expected: '$5-month', label: 'currency hyphen' },
     { input: '$5 per day', expected: '$5 per day', label: 'currency spaced' },
+    {
+      input: '\\$10, \\$20',
+      expected: '__PANPHY_ESCAPED_DOLLAR__10, __PANPHY_ESCAPED_DOLLAR__20',
+      label: 'escaped dollar literals'
+    },
     { input: '$\\frac{1}{2}$', expected: '$\\\\frac{1}{2}$', label: 'inline fraction' },
     {
       input: '$\\begin{matrix}a&b\\\\c&d\\end{matrix}$',
