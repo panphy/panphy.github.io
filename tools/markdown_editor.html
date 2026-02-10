@@ -90,6 +90,17 @@
         <button id="loadFileButton">Open .md</button>
         <button id="saveMDButton">Save .md</button>
         <button id="clearButton">Clear Input</button>
+        <div class="math-menu" id="mathMenu">
+          <button id="mathButton" aria-expanded="false" aria-controls="mathPanel">Math</button>
+          <div id="mathPanel" class="math-panel" hidden>
+            <label for="mathTemplateSelect">Template</label>
+            <select id="mathTemplateSelect">
+              <option value="basic" selected>Basic</option>
+              <option value="calculus">Calculus</option>
+              <option value="matrices">Matrices</option>
+            </select>
+          </div>
+        </div>
         <div class="font-size-selector">
           <label for="fontSizeSelect">Font Size</label>
           <select id="fontSizeSelect">
