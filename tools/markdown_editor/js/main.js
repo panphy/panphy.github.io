@@ -137,7 +137,7 @@ const mathTemplatePaths = {
 
 function openMathPanel() {
   if (!mathPanel || !mathButton || !mathTemplateSelect) return;
-  mathTemplateSelect.value = 'basic';
+  mathTemplateSelect.value = '';
   mathPanel.hidden = false;
   mathButton.setAttribute('aria-expanded', 'true');
 }
