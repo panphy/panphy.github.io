@@ -449,6 +449,10 @@ textarea:focus {
   z-index: 30;
 }
 
+.math-panel[hidden] {
+  display: none;
+}
+
 .math-panel label {
   font-size: 0.8rem;
   font-weight: 600;
