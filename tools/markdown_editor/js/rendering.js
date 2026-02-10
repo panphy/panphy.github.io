@@ -17,6 +17,7 @@
  * @returns {string} - The processed Markdown with TeX preserved.
  */
 export function preprocessMarkdown(input) {
+  const escapedDollarPlaceholder = '__PANPHY_ESCAPED_DOLLAR__';
   const isEscaped = index => {
     let backslashCount = 0;
     for (let i = index - 1; i >= 0 && input[i] === '\\'; i -= 1) {
@@ -161,6 +162,17 @@ export function preprocessMarkdown(input) {
   }
 
   return output;
+}
+
+/**
+ * Restore escaped dollar placeholders after markdown parsing.
+ * Uses HTML entity so MathJax does not interpret it as a math delimiter.
+ *
+ * @param {string} html - Parsed HTML string.
+ * @returns {string} HTML with escaped dollar placeholders restored.
+ */
+export function restoreEscapedDollarPlaceholders(html) {
+  return html.replaceAll('__PANPHY_ESCAPED_DOLLAR__', '&#36;');
 }
 
 /**

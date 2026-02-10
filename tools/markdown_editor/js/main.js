@@ -15,6 +15,7 @@ import {
 
 import {
   preprocessMarkdown,
+  restoreEscapedDollarPlaceholders,
   getCleanRenderedOutputHTML
 } from './rendering.js';
 
@@ -210,7 +211,8 @@ function renderContent() {
 
   const preprocessedText = preprocessMarkdown(inputText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
-  const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+  const restoredDollarContent = restoreEscapedDollarPlaceholders(parsedMarkdown);
+  const sanitizedContent = DOMPurify.sanitize(restoredDollarContent);
   renderedOutput.innerHTML = sanitizedContent;
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
