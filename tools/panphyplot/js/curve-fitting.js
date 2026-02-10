@@ -80,9 +80,9 @@ function changeAdvancedFitMethod() {
 function updateAdvancedFitEquation(selectedMethod) {
 	let equation = '';
 	if (selectedMethod === 'Sinusoidal') {
-		equation = 'y = A e^{bx} \sin(kx - \\phi) + c';
+		equation = 'y = A e^{bx} \\sin(kx - \\phi) + c';
 	} else if (selectedMethod === 'Gaussian') {
-		equation = 'y = A e^{-\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
+		equation = 'y = A e^{-\\frac{(x - \\mu)^2}{2 \\sigma^2}} + c';
 	}
 
 	const equationElement = document.getElementById('advanced-fit-general-equation');
@@ -1456,7 +1456,7 @@ function performGaussianFit() {
 		const fitFunction = xi => A * Math.exp(-((xi - mu) ** 2) / (2 * sigma * sigma)) + c;
 		const yFit = xFit.map(fitFunction);
 
-		let equation = `y = ${A.toFixed(3)} e^{-\frac{(x - ${mu.toFixed(3)})^2}{2(${sigma.toFixed(3)})^2}}`;
+		let equation = `y = ${A.toFixed(3)} e^{-\\frac{(x - ${mu.toFixed(3)})^2}{2(${sigma.toFixed(3)})^2}}`;
 		if (c > 0) equation += ` + ${c.toFixed(3)}`;
 		else if (c < 0) equation += ` - ${Math.abs(c).toFixed(3)}`;
 
