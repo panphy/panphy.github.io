@@ -4,11 +4,8 @@
  */
 
 import {
-  state,
   loadThemePreference,
   saveThemePreference,
-  loadScrollSyncPreference,
-  saveScrollSyncPreference,
   loadHighlightSyncPreference,
   saveHighlightSyncPreference,
   loadFontSizePreference,
@@ -96,15 +93,6 @@ export function toggleTheme() {
 }
 
 /**
- * Initialize scroll sync toggle based on saved preference.
- * @param {HTMLInputElement} scrollSyncToggle - The scroll sync toggle checkbox
- */
-export function initializeScrollSyncToggle(scrollSyncToggle) {
-  const enabled = loadScrollSyncPreference();
-  scrollSyncToggle.checked = enabled;
-}
-
-/**
  * Initialize highlight sync toggle based on saved preference.
  * @param {HTMLInputElement} highlightSyncToggle - The highlight sync toggle checkbox
  */
@@ -165,90 +153,6 @@ export function initializeFontSize(fontSizeSelect) {
  */
 export function updateOfflineFontState() {
   document.documentElement.classList.toggle('offline-font', !navigator.onLine);
-}
-
-/**
- * Clamp a value between min and max
- * @param {number} value - The value to clamp
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
- * @returns {number} The clamped value
- */
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-/**
- * Animation frame for scroll interpolation loop
- */
-let scrollAnimFrame = null;
-
-/**
- * Apply scroll position with smooth interpolation.
- * Runs a continuous animation loop so the scroll position fully converges
- * to the target, even when few scroll events are firing.
- * @param {Element} target - The target element
- * @param {number} desiredTop - The desired scroll position
- * @param {Function} [onStep] - Optional callback invoked on each animation step
- */
-function applyScrollTop(target, desiredTop, onStep) {
-  const maxTop = Math.max(0, target.scrollHeight - target.clientHeight);
-  const clampedTop = clamp(desiredTop, 0, maxTop);
-
-  if (scrollAnimFrame) {
-    cancelAnimationFrame(scrollAnimFrame);
-    scrollAnimFrame = null;
-  }
-
-  const step = () => {
-    const distance = clampedTop - target.scrollTop;
-    if (Math.abs(distance) < 0.5) {
-      target.scrollTop = clampedTop;
-      scrollAnimFrame = null;
-      return;
-    }
-    target.scrollTop = target.scrollTop + distance * 0.35;
-    if (onStep) onStep();
-    scrollAnimFrame = requestAnimationFrame(step);
-  };
-
-  step();
-}
-
-// Scroll linking state
-let isLinkingScroll = false;
-let linkScrollFrame = null;
-let programmaticScrollTarget = null;
-let programmaticScrollTimer = null;
-
-/**
- * Sync scroll position between source and target elements.
- * Tracks the programmatically-scrolled target so that the scroll event
- * it fires back does not trigger a reverse sync (feedback loop / jitter).
- * @param {Element} source - The source element being scrolled
- * @param {Element} target - The target element to sync
- */
-export function syncLinkedScroll(source, target) {
-  if (!state.isLinkScrollEnabled || isLinkingScroll) return;
-  // Suppress scroll events fired by our own programmatic scroll
-  if (source === programmaticScrollTarget) return;
-  isLinkingScroll = true;
-  if (linkScrollFrame) {
-    cancelAnimationFrame(linkScrollFrame);
-  }
-  linkScrollFrame = requestAnimationFrame(() => {
-    const sourceMax = Math.max(0, source.scrollHeight - source.clientHeight);
-    const targetMax = Math.max(0, target.scrollHeight - target.clientHeight);
-    const ratio = sourceMax > 0 ? source.scrollTop / sourceMax : 0;
-    programmaticScrollTarget = target;
-    const refreshSuppression = () => {
-      clearTimeout(programmaticScrollTimer);
-      programmaticScrollTimer = setTimeout(() => { programmaticScrollTarget = null; }, 150);
-    };
-    refreshSuppression();
-    applyScrollTop(target, targetMax * ratio, refreshSuppression);
-    isLinkingScroll = false;
-  });
 }
 
 /**

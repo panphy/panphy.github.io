@@ -6,7 +6,6 @@
 // Storage keys
 export const STORAGE_KEYS = {
   DRAFT: 'markdownEditorDraft',
-  SCROLL_SYNC: 'markdownScrollSync',
   HIGHLIGHT_SYNC: 'markdownHighlightSync',
   FONT_SIZE: 'markdownFontSize',
   THEME: 'theme'
@@ -14,7 +13,6 @@ export const STORAGE_KEYS = {
 
 // Application state
 export const state = {
-  isLinkScrollEnabled: false,
   isHighlightSyncEnabled: false
 };
 
@@ -39,29 +37,6 @@ export function clearDraft() {
  */
 export function restoreDraft() {
   return localStorage.getItem(STORAGE_KEYS.DRAFT);
-}
-
-/**
- * Save scroll sync preference
- * @param {boolean} enabled - Whether scroll sync is enabled
- */
-export function saveScrollSyncPreference(enabled) {
-  localStorage.setItem(STORAGE_KEYS.SCROLL_SYNC, enabled);
-  state.isLinkScrollEnabled = enabled;
-}
-
-/**
- * Load scroll sync preference from localStorage
- * @returns {boolean} The saved preference
- */
-export function loadScrollSyncPreference() {
-  const saved = localStorage.getItem(STORAGE_KEYS.SCROLL_SYNC);
-  if (saved === null) {
-    state.isLinkScrollEnabled = false;
-  } else {
-    state.isLinkScrollEnabled = saved === 'true';
-  }
-  return state.isLinkScrollEnabled;
 }
 
 /**
