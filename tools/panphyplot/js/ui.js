@@ -723,6 +723,9 @@ const debouncedUpdateData = debounce(updateData, 300);
 			alert('Error reading the file!');
 		};
 		reader.readAsText(file);
+
+		// Reset the file input so re-selecting the same file triggers the change event
+		event.target.value = '';
 	}
 
 
@@ -1615,6 +1618,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 	function applyGlobalUncertainties(axis) {
 		const globalVal = document.getElementById(`global-${axis}-uncertainty`).value.trim();
+		if (globalVal === '') return;
 		const toggleInput = document.getElementById(`toggle-${axis}-error`);
 		if (globalVal !== '' && toggleInput && !toggleInput.checked) {
 			toggleInput.checked = true;
