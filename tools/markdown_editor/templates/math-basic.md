@@ -1,6 +1,4 @@
-## Basic LaTeX Examples
-
-Inline symbols: $\alpha$, $\beta$, and absolute zero $-273^\circ\mathrm{C}$.
+Inline symbols: $\alpha$, $\beta$, $-273^\circ\mathrm{C}$.
 
 Display equations:
 
