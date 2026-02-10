@@ -1,5 +1,3 @@
-## Matrices LaTeX Examples
-
 $$
 \begin{pmatrix}
 a & b & c \\
