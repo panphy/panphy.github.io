@@ -16,8 +16,9 @@
  * @param {string} input - The raw Markdown input.
  * @returns {string} - The processed Markdown with TeX preserved.
  */
+const ESCAPED_DOLLAR_PLACEHOLDER = '\uE000';
+
 export function preprocessMarkdown(input) {
-  const escapedDollarPlaceholder = '__PANPHY_ESCAPED_DOLLAR__';
   const isEscaped = index => {
     let backslashCount = 0;
     for (let i = index - 1; i >= 0 && input[i] === '\\'; i -= 1) {
@@ -115,8 +116,11 @@ export function preprocessMarkdown(input) {
     }
 
     if (char === '\\' && input[i + 1] === '$' && !isEscaped(i)) {
-      // Use a literal HTML entity so MathJax will not treat this as a delimiter.
-      output += '&#36;';
+      // Use a Private Use Area placeholder that MathJax cannot interpret as
+      // a math delimiter.  After MathJax finishes typesetting the DOM, the
+      // placeholder is swapped back to a real '$' via
+      // restoreEscapedDollarPlaceholders().
+      output += ESCAPED_DOLLAR_PLACEHOLDER;
       i += 2;
       continue;
     }
@@ -165,14 +169,21 @@ export function preprocessMarkdown(input) {
 }
 
 /**
- * Restore escaped dollar placeholders after markdown parsing.
- * Uses HTML entity so MathJax does not interpret it as a math delimiter.
+ * Restore escaped-dollar placeholders inside a DOM tree.
  *
- * @param {string} html - Parsed HTML string.
- * @returns {string} HTML with escaped dollar placeholders restored.
+ * Must be called **after** MathJax has finished typesetting so that MathJax
+ * never sees the literal '$' characters these placeholders represent.
+ *
+ * @param {HTMLElement} element - Root element whose text nodes are patched.
  */
-export function restoreEscapedDollarPlaceholders(html) {
-  return html.replaceAll('__PANPHY_ESCAPED_DOLLAR__', '&#36;');
+export function restoreEscapedDollarPlaceholders(element) {
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.nodeValue.includes(ESCAPED_DOLLAR_PLACEHOLDER)) {
+      node.nodeValue = node.nodeValue.replaceAll(ESCAPED_DOLLAR_PLACEHOLDER, '$');
+    }
+  }
 }
 
 /**
@@ -194,7 +205,7 @@ export function runPreprocessMarkdownTests() {
     { input: '$5 per day', expected: '$5 per day', label: 'currency spaced' },
     {
       input: '\\$10, \\$20',
-      expected: '&#36;10, &#36;20',
+      expected: `${ESCAPED_DOLLAR_PLACEHOLDER}10, ${ESCAPED_DOLLAR_PLACEHOLDER}20`,
       label: 'escaped dollar literals'
     },
     { input: '$\\frac{1}{2}$', expected: '$\\\\frac{1}{2}$', label: 'inline fraction' },

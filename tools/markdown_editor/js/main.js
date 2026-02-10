@@ -211,12 +211,15 @@ function renderContent() {
 
   const preprocessedText = preprocessMarkdown(inputText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
-  const restoredDollarContent = restoreEscapedDollarPlaceholders(parsedMarkdown);
-  const sanitizedContent = DOMPurify.sanitize(restoredDollarContent);
+  const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = sanitizedContent;
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-    MathJax.typesetPromise([renderedOutput]).catch(console.error);
+    MathJax.typesetPromise([renderedOutput])
+      .catch(console.error)
+      .finally(() => restoreEscapedDollarPlaceholders(renderedOutput));
+  } else {
+    restoreEscapedDollarPlaceholders(renderedOutput);
   }
 }
 
