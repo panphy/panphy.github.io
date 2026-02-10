@@ -588,16 +588,6 @@ textarea {
   height: auto;
 }
 
-.md-block {
-  scroll-margin-top: 20px;
-}
-
-.highlighted-block {
-  outline: 2px solid #ff5f1f;
-  background-color: rgba(255, 95, 31, 0.12);
-  border-radius: 4px;
-}
-
 #renderedOutput ul:has(> .task-list-item) {
   padding-left: 0;
   list-style: none;
