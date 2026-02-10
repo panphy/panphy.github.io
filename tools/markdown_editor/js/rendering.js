@@ -115,7 +115,8 @@ export function preprocessMarkdown(input) {
     }
 
     if (char === '\\' && input[i + 1] === '$' && !isEscaped(i)) {
-      output += escapedDollarPlaceholder;
+      // Use a literal HTML entity so MathJax will not treat this as a delimiter.
+      output += '&#36;';
       i += 2;
       continue;
     }
@@ -193,7 +194,7 @@ export function runPreprocessMarkdownTests() {
     { input: '$5 per day', expected: '$5 per day', label: 'currency spaced' },
     {
       input: '\\$10, \\$20',
-      expected: '__PANPHY_ESCAPED_DOLLAR__10, __PANPHY_ESCAPED_DOLLAR__20',
+      expected: '&#36;10, &#36;20',
       label: 'escaped dollar literals'
     },
     { input: '$\\frac{1}{2}$', expected: '$\\\\frac{1}{2}$', label: 'inline fraction' },
