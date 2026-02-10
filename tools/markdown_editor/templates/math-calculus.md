@@ -16,10 +16,3 @@ $$
 \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}
 $$
 
-$$
-\begin{aligned}
-\because\ ax^2 + bx + c &= 0 \\
-\therefore\ x &= \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
-\end{aligned}
-$$
-
