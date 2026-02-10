@@ -62,6 +62,33 @@
 		return currentDataStr === newDataStr && currentLayoutStr === newLayoutStr;
 	}
 
+	function sanitizeFilename(filename, fallbackFilename) {
+		const trimmed = typeof filename === 'string' ? filename.trim() : '';
+		const candidate = trimmed || fallbackFilename;
+		const sanitized = candidate.replace(/[<>:"/\\|?*]/g, '_').trim();
+		return sanitized || fallbackFilename;
+	}
+
+	function createDownloadImageConfig(defaultFilename) {
+		return {
+			modeBarButtonsToRemove: ['toImage'],
+			modeBarButtonsToAdd: [{
+				name: 'Download plot as png',
+				icon: Plotly.Icons.camera,
+				click: function(gd) {
+					const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
+					if (userInput === null) return;
+					const filename = sanitizeFilename(userInput, defaultFilename);
+					Plotly.downloadImage(gd, {
+						format: 'png',
+						filename,
+						scale: 2
+					});
+				}
+			}]
+		};
+	}
+
 
 
 	function updatePlotAndRenderLatex() {
@@ -218,13 +245,7 @@
 		}
 
 		// Update the plot.
-		Plotly.react('plot', data, layout, {
-			toImageButtonOptions: {
-				format: 'png',
-				filename: 'data_plot',
-				scale: 2
-			}
-		});
+		Plotly.react('plot', data, layout, createDownloadImageConfig('data_plot'));
 
 		// Cache the current state.
 		lastPlotState.data = data;
@@ -383,9 +404,7 @@
 			return;
 		}
 
-		Plotly.newPlot('popup-plot', traces, layout, {
-			toImageButtonOptions: { format: 'png', filename: 'combined_plot', scale: 2 }
-		});
+		Plotly.newPlot('popup-plot', traces, layout, createDownloadImageConfig('combined_plot'));
 
 		lastPlotState.data = traces;
 		lastPlotState.layout = layout;
