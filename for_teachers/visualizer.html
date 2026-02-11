@@ -2255,6 +2255,23 @@
 				return !!(e.target.closest('.controls-panel') || e.target.closest('#controlsToggle') || e.target.closest('#fullscreenBtn') || e.target.closest('#textOverlay'));
 			}
 
+			function shouldBlockTextSelection(eventTarget) {
+				if (overlayVisible) return false;
+				if (eventTarget.closest('#textOverlay')) return false;
+				if (eventTarget.closest('input, textarea, [contenteditable="true"]')) return false;
+				return true;
+			}
+
+			target.addEventListener('selectstart', e => {
+				if (!shouldBlockTextSelection(e.target)) return;
+				e.preventDefault();
+			});
+
+			target.addEventListener('dragstart', e => {
+				if (!shouldBlockTextSelection(e.target)) return;
+				e.preventDefault();
+			});
+
 			target.addEventListener('pointerdown', e => {
 				if (isStageControlTarget(e)) return;
 				if (annotationOn && textModeOn && !overlayVisible) {
