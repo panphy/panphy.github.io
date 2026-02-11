@@ -57,7 +57,9 @@
 			color: var(--text);
 			font-family: var(--font-sans);
 			display: flex;
-			flex-direction: column
+			flex-direction: column;
+			-webkit-user-select: none;
+			user-select: none
 		}
 
 		.offline-font {
@@ -614,9 +616,7 @@
 			border-radius: 14px;
 			overflow: hidden;
 			background: #000;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
-			-webkit-user-select: none;
-			user-select: none
+			box-shadow: 0 8px 32px rgba(0, 0, 0, .4)
 		}
 
 		video,
@@ -807,7 +807,9 @@
 			padding: .5rem .6rem;
 			font-size: .9rem;
 			outline: none;
-			font-family: inherit
+			font-family: inherit;
+			-webkit-user-select: text;
+			user-select: text
 		}
 
 		#filenameDialog input[type="text"]:focus {
