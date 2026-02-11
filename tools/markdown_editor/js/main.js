@@ -31,7 +31,8 @@ import {
   updateOfflineFontState,
   updateThemeToggleButton,
   getCurrentFontSize,
-  showFilenameModal
+  showFilenameModal,
+  showConfirmationModal
 } from './ui.js';
 
 // DOM element references
@@ -728,7 +729,13 @@ async function saveMarkdown() {
 /**
  * Load a markdown file from the user's computer
  */
-function loadMarkdownFile() {
+async function loadMarkdownFile() {
+  if (markdownInput.value.trim() !== '') {
+    const confirmed = await showConfirmationModal(
+      'Opening a file will replace your current content. Any unsaved changes will be lost.'
+    );
+    if (!confirmed) return;
+  }
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.md,text/markdown';
@@ -848,7 +855,14 @@ document.addEventListener('click', event => {
   }
 });
 
-clearButton.addEventListener('click', () => {
+clearButton.addEventListener('click', async () => {
+  if (markdownInput.value.trim() === '') {
+    return;
+  }
+  const confirmed = await showConfirmationModal(
+    'This will clear all your current content. Any unsaved changes will be lost.'
+  );
+  if (!confirmed) return;
   markdownInput.value = '';
   clearDraft();
   renderContent();

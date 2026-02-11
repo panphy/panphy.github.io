@@ -1427,6 +1427,32 @@ mjx-container.copy-failed::after {
   color: var(--text-color);
 }
 
+.modal-message {
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.modal-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.modal-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--brand-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */
 @media print {
   #inputPane.mobile-hidden {

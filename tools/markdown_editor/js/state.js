@@ -8,7 +8,8 @@ export const STORAGE_KEYS = {
   DRAFT: 'markdownEditorDraft',
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
-  THEME: 'theme'
+  THEME: 'theme',
+  SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning'
 };
 
 // Application state
@@ -127,4 +128,20 @@ export function throttle(fn, limit) {
       setTimeout(() => inThrottle = false, limit);
     }
   };
+}
+
+/**
+ * Check whether the clear/overwrite warning is suppressed
+ * @returns {boolean} True if the user chose to suppress the warning
+ */
+export function isClearWarningSuppressed() {
+  return localStorage.getItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING) === 'true';
+}
+
+/**
+ * Save the clear/overwrite warning suppression preference
+ * @param {boolean} suppressed - Whether to suppress the warning
+ */
+export function saveClearWarningSuppressed(suppressed) {
+  localStorage.setItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING, String(suppressed));
 }
