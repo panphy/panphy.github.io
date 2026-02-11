@@ -348,7 +348,7 @@ body {
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
 	cursor: pointer;
-	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 	font-size: 0.9rem;
 	font-weight: 500;
 }
@@ -369,10 +369,17 @@ body {
 	border-color: transparent;
 	font-weight: 600;
 	color: #fff;
+	box-shadow: 0 -4px 12px rgba(90, 111, 214, 0.45),
+		-3px 0 10px rgba(90, 111, 214, 0.25),
+		3px 0 10px rgba(90, 111, 214, 0.25);
+	clip-path: inset(-14px -14px 0 -14px);
 }
 
 [data-theme="dark"] .dataset-tab.active {
 	color: #1a1a1a;
+	box-shadow: 0 -4px 14px rgba(123, 139, 230, 0.5),
+		-3px 0 12px rgba(123, 139, 230, 0.3),
+		3px 0 12px rgba(123, 139, 230, 0.3);
 }
 
 .dataset-tab.active:hover {
