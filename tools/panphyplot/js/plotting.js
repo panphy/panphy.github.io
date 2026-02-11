@@ -3,14 +3,15 @@
 	function getPlotThemeSettings() {
 		const theme = document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
-			// Light theme: darker data points, contrasting fit line colors
+			// Light theme – Tableau-inspired palette with same-hue fit lines
 			return {
-				errorColor: '#5b5b5b',
-				fitColor: '#35a8ff',
-				// Data point colors: saturated, dark enough to see on white background
-				datasetColors: ['#1e40af', '#15803d', '#7e22ce', '#c2410c', '#b91c1c', '#0e7490'],
-				// Fit line colors: contrasting hues from corresponding data points
-				fitColors: ['#be185d', '#a16207', '#0891b2', '#16a34a', '#6366f1', '#ea580c'],
+				dataColor: '#4e79a7',
+				errorColor: '#636363',
+				fitColor: '#c44e52',
+				// Data point colors: muted but distinct (Tableau 10 first six)
+				datasetColors: ['#4e79a7', '#e15759', '#59a14f', '#f28e2b', '#b07aa1', '#76b7b2'],
+				// Fit line colors: darker shade of corresponding data color
+				fitColors: ['#305f8a', '#b33436', '#3d7c36', '#c46e10', '#885b7b', '#4f9490'],
 				layout: {
 					xaxis: {
 						zerolinecolor: '#1f2937'
@@ -22,14 +23,15 @@
 			};
 		}
 
-		// Dark theme: bright data points, contrasting bright fit line colors
+		// Dark theme – brighter versions of the same hue families
 		return {
+			dataColor: '#7cb5ec',
 			errorColor: '#9aa0a6',
-			fitColor: '#00e5ff',
-			// Data point colors: bright and vivid for dark background
-			datasetColors: ['#3b82f6', '#22c55e', '#a855f7', '#f97316', '#ef4444', '#14b8a6'],
-			// Fit line colors: contrasting bright hues from corresponding data points
-			fitColors: ['#ec4899', '#eab308', '#06b6d4', '#84cc16', '#8b5cf6', '#f43f5e'],
+			fitColor: '#f48183',
+			// Data point colors: bright, clear on dark background
+			datasetColors: ['#7cb5ec', '#f48183', '#8bcf86', '#f9b06a', '#d1a4c5', '#a2dad6'],
+			// Fit line colors: lighter tint of corresponding data color
+			fitColors: ['#b0d4f4', '#f8b0b2', '#bbe3b8', '#fcd4a3', '#e4c5dc', '#c9ece9'],
 			layout: {
 				paper_bgcolor: '#1e2129',
 				plot_bgcolor: '#1e2129',
@@ -146,7 +148,7 @@
 			mode: 'markers',
 			name: 'Data',
 			marker: {
-				color: '#ff7c23',
+				color: themeSettings.dataColor,
 				symbol: 'circle',
 				size: 6.5,
 				line: { width: 0 }
