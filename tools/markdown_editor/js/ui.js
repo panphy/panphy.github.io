@@ -261,10 +261,13 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
  * the modal is skipped and the promise resolves to true immediately.
  *
  * @param {string} message - The warning message to display
+ * @param {Object} [options] - Optional suppression callbacks
+ * @param {Function} [options.isSuppressed] - Returns true if the warning is suppressed
+ * @param {Function} [options.saveSuppressed] - Saves the suppression preference
  * @returns {Promise<boolean>} True if the user confirmed, false if cancelled
  */
-export function showConfirmationModal(message) {
-  if (isClearWarningSuppressed()) {
+export function showConfirmationModal(message, { isSuppressed = isClearWarningSuppressed, saveSuppressed = saveClearWarningSuppressed } = {}) {
+  if (isSuppressed()) {
     return Promise.resolve(true);
   }
 
@@ -323,7 +326,7 @@ export function showConfirmationModal(message) {
 
     const closeModal = (confirmed) => {
       if (confirmed && checkbox.checked) {
-        saveClearWarningSuppressed(true);
+        saveSuppressed(true);
       }
       overlay.classList.remove('visible');
       setTimeout(() => {

@@ -10,7 +10,9 @@ import {
   restoreDraft,
   saveSyncScrollPreference,
   debounce,
-  throttle
+  throttle,
+  isOpenWarningSuppressed,
+  saveOpenWarningSuppressed
 } from './state.js';
 
 import {
@@ -732,7 +734,8 @@ async function saveMarkdown() {
 async function loadMarkdownFile() {
   if (markdownInput.value.trim() !== '') {
     const confirmed = await showConfirmationModal(
-      'Opening a file will replace your current content. Any unsaved changes will be lost.'
+      'Opening a file will replace your current content. Any unsaved changes will be lost.',
+      { isSuppressed: isOpenWarningSuppressed, saveSuppressed: saveOpenWarningSuppressed }
     );
     if (!confirmed) return;
   }
