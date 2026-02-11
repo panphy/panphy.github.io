@@ -296,7 +296,7 @@
         #preview-hint.visible {
             opacity: 0.7;
             height: 1.4em;
-            margin: 0.3rem 0 0;
+            margin: 0 0 0.3rem;
         }
 
         .blink {
@@ -434,6 +434,7 @@
             <div class="label" id="extra-label">25% Extra Time</div>
             <div class="time extra-time" id="extra-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
             <div class="info" id="start-end-times" aria-live="polite"></div>
+            <div id="preview-hint">Preview — click Set Time to confirm</div>
             <div class="inputs">
                 <label class="visually-hidden" for="hours">Hours</label>
                 <input id="hours" type="number" placeholder="Hrs" min="0" max="23" aria-describedby="time-input-hint">
@@ -450,7 +451,6 @@
                 </select>
             </div>
             <span id="time-input-hint" class="visually-hidden">Enter hours (0-23), minutes (0-59), and seconds (0-59)</span>
-            <div id="preview-hint">Preview — click Set Time to confirm</div>
         </div>
         <div class="control-container">
             <div class="control-area">
