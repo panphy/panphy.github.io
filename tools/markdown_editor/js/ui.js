@@ -8,7 +8,9 @@ import {
   saveThemePreference,
   loadSyncScrollPreference,
   loadFontSizePreference,
-  saveFontSizePreference
+  saveFontSizePreference,
+  isClearWarningSuppressed,
+  saveClearWarningSuppressed
 } from './state.js';
 
 // DOM element references (set during initialization)
@@ -248,6 +250,100 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         closeModal(null);
+      }
+    });
+  });
+}
+
+/**
+ * Show a confirmation modal warning the user about losing unsaved work.
+ * If the user has previously checked "Don't show this warning again",
+ * the modal is skipped and the promise resolves to true immediately.
+ *
+ * @param {string} message - The warning message to display
+ * @returns {Promise<boolean>} True if the user confirmed, false if cancelled
+ */
+export function showConfirmationModal(message) {
+  if (isClearWarningSuppressed()) {
+    return Promise.resolve(true);
+  }
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'modal-title';
+    titleEl.textContent = 'Are you sure?';
+
+    const messageEl = document.createElement('p');
+    messageEl.className = 'modal-message';
+    messageEl.textContent = message;
+
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'modal-checkbox-label';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'modal-checkbox';
+
+    const checkboxText = document.createTextNode(" Don\u2019t show this warning again");
+    checkboxLabel.appendChild(checkbox);
+    checkboxLabel.appendChild(checkboxText);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'modal-buttons';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = 'Cancel';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'btn-primary';
+    confirmBtn.textContent = 'Continue';
+
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(confirmBtn);
+
+    content.appendChild(titleEl);
+    content.appendChild(messageEl);
+    content.appendChild(checkboxLabel);
+    content.appendChild(buttons);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      confirmBtn.focus();
+    });
+
+    const closeModal = (confirmed) => {
+      if (confirmed && checkbox.checked) {
+        saveClearWarningSuppressed(true);
+      }
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+      }, 200);
+      resolve(confirmed);
+    };
+
+    cancelBtn.addEventListener('click', () => closeModal(false));
+    confirmBtn.addEventListener('click', () => closeModal(true));
+
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal(false);
+      }
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeModal(false);
       }
     });
   });
