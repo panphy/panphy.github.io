@@ -5,9 +5,8 @@
 		if (theme !== 'dark') {
 			// Light theme – Tableau-inspired palette with same-hue fit lines
 			return {
-				dataColor: '#4e79a7',
-				errorColor: '#636363',
-				fitColor: '#c44e52',
+				errorColor: '#5b5b5b',
+				fitColor: '#35a8ff',
 				// Data point colors: muted but distinct (Tableau 10 first six)
 				datasetColors: ['#4e79a7', '#e15759', '#59a14f', '#f28e2b', '#b07aa1', '#76b7b2'],
 				// Fit line colors: darker shade of corresponding data color
@@ -25,9 +24,8 @@
 
 		// Dark theme – brighter versions of the same hue families
 		return {
-			dataColor: '#7cb5ec',
 			errorColor: '#9aa0a6',
-			fitColor: '#f48183',
+			fitColor: '#00e5ff',
 			// Data point colors: bright, clear on dark background
 			datasetColors: ['#7cb5ec', '#f48183', '#8bcf86', '#f9b06a', '#d1a4c5', '#a2dad6'],
 			// Fit line colors: lighter tint of corresponding data color
@@ -148,7 +146,7 @@
 			mode: 'markers',
 			name: 'Data',
 			marker: {
-				color: themeSettings.dataColor,
+				color: '#ff7c23',
 				symbol: 'circle',
 				size: 6.5,
 				line: { width: 0 }
