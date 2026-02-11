@@ -6,6 +6,8 @@
 
 - **Tech Stack**: Vanilla JavaScript, HTML5, CSS3 (no frameworks, no bundler)
 - **Deployment**: GitHub Pages (direct file serving)
+- **External Services**: Supabase (leaderboards) - API calls are NOT cached
+
 
 ## Critical Rules
 
@@ -32,17 +34,18 @@ Each HTML file in the repo is a complete, standalone application. Complex tools 
 
 ### Filename Hashes
 
-Module files use stable, unhashed filenames (e.g. `copy.js`). Cache busting is handled via the `BUILD_ID` in `sw.js`.
+Module files must use **stable, unhashed filenames** (e.g. `copy.js`, not `copy.ab12.js`). Cache busting is handled exclusively via the `BUILD_ID` in `sw.js`. Do not rely on file hash changes for updates.
 
 ## Coding Conventions
 
 - **Variables/functions**: camelCase
 - **Constants**: UPPER_SNAKE_CASE
-- **CSS theming**: Use CSS custom properties (`--bg-color`, `--text-main`, etc.), never hardcoded colors
+- **CSS theming**: Use CSS custom properties (`--bg-color`, `--text-main`, `--brand-primary`, `--brand-accent`); hardcoded colors are allowed upon request
 - **Theme toggle**: `data-theme` attribute on `<html>`, persisted to localStorage
 - **Mobile-first**: Touch targets 48px+, responsive design
 - **Offline-first**: New features must work without network
-- **External libraries**: Loaded from CDNs, not bundled
+- **External libraries**: Loaded from CDNs (Plotly, MathJax, etc.), not bundled
+
 
 ## Directory Layout
 
@@ -51,12 +54,24 @@ Module files use stable, unhashed filenames (e.g. `copy.js`). Cache busting is h
 ├── index.html              # Landing page
 ├── sw.js                   # Service Worker (update BUILD_ID on changes!)
 ├── manifest.json           # PWA config
+├── assets/                 # Icons, logos, global assets
 ├── tools/                  # Educational tools (plotting, markdown editor, etc.)
+│   ├── panphyplot.html     # Entry point
+│   └── panphyplot/         # Modular JS/CSS (stable filenames)
 ├── simulations/            # Physics simulations
 ├── fun/                    # Games
 ├── gcse/                   # GCSE flashcards
 ├── for_teachers/           # Teacher utilities
 └── misc/                   # Miscellaneous
+```
+
+## Testing Locally
+
+Run a simple HTTP server to test service workers and absolute paths:
+
+```bash
+python3 -m http.server 8000
+# Open http://localhost:8000
 ```
 
 ## Adding a New Page
