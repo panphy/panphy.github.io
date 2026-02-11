@@ -43,7 +43,6 @@ const clearButton = document.getElementById('clearButton');
 const mathMenu = document.getElementById('mathMenu');
 const mathButton = document.getElementById('mathButton');
 const mathPanel = document.getElementById('mathPanel');
-const mathTemplateSelect = document.getElementById('mathTemplateSelect');
 const loadSampleButton = document.getElementById('loadSampleButton');
 const exportHTMLButton = document.getElementById('exportHTMLButton');
 const presentButton = document.getElementById('presentButton');
@@ -137,8 +136,7 @@ const mathTemplatePaths = {
 };
 
 function openMathPanel() {
-  if (!mathPanel || !mathButton || !mathTemplateSelect) return;
-  mathTemplateSelect.value = '';
+  if (!mathPanel || !mathButton) return;
   mathPanel.hidden = false;
   mathButton.setAttribute('aria-expanded', 'true');
 }
@@ -174,10 +172,8 @@ function insertTextAtCursor(textToInsert) {
   saveDraft(markdownInput.value);
 }
 
-function insertMathTemplate() {
-  if (!mathTemplateSelect) return;
-
-  const selectedTemplate = mathTemplateSelect.value || 'basic';
+function insertMathTemplate(templateKey) {
+  const selectedTemplate = templateKey || 'basic';
   const templatePath = mathTemplatePaths[selectedTemplate] || mathTemplatePaths.basic;
 
   fetch(templatePath)
@@ -836,11 +832,11 @@ if (mathButton) {
   });
 }
 
-
-if (mathTemplateSelect) {
-  mathTemplateSelect.addEventListener('change', event => {
-    if (event.target.value) {
-      insertMathTemplate();
+if (mathPanel) {
+  mathPanel.addEventListener('click', event => {
+    const btn = event.target.closest('.math-template-btn');
+    if (btn) {
+      insertMathTemplate(btn.dataset.template);
     }
   });
 }
