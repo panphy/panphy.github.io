@@ -278,6 +278,27 @@
             background: #2d3436;
         }
 
+        .time-preview {
+            opacity: 0.35;
+            transition: opacity 0.4s ease;
+        }
+
+        #preview-hint {
+            font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+            color: var(--text-secondary);
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
+            margin: 0;
+        }
+
+        #preview-hint.visible {
+            opacity: 0.7;
+            height: 1.4em;
+            margin: 0.3rem 0 0;
+        }
+
         .blink {
             animation: blinker 1s linear infinite;
         }
@@ -429,6 +450,7 @@
                 </select>
             </div>
             <span id="time-input-hint" class="visually-hidden">Enter hours (0-23), minutes (0-59), and seconds (0-59)</span>
+            <div id="preview-hint">Preview — click Set Time to confirm</div>
         </div>
         <div class="control-container">
             <div class="control-area">
@@ -464,6 +486,7 @@
         const toggleBtn = document.getElementById('toggleBtn');
         const clearBtn = document.getElementById('clearBtn');
         const fullscreenExitBtn = document.getElementById('fullscreenExitBtn');
+        const previewHint = document.getElementById('preview-hint');
 
         /* ------------- Live HH:MM clock ------------- */
         const updateClock = () => {
@@ -749,6 +772,7 @@
             secondsInput.value = '';
 
             updateDisplays();
+            exitPreviewMode();
             paused = false;
             stopBlink();
             originalComplete = false;
@@ -824,6 +848,7 @@
 
             updateDisplays();
             updateInfoDisplay();
+            exitPreviewMode();
 
             hoursInput.value = '';
             minutesInput.value = '';
@@ -1010,6 +1035,19 @@
 
         clearBtn.onclick = clearTimer;
 
+        /* ------------ Preview mode helpers ------------ */
+        const enterPreviewMode = () => {
+            originalEl.classList.add('time-preview');
+            extraEl.classList.add('time-preview');
+            previewHint.classList.add('visible');
+        };
+
+        const exitPreviewMode = () => {
+            originalEl.classList.remove('time-preview');
+            extraEl.classList.remove('time-preview');
+            previewHint.classList.remove('visible');
+        };
+
         /* ------------ Input change handling ------------ */
         const updateTimePreview = () => {
             // Only update preview when timer is not set/running
@@ -1029,6 +1067,13 @@
 
             originalEl.textContent = fmt(orig.h, orig.m, orig.s);
             extraEl.textContent = fmt(extra.h, extra.m, extra.s);
+
+            // Show preview styling when there's a non-zero value entered
+            if (total > 0) {
+                enterPreviewMode();
+            } else {
+                exitPreviewMode();
+            }
         };
 
         hoursInput.addEventListener('input', updateTimePreview);
