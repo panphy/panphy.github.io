@@ -10,7 +10,8 @@ export const STORAGE_KEYS = {
   FONT_SIZE: 'markdownFontSize',
   THEME: 'theme',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
-  SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning'
+  SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning',
+  SUPPRESS_SAMPLE_WARNING: 'markdownSuppressSampleWarning'
 };
 
 // Application state
@@ -161,4 +162,20 @@ export function isOpenWarningSuppressed() {
  */
 export function saveOpenWarningSuppressed(suppressed) {
   localStorage.setItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING, String(suppressed));
+}
+
+/**
+ * Check whether the sample-document warning is suppressed
+ * @returns {boolean} True if the user chose to suppress the warning
+ */
+export function isSampleWarningSuppressed() {
+  return localStorage.getItem(STORAGE_KEYS.SUPPRESS_SAMPLE_WARNING) === 'true';
+}
+
+/**
+ * Save the sample-document warning suppression preference
+ * @param {boolean} suppressed - Whether to suppress the warning
+ */
+export function saveSampleWarningSuppressed(suppressed) {
+  localStorage.setItem(STORAGE_KEYS.SUPPRESS_SAMPLE_WARNING, String(suppressed));
 }

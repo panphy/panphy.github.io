@@ -12,7 +12,9 @@ import {
   debounce,
   throttle,
   isOpenWarningSuppressed,
-  saveOpenWarningSuppressed
+  saveOpenWarningSuppressed,
+  isSampleWarningSuppressed,
+  saveSampleWarningSuppressed
 } from './state.js';
 
 import {
@@ -112,7 +114,14 @@ if (markedLib) {
 /**
  * Fetch and load the sample Markdown document
  */
-function loadSampleDocument() {
+async function loadSampleDocument() {
+  if (markdownInput.value.trim() !== '') {
+    const confirmed = await showConfirmationModal(
+      'This will open a sample document and replace your current content. Any unsaved changes will be lost.',
+      { isSuppressed: isSampleWarningSuppressed, saveSuppressed: saveSampleWarningSuppressed }
+    );
+    if (!confirmed) return;
+  }
   fetch('/tools/markdown_editor/sample_doc.md')
     .then(response => {
       if (!response.ok) {
