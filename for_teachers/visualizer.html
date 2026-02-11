@@ -113,87 +113,149 @@
 			-webkit-text-fill-color: transparent;
 		}
 
-		.controls {
+		/* Controls toggle button */
+		#controlsToggle {
 			position: absolute;
 			top: .55rem;
 			left: .55rem;
 			z-index: 6;
-			background: transparent;
-			display: inline-flex;
-			flex-direction: column;
-			align-items: flex-start;
-			max-width: calc(100% - 3.1rem)
-		}
-
-		.controls summary {
-			list-style: none;
-			cursor: pointer;
 			display: flex;
 			align-items: center;
-			justify-content: space-between;
-			gap: .5rem;
-			padding: .5rem .85rem;
-			background: var(--panel);
-			border: 1px solid var(--panel-border);
-			border-radius: .65rem;
+			gap: .35rem;
+			padding: .45rem .8rem;
+			background: rgba(22, 24, 29, 0.75);
+			border: 1px solid rgba(255, 255, 255, .1);
+			border-radius: .6rem;
 			color: var(--text-main);
 			font-weight: 600;
-			box-shadow: var(--panel-shadow)
+			font-size: .85rem;
+			font-family: inherit;
+			cursor: pointer;
+			backdrop-filter: blur(12px);
+			-webkit-backdrop-filter: blur(12px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+			-webkit-appearance: none;
+			appearance: none
 		}
 
-		.controls summary::-webkit-details-marker {
-			display: none
+		#controlsToggle:hover {
+			background: rgba(30, 33, 41, 0.85);
+			transform: translateY(-1px)
 		}
 
-		.controls summary::after {
-			content: '+';
-			font-size: 1.1rem;
-			color: var(--text-secondary)
+		#controlsToggle:active {
+			transform: translateY(0)
 		}
 
-		.controls[open] summary::after {
-			content: '–'
-		}
-
-		.controls .row {
-			margin-top: .5rem
-		}
-
-		.row {
-			display: flex;
+		/* Controls panel */
+		.controls-panel {
+			position: absolute;
+			top: .55rem;
+			left: .55rem;
+			z-index: 6;
+			display: none;
 			flex-direction: column;
-			gap: .4rem;
-			align-items: flex-start
+			gap: 0;
+			max-width: calc(100% - 3.1rem);
+			max-height: calc(100% - 1.1rem);
+			overflow-y: auto;
+			background: rgba(15, 16, 20, 0.82);
+			border: 1px solid rgba(255, 255, 255, .08);
+			border-radius: .8rem;
+			padding: .6rem .7rem;
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, .45)
 		}
 
-		.group {
+		.controls-panel.open {
+			display: flex
+		}
+
+		#controlsClose {
+			position: absolute;
+			top: .4rem;
+			right: .4rem;
+			width: 26px;
+			height: 26px;
 			display: flex;
 			align-items: center;
-			gap: .4rem;
-			flex-wrap: nowrap;
-			background: var(--panel);
-			border: 1px solid var(--panel-border);
-			padding: .32rem .45rem;
-			border-radius: .6rem;
-			box-shadow: var(--panel-shadow);
-			min-height: 44px
+			justify-content: center;
+			padding: 0;
+			background: transparent;
+			border: 1px solid transparent;
+			border-radius: .35rem;
+			color: var(--text-secondary);
+			font-size: .85rem;
+			cursor: pointer;
+			-webkit-appearance: none;
+			appearance: none
 		}
 
-		.group-label {
-			font-size: .72rem;
+		#controlsClose:hover {
+			background: rgba(255, 255, 255, .08);
+			color: var(--text-main)
+		}
+
+		/* Panel sections */
+		.cp-section {
+			display: flex;
+			flex-direction: column;
+			gap: .35rem;
+			padding: .3rem 0
+		}
+
+		.cp-label {
+			font-size: .68rem;
 			font-weight: 600;
 			text-transform: uppercase;
-			letter-spacing: .04em;
+			letter-spacing: .06em;
 			color: var(--text-secondary);
-			padding: 0 .25rem;
+			padding: 0 .1rem
+		}
+
+		.cp-sublabel {
+			font-size: .72rem;
+			font-weight: 500;
+			color: var(--muted);
 			white-space: nowrap
 		}
 
-		.vsep {
+		.cp-row {
+			display: flex;
+			align-items: center;
+			gap: .4rem;
+			flex-wrap: wrap
+		}
+
+		.cp-divider {
+			height: 1px;
+			background: rgba(255, 255, 255, .06);
+			margin: .1rem 0
+		}
+
+		.cp-sep {
 			width: 1px;
 			height: 20px;
-			background: rgba(255, 255, 255, .1);
-			margin: 0 .15rem
+			background: rgba(255, 255, 255, .08);
+			margin: 0 .1rem;
+			flex-shrink: 0
+		}
+
+		/* Contextual tool options */
+		.cp-tool-options {
+			min-height: 0
+		}
+
+		.cp-tool-opt {
+			display: none;
+			align-items: center;
+			gap: .4rem;
+			flex-wrap: wrap
+		}
+
+		.cp-tool-opt.visible {
+			display: flex
 		}
 
 		select,
@@ -495,12 +557,8 @@
 			transform: scale(1.15)
 		}
 
-		#zoomGroup {
-			white-space: nowrap
-		}
-
 		#zoomSlider {
-			width: 120px;
+			width: 100px;
 			height: 22px;
 			vertical-align: middle;
 			accent-color: var(--brand-primary)
@@ -511,7 +569,7 @@
 			min-width: 2.8ch;
 			text-align: right;
 			color: #cfd5e4;
-			font-size: .85rem;
+			font-size: .82rem;
 			font-weight: 600
 		}
 
@@ -880,7 +938,11 @@
 			}
 
 			#zoomSlider {
-				width: 80px
+				width: 70px
+			}
+
+			.controls-panel {
+				max-width: calc(100% - 1.5rem)
 			}
 		}
 	</style>
@@ -899,22 +961,20 @@
 
 	<!-- Stage -->
 	<main id="stage">
-		<details class="controls">
-			<summary>Controls</summary>
-			<div class="row">
-				<!-- Camera -->
-				<div class="group">
-					<span class="group-label">Camera</span>
+		<button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
+
+		<div class="controls-panel" id="controlsPanel">
+			<button id="controlsClose" type="button" aria-label="Close controls">&#x2715;</button>
+
+			<!-- Source section -->
+			<div class="cp-section">
+				<span class="cp-label">Source</span>
+				<div class="cp-row">
 					<select id="cameraSelect"></select>
-					<div id="cameraHelper" class="helperText" aria-live="polite"></div>
 					<button id="refreshBtn" data-tooltip="Refresh camera list">
 						<span class="btn-icon">&#x21bb;</span>
 					</button>
-				</div>
-
-				<!-- Video -->
-				<div class="group">
-					<span class="group-label">Video</span>
+					<span class="cp-sep"></span>
 					<label class="switch">
 						<input id="liveToggle" type="checkbox" checked />
 						<span class="slider"></span>
@@ -924,17 +984,19 @@
 						<span id="statusLabel" class="statusText">Live</span>
 					</div>
 				</div>
+				<div id="cameraHelper" class="helperText" aria-live="polite"></div>
+			</div>
 
-				<!-- Zoom -->
-				<div class="group" id="zoomGroup">
-					<span class="group-label">Zoom</span>
+			<div class="cp-divider"></div>
+
+			<!-- View section -->
+			<div class="cp-section">
+				<span class="cp-label">View</span>
+				<div class="cp-row">
+					<span class="cp-sublabel">Zoom</span>
 					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
 					<span id="zoomVal">1.0×</span>
-				</div>
-
-				<!-- Display -->
-				<div class="group">
-					<span class="group-label">Display</span>
+					<span class="cp-sep"></span>
 					<button id="mirrorBtn" data-tooltip="Mirror view">
 						<span class="btn-icon">&#x21C4;</span>
 						<span class="btn-text">Mirror</span>
@@ -944,57 +1006,63 @@
 						<span class="btn-text">Fit</span>
 					</button>
 				</div>
+			</div>
 
-				<!-- Tools -->
-				<div class="group">
-					<span class="group-label">Tools</span>
-					<button id="laserBtn" class="tool-btn" data-tooltip="Laser pointer">
+			<div class="cp-divider"></div>
+
+			<!-- Tools section -->
+			<div class="cp-section">
+				<span class="cp-label">Tools</span>
+				<div class="cp-row">
+					<button id="laserBtn" class="tool-btn" data-tooltip="Laser pointer (L)">
 						<span class="btn-icon">&#x2739;</span>
 						<span class="btn-text">Laser</span>
 					</button>
-					<button id="annotationBtn" class="tool-btn" data-tooltip="Draw annotation">
+					<button id="annotationBtn" class="tool-btn" data-tooltip="Draw (D)">
 						<span class="btn-icon">&#x270E;</span>
 						<span class="btn-text">Draw</span>
 					</button>
-					<button id="eraserBtn" class="tool-btn" data-tooltip="Eraser">
+					<button id="eraserBtn" class="tool-btn" data-tooltip="Eraser (E)">
 						<span class="btn-icon">&#x232B;</span>
 						<span class="btn-text">Erase</span>
 					</button>
-					<button id="textBtn" class="tool-btn" data-tooltip="Add text">
+					<button id="textBtn" class="tool-btn" data-tooltip="Add text (T)">
 						<span class="btn-icon">T</span>
 						<span class="btn-text">Text</span>
 					</button>
 				</div>
-
-				<!-- Pointer settings -->
-				<div class="group" id="pointerGroup">
-					<button class="color-label-btn" id="pointerColorBtn" title="Click to change laser color">
-						<span class="color-label-text">Laser</span>
-						<input id="pointerColorInput" type="color" value="#ff3b3b" />
-					</button>
-					<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
+				<!-- Contextual tool options -->
+				<div class="cp-row cp-tool-options" id="toolOptions">
+					<div id="pointerGroup" class="cp-tool-opt">
+						<button class="color-label-btn" id="pointerColorBtn" title="Click to change laser color">
+							<span class="color-label-text">Color</span>
+							<input id="pointerColorInput" type="color" value="#ff3b3b" />
+						</button>
+						<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
+					</div>
+					<div id="annotGroup" class="cp-tool-opt">
+						<button class="color-label-btn" id="annotColorBtn" title="Click to change annotation color">
+							<span class="color-label-text">Color</span>
+							<input id="annotColorInput" type="color" value="#33d17a" />
+						</button>
+						<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
+						<span class="cp-sep"></span>
+						<button id="undoBtn" class="muted" data-tooltip="Undo last" disabled>
+							<span class="btn-text">Undo</span>
+						</button>
+						<button id="clearBtn" class="danger" data-tooltip="Clear all">
+							<span class="btn-icon">&#x2715;</span>
+							<span class="btn-text">Clear</span>
+						</button>
+					</div>
 				</div>
+			</div>
 
-				<!-- Annotation settings -->
-				<div class="group" id="annotGroup">
-					<button class="color-label-btn" id="annotColorBtn" title="Click to change annotation color">
-						<span class="color-label-text">Annotate</span>
-						<input id="annotColorInput" type="color" value="#33d17a" />
-					</button>
-					<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
-					<span class="vsep"></span>
-					<button id="undoBtn" class="muted" data-tooltip="Undo last" disabled>
-						<span class="btn-text">Undo</span>
-					</button>
-					<button id="clearBtn" class="danger" data-tooltip="Clear all">
-						<span class="btn-icon">&#x2715;</span>
-						<span class="btn-text">Clear</span>
-					</button>
-				</div>
+			<div class="cp-divider"></div>
 
-				<!-- Capture -->
-				<div class="group">
-					<span class="group-label">Capture</span>
+			<!-- Actions row -->
+			<div class="cp-section">
+				<div class="cp-row">
 					<button id="screenshotBtn" data-tooltip="Take snapshot">
 						<span class="btn-icon">&#x1F4F7;</span>
 						<span class="btn-text">Snapshot</span>
@@ -1003,16 +1071,13 @@
 						<span class="btn-icon">&#x23FA;</span>
 						<span class="btn-text">Record</span>
 					</button>
-				</div>
-
-				<!-- Default Settings -->
-				<div class="group">
-					<button id="defaultsBtn" data-tooltip="Reset to default settings">
-						<span class="btn-text">Default Settings</span>
+					<span class="cp-sep"></span>
+					<button id="defaultsBtn" class="muted" data-tooltip="Reset to default settings">
+						<span class="btn-text">Reset</span>
 					</button>
 				</div>
 			</div>
-		</details>
+		</div>
 		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
 		<video id="video" playsinline autoplay muted></video>
 		<canvas id="freezeCanvas" class="hidden"></canvas>
@@ -1060,6 +1125,10 @@
 			const ctxDraw = drawCanvas.getContext('2d');
 			const ctxLaser = laserCanvas.getContext('2d');
 
+			const controlsToggle = document.getElementById('controlsToggle');
+			const controlsPanel = document.getElementById('controlsPanel');
+			const controlsClose = document.getElementById('controlsClose');
+
 			const cameraSelect = document.getElementById('cameraSelect');
 			const cameraHelper = document.getElementById('cameraHelper');
 			const refreshBtn = document.getElementById('refreshBtn');
@@ -1100,6 +1169,9 @@
 			const annotColorInput = document.getElementById('annotColorInput');
 			const pointerColorBtn = document.getElementById('pointerColorBtn');
 			const annotColorBtn = document.getElementById('annotColorBtn');
+
+			const pointerGroup = document.getElementById('pointerGroup');
+			const annotGroup = document.getElementById('annotGroup');
 
 			const sizeUI = {
 				pointer: document.getElementById('pointerSizes'),
@@ -1207,6 +1279,29 @@
 			document.addEventListener('fullscreenchange', updateFullscreenUI);
 			document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 			updateFullscreenUI();
+
+			/* ===== Controls panel open/close ===== */
+			function openControls() {
+				controlsPanel.classList.add('open');
+				controlsToggle.style.display = 'none';
+			}
+			function closeControls() {
+				controlsPanel.classList.remove('open');
+				controlsToggle.style.display = '';
+			}
+			controlsToggle.addEventListener('click', openControls);
+			controlsClose.addEventListener('click', closeControls);
+
+			/* ===== Contextual tool options ===== */
+			function updateToolOptions() {
+				const isLaser = !annotationOn && !eraserOn && !textModeOn;
+				const isDraw = annotationOn && !eraserOn && !textModeOn;
+				const isEraser = eraserOn;
+				const isText = textModeOn;
+
+				pointerGroup.classList.toggle('visible', isLaser);
+				annotGroup.classList.toggle('visible', isDraw || isEraser || isText);
+			}
 
 			/* ===== Utils ===== */
 			function showToast(msg, ms = 1800) {
@@ -1849,6 +1944,7 @@
 				if (!keepMode) {
 					textModeOn = false;
 					syncToolButtons();
+					updateToolOptions();
 					updateInteractionMode();
 				}
 			}
@@ -1886,6 +1982,7 @@
 				textModeOn = false;
 				hideTextOverlay();
 				syncToolButtons();
+				updateToolOptions();
 				updateInteractionMode();
 				if (showFeedback) showToast('Laser pointer active');
 			}
@@ -1896,6 +1993,7 @@
 				textModeOn = false;
 				hideTextOverlay();
 				syncToolButtons();
+				updateToolOptions();
 				updateInteractionMode();
 				if (showFeedback) showToast(annotationOn ? 'Draw mode' : 'Laser pointer');
 			}
@@ -1906,6 +2004,7 @@
 				textModeOn = false;
 				hideTextOverlay();
 				syncToolButtons();
+				updateToolOptions();
 				updateInteractionMode();
 				if (showFeedback) showToast(eraserOn ? 'Eraser mode' : 'Laser pointer');
 			}
@@ -1916,6 +2015,7 @@
 				eraserOn = false;
 				hideTextOverlay(textModeOn);
 				syncToolButtons();
+				updateToolOptions();
 				updateInteractionMode();
 				if (showFeedback) {
 					showToast(textModeOn ? 'Text mode - tap to place' : 'Laser pointer');
@@ -2119,13 +2219,13 @@
 
 			function touchGuard(e) {
 				if (overlayVisible && e.target.closest('#textOverlay')) return;
-				if (e.target.closest('.controls') || e.target.closest('#fullscreenBtn')) return;
+				if (e.target.closest('.controls-panel') || e.target.closest('#controlsToggle') || e.target.closest('#fullscreenBtn')) return;
 				e.preventDefault();
 			}
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(ev => target.addEventListener(ev, touchGuard, { passive: false }));
 
 			function isStageControlTarget(e) {
-				return !!(e.target.closest('.controls') || e.target.closest('#fullscreenBtn') || e.target.closest('#textOverlay'));
+				return !!(e.target.closest('.controls-panel') || e.target.closest('#controlsToggle') || e.target.closest('#fullscreenBtn') || e.target.closest('#textOverlay'));
 			}
 
 			target.addEventListener('pointerdown', e => {
@@ -2376,6 +2476,7 @@
 				refreshPickerColors();
 
 				syncToolButtons();
+				updateToolOptions();
 				updateInteractionMode();
 				updateMirrorButton();
 				setZoom(zoomLevel);
