@@ -258,6 +258,38 @@
 			display: flex
 		}
 
+		/* Tools row: equal buttons, full width, extra bottom spacing */
+		.cp-row-tools {
+			gap: .35rem;
+			flex-wrap: nowrap;
+			margin-bottom: .3rem
+		}
+
+		/* View row: zoom slider fills remaining space */
+		.cp-row-view {
+			flex-wrap: nowrap
+		}
+
+		.cp-row-view #zoomSlider {
+			flex: 1;
+			min-width: 0
+		}
+
+		.cp-row-view #mirrorBtn,
+		.cp-row-view #fitBtn {
+			flex: 0 0 auto;
+			min-width: 68px
+		}
+
+		/* Actions row: equal buttons, full width */
+		.cp-row-actions {
+			flex-wrap: nowrap
+		}
+
+		.cp-row-actions > button {
+			flex: 1
+		}
+
 		select,
 		button {
 			-webkit-appearance: none;
@@ -341,7 +373,8 @@
 
 		.tool-btn {
 			min-width: 38px;
-			position: relative
+			position: relative;
+			flex: 1
 		}
 
 		.tool-btn.active {
@@ -558,7 +591,6 @@
 		}
 
 		#zoomSlider {
-			width: 100px;
 			height: 22px;
 			vertical-align: middle;
 			accent-color: var(--brand-primary)
@@ -937,10 +969,6 @@
 				min-width: 36px
 			}
 
-			#zoomSlider {
-				width: 70px
-			}
-
 			.controls-panel {
 				max-width: calc(100% - 1.5rem)
 			}
@@ -992,7 +1020,7 @@
 			<!-- View section -->
 			<div class="cp-section">
 				<span class="cp-label">View</span>
-				<div class="cp-row">
+				<div class="cp-row cp-row-view">
 					<span class="cp-sublabel">Zoom</span>
 					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
 					<span id="zoomVal">1.0×</span>
@@ -1013,7 +1041,7 @@
 			<!-- Tools section -->
 			<div class="cp-section">
 				<span class="cp-label">Tools</span>
-				<div class="cp-row">
+				<div class="cp-row cp-row-tools">
 					<button id="laserBtn" class="tool-btn" data-tooltip="Laser pointer (L)">
 						<span class="btn-icon">&#x2739;</span>
 						<span class="btn-text">Laser</span>
@@ -1062,7 +1090,7 @@
 
 			<!-- Actions row -->
 			<div class="cp-section">
-				<div class="cp-row">
+				<div class="cp-row cp-row-actions">
 					<button id="screenshotBtn" data-tooltip="Take snapshot">
 						<span class="btn-icon">&#x1F4F7;</span>
 						<span class="btn-text">Snapshot</span>
@@ -1071,7 +1099,6 @@
 						<span class="btn-icon">&#x23FA;</span>
 						<span class="btn-text">Record</span>
 					</button>
-					<span class="cp-sep"></span>
 					<button id="defaultsBtn" class="muted" data-tooltip="Reset to default settings">
 						<span class="btn-text">Reset</span>
 					</button>
