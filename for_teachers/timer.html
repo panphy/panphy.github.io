@@ -958,6 +958,16 @@
             saveState();
         };
 
+        const isTimerRunning = () => timerInterval !== null && !paused;
+
+        const confirmRunningTimerAction = (actionName) => {
+            if (!isTimerRunning()) {
+                return true;
+            }
+
+            return window.confirm(`The timer is still running. Do you want to ${actionName} anyway?`);
+        };
+
         const resumeTimer = () => {
             if (!paused) return false;
             paused = false;
@@ -993,6 +1003,9 @@
                     setResetBtn.classList.add('btn-reset');
                 }
             } else {
+                if (!confirmRunningTimerAction('reset it')) {
+                    return;
+                }
                 resetTimer();
             }
         };
@@ -1030,7 +1043,13 @@
             }
         };
 
-        clearBtn.onclick = clearTimer;
+        clearBtn.onclick = () => {
+            if (!confirmRunningTimerAction('clear it')) {
+                return;
+            }
+
+            clearTimer();
+        };
 
         /* ------------ Preview mode helpers ------------ */
         const enterPreviewMode = () => {
