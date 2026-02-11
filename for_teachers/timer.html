@@ -287,16 +287,13 @@
             font-size: clamp(0.8rem, 1.1vw, 0.95rem);
             color: var(--text-secondary);
             opacity: 0;
-            height: 0;
-            overflow: hidden;
-            transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
-            margin: 0;
+            height: 1.4em;
+            margin: 0 0 0.3rem;
+            transition: opacity 0.3s ease;
         }
 
         #preview-hint.visible {
             opacity: 0.7;
-            height: 1.4em;
-            margin: 0 0 0.3rem;
         }
 
         .blink {
