@@ -9,7 +9,8 @@ export const STORAGE_KEYS = {
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
   THEME: 'theme',
-  SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning'
+  SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
+  SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning'
 };
 
 // Application state
@@ -144,4 +145,20 @@ export function isClearWarningSuppressed() {
  */
 export function saveClearWarningSuppressed(suppressed) {
   localStorage.setItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING, String(suppressed));
+}
+
+/**
+ * Check whether the open-file warning is suppressed
+ * @returns {boolean} True if the user chose to suppress the warning
+ */
+export function isOpenWarningSuppressed() {
+  return localStorage.getItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING) === 'true';
+}
+
+/**
+ * Save the open-file warning suppression preference
+ * @param {boolean} suppressed - Whether to suppress the warning
+ */
+export function saveOpenWarningSuppressed(suppressed) {
+  localStorage.setItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING, String(suppressed));
 }
