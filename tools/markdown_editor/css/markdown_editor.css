@@ -1453,6 +1453,117 @@ mjx-container.copy-failed::after {
   flex-shrink: 0;
 }
 
+/* ---------------------------------------------------------------------- */
+/* Dirty-state indicator (dot next to Save button)                        */
+/* ---------------------------------------------------------------------- */
+.save-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dirty-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f97316;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.dirty-indicator.visible {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------- */
+/* History / Snapshot modal                                                */
+/* ---------------------------------------------------------------------- */
+.history-modal {
+  max-width: 520px;
+  width: 90%;
+}
+
+.history-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-title-row .modal-title {
+  margin: 0;
+}
+
+.history-clear-btn {
+  font-size: 0.75rem !important;
+  padding: 4px 10px !important;
+}
+
+.history-list {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.history-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+.history-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--button-background);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-item-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.history-item-size {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.history-item-preview {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 3.5em;
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.history-restore-btn {
+  align-self: flex-end;
+  font-size: 0.75rem !important;
+  padding: 4px 12px !important;
+}
+
 /* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */
 @media print {
   #inputPane.mobile-hidden {

@@ -6,6 +6,7 @@
 // Storage keys
 export const STORAGE_KEYS = {
   DRAFT: 'markdownEditorDraft',
+  SNAPSHOTS: 'markdownEditorSnapshots',
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
   THEME: 'theme',
@@ -14,9 +15,14 @@ export const STORAGE_KEYS = {
   SUPPRESS_SAMPLE_WARNING: 'markdownSuppressSampleWarning'
 };
 
+// Snapshot configuration
+const MAX_SNAPSHOTS = 20;
+const MAX_SNAPSHOTS_BYTES = 2 * 1024 * 1024; // ~2 MB budget
+
 // Application state
 export const state = {
-  isSyncScrollEnabled: false
+  isSyncScrollEnabled: false,
+  lastExportedContent: null
 };
 
 /**
@@ -95,6 +101,91 @@ export function saveThemePreference(theme) {
  */
 export function loadThemePreference() {
   return localStorage.getItem(STORAGE_KEYS.THEME);
+}
+
+// ------------------------------------------------------------------ //
+// Snapshot history                                                      //
+// ------------------------------------------------------------------ //
+
+/**
+ * Load all snapshots from localStorage.
+ * Each snapshot is { timestamp: number, content: string }.
+ * @returns {Array} Array of snapshot objects, oldest first
+ */
+export function loadSnapshots() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SNAPSHOTS);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Persist the given snapshots array, pruning to stay within limits.
+ * @param {Array} snapshots
+ */
+function persistSnapshots(snapshots) {
+  // Cap count
+  while (snapshots.length > MAX_SNAPSHOTS) {
+    snapshots.shift();
+  }
+  // Cap total size — drop oldest until under budget
+  let json = JSON.stringify(snapshots);
+  while (json.length > MAX_SNAPSHOTS_BYTES && snapshots.length > 1) {
+    snapshots.shift();
+    json = JSON.stringify(snapshots);
+  }
+  localStorage.setItem(STORAGE_KEYS.SNAPSHOTS, json);
+}
+
+/**
+ * Save a snapshot of the current content.
+ * Skips saving if the content is identical to the most recent snapshot.
+ * @param {string} content - The markdown content to snapshot
+ */
+export function saveSnapshot(content) {
+  if (!content || content.trim() === '') return;
+  const snapshots = loadSnapshots();
+  // Skip duplicate of the most recent snapshot
+  if (snapshots.length > 0 && snapshots[snapshots.length - 1].content === content) {
+    return;
+  }
+  snapshots.push({ timestamp: Date.now(), content });
+  persistSnapshots(snapshots);
+}
+
+/**
+ * Delete all saved snapshots.
+ */
+export function clearSnapshots() {
+  localStorage.removeItem(STORAGE_KEYS.SNAPSHOTS);
+}
+
+// ------------------------------------------------------------------ //
+// Dirty-state tracking                                                 //
+// ------------------------------------------------------------------ //
+
+/**
+ * Mark the current content as "exported" (clean).
+ * Call this after the user saves/exports a .md file.
+ * @param {string} content
+ */
+export function markContentExported(content) {
+  state.lastExportedContent = content;
+}
+
+/**
+ * Check whether the editor content differs from the last export.
+ * @param {string} currentContent
+ * @returns {boolean} true if there are unsaved changes
+ */
+export function isDirty(currentContent) {
+  if (state.lastExportedContent === null) {
+    // Never exported this session — treat non-empty content as dirty
+    return currentContent.trim() !== '';
+  }
+  return currentContent !== state.lastExportedContent;
 }
 
 /**
