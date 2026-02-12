@@ -139,14 +139,15 @@ export function applyFontSize(value) {
 
 /**
  * Initialize font size from saved preference
- * @param {HTMLSelectElement} fontSizeSelect - The font size select element
+ * @param {HTMLElement|null} fontPanel - The font panel element with .font-option-btn children
+ * @param {Function} [updateActiveState] - Callback to highlight the active button
  */
-export function initializeFontSize(fontSizeSelect) {
+export function initializeFontSize(fontPanel, updateActiveState) {
   const savedFontSize = loadFontSizePreference();
   const initialFontSize = savedFontSize || getCurrentFontSize();
   applyFontSize(initialFontSize);
-  if (fontSizeSelect) {
-    fontSizeSelect.value = initialFontSize;
+  if (updateActiveState) {
+    updateActiveState(initialFontSize);
   }
 }
 

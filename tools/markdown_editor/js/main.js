@@ -62,7 +62,10 @@ const saveMDButton = document.getElementById('saveMDButton');
 const loadFileButton = document.getElementById('loadFileButton');
 const themeToggleButton = document.getElementById('themeToggleButton');
 const syncScrollToggle = document.getElementById('syncScrollToggle');
-const fontSizeSelect = document.getElementById('fontSizeSelect');
+const fontMenu = document.getElementById('fontMenu');
+const fontButton = document.getElementById('fontButton');
+const fontPanel = document.getElementById('fontPanel');
+const insertImageButton = document.getElementById('insertImageButton');
 const highlightStyle = document.getElementById('highlightStyle');
 const historyButton = document.getElementById('historyButton');
 const dirtyIndicator = document.getElementById('dirtyIndicator');
@@ -172,10 +175,41 @@ function closeMathPanel() {
 function toggleMathPanel() {
   if (!mathPanel) return;
   if (mathPanel.hidden) {
+    closeFontPanel();
     openMathPanel();
     return;
   }
   closeMathPanel();
+}
+
+// ---- Font panel ----
+function openFontPanel() {
+  if (!fontPanel || !fontButton) return;
+  fontPanel.hidden = false;
+  fontButton.setAttribute('aria-expanded', 'true');
+}
+
+function closeFontPanel() {
+  if (!fontPanel || !fontButton) return;
+  fontPanel.hidden = true;
+  fontButton.setAttribute('aria-expanded', 'false');
+}
+
+function toggleFontPanel() {
+  if (!fontPanel) return;
+  if (fontPanel.hidden) {
+    closeMathPanel();
+    openFontPanel();
+    return;
+  }
+  closeFontPanel();
+}
+
+function updateFontPanelActiveState(activeSize) {
+  if (!fontPanel) return;
+  fontPanel.querySelectorAll('.font-option-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.size === activeSize);
+  });
 }
 
 function insertTextAtCursor(textToInsert) {
@@ -215,6 +249,78 @@ function insertMathTemplate(templateKey) {
     });
 }
 
+// ---- Image insertion ----
+const MAX_IMAGE_DIMENSION = 800;
+const IMAGE_QUALITY = 0.75;
+
+/**
+ * Compress an image file via an offscreen canvas.
+ * Caps the longest dimension at MAX_IMAGE_DIMENSION and
+ * exports as WebP (or JPEG fallback) at IMAGE_QUALITY.
+ * @param {File} file
+ * @returns {Promise<string>} data URI
+ */
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+          if (width > height) {
+            height = Math.round(height * (MAX_IMAGE_DIMENSION / width));
+            width = MAX_IMAGE_DIMENSION;
+          } else {
+            width = Math.round(width * (MAX_IMAGE_DIMENSION / height));
+            height = MAX_IMAGE_DIMENSION;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Prefer WebP; fall back to JPEG if unsupported
+        let dataUri = canvas.toDataURL('image/webp', IMAGE_QUALITY);
+        if (!dataUri.startsWith('data:image/webp')) {
+          dataUri = canvas.toDataURL('image/jpeg', IMAGE_QUALITY);
+        }
+
+        resolve(dataUri);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Open a file picker and insert the selected image at the cursor.
+ */
+function insertImageFromFile() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const dataUri = await compressImage(file);
+      const altText = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'image';
+      insertTextAtCursor(`![${altText}](${dataUri})\n`);
+    } catch (err) {
+      console.error('Failed to process image:', err);
+    }
+  };
+  input.click();
+}
+
 /**
  * Render the markdown content to the output pane
  */
@@ -229,7 +335,7 @@ function renderContent() {
 
   const preprocessedText = preprocessMarkdown(inputText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
-  const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+  const sanitizedContent = DOMPurify.sanitize(parsedMarkdown, { ADD_DATA_URI_TAGS: ['img'] });
   renderedOutput.innerHTML = sanitizedContent;
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
@@ -877,10 +983,37 @@ if (mathPanel) {
   });
 }
 
+// Font panel toggle
+if (fontButton) {
+  fontButton.addEventListener('click', event => {
+    event.stopPropagation();
+    toggleFontPanel();
+  });
+}
+
+if (fontPanel) {
+  fontPanel.addEventListener('click', event => {
+    const btn = event.target.closest('.font-option-btn');
+    if (btn) {
+      applyFontSize(btn.dataset.size);
+      updateFontPanelActiveState(btn.dataset.size);
+      closeFontPanel();
+    }
+  });
+}
+
+// Image button
+if (insertImageButton) {
+  insertImageButton.addEventListener('click', insertImageFromFile);
+}
+
+// Close panels when clicking outside
 document.addEventListener('click', event => {
-  if (!mathMenu || !mathPanel || mathPanel.hidden) return;
-  if (!mathMenu.contains(event.target)) {
+  if (mathMenu && mathPanel && !mathPanel.hidden && !mathMenu.contains(event.target)) {
     closeMathPanel();
+  }
+  if (fontMenu && fontPanel && !fontPanel.hidden && !fontMenu.contains(event.target)) {
+    closeFontPanel();
   }
 });
 
@@ -922,11 +1055,62 @@ syncScrollToggle.addEventListener('change', event => {
   saveSyncScrollPreference(event.target.checked);
 });
 
-if (fontSizeSelect) {
-  fontSizeSelect.addEventListener('change', event => {
-    applyFontSize(event.target.value);
-  });
-}
+// Paste handler — intercept pasted images
+markdownInput.addEventListener('paste', async (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) {
+        try {
+          const dataUri = await compressImage(file);
+          const altText = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'image';
+          insertTextAtCursor(`![${altText}](${dataUri})\n`);
+        } catch (err) {
+          console.error('Failed to process pasted image:', err);
+        }
+      }
+      return;
+    }
+  }
+});
+
+// Drag-and-drop handler for images
+markdownInput.addEventListener('dragover', (e) => {
+  if (e.dataTransfer.types.includes('Files')) {
+    e.preventDefault();
+    markdownInput.classList.add('drag-over');
+  }
+});
+
+markdownInput.addEventListener('dragleave', () => {
+  markdownInput.classList.remove('drag-over');
+});
+
+markdownInput.addEventListener('drop', async (e) => {
+  markdownInput.classList.remove('drag-over');
+
+  const files = e.dataTransfer?.files;
+  if (!files || files.length === 0) return;
+
+  const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (imageFiles.length === 0) return;
+
+  e.preventDefault();
+
+  for (const file of imageFiles) {
+    try {
+      const dataUri = await compressImage(file);
+      const altText = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'image';
+      insertTextAtCursor(`![${altText}](${dataUri})\n`);
+    } catch (err) {
+      console.error('Failed to process dropped image:', err);
+    }
+  }
+});
 
 // Print event handlers
 window.addEventListener('beforeprint', () => {
@@ -1061,7 +1245,7 @@ mobileQuery.addEventListener('change', () => {
 updateOfflineFontState();
 initializeTheme();
 initializeSyncScrollToggle(syncScrollToggle);
-initializeFontSize(fontSizeSelect);
+initializeFontSize(fontPanel, updateFontPanelActiveState);
 updatePresentButtonLabel();
 updatePresentThemeIcon();
 initMobileLayout();
