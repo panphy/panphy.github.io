@@ -866,20 +866,47 @@ async function exportHTML() {
  * Save the markdown content to a file
  */
 async function saveMarkdown() {
-  const fileName = await showFilenameModal('document.md', 'Save Markdown');
-  if (!fileName) return;
-
   const content = markdownInput.value;
-  const blob = new Blob([content], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
 
-  markContentExported(content);
-  updateDirtyIndicator(dirtyIndicator, false);
+  if (HAS_FSA) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: 'document.md',
+        types: [{
+          description: 'Markdown',
+          accept: { 'text/markdown': ['.md'] }
+        }]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(content);
+      await writable.close();
+
+      // Store the parent directory as working folder for image insertion
+      // (only possible if the handle exposes the parent via resolve)
+      // Not available from showSaveFilePicker, so we skip this.
+
+      markContentExported(content);
+      updateDirtyIndicator(dirtyIndicator, false);
+    } catch (err) {
+      if (err.name === 'AbortError') return; // user cancelled
+      console.error('Save failed:', err);
+    }
+  } else {
+    const fileName = await showFilenameModal('document.md', 'Save Markdown');
+    if (!fileName) return;
+
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+    markContentExported(content);
+    updateDirtyIndicator(dirtyIndicator, false);
+  }
 }
 
 /**
@@ -893,6 +920,28 @@ async function loadMarkdownFile() {
     );
     if (!confirmed) return;
   }
+
+  if (HAS_FSA) {
+    try {
+      const [fileHandle] = await window.showOpenFilePicker({
+        types: [{
+          description: 'Markdown',
+          accept: { 'text/markdown': ['.md'] }
+        }]
+      });
+      const file = await fileHandle.getFile();
+      saveSnapshot(markdownInput.value);
+      markdownInput.value = await file.text();
+      renderContent();
+      saveDraft(markdownInput.value);
+      updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.error('Open failed:', err);
+    }
+    return;
+  }
+
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.md,text/markdown';
