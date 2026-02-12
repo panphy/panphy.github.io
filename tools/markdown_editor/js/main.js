@@ -14,7 +14,11 @@ import {
   isOpenWarningSuppressed,
   saveOpenWarningSuppressed,
   isSampleWarningSuppressed,
-  saveSampleWarningSuppressed
+  saveSampleWarningSuppressed,
+  saveSnapshot,
+  loadSnapshots,
+  markContentExported,
+  isDirty
 } from './state.js';
 
 import {
@@ -36,7 +40,9 @@ import {
   updateThemeToggleButton,
   getCurrentFontSize,
   showFilenameModal,
-  showConfirmationModal
+  showConfirmationModal,
+  showHistoryModal,
+  updateDirtyIndicator
 } from './ui.js';
 
 // DOM element references
@@ -58,6 +64,8 @@ const themeToggleButton = document.getElementById('themeToggleButton');
 const syncScrollToggle = document.getElementById('syncScrollToggle');
 const fontSizeSelect = document.getElementById('fontSizeSelect');
 const highlightStyle = document.getElementById('highlightStyle');
+const historyButton = document.getElementById('historyButton');
+const dirtyIndicator = document.getElementById('dirtyIndicator');
 const presentExitButton = document.getElementById('presentExitButton');
 const presentThemeToggle = document.getElementById('presentThemeToggle');
 const presentLaserToggle = document.getElementById('presentLaserToggle');
@@ -122,6 +130,7 @@ async function loadSampleDocument() {
     );
     if (!confirmed) return;
   }
+  saveSnapshot(markdownInput.value);
   fetch('/tools/markdown_editor/sample_doc.md')
     .then(response => {
       if (!response.ok) {
@@ -133,6 +142,7 @@ async function loadSampleDocument() {
       markdownInput.value = data;
       renderContent();
       saveDraft(markdownInput.value);
+      updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
     })
     .catch(error => {
       console.error('Error loading sample document:', error);
@@ -728,13 +738,17 @@ async function saveMarkdown() {
   const fileName = await showFilenameModal('document.md', 'Save Markdown');
   if (!fileName) return;
 
-  const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
+  const content = markdownInput.value;
+  const blob = new Blob([content], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+  markContentExported(content);
+  updateDirtyIndicator(dirtyIndicator, false);
 }
 
 /**
@@ -754,11 +768,13 @@ async function loadMarkdownFile() {
   input.onchange = e => {
     const file = e.target.files[0];
     if (file) {
+      saveSnapshot(markdownInput.value);
       const reader = new FileReader();
       reader.onload = event => {
         markdownInput.value = event.target.result;
         renderContent();
         saveDraft(markdownInput.value);
+        updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
       };
       reader.readAsText(file);
     }
@@ -824,6 +840,7 @@ const syncOutputToInput = throttle(() => {
 const debouncedRenderAndSave = debounce(() => {
   renderContent();
   saveDraft(markdownInput.value);
+  updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
 }, 200);
 
 markdownInput.addEventListener('input', debouncedRenderAndSave);
@@ -875,10 +892,26 @@ clearButton.addEventListener('click', async () => {
     'This will clear all your current content. Any unsaved changes will be lost.'
   );
   if (!confirmed) return;
+  saveSnapshot(markdownInput.value);
   markdownInput.value = '';
   clearDraft();
   renderContent();
+  updateDirtyIndicator(dirtyIndicator, false);
 });
+
+// History button — open snapshot browser
+if (historyButton) {
+  historyButton.addEventListener('click', async () => {
+    const snapshots = loadSnapshots();
+    const restored = await showHistoryModal(snapshots);
+    if (restored !== null) {
+      markdownInput.value = restored;
+      renderContent();
+      saveDraft(restored);
+      updateDirtyIndicator(dirtyIndicator, isDirty(restored));
+    }
+  });
+}
 
 themeToggleButton.addEventListener('click', () => {
   toggleTheme();
@@ -1044,3 +1077,24 @@ if (savedDraft !== null) {
   markdownInput.value = savedDraft;
 }
 renderContent();
+
+// Dirty-state indicator on load (never exported yet, so show if non-empty)
+updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+
+// ---------------------------------------------------------------------- //
+// Auto-save snapshots every 5 minutes                                     //
+// ---------------------------------------------------------------------- //
+const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
+setInterval(() => {
+  saveSnapshot(markdownInput.value);
+}, SNAPSHOT_INTERVAL_MS);
+
+// Also snapshot right before leaving the page
+window.addEventListener('beforeunload', (e) => {
+  saveSnapshot(markdownInput.value);
+
+  // Warn if there are unsaved changes
+  if (isDirty(markdownInput.value)) {
+    e.preventDefault();
+  }
+});

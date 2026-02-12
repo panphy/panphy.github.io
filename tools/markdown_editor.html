@@ -88,8 +88,12 @@
       <!-- Buttons and the markdown input textarea below -->
       <div class="buttonContainer floating-toolbar">
         <button id="loadFileButton">Open .md</button>
-        <button id="saveMDButton">Save .md</button>
+        <span class="save-wrapper">
+          <button id="saveMDButton">Save .md</button>
+          <span id="dirtyIndicator" class="dirty-indicator" aria-hidden="true"></span>
+        </span>
         <button id="clearButton">Clear</button>
+        <button id="historyButton" title="Browse saved snapshots">History</button>
         <div class="math-menu" id="mathMenu">
           <button id="mathButton" aria-expanded="false" aria-controls="mathPanel">Math Templates</button>
           <div id="mathPanel" class="math-panel" hidden>

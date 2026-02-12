@@ -10,7 +10,8 @@ import {
   loadFontSizePreference,
   saveFontSizePreference,
   isClearWarningSuppressed,
-  saveClearWarningSuppressed
+  saveClearWarningSuppressed,
+  clearSnapshots
 } from './state.js';
 
 // DOM element references (set during initialization)
@@ -348,6 +349,157 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
       if (e.target === overlay) {
         closeModal(false);
       }
+    });
+  });
+}
+
+// ------------------------------------------------------------------ //
+// Dirty-state indicator                                                //
+// ------------------------------------------------------------------ //
+
+/**
+ * Show or hide the unsaved-changes dot indicator.
+ * @param {HTMLElement|null} indicator - The dot element
+ * @param {boolean} dirty
+ */
+export function updateDirtyIndicator(indicator, dirty) {
+  if (!indicator) return;
+  indicator.classList.toggle('visible', dirty);
+  indicator.title = dirty ? 'Unsaved changes' : '';
+}
+
+// ------------------------------------------------------------------ //
+// History / Snapshot modal                                             //
+// ------------------------------------------------------------------ //
+
+/**
+ * Format a timestamp into a human-readable string.
+ * @param {number} ts - Unix millisecond timestamp
+ * @returns {string}
+ */
+function formatTimestamp(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (isToday) return `Today ${time}`;
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return `Yesterday ${time}`;
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${time}`;
+}
+
+/**
+ * Show a modal listing snapshot history. Returns the chosen snapshot's
+ * content, or null if the user cancelled.
+ * @param {Array} snapshots - Array of { timestamp, content }
+ * @returns {Promise<string|null>}
+ */
+export function showHistoryModal(snapshots) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content history-modal';
+
+    const titleRow = document.createElement('div');
+    titleRow.className = 'history-title-row';
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'modal-title';
+    titleEl.textContent = 'Version History';
+    titleRow.appendChild(titleEl);
+
+    if (snapshots.length > 0) {
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'btn-secondary history-clear-btn';
+      clearBtn.textContent = 'Clear All';
+      clearBtn.addEventListener('click', () => {
+        clearSnapshots();
+        listContainer.innerHTML = '<p class="history-empty">History cleared.</p>';
+        clearBtn.remove();
+      });
+      titleRow.appendChild(clearBtn);
+    }
+    content.appendChild(titleRow);
+
+    const listContainer = document.createElement('div');
+    listContainer.className = 'history-list';
+
+    if (snapshots.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'history-empty';
+      empty.textContent = 'No snapshots yet. Snapshots are saved every 5 minutes and before destructive actions.';
+      listContainer.appendChild(empty);
+    } else {
+      // Show newest first
+      for (let i = snapshots.length - 1; i >= 0; i--) {
+        const snap = snapshots[i];
+        const item = document.createElement('div');
+        item.className = 'history-item';
+
+        const meta = document.createElement('div');
+        meta.className = 'history-item-meta';
+
+        const timeEl = document.createElement('span');
+        timeEl.className = 'history-item-time';
+        timeEl.textContent = formatTimestamp(snap.timestamp);
+
+        const sizeEl = document.createElement('span');
+        sizeEl.className = 'history-item-size';
+        const chars = snap.content.length;
+        sizeEl.textContent = chars < 1000 ? `${chars} chars` : `${(chars / 1000).toFixed(1)}k chars`;
+
+        meta.appendChild(timeEl);
+        meta.appendChild(sizeEl);
+
+        const preview = document.createElement('div');
+        preview.className = 'history-item-preview';
+        preview.textContent = snap.content.slice(0, 120) + (snap.content.length > 120 ? '...' : '');
+
+        const restoreBtn = document.createElement('button');
+        restoreBtn.className = 'btn-primary history-restore-btn';
+        restoreBtn.textContent = 'Restore';
+        restoreBtn.addEventListener('click', () => closeModal(snap.content));
+
+        item.appendChild(meta);
+        item.appendChild(preview);
+        item.appendChild(restoreBtn);
+        listContainer.appendChild(item);
+      }
+    }
+    content.appendChild(listContainer);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'modal-buttons';
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn-secondary';
+    closeBtn.textContent = 'Close';
+    closeBtn.addEventListener('click', () => closeModal(null));
+    buttons.appendChild(closeBtn);
+    content.appendChild(buttons);
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+    });
+
+    const closeModal = (result) => {
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+      }, 200);
+      resolve(result);
+    };
+
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal(null);
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal(null);
     });
   });
 }
