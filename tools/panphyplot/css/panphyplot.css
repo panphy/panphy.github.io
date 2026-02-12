@@ -1467,7 +1467,7 @@ footer a:visited {
 
 /* Tooltip for click-to-copy */
 #export-table-rendered table::before {
-	content: "Click to copy table";
+	content: "Click to copy as image";
 	position: absolute;
 	top: -24px;
 	left: 50%;
