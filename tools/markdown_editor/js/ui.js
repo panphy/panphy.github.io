@@ -258,7 +258,8 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
 }
 
 /**
- * Show a modal for inserting an image by filename.
+ * Show a modal for inserting an image by filename (fallback for browsers
+ * without the File System Access API).
  * Instructs the user to place the image in the same folder as their .md file,
  * then collects the filename and optional alt text.
  * @returns {Promise<{filename: string, altText: string}|null>}
@@ -361,6 +362,76 @@ export function showImageInsertModal() {
       if (e.target === overlay) {
         closeModal(null);
       }
+    });
+  });
+}
+
+/**
+ * Show a modal prompting the user to choose their working folder.
+ * Displayed the first time a user inserts an image via the File System Access API,
+ * or when the stored directory permission has expired.
+ * @returns {Promise<boolean>} True if the user wants to proceed
+ */
+export function showDirectorySetupModal() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'modal-title';
+    titleEl.textContent = 'Set Working Folder';
+
+    const msg = document.createElement('p');
+    msg.className = 'modal-message';
+    msg.textContent =
+      'Choose the folder where your .md file is saved. Images you insert will be copied there automatically.';
+
+    const buttons = document.createElement('div');
+    buttons.className = 'modal-buttons';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = 'Cancel';
+
+    const chooseBtn = document.createElement('button');
+    chooseBtn.className = 'btn-primary';
+    chooseBtn.textContent = 'Choose Folder';
+
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(chooseBtn);
+
+    content.appendChild(titleEl);
+    content.appendChild(msg);
+    content.appendChild(buttons);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      chooseBtn.focus();
+    });
+
+    const closeModal = (result) => {
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+      }, 200);
+      resolve(result);
+    };
+
+    cancelBtn.addEventListener('click', () => closeModal(false));
+    chooseBtn.addEventListener('click', () => closeModal(true));
+
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal(false);
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal(false);
     });
   });
 }
