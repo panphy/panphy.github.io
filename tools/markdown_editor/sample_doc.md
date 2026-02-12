@@ -95,7 +95,7 @@ $$ \ddot{x} = \frac{d \dot{x}}{dt} = \frac{d^2x}{dt^2} $$
 
 $$ \left. \frac{\partial{y}}{\partial{t}} \right|_{t=5} $$
 
-$$ \nabla \cdot D = \left| \nabla \times \vec{A} \right| = 0 $$
+$$ \nabla \cdot \vec{D} = \left| \nabla \times \vec{A} \right| = 0 $$
 
 $$ {\lim_{\Delta x \to 0}}  \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
