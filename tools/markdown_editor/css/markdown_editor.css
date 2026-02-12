@@ -676,13 +676,6 @@ textarea {
   color: var(--text-color);
 }
 
-/* Drag-over highlight for image drop */
-textarea.drag-over {
-  outline: 3px dashed var(--brand-accent);
-  outline-offset: -3px;
-  background-color: color-mix(in srgb, var(--brand-accent) 5%, var(--pane-background));
-}
-
 /* ---------------------------------------------------------------------- */
 /* Rendered output area                                                   */
 /* ---------------------------------------------------------------------- */
