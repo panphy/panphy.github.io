@@ -1635,61 +1635,175 @@ const debouncedUpdateData = debounce(updateData, 300);
 		})).then(results => { cachedTablePngs = results; });
 	}
 
-	function copyExportedTableToClipboard(table) {
-		// Build HTML — use pre-rendered PNGs if ready, else fall back to
-		// clean text built from the markdown source.
-		let htmlString;
-		const hasPngs = cachedTablePngs && cachedTablePngs.some(p => p !== null);
+	async function renderTableToPngBlob() {
+		if (!currentExportedMarkdown) return null;
 
-		if (hasPngs) {
-			const tableClone = table.cloneNode(true);
-			tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
-			tableClone.querySelectorAll('th').forEach(cell => {
-				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
-				cell.setAttribute('align', 'center');
-			});
-			tableClone.querySelectorAll('td').forEach(cell => {
-				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
-				cell.setAttribute('align', 'center');
-			});
+		const scale = 2;
+		const cellPadX = 14;
+		const cellPadY = 10;
+		const fontSize = 14;
+		const fontFamily = 'Arial, Helvetica, sans-serif';
+		const normalFont = fontSize + 'px ' + fontFamily;
+		const boldFont = 'bold ' + fontSize + 'px ' + fontFamily;
 
-			const clonedMjxSpans = Array.from(tableClone.querySelectorAll('.MathJax_SVG'));
-			clonedMjxSpans.forEach((span, i) => {
-				const png = cachedTablePngs[i];
-				if (!png) return;
-				const img = document.createElement('img');
-				img.src = png.dataUrl;
-				img.width = Math.ceil(png.width);
-				img.height = Math.ceil(png.height);
-				img.style.verticalAlign = 'middle';
-				span.replaceWith(img);
-			});
-			tableClone.querySelectorAll('script[type*="math"]').forEach(el => el.remove());
-			htmlString = '<html><body>' + tableClone.outerHTML + '</body></html>';
-		} else {
-			// PNGs not ready yet — fall back to clean HTML from markdown
-			const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
-			htmlString = cleanTable
-				? '<html><body>' + cleanTable.html + '</body></html>'
-				: '<html><body>' + table.outerHTML + '</body></html>';
+		// Parse markdown table
+		const lines = currentExportedMarkdown.trim().split('\n').filter(function (l) { return l.trim(); });
+		if (lines.length < 3) return null;
+
+		var parseCells = function (line) {
+			return line.split('|').map(function (c) { return c.trim(); }).filter(function (c) { return c; });
+		};
+		var headerCells = parseCells(lines[0]);
+		var dataRows = [];
+		for (var i = 2; i < lines.length; i++) {
+			var cells = parseCells(lines[i]);
+			if (cells.length) dataRows.push(cells);
 		}
 
-		// Tab-separated plain text for spreadsheet pasting
-		const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
-		const plainText = cleanTable ? cleanTable.text : table.innerText;
+		var numCols = headerCells.length;
+		if (!numCols || !dataRows.length) return null;
 
-		// Clipboard write — synchronous within user gesture
-		const htmlBlob = new Blob([htmlString], { type: 'text/html' });
-		const textBlob = new Blob([plainText], { type: 'text/plain' });
-		return navigator.clipboard.write([new ClipboardItem({
-			'text/html': htmlBlob,
-			'text/plain': textBlob
-		})]).then(() => true).catch(() => {
-			return navigator.clipboard.writeText(plainText).then(() => true).catch(err => {
-				console.error('Failed to copy table:', err);
-				return false;
+		var useLatex = latexMode && cachedTablePngs && cachedTablePngs.some(function (p) { return p !== null; });
+
+		// Pre-load PNG images if in LaTeX mode
+		var pngImages = [];
+		if (useLatex) {
+			pngImages = await Promise.all(cachedTablePngs.map(function (png) {
+				if (!png || !png.dataUrl) return Promise.resolve(null);
+				return new Promise(function (resolve) {
+					var img = new Image();
+					img.onload = function () { resolve({ img: img, width: png.width, height: png.height }); };
+					img.onerror = function () { resolve(null); };
+					img.src = png.dataUrl;
+				});
+			}));
+		}
+
+		// Build cell grid: row 0 = headers, rows 1..N = data
+		var pngIdx = 0;
+		var allCellStrings = [headerCells].concat(dataRows);
+		var grid = allCellStrings.map(function (row, r) {
+			return Array.from({ length: numCols }, function (_, c) {
+				var raw = c < row.length ? row[c] : '';
+				var hasMath = raw.includes('$');
+				var png = null;
+				if (useLatex && hasMath && pngIdx < pngImages.length) {
+					png = pngImages[pngIdx++];
+				}
+				return { text: cleanLatexCell(raw, false), png: png, isHeader: r === 0 };
 			});
 		});
+
+		// Measure column widths and row heights
+		var measure = document.createElement('canvas').getContext('2d');
+		var colWidths = new Array(numCols).fill(0);
+		var rowHeights = new Array(grid.length).fill(0);
+
+		for (var r = 0; r < grid.length; r++) {
+			for (var c = 0; c < numCols; c++) {
+				var cell = grid[r][c];
+				var cw, ch;
+				if (cell.png) {
+					cw = Math.ceil(cell.png.width) + cellPadX * 2;
+					ch = Math.ceil(cell.png.height) + cellPadY * 2;
+				} else {
+					measure.font = cell.isHeader ? boldFont : normalFont;
+					cw = Math.ceil(measure.measureText(cell.text).width) + cellPadX * 2;
+					ch = Math.ceil(fontSize * 1.4) + cellPadY * 2;
+				}
+				colWidths[c] = Math.max(colWidths[c], cw);
+				rowHeights[r] = Math.max(rowHeights[r], ch);
+			}
+		}
+
+		// Ensure minimum cell sizes
+		for (var ci = 0; ci < numCols; ci++) colWidths[ci] = Math.max(colWidths[ci], 60);
+		for (var ri = 0; ri < grid.length; ri++) rowHeights[ri] = Math.max(rowHeights[ri], 32);
+
+		var totalW = colWidths.reduce(function (a, b) { return a + b; }, 0);
+		var totalH = rowHeights.reduce(function (a, b) { return a + b; }, 0);
+
+		// Create scaled canvas
+		var canvas = document.createElement('canvas');
+		canvas.width = Math.ceil(totalW * scale);
+		canvas.height = Math.ceil(totalH * scale);
+		var ctx = canvas.getContext('2d');
+		ctx.scale(scale, scale);
+
+		// White background
+		ctx.fillStyle = '#ffffff';
+		ctx.fillRect(0, 0, totalW, totalH);
+
+		// Draw cells
+		var y = 0;
+		for (var dr = 0; dr < grid.length; dr++) {
+			var rh = rowHeights[dr];
+			var x = 0;
+			for (var dc = 0; dc < numCols; dc++) {
+				var dw = colWidths[dc];
+				var dcell = grid[dr][dc];
+
+				// Cell background
+				if (dcell.isHeader) {
+					ctx.fillStyle = '#eef0f4';
+				} else {
+					ctx.fillStyle = dr % 2 === 0 ? '#f9fafc' : '#ffffff';
+				}
+				ctx.fillRect(x, y, dw, rh);
+
+				// Cell content
+				if (dcell.png) {
+					var iw = dcell.png.width;
+					var ih = dcell.png.height;
+					ctx.drawImage(dcell.png.img, x + (dw - iw) / 2, y + (rh - ih) / 2, iw, ih);
+				} else if (dcell.text) {
+					ctx.fillStyle = '#2d3436';
+					ctx.font = dcell.isHeader ? boldFont : normalFont;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(dcell.text, x + dw / 2, y + rh / 2);
+				}
+
+				// Cell border
+				ctx.strokeStyle = '#d0d0d0';
+				ctx.lineWidth = 0.5;
+				ctx.strokeRect(x, y, dw, rh);
+
+				x += dw;
+			}
+			y += rh;
+		}
+
+		return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/png'); });
+	}
+
+
+	async function copyExportedTableToClipboard(table) {
+		try {
+			var pngBlob = await renderTableToPngBlob();
+			if (!pngBlob) return false;
+
+			// Plain text fallback for text-only paste targets
+			var cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
+			var plainText = cleanTable ? cleanTable.text : table.innerText;
+
+			return navigator.clipboard.write([new ClipboardItem({
+				'image/png': pngBlob,
+				'text/plain': new Blob([plainText], { type: 'text/plain' })
+			})]).then(function () { return true; }).catch(function (err) {
+				console.error('Failed to copy table as PNG:', err);
+				// Fallback: try image only
+				return navigator.clipboard.write([new ClipboardItem({
+					'image/png': pngBlob
+				})]).then(function () { return true; }).catch(function (err2) {
+					console.error('PNG-only copy also failed:', err2);
+					return false;
+				});
+			});
+		} catch (err) {
+			console.error('Failed to render table PNG:', err);
+			return false;
+		}
 	}
 
 
