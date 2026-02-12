@@ -524,7 +524,8 @@ textarea:focus {
 }
 
 [data-theme="dark"] .font-option-btn.active {
-  background: rgba(162, 155, 254, 0.12);
+  border-color: rgba(162, 155, 254, 0.7);
+  background: rgba(162, 155, 254, 0.18);
 }
 
 @media (max-width: 600px) {
