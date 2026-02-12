@@ -30,12 +30,6 @@ import {
 import { handleCopyClick } from './copy.js';
 
 import {
-  storeImage,
-  resolveImages,
-  loadAllImages
-} from './images.js';
-
-import {
   initUI,
   initializeTheme,
   toggleTheme,
@@ -48,7 +42,6 @@ import {
   showFilenameModal,
   showConfirmationModal,
   showHistoryModal,
-  showDirectorySetupModal,
   updateDirtyIndicator
 } from './ui.js';
 
@@ -72,7 +65,6 @@ const syncScrollToggle = document.getElementById('syncScrollToggle');
 const fontMenu = document.getElementById('fontMenu');
 const fontButton = document.getElementById('fontButton');
 const fontPanel = document.getElementById('fontPanel');
-const insertImageButton = document.getElementById('insertImageButton');
 const highlightStyle = document.getElementById('highlightStyle');
 const historyButton = document.getElementById('historyButton');
 const dirtyIndicator = document.getElementById('dirtyIndicator');
@@ -220,102 +212,10 @@ function updateFontPanelActiveState(activeSize) {
 }
 
 // ---------------------------------------------------------------------- //
-// Image insertion (File System Access API with manual fallback)            //
+// File System Access API detection (used by save / open)                   //
 // ---------------------------------------------------------------------- //
 const HAS_FSA = typeof window.showDirectoryPicker === 'function'
   && typeof window.showOpenFilePicker === 'function';
-
-const IDB_NAME = 'markdownEditorImages';
-const IDB_STORE = 'handles';
-const DIR_HANDLE_KEY = 'workingDirectory';
-
-function openHandleDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function storeDirectoryHandle(handle) {
-  const db = await openHandleDB();
-  const tx = db.transaction(IDB_STORE, 'readwrite');
-  tx.objectStore(IDB_STORE).put(handle, DIR_HANDLE_KEY);
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
-  });
-}
-
-async function loadDirectoryHandle() {
-  try {
-    const db = await openHandleDB();
-    const tx = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).get(DIR_HANDLE_KEY);
-    return new Promise((resolve) => {
-      req.onsuccess = () => { db.close(); resolve(req.result || null); };
-      req.onerror = () => { db.close(); resolve(null); };
-    });
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Insert an image using the File System Access API (Chrome / Edge).
- * 1. Obtain (or reuse) a writable directory handle
- * 2. Let the user pick an image file
- * 3. Copy the image into the working directory
- * 4. Insert ![alt](filename) at the cursor
- */
-async function insertImageFSA() {
-  let dirHandle = await loadDirectoryHandle();
-
-  if (dirHandle) {
-    try {
-      const perm = await dirHandle.requestPermission({ mode: 'readwrite' });
-      if (perm !== 'granted') dirHandle = null;
-    } catch {
-      dirHandle = null;
-    }
-  }
-
-  if (!dirHandle) {
-    const confirmed = await showDirectorySetupModal();
-    if (!confirmed) return;
-    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    await storeDirectoryHandle(dirHandle);
-  }
-
-  // Pick image
-  const [fileHandle] = await window.showOpenFilePicker({
-    types: [{
-      description: 'Images',
-      accept: {
-        'image/png': ['.png'],
-        'image/jpeg': ['.jpg', '.jpeg'],
-        'image/gif': ['.gif'],
-        'image/webp': ['.webp'],
-        'image/svg+xml': ['.svg']
-      }
-    }]
-  });
-  const file = await fileHandle.getFile();
-
-  // Copy to working directory
-  const destHandle = await dirHandle.getFileHandle(file.name, { create: true });
-  const writable = await destHandle.createWritable();
-  await writable.write(file);
-  await writable.close();
-
-  // Store blob so the preview can display it
-  await storeImage(file.name, file);
-
-  // Insert markdown
-  const altText = file.name.replace(/\.[^/.]+$/, '');
-  insertTextAtCursor(`![${altText}](${file.name})`);
-}
 
 function insertTextAtCursor(textToInsert) {
   const start = markdownInput.selectionStart;
@@ -370,9 +270,6 @@ function renderContent() {
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = sanitizedContent;
-
-  // Replace relative image srcs with stored blob Object URLs
-  resolveImages(renderedOutput);
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput])
@@ -1087,80 +984,6 @@ if (fontPanel) {
   });
 }
 
-// Image button — FSA on supported browsers, file-input fallback otherwise
-if (insertImageButton) {
-  insertImageButton.addEventListener('click', async () => {
-    if (HAS_FSA) {
-      try {
-        await insertImageFSA();
-      } catch (err) {
-        if (err.name === 'AbortError') return; // user cancelled a picker
-        console.error('Image insertion failed:', err);
-      }
-    } else {
-      // Fallback: use a hidden <input type="file"> to pick the image
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml';
-      input.onchange = async () => {
-        const file = input.files[0];
-        if (!file) return;
-        await storeImage(file.name, file);
-        const altText = file.name.replace(/\.[^/.]+$/, '');
-        insertTextAtCursor(`![${altText}](${file.name})`);
-      };
-      input.click();
-    }
-  });
-}
-
-// ---------------------------------------------------------------------- //
-// Paste & drag-and-drop image support                                      //
-// ---------------------------------------------------------------------- //
-
-/**
- * Handle an image File from paste or drop: store it and insert markdown.
- * @param {File} file
- */
-async function handleDroppedImage(file) {
-  const filename = file.name && file.name !== 'image.png'
-    ? file.name
-    : `image-${Date.now()}.png`;
-  await storeImage(filename, file);
-  const altText = filename.replace(/\.[^/.]+$/, '');
-  insertTextAtCursor(`![${altText}](${filename})`);
-}
-
-markdownInput.addEventListener('paste', (e) => {
-  const items = e.clipboardData && e.clipboardData.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      e.preventDefault();
-      const file = item.getAsFile();
-      if (file) handleDroppedImage(file);
-      return;
-    }
-  }
-});
-
-markdownInput.addEventListener('dragover', (e) => {
-  if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-  }
-});
-
-markdownInput.addEventListener('drop', (e) => {
-  const files = e.dataTransfer && e.dataTransfer.files;
-  if (!files || files.length === 0) return;
-  const file = files[0];
-  if (file.type.startsWith('image/')) {
-    e.preventDefault();
-    handleDroppedImage(file);
-  }
-});
-
 // Close panels when clicking outside
 document.addEventListener('click', event => {
   if (mathMenu && mathPanel && !mathPanel.hidden && !mathMenu.contains(event.target)) {
@@ -1352,17 +1175,15 @@ if (laserCanvas && laserContext) {
   requestAnimationFrame(renderLaserTail);
 }
 
-// Load stored images then restore draft and render
-loadAllImages().finally(() => {
-  const savedDraft = restoreDraft();
-  if (savedDraft !== null) {
-    markdownInput.value = savedDraft;
-  }
-  renderContent();
+// Restore draft and render
+const savedDraft = restoreDraft();
+if (savedDraft !== null) {
+  markdownInput.value = savedDraft;
+}
+renderContent();
 
-  // Dirty-state indicator on load (never exported yet, so show if non-empty)
-  updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
-});
+// Dirty-state indicator on load (never exported yet, so show if non-empty)
+updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
 
 // ---------------------------------------------------------------------- //
 // Auto-save snapshots every 5 minutes                                     //

@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-12T22:00:00Z';
+const BUILD_ID = '2026-02-12T23:00:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -19,7 +19,6 @@ const ASSETS_TO_CACHE = [
   '/tools/markdown_editor/js/rendering.js',
   '/tools/markdown_editor/js/copy.js',
   '/tools/markdown_editor/js/ui.js',
-  '/tools/markdown_editor/js/images.js',
   '/tools/markdown_editor/js/main.js',
   '/tools/markdown_editor/sample_doc.md',
   '/tools/markdown_editor/sample_pic.webp',
