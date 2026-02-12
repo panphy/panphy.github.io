@@ -1464,29 +1464,108 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
+	// Convert a single LaTeX-delimited cell value to readable text.
+	// If asHtml is true, superscripts/subscripts use <sup>/<sub> tags.
+	function cleanLatexCell(str, asHtml) {
+		str = str.trim();
+		if (str.startsWith('$') && str.endsWith('$')) str = str.slice(1, -1);
+
+		const replacements = [
+			[/\\pm/g, '±'], [/\\Delta/g, 'Δ'], [/\\delta/g, 'δ'],
+			[/\\times/g, '×'], [/\\div/g, '÷'],
+			[/\\alpha/g, 'α'], [/\\beta/g, 'β'], [/\\gamma/g, 'γ'],
+			[/\\theta/g, 'θ'], [/\\lambda/g, 'λ'], [/\\mu/g, 'μ'],
+			[/\\pi/g, 'π'], [/\\sigma/g, 'σ'], [/\\omega/g, 'ω'],
+			[/\\Omega/g, 'Ω'], [/\\rho/g, 'ρ'], [/\\epsilon/g, 'ε'],
+			[/\\phi/g, 'φ'],
+			[/\\space/g, ' '], [/\\%/g, '%'],
+			[/\\text\{([^}]*)\}/g, '$1'],
+		];
+		for (const [re, rep] of replacements) str = str.replace(re, rep);
+
+		if (asHtml) {
+			str = str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			str = str.replace(/\^{([^}]*)}/g, '<sup>$1</sup>');
+			str = str.replace(/_{([^}]*)}/g, '<sub>$1</sub>');
+		}
+		return str;
+	}
+
+
+	// Build a clean HTML table (and plain-text version) directly from the
+	// stored markdown source, bypassing the MathJax-rendered DOM whose SVG
+	// elements cause garbled characters when pasted into Word / Google Docs.
+	function buildCleanTableFromMarkdown(markdown) {
+		if (!markdown) return null;
+		try {
+			const lines = markdown.trim().split('\n').filter(l => l.trim());
+			if (lines.length < 3) return null;
+
+			const parseCells = line => line.split('|').map(c => c.trim()).filter(c => c);
+			const headerCells = parseCells(lines[0]);
+			const dataRows = [];
+			for (let i = 2; i < lines.length; i++) {
+				const cells = parseCells(lines[i]);
+				if (cells.length) dataRows.push(cells);
+			}
+			if (!headerCells.length || !dataRows.length) return null;
+
+			const thStyle = 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;';
+			const tdStyle = 'border: 1px solid black; padding: 8px; text-align: center;';
+
+			let html = '<table style="border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;">';
+			html += '<thead><tr>' + headerCells.map(c =>
+				`<th style="${thStyle}" align="center">${cleanLatexCell(c, true)}</th>`
+			).join('') + '</tr></thead><tbody>';
+			dataRows.forEach(row => {
+				html += '<tr>' + row.map(c =>
+					`<td style="${tdStyle}" align="center">${cleanLatexCell(c, true)}</td>`
+				).join('') + '</tr>';
+			});
+			html += '</tbody></table>';
+
+			// Tab-separated plain text (pastes well into spreadsheets)
+			let text = headerCells.map(c => cleanLatexCell(c, false)).join('\t') + '\n';
+			dataRows.forEach(row => {
+				text += row.map(c => cleanLatexCell(c, false)).join('\t') + '\n';
+			});
+
+			return { html, text };
+		} catch (e) {
+			console.error('Failed to build clean table from markdown:', e);
+			return null;
+		}
+	}
+
+
 	async function copyExportedTableToClipboard(table) {
-		const tableClone = table.cloneNode(true);
+		// Build a clean HTML table from the stored markdown source to avoid
+		// MathJax SVG elements that Word / Google Docs cannot render.
+		const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
 
-		tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
-
-		// Style header cells (th) - use setAttribute for reliable serialization
-		tableClone.querySelectorAll('th').forEach(cell => {
-			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
-			cell.setAttribute('align', 'center');
-		});
-
-		// Style data cells (td)
-		tableClone.querySelectorAll('td').forEach(cell => {
-			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
-			cell.setAttribute('align', 'center');
-		});
-
-		// Wrap in HTML structure for better Word/Google Docs compatibility
-		const htmlString = `<html><body>${tableClone.outerHTML}</body></html>`;
+		let htmlString, plainText;
+		if (cleanTable) {
+			htmlString = `<html><body>${cleanTable.html}</body></html>`;
+			plainText = cleanTable.text;
+		} else {
+			// Fallback: clone the rendered DOM table (original behaviour)
+			const tableClone = table.cloneNode(true);
+			tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
+			tableClone.querySelectorAll('th').forEach(cell => {
+				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
+				cell.setAttribute('align', 'center');
+			});
+			tableClone.querySelectorAll('td').forEach(cell => {
+				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
+				cell.setAttribute('align', 'center');
+			});
+			htmlString = `<html><body>${tableClone.outerHTML}</body></html>`;
+			plainText = table.innerText;
+		}
 
 		try {
 			const htmlBlob = new Blob([htmlString], { type: 'text/html' });
-			const textBlob = new Blob([table.innerText], { type: 'text/plain' });
+			const textBlob = new Blob([plainText], { type: 'text/plain' });
 			const clipboardItem = new ClipboardItem({
 				'text/html': htmlBlob,
 				'text/plain': textBlob
@@ -1495,7 +1574,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 			return true;
 		} catch (clipboardError) {
 			try {
-				await navigator.clipboard.writeText(htmlString);
+				await navigator.clipboard.writeText(plainText);
 				return true;
 			} catch (fallbackError) {
 				console.error('Failed to copy table:', fallbackError);
