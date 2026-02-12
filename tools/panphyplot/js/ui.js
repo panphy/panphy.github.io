@@ -1538,30 +1538,121 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	async function copyExportedTableToClipboard(table) {
-		// Build a clean HTML table from the stored markdown source to avoid
-		// MathJax SVG elements that Word / Google Docs cannot render.
-		const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
-
-		let htmlString, plainText;
-		if (cleanTable) {
-			htmlString = `<html><body>${cleanTable.html}</body></html>`;
-			plainText = cleanTable.text;
-		} else {
-			// Fallback: clone the rendered DOM table (original behaviour)
-			const tableClone = table.cloneNode(true);
-			tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
-			tableClone.querySelectorAll('th').forEach(cell => {
-				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
-				cell.setAttribute('align', 'center');
-			});
-			tableClone.querySelectorAll('td').forEach(cell => {
-				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
-				cell.setAttribute('align', 'center');
-			});
-			htmlString = `<html><body>${tableClone.outerHTML}</body></html>`;
-			plainText = table.innerText;
+	// Clone a MathJax v2 SVG and inline all referenced glyph definitions
+	// so it renders correctly outside the page (clipboard, data-URL, etc.).
+	function selfContainSvg(svg) {
+		const clone = svg.cloneNode(true);
+		let defs = clone.querySelector('defs');
+		if (!defs) {
+			defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+			clone.insertBefore(defs, clone.firstChild);
 		}
+
+		const processed = new Set();
+		const pending = new Set();
+		const collectRefs = el => {
+			el.querySelectorAll('use').forEach(use => {
+				const href = use.getAttribute('xlink:href') || use.getAttribute('href');
+				if (href && href.startsWith('#')) {
+					const id = href.substring(1);
+					if (!processed.has(id)) pending.add(id);
+				}
+			});
+		};
+
+		collectRefs(clone);
+		while (pending.size > 0) {
+			const id = pending.values().next().value;
+			pending.delete(id);
+			if (processed.has(id)) continue;
+			processed.add(id);
+			if (defs.querySelector('[id="' + id + '"]')) continue;
+			const original = document.getElementById(id);
+			if (!original) continue;
+			const clonedDef = original.cloneNode(true);
+			defs.appendChild(clonedDef);
+			collectRefs(clonedDef);
+		}
+
+		clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+		clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+		return clone;
+	}
+
+	// Rasterize an SVG element to a PNG data-URL at the given scale factor.
+	// Returns a Promise that resolves to { dataUrl, width, height } or null.
+	function svgToPngDataUrl(svg, scale) {
+		scale = scale || 3;
+		const selfContained = selfContainSvg(svg);
+		let svgString = new XMLSerializer().serializeToString(selfContained);
+		// Force black fill/stroke so the copy is always light-theme
+		svgString = svgString.replace(/currentColor/g, '#000000');
+
+		const rect = svg.getBoundingClientRect();
+		const w = Math.max(Math.ceil(rect.width * scale), 1);
+		const h = Math.max(Math.ceil(rect.height * scale), 1);
+
+		return new Promise(resolve => {
+			const canvas = document.createElement('canvas');
+			canvas.width = w;
+			canvas.height = h;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) { resolve(null); return; }
+
+			const img = new Image();
+			const blob = new Blob([svgString], { type: 'image/svg+xml' });
+			const blobUrl = URL.createObjectURL(blob);
+
+			img.onload = () => {
+				URL.revokeObjectURL(blobUrl);
+				ctx.drawImage(img, 0, 0, w, h);
+				resolve({ dataUrl: canvas.toDataURL('image/png'), width: rect.width, height: rect.height });
+			};
+			img.onerror = () => {
+				URL.revokeObjectURL(blobUrl);
+				resolve(null);
+			};
+			img.src = blobUrl;
+		});
+	}
+
+	async function copyExportedTableToClipboard(table) {
+		// Rasterize every MathJax SVG in the table to a PNG data-URL so the
+		// copied HTML contains real images instead of broken SVG references.
+		const originalSvgs = Array.from(table.querySelectorAll('.MathJax_SVG svg'));
+		const pngResults = await Promise.all(originalSvgs.map(s => svgToPngDataUrl(s)));
+
+		// Clone the table and replace MathJax spans with <img> tags
+		const tableClone = table.cloneNode(true);
+		tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
+		tableClone.querySelectorAll('th').forEach(cell => {
+			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
+			cell.setAttribute('align', 'center');
+		});
+		tableClone.querySelectorAll('td').forEach(cell => {
+			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
+			cell.setAttribute('align', 'center');
+		});
+
+		const clonedMjxSpans = Array.from(tableClone.querySelectorAll('.MathJax_SVG'));
+		clonedMjxSpans.forEach((span, i) => {
+			const png = pngResults[i];
+			if (!png) return;
+			const img = document.createElement('img');
+			img.src = png.dataUrl;
+			img.width = Math.ceil(png.width);
+			img.height = Math.ceil(png.height);
+			img.style.verticalAlign = 'middle';
+			span.replaceWith(img);
+		});
+		// Remove leftover MathJax <script> tags from the clone
+		tableClone.querySelectorAll('script[type*="math"]').forEach(el => el.remove());
+
+		const htmlString = '<html><body>' + tableClone.outerHTML + '</body></html>';
+
+		// Tab-separated plain text for spreadsheet pasting
+		const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
+		const plainText = cleanTable ? cleanTable.text : table.innerText;
 
 		try {
 			const htmlBlob = new Blob([htmlString], { type: 'text/html' });

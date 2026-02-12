@@ -326,46 +326,13 @@ export async function copyEquationToClipboard(mjxContainer) {
 }
 
 /**
- * Build a map from mjx-container elements to their original LaTeX source.
- * Uses MathJax v3 internal API to retrieve the original TeX strings.
- * @param {Element[]} containers - Array of mjx-container elements
- * @returns {Map<Element, string>} Map from container element to LaTeX with delimiters
- */
-function buildTexSourceMap(containers) {
-  const map = new Map();
-  const lookup = new Set(containers);
-  if (window.MathJax?.startup?.document?.math) {
-    for (const item of MathJax.startup.document.math) {
-      if (lookup.has(item.typesetRoot)) {
-        const delim = item.display ? '$$' : '$';
-        map.set(item.typesetRoot, delim + item.math + delim);
-      }
-    }
-  }
-  return map;
-}
-
-/**
- * Copy a table to clipboard with LaTeX source preserved.
- * - HTML format: table with LaTeX source text replacing rendered equations
- * - Plain text format: tab-separated values with LaTeX source
+ * Copy a table as HTML to clipboard.
+ * HTML format works well with MS Word.
  * @param {HTMLTableElement} table - The table element to copy
  * @returns {Promise<boolean>} Success status
  */
 export async function copyTableToClipboard(table) {
-  // Extract LaTeX source from MathJax containers before cloning
-  const originalContainers = Array.from(table.querySelectorAll('mjx-container'));
-  const texMap = buildTexSourceMap(originalContainers);
-
   const tableClone = table.cloneNode(true);
-
-  // Replace MathJax containers in clone with original LaTeX source text
-  const clonedContainers = Array.from(tableClone.querySelectorAll('mjx-container'));
-  clonedContainers.forEach((container, i) => {
-    const original = originalContainers[i];
-    const tex = texMap.get(original) || container.textContent || '';
-    container.replaceWith(document.createTextNode(tex));
-  });
 
   // Add inline styles for better Word compatibility (always light theme)
   tableClone.style.borderCollapse = 'collapse';
@@ -379,27 +346,21 @@ export async function copyTableToClipboard(table) {
     cell.style.color = '#000000';
   });
 
-  // Build TSV for spreadsheet pasting (LaTeX source in cells)
-  const rows = tableClone.querySelectorAll('tr');
-  const tsv = Array.from(rows).map(row => {
-    const cells = row.querySelectorAll('th, td');
-    return Array.from(cells).map(cell => cell.textContent.trim()).join('\t');
-  }).join('\n');
-
   const htmlString = tableClone.outerHTML;
 
   try {
+    // Copy as HTML for better Word compatibility
     const blob = new Blob([htmlString], { type: 'text/html' });
     const clipboardItem = new ClipboardItem({
       'text/html': blob,
-      'text/plain': new Blob([tsv], { type: 'text/plain' })
+      'text/plain': new Blob([table.innerText], { type: 'text/plain' })
     });
     await navigator.clipboard.write([clipboardItem]);
     return true;
   } catch (err) {
     // Fallback to text copy
     try {
-      await navigator.clipboard.writeText(tsv);
+      await navigator.clipboard.writeText(htmlString);
       return true;
     } catch (fallbackErr) {
       console.error('Failed to copy table:', fallbackErr);
