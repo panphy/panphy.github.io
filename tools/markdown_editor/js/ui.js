@@ -139,14 +139,15 @@ export function applyFontSize(value) {
 
 /**
  * Initialize font size from saved preference
- * @param {HTMLSelectElement} fontSizeSelect - The font size select element
+ * @param {HTMLElement|null} fontPanel - The font panel element with .font-option-btn children
+ * @param {Function} [updateActiveState] - Callback to highlight the active button
  */
-export function initializeFontSize(fontSizeSelect) {
+export function initializeFontSize(fontPanel, updateActiveState) {
   const savedFontSize = loadFontSizePreference();
   const initialFontSize = savedFontSize || getCurrentFontSize();
   applyFontSize(initialFontSize);
-  if (fontSizeSelect) {
-    fontSizeSelect.value = initialFontSize;
+  if (updateActiveState) {
+    updateActiveState(initialFontSize);
   }
 }
 
@@ -252,6 +253,185 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
       if (e.target === overlay) {
         closeModal(null);
       }
+    });
+  });
+}
+
+/**
+ * Show a modal for inserting an image by filename (fallback for browsers
+ * without the File System Access API).
+ * Instructs the user to place the image in the same folder as their .md file,
+ * then collects the filename and optional alt text.
+ * @returns {Promise<{filename: string, altText: string}|null>}
+ */
+export function showImageInsertModal() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'modal-title';
+    titleEl.textContent = 'Insert Image';
+
+    const hint = document.createElement('p');
+    hint.className = 'modal-message';
+    hint.textContent = 'Save the image file in the same folder as your .md file, then enter the filename below.';
+
+    const filenameInput = document.createElement('input');
+    filenameInput.type = 'text';
+    filenameInput.className = 'modal-input';
+    filenameInput.placeholder = 'e.g. diagram.png';
+
+    const altLabel = document.createElement('label');
+    altLabel.className = 'modal-field-label';
+    altLabel.textContent = 'Alt text (optional)';
+
+    const altInput = document.createElement('input');
+    altInput.type = 'text';
+    altInput.className = 'modal-input';
+    altInput.placeholder = 'e.g. Circuit diagram';
+
+    const buttons = document.createElement('div');
+    buttons.className = 'modal-buttons';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = 'Cancel';
+
+    const insertBtn = document.createElement('button');
+    insertBtn.className = 'btn-primary';
+    insertBtn.textContent = 'Insert';
+
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(insertBtn);
+
+    content.appendChild(titleEl);
+    content.appendChild(hint);
+    content.appendChild(filenameInput);
+    content.appendChild(altLabel);
+    content.appendChild(altInput);
+    content.appendChild(buttons);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      filenameInput.focus();
+    });
+
+    const closeModal = (result) => {
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+      }, 200);
+      resolve(result);
+    };
+
+    const submit = () => {
+      const filename = filenameInput.value.trim();
+      if (!filename) return;
+      const altText = altInput.value.trim() || filename.replace(/\.[^/.]+$/, '');
+      closeModal({ filename, altText });
+    };
+
+    cancelBtn.addEventListener('click', () => closeModal(null));
+    insertBtn.addEventListener('click', submit);
+
+    filenameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        altInput.focus();
+      } else if (e.key === 'Escape') {
+        closeModal(null);
+      }
+    });
+
+    altInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        submit();
+      } else if (e.key === 'Escape') {
+        closeModal(null);
+      }
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeModal(null);
+      }
+    });
+  });
+}
+
+/**
+ * Show a modal prompting the user to choose their working folder.
+ * Displayed the first time a user inserts an image via the File System Access API,
+ * or when the stored directory permission has expired.
+ * @returns {Promise<boolean>} True if the user wants to proceed
+ */
+export function showDirectorySetupModal() {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'modal-title';
+    titleEl.textContent = 'Set Working Folder';
+
+    const msg = document.createElement('p');
+    msg.className = 'modal-message';
+    msg.textContent =
+      'Choose the folder where your .md file is saved. Images you insert will be copied there automatically.';
+
+    const buttons = document.createElement('div');
+    buttons.className = 'modal-buttons';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = 'Cancel';
+
+    const chooseBtn = document.createElement('button');
+    chooseBtn.className = 'btn-primary';
+    chooseBtn.textContent = 'Choose Folder';
+
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(chooseBtn);
+
+    content.appendChild(titleEl);
+    content.appendChild(msg);
+    content.appendChild(buttons);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      chooseBtn.focus();
+    });
+
+    const closeModal = (result) => {
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+      }, 200);
+      resolve(result);
+    };
+
+    cancelBtn.addEventListener('click', () => closeModal(false));
+    chooseBtn.addEventListener('click', () => closeModal(true));
+
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal(false);
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal(false);
     });
   });
 }

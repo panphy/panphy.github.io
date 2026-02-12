@@ -472,13 +472,65 @@ textarea:focus {
   background: var(--button-background);
 }
 
+/* Font-size toggle menu (mirrors math-menu) */
+.font-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.font-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--pane-background);
+  box-shadow: var(--shadow-soft);
+  z-index: 30;
+  min-width: 120px;
+}
+
+.font-panel[hidden] {
+  display: none;
+}
+
+.font-option-btn {
+  display: block;
+  width: 100%;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.font-option-btn:hover {
+  background: var(--button-background);
+}
+
+.font-option-btn.active {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
 @media (max-width: 600px) {
-  .math-menu {
+  .math-menu,
+  .font-menu {
     width: 100%;
     justify-content: center;
   }
 
-  .math-panel {
+  .math-panel,
+  .font-panel {
     left: 50%;
     right: auto;
   }
@@ -1397,6 +1449,14 @@ mjx-container.copy-failed::after {
   color: var(--text-color);
   margin-bottom: 16px;
   box-sizing: border-box;
+}
+
+.modal-field-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
 }
 
 .modal-input:focus {

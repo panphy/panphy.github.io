@@ -42,6 +42,8 @@ import {
   showFilenameModal,
   showConfirmationModal,
   showHistoryModal,
+  showImageInsertModal,
+  showDirectorySetupModal,
   updateDirtyIndicator
 } from './ui.js';
 
@@ -62,7 +64,10 @@ const saveMDButton = document.getElementById('saveMDButton');
 const loadFileButton = document.getElementById('loadFileButton');
 const themeToggleButton = document.getElementById('themeToggleButton');
 const syncScrollToggle = document.getElementById('syncScrollToggle');
-const fontSizeSelect = document.getElementById('fontSizeSelect');
+const fontMenu = document.getElementById('fontMenu');
+const fontButton = document.getElementById('fontButton');
+const fontPanel = document.getElementById('fontPanel');
+const insertImageButton = document.getElementById('insertImageButton');
 const highlightStyle = document.getElementById('highlightStyle');
 const historyButton = document.getElementById('historyButton');
 const dirtyIndicator = document.getElementById('dirtyIndicator');
@@ -172,10 +177,136 @@ function closeMathPanel() {
 function toggleMathPanel() {
   if (!mathPanel) return;
   if (mathPanel.hidden) {
+    closeFontPanel();
     openMathPanel();
     return;
   }
   closeMathPanel();
+}
+
+// ---- Font panel ----
+function openFontPanel() {
+  if (!fontPanel || !fontButton) return;
+  fontPanel.hidden = false;
+  fontButton.setAttribute('aria-expanded', 'true');
+}
+
+function closeFontPanel() {
+  if (!fontPanel || !fontButton) return;
+  fontPanel.hidden = true;
+  fontButton.setAttribute('aria-expanded', 'false');
+}
+
+function toggleFontPanel() {
+  if (!fontPanel) return;
+  if (fontPanel.hidden) {
+    closeMathPanel();
+    openFontPanel();
+    return;
+  }
+  closeFontPanel();
+}
+
+function updateFontPanelActiveState(activeSize) {
+  if (!fontPanel) return;
+  fontPanel.querySelectorAll('.font-option-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.size === activeSize);
+  });
+}
+
+// ---------------------------------------------------------------------- //
+// Image insertion (File System Access API with manual fallback)            //
+// ---------------------------------------------------------------------- //
+const HAS_FSA = typeof window.showDirectoryPicker === 'function'
+  && typeof window.showOpenFilePicker === 'function';
+
+const IDB_NAME = 'markdownEditorImages';
+const IDB_STORE = 'handles';
+const DIR_HANDLE_KEY = 'workingDirectory';
+
+function openHandleDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function storeDirectoryHandle(handle) {
+  const db = await openHandleDB();
+  const tx = db.transaction(IDB_STORE, 'readwrite');
+  tx.objectStore(IDB_STORE).put(handle, DIR_HANDLE_KEY);
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onerror = () => { db.close(); reject(tx.error); };
+  });
+}
+
+async function loadDirectoryHandle() {
+  try {
+    const db = await openHandleDB();
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(DIR_HANDLE_KEY);
+    return new Promise((resolve) => {
+      req.onsuccess = () => { db.close(); resolve(req.result || null); };
+      req.onerror = () => { db.close(); resolve(null); };
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Insert an image using the File System Access API (Chrome / Edge).
+ * 1. Obtain (or reuse) a writable directory handle
+ * 2. Let the user pick an image file
+ * 3. Copy the image into the working directory
+ * 4. Insert ![alt](filename) at the cursor
+ */
+async function insertImageFSA() {
+  let dirHandle = await loadDirectoryHandle();
+
+  if (dirHandle) {
+    try {
+      const perm = await dirHandle.requestPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') dirHandle = null;
+    } catch {
+      dirHandle = null;
+    }
+  }
+
+  if (!dirHandle) {
+    const confirmed = await showDirectorySetupModal();
+    if (!confirmed) return;
+    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    await storeDirectoryHandle(dirHandle);
+  }
+
+  // Pick image
+  const [fileHandle] = await window.showOpenFilePicker({
+    types: [{
+      description: 'Images',
+      accept: {
+        'image/png': ['.png'],
+        'image/jpeg': ['.jpg', '.jpeg'],
+        'image/gif': ['.gif'],
+        'image/webp': ['.webp'],
+        'image/svg+xml': ['.svg']
+      }
+    }]
+  });
+  const file = await fileHandle.getFile();
+
+  // Copy to working directory
+  const destHandle = await dirHandle.getFileHandle(file.name, { create: true });
+  const writable = await destHandle.createWritable();
+  await writable.write(file);
+  await writable.close();
+
+  // Insert markdown
+  const altText = file.name.replace(/\.[^/.]+$/, '');
+  insertTextAtCursor(`![${altText}](${file.name})`);
 }
 
 function insertTextAtCursor(textToInsert) {
@@ -877,10 +1008,51 @@ if (mathPanel) {
   });
 }
 
+// Font panel toggle
+if (fontButton) {
+  fontButton.addEventListener('click', event => {
+    event.stopPropagation();
+    toggleFontPanel();
+  });
+}
+
+if (fontPanel) {
+  fontPanel.addEventListener('click', event => {
+    const btn = event.target.closest('.font-option-btn');
+    if (btn) {
+      applyFontSize(btn.dataset.size);
+      updateFontPanelActiveState(btn.dataset.size);
+      closeFontPanel();
+    }
+  });
+}
+
+// Image button — FSA on supported browsers, manual fallback otherwise
+if (insertImageButton) {
+  insertImageButton.addEventListener('click', async () => {
+    if (HAS_FSA) {
+      try {
+        await insertImageFSA();
+      } catch (err) {
+        if (err.name === 'AbortError') return; // user cancelled a picker
+        console.error('Image insertion failed:', err);
+      }
+    } else {
+      const result = await showImageInsertModal();
+      if (result) {
+        insertTextAtCursor(`![${result.altText}](${result.filename})`);
+      }
+    }
+  });
+}
+
+// Close panels when clicking outside
 document.addEventListener('click', event => {
-  if (!mathMenu || !mathPanel || mathPanel.hidden) return;
-  if (!mathMenu.contains(event.target)) {
+  if (mathMenu && mathPanel && !mathPanel.hidden && !mathMenu.contains(event.target)) {
     closeMathPanel();
+  }
+  if (fontMenu && fontPanel && !fontPanel.hidden && !fontMenu.contains(event.target)) {
+    closeFontPanel();
   }
 });
 
@@ -921,12 +1093,6 @@ themeToggleButton.addEventListener('click', () => {
 syncScrollToggle.addEventListener('change', event => {
   saveSyncScrollPreference(event.target.checked);
 });
-
-if (fontSizeSelect) {
-  fontSizeSelect.addEventListener('change', event => {
-    applyFontSize(event.target.value);
-  });
-}
 
 // Print event handlers
 window.addEventListener('beforeprint', () => {
@@ -1061,7 +1227,7 @@ mobileQuery.addEventListener('change', () => {
 updateOfflineFontState();
 initializeTheme();
 initializeSyncScrollToggle(syncScrollToggle);
-initializeFontSize(fontSizeSelect);
+initializeFontSize(fontPanel, updateFontPanelActiveState);
 updatePresentButtonLabel();
 updatePresentThemeIcon();
 initMobileLayout();
