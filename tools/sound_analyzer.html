@@ -699,6 +699,8 @@
   async function startSpectrum() {
     if (isRunning || isStarting) return;
     isStarting = true;
+    toggleBtn.disabled = true;
+    toggleBtn.textContent = 'Starting…';
 
     try {
       if (!audioContext) {
@@ -706,9 +708,13 @@
         sampleRate = audioContext.sampleRate;
       }
 
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('This browser does not support microphone access.');
+      }
+
       // Kick off permission-sensitive work immediately from this user gesture
       const resumePromise =
-        (audioContext.state === 'suspended') ? audioContext.resume() : Promise.resolve();
+        (audioContext.state !== 'running') ? audioContext.resume() : Promise.resolve();
 
       const streamPromise =
         microphoneStream ? Promise.resolve(microphoneStream)
@@ -742,6 +748,8 @@
       await resetAudioSession();
     } finally {
       isStarting = false;
+      toggleBtn.disabled = false;
+      if (!isRunning) toggleBtn.textContent = 'Start';
     }
   }
 
