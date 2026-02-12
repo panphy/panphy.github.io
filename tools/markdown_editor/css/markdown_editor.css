@@ -1451,6 +1451,14 @@ mjx-container.copy-failed::after {
   box-sizing: border-box;
 }
 
+.modal-field-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
 .modal-input:focus {
   outline: 2px solid var(--brand-accent);
   outline-offset: 1px;

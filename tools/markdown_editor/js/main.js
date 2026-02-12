@@ -42,6 +42,7 @@ import {
   showFilenameModal,
   showConfirmationModal,
   showHistoryModal,
+  showImageInsertModal,
   updateDirtyIndicator
 } from './ui.js';
 
@@ -65,6 +66,7 @@ const syncScrollToggle = document.getElementById('syncScrollToggle');
 const fontMenu = document.getElementById('fontMenu');
 const fontButton = document.getElementById('fontButton');
 const fontPanel = document.getElementById('fontPanel');
+const insertImageButton = document.getElementById('insertImageButton');
 const highlightStyle = document.getElementById('highlightStyle');
 const historyButton = document.getElementById('historyButton');
 const dirtyIndicator = document.getElementById('dirtyIndicator');
@@ -925,6 +927,16 @@ if (fontPanel) {
       applyFontSize(btn.dataset.size);
       updateFontPanelActiveState(btn.dataset.size);
       closeFontPanel();
+    }
+  });
+}
+
+// Image button — prompt for filename and insert markdown
+if (insertImageButton) {
+  insertImageButton.addEventListener('click', async () => {
+    const result = await showImageInsertModal();
+    if (result) {
+      insertTextAtCursor(`![${result.altText}](${result.filename})`);
     }
   });
 }
