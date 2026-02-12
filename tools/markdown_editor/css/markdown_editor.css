@@ -502,15 +502,15 @@ textarea:focus {
 .font-option-btn {
   display: block;
   width: 100%;
-  padding: 7px 14px;
-  border: none;
+  padding: 5.5px 12.5px;
+  border: 1.5px solid transparent;
   border-radius: 7px;
   background: transparent;
   color: var(--text-color);
   font-size: 0.85rem;
   text-align: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.2s, color 0.2s;
 }
 
 .font-option-btn:hover {
@@ -518,8 +518,8 @@ textarea:focus {
 }
 
 .font-option-btn.active {
-  background: var(--brand-primary);
-  color: #fff;
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
 }
 
 @media (max-width: 600px) {
