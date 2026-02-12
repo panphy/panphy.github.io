@@ -1364,6 +1364,11 @@ const debouncedUpdateData = debounce(updateData, 300);
 	// Store the current exported markdown for saving
 	let currentExportedMarkdown = '';
 
+	// Pre-rendered PNG data-URLs for MathJax equations in the export table.
+	// Populated in the background after MathJax finishes typesetting so
+	// that copyExportedTableToClipboard() can use them synchronously.
+	let cachedTablePngs = null;
+
 
 	function showExportTablePopup() {
 		try {
@@ -1410,6 +1415,15 @@ const debouncedUpdateData = debounce(updateData, 300);
 			// Trigger MathJax typesetting for LaTeX in the table
 			safeTypeset(renderedContainer);
 
+			// After MathJax finishes, pre-render equation SVGs to PNG so
+			// the click-to-copy path can embed them synchronously.
+			cachedTablePngs = null;
+			if (typeof MathJax !== 'undefined' && MathJax.Hub && MathJax.Hub.Queue) {
+				MathJax.Hub.Queue(function () {
+					preRenderTablePngs(renderedContainer);
+				});
+			}
+
 		} catch (error) {
 			console.error('Error showing export table popup:', error);
 			alert('An error occurred while preparing the table. Please check the console for details.');
@@ -1424,8 +1438,9 @@ const debouncedUpdateData = debounce(updateData, 300);
 		if (background) background.style.display = 'none';
 		if (container) container.style.display = 'none';
 
-		// Clear the stored markdown
+		// Clear the stored markdown and cached PNGs
 		currentExportedMarkdown = '';
+		cachedTablePngs = null;
 	}
 
 
@@ -1579,52 +1594,91 @@ const debouncedUpdateData = debounce(updateData, 300);
 		return clone;
 	}
 
-	function copyExportedTableToClipboard(table) {
-		// Convert MathJax SVGs to self-contained SVG data-URL <img> tags.
-		// All operations are synchronous to stay within the user-gesture
-		// window required by navigator.clipboard.write().
-		const originalSvgs = Array.from(table.querySelectorAll('.MathJax_SVG svg'));
-		const svgData = originalSvgs.map(svg => {
+	// Pre-render all MathJax SVGs inside a container to PNG data-URLs.
+	// Called via MathJax.Hub.Queue after typesetting so the SVGs exist.
+	function preRenderTablePngs(container) {
+		const svgs = Array.from(container.querySelectorAll('.MathJax_SVG svg'));
+		if (!svgs.length) { cachedTablePngs = []; return; }
+
+		const scale = 3;
+		Promise.all(svgs.map(svg => {
 			const selfContained = selfContainSvg(svg);
 			let svgString = new XMLSerializer().serializeToString(selfContained);
 			svgString = svgString.replace(/currentColor/g, '#000000');
+
 			const rect = svg.getBoundingClientRect();
-			return {
-				dataUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString),
-				width: rect.width,
-				height: rect.height
-			};
-		});
+			const w = Math.max(Math.ceil(rect.width * scale), 1);
+			const h = Math.max(Math.ceil(rect.height * scale), 1);
 
-		const tableClone = table.cloneNode(true);
-		tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
-		tableClone.querySelectorAll('th').forEach(cell => {
-			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
-			cell.setAttribute('align', 'center');
-		});
-		tableClone.querySelectorAll('td').forEach(cell => {
-			cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
-			cell.setAttribute('align', 'center');
-		});
+			return new Promise(resolve => {
+				const canvas = document.createElement('canvas');
+				canvas.width = w;
+				canvas.height = h;
+				const ctx = canvas.getContext('2d');
+				if (!ctx) { resolve(null); return; }
 
-		const clonedMjxSpans = Array.from(tableClone.querySelectorAll('.MathJax_SVG'));
-		clonedMjxSpans.forEach((span, i) => {
-			const data = svgData[i];
-			if (!data) return;
-			const img = document.createElement('img');
-			img.src = data.dataUrl;
-			img.width = Math.ceil(data.width);
-			img.height = Math.ceil(data.height);
-			img.style.verticalAlign = 'middle';
-			span.replaceWith(img);
-		});
-		tableClone.querySelectorAll('script[type*="math"]').forEach(el => el.remove());
+				const img = new Image();
+				const blob = new Blob([svgString], { type: 'image/svg+xml' });
+				const blobUrl = URL.createObjectURL(blob);
 
-		const htmlString = '<html><body>' + tableClone.outerHTML + '</body></html>';
+				img.onload = () => {
+					URL.revokeObjectURL(blobUrl);
+					ctx.drawImage(img, 0, 0, w, h);
+					resolve({ dataUrl: canvas.toDataURL('image/png'), width: rect.width, height: rect.height });
+				};
+				img.onerror = () => {
+					URL.revokeObjectURL(blobUrl);
+					resolve(null);
+				};
+				img.src = blobUrl;
+			});
+		})).then(results => { cachedTablePngs = results; });
+	}
+
+	function copyExportedTableToClipboard(table) {
+		// Build HTML — use pre-rendered PNGs if ready, else fall back to
+		// clean text built from the markdown source.
+		let htmlString;
+		const hasPngs = cachedTablePngs && cachedTablePngs.some(p => p !== null);
+
+		if (hasPngs) {
+			const tableClone = table.cloneNode(true);
+			tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
+			tableClone.querySelectorAll('th').forEach(cell => {
+				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center; font-weight: bold;');
+				cell.setAttribute('align', 'center');
+			});
+			tableClone.querySelectorAll('td').forEach(cell => {
+				cell.setAttribute('style', 'border: 1px solid black; padding: 8px; text-align: center;');
+				cell.setAttribute('align', 'center');
+			});
+
+			const clonedMjxSpans = Array.from(tableClone.querySelectorAll('.MathJax_SVG'));
+			clonedMjxSpans.forEach((span, i) => {
+				const png = cachedTablePngs[i];
+				if (!png) return;
+				const img = document.createElement('img');
+				img.src = png.dataUrl;
+				img.width = Math.ceil(png.width);
+				img.height = Math.ceil(png.height);
+				img.style.verticalAlign = 'middle';
+				span.replaceWith(img);
+			});
+			tableClone.querySelectorAll('script[type*="math"]').forEach(el => el.remove());
+			htmlString = '<html><body>' + tableClone.outerHTML + '</body></html>';
+		} else {
+			// PNGs not ready yet — fall back to clean HTML from markdown
+			const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
+			htmlString = cleanTable
+				? '<html><body>' + cleanTable.html + '</body></html>'
+				: '<html><body>' + table.outerHTML + '</body></html>';
+		}
+
+		// Tab-separated plain text for spreadsheet pasting
 		const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
 		const plainText = cleanTable ? cleanTable.text : table.innerText;
 
-		// Clipboard write must happen synchronously within user gesture
+		// Clipboard write — synchronous within user gesture
 		const htmlBlob = new Blob([htmlString], { type: 'text/html' });
 		const textBlob = new Blob([plainText], { type: 'text/plain' });
 		return navigator.clipboard.write([new ClipboardItem({
