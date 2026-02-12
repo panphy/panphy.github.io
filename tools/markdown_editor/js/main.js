@@ -30,6 +30,12 @@ import {
 import { handleCopyClick } from './copy.js';
 
 import {
+  storeImage,
+  resolveImages,
+  loadAllImages
+} from './images.js';
+
+import {
   initUI,
   initializeTheme,
   toggleTheme,
@@ -42,7 +48,6 @@ import {
   showFilenameModal,
   showConfirmationModal,
   showHistoryModal,
-  showImageInsertModal,
   showDirectorySetupModal,
   updateDirtyIndicator
 } from './ui.js';
@@ -304,6 +309,9 @@ async function insertImageFSA() {
   await writable.write(file);
   await writable.close();
 
+  // Store blob so the preview can display it
+  await storeImage(file.name, file);
+
   // Insert markdown
   const altText = file.name.replace(/\.[^/.]+$/, '');
   insertTextAtCursor(`![${altText}](${file.name})`);
@@ -362,6 +370,9 @@ function renderContent() {
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = sanitizedContent;
+
+  // Replace relative image srcs with stored blob Object URLs
+  resolveImages(renderedOutput);
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput])
@@ -1076,7 +1087,7 @@ if (fontPanel) {
   });
 }
 
-// Image button — FSA on supported browsers, manual fallback otherwise
+// Image button — FSA on supported browsers, file-input fallback otherwise
 if (insertImageButton) {
   insertImageButton.addEventListener('click', async () => {
     if (HAS_FSA) {
@@ -1087,13 +1098,68 @@ if (insertImageButton) {
         console.error('Image insertion failed:', err);
       }
     } else {
-      const result = await showImageInsertModal();
-      if (result) {
-        insertTextAtCursor(`![${result.altText}](${result.filename})`);
-      }
+      // Fallback: use a hidden <input type="file"> to pick the image
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml';
+      input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+        await storeImage(file.name, file);
+        const altText = file.name.replace(/\.[^/.]+$/, '');
+        insertTextAtCursor(`![${altText}](${file.name})`);
+      };
+      input.click();
     }
   });
 }
+
+// ---------------------------------------------------------------------- //
+// Paste & drag-and-drop image support                                      //
+// ---------------------------------------------------------------------- //
+
+/**
+ * Handle an image File from paste or drop: store it and insert markdown.
+ * @param {File} file
+ */
+async function handleDroppedImage(file) {
+  const filename = file.name && file.name !== 'image.png'
+    ? file.name
+    : `image-${Date.now()}.png`;
+  await storeImage(filename, file);
+  const altText = filename.replace(/\.[^/.]+$/, '');
+  insertTextAtCursor(`![${altText}](${filename})`);
+}
+
+markdownInput.addEventListener('paste', (e) => {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) handleDroppedImage(file);
+      return;
+    }
+  }
+});
+
+markdownInput.addEventListener('dragover', (e) => {
+  if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  }
+});
+
+markdownInput.addEventListener('drop', (e) => {
+  const files = e.dataTransfer && e.dataTransfer.files;
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  if (file.type.startsWith('image/')) {
+    e.preventDefault();
+    handleDroppedImage(file);
+  }
+});
 
 // Close panels when clicking outside
 document.addEventListener('click', event => {
@@ -1286,15 +1352,17 @@ if (laserCanvas && laserContext) {
   requestAnimationFrame(renderLaserTail);
 }
 
-// Restore draft and render
-const savedDraft = restoreDraft();
-if (savedDraft !== null) {
-  markdownInput.value = savedDraft;
-}
-renderContent();
+// Load stored images then restore draft and render
+loadAllImages().finally(() => {
+  const savedDraft = restoreDraft();
+  if (savedDraft !== null) {
+    markdownInput.value = savedDraft;
+  }
+  renderContent();
 
-// Dirty-state indicator on load (never exported yet, so show if non-empty)
-updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+  // Dirty-state indicator on load (never exported yet, so show if non-empty)
+  updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+});
 
 // ---------------------------------------------------------------------- //
 // Auto-save snapshots every 5 minutes                                     //
