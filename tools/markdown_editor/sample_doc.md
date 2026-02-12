@@ -6,7 +6,7 @@ This lightweight and user-friendly app is designed to help you easily create sim
 
 With integrated LaTeX support, you can effortlessly include professional-looking math equations and symbols, making it an ideal tool for students and educators. Its clean and intuitive interface lets you concentrate on your writing without distractions.
 
-<br />
+<br/>
 
 ---
 
