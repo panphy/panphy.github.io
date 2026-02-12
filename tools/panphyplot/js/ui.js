@@ -1579,50 +1579,23 @@ const debouncedUpdateData = debounce(updateData, 300);
 		return clone;
 	}
 
-	// Rasterize an SVG element to a PNG data-URL at the given scale factor.
-	// Returns a Promise that resolves to { dataUrl, width, height } or null.
-	function svgToPngDataUrl(svg, scale) {
-		scale = scale || 3;
-		const selfContained = selfContainSvg(svg);
-		let svgString = new XMLSerializer().serializeToString(selfContained);
-		// Force black fill/stroke so the copy is always light-theme
-		svgString = svgString.replace(/currentColor/g, '#000000');
-
-		const rect = svg.getBoundingClientRect();
-		const w = Math.max(Math.ceil(rect.width * scale), 1);
-		const h = Math.max(Math.ceil(rect.height * scale), 1);
-
-		return new Promise(resolve => {
-			const canvas = document.createElement('canvas');
-			canvas.width = w;
-			canvas.height = h;
-			const ctx = canvas.getContext('2d');
-			if (!ctx) { resolve(null); return; }
-
-			const img = new Image();
-			const blob = new Blob([svgString], { type: 'image/svg+xml' });
-			const blobUrl = URL.createObjectURL(blob);
-
-			img.onload = () => {
-				URL.revokeObjectURL(blobUrl);
-				ctx.drawImage(img, 0, 0, w, h);
-				resolve({ dataUrl: canvas.toDataURL('image/png'), width: rect.width, height: rect.height });
-			};
-			img.onerror = () => {
-				URL.revokeObjectURL(blobUrl);
-				resolve(null);
-			};
-			img.src = blobUrl;
-		});
-	}
-
-	async function copyExportedTableToClipboard(table) {
-		// Rasterize every MathJax SVG in the table to a PNG data-URL so the
-		// copied HTML contains real images instead of broken SVG references.
+	function copyExportedTableToClipboard(table) {
+		// Convert MathJax SVGs to self-contained SVG data-URL <img> tags.
+		// All operations are synchronous to stay within the user-gesture
+		// window required by navigator.clipboard.write().
 		const originalSvgs = Array.from(table.querySelectorAll('.MathJax_SVG svg'));
-		const pngResults = await Promise.all(originalSvgs.map(s => svgToPngDataUrl(s)));
+		const svgData = originalSvgs.map(svg => {
+			const selfContained = selfContainSvg(svg);
+			let svgString = new XMLSerializer().serializeToString(selfContained);
+			svgString = svgString.replace(/currentColor/g, '#000000');
+			const rect = svg.getBoundingClientRect();
+			return {
+				dataUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString),
+				width: rect.width,
+				height: rect.height
+			};
+		});
 
-		// Clone the table and replace MathJax spans with <img> tags
 		const tableClone = table.cloneNode(true);
 		tableClone.setAttribute('style', 'border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12pt;');
 		tableClone.querySelectorAll('th').forEach(cell => {
@@ -1636,42 +1609,33 @@ const debouncedUpdateData = debounce(updateData, 300);
 
 		const clonedMjxSpans = Array.from(tableClone.querySelectorAll('.MathJax_SVG'));
 		clonedMjxSpans.forEach((span, i) => {
-			const png = pngResults[i];
-			if (!png) return;
+			const data = svgData[i];
+			if (!data) return;
 			const img = document.createElement('img');
-			img.src = png.dataUrl;
-			img.width = Math.ceil(png.width);
-			img.height = Math.ceil(png.height);
+			img.src = data.dataUrl;
+			img.width = Math.ceil(data.width);
+			img.height = Math.ceil(data.height);
 			img.style.verticalAlign = 'middle';
 			span.replaceWith(img);
 		});
-		// Remove leftover MathJax <script> tags from the clone
 		tableClone.querySelectorAll('script[type*="math"]').forEach(el => el.remove());
 
 		const htmlString = '<html><body>' + tableClone.outerHTML + '</body></html>';
-
-		// Tab-separated plain text for spreadsheet pasting
 		const cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
 		const plainText = cleanTable ? cleanTable.text : table.innerText;
 
-		try {
-			const htmlBlob = new Blob([htmlString], { type: 'text/html' });
-			const textBlob = new Blob([plainText], { type: 'text/plain' });
-			const clipboardItem = new ClipboardItem({
-				'text/html': htmlBlob,
-				'text/plain': textBlob
-			});
-			await navigator.clipboard.write([clipboardItem]);
-			return true;
-		} catch (clipboardError) {
-			try {
-				await navigator.clipboard.writeText(plainText);
-				return true;
-			} catch (fallbackError) {
-				console.error('Failed to copy table:', fallbackError);
+		// Clipboard write must happen synchronously within user gesture
+		const htmlBlob = new Blob([htmlString], { type: 'text/html' });
+		const textBlob = new Blob([plainText], { type: 'text/plain' });
+		return navigator.clipboard.write([new ClipboardItem({
+			'text/html': htmlBlob,
+			'text/plain': textBlob
+		})]).then(() => true).catch(() => {
+			return navigator.clipboard.writeText(plainText).then(() => true).catch(err => {
+				console.error('Failed to copy table:', err);
 				return false;
-			}
-		}
+			});
+		});
 	}
 
 
