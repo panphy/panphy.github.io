@@ -76,6 +76,10 @@ const laserPointer = document.getElementById('laserPointer');
 const laserCanvas = document.getElementById('laserCanvas');
 const laserContext = laserCanvas ? laserCanvas.getContext('2d') : null;
 
+// Sync scroll guard flags
+let isSyncingInputScroll = false;
+let isSyncingOutputScroll = false;
+
 // Initialize UI module with DOM references
 initUI({
   themeToggleButton,
@@ -271,12 +275,37 @@ function renderContent() {
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   renderedOutput.innerHTML = sanitizedContent;
 
+  const syncPreviewScrollToInput = () => {
+    if (!state.isSyncScrollEnabled) return;
+
+    const inputScrollableHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
+    const outputScrollableHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
+
+    let targetScrollTop = 0;
+    if (inputScrollableHeight > 0 && outputScrollableHeight > 0) {
+      const scrollRatio = markdownInput.scrollTop / inputScrollableHeight;
+      targetScrollTop = scrollRatio * outputScrollableHeight;
+    }
+
+    if (Math.abs(renderedOutput.scrollTop - targetScrollTop) <= 1) return;
+
+    isSyncingOutputScroll = true;
+    renderedOutput.scrollTop = targetScrollTop;
+    requestAnimationFrame(() => {
+      isSyncingOutputScroll = false;
+    });
+  };
+
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput])
       .catch(console.error)
-      .finally(() => restoreEscapedDollarPlaceholders(renderedOutput));
+      .finally(() => {
+        restoreEscapedDollarPlaceholders(renderedOutput);
+        syncPreviewScrollToInput();
+      });
   } else {
     restoreEscapedDollarPlaceholders(renderedOutput);
+    syncPreviewScrollToInput();
   }
 }
 
@@ -873,11 +902,8 @@ async function loadMarkdownFile() {
 // ---------------------------------------------------------------------- //
 // Sync Scroll                                                              //
 // ---------------------------------------------------------------------- //
-let isSyncingInputScroll = false;
-let isSyncingOutputScroll = false;
-
 const syncInputToOutput = throttle(() => {
-  if (!state.isSyncScrollEnabled) return;
+  if (!state.isSyncScrollEnabled || isSyncingInputScroll) return;
 
   isSyncingOutputScroll = true;
 
@@ -901,7 +927,7 @@ const syncInputToOutput = throttle(() => {
 }, 2);
 
 const syncOutputToInput = throttle(() => {
-  if (!state.isSyncScrollEnabled) return;
+  if (!state.isSyncScrollEnabled || isSyncingOutputScroll) return;
 
   isSyncingInputScroll = true;
 
