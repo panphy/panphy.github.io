@@ -10,7 +10,6 @@ import {
   restoreDraft,
   saveSyncScrollPreference,
   debounce,
-  throttle,
   isOpenWarningSuppressed,
   saveOpenWarningSuppressed,
   isSampleWarningSuppressed,
@@ -79,6 +78,67 @@ const laserContext = laserCanvas ? laserCanvas.getContext('2d') : null;
 // Sync scroll guard flags
 let isSyncingInputScroll = false;
 let isSyncingOutputScroll = false;
+let pendingSyncSource = null;
+let syncScrollRafId = 0;
+
+const SYNC_SCROLL_EPSILON = 1;
+
+function syncScrollByRatio(sourceElement, targetElement) {
+  const sourceScrollableHeight = sourceElement.scrollHeight - sourceElement.clientHeight;
+  const targetScrollableHeight = targetElement.scrollHeight - targetElement.clientHeight;
+
+  if (sourceScrollableHeight <= 0 || targetScrollableHeight <= 0) {
+    if (Math.abs(targetElement.scrollTop) > SYNC_SCROLL_EPSILON) {
+      targetElement.scrollTop = 0;
+    }
+    return;
+  }
+
+  const sourceRatio = Math.min(1, Math.max(0, sourceElement.scrollTop / sourceScrollableHeight));
+  const nextTargetScrollTop = sourceRatio * targetScrollableHeight;
+
+  if (Math.abs(targetElement.scrollTop - nextTargetScrollTop) > SYNC_SCROLL_EPSILON) {
+    targetElement.scrollTop = nextTargetScrollTop;
+  }
+}
+
+function scheduleSyncScroll(source) {
+  if (!state.isSyncScrollEnabled) return;
+
+  pendingSyncSource = source;
+  if (syncScrollRafId) return;
+
+  syncScrollRafId = requestAnimationFrame(() => {
+    const sourceToSync = pendingSyncSource;
+    pendingSyncSource = null;
+    syncScrollRafId = 0;
+
+    if (sourceToSync === 'input') {
+      if (isSyncingInputScroll) return;
+      isSyncingOutputScroll = true;
+      syncScrollByRatio(markdownInput, renderedOutput);
+      requestAnimationFrame(() => {
+        isSyncingOutputScroll = false;
+      });
+      return;
+    }
+
+    if (isSyncingOutputScroll) return;
+    isSyncingInputScroll = true;
+    syncScrollByRatio(renderedOutput, markdownInput);
+    requestAnimationFrame(() => {
+      isSyncingInputScroll = false;
+    });
+  });
+}
+
+function syncInputToOutput() {
+  scheduleSyncScroll('input');
+}
+
+function syncOutputToInput() {
+  scheduleSyncScroll('output');
+}
 
 // Initialize UI module with DOM references
 initUI({
@@ -278,23 +338,7 @@ function renderContent() {
 
   const syncPreviewScrollToInput = () => {
     if (!state.isSyncScrollEnabled) return;
-
-    const inputScrollableHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-    const outputScrollableHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-    let targetScrollTop = 0;
-    if (inputScrollableHeight > 0 && outputScrollableHeight > 0) {
-      const scrollRatio = markdownInput.scrollTop / inputScrollableHeight;
-      targetScrollTop = scrollRatio * outputScrollableHeight;
-    }
-
-    if (Math.abs(renderedOutput.scrollTop - targetScrollTop) <= 1) return;
-
-    isSyncingOutputScroll = true;
-    renderedOutput.scrollTop = targetScrollTop;
-    requestAnimationFrame(() => {
-      isSyncingOutputScroll = false;
-    });
+    syncInputToOutput();
   };
 
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
@@ -903,54 +947,6 @@ async function loadMarkdownFile() {
 // ---------------------------------------------------------------------- //
 // Sync Scroll                                                              //
 // ---------------------------------------------------------------------- //
-const syncInputToOutput = throttle(() => {
-  if (!state.isSyncScrollEnabled || isSyncingInputScroll) return;
-
-  isSyncingOutputScroll = true;
-
-  requestAnimationFrame(() => {
-    const inputScrollTop = markdownInput.scrollTop;
-    const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-    const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-
-    if (inputScrollHeight === 0) {
-      renderedOutput.scrollTop = 0;
-    } else {
-      const scrollRatio = inputScrollTop / inputScrollHeight;
-      const newOutputScrollTop = scrollRatio * outputScrollHeight;
-      if (Math.abs(renderedOutput.scrollTop - newOutputScrollTop) > 1) {
-        renderedOutput.scrollTop = newOutputScrollTop;
-      }
-    }
-
-    isSyncingOutputScroll = false;
-  });
-}, 2);
-
-const syncOutputToInput = throttle(() => {
-  if (!state.isSyncScrollEnabled || isSyncingOutputScroll) return;
-
-  isSyncingInputScroll = true;
-
-  requestAnimationFrame(() => {
-    const outputScrollTop = renderedOutput.scrollTop;
-    const outputScrollHeight = renderedOutput.scrollHeight - renderedOutput.clientHeight;
-    const inputScrollHeight = markdownInput.scrollHeight - markdownInput.clientHeight;
-
-    if (outputScrollHeight === 0) {
-      markdownInput.scrollTop = 0;
-    } else {
-      const scrollRatio = outputScrollTop / outputScrollHeight;
-      const newInputScrollTop = scrollRatio * inputScrollHeight;
-      if (Math.abs(markdownInput.scrollTop - newInputScrollTop) > 1) {
-        markdownInput.scrollTop = newInputScrollTop;
-      }
-    }
-
-    isSyncingInputScroll = false;
-  });
-}, 2);
-
 // Setup event listeners
 const debouncedRenderAndSave = debounce(() => {
   renderContent();
