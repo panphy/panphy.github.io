@@ -1223,18 +1223,17 @@
     downloadCSV(csvContent, "spectrum_data.csv");
   }
 
-  // ------------------ Export Waveform (Time vs Amplitude) only first 10 ms ------------------
+  // ------------------ Export Waveform (Time vs Amplitude) ------------------
   function exportWaveformAsCSV() {
     if (!lastWaveFrame || !sampleRate) {
       alert("No paused data available. Please pause first.");
       return;
     }
 
-    let maxSamples = Math.floor(sampleRate * 0.01);
-    if (maxSamples > lastWaveFrame.length) maxSamples = lastWaveFrame.length;
+    const totalSamples = lastWaveFrame.length;
 
     let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (normalized)\n";
-    for (let i = 0; i < maxSamples; i++) {
+    for (let i = 0; i < totalSamples; i++) {
       const timeMs = (i / sampleRate) * 1000;
       const amplitude = lastWaveFrame[i];
       csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
