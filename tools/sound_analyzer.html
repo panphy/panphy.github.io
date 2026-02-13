@@ -558,6 +558,13 @@
   let isStarting = false;
   let sampleRate;
   const fftSize = 2048;
+  const MICROPHONE_CONSTRAINTS = {
+    audio: {
+      autoGainControl: false,
+      noiseSuppression: false,
+      echoCancellation: false
+    }
+  };
 
   // Frequency data
   let dataArray;
@@ -718,7 +725,7 @@
 
       const streamPromise =
         microphoneStream ? Promise.resolve(microphoneStream)
-          : navigator.mediaDevices.getUserMedia({ audio: true });
+          : navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS);
 
       const [, stream] = await Promise.all([resumePromise, streamPromise]);
       microphoneStream = stream;
