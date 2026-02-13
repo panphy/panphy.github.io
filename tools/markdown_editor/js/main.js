@@ -107,6 +107,7 @@ const customRenderer = {
 if (markedLib) {
   markedLib.setOptions({
     gfm: true,
+    breaks: true,
     headerIds: true,
     tables: true,
     langPrefix: 'hljs language-',
