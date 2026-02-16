@@ -224,6 +224,15 @@ function renderAndPersistDraft() {
   updateDirtyIndicator(dirtyIndicator, isDirty(content));
 }
 
+function persistDraftAndDirtyState() {
+  const content = markdownInput.value;
+  clearUntouchedSampleContentFlagIfEdited(content);
+  if (!isUntouchedSampleContent(content)) {
+    saveDraft(content);
+  }
+  updateDirtyIndicator(dirtyIndicator, isDirty(content));
+}
+
 /**
  * Fetch and load the sample Markdown document
  */
@@ -1062,11 +1071,23 @@ async function loadMarkdownFile() {
 // Sync Scroll                                                              //
 // ---------------------------------------------------------------------- //
 // Setup event listeners
-const debouncedRenderAndSave = debounce(() => {
-  renderAndPersistDraft();
+let queuedInputRenderRafId = 0;
+
+const debouncedPersistDraft = debounce(() => {
+  persistDraftAndDirtyState();
 }, 200);
 
-markdownInput.addEventListener('input', debouncedRenderAndSave);
+markdownInput.addEventListener('input', () => {
+  if (!queuedInputRenderRafId) {
+    queuedInputRenderRafId = requestAnimationFrame(() => {
+      queuedInputRenderRafId = 0;
+      const content = markdownInput.value;
+      clearUntouchedSampleContentFlagIfEdited(content);
+      renderContent();
+    });
+  }
+  debouncedPersistDraft();
+});
 markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
 renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
 
