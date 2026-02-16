@@ -39,6 +39,7 @@ import {
   updateThemeToggleButton,
   getCurrentFontSize,
   showFilenameModal,
+  showImageModal,
   showConfirmationModal,
   showHistoryModal,
   updateDirtyIndicator
@@ -53,6 +54,7 @@ const clearButton = document.getElementById('clearButton');
 const mathMenu = document.getElementById('mathMenu');
 const mathButton = document.getElementById('mathButton');
 const mathPanel = document.getElementById('mathPanel');
+const imageButton = document.getElementById('imageButton');
 const loadSampleButton = document.getElementById('loadSampleButton');
 const exportHTMLButton = document.getElementById('exportHTMLButton');
 const presentButton = document.getElementById('presentButton');
@@ -326,6 +328,30 @@ function insertMathTemplate(templateKey) {
       console.error('Error loading math template:', error);
       alert('Failed to load the selected math template.');
     });
+}
+
+function getImageAlignmentStyle(align) {
+  if (align === 'left') return 'text-align: left;';
+  if (align === 'right') return 'text-align: right;';
+  return 'text-align: center;';
+}
+
+function buildImageHtmlTag({ url, align, width }) {
+  const safeUrl = escapeHtml(url);
+  const normalizedWidth = Number.isFinite(width)
+    ? Math.min(100, Math.max(5, width))
+    : 60;
+
+  const paragraphStyle = getImageAlignmentStyle(align);
+  const imageStyle = `width: ${normalizedWidth}%; height: auto;`;
+  return `<p style="${paragraphStyle}"><img src="${safeUrl}" alt="" style="${imageStyle}" /></p>`;
+}
+
+async function insertImageFromModal() {
+  const imageData = await showImageModal();
+  if (!imageData) return;
+  const imageTag = buildImageHtmlTag(imageData);
+  insertTextAtCursor(`\n${imageTag}\n`);
 }
 
 /**
@@ -1037,6 +1063,15 @@ if (fontPanel) {
       updateFontPanelActiveState(btn.dataset.size);
       closeFontPanel();
     }
+  });
+}
+
+if (imageButton) {
+  imageButton.addEventListener('click', async event => {
+    event.stopPropagation();
+    closeMathPanel();
+    closeFontPanel();
+    await insertImageFromModal();
   });
 }
 

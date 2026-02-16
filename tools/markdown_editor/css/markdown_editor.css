@@ -1470,6 +1470,99 @@ mjx-container.copy-failed::after {
   outline-offset: 1px;
 }
 
+.image-modal {
+  width: min(92vw, 430px);
+}
+
+.image-align-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.image-align-option {
+  position: relative;
+  display: block;
+}
+
+.image-align-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.image-align-option span {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--button-background);
+  color: var(--text-color);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.image-align-option:hover span {
+  border-color: var(--brand-accent);
+}
+
+.image-align-option input:focus-visible + span {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 1px;
+}
+
+.image-align-option input:checked + span {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: rgba(108, 92, 231, 0.08);
+}
+
+[data-theme="dark"] .image-align-option input:checked + span {
+  border-color: rgba(162, 155, 254, 0.7);
+  background: rgba(162, 155, 254, 0.18);
+}
+
+.modal-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.modal-slider-header .modal-field-label {
+  margin-bottom: 0;
+}
+
+.modal-slider-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.modal-slider {
+  width: 100%;
+  margin: 0 0 14px 0;
+  accent-color: var(--brand-primary);
+  cursor: pointer;
+}
+
+.modal-error {
+  margin: 0 0 14px 0;
+  min-height: 1.1em;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #dc2626;
+}
+
+[data-theme="dark"] .modal-error {
+  color: #fca5a5;
+}
+
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
@@ -1517,6 +1610,12 @@ mjx-container.copy-failed::after {
   accent-color: var(--brand-primary);
   cursor: pointer;
   flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .image-align-group {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------------------------------------------------------------------- */

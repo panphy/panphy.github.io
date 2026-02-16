@@ -258,6 +258,237 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
 }
 
 /**
+ * Show the image insertion modal.
+ * @returns {Promise<{url: string, align: string, width: number}|null>}
+ */
+export function showImageModal() {
+  return new Promise((resolve) => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    let closed = false;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const content = document.createElement('div');
+    content.className = 'modal-content image-modal';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'modal-title';
+    titleEl.textContent = 'Insert Image';
+
+    const urlLabel = document.createElement('label');
+    urlLabel.className = 'modal-field-label';
+    urlLabel.setAttribute('for', 'imageUrlInput');
+    urlLabel.textContent = 'Image URL';
+
+    const urlInput = document.createElement('input');
+    urlInput.id = 'imageUrlInput';
+    urlInput.type = 'url';
+    urlInput.className = 'modal-input';
+    urlInput.placeholder = 'https://example.com/image.png';
+    urlInput.autocomplete = 'off';
+    urlInput.spellcheck = false;
+
+    const alignLabel = document.createElement('span');
+    alignLabel.className = 'modal-field-label';
+    alignLabel.textContent = 'Alignment';
+
+    const alignGroup = document.createElement('div');
+    alignGroup.className = 'image-align-group';
+    alignGroup.setAttribute('role', 'radiogroup');
+    alignGroup.setAttribute('aria-label', 'Image alignment');
+
+    const alignOptions = [
+      { value: 'left', label: 'Left' },
+      { value: 'center', label: 'Center' },
+      { value: 'right', label: 'Right' }
+    ];
+
+    alignOptions.forEach((option) => {
+      const optionLabel = document.createElement('label');
+      optionLabel.className = 'image-align-option';
+
+      const optionInput = document.createElement('input');
+      optionInput.type = 'radio';
+      optionInput.name = 'imageAlign';
+      optionInput.value = option.value;
+      optionInput.checked = option.value === 'center';
+
+      const optionText = document.createElement('span');
+      optionText.textContent = option.label;
+
+      optionLabel.appendChild(optionInput);
+      optionLabel.appendChild(optionText);
+      alignGroup.appendChild(optionLabel);
+    });
+
+    const widthHeader = document.createElement('div');
+    widthHeader.className = 'modal-slider-header';
+
+    const widthLabel = document.createElement('label');
+    widthLabel.className = 'modal-field-label';
+    widthLabel.setAttribute('for', 'imageWidthInput');
+    widthLabel.textContent = 'Width';
+
+    const widthValue = document.createElement('span');
+    widthValue.className = 'modal-slider-value';
+    widthValue.textContent = '60%';
+
+    widthHeader.appendChild(widthLabel);
+    widthHeader.appendChild(widthValue);
+
+    const widthInput = document.createElement('input');
+    widthInput.id = 'imageWidthInput';
+    widthInput.type = 'range';
+    widthInput.className = 'modal-slider';
+    widthInput.min = '5';
+    widthInput.max = '100';
+    widthInput.step = '1';
+    widthInput.value = '60';
+
+    const errorEl = document.createElement('p');
+    errorEl.className = 'modal-error';
+    errorEl.hidden = true;
+    errorEl.setAttribute('role', 'alert');
+    errorEl.setAttribute('aria-live', 'polite');
+
+    const buttons = document.createElement('div');
+    buttons.className = 'modal-buttons';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = 'Cancel';
+
+    const insertBtn = document.createElement('button');
+    insertBtn.className = 'btn-primary';
+    insertBtn.textContent = 'Insert';
+
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(insertBtn);
+
+    content.appendChild(titleEl);
+    content.appendChild(urlLabel);
+    content.appendChild(urlInput);
+    content.appendChild(alignLabel);
+    content.appendChild(alignGroup);
+    content.appendChild(widthHeader);
+    content.appendChild(widthInput);
+    content.appendChild(errorEl);
+    content.appendChild(buttons);
+    overlay.appendChild(content);
+
+    document.body.appendChild(overlay);
+
+    const setError = (message) => {
+      if (!message) {
+        errorEl.textContent = '';
+        errorEl.hidden = true;
+        return;
+      }
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    };
+
+    const closeModal = (result) => {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', onKeyDown);
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        if (overlay.parentNode) {
+          document.body.removeChild(overlay);
+        }
+        if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+          previouslyFocused.focus();
+        }
+      }, 200);
+      resolve(result);
+    };
+
+    const normalizeAndValidateUrl = (value) => {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return { error: 'Please enter an image URL.' };
+      }
+
+      let parsedUrl;
+      try {
+        parsedUrl = new URL(trimmed);
+      } catch {
+        return { error: 'Enter a valid URL that starts with http:// or https://.' };
+      }
+
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        return { error: 'Only http:// and https:// image URLs are allowed.' };
+      }
+
+      return { value: parsedUrl.href };
+    };
+
+    const submitModal = () => {
+      const urlValidation = normalizeAndValidateUrl(urlInput.value);
+      if (!urlValidation.value) {
+        setError(urlValidation.error);
+        urlInput.focus();
+        return;
+      }
+
+      const alignInput = alignGroup.querySelector('input[name="imageAlign"]:checked');
+      const selectedAlign = alignInput ? alignInput.value : 'center';
+      const selectedWidth = Number.parseInt(widthInput.value, 10);
+      const normalizedWidth = Number.isFinite(selectedWidth)
+        ? Math.min(100, Math.max(5, selectedWidth))
+        : 60;
+
+      setError('');
+      closeModal({
+        url: urlValidation.value,
+        align: selectedAlign,
+        width: normalizedWidth
+      });
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal(null);
+        return;
+      }
+      if (event.key === 'Enter' && event.target !== cancelBtn) {
+        event.preventDefault();
+        submitModal();
+      }
+    };
+
+    urlInput.addEventListener('input', () => {
+      setError('');
+    });
+
+    widthInput.addEventListener('input', () => {
+      widthValue.textContent = `${widthInput.value}%`;
+    });
+
+    cancelBtn.addEventListener('click', () => closeModal(null));
+    insertBtn.addEventListener('click', submitModal);
+
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) {
+        closeModal(null);
+      }
+    });
+
+    document.addEventListener('keydown', onKeyDown);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      urlInput.focus();
+    });
+  });
+}
+
+/**
  * Show a confirmation modal warning the user about losing unsaved work.
  * If the user has previously checked "Don't show this warning again",
  * the modal is skipped and the promise resolves to true immediately.
