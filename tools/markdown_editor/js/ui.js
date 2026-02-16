@@ -398,6 +398,11 @@ function formatTimestamp(ts) {
  */
 export function showHistoryModal(snapshots) {
   return new Promise((resolve) => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    let closed = false;
+
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
 
@@ -483,24 +488,37 @@ export function showHistoryModal(snapshots) {
     overlay.appendChild(content);
     document.body.appendChild(overlay);
 
-    requestAnimationFrame(() => {
-      overlay.classList.add('visible');
-    });
-
     const closeModal = (result) => {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', onKeyDown);
       overlay.classList.remove('visible');
       setTimeout(() => {
-        document.body.removeChild(overlay);
+        if (overlay.parentNode) {
+          document.body.removeChild(overlay);
+        }
+        if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+          previouslyFocused.focus();
+        }
       }, 200);
       resolve(result);
     };
 
-    overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal(null);
-    });
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeModal(null);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
 
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeModal(null);
+    });
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('visible');
+      closeBtn.focus();
     });
   });
 }

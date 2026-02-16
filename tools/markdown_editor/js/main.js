@@ -148,6 +148,13 @@ initUI({
 
 // Configure marked once at initialization (not per-render)
 const markedLib = window.marked;
+const escapeHtml = (value) => value
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 const customRenderer = {
   listitem(text, task) {
     if (task) {
@@ -173,12 +180,13 @@ if (markedLib) {
     langPrefix: 'hljs language-',
     highlight: function (code, lang) {
       if (typeof hljs === 'undefined') {
-        return code;
+        return escapeHtml(code);
       }
       if (lang && hljs.getLanguage(lang)) {
         return hljs.highlight(code, { language: lang }).value;
       }
-      return hljs.highlightAuto(code).value;
+      // Avoid expensive auto-detection for unknown languages.
+      return escapeHtml(code);
     }
   });
   markedLib.use({ renderer: customRenderer });
@@ -279,8 +287,8 @@ function updateFontPanelActiveState(activeSize) {
 // ---------------------------------------------------------------------- //
 // File System Access API detection (used by save / open)                   //
 // ---------------------------------------------------------------------- //
-const HAS_FSA = typeof window.showDirectoryPicker === 'function'
-  && typeof window.showOpenFilePicker === 'function';
+const CAN_OPEN_WITH_FSA = typeof window.showOpenFilePicker === 'function';
+const CAN_SAVE_WITH_FSA = typeof window.showSaveFilePicker === 'function';
 
 function insertTextAtCursor(textToInsert) {
   const start = markdownInput.selectionStart;
@@ -296,6 +304,7 @@ function insertTextAtCursor(textToInsert) {
 
   renderContent();
   saveDraft(markdownInput.value);
+  updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
 }
 
 function insertMathTemplate(templateKey) {
@@ -442,6 +451,7 @@ let laserEnabled = false;
 const laserTail = [];
 const LASER_POINTER_SIZE = 12;
 const LASER_TAIL_MAX = 180;
+let laserRenderRafId = 0;
 
 function resizeLaserCanvas() {
   if (!laserCanvas || !laserContext) return;
@@ -513,7 +523,27 @@ function renderLaserTail() {
   for (let j = laserTail.length - 1; j >= 0; j--) {
     if (laserTail[j].life < 0.02) laserTail.splice(j, 1);
   }
-  requestAnimationFrame(renderLaserTail);
+  if (laserEnabled) {
+    laserRenderRafId = requestAnimationFrame(renderLaserTail);
+  } else {
+    laserRenderRafId = 0;
+  }
+}
+
+function startLaserRendering() {
+  if (!laserCanvas || !laserContext) return;
+  if (laserRenderRafId) return;
+  laserRenderRafId = requestAnimationFrame(renderLaserTail);
+}
+
+function stopLaserRendering() {
+  if (laserRenderRafId) {
+    cancelAnimationFrame(laserRenderRafId);
+    laserRenderRafId = 0;
+  }
+  if (laserCanvas && laserContext) {
+    laserContext.clearRect(0, 0, laserCanvas.width, laserCanvas.height);
+  }
 }
 
 function onLaserMove(e) {
@@ -539,6 +569,7 @@ function enableLaser() {
   if (laserCanvas) {
     laserCanvas.style.display = 'block';
     resizeLaserCanvas();
+    startLaserRendering();
   }
   presentLaserToggle.classList.add('laser-active');
   document.documentElement.classList.add('laser-cursor-hidden');
@@ -555,6 +586,7 @@ function disableLaser() {
   if (laserCanvas) {
     laserCanvas.style.display = 'none';
   }
+  stopLaserRendering();
   laserTail.length = 0;
   presentLaserToggle.classList.remove('laser-active');
   document.documentElement.classList.remove('laser-cursor-hidden');
@@ -850,7 +882,7 @@ async function exportHTML() {
 async function saveMarkdown() {
   const content = markdownInput.value;
 
-  if (HAS_FSA) {
+  if (CAN_SAVE_WITH_FSA) {
     try {
       const handle = await window.showSaveFilePicker({
         suggestedName: 'document.md',
@@ -870,25 +902,26 @@ async function saveMarkdown() {
 
       markContentExported(content);
       updateDirtyIndicator(dirtyIndicator, false);
+      return;
     } catch (err) {
       if (err.name === 'AbortError') return; // user cancelled
-      console.error('Save failed:', err);
+      console.error('Save with File System Access API failed; using download fallback.', err);
     }
-  } else {
-    const fileName = await showFilenameModal('document.md', 'Save Markdown');
-    if (!fileName) return;
-
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-
-    markContentExported(content);
-    updateDirtyIndicator(dirtyIndicator, false);
   }
+
+  const fileName = await showFilenameModal('document.md', 'Save Markdown');
+  if (!fileName) return;
+
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+  markContentExported(content);
+  updateDirtyIndicator(dirtyIndicator, false);
 }
 
 /**
@@ -903,7 +936,7 @@ async function loadMarkdownFile() {
     if (!confirmed) return;
   }
 
-  if (HAS_FSA) {
+  if (CAN_OPEN_WITH_FSA) {
     try {
       const [fileHandle] = await window.showOpenFilePicker({
         types: [{
@@ -917,11 +950,11 @@ async function loadMarkdownFile() {
       renderContent();
       saveDraft(markdownInput.value);
       updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+      return;
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error('Open failed:', err);
+      console.error('Open with File System Access API failed; using file-input fallback.', err);
     }
-    return;
   }
 
   const input = document.createElement('input');
@@ -1195,7 +1228,6 @@ initMobileLayout();
 if (laserCanvas && laserContext) {
   resizeLaserCanvas();
   window.addEventListener('resize', resizeLaserCanvas);
-  requestAnimationFrame(renderLaserTail);
 }
 
 // Restore draft and render
@@ -1223,5 +1255,6 @@ window.addEventListener('beforeunload', (e) => {
   // Warn if there are unsaved changes
   if (isDirty(markdownInput.value)) {
     e.preventDefault();
+    e.returnValue = '';
   }
 });
