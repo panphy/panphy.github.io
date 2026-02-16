@@ -3,6 +3,25 @@
  * Handles copying equations and tables
  */
 
+const EQUATION_PNG_BASE_SCALE = 4;
+const EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
+const EQUATION_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
+
+function getEquationRasterScale(widthPx, heightPx) {
+  const safeWidth = Math.max(1, widthPx);
+  const safeHeight = Math.max(1, heightPx);
+  const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+  const requestedScale = Math.max(EQUATION_PNG_BASE_SCALE, Math.ceil(dpr * 2));
+
+  const maxScaleBySide = Math.min(
+    EQUATION_PNG_MAX_CANVAS_SIDE / safeWidth,
+    EQUATION_PNG_MAX_CANVAS_SIDE / safeHeight
+  );
+  const maxScaleByPixels = Math.sqrt(EQUATION_PNG_MAX_PIXELS / (safeWidth * safeHeight));
+
+  return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+}
+
 /**
  * Parse SVG viewBox attribute
  * @param {SVGElement} svg - The SVG element
@@ -216,7 +235,7 @@ function prepareEquationSvg(svg) {
  */
 async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
   try {
-    const scale = 2;
+    const scale = getEquationRasterScale(widthPx, heightPx);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
@@ -232,6 +251,8 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
       img.onload = () => {
         URL.revokeObjectURL(svgObjectUrl);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(blob => resolve(blob), 'image/png');
       };
