@@ -558,6 +558,13 @@
   let isStarting = false;
   let sampleRate;
   const fftSize = 2048;
+  const MICROPHONE_CONSTRAINTS = {
+    audio: {
+      autoGainControl: false,
+      noiseSuppression: false,
+      echoCancellation: false
+    }
+  };
 
   // Frequency data
   let dataArray;
@@ -718,7 +725,7 @@
 
       const streamPromise =
         microphoneStream ? Promise.resolve(microphoneStream)
-          : navigator.mediaDevices.getUserMedia({ audio: true });
+          : navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS);
 
       const [, stream] = await Promise.all([resumePromise, streamPromise]);
       microphoneStream = stream;
@@ -727,7 +734,7 @@
         analyzer = audioContext.createAnalyser();
         analyzer.fftSize = fftSize;
         dataArray = new Uint8Array(analyzer.frequencyBinCount);
-        timeDomainData = new Uint8Array(analyzer.fftSize);
+        timeDomainData = new Float32Array(analyzer.fftSize);
       }
 
       if (source) {
@@ -970,7 +977,7 @@
 
     // Time-domain waveform
     if (isRunning) {
-      analyzer.getByteTimeDomainData(timeDomainData);
+      analyzer.getFloatTimeDomainData(timeDomainData);
       lastWaveFrame = timeDomainData.slice();
     } else if (lastWaveFrame) {
       timeDomainData.set(lastWaveFrame);
@@ -989,7 +996,7 @@
 
     let x = 0;
     for (let i = 0; i < windowSize; i++) {
-      const v = (timeDomainData[i] - 128) / 128.0;
+      const v = timeDomainData[i];
       const y = (waveCanvasSize.height / 2) + v * (waveCanvasSize.height / 2) * waveAmplitudeScale;
       if (i === 0) waveCtx.moveTo(x, y);
       else waveCtx.lineTo(x, y);
@@ -1216,20 +1223,19 @@
     downloadCSV(csvContent, "spectrum_data.csv");
   }
 
-  // ------------------ Export Waveform (Time vs Amplitude) only first 10 ms ------------------
+  // ------------------ Export Waveform (Time vs Amplitude) ------------------
   function exportWaveformAsCSV() {
     if (!lastWaveFrame || !sampleRate) {
       alert("No paused data available. Please pause first.");
       return;
     }
 
-    let maxSamples = Math.floor(sampleRate * 0.01);
-    if (maxSamples > lastWaveFrame.length) maxSamples = lastWaveFrame.length;
+    const totalSamples = lastWaveFrame.length;
 
     let csvContent = "data:text/csv;charset=utf-8,Time (ms),Amplitude (normalized)\n";
-    for (let i = 0; i < maxSamples; i++) {
+    for (let i = 0; i < totalSamples; i++) {
       const timeMs = (i / sampleRate) * 1000;
-      const amplitude = (lastWaveFrame[i] - 128) / 128;
+      const amplitude = lastWaveFrame[i];
       csvContent += timeMs.toFixed(2) + "," + amplitude + "\n";
     }
 
