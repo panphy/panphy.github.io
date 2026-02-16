@@ -1674,6 +1674,7 @@ mjx-container.copy-failed::after {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 3px;
   margin-bottom: 16px;
 }
 
@@ -1695,12 +1696,6 @@ mjx-container.copy-failed::after {
   gap: 6px;
   position: relative;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
-}
-
-.history-item:hover,
-.history-item:focus-visible {
-  box-shadow: 0 0 0 2px var(--copy-hint-outline);
 }
 
 .history-item::before {
@@ -1723,8 +1718,24 @@ mjx-container.copy-failed::after {
   z-index: 100;
 }
 
+.history-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--copy-hint-outline);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
 .history-item:hover::before,
 .history-item:focus-visible::before {
+  opacity: 1;
+}
+
+.history-item:hover::after,
+.history-item:focus-visible::after {
   opacity: 1;
 }
 
