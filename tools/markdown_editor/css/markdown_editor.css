@@ -1652,10 +1652,6 @@ mjx-container.copy-failed::after {
   width: 90%;
 }
 
-.history-modal.history-modal-single {
-  min-height: min(70vh, 520px);
-}
-
 .history-title-row {
   display: flex;
   align-items: center;
@@ -1683,8 +1679,7 @@ mjx-container.copy-failed::after {
 }
 
 .history-modal.history-modal-single .history-list {
-  min-height: 220px;
-  padding-bottom: 48px;
+  padding-bottom: 30px;
 }
 
 .history-empty {
@@ -1781,6 +1776,10 @@ mjx-container.copy-failed::after {
   padding-right: 6px;
   scrollbar-gutter: stable;
   font-family: var(--font-mono);
+}
+
+.history-modal.history-modal-multi .history-item-preview {
+  max-height: 5.6em;
 }
 
 /* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */

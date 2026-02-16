@@ -728,6 +728,9 @@ export function showHistoryModal(snapshots) {
     if (snapshots.length === 1) {
       content.classList.add('history-modal-single');
     }
+    if (snapshots.length >= 3) {
+      content.classList.add('history-modal-multi');
+    }
 
     const titleRow = document.createElement('div');
     titleRow.className = 'history-title-row';
@@ -791,6 +794,26 @@ export function showHistoryModal(snapshots) {
           ? `${snap.content.slice(0, HISTORY_PREVIEW_CHAR_LIMIT)}\n...`
           : snap.content;
         preview.textContent = previewText;
+        preview.addEventListener('wheel', (event) => {
+          const deltaY = event.deltaY;
+          if (deltaY === 0) return;
+
+          const maxPreviewScrollTop = preview.scrollHeight - preview.clientHeight;
+          if (maxPreviewScrollTop <= 0) {
+            event.preventDefault();
+            listContainer.scrollTop += deltaY;
+            return;
+          }
+
+          const isScrollingDown = deltaY > 0;
+          const isAtTop = preview.scrollTop <= 0;
+          const isAtBottom = preview.scrollTop >= maxPreviewScrollTop - 1;
+
+          if ((isScrollingDown && isAtBottom) || (!isScrollingDown && isAtTop)) {
+            event.preventDefault();
+            listContainer.scrollTop += deltaY;
+          }
+        }, { passive: false });
         item.setAttribute('aria-label', `Restore snapshot from ${formatTimestamp(snap.timestamp)}`);
         item.addEventListener('click', () => closeModal(snap.content));
         item.addEventListener('keydown', (event) => {
