@@ -133,10 +133,14 @@
 
 		// Convert errors if using percentage uncertainties.
 		const convertedXError = x.map((xi, idx) =>
-			xErrorType === 'percentage' ? (xErrorRaw[idx] / 100) * (xi || 0) : xErrorRaw[idx]
+			xErrorType === 'percentage' ?
+				(Math.abs(xErrorRaw[idx] || 0) / 100) * Math.abs(xi || 0) :
+				(xErrorRaw[idx] || 0)
 		);
 		const convertedYError = y.map((yi, idx) =>
-			yErrorType === 'percentage' ? (yErrorRaw[idx] / 100) * (yi || 0) : yErrorRaw[idx]
+			yErrorType === 'percentage' ?
+				(Math.abs(yErrorRaw[idx] || 0) / 100) * Math.abs(yi || 0) :
+				(yErrorRaw[idx] || 0)
 		);
 
 		// Build the primary data trace.
@@ -287,10 +291,14 @@
 			const errorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
 
 			const xErrorsConverted = xVals.map((xVal, i) =>
-				errorTypes.x === 'percentage' ? (xErrorsRaw[i] / 100) * (xVal || 0) : xErrorsRaw[i]
+				errorTypes.x === 'percentage' ?
+					(Math.abs(xErrorsRaw[i] || 0) / 100) * Math.abs(xVal || 0) :
+					(xErrorsRaw[i] || 0)
 			);
 			const yErrorsConverted = yVals.map((yVal, i) =>
-				errorTypes.y === 'percentage' ? (yErrorsRaw[i] / 100) * (yVal || 0) : yErrorsRaw[i]
+				errorTypes.y === 'percentage' ?
+					(Math.abs(yErrorsRaw[i] || 0) / 100) * Math.abs(yVal || 0) :
+					(yErrorsRaw[i] || 0)
 			);
 			const toggles = datasetToggles[index] || { x: false, y: false };
 

@@ -1338,6 +1338,10 @@ function performSinusoidalFit() {
 				bestResult = result;
 			}
 		}
+		if (!bestResult || !Array.isArray(bestResult.params)) {
+			alert('Sinusoidal fit could not converge on this dataset.');
+			return;
+		}
 
 		const [A, b, k, phi, c] = bestResult.params;
 

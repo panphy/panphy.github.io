@@ -33,6 +33,30 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 	return wrapInTr ? `<tr>${rowHtml}</tr>` : rowHtml;
 }
 
+function isValidPercentageUncertainty(value) {
+	return Number.isFinite(value) && value > 0;
+}
+
+function isValidUncertaintyForType(value, errorType) {
+	if (errorType === 'percentage') return isValidPercentageUncertainty(value);
+	return Number.isFinite(value);
+}
+
+function syncDataset1XValues() {
+	dataset1XValues = getDatasetPoints(0)
+		.filter(point => Number.isFinite(point.x))
+		.map(point => point.x);
+}
+
+function parseMarkdownTableLine(line) {
+	const rawLine = String(line || '').trim();
+	if (!rawLine) return [];
+	const cells = rawLine.split('|');
+	if (cells.length && cells[0].trim() === '') cells.shift();
+	if (cells.length && cells[cells.length - 1].trim() === '') cells.pop();
+	return cells.map(cell => cell.trim());
+}
+
 
 		function initializeTable(initialRows = 7) {
 			const tableBody = document.querySelector('#data-table tbody');
@@ -222,6 +246,7 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 		// Reindex the global objects so they match the new rawData order.
 		// IMPORTANT: Pass the removed index.
 		reindexDatasets(index);
+		syncDataset1XValues();
 
 		// Fix activeSet if it's now out of range
 		if (activeSet >= rawData.length) {
@@ -260,6 +285,22 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 
 		// Empty out the active dataset’s raw data
 		rawData[activeSet] = [];
+		if (activeSet === 0) dataset1XValues = [];
+
+		// Clear any stored fit state for this dataset.
+		delete datasetFitResults[activeSet];
+		delete fittedCurves[activeSet];
+
+		const fitEquationElement = document.getElementById('fit-equation');
+		const rSquaredElement = document.getElementById('r-squared-container');
+		if (fitEquationElement) {
+			fitEquationElement.style.display = 'none';
+			fitEquationElement.innerHTML = '';
+		}
+		if (rSquaredElement) {
+			rSquaredElement.style.display = 'none';
+			rSquaredElement.innerHTML = '';
+		}
 
 		if (resetHeaders) {
 			isSyncing = true;
@@ -293,7 +334,7 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 		// Update the combined-plot inputs to default headings
 		updateCombinedPlotInputsToActive();
 
-		// Re-draw the plot (with no data points). The old fit may still appear
+		// Re-draw the plot with the cleared dataset state.
 		updatePlotAndRenderLatex();
 		scheduleSaveState();
 	}
@@ -701,8 +742,14 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 
 		for (let i = 0; i < line.length; i++) {
 			const char = line[i];
-			if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
-				inQuotes = !inQuotes;
+			if (char === '"') {
+				// RFC4180 escaped quote: ""
+				if (inQuotes && line[i + 1] === '"') {
+					current += '"';
+					i++;
+				} else {
+					inQuotes = !inQuotes;
+				}
 			} else if (char === ',' && !inQuotes) {
 				result.push(current.trim());
 				current = '';
@@ -1017,6 +1064,8 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 			const yInputs = document.querySelectorAll('.y-input');
 			const xErrorInputs = document.querySelectorAll('.x-error-input');
 			const yErrorInputs = document.querySelectorAll('.y-error-input');
+			const xErrorType = document.getElementById('x-error-type')?.value || 'absolute';
+			const yErrorType = document.getElementById('y-error-type')?.value || 'absolute';
 
 			// Validate percentage uncertainty inputs
 			validatePercentageUncertaintyInputs();
@@ -1037,8 +1086,10 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 			for (let i = 0; i < xInputs.length; i++) {
 				const x = parseFloat(xInputs[i].value);
 				const y = parseFloat(yInputs[i].value);
-				const xErrorRaw = parseFloat(xErrorInputs[i]?.value) || 0;
-				const yErrorRaw = parseFloat(yErrorInputs[i]?.value) || 0;
+				const parsedXError = parseFloat(xErrorInputs[i]?.value);
+				const parsedYError = parseFloat(yErrorInputs[i]?.value);
+				const xErrorRaw = isValidUncertaintyForType(parsedXError, xErrorType) ? parsedXError : 0;
+				const yErrorRaw = isValidUncertaintyForType(parsedYError, yErrorType) ? parsedYError : 0;
 
 				// Save the row if x is a valid number, regardless of y.
 				if (!isNaN(x)) {
@@ -1261,8 +1312,8 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 				const yErrStr = yErrInput ? yErrInput.value.trim() : '';
 				const xErrVal = parseFloat(xErrStr);
 				const yErrVal = parseFloat(yErrStr);
-				const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
-				const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
+				const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && isValidUncertaintyForType(xErrVal, xErrorType);
+				const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && isValidUncertaintyForType(yErrVal, yErrorType);
 
 				let rowData = [];
 
@@ -1481,11 +1532,10 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 			const lines = markdown.trim().split('\n').filter(l => l.trim());
 			if (lines.length < 3) return null;
 
-			const parseCells = line => line.split('|').map(c => c.trim()).filter(c => c);
-			const headerCells = parseCells(lines[0]);
+			const headerCells = parseMarkdownTableLine(lines[0]);
 			const dataRows = [];
 			for (let i = 2; i < lines.length; i++) {
-				const cells = parseCells(lines[i]);
+				const cells = parseMarkdownTableLine(lines[i]);
 				if (cells.length) dataRows.push(cells);
 			}
 			if (!headerCells.length || !dataRows.length) return null;
@@ -1615,13 +1665,10 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 		const lines = currentExportedMarkdown.trim().split('\n').filter(function (l) { return l.trim(); });
 		if (lines.length < 3) return null;
 
-		var parseCells = function (line) {
-			return line.split('|').map(function (c) { return c.trim(); }).filter(function (c) { return c; });
-		};
-		var headerCells = parseCells(lines[0]);
+		var headerCells = parseMarkdownTableLine(lines[0]);
 		var dataRows = [];
 		for (var i = 2; i < lines.length; i++) {
-			var cells = parseCells(lines[i]);
+			var cells = parseMarkdownTableLine(lines[i]);
 			if (cells.length) dataRows.push(cells);
 		}
 
@@ -1830,12 +1877,11 @@ function buildDataRowHtml(options = {}, wrapInTr = false) {
 				const yErrStr = yErrInput ? yErrInput.value.trim() : '';
 				const xErrVal = parseFloat(xErrStr);
 				const yErrVal = parseFloat(yErrStr);
-
-				const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && !isNaN(xErrVal);
-				const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && !isNaN(yErrVal);
-
 				const xErrorType = document.getElementById('x-error-type').value;
 				const yErrorType = document.getElementById('y-error-type').value;
+
+				const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && isValidUncertaintyForType(xErrVal, xErrorType);
+				const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && isValidUncertaintyForType(yErrVal, yErrorType);
 
 				let rowData = [];
 
