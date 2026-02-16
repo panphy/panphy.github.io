@@ -387,18 +387,7 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
   }
 }
 
-function prepareTableSvgForImage(table) {
-  const rect = table.getBoundingClientRect();
-  const tableWidth = Math.max(
-    1,
-    Math.ceil(rect.width || table.scrollWidth || table.offsetWidth || 1)
-  );
-  const tableHeight = Math.max(
-    1,
-    Math.ceil(rect.height || table.scrollHeight || table.offsetHeight || 1)
-  );
-
-  const tableClone = table.cloneNode(true);
+function styleTableCloneForCopy(tableClone, tableWidth) {
   tableClone.classList.remove('copied', 'copy-failed', 'table-copy-actions-open', 'math-copy-table');
   tableClone.style.borderCollapse = 'collapse';
   tableClone.style.fontFamily = 'Arial, sans-serif';
@@ -421,8 +410,85 @@ function prepareTableSvgForImage(table) {
   });
 
   tableClone.querySelectorAll('svg').forEach(svg => {
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     inlineReferencedSvgDefs(svg);
   });
+}
+
+function getHtml2Canvas() {
+  if (typeof window !== 'undefined' && typeof window.html2canvas === 'function') {
+    return window.html2canvas;
+  }
+  return null;
+}
+
+async function rasterizeTableWithHtml2Canvas(table) {
+  const html2canvas = getHtml2Canvas();
+  if (!html2canvas) {
+    return null;
+  }
+
+  const rect = table.getBoundingClientRect();
+  const tableWidth = Math.max(
+    1,
+    Math.ceil(rect.width || table.scrollWidth || table.offsetWidth || 1)
+  );
+
+  const sandbox = document.createElement('div');
+  sandbox.style.position = 'fixed';
+  sandbox.style.left = '-99999px';
+  sandbox.style.top = '0';
+  sandbox.style.padding = `${TABLE_IMAGE_PADDING_PX}px`;
+  sandbox.style.background = '#ffffff';
+  sandbox.style.pointerEvents = 'none';
+  sandbox.style.zIndex = '-1';
+  sandbox.style.overflow = 'hidden';
+
+  const tableClone = table.cloneNode(true);
+  styleTableCloneForCopy(tableClone, tableWidth);
+  sandbox.appendChild(tableClone);
+  document.body.appendChild(sandbox);
+
+  try {
+    const sandboxRect = sandbox.getBoundingClientRect();
+    const widthPx = Math.max(1, Math.ceil(sandboxRect.width || tableWidth + TABLE_IMAGE_PADDING_PX * 2));
+    const heightPx = Math.max(1, Math.ceil(sandboxRect.height || tableClone.offsetHeight + TABLE_IMAGE_PADDING_PX * 2));
+    const scale = getEquationRasterScale(widthPx, heightPx);
+
+    const canvas = await html2canvas(sandbox, {
+      backgroundColor: '#ffffff',
+      scale,
+      useCORS: true,
+      logging: false
+    });
+
+    return await new Promise(resolve => {
+      canvas.toBlob(blob => resolve(blob || null), 'image/png');
+    });
+  } catch (err) {
+    console.warn('html2canvas table rasterization failed:', err);
+    return null;
+  } finally {
+    if (sandbox.parentNode) {
+      sandbox.parentNode.removeChild(sandbox);
+    }
+  }
+}
+
+function prepareTableSvgForImage(table) {
+  const rect = table.getBoundingClientRect();
+  const tableWidth = Math.max(
+    1,
+    Math.ceil(rect.width || table.scrollWidth || table.offsetWidth || 1)
+  );
+  const tableHeight = Math.max(
+    1,
+    Math.ceil(rect.height || table.scrollHeight || table.offsetHeight || 1)
+  );
+
+  const tableClone = table.cloneNode(true);
+  styleTableCloneForCopy(tableClone, tableWidth);
 
   const wrapper = document.createElement('div');
   wrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
@@ -447,6 +513,16 @@ function prepareTableSvgForImage(table) {
     widthPx,
     heightPx
   };
+}
+
+async function rasterizeTableToPng(table) {
+  const html2CanvasBlob = await rasterizeTableWithHtml2Canvas(table);
+  if (html2CanvasBlob) {
+    return html2CanvasBlob;
+  }
+
+  const preparedTable = prepareTableSvgForImage(table);
+  return rasterizeSvgToPng(preparedTable.svgString, preparedTable.widthPx, preparedTable.heightPx);
 }
 
 function isTableCopyActionsVisible() {
@@ -726,14 +802,11 @@ export async function copyEquationToClipboard(mjxContainer) {
  * @returns {Promise<boolean>} Success status
  */
 export async function copyTableAsImageToClipboard(table) {
-  const preparedTable = prepareTableSvgForImage(table);
-  const { svgString, widthPx, heightPx } = preparedTable;
-
   try {
     const useSafariCompatMode = isSafari();
 
     if (useSafariCompatMode) {
-      const pngPromise = rasterizeSvgToPng(svgString, widthPx, heightPx).then(blob => {
+      const pngPromise = rasterizeTableToPng(table).then(blob => {
         if (!blob) throw new Error('Table PNG rasterization failed');
         return blob;
       });
@@ -744,7 +817,7 @@ export async function copyTableAsImageToClipboard(table) {
       return true;
     }
 
-    const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
+    const pngBlob = await rasterizeTableToPng(table);
     if (!pngBlob) {
       return false;
     }

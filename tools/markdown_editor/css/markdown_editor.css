@@ -1455,9 +1455,9 @@ mjx-container.copy-failed::after {
 }
 
 .table-copy-action-btn-image {
-  border-color: var(--brand-primary);
-  background: var(--brand-primary);
-  color: #ffffff;
+  border-color: var(--copy-hint-outline);
+  background: var(--copy-hint-chip-bg);
+  color: var(--copy-hint-text);
 }
 
 .table-copy-action-btn:hover {
