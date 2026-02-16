@@ -260,7 +260,8 @@ async function loadSampleDocument() {
 const mathTemplatePaths = {
   basic: '/tools/markdown_editor/templates/math-basic.md',
   calculus: '/tools/markdown_editor/templates/math-calculus.md',
-  matrices: '/tools/markdown_editor/templates/math-matrices.md'
+  matrices: '/tools/markdown_editor/templates/math-matrices.md',
+  table: '/tools/markdown_editor/templates/math-table.md'
 };
 
 function openMathPanel() {
@@ -348,7 +349,7 @@ function insertMathTemplate(templateKey) {
       return response.text();
     })
     .then(data => {
-      insertTextAtCursor(data);
+      insertTextAtCursor(`\n${data}`);
       closeMathPanel();
     })
     .catch(error => {
