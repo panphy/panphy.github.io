@@ -1272,7 +1272,7 @@ mjx-container::after {
 }
 
 #renderedOutput table.math-copy-table::before {
-  content: "Math table: choose copy";
+  content: none;
 }
 
 #renderedOutput table {
@@ -1281,6 +1281,10 @@ mjx-container::after {
 
 #renderedOutput table:hover::before {
   opacity: 1;
+}
+
+#renderedOutput table.math-copy-table:hover::before {
+  opacity: 0;
 }
 
 mjx-container:hover::after {
