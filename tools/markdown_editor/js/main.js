@@ -399,7 +399,7 @@ async function insertImageFromModal() {
   const imageData = await showImageModal();
   if (!imageData) return;
   const imageTag = buildImageHtmlTag(imageData);
-  insertTextAtCursor(imageTag);
+  insertTextAtCursor(imageTag, { insertAtCursorOnBlankLine: true });
 }
 
 /**
