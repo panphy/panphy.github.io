@@ -1439,6 +1439,7 @@ mjx-container.copy-failed::after {
 .table-copy-actions-buttons {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 
