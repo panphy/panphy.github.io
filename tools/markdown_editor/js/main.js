@@ -83,8 +83,314 @@ let isSyncingOutputScroll = false;
 let pendingSyncSource = null;
 let syncScrollRafId = 0;
 let renderCycleId = 0;
+let syncAnchorMap = null;
+let syncAnchorMapRenderCycle = 0;
+let syncAnchorMirror = null;
+let syncAnchorRebuildTimeoutId = 0;
 
 const SYNC_SCROLL_EPSILON = 1;
+const SYNC_ANCHOR_REBUILD_DELAY_MS = 120;
+const MAX_SYNC_ANCHORS = 400;
+
+function clearPendingSyncAnchorRebuild() {
+  if (!syncAnchorRebuildTimeoutId) return;
+  window.clearTimeout(syncAnchorRebuildTimeoutId);
+  syncAnchorRebuildTimeoutId = 0;
+}
+
+function clearSyncAnchorMap() {
+  syncAnchorMap = null;
+  syncAnchorMapRenderCycle = 0;
+}
+
+function ensureSyncAnchorMirror() {
+  if (syncAnchorMirror) return syncAnchorMirror;
+  const mirror = document.createElement('div');
+  mirror.setAttribute('aria-hidden', 'true');
+  mirror.style.position = 'absolute';
+  mirror.style.left = '-99999px';
+  mirror.style.top = '0';
+  mirror.style.visibility = 'hidden';
+  mirror.style.pointerEvents = 'none';
+  mirror.style.zIndex = '-1';
+  mirror.style.whiteSpace = 'pre-wrap';
+  mirror.style.overflowWrap = 'break-word';
+  mirror.style.wordBreak = 'break-word';
+  mirror.style.contain = 'layout style paint';
+  document.body.appendChild(mirror);
+  syncAnchorMirror = mirror;
+  return mirror;
+}
+
+function getRenderedOutputAnchorOffsets() {
+  return Array.from(renderedOutput.children)
+    .map(element => element.offsetTop)
+    .filter(Number.isFinite);
+}
+
+function getSourceAnchorOffsets(content) {
+  if (!markedLib || typeof markedLib.lexer !== 'function') {
+    return [];
+  }
+
+  try {
+    const tokens = markedLib.lexer(content || '', {
+      gfm: true,
+      breaks: true,
+      headerIds: true,
+      tables: true
+    });
+
+    const offsets = [];
+    let cursor = 0;
+
+    tokens.forEach(token => {
+      const raw = typeof token.raw === 'string' ? token.raw : '';
+      if (!raw) return;
+      if (token.type !== 'space') {
+        offsets.push(cursor);
+      }
+      cursor += raw.length;
+    });
+
+    return offsets;
+  } catch (error) {
+    console.warn('Failed to build sync-scroll source anchors.', error);
+    return [];
+  }
+}
+
+function selectDistributedIndices(totalCount, selectedCount) {
+  if (totalCount <= 0 || selectedCount <= 0) {
+    return [];
+  }
+  if (selectedCount === 1) {
+    return [0];
+  }
+
+  const indices = [];
+  for (let i = 0; i < selectedCount; i += 1) {
+    const ratio = i / (selectedCount - 1);
+    indices.push(Math.round(ratio * (totalCount - 1)));
+  }
+  return indices;
+}
+
+function measureInputAnchorOffsets(content, sourceOffsets) {
+  if (!sourceOffsets.length) return [];
+
+  const inputWidth = markdownInput.clientWidth;
+  if (inputWidth <= 0) return [];
+
+  const mirror = ensureSyncAnchorMirror();
+  const computedStyle = window.getComputedStyle(markdownInput);
+
+  mirror.style.width = `${inputWidth}px`;
+  mirror.style.padding = computedStyle.padding;
+  mirror.style.border = computedStyle.border;
+  mirror.style.boxSizing = computedStyle.boxSizing;
+  mirror.style.fontFamily = computedStyle.fontFamily;
+  mirror.style.fontSize = computedStyle.fontSize;
+  mirror.style.fontStyle = computedStyle.fontStyle;
+  mirror.style.fontWeight = computedStyle.fontWeight;
+  mirror.style.fontVariant = computedStyle.fontVariant;
+  mirror.style.lineHeight = computedStyle.lineHeight;
+  mirror.style.letterSpacing = computedStyle.letterSpacing;
+  mirror.style.textTransform = computedStyle.textTransform;
+  mirror.style.textIndent = computedStyle.textIndent;
+  mirror.style.textAlign = computedStyle.textAlign;
+  mirror.style.direction = computedStyle.direction;
+  mirror.style.tabSize = computedStyle.tabSize;
+  mirror.style.webkitTextSizeAdjust = computedStyle.webkitTextSizeAdjust;
+
+  mirror.textContent = '';
+
+  const markerElements = [];
+  const fragment = document.createDocumentFragment();
+  let previousOffset = 0;
+  const maxOffset = content.length;
+
+  sourceOffsets.forEach((offset, index) => {
+    const clampedOffset = Math.max(previousOffset, Math.min(maxOffset, offset));
+    if (clampedOffset > previousOffset) {
+      fragment.appendChild(document.createTextNode(content.slice(previousOffset, clampedOffset)));
+    }
+
+    const marker = document.createElement('span');
+    marker.dataset.syncAnchor = String(index);
+    marker.textContent = '\u200b';
+    fragment.appendChild(marker);
+    markerElements.push(marker);
+    previousOffset = clampedOffset;
+  });
+
+  if (previousOffset < maxOffset) {
+    fragment.appendChild(document.createTextNode(content.slice(previousOffset)));
+  }
+  if (content.endsWith('\n')) {
+    fragment.appendChild(document.createTextNode('\u200b'));
+  }
+
+  mirror.appendChild(fragment);
+
+  const baseTop = markerElements.length > 0 ? markerElements[0].offsetTop : 0;
+  return markerElements.map(marker => marker.offsetTop - baseTop);
+}
+
+function normalizeSyncAnchorPairs(anchorPairs) {
+  const normalized = [];
+  let lastInputY = 0;
+  let lastOutputY = 0;
+
+  anchorPairs.forEach((pair, index) => {
+    if (!pair || !Number.isFinite(pair.inputY) || !Number.isFinite(pair.outputY)) {
+      return;
+    }
+
+    const inputY = index === 0 ? Math.max(0, pair.inputY) : Math.max(lastInputY, pair.inputY);
+    const outputY = index === 0 ? Math.max(0, pair.outputY) : Math.max(lastOutputY, pair.outputY);
+
+    if (normalized.length > 0) {
+      const previous = normalized[normalized.length - 1];
+      if (
+        Math.abs(previous.inputY - inputY) <= SYNC_SCROLL_EPSILON
+        && Math.abs(previous.outputY - outputY) <= SYNC_SCROLL_EPSILON
+      ) {
+        return;
+      }
+    }
+
+    normalized.push({ inputY, outputY });
+    lastInputY = inputY;
+    lastOutputY = outputY;
+  });
+
+  return normalized;
+}
+
+function buildSyncAnchorMap(content, cycleId = renderCycleId) {
+  if (!state.isSyncScrollEnabled) {
+    clearSyncAnchorMap();
+    return;
+  }
+  if (cycleId !== renderCycleId) return;
+
+  const sourceAnchorOffsets = getSourceAnchorOffsets(content);
+  const outputAnchorOffsets = getRenderedOutputAnchorOffsets();
+
+  if (!sourceAnchorOffsets.length || !outputAnchorOffsets.length) {
+    clearSyncAnchorMap();
+    return;
+  }
+
+  const pairCount = Math.min(sourceAnchorOffsets.length, outputAnchorOffsets.length, MAX_SYNC_ANCHORS);
+  const sourceIndices = selectDistributedIndices(sourceAnchorOffsets.length, pairCount);
+  const outputIndices = selectDistributedIndices(outputAnchorOffsets.length, pairCount);
+
+  const sampledSourceOffsets = sourceIndices.map(index => sourceAnchorOffsets[index]);
+  const sampledInputOffsets = measureInputAnchorOffsets(content, sampledSourceOffsets);
+  if (sampledInputOffsets.length !== sampledSourceOffsets.length) {
+    clearSyncAnchorMap();
+    return;
+  }
+  const sampledOutputOffsets = outputIndices.map(index => outputAnchorOffsets[index]);
+
+  const maxInputScrollTop = Math.max(0, markdownInput.scrollHeight - markdownInput.clientHeight);
+  const maxOutputScrollTop = Math.max(0, renderedOutput.scrollHeight - renderedOutput.clientHeight);
+
+  const rawPairs = [{ inputY: 0, outputY: 0 }];
+  for (let i = 0; i < sampledInputOffsets.length; i += 1) {
+    const inputY = Math.max(0, Math.min(maxInputScrollTop, sampledInputOffsets[i]));
+    const outputY = Math.max(0, Math.min(maxOutputScrollTop, sampledOutputOffsets[i]));
+    rawPairs.push({ inputY, outputY });
+  }
+  rawPairs.push({ inputY: maxInputScrollTop, outputY: maxOutputScrollTop });
+
+  const normalizedPairs = normalizeSyncAnchorPairs(rawPairs);
+  if (normalizedPairs.length < 2) {
+    clearSyncAnchorMap();
+    return;
+  }
+
+  syncAnchorMap = normalizedPairs;
+  syncAnchorMapRenderCycle = cycleId;
+}
+
+function scheduleSyncAnchorMapRebuild(content, cycleId = renderCycleId) {
+  if (!state.isSyncScrollEnabled) {
+    clearPendingSyncAnchorRebuild();
+    clearSyncAnchorMap();
+    return;
+  }
+
+  clearPendingSyncAnchorRebuild();
+  syncAnchorRebuildTimeoutId = window.setTimeout(() => {
+    syncAnchorRebuildTimeoutId = 0;
+    buildSyncAnchorMap(content, cycleId);
+  }, SYNC_ANCHOR_REBUILD_DELAY_MS);
+}
+
+function interpolateSyncTarget(anchorPairs, sourceScrollTop, sourceKey, targetKey) {
+  if (!anchorPairs || anchorPairs.length < 2) return null;
+
+  const firstPair = anchorPairs[0];
+  const lastPair = anchorPairs[anchorPairs.length - 1];
+  const clampedSource = Math.min(
+    Math.max(sourceScrollTop, firstPair[sourceKey]),
+    lastPair[sourceKey]
+  );
+
+  let low = 0;
+  let high = anchorPairs.length - 1;
+
+  while (low + 1 < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (anchorPairs[mid][sourceKey] <= clampedSource) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  const start = anchorPairs[low];
+  const end = anchorPairs[high];
+  const sourceSpan = end[sourceKey] - start[sourceKey];
+  if (sourceSpan <= SYNC_SCROLL_EPSILON) {
+    return end[targetKey];
+  }
+
+  const ratio = (clampedSource - start[sourceKey]) / sourceSpan;
+  return start[targetKey] + (end[targetKey] - start[targetKey]) * ratio;
+}
+
+function syncScrollByAnchorMap(sourceElement, targetElement, sourcePane) {
+  if (
+    !syncAnchorMap
+    || syncAnchorMapRenderCycle !== renderCycleId
+    || syncAnchorMap.length < 2
+  ) {
+    return false;
+  }
+
+  const sourceKey = sourcePane === 'input' ? 'inputY' : 'outputY';
+  const targetKey = sourcePane === 'input' ? 'outputY' : 'inputY';
+  const interpolatedTarget = interpolateSyncTarget(
+    syncAnchorMap,
+    sourceElement.scrollTop,
+    sourceKey,
+    targetKey
+  );
+
+  if (!Number.isFinite(interpolatedTarget)) return false;
+
+  const targetScrollableHeight = Math.max(0, targetElement.scrollHeight - targetElement.clientHeight);
+  const clampedTarget = Math.max(0, Math.min(targetScrollableHeight, interpolatedTarget));
+
+  if (Math.abs(targetElement.scrollTop - clampedTarget) > SYNC_SCROLL_EPSILON) {
+    targetElement.scrollTop = clampedTarget;
+  }
+  return true;
+}
 
 function syncScrollByRatio(sourceElement, targetElement) {
   const sourceScrollableHeight = sourceElement.scrollHeight - sourceElement.clientHeight;
@@ -105,6 +411,13 @@ function syncScrollByRatio(sourceElement, targetElement) {
   }
 }
 
+function syncScroll(sourceElement, targetElement, sourcePane) {
+  if (syncScrollByAnchorMap(sourceElement, targetElement, sourcePane)) {
+    return;
+  }
+  syncScrollByRatio(sourceElement, targetElement);
+}
+
 function scheduleSyncScroll(source) {
   if (!state.isSyncScrollEnabled) return;
 
@@ -119,7 +432,7 @@ function scheduleSyncScroll(source) {
     if (sourceToSync === 'input') {
       if (isSyncingInputScroll) return;
       isSyncingOutputScroll = true;
-      syncScrollByRatio(markdownInput, renderedOutput);
+      syncScroll(markdownInput, renderedOutput, 'input');
       requestAnimationFrame(() => {
         isSyncingOutputScroll = false;
       });
@@ -128,7 +441,7 @@ function scheduleSyncScroll(source) {
 
     if (isSyncingOutputScroll) return;
     isSyncingInputScroll = true;
-    syncScrollByRatio(renderedOutput, markdownInput);
+    syncScroll(renderedOutput, markdownInput, 'output');
     requestAnimationFrame(() => {
       isSyncingInputScroll = false;
     });
@@ -418,6 +731,7 @@ function renderContent() {
   const currentRenderCycle = ++renderCycleId;
   const inputText = markdownInput.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
+    clearSyncAnchorMap();
     renderedOutput.innerHTML = `
       <p>Preview unavailable: required libraries failed to load.</p>
     `;
@@ -437,6 +751,7 @@ function renderContent() {
   const finalizeRender = () => {
     if (currentRenderCycle !== renderCycleId) return;
     restoreEscapedDollarPlaceholders(renderedOutput);
+    scheduleSyncAnchorMapRebuild(inputText, currentRenderCycle);
     syncPreviewScrollToInput();
   };
 
@@ -1076,6 +1391,9 @@ let queuedInputRenderRafId = 0;
 const debouncedPersistDraft = debounce(() => {
   persistDraftAndDirtyState();
 }, 200);
+const debouncedSyncAnchorMapRebuild = debounce(() => {
+  scheduleSyncAnchorMapRebuild(markdownInput.value, renderCycleId);
+}, SYNC_ANCHOR_REBUILD_DELAY_MS);
 
 markdownInput.addEventListener('input', () => {
   if (!queuedInputRenderRafId) {
@@ -1135,6 +1453,7 @@ if (fontPanel) {
     if (btn) {
       applyFontSize(btn.dataset.size);
       updateFontPanelActiveState(btn.dataset.size);
+      debouncedSyncAnchorMapRebuild();
       closeFontPanel();
     }
   });
@@ -1194,7 +1513,16 @@ themeToggleButton.addEventListener('click', () => {
 });
 
 syncScrollToggle.addEventListener('change', event => {
-  saveSyncScrollPreference(event.target.checked);
+  const enabled = event.target.checked;
+  saveSyncScrollPreference(enabled);
+  if (enabled) {
+    clearPendingSyncAnchorRebuild();
+    buildSyncAnchorMap(markdownInput.value, renderCycleId);
+    syncInputToOutput();
+  } else {
+    clearPendingSyncAnchorRebuild();
+    clearSyncAnchorMap();
+  }
 });
 
 // Print event handlers
@@ -1213,6 +1541,7 @@ window.addEventListener('afterprint', () => {
 // Network status handlers
 window.addEventListener('online', updateOfflineFontState);
 window.addEventListener('offline', updateOfflineFontState);
+window.addEventListener('resize', debouncedSyncAnchorMapRebuild);
 
 
 function updatePresentButtonLabel() {
@@ -1324,6 +1653,7 @@ mobileQuery.addEventListener('change', () => {
       : null;
     switchMobilePane(activeTab ? activeTab.dataset.pane : 'input');
   }
+  debouncedSyncAnchorMapRebuild();
 });
 
 // Initialize the application
