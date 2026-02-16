@@ -1734,6 +1734,11 @@ mjx-container.copy-failed::after {
   opacity: 1;
 }
 
+.history-item:first-child::before {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
 .history-item:hover::after,
 .history-item:focus-visible::after {
   opacity: 1;
