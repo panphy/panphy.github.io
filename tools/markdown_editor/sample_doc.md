@@ -179,9 +179,7 @@ $$
 **3.3 Inserting Pictures** (and their alignment)
 - Let's insert a picture below...
 
-<p align="center">
-    <img src="/tools/markdown_editor/sample_pic.webp" width="250" alt="Made with ChatGPT" />
-</p>
+<p style="text-align: center;"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Hong_Kong_Island_Skyline_201108.jpg" alt="" style="width: 60%; height: auto;" /></p>
 
 <p align="center">
     Fig. 1 - This is the caption. What a nice picture!
