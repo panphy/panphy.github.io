@@ -2,7 +2,7 @@
 
 Welcome! 🎉
 
-This lightweight and user-friendly app is designed to help you easily create simple yet stunning documents.
+This lightweight, user-friendly app helps you create simple yet stunning documents with ease.
 
 With integrated LaTeX support, you can effortlessly include professional-looking math equations and symbols, making it an ideal tool for students and educators. Its clean and intuitive interface lets you concentrate on your writing without distractions.
 
@@ -33,13 +33,13 @@ With integrated LaTeX support, you can effortlessly include professional-looking
 - We can *italicize* it. (This _italicizes_ it too!)
 
 **1.3 Blockquotes**
-> This is a quotation. But it can also be used to indend a text block.
+> This is a quotation, but it can also be used to indent a text block.
 >> And this is a quotation within a quotation. *Because why not?*
 
 **1.4 Code Blocks**
 
 ~~~python
-# Type your codes here. By the way, do you like the colors?
+# Type your code here. By the way, do you like the colors?
 
 for i in range(5):
     print(i)
@@ -54,7 +54,7 @@ for i in range(5):
 | Albus | 115 | Wizard 🧙‍♂️|
 | Tony | 38 | Inventor 🤖 |
 
-> (*Did you notice the fancy text alignment I gave each column?*)
+> (*Did you notice the fancy text alignment I gave to each column?*)
 
 **1.6 Links**
 
@@ -118,7 +118,7 @@ x^{\prime} & \bar{x} & \hat{x} & \ge & \le \\
 \end{array}
 $$
 
-> Here also shows a LaTeX way to create a table. Note the mysterious <code>{|l|l|c|r|r|}</code> which occurs immediately after <code>\begin{array}</code>. Each of the letters in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries of the column should be aligned (left, left, center, right, right). The <code>|</code> represents a verticle line between columns.
+> This also shows a LaTeX way to create a table. Note the mysterious <code>{|l|l|c|r|r|}</code>, which appears immediately after <code>\begin{array}</code>. Each of the letters in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries in that column should be aligned (left, left, center, right, right). The <code>|</code> represents a vertical line between columns.
 
 - 2.2.4 **Matrices**
 $$
@@ -172,7 +172,7 @@ $$
 <div class="page-break"></div>
 
 **3.2 Line Break**
-- Can you find the line breaks I made with <code>\<br\/></code> in this doc?
+- Can you find the line breaks I made with <code>\<br\/></code> in this document?
 
 <br/>
 
