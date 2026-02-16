@@ -735,7 +735,11 @@ export function showHistoryModal(snapshots) {
       const clearBtn = document.createElement('button');
       clearBtn.className = 'btn-secondary history-clear-btn';
       clearBtn.textContent = 'Clear All';
-      clearBtn.addEventListener('click', () => {
+      clearBtn.addEventListener('click', async () => {
+        const confirmed = await showConfirmationModal(
+          'This will permanently delete all saved snapshots from version history. This action cannot be undone.'
+        );
+        if (!confirmed) return;
         clearSnapshots();
         listContainer.innerHTML = '<p class="history-empty">History cleared.</p>';
         clearBtn.remove();
