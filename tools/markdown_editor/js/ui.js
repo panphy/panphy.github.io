@@ -758,6 +758,24 @@ export function showHistoryModal(snapshots) {
 
     const listContainer = document.createElement('div');
     listContainer.className = 'history-list';
+    content.addEventListener('wheel', (event) => {
+      if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
+
+      const targetElement = event.target instanceof Element
+        ? event.target
+        : event.target && event.target.parentElement
+          ? event.target.parentElement
+          : null;
+
+      // Keep per-preview scrolling behavior intact.
+      if (targetElement && targetElement.closest('.history-item-preview')) return;
+
+      const maxListScrollTop = listContainer.scrollHeight - listContainer.clientHeight;
+      if (maxListScrollTop <= 0) return;
+
+      event.preventDefault();
+      listContainer.scrollTop += event.deltaY;
+    }, { passive: false });
 
     if (snapshots.length === 0) {
       const empty = document.createElement('p');
