@@ -459,6 +459,30 @@ function styleTableCloneForCopy(tableClone, tableWidth) {
     node.style.color = LIGHT_COPY_TEXT_COLOR;
   });
 
+  // Force code blocks and inline code to light-theme styling in copied images.
+  tableClone.querySelectorAll('pre').forEach(pre => {
+    pre.style.background = '#f6f8fa';
+    pre.style.color = LIGHT_COPY_TEXT_COLOR;
+    pre.style.border = '1px solid #d0d7de';
+    pre.style.boxShadow = 'none';
+  });
+
+  tableClone.querySelectorAll('code').forEach(code => {
+    const isBlockCode = Boolean(code.closest('pre'));
+    code.style.color = LIGHT_COPY_TEXT_COLOR;
+    code.style.background = isBlockCode ? 'transparent' : '#f1f3f5';
+    if (!isBlockCode) {
+      code.style.padding = '0.1em 0.3em';
+      code.style.borderRadius = '4px';
+    }
+  });
+
+  tableClone.querySelectorAll('.hljs, .hljs *').forEach(node => {
+    if (!(node instanceof HTMLElement)) return;
+    node.style.background = 'transparent';
+    node.style.color = LIGHT_COPY_TEXT_COLOR;
+  });
+
   tableClone.querySelectorAll('mjx-container').forEach(container => {
     container.style.color = LIGHT_COPY_TEXT_COLOR;
     container.style.background = 'transparent';
