@@ -323,13 +323,20 @@ const CAN_OPEN_WITH_FSA = typeof window.showOpenFilePicker === 'function';
 const CAN_SAVE_WITH_FSA = typeof window.showSaveFilePicker === 'function';
 
 function insertTextAtCursor(textToInsert) {
-  const start = markdownInput.selectionStart;
-  const end = markdownInput.selectionEnd;
   const inputValue = markdownInput.value;
+  const caretPosition = Number.isInteger(markdownInput.selectionStart)
+    ? markdownInput.selectionStart
+    : inputValue.length;
+  const lineEndIndex = inputValue.indexOf('\n', caretPosition);
+  const insertionPoint = lineEndIndex === -1 ? inputValue.length : lineEndIndex;
+  const normalizedText = String(textToInsert || '').replace(/^\n+/, '');
 
-  markdownInput.value = `${inputValue.slice(0, start)}${textToInsert}${inputValue.slice(end)}`;
+  if (!normalizedText) return;
 
-  const cursorPosition = start + textToInsert.length;
+  const insertionText = `\n${normalizedText}`;
+  markdownInput.value = `${inputValue.slice(0, insertionPoint)}${insertionText}${inputValue.slice(insertionPoint)}`;
+
+  const cursorPosition = insertionPoint + insertionText.length;
   markdownInput.focus();
   markdownInput.selectionStart = cursorPosition;
   markdownInput.selectionEnd = cursorPosition;
@@ -349,7 +356,7 @@ function insertMathTemplate(templateKey) {
       return response.text();
     })
     .then(data => {
-      insertTextAtCursor(`\n${data}`);
+      insertTextAtCursor(data);
       closeMathPanel();
     })
     .catch(error => {
@@ -379,7 +386,7 @@ async function insertImageFromModal() {
   const imageData = await showImageModal();
   if (!imageData) return;
   const imageTag = buildImageHtmlTag(imageData);
-  insertTextAtCursor(`\n${imageTag}\n`);
+  insertTextAtCursor(imageTag);
 }
 
 /**
