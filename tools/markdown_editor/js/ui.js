@@ -697,7 +697,7 @@ function formatTimestamp(ts) {
   const d = new Date(ts);
   const now = new Date();
   const isToday = d.toDateString() === now.toDateString();
-  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   if (isToday) return `Today ${time}`;
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
