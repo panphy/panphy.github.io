@@ -196,6 +196,33 @@ if (markedLib) {
   console.error('Marked.js failed to load. Preview rendering is unavailable.');
 }
 
+let untouchedSampleContent = null;
+
+function isUntouchedSampleContent(content = markdownInput.value) {
+  return untouchedSampleContent !== null && content === untouchedSampleContent;
+}
+
+function clearUntouchedSampleContentFlagIfEdited(content = markdownInput.value) {
+  if (untouchedSampleContent !== null && content !== untouchedSampleContent) {
+    untouchedSampleContent = null;
+  }
+}
+
+function saveSnapshotIfNeeded(content) {
+  if (isUntouchedSampleContent(content)) return;
+  saveSnapshot(content);
+}
+
+function renderAndPersistDraft() {
+  const content = markdownInput.value;
+  clearUntouchedSampleContentFlagIfEdited(content);
+  renderContent();
+  if (!isUntouchedSampleContent(content)) {
+    saveDraft(content);
+  }
+  updateDirtyIndicator(dirtyIndicator, isDirty(content));
+}
+
 /**
  * Fetch and load the sample Markdown document
  */
@@ -207,7 +234,7 @@ async function loadSampleDocument() {
     );
     if (!confirmed) return;
   }
-  saveSnapshot(markdownInput.value);
+  saveSnapshotIfNeeded(markdownInput.value);
   fetch('/tools/markdown_editor/sample_doc.md')
     .then(response => {
       if (!response.ok) {
@@ -217,9 +244,11 @@ async function loadSampleDocument() {
     })
     .then(data => {
       markdownInput.value = data;
+      untouchedSampleContent = data;
+      markContentExported(data);
       renderContent();
-      saveDraft(markdownInput.value);
-      updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+      clearDraft();
+      updateDirtyIndicator(dirtyIndicator, false);
     })
     .catch(error => {
       console.error('Error loading sample document:', error);
@@ -304,9 +333,7 @@ function insertTextAtCursor(textToInsert) {
   markdownInput.selectionStart = cursorPosition;
   markdownInput.selectionEnd = cursorPosition;
 
-  renderContent();
-  saveDraft(markdownInput.value);
-  updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+  renderAndPersistDraft();
 }
 
 function insertMathTemplate(templateKey) {
@@ -971,11 +998,13 @@ async function loadMarkdownFile() {
         }]
       });
       const file = await fileHandle.getFile();
-      saveSnapshot(markdownInput.value);
+      saveSnapshotIfNeeded(markdownInput.value);
       markdownInput.value = await file.text();
+      untouchedSampleContent = null;
+      markContentExported(markdownInput.value);
       renderContent();
       saveDraft(markdownInput.value);
-      updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+      updateDirtyIndicator(dirtyIndicator, false);
       return;
     } catch (err) {
       if (err.name === 'AbortError') return;
@@ -989,13 +1018,15 @@ async function loadMarkdownFile() {
   input.onchange = e => {
     const file = e.target.files[0];
     if (file) {
-      saveSnapshot(markdownInput.value);
+      saveSnapshotIfNeeded(markdownInput.value);
       const reader = new FileReader();
       reader.onload = event => {
         markdownInput.value = event.target.result;
+        untouchedSampleContent = null;
+        markContentExported(markdownInput.value);
         renderContent();
         saveDraft(markdownInput.value);
-        updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+        updateDirtyIndicator(dirtyIndicator, false);
       };
       reader.readAsText(file);
     }
@@ -1008,9 +1039,7 @@ async function loadMarkdownFile() {
 // ---------------------------------------------------------------------- //
 // Setup event listeners
 const debouncedRenderAndSave = debounce(() => {
-  renderContent();
-  saveDraft(markdownInput.value);
-  updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+  renderAndPersistDraft();
 }, 200);
 
 markdownInput.addEventListener('input', debouncedRenderAndSave);
@@ -1093,8 +1122,10 @@ clearButton.addEventListener('click', async () => {
     'This will clear all your current content. Any unsaved changes will be lost.'
   );
   if (!confirmed) return;
-  saveSnapshot(markdownInput.value);
+  saveSnapshotIfNeeded(markdownInput.value);
   markdownInput.value = '';
+  untouchedSampleContent = null;
+  markContentExported('');
   clearDraft();
   renderContent();
   updateDirtyIndicator(dirtyIndicator, false);
@@ -1107,9 +1138,7 @@ if (historyButton) {
     const restored = await showHistoryModal(snapshots);
     if (restored !== null) {
       markdownInput.value = restored;
-      renderContent();
-      saveDraft(restored);
-      updateDirtyIndicator(dirtyIndicator, isDirty(restored));
+      renderAndPersistDraft();
     }
   });
 }
@@ -1280,12 +1309,12 @@ updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
 // ---------------------------------------------------------------------- //
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 setInterval(() => {
-  saveSnapshot(markdownInput.value);
+  saveSnapshotIfNeeded(markdownInput.value);
 }, SNAPSHOT_INTERVAL_MS);
 
 // Also snapshot right before leaving the page
 window.addEventListener('beforeunload', (e) => {
-  saveSnapshot(markdownInput.value);
+  saveSnapshotIfNeeded(markdownInput.value);
 
   // Warn if there are unsaved changes
   if (isDirty(markdownInput.value)) {
