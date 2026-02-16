@@ -1415,9 +1415,9 @@ mjx-container.copy-failed::after {
 .table-copy-actions {
   position: absolute;
   z-index: 1100;
-  min-width: 220px;
-  max-width: min(92vw, 320px);
-  padding: 8px;
+  min-width: max-content;
+  max-width: min(92vw, 280px);
+  padding: 6px;
   border-radius: 10px;
   border: 1px solid var(--border-color);
   background: var(--pane-background);
@@ -1437,19 +1437,21 @@ mjx-container.copy-failed::after {
 }
 
 .table-copy-actions-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .table-copy-action-btn {
-  min-height: 36px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  font-size: 0.82rem;
+  min-height: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--copy-hint-outline);
+  font-size: 11px;
+  line-height: 1.2;
   font-weight: 600;
   font-family: var(--font-sans);
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -1493,8 +1495,8 @@ mjx-container.copy-failed::after {
 
 @media (pointer: coarse) {
   .table-copy-action-btn {
-    min-height: 48px;
-    font-size: 0.9rem;
+    padding: 4px 10px;
+    font-size: 11px;
   }
 }
 
