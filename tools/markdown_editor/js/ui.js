@@ -758,6 +758,8 @@ export function showHistoryModal(snapshots) {
         const snap = snapshots[i];
         const item = document.createElement('div');
         item.className = 'history-item';
+        item.tabIndex = 0;
+        item.setAttribute('role', 'button');
 
         const meta = document.createElement('div');
         meta.className = 'history-item-meta';
@@ -777,15 +779,17 @@ export function showHistoryModal(snapshots) {
         const preview = document.createElement('div');
         preview.className = 'history-item-preview';
         preview.textContent = snap.content.slice(0, 120) + (snap.content.length > 120 ? '...' : '');
-
-        const restoreBtn = document.createElement('button');
-        restoreBtn.className = 'btn-primary history-restore-btn';
-        restoreBtn.textContent = 'Restore';
-        restoreBtn.addEventListener('click', () => closeModal(snap.content));
+        item.setAttribute('aria-label', `Restore snapshot from ${formatTimestamp(snap.timestamp)}`);
+        item.addEventListener('click', () => closeModal(snap.content));
+        item.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            closeModal(snap.content);
+          }
+        });
 
         item.appendChild(meta);
         item.appendChild(preview);
-        item.appendChild(restoreBtn);
         listContainer.appendChild(item);
       }
     }

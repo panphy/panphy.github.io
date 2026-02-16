@@ -1693,6 +1693,39 @@ mjx-container.copy-failed::after {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.history-item:hover,
+.history-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--copy-hint-outline);
+}
+
+.history-item::before {
+  content: "Click to restore";
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--copy-hint-chip-bg);
+  color: var(--copy-hint-text);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+}
+
+.history-item:hover::before,
+.history-item:focus-visible::before {
+  opacity: 1;
 }
 
 .history-item-meta {
@@ -1721,12 +1754,6 @@ mjx-container.copy-failed::after {
   max-height: 3.5em;
   overflow: hidden;
   font-family: var(--font-mono);
-}
-
-.history-restore-btn {
-  align-self: flex-end;
-  font-size: 0.75rem !important;
-  padding: 4px 12px !important;
 }
 
 /* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */
