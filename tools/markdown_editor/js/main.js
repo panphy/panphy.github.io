@@ -82,6 +82,7 @@ let isSyncingInputScroll = false;
 let isSyncingOutputScroll = false;
 let pendingSyncSource = null;
 let syncScrollRafId = 0;
+let renderCycleId = 0;
 
 const SYNC_SCROLL_EPSILON = 1;
 
@@ -405,6 +406,7 @@ async function insertImageFromModal() {
  * Render the markdown content to the output pane
  */
 function renderContent() {
+  const currentRenderCycle = ++renderCycleId;
   const inputText = markdownInput.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
     renderedOutput.innerHTML = `
@@ -423,16 +425,18 @@ function renderContent() {
     syncInputToOutput();
   };
 
+  const finalizeRender = () => {
+    if (currentRenderCycle !== renderCycleId) return;
+    restoreEscapedDollarPlaceholders(renderedOutput);
+    syncPreviewScrollToInput();
+  };
+
   if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
     MathJax.typesetPromise([renderedOutput])
       .catch(console.error)
-      .finally(() => {
-        restoreEscapedDollarPlaceholders(renderedOutput);
-        syncPreviewScrollToInput();
-      });
+      .finally(finalizeRender);
   } else {
-    restoreEscapedDollarPlaceholders(renderedOutput);
-    syncPreviewScrollToInput();
+    finalizeRender();
   }
 }
 

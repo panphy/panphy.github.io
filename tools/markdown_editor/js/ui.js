@@ -11,6 +11,8 @@ import {
   saveFontSizePreference,
   isClearWarningSuppressed,
   saveClearWarningSuppressed,
+  isClearHistoryWarningSuppressed,
+  saveClearHistoryWarningSuppressed,
   clearSnapshots
 } from './state.js';
 
@@ -166,6 +168,11 @@ export function updateOfflineFontState() {
  */
 export function showFilenameModal(defaultFilename, title = 'Enter file name') {
   return new Promise((resolve) => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    let closed = false;
+
     // Create modal elements
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -211,10 +218,25 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
       input.select();
     });
 
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal(null);
+      }
+    };
+
     const closeModal = (result) => {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', onKeyDown);
       overlay.classList.remove('visible');
       setTimeout(() => {
-        document.body.removeChild(overlay);
+        if (overlay.parentNode) {
+          document.body.removeChild(overlay);
+        }
+        if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+          previouslyFocused.focus();
+        }
       }, 200);
       resolve(result);
     };
@@ -254,6 +276,8 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
         closeModal(null);
       }
     });
+
+    document.addEventListener('keydown', onKeyDown);
   });
 }
 
@@ -589,6 +613,11 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
   }
 
   return new Promise((resolve) => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    let closed = false;
+
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
 
@@ -641,13 +670,28 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
       confirmBtn.focus();
     });
 
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal(false);
+      }
+    };
+
     const closeModal = (confirmed) => {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', onKeyDown);
       if (confirmed && checkbox.checked) {
         saveSuppressed(true);
       }
       overlay.classList.remove('visible');
       setTimeout(() => {
-        document.body.removeChild(overlay);
+        if (overlay.parentNode) {
+          document.body.removeChild(overlay);
+        }
+        if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+          previouslyFocused.focus();
+        }
       }, 200);
       resolve(confirmed);
     };
@@ -655,17 +699,13 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
     cancelBtn.addEventListener('click', () => closeModal(false));
     confirmBtn.addEventListener('click', () => closeModal(true));
 
-    overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeModal(false);
-      }
-    });
-
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         closeModal(false);
       }
     });
+
+    document.addEventListener('keydown', onKeyDown);
   });
 }
 
@@ -745,7 +785,11 @@ export function showHistoryModal(snapshots) {
       clearBtn.textContent = 'Clear All';
       clearBtn.addEventListener('click', async () => {
         const confirmed = await showConfirmationModal(
-          'This will permanently delete all saved snapshots from version history. This action cannot be undone.'
+          'This will permanently delete all saved snapshots from version history. This action cannot be undone.',
+          {
+            isSuppressed: isClearHistoryWarningSuppressed,
+            saveSuppressed: saveClearHistoryWarningSuppressed
+          }
         );
         if (!confirmed) return;
         clearSnapshots();

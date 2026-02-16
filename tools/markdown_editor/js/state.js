@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   FONT_SIZE: 'markdownFontSize',
   THEME: 'theme',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
+  SUPPRESS_CLEAR_HISTORY_WARNING: 'markdownSuppressClearHistoryWarning',
   SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning',
   SUPPRESS_SAMPLE_WARNING: 'markdownSuppressSampleWarning'
 };
@@ -25,19 +26,57 @@ export const state = {
   lastExportedContent: null
 };
 
+const storageWarningKeys = new Set();
+
+function logStorageWarningOnce(operation, key, error) {
+  const warningKey = `${operation}:${key}`;
+  if (storageWarningKeys.has(warningKey)) return;
+  storageWarningKeys.add(warningKey);
+  console.warn(`localStorage ${operation} failed for "${key}".`, error);
+}
+
+function safeGetStorageItem(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    logStorageWarningOnce('read', key, error);
+    return null;
+  }
+}
+
+function safeSetStorageItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    logStorageWarningOnce('write', key, error);
+    return false;
+  }
+}
+
+function safeRemoveStorageItem(key) {
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (error) {
+    logStorageWarningOnce('remove', key, error);
+    return false;
+  }
+}
+
 /**
  * Save the current markdown draft to localStorage
  * @param {string} content - The markdown content to save
  */
 export function saveDraft(content) {
-  localStorage.setItem(STORAGE_KEYS.DRAFT, content);
+  safeSetStorageItem(STORAGE_KEYS.DRAFT, content);
 }
 
 /**
  * Clear the saved draft from localStorage
  */
 export function clearDraft() {
-  localStorage.removeItem(STORAGE_KEYS.DRAFT);
+  safeRemoveStorageItem(STORAGE_KEYS.DRAFT);
 }
 
 /**
@@ -45,7 +84,7 @@ export function clearDraft() {
  * @returns {string|null} The saved draft or null if none exists
  */
 export function restoreDraft() {
-  return localStorage.getItem(STORAGE_KEYS.DRAFT);
+  return safeGetStorageItem(STORAGE_KEYS.DRAFT);
 }
 
 /**
@@ -53,7 +92,7 @@ export function restoreDraft() {
  * @param {boolean} enabled - Whether sync scroll is enabled
  */
 export function saveSyncScrollPreference(enabled) {
-  localStorage.setItem(STORAGE_KEYS.SYNC_SCROLL, enabled);
+  safeSetStorageItem(STORAGE_KEYS.SYNC_SCROLL, enabled);
   state.isSyncScrollEnabled = enabled;
 }
 
@@ -62,7 +101,7 @@ export function saveSyncScrollPreference(enabled) {
  * @returns {boolean} The saved preference
  */
 export function loadSyncScrollPreference() {
-  const saved = localStorage.getItem(STORAGE_KEYS.SYNC_SCROLL);
+  const saved = safeGetStorageItem(STORAGE_KEYS.SYNC_SCROLL);
   if (saved === null) {
     state.isSyncScrollEnabled = false;
   } else {
@@ -76,7 +115,7 @@ export function loadSyncScrollPreference() {
  * @param {string} size - The font size value (e.g., '16px')
  */
 export function saveFontSizePreference(size) {
-  localStorage.setItem(STORAGE_KEYS.FONT_SIZE, size);
+  safeSetStorageItem(STORAGE_KEYS.FONT_SIZE, size);
 }
 
 /**
@@ -84,7 +123,7 @@ export function saveFontSizePreference(size) {
  * @returns {string|null} The saved font size or null
  */
 export function loadFontSizePreference() {
-  return localStorage.getItem(STORAGE_KEYS.FONT_SIZE);
+  return safeGetStorageItem(STORAGE_KEYS.FONT_SIZE);
 }
 
 /**
@@ -92,7 +131,7 @@ export function loadFontSizePreference() {
  * @param {string} theme - The theme value ('markdown-dark' or 'markdown-light')
  */
 export function saveThemePreference(theme) {
-  localStorage.setItem(STORAGE_KEYS.THEME, theme);
+  safeSetStorageItem(STORAGE_KEYS.THEME, theme);
 }
 
 /**
@@ -100,7 +139,7 @@ export function saveThemePreference(theme) {
  * @returns {string|null} The saved theme or null
  */
 export function loadThemePreference() {
-  return localStorage.getItem(STORAGE_KEYS.THEME);
+  return safeGetStorageItem(STORAGE_KEYS.THEME);
 }
 
 // ------------------------------------------------------------------ //
@@ -113,10 +152,40 @@ export function loadThemePreference() {
  * @returns {Array} Array of snapshot objects, oldest first
  */
 export function loadSnapshots() {
+  const sanitizeSnapshot = (snapshot) => {
+    if (!snapshot || typeof snapshot !== 'object') return null;
+    const timestamp = Number(snapshot.timestamp);
+    if (!Number.isFinite(timestamp) || typeof snapshot.content !== 'string') {
+      return null;
+    }
+    return { timestamp, content: snapshot.content };
+  };
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.SNAPSHOTS);
-    return raw ? JSON.parse(raw) : [];
+    const raw = safeGetStorageItem(STORAGE_KEYS.SNAPSHOTS);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      safeRemoveStorageItem(STORAGE_KEYS.SNAPSHOTS);
+      return [];
+    }
+
+    const sanitized = parsed
+      .map(sanitizeSnapshot)
+      .filter((snapshot) => snapshot !== null);
+
+    if (sanitized.length !== parsed.length) {
+      if (sanitized.length === 0) {
+        safeRemoveStorageItem(STORAGE_KEYS.SNAPSHOTS);
+      } else {
+        persistSnapshots(sanitized);
+      }
+    }
+
+    return sanitized;
   } catch {
+    safeRemoveStorageItem(STORAGE_KEYS.SNAPSHOTS);
     return [];
   }
 }
@@ -136,7 +205,7 @@ function persistSnapshots(snapshots) {
     snapshots.shift();
     json = JSON.stringify(snapshots);
   }
-  localStorage.setItem(STORAGE_KEYS.SNAPSHOTS, json);
+  safeSetStorageItem(STORAGE_KEYS.SNAPSHOTS, json);
 }
 
 /**
@@ -159,7 +228,7 @@ export function saveSnapshot(content) {
  * Delete all saved snapshots.
  */
 export function clearSnapshots() {
-  localStorage.removeItem(STORAGE_KEYS.SNAPSHOTS);
+  safeRemoveStorageItem(STORAGE_KEYS.SNAPSHOTS);
 }
 
 // ------------------------------------------------------------------ //
@@ -228,7 +297,7 @@ export function throttle(fn, limit) {
  * @returns {boolean} True if the user chose to suppress the warning
  */
 export function isClearWarningSuppressed() {
-  return localStorage.getItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING) === 'true';
+  return safeGetStorageItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING) === 'true';
 }
 
 /**
@@ -236,7 +305,23 @@ export function isClearWarningSuppressed() {
  * @param {boolean} suppressed - Whether to suppress the warning
  */
 export function saveClearWarningSuppressed(suppressed) {
-  localStorage.setItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING, String(suppressed));
+  safeSetStorageItem(STORAGE_KEYS.SUPPRESS_CLEAR_WARNING, String(suppressed));
+}
+
+/**
+ * Check whether the clear-history warning is suppressed
+ * @returns {boolean} True if the user chose to suppress the warning
+ */
+export function isClearHistoryWarningSuppressed() {
+  return safeGetStorageItem(STORAGE_KEYS.SUPPRESS_CLEAR_HISTORY_WARNING) === 'true';
+}
+
+/**
+ * Save the clear-history warning suppression preference
+ * @param {boolean} suppressed - Whether to suppress the warning
+ */
+export function saveClearHistoryWarningSuppressed(suppressed) {
+  safeSetStorageItem(STORAGE_KEYS.SUPPRESS_CLEAR_HISTORY_WARNING, String(suppressed));
 }
 
 /**
@@ -244,7 +329,7 @@ export function saveClearWarningSuppressed(suppressed) {
  * @returns {boolean} True if the user chose to suppress the warning
  */
 export function isOpenWarningSuppressed() {
-  return localStorage.getItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING) === 'true';
+  return safeGetStorageItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING) === 'true';
 }
 
 /**
@@ -252,7 +337,7 @@ export function isOpenWarningSuppressed() {
  * @param {boolean} suppressed - Whether to suppress the warning
  */
 export function saveOpenWarningSuppressed(suppressed) {
-  localStorage.setItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING, String(suppressed));
+  safeSetStorageItem(STORAGE_KEYS.SUPPRESS_OPEN_WARNING, String(suppressed));
 }
 
 /**
@@ -260,7 +345,7 @@ export function saveOpenWarningSuppressed(suppressed) {
  * @returns {boolean} True if the user chose to suppress the warning
  */
 export function isSampleWarningSuppressed() {
-  return localStorage.getItem(STORAGE_KEYS.SUPPRESS_SAMPLE_WARNING) === 'true';
+  return safeGetStorageItem(STORAGE_KEYS.SUPPRESS_SAMPLE_WARNING) === 'true';
 }
 
 /**
@@ -268,5 +353,5 @@ export function isSampleWarningSuppressed() {
  * @param {boolean} suppressed - Whether to suppress the warning
  */
 export function saveSampleWarningSuppressed(suppressed) {
-  localStorage.setItem(STORAGE_KEYS.SUPPRESS_SAMPLE_WARNING, String(suppressed));
+  safeSetStorageItem(STORAGE_KEYS.SUPPRESS_SAMPLE_WARNING, String(suppressed));
 }
