@@ -9,6 +9,9 @@ const EQUATION_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
 const TABLE_IMAGE_PADDING_PX = 8;
 const TABLE_COPY_ACTION_OFFSET_PX = 8;
 const TABLE_COPY_ACTION_HIDE_DELAY_MS = 120;
+const LIGHT_COPY_TEXT_COLOR = '#000000';
+const LIGHT_COPY_BG_COLOR = '#ffffff';
+const LIGHT_COPY_HEADER_BG_COLOR = '#f4f6f8';
 
 let tableCopyActionsMenu = null;
 let activeMathTable = null;
@@ -388,30 +391,83 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
 }
 
 function styleTableCloneForCopy(tableClone, tableWidth) {
+  const forceLightSvgPaint = (svg) => {
+    const normalizePaint = (value) => {
+      if (!value) return null;
+      const normalized = value.trim().toLowerCase();
+      if (
+        normalized === 'none'
+        || normalized === 'transparent'
+        || normalized === 'rgba(0,0,0,0)'
+        || normalized.startsWith('url(')
+      ) {
+        return 'none';
+      }
+      return LIGHT_COPY_TEXT_COLOR;
+    };
+
+    svg.querySelectorAll('path, use, text, tspan, ellipse, circle, polygon, polyline, line, rect')
+      .forEach(element => {
+        const fillAttr = normalizePaint(element.getAttribute('fill'));
+        if (fillAttr && fillAttr !== 'none') {
+          element.setAttribute('fill', LIGHT_COPY_TEXT_COLOR);
+        }
+
+        const strokeAttr = normalizePaint(element.getAttribute('stroke'));
+        if (strokeAttr && strokeAttr !== 'none') {
+          element.setAttribute('stroke', LIGHT_COPY_TEXT_COLOR);
+        }
+
+        if (element.style.fill && normalizePaint(element.style.fill) !== 'none') {
+          element.style.fill = LIGHT_COPY_TEXT_COLOR;
+        }
+        if (element.style.stroke && normalizePaint(element.style.stroke) !== 'none') {
+          element.style.stroke = LIGHT_COPY_TEXT_COLOR;
+        }
+      });
+
+    svg.setAttribute('color', LIGHT_COPY_TEXT_COLOR);
+    svg.style.color = LIGHT_COPY_TEXT_COLOR;
+  };
+
   tableClone.classList.remove('copied', 'copy-failed', 'table-copy-actions-open', 'math-copy-table');
   tableClone.style.borderCollapse = 'collapse';
   tableClone.style.fontFamily = 'Arial, sans-serif';
   tableClone.style.fontSize = '12pt';
-  tableClone.style.color = '#000000';
-  tableClone.style.background = '#ffffff';
+  tableClone.style.color = LIGHT_COPY_TEXT_COLOR;
+  tableClone.style.background = LIGHT_COPY_BG_COLOR;
   tableClone.style.width = `${tableWidth}px`;
   tableClone.style.margin = '0';
+  tableClone.style.boxShadow = 'none';
 
-  tableClone.querySelectorAll('th, td').forEach(cell => {
+  tableClone.querySelectorAll('th').forEach(cell => {
     cell.style.border = '1px solid black';
     cell.style.padding = '8px';
-    cell.style.color = '#000000';
-    cell.style.background = '#ffffff';
+    cell.style.color = LIGHT_COPY_TEXT_COLOR;
+    cell.style.background = LIGHT_COPY_HEADER_BG_COLOR;
+  });
+
+  tableClone.querySelectorAll('td').forEach(cell => {
+    cell.style.border = '1px solid black';
+    cell.style.padding = '8px';
+    cell.style.color = LIGHT_COPY_TEXT_COLOR;
+    cell.style.background = LIGHT_COPY_BG_COLOR;
+  });
+
+  tableClone.querySelectorAll('th *, td *').forEach(node => {
+    if (!(node instanceof HTMLElement)) return;
+    node.style.color = LIGHT_COPY_TEXT_COLOR;
   });
 
   tableClone.querySelectorAll('mjx-container').forEach(container => {
-    container.style.color = '#000000';
+    container.style.color = LIGHT_COPY_TEXT_COLOR;
     container.style.background = 'transparent';
   });
 
   tableClone.querySelectorAll('svg').forEach(svg => {
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    forceLightSvgPaint(svg);
     inlineReferencedSvgDefs(svg);
   });
 }
@@ -440,10 +496,13 @@ async function rasterizeTableWithHtml2Canvas(table) {
   sandbox.style.left = '-99999px';
   sandbox.style.top = '0';
   sandbox.style.padding = `${TABLE_IMAGE_PADDING_PX}px`;
-  sandbox.style.background = '#ffffff';
+  sandbox.style.background = LIGHT_COPY_BG_COLOR;
+  sandbox.style.color = LIGHT_COPY_TEXT_COLOR;
   sandbox.style.pointerEvents = 'none';
   sandbox.style.zIndex = '-1';
   sandbox.style.overflow = 'hidden';
+  sandbox.style.boxShadow = 'none';
+  sandbox.setAttribute('data-theme', 'light');
 
   const tableClone = table.cloneNode(true);
   styleTableCloneForCopy(tableClone, tableWidth);
@@ -609,6 +668,10 @@ function ensureTableCopyActionsMenu() {
   warning.className = 'table-copy-actions-warning';
   warning.textContent = 'Math symbols may not paste correctly';
 
+  const setWarningVisible = (visible) => {
+    warning.classList.toggle('visible', visible);
+  };
+
   tableCopyActionsMenu.appendChild(buttons);
   tableCopyActionsMenu.appendChild(warning);
   document.body.appendChild(tableCopyActionsMenu);
@@ -616,20 +679,28 @@ function ensureTableCopyActionsMenu() {
   copyTableButton.addEventListener('click', async event => {
     event.preventDefault();
     event.stopPropagation();
+    setWarningVisible(false);
     await runTableCopyAction('table');
   });
 
   copyImageButton.addEventListener('click', async event => {
     event.preventDefault();
     event.stopPropagation();
+    setWarningVisible(false);
     await runTableCopyAction('image');
   });
+
+  copyTableButton.addEventListener('mouseenter', () => setWarningVisible(true));
+  copyTableButton.addEventListener('mouseleave', () => setWarningVisible(false));
+  copyTableButton.addEventListener('focus', () => setWarningVisible(true));
+  copyTableButton.addEventListener('blur', () => setWarningVisible(false));
 
   tableCopyActionsMenu.addEventListener('mouseenter', () => {
     clearPendingTableCopyActionsHide();
   });
 
   tableCopyActionsMenu.addEventListener('mouseleave', () => {
+    setWarningVisible(false);
     scheduleTableCopyActionsHide();
   });
 
@@ -637,11 +708,13 @@ function ensureTableCopyActionsMenu() {
     if (!isTableCopyActionsVisible()) return;
     if (tableCopyActionsMenu.contains(event.target)) return;
     if (activeMathTable && activeMathTable.contains(event.target)) return;
+    setWarningVisible(false);
     dismissTableCopyActions();
   }, true);
 
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && isTableCopyActionsVisible()) {
+      setWarningVisible(false);
       dismissTableCopyActions();
     }
   });
@@ -691,6 +764,10 @@ export function dismissTableCopyActions() {
   }
 
   if (!tableCopyActionsMenu) return;
+  const warning = tableCopyActionsMenu.querySelector('.table-copy-actions-warning');
+  if (warning) {
+    warning.classList.remove('visible');
+  }
   tableCopyActionsMenu.classList.remove('visible');
   tableCopyActionsMenu.hidden = true;
 }

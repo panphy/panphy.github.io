@@ -1450,8 +1450,9 @@ mjx-container.copy-failed::after {
 }
 
 .table-copy-action-btn-table {
-  background: var(--button-background);
-  color: var(--text-color);
+  border-color: var(--copy-hint-outline);
+  background: var(--copy-hint-chip-bg);
+  color: var(--copy-hint-text);
 }
 
 .table-copy-action-btn-image {
@@ -1470,10 +1471,20 @@ mjx-container.copy-failed::after {
 }
 
 .table-copy-actions-warning {
-  margin: 7px 2px 0 2px;
+  margin: 0 2px 0 2px;
   font-size: 0.72rem;
   line-height: 1.35;
   color: var(--text-muted);
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: opacity 0.12s ease, max-height 0.12s ease, margin-top 0.12s ease;
+}
+
+.table-copy-actions-warning.visible {
+  margin-top: 7px;
+  max-height: 3em;
+  opacity: 1;
 }
 
 @media (pointer: coarse) {
