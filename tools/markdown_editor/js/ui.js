@@ -257,6 +257,110 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
   });
 }
 
+function normalizeDropboxImageUrl(parsedUrl) {
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isDropboxHost = hostname === 'dropbox.com' || hostname.endsWith('.dropbox.com');
+  if (!isDropboxHost) return parsedUrl;
+
+  const path = parsedUrl.pathname;
+  const isLikelyFileShare = path.startsWith('/s/') || path.startsWith('/scl/fi/');
+  if (!isLikelyFileShare) return parsedUrl;
+
+  const normalized = new URL(parsedUrl.href);
+  normalized.searchParams.delete('dl');
+  normalized.searchParams.set('raw', '1');
+  return normalized;
+}
+
+function extractGoogleDriveFileId(parsedUrl) {
+  const filePathMatch = parsedUrl.pathname.match(/^\/file\/d\/([^/]+)/);
+  if (filePathMatch && filePathMatch[1]) {
+    return filePathMatch[1];
+  }
+  return parsedUrl.searchParams.get('id');
+}
+
+function normalizeGoogleDriveImageUrl(parsedUrl) {
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isGoogleDriveHost = hostname === 'drive.google.com' || hostname === 'docs.google.com';
+  if (!isGoogleDriveHost) return parsedUrl;
+
+  const fileId = extractGoogleDriveFileId(parsedUrl);
+  if (!fileId) return parsedUrl;
+
+  const normalized = new URL('https://drive.google.com/uc');
+  normalized.searchParams.set('export', 'view');
+  normalized.searchParams.set('id', fileId);
+  const resourceKey = parsedUrl.searchParams.get('resourcekey');
+  if (resourceKey) {
+    normalized.searchParams.set('resourcekey', resourceKey);
+  }
+  return normalized;
+}
+
+function normalizeOneDriveImageUrl(parsedUrl) {
+  const hostname = parsedUrl.hostname.toLowerCase();
+
+  if (hostname === '1drv.ms' || hostname.endsWith('.1drv.ms')) {
+    const normalized = new URL(parsedUrl.href);
+    normalized.searchParams.set('download', '1');
+    return normalized;
+  }
+
+  if (hostname === 'onedrive.live.com') {
+    const resid = parsedUrl.searchParams.get('resid') || parsedUrl.searchParams.get('id');
+    if (resid) {
+      const normalized = new URL('https://onedrive.live.com/download');
+      normalized.searchParams.set('resid', resid);
+      const authKey = parsedUrl.searchParams.get('authkey');
+      if (authKey) {
+        normalized.searchParams.set('authkey', authKey);
+      }
+      return normalized;
+    }
+
+    const normalized = new URL(parsedUrl.href);
+    normalized.searchParams.set('download', '1');
+    normalized.searchParams.delete('web');
+    return normalized;
+  }
+
+  if (hostname.endsWith('.sharepoint.com')) {
+    const normalized = new URL(parsedUrl.href);
+    normalized.searchParams.set('download', '1');
+    normalized.searchParams.delete('web');
+    return normalized;
+  }
+
+  return parsedUrl;
+}
+
+function normalizeImageUrl(parsedUrl) {
+  const afterDropbox = normalizeDropboxImageUrl(parsedUrl);
+  const afterGoogleDrive = normalizeGoogleDriveImageUrl(afterDropbox);
+  return normalizeOneDriveImageUrl(afterGoogleDrive);
+}
+
+function normalizeAndValidateImageUrl(value) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { error: 'Please enter an image URL.' };
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(trimmed);
+  } catch {
+    return { error: 'Enter a valid URL that starts with http:// or https://.' };
+  }
+
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    return { error: 'Only http:// and https:// image URLs are allowed.' };
+  }
+
+  return { value: normalizeImageUrl(parsedUrl).href };
+}
+
 /**
  * Show the image insertion modal.
  * @returns {Promise<{url: string, align: string, width: number}|null>}
@@ -407,28 +511,8 @@ export function showImageModal() {
       resolve(result);
     };
 
-    const normalizeAndValidateUrl = (value) => {
-      const trimmed = value.trim();
-      if (!trimmed) {
-        return { error: 'Please enter an image URL.' };
-      }
-
-      let parsedUrl;
-      try {
-        parsedUrl = new URL(trimmed);
-      } catch {
-        return { error: 'Enter a valid URL that starts with http:// or https://.' };
-      }
-
-      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-        return { error: 'Only http:// and https:// image URLs are allowed.' };
-      }
-
-      return { value: parsedUrl.href };
-    };
-
     const submitModal = () => {
-      const urlValidation = normalizeAndValidateUrl(urlInput.value);
+      const urlValidation = normalizeAndValidateImageUrl(urlInput.value);
       if (!urlValidation.value) {
         setError(urlValidation.error);
         urlInput.focus();
