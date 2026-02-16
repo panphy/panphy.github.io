@@ -6,6 +6,14 @@
 const EQUATION_PNG_BASE_SCALE = 4;
 const EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
 const EQUATION_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
+const TABLE_IMAGE_PADDING_PX = 8;
+const TABLE_COPY_ACTION_OFFSET_PX = 8;
+const TABLE_COPY_ACTION_HIDE_DELAY_MS = 120;
+
+let tableCopyActionsMenu = null;
+let activeMathTable = null;
+let tableCopyActionsHideTimeoutId = 0;
+const tableMathDetectionCache = new WeakMap();
 
 function getEquationRasterScale(widthPx, heightPx) {
   const safeWidth = Math.max(1, widthPx);
@@ -20,6 +28,102 @@ function getEquationRasterScale(widthPx, heightPx) {
   const maxScaleByPixels = Math.sqrt(EQUATION_PNG_MAX_PIXELS / (safeWidth * safeHeight));
 
   return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+}
+
+function hasMathDelimiters(text) {
+  if (!text || !text.includes('$')) return false;
+
+  const isCurrencyLike = value => {
+    const trimmed = value.trim();
+    if (!/^\d/.test(trimmed)) {
+      return false;
+    }
+
+    const currencyAbbreviation = /\b(?:aud|brl|cad|chf|cny|dkk|eur|gbp|hkd|inr|jpy|krw|mxn|nok|sek|sgd|usd|zar)\b/i;
+
+    if (currencyAbbreviation.test(trimmed)) {
+      return true;
+    }
+
+    if (/^\d+(?:[.,]\d+)?\s+[A-Za-z]/.test(trimmed)) {
+      return true;
+    }
+
+    return /^\d+(?:[.,]\d+)?\s*[\/-]\s*[A-Za-z]/.test(trimmed);
+  };
+
+  const isEscaped = (value, index) => {
+    let slashCount = 0;
+    for (let i = index - 1; i >= 0 && value[i] === '\\'; i -= 1) {
+      slashCount += 1;
+    }
+    return slashCount % 2 === 1;
+  };
+
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] !== '$' || isEscaped(text, i)) {
+      i += 1;
+      continue;
+    }
+
+    const isDisplay = text[i + 1] === '$' && !isEscaped(text, i + 1);
+    const delimiter = isDisplay ? '$$' : '$';
+    const start = i + delimiter.length;
+    let searchIndex = start;
+    let closingIndex = -1;
+
+    while (searchIndex < text.length) {
+      if (text.startsWith(delimiter, searchIndex) && !isEscaped(text, searchIndex)) {
+        closingIndex = searchIndex;
+        break;
+      }
+      searchIndex += 1;
+    }
+
+    if (closingIndex === -1) {
+      i += delimiter.length;
+      continue;
+    }
+
+    const content = text.slice(start, closingIndex).trim();
+    if (!isDisplay && isCurrencyLike(content)) {
+      i = closingIndex + delimiter.length;
+      continue;
+    }
+    if (content.length > 0) {
+      return true;
+    }
+
+    i = closingIndex + delimiter.length;
+  }
+
+  return false;
+}
+
+function tableContainsMath(table) {
+  if (!table) return false;
+  if (tableMathDetectionCache.has(table)) {
+    return tableMathDetectionCache.get(table);
+  }
+
+  const hasMath = table.querySelector('mjx-container')
+    ? true
+    : hasMathDelimiters(table.textContent || '');
+  tableMathDetectionCache.set(table, hasMath);
+  return hasMath;
+}
+
+function markTableMathHint(table) {
+  const hasMath = tableContainsMath(table);
+  table.classList.toggle('math-copy-table', hasMath);
+  return hasMath;
+}
+
+function clearPendingTableCopyActionsHide() {
+  if (!tableCopyActionsHideTimeoutId) return;
+  window.clearTimeout(tableCopyActionsHideTimeoutId);
+  tableCopyActionsHideTimeoutId = 0;
 }
 
 /**
@@ -56,6 +160,60 @@ function parseViewBox(svg) {
   return null;
 }
 
+function collectReferencedSvgIds(element) {
+  const ids = new Set();
+  element.querySelectorAll('use').forEach(use => {
+    const href = use.getAttribute('href') || use.getAttribute('xlink:href');
+    if (href && href.startsWith('#')) {
+      ids.add(href.slice(1));
+    }
+  });
+  return ids;
+}
+
+function hasElementWithId(root, id) {
+  if (!root || !id) return false;
+  if (window.CSS && typeof CSS.escape === 'function') {
+    return Boolean(root.querySelector(`#${CSS.escape(id)}`));
+  }
+  const escaped = id.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return Boolean(root.querySelector(`[id="${escaped}"]`));
+}
+
+function inlineReferencedSvgDefs(svgRoot, lookupRoot = document) {
+  let defsRoot = svgRoot.querySelector('defs');
+  if (!defsRoot) {
+    defsRoot = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    svgRoot.insertBefore(defsRoot, svgRoot.firstChild);
+  }
+
+  const processedIds = new Set();
+  const pendingIds = collectReferencedSvgIds(svgRoot);
+
+  while (pendingIds.size > 0) {
+    const id = pendingIds.values().next().value;
+    pendingIds.delete(id);
+
+    if (processedIds.has(id)) continue;
+    processedIds.add(id);
+
+    if (hasElementWithId(defsRoot, id)) continue;
+
+    const original = lookupRoot.getElementById(id);
+    if (!original) continue;
+
+    const clonedDef = original.cloneNode(true);
+    defsRoot.appendChild(clonedDef);
+
+    const nestedIds = collectReferencedSvgIds(clonedDef);
+    nestedIds.forEach(nestedId => {
+      if (!processedIds.has(nestedId)) {
+        pendingIds.add(nestedId);
+      }
+    });
+  }
+}
+
 /**
  * Prepare equation SVG for copying
  * @param {SVGElement} svg - The original SVG element
@@ -65,52 +223,8 @@ function prepareEquationSvg(svg) {
   // Clone the SVG to avoid modifying the original
   const svgClone = svg.cloneNode(true);
 
-  // MathJax uses a global defs cache - we need to inline all referenced glyphs
-  // For complex equations (integrals, matrices, boxed, etc.), definitions can
-  // reference other definitions, so we need to recursively resolve all references.
-  const getReferencedIds = (element) => {
-    const ids = new Set();
-    const useElements = element.querySelectorAll('use');
-    useElements.forEach(use => {
-      const href = use.getAttribute('href') || use.getAttribute('xlink:href');
-      if (href && href.startsWith('#')) {
-        ids.add(href.substring(1));
-      }
-    });
-    return ids;
-  };
-
-  let defsClone = svgClone.querySelector('defs');
-  if (!defsClone) {
-    defsClone = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    svgClone.insertBefore(defsClone, svgClone.firstChild);
-  }
-
-  const processedIds = new Set();
-  const pendingIds = getReferencedIds(svgClone);
-
-  while (pendingIds.size > 0) {
-    const id = pendingIds.values().next().value;
-    pendingIds.delete(id);
-
-    if (processedIds.has(id)) continue;
-    processedIds.add(id);
-
-    if (defsClone.querySelector(`#${CSS.escape(id)}`)) continue;
-
-    const original = document.getElementById(id);
-    if (original) {
-      const clonedDef = original.cloneNode(true);
-      defsClone.appendChild(clonedDef);
-
-      const nestedIds = getReferencedIds(clonedDef);
-      nestedIds.forEach(nestedId => {
-        if (!processedIds.has(nestedId)) {
-          pendingIds.add(nestedId);
-        }
-      });
-    }
-  }
+  // MathJax uses global defs; inline referenced glyphs for standalone copy.
+  inlineReferencedSvgDefs(svgClone);
 
   const paddingPx = 8;
   const rect = svg.getBoundingClientRect();
@@ -273,6 +387,266 @@ async function rasterizeSvgToPng(svgString, widthPx, heightPx) {
   }
 }
 
+function prepareTableSvgForImage(table) {
+  const rect = table.getBoundingClientRect();
+  const tableWidth = Math.max(
+    1,
+    Math.ceil(rect.width || table.scrollWidth || table.offsetWidth || 1)
+  );
+  const tableHeight = Math.max(
+    1,
+    Math.ceil(rect.height || table.scrollHeight || table.offsetHeight || 1)
+  );
+
+  const tableClone = table.cloneNode(true);
+  tableClone.classList.remove('copied', 'copy-failed', 'table-copy-actions-open', 'math-copy-table');
+  tableClone.style.borderCollapse = 'collapse';
+  tableClone.style.fontFamily = 'Arial, sans-serif';
+  tableClone.style.fontSize = '12pt';
+  tableClone.style.color = '#000000';
+  tableClone.style.background = '#ffffff';
+  tableClone.style.width = `${tableWidth}px`;
+  tableClone.style.margin = '0';
+
+  tableClone.querySelectorAll('th, td').forEach(cell => {
+    cell.style.border = '1px solid black';
+    cell.style.padding = '8px';
+    cell.style.color = '#000000';
+    cell.style.background = '#ffffff';
+  });
+
+  tableClone.querySelectorAll('mjx-container').forEach(container => {
+    container.style.color = '#000000';
+    container.style.background = 'transparent';
+  });
+
+  tableClone.querySelectorAll('svg').forEach(svg => {
+    inlineReferencedSvgDefs(svg);
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  wrapper.style.display = 'inline-block';
+  wrapper.style.padding = `${TABLE_IMAGE_PADDING_PX}px`;
+  wrapper.style.background = '#ffffff';
+  wrapper.style.boxSizing = 'border-box';
+  wrapper.appendChild(tableClone);
+
+  const widthPx = tableWidth + TABLE_IMAGE_PADDING_PX * 2;
+  const heightPx = tableHeight + TABLE_IMAGE_PADDING_PX * 2;
+  const wrapperString = new XMLSerializer().serializeToString(wrapper);
+  const svgString = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}" height="${heightPx}" viewBox="0 0 ${widthPx} ${heightPx}">
+  <foreignObject x="0" y="0" width="${widthPx}" height="${heightPx}">
+    ${wrapperString}
+  </foreignObject>
+</svg>`.trim();
+
+  return {
+    svgString,
+    widthPx,
+    heightPx
+  };
+}
+
+function isTableCopyActionsVisible() {
+  return Boolean(tableCopyActionsMenu && !tableCopyActionsMenu.hidden);
+}
+
+function positionTableCopyActionsMenu(table) {
+  if (!tableCopyActionsMenu || !table) return;
+  const rect = table.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+
+  const menuRect = tableCopyActionsMenu.getBoundingClientRect();
+  const viewportPadding = 8;
+
+  let left = rect.left + (rect.width / 2) - (menuRect.width / 2);
+  left = Math.min(
+    Math.max(left, viewportPadding),
+    window.innerWidth - menuRect.width - viewportPadding
+  );
+
+  let top = rect.top - menuRect.height - TABLE_COPY_ACTION_OFFSET_PX;
+  if (top < viewportPadding) {
+    top = rect.bottom + TABLE_COPY_ACTION_OFFSET_PX;
+  }
+
+  tableCopyActionsMenu.style.left = `${Math.round(left + window.scrollX)}px`;
+  tableCopyActionsMenu.style.top = `${Math.round(top + window.scrollY)}px`;
+}
+
+async function runTableCopyAction(action) {
+  if (!activeMathTable) return;
+  const targetTable = activeMathTable;
+  dismissTableCopyActions();
+
+  let success = false;
+  if (action === 'image') {
+    success = await copyTableAsImageToClipboard(targetTable);
+  } else {
+    success = await copyTableToClipboard(targetTable);
+  }
+
+  if (success) {
+    showCopyFeedback(targetTable);
+  } else {
+    showCopyFailedFeedback(targetTable);
+  }
+}
+
+function scheduleTableCopyActionsHide() {
+  clearPendingTableCopyActionsHide();
+  tableCopyActionsHideTimeoutId = window.setTimeout(() => {
+    dismissTableCopyActions();
+  }, TABLE_COPY_ACTION_HIDE_DELAY_MS);
+}
+
+function ensureTableCopyActionsMenu() {
+  if (tableCopyActionsMenu) {
+    return tableCopyActionsMenu;
+  }
+
+  tableCopyActionsMenu = document.createElement('div');
+  tableCopyActionsMenu.className = 'table-copy-actions';
+  tableCopyActionsMenu.hidden = true;
+  tableCopyActionsMenu.setAttribute('role', 'group');
+  tableCopyActionsMenu.setAttribute('aria-label', 'Math table copy actions');
+
+  const buttons = document.createElement('div');
+  buttons.className = 'table-copy-actions-buttons';
+
+  const copyTableButton = document.createElement('button');
+  copyTableButton.type = 'button';
+  copyTableButton.className = 'table-copy-action-btn table-copy-action-btn-table';
+  copyTableButton.textContent = 'Copy table';
+
+  const copyImageButton = document.createElement('button');
+  copyImageButton.type = 'button';
+  copyImageButton.className = 'table-copy-action-btn table-copy-action-btn-image';
+  copyImageButton.textContent = 'Copy image';
+
+  buttons.appendChild(copyTableButton);
+  buttons.appendChild(copyImageButton);
+
+  const warning = document.createElement('p');
+  warning.className = 'table-copy-actions-warning';
+  warning.textContent = 'Math symbols may not paste correctly';
+
+  tableCopyActionsMenu.appendChild(buttons);
+  tableCopyActionsMenu.appendChild(warning);
+  document.body.appendChild(tableCopyActionsMenu);
+
+  copyTableButton.addEventListener('click', async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await runTableCopyAction('table');
+  });
+
+  copyImageButton.addEventListener('click', async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await runTableCopyAction('image');
+  });
+
+  tableCopyActionsMenu.addEventListener('mouseenter', () => {
+    clearPendingTableCopyActionsHide();
+  });
+
+  tableCopyActionsMenu.addEventListener('mouseleave', () => {
+    scheduleTableCopyActionsHide();
+  });
+
+  document.addEventListener('pointerdown', event => {
+    if (!isTableCopyActionsVisible()) return;
+    if (tableCopyActionsMenu.contains(event.target)) return;
+    if (activeMathTable && activeMathTable.contains(event.target)) return;
+    dismissTableCopyActions();
+  }, true);
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && isTableCopyActionsVisible()) {
+      dismissTableCopyActions();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (!isTableCopyActionsVisible()) return;
+    if (!activeMathTable) return;
+    positionTableCopyActionsMenu(activeMathTable);
+  });
+
+  window.addEventListener('scroll', () => {
+    if (isTableCopyActionsVisible()) {
+      dismissTableCopyActions();
+    }
+  }, true);
+
+  return tableCopyActionsMenu;
+}
+
+function showTableCopyActions(table) {
+  const menu = ensureTableCopyActionsMenu();
+  clearPendingTableCopyActionsHide();
+
+  if (activeMathTable === table && isTableCopyActionsVisible()) {
+    positionTableCopyActionsMenu(table);
+    return;
+  }
+
+  if (activeMathTable && activeMathTable !== table) {
+    activeMathTable.classList.remove('table-copy-actions-open');
+  }
+
+  activeMathTable = table;
+  activeMathTable.classList.add('table-copy-actions-open');
+
+  menu.hidden = false;
+  menu.classList.add('visible');
+  positionTableCopyActionsMenu(table);
+}
+
+export function dismissTableCopyActions() {
+  clearPendingTableCopyActionsHide();
+
+  if (activeMathTable) {
+    activeMathTable.classList.remove('table-copy-actions-open');
+    activeMathTable = null;
+  }
+
+  if (!tableCopyActionsMenu) return;
+  tableCopyActionsMenu.classList.remove('visible');
+  tableCopyActionsMenu.hidden = true;
+}
+
+export function handleCopyHover(event) {
+  if (window.getSelection().toString()) return false;
+  const table = event.target.closest('table');
+  if (!table) return false;
+
+  const hasMath = markTableMathHint(table);
+  if (!hasMath) return false;
+
+  showTableCopyActions(table);
+  return true;
+}
+
+export function handleCopyHoverOut(event) {
+  if (!activeMathTable) return false;
+
+  const exitedTable = event.target.closest('table');
+  if (!exitedTable || exitedTable !== activeMathTable) return false;
+
+  const nextTarget = event.relatedTarget;
+  if (nextTarget && (activeMathTable.contains(nextTarget)
+      || (tableCopyActionsMenu && tableCopyActionsMenu.contains(nextTarget)))) {
+    return false;
+  }
+
+  scheduleTableCopyActionsHide();
+  return true;
+}
+
 /**
  * Detect if running on Safari browser.
  * Safari has limited clipboard MIME type support (no image/svg+xml).
@@ -342,6 +716,46 @@ export async function copyEquationToClipboard(mjxContainer) {
     }
   } catch (err) {
     console.error('Failed to copy equation:', err);
+    return false;
+  }
+}
+
+/**
+ * Copy a table to clipboard as an image.
+ * @param {HTMLTableElement} table - The table element to copy
+ * @returns {Promise<boolean>} Success status
+ */
+export async function copyTableAsImageToClipboard(table) {
+  const preparedTable = prepareTableSvgForImage(table);
+  const { svgString, widthPx, heightPx } = preparedTable;
+
+  try {
+    const useSafariCompatMode = isSafari();
+
+    if (useSafariCompatMode) {
+      const pngPromise = rasterizeSvgToPng(svgString, widthPx, heightPx).then(blob => {
+        if (!blob) throw new Error('Table PNG rasterization failed');
+        return blob;
+      });
+      const clipboardItem = new ClipboardItem({
+        'image/png': pngPromise
+      });
+      await navigator.clipboard.write([clipboardItem]);
+      return true;
+    }
+
+    const pngBlob = await rasterizeSvgToPng(svgString, widthPx, heightPx);
+    if (!pngBlob) {
+      return false;
+    }
+
+    const clipboardItem = new ClipboardItem({
+      'image/png': pngBlob
+    });
+    await navigator.clipboard.write([clipboardItem]);
+    return true;
+  } catch (err) {
+    console.error('Failed to copy table as image:', err);
     return false;
   }
 }
@@ -417,6 +831,32 @@ export function showCopyFailedFeedback(element) {
  * @param {MouseEvent} event - The click event
  */
 export function handleCopyClick(event) {
+  if (activeMathTable && (!event.target.closest('table') || !activeMathTable.contains(event.target))) {
+    dismissTableCopyActions();
+  }
+
+  // Check if clicked on a table (but not inside a cell for text selection)
+  const table = event.target.closest('table');
+  if (table && !window.getSelection().toString()) {
+    event.preventDefault();
+
+    const hasMath = markTableMathHint(table);
+    if (hasMath) {
+      showTableCopyActions(table);
+      return true;
+    }
+
+    dismissTableCopyActions();
+    copyTableToClipboard(table).then(success => {
+      if (success) {
+        showCopyFeedback(table);
+      } else {
+        showCopyFailedFeedback(table);
+      }
+    });
+    return true;
+  }
+
   // Check if clicked on a MathJax container
   const mjxContainer = event.target.closest('mjx-container');
   if (mjxContainer) {
@@ -427,20 +867,6 @@ export function handleCopyClick(event) {
         showCopyFeedback(mjxContainer);
       } else {
         showCopyFailedFeedback(mjxContainer);
-      }
-    });
-    return true;
-  }
-
-  // Check if clicked on a table (but not inside a cell for text selection)
-  const table = event.target.closest('table');
-  if (table && !window.getSelection().toString()) {
-    event.preventDefault();
-    copyTableToClipboard(table).then(success => {
-      if (success) {
-        showCopyFeedback(table);
-      } else {
-        showCopyFailedFeedback(table);
       }
     });
     return true;

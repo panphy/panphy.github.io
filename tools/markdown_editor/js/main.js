@@ -26,7 +26,12 @@ import {
   getCleanRenderedOutputHTML
 } from './rendering.js';
 
-import { handleCopyClick } from './copy.js';
+import {
+  handleCopyClick,
+  handleCopyHover,
+  handleCopyHoverOut,
+  dismissTableCopyActions
+} from './copy.js';
 
 import {
   initUI,
@@ -741,6 +746,7 @@ function renderContent() {
   const preprocessedText = preprocessMarkdown(inputText);
   const parsedMarkdown = markedLib.parse(preprocessedText);
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
+  dismissTableCopyActions();
   renderedOutput.innerHTML = sanitizedContent;
 
   const syncPreviewScrollToInput = () => {
@@ -788,6 +794,7 @@ function hasFullscreenSupport() {
  */
 async function togglePresentMode() {
   const fullscreen = isInFullscreen();
+  dismissTableCopyActions();
 
   if (!fullscreen) {
     if (hasFullscreenSupport()) {
@@ -1409,10 +1416,24 @@ markdownInput.addEventListener('input', () => {
 markdownInput.addEventListener('scroll', syncInputToOutput, { passive: true });
 renderedOutput.addEventListener('scroll', syncOutputToInput, { passive: true });
 
+renderedOutput.addEventListener('mouseover', event => {
+  if (!isInFullscreen()) {
+    handleCopyHover(event);
+  }
+});
+
+renderedOutput.addEventListener('mouseout', event => {
+  if (!isInFullscreen()) {
+    handleCopyHoverOut(event);
+  }
+});
+
 renderedOutput.addEventListener('click', event => {
   // Disable click-to-copy while presenting
   if (!isInFullscreen()) {
     handleCopyClick(event);
+  } else {
+    dismissTableCopyActions();
   }
 });
 
@@ -1566,11 +1587,13 @@ function updatePresentThemeIcon() {
 }
 
 document.addEventListener('fullscreenchange', () => {
+  dismissTableCopyActions();
   updatePresentButtonLabel();
   updatePresentThemeIcon();
   if (!isInFullscreen()) disableLaser();
 });
 document.addEventListener('webkitfullscreenchange', () => {
+  dismissTableCopyActions();
   updatePresentButtonLabel();
   updatePresentThemeIcon();
   if (!isInFullscreen()) disableLaser();

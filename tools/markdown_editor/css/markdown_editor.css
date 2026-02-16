@@ -1271,6 +1271,10 @@ mjx-container::after {
   z-index: 100;
 }
 
+#renderedOutput table.math-copy-table::before {
+  content: "Math table: choose copy";
+}
+
 #renderedOutput table {
   position: relative;
 }
@@ -1323,6 +1327,10 @@ mjx-container.copy-failed::after {
   content: "Copied!" !important;
   background: #22c55e !important;
   opacity: 1 !important;
+}
+
+#renderedOutput table.table-copy-actions-open {
+  box-shadow: 0 0 0 2px var(--copy-hint-outline);
 }
 
 /* Code block styling */
@@ -1397,6 +1405,82 @@ mjx-container.copy-failed::after {
 #outputPane.pseudo-fullscreen mjx-container:hover::after,
 #outputPane.pseudo-fullscreen #renderedOutput table:hover::before {
   opacity: 0;
+}
+
+/* Math table quick-copy actions */
+.table-copy-actions {
+  position: absolute;
+  z-index: 1100;
+  min-width: 220px;
+  max-width: min(92vw, 320px);
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--pane-background);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.table-copy-actions[hidden] {
+  display: none;
+}
+
+.table-copy-actions.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.table-copy-actions-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.table-copy-action-btn {
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.table-copy-action-btn-table {
+  background: var(--button-background);
+  color: var(--text-color);
+}
+
+.table-copy-action-btn-image {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: #ffffff;
+}
+
+.table-copy-action-btn:hover {
+  filter: brightness(0.98);
+}
+
+.table-copy-action-btn:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+
+.table-copy-actions-warning {
+  margin: 7px 2px 0 2px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+@media (pointer: coarse) {
+  .table-copy-action-btn {
+    min-height: 48px;
+    font-size: 0.9rem;
+  }
 }
 
 /* ---------------------------------------------------------------------- */
