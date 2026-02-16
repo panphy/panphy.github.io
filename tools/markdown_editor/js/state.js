@@ -103,7 +103,7 @@ export function saveSyncScrollPreference(enabled) {
 export function loadSyncScrollPreference() {
   const saved = safeGetStorageItem(STORAGE_KEYS.SYNC_SCROLL);
   if (saved === null) {
-    state.isSyncScrollEnabled = false;
+    state.isSyncScrollEnabled = true;
   } else {
     state.isSyncScrollEnabled = saved === 'true';
   }
