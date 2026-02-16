@@ -1652,6 +1652,10 @@ mjx-container.copy-failed::after {
   width: 90%;
 }
 
+.history-modal.history-modal-single {
+  min-height: min(70vh, 520px);
+}
+
 .history-title-row {
   display: flex;
   align-items: center;
@@ -1676,6 +1680,11 @@ mjx-container.copy-failed::after {
   gap: 8px;
   padding: 3px;
   margin-bottom: 16px;
+}
+
+.history-modal.history-modal-single .history-list {
+  min-height: 220px;
+  padding-bottom: 48px;
 }
 
 .history-empty {
@@ -1767,8 +1776,10 @@ mjx-container.copy-failed::after {
   line-height: 1.4;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 3.5em;
-  overflow: hidden;
+  max-height: 8.4em;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
   font-family: var(--font-mono);
 }
 

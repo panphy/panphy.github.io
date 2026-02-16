@@ -705,6 +705,8 @@ function formatTimestamp(ts) {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` ${time}`;
 }
 
+const HISTORY_PREVIEW_CHAR_LIMIT = 2000;
+
 /**
  * Show a modal listing snapshot history. Returns the chosen snapshot's
  * content, or null if the user cancelled.
@@ -723,6 +725,9 @@ export function showHistoryModal(snapshots) {
 
     const content = document.createElement('div');
     content.className = 'modal-content history-modal';
+    if (snapshots.length === 1) {
+      content.classList.add('history-modal-single');
+    }
 
     const titleRow = document.createElement('div');
     titleRow.className = 'history-title-row';
@@ -782,7 +787,10 @@ export function showHistoryModal(snapshots) {
 
         const preview = document.createElement('div');
         preview.className = 'history-item-preview';
-        preview.textContent = snap.content.slice(0, 120) + (snap.content.length > 120 ? '...' : '');
+        const previewText = snap.content.length > HISTORY_PREVIEW_CHAR_LIMIT
+          ? `${snap.content.slice(0, HISTORY_PREVIEW_CHAR_LIMIT)}\n...`
+          : snap.content;
+        preview.textContent = previewText;
         item.setAttribute('aria-label', `Restore snapshot from ${formatTimestamp(snap.timestamp)}`);
         item.addEventListener('click', () => closeModal(snap.content));
         item.addEventListener('keydown', (event) => {
