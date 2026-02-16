@@ -835,6 +835,58 @@ function isSafari() {
   return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
 }
 
+function canWriteClipboardItems() {
+  return typeof ClipboardItem !== 'undefined'
+    && Boolean(navigator.clipboard)
+    && typeof navigator.clipboard.write === 'function';
+}
+
+function canWriteClipboardText() {
+  return Boolean(navigator.clipboard)
+    && typeof navigator.clipboard.writeText === 'function';
+}
+
+async function writePlainTextToClipboard(text) {
+  const value = String(text ?? '');
+  if (!value) return false;
+
+  if (canWriteClipboardText()) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch {
+      // Fall through to legacy copy fallback.
+    }
+  }
+
+  if (typeof document.execCommand !== 'function') {
+    return false;
+  }
+
+  const textArea = document.createElement('textarea');
+  textArea.value = value;
+  textArea.setAttribute('readonly', '');
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-99999px';
+  textArea.style.top = '0';
+  document.body.appendChild(textArea);
+  textArea.select();
+  textArea.selectionStart = 0;
+  textArea.selectionEnd = textArea.value.length;
+
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch {
+    copied = false;
+  }
+
+  if (textArea.parentNode) {
+    textArea.parentNode.removeChild(textArea);
+  }
+  return copied;
+}
+
 /**
  * Copy an equation (MathJax SVG) to clipboard as an image.
  *
@@ -854,6 +906,11 @@ export async function copyEquationToClipboard(mjxContainer) {
   if (!preparedSvg) return false;
 
   const { svgString, widthPx, heightPx } = preparedSvg;
+  const plainTextFallback = (mjxContainer.textContent || '').trim();
+
+  if (!canWriteClipboardItems()) {
+    return writePlainTextToClipboard(plainTextFallback);
+  }
 
   try {
     // Safari only supports text/plain, text/html, and image/png in ClipboardItem
@@ -888,12 +945,21 @@ export async function copyEquationToClipboard(mjxContainer) {
         clipboardPayload['image/png'] = pngBlob;
       }
 
-      await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
+      try {
+        await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
+      } catch (writeError) {
+        // Some browsers reject SVG in clipboard payloads; retry with PNG only.
+        if (pngBlob) {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+        } else {
+          throw writeError;
+        }
+      }
       return true;
     }
   } catch (err) {
-    console.error('Failed to copy equation:', err);
-    return false;
+    console.error('Failed to copy equation as an image:', err);
+    return writePlainTextToClipboard(plainTextFallback);
   }
 }
 
@@ -903,6 +969,10 @@ export async function copyEquationToClipboard(mjxContainer) {
  * @returns {Promise<boolean>} Success status
  */
 export async function copyTableAsImageToClipboard(table) {
+  if (!canWriteClipboardItems()) {
+    return copyTableToClipboard(table);
+  }
+
   try {
     const useSafariCompatMode = isSafari();
 
@@ -930,7 +1000,7 @@ export async function copyTableAsImageToClipboard(table) {
     return true;
   } catch (err) {
     console.error('Failed to copy table as image:', err);
-    return false;
+    return copyTableToClipboard(table);
   }
 }
 
@@ -942,6 +1012,7 @@ export async function copyTableAsImageToClipboard(table) {
  */
 export async function copyTableToClipboard(table) {
   const tableClone = table.cloneNode(true);
+  const plainText = table.innerText || table.textContent || '';
 
   // Add inline styles for better Word compatibility (always light theme)
   tableClone.style.borderCollapse = 'collapse';
@@ -957,25 +1028,22 @@ export async function copyTableToClipboard(table) {
 
   const htmlString = tableClone.outerHTML;
 
-  try {
-    // Copy as HTML for better Word compatibility
-    const blob = new Blob([htmlString], { type: 'text/html' });
-    const clipboardItem = new ClipboardItem({
-      'text/html': blob,
-      'text/plain': new Blob([table.innerText], { type: 'text/plain' })
-    });
-    await navigator.clipboard.write([clipboardItem]);
-    return true;
-  } catch (err) {
-    // Fallback to text copy
+  if (canWriteClipboardItems()) {
     try {
-      await navigator.clipboard.writeText(htmlString);
+      // Copy as HTML for better Word compatibility
+      const blob = new Blob([htmlString], { type: 'text/html' });
+      const clipboardItem = new ClipboardItem({
+        'text/html': blob,
+        'text/plain': new Blob([plainText], { type: 'text/plain' })
+      });
+      await navigator.clipboard.write([clipboardItem]);
       return true;
-    } catch (fallbackErr) {
-      console.error('Failed to copy table:', fallbackErr);
-      return false;
+    } catch (err) {
+      console.warn('HTML table copy failed; falling back to plain text.', err);
     }
   }
+
+  return writePlainTextToClipboard(plainText);
 }
 
 /**

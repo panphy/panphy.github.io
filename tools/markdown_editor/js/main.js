@@ -516,6 +516,10 @@ if (markedLib) {
 }
 
 let untouchedSampleContent = null;
+let sampleLoadRequestId = 0;
+const sampleButtonDefaultLabel = loadSampleButton
+  ? (loadSampleButton.textContent || '').trim() || 'Learn'
+  : 'Learn';
 
 function isUntouchedSampleContent(content = markdownInput.value) {
   return untouchedSampleContent !== null && content === untouchedSampleContent;
@@ -530,6 +534,13 @@ function clearUntouchedSampleContentFlagIfEdited(content = markdownInput.value) 
 function saveSnapshotIfNeeded(content) {
   if (isUntouchedSampleContent(content)) return;
   saveSnapshot(content);
+}
+
+function setSampleLoadingState(isLoading) {
+  if (!loadSampleButton) return;
+  loadSampleButton.disabled = isLoading;
+  loadSampleButton.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+  loadSampleButton.textContent = isLoading ? 'Loading...' : sampleButtonDefaultLabel;
 }
 
 function renderAndPersistDraft() {
@@ -555,6 +566,10 @@ function persistDraftAndDirtyState() {
  * Fetch and load the sample Markdown document
  */
 async function loadSampleDocument() {
+  if (loadSampleButton && loadSampleButton.disabled) {
+    return;
+  }
+
   if (markdownInput.value.trim() !== '') {
     const confirmed = await showConfirmationModal(
       'This will open a sample document and replace your current content. Any unsaved changes will be lost.',
@@ -562,26 +577,45 @@ async function loadSampleDocument() {
     );
     if (!confirmed) return;
   }
-  saveSnapshotIfNeeded(markdownInput.value);
-  fetch('/tools/markdown_editor/sample_doc.md')
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();
-    })
-    .then(data => {
-      markdownInput.value = data;
-      untouchedSampleContent = data;
-      markContentExported(data);
-      renderContent();
-      clearDraft();
-      updateDirtyIndicator(dirtyIndicator, false);
-    })
-    .catch(error => {
-      console.error('Error loading sample document:', error);
-      alert('Failed to load the sample document.');
-    });
+
+  const contentBeforeLoad = markdownInput.value;
+  saveSnapshotIfNeeded(contentBeforeLoad);
+
+  const requestId = ++sampleLoadRequestId;
+  setSampleLoadingState(true);
+
+  try {
+    const response = await fetch('/tools/markdown_editor/sample_doc.md');
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.text();
+    if (requestId !== sampleLoadRequestId) return;
+
+    if (markdownInput.value !== contentBeforeLoad) {
+      const confirmed = await showConfirmationModal(
+        'The sample finished loading, but your content changed while it was loading. Replace your current content with the sample?',
+        { isSuppressed: isSampleWarningSuppressed, saveSuppressed: saveSampleWarningSuppressed }
+      );
+      if (!confirmed) return;
+      saveSnapshotIfNeeded(markdownInput.value);
+    }
+
+    markdownInput.value = data;
+    untouchedSampleContent = data;
+    markContentExported(data);
+    renderContent();
+    clearDraft();
+    updateDirtyIndicator(dirtyIndicator, false);
+  } catch (error) {
+    console.error('Error loading sample document:', error);
+    alert('Failed to load the sample document.');
+  } finally {
+    if (requestId === sampleLoadRequestId) {
+      setSampleLoadingState(false);
+    }
+  }
 }
 
 
@@ -1521,10 +1555,22 @@ if (historyButton) {
   historyButton.addEventListener('click', async () => {
     const snapshots = loadSnapshots();
     const restored = await showHistoryModal(snapshots);
-    if (restored !== null) {
-      markdownInput.value = restored;
-      renderAndPersistDraft();
+    if (restored === null) return;
+
+    const currentContent = markdownInput.value;
+    if (restored === currentContent) return;
+
+    if (currentContent.trim() !== '') {
+      const confirmed = await showConfirmationModal(
+        'Restoring this snapshot will replace your current content. Any unsaved changes will be lost.'
+      );
+      if (!confirmed) return;
+      saveSnapshotIfNeeded(currentContent);
     }
+
+    markdownInput.value = restored;
+    untouchedSampleContent = null;
+    renderAndPersistDraft();
   });
 }
 

@@ -29,6 +29,12 @@ export function initUI(elements) {
   highlightStyle = elements.highlightStyle;
 }
 
+function isTopMostModalOverlay(overlay) {
+  if (!overlay || !overlay.isConnected) return false;
+  const overlays = document.querySelectorAll('.modal-overlay');
+  return overlays.length > 0 && overlays[overlays.length - 1] === overlay;
+}
+
 /**
  * Update the theme toggle button's icon and attributes.
  */
@@ -219,8 +225,10 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
     });
 
     const onKeyDown = (event) => {
+      if (!isTopMostModalOverlay(overlay)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         closeModal(null);
       }
     };
@@ -265,8 +273,11 @@ export function showFilenameModal(defaultFilename, title = 'Enter file name') {
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        e.preventDefault();
         closeModal(resolveFilename(input.value));
       } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
         closeModal(null);
       }
     });
@@ -559,8 +570,10 @@ export function showImageModal() {
     };
 
     const onKeyDown = (event) => {
+      if (!isTopMostModalOverlay(overlay)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         closeModal(null);
         return;
       }
@@ -671,8 +684,10 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
     });
 
     const onKeyDown = (event) => {
+      if (!isTopMostModalOverlay(overlay)) return;
       if (event.key === 'Escape') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         closeModal(false);
       }
     };
@@ -921,8 +936,10 @@ export function showHistoryModal(snapshots) {
     };
 
     const onKeyDown = (e) => {
+      if (!isTopMostModalOverlay(overlay)) return;
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopImmediatePropagation();
         closeModal(null);
       }
     };
