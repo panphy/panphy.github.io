@@ -3,26 +3,50 @@
 const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 const debouncedUpdateData = debounce(updateData, 300);
 
+function formatRowInputValue(value) {
+	if (value === undefined || value === null) return '';
+	return String(value);
+}
 
-	function initializeTable(initialRows = 7) {
-		const tableBody = document.querySelector('#data-table tbody');
-		// Create the default empty rows
-		for (let i = 0; i < initialRows; i++) {
-			const newRow = tableBody.insertRow();
-			newRow.innerHTML = `
-            <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
-            <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
-            <td class="error-column" style="display: none;">
-                <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" />
-            </td>
-            <td class="error-column" style="display: none;">
-                <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" />
-            </td>
-        `;
+function getErrorColumnDisplay(axis) {
+	const toggle = document.getElementById(`toggle-${axis}-error`);
+	return toggle && toggle.checked ? 'table-cell' : 'none';
+}
+
+function buildDataRowHtml(options = {}, wrapInTr = false) {
+	const {
+		xValue = '',
+		yValue = '',
+		xErrorValue = '',
+		yErrorValue = '',
+		xErrorDisplay = getErrorColumnDisplay('x'),
+		yErrorDisplay = getErrorColumnDisplay('y')
+	} = options;
+
+	const rowHtml = `
+                <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0" value="${formatRowInputValue(xValue)}"></td>
+                <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0" value="${formatRowInputValue(yValue)}"></td>
+                <td class="error-column" style="display: ${xErrorDisplay};"><input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" value="${formatRowInputValue(xErrorValue)}" /></td>
+                <td class="error-column" style="display: ${yErrorDisplay};"><input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" value="${formatRowInputValue(yErrorValue)}" /></td>
+            `;
+
+	return wrapInTr ? `<tr>${rowHtml}</tr>` : rowHtml;
+}
+
+
+		function initializeTable(initialRows = 7) {
+			const tableBody = document.querySelector('#data-table tbody');
+			// Create the default empty rows
+			for (let i = 0; i < initialRows; i++) {
+				const newRow = tableBody.insertRow();
+				newRow.innerHTML = buildDataRowHtml({
+					xErrorDisplay: 'none',
+					yErrorDisplay: 'none'
+				});
+			}
+			// Update the active dataset with the new (empty) rows.
+			updateData();
 		}
-		// Update the active dataset with the new (empty) rows.
-		updateData();
-	}
 
 
 	function updateDatasetTabsBar() {
@@ -122,90 +146,48 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	function populateTableFromActiveDataset() {
-		const tableBody = document.querySelector('#data-table tbody');
-		tableBody.innerHTML = ''; // Clear current table
+		function populateTableFromActiveDataset() {
+			const tableBody = document.querySelector('#data-table tbody');
+			tableBody.innerHTML = ''; // Clear current table
 
-		// For the active dataset, get its stored raw data.
-		let dataset = rawData[activeSet] || [];
+			// For the active dataset, get its stored raw data.
+			let dataset = rawData[activeSet] || [];
+			const xErrorDisplay = getErrorColumnDisplay('x');
+			const yErrorDisplay = getErrorColumnDisplay('y');
 
-		// For Dataset 1: if rawData is empty but we have stored x-values, rebuild the table from them.
-		if (activeSet === 0 && dataset.length === 0 && dataset1XValues && dataset1XValues.length > 0) {
-			dataset1XValues.forEach(xVal => {
-				const newRow = tableBody.insertRow();
-				newRow.innerHTML = `
-                <td>
-                    <input type="text" class="x-input"
-                           onkeydown="navigateTable(event)"
-                           oninput="debouncedUpdateData()"
-                           placeholder="0"
-                           value="${xVal}">
-                </td>
-                <td>
-                    <input type="text" class="y-input"
-                           onkeydown="navigateTable(event)"
-                           oninput="debouncedUpdateData()"
-                           placeholder="0"
-                           value="">
-                </td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
-                    <input type="text" class="x-error-input"
-                           onkeydown="navigateTable(event)"
-                           placeholder="±0"
-                           oninput="debouncedUpdateData()"
-                           value="">
-                </td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
-                    <input type="text" class="y-error-input"
-                           onkeydown="navigateTable(event)"
-                           placeholder="±0"
-                           oninput="debouncedUpdateData()"
-                           value="">
-                </td>
-            `;
-			});
-			return;
-		}
+			// For Dataset 1: if rawData is empty but we have stored x-values, rebuild the table from them.
+			if (activeSet === 0 && dataset.length === 0 && dataset1XValues && dataset1XValues.length > 0) {
+				dataset1XValues.forEach(xVal => {
+					const newRow = tableBody.insertRow();
+					newRow.innerHTML = buildDataRowHtml({
+						xValue: xVal,
+						yValue: '',
+						xErrorValue: '',
+						yErrorValue: '',
+						xErrorDisplay,
+						yErrorDisplay
+					});
+				});
+				return;
+			}
 
-		// For other datasets (or if set 1 already has valid data), build rows from rawData.
-		if (dataset.length > 0) {
-			dataset.forEach(point => {
-				const newRow = tableBody.insertRow();
-				newRow.innerHTML = `
-                <td>
-                    <input type="text" class="x-input"
-                           onkeydown="navigateTable(event)"
-                           oninput="debouncedUpdateData()"
-                           placeholder="0"
-                           value="${point.x}">
-                </td>
-                <td>
-                    <input type="text" class="y-input"
-                           onkeydown="navigateTable(event)"
-                           oninput="debouncedUpdateData()"
-                           placeholder="0"
-                           value="${point.y !== null ? point.y : ''}">
-                </td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};">
-                    <input type="text" class="x-error-input"
-                           onkeydown="navigateTable(event)"
-                           placeholder="±0"
-                           oninput="debouncedUpdateData()"
-                           value="${point.xErrorRaw || ''}">
-                </td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};">
-                    <input type="text" class="y-error-input"
-                           onkeydown="navigateTable(event)"
-                           placeholder="±0"
-                           oninput="debouncedUpdateData()"
-                           value="${point.yErrorRaw || ''}">
-                </td>
-            `;
-			});
-		} else {
-			// If there is no data in the active dataset, initialize default rows.
-			initializeTable();
-		}
+			// For other datasets (or if set 1 already has valid data), build rows from rawData.
+			if (dataset.length > 0) {
+				dataset.forEach(point => {
+					const newRow = tableBody.insertRow();
+					newRow.innerHTML = buildDataRowHtml({
+						xValue: point.x,
+						yValue: point.y !== null ? point.y : '',
+						xErrorValue: point.xErrorRaw || '',
+						yErrorValue: point.yErrorRaw || '',
+						xErrorDisplay,
+						yErrorDisplay
+					});
+				});
+			} else {
+				// If there is no data in the active dataset, initialize default rows.
+				initializeTable();
+			}
 	}
 
 
@@ -264,17 +246,12 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	function addRow() {
-		const tableBody = document.querySelector('#data-table tbody');
-		const newRow = tableBody.insertRow();
-		newRow.innerHTML = `
-                <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
-                <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0"></td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-x-error').checked ? 'table-cell' : 'none'};"><input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" /></td>
-                <td class="error-column" style="display: ${document.getElementById('toggle-y-error').checked ? 'table-cell' : 'none'};"><input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" /></td>
-            `;
-		updateData();
-	}
+		function addRow() {
+			const tableBody = document.querySelector('#data-table tbody');
+			const newRow = tableBody.insertRow();
+			newRow.innerHTML = buildDataRowHtml();
+			updateData();
+		}
 
 
 	function clearRows(resetHeaders = true) {
@@ -322,7 +299,7 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	function copyXFromSet1() {
+		function copyXFromSet1() {
 		if (!dataset1XValues || dataset1XValues.length === 0) {
 			alert("Dataset 1 does not contain any valid x values yet.");
 			return;
@@ -339,22 +316,10 @@ const debouncedUpdateData = debounce(updateData, 300);
 			const toggleYError = document.getElementById('toggle-y-error').checked;
 			// Build the HTML string for the missing rows.
 			for (let i = 0; i < missingCount; i++) {
-				newRowsHTML += `
-                <tr>
-                    <td>
-                        <input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0">
-                    </td>
-                    <td>
-                        <input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0">
-                    </td>
-                    <td class="error-column" style="display: ${toggleXError ? 'table-cell' : 'none'};">
-                        <input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()">
-                    </td>
-                    <td class="error-column" style="display: ${toggleYError ? 'table-cell' : 'none'};">
-                        <input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()">
-                    </td>
-                </tr>
-            `;
+				newRowsHTML += buildDataRowHtml({
+					xErrorDisplay: toggleXError ? 'table-cell' : 'none',
+					yErrorDisplay: toggleYError ? 'table-cell' : 'none'
+				}, true);
 			}
 			// Insert all missing rows at once.
 			tableBody.insertAdjacentHTML('beforeend', newRowsHTML);
@@ -2000,24 +1965,24 @@ const debouncedUpdateData = debounce(updateData, 300);
 	}
 
 
-	function confirmFilename() {
-		const input = document.getElementById('filename-prompt-input');
-		let filename = input.value.trim();
+		function confirmFilename() {
+			const input = document.getElementById('filename-prompt-input');
+			let filename = input.value.trim();
 
-		// Use default if empty
-		if (!filename) {
-			filename = 'data';
+			// Use default if empty
+			if (!filename) {
+				filename = 'data';
+			}
+
+			// Sanitize filename using shared helper.
+			filename = sanitizeFilename(filename, 'data');
+
+			// Call the appropriate export function
+			if (filenamePromptType === 'csv') {
+				closeFilenamePrompt();
+				exportCSV(filename);
+			} else if (filenamePromptType === 'md') {
+				closeFilenamePrompt();
+				saveExportedMarkdown(filename);
+			}
 		}
-
-		// Sanitize filename (remove invalid characters)
-		filename = filename.replace(/[<>:"/\\|?*]/g, '_');
-
-		// Call the appropriate export function
-		if (filenamePromptType === 'csv') {
-			closeFilenamePrompt();
-			exportCSV(filename);
-		} else if (filenamePromptType === 'md') {
-			closeFilenamePrompt();
-			saveExportedMarkdown(filename);
-		}
-	}

@@ -86,3 +86,12 @@ function loadState() {
 		return null;
 	}
 }
+
+function getDatasetPoints(index = activeSet) {
+	const dataset = rawData[index];
+	return Array.isArray(dataset) ? dataset : [];
+}
+
+function getFiniteDatasetPoints(index = activeSet) {
+	return getDatasetPoints(index).filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
+}

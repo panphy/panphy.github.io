@@ -277,7 +277,7 @@
 
 		// Build traces for each dataset.
 		rawData.forEach((dataset, index) => {
-			const valid = dataset.filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
+			const valid = getFiniteDatasetPoints(index);
 			const xVals = valid.map(point => point.x);
 			const yVals = valid.map(point => point.y);
 

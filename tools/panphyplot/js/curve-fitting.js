@@ -1,9 +1,7 @@
 // Curve fitting helpers
 
 function fitCurve() {
-	const filteredData = rawData[activeSet].filter(
-		point => Number.isFinite(point.x) && Number.isFinite(point.y)
-	);
+	const filteredData = getFiniteDatasetPoints(activeSet);
 	const xValues = filteredData.map(point => point.x);
 	const yValues = filteredData.map(point => point.y);
 	const fitMethod = document.getElementById('fit-method').value;
@@ -99,9 +97,7 @@ function calculateFWHM(x, y, maxY) {
 		right = null;
 
 	// Sort data by x (use only finite x and y)
-	const sortedData = rawData[activeSet]
-		.slice()
-		.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+	const sortedData = getFiniteDatasetPoints(activeSet)
 		.sort((a, b) => a.x - b.x);
 
 	if (sortedData.length < 2) {
@@ -145,10 +141,10 @@ function calculateFWHM(x, y, maxY) {
 
 function setInitialParameters(method) {
 	if (!method) return;
-	if (!rawData[activeSet] || rawData[activeSet].length === 0) return;
+	if (getDatasetPoints(activeSet).length === 0) return;
 
 	// Use only finite points (avoid null/blank cells corrupting guesses)
-	const pts = rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+	const pts = getFiniteDatasetPoints(activeSet);
 	if (pts.length < 4) return;
 
 	const x = pts.map(p => p.x);
@@ -603,7 +599,7 @@ function performPolynomialFit(x, y, degree) {
 
 function performExponentialFit() {
 	try {
-		const data = (rawData && rawData[activeSet]) ? rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y)) : [];
+		const data = getFiniteDatasetPoints(activeSet);
 		if (data.length < 3) {
 			alert('Exponential fit requires at least three valid data points.');
 			return;
@@ -641,9 +637,7 @@ function performExponentialFit() {
 function performPowerFit() {
 	try {
 		// 1. Filter and validate input data
-		const validData = rawData[activeSet].filter(point =>
-			Number.isFinite(point.x) && Number.isFinite(point.y)
-		);
+		const validData = getFiniteDatasetPoints(activeSet);
 		if (validData.length < 4) {
 			alert("Power fit requires at least 4 data points.");
 			return;
@@ -1066,15 +1060,14 @@ function median(arr) {
 
 
 function estimateKFromData() {
-	if (!rawData[activeSet] || rawData[activeSet].length < 4) {
+	if (getDatasetPoints(activeSet).length < 4) {
 		console.warn("Not enough data points to estimate k.");
 		return null;
 	}
 
 	// === 1. Sort & detrend ===
 	// Filter out entries with non-finite x or y (e.g. null y from blank cells)
-	const sortedData = rawData[activeSet]
-		.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+	const sortedData = getFiniteDatasetPoints(activeSet)
 		.sort((a, b) => a.x - b.x);
 	if (sortedData.length < 4) {
 		console.warn("Not enough valid data points to estimate k.");
@@ -1267,7 +1260,7 @@ function performSinusoidalFit() {
 			return;
 		}
 
-		const data = rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+		const data = getFiniteDatasetPoints(activeSet);
 		if (data.length < 4) {
 			alert('Sinusoidal fit requires at least four valid data points.');
 			return;
@@ -1387,7 +1380,7 @@ function performGaussianFit() {
 		if (sigma0 === 0) sigma0 = 1e-6;
 		if (sigma0 < 0) sigma0 = Math.abs(sigma0);
 
-		const data = rawData[activeSet].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+		const data = getFiniteDatasetPoints(activeSet);
 		if (data.length < 4) {
 			alert('Gaussian fit requires at least four valid data points.');
 			return;
