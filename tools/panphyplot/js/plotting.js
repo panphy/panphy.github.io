@@ -147,6 +147,7 @@
 
 		function createDownloadImageConfig(defaultFilename) {
 			return {
+				displayModeBar: true,
 				displaylogo: false,
 				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'resetScale2d'],
 				modeBarButtonsToAdd: [{
