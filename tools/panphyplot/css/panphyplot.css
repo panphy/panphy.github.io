@@ -456,36 +456,39 @@ body {
 	color: #fecaca;
 }
 
-/* Add Dataset - Sage green (Create action) */
+/* Add Dataset (+) */
 .add-dataset-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 10px 14px;
+	padding: 10px 0;
 	margin-left: 0;
-	line-height: 1.2;
-	background-color: var(--btn-create);
-	color: #fff;
-	border: none;
+	line-height: 1;
+	background-color: var(--tab-bg);
+	color: var(--text-secondary);
+	border: 1px solid transparent;
+	border-bottom: none;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 	cursor: pointer;
-	transition: background-color 0.2s ease, transform 0.2s ease;
-	font-size: 0.9rem;
-	font-weight: 600;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+	font-size: 1.25rem;
+	font-weight: 700;
 	flex: none;
-	width: 120px;
-}
-
-[data-theme="dark"] .add-dataset-btn {
-	color: #1a1a1a;
+	width: 56px;
 }
 
 .add-dataset-btn:hover {
-	background-color: var(--btn-create-hover);
-	transform: translateY(-1px);
+	background-color: rgba(90, 111, 214, 0.1);
+	color: var(--text-main);
+	border-color: rgba(90, 111, 214, 0.25);
+}
+
+[data-theme="dark"] .add-dataset-btn:hover {
+	background-color: rgba(123, 139, 230, 0.15);
+	border-color: rgba(123, 139, 230, 0.3);
 }
 
 /* Layout Sections */
