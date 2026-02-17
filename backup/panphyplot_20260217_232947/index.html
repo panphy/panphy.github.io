@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <link rel="manifest" href="/manifest.json">
+    <script src="/assets/sw-register.js" defer></script>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PanPhy Labs | Physics Tools & Simulations</title>
+    <meta name="description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta property="og:title" content="PanPhy Labs">
+    <meta property="og:description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta name="twitter:title" content="PanPhy Labs">
+    <meta name="twitter:description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta name="google-site-verification" content="REPLACE_WITH_GOOGLE_SEARCH_CONSOLE_TOKEN">
+    
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
+        /* CSS Variables */
+        :root {
+            --font-sans: 'Inter', sans-serif;
+            --font-display: 'Poppins', 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Light Theme */
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+            
+            --brand-primary: #6c5ce7; /* Indigo */
+            --brand-secondary: #a29bfe;
+            --brand-accent: #00cec9; /* Teal */
+            
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.5);
+            
+            --card-bg: #ffffff;
+            --card-border: transparent;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
+            
+            --btn-bg: #2d3436;
+            --btn-text: #fff;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg-color: #0f1014;
+            --bg-pattern: #181a20;
+            --text-main: #dfe6e9;
+            --text-secondary: #b2bec3;
+            
+            --brand-primary: #a29bfe;
+            --brand-secondary: #6c5ce7;
+            --brand-accent: #81ecec;
+            
+            --nav-bg: rgba(22, 24, 29, 0.85);
+            --nav-border: rgba(255, 255, 255, 0.05);
+            
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.2);
+            
+            --btn-bg: #6c5ce7;
+            --btn-text: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .offline-font {
+            --font-sans: 'Inter', 'Poppins', sans-serif;
+            --font-display: 'Poppins', 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px; /* Dot pattern */
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Header */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            height: 80px;
+            width: auto;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        header h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+            color: var(--brand-primary);
+        }
+
+        header h1.gradient-text {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-top: 1rem;
+        }
+
+        /* Floating Navigation */
+        nav {
+            position: fixed;
+            top: calc(12px + env(safe-area-inset-top, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 0.5rem 0.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--nav-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: max-content;
+            max-width: 90%;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: var(--brand-primary);
+            color: #fff;
+        }
+
+        nav a,
+        .card a,
+        .theme-toggle button {
+            touch-action: manipulation;
+        }
+
+        /* Theme Toggle Inside Nav */
+        .theme-toggle button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0.5rem;
+        }
+
+        .theme-toggle button:hover {
+            background-color: rgba(128, 128, 128, 0.2);
+            transform: rotate(15deg);
+        }
+
+        /* Sections */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto 5rem;
+            padding: 0 1.5rem;
+        }
+
+        .section h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 32px;
+            background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
+            border-radius: 4px;
+        }
+
+        /* Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--brand-primary);
+        }
+
+        /* Modern Card Decoration */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            margin: 0 0 0.8rem 0;
+            color: var(--text-main);
+        }
+
+        .card p {
+            font-size: 1rem;
+            margin: 0 0 1.5rem 0;
+            color: var(--text-secondary);
+            flex-grow: 1;
+        }
+
+        .card a {
+            display: inline-block;
+            text-align: center;
+            background: transparent;
+            color: var(--brand-primary);
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 2px solid var(--brand-primary);
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .card a:hover {
+            background: var(--brand-primary);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* About Section Enhancement */
+        #about p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 3rem 1.5rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        footer a {
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Tweaks */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            nav {
+                width: calc(100vw - 16px);
+                max-width: 760px;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+                align-items: center;
+                gap: 0.15rem;
+                padding: 0.35rem 0.4rem;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            nav a {
+                margin: 0;
+                padding: 0.4rem 0.3rem;
+                font-size: 0.78rem;
+                text-align: center;
+            }
+
+            .theme-toggle {
+                display: flex;
+                justify-content: center;
+            }
+
+            .theme-toggle button {
+                margin-left: 0;
+                padding: 0.35rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (pointer: coarse) {
+            nav a,
+            .card a,
+            .theme-toggle button {
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="#tools">Tools</a>
+        <a href="#simulations">Sims</a>
+        <a href="#for_teachers">Teachers</a>
+        <a href="#fun">Fun</a>
+        <a href="#about">About</a>
+        <div class="theme-toggle">
+            <button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+        </div>
+    </nav>
+
+    <header>
+        <img src="/assets/panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
+        <h1>PanPhy Labs</h1>
+        <p>Physics apps, tools, sims, and some random stuff.</p>
+    </header>
+
+    <div class="section" id="tools">
+        <h2>Tools</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Markdown + LaTeX</h3>
+                <p>Write, preview, and present scientific documents with LaTeX and live rendering.</p>
+                <a href="/tools/markdown_editor.html">Open Editor</a>
+            </div>
+            <div class="card">
+                <h3>Data Plotting & Fitting</h3>
+                <p>Plot data, add uncertainties, and run best-fit analysis.</p>
+                <a href="/tools/panphyplot.html">Plot Data</a>
+            </div>
+            <div class="card">
+                <h3>Motion Tracker</h3>
+                <p>Step through video frames, click to track objects, and extract motion data.</p>
+                <a href="/tools/motion_tracker.html">Track Motion</a>
+            </div>
+            <div class="card">
+                <h3>Sound Analyzer</h3>
+                <p>Visualize live audio as frequency spectrum and waveform, with measurement tools.</p>
+                <a href="/tools/sound_analyzer.html">Analyze Sound</a>
+            </div>
+            <div class="card">
+                <h3>Tone Generator</h3>
+                <p>Layer multiple sine waves with real-time waveform display.</p>
+                <a href="/tools/tone_generator.html">Generate Tone</a>
+            </div>
+            <div class="card">
+                <h3>Graph Digitizer</h3>
+                <p>Import a graph image, calibrate axes, and extract data points.</p>
+                <a href="/tools/digitizer.html">Digitize</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="simulations">
+        <h2>Simulations</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Wave Superposition</h3>
+                <p>Interactive real-time simulation of wave interference.</p>
+                <a href="/simulations/superposition.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>Standing Wave</h3>
+                <p>Visualize nodes and antinodes with boundary conditions.</p>
+                <a href="/simulations/standing_wave.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>Lorentz Transform</h3>
+                <p>Drag events on a Minkowski diagram and watch frames transform in real time.</p>
+                <a href="/simulations/lorentz.html">Launch Sim</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="for_teachers">
+        <h2>For Teachers</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Exam Timer</h3>
+                <p>Manage exam times with automatic extra-time calculation.</p>
+                <a href="/for_teachers/timer.html">Open Timer</a>
+            </div>
+            <div class="card">
+                <h3>Camera Visualizer</h3>
+                <p>Project your device camera to the big screen, then snap & sketch.</p>
+                <a href="/for_teachers/visualizer.html">Use Camera</a>
+            </div>
+            <div class="card">
+                <h3>EAL Companion</h3>
+                <p>AI-powered language support for EAL learners.</p>
+                <a href="https://panphy-eal.streamlit.app/" target="_blank" rel="noopener noreferrer">Open App</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="fun">
+        <h2>For Fun</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Asteroid Storm</h3>
+                <p>Survive the asteroid storm in this arcade game.</p>
+                <a href="/fun/dodge.html">Play Now</a>
+            </div>
+            <div class="card">
+                <h3>Hit Me!</h3>
+                <p>Wait for it... tap when green! Tracks your best and average times.</p>
+                <a href="/fun/react.html">Play Now</a>
+            </div>
+            <div class="card">
+                <h3>ASCII Camera</h3>
+                <p>See yourself in 8-bit color ASCII characters.</p>
+                <a href="/fun/ascii_cam.html">Open Camera</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="about">
+        <h2>About</h2>
+        <p>
+            Welcome to <strong>PanPhy Labs</strong>. The tools, simulations, and games here are built with AI and
+            designed to be interactive and educational. While there are many great web tools and physics simulations
+            online, not all meet my needs. With school devices locked down, installing software is a hassle, so I
+            build my own web apps: simple, browser-based, and ready for everyone to explore and enjoy.
+            <br><br>
+            Most importantly, the site is offline-friendly (apart from the game "Asteroid Storm" and "EAL Learning
+            Companion," which is a Streamlit app). Once you open it in a browser, you can keep using the tools,
+            simulations, and games even without an internet connection.
+        </p>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 PanPhy Labs</p>
+        <p>
+            <a href="mailto:panphylabs@icloud.com">Contact Me</a> • 
+            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        </p>
+    </footer>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeButton = document.getElementById('theme-button');
+        const DARK_THEME_KEY = "panphy-dark";
+        const LIGHT_THEME_KEY = "panphy-light";
+
+        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+            "dark" :
+            localStorage.getItem(LIGHT_THEME_KEY) ?
+                "light" :
+                "light";
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateButtonEmoji(currentTheme);
+
+        function updateButtonEmoji(theme) {
+            themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+
+        themeButton.addEventListener('click', function () {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem(DARK_THEME_KEY, 'true');
+                localStorage.removeItem(LIGHT_THEME_KEY);
+                updateButtonEmoji('dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                localStorage.removeItem(DARK_THEME_KEY);
+                updateButtonEmoji('light');
+            }
+        });
+    </script>
+    <script>
+        // Apply gradient text effect, skip on Brave iOS where background-clip:text is broken
+        (function() {
+            var h1 = document.querySelector('header h1');
+            if (!h1) return;
+            var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+            var isBrave = !!navigator.brave;
+            if (!(isIOS && isBrave)) {
+                h1.classList.add('gradient-text');
+            }
+        })();
+    </script>
+    <script>
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
+    </script>
+</body>
+
+</html>
