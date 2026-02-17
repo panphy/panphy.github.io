@@ -1381,7 +1381,7 @@ function performSinusoidalFit() {
 		const fitFunction = xi => A * Math.exp(b * xi) * Math.sin(k * xi - phi) + c;
 		const yFit = xFit.map(fitFunction);
 
-		let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x} \sin(${k.toFixed(3)}x`;
+		let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x} \\sin(${k.toFixed(3)}x`;
 		if (phi > 0) equation += ` - ${phi.toFixed(3)}`;
 		else if (phi < 0) equation += ` + ${Math.abs(phi).toFixed(3)}`;
 		equation += `)`;
