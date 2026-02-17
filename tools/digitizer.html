@@ -826,8 +826,12 @@
     statusDiv.textContent = message;
   }
 
+  function isGraphLoaded() {
+    return canvas.style.display !== "none" && !!image.getAttribute("src");
+  }
+
   function hasWorkToWarnAbout() {
-    return !!image.src || calibrationX.length > 0 || calibrationY.length > 0 || digitizedPoints.length > 0 || activeCalibration !== null;
+    return isGraphLoaded() || calibrationX.length > 0 || calibrationY.length > 0 || digitizedPoints.length > 0 || activeCalibration !== null;
   }
 
   function confirmGraphDataLoss(triggerDescription) {
@@ -935,7 +939,7 @@
   if (importGraphLabel) {
     importGraphLabel.addEventListener('click', function (e) {
       importGraphConfirmed = false;
-      if (!image.src) {
+      if (!isGraphLoaded()) {
         return;
       }
       if (!confirmGraphDataLoss("Importing a new graph")) {
