@@ -1,5 +1,38 @@
 // Plotting helpers
 
+	const PLOT_EXPORT_BASE_SCALE = 3;
+	const PLOT_EXPORT_MAX_CANVAS_SIDE = 8192;
+	const PLOT_EXPORT_MAX_PIXELS = 16777216;
+
+	function getPlotExportDimensions(gd) {
+		const rect = gd && typeof gd.getBoundingClientRect === 'function' ? gd.getBoundingClientRect() : null;
+		const layoutWidth = gd && gd._fullLayout ? Number(gd._fullLayout.width) : 0;
+		const layoutHeight = gd && gd._fullLayout ? Number(gd._fullLayout.height) : 0;
+		const rectWidth = rect ? Number(rect.width) : 0;
+		const rectHeight = rect ? Number(rect.height) : 0;
+		const clientWidth = gd ? Number(gd.clientWidth) : 0;
+		const clientHeight = gd ? Number(gd.clientHeight) : 0;
+
+		return {
+			width: Math.max(1, Math.ceil(layoutWidth || rectWidth || clientWidth || 1200)),
+			height: Math.max(1, Math.ceil(layoutHeight || rectHeight || clientHeight || 800))
+		};
+	}
+
+	function getAdaptivePlotExportScale(gd) {
+		const dims = getPlotExportDimensions(gd);
+		const safeWidth = Math.max(1, dims.width);
+		const safeHeight = Math.max(1, dims.height);
+		const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+		const requestedScale = Math.max(PLOT_EXPORT_BASE_SCALE, Math.ceil(dpr * 2));
+		const maxScaleBySide = Math.min(
+			PLOT_EXPORT_MAX_CANVAS_SIDE / safeWidth,
+			PLOT_EXPORT_MAX_CANVAS_SIDE / safeHeight
+		);
+		const maxScaleByPixels = Math.sqrt(PLOT_EXPORT_MAX_PIXELS / (safeWidth * safeHeight));
+		return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+	}
+
 	function getPlotThemeSettings() {
 		const theme = document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
@@ -123,10 +156,11 @@
 						const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
 						if (userInput === null) return;
 						const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
+						const exportScale = getAdaptivePlotExportScale(gd);
 						try {
 							const dataUrl = await Plotly.toImage(gd, {
 								format: 'png',
-								scale: 2
+								scale: exportScale
 							});
 							const imageBlob = await fetch(dataUrl).then(res => res.blob());
 							await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
@@ -135,7 +169,7 @@
 							Plotly.downloadImage(gd, {
 								format: 'png',
 								filename: filenameBase,
-								scale: 2
+								scale: exportScale
 							});
 						}
 					}

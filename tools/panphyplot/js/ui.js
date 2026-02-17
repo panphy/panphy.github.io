@@ -1899,6 +1899,23 @@ function initializeFitEquationCopyInteractions() {
 	// Populated in the background after MathJax finishes typesetting so
 	// that copyExportedTableToClipboard() can use them synchronously.
 	let cachedTablePngs = null;
+	const TABLE_EXPORT_BASE_SCALE = 3;
+	const TABLE_EXPORT_MATH_BASE_SCALE = 4;
+	const TABLE_EXPORT_MAX_CANVAS_SIDE = 8192;
+	const TABLE_EXPORT_MAX_PIXELS = 16777216;
+
+	function getSafeTableExportScale(widthPx, heightPx, baseScale) {
+		const safeWidth = Math.max(1, widthPx);
+		const safeHeight = Math.max(1, heightPx);
+		const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+		const requestedScale = Math.max(baseScale, Math.ceil(dpr * 2));
+		const maxScaleBySide = Math.min(
+			TABLE_EXPORT_MAX_CANVAS_SIDE / safeWidth,
+			TABLE_EXPORT_MAX_CANVAS_SIDE / safeHeight
+		);
+		const maxScaleByPixels = Math.sqrt(TABLE_EXPORT_MAX_PIXELS / (safeWidth * safeHeight));
+		return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+	}
 
 
 	function showExportTablePopup() {
@@ -2122,13 +2139,13 @@ function initializeFitEquationCopyInteractions() {
 		const svgs = Array.from(container.querySelectorAll('.MathJax_SVG svg'));
 		if (!svgs.length) { cachedTablePngs = []; return; }
 
-		const scale = 3;
 		Promise.all(svgs.map(svg => {
 			const selfContained = selfContainSvg(svg);
 			let svgString = new XMLSerializer().serializeToString(selfContained);
 			svgString = svgString.replace(/currentColor/g, '#000000');
 
 			const rect = svg.getBoundingClientRect();
+			const scale = getSafeTableExportScale(rect.width, rect.height, TABLE_EXPORT_MATH_BASE_SCALE);
 			const w = Math.max(Math.ceil(rect.width * scale), 1);
 			const h = Math.max(Math.ceil(rect.height * scale), 1);
 
@@ -2160,7 +2177,6 @@ function initializeFitEquationCopyInteractions() {
 	async function renderTableToPngBlob() {
 		if (!currentExportedMarkdown) return null;
 
-		const scale = 2;
 		const cellPadX = 14;
 		const cellPadY = 10;
 		const fontSize = 14;
@@ -2241,6 +2257,7 @@ function initializeFitEquationCopyInteractions() {
 
 		var totalW = colWidths.reduce(function (a, b) { return a + b; }, 0);
 		var totalH = rowHeights.reduce(function (a, b) { return a + b; }, 0);
+		var scale = getSafeTableExportScale(totalW, totalH, TABLE_EXPORT_BASE_SCALE);
 
 		// Create scaled canvas
 		var canvas = document.createElement('canvas');
