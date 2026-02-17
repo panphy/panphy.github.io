@@ -354,6 +354,13 @@ body {
 	font-weight: 500;
 }
 
+[data-theme="dark"] .dataset-tab:not(.active),
+[data-theme="dark"] .add-dataset-btn {
+	background-color: rgba(255, 255, 255, 0.035);
+	color: rgba(223, 230, 233, 0.78);
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
 .dataset-tab:not(.active):hover {
 	background-color: rgba(90, 111, 214, 0.1);
 	color: var(--text-main);
@@ -462,9 +469,9 @@ body {
 	align-items: center;
 	justify-content: center;
 	min-width: 0;
-	padding: 10px 16px;
+	padding: 9px 16px;
 	margin-left: 0;
-	line-height: 1.2;
+	line-height: 1;
 	background-color: var(--tab-bg);
 	color: var(--text-secondary);
 	border: 1px solid transparent;
@@ -475,8 +482,8 @@ body {
 	border-bottom-right-radius: 0;
 	cursor: pointer;
 	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-	font-size: 0.9rem;
-	font-weight: 500;
+	font-size: 1.2rem;
+	font-weight: 700;
 	flex: none;
 	width: auto;
 }
