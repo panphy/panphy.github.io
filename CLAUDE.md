@@ -29,8 +29,7 @@
 │   ├── markdown_editor/    # Modular JS/CSS for Markdown Editor
 │   │   ├── css/markdown_editor.css
 │   │   ├── js/             # state.js, main.js, rendering.js, copy.js, ui.js
-│   │   ├── sample_doc.md   # Sample markdown document
-│   │   └── sample_pic.webp # Sample image for documentation
+│   │   └── sample_doc.md   # Sample markdown document
 │   ├── digitizer.html
 │   ├── motion_tracker.html
 │   ├── sound_analyzer.html
@@ -57,8 +56,8 @@
 │   └── visualizer.html
 │
 └── misc/                   # Miscellaneous physics tools
-    ├── ising.html
-    └── physics_club.html
+    ├── ising_model.html
+    └── phyclub_showcase.html
 ```
 
 ## Tech Stack & Dependencies
@@ -91,7 +90,7 @@ Each application is self-contained in a single HTML file:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Title</title>
-    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+    <script src="/assets/sw-register.js" defer></script>
     <style>/* CSS with variables for theming */</style>
 </head>
 <body>
@@ -151,14 +150,13 @@ markdown_editor.html (imports scripts via ES modules)
 ├── js/copy.js           # Copy-to-clipboard (equations, tables, code)
 ├── js/ui.js             # Theme, scroll sync, modals
 ├── css/markdown_editor.css  # Styling
-├── sample_doc.md        # Tutorial document
-└── sample_pic.webp      # Sample image
+└── sample_doc.md        # Tutorial document
 ```
 
 ## Service Worker & Caching
 
 **File**: `sw.js`
-**Cache Version**: `panphy-labs-<build-id>` (content-hashed build identifier)
+**Cache Version**: `panphy-labs-<BUILD_ID>` where `BUILD_ID` is a timestamp string
 
 ### Caching Strategy
 - **Install**: Pre-caches core assets listed in `ASSETS_TO_CACHE`
@@ -172,6 +170,11 @@ Any time you change a file listed in `ASSETS_TO_CACHE`, **bump the `BUILD_ID` ti
 ```javascript
 const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';  // Update this on every change
 ```
+
+### Cache-Manifest Accuracy Rules
+1. External CDN URLs must match exactly between HTML and `ASSETS_TO_CACHE` (version/path/query included)
+2. If a cached page depends on local media assets (`.mp3`, `.webm`, images, fonts) for core UX, add those assets to `ASSETS_TO_CACHE`
+3. If `assets/sw-register.js` is updated (it is cached), bump `BUILD_ID` in `sw.js`
 
 ### When Adding New Pages
 1. Add the new page path to `ASSETS_TO_CACHE` array in `sw.js`
@@ -208,7 +211,7 @@ Then open `http://localhost:8000` in a browser.
 
 ### Adding a New Tool/Page
 1. Create new HTML file in appropriate directory (`tools/`, `simulations/`, etc.)
-2. Include service worker registration in `<head>`
+2. Include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
 3. Use the standard theming CSS variables
 4. Add to `sw.js` `ASSETS_TO_CACHE` array
 5. Add link to `index.html` in the appropriate section
@@ -266,15 +269,13 @@ function toggleTheme() {
 ```
 
 ### Service Worker Registration
-```javascript
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
+```html
+<script src="/assets/sw-register.js" defer></script>
 ```
 
 ## Offline Behavior
 
-- **Works offline**: All tools, simulations, flashcards, and most games
+- **Works offline**: Core tools/simulations/pages listed in `sw.js` `ASSETS_TO_CACHE`
 - **Requires network**: Dodge game (Supabase leaderboard), any Supabase API calls
 
 ## External Services
@@ -287,8 +288,9 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 1. **No build step**: Edit files directly, no npm/webpack/etc.
 2. **Self-contained pages**: Each HTML file is a complete application
 3. **Update sw.js**: When adding or modifying cached assets, bump `BUILD_ID` and update the cache list
-4. **Theme awareness**: Always use CSS variables, not hardcoded colors
-5. **Mobile-first**: Consider touch interactions and responsive design
-6. **Offline-first**: Ensure new features work without network
-7. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
-8. **Keep it simple**: Avoid adding frameworks or build complexity
+4. **CDN URL exactness**: Keep CDN script/style URLs in HTML exactly aligned with `ASSETS_TO_CACHE`
+5. **Theme awareness**: Always use CSS variables, not hardcoded colors
+6. **Mobile-first**: Consider touch interactions and responsive design
+7. **Offline-first**: Ensure new features work without network
+8. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
+9. **Keep it simple**: Avoid adding frameworks or build complexity

@@ -1,6 +1,6 @@
 Welcome to PanPhy Labs. The tools, simulations, and games here are built with AI and designed to be interactive and educational. While there are many great web tools and physics simulations online, not all meet my needs. With school devices locked down, installing software is a hassle, so I build my own web apps: simple, browser-based, and ready for everyone to explore and enjoy.
 
-Most importantly, the site is offline-friendly (apart from the game "Asteroid Storm" and "EAL Learning Companion," which is a Streamlit app). Once you open it in a browser, you can keep using the tools, simulations, and games even without an internet connection.
+Most importantly, the site is offline-friendly (apart from the game "Asteroid Storm" and "EAL Learning Companion," which is a Streamlit app). Once a page and its required assets are cached, you can keep using the tools, simulations, and games even without an internet connection.
 
 ## Tech Stack
 - **HTML/CSS:** Lightweight, fast-loading UI with a consistent look and feel  
@@ -38,3 +38,5 @@ When modifying the site:
 - **Changing an existing cached file**: Bump `BUILD_ID` in `sw.js`
 - **Adding a new page**: Add its path to `ASSETS_TO_CACHE` in `sw.js` and bump `BUILD_ID`
 - **Renaming a module file**: Update the `<script>` / `<link>` reference in the HTML entry point, update the path in `ASSETS_TO_CACHE`, and bump `BUILD_ID`
+- **Updating a CDN URL in HTML**: Update the exact same URL in `ASSETS_TO_CACHE` (URL strings must match exactly for cache hits)
+- **Adding required local media (audio/video/images/fonts) to a cached page**: Add those assets to `ASSETS_TO_CACHE` too, then bump `BUILD_ID`

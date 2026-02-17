@@ -24,6 +24,10 @@ const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';
 
 When adding a new page, also add its path to the `ASSETS_TO_CACHE` array.
 
+**Cache URLs are exact-match keys.** If an HTML file changes any CDN script/style URL, update the exact same URL in `ASSETS_TO_CACHE` (including version/path/query string), then bump `BUILD_ID`.
+
+If a cached page depends on local media assets (audio/video/images/fonts) for core UX, add those file paths to `ASSETS_TO_CACHE` as well.
+
 ### No Build System
 
 Edit files directly. There is no npm, webpack, or any compilation step. Do not introduce one.
@@ -77,7 +81,7 @@ python3 -m http.server 8000
 ## Adding a New Page
 
 1. Create the HTML file in the appropriate directory
-2. Include service worker registration: `if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');`
+2. Include service worker registration via shared loader: `<script src="/assets/sw-register.js" defer></script>`
 3. Use the standard CSS theme variables
 4. Add the path to `ASSETS_TO_CACHE` in `sw.js`
 5. Bump the `BUILD_ID` in `sw.js`
