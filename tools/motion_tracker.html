@@ -46,6 +46,9 @@
 			--chart-text: rgba(45, 52, 54, 0.95);
 			--overlay-axis: rgba(255, 255, 255, 0.9);
 			--overlay-shadow: rgba(0, 0, 0, 0.35);
+			--copy-hint-outline: #93c5fd;
+			--copy-hint-chip-bg: #e0f2fe;
+			--copy-hint-text: #1e3a8a;
 		}
 
 		[data-theme="dark"] {
@@ -78,6 +81,9 @@
 			--chart-text: rgba(223, 230, 233, 0.95);
 			--overlay-axis: rgba(255, 255, 255, 0.75);
 			--overlay-shadow: rgba(0, 0, 0, 0.7);
+			--copy-hint-outline: #7dd3fc;
+			--copy-hint-chip-bg: #e0f2fe;
+			--copy-hint-text: #1e3a8a;
 		}
 
 		* {
@@ -530,24 +536,86 @@
 			text-align: right;
 		}
 
-		/* --- Chart Section --- */
-		#chartCanvasContainer {
-			width: 100%;
-			height: 400px;
-			position: relative;
-			background: var(--surface);
-			border-radius: var(--border-radius);
-			border: 1px solid var(--border-color);
-			padding: 10px;
-		}
+			/* --- Chart Section --- */
+			#chartCanvasContainer {
+				width: 100%;
+				height: 400px;
+				position: relative;
+				background: var(--surface);
+				border-radius: var(--border-radius);
+				border: 1px solid var(--border-color);
+				padding: 10px;
+			}
 
-		.chart-controls {
-			display: flex;
-			gap: 10px;
-			margin-top: 15px;
-			width: 100%;
-			justify-content: center;
-		}
+			#chartCanvasContainer.copy-ready {
+				cursor: pointer;
+				transition: box-shadow 0.15s ease, border-color 0.15s ease;
+			}
+
+			#chartCanvasContainer.copy-ready:hover,
+			#chartCanvasContainer.copy-ready:focus-visible {
+				box-shadow: 0 0 0 2px var(--copy-hint-outline);
+			}
+
+			#chartCanvasContainer.copy-ready::after {
+				content: "Copy image";
+				position: absolute;
+				top: -28px;
+				left: 50%;
+				transform: translateX(-50%);
+				background: var(--copy-hint-chip-bg);
+				color: var(--copy-hint-text);
+				padding: 4px 10px;
+				border-radius: 999px;
+				font-size: 11px;
+				font-family: var(--font-sans);
+				white-space: nowrap;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.15s ease;
+				z-index: 10;
+			}
+
+			#chartCanvasContainer.copy-ready:hover::after,
+			#chartCanvasContainer.copy-ready:focus-visible::after {
+				opacity: 1;
+			}
+
+			#chartCanvasContainer.copy-ready.copied {
+				box-shadow: 0 0 0 2px #22c55e !important;
+			}
+
+			#chartCanvasContainer.copy-ready.copied::after {
+				content: "Copied!" !important;
+				background: #22c55e !important;
+				color: #ffffff !important;
+				opacity: 1 !important;
+			}
+
+			#chartCanvasContainer.copy-ready.copy-failed {
+				box-shadow: 0 0 0 2px #ef4444 !important;
+			}
+
+			#chartCanvasContainer.copy-ready.copy-failed::after {
+				content: "Copy failed" !important;
+				background: #ef4444 !important;
+				color: #ffffff !important;
+				opacity: 1 !important;
+			}
+
+			#chartCanvasContainer.copy-ready.copying::after {
+				content: "Copying..." !important;
+				opacity: 1 !important;
+			}
+
+			.chart-controls {
+				display: flex;
+				gap: 10px;
+				margin-top: 15px;
+				width: 100%;
+				justify-content: center;
+			}
 
 		.chart-controls button {
 			min-height: 38px;
@@ -685,10 +753,10 @@
 			overflow: hidden;
 		}
 
-		@media (pointer: coarse) {
-			button,
-			input,
-			select,
+			@media (pointer: coarse) {
+				button,
+				input,
+				select,
 			.control-button,
 			.primary-button,
 			.secondary-button {
@@ -715,12 +783,18 @@
 				height: 6px;
 			}
 
-			#slider::-moz-range-thumb {
-				width: 28px;
-				height: 28px;
+				#slider::-moz-range-thumb {
+					width: 28px;
+					height: 28px;
+				}
 			}
-		}
-	</style>
+
+			@media (hover: none), (pointer: coarse) {
+				#chartCanvasContainer.copy-ready::after {
+					display: none;
+				}
+			}
+		</style>
 </head>
 
 <body>
@@ -885,11 +959,19 @@
 		const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
 		let frameData = [];
 		let isPlaying = false;
-		let positionChart = null;
-		let skippingFrame = false;
-		let blobUrl = null;
-		let currentPlotMode = 'pos'; // Tracks 'pos', 'vx', or 'vy'
-		let crossesVisible = true; // Toggle for hiding crosses on video
+			let positionChart = null;
+			let skippingFrame = false;
+			let blobUrl = null;
+			let currentPlotMode = 'pos'; // Tracks 'pos', 'vx', or 'vy'
+			let crossesVisible = true; // Toggle for hiding crosses on video
+			let graphCopyInProgress = false;
+
+			const GRAPH_PNG_BASE_SCALE = 3;
+			const GRAPH_PNG_MAX_CANVAS_SIDE = 8192;
+			const GRAPH_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
+			const GRAPH_COPY_PADDING_PX = 8;
+			const GRAPH_COPY_SUCCESS_MS = 1500;
+			const GRAPH_COPY_FAIL_MS = 2000;
 
 		let calibrationMode = false;
 		let calibrationStart = null;
@@ -978,10 +1060,11 @@
 		const clearDataPointsButton = document.getElementById('clearDataPoints');
 		const clearCalibrationButton = document.getElementById('clearCalibration');
 		const clearOriginButton = document.getElementById('clearOrigin');
-		const plotVxButton = document.getElementById('plotVx');
-		const plotVyButton = document.getElementById('plotVy');
-		const backToPositionButton = document.getElementById('backToPosition');
-		const hideCrossesToggle = document.getElementById('hideCrossesToggle');
+			const plotVxButton = document.getElementById('plotVx');
+			const plotVyButton = document.getElementById('plotVy');
+			const backToPositionButton = document.getElementById('backToPosition');
+			const hideCrossesToggle = document.getElementById('hideCrossesToggle');
+			const chartCanvasContainer = document.getElementById('chartCanvasContainer');
 
 		const slider = document.getElementById('slider');
 		const timeDisplay = document.getElementById('timeDisplay');
@@ -1002,13 +1085,14 @@
 		const cancelExportButton = document.getElementById('cancelExport');
 
 		const frameRatePrompt = document.getElementById('frameRatePrompt');
-		const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
-		const confirmFrameRateButton = document.getElementById('confirmFrameRate');
-		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
-		const frameRateButton = document.getElementById('frameRateButton');
-		const specialRecordingCheckbox = document.getElementById('specialRecordingMode');
-		const captureRateSection = document.getElementById('captureRateSection');
-		const detectedFpsDisplay = document.getElementById('detectedFpsDisplay');
+			const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
+			const confirmFrameRateButton = document.getElementById('confirmFrameRate');
+			const cancelFrameRateButton = document.getElementById('cancelFrameRate');
+			const frameRateButton = document.getElementById('frameRateButton');
+			const specialRecordingCheckbox = document.getElementById('specialRecordingMode');
+			const captureRateSection = document.getElementById('captureRateSection');
+			const detectedFpsDisplay = document.getElementById('detectedFpsDisplay');
+			const positionChartCanvas = document.getElementById('positionChart');
 
 		function canvasYToCartesianY(y) { return frameCanvas.height - y; }
 
@@ -1037,14 +1121,130 @@
 			return Math.max(0.5, frameCanvas.width / baseResolutionWidth);
 		}
 
-		/* Seekable helpers */
-		function getSeekableEnd() {
-			const s = hiddenVideo.seekable;
-			if (s && s.length > 0) return s.end(s.length - 1);
-			const d = hiddenVideo.duration;
-			if (Number.isFinite(d) && d > 0) return d;
-			return 0;
-		}
+			/* Seekable helpers */
+			function getSeekableEnd() {
+				const s = hiddenVideo.seekable;
+				if (s && s.length > 0) return s.end(s.length - 1);
+				const d = hiddenVideo.duration;
+				if (Number.isFinite(d) && d > 0) return d;
+				return 0;
+			}
+
+			function isSafariBrowser() {
+				const ua = navigator.userAgent;
+				return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
+			}
+
+			function canWriteClipboardItems() {
+				return typeof ClipboardItem !== 'undefined'
+					&& Boolean(navigator.clipboard)
+					&& typeof navigator.clipboard.write === 'function';
+			}
+
+			function getGraphRasterScale(widthPx, heightPx) {
+				const safeWidth = Math.max(1, widthPx);
+				const safeHeight = Math.max(1, heightPx);
+				const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+				const requestedScale = Math.max(GRAPH_PNG_BASE_SCALE, Math.ceil(dpr * 2));
+				const maxScaleBySide = Math.min(
+					GRAPH_PNG_MAX_CANVAS_SIDE / safeWidth,
+					GRAPH_PNG_MAX_CANVAS_SIDE / safeHeight
+				);
+				const maxScaleByPixels = Math.sqrt(GRAPH_PNG_MAX_PIXELS / (safeWidth * safeHeight));
+				return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+			}
+
+			async function rasterizeGraphToPngBlob() {
+				if (!positionChartCanvas || !chartCanvasContainer) return null;
+
+				const rect = positionChartCanvas.getBoundingClientRect();
+				const widthPx = rect.width > 0 ? rect.width : Math.max(1, positionChartCanvas.width);
+				const heightPx = rect.height > 0 ? rect.height : Math.max(1, positionChartCanvas.height);
+				if (widthPx <= 1 || heightPx <= 1) return null;
+
+				const scale = getGraphRasterScale(widthPx, heightPx);
+				const paddingPx = Math.max(1, Math.round(GRAPH_COPY_PADDING_PX * scale));
+				const outWidth = Math.ceil(widthPx * scale) + (paddingPx * 2);
+				const outHeight = Math.ceil(heightPx * scale) + (paddingPx * 2);
+
+				const exportCanvas = document.createElement('canvas');
+				exportCanvas.width = outWidth;
+				exportCanvas.height = outHeight;
+				const exportCtx = exportCanvas.getContext('2d');
+				if (!exportCtx) return null;
+
+				const containerStyles = getComputedStyle(chartCanvasContainer);
+				const backgroundColor = containerStyles.backgroundColor || getCssVar('--surface') || '#ffffff';
+				exportCtx.fillStyle = backgroundColor;
+				exportCtx.fillRect(0, 0, outWidth, outHeight);
+				exportCtx.imageSmoothingEnabled = true;
+				exportCtx.imageSmoothingQuality = 'high';
+				exportCtx.drawImage(
+					positionChartCanvas,
+					paddingPx,
+					paddingPx,
+					outWidth - (paddingPx * 2),
+					outHeight - (paddingPx * 2)
+				);
+
+				return new Promise(resolve => {
+					exportCanvas.toBlob(blob => resolve(blob || null), 'image/png');
+				});
+			}
+
+			function showGraphCopyFeedback() {
+				if (!chartCanvasContainer) return;
+				chartCanvasContainer.classList.remove('copy-failed');
+				chartCanvasContainer.classList.add('copied');
+				setTimeout(() => {
+					chartCanvasContainer.classList.remove('copied');
+				}, GRAPH_COPY_SUCCESS_MS);
+			}
+
+			function showGraphCopyFailedFeedback() {
+				if (!chartCanvasContainer) return;
+				chartCanvasContainer.classList.remove('copied');
+				chartCanvasContainer.classList.add('copy-failed');
+				setTimeout(() => {
+					chartCanvasContainer.classList.remove('copy-failed');
+				}, GRAPH_COPY_FAIL_MS);
+			}
+
+			async function copyGraphImageToClipboard() {
+				if (!chartCanvasContainer || !positionChartCanvas || graphCopyInProgress) return false;
+				if (!canWriteClipboardItems()) {
+					showGraphCopyFailedFeedback();
+					document.getElementById('message').innerHTML = "<p>Image clipboard copy is not supported by this browser.</p>";
+					return false;
+				}
+
+				graphCopyInProgress = true;
+				chartCanvasContainer.classList.add('copying');
+
+				const pngPromise = rasterizeGraphToPngBlob().then(blob => {
+					if (!blob) throw new Error('Graph PNG rasterization failed');
+					return blob;
+				});
+
+				try {
+					if (isSafariBrowser()) {
+						const item = new ClipboardItem({ 'image/png': pngPromise });
+						await navigator.clipboard.write([item]);
+					} else {
+						const blob = await pngPromise;
+						await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+					}
+					showGraphCopyFeedback();
+					return true;
+				} catch (err) {
+					console.error('Failed to copy graph image:', err);
+					showGraphCopyFailedFeedback();
+					return false;
+				} finally {
+					graphCopyInProgress = false;
+					chartCanvasContainer.classList.remove('copying');
+				}
+			}
 
 		/* ===== Auto FPS Detection ===== */
 		function detectFrameRate() {
@@ -1273,16 +1473,17 @@
 
 			// 6. Reset UI elements
 			playPauseButton.textContent = "Play";
-			frameCanvas.style.cursor = "default";
-			document.getElementById('crosshair').style.display = "none";
-			overlayCanvas.style.pointerEvents = "none";
-			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
-			hideCrossesToggle.classList.remove('crosses-hidden');
-			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
-			specialRecordingCheckbox.checked = false;
-			captureRateSection.style.display = 'none';
-			detectedFpsDisplay.textContent = 'Detecting...';
-			frameRateButton.textContent = 'FPS: 30';
+				frameCanvas.style.cursor = "default";
+				document.getElementById('crosshair').style.display = "none";
+				overlayCanvas.style.pointerEvents = "none";
+				document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
+				hideCrossesToggle.classList.remove('crosses-hidden');
+				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
+				chartCanvasContainer.classList.remove('copied', 'copy-failed', 'copying');
+				specialRecordingCheckbox.checked = false;
+				captureRateSection.style.display = 'none';
+				detectedFpsDisplay.textContent = 'Detecting...';
+				frameRateButton.textContent = 'FPS: 30';
 
 			// 7. Hide any open prompts
 			calibrationPrompt.style.display = 'none';
@@ -1293,18 +1494,22 @@
 			disableControls(true);
 		}
 
-		/* Init */
-		document.addEventListener('DOMContentLoaded', () => {
-			disableControls(true);
-			updateFpsButtonText();
-			document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
-			frameCanvas.style.display = "none";
+			/* Init */
+			document.addEventListener('DOMContentLoaded', () => {
+				disableControls(true);
+				updateFpsButtonText();
+				document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
+				frameCanvas.style.display = "none";
+				chartCanvasContainer.classList.add('copy-ready');
+				chartCanvasContainer.tabIndex = 0;
+				chartCanvasContainer.setAttribute('role', 'button');
+				chartCanvasContainer.setAttribute('aria-label', 'Copy graph image');
 
-			// Toggle capture rate section visibility based on checkbox
-			specialRecordingCheckbox.addEventListener('change', () => {
-				captureRateSection.style.display = specialRecordingCheckbox.checked ? 'block' : 'none';
+				// Toggle capture rate section visibility based on checkbox
+				specialRecordingCheckbox.addEventListener('change', () => {
+					captureRateSection.style.display = specialRecordingCheckbox.checked ? 'block' : 'none';
+				});
 			});
-		});
 
 		/* Import video */
 		openVideoButton.addEventListener('click', () => videoUploadInput.click());
@@ -1597,8 +1802,7 @@
 			}
 		}
 
-		/* ===== Plotting ===== */
-		const positionChartCanvas = document.getElementById('positionChart');
+			/* ===== Plotting ===== */
 
 		function plotPosition() {
 			currentPlotMode = 'pos';
@@ -1698,9 +1902,18 @@
 			applyThemeToChart();
 		}
 
-		plotVxButton.addEventListener("click", () => plotVelocity("x"));
-		plotVyButton.addEventListener("click", () => plotVelocity("y"));
-		backToPositionButton.addEventListener("click", plotPosition);
+			plotVxButton.addEventListener("click", () => plotVelocity("x"));
+			plotVyButton.addEventListener("click", () => plotVelocity("y"));
+			backToPositionButton.addEventListener("click", plotPosition);
+			chartCanvasContainer.addEventListener('click', () => {
+				void copyGraphImageToClipboard();
+			});
+			chartCanvasContainer.addEventListener('keydown', (event) => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					void copyGraphImageToClipboard();
+				}
+			});
 
 		/* Clear / Export */
 		clearDataPointsButton.addEventListener("click", () => {
