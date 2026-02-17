@@ -112,6 +112,496 @@ function syncDataset1XValues() {
 		return copied;
 	}
 
+const FIT_EQUATION_PNG_BASE_SCALE = 4;
+const FIT_EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
+const FIT_EQUATION_PNG_MAX_PIXELS = 16777216;
+const FIT_EQUATION_COPY_ACTION_OFFSET_PX = 8;
+const FIT_EQUATION_COPY_HIDE_DELAY_MS = 120;
+
+let fitEquationCopyActionsMenu = null;
+let activeFitEquationCopyTarget = null;
+let fitEquationCopyActionsHideTimeoutId = 0;
+let activeFitEquationRawLatex = '';
+
+function parseSvgViewBox(svg) {
+	const attr = svg.getAttribute('viewBox');
+	if (attr) {
+		const parts = attr.trim().split(/[\s,]+/).map(Number);
+		if (parts.length === 4 && parts.every(Number.isFinite)) {
+			return {
+				x: parts[0],
+				y: parts[1],
+				width: parts[2],
+				height: parts[3]
+			};
+		}
+	}
+
+	if (svg.viewBox && svg.viewBox.baseVal) {
+		const vb = svg.viewBox.baseVal;
+		if ([vb.x, vb.y, vb.width, vb.height].every(Number.isFinite)) {
+			return {
+				x: vb.x,
+				y: vb.y,
+				width: vb.width,
+				height: vb.height
+			};
+		}
+	}
+
+	return null;
+}
+
+function getFitEquationRasterScale(widthPx, heightPx) {
+	const safeWidth = Math.max(1, widthPx);
+	const safeHeight = Math.max(1, heightPx);
+	const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+	const requestedScale = Math.max(FIT_EQUATION_PNG_BASE_SCALE, Math.ceil(dpr * 2));
+
+	const maxScaleBySide = Math.min(
+		FIT_EQUATION_PNG_MAX_CANVAS_SIDE / safeWidth,
+		FIT_EQUATION_PNG_MAX_CANVAS_SIDE / safeHeight
+	);
+	const maxScaleByPixels = Math.sqrt(FIT_EQUATION_PNG_MAX_PIXELS / (safeWidth * safeHeight));
+
+	return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+}
+
+function prepareFitEquationSvgForCopy(target) {
+	if (!target) return null;
+	const svg = target.querySelector('.MathJax_SVG svg, svg');
+	if (!svg) return null;
+
+	const clone = selfContainSvg(svg);
+	const paddingPx = 8;
+	const rect = svg.getBoundingClientRect();
+	const hasRectSize = rect.width > 0 && rect.height > 0;
+
+	let viewBox = parseSvgViewBox(svg);
+	if (!viewBox) {
+		try {
+			const bbox = svg.getBBox();
+			if (Number.isFinite(bbox.width) && Number.isFinite(bbox.height)) {
+				viewBox = {
+					x: bbox.x,
+					y: bbox.y,
+					width: bbox.width,
+					height: bbox.height
+				};
+			}
+		} catch (err) {
+			console.warn('Unable to read fit equation bounds:', err);
+		}
+	}
+	if (!viewBox || !viewBox.width || !viewBox.height) {
+		return null;
+	}
+
+	const scaleX = hasRectSize ? viewBox.width / rect.width : 1;
+	const scaleY = hasRectSize ? viewBox.height / rect.height : 1;
+	const paddingX = paddingPx * scaleX;
+	const paddingY = paddingPx * scaleY;
+
+	const widthPx = Math.max((hasRectSize ? rect.width : viewBox.width) + (paddingPx * 2), 20);
+	const heightPx = Math.max((hasRectSize ? rect.height : viewBox.height) + (paddingPx * 2), 20);
+
+	clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+	clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+	clone.setAttribute('width', `${widthPx}px`);
+	clone.setAttribute('height', `${heightPx}px`);
+	clone.setAttribute(
+		'viewBox',
+		`${viewBox.x - paddingX} ${viewBox.y - paddingY} ${viewBox.width + (paddingX * 2)} ${viewBox.height + (paddingY * 2)}`
+	);
+	clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+	clone.setAttribute('color', '#000000');
+
+	let svgString = new XMLSerializer().serializeToString(clone);
+	svgString = svgString.replace(/currentColor/g, '#000000');
+
+	return {
+		svgString,
+		widthPx,
+		heightPx
+	};
+}
+
+async function rasterizeFitEquationSvgToPng(svgString, widthPx, heightPx) {
+	try {
+		const scale = getFitEquationRasterScale(widthPx, heightPx);
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return null;
+
+		canvas.width = Math.ceil(widthPx * scale);
+		canvas.height = Math.ceil(heightPx * scale);
+
+		const img = new Image();
+		const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+		const svgObjectUrl = URL.createObjectURL(svgBlob);
+
+		const pngBlob = await new Promise(resolve => {
+			img.onload = () => {
+				URL.revokeObjectURL(svgObjectUrl);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.imageSmoothingEnabled = true;
+				ctx.imageSmoothingQuality = 'high';
+				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+				canvas.toBlob(blob => resolve(blob), 'image/png');
+			};
+
+			img.onerror = () => {
+				URL.revokeObjectURL(svgObjectUrl);
+				resolve(null);
+			};
+
+			img.src = svgObjectUrl;
+		});
+
+		return pngBlob || null;
+	} catch (err) {
+		console.warn('Failed to rasterize fit equation SVG:', err);
+		return null;
+	}
+}
+
+function getFitEquationFallbackText(target) {
+	if (activeFitEquationRawLatex) return `$${activeFitEquationRawLatex}$`;
+	return (target && (target.textContent || '')).trim();
+}
+
+async function copyFitEquationAsImageToClipboard(target) {
+	if (!target) return false;
+	const prepared = prepareFitEquationSvgForCopy(target);
+	if (!prepared) {
+		return writePlainTextToClipboard(getFitEquationFallbackText(target));
+	}
+
+	const { svgString, widthPx, heightPx } = prepared;
+	const fallbackText = getFitEquationFallbackText(target);
+
+	if (!canWriteClipboardItems()) {
+		return writePlainTextToClipboard(fallbackText);
+	}
+
+	try {
+		const safariCompatMode = isSafariBrowser();
+		if (safariCompatMode) {
+			const pngPromise = rasterizeFitEquationSvgToPng(svgString, widthPx, heightPx).then(blob => {
+				if (!blob) throw new Error('Unable to render fit equation image.');
+				return blob;
+			});
+
+			const clipboardItem = new ClipboardItem({
+				'image/png': pngPromise
+			});
+			await navigator.clipboard.write([clipboardItem]);
+			return true;
+		}
+
+		const clipboardPayload = {};
+		clipboardPayload['image/svg+xml'] = new Blob([svgString], { type: 'image/svg+xml' });
+
+		const pngBlob = await rasterizeFitEquationSvgToPng(svgString, widthPx, heightPx);
+		if (pngBlob) {
+			clipboardPayload['image/png'] = pngBlob;
+		}
+
+		try {
+			await navigator.clipboard.write([new ClipboardItem(clipboardPayload)]);
+		} catch (err) {
+			if (pngBlob) {
+				await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+			} else {
+				throw err;
+			}
+		}
+		return true;
+	} catch (err) {
+		console.error('Failed to copy fit equation image:', err);
+		return writePlainTextToClipboard(fallbackText);
+	}
+}
+
+function showFitEquationCopyFeedback(target) {
+	if (!target) return;
+	target.classList.add('copied');
+	window.setTimeout(() => {
+		target.classList.remove('copied');
+	}, 1500);
+}
+
+function showFitEquationCopyFailedFeedback(target) {
+	if (!target) return;
+	target.classList.add('copy-failed');
+	window.setTimeout(() => {
+		target.classList.remove('copy-failed');
+	}, 2000);
+}
+
+function clearPendingFitEquationCopyActionsHide() {
+	if (!fitEquationCopyActionsHideTimeoutId) return;
+	window.clearTimeout(fitEquationCopyActionsHideTimeoutId);
+	fitEquationCopyActionsHideTimeoutId = 0;
+}
+
+function isFitEquationCopyActionsVisible() {
+	return Boolean(fitEquationCopyActionsMenu && !fitEquationCopyActionsMenu.hidden);
+}
+
+function scheduleFitEquationCopyActionsHide() {
+	clearPendingFitEquationCopyActionsHide();
+	fitEquationCopyActionsHideTimeoutId = window.setTimeout(() => {
+		dismissFitEquationCopyActions();
+	}, FIT_EQUATION_COPY_HIDE_DELAY_MS);
+}
+
+function positionFitEquationCopyActionsMenu(target) {
+	if (!fitEquationCopyActionsMenu || !target) return;
+	const targetRect = target.getBoundingClientRect();
+	if (!targetRect.width || !targetRect.height) return;
+
+	const menuRect = fitEquationCopyActionsMenu.getBoundingClientRect();
+	const viewportPadding = 8;
+
+	let left = targetRect.left + (targetRect.width / 2) - (menuRect.width / 2);
+	left = Math.min(
+		Math.max(left, viewportPadding),
+		window.innerWidth - menuRect.width - viewportPadding
+	);
+
+	let top = targetRect.top - menuRect.height - FIT_EQUATION_COPY_ACTION_OFFSET_PX;
+	if (top < viewportPadding) {
+		top = targetRect.bottom + FIT_EQUATION_COPY_ACTION_OFFSET_PX;
+	}
+
+	fitEquationCopyActionsMenu.style.left = `${Math.round(left + window.scrollX)}px`;
+	fitEquationCopyActionsMenu.style.top = `${Math.round(top + window.scrollY)}px`;
+}
+
+async function runFitEquationCopyAction(action) {
+	if (!activeFitEquationCopyTarget) return;
+	const target = activeFitEquationCopyTarget;
+	dismissFitEquationCopyActions();
+
+	let success = false;
+	if (action === 'image') {
+		success = await copyFitEquationAsImageToClipboard(target);
+	} else {
+		success = await writePlainTextToClipboard(activeFitEquationRawLatex ? `$${activeFitEquationRawLatex}$` : '');
+	}
+
+	if (success) {
+		showFitEquationCopyFeedback(target);
+	} else {
+		showFitEquationCopyFailedFeedback(target);
+	}
+}
+
+function ensureFitEquationCopyActionsMenu() {
+	if (fitEquationCopyActionsMenu) return fitEquationCopyActionsMenu;
+
+	fitEquationCopyActionsMenu = document.createElement('div');
+	fitEquationCopyActionsMenu.className = 'fit-equation-copy-actions';
+	fitEquationCopyActionsMenu.hidden = true;
+	fitEquationCopyActionsMenu.setAttribute('role', 'group');
+	fitEquationCopyActionsMenu.setAttribute('aria-label', 'Fit equation copy actions');
+
+	const buttons = document.createElement('div');
+	buttons.className = 'fit-equation-copy-actions-buttons';
+
+	const copyImageButton = document.createElement('button');
+	copyImageButton.type = 'button';
+	copyImageButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-image';
+	copyImageButton.textContent = 'Copy image';
+
+	const copyLatexButton = document.createElement('button');
+	copyLatexButton.type = 'button';
+	copyLatexButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-latex';
+	copyLatexButton.textContent = 'Copy raw LaTeX';
+
+	buttons.appendChild(copyImageButton);
+	buttons.appendChild(copyLatexButton);
+	fitEquationCopyActionsMenu.appendChild(buttons);
+	document.body.appendChild(fitEquationCopyActionsMenu);
+
+	copyImageButton.addEventListener('click', async event => {
+		event.preventDefault();
+		event.stopPropagation();
+		await runFitEquationCopyAction('image');
+	});
+
+	copyLatexButton.addEventListener('click', async event => {
+		event.preventDefault();
+		event.stopPropagation();
+		await runFitEquationCopyAction('latex');
+	});
+
+	fitEquationCopyActionsMenu.addEventListener('mouseenter', () => {
+		clearPendingFitEquationCopyActionsHide();
+	});
+
+	fitEquationCopyActionsMenu.addEventListener('mouseleave', () => {
+		scheduleFitEquationCopyActionsHide();
+	});
+
+	document.addEventListener('pointerdown', event => {
+		if (!isFitEquationCopyActionsVisible()) return;
+		if (fitEquationCopyActionsMenu.contains(event.target)) return;
+		if (activeFitEquationCopyTarget && activeFitEquationCopyTarget.contains(event.target)) return;
+		dismissFitEquationCopyActions();
+	}, true);
+
+	document.addEventListener('keydown', event => {
+		if (event.key === 'Escape' && isFitEquationCopyActionsVisible()) {
+			dismissFitEquationCopyActions();
+		}
+	});
+
+	window.addEventListener('resize', () => {
+		if (!isFitEquationCopyActionsVisible()) return;
+		if (!activeFitEquationCopyTarget) return;
+		positionFitEquationCopyActionsMenu(activeFitEquationCopyTarget);
+	});
+
+	window.addEventListener('scroll', () => {
+		if (isFitEquationCopyActionsVisible()) {
+			dismissFitEquationCopyActions();
+		}
+	}, true);
+
+	return fitEquationCopyActionsMenu;
+}
+
+function showFitEquationCopyActions(target) {
+	if (!target) return;
+	const menu = ensureFitEquationCopyActionsMenu();
+	clearPendingFitEquationCopyActionsHide();
+
+	if (activeFitEquationCopyTarget && activeFitEquationCopyTarget !== target) {
+		activeFitEquationCopyTarget.classList.remove('fit-copy-actions-open');
+	}
+
+	activeFitEquationCopyTarget = target;
+	activeFitEquationRawLatex = target.getAttribute('data-fit-latex') || activeFitEquationRawLatex;
+	activeFitEquationCopyTarget.classList.add('fit-copy-actions-open');
+
+	menu.hidden = false;
+	menu.classList.add('visible');
+	positionFitEquationCopyActionsMenu(target);
+}
+
+function dismissFitEquationCopyActions() {
+	clearPendingFitEquationCopyActionsHide();
+	if (activeFitEquationCopyTarget) {
+		activeFitEquationCopyTarget.classList.remove('fit-copy-actions-open');
+		activeFitEquationCopyTarget = null;
+	}
+
+	if (!fitEquationCopyActionsMenu) return;
+	fitEquationCopyActionsMenu.classList.remove('visible');
+	fitEquationCopyActionsMenu.hidden = true;
+}
+
+function clearFittingResultDisplay() {
+	dismissFitEquationCopyActions();
+	activeFitEquationRawLatex = '';
+
+	const fitEquationElement = document.getElementById('fit-equation');
+	const rSquaredElement = document.getElementById('r-squared-container');
+	if (fitEquationElement) {
+		fitEquationElement.style.display = 'none';
+		fitEquationElement.innerHTML = '';
+	}
+	if (rSquaredElement) {
+		rSquaredElement.style.display = 'none';
+		rSquaredElement.innerHTML = '';
+	}
+}
+
+function renderFittingResult(equation, rSquaredDisplay) {
+	const fitEquationElement = document.getElementById('fit-equation');
+	const rSquaredElement = document.getElementById('r-squared-container');
+	if (!fitEquationElement || !rSquaredElement) return;
+
+	if (typeof equation !== 'string' || !equation.trim()) {
+		clearFittingResultDisplay();
+		return;
+	}
+
+	const copyTarget = document.createElement('span');
+	copyTarget.className = 'fit-equation-copy-target';
+	copyTarget.setAttribute('role', 'button');
+	copyTarget.setAttribute('tabindex', '0');
+	copyTarget.setAttribute('aria-label', 'Copy fitted equation');
+	copyTarget.setAttribute('data-fit-latex', equation);
+	copyTarget.textContent = `\\(${equation}\\)`;
+
+	activeFitEquationRawLatex = equation;
+	fitEquationElement.innerHTML = '';
+	fitEquationElement.appendChild(copyTarget);
+	fitEquationElement.style.display = 'block';
+
+	rSquaredElement.textContent = `\\( R^2 = ${rSquaredDisplay} \\)`;
+	rSquaredElement.style.display = 'block';
+
+	initializeFitEquationCopyInteractions();
+	safeTypeset(fitEquationElement);
+	safeTypeset(rSquaredElement);
+}
+
+function initializeFitEquationCopyInteractions() {
+	const fitEquationElement = document.getElementById('fit-equation');
+	if (!fitEquationElement || fitEquationElement.dataset.copyInteractionsReady === 'true') return;
+
+	fitEquationElement.dataset.copyInteractionsReady = 'true';
+
+	fitEquationElement.addEventListener('mouseover', event => {
+		if (window.getSelection().toString()) return;
+		const target = event.target.closest('.fit-equation-copy-target');
+		if (!target) return;
+		showFitEquationCopyActions(target);
+	});
+
+	fitEquationElement.addEventListener('mouseout', event => {
+		if (!activeFitEquationCopyTarget) return;
+		const exitedTarget = event.target.closest('.fit-equation-copy-target');
+		if (!exitedTarget || exitedTarget !== activeFitEquationCopyTarget) return;
+
+		const nextTarget = event.relatedTarget;
+		if (nextTarget && (activeFitEquationCopyTarget.contains(nextTarget)
+			|| (fitEquationCopyActionsMenu && fitEquationCopyActionsMenu.contains(nextTarget)))) {
+			return;
+		}
+
+		scheduleFitEquationCopyActionsHide();
+	});
+
+	fitEquationElement.addEventListener('click', event => {
+		const target = event.target.closest('.fit-equation-copy-target');
+		if (!target || window.getSelection().toString()) {
+			if (isFitEquationCopyActionsVisible()) dismissFitEquationCopyActions();
+			return;
+		}
+
+		event.preventDefault();
+		event.stopPropagation();
+		showFitEquationCopyActions(target);
+	});
+
+	fitEquationElement.addEventListener('keydown', event => {
+		const target = event.target.closest('.fit-equation-copy-target');
+		if (!target) return;
+		if (event.key !== 'Enter' && event.key !== ' ') return;
+		event.preventDefault();
+		showFitEquationCopyActions(target);
+
+		const menu = ensureFitEquationCopyActionsMenu();
+		const firstButton = menu.querySelector('.fit-equation-copy-action-btn');
+		if (firstButton) firstButton.focus();
+	});
+}
+
 
 		function initializeTable(initialRows = 7) {
 			const tableBody = document.querySelector('#data-table tbody');
@@ -206,21 +696,11 @@ function syncDataset1XValues() {
 		updateCombinedPlotInputsToActive();
 
 		// Restore or clear the fitting result for the current dataset.
-		const fitEquationElement = document.getElementById('fit-equation');
-		const rSquaredElement = document.getElementById('r-squared-container');
 		if (datasetFitResults.hasOwnProperty(activeSet)) {
 			const result = datasetFitResults[activeSet];
-			fitEquationElement.innerHTML = `\\(${result.equation}\\)`;
-			fitEquationElement.style.display = 'block';
-			rSquaredElement.innerHTML = `\\( R^2 = ${result.rSquared} \\)`;
-			rSquaredElement.style.display = 'block';
-			safeTypeset(fitEquationElement);
-			safeTypeset(rSquaredElement);
+			renderFittingResult(result.equation, result.rSquared);
 		} else {
-			fitEquationElement.style.display = 'none';
-			fitEquationElement.innerHTML = '';
-			rSquaredElement.style.display = 'none';
-			rSquaredElement.innerHTML = '';
+			clearFittingResultDisplay();
 		}
 	}
 
@@ -345,17 +825,7 @@ function syncDataset1XValues() {
 		// Clear any stored fit state for this dataset.
 		delete datasetFitResults[activeSet];
 		delete fittedCurves[activeSet];
-
-		const fitEquationElement = document.getElementById('fit-equation');
-		const rSquaredElement = document.getElementById('r-squared-container');
-		if (fitEquationElement) {
-			fitEquationElement.style.display = 'none';
-			fitEquationElement.innerHTML = '';
-		}
-		if (rSquaredElement) {
-			rSquaredElement.style.display = 'none';
-			rSquaredElement.innerHTML = '';
-		}
+		clearFittingResultDisplay();
 
 		if (resetHeaders) {
 			isSyncing = true;
@@ -447,18 +917,7 @@ function syncDataset1XValues() {
 		if (fittedCurves.hasOwnProperty(activeSet)) {
 			delete fittedCurves[activeSet];
 		}
-
-		// Clear any displayed equation/R² from the UI
-		const fitEquationElement = document.getElementById('fit-equation');
-		const rSquaredElement = document.getElementById('r-squared-container');
-		if (fitEquationElement) {
-			fitEquationElement.style.display = 'none';
-			fitEquationElement.innerHTML = '';
-		}
-		if (rSquaredElement) {
-			rSquaredElement.style.display = 'none';
-			rSquaredElement.innerHTML = '';
-		}
+		clearFittingResultDisplay();
 
 		// Force a re-plot so that the old line is removed
 		lastPlotState.data = null;

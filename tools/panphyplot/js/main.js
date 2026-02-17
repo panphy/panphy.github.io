@@ -152,6 +152,8 @@ document.addEventListener("DOMContentLoaded", function() {
 		});
 	}
 
+	initializeFitEquationCopyInteractions();
+
 	updatePlotAndRenderLatex();
 	scheduleSaveState();
 });

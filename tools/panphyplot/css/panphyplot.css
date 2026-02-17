@@ -1096,6 +1096,149 @@ select {
 	color: var(--text-secondary);
 }
 
+#fit-equation {
+	position: relative;
+}
+
+.fit-equation-copy-target {
+	display: inline-flex;
+	align-items: center;
+	max-width: 100%;
+	position: relative;
+	cursor: pointer;
+	border-radius: 8px;
+	padding: 2px 8px;
+	transition: box-shadow 0.15s ease;
+	outline: none;
+}
+
+.fit-equation-copy-target:hover,
+.fit-equation-copy-target.fit-copy-actions-open,
+.fit-equation-copy-target:focus-visible {
+	box-shadow: 0 0 0 2px var(--brand-accent);
+}
+
+.fit-equation-copy-target::after {
+	content: "Copy equation";
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--text-main);
+	color: var(--card-bg);
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-family: var(--font-body);
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s ease;
+	z-index: 120;
+}
+
+.fit-equation-copy-target:hover::after,
+.fit-equation-copy-target:focus-visible::after {
+	opacity: 1;
+}
+
+.fit-equation-copy-target.fit-copy-actions-open::after {
+	opacity: 0;
+}
+
+.fit-equation-copy-target.copied {
+	box-shadow: 0 0 0 2px #22c55e !important;
+}
+
+.fit-equation-copy-target.copied::after {
+	content: "Copied!" !important;
+	background: #22c55e !important;
+	color: #ffffff !important;
+	opacity: 1 !important;
+}
+
+.fit-equation-copy-target.copy-failed {
+	box-shadow: 0 0 0 2px #ef4444 !important;
+}
+
+.fit-equation-copy-target.copy-failed::after {
+	content: "Copy failed" !important;
+	background: #ef4444 !important;
+	color: #ffffff !important;
+	opacity: 1 !important;
+}
+
+.fit-equation-copy-actions {
+	position: absolute;
+	z-index: 2100;
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+	padding: 8px;
+	box-shadow: var(--soft-shadow);
+	min-width: 220px;
+	max-width: calc(100vw - 16px);
+}
+
+.fit-equation-copy-actions[hidden] {
+	display: none;
+}
+
+.fit-equation-copy-actions.visible {
+	display: block;
+}
+
+.fit-equation-copy-actions-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fit-equation-copy-action-btn {
+	flex: 1 1 100%;
+	border: none;
+	border-radius: 8px;
+	padding: 8px 12px;
+	font-weight: 600;
+	cursor: pointer;
+	font-size: 0.85rem;
+	min-height: 40px;
+}
+
+.fit-equation-copy-action-btn-image {
+	background-color: var(--btn-analyze);
+	color: #ffffff;
+}
+
+.fit-equation-copy-action-btn-image:hover {
+	background-color: var(--btn-analyze-hover);
+}
+
+.fit-equation-copy-action-btn-latex {
+	background-color: var(--btn-export);
+	color: #ffffff;
+}
+
+.fit-equation-copy-action-btn-latex:hover {
+	background-color: var(--btn-export-hover);
+}
+
+[data-theme="dark"] .fit-equation-copy-action-btn-image,
+[data-theme="dark"] .fit-equation-copy-action-btn-latex {
+	color: #1a1a1a;
+}
+
+.fit-equation-copy-action-btn:focus-visible {
+	outline: 2px solid var(--brand-primary);
+	outline-offset: 2px;
+}
+
+@media (hover: none) {
+	.fit-equation-copy-target::after {
+		display: none;
+	}
+}
+
 /* Plot */
 #plot {
 	width: 100%;
@@ -1362,6 +1505,20 @@ footer a:visited {
 		align-items: center;
 		justify-content: center;
 		line-height: 1;
+	}
+
+	.fit-equation-copy-target {
+		padding: 6px 10px;
+	}
+
+	.fit-equation-copy-actions {
+		padding: 10px;
+		width: min(340px, calc(100vw - 16px));
+	}
+
+	.fit-equation-copy-action-btn {
+		min-height: 44px;
+		font-size: 0.9rem;
 	}
 }
 

@@ -462,22 +462,23 @@ function updateResults(equation, x, y, fitFunction) {
 			rSquaredDisplay = 'N/A';
 		}
 
-		// Update the UI (fitting result container)
-		const fitEquationElement = document.getElementById('fit-equation');
-		if (fitEquationElement) {
-			fitEquationElement.innerHTML = `\\(${equation}\\)`;
-			fitEquationElement.style.display = 'block';
+		// Update the fitting result UI. ui.js owns the interactive copy affordance.
+		if (typeof renderFittingResult === 'function') {
+			renderFittingResult(equation, rSquaredDisplay);
+		} else {
+			const fitEquationElement = document.getElementById('fit-equation');
+			const rSquaredElement = document.getElementById('r-squared-container');
+			if (fitEquationElement) {
+				fitEquationElement.innerHTML = `\\(${equation}\\)`;
+				fitEquationElement.style.display = 'block';
+			}
+			if (rSquaredElement) {
+				rSquaredElement.innerHTML = `\\( R^2 = ${rSquaredDisplay} \\)`;
+				rSquaredElement.style.display = 'block';
+			}
+			safeTypeset(fitEquationElement);
+			safeTypeset(rSquaredElement);
 		}
-
-		const rSquaredElement = document.getElementById('r-squared-container');
-		if (rSquaredElement) {
-			rSquaredElement.innerHTML = `\\( R^2 = ${rSquaredDisplay} \\)`;
-			rSquaredElement.style.display = 'block';
-		}
-
-		// Trigger MathJax typesetting if available.
-		safeTypeset(fitEquationElement);
-		safeTypeset(rSquaredElement);
 
 		// Store this result for the current dataset.
 		datasetFitResults[activeSet] = {
