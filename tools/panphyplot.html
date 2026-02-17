@@ -75,7 +75,7 @@
 							<button class="tab-close" type="button" title="Remove dataset" aria-label="Remove dataset">×</button>
 						</div>
 		<!-- The Add Dataset button looks just like a tab except it keeps its own color -->
-		<button class="add-dataset-btn" type="button" title="Add a new dataset tab" aria-label="Add dataset">+</button>
+		<button class="add-dataset-btn" type="button" title="Add a new dataset" aria-label="Add dataset">+</button>
 	</div>
 
 	<!-- Main container: left = Input section, right = Graph section -->
@@ -115,11 +115,11 @@
 						Row</button>
 					<button class="btn-copy-x" onclick="copyXFromSet1()"
 						title="Copy x-values from Dataset 1 into this dataset">Copy x₁</button>
-					<button class="btn-clear-all" onclick="clearRows()"
+					<button class="btn-clear-all" onclick="confirmClearRows()"
 						title="Clear all data rows in this dataset">Clear Data</button>
 				</div>
 				<div class="button-row">
-					<button class="btn-import-csv" onclick="document.getElementById('csv-file-input').click()"
+					<button class="btn-import-csv" onclick="confirmImportCSV()"
 						title="Import data from a CSV file">
 						Import .csv
 					</button>

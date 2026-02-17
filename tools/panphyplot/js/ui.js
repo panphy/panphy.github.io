@@ -908,14 +908,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 		}
 
 		const datasetName = getDatasetDisplayName(index);
-		const hasStoredData = Array.isArray(rawData[index]) && rawData[index].length > 0;
-		const hasStoredHeaders = Boolean(datasetHeaders[index] && (
-			(datasetHeaders[index].x && datasetHeaders[index].x !== 'x')
-			|| (datasetHeaders[index].y && datasetHeaders[index].y !== 'y')
-		));
-		const hasStoredFit = Boolean(datasetFitResults[index] || fittedCurves[index]);
-		const hasMeaningfulContent = hasStoredData || hasStoredHeaders || hasStoredFit;
-		const confirmMessage = hasMeaningfulContent
+		const confirmMessage = hasMeaningfulDatasetContent(index)
 			? `Delete "${datasetName}" and all of its data/settings? This cannot be undone.`
 			: `Delete "${datasetName}"?`;
 		if (!window.confirm(confirmMessage)) {
@@ -959,6 +952,39 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 			newRow.innerHTML = buildDataRowHtml();
 			updateData();
 		}
+
+
+function hasMeaningfulDatasetContent(index = activeSet) {
+	const hasStoredData = Array.isArray(rawData[index]) && rawData[index].length > 0;
+	const hasStoredHeaders = Boolean(datasetHeaders[index] && (
+		(datasetHeaders[index].x && datasetHeaders[index].x !== 'x')
+		|| (datasetHeaders[index].y && datasetHeaders[index].y !== 'y')
+	));
+	const hasStoredFit = Boolean(datasetFitResults[index] || fittedCurves[index]);
+	const hasUncertaintiesEnabled = Boolean(datasetToggles[index] && (datasetToggles[index].x || datasetToggles[index].y));
+	return hasStoredData || hasStoredHeaders || hasStoredFit || hasUncertaintiesEnabled;
+}
+
+function confirmClearRows() {
+	const datasetName = getDatasetDisplayName(activeSet);
+	const confirmMessage = hasMeaningfulDatasetContent(activeSet)
+		? `Clear all data in "${datasetName}"? This will remove all rows, uncertainties, and fitted results for this dataset.`
+		: `Clear "${datasetName}"?`;
+	if (!window.confirm(confirmMessage)) return;
+	clearRows();
+}
+
+function confirmImportCSV() {
+	const datasetName = getDatasetDisplayName(activeSet);
+	const fileInput = document.getElementById('csv-file-input');
+	if (!fileInput) return;
+
+	const confirmMessage = hasMeaningfulDatasetContent(activeSet)
+		? `Import a CSV into "${datasetName}"? This will replace the current data/settings for this dataset.`
+		: `Import a CSV into "${datasetName}"?`;
+	if (!window.confirm(confirmMessage)) return;
+	fileInput.click();
+}
 
 
 	function clearRows(resetHeaders = true) {
