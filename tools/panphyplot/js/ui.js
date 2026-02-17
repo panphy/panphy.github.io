@@ -1897,6 +1897,7 @@ function initializeFitEquationCopyInteractions() {
 	// Populated in the background after MathJax finishes typesetting so
 	// that copyExportedTableToClipboard() can use them synchronously.
 	let cachedTablePngs = null;
+	let cachedTablePngsPromise = null;
 	const TABLE_EXPORT_BASE_SCALE = 3;
 	const TABLE_EXPORT_MATH_BASE_SCALE = 4;
 	const TABLE_EXPORT_MAX_CANVAS_SIDE = 8192;
@@ -1964,9 +1965,12 @@ function initializeFitEquationCopyInteractions() {
 			// After MathJax finishes, pre-render equation SVGs to PNG so
 			// the click-to-copy path can embed them synchronously.
 			cachedTablePngs = null;
+			cachedTablePngsPromise = Promise.resolve([]);
 			if (typeof MathJax !== 'undefined' && MathJax.Hub && MathJax.Hub.Queue) {
-				MathJax.Hub.Queue(function () {
-					preRenderTablePngs(renderedContainer);
+				cachedTablePngsPromise = new Promise(resolve => {
+					MathJax.Hub.Queue(function () {
+						preRenderTablePngs(renderedContainer).then(resolve).catch(() => resolve([]));
+					});
 				});
 			}
 
@@ -1987,6 +1991,7 @@ function initializeFitEquationCopyInteractions() {
 		// Clear the stored markdown and cached PNGs
 		currentExportedMarkdown = '';
 		cachedTablePngs = null;
+		cachedTablePngsPromise = null;
 	}
 
 
@@ -2135,9 +2140,12 @@ function initializeFitEquationCopyInteractions() {
 	// Called via MathJax.Hub.Queue after typesetting so the SVGs exist.
 	function preRenderTablePngs(container) {
 		const svgs = Array.from(container.querySelectorAll('.MathJax_SVG svg'));
-		if (!svgs.length) { cachedTablePngs = []; return; }
+		if (!svgs.length) {
+			cachedTablePngs = [];
+			return Promise.resolve(cachedTablePngs);
+		}
 
-		Promise.all(svgs.map(svg => {
+		return Promise.all(svgs.map(svg => {
 			const selfContained = selfContainSvg(svg);
 			let svgString = new XMLSerializer().serializeToString(selfContained);
 			svgString = svgString.replace(/currentColor/g, '#000000');
@@ -2169,11 +2177,21 @@ function initializeFitEquationCopyInteractions() {
 				};
 				img.src = blobUrl;
 			});
-		})).then(results => { cachedTablePngs = results; });
+		})).then(results => {
+			cachedTablePngs = results;
+			return results;
+		});
 	}
 
 	async function renderTableToPngBlob() {
 		if (!currentExportedMarkdown) return null;
+		if (cachedTablePngsPromise) {
+			try {
+				await cachedTablePngsPromise;
+			} catch (e) {
+				console.warn('Table LaTeX PNG pre-render failed:', e);
+			}
+		}
 
 		const cellPadX = 14;
 		const cellPadY = 10;
@@ -2196,7 +2214,7 @@ function initializeFitEquationCopyInteractions() {
 		var numCols = headerCells.length;
 		if (!numCols || !dataRows.length) return null;
 
-		var useLatex = latexMode && cachedTablePngs && cachedTablePngs.some(function (p) { return p !== null; });
+		var useLatex = cachedTablePngs && cachedTablePngs.some(function (p) { return p !== null; });
 
 		// Pre-load PNG images if in LaTeX mode
 		var pngImages = [];
