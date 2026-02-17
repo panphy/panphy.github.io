@@ -672,7 +672,10 @@
     btnRedo = document.getElementById('redoButton'),
     btnReset = document.getElementById('resetButton'),
     btnRemoveGraph = document.getElementById('removeGraphButton'),
-    exportButton = document.getElementById('exportButton');
+    exportButton = document.getElementById('exportButton'),
+    imageLoaderInput = document.getElementById('imageLoader'),
+    importGraphLabel = document.querySelector('label[for="imageLoader"]');
+  let importGraphConfirmed = false;
 
   // Add export button event listener
   exportButton.addEventListener('click', exportCSV);
@@ -824,7 +827,7 @@
   }
 
   function hasWorkToWarnAbout() {
-    return calibrationX.length > 0 || calibrationY.length > 0 || digitizedPoints.length > 0 || activeCalibration !== null;
+    return !!image.src || calibrationX.length > 0 || calibrationY.length > 0 || digitizedPoints.length > 0 || activeCalibration !== null;
   }
 
   function confirmGraphDataLoss(triggerDescription) {
@@ -929,16 +932,33 @@
     btnRedo.disabled = redoHistory.length === 0;
   }
 
-  document.getElementById('imageLoader').addEventListener('change', handleImage, false);
+  if (importGraphLabel) {
+    importGraphLabel.addEventListener('click', function (e) {
+      importGraphConfirmed = false;
+      if (!image.src) {
+        return;
+      }
+      if (!confirmGraphDataLoss("Importing a new graph")) {
+        e.preventDefault();
+        imageLoaderInput.value = "";
+        updateStatus("Import cancelled. Current graph preserved.");
+        return;
+      }
+      importGraphConfirmed = true;
+    });
+  }
+
+  imageLoaderInput.addEventListener('change', handleImage, false);
 
   function handleImage(e) {
     const file = (e.target.files && e.target.files[0]) ? e.target.files[0] : null;
     if (!file) return;
-    if (!confirmGraphDataLoss("Importing a new graph")) {
+    if (!importGraphConfirmed && !confirmGraphDataLoss("Importing a new graph")) {
       e.target.value = "";
       updateStatus("Import cancelled. Current graph preserved.");
       return;
     }
+    importGraphConfirmed = false;
 
     // IMPORTANT:
     // resetAllState() clears the <input type="file"> value.
