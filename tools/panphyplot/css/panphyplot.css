@@ -461,9 +461,10 @@ body {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 10px 0;
+	min-width: 0;
+	padding: 10px 16px;
 	margin-left: 0;
-	line-height: 1;
+	line-height: 1.2;
 	background-color: var(--tab-bg);
 	color: var(--text-secondary);
 	border: 1px solid transparent;
@@ -474,10 +475,10 @@ body {
 	border-bottom-right-radius: 0;
 	cursor: pointer;
 	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-	font-size: 1.25rem;
-	font-weight: 700;
+	font-size: 0.9rem;
+	font-weight: 500;
 	flex: none;
-	width: 56px;
+	width: auto;
 }
 
 .add-dataset-btn:hover {
