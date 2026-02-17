@@ -139,6 +139,31 @@ function calculateFWHM(x, y, maxY) {
 }
 
 
+function applyDefaultAdvancedFitParameters(method) {
+	if (method === 'Gaussian') {
+		document.getElementById('initial-A-gaussian').value = '1';
+		document.getElementById('initial-mu').value = '0';
+		document.getElementById('initial-sigma').value = '1';
+		document.getElementById('initial-c-gaussian').value = '0';
+		return;
+	}
+
+	if (method === 'Sinusoidal') {
+		document.getElementById('initial-A').value = '1';
+		document.getElementById('initial-b').value = '0';
+		document.getElementById('initial-k').value = '1';
+		document.getElementById('initial-phi').value = '0';
+		document.getElementById('initial-c').value = '0';
+	}
+}
+
+function resetAdvancedFitParameters(method = getCurrentAdvancedFitMethod()) {
+	if (!method) return;
+
+	applyDefaultAdvancedFitParameters(method);
+	setInitialParameters(method);
+}
+
 function setInitialParameters(method) {
 	if (!method) return;
 	if (getDatasetPoints(activeSet).length === 0) return;

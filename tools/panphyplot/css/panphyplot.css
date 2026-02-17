@@ -970,6 +970,43 @@ select {
 	flex-wrap: wrap;
 }
 
+.advanced-fit-top-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+.advanced-fit-top-row .advanced-fit-item {
+	margin-bottom: 0;
+}
+
+.advanced-fit-reset-btn {
+	margin-left: auto;
+	border: 1px solid var(--input-border);
+	background: var(--card-bg);
+	color: var(--text-secondary);
+	border-radius: 999px;
+	padding: 6px 12px;
+	font-size: 0.78rem;
+	font-weight: 600;
+	line-height: 1.15;
+	cursor: pointer;
+	transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.advanced-fit-reset-btn:hover {
+	border-color: var(--brand-primary);
+	background: var(--muted-bg);
+	color: var(--text-main);
+}
+
+.advanced-fit-reset-btn:focus-visible {
+	outline: 2px solid var(--brand-primary);
+	outline-offset: 2px;
+}
+
 .advanced-fit-item label {
 	white-space: nowrap;
 	color: var(--text-secondary);

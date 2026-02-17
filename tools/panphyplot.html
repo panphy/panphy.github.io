@@ -227,13 +227,18 @@
 						<div id="advanced-fit-general-equation" class="general-equation">
 							\( y = A e^{bx} \sin(kx - \phi) + c \)
 						</div>
-						<p class="table-prompt">Enter initial fitting parameters below.</p>
+						<p class="table-prompt">Adjust the initial fitting parameters below.</p>
 
 						<!-- Sinusoidal -->
 						<div id="Sinusoidal-parameters" class="parameter-section active">
-							<div class="advanced-fit-item">
-								<label for="initial-A">A:</label>
-								<input type="number" id="initial-A" value="1" step="any" />
+							<div class="advanced-fit-top-row">
+								<div class="advanced-fit-item">
+									<label for="initial-A">A:</label>
+									<input type="number" id="initial-A" value="1" step="any" />
+								</div>
+								<button type="button" class="advanced-fit-reset-btn"
+									onclick="resetAdvancedFitParameters('Sinusoidal')"
+									title="Reset sinusoidal initial parameters">Reset parameters</button>
 							</div>
 							<div class="advanced-fit-item">
 								<label for="initial-b">b:</label>
@@ -255,9 +260,14 @@
 
 						<!-- Gaussian -->
 						<div id="Gaussian-parameters" class="parameter-section">
-							<div class="advanced-fit-item">
-								<label for="initial-A-gaussian">A:</label>
-								<input type="number" id="initial-A-gaussian" value="1" step="any" />
+							<div class="advanced-fit-top-row">
+								<div class="advanced-fit-item">
+									<label for="initial-A-gaussian">A:</label>
+									<input type="number" id="initial-A-gaussian" value="1" step="any" />
+								</div>
+								<button type="button" class="advanced-fit-reset-btn"
+									onclick="resetAdvancedFitParameters('Gaussian')"
+									title="Reset gaussian initial parameters">Reset parameters</button>
 							</div>
 							<div class="advanced-fit-item">
 								<label for="initial-mu">μ:</label>
