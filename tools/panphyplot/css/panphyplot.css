@@ -138,7 +138,14 @@ body {
 	justify-self: start;
 }
 
+.banner-logo a {
+	display: flex;
+	align-items: center;
+	line-height: 0;
+}
+
 .banner-logo img {
+	display: block;
 	max-height: 38px;
 	margin-right: 8px;
 }
