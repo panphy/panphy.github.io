@@ -578,6 +578,15 @@
   // Zoom parameters
   let waveAmplitudeScale = 5.0;
   let waveTimeScale = 1.0;
+  // Display-only normalization to reduce cross-device mic sensitivity differences.
+  const AUTO_WAVE_REFERENCE_SCALE = 5.0;
+  const AUTO_WAVE_TARGET_HEIGHT = 0.35;
+  const AUTO_WAVE_MIN_PEAK = 0.0002;
+  const AUTO_WAVE_MIN_GAIN = 0.4;
+  const AUTO_WAVE_MAX_GAIN = 20;
+  const AUTO_WAVE_ATTACK = 0.2;
+  const AUTO_WAVE_RELEASE = 0.08;
+  let adaptiveWaveGain = 1;
 
   // DOM references
   const freqCanvas = document.getElementById('visualizer');
@@ -780,6 +789,7 @@
     timeDomainData = null;
     lastFreqFrame = null;
     lastWaveFrame = null;
+    adaptiveWaveGain = 1;
     isRunning = false;
     isStarting = false;
 
@@ -907,6 +917,26 @@
     setFrequencyZoom(startIndex, endIndex);
   }
 
+  function getAdaptiveWaveGain(samples) {
+    if (!samples || !samples.length) return adaptiveWaveGain;
+
+    let peak = 0;
+    for (let i = 0; i < samples.length; i++) {
+      const absoluteValue = Math.abs(samples[i]);
+      if (absoluteValue > peak) peak = absoluteValue;
+    }
+
+    let targetGain = 1;
+    if (peak >= AUTO_WAVE_MIN_PEAK) {
+      targetGain = AUTO_WAVE_TARGET_HEIGHT / (peak * AUTO_WAVE_REFERENCE_SCALE);
+      targetGain = Math.max(AUTO_WAVE_MIN_GAIN, Math.min(targetGain, AUTO_WAVE_MAX_GAIN));
+    }
+
+    const smoothing = targetGain > adaptiveWaveGain ? AUTO_WAVE_ATTACK : AUTO_WAVE_RELEASE;
+    adaptiveWaveGain += (targetGain - adaptiveWaveGain) * smoothing;
+    return adaptiveWaveGain;
+  }
+
   // ------------------ The Continuous Draw Loop ------------------
   function drawLoop() {
     requestAnimationFrame(drawLoop);
@@ -993,11 +1023,13 @@
     windowSize = Math.max(2, Math.floor(windowSize));
 
     const sliceWidth = waveCanvasSize.width / (windowSize - 1);
+    const frameWaveGain = isRunning ? getAdaptiveWaveGain(timeDomainData) : adaptiveWaveGain;
+    const displayWaveGain = waveAmplitudeScale * frameWaveGain;
 
     let x = 0;
     for (let i = 0; i < windowSize; i++) {
       const v = timeDomainData[i];
-      const y = (waveCanvasSize.height / 2) + v * (waveCanvasSize.height / 2) * waveAmplitudeScale;
+      const y = (waveCanvasSize.height / 2) + v * (waveCanvasSize.height / 2) * displayWaveGain;
       if (i === 0) waveCtx.moveTo(x, y);
       else waveCtx.lineTo(x, y);
       x += sliceWidth;
