@@ -1615,11 +1615,12 @@ footer a:visited {
 	overflow-x: auto;
 	overflow-y: visible;
 	margin-bottom: 16px;
-	padding-top: 28px;
+	padding: 28px 4px 0;
 }
 
 #export-table-rendered table {
-	width: 100%;
+	width: calc(100% - 4px);
+	margin: 0 auto;
 	border-collapse: collapse;
 	cursor: pointer;
 	transition: box-shadow 0.15s ease;
