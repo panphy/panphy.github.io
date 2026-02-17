@@ -308,7 +308,7 @@ body {
 .dataset-tabs-bar {
 	display: flex;
 	align-items: center;
-	padding: 6px 20px 0;
+	padding: 3px 20px 0;
 	background-color: var(--bg-color);
 	flex-wrap: nowrap;
 	overflow-x: auto;
@@ -493,7 +493,7 @@ body {
 	display: flex;
 	gap: 20px;
 	flex-wrap: wrap;
-	padding: 4px 20px 40px;
+	padding: 0 20px 40px;
 }
 
 .input-section,
