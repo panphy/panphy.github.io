@@ -16,20 +16,32 @@
 ├── index.html              # Main landing page
 ├── sw.js                   # Service Worker for offline support
 ├── manifest.json           # PWA configuration
-├── assets/favicon.png             # Site favicon
-├── assets/panphy.png              # App icon (512x512)
-├── assets/apple-touch-icon.png    # iOS icon
+├── _headers                # HTTP headers configuration
+├── robots.txt              # Search engine crawl rules
+├── sitemap.xml             # Site sitemap
+│
+├── assets/
+│   ├── favicon.png             # Site favicon (48x48)
+│   ├── panphy.png              # App icon (512x512)
+│   ├── apple-touch-icon.png    # iOS icon (180x180)
+│   └── sw-register.js          # Service Worker registration script
 │
 ├── tools/                  # Educational data analysis tools
 │   ├── panphyplot.html     # Advanced plotting tool (entry point)
 │   ├── panphyplot/         # Modular JS/CSS for PanPhyPlot
 │   │   ├── css/panphyplot.css
-│   │   └── js/             # state.js, main.js, plotting.js, curve-fitting.js, etc.
+│   │   ├── js/             # state.js, main.js, plotting.js, curve-fitting.js, etc.
+│   │   └── panphyplot_manual.html  # User manual
 │   ├── markdown_editor.html # Markdown & LaTeX editor (entry point)
 │   ├── markdown_editor/    # Modular JS/CSS for Markdown Editor
 │   │   ├── css/markdown_editor.css
 │   │   ├── js/             # state.js, main.js, rendering.js, copy.js, ui.js
-│   │   └── sample_doc.md   # Sample markdown document
+│   │   ├── sample_doc.md   # Sample/tutorial document
+│   │   └── templates/      # Math template documents
+│   │       ├── math-basic.md
+│   │       ├── math-calculus.md
+│   │       ├── math-matrices.md
+│   │       └── math-table.md
 │   ├── digitizer.html
 │   ├── motion_tracker.html
 │   ├── sound_analyzer.html
@@ -41,18 +53,21 @@
 │   └── lorentz.html
 │
 ├── fun/                    # Interactive games
-│   ├── dodge.html          # Dodge game (requires network for leaderboard)
+│   ├── dodge.html          # Asteroid Storm (requires network for leaderboard)
 │   ├── dodge_assets/       # Game sprites and audio
 │   ├── react.html
 │   └── ascii_cam.html
 │
 ├── gcse/                   # GCSE exam preparation flashcards
+│   ├── phy_flashcard.html
 │   ├── phy_flashcard_cs.html
 │   ├── phy_flashcard_ss.html
-│   └── phy_*.csv           # Flashcard data files
+│   ├── phy_cs.csv           # Combined Science flashcard data
+│   └── phy_ss.csv           # Separate Science flashcard data
 │
 ├── for_teachers/           # Teacher utilities
 │   ├── timer.html
+│   ├── timer_beep.mp3       # Timer audio alert
 │   └── visualizer.html
 │
 └── misc/                   # Miscellaneous physics tools
@@ -76,6 +91,7 @@
 - `DOMPurify` (2.3.4) - HTML sanitization
 - `Marked` - Markdown parsing
 - `Chart.js` - Data visualization
+- `html2canvas` (1.4.1) - HTML-to-canvas screenshots
 - `Supabase.js` - Backend for leaderboards
 
 ## Coding Conventions
@@ -150,7 +166,12 @@ markdown_editor.html (imports scripts via ES modules)
 ├── js/copy.js           # Copy-to-clipboard (equations, tables, code)
 ├── js/ui.js             # Theme, scroll sync, modals
 ├── css/markdown_editor.css  # Styling
-└── sample_doc.md        # Tutorial document
+├── sample_doc.md        # Tutorial document
+└── templates/           # Math template documents
+    ├── math-basic.md
+    ├── math-calculus.md
+    ├── math-matrices.md
+    └── math-table.md
 ```
 
 ## Service Worker & Caching

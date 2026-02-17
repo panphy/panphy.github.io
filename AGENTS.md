@@ -58,12 +58,13 @@ Module files must use **stable, unhashed filenames** (e.g. `copy.js`, not `copy.
 ├── index.html              # Landing page
 ├── sw.js                   # Service Worker (update BUILD_ID on changes!)
 ├── manifest.json           # PWA config
-├── assets/                 # Icons, logos, global assets
-├── tools/                  # Educational tools (plotting, markdown editor, etc.)
-│   ├── panphyplot.html     # Entry point
-│   └── panphyplot/         # Modular JS/CSS (stable filenames)
+├── assets/                 # Icons, logos, sw-register.js
+├── tools/                  # Educational tools
+│   ├── panphyplot.html     # Entry point → panphyplot/ (modular JS/CSS)
+│   ├── markdown_editor.html # Entry point → markdown_editor/ (ES modules)
+│   └── *.html              # digitizer, motion_tracker, sound_analyzer, tone_generator
 ├── simulations/            # Physics simulations
-├── fun/                    # Games
+├── fun/                    # Games (dodge.html excluded from SW cache)
 ├── gcse/                   # GCSE flashcards
 ├── for_teachers/           # Teacher utilities
 └── misc/                   # Miscellaneous
