@@ -1670,17 +1670,15 @@
 				});
 			});
 
-		/* Import video */
-		openVideoButton.addEventListener('click', () => videoUploadInput.click());
+			/* Import video */
+		openVideoButton.addEventListener('click', () => {
+			if (!confirmVideoImportReplace()) return;
+			videoUploadInput.click();
+		});
 
 			videoUploadInput.addEventListener('change', (e) => {
 				const file = e.target.files?.[0];
 				if (!file) return; // User cancelled
-
-				if (!confirmVideoImportReplace()) {
-					e.target.value = '';
-					return;
-				}
 
 				// Perform full reset before loading new file
 				if (blobUrl) URL.revokeObjectURL(blobUrl);
