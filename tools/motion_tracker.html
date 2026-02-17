@@ -609,6 +609,61 @@
 				opacity: 1 !important;
 			}
 
+			#chartCopyAction {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				z-index: 12;
+				border: 1px solid var(--copy-hint-outline);
+				background: var(--copy-hint-chip-bg);
+				color: var(--copy-hint-text);
+				padding: 6px 12px;
+				border-radius: 999px;
+				font-size: 12px;
+				font-family: var(--font-sans);
+				font-weight: 600;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+				opacity: 0;
+				transform: translateY(-4px);
+				pointer-events: none;
+				transition: opacity 0.15s ease, transform 0.15s ease;
+			}
+
+			#chartCopyAction[hidden] {
+				display: none;
+			}
+
+			#chartCanvasContainer.touch-copy-mode::after {
+				display: none;
+			}
+
+			#chartCanvasContainer.touch-copy-open {
+				box-shadow: 0 0 0 2px var(--copy-hint-outline);
+			}
+
+			#chartCanvasContainer.touch-copy-open #chartCopyAction {
+				opacity: 1;
+				transform: translateY(0);
+				pointer-events: auto;
+			}
+
+			#chartCanvasContainer.touch-copy-open.copying #chartCopyAction {
+				opacity: 0.85;
+				pointer-events: none;
+			}
+
+			#chartCanvasContainer.touch-copy-open.copied #chartCopyAction {
+				border-color: #22c55e;
+				background: #22c55e;
+				color: #ffffff;
+			}
+
+			#chartCanvasContainer.touch-copy-open.copy-failed #chartCopyAction {
+				border-color: #ef4444;
+				background: #ef4444;
+				color: #ffffff;
+			}
+
 			.chart-controls {
 				display: flex;
 				gap: 10px;
@@ -873,9 +928,10 @@
 				<h3 style="margin:0; font-size:1.1rem;">Data Analysis</h3>
 			</div>
 
-			<div id="chartCanvasContainer">
-				<canvas id="positionChart"></canvas>
-			</div>
+				<div id="chartCanvasContainer">
+					<canvas id="positionChart"></canvas>
+					<button id="chartCopyAction" type="button" hidden>Copy image</button>
+				</div>
 
 			<div class="chart-controls">
 				<button id="backToPosition" disabled>Position (x,y)</button>
@@ -956,15 +1012,17 @@
 		let detectedFps = null;  // Auto-detected FPS from video
 		let isSpecialRecording = false;  // Whether user has slow-mo/time-lapse video
 		let fpsDetectionPending = false;  // Whether FPS detection is in progress
-		const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
-		let frameData = [];
-		let isPlaying = false;
+			const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
+			let frameData = [];
+			let isPlaying = false;
 			let positionChart = null;
 			let skippingFrame = false;
 			let blobUrl = null;
 			let currentPlotMode = 'pos'; // Tracks 'pos', 'vx', or 'vy'
 			let crossesVisible = true; // Toggle for hiding crosses on video
 			let graphCopyInProgress = false;
+			let graphTouchCopyMode = false;
+			let graphCopyStatusResetTimeoutId = 0;
 
 			const GRAPH_PNG_BASE_SCALE = 3;
 			const GRAPH_PNG_MAX_CANVAS_SIDE = 8192;
@@ -1056,15 +1114,16 @@
 		const playPauseButton = document.getElementById('playPause');
 		const calibrateButton = document.getElementById('calibrate');
 		const setOriginButton = document.getElementById('setOrigin');
-		const exportDataButton = document.getElementById('exportData');
-		const clearDataPointsButton = document.getElementById('clearDataPoints');
-		const clearCalibrationButton = document.getElementById('clearCalibration');
-		const clearOriginButton = document.getElementById('clearOrigin');
+			const exportDataButton = document.getElementById('exportData');
+			const clearDataPointsButton = document.getElementById('clearDataPoints');
+			const clearCalibrationButton = document.getElementById('clearCalibration');
+			const clearOriginButton = document.getElementById('clearOrigin');
 			const plotVxButton = document.getElementById('plotVx');
 			const plotVyButton = document.getElementById('plotVy');
 			const backToPositionButton = document.getElementById('backToPosition');
 			const hideCrossesToggle = document.getElementById('hideCrossesToggle');
 			const chartCanvasContainer = document.getElementById('chartCanvasContainer');
+			const chartCopyActionButton = document.getElementById('chartCopyAction');
 
 		const slider = document.getElementById('slider');
 		const timeDisplay = document.getElementById('timeDisplay');
@@ -1081,10 +1140,10 @@
 
 		const exportPrompt = document.getElementById('exportPrompt');
 		const exportFilenameInput = document.getElementById('exportFilename');
-		const confirmExportButton = document.getElementById('confirmExport');
-		const cancelExportButton = document.getElementById('cancelExport');
+			const confirmExportButton = document.getElementById('confirmExport');
+			const cancelExportButton = document.getElementById('cancelExport');
 
-		const frameRatePrompt = document.getElementById('frameRatePrompt');
+			const frameRatePrompt = document.getElementById('frameRatePrompt');
 			const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
 			const confirmFrameRateButton = document.getElementById('confirmFrameRate');
 			const cancelFrameRateButton = document.getElementById('cancelFrameRate');
@@ -1135,10 +1194,53 @@
 				return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
 			}
 
+			function isTouchCopyMode() {
+				const hasCoarsePointer = typeof window.matchMedia === 'function'
+					&& window.matchMedia('(hover: none), (pointer: coarse)').matches;
+				const hasTouchPoints = Number.isFinite(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0;
+				return hasCoarsePointer || hasTouchPoints;
+			}
+
 			function canWriteClipboardItems() {
 				return typeof ClipboardItem !== 'undefined'
 					&& Boolean(navigator.clipboard)
 					&& typeof navigator.clipboard.write === 'function';
+			}
+
+			function openTouchGraphCopyActions() {
+				if (!graphTouchCopyMode || !chartCanvasContainer || !chartCopyActionButton || chartCopyActionButton.hidden) return;
+				chartCanvasContainer.classList.add('touch-copy-open');
+			}
+
+			function closeTouchGraphCopyActions() {
+				if (!chartCanvasContainer) return;
+				chartCanvasContainer.classList.remove('touch-copy-open');
+			}
+
+			function setGraphCopyActionLabel(label, disabled = false) {
+				if (!chartCopyActionButton) return;
+				chartCopyActionButton.textContent = label;
+				chartCopyActionButton.disabled = disabled;
+			}
+
+			function resetGraphCopyStatus() {
+				if (graphCopyStatusResetTimeoutId) {
+					clearTimeout(graphCopyStatusResetTimeoutId);
+					graphCopyStatusResetTimeoutId = 0;
+				}
+				if (!chartCanvasContainer) return;
+				chartCanvasContainer.classList.remove('copied', 'copy-failed', 'copying');
+				setGraphCopyActionLabel('Copy image', false);
+			}
+
+			function scheduleGraphCopyStatusReset(delayMs) {
+				if (graphCopyStatusResetTimeoutId) {
+					clearTimeout(graphCopyStatusResetTimeoutId);
+				}
+				graphCopyStatusResetTimeoutId = window.setTimeout(() => {
+					graphCopyStatusResetTimeoutId = 0;
+					resetGraphCopyStatus();
+				}, delayMs);
 			}
 
 			function getGraphRasterScale(widthPx, heightPx) {
@@ -1196,18 +1298,20 @@
 				if (!chartCanvasContainer) return;
 				chartCanvasContainer.classList.remove('copy-failed');
 				chartCanvasContainer.classList.add('copied');
-				setTimeout(() => {
-					chartCanvasContainer.classList.remove('copied');
-				}, GRAPH_COPY_SUCCESS_MS);
+				if (graphTouchCopyMode) {
+					setGraphCopyActionLabel('Copied!', false);
+				}
+				scheduleGraphCopyStatusReset(GRAPH_COPY_SUCCESS_MS);
 			}
 
 			function showGraphCopyFailedFeedback() {
 				if (!chartCanvasContainer) return;
 				chartCanvasContainer.classList.remove('copied');
 				chartCanvasContainer.classList.add('copy-failed');
-				setTimeout(() => {
-					chartCanvasContainer.classList.remove('copy-failed');
-				}, GRAPH_COPY_FAIL_MS);
+				if (graphTouchCopyMode) {
+					setGraphCopyActionLabel('Copy failed', false);
+				}
+				scheduleGraphCopyStatusReset(GRAPH_COPY_FAIL_MS);
 			}
 
 			async function copyGraphImageToClipboard() {
@@ -1217,9 +1321,17 @@
 					document.getElementById('message').innerHTML = "<p>Image clipboard copy is not supported by this browser.</p>";
 					return false;
 				}
+				if (graphCopyStatusResetTimeoutId) {
+					clearTimeout(graphCopyStatusResetTimeoutId);
+					graphCopyStatusResetTimeoutId = 0;
+				}
 
 				graphCopyInProgress = true;
+				chartCanvasContainer.classList.remove('copied', 'copy-failed');
 				chartCanvasContainer.classList.add('copying');
+				if (graphTouchCopyMode) {
+					setGraphCopyActionLabel('Copying...', true);
+				}
 
 				const pngPromise = rasterizeGraphToPngBlob().then(blob => {
 					if (!blob) throw new Error('Graph PNG rasterization failed');
@@ -1243,6 +1355,9 @@
 				} finally {
 					graphCopyInProgress = false;
 					chartCanvasContainer.classList.remove('copying');
+					if (graphTouchCopyMode && !chartCanvasContainer.classList.contains('copied') && !chartCanvasContainer.classList.contains('copy-failed')) {
+						setGraphCopyActionLabel('Copy image', false);
+					}
 				}
 			}
 
@@ -1473,17 +1588,18 @@
 
 			// 6. Reset UI elements
 			playPauseButton.textContent = "Play";
-				frameCanvas.style.cursor = "default";
-				document.getElementById('crosshair').style.display = "none";
-				overlayCanvas.style.pointerEvents = "none";
-				document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
-				hideCrossesToggle.classList.remove('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
-				chartCanvasContainer.classList.remove('copied', 'copy-failed', 'copying');
-				specialRecordingCheckbox.checked = false;
-				captureRateSection.style.display = 'none';
-				detectedFpsDisplay.textContent = 'Detecting...';
-				frameRateButton.textContent = 'FPS: 30';
+			frameCanvas.style.cursor = "default";
+			document.getElementById('crosshair').style.display = "none";
+			overlayCanvas.style.pointerEvents = "none";
+			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
+			hideCrossesToggle.classList.remove('crosses-hidden');
+			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
+			resetGraphCopyStatus();
+			closeTouchGraphCopyActions();
+			specialRecordingCheckbox.checked = false;
+			captureRateSection.style.display = 'none';
+			detectedFpsDisplay.textContent = 'Detecting...';
+			frameRateButton.textContent = 'FPS: 30';
 
 			// 7. Hide any open prompts
 			calibrationPrompt.style.display = 'none';
@@ -1501,9 +1617,21 @@
 				document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
 				frameCanvas.style.display = "none";
 				chartCanvasContainer.classList.add('copy-ready');
-				chartCanvasContainer.tabIndex = 0;
-				chartCanvasContainer.setAttribute('role', 'button');
-				chartCanvasContainer.setAttribute('aria-label', 'Copy graph image');
+
+				graphTouchCopyMode = isTouchCopyMode();
+				chartCanvasContainer.classList.toggle('touch-copy-mode', graphTouchCopyMode);
+				if (graphTouchCopyMode) {
+					chartCanvasContainer.removeAttribute('tabindex');
+					chartCanvasContainer.setAttribute('role', 'group');
+					chartCanvasContainer.setAttribute('aria-label', 'Graph copy actions');
+					chartCopyActionButton.hidden = false;
+				} else {
+					chartCanvasContainer.tabIndex = 0;
+					chartCanvasContainer.setAttribute('role', 'button');
+					chartCanvasContainer.setAttribute('aria-label', 'Copy graph image');
+					chartCopyActionButton.hidden = true;
+				}
+				setGraphCopyActionLabel('Copy image', false);
 
 				// Toggle capture rate section visibility based on checkbox
 				specialRecordingCheckbox.addEventListener('change', () => {
@@ -1905,14 +2033,39 @@
 			plotVxButton.addEventListener("click", () => plotVelocity("x"));
 			plotVyButton.addEventListener("click", () => plotVelocity("y"));
 			backToPositionButton.addEventListener("click", plotPosition);
-			chartCanvasContainer.addEventListener('click', () => {
+
+			chartCanvasContainer.addEventListener('click', (event) => {
+				if (graphTouchCopyMode) {
+					if (chartCopyActionButton && chartCopyActionButton.contains(event.target)) {
+						return;
+					}
+					openTouchGraphCopyActions();
+					return;
+				}
 				void copyGraphImageToClipboard();
 			});
+
+			chartCopyActionButton.addEventListener('click', (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				void copyGraphImageToClipboard();
+			});
+
 			chartCanvasContainer.addEventListener('keydown', (event) => {
-				if (event.key === 'Enter' || event.key === ' ') {
-					event.preventDefault();
-					void copyGraphImageToClipboard();
+				if (event.key !== 'Enter' && event.key !== ' ') return;
+				event.preventDefault();
+				if (graphTouchCopyMode) {
+					openTouchGraphCopyActions();
+					return;
 				}
+				void copyGraphImageToClipboard();
+			});
+
+			document.addEventListener('click', (event) => {
+				if (!graphTouchCopyMode) return;
+				if (!chartCanvasContainer.classList.contains('touch-copy-open')) return;
+				if (chartCanvasContainer.contains(event.target)) return;
+				closeTouchGraphCopyActions();
 			});
 
 		/* Clear / Export */
@@ -2220,11 +2373,15 @@
 
 		hideCrossesToggle.addEventListener('click', toggleCrossesVisibility);
 
-		/* Keyboard shortcut: H to toggle crosses */
-		document.addEventListener('keydown', (e) => {
-			// Ignore if typing in input fields or if video not loaded
-			if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-			if (hideCrossesToggle.disabled) return;
+			/* Keyboard shortcut: H to toggle crosses */
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape') {
+					closeTouchGraphCopyActions();
+				}
+
+				// Ignore if typing in input fields or if video not loaded
+				if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+				if (hideCrossesToggle.disabled) return;
 
 			if (e.key === 'h' || e.key === 'H') {
 				e.preventDefault();
