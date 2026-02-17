@@ -1198,6 +1198,12 @@
 				return window.confirm(message);
 			}
 
+			function confirmVideoImportReplace() {
+				const hasLoadedVideo = Boolean(blobUrl);
+				if (!hasLoadedVideo && !hasDataLossRisk()) return true;
+				return window.confirm(NEW_VIDEO_WARNING);
+			}
+
 			// Scale helper
 			function getVisualScale() {
 			if (!frameCanvas.width) return 1;
@@ -1671,7 +1677,7 @@
 				const file = e.target.files?.[0];
 				if (!file) return; // User cancelled
 
-				if (!confirmDataLoss(NEW_VIDEO_WARNING)) {
+				if (!confirmVideoImportReplace()) {
 					e.target.value = '';
 					return;
 				}
