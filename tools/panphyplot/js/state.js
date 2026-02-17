@@ -2,6 +2,7 @@
 let rawData = []; // Each element will be an array of data points
 let activeSet = 0; // Index of the current active dataset
 let datasetHeaders = {}; // Object to store headers per dataset, e.g. {0: {x: 'x', y: 'y'}, 1: {x: 'Time', y: 'Distance'}}
+let datasetNames = {}; // Optional custom names per dataset index, e.g. {0: 'Trial A', 1: 'Control'}
 let datasetToggles = {}; // Global object to hold fitted curves by dataset index.
 let datasetErrorTypes = {}; // stores the error type per axis per dataset, e.g. { 0: { x: 'absolute', y: 'absolute' }, 1: { x: 'percentage', y: 'percentage' } }
 let fittedCurves = {};
@@ -23,6 +24,7 @@ datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
 let isSyncing = false;
 const STORAGE_KEY = 'panphyplot-state-v1';
 const THEME_KEY = 'panphyplot-theme';
+const DATASET_NAME_MAX_LENGTH = 20;
 
 function debounce(func, wait) {
 	let timeout;
@@ -48,6 +50,7 @@ function buildPersistedState() {
 		rawData,
 		activeSet,
 		datasetHeaders,
+		datasetNames,
 		datasetToggles,
 		datasetErrorTypes,
 		fittedCurves,
@@ -137,6 +140,21 @@ function normalizeDatasetFitResultsState(savedResults, datasetCount) {
 			? result.rSquared
 			: String(result.rSquared ?? '');
 		normalized[index] = { equation, rSquared };
+	}
+
+	return normalized;
+}
+
+function normalizeDatasetNamesState(savedNames, datasetCount) {
+	const normalized = {};
+	if (!savedNames || typeof savedNames !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const rawName = savedNames[index];
+		if (typeof rawName !== 'string') continue;
+		const trimmed = rawName.trim();
+		if (!trimmed) continue;
+		normalized[index] = trimmed.slice(0, DATASET_NAME_MAX_LENGTH);
 	}
 
 	return normalized;

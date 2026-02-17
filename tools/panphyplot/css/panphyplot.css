@@ -338,6 +338,7 @@ body {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	min-width: 0;
 	padding: 10px 16px;
 	margin-right: 6px;
 	line-height: 1.2;
@@ -391,8 +392,43 @@ body {
 }
 
 .dataset-tab .tab-label {
+	display: inline-block;
+	min-width: 0;
+	max-width: 132px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	margin-right: 5px;
 	white-space: nowrap;
+}
+
+.dataset-tab-name-input {
+	width: 132px;
+	max-width: 140px;
+	min-width: 84px;
+	padding: 5px 8px;
+	border: 1px solid var(--input-border);
+	border-radius: 8px;
+	background: var(--card-bg);
+	color: var(--text-main);
+	font: inherit;
+	line-height: 1.2;
+}
+
+.dataset-tab-name-input:focus {
+	outline: 2px solid var(--brand-primary);
+	outline-offset: 1px;
+}
+
+.dataset-tab.active .dataset-tab-name-input {
+	background: rgba(255, 255, 255, 0.92);
+	color: #1a1a1a;
+	border-color: rgba(255, 255, 255, 0.92);
+}
+
+[data-theme="dark"] .dataset-tab.active .dataset-tab-name-input {
+	background: rgba(26, 26, 26, 0.94);
+	color: #f4f6fb;
+	border-color: rgba(244, 246, 251, 0.7);
 }
 
 .dataset-tab .tab-close {

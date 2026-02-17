@@ -117,6 +117,8 @@ const FIT_EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
 const FIT_EQUATION_PNG_MAX_PIXELS = 16777216;
 const FIT_EQUATION_COPY_ACTION_OFFSET_PX = 8;
 const FIT_EQUATION_COPY_HIDE_DELAY_MS = 120;
+const DATASET_TAB_LONG_PRESS_MS = 450;
+const DATASET_TAB_NAME_MAX_LENGTH = Number.isInteger(DATASET_NAME_MAX_LENGTH) ? DATASET_NAME_MAX_LENGTH : 20;
 
 let fitEquationCopyActionsMenu = null;
 let activeFitEquationCopyTarget = null;
@@ -617,6 +619,100 @@ function initializeFitEquationCopyInteractions() {
 			updateData();
 		}
 
+function getDefaultDatasetName(index) {
+	return `Dataset ${index + 1}`;
+}
+
+function normalizeDatasetTabName(name) {
+	if (typeof name !== 'string') return '';
+	return name.trim().slice(0, DATASET_TAB_NAME_MAX_LENGTH);
+}
+
+function getDatasetDisplayName(index) {
+	const customName = normalizeDatasetTabName(datasetNames[index]);
+	return customName || getDefaultDatasetName(index);
+}
+
+function setDatasetDisplayName(index, nextName) {
+	if (index < 0 || index >= rawData.length) return;
+
+	const normalized = normalizeDatasetTabName(nextName);
+	const defaultName = getDefaultDatasetName(index);
+	if (!normalized || normalized === defaultName) {
+		delete datasetNames[index];
+		return;
+	}
+
+	datasetNames[index] = normalized;
+}
+
+function renderDatasetTabLabel(labelElement, index) {
+	if (!labelElement) return;
+	const displayName = getDatasetDisplayName(index);
+	labelElement.textContent = displayName;
+	labelElement.title = displayName;
+}
+
+function startDatasetTabRename(index, tabElement, labelElement) {
+	if (!tabElement || !labelElement || tabElement.classList.contains('renaming')) return;
+	if (index < 0 || index >= rawData.length) return;
+
+	const input = document.createElement('input');
+	input.type = 'text';
+	input.className = 'dataset-tab-name-input';
+	input.maxLength = DATASET_TAB_NAME_MAX_LENGTH;
+	input.spellcheck = false;
+	input.value = getDatasetDisplayName(index);
+	input.setAttribute('aria-label', `Rename dataset ${index + 1}`);
+
+	tabElement.classList.add('renaming');
+	labelElement.textContent = '';
+	labelElement.appendChild(input);
+
+	let finalized = false;
+	const finalizeRename = (shouldSave) => {
+		if (finalized) return;
+		finalized = true;
+
+		if (shouldSave) {
+			setDatasetDisplayName(index, input.value);
+			scheduleSaveState();
+		}
+
+		tabElement.classList.remove('renaming');
+		labelElement.innerHTML = '';
+		renderDatasetTabLabel(labelElement, index);
+	};
+
+	input.addEventListener('keydown', event => {
+		event.stopPropagation();
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			finalizeRename(true);
+			return;
+		}
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			finalizeRename(false);
+		}
+	});
+
+	input.addEventListener('blur', () => {
+		finalizeRename(true);
+	});
+
+	input.addEventListener('click', event => {
+		event.stopPropagation();
+	});
+
+	input.addEventListener('pointerdown', event => {
+		event.stopPropagation();
+	});
+
+	input.focus();
+	input.select();
+}
+
 
 	function updateDatasetTabsBar() {
 		const tabsBar = document.querySelector('.dataset-tabs-bar');
@@ -636,8 +732,36 @@ function initializeFitEquationCopyInteractions() {
 			// Create a span for the label (e.g., "Dataset 1")
 			const labelSpan = document.createElement('span');
 			labelSpan.classList.add('tab-label');
-			labelSpan.textContent = `Dataset ${index + 1}`;
+			renderDatasetTabLabel(labelSpan, index);
 			tab.appendChild(labelSpan);
+
+			let longPressTimerId = 0;
+			let suppressNextTabClick = false;
+
+			const clearLongPressTimer = () => {
+				if (!longPressTimerId) return;
+				window.clearTimeout(longPressTimerId);
+				longPressTimerId = 0;
+			};
+
+			labelSpan.addEventListener('dblclick', event => {
+				event.preventDefault();
+				event.stopPropagation();
+				startDatasetTabRename(index, tab, labelSpan);
+			});
+
+			labelSpan.addEventListener('pointerdown', event => {
+				if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+				clearLongPressTimer();
+				longPressTimerId = window.setTimeout(() => {
+					suppressNextTabClick = true;
+					startDatasetTabRename(index, tab, labelSpan);
+				}, DATASET_TAB_LONG_PRESS_MS);
+			});
+
+			labelSpan.addEventListener('pointerup', clearLongPressTimer);
+			labelSpan.addEventListener('pointercancel', clearLongPressTimer);
+			labelSpan.addEventListener('pointerleave', clearLongPressTimer);
 
 			// Create the close button. (Do not add a close icon if there is only one dataset.)
 			if (rawData.length > 1) {
@@ -648,13 +772,21 @@ function initializeFitEquationCopyInteractions() {
 				closeSpan.addEventListener('click', function(e) {
 					// prevent the click from also firing the tab-switch event
 					e.stopPropagation();
+					clearLongPressTimer();
 					removeDataset(index);
 				});
 				tab.appendChild(closeSpan);
 			}
 
 			// Clicking on a tab should switch to that dataset.
-			tab.addEventListener('click', function() {
+			tab.addEventListener('click', function(event) {
+				if (suppressNextTabClick) {
+					suppressNextTabClick = false;
+					event.preventDefault();
+					return;
+				}
+				if (tab.classList.contains('renaming')) return;
+				if (index === activeSet) return;
 				switchDataset(index);
 			});
 
@@ -1124,6 +1256,13 @@ function clearFittedCurve() {
 				delete datasetHeaders[j];
 			}
 
+			// datasetNames
+			if (datasetNames.hasOwnProperty(j + 1)) {
+				datasetNames[j] = datasetNames[j + 1];
+			} else {
+				delete datasetNames[j];
+			}
+
 			// datasetToggles
 			if (datasetToggles.hasOwnProperty(j + 1)) {
 				datasetToggles[j] = datasetToggles[j + 1];
@@ -1156,6 +1295,7 @@ function clearFittedCurve() {
 		// Then delete the old "last" index which no longer corresponds to a dataset
 		const lastIndex = rawData.length;
 		delete datasetHeaders[lastIndex];
+		delete datasetNames[lastIndex];
 		delete datasetToggles[lastIndex];
 		delete datasetErrorTypes[lastIndex];
 		delete datasetFitResults[lastIndex];

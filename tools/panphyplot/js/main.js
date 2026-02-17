@@ -38,6 +38,9 @@ document.addEventListener("DOMContentLoaded", function() {
 		rawData = Array.isArray(savedState.rawData) && savedState.rawData.length ? savedState.rawData : [[]];
 		activeSet = Math.min(savedState.activeSet ?? 0, rawData.length - 1);
 		datasetHeaders = savedState.datasetHeaders || {};
+		datasetNames = typeof normalizeDatasetNamesState === 'function'
+			? normalizeDatasetNamesState(savedState.datasetNames, rawData.length)
+			: (savedState.datasetNames || {});
 		datasetToggles = savedState.datasetToggles || {};
 		datasetErrorTypes = savedState.datasetErrorTypes || {};
 		fittedCurves = typeof normalizeFittedCurvesState === 'function'
