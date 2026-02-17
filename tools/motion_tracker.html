@@ -1023,6 +1023,7 @@
 			let graphCopyInProgress = false;
 			let graphTouchCopyMode = false;
 			let graphCopyStatusResetTimeoutId = 0;
+			let hasUnsavedChanges = false;
 
 			const GRAPH_PNG_BASE_SCALE = 3;
 			const GRAPH_PNG_MAX_CANVAS_SIDE = 8192;
@@ -1039,10 +1040,13 @@
 		let isDrawingCalibration = false;
 
 		let originMode = false;
-		let originSet = false;
-		let originPoint = { x: 0, y: 0 };
+			let originSet = false;
+			let originPoint = { x: 0, y: 0 };
 
-		const baseResolutionWidth = 1280; // Reference width (720p)
+			const baseResolutionWidth = 1280; // Reference width (720p)
+			const UNSAVED_EXIT_WARNING = "You have unsaved tracking data. If you leave or refresh, your progress will be lost.";
+			const CLEAR_DATA_WARNING = "This will clear your tracked data points and cannot be undone. Continue?";
+			const NEW_VIDEO_WARNING = "Loading a new video will clear your current analysis data. Continue?";
 
 		/* ===== Theme ===== */
 		const themeButton = document.getElementById('theme-button');
@@ -1170,12 +1174,32 @@
 			return frameIndex / captureFrameRate;
 		}
 
-		function updateTimeDisplay(playbackTime) {
-			timeDisplay.textContent = formatTime(getAnalysisTime(playbackTime));
-		}
+			function updateTimeDisplay(playbackTime) {
+				timeDisplay.textContent = formatTime(getAnalysisTime(playbackTime));
+			}
 
-		// Scale helper
-		function getVisualScale() {
+			function markUnsavedChanges() {
+				hasUnsavedChanges = true;
+			}
+
+			function clearUnsavedChanges() {
+				hasUnsavedChanges = false;
+			}
+
+			function hasDataLossRisk() {
+				return frameData.length > 0
+					|| originSet
+					|| scaleFactor !== 1
+					|| scaleUnit !== "pixels";
+			}
+
+			function confirmDataLoss(message) {
+				if (!hasDataLossRisk()) return true;
+				return window.confirm(message);
+			}
+
+			// Scale helper
+			function getVisualScale() {
 			if (!frameCanvas.width) return 1;
 			return Math.max(0.5, frameCanvas.width / baseResolutionWidth);
 		}
@@ -1551,11 +1575,12 @@
 		}
 
 		/* ===== RESET FUNCTION ===== */
-		function resetApp() {
-			// 1. Clear data
-			frameData = [];
-			calibrationMode = false;
-			originMode = false;
+			function resetApp() {
+				// 1. Clear data
+				frameData = [];
+				clearUnsavedChanges();
+				calibrationMode = false;
+				originMode = false;
 			isDrawingCalibration = false;
 			skippingFrame = false;
 			isPlaying = false;
@@ -1642,12 +1667,17 @@
 		/* Import video */
 		openVideoButton.addEventListener('click', () => videoUploadInput.click());
 
-		videoUploadInput.addEventListener('change', (e) => {
-			const file = e.target.files?.[0];
-			if (!file) return; // User cancelled
+			videoUploadInput.addEventListener('change', (e) => {
+				const file = e.target.files?.[0];
+				if (!file) return; // User cancelled
 
-			// Perform full reset before loading new file
-			if (blobUrl) URL.revokeObjectURL(blobUrl);
+				if (!confirmDataLoss(NEW_VIDEO_WARNING)) {
+					e.target.value = '';
+					return;
+				}
+
+				// Perform full reset before loading new file
+				if (blobUrl) URL.revokeObjectURL(blobUrl);
 			resetApp();
 
 			blobUrl = URL.createObjectURL(file);
@@ -1767,8 +1797,9 @@
 				const canvasY = (event.clientY - rect.top) * scaleY;
 				const cartesianY = canvasYToCartesianY(canvasY);
 
-				// Store playbackTime so analysis time can be recalculated if FPS changes
-				frameData.push({ x: canvasX, y: cartesianY, playbackTime: hiddenVideo.currentTime });
+					// Store playbackTime so analysis time can be recalculated if FPS changes
+					frameData.push({ x: canvasX, y: cartesianY, playbackTime: hiddenVideo.currentTime });
+					markUnsavedChanges();
 
 				// Update the specific plot user is viewing
 				if (currentPlotMode === 'vx') {
@@ -1783,11 +1814,12 @@
 			}
 		});
 
-		function finalizeOriginSelection(canvasX, canvasY) {
-			const cartesianY = canvasYToCartesianY(canvasY);
-			originPoint = { x: canvasX, y: cartesianY };
-			originSet = true;
-			originMode = false;
+			function finalizeOriginSelection(canvasX, canvasY) {
+				const cartesianY = canvasYToCartesianY(canvasY);
+				originPoint = { x: canvasX, y: cartesianY };
+				originSet = true;
+				markUnsavedChanges();
+				originMode = false;
 			frameCanvas.style.cursor = "default";
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "none";
@@ -2068,35 +2100,46 @@
 				closeTouchGraphCopyActions();
 			});
 
-		/* Clear / Export */
-		clearDataPointsButton.addEventListener("click", () => {
-			frameData = [];
-			if (positionChart) {
-				positionChart.data.datasets.forEach(d => d.data = []);
-				positionChart.update();
+			/* Clear / Export */
+			clearDataPointsButton.addEventListener("click", () => {
+				if (frameData.length > 0 && !window.confirm(CLEAR_DATA_WARNING)) {
+					return;
+				}
+
+				frameData = [];
+				clearUnsavedChanges();
+				if (positionChart) {
+					positionChart.data.datasets.forEach(d => d.data = []);
+					positionChart.update();
 			}
 			drawFrame();
 			drawOverlay();
 			document.getElementById('message').innerHTML = "<p>Data points cleared.</p>";
 		});
-		clearCalibrationButton.addEventListener("click", () => {
-			scaleFactor = 1;
-			scaleUnit = "pixels";
-			calibrationStart = null;
-			calibrationEnd = null;
-			drawOverlay();
-			drawFrame();
+			clearCalibrationButton.addEventListener("click", () => {
+				scaleFactor = 1;
+				scaleUnit = "pixels";
+				calibrationStart = null;
+				calibrationEnd = null;
+				if (frameData.length > 0 || originSet) {
+					markUnsavedChanges();
+				}
+				drawOverlay();
+				drawFrame();
 			if (positionChart) {
 				positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
 				plotPosition();
 			}
 			document.getElementById('message').innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
 		});
-		clearOriginButton.addEventListener("click", () => {
-			originSet = false;
-			originPoint = { x: 0, y: 0 };
-			drawOverlay();
-			plotPosition();
+			clearOriginButton.addEventListener("click", () => {
+				originSet = false;
+				originPoint = { x: 0, y: 0 };
+				if (frameData.length > 0) {
+					markUnsavedChanges();
+				}
+				drawOverlay();
+				plotPosition();
 			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
 		});
 		exportDataButton.addEventListener("click", () => {
@@ -2104,15 +2147,16 @@
 			exportFilenameInput.value = "motion_tracker_data";
 			exportPrompt.style.display = "block";
 		});
-		confirmExportButton.addEventListener("click", () => {
-			const desired = exportFilenameInput.value.trim();
-			if (!desired) { alert("Please enter a valid filename."); return; }
-			const sanitized = desired.replace(/[^a-zA-Z0-9-_.]/g, "_");
-			const finalName = sanitized.toLowerCase().endsWith(".csv") ? sanitized : sanitized + ".csv";
-			exportCSV(finalName);
-			exportPrompt.style.display = "none";
-			document.getElementById('message').innerHTML = `<p>Data exported as ${finalName}.</p>`;
-		});
+			confirmExportButton.addEventListener("click", () => {
+				const desired = exportFilenameInput.value.trim();
+				if (!desired) { alert("Please enter a valid filename."); return; }
+				const sanitized = desired.replace(/[^a-zA-Z0-9-_.]/g, "_");
+				const finalName = sanitized.toLowerCase().endsWith(".csv") ? sanitized : sanitized + ".csv";
+				exportCSV(finalName);
+				clearUnsavedChanges();
+				exportPrompt.style.display = "none";
+				document.getElementById('message').innerHTML = `<p>Data exported as ${finalName}.</p>`;
+			});
 		cancelExportButton.addEventListener("click", () => {
 			exportPrompt.style.display = "none";
 			document.getElementById('message').innerHTML = "<p>Export cancelled.</p>";
@@ -2317,19 +2361,20 @@
 				endCalibrationDraw();
 			}
 		}, { passive: false });
-		confirmCalibrationButton.addEventListener('click', () => {
-			const actualLength = parseFloat(actualLengthInput.value);
-			const actualUnit = actualUnitInput.value.trim();
-			if (!Number.isFinite(actualLength) || actualLength <= 0 || !actualUnit) { alert("Enter a positive length and a unit."); return; }
+			confirmCalibrationButton.addEventListener('click', () => {
+				const actualLength = parseFloat(actualLengthInput.value);
+				const actualUnit = actualUnitInput.value.trim();
+				if (!Number.isFinite(actualLength) || actualLength <= 0 || !actualUnit) { alert("Enter a positive length and a unit."); return; }
 			const dx = calibrationEnd.x - calibrationStart.x,
 				dy = calibrationEnd.y - calibrationStart.y;
 			const pxLen = Math.hypot(dx, dy);
 			if (pxLen === 0) { alert("Calibration line length cannot be zero."); return; }
-			scaleFactor = actualLength / pxLen;
-			scaleUnit = actualUnit;
-			calibrationPrompt.style.display = "none";
-			drawOverlay();
-			drawFrame();
+				scaleFactor = actualLength / pxLen;
+				scaleUnit = actualUnit;
+				markUnsavedChanges();
+				calibrationPrompt.style.display = "none";
+				drawOverlay();
+				drawFrame();
 			plotPosition();
 			document.getElementById('message').innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
 		});
@@ -2355,8 +2400,16 @@
 			document.getElementById('message').innerHTML = "<p>Click on the video to set the new origin.</p>";
 		});
 
-		/* Cleanup */
-		window.addEventListener('beforeunload', () => { if (blobUrl) URL.revokeObjectURL(blobUrl); });
+			/* Cleanup + Unsaved warning */
+			window.addEventListener('beforeunload', (event) => {
+				if (hasDataLossRisk()) {
+					event.preventDefault();
+					event.returnValue = UNSAVED_EXIT_WARNING;
+				}
+			});
+			window.addEventListener('unload', () => {
+				if (blobUrl) URL.revokeObjectURL(blobUrl);
+			});
 
 		/* ===== Hide Crosses Toggle ===== */
 		function toggleCrossesVisibility() {
