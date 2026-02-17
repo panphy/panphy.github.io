@@ -524,10 +524,12 @@
         <strong>Data Input</strong>
         <ul>
           <li>Enter your data points manually in the table.</li>
-          <li><strong>Add Dataset:</strong> Create and manage multiple datasets. Each dataset retains its own data,
-            uncertainty settings, and fitting results.</li>
+          <li><strong>Datasets:</strong> Create and manage multiple datasets using the <code>+</code> tab. You can
+            rename a dataset tab (double-click on desktop, long-press on touch/pen). Each dataset retains its own
+            data, uncertainty settings, and fitting results.</li>
           <li><strong>Add Row:</strong> Click the "Add Row" button to add an individual data row.</li>
-          <li><strong>Clear Data:</strong> Remove all data from the active dataset with a single click.</li>
+          <li><strong>Clear Data:</strong> Remove all data from the active dataset. A confirmation dialog appears only
+            when the dataset already contains data.</li>
           <li><strong>Copy x₁:</strong> Use the "Copy x₁" button to copy all x-values from Dataset 1 into the active
             dataset. This feature simplifies workflows when comparing multiple datasets.</li>
         </ul>
@@ -538,8 +540,8 @@
           <li>Import data from a <code>.csv</code> file.</li>
           <li>Export your data to <code>.csv</code> format.</li>
           <li><strong>View Table:</strong> Opens a popup showing a formatted table preview with rendered LaTeX.
-            Click the table to copy it to your clipboard (works with Word, Google Docs, etc.), or save as a
-            <code>.md</code> file.</li>
+            Hover (desktop) or tap (touch devices) the table to open copy actions:
+            <code>Copy image</code> or <code>Copy raw Markdown</code>.</li>
         </ul>
       </li>
       <li>
@@ -547,7 +549,7 @@
         <ul>
           <li>Perform basic fits such as Linear, Quadratic, Cubic, Exponential, and Power.</li>
           <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
-          <li>Customize initial parameters for advanced fitting methods.</li>
+          <li>Adjust and reset initial parameters for advanced fitting methods.</li>
           <li>View fitting equations and R² values.</li>
           <li><strong>Copy fitted equations:</strong> In the Fitting Result panel, hover (desktop) or tap (touch
             devices) the fitted equation to open copy actions:
@@ -601,13 +603,13 @@
       <li><strong>Adding Data Points:</strong> Click the "Add Row" button to add a new data row. Enter your
         <code>x</code> and <code>y</code> values in the respective input fields.</li>
       <li><strong>Removing Data Points:</strong> Click the "Clear Data" button to remove all data in the active
-        dataset.</li>
+        dataset. A confirmation dialog appears only when the dataset is not empty.</li>
       <li><strong>Copying x-values from Dataset 1:</strong> In the active dataset view, click the "Copy x₁" button to
         copy the x-values from Dataset 1 into the current dataset.</li>
-      <li><strong>Adding a New Dataset:</strong> Click the "Add Dataset" button to create a new dataset. Each dataset is
+      <li><strong>Adding a New Dataset:</strong> Click the <code>+</code> tab ("Add a new dataset") to create a new dataset. Each dataset is
         stored independently and maintains its own header values, uncertainty settings, and fitting results.</li>
-      <li><strong>Removing a Dataset:</strong> Click the × button on a dataset tab to remove that dataset. You must keep
-        at least one dataset.</li>
+      <li><strong>Renaming a Dataset:</strong> Double-click a dataset tab label on desktop, or long-press it on touch/pen devices.</li>
+      <li><strong>Removing a Dataset:</strong> Click the × button on a dataset tab to remove that dataset. A confirmation is shown when the dataset is not empty. You must keep at least one dataset.</li>
       <li><strong>Keyboard Navigation:</strong> Use the arrow keys to navigate between cells in the data table. Press
         Enter to move to the cell below.</li>
     </ul>
@@ -627,26 +629,27 @@
     <h3>3. Importing and Exporting Data</h3>
     <ul>
       <li><strong>Importing from CSV:</strong> Click the "Import .csv" button and select a CSV file from your device.
-        Ensure that the CSV file has at least two columns for <code>x</code> and <code>y</code>. Additional columns can
-        represent uncertainties.</li>
+        If the active dataset already has data, a confirmation dialog appears before import. Ensure that the CSV file
+        has at least two columns for <code>x</code> and <code>y</code>. Additional columns can represent uncertainties.</li>
       <li><strong>Export .csv:</strong> Click the "Export .csv" button to download your data in CSV format.</li>
       <li>
         <strong>View Table:</strong> Click the "View Table" button to open a popup with your data displayed as a
         formatted table.
         <ul>
           <li>LaTeX expressions in headers and values are rendered as proper mathematical notation.</li>
-          <li><strong>Click to Copy:</strong> Hover over the table to see the "Click to copy table" tooltip. Click
-            anywhere on the table to copy it to your clipboard. The table can be pasted directly into Word, Google
-            Docs, or other rich text editors.</li>
-          <li><strong>Save .md File:</strong> Click the "Save .md File" button to download the raw Markdown source,
-            suitable for documentation or use in the Markdown Editor.</li>
+          <li><strong>Copy Actions:</strong> Hover (desktop) or tap (touch devices) the table to open
+            <strong>Copy image</strong> and <strong>Copy raw Markdown</strong>.</li>
+          <li><strong>Copy image:</strong> Copies the rendered table as an image for pasting into Word, Google Docs,
+            or slides.</li>
+          <li><strong>Copy raw Markdown:</strong> Copies the raw Markdown table source, suitable for documentation or
+            use in the Markdown Editor.</li>
         </ul>
       </li>
     </ul>
 
     <div class="note-box">
       <p><strong>Note:</strong> Uncertainties (absolute or percentage) play a crucial role in determining how data is
-        formatted in the exported <code>.csv</code> and <code>.md</code> files.</p>
+        formatted in exported <code>.csv</code> output and copied raw Markdown tables.</p>
       <p><strong>1. Absolute Uncertainties:</strong> The number of decimal places in the exported values matches the
         precision of the absolute uncertainty. For example, if the uncertainty is <code>±0.05</code>, the corresponding
         data value will be exported with two decimal places (e.g., <code>5.25 ± 0.05</code>).</p>
@@ -682,8 +685,8 @@
         <ul>
           <li>Navigate to the "Advanced Fit" tab.</li>
           <li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
-          <li>Some initial parameters are calculated based on the imported dataset. Change the initial parameters if
-            needed.</li>
+          <li>Some initial parameters are calculated based on the imported dataset. Adjust the initial parameters if
+            needed, or use <strong>Reset parameters</strong>.</li>
           <li>Click the "Fit Curve" button to perform the fitting.</li>
           <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
           <li>You can copy the displayed fitted equation using the same equation menu
