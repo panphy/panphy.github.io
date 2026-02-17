@@ -823,6 +823,24 @@
     statusDiv.textContent = message;
   }
 
+  function hasWorkToWarnAbout() {
+    return calibrationX.length > 0 || calibrationY.length > 0 || digitizedPoints.length > 0 || activeCalibration !== null;
+  }
+
+  function confirmGraphDataLoss(triggerDescription) {
+    if (!hasWorkToWarnAbout()) {
+      return true;
+    }
+    return window.confirm("Warning: " + triggerDescription + " will clear your current calibration and digitized data. Continue?");
+  }
+
+  function confirmResetDataLoss() {
+    if (digitizedPoints.length === 0) {
+      return true;
+    }
+    return window.confirm("Warning: Reset will clear all digitized points. Continue?");
+  }
+
   function saveState() {
     if (!image.src) {
       localStorage.removeItem(STORAGE_KEY);
@@ -916,6 +934,11 @@
   function handleImage(e) {
     const file = (e.target.files && e.target.files[0]) ? e.target.files[0] : null;
     if (!file) return;
+    if (!confirmGraphDataLoss("Importing a new graph")) {
+      e.target.value = "";
+      updateStatus("Import cancelled. Current graph preserved.");
+      return;
+    }
 
     // IMPORTANT:
     // resetAllState() clears the <input type="file"> value.
@@ -1012,10 +1035,18 @@
   });
 
   document.getElementById('resetButton').addEventListener('click', function () {
+    if (!confirmResetDataLoss()) {
+      updateStatus("Reset cancelled. Digitized points preserved.");
+      return;
+    }
     resetDigitizedData();
   });
 
   document.getElementById('removeGraphButton').addEventListener('click', function () {
+    if (!confirmGraphDataLoss("Removing the graph")) {
+      updateStatus("Remove graph cancelled. Current graph preserved.");
+      return;
+    }
     resetAllState();
   });
 
@@ -1301,6 +1332,14 @@
     exportButton.disabled = true;
     updateStatus("Data cleared. Calibration preserved. Ready to digitize.");
   }
+
+  window.addEventListener("beforeunload", function (e) {
+    if (!hasWorkToWarnAbout()) {
+      return;
+    }
+    e.preventDefault();
+    e.returnValue = "";
+  });
 
   window.addEventListener("load", function () {
     if (!loadSavedState()) {
