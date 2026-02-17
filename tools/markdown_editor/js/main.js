@@ -1060,6 +1060,56 @@ function printToPDF() {
   window.print();
 }
 
+function sanitizeFilenameForDownload(filename, fallback) {
+  const trimmed = typeof filename === 'string' ? filename.trim() : '';
+  const candidate = trimmed || fallback;
+  const sanitized = candidate.replace(/[<>:"/\\|?*]/g, '_').trim();
+  return sanitized || fallback;
+}
+
+function isAppleMobileWebKitBrowser() {
+  const ua = navigator.userAgent || '';
+  const isiPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  const isIOSDevice = /iPad|iPhone|iPod/.test(ua) || isiPadOSDesktopUA;
+  const isWebKit = /AppleWebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|OPR|SamsungBrowser/.test(ua);
+  return isIOSDevice && isWebKit;
+}
+
+async function saveBlobWithFallback(blob, filename, { title = 'Save file' } = {}) {
+  const safeFilename = sanitizeFilenameForDownload(filename, 'document');
+  const safeType = blob?.type || 'application/octet-stream';
+  const canUseShareSheet = Boolean(navigator.share)
+    && typeof navigator.canShare === 'function';
+
+  if (isAppleMobileWebKitBrowser() && canUseShareSheet) {
+    try {
+      const fileForShare = new File([blob], safeFilename, { type: safeType });
+      if (navigator.canShare({ files: [fileForShare] })) {
+        await navigator.share({
+          title,
+          files: [fileForShare]
+        });
+        return true;
+      }
+    } catch (error) {
+      if (error && error.name === 'AbortError') return false;
+      console.warn('Share sheet failed; falling back to direct download.', error);
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = safeFilename;
+  link.rel = 'noopener';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
+}
+
 /**
  * Export the document as HTML
  */
@@ -1310,12 +1360,7 @@ async function exportHTML() {
 
   const exportedHTML = `<!DOCTYPE html>${doc.documentElement.outerHTML}`;
   const blob = new Blob([exportedHTML], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  await saveBlobWithFallback(blob, fileName, { title: 'Export HTML' });
 }
 
 /**
@@ -1355,12 +1400,8 @@ async function saveMarkdown() {
   if (!fileName) return;
 
   const blob = new Blob([content], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  const wasSaved = await saveBlobWithFallback(blob, fileName, { title: 'Save Markdown' });
+  if (!wasSaved) return;
 
   markContentExported(content);
   updateDirtyIndicator(dirtyIndicator, false);

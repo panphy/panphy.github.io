@@ -67,6 +67,9 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 100vh;
   margin: 0;
   font-family: var(--font-sans);
   line-height: 1.5;
@@ -186,6 +189,8 @@ a:visited {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   max-width: none;
   max-height: none;
   border: none;
@@ -254,6 +259,13 @@ a:visited {
 #outputPane:-webkit-full-screen:hover .present-controls,
 #outputPane:-webkit-full-screen .present-controls:focus-within {
   opacity: 1;
+}
+
+@media (hover: none) {
+  #outputPane:fullscreen .present-controls,
+  #outputPane:-webkit-full-screen .present-controls {
+    opacity: 1;
+  }
 }
 
 /* Pseudo-fullscreen present controls (always visible on touch devices) */
@@ -1203,7 +1215,7 @@ button:hover {
   }
 
   .mobile-tab {
-    min-height: 36px;
+    min-height: 44px;
   }
 }
 

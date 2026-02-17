@@ -62,33 +62,86 @@
 		return currentDataStr === newDataStr && currentLayoutStr === newLayoutStr;
 	}
 
-	function sanitizeFilename(filename, fallbackFilename) {
-		const trimmed = typeof filename === 'string' ? filename.trim() : '';
-		const candidate = trimmed || fallbackFilename;
-		const sanitized = candidate.replace(/[<>:"/\\|?*]/g, '_').trim();
-		return sanitized || fallbackFilename;
-	}
+		function sanitizeFilename(filename, fallbackFilename) {
+			const trimmed = typeof filename === 'string' ? filename.trim() : '';
+			const candidate = trimmed || fallbackFilename;
+			const sanitized = candidate.replace(/[<>:"/\\|?*]/g, '_').trim();
+			return sanitized || fallbackFilename;
+		}
 
-	function createDownloadImageConfig(defaultFilename) {
-		return {
-			displaylogo: false,
-			modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'resetScale2d'],
-			modeBarButtonsToAdd: [{
-				name: 'Download plot as png',
-				icon: Plotly.Icons.camera,
-				click: function(gd) {
-					const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
-					if (userInput === null) return;
-					const filename = sanitizeFilename(userInput, defaultFilename);
-					Plotly.downloadImage(gd, {
-						format: 'png',
-						filename,
-						scale: 2
-					});
+		function isAppleMobileWebKitBrowser() {
+			const ua = navigator.userAgent || '';
+			const isiPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+			const isIOSDevice = /iPad|iPhone|iPod/.test(ua) || isiPadOSDesktopUA;
+			const isWebKit = /AppleWebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|OPR|SamsungBrowser/.test(ua);
+			return isIOSDevice && isWebKit;
+		}
+
+		async function saveBlobWithFallback(blob, filename, { title = 'Save file' } = {}) {
+			const safeFilename = sanitizeFilename(filename, 'download');
+			const safeType = blob?.type || 'application/octet-stream';
+			const canUseShareSheet = Boolean(navigator.share)
+				&& typeof navigator.canShare === 'function';
+
+			if (isAppleMobileWebKitBrowser() && canUseShareSheet) {
+				try {
+					const fileForShare = new File([blob], safeFilename, { type: safeType });
+					if (navigator.canShare({ files: [fileForShare] })) {
+						await navigator.share({
+							title,
+							files: [fileForShare]
+						});
+						return true;
+					}
+				} catch (error) {
+					if (error && error.name === 'AbortError') return false;
+					console.warn('Share sheet failed; falling back to direct download.', error);
 				}
-			}]
-		};
-	}
+			}
+
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = safeFilename;
+			link.rel = 'noopener';
+			link.style.display = 'none';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			setTimeout(() => URL.revokeObjectURL(url), 60000);
+			return true;
+		}
+
+		function createDownloadImageConfig(defaultFilename) {
+			return {
+				displaylogo: false,
+				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'resetScale2d'],
+				modeBarButtonsToAdd: [{
+					name: 'Download plot as png',
+					icon: Plotly.Icons.camera,
+					click: async function(gd) {
+						const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
+						if (userInput === null) return;
+						const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
+						try {
+							const dataUrl = await Plotly.toImage(gd, {
+								format: 'png',
+								scale: 2
+							});
+							const imageBlob = await fetch(dataUrl).then(res => res.blob());
+							await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
+						} catch (error) {
+							console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
+							Plotly.downloadImage(gd, {
+								format: 'png',
+								filename: filenameBase,
+								scale: 2
+							});
+						}
+					}
+				}]
+			};
+		}
 
 
 

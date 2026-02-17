@@ -468,6 +468,8 @@ body {
 	padding: 24px;
 	box-sizing: border-box;
 	height: 80vh;
+	height: 80svh;
+	height: 80dvh;
 	overflow-y: auto;
 	border: 1px solid var(--card-border);
 }
@@ -1238,7 +1240,7 @@ select {
 
 #popup-plot {
 	width: 100%;
-	min-width: 600px;
+	min-width: 0;
 	min-height: 400px;
 	margin-top: 10px;
 }

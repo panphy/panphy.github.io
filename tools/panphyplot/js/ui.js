@@ -13,25 +13,25 @@ function getErrorColumnDisplay(axis) {
 	return toggle && toggle.checked ? 'table-cell' : 'none';
 }
 
-function buildDataRowHtml(options = {}, wrapInTr = false) {
-	const {
-		xValue = '',
-		yValue = '',
-		xErrorValue = '',
-		yErrorValue = '',
-		xErrorDisplay = getErrorColumnDisplay('x'),
-		yErrorDisplay = getErrorColumnDisplay('y')
-	} = options;
+	function buildDataRowHtml(options = {}, wrapInTr = false) {
+		const {
+			xValue = '',
+			yValue = '',
+			xErrorValue = '',
+			yErrorValue = '',
+			xErrorDisplay = getErrorColumnDisplay('x'),
+			yErrorDisplay = getErrorColumnDisplay('y')
+		} = options;
 
-	const rowHtml = `
-                <td><input type="text" class="x-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0" value="${formatRowInputValue(xValue)}"></td>
-                <td><input type="text" class="y-input" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0" value="${formatRowInputValue(yValue)}"></td>
-                <td class="error-column" style="display: ${xErrorDisplay};"><input type="text" class="x-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" value="${formatRowInputValue(xErrorValue)}" /></td>
-                <td class="error-column" style="display: ${yErrorDisplay};"><input type="text" class="y-error-input" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" value="${formatRowInputValue(yErrorValue)}" /></td>
-            `;
+		const rowHtml = `
+	                <td><input type="text" class="x-input" inputmode="decimal" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0" value="${formatRowInputValue(xValue)}"></td>
+	                <td><input type="text" class="y-input" inputmode="decimal" onkeydown="navigateTable(event)" oninput="debouncedUpdateData()" placeholder="0" value="${formatRowInputValue(yValue)}"></td>
+	                <td class="error-column" style="display: ${xErrorDisplay};"><input type="text" class="x-error-input" inputmode="decimal" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" value="${formatRowInputValue(xErrorValue)}" /></td>
+	                <td class="error-column" style="display: ${yErrorDisplay};"><input type="text" class="y-error-input" inputmode="decimal" onkeydown="navigateTable(event)" placeholder="±0" oninput="debouncedUpdateData()" value="${formatRowInputValue(yErrorValue)}" /></td>
+	            `;
 
-	return wrapInTr ? `<tr>${rowHtml}</tr>` : rowHtml;
-}
+		return wrapInTr ? `<tr>${rowHtml}</tr>` : rowHtml;
+	}
 
 function isValidPercentageUncertainty(value) {
 	return Number.isFinite(value) && value > 0;
@@ -48,14 +48,69 @@ function syncDataset1XValues() {
 		.map(point => point.x);
 }
 
-function parseMarkdownTableLine(line) {
-	const rawLine = String(line || '').trim();
-	if (!rawLine) return [];
-	const cells = rawLine.split('|');
-	if (cells.length && cells[0].trim() === '') cells.shift();
-	if (cells.length && cells[cells.length - 1].trim() === '') cells.pop();
-	return cells.map(cell => cell.trim());
-}
+	function parseMarkdownTableLine(line) {
+		const rawLine = String(line || '').trim();
+		if (!rawLine) return [];
+		const cells = rawLine.split('|');
+		if (cells.length && cells[0].trim() === '') cells.shift();
+		if (cells.length && cells[cells.length - 1].trim() === '') cells.pop();
+		return cells.map(cell => cell.trim());
+	}
+
+	function isSafariBrowser() {
+		const ua = navigator.userAgent || '';
+		return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg|Firefox|FxiOS|OPR|OPiOS|SamsungBrowser/.test(ua);
+	}
+
+	function canWriteClipboardItems() {
+		return typeof ClipboardItem !== 'undefined'
+			&& Boolean(navigator.clipboard)
+			&& typeof navigator.clipboard.write === 'function';
+	}
+
+	function canWriteClipboardText() {
+		return Boolean(navigator.clipboard)
+			&& typeof navigator.clipboard.writeText === 'function';
+	}
+
+	async function writePlainTextToClipboard(value) {
+		const text = String(value || '');
+		if (!text) return false;
+
+		if (canWriteClipboardText()) {
+			try {
+				await navigator.clipboard.writeText(text);
+				return true;
+			} catch {
+				// Fall through to legacy copy fallback.
+			}
+		}
+
+		if (typeof document.execCommand !== 'function') return false;
+
+		const textArea = document.createElement('textarea');
+		textArea.value = text;
+		textArea.setAttribute('readonly', '');
+		textArea.style.position = 'fixed';
+		textArea.style.left = '-99999px';
+		textArea.style.top = '0';
+		document.body.appendChild(textArea);
+		textArea.select();
+		textArea.selectionStart = 0;
+		textArea.selectionEnd = textArea.value.length;
+
+		let copied = false;
+		try {
+			copied = document.execCommand('copy');
+		} catch {
+			copied = false;
+		}
+
+		if (textArea.parentNode) {
+			textArea.parentNode.removeChild(textArea);
+		}
+		return copied;
+	}
 
 
 		function initializeTable(initialRows = 7) {
@@ -804,15 +859,16 @@ function parseMarkdownTableLine(line) {
 		const tableBody = document.querySelector('#data-table tbody');
 		const fragment = document.createDocumentFragment();
 
-		const makeInput = (className, value, placeholder) => {
-			const input = document.createElement('input');
-			input.type = 'text';
-			input.className = className;
-			input.placeholder = placeholder;
-			input.value = value || '';
-			input.addEventListener('keydown', navigateTable);
-			input.addEventListener('input', debouncedUpdateData);
-			return input;
+			const makeInput = (className, value, placeholder) => {
+				const input = document.createElement('input');
+				input.type = 'text';
+				input.className = className;
+				input.inputMode = 'decimal';
+				input.placeholder = placeholder;
+				input.value = value || '';
+				input.addEventListener('keydown', navigateTable);
+				input.addEventListener('input', debouncedUpdateData);
+				return input;
 		};
 
 		for (let i = 0; i < dataRows.length; i++) {
@@ -1460,23 +1516,15 @@ function parseMarkdownTableLine(line) {
 	}
 
 
-	function saveExportedMarkdown(filename = 'data') {
-		if (!currentExportedMarkdown) {
-			alert('No markdown content to save.');
-			return;
-		}
+		async function saveExportedMarkdown(filename = 'data') {
+			if (!currentExportedMarkdown) {
+				alert('No markdown content to save.');
+				return;
+			}
 
-		const blob = new Blob([currentExportedMarkdown], { type: 'text/plain;charset=utf-8;' });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement('a');
-		link.setAttribute('href', url);
-		link.setAttribute('download', `${filename}.md`);
-		link.style.visibility = 'hidden';
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
+			const blob = new Blob([currentExportedMarkdown], { type: 'text/plain;charset=utf-8;' });
+			await saveBlobWithFallback(blob, `${filename}.md`, { title: 'Save Markdown table' });
+		}
 
 
 	function handleExportTableClick(event) {
@@ -1791,30 +1839,49 @@ function parseMarkdownTableLine(line) {
 
 
 	async function copyExportedTableToClipboard(table) {
+		var cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
+		var plainText = cleanTable ? cleanTable.text : (table.innerText || table.textContent || '');
+
+		if (!canWriteClipboardItems()) {
+			return writePlainTextToClipboard(plainText);
+		}
+
 		try {
-			var pngBlob = await renderTableToPngBlob();
-			if (!pngBlob) return false;
+			const safariCompatMode = isSafariBrowser();
 
-			// Plain text fallback for text-only paste targets
-			var cleanTable = buildCleanTableFromMarkdown(currentExportedMarkdown);
-			var plainText = cleanTable ? cleanTable.text : table.innerText;
-
-			return navigator.clipboard.write([new ClipboardItem({
-				'image/png': pngBlob,
-				'text/plain': new Blob([plainText], { type: 'text/plain' })
-			})]).then(function () { return true; }).catch(function (err) {
-				console.error('Failed to copy table as PNG:', err);
-				// Fallback: try image only
-				return navigator.clipboard.write([new ClipboardItem({
-					'image/png': pngBlob
-				})]).then(function () { return true; }).catch(function (err2) {
-					console.error('PNG-only copy also failed:', err2);
-					return false;
+			if (safariCompatMode) {
+				const pngPromise = renderTableToPngBlob().then((blob) => {
+					if (!blob) throw new Error('Unable to render table image.');
+					return blob;
 				});
-			});
+
+				const clipboardItem = new ClipboardItem({
+					'image/png': pngPromise
+				});
+
+				await navigator.clipboard.write([clipboardItem]);
+				return true;
+			}
+
+			var pngBlob = await renderTableToPngBlob();
+			if (!pngBlob) return writePlainTextToClipboard(plainText);
+
+			try {
+				await navigator.clipboard.write([new ClipboardItem({
+					'image/png': pngBlob,
+					'text/plain': new Blob([plainText], { type: 'text/plain' })
+				})]);
+				return true;
+			} catch (err) {
+				console.warn('PNG + text clipboard write failed; retrying PNG-only.', err);
+				await navigator.clipboard.write([new ClipboardItem({
+					'image/png': pngBlob
+				})]);
+				return true;
+			}
 		} catch (err) {
-			console.error('Failed to render table PNG:', err);
-			return false;
+			console.error('Failed to copy table image to clipboard:', err);
+			return writePlainTextToClipboard(plainText);
 		}
 	}
 
@@ -1835,11 +1902,11 @@ function parseMarkdownTableLine(line) {
 	}
 
 
-	function exportCSV(filename = 'data') {
-		try {
-			const table = document.getElementById('data-table');
-			const rows = table.querySelectorAll('tr');
-			let csvContent = '';
+		async function exportCSV(filename = 'data') {
+			try {
+				const table = document.getElementById('data-table');
+				const rows = table.querySelectorAll('tr');
+				let csvContent = '';
 
 			const xHeader = document.getElementById('x-column-name').value.trim() || 'x';
 			const yHeader = document.getElementById('y-column-name').value.trim() || 'y';
@@ -1913,18 +1980,11 @@ function parseMarkdownTableLine(line) {
 				csvContent += rowData.join(',') + '\n';
 			}
 
-			const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-			const url = URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.setAttribute('href', url);
-			link.setAttribute('download', `${filename}.csv`);
-			link.style.visibility = 'hidden';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-		} catch (error) {
-			console.error('Error exporting CSV:', error);
-			alert('An error occurred while exporting the CSV. Please check the console for details.');
+				const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+				await saveBlobWithFallback(blob, `${filename}.csv`, { title: 'Save CSV data' });
+			} catch (error) {
+				console.error('Error exporting CSV:', error);
+				alert('An error occurred while exporting the CSV. Please check the console for details.');
 		}
 	}
 
@@ -2011,9 +2071,9 @@ function parseMarkdownTableLine(line) {
 	}
 
 
-		function confirmFilename() {
-			const input = document.getElementById('filename-prompt-input');
-			let filename = input.value.trim();
+			async function confirmFilename() {
+				const input = document.getElementById('filename-prompt-input');
+				let filename = input.value.trim();
 
 			// Use default if empty
 			if (!filename) {
@@ -2023,12 +2083,12 @@ function parseMarkdownTableLine(line) {
 			// Sanitize filename using shared helper.
 			filename = sanitizeFilename(filename, 'data');
 
-			// Call the appropriate export function
-			if (filenamePromptType === 'csv') {
-				closeFilenamePrompt();
-				exportCSV(filename);
-			} else if (filenamePromptType === 'md') {
-				closeFilenamePrompt();
-				saveExportedMarkdown(filename);
+				// Call the appropriate export function
+				if (filenamePromptType === 'csv') {
+					closeFilenamePrompt();
+					await exportCSV(filename);
+				} else if (filenamePromptType === 'md') {
+					closeFilenamePrompt();
+					await saveExportedMarkdown(filename);
+				}
 			}
-		}
