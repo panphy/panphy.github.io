@@ -2067,6 +2067,224 @@ function clearFittedCurve() {
 
 	// Store the current exported markdown for saving
 	let currentExportedMarkdown = '';
+	let exportTableCopyActionsMenu = null;
+	let activeExportTableCopyTarget = null;
+	let exportTableCopyActionsHideTimeoutId = 0;
+
+	function clearPendingExportTableCopyActionsHide() {
+		if (!exportTableCopyActionsHideTimeoutId) return;
+		window.clearTimeout(exportTableCopyActionsHideTimeoutId);
+		exportTableCopyActionsHideTimeoutId = 0;
+	}
+
+	function isExportTableCopyActionsVisible() {
+		return Boolean(exportTableCopyActionsMenu && !exportTableCopyActionsMenu.hidden);
+	}
+
+	function scheduleExportTableCopyActionsHide() {
+		clearPendingExportTableCopyActionsHide();
+		exportTableCopyActionsHideTimeoutId = window.setTimeout(() => {
+			dismissExportTableCopyActions();
+		}, FIT_EQUATION_COPY_HIDE_DELAY_MS);
+	}
+
+	function positionExportTableCopyActionsMenu(target) {
+		if (!exportTableCopyActionsMenu || !target) return;
+		const targetRect = target.getBoundingClientRect();
+		if (!targetRect.width || !targetRect.height) return;
+
+		const menuRect = exportTableCopyActionsMenu.getBoundingClientRect();
+		const viewportPadding = 8;
+
+		let left = targetRect.left + (targetRect.width / 2) - (menuRect.width / 2);
+		left = Math.min(
+			Math.max(left, viewportPadding),
+			window.innerWidth - menuRect.width - viewportPadding
+		);
+
+		let top = targetRect.top - menuRect.height - FIT_EQUATION_COPY_ACTION_OFFSET_PX;
+		if (top < viewportPadding) {
+			top = targetRect.bottom + FIT_EQUATION_COPY_ACTION_OFFSET_PX;
+		}
+
+		exportTableCopyActionsMenu.style.left = `${Math.round(left + window.scrollX)}px`;
+		exportTableCopyActionsMenu.style.top = `${Math.round(top + window.scrollY)}px`;
+	}
+
+	async function runExportTableCopyAction(action) {
+		if (!activeExportTableCopyTarget) return;
+		const target = activeExportTableCopyTarget;
+		dismissExportTableCopyActions();
+
+		let success = false;
+		if (action === 'image') {
+			success = await copyExportedTableToClipboard(target);
+		} else {
+			success = await writePlainTextToClipboard(currentExportedMarkdown || '');
+		}
+
+		if (success) {
+			showExportTableCopyFeedback(target);
+		} else {
+			showExportTableCopyFailedFeedback(target);
+		}
+	}
+
+	function ensureExportTableCopyActionsMenu() {
+		if (exportTableCopyActionsMenu) return exportTableCopyActionsMenu;
+
+		exportTableCopyActionsMenu = document.createElement('div');
+		exportTableCopyActionsMenu.className = 'fit-equation-copy-actions';
+		exportTableCopyActionsMenu.hidden = true;
+		exportTableCopyActionsMenu.setAttribute('role', 'group');
+		exportTableCopyActionsMenu.setAttribute('aria-label', 'Table copy actions');
+
+		const buttons = document.createElement('div');
+		buttons.className = 'fit-equation-copy-actions-buttons';
+
+		const copyImageButton = document.createElement('button');
+		copyImageButton.type = 'button';
+		copyImageButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-image';
+		copyImageButton.textContent = 'Copy image';
+
+		const copyLatexButton = document.createElement('button');
+		copyLatexButton.type = 'button';
+		copyLatexButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-latex';
+		copyLatexButton.textContent = 'Copy raw Markdown';
+
+		buttons.appendChild(copyImageButton);
+		buttons.appendChild(copyLatexButton);
+		exportTableCopyActionsMenu.appendChild(buttons);
+		document.body.appendChild(exportTableCopyActionsMenu);
+
+		copyImageButton.addEventListener('click', async event => {
+			event.preventDefault();
+			event.stopPropagation();
+			await runExportTableCopyAction('image');
+		});
+
+		copyLatexButton.addEventListener('click', async event => {
+			event.preventDefault();
+			event.stopPropagation();
+			await runExportTableCopyAction('latex');
+		});
+
+		exportTableCopyActionsMenu.addEventListener('mouseenter', () => {
+			clearPendingExportTableCopyActionsHide();
+		});
+
+		exportTableCopyActionsMenu.addEventListener('mouseleave', () => {
+			scheduleExportTableCopyActionsHide();
+		});
+
+		document.addEventListener('pointerdown', event => {
+			if (!isExportTableCopyActionsVisible()) return;
+			if (exportTableCopyActionsMenu.contains(event.target)) return;
+			if (activeExportTableCopyTarget && activeExportTableCopyTarget.contains(event.target)) return;
+			dismissExportTableCopyActions();
+		}, true);
+
+		document.addEventListener('keydown', event => {
+			if (event.key === 'Escape' && isExportTableCopyActionsVisible()) {
+				dismissExportTableCopyActions();
+			}
+		});
+
+		window.addEventListener('resize', () => {
+			if (!isExportTableCopyActionsVisible()) return;
+			if (!activeExportTableCopyTarget) return;
+			positionExportTableCopyActionsMenu(activeExportTableCopyTarget);
+		});
+
+		window.addEventListener('scroll', () => {
+			if (isExportTableCopyActionsVisible()) {
+				dismissExportTableCopyActions();
+			}
+		}, true);
+
+		return exportTableCopyActionsMenu;
+	}
+
+	function showExportTableCopyActions(target) {
+		if (!target) return;
+		const menu = ensureExportTableCopyActionsMenu();
+		clearPendingExportTableCopyActionsHide();
+
+		if (activeExportTableCopyTarget && activeExportTableCopyTarget !== target) {
+			activeExportTableCopyTarget.classList.remove('export-table-copy-actions-open');
+		}
+
+		activeExportTableCopyTarget = target;
+		activeExportTableCopyTarget.classList.add('export-table-copy-actions-open');
+
+		menu.hidden = false;
+		menu.classList.add('visible');
+		positionExportTableCopyActionsMenu(target);
+	}
+
+	function dismissExportTableCopyActions() {
+		clearPendingExportTableCopyActionsHide();
+		if (activeExportTableCopyTarget) {
+			activeExportTableCopyTarget.classList.remove('export-table-copy-actions-open');
+			activeExportTableCopyTarget = null;
+		}
+
+		if (!exportTableCopyActionsMenu) return;
+		exportTableCopyActionsMenu.classList.remove('visible');
+		exportTableCopyActionsMenu.hidden = true;
+	}
+
+	function initializeExportTableCopyInteractions() {
+		const renderedContainer = document.getElementById('export-table-rendered');
+		if (!renderedContainer || renderedContainer.dataset.copyInteractionsReady === 'true') return;
+
+		renderedContainer.dataset.copyInteractionsReady = 'true';
+
+		renderedContainer.addEventListener('mouseover', event => {
+			if (window.getSelection().toString()) return;
+			const target = event.target.closest('.export-table-copy-target');
+			if (!target) return;
+			showExportTableCopyActions(target);
+		});
+
+		renderedContainer.addEventListener('mouseout', event => {
+			if (!activeExportTableCopyTarget) return;
+			const exitedTarget = event.target.closest('.export-table-copy-target');
+			if (!exitedTarget || exitedTarget !== activeExportTableCopyTarget) return;
+
+			const nextTarget = event.relatedTarget;
+			if (nextTarget && (activeExportTableCopyTarget.contains(nextTarget)
+				|| (exportTableCopyActionsMenu && exportTableCopyActionsMenu.contains(nextTarget)))) {
+				return;
+			}
+
+			scheduleExportTableCopyActionsHide();
+		});
+
+		renderedContainer.addEventListener('click', event => {
+			const target = event.target.closest('.export-table-copy-target');
+			if (!target || window.getSelection().toString()) {
+				if (isExportTableCopyActionsVisible()) dismissExportTableCopyActions();
+				return;
+			}
+
+			event.preventDefault();
+			event.stopPropagation();
+			showExportTableCopyActions(target);
+		});
+
+		renderedContainer.addEventListener('keydown', event => {
+			const target = event.target.closest('.export-table-copy-target');
+			if (!target) return;
+			if (event.key !== 'Enter' && event.key !== ' ') return;
+			event.preventDefault();
+			showExportTableCopyActions(target);
+
+			const menu = ensureExportTableCopyActionsMenu();
+			const firstButton = menu.querySelector('.fit-equation-copy-action-btn');
+			if (firstButton) firstButton.focus();
+		});
+	}
 
 	// Pre-rendered PNG data-URLs for MathJax equations in the export table.
 	// Populated in the background after MathJax finishes typesetting so
@@ -2123,10 +2341,14 @@ function clearFittedCurve() {
 			// Render into the popup container
 			const renderedContainer = document.getElementById('export-table-rendered');
 			renderedContainer.innerHTML = sanitizedHtml;
-
-			// Add click listener to the container for copy functionality
-			renderedContainer.removeEventListener('click', handleExportTableClick);
-			renderedContainer.addEventListener('click', handleExportTableClick);
+			const renderedTable = renderedContainer.querySelector('table');
+			if (renderedTable) {
+				renderedTable.classList.add('export-table-copy-target');
+				renderedTable.setAttribute('role', 'button');
+				renderedTable.setAttribute('tabindex', '0');
+				renderedTable.setAttribute('aria-label', 'Copy table');
+			}
+			initializeExportTableCopyInteractions();
 
 			// Show the popup
 			const background = document.getElementById('export-table-background');
@@ -2138,7 +2360,7 @@ function clearFittedCurve() {
 			safeTypeset(renderedContainer);
 
 			// After MathJax finishes, pre-render equation SVGs to PNG so
-			// the click-to-copy path can embed them synchronously.
+			// the copy-as-image path can embed them synchronously.
 			cachedTablePngs = null;
 			cachedTablePngsPromise = Promise.resolve([]);
 			if (typeof MathJax !== 'undefined' && MathJax.Hub && MathJax.Hub.Queue) {
@@ -2160,6 +2382,7 @@ function clearFittedCurve() {
 		const background = document.getElementById('export-table-background');
 		const container = document.getElementById('export-table-container');
 
+		dismissExportTableCopyActions();
 		if (background) background.style.display = 'none';
 		if (container) container.style.display = 'none';
 
@@ -2179,22 +2402,6 @@ function clearFittedCurve() {
 			const blob = new Blob([currentExportedMarkdown], { type: 'text/plain;charset=utf-8;' });
 			await saveBlobWithFallback(blob, `${filename}.md`, { title: 'Save Markdown table' });
 		}
-
-
-	function handleExportTableClick(event) {
-		const table = event.target.closest('table');
-		if (!table || window.getSelection().toString()) return;
-
-		event.preventDefault();
-		event.stopPropagation();
-		copyExportedTableToClipboard(table).then(success => {
-			if (success) {
-				showExportTableCopyFeedback(table);
-			} else {
-				showExportTableCopyFailedFeedback(table);
-			}
-		});
-	}
 
 
 	// Convert a single LaTeX-delimited cell value to readable text.

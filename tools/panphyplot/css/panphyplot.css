@@ -1715,33 +1715,26 @@ footer a:visited {
 	width: calc(100% - 4px);
 	margin: 0 auto;
 	border-collapse: collapse;
-	cursor: pointer;
-	transition: box-shadow 0.15s ease;
 	background: var(--card-bg);
 	position: relative;
 }
 
-#export-table-rendered table::after {
-	content: "";
-	position: absolute;
-	inset: -2px;
-	border: 2px solid var(--brand-accent);
-	opacity: 0;
-	pointer-events: none;
-	transition: opacity 0.15s ease;
+#export-table-rendered .export-table-copy-target {
+	cursor: pointer;
+	transition: box-shadow 0.15s ease;
+	outline: none;
 }
 
-/* Tooltip for click-to-copy */
-#export-table-rendered table::before {
-	content: "Click to copy as image";
+#export-table-rendered .export-table-copy-target::after {
+	content: "Copy table";
 	position: absolute;
 	top: -24px;
 	left: 50%;
 	transform: translateX(-50%);
 	background: var(--text-main);
 	color: var(--card-bg);
-	padding: 4px 8px;
-	border-radius: 4px;
+	padding: 4px 10px;
+	border-radius: 999px;
 	font-size: 11px;
 	font-family: var(--font-body);
 	white-space: nowrap;
@@ -1751,32 +1744,45 @@ footer a:visited {
 	z-index: 100;
 }
 
-#export-table-rendered table:hover {
+#export-table-rendered .export-table-copy-target:hover,
+#export-table-rendered .export-table-copy-target.export-table-copy-actions-open,
+#export-table-rendered .export-table-copy-target:focus-visible {
 	box-shadow: 0 0 0 2px var(--brand-accent);
 }
 
-#export-table-rendered table:hover::before {
+#export-table-rendered .export-table-copy-target:hover::after,
+#export-table-rendered .export-table-copy-target:focus-visible::after {
 	opacity: 1;
 }
 
-#export-table-rendered table.copied {
+#export-table-rendered .export-table-copy-target.export-table-copy-actions-open::after {
+	opacity: 0;
+}
+
+#export-table-rendered .export-table-copy-target.copied {
 	box-shadow: 0 0 0 2px #22c55e !important;
 }
 
-#export-table-rendered table.copied::before {
+#export-table-rendered .export-table-copy-target.copied::after {
 	content: "Copied!" !important;
 	background: #22c55e !important;
 	opacity: 1 !important;
 }
 
-#export-table-rendered table.copy-failed {
+#export-table-rendered .export-table-copy-target.copy-failed {
 	box-shadow: 0 0 0 2px #ef4444 !important;
 }
 
-#export-table-rendered table.copy-failed::before {
+#export-table-rendered .export-table-copy-target.copy-failed::after {
 	content: "Copy failed" !important;
 	background: #ef4444 !important;
 	opacity: 1 !important;
+}
+
+@media (hover: none) {
+	#export-table-rendered .export-table-copy-target::after {
+		display: none;
+	}
 }
 
 #export-table-rendered th,
