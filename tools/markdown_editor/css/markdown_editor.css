@@ -1349,6 +1349,10 @@ mjx-container.copy-failed::after {
   box-shadow: 0 0 0 2px var(--copy-hint-outline);
 }
 
+.touch-copy-target-active {
+  box-shadow: 0 0 0 2px var(--copy-hint-outline) !important;
+}
+
 /* Code block styling */
 #renderedOutput pre {
   margin-top: 20px;
@@ -1510,6 +1514,19 @@ mjx-container.copy-failed::after {
   .table-copy-action-btn {
     padding: 4px 10px;
     font-size: 11px;
+  }
+
+  .touch-copy-actions .table-copy-action-btn {
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  mjx-container:hover::after,
+  #renderedOutput table:hover::before {
+    opacity: 0;
   }
 }
 
@@ -1796,6 +1813,13 @@ mjx-container.copy-failed::after {
   padding-bottom: 30px;
 }
 
+.history-touch-hint {
+  margin: 0 0 10px 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .history-empty {
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -1862,6 +1886,27 @@ mjx-container.copy-failed::after {
   opacity: 1;
 }
 
+.history-item-selected::after {
+  opacity: 1;
+}
+
+.history-item-selected {
+  border-color: var(--copy-hint-outline);
+}
+
+.history-modal-touch .history-item::before {
+  content: "Tap to select";
+}
+
+.history-restore-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.history-restore-btn:disabled:hover {
+  filter: none;
+}
+
 .history-item-meta {
   display: flex;
   justify-content: space-between;
@@ -1894,6 +1939,67 @@ mjx-container.copy-failed::after {
 
 .history-modal.history-modal-multi .history-item-preview {
   max-height: 5.6em;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Restore undo toast                                                     */
+/* ---------------------------------------------------------------------- */
+.history-undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translate(-50%, 10px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(92vw, 520px);
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--pane-background);
+  color: var(--text-color);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 1200;
+}
+
+.history-undo-toast.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.history-undo-toast-message {
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.history-undo-toast-btn {
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--copy-hint-outline);
+  background: var(--copy-hint-chip-bg);
+  color: var(--copy-hint-text);
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+  .history-undo-toast {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .history-undo-toast-btn {
+    min-height: 40px;
+    padding: 9px 14px;
+  }
 }
 
 /* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */

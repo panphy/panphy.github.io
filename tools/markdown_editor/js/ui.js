@@ -35,6 +35,16 @@ function isTopMostModalOverlay(overlay) {
   return overlays.length > 0 && overlays[overlays.length - 1] === overlay;
 }
 
+function isTouchInteractionMode() {
+  if (typeof window === 'undefined') return false;
+  const hasCoarsePointer = typeof window.matchMedia === 'function'
+    && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  const hasTouchPoints = typeof navigator !== 'undefined'
+    && Number.isFinite(navigator.maxTouchPoints)
+    && navigator.maxTouchPoints > 0;
+  return hasCoarsePointer || hasTouchPoints;
+}
+
 /**
  * Update the theme toggle button's icon and attributes.
  */
@@ -618,10 +628,18 @@ export function showImageModal() {
  * @param {Object} [options] - Optional suppression callbacks
  * @param {Function} [options.isSuppressed] - Returns true if the warning is suppressed
  * @param {Function} [options.saveSuppressed] - Saves the suppression preference
+ * @param {boolean} [options.allowSuppress] - Whether users can suppress this warning
  * @returns {Promise<boolean>} True if the user confirmed, false if cancelled
  */
-export function showConfirmationModal(message, { isSuppressed = isClearWarningSuppressed, saveSuppressed = saveClearWarningSuppressed } = {}) {
-  if (isSuppressed()) {
+export function showConfirmationModal(
+  message,
+  {
+    isSuppressed = isClearWarningSuppressed,
+    saveSuppressed = saveClearWarningSuppressed,
+    allowSuppress = true
+  } = {}
+) {
+  if (allowSuppress && isSuppressed()) {
     return Promise.resolve(true);
   }
 
@@ -645,16 +663,20 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
     messageEl.className = 'modal-message';
     messageEl.textContent = message;
 
-    const checkboxLabel = document.createElement('label');
-    checkboxLabel.className = 'modal-checkbox-label';
+    let checkbox = null;
+    let checkboxLabel = null;
+    if (allowSuppress) {
+      checkboxLabel = document.createElement('label');
+      checkboxLabel.className = 'modal-checkbox-label';
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.className = 'modal-checkbox';
+      checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'modal-checkbox';
 
-    const checkboxText = document.createTextNode(" Don\u2019t show this warning again");
-    checkboxLabel.appendChild(checkbox);
-    checkboxLabel.appendChild(checkboxText);
+      const checkboxText = document.createTextNode(" Don\u2019t show this warning again");
+      checkboxLabel.appendChild(checkbox);
+      checkboxLabel.appendChild(checkboxText);
+    }
 
     const buttons = document.createElement('div');
     buttons.className = 'modal-buttons';
@@ -672,7 +694,9 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
 
     content.appendChild(titleEl);
     content.appendChild(messageEl);
-    content.appendChild(checkboxLabel);
+    if (checkboxLabel) {
+      content.appendChild(checkboxLabel);
+    }
     content.appendChild(buttons);
     overlay.appendChild(content);
 
@@ -696,7 +720,7 @@ export function showConfirmationModal(message, { isSuppressed = isClearWarningSu
       if (closed) return;
       closed = true;
       document.removeEventListener('keydown', onKeyDown);
-      if (confirmed && checkbox.checked) {
+      if (allowSuppress && confirmed && checkbox && checkbox.checked) {
         saveSuppressed(true);
       }
       overlay.classList.remove('visible');
@@ -774,6 +798,10 @@ export function showHistoryModal(snapshots) {
       ? document.activeElement
       : null;
     let closed = false;
+    const requireExplicitRestore = isTouchInteractionMode();
+    let selectedSnapshotContent = null;
+    let selectedHistoryItem = null;
+    let restoreBtn = null;
 
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -785,6 +813,9 @@ export function showHistoryModal(snapshots) {
     }
     if (snapshots.length >= 3) {
       content.classList.add('history-modal-multi');
+    }
+    if (requireExplicitRestore) {
+      content.classList.add('history-modal-touch');
     }
 
     const titleRow = document.createElement('div');
@@ -809,11 +840,26 @@ export function showHistoryModal(snapshots) {
         if (!confirmed) return;
         clearSnapshots();
         listContainer.innerHTML = '<p class="history-empty">History cleared.</p>';
+        if (selectedHistoryItem) {
+          selectedHistoryItem.classList.remove('history-item-selected');
+          selectedHistoryItem = null;
+        }
+        selectedSnapshotContent = null;
+        if (restoreBtn) {
+          restoreBtn.disabled = true;
+        }
         clearBtn.remove();
       });
       titleRow.appendChild(clearBtn);
     }
     content.appendChild(titleRow);
+
+    if (requireExplicitRestore && snapshots.length > 0) {
+      const touchHint = document.createElement('p');
+      touchHint.className = 'history-touch-hint';
+      touchHint.textContent = 'Tap a snapshot to select it, then tap Restore Selected.';
+      content.appendChild(touchHint);
+    }
 
     const listContainer = document.createElement('div');
     listContainer.className = 'history-list';
@@ -835,6 +881,20 @@ export function showHistoryModal(snapshots) {
       event.preventDefault();
       listContainer.scrollTop += event.deltaY;
     }, { passive: false });
+
+    const selectHistoryItem = (item, snapshotContent) => {
+      if (selectedHistoryItem && selectedHistoryItem !== item) {
+        selectedHistoryItem.classList.remove('history-item-selected');
+        selectedHistoryItem.setAttribute('aria-pressed', 'false');
+      }
+      selectedHistoryItem = item;
+      selectedSnapshotContent = snapshotContent;
+      item.classList.add('history-item-selected');
+      item.setAttribute('aria-pressed', 'true');
+      if (restoreBtn) {
+        restoreBtn.disabled = false;
+      }
+    };
 
     if (snapshots.length === 0) {
       const empty = document.createElement('p');
@@ -891,14 +951,28 @@ export function showHistoryModal(snapshots) {
             listContainer.scrollTop += deltaY;
           }
         }, { passive: false });
-        item.setAttribute('aria-label', `Restore snapshot from ${formatTimestamp(snap.timestamp)}`);
-        item.addEventListener('click', () => closeModal(snap.content));
-        item.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            closeModal(snap.content);
-          }
-        });
+        if (requireExplicitRestore) {
+          item.setAttribute('aria-label', `Select snapshot from ${formatTimestamp(snap.timestamp)}`);
+          item.setAttribute('aria-pressed', 'false');
+          item.addEventListener('click', () => {
+            selectHistoryItem(item, snap.content);
+          });
+          item.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              selectHistoryItem(item, snap.content);
+            }
+          });
+        } else {
+          item.setAttribute('aria-label', `Restore snapshot from ${formatTimestamp(snap.timestamp)}`);
+          item.addEventListener('click', () => closeModal(snap.content));
+          item.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              closeModal(snap.content);
+            }
+          });
+        }
 
         item.appendChild(meta);
         item.appendChild(preview);
@@ -914,6 +988,18 @@ export function showHistoryModal(snapshots) {
     closeBtn.textContent = 'Close';
     closeBtn.addEventListener('click', () => closeModal(null));
     buttons.appendChild(closeBtn);
+    if (requireExplicitRestore && snapshots.length > 0) {
+      restoreBtn = document.createElement('button');
+      restoreBtn.type = 'button';
+      restoreBtn.className = 'btn-primary history-restore-btn';
+      restoreBtn.textContent = 'Restore Selected';
+      restoreBtn.disabled = true;
+      restoreBtn.addEventListener('click', () => {
+        if (selectedSnapshotContent === null) return;
+        closeModal(selectedSnapshotContent);
+      });
+      buttons.appendChild(restoreBtn);
+    }
     content.appendChild(buttons);
 
     overlay.appendChild(content);

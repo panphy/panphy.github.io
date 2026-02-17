@@ -16,6 +16,12 @@ const LIGHT_COPY_HEADER_BG_COLOR = '#f4f6f8';
 let tableCopyActionsMenu = null;
 let activeMathTable = null;
 let tableCopyActionsHideTimeoutId = 0;
+let touchCopyActionsMenu = null;
+let activeTouchCopyTarget = null;
+let activeTouchCopyTargetType = null;
+let touchCopyTableButton = null;
+let touchCopyImageButton = null;
+let touchCopyWarning = null;
 const tableMathDetectionCache = new WeakMap();
 
 function getEquationRasterScale(widthPx, heightPx) {
@@ -121,6 +127,16 @@ function markTableMathHint(table) {
   const hasMath = tableContainsMath(table);
   table.classList.toggle('math-copy-table', hasMath);
   return hasMath;
+}
+
+function isTouchCopyMode() {
+  if (typeof window === 'undefined') return false;
+  const hasCoarsePointer = typeof window.matchMedia === 'function'
+    && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  const hasTouchPoints = typeof navigator !== 'undefined'
+    && Number.isFinite(navigator.maxTouchPoints)
+    && navigator.maxTouchPoints > 0;
+  return hasCoarsePointer || hasTouchPoints;
 }
 
 function clearPendingTableCopyActionsHide() {
@@ -612,12 +628,12 @@ function isTableCopyActionsVisible() {
   return Boolean(tableCopyActionsMenu && !tableCopyActionsMenu.hidden);
 }
 
-function positionTableCopyActionsMenu(table) {
-  if (!tableCopyActionsMenu || !table) return;
-  const rect = table.getBoundingClientRect();
+function positionCopyActionsMenu(menu, targetElement) {
+  if (!menu || !targetElement) return;
+  const rect = targetElement.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
 
-  const menuRect = tableCopyActionsMenu.getBoundingClientRect();
+  const menuRect = menu.getBoundingClientRect();
   const viewportPadding = 8;
 
   let left = rect.left + (rect.width / 2) - (menuRect.width / 2);
@@ -631,8 +647,12 @@ function positionTableCopyActionsMenu(table) {
     top = rect.bottom + TABLE_COPY_ACTION_OFFSET_PX;
   }
 
-  tableCopyActionsMenu.style.left = `${Math.round(left + window.scrollX)}px`;
-  tableCopyActionsMenu.style.top = `${Math.round(top + window.scrollY)}px`;
+  menu.style.left = `${Math.round(left + window.scrollX)}px`;
+  menu.style.top = `${Math.round(top + window.scrollY)}px`;
+}
+
+function positionTableCopyActionsMenu(table) {
+  positionCopyActionsMenu(tableCopyActionsMenu, table);
 }
 
 async function runTableCopyAction(action) {
@@ -779,7 +799,7 @@ function showTableCopyActions(table) {
   positionTableCopyActionsMenu(table);
 }
 
-export function dismissTableCopyActions() {
+function dismissDesktopTableCopyActions() {
   clearPendingTableCopyActionsHide();
 
   if (activeMathTable) {
@@ -787,16 +807,185 @@ export function dismissTableCopyActions() {
     activeMathTable = null;
   }
 
-  if (!tableCopyActionsMenu) return;
-  const warning = tableCopyActionsMenu.querySelector('.table-copy-actions-warning');
-  if (warning) {
-    warning.classList.remove('visible');
+  if (tableCopyActionsMenu) {
+    const warning = tableCopyActionsMenu.querySelector('.table-copy-actions-warning');
+    if (warning) {
+      warning.classList.remove('visible');
+    }
+    tableCopyActionsMenu.classList.remove('visible');
+    tableCopyActionsMenu.hidden = true;
   }
-  tableCopyActionsMenu.classList.remove('visible');
-  tableCopyActionsMenu.hidden = true;
+}
+
+export function dismissTableCopyActions() {
+  dismissTouchCopyActions();
+  dismissDesktopTableCopyActions();
+}
+
+function isTouchCopyActionsVisible() {
+  return Boolean(touchCopyActionsMenu && !touchCopyActionsMenu.hidden);
+}
+
+function configureTouchCopyActionsMenu(targetType, hasMath) {
+  if (!touchCopyActionsMenu || !touchCopyTableButton || !touchCopyImageButton || !touchCopyWarning) return;
+
+  const canCopyTable = targetType === 'table';
+  const canCopyImage = targetType === 'equation' || (targetType === 'table' && hasMath);
+  const showWarning = targetType === 'table' && hasMath && canCopyTable;
+
+  touchCopyTableButton.hidden = !canCopyTable;
+  touchCopyImageButton.hidden = !canCopyImage;
+  touchCopyWarning.hidden = !showWarning;
+  touchCopyWarning.classList.toggle('visible', showWarning);
+}
+
+function positionTouchCopyActionsMenu(targetElement) {
+  positionCopyActionsMenu(touchCopyActionsMenu, targetElement);
+}
+
+function dismissTouchCopyActions() {
+  if (activeTouchCopyTarget) {
+    activeTouchCopyTarget.classList.remove('touch-copy-target-active');
+    activeTouchCopyTarget = null;
+  }
+  activeTouchCopyTargetType = null;
+
+  if (!touchCopyActionsMenu) return;
+  if (touchCopyWarning) {
+    touchCopyWarning.classList.remove('visible');
+    touchCopyWarning.hidden = true;
+  }
+  touchCopyActionsMenu.classList.remove('visible');
+  touchCopyActionsMenu.hidden = true;
+}
+
+async function runTouchCopyAction(action) {
+  if (!activeTouchCopyTarget || !activeTouchCopyTargetType) return;
+
+  const target = activeTouchCopyTarget;
+  const targetType = activeTouchCopyTargetType;
+  dismissTouchCopyActions();
+
+  let success = false;
+  if (targetType === 'equation') {
+    success = await copyEquationToClipboard(target);
+  } else if (action === 'image') {
+    success = await copyTableAsImageToClipboard(target);
+  } else {
+    success = await copyTableToClipboard(target);
+  }
+
+  if (success) {
+    showCopyFeedback(target);
+  } else {
+    showCopyFailedFeedback(target);
+  }
+}
+
+function ensureTouchCopyActionsMenu() {
+  if (touchCopyActionsMenu) {
+    return touchCopyActionsMenu;
+  }
+
+  touchCopyActionsMenu = document.createElement('div');
+  touchCopyActionsMenu.className = 'table-copy-actions touch-copy-actions';
+  touchCopyActionsMenu.hidden = true;
+  touchCopyActionsMenu.setAttribute('role', 'group');
+  touchCopyActionsMenu.setAttribute('aria-label', 'Copy actions');
+
+  const buttons = document.createElement('div');
+  buttons.className = 'table-copy-actions-buttons';
+
+  touchCopyTableButton = document.createElement('button');
+  touchCopyTableButton.type = 'button';
+  touchCopyTableButton.className = 'table-copy-action-btn table-copy-action-btn-table';
+  touchCopyTableButton.textContent = 'Copy table';
+
+  touchCopyImageButton = document.createElement('button');
+  touchCopyImageButton.type = 'button';
+  touchCopyImageButton.className = 'table-copy-action-btn table-copy-action-btn-image';
+  touchCopyImageButton.textContent = 'Copy image';
+
+  buttons.appendChild(touchCopyTableButton);
+  buttons.appendChild(touchCopyImageButton);
+
+  touchCopyWarning = document.createElement('p');
+  touchCopyWarning.className = 'table-copy-actions-warning';
+  touchCopyWarning.textContent = 'Math symbols may not paste correctly';
+  touchCopyWarning.hidden = true;
+
+  touchCopyActionsMenu.appendChild(buttons);
+  touchCopyActionsMenu.appendChild(touchCopyWarning);
+  document.body.appendChild(touchCopyActionsMenu);
+
+  touchCopyTableButton.addEventListener('click', async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await runTouchCopyAction('table');
+  });
+
+  touchCopyImageButton.addEventListener('click', async event => {
+    event.preventDefault();
+    event.stopPropagation();
+    await runTouchCopyAction('image');
+  });
+
+  document.addEventListener('pointerdown', event => {
+    if (!isTouchCopyActionsVisible()) return;
+    if (touchCopyActionsMenu && touchCopyActionsMenu.contains(event.target)) return;
+    if (activeTouchCopyTarget && activeTouchCopyTarget.contains(event.target)) return;
+    dismissTouchCopyActions();
+  }, true);
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && isTouchCopyActionsVisible()) {
+      dismissTouchCopyActions();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (!isTouchCopyActionsVisible()) return;
+    if (!activeTouchCopyTarget) return;
+    positionTouchCopyActionsMenu(activeTouchCopyTarget);
+  });
+
+  window.addEventListener('scroll', () => {
+    if (isTouchCopyActionsVisible()) {
+      dismissTouchCopyActions();
+    }
+  }, true);
+
+  return touchCopyActionsMenu;
+}
+
+function showTouchCopyActions(targetElement, { targetType, hasMath = false } = {}) {
+  if (!targetElement || !targetType) return;
+  const menu = ensureTouchCopyActionsMenu();
+
+  if (isTouchCopyActionsVisible()
+      && activeTouchCopyTarget === targetElement
+      && activeTouchCopyTargetType === targetType) {
+    dismissTouchCopyActions();
+    return;
+  }
+
+  if (activeTouchCopyTarget && activeTouchCopyTarget !== targetElement) {
+    activeTouchCopyTarget.classList.remove('touch-copy-target-active');
+  }
+
+  activeTouchCopyTarget = targetElement;
+  activeTouchCopyTargetType = targetType;
+  activeTouchCopyTarget.classList.add('touch-copy-target-active');
+  menu.setAttribute('aria-label', targetType === 'equation' ? 'Equation copy actions' : 'Table copy actions');
+  configureTouchCopyActionsMenu(targetType, hasMath);
+
+  menu.hidden = false;
+  menu.classList.add('visible');
+  positionTouchCopyActionsMenu(targetElement);
 }
 
 export function handleCopyHover(event) {
+  if (isTouchCopyMode()) return false;
   if (window.getSelection().toString()) return false;
   const table = event.target.closest('table');
   if (!table) return false;
@@ -809,6 +998,7 @@ export function handleCopyHover(event) {
 }
 
 export function handleCopyHoverOut(event) {
+  if (isTouchCopyMode()) return false;
   if (!activeMathTable) return false;
 
   const exitedTable = event.target.closest('table');
@@ -1074,8 +1264,10 @@ export function showCopyFailedFeedback(element) {
  */
 export function handleCopyClick(event) {
   if (activeMathTable && (!event.target.closest('table') || !activeMathTable.contains(event.target))) {
-    dismissTableCopyActions();
+    dismissDesktopTableCopyActions();
   }
+
+  const touchMode = isTouchCopyMode();
 
   // Check if clicked on a table (but not inside a cell for text selection)
   const table = event.target.closest('table');
@@ -1083,6 +1275,12 @@ export function handleCopyClick(event) {
     event.preventDefault();
 
     const hasMath = markTableMathHint(table);
+    if (touchMode) {
+      dismissDesktopTableCopyActions();
+      showTouchCopyActions(table, { targetType: 'table', hasMath });
+      return true;
+    }
+
     if (hasMath) {
       showTableCopyActions(table);
       return true;
@@ -1104,6 +1302,12 @@ export function handleCopyClick(event) {
   if (mjxContainer) {
     event.preventDefault();
     event.stopPropagation();
+    if (touchMode) {
+      dismissDesktopTableCopyActions();
+      showTouchCopyActions(mjxContainer, { targetType: 'equation' });
+      return true;
+    }
+
     copyEquationToClipboard(mjxContainer).then(success => {
       if (success) {
         showCopyFeedback(mjxContainer);

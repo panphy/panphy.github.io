@@ -517,6 +517,9 @@ if (markedLib) {
 
 let untouchedSampleContent = null;
 let sampleLoadRequestId = 0;
+const RESTORE_UNDO_TIMEOUT_MS = 7000;
+let restoreUndoTimeoutId = 0;
+let restoreUndoToast = null;
 
 function isUntouchedSampleContent(content = markdownInput.value) {
   return untouchedSampleContent !== null && content === untouchedSampleContent;
@@ -531,6 +534,61 @@ function clearUntouchedSampleContentFlagIfEdited(content = markdownInput.value) 
 function saveSnapshotIfNeeded(content) {
   if (isUntouchedSampleContent(content)) return;
   saveSnapshot(content);
+}
+
+function dismissRestoreUndoToast() {
+  if (restoreUndoTimeoutId) {
+    window.clearTimeout(restoreUndoTimeoutId);
+    restoreUndoTimeoutId = 0;
+  }
+  if (!restoreUndoToast) return;
+
+  const toast = restoreUndoToast;
+  restoreUndoToast = null;
+  toast.classList.remove('visible');
+  window.setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+  }, 180);
+}
+
+function showRestoreUndoToast(previousContent) {
+  dismissRestoreUndoToast();
+
+  const toast = document.createElement('div');
+  toast.className = 'history-undo-toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+
+  const message = document.createElement('span');
+  message.className = 'history-undo-toast-message';
+  message.textContent = 'Version restored.';
+
+  const undoBtn = document.createElement('button');
+  undoBtn.type = 'button';
+  undoBtn.className = 'history-undo-toast-btn';
+  undoBtn.textContent = 'Undo';
+  undoBtn.addEventListener('click', () => {
+    saveSnapshotIfNeeded(markdownInput.value);
+    markdownInput.value = previousContent;
+    untouchedSampleContent = null;
+    renderAndPersistDraft();
+    dismissRestoreUndoToast();
+  });
+
+  toast.appendChild(message);
+  toast.appendChild(undoBtn);
+  document.body.appendChild(toast);
+  restoreUndoToast = toast;
+
+  requestAnimationFrame(() => {
+    toast.classList.add('visible');
+  });
+
+  restoreUndoTimeoutId = window.setTimeout(() => {
+    dismissRestoreUndoToast();
+  }, RESTORE_UNDO_TIMEOUT_MS);
 }
 
 function setSampleLoadingState(isLoading) {
@@ -562,6 +620,7 @@ function persistDraftAndDirtyState() {
  * Fetch and load the sample Markdown document
  */
 async function loadSampleDocument() {
+  dismissRestoreUndoToast();
   if (loadSampleButton && loadSampleButton.disabled) {
     return;
   }
@@ -1407,6 +1466,7 @@ async function saveMarkdown() {
  * Load a markdown file from the user's computer
  */
 async function loadMarkdownFile() {
+  dismissRestoreUndoToast();
   if (markdownInput.value.trim() !== '') {
     const confirmed = await showConfirmationModal(
       'Opening a file will replace your current content. Any unsaved changes will be lost.',
@@ -1474,6 +1534,7 @@ const debouncedSyncAnchorMapRebuild = debounce(() => {
 }, SYNC_ANCHOR_REBUILD_DELAY_MS);
 
 markdownInput.addEventListener('input', () => {
+  dismissRestoreUndoToast();
   if (!queuedInputRenderRafId) {
     queuedInputRenderRafId = requestAnimationFrame(() => {
       queuedInputRenderRafId = 0;
@@ -1571,6 +1632,7 @@ document.addEventListener('click', event => {
 });
 
 clearButton.addEventListener('click', async () => {
+  dismissRestoreUndoToast();
   if (markdownInput.value.trim() === '') {
     return;
   }
@@ -1590,6 +1652,7 @@ clearButton.addEventListener('click', async () => {
 // History button — open snapshot browser
 if (historyButton) {
   historyButton.addEventListener('click', async () => {
+    dismissRestoreUndoToast();
     const snapshots = loadSnapshots();
     const restored = await showHistoryModal(snapshots);
     if (restored === null) return;
@@ -1599,7 +1662,8 @@ if (historyButton) {
 
     if (currentContent.trim() !== '') {
       const confirmed = await showConfirmationModal(
-        'Restoring this snapshot will replace your current content. Any unsaved changes will be lost.'
+        'Restoring this snapshot will replace your current content. Any unsaved changes will be lost.',
+        { allowSuppress: false }
       );
       if (!confirmed) return;
       saveSnapshotIfNeeded(currentContent);
@@ -1608,6 +1672,7 @@ if (historyButton) {
     markdownInput.value = restored;
     untouchedSampleContent = null;
     renderAndPersistDraft();
+    showRestoreUndoToast(currentContent);
   });
 }
 
