@@ -1721,8 +1721,9 @@ footer a:visited {
 
 #export-table-rendered .export-table-copy-target {
 	cursor: pointer;
-	transition: box-shadow 0.15s ease;
-	outline: none;
+	transition: outline-color 0.15s ease;
+	outline: 2px solid transparent;
+	outline-offset: -2px;
 }
 
 #export-table-rendered .export-table-copy-target::after {
@@ -1747,7 +1748,7 @@ footer a:visited {
 #export-table-rendered .export-table-copy-target:hover,
 #export-table-rendered .export-table-copy-target.export-table-copy-actions-open,
 #export-table-rendered .export-table-copy-target:focus-visible {
-	box-shadow: inset 0 0 0 2px var(--brand-accent);
+	outline-color: var(--brand-accent);
 }
 
 #export-table-rendered .export-table-copy-target:hover::after,
@@ -1760,7 +1761,7 @@ footer a:visited {
 }
 
 #export-table-rendered .export-table-copy-target.copied {
-	box-shadow: inset 0 0 0 2px #22c55e !important;
+	outline-color: #22c55e !important;
 }
 
 #export-table-rendered .export-table-copy-target.copied::after {
@@ -1770,7 +1771,7 @@ footer a:visited {
 }
 
 #export-table-rendered .export-table-copy-target.copy-failed {
-	box-shadow: inset 0 0 0 2px #ef4444 !important;
+	outline-color: #ef4444 !important;
 }
 
 #export-table-rendered .export-table-copy-target.copy-failed::after {
