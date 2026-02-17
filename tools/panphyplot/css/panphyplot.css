@@ -370,17 +370,17 @@ body {
 	border-color: transparent;
 	font-weight: 600;
 	color: #fff;
-	box-shadow: 0 -4px 12px rgba(90, 111, 214, 0.45),
-		-3px 0 10px rgba(90, 111, 214, 0.25),
-		3px 0 10px rgba(90, 111, 214, 0.25);
-	clip-path: inset(-14px -14px 0 -14px);
+	box-shadow: 0 -2px 8px rgba(90, 111, 214, 0.36),
+		-2px 0 8px rgba(90, 111, 214, 0.2),
+		2px 0 8px rgba(90, 111, 214, 0.2);
+	clip-path: inset(-8px -10px 0 -10px);
 }
 
 [data-theme="dark"] .dataset-tab.active {
 	color: #1a1a1a;
-	box-shadow: 0 -4px 14px rgba(123, 139, 230, 0.5),
-		-3px 0 12px rgba(123, 139, 230, 0.3),
-		3px 0 12px rgba(123, 139, 230, 0.3);
+	box-shadow: 0 -2px 9px rgba(123, 139, 230, 0.42),
+		-2px 0 9px rgba(123, 139, 230, 0.24),
+		2px 0 9px rgba(123, 139, 230, 0.24);
 }
 
 .dataset-tab.active:hover {
