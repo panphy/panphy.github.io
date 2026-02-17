@@ -907,6 +907,21 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 			return;
 		}
 
+		const datasetName = getDatasetDisplayName(index);
+		const hasStoredData = Array.isArray(rawData[index]) && rawData[index].length > 0;
+		const hasStoredHeaders = Boolean(datasetHeaders[index] && (
+			(datasetHeaders[index].x && datasetHeaders[index].x !== 'x')
+			|| (datasetHeaders[index].y && datasetHeaders[index].y !== 'y')
+		));
+		const hasStoredFit = Boolean(datasetFitResults[index] || fittedCurves[index]);
+		const hasMeaningfulContent = hasStoredData || hasStoredHeaders || hasStoredFit;
+		const confirmMessage = hasMeaningfulContent
+			? `Delete "${datasetName}" and all of its data/settings? This cannot be undone.`
+			: `Delete "${datasetName}"?`;
+		if (!window.confirm(confirmMessage)) {
+			return;
+		}
+
 		// Remove this dataset from rawData.
 		rawData.splice(index, 1);
 

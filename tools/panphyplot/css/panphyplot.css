@@ -465,6 +465,9 @@ body {
 
 /* Add Dataset (+) */
 .add-dataset-btn {
+	-webkit-appearance: none;
+	appearance: none;
+	background-image: none;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
