@@ -50,6 +50,8 @@ function buildPersistedState() {
 		datasetHeaders,
 		datasetToggles,
 		datasetErrorTypes,
+		fittedCurves,
+		datasetFitResults,
 		dataset1XValues,
 		latexMode,
 		titleWasAuto,
@@ -85,6 +87,59 @@ function loadState() {
 		console.warn('Unable to load state:', error);
 		return null;
 	}
+}
+
+function normalizeFittedCurvesState(savedCurves, datasetCount) {
+	const normalized = {};
+	if (!savedCurves || typeof savedCurves !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const curve = savedCurves[index];
+		if (!curve || !Array.isArray(curve.x) || !Array.isArray(curve.y)) continue;
+
+		const maxLen = Math.min(curve.x.length, curve.y.length);
+		if (maxLen === 0) continue;
+
+		const x = [];
+		const y = [];
+		for (let i = 0; i < maxLen; i++) {
+			const xi = Number(curve.x[i]);
+			const yi = Number(curve.y[i]);
+			if (!Number.isFinite(xi) || !Number.isFinite(yi)) continue;
+			x.push(xi);
+			y.push(yi);
+		}
+
+		if (!x.length) continue;
+
+		normalized[index] = {
+			x,
+			y,
+			equation: typeof curve.equation === 'string' ? curve.equation : ''
+		};
+	}
+
+	return normalized;
+}
+
+function normalizeDatasetFitResultsState(savedResults, datasetCount) {
+	const normalized = {};
+	if (!savedResults || typeof savedResults !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const result = savedResults[index];
+		if (!result || typeof result !== 'object') continue;
+
+		const equation = typeof result.equation === 'string' ? result.equation.trim() : '';
+		if (!equation) continue;
+
+		const rSquared = typeof result.rSquared === 'string'
+			? result.rSquared
+			: String(result.rSquared ?? '');
+		normalized[index] = { equation, rSquared };
+	}
+
+	return normalized;
 }
 
 function getDatasetPoints(index = activeSet) {

@@ -485,6 +485,10 @@ function updateResults(equation, x, y, fitFunction) {
 			equation: equation,
 			rSquared: rSquaredDisplay
 		};
+
+		if (typeof scheduleSaveState === 'function') {
+			scheduleSaveState();
+		}
 	} catch (error) {
 		console.error('Error updating results:', error);
 	}

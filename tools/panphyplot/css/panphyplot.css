@@ -1100,8 +1100,12 @@ select {
 #fit-equation {
 	position: relative;
 	margin: 2px 0 12px;
-	padding: 4px 2px;
-	line-height: 1.45;
+	padding: 8px 10px;
+	line-height: 1.5;
+	text-align: center;
+	font-size: 1.08rem;
+	overflow-x: auto;
+	overflow-y: visible;
 }
 
 #r-squared-container {
@@ -1112,11 +1116,13 @@ select {
 .fit-equation-copy-target {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	max-width: 100%;
 	position: relative;
 	cursor: pointer;
 	border-radius: 8px;
-	padding: 2px 8px;
+	margin: 2px 0;
+	padding: 4px 10px;
 	transition: box-shadow 0.15s ease;
 	outline: none;
 }

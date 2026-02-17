@@ -40,6 +40,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		datasetHeaders = savedState.datasetHeaders || {};
 		datasetToggles = savedState.datasetToggles || {};
 		datasetErrorTypes = savedState.datasetErrorTypes || {};
+		fittedCurves = typeof normalizeFittedCurvesState === 'function'
+			? normalizeFittedCurvesState(savedState.fittedCurves, rawData.length)
+			: (savedState.fittedCurves || {});
+		datasetFitResults = typeof normalizeDatasetFitResultsState === 'function'
+			? normalizeDatasetFitResultsState(savedState.datasetFitResults, rawData.length)
+			: (savedState.datasetFitResults || {});
 		dataset1XValues = savedState.dataset1XValues || [];
 		latexMode = !!savedState.latexMode;
 		titleWasAuto = savedState.titleWasAuto ?? true;
@@ -79,6 +85,13 @@ document.addEventListener("DOMContentLoaded", function() {
 		loadHeaders();
 		loadToggles();
 		loadErrorTypes();
+	}
+
+	if (datasetFitResults.hasOwnProperty(activeSet)) {
+		const result = datasetFitResults[activeSet];
+		renderFittingResult(result.equation, result.rSquared);
+	} else {
+		clearFittingResultDisplay();
 	}
 
 	// Combined plot inputs.

@@ -907,25 +907,26 @@ function initializeFitEquationCopyInteractions() {
 	}
 
 
-	function clearFittedCurve() {
-		// Remove any stored fit results from datasetFitResults
-		if (datasetFitResults.hasOwnProperty(activeSet)) {
-			delete datasetFitResults[activeSet];
-		}
-
-		// Remove the fitted curve from fittedCurves
-		if (fittedCurves.hasOwnProperty(activeSet)) {
-			delete fittedCurves[activeSet];
-		}
-		clearFittingResultDisplay();
-
-		// Force a re-plot so that the old line is removed
-		lastPlotState.data = null;
-		lastPlotState.layout = null;
-
-		// Now re-draw with no line but the same data
-		updatePlotAndRenderLatex();
+function clearFittedCurve() {
+	// Remove any stored fit results from datasetFitResults
+	if (datasetFitResults.hasOwnProperty(activeSet)) {
+		delete datasetFitResults[activeSet];
 	}
+
+	// Remove the fitted curve from fittedCurves
+	if (fittedCurves.hasOwnProperty(activeSet)) {
+		delete fittedCurves[activeSet];
+	}
+	clearFittingResultDisplay();
+
+	// Force a re-plot so that the old line is removed
+	lastPlotState.data = null;
+	lastPlotState.layout = null;
+
+	// Now re-draw with no line but the same data
+	updatePlotAndRenderLatex();
+	scheduleSaveState();
+}
 
 
 	function updateCombinedPlotInputsToActive() {
