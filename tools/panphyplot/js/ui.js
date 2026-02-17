@@ -1838,15 +1838,15 @@ function initializeFitEquationCopyInteractions() {
 					const xSigFigs = xErrorEnabledThisRow && xErrorType === 'percentage' ? getSigFigsFromPercentage(xErrVal) : null;
 					if (xUseSciNotation && xSigFigs !== null) {
 						const sciFormatted = formatScientificNotation(xVal, xSigFigs);
-						xFormatted = `$${sciFormatted}$`;
+						xFormatted = sciFormatted;
 					} else if (xSigFigs !== null) {
 						const sigFormatted = toSigFigs(xVal, xSigFigs);
-						xFormatted = `$${sigFormatted}$`;
+						xFormatted = sigFormatted;
 					} else if (xErrorEnabledThisRow && xErrorType === 'absolute') {
 						const formattedData = formatDataValue(xVal, xErrVal, 'absolute', false);
-						xFormatted = `$${formattedData}$`;
+						xFormatted = formattedData;
 					} else {
-						xFormatted = `$${xValStr}$`;
+						xFormatted = xValStr;
 					}
 				}
 
@@ -1856,28 +1856,26 @@ function initializeFitEquationCopyInteractions() {
 					const ySigFigs = yErrorEnabledThisRow && yErrorType === 'percentage' ? getSigFigsFromPercentage(yErrVal) : null;
 					if (yUseSciNotation && ySigFigs !== null) {
 						const sciFormatted = formatScientificNotation(yVal, ySigFigs);
-						yFormatted = `$${sciFormatted}$`;
+						yFormatted = sciFormatted;
 					} else if (ySigFigs !== null) {
 						const sigFormatted = toSigFigs(yVal, ySigFigs);
-						yFormatted = `$${sigFormatted}$`;
+						yFormatted = sigFormatted;
 					} else if (yErrorEnabledThisRow && yErrorType === 'absolute') {
 						const formattedData = formatDataValue(yVal, yErrVal, 'absolute', false);
-						yFormatted = `$${formattedData}$`;
+						yFormatted = formattedData;
 					} else {
-						yFormatted = `$${yValStr}$`;
+						yFormatted = yValStr;
 					}
 				}
 
 				rowData.push(xFormatted);
 				rowData.push(yFormatted);
 				if (xErrorEnabled) {
-					let xErrorFormatted = xErrorEnabledThisRow ? formatUncertainty(xErrStr, xErrorType) : '';
-					if (xErrorFormatted !== '') xErrorFormatted = `$${xErrorFormatted}$`;
+					const xErrorFormatted = xErrorEnabledThisRow ? formatUncertainty(xErrStr, xErrorType) : '';
 					rowData.push(xErrorFormatted);
 				}
 				if (yErrorEnabled) {
-					let yErrorFormatted = yErrorEnabledThisRow ? formatUncertainty(yErrStr, yErrorType) : '';
-					if (yErrorFormatted !== '') yErrorFormatted = `$${yErrorFormatted}$`;
+					const yErrorFormatted = yErrorEnabledThisRow ? formatUncertainty(yErrStr, yErrorType) : '';
 					rowData.push(yErrorFormatted);
 				}
 				markdown += `| ${rowData.join(' | ')} |\n`;
