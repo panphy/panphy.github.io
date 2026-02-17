@@ -517,9 +517,6 @@ if (markedLib) {
 
 let untouchedSampleContent = null;
 let sampleLoadRequestId = 0;
-const sampleButtonDefaultLabel = loadSampleButton
-  ? (loadSampleButton.textContent || '').trim() || 'Learn'
-  : 'Learn';
 
 function isUntouchedSampleContent(content = markdownInput.value) {
   return untouchedSampleContent !== null && content === untouchedSampleContent;
@@ -540,7 +537,6 @@ function setSampleLoadingState(isLoading) {
   if (!loadSampleButton) return;
   loadSampleButton.disabled = isLoading;
   loadSampleButton.setAttribute('aria-busy', isLoading ? 'true' : 'false');
-  loadSampleButton.textContent = isLoading ? 'Loading...' : sampleButtonDefaultLabel;
 }
 
 function renderAndPersistDraft() {
