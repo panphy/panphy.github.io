@@ -1127,7 +1127,7 @@ select {
 .tabs {
 	display: flex;
 	border-radius: 12px;
-	margin-bottom: 10px;
+	margin-bottom: 4px;
 	background: var(--tab-bg);
 	padding: 4px;
 	gap: 4px;
@@ -1171,7 +1171,7 @@ select {
 
 .tab-content {
 	display: none;
-	padding: 15px 1px;
+	padding: 8px 1px 15px;
 }
 
 .tab-content.active {
@@ -1245,6 +1245,16 @@ select {
 	border-color: var(--brand-primary);
 	outline: none;
 	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+.custom-fit-formula-note {
+	margin: 6px 2px 0;
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+}
+
+.custom-fit-formula-note code {
+	font-size: 0.86em;
 }
 
 #custom-fit-formula-message {
