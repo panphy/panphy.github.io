@@ -609,23 +609,30 @@ body {
 
 .section-toggle-popup {
 	margin-bottom: 0;
-	position: relative;
-	padding-right: 2.5rem;
 }
 
 .section-toggle-popup::after {
-	content: "\2197\FE0E";
-	position: absolute;
-	right: 12px;
-	top: 50%;
-	font-size: 1.5rem;
+	content: "POPUP";
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 	line-height: 1;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	transform: translateY(-50%);
-	font-family: var(--font-body), "Apple Symbols", "Segoe UI Symbol", sans-serif;
-	font-variant-emoji: text;
+	padding: 0.34em 0.56em;
+	border-radius: 999px;
+	color: var(--btn-analyze);
+	border: 1px solid rgba(90, 111, 214, 0.35);
+	background: rgba(90, 111, 214, 0.1);
+	font-family: var(--font-body), sans-serif;
+	flex-shrink: 0;
+}
+
+[data-theme="dark"] .section-toggle-popup::after {
+	border-color: rgba(123, 139, 230, 0.4);
+	background: rgba(123, 139, 230, 0.14);
 }
 
 .collapsible-content {
