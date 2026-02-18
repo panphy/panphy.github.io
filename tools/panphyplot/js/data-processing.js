@@ -28,6 +28,7 @@
 			background: document.getElementById('data-processing-background'),
 			container: document.getElementById('data-processing-container'),
 			closeButton: document.getElementById('data-processing-close'),
+			sourceHeading: document.getElementById('data-processing-source-heading'),
 			sourceHeaderRow: document.getElementById('data-processing-source-header-row'),
 			sourceXHeader: document.getElementById('data-processing-source-x-header'),
 			sourceYHeader: document.getElementById('data-processing-source-y-header'),
@@ -170,6 +171,11 @@
 		const xLabel = getSourceHeaderLabel('x');
 		const yLabel = getSourceHeaderLabel('y');
 		const sourceTableColumns = getSourceTableColumns();
+		const sourceDatasetLabel = getDatasetLabel(activeSet);
+
+		if (elements.sourceHeading) {
+			elements.sourceHeading.textContent = `Source Data - ${sourceDatasetLabel}`;
+		}
 
 		if (elements.sourceXHeader) elements.sourceXHeader.textContent = xLabel;
 		if (elements.sourceYHeader) elements.sourceYHeader.textContent = yLabel;
