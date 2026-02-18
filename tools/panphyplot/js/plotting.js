@@ -413,7 +413,6 @@
 
 		// Only replot if the new state is different.
 		if (isPlotStateEqual(data, layout)) {
-			console.log("No changes in plot state; skipping update.");
 			return;
 		}
 
@@ -579,7 +578,6 @@
 		}
 
 		if (isPlotStateEqual(traces, layout)) {
-			console.log("No changes detected in combined plot; skipping update.");
 			showPopup();
 			return;
 		}

@@ -1429,7 +1429,6 @@ function clearFittedCurve() {
 			// **Clear the fitted curve for the active dataset**
 			if (fittedCurves.hasOwnProperty(activeSet)) {
 				delete fittedCurves[activeSet];
-				console.log(`Fitted curve for Dataset ${activeSet + 1} has been cleared.`);
 			}
 
 			// **Parse the CSV and update the data**
@@ -2184,7 +2183,6 @@ function clearFittedCurve() {
 				markdown += `| ${rowData.join(' | ')} |\n`;
 			});
 
-			console.log("Final Markdown Content:\n", markdown);
 			return markdown;
 		} catch (error) {
 			console.error('Error generating markdown:', error);

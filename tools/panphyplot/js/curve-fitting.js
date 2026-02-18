@@ -1096,31 +1096,8 @@ function exponentialFit_logLinear(raw) {
 
 function updateResults(equation, x, y, fitFunction) {
 	try {
-		const yPredicted = x.map(point => fitFunction(point));
-		const meanY = y.reduce((sum, yi) => sum + yi, 0) / y.length;
-
-		let ssTotal = 0,
-			ssResidual = 0;
-		for (let i = 0; i < y.length; i++) {
-			ssTotal += Math.pow(y[i] - meanY, 2);
-			ssResidual += Math.pow(y[i] - yPredicted[i], 2);
-		}
-
-		const zeroTolerance = 1e-12;
-		let rSquared = 1 - ssResidual / ssTotal;
-		let rSquaredDisplay = rSquared.toFixed(5);
-
-		if (Math.abs(ssTotal) < zeroTolerance) {
-			if (Math.abs(ssResidual) < zeroTolerance) {
-				rSquared = 1;
-				rSquaredDisplay = '1.00000';
-			} else {
-				rSquared = 0;
-				rSquaredDisplay = '0.00000';
-			}
-		} else if (!Number.isFinite(rSquared)) {
-			rSquaredDisplay = 'N/A';
-		}
+		const rSquared = computeRSq(x, y, fitFunction);
+		const rSquaredDisplay = Number.isFinite(rSquared) ? rSquared.toFixed(5) : 'N/A';
 
 		// Update the fitting result UI. ui.js owns the interactive copy affordance.
 		if (typeof renderFittingResult === 'function') {
@@ -1411,7 +1388,6 @@ function performExponentialFit() {
 		updateResults(best.eq, xAll, yAll, best.fitFn);
 		plotGraph(best.xFit, best.yFit);
 
-		console.log(`Exponential (auto) chose: ${best.model}, R² = ${best.r2.toFixed(5)}`);
 	} catch (error) {
 		console.error('Error performing exponential fit:', error);
 		alert('An error occurred during exponential fitting. Please check the console for details.');
@@ -1750,7 +1726,7 @@ function computeJacobian(params, data) {
 			if (!Number.isFinite(dx0)) dx0 = 0;
 		} catch {
 			// In case of domain errors
-			dA = dA = dx0 = dc = 0;
+			dA = db = dx0 = dc = 0;
 		}
 
 		return [dA, db, dx0, dc];
@@ -1895,11 +1871,6 @@ function estimateKFromData() {
 		}
 		const avgPeriod = intervals.reduce((a, b) => a + b, 0) / intervals.length;
 		kGuess = (2 * Math.PI) / avgPeriod;
-		console.log(
-			`Peak-detect guess => period ~ ${avgPeriod.toFixed(4)}, kGuess ~ ${kGuess.toFixed(4)}`
-		);
-	} else {
-		console.log("Not enough peaks for a peak-based guess.");
 	}
 
 	// === 3. Define an initial log-spaced frequency range ===
@@ -1916,24 +1887,14 @@ function estimateKFromData() {
 	if (kGuess && Number.isFinite(kGuess) && kGuess > 0) {
 		if (kGuess < minCandidate) {
 			// expand downward
-			console.log(
-				`kGuess < minCandidate => adjusting minCandidate from ${minCandidate.toFixed(4)} to ~${kGuess / 5}`
-			);
 			minCandidate <= 1e-7 ?
 				(minCandidate = 1e-7) :
 				(minCandidate = Math.max(1e-7, kGuess / 5));
 		}
 		if (kGuess > maxCandidate) {
-			console.log(
-				`kGuess > maxCandidate => adjusting maxCandidate from ${maxCandidate.toFixed(4)} to ~${kGuess * 5}`
-			);
 			maxCandidate = kGuess * 5;
 		}
 	}
-
-	console.log(
-		`Log-search range: [${minCandidate.toFixed(4)}, ${maxCandidate.toFixed(4)}]`
-	);
 
 	// === 4. Coarse search in log space ===
 	// We'll sample frequencies log-spaced from minCandidate to maxCandidate
@@ -1963,9 +1924,6 @@ function estimateKFromData() {
 			bestCoarseOmega = omega;
 		}
 	}
-	console.log(
-		`Log-coarse best => omega = ${bestCoarseOmega.toFixed(4)}, score = ${bestCoarseScore.toExponential(3)}`
-	);
 
 	// === 5. Fine local linear search around bestCoarseOmega ===
 	// We'll do ± 30% in linear space (adjust as desired)
@@ -2002,9 +1960,6 @@ function estimateKFromData() {
 			bestFineOmega = omega;
 		}
 	}
-	console.log(
-		`Fine search best => omega = ${bestFineOmega.toFixed(4)}, score = ${bestFineScore.toExponential(3)}`
-	);
 
 	// === 6. Final sanity check vs. Nyquist? ===
 	if (bestFineOmega > 2 * nyquist) {
@@ -2013,9 +1968,6 @@ function estimateKFromData() {
 		);
 	}
 
-	console.log(
-		`Final estimated k = ${bestFineOmega.toFixed(4)}`
-	);
 	return bestFineOmega;
 }
 
@@ -2033,7 +1985,6 @@ function performSinusoidalFit() {
 			if (estimatedK !== null && Number.isFinite(estimatedK) && estimatedK > 0) {
 				k0 = estimatedK;
 				document.getElementById('initial-k').value = k0.toFixed(3);
-				console.log(`Using estimated k: ${k0}`);
 			} else {
 				alert('Failed to estimate k. Please provide an initial value.');
 				return;
