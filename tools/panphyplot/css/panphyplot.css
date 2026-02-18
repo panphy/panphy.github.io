@@ -595,11 +595,16 @@ body {
 	content: "▾";
 	color: var(--btn-analyze);
 	font-size: 0.9rem;
+	display: inline-block;
+	line-height: 1;
+	transform: rotate(0deg);
+	transform-origin: center;
 	transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .section-toggle[aria-expanded="true"]::after {
-	content: "▴";
+	content: "▾";
+	transform: rotate(180deg);
 }
 
 .section-toggle-popup {
@@ -608,7 +613,7 @@ body {
 
 .section-toggle-popup::after {
 	content: "\2197\FE0E";
-	font-size: 1.1rem;
+	font-size: 1.5rem;
 	line-height: 1;
 	font-family: var(--font-body), "Apple Symbols", "Segoe UI Symbol", sans-serif;
 	font-variant-emoji: text;
