@@ -3,6 +3,7 @@
 const CUSTOM_FIT_MAX_PARAMETERS = 5;
 const CUSTOM_FIT_SAMPLE_POINTS = 300;
 const CUSTOM_FIT_PENALTY = 1e6;
+const CUSTOM_FIT_MULTI_START_LIMIT = 24;
 const CUSTOM_FIT_HELP_URL = '/tools/panphyplot/math_ref.html';
 const CUSTOM_FIT_IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const CUSTOM_FIT_FORBIDDEN_NODE_TYPES = new Set([
@@ -240,7 +241,7 @@ function getCustomFitGuessByName(parameterName, stats) {
 function formatCustomFitInputValue(value) {
 	const numeric = Number(value);
 	if (!Number.isFinite(numeric)) return '';
-	return numeric.toFixed(3);
+	return String(numeric);
 }
 
 function syncCustomFitInputsToState() {
@@ -544,28 +545,83 @@ function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameter
 }
 
 function buildCustomFitInitialCandidates(baseParams) {
-	const candidates = [baseParams.slice()];
-	for (let index = 0; index < baseParams.length; index++) {
-		const base = Number(baseParams[index]);
-		const delta = Math.max(0.1, Math.abs(base) * 0.2);
-		const plus = baseParams.slice();
-		plus[index] = base + delta;
-		candidates.push(plus);
-
-		const minus = baseParams.slice();
-		minus[index] = base - delta;
-		candidates.push(minus);
-	}
-
-	const deduped = [];
+	const seed = baseParams.map((value) => Number(value));
+	const limit = CUSTOM_FIT_MULTI_START_LIMIT;
 	const seen = new Set();
-	candidates.forEach((candidate) => {
-		const key = candidate.map((value) => Number(value).toPrecision(10)).join('|');
+	const candidates = [];
+
+	const addCandidate = (candidate) => {
+		if (!Array.isArray(candidate) || candidate.length !== seed.length) return;
+		if (candidate.some((value) => !Number.isFinite(value))) return;
+		const key = candidate.map((value) => Number(value).toPrecision(12)).join('|');
 		if (seen.has(key)) return;
 		seen.add(key);
-		deduped.push(candidate);
-	});
-	return deduped;
+		candidates.push(candidate);
+	};
+
+	const getStep = (value) => {
+		const magnitude = Math.max(Math.abs(value), 1);
+		return Math.max(1e-6, magnitude * 0.25);
+	};
+
+	const steps = seed.map(getStep);
+	addCandidate(seed.slice());
+
+	// Single-parameter perturbations around the seed.
+	for (let index = 0; index < seed.length && candidates.length < limit; index++) {
+		const base = seed[index];
+		const step = steps[index];
+
+		const plus = seed.slice();
+		plus[index] = base + step;
+		addCandidate(plus);
+		if (candidates.length >= limit) break;
+
+		const minus = seed.slice();
+		minus[index] = base - step;
+		addCandidate(minus);
+		if (candidates.length >= limit) break;
+
+		const flip = seed.slice();
+		flip[index] = Math.abs(base) > step * 0.5 ? -base : step;
+		addCandidate(flip);
+	}
+
+	// Pairwise perturbations help when parameters are correlated.
+	for (let i = 0; i < seed.length && candidates.length < limit; i++) {
+		for (let j = i + 1; j < seed.length && candidates.length < limit; j++) {
+			const pair1 = seed.slice();
+			pair1[i] = seed[i] + steps[i];
+			pair1[j] = seed[j] - steps[j];
+			addCandidate(pair1);
+			if (candidates.length >= limit) break;
+
+			const pair2 = seed.slice();
+			pair2[i] = seed[i] - steps[i];
+			pair2[j] = seed[j] + steps[j];
+			addCandidate(pair2);
+		}
+	}
+
+	// Global scaling catches cases where all parameters start too small/large.
+	if (candidates.length < limit) {
+		const halfScale = seed.map((value, index) => value === 0 ? steps[index] : value * 0.5);
+		addCandidate(halfScale);
+	}
+	if (candidates.length < limit) {
+		const doubleScale = seed.map((value, index) => value === 0 ? -steps[index] : value * 2);
+		addCandidate(doubleScale);
+	}
+
+	// Final broad nudges if we still have room.
+	if (candidates.length < limit) {
+		addCandidate(seed.map((value, index) => value + steps[index]));
+	}
+	if (candidates.length < limit) {
+		addCandidate(seed.map((value, index) => value - steps[index]));
+	}
+
+	return candidates.slice(0, limit);
 }
 
 function fitCurve() {
