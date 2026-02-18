@@ -609,17 +609,21 @@ body {
 
 .section-toggle-popup {
 	margin-bottom: 0;
+	position: relative;
+	padding-right: 2.5rem;
 }
 
 .section-toggle-popup::after {
 	content: "\2197\FE0E";
+	position: absolute;
+	right: 12px;
+	top: 50%;
 	font-size: 1.5rem;
 	line-height: 1;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	align-self: center;
-	transform: translateY(0.04em);
+	transform: translateY(-50%);
 	font-family: var(--font-body), "Apple Symbols", "Segoe UI Symbol", sans-serif;
 	font-variant-emoji: text;
 }
