@@ -540,9 +540,9 @@
             when the dataset already contains data.</li>
           <li><strong>Copy x₁:</strong> Use the "Copy x₁" button to copy all x-values from Dataset 1 into the active
             dataset. This feature simplifies workflows when comparing multiple datasets.</li>
-          <li><strong>Data Processing:</strong> Create processed columns from the active dataset using math expressions
-            (for example, transform data to <code>1/V</code> or <code>x^2</code>) and copy mapped output into another
-            dataset.</li>
+          <li><strong>Data Processing:</strong> Open the Data Processing popup to create processed columns from the active
+            dataset (for example, transform data to <code>1/V</code> or <code>x^2</code>) and copy mapped output into
+            another dataset.</li>
         </ul>
       </li>
       <li>
@@ -583,6 +583,9 @@
         <strong>Graph Visualization</strong>
         <ul>
           <li>Interactive plots powered by Plotly.js.</li>
+          <li><strong>Toolbar controls:</strong> Pan, Zoom, Zoom In, Zoom Out, Auto-scale, Reset axes, and Download plot.</li>
+          <li><strong>Auto-scale vs Reset axes:</strong> Auto-scale fits both axes to the visible data values. Reset axes
+            restores Plotly's default reset behavior for the current plot.</li>
           <li>Customize the graph title and axis labels.</li>
           <li><strong>LaTeX Mode:</strong> A toggle allows you to activate or deactivate LaTeX rendering for all
             headings, labels, and titles.</li>
@@ -678,14 +681,23 @@
 
     <h3>4. Data Processing</h3>
     <ul>
-      <li><strong>Open Data Processing:</strong> Click the "Data Processing" button in the Data section.</li>
+      <li><strong>Open Data Processing:</strong> Click the "Data Processing" button in the Data section (marked with an
+        arrow to indicate it opens a popup).</li>
       <li><strong>Source scope:</strong> The popup reads valid rows from the active dataset where both <code>x</code>
-        and <code>y</code> are finite numbers.</li>
+        and <code>y</code> are finite numbers. The source section title shows the active dataset name.</li>
+      <li><strong>Source table:</strong> The source table is scrollable and shows roughly seven rows at a time.</li>
       <li><strong>Create processed columns:</strong> Use <code>Process x</code> or <code>Process y</code>, then enter a
         math.js expression such as <code>=1/x</code>, <code>1/V</code>, <code>x^2</code>, <code>log(y)</code>, or
         <code>sqrt(abs(y))</code>.</li>
+      <li><strong>Process button labels:</strong> Buttons show axis-first labels (for example <code>Process x (time)</code>)
+        when custom headers are used, to reduce ambiguity.</li>
+      <li><strong>Apply/Cancel flow:</strong> Pressing Process first adds a pending column preview. Click
+        <strong>Apply</strong> (or press Enter in the formula box) to compute and keep it. Click <strong>Cancel</strong>
+        to remove the pending column.</li>
       <li><strong>Variables:</strong> <code>x</code>, <code>y</code>, and valid header identifiers are available in
         formulas.</li>
+      <li><strong>Formula validation:</strong> Formula warnings/errors (for example unknown variables) appear inside the
+        formula panel.</li>
       <li><strong>Map output:</strong> Choose <strong>New X column</strong> and <strong>New Y column</strong> from
         source or processed columns, choose a <strong>Target dataset</strong>, then click <strong>Copy to Dataset</strong>.</li>
       <li><strong>Row filtering:</strong> Any row producing invalid/non-finite mapped values is skipped during copy.</li>
