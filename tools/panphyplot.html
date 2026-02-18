@@ -128,12 +128,12 @@
 					<button class="btn-export-md" onclick="showExportTablePopup()"
 						title="View this dataset as a formatted table">View Table</button>
 				</div>
-				<div class="button-row button-row-data-processing">
-					<button class="section-toggle section-toggle-popup" type="button" aria-haspopup="dialog"
-						onclick="openDataProcessingPopup()"
-						title="Create processed columns from the current dataset">Data Processing</button>
+					<div class="button-row button-row-data-processing">
+						<button class="section-toggle section-toggle-popup" type="button" aria-haspopup="dialog"
+							onclick="openDataProcessingPopup()"
+							title="Create processed columns from the current dataset">Data Processing...</button>
+					</div>
 				</div>
-			</div>
 			<input type="file" id="csv-file-input" accept=".csv" style="display: none;"
 				onchange="handleCSVUpload(event)" />
 
