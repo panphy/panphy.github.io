@@ -4,8 +4,10 @@ const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150
 const debouncedUpdateData = debounce(updateData, 300);
 const MARKED_CDN_URL = 'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js';
 const DOMPURIFY_CDN_URL = 'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js';
+const TABLE_RENDER_CHUNK_SIZE = 250;
 const lazyScriptPromises = {};
 let tableRenderLibrariesPromise = null;
+let tableRenderJobId = 0;
 
 function loadExternalScript(url) {
 	if (!url) return Promise.reject(new Error('Missing script URL.'));
@@ -91,6 +93,69 @@ function getErrorColumnDisplay(axis) {
 
 		return wrapInTr ? `<tr>${rowHtml}</tr>` : rowHtml;
 	}
+
+function cancelTableRenderJob() {
+	tableRenderJobId += 1;
+	const tableBody = document.querySelector('#data-table tbody');
+	if (tableBody) {
+		tableBody.style.pointerEvents = '';
+		tableBody.removeAttribute('aria-busy');
+	}
+}
+
+function buildDataRowElement(options = {}) {
+	const row = document.createElement('tr');
+	row.innerHTML = buildDataRowHtml(options);
+	return row;
+}
+
+function renderTableRows(tableBody, rowOptions = []) {
+	cancelTableRenderJob();
+	const jobId = tableRenderJobId;
+	tableBody.innerHTML = '';
+
+	if (!Array.isArray(rowOptions) || rowOptions.length === 0) {
+		tableBody.style.pointerEvents = '';
+		tableBody.removeAttribute('aria-busy');
+		return;
+	}
+
+	if (rowOptions.length <= TABLE_RENDER_CHUNK_SIZE * 2) {
+		const fragment = document.createDocumentFragment();
+		rowOptions.forEach((options) => {
+			fragment.appendChild(buildDataRowElement(options));
+		});
+		tableBody.appendChild(fragment);
+		tableBody.style.pointerEvents = '';
+		tableBody.removeAttribute('aria-busy');
+		return;
+	}
+
+	tableBody.style.pointerEvents = 'none';
+	tableBody.setAttribute('aria-busy', 'true');
+
+	let index = 0;
+	const renderChunk = () => {
+		if (jobId !== tableRenderJobId) return;
+
+		const fragment = document.createDocumentFragment();
+		const end = Math.min(index + TABLE_RENDER_CHUNK_SIZE, rowOptions.length);
+		for (; index < end; index++) {
+			fragment.appendChild(buildDataRowElement(rowOptions[index]));
+		}
+		tableBody.appendChild(fragment);
+
+		if (index < rowOptions.length) {
+			window.requestAnimationFrame(renderChunk);
+			return;
+		}
+
+		tableBody.style.pointerEvents = '';
+		tableBody.removeAttribute('aria-busy');
+	};
+
+	window.requestAnimationFrame(renderChunk);
+}
 
 function isValidPercentageUncertainty(value) {
 	return Number.isFinite(value) && value > 0;
@@ -666,14 +731,11 @@ function initializeFitEquationCopyInteractions() {
 
 		function initializeTable(initialRows = 7) {
 			const tableBody = document.querySelector('#data-table tbody');
-			// Create the default empty rows
-			for (let i = 0; i < initialRows; i++) {
-				const newRow = tableBody.insertRow();
-				newRow.innerHTML = buildDataRowHtml({
-					xErrorDisplay: 'none',
-					yErrorDisplay: 'none'
-				});
-			}
+			const rowOptions = Array.from({ length: initialRows }, () => ({
+				xErrorDisplay: 'none',
+				yErrorDisplay: 'none'
+			}));
+			renderTableRows(tableBody, rowOptions);
 			// Update the active dataset with the new (empty) rows.
 			updateData();
 		}
@@ -899,19 +961,16 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 		function populateTableFromActiveDataset() {
 			const tableBody = document.querySelector('#data-table tbody');
-			tableBody.innerHTML = ''; // Clear current table
-			const fragment = document.createDocumentFragment();
-
-			// For the active dataset, get its stored raw data.
-			let dataset = rawData[activeSet] || [];
+			const dataset = rawData[activeSet] || [];
 			const xErrorDisplay = getErrorColumnDisplay('x');
 			const yErrorDisplay = getErrorColumnDisplay('y');
 
+			const rowOptions = [];
+
 			// For Dataset 1: if rawData is empty but we have stored x-values, rebuild the table from them.
 			if (activeSet === 0 && dataset.length === 0 && dataset1XValues && dataset1XValues.length > 0) {
-				dataset1XValues.forEach(xVal => {
-					const newRow = document.createElement('tr');
-					newRow.innerHTML = buildDataRowHtml({
+				dataset1XValues.forEach((xVal) => {
+					rowOptions.push({
 						xValue: xVal,
 						yValue: '',
 						xErrorValue: '',
@@ -919,17 +978,15 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 						xErrorDisplay,
 						yErrorDisplay
 					});
-					fragment.appendChild(newRow);
 				});
-				tableBody.appendChild(fragment);
+				renderTableRows(tableBody, rowOptions);
 				return;
 			}
 
 			// For other datasets (or if set 1 already has valid data), build rows from rawData.
 			if (dataset.length > 0) {
-				dataset.forEach(point => {
-					const newRow = document.createElement('tr');
-					newRow.innerHTML = buildDataRowHtml({
+				dataset.forEach((point) => {
+					rowOptions.push({
 						xValue: point.x,
 						yValue: point.y !== null ? point.y : '',
 						xErrorValue: point.xErrorRaw || '',
@@ -937,13 +994,13 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 						xErrorDisplay,
 						yErrorDisplay
 					});
-					fragment.appendChild(newRow);
 				});
-				tableBody.appendChild(fragment);
-			} else {
-				// If there is no data in the active dataset, initialize default rows.
-				initializeTable();
+				renderTableRows(tableBody, rowOptions);
+				return;
 			}
+
+			// If there is no data in the active dataset, initialize default rows.
+			initializeTable();
 	}
 
 
@@ -1017,6 +1074,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 
 		function addRow() {
+			cancelTableRenderJob();
 			const tableBody = document.querySelector('#data-table tbody');
 			const newRow = tableBody.insertRow();
 			newRow.innerHTML = buildDataRowHtml();
@@ -1051,6 +1109,7 @@ function confirmImportCSV() {
 
 
 	function clearRows(resetHeaders = true) {
+		cancelTableRenderJob();
 		const tableBody = document.querySelector('#data-table tbody');
 		tableBody.innerHTML = '';
 
