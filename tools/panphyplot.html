@@ -405,22 +405,26 @@
 				</div>
 			</div>
 
-			<div class="data-processing-section">
-				<div class="data-processing-heading">Column Processing</div>
-				<div class="data-processing-process-actions">
-					<button id="data-processing-process-x" type="button">Process x</button>
-					<button id="data-processing-process-y" type="button">Process y</button>
-				</div>
-				<div id="data-processing-formula-panel" style="display: none;">
-					<label id="data-processing-formula-label" for="data-processing-formula-input">Formula for x</label>
-					<input id="data-processing-formula-input" type="text" placeholder="e.g. =1/x" autocomplete="off" />
-					<div id="data-processing-formula-message" aria-live="polite" style="display: none;"></div>
-					<div class="data-processing-inline-actions">
-						<button id="data-processing-apply" type="button">Apply</button>
-						<button id="data-processing-cancel" type="button">Cancel</button>
+				<div class="data-processing-section">
+					<div class="data-processing-heading">Column Processing</div>
+					<div class="data-processing-process-actions">
+						<button id="data-processing-process-x" type="button">Process x</button>
+						<button id="data-processing-process-y" type="button">Process y</button>
+					</div>
+					<div id="data-processing-formula-panel" style="display: none;">
+						<div class="data-processing-formula-header">
+							<label id="data-processing-formula-label" for="data-processing-formula-input">Formula for x</label>
+							<button id="data-processing-formula-help" type="button"
+								title="Open quick math reference in a new tab">Help</button>
+						</div>
+						<input id="data-processing-formula-input" type="text" placeholder="e.g. =1/x" autocomplete="off" />
+						<div id="data-processing-formula-message" aria-live="polite" style="display: none;"></div>
+						<div class="data-processing-inline-actions">
+							<button id="data-processing-apply" type="button">Apply</button>
+							<button id="data-processing-cancel" type="button">Cancel</button>
+						</div>
 					</div>
 				</div>
-			</div>
 
 			<div class="data-processing-section">
 				<div class="data-processing-heading">Processed Columns</div>

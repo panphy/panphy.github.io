@@ -1762,11 +1762,39 @@ select {
 	padding: 10px;
 }
 
+.data-processing-formula-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
 #data-processing-formula-label {
 	display: block;
 	font-size: 0.86rem;
 	font-weight: 600;
-	margin-bottom: 6px;
+	margin: 0;
+	color: var(--text-main);
+}
+
+#data-processing-formula-help {
+	padding: 4px 11px;
+	border-radius: 999px;
+	border: 1px solid var(--border-color);
+	background: var(--muted-bg);
+	color: var(--text-secondary);
+	font-size: 0.78rem;
+	font-weight: 600;
+}
+
+#data-processing-formula-help:hover {
+	background: rgba(90, 111, 214, 0.08);
+	border-color: rgba(90, 111, 214, 0.3);
+	color: var(--btn-analyze);
+}
+
+[data-theme="dark"] #data-processing-formula-help {
 	color: var(--text-main);
 }
 
@@ -1784,12 +1812,6 @@ select {
 	border-color: var(--brand-primary);
 	outline: none;
 	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-}
-
-#data-processing-formula-helper {
-	margin: 8px 0;
-	font-size: 0.8rem;
-	color: var(--text-secondary);
 }
 
 #data-processing-formula-message {

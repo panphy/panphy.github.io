@@ -1,6 +1,7 @@
 // Data Processing popup (PanPhyPlot MVP)
 (function() {
 	const CREATE_NEW_TARGET_VALUE = '__create_new_dataset__';
+	const MATH_REFERENCE_URL = '/tools/panphyplot/math_ref.html';
 	const IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
 	const FORBIDDEN_NODE_TYPES = new Set([
 		'AssignmentNode',
@@ -39,6 +40,7 @@
 			processYButton: document.getElementById('data-processing-process-y'),
 			formulaPanel: document.getElementById('data-processing-formula-panel'),
 			formulaLabel: document.getElementById('data-processing-formula-label'),
+			formulaHelpButton: document.getElementById('data-processing-formula-help'),
 			formulaInput: document.getElementById('data-processing-formula-input'),
 			formulaMessage: document.getElementById('data-processing-formula-message'),
 			applyButton: document.getElementById('data-processing-apply'),
@@ -187,6 +189,10 @@
 		return event.key === 'Escape'
 			|| event.code === 'Escape'
 			|| event.keyCode === 27;
+	}
+
+	function openFormulaHelp() {
+		window.open(MATH_REFERENCE_URL, '_blank', 'noopener,noreferrer');
 	}
 
 	function getSourceTableColumns() {
@@ -857,6 +863,9 @@
 		}
 		if (elements.cancelButton) {
 			elements.cancelButton.addEventListener('click', handleCancelFormula);
+		}
+		if (elements.formulaHelpButton) {
+			elements.formulaHelpButton.addEventListener('click', openFormulaHelp);
 		}
 		if (elements.formulaInput) {
 			elements.formulaInput.addEventListener('keydown', (event) => {
