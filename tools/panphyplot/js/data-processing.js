@@ -40,6 +40,7 @@
 			formulaPanel: document.getElementById('data-processing-formula-panel'),
 			formulaLabel: document.getElementById('data-processing-formula-label'),
 			formulaInput: document.getElementById('data-processing-formula-input'),
+			formulaHelper: document.getElementById('data-processing-formula-helper'),
 			formulaMessage: document.getElementById('data-processing-formula-message'),
 			applyButton: document.getElementById('data-processing-apply'),
 			cancelButton: document.getElementById('data-processing-cancel'),
@@ -166,6 +167,16 @@
 		setFormulaMessage('');
 	}
 
+	function getAxisProcessButtonText(axis) {
+		const axisKey = axis === 'y' ? 'y' : 'x';
+		const axisLabel = axisKey;
+		const headerLabel = getSourceHeaderLabel(axisKey);
+		if (String(headerLabel || '').trim().toLowerCase() === axisLabel) {
+			return `Process ${axisLabel}`;
+		}
+		return `Process ${axisLabel} (${headerLabel})`;
+	}
+
 	function isEnterKey(event) {
 		return event.key === 'Enter'
 			|| event.code === 'Enter'
@@ -259,11 +270,11 @@
 		}
 
 		if (elements.processXButton) {
-			elements.processXButton.textContent = `Process ${xLabel}`;
+			elements.processXButton.textContent = getAxisProcessButtonText('x');
 			elements.processXButton.disabled = !hasRows;
 		}
 		if (elements.processYButton) {
-			elements.processYButton.textContent = `Process ${yLabel}`;
+			elements.processYButton.textContent = getAxisProcessButtonText('y');
 			elements.processYButton.disabled = !hasRows;
 		}
 	}
@@ -529,7 +540,10 @@
 		state.pendingDerivedColumn = buildPendingColumn(axis);
 		renderSourceSection();
 		elements.formulaLabel.textContent = `Formula for ${headerLabel}`;
-		elements.formulaInput.placeholder = `e.g. =1/${headerLabel}`;
+		elements.formulaInput.placeholder = `e.g. =1/${axis}`;
+		if (elements.formulaHelper) {
+			elements.formulaHelper.textContent = `e.g. =1/${axis}`;
+		}
 		elements.formulaInput.value = '';
 		clearFormulaMessage();
 		elements.formulaPanel.style.display = 'block';
