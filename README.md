@@ -1,42 +1,65 @@
-Welcome to PanPhy Labs. The tools, simulations, and games here are built with AI and designed to be interactive and educational. While there are many great web tools and physics simulations online, not all meet my needs. With school devices locked down, installing software is a hassle, so I build my own web apps: simple, browser-based, and ready for everyone to explore and enjoy.
+# PanPhy Labs
 
-Most importantly, the site is offline-friendly (apart from the game "Asteroid Storm" and "EAL Learning Companion," which is a Streamlit app). Once a page and its required assets are cached, you can keep using the tools, simulations, and games even without an internet connection.
+PanPhy Labs is a static Progressive Web App (PWA) with browser-based physics tools, simulations, and games. The project is deployed directly from this repo to GitHub Pages, with no build system.
 
 ## Tech Stack
-- **HTML/CSS:** Lightweight, fast-loading UI with a consistent look and feel  
-- **Vanilla JavaScript:** Framework-free interactive logic (simulations, controls, rendering, state)  
-- **Supabase:** Powers the online leaderboard for the game "Asteroid Storm"  
-- **Offline support:** Service Worker caching for offline use after the first visit
 
-## Offline & App Behavior
-- `manifest.json` defines the Progressive Web App (PWA) metadata: app name, icons, start URL, and display mode. It lets browsers offer "install to home screen" and ensures the app launches with the correct branding and colors.
-- `sw.js` is the service worker that pre-caches core assets and manages runtime caching. It serves cached pages and assets when offline and updates caches when online, enabling the offline-friendly experience described above.
+- **HTML5 / CSS3 / Vanilla JavaScript** (no framework, no bundler)
+- **Service Worker** (`sw.js`) for offline support and update lifecycle
+- **Supabase** for the Asteroid Storm leaderboard
 
-## Versioning & Deployment
+## Route Status (Reviewed: 2026-02-18)
 
-### How updates reach users
+### Published routes
 
-The site is deployed directly via **GitHub Pages** from the `main` branch -- every push to `main` goes live immediately.
+These are linked from `index.html` and listed in `sitemap.xml`:
 
-However, because the service worker serves assets **cache-first**, returning users won't see updates unless the service worker cache is invalidated. This is controlled by the `BUILD_ID` in `sw.js` -- a timestamp at the top of `sw.js` (e.g. `2026-02-06T12:00:00Z`) that is embedded into the cache name. When the browser detects that `sw.js` has changed, the new service worker installs, re-downloads all assets in `ASSETS_TO_CACHE` into a fresh cache, and deletes the old one on activation. **This must be bumped whenever any cached asset is modified**, otherwise users will keep getting stale files from the old cache.
+- `tools/*` (Markdown Editor, PanPhyPlot, Motion Tracker, Sound Analyzer, Tone Generator, Digitizer)
+- `simulations/*` (Superposition, Standing Wave, Lorentz)
+- `for_teachers/*` (Timer, Visualizer)
+- `fun/*` (Dodge, React, ASCII Cam)
 
-### Update flow in practice
+### Unlisted routes in repo
 
+These are present in the repository but not currently linked from `index.html` or `sitemap.xml`:
+
+- `gcse/phy_flashcard.html`
+- `gcse/phy_flashcard_cs.html`
+- `gcse/phy_flashcard_ss.html`
+- `misc/ising_model.html`
+- `misc/phyclub_showcase.html`
+
+Treat those as legacy/internal unless intentionally promoted.
+
+Only routes linked from `index.html` are SW-managed by policy. Unlisted/internal pages should not include `/assets/sw-register.js` and should not be added to `ASSETS_TO_CACHE` unless they are being promoted to published status.
+
+## Offline Model
+
+- `sw.js` pre-caches the explicit list in `ASSETS_TO_CACHE`.
+- Navigations use **network-first** with cache fallback.
+- Other GET assets use **cache-first**.
+- `/fun/dodge.html`, `/fun/dodge_assets/*`, and `*.supabase.co` requests are always fetched fresh (not cached by SW).
+
+Only pages/assets in `ASSETS_TO_CACHE` are guaranteed to be available offline immediately after SW install. Other same-origin pages may still work offline after they are visited online while the SW is active (runtime cache).
+
+## Cache Versioning Rules
+
+`sw.js` uses a timestamped `BUILD_ID` to version cache names. Because serving is cache-heavy, stale `BUILD_ID` means stale client content.
+
+When changing the site:
+
+- **Modify any cached file** (`ASSETS_TO_CACHE` entry): bump `BUILD_ID` in `sw.js`
+- **Add a new published page**: add page path to `ASSETS_TO_CACHE`, link it from `index.html`, add it to `sitemap.xml`, then bump `BUILD_ID`
+- **Keep a page unlisted/internal**: do not add SW registration and do not add it to `ASSETS_TO_CACHE`
+- **Change CDN script/style URL in a cached page**: update the exact same URL in `ASSETS_TO_CACHE`, then bump `BUILD_ID`
+- **Add local media required by a cached page**: add media paths to `ASSETS_TO_CACHE`, then bump `BUILD_ID`
+- **Edit `assets/sw-register.js`**: bump `BUILD_ID` in `sw.js` (the register script is pre-cached)
+
+## Local Testing
+
+```bash
+python3 -m http.server 8000
+# then open http://localhost:8000
 ```
-Code changed on main
-  └─> GitHub Pages serves new files
-        └─> Browser detects sw.js changed (BUILD_ID bumped)
-              └─> New service worker installs
-                    └─> Pre-caches fresh copies of all assets
-                          └─> Old cache deleted on activation
-                                └─> User sees updated content on next visit
-```
 
-### Summary for contributors
-
-When modifying the site:
-- **Changing an existing cached file**: Bump `BUILD_ID` in `sw.js`
-- **Adding a new page**: Add its path to `ASSETS_TO_CACHE` in `sw.js` and bump `BUILD_ID`
-- **Renaming a module file**: Update the `<script>` / `<link>` reference in the HTML entry point, update the path in `ASSETS_TO_CACHE`, and bump `BUILD_ID`
-- **Updating a CDN URL in HTML**: Update the exact same URL in `ASSETS_TO_CACHE` (URL strings must match exactly for cache hits)
-- **Adding required local media (audio/video/images/fonts) to a cached page**: Add those assets to `ASSETS_TO_CACHE` too, then bump `BUILD_ID`
+Use a real HTTP server (not `file://`) so service workers and absolute paths behave correctly.

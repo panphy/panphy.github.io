@@ -75,6 +75,27 @@
     └── phyclub_showcase.html
 ```
 
+## Published vs Unlisted Routes
+
+Not every HTML file in the repo is currently treated as a published page.
+
+- **Published pages** are linked from `index.html` and listed in `sitemap.xml`
+- Only published pages should include `<script src="/assets/sw-register.js" defer></script>` and be included in `sw.js` `ASSETS_TO_CACHE`
+- **Current unlisted/legacy pages**:
+  - `gcse/phy_flashcard.html`
+  - `gcse/phy_flashcard_cs.html`
+  - `gcse/phy_flashcard_ss.html`
+  - `misc/ising_model.html`
+  - `misc/phyclub_showcase.html`
+- Unlisted/internal pages should remain outside SW registration and pre-cache unless intentionally promoted
+
+If you promote an unlisted page to production, do all of the following:
+1. Add `<script src="/assets/sw-register.js" defer></script>` if missing
+2. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js`
+3. Bump `BUILD_ID` in `sw.js`
+4. Add a card/link in `index.html`
+5. Add the page URL to `sitemap.xml`
+
 ## Tech Stack & Dependencies
 
 ### Core Technologies
@@ -232,10 +253,11 @@ Then open `http://localhost:8000` in a browser.
 
 ### Adding a New Tool/Page
 1. Create new HTML file in appropriate directory (`tools/`, `simulations/`, etc.)
-2. Include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
+2. If it will be published from `index.html`, include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
 3. Use the standard theming CSS variables
-4. Add to `sw.js` `ASSETS_TO_CACHE` array
+4. If published, add to `sw.js` `ASSETS_TO_CACHE` array
 5. Add link to `index.html` in the appropriate section
+6. Add URL to `sitemap.xml` if page is public
 
 ### Updating the Theme System
 Theme colors are defined in CSS `:root` and `[data-theme="dark"]` selectors. Key variables:
@@ -296,8 +318,9 @@ function toggleTheme() {
 
 ## Offline Behavior
 
-- **Works offline**: Core tools/simulations/pages listed in `sw.js` `ASSETS_TO_CACHE`
-- **Requires network**: Dodge game (Supabase leaderboard), any Supabase API calls
+- **Guaranteed offline after install**: Pages/assets explicitly listed in `sw.js` `ASSETS_TO_CACHE`
+- **May work offline after first online visit**: Other same-origin GET resources (runtime cache)
+- **Requires network**: `fun/dodge.html`, `fun/dodge_assets/*`, and any `*.supabase.co` API calls
 
 ## External Services
 

@@ -40,6 +40,27 @@ Each HTML file in the repo is a complete, standalone application. Complex tools 
 
 Module files must use **stable, unhashed filenames** (e.g. `copy.js`, not `copy.ab12.js`). Cache busting is handled exclusively via the `BUILD_ID` in `sw.js`. Do not rely on file hash changes for updates.
 
+### Published vs Unlisted Pages
+
+Not every HTML file in the repo is currently part of the published navigation.
+
+- **Published pages** are linked from `index.html` and listed in `sitemap.xml`
+- Only published pages should include `<script src="/assets/sw-register.js" defer></script>` and be tracked in `ASSETS_TO_CACHE`
+- **Current unlisted/legacy pages** include:
+  - `gcse/phy_flashcard.html`
+  - `gcse/phy_flashcard_cs.html`
+  - `gcse/phy_flashcard_ss.html`
+  - `misc/ising_model.html`
+  - `misc/phyclub_showcase.html`
+- Unlisted/internal pages should stay outside service-worker registration and pre-cache lists unless explicitly promoted
+
+If you promote an unlisted page to production, treat it as a full launch task:
+1. Add `<script src="/assets/sw-register.js" defer></script>` if missing
+2. Add route + required assets to `ASSETS_TO_CACHE`
+3. Bump `BUILD_ID` in `sw.js`
+4. Link it from `index.html`
+5. Add it to `sitemap.xml`
+
 ## Coding Conventions
 
 - **Variables/functions**: camelCase
@@ -82,11 +103,12 @@ python3 -m http.server 8000
 ## Adding a New Page
 
 1. Create the HTML file in the appropriate directory
-2. Include service worker registration via shared loader: `<script src="/assets/sw-register.js" defer></script>`
+2. If the page will be published (linked from `index.html`), include service worker registration via shared loader: `<script src="/assets/sw-register.js" defer></script>`
 3. Use the standard CSS theme variables
-4. Add the path to `ASSETS_TO_CACHE` in `sw.js`
+4. If published, add the path to `ASSETS_TO_CACHE` in `sw.js`
 5. Bump the `BUILD_ID` in `sw.js`
 6. Add a link from `index.html`
+7. Add a `<loc>` entry to `sitemap.xml` if the page is public
 
 ## Git Workflow
 
