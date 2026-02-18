@@ -258,18 +258,117 @@
 
         let filesetResolverCtor = null;
         let handLandmarkerCtor = null;
+        let mediapipeWasmBaseUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm';
+
+        const MEDIAPIPE_SOURCES = [
+            {
+                label: 'jsdelivr-module',
+                kind: 'module',
+                url: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22',
+                wasmBase: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm'
+            },
+            {
+                label: 'unpkg-module',
+                kind: 'module',
+                url: 'https://unpkg.com/@mediapipe/tasks-vision@0.10.22?module',
+                wasmBase: 'https://unpkg.com/@mediapipe/tasks-vision@0.10.22/wasm'
+            },
+            {
+                label: 'jsdelivr-script',
+                kind: 'script',
+                url: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.js',
+                wasmBase: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm'
+            },
+            {
+                label: 'unpkg-script',
+                kind: 'script',
+                url: 'https://unpkg.com/@mediapipe/tasks-vision@0.10.22/vision_bundle.js',
+                wasmBase: 'https://unpkg.com/@mediapipe/tasks-vision@0.10.22/wasm'
+            }
+        ];
 
         function isLocalLoopbackHost() {
             return ['localhost', '127.0.0.1', '::1', '[::1]'].includes(window.location.hostname);
+        }
+
+        function extractVisionApi(moduleNamespace) {
+            const candidates = [
+                moduleNamespace,
+                moduleNamespace && moduleNamespace.default,
+                window.vision
+            ];
+            for (const candidate of candidates) {
+                if (candidate && candidate.FilesetResolver && candidate.HandLandmarker) {
+                    return {
+                        filesetResolver: candidate.FilesetResolver,
+                        handLandmarker: candidate.HandLandmarker
+                    };
+                }
+            }
+            return null;
+        }
+
+        function loadScript(url) {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[data-load-url="${url}"]`);
+                if (existing) {
+                    if (existing.dataset.loaded === '1') {
+                        resolve();
+                        return;
+                    }
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error(`Script failed: ${url}`)), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = url;
+                script.async = true;
+                script.crossOrigin = 'anonymous';
+                script.dataset.loadUrl = url;
+                script.addEventListener('load', () => {
+                    script.dataset.loaded = '1';
+                    resolve();
+                }, { once: true });
+                script.addEventListener('error', () => reject(new Error(`Script failed: ${url}`)), { once: true });
+                document.head.append(script);
+            });
         }
 
         async function ensureHandTrackingDeps() {
             if (filesetResolverCtor && handLandmarkerCtor) {
                 return;
             }
-            const mediapipe = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs');
-            filesetResolverCtor = mediapipe.FilesetResolver;
-            handLandmarkerCtor = mediapipe.HandLandmarker;
+
+            const errors = [];
+
+            for (const source of MEDIAPIPE_SOURCES) {
+                try {
+                    let moduleNamespace = null;
+                    if (source.kind === 'module') {
+                        moduleNamespace = await import(source.url);
+                    } else {
+                        await loadScript(source.url);
+                        moduleNamespace = window.vision || null;
+                    }
+
+                    const api = extractVisionApi(moduleNamespace);
+                    if (!api) {
+                        errors.push(`${source.label}: API missing`);
+                        continue;
+                    }
+
+                    filesetResolverCtor = api.filesetResolver;
+                    handLandmarkerCtor = api.handLandmarker;
+                    mediapipeWasmBaseUrl = source.wasmBase;
+                    return;
+                } catch (error) {
+                    const message = error && error.message ? error.message : String(error);
+                    errors.push(`${source.label}: ${message}`);
+                }
+            }
+
+            throw new Error(`Unable to load MediaPipe hand tracker. ${errors.join(' | ')}`);
         }
 
         const physics = {
@@ -532,7 +631,7 @@
         async function createHandLandmarker() {
             await ensureHandTrackingDeps();
             const vision = await filesetResolverCtor.forVisionTasks(
-                'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm'
+                mediapipeWasmBaseUrl
             );
 
             return handLandmarkerCtor.createFromOptions(vision, {
