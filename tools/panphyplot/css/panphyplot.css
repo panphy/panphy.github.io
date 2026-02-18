@@ -785,15 +785,15 @@ button:hover {
 	color: #1a1a1a;
 }
 
-/* Copy x₁ - Teal (Utility action) */
+/* Copy x₁ - Sage green (Create action) */
 .btn-copy-x {
-	background-color: var(--btn-utility);
+	background-color: var(--btn-create);
 	color: #fff;
 	font-weight: 600;
 }
 
 .btn-copy-x:hover {
-	background-color: var(--btn-utility-hover);
+	background-color: var(--btn-create-hover);
 }
 
 [data-theme="dark"] .btn-copy-x {
@@ -811,30 +811,26 @@ button:hover {
 	background-color: var(--btn-import-hover);
 }
 
-/* Export CSV - Lavender (Export action) */
+/* Export CSV - Peach (Import-style action) */
 .btn-export-csv {
-	background-color: var(--btn-export);
-	color: #fff;
+	background-color: var(--btn-import);
+	color: #1a1a1a;
 	font-weight: 600;
 }
 
 .btn-export-csv:hover {
-	background-color: var(--btn-export-hover);
+	background-color: var(--btn-import-hover);
 }
 
-[data-theme="dark"] .btn-export-csv {
-	color: #1a1a1a;
-}
-
-/* View Table - Slate (View/Neutral action) */
+/* View Table - Teal (Utility action) */
 .btn-export-md {
-	background-color: var(--btn-neutral);
+	background-color: var(--btn-utility);
 	color: #fff;
 	font-weight: 600;
 }
 
 .btn-export-md:hover {
-	background-color: var(--btn-neutral-hover);
+	background-color: var(--btn-utility-hover);
 }
 
 [data-theme="dark"] .btn-export-md {
