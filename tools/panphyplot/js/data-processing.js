@@ -16,6 +16,7 @@
 		sourceRows: [],
 		sourceHeaders: { x: 'x', y: 'y' },
 		derivedColumns: [],
+		pendingDerivedColumn: null,
 		columnChoices: [],
 		targetChoices: [],
 		formulaAxis: null,
@@ -27,6 +28,7 @@
 			background: document.getElementById('data-processing-background'),
 			container: document.getElementById('data-processing-container'),
 			closeButton: document.getElementById('data-processing-close'),
+			sourceHeaderRow: document.getElementById('data-processing-source-header-row'),
 			sourceXHeader: document.getElementById('data-processing-source-x-header'),
 			sourceYHeader: document.getElementById('data-processing-source-y-header'),
 			sourceBody: document.getElementById('data-processing-source-body'),
@@ -91,7 +93,6 @@
 			if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
 			rows.push({
-				rowNumber: index + 1,
 				x,
 				y
 			});
@@ -143,30 +144,67 @@
 		setMessages([]);
 	}
 
+	function getSourceTableColumns() {
+		const columns = state.derivedColumns.slice();
+		if (state.pendingDerivedColumn) {
+			columns.push(state.pendingDerivedColumn);
+		}
+		return columns;
+	}
+
+	function buildPendingColumn(axis) {
+		const axisLabel = getSourceHeaderLabel(axis);
+		return {
+			axis,
+			name: `Processed ${axisLabel}`,
+			formula: '',
+			values: [],
+			invalidCount: 0,
+			isPending: true
+		};
+	}
+
 	function renderSourceSection() {
 		const elements = getElements();
 		const hasRows = state.sourceRows.length > 0;
 		const xLabel = getSourceHeaderLabel('x');
 		const yLabel = getSourceHeaderLabel('y');
+		const sourceTableColumns = getSourceTableColumns();
 
 		if (elements.sourceXHeader) elements.sourceXHeader.textContent = xLabel;
 		if (elements.sourceYHeader) elements.sourceYHeader.textContent = yLabel;
+		if (elements.sourceHeaderRow) {
+			elements.sourceHeaderRow.querySelectorAll('.data-processing-derived-header').forEach((cell) => {
+				cell.remove();
+			});
+			sourceTableColumns.forEach((column) => {
+				const th = document.createElement('th');
+				th.className = 'data-processing-derived-header';
+				th.textContent = column.isPending ? `${column.name} (pending)` : column.name;
+				elements.sourceHeaderRow.appendChild(th);
+			});
+		}
 
 		if (elements.sourceBody) {
 			elements.sourceBody.innerHTML = '';
 			if (hasRows) {
 				const fragment = document.createDocumentFragment();
-				state.sourceRows.forEach((row) => {
+				state.sourceRows.forEach((row, rowIndex) => {
 					const tr = document.createElement('tr');
-					const rowCell = document.createElement('td');
 					const xCell = document.createElement('td');
 					const yCell = document.createElement('td');
-					rowCell.textContent = String(row.rowNumber);
 					xCell.textContent = String(row.x);
 					yCell.textContent = String(row.y);
-					tr.appendChild(rowCell);
 					tr.appendChild(xCell);
 					tr.appendChild(yCell);
+
+					sourceTableColumns.forEach((column) => {
+						const derivedCell = document.createElement('td');
+						const value = Array.isArray(column.values) ? column.values[rowIndex] : null;
+						derivedCell.textContent = Number.isFinite(Number(value)) ? String(value) : '';
+						tr.appendChild(derivedCell);
+					});
+
 					fragment.appendChild(tr);
 				});
 				elements.sourceBody.appendChild(fragment);
@@ -448,6 +486,8 @@
 
 		const headerLabel = getSourceHeaderLabel(axis);
 		state.formulaAxis = axis;
+		state.pendingDerivedColumn = buildPendingColumn(axis);
+		renderSourceSection();
 		elements.formulaLabel.textContent = `Formula for ${headerLabel}`;
 		elements.formulaInput.placeholder = `e.g. =1/${headerLabel}`;
 		elements.formulaInput.value = '';
@@ -455,16 +495,25 @@
 		elements.formulaInput.focus();
 	}
 
-	function hideFormulaPanel() {
+	function hideFormulaPanel({ discardPending = false } = {}) {
 		const elements = getElements();
 		state.formulaAxis = null;
 		if (!elements.formulaPanel || !elements.formulaInput) return;
 		elements.formulaPanel.style.display = 'none';
 		elements.formulaInput.value = '';
+		if (discardPending) {
+			state.pendingDerivedColumn = null;
+			renderSourceSection();
+		}
+	}
+
+	function handleCancelFormula() {
+		hideFormulaPanel({ discardPending: true });
+		clearMessages();
 	}
 
 	function handleApplyFormula() {
-		if (!state.formulaAxis || !state.sourceRows.length) return;
+		if (!state.formulaAxis || !state.sourceRows.length || !state.pendingDerivedColumn) return;
 		if (typeof math !== 'object' || math === null || typeof math.parse !== 'function') {
 			setMessages([{ type: 'error', text: 'Invalid formula. Please check syntax and try again.' }]);
 			return;
@@ -509,7 +558,7 @@
 		}
 
 		const { values, invalidCount } = evaluateFormula(compiledExpression, aliases);
-		const axisLabel = getSourceHeaderLabel(state.formulaAxis);
+		const axisLabel = getSourceHeaderLabel(state.pendingDerivedColumn.axis || state.formulaAxis);
 		const derivedColumn = {
 			id: `derived-${state.nextDerivedId++}`,
 			name: `${axisLabel} | ${sanitizedFormula}`,
@@ -519,7 +568,9 @@
 		};
 
 		state.derivedColumns.push(derivedColumn);
+		state.pendingDerivedColumn = null;
 		hideFormulaPanel();
+		renderSourceSection();
 		renderDerivedColumns();
 		renderMappingSection(true);
 
@@ -676,11 +727,13 @@
 
 	function resetSessionState() {
 		state.derivedColumns = [];
+		state.pendingDerivedColumn = null;
 		state.columnChoices = [];
 		state.targetChoices = [];
 		state.formulaAxis = null;
 		state.nextDerivedId = 1;
 		hideFormulaPanel();
+		renderSourceSection();
 		renderDerivedColumns();
 		renderMappingSection(false);
 		clearMessages();
@@ -712,7 +765,7 @@
 		if (!elements.background || !elements.container) return;
 		elements.background.style.display = 'none';
 		elements.container.style.display = 'none';
-		hideFormulaPanel();
+		hideFormulaPanel({ discardPending: true });
 		clearMessages();
 		isOpen = false;
 	}
@@ -724,6 +777,7 @@
 		if (!derivedId) return;
 
 		state.derivedColumns = state.derivedColumns.filter((column) => column.id !== derivedId);
+		renderSourceSection();
 		renderDerivedColumns();
 		renderMappingSection(true);
 	}
@@ -749,7 +803,7 @@
 			elements.applyButton.addEventListener('click', handleApplyFormula);
 		}
 		if (elements.cancelButton) {
-			elements.cancelButton.addEventListener('click', hideFormulaPanel);
+			elements.cancelButton.addEventListener('click', handleCancelFormula);
 		}
 		if (elements.formulaInput) {
 			elements.formulaInput.addEventListener('keydown', (event) => {
@@ -760,7 +814,8 @@
 				}
 				if (event.key === 'Escape') {
 					event.preventDefault();
-					hideFormulaPanel();
+					event.stopPropagation();
+					handleCancelFormula();
 				}
 			});
 		}

@@ -1679,7 +1679,8 @@ select {
 }
 
 #data-processing-source-table-wrap {
-	overflow-x: auto;
+	max-height: 290px;
+	overflow: auto;
 }
 
 #data-processing-source-table {
@@ -1703,6 +1704,9 @@ select {
 #data-processing-source-table th {
 	font-weight: 600;
 	background: var(--card-bg);
+	position: sticky;
+	top: 0;
+	z-index: 1;
 }
 
 #data-processing-source-table tr:last-child td {
