@@ -149,7 +149,7 @@
 			return {
 				displayModeBar: true,
 				displaylogo: false,
-				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'resetScale2d'],
+				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d'],
 				modeBarButtonsToAdd: [{
 					name: 'Download plot as png',
 					icon: Plotly.Icons.camera,
