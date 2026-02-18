@@ -509,6 +509,14 @@ function evaluateCustomFitExpression(compiledExpression, parameterNames, paramet
 	}
 }
 
+function normalizeCustomFitEquationSigns(latexExpression) {
+	return String(latexExpression || '')
+		.replace(/\+\s*-\s*/g, ' - ')
+		.replace(/-\s*-\s*/g, ' + ')
+		.replace(/\s{2,}/g, ' ')
+		.trim();
+}
+
 function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameterValues) {
 	const replacementMap = {};
 	parameterNames.forEach((name, index) => {
@@ -524,12 +532,14 @@ function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameter
 			}
 			return node;
 		});
-		return `y = ${substituted.toTex()}`;
+		return `y = ${normalizeCustomFitEquationSigns(substituted.toTex())}`;
 	} catch {
 		const fallbackTerms = parameterNames
 			.map((name, index) => `${name}=${Number(parameterValues[index]).toFixed(3)}`)
 			.join(',\\;');
-		return fallbackTerms ? `y = ${fallbackTerms}` : 'y = f(x)';
+		return fallbackTerms
+			? `y = ${normalizeCustomFitEquationSigns(fallbackTerms)}`
+			: 'y = f(x)';
 	}
 }
 
