@@ -23,7 +23,9 @@ datasetToggles[0] = { x: false, y: false };
 datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
 
 let isSyncing = false;
-const STORAGE_KEY = 'panphyplot-state-v1';
+const STATE_SCHEMA_VERSION = 2;
+const STORAGE_KEY = 'panphyplot-state-v2';
+const LEGACY_STORAGE_KEYS = ['panphyplot-state-v1'];
 const THEME_KEY = 'panphyplot-theme';
 const DATASET_NAME_MAX_LENGTH = 20;
 
@@ -41,13 +43,41 @@ function debounce(func, wait) {
 
 let saveTimeout;
 
-function buildPersistedState() {
+function getUiStateSnapshotFromDom() {
 	const graphTitleInput = document.getElementById('graph-title');
 	const combinedTitleInput = document.getElementById('combined-title');
 	const combinedXInput = document.getElementById('combined-x-label');
 	const combinedYInput = document.getElementById('combined-y-label');
 
 	return {
+		graphTitle: graphTitleInput ? graphTitleInput.value : '',
+		combinedPlot: {
+			title: combinedTitleInput ? combinedTitleInput.value : '',
+			xLabel: combinedXInput ? combinedXInput.value : '',
+			yLabel: combinedYInput ? combinedYInput.value : ''
+		}
+	};
+}
+
+function normalizePersistedUiState(uiState = {}) {
+	const graphTitle = typeof uiState.graphTitle === 'string' ? uiState.graphTitle : '';
+	const combinedPlotInput = uiState.combinedPlot && typeof uiState.combinedPlot === 'object'
+		? uiState.combinedPlot
+		: {};
+
+	return {
+		graphTitle,
+		combinedPlot: {
+			title: typeof combinedPlotInput.title === 'string' ? combinedPlotInput.title : '',
+			xLabel: typeof combinedPlotInput.xLabel === 'string' ? combinedPlotInput.xLabel : '',
+			yLabel: typeof combinedPlotInput.yLabel === 'string' ? combinedPlotInput.yLabel : ''
+		}
+	};
+}
+
+function buildCorePersistedState() {
+	return {
+		schemaVersion: STATE_SCHEMA_VERSION,
 		rawData,
 		activeSet,
 		datasetHeaders,
@@ -59,20 +89,54 @@ function buildPersistedState() {
 		customFitStates,
 		dataset1XValues,
 		latexMode,
-		titleWasAuto,
-		graphTitle: graphTitleInput ? graphTitleInput.value : '',
-		combinedPlot: {
-			title: combinedTitleInput ? combinedTitleInput.value : '',
-			xLabel: combinedXInput ? combinedXInput.value : '',
-			yLabel: combinedYInput ? combinedYInput.value : ''
-		}
+		titleWasAuto
 	};
+}
+
+function buildPersistedState(uiState = getUiStateSnapshotFromDom()) {
+	return {
+		...buildCorePersistedState(),
+		...normalizePersistedUiState(uiState)
+	};
+}
+
+function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
+	if (!savedState || typeof savedState !== 'object') return null;
+	const migrated = { ...savedState };
+	const detectedVersion = Number.isInteger(migrated.schemaVersion)
+		? migrated.schemaVersion
+		: (sourceKey === 'panphyplot-state-v1' ? 1 : 1);
+
+	// v1 -> v2: introduce explicit schemaVersion and normalized UI slice.
+	if (detectedVersion < 2) {
+		const normalizedUiState = normalizePersistedUiState({
+			graphTitle: migrated.graphTitle,
+			combinedPlot: migrated.combinedPlot
+		});
+		migrated.graphTitle = normalizedUiState.graphTitle;
+		migrated.combinedPlot = normalizedUiState.combinedPlot;
+	}
+
+	if (!Array.isArray(migrated.rawData) || migrated.rawData.length === 0) {
+		migrated.rawData = [[]];
+	}
+	const maxActive = Math.max(0, migrated.rawData.length - 1);
+	const active = Number(migrated.activeSet);
+	migrated.activeSet = Number.isInteger(active) ? Math.min(Math.max(active, 0), maxActive) : 0;
+	migrated.schemaVersion = STATE_SCHEMA_VERSION;
+
+	return migrated;
 }
 
 function saveState() {
 	try {
 		const state = buildPersistedState();
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		for (const legacyKey of LEGACY_STORAGE_KEYS) {
+			if (legacyKey !== STORAGE_KEY) {
+				localStorage.removeItem(legacyKey);
+			}
+		}
 	} catch (error) {
 		console.warn('Unable to save state:', error);
 	}
@@ -85,9 +149,30 @@ function scheduleSaveState(delay = 200) {
 
 function loadState() {
 	try {
-		const saved = localStorage.getItem(STORAGE_KEY);
-		if (!saved) return null;
-		return JSON.parse(saved);
+		const candidateKeys = [STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
+		for (const key of candidateKeys) {
+			const saved = localStorage.getItem(key);
+			if (!saved) continue;
+
+			let parsed = null;
+			try {
+				parsed = JSON.parse(saved);
+			} catch (parseError) {
+				console.warn('Unable to parse saved state:', parseError);
+				continue;
+			}
+
+			const migrated = migratePersistedState(parsed, key);
+			if (!migrated) continue;
+
+			if (key !== STORAGE_KEY) {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+			}
+
+			return migrated;
+		}
+
+		return null;
 	} catch (error) {
 		console.warn('Unable to load state:', error);
 		return null;

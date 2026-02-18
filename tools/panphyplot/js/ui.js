@@ -1292,69 +1292,34 @@ function clearFittedCurve() {
 	}
 
 
-	function reindexDatasets(removedIndex) {
-		// SHIFT each object from j+1 to j, for all j >= removedIndex
-		for (let j = removedIndex; j < rawData.length; j++) {
+	function shiftIndexedDatasetMap(mapRef, removedIndex, nextLength) {
+		if (!mapRef || typeof mapRef !== 'object') return;
 
-			// datasetHeaders
-			if (datasetHeaders.hasOwnProperty(j + 1)) {
-				datasetHeaders[j] = datasetHeaders[j + 1];
+		for (let index = removedIndex; index < nextLength; index++) {
+			if (Object.prototype.hasOwnProperty.call(mapRef, index + 1)) {
+				mapRef[index] = mapRef[index + 1];
 			} else {
-				delete datasetHeaders[j];
-			}
-
-			// datasetNames
-			if (datasetNames.hasOwnProperty(j + 1)) {
-				datasetNames[j] = datasetNames[j + 1];
-			} else {
-				delete datasetNames[j];
-			}
-
-			// datasetToggles
-			if (datasetToggles.hasOwnProperty(j + 1)) {
-				datasetToggles[j] = datasetToggles[j + 1];
-			} else {
-				delete datasetToggles[j];
-			}
-
-			// datasetErrorTypes
-			if (datasetErrorTypes.hasOwnProperty(j + 1)) {
-				datasetErrorTypes[j] = datasetErrorTypes[j + 1];
-			} else {
-				delete datasetErrorTypes[j];
-			}
-
-			// datasetFitResults
-			if (datasetFitResults.hasOwnProperty(j + 1)) {
-				datasetFitResults[j] = datasetFitResults[j + 1];
-			} else {
-				delete datasetFitResults[j];
-			}
-
-			// fittedCurves
-			if (fittedCurves.hasOwnProperty(j + 1)) {
-				fittedCurves[j] = fittedCurves[j + 1];
-			} else {
-				delete fittedCurves[j];
-			}
-
-			// customFitStates
-			if (customFitStates.hasOwnProperty(j + 1)) {
-				customFitStates[j] = customFitStates[j + 1];
-			} else {
-				delete customFitStates[j];
+				delete mapRef[index];
 			}
 		}
 
-		// Then delete the old "last" index which no longer corresponds to a dataset
-		const lastIndex = rawData.length;
-		delete datasetHeaders[lastIndex];
-		delete datasetNames[lastIndex];
-		delete datasetToggles[lastIndex];
-		delete datasetErrorTypes[lastIndex];
-		delete datasetFitResults[lastIndex];
-		delete fittedCurves[lastIndex];
-		delete customFitStates[lastIndex];
+		delete mapRef[nextLength];
+	}
+
+	function reindexDatasets(removedIndex) {
+		const indexedMaps = [
+			datasetHeaders,
+			datasetNames,
+			datasetToggles,
+			datasetErrorTypes,
+			datasetFitResults,
+			fittedCurves,
+			customFitStates
+		];
+
+		for (const mapRef of indexedMaps) {
+			shiftIndexedDatasetMap(mapRef, removedIndex, rawData.length);
+		}
 	}
 
 
