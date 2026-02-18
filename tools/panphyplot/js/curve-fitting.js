@@ -241,7 +241,7 @@ function getCustomFitGuessByName(parameterName, stats) {
 function formatCustomFitInputValue(value) {
 	const numeric = Number(value);
 	if (!Number.isFinite(numeric)) return '';
-	return String(numeric);
+	return numeric.toFixed(3);
 }
 
 function syncCustomFitInputsToState() {
