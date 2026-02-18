@@ -232,7 +232,6 @@
 
     <script type="module">
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
-        import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs';
 
         const ui = {
             startBtn: document.getElementById('startBtn'),
@@ -256,6 +255,22 @@
             handsCount: 0,
             contactsCount: 0
         };
+
+        let filesetResolverCtor = null;
+        let handLandmarkerCtor = null;
+
+        function isLocalLoopbackHost() {
+            return ['localhost', '127.0.0.1', '::1', '[::1]'].includes(window.location.hostname);
+        }
+
+        async function ensureHandTrackingDeps() {
+            if (filesetResolverCtor && handLandmarkerCtor) {
+                return;
+            }
+            const mediapipe = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs');
+            filesetResolverCtor = mediapipe.FilesetResolver;
+            handLandmarkerCtor = mediapipe.HandLandmarker;
+        }
 
         const physics = {
             size: 0.3,
@@ -515,11 +530,12 @@
         }
 
         async function createHandLandmarker() {
-            const vision = await FilesetResolver.forVisionTasks(
+            await ensureHandTrackingDeps();
+            const vision = await filesetResolverCtor.forVisionTasks(
                 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm'
             );
 
-            return HandLandmarker.createFromOptions(vision, {
+            return handLandmarkerCtor.createFromOptions(vision, {
                 baseOptions: {
                     modelAssetPath:
                         'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'
@@ -539,8 +555,8 @@
                 return;
             }
 
-            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                setStatus('Camera access requires HTTPS or localhost.', true);
+            if (!window.isSecureContext && !isLocalLoopbackHost()) {
+                setStatus(`Camera access requires HTTPS or localhost. Current URL: ${window.location.origin}`, true);
                 return;
             }
 
@@ -548,36 +564,55 @@
             setStatus('Requesting camera permission...');
 
             try {
-                state.stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'user',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                });
+                const hasLiveStream = state.stream && state.stream.getTracks().some((track) => track.readyState === 'live');
+                if (!hasLiveStream) {
+                    state.stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'user',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        },
+                        audio: false
+                    });
+                }
 
-                ui.video.srcObject = state.stream;
+                if (ui.video.srcObject !== state.stream) {
+                    ui.video.srcObject = state.stream;
+                }
                 await ui.video.play();
-
-                setStatus('Loading hand tracker...');
-                state.handLandmarker = await createHandLandmarker();
-
-                resizeStage();
-                state.running = true;
-                state.lastFrameTime = performance.now();
-                ui.placeBtn.disabled = false;
-                ui.resetBtn.disabled = false;
-                setStatus('Ready. Press "Place Cube" to start.');
-                requestAnimationFrame(step);
             } catch (error) {
-                if (state.stream) {
-                    state.stream.getTracks().forEach((track) => track.stop());
+                if (state.stream && state.stream.getTracks().every((track) => track.readyState !== 'live')) {
                     state.stream = null;
                 }
                 ui.startBtn.disabled = false;
-                setStatus(`Could not start: ${error.message || error}`, true);
+                const name = error && error.name ? error.name : 'Error';
+                const message = error && error.message ? error.message : String(error);
+                console.error('Camera/tracking startup failed:', error);
+                setStatus(`Could not access camera (${name}): ${message}`, true);
+                return;
             }
+
+            setStatus('Loading hand tracker...');
+
+            try {
+                state.handLandmarker = await createHandLandmarker();
+            } catch (error) {
+                ui.startBtn.disabled = false;
+                const name = error && error.name ? error.name : 'Error';
+                const message = error && error.message ? error.message : String(error);
+                console.error('Hand tracker load failed:', error);
+                setStatus(`Camera started, but hand tracker failed (${name}): ${message}. Click Start Camera to retry.`, true);
+                return;
+            }
+
+            resizeStage();
+            state.running = true;
+            state.lastFrameTime = performance.now();
+            ui.placeBtn.disabled = false;
+            ui.resetBtn.disabled = false;
+            ui.startBtn.textContent = 'Running';
+            setStatus('Ready. Press "Place Cube" to start.');
+            requestAnimationFrame(step);
         }
 
         ui.startBtn.addEventListener('click', startCameraAndTracking);
