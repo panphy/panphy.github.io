@@ -473,7 +473,7 @@ function refreshCustomFitDefinition(options = {}) {
 	try {
 		parsedExpression = math.parse(normalizedFormula);
 	} catch {
-		setCustomFitFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
+		setCustomFitFormulaMessage('Invalid formula. Please check syntax.', 'error');
 		renderCustomFitParameterInputs([], {});
 		setCustomFitEquationPreview('');
 		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
