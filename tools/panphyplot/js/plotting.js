@@ -146,35 +146,105 @@
 		}
 
 		function createDownloadImageConfig(defaultFilename) {
+			function isTraceVisible(trace) {
+				return trace && trace.visible !== false && trace.visible !== 'legendonly';
+			}
+
+			function isMarkerTrace(trace) {
+				return typeof trace?.mode === 'string' && trace.mode.includes('markers');
+			}
+
+			function computeFiniteBounds(values) {
+				let min = Infinity;
+				let max = -Infinity;
+				for (let index = 0; index < values.length; index++) {
+					const numeric = Number(values[index]);
+					if (!Number.isFinite(numeric)) continue;
+					if (numeric < min) min = numeric;
+					if (numeric > max) max = numeric;
+				}
+				if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+				return { min, max };
+			}
+
+			function collectAxisValues(traces, axis, markerOnly) {
+				const values = [];
+				traces.forEach((trace) => {
+					if (!isTraceVisible(trace)) return;
+					if (markerOnly && !isMarkerTrace(trace)) return;
+					const axisValues = trace && Array.isArray(trace[axis]) ? trace[axis] : [];
+					axisValues.forEach((value) => values.push(value));
+				});
+				return values;
+			}
+
+			function expandRange(min, max) {
+				if (min === max) {
+					const delta = min === 0 ? 1 : Math.abs(min) * 0.05;
+					return [min - delta, max + delta];
+				}
+				const padding = (max - min) * 0.05;
+				return [min - padding, max + padding];
+			}
+
+			function applyTrueAutoScale(gd) {
+				const traces = Array.isArray(gd?.data) ? gd.data : [];
+				let xBounds = computeFiniteBounds(collectAxisValues(traces, 'x', true));
+				let yBounds = computeFiniteBounds(collectAxisValues(traces, 'y', true));
+
+				// Fall back to all visible traces when marker traces are unavailable.
+				if (!xBounds || !yBounds) {
+					xBounds = computeFiniteBounds(collectAxisValues(traces, 'x', false));
+					yBounds = computeFiniteBounds(collectAxisValues(traces, 'y', false));
+				}
+				if (!xBounds || !yBounds) return;
+
+				Plotly.relayout(gd, {
+					'xaxis.autorange': false,
+					'yaxis.autorange': false,
+					'xaxis.range': expandRange(xBounds.min, xBounds.max),
+					'yaxis.range': expandRange(yBounds.min, yBounds.max)
+				});
+			}
+
 			return {
 				displayModeBar: true,
 				displaylogo: false,
-				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d'],
-				modeBarButtonsToAdd: [{
-					name: 'Download plot as png',
-					icon: Plotly.Icons.camera,
-					click: async function(gd) {
-						const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
-						if (userInput === null) return;
-						const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
-						const exportScale = getAdaptivePlotExportScale(gd);
-						try {
-							const dataUrl = await Plotly.toImage(gd, {
-								format: 'png',
-								scale: exportScale
-							});
-							const imageBlob = await fetch(dataUrl).then(res => res.blob());
-							await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
-						} catch (error) {
-							console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
-							Plotly.downloadImage(gd, {
-								format: 'png',
-								filename: filenameBase,
-								scale: exportScale
-							});
+				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'autoscale2d'],
+				modeBarButtonsToAdd: [
+					{
+						name: 'Auto-scale axes to data',
+						icon: Plotly.Icons.autoscale,
+						click: function(gd) {
+							applyTrueAutoScale(gd);
+						}
+					},
+					{
+						name: 'Download plot as png',
+						icon: Plotly.Icons.camera,
+						click: async function(gd) {
+							const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
+							if (userInput === null) return;
+							const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
+							const exportScale = getAdaptivePlotExportScale(gd);
+							try {
+								const dataUrl = await Plotly.toImage(gd, {
+									format: 'png',
+									scale: exportScale
+								});
+								const imageBlob = await fetch(dataUrl).then(res => res.blob());
+								await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
+							} catch (error) {
+								console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
+								Plotly.downloadImage(gd, {
+									format: 'png',
+									filename: filenameBase,
+									scale: exportScale
+								});
+							}
 						}
 					}
-				}]
+				]
 			};
 		}
 
