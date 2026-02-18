@@ -264,6 +264,9 @@ function computeLinearFit(x, y) {
 
 function computeRSq(xArr, yArr, f) {
 	try {
+		if (!Array.isArray(xArr) || !Array.isArray(yArr) || xArr.length === 0 || xArr.length !== yArr.length) {
+			return -Infinity;
+		}
 		const yhat = xArr.map(f);
 		const meanY = yArr.reduce((s, v) => s + v, 0) / yArr.length;
 		let ssTot = 0,
@@ -274,7 +277,12 @@ function computeRSq(xArr, yArr, f) {
 			const di = yArr[i] - meanY;
 			ssTot += di * di;
 		}
-		return 1 - (ssRes / ssTot);
+		const zeroTolerance = 1e-12;
+		if (Math.abs(ssTot) < zeroTolerance) {
+			return Math.abs(ssRes) < zeroTolerance ? 1 : 0;
+		}
+		const rSquared = 1 - (ssRes / ssTot);
+		return Number.isFinite(rSquared) ? rSquared : -Infinity;
 	} catch (e) {
 		console.error('R² error:', e);
 		return -Infinity;
@@ -641,7 +649,8 @@ function performExponentialFit() {
 
 		// choose by R², fallback gracefully
 		let best = null;
-		if (cand1 && cand2) best = (cand1.r2 >= cand2.r2) ? cand1 : cand2;
+		const rankedRSq = (candidate) => Number.isFinite(candidate?.r2) ? candidate.r2 : -Infinity;
+		if (cand1 && cand2) best = (rankedRSq(cand1) >= rankedRSq(cand2)) ? cand1 : cand2;
 		else best = cand1 || cand2;
 
 		if (!best) {

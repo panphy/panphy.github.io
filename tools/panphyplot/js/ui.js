@@ -923,6 +923,11 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 		reindexDatasets(index);
 		syncDataset1XValues();
 
+		// Keep the same logical active dataset when deleting one before it.
+		if (index < activeSet) {
+			activeSet -= 1;
+		}
+
 		// Fix activeSet if it's now out of range
 		if (activeSet >= rawData.length) {
 			activeSet = rawData.length - 1;
@@ -1450,6 +1455,17 @@ function clearFittedCurve() {
 		return result;
 	}
 
+	function inferErrorTypeFromHeader(headerText) {
+		const header = String(headerText || '').trim();
+		return header.includes('%') ? 'percentage' : 'absolute';
+	}
+
+	function escapeCsvCell(value) {
+		const text = String(value ?? '');
+		const escaped = text.replace(/"/g, '""');
+		return /[",\r\n]/.test(text) ? `"${escaped}"` : escaped;
+	}
+
 
 	function parseCSV(text) {
 		const lines = text.trim().split(/\r?\n/).filter(l => l.trim() !== '');
@@ -1468,6 +1484,8 @@ function clearFittedCurve() {
 		// Determine if the CSV has X and Y errors
 		const hasXError = headers.length >= 3;
 		const hasYError = headers.length >= 4;
+		const xImportedErrorType = hasXError ? inferErrorTypeFromHeader(headers[2]) : 'absolute';
+		const yImportedErrorType = hasYError ? inferErrorTypeFromHeader(headers[3]) : 'absolute';
 
 		// 2) Store headers for the active dataset and update the UI
 		isSyncing = true;
@@ -1487,6 +1505,18 @@ function clearFittedCurve() {
 		if (!datasetToggles[activeSet]) datasetToggles[activeSet] = { x: false, y: false };
 		datasetToggles[activeSet].x = hasXError;
 		datasetToggles[activeSet].y = hasYError;
+		if (!datasetErrorTypes[activeSet]) datasetErrorTypes[activeSet] = { x: 'absolute', y: 'absolute' };
+		datasetErrorTypes[activeSet].x = xImportedErrorType;
+		datasetErrorTypes[activeSet].y = yImportedErrorType;
+
+		const xErrorTypeElement = document.getElementById('x-error-type');
+		const yErrorTypeElement = document.getElementById('y-error-type');
+		if (xErrorTypeElement) {
+			xErrorTypeElement.value = xImportedErrorType;
+		}
+		if (yErrorTypeElement) {
+			yErrorTypeElement.value = yImportedErrorType;
+		}
 
 		// 3) Build the new rows
 		const dataRows = lines.slice(1);
@@ -1848,7 +1878,7 @@ function clearFittedCurve() {
 		if (sigFigs === 1) {
 			const order = Math.floor(Math.log10(Math.abs(num)));
 			const factor = Math.pow(10, order);
-			const rounded = Math.floor(num / factor) * factor;
+			const rounded = Math.round(num / factor) * factor;
 			return order >= 0 ? rounded.toString() : rounded.toFixed(Math.abs(order));
 		}
 
@@ -2776,7 +2806,7 @@ function clearFittedCurve() {
 	}
 
 
-		async function exportCSV(filename = 'data') {
+	async function exportCSV(filename = 'data') {
 			try {
 				const table = document.getElementById('data-table');
 				const rows = table.querySelectorAll('tr');
@@ -2799,7 +2829,7 @@ function clearFittedCurve() {
 				headers.push(yErrorHead);
 			}
 
-			csvContent += headers.join(',') + '\n';
+			csvContent += headers.map(escapeCsvCell).join(',') + '\n';
 
 			const dataRows = table.querySelectorAll('tbody tr');
 
@@ -2851,7 +2881,7 @@ function clearFittedCurve() {
 					rowData.push(yErrorEnabledThisRow ? yErrStr : '');
 				}
 
-				csvContent += rowData.join(',') + '\n';
+				csvContent += rowData.map(escapeCsvCell).join(',') + '\n';
 			}
 
 				const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
