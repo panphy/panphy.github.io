@@ -7,6 +7,7 @@ let datasetToggles = {}; // Global object to hold fitted curves by dataset index
 let datasetErrorTypes = {}; // stores the error type per axis per dataset, e.g. { 0: { x: 'absolute', y: 'absolute' }, 1: { x: 'percentage', y: 'percentage' } }
 let fittedCurves = {};
 let datasetFitResults = {}; // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
+let customFitStates = {}; // per-dataset custom fit drafts, e.g. { 0: { formula: 'A*x+c', initialValues: { A: '1', c: '0' } } }
 let dataset1XValues = [];
 let latexMode = false; // false by default: plain text mode
 let titleWasAuto = true; // track whether graph title should auto-update
@@ -55,6 +56,7 @@ function buildPersistedState() {
 		datasetErrorTypes,
 		fittedCurves,
 		datasetFitResults,
+		customFitStates,
 		dataset1XValues,
 		latexMode,
 		titleWasAuto,
@@ -155,6 +157,32 @@ function normalizeDatasetNamesState(savedNames, datasetCount) {
 		const trimmed = rawName.trim();
 		if (!trimmed) continue;
 		normalized[index] = trimmed.slice(0, DATASET_NAME_MAX_LENGTH);
+	}
+
+	return normalized;
+}
+
+function normalizeCustomFitStates(savedStates, datasetCount) {
+	const normalized = {};
+	if (!savedStates || typeof savedStates !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const saved = savedStates[index];
+		if (!saved || typeof saved !== 'object') continue;
+
+		const formula = typeof saved.formula === 'string' ? saved.formula : '';
+		const initialValues = {};
+		if (saved.initialValues && typeof saved.initialValues === 'object') {
+			Object.keys(saved.initialValues).forEach((key) => {
+				const trimmedKey = String(key || '').trim();
+				if (!trimmedKey) return;
+				const rawValue = saved.initialValues[key];
+				const value = rawValue === undefined || rawValue === null ? '' : String(rawValue);
+				initialValues[trimmedKey] = value;
+			});
+		}
+
+		normalized[index] = { formula, initialValues };
 	}
 
 	return normalized;

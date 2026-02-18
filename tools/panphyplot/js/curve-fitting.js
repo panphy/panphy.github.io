@@ -1,5 +1,545 @@
 // Curve fitting helpers
 
+const CUSTOM_FIT_MAX_PARAMETERS = 5;
+const CUSTOM_FIT_SAMPLE_POINTS = 300;
+const CUSTOM_FIT_PENALTY = 1e6;
+const CUSTOM_FIT_HELP_URL = '/tools/panphyplot/math_ref.html';
+const CUSTOM_FIT_IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const CUSTOM_FIT_FORBIDDEN_NODE_TYPES = new Set([
+	'AssignmentNode',
+	'FunctionAssignmentNode',
+	'BlockNode'
+]);
+const CUSTOM_FIT_FORBIDDEN_FUNCTION_NAMES = new Set(['import']);
+const debouncedRefreshCustomFitDefinition = debounce(() => {
+	refreshCustomFitDefinition({ preserveUserValues: true });
+}, 180);
+
+function getCustomFitUiElements() {
+	return {
+		formulaInput: document.getElementById('custom-fit-formula-input'),
+		formulaHelpButton: document.getElementById('custom-fit-formula-help'),
+		formulaMessage: document.getElementById('custom-fit-formula-message'),
+		parameterList: document.getElementById('custom-fit-parameters-list'),
+		parameterEmpty: document.getElementById('custom-fit-parameters-empty'),
+		equationElement: document.getElementById('custom-fit-general-equation')
+	};
+}
+
+function ensureCustomFitState(index = activeSet) {
+	if (!customFitStates || typeof customFitStates !== 'object') {
+		customFitStates = {};
+	}
+	if (!customFitStates[index] || typeof customFitStates[index] !== 'object') {
+		customFitStates[index] = { formula: '', initialValues: {} };
+		return customFitStates[index];
+	}
+	if (!customFitStates[index].initialValues || typeof customFitStates[index].initialValues !== 'object') {
+		customFitStates[index].initialValues = {};
+	}
+	if (typeof customFitStates[index].formula !== 'string') {
+		customFitStates[index].formula = '';
+	}
+	return customFitStates[index];
+}
+
+function openCustomFitHelp() {
+	window.open(CUSTOM_FIT_HELP_URL, '_blank', 'noopener,noreferrer');
+}
+
+function setCustomFitFormulaMessage(text = '', type = 'error') {
+	const { formulaMessage } = getCustomFitUiElements();
+	if (!formulaMessage) return;
+
+	if (!text) {
+		formulaMessage.textContent = '';
+		formulaMessage.className = '';
+		formulaMessage.style.display = 'none';
+		return;
+	}
+
+	formulaMessage.textContent = text;
+	formulaMessage.className = `is-${type}`;
+	formulaMessage.style.display = 'block';
+}
+
+function setCustomFitEquationPreview(texExpression = '') {
+	const { equationElement } = getCustomFitUiElements();
+	if (!equationElement) return;
+
+	if (!texExpression) {
+		equationElement.textContent = '\\( y = f(x, \\theta) \\)';
+		safeTypeset(equationElement);
+		return;
+	}
+
+	equationElement.textContent = `\\( y = ${texExpression} \\)`;
+	safeTypeset(equationElement);
+}
+
+function toCustomFitTex(node) {
+	try {
+		return node.toTex();
+	} catch {
+		return '';
+	}
+}
+
+function sanitizeCustomFitFormulaText(rawFormula) {
+	let trimmed = String(rawFormula || '').trim();
+	if (!trimmed) return '';
+
+	if (trimmed.startsWith('=')) {
+		trimmed = trimmed.slice(1).trim();
+	}
+
+	if (/^y\s*=/i.test(trimmed)) {
+		trimmed = trimmed.replace(/^y\s*=/i, '').trim();
+	}
+
+	return trimmed;
+}
+
+function hasCustomFitForbiddenConstruct(node) {
+	let blocked = false;
+
+	node.traverse((child) => {
+		if (blocked) return;
+
+		if (CUSTOM_FIT_FORBIDDEN_NODE_TYPES.has(child.type)) {
+			blocked = true;
+			return;
+		}
+
+		if (child.type === 'FunctionNode' && child.fn && child.fn.type === 'SymbolNode') {
+			if (CUSTOM_FIT_FORBIDDEN_FUNCTION_NAMES.has(child.fn.name)) {
+				blocked = true;
+			}
+		}
+	});
+
+	return blocked;
+}
+
+function isKnownMathIdentifier(name) {
+	return typeof math === 'object' && math !== null && name in math;
+}
+
+function extractCustomFitParameters(node) {
+	const parameterNames = [];
+	const seen = new Set();
+	let unknownFunctionName = '';
+	let invalidIdentifier = '';
+	let usesY = false;
+
+	node.traverse((child, _path, parent) => {
+		if (child.type !== 'SymbolNode') return;
+		const symbolName = child.name;
+		const isFunctionName = parent
+			&& parent.type === 'FunctionNode'
+			&& parent.fn === child;
+
+		if (isFunctionName) {
+			if (!isKnownMathIdentifier(symbolName) && !unknownFunctionName) {
+				unknownFunctionName = symbolName;
+			}
+			return;
+		}
+
+		if (symbolName === 'x') return;
+		if (symbolName === 'y') {
+			usesY = true;
+			return;
+		}
+		if (isKnownMathIdentifier(symbolName)) return;
+		if (!CUSTOM_FIT_IDENTIFIER_REGEX.test(symbolName)) {
+			if (!invalidIdentifier) invalidIdentifier = symbolName;
+			return;
+		}
+		if (seen.has(symbolName)) return;
+		seen.add(symbolName);
+		parameterNames.push(symbolName);
+	});
+
+	return {
+		parameterNames,
+		usesY,
+		unknownFunctionName,
+		invalidIdentifier
+	};
+}
+
+function getCustomFitDataStats() {
+	const points = getFiniteDatasetPoints(activeSet);
+	if (!points.length) {
+		return {
+			pointCount: 0,
+			xMin: 0,
+			xMax: 1,
+			xMean: 0,
+			xSpan: 1,
+			yMin: 0,
+			yMax: 1,
+			yMean: 0,
+			ySpan: 1,
+			slope: 1
+		};
+	}
+
+	const xValues = points.map((point) => point.x);
+	const yValues = points.map((point) => point.y);
+	const xMin = Math.min(...xValues);
+	const xMax = Math.max(...xValues);
+	const yMin = Math.min(...yValues);
+	const yMax = Math.max(...yValues);
+	const xSpan = Math.max(Math.abs(xMax - xMin), 1e-9);
+	const ySpan = Math.max(Math.abs(yMax - yMin), 1e-9);
+	const xMean = xValues.reduce((sum, value) => sum + value, 0) / xValues.length;
+	const yMean = yValues.reduce((sum, value) => sum + value, 0) / yValues.length;
+	let slope = 1;
+	if (xValues.length >= 2) {
+		try {
+			slope = computeLinearFit(xValues, yValues).slope;
+		} catch {
+			slope = ySpan / xSpan;
+		}
+	}
+	if (!Number.isFinite(slope) || Math.abs(slope) < 1e-9) {
+		slope = ySpan / xSpan;
+	}
+
+	return {
+		pointCount: points.length,
+		xMin,
+		xMax,
+		xMean,
+		xSpan,
+		yMin,
+		yMax,
+		yMean,
+		ySpan,
+		slope: Number.isFinite(slope) ? slope : 1
+	};
+}
+
+function getCustomFitGuessByName(parameterName, stats) {
+	const key = String(parameterName || '').trim().toLowerCase();
+	if (!key) return 1;
+
+	if (/^(a|amp|amplitude)$/.test(key)) return stats.ySpan / 2;
+	if (/^(c|offset|intercept|b0)$/.test(key)) return stats.yMean;
+	if (/^(m|slope)$/.test(key)) return stats.slope;
+	if (/^(x0|mu|center)$/.test(key)) return stats.xMean;
+	if (/^(sigma|w|width)$/.test(key)) return stats.xSpan / 4;
+	if (/^(k|omega|freq|frequency)$/.test(key)) return (2 * Math.PI) / stats.xSpan;
+	if (/^(n|p|pow|exponent)$/.test(key)) return 1;
+
+	return 1;
+}
+
+function formatCustomFitInputValue(value) {
+	const numeric = Number(value);
+	if (!Number.isFinite(numeric)) return '';
+	return String(Number(numeric.toPrecision(10)));
+}
+
+function syncCustomFitInputsToState() {
+	const state = ensureCustomFitState(activeSet);
+	const { parameterList } = getCustomFitUiElements();
+	if (!parameterList) return;
+
+	const inputs = parameterList.querySelectorAll('.custom-fit-parameter-input');
+	inputs.forEach((input) => {
+		const name = input.getAttribute('data-param');
+		if (!name) return;
+		state.initialValues[name] = input.value;
+	});
+}
+
+function renderCustomFitParameterInputs(parameterNames, valuesMap) {
+	const { parameterList, parameterEmpty } = getCustomFitUiElements();
+	if (!parameterList || !parameterEmpty) return;
+
+	parameterList.innerHTML = '';
+	if (!Array.isArray(parameterNames) || parameterNames.length === 0) {
+		parameterEmpty.style.display = 'block';
+		return;
+	}
+
+	parameterEmpty.style.display = 'none';
+	const fragment = document.createDocumentFragment();
+
+	parameterNames.forEach((name) => {
+		const row = document.createElement('div');
+		row.className = 'custom-fit-parameter-row';
+
+		const label = document.createElement('label');
+		label.textContent = `${name}:`;
+		label.setAttribute('for', `custom-fit-param-${name}`);
+
+		const input = document.createElement('input');
+		input.type = 'number';
+		input.step = 'any';
+		input.id = `custom-fit-param-${name}`;
+		input.className = 'custom-fit-parameter-input';
+		input.setAttribute('data-param', name);
+		input.value = formatCustomFitInputValue(valuesMap[name]);
+		input.addEventListener('input', handleCustomFitParameterInput);
+		input.addEventListener('change', handleCustomFitParameterInput);
+
+		row.appendChild(label);
+		row.appendChild(input);
+		fragment.appendChild(row);
+	});
+
+	parameterList.appendChild(fragment);
+}
+
+function refreshCustomFitDefinition(options = {}) {
+	const preserveUserValues = options.preserveUserValues !== false;
+	const suppressSave = !!options.suppressSave;
+	const showMessage = options.showMessage !== false;
+
+	const elements = getCustomFitUiElements();
+	if (!elements.formulaInput) {
+		return { ok: false, reason: 'ui-unavailable' };
+	}
+
+	syncCustomFitInputsToState();
+	const state = ensureCustomFitState(activeSet);
+	const rawFormula = String(elements.formulaInput.value || '');
+	state.formula = rawFormula;
+
+	const normalizedFormula = sanitizeCustomFitFormulaText(rawFormula);
+	if (!normalizedFormula) {
+		state.initialValues = {};
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		setCustomFitFormulaMessage('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'empty-formula' };
+	}
+
+	if (typeof math !== 'object' || math === null || typeof math.parse !== 'function') {
+		setCustomFitFormulaMessage('Math parser unavailable. Please refresh and try again.', 'error');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		return { ok: false, reason: 'math-unavailable' };
+	}
+
+	let parsedExpression = null;
+	try {
+		parsedExpression = math.parse(normalizedFormula);
+	} catch {
+		setCustomFitFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'parse-error' };
+	}
+
+	if (hasCustomFitForbiddenConstruct(parsedExpression)) {
+		setCustomFitFormulaMessage('This formula uses unsupported constructs.', 'error');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'forbidden-construct' };
+	}
+
+	const extraction = extractCustomFitParameters(parsedExpression);
+	if (extraction.unknownFunctionName) {
+		setCustomFitFormulaMessage(`Unknown function "${extraction.unknownFunctionName}" in formula.`, 'warning');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'unknown-function' };
+	}
+	if (extraction.invalidIdentifier) {
+		setCustomFitFormulaMessage(`Invalid parameter name "${extraction.invalidIdentifier}".`, 'error');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'invalid-identifier' };
+	}
+	if (extraction.usesY) {
+		setCustomFitFormulaMessage('Use only x and parameters on the right-hand side (do not use y).', 'warning');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'uses-y' };
+	}
+	if (extraction.parameterNames.length === 0) {
+		setCustomFitFormulaMessage('No fit parameters detected. Use symbols besides x.', 'warning');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview(toCustomFitTex(parsedExpression));
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'no-parameters' };
+	}
+	if (extraction.parameterNames.length > CUSTOM_FIT_MAX_PARAMETERS) {
+		setCustomFitFormulaMessage(`Too many parameters detected (${extraction.parameterNames.length}). Maximum is ${CUSTOM_FIT_MAX_PARAMETERS}.`, 'error');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview(toCustomFitTex(parsedExpression));
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'too-many-parameters' };
+	}
+
+	let compiledExpression = null;
+	try {
+		compiledExpression = parsedExpression.compile();
+	} catch {
+		setCustomFitFormulaMessage('Unable to compile formula. Please simplify and try again.', 'error');
+		renderCustomFitParameterInputs([], {});
+		setCustomFitEquationPreview('');
+		if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+		return { ok: false, reason: 'compile-error' };
+	}
+
+	const stats = getCustomFitDataStats();
+	const nextInitialValues = {};
+	extraction.parameterNames.forEach((name) => {
+		const autoGuess = getCustomFitGuessByName(name, stats);
+		if (preserveUserValues) {
+			const current = Number.parseFloat(state.initialValues[name]);
+			if (Number.isFinite(current)) {
+				nextInitialValues[name] = current;
+				return;
+			}
+		}
+		nextInitialValues[name] = Number.isFinite(autoGuess) ? autoGuess : 1;
+	});
+
+	state.initialValues = {};
+	extraction.parameterNames.forEach((name) => {
+		state.initialValues[name] = formatCustomFitInputValue(nextInitialValues[name]);
+	});
+
+	renderCustomFitParameterInputs(extraction.parameterNames, state.initialValues);
+	setCustomFitEquationPreview(toCustomFitTex(parsedExpression));
+	if (showMessage) {
+		setCustomFitFormulaMessage(`Detected ${extraction.parameterNames.length} parameter(s): ${extraction.parameterNames.join(', ')}`, 'success');
+	}
+
+	if (!suppressSave && typeof scheduleSaveState === 'function') scheduleSaveState();
+
+	return {
+		ok: true,
+		parsedExpression,
+		compiledExpression,
+		normalizedFormula,
+		parameterNames: extraction.parameterNames,
+		initialValues: { ...state.initialValues }
+	};
+}
+
+function initializeCustomFitUI() {
+	const elements = getCustomFitUiElements();
+	if (!elements.formulaInput || elements.formulaInput.dataset.customFitReady === 'true') return;
+
+	elements.formulaInput.dataset.customFitReady = 'true';
+	elements.formulaInput.addEventListener('input', () => {
+		debouncedRefreshCustomFitDefinition();
+	});
+	elements.formulaInput.addEventListener('change', () => {
+		refreshCustomFitDefinition({ preserveUserValues: true });
+	});
+
+	if (elements.formulaHelpButton) {
+		elements.formulaHelpButton.addEventListener('click', openCustomFitHelp);
+	}
+}
+
+function loadCustomFitUiForActiveDataset() {
+	const elements = getCustomFitUiElements();
+	if (!elements.formulaInput) return;
+
+	const state = ensureCustomFitState(activeSet);
+	elements.formulaInput.value = state.formula || '';
+	refreshCustomFitDefinition({ preserveUserValues: true, suppressSave: true, showMessage: false });
+}
+
+function resetCustomFitParametersFromData() {
+	const result = refreshCustomFitDefinition({ preserveUserValues: false });
+	if (!result.ok && result.reason !== 'empty-formula') {
+		return;
+	}
+}
+
+function handleCustomFitParameterInput(event) {
+	const input = event && event.target ? event.target : null;
+	if (!input) return;
+
+	const parameterName = input.getAttribute('data-param');
+	if (!parameterName) return;
+
+	const state = ensureCustomFitState(activeSet);
+	state.initialValues[parameterName] = input.value;
+	if (typeof scheduleSaveState === 'function') scheduleSaveState();
+}
+
+function evaluateCustomFitExpression(compiledExpression, parameterNames, parameterValues, xValue) {
+	const scope = { x: xValue };
+	for (let index = 0; index < parameterNames.length; index++) {
+		scope[parameterNames[index]] = parameterValues[index];
+	}
+
+	try {
+		const raw = compiledExpression.evaluate(scope);
+		const numeric = Number(raw);
+		return Number.isFinite(numeric) ? numeric : NaN;
+	} catch {
+		return NaN;
+	}
+}
+
+function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameterValues) {
+	const replacementMap = {};
+	parameterNames.forEach((name, index) => {
+		const numeric = Number(parameterValues[index]);
+		if (!Number.isFinite(numeric)) return;
+		replacementMap[name] = Number(numeric.toPrecision(8));
+	});
+
+	try {
+		const substituted = parsedExpression.transform((node) => {
+			if (node.type === 'SymbolNode' && Object.prototype.hasOwnProperty.call(replacementMap, node.name)) {
+				return math.parse(String(replacementMap[node.name]));
+			}
+			return node;
+		});
+		return `y = ${substituted.toTex()}`;
+	} catch {
+		const fallbackTerms = parameterNames
+			.map((name, index) => `${name}=${Number(parameterValues[index]).toFixed(4)}`)
+			.join(',\\;');
+		return fallbackTerms ? `y = ${fallbackTerms}` : 'y = f(x)';
+	}
+}
+
+function buildCustomFitInitialCandidates(baseParams) {
+	const candidates = [baseParams.slice()];
+	for (let index = 0; index < baseParams.length; index++) {
+		const base = Number(baseParams[index]);
+		const delta = Math.max(0.1, Math.abs(base) * 0.2);
+		const plus = baseParams.slice();
+		plus[index] = base + delta;
+		candidates.push(plus);
+
+		const minus = baseParams.slice();
+		minus[index] = base - delta;
+		candidates.push(minus);
+	}
+
+	const deduped = [];
+	const seen = new Set();
+	candidates.forEach((candidate) => {
+		const key = candidate.map((value) => Number(value).toPrecision(10)).join('|');
+		if (seen.has(key)) return;
+		seen.add(key);
+		deduped.push(candidate);
+	});
+	return deduped;
+}
+
 function fitCurve() {
 	const filteredData = getFiniteDatasetPoints(activeSet);
 	const xValues = filteredData.map(point => point.x);
@@ -565,6 +1105,119 @@ function fitAdvancedCurve() {
 		performSinusoidalFit();
 	} else if (fitMethod === 'Gaussian') {
 		performGaussianFit();
+	}
+}
+
+function fitCustomCurve() {
+	try {
+		const analysis = refreshCustomFitDefinition({ preserveUserValues: true });
+		if (!analysis.ok) {
+			alert('Please enter a valid custom equation before fitting.');
+			return;
+		}
+
+		const data = getFiniteDatasetPoints(activeSet);
+		const minimumPoints = Math.max(4, analysis.parameterNames.length + 1);
+		if (data.length < minimumPoints) {
+			alert(`Please enter at least ${minimumPoints} valid data points for this custom fit.`);
+			return;
+		}
+
+		const initialParams = [];
+		for (let index = 0; index < analysis.parameterNames.length; index++) {
+			const parameterName = analysis.parameterNames[index];
+			const rawValue = analysis.initialValues[parameterName];
+			const numericValue = Number.parseFloat(rawValue);
+			if (!Number.isFinite(numericValue)) {
+				alert(`Please enter a valid initial value for parameter "${parameterName}".`);
+				return;
+			}
+			initialParams.push(numericValue);
+		}
+
+		const starts = buildCustomFitInitialCandidates(initialParams);
+		const residualFn = (params, points) => {
+			return points.map(({ x, y }) => {
+				const yPred = evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, params, x);
+				if (!Number.isFinite(yPred)) return CUSTOM_FIT_PENALTY;
+				return yPred - y;
+			});
+		};
+		const jacobianFn = (params, points) => {
+			const cols = analysis.parameterNames.length;
+			return points.map(({ x }) => {
+				const row = new Array(cols).fill(0);
+				for (let col = 0; col < cols; col++) {
+					const base = params[col];
+					const delta = Math.max(1e-6, Math.abs(base) * 1e-6);
+					const plus = params.slice();
+					const minus = params.slice();
+					plus[col] = base + delta;
+					minus[col] = base - delta;
+
+					const fPlus = evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, plus, x);
+					const fMinus = evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, minus, x);
+
+					if (Number.isFinite(fPlus) && Number.isFinite(fMinus)) {
+						row[col] = (fPlus - fMinus) / (2 * delta);
+					}
+				}
+				return row;
+			});
+		};
+
+		let bestParams = null;
+		let bestCost = Infinity;
+		for (const start of starts) {
+			const result = levenbergMarquardt(
+				data,
+				start,
+				residualFn,
+				jacobianFn,
+				{ maxIterations: 350, tolerance: 1e-10 }
+			);
+			if (!Number.isFinite(result.cost)) continue;
+			if (result.cost < bestCost) {
+				bestCost = result.cost;
+				bestParams = result.params;
+			}
+		}
+
+		if (!bestParams || !Array.isArray(bestParams)) {
+			alert('Custom fit could not converge on this dataset.');
+			return;
+		}
+
+		const xValues = data.map((point) => point.x);
+		const yValues = data.map((point) => point.y);
+		const xMin = Math.min(...xValues);
+		const xMax = Math.max(...xValues);
+		const xRange = xMax - xMin;
+		const xFit = Array.from({ length: CUSTOM_FIT_SAMPLE_POINTS }, (_, i) => {
+			if (Math.abs(xRange) < 1e-12) return xMin;
+			return xMin + (i * xRange) / (CUSTOM_FIT_SAMPLE_POINTS - 1);
+		});
+		const fitFunction = (xInput) => {
+			return evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, bestParams, xInput);
+		};
+		const yFit = xFit.map(fitFunction);
+		const equation = buildCustomFitEquationLatex(analysis.parsedExpression, analysis.parameterNames, bestParams);
+
+		fittedCurves[activeSet] = { x: xFit, y: yFit, equation };
+		updateResults(equation, xValues, yValues, fitFunction);
+		plotGraph(xFit, yFit);
+
+		const state = ensureCustomFitState(activeSet);
+		state.initialValues = {};
+		analysis.parameterNames.forEach((name, index) => {
+			state.initialValues[name] = formatCustomFitInputValue(bestParams[index]);
+		});
+		renderCustomFitParameterInputs(analysis.parameterNames, state.initialValues);
+		setCustomFitFormulaMessage('Custom fit completed.', 'success');
+		if (typeof scheduleSaveState === 'function') scheduleSaveState();
+	} catch (error) {
+		console.error('Error performing custom fit:', error);
+		alert('An error occurred during custom fitting. Please check the console for details.');
 	}
 }
 

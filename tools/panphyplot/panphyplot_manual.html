@@ -566,6 +566,8 @@
         <ul>
           <li>Perform basic fits such as Linear, Quadratic, Cubic, Exponential, and Power.</li>
           <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
+          <li>Use Custom Fit with math.js syntax for user-defined equations.</li>
+          <li>Custom Fit auto-detects up to 5 parameters and auto-fills initial guesses from data.</li>
           <li>Adjust and reset initial parameters for advanced fitting methods.</li>
           <li>View fitting equations and R² values.</li>
           <li><strong>Copy fitted equations:</strong> In the Fitting Result panel, hover (desktop) or tap (touch
@@ -581,6 +583,7 @@
               <li>Power: $y = A(x - x_0)^b + c$</li>
               <li>Sinusoidal: $y = A e^{bx} \sin(kx - \phi) + c$</li>
               <li>Gaussian: $y = A e^{-\frac{(x - \mu)^2}{2\sigma^2}} + c$</li>
+              <li>Custom: $y = f(x,\theta)$ where $\theta$ are auto-detected parameters (max 5)</li>
             </ul>
           </li>
         </ul>
@@ -740,6 +743,24 @@
           <li>Click the "Clear Fit" button to remove the fitted curve.</li>
         </ul>
       </li>
+      <li>
+        <strong>Custom Fit:</strong>
+        <ul>
+          <li>Navigate to the "Custom Fit" tab.</li>
+          <li>Enter a custom equation for <code>y</code> using math.js syntax (for example:
+            <code>A*exp(-k*x)+c</code> or <code>a*x^2+b*x+d</code>).</li>
+          <li>Use the <strong>Help</strong> button for quick math syntax reference.</li>
+          <li>Parameters are detected automatically from symbols that are not <code>x</code>,
+            math constants, or math functions.</li>
+          <li>Up to 5 parameters are supported for Custom Fit.</li>
+          <li>Initial parameter values are auto-filled from the dataset. You can edit them manually or click
+            <strong>Auto-fill from data</strong> to regenerate guesses.</li>
+          <li>Click the "Fit Curve" button to perform the fit.</li>
+          <li>The fitted equation and R² value are shown in the Fitting Result panel and support
+            <strong>Copy image</strong> / <strong>Copy raw LaTeX</strong>.</li>
+          <li>Click the "Clear Fit" button to remove the fitted curve.</li>
+        </ul>
+      </li>
     </ul>
 
     <h3>6. Visualizing All Datasets</h3>
@@ -792,7 +813,8 @@
       <li><strong>Data Quality:</strong> Ensure that your data points are accurate and representative of the phenomenon
         you are modeling.</li>
       <li><strong>Choosing Initial Parameters:</strong> For advanced fitting methods, selecting appropriate initial
-        parameters can significantly impact the convergence and accuracy of the fit.</li>
+        parameters can significantly impact the convergence and accuracy of the fit. For Custom Fit, start from the
+        auto-filled values and adjust them if convergence is poor.</li>
       <li><strong>Uncertainties:</strong> Use uncertainties to account for measurement errors or variability in your
         data. Choose between absolute and percentage uncertainties based on your data's nature.</li>
       <li><strong>LaTeX Formatting:</strong> Enable LaTeX mode when you need high-quality mathematical expressions.
@@ -809,6 +831,11 @@
     <ul>
       <li><strong>Fitting Did Not Converge:</strong> If a fitting method fails to converge, try adjusting the initial
         parameters or selecting a different fitting model.</li>
+      <li><strong>Custom Fit Formula Errors:</strong> Verify math.js syntax, keep multiplication explicit (for example
+        <code>2*x</code>), and ensure the equation uses only <code>x</code> plus parameter symbols on the right-hand
+        side.</li>
+      <li><strong>Custom Fit Parameter Limit:</strong> If more than 5 parameters are detected, simplify the equation
+        before fitting.</li>
       <li><strong>Import Errors:</strong> Ensure that your CSV file is properly formatted with headers and consistent
         columns.</li>
       <li><strong>LaTeX Rendering Issues:</strong> Verify that your LaTeX syntax is correct. If you experience delays,

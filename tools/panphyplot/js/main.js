@@ -49,6 +49,9 @@ document.addEventListener("DOMContentLoaded", function() {
 		datasetFitResults = typeof normalizeDatasetFitResultsState === 'function'
 			? normalizeDatasetFitResultsState(savedState.datasetFitResults, rawData.length)
 			: (savedState.datasetFitResults || {});
+		customFitStates = typeof normalizeCustomFitStates === 'function'
+			? normalizeCustomFitStates(savedState.customFitStates, rawData.length)
+			: (savedState.customFitStates || {});
 		dataset1XValues = savedState.dataset1XValues || [];
 		latexMode = !!savedState.latexMode;
 		titleWasAuto = savedState.titleWasAuto ?? true;
@@ -58,12 +61,14 @@ document.addEventListener("DOMContentLoaded", function() {
 			if (!datasetHeaders[index]) datasetHeaders[index] = { x: 'x', y: 'y' };
 			if (!datasetToggles[index]) datasetToggles[index] = { x: false, y: false };
 			if (!datasetErrorTypes[index]) datasetErrorTypes[index] = { x: 'absolute', y: 'absolute' };
+			if (!customFitStates[index]) customFitStates[index] = { formula: '', initialValues: {} };
 		});
 	} else {
 		// Ensure base dataset structures exist.
 		if (!datasetHeaders[0]) datasetHeaders[0] = { x: 'x', y: 'y' };
 		if (!datasetToggles[0]) datasetToggles[0] = { x: false, y: false };
 		if (!datasetErrorTypes[0]) datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
+		if (!customFitStates[0]) customFitStates[0] = { formula: '', initialValues: {} };
 
 		// Initialise a clean table with defaults.
 		clearRows(true);
@@ -78,6 +83,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
 	changeAdvancedFitMethod();
 	setInitialParameters(initialAdvancedFitMethod);
+	initializeCustomFitUI();
 
 	// Dataset tabs.
 	initializeDatasetTabsBar();
@@ -89,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		loadToggles();
 		loadErrorTypes();
 	}
+	loadCustomFitUiForActiveDataset();
 
 	if (datasetFitResults.hasOwnProperty(activeSet)) {
 		const result = datasetFitResults[activeSet];

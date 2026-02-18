@@ -818,6 +818,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 		// Restore error type settings.
 		loadErrorTypes();
+		loadCustomFitUiForActiveDataset();
 
 		// Update the graph and LaTeX-rendered labels.
 		updatePlotAndRenderLatex();
@@ -992,6 +993,8 @@ function confirmImportCSV() {
 		// Empty out the active dataset’s raw data
 		rawData[activeSet] = [];
 		if (activeSet === 0) dataset1XValues = [];
+		if (!customFitStates[activeSet]) customFitStates[activeSet] = { formula: '', initialValues: {} };
+		customFitStates[activeSet].initialValues = {};
 
 		// Clear any stored fit state for this dataset.
 		delete datasetFitResults[activeSet];
@@ -1026,6 +1029,7 @@ function confirmImportCSV() {
 
 		// Reset advanced-fit parameters
 		setInitialParameters(getCurrentAdvancedFitMethod());
+		resetCustomFitParametersFromData();
 
 		// Update the combined-plot inputs to default headings
 		updateCombinedPlotInputsToActive();
@@ -1333,6 +1337,13 @@ function clearFittedCurve() {
 			} else {
 				delete fittedCurves[j];
 			}
+
+			// customFitStates
+			if (customFitStates.hasOwnProperty(j + 1)) {
+				customFitStates[j] = customFitStates[j + 1];
+			} else {
+				delete customFitStates[j];
+			}
 		}
 
 		// Then delete the old "last" index which no longer corresponds to a dataset
@@ -1343,6 +1354,7 @@ function clearFittedCurve() {
 		delete datasetErrorTypes[lastIndex];
 		delete datasetFitResults[lastIndex];
 		delete fittedCurves[lastIndex];
+		delete customFitStates[lastIndex];
 	}
 
 
@@ -1644,6 +1656,9 @@ function clearFittedCurve() {
 		} else if (tabName === 'AdvancedFit') {
 			changeAdvancedFitMethod();
 			safeTypeset(document.getElementById('advanced-fit-general-equation'));
+		} else if (tabName === 'CustomFit') {
+			refreshCustomFitDefinition({ preserveUserValues: true, suppressSave: true });
+			safeTypeset(document.getElementById('custom-fit-general-equation'));
 		}
 	}
 

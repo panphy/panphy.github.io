@@ -1143,7 +1143,8 @@ select {
 	font-weight: 500;
 	border-radius: 10px;
 	color: var(--text-secondary);
-	width: 50%;
+	flex: 1 1 0;
+	min-width: 0;
 	box-shadow: none;
 }
 
@@ -1175,6 +1176,178 @@ select {
 
 .tab-content.active {
 	display: block;
+}
+
+.custom-fit-formula-panel {
+	margin-top: 12px;
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+	padding: 10px;
+}
+
+.custom-fit-formula-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+#custom-fit-formula-label {
+	display: block;
+	font-size: 0.86rem;
+	font-weight: 600;
+	margin: 0;
+	color: var(--text-main);
+}
+
+#custom-fit-formula-help {
+	flex: 0 0 auto;
+	width: auto;
+	margin: 0;
+	padding: 4px 11px;
+	border-radius: 999px;
+	border: 1px solid var(--border-color);
+	background: var(--muted-bg);
+	color: var(--text-secondary);
+	font-size: 0.78rem;
+	font-weight: 600;
+	line-height: 1;
+	white-space: nowrap;
+	box-shadow: none;
+	transform: none;
+}
+
+#custom-fit-formula-help:hover {
+	background: rgba(90, 111, 214, 0.08);
+	border-color: rgba(90, 111, 214, 0.3);
+	color: var(--btn-analyze);
+	box-shadow: none;
+	transform: none;
+}
+
+[data-theme="dark"] #custom-fit-formula-help {
+	color: var(--text-main);
+}
+
+#custom-fit-formula-input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid var(--input-border);
+	border-radius: 10px;
+	font-size: 0.9rem;
+	background-color: var(--card-bg);
+	color: var(--text-main);
+}
+
+#custom-fit-formula-input:focus {
+	border-color: var(--brand-primary);
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+#custom-fit-formula-message {
+	margin: 8px 0 0;
+	padding: 8px 10px;
+	border-radius: 8px;
+	font-size: 0.82rem;
+	border: 1px solid transparent;
+}
+
+#custom-fit-formula-message.is-error {
+	background: rgba(231, 76, 60, 0.12);
+	border-color: rgba(231, 76, 60, 0.35);
+	color: #8e2a2a;
+}
+
+#custom-fit-formula-message.is-warning {
+	background: rgba(241, 196, 15, 0.18);
+	border-color: rgba(241, 196, 15, 0.4);
+	color: #7a5f00;
+}
+
+#custom-fit-formula-message.is-success {
+	background: rgba(46, 172, 113, 0.15);
+	border-color: rgba(46, 172, 113, 0.35);
+	color: #176d45;
+}
+
+[data-theme="dark"] #custom-fit-formula-message.is-error {
+	background: rgba(231, 76, 60, 0.24);
+	border-color: rgba(231, 76, 60, 0.42);
+	color: #ffd3cc;
+}
+
+[data-theme="dark"] #custom-fit-formula-message.is-warning {
+	background: rgba(241, 196, 15, 0.22);
+	border-color: rgba(241, 196, 15, 0.45);
+	color: #ffe9a8;
+}
+
+[data-theme="dark"] #custom-fit-formula-message.is-success {
+	color: #86efac;
+}
+
+.custom-fit-parameters-panel {
+	margin-top: 10px;
+	padding: 10px;
+	background: var(--card-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+}
+
+.custom-fit-parameters-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 8px;
+}
+
+.custom-fit-parameters-header .table-prompt {
+	margin: 0;
+}
+
+.custom-fit-parameters-empty {
+	margin: 0;
+	font-size: 0.86rem;
+	color: var(--text-secondary);
+}
+
+#custom-fit-parameters-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.custom-fit-parameter-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.custom-fit-parameter-row label {
+	min-width: 64px;
+	color: var(--text-secondary);
+	font-weight: 600;
+}
+
+.custom-fit-parameter-row input {
+	max-width: 220px;
+	padding: 8px 10px;
+	border: 1px solid var(--input-border);
+	border-radius: 10px;
+	background-color: var(--card-bg);
+	color: var(--text-main);
+}
+
+.custom-fit-parameter-row input:focus {
+	border-color: var(--brand-primary);
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
 }
 
 /* Results */
