@@ -91,6 +91,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+            align-items: end;
         }
 
         button {
@@ -128,6 +129,48 @@
         #startBtn:disabled {
             opacity: 0.82;
             color: #001018;
+        }
+
+        .control-block {
+            display: grid;
+            gap: 4px;
+            min-height: 48px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            align-content: center;
+        }
+
+        .control-block select,
+        .control-block input[type="range"] {
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            background: rgba(2, 6, 23, 0.58);
+            color: var(--text-main);
+            min-height: 36px;
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            padding: 6px 10px;
+            width: 170px;
+        }
+
+        [data-theme="light"] .control-block select,
+        [data-theme="light"] .control-block input[type="range"] {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .control-block input[type="range"] {
+            padding: 0 4px;
+            accent-color: var(--brand-primary);
+        }
+
+        .value-badge {
+            color: var(--brand-accent);
+            font-weight: 700;
+            margin-left: 6px;
+            text-transform: none;
+            font-size: 0.85rem;
         }
 
         .stage {
@@ -217,6 +260,19 @@
                 <button id="startBtn" type="button">Start Camera</button>
                 <button id="placeBtn" type="button" disabled>Place Sphere</button>
                 <button id="resetBtn" type="button" disabled>Reset Motion</button>
+                <label for="modeSelect" class="control-block">
+                    Interaction
+                    <select id="modeSelect">
+                        <option value="balanced" selected>Balanced</option>
+                        <option value="elastic">Elastic Balls</option>
+                        <option value="sticky">Sticky Balls</option>
+                    </select>
+                </label>
+                <label for="sensitivityRange" class="control-block">
+                    Sensitivity
+                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
+                    <span id="sensitivityValue" class="value-badge">1.0x</span>
+                </label>
             </div>
         </header>
 
@@ -231,7 +287,7 @@
         </section>
 
         <p class="hint">
-            Place sphere, then push it with the tracked green fingertip circles. Motion is constrained to 2D.
+            Place sphere, push with tracked green fingertips, and tune response with Interaction + Sensitivity controls.
         </p>
     </main>
 
@@ -244,6 +300,9 @@
             resetBtn: document.getElementById('resetBtn'),
             status: document.getElementById('status'),
             metrics: document.getElementById('metrics'),
+            modeSelect: document.getElementById('modeSelect'),
+            sensitivityRange: document.getElementById('sensitivityRange'),
+            sensitivityValue: document.getElementById('sensitivityValue'),
             stage: document.getElementById('stage'),
             video: document.getElementById('camera'),
             canvas: document.getElementById('renderCanvas'),
@@ -261,7 +320,9 @@
             handsCount: 0,
             tipCount: 0,
             trackedTips: [],
-            contactsCount: 0
+            contactsCount: 0,
+            interactionMode: 'balanced',
+            sensitivity: 1.0
         };
 
         let filesetResolverCtor = null;
@@ -343,10 +404,46 @@
         };
 
         const FINGERTIP_POINTS = [4, 8, 12, 16, 20];
-        const CONTACT_RADIUS = 0.12;
-        const SPRING_FORCE = 95;
-        const CONTACT_DAMPING = 5;
-        const POSITION_CORRECTION = 0.6;
+        const INTERACTION_LABELS = {
+            balanced: 'Balanced',
+            elastic: 'Elastic',
+            sticky: 'Sticky'
+        };
+        const INTERACTION_PROFILES = {
+            balanced: {
+                contactRadius: 0.12,
+                spring: 95,
+                damping: 5,
+                correction: 0.6,
+                airDrag: 0.05,
+                restitution: 0.92,
+                stickPull: 0,
+                stickCapture: 0,
+                maxSpeed: 2.6
+            },
+            elastic: {
+                contactRadius: 0.14,
+                spring: 145,
+                damping: 3.2,
+                correction: 0.78,
+                airDrag: 0.03,
+                restitution: 0.98,
+                stickPull: 0,
+                stickCapture: 0,
+                maxSpeed: 4.0
+            },
+            sticky: {
+                contactRadius: 0.17,
+                spring: 78,
+                damping: 8.5,
+                correction: 0.9,
+                airDrag: 0.16,
+                restitution: 0.84,
+                stickPull: 14,
+                stickCapture: 2.2,
+                maxSpeed: 1.85
+            }
+        };
 
         const scene = new THREE.Scene();
         const camera3d = new THREE.PerspectiveCamera(52, 1, 0.01, 20);
@@ -407,10 +504,30 @@
             ui.status.classList.toggle('status-error', isError);
         }
 
+        function getInteractionProfile() {
+            const base = INTERACTION_PROFILES[state.interactionMode] || INTERACTION_PROFILES.balanced;
+            const s = Math.max(0.6, Math.min(2.0, state.sensitivity));
+            return {
+                contactRadius: base.contactRadius * (0.9 + (0.1 * s)),
+                spring: base.spring * s,
+                damping: base.damping * (0.95 + (0.05 * s)),
+                correction: Math.min(1, base.correction * (0.9 + (0.1 * s))),
+                airDrag: base.airDrag * (0.9 + (0.1 * s)),
+                restitution: base.restitution,
+                stickPull: base.stickPull * s,
+                stickCapture: base.stickCapture * s,
+                maxSpeed: base.maxSpeed * (0.9 + (0.1 * s))
+            };
+        }
+
+        function updateSensitivityLabel() {
+            ui.sensitivityValue.textContent = `${state.sensitivity.toFixed(1)}x`;
+        }
+
         function updateMetrics() {
             const speed = Math.hypot(physics.velocity.x, physics.velocity.y);
             ui.metrics.textContent =
-                `FPS: ${state.fps.toFixed(0)} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Speed: ${speed.toFixed(2)}`;
+                `FPS: ${state.fps.toFixed(0)} | Mode: ${INTERACTION_LABELS[state.interactionMode]} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Speed: ${speed.toFixed(2)}`;
         }
 
         function resizeStage() {
@@ -507,7 +624,7 @@
             }
         }
 
-        function applyTipForces(dt) {
+        function applyTipForces(dt, profile) {
             if (!physics.placed) {
                 return 0;
             }
@@ -521,7 +638,7 @@
                 );
 
                 const distance = scratch.normal.length();
-                if (distance >= CONTACT_RADIUS) {
+                if (distance >= profile.contactRadius) {
                     continue;
                 }
 
@@ -532,30 +649,41 @@
                     scratch.normal.multiplyScalar(1 / distance);
                 }
 
-                const penetration = CONTACT_RADIUS - distance;
+                const penetration = profile.contactRadius - distance;
                 const inwardSpeed = Math.min(
                     (physics.velocity.x * scratch.normal.x) + (physics.velocity.y * scratch.normal.y),
                     0
                 );
-                const pushAccel = (SPRING_FORCE * penetration) - (CONTACT_DAMPING * inwardSpeed);
+                const pushAccel = (profile.spring * penetration) - (profile.damping * inwardSpeed);
 
-                physics.position.x += scratch.normal.x * penetration * POSITION_CORRECTION;
-                physics.position.y += scratch.normal.y * penetration * POSITION_CORRECTION;
+                physics.position.x += scratch.normal.x * penetration * profile.correction;
+                physics.position.y += scratch.normal.y * penetration * profile.correction;
                 physics.velocity.x += scratch.normal.x * pushAccel * dt;
                 physics.velocity.y += scratch.normal.y * pushAccel * dt;
+
+                if (profile.stickPull > 0 && distance > 0.000001) {
+                    const toTipX = tip.worldX - physics.position.x;
+                    const toTipY = tip.worldY - physics.position.y;
+                    const invDistance = 1 / distance;
+                    const stickFactor = penetration / profile.contactRadius;
+                    physics.velocity.x += toTipX * invDistance * profile.stickPull * stickFactor * dt;
+                    physics.velocity.y += toTipY * invDistance * profile.stickPull * stickFactor * dt;
+                    physics.position.x += toTipX * profile.stickCapture * stickFactor * dt;
+                    physics.position.y += toTipY * profile.stickCapture * stickFactor * dt;
+                }
             }
 
             return contacts;
         }
 
-        function constrainSphereToView() {
+        function constrainSphereToView(profile) {
             const depth = camera3d.position.z - physics.planeZ;
             const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera3d.fov * 0.5)) * depth;
             const halfWidth = halfHeight * camera3d.aspect;
 
             const xLimit = Math.max(0.2, halfWidth - physics.radius);
             const yLimit = Math.max(0.2, halfHeight - physics.radius);
-            const restitution = 0.92;
+            const restitution = profile.restitution;
 
             if (physics.position.x > xLimit) {
                 physics.position.x = xLimit;
@@ -577,18 +705,25 @@
             physics.velocity.z = 0;
         }
 
-        function updatePhysics(dt) {
+        function updatePhysics(dt, profile) {
             if (!physics.placed) {
                 return;
             }
 
             physics.position.x += physics.velocity.x * dt;
             physics.position.y += physics.velocity.y * dt;
-            constrainSphereToView();
+            constrainSphereToView(profile);
 
-            const linearDrag = Math.exp(-0.05 * dt);
+            const linearDrag = Math.exp(-profile.airDrag * dt);
             physics.velocity.x *= linearDrag;
             physics.velocity.y *= linearDrag;
+
+            const speed = Math.hypot(physics.velocity.x, physics.velocity.y);
+            if (speed > profile.maxSpeed && speed > 0.000001) {
+                const scale = profile.maxSpeed / speed;
+                physics.velocity.x *= scale;
+                physics.velocity.y *= scale;
+            }
 
             sphereGroup.position.set(physics.position.x, physics.position.y, physics.planeZ);
         }
@@ -616,8 +751,9 @@
             state.handsCount = state.lastHands.length;
             state.trackedTips = collectTrackedTips();
             state.tipCount = state.trackedTips.length;
-            state.contactsCount = applyTipForces(dt);
-            updatePhysics(dt);
+            const profile = getInteractionProfile();
+            state.contactsCount = applyTipForces(dt, profile);
+            updatePhysics(dt, profile);
             drawTrackedTips();
             updateMetrics();
             renderer.render(scene, camera3d);
@@ -706,13 +842,28 @@
             ui.placeBtn.disabled = false;
             ui.resetBtn.disabled = false;
             ui.startBtn.textContent = 'Running';
-            setStatus('Ready. Press "Place Sphere" to start.');
+            setStatus(`Ready. Press "Place Sphere" to start. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
             requestAnimationFrame(step);
         }
 
         ui.startBtn.addEventListener('click', startCameraAndTracking);
         ui.placeBtn.addEventListener('click', placeSphere);
         ui.resetBtn.addEventListener('click', resetSphereState);
+        ui.modeSelect.addEventListener('change', () => {
+            if (!INTERACTION_PROFILES[ui.modeSelect.value]) {
+                return;
+            }
+            state.interactionMode = ui.modeSelect.value;
+            setStatus(`Interaction mode switched to ${INTERACTION_LABELS[state.interactionMode]}.`);
+        });
+        ui.sensitivityRange.addEventListener('input', () => {
+            const nextValue = Number(ui.sensitivityRange.value);
+            if (!Number.isFinite(nextValue)) {
+                return;
+            }
+            state.sensitivity = Math.max(0.6, Math.min(2.0, nextValue));
+            updateSensitivityLabel();
+        });
 
         window.addEventListener('resize', resizeStage);
         if ('ResizeObserver' in window) {
@@ -725,6 +876,9 @@
             }
         });
 
+        ui.modeSelect.value = state.interactionMode;
+        ui.sensitivityRange.value = state.sensitivity.toFixed(1);
+        updateSensitivityLabel();
         resizeStage();
         renderer.render(scene, camera3d);
     </script>
