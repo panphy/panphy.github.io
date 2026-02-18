@@ -88,11 +88,11 @@
 					<thead>
 						<tr>
 							<th>
-								<input type="text" id="x-column-name" value="x" oninput="updateLabels('x')" aria-label="X column name" />
+								<input type="text" id="x-column-name" value="x" oninput="updateLabels('x')" aria-label="x column name" />
 								<div id="x-column-latex" class="latex-display">\( x \)</div>
 							</th>
 							<th>
-								<input type="text" id="y-column-name" value="y" oninput="updateLabels('y')" aria-label="Y column name" />
+								<input type="text" id="y-column-name" value="y" oninput="updateLabels('y')" aria-label="y column name" />
 								<div id="y-column-latex" class="latex-display">\( y \)</div>
 							</th>
 							<th class="error-column" id="x-error-header" style="display: none;">
@@ -109,25 +109,25 @@
 				</table>
 			</div>
 
-			<div class="button-container">
-				<div class="button-row">
-					<button class="btn-add-row" onclick="addRow()" title="Add a new data row to this dataset">Add
-						Row</button>
-					<button class="btn-copy-x" onclick="copyXToNewDataset()"
-						title="Create a new dataset and copy x-values from the current dataset">Copy x</button>
-					<button class="btn-clear-all" onclick="confirmClearRows()"
-						title="Clear all data rows in this dataset">Clear Data</button>
-				</div>
-				<div class="button-row">
-					<button class="btn-import-csv" onclick="confirmImportCSV()"
-						title="Import data from a CSV file">
-						Import .csv
-					</button>
-					<button class="btn-export-csv" onclick="showFilenamePrompt('csv')"
-						title="Export this dataset to a CSV file">Export .csv</button>
-					<button class="btn-export-md" onclick="showExportTablePopup()"
-						title="View this dataset as a formatted table">View Table</button>
-				</div>
+				<div class="button-container">
+					<div class="button-row">
+						<button class="btn-add-row" onclick="addRow()" title="Add a new data row to this dataset">Add
+							Row</button>
+						<button class="btn-copy-x" onclick="copyXToNewDataset()"
+							title="Create a new dataset and clone x-values from the current dataset">Clone x</button>
+						<button class="btn-clear-all" onclick="confirmClearRows()"
+							title="Clear all data rows in this dataset">Clear Data</button>
+					</div>
+					<div class="button-row">
+						<button class="btn-import-csv" onclick="confirmImportCSV()"
+							title="Import data from a CSV file">
+							Import .csv
+						</button>
+						<button class="btn-export-csv" onclick="showFilenamePrompt('csv')"
+							title="Export this dataset to a CSV file">Export .csv</button>
+						<button class="btn-export-md" onclick="showExportTablePopup()"
+							title="View this dataset as a formatted table">View Table</button>
+					</div>
 					<div class="button-row button-row-data-processing">
 						<button class="section-toggle section-toggle-popup" type="button" aria-haspopup="dialog"
 							onclick="openDataProcessingPopup()"
@@ -432,24 +432,24 @@
 				<div id="data-processing-derived-list"></div>
 			</div>
 
-			<div class="data-processing-section">
-				<div class="data-processing-heading">Output Mapping</div>
-				<div class="data-processing-mapping-grid">
-					<label for="data-processing-output-x">New X column</label>
-					<select id="data-processing-output-x"></select>
+				<div class="data-processing-section">
+					<div class="data-processing-heading">Output Mapping</div>
+					<div class="data-processing-mapping-grid">
+						<label for="data-processing-output-x">New x column</label>
+						<select id="data-processing-output-x"></select>
 
-					<label for="data-processing-output-y">New Y column</label>
-					<select id="data-processing-output-y"></select>
+						<label for="data-processing-output-y">New y column</label>
+						<select id="data-processing-output-y"></select>
 
-					<label for="data-processing-target">Target dataset</label>
-					<select id="data-processing-target"></select>
+						<label for="data-processing-target">Target dataset</label>
+						<select id="data-processing-target"></select>
+					</div>
+					<div id="data-processing-message" aria-live="polite"></div>
+					<div class="data-processing-footer-actions">
+						<button id="data-processing-copy" type="button">Copy to Dataset</button>
+						<button id="data-processing-reset" type="button">Reset</button>
+					</div>
 				</div>
-				<div id="data-processing-message" aria-live="polite"></div>
-				<div class="data-processing-footer-actions">
-					<button id="data-processing-copy" type="button">Copy to Dataset</button>
-					<button id="data-processing-reset" type="button">Reset</button>
-				</div>
-			</div>
 		</div>
 	</div>
 
