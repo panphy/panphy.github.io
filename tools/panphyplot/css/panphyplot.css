@@ -1802,6 +1802,7 @@ select {
 .data-processing-inline-actions {
 	display: flex;
 	gap: 8px;
+	margin-top: 12px;
 }
 
 #data-processing-apply {
