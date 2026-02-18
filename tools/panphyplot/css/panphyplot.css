@@ -893,6 +893,10 @@ button:hover {
 	width: 100%;
 }
 
+.button-row-data-processing {
+	margin-top: 12px;
+}
+
 /* Global Uncertainty */
 .global-uncertainty {
 	margin: 20px 0;
