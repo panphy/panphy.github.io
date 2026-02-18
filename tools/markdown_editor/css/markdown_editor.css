@@ -543,8 +543,36 @@ textarea:focus {
 @media (max-width: 600px) {
   .math-menu,
   .font-menu {
+    width: auto;
+    justify-content: stretch;
+    flex: 1 1 calc((100% - 12px) / 3);
+    min-width: 0;
+  }
+
+  #imageButton {
+    flex: 1 1 calc((100% - 12px) / 3);
+    min-width: 0;
+  }
+
+  #mathMenu {
+    order: 20;
+  }
+
+  #imageButton {
+    order: 21;
+  }
+
+  #fontMenu {
+    order: 22;
+  }
+
+  #mathButton,
+  #fontButton,
+  #imageButton {
     width: 100%;
-    justify-content: center;
+    min-width: 0;
+    padding: 0.38rem 0.45rem;
+    font-size: 0.72rem;
   }
 
   .math-panel,

@@ -1526,6 +1526,12 @@ async function loadMarkdownFile() {
 // Setup event listeners
 let queuedInputRenderRafId = 0;
 
+function shouldRenderPreviewDuringTyping() {
+  const isMobileViewport = window.matchMedia('(max-width: 900px)').matches;
+  if (!isMobileViewport) return true;
+  return !outputPane.classList.contains('mobile-hidden');
+}
+
 const debouncedPersistDraft = debounce(() => {
   persistDraftAndDirtyState();
 }, 200);
@@ -1540,7 +1546,9 @@ markdownInput.addEventListener('input', () => {
       queuedInputRenderRafId = 0;
       const content = markdownInput.value;
       clearUntouchedSampleContentFlagIfEdited(content);
-      renderContent();
+      if (shouldRenderPreviewDuringTyping()) {
+        renderContent();
+      }
     });
   }
   debouncedPersistDraft();
