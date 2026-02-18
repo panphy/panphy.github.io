@@ -8,10 +8,10 @@
 	<title>PanPhyPlot</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
-<!-- Plotly.js for graphing -->
-	<script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
-	<!-- Math.js for computations -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+<!-- Plotly.js (basic bundle) for graphing -->
+		<script src="https://cdn.plot.ly/plotly-basic-2.29.1.min.js" defer></script>
+		<!-- Math.js for computations -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js" defer></script>
 	<!-- MathJax v2 Configuration (must be before MathJax script) -->
 	<script type="text/x-mathjax-config">
 		MathJax.Hub.Config({
@@ -21,13 +21,13 @@
 				processEscapes: true
 			}
 		});
-	</script>
-	<!-- MathJax v2 for LaTeX rendering -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js"></script>
-	<!-- Marked.js for Markdown parsing (used in View Table) -->
-	<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-	<!-- DOMPurify for sanitizing HTML (used in View Table) -->
-	<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
+		</script>
+		<!-- MathJax v2 for LaTeX rendering -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+		<!-- Marked.js for Markdown parsing (used in View Table) -->
+		<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js" defer></script>
+		<!-- DOMPurify for sanitizing HTML (used in View Table) -->
+		<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js" defer></script>
 
 	<link rel="stylesheet" href="/tools/panphyplot/css/panphyplot.css">
 </head>

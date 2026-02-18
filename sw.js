@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-18T18:43:23Z';
+const BUILD_ID = '2026-02-18T18:48:59Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -34,7 +34,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphyplot/js/plotting.js',
   '/tools/panphyplot/js/state.js',
   '/tools/panphyplot/js/ui.js',
-  'https://cdn.plot.ly/plotly-2.29.1.min.js',
+  'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
   '/tools/panphyplot/panphyplot_manual.html',

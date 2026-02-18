@@ -841,6 +841,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 		function populateTableFromActiveDataset() {
 			const tableBody = document.querySelector('#data-table tbody');
 			tableBody.innerHTML = ''; // Clear current table
+			const fragment = document.createDocumentFragment();
 
 			// For the active dataset, get its stored raw data.
 			let dataset = rawData[activeSet] || [];
@@ -850,7 +851,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 			// For Dataset 1: if rawData is empty but we have stored x-values, rebuild the table from them.
 			if (activeSet === 0 && dataset.length === 0 && dataset1XValues && dataset1XValues.length > 0) {
 				dataset1XValues.forEach(xVal => {
-					const newRow = tableBody.insertRow();
+					const newRow = document.createElement('tr');
 					newRow.innerHTML = buildDataRowHtml({
 						xValue: xVal,
 						yValue: '',
@@ -859,14 +860,16 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 						xErrorDisplay,
 						yErrorDisplay
 					});
+					fragment.appendChild(newRow);
 				});
+				tableBody.appendChild(fragment);
 				return;
 			}
 
 			// For other datasets (or if set 1 already has valid data), build rows from rawData.
 			if (dataset.length > 0) {
 				dataset.forEach(point => {
-					const newRow = tableBody.insertRow();
+					const newRow = document.createElement('tr');
 					newRow.innerHTML = buildDataRowHtml({
 						xValue: point.x,
 						yValue: point.y !== null ? point.y : '',
@@ -875,7 +878,9 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 						xErrorDisplay,
 						yErrorDisplay
 					});
+					fragment.appendChild(newRow);
 				});
+				tableBody.appendChild(fragment);
 			} else {
 				// If there is no data in the active dataset, initialize default rows.
 				initializeTable();
