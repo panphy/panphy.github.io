@@ -1249,7 +1249,7 @@ select {
 
 .custom-fit-formula-note {
 	margin: 6px 2px 14px;
-	font-size: 0.72rem;
+	font-size: 0.75rem;
 	color: var(--btn-danger);
 	font-weight: 600;
 }
