@@ -40,7 +40,6 @@
 			formulaPanel: document.getElementById('data-processing-formula-panel'),
 			formulaLabel: document.getElementById('data-processing-formula-label'),
 			formulaInput: document.getElementById('data-processing-formula-input'),
-			formulaHelper: document.getElementById('data-processing-formula-helper'),
 			formulaMessage: document.getElementById('data-processing-formula-message'),
 			applyButton: document.getElementById('data-processing-apply'),
 			cancelButton: document.getElementById('data-processing-cancel'),
@@ -541,9 +540,6 @@
 		renderSourceSection();
 		elements.formulaLabel.textContent = `Formula for ${headerLabel}`;
 		elements.formulaInput.placeholder = `e.g. =1/${axis}`;
-		if (elements.formulaHelper) {
-			elements.formulaHelper.textContent = `e.g. =1/${axis}`;
-		}
 		elements.formulaInput.value = '';
 		clearFormulaMessage();
 		elements.formulaPanel.style.display = 'block';
