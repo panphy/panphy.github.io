@@ -1,12 +1,11 @@
 // LaTeX rendering helpers
-
+(function() {
 	function processLabel(label) {
 		if (!label) return '';
 		if (!latexMode) return label;
 		// Plotly/MathJax rendering uses $...$ delimiters.
 		return '$' + formatLabelForLatex(label) + '$';
 	}
-
 
 	function safeTypeset(target) {
 		try {
@@ -18,7 +17,6 @@
 			console.warn('MathJax typeset skipped:', e);
 		}
 	}
-
 
 	function renderLatex(elementId, rawString) {
 		const element = document.querySelector(elementId);
@@ -38,7 +36,6 @@
 		safeTypeset(element);
 	}
 
-
 	function updateGraphTitle(force = false) {
 		const xColumn = document.getElementById('x-column-name').value || 'x';
 		const yColumn = document.getElementById('y-column-name').value || 'y';
@@ -54,7 +51,15 @@
 		}
 	}
 
-
 	function formatLabelForLatex(label) {
 		return label ? label.replace(/ /g, '\\space ') : '';
 	}
+
+	Object.assign(window, {
+		processLabel,
+		safeTypeset,
+		renderLatex,
+		updateGraphTitle,
+		formatLabelForLatex
+	});
+})();

@@ -2,6 +2,65 @@
 
 const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 const debouncedUpdateData = debounce(updateData, 300);
+const MARKED_CDN_URL = 'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js';
+const DOMPURIFY_CDN_URL = 'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js';
+const lazyScriptPromises = {};
+let tableRenderLibrariesPromise = null;
+
+function loadExternalScript(url) {
+	if (!url) return Promise.reject(new Error('Missing script URL.'));
+	if (lazyScriptPromises[url]) return lazyScriptPromises[url];
+
+	lazyScriptPromises[url] = new Promise((resolve, reject) => {
+		const existing = document.querySelector(`script[src="${url}"]`);
+		if (existing) {
+			if (existing.dataset.loaded === 'true') {
+				resolve();
+				return;
+			}
+			existing.addEventListener('load', () => {
+				existing.dataset.loaded = 'true';
+				resolve();
+			}, { once: true });
+			existing.addEventListener('error', () => {
+				reject(new Error(`Failed to load script: ${url}`));
+			}, { once: true });
+			return;
+		}
+
+		const script = document.createElement('script');
+		script.src = url;
+		script.async = true;
+		script.defer = true;
+		script.dataset.lazySrc = url;
+		script.addEventListener('load', () => {
+			script.dataset.loaded = 'true';
+			resolve();
+		}, { once: true });
+		script.addEventListener('error', () => {
+			reject(new Error(`Failed to load script: ${url}`));
+		}, { once: true });
+		document.head.appendChild(script);
+	});
+
+	return lazyScriptPromises[url];
+}
+
+async function ensureTableRenderLibraries() {
+	if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') return;
+
+	if (!tableRenderLibrariesPromise) {
+		tableRenderLibrariesPromise = (async () => {
+			await loadExternalScript(MARKED_CDN_URL);
+			await loadExternalScript(DOMPURIFY_CDN_URL);
+			if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+				throw new Error('Table rendering libraries are unavailable.');
+			}
+		})();
+	}
+
+	await tableRenderLibrariesPromise;
+}
 
 function formatRowInputValue(value) {
 	if (value === undefined || value === null) return '';
@@ -2406,8 +2465,10 @@ function clearFittedCurve() {
 	}
 
 
-	function showExportTablePopup() {
+	async function showExportTablePopup() {
 		try {
+			await ensureTableRenderLibraries();
+
 			// Generate the markdown table
 			const markdown = exportPlainText();
 			if (!markdown) {

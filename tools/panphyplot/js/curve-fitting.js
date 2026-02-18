@@ -1,4 +1,5 @@
 // Curve fitting helpers
+(function() {
 
 const CUSTOM_FIT_MAX_PARAMETERS = 5;
 const CUSTOM_FIT_SAMPLE_POINTS = 300;
@@ -2202,3 +2203,19 @@ function performGaussianFit() {
 		alert('An error occurred during Gaussian fitting. Please check the console for details.');
 	}
 }
+
+Object.assign(window, {
+	fitCurve,
+	updateBasicFitEquation,
+	changeAdvancedFitMethod,
+	resetAdvancedFitParameters,
+	setInitialParameters,
+	getCurrentAdvancedFitMethod,
+	fitAdvancedCurve,
+	fitCustomCurve,
+	refreshCustomFitDefinition,
+	initializeCustomFitUI,
+	loadCustomFitUiForActiveDataset,
+	resetCustomFitParametersFromData
+});
+})();

@@ -1,4 +1,5 @@
 // Plotting helpers
+(function() {
 
 	const PLOT_EXPORT_BASE_SCALE = 3;
 	const PLOT_EXPORT_MAX_CANVAS_SIDE = 8192;
@@ -590,3 +591,11 @@
 		showPopup();
 		safeTypeset(document.getElementById('popup-plot'));
 	}
+
+	Object.assign(window, {
+		sanitizeFilename,
+		updatePlotAndRenderLatex,
+		plotGraph,
+		plotAllDatasets
+	});
+})();
