@@ -607,8 +607,10 @@ body {
 }
 
 .section-toggle-popup::after {
-	content: "↗";
+	content: "\2197\FE0E";
 	font-size: 1rem;
+	font-family: var(--font-body), "Apple Symbols", "Segoe UI Symbol", sans-serif;
+	font-variant-emoji: text;
 }
 
 .collapsible-content {
