@@ -1767,6 +1767,38 @@ select {
 	color: var(--text-secondary);
 }
 
+#data-processing-formula-message {
+	margin: 8px 0;
+	padding: 8px 10px;
+	border-radius: 8px;
+	font-size: 0.82rem;
+	border: 1px solid transparent;
+}
+
+#data-processing-formula-message.is-error {
+	background: rgba(231, 76, 60, 0.12);
+	border-color: rgba(231, 76, 60, 0.35);
+	color: #8e2a2a;
+}
+
+#data-processing-formula-message.is-warning {
+	background: rgba(241, 196, 15, 0.18);
+	border-color: rgba(241, 196, 15, 0.4);
+	color: #7a5f00;
+}
+
+[data-theme="dark"] #data-processing-formula-message.is-error {
+	background: rgba(231, 76, 60, 0.24);
+	border-color: rgba(231, 76, 60, 0.42);
+	color: #ffd3cc;
+}
+
+[data-theme="dark"] #data-processing-formula-message.is-warning {
+	background: rgba(241, 196, 15, 0.22);
+	border-color: rgba(241, 196, 15, 0.45);
+	color: #ffe9a8;
+}
+
 .data-processing-inline-actions {
 	display: flex;
 	gap: 8px;

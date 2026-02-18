@@ -40,6 +40,7 @@
 			formulaPanel: document.getElementById('data-processing-formula-panel'),
 			formulaLabel: document.getElementById('data-processing-formula-label'),
 			formulaInput: document.getElementById('data-processing-formula-input'),
+			formulaMessage: document.getElementById('data-processing-formula-message'),
 			applyButton: document.getElementById('data-processing-apply'),
 			cancelButton: document.getElementById('data-processing-cancel'),
 			derivedList: document.getElementById('data-processing-derived-list'),
@@ -143,6 +144,39 @@
 
 	function clearMessages() {
 		setMessages([]);
+	}
+
+	function setFormulaMessage(text = '', type = 'error') {
+		const elements = getElements();
+		if (!elements.formulaMessage) return;
+
+		if (!text) {
+			elements.formulaMessage.textContent = '';
+			elements.formulaMessage.className = '';
+			elements.formulaMessage.style.display = 'none';
+			return;
+		}
+
+		elements.formulaMessage.textContent = text;
+		elements.formulaMessage.className = `is-${type}`;
+		elements.formulaMessage.style.display = 'block';
+	}
+
+	function clearFormulaMessage() {
+		setFormulaMessage('');
+	}
+
+	function isEnterKey(event) {
+		return event.key === 'Enter'
+			|| event.code === 'Enter'
+			|| event.code === 'NumpadEnter'
+			|| event.keyCode === 13;
+	}
+
+	function isEscapeKey(event) {
+		return event.key === 'Escape'
+			|| event.code === 'Escape'
+			|| event.keyCode === 27;
 	}
 
 	function getSourceTableColumns() {
@@ -497,6 +531,7 @@
 		elements.formulaLabel.textContent = `Formula for ${headerLabel}`;
 		elements.formulaInput.placeholder = `e.g. =1/${headerLabel}`;
 		elements.formulaInput.value = '';
+		clearFormulaMessage();
 		elements.formulaPanel.style.display = 'block';
 		elements.formulaInput.focus();
 	}
@@ -507,6 +542,7 @@
 		if (!elements.formulaPanel || !elements.formulaInput) return;
 		elements.formulaPanel.style.display = 'none';
 		elements.formulaInput.value = '';
+		clearFormulaMessage();
 		if (discardPending) {
 			state.pendingDerivedColumn = null;
 			renderSourceSection();
@@ -520,15 +556,16 @@
 
 	function handleApplyFormula() {
 		if (!state.formulaAxis || !state.sourceRows.length || !state.pendingDerivedColumn) return;
+		clearFormulaMessage();
 		if (typeof math !== 'object' || math === null || typeof math.parse !== 'function') {
-			setMessages([{ type: 'error', text: 'Invalid formula. Please check syntax and try again.' }]);
+			setFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
 			return;
 		}
 
 		const elements = getElements();
 		const sanitizedFormula = sanitizeFormulaText(elements.formulaInput ? elements.formulaInput.value : '');
 		if (!sanitizedFormula) {
-			setMessages([{ type: 'error', text: 'Invalid formula. Please check syntax and try again.' }]);
+			setFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
 			return;
 		}
 
@@ -536,12 +573,12 @@
 		try {
 			parsedExpression = math.parse(sanitizedFormula);
 		} catch {
-			setMessages([{ type: 'error', text: 'Invalid formula. Please check syntax and try again.' }]);
+			setFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
 			return;
 		}
 
 		if (hasForbiddenConstruct(parsedExpression)) {
-			setMessages([{ type: 'error', text: 'Invalid formula. Please check syntax and try again.' }]);
+			setFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
 			return;
 		}
 
@@ -551,7 +588,7 @@
 
 		const unknownSymbol = findUnknownSymbol(parsedExpression, allowedSymbols);
 		if (unknownSymbol) {
-			setMessages([{ type: 'error', text: `Unknown variable "${unknownSymbol}" in formula.` }]);
+			setFormulaMessage(`Unknown variable "${unknownSymbol}" in formula.`, 'warning');
 			return;
 		}
 
@@ -559,7 +596,7 @@
 		try {
 			compiledExpression = parsedExpression.compile();
 		} catch {
-			setMessages([{ type: 'error', text: 'Invalid formula. Please check syntax and try again.' }]);
+			setFormulaMessage('Invalid formula. Please check syntax and try again.', 'error');
 			return;
 		}
 
@@ -813,12 +850,12 @@
 		}
 		if (elements.formulaInput) {
 			elements.formulaInput.addEventListener('keydown', (event) => {
-				if (event.key === 'Enter') {
+				if (isEnterKey(event)) {
 					event.preventDefault();
 					handleApplyFormula();
 					return;
 				}
-				if (event.key === 'Escape') {
+				if (isEscapeKey(event)) {
 					event.preventDefault();
 					event.stopPropagation();
 					handleCancelFormula();
