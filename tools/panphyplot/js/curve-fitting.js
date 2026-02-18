@@ -569,6 +569,9 @@ function buildCustomFitInitialCandidates(baseParams) {
 }
 
 function fitCurve() {
+	if (typeof updateData === 'function') {
+		updateData();
+	}
 	const filteredData = getFiniteDatasetPoints(activeSet);
 	const xValues = filteredData.map(point => point.x);
 	const yValues = filteredData.map(point => point.y);
@@ -1122,6 +1125,9 @@ function polyEval(coefficients, x) {
 
 
 function fitAdvancedCurve() {
+	if (typeof updateData === 'function') {
+		updateData();
+	}
 	if (rawData[activeSet].length < 4) { // Increased to 4 for more complex fits
 		alert('Please enter at least four data points for advanced fitting.');
 		return;
@@ -1138,6 +1144,9 @@ function fitAdvancedCurve() {
 
 function fitCustomCurve() {
 	try {
+		if (typeof updateData === 'function') {
+			updateData();
+		}
 		const analysis = refreshCustomFitDefinition({ preserveUserValues: true });
 		if (!analysis.ok) {
 			alert('Please enter a valid custom equation before fitting.');

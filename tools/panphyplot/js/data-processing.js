@@ -92,13 +92,11 @@
 
 		for (let index = 0; index < dataset.length; index++) {
 			const point = dataset[index] || {};
-			const x = Number(point.x);
-			const y = Number(point.y);
-			if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+			if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
 
 			rows.push({
-				x,
-				y
+				x: point.x,
+				y: point.y
 			});
 		}
 
@@ -808,6 +806,9 @@
 		const elements = getElements();
 		if (!elements.background || !elements.container) return;
 
+		if (typeof updateData === 'function') {
+			updateData();
+		}
 		refreshSourceState();
 		resetSessionState();
 		renderSourceSection();

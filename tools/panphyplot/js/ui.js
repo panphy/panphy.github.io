@@ -1476,6 +1476,83 @@ function clearFittedCurve() {
 		return header.includes('%') ? 'percentage' : 'absolute';
 	}
 
+	function escapeRegExp(value) {
+		return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	}
+
+	function normalizeCsvHeaderForMatch(headerText) {
+		return String(headerText || '')
+			.toLowerCase()
+			.replace(/[δΔ]/g, 'delta ')
+			.replace(/[_-]+/g, ' ')
+			.replace(/\s+/g, ' ')
+			.trim();
+	}
+
+	function headerMentionsLabel(normalizedHeader, label) {
+		const normalizedLabel = normalizeCsvHeaderForMatch(label);
+		if (!normalizedHeader || !normalizedLabel) return false;
+		if (normalizedHeader.includes(normalizedLabel)) return true;
+
+		const labelTokens = normalizedLabel.split(' ').filter(Boolean);
+		if (labelTokens.length === 1) {
+			const tokenRegex = new RegExp(`\\b${escapeRegExp(labelTokens[0])}\\b`);
+			return tokenRegex.test(normalizedHeader);
+		}
+		return false;
+	}
+
+	function inferErrorAxisFromHeader(headerText, xHeaderLabel, yHeaderLabel) {
+		const normalizedHeader = normalizeCsvHeaderForMatch(headerText);
+		if (!normalizedHeader) return null;
+
+		const xMatch = headerMentionsLabel(normalizedHeader, xHeaderLabel)
+			|| /\b(?:delta x|x uncertainty|x error|dx)\b/.test(normalizedHeader);
+		const yMatch = headerMentionsLabel(normalizedHeader, yHeaderLabel)
+			|| /\b(?:delta y|y uncertainty|y error|dy)\b/.test(normalizedHeader);
+
+		if (xMatch && !yMatch) return 'x';
+		if (yMatch && !xMatch) return 'y';
+		return null;
+	}
+
+	function detectCsvErrorColumns(headers, xHeaderLabel, yHeaderLabel) {
+		let xErrorIndex = null;
+		let yErrorIndex = null;
+		const unmatchedErrorIndices = [];
+
+		for (let index = 2; index < headers.length; index++) {
+			const axis = inferErrorAxisFromHeader(headers[index], xHeaderLabel, yHeaderLabel);
+			if (axis === 'x' && xErrorIndex === null) {
+				xErrorIndex = index;
+				continue;
+			}
+			if (axis === 'y' && yErrorIndex === null) {
+				yErrorIndex = index;
+				continue;
+			}
+			unmatchedErrorIndices.push(index);
+		}
+
+		// Fallback for legacy/malformed headers: assign remaining columns in X->Y order.
+		unmatchedErrorIndices.forEach((index) => {
+			if (xErrorIndex === null) {
+				xErrorIndex = index;
+				return;
+			}
+			if (yErrorIndex === null) {
+				yErrorIndex = index;
+			}
+		});
+
+		return {
+			xErrorIndex,
+			yErrorIndex,
+			xErrorType: xErrorIndex !== null ? inferErrorTypeFromHeader(headers[xErrorIndex]) : 'absolute',
+			yErrorType: yErrorIndex !== null ? inferErrorTypeFromHeader(headers[yErrorIndex]) : 'absolute'
+		};
+	}
+
 	function escapeCsvCell(value) {
 		const text = String(value ?? '');
 		const escaped = text.replace(/"/g, '""');
@@ -1497,11 +1574,12 @@ function clearFittedCurve() {
 			return;
 		}
 
-		// Determine if the CSV has X and Y errors
-		const hasXError = headers.length >= 3;
-		const hasYError = headers.length >= 4;
-		const xImportedErrorType = hasXError ? inferErrorTypeFromHeader(headers[2]) : 'absolute';
-		const yImportedErrorType = hasYError ? inferErrorTypeFromHeader(headers[3]) : 'absolute';
+		// Determine CSV uncertainty columns by header mapping (not fixed positions).
+		const detectedErrors = detectCsvErrorColumns(headers, headers[0], headers[1]);
+		const hasXError = Number.isInteger(detectedErrors.xErrorIndex);
+		const hasYError = Number.isInteger(detectedErrors.yErrorIndex);
+		const xImportedErrorType = detectedErrors.xErrorType;
+		const yImportedErrorType = detectedErrors.yErrorType;
 
 		// 2) Store headers for the active dataset and update the UI
 		isSyncing = true;
@@ -1569,14 +1647,16 @@ function clearFittedCurve() {
 			const tdXErr = document.createElement('td');
 			tdXErr.className = 'error-column x-error-td';
 			if (!hasXError) tdXErr.style.display = 'none';
-			tdXErr.appendChild(makeInput('x-error-input', rowData[2], '±0'));
+			const xErrorValue = hasXError ? rowData[detectedErrors.xErrorIndex] : '';
+			tdXErr.appendChild(makeInput('x-error-input', xErrorValue, '±0'));
 			tr.appendChild(tdXErr);
 
 			// Y-error cell
 			const tdYErr = document.createElement('td');
 			tdYErr.className = 'error-column y-error-td';
 			if (!hasYError) tdYErr.style.display = 'none';
-			tdYErr.appendChild(makeInput('y-error-input', rowData[3], '±0'));
+			const yErrorValue = hasYError ? rowData[detectedErrors.yErrorIndex] : '';
+			tdYErr.appendChild(makeInput('y-error-input', yErrorValue, '±0'));
 			tr.appendChild(tdYErr);
 
 			fragment.appendChild(tr);
@@ -1796,7 +1876,6 @@ function clearFittedCurve() {
 		return allValid;
 	}
 
-
 	function updateData() {
 		try {
 			const xInputs = document.querySelectorAll('.x-input');
@@ -1814,7 +1893,7 @@ function clearFittedCurve() {
 				dataset1XValues = [];
 				for (let i = 0; i < xInputs.length; i++) {
 					const xVal = parseFloat(xInputs[i].value);
-					if (!isNaN(xVal)) {
+					if (Number.isFinite(xVal)) {
 						dataset1XValues.push(xVal);
 					}
 				}
@@ -1831,10 +1910,10 @@ function clearFittedCurve() {
 				const yErrorRaw = isValidUncertaintyForType(parsedYError, yErrorType) ? parsedYError : 0;
 
 				// Save the row if x is a valid number, regardless of y.
-				if (!isNaN(x)) {
+				if (Number.isFinite(x)) {
 					rawData[activeSet].push({
 						x: x,
-						y: (!isNaN(y) ? y : null), // If y is not valid, store it as null.
+						y: (Number.isFinite(y) ? y : null), // If y is not valid, store it as null.
 						xErrorRaw: xErrorRaw,
 						yErrorRaw: yErrorRaw
 					});

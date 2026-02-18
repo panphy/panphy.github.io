@@ -158,7 +158,9 @@
 				let min = Infinity;
 				let max = -Infinity;
 				for (let index = 0; index < values.length; index++) {
-					const numeric = Number(values[index]);
+					const rawValue = values[index];
+					if (rawValue === null || rawValue === undefined || rawValue === '') continue;
+					const numeric = typeof rawValue === 'number' ? rawValue : Number(rawValue);
 					if (!Number.isFinite(numeric)) continue;
 					if (numeric < min) min = numeric;
 					if (numeric > max) max = numeric;
@@ -425,6 +427,9 @@
 
 
 	function plotAllDatasets() {
+		if (typeof updateData === 'function') {
+			updateData();
+		}
 		const traces = [];
 		const themeSettings = getPlotThemeSettings();
 
