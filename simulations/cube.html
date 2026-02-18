@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Cube Inertia (Prototype)</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+        :root {
+            --font-ui: 'Space Grotesk', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+
+            --bg-color: #020817;
+            --bg-accent: #0f172a;
+            --panel-bg: rgba(15, 23, 42, 0.82);
+            --panel-border: rgba(125, 211, 252, 0.28);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+
+            --brand-primary: #22d3ee;
+            --brand-secondary: #38bdf8;
+            --brand-accent: #86efac;
+            --danger: #fb7185;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #e2e8f0;
+            --bg-accent: #cbd5e1;
+            --panel-bg: rgba(248, 250, 252, 0.9);
+            --panel-border: rgba(2, 132, 199, 0.28);
+            --text-main: #0f172a;
+            --text-muted: #334155;
+
+            --brand-primary: #0284c7;
+            --brand-secondary: #0ea5e9;
+            --brand-accent: #16a34a;
+            --danger: #be123c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--font-ui);
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at 20% 18%, rgba(34, 211, 238, 0.2), transparent 30%),
+                radial-gradient(circle at 78% 8%, rgba(134, 239, 172, 0.16), transparent 30%),
+                linear-gradient(160deg, var(--bg-color), var(--bg-accent));
+            display: grid;
+            place-items: center;
+            padding: 18px;
+        }
+
+        .app {
+            width: min(1100px, 100%);
+            display: grid;
+            gap: 12px;
+        }
+
+        .panel {
+            border: 1px solid var(--panel-border);
+            background: var(--panel-bg);
+            border-radius: 16px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            margin: 0;
+            font-size: clamp(1rem, 1.4vw, 1.35rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        button {
+            border: 1px solid var(--panel-border);
+            background: rgba(15, 23, 42, 0.54);
+            color: var(--text-main);
+            font: 500 0.92rem/1 var(--font-ui);
+            border-radius: 10px;
+            padding: 10px 12px;
+            min-height: 48px;
+            cursor: pointer;
+        }
+
+        [data-theme="light"] button {
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        button:hover:not(:disabled) {
+            border-color: var(--brand-primary);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.46;
+            cursor: not-allowed;
+        }
+
+        #startBtn {
+            background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary));
+            color: #001018;
+            border: none;
+            font-weight: 700;
+        }
+
+        #startBtn:disabled {
+            opacity: 0.82;
+            color: #001018;
+        }
+
+        .stage {
+            position: relative;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+        }
+
+        .media-layer {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        #renderCanvas {
+            pointer-events: none;
+        }
+
+        .hud {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            z-index: 10;
+            display: grid;
+            gap: 6px;
+            max-width: min(92vw, 680px);
+        }
+
+        .pill {
+            border: 1px solid var(--panel-border);
+            background: rgba(2, 6, 23, 0.7);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.86rem;
+            line-height: 1.2;
+        }
+
+        [data-theme="light"] .pill {
+            background: rgba(255, 255, 255, 0.76);
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            letter-spacing: 0.01em;
+        }
+
+        .status-error {
+            border-color: color-mix(in srgb, var(--danger) 66%, transparent);
+            color: var(--danger);
+        }
+
+        .hint {
+            margin: 0;
+            padding: 0 4px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+
+            .topbar {
+                padding: 10px;
+            }
+
+            .stage {
+                border-radius: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header class="topbar panel">
+            <h1 class="title">Hand Cube Inertia (Prototype)</h1>
+            <div class="controls">
+                <button id="startBtn" type="button">Start Camera</button>
+                <button id="placeBtn" type="button" disabled>Place Cube</button>
+                <button id="resetBtn" type="button" disabled>Reset Motion</button>
+            </div>
+        </header>
+
+        <section id="stage" class="stage panel">
+            <video id="camera" class="media-layer" autoplay playsinline muted></video>
+            <canvas id="renderCanvas" class="media-layer"></canvas>
+            <div class="hud">
+                <div id="status" class="pill">Camera is off.</div>
+                <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Contacts: 0 | Speed: 0.00</div>
+            </div>
+        </section>
+
+        <p class="hint">
+            Place cube, then push it with fingertips or palm. The cube has no gravity and very low drag.
+        </p>
+    </main>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+        import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/vision_bundle.mjs';
+
+        const ui = {
+            startBtn: document.getElementById('startBtn'),
+            placeBtn: document.getElementById('placeBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            status: document.getElementById('status'),
+            metrics: document.getElementById('metrics'),
+            stage: document.getElementById('stage'),
+            video: document.getElementById('camera'),
+            canvas: document.getElementById('renderCanvas')
+        };
+
+        const state = {
+            running: false,
+            lastFrameTime: 0,
+            fps: 0,
+            handLandmarker: null,
+            stream: null,
+            lastVideoTime: -1,
+            lastHands: [],
+            handsCount: 0,
+            contactsCount: 0
+        };
+
+        const physics = {
+            size: 0.3,
+            placed: false,
+            position: new THREE.Vector3(0, 0, 0),
+            velocity: new THREE.Vector3(0, 0, 0),
+            angularVelocity: new THREE.Vector3(0, 0, 0)
+        };
+
+        const CONTACT_POINTS = [0, 4, 8, 12, 16, 20];
+        const CONTACT_RADIUS = 0.085;
+        const SPRING_FORCE = 120;
+        const CONTACT_DAMPING = 6;
+        const POSITION_CORRECTION = 0.62;
+
+        const scene = new THREE.Scene();
+        const camera3d = new THREE.PerspectiveCamera(52, 1, 0.01, 20);
+        camera3d.position.set(0, 0, 2.2);
+        scene.add(camera3d);
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: ui.canvas,
+            alpha: true,
+            antialias: true,
+            powerPreference: 'high-performance'
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        scene.add(new THREE.HemisphereLight(0xb8f7ff, 0x091321, 1.05));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+        keyLight.position.set(1.4, 1.6, 2.0);
+        scene.add(keyLight);
+        const rimLight = new THREE.DirectionalLight(0x7dd3fc, 0.8);
+        rimLight.position.set(-1.4, -0.4, -1.0);
+        scene.add(rimLight);
+
+        const cubeGroup = new THREE.Group();
+        const cubeGeometry = new THREE.BoxGeometry(physics.size, physics.size, physics.size);
+        const cubeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x22d3ee,
+            emissive: 0x052f40,
+            metalness: 0.2,
+            roughness: 0.25,
+            transparent: true,
+            opacity: 0.9
+        });
+        const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        const edgeLines = new THREE.LineSegments(
+            new THREE.EdgesGeometry(cubeGeometry),
+            new THREE.LineBasicMaterial({ color: 0x00131c })
+        );
+        cubeGroup.add(cubeMesh, edgeLines);
+        cubeGroup.visible = false;
+        scene.add(cubeGroup);
+
+        const scratch = {
+            rayPoint: new THREE.Vector3(),
+            rayDir: new THREE.Vector3(),
+            handPoint: new THREE.Vector3(),
+            closest: new THREE.Vector3(),
+            normal: new THREE.Vector3(),
+            torque: new THREE.Vector3(),
+            arm: new THREE.Vector3()
+        };
+
+        function setStatus(message, isError = false) {
+            ui.status.textContent = message;
+            ui.status.classList.toggle('status-error', isError);
+        }
+
+        function updateMetrics() {
+            const speed = physics.velocity.length();
+            ui.metrics.textContent =
+                `FPS: ${state.fps.toFixed(0)} | Hands: ${state.handsCount} | Contacts: ${state.contactsCount} | Speed: ${speed.toFixed(2)}`;
+        }
+
+        function resizeStage() {
+            const rect = ui.stage.getBoundingClientRect();
+            if (!rect.width || !rect.height) {
+                return;
+            }
+
+            renderer.setSize(rect.width, rect.height, false);
+            camera3d.aspect = rect.width / rect.height;
+            camera3d.updateProjectionMatrix();
+        }
+
+        function resetCubePose() {
+            physics.position.set(0, 0, 0);
+            physics.velocity.set(0, 0, 0);
+            physics.angularVelocity.set(0, 0, 0);
+            cubeGroup.position.copy(physics.position);
+            cubeGroup.rotation.set(0.35, 0.5, 0.05);
+        }
+
+        function placeCube() {
+            physics.placed = true;
+            cubeGroup.visible = true;
+            resetCubePose();
+            setStatus('Cube placed. Push with hand landmarks.');
+        }
+
+        function landmarkToWorld(landmark, out) {
+            const ndcX = (landmark.x * 2) - 1;
+            const ndcY = -((landmark.y * 2) - 1);
+            const worldZ = THREE.MathUtils.clamp(-landmark.z * 2.3, -0.65, 1.25);
+
+            scratch.rayPoint.set(ndcX, ndcY, 0.5).unproject(camera3d);
+            scratch.rayDir.copy(scratch.rayPoint).sub(camera3d.position);
+
+            if (Math.abs(scratch.rayDir.z) < 0.0001) {
+                return false;
+            }
+
+            const t = (worldZ - camera3d.position.z) / scratch.rayDir.z;
+            if (!Number.isFinite(t) || t < 0) {
+                return false;
+            }
+
+            out.copy(camera3d.position).addScaledVector(scratch.rayDir, t);
+            return true;
+        }
+
+        function applyHandForces(dt) {
+            if (!physics.placed) {
+                return 0;
+            }
+
+            const half = physics.size * 0.5;
+            let contacts = 0;
+
+            for (const hand of state.lastHands) {
+                for (const pointIndex of CONTACT_POINTS) {
+                    if (!landmarkToWorld(hand[pointIndex], scratch.handPoint)) {
+                        continue;
+                    }
+
+                    scratch.closest.set(
+                        THREE.MathUtils.clamp(scratch.handPoint.x, physics.position.x - half, physics.position.x + half),
+                        THREE.MathUtils.clamp(scratch.handPoint.y, physics.position.y - half, physics.position.y + half),
+                        THREE.MathUtils.clamp(scratch.handPoint.z, physics.position.z - half, physics.position.z + half)
+                    );
+
+                    scratch.normal.copy(scratch.closest).sub(scratch.handPoint);
+                    const distance = scratch.normal.length();
+                    if (distance >= CONTACT_RADIUS) {
+                        continue;
+                    }
+
+                    contacts += 1;
+                    if (distance < 0.000001) {
+                        scratch.normal.set(0, 1, 0);
+                    } else {
+                        scratch.normal.multiplyScalar(1 / distance);
+                    }
+
+                    const penetration = CONTACT_RADIUS - distance;
+                    const inwardSpeed = Math.min(physics.velocity.dot(scratch.normal), 0);
+                    const pushAccel = (SPRING_FORCE * penetration) - (CONTACT_DAMPING * inwardSpeed);
+
+                    physics.position.addScaledVector(scratch.normal, penetration * POSITION_CORRECTION);
+                    physics.velocity.addScaledVector(scratch.normal, pushAccel * dt);
+
+                    scratch.arm.copy(scratch.handPoint).sub(physics.position);
+                    scratch.torque.copy(scratch.arm).cross(scratch.normal).multiplyScalar(penetration * 45);
+                    physics.angularVelocity.addScaledVector(scratch.torque, dt);
+                }
+            }
+
+            return contacts;
+        }
+
+        function constrainCubeToView() {
+            const half = physics.size * 0.5;
+            const depth = camera3d.position.z - physics.position.z;
+            const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera3d.fov * 0.5)) * depth;
+            const halfWidth = halfHeight * camera3d.aspect;
+
+            const xLimit = Math.max(0.2, halfWidth - half);
+            const yLimit = Math.max(0.2, halfHeight - half);
+            const zMin = -0.8;
+            const zMax = 1.45;
+            const restitution = 0.92;
+
+            if (physics.position.x > xLimit) {
+                physics.position.x = xLimit;
+                physics.velocity.x = -Math.abs(physics.velocity.x) * restitution;
+            } else if (physics.position.x < -xLimit) {
+                physics.position.x = -xLimit;
+                physics.velocity.x = Math.abs(physics.velocity.x) * restitution;
+            }
+
+            if (physics.position.y > yLimit) {
+                physics.position.y = yLimit;
+                physics.velocity.y = -Math.abs(physics.velocity.y) * restitution;
+            } else if (physics.position.y < -yLimit) {
+                physics.position.y = -yLimit;
+                physics.velocity.y = Math.abs(physics.velocity.y) * restitution;
+            }
+
+            if (physics.position.z > zMax) {
+                physics.position.z = zMax;
+                physics.velocity.z = -Math.abs(physics.velocity.z) * restitution;
+            } else if (physics.position.z < zMin) {
+                physics.position.z = zMin;
+                physics.velocity.z = Math.abs(physics.velocity.z) * restitution;
+            }
+        }
+
+        function updatePhysics(dt) {
+            if (!physics.placed) {
+                return;
+            }
+
+            physics.position.addScaledVector(physics.velocity, dt);
+            constrainCubeToView();
+
+            const linearDrag = Math.exp(-0.03 * dt);
+            const angularDrag = Math.exp(-0.08 * dt);
+            physics.velocity.multiplyScalar(linearDrag);
+            physics.angularVelocity.multiplyScalar(angularDrag);
+
+            cubeGroup.position.copy(physics.position);
+            cubeGroup.rotation.x += physics.angularVelocity.x * dt;
+            cubeGroup.rotation.y += physics.angularVelocity.y * dt;
+            cubeGroup.rotation.z += physics.angularVelocity.z * dt;
+        }
+
+        function step(now) {
+            if (!state.running) {
+                return;
+            }
+
+            if (!state.lastFrameTime) {
+                state.lastFrameTime = now;
+            }
+            const dt = Math.min((now - state.lastFrameTime) / 1000, 1 / 20);
+            state.lastFrameTime = now;
+            state.fps = state.fps ? (state.fps * 0.9) + ((1 / Math.max(dt, 0.0001)) * 0.1) : (1 / Math.max(dt, 0.0001));
+
+            if (state.handLandmarker && ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                if (ui.video.currentTime !== state.lastVideoTime) {
+                    state.lastVideoTime = ui.video.currentTime;
+                    const result = state.handLandmarker.detectForVideo(ui.video, now);
+                    state.lastHands = result.landmarks || [];
+                }
+            }
+
+            state.handsCount = state.lastHands.length;
+            state.contactsCount = applyHandForces(dt);
+            updatePhysics(dt);
+            updateMetrics();
+            renderer.render(scene, camera3d);
+
+            requestAnimationFrame(step);
+        }
+
+        async function createHandLandmarker() {
+            const vision = await FilesetResolver.forVisionTasks(
+                'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm'
+            );
+
+            return HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath:
+                        'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'
+                },
+                runningMode: 'VIDEO',
+                numHands: 2
+            });
+        }
+
+        async function startCameraAndTracking() {
+            if (state.running) {
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setStatus('getUserMedia is not available in this browser.', true);
+                return;
+            }
+
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                setStatus('Camera access requires HTTPS or localhost.', true);
+                return;
+            }
+
+            ui.startBtn.disabled = true;
+            setStatus('Requesting camera permission...');
+
+            try {
+                state.stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+
+                ui.video.srcObject = state.stream;
+                await ui.video.play();
+
+                setStatus('Loading hand tracker...');
+                state.handLandmarker = await createHandLandmarker();
+
+                resizeStage();
+                state.running = true;
+                state.lastFrameTime = performance.now();
+                ui.placeBtn.disabled = false;
+                ui.resetBtn.disabled = false;
+                setStatus('Ready. Press "Place Cube" to start.');
+                requestAnimationFrame(step);
+            } catch (error) {
+                if (state.stream) {
+                    state.stream.getTracks().forEach((track) => track.stop());
+                    state.stream = null;
+                }
+                ui.startBtn.disabled = false;
+                setStatus(`Could not start: ${error.message || error}`, true);
+            }
+        }
+
+        ui.startBtn.addEventListener('click', startCameraAndTracking);
+        ui.placeBtn.addEventListener('click', placeCube);
+        ui.resetBtn.addEventListener('click', resetCubePose);
+
+        window.addEventListener('resize', resizeStage);
+        if ('ResizeObserver' in window) {
+            new ResizeObserver(resizeStage).observe(ui.stage);
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (state.stream) {
+                state.stream.getTracks().forEach((track) => track.stop());
+            }
+        });
+
+        resizeStage();
+        renderer.render(scene, camera3d);
+    </script>
+</body>
+</html>
