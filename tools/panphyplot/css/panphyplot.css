@@ -1709,7 +1709,8 @@ select {
 }
 
 #data-processing-source-table {
-	width: 100%;
+	width: max-content;
+	min-width: 100%;
 	border-collapse: collapse;
 	background: var(--card-bg);
 	border: 1px solid var(--border-color);
@@ -1724,6 +1725,8 @@ select {
 	border: 1px solid var(--border-color);
 	font-size: 0.88rem;
 	color: var(--text-main);
+	min-width: 90px;
+	white-space: nowrap;
 }
 
 #data-processing-source-table th {
