@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand Cube Inertia (Prototype)</title>
+    <title>Fingertip Sphere Inertia (2D Prototype)</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
@@ -149,6 +149,10 @@
             pointer-events: none;
         }
 
+        #tipCanvas {
+            pointer-events: none;
+        }
+
         .hud {
             position: absolute;
             left: 12px;
@@ -208,10 +212,10 @@
 <body>
     <main class="app">
         <header class="topbar panel">
-            <h1 class="title">Hand Cube Inertia (Prototype)</h1>
+            <h1 class="title">Fingertip Sphere Inertia (2D Prototype)</h1>
             <div class="controls">
                 <button id="startBtn" type="button">Start Camera</button>
-                <button id="placeBtn" type="button" disabled>Place Cube</button>
+                <button id="placeBtn" type="button" disabled>Place Sphere</button>
                 <button id="resetBtn" type="button" disabled>Reset Motion</button>
             </div>
         </header>
@@ -219,14 +223,15 @@
         <section id="stage" class="stage panel">
             <video id="camera" class="media-layer" autoplay playsinline muted></video>
             <canvas id="renderCanvas" class="media-layer"></canvas>
+            <canvas id="tipCanvas" class="media-layer"></canvas>
             <div class="hud">
                 <div id="status" class="pill">Camera is off.</div>
-                <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Contacts: 0 | Speed: 0.00</div>
+                <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 | Speed: 0.00</div>
             </div>
         </section>
 
         <p class="hint">
-            Place cube, then push it with fingertips or palm. The cube has no gravity and very low drag.
+            Place sphere, then push it with the tracked green fingertip circles. Motion is constrained to 2D.
         </p>
     </main>
 
@@ -241,7 +246,8 @@
             metrics: document.getElementById('metrics'),
             stage: document.getElementById('stage'),
             video: document.getElementById('camera'),
-            canvas: document.getElementById('renderCanvas')
+            canvas: document.getElementById('renderCanvas'),
+            tipCanvas: document.getElementById('tipCanvas')
         };
 
         const state = {
@@ -253,6 +259,8 @@
             lastVideoTime: -1,
             lastHands: [],
             handsCount: 0,
+            tipCount: 0,
+            trackedTips: [],
             contactsCount: 0
         };
 
@@ -327,18 +335,18 @@
         }
 
         const physics = {
-            size: 0.3,
+            radius: 0.18,
+            planeZ: 0,
             placed: false,
             position: new THREE.Vector3(0, 0, 0),
-            velocity: new THREE.Vector3(0, 0, 0),
-            angularVelocity: new THREE.Vector3(0, 0, 0)
+            velocity: new THREE.Vector3(0, 0, 0)
         };
 
-        const CONTACT_POINTS = [0, 4, 8, 12, 16, 20];
-        const CONTACT_RADIUS = 0.085;
-        const SPRING_FORCE = 120;
-        const CONTACT_DAMPING = 6;
-        const POSITION_CORRECTION = 0.62;
+        const FINGERTIP_POINTS = [4, 8, 12, 16, 20];
+        const CONTACT_RADIUS = 0.12;
+        const SPRING_FORCE = 95;
+        const CONTACT_DAMPING = 5;
+        const POSITION_CORRECTION = 0.6;
 
         const scene = new THREE.Scene();
         const camera3d = new THREE.PerspectiveCamera(52, 1, 0.01, 20);
@@ -351,6 +359,7 @@
             antialias: true,
             powerPreference: 'high-performance'
         });
+        const tipCtx = ui.tipCanvas.getContext('2d', { alpha: true });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -362,33 +371,35 @@
         rimLight.position.set(-1.4, -0.4, -1.0);
         scene.add(rimLight);
 
-        const cubeGroup = new THREE.Group();
-        const cubeGeometry = new THREE.BoxGeometry(physics.size, physics.size, physics.size);
-        const cubeMaterial = new THREE.MeshStandardMaterial({
+        const sphereGroup = new THREE.Group();
+        const sphereGeometry = new THREE.SphereGeometry(physics.radius, 36, 28);
+        const sphereMaterial = new THREE.MeshStandardMaterial({
             color: 0x22d3ee,
             emissive: 0x052f40,
-            metalness: 0.2,
-            roughness: 0.25,
+            metalness: 0.22,
+            roughness: 0.22,
             transparent: true,
             opacity: 0.9
         });
-        const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        const edgeLines = new THREE.LineSegments(
-            new THREE.EdgesGeometry(cubeGeometry),
-            new THREE.LineBasicMaterial({ color: 0x00131c })
+        const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        const sphereWire = new THREE.Mesh(
+            sphereGeometry,
+            new THREE.MeshBasicMaterial({
+                color: 0x00131c,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.25
+            })
         );
-        cubeGroup.add(cubeMesh, edgeLines);
-        cubeGroup.visible = false;
-        scene.add(cubeGroup);
+        sphereGroup.add(sphereMesh, sphereWire);
+        sphereGroup.visible = false;
+        scene.add(sphereGroup);
 
         const scratch = {
             rayPoint: new THREE.Vector3(),
             rayDir: new THREE.Vector3(),
-            handPoint: new THREE.Vector3(),
-            closest: new THREE.Vector3(),
-            normal: new THREE.Vector3(),
-            torque: new THREE.Vector3(),
-            arm: new THREE.Vector3()
+            tipWorld: new THREE.Vector3(),
+            normal: new THREE.Vector3()
         };
 
         function setStatus(message, isError = false) {
@@ -397,9 +408,9 @@
         }
 
         function updateMetrics() {
-            const speed = physics.velocity.length();
+            const speed = Math.hypot(physics.velocity.x, physics.velocity.y);
             ui.metrics.textContent =
-                `FPS: ${state.fps.toFixed(0)} | Hands: ${state.handsCount} | Contacts: ${state.contactsCount} | Speed: ${speed.toFixed(2)}`;
+                `FPS: ${state.fps.toFixed(0)} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Speed: ${speed.toFixed(2)}`;
         }
 
         function resizeStage() {
@@ -411,27 +422,30 @@
             renderer.setSize(rect.width, rect.height, false);
             camera3d.aspect = rect.width / rect.height;
             camera3d.updateProjectionMatrix();
+
+            ui.tipCanvas.width = Math.max(1, Math.round(rect.width));
+            ui.tipCanvas.height = Math.max(1, Math.round(rect.height));
+            if (tipCtx) {
+                tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
+            }
         }
 
-        function resetCubePose() {
-            physics.position.set(0, 0, 0);
+        function resetSphereState() {
+            physics.position.set(0, 0, physics.planeZ);
             physics.velocity.set(0, 0, 0);
-            physics.angularVelocity.set(0, 0, 0);
-            cubeGroup.position.copy(physics.position);
-            cubeGroup.rotation.set(0.35, 0.5, 0.05);
+            sphereGroup.position.copy(physics.position);
         }
 
-        function placeCube() {
+        function placeSphere() {
             physics.placed = true;
-            cubeGroup.visible = true;
-            resetCubePose();
-            setStatus('Cube placed. Push with hand landmarks.');
+            sphereGroup.visible = true;
+            resetSphereState();
+            setStatus('Sphere placed. Only tracked fingertips can push it.');
         }
 
-        function landmarkToWorld(landmark, out) {
+        function landmarkToPlane(landmark, out) {
             const ndcX = (landmark.x * 2) - 1;
             const ndcY = -((landmark.y * 2) - 1);
-            const worldZ = THREE.MathUtils.clamp(-landmark.z * 2.3, -0.65, 1.25);
 
             scratch.rayPoint.set(ndcX, ndcY, 0.5).unproject(camera3d);
             scratch.rayDir.copy(scratch.rayPoint).sub(camera3d.position);
@@ -440,7 +454,7 @@
                 return false;
             }
 
-            const t = (worldZ - camera3d.position.z) / scratch.rayDir.z;
+            const t = (physics.planeZ - camera3d.position.z) / scratch.rayDir.z;
             if (!Number.isFinite(t) || t < 0) {
                 return false;
             }
@@ -449,65 +463,98 @@
             return true;
         }
 
-        function applyHandForces(dt) {
+        function collectTrackedTips() {
+            const tips = [];
+            for (const hand of state.lastHands) {
+                for (const tipIndex of FINGERTIP_POINTS) {
+                    const landmark = hand[tipIndex];
+                    if (!landmark) {
+                        continue;
+                    }
+                    if (!landmarkToPlane(landmark, scratch.tipWorld)) {
+                        continue;
+                    }
+                    tips.push({
+                        x: landmark.x,
+                        y: landmark.y,
+                        worldX: scratch.tipWorld.x,
+                        worldY: scratch.tipWorld.y
+                    });
+                }
+            }
+            return tips;
+        }
+
+        function drawTrackedTips() {
+            if (!tipCtx) {
+                return;
+            }
+            const width = ui.tipCanvas.width;
+            const height = ui.tipCanvas.height;
+            tipCtx.clearRect(0, 0, width, height);
+
+            tipCtx.lineWidth = 2;
+            tipCtx.strokeStyle = '#22c55e';
+            tipCtx.fillStyle = 'rgba(34, 197, 94, 0.24)';
+
+            for (const tip of state.trackedTips) {
+                const x = tip.x * width;
+                const y = tip.y * height;
+                tipCtx.beginPath();
+                tipCtx.arc(x, y, 11, 0, Math.PI * 2);
+                tipCtx.fill();
+                tipCtx.stroke();
+            }
+        }
+
+        function applyTipForces(dt) {
             if (!physics.placed) {
                 return 0;
             }
 
-            const half = physics.size * 0.5;
             let contacts = 0;
+            for (const tip of state.trackedTips) {
+                scratch.normal.set(
+                    physics.position.x - tip.worldX,
+                    physics.position.y - tip.worldY,
+                    0
+                );
 
-            for (const hand of state.lastHands) {
-                for (const pointIndex of CONTACT_POINTS) {
-                    if (!landmarkToWorld(hand[pointIndex], scratch.handPoint)) {
-                        continue;
-                    }
-
-                    scratch.closest.set(
-                        THREE.MathUtils.clamp(scratch.handPoint.x, physics.position.x - half, physics.position.x + half),
-                        THREE.MathUtils.clamp(scratch.handPoint.y, physics.position.y - half, physics.position.y + half),
-                        THREE.MathUtils.clamp(scratch.handPoint.z, physics.position.z - half, physics.position.z + half)
-                    );
-
-                    scratch.normal.copy(scratch.closest).sub(scratch.handPoint);
-                    const distance = scratch.normal.length();
-                    if (distance >= CONTACT_RADIUS) {
-                        continue;
-                    }
-
-                    contacts += 1;
-                    if (distance < 0.000001) {
-                        scratch.normal.set(0, 1, 0);
-                    } else {
-                        scratch.normal.multiplyScalar(1 / distance);
-                    }
-
-                    const penetration = CONTACT_RADIUS - distance;
-                    const inwardSpeed = Math.min(physics.velocity.dot(scratch.normal), 0);
-                    const pushAccel = (SPRING_FORCE * penetration) - (CONTACT_DAMPING * inwardSpeed);
-
-                    physics.position.addScaledVector(scratch.normal, penetration * POSITION_CORRECTION);
-                    physics.velocity.addScaledVector(scratch.normal, pushAccel * dt);
-
-                    scratch.arm.copy(scratch.handPoint).sub(physics.position);
-                    scratch.torque.copy(scratch.arm).cross(scratch.normal).multiplyScalar(penetration * 45);
-                    physics.angularVelocity.addScaledVector(scratch.torque, dt);
+                const distance = scratch.normal.length();
+                if (distance >= CONTACT_RADIUS) {
+                    continue;
                 }
+
+                contacts += 1;
+                if (distance < 0.000001) {
+                    scratch.normal.set(0, 1, 0);
+                } else {
+                    scratch.normal.multiplyScalar(1 / distance);
+                }
+
+                const penetration = CONTACT_RADIUS - distance;
+                const inwardSpeed = Math.min(
+                    (physics.velocity.x * scratch.normal.x) + (physics.velocity.y * scratch.normal.y),
+                    0
+                );
+                const pushAccel = (SPRING_FORCE * penetration) - (CONTACT_DAMPING * inwardSpeed);
+
+                physics.position.x += scratch.normal.x * penetration * POSITION_CORRECTION;
+                physics.position.y += scratch.normal.y * penetration * POSITION_CORRECTION;
+                physics.velocity.x += scratch.normal.x * pushAccel * dt;
+                physics.velocity.y += scratch.normal.y * pushAccel * dt;
             }
 
             return contacts;
         }
 
-        function constrainCubeToView() {
-            const half = physics.size * 0.5;
-            const depth = camera3d.position.z - physics.position.z;
+        function constrainSphereToView() {
+            const depth = camera3d.position.z - physics.planeZ;
             const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera3d.fov * 0.5)) * depth;
             const halfWidth = halfHeight * camera3d.aspect;
 
-            const xLimit = Math.max(0.2, halfWidth - half);
-            const yLimit = Math.max(0.2, halfHeight - half);
-            const zMin = -0.8;
-            const zMax = 1.45;
+            const xLimit = Math.max(0.2, halfWidth - physics.radius);
+            const yLimit = Math.max(0.2, halfHeight - physics.radius);
             const restitution = 0.92;
 
             if (physics.position.x > xLimit) {
@@ -526,13 +573,8 @@
                 physics.velocity.y = Math.abs(physics.velocity.y) * restitution;
             }
 
-            if (physics.position.z > zMax) {
-                physics.position.z = zMax;
-                physics.velocity.z = -Math.abs(physics.velocity.z) * restitution;
-            } else if (physics.position.z < zMin) {
-                physics.position.z = zMin;
-                physics.velocity.z = Math.abs(physics.velocity.z) * restitution;
-            }
+            physics.position.z = physics.planeZ;
+            physics.velocity.z = 0;
         }
 
         function updatePhysics(dt) {
@@ -540,18 +582,15 @@
                 return;
             }
 
-            physics.position.addScaledVector(physics.velocity, dt);
-            constrainCubeToView();
+            physics.position.x += physics.velocity.x * dt;
+            physics.position.y += physics.velocity.y * dt;
+            constrainSphereToView();
 
-            const linearDrag = Math.exp(-0.03 * dt);
-            const angularDrag = Math.exp(-0.08 * dt);
-            physics.velocity.multiplyScalar(linearDrag);
-            physics.angularVelocity.multiplyScalar(angularDrag);
+            const linearDrag = Math.exp(-0.05 * dt);
+            physics.velocity.x *= linearDrag;
+            physics.velocity.y *= linearDrag;
 
-            cubeGroup.position.copy(physics.position);
-            cubeGroup.rotation.x += physics.angularVelocity.x * dt;
-            cubeGroup.rotation.y += physics.angularVelocity.y * dt;
-            cubeGroup.rotation.z += physics.angularVelocity.z * dt;
+            sphereGroup.position.set(physics.position.x, physics.position.y, physics.planeZ);
         }
 
         function step(now) {
@@ -575,8 +614,11 @@
             }
 
             state.handsCount = state.lastHands.length;
-            state.contactsCount = applyHandForces(dt);
+            state.trackedTips = collectTrackedTips();
+            state.tipCount = state.trackedTips.length;
+            state.contactsCount = applyTipForces(dt);
             updatePhysics(dt);
+            drawTrackedTips();
             updateMetrics();
             renderer.render(scene, camera3d);
 
@@ -664,13 +706,13 @@
             ui.placeBtn.disabled = false;
             ui.resetBtn.disabled = false;
             ui.startBtn.textContent = 'Running';
-            setStatus('Ready. Press "Place Cube" to start.');
+            setStatus('Ready. Press "Place Sphere" to start.');
             requestAnimationFrame(step);
         }
 
         ui.startBtn.addEventListener('click', startCameraAndTracking);
-        ui.placeBtn.addEventListener('click', placeCube);
-        ui.resetBtn.addEventListener('click', resetCubePose);
+        ui.placeBtn.addEventListener('click', placeSphere);
+        ui.resetBtn.addEventListener('click', resetSphereState);
 
         window.addEventListener('resize', resizeStage);
         if ('ResizeObserver' in window) {
