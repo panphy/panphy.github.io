@@ -602,6 +602,15 @@ body {
 	content: "▴";
 }
 
+.section-toggle-popup {
+	margin-bottom: 0;
+}
+
+.section-toggle-popup::after {
+	content: "↗";
+	font-size: 1rem;
+}
+
 .collapsible-content {
 	display: none;
 }
@@ -825,21 +834,6 @@ button:hover {
 }
 
 [data-theme="dark"] .btn-export-md {
-	color: #1a1a1a;
-}
-
-/* Data Processing - Periwinkle (Analysis action) */
-.btn-data-processing {
-	background-color: var(--btn-analyze);
-	color: #fff;
-	font-weight: 600;
-}
-
-.btn-data-processing:hover {
-	background-color: var(--btn-analyze-hover);
-}
-
-[data-theme="dark"] .btn-data-processing {
 	color: #1a1a1a;
 }
 
