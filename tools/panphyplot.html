@@ -128,6 +128,10 @@
 					<button class="btn-export-md" onclick="showExportTablePopup()"
 						title="View this dataset as a formatted table">View Table</button>
 				</div>
+				<div class="button-row">
+					<button class="btn-data-processing" onclick="openDataProcessingPopup()"
+						title="Create processed columns from the current dataset">Data Processing</button>
+				</div>
 			</div>
 			<input type="file" id="csv-file-input" accept=".csv" style="display: none;"
 				onchange="handleCSVUpload(event)" />
@@ -372,6 +376,81 @@
 		</div>
 	</div>
 
+	<!-- Data Processing Popup -->
+	<div id="data-processing-background" style="display: none;"></div>
+	<div id="data-processing-container" style="display: none;">
+		<div id="data-processing-content" role="dialog" aria-modal="true" aria-labelledby="data-processing-title">
+			<button id="data-processing-close" type="button" title="Close the data processing window">Close</button>
+			<div id="data-processing-title">Data Processing</div>
+			<p id="data-processing-subtitle">
+				Source: current dataset only (x and y columns). Uncertainties are not included in this step.
+			</p>
+
+			<div class="data-processing-section">
+				<div class="data-processing-heading">Source Data</div>
+				<p id="data-processing-source-empty" style="display: none;">
+					No valid x-y rows found in this dataset. Add data first.
+				</p>
+				<div id="data-processing-source-table-wrap">
+					<table id="data-processing-source-table">
+						<thead>
+							<tr>
+								<th>Row</th>
+								<th id="data-processing-source-x-header">x</th>
+								<th id="data-processing-source-y-header">y</th>
+							</tr>
+						</thead>
+						<tbody id="data-processing-source-body"></tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="data-processing-section">
+				<div class="data-processing-heading">Column Processing</div>
+				<div class="data-processing-process-actions">
+					<button id="data-processing-process-x" type="button">Process x</button>
+					<button id="data-processing-process-y" type="button">Process y</button>
+				</div>
+				<div id="data-processing-formula-panel" style="display: none;">
+					<label id="data-processing-formula-label" for="data-processing-formula-input">Formula for x</label>
+					<input id="data-processing-formula-input" type="text" placeholder="e.g. =1/x" autocomplete="off" />
+					<p id="data-processing-formula-helper">
+						Use math expressions. Variables available: x, y, and valid header names.
+					</p>
+					<div class="data-processing-inline-actions">
+						<button id="data-processing-apply" type="button">Apply</button>
+						<button id="data-processing-cancel" type="button">Cancel</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="data-processing-section">
+				<div class="data-processing-heading">Processed Columns</div>
+				<p id="data-processing-derived-empty">No processed columns created yet.</p>
+				<div id="data-processing-derived-list"></div>
+			</div>
+
+			<div class="data-processing-section">
+				<div class="data-processing-heading">Output Mapping</div>
+				<div class="data-processing-mapping-grid">
+					<label for="data-processing-output-x">New X column</label>
+					<select id="data-processing-output-x"></select>
+
+					<label for="data-processing-output-y">New Y column</label>
+					<select id="data-processing-output-y"></select>
+
+					<label for="data-processing-target">Target dataset</label>
+					<select id="data-processing-target"></select>
+				</div>
+				<div id="data-processing-message" aria-live="polite"></div>
+				<div class="data-processing-footer-actions">
+					<button id="data-processing-copy" type="button">Copy to Dataset</button>
+					<button id="data-processing-reset" type="button">Reset</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<footer>
 		&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
 		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
@@ -392,6 +471,7 @@
 	<script src="/tools/panphyplot/js/plotting.js"></script>
 	<script src="/tools/panphyplot/js/curve-fitting.js"></script>
 	<script src="/tools/panphyplot/js/ui.js"></script>
+	<script src="/tools/panphyplot/js/data-processing.js"></script>
 	<script src="/tools/panphyplot/js/main.js"></script>
 </body>
 

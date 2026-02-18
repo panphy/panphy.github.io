@@ -169,6 +169,9 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 
 	initializeFitEquationCopyInteractions();
+	if (typeof initializeDataProcessing === 'function') {
+		initializeDataProcessing();
+	}
 
 	updatePlotAndRenderLatex();
 	scheduleSaveState();

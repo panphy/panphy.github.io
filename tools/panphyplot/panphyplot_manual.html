@@ -540,6 +540,9 @@
             when the dataset already contains data.</li>
           <li><strong>Copy x₁:</strong> Use the "Copy x₁" button to copy all x-values from Dataset 1 into the active
             dataset. This feature simplifies workflows when comparing multiple datasets.</li>
+          <li><strong>Data Processing:</strong> Create processed columns from the active dataset using math expressions
+            (for example, transform data to <code>1/V</code> or <code>x^2</code>) and copy mapped output into another
+            dataset.</li>
         </ul>
       </li>
       <li>
@@ -673,7 +676,24 @@
         reported value.</p>
     </div>
 
-    <h3>4. Performing Curve Fitting</h3>
+    <h3>4. Data Processing</h3>
+    <ul>
+      <li><strong>Open Data Processing:</strong> Click the "Data Processing" button in the Data section.</li>
+      <li><strong>Source scope:</strong> The popup reads valid rows from the active dataset where both <code>x</code>
+        and <code>y</code> are finite numbers.</li>
+      <li><strong>Create processed columns:</strong> Use <code>Process x</code> or <code>Process y</code>, then enter a
+        math.js expression such as <code>=1/x</code>, <code>1/V</code>, <code>x^2</code>, <code>log(y)</code>, or
+        <code>sqrt(abs(y))</code>.</li>
+      <li><strong>Variables:</strong> <code>x</code>, <code>y</code>, and valid header identifiers are available in
+        formulas.</li>
+      <li><strong>Map output:</strong> Choose <strong>New X column</strong> and <strong>New Y column</strong> from
+        source or processed columns, choose a <strong>Target dataset</strong>, then click <strong>Copy to Dataset</strong>.</li>
+      <li><strong>Row filtering:</strong> Any row producing invalid/non-finite mapped values is skipped during copy.</li>
+      <li><strong>Limitations (MVP):</strong> Uncertainties are not included in this processing step. Copied target data
+        writes only <code>x,y</code> and resets target uncertainty settings and stored fit artifacts.</li>
+    </ul>
+
+    <h3>5. Performing Curve Fitting</h3>
     <ul>
       <li>
         <strong>Basic Fit:</strong>
@@ -704,7 +724,7 @@
       </li>
     </ul>
 
-    <h3>5. Visualizing All Datasets</h3>
+    <h3>6. Visualizing All Datasets</h3>
     <ul>
       <li>
         <strong>Plot All Datasets:</strong> Click the "Plot All Datasets" button to open a popup displaying a combined
@@ -719,7 +739,7 @@
       </li>
     </ul>
 
-    <h3>6. LaTeX Mode</h3>
+    <h3>7. LaTeX Mode</h3>
     <ul>
       <li>
         <strong>LaTeX Toggle:</strong> A LaTeX mode toggle is located at the top of the app.
@@ -734,7 +754,7 @@
       </li>
     </ul>
 
-    <h3>7. Theme Toggle</h3>
+    <h3>8. Theme Toggle</h3>
     <ul>
       <li>
         <strong>Light/Dark Mode:</strong> Click the theme toggle button (sun/moon icon) in the top-right corner of the
