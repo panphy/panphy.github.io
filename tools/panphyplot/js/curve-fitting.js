@@ -269,9 +269,9 @@ function renderCustomFitParameterInputs(parameterNames, valuesMap) {
 	parameterEmpty.style.display = 'none';
 	const fragment = document.createDocumentFragment();
 
-	parameterNames.forEach((name) => {
+	parameterNames.forEach((name, index) => {
 		const row = document.createElement('div');
-		row.className = 'custom-fit-parameter-row';
+		row.className = 'advanced-fit-item custom-fit-parameter-row';
 
 		const label = document.createElement('label');
 		label.textContent = `${name}:`;
@@ -289,6 +289,24 @@ function renderCustomFitParameterInputs(parameterNames, valuesMap) {
 
 		row.appendChild(label);
 		row.appendChild(input);
+
+		if (index === 0) {
+			const topRow = document.createElement('div');
+			topRow.className = 'advanced-fit-top-row';
+			topRow.appendChild(row);
+
+			const resetButton = document.createElement('button');
+			resetButton.type = 'button';
+			resetButton.className = 'advanced-fit-reset-btn';
+			resetButton.textContent = 'Reset parameter';
+			resetButton.title = 'Recalculate initial parameter values from current data';
+			resetButton.addEventListener('click', resetCustomFitParametersFromData);
+			topRow.appendChild(resetButton);
+
+			fragment.appendChild(topRow);
+			return;
+		}
+
 		fragment.appendChild(row);
 	});
 

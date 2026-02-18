@@ -1290,28 +1290,15 @@ select {
 }
 
 .custom-fit-parameters-panel {
-	margin-top: 10px;
-	padding: 10px;
-	background: var(--card-bg);
-	border: 1px solid var(--border-color);
-	border-radius: 10px;
-}
-
-.custom-fit-parameters-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 10px;
-	flex-wrap: wrap;
-	margin-bottom: 8px;
-}
-
-.custom-fit-parameters-header .table-prompt {
-	margin: 0;
+	margin-top: 0;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
 }
 
 .custom-fit-parameters-empty {
-	margin: 0;
+	margin: 0 0 8px;
 	font-size: 0.86rem;
 	color: var(--text-secondary);
 }
@@ -1330,18 +1317,11 @@ select {
 }
 
 .custom-fit-parameter-row label {
-	min-width: 64px;
-	color: var(--text-secondary);
-	font-weight: 600;
+	min-width: 0;
 }
 
 .custom-fit-parameter-row input {
-	max-width: 220px;
-	padding: 8px 10px;
-	border: 1px solid var(--input-border);
-	border-radius: 10px;
-	background-color: var(--card-bg);
-	color: var(--text-main);
+	max-width: 200px;
 }
 
 .custom-fit-parameter-row input:focus {

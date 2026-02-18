@@ -194,11 +194,11 @@
 				<div id="best-fit-content" class="collapsible-content">
 						<div class="tabs">
 							<button class="tablink active" onclick="openTab(event, 'BasicFit')"
-								title="Show basic best-fit options">Basic Fit</button>
+								title="Show basic best-fit options">Basic</button>
 							<button class="tablink" onclick="openTab(event, 'AdvancedFit')"
-								title="Show advanced best-fit options">Advanced Fit</button>
+								title="Show advanced best-fit options">Advanced</button>
 							<button class="tablink" onclick="openTab(event, 'CustomFit')"
-								title="Show custom best-fit options">Custom Fit</button>
+								title="Show custom best-fit options">Custom</button>
 						</div>
 
 					<!-- Basic Fit -->
@@ -300,13 +300,6 @@
 
 						<!-- Custom Fit -->
 						<div id="CustomFit" class="tab-content">
-							<div style="display: flex; gap: 6px;">
-								<button class="fit-button" onclick="fitCustomCurve()"
-									title="Fit a custom equation to the selected dataset">Fit Curve</button>
-								<button class="clear-fit-button" onclick="clearFittedCurve()"
-									title="Remove the current fitted curve">Clear Fit</button>
-							</div>
-
 							<div id="custom-fit-formula-panel" class="custom-fit-formula-panel">
 								<div class="custom-fit-formula-header">
 									<label id="custom-fit-formula-label" for="custom-fit-formula-input">Formula for y</label>
@@ -318,21 +311,23 @@
 								<div id="custom-fit-formula-message" aria-live="polite" style="display: none;"></div>
 							</div>
 
+							<div id="custom-fit-general-equation" class="general-equation">
+								\( y = f(x, \theta) \)
+							</div>
+
 							<div id="custom-fit-parameters-panel" class="custom-fit-parameters-panel">
-								<div class="custom-fit-parameters-header">
-									<p class="table-prompt">Initial fitting parameters (auto-detected, max 5)</p>
-									<button type="button" class="advanced-fit-reset-btn"
-										onclick="resetCustomFitParametersFromData()"
-										title="Recalculate initial parameter values from current data">Auto-fill from data</button>
-								</div>
+								<p class="table-prompt">Adjust the initial fitting parameters below.</p>
 								<p id="custom-fit-parameters-empty" class="custom-fit-parameters-empty">
 									Enter a custom equation to detect parameters.
 								</p>
 								<div id="custom-fit-parameters-list"></div>
 							</div>
 
-							<div id="custom-fit-general-equation" class="general-equation">
-								\( y = f(x, \theta) \)
+							<div style="display: flex; gap: 6px;">
+								<button class="fit-button" onclick="fitCustomCurve()"
+									title="Fit a custom equation to the selected dataset">Fit Curve</button>
+								<button class="clear-fit-button" onclick="clearFittedCurve()"
+									title="Remove the current fitted curve">Clear Fit</button>
 							</div>
 						</div>
 					</div>
