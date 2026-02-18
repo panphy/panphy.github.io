@@ -1036,46 +1036,50 @@ function confirmImportCSV() {
 	}
 
 
-		function copyXFromSet1() {
-		if (!dataset1XValues || dataset1XValues.length === 0) {
-			alert("Dataset 1 does not contain any valid x values yet.");
-			return;
-		}
-		const sourceX = dataset1XValues;
-		const tableBody = document.querySelector('#data-table tbody');
-		let rows = tableBody.querySelectorAll('tr');
-		const missingCount = sourceX.length - rows.length;
+		function copyXToNewDataset() {
+			const sourceDatasetIndex = activeSet;
+			const sourceXValues = Array.from(document.querySelectorAll('#data-table .x-input'))
+				.map(input => (input ? String(input.value || '') : '').trim());
+			const sourceX = sourceXValues
+				.map(value => Number.parseFloat(value))
+				.filter(Number.isFinite);
 
-		// If there are missing rows, create them in one batch.
-		if (missingCount > 0) {
-			let newRowsHTML = '';
-			const toggleXError = document.getElementById('toggle-x-error').checked;
-			const toggleYError = document.getElementById('toggle-y-error').checked;
-			// Build the HTML string for the missing rows.
-			for (let i = 0; i < missingCount; i++) {
-				newRowsHTML += buildDataRowHtml({
-					xErrorDisplay: toggleXError ? 'table-cell' : 'none',
-					yErrorDisplay: toggleYError ? 'table-cell' : 'none'
-				}, true);
+			if (sourceX.length === 0) {
+				const sourceDatasetName = getDatasetDisplayName(sourceDatasetIndex);
+				alert(`"${sourceDatasetName}" does not contain any valid x values yet.`);
+				return;
 			}
-			// Insert all missing rows at once.
-			tableBody.insertAdjacentHTML('beforeend', newRowsHTML);
-			// Requery the rows after insertion.
-			rows = tableBody.querySelectorAll('tr');
-		}
 
-		// Update all x-inputs in one go.
-		const xInputs = tableBody.querySelectorAll('.x-input');
-		for (let i = 0; i < sourceX.length; i++) {
-			if (xInputs[i]) {
-				xInputs[i].value = sourceX[i];
+			// Persist pending edits in the source dataset before switching tabs.
+			updateData();
+
+			addDataset();
+
+			const tableBody = document.querySelector('#data-table tbody');
+			const rows = tableBody.querySelectorAll('tr');
+			const missingCount = sourceXValues.length - rows.length;
+
+			if (missingCount > 0) {
+				let newRowsHTML = '';
+				const toggleXError = document.getElementById('toggle-x-error').checked;
+				const toggleYError = document.getElementById('toggle-y-error').checked;
+				for (let i = 0; i < missingCount; i++) {
+					newRowsHTML += buildDataRowHtml({
+						xErrorDisplay: toggleXError ? 'table-cell' : 'none',
+						yErrorDisplay: toggleYError ? 'table-cell' : 'none'
+					}, true);
+				}
+				tableBody.insertAdjacentHTML('beforeend', newRowsHTML);
 			}
-		}
 
-		// Update the underlying data and replot.
-		updateData();
-		updatePlotAndRenderLatex();
-	}
+			const xInputs = tableBody.querySelectorAll('.x-input');
+			for (let i = 0; i < xInputs.length; i++) {
+				xInputs[i].value = i < sourceXValues.length ? sourceXValues[i] : '';
+			}
+
+			updateData();
+			updatePlotAndRenderLatex();
+		}
 
 
 function clearFittedCurve() {
