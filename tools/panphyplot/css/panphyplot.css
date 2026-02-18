@@ -1249,13 +1249,13 @@ select {
 
 .custom-fit-formula-note {
 	margin: 6px 2px 14px;
-	font-size: 0.8rem;
+	font-size: 0.72rem;
 	color: var(--btn-danger);
 	font-weight: 600;
 }
 
 .custom-fit-formula-note code {
-	font-size: 0.86em;
+	font-size: 0.8em;
 	color: var(--btn-danger);
 }
 
@@ -1546,7 +1546,7 @@ select {
 #popup-plot .modebar-group {
 	display: flex !important;
 	align-items: center;
-	gap: 3px;
+	gap: 1px;
 	margin: 0 !important;
 	padding: 0 !important;
 }
