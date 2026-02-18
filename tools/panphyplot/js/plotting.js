@@ -207,44 +207,52 @@
 				});
 			}
 
+			const autoScaleButton = {
+				name: 'Auto-scale axes to data',
+				icon: Plotly.Icons.autoscale,
+				click: function(gd) {
+					applyTrueAutoScale(gd);
+				}
+			};
+
+			const downloadImageButton = {
+				name: 'Download plot as png',
+				icon: Plotly.Icons.camera,
+				click: async function(gd) {
+					const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
+					if (userInput === null) return;
+					const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
+					const exportScale = getAdaptivePlotExportScale(gd);
+					try {
+						const dataUrl = await Plotly.toImage(gd, {
+							format: 'png',
+							scale: exportScale
+						});
+						const imageBlob = await fetch(dataUrl).then(res => res.blob());
+						await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
+					} catch (error) {
+						console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
+						Plotly.downloadImage(gd, {
+							format: 'png',
+							filename: filenameBase,
+							scale: exportScale
+						});
+					}
+				}
+			};
+
 			return {
 				displayModeBar: true,
 				displaylogo: false,
-				modeBarButtonsToRemove: ['toImage', 'select2d', 'lasso2d', 'autoscale2d'],
-				modeBarButtonsToAdd: [
-					{
-						name: 'Auto-scale axes to data',
-						icon: Plotly.Icons.autoscale,
-						click: function(gd) {
-							applyTrueAutoScale(gd);
-						}
-					},
-					{
-						name: 'Download plot as png',
-						icon: Plotly.Icons.camera,
-						click: async function(gd) {
-							const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
-							if (userInput === null) return;
-							const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
-							const exportScale = getAdaptivePlotExportScale(gd);
-							try {
-								const dataUrl = await Plotly.toImage(gd, {
-									format: 'png',
-									scale: exportScale
-								});
-								const imageBlob = await fetch(dataUrl).then(res => res.blob());
-								await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
-							} catch (error) {
-								console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
-								Plotly.downloadImage(gd, {
-									format: 'png',
-									filename: filenameBase,
-									scale: exportScale
-								});
-							}
-						}
-					}
-				]
+				modeBarButtons: [[
+					'pan2d',
+					'zoom2d',
+					'zoomIn2d',
+					'zoomOut2d',
+					autoScaleButton,
+					'resetScale2d',
+					downloadImageButton
+				]]
 			};
 		}
 

@@ -1373,6 +1373,33 @@ select {
 	margin-top: 20px;
 }
 
+/* Plotly toolbar spacing */
+#plot .modebar,
+#popup-plot .modebar {
+	padding: 6px 8px !important;
+}
+
+#plot .modebar-group,
+#popup-plot .modebar-group {
+	display: flex !important;
+	align-items: center;
+	gap: 8px;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+#plot .modebar-btn,
+#popup-plot .modebar-btn {
+	width: 34px !important;
+	height: 34px !important;
+	padding: 6px !important;
+	margin: 0 !important;
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+}
+
 .plot-all-container {
 	display: flex;
 	justify-content: center;
