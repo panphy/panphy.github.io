@@ -1250,11 +1250,13 @@ select {
 .custom-fit-formula-note {
 	margin: 6px 2px 0;
 	font-size: 0.8rem;
-	color: var(--text-secondary);
+	color: var(--btn-danger);
+	font-weight: 600;
 }
 
 .custom-fit-formula-note code {
 	font-size: 0.86em;
+	color: var(--btn-danger);
 }
 
 #custom-fit-formula-message {

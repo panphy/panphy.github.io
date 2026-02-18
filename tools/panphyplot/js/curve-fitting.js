@@ -240,7 +240,7 @@ function getCustomFitGuessByName(parameterName, stats) {
 function formatCustomFitInputValue(value) {
 	const numeric = Number(value);
 	if (!Number.isFinite(numeric)) return '';
-	return String(Number(numeric.toPrecision(10)));
+	return numeric.toFixed(3);
 }
 
 function syncCustomFitInputsToState() {
@@ -514,7 +514,7 @@ function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameter
 	parameterNames.forEach((name, index) => {
 		const numeric = Number(parameterValues[index]);
 		if (!Number.isFinite(numeric)) return;
-		replacementMap[name] = Number(numeric.toPrecision(8));
+		replacementMap[name] = Number(numeric.toFixed(3));
 	});
 
 	try {
@@ -527,7 +527,7 @@ function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameter
 		return `y = ${substituted.toTex()}`;
 	} catch {
 		const fallbackTerms = parameterNames
-			.map((name, index) => `${name}=${Number(parameterValues[index]).toFixed(4)}`)
+			.map((name, index) => `${name}=${Number(parameterValues[index]).toFixed(3)}`)
 			.join(',\\;');
 		return fallbackTerms ? `y = ${fallbackTerms}` : 'y = f(x)';
 	}
