@@ -409,209 +409,6 @@
             pointer-events: none;
         }
 
-        .game-layer {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 11;
-        }
-
-        .goal-wall {
-            position: absolute;
-            top: 12px;
-            bottom: 12px;
-            width: 7px;
-            border-radius: 999px;
-            opacity: 0;
-            transition: opacity 0.24s ease;
-            background: linear-gradient(
-                to bottom,
-                rgba(34, 211, 238, 0.95) 0%,
-                rgba(34, 211, 238, 0.95) var(--goal-gap-top, 36%),
-                rgba(34, 211, 238, 0.08) var(--goal-gap-top, 36%),
-                rgba(34, 211, 238, 0.08) var(--goal-gap-bottom, 64%),
-                rgba(34, 211, 238, 0.95) var(--goal-gap-bottom, 64%),
-                rgba(34, 211, 238, 0.95) 100%
-            );
-            box-shadow: 0 0 14px rgba(34, 211, 238, 0.55);
-        }
-
-        .goal-wall::before,
-        .goal-wall::after {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 2px;
-            background: rgba(34, 211, 238, 0.88);
-            border-radius: 999px;
-            left: -4px;
-        }
-
-        .goal-wall::before {
-            top: var(--goal-gap-top, 36%);
-            transform: translateY(-1px);
-        }
-
-        .goal-wall::after {
-            top: var(--goal-gap-bottom, 64%);
-            transform: translateY(-1px);
-        }
-
-        .goal-wall.left {
-            left: 8px;
-        }
-
-        .goal-wall.right {
-            right: 8px;
-        }
-
-        .score-hud {
-            position: absolute;
-            top: 14px;
-            left: 50%;
-            transform: translateX(-50%) scale(0.95);
-            display: grid;
-            justify-items: center;
-            gap: 2px;
-            border: 1px solid rgba(125, 211, 252, 0.4);
-            border-radius: 999px;
-            padding: 6px 14px 7px;
-            background: rgba(2, 6, 23, 0.72);
-            color: #d5f7ff;
-            font: 700 0.95rem/1 var(--font-mono);
-            opacity: 0;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            box-shadow: 0 0 26px rgba(34, 211, 238, 0.26);
-        }
-
-        .score-main {
-            font: 700 0.95rem/1 var(--font-mono);
-            letter-spacing: 0.03em;
-        }
-
-        .score-divider {
-            margin: 0 6px;
-            color: rgba(226, 232, 240, 0.78);
-        }
-
-        .score-meta {
-            font: 600 0.64rem/1 var(--font-ui);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(226, 232, 240, 0.84);
-            white-space: nowrap;
-        }
-
-        .score-hud.pulse {
-            animation: scorePulse 420ms ease;
-        }
-
-        .goal-popup {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%) scale(0.82);
-            border: 1px solid rgba(134, 239, 172, 0.56);
-            border-radius: 12px;
-            padding: 10px 16px;
-            background: rgba(2, 6, 23, 0.84);
-            color: #dcfce7;
-            font: 700 1.08rem/1 var(--font-ui);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            opacity: 0;
-            box-shadow: 0 14px 38px rgba(2, 6, 23, 0.55);
-        }
-
-        .goal-popup.show {
-            animation: goalPopupIn 980ms cubic-bezier(0.19, 0.9, 0.2, 1);
-        }
-
-        .goal-flash {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            background:
-                radial-gradient(
-                    circle at var(--goal-flash-x, 50%) 50%,
-                    rgba(34, 211, 238, 0.42),
-                    rgba(34, 211, 238, 0.12) 28%,
-                    rgba(2, 6, 23, 0) 62%
-                );
-        }
-
-        .goal-flash.flash {
-            animation: goalFlashPulse 520ms ease-out;
-        }
-
-        .stage.game-mode .goal-wall {
-            opacity: 0.95;
-        }
-
-        .stage.game-mode .score-hud {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
-
-        #gameModeBtn.game-on {
-            border-color: rgba(34, 211, 238, 0.6);
-            background: linear-gradient(120deg, rgba(34, 211, 238, 0.35), rgba(56, 189, 248, 0.18));
-            color: #d9fbff;
-        }
-
-        @keyframes scorePulse {
-            0% {
-                transform: translateX(-50%) scale(1);
-            }
-            42% {
-                transform: translateX(-50%) scale(1.14);
-            }
-            100% {
-                transform: translateX(-50%) scale(1);
-            }
-        }
-
-        @keyframes goalPopupIn {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -54%) scale(0.72);
-            }
-            15% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.05);
-            }
-            72% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -46%) scale(1.02);
-            }
-        }
-
-        @keyframes goalFlashPulse {
-            0% {
-                opacity: 0;
-            }
-            24% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-            }
-        }
-
-        [data-theme="light"] .score-hud,
-        [data-theme="light"] .goal-popup {
-            background: rgba(248, 250, 252, 0.86);
-            color: #0f172a;
-        }
-
-        [data-theme="light"] .score-meta {
-            color: rgba(15, 23, 42, 0.8);
-        }
-
         .hud {
             display: grid;
             gap: 6px;
@@ -702,14 +499,6 @@
                                 <option value="">Default</option>
                             </select>
                         </label>
-                        <button id="gameModeBtn" type="button">Game Mode: Off</button>
-                        <label for="winConditionSelect" class="control-block">
-                            <span class="control-label">Win Condition</span>
-                            <select id="winConditionSelect">
-                                <option value="firstTo3" selected>First to 3</option>
-                                <option value="bestIn2Min">Best in 2 min</option>
-                            </select>
-                        </label>
                         <button id="addBtn" type="button" disabled>Add Sphere</button>
                         <button id="resetBtn" type="button" disabled>Reset Motion</button>
                     </div>
@@ -768,18 +557,6 @@
                 </div>
             </div>
             <button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
-            <div id="gameLayer" class="game-layer" aria-hidden="true">
-                <div class="goal-wall left"></div>
-                <div class="goal-wall right"></div>
-                <div id="scoreHud" class="score-hud" aria-label="Match score">
-                    <div class="score-main">
-                        <span id="leftScore">0</span><span class="score-divider">:</span><span id="rightScore">0</span>
-                    </div>
-                    <div id="scoreMeta" class="score-meta">First to 3</div>
-                </div>
-                <div id="goalPopup" class="goal-popup"></div>
-                <div id="goalFlash" class="goal-flash"></div>
-            </div>
             <video id="camera" class="media-layer" autoplay playsinline muted></video>
             <canvas id="renderCanvas" class="media-layer"></canvas>
             <canvas id="tipCanvas" class="media-layer"></canvas>
@@ -806,8 +583,6 @@
             controlsClose: document.getElementById('controlsClose'),
             fullscreenBtn: document.getElementById('fullscreenBtn'),
             cameraSelect: document.getElementById('cameraSelect'),
-            gameModeBtn: document.getElementById('gameModeBtn'),
-            winConditionSelect: document.getElementById('winConditionSelect'),
             status: document.getElementById('status'),
             metrics: document.getElementById('metrics'),
             modeSelect: document.getElementById('modeSelect'),
@@ -824,13 +599,7 @@
             video: document.getElementById('camera'),
             canvas: document.getElementById('renderCanvas'),
             tipCanvas: document.getElementById('tipCanvas'),
-            physicsDetails: document.getElementById('physicsDetails'),
-            scoreHud: document.getElementById('scoreHud'),
-            leftScore: document.getElementById('leftScore'),
-            rightScore: document.getElementById('rightScore'),
-            scoreMeta: document.getElementById('scoreMeta'),
-            goalPopup: document.getElementById('goalPopup'),
-            goalFlash: document.getElementById('goalFlash')
+            physicsDetails: document.getElementById('physicsDetails')
         };
 
         function openControls() {
@@ -904,19 +673,7 @@
             gravity: 0.0,
             airDrag: 0.0,
             mass: 1.0,
-            nextTrackingErrorReportAt: 0,
-            gameMode: false,
-            sandboxInteractionMode: 'balanced',
-            score: {
-                left: 0,
-                right: 0
-            },
-            goalGapRatio: 0.28,
-            goalCooldownUntil: 0,
-            gameWinCondition: 'firstTo3',
-            gameMatchActive: false,
-            gameEndsAt: 0,
-            gameTimeLeftMs: 0
+            nextTrackingErrorReportAt: 0
         };
 
         let filesetResolverCtor = null;
@@ -996,12 +753,6 @@
         const MAX_SPHERES = 6;
         const IDEAL_WALL_RESTITUTION = 1.0;
         const IDEAL_SPHERE_RESTITUTION = 1.0;
-        const GOAL_EXIT_MARGIN = SPHERE_RADIUS * 0.45;
-        const SERVE_SPEED_MIN = 1.15;
-        const SERVE_SPEED_MAX = 1.95;
-        const SERVE_Y_JITTER = 0.7;
-        const GAME_FIRST_TO_SCORE = 3;
-        const GAME_MATCH_DURATION_MS = 120000;
 
         const SPHERE_COLORS = [
             0x22d3ee, // cyan
@@ -1161,10 +912,7 @@
         }
 
         function updateModeDescription() {
-            const base = INTERACTION_MODE_HELP[state.interactionMode] || '';
-            ui.modeDescription.textContent = state.gameMode
-                ? `${base} Game mode keeps interaction locked to Bounce.`
-                : base;
+            ui.modeDescription.textContent = INTERACTION_MODE_HELP[state.interactionMode] || '';
         }
 
         function updateSensitivityLabel() {
@@ -1191,111 +939,12 @@
                     maxSpeed = speed;
                 }
             }
-            let scoreText = '';
-            if (state.gameMode) {
-                if (state.gameWinCondition === 'bestIn2Min') {
-                    scoreText = ` | Score: ${state.score.left}:${state.score.right} | Time: ${getGameClockText()}`;
-                } else {
-                    scoreText = ` | Score: ${state.score.left}:${state.score.right} | Target: ${GAME_FIRST_TO_SCORE}`;
-                }
-            }
             ui.metrics.textContent =
-                `FPS: ${state.fps.toFixed(0)} | Mode: ${INTERACTION_LABELS[state.interactionMode]} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}${scoreText}`;
+                `FPS: ${state.fps.toFixed(0)} | Mode: ${INTERACTION_LABELS[state.interactionMode]} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}`;
         }
 
         function updateAddBtnState() {
-            ui.addBtn.disabled = !state.running || state.gameMode || spheres.length >= MAX_SPHERES;
-        }
-
-        function getWinConditionLabel() {
-            return state.gameWinCondition === 'bestIn2Min'
-                ? 'Best in 2 min'
-                : `First to ${GAME_FIRST_TO_SCORE}`;
-        }
-
-        function formatClock(ms) {
-            const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${minutes}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        function getGameClockText(now = performance.now()) {
-            if (state.gameWinCondition !== 'bestIn2Min') {
-                return '';
-            }
-            const remaining = state.gameMatchActive
-                ? Math.max(0, state.gameEndsAt - now)
-                : Math.max(0, state.gameTimeLeftMs);
-            return formatClock(remaining);
-        }
-
-        function updateGoalGuideVars() {
-            const gapPercent = Math.max(8, Math.min(72, state.goalGapRatio * 100));
-            const topPercent = (100 - gapPercent) / 2;
-            ui.stage.style.setProperty('--goal-gap-top', `${topPercent.toFixed(2)}%`);
-            ui.stage.style.setProperty('--goal-gap-bottom', `${(topPercent + gapPercent).toFixed(2)}%`);
-        }
-
-        function getGoalHalfHeight(bounds) {
-            return bounds.halfHeight * state.goalGapRatio;
-        }
-
-        function updateScoreHud() {
-            ui.leftScore.textContent = String(state.score.left);
-            ui.rightScore.textContent = String(state.score.right);
-        }
-
-        function updateScoreMeta(now = performance.now()) {
-            if (state.gameWinCondition === 'bestIn2Min') {
-                ui.scoreMeta.textContent = `Time ${getGameClockText(now)}`;
-                return;
-            }
-            ui.scoreMeta.textContent = `First to ${GAME_FIRST_TO_SCORE}`;
-        }
-
-        function updateGameModeButton() {
-            ui.gameModeBtn.classList.toggle('game-on', state.gameMode);
-            ui.gameModeBtn.textContent = state.gameMode ? 'Game Mode: On' : 'Game Mode: Off';
-        }
-
-        function clearGoalEffects() {
-            ui.goalPopup.classList.remove('show');
-            ui.goalFlash.classList.remove('flash');
-            ui.scoreHud.classList.remove('pulse');
-        }
-
-        function flashGoal(goalSide, scorerLabel) {
-            const scoreText = `${state.score.left}:${state.score.right}`;
-            ui.goalPopup.textContent = `${scorerLabel} SCORES  ${scoreText}`;
-            ui.goalPopup.classList.remove('show');
-            void ui.goalPopup.offsetWidth;
-            ui.goalPopup.classList.add('show');
-
-            ui.scoreHud.classList.remove('pulse');
-            void ui.scoreHud.offsetWidth;
-            ui.scoreHud.classList.add('pulse');
-
-            ui.goalFlash.style.setProperty('--goal-flash-x', goalSide === 'left' ? '14%' : '86%');
-            ui.goalFlash.classList.remove('flash');
-            void ui.goalFlash.offsetWidth;
-            ui.goalFlash.classList.add('flash');
-        }
-
-        function updateGameUiState() {
-            ui.stage.classList.toggle('game-mode', state.gameMode);
-            ui.modeSelect.disabled = state.gameMode;
-            ui.resetBtn.textContent = state.gameMode ? 'Reset Match' : 'Reset Motion';
-            ui.winConditionSelect.value = state.gameWinCondition;
-            updateModeDescription();
-            updateGameModeButton();
-            updateScoreHud();
-            updateScoreMeta();
-            updateAddBtnState();
-            updateMetrics();
-            if (!state.gameMode) {
-                clearGoalEffects();
-            }
+            ui.addBtn.disabled = !state.running || spheres.length >= MAX_SPHERES;
         }
 
         function resizeStage() {
@@ -1313,7 +962,6 @@
             if (tipCtx) {
                 tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
             }
-            updateGoalGuideVars();
         }
 
         function getViewBounds() {
@@ -1348,7 +996,7 @@
         }
 
         function addSphere() {
-            if (state.gameMode || spheres.length >= MAX_SPHERES) {
+            if (spheres.length >= MAX_SPHERES) {
                 return;
             }
 
@@ -1374,204 +1022,16 @@
             setStatus(`Sphere ${count} added.${count < MAX_SPHERES ? ' Add more or start pushing!' : ' Max reached.'}`);
         }
 
-        function clearSpheres({ clearTracking = false } = {}) {
+        function resetAll() {
             for (const sphere of spheres) {
                 scene.remove(sphere.group);
                 sphere.material.dispose();
             }
             spheres.length = 0;
             activeContacts.clear();
-            if (clearTracking) {
-                tipHistory.clear();
-            }
-        }
-
-        function serveSphere(sphere, preferredDirection = 0) {
-            const direction = preferredDirection === 0
-                ? (Math.random() < 0.5 ? -1 : 1)
-                : Math.sign(preferredDirection);
-            const speed = SERVE_SPEED_MIN + (Math.random() * (SERVE_SPEED_MAX - SERVE_SPEED_MIN));
-            sphere.velocity.x = direction * speed;
-            sphere.velocity.y = (Math.random() * 2 - 1) * SERVE_Y_JITTER;
-            sphere.velocity.z = 0;
-        }
-
-        function spawnGamePuck(preferredDirection = 0) {
-            clearSpheres();
-            const puck = createSphere(0);
-            puck.position.set(0, 0, PLANE_Z);
-            puck.group.position.copy(puck.position);
-            serveSphere(puck, preferredDirection);
-            scene.add(puck.group);
-            spheres.push(puck);
+            tipHistory.clear();
             updateAddBtnState();
-            updateMetrics();
-            return puck;
-        }
-
-        function resetGameScore() {
-            state.score.left = 0;
-            state.score.right = 0;
-            updateScoreHud();
-        }
-
-        function flashMatchResult(message) {
-            ui.goalPopup.textContent = message;
-            ui.goalPopup.classList.remove('show');
-            void ui.goalPopup.offsetWidth;
-            ui.goalPopup.classList.add('show');
-
-            ui.scoreHud.classList.remove('pulse');
-            void ui.scoreHud.offsetWidth;
-            ui.scoreHud.classList.add('pulse');
-
-            ui.goalFlash.classList.remove('flash');
-        }
-
-        function finishTimedMatch() {
-            if (!state.gameMatchActive || state.gameWinCondition !== 'bestIn2Min') {
-                return;
-            }
-
-            if (state.score.left > state.score.right) {
-                finishGameMatch('left');
-            } else if (state.score.right > state.score.left) {
-                finishGameMatch('right');
-            } else {
-                finishGameMatch('draw');
-            }
-        }
-
-        function finishGameMatch(result) {
-            if (!state.gameMatchActive) {
-                return;
-            }
-
-            state.gameMatchActive = false;
-            state.goalCooldownUntil = 0;
-            if (state.gameWinCondition === 'bestIn2Min') {
-                state.gameTimeLeftMs = 0;
-            }
-            clearSpheres();
-
-            let popupMessage = '';
-            let statusMessage = '';
-            if (result === 'draw') {
-                popupMessage = `DRAW  ${state.score.left}:${state.score.right}`;
-                statusMessage = `Time up. Draw ${state.score.left}:${state.score.right}. Press Reset Match to play again.`;
-            } else {
-                const winnerLabel = result === 'left' ? 'LEFT' : 'RIGHT';
-                popupMessage = `${winnerLabel} WINS  ${state.score.left}:${state.score.right}`;
-                statusMessage = `${winnerLabel[0] + winnerLabel.slice(1).toLowerCase()} wins ${state.score.left}:${state.score.right}. Press Reset Match to play again.`;
-            }
-
-            flashMatchResult(popupMessage);
-            updateScoreMeta();
-            updateMetrics();
-            setStatus(statusMessage);
-        }
-
-        function updateTimedMatchClock(now) {
-            if (!state.gameMode || !state.gameMatchActive || state.gameWinCondition !== 'bestIn2Min') {
-                return;
-            }
-
-            state.gameTimeLeftMs = Math.max(0, state.gameEndsAt - now);
-            if (state.gameTimeLeftMs <= 0) {
-                finishTimedMatch();
-            }
-        }
-
-        function resetGameMatch() {
-            resetGameScore();
-            state.gameMatchActive = true;
-            const now = performance.now();
-            if (state.gameWinCondition === 'bestIn2Min') {
-                state.gameEndsAt = now + GAME_MATCH_DURATION_MS;
-                state.gameTimeLeftMs = GAME_MATCH_DURATION_MS;
-            } else {
-                state.gameEndsAt = 0;
-                state.gameTimeLeftMs = 0;
-            }
-            spawnGamePuck();
-            state.goalCooldownUntil = now + 320;
-            updateScoreMeta(now);
-            setStatus(`Match reset (${getWinConditionLabel()}). Side gaps are open.`);
-        }
-
-        function handleGoal(goalSide) {
-            if (!state.gameMode || !state.gameMatchActive) {
-                return;
-            }
-            const now = performance.now();
-            if (now < state.goalCooldownUntil) {
-                return;
-            }
-
-            const scorer = goalSide === 'left' ? 'right' : 'left';
-            state.score[scorer] += 1;
-            updateScoreHud();
-            updateScoreMeta(now);
-            updateMetrics();
-
-            const scorerLabel = scorer === 'left' ? 'Left' : 'Right';
-            flashGoal(goalSide, scorerLabel);
-            setStatus(`${scorerLabel} scores! ${state.score.left}:${state.score.right}`);
-
-            if (state.gameWinCondition === 'firstTo3' && state.score[scorer] >= GAME_FIRST_TO_SCORE) {
-                finishGameMatch(scorer);
-                return;
-            }
-            if (state.gameWinCondition === 'bestIn2Min' && now >= state.gameEndsAt) {
-                finishTimedMatch();
-                return;
-            }
-
-            const serveDirection = goalSide === 'left' ? -1 : 1;
-            spawnGamePuck(serveDirection);
-            state.goalCooldownUntil = now + 340;
-        }
-
-        function setGameMode(enabled) {
-            const nextMode = Boolean(enabled);
-            if (nextMode === state.gameMode) {
-                return;
-            }
-
-            state.gameMode = nextMode;
-
-            if (nextMode) {
-                state.sandboxInteractionMode = state.interactionMode;
-                state.interactionMode = 'elastic';
-                ui.modeSelect.value = 'elastic';
-                resetGameMatch();
-                setStatus(`Game mode on (${getWinConditionLabel()}). Bounce is locked.`);
-            } else {
-                state.gameMatchActive = false;
-                state.gameEndsAt = 0;
-                state.gameTimeLeftMs = 0;
-                state.goalCooldownUntil = 0;
-                state.interactionMode = INTERACTION_PROFILES[state.sandboxInteractionMode]
-                    ? state.sandboxInteractionMode
-                    : 'balanced';
-                ui.modeSelect.value = state.interactionMode;
-                setStatus(`Game mode off. Restored ${INTERACTION_LABELS[state.interactionMode]} mode.`);
-            }
-
-            updateGameUiState();
-        }
-
-        function resetAll() {
-            if (state.gameMode) {
-                resetGameMatch();
-                updateGameUiState();
-                return;
-            }
-
-            clearSpheres({ clearTracking: true });
             setStatus(`All spheres removed. Press "Add Sphere" to start.`);
-            updateAddBtnState();
-            updateMetrics();
         }
 
         function landmarkToPlane(landmark, out) {
@@ -1821,29 +1281,18 @@
             return totalContacts;
         }
 
-        function constrainSphereToView(sphere, bounds) {
+        function constrainSphereToView(sphere, profile) {
+            const bounds = getViewBounds();
             const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
             const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
             const restitution = IDEAL_WALL_RESTITUTION;
-            const goalHalfHeight = state.gameMode ? getGoalHalfHeight(bounds) : 0;
-            let goalSide = null;
 
             if (sphere.position.x > xLimit) {
-                const insideRightGoal = state.gameMode && Math.abs(sphere.position.y) <= goalHalfHeight;
-                if (insideRightGoal && sphere.position.x > xLimit + GOAL_EXIT_MARGIN) {
-                    goalSide = 'right';
-                } else if (!insideRightGoal) {
-                    sphere.position.x = xLimit;
-                    sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
-                }
+                sphere.position.x = xLimit;
+                sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
             } else if (sphere.position.x < -xLimit) {
-                const insideLeftGoal = state.gameMode && Math.abs(sphere.position.y) <= goalHalfHeight;
-                if (insideLeftGoal && sphere.position.x < -xLimit - GOAL_EXIT_MARGIN) {
-                    goalSide = 'left';
-                } else if (!insideLeftGoal) {
-                    sphere.position.x = -xLimit;
-                    sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
-                }
+                sphere.position.x = -xLimit;
+                sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
             }
 
             if (sphere.position.y > yLimit) {
@@ -1856,7 +1305,6 @@
 
             sphere.position.z = PLANE_Z;
             sphere.velocity.z = 0;
-            return goalSide;
         }
 
         function resolveSphereCollisions(profile) {
@@ -1908,19 +1356,13 @@
                 return;
             }
 
-            const bounds = getViewBounds();
-            let goalSide = null;
-
             for (const sphere of spheres) {
                 // Gravity
                 sphere.velocity.y -= state.gravity * dt;
 
                 sphere.position.x += sphere.velocity.x * dt;
                 sphere.position.y += sphere.velocity.y * dt;
-                const scoredAt = constrainSphereToView(sphere, bounds);
-                if (scoredAt && !goalSide) {
-                    goalSide = scoredAt;
-                }
+                constrainSphereToView(sphere, profile);
 
                 const linearDrag = Math.exp(-profile.airDrag * dt);
                 sphere.velocity.x *= linearDrag;
@@ -1935,10 +1377,6 @@
 
             // Sphere-to-sphere collision
             resolveSphereCollisions(profile);
-
-            if (goalSide) {
-                handleGoal(goalSide);
-            }
         }
 
         function updateGlow(dt) {
@@ -1982,8 +1420,6 @@
             state.handsCount = state.lastHands.length;
             state.trackedTips = collectTrackedTips();
             state.tipCount = state.trackedTips.length;
-            updateTimedMatchClock(now);
-            updateScoreMeta(now);
             const profile = getInteractionProfile();
             state.contactsCount = applyTipForces(dt, profile);
             updatePhysics(dt, profile);
@@ -2173,11 +1609,7 @@
             state.running = true;
             state.lastFrameTime = performance.now();
             if (spheres.length === 0) {
-                if (state.gameMode) {
-                    spawnGamePuck();
-                } else {
-                    addSphere();
-                }
+                addSphere();
             }
             updateAddBtnState();
             ui.resetBtn.disabled = false;
@@ -2189,25 +1621,6 @@
         ui.startBtn.addEventListener('click', startCameraAndTracking);
         ui.addBtn.addEventListener('click', addSphere);
         ui.resetBtn.addEventListener('click', resetAll);
-        ui.gameModeBtn.addEventListener('click', () => {
-            setGameMode(!state.gameMode);
-        });
-        ui.winConditionSelect.addEventListener('change', () => {
-            if (!['firstTo3', 'bestIn2Min'].includes(ui.winConditionSelect.value)) {
-                return;
-            }
-            state.gameWinCondition = ui.winConditionSelect.value;
-
-            if (state.gameMode) {
-                resetGameMatch();
-                updateGameUiState();
-                setStatus(`Win condition set to ${getWinConditionLabel()}. Match restarted.`);
-            } else {
-                updateScoreMeta();
-                updateMetrics();
-                setStatus(`Win condition set to ${getWinConditionLabel()}.`);
-            }
-        });
         ui.controlsToggle.addEventListener('click', openControls);
         ui.controlsClose.addEventListener('click', closeControls);
         ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
@@ -2221,7 +1634,6 @@
                 return;
             }
             state.interactionMode = ui.modeSelect.value;
-            state.sandboxInteractionMode = ui.modeSelect.value;
             updateModeDescription();
             setStatus(`Interaction mode switched to ${INTERACTION_LABELS[state.interactionMode]}.`);
         });
@@ -2257,15 +1669,6 @@
             state.mass = Math.max(0.2, Math.min(5.0, nextValue));
             updateMassLabel();
         });
-        ui.goalPopup.addEventListener('animationend', () => {
-            ui.goalPopup.classList.remove('show');
-        });
-        ui.goalFlash.addEventListener('animationend', () => {
-            ui.goalFlash.classList.remove('flash');
-        });
-        ui.scoreHud.addEventListener('animationend', () => {
-            ui.scoreHud.classList.remove('pulse');
-        });
 
         window.addEventListener('resize', resizeStage);
         document.addEventListener('fullscreenchange', updateFullscreenUI);
@@ -2290,9 +1693,6 @@
         updateAirDragLabel();
         ui.massRange.value = state.mass.toFixed(1);
         updateMassLabel();
-        ui.winConditionSelect.value = state.gameWinCondition;
-        updateGoalGuideVars();
-        updateGameUiState();
         updateFullscreenUI();
         resizeStage();
         renderer.render(scene, camera3d);
