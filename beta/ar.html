@@ -258,6 +258,12 @@
             <h1 class="title">Fingertip Sphere Inertia (2D Prototype)</h1>
             <div class="controls">
                 <button id="startBtn" type="button">Start Camera</button>
+                <label for="cameraSelect" class="control-block">
+                    Camera
+                    <select id="cameraSelect" disabled>
+                        <option value="">Default</option>
+                    </select>
+                </label>
                 <button id="placeBtn" type="button" disabled>Place Sphere</button>
                 <button id="resetBtn" type="button" disabled>Reset Motion</button>
                 <label for="modeSelect" class="control-block">
@@ -303,6 +309,7 @@
             startBtn: document.getElementById('startBtn'),
             placeBtn: document.getElementById('placeBtn'),
             resetBtn: document.getElementById('resetBtn'),
+            cameraSelect: document.getElementById('cameraSelect'),
             status: document.getElementById('status'),
             metrics: document.getElementById('metrics'),
             modeSelect: document.getElementById('modeSelect'),
@@ -909,6 +916,65 @@
             });
         }
 
+        async function populateCameraList() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+                if (videoDevices.length <= 1) {
+                    return;
+                }
+                ui.cameraSelect.innerHTML = '';
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.textContent = device.label || `Camera ${index + 1}`;
+                    ui.cameraSelect.appendChild(option);
+                });
+                // Select the currently active device if possible
+                if (state.stream) {
+                    const activeTrack = state.stream.getVideoTracks()[0];
+                    if (activeTrack) {
+                        const settings = activeTrack.getSettings();
+                        if (settings.deviceId) {
+                            ui.cameraSelect.value = settings.deviceId;
+                        }
+                    }
+                }
+                ui.cameraSelect.disabled = false;
+            } catch (error) {
+                console.warn('Could not enumerate cameras:', error);
+            }
+        }
+
+        async function switchCamera(deviceId) {
+            if (!deviceId) {
+                return;
+            }
+            setStatus('Switching camera...');
+            try {
+                // Stop existing tracks
+                if (state.stream) {
+                    state.stream.getTracks().forEach((track) => track.stop());
+                }
+                state.stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        deviceId: { exact: deviceId },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+                ui.video.srcObject = state.stream;
+                await ui.video.play();
+                state.lastVideoTime = -1;
+                setStatus(`Camera switched. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
+            } catch (error) {
+                const message = error && error.message ? error.message : String(error);
+                console.error('Camera switch failed:', error);
+                setStatus(`Could not switch camera: ${message}`, true);
+            }
+        }
+
         async function startCameraAndTracking() {
             if (state.running) {
                 return;
@@ -944,6 +1010,7 @@
                     ui.video.srcObject = state.stream;
                 }
                 await ui.video.play();
+                await populateCameraList();
             } catch (error) {
                 if (state.stream && state.stream.getTracks().every((track) => track.readyState !== 'live')) {
                     state.stream = null;
@@ -982,6 +1049,11 @@
         ui.startBtn.addEventListener('click', startCameraAndTracking);
         ui.placeBtn.addEventListener('click', placeSphere);
         ui.resetBtn.addEventListener('click', resetSphereState);
+        ui.cameraSelect.addEventListener('change', () => {
+            if (state.running && ui.cameraSelect.value) {
+                switchCamera(ui.cameraSelect.value);
+            }
+        });
         ui.modeSelect.addEventListener('change', () => {
             if (!INTERACTION_PROFILES[ui.modeSelect.value]) {
                 return;
