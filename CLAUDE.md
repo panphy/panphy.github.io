@@ -26,6 +26,10 @@
 │   ├── apple-touch-icon.png    # iOS icon (180x180)
 │   └── sw-register.js          # Service Worker registration script
 │
+├── beta/                   # Unpublished WIP pages/assets (never SW-cached)
+│   ├── ar.html
+│   └── ar_assets/
+│
 ├── tools/                  # Educational data analysis tools
 │   ├── panphyplot.html     # Advanced plotting tool (entry point)
 │   ├── panphyplot/         # Modular JS/CSS for PanPhyPlot
@@ -58,19 +62,18 @@
 │   ├── react.html
 │   └── ascii_cam.html
 │
-├── gcse/                   # GCSE exam preparation flashcards
-│   ├── phy_flashcard.html
-│   ├── phy_flashcard_cs.html
-│   ├── phy_flashcard_ss.html
-│   ├── phy_cs.csv           # Combined Science flashcard data
-│   └── phy_ss.csv           # Separate Science flashcard data
-│
 ├── for_teachers/           # Teacher utilities
 │   ├── timer.html
 │   ├── timer_beep.mp3       # Timer audio alert
 │   └── visualizer.html
 │
 └── misc/                   # Miscellaneous physics tools
+    ├── gcse_phy/           # GCSE exam preparation flashcards
+    │   ├── phy_flashcard.html
+    │   ├── phy_flashcard_cs.html
+    │   ├── phy_flashcard_ss.html
+    │   ├── phy_cs.csv       # Combined Science flashcard data
+    │   └── phy_ss.csv       # Separate Science flashcard data
     ├── ising_model.html
     └── phyclub_showcase.html
 ```
@@ -81,20 +84,24 @@ Not every HTML file in the repo is currently treated as a published page.
 
 - **Published pages** are linked from `index.html` and listed in `sitemap.xml`
 - Only published pages should include `<script src="/assets/sw-register.js" defer></script>` and be included in `sw.js` `ASSETS_TO_CACHE`
+- New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
+- `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
 - **Current unlisted/legacy pages**:
-  - `gcse/phy_flashcard.html`
-  - `gcse/phy_flashcard_cs.html`
-  - `gcse/phy_flashcard_ss.html`
+  - `beta/ar.html`
+  - `misc/gcse_phy/phy_flashcard.html`
+  - `misc/gcse_phy/phy_flashcard_cs.html`
+  - `misc/gcse_phy/phy_flashcard_ss.html`
   - `misc/ising_model.html`
   - `misc/phyclub_showcase.html`
 - Unlisted/internal pages should remain outside SW registration and pre-cache unless intentionally promoted
 
 If you promote an unlisted page to production, do all of the following:
-1. Add `<script src="/assets/sw-register.js" defer></script>` if missing
-2. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js`
-3. Bump `BUILD_ID` in `sw.js`
-4. Add a card/link in `index.html`
-5. Add the page URL to `sitemap.xml`
+1. If the page lives in `/beta`, move it to the correct public directory first
+2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
+3. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js`
+4. Bump `BUILD_ID` in `sw.js`
+5. Add a card/link in `index.html`
+6. Add the page URL to `sitemap.xml`
 
 ## Tech Stack & Dependencies
 
@@ -127,6 +134,7 @@ Each application is self-contained in a single HTML file:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Title</title>
+    <!-- Include only for published pages -->
     <script src="/assets/sw-register.js" defer></script>
     <style>/* CSS with variables for theming */</style>
 </head>
@@ -204,7 +212,7 @@ markdown_editor.html (imports scripts via ES modules)
 - **Install**: Pre-caches core assets listed in `ASSETS_TO_CACHE`
 - **Navigations**: Network-first, fallback to cache
 - **Assets**: Cache-first, then fetch and update
-- **Exclusions**: Dodge game and Supabase API calls (always fetch fresh)
+- **Exclusions**: `/beta/*`, Dodge game routes, and Supabase API calls (always fetch fresh)
 
 ### When Modifying Any Cached Asset
 Any time you change a file listed in `ASSETS_TO_CACHE`, **bump the `BUILD_ID` timestamp** at the top of `sw.js`. Without this, returning users will keep getting the old cached version.
@@ -217,10 +225,13 @@ const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';  // Update this on every change
 1. External CDN URLs must match exactly between HTML and `ASSETS_TO_CACHE` (version/path/query included)
 2. If a cached page depends on local media assets (`.mp3`, `.webm`, images, fonts) for core UX, add those assets to `ASSETS_TO_CACHE`
 3. If `assets/sw-register.js` is updated (it is cached), bump `BUILD_ID` in `sw.js`
+4. Never add `/beta/*` paths to `ASSETS_TO_CACHE`
 
 ### When Adding New Pages
-1. Add the new page path to `ASSETS_TO_CACHE` array in `sw.js`
-2. Bump the `BUILD_ID` timestamp
+1. Unless explicitly requested to publish and list on `index.html`, create the new page under `/beta`
+2. Keep `/beta` pages out of SW registration and `ASSETS_TO_CACHE`
+3. For published pages, add the new page path to `ASSETS_TO_CACHE` array in `sw.js`
+4. Bump the `BUILD_ID` timestamp for published/cached additions
 
 ```javascript
 const ASSETS_TO_CACHE = [
@@ -252,12 +263,14 @@ Then open `http://localhost:8000` in a browser.
 ## Common Tasks
 
 ### Adding a New Tool/Page
-1. Create new HTML file in appropriate directory (`tools/`, `simulations/`, etc.)
-2. If it will be published from `index.html`, include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
-3. Use the standard theming CSS variables
-4. If published, add to `sw.js` `ASSETS_TO_CACHE` array
-5. Add link to `index.html` in the appropriate section
-6. Add URL to `sitemap.xml` if page is public
+1. Unless explicitly requested to publish/list on `index.html`, create new HTML in `/beta`
+2. For `/beta` pages, do not include `<script src="/assets/sw-register.js" defer></script>` and do not add `/beta/*` paths to `sw.js` `ASSETS_TO_CACHE`
+3. If it will be published, create/move it in the appropriate public directory (`tools/`, `simulations/`, etc.)
+4. If it will be published from `index.html`, include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
+5. Use the standard theming CSS variables
+6. If published, add to `sw.js` `ASSETS_TO_CACHE` array and bump `BUILD_ID`
+7. Add link to `index.html` in the appropriate section
+8. Add URL to `sitemap.xml` if page is public
 
 ### Updating the Theme System
 Theme colors are defined in CSS `:root` and `[data-theme="dark"]` selectors. Key variables:
@@ -315,12 +328,13 @@ function toggleTheme() {
 ```html
 <script src="/assets/sw-register.js" defer></script>
 ```
+Use this only on published pages (not on `/beta/*` pages).
 
 ## Offline Behavior
 
 - **Guaranteed offline after install**: Pages/assets explicitly listed in `sw.js` `ASSETS_TO_CACHE`
-- **May work offline after first online visit**: Other same-origin GET resources (runtime cache)
-- **Requires network**: `fun/dodge.html`, `fun/dodge_assets/*`, and any `*.supabase.co` API calls
+- **May work offline after first online visit**: Other same-origin GET resources (runtime cache), except `/beta/*`
+- **Requires network**: `/beta/*`, `fun/dodge.html`, `fun/dodge_assets/*`, and any `*.supabase.co` API calls
 
 ## External Services
 
@@ -331,10 +345,12 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 
 1. **No build step**: Edit files directly, no npm/webpack/etc.
 2. **Self-contained pages**: Each HTML file is a complete application
-3. **Update sw.js**: When adding or modifying cached assets, bump `BUILD_ID` and update the cache list
-4. **CDN URL exactness**: Keep CDN script/style URLs in HTML exactly aligned with `ASSETS_TO_CACHE`
-5. **Theme awareness**: Always use CSS variables, not hardcoded colors
-6. **Mobile-first**: Consider touch interactions and responsive design
-7. **Offline-first**: Ensure new features work without network
-8. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
-9. **Keep it simple**: Avoid adding frameworks or build complexity
+3. **New pages default to `/beta`**: Unless explicitly asked to publish/list in `index.html`, create under `/beta`
+4. **Update sw.js for published cached assets only**: When adding or modifying cached assets, bump `BUILD_ID` and update the cache list
+5. **Never cache `/beta/*`**: Keep `/beta` files out of SW registration and `ASSETS_TO_CACHE`
+6. **CDN URL exactness**: Keep CDN script/style URLs in HTML exactly aligned with `ASSETS_TO_CACHE`
+7. **Theme awareness**: Always use CSS variables, not hardcoded colors
+8. **Mobile-first**: Consider touch interactions and responsive design
+9. **Offline-first**: Ensure new features work without network
+10. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
+11. **Keep it simple**: Avoid adding frameworks or build complexity

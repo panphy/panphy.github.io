@@ -128,7 +128,13 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
   const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
+  const isBetaPath = isSameOrigin && (url.pathname === '/beta' || url.pathname.startsWith('/beta/'));
 
+  // Keep all beta routes/assets network-only (no SW cache reads/writes).
+  if (isBetaPath) {
+    event.respondWith(fetch(req));
+    return;
+  }
   // Never cache the dodge game or provide offline fallback for it.
   if (isSameOrigin && (url.pathname === '/fun/dodge.html' || url.pathname.startsWith('/fun/dodge_assets/'))) {
     event.respondWith(fetch(req));

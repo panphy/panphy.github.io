@@ -8,7 +8,7 @@ PanPhy Labs is a static Progressive Web App (PWA) with browser-based physics too
 - **Service Worker** (`sw.js`) for offline support and update lifecycle
 - **Supabase** for the Asteroid Storm leaderboard
 
-## Route Status (Reviewed: 2026-02-18)
+## Route Status (Reviewed: 2026-02-19)
 
 ### Published routes
 
@@ -23,13 +23,16 @@ These are linked from `index.html` and listed in `sitemap.xml`:
 
 These are present in the repository but not currently linked from `index.html` or `sitemap.xml`:
 
-- `gcse/phy_flashcard.html`
-- `gcse/phy_flashcard_cs.html`
-- `gcse/phy_flashcard_ss.html`
+- `beta/ar.html`
+- `misc/gcse_phy/phy_flashcard.html`
+- `misc/gcse_phy/phy_flashcard_cs.html`
+- `misc/gcse_phy/phy_flashcard_ss.html`
 - `misc/ising_model.html`
 - `misc/phyclub_showcase.html`
 
 Treat those as legacy/internal unless intentionally promoted.
+
+New work-in-progress pages should be created under `beta/` by default unless there is an explicit request to publish and list them on `index.html`.
 
 Only routes linked from `index.html` are SW-managed by policy. Unlisted/internal pages should not include `/assets/sw-register.js` and should not be added to `ASSETS_TO_CACHE` unless they are being promoted to published status.
 
@@ -38,9 +41,9 @@ Only routes linked from `index.html` are SW-managed by policy. Unlisted/internal
 - `sw.js` pre-caches the explicit list in `ASSETS_TO_CACHE`.
 - Navigations use **network-first** with cache fallback.
 - Other GET assets use **cache-first**.
-- `/fun/dodge.html`, `/fun/dodge_assets/*`, and `*.supabase.co` requests are always fetched fresh (not cached by SW).
+- `/beta/*`, `/fun/dodge.html`, `/fun/dodge_assets/*`, and `*.supabase.co` requests are always fetched fresh (not cached by SW).
 
-Only pages/assets in `ASSETS_TO_CACHE` are guaranteed to be available offline immediately after SW install. Other same-origin pages may still work offline after they are visited online while the SW is active (runtime cache).
+Only pages/assets in `ASSETS_TO_CACHE` are guaranteed to be available offline immediately after SW install. Other same-origin pages may still work offline after they are visited online while the SW is active (runtime cache), except `/beta/*`.
 
 ## Cache Versioning Rules
 
@@ -49,8 +52,8 @@ Only pages/assets in `ASSETS_TO_CACHE` are guaranteed to be available offline im
 When changing the site:
 
 - **Modify any cached file** (`ASSETS_TO_CACHE` entry): bump `BUILD_ID` in `sw.js`
-- **Add a new published page**: add page path to `ASSETS_TO_CACHE`, link it from `index.html`, add it to `sitemap.xml`, then bump `BUILD_ID`
-- **Keep a page unlisted/internal**: do not add SW registration and do not add it to `ASSETS_TO_CACHE`
+- **Add a new unpublished/internal page**: create it under `beta/`, do not add SW registration, and do not add it to `ASSETS_TO_CACHE`
+- **Publish a page from beta/internal**: move it to a public directory, add page path to `ASSETS_TO_CACHE`, link it from `index.html`, add it to `sitemap.xml`, then bump `BUILD_ID`
 - **Change CDN script/style URL in a cached page**: update the exact same URL in `ASSETS_TO_CACHE`, then bump `BUILD_ID`
 - **Add local media required by a cached page**: add media paths to `ASSETS_TO_CACHE`, then bump `BUILD_ID`
 - **Edit `assets/sw-register.js`**: bump `BUILD_ID` in `sw.js` (the register script is pre-cached)

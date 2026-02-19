@@ -22,11 +22,13 @@ The site uses a service worker for offline support. Assets are served **cache-fi
 const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';
 ```
 
-When adding a new page, also add its path to the `ASSETS_TO_CACHE` array.
+When adding a new published page, also add its path to the `ASSETS_TO_CACHE` array.
 
 **Cache URLs are exact-match keys.** If an HTML file changes any CDN script/style URL, update the exact same URL in `ASSETS_TO_CACHE` (including version/path/query string), then bump `BUILD_ID`.
 
 If a cached page depends on local media assets (audio/video/images/fonts) for core UX, add those file paths to `ASSETS_TO_CACHE` as well.
+
+Any file under `/beta` is intentionally excluded from service-worker caching. Do not add `/beta/*` paths to `ASSETS_TO_CACHE`.
 
 ### No Build System
 
@@ -46,20 +48,24 @@ Not every HTML file in the repo is currently part of the published navigation.
 
 - **Published pages** are linked from `index.html` and listed in `sitemap.xml`
 - Only published pages should include `<script src="/assets/sw-register.js" defer></script>` and be tracked in `ASSETS_TO_CACHE`
+- New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
+- `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
 - **Current unlisted/legacy pages** include:
-  - `gcse/phy_flashcard.html`
-  - `gcse/phy_flashcard_cs.html`
-  - `gcse/phy_flashcard_ss.html`
+  - `beta/ar.html`
+  - `misc/gcse_phy/phy_flashcard.html`
+  - `misc/gcse_phy/phy_flashcard_cs.html`
+  - `misc/gcse_phy/phy_flashcard_ss.html`
   - `misc/ising_model.html`
   - `misc/phyclub_showcase.html`
 - Unlisted/internal pages should stay outside service-worker registration and pre-cache lists unless explicitly promoted
 
 If you promote an unlisted page to production, treat it as a full launch task:
-1. Add `<script src="/assets/sw-register.js" defer></script>` if missing
-2. Add route + required assets to `ASSETS_TO_CACHE`
-3. Bump `BUILD_ID` in `sw.js`
-4. Link it from `index.html`
-5. Add it to `sitemap.xml`
+1. If the page lives in `/beta`, move it to the correct public directory first
+2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
+3. Add route + required assets to `ASSETS_TO_CACHE`
+4. Bump `BUILD_ID` in `sw.js`
+5. Link it from `index.html`
+6. Add it to `sitemap.xml`
 
 ## Coding Conventions
 
@@ -80,15 +86,15 @@ If you promote an unlisted page to production, treat it as a full launch task:
 ├── sw.js                   # Service Worker (update BUILD_ID on changes!)
 ├── manifest.json           # PWA config
 ├── assets/                 # Icons, logos, sw-register.js
+├── beta/                   # Unpublished WIP pages/assets (never SW-cached)
 ├── tools/                  # Educational tools
 │   ├── panphyplot.html     # Entry point → panphyplot/ (modular JS/CSS)
 │   ├── markdown_editor.html # Entry point → markdown_editor/ (ES modules)
 │   └── *.html              # digitizer, motion_tracker, sound_analyzer, tone_generator
 ├── simulations/            # Physics simulations
 ├── fun/                    # Games (dodge.html excluded from SW cache)
-├── gcse/                   # GCSE flashcards
 ├── for_teachers/           # Teacher utilities
-└── misc/                   # Miscellaneous
+└── misc/                   # Miscellaneous (includes gcse_phy flashcards)
 ```
 
 ## Testing Locally
@@ -102,13 +108,14 @@ python3 -m http.server 8000
 
 ## Adding a New Page
 
-1. Create the HTML file in the appropriate directory
-2. If the page will be published (linked from `index.html`), include service worker registration via shared loader: `<script src="/assets/sw-register.js" defer></script>`
-3. Use the standard CSS theme variables
-4. If published, add the path to `ASSETS_TO_CACHE` in `sw.js`
-5. Bump the `BUILD_ID` in `sw.js`
-6. Add a link from `index.html`
-7. Add a `<loc>` entry to `sitemap.xml` if the page is public
+1. Unless explicitly requested to publish and list on `index.html`, create the page in `/beta`
+2. For `/beta` pages, do not include service worker registration and do not add any `/beta/*` path to `ASSETS_TO_CACHE`
+3. If the page will be published, place it in the appropriate public directory and include service worker registration via shared loader: `<script src="/assets/sw-register.js" defer></script>`
+4. Use the standard CSS theme variables
+5. If published, add the path to `ASSETS_TO_CACHE` in `sw.js`
+6. Bump the `BUILD_ID` in `sw.js` after published/cached asset changes
+7. Add a link from `index.html`
+8. Add a `<loc>` entry to `sitemap.xml` if the page is public
 
 ## Git Workflow
 
