@@ -94,6 +94,55 @@
             align-items: end;
         }
 
+        .controls-actions {
+            display: contents;
+        }
+
+        .physics-controls {
+            width: 100%;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .physics-controls > summary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--panel-border);
+            background: rgba(15, 23, 42, 0.54);
+            color: var(--text-muted);
+            font: 500 0.82rem/1 var(--font-ui);
+            border-radius: 10px;
+            padding: 8px 14px;
+            min-height: 36px;
+            cursor: pointer;
+            list-style: none;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            user-select: none;
+        }
+
+        .physics-controls > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        [data-theme="light"] .physics-controls > summary {
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        .physics-controls > summary:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .physics-controls-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: end;
+            padding-top: 8px;
+        }
+
         button {
             border: 1px solid var(--panel-border);
             background: rgba(15, 23, 42, 0.54);
@@ -250,6 +299,12 @@
                 border-radius: 14px;
             }
         }
+
+        @media (min-width: 641px) {
+            .physics-controls {
+                /* Default open on wide screens via JS, but also visually hint */
+            }
+        }
     </style>
 </head>
 <body>
@@ -257,38 +312,45 @@
         <header class="topbar panel">
             <h1 class="title">Fingertip Sphere Inertia (2D Prototype)</h1>
             <div class="controls">
-                <button id="startBtn" type="button">Start Camera</button>
-                <label for="cameraSelect" class="control-block">
-                    Camera
-                    <select id="cameraSelect" disabled>
-                        <option value="">Default</option>
-                    </select>
-                </label>
-                <button id="placeBtn" type="button" disabled>Place Sphere</button>
-                <button id="resetBtn" type="button" disabled>Reset Motion</button>
-                <label for="modeSelect" class="control-block">
-                    Interaction
-                    <select id="modeSelect">
-                        <option value="balanced" selected>Balanced</option>
-                        <option value="elastic">Elastic Balls</option>
-                        <option value="sticky">Sticky Balls</option>
-                    </select>
-                </label>
-                <label for="sensitivityRange" class="control-block">
-                    Sensitivity
-                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
-                    <span id="sensitivityValue" class="value-badge">1.0x</span>
-                </label>
-                <label for="gravityRange" class="control-block">
-                    Gravity
-                    <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
-                    <span id="gravityValue" class="value-badge">0.55g</span>
-                </label>
-                <label for="massRange" class="control-block">
-                    Mass
-                    <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
-                    <span id="massValue" class="value-badge">1.0 kg</span>
-                </label>
+                <div class="controls-actions">
+                    <button id="startBtn" type="button">Start Camera</button>
+                    <label for="cameraSelect" class="control-block">
+                        Camera
+                        <select id="cameraSelect" disabled>
+                            <option value="">Default</option>
+                        </select>
+                    </label>
+                    <button id="addBtn" type="button" disabled>Add Sphere</button>
+                    <button id="resetBtn" type="button" disabled>Reset Motion</button>
+                </div>
+                <details id="physicsDetails" class="physics-controls">
+                    <summary>Settings</summary>
+                    <div class="physics-controls-inner">
+                        <label for="modeSelect" class="control-block">
+                            Interaction
+                            <select id="modeSelect">
+                                <option value="balanced" selected>Balanced</option>
+                                <option value="elastic">Elastic Balls</option>
+                                <option value="sticky">Sticky Balls</option>
+                            </select>
+                        </label>
+                        <label for="sensitivityRange" class="control-block">
+                            Sensitivity
+                            <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
+                            <span id="sensitivityValue" class="value-badge">1.0x</span>
+                        </label>
+                        <label for="gravityRange" class="control-block">
+                            Gravity
+                            <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
+                            <span id="gravityValue" class="value-badge">0.55g</span>
+                        </label>
+                        <label for="massRange" class="control-block">
+                            Mass
+                            <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
+                            <span id="massValue" class="value-badge">1.0 kg</span>
+                        </label>
+                    </div>
+                </details>
             </div>
         </header>
 
@@ -298,12 +360,12 @@
             <canvas id="tipCanvas" class="media-layer"></canvas>
             <div class="hud">
                 <div id="status" class="pill">Camera is off.</div>
-                <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 | Speed: 0.00</div>
+                <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 | Spheres: 0</div>
             </div>
         </section>
 
         <p class="hint">
-            Place sphere, then flick your fingertips to push it. Gravity pulls it down — use your whole hand to catch and throw it!
+            Add spheres, then flick your fingertips or use your palm to push them. Gravity pulls them down — catch and throw!
         </p>
     </main>
 
@@ -312,7 +374,7 @@
 
         const ui = {
             startBtn: document.getElementById('startBtn'),
-            placeBtn: document.getElementById('placeBtn'),
+            addBtn: document.getElementById('addBtn'),
             resetBtn: document.getElementById('resetBtn'),
             cameraSelect: document.getElementById('cameraSelect'),
             status: document.getElementById('status'),
@@ -327,8 +389,14 @@
             stage: document.getElementById('stage'),
             video: document.getElementById('camera'),
             canvas: document.getElementById('renderCanvas'),
-            tipCanvas: document.getElementById('tipCanvas')
+            tipCanvas: document.getElementById('tipCanvas'),
+            physicsDetails: document.getElementById('physicsDetails')
         };
+
+        // Default open on wide screens
+        if (window.innerWidth >= 641) {
+            ui.physicsDetails.open = true;
+        }
 
         const state = {
             running: false,
@@ -418,17 +486,44 @@
             throw new Error(`Unable to load MediaPipe hand tracker. ${errors.join(' | ')}`);
         }
 
-        const physics = {
-            radius: 0.18,
-            planeZ: 0,
-            placed: false,
-            position: new THREE.Vector3(0, 0, 0),
-            velocity: new THREE.Vector3(0, 0, 0)
-        };
+        // --- Multi-sphere architecture ---
 
-        // Gravity magnitude is controlled by state.gravity (applied as negative Y)
+        const SPHERE_RADIUS = 0.18;
+        const PLANE_Z = 0;
+        const MAX_SPHERES = 6;
+
+        const SPHERE_COLORS = [
+            0x22d3ee, // cyan
+            0xf472b6, // pink
+            0xa78bfa, // purple
+            0xfbbf24, // amber
+            0x34d399, // emerald
+            0xfb923c  // orange
+        ];
+
+        // Emissive colors (darker tint of each sphere color)
+        const SPHERE_EMISSIVES = [
+            0x052f40,
+            0x3d1028,
+            0x1e1540,
+            0x3d2e08,
+            0x0a3020,
+            0x3d1e08
+        ];
+
+        const spheres = [];
+
+        // Shared geometry and wireframe material (reused across all spheres)
+        const sharedSphereGeometry = new THREE.SphereGeometry(SPHERE_RADIUS, 36, 28);
+        const sharedWireMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00131c,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.25
+        });
 
         const FINGERTIP_POINTS = [4, 8, 12, 16, 20];
+        const PALM_LANDMARKS = [0, 5, 9, 13, 17]; // wrist + MCP joints
 
         // Hand skeleton connections for visual feedback
         const HAND_CONNECTIONS = [
@@ -509,30 +604,6 @@
         rimLight.position.set(-1.4, -0.4, -1.0);
         scene.add(rimLight);
 
-        const sphereGroup = new THREE.Group();
-        const sphereGeometry = new THREE.SphereGeometry(physics.radius, 36, 28);
-        const sphereMaterial = new THREE.MeshStandardMaterial({
-            color: 0x22d3ee,
-            emissive: 0x052f40,
-            metalness: 0.22,
-            roughness: 0.22,
-            transparent: true,
-            opacity: 0.9
-        });
-        const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        const sphereWire = new THREE.Mesh(
-            sphereGeometry,
-            new THREE.MeshBasicMaterial({
-                color: 0x00131c,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.25
-            })
-        );
-        sphereGroup.add(sphereMesh, sphereWire);
-        sphereGroup.visible = false;
-        scene.add(sphereGroup);
-
         const scratch = {
             rayPoint: new THREE.Vector3(),
             rayDir: new THREE.Vector3(),
@@ -543,6 +614,7 @@
         // Per-landmark position/velocity history for fingertip velocity tracking
         const tipHistory = new Map();
         // Tracks which tip keys were in contact last frame (for first-contact impulse)
+        // Keyed by "${tipKey}:${sphereIndex}" to track per-sphere contacts
         const activeContacts = new Set();
 
         function setStatus(message, isError = false) {
@@ -580,9 +652,19 @@
         }
 
         function updateMetrics() {
-            const speed = Math.hypot(physics.velocity.x, physics.velocity.y);
+            let maxSpeed = 0;
+            for (const sphere of spheres) {
+                const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
+                if (speed > maxSpeed) {
+                    maxSpeed = speed;
+                }
+            }
             ui.metrics.textContent =
-                `FPS: ${state.fps.toFixed(0)} | Mode: ${INTERACTION_LABELS[state.interactionMode]} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Speed: ${speed.toFixed(2)}`;
+                `FPS: ${state.fps.toFixed(0)} | Mode: ${INTERACTION_LABELS[state.interactionMode]} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}`;
+        }
+
+        function updateAddBtnState() {
+            ui.addBtn.disabled = !state.running || spheres.length >= MAX_SPHERES;
         }
 
         function resizeStage() {
@@ -602,18 +684,74 @@
             }
         }
 
-        function resetSphereState() {
-            physics.position.set(0, 0, physics.planeZ);
-            physics.velocity.set(0, 0, 0);
-            sphereGroup.position.copy(physics.position);
-            sphereGroup.rotation.set(0, 0, 0);
+        function getViewBounds() {
+            const depth = camera3d.position.z - PLANE_Z;
+            const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera3d.fov * 0.5)) * depth;
+            const halfWidth = halfHeight * camera3d.aspect;
+            return { halfWidth, halfHeight };
         }
 
-        function placeSphere() {
-            physics.placed = true;
-            sphereGroup.visible = true;
-            resetSphereState();
-            setStatus('Sphere placed. Flick your fingertips to push it!');
+        function createSphere(colorIndex) {
+            const material = new THREE.MeshStandardMaterial({
+                color: SPHERE_COLORS[colorIndex],
+                emissive: SPHERE_EMISSIVES[colorIndex],
+                emissiveIntensity: 1.0,
+                metalness: 0.22,
+                roughness: 0.22,
+                transparent: true,
+                opacity: 0.9
+            });
+            const mesh = new THREE.Mesh(sharedSphereGeometry, material);
+            const wire = new THREE.Mesh(sharedSphereGeometry, sharedWireMaterial);
+            const group = new THREE.Group();
+            group.add(mesh, wire);
+
+            return {
+                group,
+                material,
+                position: new THREE.Vector3(0, 0, PLANE_Z),
+                velocity: new THREE.Vector3(0, 0, 0),
+                contactCount: 0
+            };
+        }
+
+        function addSphere() {
+            if (spheres.length >= MAX_SPHERES) {
+                return;
+            }
+
+            const colorIndex = spheres.length % SPHERE_COLORS.length;
+            const sphere = createSphere(colorIndex);
+
+            // Place at random position within inner 60% of view bounds
+            const bounds = getViewBounds();
+            const rangeX = bounds.halfWidth * 0.6;
+            const rangeY = bounds.halfHeight * 0.6;
+            sphere.position.set(
+                (Math.random() * 2 - 1) * rangeX,
+                (Math.random() * 2 - 1) * rangeY,
+                PLANE_Z
+            );
+            sphere.group.position.copy(sphere.position);
+
+            scene.add(sphere.group);
+            spheres.push(sphere);
+            updateAddBtnState();
+
+            const count = spheres.length;
+            setStatus(`Sphere ${count} added.${count < MAX_SPHERES ? ' Add more or start pushing!' : ' Max reached.'}`);
+        }
+
+        function resetAll() {
+            for (const sphere of spheres) {
+                scene.remove(sphere.group);
+                sphere.material.dispose();
+            }
+            spheres.length = 0;
+            activeContacts.clear();
+            tipHistory.clear();
+            updateAddBtnState();
+            setStatus(`All spheres removed. Press "Add Sphere" to start.`);
         }
 
         function landmarkToPlane(landmark, out) {
@@ -627,7 +765,7 @@
                 return false;
             }
 
-            const t = (physics.planeZ - camera3d.position.z) / scratch.rayDir.z;
+            const t = (PLANE_Z - camera3d.position.z) / scratch.rayDir.z;
             if (!Number.isFinite(t) || t < 0) {
                 return false;
             }
@@ -636,48 +774,77 @@
             return true;
         }
 
+        function trackPoint(key, landmark, now, tips) {
+            if (!landmarkToPlane(landmark, scratch.tipWorld)) {
+                return;
+            }
+
+            const worldX = scratch.tipWorld.x;
+            const worldY = scratch.tipWorld.y;
+
+            let velX = 0;
+            let velY = 0;
+            const prev = tipHistory.get(key);
+            if (prev) {
+                const elapsed = (now - prev.time) / 1000;
+                if (elapsed > 0 && elapsed < 0.12) {
+                    const rawVelX = (worldX - prev.worldX) / elapsed;
+                    const rawVelY = (worldY - prev.worldY) / elapsed;
+                    // EMA smoothing to reduce landmark noise
+                    const alpha = 0.55;
+                    velX = prev.velX !== undefined
+                        ? alpha * rawVelX + (1 - alpha) * prev.velX
+                        : rawVelX;
+                    velY = prev.velY !== undefined
+                        ? alpha * rawVelY + (1 - alpha) * prev.velY
+                        : rawVelY;
+                }
+            }
+
+            tipHistory.set(key, { worldX, worldY, velX, velY, time: now });
+            tips.push({ key, x: landmark.x, y: landmark.y, worldX, worldY, velX, velY });
+        }
+
         function collectTrackedTips() {
             const now = performance.now();
             const tips = [];
             const seenKeys = new Set();
 
             state.lastHands.forEach((hand, handIndex) => {
+                // Fingertips
                 for (const tipIndex of FINGERTIP_POINTS) {
                     const landmark = hand[tipIndex];
                     if (!landmark) {
                         continue;
                     }
-                    if (!landmarkToPlane(landmark, scratch.tipWorld)) {
-                        continue;
-                    }
-
                     const key = `${handIndex}-${tipIndex}`;
                     seenKeys.add(key);
+                    trackPoint(key, landmark, now, tips);
+                }
 
-                    const worldX = scratch.tipWorld.x;
-                    const worldY = scratch.tipWorld.y;
-
-                    let velX = 0;
-                    let velY = 0;
-                    const prev = tipHistory.get(key);
-                    if (prev) {
-                        const elapsed = (now - prev.time) / 1000;
-                        if (elapsed > 0 && elapsed < 0.12) {
-                            const rawVelX = (worldX - prev.worldX) / elapsed;
-                            const rawVelY = (worldY - prev.worldY) / elapsed;
-                            // EMA smoothing to reduce landmark noise
-                            const alpha = 0.55;
-                            velX = prev.velX !== undefined
-                                ? alpha * rawVelX + (1 - alpha) * prev.velX
-                                : rawVelX;
-                            velY = prev.velY !== undefined
-                                ? alpha * rawVelY + (1 - alpha) * prev.velY
-                                : rawVelY;
-                        }
+                // Palm center (average of wrist + MCP joints)
+                let palmX = 0;
+                let palmY = 0;
+                let palmZ = 0;
+                let palmCount = 0;
+                for (const lmIndex of PALM_LANDMARKS) {
+                    const lm = hand[lmIndex];
+                    if (lm) {
+                        palmX += lm.x;
+                        palmY += lm.y;
+                        palmZ += lm.z || 0;
+                        palmCount++;
                     }
-
-                    tipHistory.set(key, { worldX, worldY, velX, velY, time: now });
-                    tips.push({ key, x: landmark.x, y: landmark.y, worldX, worldY, velX, velY });
+                }
+                if (palmCount >= 3) {
+                    const palmLandmark = {
+                        x: palmX / palmCount,
+                        y: palmY / palmCount,
+                        z: palmZ / palmCount
+                    };
+                    const key = `${handIndex}-palm`;
+                    seenKeys.add(key);
+                    trackPoint(key, palmLandmark, now, tips);
                 }
             });
 
@@ -729,89 +896,99 @@
                 }
             }
 
-            // Highlighted fingertip circles
+            // Highlighted fingertip and palm circles
             tipCtx.lineWidth = 2.5;
             tipCtx.strokeStyle = '#22c55e';
             tipCtx.fillStyle = 'rgba(34, 197, 94, 0.22)';
             for (const tip of state.trackedTips) {
                 const x = tip.x * width;
                 const y = tip.y * height;
+                const isPalm = tip.key.endsWith('-palm');
+                const radius = isPalm ? 18 : 12;
                 tipCtx.beginPath();
-                tipCtx.arc(x, y, 12, 0, Math.PI * 2);
+                tipCtx.arc(x, y, radius, 0, Math.PI * 2);
                 tipCtx.fill();
                 tipCtx.stroke();
             }
         }
 
         function applyTipForces(dt, profile) {
-            if (!physics.placed) {
+            if (spheres.length === 0) {
                 return 0;
             }
 
-            let contacts = 0;
+            let totalContacts = 0;
             const newContacts = new Set();
 
+            // Reset contact counts
+            for (const sphere of spheres) {
+                sphere.contactCount = 0;
+            }
+
             for (const tip of state.trackedTips) {
-                scratch.normal.set(
-                    physics.position.x - tip.worldX,
-                    physics.position.y - tip.worldY,
-                    0
-                );
+                for (let si = 0; si < spheres.length; si++) {
+                    const sphere = spheres[si];
 
-                const distance = scratch.normal.length();
-                if (distance >= profile.contactRadius) {
-                    continue;
-                }
+                    scratch.normal.set(
+                        sphere.position.x - tip.worldX,
+                        sphere.position.y - tip.worldY,
+                        0
+                    );
 
-                contacts += 1;
-                newContacts.add(tip.key);
-
-                if (distance < 0.000001) {
-                    scratch.normal.set(0, 1, 0);
-                } else {
-                    scratch.normal.multiplyScalar(1 / distance);
-                }
-
-                const penetration = profile.contactRadius - distance;
-
-                // Spring-damper: pushes sphere away from tip, damps inward sphere motion
-                const inwardSpeed = Math.min(
-                    (physics.velocity.x * scratch.normal.x) + (physics.velocity.y * scratch.normal.y),
-                    0
-                );
-                const pushForce = (profile.spring * penetration) - (profile.damping * inwardSpeed);
-                const pushAccel = pushForce / state.mass;
-
-                physics.position.x += scratch.normal.x * penetration * profile.correction;
-                physics.position.y += scratch.normal.y * penetration * profile.correction;
-                physics.velocity.x += scratch.normal.x * pushAccel * dt;
-                physics.velocity.y += scratch.normal.y * pushAccel * dt;
-
-                // First-contact velocity impulse: transfers fingertip momentum to sphere.
-                // This makes fast flicks register even if contact lasts only 1-2 frames.
-                // Heavier sphere receives less velocity from the same impulse.
-                if (!activeContacts.has(tip.key)) {
-                    // Relative velocity of tip w.r.t. sphere, along contact normal (tip→sphere)
-                    const relVelAlongNormal =
-                        (tip.velX - physics.velocity.x) * scratch.normal.x +
-                        (tip.velY - physics.velocity.y) * scratch.normal.y;
-                    if (relVelAlongNormal > 0.05) {
-                        const impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
-                        physics.velocity.x += scratch.normal.x * impulse;
-                        physics.velocity.y += scratch.normal.y * impulse;
+                    const distance = scratch.normal.length();
+                    if (distance >= profile.contactRadius) {
+                        continue;
                     }
-                }
 
-                if (profile.stickPull > 0 && distance > 0.000001) {
-                    const toTipX = tip.worldX - physics.position.x;
-                    const toTipY = tip.worldY - physics.position.y;
-                    const invDistance = 1 / distance;
-                    const stickFactor = penetration / profile.contactRadius;
-                    const stickAccel = profile.stickPull / state.mass;
-                    physics.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt;
-                    physics.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt;
-                    physics.position.x += toTipX * profile.stickCapture * stickFactor * dt;
-                    physics.position.y += toTipY * profile.stickCapture * stickFactor * dt;
+                    totalContacts += 1;
+                    sphere.contactCount += 1;
+                    const contactKey = `${tip.key}:${si}`;
+                    newContacts.add(contactKey);
+
+                    if (distance < 0.000001) {
+                        scratch.normal.set(0, 1, 0);
+                    } else {
+                        scratch.normal.multiplyScalar(1 / distance);
+                    }
+
+                    const penetration = profile.contactRadius - distance;
+
+                    // Spring-damper: pushes sphere away from tip, damps inward sphere motion
+                    const inwardSpeed = Math.min(
+                        (sphere.velocity.x * scratch.normal.x) + (sphere.velocity.y * scratch.normal.y),
+                        0
+                    );
+                    const pushForce = (profile.spring * penetration) - (profile.damping * inwardSpeed);
+                    const pushAccel = pushForce / state.mass;
+
+                    sphere.position.x += scratch.normal.x * penetration * profile.correction;
+                    sphere.position.y += scratch.normal.y * penetration * profile.correction;
+                    sphere.velocity.x += scratch.normal.x * pushAccel * dt;
+                    sphere.velocity.y += scratch.normal.y * pushAccel * dt;
+
+                    // First-contact velocity impulse
+                    if (!activeContacts.has(contactKey)) {
+                        const relVelAlongNormal =
+                            (tip.velX - sphere.velocity.x) * scratch.normal.x +
+                            (tip.velY - sphere.velocity.y) * scratch.normal.y;
+                        if (relVelAlongNormal > 0.05) {
+                            const impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
+                            sphere.velocity.x += scratch.normal.x * impulse;
+                            sphere.velocity.y += scratch.normal.y * impulse;
+                        }
+                    }
+
+                    if (profile.stickPull > 0 && distance > 0.000001) {
+                        const toTipX = tip.worldX - sphere.position.x;
+                        const toTipY = tip.worldY - sphere.position.y;
+                        const invDistance = 1 / distance;
+                        const stickFactor = penetration / profile.contactRadius;
+                        const stickAccel = profile.stickPull / state.mass;
+                        sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt;
+                        sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt;
+                        sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt;
+                        sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt;
+                    }
                 }
             }
 
@@ -821,66 +998,120 @@
                 activeContacts.add(k);
             }
 
-            return contacts;
+            return totalContacts;
         }
 
-        function constrainSphereToView(profile) {
-            const depth = camera3d.position.z - physics.planeZ;
-            const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera3d.fov * 0.5)) * depth;
-            const halfWidth = halfHeight * camera3d.aspect;
-
-            const xLimit = Math.max(0.2, halfWidth - physics.radius);
-            const yLimit = Math.max(0.2, halfHeight - physics.radius);
+        function constrainSphereToView(sphere, profile) {
+            const bounds = getViewBounds();
+            const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+            const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
             const restitution = profile.restitution;
 
-            if (physics.position.x > xLimit) {
-                physics.position.x = xLimit;
-                physics.velocity.x = -Math.abs(physics.velocity.x) * restitution;
-            } else if (physics.position.x < -xLimit) {
-                physics.position.x = -xLimit;
-                physics.velocity.x = Math.abs(physics.velocity.x) * restitution;
+            if (sphere.position.x > xLimit) {
+                sphere.position.x = xLimit;
+                sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
+            } else if (sphere.position.x < -xLimit) {
+                sphere.position.x = -xLimit;
+                sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
             }
 
-            if (physics.position.y > yLimit) {
-                physics.position.y = yLimit;
-                physics.velocity.y = -Math.abs(physics.velocity.y) * restitution;
-            } else if (physics.position.y < -yLimit) {
-                physics.position.y = -yLimit;
-                physics.velocity.y = Math.abs(physics.velocity.y) * restitution;
+            if (sphere.position.y > yLimit) {
+                sphere.position.y = yLimit;
+                sphere.velocity.y = -Math.abs(sphere.velocity.y) * restitution;
+            } else if (sphere.position.y < -yLimit) {
+                sphere.position.y = -yLimit;
+                sphere.velocity.y = Math.abs(sphere.velocity.y) * restitution;
             }
 
-            physics.position.z = physics.planeZ;
-            physics.velocity.z = 0;
+            sphere.position.z = PLANE_Z;
+            sphere.velocity.z = 0;
+        }
+
+        function resolveSphereCollisions(profile) {
+            const diameter = SPHERE_RADIUS * 2;
+            for (let i = 0; i < spheres.length; i++) {
+                for (let j = i + 1; j < spheres.length; j++) {
+                    const a = spheres[i];
+                    const b = spheres[j];
+
+                    const dx = b.position.x - a.position.x;
+                    const dy = b.position.y - a.position.y;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist >= diameter || dist < 0.000001) {
+                        continue;
+                    }
+
+                    // Contact normal from a to b
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+
+                    // Position correction: push apart equally
+                    const overlap = (diameter - dist) * 0.5;
+                    a.position.x -= nx * overlap;
+                    a.position.y -= ny * overlap;
+                    b.position.x += nx * overlap;
+                    b.position.y += ny * overlap;
+
+                    // Elastic velocity exchange along contact normal
+                    const relVelN = (b.velocity.x - a.velocity.x) * nx + (b.velocity.y - a.velocity.y) * ny;
+
+                    // Only resolve if spheres are approaching
+                    if (relVelN >= 0) {
+                        continue;
+                    }
+
+                    // Equal mass elastic collision with restitution
+                    const impulse = relVelN * (1 + profile.restitution) * 0.5;
+                    a.velocity.x += impulse * nx;
+                    a.velocity.y += impulse * ny;
+                    b.velocity.x -= impulse * nx;
+                    b.velocity.y -= impulse * ny;
+                }
+            }
         }
 
         function updatePhysics(dt, profile) {
-            if (!physics.placed) {
+            if (spheres.length === 0) {
                 return;
             }
 
-            // Gravity
-            physics.velocity.y -= state.gravity * dt;
+            for (const sphere of spheres) {
+                // Gravity
+                sphere.velocity.y -= state.gravity * dt;
 
-            physics.position.x += physics.velocity.x * dt;
-            physics.position.y += physics.velocity.y * dt;
-            constrainSphereToView(profile);
+                sphere.position.x += sphere.velocity.x * dt;
+                sphere.position.y += sphere.velocity.y * dt;
+                constrainSphereToView(sphere, profile);
 
-            const linearDrag = Math.exp(-profile.airDrag * dt);
-            physics.velocity.x *= linearDrag;
-            physics.velocity.y *= linearDrag;
+                const linearDrag = Math.exp(-profile.airDrag * dt);
+                sphere.velocity.x *= linearDrag;
+                sphere.velocity.y *= linearDrag;
 
-            const speed = Math.hypot(physics.velocity.x, physics.velocity.y);
-            if (speed > profile.maxSpeed && speed > 0.000001) {
-                const scale = profile.maxSpeed / speed;
-                physics.velocity.x *= scale;
-                physics.velocity.y *= scale;
+                const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
+                if (speed > profile.maxSpeed && speed > 0.000001) {
+                    const scale = profile.maxSpeed / speed;
+                    sphere.velocity.x *= scale;
+                    sphere.velocity.y *= scale;
+                }
+
+                // Visual rolling rotation based on current velocity
+                sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
+                sphere.group.rotation.x += (sphere.velocity.y / SPHERE_RADIUS) * dt;
+
+                sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
             }
 
-            // Visual rolling rotation based on current velocity
-            sphereGroup.rotation.z -= (physics.velocity.x / physics.radius) * dt;
-            sphereGroup.rotation.x += (physics.velocity.y / physics.radius) * dt;
+            // Sphere-to-sphere collision
+            resolveSphereCollisions(profile);
+        }
 
-            sphereGroup.position.set(physics.position.x, physics.position.y, physics.planeZ);
+        function updateGlow(dt) {
+            for (const sphere of spheres) {
+                const target = sphere.contactCount > 0 ? 3.0 : 1.0;
+                const alpha = sphere.contactCount > 0 ? 0.3 : 0.1;
+                sphere.material.emissiveIntensity += (target - sphere.material.emissiveIntensity) * alpha;
+            }
         }
 
         function step(now) {
@@ -909,6 +1140,7 @@
             const profile = getInteractionProfile();
             state.contactsCount = applyTipForces(dt, profile);
             updatePhysics(dt, profile);
+            updateGlow(dt);
             drawTrackedTips();
             updateMetrics();
             renderer.render(scene, camera3d);
@@ -1054,16 +1286,16 @@
             resizeStage();
             state.running = true;
             state.lastFrameTime = performance.now();
-            ui.placeBtn.disabled = false;
+            updateAddBtnState();
             ui.resetBtn.disabled = false;
             ui.startBtn.textContent = 'Running';
-            setStatus(`Ready. Press "Place Sphere" to start. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
+            setStatus(`Ready. Press "Add Sphere" to start. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
             requestAnimationFrame(step);
         }
 
         ui.startBtn.addEventListener('click', startCameraAndTracking);
-        ui.placeBtn.addEventListener('click', placeSphere);
-        ui.resetBtn.addEventListener('click', resetSphereState);
+        ui.addBtn.addEventListener('click', addSphere);
+        ui.resetBtn.addEventListener('click', resetAll);
         ui.cameraSelect.addEventListener('change', () => {
             if (state.running && ui.cameraSelect.value) {
                 switchCamera(ui.cameraSelect.value);
