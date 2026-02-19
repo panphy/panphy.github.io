@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,7 +202,7 @@
             background: rgba(255, 255, 255, 0.7);
         }
 
-        .physics-controls > summary {
+        .physics-controls>summary {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -238,15 +239,15 @@
             transform: rotate(180deg);
         }
 
-        .physics-controls > summary::-webkit-details-marker {
+        .physics-controls>summary::-webkit-details-marker {
             display: none;
         }
 
-        .physics-controls > summary:hover {
+        .physics-controls>summary:hover {
             background: rgba(15, 23, 42, 0.2);
         }
 
-        [data-theme="light"] .physics-controls > summary:hover {
+        [data-theme="light"] .physics-controls>summary:hover {
             background: rgba(148, 163, 184, 0.14);
         }
 
@@ -413,6 +414,13 @@
             display: grid;
             gap: 6px;
             width: 100%;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+
+        .hud.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .pill {
@@ -478,6 +486,7 @@
         }
     </style>
 </head>
+
 <body>
     <main class="app">
         <header class="topbar panel">
@@ -501,6 +510,11 @@
                         </label>
                         <button id="addBtn" type="button" disabled>Add Sphere</button>
                         <button id="resetBtn" type="button" disabled>Reset Motion</button>
+                        <label for="showHudCheckbox" class="control-block"
+                            style="flex-direction: row; justify-content: flex-start; align-items: center; gap: 8px;">
+                            <input id="showHudCheckbox" type="checkbox" checked style="width: auto; min-height: auto;">
+                            <span class="control-label">Show HUD</span>
+                        </label>
                     </div>
                 </div>
                 <div class="cp-divider"></div>
@@ -510,7 +524,8 @@
                         <summary>
                             <span class="physics-summary-copy">
                                 <span>Physics Settings</span>
-                                <span class="physics-summary-note">Interaction, sensitivity, gravity, air drag, and mass</span>
+                                <span class="physics-summary-note">Interaction, sensitivity, gravity, air drag, and
+                                    mass</span>
                             </span>
                             <span class="summary-caret" aria-hidden="true">▼</span>
                         </summary>
@@ -522,7 +537,8 @@
                                     <option value="elastic">Bounce</option>
                                     <option value="sticky">Catch</option>
                                 </select>
-                                <p id="modeDescription" class="control-help">Push mode: stable pushes with moderate bounce.</p>
+                                <p id="modeDescription" class="control-help">Push mode: stable pushes with moderate
+                                    bounce.</p>
                             </label>
                             <label for="sensitivityRange" class="control-block">
                                 <span class="control-label-row">
@@ -556,14 +572,16 @@
                     </details>
                 </div>
             </div>
-            <button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
+            <button id="fullscreenBtn" type="button" aria-label="Enter full screen"
+                title="Enter full screen">&#x26F6;</button>
             <video id="camera" class="media-layer" autoplay playsinline muted></video>
             <canvas id="renderCanvas" class="media-layer"></canvas>
             <canvas id="tipCanvas" class="media-layer"></canvas>
         </section>
 
         <p class="hint">
-            Add spheres, then flick your fingertips or use your palm to push them. Raise gravity above 0g for downward pull, then catch and throw.
+            Add spheres, then flick your fingertips or use your palm to push them. Raise gravity above 0g for downward
+            pull, then catch and throw.
         </p>
         <div class="hud">
             <div id="status" class="pill">Camera is off.</div>
@@ -599,7 +617,9 @@
             video: document.getElementById('camera'),
             canvas: document.getElementById('renderCanvas'),
             tipCanvas: document.getElementById('tipCanvas'),
-            physicsDetails: document.getElementById('physicsDetails')
+            physicsDetails: document.getElementById('physicsDetails'),
+            hud: document.querySelector('.hud'),
+            showHudCheckbox: document.getElementById('showHudCheckbox')
         };
 
         function openControls() {
@@ -1054,6 +1074,16 @@
             return true;
         }
 
+        const tipPool = [];
+        let tipPoolIndex = 0;
+        const seenKeys = new Set();
+        function getTipObject() {
+            if (tipPoolIndex >= tipPool.length) {
+                tipPool.push({ key: '', x: 0, y: 0, worldX: 0, worldY: 0, velX: 0, velY: 0 });
+            }
+            return tipPool[tipPoolIndex++];
+        }
+
         function trackPoint(key, landmark, now, tips) {
             if (!landmarkToPlane(landmark, scratch.tipWorld)) {
                 return;
@@ -1082,17 +1112,28 @@
             }
 
             tipHistory.set(key, { worldX, worldY, velX, velY, time: now });
-            tips.push({ key, x: landmark.x, y: landmark.y, worldX, worldY, velX, velY });
+            const tipObj = getTipObject();
+            tipObj.key = key;
+            tipObj.x = landmark.x;
+            tipObj.y = landmark.y;
+            tipObj.worldX = worldX;
+            tipObj.worldY = worldY;
+            tipObj.velX = velX;
+            tipObj.velY = velY;
+            tips.push(tipObj);
         }
 
         function collectTrackedTips() {
             const now = performance.now();
             const tips = [];
-            const seenKeys = new Set();
+            seenKeys.clear();
+            tipPoolIndex = 0;
 
-            state.lastHands.forEach((hand, handIndex) => {
+            for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
+                const hand = state.lastHands[handIndex];
                 // Fingertips
-                for (const tipIndex of FINGERTIP_POINTS) {
+                for (let i = 0; i < FINGERTIP_POINTS.length; i++) {
+                    const tipIndex = FINGERTIP_POINTS[i];
                     const landmark = hand[tipIndex];
                     if (!landmark) {
                         continue;
@@ -1107,7 +1148,8 @@
                 let palmY = 0;
                 let palmZ = 0;
                 let palmCount = 0;
-                for (const lmIndex of PALM_LANDMARKS) {
+                for (let i = 0; i < PALM_LANDMARKS.length; i++) {
+                    const lmIndex = PALM_LANDMARKS[i];
                     const lm = hand[lmIndex];
                     if (lm) {
                         palmX += lm.x;
@@ -1126,7 +1168,7 @@
                     seenKeys.add(key);
                     trackPoint(key, palmLandmark, now, tips);
                 }
-            });
+            }
 
             // Prune history for landmarks no longer visible
             for (const k of tipHistory.keys()) {
@@ -1147,13 +1189,15 @@
             tipCtx.clearRect(0, 0, width, height);
 
             // Draw hand skeleton for each detected hand
-            for (const hand of state.lastHands) {
+            for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
+                const hand = state.lastHands[handIndex];
                 tipCtx.lineWidth = 1.5;
                 tipCtx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
                 tipCtx.lineJoin = 'round';
-                for (const [a, b] of HAND_CONNECTIONS) {
-                    const lmA = hand[a];
-                    const lmB = hand[b];
+                for (let c = 0; c < HAND_CONNECTIONS.length; c++) {
+                    const conn = HAND_CONNECTIONS[c];
+                    const lmA = hand[conn[0]];
+                    const lmB = hand[conn[1]];
                     if (!lmA || !lmB) {
                         continue;
                     }
@@ -1180,7 +1224,8 @@
             tipCtx.lineWidth = 2.5;
             tipCtx.strokeStyle = '#22c55e';
             tipCtx.fillStyle = 'rgba(34, 197, 94, 0.22)';
-            for (const tip of state.trackedTips) {
+            for (let i = 0; i < state.trackedTips.length; i++) {
+                const tip = state.trackedTips[i];
                 const x = tip.x * width;
                 const y = tip.y * height;
                 const isPalm = tip.key.endsWith('-palm');
@@ -1192,22 +1237,78 @@
             }
         }
 
+        const newContacts = new Set();
+        const PINCH_THRESHOLD = 0.05;
+
         function applyTipForces(dt, profile) {
             if (spheres.length === 0) {
                 return 0;
             }
 
             let totalContacts = 0;
-            const newContacts = new Set();
+            newContacts.clear();
 
-            // Reset contact counts
-            for (const sphere of spheres) {
-                sphere.contactCount = 0;
+            // Detect Pinches
+            const pinchedSpheres = new Set();
+            for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
+                const hand = state.lastHands[handIndex];
+                const thumb = hand[4];
+                const index = hand[8];
+                if (!thumb || !index) continue;
+
+                const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+                if (pinchDist < PINCH_THRESHOLD) {
+                    if (landmarkToPlane(index, scratch.tipWorld)) {
+                        const indexWorldX = scratch.tipWorld.x;
+                        const indexWorldY = scratch.tipWorld.y;
+
+                        // Find closest sphere
+                        let closestSphere = null;
+                        let minDt = profile.contactRadius * 1.5;
+                        for (let si = 0; si < spheres.length; si++) {
+                            const sphere = spheres[si];
+                            const dist = Math.hypot(sphere.position.x - indexWorldX, sphere.position.y - indexWorldY);
+                            if (dist < minDt) {
+                                minDt = dist;
+                                closestSphere = sphere;
+                            }
+                        }
+
+                        if (closestSphere) {
+                            pinchedSpheres.add(closestSphere);
+                            // Lock to finger position
+                            closestSphere.position.x = indexWorldX;
+                            closestSphere.position.y = indexWorldY;
+
+                            // Estimate velocity for throw
+                            const tipKey = `${handIndex}-8`;
+                            const tipData = tipHistory.get(tipKey);
+                            if (tipData) {
+                                closestSphere.velocity.x = tipData.velX;
+                                closestSphere.velocity.y = tipData.velY;
+                            } else {
+                                closestSphere.velocity.x = 0;
+                                closestSphere.velocity.y = 0;
+                            }
+                            closestSphere.contactCount += 1;
+                        }
+                    }
+                }
             }
 
-            for (const tip of state.trackedTips) {
+
+            // Reset contact counts for unpinched spheres
+            for (let i = 0; i < spheres.length; i++) {
+                if (!pinchedSpheres.has(spheres[i])) {
+                    spheres[i].contactCount = 0;
+                }
+            }
+
+            for (let ti = 0; ti < state.trackedTips.length; ti++) {
+                const tip = state.trackedTips[ti];
                 for (let si = 0; si < spheres.length; si++) {
                     const sphere = spheres[si];
+                    if (pinchedSpheres.has(sphere)) continue;
 
                     scratch.normal.set(
                         sphere.position.x - tip.worldX,
@@ -1239,7 +1340,10 @@
                         0
                     );
                     const pushForce = (profile.spring * penetration) - (profile.damping * inwardSpeed);
-                    const pushAccel = pushForce / state.mass;
+                    let pushAccel = pushForce / state.mass;
+
+                    // Cap extreme forces
+                    pushAccel = Math.min(pushAccel, 50.0);
 
                     sphere.position.x += scratch.normal.x * penetration * profile.correction;
                     sphere.position.y += scratch.normal.y * penetration * profile.correction;
@@ -1252,7 +1356,8 @@
                             (tip.velX - sphere.velocity.x) * scratch.normal.x +
                             (tip.velY - sphere.velocity.y) * scratch.normal.y;
                         if (relVelAlongNormal > 0.05) {
-                            const impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
+                            let impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
+                            impulse = Math.min(impulse, 25.0); // Cap extreme impulses
                             sphere.velocity.x += scratch.normal.x * impulse;
                             sphere.velocity.y += scratch.normal.y * impulse;
                         }
@@ -1274,9 +1379,7 @@
 
             // Update contact state for next frame's first-contact detection
             activeContacts.clear();
-            for (const k of newContacts) {
-                activeContacts.add(k);
-            }
+            newContacts.forEach(k => activeContacts.add(k));
 
             return totalContacts;
         }
@@ -1624,6 +1727,17 @@
         ui.controlsToggle.addEventListener('click', openControls);
         ui.controlsClose.addEventListener('click', closeControls);
         ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
+        ui.hud.addEventListener('click', () => {
+            ui.hud.classList.add('hidden');
+            ui.showHudCheckbox.checked = false;
+        });
+        ui.showHudCheckbox.addEventListener('change', () => {
+            if (ui.showHudCheckbox.checked) {
+                ui.hud.classList.remove('hidden');
+            } else {
+                ui.hud.classList.add('hidden');
+            }
+        });
         ui.cameraSelect.addEventListener('change', () => {
             if (state.running && ui.cameraSelect.value) {
                 switchCamera(ui.cameraSelect.value);
@@ -1699,4 +1813,5 @@
         startCameraAndTracking();
     </script>
 </body>
+
 </html>
