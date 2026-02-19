@@ -510,7 +510,7 @@
                         <summary>
                             <span class="physics-summary-copy">
                                 <span>Physics Settings</span>
-                                <span class="physics-summary-note">Interaction, sensitivity, gravity, and mass</span>
+                                <span class="physics-summary-note">Interaction, sensitivity, gravity, air drag, and mass</span>
                             </span>
                             <span class="summary-caret" aria-hidden="true">▼</span>
                         </summary>
@@ -537,6 +537,13 @@
                                     <span id="gravityValue" class="value-badge">0.00g</span>
                                 </span>
                                 <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0">
+                            </label>
+                            <label for="airDragRange" class="control-block">
+                                <span class="control-label-row">
+                                    <span class="control-label">Air drag</span>
+                                    <span id="airDragValue" class="value-badge">0.00</span>
+                                </span>
+                                <input id="airDragRange" type="range" min="0" max="1.0" step="0.01" value="0">
                             </label>
                             <label for="massRange" class="control-block">
                                 <span class="control-label-row">
@@ -584,6 +591,8 @@
             sensitivityValue: document.getElementById('sensitivityValue'),
             gravityRange: document.getElementById('gravityRange'),
             gravityValue: document.getElementById('gravityValue'),
+            airDragRange: document.getElementById('airDragRange'),
+            airDragValue: document.getElementById('airDragValue'),
             massRange: document.getElementById('massRange'),
             massValue: document.getElementById('massValue'),
             stage: document.getElementById('stage'),
@@ -662,6 +671,7 @@
             interactionMode: 'balanced',
             sensitivity: 1.0,
             gravity: 0.0,
+            airDrag: 0.0,
             mass: 1.0,
             nextTrackingErrorReportAt: 0
         };
@@ -892,7 +902,7 @@
                 spring: base.spring * powerScale,
                 damping: base.damping,
                 correction: base.correction,
-                airDrag: base.airDrag,
+                airDrag: Math.max(0, Math.min(1.0, state.airDrag)),
                 restitution: base.restitution,
                 stickPull: base.stickPull * powerScale,
                 stickCapture: base.stickCapture * stickyScale,
@@ -911,6 +921,10 @@
 
         function updateGravityLabel() {
             ui.gravityValue.textContent = `${state.gravity.toFixed(2)}g`;
+        }
+
+        function updateAirDragLabel() {
+            ui.airDragValue.textContent = state.airDrag.toFixed(2);
         }
 
         function updateMassLabel() {
@@ -1350,6 +1364,9 @@
                 sphere.position.y += sphere.velocity.y * dt;
                 constrainSphereToView(sphere, profile);
 
+                const linearDrag = Math.exp(-profile.airDrag * dt);
+                sphere.velocity.x *= linearDrag;
+                sphere.velocity.y *= linearDrag;
 
                 // Visual rolling rotation based on current velocity
                 sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
@@ -1636,6 +1653,14 @@
             state.gravity = Math.max(0, Math.min(2.0, nextValue));
             updateGravityLabel();
         });
+        ui.airDragRange.addEventListener('input', () => {
+            const nextValue = Number(ui.airDragRange.value);
+            if (!Number.isFinite(nextValue)) {
+                return;
+            }
+            state.airDrag = Math.max(0, Math.min(1.0, nextValue));
+            updateAirDragLabel();
+        });
         ui.massRange.addEventListener('input', () => {
             const nextValue = Number(ui.massRange.value);
             if (!Number.isFinite(nextValue)) {
@@ -1664,6 +1689,8 @@
         updateSensitivityLabel();
         ui.gravityRange.value = state.gravity.toFixed(2);
         updateGravityLabel();
+        ui.airDragRange.value = state.airDrag.toFixed(2);
+        updateAirDragLabel();
         ui.massRange.value = state.mass.toFixed(1);
         updateMassLabel();
         updateFullscreenUI();
