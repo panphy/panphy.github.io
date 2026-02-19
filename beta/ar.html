@@ -741,6 +741,8 @@
         const SPHERE_RADIUS = 0.18;
         const PLANE_Z = 0;
         const MAX_SPHERES = 6;
+        const IDEAL_WALL_RESTITUTION = 1.0;
+        const IDEAL_SPHERE_RESTITUTION = 1.0;
 
         const SPHERE_COLORS = [
             0x22d3ee, // cyan
@@ -1269,7 +1271,7 @@
             const bounds = getViewBounds();
             const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
             const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
-            const restitution = profile.restitution;
+            const restitution = IDEAL_WALL_RESTITUTION;
 
             if (sphere.position.x > xLimit) {
                 sphere.position.x = xLimit;
@@ -1326,7 +1328,7 @@
                     }
 
                     // Equal mass elastic collision with restitution
-                    const impulse = relVelN * (1 + profile.restitution) * 0.5;
+                    const impulse = relVelN * (1 + IDEAL_SPHERE_RESTITUTION) * 0.5;
                     a.velocity.x += impulse * nx;
                     a.velocity.y += impulse * ny;
                     b.velocity.x -= impulse * nx;
@@ -1348,16 +1350,6 @@
                 sphere.position.y += sphere.velocity.y * dt;
                 constrainSphereToView(sphere, profile);
 
-                const linearDrag = Math.exp(-profile.airDrag * dt);
-                sphere.velocity.x *= linearDrag;
-                sphere.velocity.y *= linearDrag;
-
-                const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
-                if (speed > profile.maxSpeed && speed > 0.000001) {
-                    const scale = profile.maxSpeed / speed;
-                    sphere.velocity.x *= scale;
-                    sphere.velocity.y *= scale;
-                }
 
                 // Visual rolling rotation based on current velocity
                 sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
