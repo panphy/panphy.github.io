@@ -577,6 +577,19 @@
             <video id="camera" class="media-layer" autoplay playsinline muted></video>
             <canvas id="renderCanvas" class="media-layer"></canvas>
             <canvas id="tipCanvas" class="media-layer"></canvas>
+
+            <div id="selectionOverlay"
+                style="display: none; position: absolute; inset: 0; background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 20; align-items: center; justify-content: center; flex-direction: column; gap: 16px;">
+                <p style="margin: 0; font-size: 1.2rem; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                    Sphere Selected</p>
+                <div style="display: flex; gap: 12px;">
+                    <button id="removeTargetBtn" type="button"
+                        style="width: auto; padding: 10px 24px; min-height: 44px; background: rgba(251, 113, 133, 0.2); border-color: var(--danger); color: #fff;">Remove
+                        Sphere</button>
+                    <button id="cancelTargetBtn" type="button"
+                        style="width: auto; padding: 10px 24px; min-height: 44px;">Cancel</button>
+                </div>
+            </div>
         </section>
 
         <p class="hint">
@@ -619,7 +632,10 @@
             tipCanvas: document.getElementById('tipCanvas'),
             physicsDetails: document.getElementById('physicsDetails'),
             hud: document.querySelector('.hud'),
-            showHudCheckbox: document.getElementById('showHudCheckbox')
+            showHudCheckbox: document.getElementById('showHudCheckbox'),
+            selectionOverlay: document.getElementById('selectionOverlay'),
+            removeTargetBtn: document.getElementById('removeTargetBtn'),
+            cancelTargetBtn: document.getElementById('cancelTargetBtn')
         };
 
         function openControls() {
@@ -770,7 +786,7 @@
 
         const SPHERE_RADIUS = 0.18;
         const PLANE_Z = 0;
-        const MAX_SPHERES = 6;
+        const MAX_SPHERES = 3;
         const IDEAL_WALL_RESTITUTION = 1.0;
         const IDEAL_SPHERE_RESTITUTION = 1.0;
 
@@ -1460,6 +1476,10 @@
             }
 
             for (const sphere of spheres) {
+                if (sphere === state.selectedSphere) {
+                    continue; // Skip physics for selected sphere
+                }
+
                 // Gravity
                 sphere.velocity.y -= state.gravity * dt;
 
@@ -1520,6 +1540,8 @@
                 }
             }
 
+            // end of block
+
             state.handsCount = state.lastHands.length;
             state.trackedTips = collectTrackedTips();
             state.tipCount = state.trackedTips.length;
@@ -1532,6 +1554,68 @@
             renderer.render(scene, camera3d);
 
             requestAnimationFrame(step);
+        }
+
+        // Raycaster for mouse/touch selection
+        const raycaster = new THREE.Raycaster();
+        const mouseVector = new THREE.Vector2();
+
+        function handleStageClick(event) {
+            if (spheres.length === 0) return;
+
+            const rect = ui.canvas.getBoundingClientRect();
+            let clientX, clientY;
+            if (event.touches && event.touches.length > 0) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+
+            mouseVector.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+            mouseVector.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouseVector, camera3d);
+
+            // Check intersection with spheres
+            const meshes = spheres.map(s => s.group.children[0]);
+            const intersects = raycaster.intersectObjects(meshes);
+
+            if (intersects.length > 0) {
+                const hitMesh = intersects[0].object;
+                const hitSphere = spheres.find(s => s.group.children[0] === hitMesh);
+
+                if (hitSphere) {
+                    selectSphere(hitSphere);
+                }
+            } else {
+                deselectSphere();
+            }
+        }
+
+        function selectSphere(sphere) {
+            state.selectedSphere = sphere;
+            sphere.velocity.set(0, 0, 0); // Freeze
+            ui.selectionOverlay.style.display = 'flex';
+        }
+
+        function deselectSphere() {
+            state.selectedSphere = null;
+            ui.selectionOverlay.style.display = 'none';
+        }
+
+        function removeSelectedSphere() {
+            if (state.selectedSphere) {
+                scene.remove(state.selectedSphere.group);
+                state.selectedSphere.material.dispose();
+                const idx = spheres.indexOf(state.selectedSphere);
+                if (idx > -1) {
+                    spheres.splice(idx, 1);
+                }
+                deselectSphere();
+                updateAddBtnState();
+            }
         }
 
         async function createHandLandmarker() {
@@ -1727,6 +1811,11 @@
         ui.controlsToggle.addEventListener('click', openControls);
         ui.controlsClose.addEventListener('click', closeControls);
         ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        ui.canvas.addEventListener('pointerdown', handleStageClick);
+        ui.removeTargetBtn.addEventListener('click', removeSelectedSphere);
+        ui.cancelTargetBtn.addEventListener('click', deselectSphere);
+
         ui.hud.addEventListener('click', () => {
             ui.hud.classList.add('hidden');
             ui.showHudCheckbox.checked = false;
