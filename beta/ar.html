@@ -73,7 +73,7 @@
 
         .topbar {
             display: grid;
-            gap: 12px;
+            gap: 4px;
             padding: 12px 14px;
         }
 
@@ -84,10 +84,29 @@
             letter-spacing: 0.02em;
         }
 
-        .controls {
-            display: grid;
-            gap: 10px;
-            width: 100%;
+        .topbar-note {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            line-height: 1.25;
+        }
+
+        #controlsToggle {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 18;
+            width: auto;
+            min-height: 36px;
+            padding: 7px 12px;
+            border-radius: 10px;
+            border-color: rgba(125, 211, 252, 0.34);
+            background: rgba(2, 6, 23, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(2, 6, 23, 0.4);
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .controls-main {
@@ -95,6 +114,77 @@
             gap: 8px;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             align-items: end;
+        }
+
+        .controls-panel {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 19;
+            display: none;
+            width: min(470px, calc(100% - 24px));
+            max-height: calc(100% - 24px);
+            overflow-y: auto;
+            padding: 12px;
+            border: 1px solid rgba(125, 211, 252, 0.3);
+            border-radius: 14px;
+            background: rgba(2, 6, 23, 0.84);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 12px 36px rgba(2, 6, 23, 0.55);
+        }
+
+        [data-theme="light"] .controls-panel {
+            background: rgba(248, 250, 252, 0.9);
+        }
+
+        .controls-panel.open {
+            display: block;
+        }
+
+        #controlsClose {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 30px;
+            min-height: 30px;
+            border-radius: 8px;
+            padding: 0;
+            font-size: 0.85rem;
+            border-color: transparent;
+            background: transparent;
+            color: var(--text-muted);
+            box-shadow: none;
+        }
+
+        #controlsClose:hover {
+            background: rgba(148, 163, 184, 0.2);
+            border-color: rgba(125, 211, 252, 0.28);
+            color: var(--text-main);
+        }
+
+        .cp-section {
+            display: grid;
+            gap: 8px;
+        }
+
+        .cp-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding-right: 30px;
+        }
+
+        .cp-divider {
+            height: 1px;
+            margin: 10px 0;
+            background: color-mix(in srgb, var(--panel-border) 74%, transparent);
+        }
+
+        .controls-panel .controls-main {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .physics-controls {
@@ -270,6 +360,38 @@
             overflow: hidden;
         }
 
+        #fullscreenBtn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 18;
+            width: 38px;
+            min-height: 34px;
+            padding: 0;
+            border-radius: 10px;
+            border-color: rgba(125, 211, 252, 0.34);
+            background: rgba(2, 6, 23, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 8px 20px rgba(2, 6, 23, 0.4);
+            font-size: 1.05rem;
+            line-height: 1;
+        }
+
+        #fullscreenBtn:hover {
+            background: rgba(15, 23, 42, 0.84);
+        }
+
+        .stage:fullscreen,
+        .stage:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            aspect-ratio: auto;
+            border: none;
+            border-radius: 0;
+        }
+
         .media-layer {
             position: absolute;
             inset: 0;
@@ -337,6 +459,10 @@
                 padding: 10px;
             }
 
+            .controls-panel .controls-main {
+                grid-template-columns: 1fr;
+            }
+
             .stage {
                 border-radius: 14px;
             }
@@ -344,17 +470,7 @@
 
         @media (min-width: 900px) {
             .topbar {
-                grid-template-columns: minmax(240px, auto) 1fr;
-                align-items: start;
-            }
-
-            .controls {
-                justify-self: end;
-                width: min(760px, 100%);
-            }
-
-            .controls-main {
-                grid-template-columns: minmax(170px, 1.3fr) minmax(180px, 1.3fr) 1fr 1fr;
+                padding: 14px 16px;
             }
         }
     </style>
@@ -363,62 +479,73 @@
     <main class="app">
         <header class="topbar panel">
             <h1 class="title">Fingertip Sphere Inertia (2D Prototype)</h1>
-            <div class="controls" aria-label="Simulation controls">
-                <div class="controls-main">
-                    <button id="startBtn" type="button">Start Camera</button>
-                    <label for="cameraSelect" class="control-block">
-                        <span class="control-label">Camera</span>
-                        <select id="cameraSelect" disabled>
-                            <option value="">Default</option>
-                        </select>
-                    </label>
-                    <button id="addBtn" type="button" disabled>Add Sphere</button>
-                    <button id="resetBtn" type="button" disabled>Reset Motion</button>
-                </div>
-                <details id="physicsDetails" class="physics-controls">
-                    <summary>
-                        <span class="physics-summary-copy">
-                            <span>Physics Settings</span>
-                            <span class="physics-summary-note">Interaction, sensitivity, gravity, and mass</span>
-                        </span>
-                        <span class="summary-caret" aria-hidden="true">▼</span>
-                    </summary>
-                    <div class="physics-controls-inner">
-                        <label for="modeSelect" class="control-block">
-                            <span class="control-label">Interaction</span>
-                            <select id="modeSelect">
-                                <option value="balanced" selected>Balanced</option>
-                                <option value="elastic">Elastic Balls</option>
-                                <option value="sticky">Sticky Balls</option>
-                            </select>
-                        </label>
-                        <label for="sensitivityRange" class="control-block">
-                            <span class="control-label-row">
-                                <span class="control-label">Sensitivity</span>
-                                <span id="sensitivityValue" class="value-badge">1.0x</span>
-                            </span>
-                            <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
-                        </label>
-                        <label for="gravityRange" class="control-block">
-                            <span class="control-label-row">
-                                <span class="control-label">Gravity</span>
-                                <span id="gravityValue" class="value-badge">0.55g</span>
-                            </span>
-                            <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
-                        </label>
-                        <label for="massRange" class="control-block">
-                            <span class="control-label-row">
-                                <span class="control-label">Mass</span>
-                                <span id="massValue" class="value-badge">1.0 kg</span>
-                            </span>
-                            <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
-                        </label>
-                    </div>
-                </details>
-            </div>
+            <p class="topbar-note">Open Controls to start camera, add spheres, and tune physics settings.</p>
         </header>
 
         <section id="stage" class="stage panel">
+            <button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
+            <div class="controls-panel" id="controlsPanel" aria-label="Simulation controls">
+                <button id="controlsClose" type="button" aria-label="Close controls">&#x2715;</button>
+                <div class="cp-section">
+                    <span class="cp-label">Setup</span>
+                    <div class="controls-main">
+                        <button id="startBtn" type="button">Start Camera</button>
+                        <label for="cameraSelect" class="control-block">
+                            <span class="control-label">Camera</span>
+                            <select id="cameraSelect" disabled>
+                                <option value="">Default</option>
+                            </select>
+                        </label>
+                        <button id="addBtn" type="button" disabled>Add Sphere</button>
+                        <button id="resetBtn" type="button" disabled>Reset Motion</button>
+                    </div>
+                </div>
+                <div class="cp-divider"></div>
+                <div class="cp-section">
+                    <span class="cp-label">Physics</span>
+                    <details id="physicsDetails" class="physics-controls">
+                        <summary>
+                            <span class="physics-summary-copy">
+                                <span>Physics Settings</span>
+                                <span class="physics-summary-note">Interaction, sensitivity, gravity, and mass</span>
+                            </span>
+                            <span class="summary-caret" aria-hidden="true">▼</span>
+                        </summary>
+                        <div class="physics-controls-inner">
+                            <label for="modeSelect" class="control-block">
+                                <span class="control-label">Interaction</span>
+                                <select id="modeSelect">
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="elastic">Elastic Balls</option>
+                                    <option value="sticky">Sticky Balls</option>
+                                </select>
+                            </label>
+                            <label for="sensitivityRange" class="control-block">
+                                <span class="control-label-row">
+                                    <span class="control-label">Sensitivity</span>
+                                    <span id="sensitivityValue" class="value-badge">1.0x</span>
+                                </span>
+                                <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
+                            </label>
+                            <label for="gravityRange" class="control-block">
+                                <span class="control-label-row">
+                                    <span class="control-label">Gravity</span>
+                                    <span id="gravityValue" class="value-badge">0.55g</span>
+                                </span>
+                                <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
+                            </label>
+                            <label for="massRange" class="control-block">
+                                <span class="control-label-row">
+                                    <span class="control-label">Mass</span>
+                                    <span id="massValue" class="value-badge">1.0 kg</span>
+                                </span>
+                                <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
+                            </label>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
             <video id="camera" class="media-layer" autoplay playsinline muted></video>
             <canvas id="renderCanvas" class="media-layer"></canvas>
             <canvas id="tipCanvas" class="media-layer"></canvas>
@@ -440,6 +567,10 @@
             startBtn: document.getElementById('startBtn'),
             addBtn: document.getElementById('addBtn'),
             resetBtn: document.getElementById('resetBtn'),
+            controlsToggle: document.getElementById('controlsToggle'),
+            controlsPanel: document.getElementById('controlsPanel'),
+            controlsClose: document.getElementById('controlsClose'),
+            fullscreenBtn: document.getElementById('fullscreenBtn'),
             cameraSelect: document.getElementById('cameraSelect'),
             status: document.getElementById('status'),
             metrics: document.getElementById('metrics'),
@@ -456,6 +587,55 @@
             tipCanvas: document.getElementById('tipCanvas'),
             physicsDetails: document.getElementById('physicsDetails')
         };
+
+        function openControls() {
+            ui.controlsPanel.classList.add('open');
+            ui.controlsToggle.style.display = 'none';
+        }
+
+        function closeControls() {
+            ui.controlsPanel.classList.remove('open');
+            ui.controlsToggle.style.display = '';
+        }
+
+        function isFullscreenActive() {
+            return document.fullscreenElement === ui.stage ||
+                document.fullscreenElement === ui.video ||
+                document.webkitFullscreenElement === ui.stage ||
+                document.webkitFullscreenElement === ui.video;
+        }
+
+        function updateFullscreenUI() {
+            const active = isFullscreenActive();
+            ui.fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
+            ui.fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
+            ui.fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
+            resizeStage();
+        }
+
+        function toggleFullscreen() {
+            const requestFullscreen = ui.stage.requestFullscreen || ui.stage.webkitRequestFullscreen || ui.stage.webkitRequestFullScreen;
+            const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
+
+            if (isFullscreenActive()) {
+                if (exitFullscreen) {
+                    exitFullscreen.call(document);
+                }
+                return;
+            }
+
+            if (requestFullscreen) {
+                requestFullscreen.call(ui.stage);
+                return;
+            }
+
+            if (ui.video.webkitEnterFullscreen) {
+                ui.video.webkitEnterFullscreen();
+                return;
+            }
+
+            setStatus('Fullscreen is not supported in this browser.', true);
+        }
 
         // Default open on wide screens
         if (window.innerWidth >= 900) {
@@ -1410,6 +1590,9 @@
         ui.startBtn.addEventListener('click', startCameraAndTracking);
         ui.addBtn.addEventListener('click', addSphere);
         ui.resetBtn.addEventListener('click', resetAll);
+        ui.controlsToggle.addEventListener('click', openControls);
+        ui.controlsClose.addEventListener('click', closeControls);
+        ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
         ui.cameraSelect.addEventListener('change', () => {
             if (state.running && ui.cameraSelect.value) {
                 switchCamera(ui.cameraSelect.value);
@@ -1448,6 +1631,8 @@
         });
 
         window.addEventListener('resize', resizeStage);
+        document.addEventListener('fullscreenchange', updateFullscreenUI);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
         if ('ResizeObserver' in window) {
             new ResizeObserver(resizeStage).observe(ui.stage);
         }
@@ -1465,6 +1650,7 @@
         updateGravityLabel();
         ui.massRange.value = state.mass.toFixed(1);
         updateMassLabel();
+        updateFullscreenUI();
         resizeStage();
         renderer.render(scene, camera3d);
     </script>
