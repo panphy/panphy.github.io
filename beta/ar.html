@@ -284,6 +284,11 @@
                     <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
                     <span id="gravityValue" class="value-badge">0.55g</span>
                 </label>
+                <label for="massRange" class="control-block">
+                    Mass
+                    <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
+                    <span id="massValue" class="value-badge">1.0 kg</span>
+                </label>
             </div>
         </header>
 
@@ -317,6 +322,8 @@
             sensitivityValue: document.getElementById('sensitivityValue'),
             gravityRange: document.getElementById('gravityRange'),
             gravityValue: document.getElementById('gravityValue'),
+            massRange: document.getElementById('massRange'),
+            massValue: document.getElementById('massValue'),
             stage: document.getElementById('stage'),
             video: document.getElementById('camera'),
             canvas: document.getElementById('renderCanvas'),
@@ -337,7 +344,8 @@
             contactsCount: 0,
             interactionMode: 'balanced',
             sensitivity: 1.0,
-            gravity: 0.55
+            gravity: 0.55,
+            mass: 1.0
         };
 
         let filesetResolverCtor = null;
@@ -567,6 +575,10 @@
             ui.gravityValue.textContent = `${state.gravity.toFixed(2)}g`;
         }
 
+        function updateMassLabel() {
+            ui.massValue.textContent = `${state.mass.toFixed(1)} kg`;
+        }
+
         function updateMetrics() {
             const speed = Math.hypot(physics.velocity.x, physics.velocity.y);
             ui.metrics.textContent =
@@ -767,7 +779,8 @@
                     (physics.velocity.x * scratch.normal.x) + (physics.velocity.y * scratch.normal.y),
                     0
                 );
-                const pushAccel = (profile.spring * penetration) - (profile.damping * inwardSpeed);
+                const pushForce = (profile.spring * penetration) - (profile.damping * inwardSpeed);
+                const pushAccel = pushForce / state.mass;
 
                 physics.position.x += scratch.normal.x * penetration * profile.correction;
                 physics.position.y += scratch.normal.y * penetration * profile.correction;
@@ -776,13 +789,14 @@
 
                 // First-contact velocity impulse: transfers fingertip momentum to sphere.
                 // This makes fast flicks register even if contact lasts only 1-2 frames.
+                // Heavier sphere receives less velocity from the same impulse.
                 if (!activeContacts.has(tip.key)) {
                     // Relative velocity of tip w.r.t. sphere, along contact normal (tip→sphere)
                     const relVelAlongNormal =
                         (tip.velX - physics.velocity.x) * scratch.normal.x +
                         (tip.velY - physics.velocity.y) * scratch.normal.y;
                     if (relVelAlongNormal > 0.05) {
-                        const impulse = relVelAlongNormal * profile.velocityTransfer;
+                        const impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
                         physics.velocity.x += scratch.normal.x * impulse;
                         physics.velocity.y += scratch.normal.y * impulse;
                     }
@@ -793,8 +807,9 @@
                     const toTipY = tip.worldY - physics.position.y;
                     const invDistance = 1 / distance;
                     const stickFactor = penetration / profile.contactRadius;
-                    physics.velocity.x += toTipX * invDistance * profile.stickPull * stickFactor * dt;
-                    physics.velocity.y += toTipY * invDistance * profile.stickPull * stickFactor * dt;
+                    const stickAccel = profile.stickPull / state.mass;
+                    physics.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt;
+                    physics.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt;
                     physics.position.x += toTipX * profile.stickCapture * stickFactor * dt;
                     physics.position.y += toTipY * profile.stickCapture * stickFactor * dt;
                 }
@@ -1077,6 +1092,14 @@
             state.gravity = Math.max(0, Math.min(2.0, nextValue));
             updateGravityLabel();
         });
+        ui.massRange.addEventListener('input', () => {
+            const nextValue = Number(ui.massRange.value);
+            if (!Number.isFinite(nextValue)) {
+                return;
+            }
+            state.mass = Math.max(0.2, Math.min(5.0, nextValue));
+            updateMassLabel();
+        });
 
         window.addEventListener('resize', resizeStage);
         if ('ResizeObserver' in window) {
@@ -1094,6 +1117,8 @@
         updateSensitivityLabel();
         ui.gravityRange.value = state.gravity.toFixed(2);
         updateGravityLabel();
+        ui.massRange.value = state.mass.toFixed(1);
+        updateMassLabel();
         resizeStage();
         renderer.render(scene, camera3d);
     </script>
