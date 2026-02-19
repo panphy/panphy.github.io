@@ -273,6 +273,11 @@
                     <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
                     <span id="sensitivityValue" class="value-badge">1.0x</span>
                 </label>
+                <label for="gravityRange" class="control-block">
+                    Gravity
+                    <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
+                    <span id="gravityValue" class="value-badge">0.55g</span>
+                </label>
             </div>
         </header>
 
@@ -287,7 +292,7 @@
         </section>
 
         <p class="hint">
-            Place sphere, push with tracked green fingertips, and tune response with Interaction + Sensitivity controls.
+            Place sphere, then flick your fingertips to push it. Gravity pulls it down — use your whole hand to catch and throw it!
         </p>
     </main>
 
@@ -303,6 +308,8 @@
             modeSelect: document.getElementById('modeSelect'),
             sensitivityRange: document.getElementById('sensitivityRange'),
             sensitivityValue: document.getElementById('sensitivityValue'),
+            gravityRange: document.getElementById('gravityRange'),
+            gravityValue: document.getElementById('gravityValue'),
             stage: document.getElementById('stage'),
             video: document.getElementById('camera'),
             canvas: document.getElementById('renderCanvas'),
@@ -322,7 +329,8 @@
             trackedTips: [],
             contactsCount: 0,
             interactionMode: 'balanced',
-            sensitivity: 1.0
+            sensitivity: 1.0,
+            gravity: 0.55
         };
 
         let filesetResolverCtor = null;
@@ -403,15 +411,30 @@
             velocity: new THREE.Vector3(0, 0, 0)
         };
 
+        // Gravity magnitude is controlled by state.gravity (applied as negative Y)
+
         const FINGERTIP_POINTS = [4, 8, 12, 16, 20];
+
+        // Hand skeleton connections for visual feedback
+        const HAND_CONNECTIONS = [
+            [0, 1], [1, 2], [2, 3], [3, 4],
+            [0, 5], [5, 6], [6, 7], [7, 8],
+            [0, 9], [9, 10], [10, 11], [11, 12],
+            [0, 13], [13, 14], [14, 15], [15, 16],
+            [0, 17], [17, 18], [18, 19], [19, 20],
+            [5, 9], [9, 13], [13, 17]
+        ];
+
         const INTERACTION_LABELS = {
             balanced: 'Balanced',
             elastic: 'Elastic',
             sticky: 'Sticky'
         };
+
+        // velocityTransfer: fraction of fingertip approach speed added as impulse on first contact
         const INTERACTION_PROFILES = {
             balanced: {
-                contactRadius: 0.12,
+                contactRadius: 0.14,
                 spring: 95,
                 damping: 5,
                 correction: 0.6,
@@ -419,10 +442,11 @@
                 restitution: 0.92,
                 stickPull: 0,
                 stickCapture: 0,
-                maxSpeed: 2.6
+                maxSpeed: 3.0,
+                velocityTransfer: 0.55
             },
             elastic: {
-                contactRadius: 0.14,
+                contactRadius: 0.16,
                 spring: 145,
                 damping: 3.2,
                 correction: 0.78,
@@ -430,10 +454,11 @@
                 restitution: 0.98,
                 stickPull: 0,
                 stickCapture: 0,
-                maxSpeed: 4.0
+                maxSpeed: 4.5,
+                velocityTransfer: 0.80
             },
             sticky: {
-                contactRadius: 0.17,
+                contactRadius: 0.19,
                 spring: 78,
                 damping: 8.5,
                 correction: 0.9,
@@ -441,7 +466,8 @@
                 restitution: 0.84,
                 stickPull: 14,
                 stickCapture: 2.2,
-                maxSpeed: 1.85
+                maxSpeed: 1.85,
+                velocityTransfer: 0.30
             }
         };
 
@@ -499,6 +525,11 @@
             normal: new THREE.Vector3()
         };
 
+        // Per-landmark position/velocity history for fingertip velocity tracking
+        const tipHistory = new Map();
+        // Tracks which tip keys were in contact last frame (for first-contact impulse)
+        const activeContacts = new Set();
+
         function setStatus(message, isError = false) {
             ui.status.textContent = message;
             ui.status.classList.toggle('status-error', isError);
@@ -516,12 +547,17 @@
                 restitution: base.restitution,
                 stickPull: base.stickPull * s,
                 stickCapture: base.stickCapture * s,
-                maxSpeed: base.maxSpeed * (0.9 + (0.1 * s))
+                maxSpeed: base.maxSpeed * (0.9 + (0.1 * s)),
+                velocityTransfer: base.velocityTransfer * s
             };
         }
 
         function updateSensitivityLabel() {
             ui.sensitivityValue.textContent = `${state.sensitivity.toFixed(1)}x`;
+        }
+
+        function updateGravityLabel() {
+            ui.gravityValue.textContent = `${state.gravity.toFixed(2)}g`;
         }
 
         function updateMetrics() {
@@ -551,13 +587,14 @@
             physics.position.set(0, 0, physics.planeZ);
             physics.velocity.set(0, 0, 0);
             sphereGroup.position.copy(physics.position);
+            sphereGroup.rotation.set(0, 0, 0);
         }
 
         function placeSphere() {
             physics.placed = true;
             sphereGroup.visible = true;
             resetSphereState();
-            setStatus('Sphere placed. Only tracked fingertips can push it.');
+            setStatus('Sphere placed. Flick your fingertips to push it!');
         }
 
         function landmarkToPlane(landmark, out) {
@@ -581,8 +618,11 @@
         }
 
         function collectTrackedTips() {
+            const now = performance.now();
             const tips = [];
-            for (const hand of state.lastHands) {
+            const seenKeys = new Set();
+
+            state.lastHands.forEach((hand, handIndex) => {
                 for (const tipIndex of FINGERTIP_POINTS) {
                     const landmark = hand[tipIndex];
                     if (!landmark) {
@@ -591,14 +631,44 @@
                     if (!landmarkToPlane(landmark, scratch.tipWorld)) {
                         continue;
                     }
-                    tips.push({
-                        x: landmark.x,
-                        y: landmark.y,
-                        worldX: scratch.tipWorld.x,
-                        worldY: scratch.tipWorld.y
-                    });
+
+                    const key = `${handIndex}-${tipIndex}`;
+                    seenKeys.add(key);
+
+                    const worldX = scratch.tipWorld.x;
+                    const worldY = scratch.tipWorld.y;
+
+                    let velX = 0;
+                    let velY = 0;
+                    const prev = tipHistory.get(key);
+                    if (prev) {
+                        const elapsed = (now - prev.time) / 1000;
+                        if (elapsed > 0 && elapsed < 0.12) {
+                            const rawVelX = (worldX - prev.worldX) / elapsed;
+                            const rawVelY = (worldY - prev.worldY) / elapsed;
+                            // EMA smoothing to reduce landmark noise
+                            const alpha = 0.55;
+                            velX = prev.velX !== undefined
+                                ? alpha * rawVelX + (1 - alpha) * prev.velX
+                                : rawVelX;
+                            velY = prev.velY !== undefined
+                                ? alpha * rawVelY + (1 - alpha) * prev.velY
+                                : rawVelY;
+                        }
+                    }
+
+                    tipHistory.set(key, { worldX, worldY, velX, velY, time: now });
+                    tips.push({ key, x: landmark.x, y: landmark.y, worldX, worldY, velX, velY });
+                }
+            });
+
+            // Prune history for landmarks no longer visible
+            for (const k of tipHistory.keys()) {
+                if (!seenKeys.has(k)) {
+                    tipHistory.delete(k);
                 }
             }
+
             return tips;
         }
 
@@ -610,15 +680,45 @@
             const height = ui.tipCanvas.height;
             tipCtx.clearRect(0, 0, width, height);
 
-            tipCtx.lineWidth = 2;
-            tipCtx.strokeStyle = '#22c55e';
-            tipCtx.fillStyle = 'rgba(34, 197, 94, 0.24)';
+            // Draw hand skeleton for each detected hand
+            for (const hand of state.lastHands) {
+                tipCtx.lineWidth = 1.5;
+                tipCtx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
+                tipCtx.lineJoin = 'round';
+                for (const [a, b] of HAND_CONNECTIONS) {
+                    const lmA = hand[a];
+                    const lmB = hand[b];
+                    if (!lmA || !lmB) {
+                        continue;
+                    }
+                    tipCtx.beginPath();
+                    tipCtx.moveTo(lmA.x * width, lmA.y * height);
+                    tipCtx.lineTo(lmB.x * width, lmB.y * height);
+                    tipCtx.stroke();
+                }
 
+                // Joint dots
+                tipCtx.fillStyle = 'rgba(34, 197, 94, 0.55)';
+                for (let i = 0; i < hand.length; i++) {
+                    const lm = hand[i];
+                    if (!lm) {
+                        continue;
+                    }
+                    tipCtx.beginPath();
+                    tipCtx.arc(lm.x * width, lm.y * height, 3, 0, Math.PI * 2);
+                    tipCtx.fill();
+                }
+            }
+
+            // Highlighted fingertip circles
+            tipCtx.lineWidth = 2.5;
+            tipCtx.strokeStyle = '#22c55e';
+            tipCtx.fillStyle = 'rgba(34, 197, 94, 0.22)';
             for (const tip of state.trackedTips) {
                 const x = tip.x * width;
                 const y = tip.y * height;
                 tipCtx.beginPath();
-                tipCtx.arc(x, y, 11, 0, Math.PI * 2);
+                tipCtx.arc(x, y, 12, 0, Math.PI * 2);
                 tipCtx.fill();
                 tipCtx.stroke();
             }
@@ -630,6 +730,8 @@
             }
 
             let contacts = 0;
+            const newContacts = new Set();
+
             for (const tip of state.trackedTips) {
                 scratch.normal.set(
                     physics.position.x - tip.worldX,
@@ -643,6 +745,8 @@
                 }
 
                 contacts += 1;
+                newContacts.add(tip.key);
+
                 if (distance < 0.000001) {
                     scratch.normal.set(0, 1, 0);
                 } else {
@@ -650,6 +754,8 @@
                 }
 
                 const penetration = profile.contactRadius - distance;
+
+                // Spring-damper: pushes sphere away from tip, damps inward sphere motion
                 const inwardSpeed = Math.min(
                     (physics.velocity.x * scratch.normal.x) + (physics.velocity.y * scratch.normal.y),
                     0
@@ -661,6 +767,20 @@
                 physics.velocity.x += scratch.normal.x * pushAccel * dt;
                 physics.velocity.y += scratch.normal.y * pushAccel * dt;
 
+                // First-contact velocity impulse: transfers fingertip momentum to sphere.
+                // This makes fast flicks register even if contact lasts only 1-2 frames.
+                if (!activeContacts.has(tip.key)) {
+                    // Relative velocity of tip w.r.t. sphere, along contact normal (tip→sphere)
+                    const relVelAlongNormal =
+                        (tip.velX - physics.velocity.x) * scratch.normal.x +
+                        (tip.velY - physics.velocity.y) * scratch.normal.y;
+                    if (relVelAlongNormal > 0.05) {
+                        const impulse = relVelAlongNormal * profile.velocityTransfer;
+                        physics.velocity.x += scratch.normal.x * impulse;
+                        physics.velocity.y += scratch.normal.y * impulse;
+                    }
+                }
+
                 if (profile.stickPull > 0 && distance > 0.000001) {
                     const toTipX = tip.worldX - physics.position.x;
                     const toTipY = tip.worldY - physics.position.y;
@@ -671,6 +791,12 @@
                     physics.position.x += toTipX * profile.stickCapture * stickFactor * dt;
                     physics.position.y += toTipY * profile.stickCapture * stickFactor * dt;
                 }
+            }
+
+            // Update contact state for next frame's first-contact detection
+            activeContacts.clear();
+            for (const k of newContacts) {
+                activeContacts.add(k);
             }
 
             return contacts;
@@ -710,6 +836,9 @@
                 return;
             }
 
+            // Gravity
+            physics.velocity.y -= state.gravity * dt;
+
             physics.position.x += physics.velocity.x * dt;
             physics.position.y += physics.velocity.y * dt;
             constrainSphereToView(profile);
@@ -724,6 +853,10 @@
                 physics.velocity.x *= scale;
                 physics.velocity.y *= scale;
             }
+
+            // Visual rolling rotation based on current velocity
+            sphereGroup.rotation.z -= (physics.velocity.x / physics.radius) * dt;
+            sphereGroup.rotation.x += (physics.velocity.y / physics.radius) * dt;
 
             sphereGroup.position.set(physics.position.x, physics.position.y, physics.planeZ);
         }
@@ -864,6 +997,14 @@
             state.sensitivity = Math.max(0.6, Math.min(2.0, nextValue));
             updateSensitivityLabel();
         });
+        ui.gravityRange.addEventListener('input', () => {
+            const nextValue = Number(ui.gravityRange.value);
+            if (!Number.isFinite(nextValue)) {
+                return;
+            }
+            state.gravity = Math.max(0, Math.min(2.0, nextValue));
+            updateGravityLabel();
+        });
 
         window.addEventListener('resize', resizeStage);
         if ('ResizeObserver' in window) {
@@ -879,6 +1020,8 @@
         ui.modeSelect.value = state.interactionMode;
         ui.sensitivityRange.value = state.sensitivity.toFixed(1);
         updateSensitivityLabel();
+        ui.gravityRange.value = state.gravity.toFixed(2);
+        updateGravityLabel();
         resizeStage();
         renderer.render(scene, camera3d);
     </script>
