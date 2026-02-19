@@ -1,68 +1,66 @@
 # PanPhy Labs
 
-PanPhy Labs is a static Progressive Web App (PWA) with browser-based physics tools, simulations, and games. The project is deployed directly from this repo to GitHub Pages, with no build system.
+PanPhy Labs is a collection of browser-based physics tools, simulations, and mini games designed for learning by doing.
 
-## Tech Stack
+This project started from a practical classroom problem: many school devices are locked down, and installing software is difficult. PanPhy Labs takes a different approach—keep everything simple, interactive, and available in the browser so students and teachers can get started immediately. The site is also built to be offline-friendly after first load, so learning can continue even with unreliable internet.
 
-- **HTML5 / CSS3 / Vanilla JavaScript** (no framework, no bundler)
-- **Service Worker** (`sw.js`) for offline support and update lifecycle
-- **Supabase** for the Asteroid Storm leaderboard
+## Why PanPhy Labs exists
 
-## Route Status (Reviewed: 2026-02-19)
+- **Accessible by default**: works in a browser without installing desktop software.
+- **Interactive over passive**: tools are made for exploration, not just reading.
+- **Education-focused**: apps are intentionally practical for classwork, revision, and demonstrations.
+- **Offline-friendly**: most experiences continue to work without a constant connection.
 
-### Published routes
+> Note: A few features rely on external services and need internet access (for example, the Asteroid Storm leaderboard and the EAL Companion app).
 
-These are linked from `index.html` and listed in `sitemap.xml`:
+## What you can find here
 
-- `tools/*` (Markdown Editor, PanPhyPlot, Motion Tracker, Sound Analyzer, Tone Generator, Digitizer)
-- `simulations/*` (Superposition, Standing Wave, Lorentz)
-- `for_teachers/*` (Timer, Visualizer)
-- `fun/*` (Dodge, React, ASCII Cam)
+- **Physics tools** for analysis and productivity (e.g., plotting, digitizing, trackers, editors)
+- **Simulations** for key concepts
+- **Teacher utilities**
+- **Small games / interactive demos** for engagement and quick practice
 
-### Unlisted routes in repo
+The landing page is the best place to browse everything currently published:
+- `index.html`
 
-These are present in the repository but not currently linked from `index.html` or `sitemap.xml`:
+## Tech stack (simple on purpose)
 
-- `beta/ar.html`
-- `misc/gcse_phy/phy_flashcard.html`
-- `misc/gcse_phy/phy_flashcard_cs.html`
-- `misc/gcse_phy/phy_flashcard_ss.html`
-- `misc/ising_model.html`
-- `misc/phyclub_showcase.html`
+PanPhy Labs is intentionally lightweight:
 
-Treat those as legacy/internal unless intentionally promoted.
+- **HTML5, CSS3, Vanilla JavaScript**
+- **No framework, no bundler, no build step**
+- **Service Worker** for offline support and caching
+- **GitHub Pages** deployment
+- **Supabase** for selected online features (e.g., leaderboard)
 
-New work-in-progress pages should be created under `beta/` by default unless there is an explicit request to publish and list them on `index.html`.
+## For contributors
 
-Only routes linked from `index.html` are SW-managed by policy. Unlisted/internal pages should not include `/assets/sw-register.js` and should not be added to `ASSETS_TO_CACHE` unless they are being promoted to published status.
+Contributions are welcome—especially fixes, usability improvements, and new educational tools.
 
-## Offline Model
+### Project principles
 
-- `sw.js` pre-caches the explicit list in `ASSETS_TO_CACHE`.
-- Navigations use **network-first** with cache fallback.
-- Other GET assets use **cache-first**.
-- `/beta/*`, `/fun/dodge.html`, `/fun/dodge_assets/*`, and `*.supabase.co` requests are always fetched fresh (not cached by SW).
+When contributing, try to preserve the project philosophy:
 
-Only pages/assets in `ASSETS_TO_CACHE` are guaranteed to be available offline immediately after SW install. Other same-origin pages may still work offline after they are visited online while the SW is active (runtime cache), except `/beta/*`.
+1. **Keep it simple**: prefer small, readable, dependency-light solutions.
+2. **Keep it usable in classrooms**: mobile-friendly, touch-friendly, low-friction UI.
+3. **Keep it resilient**: avoid unnecessary network dependencies.
+4. **Keep pages self-contained**: each published HTML entry should work as an independent app/page.
 
-## Cache Versioning Rules
+### Important implementation notes
 
-`sw.js` uses a timestamped `BUILD_ID` to version cache names. Because serving is cache-heavy, stale `BUILD_ID` means stale client content.
+- This is a static site. Edit files directly in-repo.
+- If you modify files that are pre-cached by the service worker, you must bump `BUILD_ID` in `sw.js` so users receive updates.
+- New work-in-progress pages should normally go under `/beta` unless they are explicitly being published.
 
-When changing the site:
-
-- **Modify any cached file** (`ASSETS_TO_CACHE` entry): bump `BUILD_ID` in `sw.js`
-- **Add a new unpublished/internal page**: create it under `beta/`, do not add SW registration, and do not add it to `ASSETS_TO_CACHE`
-- **Publish a page from beta/internal**: move it to a public directory, add page path to `ASSETS_TO_CACHE`, link it from `index.html`, add it to `sitemap.xml`, then bump `BUILD_ID`
-- **Change CDN script/style URL in a cached page**: update the exact same URL in `ASSETS_TO_CACHE`, then bump `BUILD_ID`
-- **Add local media required by a cached page**: add media paths to `ASSETS_TO_CACHE`, then bump `BUILD_ID`
-- **Edit `assets/sw-register.js`**: bump `BUILD_ID` in `sw.js` (the register script is pre-cached)
-
-## Local Testing
+### Run locally
 
 ```bash
 python3 -m http.server 8000
-# then open http://localhost:8000
 ```
 
-Use a real HTTP server (not `file://`) so service workers and absolute paths behave correctly.
+Then open `http://localhost:8000` in your browser.
+
+## Contact
+
+- Email: `panphylabs@icloud.com`
+- Support: https://buymeacoffee.com/panphy
