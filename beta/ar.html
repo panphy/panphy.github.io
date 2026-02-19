@@ -72,12 +72,9 @@
         }
 
         .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: grid;
             gap: 12px;
             padding: 12px 14px;
-            flex-wrap: wrap;
         }
 
         .title {
@@ -88,59 +85,88 @@
         }
 
         .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: end;
+            display: grid;
+            gap: 10px;
+            width: 100%;
         }
 
-        .controls-actions {
-            display: contents;
+        .controls-main {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            align-items: end;
         }
 
         .physics-controls {
             width: 100%;
-            border: none;
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            background: rgba(2, 6, 23, 0.35);
             margin: 0;
             padding: 0;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .physics-controls {
+            background: rgba(255, 255, 255, 0.7);
         }
 
         .physics-controls > summary {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            border: 1px solid var(--panel-border);
-            background: rgba(15, 23, 42, 0.54);
-            color: var(--text-muted);
-            font: 500 0.82rem/1 var(--font-ui);
-            border-radius: 10px;
-            padding: 8px 14px;
-            min-height: 36px;
+            justify-content: space-between;
+            gap: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font: 600 0.9rem/1.2 var(--font-ui);
+            padding: 10px 12px;
+            min-height: 48px;
             cursor: pointer;
             list-style: none;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
             user-select: none;
+        }
+
+        .physics-summary-copy {
+            display: grid;
+            gap: 2px;
+        }
+
+        .physics-summary-note {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .summary-caret {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.18s ease;
+        }
+
+        .physics-controls[open] .summary-caret {
+            transform: rotate(180deg);
         }
 
         .physics-controls > summary::-webkit-details-marker {
             display: none;
         }
 
-        [data-theme="light"] .physics-controls > summary {
-            background: rgba(255, 255, 255, 0.86);
+        .physics-controls > summary:hover {
+            background: rgba(15, 23, 42, 0.2);
         }
 
-        .physics-controls > summary:hover {
-            border-color: var(--brand-primary);
+        [data-theme="light"] .physics-controls > summary:hover {
+            background: rgba(148, 163, 184, 0.14);
         }
 
         .physics-controls-inner {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
             align-items: end;
-            padding-top: 8px;
+            padding: 0 12px 12px;
+            border-top: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);
         }
 
         button {
@@ -151,6 +177,10 @@
             border-radius: 10px;
             padding: 10px 12px;
             min-height: 48px;
+            width: 100%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
         }
 
@@ -182,13 +212,24 @@
 
         .control-block {
             display: grid;
-            gap: 4px;
+            gap: 6px;
             min-height: 48px;
             color: var(--text-muted);
-            font-size: 0.72rem;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            align-content: center;
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            align-content: start;
+        }
+
+        .control-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .control-label {
+            line-height: 1.1;
         }
 
         .control-block select,
@@ -197,11 +238,11 @@
             border-radius: 10px;
             background: rgba(2, 6, 23, 0.58);
             color: var(--text-main);
-            min-height: 36px;
+            min-height: 40px;
             font-family: var(--font-ui);
             font-size: 0.9rem;
             padding: 6px 10px;
-            width: 170px;
+            width: 100%;
         }
 
         [data-theme="light"] .control-block select,
@@ -217,9 +258,10 @@
         .value-badge {
             color: var(--brand-accent);
             font-weight: 700;
-            margin-left: 6px;
+            margin-left: 0;
             text-transform: none;
-            font-size: 0.85rem;
+            letter-spacing: 0;
+            font-size: 0.82rem;
         }
 
         .stage {
@@ -300,9 +342,19 @@
             }
         }
 
-        @media (min-width: 641px) {
-            .physics-controls {
-                /* Default open on wide screens via JS, but also visually hint */
+        @media (min-width: 900px) {
+            .topbar {
+                grid-template-columns: minmax(240px, auto) 1fr;
+                align-items: start;
+            }
+
+            .controls {
+                justify-self: end;
+                width: min(760px, 100%);
+            }
+
+            .controls-main {
+                grid-template-columns: minmax(170px, 1.3fr) minmax(180px, 1.3fr) 1fr 1fr;
             }
         }
     </style>
@@ -311,11 +363,11 @@
     <main class="app">
         <header class="topbar panel">
             <h1 class="title">Fingertip Sphere Inertia (2D Prototype)</h1>
-            <div class="controls">
-                <div class="controls-actions">
+            <div class="controls" aria-label="Simulation controls">
+                <div class="controls-main">
                     <button id="startBtn" type="button">Start Camera</button>
                     <label for="cameraSelect" class="control-block">
-                        Camera
+                        <span class="control-label">Camera</span>
                         <select id="cameraSelect" disabled>
                             <option value="">Default</option>
                         </select>
@@ -324,10 +376,16 @@
                     <button id="resetBtn" type="button" disabled>Reset Motion</button>
                 </div>
                 <details id="physicsDetails" class="physics-controls">
-                    <summary>Settings</summary>
+                    <summary>
+                        <span class="physics-summary-copy">
+                            <span>Physics Settings</span>
+                            <span class="physics-summary-note">Interaction, sensitivity, gravity, and mass</span>
+                        </span>
+                        <span class="summary-caret" aria-hidden="true">▼</span>
+                    </summary>
                     <div class="physics-controls-inner">
                         <label for="modeSelect" class="control-block">
-                            Interaction
+                            <span class="control-label">Interaction</span>
                             <select id="modeSelect">
                                 <option value="balanced" selected>Balanced</option>
                                 <option value="elastic">Elastic Balls</option>
@@ -335,19 +393,25 @@
                             </select>
                         </label>
                         <label for="sensitivityRange" class="control-block">
-                            Sensitivity
+                            <span class="control-label-row">
+                                <span class="control-label">Sensitivity</span>
+                                <span id="sensitivityValue" class="value-badge">1.0x</span>
+                            </span>
                             <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
-                            <span id="sensitivityValue" class="value-badge">1.0x</span>
                         </label>
                         <label for="gravityRange" class="control-block">
-                            Gravity
+                            <span class="control-label-row">
+                                <span class="control-label">Gravity</span>
+                                <span id="gravityValue" class="value-badge">0.55g</span>
+                            </span>
                             <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
-                            <span id="gravityValue" class="value-badge">0.55g</span>
                         </label>
                         <label for="massRange" class="control-block">
-                            Mass
+                            <span class="control-label-row">
+                                <span class="control-label">Mass</span>
+                                <span id="massValue" class="value-badge">1.0 kg</span>
+                            </span>
                             <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
-                            <span id="massValue" class="value-badge">1.0 kg</span>
                         </label>
                     </div>
                 </details>
@@ -394,7 +458,7 @@
         };
 
         // Default open on wide screens
-        if (window.innerWidth >= 641) {
+        if (window.innerWidth >= 900) {
             ui.physicsDetails.open = true;
         }
 
@@ -413,7 +477,8 @@
             interactionMode: 'balanced',
             sensitivity: 1.0,
             gravity: 0.55,
-            mass: 1.0
+            mass: 1.0,
+            nextTrackingErrorReportAt: 0
         };
 
         let filesetResolverCtor = null;
@@ -1129,8 +1194,18 @@
             if (state.handLandmarker && ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
                 if (ui.video.currentTime !== state.lastVideoTime) {
                     state.lastVideoTime = ui.video.currentTime;
-                    const result = state.handLandmarker.detectForVideo(ui.video, now);
-                    state.lastHands = result.landmarks || [];
+                    try {
+                        const result = state.handLandmarker.detectForVideo(ui.video, now);
+                        state.lastHands = result.landmarks || [];
+                    } catch (error) {
+                        state.lastHands = [];
+                        if (now >= state.nextTrackingErrorReportAt) {
+                            state.nextTrackingErrorReportAt = now + 2000;
+                            const message = error && error.message ? error.message : String(error);
+                            console.error('Hand tracking frame failed:', error);
+                            setStatus(`Tracking hiccup: ${message}. Continuing...`, true);
+                        }
+                    }
                 }
             }
 
@@ -1197,13 +1272,15 @@
             if (!deviceId) {
                 return;
             }
+            const previousStream = state.stream;
+            const previousTrack = previousStream ? previousStream.getVideoTracks()[0] : null;
+            const previousSettings = previousTrack ? previousTrack.getSettings() : null;
+            const previousDeviceId = previousSettings && previousSettings.deviceId ? previousSettings.deviceId : null;
+            let nextStream = null;
+            ui.cameraSelect.disabled = true;
             setStatus('Switching camera...');
             try {
-                // Stop existing tracks
-                if (state.stream) {
-                    state.stream.getTracks().forEach((track) => track.stop());
-                }
-                state.stream = await navigator.mediaDevices.getUserMedia({
+                nextStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         deviceId: { exact: deviceId },
                         width: { ideal: 1280 },
@@ -1211,14 +1288,51 @@
                     },
                     audio: false
                 });
-                ui.video.srcObject = state.stream;
+                ui.video.srcObject = nextStream;
                 await ui.video.play();
+                state.stream = nextStream;
                 state.lastVideoTime = -1;
+
+                if (previousStream && previousStream !== nextStream) {
+                    previousStream.getTracks().forEach((track) => track.stop());
+                }
+
+                if ([...ui.cameraSelect.options].some((option) => option.value === deviceId)) {
+                    ui.cameraSelect.value = deviceId;
+                }
                 setStatus(`Camera switched. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
             } catch (error) {
                 const message = error && error.message ? error.message : String(error);
                 console.error('Camera switch failed:', error);
-                setStatus(`Could not switch camera: ${message}`, true);
+                if (nextStream) {
+                    nextStream.getTracks().forEach((track) => track.stop());
+                }
+
+                const hasLivePreviousStream =
+                    previousStream && previousStream.getTracks().some((track) => track.readyState === 'live');
+
+                if (hasLivePreviousStream) {
+                    state.stream = previousStream;
+                    if (ui.video.srcObject !== previousStream) {
+                        ui.video.srcObject = previousStream;
+                    }
+                    try {
+                        await ui.video.play();
+                    } catch (resumeError) {
+                        console.warn('Could not resume previous camera stream:', resumeError);
+                    }
+
+                    if (previousDeviceId && [...ui.cameraSelect.options].some((option) => option.value === previousDeviceId)) {
+                        ui.cameraSelect.value = previousDeviceId;
+                    }
+
+                    setStatus(`Could not switch camera: ${message}. Keeping current camera.`, true);
+                } else {
+                    state.stream = null;
+                    setStatus(`Could not switch camera: ${message}`, true);
+                }
+            } finally {
+                ui.cameraSelect.disabled = ui.cameraSelect.options.length <= 1;
             }
         }
 
