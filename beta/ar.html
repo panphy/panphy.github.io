@@ -410,13 +410,9 @@
         }
 
         .hud {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            z-index: 10;
             display: grid;
             gap: 6px;
-            max-width: min(92vw, 680px);
+            width: 100%;
         }
 
         .pill {
@@ -448,6 +444,13 @@
             padding: 0 4px;
             color: var(--text-muted);
             font-size: 0.9rem;
+        }
+
+        .control-help {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            line-height: 1.2;
         }
 
         @media (max-width: 640px) {
@@ -515,10 +518,11 @@
                             <label for="modeSelect" class="control-block">
                                 <span class="control-label">Interaction</span>
                                 <select id="modeSelect">
-                                    <option value="balanced" selected>Balanced</option>
-                                    <option value="elastic">Elastic Balls</option>
-                                    <option value="sticky">Sticky Balls</option>
+                                    <option value="balanced" selected>Push</option>
+                                    <option value="elastic">Bounce</option>
+                                    <option value="sticky">Catch</option>
                                 </select>
+                                <p id="modeDescription" class="control-help">Push mode: stable pushes with moderate bounce.</p>
                             </label>
                             <label for="sensitivityRange" class="control-block">
                                 <span class="control-label-row">
@@ -530,9 +534,9 @@
                             <label for="gravityRange" class="control-block">
                                 <span class="control-label-row">
                                     <span class="control-label">Gravity</span>
-                                    <span id="gravityValue" class="value-badge">0.55g</span>
+                                    <span id="gravityValue" class="value-badge">0.00g</span>
                                 </span>
-                                <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0.55">
+                                <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0">
                             </label>
                             <label for="massRange" class="control-block">
                                 <span class="control-label-row">
@@ -549,15 +553,15 @@
             <video id="camera" class="media-layer" autoplay playsinline muted></video>
             <canvas id="renderCanvas" class="media-layer"></canvas>
             <canvas id="tipCanvas" class="media-layer"></canvas>
-            <div class="hud">
-                <div id="status" class="pill">Camera is off.</div>
-                <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 | Spheres: 0</div>
-            </div>
         </section>
 
         <p class="hint">
-            Add spheres, then flick your fingertips or use your palm to push them. Gravity pulls them down — catch and throw!
+            Add spheres, then flick your fingertips or use your palm to push them. Raise gravity above 0g for downward pull, then catch and throw.
         </p>
+        <div class="hud">
+            <div id="status" class="pill">Camera is off.</div>
+            <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 | Spheres: 0</div>
+        </div>
     </main>
 
     <script type="module">
@@ -575,6 +579,7 @@
             status: document.getElementById('status'),
             metrics: document.getElementById('metrics'),
             modeSelect: document.getElementById('modeSelect'),
+            modeDescription: document.getElementById('modeDescription'),
             sensitivityRange: document.getElementById('sensitivityRange'),
             sensitivityValue: document.getElementById('sensitivityValue'),
             gravityRange: document.getElementById('gravityRange'),
@@ -656,7 +661,7 @@
             contactsCount: 0,
             interactionMode: 'balanced',
             sensitivity: 1.0,
-            gravity: 0.55,
+            gravity: 0.0,
             mass: 1.0,
             nextTrackingErrorReportAt: 0
         };
@@ -781,48 +786,54 @@
         ];
 
         const INTERACTION_LABELS = {
-            balanced: 'Balanced',
-            elastic: 'Elastic',
-            sticky: 'Sticky'
+            balanced: 'Push',
+            elastic: 'Bounce',
+            sticky: 'Catch'
+        };
+
+        const INTERACTION_MODE_HELP = {
+            balanced: 'Push mode: stable pushes with moderate bounce.',
+            elastic: 'Bounce mode: high-energy rebounds and faster ricochets.',
+            sticky: 'Catch mode: fingertips can pull and hold spheres briefly.'
         };
 
         // velocityTransfer: fraction of fingertip approach speed added as impulse on first contact
         const INTERACTION_PROFILES = {
             balanced: {
-                contactRadius: 0.14,
-                spring: 95,
-                damping: 5,
-                correction: 0.6,
-                airDrag: 0.05,
-                restitution: 0.92,
+                contactRadius: 0.15,
+                spring: 110,
+                damping: 6.2,
+                correction: 0.62,
+                airDrag: 0.08,
+                restitution: 0.88,
                 stickPull: 0,
                 stickCapture: 0,
                 maxSpeed: 3.0,
-                velocityTransfer: 0.55
+                velocityTransfer: 0.56
             },
             elastic: {
                 contactRadius: 0.16,
-                spring: 145,
-                damping: 3.2,
-                correction: 0.78,
+                spring: 138,
+                damping: 2.5,
+                correction: 0.8,
                 airDrag: 0.03,
-                restitution: 0.98,
+                restitution: 0.99,
                 stickPull: 0,
                 stickCapture: 0,
-                maxSpeed: 4.5,
-                velocityTransfer: 0.80
+                maxSpeed: 4.8,
+                velocityTransfer: 0.88
             },
             sticky: {
-                contactRadius: 0.19,
-                spring: 78,
-                damping: 8.5,
-                correction: 0.9,
-                airDrag: 0.16,
-                restitution: 0.84,
-                stickPull: 14,
-                stickCapture: 2.2,
-                maxSpeed: 1.85,
-                velocityTransfer: 0.30
+                contactRadius: 0.2,
+                spring: 72,
+                damping: 9.8,
+                correction: 0.92,
+                airDrag: 0.24,
+                restitution: 0.7,
+                stickPull: 21,
+                stickCapture: 3.4,
+                maxSpeed: 1.65,
+                velocityTransfer: 0.24
             }
         };
 
@@ -870,18 +881,26 @@
         function getInteractionProfile() {
             const base = INTERACTION_PROFILES[state.interactionMode] || INTERACTION_PROFILES.balanced;
             const s = Math.max(0.6, Math.min(2.0, state.sensitivity));
+            const sensitivityNorm = (s - 0.6) / 1.4;
+            const powerScale = 0.75 + (0.9 * sensitivityNorm);
+            const rangeScale = 0.9 + (0.2 * sensitivityNorm);
+            const stickyScale = 0.85 + (0.5 * sensitivityNorm);
             return {
-                contactRadius: base.contactRadius * (0.9 + (0.1 * s)),
-                spring: base.spring * s,
-                damping: base.damping * (0.95 + (0.05 * s)),
-                correction: Math.min(1, base.correction * (0.9 + (0.1 * s))),
-                airDrag: base.airDrag * (0.9 + (0.1 * s)),
+                contactRadius: base.contactRadius * rangeScale,
+                spring: base.spring * powerScale,
+                damping: base.damping,
+                correction: base.correction,
+                airDrag: base.airDrag,
                 restitution: base.restitution,
-                stickPull: base.stickPull * s,
-                stickCapture: base.stickCapture * s,
-                maxSpeed: base.maxSpeed * (0.9 + (0.1 * s)),
-                velocityTransfer: base.velocityTransfer * s
+                stickPull: base.stickPull * powerScale,
+                stickCapture: base.stickCapture * stickyScale,
+                maxSpeed: base.maxSpeed,
+                velocityTransfer: base.velocityTransfer * powerScale
             };
+        }
+
+        function updateModeDescription() {
+            ui.modeDescription.textContent = INTERACTION_MODE_HELP[state.interactionMode] || '';
         }
 
         function updateSensitivityLabel() {
@@ -1603,6 +1622,7 @@
                 return;
             }
             state.interactionMode = ui.modeSelect.value;
+            updateModeDescription();
             setStatus(`Interaction mode switched to ${INTERACTION_LABELS[state.interactionMode]}.`);
         });
         ui.sensitivityRange.addEventListener('input', () => {
@@ -1644,6 +1664,7 @@
         });
 
         ui.modeSelect.value = state.interactionMode;
+        updateModeDescription();
         ui.sensitivityRange.value = state.sensitivity.toFixed(1);
         updateSensitivityLabel();
         ui.gravityRange.value = state.gravity.toFixed(2);
