@@ -2,7 +2,7 @@
 
 PanPhy Labs is a collection of browser-based physics tools, simulations, and mini games designed for learning by doing.
 
-This project started from a practical classroom problem: many school devices are locked down, and installing software is difficult. PanPhy Labs takes a different approach—keep everything simple, interactive, and available in the browser so students and teachers can get started immediately. The site is also built to be offline-friendly after first load, so learning can continue even with unreliable internet.
+This project started from a practical classroom problem: many school devices are locked down, and installing software is difficult. PanPhy Labs takes a different approach - keep everything simple, interactive, and available in the browser so students and teachers can get started immediately. The site is also built to be offline-friendly after first load, so learning can continue even with unreliable internet.
 
 ## Why PanPhy Labs exists
 
@@ -35,7 +35,7 @@ PanPhy Labs is intentionally lightweight:
 
 ## For contributors
 
-Contributions are welcome—especially fixes, usability improvements, and new educational tools.
+Contributions are welcome - especially fixes, usability improvements, and new educational tools.
 
 ### Project principles
 
@@ -52,13 +52,7 @@ When contributing, try to preserve the project philosophy:
 - If you modify files that are pre-cached by the service worker, you must bump `BUILD_ID` in `sw.js` so users receive updates.
 - New work-in-progress pages should normally go under `/beta` unless they are explicitly being published.
 
-### Run locally
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000` in your browser.
+---
 
 ## Contact
 
