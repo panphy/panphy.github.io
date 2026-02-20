@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-21T00:02:00Z';
+  const BUILD_ID = '2026-02-21T00:31:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -8,6 +8,38 @@
   }
 
   let updateBanner;
+  let isReloadingForUpdate = false;
+
+  const removeUpdateBanner = () => {
+    if (!updateBanner) {
+      return;
+    }
+    updateBanner.remove();
+    updateBanner = null;
+  };
+
+  const requestActivation = async (registration) => {
+    if (!registration) {
+      return false;
+    }
+
+    let waitingWorker = registration.waiting;
+    if (!waitingWorker) {
+      try {
+        await registration.update();
+      } catch (error) {
+        console.warn('Service Worker update check failed', error);
+      }
+      waitingWorker = registration.waiting;
+    }
+
+    if (!waitingWorker) {
+      return false;
+    }
+
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    return true;
+  };
 
   const showUpdateBanner = (registration) => {
     if (updateBanner || !registration?.waiting) {
@@ -51,8 +83,23 @@
       'font-weight: 600'
     ].join(';');
 
-    button.addEventListener('click', () => {
-      registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      button.textContent = 'Updating...';
+
+      const activationRequested = await requestActivation(registration);
+      if (!activationRequested) {
+        button.disabled = false;
+        button.textContent = 'Update';
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (!isReloadingForUpdate) {
+          isReloadingForUpdate = true;
+          window.location.reload();
+        }
+      }, 2200);
     });
 
     updateBanner.append(message, button);
@@ -87,7 +134,11 @@
       listenForUpdates(registration);
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
+        removeUpdateBanner();
+        if (!isReloadingForUpdate) {
+          isReloadingForUpdate = true;
+          window.location.reload();
+        }
       });
 
       const update = () => registration.update();

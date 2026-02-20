@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-21T00:18:00Z';
+const BUILD_ID = '2026-02-21T00:31:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -133,7 +133,7 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event?.data?.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    event.waitUntil(self.skipWaiting());
   }
 });
 
