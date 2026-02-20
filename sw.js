@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-21T09:20:00Z';
+const BUILD_ID = '2026-02-21T10:00:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -62,16 +62,16 @@ const ASSETS_TO_CACHE = [
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',
   '/simulations/lorentz.html',
-  '/simulations/ball.html',
-  '/simulations/ball/styles.css',
-  '/simulations/ball/app.js',
+  '/simulations/collision.html',
+  '/simulations/collision/styles.css',
+  '/simulations/collision/app.js',
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
-  '/simulations/ball/ball_assets/models/hand_landmarker.task',
-  '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
-  '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',
-  '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.wasm',
-  '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.js',
-  '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.wasm',
+  '/simulations/collision/collision_assets/models/hand_landmarker.task',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.wasm',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.js',
+  '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.wasm',
 
   // For Teachers
   '/for_teachers/timer.html',
