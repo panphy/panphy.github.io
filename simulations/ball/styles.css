@@ -562,7 +562,7 @@ footer {
 }
 
 footer a {
-    color: #ff5f1f;
+    color: var(--brand-primary);
     text-decoration: none;
 }
 

@@ -31,14 +31,48 @@ const ui = {
     cancelTargetBtn: document.getElementById('cancelTargetBtn')
 };
 
+function getFocusableElements(container) {
+    return container.querySelectorAll(
+        'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+    );
+}
+
+function trapFocus(event) {
+    const focusable = getFocusableElements(ui.controlsPanel);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
 function openControls() {
     ui.controlsPanel.classList.add('open');
     ui.controlsToggle.style.display = 'none';
+    ui.controlsPanel.addEventListener('keydown', handleControlsPanelKeydown);
+    ui.controlsClose.focus();
 }
 
 function closeControls() {
     ui.controlsPanel.classList.remove('open');
     ui.controlsToggle.style.display = '';
+    ui.controlsPanel.removeEventListener('keydown', handleControlsPanelKeydown);
+    ui.controlsToggle.focus();
+}
+
+function handleControlsPanelKeydown(event) {
+    if (event.key === 'Escape') {
+        closeControls();
+        return;
+    }
+    if (event.key === 'Tab') {
+        trapFocus(event);
+    }
 }
 
 const userAgent = navigator.userAgent || '';
@@ -151,7 +185,9 @@ const state = {
     airDrag: 0.0,
     mass: 1.0,
     statusMessage: 'Camera is off.',
-    nextTrackingErrorReportAt: 0
+    nextTrackingErrorReportAt: 0,
+    selectedSphere: null,
+    lastDrawVideoTime: -1
 };
 
 let filesetResolverCtor = null;
@@ -232,8 +268,9 @@ const MAX_SPHERES = 3;
 const IDEAL_WALL_RESTITUTION = 1.0;
 const IDEAL_SPHERE_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
-const COLLISION_SOLVER_POSITION_ITERATIONS = 6;
+const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
+const GRAVITY_SCALE = 9.81;
 
 const SPHERE_COLORS = [
     0x22d3ee, // cyan
@@ -332,6 +369,10 @@ const rimLight = new THREE.DirectionalLight(0x7dd3fc, 0.8);
 rimLight.position.set(-1.4, -0.4, -1.0);
 scene.add(rimLight);
 
+// Reusable scratch vectors to avoid per-frame allocations.
+// IMPORTANT: These are mutated in-place by landmarkToPlane, trackPoint,
+// countFingertipsNearSphere, holdSphereWithHand, and applyTipForces.
+// Callers must read values before the next mutation of the same field.
 const scratch = {
     rayPoint: new THREE.Vector3(),
     rayDir: new THREE.Vector3(),
@@ -430,11 +471,20 @@ function resizeStage() {
     }
 }
 
+let cachedViewBounds = null;
+let cachedViewBoundsFrame = -1;
+let currentFrameId = 0;
+
 function getViewBounds() {
+    if (cachedViewBounds && cachedViewBoundsFrame === currentFrameId) {
+        return cachedViewBounds;
+    }
     const depth = camera3d.position.z - PLANE_Z;
     const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera3d.fov * 0.5)) * depth;
     const halfWidth = halfHeight * camera3d.aspect;
-    return { halfWidth, halfHeight };
+    cachedViewBounds = { halfWidth, halfHeight };
+    cachedViewBoundsFrame = currentFrameId;
+    return cachedViewBounds;
 }
 
 function createSphere(colorIndex) {
@@ -555,7 +605,7 @@ function trackPoint(key, landmark, now, tips) {
     const prev = tipHistory.get(key);
     if (prev) {
         const elapsed = (now - prev.time) / 1000;
-        if (elapsed > 0 && elapsed < 0.12) {
+        if (elapsed > 0 && elapsed < TIP_VELOCITY_MAX_ELAPSED) {
             const rawVelX = (worldX - prev.worldX) / elapsed;
             const rawVelY = (worldY - prev.worldY) / elapsed;
             // EMA smoothing to reduce landmark noise
@@ -763,6 +813,10 @@ function drawTrackedTips() {
     if (!tipCtx) {
         return;
     }
+    if (state.lastDrawVideoTime === state.lastVideoTime) {
+        return;
+    }
+    state.lastDrawVideoTime = state.lastVideoTime;
     const width = ui.tipCanvas.width;
     const height = ui.tipCanvas.height;
     tipCtx.clearRect(0, 0, width, height);
@@ -848,6 +902,10 @@ const PALM_MIN_APPROACH_SPEED_SCALE = 0.55;
 const PALM_IMPULSE_SCALE = 1.12;
 const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
 const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
+const MAX_PUSH_ACCEL = 50.0;
+const MAX_IMPULSE = 25.0;
+const SHELL_IMPULSE_BOOST = 1.15;
+const TIP_VELOCITY_MAX_ELAPSED = 0.12;
 const FINGER_OPEN_RATIO = {
     4: 0.92,
     8: 1.02,
@@ -1310,8 +1368,7 @@ function applyTipForces(dt, profile) {
                 const pushForce = (profile.spring * corePenetration) - (profile.damping * inwardSpeed);
                 let pushAccel = pushForce / state.mass;
 
-                // Cap extreme forces
-                pushAccel = Math.min(pushAccel, 50.0);
+                pushAccel = Math.min(pushAccel, MAX_PUSH_ACCEL);
 
                 sphere.position.x += scratch.normal.x * corePenetration * profile.correction * contactScale;
                 sphere.position.y += scratch.normal.y * corePenetration * profile.correction * contactScale;
@@ -1325,13 +1382,12 @@ function applyTipForces(dt, profile) {
                 if (relVelAlongNormal > minApproachSpeed) {
                     let impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
                     if (corePenetration <= 0 && radiusBoost > 0) {
-                        // Slightly boost shell contacts so quick flicks still transfer momentum.
-                        impulse *= 1.15;
+                        impulse *= SHELL_IMPULSE_BOOST;
                     }
                     if (isPalm) {
                         impulse *= PALM_IMPULSE_SCALE;
                     }
-                    impulse = Math.min(impulse, 25.0); // Cap extreme impulses
+                    impulse = Math.min(impulse, MAX_IMPULSE);
                     sphere.velocity.x += scratch.normal.x * impulse * contactScale;
                     sphere.velocity.y += scratch.normal.y * impulse * contactScale;
                 }
@@ -1366,17 +1422,21 @@ function constrainSphereToView(sphere, profile) {
         const xSpan = xWrapLimit * 2;
         const ySpan = yWrapLimit * 2;
 
-        while (sphere.position.x > xWrapLimit) {
-            sphere.position.x -= xSpan;
+        if (!Number.isFinite(sphere.position.x) || !Number.isFinite(sphere.position.y)) {
+            sphere.position.set(0, 0, PLANE_Z);
+            sphere.velocity.set(0, 0, 0);
+            return;
         }
-        while (sphere.position.x < -xWrapLimit) {
-            sphere.position.x += xSpan;
+
+        if (sphere.position.x > xWrapLimit) {
+            sphere.position.x -= xSpan * Math.ceil((sphere.position.x - xWrapLimit) / xSpan);
+        } else if (sphere.position.x < -xWrapLimit) {
+            sphere.position.x += xSpan * Math.ceil((-xWrapLimit - sphere.position.x) / xSpan);
         }
-        while (sphere.position.y > yWrapLimit) {
-            sphere.position.y -= ySpan;
-        }
-        while (sphere.position.y < -yWrapLimit) {
-            sphere.position.y += ySpan;
+        if (sphere.position.y > yWrapLimit) {
+            sphere.position.y -= ySpan * Math.ceil((sphere.position.y - yWrapLimit) / ySpan);
+        } else if (sphere.position.y < -yWrapLimit) {
+            sphere.position.y += ySpan * Math.ceil((-yWrapLimit - sphere.position.y) / ySpan);
         }
 
         sphere.position.z = PLANE_Z;
@@ -1507,7 +1567,7 @@ function updatePhysics(dt, profile) {
                 continue;
             }
 
-            sphere.velocity.y -= state.gravity * subDt;
+            sphere.velocity.y -= state.gravity * GRAVITY_SCALE * subDt;
             sphere.position.x += sphere.velocity.x * subDt;
             sphere.position.y += sphere.velocity.y * subDt;
             constrainSphereToView(sphere, profile);
@@ -1549,7 +1609,8 @@ function updatePhysics(dt, profile) {
 function updateGlow(dt) {
     for (const sphere of spheres) {
         const target = sphere.contactCount > 0 ? 3.0 : 1.0;
-        const alpha = sphere.contactCount > 0 ? 0.3 : 0.1;
+        const rate = sphere.contactCount > 0 ? 12.0 : 4.0;
+        const alpha = 1 - Math.exp(-rate * dt);
         sphere.material.emissiveIntensity += (target - sphere.material.emissiveIntensity) * alpha;
     }
 }
@@ -1559,12 +1620,17 @@ function step(now) {
         return;
     }
 
+    currentFrameId += 1;
+
     if (!state.lastFrameTime) {
         state.lastFrameTime = now;
+        requestAnimationFrame(step);
+        return;
     }
     const dt = Math.min((now - state.lastFrameTime) / 1000, 1 / 20);
     state.lastFrameTime = now;
-    state.fps = state.fps ? (state.fps * 0.9) + ((1 / Math.max(dt, 0.0001)) * 0.1) : (1 / Math.max(dt, 0.0001));
+    const instantFps = 1 / Math.max(dt, 0.0001);
+    state.fps = state.fps ? (state.fps * 0.9) + (instantFps * 0.1) : instantFps;
 
     if (state.handLandmarker && ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
         if (ui.video.currentTime !== state.lastVideoTime) {
@@ -1583,8 +1649,6 @@ function step(now) {
             }
         }
     }
-
-    // end of block
 
     state.handsCount = state.lastHands.length;
     state.trackedTips = collectTrackedTips();
@@ -1606,6 +1670,7 @@ const mouseVector = new THREE.Vector2();
 
 function handleStageClick(event) {
     if (spheres.length === 0) return;
+    if (ui.selectionOverlay.style.display !== 'none') return;
     if (
         event.target !== ui.video &&
         event.target !== ui.canvas &&
@@ -1654,8 +1719,9 @@ function handleStageClick(event) {
 
 function selectSphere(sphere) {
     state.selectedSphere = sphere;
-    sphere.velocity.set(0, 0, 0); // Freeze
+    sphere.velocity.set(0, 0, 0);
     ui.selectionOverlay.style.display = 'flex';
+    ui.cancelTargetBtn.focus();
 }
 
 function deselectSphere() {
@@ -1893,6 +1959,7 @@ function stopCameraAndTracking() {
     state.lastFrameTime = 0;
     state.fps = 0;
     state.lastVideoTime = -1;
+    state.lastDrawVideoTime = -1;
     state.lastHands = [];
     state.handsCount = 0;
     state.tipCount = 0;
@@ -2016,10 +2083,25 @@ if ('ResizeObserver' in window) {
     new ResizeObserver(scheduleResizeStage).observe(ui.stage);
 }
 
+ui.canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    setStatus('WebGL context lost. Waiting for recovery...', true);
+});
+ui.canvas.addEventListener('webglcontextrestored', () => {
+    setStatus('WebGL context restored.');
+    resizeStage();
+    if (state.running) {
+        renderer.render(scene, camera3d);
+    }
+});
+
 window.addEventListener('beforeunload', () => {
     if (state.stream) {
         state.stream.getTracks().forEach((track) => track.stop());
     }
+    sharedSphereGeometry.dispose();
+    sharedWireMaterial.dispose();
+    renderer.dispose();
 });
 
 ui.boundaryModeSelect.value = state.boundaryMode;
@@ -2037,4 +2119,3 @@ renderHudInfo();
 updateFullscreenUI();
 resizeStage();
 renderer.render(scene, camera3d);
-startCameraAndTracking();
