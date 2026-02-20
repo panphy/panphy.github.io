@@ -1409,11 +1409,19 @@
         }
 
         const newContacts = new Set();
+        const frameGrippedSpheres = new Set();
         const GRIP_CAPTURE_RADIUS = SPHERE_RADIUS * 2.45;
         const GRIP_FINGER_PROXIMITY_RADIUS = SPHERE_RADIUS * 1.95;
-        const GRIP_MIN_FINGERS_NEAR = 3;
-        const GRIP_CAPTURE_FRAMES = 2;
-        const GRIP_RELEASE_FRAMES = 3;
+        const GRIP_MIN_FINGERS_NEAR = 2;
+        const GRIP_CAPTURE_FRAMES = 1;
+        const GRIP_RELEASE_FRAMES = 4;
+        const GRIP_TRACK_LOST_GRACE_FRAMES = 6;
+        const GRIP_MIN_CLOSED_FINGERS = 4;
+        const GRIP_MIN_OPEN_FINGERS = 4;
+        const GRIP_PRECAPTURE_MIN_CLOSED_FINGERS = 3;
+        const GRIP_PRECAPTURE_MIN_FINGERS_NEAR = 2;
+        const GRIP_MAX_HOLD_SPEED = 5.5;
+        const GRIP_MEMORY_DAMPING = 0.9;
         const FINGER_OPEN_RATIO = {
             4: 0.92,
             8: 1.02,
@@ -1435,7 +1443,12 @@
                 gripState = {
                     sphere: null,
                     closedFrames: 0,
-                    openFrames: 0
+                    openFrames: 0,
+                    lostFrames: 0,
+                    lastGripX: 0,
+                    lastGripY: 0,
+                    lastVelX: 0,
+                    lastVelY: 0
                 };
                 handGripStates.set(handKey, gripState);
             }
@@ -1448,6 +1461,9 @@
                     gripState.sphere = null;
                     gripState.closedFrames = 0;
                     gripState.openFrames = 0;
+                    gripState.lostFrames = 0;
+                    gripState.lastVelX = 0;
+                    gripState.lastVelY = 0;
                 }
             }
         }
@@ -1484,8 +1500,10 @@
 
             return {
                 palmLandmark,
-                isAllOpen: openCount === FINGERTIP_POINTS.length,
-                isAllClosed: closedCount === FINGERTIP_POINTS.length
+                openCount,
+                closedCount,
+                isMostlyOpen: openCount >= GRIP_MIN_OPEN_FINGERS,
+                isMostlyClosed: closedCount >= GRIP_MIN_CLOSED_FINGERS
             };
         }
 
@@ -1508,26 +1526,62 @@
             return nearCount;
         }
 
-        function holdSphereWithHand(sphere, handIndex, palmLandmark) {
-            if (!landmarkToPlane(palmLandmark, scratch.gripWorld)) {
-                return false;
-            }
-            sphere.position.x = scratch.gripWorld.x;
-            sphere.position.y = scratch.gripWorld.y;
-
-            const palmTipData = tipHistory.get(`${handIndex}-palm`);
-            if (palmTipData) {
-                sphere.velocity.x = palmTipData.velX;
-                sphere.velocity.y = palmTipData.velY;
-            } else {
-                sphere.velocity.x = 0;
-                sphere.velocity.y = 0;
-            }
+        function holdSphereAtWorld(sphere, worldX, worldY, velX, velY) {
+            const clampedVelX = Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velX || 0));
+            const clampedVelY = Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velY || 0));
+            sphere.position.x = worldX;
+            sphere.position.y = worldY;
+            sphere.velocity.x = clampedVelX;
+            sphere.velocity.y = clampedVelY;
+            sphere.group.position.set(worldX, worldY, PLANE_Z);
             sphere.contactCount += 1;
             return true;
         }
 
+        function holdSphereWithHand(sphere, handIndex, palmLandmark, gripState) {
+            if (!landmarkToPlane(palmLandmark, scratch.gripWorld)) {
+                return false;
+            }
+
+            const palmTipData = tipHistory.get(`${handIndex}-palm`);
+            let velX = 0;
+            let velY = 0;
+            if (palmTipData) {
+                velX = palmTipData.velX;
+                velY = palmTipData.velY;
+            }
+
+            if (gripState) {
+                gripState.lostFrames = 0;
+                gripState.lastGripX = scratch.gripWorld.x;
+                gripState.lastGripY = scratch.gripWorld.y;
+                gripState.lastVelX = velX;
+                gripState.lastVelY = velY;
+            }
+            return holdSphereAtWorld(sphere, scratch.gripWorld.x, scratch.gripWorld.y, velX, velY);
+        }
+
+        function holdSphereFromMemory(gripState, dt) {
+            if (!gripState || !gripState.sphere) {
+                return false;
+            }
+            const predictedX = gripState.lastGripX + (gripState.lastVelX * dt);
+            const predictedY = gripState.lastGripY + (gripState.lastVelY * dt);
+            gripState.lastGripX = predictedX;
+            gripState.lastGripY = predictedY;
+            gripState.lastVelX *= GRIP_MEMORY_DAMPING;
+            gripState.lastVelY *= GRIP_MEMORY_DAMPING;
+            return holdSphereAtWorld(
+                gripState.sphere,
+                predictedX,
+                predictedY,
+                gripState.lastVelX,
+                gripState.lastVelY
+            );
+        }
+
         function applyTipForces(dt, profile) {
+            frameGrippedSpheres.clear();
             if (spheres.length === 0) {
                 handGripStates.clear();
                 return 0;
@@ -1536,36 +1590,49 @@
             let totalContacts = 0;
             newContacts.clear();
 
-            const grippedSpheres = new Set();
+            const precaptureSpheres = new Set();
             const visibleHands = new Set();
             for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
                 const handKey = String(handIndex);
                 visibleHands.add(handKey);
+                const gripState = getOrCreateHandGripState(handKey);
+                gripState.lostFrames = 0;
                 const hand = state.lastHands[handIndex];
                 const gripPose = analyzeHandGripPose(hand);
                 if (!gripPose) {
-                    const gripState = handGripStates.get(handKey);
                     const fallbackPalm = getPalmLandmark(hand);
                     if (gripState && gripState.sphere && fallbackPalm) {
-                        if (holdSphereWithHand(gripState.sphere, handIndex, fallbackPalm)) {
-                            grippedSpheres.add(gripState.sphere);
+                        if (holdSphereWithHand(gripState.sphere, handIndex, fallbackPalm, gripState)) {
+                            frameGrippedSpheres.add(gripState.sphere);
+                        }
+                    } else if (gripState && gripState.sphere) {
+                        gripState.lostFrames += 1;
+                        if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
+                            frameGrippedSpheres.add(gripState.sphere);
+                        } else {
+                            gripState.sphere = null;
+                            gripState.closedFrames = 0;
+                            gripState.openFrames = 0;
+                            gripState.lastVelX = 0;
+                            gripState.lastVelY = 0;
                         }
                     }
                     continue;
                 }
 
-                const gripState = getOrCreateHandGripState(handKey);
                 if (
                     gripState.sphere &&
-                    (gripState.sphere === state.selectedSphere || !spheres.includes(gripState.sphere))
+                    (gripState.sphere === state.selectedSphere || !spheres.includes(gripState.sphere) || frameGrippedSpheres.has(gripState.sphere))
                 ) {
                     gripState.sphere = null;
                     gripState.closedFrames = 0;
                     gripState.openFrames = 0;
+                    gripState.lastVelX = 0;
+                    gripState.lastVelY = 0;
                 }
 
                 if (gripState.sphere) {
-                    if (gripPose.isAllOpen) {
+                    if (gripPose.isMostlyOpen) {
                         gripState.openFrames += 1;
                     } else {
                         gripState.openFrames = 0;
@@ -1575,13 +1642,52 @@
                         gripState.sphere = null;
                         gripState.closedFrames = 0;
                         gripState.openFrames = 0;
-                    } else if (holdSphereWithHand(gripState.sphere, handIndex, gripPose.palmLandmark)) {
-                        grippedSpheres.add(gripState.sphere);
+                        gripState.lastVelX = 0;
+                        gripState.lastVelY = 0;
+                    } else if (holdSphereWithHand(gripState.sphere, handIndex, gripPose.palmLandmark, gripState)) {
+                        frameGrippedSpheres.add(gripState.sphere);
                     }
                     continue;
                 }
 
-                if (!gripPose.isAllClosed) {
+                if (!landmarkToPlane(gripPose.palmLandmark, scratch.gripWorld)) {
+                    gripState.closedFrames = 0;
+                    continue;
+                }
+
+                let closestSphere = null;
+                let minDist = GRIP_CAPTURE_RADIUS;
+                let precaptureSphere = null;
+                let precaptureDist = GRIP_CAPTURE_RADIUS;
+                for (let si = 0; si < spheres.length; si++) {
+                    const sphere = spheres[si];
+                    if (sphere === state.selectedSphere || frameGrippedSpheres.has(sphere)) {
+                        continue;
+                    }
+                    const dist = Math.hypot(
+                        sphere.position.x - scratch.gripWorld.x,
+                        sphere.position.y - scratch.gripWorld.y
+                    );
+                    if (dist >= GRIP_CAPTURE_RADIUS) {
+                        continue;
+                    }
+
+                    const fingertipsNear = countFingertipsNearSphere(hand, sphere, GRIP_FINGER_PROXIMITY_RADIUS);
+                    if (gripPose.closedCount >= GRIP_PRECAPTURE_MIN_CLOSED_FINGERS && fingertipsNear >= GRIP_PRECAPTURE_MIN_FINGERS_NEAR && dist < precaptureDist) {
+                        precaptureDist = dist;
+                        precaptureSphere = sphere;
+                    }
+                    if (fingertipsNear >= GRIP_MIN_FINGERS_NEAR && dist < minDist) {
+                        minDist = dist;
+                        closestSphere = sphere;
+                    }
+                }
+
+                if (precaptureSphere) {
+                    precaptureSpheres.add(precaptureSphere);
+                }
+
+                if (!gripPose.isMostlyClosed) {
                     gripState.closedFrames = 0;
                     continue;
                 }
@@ -1591,58 +1697,42 @@
                     continue;
                 }
 
-                if (!landmarkToPlane(gripPose.palmLandmark, scratch.gripWorld)) {
-                    continue;
-                }
-
-                let closestSphere = null;
-                let minDist = GRIP_CAPTURE_RADIUS;
-                for (let si = 0; si < spheres.length; si++) {
-                    const sphere = spheres[si];
-                    if (sphere === state.selectedSphere || grippedSpheres.has(sphere)) {
-                        continue;
-                    }
-                    const dist = Math.hypot(
-                        sphere.position.x - scratch.gripWorld.x,
-                        sphere.position.y - scratch.gripWorld.y
-                    );
-                    if (dist >= minDist) {
-                        continue;
-                    }
-
-                    const fingertipsNear = countFingertipsNearSphere(hand, sphere, GRIP_FINGER_PROXIMITY_RADIUS);
-                    if (fingertipsNear >= GRIP_MIN_FINGERS_NEAR) {
-                        minDist = dist;
-                        closestSphere = sphere;
-                    }
-                }
-
                 if (closestSphere) {
                     gripState.sphere = closestSphere;
                     gripState.closedFrames = 0;
                     gripState.openFrames = 0;
-                    if (holdSphereWithHand(closestSphere, handIndex, gripPose.palmLandmark)) {
-                        grippedSpheres.add(closestSphere);
+                    gripState.lostFrames = 0;
+                    if (holdSphereWithHand(closestSphere, handIndex, gripPose.palmLandmark, gripState)) {
+                        frameGrippedSpheres.add(closestSphere);
                     } else {
                         gripState.sphere = null;
                         gripState.closedFrames = 0;
                         gripState.openFrames = 0;
+                        gripState.lastVelX = 0;
+                        gripState.lastVelY = 0;
                     }
                 } else {
                     gripState.closedFrames = 0;
                 }
             }
 
-            // Drop grip states for hands that are no longer tracked
-            for (const handKey of handGripStates.keys()) {
+            // Keep gripped spheres stable briefly across hand-tracker dropouts.
+            for (const [handKey, gripState] of handGripStates) {
                 if (!visibleHands.has(handKey)) {
+                    if (gripState.sphere) {
+                        gripState.lostFrames += 1;
+                        if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
+                            frameGrippedSpheres.add(gripState.sphere);
+                            continue;
+                        }
+                    }
                     handGripStates.delete(handKey);
                 }
             }
 
             // Reset contact counts for ungripped spheres
             for (let i = 0; i < spheres.length; i++) {
-                if (!grippedSpheres.has(spheres[i])) {
+                if (!frameGrippedSpheres.has(spheres[i])) {
                     spheres[i].contactCount = 0;
                 }
             }
@@ -1651,7 +1741,7 @@
                 const tip = state.trackedTips[ti];
                 for (let si = 0; si < spheres.length; si++) {
                     const sphere = spheres[si];
-                    if (grippedSpheres.has(sphere) || sphere === state.selectedSphere) {
+                    if (frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
                         continue;
                     }
 
@@ -1785,6 +1875,9 @@
                 for (let j = i + 1; j < spheres.length; j++) {
                     const a = spheres[i];
                     const b = spheres[j];
+                    if (frameGrippedSpheres.has(a) || frameGrippedSpheres.has(b) || a === state.selectedSphere || b === state.selectedSphere) {
+                        continue;
+                    }
 
                     const dx = b.position.x - a.position.x;
                     const dy = b.position.y - a.position.y;
@@ -1829,8 +1922,8 @@
             }
 
             for (const sphere of spheres) {
-                if (sphere === state.selectedSphere) {
-                    continue; // Skip physics for selected sphere
+                if (sphere === state.selectedSphere || frameGrippedSpheres.has(sphere)) {
+                    continue; // Skip physics for selected or currently gripped spheres
                 }
 
                 // Gravity
