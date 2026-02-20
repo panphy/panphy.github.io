@@ -1562,6 +1562,13 @@
 
         function handleStageClick(event) {
             if (spheres.length === 0) return;
+            if (
+                event.target !== ui.video &&
+                event.target !== ui.canvas &&
+                event.target !== ui.tipCanvas
+            ) {
+                return;
+            }
 
             const rect = ui.canvas.getBoundingClientRect();
             let clientX, clientY;
@@ -1573,8 +1580,15 @@
                 clientY = event.clientY;
             }
 
-            mouseVector.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-            mouseVector.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+            const normalizedX = (clientX - rect.left) / rect.width;
+            const normalizedY = (clientY - rect.top) / rect.height;
+            if (normalizedX < 0 || normalizedX > 1 || normalizedY < 0 || normalizedY > 1) {
+                return;
+            }
+
+            // The stage is mirrored in CSS (`scaleX(-1)`), so pointer x must be mirrored for raycasting.
+            mouseVector.x = (1 - normalizedX) * 2 - 1;
+            mouseVector.y = -(normalizedY * 2 - 1);
 
             raycaster.setFromCamera(mouseVector, camera3d);
 
@@ -1812,7 +1826,7 @@
         ui.controlsClose.addEventListener('click', closeControls);
         ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
 
-        ui.canvas.addEventListener('pointerdown', handleStageClick);
+        ui.stage.addEventListener('pointerdown', handleStageClick);
         ui.removeTargetBtn.addEventListener('click', removeSelectedSphere);
         ui.cancelTargetBtn.addEventListener('click', deselectSphere);
 
