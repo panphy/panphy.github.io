@@ -1214,7 +1214,7 @@
             activeContacts.clear();
             tipHistory.clear();
             handGripStates.clear();
-            releaseImmunityFrames.clear();
+            releaseHandSuppression.clear();
             updateAddBtnState();
             setStatus(`Motion reset. Spheres restored to their starting positions.`);
         }
@@ -1411,7 +1411,7 @@
 
         const newContacts = new Set();
         const frameGrippedSpheres = new Set();
-        const releaseImmunityFrames = new Map();
+        const releaseHandSuppression = new Map();
         const GRIP_CAPTURE_RADIUS = SPHERE_RADIUS * 2.45;
         const GRIP_FINGER_PROXIMITY_RADIUS = SPHERE_RADIUS * 1.95;
         const GRIP_MIN_FINGERS_NEAR = 2;
@@ -1426,7 +1426,8 @@
         const GRIP_MEMORY_DAMPING = 0.9;
         const GRIP_CARRY_VELOCITY_ALPHA = 0.4;
         const GRIP_RELEASE_DEADZONE_SPEED = 0.12;
-        const GRIP_RELEASE_IMMUNITY_FRAMES = 3;
+        const GRIP_RELEASE_SUPPRESSION_SECONDS = 0.14;
+        const GRIP_RELEASE_RAMP_SECONDS = 0.10;
         const FINGER_OPEN_RATIO = {
             4: 0.92,
             8: 1.02,
@@ -1476,19 +1477,31 @@
             gripState.carryVelY = 0;
         }
 
-        function updateReleaseImmunityFrames() {
-            for (const [sphere, frames] of releaseImmunityFrames) {
+        function updateReleaseHandSuppression(dt) {
+            for (const [sphere, age] of releaseHandSuppression) {
                 if (!spheres.includes(sphere)) {
-                    releaseImmunityFrames.delete(sphere);
+                    releaseHandSuppression.delete(sphere);
                     continue;
                 }
-                const next = frames - 1;
-                if (next <= 0) {
-                    releaseImmunityFrames.delete(sphere);
+                const nextAge = age + dt;
+                if (nextAge >= GRIP_RELEASE_SUPPRESSION_SECONDS + GRIP_RELEASE_RAMP_SECONDS) {
+                    releaseHandSuppression.delete(sphere);
                 } else {
-                    releaseImmunityFrames.set(sphere, next);
+                    releaseHandSuppression.set(sphere, nextAge);
                 }
             }
+        }
+
+        function getReleaseHandInfluenceScale(sphere) {
+            const age = releaseHandSuppression.get(sphere);
+            if (age === undefined) {
+                return 1;
+            }
+            if (age < GRIP_RELEASE_SUPPRESSION_SECONDS) {
+                return 0;
+            }
+            const rampElapsed = age - GRIP_RELEASE_SUPPRESSION_SECONDS;
+            return Math.min(1, rampElapsed / Math.max(0.0001, GRIP_RELEASE_RAMP_SECONDS));
         }
 
         function applyReleaseVelocity(gripState) {
@@ -1509,7 +1522,7 @@
             }
             sphere.velocity.x = releaseVelX;
             sphere.velocity.y = releaseVelY;
-            releaseImmunityFrames.set(sphere, GRIP_RELEASE_IMMUNITY_FRAMES);
+            releaseHandSuppression.set(sphere, 0);
         }
 
         function releaseGripState(gripState, applyVelocity = true) {
@@ -1528,7 +1541,7 @@
                     clearGripState(gripState);
                 }
             }
-            releaseImmunityFrames.delete(targetSphere);
+            releaseHandSuppression.delete(targetSphere);
         }
 
         function analyzeHandGripPose(hand) {
@@ -1649,10 +1662,10 @@
 
         function applyTipForces(dt, profile) {
             frameGrippedSpheres.clear();
-            updateReleaseImmunityFrames();
+            updateReleaseHandSuppression(dt);
             if (spheres.length === 0) {
                 handGripStates.clear();
-                releaseImmunityFrames.clear();
+                releaseHandSuppression.clear();
                 return 0;
             }
 
@@ -1795,7 +1808,7 @@
                 const tip = state.trackedTips[ti];
                 for (let si = 0; si < spheres.length; si++) {
                     const sphere = spheres[si];
-                    if (frameGrippedSpheres.has(sphere) || releaseImmunityFrames.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
+                    if (frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
                         continue;
                     }
 
@@ -1807,6 +1820,11 @@
 
                     const distance = scratch.normal.length();
                     if (distance >= profile.contactRadius) {
+                        continue;
+                    }
+
+                    const handInfluenceScale = getReleaseHandInfluenceScale(sphere);
+                    if (handInfluenceScale <= 0) {
                         continue;
                     }
 
@@ -1834,13 +1852,13 @@
                     // Cap extreme forces
                     pushAccel = Math.min(pushAccel, 50.0);
 
-                    sphere.position.x += scratch.normal.x * penetration * profile.correction;
-                    sphere.position.y += scratch.normal.y * penetration * profile.correction;
-                    sphere.velocity.x += scratch.normal.x * pushAccel * dt;
-                    sphere.velocity.y += scratch.normal.y * pushAccel * dt;
+                    sphere.position.x += scratch.normal.x * penetration * profile.correction * handInfluenceScale;
+                    sphere.position.y += scratch.normal.y * penetration * profile.correction * handInfluenceScale;
+                    sphere.velocity.x += scratch.normal.x * pushAccel * dt * handInfluenceScale;
+                    sphere.velocity.y += scratch.normal.y * pushAccel * dt * handInfluenceScale;
 
                     // First-contact velocity impulse
-                    if (!activeContacts.has(contactKey)) {
+                    if (!activeContacts.has(contactKey) && handInfluenceScale >= 0.999) {
                         const relVelAlongNormal =
                             (tip.velX - sphere.velocity.x) * scratch.normal.x +
                             (tip.velY - sphere.velocity.y) * scratch.normal.y;
@@ -1858,10 +1876,10 @@
                         const invDistance = 1 / distance;
                         const stickFactor = penetration / profile.contactRadius;
                         const stickAccel = profile.stickPull / state.mass;
-                        sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt;
-                        sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt;
-                        sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt;
-                        sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt;
+                        sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * handInfluenceScale;
+                        sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * handInfluenceScale;
+                        sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * handInfluenceScale;
+                        sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * handInfluenceScale;
                     }
                 }
             }
