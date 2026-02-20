@@ -275,8 +275,6 @@ const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 8;
 const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 5;
 const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
-const ONE_D_CONTACT_POSITION_TOLERANCE = COLLISION_SEPARATION_EPSILON * 6;
-const ONE_D_RESIDUAL_CLOSING_SPEED_MAX = 0.03;
 const GRAVITY_SCALE = 9.81;
 const MIN_SPHERE_MASS = 0.2;
 const MAX_SPHERE_MASS = 5.0;
@@ -677,6 +675,7 @@ function createSphere(colorIndex) {
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
         prevSubstepX: 0,
+        integratedSubstepX: 0,
         prevSubstepY: 0,
         velocity: new THREE.Vector3(0, 0, 0),
         mass: DEFAULT_SPHERE_MASS,
@@ -706,6 +705,7 @@ function addSphere() {
     );
     sphere.spawnPosition.copy(sphere.position);
     sphere.prevSubstepX = sphere.position.x;
+    sphere.integratedSubstepX = sphere.position.x;
     sphere.prevSubstepY = sphere.position.y;
     sphere.group.position.copy(sphere.position);
 
@@ -735,6 +735,7 @@ function resetAll() {
     for (const sphere of spheres) {
         sphere.position.copy(sphere.spawnPosition);
         sphere.prevSubstepX = sphere.position.x;
+        sphere.integratedSubstepX = sphere.position.x;
         sphere.prevSubstepY = sphere.position.y;
         sphere.velocity.set(0, 0, 0);
         sphere.contactCount = 0;
@@ -1745,7 +1746,7 @@ function getOneDCollisionNormalX(a, b, dx) {
 
 function didOneDCentersCrossThisSubstep(a, b) {
     const prevDx = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
-    const currDx = b.position.x - a.position.x;
+    const currDx = (b.integratedSubstepX ?? b.position.x) - (a.integratedSubstepX ?? a.position.x);
     return (prevDx > 0 && currDx < 0) || (prevDx < 0 && currDx > 0);
 }
 
@@ -1764,6 +1765,28 @@ function stabilizeOneDWallPacking() {
     const count = ordered.length;
     const availableSpan = xLimit * 2;
     const requiredSpan = minSeparation * (count - 1);
+    const violationTolerance = COLLISION_SEPARATION_EPSILON * 0.5;
+
+    let hasViolation = false;
+    for (let i = 0; i < count; i++) {
+        const sphere = ordered[i];
+        if (sphere.position.x > xLimit + violationTolerance || sphere.position.x < -xLimit - violationTolerance) {
+            hasViolation = true;
+            break;
+        }
+    }
+    if (!hasViolation) {
+        for (let i = 0; i < count - 1; i++) {
+            const gap = ordered[i + 1].position.x - ordered[i].position.x;
+            if (gap < (minSeparation - violationTolerance)) {
+                hasViolation = true;
+                break;
+            }
+        }
+    }
+    if (!hasViolation) {
+        return;
+    }
 
     if (requiredSpan > availableSpan + 0.000001) {
         // Not enough horizontal room: spread as evenly as possible to minimize overlap.
@@ -1805,48 +1828,6 @@ function stabilizeOneDWallPacking() {
     for (const sphere of ordered) {
         sphere.position.y = 0;
         sphere.velocity.y = 0;
-    }
-}
-
-function dampOneDResidualClosingVelocity() {
-    if (!state.oneD || spheres.length < 2) {
-        return;
-    }
-
-    const minSeparation = (SPHERE_RADIUS * 2) + COLLISION_SEPARATION_EPSILON;
-    const contactThreshold = minSeparation + ONE_D_CONTACT_POSITION_TOLERANCE;
-    const ordered = [...spheres].sort((a, b) => a.position.x - b.position.x);
-
-    for (let i = 0; i < ordered.length - 1; i++) {
-        const left = ordered[i];
-        const right = ordered[i + 1];
-        const leftPinned = isPinnedSphere(left);
-        const rightPinned = isPinnedSphere(right);
-        if (leftPinned && rightPinned) {
-            continue;
-        }
-
-        const separation = right.position.x - left.position.x;
-        if (separation > contactThreshold) {
-            continue;
-        }
-
-        const invMassLeft = leftPinned ? 0 : (1 / clampSphereMass(left.mass));
-        const invMassRight = rightPinned ? 0 : (1 / clampSphereMass(right.mass));
-        const invMassSum = invMassLeft + invMassRight;
-        if (invMassSum <= 0) {
-            continue;
-        }
-
-        const relVel = right.velocity.x - left.velocity.x;
-        if (relVel >= 0 || relVel < -ONE_D_RESIDUAL_CLOSING_SPEED_MAX) {
-            continue;
-        }
-
-        // Remove only tiny residual numerical closing speed; keep real impacts intact.
-        const impulse = (-relVel) / invMassSum;
-        left.velocity.x -= impulse * invMassLeft;
-        right.velocity.x += impulse * invMassRight;
     }
 }
 
@@ -1977,6 +1958,7 @@ function updatePhysics(dt, profile) {
 
         for (const sphere of spheres) {
             sphere.prevSubstepX = sphere.position.x;
+            sphere.integratedSubstepX = sphere.position.x;
             sphere.prevSubstepY = sphere.position.y;
         }
 
@@ -1993,6 +1975,7 @@ function updatePhysics(dt, profile) {
                 sphere.position.y += sphere.velocity.y * subDt;
             }
             constrainSphereToView(sphere, profile);
+            sphere.integratedSubstepX = sphere.position.x;
 
             const linearDrag = Math.exp(-profile.airDrag * subDt);
             sphere.velocity.x *= linearDrag;
@@ -2023,7 +2006,6 @@ function updatePhysics(dt, profile) {
         }
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
-            dampOneDResidualClosingVelocity();
         }
     }
 
