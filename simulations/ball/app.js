@@ -41,11 +41,43 @@ function closeControls() {
     ui.controlsToggle.style.display = '';
 }
 
-function isFullscreenActive() {
+const userAgent = navigator.userAgent || '';
+const isTouchAppleDevice = /iPad|iPhone|iPod/.test(userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isSafariBrowser = /Safari/i.test(userAgent) &&
+    !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Chromium|Android/i.test(userAgent);
+const prefersPseudoFullscreen = isTouchAppleDevice && isSafariBrowser;
+
+function isPseudoFullscreenActive() {
+    return ui.stage.classList.contains('pseudo-fullscreen');
+}
+
+function isNativeFullscreenActive() {
     return document.fullscreenElement === ui.stage ||
         document.fullscreenElement === ui.video ||
         document.webkitFullscreenElement === ui.stage ||
         document.webkitFullscreenElement === ui.video;
+}
+
+function isFullscreenActive() {
+    return isNativeFullscreenActive() || isPseudoFullscreenActive();
+}
+
+function setPseudoFullscreen(active) {
+    ui.stage.classList.toggle('pseudo-fullscreen', active);
+    document.documentElement.classList.toggle('ball-fullscreen-lock', active);
+    document.body.classList.toggle('ball-fullscreen-lock', active);
+    if (active) {
+        window.scrollTo(0, 0);
+    }
+}
+
+function scheduleResizeStage() {
+    resizeStage();
+    requestAnimationFrame(() => {
+        resizeStage();
+        requestAnimationFrame(resizeStage);
+    });
 }
 
 function updateFullscreenUI() {
@@ -53,31 +85,43 @@ function updateFullscreenUI() {
     ui.fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
     ui.fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
     ui.fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
-    resizeStage();
+    scheduleResizeStage();
 }
 
-function toggleFullscreen() {
+async function toggleFullscreen() {
     const requestFullscreen = ui.stage.requestFullscreen || ui.stage.webkitRequestFullscreen || ui.stage.webkitRequestFullScreen;
     const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
 
-    if (isFullscreenActive()) {
+    if (isPseudoFullscreenActive()) {
+        setPseudoFullscreen(false);
+        updateFullscreenUI();
+        return;
+    }
+
+    if (isNativeFullscreenActive()) {
         if (exitFullscreen) {
-            exitFullscreen.call(document);
+            try {
+                await exitFullscreen.call(document);
+            } catch (error) {
+                console.warn('Failed to exit native fullscreen:', error);
+            }
         }
         return;
     }
 
-    if (requestFullscreen) {
-        requestFullscreen.call(ui.stage);
+    if (prefersPseudoFullscreen || !requestFullscreen) {
+        setPseudoFullscreen(true);
+        updateFullscreenUI();
         return;
     }
 
-    if (ui.video.webkitEnterFullscreen) {
-        ui.video.webkitEnterFullscreen();
-        return;
+    try {
+        await requestFullscreen.call(ui.stage);
+    } catch (error) {
+        console.warn('Native fullscreen request failed. Falling back to pseudo fullscreen.', error);
+        setPseudoFullscreen(true);
+        updateFullscreenUI();
     }
-
-    setStatus('Fullscreen is not supported in this browser.', true);
 }
 
 // Default open on wide screens
@@ -1802,11 +1846,15 @@ ui.massRange.addEventListener('input', () => {
     updateMassLabel();
 });
 
-window.addEventListener('resize', resizeStage);
+window.addEventListener('resize', scheduleResizeStage);
+window.addEventListener('orientationchange', scheduleResizeStage);
+if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
+    window.visualViewport.addEventListener('resize', scheduleResizeStage);
+}
 document.addEventListener('fullscreenchange', updateFullscreenUI);
 document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 if ('ResizeObserver' in window) {
-    new ResizeObserver(resizeStage).observe(ui.stage);
+    new ResizeObserver(scheduleResizeStage).observe(ui.stage);
 }
 
 window.addEventListener('beforeunload', () => {

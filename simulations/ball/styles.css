@@ -396,12 +396,14 @@ button:disabled {
     position: relative;
     aspect-ratio: 16 / 10;
     overflow: hidden;
+    isolation: isolate;
 }
 
 .stage::after {
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 3;
     pointer-events: none;
     opacity: 0;
     border-radius: inherit;
@@ -446,7 +448,8 @@ button:disabled {
 }
 
 .stage:fullscreen,
-.stage:-webkit-full-screen {
+.stage:-webkit-full-screen,
+.stage.pseudo-fullscreen {
     width: 100vw;
     height: 100vh;
     max-width: none;
@@ -455,21 +458,43 @@ button:disabled {
     border-radius: 0;
 }
 
+.stage.pseudo-fullscreen {
+    position: fixed;
+    inset: 0;
+    height: 100svh;
+    height: 100dvh;
+    z-index: 1200;
+}
+
 .media-layer {
     position: absolute;
     inset: 0;
+    z-index: 1;
     width: 100%;
     height: 100%;
     object-fit: cover;
     transform: scaleX(-1);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+#camera {
+    z-index: 0;
 }
 
 #renderCanvas {
     pointer-events: none;
+    z-index: 1;
 }
 
 #tipCanvas {
     pointer-events: none;
+    z-index: 2;
+}
+
+html.ball-fullscreen-lock,
+body.ball-fullscreen-lock {
+    overflow: hidden;
 }
 
 .hud {
