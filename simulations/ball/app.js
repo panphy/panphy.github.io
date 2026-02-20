@@ -267,6 +267,24 @@ const sharedWireMaterial = new THREE.MeshBasicMaterial({
 
 const FINGERTIP_POINTS = [4, 8, 12, 16, 20];
 const PALM_LANDMARKS = [0, 5, 9, 13, 17]; // wrist + MCP joints
+const FINGER_CHAINS = [
+    [1, 2, 3, 4],   // thumb
+    [5, 6, 7, 8],   // index
+    [9, 10, 11, 12], // middle
+    [13, 14, 15, 16], // ring
+    [17, 18, 19, 20] // pinky
+];
+const HAND_MIN_DETECTION_CONFIDENCE = 0.62;
+const HAND_MIN_PRESENCE_CONFIDENCE = 0.62;
+const HAND_MIN_TRACKING_CONFIDENCE = 0.65;
+const HAND_MIN_HANDEDNESS_SCORE = 0.6;
+const HAND_MIN_BBOX_AREA = 0.003;
+const HAND_MIN_SPAN = 0.06;
+const HAND_MIN_PALM_WIDTH = 0.035;
+const HAND_MIN_TIP_SPREAD_SCALE = 0.2;
+const HAND_MIN_VALID_FINGER_CHAINS = 2;
+const HAND_MIN_FINGER_CHAIN_SCALE = 0.42;
+const HAND_MIN_THUMB_CHAIN_SCALE = 0.28;
 
 // Hand skeleton connections for visual feedback
 const HAND_CONNECTIONS = [
@@ -587,6 +605,120 @@ function getPalmLandmark(hand) {
         y: palmY / palmCount,
         z: palmZ / palmCount
     };
+}
+
+function getLandmarkDistance(hand, indexA, indexB) {
+    const a = hand[indexA];
+    const b = hand[indexB];
+    if (!a || !b) {
+        return 0;
+    }
+    return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function getHandednessScore(result, handIndex) {
+    const handednessSets = result && (result.handedness || result.handednesses);
+    if (!Array.isArray(handednessSets)) {
+        return null;
+    }
+    const categories = handednessSets[handIndex];
+    if (!Array.isArray(categories) || categories.length === 0) {
+        return null;
+    }
+    let maxScore = null;
+    for (let i = 0; i < categories.length; i++) {
+        const category = categories[i];
+        if (!category || !Number.isFinite(category.score)) {
+            continue;
+        }
+        maxScore = maxScore === null ? category.score : Math.max(maxScore, category.score);
+    }
+    return maxScore;
+}
+
+function isLikelyRealHand(hand) {
+    if (!Array.isArray(hand) || hand.length < 21) {
+        return false;
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (let i = 0; i < 21; i++) {
+        const lm = hand[i];
+        if (!lm || !Number.isFinite(lm.x) || !Number.isFinite(lm.y)) {
+            return false;
+        }
+        minX = Math.min(minX, lm.x);
+        minY = Math.min(minY, lm.y);
+        maxX = Math.max(maxX, lm.x);
+        maxY = Math.max(maxY, lm.y);
+    }
+
+    const boxWidth = maxX - minX;
+    const boxHeight = maxY - minY;
+    const bboxArea = boxWidth * boxHeight;
+    if (bboxArea < HAND_MIN_BBOX_AREA || Math.max(boxWidth, boxHeight) < HAND_MIN_SPAN) {
+        return false;
+    }
+
+    const palmWidth = getLandmarkDistance(hand, 5, 17);
+    if (palmWidth < HAND_MIN_PALM_WIDTH) {
+        return false;
+    }
+
+    const palm = getPalmLandmark(hand);
+    if (!palm) {
+        return false;
+    }
+
+    let tipSpreadSum = 0;
+    for (let i = 0; i < FINGERTIP_POINTS.length; i++) {
+        const tip = hand[FINGERTIP_POINTS[i]];
+        tipSpreadSum += Math.hypot(tip.x - palm.x, tip.y - palm.y);
+    }
+    const avgTipSpread = tipSpreadSum / FINGERTIP_POINTS.length;
+    if (avgTipSpread < palmWidth * HAND_MIN_TIP_SPREAD_SCALE) {
+        return false;
+    }
+
+    let validFingerChains = 0;
+    for (let chainIndex = 0; chainIndex < FINGER_CHAINS.length; chainIndex++) {
+        const chain = FINGER_CHAINS[chainIndex];
+        const chainLength =
+            getLandmarkDistance(hand, chain[0], chain[1]) +
+            getLandmarkDistance(hand, chain[1], chain[2]) +
+            getLandmarkDistance(hand, chain[2], chain[3]);
+        const requiredScale = chainIndex === 0
+            ? HAND_MIN_THUMB_CHAIN_SCALE
+            : HAND_MIN_FINGER_CHAIN_SCALE;
+        if (chainLength >= palmWidth * requiredScale) {
+            validFingerChains += 1;
+        }
+    }
+
+    return validFingerChains >= HAND_MIN_VALID_FINGER_CHAINS;
+}
+
+function extractReliableHands(result) {
+    const landmarks = result && Array.isArray(result.landmarks) ? result.landmarks : [];
+    if (landmarks.length === 0) {
+        return [];
+    }
+    const reliableHands = [];
+    for (let i = 0; i < landmarks.length; i++) {
+        const hand = landmarks[i];
+        if (!isLikelyRealHand(hand)) {
+            continue;
+        }
+        const handednessScore = getHandednessScore(result, i);
+        if (handednessScore !== null && handednessScore < HAND_MIN_HANDEDNESS_SCORE) {
+            continue;
+        }
+        reliableHands.push(hand);
+    }
+    return reliableHands;
 }
 
 function collectTrackedTips() {
@@ -1439,7 +1571,7 @@ function step(now) {
             state.lastVideoTime = ui.video.currentTime;
             try {
                 const result = state.handLandmarker.detectForVideo(ui.video, now);
-                state.lastHands = result.landmarks || [];
+                state.lastHands = extractReliableHands(result);
             } catch (error) {
                 state.lastHands = [];
                 if (now >= state.nextTrackingErrorReportAt) {
@@ -1574,7 +1706,10 @@ async function createHandLandmarker() {
             modelAssetPath: LOCAL_MODEL_PATH
         },
         runningMode: 'VIDEO',
-        numHands: 2
+        numHands: 2,
+        minHandDetectionConfidence: HAND_MIN_DETECTION_CONFIDENCE,
+        minHandPresenceConfidence: HAND_MIN_PRESENCE_CONFIDENCE,
+        minTrackingConfidence: HAND_MIN_TRACKING_CONFIDENCE
     });
 }
 
