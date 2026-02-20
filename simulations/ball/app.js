@@ -2119,3 +2119,4 @@ renderHudInfo();
 updateFullscreenUI();
 resizeStage();
 renderer.render(scene, camera3d);
+startCameraAndTracking();
