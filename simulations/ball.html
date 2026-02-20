@@ -94,14 +94,19 @@
                             </div>
                         </div>
                     </details>
-                    <section id="ballControlsSection" class="ball-controls" aria-live="polite">
-                        <div class="ball-controls-head">
-                            <span class="cp-label">Ball Controls</span>
-                            <span id="ballControlsCount" class="value-badge">0 / 3</span>
+                    <details id="ballControlsSection" class="ball-controls" aria-live="polite" open>
+                        <summary class="ball-controls-summary">
+                            <span class="ball-controls-head">
+                                <span class="cp-label">Ball Settings</span>
+                                <span id="ballControlsCount" class="value-badge">0 / 3</span>
+                            </span>
+                            <span class="summary-caret" aria-hidden="true">▼</span>
+                        </summary>
+                        <div class="ball-controls-body">
+                            <p class="control-help">Add a sphere to adjust its mass and coefficient of restitution.</p>
+                            <div id="ballControlsList" class="ball-controls-list"></div>
                         </div>
-                        <p class="control-help">Add a sphere to adjust its mass and coefficient of restitution.</p>
-                        <div id="ballControlsList" class="ball-controls-list"></div>
-                    </section>
+                    </details>
                 </div>
             </div>
             <button id="fullscreenBtn" type="button" aria-label="Enter full screen"

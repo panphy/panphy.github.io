@@ -573,7 +573,11 @@ function renderBallControls() {
             }
         });
 
-        card.append(massControl, restitutionControl);
+        const sliderRow = document.createElement('div');
+        sliderRow.className = 'ball-control-grid';
+        sliderRow.append(massControl, restitutionControl);
+
+        card.appendChild(sliderRow);
         ui.ballControlsList.appendChild(card);
     }
 }

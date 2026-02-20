@@ -357,28 +357,59 @@ body {
 }
 
 .ball-controls {
-    display: grid;
-    gap: 10px;
     margin-top: 12px;
-    padding: 12px;
     border: 1px solid var(--panel-border);
     border-radius: 12px;
     background: rgba(15, 16, 20, 0.5);
+    overflow: hidden;
 }
 
 [data-theme="light"] .ball-controls {
     background: rgba(255, 255, 255, 0.7);
 }
 
-.ball-controls-head {
+.ball-controls-summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.ball-controls-summary::-webkit-details-marker {
+    display: none;
+}
+
+.ball-controls-summary:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .ball-controls-summary:hover {
+    background: rgba(148, 163, 184, 0.14);
+}
+
+.ball-controls-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .ball-controls-head .cp-label {
     padding-right: 0;
+}
+
+.ball-controls-body {
+    display: grid;
+    gap: 10px;
+    padding: 0 12px 12px;
+    border-top: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);
+}
+
+.ball-controls[open] .summary-caret {
+    transform: rotate(180deg);
 }
 
 .ball-controls .control-help {
@@ -407,6 +438,13 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.ball-control-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
 }
 
 .ball-color-dot {
