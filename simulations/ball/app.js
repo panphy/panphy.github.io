@@ -275,6 +275,8 @@ const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 8;
 const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 5;
 const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
+const ONE_D_CONTACT_POSITION_TOLERANCE = COLLISION_SEPARATION_EPSILON * 6;
+const ONE_D_CONTACT_VELOCITY_TOLERANCE = 0.0005;
 const GRAVITY_SCALE = 9.81;
 const MIN_SPHERE_MASS = 0.2;
 const MAX_SPHERE_MASS = 5.0;
@@ -1806,6 +1808,48 @@ function stabilizeOneDWallPacking() {
     }
 }
 
+function enforceOneDNonCompressionVelocity() {
+    if (!state.oneD || spheres.length < 2) {
+        return;
+    }
+
+    const minSeparation = (SPHERE_RADIUS * 2) + COLLISION_SEPARATION_EPSILON;
+    const contactThreshold = minSeparation + ONE_D_CONTACT_POSITION_TOLERANCE;
+    const ordered = [...spheres].sort((a, b) => a.position.x - b.position.x);
+
+    for (let i = 0; i < ordered.length - 1; i++) {
+        const left = ordered[i];
+        const right = ordered[i + 1];
+        const leftPinned = isPinnedSphere(left);
+        const rightPinned = isPinnedSphere(right);
+        if (leftPinned && rightPinned) {
+            continue;
+        }
+
+        const separation = right.position.x - left.position.x;
+        if (separation > contactThreshold) {
+            continue;
+        }
+
+        const invMassLeft = leftPinned ? 0 : (1 / clampSphereMass(left.mass));
+        const invMassRight = rightPinned ? 0 : (1 / clampSphereMass(right.mass));
+        const invMassSum = invMassLeft + invMassRight;
+        if (invMassSum <= 0) {
+            continue;
+        }
+
+        const relVel = right.velocity.x - left.velocity.x;
+        if (relVel >= -ONE_D_CONTACT_VELOCITY_TOLERANCE) {
+            continue;
+        }
+
+        // Project away residual closing speed so contacts don't "re-stick" after depenetration.
+        const impulse = (-relVel) / invMassSum;
+        left.velocity.x -= impulse * invMassLeft;
+        right.velocity.x += impulse * invMassRight;
+    }
+}
+
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
@@ -1966,6 +2010,7 @@ function updatePhysics(dt, profile) {
         }
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
+            enforceOneDNonCompressionVelocity();
         }
 
         // Iterative velocity solver improves simultaneous-contact chains.
@@ -1979,6 +2024,7 @@ function updatePhysics(dt, profile) {
         }
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
+            enforceOneDNonCompressionVelocity();
         }
     }
 
