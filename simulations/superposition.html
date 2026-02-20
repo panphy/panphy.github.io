@@ -577,7 +577,7 @@
                         <label for="speed1">
                             Wave Speed: <span id="speed1Value">200</span> px/s
                         </label>
-                        <input type="range" id="speed1" min="50" max="500" step="10" value="200">
+                        <input type="range" id="speed1" min="-500" max="500" step="10" value="200">
                     </div>
                 </div>
 
@@ -597,9 +597,9 @@
                     </div>
                     <div class="control-group">
                         <label for="speed2">
-                            Wave Speed: <span id="speed2Value">200</span> px/s
+                            Wave Speed: <span id="speed2Value">-200</span> px/s
                         </label>
-                        <input type="range" id="speed2" min="50" max="500" step="10" value="200">
+                        <input type="range" id="speed2" min="-500" max="500" step="10" value="-200">
                     </div>
                 </div>
 
@@ -835,17 +835,18 @@
             const omega1 = 2 * Math.PI * frequency1;
             const omega2 = 2 * Math.PI * frequency2;
 
-            const actualSpeed1 = Math.max(speed1, 1e-6);
-            const actualSpeed2 = Math.max(speed2, 1e-6);
-
-            const k1 = omega1 / actualSpeed1;
-            const k2 = omega2 / actualSpeed2;
+            function evaluateWave(amplitude, omega, speed, xVirtual, t) {
+                const direction = speed < 0 ? -1 : 1; // -1 => left, +1 => right
+                const speedMagnitude = Math.max(Math.abs(speed), 1e-6);
+                const k = omega / speedMagnitude;
+                return amplitude * Math.sin((k * xVirtual) - (direction * omega * t));
+            }
 
             if (toggleWave1.checked) {
                 ctx.beginPath();
                 for (let x = 0; x <= width; x++) {
                     const xVirtual = x / timeZoom;
-                    const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
+                    const wave1Val = evaluateWave(amplitude1, omega1, speed1, xVirtual, t);
                     const canvasY = baseline - wave1Val;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
@@ -859,7 +860,7 @@
                 ctx.beginPath();
                 for (let x = 0; x <= width; x++) {
                     const xVirtual = x / timeZoom;
-                    const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
+                    const wave2Val = evaluateWave(amplitude2, omega2, speed2, xVirtual, t);
                     const canvasY = baseline - wave2Val;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
@@ -873,8 +874,8 @@
                 ctx.beginPath();
                 for (let x = 0; x <= width; x++) {
                     const xVirtual = x / timeZoom;
-                    const wave1Val = amplitude1 * Math.sin(k1 * xVirtual - omega1 * t);
-                    const wave2Val = amplitude2 * Math.sin(k2 * xVirtual + omega2 * t);
+                    const wave1Val = evaluateWave(amplitude1, omega1, speed1, xVirtual, t);
+                    const wave2Val = evaluateWave(amplitude2, omega2, speed2, xVirtual, t);
                     const sumVal = wave1Val + wave2Val;
                     const canvasY = baseline - sumVal;
                     if (x === 0) ctx.moveTo(x, canvasY);
