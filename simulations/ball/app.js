@@ -1289,6 +1289,9 @@ function shouldHoldGripFromMemory(gripState) {
     if (!gripState || !gripState.sphere) {
         return false;
     }
+    if (state.oneD) {
+        return false;
+    }
     const carrySpeed = Math.hypot(
         gripState.carryVelX || 0,
         state.oneD ? 0 : (gripState.carryVelY || 0)
@@ -1331,11 +1334,11 @@ function applyTipForces(dt, profile) {
             } else if (gripState && gripState.sphere) {
                 gripState.lostFrames += 1;
                 if (!shouldHoldGripFromMemory(gripState)) {
-                    releaseGripState(gripState);
+                    releaseGripState(gripState, false);
                 } else if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
                     frameGrippedSpheres.add(gripState.sphere);
                 } else {
-                    releaseGripState(gripState);
+                    releaseGripState(gripState, false);
                 }
             }
             continue;
@@ -1447,7 +1450,7 @@ function applyTipForces(dt, profile) {
                     frameGrippedSpheres.add(gripState.sphere);
                     continue;
                 }
-                releaseGripState(gripState);
+                releaseGripState(gripState, false);
             }
             handGripStates.delete(handKey);
         }
