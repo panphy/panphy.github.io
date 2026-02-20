@@ -18,8 +18,9 @@ const ui = {
     gravityValue: document.getElementById('gravityValue'),
     airDragRange: document.getElementById('airDragRange'),
     airDragValue: document.getElementById('airDragValue'),
-    massRange: document.getElementById('massRange'),
-    massValue: document.getElementById('massValue'),
+    ballControlsSection: document.getElementById('ballControlsSection'),
+    ballControlsCount: document.getElementById('ballControlsCount'),
+    ballControlsList: document.getElementById('ballControlsList'),
     stage: document.getElementById('stage'),
     video: document.getElementById('camera'),
     canvas: document.getElementById('renderCanvas'),
@@ -185,7 +186,6 @@ const state = {
     sensitivity: 1.0,
     gravity: 0.0,
     airDrag: 0.0,
-    mass: 1.0,
     statusMessage: 'Camera is off.',
     nextTrackingErrorReportAt: 0,
     selectedSphere: null,
@@ -268,11 +268,16 @@ const SPHERE_RADIUS = 0.18;
 const PLANE_Z = 0;
 const MAX_SPHERES = 3;
 const IDEAL_WALL_RESTITUTION = 1.0;
-const IDEAL_SPHERE_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 const GRAVITY_SCALE = 9.81;
+const MIN_SPHERE_MASS = 0.2;
+const MAX_SPHERE_MASS = 5.0;
+const DEFAULT_SPHERE_MASS = 1.0;
+const MIN_SPHERE_RESTITUTION = 0.0;
+const MAX_SPHERE_RESTITUTION = 1.0;
+const DEFAULT_SPHERE_RESTITUTION = 1.0;
 
 const SPHERE_COLORS = [
     0x22d3ee, // cyan
@@ -438,8 +443,139 @@ function updateAirDragLabel() {
     ui.airDragValue.textContent = state.airDrag.toFixed(2);
 }
 
-function updateMassLabel() {
-    ui.massValue.textContent = `${state.mass.toFixed(1)} kg`;
+function clampSphereMass(value) {
+    return Math.max(MIN_SPHERE_MASS, Math.min(MAX_SPHERE_MASS, value));
+}
+
+function clampSphereRestitution(value) {
+    return Math.max(MIN_SPHERE_RESTITUTION, Math.min(MAX_SPHERE_RESTITUTION, value));
+}
+
+function formatSphereMass(value) {
+    return `${value.toFixed(1)} kg`;
+}
+
+function formatSphereRestitution(value) {
+    return value.toFixed(2);
+}
+
+function toCssHexColor(colorValue) {
+    return `#${colorValue.toString(16).padStart(6, '0')}`;
+}
+
+function createBallSliderControl({
+    sphereNumber,
+    labelText,
+    valueText,
+    min,
+    max,
+    step,
+    value,
+    onInput
+}) {
+    const label = document.createElement('label');
+    label.className = 'control-block';
+
+    const row = document.createElement('span');
+    row.className = 'control-label-row';
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'control-label';
+    labelEl.textContent = labelText;
+
+    const valueEl = document.createElement('span');
+    valueEl.className = 'value-badge';
+    valueEl.textContent = valueText;
+
+    row.append(labelEl, valueEl);
+
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = String(min);
+    input.max = String(max);
+    input.step = String(step);
+    input.value = String(value);
+    input.setAttribute('aria-label', `${labelText} for Sphere ${sphereNumber}`);
+    input.addEventListener('input', () => onInput(input, valueEl));
+
+    label.append(row, input);
+    return label;
+}
+
+function renderBallControls() {
+    if (!ui.ballControlsList || !ui.ballControlsSection || !ui.ballControlsCount) {
+        return;
+    }
+
+    ui.ballControlsCount.textContent = `${spheres.length} / ${MAX_SPHERES}`;
+    ui.ballControlsList.innerHTML = '';
+
+    if (spheres.length === 0) {
+        return;
+    }
+
+    for (let index = 0; index < spheres.length; index++) {
+        const sphere = spheres[index];
+        const card = document.createElement('article');
+        card.className = 'ball-control-card';
+
+        const header = document.createElement('div');
+        header.className = 'ball-control-header';
+
+        const colorDot = document.createElement('span');
+        colorDot.className = 'ball-color-dot';
+        colorDot.style.backgroundColor = toCssHexColor(SPHERE_COLORS[sphere.colorIndex % SPHERE_COLORS.length]);
+
+        const title = document.createElement('span');
+        title.className = 'ball-control-title';
+        title.textContent = `Sphere ${index + 1}`;
+
+        header.append(colorDot, title);
+        card.appendChild(header);
+
+        const sphereNumber = index + 1;
+
+        const massControl = createBallSliderControl({
+            sphereNumber,
+            labelText: 'Mass',
+            valueText: formatSphereMass(sphere.mass),
+            min: MIN_SPHERE_MASS,
+            max: MAX_SPHERE_MASS,
+            step: 0.1,
+            value: sphere.mass,
+            onInput: (inputEl, valueEl) => {
+                const nextValue = Number(inputEl.value);
+                if (!Number.isFinite(nextValue)) {
+                    return;
+                }
+                sphere.mass = clampSphereMass(nextValue);
+                valueEl.textContent = formatSphereMass(sphere.mass);
+                inputEl.value = sphere.mass.toFixed(1);
+            }
+        });
+
+        const restitutionControl = createBallSliderControl({
+            sphereNumber,
+            labelText: 'Coeff. of restitution',
+            valueText: formatSphereRestitution(sphere.restitution),
+            min: MIN_SPHERE_RESTITUTION,
+            max: MAX_SPHERE_RESTITUTION,
+            step: 0.01,
+            value: sphere.restitution,
+            onInput: (inputEl, valueEl) => {
+                const nextValue = Number(inputEl.value);
+                if (!Number.isFinite(nextValue)) {
+                    return;
+                }
+                sphere.restitution = clampSphereRestitution(nextValue);
+                valueEl.textContent = formatSphereRestitution(sphere.restitution);
+                inputEl.value = sphere.restitution.toFixed(2);
+            }
+        });
+
+        card.append(massControl, restitutionControl);
+        ui.ballControlsList.appendChild(card);
+    }
 }
 
 function updateMetrics() {
@@ -505,11 +641,14 @@ function createSphere(colorIndex) {
     group.add(mesh, wire);
 
     return {
+        colorIndex,
         group,
         material,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
         velocity: new THREE.Vector3(0, 0, 0),
+        mass: DEFAULT_SPHERE_MASS,
+        restitution: DEFAULT_SPHERE_RESTITUTION,
         contactCount: 0
     };
 }
@@ -536,6 +675,7 @@ function addSphere() {
 
     scene.add(sphere.group);
     spheres.push(sphere);
+    renderBallControls();
     updateAddBtnState();
 
     const count = spheres.length;
@@ -1356,6 +1496,7 @@ function applyTipForces(dt, profile) {
                 ? 1
                 : Math.max(minShellScale, 1 - ((distance - baseContactRadius) / radiusBoost));
             const contactScale = handInfluenceScale * shellScale * (isPalm ? PALM_FORCE_SCALE : 1);
+            const sphereMass = clampSphereMass(sphere.mass);
 
             const nxF = scratch.normal.x;
             const nyF = state.oneD ? 0 : scratch.normal.y;
@@ -1371,7 +1512,7 @@ function applyTipForces(dt, profile) {
                     0
                 );
                 const pushForce = (profile.spring * corePenetration) - (profile.damping * inwardSpeed);
-                let pushAccel = pushForce / state.mass;
+                let pushAccel = pushForce / sphereMass;
 
                 pushAccel = Math.min(pushAccel, MAX_PUSH_ACCEL);
 
@@ -1387,7 +1528,7 @@ function applyTipForces(dt, profile) {
             if (!activeContacts.has(contactKey) && handInfluenceScale >= 0.999) {
                 const minApproachSpeed = PUSH_MIN_APPROACH_SPEED * (isPalm ? PALM_MIN_APPROACH_SPEED_SCALE : 1);
                 if (relVelAlongNormal > minApproachSpeed) {
-                    let impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
+                    let impulse = (relVelAlongNormal * profile.velocityTransfer) / sphereMass;
                     if (corePenetration <= 0 && radiusBoost > 0) {
                         impulse *= SHELL_IMPULSE_BOOST;
                     }
@@ -1406,7 +1547,7 @@ function applyTipForces(dt, profile) {
                 const toTipX = tip.worldX - sphere.position.x;
                 const invDistance = 1 / distance;
                 const stickFactor = corePenetration / profile.contactRadius;
-                const stickAccel = profile.stickPull / state.mass;
+                const stickAccel = profile.stickPull / sphereMass;
                 sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * contactScale;
                 sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * contactScale;
                 if (!state.oneD) {
@@ -1461,7 +1602,7 @@ function constrainSphereToView(sphere, profile) {
 
     const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
     const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
-    const restitution = IDEAL_WALL_RESTITUTION;
+    const restitution = IDEAL_WALL_RESTITUTION * clampSphereRestitution(sphere.restitution);
 
     if (sphere.position.x > xLimit) {
         sphere.position.x = xLimit;
@@ -1550,8 +1691,8 @@ function resolveSphereCollisions(applyVelocity = true) {
             if (penetration <= 0 && !applyVelocity) {
                 continue;
             }
-            const invMassA = aPinned ? 0 : 1;
-            const invMassB = bPinned ? 0 : 1;
+            const invMassA = aPinned ? 0 : (1 / clampSphereMass(a.mass));
+            const invMassB = bPinned ? 0 : (1 / clampSphereMass(b.mass));
             const invMassSum = invMassA + invMassB;
             if (invMassSum <= 0) {
                 continue;
@@ -1580,7 +1721,11 @@ function resolveSphereCollisions(applyVelocity = true) {
                 continue;
             }
 
-            const impulse = (-(1 + IDEAL_SPHERE_RESTITUTION) * relVelN) / invMassSum;
+            const pairRestitution = Math.min(
+                clampSphereRestitution(a.restitution),
+                clampSphereRestitution(b.restitution)
+            );
+            const impulse = (-(1 + pairRestitution) * relVelN) / invMassSum;
             a.velocity.x -= impulse * nx * invMassA;
             b.velocity.x += impulse * nx * invMassB;
             if (!is1D) {
@@ -1779,6 +1924,7 @@ function removeSelectedSphere() {
             spheres.splice(idx, 1);
         }
         deselectSphere();
+        renderBallControls();
         updateAddBtnState();
     }
 }
@@ -1794,6 +1940,7 @@ function removeAllSpheres() {
         sphere.material.dispose();
     }
     spheres.length = 0;
+    renderBallControls();
     activeContacts.clear();
     tipHistory.clear();
     handGripStates.clear();
@@ -2117,14 +2264,6 @@ ui.airDragRange.addEventListener('input', () => {
     state.airDrag = Math.max(0, Math.min(1.0, nextValue));
     updateAirDragLabel();
 });
-ui.massRange.addEventListener('input', () => {
-    const nextValue = Number(ui.massRange.value);
-    if (!Number.isFinite(nextValue)) {
-        return;
-    }
-    state.mass = Math.max(0.2, Math.min(5.0, nextValue));
-    updateMassLabel();
-});
 
 window.addEventListener('resize', scheduleResizeStage);
 window.addEventListener('orientationchange', scheduleResizeStage);
@@ -2167,8 +2306,7 @@ ui.gravityRange.value = state.gravity.toFixed(2);
 updateGravityLabel();
 ui.airDragRange.value = state.airDrag.toFixed(2);
 updateAirDragLabel();
-ui.massRange.value = state.mass.toFixed(1);
-updateMassLabel();
+renderBallControls();
 updateStartButtonState();
 renderHudInfo();
 updateFullscreenUI();

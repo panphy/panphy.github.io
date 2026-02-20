@@ -6,7 +6,12 @@
  */
 
 const SPHERE_RADIUS = 0.18;
-const IDEAL_SPHERE_RESTITUTION = 1.0;
+const MIN_SPHERE_MASS = 0.2;
+const MAX_SPHERE_MASS = 5.0;
+const MIN_SPHERE_RESTITUTION = 0.0;
+const MAX_SPHERE_RESTITUTION = 1.0;
+const DEFAULT_SPHERE_MASS = 1.0;
+const DEFAULT_SPHERE_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
@@ -15,11 +20,29 @@ const DIAMETER = SPHERE_RADIUS * 2;
 const DEFAULT_DT = 1 / 60;
 const EPS = 1e-6;
 
-function makeSphere(x, vx, pinned = false) {
+function clampSphereMass(value) {
+    return Math.max(MIN_SPHERE_MASS, Math.min(MAX_SPHERE_MASS, value));
+}
+
+function clampSphereRestitution(value) {
+    return Math.max(MIN_SPHERE_RESTITUTION, Math.min(MAX_SPHERE_RESTITUTION, value));
+}
+
+function makeSphere(
+    x,
+    vx,
+    {
+        pinned = false,
+        mass = DEFAULT_SPHERE_MASS,
+        restitution = DEFAULT_SPHERE_RESTITUTION
+    } = {}
+) {
     return {
         position: { x },
         velocity: { x: vx },
-        pinned
+        pinned,
+        mass: clampSphereMass(mass),
+        restitution: clampSphereRestitution(restitution)
     };
 }
 
@@ -47,8 +70,8 @@ function resolveSphereCollisions1D(spheres, applyVelocity = true) {
                 continue;
             }
 
-            const invMassA = a.pinned ? 0 : 1;
-            const invMassB = b.pinned ? 0 : 1;
+            const invMassA = a.pinned ? 0 : (1 / clampSphereMass(a.mass));
+            const invMassB = b.pinned ? 0 : (1 / clampSphereMass(b.mass));
             const invMassSum = invMassA + invMassB;
             if (invMassSum <= 0) {
                 continue;
@@ -69,7 +92,11 @@ function resolveSphereCollisions1D(spheres, applyVelocity = true) {
                 continue;
             }
 
-            const impulse = (-(1 + IDEAL_SPHERE_RESTITUTION) * relVelN) / invMassSum;
+            const pairRestitution = Math.min(
+                clampSphereRestitution(a.restitution),
+                clampSphereRestitution(b.restitution)
+            );
+            const impulse = (-(1 + pairRestitution) * relVelN) / invMassSum;
             a.velocity.x -= impulse * nx * invMassA;
             b.velocity.x += impulse * nx * invMassB;
         }
@@ -121,6 +148,14 @@ function runFrames(spheres, frameCount, dt = DEFAULT_DT) {
     }
 }
 
+function expected1DCollision(m1, m2, u1, u2, restitution) {
+    const denom = m1 + m2;
+    return {
+        v1: ((m1 - (restitution * m2)) * u1 + ((1 + restitution) * m2 * u2)) / denom,
+        v2: ((m2 - (restitution * m1)) * u2 + ((1 + restitution) * m1 * u1)) / denom
+    };
+}
+
 const tests = [
     {
         name: 'near-contact approaching pair still gets elastic impulse',
@@ -149,6 +184,38 @@ const tests = [
 
             assertNear(spheres[0].velocity.x, -1, 1e-9, 'Left sphere velocity mismatch');
             assertNear(spheres[1].velocity.x, 1, 1e-9, 'Right sphere velocity mismatch');
+        }
+    },
+    {
+        name: 'unequal masses follow elastic 1D collision equations',
+        run() {
+            const startDist = DIAMETER + (0.5 * COLLISION_SEPARATION_EPSILON);
+            const spheres = [
+                makeSphere(0, 1, { mass: 1.0, restitution: 1.0 }),
+                makeSphere(startDist, 0, { mass: 2.0, restitution: 1.0 })
+            ];
+
+            resolveSphereCollisions1D(spheres, true);
+            const expected = expected1DCollision(1.0, 2.0, 1, 0, 1);
+
+            assertNear(spheres[0].velocity.x, expected.v1, 1e-9, 'Sphere 1 velocity mismatch');
+            assertNear(spheres[1].velocity.x, expected.v2, 1e-9, 'Sphere 2 velocity mismatch');
+        }
+    },
+    {
+        name: 'pair restitution uses lower sphere restitution value',
+        run() {
+            const startDist = DIAMETER + (0.5 * COLLISION_SEPARATION_EPSILON);
+            const spheres = [
+                makeSphere(0, 1, { mass: 1.0, restitution: 0.2 }),
+                makeSphere(startDist, 0, { mass: 1.0, restitution: 0.8 })
+            ];
+
+            resolveSphereCollisions1D(spheres, true);
+            const expected = expected1DCollision(1.0, 1.0, 1, 0, 0.2);
+
+            assertNear(spheres[0].velocity.x, expected.v1, 1e-9, 'Sphere 1 velocity mismatch');
+            assertNear(spheres[1].velocity.x, expected.v2, 1e-9, 'Sphere 2 velocity mismatch');
         }
     },
     {

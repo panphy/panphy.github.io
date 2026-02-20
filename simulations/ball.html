@@ -49,10 +49,7 @@
                     <span class="cp-label">Physics</span>
                     <details id="physicsDetails" class="physics-controls">
                         <summary>
-                            <span class="physics-summary-copy">
-                                <span>Physics Settings</span>
-                                <span class="physics-summary-note">Walls, 1D mode, sensitivity, gravity, air drag, and mass</span>
-                            </span>
+                            <span class="physics-summary-copy">Physics Settings</span>
                             <span class="summary-caret" aria-hidden="true">▼</span>
                         </summary>
                         <div class="physics-controls-inner">
@@ -94,16 +91,17 @@
                                     </span>
                                     <input id="airDragRange" type="range" min="0" max="1.0" step="0.01" value="0">
                                 </label>
-                                <label for="massRange" class="control-block">
-                                    <span class="control-label-row">
-                                        <span class="control-label">Mass</span>
-                                        <span id="massValue" class="value-badge">1.0 kg</span>
-                                    </span>
-                                    <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
-                                </label>
                             </div>
                         </div>
                     </details>
+                    <section id="ballControlsSection" class="ball-controls" aria-live="polite">
+                        <div class="ball-controls-head">
+                            <span class="cp-label">Ball Controls</span>
+                            <span id="ballControlsCount" class="value-badge">0 / 3</span>
+                        </div>
+                        <p class="control-help">Add a sphere to adjust its mass and coefficient of restitution.</p>
+                        <div id="ballControlsList" class="ball-controls-list"></div>
+                    </section>
                 </div>
             </div>
             <button id="fullscreenBtn" type="button" aria-label="Enter full screen"

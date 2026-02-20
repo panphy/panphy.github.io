@@ -247,14 +247,7 @@ body {
 }
 
 .physics-summary-copy {
-    display: grid;
-    gap: 2px;
-}
-
-.physics-summary-note {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 700;
 }
 
 .summary-caret {
@@ -281,15 +274,15 @@ body {
 
 .physics-controls-inner {
     display: grid;
-    gap: 10px;
-    padding: 0 12px 12px;
+    gap: 12px;
+    padding: 12px;
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);
 }
 
 .physics-toggle-row {
     display: flex;
     gap: 16px;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
 }
 
 .toggle-block {
@@ -361,6 +354,73 @@ body {
     gap: 10px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: end;
+}
+
+.ball-controls {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: rgba(15, 16, 20, 0.5);
+}
+
+[data-theme="light"] .ball-controls {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.ball-controls-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ball-controls-head .cp-label {
+    padding-right: 0;
+}
+
+.ball-controls .control-help {
+    margin: 0;
+}
+
+.ball-controls-list {
+    display: grid;
+    gap: 10px;
+}
+
+.ball-control-card {
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--panel-border) 90%, transparent);
+    background: rgba(20, 24, 32, 0.78);
+}
+
+[data-theme="light"] .ball-control-card {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.ball-control-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ball-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.ball-control-title {
+    color: var(--text-main);
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
 }
 
 button {
