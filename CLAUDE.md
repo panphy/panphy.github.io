@@ -28,7 +28,7 @@
 │
 ├── beta/                   # Unpublished WIP pages/assets (never SW-cached)
 │   ├── ar.html
-│   └── ar_assets/
+│   └── ball_assets/
 │
 ├── tools/                  # Educational data analysis tools
 │   ├── panphyplot.html     # Advanced plotting tool (entry point)
@@ -87,7 +87,7 @@ Not every HTML file in the repo is currently treated as a published page.
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
 - `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
 - **Current unlisted/legacy pages**:
-  - `beta/ar.html`
+  - `beta/ball.html`
   - `misc/gcse_phy/phy_flashcard.html`
   - `misc/gcse_phy/phy_flashcard_cs.html`
   - `misc/gcse_phy/phy_flashcard_ss.html`

@@ -51,7 +51,7 @@ Not every HTML file in the repo is currently part of the published navigation.
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
 - `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
 - **Current unlisted/legacy pages** include:
-  - `beta/ar.html`
+  - `beta/ball.html`
   - `misc/gcse_phy/phy_flashcard.html`
   - `misc/gcse_phy/phy_flashcard_cs.html`
   - `misc/gcse_phy/phy_flashcard_ss.html`
