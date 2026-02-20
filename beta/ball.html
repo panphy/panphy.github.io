@@ -1428,6 +1428,17 @@
         const GRIP_RELEASE_DEADZONE_SPEED = 0.12;
         const GRIP_RELEASE_SUPPRESSION_SECONDS = 0.30;
         const GRIP_RELEASE_RAMP_SECONDS = 0.24;
+        const PUSH_LOOKAHEAD_SECONDS = 0.05;
+        const PUSH_RADIUS_BOOST_MAX = SPHERE_RADIUS * 0.7;
+        const PUSH_SHELL_FORCE_SCALE = 0.32;
+        const PUSH_MIN_APPROACH_SPEED = 0.03;
+        const PALM_CONTACT_RADIUS_SCALE = 1.55;
+        const PALM_LOOKAHEAD_SCALE = 1.35;
+        const PALM_RADIUS_BOOST_SCALE = 1.4;
+        const PALM_SHELL_FORCE_SCALE_MIN = 0.55;
+        const PALM_FORCE_SCALE = 1.18;
+        const PALM_MIN_APPROACH_SPEED_SCALE = 0.55;
+        const PALM_IMPULSE_SCALE = 1.12;
         const FINGER_OPEN_RATIO = {
             4: 0.92,
             8: 1.02,
@@ -1806,6 +1817,7 @@
 
             for (let ti = 0; ti < state.trackedTips.length; ti++) {
                 const tip = state.trackedTips[ti];
+                const isPalm = tip.key.endsWith('-palm');
                 for (let si = 0; si < spheres.length; si++) {
                     const sphere = spheres[si];
                     if (frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
@@ -1818,8 +1830,18 @@
                         0
                     );
 
+                    const tipSpeed = Math.hypot(tip.velX, tip.velY);
+                    const baseLookaheadScale = state.interactionMode === 'sticky' ? 0.35 : 1.0;
+                    const lookaheadScale = baseLookaheadScale * (isPalm ? PALM_LOOKAHEAD_SCALE : 1);
+                    const baseContactRadius = profile.contactRadius * (isPalm ? PALM_CONTACT_RADIUS_SCALE : 1);
+                    const radiusBoost = Math.min(
+                        PUSH_RADIUS_BOOST_MAX * lookaheadScale * (isPalm ? PALM_RADIUS_BOOST_SCALE : 1),
+                        tipSpeed * PUSH_LOOKAHEAD_SECONDS * lookaheadScale
+                    );
+                    const effectiveContactRadius = baseContactRadius + radiusBoost;
+
                     const distance = scratch.normal.length();
-                    if (distance >= profile.contactRadius) {
+                    if (distance >= effectiveContactRadius) {
                         continue;
                     }
 
@@ -1839,47 +1861,65 @@
                         scratch.normal.multiplyScalar(1 / distance);
                     }
 
-                    const penetration = profile.contactRadius - distance;
+                    const corePenetration = baseContactRadius - distance;
+                    const minShellScale = isPalm
+                        ? Math.max(PUSH_SHELL_FORCE_SCALE, PALM_SHELL_FORCE_SCALE_MIN)
+                        : PUSH_SHELL_FORCE_SCALE;
+                    const shellScale = (corePenetration >= 0 || radiusBoost < 0.000001)
+                        ? 1
+                        : Math.max(minShellScale, 1 - ((distance - baseContactRadius) / radiusBoost));
+                    const contactScale = handInfluenceScale * shellScale * (isPalm ? PALM_FORCE_SCALE : 1);
 
-                    // Spring-damper: pushes sphere away from tip, damps inward sphere motion
-                    const inwardSpeed = Math.min(
-                        (sphere.velocity.x * scratch.normal.x) + (sphere.velocity.y * scratch.normal.y),
-                        0
-                    );
-                    const pushForce = (profile.spring * penetration) - (profile.damping * inwardSpeed);
-                    let pushAccel = pushForce / state.mass;
+                    const relVelAlongNormal =
+                        (tip.velX - sphere.velocity.x) * scratch.normal.x +
+                        (tip.velY - sphere.velocity.y) * scratch.normal.y;
 
-                    // Cap extreme forces
-                    pushAccel = Math.min(pushAccel, 50.0);
+                    if (corePenetration > 0) {
+                        // Spring-damper: pushes sphere away from tip, damps inward sphere motion
+                        const inwardSpeed = Math.min(
+                            (sphere.velocity.x * scratch.normal.x) + (sphere.velocity.y * scratch.normal.y),
+                            0
+                        );
+                        const pushForce = (profile.spring * corePenetration) - (profile.damping * inwardSpeed);
+                        let pushAccel = pushForce / state.mass;
 
-                    sphere.position.x += scratch.normal.x * penetration * profile.correction * handInfluenceScale;
-                    sphere.position.y += scratch.normal.y * penetration * profile.correction * handInfluenceScale;
-                    sphere.velocity.x += scratch.normal.x * pushAccel * dt * handInfluenceScale;
-                    sphere.velocity.y += scratch.normal.y * pushAccel * dt * handInfluenceScale;
+                        // Cap extreme forces
+                        pushAccel = Math.min(pushAccel, 50.0);
+
+                        sphere.position.x += scratch.normal.x * corePenetration * profile.correction * contactScale;
+                        sphere.position.y += scratch.normal.y * corePenetration * profile.correction * contactScale;
+                        sphere.velocity.x += scratch.normal.x * pushAccel * dt * contactScale;
+                        sphere.velocity.y += scratch.normal.y * pushAccel * dt * contactScale;
+                    }
 
                     // First-contact velocity impulse
                     if (!activeContacts.has(contactKey) && handInfluenceScale >= 0.999) {
-                        const relVelAlongNormal =
-                            (tip.velX - sphere.velocity.x) * scratch.normal.x +
-                            (tip.velY - sphere.velocity.y) * scratch.normal.y;
-                        if (relVelAlongNormal > 0.05) {
+                        const minApproachSpeed = PUSH_MIN_APPROACH_SPEED * (isPalm ? PALM_MIN_APPROACH_SPEED_SCALE : 1);
+                        if (relVelAlongNormal > minApproachSpeed) {
                             let impulse = (relVelAlongNormal * profile.velocityTransfer) / state.mass;
+                            if (corePenetration <= 0 && radiusBoost > 0) {
+                                // Slightly boost shell contacts so quick flicks still transfer momentum.
+                                impulse *= 1.15;
+                            }
+                            if (isPalm) {
+                                impulse *= PALM_IMPULSE_SCALE;
+                            }
                             impulse = Math.min(impulse, 25.0); // Cap extreme impulses
-                            sphere.velocity.x += scratch.normal.x * impulse;
-                            sphere.velocity.y += scratch.normal.y * impulse;
+                            sphere.velocity.x += scratch.normal.x * impulse * contactScale;
+                            sphere.velocity.y += scratch.normal.y * impulse * contactScale;
                         }
                     }
 
-                    if (profile.stickPull > 0 && distance > 0.000001) {
+                    if (!isPalm && profile.stickPull > 0 && corePenetration > 0 && distance > 0.000001) {
                         const toTipX = tip.worldX - sphere.position.x;
                         const toTipY = tip.worldY - sphere.position.y;
                         const invDistance = 1 / distance;
-                        const stickFactor = penetration / profile.contactRadius;
+                        const stickFactor = corePenetration / profile.contactRadius;
                         const stickAccel = profile.stickPull / state.mass;
-                        sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * handInfluenceScale;
-                        sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * handInfluenceScale;
-                        sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * handInfluenceScale;
-                        sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * handInfluenceScale;
+                        sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * contactScale;
+                        sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * contactScale;
+                        sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * contactScale;
+                        sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * contactScale;
                     }
                 }
             }
