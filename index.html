@@ -375,8 +375,10 @@
             display: inline-flex;
             align-items: center;
             gap: 0.28rem;
-            align-self: flex-end;
-            margin-bottom: 0.7rem;
+            position: absolute;
+            top: 0.85rem;
+            right: 0.85rem;
+            z-index: 2;
             padding: 0.26rem 0.45rem;
             border-radius: 999px;
             border: 1px solid var(--nav-border);
@@ -878,10 +880,9 @@
 
                 const cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
                 const summary = updateOfflineCardPills(cacheMap);
-                const progressText = `${summary.readyApps}/${summary.totalApps}`;
 
                 if (summary.readyApps === summary.totalApps) {
-                    setOfflineStatus('ready', `Offline apps ready (${progressText})`);
+                    setOfflineStatus('ready', 'Offline ready');
                     if (offlineReadyPollId) {
                         clearInterval(offlineReadyPollId);
                         offlineReadyPollId = 0;
@@ -890,11 +891,11 @@
                 }
 
                 if (!navigator.onLine) {
-                    setOfflineStatus('warning', `Offline apps not ready (${progressText}). Go online once to finish caching.`);
+                    setOfflineStatus('warning', 'Offline apps not ready. Go online once to finish caching.');
                     return;
                 }
 
-                setOfflineStatus('checking', `Preparing offline apps (${progressText})...`);
+                setOfflineStatus('checking', 'Preparing offline apps...');
             } catch (error) {
                 setOfflineStatus('warning', 'Offline status check paused. Refresh to retry.');
             } finally {
