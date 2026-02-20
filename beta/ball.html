@@ -1214,6 +1214,7 @@
             activeContacts.clear();
             tipHistory.clear();
             handGripStates.clear();
+            releaseImmunityFrames.clear();
             updateAddBtnState();
             setStatus(`Motion reset. Spheres restored to their starting positions.`);
         }
@@ -1410,6 +1411,7 @@
 
         const newContacts = new Set();
         const frameGrippedSpheres = new Set();
+        const releaseImmunityFrames = new Map();
         const GRIP_CAPTURE_RADIUS = SPHERE_RADIUS * 2.45;
         const GRIP_FINGER_PROXIMITY_RADIUS = SPHERE_RADIUS * 1.95;
         const GRIP_MIN_FINGERS_NEAR = 2;
@@ -1422,6 +1424,9 @@
         const GRIP_PRECAPTURE_MIN_FINGERS_NEAR = 2;
         const GRIP_MAX_HOLD_SPEED = 5.5;
         const GRIP_MEMORY_DAMPING = 0.9;
+        const GRIP_CARRY_VELOCITY_ALPHA = 0.4;
+        const GRIP_RELEASE_DEADZONE_SPEED = 0.12;
+        const GRIP_RELEASE_IMMUNITY_FRAMES = 3;
         const FINGER_OPEN_RATIO = {
             4: 0.92,
             8: 1.02,
@@ -1448,24 +1453,82 @@
                     lastGripX: 0,
                     lastGripY: 0,
                     lastVelX: 0,
-                    lastVelY: 0
+                    lastVelY: 0,
+                    carryVelX: 0,
+                    carryVelY: 0
                 };
                 handGripStates.set(handKey, gripState);
             }
             return gripState;
         }
 
+        function clearGripState(gripState) {
+            if (!gripState) {
+                return;
+            }
+            gripState.sphere = null;
+            gripState.closedFrames = 0;
+            gripState.openFrames = 0;
+            gripState.lostFrames = 0;
+            gripState.lastVelX = 0;
+            gripState.lastVelY = 0;
+            gripState.carryVelX = 0;
+            gripState.carryVelY = 0;
+        }
+
+        function updateReleaseImmunityFrames() {
+            for (const [sphere, frames] of releaseImmunityFrames) {
+                if (!spheres.includes(sphere)) {
+                    releaseImmunityFrames.delete(sphere);
+                    continue;
+                }
+                const next = frames - 1;
+                if (next <= 0) {
+                    releaseImmunityFrames.delete(sphere);
+                } else {
+                    releaseImmunityFrames.set(sphere, next);
+                }
+            }
+        }
+
+        function applyReleaseVelocity(gripState) {
+            const sphere = gripState && gripState.sphere;
+            if (!sphere) {
+                return;
+            }
+            let releaseVelX = gripState.carryVelX;
+            let releaseVelY = gripState.carryVelY;
+            const releaseSpeed = Math.hypot(releaseVelX, releaseVelY);
+            if (releaseSpeed < GRIP_RELEASE_DEADZONE_SPEED) {
+                releaseVelX = 0;
+                releaseVelY = 0;
+            } else if (releaseSpeed > GRIP_MAX_HOLD_SPEED) {
+                const scale = GRIP_MAX_HOLD_SPEED / releaseSpeed;
+                releaseVelX *= scale;
+                releaseVelY *= scale;
+            }
+            sphere.velocity.x = releaseVelX;
+            sphere.velocity.y = releaseVelY;
+            releaseImmunityFrames.set(sphere, GRIP_RELEASE_IMMUNITY_FRAMES);
+        }
+
+        function releaseGripState(gripState, applyVelocity = true) {
+            if (!gripState) {
+                return;
+            }
+            if (applyVelocity && gripState.sphere) {
+                applyReleaseVelocity(gripState);
+            }
+            clearGripState(gripState);
+        }
+
         function clearGripReferencesToSphere(targetSphere) {
             for (const gripState of handGripStates.values()) {
                 if (gripState.sphere === targetSphere) {
-                    gripState.sphere = null;
-                    gripState.closedFrames = 0;
-                    gripState.openFrames = 0;
-                    gripState.lostFrames = 0;
-                    gripState.lastVelX = 0;
-                    gripState.lastVelY = 0;
+                    clearGripState(gripState);
                 }
             }
+            releaseImmunityFrames.delete(targetSphere);
         }
 
         function analyzeHandGripPose(hand) {
@@ -1552,13 +1615,15 @@
             }
 
             if (gripState) {
+                gripState.carryVelX = (gripState.carryVelX * (1 - GRIP_CARRY_VELOCITY_ALPHA)) + (velX * GRIP_CARRY_VELOCITY_ALPHA);
+                gripState.carryVelY = (gripState.carryVelY * (1 - GRIP_CARRY_VELOCITY_ALPHA)) + (velY * GRIP_CARRY_VELOCITY_ALPHA);
                 gripState.lostFrames = 0;
                 gripState.lastGripX = scratch.gripWorld.x;
                 gripState.lastGripY = scratch.gripWorld.y;
-                gripState.lastVelX = velX;
-                gripState.lastVelY = velY;
+                gripState.lastVelX = gripState.carryVelX;
+                gripState.lastVelY = gripState.carryVelY;
             }
-            return holdSphereAtWorld(sphere, scratch.gripWorld.x, scratch.gripWorld.y, velX, velY);
+            return holdSphereAtWorld(sphere, scratch.gripWorld.x, scratch.gripWorld.y, gripState ? gripState.carryVelX : velX, gripState ? gripState.carryVelY : velY);
         }
 
         function holdSphereFromMemory(gripState, dt) {
@@ -1571,6 +1636,8 @@
             gripState.lastGripY = predictedY;
             gripState.lastVelX *= GRIP_MEMORY_DAMPING;
             gripState.lastVelY *= GRIP_MEMORY_DAMPING;
+            gripState.carryVelX = gripState.lastVelX;
+            gripState.carryVelY = gripState.lastVelY;
             return holdSphereAtWorld(
                 gripState.sphere,
                 predictedX,
@@ -1582,8 +1649,10 @@
 
         function applyTipForces(dt, profile) {
             frameGrippedSpheres.clear();
+            updateReleaseImmunityFrames();
             if (spheres.length === 0) {
                 handGripStates.clear();
+                releaseImmunityFrames.clear();
                 return 0;
             }
 
@@ -1610,11 +1679,7 @@
                         if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
                             frameGrippedSpheres.add(gripState.sphere);
                         } else {
-                            gripState.sphere = null;
-                            gripState.closedFrames = 0;
-                            gripState.openFrames = 0;
-                            gripState.lastVelX = 0;
-                            gripState.lastVelY = 0;
+                            releaseGripState(gripState);
                         }
                     }
                     continue;
@@ -1624,11 +1689,7 @@
                     gripState.sphere &&
                     (gripState.sphere === state.selectedSphere || !spheres.includes(gripState.sphere) || frameGrippedSpheres.has(gripState.sphere))
                 ) {
-                    gripState.sphere = null;
-                    gripState.closedFrames = 0;
-                    gripState.openFrames = 0;
-                    gripState.lastVelX = 0;
-                    gripState.lastVelY = 0;
+                    clearGripState(gripState);
                 }
 
                 if (gripState.sphere) {
@@ -1639,11 +1700,7 @@
                     }
 
                     if (gripState.openFrames >= GRIP_RELEASE_FRAMES) {
-                        gripState.sphere = null;
-                        gripState.closedFrames = 0;
-                        gripState.openFrames = 0;
-                        gripState.lastVelX = 0;
-                        gripState.lastVelY = 0;
+                        releaseGripState(gripState);
                     } else if (holdSphereWithHand(gripState.sphere, handIndex, gripPose.palmLandmark, gripState)) {
                         frameGrippedSpheres.add(gripState.sphere);
                     }
@@ -1705,11 +1762,7 @@
                     if (holdSphereWithHand(closestSphere, handIndex, gripPose.palmLandmark, gripState)) {
                         frameGrippedSpheres.add(closestSphere);
                     } else {
-                        gripState.sphere = null;
-                        gripState.closedFrames = 0;
-                        gripState.openFrames = 0;
-                        gripState.lastVelX = 0;
-                        gripState.lastVelY = 0;
+                        clearGripState(gripState);
                     }
                 } else {
                     gripState.closedFrames = 0;
@@ -1725,6 +1778,7 @@
                             frameGrippedSpheres.add(gripState.sphere);
                             continue;
                         }
+                        releaseGripState(gripState);
                     }
                     handGripStates.delete(handKey);
                 }
@@ -1741,7 +1795,7 @@
                 const tip = state.trackedTips[ti];
                 for (let si = 0; si < spheres.length; si++) {
                     const sphere = spheres[si];
-                    if (frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
+                    if (frameGrippedSpheres.has(sphere) || releaseImmunityFrames.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
                         continue;
                     }
 
