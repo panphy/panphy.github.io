@@ -912,6 +912,7 @@
             rayPoint: new THREE.Vector3(),
             rayDir: new THREE.Vector3(),
             tipWorld: new THREE.Vector3(),
+            gripWorld: new THREE.Vector3(),
             normal: new THREE.Vector3()
         };
 
@@ -920,6 +921,7 @@
         // Tracks which tip keys were in contact last frame (for first-contact impulse)
         // Keyed by "${tipKey}:${sphereIndex}" to track per-sphere contacts
         const activeContacts = new Set();
+        const handGripStates = new Map();
 
         function setStatus(message, isError = false) {
             ui.status.textContent = message;
@@ -1066,6 +1068,7 @@
             spheres.length = 0;
             activeContacts.clear();
             tipHistory.clear();
+            handGripStates.clear();
             updateAddBtnState();
             setStatus(`All spheres removed. Press "Add Sphere" to start.`);
         }
@@ -1139,6 +1142,32 @@
             tips.push(tipObj);
         }
 
+        function getPalmLandmark(hand) {
+            let palmX = 0;
+            let palmY = 0;
+            let palmZ = 0;
+            let palmCount = 0;
+            for (let i = 0; i < PALM_LANDMARKS.length; i++) {
+                const lmIndex = PALM_LANDMARKS[i];
+                const lm = hand[lmIndex];
+                if (!lm) {
+                    continue;
+                }
+                palmX += lm.x;
+                palmY += lm.y;
+                palmZ += lm.z || 0;
+                palmCount += 1;
+            }
+            if (palmCount < 3) {
+                return null;
+            }
+            return {
+                x: palmX / palmCount,
+                y: palmY / palmCount,
+                z: palmZ / palmCount
+            };
+        }
+
         function collectTrackedTips() {
             const now = performance.now();
             const tips = [];
@@ -1159,27 +1188,8 @@
                     trackPoint(key, landmark, now, tips);
                 }
 
-                // Palm center (average of wrist + MCP joints)
-                let palmX = 0;
-                let palmY = 0;
-                let palmZ = 0;
-                let palmCount = 0;
-                for (let i = 0; i < PALM_LANDMARKS.length; i++) {
-                    const lmIndex = PALM_LANDMARKS[i];
-                    const lm = hand[lmIndex];
-                    if (lm) {
-                        palmX += lm.x;
-                        palmY += lm.y;
-                        palmZ += lm.z || 0;
-                        palmCount++;
-                    }
-                }
-                if (palmCount >= 3) {
-                    const palmLandmark = {
-                        x: palmX / palmCount,
-                        y: palmY / palmCount,
-                        z: palmZ / palmCount
-                    };
+                const palmLandmark = getPalmLandmark(hand);
+                if (palmLandmark) {
                     const key = `${handIndex}-palm`;
                     seenKeys.add(key);
                     trackPoint(key, palmLandmark, now, tips);
@@ -1254,68 +1264,240 @@
         }
 
         const newContacts = new Set();
-        const PINCH_THRESHOLD = 0.05;
+        const GRIP_CAPTURE_RADIUS = SPHERE_RADIUS * 2.45;
+        const GRIP_FINGER_PROXIMITY_RADIUS = SPHERE_RADIUS * 1.95;
+        const GRIP_MIN_FINGERS_NEAR = 3;
+        const GRIP_CAPTURE_FRAMES = 2;
+        const GRIP_RELEASE_FRAMES = 3;
+        const FINGER_OPEN_RATIO = {
+            4: 0.92,
+            8: 1.02,
+            12: 1.04,
+            16: 1.0,
+            20: 0.95
+        };
+        const FINGER_CLOSED_RATIO = {
+            4: 0.72,
+            8: 0.82,
+            12: 0.84,
+            16: 0.81,
+            20: 0.78
+        };
+
+        function getOrCreateHandGripState(handKey) {
+            let gripState = handGripStates.get(handKey);
+            if (!gripState) {
+                gripState = {
+                    sphere: null,
+                    closedFrames: 0,
+                    openFrames: 0
+                };
+                handGripStates.set(handKey, gripState);
+            }
+            return gripState;
+        }
+
+        function clearGripReferencesToSphere(targetSphere) {
+            for (const gripState of handGripStates.values()) {
+                if (gripState.sphere === targetSphere) {
+                    gripState.sphere = null;
+                    gripState.closedFrames = 0;
+                    gripState.openFrames = 0;
+                }
+            }
+        }
+
+        function analyzeHandGripPose(hand) {
+            const palmLandmark = getPalmLandmark(hand);
+            const indexMcp = hand[5];
+            const pinkyMcp = hand[17];
+            if (!palmLandmark || !indexMcp || !pinkyMcp) {
+                return null;
+            }
+
+            const palmScale = Math.hypot(indexMcp.x - pinkyMcp.x, indexMcp.y - pinkyMcp.y);
+            if (palmScale < 0.01) {
+                return null;
+            }
+
+            let openCount = 0;
+            let closedCount = 0;
+            for (let i = 0; i < FINGERTIP_POINTS.length; i++) {
+                const tipIndex = FINGERTIP_POINTS[i];
+                const tip = hand[tipIndex];
+                if (!tip) {
+                    return null;
+                }
+                const distToPalm = Math.hypot(tip.x - palmLandmark.x, tip.y - palmLandmark.y);
+                if (distToPalm >= palmScale * FINGER_OPEN_RATIO[tipIndex]) {
+                    openCount += 1;
+                }
+                if (distToPalm <= palmScale * FINGER_CLOSED_RATIO[tipIndex]) {
+                    closedCount += 1;
+                }
+            }
+
+            return {
+                palmLandmark,
+                isAllOpen: openCount === FINGERTIP_POINTS.length,
+                isAllClosed: closedCount === FINGERTIP_POINTS.length
+            };
+        }
+
+        function countFingertipsNearSphere(hand, sphere, radius) {
+            let nearCount = 0;
+            for (let i = 0; i < FINGERTIP_POINTS.length; i++) {
+                const tipIndex = FINGERTIP_POINTS[i];
+                const tip = hand[tipIndex];
+                if (!tip || !landmarkToPlane(tip, scratch.tipWorld)) {
+                    continue;
+                }
+                const dist = Math.hypot(
+                    sphere.position.x - scratch.tipWorld.x,
+                    sphere.position.y - scratch.tipWorld.y
+                );
+                if (dist <= radius) {
+                    nearCount += 1;
+                }
+            }
+            return nearCount;
+        }
+
+        function holdSphereWithHand(sphere, handIndex, palmLandmark) {
+            if (!landmarkToPlane(palmLandmark, scratch.gripWorld)) {
+                return false;
+            }
+            sphere.position.x = scratch.gripWorld.x;
+            sphere.position.y = scratch.gripWorld.y;
+
+            const palmTipData = tipHistory.get(`${handIndex}-palm`);
+            if (palmTipData) {
+                sphere.velocity.x = palmTipData.velX;
+                sphere.velocity.y = palmTipData.velY;
+            } else {
+                sphere.velocity.x = 0;
+                sphere.velocity.y = 0;
+            }
+            sphere.contactCount += 1;
+            return true;
+        }
 
         function applyTipForces(dt, profile) {
             if (spheres.length === 0) {
+                handGripStates.clear();
                 return 0;
             }
 
             let totalContacts = 0;
             newContacts.clear();
 
-            // Detect Pinches
-            const pinchedSpheres = new Set();
+            const grippedSpheres = new Set();
+            const visibleHands = new Set();
             for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
+                const handKey = String(handIndex);
+                visibleHands.add(handKey);
                 const hand = state.lastHands[handIndex];
-                const thumb = hand[4];
-                const index = hand[8];
-                if (!thumb || !index) continue;
-
-                const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
-                if (pinchDist < PINCH_THRESHOLD) {
-                    if (landmarkToPlane(index, scratch.tipWorld)) {
-                        const indexWorldX = scratch.tipWorld.x;
-                        const indexWorldY = scratch.tipWorld.y;
-
-                        // Find closest sphere
-                        let closestSphere = null;
-                        let minDt = profile.contactRadius * 1.5;
-                        for (let si = 0; si < spheres.length; si++) {
-                            const sphere = spheres[si];
-                            const dist = Math.hypot(sphere.position.x - indexWorldX, sphere.position.y - indexWorldY);
-                            if (dist < minDt) {
-                                minDt = dist;
-                                closestSphere = sphere;
-                            }
-                        }
-
-                        if (closestSphere) {
-                            pinchedSpheres.add(closestSphere);
-                            // Lock to finger position
-                            closestSphere.position.x = indexWorldX;
-                            closestSphere.position.y = indexWorldY;
-
-                            // Estimate velocity for throw
-                            const tipKey = `${handIndex}-8`;
-                            const tipData = tipHistory.get(tipKey);
-                            if (tipData) {
-                                closestSphere.velocity.x = tipData.velX;
-                                closestSphere.velocity.y = tipData.velY;
-                            } else {
-                                closestSphere.velocity.x = 0;
-                                closestSphere.velocity.y = 0;
-                            }
-                            closestSphere.contactCount += 1;
+                const gripPose = analyzeHandGripPose(hand);
+                if (!gripPose) {
+                    const gripState = handGripStates.get(handKey);
+                    const fallbackPalm = getPalmLandmark(hand);
+                    if (gripState && gripState.sphere && fallbackPalm) {
+                        if (holdSphereWithHand(gripState.sphere, handIndex, fallbackPalm)) {
+                            grippedSpheres.add(gripState.sphere);
                         }
                     }
+                    continue;
+                }
+
+                const gripState = getOrCreateHandGripState(handKey);
+                if (
+                    gripState.sphere &&
+                    (gripState.sphere === state.selectedSphere || !spheres.includes(gripState.sphere))
+                ) {
+                    gripState.sphere = null;
+                    gripState.closedFrames = 0;
+                    gripState.openFrames = 0;
+                }
+
+                if (gripState.sphere) {
+                    if (gripPose.isAllOpen) {
+                        gripState.openFrames += 1;
+                    } else {
+                        gripState.openFrames = 0;
+                    }
+
+                    if (gripState.openFrames >= GRIP_RELEASE_FRAMES) {
+                        gripState.sphere = null;
+                        gripState.closedFrames = 0;
+                        gripState.openFrames = 0;
+                    } else if (holdSphereWithHand(gripState.sphere, handIndex, gripPose.palmLandmark)) {
+                        grippedSpheres.add(gripState.sphere);
+                    }
+                    continue;
+                }
+
+                if (!gripPose.isAllClosed) {
+                    gripState.closedFrames = 0;
+                    continue;
+                }
+
+                gripState.closedFrames += 1;
+                if (gripState.closedFrames < GRIP_CAPTURE_FRAMES) {
+                    continue;
+                }
+
+                if (!landmarkToPlane(gripPose.palmLandmark, scratch.gripWorld)) {
+                    continue;
+                }
+
+                let closestSphere = null;
+                let minDist = GRIP_CAPTURE_RADIUS;
+                for (let si = 0; si < spheres.length; si++) {
+                    const sphere = spheres[si];
+                    if (sphere === state.selectedSphere || grippedSpheres.has(sphere)) {
+                        continue;
+                    }
+                    const dist = Math.hypot(
+                        sphere.position.x - scratch.gripWorld.x,
+                        sphere.position.y - scratch.gripWorld.y
+                    );
+                    if (dist >= minDist) {
+                        continue;
+                    }
+
+                    const fingertipsNear = countFingertipsNearSphere(hand, sphere, GRIP_FINGER_PROXIMITY_RADIUS);
+                    if (fingertipsNear >= GRIP_MIN_FINGERS_NEAR) {
+                        minDist = dist;
+                        closestSphere = sphere;
+                    }
+                }
+
+                if (closestSphere) {
+                    gripState.sphere = closestSphere;
+                    gripState.closedFrames = 0;
+                    gripState.openFrames = 0;
+                    if (holdSphereWithHand(closestSphere, handIndex, gripPose.palmLandmark)) {
+                        grippedSpheres.add(closestSphere);
+                    } else {
+                        gripState.sphere = null;
+                        gripState.closedFrames = 0;
+                        gripState.openFrames = 0;
+                    }
+                } else {
+                    gripState.closedFrames = 0;
                 }
             }
 
+            // Drop grip states for hands that are no longer tracked
+            for (const handKey of handGripStates.keys()) {
+                if (!visibleHands.has(handKey)) {
+                    handGripStates.delete(handKey);
+                }
+            }
 
-            // Reset contact counts for unpinched spheres
+            // Reset contact counts for ungripped spheres
             for (let i = 0; i < spheres.length; i++) {
-                if (!pinchedSpheres.has(spheres[i])) {
+                if (!grippedSpheres.has(spheres[i])) {
                     spheres[i].contactCount = 0;
                 }
             }
@@ -1324,7 +1506,9 @@
                 const tip = state.trackedTips[ti];
                 for (let si = 0; si < spheres.length; si++) {
                     const sphere = spheres[si];
-                    if (pinchedSpheres.has(sphere)) continue;
+                    if (grippedSpheres.has(sphere) || sphere === state.selectedSphere) {
+                        continue;
+                    }
 
                     scratch.normal.set(
                         sphere.position.x - tip.worldX,
@@ -1621,6 +1805,7 @@
 
         function removeSelectedSphere() {
             if (state.selectedSphere) {
+                clearGripReferencesToSphere(state.selectedSphere);
                 scene.remove(state.selectedSphere.group);
                 state.selectedSphere.material.dispose();
                 const idx = spheres.indexOf(state.selectedSphere);
