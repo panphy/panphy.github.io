@@ -341,6 +341,12 @@ function updateAddBtnState() {
     ui.addBtn.disabled = !state.running || spheres.length >= MAX_SPHERES;
 }
 
+function updateStartButtonState() {
+    const isRunning = state.running;
+    ui.startBtn.textContent = isRunning ? 'Stop Camera' : 'Start Camera';
+    ui.startBtn.setAttribute('aria-label', isRunning ? 'Stop camera' : 'Start camera');
+}
+
 function resizeStage() {
     const rect = ui.stage.getBoundingClientRect();
     if (!rect.width || !rect.height) {
@@ -1471,6 +1477,24 @@ function removeSelectedSphere() {
     }
 }
 
+function removeAllSpheres() {
+    if (spheres.length === 0) {
+        return;
+    }
+    deselectSphere();
+    for (const sphere of spheres) {
+        clearGripReferencesToSphere(sphere);
+        scene.remove(sphere.group);
+        sphere.material.dispose();
+    }
+    spheres.length = 0;
+    activeContacts.clear();
+    tipHistory.clear();
+    handGripStates.clear();
+    releaseHandSuppression.clear();
+    updateAddBtnState();
+}
+
 async function createHandLandmarker() {
     await ensureHandTrackingDeps();
     const vision = await filesetResolverCtor.forVisionTasks(
@@ -1625,6 +1649,7 @@ async function startCameraAndTracking() {
             state.stream = null;
         }
         ui.startBtn.disabled = false;
+        updateStartButtonState();
         const name = error && error.name ? error.name : 'Error';
         const message = error && error.message ? error.message : String(error);
         console.error('Camera/tracking startup failed:', error);
@@ -1638,6 +1663,7 @@ async function startCameraAndTracking() {
         state.handLandmarker = await createHandLandmarker();
     } catch (error) {
         ui.startBtn.disabled = false;
+        updateStartButtonState();
         const name = error && error.name ? error.name : 'Error';
         const message = error && error.message ? error.message : String(error);
         console.error('Hand tracker load failed:', error);
@@ -1653,11 +1679,61 @@ async function startCameraAndTracking() {
     }
     updateAddBtnState();
     ui.resetBtn.disabled = false;
+    ui.startBtn.disabled = false;
+    updateStartButtonState();
     setStatus('Ready.');
     requestAnimationFrame(step);
 }
 
-ui.startBtn.addEventListener('click', startCameraAndTracking);
+function stopCameraAndTracking() {
+    state.running = false;
+    state.lastFrameTime = 0;
+    state.fps = 0;
+    state.lastVideoTime = -1;
+    state.lastHands = [];
+    state.handsCount = 0;
+    state.tipCount = 0;
+    state.contactsCount = 0;
+    state.trackedTips = [];
+    state.nextTrackingErrorReportAt = 0;
+
+    if (state.handLandmarker && typeof state.handLandmarker.close === 'function') {
+        try {
+            state.handLandmarker.close();
+        } catch (error) {
+            console.warn('Could not close hand landmarker cleanly:', error);
+        }
+    }
+    state.handLandmarker = null;
+
+    if (state.stream) {
+        state.stream.getTracks().forEach((track) => track.stop());
+        state.stream = null;
+    }
+    ui.video.srcObject = null;
+    ui.cameraSelect.innerHTML = '<option value="">Default</option>';
+    ui.cameraSelect.disabled = true;
+
+    removeAllSpheres();
+    ui.resetBtn.disabled = true;
+
+    if (tipCtx) {
+        tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
+    }
+    renderer.render(scene, camera3d);
+    updateStartButtonState();
+    setStatus('Camera stopped.');
+}
+
+async function handleStartStopClick() {
+    if (state.running) {
+        stopCameraAndTracking();
+        return;
+    }
+    await startCameraAndTracking();
+}
+
+ui.startBtn.addEventListener('click', handleStartStopClick);
 ui.addBtn.addEventListener('click', addSphere);
 ui.resetBtn.addEventListener('click', resetAll);
 ui.controlsToggle.addEventListener('click', openControls);
@@ -1749,6 +1825,7 @@ ui.airDragRange.value = state.airDrag.toFixed(2);
 updateAirDragLabel();
 ui.massRange.value = state.mass.toFixed(1);
 updateMassLabel();
+updateStartButtonState();
 renderHudInfo();
 updateFullscreenUI();
 resizeStage();
