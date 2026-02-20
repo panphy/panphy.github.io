@@ -1067,6 +1067,7 @@ const FINGER_CLOSED_RATIO = {
     16: 0.81,
     20: 0.78
 };
+const ONE_D_CONTACT_Y_TOLERANCE = SPHERE_RADIUS * 1.4;
 
 function getOrCreateHandGripState(handKey) {
     let gripState = handGripStates.get(handKey);
@@ -1167,6 +1168,15 @@ function clearGripReferencesToSphere(targetSphere) {
         }
     }
     releaseHandSuppression.delete(targetSphere);
+}
+
+function clearAllGripStates(applyVelocity = false) {
+    for (const gripState of handGripStates.values()) {
+        releaseGripState(gripState, applyVelocity);
+    }
+    handGripStates.clear();
+    frameGrippedSpheres.clear();
+    releaseHandSuppression.clear();
 }
 
 function analyzeHandGripPose(hand) {
@@ -1311,6 +1321,9 @@ function applyTipForces(dt, profile) {
         releaseHandSuppression.clear();
         return 0;
     }
+    if (state.oneD && handGripStates.size > 0) {
+        clearAllGripStates(false);
+    }
 
     let totalContacts = 0;
     newContacts.clear();
@@ -1321,9 +1334,12 @@ function applyTipForces(dt, profile) {
     for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
         const handKey = String(handIndex);
         visibleHands.add(handKey);
+        const hand = state.lastHands[handIndex];
+        if (state.oneD) {
+            continue;
+        }
         const gripState = getOrCreateHandGripState(handKey);
         gripState.lostFrames = 0;
-        const hand = state.lastHands[handIndex];
         const gripPose = analyzeHandGripPose(hand);
         if (!gripPose) {
             const fallbackPalm = getPalmLandmark(hand);
@@ -1466,6 +1482,9 @@ function applyTipForces(dt, profile) {
     for (let ti = 0; ti < state.trackedTips.length; ti++) {
         const tip = state.trackedTips[ti];
         const isPalm = tip.key.endsWith('-palm');
+        if (state.oneD && isPalm) {
+            continue;
+        }
         if (isPalm) {
             const separatorIndex = tip.key.indexOf('-');
             const tipHandKey = separatorIndex >= 0 ? tip.key.slice(0, separatorIndex) : tip.key;
@@ -1477,6 +1496,12 @@ function applyTipForces(dt, profile) {
             const sphere = spheres[si];
             if (frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
                 continue;
+            }
+            if (state.oneD) {
+                const laneOffsetY = Math.abs((sphere.position.y || 0) - tip.worldY);
+                if (laneOffsetY > ONE_D_CONTACT_Y_TOLERANCE) {
+                    continue;
+                }
             }
 
             scratch.normal.set(
@@ -2257,6 +2282,7 @@ ui.wallsToggle.addEventListener('change', () => {
 ui.oneDToggle.addEventListener('change', () => {
     state.oneD = ui.oneDToggle.checked;
     if (state.oneD) {
+        clearAllGripStates(false);
         for (const sphere of spheres) {
             sphere.position.y = 0;
             sphere.velocity.y = 0;
