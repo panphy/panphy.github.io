@@ -276,7 +276,7 @@ const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 5;
 const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 const ONE_D_CONTACT_POSITION_TOLERANCE = COLLISION_SEPARATION_EPSILON * 6;
-const ONE_D_CONTACT_VELOCITY_TOLERANCE = 0.0005;
+const ONE_D_RESIDUAL_CLOSING_SPEED_MAX = 0.03;
 const GRAVITY_SCALE = 9.81;
 const MIN_SPHERE_MASS = 0.2;
 const MAX_SPHERE_MASS = 5.0;
@@ -1808,7 +1808,7 @@ function stabilizeOneDWallPacking() {
     }
 }
 
-function enforceOneDNonCompressionVelocity() {
+function dampOneDResidualClosingVelocity() {
     if (!state.oneD || spheres.length < 2) {
         return;
     }
@@ -1839,11 +1839,11 @@ function enforceOneDNonCompressionVelocity() {
         }
 
         const relVel = right.velocity.x - left.velocity.x;
-        if (relVel >= -ONE_D_CONTACT_VELOCITY_TOLERANCE) {
+        if (relVel >= 0 || relVel < -ONE_D_RESIDUAL_CLOSING_SPEED_MAX) {
             continue;
         }
 
-        // Project away residual closing speed so contacts don't "re-stick" after depenetration.
+        // Remove only tiny residual numerical closing speed; keep real impacts intact.
         const impulse = (-relVel) / invMassSum;
         left.velocity.x -= impulse * invMassLeft;
         right.velocity.x += impulse * invMassRight;
@@ -2010,7 +2010,6 @@ function updatePhysics(dt, profile) {
         }
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
-            enforceOneDNonCompressionVelocity();
         }
 
         // Iterative velocity solver improves simultaneous-contact chains.
@@ -2024,7 +2023,7 @@ function updatePhysics(dt, profile) {
         }
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
-            enforceOneDNonCompressionVelocity();
+            dampOneDResidualClosingVelocity();
         }
     }
 
