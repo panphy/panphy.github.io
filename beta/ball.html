@@ -128,14 +128,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .intro-note {
-            margin: 0;
-            padding: 10px 12px;
-            color: var(--text-muted);
-            font-size: 0.86rem;
-            line-height: 1.25;
-        }
-
         #controlsToggle {
             position: absolute;
             bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -517,16 +509,6 @@
             color: var(--danger);
         }
 
-        .hint {
-            margin: 0;
-            padding: 8px 10px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            border: 1px solid var(--panel-border);
-            border-radius: 10px;
-            background: rgba(30, 33, 41, 0.62);
-        }
-
         .control-help {
             margin: 0;
             color: var(--text-muted);
@@ -607,8 +589,6 @@
     </div>
 
     <main class="app">
-        <p class="intro-note panel">Open Controls to start camera, add spheres, and tune physics settings.</p>
-
         <section id="stage" class="stage panel">
             <button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
             <div class="controls-panel" id="controlsPanel" aria-label="Simulation controls">
@@ -639,22 +619,11 @@
                         <summary>
                             <span class="physics-summary-copy">
                                 <span>Physics Settings</span>
-                                <span class="physics-summary-note">Interaction, boundary, sensitivity, gravity, air drag, and
-                                    mass</span>
+                                <span class="physics-summary-note">Boundary, sensitivity, gravity, air drag, and mass</span>
                             </span>
                             <span class="summary-caret" aria-hidden="true">▼</span>
                         </summary>
                         <div class="physics-controls-inner">
-                            <label for="modeSelect" class="control-block">
-                                <span class="control-label">Interaction</span>
-                                <select id="modeSelect">
-                                    <option value="balanced" selected>Push</option>
-                                    <option value="elastic">Bounce</option>
-                                    <option value="sticky">Catch</option>
-                                </select>
-                                <p id="modeDescription" class="control-help">Push mode: stable pushes with moderate
-                                    bounce.</p>
-                            </label>
                             <label for="boundaryModeSelect" class="control-block">
                                 <span class="control-label">Boundary</span>
                                 <select id="boundaryModeSelect">
@@ -716,13 +685,9 @@
             </div>
         </section>
 
-        <p class="hint">
-            Add spheres, then flick your fingertips or use your palm to push them. Raise gravity above 0g for downward
-            pull, then catch and throw.
-        </p>
         <div class="hud">
-            <div id="status" class="pill">Camera is off.</div>
-            <div id="metrics" class="pill mono">FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 | Spheres: 0</div>
+            <div id="statusMetrics" class="pill mono">Camera is off. | FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 |
+                Spheres: 0</div>
         </div>
     </main>
 
@@ -743,11 +708,8 @@
             controlsClose: document.getElementById('controlsClose'),
             fullscreenBtn: document.getElementById('fullscreenBtn'),
             cameraSelect: document.getElementById('cameraSelect'),
-            status: document.getElementById('status'),
-            metrics: document.getElementById('metrics'),
-            modeSelect: document.getElementById('modeSelect'),
+            statusMetrics: document.getElementById('statusMetrics'),
             boundaryModeSelect: document.getElementById('boundaryModeSelect'),
-            modeDescription: document.getElementById('modeDescription'),
             sensitivityRange: document.getElementById('sensitivityRange'),
             sensitivityValue: document.getElementById('sensitivityValue'),
             gravityRange: document.getElementById('gravityRange'),
@@ -834,12 +796,12 @@
             tipCount: 0,
             trackedTips: [],
             contactsCount: 0,
-            interactionMode: 'balanced',
             boundaryMode: 'walls',
             sensitivity: 1.0,
             gravity: 0.0,
             airDrag: 0.0,
             mass: 1.0,
+            statusMessage: 'Camera is off.',
             nextTrackingErrorReportAt: 0
         };
 
@@ -964,56 +926,17 @@
             [5, 9], [9, 13], [13, 17]
         ];
 
-        const INTERACTION_LABELS = {
-            balanced: 'Push',
-            elastic: 'Bounce',
-            sticky: 'Catch'
-        };
-
-        const INTERACTION_MODE_HELP = {
-            balanced: 'Push mode: stable pushes with moderate bounce.',
-            elastic: 'Bounce mode: high-energy rebounds and faster ricochets.',
-            sticky: 'Catch mode: fingertips can pull and hold spheres briefly.'
-        };
-
-        // velocityTransfer: fraction of fingertip approach speed added as impulse on first contact
-        const INTERACTION_PROFILES = {
-            balanced: {
-                contactRadius: 0.15,
-                spring: 110,
-                damping: 6.2,
-                correction: 0.62,
-                airDrag: 0.08,
-                restitution: 0.88,
-                stickPull: 0,
-                stickCapture: 0,
-                maxSpeed: 3.0,
-                velocityTransfer: 0.56
-            },
-            elastic: {
-                contactRadius: 0.16,
-                spring: 138,
-                damping: 2.5,
-                correction: 0.8,
-                airDrag: 0.03,
-                restitution: 0.99,
-                stickPull: 0,
-                stickCapture: 0,
-                maxSpeed: 4.8,
-                velocityTransfer: 0.88
-            },
-            sticky: {
-                contactRadius: 0.2,
-                spring: 72,
-                damping: 9.8,
-                correction: 0.92,
-                airDrag: 0.24,
-                restitution: 0.7,
-                stickPull: 21,
-                stickCapture: 3.4,
-                maxSpeed: 1.65,
-                velocityTransfer: 0.24
-            }
+        // velocityTransfer: fraction of hand approach speed added as impulse on first contact
+        const REAL_INTERACTION_PROFILE = {
+            contactRadius: 0.15,
+            spring: 112,
+            damping: 6.4,
+            correction: 0.64,
+            restitution: 0.9,
+            stickPull: 0,
+            stickCapture: 0,
+            maxSpeed: 3.2,
+            velocityTransfer: 0.58
         };
 
         const scene = new THREE.Scene();
@@ -1054,18 +977,24 @@
         const activeContacts = new Set();
         const handGripStates = new Map();
 
+        function renderHudInfo() {
+            const fpsText = state.running ? state.fps.toFixed(0) : '--';
+            ui.statusMetrics.textContent =
+                `${state.statusMessage} | FPS: ${fpsText} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}`;
+        }
+
         function setStatus(message, isError = false) {
-            ui.status.textContent = message;
-            ui.status.classList.toggle('status-error', isError);
+            state.statusMessage = message;
+            ui.statusMetrics.classList.toggle('status-error', isError);
+            renderHudInfo();
         }
 
         function getInteractionProfile() {
-            const base = INTERACTION_PROFILES[state.interactionMode] || INTERACTION_PROFILES.balanced;
+            const base = REAL_INTERACTION_PROFILE;
             const s = Math.max(0.6, Math.min(2.0, state.sensitivity));
             const sensitivityNorm = (s - 0.6) / 1.4;
             const powerScale = 0.75 + (0.9 * sensitivityNorm);
             const rangeScale = 0.9 + (0.2 * sensitivityNorm);
-            const stickyScale = 0.85 + (0.5 * sensitivityNorm);
             return {
                 contactRadius: base.contactRadius * rangeScale,
                 spring: base.spring * powerScale,
@@ -1073,15 +1002,11 @@
                 correction: base.correction,
                 airDrag: Math.max(0, Math.min(1.0, state.airDrag)),
                 restitution: base.restitution,
-                stickPull: base.stickPull * powerScale,
-                stickCapture: base.stickCapture * stickyScale,
+                stickPull: base.stickPull,
+                stickCapture: base.stickCapture,
                 maxSpeed: base.maxSpeed,
                 velocityTransfer: base.velocityTransfer * powerScale
             };
-        }
-
-        function updateModeDescription() {
-            ui.modeDescription.textContent = INTERACTION_MODE_HELP[state.interactionMode] || '';
         }
 
         function updateBoundaryModeUI() {
@@ -1105,15 +1030,7 @@
         }
 
         function updateMetrics() {
-            let maxSpeed = 0;
-            for (const sphere of spheres) {
-                const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
-                if (speed > maxSpeed) {
-                    maxSpeed = speed;
-                }
-            }
-            ui.metrics.textContent =
-                `FPS: ${state.fps.toFixed(0)} | Mode: ${INTERACTION_LABELS[state.interactionMode]} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}`;
+            renderHudInfo();
         }
 
         function updateAddBtnState() {
@@ -1831,7 +1748,7 @@
                     );
 
                     const tipSpeed = Math.hypot(tip.velX, tip.velY);
-                    const baseLookaheadScale = state.interactionMode === 'sticky' ? 0.35 : 1.0;
+                    const baseLookaheadScale = 1.0;
                     const lookaheadScale = baseLookaheadScale * (isPalm ? PALM_LOOKAHEAD_SCALE : 1);
                     const baseContactRadius = profile.contactRadius * (isPalm ? PALM_CONTACT_RADIUS_SCALE : 1);
                     const radiusBoost = Math.min(
@@ -2268,7 +2185,7 @@
                 if ([...ui.cameraSelect.options].some((option) => option.value === deviceId)) {
                     ui.cameraSelect.value = deviceId;
                 }
-                setStatus(`Camera switched. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
+                setStatus('Camera switched.');
             } catch (error) {
                 const message = error && error.message ? error.message : String(error);
                 console.error('Camera switch failed:', error);
@@ -2374,7 +2291,7 @@
             updateAddBtnState();
             ui.resetBtn.disabled = false;
             ui.startBtn.textContent = 'Running';
-            setStatus(`Ready. Mode: ${INTERACTION_LABELS[state.interactionMode]}.`);
+            setStatus('Ready.');
             requestAnimationFrame(step);
         }
 
@@ -2404,14 +2321,6 @@
             if (state.running && ui.cameraSelect.value) {
                 switchCamera(ui.cameraSelect.value);
             }
-        });
-        ui.modeSelect.addEventListener('change', () => {
-            if (!INTERACTION_PROFILES[ui.modeSelect.value]) {
-                return;
-            }
-            state.interactionMode = ui.modeSelect.value;
-            updateModeDescription();
-            setStatus(`Interaction mode switched to ${INTERACTION_LABELS[state.interactionMode]}.`);
         });
         ui.boundaryModeSelect.addEventListener('change', () => {
             state.boundaryMode = ui.boundaryModeSelect.value === 'wrap' ? 'wrap' : 'walls';
@@ -2468,8 +2377,6 @@
             }
         });
 
-        ui.modeSelect.value = state.interactionMode;
-        updateModeDescription();
         ui.boundaryModeSelect.value = state.boundaryMode;
         updateBoundaryModeUI();
         ui.sensitivityRange.value = state.sensitivity.toFixed(1);
@@ -2480,6 +2387,7 @@
         updateAirDragLabel();
         ui.massRange.value = state.mass.toFixed(1);
         updateMassLabel();
+        renderHudInfo();
         updateFullscreenUI();
         resizeStage();
         renderer.render(scene, camera3d);
