@@ -1035,6 +1035,7 @@ const GRIP_CARRY_VELOCITY_ALPHA = 0.4;
 const GRIP_RELEASE_DEADZONE_SPEED = 0.12;
 const GRIP_RELEASE_SUPPRESSION_SECONDS = 0.30;
 const GRIP_RELEASE_RAMP_SECONDS = 0.24;
+const GRIP_MEMORY_HOLD_MAX_SPEED = 0.45;
 const PUSH_LOOKAHEAD_SECONDS = 0.05;
 const PUSH_RADIUS_BOOST_MAX = SPHERE_RADIUS * 0.7;
 const PUSH_SHELL_FORCE_SCALE = 0.32;
@@ -1284,6 +1285,21 @@ function holdSphereFromMemory(gripState, dt) {
     );
 }
 
+function shouldHoldGripFromMemory(gripState) {
+    if (!gripState || !gripState.sphere) {
+        return false;
+    }
+    const carrySpeed = Math.hypot(
+        gripState.carryVelX || 0,
+        state.oneD ? 0 : (gripState.carryVelY || 0)
+    );
+    const sphereSpeed = Math.hypot(
+        gripState.sphere.velocity.x || 0,
+        state.oneD ? 0 : (gripState.sphere.velocity.y || 0)
+    );
+    return Math.max(carrySpeed, sphereSpeed) <= GRIP_MEMORY_HOLD_MAX_SPEED;
+}
+
 function applyTipForces(dt, profile) {
     frameGrippedSpheres.clear();
     updateReleaseHandSuppression(dt);
@@ -1314,7 +1330,9 @@ function applyTipForces(dt, profile) {
                 }
             } else if (gripState && gripState.sphere) {
                 gripState.lostFrames += 1;
-                if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
+                if (!shouldHoldGripFromMemory(gripState)) {
+                    releaseGripState(gripState);
+                } else if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
                     frameGrippedSpheres.add(gripState.sphere);
                 } else {
                     releaseGripState(gripState);
@@ -1422,7 +1440,10 @@ function applyTipForces(dt, profile) {
         if (!visibleHands.has(handKey)) {
             if (gripState.sphere) {
                 gripState.lostFrames += 1;
-                if (gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES && holdSphereFromMemory(gripState, dt)) {
+                const shouldUseMemoryHold =
+                    shouldHoldGripFromMemory(gripState) &&
+                    gripState.lostFrames <= GRIP_TRACK_LOST_GRACE_FRAMES;
+                if (shouldUseMemoryHold && holdSphereFromMemory(gripState, dt)) {
                     frameGrippedSpheres.add(gripState.sphere);
                     continue;
                 }
