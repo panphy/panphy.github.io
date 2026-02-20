@@ -45,6 +45,11 @@
             
             --btn-bg: #2d3436;
             --btn-text: #fff;
+
+            --status-check: #2563eb;
+            --status-ready: #0f9d58;
+            --status-warning: #d97706;
+            --status-error: #dc2626;
         }
 
         [data-theme="dark"] {
@@ -68,6 +73,11 @@
             
             --btn-bg: #6c5ce7;
             --btn-text: #fff;
+
+            --status-check: #7da8ff;
+            --status-ready: #4cd08d;
+            --status-warning: #f6b354;
+            --status-error: #ff7d7d;
         }
 
         * {
@@ -132,6 +142,88 @@
             color: var(--text-secondary);
             max-width: 600px;
             margin-top: 1rem;
+        }
+
+        .offline-status {
+            margin-top: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid var(--nav-border);
+            background: var(--nav-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            max-width: min(92vw, 560px);
+        }
+
+        .offline-status-dot {
+            width: 0.58rem;
+            height: 0.58rem;
+            border-radius: 50%;
+            background: var(--status-check);
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
+            flex: 0 0 auto;
+        }
+
+        .offline-status[data-state="checking"] .offline-status-dot {
+            background: var(--status-check);
+            animation: offlinePulse 1.4s ease-out infinite;
+        }
+
+        .offline-status[data-state="ready"] .offline-status-dot {
+            background: var(--status-ready);
+            box-shadow: none;
+            animation: none;
+        }
+
+        .offline-status[data-state="warning"] .offline-status-dot {
+            background: var(--status-warning);
+            box-shadow: none;
+            animation: none;
+        }
+
+        .offline-status[data-state="error"] .offline-status-dot {
+            background: var(--status-error);
+            box-shadow: none;
+            animation: none;
+        }
+
+        .offline-status[data-state="unsupported"] .offline-status-dot {
+            background: var(--status-warning);
+            box-shadow: none;
+            animation: none;
+        }
+
+        .offline-status[data-state="ready"] {
+            color: var(--status-ready);
+        }
+
+        .offline-status[data-state="warning"],
+        .offline-status[data-state="unsupported"] {
+            color: var(--status-warning);
+        }
+
+        .offline-status[data-state="error"] {
+            color: var(--status-error);
+        }
+
+        @keyframes offlinePulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+            }
         }
 
         /* Floating Navigation */
@@ -396,6 +488,10 @@
         <img src="/assets/panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
         <h1>PanPhy Labs</h1>
         <p>Physics apps, tools, sims, and some random stuff.</p>
+        <div class="offline-status" id="offline-status" data-state="checking" role="status" aria-live="polite">
+            <span class="offline-status-dot" aria-hidden="true"></span>
+            <span id="offline-status-text">Preparing offline cache...</span>
+        </div>
     </header>
 
     <div class="section" id="tools">
@@ -557,6 +653,108 @@
                 updateButtonEmoji('light');
             }
         });
+
+        const offlineStatus = document.getElementById('offline-status');
+        const offlineStatusText = document.getElementById('offline-status-text');
+        const OFFLINE_REQUIRED_ASSETS = [
+            '/index.html',
+            '/tools/markdown_editor.html',
+            '/tools/panphyplot.html',
+            '/tools/motion_tracker.html',
+            '/tools/sound_analyzer.html',
+            '/tools/tone_generator.html',
+            '/tools/digitizer.html',
+            '/simulations/superposition.html',
+            '/simulations/standing_wave.html',
+            '/simulations/lorentz.html',
+            '/simulations/ball.html',
+            '/for_teachers/timer.html',
+            '/for_teachers/visualizer.html',
+            '/fun/react.html',
+            '/fun/ascii_cam.html',
+            'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js'
+        ];
+
+        let offlineReadyPollId = 0;
+
+        function setOfflineStatus(state, message) {
+            if (!offlineStatus || !offlineStatusText) return;
+            offlineStatus.dataset.state = state;
+            offlineStatusText.textContent = message;
+        }
+
+        async function getOfflineCacheSummary() {
+            if (!('caches' in window)) {
+                return { total: OFFLINE_REQUIRED_ASSETS.length, cachedCount: 0, ready: false };
+            }
+
+            const checks = await Promise.all(
+                OFFLINE_REQUIRED_ASSETS.map(async (asset) => {
+                    try {
+                        const absoluteUrl = new URL(asset, window.location.origin).href;
+                        const match = await caches.match(absoluteUrl);
+                        return Boolean(match);
+                    } catch (error) {
+                        return false;
+                    }
+                })
+            );
+
+            const cachedCount = checks.filter(Boolean).length;
+            return {
+                total: OFFLINE_REQUIRED_ASSETS.length,
+                cachedCount,
+                ready: cachedCount === OFFLINE_REQUIRED_ASSETS.length
+            };
+        }
+
+        async function updateOfflineReadiness() {
+            if (!('serviceWorker' in navigator) || !('caches' in window)) {
+                setOfflineStatus('unsupported', 'Offline caching is not supported in this browser.');
+                if (offlineReadyPollId) {
+                    clearInterval(offlineReadyPollId);
+                    offlineReadyPollId = 0;
+                }
+                return;
+            }
+
+            const summary = await getOfflineCacheSummary();
+            const progressText = `${summary.cachedCount}/${summary.total}`;
+
+            if (summary.ready) {
+                setOfflineStatus('ready', `Offline ready (${progressText})`);
+                if (offlineReadyPollId) {
+                    clearInterval(offlineReadyPollId);
+                    offlineReadyPollId = 0;
+                }
+                return;
+            }
+
+            if (!navigator.onLine) {
+                setOfflineStatus('warning', `Offline not ready (${progressText}). Go online once to finish caching.`);
+                return;
+            }
+
+            setOfflineStatus('checking', `Preparing offline cache (${progressText})...`);
+        }
+
+        function startOfflineReadinessMonitor() {
+            updateOfflineReadiness();
+            if (!offlineReadyPollId) {
+                offlineReadyPollId = setInterval(updateOfflineReadiness, 3000);
+            }
+            window.addEventListener('online', updateOfflineReadiness);
+            window.addEventListener('offline', updateOfflineReadiness);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    updateOfflineReadiness();
+                }
+            });
+        }
+
+        startOfflineReadinessMonitor();
     </script>
     <script>
         // Apply gradient text effect, skip on Brave iOS where background-clip:text is broken

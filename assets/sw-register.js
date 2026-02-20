@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-18T20:15:00Z';
+  const BUILD_ID = '2026-02-20T22:20:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -103,5 +103,9 @@
     }
   };
 
-  window.addEventListener('load', registerServiceWorker);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', registerServiceWorker, { once: true });
+  } else {
+    registerServiceWorker();
+  }
 })();
