@@ -20,6 +20,18 @@
         </div>
     </div>
 
+    <!--
+      Collision solver note (for future maintenance):
+      - 2D mode (1D toggle OFF):
+        Uses geometric collision normals from full x/y separation vectors. This is generally stable because collisions can resolve
+        in many directions and contacts are less likely to become long compressed chains.
+      - 1D mode (1D toggle ON):
+        Forces motion and normals to the x-axis only. The solver additionally uses swept crossing checks and optional wall-packing
+        stabilization to handle tunneling and overlap on a single line.
+      - Why 1D is harder here:
+        In 1D, all bodies share one lane, so repeated chain impacts (and wall compression) happen often. Small numerical errors
+        can accumulate faster, which can look like temporary sticking or jitter under high collision frequency.
+    -->
     <main class="app">
         <section id="stage" class="stage panel">
             <button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>

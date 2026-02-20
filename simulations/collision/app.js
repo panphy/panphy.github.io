@@ -269,10 +269,11 @@ const PLANE_Z = 0;
 const MAX_SPHERES = 3;
 const IDEAL_WALL_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
+const PHYSICS_SUBSTEPS_1D = 6;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
 const COLLISION_SOLVER_VELOCITY_ITERATIONS = 3;
-const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 8;
-const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 5;
+const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 10;
+const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 7;
 const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 const GRAVITY_SCALE = 9.81;
@@ -1951,8 +1952,9 @@ function updatePhysics(dt, profile) {
         return;
     }
 
-    const subDt = dt / PHYSICS_SUBSTEPS;
-    for (let substep = 0; substep < PHYSICS_SUBSTEPS; substep++) {
+    const substeps = state.oneD ? PHYSICS_SUBSTEPS_1D : PHYSICS_SUBSTEPS;
+    const subDt = dt / substeps;
+    for (let substep = 0; substep < substeps; substep++) {
         const positionIterations = state.oneD ? COLLISION_SOLVER_POSITION_ITERATIONS_1D : COLLISION_SOLVER_POSITION_ITERATIONS;
         const velocityIterations = state.oneD ? COLLISION_SOLVER_VELOCITY_ITERATIONS_1D : COLLISION_SOLVER_VELOCITY_ITERATIONS;
 
