@@ -270,6 +270,7 @@ const MAX_SPHERES = 3;
 const IDEAL_WALL_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
+const COLLISION_SOLVER_VELOCITY_ITERATIONS = 3;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 const GRAVITY_SCALE = 9.81;
 const MIN_SPHERE_MASS = 0.2;
@@ -650,6 +651,8 @@ function createSphere(colorIndex) {
         material,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
+        prevSubstepX: 0,
+        prevSubstepY: 0,
         velocity: new THREE.Vector3(0, 0, 0),
         mass: DEFAULT_SPHERE_MASS,
         restitution: DEFAULT_SPHERE_RESTITUTION,
@@ -675,6 +678,8 @@ function addSphere() {
         PLANE_Z
     );
     sphere.spawnPosition.copy(sphere.position);
+    sphere.prevSubstepX = sphere.position.x;
+    sphere.prevSubstepY = sphere.position.y;
     sphere.group.position.copy(sphere.position);
 
     scene.add(sphere.group);
@@ -695,6 +700,8 @@ function resetAll() {
     deselectSphere();
     for (const sphere of spheres) {
         sphere.position.copy(sphere.spawnPosition);
+        sphere.prevSubstepX = sphere.position.x;
+        sphere.prevSubstepY = sphere.position.y;
         sphere.velocity.set(0, 0, 0);
         sphere.contactCount = 0;
         sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
@@ -1686,12 +1693,35 @@ function isPinnedSphere(sphere) {
     return frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere;
 }
 
+function getOneDCollisionNormalX(a, b, dx) {
+    const prevDx = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
+    if (Math.abs(prevDx) > 0.000001) {
+        return prevDx >= 0 ? 1 : -1;
+    }
+    if (Math.abs(dx) > 0.000001) {
+        return dx >= 0 ? 1 : -1;
+    }
+    const relVelX = b.velocity.x - a.velocity.x;
+    if (Math.abs(relVelX) > 0.000001) {
+        // Oppose relative motion so coincident centers can still resolve with an impulse.
+        return relVelX >= 0 ? -1 : 1;
+    }
+    return 1;
+}
+
+function didOneDCentersCrossThisSubstep(a, b) {
+    const prevDx = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
+    const currDx = b.position.x - a.position.x;
+    return (prevDx > 0 && currDx < 0) || (prevDx < 0 && currDx > 0);
+}
+
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
     const velocityContactDistance = diameter + COLLISION_SEPARATION_EPSILON;
     const velocityContactDistanceSq = velocityContactDistance * velocityContactDistance;
     const is1D = state.oneD;
+    const allowSweptOneDCollision = is1D && state.boundaryMode === 'walls' && applyVelocity;
     for (let i = 0; i < spheres.length; i++) {
         for (let j = i + 1; j < spheres.length; j++) {
             const a = spheres[i];
@@ -1706,8 +1736,9 @@ function resolveSphereCollisions(applyVelocity = true) {
             const dy = is1D ? 0 : (b.position.y - a.position.y);
             const distSq = (dx * dx) + (dy * dy);
             const contactLimitSq = applyVelocity ? velocityContactDistanceSq : diameterSq;
+            const crossedInStep = allowSweptOneDCollision ? didOneDCentersCrossThisSubstep(a, b) : false;
 
-            if (distSq > contactLimitSq) {
+            if (distSq > contactLimitSq && !crossedInStep) {
                 continue;
             }
 
@@ -1717,7 +1748,7 @@ function resolveSphereCollisions(applyVelocity = true) {
 
             if (is1D) {
                 // In 1D mode, collision normal is always along x-axis
-                nx = dx >= 0 ? 1 : -1;
+                nx = getOneDCollisionNormalX(a, b, dx);
                 ny = 0;
                 dist = Math.abs(dx);
             } else if (dist > 0.000001) {
@@ -1760,6 +1791,16 @@ function resolveSphereCollisions(applyVelocity = true) {
                     a.position.y -= ny * correction * invMassA;
                     b.position.y += ny * correction * invMassB;
                 }
+            } else if (is1D && crossedInStep) {
+                // Reorder tunneled 1D pairs back to a touching state before impulse.
+                const desiredSeparation = diameter + COLLISION_SEPARATION_EPSILON;
+                const currentSeparationAlongNormal = (b.position.x - a.position.x) * nx;
+                const correctionNeeded = desiredSeparation - currentSeparationAlongNormal;
+                if (correctionNeeded > 0) {
+                    const correction = correctionNeeded / invMassSum;
+                    a.position.x -= nx * correction * invMassA;
+                    b.position.x += nx * correction * invMassB;
+                }
             }
 
             if (!applyVelocity) {
@@ -1797,6 +1838,11 @@ function updatePhysics(dt, profile) {
     const subDt = dt / PHYSICS_SUBSTEPS;
     for (let substep = 0; substep < PHYSICS_SUBSTEPS; substep++) {
         for (const sphere of spheres) {
+            sphere.prevSubstepX = sphere.position.x;
+            sphere.prevSubstepY = sphere.position.y;
+        }
+
+        for (const sphere of spheres) {
             if (isPinnedSphere(sphere)) {
                 continue;
             }
@@ -1825,11 +1871,13 @@ function updatePhysics(dt, profile) {
             }
         }
 
-        // One velocity pass after positions are separated.
-        resolveSphereCollisions(true);
-        for (const sphere of spheres) {
-            if (!isPinnedSphere(sphere)) {
-                constrainSphereToView(sphere, profile);
+        // Iterative velocity solver improves simultaneous-contact chains.
+        for (let iter = 0; iter < COLLISION_SOLVER_VELOCITY_ITERATIONS; iter++) {
+            resolveSphereCollisions(true);
+            for (const sphere of spheres) {
+                if (!isPinnedSphere(sphere)) {
+                    constrainSphereToView(sphere, profile);
+                }
             }
         }
     }
