@@ -271,6 +271,9 @@ const IDEAL_WALL_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
 const COLLISION_SOLVER_VELOCITY_ITERATIONS = 3;
+const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 8;
+const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 5;
+const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 const GRAVITY_SCALE = 9.81;
 const MIN_SPHERE_MASS = 0.2;
@@ -587,8 +590,18 @@ function updateMetrics() {
     renderHudInfo();
 }
 
+function getOneDWallsSphereCapacity() {
+    const bounds = getViewBounds();
+    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+    const minSeparation = (SPHERE_RADIUS * 2) + COLLISION_SEPARATION_EPSILON;
+    const availableSpan = Math.max(0, xLimit * 2);
+    return Math.max(1, Math.floor(availableSpan / Math.max(0.0001, minSeparation)) + 1);
+}
+
 function updateAddBtnState() {
-    ui.addBtn.disabled = !state.running || spheres.length >= MAX_SPHERES;
+    const oneDCapacity = Math.min(MAX_SPHERES, getOneDWallsSphereCapacity());
+    const maxAllowedSpheres = (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
+    ui.addBtn.disabled = !state.running || spheres.length >= maxAllowedSpheres;
 }
 
 function updateStartButtonState() {
@@ -606,12 +619,22 @@ function resizeStage() {
     renderer.setSize(rect.width, rect.height, false);
     camera3d.aspect = rect.width / rect.height;
     camera3d.updateProjectionMatrix();
+    cachedViewBounds = null;
+    cachedViewBoundsFrame = -1;
 
     ui.tipCanvas.width = Math.max(1, Math.round(rect.width));
     ui.tipCanvas.height = Math.max(1, Math.round(rect.height));
     if (tipCtx) {
         tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
     }
+
+    if (state.oneD && state.boundaryMode === 'walls') {
+        stabilizeOneDWallPacking();
+        for (const sphere of spheres) {
+            sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+        }
+    }
+    updateAddBtnState();
 }
 
 let cachedViewBounds = null;
@@ -661,7 +684,9 @@ function createSphere(colorIndex) {
 }
 
 function addSphere() {
-    if (spheres.length >= MAX_SPHERES) {
+    const oneDCapacity = Math.min(MAX_SPHERES, getOneDWallsSphereCapacity());
+    const maxAllowedSpheres = (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
+    if (spheres.length >= maxAllowedSpheres) {
         return;
     }
 
@@ -684,6 +709,13 @@ function addSphere() {
 
     scene.add(sphere.group);
     spheres.push(sphere);
+    if (state.oneD && state.boundaryMode === 'walls') {
+        stabilizeOneDWallPacking();
+        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+        for (const existing of spheres) {
+            existing.group.position.set(existing.position.x, existing.position.y, PLANE_Z);
+        }
+    }
     renderBallControls();
     updateAddBtnState();
 
@@ -1715,6 +1747,65 @@ function didOneDCentersCrossThisSubstep(a, b) {
     return (prevDx > 0 && currDx < 0) || (prevDx < 0 && currDx > 0);
 }
 
+function stabilizeOneDWallPacking() {
+    if (!state.oneD || state.boundaryMode !== 'walls' || spheres.length < 2) {
+        return;
+    }
+    if (spheres.some(isPinnedSphere)) {
+        return;
+    }
+
+    const bounds = getViewBounds();
+    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+    const minSeparation = (SPHERE_RADIUS * 2) + COLLISION_SEPARATION_EPSILON;
+    const ordered = [...spheres].sort((a, b) => a.position.x - b.position.x);
+    const count = ordered.length;
+    const availableSpan = xLimit * 2;
+    const requiredSpan = minSeparation * (count - 1);
+
+    if (requiredSpan > availableSpan + 0.000001) {
+        // Not enough horizontal room: spread as evenly as possible to minimize overlap.
+        const spacing = availableSpan / Math.max(1, count - 1);
+        for (let i = 0; i < count; i++) {
+            const sphere = ordered[i];
+            sphere.position.x = -xLimit + (spacing * i);
+            sphere.position.y = 0;
+            sphere.velocity.y = 0;
+        }
+        return;
+    }
+
+    const lowerBounds = new Array(count);
+    const upperBounds = new Array(count);
+    lowerBounds[0] = -xLimit;
+    for (let i = 1; i < count; i++) {
+        lowerBounds[i] = lowerBounds[i - 1] + minSeparation;
+    }
+    upperBounds[count - 1] = xLimit;
+    for (let i = count - 2; i >= 0; i--) {
+        upperBounds[i] = upperBounds[i + 1] - minSeparation;
+    }
+
+    for (let pass = 0; pass < ONE_D_STACK_STABILIZATION_PASSES; pass++) {
+        ordered[0].position.x = Math.min(upperBounds[0], Math.max(lowerBounds[0], ordered[0].position.x));
+        for (let i = 1; i < count; i++) {
+            const clamped = Math.min(upperBounds[i], Math.max(lowerBounds[i], ordered[i].position.x));
+            ordered[i].position.x = Math.max(clamped, ordered[i - 1].position.x + minSeparation);
+        }
+
+        ordered[count - 1].position.x = Math.min(upperBounds[count - 1], Math.max(lowerBounds[count - 1], ordered[count - 1].position.x));
+        for (let i = count - 2; i >= 0; i--) {
+            const clamped = Math.min(upperBounds[i], Math.max(lowerBounds[i], ordered[i].position.x));
+            ordered[i].position.x = Math.min(clamped, ordered[i + 1].position.x - minSeparation);
+        }
+    }
+
+    for (const sphere of ordered) {
+        sphere.position.y = 0;
+        sphere.velocity.y = 0;
+    }
+}
+
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
@@ -1837,6 +1928,9 @@ function updatePhysics(dt, profile) {
 
     const subDt = dt / PHYSICS_SUBSTEPS;
     for (let substep = 0; substep < PHYSICS_SUBSTEPS; substep++) {
+        const positionIterations = state.oneD ? COLLISION_SOLVER_POSITION_ITERATIONS_1D : COLLISION_SOLVER_POSITION_ITERATIONS;
+        const velocityIterations = state.oneD ? COLLISION_SOLVER_VELOCITY_ITERATIONS_1D : COLLISION_SOLVER_VELOCITY_ITERATIONS;
+
         for (const sphere of spheres) {
             sphere.prevSubstepX = sphere.position.x;
             sphere.prevSubstepY = sphere.position.y;
@@ -1862,7 +1956,7 @@ function updatePhysics(dt, profile) {
         }
 
         // Position solver iterations to prevent visible overlap.
-        for (let iter = 0; iter < COLLISION_SOLVER_POSITION_ITERATIONS; iter++) {
+        for (let iter = 0; iter < positionIterations; iter++) {
             resolveSphereCollisions(false);
             for (const sphere of spheres) {
                 if (!isPinnedSphere(sphere)) {
@@ -1870,15 +1964,21 @@ function updatePhysics(dt, profile) {
                 }
             }
         }
+        if (state.oneD && state.boundaryMode === 'walls') {
+            stabilizeOneDWallPacking();
+        }
 
         // Iterative velocity solver improves simultaneous-contact chains.
-        for (let iter = 0; iter < COLLISION_SOLVER_VELOCITY_ITERATIONS; iter++) {
+        for (let iter = 0; iter < velocityIterations; iter++) {
             resolveSphereCollisions(true);
             for (const sphere of spheres) {
                 if (!isPinnedSphere(sphere)) {
                     constrainSphereToView(sphere, profile);
                 }
             }
+        }
+        if (state.oneD && state.boundaryMode === 'walls') {
+            stabilizeOneDWallPacking();
         }
     }
 
@@ -2321,6 +2421,13 @@ ui.cameraSelect.addEventListener('change', () => {
 ui.wallsToggle.addEventListener('change', () => {
     state.boundaryMode = ui.wallsToggle.checked ? 'walls' : 'wrap';
     updateBoundaryModeUI();
+    if (state.oneD && state.boundaryMode === 'walls') {
+        stabilizeOneDWallPacking();
+        for (const sphere of spheres) {
+            sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+        }
+    }
+    updateAddBtnState();
     if (state.boundaryMode === 'wrap') {
         setStatus('Walls removed. Spheres now wrap across edges.');
     } else {
@@ -2337,10 +2444,17 @@ ui.oneDToggle.addEventListener('change', () => {
             sphere.spawnPosition.y = 0;
             sphere.group.position.y = 0;
         }
+        if (state.boundaryMode === 'walls') {
+            stabilizeOneDWallPacking();
+            for (const sphere of spheres) {
+                sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+            }
+        }
         setStatus('1D mode: spheres move horizontally only.');
     } else {
         setStatus('2D mode restored.');
     }
+    updateAddBtnState();
 });
 ui.sensitivityRange.addEventListener('input', () => {
     const nextValue = Number(ui.sensitivityRange.value);
