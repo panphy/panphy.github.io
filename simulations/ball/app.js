@@ -1313,11 +1313,11 @@ function applyTipForces(dt, profile) {
 
             scratch.normal.set(
                 sphere.position.x - tip.worldX,
-                sphere.position.y - tip.worldY,
+                state.oneD ? 0 : (sphere.position.y - tip.worldY),
                 0
             );
 
-            const tipSpeed = Math.hypot(tip.velX, tip.velY);
+            const tipSpeed = state.oneD ? Math.abs(tip.velX) : Math.hypot(tip.velX, tip.velY);
             const baseLookaheadScale = 1.0;
             const lookaheadScale = baseLookaheadScale * (isPalm ? PALM_LOOKAHEAD_SCALE : 1);
             const baseContactRadius = profile.contactRadius * (isPalm ? PALM_CONTACT_RADIUS_SCALE : 1);
@@ -1343,7 +1343,7 @@ function applyTipForces(dt, profile) {
             newContacts.add(contactKey);
 
             if (distance < 0.000001) {
-                scratch.normal.set(0, 1, 0);
+                scratch.normal.set(state.oneD ? 1 : 0, state.oneD ? 0 : 1, 0);
             } else {
                 scratch.normal.multiplyScalar(1 / distance);
             }
@@ -1357,14 +1357,17 @@ function applyTipForces(dt, profile) {
                 : Math.max(minShellScale, 1 - ((distance - baseContactRadius) / radiusBoost));
             const contactScale = handInfluenceScale * shellScale * (isPalm ? PALM_FORCE_SCALE : 1);
 
+            const nxF = scratch.normal.x;
+            const nyF = state.oneD ? 0 : scratch.normal.y;
+
             const relVelAlongNormal =
-                (tip.velX - sphere.velocity.x) * scratch.normal.x +
-                (tip.velY - sphere.velocity.y) * scratch.normal.y;
+                (tip.velX - sphere.velocity.x) * nxF +
+                (state.oneD ? 0 : (tip.velY - sphere.velocity.y) * nyF);
 
             if (corePenetration > 0) {
                 // Spring-damper: pushes sphere away from tip, damps inward sphere motion
                 const inwardSpeed = Math.min(
-                    (sphere.velocity.x * scratch.normal.x) + (sphere.velocity.y * scratch.normal.y),
+                    (sphere.velocity.x * nxF) + (state.oneD ? 0 : sphere.velocity.y * nyF),
                     0
                 );
                 const pushForce = (profile.spring * corePenetration) - (profile.damping * inwardSpeed);
@@ -1372,10 +1375,12 @@ function applyTipForces(dt, profile) {
 
                 pushAccel = Math.min(pushAccel, MAX_PUSH_ACCEL);
 
-                sphere.position.x += scratch.normal.x * corePenetration * profile.correction * contactScale;
-                sphere.position.y += scratch.normal.y * corePenetration * profile.correction * contactScale;
-                sphere.velocity.x += scratch.normal.x * pushAccel * dt * contactScale;
-                sphere.velocity.y += scratch.normal.y * pushAccel * dt * contactScale;
+                sphere.position.x += nxF * corePenetration * profile.correction * contactScale;
+                sphere.velocity.x += nxF * pushAccel * dt * contactScale;
+                if (!state.oneD) {
+                    sphere.position.y += nyF * corePenetration * profile.correction * contactScale;
+                    sphere.velocity.y += nyF * pushAccel * dt * contactScale;
+                }
             }
 
             // First-contact velocity impulse
@@ -1390,21 +1395,25 @@ function applyTipForces(dt, profile) {
                         impulse *= PALM_IMPULSE_SCALE;
                     }
                     impulse = Math.min(impulse, MAX_IMPULSE);
-                    sphere.velocity.x += scratch.normal.x * impulse * contactScale;
-                    sphere.velocity.y += scratch.normal.y * impulse * contactScale;
+                    sphere.velocity.x += nxF * impulse * contactScale;
+                    if (!state.oneD) {
+                        sphere.velocity.y += nyF * impulse * contactScale;
+                    }
                 }
             }
 
             if (!isPalm && profile.stickPull > 0 && corePenetration > 0 && distance > 0.000001) {
                 const toTipX = tip.worldX - sphere.position.x;
-                const toTipY = tip.worldY - sphere.position.y;
                 const invDistance = 1 / distance;
                 const stickFactor = corePenetration / profile.contactRadius;
                 const stickAccel = profile.stickPull / state.mass;
                 sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * contactScale;
-                sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * contactScale;
                 sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * contactScale;
-                sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * contactScale;
+                if (!state.oneD) {
+                    const toTipY = tip.worldY - sphere.position.y;
+                    sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * contactScale;
+                    sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * contactScale;
+                }
             }
         }
     }
@@ -1486,6 +1495,7 @@ function isPinnedSphere(sphere) {
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
+    const is1D = state.oneD;
     for (let i = 0; i < spheres.length; i++) {
         for (let j = i + 1; j < spheres.length; j++) {
             const a = spheres[i];
@@ -1497,7 +1507,7 @@ function resolveSphereCollisions(applyVelocity = true) {
             }
 
             const dx = b.position.x - a.position.x;
-            const dy = b.position.y - a.position.y;
+            const dy = is1D ? 0 : (b.position.y - a.position.y);
             const distSq = (dx * dx) + (dy * dy);
 
             if (distSq >= diameterSq) {
@@ -1505,9 +1515,15 @@ function resolveSphereCollisions(applyVelocity = true) {
             }
 
             let nx = 0;
-            let ny = 1;
+            let ny = 0;
             let dist = Math.sqrt(Math.max(0, distSq));
-            if (dist > 0.000001) {
+
+            if (is1D) {
+                // In 1D mode, collision normal is always along x-axis
+                nx = dx >= 0 ? 1 : -1;
+                ny = 0;
+                dist = Math.abs(dx);
+            } else if (dist > 0.000001) {
                 nx = dx / dist;
                 ny = dy / dist;
             } else {
@@ -1541,16 +1557,18 @@ function resolveSphereCollisions(applyVelocity = true) {
             // Position correction with small bias so contacts don't sink.
             const correction = (penetration + COLLISION_SEPARATION_EPSILON) / invMassSum;
             a.position.x -= nx * correction * invMassA;
-            a.position.y -= ny * correction * invMassA;
             b.position.x += nx * correction * invMassB;
-            b.position.y += ny * correction * invMassB;
+            if (!is1D) {
+                a.position.y -= ny * correction * invMassA;
+                b.position.y += ny * correction * invMassB;
+            }
 
             if (!applyVelocity) {
                 continue;
             }
 
             // Resolve normal velocity with inverse-mass impulse.
-            const relVelN = (b.velocity.x - a.velocity.x) * nx + (b.velocity.y - a.velocity.y) * ny;
+            const relVelN = (b.velocity.x - a.velocity.x) * nx + (is1D ? 0 : (b.velocity.y - a.velocity.y) * ny);
 
             // Only resolve if spheres are approaching
             if (relVelN >= 0) {
@@ -1559,9 +1577,11 @@ function resolveSphereCollisions(applyVelocity = true) {
 
             const impulse = (-(1 + IDEAL_SPHERE_RESTITUTION) * relVelN) / invMassSum;
             a.velocity.x -= impulse * nx * invMassA;
-            a.velocity.y -= impulse * ny * invMassA;
             b.velocity.x += impulse * nx * invMassB;
-            b.velocity.y += impulse * ny * invMassB;
+            if (!is1D) {
+                a.velocity.y -= impulse * ny * invMassA;
+                b.velocity.y += impulse * ny * invMassB;
+            }
         }
     }
 }
@@ -1578,9 +1598,13 @@ function updatePhysics(dt, profile) {
                 continue;
             }
 
-            sphere.velocity.y -= state.gravity * GRAVITY_SCALE * subDt;
+            if (!state.oneD) {
+                sphere.velocity.y -= state.gravity * GRAVITY_SCALE * subDt;
+            }
             sphere.position.x += sphere.velocity.x * subDt;
-            sphere.position.y += sphere.velocity.y * subDt;
+            if (!state.oneD) {
+                sphere.position.y += sphere.velocity.y * subDt;
+            }
             constrainSphereToView(sphere, profile);
 
             const linearDrag = Math.exp(-profile.airDrag * subDt);
