@@ -710,6 +710,8 @@ const PALM_SHELL_FORCE_SCALE_MIN = 0.55;
 const PALM_FORCE_SCALE = 1.18;
 const PALM_MIN_APPROACH_SPEED_SCALE = 0.55;
 const PALM_IMPULSE_SCALE = 1.12;
+const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
+const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
 const FINGER_OPEN_RATIO = {
     4: 0.92,
     8: 1.02,
@@ -956,6 +958,7 @@ function applyTipForces(dt, profile) {
 
     const precaptureSpheres = new Set();
     const visibleHands = new Set();
+    const idleOpenPalmHands = new Set();
     for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
         const handKey = String(handIndex);
         visibleHands.add(handKey);
@@ -985,6 +988,16 @@ function applyTipForces(dt, profile) {
             (gripState.sphere === state.selectedSphere || !spheres.includes(gripState.sphere) || frameGrippedSpheres.has(gripState.sphere))
         ) {
             clearGripState(gripState);
+        }
+
+        const palmTipData = tipHistory.get(`${handIndex}-palm`);
+        const palmSpeed = palmTipData ? Math.hypot(palmTipData.velX, palmTipData.velY) : 0;
+        if (
+            !gripState.sphere &&
+            gripPose.openCount >= PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS &&
+            palmSpeed <= PALM_IDLE_SUPPRESS_MAX_SPEED
+        ) {
+            idleOpenPalmHands.add(handKey);
         }
 
         if (gripState.sphere) {
@@ -1089,6 +1102,13 @@ function applyTipForces(dt, profile) {
     for (let ti = 0; ti < state.trackedTips.length; ti++) {
         const tip = state.trackedTips[ti];
         const isPalm = tip.key.endsWith('-palm');
+        if (isPalm) {
+            const separatorIndex = tip.key.indexOf('-');
+            const tipHandKey = separatorIndex >= 0 ? tip.key.slice(0, separatorIndex) : tip.key;
+            if (idleOpenPalmHands.has(tipHandKey)) {
+                continue;
+            }
+        }
         for (let si = 0; si < spheres.length; si++) {
             const sphere = spheres[si];
             if (frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere || precaptureSpheres.has(sphere)) {
