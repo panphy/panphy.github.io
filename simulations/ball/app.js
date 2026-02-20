@@ -48,6 +48,10 @@ const isSafariBrowser = /Safari/i.test(userAgent) &&
     !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Chromium|Android/i.test(userAgent);
 const prefersPseudoFullscreen = isTouchAppleDevice && isSafariBrowser;
 
+if (isTouchAppleDevice) {
+    document.documentElement.classList.add('ios-touch-device');
+}
+
 function isPseudoFullscreenActive() {
     return ui.stage.classList.contains('pseudo-fullscreen');
 }

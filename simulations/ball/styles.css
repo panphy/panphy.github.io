@@ -529,6 +529,15 @@ body.ball-fullscreen-lock {
     letter-spacing: 0.01em;
 }
 
+.ios-touch-device #statusMetrics {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.1;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 .status-error {
     border-color: color-mix(in srgb, var(--danger) 66%, transparent);
     color: var(--danger);
