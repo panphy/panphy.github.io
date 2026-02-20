@@ -1591,7 +1591,6 @@ async function startCameraAndTracking() {
     }
     updateAddBtnState();
     ui.resetBtn.disabled = false;
-    ui.startBtn.textContent = 'Running';
     setStatus('Ready.');
     requestAnimationFrame(step);
 }

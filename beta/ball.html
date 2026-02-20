@@ -55,7 +55,7 @@
                             <span class="summary-caret" aria-hidden="true">▼</span>
                         </summary>
                         <div class="physics-controls-inner">
-                            <label for="boundaryModeSelect" class="control-block">
+                            <label for="boundaryModeSelect" class="control-block physics-boundary-control">
                                 <span class="control-label">Boundary</span>
                                 <select id="boundaryModeSelect">
                                     <option value="walls" selected>Walls On</option>
@@ -64,34 +64,36 @@
                                 <p class="control-help">Walls Off wraps spheres to the opposite edge (snake-style).
                                 </p>
                             </label>
-                            <label for="sensitivityRange" class="control-block">
-                                <span class="control-label-row">
-                                    <span class="control-label">Sensitivity</span>
-                                    <span id="sensitivityValue" class="value-badge">1.0x</span>
-                                </span>
-                                <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
-                            </label>
-                            <label for="gravityRange" class="control-block">
-                                <span class="control-label-row">
-                                    <span class="control-label">Gravity</span>
-                                    <span id="gravityValue" class="value-badge">0.00g</span>
-                                </span>
-                                <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0">
-                            </label>
-                            <label for="airDragRange" class="control-block">
-                                <span class="control-label-row">
-                                    <span class="control-label">Air drag</span>
-                                    <span id="airDragValue" class="value-badge">0.00</span>
-                                </span>
-                                <input id="airDragRange" type="range" min="0" max="1.0" step="0.01" value="0">
-                            </label>
-                            <label for="massRange" class="control-block">
-                                <span class="control-label-row">
-                                    <span class="control-label">Mass</span>
-                                    <span id="massValue" class="value-badge">1.0 kg</span>
-                                </span>
-                                <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
-                            </label>
+                            <div class="physics-slider-grid">
+                                <label for="sensitivityRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Sensitivity</span>
+                                        <span id="sensitivityValue" class="value-badge">1.0x</span>
+                                    </span>
+                                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
+                                </label>
+                                <label for="gravityRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Gravity</span>
+                                        <span id="gravityValue" class="value-badge">0.00g</span>
+                                    </span>
+                                    <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0">
+                                </label>
+                                <label for="airDragRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Air drag</span>
+                                        <span id="airDragValue" class="value-badge">0.00</span>
+                                    </span>
+                                    <input id="airDragRange" type="range" min="0" max="1.0" step="0.01" value="0">
+                                </label>
+                                <label for="massRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Mass</span>
+                                        <span id="massValue" class="value-badge">1.0 kg</span>
+                                    </span>
+                                    <input id="massRange" type="range" min="0.2" max="5.0" step="0.1" value="1.0">
+                                </label>
+                            </div>
                         </div>
                     </details>
                 </div>
