@@ -614,7 +614,7 @@
                         <summary>
                             <span class="physics-summary-copy">
                                 <span>Physics Settings</span>
-                                <span class="physics-summary-note">Interaction, sensitivity, gravity, air drag, and
+                                <span class="physics-summary-note">Interaction, boundary, sensitivity, gravity, air drag, and
                                     mass</span>
                             </span>
                             <span class="summary-caret" aria-hidden="true">▼</span>
@@ -629,6 +629,15 @@
                                 </select>
                                 <p id="modeDescription" class="control-help">Push mode: stable pushes with moderate
                                     bounce.</p>
+                            </label>
+                            <label for="boundaryModeSelect" class="control-block">
+                                <span class="control-label">Boundary</span>
+                                <select id="boundaryModeSelect">
+                                    <option value="walls" selected>Walls On (Bounce)</option>
+                                    <option value="wrap">Walls Off (Wrap)</option>
+                                </select>
+                                <p class="control-help">Walls Off wraps spheres to the opposite edge (snake-style).
+                                </p>
                             </label>
                             <label for="sensitivityRange" class="control-block">
                                 <span class="control-label-row">
@@ -712,6 +721,7 @@
             status: document.getElementById('status'),
             metrics: document.getElementById('metrics'),
             modeSelect: document.getElementById('modeSelect'),
+            boundaryModeSelect: document.getElementById('boundaryModeSelect'),
             modeDescription: document.getElementById('modeDescription'),
             sensitivityRange: document.getElementById('sensitivityRange'),
             sensitivityValue: document.getElementById('sensitivityValue'),
@@ -800,6 +810,7 @@
             trackedTips: [],
             contactsCount: 0,
             interactionMode: 'balanced',
+            boundaryMode: 'walls',
             sensitivity: 1.0,
             gravity: 0.0,
             airDrag: 0.0,
@@ -1691,6 +1702,30 @@
 
         function constrainSphereToView(sphere, profile) {
             const bounds = getViewBounds();
+            if (state.boundaryMode === 'wrap') {
+                const xWrapLimit = Math.max(0.2, bounds.halfWidth + SPHERE_RADIUS);
+                const yWrapLimit = Math.max(0.2, bounds.halfHeight + SPHERE_RADIUS);
+                const xSpan = xWrapLimit * 2;
+                const ySpan = yWrapLimit * 2;
+
+                while (sphere.position.x > xWrapLimit) {
+                    sphere.position.x -= xSpan;
+                }
+                while (sphere.position.x < -xWrapLimit) {
+                    sphere.position.x += xSpan;
+                }
+                while (sphere.position.y > yWrapLimit) {
+                    sphere.position.y -= ySpan;
+                }
+                while (sphere.position.y < -yWrapLimit) {
+                    sphere.position.y += ySpan;
+                }
+
+                sphere.position.z = PLANE_Z;
+                sphere.velocity.z = 0;
+                return;
+            }
+
             const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
             const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
             const restitution = IDEAL_WALL_RESTITUTION;
@@ -2144,6 +2179,14 @@
             updateModeDescription();
             setStatus(`Interaction mode switched to ${INTERACTION_LABELS[state.interactionMode]}.`);
         });
+        ui.boundaryModeSelect.addEventListener('change', () => {
+            state.boundaryMode = ui.boundaryModeSelect.value === 'wrap' ? 'wrap' : 'walls';
+            if (state.boundaryMode === 'wrap') {
+                setStatus('Walls removed. Spheres now wrap across edges.');
+            } else {
+                setStatus('Walls enabled. Spheres now bounce at edges.');
+            }
+        });
         ui.sensitivityRange.addEventListener('input', () => {
             const nextValue = Number(ui.sensitivityRange.value);
             if (!Number.isFinite(nextValue)) {
@@ -2192,6 +2235,7 @@
 
         ui.modeSelect.value = state.interactionMode;
         updateModeDescription();
+        ui.boundaryModeSelect.value = state.boundaryMode;
         ui.sensitivityRange.value = state.sensitivity.toFixed(1);
         updateSensitivityLabel();
         ui.gravityRange.value = state.gravity.toFixed(2);
