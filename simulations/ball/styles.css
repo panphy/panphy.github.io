@@ -286,8 +286,74 @@ body {
     border-top: 1px solid color-mix(in srgb, var(--panel-border) 75%, transparent);
 }
 
-.physics-boundary-control {
-    width: 100%;
+.physics-toggle-row {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 2px;
+}
+
+.toggle-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #4b5563;
+    transition: background-color 0.25s ease;
+    border-radius: 22px;
+}
+
+[data-theme="light"] .switch-slider {
+    background-color: #cfd5df;
+}
+
+.switch-slider::before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    transition: transform 0.25s ease;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.switch input:checked + .switch-slider {
+    background-color: var(--brand-accent);
+}
+
+[data-theme="dark"] .switch input:checked + .switch-slider {
+    background-color: #53c7c8;
+}
+
+.switch input:checked + .switch-slider::before {
+    transform: translateX(20px);
 }
 
 .physics-slider-grid {

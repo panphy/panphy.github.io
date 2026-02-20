@@ -51,20 +51,27 @@
                         <summary>
                             <span class="physics-summary-copy">
                                 <span>Physics Settings</span>
-                                <span class="physics-summary-note">Boundary, sensitivity, gravity, air drag, and mass</span>
+                                <span class="physics-summary-note">Walls, 1D mode, sensitivity, gravity, air drag, and mass</span>
                             </span>
                             <span class="summary-caret" aria-hidden="true">▼</span>
                         </summary>
                         <div class="physics-controls-inner">
-                            <label for="boundaryModeSelect" class="control-block physics-boundary-control">
-                                <span class="control-label">Boundary</span>
-                                <select id="boundaryModeSelect">
-                                    <option value="walls" selected>Walls On</option>
-                                    <option value="wrap">Walls Off</option>
-                                </select>
-                                <p class="control-help">Walls Off wraps spheres to the opposite edge (snake-style).
-                                </p>
-                            </label>
+                            <div class="physics-toggle-row">
+                                <div class="toggle-block">
+                                    <span class="control-label">Walls</span>
+                                    <label class="switch" aria-label="Toggle walls">
+                                        <input type="checkbox" id="wallsToggle" checked>
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-block">
+                                    <span class="control-label">1D mode</span>
+                                    <label class="switch" aria-label="Toggle 1D mode">
+                                        <input type="checkbox" id="oneDToggle">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
                             <div class="physics-slider-grid">
                                 <label for="sensitivityRange" class="control-block">
                                     <span class="control-label-row">

@@ -10,7 +10,8 @@ const ui = {
     fullscreenBtn: document.getElementById('fullscreenBtn'),
     cameraSelect: document.getElementById('cameraSelect'),
     statusMetrics: document.getElementById('statusMetrics'),
-    boundaryModeSelect: document.getElementById('boundaryModeSelect'),
+    wallsToggle: document.getElementById('wallsToggle'),
+    oneDToggle: document.getElementById('oneDToggle'),
     sensitivityRange: document.getElementById('sensitivityRange'),
     sensitivityValue: document.getElementById('sensitivityValue'),
     gravityRange: document.getElementById('gravityRange'),
@@ -180,6 +181,7 @@ const state = {
     trackedTips: [],
     contactsCount: 0,
     boundaryMode: 'walls',
+    oneD: false,
     sensitivity: 1.0,
     gravity: 0.0,
     airDrag: 0.0,
@@ -523,10 +525,10 @@ function addSphere() {
     // Place at random position within inner 60% of view bounds
     const bounds = getViewBounds();
     const rangeX = bounds.halfWidth * 0.6;
-    const rangeY = bounds.halfHeight * 0.6;
+    const rangeY = state.oneD ? 0 : bounds.halfHeight * 0.6;
     sphere.position.set(
         (Math.random() * 2 - 1) * rangeX,
-        (Math.random() * 2 - 1) * rangeY,
+        rangeY === 0 ? 0 : (Math.random() * 2 - 1) * rangeY,
         PLANE_Z
     );
     sphere.spawnPosition.copy(sphere.position);
@@ -1082,9 +1084,9 @@ function countFingertipsNearSphere(hand, sphere, radius) {
 
 function holdSphereAtWorld(sphere, worldX, worldY, velX, velY) {
     const clampedVelX = Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velX || 0));
-    const clampedVelY = Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velY || 0));
+    const clampedVelY = state.oneD ? 0 : Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velY || 0));
     sphere.position.x = worldX;
-    sphere.position.y = worldY;
+    sphere.position.y = state.oneD ? 0 : worldY;
     sphere.velocity.x = clampedVelX;
     sphere.velocity.y = clampedVelY;
     sphere.group.position.set(worldX, worldY, PLANE_Z);
@@ -1441,6 +1443,10 @@ function constrainSphereToView(sphere, profile) {
 
         sphere.position.z = PLANE_Z;
         sphere.velocity.z = 0;
+        if (state.oneD) {
+            sphere.position.y = 0;
+            sphere.velocity.y = 0;
+        }
         return;
     }
 
@@ -1466,6 +1472,11 @@ function constrainSphereToView(sphere, profile) {
 
     sphere.position.z = PLANE_Z;
     sphere.velocity.z = 0;
+
+    if (state.oneD) {
+        sphere.position.y = 0;
+        sphere.velocity.y = 0;
+    }
 }
 
 function isPinnedSphere(sphere) {
@@ -2030,13 +2041,27 @@ ui.cameraSelect.addEventListener('change', () => {
         switchCamera(ui.cameraSelect.value);
     }
 });
-ui.boundaryModeSelect.addEventListener('change', () => {
-    state.boundaryMode = ui.boundaryModeSelect.value === 'wrap' ? 'wrap' : 'walls';
+ui.wallsToggle.addEventListener('change', () => {
+    state.boundaryMode = ui.wallsToggle.checked ? 'walls' : 'wrap';
     updateBoundaryModeUI();
     if (state.boundaryMode === 'wrap') {
         setStatus('Walls removed. Spheres now wrap across edges.');
     } else {
         setStatus('Walls enabled. Spheres now bounce at edges.');
+    }
+});
+ui.oneDToggle.addEventListener('change', () => {
+    state.oneD = ui.oneDToggle.checked;
+    if (state.oneD) {
+        for (const sphere of spheres) {
+            sphere.position.y = 0;
+            sphere.velocity.y = 0;
+            sphere.spawnPosition.y = 0;
+            sphere.group.position.y = 0;
+        }
+        setStatus('1D mode: spheres move horizontally only.');
+    } else {
+        setStatus('2D mode restored.');
     }
 });
 ui.sensitivityRange.addEventListener('input', () => {
@@ -2104,7 +2129,8 @@ window.addEventListener('beforeunload', () => {
     renderer.dispose();
 });
 
-ui.boundaryModeSelect.value = state.boundaryMode;
+ui.wallsToggle.checked = state.boundaryMode === 'walls';
+ui.oneDToggle.checked = state.oneD;
 updateBoundaryModeUI();
 ui.sensitivityRange.value = state.sensitivity.toFixed(1);
 updateSensitivityLabel();
