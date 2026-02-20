@@ -109,8 +109,8 @@ const state = {
 let filesetResolverCtor = null;
 let handLandmarkerCtor = null;
 
-const LOCAL_MEDIAPIPE_BASE = './assets/mediapipe/tasks-vision-0.10.32';
-const LOCAL_MODEL_PATH = './assets/models/hand_landmarker.task';
+const LOCAL_MEDIAPIPE_BASE = new URL('./ball_assets/mediapipe/tasks-vision-0.10.32', import.meta.url).href;
+const LOCAL_MODEL_PATH = new URL('./ball_assets/models/hand_landmarker.task', import.meta.url).href;
 let mediapipeWasmBaseUrl = `${LOCAL_MEDIAPIPE_BASE}/wasm`;
 
 const MEDIAPIPE_SOURCES = [
