@@ -1123,6 +1123,7 @@
                 group,
                 material,
                 position: new THREE.Vector3(0, 0, PLANE_Z),
+                spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
                 velocity: new THREE.Vector3(0, 0, 0),
                 contactCount: 0
             };
@@ -1145,6 +1146,7 @@
                 (Math.random() * 2 - 1) * rangeY,
                 PLANE_Z
             );
+            sphere.spawnPosition.copy(sphere.position);
             sphere.group.position.copy(sphere.position);
 
             scene.add(sphere.group);
@@ -1156,16 +1158,24 @@
         }
 
         function resetAll() {
-            for (const sphere of spheres) {
-                scene.remove(sphere.group);
-                sphere.material.dispose();
+            if (spheres.length === 0) {
+                setStatus('No spheres to reset. Press "Add Sphere" to create one.');
+                return;
             }
-            spheres.length = 0;
+
+            deselectSphere();
+            for (const sphere of spheres) {
+                sphere.position.copy(sphere.spawnPosition);
+                sphere.velocity.set(0, 0, 0);
+                sphere.contactCount = 0;
+                sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+                sphere.group.rotation.set(0, 0, 0);
+            }
             activeContacts.clear();
             tipHistory.clear();
             handGripStates.clear();
             updateAddBtnState();
-            setStatus(`All spheres removed. Press "Add Sphere" to start.`);
+            setStatus(`Motion reset. Spheres restored to their starting positions.`);
         }
 
         function landmarkToPlane(landmark, out) {
