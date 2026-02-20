@@ -1,7 +1,10 @@
-const BUILD_ID = '2026-02-20T22:45:00Z';
+const BUILD_ID = '2026-02-20T23:05:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
+const CORS_REQUIRED_ASSETS = new Set([
+  'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js'
+]);
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -88,14 +91,37 @@ self.addEventListener('install', (event) => {
       try {
         const resolvedUrl = new URL(url, self.location.origin);
         const isSameOrigin = resolvedUrl.origin === self.location.origin;
-        const res = await fetch(
-          new Request(resolvedUrl.href, {
-            cache: 'reload',
-            mode: isSameOrigin ? 'same-origin' : 'no-cors'
-          })
-        );
-        if (res.ok || res.type === 'opaque') {
-          await cache.put(resolvedUrl.href, res);
+        const isCorsRequired = CORS_REQUIRED_ASSETS.has(resolvedUrl.href);
+        const requestModes = isSameOrigin
+          ? ['same-origin']
+          : (isCorsRequired ? ['cors'] : ['cors', 'no-cors']);
+        let precached = false;
+
+        for (const mode of requestModes) {
+          try {
+            const res = await fetch(
+              new Request(resolvedUrl.href, {
+                cache: 'reload',
+                mode
+              })
+            );
+
+            const isOpaque = res.type === 'opaque';
+            if (res.ok || isOpaque) {
+              if (isCorsRequired && isOpaque) {
+                continue;
+              }
+              await cache.put(resolvedUrl.href, res);
+              precached = true;
+              break;
+            }
+          } catch (fetchErr) {
+            // Try fallback mode (if available) before logging.
+          }
+        }
+
+        if (!precached) {
+          console.warn('Precache failed:', url);
         }
       } catch (e) {
         // keep going even if one file fails
@@ -179,7 +205,12 @@ self.addEventListener('fetch', (event) => {
   // Assets (same-origin and cross-origin): cache-first, then fetch and store
   event.respondWith((async () => {
     const cached = await caches.match(req);
-    if (cached) return cached;
+    if (cached) {
+      // Opaque responses cannot satisfy CORS requests (e.g. module scripts).
+      if (!(req.mode === 'cors' && cached.type === 'opaque')) {
+        return cached;
+      }
+    }
 
     try {
       const fresh = await fetch(req);
