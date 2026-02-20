@@ -144,74 +144,6 @@
             margin-top: 1rem;
         }
 
-        .offline-status {
-            margin-top: 1.2rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-            padding: 0.5rem 0.85rem;
-            border-radius: 999px;
-            border: 1px solid var(--nav-border);
-            background: var(--nav-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 600;
-            max-width: min(92vw, 560px);
-        }
-
-        .offline-status-dot {
-            width: 0.58rem;
-            height: 0.58rem;
-            border-radius: 50%;
-            background: var(--status-check);
-            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
-            flex: 0 0 auto;
-        }
-
-        .offline-status[data-state="checking"] .offline-status-dot {
-            background: var(--status-check);
-            animation: offlinePulse 1.4s ease-out infinite;
-        }
-
-        .offline-status[data-state="ready"] .offline-status-dot {
-            background: var(--status-ready);
-            box-shadow: none;
-            animation: none;
-        }
-
-        .offline-status[data-state="warning"] .offline-status-dot {
-            background: var(--status-warning);
-            box-shadow: none;
-            animation: none;
-        }
-
-        .offline-status[data-state="error"] .offline-status-dot {
-            background: var(--status-error);
-            box-shadow: none;
-            animation: none;
-        }
-
-        .offline-status[data-state="unsupported"] .offline-status-dot {
-            background: var(--status-warning);
-            box-shadow: none;
-            animation: none;
-        }
-
-        .offline-status[data-state="ready"] {
-            color: var(--status-ready);
-        }
-
-        .offline-status[data-state="warning"],
-        .offline-status[data-state="unsupported"] {
-            color: var(--status-warning);
-        }
-
-        .offline-status[data-state="error"] {
-            color: var(--status-error);
-        }
-
         @keyframes offlinePulse {
             0% {
                 box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
@@ -543,10 +475,6 @@
         <img src="/assets/panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
         <h1>PanPhy Labs</h1>
         <p>Physics apps, tools, sims, and some random stuff.</p>
-        <div class="offline-status" id="offline-status" data-state="checking" role="status" aria-live="polite">
-            <span class="offline-status-dot" aria-hidden="true"></span>
-            <span id="offline-status-text">Preparing offline apps...</span>
-        </div>
     </header>
 
     <div class="section" id="tools">
@@ -709,8 +637,6 @@
             }
         });
 
-        const offlineStatus = document.getElementById('offline-status');
-        const offlineStatusText = document.getElementById('offline-status-text');
         const OFFLINE_CARD_REQUIREMENTS = {
             '/tools/markdown_editor.html': [
                 '/tools/markdown_editor.html',
@@ -767,12 +693,6 @@
 
         let offlineReadyPollId = 0;
         let offlineReadinessUpdateInFlight = false;
-
-        function setOfflineStatus(state, message) {
-            if (!offlineStatus || !offlineStatusText) return;
-            offlineStatus.dataset.state = state;
-            offlineStatusText.textContent = message;
-        }
 
         function setCardOfflineState(pill, state, label) {
             if (!pill) return;
@@ -867,7 +787,6 @@
 
             try {
                 if (!('serviceWorker' in navigator) || !('caches' in window)) {
-                    setOfflineStatus('unsupported', 'Offline caching is not supported in this browser.');
                     offlineCardPills.forEach((pill) => {
                         setCardOfflineState(pill, 'warning', 'Needs internet');
                     });
@@ -882,7 +801,6 @@
                 const summary = updateOfflineCardPills(cacheMap);
 
                 if (summary.readyApps === summary.totalApps) {
-                    setOfflineStatus('ready', 'Offline ready');
                     if (offlineReadyPollId) {
                         clearInterval(offlineReadyPollId);
                         offlineReadyPollId = 0;
@@ -891,13 +809,15 @@
                 }
 
                 if (!navigator.onLine) {
-                    setOfflineStatus('warning', 'Offline apps not ready. Go online once to finish caching.');
                     return;
                 }
 
-                setOfflineStatus('checking', 'Preparing offline apps...');
             } catch (error) {
-                setOfflineStatus('warning', 'Offline status check paused. Refresh to retry.');
+                offlineCardPills.forEach((pill) => {
+                    if (pill.dataset.state !== 'ready') {
+                        setCardOfflineState(pill, 'warning', 'Needs internet');
+                    }
+                });
             } finally {
                 offlineReadinessUpdateInFlight = false;
             }
