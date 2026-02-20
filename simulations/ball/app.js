@@ -1495,6 +1495,8 @@ function isPinnedSphere(sphere) {
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
+    const velocityContactDistance = diameter + COLLISION_SEPARATION_EPSILON;
+    const velocityContactDistanceSq = velocityContactDistance * velocityContactDistance;
     const is1D = state.oneD;
     for (let i = 0; i < spheres.length; i++) {
         for (let j = i + 1; j < spheres.length; j++) {
@@ -1509,8 +1511,9 @@ function resolveSphereCollisions(applyVelocity = true) {
             const dx = b.position.x - a.position.x;
             const dy = is1D ? 0 : (b.position.y - a.position.y);
             const distSq = (dx * dx) + (dy * dy);
+            const contactLimitSq = applyVelocity ? velocityContactDistanceSq : diameterSq;
 
-            if (distSq >= diameterSq) {
+            if (distSq > contactLimitSq) {
                 continue;
             }
 
@@ -1544,7 +1547,7 @@ function resolveSphereCollisions(applyVelocity = true) {
             }
 
             const penetration = diameter - dist;
-            if (penetration <= 0) {
+            if (penetration <= 0 && !applyVelocity) {
                 continue;
             }
             const invMassA = aPinned ? 0 : 1;
@@ -1554,13 +1557,15 @@ function resolveSphereCollisions(applyVelocity = true) {
                 continue;
             }
 
-            // Position correction with small bias so contacts don't sink.
-            const correction = (penetration + COLLISION_SEPARATION_EPSILON) / invMassSum;
-            a.position.x -= nx * correction * invMassA;
-            b.position.x += nx * correction * invMassB;
-            if (!is1D) {
-                a.position.y -= ny * correction * invMassA;
-                b.position.y += ny * correction * invMassB;
+            if (penetration > 0) {
+                // Position correction with small bias so contacts don't sink.
+                const correction = (penetration + COLLISION_SEPARATION_EPSILON) / invMassSum;
+                a.position.x -= nx * correction * invMassA;
+                b.position.x += nx * correction * invMassB;
+                if (!is1D) {
+                    a.position.y -= ny * correction * invMassA;
+                    b.position.y += ny * correction * invMassB;
+                }
             }
 
             if (!applyVelocity) {
