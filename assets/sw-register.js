@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-20T23:05:00Z';
+  const BUILD_ID = '2026-02-20T23:40:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 

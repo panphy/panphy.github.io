@@ -371,6 +371,59 @@
             flex-grow: 1;
         }
 
+        .card-offline-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.28rem;
+            align-self: flex-end;
+            margin-bottom: 0.7rem;
+            padding: 0.26rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid var(--nav-border);
+            background: var(--nav-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-secondary);
+            font-size: 10px;
+            line-height: 1.1;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .card-offline-pill::before {
+            content: '';
+            width: 0.36rem;
+            height: 0.36rem;
+            border-radius: 50%;
+            background: var(--status-check);
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+        }
+
+        .card-offline-pill[data-state="checking"]::before {
+            background: var(--status-check);
+            animation: offlinePulse 1.4s ease-out infinite;
+        }
+
+        .card-offline-pill[data-state="ready"]::before {
+            background: var(--status-ready);
+            animation: none;
+            box-shadow: none;
+        }
+
+        .card-offline-pill[data-state="warning"]::before {
+            background: var(--status-warning);
+            animation: none;
+            box-shadow: none;
+        }
+
+        .card-offline-pill[data-state="ready"] {
+            color: var(--status-ready);
+        }
+
+        .card-offline-pill[data-state="warning"] {
+            color: var(--status-warning);
+        }
+
         .card a {
             display: inline-block;
             text-align: center;
@@ -490,7 +543,7 @@
         <p>Physics apps, tools, sims, and some random stuff.</p>
         <div class="offline-status" id="offline-status" data-state="checking" role="status" aria-live="polite">
             <span class="offline-status-dot" aria-hidden="true"></span>
-            <span id="offline-status-text">Preparing offline cache...</span>
+            <span id="offline-status-text">Preparing offline apps...</span>
         </div>
     </header>
 
@@ -656,28 +709,62 @@
 
         const offlineStatus = document.getElementById('offline-status');
         const offlineStatusText = document.getElementById('offline-status-text');
-        const OFFLINE_REQUIRED_ASSETS = [
-            '/index.html',
-            '/tools/markdown_editor.html',
-            '/tools/panphyplot.html',
-            '/tools/motion_tracker.html',
-            '/tools/sound_analyzer.html',
-            '/tools/tone_generator.html',
-            '/tools/digitizer.html',
-            '/simulations/superposition.html',
-            '/simulations/standing_wave.html',
-            '/simulations/lorentz.html',
-            '/simulations/ball.html',
-            '/for_teachers/timer.html',
-            '/for_teachers/visualizer.html',
-            '/fun/react.html',
-            '/fun/ascii_cam.html',
-            'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
-            'https://cdn.jsdelivr.net/npm/chart.js',
-            'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js'
-        ];
+        const OFFLINE_CARD_REQUIREMENTS = {
+            '/tools/markdown_editor.html': [
+                '/tools/markdown_editor.html',
+                '/tools/markdown_editor/css/markdown_editor.css',
+                '/tools/markdown_editor/js/main.js',
+                'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js',
+                'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
+                'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
+                'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js'
+            ],
+            '/tools/panphyplot.html': [
+                '/tools/panphyplot.html',
+                '/tools/panphyplot/js/main.js',
+                '/tools/panphyplot/js/fit-worker.js',
+                'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js'
+            ],
+            '/tools/motion_tracker.html': [
+                '/tools/motion_tracker.html',
+                'https://cdn.jsdelivr.net/npm/chart.js'
+            ],
+            '/tools/sound_analyzer.html': ['/tools/sound_analyzer.html'],
+            '/tools/tone_generator.html': ['/tools/tone_generator.html'],
+            '/tools/digitizer.html': ['/tools/digitizer.html'],
+            '/simulations/superposition.html': ['/simulations/superposition.html'],
+            '/simulations/standing_wave.html': ['/simulations/standing_wave.html'],
+            '/simulations/lorentz.html': ['/simulations/lorentz.html'],
+            '/simulations/ball.html': [
+                '/simulations/ball.html',
+                '/simulations/ball/app.js',
+                'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
+                '/simulations/ball/ball_assets/models/hand_landmarker.task',
+                '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
+                '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',
+                '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.wasm',
+                '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.js',
+                '/simulations/ball/ball_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.wasm'
+            ],
+            '/for_teachers/timer.html': [
+                '/for_teachers/timer.html',
+                '/for_teachers/timer_beep.mp3'
+            ],
+            '/for_teachers/visualizer.html': ['/for_teachers/visualizer.html'],
+            '/fun/react.html': ['/fun/react.html'],
+            '/fun/ascii_cam.html': ['/fun/ascii_cam.html']
+        };
+        const OFFLINE_APP_PATHS = Object.keys(OFFLINE_CARD_REQUIREMENTS);
+        const OFFLINE_REQUIRED_ASSETS = [...new Set(
+            OFFLINE_APP_PATHS.flatMap((path) => OFFLINE_CARD_REQUIREMENTS[path])
+        )];
+        const offlineCardPills = new Map();
 
         let offlineReadyPollId = 0;
+        let offlineReadinessUpdateInFlight = false;
 
         function setOfflineStatus(state, message) {
             if (!offlineStatus || !offlineStatusText) return;
@@ -685,62 +772,138 @@
             offlineStatusText.textContent = message;
         }
 
-        async function getOfflineCacheSummary() {
+        function setCardOfflineState(pill, state, label) {
+            if (!pill) return;
+            pill.dataset.state = state;
+            pill.textContent = label;
+        }
+
+        function normalizeCardPath(hrefValue) {
+            try {
+                const url = new URL(hrefValue, window.location.origin);
+                if (url.origin !== window.location.origin) return null;
+                return url.pathname;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function initOfflineCardPills() {
+            const cardLinks = document.querySelectorAll('.card a[href]');
+            cardLinks.forEach((link) => {
+                const cardPath = normalizeCardPath(link.getAttribute('href'));
+                if (!cardPath || !OFFLINE_CARD_REQUIREMENTS[cardPath]) return;
+
+                const card = link.closest('.card');
+                if (!card || offlineCardPills.has(cardPath)) return;
+
+                const pill = document.createElement('span');
+                pill.className = 'card-offline-pill';
+                setCardOfflineState(pill, 'checking', 'Caching...');
+                card.prepend(pill);
+                offlineCardPills.set(cardPath, pill);
+            });
+        }
+
+        async function getAssetCacheMap(assets) {
+            const cacheMap = new Map();
             if (!('caches' in window)) {
-                return { total: OFFLINE_REQUIRED_ASSETS.length, cachedCount: 0, ready: false };
+                return cacheMap;
             }
 
             const checks = await Promise.all(
-                OFFLINE_REQUIRED_ASSETS.map(async (asset) => {
+                assets.map(async (asset) => {
                     try {
                         const absoluteUrl = new URL(asset, window.location.origin).href;
                         const match = await caches.match(absoluteUrl);
-                        return Boolean(match);
+                        return [asset, Boolean(match)];
                     } catch (error) {
-                        return false;
+                        return [asset, false];
                     }
                 })
             );
 
-            const cachedCount = checks.filter(Boolean).length;
+            checks.forEach(([asset, isCached]) => {
+                cacheMap.set(asset, isCached);
+            });
+            return cacheMap;
+        }
+
+        function updateOfflineCardPills(cacheMap) {
+            let readyApps = 0;
+
+            OFFLINE_APP_PATHS.forEach((path) => {
+                const requirements = OFFLINE_CARD_REQUIREMENTS[path];
+                const ready = requirements.every((asset) => cacheMap.get(asset));
+                if (ready) {
+                    readyApps += 1;
+                }
+
+                const pill = offlineCardPills.get(path);
+                if (!pill) return;
+
+                if (ready) {
+                    setCardOfflineState(pill, 'ready', 'Offline ready');
+                    return;
+                }
+                if (!navigator.onLine) {
+                    setCardOfflineState(pill, 'warning', 'Needs internet');
+                    return;
+                }
+                setCardOfflineState(pill, 'checking', 'Caching...');
+            });
+
             return {
-                total: OFFLINE_REQUIRED_ASSETS.length,
-                cachedCount,
-                ready: cachedCount === OFFLINE_REQUIRED_ASSETS.length
+                readyApps,
+                totalApps: OFFLINE_APP_PATHS.length
             };
         }
 
         async function updateOfflineReadiness() {
-            if (!('serviceWorker' in navigator) || !('caches' in window)) {
-                setOfflineStatus('unsupported', 'Offline caching is not supported in this browser.');
-                if (offlineReadyPollId) {
-                    clearInterval(offlineReadyPollId);
-                    offlineReadyPollId = 0;
+            if (offlineReadinessUpdateInFlight) return;
+            offlineReadinessUpdateInFlight = true;
+
+            try {
+                if (!('serviceWorker' in navigator) || !('caches' in window)) {
+                    setOfflineStatus('unsupported', 'Offline caching is not supported in this browser.');
+                    offlineCardPills.forEach((pill) => {
+                        setCardOfflineState(pill, 'warning', 'Needs internet');
+                    });
+                    if (offlineReadyPollId) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                    }
+                    return;
                 }
-                return;
-            }
 
-            const summary = await getOfflineCacheSummary();
-            const progressText = `${summary.cachedCount}/${summary.total}`;
+                const cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
+                const summary = updateOfflineCardPills(cacheMap);
+                const progressText = `${summary.readyApps}/${summary.totalApps}`;
 
-            if (summary.ready) {
-                setOfflineStatus('ready', `Offline ready (${progressText})`);
-                if (offlineReadyPollId) {
-                    clearInterval(offlineReadyPollId);
-                    offlineReadyPollId = 0;
+                if (summary.readyApps === summary.totalApps) {
+                    setOfflineStatus('ready', `Offline apps ready (${progressText})`);
+                    if (offlineReadyPollId) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                    }
+                    return;
                 }
-                return;
-            }
 
-            if (!navigator.onLine) {
-                setOfflineStatus('warning', `Offline not ready (${progressText}). Go online once to finish caching.`);
-                return;
-            }
+                if (!navigator.onLine) {
+                    setOfflineStatus('warning', `Offline apps not ready (${progressText}). Go online once to finish caching.`);
+                    return;
+                }
 
-            setOfflineStatus('checking', `Preparing offline cache (${progressText})...`);
+                setOfflineStatus('checking', `Preparing offline apps (${progressText})...`);
+            } catch (error) {
+                setOfflineStatus('warning', 'Offline status check paused. Refresh to retry.');
+            } finally {
+                offlineReadinessUpdateInFlight = false;
+            }
         }
 
         function startOfflineReadinessMonitor() {
+            initOfflineCardPills();
             updateOfflineReadiness();
             if (!offlineReadyPollId) {
                 offlineReadyPollId = setInterval(updateOfflineReadiness, 3000);
@@ -777,6 +940,7 @@
         window.addEventListener('offline', updateOfflineFontState);
         updateOfflineFontState();
     </script>
+
 </body>
 
 </html>
