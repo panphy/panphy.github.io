@@ -183,6 +183,9 @@ const PLANE_Z = 0;
 const MAX_SPHERES = 3;
 const IDEAL_WALL_RESTITUTION = 1.0;
 const IDEAL_SPHERE_RESTITUTION = 1.0;
+const PHYSICS_SUBSTEPS = 3;
+const COLLISION_SOLVER_POSITION_ITERATIONS = 6;
+const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 
 const SPHERE_COLORS = [
     0x22d3ee, // cyan
@@ -1199,36 +1202,77 @@ function constrainSphereToView(sphere, profile) {
     sphere.velocity.z = 0;
 }
 
-function resolveSphereCollisions(profile) {
+function isPinnedSphere(sphere) {
+    return frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere;
+}
+
+function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
+    const diameterSq = diameter * diameter;
     for (let i = 0; i < spheres.length; i++) {
         for (let j = i + 1; j < spheres.length; j++) {
             const a = spheres[i];
             const b = spheres[j];
-            if (frameGrippedSpheres.has(a) || frameGrippedSpheres.has(b) || a === state.selectedSphere || b === state.selectedSphere) {
+            const aPinned = isPinnedSphere(a);
+            const bPinned = isPinnedSphere(b);
+            if (aPinned && bPinned) {
                 continue;
             }
 
             const dx = b.position.x - a.position.x;
             const dy = b.position.y - a.position.y;
-            const dist = Math.hypot(dx, dy);
+            const distSq = (dx * dx) + (dy * dy);
 
-            if (dist >= diameter || dist < 0.000001) {
+            if (distSq >= diameterSq) {
                 continue;
             }
 
-            // Contact normal from a to b
-            const nx = dx / dist;
-            const ny = dy / dist;
+            let nx = 0;
+            let ny = 1;
+            let dist = Math.sqrt(Math.max(0, distSq));
+            if (dist > 0.000001) {
+                nx = dx / dist;
+                ny = dy / dist;
+            } else {
+                // Deterministic fallback normal when centers coincide.
+                const rvx = b.velocity.x - a.velocity.x;
+                const rvy = b.velocity.y - a.velocity.y;
+                const rvLen = Math.hypot(rvx, rvy);
+                if (rvLen > 0.000001) {
+                    nx = rvx / rvLen;
+                    ny = rvy / rvLen;
+                } else {
+                    const seed = ((i + 1) * 73856093) ^ ((j + 1) * 19349663);
+                    const angle = (Math.abs(seed) % 6283) / 1000;
+                    nx = Math.cos(angle);
+                    ny = Math.sin(angle);
+                }
+                dist = 0;
+            }
 
-            // Position correction: push apart equally
-            const overlap = (diameter - dist) * 0.5;
-            a.position.x -= nx * overlap;
-            a.position.y -= ny * overlap;
-            b.position.x += nx * overlap;
-            b.position.y += ny * overlap;
+            const penetration = diameter - dist;
+            if (penetration <= 0) {
+                continue;
+            }
+            const invMassA = aPinned ? 0 : 1;
+            const invMassB = bPinned ? 0 : 1;
+            const invMassSum = invMassA + invMassB;
+            if (invMassSum <= 0) {
+                continue;
+            }
 
-            // Elastic velocity exchange along contact normal
+            // Position correction with small bias so contacts don't sink.
+            const correction = (penetration + COLLISION_SEPARATION_EPSILON) / invMassSum;
+            a.position.x -= nx * correction * invMassA;
+            a.position.y -= ny * correction * invMassA;
+            b.position.x += nx * correction * invMassB;
+            b.position.y += ny * correction * invMassB;
+
+            if (!applyVelocity) {
+                continue;
+            }
+
+            // Resolve normal velocity with inverse-mass impulse.
             const relVelN = (b.velocity.x - a.velocity.x) * nx + (b.velocity.y - a.velocity.y) * ny;
 
             // Only resolve if spheres are approaching
@@ -1236,12 +1280,11 @@ function resolveSphereCollisions(profile) {
                 continue;
             }
 
-            // Equal mass elastic collision with restitution
-            const impulse = relVelN * (1 + IDEAL_SPHERE_RESTITUTION) * 0.5;
-            a.velocity.x += impulse * nx;
-            a.velocity.y += impulse * ny;
-            b.velocity.x -= impulse * nx;
-            b.velocity.y -= impulse * ny;
+            const impulse = (-(1 + IDEAL_SPHERE_RESTITUTION) * relVelN) / invMassSum;
+            a.velocity.x -= impulse * nx * invMassA;
+            a.velocity.y -= impulse * ny * invMassA;
+            b.velocity.x += impulse * nx * invMassB;
+            b.velocity.y += impulse * ny * invMassB;
         }
     }
 }
@@ -1251,31 +1294,50 @@ function updatePhysics(dt, profile) {
         return;
     }
 
-    for (const sphere of spheres) {
-        if (sphere === state.selectedSphere || frameGrippedSpheres.has(sphere)) {
-            continue; // Skip physics for selected or currently gripped spheres
+    const subDt = dt / PHYSICS_SUBSTEPS;
+    for (let substep = 0; substep < PHYSICS_SUBSTEPS; substep++) {
+        for (const sphere of spheres) {
+            if (isPinnedSphere(sphere)) {
+                continue;
+            }
+
+            sphere.velocity.y -= state.gravity * subDt;
+            sphere.position.x += sphere.velocity.x * subDt;
+            sphere.position.y += sphere.velocity.y * subDt;
+            constrainSphereToView(sphere, profile);
+
+            const linearDrag = Math.exp(-profile.airDrag * subDt);
+            sphere.velocity.x *= linearDrag;
+            sphere.velocity.y *= linearDrag;
         }
 
-        // Gravity
-        sphere.velocity.y -= state.gravity * dt;
+        // Position solver iterations to prevent visible overlap.
+        for (let iter = 0; iter < COLLISION_SOLVER_POSITION_ITERATIONS; iter++) {
+            resolveSphereCollisions(false);
+            for (const sphere of spheres) {
+                if (!isPinnedSphere(sphere)) {
+                    constrainSphereToView(sphere, profile);
+                }
+            }
+        }
 
-        sphere.position.x += sphere.velocity.x * dt;
-        sphere.position.y += sphere.velocity.y * dt;
-        constrainSphereToView(sphere, profile);
-
-        const linearDrag = Math.exp(-profile.airDrag * dt);
-        sphere.velocity.x *= linearDrag;
-        sphere.velocity.y *= linearDrag;
-
-        // Visual rolling rotation based on current velocity
-        sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
-        sphere.group.rotation.x += (sphere.velocity.y / SPHERE_RADIUS) * dt;
-
-        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+        // One velocity pass after positions are separated.
+        resolveSphereCollisions(true);
+        for (const sphere of spheres) {
+            if (!isPinnedSphere(sphere)) {
+                constrainSphereToView(sphere, profile);
+            }
+        }
     }
 
-    // Sphere-to-sphere collision
-    resolveSphereCollisions(profile);
+    for (const sphere of spheres) {
+        if (isPinnedSphere(sphere)) {
+            continue;
+        }
+        sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
+        sphere.group.rotation.x += (sphere.velocity.y / SPHERE_RADIUS) * dt;
+        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+    }
 }
 
 function updateGlow(dt) {
