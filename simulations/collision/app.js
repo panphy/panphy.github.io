@@ -1828,6 +1828,64 @@ function stabilizeOneDWallPacking() {
     }
 }
 
+
+function getSweptCollisionNormal2D(a, b, diameter) {
+    const startRelX = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
+    const startRelY = (b.prevSubstepY ?? b.position.y) - (a.prevSubstepY ?? a.position.y);
+    const endRelX = b.position.x - a.position.x;
+    const endRelY = b.position.y - a.position.y;
+    const relStepX = endRelX - startRelX;
+    const relStepY = endRelY - startRelY;
+
+    const startDistSq = (startRelX * startRelX) + (startRelY * startRelY);
+    const endDistSq = (endRelX * endRelX) + (endRelY * endRelY);
+    const diameterSq = diameter * diameter;
+
+    if (startDistSq <= diameterSq || endDistSq >= startDistSq) {
+        return null;
+    }
+
+    const aCoeff = (relStepX * relStepX) + (relStepY * relStepY);
+    if (aCoeff <= 1e-12) {
+        return null;
+    }
+
+    const bCoeff = 2 * ((startRelX * relStepX) + (startRelY * relStepY));
+    const cCoeff = startDistSq - diameterSq;
+    const discriminant = (bCoeff * bCoeff) - (4 * aCoeff * cCoeff);
+    if (discriminant < 0) {
+        return null;
+    }
+
+    const sqrtDisc = Math.sqrt(discriminant);
+    const invDenominator = 1 / (2 * aCoeff);
+    const tEnter = (-bCoeff - sqrtDisc) * invDenominator;
+    const tExit = (-bCoeff + sqrtDisc) * invDenominator;
+    let toi = null;
+
+    if (tEnter >= 0 && tEnter <= 1) {
+        toi = tEnter;
+    } else if (tExit >= 0 && tExit <= 1) {
+        toi = tExit;
+    }
+
+    if (toi === null) {
+        return null;
+    }
+
+    const hitRelX = startRelX + (relStepX * toi);
+    const hitRelY = startRelY + (relStepY * toi);
+    const hitLen = Math.hypot(hitRelX, hitRelY);
+    if (hitLen <= 1e-6) {
+        return null;
+    }
+
+    return {
+        nx: hitRelX / hitLen,
+        ny: hitRelY / hitLen
+    };
+}
+
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
@@ -1850,8 +1908,9 @@ function resolveSphereCollisions(applyVelocity = true) {
             const distSq = (dx * dx) + (dy * dy);
             const contactLimitSq = applyVelocity ? velocityContactDistanceSq : diameterSq;
             const crossedInStep = allowSweptOneDCollision ? didOneDCentersCrossThisSubstep(a, b) : false;
+            const sweptHit2D = (!is1D && applyVelocity) ? getSweptCollisionNormal2D(a, b, diameter) : null;
 
-            if (distSq > contactLimitSq && !crossedInStep) {
+            if (distSq > contactLimitSq && !crossedInStep && !sweptHit2D) {
                 continue;
             }
 
@@ -1864,6 +1923,10 @@ function resolveSphereCollisions(applyVelocity = true) {
                 nx = getOneDCollisionNormalX(a, b, dx);
                 ny = 0;
                 dist = Math.abs(dx);
+            } else if (sweptHit2D) {
+                nx = sweptHit2D.nx;
+                ny = sweptHit2D.ny;
+                dist = Math.min(dist, diameter);
             } else if (dist > 0.000001) {
                 nx = dx / dist;
                 ny = dy / dist;
