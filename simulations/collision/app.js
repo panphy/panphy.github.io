@@ -368,7 +368,7 @@ const HAND_CONNECTIONS = [
 const REAL_INTERACTION_PROFILE = {
     contactRadius: 0.15,
     spring: 44,
-    damping: 8.2,
+    damping: 4.0,
     correction: 0.56,
     restitution: 0.9,
     stickPull: 0,
@@ -1296,7 +1296,7 @@ const GRIP_FINGER_PROXIMITY_RADIUS = SPHERE_RADIUS * 1.95;
 const GRIP_MIN_FINGERS_NEAR = 2;
 const GRIP_CAPTURE_FRAMES = 1;
 const GRIP_RELEASE_FRAMES = 2;
-const GRIP_TRACK_LOST_GRACE_FRAMES = 6;
+const GRIP_TRACK_LOST_GRACE_FRAMES = 3;
 const GRIP_MIN_CLOSED_FINGERS = 4;
 const GRIP_MIN_OPEN_FINGERS = 3;
 const GRIP_PRECAPTURE_MIN_CLOSED_FINGERS = 3;
@@ -1304,9 +1304,9 @@ const GRIP_PRECAPTURE_MIN_FINGERS_NEAR = 2;
 const GRIP_MAX_HOLD_SPEED = 3.2;
 const GRIP_MEMORY_DAMPING = 0.9;
 const GRIP_CARRY_VELOCITY_ALPHA = 0.4;
-const GRIP_RELEASE_DEADZONE_SPEED = 0.18;
-const GRIP_RELEASE_SUPPRESSION_SECONDS = 0.30;
-const GRIP_RELEASE_RAMP_SECONDS = 0.24;
+const GRIP_RELEASE_DEADZONE_SPEED = 0.08;
+const GRIP_RELEASE_SUPPRESSION_SECONDS = 0.12;
+const GRIP_RELEASE_RAMP_SECONDS = 0.12;
 const GRIP_MEMORY_HOLD_MAX_SPEED = 0.45;
 const PUSH_LOOKAHEAD_SECONDS = 0.03;
 const PUSH_RADIUS_BOOST_MAX = SPHERE_RADIUS * 0.45;
@@ -1320,7 +1320,6 @@ const PALM_FORCE_SCALE = 1.0;
 const PALM_MIN_APPROACH_SPEED_SCALE = 0.8;
 const PALM_IMPULSE_SCALE = 0.95;
 const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
-const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
 const MAX_PUSH_ACCEL = 8.0;
 const MAX_IMPULSE = 1.4;
 const HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER = 1.15;
@@ -1682,12 +1681,13 @@ function applyTipForces(dt, profile) {
             clearGripState(gripState);
         }
 
-        const palmTipData = tipHistory.get(`${handIndex}-palm`);
-        const palmSpeed = palmTipData ? Math.hypot(palmTipData.velX, palmTipData.velY) : 0;
+        // Suppress palm contact when the hand is clearly open (4+ fingers),
+        // regardless of movement speed.  Previously palm was only suppressed
+        // when nearly stationary, causing a sticky "trap" when the open hand
+        // approached a ball — the palm force fought against the fingertip push.
         if (
             !gripState.sphere &&
-            gripPose.openCount >= PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS &&
-            palmSpeed <= PALM_IDLE_SUPPRESS_MAX_SPEED
+            gripPose.openCount >= PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS
         ) {
             idleOpenPalmHands.add(handKey);
         }
