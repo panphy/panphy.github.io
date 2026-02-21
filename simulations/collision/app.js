@@ -27,7 +27,6 @@ const ui = {
     tipCanvas: document.getElementById('tipCanvas'),
     physicsDetails: document.getElementById('physicsDetails'),
     hud: document.querySelector('.hud'),
-    showHudCheckbox: document.getElementById('showHudCheckbox'),
     selectionOverlay: document.getElementById('selectionOverlay'),
     removeTargetBtn: document.getElementById('removeTargetBtn'),
     cancelTargetBtn: document.getElementById('cancelTargetBtn')
@@ -284,24 +283,21 @@ const MIN_SPHERE_RESTITUTION = 0.0;
 const MAX_SPHERE_RESTITUTION = 1.0;
 const DEFAULT_SPHERE_RESTITUTION = 1.0;
 
-const SPHERE_COLORS = [
-    0x22d3ee, // cyan
-    0xf472b6, // pink
-    0xa78bfa, // purple
-    0xfbbf24, // amber
-    0x34d399, // emerald
-    0xfb923c  // orange
-];
+function randomHexColor() {
+    return Math.floor(Math.random() * 0x1000000);
+}
 
-// Emissive colors (darker tint of each sphere color)
-const SPHERE_EMISSIVES = [
-    0x052f40,
-    0x3d1028,
-    0x1e1540,
-    0x3d2e08,
-    0x0a3020,
-    0x3d1e08
-];
+function darkenHexColor(colorValue, factor = 0.3) {
+    const red = (colorValue >> 16) & 0xff;
+    const green = (colorValue >> 8) & 0xff;
+    const blue = colorValue & 0xff;
+
+    const darkRed = Math.max(0, Math.floor(red * factor));
+    const darkGreen = Math.max(0, Math.floor(green * factor));
+    const darkBlue = Math.max(0, Math.floor(blue * factor));
+
+    return (darkRed << 16) | (darkGreen << 8) | darkBlue;
+}
 
 const spheres = [];
 
@@ -529,7 +525,7 @@ function renderBallControls() {
 
         const colorDot = document.createElement('span');
         colorDot.className = 'ball-color-dot';
-        colorDot.style.backgroundColor = toCssHexColor(SPHERE_COLORS[sphere.colorIndex % SPHERE_COLORS.length]);
+        colorDot.style.backgroundColor = toCssHexColor(sphere.colorHex);
 
         const title = document.createElement('span');
         title.className = 'ball-control-title';
@@ -654,10 +650,10 @@ function getViewBounds() {
     return cachedViewBounds;
 }
 
-function createSphere(colorIndex) {
+function createSphere(colorHex) {
     const material = new THREE.MeshStandardMaterial({
-        color: SPHERE_COLORS[colorIndex],
-        emissive: SPHERE_EMISSIVES[colorIndex],
+        color: colorHex,
+        emissive: darkenHexColor(colorHex),
         emissiveIntensity: 1.0,
         metalness: 0.22,
         roughness: 0.22,
@@ -670,7 +666,7 @@ function createSphere(colorIndex) {
     group.add(mesh, wire);
 
     return {
-        colorIndex,
+        colorHex,
         group,
         material,
         position: new THREE.Vector3(0, 0, PLANE_Z),
@@ -692,8 +688,8 @@ function addSphere() {
         return;
     }
 
-    const colorIndex = spheres.length % SPHERE_COLORS.length;
-    const sphere = createSphere(colorIndex);
+    const colorHex = randomHexColor();
+    const sphere = createSphere(colorHex);
 
     // Place at random position within inner 60% of view bounds
     const bounds = getViewBounds();
@@ -2431,17 +2427,8 @@ ui.stage.addEventListener('pointerdown', handleStageClick);
 ui.removeTargetBtn.addEventListener('click', removeSelectedSphere);
 ui.cancelTargetBtn.addEventListener('click', deselectSphere);
 
-ui.hud.addEventListener('click', () => {
-    ui.hud.classList.add('hidden');
-    ui.showHudCheckbox.checked = false;
-});
-ui.showHudCheckbox.addEventListener('change', () => {
-    if (ui.showHudCheckbox.checked) {
-        ui.hud.classList.remove('hidden');
-    } else {
-        ui.hud.classList.add('hidden');
-    }
-});
+ui.hud.classList.remove('hidden');
+
 ui.cameraSelect.addEventListener('change', () => {
     if (state.running && ui.cameraSelect.value) {
         switchCamera(ui.cameraSelect.value);
