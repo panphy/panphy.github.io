@@ -1,5 +1,6 @@
 (() => {
-  const BUILD_ID = '2026-02-21T14:10:00Z';
+  const BUILD_ID = '2026-02-21T15:05:00Z';
+  const UPDATE_ACK_KEY = 'panphy-sw-update-ack';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -43,7 +44,7 @@
   };
 
   const showUpdateBanner = (registration) => {
-    if (updateBanner || !registration?.waiting || isUpdateInProgress) {
+    if (updateBanner || !registration?.waiting || isUpdateInProgress || sessionStorage.getItem(UPDATE_ACK_KEY) === '1') {
       return;
     }
 
@@ -101,6 +102,8 @@
         return;
       }
 
+      sessionStorage.setItem(UPDATE_ACK_KEY, '1');
+
       removeUpdateBanner();
 
       window.setTimeout(() => {
@@ -142,8 +145,17 @@
 
       listenForUpdates(registration);
 
+      if (sessionStorage.getItem(UPDATE_ACK_KEY) === '1') {
+        if (registration.waiting) {
+          await requestActivation(registration);
+        } else {
+          sessionStorage.removeItem(UPDATE_ACK_KEY);
+        }
+      }
+
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         isUpdateInProgress = false;
+        sessionStorage.removeItem(UPDATE_ACK_KEY);
         removeUpdateBanner();
         if (!isReloadingForUpdate) {
           isReloadingForUpdate = true;
