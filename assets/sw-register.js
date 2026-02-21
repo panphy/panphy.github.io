@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-21T13:55:31Z';
+  const BUILD_ID = '2026-02-21T17:10:00Z';
   const UPDATE_ACK_KEY = 'panphy-sw-update-ack';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
@@ -106,12 +106,22 @@
 
       removeUpdateBanner();
 
-      window.setTimeout(() => {
-        if (!isReloadingForUpdate) {
-          isReloadingForUpdate = true;
-          window.location.reload();
+      window.setTimeout(async () => {
+        if (isReloadingForUpdate) {
+          return;
         }
-      }, 2200);
+
+        try {
+          await registration.update();
+        } catch (error) {
+          console.warn('Service Worker update retry failed', error);
+        }
+
+        isReloadingForUpdate = true;
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set('sw-refresh', BUILD_ID);
+        window.location.replace(nextUrl.toString());
+      }, 4000);
     });
 
     updateBanner.append(message, button);
