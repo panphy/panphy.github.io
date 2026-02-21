@@ -1298,8 +1298,9 @@ const PALM_MIN_APPROACH_SPEED_SCALE = 0.55;
 const PALM_IMPULSE_SCALE = 1.12;
 const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
 const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
-const MAX_PUSH_ACCEL = 50.0;
-const MAX_IMPULSE = 25.0;
+const MAX_PUSH_ACCEL = 30.0;
+const MAX_IMPULSE = 10.0;
+const HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER = 1.8;
 const SHELL_IMPULSE_BOOST = 1.15;
 const TIP_VELOCITY_MAX_ELAPSED = 0.12;
 const FINGER_OPEN_RATIO = {
@@ -1865,7 +1866,68 @@ function applyTipForces(dt, profile) {
     activeContacts.clear();
     newContacts.forEach(k => activeContacts.add(k));
 
+    const maxInteractionSpeed = Math.max(0.6, profile.maxSpeed * HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER);
+    for (const sphere of spheres) {
+        if (sphere.contactCount > 0 && !isPinnedSphere(sphere)) {
+            const vx = sphere.velocity.x;
+            const vy = state.oneD ? 0 : sphere.velocity.y;
+            const speed = Math.hypot(vx, vy);
+            if (speed > maxInteractionSpeed) {
+                const scale = maxInteractionSpeed / speed;
+                sphere.velocity.x = vx * scale;
+                sphere.velocity.y = vy * scale;
+            }
+        }
+    }
+
     return totalContacts;
+}
+
+function enforceWallBounceFallback(sphere) {
+    if (state.boundaryMode !== 'walls') {
+        return;
+    }
+    const bounds = getViewBounds();
+    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+    const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
+    const restitution = IDEAL_WALL_RESTITUTION * clampSphereRestitution(sphere.restitution);
+
+    let bounced = false;
+
+    if (sphere.position.x > xLimit) {
+        sphere.position.x = xLimit;
+        if (sphere.velocity.x > 0) {
+            sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
+            bounced = true;
+        }
+    } else if (sphere.position.x < -xLimit) {
+        sphere.position.x = -xLimit;
+        if (sphere.velocity.x < 0) {
+            sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
+            bounced = true;
+        }
+    }
+
+    if (state.oneD) {
+        sphere.position.y = 0;
+        sphere.velocity.y = 0;
+    } else if (sphere.position.y > yLimit) {
+        sphere.position.y = yLimit;
+        if (sphere.velocity.y > 0) {
+            sphere.velocity.y = -Math.abs(sphere.velocity.y) * restitution;
+            bounced = true;
+        }
+    } else if (sphere.position.y < -yLimit) {
+        sphere.position.y = -yLimit;
+        if (sphere.velocity.y < 0) {
+            sphere.velocity.y = Math.abs(sphere.velocity.y) * restitution;
+            bounced = true;
+        }
+    }
+
+    if (bounced) {
+        syncSphereStateToBody(sphere);
+    }
 }
 
 function isPinnedSphere(sphere) {
@@ -1983,9 +2045,6 @@ function updatePhysics(dt, profile) {
                 sphere.position.y = 0;
                 sphere.velocity.y = 0;
             }
-            if (state.boundaryMode === 'walls') {
-                clampSphereToWalls(sphere);
-            }
             sphere.velocity.x *= linearDrag;
             sphere.velocity.y *= linearDrag;
         } else {
@@ -2010,6 +2069,9 @@ function updatePhysics(dt, profile) {
             }
         }
         syncBodyStateToSphere(sphere);
+        if (!isPinnedSphere(sphere)) {
+            enforceWallBounceFallback(sphere);
+        }
     }
 
     if (state.oneD && state.boundaryMode === 'walls') {
