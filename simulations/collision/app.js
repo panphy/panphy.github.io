@@ -300,9 +300,9 @@ const MATTER_WALL_THICKNESS = SPHERE_RADIUS * 2.5;
 const MATTER_POSITION_ITERATIONS = 12;
 const MATTER_VELOCITY_ITERATIONS = 10;
 const MATTER_CONSTRAINT_ITERATIONS = 2;
-const MATTER_BASE_DT = 1 / 60; // canonical tick duration (seconds) for Matter.js velocity conversion
 const PHYSICS_STEP_DT = 1 / 120; // fixed physics timestep (seconds)
-const PHYSICS_MAX_SUBSTEPS = 6; // safety cap to avoid spiral of death
+const MATTER_BASE_DT = PHYSICS_STEP_DT; // velocity conversion: must match the step rate
+const PHYSICS_MAX_SUBSTEPS = 8; // safety cap to avoid spiral of death
 
 function randomHexColor() {
     return Math.floor(Math.random() * 0x1000000);
@@ -2076,6 +2076,88 @@ function stabilizeOneDWallPacking() {
     }
 }
 
+// Analytical 1D sphere-sphere collision resolution.
+// Bypasses Matter.js pair tracking which can cause repeated impulses and sticking.
+function resolveOneDCollisions() {
+    const count = spheres.length;
+    if (count < 2) {
+        return;
+    }
+
+    const contactDist = SPHERE_RADIUS * 2;
+
+    // Sort by x so we only check adjacent pairs
+    const ordered = [...spheres].sort((a, b) => a.position.x - b.position.x);
+
+    for (let i = 0; i < count - 1; i++) {
+        const a = ordered[i];
+        const b = ordered[i + 1];
+
+        if (isPinnedSphere(a) && isPinnedSphere(b)) {
+            continue;
+        }
+
+        const gap = b.position.x - a.position.x;
+        if (gap >= contactDist) {
+            continue;
+        }
+
+        // Approaching check: only resolve if closing gap
+        const relVel = a.velocity.x - b.velocity.x;
+        if (relVel <= 0) {
+            // Already separating — just fix overlap without changing velocities
+            if (gap < contactDist) {
+                const overlap = contactDist - gap;
+                if (!isPinnedSphere(a) && !isPinnedSphere(b)) {
+                    a.position.x -= overlap * 0.5;
+                    b.position.x += overlap * 0.5;
+                } else if (isPinnedSphere(a)) {
+                    b.position.x += overlap;
+                } else {
+                    a.position.x -= overlap;
+                }
+            }
+            continue;
+        }
+
+        // Compute post-collision velocities analytically
+        const ma = clampSphereMass(a.mass);
+        const mb = clampSphereMass(b.mass);
+        const e = Math.min(
+            clampSphereRestitution(a.restitution),
+            clampSphereRestitution(b.restitution)
+        );
+        const totalMass = ma + mb;
+        const va = a.velocity.x;
+        const vb = b.velocity.x;
+
+        if (!isPinnedSphere(a)) {
+            a.velocity.x = (ma * va + mb * vb - mb * e * (va - vb)) / totalMass;
+        }
+        if (!isPinnedSphere(b)) {
+            b.velocity.x = (ma * va + mb * vb + ma * e * (va - vb)) / totalMass;
+        }
+
+        // Separate positions
+        const overlap = contactDist - gap;
+        if (overlap > 0) {
+            if (!isPinnedSphere(a) && !isPinnedSphere(b)) {
+                const aShare = mb / totalMass;
+                a.position.x -= overlap * aShare;
+                b.position.x += overlap * (1 - aShare);
+            } else if (isPinnedSphere(a)) {
+                b.position.x += overlap;
+            } else {
+                a.position.x -= overlap;
+            }
+        }
+    }
+
+    // Sync all positions/velocities back to Matter.js
+    for (const sphere of ordered) {
+        syncSphereStateToBody(sphere);
+    }
+}
 
 function updatePhysics(dt, profile) {
     if (spheres.length === 0) {
@@ -2135,6 +2217,12 @@ function updatePhysics(dt, profile) {
                 syncSphereStateToBody(sphere);
             }
         }
+    }
+
+    // In 1D, use analytical collision resolution instead of relying on Matter.js
+    // pair tracking, which can produce repeated impulses and sticking.
+    if (state.oneD) {
+        resolveOneDCollisions();
     }
 
     if (state.oneD && state.boundaryMode === 'walls') {
@@ -2724,7 +2812,7 @@ ui.timeScaleRange.addEventListener('input', () => {
     if (!Number.isFinite(nextValue)) {
         return;
     }
-    state.timeScale = Math.max(0.1, Math.min(1.0, nextValue));
+    state.timeScale = Math.max(0.1, Math.min(2.0, nextValue));
     updateTimeScaleLabel();
 });
 
