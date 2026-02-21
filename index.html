@@ -737,7 +737,8 @@
                 assets.map(async (asset) => {
                     try {
                         const absoluteUrl = new URL(asset, window.location.origin).href;
-                        const match = await caches.match(absoluteUrl);
+                        // CDN assets often send Vary headers; ignore them for readiness checks.
+                        const match = await caches.match(absoluteUrl, { ignoreVary: true });
                         return [asset, Boolean(match)];
                     } catch (error) {
                         return [asset, false];

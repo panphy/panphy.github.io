@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-21T13:37:48Z';
+  const BUILD_ID = '2026-02-21T13:47:04Z';
   const UPDATE_ACK_KEY = 'panphy-sw-update-ack';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
