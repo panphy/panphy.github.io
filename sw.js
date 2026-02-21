@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-22T03:30:00Z';
+const BUILD_ID = '2026-02-21T13:30:59Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -163,25 +163,25 @@ function getNavigationFallbackCandidates(requestUrl) {
   const pathname = requestUrl.pathname;
 
   // Try exact route, then route with trailing slash handling, then index fallback.
-  if (pathname === ‘/’) {
-    candidates.push(‘/’);
-    candidates.push(‘/index.html’);
+  if (pathname === '/') {
+    candidates.push('/');
+    candidates.push('/index.html');
   } else {
     candidates.push(pathname);
-    if (pathname.endsWith(‘/’)) {
+    if (pathname.endsWith('/')) {
       candidates.push(`${pathname}index.html`);
     } else {
       candidates.push(`${pathname}/index.html`);
     }
   }
 
-  candidates.push(‘/index.html’);
+  candidates.push('/index.html');
   return [...new Set(candidates)];
 }
 
-// Search only this SW version’s caches (precache first, then runtime).
+// Search only this SW version's caches (precache first, then runtime).
 // Using the global caches.match() searches ALL caches in creation order,
-// which can return stale entries from an old SW’s cache during the brief
+// which can return stale entries from an old SW's cache during the brief
 // window between activation and old-cache cleanup.
 async function matchCurrentCaches(request) {
   const precache = await caches.open(PRECACHE_NAME);
@@ -192,16 +192,16 @@ async function matchCurrentCaches(request) {
 }
 
 // Fetch: cache-first for navigations when available, cache-first for other assets
-self.addEventListener(‘fetch’, (event) => {
+self.addEventListener('fetch', (event) => {
   const req = event.request;
 
-  // Don’t try to cache non-GET (POST, etc.)
-  if (req.method !== ‘GET’) return;
+  // Don't try to cache non-GET (POST, etc.)
+  if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
   const isSameOrigin = url.origin === self.location.origin;
-  const isSupabaseApi = !isSameOrigin && url.hostname.endsWith(‘.supabase.co’);
-  const isBetaPath = isSameOrigin && (url.pathname === ‘/beta’ || url.pathname.startsWith(‘/beta/’));
+  const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
+  const isBetaPath = isSameOrigin && (url.pathname === '/beta' || url.pathname.startsWith('/beta/'));
 
   // Keep all beta routes/assets network-only (no SW cache reads/writes).
   if (isBetaPath) {
@@ -209,7 +209,7 @@ self.addEventListener(‘fetch’, (event) => {
     return;
   }
   // Never cache the dodge game or provide offline fallback for it.
-  if (isSameOrigin && (url.pathname === ‘/fun/dodge.html’ || url.pathname.startsWith(‘/fun/dodge_assets/’))) {
+  if (isSameOrigin && (url.pathname === '/fun/dodge.html' || url.pathname.startsWith('/fun/dodge_assets/'))) {
     event.respondWith(fetch(req));
     return;
   }
@@ -220,7 +220,7 @@ self.addEventListener(‘fetch’, (event) => {
   }
 
   // Navigations: serve cached page immediately (if present), then update in background.
-  if (req.mode === ‘navigate’) {
+  if (req.mode === 'navigate') {
     event.respondWith((async () => {
       const navigationCandidates = getNavigationFallbackCandidates(url);
 
@@ -231,7 +231,7 @@ self.addEventListener(‘fetch’, (event) => {
             try {
               const preload = await event.preloadResponse;
               const fresh = preload || await fetch(req);
-              if (fresh && (fresh.ok || fresh.type === ‘opaque’)) {
+              if (fresh && (fresh.ok || fresh.type === 'opaque')) {
                 const cache = await caches.open(RUNTIME_CACHE);
                 await cache.put(req, fresh.clone());
               }
@@ -246,7 +246,7 @@ self.addEventListener(‘fetch’, (event) => {
       try {
         const preload = await event.preloadResponse;
         const fresh = preload || await fetch(req);
-        if (fresh && (fresh.ok || fresh.type === ‘opaque’)) {
+        if (fresh && (fresh.ok || fresh.type === 'opaque')) {
           const cache = await caches.open(RUNTIME_CACHE);
           await cache.put(req, fresh.clone());
         }
@@ -267,14 +267,14 @@ self.addEventListener(‘fetch’, (event) => {
     const cached = await matchCurrentCaches(req);
     if (cached) {
       // Opaque responses cannot satisfy CORS requests (e.g. module scripts).
-      if (!(req.mode === ‘cors’ && cached.type === ‘opaque’)) {
+      if (!(req.mode === 'cors' && cached.type === 'opaque')) {
         return cached;
       }
     }
 
     try {
       const fresh = await fetch(req);
-      if (fresh && (fresh.ok || fresh.type === ‘opaque’)) {
+      if (fresh && (fresh.ok || fresh.type === 'opaque')) {
         const cache = await caches.open(RUNTIME_CACHE);
         cache.put(req, fresh.clone());
       }
