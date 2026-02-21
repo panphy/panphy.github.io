@@ -72,9 +72,12 @@ for i in range(5):
 
 **2.1 Greek Letters**
 > *In case you need more symbols...*
->> $\alpha \space \beta \space \lambda \space \Lambda \space \theta \space \Omega$
 
->> $\mu_\tau^\alpha \quad \nu \quad \tau \quad \epsilon \quad \psi \quad \rho \quad g_{\mu\nu}$  
+>> $\alpha \beta \gamma$
+
+>> if you need some space between them: $\Lambda \space \theta \space \Omega \space \Delta$ 
+
+>> if you want even more space: $\mu \quad \nu \quad \tau \quad \epsilon \quad \psi \quad \rho$
 
 **2.2 Math Expressions**
 
@@ -103,7 +106,7 @@ $$ {\lim_{\Delta x \to 0}}  \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 | :--- |
 | <small>You need to type <code>\lim\limits_{\Delta x \to 0}</code> for the correct inline version of $ \lim\limits_{\Delta x \to 0} $. If you type <code>\lim_{\Delta x \to 0}</code> inline, you will get $\lim_{\Delta x \to 0}$ instead. (*What's the logic!?* 😑)</small> |
 
-- 2.2.3 **Some more symbols:**
+- 2.2.3 **Some more math symbols:**
 $$
 \begin{array}{|l|l|c|r|r|}
 \hline
