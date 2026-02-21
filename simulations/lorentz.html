@@ -692,10 +692,19 @@
 
             let origin = { x: canvas.width * 0.5, y: canvas.height * 0.9 };
             const scale = 80;
+            const FRAME_ALIGNMENT_EPSILON = 1e-6;
 
             let events = [];
             let nextEventLabelCode = "A".charCodeAt(0);
             let availableLabels = [];
+
+            function isFramesAligned(v) {
+                return Math.abs(v) < FRAME_ALIGNMENT_EPSILON;
+            }
+
+            function getPrimeSuffix(v) {
+                return isFramesAligned(v) ? "" : "'";
+            }
 
             function getNextLabel() {
                 if (availableLabels.length > 0) {
@@ -886,6 +895,7 @@
             }
 
             function drawVelocityLines(u_line, relSpeed) {
+                const primeSuffix = getPrimeSuffix(relSpeed);
                 let endG = computeLineBoxEndpoints(u_line);
                 if (endG.length === 2) {
                     let G0 = endG[0];
@@ -928,13 +938,14 @@
                     let Oc = toCanvasCoords(Opoint.x, Opoint.t);
                     ctx.fillStyle = getCssVar('--velocity-line-u-prime');
                     ctx.font = "14px Arial";
-                    ctx.fillText(`u' = ${u_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
+                    ctx.fillText(`u${primeSuffix} = ${u_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
                 }
             }
 
             function drawProjections(evt, v) {
                 const cp = toCanvasCoords(evt.x, evt.t);
                 const pm = lorentzTransform(evt, v);
+                const primeSuffix = getPrimeSuffix(v);
 
                 // --- Rest frame: perpendicular projections from green dot to x and t axes ---
                 const restColor = getCssVar('--event-rest');
@@ -966,7 +977,7 @@
                 ctx.fillText(evt.t.toFixed(2), tAxisPt.x - 8, tAxisPt.y);
 
                 // --- Moving frame: project from green dot parallel to primed axes ---
-                if (Math.abs(v) < 1e-6) {
+                if (isFramesAligned(v)) {
                     ctx.textAlign = "start";
                     ctx.textBaseline = "alphabetic";
                     return;
@@ -1007,7 +1018,7 @@
                 ctx.rotate(-axisAngle);
                 ctx.textAlign = "center";
                 ctx.textBaseline = "bottom";
-                ctx.fillText("x'=" + pm.x.toFixed(2), 0, -6);
+                ctx.fillText(`x${primeSuffix}=` + pm.x.toFixed(2), 0, -6);
                 ctx.restore();
 
                 ctx.save();
@@ -1015,7 +1026,7 @@
                 ctx.rotate(-axisAngle);
                 ctx.textAlign = "right";
                 ctx.textBaseline = "middle";
-                ctx.fillText("t'=" + pm.t.toFixed(2), -6, 0);
+                ctx.fillText(`t${primeSuffix}=` + pm.t.toFixed(2), -6, 0);
                 ctx.restore();
 
                 // Reset text alignment
@@ -1025,6 +1036,7 @@
 
             function draw() {
                 const relSpeed = parseFloat(speedSlider.value);
+                const primeSuffix = getPrimeSuffix(relSpeed);
                 speedValueDisplay.textContent = relSpeed.toFixed(2);
 
                 const u_line = parseFloat(velocitySlider.value);
@@ -1079,12 +1091,12 @@
                 ctx.stroke();
 
                 ctx.fillStyle = getCssVar('--axis-moving');
-                if (Math.abs(relSpeed) < 0.001) {
-                    ctx.fillText("t'", origin.x + 10, 20);
-                    ctx.fillText("x'", canvas.width - 20, origin.y - 10);
+                if (isFramesAligned(relSpeed)) {
+                    ctx.fillText(`t${primeSuffix}`, origin.x + 10, 20);
+                    ctx.fillText(`x${primeSuffix}`, canvas.width - 20, origin.y - 10);
                 } else {
-                    ctx.fillText("t'", tB.x + 10, tB.y + 20);
-                    ctx.fillText("x'", xB.x - 30, xB.y - 5);
+                    ctx.fillText(`t${primeSuffix}`, tB.x + 10, tB.y + 20);
+                    ctx.fillText(`x${primeSuffix}`, xB.x - 30, xB.y - 5);
                 }
 
                 if (velocityToggle.checked) {
@@ -1155,7 +1167,7 @@
                     ctx.strokeStyle = "#000";
                     ctx.lineWidth = 1;
                     ctx.stroke();
-                    ctx.fillText(p.label + "'", cpm.x + p.radius + 2, cpm.y - p.radius - 2);
+                    ctx.fillText(p.label + primeSuffix, cpm.x + p.radius + 2, cpm.y - p.radius - 2);
                 });
 
                 let html = `
