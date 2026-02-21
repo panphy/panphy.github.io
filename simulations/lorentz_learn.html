@@ -2,307 +2,895 @@
 <html lang="en" data-theme="light">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lorentz Learn – PanPhy Labs</title>
-    <link rel="icon" type="image/png" href="/assets/favicon.png">
-    <script src="/assets/sw-register.js" defer></script>
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            svg: {
-                fontCache: 'global'
-            }
-        };
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorentz Transformation – Learn</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <script src="/assets/sw-register.js" defer></script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
 
-        :root {
-            --font-sans: 'Inter', sans-serif;
-            --font-display: 'Poppins', 'Inter', sans-serif;
-            --bg-color: #f8f9fa;
-            --bg-pattern: #e9ecef;
-            --text-main: #2d3436;
-            --text-secondary: #636e72;
-            --brand-primary: #6c5ce7;
-            --brand-accent: #00cec9;
-            --card-bg: #ffffff;
-            --card-border: #e9ecef;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            --nav-bg: rgba(255, 255, 255, 0.9);
-            --nav-border: rgba(255, 255, 255, 0.5);
-            --muted-bg: #f3f4f6;
-        }
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Poppins', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+      --card-bg: #ffffff;
+      --card-border: #e6e9ef;
+      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      --soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      --muted-bg: #f2f4f8;
+      --border-color: #dfe3ea;
+      --table-header-bg: #f6f8fa;
+      --table-border: #d0d7de;
+      --nav-bg: rgba(255, 255, 255, 0.9);
+      --nav-border: #dfe3ea;
+      --link-color: #6c5ce7;
+      --note-bg: #f0f7ff;
+      --note-border: #54a3ff;
+      --tip-bg: #f0fdf4;
+      --tip-border: #22c55e;
+    }
 
-        [data-theme="dark"] {
-            --bg-color: #0f1014;
-            --bg-pattern: #181a20;
-            --text-main: #dfe6e9;
-            --text-secondary: #b2bec3;
-            --brand-primary: #a29bfe;
-            --brand-accent: #81ecec;
-            --card-bg: #1e2129;
-            --card-border: #2d3436;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-            --nav-bg: rgba(22, 24, 29, 0.9);
-            --nav-border: rgba(255, 255, 255, 0.08);
-            --muted-bg: #252b34;
-        }
+    [data-theme="dark"] {
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+      --card-bg: #1e2129;
+      --card-border: #2d3436;
+      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      --soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      --muted-bg: #252b34;
+      --border-color: #2d3436;
+      --table-header-bg: #21262d;
+      --table-border: #30363d;
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+      --link-color: #a29bfe;
+      --note-bg: #1c2128;
+      --note-border: #388bfd;
+      --tip-bg: #132218;
+      --tip-border: #22c55e;
+    }
 
-        * {
-            box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        body {
-            margin: 0;
-            font-family: var(--font-sans);
-            background: var(--bg-color);
-            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-            background-size: 30px 30px;
-            color: var(--text-main);
-            line-height: 1.75;
-        }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text-main);
+      line-height: 1.7;
+    }
 
-        .banner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            margin: 16px auto 0;
-            width: calc(100% - 40px);
-            max-width: 1000px;
-            padding: 8px 16px;
-            border-radius: 18px;
-            background: var(--nav-bg);
-            border: 1px solid var(--nav-border);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--card-shadow);
-        }
+    /* Banner */
+    .banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--nav-bg);
+      color: var(--text-main);
+      padding: 6px 20px;
+      font-size: 22px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--nav-border);
+      box-shadow: var(--soft-shadow);
+    }
 
-        .banner-logo img {
-            height: 34px;
-        }
+    .banner-logo {
+      display: flex;
+      align-items: center;
+    }
 
-        .banner-title {
-            flex: 1;
-            text-align: center;
-            font-family: var(--font-display);
-            font-size: 1.4rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .banner-logo a {
+      display: flex;
+      align-items: center;
+      line-height: 0;
+    }
 
-        .banner-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .banner-logo img {
+      display: block;
+      max-height: 38px;
+      margin-right: 8px;
+    }
 
-        .banner-link {
-            text-decoration: none;
-            color: var(--text-main);
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 6px 12px;
-            border-radius: 999px;
-            border: 1px solid var(--card-border);
-            background: var(--muted-bg);
-        }
+    .banner-title {
+      flex: 1;
+      text-align: center;
+      font-size: 1.5rem;
+      font-family: var(--font-display);
+      letter-spacing: -0.5px;
+      color: var(--brand-primary);
+    }
 
-        .theme-toggle {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            border-radius: 50%;
-            padding: 6px;
-            color: var(--text-main);
-        }
+    .banner-title.gradient-text {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .content {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 28px 20px 60px;
-        }
+    .banner-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-right: 5px;
+      gap: 10px;
+      align-items: center;
+    }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
-            padding: 22px;
-            margin-bottom: 16px;
-        }
+    .banner-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--muted-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    }
 
-        h1,
-        h2 {
-            font-family: var(--font-display);
-            margin: 0 0 12px;
-            color: var(--brand-primary);
-        }
+    .banner-button:hover {
+      background: #ffffff;
+      transform: translateY(-1px);
+      border-color: var(--brand-primary);
+      text-decoration: none;
+    }
 
-        h2 {
-            margin-top: 0;
-            font-size: 1.35rem;
-        }
+    [data-theme="dark"] .banner-button:hover {
+      background: #2a303a;
+    }
 
-        ul {
-            margin: 10px 0 0 18px;
-            color: var(--text-main);
-        }
+    .theme-toggle button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 6px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      box-shadow: none;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
 
-        p {
-            margin: 0 0 12px;
-        }
+    .theme-toggle button:hover {
+      background-color: rgba(128, 128, 128, 0.2);
+      transform: rotate(15deg);
+    }
 
-        .equation-note {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
+    /* Main Content */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
 
-        footer {
-            text-align: center;
-            padding: 24px;
-            background: var(--card-bg);
-            border-top: 1px solid var(--card-border);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
+    /* Typography */
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0 0 1.5rem 0;
+      letter-spacing: -1px;
+      color: var(--brand-primary);
+    }
 
-        footer a {
-            color: var(--brand-primary);
-        }
+    h1.gradient-text {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        footer a:hover {
-            text-decoration: underline;
-        }
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem 0;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-        @media (max-width: 700px) {
-            .banner {
-                width: calc(100% - 20px);
-                margin-top: 10px;
-                padding: 8px 10px;
-            }
+    h2::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 28px;
+      background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
 
-            .banner-title {
-                font-size: 1.05rem;
-            }
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem 0;
+      color: var(--text-main);
+    }
 
-            .card {
-                padding: 18px;
-            }
-        }
-    </style>
+    p {
+      margin: 0 0 1rem 0;
+      color: var(--text-main);
+    }
+
+    a {
+      color: var(--link-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Lists */
+    ul,
+    ol {
+      margin: 0 0 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    li > ul,
+    li > ol {
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--table-border);
+    }
+
+    th,
+    td {
+      padding: 12px 16px;
+      text-align: center;
+      border-bottom: 1px solid var(--table-border);
+    }
+
+    th {
+      background-color: var(--table-header-bg);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    td {
+      background-color: var(--card-bg);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Note Box */
+    .note-box {
+      background-color: var(--note-bg);
+      border-left: 4px solid var(--note-border);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin: 1.5rem 0;
+    }
+
+    .note-box strong {
+      color: var(--brand-primary);
+    }
+
+    .note-box p {
+      margin: 0.5rem 0;
+    }
+
+    .note-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Tip Box */
+    .tip-box {
+      background-color: var(--tip-bg);
+      border-left: 4px solid var(--tip-border);
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin: 1.5rem 0;
+    }
+
+    .tip-box strong {
+      color: var(--tip-border);
+    }
+
+    .tip-box p {
+      margin: 0.5rem 0;
+    }
+
+    .tip-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Horizontal Rule */
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-color), transparent);
+      margin: 3rem 0;
+    }
+
+    /* Feature Cards */
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+    }
+
+    .feature-list > li {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--soft-shadow);
+    }
+
+    .feature-list > li > strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--brand-primary);
+    }
+
+    .feature-list > li > ul {
+      margin: 0.5rem 0 0 0;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--brand-primary);
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .content {
+        padding: 24px 16px 40px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .banner-title {
+        font-size: 1.2rem;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (pointer: coarse) {
+      .banner-button,
+      .theme-toggle button {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <header class="banner">
-        <div class="banner-logo">
-            <a href="/">
-                <img src="/assets/panphy.png" alt="PanPhy logo">
-            </a>
-        </div>
-        <div class="banner-title">Lorentz Transformation — Learn</div>
-        <div class="banner-actions">
-            <a class="banner-link" href="/simulations/lorentz.html" aria-label="Back to simulator">Back to Sim</a>
-            <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
-        </div>
-    </header>
+  <div class="banner">
+    <div class="banner-logo">
+      <a href="https://panphy.github.io/">
+        <img src="/assets/panphy.png" alt="PanPhy logo" />
+      </a>
+    </div>
 
-    <main class="content">
-        <section class="card">
-            <h1>Why Lorentz transformations matter</h1>
-            <p>At everyday speeds, Newtonian ideas work well. But when objects move close to the speed of light, measurements of space and time depend on the observer’s frame of reference.</p>
-            <p>The Lorentz transformation tells us exactly how to convert coordinates between two inertial frames, usually written as a rest frame \(S\) and a moving frame \(S'\) with relative speed \(v\).</p>
-            <p class="equation-note">In this app, velocities are shown as a fraction of \(c\), so \(\beta = v/c\).</p>
-        </section>
+    <div class="banner-title">Lorentz Transformation – Learn</div>
 
-        <section class="card">
-            <h2>Core equations</h2>
-            <p>For motion along one spatial dimension:</p>
-            $$x' = \gamma (x - vt), \qquad t' = \gamma\left(t - \frac{vx}{c^2}\right)$$
-            $$\gamma = \frac{1}{\sqrt{1-\frac{v^2}{c^2}}} = \frac{1}{\sqrt{1-\beta^2}}$$
-            <p>These equations explain time dilation, length contraction, and relativity of simultaneity as one consistent geometry in spacetime.</p>
-        </section>
+    <div class="banner-buttons">
+      <a href="/simulations/lorentz.html" class="banner-button" title="Open App">Open App</a>
+      <div class="theme-toggle">
+        <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+      </div>
+    </div>
+  </div>
 
-        <section class="card">
-            <h2>How to read the Minkowski diagram</h2>
-            <ul>
-                <li>The vertical axis is \(ct\) and the horizontal axis is \(x\).</li>
-                <li>The light cone lines \(ct=\pm x\) are the same in every inertial frame.</li>
-                <li>The primed axes tilt when \(v\neq 0\): this visualizes how space and time mix.</li>
-                <li>Events are points in spacetime. Their \((x,t)\) and \((x',t')\) values are both shown.</li>
-            </ul>
-        </section>
+  <div class="content">
+    <h1>The Lorentz Transformation</h1>
+    <p>
+      Welcome! This page introduces the physics behind the
+      <a href="/simulations/lorentz.html">Lorentz Transformation interactive diagram</a>.
+      The material is aimed at pre-university physics students meeting special relativity for the first time.
+    </p>
 
-        <section class="card">
-            <h2>Velocity transformation</h2>
-            <p>If an object moves at speed \(u\) in \(S\), then its speed in \(S'\) is:</p>
-            $$u' = \frac{u-v}{1-\frac{uv}{c^2}}$$
-            <p>This formula ensures no observer measures any object faster than light when \(|u|\le c\) and \(|v|<c\).</p>
-        </section>
+    <hr>
 
-        <section class="card">
-            <h2>How this simulator helps pre-uni learners</h2>
-            <ul>
-                <li><strong>Slider for \(v\):</strong> directly see how increasing relative speed changes axis tilt and coordinate values.</li>
-                <li><strong>Event placement:</strong> add events to connect algebra (equations) with geometry (diagram points).</li>
-                <li><strong>Frame comparison table:</strong> instantly compare \((x,t)\) with \((x',t')\) for the same physical event.</li>
-                <li><strong>Velocity mode:</strong> test intuition about relativistic velocity addition and compare \(u\) vs. \(u'\).</li>
-            </ul>
-            <p>Try changing \(v\) slowly from \(0\) to \(0.8c\), and watch how simultaneity lines rotate. This gives a powerful visual reason why “same time” is frame-dependent.</p>
-        </section>
-    </main>
+    <h2>Why Do We Need Special Relativity?</h2>
+    <p>
+      In everyday life we combine velocities by simple addition. If you walk at $2\;\text{m/s}$ on a train
+      travelling at $30\;\text{m/s}$, a person on the platform sees you move at $32\;\text{m/s}$. This is
+      the <strong>Galilean velocity addition</strong>:
+    </p>
+    <p>$$u = u' + v$$</p>
+    <p>
+      However, experiments in the late 19th century&mdash;most famously the
+      <strong>Michelson&ndash;Morley experiment</strong> (1887)&mdash;showed that the speed of light is the same for
+      every observer, regardless of their motion. This contradicts Galilean addition: if you shine a torch on a
+      train, the light does <em>not</em> move at $c + v$ relative to the ground. It moves at exactly $c$.
+    </p>
+    <p>
+      In 1905, Albert Einstein resolved this by publishing the theory of <strong>special relativity</strong>,
+      built on two postulates:
+    </p>
+    <ol>
+      <li><strong>Principle of Relativity:</strong> The laws of physics are the same in every inertial (non-accelerating) reference frame.</li>
+      <li><strong>Invariance of $c$:</strong> The speed of light in a vacuum, $c \approx 3.00 \times 10^{8}\;\text{m/s}$, is the same for all inertial observers.</li>
+    </ol>
+    <p>
+      The mathematical framework that makes these two postulates consistent is the
+      <strong>Lorentz transformation</strong>.
+    </p>
 
-    <footer>
-        &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
-        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-    </footer>
+    <hr>
 
-    <script>
-        const themeButton = document.getElementById('theme-button');
-        const DARK_THEME_KEY = 'panphy-dark';
-        const LIGHT_THEME_KEY = 'panphy-light';
+    <h2>The Lorentz Transformation Equations</h2>
+    <p>
+      Consider two inertial reference frames, $S$ (the "rest frame") and $S'$ (the "moving frame").
+      Frame $S'$ moves at velocity $v$ along the positive $x$-direction relative to $S$.
+      If an event has coordinates $(x,\,t)$ in $S$, then in $S'$ its coordinates $(x',\,t')$ are given by:
+    </p>
+    <p>
+      $$x' = \gamma\,(x - v\,t)$$
+      $$t' = \gamma\!\left(t - \frac{v\,x}{c^{2}}\right)$$
+    </p>
+    <p>where the <strong>Lorentz factor</strong> $\gamma$ is defined as:</p>
+    <p>
+      $$\gamma = \frac{1}{\sqrt{1 - \dfrac{v^{2}}{c^{2}}}}$$
+    </p>
 
-        const currentTheme = localStorage.getItem(DARK_THEME_KEY)
-            ? 'dark'
-            : localStorage.getItem(LIGHT_THEME_KEY)
-                ? 'light'
-                : 'light';
+    <div class="note-box">
+      <p><strong>Natural units:</strong> In the interactive diagram, we measure distances in units where $c = 1$.
+        This means that one unit on the $x$-axis equals one light-second, and one unit on the $t$-axis equals
+        one second. Setting $c = 1$ simplifies the equations to:</p>
+      <p>$$x' = \gamma\,(x - v\,t), \qquad t' = \gamma\,(t - v\,x)$$</p>
+      <p>$$\gamma = \frac{1}{\sqrt{1 - v^{2}}}$$</p>
+    </div>
 
-        function updateButtonEmoji(theme) {
-            themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-        }
+    <h3>Key Properties of $\gamma$</h3>
+    <ul>
+      <li>When $v = 0$: $\gamma = 1$ and the transformation reduces to the identity&mdash;both frames agree.</li>
+      <li>As $v \to c$: $\gamma \to \infty$, and relativistic effects become extreme.</li>
+      <li>$\gamma$ is always $\geq 1$ for any physical velocity $\lvert v \rvert < c$.</li>
+    </ul>
 
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        updateButtonEmoji(currentTheme);
+    <table>
+      <thead>
+        <tr>
+          <th>$v / c$</th>
+          <th>$\gamma$</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>$0$</td><td>$1.000$</td></tr>
+        <tr><td>$0.10$</td><td>$1.005$</td></tr>
+        <tr><td>$0.50$</td><td>$1.155$</td></tr>
+        <tr><td>$0.80$</td><td>$1.667$</td></tr>
+        <tr><td>$0.90$</td><td>$2.294$</td></tr>
+        <tr><td>$0.95$</td><td>$3.203$</td></tr>
+        <tr><td>$0.99$</td><td>$7.089$</td></tr>
+      </tbody>
+    </table>
 
-        themeButton.addEventListener('click', () => {
-            const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', theme);
+    <hr>
 
-            if (theme === 'dark') {
-                localStorage.setItem(DARK_THEME_KEY, 'true');
-                localStorage.removeItem(LIGHT_THEME_KEY);
-            } else {
-                localStorage.setItem(LIGHT_THEME_KEY, 'true');
-                localStorage.removeItem(DARK_THEME_KEY);
-            }
-            updateButtonEmoji(theme);
-        });
-    </script>
+    <h2>Consequences of the Lorentz Transformation</h2>
+
+    <h3>1. Time Dilation</h3>
+    <p>
+      A clock at rest in $S'$ (i.e. at a fixed $x'$) ticks more slowly as seen from $S$.
+      If the clock measures a proper time interval $\Delta t'$ between two events at the same location,
+      the time interval measured in $S$ is:
+    </p>
+    <p>$$\Delta t = \gamma\,\Delta t'$$</p>
+    <p>
+      Since $\gamma > 1$, moving clocks run slow: $\Delta t > \Delta t'$. This is not an illusion&mdash;it is a
+      real, measurable effect confirmed by experiments with fast-moving muons and precision atomic clocks on aircraft.
+    </p>
+
+    <div class="tip-box">
+      <p><strong>Try it in the app:</strong> Place two events at the same $x'$ position (on the same moving-frame
+        worldline) and read off their $t$ and $t'$ coordinates. You will see that the time difference in the rest
+        frame is larger than in the moving frame by a factor of $\gamma$.</p>
+    </div>
+
+    <h3>2. Length Contraction</h3>
+    <p>
+      A rod at rest in $S'$ with proper length $L'$ appears shorter when measured in $S$:
+    </p>
+    <p>$$L = \frac{L'}{\gamma}$$</p>
+    <p>
+      The rod is contracted along its direction of motion. Like time dilation, this is a real physical effect
+      that follows directly from the Lorentz transformation.
+    </p>
+
+    <div class="tip-box">
+      <p><strong>Try it in the app:</strong> Place two events at the same $t$ (simultaneously in the rest frame)
+        separated by some distance $\Delta x$. Now look at their $x'$ separation. The moving frame measures a
+        different spatial separation because the events are not simultaneous in $S'$.</p>
+    </div>
+
+    <h3>3. Relativity of Simultaneity</h3>
+    <p>
+      Two events that are simultaneous in one frame ($\Delta t = 0$) are generally <strong>not</strong>
+      simultaneous in another frame ($\Delta t' \neq 0$), unless they also occur at the same location.
+      From the transformation:
+    </p>
+    <p>$$\Delta t' = \gamma\!\left(\Delta t - v\,\Delta x\right)$$</p>
+    <p>
+      If $\Delta t = 0$ but $\Delta x \neq 0$, then $\Delta t' = -\gamma\,v\,\Delta x \neq 0$.
+    </p>
+
+    <div class="tip-box">
+      <p><strong>Try it in the app:</strong> Place two events at the same $t$ but different $x$ values.
+        Increase the velocity $v$ and watch their $t'$ coordinates diverge&mdash;demonstrating that
+        simultaneity depends on the observer's frame of reference.</p>
+    </div>
+
+    <hr>
+
+    <h2>The Minkowski Diagram</h2>
+    <p>
+      The interactive diagram is a <strong>Minkowski diagram</strong> (also called a spacetime diagram).
+      It plots position $x$ on the horizontal axis and time $t$ on the vertical axis.
+    </p>
+
+    <h3>Rest Frame Axes</h3>
+    <p>
+      The rest frame $S$ has the standard perpendicular axes $x$ and $t$.
+      Gridlines of constant $x$ are vertical; gridlines of constant $t$ are horizontal.
+    </p>
+
+    <h3>Moving Frame Axes</h3>
+    <p>
+      When the moving frame $S'$ has velocity $v$ relative to $S$, its axes appear
+      <strong>tilted</strong> on the diagram:
+    </p>
+    <ul>
+      <li>The $t'$ axis (worldline of $x' = 0$) has the equation $x = v\,t$&mdash;it tilts towards the light cone.</li>
+      <li>The $x'$ axis (line of $t' = 0$) has the equation $t = v\,x$&mdash;it also tilts towards the light cone.</li>
+    </ul>
+    <p>
+      As $v$ increases, both primed axes rotate towards the 45&deg; light-cone line. They can never reach
+      or cross it because nothing can travel at or beyond $c$.
+    </p>
+
+    <h3>The Light Cone</h3>
+    <p>
+      The dashed diagonal lines at 45&deg; represent the paths of light rays passing through the origin
+      ($x = \pm\,c\,t$, or simply $x = \pm\,t$ in natural units). These lines divide spacetime into regions:
+    </p>
+    <ul>
+      <li><strong>Inside the cone</strong> (above and below): <em>timelike</em> separated events.
+        A massive particle can travel between them. Events above the origin are in its future; below, in its past.</li>
+      <li><strong>On the cone:</strong> <em>lightlike</em> (null) separated events. Only light can connect them.</li>
+      <li><strong>Outside the cone</strong> (left and right): <em>spacelike</em> separated events.
+        No signal can travel between them. Different observers may disagree on their time ordering.</li>
+    </ul>
+
+    <div class="note-box">
+      <p><strong>Key insight:</strong> The light cone is invariant under Lorentz transformations.
+        Both frames agree on which events are inside, on, or outside the light cone. This is because the
+        <strong>spacetime interval</strong></p>
+      <p>$$s^{2} = c^{2}\,\Delta t^{2} - \Delta x^{2}$$</p>
+      <p>is the same in every inertial frame.</p>
+    </div>
+
+    <hr>
+
+    <h2>Relativistic Velocity Addition</h2>
+    <p>
+      If an object moves at velocity $u$ in frame $S$, what velocity $u'$ does an observer in frame $S'$ measure?
+      The answer is <strong>not</strong> simple subtraction. The correct formula is:
+    </p>
+    <p>
+      $$u' = \frac{u - v}{1 - \dfrac{u\,v}{c^{2}}}$$
+    </p>
+    <p>In natural units ($c = 1$):</p>
+    <p>
+      $$u' = \frac{u - v}{1 - u\,v}$$
+    </p>
+    <p>
+      This formula ensures that no combination of sub-light velocities ever yields a result $\geq c$.
+      For example, if $u = 0.9\,c$ and $v = 0.9\,c$:
+    </p>
+    <p>
+      $$u' = \frac{0.9 - 0.9}{1 - 0.81} = 0$$
+    </p>
+    <p>
+      The object is at rest in the moving frame, exactly as expected! And if $u = c$:
+    </p>
+    <p>
+      $$u' = \frac{c - v}{1 - v} = \frac{c(1 - v/c)}{1 - v/c} = c$$
+    </p>
+    <p>
+      Light always travels at $c$ in every frame&mdash;consistent with Einstein's second postulate.
+    </p>
+
+    <div class="tip-box">
+      <p><strong>Try it in the app:</strong> Enable the "Velocity Transformation" checkbox. The green line
+        shows velocity $u$ in the rest frame, and the orange line shows the transformed velocity $u'$ in the
+        moving frame. Adjust both $v$ and $u$ to see how the relativistic formula differs from simple subtraction.</p>
+    </div>
+
+    <hr>
+
+    <h2>Events on the Diagram</h2>
+    <p>
+      An <strong>event</strong> is something that happens at a specific place and time&mdash;it has definite
+      coordinates $(x, t)$. On the Minkowski diagram, each event appears as a dot.
+    </p>
+    <p>
+      In the app, each event is plotted twice:
+    </p>
+    <ul>
+      <li>A <strong style="color: #10b981;">green dot</strong> at $(x, t)$&mdash;its rest-frame coordinates (plotted on the $S$ grid).</li>
+      <li>A <strong style="color: #f43f5e;">red dot</strong> at $(x', t')$&mdash;its moving-frame coordinates (also plotted on the $S$ grid
+        to show the numerical values from the Lorentz transformation).</li>
+    </ul>
+    <p>
+      As you change $v$, the red dots move to show how the same physical event has different coordinates
+      in a different frame. The coordinates table below the diagram updates in real time.
+    </p>
+
+    <div class="tip-box">
+      <p><strong>Try it in the app:</strong> Add two or more events, then slowly drag the velocity slider.
+        Watch how the red (moving-frame) dots shift. Events that were simultaneous may no longer be,
+        and time orderings can reverse for spacelike-separated events.</p>
+    </div>
+
+    <hr>
+
+    <h2>Using the App</h2>
+
+    <ul class="feature-list">
+      <li>
+        <strong>Velocity Slider ($v$)</strong>
+        <ul>
+          <li>Controls the velocity of frame $S'$ relative to $S$, in units of $c$.</li>
+          <li>Ranges from $-0.95\,c$ to $+0.95\,c$.</li>
+          <li>At $v = 0$, both frames are aligned and the primed axes overlap the unprimed axes.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Rest Frame Grid / Moving Frame Grid</strong>
+        <ul>
+          <li>Toggle the gridlines for each frame on or off.</li>
+          <li>The rest frame grid is always perpendicular. The moving frame grid shears as $v$ increases.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Velocity Transformation</strong>
+        <ul>
+          <li>Enables the velocity addition visualisation.</li>
+          <li>The green line represents an object moving at velocity $u$ in the rest frame.</li>
+          <li>The orange line represents the same object's velocity $u'$ in the moving frame.</li>
+          <li>The second slider controls $u$.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Adding &amp; Removing Events</strong>
+        <ul>
+          <li>Click "Add Event" to place a new event (labelled A, B, C, ...) at a random position.</li>
+          <li>Drag events to reposition them on the diagram.</li>
+          <li>Right-click (or long-press on mobile) an event to remove it.</li>
+          <li>"Remove All Events" clears every event from the diagram.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Align Frames</strong>
+        <ul>
+          <li>Resets $v$ to zero so both frames coincide.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Pan the Diagram</strong>
+        <ul>
+          <li>Click (or touch) an empty area and drag to pan the view.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <hr>
+
+    <h2>Suggested Exercises</h2>
+    <ol>
+      <li>
+        <strong>Verify time dilation:</strong> Place two events at $(0,\,0)$ and $(0,\,3)$ (same $x$, different $t$).
+        Set $v = 0.60\,c$. Read off $\Delta t'$ and confirm that $\Delta t = \gamma\,\Delta t'$.
+        Calculate: $\gamma = 1/\sqrt{1 - 0.36} = 1.25$.
+      </li>
+      <li>
+        <strong>Explore simultaneity:</strong> Place events at $(-2,\,3)$ and $(2,\,3)$. They share the same $t$, so
+        they are simultaneous in $S$. Now increase $v$ and observe that $t'$ values diverge.
+      </li>
+      <li>
+        <strong>Velocity addition:</strong> Enable velocity transformation. Set $u = 0.80\,c$ and $v = 0.60\,c$.
+        Calculate $u'$ by hand using the formula and verify it matches the value displayed.
+      </li>
+      <li>
+        <strong>Symmetry check:</strong> Compare $v = +0.5\,c$ with $v = -0.5\,c$. Notice how the axes tilt in
+        opposite directions, but $\gamma$ is the same.
+      </li>
+      <li>
+        <strong>Light speed invariance:</strong> Set $u = 0.95\,c$ in the velocity transformation and vary $v$.
+        Notice that $u'$ never reaches $c$. Then consider: what would happen if $u = c$?
+      </li>
+    </ol>
+
+    <hr>
+
+    <h2>Summary of Key Equations</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>Equation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lorentz factor</td>
+          <td>$\gamma = \dfrac{1}{\sqrt{1 - v^{2}/c^{2}}}$</td>
+        </tr>
+        <tr>
+          <td>Position transformation</td>
+          <td>$x' = \gamma\,(x - v\,t)$</td>
+        </tr>
+        <tr>
+          <td>Time transformation</td>
+          <td>$t' = \gamma\!\left(t - \dfrac{v\,x}{c^{2}}\right)$</td>
+        </tr>
+        <tr>
+          <td>Time dilation</td>
+          <td>$\Delta t = \gamma\,\Delta t'$</td>
+        </tr>
+        <tr>
+          <td>Length contraction</td>
+          <td>$L = L'/\gamma$</td>
+        </tr>
+        <tr>
+          <td>Velocity addition</td>
+          <td>$u' = \dfrac{u - v}{1 - uv/c^{2}}$</td>
+        </tr>
+        <tr>
+          <td>Spacetime interval</td>
+          <td>$s^{2} = c^{2}\Delta t^{2} - \Delta x^{2}$</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <p style="text-align: center; font-size: 1.1rem; color: var(--brand-primary); font-weight: 600;">
+      Happy exploring!
+    </p>
+  </div>
+
+  <footer>
+    &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
+    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+  </footer>
+
+  <script>
+    // Theme Toggle
+    const themeButton = document.getElementById('theme-button');
+    const DARK_THEME_KEY = "panphy-dark";
+    const LIGHT_THEME_KEY = "panphy-light";
+
+    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
+      "dark" :
+      localStorage.getItem(LIGHT_THEME_KEY) ?
+        "light" :
+        "light";
+
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateButtonEmoji(currentTheme);
+
+    function updateButtonEmoji(theme) {
+      themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+    }
+
+    themeButton.addEventListener('click', function () {
+      let theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem(DARK_THEME_KEY, 'true');
+        localStorage.removeItem(LIGHT_THEME_KEY);
+        updateButtonEmoji('dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem(LIGHT_THEME_KEY, 'true');
+        localStorage.removeItem(DARK_THEME_KEY);
+        updateButtonEmoji('light');
+      }
+    });
+  </script>
+  <script>
+    // Gradient text: skip on Brave iOS where background-clip:text is broken
+    (function() {
+      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
+      document.querySelectorAll('.banner-title, h1').forEach(function(el) { el.classList.add('gradient-text'); });
+    })();
+  </script>
 </body>
 
 </html>

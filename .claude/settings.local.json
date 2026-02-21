@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node --check:*)"
+      "Bash(node --check:*)",
+      "Bash(git show:*)",
+      "Bash(cd \"/Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/Made with AI/GitHub/panphy.github.io\" && git checkout claude/add-lorentz-learn-page-b7ZP2 2>&1 || git checkout -b claude/add-lorentz-learn-page-b7ZP2 origin/claude/add-lorentz-learn-page-b7ZP2 2>&1)",
+      "Bash(cd:*)"
     ]
   }
 }

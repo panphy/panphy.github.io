@@ -187,23 +187,31 @@
             gap: 12px;
         }
 
-        .header-link {
+        .banner-button {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 6px 14px;
-            border-radius: 999px;
+            text-align: center;
+            background: var(--muted-bg, rgba(128, 128, 128, 0.1));
             border: 1px solid var(--card-border);
-            background: var(--card-bg);
             color: var(--text-main);
             text-decoration: none;
+            cursor: pointer;
             font-size: 0.9rem;
-            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+            transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
         }
 
-        .header-link:hover {
-            border-color: var(--brand-primary);
+        .banner-button:hover {
+            background: #ffffff;
             transform: translateY(-1px);
+            border-color: var(--brand-primary);
+            text-decoration: none;
+        }
+
+        [data-theme="dark"] .banner-button:hover {
+            background: #2a303a;
         }
 
         .theme-toggle button {
@@ -541,7 +549,7 @@
         </div>
         <div class="banner-title">Lorentz Transformation</div>
         <div class="banner-actions">
-            <a class="header-link" href="/simulations/lorentz_learn.html" aria-label="Open Lorentz learn page">Learn</a>
+            <a href="/simulations/lorentz_learn.html" class="banner-button" title="Learn the physics">Learn</a>
             <div class="theme-toggle">
                 <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
             </div>
