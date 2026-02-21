@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-21T00:31:00Z';
+  const BUILD_ID = '2026-02-21T14:10:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -9,6 +9,7 @@
 
   let updateBanner;
   let isReloadingForUpdate = false;
+  let isUpdateInProgress = false;
 
   const removeUpdateBanner = () => {
     if (!updateBanner) {
@@ -42,7 +43,7 @@
   };
 
   const showUpdateBanner = (registration) => {
-    if (updateBanner || !registration?.waiting) {
+    if (updateBanner || !registration?.waiting || isUpdateInProgress) {
       return;
     }
 
@@ -84,15 +85,23 @@
     ].join(';');
 
     button.addEventListener('click', async () => {
+      if (isUpdateInProgress) {
+        return;
+      }
+
+      isUpdateInProgress = true;
       button.disabled = true;
       button.textContent = 'Updating...';
 
       const activationRequested = await requestActivation(registration);
       if (!activationRequested) {
+        isUpdateInProgress = false;
         button.disabled = false;
         button.textContent = 'Update';
         return;
       }
+
+      removeUpdateBanner();
 
       window.setTimeout(() => {
         if (!isReloadingForUpdate) {
@@ -134,6 +143,7 @@
       listenForUpdates(registration);
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        isUpdateInProgress = false;
         removeUpdateBanner();
         if (!isReloadingForUpdate) {
           isReloadingForUpdate = true;
