@@ -684,6 +684,8 @@
             let longPressTimeout = null;
 
             let didDrag = false;
+            let mouseDownPos = { x: 0, y: 0 };
+            const DRAG_THRESHOLD = 5;
             let draggingCanvas = false;
             let canvasDragStart = { x: 0, y: 0 };
             let originStart = { x: 0, y: 0 };
@@ -1200,6 +1202,8 @@
                 didDrag = false;
                 const r = canvas.getBoundingClientRect();
                 const mx = e.clientX - r.left, my = e.clientY - r.top;
+                mouseDownPos.x = mx;
+                mouseDownPos.y = my;
 
                 let foundEvent = false;
                 for (let i = events.length - 1; i >= 0; i--) {
@@ -1225,14 +1229,18 @@
                 const r = canvas.getBoundingClientRect();
                 const mx = e.clientX - r.left, my = e.clientY - r.top;
 
-                if (draggingEvent) {
+                if (!didDrag) {
+                    const dx = mx - mouseDownPos.x, dy = my - mouseDownPos.y;
+                    if (dx * dx + dy * dy < DRAG_THRESHOLD * DRAG_THRESHOLD) return;
                     didDrag = true;
+                }
+
+                if (draggingEvent) {
                     const coords = toMinkowskiCoords(mx, my);
                     draggingEvent.x = coords.x;
                     draggingEvent.t = coords.t;
                     draw();
                 } else if (draggingCanvas) {
-                    didDrag = true;
                     origin.x = originStart.x + (mx - canvasDragStart.x);
                     origin.y = originStart.y + (my - canvasDragStart.y);
                     draw();
@@ -1265,6 +1273,8 @@
                 const t = e.touches[0];
                 const r = canvas.getBoundingClientRect();
                 const tx = t.clientX - r.left, ty = t.clientY - r.top;
+                mouseDownPos.x = tx;
+                mouseDownPos.y = ty;
 
                 let found = false;
                 for (let i = events.length - 1; i >= 0; i--) {
@@ -1294,10 +1304,15 @@
 
             canvas.addEventListener("touchmove", e => {
                 e.preventDefault();
-                didDrag = true;
                 const t = e.touches[0];
                 const r = canvas.getBoundingClientRect();
                 const tx = t.clientX - r.left, ty = t.clientY - r.top;
+
+                if (!didDrag) {
+                    const dx = tx - mouseDownPos.x, dy = ty - mouseDownPos.y;
+                    if (dx * dx + dy * dy < DRAG_THRESHOLD * DRAG_THRESHOLD) return;
+                    didDrag = true;
+                }
 
                 if (draggingEvent) {
                     if (longPressTimeout) {
