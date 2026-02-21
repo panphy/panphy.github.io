@@ -360,14 +360,14 @@ const HAND_CONNECTIONS = [
 // velocityTransfer: fraction of hand approach speed added as impulse on first contact
 const REAL_INTERACTION_PROFILE = {
     contactRadius: 0.15,
-    spring: 112,
-    damping: 6.4,
-    correction: 0.64,
+    spring: 86,
+    damping: 8.2,
+    correction: 0.56,
     restitution: 0.9,
     stickPull: 0,
     stickCapture: 0,
-    maxSpeed: 3.2,
-    velocityTransfer: 0.58
+    maxSpeed: 2.0,
+    velocityTransfer: 0.22
 };
 
 const scene = new THREE.Scene();
@@ -986,11 +986,11 @@ function trackPoint(key, landmark, now, tips) {
     const prev = tipHistory.get(key);
     if (prev) {
         const elapsed = (now - prev.time) / 1000;
-        if (elapsed > 0 && elapsed < TIP_VELOCITY_MAX_ELAPSED) {
+        if (elapsed >= TIP_VELOCITY_MIN_ELAPSED && elapsed < TIP_VELOCITY_MAX_ELAPSED) {
             const rawVelX = (worldX - prev.worldX) / elapsed;
             const rawVelY = (worldY - prev.worldY) / elapsed;
             // EMA smoothing to reduce landmark noise
-            const alpha = 0.55;
+            const alpha = TIP_VELOCITY_FILTER_ALPHA;
             velX = prev.velX !== undefined
                 ? alpha * rawVelX + (1 - alpha) * prev.velX
                 : rawVelX;
@@ -998,6 +998,16 @@ function trackPoint(key, landmark, now, tips) {
                 ? alpha * rawVelY + (1 - alpha) * prev.velY
                 : rawVelY;
         }
+    }
+
+    const tipSpeed = Math.hypot(velX, velY);
+    if (tipSpeed < TIP_VELOCITY_DEADZONE) {
+        velX = 0;
+        velY = 0;
+    } else if (tipSpeed > TIP_VELOCITY_MAX) {
+        const scale = TIP_VELOCITY_MAX / tipSpeed;
+        velX *= scale;
+        velY *= scale;
     }
 
     tipHistory.set(key, { worldX, worldY, velX, velY, time: now });
@@ -1278,31 +1288,40 @@ const GRIP_MIN_CLOSED_FINGERS = 4;
 const GRIP_MIN_OPEN_FINGERS = 3;
 const GRIP_PRECAPTURE_MIN_CLOSED_FINGERS = 3;
 const GRIP_PRECAPTURE_MIN_FINGERS_NEAR = 2;
-const GRIP_MAX_HOLD_SPEED = 5.5;
+const GRIP_MAX_HOLD_SPEED = 3.2;
 const GRIP_MEMORY_DAMPING = 0.9;
 const GRIP_CARRY_VELOCITY_ALPHA = 0.4;
-const GRIP_RELEASE_DEADZONE_SPEED = 0.12;
+const GRIP_RELEASE_DEADZONE_SPEED = 0.18;
 const GRIP_RELEASE_SUPPRESSION_SECONDS = 0.30;
 const GRIP_RELEASE_RAMP_SECONDS = 0.24;
 const GRIP_MEMORY_HOLD_MAX_SPEED = 0.45;
-const PUSH_LOOKAHEAD_SECONDS = 0.05;
-const PUSH_RADIUS_BOOST_MAX = SPHERE_RADIUS * 0.7;
-const PUSH_SHELL_FORCE_SCALE = 0.32;
-const PUSH_MIN_APPROACH_SPEED = 0.03;
-const PALM_CONTACT_RADIUS_SCALE = 1.55;
-const PALM_LOOKAHEAD_SCALE = 1.35;
-const PALM_RADIUS_BOOST_SCALE = 1.4;
+const PUSH_LOOKAHEAD_SECONDS = 0.03;
+const PUSH_RADIUS_BOOST_MAX = SPHERE_RADIUS * 0.45;
+const PUSH_SHELL_FORCE_SCALE = 0.2;
+const PUSH_MIN_APPROACH_SPEED = 0.09;
+const PALM_CONTACT_RADIUS_SCALE = 1.35;
+const PALM_LOOKAHEAD_SCALE = 1.15;
+const PALM_RADIUS_BOOST_SCALE = 1.2;
 const PALM_SHELL_FORCE_SCALE_MIN = 0.55;
-const PALM_FORCE_SCALE = 1.18;
-const PALM_MIN_APPROACH_SPEED_SCALE = 0.55;
-const PALM_IMPULSE_SCALE = 1.12;
+const PALM_FORCE_SCALE = 1.0;
+const PALM_MIN_APPROACH_SPEED_SCALE = 0.8;
+const PALM_IMPULSE_SCALE = 0.95;
 const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
 const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
-const MAX_PUSH_ACCEL = 30.0;
-const MAX_IMPULSE = 10.0;
-const HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER = 1.8;
-const SHELL_IMPULSE_BOOST = 1.15;
+const MAX_PUSH_ACCEL = 12.0;
+const MAX_IMPULSE = 2.2;
+const HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER = 1.15;
+const GLOBAL_SPEED_LIMIT_MULTIPLIER = 1.2;
+const GLOBAL_SPEED_LIMIT_MIN = 2.2;
+const HAND_FORCE_MASS_FLOOR = 0.75;
+const MAX_RELATIVE_APPROACH_SPEED = 1.9;
+const HAND_FORCE_MAX_DT = 1 / 45;
 const TIP_VELOCITY_MAX_ELAPSED = 0.12;
+const TIP_VELOCITY_MIN_ELAPSED = 1 / 90;
+const TIP_VELOCITY_FILTER_ALPHA = 0.35;
+const TIP_VELOCITY_MAX = 2.4;
+const TIP_VELOCITY_DEADZONE = 0.04;
+const TIP_INTERACTION_SPEED_CAP = 1.6;
 const FINGER_OPEN_RATIO = {
     4: 0.92,
     8: 1.02,
@@ -1563,7 +1582,40 @@ function shouldHoldGripFromMemory(gripState) {
     return Math.max(carrySpeed, sphereSpeed) <= GRIP_MEMORY_HOLD_MAX_SPEED;
 }
 
+function getHandContactSpeedLimit(profile) {
+    return Math.max(0.7, profile.maxSpeed * HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER);
+}
+
+function getGlobalSpeedLimit(profile) {
+    return Math.max(
+        GLOBAL_SPEED_LIMIT_MIN,
+        getHandContactSpeedLimit(profile) * GLOBAL_SPEED_LIMIT_MULTIPLIER
+    );
+}
+
+function limitSphereSpeed(sphere, maxSpeed) {
+    if (!Number.isFinite(maxSpeed) || maxSpeed <= 0) {
+        return false;
+    }
+    const vx = sphere.velocity.x;
+    const vy = state.oneD ? 0 : sphere.velocity.y;
+    const speed = Math.hypot(vx, vy);
+    if (!Number.isFinite(speed)) {
+        sphere.velocity.x = 0;
+        sphere.velocity.y = 0;
+        return true;
+    }
+    if (speed <= maxSpeed) {
+        return false;
+    }
+    const scale = maxSpeed / speed;
+    sphere.velocity.x = vx * scale;
+    sphere.velocity.y = state.oneD ? 0 : (vy * scale);
+    return true;
+}
+
 function applyTipForces(dt, profile) {
+    const interactionDt = Math.min(dt, HAND_FORCE_MAX_DT);
     frameGrippedSpheres.clear();
     updateReleaseHandSuppression(dt);
     if (spheres.length === 0) {
@@ -1761,12 +1813,13 @@ function applyTipForces(dt, profile) {
             );
 
             const tipSpeed = state.oneD ? Math.abs(tip.velX) : Math.hypot(tip.velX, tip.velY);
+            const interactionTipSpeed = Math.min(tipSpeed, TIP_INTERACTION_SPEED_CAP);
             const baseLookaheadScale = 1.0;
             const lookaheadScale = baseLookaheadScale * (isPalm ? PALM_LOOKAHEAD_SCALE : 1);
             const baseContactRadius = profile.contactRadius * (isPalm ? PALM_CONTACT_RADIUS_SCALE : 1);
             const radiusBoost = Math.min(
                 PUSH_RADIUS_BOOST_MAX * lookaheadScale * (isPalm ? PALM_RADIUS_BOOST_SCALE : 1),
-                tipSpeed * PUSH_LOOKAHEAD_SECONDS * lookaheadScale
+                interactionTipSpeed * PUSH_LOOKAHEAD_SECONDS * lookaheadScale
             );
             const effectiveContactRadius = baseContactRadius + radiusBoost;
 
@@ -1800,6 +1853,7 @@ function applyTipForces(dt, profile) {
                 : Math.max(minShellScale, 1 - ((distance - baseContactRadius) / radiusBoost));
             const contactScale = handInfluenceScale * shellScale * (isPalm ? PALM_FORCE_SCALE : 1);
             const sphereMass = clampSphereMass(sphere.mass);
+            const interactionMass = Math.max(HAND_FORCE_MASS_FLOOR, sphereMass);
 
             const nxF = scratch.normal.x;
             const nyF = state.oneD ? 0 : scratch.normal.y;
@@ -1815,26 +1869,24 @@ function applyTipForces(dt, profile) {
                     0
                 );
                 const pushForce = (profile.spring * corePenetration) - (profile.damping * inwardSpeed);
-                let pushAccel = pushForce / sphereMass;
+                let pushAccel = pushForce / interactionMass;
 
                 pushAccel = Math.min(pushAccel, MAX_PUSH_ACCEL);
 
                 sphere.position.x += nxF * corePenetration * profile.correction * contactScale;
-                sphere.velocity.x += nxF * pushAccel * dt * contactScale;
+                sphere.velocity.x += nxF * pushAccel * interactionDt * contactScale;
                 if (!state.oneD) {
                     sphere.position.y += nyF * corePenetration * profile.correction * contactScale;
-                    sphere.velocity.y += nyF * pushAccel * dt * contactScale;
+                    sphere.velocity.y += nyF * pushAccel * interactionDt * contactScale;
                 }
             }
 
             // First-contact velocity impulse
-            if (!activeContacts.has(contactKey) && handInfluenceScale >= 0.999) {
+            if (!activeContacts.has(contactKey) && handInfluenceScale >= 0.999 && corePenetration > 0) {
                 const minApproachSpeed = PUSH_MIN_APPROACH_SPEED * (isPalm ? PALM_MIN_APPROACH_SPEED_SCALE : 1);
-                if (relVelAlongNormal > minApproachSpeed) {
-                    let impulse = (relVelAlongNormal * profile.velocityTransfer) / sphereMass;
-                    if (corePenetration <= 0 && radiusBoost > 0) {
-                        impulse *= SHELL_IMPULSE_BOOST;
-                    }
+                const approachSpeed = Math.min(relVelAlongNormal, MAX_RELATIVE_APPROACH_SPEED);
+                if (approachSpeed > minApproachSpeed) {
+                    let impulse = (approachSpeed * profile.velocityTransfer) / interactionMass;
                     if (isPalm) {
                         impulse *= PALM_IMPULSE_SCALE;
                     }
@@ -1850,13 +1902,13 @@ function applyTipForces(dt, profile) {
                 const toTipX = tip.worldX - sphere.position.x;
                 const invDistance = 1 / distance;
                 const stickFactor = corePenetration / profile.contactRadius;
-                const stickAccel = profile.stickPull / sphereMass;
-                sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * contactScale;
-                sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * contactScale;
+                const stickAccel = profile.stickPull / interactionMass;
+                sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * interactionDt * contactScale;
+                sphere.position.x += toTipX * profile.stickCapture * stickFactor * interactionDt * contactScale;
                 if (!state.oneD) {
                     const toTipY = tip.worldY - sphere.position.y;
-                    sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * contactScale;
-                    sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * contactScale;
+                    sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * interactionDt * contactScale;
+                    sphere.position.y += toTipY * profile.stickCapture * stickFactor * interactionDt * contactScale;
                 }
             }
         }
@@ -1866,17 +1918,10 @@ function applyTipForces(dt, profile) {
     activeContacts.clear();
     newContacts.forEach(k => activeContacts.add(k));
 
-    const maxInteractionSpeed = Math.max(0.6, profile.maxSpeed * HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER);
+    const maxInteractionSpeed = getHandContactSpeedLimit(profile);
     for (const sphere of spheres) {
         if (sphere.contactCount > 0 && !isPinnedSphere(sphere)) {
-            const vx = sphere.velocity.x;
-            const vy = state.oneD ? 0 : sphere.velocity.y;
-            const speed = Math.hypot(vx, vy);
-            if (speed > maxInteractionSpeed) {
-                const scale = maxInteractionSpeed / speed;
-                sphere.velocity.x = vx * scale;
-                sphere.velocity.y = vy * scale;
-            }
+            limitSphereSpeed(sphere, maxInteractionSpeed);
         }
     }
 
@@ -2024,6 +2069,7 @@ function updatePhysics(dt, profile) {
     }
 
     const linearDrag = Math.exp(-profile.airDrag * dt);
+    const globalSpeedLimit = getGlobalSpeedLimit(profile);
 
     for (const sphere of spheres) {
         const pinned = isPinnedSphere(sphere);
@@ -2071,6 +2117,9 @@ function updatePhysics(dt, profile) {
         syncBodyStateToSphere(sphere);
         if (!isPinnedSphere(sphere)) {
             enforceWallBounceFallback(sphere);
+            if (limitSphereSpeed(sphere, globalSpeedLimit)) {
+                syncSphereStateToBody(sphere);
+            }
         }
     }
 
