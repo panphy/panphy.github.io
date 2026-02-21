@@ -189,7 +189,11 @@ const state = {
     statusMessage: 'Camera is off.',
     nextTrackingErrorReportAt: 0,
     selectedSphere: null,
-    lastDrawVideoTime: -1
+    lastDrawVideoTime: -1,
+    nextHandDetectAt: 0,
+    lastHudUpdateAt: 0,
+    lastHudText: '',
+    tipOverlayVisible: false
 };
 
 let filesetResolverCtor = null;
@@ -334,6 +338,8 @@ const HAND_MIN_TIP_SPREAD_SCALE = 0.2;
 const HAND_MIN_VALID_FINGER_CHAINS = 2;
 const HAND_MIN_FINGER_CHAIN_SCALE = 0.42;
 const HAND_MIN_THUMB_CHAIN_SCALE = 0.28;
+const HAND_TRACKING_IDLE_INTERVAL_MS = 60;
+const HUD_UPDATE_INTERVAL_MS = 200;
 
 // Hand skeleton connections for visual feedback
 const HAND_CONNECTIONS = [
@@ -367,7 +373,7 @@ const renderer = new THREE.WebGLRenderer({
     canvas: ui.canvas,
     alpha: true,
     antialias: true,
-    powerPreference: 'high-performance'
+    powerPreference: 'default'
 });
 const tipCtx = ui.tipCanvas.getContext('2d', { alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -400,16 +406,21 @@ const tipHistory = new Map();
 const activeContacts = new Set();
 const handGripStates = new Map();
 
-function renderHudInfo() {
+function renderHudInfo(force = false) {
     const fpsText = state.running ? state.fps.toFixed(0) : '--';
-    ui.statusMetrics.textContent =
+    const nextText =
         `${state.statusMessage} | FPS: ${fpsText} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}`;
+    if (!force && state.lastHudText === nextText) {
+        return;
+    }
+    state.lastHudText = nextText;
+    ui.statusMetrics.textContent = nextText;
 }
 
 function setStatus(message, isError = false) {
     state.statusMessage = message;
     ui.statusMetrics.classList.toggle('status-error', isError);
-    renderHudInfo();
+    renderHudInfo(true);
 }
 
 function getInteractionProfile() {
@@ -587,7 +598,11 @@ function renderBallControls() {
     }
 }
 
-function updateMetrics() {
+function updateMetrics(now) {
+    if ((now - state.lastHudUpdateAt) < HUD_UPDATE_INTERVAL_MS) {
+        return;
+    }
+    state.lastHudUpdateAt = now;
     renderHudInfo();
 }
 
@@ -627,6 +642,8 @@ function resizeStage() {
     ui.tipCanvas.height = Math.max(1, Math.round(rect.height));
     if (tipCtx) {
         tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
+        state.tipOverlayVisible = false;
+        state.lastDrawVideoTime = -1;
     }
 
     if (state.oneD && state.boundaryMode === 'walls') {
@@ -1002,6 +1019,18 @@ function drawTrackedTips() {
     if (!tipCtx) {
         return;
     }
+
+    const hasOverlayContent = state.lastHands.length > 0 || state.trackedTips.length > 0;
+    if (!hasOverlayContent) {
+        if (!state.tipOverlayVisible) {
+            return;
+        }
+        tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
+        state.tipOverlayVisible = false;
+        state.lastDrawVideoTime = state.lastVideoTime;
+        return;
+    }
+
     if (state.lastDrawVideoTime === state.lastVideoTime) {
         return;
     }
@@ -1057,6 +1086,8 @@ function drawTrackedTips() {
         tipCtx.fill();
         tipCtx.stroke();
     }
+
+    state.tipOverlayVisible = true;
 }
 
 const newContacts = new Set();
@@ -2035,6 +2066,12 @@ function step(now) {
         return;
     }
 
+    if (document.hidden) {
+        state.lastFrameTime = now;
+        requestAnimationFrame(step);
+        return;
+    }
+
     currentFrameId += 1;
 
     if (!state.lastFrameTime) {
@@ -2048,13 +2085,16 @@ function step(now) {
     state.fps = state.fps ? (state.fps * 0.9) + (instantFps * 0.1) : instantFps;
 
     if (state.handLandmarker && ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-        if (ui.video.currentTime !== state.lastVideoTime) {
-            state.lastVideoTime = ui.video.currentTime;
+        const currentVideoTime = ui.video.currentTime;
+        if (currentVideoTime !== state.lastVideoTime && now >= state.nextHandDetectAt) {
+            state.lastVideoTime = currentVideoTime;
             try {
                 const result = state.handLandmarker.detectForVideo(ui.video, now);
                 state.lastHands = extractReliableHands(result);
+                state.nextHandDetectAt = now + (state.lastHands.length > 0 ? 0 : HAND_TRACKING_IDLE_INTERVAL_MS);
             } catch (error) {
                 state.lastHands = [];
+                state.nextHandDetectAt = now + HAND_TRACKING_IDLE_INTERVAL_MS;
                 if (now >= state.nextTrackingErrorReportAt) {
                     state.nextTrackingErrorReportAt = now + 2000;
                     const message = error && error.message ? error.message : String(error);
@@ -2073,7 +2113,7 @@ function step(now) {
     updatePhysics(dt, profile);
     updateGlow(dt);
     drawTrackedTips();
-    updateMetrics();
+    updateMetrics(now);
     renderer.render(scene, camera3d);
 
     requestAnimationFrame(step);
@@ -2250,6 +2290,9 @@ async function switchCamera(deviceId) {
         await ui.video.play();
         state.stream = nextStream;
         state.lastVideoTime = -1;
+        state.lastDrawVideoTime = -1;
+        state.nextHandDetectAt = 0;
+        state.tipOverlayVisible = false;
 
         if (previousStream && previousStream !== nextStream) {
             previousStream.getTracks().forEach((track) => track.stop());
@@ -2292,6 +2335,43 @@ async function switchCamera(deviceId) {
     } finally {
         ui.cameraSelect.disabled = ui.cameraSelect.options.length <= 1;
     }
+}
+
+function setStreamTracksEnabled(enabled) {
+    if (!state.stream) {
+        return;
+    }
+    const tracks = state.stream.getVideoTracks();
+    for (let i = 0; i < tracks.length; i++) {
+        tracks[i].enabled = enabled;
+    }
+}
+
+function handleVisibilityChange() {
+    if (!state.running) {
+        return;
+    }
+
+    if (document.hidden) {
+        setStreamTracksEnabled(false);
+        state.lastFrameTime = 0;
+        state.lastDrawVideoTime = -1;
+        state.nextHandDetectAt = 0;
+        setStatus('Paused in background to save battery.');
+        return;
+    }
+
+    setStreamTracksEnabled(true);
+    state.lastFrameTime = performance.now();
+    state.lastVideoTime = -1;
+    state.lastDrawVideoTime = -1;
+    state.nextHandDetectAt = 0;
+    if (ui.video.paused) {
+        void ui.video.play().catch((error) => {
+            console.warn('Could not resume camera playback after background pause:', error);
+        });
+    }
+    setStatus('Ready.');
 }
 
 async function startCameraAndTracking() {
@@ -2360,6 +2440,8 @@ async function startCameraAndTracking() {
     resizeStage();
     state.running = true;
     state.lastFrameTime = performance.now();
+    state.nextHandDetectAt = 0;
+    state.lastHudUpdateAt = 0;
     if (spheres.length === 0) {
         addSphere();
     }
@@ -2367,7 +2449,12 @@ async function startCameraAndTracking() {
     ui.resetBtn.disabled = false;
     ui.startBtn.disabled = false;
     updateStartButtonState();
-    setStatus('Ready.');
+    if (document.hidden) {
+        setStreamTracksEnabled(false);
+        setStatus('Paused in background to save battery.');
+    } else {
+        setStatus('Ready.');
+    }
     requestAnimationFrame(step);
 }
 
@@ -2377,6 +2464,9 @@ function stopCameraAndTracking() {
     state.fps = 0;
     state.lastVideoTime = -1;
     state.lastDrawVideoTime = -1;
+    state.nextHandDetectAt = 0;
+    state.lastHudUpdateAt = 0;
+    state.tipOverlayVisible = false;
     state.lastHands = [];
     state.handsCount = 0;
     state.tipCount = 0;
@@ -2517,6 +2607,7 @@ if (window.visualViewport && typeof window.visualViewport.addEventListener === '
 }
 document.addEventListener('fullscreenchange', updateFullscreenUI);
 document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+document.addEventListener('visibilitychange', handleVisibilityChange);
 if ('ResizeObserver' in window) {
     new ResizeObserver(scheduleResizeStage).observe(ui.stage);
 }
