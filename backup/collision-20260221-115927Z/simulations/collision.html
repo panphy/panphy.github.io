@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision Lab</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <script src="/assets/sw-register.js" defer></script>
+    <link rel="stylesheet" href="/simulations/collision/styles.css">
+</head>
+
+<body>
+    <div class="topbar">
+        <div class="bar">
+            <a class="brand" href="/" aria-label="PanPhy home">
+                <img src="/assets/panphy.png" alt="panphy logo">
+            </a>
+            <div class="title gradient-text">Collision Lab</div>
+        </div>
+    </div>
+
+    <!--
+      Collision solver note (for future maintenance):
+      - 2D mode (1D toggle OFF):
+        Uses geometric collision normals from full x/y separation vectors. This is generally stable because collisions can resolve
+        in many directions and contacts are less likely to become long compressed chains.
+      - 1D mode (1D toggle ON):
+        Forces motion and normals to the x-axis only. The solver additionally uses swept crossing checks and optional wall-packing
+        stabilization to handle tunneling and overlap on a single line.
+      - Why 1D is harder here:
+        In 1D, all bodies share one lane, so repeated chain impacts (and wall compression) happen often. Small numerical errors
+        can accumulate faster, which can look like temporary sticking or jitter under high collision frequency.
+    -->
+    <main class="app">
+        <section id="stage" class="stage panel">
+            <button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
+            <div class="controls-panel" id="controlsPanel" aria-label="Simulation controls">
+                <button id="controlsClose" type="button" aria-label="Close controls">&#x2715;</button>
+                <div class="cp-section">
+                    <span class="cp-label">Setup</span>
+                    <div class="controls-main">
+                        <button id="startBtn" type="button">Start Camera</button>
+                        <label for="cameraSelect" class="control-block">
+                            <span class="control-label">Camera</span>
+                            <select id="cameraSelect" disabled>
+                                <option value="">Default</option>
+                            </select>
+                        </label>
+                        <button id="addBtn" type="button" disabled>Add Sphere</button>
+                        <button id="resetBtn" type="button" disabled>Reset Motion</button>
+                    </div>
+                </div>
+                <div class="cp-divider"></div>
+                <div class="cp-section">
+                    <span class="cp-label">Physics</span>
+                    <details id="physicsDetails" class="physics-controls">
+                        <summary>
+                            <span class="physics-summary-copy">Physics Settings</span>
+                            <span class="summary-caret" aria-hidden="true">▼</span>
+                        </summary>
+                        <div class="physics-controls-inner">
+                            <div class="physics-toggle-row">
+                                <div class="toggle-block">
+                                    <span class="control-label">Walls</span>
+                                    <label class="switch" aria-label="Toggle walls">
+                                        <input type="checkbox" id="wallsToggle" checked>
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-block">
+                                    <span class="control-label">1D mode</span>
+                                    <label class="switch" aria-label="Toggle 1D mode">
+                                        <input type="checkbox" id="oneDToggle">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="physics-slider-grid">
+                                <label for="sensitivityRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Sensitivity</span>
+                                        <span id="sensitivityValue" class="value-badge">1.0x</span>
+                                    </span>
+                                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
+                                </label>
+                                <label for="gravityRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Gravity</span>
+                                        <span id="gravityValue" class="value-badge">0.00g</span>
+                                    </span>
+                                    <input id="gravityRange" type="range" min="0" max="2.0" step="0.05" value="0">
+                                </label>
+                                <label for="airDragRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Air drag</span>
+                                        <span id="airDragValue" class="value-badge">0.00</span>
+                                    </span>
+                                    <input id="airDragRange" type="range" min="0" max="1.0" step="0.01" value="0">
+                                </label>
+                            </div>
+                        </div>
+                    </details>
+                    <details id="ballControlsSection" class="ball-controls" aria-live="polite" open>
+                        <summary class="ball-controls-summary">
+                            <span class="ball-controls-head">
+                                <span class="cp-label">Ball Settings</span>
+                                <span id="ballControlsCount" class="value-badge">0 / 3</span>
+                            </span>
+                            <span class="summary-caret" aria-hidden="true">▼</span>
+                        </summary>
+                        <div class="ball-controls-body">
+                            <p class="control-help">Add a sphere to adjust its mass and coefficient of restitution.</p>
+                            <div id="ballControlsList" class="ball-controls-list"></div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <button id="fullscreenBtn" type="button" aria-label="Enter full screen"
+                title="Enter full screen">&#x26F6;</button>
+            <video id="camera" class="media-layer" autoplay playsinline muted></video>
+            <canvas id="renderCanvas" class="media-layer"></canvas>
+            <canvas id="tipCanvas" class="media-layer"></canvas>
+
+            <div id="selectionOverlay" role="dialog" aria-modal="true" aria-label="Sphere selection"
+                style="display: none; position: absolute; inset: 0; background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 20; align-items: center; justify-content: center; flex-direction: column; gap: 16px;">
+                <p style="margin: 0; font-size: 1.2rem; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                    Sphere Selected</p>
+                <div style="display: flex; gap: 12px;">
+                    <button id="removeTargetBtn" type="button"
+                        style="width: auto; padding: 10px 24px; min-height: 44px; background: rgba(251, 113, 133, 0.2); border-color: var(--danger); color: #fff;">Remove
+                        Sphere</button>
+                    <button id="cancelTargetBtn" type="button"
+                        style="width: auto; padding: 10px 24px; min-height: 44px;">Cancel</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="hud">
+            <div id="statusMetrics" class="pill mono">Camera is off. | FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 |
+                Spheres: 0</div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; <a href="/">PanPhy Labs</a> |
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+    </footer>
+    <script type="module" src="/simulations/collision/app.js"></script>
+</body>
+
+</html>
