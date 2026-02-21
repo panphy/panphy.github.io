@@ -933,10 +933,10 @@
             }
 
             function drawProjections(evt, v) {
+                const cp = toCanvasCoords(evt.x, evt.t);
                 const pm = lorentzTransform(evt, v);
 
-                // Green dot → rest frame axes (vertical to x-axis, horizontal to t-axis)
-                const cp = toCanvasCoords(evt.x, evt.t);
+                // --- Rest frame: perpendicular projections from green dot to x and t axes ---
                 const restColor = getCssVar('--event-rest');
                 ctx.strokeStyle = restColor;
                 ctx.lineWidth = 1.5;
@@ -965,35 +965,58 @@
                 ctx.textBaseline = "middle";
                 ctx.fillText(evt.t.toFixed(2), tAxisPt.x - 8, tAxisPt.y);
 
-                // Red dot → rest frame axes, labelled with primed values
-                const cpm = toCanvasCoords(pm.x, pm.t);
+                // --- Moving frame: project from green dot parallel to primed axes ---
+                if (Math.abs(v) < 1e-6) {
+                    ctx.textAlign = "start";
+                    ctx.textBaseline = "alphabetic";
+                    return;
+                }
+
                 const movColor = getCssVar('--axis-moving');
                 ctx.strokeStyle = movColor;
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([6, 4]);
 
-                const xAxisPtM = toCanvasCoords(pm.x, 0);
+                const invGammaSq = 1 - v * v;
+
+                // To read x': line parallel to t'-axis (direction (v,1)) from event to x'-axis (t = v*x)
+                const s1 = (v * evt.x - evt.t) / invGammaSq;
+                const hitXPrime = toCanvasCoords(evt.x + v * s1, evt.t + s1);
                 ctx.beginPath();
-                ctx.moveTo(cpm.x, cpm.y);
-                ctx.lineTo(xAxisPtM.x, xAxisPtM.y);
+                ctx.moveTo(cp.x, cp.y);
+                ctx.lineTo(hitXPrime.x, hitXPrime.y);
                 ctx.stroke();
 
-                const tAxisPtM = toCanvasCoords(0, pm.t);
+                // To read t': line parallel to x'-axis (direction (1,v)) from event to t'-axis (x = v*t)
+                const s2 = (v * evt.t - evt.x) / invGammaSq;
+                const hitTPrime = toCanvasCoords(evt.x + s2, evt.t + v * s2);
                 ctx.beginPath();
-                ctx.moveTo(cpm.x, cpm.y);
-                ctx.lineTo(tAxisPtM.x, tAxisPtM.y);
+                ctx.moveTo(cp.x, cp.y);
+                ctx.lineTo(hitTPrime.x, hitTPrime.y);
                 ctx.stroke();
 
                 ctx.setLineDash([]);
 
+                // Labels rotated to align with the primed axes
                 ctx.fillStyle = movColor;
                 ctx.font = "bold 12px Arial";
+                const axisAngle = Math.atan(v);
+
+                ctx.save();
+                ctx.translate(hitXPrime.x, hitXPrime.y);
+                ctx.rotate(-axisAngle);
                 ctx.textAlign = "center";
-                ctx.textBaseline = "top";
-                ctx.fillText("x'=" + pm.x.toFixed(2), xAxisPtM.x, xAxisPtM.y + 6);
+                ctx.textBaseline = "bottom";
+                ctx.fillText("x'=" + pm.x.toFixed(2), 0, -6);
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(hitTPrime.x, hitTPrime.y);
+                ctx.rotate(-axisAngle);
                 ctx.textAlign = "right";
                 ctx.textBaseline = "middle";
-                ctx.fillText("t'=" + pm.t.toFixed(2), tAxisPtM.x - 8, tAxisPtM.y);
+                ctx.fillText("t'=" + pm.t.toFixed(2), -6, 0);
+                ctx.restore();
 
                 // Reset text alignment
                 ctx.textAlign = "start";

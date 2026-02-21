@@ -714,20 +714,26 @@
     <h3>Reading Coordinates with Projection Lines</h3>
     <p>
       Click (or tap) any green event dot to select it. When an event is selected and the
-      "Projection Lines" toggle is on, the app draws dashed guide lines showing how to read
-      the event's coordinates in both frames:
+      "Projection Lines" toggle is on, the app draws dashed guide lines from the event
+      showing how to read its coordinates in both frames:
     </p>
     <ul>
-      <li><strong style="color: #10b981;">Green dashed lines</strong> project from the green dot (rest-frame event)
-        vertically down to the $x$-axis and horizontally across to the $t$-axis, showing $(x, t)$.</li>
-      <li><strong style="color: #3b82f6;">Blue dashed lines</strong> project from the red dot (moving-frame event)
-        vertically and horizontally to the axes, labelled with the primed coordinates $(x', t')$.</li>
+      <li><strong style="color: #10b981;">Green dashed lines</strong> project vertically down to the $x$-axis
+        and horizontally across to the $t$-axis, giving the rest-frame coordinates $(x, t)$.</li>
+      <li><strong style="color: #3b82f6;">Blue dashed lines</strong> project <em>parallel to the primed axes</em>:
+        one line runs parallel to $t'$ until it meets the $x'$-axis (giving the $x'$ reading), and another
+        runs parallel to $x'$ until it meets the $t'$-axis (giving the $t'$ reading).</li>
     </ul>
+    <p>
+      This is the standard technique for reading coordinates on a Minkowski diagram: in the rest frame
+      you project perpendicular to the axes, but in the moving frame you project <em>parallel</em> to
+      the primed axes&mdash;not perpendicular to them.
+    </p>
 
     <div class="tip-box">
-      <p><strong>Try it in the app:</strong> Click an event, then increase $v$. The green lines stay fixed
-        while the blue lines shift with the red dot, showing how the Lorentz transformation remaps the
-        coordinates in real time.</p>
+      <p><strong>Try it in the app:</strong> Click an event, then increase $v$. Watch the blue projection lines
+        tilt with the primed axes. The labels at the axis intersections update in real time, so you can see
+        exactly how the Lorentz transformation remaps the coordinates.</p>
     </div>
 
     <div class="tip-box">
@@ -780,8 +786,8 @@
         <strong>Projection Lines</strong>
         <ul>
           <li>When an event is selected and this toggle is on, dashed guide lines show how to read coordinates.</li>
-          <li>Green lines project from the green dot to the rest-frame axes, labelled $(x, t)$.</li>
-          <li>Blue lines project from the red dot to the axes, labelled $(x', t')$.</li>
+          <li>Green lines project perpendicular to the rest-frame axes, labelled $(x, t)$.</li>
+          <li>Blue lines project parallel to the primed axes, labelled $(x', t')$.</li>
         </ul>
       </li>
       <li>
