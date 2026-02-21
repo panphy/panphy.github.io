@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-21T18:45:00Z';
+const BUILD_ID = '2026-02-21T19:15:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -65,6 +65,7 @@ const ASSETS_TO_CACHE = [
   '/simulations/collision.html',
   '/simulations/collision/styles.css',
   '/simulations/collision/app.js',
+  '/simulations/collision/collision_assets/vendor/matter-0.20.0.min.js',
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
   '/simulations/collision/collision_assets/models/hand_landmarker.task',
   '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',

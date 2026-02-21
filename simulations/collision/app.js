@@ -1,4 +1,16 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+import './collision_assets/vendor/matter-0.20.0.min.js';
+
+const MatterLib = window.Matter;
+if (!MatterLib) {
+    throw new Error('Matter.js failed to load.');
+}
+const {
+    Engine: MatterEngine,
+    World: MatterWorld,
+    Bodies: MatterBodies,
+    Body: MatterBody
+} = MatterLib;
 
 const ui = {
     startBtn: document.getElementById('startBtn'),
@@ -271,12 +283,6 @@ const SPHERE_RADIUS = 0.18;
 const PLANE_Z = 0;
 const MAX_SPHERES = 3;
 const IDEAL_WALL_RESTITUTION = 1.0;
-const PHYSICS_SUBSTEPS = 3;
-const PHYSICS_SUBSTEPS_1D = 6;
-const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
-const COLLISION_SOLVER_VELOCITY_ITERATIONS = 3;
-const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 10;
-const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 7;
 const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
 const GRAVITY_SCALE = 9.81;
@@ -286,6 +292,10 @@ const DEFAULT_SPHERE_MASS = 1.0;
 const MIN_SPHERE_RESTITUTION = 0.0;
 const MAX_SPHERE_RESTITUTION = 1.0;
 const DEFAULT_SPHERE_RESTITUTION = 1.0;
+const MATTER_WALL_THICKNESS = SPHERE_RADIUS * 2.5;
+const MATTER_POSITION_ITERATIONS = 12;
+const MATTER_VELOCITY_ITERATIONS = 10;
+const MATTER_CONSTRAINT_ITERATIONS = 2;
 
 function randomHexColor() {
     return Math.floor(Math.random() * 0x1000000);
@@ -382,6 +392,17 @@ scene.add(keyLight);
 const rimLight = new THREE.DirectionalLight(0x7dd3fc, 0.8);
 rimLight.position.set(-1.4, -0.4, -1.0);
 scene.add(rimLight);
+
+const matterState = {
+    engine: MatterEngine.create({ enableSleeping: false }),
+    wallBodies: []
+};
+matterState.engine.gravity.x = 0;
+matterState.engine.gravity.y = 0;
+matterState.engine.gravity.scale = 0;
+matterState.engine.positionIterations = MATTER_POSITION_ITERATIONS;
+matterState.engine.velocityIterations = MATTER_VELOCITY_ITERATIONS;
+matterState.engine.constraintIterations = MATTER_CONSTRAINT_ITERATIONS;
 
 // Reusable scratch vectors to avoid per-frame allocations.
 // IMPORTANT: These are mutated in-place by landmarkToPlane, trackPoint,
@@ -561,6 +582,7 @@ function renderBallControls() {
                     return;
                 }
                 sphere.mass = clampSphereMass(nextValue);
+                MatterBody.setMass(sphere.body, sphere.mass);
                 valueEl.textContent = formatSphereMass(sphere.mass);
                 inputEl.value = sphere.mass.toFixed(1);
             }
@@ -580,6 +602,7 @@ function renderBallControls() {
                     return;
                 }
                 sphere.restitution = clampSphereRestitution(nextValue);
+                sphere.body.restitution = sphere.restitution;
                 valueEl.textContent = formatSphereRestitution(sphere.restitution);
                 inputEl.value = sphere.restitution.toFixed(2);
             }
@@ -642,11 +665,22 @@ function resizeStage() {
         state.lastDrawVideoTime = -1;
     }
 
+    rebuildMatterWalls();
+
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
-        for (const sphere of spheres) {
-            sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+    }
+    for (const sphere of spheres) {
+        if (state.oneD) {
+            sphere.position.y = 0;
+            sphere.velocity.y = 0;
         }
+        if (state.boundaryMode === 'walls') {
+            clampSphereToWalls(sphere);
+        }
+        syncSphereStateToBody(sphere);
+        syncBodyStateToSphere(sphere);
+        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
     }
     updateAddBtnState();
 }
@@ -667,6 +701,137 @@ function getViewBounds() {
     return cachedViewBounds;
 }
 
+function removeMatterWalls() {
+    if (matterState.wallBodies.length === 0) {
+        return;
+    }
+    for (let i = 0; i < matterState.wallBodies.length; i++) {
+        MatterWorld.remove(matterState.engine.world, matterState.wallBodies[i]);
+    }
+    matterState.wallBodies.length = 0;
+}
+
+function rebuildMatterWalls() {
+    removeMatterWalls();
+    if (state.boundaryMode !== 'walls') {
+        return;
+    }
+
+    const bounds = getViewBounds();
+    const halfWidth = Math.max(0.2, bounds.halfWidth);
+    const halfHeight = Math.max(0.2, bounds.halfHeight);
+    const thickness = MATTER_WALL_THICKNESS;
+    const wallOptions = {
+        isStatic: true,
+        restitution: IDEAL_WALL_RESTITUTION,
+        friction: 0,
+        frictionStatic: 0,
+        frictionAir: 0,
+        slop: COLLISION_SEPARATION_EPSILON,
+        label: 'boundary-wall'
+    };
+
+    const left = MatterBodies.rectangle(
+        -halfWidth - (thickness * 0.5),
+        0,
+        thickness,
+        (halfHeight * 2) + (thickness * 2),
+        wallOptions
+    );
+    const right = MatterBodies.rectangle(
+        halfWidth + (thickness * 0.5),
+        0,
+        thickness,
+        (halfHeight * 2) + (thickness * 2),
+        wallOptions
+    );
+    const top = MatterBodies.rectangle(
+        0,
+        halfHeight + (thickness * 0.5),
+        (halfWidth * 2) + (thickness * 2),
+        thickness,
+        wallOptions
+    );
+    const bottom = MatterBodies.rectangle(
+        0,
+        -halfHeight - (thickness * 0.5),
+        (halfWidth * 2) + (thickness * 2),
+        thickness,
+        wallOptions
+    );
+
+    matterState.wallBodies.push(left, right, top, bottom);
+    MatterWorld.add(matterState.engine.world, matterState.wallBodies);
+}
+
+function syncSphereStateToBody(sphere) {
+    const nextX = Number.isFinite(sphere.position.x) ? sphere.position.x : 0;
+    const nextY = state.oneD ? 0 : (Number.isFinite(sphere.position.y) ? sphere.position.y : 0);
+    const nextVx = Number.isFinite(sphere.velocity.x) ? sphere.velocity.x : 0;
+    const nextVy = state.oneD ? 0 : (Number.isFinite(sphere.velocity.y) ? sphere.velocity.y : 0);
+
+    MatterBody.setPosition(sphere.body, { x: nextX, y: nextY });
+    MatterBody.setVelocity(sphere.body, { x: nextVx, y: nextVy });
+    MatterBody.setAngle(sphere.body, 0);
+    MatterBody.setAngularVelocity(sphere.body, 0);
+}
+
+function syncBodyStateToSphere(sphere) {
+    const y = state.oneD ? 0 : sphere.body.position.y;
+    const vy = state.oneD ? 0 : sphere.body.velocity.y;
+    sphere.position.set(sphere.body.position.x, y, PLANE_Z);
+    sphere.velocity.set(sphere.body.velocity.x, vy, 0);
+}
+
+function clampSphereToWalls(sphere) {
+    if (state.boundaryMode !== 'walls') {
+        return;
+    }
+    const bounds = getViewBounds();
+    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+    const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
+    sphere.position.x = Math.max(-xLimit, Math.min(xLimit, sphere.position.x));
+    sphere.position.y = Math.max(-yLimit, Math.min(yLimit, sphere.position.y));
+}
+
+function wrapSphereBody(sphere) {
+    if (state.boundaryMode !== 'wrap') {
+        return;
+    }
+    const bounds = getViewBounds();
+    const xWrapLimit = Math.max(0.2, bounds.halfWidth + SPHERE_RADIUS);
+    const yWrapLimit = Math.max(0.2, bounds.halfHeight + SPHERE_RADIUS);
+    const xSpan = xWrapLimit * 2;
+    const ySpan = yWrapLimit * 2;
+
+    let x = sphere.body.position.x;
+    let y = sphere.body.position.y;
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        MatterBody.setPosition(sphere.body, { x: 0, y: 0 });
+        MatterBody.setVelocity(sphere.body, { x: 0, y: 0 });
+        return;
+    }
+
+    if (x > xWrapLimit) {
+        x -= xSpan * Math.ceil((x - xWrapLimit) / xSpan);
+    } else if (x < -xWrapLimit) {
+        x += xSpan * Math.ceil((-xWrapLimit - x) / xSpan);
+    }
+
+    if (y > yWrapLimit) {
+        y -= ySpan * Math.ceil((y - yWrapLimit) / ySpan);
+    } else if (y < -yWrapLimit) {
+        y += ySpan * Math.ceil((-yWrapLimit - y) / ySpan);
+    }
+
+    if (state.oneD) {
+        y = 0;
+    }
+
+    MatterBody.setPosition(sphere.body, { x, y });
+}
+
 function createSphere(colorHex) {
     const material = new THREE.MeshStandardMaterial({
         color: colorHex,
@@ -681,11 +846,22 @@ function createSphere(colorHex) {
     const wire = new THREE.Mesh(sharedSphereGeometry, sharedWireMaterial);
     const group = new THREE.Group();
     group.add(mesh, wire);
+    const body = MatterBodies.circle(0, 0, SPHERE_RADIUS, {
+        restitution: DEFAULT_SPHERE_RESTITUTION,
+        friction: 0,
+        frictionStatic: 0,
+        frictionAir: 0,
+        slop: COLLISION_SEPARATION_EPSILON,
+        label: 'sphere'
+    });
+    MatterBody.setMass(body, DEFAULT_SPHERE_MASS);
+    MatterBody.setInertia(body, Infinity);
 
     return {
         colorHex,
         group,
         material,
+        body,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
         prevSubstepX: 0,
@@ -722,13 +898,15 @@ function addSphere() {
     sphere.integratedSubstepX = sphere.position.x;
     sphere.prevSubstepY = sphere.position.y;
     sphere.group.position.copy(sphere.position);
+    syncSphereStateToBody(sphere);
 
     scene.add(sphere.group);
+    MatterWorld.add(matterState.engine.world, sphere.body);
     spheres.push(sphere);
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
-        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
         for (const existing of spheres) {
+            syncSphereStateToBody(existing);
             existing.group.position.set(existing.position.x, existing.position.y, PLANE_Z);
         }
     }
@@ -753,6 +931,7 @@ function resetAll() {
         sphere.prevSubstepY = sphere.position.y;
         sphere.velocity.set(0, 0, 0);
         sphere.contactCount = 0;
+        syncSphereStateToBody(sphere);
         sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
         sphere.group.rotation.set(0, 0, 0);
     }
@@ -1689,93 +1868,8 @@ function applyTipForces(dt, profile) {
     return totalContacts;
 }
 
-function constrainSphereToView(sphere, profile) {
-    const bounds = getViewBounds();
-    if (state.boundaryMode === 'wrap') {
-        const xWrapLimit = Math.max(0.2, bounds.halfWidth + SPHERE_RADIUS);
-        const yWrapLimit = Math.max(0.2, bounds.halfHeight + SPHERE_RADIUS);
-        const xSpan = xWrapLimit * 2;
-        const ySpan = yWrapLimit * 2;
-
-        if (!Number.isFinite(sphere.position.x) || !Number.isFinite(sphere.position.y)) {
-            sphere.position.set(0, 0, PLANE_Z);
-            sphere.velocity.set(0, 0, 0);
-            return;
-        }
-
-        if (sphere.position.x > xWrapLimit) {
-            sphere.position.x -= xSpan * Math.ceil((sphere.position.x - xWrapLimit) / xSpan);
-        } else if (sphere.position.x < -xWrapLimit) {
-            sphere.position.x += xSpan * Math.ceil((-xWrapLimit - sphere.position.x) / xSpan);
-        }
-        if (sphere.position.y > yWrapLimit) {
-            sphere.position.y -= ySpan * Math.ceil((sphere.position.y - yWrapLimit) / ySpan);
-        } else if (sphere.position.y < -yWrapLimit) {
-            sphere.position.y += ySpan * Math.ceil((-yWrapLimit - sphere.position.y) / ySpan);
-        }
-
-        sphere.position.z = PLANE_Z;
-        sphere.velocity.z = 0;
-        if (state.oneD) {
-            sphere.position.y = 0;
-            sphere.velocity.y = 0;
-        }
-        return;
-    }
-
-    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
-    const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
-    const restitution = IDEAL_WALL_RESTITUTION * clampSphereRestitution(sphere.restitution);
-
-    if (sphere.position.x > xLimit) {
-        sphere.position.x = xLimit;
-        sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
-    } else if (sphere.position.x < -xLimit) {
-        sphere.position.x = -xLimit;
-        sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
-    }
-
-    if (sphere.position.y > yLimit) {
-        sphere.position.y = yLimit;
-        sphere.velocity.y = -Math.abs(sphere.velocity.y) * restitution;
-    } else if (sphere.position.y < -yLimit) {
-        sphere.position.y = -yLimit;
-        sphere.velocity.y = Math.abs(sphere.velocity.y) * restitution;
-    }
-
-    sphere.position.z = PLANE_Z;
-    sphere.velocity.z = 0;
-
-    if (state.oneD) {
-        sphere.position.y = 0;
-        sphere.velocity.y = 0;
-    }
-}
-
 function isPinnedSphere(sphere) {
     return frameGrippedSpheres.has(sphere) || sphere === state.selectedSphere;
-}
-
-function getOneDCollisionNormalX(a, b, dx) {
-    const prevDx = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
-    if (Math.abs(prevDx) > 0.000001) {
-        return prevDx >= 0 ? 1 : -1;
-    }
-    if (Math.abs(dx) > 0.000001) {
-        return dx >= 0 ? 1 : -1;
-    }
-    const relVelX = b.velocity.x - a.velocity.x;
-    if (Math.abs(relVelX) > 0.000001) {
-        // Oppose relative motion so coincident centers can still resolve with an impulse.
-        return relVelX >= 0 ? -1 : 1;
-    }
-    return 1;
-}
-
-function didOneDCentersCrossThisSubstep(a, b) {
-    const prevDx = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
-    const currDx = (b.integratedSubstepX ?? b.position.x) - (a.integratedSubstepX ?? a.position.x);
-    return (prevDx > 0 && currDx < 0) || (prevDx < 0 && currDx > 0);
 }
 
 function stabilizeOneDWallPacking() {
@@ -1824,6 +1918,7 @@ function stabilizeOneDWallPacking() {
             sphere.position.x = -xLimit + (spacing * i);
             sphere.position.y = 0;
             sphere.velocity.y = 0;
+            syncSphereStateToBody(sphere);
         }
         return;
     }
@@ -1856,257 +1951,76 @@ function stabilizeOneDWallPacking() {
     for (const sphere of ordered) {
         sphere.position.y = 0;
         sphere.velocity.y = 0;
+        syncSphereStateToBody(sphere);
     }
 }
 
-
-function getSweptCollisionNormal2D(a, b, diameter) {
-    const startRelX = (b.prevSubstepX ?? b.position.x) - (a.prevSubstepX ?? a.position.x);
-    const startRelY = (b.prevSubstepY ?? b.position.y) - (a.prevSubstepY ?? a.position.y);
-    const endRelX = b.position.x - a.position.x;
-    const endRelY = b.position.y - a.position.y;
-    const relStepX = endRelX - startRelX;
-    const relStepY = endRelY - startRelY;
-
-    const startDistSq = (startRelX * startRelX) + (startRelY * startRelY);
-    const endDistSq = (endRelX * endRelX) + (endRelY * endRelY);
-    const diameterSq = diameter * diameter;
-
-    if (startDistSq <= diameterSq || endDistSq >= startDistSq) {
-        return null;
-    }
-
-    const aCoeff = (relStepX * relStepX) + (relStepY * relStepY);
-    if (aCoeff <= 1e-12) {
-        return null;
-    }
-
-    const bCoeff = 2 * ((startRelX * relStepX) + (startRelY * relStepY));
-    const cCoeff = startDistSq - diameterSq;
-    const discriminant = (bCoeff * bCoeff) - (4 * aCoeff * cCoeff);
-    if (discriminant < 0) {
-        return null;
-    }
-
-    const sqrtDisc = Math.sqrt(discriminant);
-    const invDenominator = 1 / (2 * aCoeff);
-    const tEnter = (-bCoeff - sqrtDisc) * invDenominator;
-    const tExit = (-bCoeff + sqrtDisc) * invDenominator;
-    let toi = null;
-
-    if (tEnter >= 0 && tEnter <= 1) {
-        toi = tEnter;
-    } else if (tExit >= 0 && tExit <= 1) {
-        toi = tExit;
-    }
-
-    if (toi === null) {
-        return null;
-    }
-
-    const hitRelX = startRelX + (relStepX * toi);
-    const hitRelY = startRelY + (relStepY * toi);
-    const hitLen = Math.hypot(hitRelX, hitRelY);
-    if (hitLen <= 1e-6) {
-        return null;
-    }
-
-    return {
-        nx: hitRelX / hitLen,
-        ny: hitRelY / hitLen
-    };
-}
-
-function resolveSphereCollisions(applyVelocity = true) {
-    const diameter = SPHERE_RADIUS * 2;
-    const diameterSq = diameter * diameter;
-    const velocityContactDistance = diameter + COLLISION_SEPARATION_EPSILON;
-    const velocityContactDistanceSq = velocityContactDistance * velocityContactDistance;
-    const is1D = state.oneD;
-    const allowSweptOneDCollision = is1D && state.boundaryMode === 'walls' && applyVelocity;
-    for (let i = 0; i < spheres.length; i++) {
-        for (let j = i + 1; j < spheres.length; j++) {
-            const a = spheres[i];
-            const b = spheres[j];
-            const aPinned = isPinnedSphere(a);
-            const bPinned = isPinnedSphere(b);
-            if (aPinned && bPinned) {
-                continue;
-            }
-
-            const dx = b.position.x - a.position.x;
-            const dy = is1D ? 0 : (b.position.y - a.position.y);
-            const distSq = (dx * dx) + (dy * dy);
-            const contactLimitSq = applyVelocity ? velocityContactDistanceSq : diameterSq;
-            const crossedInStep = allowSweptOneDCollision ? didOneDCentersCrossThisSubstep(a, b) : false;
-            const sweptHit2D = (!is1D && applyVelocity) ? getSweptCollisionNormal2D(a, b, diameter) : null;
-
-            if (distSq > contactLimitSq && !crossedInStep && !sweptHit2D) {
-                continue;
-            }
-
-            let nx = 0;
-            let ny = 0;
-            let dist = Math.sqrt(Math.max(0, distSq));
-
-            if (is1D) {
-                // In 1D mode, collision normal is always along x-axis
-                nx = getOneDCollisionNormalX(a, b, dx);
-                ny = 0;
-                dist = Math.abs(dx);
-            } else if (sweptHit2D) {
-                nx = sweptHit2D.nx;
-                ny = sweptHit2D.ny;
-                dist = Math.min(dist, diameter);
-            } else if (dist > 0.000001) {
-                nx = dx / dist;
-                ny = dy / dist;
-            } else {
-                // Deterministic fallback normal when centers coincide.
-                const rvx = b.velocity.x - a.velocity.x;
-                const rvy = b.velocity.y - a.velocity.y;
-                const rvLen = Math.hypot(rvx, rvy);
-                if (rvLen > 0.000001) {
-                    nx = rvx / rvLen;
-                    ny = rvy / rvLen;
-                } else {
-                    const seed = ((i + 1) * 73856093) ^ ((j + 1) * 19349663);
-                    const angle = (Math.abs(seed) % 6283) / 1000;
-                    nx = Math.cos(angle);
-                    ny = Math.sin(angle);
-                }
-                dist = 0;
-            }
-
-            const penetration = diameter - dist;
-            if (penetration <= 0 && !applyVelocity) {
-                continue;
-            }
-            const invMassA = aPinned ? 0 : (1 / clampSphereMass(a.mass));
-            const invMassB = bPinned ? 0 : (1 / clampSphereMass(b.mass));
-            const invMassSum = invMassA + invMassB;
-            if (invMassSum <= 0) {
-                continue;
-            }
-
-            if (penetration > 0) {
-                // Position correction with small bias so contacts don't sink.
-                const correction = (penetration + COLLISION_SEPARATION_EPSILON) / invMassSum;
-                a.position.x -= nx * correction * invMassA;
-                b.position.x += nx * correction * invMassB;
-                if (!is1D) {
-                    a.position.y -= ny * correction * invMassA;
-                    b.position.y += ny * correction * invMassB;
-                }
-            } else if (is1D && crossedInStep) {
-                // Reorder tunneled 1D pairs back to a touching state before impulse.
-                const desiredSeparation = diameter + COLLISION_SEPARATION_EPSILON;
-                const currentSeparationAlongNormal = (b.position.x - a.position.x) * nx;
-                const correctionNeeded = desiredSeparation - currentSeparationAlongNormal;
-                if (correctionNeeded > 0) {
-                    const correction = correctionNeeded / invMassSum;
-                    a.position.x -= nx * correction * invMassA;
-                    b.position.x += nx * correction * invMassB;
-                }
-            }
-
-            if (!applyVelocity) {
-                continue;
-            }
-
-            // Resolve normal velocity with inverse-mass impulse.
-            const relVelN = (b.velocity.x - a.velocity.x) * nx + (is1D ? 0 : (b.velocity.y - a.velocity.y) * ny);
-
-            // Only resolve if spheres are approaching
-            if (relVelN >= 0) {
-                continue;
-            }
-
-            const pairRestitution = Math.min(
-                clampSphereRestitution(a.restitution),
-                clampSphereRestitution(b.restitution)
-            );
-            const impulse = (-(1 + pairRestitution) * relVelN) / invMassSum;
-            a.velocity.x -= impulse * nx * invMassA;
-            b.velocity.x += impulse * nx * invMassB;
-            if (!is1D) {
-                a.velocity.y -= impulse * ny * invMassA;
-                b.velocity.y += impulse * ny * invMassB;
-            }
-        }
-    }
-}
 
 function updatePhysics(dt, profile) {
     if (spheres.length === 0) {
         return;
     }
 
-    const substeps = state.oneD ? PHYSICS_SUBSTEPS_1D : PHYSICS_SUBSTEPS;
-    const subDt = dt / substeps;
-    for (let substep = 0; substep < substeps; substep++) {
-        const positionIterations = state.oneD ? COLLISION_SOLVER_POSITION_ITERATIONS_1D : COLLISION_SOLVER_POSITION_ITERATIONS;
-        const velocityIterations = state.oneD ? COLLISION_SOLVER_VELOCITY_ITERATIONS_1D : COLLISION_SOLVER_VELOCITY_ITERATIONS;
+    const linearDrag = Math.exp(-profile.airDrag * dt);
 
-        for (const sphere of spheres) {
-            sphere.prevSubstepX = sphere.position.x;
-            sphere.integratedSubstepX = sphere.position.x;
-            sphere.prevSubstepY = sphere.position.y;
+    for (const sphere of spheres) {
+        const pinned = isPinnedSphere(sphere);
+
+        if (sphere.body.isStatic !== pinned) {
+            MatterBody.setStatic(sphere.body, pinned);
         }
 
-        for (const sphere of spheres) {
-            if (isPinnedSphere(sphere)) {
-                continue;
-            }
+        sphere.body.restitution = clampSphereRestitution(sphere.restitution);
+        sphere.body.friction = 0;
+        sphere.body.frictionStatic = 0;
+        sphere.body.frictionAir = 0;
 
+        if (!pinned) {
+            MatterBody.setMass(sphere.body, clampSphereMass(sphere.mass));
             if (!state.oneD) {
-                sphere.velocity.y -= state.gravity * GRAVITY_SCALE * subDt;
+                sphere.velocity.y -= state.gravity * GRAVITY_SCALE * dt;
+            } else {
+                sphere.position.y = 0;
+                sphere.velocity.y = 0;
             }
-            sphere.position.x += sphere.velocity.x * subDt;
-            if (!state.oneD) {
-                sphere.position.y += sphere.velocity.y * subDt;
+            if (state.boundaryMode === 'walls') {
+                clampSphereToWalls(sphere);
             }
-            constrainSphereToView(sphere, profile);
-            sphere.integratedSubstepX = sphere.position.x;
-
-            const linearDrag = Math.exp(-profile.airDrag * subDt);
             sphere.velocity.x *= linearDrag;
             sphere.velocity.y *= linearDrag;
-        }
-
-        // Position solver iterations to prevent visible overlap.
-        for (let iter = 0; iter < positionIterations; iter++) {
-            resolveSphereCollisions(false);
-            for (const sphere of spheres) {
-                if (!isPinnedSphere(sphere)) {
-                    constrainSphereToView(sphere, profile);
-                }
+        } else {
+            clampSphereToWalls(sphere);
+            if (state.oneD) {
+                sphere.position.y = 0;
+                sphere.velocity.y = 0;
             }
         }
-        if (state.oneD && state.boundaryMode === 'walls') {
-            stabilizeOneDWallPacking();
-        }
 
-        // Iterative velocity solver improves simultaneous-contact chains.
-        for (let iter = 0; iter < velocityIterations; iter++) {
-            resolveSphereCollisions(true);
-            for (const sphere of spheres) {
-                if (!isPinnedSphere(sphere)) {
-                    constrainSphereToView(sphere, profile);
-                }
+        syncSphereStateToBody(sphere);
+    }
+
+    MatterEngine.update(matterState.engine, dt * 1000);
+
+    for (const sphere of spheres) {
+        if (!isPinnedSphere(sphere)) {
+            wrapSphereBody(sphere);
+            if (state.oneD) {
+                MatterBody.setPosition(sphere.body, { x: sphere.body.position.x, y: 0 });
+                MatterBody.setVelocity(sphere.body, { x: sphere.body.velocity.x, y: 0 });
             }
         }
-        if (state.oneD && state.boundaryMode === 'walls') {
-            stabilizeOneDWallPacking();
-        }
+        syncBodyStateToSphere(sphere);
+    }
+
+    if (state.oneD && state.boundaryMode === 'walls') {
+        stabilizeOneDWallPacking();
     }
 
     for (const sphere of spheres) {
-        if (isPinnedSphere(sphere)) {
-            continue;
+        if (!isPinnedSphere(sphere)) {
+            sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
+            sphere.group.rotation.x += (sphere.velocity.y / SPHERE_RADIUS) * dt;
         }
-        sphere.group.rotation.z -= (sphere.velocity.x / SPHERE_RADIUS) * dt;
-        sphere.group.rotation.x += (sphere.velocity.y / SPHERE_RADIUS) * dt;
         sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
     }
 }
@@ -2234,11 +2148,17 @@ function handleStageClick(event) {
 function selectSphere(sphere) {
     state.selectedSphere = sphere;
     sphere.velocity.set(0, 0, 0);
+    MatterBody.setStatic(sphere.body, true);
+    syncSphereStateToBody(sphere);
     ui.selectionOverlay.style.display = 'flex';
     ui.cancelTargetBtn.focus();
 }
 
 function deselectSphere() {
+    if (state.selectedSphere && state.selectedSphere.body.isStatic) {
+        MatterBody.setStatic(state.selectedSphere.body, false);
+        syncSphereStateToBody(state.selectedSphere);
+    }
     state.selectedSphere = null;
     ui.selectionOverlay.style.display = 'none';
 }
@@ -2246,6 +2166,7 @@ function deselectSphere() {
 function removeSelectedSphere() {
     if (state.selectedSphere) {
         clearGripReferencesToSphere(state.selectedSphere);
+        MatterWorld.remove(matterState.engine.world, state.selectedSphere.body);
         scene.remove(state.selectedSphere.group);
         state.selectedSphere.material.dispose();
         const idx = spheres.indexOf(state.selectedSphere);
@@ -2265,6 +2186,7 @@ function removeAllSpheres() {
     deselectSphere();
     for (const sphere of spheres) {
         clearGripReferencesToSphere(sphere);
+        MatterWorld.remove(matterState.engine.world, sphere.body);
         scene.remove(sphere.group);
         sphere.material.dispose();
     }
@@ -2590,11 +2512,16 @@ ui.cameraSelect.addEventListener('change', () => {
 ui.wallsToggle.addEventListener('change', () => {
     state.boundaryMode = ui.wallsToggle.checked ? 'walls' : 'wrap';
     updateBoundaryModeUI();
+    rebuildMatterWalls();
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
-        for (const sphere of spheres) {
-            sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+    }
+    for (const sphere of spheres) {
+        if (state.boundaryMode === 'walls') {
+            clampSphereToWalls(sphere);
         }
+        syncSphereStateToBody(sphere);
+        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
     }
     updateAddBtnState();
     if (state.boundaryMode === 'wrap') {
@@ -2612,17 +2539,19 @@ ui.oneDToggle.addEventListener('change', () => {
             sphere.velocity.y = 0;
             sphere.spawnPosition.y = 0;
             sphere.group.position.y = 0;
+            syncSphereStateToBody(sphere);
         }
         if (state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
-            for (const sphere of spheres) {
-                sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-            }
         }
         setStatus('1D mode: spheres move horizontally only.');
     } else {
+        for (const sphere of spheres) {
+            syncSphereStateToBody(sphere);
+        }
         setStatus('2D mode restored.');
     }
+    rebuildMatterWalls();
     updateAddBtnState();
 });
 ui.sensitivityRange.addEventListener('input', () => {
@@ -2678,6 +2607,8 @@ window.addEventListener('beforeunload', () => {
     if (state.stream) {
         state.stream.getTracks().forEach((track) => track.stop());
     }
+    MatterWorld.clear(matterState.engine.world, false);
+    MatterEngine.clear(matterState.engine);
     sharedSphereGeometry.dispose();
     sharedWireMaterial.dispose();
     renderer.dispose();
