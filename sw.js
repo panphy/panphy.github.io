@@ -154,7 +154,28 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: network-first for navigations, cache-first for other assets
+function getNavigationFallbackCandidates(requestUrl) {
+  const candidates = [];
+  const pathname = requestUrl.pathname;
+
+  // Try exact route, then route with trailing slash handling, then index fallback.
+  if (pathname === '/') {
+    candidates.push('/');
+    candidates.push('/index.html');
+  } else {
+    candidates.push(pathname);
+    if (pathname.endsWith('/')) {
+      candidates.push(`${pathname}index.html`);
+    } else {
+      candidates.push(`${pathname}/index.html`);
+    }
+  }
+
+  candidates.push('/index.html');
+  return [...new Set(candidates)];
+}
+
+// Fetch: cache-first for navigations when available, cache-first for other assets
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
@@ -182,21 +203,44 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigations: fetch fresh when online, fall back to cache/offline
+  // Navigations: serve cached page immediately (if present), then update in background.
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
+      const navigationCandidates = getNavigationFallbackCandidates(url);
+
+      for (const candidate of navigationCandidates) {
+        const cachedCandidate = await caches.match(candidate);
+        if (cachedCandidate) {
+          event.waitUntil((async () => {
+            try {
+              const preload = await event.preloadResponse;
+              const fresh = preload || await fetch(req);
+              if (fresh && (fresh.ok || fresh.type === 'opaque')) {
+                const cache = await caches.open(RUNTIME_CACHE);
+                await cache.put(req, fresh.clone());
+              }
+            } catch {
+              // Keep serving cached content when background refresh fails.
+            }
+          })());
+          return cachedCandidate;
+        }
+      }
+
       try {
         const preload = await event.preloadResponse;
         const fresh = preload || await fetch(req);
         if (fresh && (fresh.ok || fresh.type === 'opaque')) {
           const cache = await caches.open(RUNTIME_CACHE);
-          cache.put(req, fresh.clone());
+          await cache.put(req, fresh.clone());
         }
         return fresh;
       } catch {
-        const cached = await caches.match(req);
-        if (cached) return cached;
-        return (await caches.match('/index.html')) || Response.error();
+        for (const candidate of navigationCandidates) {
+          const cachedCandidate = await caches.match(candidate);
+          if (cachedCandidate) return cachedCandidate;
+        }
+        return Response.error();
       }
     })());
     return;

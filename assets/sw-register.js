@@ -1,5 +1,6 @@
 (() => {
-  const BUILD_ID = '2026-02-21T00:31:00Z';
+  const BUILD_ID = '2026-02-21T15:05:00Z';
+  const UPDATE_ACK_KEY = 'panphy-sw-update-ack';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -9,6 +10,7 @@
 
   let updateBanner;
   let isReloadingForUpdate = false;
+  let isUpdateInProgress = false;
 
   const removeUpdateBanner = () => {
     if (!updateBanner) {
@@ -42,7 +44,7 @@
   };
 
   const showUpdateBanner = (registration) => {
-    if (updateBanner || !registration?.waiting) {
+    if (updateBanner || !registration?.waiting || isUpdateInProgress || sessionStorage.getItem(UPDATE_ACK_KEY) === '1') {
       return;
     }
 
@@ -84,15 +86,25 @@
     ].join(';');
 
     button.addEventListener('click', async () => {
+      if (isUpdateInProgress) {
+        return;
+      }
+
+      isUpdateInProgress = true;
       button.disabled = true;
       button.textContent = 'Updating...';
 
       const activationRequested = await requestActivation(registration);
       if (!activationRequested) {
+        isUpdateInProgress = false;
         button.disabled = false;
         button.textContent = 'Update';
         return;
       }
+
+      sessionStorage.setItem(UPDATE_ACK_KEY, '1');
+
+      removeUpdateBanner();
 
       window.setTimeout(() => {
         if (!isReloadingForUpdate) {
@@ -133,7 +145,17 @@
 
       listenForUpdates(registration);
 
+      if (sessionStorage.getItem(UPDATE_ACK_KEY) === '1') {
+        if (registration.waiting) {
+          await requestActivation(registration);
+        } else {
+          sessionStorage.removeItem(UPDATE_ACK_KEY);
+        }
+      }
+
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        isUpdateInProgress = false;
+        sessionStorage.removeItem(UPDATE_ACK_KEY);
         removeUpdateBanner();
         if (!isReloadingForUpdate) {
           isReloadingForUpdate = true;
