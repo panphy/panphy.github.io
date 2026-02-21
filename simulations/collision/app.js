@@ -215,6 +215,68 @@ const MEDIAPIPE_SOURCES = [
     }
 ];
 
+const CAMERA_PREFERENCE_STORAGE_KEY = 'panphy-collision-preferred-camera';
+
+function loadPreferredCameraId() {
+    try {
+        const storedId = localStorage.getItem(CAMERA_PREFERENCE_STORAGE_KEY);
+        if (typeof storedId === 'string' && storedId.trim()) {
+            return storedId;
+        }
+    } catch (error) {
+        // Ignore storage access issues (e.g. private mode restrictions).
+    }
+    return '';
+}
+
+function savePreferredCameraId(deviceId) {
+    try {
+        if (typeof deviceId === 'string' && deviceId.trim()) {
+            localStorage.setItem(CAMERA_PREFERENCE_STORAGE_KEY, deviceId);
+            return;
+        }
+        localStorage.removeItem(CAMERA_PREFERENCE_STORAGE_KEY);
+    } catch (error) {
+        // Ignore storage access issues (e.g. private mode restrictions).
+    }
+}
+
+function getActiveStreamDeviceId(stream = state.stream) {
+    if (!stream) {
+        return '';
+    }
+    const activeTrack = stream.getVideoTracks()[0];
+    if (!activeTrack) {
+        return '';
+    }
+    const settings = activeTrack.getSettings();
+    if (settings && typeof settings.deviceId === 'string' && settings.deviceId) {
+        return settings.deviceId;
+    }
+    return '';
+}
+
+function hasCameraOption(deviceId) {
+    if (!deviceId) {
+        return false;
+    }
+    return [...ui.cameraSelect.options].some((option) => option.value === deviceId);
+}
+
+function buildVideoConstraints(deviceId = '') {
+    const constraints = {
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+    };
+
+    if (deviceId) {
+        constraints.deviceId = { exact: deviceId };
+    } else {
+        constraints.facingMode = 'user';
+    }
+    return constraints;
+}
+
 function isLocalLoopbackHost() {
     return ['localhost', '127.0.0.1', '::1', '[::1]'].includes(window.location.hostname);
 }
@@ -2300,6 +2362,10 @@ async function populateCameraList() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter((d) => d.kind === 'videoinput');
         if (videoDevices.length <= 1) {
+            const activeDeviceId = getActiveStreamDeviceId();
+            if (activeDeviceId) {
+                savePreferredCameraId(activeDeviceId);
+            }
             return;
         }
         ui.cameraSelect.innerHTML = '';
@@ -2309,16 +2375,19 @@ async function populateCameraList() {
             option.textContent = device.label || `Camera ${index + 1}`;
             ui.cameraSelect.appendChild(option);
         });
-        // Select the currently active device if possible
-        if (state.stream) {
-            const activeTrack = state.stream.getVideoTracks()[0];
-            if (activeTrack) {
-                const settings = activeTrack.getSettings();
-                if (settings.deviceId) {
-                    ui.cameraSelect.value = settings.deviceId;
-                }
+
+        // Prefer active stream device, otherwise remembered preference.
+        const activeDeviceId = getActiveStreamDeviceId();
+        if (hasCameraOption(activeDeviceId)) {
+            ui.cameraSelect.value = activeDeviceId;
+            savePreferredCameraId(activeDeviceId);
+        } else {
+            const preferredDeviceId = loadPreferredCameraId();
+            if (hasCameraOption(preferredDeviceId)) {
+                ui.cameraSelect.value = preferredDeviceId;
             }
         }
+
         ui.cameraSelect.disabled = false;
     } catch (error) {
         console.warn('Could not enumerate cameras:', error);
@@ -2338,11 +2407,7 @@ async function switchCamera(deviceId) {
     setStatus('Switching camera...');
     try {
         nextStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                deviceId: { exact: deviceId },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            },
+            video: buildVideoConstraints(deviceId),
             audio: false
         });
         ui.video.srcObject = nextStream;
@@ -2357,12 +2422,15 @@ async function switchCamera(deviceId) {
             previousStream.getTracks().forEach((track) => track.stop());
         }
 
-        if ([...ui.cameraSelect.options].some((option) => option.value === deviceId)) {
+        if (hasCameraOption(deviceId)) {
             ui.cameraSelect.value = deviceId;
         }
+        const activeDeviceId = getActiveStreamDeviceId(nextStream);
+        savePreferredCameraId(activeDeviceId || deviceId);
         setStatus('Camera switched.');
     } catch (error) {
         const message = error && error.message ? error.message : String(error);
+        const name = error && error.name ? error.name : '';
         console.error('Camera switch failed:', error);
         if (nextStream) {
             nextStream.getTracks().forEach((track) => track.stop());
@@ -2382,13 +2450,19 @@ async function switchCamera(deviceId) {
                 console.warn('Could not resume previous camera stream:', resumeError);
             }
 
-            if (previousDeviceId && [...ui.cameraSelect.options].some((option) => option.value === previousDeviceId)) {
+            if (hasCameraOption(previousDeviceId)) {
                 ui.cameraSelect.value = previousDeviceId;
+            }
+            if (previousDeviceId) {
+                savePreferredCameraId(previousDeviceId);
             }
 
             setStatus(`Could not switch camera: ${message}. Keeping current camera.`, true);
         } else {
             state.stream = null;
+            if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+                savePreferredCameraId('');
+            }
             setStatus(`Could not switch camera: ${message}`, true);
         }
     } finally {
@@ -2454,14 +2528,35 @@ async function startCameraAndTracking() {
     try {
         const hasLiveStream = state.stream && state.stream.getTracks().some((track) => track.readyState === 'live');
         if (!hasLiveStream) {
-            state.stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'user',
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
-                audio: false
-            });
+            let nextStream = null;
+            const preferredCameraId = loadPreferredCameraId();
+
+            if (preferredCameraId) {
+                try {
+                    nextStream = await navigator.mediaDevices.getUserMedia({
+                        video: buildVideoConstraints(preferredCameraId),
+                        audio: false
+                    });
+                } catch (preferredError) {
+                    const preferredName = preferredError && preferredError.name ? preferredError.name : 'Error';
+                    console.warn(
+                        `Preferred camera unavailable (${preferredName}). Falling back to default camera.`,
+                        preferredError
+                    );
+                    if (preferredName === 'NotFoundError' || preferredName === 'OverconstrainedError') {
+                        savePreferredCameraId('');
+                    }
+                }
+            }
+
+            if (!nextStream) {
+                nextStream = await navigator.mediaDevices.getUserMedia({
+                    video: buildVideoConstraints(),
+                    audio: false
+                });
+            }
+
+            state.stream = nextStream;
         }
 
         if (ui.video.srcObject !== state.stream) {
@@ -2469,6 +2564,10 @@ async function startCameraAndTracking() {
         }
         await ui.video.play();
         await populateCameraList();
+        const activeDeviceId = getActiveStreamDeviceId();
+        if (activeDeviceId) {
+            savePreferredCameraId(activeDeviceId);
+        }
     } catch (error) {
         if (state.stream && state.stream.getTracks().every((track) => track.readyState !== 'live')) {
             state.stream = null;
