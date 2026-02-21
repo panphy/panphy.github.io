@@ -692,6 +692,8 @@
 
             let origin = { x: canvas.width * 0.5, y: canvas.height * 0.9 };
             const scale = 80;
+            const PAN_EDGE_MARGIN_UNITS = 0.5;
+            const PAN_EDGE_MARGIN_PX = PAN_EDGE_MARGIN_UNITS * scale;
             const FRAME_ALIGNMENT_EPSILON = 1e-6;
 
             let events = [];
@@ -739,6 +741,25 @@
                     x: gamma * (pt.x - v * pt.t)
                 };
             }
+
+            function clampToRange(value, min, max) {
+                if (min > max) return (min + max) * 0.5;
+                return Math.min(max, Math.max(min, value));
+            }
+
+            function clampOriginToViewport(nextOrigin) {
+                const minOriginX = PAN_EDGE_MARGIN_PX;
+                const maxOriginX = canvas.width - PAN_EDGE_MARGIN_PX;
+                const minOriginY = PAN_EDGE_MARGIN_PX;
+                const maxOriginY = canvas.height - PAN_EDGE_MARGIN_PX;
+
+                return {
+                    x: clampToRange(nextOrigin.x, minOriginX, maxOriginX),
+                    y: clampToRange(nextOrigin.y, minOriginY, maxOriginY)
+                };
+            }
+
+            origin = clampOriginToViewport(origin);
 
             function getBoundingBox() {
                 return {
@@ -1246,8 +1267,11 @@
                     draggingEvent.t = coords.t;
                     draw();
                 } else if (draggingCanvas) {
-                    origin.x = originStart.x + (mx - canvasDragStart.x);
-                    origin.y = originStart.y + (my - canvasDragStart.y);
+                    const nextOrigin = {
+                        x: originStart.x + (mx - canvasDragStart.x),
+                        y: originStart.y + (my - canvasDragStart.y)
+                    };
+                    origin = clampOriginToViewport(nextOrigin);
                     draw();
                 }
             });
@@ -1330,8 +1354,11 @@
                     draggingEvent.t = coords.t;
                     draw();
                 } else if (draggingCanvas) {
-                    origin.x = originStart.x + (tx - canvasDragStart.x);
-                    origin.y = originStart.y + (ty - canvasDragStart.y);
+                    const nextOrigin = {
+                        x: originStart.x + (tx - canvasDragStart.x),
+                        y: originStart.y + (ty - canvasDragStart.y)
+                    };
+                    origin = clampOriginToViewport(nextOrigin);
                     draw();
                 }
             });
@@ -1399,21 +1426,60 @@
                 }
             });
 
+            function getRandomVisibleFutureConeEvent() {
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+                const EVENT_VIEW_PADDING = 0.15;
+                const MIN_EVENT_T = 0.1;
+
+                const visibleXMin = xMin + EVENT_VIEW_PADDING;
+                const visibleXMax = xMax - EVENT_VIEW_PADDING;
+                const visibleTMin = tMin + EVENT_VIEW_PADDING;
+                const visibleTMax = tMax - EVENT_VIEW_PADDING;
+
+                if (visibleXMin > visibleXMax || visibleTMin > visibleTMax) {
+                    return null;
+                }
+
+                const minAllowedT = Math.max(
+                    MIN_EVENT_T,
+                    visibleTMin,
+                    visibleXMin,
+                    -visibleXMax
+                );
+                const maxAllowedT = visibleTMax;
+
+                if (minAllowedT > maxAllowedT) {
+                    return null;
+                }
+
+                const newT = minAllowedT + Math.random() * (maxAllowedT - minAllowedT);
+                const minAllowedX = Math.max(visibleXMin, -newT);
+                const maxAllowedX = Math.min(visibleXMax, newT);
+
+                if (minAllowedX > maxAllowedX) {
+                    return null;
+                }
+
+                const newX = minAllowedX + Math.random() * (maxAllowedX - minAllowedX);
+                return { x: newX, t: newT };
+            }
+
             addEventBtn.addEventListener("click", () => {
                 if (events.length >= 15) {
                     console.log("Maximum number of events reached.");
                     return;
                 }
 
-                const minT = 0.1;
-                const maxT = 6.5;
-                const newT = minT + Math.random() * (maxT - minT);
-                const newX = (Math.random() * 2 - 1) * newT;
+                const eventCoords = getRandomVisibleFutureConeEvent();
+                if (!eventCoords) {
+                    alert("Current view does not intersect the future light cone. Pan the diagram and try again.");
+                    return;
+                }
 
                 events.push({
                     label: getNextLabel(),
-                    x: newX,
-                    t: newT,
+                    x: eventCoords.x,
+                    t: eventCoords.t,
                     radius: 8
                 });
 
