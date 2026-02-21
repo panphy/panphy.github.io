@@ -175,7 +175,18 @@
         footer {
             text-align: center;
             padding: 24px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--card-border);
             color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--brand-primary);
+        }
+
+        footer a:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 700px) {
@@ -256,7 +267,8 @@
     </main>
 
     <footer>
-        &copy; <a href="/">PanPhy Labs</a>
+        &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
     </footer>
 
     <script>
