@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorentz Learn – PanPhy Labs</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <script src="/assets/sw-register.js" defer></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
+
+        :root {
+            --font-sans: 'Inter', sans-serif;
+            --font-display: 'Poppins', 'Inter', sans-serif;
+            --bg-color: #f8f9fa;
+            --bg-pattern: #e9ecef;
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+            --brand-primary: #6c5ce7;
+            --brand-accent: #00cec9;
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --nav-bg: rgba(255, 255, 255, 0.9);
+            --nav-border: rgba(255, 255, 255, 0.5);
+            --muted-bg: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f1014;
+            --bg-pattern: #181a20;
+            --text-main: #dfe6e9;
+            --text-secondary: #b2bec3;
+            --brand-primary: #a29bfe;
+            --brand-accent: #81ecec;
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            --nav-bg: rgba(22, 24, 29, 0.9);
+            --nav-border: rgba(255, 255, 255, 0.08);
+            --muted-bg: #252b34;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-sans);
+            background: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main);
+            line-height: 1.75;
+        }
+
+        .banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin: 16px auto 0;
+            width: calc(100% - 40px);
+            max-width: 1000px;
+            padding: 8px 16px;
+            border-radius: 18px;
+            background: var(--nav-bg);
+            border: 1px solid var(--nav-border);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .banner-logo img {
+            height: 34px;
+        }
+
+        .banner-title {
+            flex: 1;
+            text-align: center;
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .banner-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .banner-link {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--card-border);
+            background: var(--muted-bg);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 50%;
+            padding: 6px;
+            color: var(--text-main);
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 22px;
+            margin-bottom: 16px;
+        }
+
+        h1,
+        h2 {
+            font-family: var(--font-display);
+            margin: 0 0 12px;
+            color: var(--brand-primary);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.35rem;
+        }
+
+        ul {
+            margin: 10px 0 0 18px;
+            color: var(--text-main);
+        }
+
+        p {
+            margin: 0 0 12px;
+        }
+
+        .equation-note {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 700px) {
+            .banner {
+                width: calc(100% - 20px);
+                margin-top: 10px;
+                padding: 8px 10px;
+            }
+
+            .banner-title {
+                font-size: 1.05rem;
+            }
+
+            .card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="banner">
+        <div class="banner-logo">
+            <a href="/">
+                <img src="/assets/panphy.png" alt="PanPhy logo">
+            </a>
+        </div>
+        <div class="banner-title">Lorentz Transformation — Learn</div>
+        <div class="banner-actions">
+            <a class="banner-link" href="/simulations/lorentz.html" aria-label="Back to simulator">Back to Sim</a>
+            <button class="theme-toggle" id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+        </div>
+    </header>
+
+    <main class="content">
+        <section class="card">
+            <h1>Why Lorentz transformations matter</h1>
+            <p>At everyday speeds, Newtonian ideas work well. But when objects move close to the speed of light, measurements of space and time depend on the observer’s frame of reference.</p>
+            <p>The Lorentz transformation tells us exactly how to convert coordinates between two inertial frames, usually written as a rest frame \(S\) and a moving frame \(S'\) with relative speed \(v\).</p>
+            <p class="equation-note">In this app, velocities are shown as a fraction of \(c\), so \(\beta = v/c\).</p>
+        </section>
+
+        <section class="card">
+            <h2>Core equations</h2>
+            <p>For motion along one spatial dimension:</p>
+            $$x' = \gamma (x - vt), \qquad t' = \gamma\left(t - \frac{vx}{c^2}\right)$$
+            $$\gamma = \frac{1}{\sqrt{1-\frac{v^2}{c^2}}} = \frac{1}{\sqrt{1-\beta^2}}$$
+            <p>These equations explain time dilation, length contraction, and relativity of simultaneity as one consistent geometry in spacetime.</p>
+        </section>
+
+        <section class="card">
+            <h2>How to read the Minkowski diagram</h2>
+            <ul>
+                <li>The vertical axis is \(ct\) and the horizontal axis is \(x\).</li>
+                <li>The light cone lines \(ct=\pm x\) are the same in every inertial frame.</li>
+                <li>The primed axes tilt when \(v\neq 0\): this visualizes how space and time mix.</li>
+                <li>Events are points in spacetime. Their \((x,t)\) and \((x',t')\) values are both shown.</li>
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>Velocity transformation</h2>
+            <p>If an object moves at speed \(u\) in \(S\), then its speed in \(S'\) is:</p>
+            $$u' = \frac{u-v}{1-\frac{uv}{c^2}}$$
+            <p>This formula ensures no observer measures any object faster than light when \(|u|\le c\) and \(|v|<c\).</p>
+        </section>
+
+        <section class="card">
+            <h2>How this simulator helps pre-uni learners</h2>
+            <ul>
+                <li><strong>Slider for \(v\):</strong> directly see how increasing relative speed changes axis tilt and coordinate values.</li>
+                <li><strong>Event placement:</strong> add events to connect algebra (equations) with geometry (diagram points).</li>
+                <li><strong>Frame comparison table:</strong> instantly compare \((x,t)\) with \((x',t')\) for the same physical event.</li>
+                <li><strong>Velocity mode:</strong> test intuition about relativistic velocity addition and compare \(u\) vs. \(u'\).</li>
+            </ul>
+            <p>Try changing \(v\) slowly from \(0\) to \(0.8c\), and watch how simultaneity lines rotate. This gives a powerful visual reason why “same time” is frame-dependent.</p>
+        </section>
+    </main>
+
+    <footer>
+        &copy; <a href="/">PanPhy Labs</a>
+    </footer>
+
+    <script>
+        const themeButton = document.getElementById('theme-button');
+        const DARK_THEME_KEY = 'panphy-dark';
+        const LIGHT_THEME_KEY = 'panphy-light';
+
+        const currentTheme = localStorage.getItem(DARK_THEME_KEY)
+            ? 'dark'
+            : localStorage.getItem(LIGHT_THEME_KEY)
+                ? 'light'
+                : 'light';
+
+        function updateButtonEmoji(theme) {
+            themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateButtonEmoji(currentTheme);
+
+        themeButton.addEventListener('click', () => {
+            const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+
+            if (theme === 'dark') {
+                localStorage.setItem(DARK_THEME_KEY, 'true');
+                localStorage.removeItem(LIGHT_THEME_KEY);
+            } else {
+                localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                localStorage.removeItem(DARK_THEME_KEY);
+            }
+            updateButtonEmoji(theme);
+        });
+    </script>
+</body>
+
+</html>

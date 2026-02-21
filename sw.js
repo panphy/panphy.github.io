@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-21T13:55:31Z';
+const BUILD_ID = '2026-02-21T14:40:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -62,6 +62,7 @@ const ASSETS_TO_CACHE = [
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',
   '/simulations/lorentz.html',
+  '/simulations/lorentz_learn.html',
   '/simulations/collision.html',
   '/simulations/collision/styles.css',
   '/simulations/collision/app.js',

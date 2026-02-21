@@ -187,6 +187,25 @@
             gap: 12px;
         }
 
+        .header-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .header-link:hover {
+            border-color: var(--brand-primary);
+            transform: translateY(-1px);
+        }
+
         .theme-toggle button {
             background: transparent;
             border: none;
@@ -522,6 +541,7 @@
         </div>
         <div class="banner-title">Lorentz Transformation</div>
         <div class="banner-actions">
+            <a class="header-link" href="/simulations/lorentz_learn.html" aria-label="Open Lorentz learn page">Learn</a>
             <div class="theme-toggle">
                 <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
             </div>
