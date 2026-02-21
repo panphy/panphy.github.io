@@ -30,6 +30,8 @@ const ui = {
     gravityValue: document.getElementById('gravityValue'),
     airDragRange: document.getElementById('airDragRange'),
     airDragValue: document.getElementById('airDragValue'),
+    timeScaleRange: document.getElementById('timeScaleRange'),
+    timeScaleValue: document.getElementById('timeScaleValue'),
     ballControlsSection: document.getElementById('ballControlsSection'),
     ballControlsCount: document.getElementById('ballControlsCount'),
     ballControlsList: document.getElementById('ballControlsList'),
@@ -204,7 +206,9 @@ const state = {
     nextHandDetectAt: 0,
     lastHudUpdateAt: 0,
     lastHudText: '',
-    tipOverlayVisible: false
+    tipOverlayVisible: false,
+    physicsAccumulator: 0,
+    timeScale: 1.0
 };
 
 let filesetResolverCtor = null;
@@ -296,6 +300,9 @@ const MATTER_WALL_THICKNESS = SPHERE_RADIUS * 2.5;
 const MATTER_POSITION_ITERATIONS = 12;
 const MATTER_VELOCITY_ITERATIONS = 10;
 const MATTER_CONSTRAINT_ITERATIONS = 2;
+const MATTER_BASE_DT = 1 / 60; // canonical tick duration (seconds) for Matter.js velocity conversion
+const PHYSICS_STEP_DT = 1 / 120; // fixed physics timestep (seconds)
+const PHYSICS_MAX_SUBSTEPS = 6; // safety cap to avoid spiral of death
 
 function randomHexColor() {
     return Math.floor(Math.random() * 0x1000000);
@@ -360,14 +367,14 @@ const HAND_CONNECTIONS = [
 // velocityTransfer: fraction of hand approach speed added as impulse on first contact
 const REAL_INTERACTION_PROFILE = {
     contactRadius: 0.15,
-    spring: 86,
+    spring: 44,
     damping: 8.2,
     correction: 0.56,
     restitution: 0.9,
     stickPull: 0,
     stickCapture: 0,
-    maxSpeed: 2.0,
-    velocityTransfer: 0.22
+    maxSpeed: 1.2,
+    velocityTransfer: 0.18
 };
 
 const scene = new THREE.Scene();
@@ -474,6 +481,10 @@ function updateGravityLabel() {
 
 function updateAirDragLabel() {
     ui.airDragValue.textContent = state.airDrag.toFixed(2);
+}
+
+function updateTimeScaleLabel() {
+    ui.timeScaleValue.textContent = `${state.timeScale.toFixed(2)}x`;
 }
 
 function clampSphereMass(value) {
@@ -771,7 +782,8 @@ function syncSphereStateToBody(sphere) {
     const nextVy = state.oneD ? 0 : (Number.isFinite(sphere.velocity.y) ? sphere.velocity.y : 0);
 
     MatterBody.setPosition(sphere.body, { x: nextX, y: nextY });
-    MatterBody.setVelocity(sphere.body, { x: nextVx, y: nextVy });
+    // Convert from units/sec to units/tick for Matter.js
+    MatterBody.setVelocity(sphere.body, { x: nextVx * MATTER_BASE_DT, y: nextVy * MATTER_BASE_DT });
     MatterBody.setAngle(sphere.body, 0);
     MatterBody.setAngularVelocity(sphere.body, 0);
 }
@@ -780,7 +792,8 @@ function syncBodyStateToSphere(sphere) {
     const y = state.oneD ? 0 : sphere.body.position.y;
     const vy = state.oneD ? 0 : sphere.body.velocity.y;
     sphere.position.set(sphere.body.position.x, y, PLANE_Z);
-    sphere.velocity.set(sphere.body.velocity.x, vy, 0);
+    // Convert from units/tick back to units/sec
+    sphere.velocity.set(sphere.body.velocity.x / MATTER_BASE_DT, vy / MATTER_BASE_DT, 0);
 }
 
 function clampSphereToWalls(sphere) {
@@ -1308,20 +1321,20 @@ const PALM_MIN_APPROACH_SPEED_SCALE = 0.8;
 const PALM_IMPULSE_SCALE = 0.95;
 const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
 const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
-const MAX_PUSH_ACCEL = 12.0;
-const MAX_IMPULSE = 2.2;
+const MAX_PUSH_ACCEL = 8.0;
+const MAX_IMPULSE = 1.4;
 const HAND_INTERACTION_SPEED_LIMIT_MULTIPLIER = 1.15;
 const GLOBAL_SPEED_LIMIT_MULTIPLIER = 1.2;
-const GLOBAL_SPEED_LIMIT_MIN = 2.2;
+const GLOBAL_SPEED_LIMIT_MIN = 1.5;
 const HAND_FORCE_MASS_FLOOR = 0.75;
-const MAX_RELATIVE_APPROACH_SPEED = 1.9;
+const MAX_RELATIVE_APPROACH_SPEED = 1.2;
 const HAND_FORCE_MAX_DT = 1 / 45;
 const TIP_VELOCITY_MAX_ELAPSED = 0.12;
 const TIP_VELOCITY_MIN_ELAPSED = 1 / 90;
 const TIP_VELOCITY_FILTER_ALPHA = 0.35;
-const TIP_VELOCITY_MAX = 2.4;
+const TIP_VELOCITY_MAX = 1.6;
 const TIP_VELOCITY_DEADZONE = 0.04;
-const TIP_INTERACTION_SPEED_CAP = 1.6;
+const TIP_INTERACTION_SPEED_CAP = 1.2;
 const FINGER_OPEN_RATIO = {
     4: 0.92,
     8: 1.02,
@@ -1935,21 +1948,22 @@ function enforceWallBounceFallback(sphere) {
     const bounds = getViewBounds();
     const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
     const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
-    const restitution = IDEAL_WALL_RESTITUTION * clampSphereRestitution(sphere.restitution);
 
-    let bounced = false;
+    // Position-only clamp — Matter.js already applied restitution during its
+    // collision step, so we just reflect velocity without scaling it again.
+    let clamped = false;
 
     if (sphere.position.x > xLimit) {
         sphere.position.x = xLimit;
         if (sphere.velocity.x > 0) {
-            sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
-            bounced = true;
+            sphere.velocity.x = -sphere.velocity.x;
+            clamped = true;
         }
     } else if (sphere.position.x < -xLimit) {
         sphere.position.x = -xLimit;
         if (sphere.velocity.x < 0) {
-            sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
-            bounced = true;
+            sphere.velocity.x = -sphere.velocity.x;
+            clamped = true;
         }
     }
 
@@ -1959,18 +1973,18 @@ function enforceWallBounceFallback(sphere) {
     } else if (sphere.position.y > yLimit) {
         sphere.position.y = yLimit;
         if (sphere.velocity.y > 0) {
-            sphere.velocity.y = -Math.abs(sphere.velocity.y) * restitution;
-            bounced = true;
+            sphere.velocity.y = -sphere.velocity.y;
+            clamped = true;
         }
     } else if (sphere.position.y < -yLimit) {
         sphere.position.y = -yLimit;
         if (sphere.velocity.y < 0) {
-            sphere.velocity.y = Math.abs(sphere.velocity.y) * restitution;
-            bounced = true;
+            sphere.velocity.y = -sphere.velocity.y;
+            clamped = true;
         }
     }
 
-    if (bounced) {
+    if (clamped) {
         syncSphereStateToBody(sphere);
     }
 }
@@ -2193,8 +2207,23 @@ function step(now) {
     state.trackedTips = collectTrackedTips();
     state.tipCount = state.trackedTips.length;
     const profile = getInteractionProfile();
+
+    // Hand forces are applied once per render frame (they read live tracking data)
     state.contactsCount = applyTipForces(dt, profile);
-    updatePhysics(dt, profile);
+
+    // Fixed-timestep physics accumulator for deterministic behaviour
+    state.physicsAccumulator += dt * state.timeScale;
+    let substeps = 0;
+    while (state.physicsAccumulator >= PHYSICS_STEP_DT && substeps < PHYSICS_MAX_SUBSTEPS) {
+        updatePhysics(PHYSICS_STEP_DT, profile);
+        state.physicsAccumulator -= PHYSICS_STEP_DT;
+        substeps += 1;
+    }
+    // Drain any leftover to prevent accumulation when capped
+    if (substeps >= PHYSICS_MAX_SUBSTEPS) {
+        state.physicsAccumulator = 0;
+    }
+
     updateGlow(dt);
     drawTrackedTips();
     updateMetrics(now);
@@ -2559,6 +2588,7 @@ function stopCameraAndTracking() {
     state.nextHandDetectAt = 0;
     state.lastHudUpdateAt = 0;
     state.tipOverlayVisible = false;
+    state.physicsAccumulator = 0;
     state.lastHands = [];
     state.handsCount = 0;
     state.tipCount = 0;
@@ -2689,6 +2719,14 @@ ui.airDragRange.addEventListener('input', () => {
     state.airDrag = Math.max(0, Math.min(1.0, nextValue));
     updateAirDragLabel();
 });
+ui.timeScaleRange.addEventListener('input', () => {
+    const nextValue = Number(ui.timeScaleRange.value);
+    if (!Number.isFinite(nextValue)) {
+        return;
+    }
+    state.timeScale = Math.max(0.1, Math.min(1.0, nextValue));
+    updateTimeScaleLabel();
+});
 
 window.addEventListener('resize', scheduleResizeStage);
 window.addEventListener('orientationchange', scheduleResizeStage);
@@ -2734,6 +2772,8 @@ ui.gravityRange.value = state.gravity.toFixed(2);
 updateGravityLabel();
 ui.airDragRange.value = state.airDrag.toFixed(2);
 updateAirDragLabel();
+ui.timeScaleRange.value = state.timeScale.toFixed(2);
+updateTimeScaleLabel();
 renderBallControls();
 updateStartButtonState();
 renderHudInfo();
