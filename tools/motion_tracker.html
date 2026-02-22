@@ -661,7 +661,7 @@
 			.chart-controls {
 				display: flex;
 				flex-direction: column;
-				gap: 5px;
+				gap: 8px;
 				margin-top: 12px;
 				max-width: 370px;
 				width: 100%;
@@ -673,7 +673,7 @@
 		.chart-controls-row {
 			display: grid;
 			grid-template-columns: repeat(3, 1fr);
-			gap: 5px;
+			gap: 8px;
 		}
 
 		.chart-controls .plot-btn {
@@ -2035,7 +2035,7 @@
 								ticks: { color: theme.textColor }
 							}
 						},
-						plugins: { legend: { display: true, position: 'top', labels: { color: theme.textColor, usePointStyle: true, pointStyle: 'circle' } } }
+						plugins: { legend: { display: true, position: 'top', labels: { color: theme.textColor, usePointStyle: true, pointStyle: 'circle', pointStyleWidth: 8 } } }
 					},
 				});
 			} else {
