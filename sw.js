@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-22T16:00:00Z';
+const BUILD_ID = '2026-02-22T16:10:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -99,9 +99,13 @@ self.addEventListener('install', (event) => {
 
         for (const mode of requestModes) {
           try {
+            const fetchUrl = new URL(resolvedUrl.href);
+            if (isSameOrigin) {
+              fetchUrl.searchParams.set('v', BUILD_ID);
+            }
             const res = await fetch(
-              new Request(resolvedUrl.href, {
-                cache: 'reload',
+              new Request(fetchUrl.href, {
+                cache: 'no-store',
                 mode
               })
             );
@@ -132,8 +136,8 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event?.data?.type === 'SKIP_WAITING') {
-    event.waitUntil(self.skipWaiting());
+  if (event && event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
 

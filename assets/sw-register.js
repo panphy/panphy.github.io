@@ -80,6 +80,14 @@
         return;
       }
 
+      // Ensure we immediately reload once the new SW takes control. This bypasses the
+      // `hadController` check elsewhere, ensuring the update doesn't silently stall.
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
       // Ask the waiting SW to activate immediately.
       waiting.postMessage({ type: 'SKIP_WAITING' });
 
@@ -147,7 +155,7 @@
         window.location.reload();
       });
 
-      const update = () => registration.update().catch(() => {});
+      const update = () => registration.update().catch(() => { });
       update();
       setInterval(update, 60 * 60 * 1000);
       document.addEventListener('visibilitychange', () => {
