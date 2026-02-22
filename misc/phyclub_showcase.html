@@ -853,102 +853,131 @@
 			/* ========================================
 			   SCENE: EM Wave — 3D perspective
 			   ======================================== */
-			const sceneEMWave = makeScene("Electromagnetic Wave", function () {
+			const sceneEMWave = makeScene("Electromagnetic Wave (3D Rotating)", function () {
 				this.t0 = now();
+				this.cx = W * 0.5; this.cy = H * 0.5;
+				this.perspective = 800;
+
+				// Rotation axis (arbitrary off-axis)
+				const ax = 0.4, ay = 0.6, az = 0.3;
+				const len = Math.sqrt(ax * ax + ay * ay + az * az);
+				this.rotAxis = { x: ax / len, y: ay / len, z: az / len };
+				this.rotSpeed = 0.4;
 			}, function (t) {
 				const local = t - this.t0;
 				sctx.clearRect(0, 0, W, H);
 				sctx.fillStyle = '#070b14';
 				sctx.fillRect(0, 0, W, H);
 
-				const cx = W * 0.5, cy = H * 0.5;
 				const span = Math.min(W, H) * 0.85;
 				const amp = Math.min(W, H) * 0.18;
 				const numPts = 120;
+				// wave number
+				const k = TAU * 2.5 / span;
 				const omega = 3;
-				const zDx = 0.5, zDy = 0.3; // z-axis projection
+
+				// Rotation matrix (Rodrigues' formula)
+				const angle = local * this.rotSpeed;
+				const cA = Math.cos(angle), sA = Math.sin(angle), iA = 1 - cA;
+				const kx = this.rotAxis.x, ky = this.rotAxis.y, kz = this.rotAxis.z;
+
+				const r11 = cA + kx * kx * iA, r12 = kx * ky * iA - kz * sA, r13 = kx * kz * iA + ky * sA;
+				const r21 = ky * kx * iA + kz * sA, r22 = cA + ky * ky * iA, r23 = ky * kz * iA - kx * sA;
+				const r31 = kz * kx * iA - ky * sA, r32 = kz * ky * iA + kx * sA, r33 = cA + kz * kz * iA;
+
+				const rotate3D = (vx, vy, vz) => ({
+					x: r11 * vx + r12 * vy + r13 * vz,
+					y: r21 * vx + r22 * vy + r23 * vz,
+					z: r31 * vx + r32 * vy + r33 * vz
+				});
+
+				const project = (px, py, pz) => {
+					const scale = this.perspective / (this.perspective + pz + 500);
+					return {
+						x: this.cx + px * scale,
+						y: this.cy + py * scale,
+						scale: scale,
+						z: pz
+					};
+				};
+
+				const renderables = [];
 
 				/* Propagation axis */
-				sctx.strokeStyle = 'rgba(255,255,255,.2)';
-				sctx.lineWidth = 1;
-				sctx.beginPath();
-				sctx.moveTo(cx - span * 0.45, cy);
-				sctx.lineTo(cx + span * 0.45, cy);
-				sctx.stroke();
+				const axisP1Raw = rotate3D(-span * 0.45, 0, 0);
+				const axisP2Raw = rotate3D(span * 0.45, 0, 0);
+				const axisP1 = project(axisP1Raw.x, axisP1Raw.y, axisP1Raw.z);
+				const axisP2 = project(axisP2Raw.x, axisP2Raw.y, axisP2Raw.z);
 
-				/* E field wave (vertical) */
-				sctx.strokeStyle = '#58e1ff';
-				sctx.lineWidth = 2.5;
-				sctx.shadowColor = '#58e1ff';
-				sctx.shadowBlur = 8;
-				sctx.beginPath();
-				for (let i = 0; i <= numPts; i++) {
-					const f = i / numPts;
-					const px = cx - span * 0.42 + f * span * 0.84;
-					const phase = f * TAU * 2.5 - omega * local;
-					const ey = amp * Math.sin(phase);
-					if (i === 0) sctx.moveTo(px, cy - ey);
-					else sctx.lineTo(px, cy - ey);
-				}
-				sctx.stroke();
-				sctx.shadowBlur = 0;
+				renderables.push({
+					type: 'line', p1: axisP1, p2: axisP2,
+					z: (axisP1.z + axisP2.z) / 2, color: 'rgba(255,255,255,.2)', w: 1, glow: null
+				});
 
-				/* E field arrows */
+				/* Build wave curves and arrows */
+				let lastEProj = null, lastBProj = null;
 				const arrInt = Math.floor(numPts / 14);
-				for (let i = 0; i <= numPts; i += arrInt) {
-					const f = i / numPts;
-					const px = cx - span * 0.42 + f * span * 0.84;
-					const phase = f * TAU * 2.5 - omega * local;
-					const ey = amp * Math.sin(phase);
-					sctx.strokeStyle = 'rgba(88,225,255,.3)';
-					sctx.lineWidth = 1;
-					sctx.beginPath();
-					sctx.moveTo(px, cy);
-					sctx.lineTo(px, cy - ey);
-					sctx.stroke();
-				}
 
-				/* B field wave (z projection) */
-				sctx.strokeStyle = '#a0ff6a';
-				sctx.lineWidth = 2.5;
-				sctx.shadowColor = '#a0ff6a';
-				sctx.shadowBlur = 8;
-				sctx.beginPath();
 				for (let i = 0; i <= numPts; i++) {
-					const f = i / numPts;
-					const px = cx - span * 0.42 + f * span * 0.84;
-					const phase = f * TAU * 2.5 - omega * local;
+					const lx = -span * 0.42 + (i / numPts) * span * 0.84;
+					const phase = k * (lx + span * 0.42) - omega * local;
+					const ey = amp * Math.sin(phase);
 					const bz = amp * 0.7 * Math.sin(phase);
-					if (i === 0) sctx.moveTo(px + zDx * bz, cy + zDy * bz);
-					else sctx.lineTo(px + zDx * bz, cy + zDy * bz);
-				}
-				sctx.stroke();
-				sctx.shadowBlur = 0;
 
-				/* B arrows */
-				for (let i = 0; i <= numPts; i += arrInt) {
-					const f = i / numPts;
-					const px = cx - span * 0.42 + f * span * 0.84;
-					const phase = f * TAU * 2.5 - omega * local;
-					const bz = amp * 0.7 * Math.sin(phase);
-					sctx.strokeStyle = 'rgba(160,255,106,.3)';
-					sctx.lineWidth = 1;
+					const eRot = rotate3D(lx, ey, 0); const eProj = project(eRot.x, eRot.y, eRot.z);
+					const bRot = rotate3D(lx, 0, bz); const bProj = project(bRot.x, bRot.y, bRot.z);
+					const oRot = rotate3D(lx, 0, 0); const oProj = project(oRot.x, oRot.y, oRot.z);
+
+					if (lastEProj) {
+						renderables.push({ type: 'line', p1: lastEProj, p2: eProj, z: (lastEProj.z + eProj.z) / 2, color: '#58e1ff', w: 2.5 * eProj.scale, glow: '#58e1ff' });
+					}
+					if (lastBProj) {
+						renderables.push({ type: 'line', p1: lastBProj, p2: bProj, z: (lastBProj.z + bProj.z) / 2, color: '#a0ff6a', w: 2.5 * bProj.scale, glow: '#a0ff6a' });
+					}
+
+					// Arrows
+					if (i % arrInt === 0) {
+						renderables.push({ type: 'line', p1: oProj, p2: eProj, z: (oProj.z + eProj.z) / 2, color: 'rgba(88,225,255,.4)', w: 1.5 * eProj.scale, glow: null });
+						renderables.push({ type: 'line', p1: oProj, p2: bProj, z: (oProj.z + bProj.z) / 2, color: 'rgba(160,255,106,.4)', w: 1.5 * bProj.scale, glow: null });
+					}
+
+					lastEProj = eProj; lastBProj = bProj;
+				}
+
+				// Z-sort (Painter's algorithm)
+				renderables.sort((a, b) => b.z - a.z);
+
+				/* Draw Renderables */
+				sctx.lineCap = 'round';
+				for (const r of renderables) {
+					sctx.lineWidth = r.w;
+					sctx.strokeStyle = r.color;
+					if (r.glow) {
+						sctx.shadowColor = r.glow;
+						sctx.shadowBlur = 8 * r.p1.scale;
+					} else {
+						sctx.shadowBlur = 0;
+					}
 					sctx.beginPath();
-					sctx.moveTo(px, cy);
-					sctx.lineTo(px + zDx * bz, cy + zDy * bz);
+					sctx.moveTo(r.p1.x, r.p1.y);
+					sctx.lineTo(r.p2.x, r.p2.y);
 					sctx.stroke();
 				}
+				sctx.lineCap = 'butt';
+				sctx.shadowBlur = 0;
 
 				/* Axis labels */
+				const labelEAxis = rotate3D(0, amp + 20, 0);
+				const labelEProj = project(labelEAxis.x, labelEAxis.y, labelEAxis.z);
+				const labelBAxis = rotate3D(0, 0, amp * 0.7 + 20);
+				const labelBProj = project(labelBAxis.x, labelBAxis.y, labelBAxis.z);
+
 				sctx.font = 'bold 16px Inter, sans-serif';
 				sctx.textAlign = 'center';
 				sctx.fillStyle = '#58e1ff';
-				sctx.fillText('E', cx + span * 0.44, cy - amp - 8);
+				sctx.fillText('E', labelEProj.x, labelEProj.y);
 				sctx.fillStyle = '#a0ff6a';
-				sctx.fillText('B', cx + span * 0.44 + zDx * amp * 0.7, cy + zDy * amp * 0.7 + 16);
-				sctx.fillStyle = 'rgba(255,255,255,.5)';
-				sctx.font = '13px Inter, sans-serif';
-				sctx.fillText('propagation →', cx + span * 0.32, cy - 6);
+				sctx.fillText('B', labelBProj.x, labelBProj.y);
 				sctx.textAlign = 'start';
 
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
@@ -1169,91 +1198,7 @@
 				drawArrow(sctx, this.x, this.y, this.x + this.dir * 54, this.y, '#a0ff6a');
 			}, function (w, h) { this.y = h * 0.5; });
 
-			/* ========================================
-			   SCENE: Pendulum + afterimage trail
-			   ======================================== */
-			const scenePendulum = makeScene("SHM — Simple Pendulum", function () {
-				this.t0 = now();
-				this.L = Math.min(W, H) * 0.32;
-				this.g = 9.8 * 200;
-				this.theta0 = 0.48;
-				this.omega = Math.sqrt(this.g / this.L);
-				this.pivot = { x: W * 0.5, y: H * 0.18 };
-				this.bobR = 16;
-				this.trail = [];
-				this.trailMax = 18;
-			}, function (t) {
-				const local = t - this.t0;
-				const theta = this.theta0 * Math.cos(this.omega * local);
-				const bx = this.pivot.x + this.L * Math.sin(theta);
-				const by = this.pivot.y + this.L * Math.cos(theta);
 
-				sctx.clearRect(0, 0, W, H);
-				drawGrid(sctx, 36, 0.16);
-
-				/* Ghost trail */
-				this.trail.push({ x: bx, y: by });
-				if (this.trail.length > this.trailMax) this.trail.shift();
-				for (let i = 0; i < this.trail.length; i++) {
-					const a = (i / this.trail.length) * 0.25;
-					sctx.globalAlpha = a;
-					sctx.fillStyle = '#ff7ad9';
-					sctx.beginPath();
-					sctx.arc(this.trail[i].x, this.trail[i].y, this.bobR, 0, TAU);
-					sctx.fill();
-				}
-				sctx.globalAlpha = 1;
-
-				/* Rod */
-				sctx.strokeStyle = 'rgba(255,255,255,.75)';
-				sctx.lineWidth = 1;
-				sctx.beginPath();
-				sctx.moveTo(this.pivot.x, this.pivot.y);
-				sctx.lineTo(bx, by);
-				sctx.stroke();
-				glowCircle(sctx, this.pivot.x, this.pivot.y, 6, '#58e1ff');
-				glowCircle(sctx, bx, by, this.bobR, '#ff7ad9');
-
-				/* Restoring-force arrow */
-				const mid = { x: this.pivot.x + this.L * 0.5 * Math.sin(theta), y: this.pivot.y + this.L * 0.5 * Math.cos(theta) };
-				drawArrow(sctx, mid.x, mid.y, mid.x - 60 * Math.sin(theta), mid.y + 60 * Math.cos(theta), '#a0ff6a');
-			}, function (w, h) {
-				this.L = Math.min(w, h) * 0.32;
-				this.pivot = { x: w * 0.5, y: h * 0.18 };
-			});
-
-			/* ========================================
-			   SCENE: Ripple Tank
-			   ======================================== */
-			const sceneRipple = makeScene("Wave Interference — Ripple Tank", function () {
-				this.t0 = now();
-				this.c = 220; this.emitEvery = 0.22; this.lastEmit = 0;
-				const ccx = W * 0.4, ccy = H * 0.55, sep = Math.min(W, H) * 0.18;
-				this.sources = [{ x: ccx - sep / 2, y: ccy }, { x: ccx + sep / 2, y: ccy }];
-				this.fronts = [];
-			}, function (t) {
-				sctx.clearRect(0, 0, W, H);
-				const g = sctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
-				g.addColorStop(0, '#0b1220');
-				g.addColorStop(1, '#070a12');
-				sctx.fillStyle = g;
-				sctx.fillRect(0, 0, W, H);
-				if (t - this.lastEmit > this.emitEvery) {
-					for (const s of this.sources) this.fronts.push({ x: s.x, y: s.y, t });
-					this.lastEmit = t;
-				}
-				sctx.lineWidth = 1.2;
-				for (let i = this.fronts.length - 1; i >= 0; i--) {
-					const f = this.fronts[i];
-					const r = (t - f.t) * this.c;
-					if (r > Math.max(W, H)) { this.fronts.splice(i, 1); continue; }
-					sctx.strokeStyle = 'rgba(88,225,255,.2)';
-					sctx.beginPath();
-					sctx.arc(f.x, f.y, r, 0, TAU);
-					sctx.stroke();
-				}
-				for (const s of this.sources) glowCircle(sctx, s.x, s.y, 7, '#58e1ff');
-			}, function () { });
 
 			/* ========================================
 			   SCENE: Quantum Tunneling (Wave Packet)
@@ -1551,6 +1496,289 @@
 				sctx.fillText('3D Rotating Magnetic Field (Current loop approximation)', 16, 24);
 			});
 
+			/* ========================================
+			   SCENE: Brownian Motion (Thermodynamics)
+			   ======================================== */
+			const sceneBrownian = makeScene("Brownian Motion", function () {
+				this.t0 = now();
+				this.cx = W / 2;
+				this.cy = H / 2;
+
+				// Large visible grain
+				this.grain = {
+					x: this.cx, y: this.cy,
+					vx: 0, vy: 0,
+					r: 20, mass: 100, // Very massive compared to fluid particles
+					trail: []
+				};
+
+				// Fluid particles
+				this.particles = [];
+				const nParticles = 400; // Enough for chaos, few enough for performance
+				const vBase = 250; // High speed
+				for (let i = 0; i < nParticles; i++) {
+					const angle = Math.random() * TAU;
+					this.particles.push({
+						x: Math.random() * W,
+						y: Math.random() * H,
+						vx: vBase * Math.cos(angle),
+						vy: vBase * Math.sin(angle),
+						r: 1.5, mass: 1
+					});
+				}
+			}, function (t) {
+				const dt = 1 / 60; // Fixed timestep for stability
+				const substeps = 4; // Sub-stepping for collision accuracy at high speeds
+				const sdt = dt / substeps;
+
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 36, 0.1);
+
+				// Physics Engine Loop
+				for (let step = 0; step < substeps; step++) {
+					// 1. Move fluid particles and check collisions with walls & grain
+					for (const p of this.particles) {
+						p.x += p.vx * sdt;
+						p.y += p.vy * sdt;
+
+						// Wall collisions
+						if (p.x < 0) { p.x = 0; p.vx *= -1; }
+						if (p.x > W) { p.x = W; p.vx *= -1; }
+						if (p.y < 0) { p.y = 0; p.vy *= -1; }
+						if (p.y > H) { p.y = H; p.vy *= -1; }
+
+						// Collision with large grain
+						const dx = p.x - this.grain.x;
+						const dy = p.y - this.grain.y;
+						const distSq = dx * dx + dy * dy;
+						const minDist = p.r + this.grain.r;
+
+						if (distSq < minDist * minDist) {
+							const dist = Math.sqrt(distSq);
+							const nx = dx / dist; const ny = dy / dist; // normal
+
+							// relative velocity
+							const rvx = p.vx - this.grain.vx;
+							const rvy = p.vy - this.grain.vy;
+							const velAlongNormal = rvx * nx + rvy * ny;
+
+							if (velAlongNormal > 0) continue; // moving apart
+
+							// Restitution (elastic)
+							const e = 1.0;
+							const j = -(1 + e) * velAlongNormal / (1 / p.mass + 1 / this.grain.mass); // impulse scalar
+
+							const impulseX = j * nx;
+							const impulseY = j * ny;
+
+							p.vx += impulseX / p.mass;
+							p.vy += impulseY / p.mass;
+							this.grain.vx -= impulseX / this.grain.mass;
+							this.grain.vy -= impulseY / this.grain.mass;
+
+							// push apart to prevent overlap
+							const overlap = minDist - dist;
+							p.x += nx * overlap * 0.5;
+							p.y += ny * overlap * 0.5;
+						}
+					}
+
+					// 2. Move large grain (includes dampening/viscosity)
+					this.grain.x += this.grain.vx * sdt;
+					this.grain.y += this.grain.vy * sdt;
+
+					// Grain wall boundary
+					if (this.grain.x < this.grain.r) { this.grain.x = this.grain.r; this.grain.vx *= -0.5; }
+					if (this.grain.x > W - this.grain.r) { this.grain.x = W - this.grain.r; this.grain.vx *= -0.5; }
+					if (this.grain.y < this.grain.r) { this.grain.y = this.grain.r; this.grain.vy *= -0.5; }
+					if (this.grain.y > H - this.grain.r) { this.grain.y = H - this.grain.r; this.grain.vy *= -0.5; }
+				}
+
+				// Record trail (throttle pushing to array based on distance moved to make jagged path obvious)
+				if (this.grain.trail.length === 0 ||
+					Math.hypot(this.grain.x - this.grain.trail[this.grain.trail.length - 1].x,
+						this.grain.y - this.grain.trail[this.grain.trail.length - 1].y) > 2) {
+					this.grain.trail.push({ x: this.grain.x, y: this.grain.y });
+					if (this.grain.trail.length > 300) this.grain.trail.shift();
+				}
+
+				/* Draw Renderables */
+
+				// 1. Trail
+				sctx.strokeStyle = 'rgba(255,255,255, 0.5)';
+				sctx.lineWidth = 1.5;
+				sctx.beginPath();
+				for (let i = 0; i < this.grain.trail.length; i++) {
+					const pt = this.grain.trail[i];
+					if (i === 0) sctx.moveTo(pt.x, pt.y);
+					else sctx.lineTo(pt.x, pt.y);
+				}
+				sctx.stroke();
+
+				// 2. Fluid Particles
+				sctx.fillStyle = 'rgba(88,225,255, 0.6)';
+				sctx.beginPath();
+				for (const p of this.particles) {
+					sctx.moveTo(p.x, p.y);
+					sctx.arc(p.x, p.y, p.r, 0, TAU);
+				}
+				sctx.fill();
+
+				// 3. Large Grain
+				glowCircle(sctx, this.grain.x, this.grain.y, this.grain.r, '#ffcc66');
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('Random walk emerges from microscopic fluid collisions', 16, 24);
+			});
+
+			/* ========================================
+			   SCENE: Cyclotron Accelerator
+			   ======================================== */
+			const sceneCyclotron = makeScene("Cyclotron Accelerator", function () {
+				this.t0 = now();
+				this.cx = W / 2;
+				this.cy = H / 2;
+
+				this.gapW = 20; // Width of the gap between Dees
+				this.deeR = Math.min(W, H) * 0.4;
+
+				this.q = 1;     // Charge
+				this.m = 1;     // Mass
+				this.B = 1.2;   // Magnetic field strength (uniform everywhere)
+
+				// Cyclotron Frequency (omega = qB/m)
+				this.omega_c = (this.q * this.B) / this.m;
+				// Electric field magnitude in the gap
+				this.E_mag = 400;
+
+				this.p = {
+					x: this.cx, y: this.cy + 2, // Start slightly off-center to kickstart spiral
+					vx: 0, vy: 40,
+					trail: []
+				};
+			}, function (t) {
+				const dt = 1 / 60;
+				const substeps = 10; // high precision for circular orbit Integration
+				const sdt = dt / substeps;
+
+				const local = t - this.t0;
+
+				sctx.clearRect(0, 0, W, H);
+
+				// Background grid
+				drawGrid(sctx, 30, 0.1);
+
+				// Determine alternating E-field direction based on Cyclotron Frequency
+				// The E field should switch signs every half-period T/2 = PI / omega_c
+				const period = TAU / this.omega_c;
+				const phase = (local % period) / period;
+				// +1 if phase < 0.5 (left to right), -1 if phase >= 0.5 (right to left)
+				const E_dir = (phase < 0.5) ? 1 : -1;
+				const E_current = this.E_mag * E_dir;
+
+				// Integration Loop
+				for (let step = 0; step < substeps; step++) {
+					// Is particle in the gap?
+					const inGap = Math.abs(this.p.x - this.cx) < (this.gapW / 2);
+
+					let fx = 0, fy = 0;
+
+					if (inGap) {
+						// Electric force F = qE
+						fx += this.q * E_current;
+					} else {
+						// Magnetic force F = qv x B. B is out of page (z). 
+						// v x B = (vy*Bz, -vx*Bz)
+						fx += this.q * this.p.vy * this.B;
+						fy += -this.q * this.p.vx * this.B;
+					}
+
+					// Update velocity
+					this.p.vx += (fx / this.m) * sdt;
+					this.p.vy += (fy / this.m) * sdt;
+					// Update position
+					this.p.x += this.p.vx * sdt;
+					this.p.y += this.p.vy * sdt;
+
+					// Save trail if still inside bounds
+					const distFromCenter = Math.hypot(this.p.x - this.cx, this.p.y - this.cy);
+					if (distFromCenter < this.deeR * 1.5 && (step === 0)) {
+						this.p.trail.push({ x: this.p.x, y: this.p.y });
+						if (this.p.trail.length > 600) this.p.trail.shift();
+					}
+				}
+
+				/* Draw Renderables */
+
+				// 1. Draw "Dees" (Electrodes)
+				sctx.lineWidth = 4;
+				sctx.strokeStyle = '#58e1ff';
+				sctx.fillStyle = 'rgba(88,225,255, 0.05)';
+				sctx.shadowColor = '#58e1ff';
+				sctx.shadowBlur = 10;
+
+				// Left Dee
+				sctx.beginPath();
+				sctx.arc(this.cx - this.gapW / 2, this.cy, this.deeR, Math.PI / 2, -Math.PI / 2);
+				sctx.closePath();
+				sctx.stroke(); sctx.fill();
+
+				// Right Dee
+				sctx.beginPath();
+				sctx.arc(this.cx + this.gapW / 2, this.cy, this.deeR, -Math.PI / 2, Math.PI / 2);
+				sctx.closePath();
+				sctx.stroke(); sctx.fill();
+
+				sctx.shadowBlur = 0;
+
+				// 2. Draw Alternating Electric Field in Gap
+				sctx.strokeStyle = `rgba(255,122,217, ${0.4 + 0.4 * Math.abs(Math.sin(local * this.omega_c))})`;
+				sctx.lineWidth = 2;
+				const nArrows = 7;
+				for (let i = 0; i < nArrows; i++) {
+					const yStart = this.cy - this.deeR * 0.8 + (i / (nArrows - 1)) * this.deeR * 1.6;
+					if (E_dir > 0) {
+						drawArrow(sctx, this.cx - this.gapW / 2 + 2, yStart, this.cx + this.gapW / 2 - 2, yStart, sctx.strokeStyle);
+					} else {
+						drawArrow(sctx, this.cx + this.gapW / 2 - 2, yStart, this.cx - this.gapW / 2 + 2, yStart, sctx.strokeStyle);
+					}
+				}
+
+				// 3. Draw B-field indicators (uniform dots/crosses)
+				sctx.fillStyle = 'rgba(160, 255, 106, 0.3)';
+				const dotSpacing = 40;
+				for (let x = this.cx - this.deeR; x <= this.cx + this.deeR; x += dotSpacing) {
+					for (let y = this.cy - this.deeR; y <= this.cy + this.deeR; y += dotSpacing) {
+						if (Math.hypot(x - this.cx, y - this.cy) < this.deeR - 10 && Math.abs(x - this.cx) > this.gapW / 2) {
+							// Draw an "out of page" dot vector
+							sctx.beginPath(); sctx.arc(x, y, 2, 0, TAU); sctx.fill();
+							sctx.beginPath(); sctx.arc(x, y, 5, 0, TAU); sctx.stroke();
+						}
+					}
+				}
+
+				// 4. Draw Particle Trail
+				sctx.strokeStyle = 'rgba(255, 204, 102, 0.8)';
+				sctx.lineWidth = 2;
+				sctx.beginPath();
+				for (let i = 0; i < this.p.trail.length; i++) {
+					const pt = this.p.trail[i];
+					if (i === 0) sctx.moveTo(pt.x, pt.y);
+					else sctx.lineTo(pt.x, pt.y);
+				}
+				sctx.stroke();
+
+				// 5. Draw Particle
+				glowCircle(sctx, this.p.x, this.p.y, 6, '#ffcc66');
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('v = qrB/m  (Alternating E-field accelerates, B-field steers)', 16, 24);
+			});
+
 			/* ===== Scene list (curated order) ===== */
 			const scenes = [
 				sceneDoublePendulum,  // 1 — chaotic rainbow eye-catcher
@@ -1559,10 +1787,10 @@
 				sceneEMWave,          // 4 — 3D fields
 				sceneSolenoid,        // 5 — iron filings magnetic field
 				sceneSpring,          // 6 — classic + trace
-				sceneGalaxy,          // 7 — spiral particles
-				sceneDoppler,         // 8 — wavefronts
-				scenePendulum,        // 9 — swinging trail
-				sceneRipple           // 10 — interference
+				sceneCyclotron,       // 7 — spiral accelerator
+				sceneBrownian,        // 8 — thermodynamics collisions
+				sceneGalaxy,          // 9 — spiral particles
+				sceneDoppler          // 10 — wavefronts
 			];
 
 			let index = 0, current = null;
