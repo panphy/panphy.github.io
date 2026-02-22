@@ -1500,151 +1500,7 @@
 				sctx.fillText('Random walk emerges from microscopic fluid collisions', 16, 24);
 			});
 
-			/* ========================================
-			   SCENE: Cyclotron Accelerator
-			   ======================================== */
-			const sceneCyclotron = makeScene("Cyclotron Accelerator", function () {
-				this.t0 = now();
-				this.cx = W / 2;
-				this.cy = H / 2;
 
-				this.gapW = 20; // Width of the gap between Dees
-				this.deeR = Math.min(W, H) * 0.4;
-
-				this.q = 1;     // Charge
-				this.m = 1;     // Mass
-				this.B = 4.0;   // Magnetic field strength (substantially increased for tighter circles)
-
-				// Cyclotron Frequency (omega = qB/m)
-				this.omega_c = (this.q * this.B) / this.m;
-				// Electric field magnitude in the gap
-				this.E_mag = 400; // Keep acceleration moderate so orbits stay tight
-
-				this.p = {
-					x: this.cx, y: this.cy + 2, // Start slightly off-center to kickstart spiral
-					vx: 0, vy: 60, // Moderate initial velocity
-					trail: []
-				};
-			}, function (t) {
-				const dt = 1 / 60;
-				const substeps = 10; // high precision for circular orbit Integration
-				const sdt = dt / substeps;
-
-				const local = t - this.t0;
-
-				sctx.clearRect(0, 0, W, H);
-
-				// Background grid
-				drawGrid(sctx, 30, 0.1);
-
-				// Determine alternating E-field direction based on Cyclotron Frequency
-				// The E field should switch signs every half-period T/2 = PI / omega_c
-				const period = TAU / this.omega_c;
-				const phase = (local % period) / period;
-				// +1 if phase < 0.5 (left to right), -1 if phase >= 0.5 (right to left)
-				const E_dir = (phase < 0.5) ? 1 : -1;
-				const E_current = this.E_mag * E_dir;
-
-				// Integration Loop
-				for (let step = 0; step < substeps; step++) {
-					// Is particle in the gap?
-					const inGap = Math.abs(this.p.x - this.cx) < (this.gapW / 2);
-
-					let fx = 0, fy = 0;
-
-					if (inGap) {
-						// Electric force F = qE
-						fx += this.q * E_current;
-					} else {
-						// Magnetic force F = qv x B. B is out of page (z). 
-						// v x B = (vy*Bz, -vx*Bz)
-						fx += this.q * this.p.vy * this.B;
-						fy += -this.q * this.p.vx * this.B;
-					}
-
-					// Update velocity
-					this.p.vx += (fx / this.m) * sdt;
-					this.p.vy += (fy / this.m) * sdt;
-					// Update position
-					this.p.x += this.p.vx * sdt;
-					this.p.y += this.p.vy * sdt;
-
-					// Save trail if still inside bounds
-					const distFromCenter = Math.hypot(this.p.x - this.cx, this.p.y - this.cy);
-					if (distFromCenter < this.deeR * 1.5 && (step === 0)) {
-						this.p.trail.push({ x: this.p.x, y: this.p.y });
-						if (this.p.trail.length > 600) this.p.trail.shift();
-					}
-				}
-
-				/* Draw Renderables */
-
-				// 1. Draw "Dees" (Electrodes)
-				sctx.lineWidth = 4;
-				sctx.strokeStyle = '#58e1ff';
-				sctx.fillStyle = 'rgba(88,225,255, 0.05)';
-				sctx.shadowColor = '#58e1ff';
-				sctx.shadowBlur = 10;
-
-				// Left Dee
-				sctx.beginPath();
-				sctx.arc(this.cx - this.gapW / 2, this.cy, this.deeR, Math.PI / 2, -Math.PI / 2);
-				sctx.closePath();
-				sctx.stroke(); sctx.fill();
-
-				// Right Dee
-				sctx.beginPath();
-				sctx.arc(this.cx + this.gapW / 2, this.cy, this.deeR, -Math.PI / 2, Math.PI / 2);
-				sctx.closePath();
-				sctx.stroke(); sctx.fill();
-
-				sctx.shadowBlur = 0;
-
-				// 2. Draw Alternating Electric Field in Gap
-				sctx.strokeStyle = `rgba(255,122,217, ${0.4 + 0.4 * Math.abs(Math.sin(local * this.omega_c))})`;
-				sctx.lineWidth = 2;
-				const nArrows = 7;
-				for (let i = 0; i < nArrows; i++) {
-					const yStart = this.cy - this.deeR * 0.8 + (i / (nArrows - 1)) * this.deeR * 1.6;
-					if (E_dir > 0) {
-						drawArrow(sctx, this.cx - this.gapW / 2 + 2, yStart, this.cx + this.gapW / 2 - 2, yStart, sctx.strokeStyle);
-					} else {
-						drawArrow(sctx, this.cx + this.gapW / 2 - 2, yStart, this.cx - this.gapW / 2 + 2, yStart, sctx.strokeStyle);
-					}
-				}
-
-				// 3. Draw B-field indicators (uniform dots/crosses)
-				sctx.fillStyle = 'rgba(160, 255, 106, 0.3)';
-				const dotSpacing = 40;
-				for (let x = this.cx - this.deeR; x <= this.cx + this.deeR; x += dotSpacing) {
-					for (let y = this.cy - this.deeR; y <= this.cy + this.deeR; y += dotSpacing) {
-						if (Math.hypot(x - this.cx, y - this.cy) < this.deeR - 10 && Math.abs(x - this.cx) > this.gapW / 2) {
-							// Draw an "out of page" dot vector
-							sctx.beginPath(); sctx.arc(x, y, 2, 0, TAU); sctx.fill();
-							sctx.beginPath(); sctx.arc(x, y, 5, 0, TAU); sctx.stroke();
-						}
-					}
-				}
-
-				// 4. Draw Particle Trail
-				sctx.strokeStyle = 'rgba(255, 204, 102, 0.8)';
-				sctx.lineWidth = 2;
-				sctx.beginPath();
-				for (let i = 0; i < this.p.trail.length; i++) {
-					const pt = this.p.trail[i];
-					if (i === 0) sctx.moveTo(pt.x, pt.y);
-					else sctx.lineTo(pt.x, pt.y);
-				}
-				sctx.stroke();
-
-				// 5. Draw Particle
-				glowCircle(sctx, this.p.x, this.p.y, 6, '#ffcc66');
-
-				/* Label */
-				sctx.fillStyle = 'rgba(255,255,255,.85)';
-				sctx.font = '14px Inter, sans-serif';
-				sctx.fillText('v = qrB/m  (Alternating E-field accelerates, B-field steers)', 16, 24);
-			});
 
 			/* ===== Scene list (curated order) ===== */
 			const scenes = [
@@ -1653,10 +1509,9 @@
 				sceneStandingWave,    // 3 — harmonics
 				sceneSolenoid,        // 4 — iron filings magnetic field
 				sceneSpring,          // 5 — classic + trace
-				sceneCyclotron,       // 6 — spiral accelerator
-				sceneBrownian,        // 7 — thermodynamics collisions
-				sceneGalaxy,          // 8 — spiral particles
-				sceneDoppler          // 9 — wavefronts
+				sceneBrownian,        // 6 — thermodynamics collisions
+				sceneGalaxy,          // 7 — spiral particles
+				sceneDoppler          // 8 — wavefronts
 			];
 
 			let index = 0, current = null;
