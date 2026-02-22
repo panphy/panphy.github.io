@@ -62,7 +62,8 @@ for i in range(5):
 > I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog videos. 🐶
 
 - 1.6.2 **Reference Links:**
-  - *"[Markdown][1] is a lightweight markup language for creating formatted text using a plain-text editor."* 
+  - *"[Markdown][1] is a lightweight markup language for creating formatted text using a plain-text editor."*
+
   - *"[LaTeX][2] is widely used in academia for the communication and publication of scientific documents and technical note-taking in many fields, owing partially to its support for complex mathematical notation."*
 
 ---
@@ -71,25 +72,35 @@ for i in range(5):
 
 **2.1 Greek Letters**
 > *In case you need more symbols...*
+
 >> $\alpha \beta \gamma$
->> if you need some space between them: $\Lambda \space \theta \space \Omega \space \Delta$ 
+
+>> if you need some space between them: $\Lambda \space \theta \space \Omega \space \Delta$
+
 >> if you want even more space: $\mu \quad \nu \quad \tau \quad \epsilon \quad \psi \quad \rho$
 
 **2.2 Math Expressions**
 
 - 2.2.1 **Inline Examples:**
-> Newton's Second Law states that $F=ma$. 
-> Absolute zero is $-273 ^\circ{C}$ 🥶.  
+> - Newton's Second Law states that $F=ma$. 
+> - Absolute zero is $-273 ^\circ{C}$ 🥶.  
 
 - 2.2.2 **Displayed Examples:**
 
 $$ \frac{1}{x} $$
+
 $$ \boxed{M_\odot^2} $$
+
 $$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
+
 $$ \int_{t=-\infty}^{\infty} \ln \frac{1}{t} dt $$
+
 $$ \ddot{x} = \frac{d \dot{x}}{dt} = \frac{d^2x}{dt^2} $$
+
 $$ \left. \frac{\partial{y}}{\partial{t}} \right|_{t=5} $$
+
 $$ \nabla \cdot \vec{D} = \left| \nabla \times \vec{A} \right| = 0 $$
+
 $$ {\lim_{\Delta x \to 0}} \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
 | <small>More about $\lim\limits_{\Delta x \to 0}$</small> |
