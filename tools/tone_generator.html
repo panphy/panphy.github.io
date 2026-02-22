@@ -1093,6 +1093,8 @@
       combinedCtx.lineWidth = 2.25;
       combinedCtx.strokeStyle = combinedPlaying ? colors.combinedLine : colors.combinedLinePaused;
 
+      const ampScale = activeChannels.length;
+
       for (let x = 0; x < width; x += 1) {
         const fraction = x / (width - 1 || 1);
         let sampleSum = 0;
@@ -1102,8 +1104,7 @@
           sampleSum += Math.sin(2 * Math.PI * channel.frequency * t);
         }
 
-        const avgSample = sampleSum / activeChannels.length;
-        const y = (avgSample * 0.5 + 0.5) * height;
+        const y = (sampleSum / ampScale * 0.5 + 0.5) * height;
 
         if (x === 0) {
           combinedCtx.moveTo(x, y);
@@ -1246,11 +1247,12 @@
     function addChannel(options = {}) {
       clearEmptyState();
 
+      const referenceChannel = channels.find(c => c.isPlaying) || channels[0];
       const channel = {
         id: nextChannelId,
         frequency: options.frequency || 440,
         isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
-        waveTime: 0
+        waveTime: referenceChannel ? referenceChannel.waveTime : 0
       };
       nextChannelId += 1;
 
