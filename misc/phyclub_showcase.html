@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow">
+	<meta name="robots" content="noindex, nofollow">
 
 	<title>Physics Club — Sim Showcase</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
@@ -43,7 +43,17 @@
 			justify-content: center;
 			letter-spacing: .06em;
 			font-weight: 700;
-			color: #cfe6ff
+			background: linear-gradient(135deg, #58e1ff, #a0ff6a, #ff7ad9, #58e1ff);
+			background-size: 300% 300%;
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			animation: gradShift 6s ease infinite
+		}
+
+		@keyframes gradShift {
+			0%,100% { background-position: 0% 50% }
+			50% { background-position: 100% 50% }
 		}
 
 		#stage {
@@ -66,9 +76,9 @@
 			opacity: .85;
 			padding: 6px 8px;
 			border-radius: 8px;
-			background: rgba(10, 13, 18, .35);
-			backdrop-filter: blur(6px);
-			border: 1px solid rgba(255, 255, 255, .07)
+			background: rgba(10, 13, 18, .45);
+			backdrop-filter: blur(8px);
+			border: 1px solid rgba(255, 255, 255, .08)
 		}
 
 		#sceneName {
@@ -95,17 +105,21 @@
 		button {
 			appearance: none;
 			border: 1px solid rgba(255, 255, 255, .12);
-			background: rgba(255, 255, 255, .05);
+			background: rgba(255, 255, 255, .06);
+			backdrop-filter: blur(4px);
 			color: var(--fg);
 			padding: 10px 14px;
 			border-radius: 10px;
 			font-weight: 700;
 			letter-spacing: .04em;
-			cursor: pointer
+			cursor: pointer;
+			transition: all .25s ease
 		}
 
 		button:hover {
-			border-color: rgba(255, 255, 255, .25)
+			border-color: rgba(88, 225, 255, .45);
+			background: rgba(88, 225, 255, .1);
+			box-shadow: 0 0 14px rgba(88, 225, 255, .25)
 		}
 
 		.pill {
@@ -114,21 +128,38 @@
 			opacity: .9
 		}
 
+		.scene-dots {
+			display: flex;
+			gap: 6px;
+			align-items: center;
+			margin: 0 10px
+		}
+
+		.scene-dots .dot {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, .18);
+			transition: all .3s ease
+		}
+
+		.scene-dots .dot.active {
+			background: var(--accent);
+			box-shadow: 0 0 8px var(--accent)
+		}
+
 		#hint {
 			position: absolute;
 			left: 12px;
 			bottom: 62px;
 			font-size: 12px;
-			opacity: .6
+			opacity: .6;
+			animation: hintFade 5s forwards
 		}
 
-		/* Interstitial cover element just for a fade; drawing happens on titleCanvas */
-		#titleCover {
-			position: absolute;
-			inset: 0;
-			pointer-events: none;
-			opacity: 0;
-			transition: opacity .2s ease
+		@keyframes hintFade {
+			0%, 60% { opacity: .6 }
+			100% { opacity: 0 }
 		}
 	</style>
 </head>
@@ -139,29 +170,28 @@
 		<div id="stage">
 			<canvas id="simCanvas"></canvas>
 			<canvas id="titleCanvas"></canvas>
-			<div id="titleCover"></div>
 			<div id="hud">
 				<div id="sceneName">Loading…</div>
 				<div id="timer">00:00</div>
 			</div>
-			<div id="hint">Tap to Pause/Play. Swipe for Next/Prev.</div>
+			<div id="hint">Tap / Space: Pause · Swipe / Arrows: Prev / Next · F: Fullscreen</div>
 		</div>
 		<div id="controls">
-			<button id="prev">Prev ◀</button>
+			<button id="prev">◀ Prev</button>
 			<button id="toggle">Pause ⏸</button>
 			<button id="next">Next ▶</button>
+			<div class="scene-dots" id="sceneDots"></div>
 			<button id="fs" class="pill">Fullscreen ⛶</button>
 		</div>
 	</div>
 
 	<script>
 		(() => {
-			// Elements and canvases
+			/* ===== Elements ===== */
 			const sim = document.getElementById('simCanvas');
 			const sctx = sim.getContext('2d');
 			const tit = document.getElementById('titleCanvas');
 			const tctx = tit.getContext('2d');
-			const titleCover = document.getElementById('titleCover');
 			const hudName = document.getElementById('sceneName');
 			const timerEl = document.getElementById('timer');
 			const btnPrev = document.getElementById('prev');
@@ -169,10 +199,9 @@
 			const btnToggle = document.getElementById('toggle');
 			const btnFS = document.getElementById('fs');
 			const stage = document.getElementById('stage');
+			const dotsEl = document.getElementById('sceneDots');
 
-			let W = 0,
-				H = 0,
-				D = 1;
+			let W = 0, H = 0, D = 1;
 
 			function resize() {
 				D = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
@@ -190,17 +219,17 @@
 			}
 			addEventListener('resize', resize, { passive: true });
 
-			// Timing
-			const dwellSeconds = 7;
-			const interstitialSeconds = 2.2;
+			/* ===== Timing ===== */
+			const dwellSeconds = 12;
+			const interstitialSeconds = 2.5;
 			let interstitialUntil = 0;
-			let inInterstitial = false; // NEW: prevents sim draw during title
+			let inInterstitial = false;
 			let lastSwitch = 0;
 			let playing = true;
 			let startBase = performance.now() / 1000;
 			let elapsed = 0;
 
-			// Interactions
+			/* ===== Interactions ===== */
 			let touchStartX = null;
 			sim.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
 			sim.addEventListener('touchend', e => {
@@ -214,10 +243,18 @@
 			btnNext.onclick = nextScene;
 			btnToggle.onclick = togglePlay;
 			btnFS.onclick = () => {
-				const el = document.documentElement;
-				if (!document.fullscreenElement) el.requestFullscreen?.();
+				if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
 				else document.exitFullscreen?.();
 			};
+			document.addEventListener('keydown', e => {
+				if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); togglePlay(); }
+				else if (e.key === 'ArrowRight') nextScene();
+				else if (e.key === 'ArrowLeft') prevScene();
+				else if (e.key === 'f' || e.key === 'F') {
+					if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+					else document.exitFullscreen?.();
+				}
+			});
 
 			function togglePlay() {
 				playing = !playing;
@@ -225,7 +262,7 @@
 				if (playing) startBase = performance.now() / 1000 - elapsed;
 			}
 
-			// Helpers
+			/* ===== Helpers ===== */
 			const TAU = Math.PI * 2;
 			const now = () => performance.now() / 1000;
 
@@ -233,10 +270,8 @@
 				ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
 				ctx.lineWidth = 1;
 				ctx.beginPath();
-				for (let x = 0; x < W; x += step) { ctx.moveTo(x, 0);
-					ctx.lineTo(x, H); }
-				for (let y = 0; y < H; y += step) { ctx.moveTo(0, y);
-					ctx.lineTo(W, y); }
+				for (let x = 0; x < W; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+				for (let y = 0; y < H; y += step) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
 				ctx.stroke();
 			}
 
@@ -262,8 +297,7 @@
 				ctx.moveTo(x1, y1);
 				ctx.lineTo(x2, y2);
 				ctx.stroke();
-				const a = Math.atan2(y2 - y1, x2 - x1),
-					ah = 8;
+				const a = Math.atan2(y2 - y1, x2 - x1), ah = 8;
 				ctx.beginPath();
 				ctx.moveTo(x2, y2);
 				ctx.lineTo(x2 - ah * Math.cos(a - 0.45), y2 - ah * Math.sin(a - 0.45));
@@ -275,257 +309,769 @@
 			function spring(ctx, x1, y1, x2, y2, coils = 14, amp = 10, color = '#58e1ff') {
 				ctx.strokeStyle = color;
 				ctx.lineWidth = 2;
-				const dx = x2 - x1,
-					dy = y2 - y1,
-					len = Math.hypot(dx, dy);
-				const nx = dx / len,
-					ny = dy / len,
-					px = -ny,
-					py = nx,
-					seg = (len - 30) / coils;
+				const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+				const nx = dx / len, ny = dy / len, px = -ny, py = nx, seg = (len - 30) / coils;
 				ctx.beginPath();
 				ctx.moveTo(x1, y1);
 				ctx.lineTo(x1 + nx * 10, y1 + ny * 10);
-				let cx = x1 + nx * 10,
-					cy = y1 + ny * 10;
+				let cx = x1 + nx * 10, cy = y1 + ny * 10;
 				for (let i = 0; i < coils; i++) {
-					const dir = (i % 2 ? -1 : 1),
-						ox = px * amp * dir,
-						oy = py * amp * dir;
-					cx += nx * seg;
-					cy += ny * seg;
+					const dir = (i % 2 ? -1 : 1), ox = px * amp * dir, oy = py * amp * dir;
+					cx += nx * seg; cy += ny * seg;
 					ctx.lineTo(cx + ox, cy + oy);
 				}
 				ctx.lineTo(x2, y2);
 				ctx.stroke();
 			}
 
-			// INTERSTITIAL — brighter neon glow version
+			/* ===== Interstitial ===== */
+			const eqTexts = ['E = mc²', 'F = ma', 'v = λf', 'E = hf', 'p = mv', 'V = IR', 'PV = nRT', 'F = qvB', 'a = v²/r', 'λ = h/p', 'ΔE = qΔV', 'W = Fd'];
+
 			function startInterstitial() {
 				inInterstitial = true;
 				interstitialUntil = now() + interstitialSeconds;
-				titleCover.style.opacity = 1; // quick fade veil
-				sctx.clearRect(0, 0, W, H); // IMPORTANT: prevent last-frame flash
+				sctx.clearRect(0, 0, W, H);
 			}
 
 			function endInterstitial() {
 				inInterstitial = false;
-				titleCover.style.opacity = 0;
 				tctx.clearRect(0, 0, W, H);
 			}
 
 			function drawInterstitial(t) {
 				tctx.clearRect(0, 0, W, H);
 
-				// Deep space background with soft nebula
+				/* Background */
 				const bg = tctx.createRadialGradient(W * 0.5, H * 0.45, 0, W * 0.5, H * 0.45, Math.max(W, H) * 0.9);
 				bg.addColorStop(0, '#0b1220');
 				bg.addColorStop(1, '#070a12');
 				tctx.fillStyle = bg;
 				tctx.fillRect(0, 0, W, H);
 
-				// Sparkles
-				const n = Math.floor(W * H / 14000);
-				for (let i = 0; i < n; i++) {
-					const x = (i * 71) % W,
-						y = (i * 199) % H;
-					const twinkle = 0.35 + 0.65 * Math.abs(Math.sin(t * 3 + i));
-					tctx.fillStyle = `rgba(255,255,255,${twinkle*0.6})`;
-					tctx.fillRect(x, y, 1, 1);
+				/* Sparkles */
+				const nStar = Math.floor(W * H / 12000);
+				for (let i = 0; i < nStar; i++) {
+					const sx = (i * 71) % W, sy = (i * 199) % H;
+					const tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 3 + i));
+					tctx.fillStyle = `rgba(255,255,255,${tw * 0.55})`;
+					tctx.fillRect(sx, sy, 1, 1);
 				}
 
-				// Radial energy burst
-				for (let i = 0; i < 24; i++) {
-					const a = (i / 24) * TAU + t * 0.6;
-					const r0 = Math.min(W, H) * 0.08;
-					const r1 = Math.min(W, H) * 0.48;
-					tctx.strokeStyle = 'rgba(155,234,255,0.08)';
-					tctx.lineWidth = 2;
+				/* Floating equations */
+				tctx.font = '14px Inter, sans-serif';
+				for (let i = 0; i < eqTexts.length; i++) {
+					const ex = ((i * 137 + t * 12) % (W + 120)) - 60;
+					const ey = ((i * 199 + t * 6) % (H + 80)) - 40;
+					const ea = 0.08 + 0.06 * Math.sin(t * 0.7 + i * 2.5);
+					tctx.fillStyle = `rgba(150,220,255,${ea})`;
+					tctx.fillText(eqTexts[i], ex, ey);
+				}
+
+				/* Radial energy burst */
+				for (let i = 0; i < 20; i++) {
+					const a = (i / 20) * TAU + t * 0.5;
+					const r0 = Math.min(W, H) * 0.07;
+					const r1 = Math.min(W, H) * 0.42;
+					tctx.strokeStyle = 'rgba(155,234,255,0.06)';
+					tctx.lineWidth = 1.5;
 					tctx.beginPath();
 					tctx.moveTo(W / 2 + Math.cos(a) * r0, H / 2 + Math.sin(a) * r0);
 					tctx.lineTo(W / 2 + Math.cos(a) * r1, H / 2 + Math.sin(a) * r1);
 					tctx.stroke();
 				}
 
-				// Title — layered neon glow
+				/* Bohr-model atom orbits */
+				const acx = W / 2, acy = H / 2;
+				const orbits = [
+					{ a: Math.min(W, H) * 0.18, b: Math.min(W, H) * 0.06, tilt: -0.35, speed: 2.2 },
+					{ a: Math.min(W, H) * 0.24, b: Math.min(W, H) * 0.07, tilt: 0.7, speed: 1.6 },
+					{ a: Math.min(W, H) * 0.30, b: Math.min(W, H) * 0.08, tilt: -1.1, speed: 1.1 }
+				];
+				for (const orb of orbits) {
+					/* Draw orbit ellipse */
+					tctx.save();
+					tctx.translate(acx, acy);
+					tctx.rotate(orb.tilt);
+					tctx.strokeStyle = 'rgba(88,225,255,0.18)';
+					tctx.lineWidth = 1;
+					tctx.beginPath();
+					tctx.ellipse(0, 0, orb.a, orb.b, 0, 0, TAU);
+					tctx.stroke();
+					tctx.restore();
+
+					/* Draw electron */
+					const ea = t * orb.speed;
+					const elx = orb.a * Math.cos(ea);
+					const ely = orb.b * Math.sin(ea);
+					const ex = acx + elx * Math.cos(orb.tilt) - ely * Math.sin(orb.tilt);
+					const ey = acy + elx * Math.sin(orb.tilt) + ely * Math.cos(orb.tilt);
+					glowCircle(tctx, ex, ey, 4, '#58e1ff');
+				}
+
+				/* Nucleus glow */
+				const ng = tctx.createRadialGradient(acx, acy, 0, acx, acy, 12);
+				ng.addColorStop(0, 'rgba(255,160,106,0.8)');
+				ng.addColorStop(1, 'rgba(255,160,106,0)');
+				tctx.fillStyle = ng;
+				tctx.beginPath();
+				tctx.arc(acx, acy, 12, 0, TAU);
+				tctx.fill();
+				tctx.fillStyle = '#ffb87a';
+				tctx.beginPath();
+				tctx.arc(acx, acy, 4, 0, TAU);
+				tctx.fill();
+
+				/* Title — multi-layer neon glow */
 				const title = "Physics Club";
 				tctx.save();
 				tctx.translate(W / 2, H / 2);
-				const pulse = 1 + 0.04 * Math.sin(t * 6);
+				const pulse = 1 + 0.03 * Math.sin(t * 5);
 				tctx.scale(pulse, pulse);
 				tctx.textAlign = 'center';
 				tctx.textBaseline = 'middle';
 				const fontSize = Math.floor(Math.min(W, H) * 0.14);
 				tctx.font = `800 ${fontSize}px system-ui, -apple-system, Segoe UI, Roboto, Arial Black, sans-serif`;
 
-				// Outer glow layers
 				const layers = [
-					{ blur: 50, color: 'rgba(88,225,255,0.35)' },
-					{ blur: 80, color: 'rgba(88,225,255,0.25)' },
-					{ blur: 110, color: 'rgba(160,255,106,0.18)' }
+					{ blur: 60, color: 'rgba(88,225,255,0.4)' },
+					{ blur: 90, color: 'rgba(88,225,255,0.28)' },
+					{ blur: 120, color: 'rgba(160,255,106,0.18)' },
+					{ blur: 150, color: 'rgba(255,122,217,0.12)' }
 				];
-				layers.forEach(L => {
+				for (const L of layers) {
 					tctx.save();
 					tctx.shadowColor = L.color;
 					tctx.shadowBlur = L.blur;
-					tctx.fillStyle = 'rgba(0,0,0,0)'; // glow via shadow
-					tctx.strokeStyle = 'rgba(0,0,0,0)';
-					tctx.lineWidth = 0;
+					tctx.fillStyle = 'rgba(0,0,0,0)';
 					tctx.fillText(title, 0, 0);
 					tctx.restore();
-				});
+				}
 
-				// Bright stroke + fill
 				tctx.lineWidth = 3;
 				tctx.strokeStyle = '#9beaff';
 				tctx.strokeText(title, 0, 0);
-
 				tctx.shadowColor = '#9beaff';
-				tctx.shadowBlur = 28;
-				tctx.fillStyle = '#c8f2ff';
+				tctx.shadowBlur = 30;
+				tctx.fillStyle = '#d0f4ff';
 				tctx.fillText(title, 0, 0);
+				tctx.shadowBlur = 0;
+
+				/* Subtitle */
+				const subSize = Math.floor(fontSize * 0.28);
+				tctx.font = `600 ${subSize}px Inter, sans-serif`;
+				tctx.fillStyle = 'rgba(200,230,255,0.55)';
+				tctx.fillText('Sim Showcase', 0, fontSize * 0.55);
 
 				tctx.restore();
+
+				/* Scene counter */
+				const counterSize = Math.floor(Math.min(W, H) * 0.035);
+				tctx.font = `600 ${counterSize}px Inter, sans-serif`;
+				tctx.textAlign = 'center';
+				tctx.fillStyle = 'rgba(200,230,255,0.4)';
+				tctx.fillText(`${index + 1} / ${scenes.length}`, W / 2, H - 24);
 			}
 
-			// Scenes
-			function makeScene(name, init, draw, resize) { return { name, init, draw, onResize: resize || null }; }
+			/* ===== Scene factory ===== */
+			function makeScene(name, init, draw, onResize) { return { name, init, draw, onResize: onResize || null }; }
 
-			// 1) SHM spring-mass
-			const sceneSpring = makeScene("SHM — Mass on a Spring", function() {
-				this.t0 = now();
-				this.k = 12;
-				this.m = 1;
-				this.A = Math.min(W, H) * 0.18;
-				this.omega = Math.sqrt(this.k / this.m);
-				this.bobR = 18;
-				this.anchor = { x: W * 0.5, y: H * 0.16 };
-			}, function(t) {
-				const local = t - this.t0;
-				const x = this.A * Math.cos(this.omega * local);
-				const v = -this.A * this.omega * Math.sin(this.omega * local);
-				const bob = { x: this.anchor.x, y: this.anchor.y + 120 + x };
+			/* ========================================
+			   SCENE: Double Pendulum — rainbow trail
+			   ======================================== */
+			const sceneDoublePendulum = makeScene("Chaos — Double Pendulum", function () {
+				this.m1 = 1; this.m2 = 1;
+				this.L1 = Math.min(W, H) * 0.22;
+				this.L2 = Math.min(W, H) * 0.22;
+				this.g = 9.8 * 220;
+				this.theta1 = Math.PI * 0.6;
+				this.theta2 = Math.PI * 0.45;
+				this.w1 = 0; this.w2 = 0;
+				this.pivot = { x: W * 0.5, y: H * 0.16 };
+				this.trail = [];
+			}, function (t) {
+				const dt = 1 / 60;
+				for (let k = 0; k < 2; k++) {
+					const { m1, m2, L1, L2, g, theta1, theta2, w1, w2 } = this;
+					const d = theta1 - theta2;
+					const den = 2 * m1 + m2 - m2 * Math.cos(2 * d);
+					const a1 = (-g * (2 * m1 + m2) * Math.sin(theta1) - m2 * g * Math.sin(theta1 - 2 * theta2)
+						- 2 * Math.sin(d) * m2 * (w2 * w2 * L2 + w1 * w1 * L1 * Math.cos(d))) / (L1 * den);
+					const a2 = (2 * Math.sin(d) * (w1 * w1 * L1 * (m1 + m2) + g * (m1 + m2) * Math.cos(theta1)
+						+ w2 * w2 * L2 * m2 * Math.cos(d))) / (L2 * den);
+					this.w1 += a1 * dt; this.w2 += a2 * dt;
+					this.theta1 += this.w1 * dt; this.theta2 += this.w2 * dt;
+				}
+				const x1 = this.pivot.x + this.L1 * Math.sin(this.theta1);
+				const y1 = this.pivot.y + this.L1 * Math.cos(this.theta1);
+				const x2 = x1 + this.L2 * Math.sin(this.theta2);
+				const y2 = y1 + this.L2 * Math.cos(this.theta2);
+
 				sctx.clearRect(0, 0, W, H);
-				drawGrid(sctx, 30, 0.18);
-				spring(sctx, this.anchor.x, this.anchor.y, bob.x, bob.y - this.bobR, 13, 12, '#58e1ff');
-				glowCircle(sctx, this.anchor.x, this.anchor.y, 6, '#8fd9ff');
-				glowCircle(sctx, bob.x, bob.y, this.bobR, '#a0ff6a');
-				const KE = .5 * this.m * v * v,
-					PE = .5 * this.k * (x * x),
-					E = KE + PE;
-				const barW = 14,
-					gap = 8,
-					baseX = 20,
-					baseY = H - 24,
-					scale = 0.00002 * Math.min(W, H);
-				[
-					['#a0ff6a', 'KE', -KE * scale],
-					['#58e1ff', 'PE', -PE * scale],
-					['#ff7ad9', 'E', -E * scale]
-				].forEach((b, i) => {
-					sctx.fillStyle = 'rgba(255,255,255,.35)';
-					sctx.fillRect(baseX - 3 + i * (barW + gap), baseY - 100, 1, 100);
-					sctx.fillStyle = b[0];
-					sctx.fillRect(baseX + i * (barW + gap), baseY, barW, b[2]);
-					sctx.fillStyle = 'rgba(255,255,255,.85)';
-					sctx.fillText(b[1], baseX - 2 + i * (barW + gap), baseY + 14);
-				});
-				sctx.fillStyle = 'rgba(255,255,255,.85)';
-				sctx.fillText('x(t) = A cos(ωt),  ω = √(k/m)', 16, 24);
-			}, function(w, h) { this.A = Math.min(w, h) * 0.18;
-				this.anchor = { x: w * 0.5, y: h * 0.16 }; });
+				drawGrid(sctx, 34, 0.14);
 
-			// 2) Solar system — 2D, larger, starry background (from previous version)
-			const sceneSolar = makeScene("Solar System — 2D Orbits", function() {
-				this.cx = W / 2;
-				this.cy = H / 2;
+				/* Rainbow trail */
+				this.trail.push({ x: x2, y: y2 });
+				if (this.trail.length > 400) this.trail.shift();
+				sctx.lineWidth = 2;
+				for (let i = 1; i < this.trail.length; i++) {
+					const frac = i / this.trail.length;
+					sctx.strokeStyle = `hsla(${frac * 360}, 100%, 60%, ${frac * 0.7})`;
+					sctx.beginPath();
+					sctx.moveTo(this.trail[i - 1].x, this.trail[i - 1].y);
+					sctx.lineTo(this.trail[i].x, this.trail[i].y);
+					sctx.stroke();
+				}
+
+				/* Rods */
+				sctx.strokeStyle = 'rgba(255,255,255,.8)';
+				sctx.lineWidth = 2;
+				sctx.beginPath();
+				sctx.moveTo(this.pivot.x, this.pivot.y);
+				sctx.lineTo(x1, y1);
+				sctx.lineTo(x2, y2);
+				sctx.stroke();
+				glowCircle(sctx, this.pivot.x, this.pivot.y, 5, '#58e1ff');
+				glowCircle(sctx, x1, y1, 10, '#a0ff6a');
+				glowCircle(sctx, x2, y2, 10, '#ff7ad9');
+			}, function (w, h) {
+				this.L1 = Math.min(w, h) * 0.22; this.L2 = Math.min(w, h) * 0.22;
+				this.pivot = { x: w * 0.5, y: h * 0.16 };
+			});
+
+			/* ========================================
+			   SCENE: Electric Field — Dipole
+			   ======================================== */
+			const sceneElectricField = makeScene("Electric Field — Dipole", function () {
+				this.t0 = now();
+				const sep = Math.min(W, H) * 0.3;
+				this.qPos = { x: W / 2 - sep / 2, y: H / 2 };
+				this.qNeg = { x: W / 2 + sep / 2, y: H / 2 };
+
+				/* Pre-compute field lines */
+				this.lines = [];
+				const nLines = 14;
+				const ds = 4;
+				const maxSteps = 250;
+				for (let i = 0; i < nLines; i++) {
+					const angle = (i / nLines) * TAU;
+					let lx = this.qPos.x + 18 * Math.cos(angle);
+					let ly = this.qPos.y + 18 * Math.sin(angle);
+					const pts = [{ x: lx, y: ly }];
+					for (let s = 0; s < maxSteps; s++) {
+						let Ex = 0, Ey = 0;
+						let ddx = lx - this.qPos.x, ddy = ly - this.qPos.y;
+						let r2 = ddx * ddx + ddy * ddy, r = Math.sqrt(r2);
+						if (r < 6) break;
+						Ex += ddx / (r2 * r); Ey += ddy / (r2 * r);
+						ddx = lx - this.qNeg.x; ddy = ly - this.qNeg.y;
+						r2 = ddx * ddx + ddy * ddy; r = Math.sqrt(r2);
+						if (r < 18) { pts.push({ x: this.qNeg.x, y: this.qNeg.y }); break; }
+						Ex -= ddx / (r2 * r); Ey -= ddy / (r2 * r);
+						const Em = Math.sqrt(Ex * Ex + Ey * Ey);
+						if (Em < 1e-12) break;
+						lx += ds * Ex / Em; ly += ds * Ey / Em;
+						if (lx < -60 || lx > W + 60 || ly < -60 || ly > H + 60) break;
+						pts.push({ x: lx, y: ly });
+					}
+					if (pts.length > 8) this.lines.push(pts);
+				}
+
+				/* Particles flowing along lines */
+				this.particles = [];
+				for (const line of this.lines) {
+					const np = 3;
+					for (let j = 0; j < np; j++) {
+						this.particles.push({ line, pos: (j / np) * line.length, speed: 50 + Math.random() * 25 });
+					}
+				}
+			}, function (t) {
+				sctx.clearRect(0, 0, W, H);
+				const bg = sctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
+				bg.addColorStop(0, '#0b1220');
+				bg.addColorStop(1, '#070a12');
+				sctx.fillStyle = bg;
+				sctx.fillRect(0, 0, W, H);
+
+				/* Draw field lines */
+				for (const line of this.lines) {
+					sctx.strokeStyle = 'rgba(88,225,255,0.18)';
+					sctx.lineWidth = 1.2;
+					sctx.beginPath();
+					for (let i = 0; i < line.length; i++) {
+						if (i === 0) sctx.moveTo(line[i].x, line[i].y);
+						else sctx.lineTo(line[i].x, line[i].y);
+					}
+					sctx.stroke();
+				}
+
+				/* Animate particles */
+				const dt = 1 / 60;
+				for (const p of this.particles) {
+					p.pos += p.speed * dt;
+					if (p.pos >= p.line.length) p.pos -= p.line.length;
+					const idx = Math.floor(p.pos);
+					const frac = p.pos - idx;
+					if (idx >= p.line.length - 1) continue;
+					const px = p.line[idx].x + (p.line[idx + 1].x - p.line[idx].x) * frac;
+					const py = p.line[idx].y + (p.line[idx + 1].y - p.line[idx].y) * frac;
+					glowCircle(sctx, px, py, 3, '#58e1ff');
+				}
+
+				/* Charges */
+				glowCircle(sctx, this.qPos.x, this.qPos.y, 16, '#ff6b6b');
+				sctx.fillStyle = '#fff';
+				sctx.font = 'bold 18px Inter, sans-serif';
+				sctx.textAlign = 'center';
+				sctx.textBaseline = 'middle';
+				sctx.fillText('+', this.qPos.x, this.qPos.y);
+
+				glowCircle(sctx, this.qNeg.x, this.qNeg.y, 16, '#4dabf7');
+				sctx.fillStyle = '#fff';
+				sctx.fillText('−', this.qNeg.x, this.qNeg.y);
+				sctx.textAlign = 'start';
+				sctx.textBaseline = 'alphabetic';
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('E = kQ/r²', 16, 24);
+			});
+
+			/* ========================================
+			   SCENE: Solar System + Comet
+			   ======================================== */
+			const sceneSolar = makeScene("Solar System — 2D Orbits", function () {
+				this.cx = W / 2; this.cy = H / 2;
 				this.planets = [];
-				const baseR = Math.min(W, H) * 0.18;
+				const baseR = Math.min(W, H) * 0.16;
 				const gap = baseR * 0.42;
 				const cols = ['#58e1ff', '#a0ff6a', '#ffcc66', '#ff7ad9', '#9bb0ff'];
 				for (let i = 0; i < 5; i++) {
-					this.planets.push({
-						r: baseR + i * gap,
-						a: Math.random() * TAU,
-						w: 0.45 / (i + 1),
-						color: cols[i % cols.length],
-						size: 10 + i * 3
-					});
+					this.planets.push({ r: baseR + i * gap, a: Math.random() * TAU, w: 0.45 / (i + 1), color: cols[i], size: 8 + i * 2.5 });
 				}
 				this.stars = [];
 				const n = Math.floor(W * H / 9000);
 				for (let i = 0; i < n; i++) {
-					this.stars.push({
-						x: Math.random() * W,
-						y: Math.random() * H,
-						a: 0.2 + Math.random() * 0.6,
-						s: Math.random() < 0.06 ? 2 : 1
-					});
+					this.stars.push({ x: Math.random() * W, y: Math.random() * H, a: 0.2 + Math.random() * 0.6, s: Math.random() < 0.06 ? 2 : 1 });
 				}
-			}, function(t) {
+				/* Comet */
+				this.comet = { angle: 0, e: 0.7, a: baseR + 4.5 * gap, trail: [] };
+			}, function (t) {
+				const dt = 1 / 60;
 				sctx.clearRect(0, 0, W, H);
 				sctx.fillStyle = '#070b12';
 				sctx.fillRect(0, 0, W, H);
+
+				/* Stars */
 				for (const s of this.stars) {
 					sctx.globalAlpha = s.a * (0.8 + 0.2 * Math.sin(t * 2 + s.x * 0.01));
 					sctx.fillStyle = 'white';
 					sctx.fillRect(s.x, s.y, s.s, s.s);
 				}
 				sctx.globalAlpha = 1;
-				glowCircle(sctx, this.cx, this.cy, 40, '#ffd36b');
-				sctx.strokeStyle = 'rgba(255,255,255,.12)';
-				sctx.lineWidth = 1;
-				for (const p of this.planets) { sctx.beginPath();
-					sctx.arc(this.cx, this.cy, p.r, 0, TAU);
-					sctx.stroke(); }
-				for (const p of this.planets) {
-					p.a += p.w * 0.016;
-					const x = this.cx + Math.cos(p.a) * p.r;
-					const y = this.cy + Math.sin(p.a) * p.r;
-					glowCircle(sctx, x, y, p.size, p.color);
-				}
-			}, function(w, h) { this.cx = w / 2;
-				this.cy = h / 2; });
 
-			// 3) Doppler effect
-			const sceneDoppler = makeScene("Doppler Effect — Moving Source", function() {
+				/* Sun */
+				glowCircle(sctx, this.cx, this.cy, 36, '#ffd36b');
+
+				/* Orbits & planets */
+				sctx.strokeStyle = 'rgba(255,255,255,.1)';
+				sctx.lineWidth = 1;
+				for (const p of this.planets) { sctx.beginPath(); sctx.arc(this.cx, this.cy, p.r, 0, TAU); sctx.stroke(); }
+				for (const p of this.planets) {
+					p.a += p.w * dt;
+					glowCircle(sctx, this.cx + Math.cos(p.a) * p.r, this.cy + Math.sin(p.a) * p.r, p.size, p.color);
+				}
+
+				/* Comet */
+				const c = this.comet;
+				const cr = c.a * (1 - c.e * c.e) / (1 + c.e * Math.cos(c.angle));
+				const cSpeed = 800 / (cr * cr + 1000);
+				c.angle += cSpeed * dt;
+				const cox = this.cx + cr * Math.cos(c.angle);
+				const coy = this.cy + cr * Math.sin(c.angle);
+				c.trail.push({ x: cox, y: coy });
+				if (c.trail.length > 50) c.trail.shift();
+
+				/* Comet trail */
+				for (let i = 1; i < c.trail.length; i++) {
+					const a = i / c.trail.length;
+					sctx.strokeStyle = `rgba(180,220,255,${a * 0.5})`;
+					sctx.lineWidth = 3 * a;
+					sctx.beginPath();
+					sctx.moveTo(c.trail[i - 1].x, c.trail[i - 1].y);
+					sctx.lineTo(c.trail[i].x, c.trail[i].y);
+					sctx.stroke();
+				}
+				glowCircle(sctx, cox, coy, 4, '#e0f0ff');
+			}, function (w, h) { this.cx = w / 2; this.cy = h / 2; });
+
+			/* ========================================
+			   SCENE: Standing Wave — Harmonics
+			   ======================================== */
+			const sceneStandingWave = makeScene("Standing Wave — Harmonics", function () {
+				this.t0 = now();
+				this.harmonicDur = 2.5;
+				this.maxN = 5;
+			}, function (t) {
+				const local = t - this.t0;
+				const n = (Math.floor(local / this.harmonicDur) % this.maxN) + 1;
+				const omega = 5;
+
+				sctx.clearRect(0, 0, W, H);
+				sctx.fillStyle = '#070b14';
+				sctx.fillRect(0, 0, W, H);
+
+				const margin = W * 0.08;
+				const L = W - 2 * margin;
+				const cy = H * 0.5;
+				const A = H * 0.22;
+
+				/* Fixed ends */
+				sctx.fillStyle = 'rgba(255,255,255,.4)';
+				sctx.fillRect(margin - 2, cy - A * 1.2, 4, A * 2.4);
+				sctx.fillRect(margin + L - 2, cy - A * 1.2, 4, A * 2.4);
+
+				/* Envelope */
+				sctx.strokeStyle = 'rgba(88,225,255,.12)';
+				sctx.lineWidth = 1;
+				for (const sign of [1, -1]) {
+					sctx.beginPath();
+					for (let px = 0; px <= L; px += 2) {
+						const xf = px / L;
+						const env = sign * A * Math.sin(n * Math.PI * xf);
+						if (px === 0) sctx.moveTo(margin, cy - env);
+						else sctx.lineTo(margin + px, cy - env);
+					}
+					sctx.stroke();
+				}
+
+				/* Wave */
+				const cosVal = Math.cos(omega * local);
+				sctx.strokeStyle = '#58e1ff';
+				sctx.lineWidth = 3;
+				sctx.shadowColor = '#58e1ff';
+				sctx.shadowBlur = 10;
+				sctx.beginPath();
+				for (let px = 0; px <= L; px += 2) {
+					const xf = px / L;
+					const yv = A * Math.sin(n * Math.PI * xf) * cosVal;
+					if (px === 0) sctx.moveTo(margin, cy - yv);
+					else sctx.lineTo(margin + px, cy - yv);
+				}
+				sctx.stroke();
+				sctx.shadowBlur = 0;
+
+				/* Nodes */
+				for (let k = 0; k <= n; k++) {
+					glowCircle(sctx, margin + (k / n) * L, cy, 5, '#ff7ad9');
+				}
+				/* Antinodes */
+				for (let k = 0; k < n; k++) {
+					const axf = (k + 0.5) / n;
+					const ay = A * Math.sin(n * Math.PI * axf) * cosVal;
+					glowCircle(sctx, margin + axf * L, cy - ay, 4, '#a0ff6a');
+				}
+
+				/* Labels */
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText(`Harmonic n = ${n}`, 16, 24);
+				sctx.fillText('y(x,t) = A sin(nπx/L) cos(ωt)', 16, 44);
+			});
+
+			/* ========================================
+			   SCENE: EM Wave — 3D perspective
+			   ======================================== */
+			const sceneEMWave = makeScene("Electromagnetic Wave", function () {
+				this.t0 = now();
+			}, function (t) {
+				const local = t - this.t0;
+				sctx.clearRect(0, 0, W, H);
+				sctx.fillStyle = '#070b14';
+				sctx.fillRect(0, 0, W, H);
+
+				const cx = W * 0.5, cy = H * 0.5;
+				const span = Math.min(W, H) * 0.85;
+				const amp = Math.min(W, H) * 0.18;
+				const numPts = 120;
+				const omega = 3;
+				const zDx = 0.5, zDy = 0.3; // z-axis projection
+
+				/* Propagation axis */
+				sctx.strokeStyle = 'rgba(255,255,255,.2)';
+				sctx.lineWidth = 1;
+				sctx.beginPath();
+				sctx.moveTo(cx - span * 0.45, cy);
+				sctx.lineTo(cx + span * 0.45, cy);
+				sctx.stroke();
+
+				/* E field wave (vertical) */
+				sctx.strokeStyle = '#58e1ff';
+				sctx.lineWidth = 2.5;
+				sctx.shadowColor = '#58e1ff';
+				sctx.shadowBlur = 8;
+				sctx.beginPath();
+				for (let i = 0; i <= numPts; i++) {
+					const f = i / numPts;
+					const px = cx - span * 0.42 + f * span * 0.84;
+					const phase = f * TAU * 2.5 - omega * local;
+					const ey = amp * Math.sin(phase);
+					if (i === 0) sctx.moveTo(px, cy - ey);
+					else sctx.lineTo(px, cy - ey);
+				}
+				sctx.stroke();
+				sctx.shadowBlur = 0;
+
+				/* E field arrows */
+				const arrInt = Math.floor(numPts / 14);
+				for (let i = 0; i <= numPts; i += arrInt) {
+					const f = i / numPts;
+					const px = cx - span * 0.42 + f * span * 0.84;
+					const phase = f * TAU * 2.5 - omega * local;
+					const ey = amp * Math.sin(phase);
+					sctx.strokeStyle = 'rgba(88,225,255,.3)';
+					sctx.lineWidth = 1;
+					sctx.beginPath();
+					sctx.moveTo(px, cy);
+					sctx.lineTo(px, cy - ey);
+					sctx.stroke();
+				}
+
+				/* B field wave (z projection) */
+				sctx.strokeStyle = '#a0ff6a';
+				sctx.lineWidth = 2.5;
+				sctx.shadowColor = '#a0ff6a';
+				sctx.shadowBlur = 8;
+				sctx.beginPath();
+				for (let i = 0; i <= numPts; i++) {
+					const f = i / numPts;
+					const px = cx - span * 0.42 + f * span * 0.84;
+					const phase = f * TAU * 2.5 - omega * local;
+					const bz = amp * 0.7 * Math.sin(phase);
+					if (i === 0) sctx.moveTo(px + zDx * bz, cy + zDy * bz);
+					else sctx.lineTo(px + zDx * bz, cy + zDy * bz);
+				}
+				sctx.stroke();
+				sctx.shadowBlur = 0;
+
+				/* B arrows */
+				for (let i = 0; i <= numPts; i += arrInt) {
+					const f = i / numPts;
+					const px = cx - span * 0.42 + f * span * 0.84;
+					const phase = f * TAU * 2.5 - omega * local;
+					const bz = amp * 0.7 * Math.sin(phase);
+					sctx.strokeStyle = 'rgba(160,255,106,.3)';
+					sctx.lineWidth = 1;
+					sctx.beginPath();
+					sctx.moveTo(px, cy);
+					sctx.lineTo(px + zDx * bz, cy + zDy * bz);
+					sctx.stroke();
+				}
+
+				/* Axis labels */
+				sctx.font = 'bold 16px Inter, sans-serif';
+				sctx.textAlign = 'center';
+				sctx.fillStyle = '#58e1ff';
+				sctx.fillText('E', cx + span * 0.44, cy - amp - 8);
+				sctx.fillStyle = '#a0ff6a';
+				sctx.fillText('B', cx + span * 0.44 + zDx * amp * 0.7, cy + zDy * amp * 0.7 + 16);
+				sctx.fillStyle = 'rgba(255,255,255,.5)';
+				sctx.font = '13px Inter, sans-serif';
+				sctx.fillText('propagation →', cx + span * 0.32, cy - 6);
+				sctx.textAlign = 'start';
+
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('E ⊥ B ⊥ propagation direction, c = 3×10⁸ m/s', 16, 24);
+			});
+
+			/* ========================================
+			   SCENE: SHM — Spring + Oscilloscope
+			   ======================================== */
+			const sceneSpring = makeScene("SHM — Mass on a Spring", function () {
+				this.t0 = now();
+				this.k = 12; this.m = 1;
+				this.A = Math.min(W, H) * 0.18;
+				this.omega = Math.sqrt(this.k / this.m);
+				this.bobR = 18;
+				this.anchor = { x: W * 0.32, y: H * 0.16 };
+				this.trace = [];
+				this.traceMax = 200;
+			}, function (t) {
+				const local = t - this.t0;
+				const x = this.A * Math.cos(this.omega * local);
+				const v = -this.A * this.omega * Math.sin(this.omega * local);
+				const bob = { x: this.anchor.x, y: this.anchor.y + 120 + x };
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 30, 0.16);
+
+				/* Spring & bob */
+				spring(sctx, this.anchor.x, this.anchor.y, bob.x, bob.y - this.bobR, 13, 12, '#58e1ff');
+				glowCircle(sctx, this.anchor.x, this.anchor.y, 6, '#8fd9ff');
+				glowCircle(sctx, bob.x, bob.y, this.bobR, '#a0ff6a');
+
+				/* Oscilloscope trace */
+				this.trace.push(x);
+				if (this.trace.length > this.traceMax) this.trace.shift();
+				const trX = W * 0.52, trW = W * 0.42, trY = H * 0.5;
+
+				/* Axis */
+				sctx.strokeStyle = 'rgba(255,255,255,.15)';
+				sctx.lineWidth = 1;
+				sctx.beginPath();
+				sctx.moveTo(trX, trY);
+				sctx.lineTo(trX + trW, trY);
+				sctx.stroke();
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.4)';
+				sctx.font = '12px Inter, sans-serif';
+				sctx.fillText('x(t)', trX + trW + 6, trY + 4);
+
+				/* Trace curve */
+				sctx.strokeStyle = '#a0ff6a';
+				sctx.lineWidth = 2;
+				sctx.shadowColor = '#a0ff6a';
+				sctx.shadowBlur = 6;
+				sctx.beginPath();
+				for (let i = 0; i < this.trace.length; i++) {
+					const px = trX + (i / this.traceMax) * trW;
+					const py = trY - this.trace[i] * 0.9;
+					if (i === 0) sctx.moveTo(px, py);
+					else sctx.lineTo(px, py);
+				}
+				sctx.stroke();
+				sctx.shadowBlur = 0;
+
+				/* Energy bars */
+				const KE = 0.5 * this.m * v * v, PE = 0.5 * this.k * x * x, E = KE + PE;
+				const barW = 14, gap = 8, baseX = 20, baseY = H - 24, scale = 0.00002 * Math.min(W, H);
+				[['#a0ff6a', 'KE', -KE * scale], ['#58e1ff', 'PE', -PE * scale], ['#ff7ad9', 'E', -E * scale]].forEach((b, i) => {
+					sctx.fillStyle = 'rgba(255,255,255,.3)';
+					sctx.fillRect(baseX - 3 + i * (barW + gap), baseY - 100, 1, 100);
+					sctx.fillStyle = b[0];
+					sctx.fillRect(baseX + i * (barW + gap), baseY, barW, b[2]);
+					sctx.fillStyle = 'rgba(255,255,255,.8)';
+					sctx.font = '11px Inter, sans-serif';
+					sctx.fillText(b[1], baseX - 2 + i * (barW + gap), baseY + 14);
+				});
+
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('x(t) = A cos(ωt),  ω = √(k/m)', 16, 24);
+			}, function (w, h) {
+				this.A = Math.min(w, h) * 0.18;
+				this.anchor = { x: w * 0.32, y: h * 0.16 };
+			});
+
+			/* ========================================
+			   SCENE: Spiral Galaxy
+			   ======================================== */
+			const sceneGalaxy = makeScene("Spiral Galaxy", function () {
+				this.cx = W / 2; this.cy = H / 2;
+				this.particles = [];
+				const nArms = 2;
+				for (let i = 0; i < 300; i++) {
+					const arm = i % nArms;
+					const r = 15 + Math.random() * Math.min(W, H) * 0.38;
+					const armA = (arm / nArms) * TAU;
+					const spiralA = armA + Math.log(r / 15) * 1.4;
+					const spread = (Math.random() - 0.5) * 0.7;
+					this.particles.push({
+						r, theta: spiralA + spread,
+						omega: 0.55 / Math.sqrt(r / 40),
+						size: 1 + Math.random() * 1.5,
+						bright: 0.3 + Math.random() * 0.7,
+						hue: 190 + Math.random() * 70
+					});
+				}
+				this.bgStars = [];
+				for (let i = 0; i < 120; i++) {
+					this.bgStars.push({ x: Math.random() * W, y: Math.random() * H, a: 0.08 + Math.random() * 0.25 });
+				}
+				this.firstFrame = true;
+			}, function (t) {
+				const dt = 1 / 60;
+
+				/* Fade trail */
+				if (this.firstFrame) {
+					sctx.fillStyle = '#060810';
+					sctx.fillRect(0, 0, W, H);
+					this.firstFrame = false;
+				} else {
+					sctx.fillStyle = 'rgba(6,8,16,0.14)';
+					sctx.fillRect(0, 0, W, H);
+				}
+
+				/* Background stars (subtle) */
+				for (const s of this.bgStars) {
+					sctx.fillStyle = `rgba(255,255,255,${s.a})`;
+					sctx.fillRect(s.x, s.y, 1, 1);
+				}
+
+				/* Central glow */
+				const cg = sctx.createRadialGradient(this.cx, this.cy, 0, this.cx, this.cy, 28);
+				cg.addColorStop(0, 'rgba(255,225,170,0.7)');
+				cg.addColorStop(1, 'rgba(255,225,170,0)');
+				sctx.fillStyle = cg;
+				sctx.beginPath();
+				sctx.arc(this.cx, this.cy, 28, 0, TAU);
+				sctx.fill();
+
+				/* Particles */
+				for (const p of this.particles) {
+					p.theta += p.omega * dt;
+					const px = this.cx + p.r * Math.cos(p.theta);
+					const py = this.cy + p.r * Math.sin(p.theta) * 0.55;
+					sctx.fillStyle = `hsla(${p.hue},75%,68%,${p.bright})`;
+					sctx.beginPath();
+					sctx.arc(px, py, p.size, 0, TAU);
+					sctx.fill();
+				}
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.7)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('Differential rotation → spiral arms', 16, 24);
+			}, function (w, h) { this.cx = w / 2; this.cy = h / 2; });
+
+			/* ========================================
+			   SCENE: Doppler Effect
+			   ======================================== */
+			const sceneDoppler = makeScene("Doppler Effect — Moving Source", function () {
 				this.t0 = now();
 				this.wave = [];
-				this.c = 260;
-				this.v = 160;
-				this.y = H * 0.5;
-				this.x = W * 0.15;
-				this.dir = 1;
-				this.emitEvery = 0.16;
-				this.lastEmit = 0;
-				this.hFront = 200;
-				this.hBack = 350;
-			}, function(t) {
+				this.c = 260; this.v = 160;
+				this.y = H * 0.5; this.x = W * 0.15; this.dir = 1;
+				this.emitEvery = 0.16; this.lastEmit = 0;
+				this.hFront = 190; this.hBack = 340;
+			}, function (t) {
 				const dt = 1 / 60;
 				sctx.clearRect(0, 0, W, H);
-				drawGrid(sctx, 32, 0.2);
+				drawGrid(sctx, 32, 0.18);
 				this.x += this.v * this.dir * dt;
 				if (this.x > W * 0.85) this.dir = -1;
 				if (this.x < W * 0.15) this.dir = 1;
-				if (t - this.lastEmit > this.emitEvery) { this.wave.push({ x: this.x, y: this.y, t });
-					this.lastEmit = t; }
+				if (t - this.lastEmit > this.emitEvery) { this.wave.push({ x: this.x, y: this.y, t }); this.lastEmit = t; }
 				for (let i = this.wave.length - 1; i >= 0; i--) {
 					const w = this.wave[i];
 					const r = (t - w.t) * this.c;
 					if (r > Math.max(W, H)) { this.wave.splice(i, 1); continue; }
 					const ahead = (this.dir > 0 && w.x < this.x) || (this.dir < 0 && w.x > this.x);
-					sctx.strokeStyle = ahead ? `hsla(${this.hFront},100%,70%,.65)` : `hsla(${this.hBack},100%,70%,.45)`;
-					sctx.lineWidth = 2;
+					sctx.strokeStyle = ahead ? `hsla(${this.hFront},100%,70%,.6)` : `hsla(${this.hBack},100%,70%,.4)`;
+					sctx.lineWidth = 1.8;
 					sctx.beginPath();
 					sctx.arc(w.x, w.y, r, 0, TAU);
 					sctx.stroke();
 				}
 				glowCircle(sctx, this.x, this.y, 12, '#a0ff6a');
 				drawArrow(sctx, this.x, this.y, this.x + this.dir * 54, this.y, '#a0ff6a');
-			}, function(w, h) { this.y = h * 0.5; });
+			}, function (w, h) { this.y = h * 0.5; });
 
-			// 4) Pendulum
-			const scenePendulum = makeScene("SHM — Simple Pendulum", function() {
+			/* ========================================
+			   SCENE: Pendulum + afterimage trail
+			   ======================================== */
+			const scenePendulum = makeScene("SHM — Simple Pendulum", function () {
 				this.t0 = now();
 				this.L = Math.min(W, H) * 0.32;
 				this.g = 9.8 * 200;
@@ -533,39 +1079,58 @@
 				this.omega = Math.sqrt(this.g / this.L);
 				this.pivot = { x: W * 0.5, y: H * 0.18 };
 				this.bobR = 16;
-			}, function(t) {
-				const local = t - this.t0,
-					theta = this.theta0 * Math.cos(this.omega * local);
-				const x = this.pivot.x + this.L * Math.sin(theta),
-					y = this.pivot.y + this.L * Math.cos(theta);
+				this.trail = [];
+				this.trailMax = 18;
+			}, function (t) {
+				const local = t - this.t0;
+				const theta = this.theta0 * Math.cos(this.omega * local);
+				const bx = this.pivot.x + this.L * Math.sin(theta);
+				const by = this.pivot.y + this.L * Math.cos(theta);
+
 				sctx.clearRect(0, 0, W, H);
-				drawGrid(sctx, 36, 0.18);
+				drawGrid(sctx, 36, 0.16);
+
+				/* Ghost trail */
+				this.trail.push({ x: bx, y: by });
+				if (this.trail.length > this.trailMax) this.trail.shift();
+				for (let i = 0; i < this.trail.length; i++) {
+					const a = (i / this.trail.length) * 0.25;
+					sctx.globalAlpha = a;
+					sctx.fillStyle = '#ff7ad9';
+					sctx.beginPath();
+					sctx.arc(this.trail[i].x, this.trail[i].y, this.bobR, 0, TAU);
+					sctx.fill();
+				}
+				sctx.globalAlpha = 1;
+
+				/* Rod */
 				sctx.strokeStyle = 'rgba(255,255,255,.75)';
 				sctx.lineWidth = 1;
 				sctx.beginPath();
 				sctx.moveTo(this.pivot.x, this.pivot.y);
-				sctx.lineTo(x, y);
+				sctx.lineTo(bx, by);
 				sctx.stroke();
 				glowCircle(sctx, this.pivot.x, this.pivot.y, 6, '#58e1ff');
-				glowCircle(sctx, x, y, this.bobR, '#ff7ad9');
-				const midx = this.pivot.x + (this.L * 0.5) * Math.sin(theta);
-				const midy = this.pivot.y + (this.L * 0.5) * Math.cos(theta);
-				drawArrow(sctx, midx, midy, midx - 60 * Math.sin(theta), midy + 60 * Math.cos(theta), '#a0ff6a');
-			}, function(w, h) { this.L = Math.min(w, h) * 0.32;
-				this.pivot = { x: w * 0.5, y: h * 0.18 }; });
+				glowCircle(sctx, bx, by, this.bobR, '#ff7ad9');
 
-			// 5) Ripple tank — two-source interference
-			const sceneRipple = makeScene("Wave Interference — Ripple Tank", function() {
+				/* Restoring-force arrow */
+				const mid = { x: this.pivot.x + this.L * 0.5 * Math.sin(theta), y: this.pivot.y + this.L * 0.5 * Math.cos(theta) };
+				drawArrow(sctx, mid.x, mid.y, mid.x - 60 * Math.sin(theta), mid.y + 60 * Math.cos(theta), '#a0ff6a');
+			}, function (w, h) {
+				this.L = Math.min(w, h) * 0.32;
+				this.pivot = { x: w * 0.5, y: h * 0.18 };
+			});
+
+			/* ========================================
+			   SCENE: Ripple Tank
+			   ======================================== */
+			const sceneRipple = makeScene("Wave Interference — Ripple Tank", function () {
 				this.t0 = now();
-				this.c = 220;
-				this.emitEvery = 0.22;
-				this.lastEmit = 0;
-				const cx = W * 0.4,
-					cy = H * 0.55,
-					sep = Math.min(W, H) * 0.18;
-				this.sources = [{ x: cx - sep / 2, y: cy }, { x: cx + sep / 2, y: cy }];
+				this.c = 220; this.emitEvery = 0.22; this.lastEmit = 0;
+				const ccx = W * 0.4, ccy = H * 0.55, sep = Math.min(W, H) * 0.18;
+				this.sources = [{ x: ccx - sep / 2, y: ccy }, { x: ccx + sep / 2, y: ccy }];
 				this.fronts = [];
-			}, function(t) {
+			}, function (t) {
 				sctx.clearRect(0, 0, W, H);
 				const g = sctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
 				g.addColorStop(0, '#0b1220');
@@ -581,75 +1146,40 @@
 					const f = this.fronts[i];
 					const r = (t - f.t) * this.c;
 					if (r > Math.max(W, H)) { this.fronts.splice(i, 1); continue; }
-					sctx.strokeStyle = 'rgba(88,225,255,.22)';
+					sctx.strokeStyle = 'rgba(88,225,255,.2)';
 					sctx.beginPath();
 					sctx.arc(f.x, f.y, r, 0, TAU);
 					sctx.stroke();
 				}
 				for (const s of this.sources) glowCircle(sctx, s.x, s.y, 7, '#58e1ff');
-			}, function() {});
+			}, function () { });
 
-			// 6) Double pendulum — chaotic motion with trail
-			const sceneDoublePendulum = makeScene("Chaos — Double Pendulum", function() {
-				this.m1 = 1;
-				this.m2 = 1;
-				this.L1 = Math.min(W, H) * 0.22;
-				this.L2 = Math.min(W, H) * 0.22;
-				this.g = 9.8 * 220;
-				this.theta1 = Math.PI * 0.6;
-				this.theta2 = Math.PI * 0.45;
-				this.w1 = 0;
-				this.w2 = 0;
-				this.pivot = { x: W * 0.5, y: H * 0.16 };
-				this.trail = [];
-			}, function(t) {
-				const dt = 1 / 60;
-				for (let k = 0; k < 2; k++) {
-					const { m1, m2, L1, L2, g, theta1, theta2, w1, w2 } = this;
-					const d = theta1 - theta2;
-					const den = (2 * m1 + m2 - m2 * Math.cos(2 * d));
-					const a1 = (-g * (2 * m1 + m2) * Math.sin(theta1) - m2 * g * Math.sin(theta1 - 2 * theta2) -
-						2 * Math.sin(d) * m2 * (w2 * w2 * L2 + w1 * w1 * L1 * Math.cos(d))) / (L1 * den);
-					const a2 = (2 * Math.sin(d) * (w1 * w1 * L1 * (m1 + m2) + g * (m1 + m2) * Math.cos(theta1) + w2 * w2 * L2 * m2 * Math.cos(d))) / (L2 * den);
-					this.w1 += a1 * dt;
-					this.w2 += a2 * dt;
-					this.theta1 += this.w1 * dt;
-					this.theta2 += this.w2 * dt;
-				}
-				const x1 = this.pivot.x + this.L1 * Math.sin(this.theta1);
-				const y1 = this.pivot.y + this.L1 * Math.cos(this.theta1);
-				const x2 = x1 + this.L2 * Math.sin(this.theta2);
-				const y2 = y1 + this.L2 * Math.cos(this.theta2);
+			/* ===== Scene list (curated order) ===== */
+			const scenes = [
+				sceneDoublePendulum,  // 1 — chaotic rainbow eye-catcher
+				sceneElectricField,   // 2 — flowing particles
+				sceneSolar,           // 3 — space
+				sceneStandingWave,    // 4 — harmonics
+				sceneEMWave,          // 5 — 3D fields
+				sceneSpring,          // 6 — classic + trace
+				sceneGalaxy,          // 7 — spiral particles
+				sceneDoppler,         // 8 — wavefronts
+				scenePendulum,        // 9 — swinging trail
+				sceneRipple           // 10 — interference
+			];
 
-				sctx.clearRect(0, 0, W, H);
-				drawGrid(sctx, 34, 0.16);
-				sctx.strokeStyle = 'rgba(255,255,255,.8)';
-				sctx.lineWidth = 2;
-				sctx.beginPath();
-				sctx.moveTo(this.pivot.x, this.pivot.y);
-				sctx.lineTo(x1, y1);
-				sctx.lineTo(x2, y2);
-				sctx.stroke();
-				glowCircle(sctx, this.pivot.x, this.pivot.y, 5, '#58e1ff');
-				glowCircle(sctx, x1, y1, 10, '#a0ff6a');
-				glowCircle(sctx, x2, y2, 10, '#ff7ad9');
-				this.trail.push({ x: x2, y: y2 });
-				if (this.trail.length > 220) this.trail.shift();
-				for (let i = 1; i < this.trail.length; i++) {
-					const a = i / this.trail.length;
-					sctx.strokeStyle = `rgba(255,122,217,${a*0.5})`;
-					sctx.beginPath();
-					sctx.moveTo(this.trail[i - 1].x, this.trail[i - 1].y);
-					sctx.lineTo(this.trail[i].x, this.trail[i].y);
-					sctx.stroke();
-				}
-			}, function(w, h) { this.L1 = Math.min(w, h) * 0.22;
-				this.L2 = Math.min(w, h) * 0.22;
-				this.pivot = { x: w * 0.5, y: h * 0.16 }; });
+			let index = 0, current = null;
 
-			const scenes = [sceneSpring, sceneSolar, sceneDoppler, scenePendulum, sceneRipple, sceneDoublePendulum];
-			let index = 0,
-				current = null;
+			/* Scene indicator dots */
+			for (let i = 0; i < scenes.length; i++) {
+				const d = document.createElement('div');
+				d.className = 'dot';
+				dotsEl.appendChild(d);
+			}
+			function updateDots() {
+				const dots = dotsEl.children;
+				for (let i = 0; i < dots.length; i++) dots[i].classList.toggle('active', i === index);
+			}
 
 			function setScene(i, showTitle = true) {
 				index = (i + scenes.length) % scenes.length;
@@ -657,51 +1187,42 @@
 				hudName.textContent = current.name;
 				current.init();
 				lastSwitch = now();
-				if (showTitle) { startInterstitial(); }
+				updateDots();
+				if (showTitle) startInterstitial();
 			}
 
 			function nextScene() { setScene(index + 1); }
-
 			function prevScene() { setScene(index - 1); }
 
-			// Main loop — with flash fix
+			/* ===== Main loop ===== */
 			function loop() {
 				const t = now();
 				if (playing) {
 					elapsed = t - startBase;
 					const age = t - lastSwitch;
 
-					// Trigger interstitial as soon as dwell ends (before any sim draw)
 					if (!inInterstitial && age > dwellSeconds) {
 						startInterstitial();
 					}
 
 					if (inInterstitial) {
-						// Only draw the glowing title; sim stays cleared
 						drawInterstitial(t);
-						if (t >= interstitialUntil) {
-							endInterstitial();
-						}
+						if (t >= interstitialUntil) endInterstitial();
 					} else {
-						// Normal scene draw
 						current?.draw(t);
 					}
 
-					// Auto-advance after scene dwell + interstitial
 					if (age > dwellSeconds + interstitialSeconds) {
 						setScene(index + 1);
 					}
 
-					// HUD timer
 					const secs = Math.floor(age);
-					const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-					const ss = String(secs % 60).padStart(2, '0');
-					timerEl.textContent = `${mm}:${ss}`;
+					timerEl.textContent = `${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
 				}
 				requestAnimationFrame(loop);
 			}
 
-			// Init
+			/* ===== Init ===== */
 			resize();
 			setScene(0, true);
 			startBase = now();
