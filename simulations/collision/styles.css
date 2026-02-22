@@ -781,3 +781,53 @@ footer a:hover {
         font-size: 1.58rem;
     }
 }
+
+.selection-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 20;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+}
+
+[data-theme="light"] .selection-overlay {
+    background: rgba(248, 250, 252, 0.6);
+}
+
+.selection-overlay-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+[data-theme="light"] .selection-overlay-title {
+    text-shadow: 0 2px 8px rgba(255,255,255,0.5);
+}
+
+.selection-overlay-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.selection-overlay-actions button {
+    width: auto;
+    padding: 10px 24px;
+    min-height: 44px;
+}
+
+button.btn-danger {
+    background: rgba(251, 113, 133, 0.2);
+    border-color: var(--danger);
+    color: #fff;
+}
+
+[data-theme="light"] button.btn-danger {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger);
+}

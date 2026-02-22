@@ -2577,7 +2577,12 @@ async function startCameraAndTracking() {
         const name = error && error.name ? error.name : 'Error';
         const message = error && error.message ? error.message : String(error);
         console.error('Camera/tracking startup failed:', error);
-        setStatus(`Could not access camera (${name}): ${message}`, true);
+
+        if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+            setStatus('Camera access required. Click "Start Camera" to allow.');
+        } else {
+            setStatus(`Could not access camera (${name}): ${message}`, true);
+        }
         return;
     }
 

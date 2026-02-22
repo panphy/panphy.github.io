@@ -82,7 +82,8 @@
                                         <span class="control-label">Sensitivity</span>
                                         <span id="sensitivityValue" class="value-badge">1.0x</span>
                                     </span>
-                                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1" value="1.0">
+                                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1"
+                                        value="1.0">
                                 </label>
                                 <label for="gravityRange" class="control-block">
                                     <span class="control-label-row">
@@ -122,16 +123,12 @@
             <canvas id="renderCanvas" class="media-layer"></canvas>
             <canvas id="tipCanvas" class="media-layer"></canvas>
 
-            <div id="selectionOverlay" role="dialog" aria-modal="true" aria-label="Sphere selection"
-                style="display: none; position: absolute; inset: 0; background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 20; align-items: center; justify-content: center; flex-direction: column; gap: 16px;">
-                <p style="margin: 0; font-size: 1.2rem; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
-                    Sphere Selected</p>
-                <div style="display: flex; gap: 12px;">
-                    <button id="removeTargetBtn" type="button"
-                        style="width: auto; padding: 10px 24px; min-height: 44px; background: rgba(251, 113, 133, 0.2); border-color: var(--danger); color: #fff;">Remove
-                        Sphere</button>
-                    <button id="cancelTargetBtn" type="button"
-                        style="width: auto; padding: 10px 24px; min-height: 44px;">Cancel</button>
+            <div id="selectionOverlay" class="selection-overlay" role="dialog" aria-modal="true"
+                aria-label="Sphere selection" style="display: none;">
+                <p class="selection-overlay-title">Sphere Selected</p>
+                <div class="selection-overlay-actions">
+                    <button id="removeTargetBtn" class="btn-danger" type="button">Remove Sphere</button>
+                    <button id="cancelTargetBtn" class="btn-cancel" type="button">Cancel</button>
                 </div>
             </div>
         </section>
