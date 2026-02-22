@@ -6,65 +6,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-Channel Tone Generator</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
-    <script src="/assets/sw-register.js" defer></script>
-<style>
+  <script src="/assets/sw-register.js" defer></script>
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
 
     :root {
-      --font-sans: 'Inter', sans-serif;
+      --font-body: 'Inter', sans-serif;
       --font-display: 'Poppins', 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      --bg-color: #f8f9fa;
-      --bg-pattern: #e9ecef;
-      --text-main: #2d3436;
-      --text-secondary: #636e72;
-      --brand-primary: #6c5ce7;
-      --brand-secondary: #a29bfe;
-      --brand-accent: #00cec9;
-      --surface: #ffffff;
-      --surface-alt: #f1f5f9;
-      --border: #e2e8f0;
-      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-      --btn-bg-color: #6c5ce7;
-      --btn-bg-hover: #5b4cdb;
-      --btn-text-color: #ffffff;
-      --btn-border-color: rgba(108, 92, 231, 0.25);
-      --slider-bg: #dbe4f3;
-      --slider-hover: #c7d2fe;
-      --slider-thumb: #6c5ce7;
-      --nav-bg: rgba(255, 255, 255, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.6);
+
+      --bg-color: #eff3fb;
+      --bg-glow: rgba(11, 95, 255, 0.16);
+      --text-main: #1d2738;
+      --text-muted: #5a6a85;
+
+      --panel-bg: rgba(255, 255, 255, 0.88);
+      --panel-border: rgba(147, 166, 198, 0.35);
+      --card-bg: #f8fbff;
+      --card-border: #d6e3f8;
       --canvas-bg: #ffffff;
-      --channel-line: #0ea5e9;
+
+      --brand-primary: #0b5fff;
+      --brand-primary-hover: #0a4fd5;
+      --brand-accent: #f97316;
+      --danger: #d92d20;
+
+      --channel-line: #1d9bf0;
+      --channel-line-paused: #7ea8c7;
       --combined-line: #ef4444;
-      --toggle-hover: rgba(108, 92, 231, 0.15);
+      --combined-line-paused: #c58888;
+      --axis-line: #d8e2f4;
+      --paused-overlay: rgba(253, 253, 255, 0.5);
+
+      --btn-text: #ffffff;
+      --btn-secondary-bg: #e9f1ff;
+      --btn-secondary-text: #244c9a;
+      --btn-secondary-border: #c6dafb;
+
+      --shadow-lg: 0 20px 44px rgba(17, 36, 74, 0.13);
+      --shadow-sm: 0 10px 24px rgba(17, 36, 74, 0.08);
+      --ring: 0 0 0 3px rgba(11, 95, 255, 0.18);
     }
 
     [data-theme="dark"] {
-      --bg-color: #0f1014;
-      --bg-pattern: #181a20;
-      --text-main: #dfe6e9;
-      --text-secondary: #b2bec3;
-      --brand-primary: #a29bfe;
-      --brand-secondary: #6c5ce7;
-      --brand-accent: #81ecec;
-      --surface: #1e2129;
-      --surface-alt: #17191f;
-      --border: #2d3436;
-      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-      --btn-bg-color: #2b2f39;
-      --btn-bg-hover: #3a3f4b;
-      --btn-text-color: #ffffff;
-      --btn-border-color: #3a3f4b;
-      --slider-bg: #3a3f4b;
-      --slider-hover: #4a4f5b;
-      --slider-thumb: #a29bfe;
-      --nav-bg: rgba(22, 24, 29, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.08);
-      --canvas-bg: #1e1e1e;
-      --channel-line: #57c7ff;
-      --combined-line: #ff638f;
-      --toggle-hover: rgba(162, 155, 254, 0.2);
+      --bg-color: #0d111a;
+      --bg-glow: rgba(116, 158, 255, 0.2);
+      --text-main: #ecf0f9;
+      --text-muted: #a4afc4;
+
+      --panel-bg: rgba(21, 28, 42, 0.9);
+      --panel-border: rgba(98, 118, 160, 0.4);
+      --card-bg: #151e2d;
+      --card-border: #27344b;
+      --canvas-bg: #0f1624;
+
+      --brand-primary: #7da6ff;
+      --brand-primary-hover: #6a95f8;
+      --brand-accent: #fb923c;
+      --danger: #ff7870;
+
+      --channel-line: #6cc8ff;
+      --channel-line-paused: #4f6f8d;
+      --combined-line: #ff6f82;
+      --combined-line-paused: #96656d;
+      --axis-line: #27344a;
+      --paused-overlay: rgba(7, 11, 18, 0.42);
+
+      --btn-text: #ffffff;
+      --btn-secondary-bg: #1e2a40;
+      --btn-secondary-text: #cfe0ff;
+      --btn-secondary-border: #2c3e5f;
+
+      --shadow-lg: 0 24px 46px rgba(0, 0, 0, 0.42);
+      --shadow-sm: 0 12px 24px rgba(0, 0, 0, 0.3);
+      --ring: 0 0 0 3px rgba(125, 166, 255, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     html,
@@ -72,91 +91,20 @@
       height: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden;
-    }
-
-    * {
-      box-sizing: border-box;
     }
 
     body {
-      background-color: var(--bg-color);
-      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-      background-size: 32px 32px;
+      font-family: var(--font-body);
       color: var(--text-main);
-      font-family: var(--font-sans);
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Title banner container: 3-column grid */
-    #titleBanner {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      background: var(--nav-bg);
-      margin: 1rem auto 0.75rem;
-      padding: 0.5rem 1.25rem;
-      border-radius: 18px;
-      border: 1px solid var(--nav-border);
-      box-shadow: var(--shadow);
-      width: calc(100% - 3rem);
-      max-width: calc(1300px - 3rem);
-      backdrop-filter: blur(10px);
-    }
-
-    /* The logo container (left column): control the image size */
-    .banner-logo img {
-      max-height: 32px;
-      width: auto;
-      height: auto;
-    }
-
-    /* The heading in the center column */
-    .banner-title {
-      margin: 0;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      font-family: var(--font-display);
-      color: var(--brand-primary);
-    }
-
-    .banner-title.gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* Empty placeholder in the right column to keep the heading truly centered */
-    .theme-toggle {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .theme-toggle button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 0.5rem;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-main);
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .theme-toggle button:hover {
-      background-color: var(--toggle-hover);
-      transform: translateY(-1px);
+      background:
+        radial-gradient(circle at 8% -10%, var(--bg-glow), transparent 38%),
+        radial-gradient(circle at 90% 110%, rgba(249, 115, 22, 0.11), transparent 34%),
+        var(--bg-color);
+      overflow: hidden;
     }
 
     a {
-      color: var(--brand-accent);
+      color: var(--brand-primary);
       text-decoration: none;
     }
 
@@ -164,949 +112,1375 @@
       text-decoration: underline;
     }
 
-    #content {
-      flex: 1 1 auto;
-      display: flex;
-      width: 100%;
-      max-width: 1300px;
-      margin: 0 auto;
-      gap: 20px;
-      padding: 0 1.5rem 1.5rem;
-      overflow: hidden;
-    }
-
-    button,
-    input[type="range"],
-    input[type="number"] {
-      cursor: pointer;
-      outline: none;
-    }
-
-    /* LEFT COLUMN */
-    #leftColumn {
-      flex: 0 0 40%;
-      max-width: 40%;
+    #app {
+      height: 100%;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid var(--border);
-      padding: 16px;
-      overflow: hidden;
-      background-color: var(--surface);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
+      padding: 0.9rem 1rem 0.75rem;
+      gap: 0.8rem;
     }
 
-    #channelsScrollContainer {
-      overflow-y: auto;
-      flex: 1;
-      padding-right: 10px;
-    }
-
-    /* RIGHT COLUMN */
-    #rightColumn {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      overflow: hidden;
-      background-color: var(--surface);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    /* CHANNEL UI */
-    .channel {
-      background-color: var(--surface-alt);
-      border: 1px solid var(--border);
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 12px;
-      width: 100%;
-    }
-
-    .channel-header {
-      display: flex;
-      justify-content: space-between;
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      margin-bottom: 10px;
+      gap: 0.8rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(8px);
+      min-height: 62px;
+      padding: 0.5rem 0.9rem;
     }
 
-    .channel-header h3 {
+    .banner-logo img {
+      width: auto;
+      height: 34px;
+      display: block;
+    }
+
+    .banner-title {
       margin: 0;
-      font-size: 1rem;
-      margin-right: 10px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.42rem;
+      letter-spacing: -0.02em;
       color: var(--text-main);
     }
 
-    .slider-container {
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-      gap: 5px;
-      margin-bottom: 5px;
+    .banner-title .accent {
+      color: var(--brand-primary);
     }
 
-    .slider-container span {
-      white-space: nowrap;
-      min-width: 60px;
-      text-align: right;
+    .theme-toggle {
+      justify-self: end;
     }
 
-    .freq-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .channel-canvas {
-      width: 100%;
-      height: 80px;
-      background-color: var(--canvas-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-
-    /* BUTTONS */
-    .btn {
-      display: inline-block;
-      padding: 8px 18px;
-      font-size: 0.9rem;
-      color: var(--btn-text-color);
-      background-color: var(--btn-bg-color);
-      border: 1px solid var(--btn-border-color);
+    #theme-button {
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
       border-radius: 999px;
-      margin-right: 5px;
-      text-decoration: none;
-      min-width: 80px;
-      text-align: center;
-      transition: background-color 0.2s, transform 0.2s;
+      font-size: 0.83rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      min-height: 42px;
+      padding: 0.5rem 0.9rem;
+      min-width: 90px;
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    #theme-button:hover {
+      transform: translateY(-1px);
+      border-color: var(--brand-primary);
+    }
+
+    #theme-button:focus-visible {
+      outline: none;
+      box-shadow: var(--ring);
+    }
+
+    #workspace {
+      min-height: 0;
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
+      gap: 0.9rem;
+    }
+
+    #transportPanel,
+    #channelsPanel {
+      min-height: 0;
+    }
+
+    #transportPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .panel,
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(8px);
+    }
+
+    .card {
+      padding: 0.9rem;
+    }
+
+    .transport-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.7rem;
+      align-items: flex-start;
+      margin-bottom: 0.65rem;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .transport-meta {
+      margin-top: 0.32rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    #activeSummary {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    #combinedCanvas {
+      display: block;
+      width: 100%;
+      height: 220px;
+      background: var(--canvas-bg);
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    #transportHint {
+      margin: 0.5rem 0 0;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 0 0.65rem;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .status-chip.playing {
+      background: rgba(14, 165, 233, 0.15);
+      border-color: rgba(14, 165, 233, 0.28);
+      color: #0075b1;
+    }
+
+    [data-theme="dark"] .status-chip.playing {
+      color: #9ddfff;
+    }
+
+    .status-chip.armed {
+      background: rgba(249, 115, 22, 0.14);
+      border-color: rgba(249, 115, 22, 0.3);
+      color: #b45309;
+    }
+
+    [data-theme="dark"] .status-chip.armed {
+      color: #ffc58f;
+    }
+
+    .status-chip.paused {
+      background: rgba(127, 138, 162, 0.14);
+      border-color: rgba(127, 138, 162, 0.3);
+      color: #63708a;
+    }
+
+    [data-theme="dark"] .status-chip.paused {
+      color: #b4bfd6;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      min-height: 46px;
+      padding: 0.55rem 0.95rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
+      white-space: nowrap;
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: var(--ring);
     }
 
     .btn:hover {
-      background-color: var(--btn-bg-hover);
       transform: translateY(-1px);
+      filter: brightness(1.02);
     }
 
-    #freezeBtn {
-      width: 100px;
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+      filter: none;
     }
 
-    /* RANGE SLIDERS */
+    .btn-primary {
+      background: var(--brand-primary);
+      color: var(--btn-text);
+      border-color: rgba(11, 95, 255, 0.35);
+      min-width: 158px;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--btn-secondary-bg);
+      color: var(--btn-secondary-text);
+      border-color: var(--btn-secondary-border);
+    }
+
+    .btn-danger {
+      background: rgba(217, 45, 32, 0.11);
+      color: var(--danger);
+      border-color: rgba(217, 45, 32, 0.24);
+    }
+
+    .btn-small {
+      min-height: 40px;
+      padding: 0.45rem 0.7rem;
+      border-radius: 10px;
+      font-size: 0.82rem;
+    }
+
+    #controlsCard {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .control-block {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .control-header label {
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .control-header span {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-main);
+    }
+
     input[type="range"] {
+      width: 100%;
+      height: 32px;
+      background: transparent;
+      cursor: pointer;
+      margin: 0;
       -webkit-appearance: none;
       appearance: none;
-      width: 100%;
-      height: 22px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
+    }
+
+    input[type="range"]:focus-visible {
+      outline: none;
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
-      width: 100%;
       height: 6px;
-      background: var(--slider-bg);
-      border-radius: 3px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    input[type="range"]:hover::-webkit-slider-runnable-track {
-      background: var(--slider-hover);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(11, 95, 255, 0.33), rgba(249, 115, 22, 0.33));
+      border: 1px solid rgba(11, 95, 255, 0.18);
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--slider-thumb);
-      cursor: pointer;
-      border: none;
+      width: 20px;
+      height: 20px;
       margin-top: -8px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s;
+      border-radius: 50%;
+      border: none;
+      background: var(--brand-primary);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
     }
 
     input[type="range"]::-moz-range-track {
-      width: 100%;
       height: 6px;
-      background: var(--slider-bg);
-      border-radius: 3px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    input[type="range"]:hover::-moz-range-track {
-      background: var(--slider-hover);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(11, 95, 255, 0.33), rgba(249, 115, 22, 0.33));
+      border: 1px solid rgba(11, 95, 255, 0.18);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      background: var(--slider-thumb);
-      cursor: pointer;
       border: none;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s;
+      background: var(--brand-primary);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.24);
     }
 
-    /* COMBINED WAVE */
-    #combinedWaveContainer {
+    .utility-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+
+    #channelsPanel {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin-top: 20px;
-      flex: 1 1 auto;
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
+      padding: 0.95rem;
+      overflow: hidden;
     }
 
-    #sumCanvas {
-      width: 95%;
-      height: 160px;
-      background-color: var(--canvas-bg);
-      border: 2px solid var(--border);
-      border-radius: 12px;
+    .channels-header {
+      margin-bottom: 0.6rem;
     }
 
-    #combinedWaveButtons {
-      margin-top: 10px;
+    .channels-header h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.06rem;
+      letter-spacing: -0.01em;
+    }
+
+    .channels-header p {
+      margin: 0.2rem 0 0;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+    }
+
+    #channelsList {
+      min-height: 0;
+      overflow-y: auto;
       display: flex;
-      gap: 10px;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding-right: 0.4rem;
     }
 
-    #toggleCombinedBtn {
-      min-width: 150px;
-      text-align: center;
+    .channel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 0.75rem;
+      display: grid;
+      gap: 0.6rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    /* TOP SLIDERS ROW */
-    #controlsContainer {
+    .channel-card[data-state="playing"] {
+      border-color: rgba(14, 165, 233, 0.45);
+      box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.16);
+    }
+
+    .channel-card[data-state="armed"] {
+      border-color: rgba(249, 115, 22, 0.42);
+      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
+    }
+
+    .channel-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 15px;
-      gap: 20px;
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-    }
-
-    .controlRow {
-      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
       align-items: center;
-      margin-bottom: 10px;
-      flex: 1;
-      flex-direction: column;
     }
 
-    .controlRow label {
-      margin-bottom: 5px;
-      font-size: 0.85rem;
-      white-space: nowrap;
-      text-align: center;
-      color: var(--text-secondary);
+    .channel-title-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 40px;
     }
 
-    .controlRow span {
-      font-size: 0.85rem;
-      width: 60px;
-      text-align: center;
-      margin-top: 5px;
+    .channel-title {
+      margin: 0;
+      font-size: 0.98rem;
+    }
+
+    .channel-actions {
+      display: inline-flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .frequency-row {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .freq-label {
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .freq-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .freq-number {
+      width: 98px;
+      min-height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--canvas-bg);
       color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      padding: 0.35rem 0.5rem;
     }
 
-    /* VOLUME SLIDER + LABEL */
-    #volumeWrapper {
-      display: flex;
-      align-items: center;
-      margin-right: 10px;
-      flex-direction: column;
+    .freq-number:focus-visible {
+      outline: none;
+      box-shadow: var(--ring);
+      border-color: var(--brand-primary);
     }
 
-    #volumeWrapper label {
-      font-size: 0.85rem;
-      margin-bottom: 5px;
-      white-space: nowrap;
+    .freq-value {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .channel-canvas {
+      width: 100%;
+      height: 92px;
+      display: block;
+      background: var(--canvas-bg);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+
+    #emptyState {
+      border: 1px dashed var(--card-border);
+      border-radius: 12px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.36);
       text-align: center;
-      color: var(--text-secondary);
+      padding: 1rem;
+      font-size: 0.89rem;
+      font-weight: 600;
     }
 
-    #volumeSlider {
-      width: 120px;
-      max-width: 150px;
+    [data-theme="dark"] #emptyState {
+      background: rgba(9, 12, 18, 0.4);
     }
 
-    /* FOOTER */
     footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      margin: 10px 0 20px;
       flex: 0 0 auto;
+      text-align: center;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      padding: 0 0.25rem;
     }
 
     @media (pointer: coarse) {
-      button,
-      input,
-      select,
-      .controlRow button {
-        min-height: 44px;
-        touch-action: manipulation;
+      .btn,
+      .btn-small,
+      .freq-number,
+      #theme-button {
+        min-height: 48px;
       }
 
       input[type="range"] {
-        height: 44px;
-        touch-action: manipulation;
-      }
-
-      input[type="range"]::-webkit-slider-runnable-track {
-        height: 6px;
+        height: 40px;
       }
 
       input[type="range"]::-webkit-slider-thumb {
-        width: 28px;
-        height: 28px;
-        margin-top: -11px;
-      }
-
-      input[type="range"]::-moz-range-track {
-        height: 6px;
+        width: 24px;
+        height: 24px;
+        margin-top: -10px;
       }
 
       input[type="range"]::-moz-range-thumb {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
       }
     }
 
-    /* Mobile responsive layout */
-    @media (max-width: 768px) {
-      html, body {
+    @media (max-width: 1050px) {
+      body {
         overflow: auto;
       }
 
-      #titleBanner {
-        width: calc(100% - 1.5rem);
-        margin: 0.75rem auto;
-        padding: 0.4rem 0.75rem;
+      #app {
+        height: auto;
+        min-height: 100%;
       }
 
-      .banner-title {
-        font-size: 1.1rem;
+      #workspace {
+        grid-template-columns: 1fr;
       }
 
-      .banner-logo img {
-        max-height: 26px;
+      #transportPanel {
+        order: 1;
       }
 
-      .theme-toggle button {
-        font-size: 1.05rem;
-        padding: 0.4rem;
+      #channelsPanel {
+        order: 2;
+        min-height: 52vh;
       }
 
-      #content {
-        flex-direction: column;
-        padding: 0 0.75rem 1rem;
-        gap: 12px;
-        overflow: visible;
-      }
-
-      #leftColumn {
-        flex: none;
-        max-width: 100%;
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 12px;
-        max-height: 50vh;
-        overflow-y: auto;
-      }
-
-      #rightColumn {
-        flex: none;
-        width: 100%;
-        padding: 12px;
-        min-height: 300px;
-      }
-
-      .channel {
-        padding: 10px;
-      }
-
-      .channel-header {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .slider-container {
-        flex-wrap: wrap;
-      }
-
-      #globalControlsArea {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      #chartContainer {
-        min-height: 250px;
+      .control-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 480px) {
-      .banner-title {
-        font-size: 0.95rem;
+    @media (max-width: 640px) {
+      #app {
+        padding: 0.7rem 0.62rem;
+      }
+
+      #titleBanner {
+        min-height: 56px;
+        border-radius: 15px;
+        padding: 0.45rem 0.62rem;
       }
 
       .banner-logo img {
-        max-height: 22px;
+        height: 27px;
       }
 
-      #leftColumn {
-        max-height: 45vh;
+      .banner-title {
+        font-size: 1.05rem;
       }
 
-      .channel-header h3 {
-        font-size: 0.9rem;
+      #theme-button {
+        min-width: 74px;
+        font-size: 0.76rem;
+        padding: 0.45rem 0.65rem;
+      }
+
+      .utility-row {
+        grid-template-columns: 1fr;
+      }
+
+      .transport-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-primary {
+        width: 100%;
+      }
+
+      .channel-actions {
+        width: 100%;
+      }
+
+      .channel-actions .btn-small {
+        flex: 1;
+      }
+
+      .freq-meta {
+        justify-content: flex-start;
       }
     }
   </style>
 </head>
 
 <body>
-
-  <!-- Title Banner: Logo (Left), Heading (Center), Theme Toggle (Right) -->
-  <div id="titleBanner">
-    <div class="banner-logo">
-      <a href="https://panphy.github.io/">
-        <img src="/assets/panphy.png" alt="PanPhy logo" />
-      </a>
-    </div>
-
-    <h1 class="banner-title">Multi-Channel Tone Generator</h1>
-
-    <div class="theme-toggle">
-      <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
-    </div>
-  </div>
-
-  <div id="content">
-    <!-- LEFT COLUMN: Channels -->
-    <div id="leftColumn">
-      <button id="addChannelBtn" class="btn" style="margin-bottom: 10px;">Add Channel</button>
-      <div id="channelsScrollContainer"></div>
-    </div>
-
-    <!-- RIGHT COLUMN: Controls + Combined Wave -->
-    <div id="rightColumn">
-      <!-- Sliders: Panning, Log-Time Scale, Zoom In/Out -->
-      <div id="controlsContainer">
-        <div class="controlRow">
-          <label for="panningSlider">L/R Panning:</label>
-          <input type="range" id="panningSlider" min="-1" max="1" step="0.01" value="0">
-          <span id="panningValue">0.00</span>
-        </div>
-
-        <!-- LOGARITHMIC TIME SCALE: slider from -3 => 1 => 10^(-3..1) => 0.001x to 10x -->
-        <div class="controlRow">
-          <label for="timeScaleSlider">Animation Speed:</label>
-          <input type="range" id="timeScaleSlider" min="-3" max="1" step="0.01" value="0">
-          <span id="timeScaleValue">1.00x</span>
-        </div>
-
-        <div class="controlRow">
-          <label for="zoomScaleSlider">Zoom In/Out:</label>
-          <input type="range" id="zoomScaleSlider" min="0.01" max="50" step="0.01" value="1">
-          <span id="zoomScaleValue">1.00x</span>
-        </div>
+  <div id="app">
+    <header id="titleBanner">
+      <div class="banner-logo">
+        <a href="https://panphy.github.io/">
+          <img src="/assets/panphy.png" alt="PanPhy logo">
+        </a>
       </div>
+      <h1 class="banner-title">Tone <span class="accent">Mixer</span> Lab</h1>
+      <div class="theme-toggle">
+        <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">Dark</button>
+      </div>
+    </header>
 
-      <div id="combinedWaveContainer">
-        <canvas id="sumCanvas"></canvas>
-        <div id="combinedWaveButtons">
-          <div id="volumeWrapper">
-            <label for="volumeSlider">Volume:</label>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+    <main id="workspace">
+      <section id="transportPanel">
+        <div class="card" id="combinedCard">
+          <div class="transport-header">
+            <div>
+              <p class="eyebrow">Combined Output</p>
+              <div class="transport-meta">
+                <span id="combinedStateChip" class="status-chip paused">Paused</span>
+                <p id="activeSummary">0 active / 0 channels</p>
+              </div>
+            </div>
+            <button id="toggleCombinedBtn" class="btn btn-primary" disabled>Play Combined</button>
           </div>
-          <button id="toggleCombinedBtn" class="btn">Play Combined</button>
-          <button id="freezeBtn" class="btn">Freeze</button>
+          <canvas id="combinedCanvas"></canvas>
+          <p id="transportHint">Space key toggles combined play/pause.</p>
         </div>
-      </div>
-    </div>
+
+        <div class="card" id="controlsCard">
+          <div class="control-grid">
+            <div class="control-block">
+              <div class="control-header">
+                <label for="volumeSlider">Volume</label>
+                <span id="volumeValue">100%</span>
+              </div>
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+            </div>
+
+            <div class="control-block">
+              <div class="control-header">
+                <label for="panningSlider">L/R Pan</label>
+                <span id="panningValue">0.00</span>
+              </div>
+              <input type="range" id="panningSlider" min="-1" max="1" step="0.01" value="0">
+            </div>
+
+            <div class="control-block">
+              <div class="control-header">
+                <label for="timeScaleSlider">Animation Speed</label>
+                <span id="timeScaleValue">1.000x</span>
+              </div>
+              <input type="range" id="timeScaleSlider" min="-3" max="1" step="0.01" value="0">
+            </div>
+
+            <div class="control-block">
+              <div class="control-header">
+                <label for="zoomScaleSlider">Wave Zoom</label>
+                <span id="zoomScaleValue">1.00x</span>
+              </div>
+              <input type="range" id="zoomScaleSlider" min="0.01" max="50" step="0.01" value="1">
+            </div>
+          </div>
+
+          <div class="utility-row">
+            <button id="addChannelBtn" class="btn btn-primary">Add Channel</button>
+            <button id="playAllBtn" class="btn btn-secondary" disabled>Play All Channels</button>
+            <button id="pauseAllBtn" class="btn btn-secondary" disabled>Pause All Channels</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="channelsPanel" class="panel">
+        <div class="channels-header">
+          <h2>Channel Mixer</h2>
+          <p>Each channel has independent play/pause. Combined play controls final audio output and combined waveform motion.</p>
+        </div>
+        <div id="channelsList"></div>
+      </section>
+    </main>
+
+    <footer>
+      &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+    </footer>
   </div>
 
-  <footer>
-    &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> | <a
-      href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support
-      My Projects</a>
-  </footer>
   <script>
-    // Gradient text: skip on Brave iOS where background-clip:text is broken
-    (function() {
-      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-      document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
-    })();
-  </script>
-  <script>
-    // Theme Toggle
     const themeButton = document.getElementById('theme-button');
-    const DARK_THEME_KEY = "panphy-dark";
-    const LIGHT_THEME_KEY = "panphy-light";
+    const DARK_THEME_KEY = 'panphy-dark';
+    const LIGHT_THEME_KEY = 'panphy-light';
 
-    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-      "dark" :
-      localStorage.getItem(LIGHT_THEME_KEY) ?
-        "light" :
-        "light";
-
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateButtonEmoji(currentTheme);
-
-    function updateButtonEmoji(theme) {
-      themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      themeButton.textContent = theme === 'dark' ? 'Light' : 'Dark';
     }
 
-    themeButton.addEventListener('click', function () {
-      let theme = document.documentElement.getAttribute('data-theme');
-      if (theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'dark');
+    const initialTheme = localStorage.getItem(DARK_THEME_KEY)
+      ? 'dark'
+      : (localStorage.getItem(LIGHT_THEME_KEY) ? 'light' : 'light');
+
+    applyTheme(initialTheme);
+
+    themeButton.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        applyTheme('dark');
         localStorage.setItem(DARK_THEME_KEY, 'true');
         localStorage.removeItem(LIGHT_THEME_KEY);
-        updateButtonEmoji('dark');
       } else {
-        document.documentElement.setAttribute('data-theme', 'light');
+        applyTheme('light');
         localStorage.setItem(LIGHT_THEME_KEY, 'true');
         localStorage.removeItem(DARK_THEME_KEY);
-        updateButtonEmoji('light');
       }
     });
   </script>
-</body>
 
-<script>
-  /* ========== AUDIO CONTEXT & NODES ========== */
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = new AudioContext({ latencyHint: 'interactive' });
-
-  // Gains: channels -> masterGain -> volumeGain -> combinedGain -> panner -> destination
-  const masterGain = audioCtx.createGain();
-  masterGain.gain.value = 1;
-
-  const volumeGain = audioCtx.createGain();
-  volumeGain.gain.value = 1;
-
-  const combinedGain = audioCtx.createGain();
-  combinedGain.gain.value = 0; // start off
-
-  masterGain.connect(volumeGain);
-  volumeGain.connect(combinedGain);
-
-  const stereoPanner = audioCtx.createStereoPanner();
-
-  const saturation = audioCtx.createWaveShaper();
-  saturation.curve = makeSoftClipCurve(0.9);
-  saturation.oversample = '4x';
-
-  const compressor = audioCtx.createDynamicsCompressor();
-  compressor.threshold.value = -24;
-  compressor.knee.value = 20;
-  compressor.ratio.value = 4;
-  compressor.attack.value = 0.003;
-  compressor.release.value = 0.25;
-
-  const convolver = audioCtx.createConvolver();
-  convolver.buffer = makeImpulseResponse(0.6, 2.5);
-
-  const dryGain = audioCtx.createGain();
-  dryGain.gain.value = 0.85;
-
-  const wetGain = audioCtx.createGain();
-  wetGain.gain.value = 0.15;
-
-  combinedGain.connect(saturation);
-  saturation.connect(compressor);
-  compressor.connect(dryGain);
-  compressor.connect(convolver);
-  convolver.connect(wetGain);
-  dryGain.connect(stereoPanner);
-  wetGain.connect(stereoPanner);
-  stereoPanner.connect(audioCtx.destination);
-
-  /* DOM Elements */
-  const addChannelBtn = document.getElementById('addChannelBtn');
-  const channelsScrollContainer = document.getElementById('channelsScrollContainer');
-
-  const panningSlider = document.getElementById('panningSlider');
-  const panningValue = document.getElementById('panningValue');
-
-  // LOG TIME SCALE: slider from -3..1 => timeScale = 10^sliderValue in [0.001..10]
-  const timeScaleSlider = document.getElementById('timeScaleSlider');
-  const timeScaleValue = document.getElementById('timeScaleValue');
-
-  const zoomScaleSlider = document.getElementById('zoomScaleSlider');
-  const zoomScaleValue = document.getElementById('zoomScaleValue');
-
-  const volumeSlider = document.getElementById('volumeSlider');
-
-  const toggleCombinedBtn = document.getElementById('toggleCombinedBtn');
-  const freezeBtn = document.getElementById('freezeBtn');
-
-  const sumCanvas = document.getElementById('sumCanvas');
-  const sumCtx = sumCanvas.getContext('2d');
-
-  const channels = [];
-
-  /* States */
-  let combinedPlaying = false;
-  let isFrozen = false;
-
-  // Zoom scale
-  let zoomScale = parseFloat(zoomScaleSlider.value);
-  zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
-
-  // "timeScale" is derived from the slider (log scale)
-  // slider range: -3..1 => timeScale in [0.001..10]
-  let timeScale = Math.pow(10, parseFloat(timeScaleSlider.value));
-  timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
-
-  // We'll track the total "time offset" for scrolling
-  let accumulatedTime = 0;
-  let lastTime = null;
-
-  // If we want real-time => timeScale=1 => wave shows actual frequency
-  // If timeScale=0.001 => wave is slowed 1000x
-  // If timeScale=10 => wave is 10x faster than real time
-  // We keep SCALE=1 for straightforward mapping
-  const SCALE = 1;
-
-  // We'll keep a small base window in seconds
-  const BASE_WINDOW = 0.01;
-
-  /* ========== CREATE & REMOVE CHANNELS ========== */
-  function addChannel() {
-    const channelIndex = channels.length + 1;
-
-    const oscillator = audioCtx.createOscillator();
-    oscillator.type = 'sine';
-    oscillator.frequency.value = 440;
-    oscillator.start();
-
-    const channelGain = audioCtx.createGain();
-    channelGain.gain.value = 0; // start silent
-    oscillator.connect(channelGain);
-    channelGain.connect(masterGain);
-
-    const channelDiv = document.createElement('div');
-    channelDiv.className = 'channel';
-
-    // Header
-    const headerDiv = document.createElement('div');
-    headerDiv.className = 'channel-header';
-    const title = document.createElement('h3');
-    title.textContent = `Channel ${channelIndex}`;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = 'Remove';
-    removeBtn.className = 'btn';
-    removeBtn.onclick = () => removeChannel(channelIndex - 1);
-
-    headerDiv.appendChild(title);
-    headerDiv.appendChild(removeBtn);
-
-    // Frequency controls
-    const controlsDiv = document.createElement('div');
-    controlsDiv.className = 'slider-container freq-controls';
-
-    const freqSlider = document.createElement('input');
-    freqSlider.type = 'range';
-    freqSlider.min = 15;
-    freqSlider.max = 23000;
-    freqSlider.value = 440;
-    freqSlider.step = 1;
-
-    const freqNumber = document.createElement('input');
-    freqNumber.type = 'number';
-    freqNumber.min = 15;
-    freqNumber.max = 23000;
-    freqNumber.value = 440;
-    freqNumber.step = 1;
-    freqNumber.style.width = '70px';
-
-    const freqLabel = document.createElement('span');
-    freqLabel.textContent = '440 Hz';
-
-    freqSlider.oninput = () => {
-      const freq = parseFloat(freqSlider.value);
-      freqNumber.value = freq;
-      freqLabel.textContent = `${freq} Hz`;
-      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      channels[channelIndex - 1].frequency = freq;
-    };
-    freqNumber.onchange = () => {
-      let val = parseFloat(freqNumber.value);
-      if (isNaN(val)) val = 440;
-      if (val < 15) val = 15;
-      if (val > 23000) val = 23000;
-      freqNumber.value = val;
-      freqSlider.value = val;
-      freqLabel.textContent = `${val} Hz`;
-      oscillator.frequency.setValueAtTime(val, audioCtx.currentTime);
-      channels[channelIndex - 1].frequency = val;
-    };
-
-    controlsDiv.appendChild(freqSlider);
-    controlsDiv.appendChild(freqNumber);
-    controlsDiv.appendChild(freqLabel);
-
-    // Play/Pause
-    const playPauseBtn = document.createElement('button');
-    playPauseBtn.textContent = 'Play';
-    playPauseBtn.className = 'btn';
-    let playing = false;
-    playPauseBtn.onclick = () => {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      playing = !playing;
-      channelGain.gain.setValueAtTime(playing ? 1 : 0, audioCtx.currentTime);
-      playPauseBtn.textContent = playing ? 'Pause' : 'Play';
-    };
-
-    // Wave canvas
-    const canvas = document.createElement('canvas');
-    canvas.className = 'channel-canvas';
-    const ctx = canvas.getContext('2d');
-
-    channelDiv.appendChild(headerDiv);
-    channelDiv.appendChild(controlsDiv);
-    channelDiv.appendChild(playPauseBtn);
-    channelDiv.appendChild(canvas);
-
-    channelsScrollContainer.appendChild(channelDiv);
-
-    const channelObj = {
-      oscillator,
-      channelGain,
-      canvas,
-      ctx,
-      frequency: 440
-    };
-    channels.push(channelObj);
-
-    resizeCanvas(canvas);
-  }
-
-  function removeChannel(index) {
-    const ch = channels[index];
-    if (!ch) return;
-    ch.oscillator.stop();
-    ch.oscillator.disconnect();
-    ch.channelGain.disconnect();
-
-    channels.splice(index, 1);
-    channelsScrollContainer.removeChild(channelsScrollContainer.children[index]);
-
-    Array.from(channelsScrollContainer.children).forEach((child, i) => {
-      const title = child.querySelector('h3');
-      title.textContent = `Channel ${i + 1}`;
-    });
-  }
-
-  // ========== DRAW LOOP ==========
-  function getCssVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  function getThemeColors() {
-    return {
-      canvasBg: getCssVar('--canvas-bg'),
-      channelLine: getCssVar('--channel-line'),
-      combinedLine: getCssVar('--combined-line')
-    };
-  }
-
-  function draw(time) {
-    requestAnimationFrame(draw);
-
-    if (!lastTime) {
-      lastTime = time;
-      return;
-    }
-    const deltaTime = (time - lastTime) / 1000;
-    lastTime = time;
-
-    if (!isFrozen) {
-      // timeScale = 10^sliderVal, so timeScale=1 => real time, 0.001 => 1000x slower, etc.
-      accumulatedTime += (deltaTime * timeScale) / (SCALE);
-    }
-
-    const themeColors = getThemeColors();
-    channels.forEach(ch => drawChannelWave(ch, ch.ctx, ch.canvas, themeColors));
-    drawCombinedWave(sumCtx, sumCanvas, themeColors);
-  }
-
-  function drawChannelWave(channel, ctx, canvas, themeColors) {
-    ctx.fillStyle = themeColors.canvasBg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = themeColors.channelLine;
-    ctx.beginPath();
-
-    const timeWindow = BASE_WINDOW * zoomScale;
-    for (let x = 0; x < canvas.width; x++) {
-      const fraction = x / (canvas.width - 1);
-      // time offset plus fraction of the time window
-      const t = accumulatedTime - fraction * timeWindow;
-      const val = Math.sin(2 * Math.PI * channel.frequency * t);
-
-      const y = (val * 0.5 + 0.5) * canvas.height;
-      if (x === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-
-  function drawCombinedWave(ctx, canvas, themeColors) {
-    ctx.fillStyle = themeColors.canvasBg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (channels.length === 0) return;
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = themeColors.combinedLine;
-    ctx.beginPath();
-
-    const timeWindow = BASE_WINDOW * zoomScale;
-    for (let x = 0; x < canvas.width; x++) {
-      const fraction = x / (canvas.width - 1);
-      const t = accumulatedTime - fraction * timeWindow;
-
-      let sumVal = 0;
-      channels.forEach(ch => {
-        sumVal += Math.sin(2 * Math.PI * ch.frequency * t);
-      });
-      const avgVal = sumVal / channels.length;
-      const y = (avgVal * 0.5 + 0.5) * canvas.height;
-
-      if (x === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-
-  function makeSoftClipCurve(amount) {
-    const curve = new Float32Array(44100);
-    const k = typeof amount === 'number' ? amount * 30 : 30;
-    for (let i = 0; i < curve.length; i++) {
-      const x = (i * 2) / curve.length - 1;
-      curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x));
-    }
-    return curve;
-  }
-
-  function makeImpulseResponse(duration, decay) {
-    const rate = audioCtx.sampleRate;
-    const length = rate * duration;
-    const impulse = audioCtx.createBuffer(2, length, rate);
-    for (let channel = 0; channel < impulse.numberOfChannels; channel++) {
-      const channelData = impulse.getChannelData(channel);
-      for (let i = 0; i < length; i++) {
-        channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+  <script>
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
+
+    const channelBus = audioCtx.createGain();
+    channelBus.gain.value = 1;
+
+    const volumeGain = audioCtx.createGain();
+    volumeGain.gain.value = 1;
+
+    const combinedGain = audioCtx.createGain();
+    combinedGain.gain.value = 0;
+
+    const compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -22;
+    compressor.knee.value = 18;
+    compressor.ratio.value = 3;
+    compressor.attack.value = 0.004;
+    compressor.release.value = 0.2;
+
+    const stereoPanner = audioCtx.createStereoPanner();
+
+    channelBus.connect(volumeGain);
+    volumeGain.connect(combinedGain);
+    combinedGain.connect(compressor);
+    compressor.connect(stereoPanner);
+    stereoPanner.connect(audioCtx.destination);
+
+    const addChannelBtn = document.getElementById('addChannelBtn');
+    const playAllBtn = document.getElementById('playAllBtn');
+    const pauseAllBtn = document.getElementById('pauseAllBtn');
+    const channelsList = document.getElementById('channelsList');
+
+    const combinedCanvas = document.getElementById('combinedCanvas');
+    const combinedCtx = combinedCanvas.getContext('2d');
+    const toggleCombinedBtn = document.getElementById('toggleCombinedBtn');
+    const combinedStateChip = document.getElementById('combinedStateChip');
+    const activeSummary = document.getElementById('activeSummary');
+
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeValue = document.getElementById('volumeValue');
+
+    const panningSlider = document.getElementById('panningSlider');
+    const panningValue = document.getElementById('panningValue');
+
+    const timeScaleSlider = document.getElementById('timeScaleSlider');
+    const timeScaleValue = document.getElementById('timeScaleValue');
+
+    const zoomScaleSlider = document.getElementById('zoomScaleSlider');
+    const zoomScaleValue = document.getElementById('zoomScaleValue');
+
+    const channels = [];
+    let nextChannelId = 1;
+    let combinedPlaying = false;
+    let timeScale = Math.pow(10, parseFloat(timeScaleSlider.value));
+    let zoomScale = parseFloat(zoomScaleSlider.value);
+    let lastFrameTime = null;
+
+    const BASE_WINDOW = 0.01;
+    const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
+
+    function ensureAudioContext() {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
       }
     }
-    return impulse;
-  }
 
-  // ========== CONTROLS ==========
-  addChannelBtn.addEventListener('click', () => {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    addChannel();
-  });
-
-  toggleCombinedBtn.addEventListener('click', () => {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    combinedPlaying = !combinedPlaying;
-    combinedGain.gain.setValueAtTime(combinedPlaying ? 1 : 0, audioCtx.currentTime);
-    toggleCombinedBtn.textContent = combinedPlaying ? 'Pause Combined' : 'Play Combined';
-  });
-
-  freezeBtn.addEventListener('click', () => {
-    toggleFreeze();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.code === 'Space') {
-      e.preventDefault();
-      toggleFreeze();
+    function setGain(node, targetValue) {
+      const now = audioCtx.currentTime;
+      node.gain.cancelScheduledValues(now);
+      node.gain.setTargetAtTime(targetValue, now, 0.012);
     }
-  });
-  function toggleFreeze() {
-    isFrozen = !isFrozen;
-    freezeBtn.textContent = isFrozen ? 'Unfreeze' : 'Freeze';
-    if (isFrozen) {
-      masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-    } else {
-      masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
-  }
 
-  panningSlider.addEventListener('input', () => {
-    let panVal = parseFloat(panningSlider.value);
-    if (Math.abs(panVal) < 0.05) {
-      panVal = 0;
-      panningSlider.value = '0';
+    function getCssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
-    stereoPanner.pan.setValueAtTime(panVal, audioCtx.currentTime);
-    panningValue.textContent = panVal.toFixed(2);
-  });
 
-  // LOG Scale for timeScale: timeScale = 10^(sliderVal)
-  timeScaleSlider.addEventListener('input', () => {
-    const sliderVal = parseFloat(timeScaleSlider.value);  // -3..1
-    timeScale = Math.pow(10, sliderVal);                  // 10^sliderVal => [0.001..10]
-    // Display with up to 3 decimal places so 0.001 or 10.0 is shown properly
-    timeScaleValue.textContent = timeScale.toFixed(3) + 'x';
-  });
+    function getThemeColors() {
+      return {
+        canvasBg: getCssVar('--canvas-bg'),
+        axisLine: getCssVar('--axis-line'),
+        textMuted: getCssVar('--text-muted'),
+        pausedOverlay: getCssVar('--paused-overlay'),
+        channelLine: getCssVar('--channel-line'),
+        channelLinePaused: getCssVar('--channel-line-paused'),
+        combinedLine: getCssVar('--combined-line'),
+        combinedLinePaused: getCssVar('--combined-line-paused')
+      };
+    }
 
-  zoomScaleSlider.addEventListener('input', () => {
-    zoomScale = parseFloat(zoomScaleSlider.value);
-    zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
-  });
+    function updateControlReadouts() {
+      const volumePercent = Math.round(parseFloat(volumeSlider.value) * 100);
+      volumeValue.textContent = `${volumePercent}%`;
 
-  volumeSlider.addEventListener('input', () => {
-    const volVal = parseFloat(volumeSlider.value);
-    volumeGain.gain.setValueAtTime(volVal, audioCtx.currentTime);
-  });
+      const pan = parseFloat(panningSlider.value);
+      panningValue.textContent = pan.toFixed(2);
 
-  // ========== INIT ==========
-  requestAnimationFrame(draw);
-  addChannel();
+      timeScaleValue.textContent = `${timeScale.toFixed(3)}x`;
+      zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
+    }
 
-  // ========== RESIZE ==========
-  function resizeCanvas(canvas) {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-  }
+    function drawCenterAxis(ctx, width, height, color) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-  function debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  }
+    function drawWavePath(ctx, width, height, frequency, waveTime, timeWindow, color) {
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = color;
 
-  window.addEventListener('resize', debounce(() => {
-    channels.forEach(ch => resizeCanvas(ch.canvas));
-    resizeCanvas(sumCanvas);
-  }, 200));
+      for (let x = 0; x < width; x += 1) {
+        const fraction = x / (width - 1 || 1);
+        const t = waveTime - fraction * timeWindow;
+        const sample = Math.sin(2 * Math.PI * frequency * t);
+        const y = (sample * 0.5 + 0.5) * height;
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
 
-  resizeCanvas(sumCanvas);
-</script>
+      ctx.stroke();
+    }
+
+    function drawChannelWave(channel, colors) {
+      const ctx = channel.ctx;
+      const canvas = channel.canvas;
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.fillStyle = colors.canvasBg;
+      ctx.fillRect(0, 0, width, height);
+      drawCenterAxis(ctx, width, height, colors.axisLine);
+
+      const timeWindow = BASE_WINDOW * zoomScale;
+      const animated = combinedPlaying && channel.isPlaying;
+      drawWavePath(
+        ctx,
+        width,
+        height,
+        channel.frequency,
+        channel.waveTime,
+        timeWindow,
+        animated ? colors.channelLine : colors.channelLinePaused
+      );
+
+      if (!animated) {
+        ctx.fillStyle = colors.pausedOverlay;
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = colors.textMuted;
+        ctx.font = '12px "JetBrains Mono", monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(channel.isPlaying ? 'Armed' : 'Paused', width - 10, 16);
+      }
+    }
+
+    function drawCombinedWave(colors) {
+      const width = combinedCanvas.width;
+      const height = combinedCanvas.height;
+
+      combinedCtx.fillStyle = colors.canvasBg;
+      combinedCtx.fillRect(0, 0, width, height);
+      drawCenterAxis(combinedCtx, width, height, colors.axisLine);
+
+      const activeChannels = channels.filter((channel) => channel.isPlaying);
+      if (activeChannels.length === 0) {
+        combinedCtx.fillStyle = colors.textMuted;
+        combinedCtx.textAlign = 'center';
+        combinedCtx.font = '13px "JetBrains Mono", monospace';
+        combinedCtx.fillText('No active channels', width / 2, height / 2 - 8);
+        combinedCtx.fillText('Press Play on a channel to add it to the mix', width / 2, height / 2 + 14);
+        return;
+      }
+
+      const timeWindow = BASE_WINDOW * zoomScale;
+      combinedCtx.beginPath();
+      combinedCtx.lineWidth = 2.25;
+      combinedCtx.strokeStyle = combinedPlaying ? colors.combinedLine : colors.combinedLinePaused;
+
+      for (let x = 0; x < width; x += 1) {
+        const fraction = x / (width - 1 || 1);
+        let sampleSum = 0;
+
+        for (const channel of activeChannels) {
+          const t = channel.waveTime - fraction * timeWindow;
+          sampleSum += Math.sin(2 * Math.PI * channel.frequency * t);
+        }
+
+        const avgSample = sampleSum / activeChannels.length;
+        const y = (avgSample * 0.5 + 0.5) * height;
+
+        if (x === 0) {
+          combinedCtx.moveTo(x, y);
+        } else {
+          combinedCtx.lineTo(x, y);
+        }
+      }
+
+      combinedCtx.stroke();
+
+      if (!combinedPlaying) {
+        combinedCtx.fillStyle = colors.pausedOverlay;
+        combinedCtx.fillRect(0, 0, width, height);
+        combinedCtx.fillStyle = colors.textMuted;
+        combinedCtx.textAlign = 'right';
+        combinedCtx.font = '12px "JetBrains Mono", monospace';
+        combinedCtx.fillText('Combined paused', width - 10, 18);
+      }
+    }
+
+    function refreshChannelTitles() {
+      channels.forEach((channel, index) => {
+        channel.title.textContent = `Channel ${index + 1}`;
+      });
+    }
+
+    function syncChannelUi(channel) {
+      let visualState = 'paused';
+      let label = 'Paused';
+
+      if (channel.isPlaying && combinedPlaying) {
+        visualState = 'playing';
+        label = 'Playing';
+      } else if (channel.isPlaying) {
+        visualState = 'armed';
+        label = 'Armed';
+      }
+
+      channel.card.dataset.state = visualState;
+      channel.statusChip.className = `status-chip ${visualState}`;
+      channel.statusChip.textContent = label;
+
+      channel.toggleBtn.textContent = channel.isPlaying ? 'Pause' : 'Play';
+      channel.toggleBtn.setAttribute('aria-pressed', channel.isPlaying ? 'true' : 'false');
+    }
+
+    function syncCombinedUi() {
+      if (combinedPlaying) {
+        combinedStateChip.className = 'status-chip playing';
+        combinedStateChip.textContent = 'Playing';
+        toggleCombinedBtn.textContent = 'Pause Combined';
+      } else {
+        combinedStateChip.className = 'status-chip paused';
+        combinedStateChip.textContent = 'Paused';
+        toggleCombinedBtn.textContent = 'Play Combined';
+      }
+
+      if (channels.length === 0) {
+        combinedStateChip.className = 'status-chip paused';
+        combinedStateChip.textContent = 'No Channels';
+        toggleCombinedBtn.disabled = true;
+      }
+    }
+
+    function refreshSummary() {
+      const activeCount = channels.filter((channel) => channel.isPlaying).length;
+      activeSummary.textContent = `${activeCount} active / ${channels.length} channels`;
+
+      playAllBtn.disabled = channels.length === 0 || activeCount === channels.length;
+      pauseAllBtn.disabled = channels.length === 0 || activeCount === 0;
+
+      if (channels.length === 0 && combinedPlaying) {
+        combinedPlaying = false;
+        setGain(combinedGain, 0);
+      }
+
+      toggleCombinedBtn.disabled = channels.length === 0;
+      syncCombinedUi();
+    }
+
+    function applyFrequency(channel, rawFrequency) {
+      const frequency = Math.round(clamp(rawFrequency, 15, 23000));
+      channel.frequency = frequency;
+      channel.oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      channel.freqSlider.value = String(frequency);
+      channel.freqNumber.value = String(frequency);
+      channel.freqValue.textContent = `${frequency} Hz`;
+    }
+
+    function toggleChannel(channelId) {
+      const channel = channels.find((item) => item.id === channelId);
+      if (!channel) {
+        return;
+      }
+
+      ensureAudioContext();
+      channel.isPlaying = !channel.isPlaying;
+      setGain(channel.gainNode, channel.isPlaying ? 1 : 0);
+      syncChannelUi(channel);
+      refreshSummary();
+    }
+
+    function removeChannel(channelId) {
+      const index = channels.findIndex((item) => item.id === channelId);
+      if (index === -1) {
+        return;
+      }
+
+      const [channel] = channels.splice(index, 1);
+      channel.oscillator.stop();
+      channel.oscillator.disconnect();
+      channel.gainNode.disconnect();
+      channel.card.remove();
+
+      refreshChannelTitles();
+      refreshSummary();
+
+      if (channels.length === 0) {
+        renderEmptyState();
+      }
+    }
+
+    function renderEmptyState() {
+      if (document.getElementById('emptyState')) {
+        return;
+      }
+      const empty = document.createElement('div');
+      empty.id = 'emptyState';
+      empty.textContent = 'No channels yet. Add a channel to begin mixing.';
+      channelsList.appendChild(empty);
+    }
+
+    function clearEmptyState() {
+      const empty = document.getElementById('emptyState');
+      if (empty) {
+        empty.remove();
+      }
+    }
+
+    function addChannel(options = {}) {
+      clearEmptyState();
+
+      const channel = {
+        id: nextChannelId,
+        frequency: options.frequency || 440,
+        isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
+        waveTime: 0
+      };
+      nextChannelId += 1;
+
+      const oscillator = audioCtx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(channel.frequency, audioCtx.currentTime);
+
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(channel.isPlaying ? 1 : 0, audioCtx.currentTime);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(channelBus);
+      oscillator.start();
+
+      channel.oscillator = oscillator;
+      channel.gainNode = gainNode;
+
+      const card = document.createElement('article');
+      card.className = 'channel-card';
+      card.dataset.state = 'paused';
+
+      const header = document.createElement('div');
+      header.className = 'channel-header';
+
+      const titleWrap = document.createElement('div');
+      titleWrap.className = 'channel-title-wrap';
+
+      const title = document.createElement('h3');
+      title.className = 'channel-title';
+      title.textContent = 'Channel';
+
+      const statusChip = document.createElement('span');
+      statusChip.className = 'status-chip paused';
+      statusChip.textContent = 'Paused';
+
+      titleWrap.appendChild(title);
+      titleWrap.appendChild(statusChip);
+
+      const actions = document.createElement('div');
+      actions.className = 'channel-actions';
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'btn btn-secondary btn-small';
+      toggleBtn.textContent = 'Play';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn btn-danger btn-small';
+      removeBtn.textContent = 'Remove';
+
+      actions.appendChild(toggleBtn);
+      actions.appendChild(removeBtn);
+
+      header.appendChild(titleWrap);
+      header.appendChild(actions);
+
+      const frequencyRow = document.createElement('div');
+      frequencyRow.className = 'frequency-row';
+
+      const freqLabel = document.createElement('label');
+      freqLabel.className = 'freq-label';
+      freqLabel.textContent = 'Frequency';
+
+      const freqSlider = document.createElement('input');
+      freqSlider.type = 'range';
+      freqSlider.min = '15';
+      freqSlider.max = '23000';
+      freqSlider.step = '1';
+      freqSlider.value = String(channel.frequency);
+
+      const freqMeta = document.createElement('div');
+      freqMeta.className = 'freq-meta';
+
+      const freqNumber = document.createElement('input');
+      freqNumber.className = 'freq-number';
+      freqNumber.type = 'number';
+      freqNumber.min = '15';
+      freqNumber.max = '23000';
+      freqNumber.step = '1';
+      freqNumber.value = String(channel.frequency);
+
+      const freqValue = document.createElement('span');
+      freqValue.className = 'freq-value';
+      freqValue.textContent = `${channel.frequency} Hz`;
+
+      freqMeta.appendChild(freqNumber);
+      freqMeta.appendChild(freqValue);
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'channel-canvas';
+      const ctx = canvas.getContext('2d');
+
+      frequencyRow.appendChild(freqLabel);
+      frequencyRow.appendChild(freqSlider);
+      frequencyRow.appendChild(freqMeta);
+
+      card.appendChild(header);
+      card.appendChild(frequencyRow);
+      card.appendChild(canvas);
+
+      channelsList.appendChild(card);
+
+      channel.card = card;
+      channel.title = title;
+      channel.statusChip = statusChip;
+      channel.toggleBtn = toggleBtn;
+      channel.freqSlider = freqSlider;
+      channel.freqNumber = freqNumber;
+      channel.freqValue = freqValue;
+      channel.canvas = canvas;
+      channel.ctx = ctx;
+
+      freqSlider.addEventListener('input', () => {
+        applyFrequency(channel, parseFloat(freqSlider.value));
+      });
+
+      freqNumber.addEventListener('change', () => {
+        const raw = parseFloat(freqNumber.value);
+        applyFrequency(channel, Number.isFinite(raw) ? raw : channel.frequency);
+      });
+
+      toggleBtn.addEventListener('click', () => {
+        toggleChannel(channel.id);
+      });
+
+      removeBtn.addEventListener('click', () => {
+        removeChannel(channel.id);
+      });
+
+      channels.push(channel);
+
+      resizeCanvas(canvas);
+      refreshChannelTitles();
+      syncChannelUi(channel);
+      refreshSummary();
+    }
+
+    function setAllChannelsPlaying(targetPlaying) {
+      if (channels.length === 0) {
+        return;
+      }
+
+      ensureAudioContext();
+      channels.forEach((channel) => {
+        channel.isPlaying = targetPlaying;
+        setGain(channel.gainNode, targetPlaying ? 1 : 0);
+        syncChannelUi(channel);
+      });
+
+      refreshSummary();
+    }
+
+    function toggleCombined() {
+      if (channels.length === 0) {
+        return;
+      }
+
+      combinedPlaying = !combinedPlaying;
+      if (combinedPlaying) {
+        ensureAudioContext();
+      }
+
+      setGain(combinedGain, combinedPlaying ? 1 : 0);
+      syncCombinedUi();
+      channels.forEach((channel) => {
+        syncChannelUi(channel);
+      });
+    }
+
+    function draw(timestamp) {
+      requestAnimationFrame(draw);
+
+      if (lastFrameTime === null) {
+        lastFrameTime = timestamp;
+        return;
+      }
+
+      const deltaSeconds = Math.min((timestamp - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = timestamp;
+
+      if (combinedPlaying) {
+        const step = deltaSeconds * timeScale;
+        channels.forEach((channel) => {
+          if (channel.isPlaying) {
+            channel.waveTime += step;
+          }
+        });
+      }
+
+      const colors = getThemeColors();
+      channels.forEach((channel) => {
+        drawChannelWave(channel, colors);
+      });
+      drawCombinedWave(colors);
+    }
+
+    function resizeCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(1, Math.floor(rect.width));
+      const height = Math.max(1, Math.floor(rect.height));
+
+      if (canvas.width !== width) {
+        canvas.width = width;
+      }
+      if (canvas.height !== height) {
+        canvas.height = height;
+      }
+    }
+
+    function debounce(fn, waitMs) {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          fn(...args);
+        }, waitMs);
+      };
+    }
+
+    addChannelBtn.addEventListener('click', () => {
+      ensureAudioContext();
+      addChannel({ frequency: 440, isPlaying: true });
+    });
+
+    playAllBtn.addEventListener('click', () => {
+      setAllChannelsPlaying(true);
+    });
+
+    pauseAllBtn.addEventListener('click', () => {
+      setAllChannelsPlaying(false);
+    });
+
+    toggleCombinedBtn.addEventListener('click', () => {
+      toggleCombined();
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      const volume = parseFloat(volumeSlider.value);
+      setGain(volumeGain, volume);
+      updateControlReadouts();
+    });
+
+    panningSlider.addEventListener('input', () => {
+      let pan = parseFloat(panningSlider.value);
+      if (Math.abs(pan) < 0.05) {
+        pan = 0;
+        panningSlider.value = '0';
+      }
+      stereoPanner.pan.setValueAtTime(pan, audioCtx.currentTime);
+      updateControlReadouts();
+    });
+
+    timeScaleSlider.addEventListener('input', () => {
+      const sliderValue = parseFloat(timeScaleSlider.value);
+      timeScale = Math.pow(10, sliderValue);
+      updateControlReadouts();
+    });
+
+    zoomScaleSlider.addEventListener('input', () => {
+      zoomScale = parseFloat(zoomScaleSlider.value);
+      updateControlReadouts();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.code !== 'Space') {
+        return;
+      }
+      const targetTag = event.target && event.target.tagName ? event.target.tagName.toUpperCase() : '';
+      if (INTERACTIVE_TAGS.has(targetTag)) {
+        return;
+      }
+      event.preventDefault();
+      toggleCombined();
+    });
+
+    window.addEventListener('resize', debounce(() => {
+      resizeCanvas(combinedCanvas);
+      channels.forEach((channel) => {
+        resizeCanvas(channel.canvas);
+      });
+    }, 180));
+
+    resizeCanvas(combinedCanvas);
+    updateControlReadouts();
+    syncCombinedUi();
+    renderEmptyState();
+    addChannel({ frequency: 440, isPlaying: true });
+    requestAnimationFrame(draw);
+  </script>
+</body>
 
 </html>
