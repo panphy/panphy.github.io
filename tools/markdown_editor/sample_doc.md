@@ -39,7 +39,7 @@ With integrated LaTeX support, you can effortlessly include professional-looking
 **1.4 Code Blocks**
 
 ~~~python
-# Type your code here. By the way, do you like the colors?
+# Type your code here.
 
 for i in range(5):
     print(i)
@@ -54,7 +54,7 @@ for i in range(5):
 | Albus | 115 | Wizard 🧙‍♂️|
 | Tony | 38 | Inventor 🤖 |
 
-> (*Did you notice how the text alignment is done?*)
+> (*Did you notice how the text alignments are done?*)
 
 **1.6 Links**
 
