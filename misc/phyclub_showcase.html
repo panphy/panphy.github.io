@@ -1508,14 +1508,14 @@
 				this.grain = {
 					x: this.cx, y: this.cy,
 					vx: 0, vy: 0,
-					r: 20, mass: 100, // Very massive compared to fluid particles
+					r: 32, mass: 100, // Very massive compared to fluid particles
 					trail: []
 				};
 
 				// Fluid particles
 				this.particles = [];
 				const nParticles = 400; // Enough for chaos, few enough for performance
-				const vBase = 250; // High speed
+				const vBase = 400; // Even higher speed
 				for (let i = 0; i < nParticles; i++) {
 					const angle = Math.random() * TAU;
 					this.particles.push({
@@ -1523,7 +1523,7 @@
 						y: Math.random() * H,
 						vx: vBase * Math.cos(angle),
 						vy: vBase * Math.sin(angle),
-						r: 1.5, mass: 1
+						r: 3.5, mass: 1
 					});
 				}
 			}, function (t) {
@@ -1651,11 +1651,11 @@
 				// Cyclotron Frequency (omega = qB/m)
 				this.omega_c = (this.q * this.B) / this.m;
 				// Electric field magnitude in the gap
-				this.E_mag = 400;
+				this.E_mag = 1200; // Increased E_mag to accelerate faster per loop
 
 				this.p = {
 					x: this.cx, y: this.cy + 2, // Start slightly off-center to kickstart spiral
-					vx: 0, vy: 40,
+					vx: 0, vy: 120, // Start with a bit more initial speed to get wider early loops
 					trail: []
 				};
 			}, function (t) {
