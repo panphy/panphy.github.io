@@ -965,16 +965,47 @@
 				this.A = Math.min(W, H) * 0.18;
 				this.omega = Math.sqrt(this.k / this.m);
 				this.bobR = 18;
-				this.anchor = { x: W * 0.32, y: H * 0.16 };
+				this.anchor = { x: W * 0.45, y: H * 0.16 };
+				this.ucmCenter = { x: W * 0.2, y: H * 0.16 + 120 }; // Aligned with rest position of mass
 				this.trace = [];
 				this.traceMax = 200;
 			}, function (t) {
 				const local = t - this.t0;
-				const x = this.A * Math.cos(this.omega * local);
-				const v = -this.A * this.omega * Math.sin(this.omega * local);
+				const x = this.A * Math.cos(this.omega * local); // Vertical displacement
 				const bob = { x: this.anchor.x, y: this.anchor.y + 120 + x };
 				sctx.clearRect(0, 0, W, H);
 				drawGrid(sctx, 30, 0.16);
+
+				/* Uniform Circular Motion (UCM) */
+				const angle = this.omega * local;
+				const ucmX = this.ucmCenter.x - this.A * Math.sin(angle);
+				const ucmY = this.ucmCenter.y + this.A * Math.cos(angle); // Matches SHM x
+
+				// UCM Circle path
+				sctx.strokeStyle = 'rgba(255,255,255,.2)';
+				sctx.lineWidth = 1;
+				sctx.beginPath();
+				sctx.arc(this.ucmCenter.x, this.ucmCenter.y, this.A, 0, TAU);
+				sctx.stroke();
+
+				// UCM Axes
+				sctx.beginPath();
+				sctx.moveTo(this.ucmCenter.x - this.A - 10, this.ucmCenter.y);
+				sctx.lineTo(this.ucmCenter.x + this.A + 10, this.ucmCenter.y);
+				sctx.moveTo(this.ucmCenter.x, this.ucmCenter.y - this.A - 10);
+				sctx.lineTo(this.ucmCenter.x, this.ucmCenter.y + this.A + 10);
+				sctx.stroke();
+
+				// UCM Radius vector
+				sctx.strokeStyle = 'rgba(255,122,217,.6)';
+				sctx.lineWidth = 2;
+				sctx.beginPath();
+				sctx.moveTo(this.ucmCenter.x, this.ucmCenter.y);
+				sctx.lineTo(ucmX, ucmY);
+				sctx.stroke();
+
+				// UCM Particle
+				glowCircle(sctx, ucmX, ucmY, 8, '#ff7ad9');
 
 				/* Spring & bob */
 				spring(sctx, this.anchor.x, this.anchor.y, bob.x, bob.y - this.bobR, 13, 12, '#58e1ff');
@@ -984,11 +1015,20 @@
 				/* Oscilloscope trace */
 				this.trace.push(x);
 				if (this.trace.length > this.traceMax) this.trace.shift();
-				const trX = W * 0.52, trW = W * 0.42, trY = H * 0.5;
+				const trX = W * 0.6, trW = W * 0.35, trY = this.ucmCenter.y;
+
+				/* Connecting Projection Line (UCM -> Bob -> Trace) */
+				sctx.strokeStyle = 'rgba(255,255,255,.4)';
+				sctx.setLineDash([5, 5]);
+				sctx.lineWidth = 1;
+				sctx.beginPath();
+				sctx.moveTo(ucmX, ucmY);
+				sctx.lineTo(trX, ucmY);
+				sctx.stroke();
+				sctx.setLineDash([]);
 
 				/* Axis */
 				sctx.strokeStyle = 'rgba(255,255,255,.15)';
-				sctx.lineWidth = 1;
 				sctx.beginPath();
 				sctx.moveTo(trX, trY);
 				sctx.lineTo(trX + trW, trY);
@@ -997,7 +1037,7 @@
 				/* Label */
 				sctx.fillStyle = 'rgba(255,255,255,.4)';
 				sctx.font = '12px Inter, sans-serif';
-				sctx.fillText('x(t)', trX + trW + 6, trY + 4);
+				sctx.fillText('y(t)', trX + trW + 6, trY + 4);
 
 				/* Trace curve */
 				sctx.strokeStyle = '#a0ff6a';
@@ -1005,9 +1045,11 @@
 				sctx.shadowColor = '#a0ff6a';
 				sctx.shadowBlur = 6;
 				sctx.beginPath();
+				const dx = trW / this.traceMax;
 				for (let i = 0; i < this.trace.length; i++) {
-					const px = trX + (i / this.traceMax) * trW;
-					const py = trY - this.trace[i] * 0.9;
+					// Newest point (i = length - 1) is at trX. Oldest point is at trX + trW.
+					const px = trX + (this.trace.length - 1 - i) * dx;
+					const py = trY + this.trace[i];
 					if (i === 0) sctx.moveTo(px, py);
 					else sctx.lineTo(px, py);
 				}
@@ -1016,10 +1058,11 @@
 
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
-				sctx.fillText('x(t) = A cos(ωt),  ω = √(k/m)', 16, 24);
+				sctx.fillText('SHM is the 1D projection of Uniform Circular Motion', 16, 24);
 			}, function (w, h) {
 				this.A = Math.min(w, h) * 0.18;
-				this.anchor = { x: w * 0.32, y: h * 0.16 };
+				this.anchor = { x: w * 0.45, y: h * 0.16 };
+				this.ucmCenter = { x: w * 0.2, y: h * 0.16 + 120 };
 			});
 
 			/* ========================================
@@ -1316,145 +1359,207 @@
 			/* ========================================
 			   SCENE: Magnetic Field — Solenoid
 			   ======================================== */
-			const sceneSolenoid = makeScene("Magnetic Field — Solenoid", function () {
+			const sceneSolenoid = makeScene("Magnetic Field — Solenoid (3D)", function () {
 				this.t0 = now();
 				this.cx = W / 2;
 				this.cy = H / 2 + 20;
 				this.L = W * 0.35; // length of solenoid
 				this.R = H * 0.15; // radius of solenoid
+				this.perspective = 800;
 
-				// Generate iron filings (particles)
+				// Generate iron filings (particles) in 3D local space
 				this.filings = [];
-				const nFilings = 4500;
+				const nFilings = 4000;
 				for (let i = 0; i < nFilings; i++) {
 					this.filings.push({
-						x: Math.random() * W,
-						y: Math.random() * H,
-						length: 6 + Math.random() * 8, // Doubled filing length
-						alpha: 0.2 + Math.random() * 0.6 // Increased base alpha for visibility
+						x: (Math.random() - 0.5) * W * 1.2,
+						y: (Math.random() - 0.5) * H * 1.2,
+						z: (Math.random() - 0.5) * H * 1.2,
+						length: 6 + Math.random() * 8,
+						alpha: 0.2 + Math.random() * 0.6
 					});
 				}
 
-				// Helper to calculate B-field at a point (simplified Biot-Savart approximation for a finite solenoid)
-				this.getBField = (x, y) => {
-					// Translate to origin at center of solenoid
-					const dx = x - this.cx;
-					const dy = y - this.cy;
+				// Helper to calculate B-field at a point (3D)
+				this.getBField = (x, y, z) => {
+					const r_cyl = Math.sqrt(y * y + z * z);
 
-					// Inside the solenoid, near the center, field is strong and uniform
-					if (Math.abs(dx) < this.L / 2 && Math.abs(dy) < this.R) {
-						// stronger towards the center axis
-						const axialFalloff = 1 - (Math.abs(dy) / this.R) * 0.1;
-						return { bx: 10 * axialFalloff, by: dy * 0.02 };
+					// Inside the solenoid
+					if (Math.abs(x) < this.L / 2 && r_cyl < this.R) {
+						const axialFalloff = 1 - (r_cyl / this.R) * 0.1;
+						const flareX = x / (this.L / 2);
+						return { bx: 10 * axialFalloff, by: y * 0.02 * flareX, bz: z * 0.02 * flareX };
 					}
 
-					// Outside, treat as a dipole if far away, or approximate looping field lines
-					// We'll use two magnetic monopoles (poles of the solenoid) as a heuristic
-					const pole1 = { x: this.cx - this.L / 2, y: this.cy };
-					const pole2 = { x: this.cx + this.L / 2, y: this.cy };
+					// Outside (dipole approximation)
+					const pole1 = { x: -this.L / 2, y: 0, z: 0 };
+					const pole2 = { x: this.L / 2, y: 0, z: 0 };
 
-					let rx1 = x - pole1.x, ry1 = y - pole1.y;
-					let r1_3 = Math.pow(rx1 * rx1 + ry1 * ry1, 1.5);
+					const rx1 = x - pole1.x, ry1 = y - pole1.y, rz1 = z - pole1.z;
+					let r1_3 = Math.pow(rx1 * rx1 + ry1 * ry1 + rz1 * rz1, 1.5);
 
-					let rx2 = x - pole2.x, ry2 = y - pole2.y;
-					let r2_3 = Math.pow(rx2 * rx2 + ry2 * ry2, 1.5);
+					const rx2 = x - pole2.x, ry2 = y - pole2.y, rz2 = z - pole2.z;
+					let r2_3 = Math.pow(rx2 * rx2 + ry2 * ry2 + rz2 * rz2, 1.5);
 
-					// Avoid divide by zero near poles
 					if (r1_3 < 100) r1_3 = 100;
 					if (r2_3 < 100) r2_3 = 100;
 
-					// Pole 1 acts like source (N), Pole 2 acts like sink (S) for mapping lines
 					const Bx = rx1 / r1_3 - rx2 / r2_3;
 					const By = ry1 / r1_3 - ry2 / r2_3;
+					const Bz = rz1 / r1_3 - rz2 / r2_3;
 
-					return { bx: Bx * 20000, by: By * 20000 };
+					return { bx: Bx * 20000, by: By * 20000, bz: Bz * 20000 };
 				};
 
+				// Rotation axis (arbitrary off-axis)
+				const ax = 0.5, ay = 0.7, az = -0.3;
+				const len = Math.sqrt(ax * ax + ay * ay + az * az);
+				this.rotAxis = { x: ax / len, y: ay / len, z: az / len };
+				this.rotSpeed = 0.25;
 			}, function (t) {
 				const local = t - this.t0;
 				sctx.clearRect(0, 0, W, H);
 
-				// Pulsing background grid
 				const pulse = 0.5 + 0.5 * Math.sin(local * 3);
 				drawGrid(sctx, 40, 0.05 + 0.05 * pulse);
 
-				/* Draw Filings */
-				sctx.lineWidth = 2; // Made lines thicker
+				// Rotation matrix (Rodrigues' formula)
+				const angle = local * this.rotSpeed;
+				const cA = Math.cos(angle), sA = Math.sin(angle), iA = 1 - cA;
+				const kx = this.rotAxis.x, ky = this.rotAxis.y, kz = this.rotAxis.z;
+
+				const r11 = cA + kx * kx * iA, r12 = kx * ky * iA - kz * sA, r13 = kx * kz * iA + ky * sA;
+				const r21 = ky * kx * iA + kz * sA, r22 = cA + ky * ky * iA, r23 = ky * kz * iA - kx * sA;
+				const r31 = kz * kx * iA - ky * sA, r32 = kz * ky * iA + kx * sA, r33 = cA + kz * kz * iA;
+
+				const rotate3D = (vx, vy, vz) => ({
+					x: r11 * vx + r12 * vy + r13 * vz,
+					y: r21 * vx + r22 * vy + r23 * vz,
+					z: r31 * vx + r32 * vy + r33 * vz
+				});
+
+				const project = (px, py, pz) => {
+					const scale = this.perspective / (this.perspective + pz + 500); // 500 = distance from camera
+					return {
+						x: this.cx + px * scale,
+						y: this.cy + py * scale,
+						scale: scale,
+						z: pz
+					};
+				};
+
+				const renderables = [];
+
+				/* Process Filings */
 				for (const f of this.filings) {
-					// Add some per-filing noise to time to make them twinkle
 					const f_pulse = 0.5 + 0.5 * Math.sin(local * 4 + f.x * 0.1);
+					const B = this.getBField(f.x, f.y, f.z);
+					const Bmag = Math.sqrt(B.bx * B.bx + B.by * B.by + B.bz * B.bz);
 
-					const B = this.getBField(f.x, f.y);
-					const Bmag = Math.sqrt(B.bx * B.bx + B.by * B.by);
-
-					// Only draw clearly if field is strong enough
 					if (Bmag > 0.1) {
-						// Normalize vector to get direction
-						const nx = B.bx / Bmag;
-						const ny = B.by / Bmag;
+						const nx = B.bx / Bmag, ny = B.by / Bmag, nz = B.bz / Bmag;
 
-						// Intensity based on field strength and pulse
+						// endpoints in local 3D
+						const p1_local = { x: f.x - nx * f.length / 2, y: f.y - ny * f.length / 2, z: f.z - nz * f.length / 2 };
+						const p2_local = { x: f.x + nx * f.length / 2, y: f.y + ny * f.length / 2, z: f.z + nz * f.length / 2 };
+
+						// rotate
+						const p1_rot = rotate3D(p1_local.x, p1_local.y, p1_local.z);
+						const p2_rot = rotate3D(p2_local.x, p2_local.y, p2_local.z);
+
+						// project
+						const p1_proj = project(p1_rot.x, p1_rot.y, p1_rot.z);
+						const p2_proj = project(p2_rot.x, p2_rot.y, p2_rot.z);
+
 						const intensity = Math.min(1, Bmag * 0.5) * f.alpha * (0.6 + 0.4 * f_pulse);
 
-						sctx.strokeStyle = `rgba(160, 255, 106, ${intensity})`;
-						sctx.beginPath();
-						sctx.moveTo(f.x - nx * f.length / 2, f.y - ny * f.length / 2);
-						sctx.lineTo(f.x + nx * f.length / 2, f.y + ny * f.length / 2);
-						sctx.stroke();
+						renderables.push({
+							type: 'line',
+							p1: p1_proj, p2: p2_proj,
+							z: (p1_proj.z + p2_proj.z) / 2, // Sort by Z
+							color: `rgba(160, 255, 106, ${intensity})`,
+							w: 2 * p1_proj.scale
+						});
 					} else {
-						// If field is very weak, just draw a faint dot
-						sctx.fillStyle = `rgba(255, 255, 255, ${f.alpha * 0.35})`;
-						sctx.fillRect(f.x, f.y, 2, 2); // Bigger faint dots
+						// faint dot
+						const p_rot = rotate3D(f.x, f.y, f.z);
+						const p_proj = project(p_rot.x, p_rot.y, p_rot.z);
+						renderables.push({
+							type: 'dot',
+							p: p_proj,
+							z: p_proj.z,
+							color: `rgba(255, 255, 255, ${f.alpha * 0.35})`,
+							r: 1.5 * p_proj.scale
+						});
 					}
 				}
 
-				/* Draw Solenoid Coils */
+				/* Process Solenoid Coils */
 				const nCoils = 18;
-				sctx.strokeStyle = '#58e1ff';
-				sctx.lineWidth = 3;
-				sctx.shadowColor = '#58e1ff';
-
-				const startX = this.cx - this.L / 2;
+				const startX = -this.L / 2;
 				const coilDx = this.L / nCoils;
+				const segments = 24;
 
-				// Draw back halves of coils (dimmer)
-				sctx.globalAlpha = 0.3;
-				sctx.shadowBlur = 0;
 				for (let i = 0; i < nCoils; i++) {
-					const x = startX + i * coilDx;
-					sctx.beginPath();
-					sctx.ellipse(x + coilDx / 2, this.cy, coilDx / 2, this.R, 0, -Math.PI / 2, Math.PI / 2, true);
-					sctx.stroke();
-				}
+					const cx = startX + i * coilDx;
+					for (let s = 0; s < segments; s++) {
+						const a1 = (s / segments) * Math.PI * 2;
+						const a2 = ((s + 1) / segments) * Math.PI * 2;
 
-				// Draw front halves of coils (brighter, pulsating with current)
-				sctx.globalAlpha = 0.8 + 0.2 * pulse;
-				sctx.shadowBlur = 10 * pulse;
-				for (let i = 0; i < nCoils; i++) {
-					const x = startX + i * coilDx;
-					sctx.beginPath();
-					sctx.ellipse(x + coilDx / 2, this.cy, coilDx / 2, this.R, 0, Math.PI / 2, -Math.PI / 2, true);
-					sctx.stroke();
+						const p1_local = { x: cx, y: this.R * Math.cos(a1), z: this.R * Math.sin(a1) };
+						const p2_local = { x: cx, y: this.R * Math.cos(a2), z: this.R * Math.sin(a2) };
 
-					// Draw current arrows on front coils
-					if (i % 3 === 1) {
-						const ax = x + coilDx / 2;
-						const ay = this.cy + this.R;
-						drawArrow(sctx, ax - 5, ay, ax + 5, ay, '#58e1ff');
+						const p1_rot = rotate3D(p1_local.x, p1_local.y, p1_local.z);
+						const p2_rot = rotate3D(p2_local.x, p2_local.y, p2_local.z);
+
+						const p1_proj = project(p1_rot.x, p1_rot.y, p1_rot.z);
+						const p2_proj = project(p2_rot.x, p2_rot.y, p2_rot.z);
+
+						renderables.push({
+							type: 'coil',
+							p1: p1_proj, p2: p2_proj,
+							z: (p1_proj.z + p2_proj.z) / 2,
+							isFront: p1_proj.z < 0 // front of coil is physically closer (z is deeper if pos)
+						});
 					}
 				}
-				sctx.globalAlpha = 1;
-				sctx.shadowBlur = 0;
 
-				// Label current
-				sctx.fillStyle = 'rgba(88,225,255, 0.8)';
-				sctx.font = '14px Inter, sans-serif';
-				sctx.fillText('Current I', startX - 40, this.cy + this.R + 20);
+				// Z-sort (Painter's algorithm: draw furthest things first, z > 0 is deep)
+				renderables.sort((a, b) => b.z - a.z);
+
+				/* Draw Renderables */
+				sctx.lineCap = 'round';
+				for (const r of renderables) {
+					if (r.type === 'line') {
+						sctx.lineWidth = r.w;
+						sctx.strokeStyle = r.color;
+						sctx.beginPath();
+						sctx.moveTo(r.p1.x, r.p1.y);
+						sctx.lineTo(r.p2.x, r.p2.y);
+						sctx.stroke();
+					} else if (r.type === 'dot') {
+						sctx.fillStyle = r.color;
+						sctx.beginPath();
+						sctx.arc(r.p.x, r.p.y, r.r, 0, TAU);
+						sctx.fill();
+					} else if (r.type === 'coil') {
+						sctx.lineWidth = 3 * r.p1.scale;
+						sctx.strokeStyle = `rgba(88, 225, 255, ${r.isFront ? 0.8 + 0.2 * pulse : 0.4})`;
+						sctx.shadowColor = '#58e1ff';
+						sctx.shadowBlur = (r.isFront ? 10 * pulse : 0);
+						sctx.beginPath();
+						sctx.moveTo(r.p1.x, r.p1.y);
+						sctx.lineTo(r.p2.x, r.p2.y);
+						sctx.stroke();
+						sctx.shadowBlur = 0;
+					}
+				}
+				sctx.lineCap = 'butt';
 
 				/* Label */
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
-				sctx.fillText('B = μ₀nI  (Uniform field inside ideal solenoid)', 16, 24);
+				sctx.fillText('3D Rotating Magnetic Field (Current loop approximation)', 16, 24);
 			});
 
 			/* ===== Scene list (curated order) ===== */
