@@ -1,6 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-21T17:10:00Z';
-  const UPDATE_ACK_KEY = 'panphy-sw-update-ack';
+  const BUILD_ID = '2026-02-22T23:30:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -9,8 +8,11 @@
   }
 
   let updateBanner;
-  let isReloadingForUpdate = false;
-  let isUpdateInProgress = false;
+  let refreshing = false;
+  // Track whether the page already had a controlling SW on load.
+  // On first install, controllerchange fires when the new SW claims clients,
+  // but we don't need to reload because the page is already fresh.
+  const hadController = !!navigator.serviceWorker.controller;
 
   const removeUpdateBanner = () => {
     if (!updateBanner) {
@@ -20,31 +22,8 @@
     updateBanner = null;
   };
 
-  const requestActivation = async (registration) => {
-    if (!registration) {
-      return false;
-    }
-
-    let waitingWorker = registration.waiting;
-    if (!waitingWorker) {
-      try {
-        await registration.update();
-      } catch (error) {
-        console.warn('Service Worker update check failed', error);
-      }
-      waitingWorker = registration.waiting;
-    }
-
-    if (!waitingWorker) {
-      return false;
-    }
-
-    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    return true;
-  };
-
   const showUpdateBanner = (registration) => {
-    if (updateBanner || !registration?.waiting || isUpdateInProgress || sessionStorage.getItem(UPDATE_ACK_KEY) === '1') {
+    if (updateBanner || !registration?.waiting || refreshing) {
       return;
     }
 
@@ -85,43 +64,45 @@
       'font-weight: 600'
     ].join(';');
 
-    button.addEventListener('click', async () => {
-      if (isUpdateInProgress) {
+    button.addEventListener('click', () => {
+      if (refreshing) {
         return;
       }
 
-      isUpdateInProgress = true;
       button.disabled = true;
       button.textContent = 'Updating...';
 
-      const activationRequested = await requestActivation(registration);
-      if (!activationRequested) {
-        isUpdateInProgress = false;
-        button.disabled = false;
-        button.textContent = 'Update';
+      const waiting = registration.waiting;
+      if (!waiting) {
+        // Waiting worker is gone (may have activated from another tab).
+        refreshing = true;
+        window.location.reload();
         return;
       }
 
-      sessionStorage.setItem(UPDATE_ACK_KEY, '1');
+      // Ask the waiting SW to activate immediately.
+      waiting.postMessage({ type: 'SKIP_WAITING' });
 
-      removeUpdateBanner();
-
-      window.setTimeout(async () => {
-        if (isReloadingForUpdate) {
+      // The controllerchange listener (below) handles the reload.
+      // Retry SKIP_WAITING after 2 s in case the first message was lost.
+      setTimeout(() => {
+        if (refreshing) {
           return;
         }
-
-        try {
-          await registration.update();
-        } catch (error) {
-          console.warn('Service Worker update retry failed', error);
+        const w = registration.waiting;
+        if (w) {
+          w.postMessage({ type: 'SKIP_WAITING' });
         }
+      }, 2000);
 
-        isReloadingForUpdate = true;
-        const nextUrl = new URL(window.location.href);
-        nextUrl.searchParams.set('sw-refresh', BUILD_ID);
-        window.location.replace(nextUrl.toString());
-      }, 4000);
+      // Failsafe: if controllerchange still hasn't fired after 8 s,
+      // force a reload so the user isn't stuck.
+      setTimeout(() => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      }, 8000);
     });
 
     updateBanner.append(message, button);
@@ -155,25 +136,18 @@
 
       listenForUpdates(registration);
 
-      if (sessionStorage.getItem(UPDATE_ACK_KEY) === '1') {
-        if (registration.waiting) {
-          await requestActivation(registration);
-        } else {
-          sessionStorage.removeItem(UPDATE_ACK_KEY);
-        }
-      }
-
+      // When a new SW takes control, reload so every resource is served
+      // from the new cache.  Skip the reload on first install (no update).
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        isUpdateInProgress = false;
-        sessionStorage.removeItem(UPDATE_ACK_KEY);
-        removeUpdateBanner();
-        if (!isReloadingForUpdate) {
-          isReloadingForUpdate = true;
-          window.location.reload();
+        if (!hadController || refreshing) {
+          return;
         }
+        refreshing = true;
+        removeUpdateBanner();
+        window.location.reload();
       });
 
-      const update = () => registration.update();
+      const update = () => registration.update().catch(() => {});
       update();
       setInterval(update, 60 * 60 * 1000);
       document.addEventListener('visibilitychange', () => {
