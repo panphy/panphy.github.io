@@ -104,11 +104,16 @@
       }, 2000);
 
       // Failsafe: if controllerchange still hasn't fired after 8 s,
-      // force a reload so the user isn't stuck.
+      // the waiting worker is stuck (e.g., browser bug dropping messages 
+      // or previous buggy SW version). Unregister to break the loop entirely.
       setTimeout(() => {
         if (!refreshing) {
           refreshing = true;
-          window.location.reload();
+          registration.unregister().then(() => {
+            window.location.reload();
+          }).catch(() => {
+            window.location.reload();
+          });
         }
       }, 8000);
     });
