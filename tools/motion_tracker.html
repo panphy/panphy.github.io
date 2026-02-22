@@ -664,14 +664,12 @@
 				gap: 5px;
 				margin-top: 12px;
 				width: 100%;
-				align-items: center;
 			}
 
 		.chart-controls-row {
-			display: flex;
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
 			gap: 5px;
-			justify-content: center;
-			flex-wrap: wrap;
 		}
 
 		.chart-controls .plot-btn {
@@ -679,6 +677,7 @@
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
+			width: 100%;
 		}
 
 		.btn-export {
