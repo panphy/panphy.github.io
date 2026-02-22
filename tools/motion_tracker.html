@@ -300,20 +300,20 @@
 			box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 0 2.5px rgba(255,255,255,0.45);
 		}
 
-		/* Position plot buttons - colors match data point colors */
-		#plotX { background-color: #ac57fb; }
-		#plotY { background-color: #ff7331; }
-		#plotXY { background: linear-gradient(135deg, #ac57fb, #ff7331); }
+		/* Position plot buttons - same colors as velocity counterparts */
+		#plotX { background-color: #2e9cff; }
+		#plotY { background-color: #ff75f9; }
+		#plotXY { background: linear-gradient(135deg, #2e9cff, #ff75f9); }
 
-		/* Velocity plot buttons - colors match data point colors */
+		/* Velocity plot buttons */
 		#plotVx { background-color: #2e9cff; }
 		#plotVy { background-color: #ff75f9; }
 		#plotVxVy { background: linear-gradient(135deg, #2e9cff, #ff75f9); }
 
 		/* Dark theme overrides for plot buttons */
-		[data-theme="dark"] #plotX { background-color: #9645e0; }
-		[data-theme="dark"] #plotY { background-color: #e6622a; }
-		[data-theme="dark"] #plotXY { background: linear-gradient(135deg, #9645e0, #e6622a); }
+		[data-theme="dark"] #plotX { background-color: #2088e0; }
+		[data-theme="dark"] #plotY { background-color: #e055d8; }
+		[data-theme="dark"] #plotXY { background: linear-gradient(135deg, #2088e0, #e055d8); }
 		[data-theme="dark"] #plotVx { background-color: #2088e0; }
 		[data-theme="dark"] #plotVy { background-color: #e055d8; }
 		[data-theme="dark"] #plotVxVy { background: linear-gradient(135deg, #2088e0, #e055d8); }
@@ -933,14 +933,14 @@
 
 			<div class="chart-controls">
 				<div class="chart-controls-row">
-					<button id="plotX" class="plot-btn" disabled>x(t)</button>
-					<button id="plotY" class="plot-btn" disabled>y(t)</button>
-					<button id="plotXY" class="plot-btn" disabled>x, y(t)</button>
+					<button id="plotX" class="plot-btn" disabled>Plot x vs t</button>
+					<button id="plotY" class="plot-btn" disabled>Plot y vs t</button>
+					<button id="plotXY" class="plot-btn" disabled>x(t) and y(t)</button>
 				</div>
 				<div class="chart-controls-row">
-					<button id="plotVx" class="plot-btn" disabled>vₓ(t)</button>
-					<button id="plotVy" class="plot-btn" disabled>vᵧ(t)</button>
-					<button id="plotVxVy" class="plot-btn" disabled>vₓ, vᵧ(t)</button>
+					<button id="plotVx" class="plot-btn" disabled>Plot vₓ vs t</button>
+					<button id="plotVy" class="plot-btn" disabled>Plot vᵧ vs t</button>
+					<button id="plotVxVy" class="plot-btn" disabled>vₓ(t) and vᵧ(t)</button>
 				</div>
 			</div>
 		</div>
@@ -1016,7 +1016,7 @@
 		let detectedFps = null;  // Auto-detected FPS from video
 		let isSpecialRecording = false;  // Whether user has slow-mo/time-lapse video
 		let fpsDetectionPending = false;  // Whether FPS detection is in progress
-			const dataPointColors = { x: '#ac57fb', y: '#ff7331', vx: '#2e9cff', vy: '#ff75f9' };
+			const dataPointColors = { x: '#2e9cff', y: '#ff75f9', vx: '#2e9cff', vy: '#ff75f9' };
 			let frameData = [];
 			let isPlaying = false;
 			let positionChart = null;
