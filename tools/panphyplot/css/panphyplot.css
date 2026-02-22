@@ -1433,6 +1433,11 @@ select {
 	opacity: 0;
 }
 
+#fit-equation:has(.fit-equation-copy-target.copied),
+#fit-equation:has(.fit-equation-copy-target.copy-failed) {
+	overflow: visible;
+}
+
 .fit-equation-copy-target.copied {
 	box-shadow: 0 0 0 2px #22c55e !important;
 }
