@@ -280,51 +280,43 @@
 		}
 
 		/* --- Plot Buttons (Colorful) --- */
-		#backToPosition {
-			background-color: var(--success);
-			/* Green */
+		.plot-btn {
 			color: white;
 			border: none;
+			font-size: 0.85rem;
+			flex: 1;
+			min-width: 0;
 		}
 
-		#backToPosition:hover:not(:disabled) {
-			filter: brightness(0.95);
+		.plot-btn:hover:not(:disabled) {
+			filter: brightness(0.92);
 		}
 
-		#plotVx {
-			background-color: #2e9cff;
-			/* Light blue to match v_x data points */
-			color: white;
-			border: none;
+		.plot-btn.active {
+			box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 2.5px rgba(255,255,255,0.7);
 		}
 
-		#plotVx:hover:not(:disabled) {
-			filter: brightness(0.95);
+		[data-theme="dark"] .plot-btn.active {
+			box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 0 2.5px rgba(255,255,255,0.45);
 		}
 
-		#plotVy {
-			background-color: #d946ef;
-			/* Pink/Purple */
-			color: white;
-			border: none;
-		}
+		/* Position plot buttons - colors match data point colors */
+		#plotX { background-color: #ac57fb; }
+		#plotY { background-color: #ff7331; }
+		#plotXY { background: linear-gradient(135deg, #ac57fb, #ff7331); }
 
-		#plotVy:hover:not(:disabled) {
-			filter: brightness(0.95);
-		}
+		/* Velocity plot buttons - colors match data point colors */
+		#plotVx { background-color: #2e9cff; }
+		#plotVy { background-color: #ff75f9; }
+		#plotVxVy { background: linear-gradient(135deg, #2e9cff, #ff75f9); }
 
-		/* Dark theme overrides for plot buttons - use darker colors for better contrast */
-		[data-theme="dark"] #backToPosition {
-			background-color: #00b894;
-		}
-
-		[data-theme="dark"] #plotVx {
-			background-color: #2e9cff;
-		}
-
-		[data-theme="dark"] #plotVy {
-			background-color: #be2edd;
-		}
+		/* Dark theme overrides for plot buttons */
+		[data-theme="dark"] #plotX { background-color: #9645e0; }
+		[data-theme="dark"] #plotY { background-color: #e6622a; }
+		[data-theme="dark"] #plotXY { background: linear-gradient(135deg, #9645e0, #e6622a); }
+		[data-theme="dark"] #plotVx { background-color: #2088e0; }
+		[data-theme="dark"] #plotVy { background-color: #e055d8; }
+		[data-theme="dark"] #plotVxVy { background: linear-gradient(135deg, #2088e0, #e055d8); }
 
 		/* Hide Crosses Toggle Button */
 		.hide-crosses-toggle {
@@ -666,14 +658,19 @@
 
 			.chart-controls {
 				display: flex;
-				gap: 10px;
+				flex-direction: column;
+				gap: 6px;
 				margin-top: 15px;
 				width: 100%;
-				justify-content: center;
 			}
 
+		.chart-controls-row {
+			display: flex;
+			gap: 6px;
+		}
+
 		.chart-controls button {
-			min-height: 38px;
+			min-height: 36px;
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
@@ -926,6 +923,7 @@
 			<div
 				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 				<h3 style="margin:0; font-size:1.1rem;">Data Analysis</h3>
+				<button id="exportData" class="btn-export" disabled>Export .csv</button>
 			</div>
 
 				<div id="chartCanvasContainer">
@@ -934,10 +932,16 @@
 				</div>
 
 			<div class="chart-controls">
-				<button id="backToPosition" disabled>Position (x,y)</button>
-				<button id="plotVx" disabled>Velocity (vₓ)</button>
-				<button id="plotVy" disabled>Velocity (vᵧ)</button>
-				<button id="exportData" class="btn-export" disabled>Export .csv</button>
+				<div class="chart-controls-row">
+					<button id="plotX" class="plot-btn" disabled>x(t)</button>
+					<button id="plotY" class="plot-btn" disabled>y(t)</button>
+					<button id="plotXY" class="plot-btn" disabled>x, y(t)</button>
+				</div>
+				<div class="chart-controls-row">
+					<button id="plotVx" class="plot-btn" disabled>vₓ(t)</button>
+					<button id="plotVy" class="plot-btn" disabled>vᵧ(t)</button>
+					<button id="plotVxVy" class="plot-btn" disabled>vₓ, vᵧ(t)</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -1018,7 +1022,7 @@
 			let positionChart = null;
 			let skippingFrame = false;
 			let blobUrl = null;
-			let currentPlotMode = 'pos'; // Tracks 'pos', 'vx', or 'vy'
+			let currentPlotMode = 'pos'; // Tracks 'x', 'y', 'pos', 'vx', 'vy', or 'vxy'
 			let crossesVisible = true; // Toggle for hiding crosses on video
 			let graphCopyInProgress = false;
 			let graphTouchCopyMode = false;
@@ -1122,9 +1126,12 @@
 			const clearDataPointsButton = document.getElementById('clearDataPoints');
 			const clearCalibrationButton = document.getElementById('clearCalibration');
 			const clearOriginButton = document.getElementById('clearOrigin');
+			const plotXButton = document.getElementById('plotX');
+			const plotYButton = document.getElementById('plotY');
+			const plotXYButton = document.getElementById('plotXY');
 			const plotVxButton = document.getElementById('plotVx');
 			const plotVyButton = document.getElementById('plotVy');
-			const backToPositionButton = document.getElementById('backToPosition');
+			const plotVxVyButton = document.getElementById('plotVxVy');
 			const hideCrossesToggle = document.getElementById('hideCrossesToggle');
 			const chartCanvasContainer = document.getElementById('chartCanvasContainer');
 			const chartCopyActionButton = document.getElementById('chartCopyAction');
@@ -1568,9 +1575,12 @@
 			playPauseButton.disabled = state;
 			calibrateButton.disabled = state;
 			setOriginButton.disabled = state;
+			plotXButton.disabled = state;
+			plotYButton.disabled = state;
+			plotXYButton.disabled = state;
 			plotVxButton.disabled = state;
 			plotVyButton.disabled = state;
-			backToPositionButton.disabled = state;
+			plotVxVyButton.disabled = state;
 			clearDataPointsButton.disabled = state;
 			clearCalibrationButton.disabled = state;
 			clearOriginButton.disabled = state;
@@ -1806,13 +1816,7 @@
 					markUnsavedChanges();
 
 				// Update the specific plot user is viewing
-				if (currentPlotMode === 'vx') {
-					plotVelocity('x');
-				} else if (currentPlotMode === 'vy') {
-					plotVelocity('y');
-				} else {
-					plotPosition();
-				}
+				replotCurrentView();
 
 				stepOneFrame();
 			}
@@ -1828,7 +1832,7 @@
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "none";
 			drawOverlay();
-			plotPosition(); // Resets to position view on new origin
+			replotCurrentView();
 			document.getElementById('message').innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
 		}
 
@@ -1891,13 +1895,7 @@
 
 			// Re-plot if we have data (times are recalculated automatically from playbackTime)
 			if (frameData.length > 0) {
-				if (currentPlotMode === 'vx') {
-					plotVelocity('x');
-				} else if (currentPlotMode === 'vy') {
-					plotVelocity('y');
-				} else {
-					plotPosition();
-				}
+				replotCurrentView();
 			}
 
 			document.getElementById('message').innerHTML = isSpecialRecording
@@ -1968,23 +1966,46 @@
 
 			/* ===== Plotting ===== */
 
-		function plotPosition() {
-			currentPlotMode = 'pos';
-			// Calculate analysis time on-the-fly from playbackTime
+		function updateActivePlotButton() {
+			const buttons = [plotXButton, plotYButton, plotXYButton, plotVxButton, plotVyButton, plotVxVyButton];
+			const modeMap = { 'x': plotXButton, 'y': plotYButton, 'pos': plotXYButton, 'vx': plotVxButton, 'vy': plotVyButton, 'vxy': plotVxVyButton };
+			buttons.forEach(b => b.classList.remove('active'));
+			const active = modeMap[currentPlotMode];
+			if (active) active.classList.add('active');
+		}
+
+		function replotCurrentView() {
+			switch (currentPlotMode) {
+				case 'x': plotPosition('x'); break;
+				case 'y': plotPosition('y'); break;
+				case 'vx': plotVelocity('x'); break;
+				case 'vy': plotVelocity('y'); break;
+				case 'vxy': plotVelocity('xy'); break;
+				default: plotPosition('xy'); break;
+			}
+		}
+
+		function plotPosition(mode) {
+			mode = mode || 'xy';
+			currentPlotMode = mode === 'xy' ? 'pos' : mode;
+
 			const xData = frameData.map(p => parseFloat(getAnalysisTime(p.playbackTime).toFixed(3)));
-			const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
-			const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
+			const datasets = [];
 			const theme = getChartTheme();
+
+			if (mode === 'x' || mode === 'xy') {
+				const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
+				datasets.push({ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 });
+			}
+			if (mode === 'y' || mode === 'xy') {
+				const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
+				datasets.push({ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 });
+			}
 
 			if (!positionChart) {
 				positionChart = new Chart(positionChartCanvas.getContext("2d"), {
 					type: "scatter",
-					data: {
-						datasets: [
-							{ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 },
-							{ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 }
-						]
-					},
+					data: { datasets },
 					options: {
 						responsive: true,
 						maintainAspectRatio: false,
@@ -2009,66 +2030,75 @@
 					},
 				});
 			} else {
-				positionChart.data.datasets = [
-					{ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 },
-					{ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 }
-				];
+				positionChart.data.datasets = datasets;
 				positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
 				positionChart.update();
 			}
 			applyThemeToChart();
+			updateActivePlotButton();
 		}
 
-		function plotVelocity(axis) {
-			currentPlotMode = axis === 'x' ? 'vx' : 'vy';
-			const velocityEstimates = [];
-			const velocityTimes = [];
-			for (let i = 1; i < frameData.length; i++) {
-				// Calculate analysis times on-the-fly
-				const t1 = getAnalysisTime(frameData[i - 1].playbackTime);
-				const t2 = getAnalysisTime(frameData[i].playbackTime);
-				const dt = t2 - t1;
-				const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-				const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-				const d = axis === 'x' ? (p2.x - p1.x) : (p2.y - p1.y);
-				const v = dt > 0 ? (d * scaleFactor) / dt : 0;
-				if (dt > 0) {
-					velocityEstimates.push(v);
-					velocityTimes.push((t2 + t1) / 2);
+		function plotVelocity(mode) {
+			currentPlotMode = mode === 'xy' ? 'vxy' : (mode === 'x' ? 'vx' : 'vy');
+
+			const axes = mode === 'xy' ? ['x', 'y'] : [mode];
+			const datasets = [];
+
+			for (const axis of axes) {
+				const velocityEstimates = [];
+				const velocityTimes = [];
+				for (let i = 1; i < frameData.length; i++) {
+					const t1 = getAnalysisTime(frameData[i - 1].playbackTime);
+					const t2 = getAnalysisTime(frameData[i].playbackTime);
+					const dt = t2 - t1;
+					const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
+					const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
+					const d = axis === 'x' ? (p2.x - p1.x) : (p2.y - p1.y);
+					const v = dt > 0 ? (d * scaleFactor) / dt : 0;
+					if (dt > 0) {
+						velocityEstimates.push(v);
+						velocityTimes.push((t2 + t1) / 2);
+					}
 				}
-			}
 
-			if (velocityEstimates.length < 3) {
-				document.getElementById('message').innerHTML = "<p>Velocity smoothing requires multiple distinct timestamps. Add more points with different times to plot velocity.</p>";
-				return;
-			}
+				if (velocityEstimates.length < 3) {
+					document.getElementById('message').innerHTML = "<p>Velocity smoothing requires multiple distinct timestamps. Add more points with different times to plot velocity.</p>";
+					return;
+				}
 
-			const smoothed = [];
-			const times = [];
-			for (let i = 2; i < velocityEstimates.length; i++) {
-				const avg = (velocityEstimates[i - 2] + velocityEstimates[i - 1] + velocityEstimates[i]) / 3;
-				smoothed.push(parseFloat(avg.toFixed(3)));
-				const avgTime = (velocityTimes[i - 2] + velocityTimes[i]) / 2;
-				times.push(parseFloat(avgTime.toFixed(3)));
+				const smoothed = [];
+				const times = [];
+				for (let i = 2; i < velocityEstimates.length; i++) {
+					const avg = (velocityEstimates[i - 2] + velocityEstimates[i - 1] + velocityEstimates[i]) / 3;
+					smoothed.push(parseFloat(avg.toFixed(3)));
+					const avgTime = (velocityTimes[i - 2] + velocityTimes[i]) / 2;
+					times.push(parseFloat(avgTime.toFixed(3)));
+				}
+
+				datasets.push({
+					label: axis === "x" ? "x-velocity" : "y-velocity",
+					data: times.map((t, i) => ({ x: t, y: smoothed[i] })),
+					borderColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
+					backgroundColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
+					showLine: false,
+					pointRadius: 4
+				});
 			}
 
 			if (!positionChart) return;
-			positionChart.data.datasets = [{
-				label: axis === "x" ? "x-velocity" : "y-velocity",
-				data: times.map((t, i) => ({ x: t, y: smoothed[i] })),
-				borderColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
-				backgroundColor: axis === "x" ? dataPointColors.vx : dataPointColors.vy,
-				showLine: false,
-				pointRadius: 4
-			}];
+			positionChart.data.datasets = datasets;
 			positionChart.options.scales.y.title.text = `Velocity (${scaleUnit}/s)`;
 			positionChart.update();
 			applyThemeToChart();
+			updateActivePlotButton();
 		}
 
+			plotXButton.addEventListener("click", () => plotPosition("x"));
+			plotYButton.addEventListener("click", () => plotPosition("y"));
+			plotXYButton.addEventListener("click", () => plotPosition("xy"));
 			plotVxButton.addEventListener("click", () => plotVelocity("x"));
 			plotVyButton.addEventListener("click", () => plotVelocity("y"));
-			backToPositionButton.addEventListener("click", plotPosition);
+			plotVxVyButton.addEventListener("click", () => plotVelocity("xy"));
 
 			chartCanvasContainer.addEventListener('click', (event) => {
 				if (graphTouchCopyMode) {
@@ -2131,8 +2161,7 @@
 				drawOverlay();
 				drawFrame();
 			if (positionChart) {
-				positionChart.options.scales.y.title.text = `Position (${scaleUnit})`;
-				plotPosition();
+				replotCurrentView();
 			}
 			document.getElementById('message').innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
 		});
@@ -2143,7 +2172,7 @@
 					markUnsavedChanges();
 				}
 				drawOverlay();
-				plotPosition();
+				replotCurrentView();
 			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
 		});
 		exportDataButton.addEventListener("click", () => {
@@ -2379,7 +2408,7 @@
 				calibrationPrompt.style.display = "none";
 				drawOverlay();
 				drawFrame();
-			plotPosition();
+			replotCurrentView();
 			document.getElementById('message').innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
 		});
 		cancelCalibrationButton.addEventListener('click', () => {
