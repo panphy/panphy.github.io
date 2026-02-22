@@ -696,6 +696,17 @@
             const PAN_EDGE_MARGIN_PX = PAN_EDGE_MARGIN_UNITS * scale;
             const FRAME_ALIGNMENT_EPSILON = 1e-6;
 
+            const TOUCH_HIT_EXTRA = 25;
+            const TOUCH_SELECT_RADIUS = 50;
+
+            function clientToCanvas(clientX, clientY) {
+                const r = canvas.getBoundingClientRect();
+                return {
+                    x: (clientX - r.left) * (canvas.width / r.width),
+                    y: (clientY - r.top) * (canvas.height / r.height)
+                };
+            }
+
             let events = [];
             let nextEventLabelCode = "A".charCodeAt(0);
             let availableLabels = [];
@@ -1226,8 +1237,7 @@
             canvas.addEventListener("mousedown", e => {
                 if (e.button !== 0) return;
                 didDrag = false;
-                const r = canvas.getBoundingClientRect();
-                const mx = e.clientX - r.left, my = e.clientY - r.top;
+                const { x: mx, y: my } = clientToCanvas(e.clientX, e.clientY);
                 mouseDownPos.x = mx;
                 mouseDownPos.y = my;
 
@@ -1252,8 +1262,7 @@
             });
 
             canvas.addEventListener("mousemove", e => {
-                const r = canvas.getBoundingClientRect();
-                const mx = e.clientX - r.left, my = e.clientY - r.top;
+                const { x: mx, y: my } = clientToCanvas(e.clientX, e.clientY);
 
                 if (!didDrag) {
                     const dx = mx - mouseDownPos.x, dy = my - mouseDownPos.y;
@@ -1299,9 +1308,8 @@
             canvas.addEventListener("touchstart", e => {
                 e.preventDefault();
                 didDrag = false;
-                const t = e.touches[0];
-                const r = canvas.getBoundingClientRect();
-                const tx = t.clientX - r.left, ty = t.clientY - r.top;
+                const touch = e.touches[0];
+                const { x: tx, y: ty } = clientToCanvas(touch.clientX, touch.clientY);
                 mouseDownPos.x = tx;
                 mouseDownPos.y = ty;
 
@@ -1309,14 +1317,14 @@
                 for (let i = events.length - 1; i >= 0; i--) {
                     const p = events[i];
                     const cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + 5) {
+                    if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + TOUCH_HIT_EXTRA) {
                         draggingEvent = p;
                         found = true;
                         longPressTimeout = setTimeout(() => {
                             contextEvent = p;
                             contextMenu.style.display = "block";
-                            contextMenu.style.left = t.pageX + "px";
-                            contextMenu.style.top = t.pageY + "px";
+                            contextMenu.style.left = touch.pageX + "px";
+                            contextMenu.style.top = touch.pageY + "px";
                         }, 800);
                         break;
                     }
@@ -1333,9 +1341,8 @@
 
             canvas.addEventListener("touchmove", e => {
                 e.preventDefault();
-                const t = e.touches[0];
-                const r = canvas.getBoundingClientRect();
-                const tx = t.clientX - r.left, ty = t.clientY - r.top;
+                const touch = e.touches[0];
+                const { x: tx, y: ty } = clientToCanvas(touch.clientX, touch.clientY);
 
                 if (!didDrag) {
                     const dx = tx - mouseDownPos.x, dy = ty - mouseDownPos.y;
@@ -1369,7 +1376,22 @@
                     if (draggingEvent) {
                         selectedEvent = (selectedEvent === draggingEvent) ? null : draggingEvent;
                     } else {
-                        selectedEvent = null;
+                        // Tap-to-select: find nearest event within threshold
+                        let nearest = null;
+                        let nearestDist = Infinity;
+                        for (let i = 0; i < events.length; i++) {
+                            const cp = toCanvasCoords(events[i].x, events[i].t);
+                            const dist = Math.sqrt((mouseDownPos.x - cp.x) ** 2 + (mouseDownPos.y - cp.y) ** 2);
+                            if (dist < nearestDist) {
+                                nearestDist = dist;
+                                nearest = events[i];
+                            }
+                        }
+                        if (nearest && nearestDist < TOUCH_SELECT_RADIUS) {
+                            selectedEvent = (selectedEvent === nearest) ? null : nearest;
+                        } else {
+                            selectedEvent = null;
+                        }
                     }
                     draw();
                 }
@@ -1385,8 +1407,7 @@
 
             canvas.addEventListener("contextmenu", e => {
                 e.preventDefault();
-                const r = canvas.getBoundingClientRect();
-                const mx = e.clientX - r.left, my = e.clientY - r.top;
+                const { x: mx, y: my } = clientToCanvas(e.clientX, e.clientY);
                 let found = false;
                 for (let i = events.length - 1; i >= 0; i--) {
                     const p = events[i];
