@@ -1480,17 +1480,6 @@
 							color: `rgba(160, 255, 106, ${intensity})`,
 							w: 2 * p1_proj.scale
 						});
-					} else {
-						// faint dot
-						const p_rot = rotate3D(f.x, f.y, f.z);
-						const p_proj = project(p_rot.x, p_rot.y, p_rot.z);
-						renderables.push({
-							type: 'dot',
-							p: p_proj,
-							z: p_proj.z,
-							color: `rgba(255, 255, 255, ${f.alpha * 0.35})`,
-							r: 1.5 * p_proj.scale
-						});
 					}
 				}
 
