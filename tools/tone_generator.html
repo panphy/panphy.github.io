@@ -11,14 +11,15 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
 
     :root {
+      --font-sans: 'Inter', sans-serif;
       --font-body: 'Inter', sans-serif;
       --font-display: 'Poppins', 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
 
-      --bg-color: #eff3fb;
-      --bg-glow: rgba(11, 95, 255, 0.16);
-      --text-main: #1d2738;
-      --text-muted: #5a6a85;
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-muted: #636e72;
 
       --panel-bg: rgba(255, 255, 255, 0.88);
       --panel-border: rgba(147, 166, 198, 0.35);
@@ -26,10 +27,13 @@
       --card-border: #d6e3f8;
       --canvas-bg: #ffffff;
 
-      --brand-primary: #0b5fff;
-      --brand-primary-hover: #0a4fd5;
-      --brand-accent: #f97316;
+      --brand-primary: #6c5ce7;
+      --brand-primary-hover: #5b4cdb;
+      --brand-accent: #00cec9;
       --danger: #d92d20;
+
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.5);
 
       --channel-line: #1d9bf0;
       --channel-line-paused: #7ea8c7;
@@ -45,14 +49,14 @@
 
       --shadow-lg: 0 20px 44px rgba(17, 36, 74, 0.13);
       --shadow-sm: 0 10px 24px rgba(17, 36, 74, 0.08);
-      --ring: 0 0 0 3px rgba(11, 95, 255, 0.18);
+      --ring: 0 0 0 3px rgba(108, 92, 231, 0.22);
     }
 
     [data-theme="dark"] {
-      --bg-color: #0d111a;
-      --bg-glow: rgba(116, 158, 255, 0.2);
-      --text-main: #ecf0f9;
-      --text-muted: #a4afc4;
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-muted: #b2bec3;
 
       --panel-bg: rgba(21, 28, 42, 0.9);
       --panel-border: rgba(98, 118, 160, 0.4);
@@ -60,10 +64,13 @@
       --card-border: #27344b;
       --canvas-bg: #0f1624;
 
-      --brand-primary: #7da6ff;
-      --brand-primary-hover: #6a95f8;
-      --brand-accent: #fb923c;
+      --brand-primary: #a29bfe;
+      --brand-primary-hover: #8d84f5;
+      --brand-accent: #81ecec;
       --danger: #ff7870;
+
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
 
       --channel-line: #6cc8ff;
       --channel-line-paused: #4f6f8d;
@@ -79,7 +86,7 @@
 
       --shadow-lg: 0 24px 46px rgba(0, 0, 0, 0.42);
       --shadow-sm: 0 12px 24px rgba(0, 0, 0, 0.3);
-      --ring: 0 0 0 3px rgba(125, 166, 255, 0.22);
+      --ring: 0 0 0 3px rgba(162, 155, 254, 0.25);
     }
 
     * {
@@ -94,12 +101,11 @@
     }
 
     body {
-      font-family: var(--font-body);
+      font-family: var(--font-sans);
       color: var(--text-main);
-      background:
-        radial-gradient(circle at 8% -10%, var(--bg-glow), transparent 38%),
-        radial-gradient(circle at 90% 110%, rgba(249, 115, 22, 0.11), transparent 34%),
-        var(--bg-color);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
       overflow: hidden;
     }
 
@@ -116,65 +122,79 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 0.9rem 1rem 0.75rem;
       gap: 0.8rem;
+      padding: 0;
     }
 
     #titleBanner {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 0.8rem;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: 18px;
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(8px);
-      min-height: 62px;
-      padding: 0.5rem 0.9rem;
+      gap: 16px;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 16px auto 0;
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      min-height: 58px;
+      padding: 8px 20px;
     }
 
     .banner-logo img {
       width: auto;
-      height: 34px;
+      height: 36px;
       display: block;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
     }
 
     .banner-title {
       margin: 0;
       text-align: center;
       font-family: var(--font-display);
-      font-size: 1.42rem;
-      letter-spacing: -0.02em;
-      color: var(--text-main);
-    }
-
-    .banner-title .accent {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
       color: var(--brand-primary);
     }
 
-    .theme-toggle {
-      justify-self: end;
+    .banner-title.gradient-text {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .banner-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
     }
 
     #theme-button {
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
+      background: transparent;
+      border: none;
       color: var(--text-main);
-      border-radius: 999px;
-      font-size: 0.83rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      line-height: 1;
       min-height: 42px;
-      padding: 0.5rem 0.9rem;
-      min-width: 90px;
+      min-width: 42px;
+      padding: 0.5rem;
       cursor: pointer;
-      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, background-color 0.2s ease;
     }
 
     #theme-button:hover {
-      transform: translateY(-1px);
-      border-color: var(--brand-primary);
+      background-color: rgba(128, 128, 128, 0.2);
+      transform: rotate(15deg);
     }
 
     #theme-button:focus-visible {
@@ -186,8 +206,12 @@
       min-height: 0;
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.9rem;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 0 auto;
+      padding-bottom: 0.75rem;
     }
 
     #transportPanel,
@@ -316,7 +340,10 @@
       letter-spacing: 0.01em;
       cursor: pointer;
       transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+      text-align: center;
     }
 
     .btn:focus-visible {
@@ -340,7 +367,7 @@
       background: var(--brand-primary);
       color: var(--btn-text);
       border-color: rgba(11, 95, 255, 0.35);
-      min-width: 158px;
+      min-width: 128px;
     }
 
     .btn-primary:hover {
@@ -464,6 +491,11 @@
       gap: 0.55rem;
     }
 
+    .utility-row .btn {
+      width: 100%;
+      min-width: 0;
+    }
+
     #channelsPanel {
       display: flex;
       flex-direction: column;
@@ -541,6 +573,10 @@
       display: inline-flex;
       gap: 0.45rem;
       flex-wrap: wrap;
+    }
+
+    .channel-actions .btn {
+      min-width: 0;
     }
 
     .frequency-row {
@@ -627,6 +663,10 @@
         min-height: 48px;
       }
 
+      #theme-button {
+        min-width: 48px;
+      }
+
       input[type="range"] {
         height: 40px;
       }
@@ -672,28 +712,31 @@
     }
 
     @media (max-width: 640px) {
-      #app {
-        padding: 0.7rem 0.62rem;
+      #titleBanner {
+        width: calc(100% - 24px);
+        margin: 12px auto 0;
+        min-height: 52px;
+        border-radius: 18px;
+        padding: 8px 12px;
       }
 
-      #titleBanner {
-        min-height: 56px;
-        border-radius: 15px;
-        padding: 0.45rem 0.62rem;
+      #workspace {
+        width: calc(100% - 24px);
       }
 
       .banner-logo img {
-        height: 27px;
+        height: 28px;
       }
 
       .banner-title {
-        font-size: 1.05rem;
+        font-size: 1rem;
       }
 
       #theme-button {
-        min-width: 74px;
-        font-size: 0.76rem;
-        padding: 0.45rem 0.65rem;
+        min-width: 40px;
+        min-height: 40px;
+        font-size: 1.05rem;
+        padding: 0.45rem;
       }
 
       .utility-row {
@@ -732,9 +775,11 @@
           <img src="/assets/panphy.png" alt="PanPhy logo">
         </a>
       </div>
-      <h1 class="banner-title">Tone <span class="accent">Mixer</span> Lab</h1>
-      <div class="theme-toggle">
-        <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">Dark</button>
+      <h1 class="banner-title">Tone Mixer Lab</h1>
+      <div class="banner-actions">
+        <div class="theme-toggle">
+          <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+        </div>
       </div>
     </header>
 
@@ -814,31 +859,44 @@
   </div>
 
   <script>
+    // Gradient text: skip on Brave iOS where background-clip:text is broken
+    (function () {
+      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
+      document.querySelectorAll('.banner-title').forEach(function (el) {
+        el.classList.add('gradient-text');
+      });
+    })();
+
+    // Theme Toggle
     const themeButton = document.getElementById('theme-button');
     const DARK_THEME_KEY = 'panphy-dark';
     const LIGHT_THEME_KEY = 'panphy-light';
 
-    function applyTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      themeButton.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    const currentTheme = localStorage.getItem(DARK_THEME_KEY)
+      ? 'dark'
+      : localStorage.getItem(LIGHT_THEME_KEY)
+        ? 'light'
+        : 'light';
+
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateButtonEmoji(currentTheme);
+
+    function updateButtonEmoji(theme) {
+      themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
     }
 
-    const initialTheme = localStorage.getItem(DARK_THEME_KEY)
-      ? 'dark'
-      : (localStorage.getItem(LIGHT_THEME_KEY) ? 'light' : 'light');
-
-    applyTheme(initialTheme);
-
-    themeButton.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      if (currentTheme === 'light') {
-        applyTheme('dark');
+    themeButton.addEventListener('click', function () {
+      let theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
         localStorage.setItem(DARK_THEME_KEY, 'true');
         localStorage.removeItem(LIGHT_THEME_KEY);
+        updateButtonEmoji('dark');
       } else {
-        applyTheme('light');
+        document.documentElement.setAttribute('data-theme', 'light');
         localStorage.setItem(LIGHT_THEME_KEY, 'true');
         localStorage.removeItem(DARK_THEME_KEY);
+        updateButtonEmoji('light');
       }
     });
   </script>
