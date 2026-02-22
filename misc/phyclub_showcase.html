@@ -1219,8 +1219,9 @@
 				this.t0 = now();
 				this.k0 = 12; // central wave number
 				this.sigma = W * 0.05; // width of packet
-				this.x0 = W * 0.2; // starting position
-				this.v_group = 150; // group velocity
+				this.x0 = W * -0.1; // starting position (slightly offscreen left)
+				// calculate speed so it traverses screen + margin within dwell time
+				this.v_group = (W * 1.2) / dwellSeconds;
 				this.barrierX = W * 0.55;
 				this.barrierW = W * 0.08;
 				this.A_inc = H * 0.15; // incident amplitude
@@ -1241,7 +1242,7 @@
 				// Label barrier
 				sctx.fillStyle = 'rgba(255,255,255,.5)';
 				sctx.font = '12px Inter, sans-serif';
-				sctx.fillText('Potential Energy Barrier (V0 > E)', this.barrierX - 40, cy - H * 0.3 - 10);
+				sctx.fillText('Potential Energy Barrier', this.barrierX - 40, cy - H * 0.3 - 10);
 
 				/* Wave packet logic (heuristic for visual effect) */
 				const xc = this.x0 + this.v_group * local; // where the center of the incident packet *would* be
@@ -1329,8 +1330,8 @@
 					this.filings.push({
 						x: Math.random() * W,
 						y: Math.random() * H,
-						length: 3 + Math.random() * 4,
-						alpha: 0.1 + Math.random() * 0.4
+						length: 6 + Math.random() * 8, // Doubled filing length
+						alpha: 0.2 + Math.random() * 0.6 // Increased base alpha for visibility
 					});
 				}
 
@@ -1378,7 +1379,7 @@
 				drawGrid(sctx, 40, 0.05 + 0.05 * pulse);
 
 				/* Draw Filings */
-				sctx.lineWidth = 1;
+				sctx.lineWidth = 2; // Made lines thicker
 				for (const f of this.filings) {
 					// Add some per-filing noise to time to make them twinkle
 					const f_pulse = 0.5 + 0.5 * Math.sin(local * 4 + f.x * 0.1);
@@ -1393,7 +1394,7 @@
 						const ny = B.by / Bmag;
 
 						// Intensity based on field strength and pulse
-						const intensity = Math.min(1, Bmag * 0.5) * f.alpha * (0.5 + 0.5 * f_pulse);
+						const intensity = Math.min(1, Bmag * 0.5) * f.alpha * (0.6 + 0.4 * f_pulse);
 
 						sctx.strokeStyle = `rgba(160, 255, 106, ${intensity})`;
 						sctx.beginPath();
@@ -1402,8 +1403,8 @@
 						sctx.stroke();
 					} else {
 						// If field is very weak, just draw a faint dot
-						sctx.fillStyle = `rgba(255, 255, 255, ${f.alpha * 0.2})`;
-						sctx.fillRect(f.x, f.y, 1, 1);
+						sctx.fillStyle = `rgba(255, 255, 255, ${f.alpha * 0.35})`;
+						sctx.fillRect(f.x, f.y, 2, 2); // Bigger faint dots
 					}
 				}
 
