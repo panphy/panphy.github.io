@@ -1164,7 +1164,22 @@
                     drawProjections(selectedEvent, relSpeed);
                 }
 
-                // Events
+                // Events – draw moving-frame (red) dots first, then rest-frame
+                // (green) dots on top so green is visible when frames overlap.
+                events.forEach(p => {
+                    let pm = lorentzTransform(p, relSpeed);
+                    let cpm = toCanvasCoords(pm.x, pm.t);
+                    ctx.fillStyle = getCssVar('--event-moving');
+                    ctx.beginPath();
+                    ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.font = "14px Arial";
+                    ctx.fillText(p.label + primeSuffix, cpm.x + p.radius + 2, cpm.y - p.radius - 2);
+                });
+
                 events.forEach(p => {
                     let cp = toCanvasCoords(p.x, p.t);
                     const isSelected = (p === selectedEvent);
@@ -1189,17 +1204,6 @@
                     ctx.fillStyle = getCssVar('--axis-rest');
                     ctx.font = "14px Arial";
                     ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
-
-                    let pm = lorentzTransform(p, relSpeed);
-                    let cpm = toCanvasCoords(pm.x, pm.t);
-                    ctx.fillStyle = getCssVar('--event-moving');
-                    ctx.beginPath();
-                    ctx.arc(cpm.x, cpm.y, p.radius, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.strokeStyle = "#000";
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                    ctx.fillText(p.label + primeSuffix, cpm.x + p.radius + 2, cpm.y - p.radius - 2);
                 });
 
                 let html = `
