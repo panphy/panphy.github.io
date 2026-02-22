@@ -653,16 +653,25 @@
 			});
 
 			/* ========================================
-			   SCENE: Solar System + Comet
+			   SCENE: Solar System + Comet (3D)
 			   ======================================== */
-			const sceneSolar = makeScene("Solar System — 2D Orbits", function () {
+			const sceneSolar = makeScene("Solar System — 3D Orbits", function () {
 				this.cx = W / 2; this.cy = H / 2;
 				this.planets = [];
 				const baseR = Math.min(W, H) * 0.16;
 				const gap = baseR * 0.42;
 				const cols = ['#58e1ff', '#a0ff6a', '#ffcc66', '#ff7ad9', '#9bb0ff'];
+				// tilt orbits slightly for 3D effect
 				for (let i = 0; i < 5; i++) {
-					this.planets.push({ r: baseR + i * gap, a: Math.random() * TAU, w: 0.45 / (i + 1), color: cols[i], size: 8 + i * 2.5 });
+					this.planets.push({
+						a: baseR + i * gap, // semi-major axis
+						b: (baseR + i * gap) * 0.98, // semi-minor (slight eccentricity)
+						angle: Math.random() * TAU,
+						w: 0.45 / (i + 1),
+						color: cols[i],
+						size: 8 + i * 2.5,
+						inclination: (Math.random() - 0.5) * 0.3 // random orbital tilt
+					});
 				}
 				this.stars = [];
 				const n = Math.floor(W * H / 9000);
@@ -670,7 +679,11 @@
 					this.stars.push({ x: Math.random() * W, y: Math.random() * H, a: 0.2 + Math.random() * 0.6, s: Math.random() < 0.06 ? 2 : 1 });
 				}
 				/* Comet */
-				this.comet = { angle: 0, e: 0.7, a: baseR + 4.5 * gap, trail: [] };
+				this.comet = { angle: 0, e: 0.7, a: baseR + 4.5 * gap, inclination: 0.6, trail: [] };
+
+				// Camera / projection params
+				this.camTilt = 0.6; // radian tilt of the whole system
+				this.perspective = 800;
 			}, function (t) {
 				const dt = 1 / 60;
 				sctx.clearRect(0, 0, W, H);
@@ -685,39 +698,110 @@
 				}
 				sctx.globalAlpha = 1;
 
-				/* Sun */
-				glowCircle(sctx, this.cx, this.cy, 36, '#ffd36b');
+				// 3D Projection helper
+				const project = (x, y, z) => {
+					// apply camera tilt (rotate around X axis)
+					const ry = y * Math.cos(this.camTilt) - z * Math.sin(this.camTilt);
+					const rz = y * Math.sin(this.camTilt) + z * Math.cos(this.camTilt);
 
-				/* Orbits & planets */
-				sctx.strokeStyle = 'rgba(255,255,255,.1)';
-				sctx.lineWidth = 1;
-				for (const p of this.planets) { sctx.beginPath(); sctx.arc(this.cx, this.cy, p.r, 0, TAU); sctx.stroke(); }
+					const scale = this.perspective / (this.perspective + rz);
+					return {
+						px: this.cx + x * scale,
+						py: this.cy + ry * scale,
+						scale: scale,
+						z: rz
+					};
+				};
+
+				/* Draw orbits */
+				sctx.strokeStyle = 'rgba(255,255,255,.08)';
+				sctx.lineWidth = 1.5;
 				for (const p of this.planets) {
-					p.a += p.w * dt;
-					glowCircle(sctx, this.cx + Math.cos(p.a) * p.r, this.cy + Math.sin(p.a) * p.r, p.size, p.color);
+					sctx.beginPath();
+					for (let a = 0; a <= TAU; a += 0.1) {
+						// Parametric equation of tilted ellipse
+						const x = p.a * Math.cos(a);
+						const y = p.b * Math.sin(a) * Math.cos(p.inclination);
+						const z = p.b * Math.sin(a) * Math.sin(p.inclination);
+						const proj = project(x, y, z);
+						if (a === 0) sctx.moveTo(proj.px, proj.py);
+						else sctx.lineTo(proj.px, proj.py);
+					}
+					sctx.closePath();
+					sctx.stroke();
 				}
 
-				/* Comet */
+				/* Calculate Sun projection */
+				const sunProj = project(0, 0, 0);
+
+				/* Calculate Comet projection */
 				const c = this.comet;
 				const cr = c.a * (1 - c.e * c.e) / (1 + c.e * Math.cos(c.angle));
 				const cSpeed = 800 / (cr * cr + 1000);
 				c.angle += cSpeed * dt;
-				const cox = this.cx + cr * Math.cos(c.angle);
-				const coy = this.cy + cr * Math.sin(c.angle);
-				c.trail.push({ x: cox, y: coy });
-				if (c.trail.length > 50) c.trail.shift();
+				const cox = cr * Math.cos(c.angle);
+				const coy = cr * Math.sin(c.angle) * Math.cos(c.inclination);
+				const coz = cr * Math.sin(c.angle) * Math.sin(c.inclination);
+				const cometProj = project(cox, coy, coz);
 
-				/* Comet trail */
-				for (let i = 1; i < c.trail.length; i++) {
-					const a = i / c.trail.length;
-					sctx.strokeStyle = `rgba(180,220,255,${a * 0.5})`;
-					sctx.lineWidth = 3 * a;
-					sctx.beginPath();
-					sctx.moveTo(c.trail[i - 1].x, c.trail[i - 1].y);
-					sctx.lineTo(c.trail[i].x, c.trail[i].y);
-					sctx.stroke();
+				// trail needs 3D positions saved for correct projection each frame
+				if (!c.trace) c.trace = [];
+				c.trace.push({ x: cox, y: coy, z: coz });
+				if (c.trace.length > 50) c.trace.shift();
+
+				/* Calculate Planet projections */
+				const renderableEntities = [];
+				for (const p of this.planets) {
+					p.angle += p.w * dt;
+					const x = p.a * Math.cos(p.angle);
+					const y = p.b * Math.sin(p.angle) * Math.cos(p.inclination);
+					const z = p.b * Math.sin(p.angle) * Math.sin(p.inclination);
+					const proj = project(x, y, z);
+					renderableEntities.push({
+						...proj,
+						type: 'planet',
+						color: p.color,
+						size: p.size * proj.scale
+					});
 				}
-				glowCircle(sctx, cox, coy, 4, '#e0f0ff');
+
+				// Add sun & comet to render queue for depth sorting
+				renderableEntities.push({
+					...sunProj,
+					type: 'sun',
+					color: '#ffd36b',
+					size: 36 * sunProj.scale
+				});
+				renderableEntities.push({
+					...cometProj,
+					type: 'comet'
+				});
+
+				// Z-sort (painter's algorithm)
+				renderableEntities.sort((a, b) => b.z - a.z);
+
+				/* Draw Comet trail (behind all entities that are closer) */
+				sctx.beginPath();
+				for (let i = 1; i < c.trace.length; i++) {
+					const pt = c.trace[i];
+					const proj = project(pt.x, pt.y, pt.z);
+					const a = i / c.trace.length;
+					sctx.strokeStyle = `rgba(180,220,255,${a * 0.5})`;
+					sctx.lineWidth = 3 * a * proj.scale;
+					if (i === 1) sctx.moveTo(proj.px, proj.py);
+					else sctx.lineTo(proj.px, proj.py);
+				}
+				sctx.stroke();
+
+				/* Draw Renderables back-to-front */
+				for (const entity of renderableEntities) {
+					if (entity.type === 'sun' || entity.type === 'planet') {
+						glowCircle(sctx, entity.px, entity.py, entity.size, entity.color);
+					} else if (entity.type === 'comet') {
+						glowCircle(sctx, entity.px, entity.py, 4 * entity.scale, '#e0f0ff');
+					}
+				}
+
 			}, function (w, h) { this.cx = w / 2; this.cy = h / 2; });
 
 			/* ========================================
@@ -957,19 +1041,6 @@
 				}
 				sctx.stroke();
 				sctx.shadowBlur = 0;
-
-				/* Energy bars */
-				const KE = 0.5 * this.m * v * v, PE = 0.5 * this.k * x * x, E = KE + PE;
-				const barW = 14, gap = 8, baseX = 20, baseY = H - 24, scale = 0.00002 * Math.min(W, H);
-				[['#a0ff6a', 'KE', -KE * scale], ['#58e1ff', 'PE', -PE * scale], ['#ff7ad9', 'E', -E * scale]].forEach((b, i) => {
-					sctx.fillStyle = 'rgba(255,255,255,.3)';
-					sctx.fillRect(baseX - 3 + i * (barW + gap), baseY - 100, 1, 100);
-					sctx.fillStyle = b[0];
-					sctx.fillRect(baseX + i * (barW + gap), baseY, barW, b[2]);
-					sctx.fillStyle = 'rgba(255,255,255,.8)';
-					sctx.font = '11px Inter, sans-serif';
-					sctx.fillText(b[1], baseX - 2 + i * (barW + gap), baseY + 14);
-				});
 
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
