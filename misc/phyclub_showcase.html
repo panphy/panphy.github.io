@@ -1095,7 +1095,9 @@
 				// Label barrier
 				sctx.fillStyle = 'rgba(255,255,255,.5)';
 				sctx.font = '12px Inter, sans-serif';
-				sctx.fillText('Potential Energy Barrier', this.barrierX - 40, cy - H * 0.3 - 10);
+				sctx.textAlign = 'center';
+				sctx.fillText('Potential Energy Barrier', this.barrierX + this.barrierW / 2, cy - H * 0.3 - 10);
+				sctx.textAlign = 'left';
 
 				/* Wave packet logic (heuristic for visual effect) */
 				const xc = this.x0 + this.v_group * local; // where the center of the incident packet *would* be
@@ -1511,16 +1513,16 @@
 
 				this.q = 1;     // Charge
 				this.m = 1;     // Mass
-				this.B = 1.2;   // Magnetic field strength (uniform everywhere)
+				this.B = 4.0;   // Magnetic field strength (substantially increased for tighter circles)
 
 				// Cyclotron Frequency (omega = qB/m)
 				this.omega_c = (this.q * this.B) / this.m;
 				// Electric field magnitude in the gap
-				this.E_mag = 400; // Lower E_mag so it gains less speed per crossing
+				this.E_mag = 400; // Keep acceleration moderate so orbits stay tight
 
 				this.p = {
 					x: this.cx, y: this.cy + 2, // Start slightly off-center to kickstart spiral
-					vx: 0, vy: 30, // Low initial speed for tight inner orbits
+					vx: 0, vy: 60, // Moderate initial velocity
 					trail: []
 				};
 			}, function (t) {
