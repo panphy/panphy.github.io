@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-22T23:30:00Z';
+  const BUILD_ID = '2026-02-22T16:42:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -9,10 +9,7 @@
 
   let updateBanner;
   let refreshing = false;
-  // Track whether the page already had a controlling SW on load.
-  // On first install, controllerchange fires when the new SW claims clients,
-  // but we don't need to reload because the page is already fresh.
-  const hadController = !!navigator.serviceWorker.controller;
+  let newWorker;
 
   const removeUpdateBanner = () => {
     if (!updateBanner) {
@@ -22,10 +19,12 @@
     updateBanner = null;
   };
 
-  const showUpdateBanner = (registration) => {
-    if (updateBanner || !registration?.waiting || refreshing) {
+  const showUpdateBanner = (worker) => {
+    if (updateBanner || refreshing) {
       return;
     }
+
+    newWorker = worker;
 
     updateBanner = document.createElement('div');
     updateBanner.setAttribute('role', 'status');
@@ -65,57 +64,12 @@
     ].join(';');
 
     button.addEventListener('click', () => {
-      if (refreshing) {
+      if (refreshing || !newWorker) {
         return;
       }
-
       button.disabled = true;
       button.textContent = 'Updating...';
-
-      const waiting = registration.waiting;
-      if (!waiting) {
-        // Waiting worker is gone (may have activated from another tab).
-        refreshing = true;
-        window.location.reload();
-        return;
-      }
-
-      // Ensure we immediately reload once the new SW takes control. This bypasses the
-      // `hadController` check elsewhere, ensuring the update doesn't silently stall.
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        window.location.reload();
-      });
-
-      // Ask the waiting SW to activate immediately.
-      waiting.postMessage({ type: 'SKIP_WAITING' });
-
-      // The controllerchange listener (below) handles the reload.
-      // Retry SKIP_WAITING after 2 s in case the first message was lost.
-      setTimeout(() => {
-        if (refreshing) {
-          return;
-        }
-        const w = registration.waiting;
-        if (w) {
-          w.postMessage({ type: 'SKIP_WAITING' });
-        }
-      }, 2000);
-
-      // Failsafe: if controllerchange still hasn't fired after 8 s,
-      // the waiting worker is stuck (e.g., browser bug dropping messages 
-      // or previous buggy SW version). Unregister to break the loop entirely.
-      setTimeout(() => {
-        if (!refreshing) {
-          refreshing = true;
-          registration.unregister().then(() => {
-            window.location.reload();
-          }).catch(() => {
-            window.location.reload();
-          });
-        }
-      }, 8000);
+      newWorker.postMessage({ type: 'SKIP_WAITING' });
     });
 
     updateBanner.append(message, button);
@@ -123,19 +77,20 @@
   };
 
   const listenForUpdates = (registration) => {
+    // If a worker is already waiting, it's ready to take over
     if (registration.waiting) {
-      showUpdateBanner(registration);
+      showUpdateBanner(registration.waiting);
     }
 
     registration.addEventListener('updatefound', () => {
-      const newWorker = registration.installing;
-      if (!newWorker) {
-        return;
-      }
+      const installingWorker = registration.installing;
+      if (!installingWorker) return;
 
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          showUpdateBanner(registration);
+      installingWorker.addEventListener('statechange', () => {
+        // Once installed, check if there's an existing controller.
+        // If there's no controller, this is the very first install, so we don't need to prompt.
+        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBanner(installingWorker);
         }
       });
     });
@@ -149,17 +104,16 @@
 
       listenForUpdates(registration);
 
-      // When a new SW takes control, reload so every resource is served
-      // from the new cache.  Skip the reload on first install (no update).
+      // When the new worker takes over (activation completes and it claims clients),
+      // we just softly reload the page to start using the new resources.
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!hadController || refreshing) {
-          return;
-        }
+        if (refreshing) return;
         refreshing = true;
         removeUpdateBanner();
         window.location.reload();
       });
 
+      // Periodically check for updates
       const update = () => registration.update().catch(() => { });
       update();
       setInterval(update, 60 * 60 * 1000);

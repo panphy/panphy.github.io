@@ -4,15 +4,18 @@
 <head>
     <link rel="manifest" href="/manifest.json">
     <script src="/assets/sw-register.js" defer></script>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>PanPhy Labs | Physics Tools & Simulations</title>
-    <meta name="description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta name="description"
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta property="og:title" content="PanPhy Labs">
-    <meta property="og:description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta property="og:description"
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta name="twitter:title" content="PanPhy Labs">
-    <meta name="twitter:description" content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
-    
+    <meta name="twitter:description"
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
 
@@ -30,19 +33,21 @@
             --bg-pattern: #e9ecef;
             --text-main: #2d3436;
             --text-secondary: #636e72;
-            
-            --brand-primary: #6c5ce7; /* Indigo */
+
+            --brand-primary: #6c5ce7;
+            /* Indigo */
             --brand-secondary: #a29bfe;
-            --brand-accent: #00cec9; /* Teal */
-            
+            --brand-accent: #00cec9;
+            /* Teal */
+
             --nav-bg: rgba(255, 255, 255, 0.85);
             --nav-border: rgba(255, 255, 255, 0.5);
-            
+
             --card-bg: #ffffff;
             --card-border: transparent;
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
-            
+
             --btn-bg: #2d3436;
             --btn-text: #fff;
 
@@ -58,19 +63,19 @@
             --bg-pattern: #181a20;
             --text-main: #dfe6e9;
             --text-secondary: #b2bec3;
-            
+
             --brand-primary: #a29bfe;
             --brand-secondary: #6c5ce7;
             --brand-accent: #81ecec;
-            
+
             --nav-bg: rgba(22, 24, 29, 0.85);
             --nav-border: rgba(255, 255, 255, 0.05);
-            
+
             --card-bg: #1e2129;
             --card-border: #2d3436;
-            --card-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.2);
-            
+
             --btn-bg: #6c5ce7;
             --btn-text: #fff;
 
@@ -97,7 +102,8 @@
             padding: 0;
             background-color: var(--bg-color);
             background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-            background-size: 30px 30px; /* Dot pattern */
+            background-size: 30px 30px;
+            /* Dot pattern */
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
@@ -118,7 +124,7 @@
             height: 80px;
             width: auto;
             margin-bottom: 1.5rem;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
         }
 
         header h1 {
@@ -235,7 +241,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .section h2::before {
             content: '';
             display: block;
@@ -414,7 +420,7 @@
             header h1 {
                 font-size: 2.5rem;
             }
-            
+
             nav {
                 width: calc(100vw - 16px);
                 max-width: 760px;
@@ -450,6 +456,7 @@
         }
 
         @media (pointer: coarse) {
+
             nav a,
             .card a,
             .theme-toggle button {
@@ -595,7 +602,7 @@
     <footer>
         <p>&copy; 2026 PanPhy Labs</p>
         <p>
-            <a href="mailto:panphylabs@icloud.com">Contact Me</a> • 
+            <a href="mailto:panphylabs@icloud.com">Contact Me</a> •
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
         </p>
     </footer>
@@ -839,7 +846,7 @@
     </script>
     <script>
         // Apply gradient text effect, skip on Brave iOS where background-clip:text is broken
-        (function() {
+        (function () {
             var h1 = document.querySelector('header h1');
             if (!h1) return;
             var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);

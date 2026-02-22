@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-22T16:21:00Z';
+const BUILD_ID = '2026-02-22T16:42:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -87,7 +87,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(PRECACHE_NAME);
-    for (const url of ASSETS_TO_CACHE) {
+    await Promise.allSettled(ASSETS_TO_CACHE.map(async (url) => {
       try {
         const resolvedUrl = new URL(url, self.location.origin);
         const isSameOrigin = resolvedUrl.origin === self.location.origin;
@@ -128,10 +128,9 @@ self.addEventListener('install', (event) => {
           console.warn('Precache failed:', url);
         }
       } catch (e) {
-        // keep going even if one file fails
         console.warn('Precache failed:', url, e);
       }
-    }
+    }));
   })());
 });
 
@@ -142,9 +141,6 @@ self.addEventListener('message', (event) => {
 });
 
 // Activate: clear old caches, then claim clients.
-// clients.claim() MUST run after old caches are deleted, otherwise the
-// page reload triggered by controllerchange can still hit stale entries
-// via caches.match() (which searches all caches in creation order).
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     if ('navigationPreload' in self.registration) {
@@ -183,9 +179,6 @@ function getNavigationFallbackCandidates(requestUrl) {
 }
 
 // Search only this SW version's caches (precache first, then runtime).
-// Using the global caches.match() searches ALL caches in creation order,
-// which can return stale entries from an old SW's cache during the brief
-// window between activation and old-cache cleanup.
 async function matchCurrentCaches(request) {
   const precache = await caches.open(PRECACHE_NAME);
   const hit = await precache.match(request);
@@ -194,7 +187,7 @@ async function matchCurrentCaches(request) {
   return runtime.match(request);
 }
 
-// Fetch: cache-first for navigations when available, cache-first for other assets
+// Fetch: cache-first for navigations and assets
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
@@ -222,28 +215,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigations: serve cached page immediately (if present), then update in background.
+  // Navigations: Cache first
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
       const navigationCandidates = getNavigationFallbackCandidates(url);
 
       for (const candidate of navigationCandidates) {
         const cachedCandidate = await matchCurrentCaches(candidate);
-        if (cachedCandidate) {
-          event.waitUntil((async () => {
-            try {
-              const preload = await event.preloadResponse;
-              const fresh = preload || await fetch(req);
-              if (fresh && (fresh.ok || fresh.type === 'opaque')) {
-                const cache = await caches.open(RUNTIME_CACHE);
-                await cache.put(req, fresh.clone());
-              }
-            } catch {
-              // Keep serving cached content when background refresh fails.
-            }
-          })());
-          return cachedCandidate;
-        }
+        if (cachedCandidate) return cachedCandidate;
       }
 
       try {
@@ -255,10 +234,6 @@ self.addEventListener('fetch', (event) => {
         }
         return fresh;
       } catch {
-        for (const candidate of navigationCandidates) {
-          const cachedCandidate = await matchCurrentCaches(candidate);
-          if (cachedCandidate) return cachedCandidate;
-        }
         return Response.error();
       }
     })());
