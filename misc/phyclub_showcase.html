@@ -36,33 +36,6 @@
 			flex-direction: column
 		}
 
-		header {
-			height: 44px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			letter-spacing: .06em;
-			font-weight: 700;
-			background: linear-gradient(135deg, #58e1ff, #a0ff6a, #ff7ad9, #58e1ff);
-			background-size: 300% 300%;
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			background-clip: text;
-			animation: gradShift 6s ease infinite
-		}
-
-		@keyframes gradShift {
-
-			0%,
-			100% {
-				background-position: 0% 50%
-			}
-
-			50% {
-				background-position: 100% 50%
-			}
-		}
-
 		#stage {
 			flex: 1;
 			position: relative
@@ -181,7 +154,6 @@
 
 <body>
 	<div id="wrap">
-		<header>Physics Club — Sim Showcase</header>
 		<div id="stage">
 			<canvas id="simCanvas"></canvas>
 			<canvas id="titleCanvas"></canvas>
@@ -1240,17 +1212,262 @@
 				for (const s of this.sources) glowCircle(sctx, s.x, s.y, 7, '#58e1ff');
 			}, function () { });
 
+			/* ========================================
+			   SCENE: Quantum Tunneling (Wave Packet)
+			   ======================================== */
+			const sceneQuantumTunneling = makeScene("Quantum Tunneling — Wave Packet", function () {
+				this.t0 = now();
+				this.k0 = 12; // central wave number
+				this.sigma = W * 0.05; // width of packet
+				this.x0 = W * 0.2; // starting position
+				this.v_group = 150; // group velocity
+				this.barrierX = W * 0.55;
+				this.barrierW = W * 0.08;
+				this.A_inc = H * 0.15; // incident amplitude
+			}, function (t) {
+				const local = t - this.t0;
+				sctx.clearRect(0, 0, W, H);
+				drawGrid(sctx, 32, 0.12);
+
+				const cy = H * 0.5;
+
+				/* Draw Barrier */
+				sctx.fillStyle = 'rgba(88,225,255,0.15)';
+				sctx.fillRect(this.barrierX, cy - H * 0.3, this.barrierW, H * 0.6);
+				sctx.strokeStyle = 'rgba(88,225,255,0.4)';
+				sctx.lineWidth = 2;
+				sctx.strokeRect(this.barrierX, cy - H * 0.3, this.barrierW, H * 0.6);
+
+				// Label barrier
+				sctx.fillStyle = 'rgba(255,255,255,.5)';
+				sctx.font = '12px Inter, sans-serif';
+				sctx.fillText('Potential Energy Barrier (V0 > E)', this.barrierX - 40, cy - H * 0.3 - 10);
+
+				/* Wave packet logic (heuristic for visual effect) */
+				const xc = this.x0 + this.v_group * local; // where the center of the incident packet *would* be
+
+				sctx.strokeStyle = '#ff7ad9';
+				sctx.lineWidth = 2.5;
+				sctx.shadowColor = '#ff7ad9';
+				sctx.shadowBlur = 8;
+				sctx.beginPath();
+
+				for (let x = 0; x < W; x += 2) {
+					// 1. Incident + Reflected Region (Left of barrier)
+					if (x < this.barrierX) {
+						// Incoming packet
+						const envInc = this.A_inc * Math.exp(-Math.pow(x - xc, 2) / (2 * this.sigma * this.sigma));
+						const waveInc = envInc * Math.cos(this.k0 * x - 2 * this.k0 * this.v_group * local);
+
+						// Reflected packet (starts forming as xc crosses barrier)
+						let waveRef = 0;
+						if (xc > this.barrierX - this.sigma * 2) {
+							// packet reflects back at -v_group
+							const xc_ref = this.barrierX - (xc - this.barrierX);
+							// reflection coefficient heuristic ~ 0.8
+							const envRef = 0.8 * this.A_inc * Math.exp(-Math.pow(x - xc_ref, 2) / (2 * this.sigma * this.sigma));
+							// phase flip on reflection
+							waveRef = -envRef * Math.cos(-this.k0 * x - 2 * this.k0 * this.v_group * local);
+						}
+
+						const y = cy - (waveInc + waveRef);
+						if (x === 0) sctx.moveTo(x, y);
+						else sctx.lineTo(x, y);
+					}
+					// 2. Tunnelling Region (Inside barrier)
+					else if (x >= this.barrierX && x <= this.barrierX + this.barrierW) {
+						// Exponential decay
+						if (xc > this.barrierX - this.sigma * 2) {
+							// Amplitude at front of barrier
+							const A_edge = this.A_inc * Math.exp(-Math.pow(this.barrierX - xc, 2) / (2 * this.sigma * this.sigma));
+							const decayFactor = Math.exp(-0.06 * (x - this.barrierX)); // decay constant
+							const y = cy - (A_edge * decayFactor * Math.cos(this.k0 * x - 2 * this.k0 * this.v_group * local));
+							sctx.lineTo(x, y);
+						} else {
+							sctx.lineTo(x, cy);
+						}
+					}
+					// 3. Transmitted Region (Right of barrier)
+					else {
+						if (xc > this.barrierX + this.barrierW / 2) {
+							// transmission coefficient heuristic ~ 0.15 (greatly reduced amplitude)
+							const A_trans = 0.15 * this.A_inc;
+							// center of transmitted packet
+							const xc_trans = this.barrierX + this.barrierW + (xc - (this.barrierX + this.barrierW));
+							const envTrans = A_trans * Math.exp(-Math.pow(x - xc_trans, 2) / (2 * this.sigma * this.sigma));
+							const waveTrans = envTrans * Math.cos(this.k0 * x - 2 * this.k0 * this.v_group * local);
+							const y = cy - waveTrans;
+							sctx.lineTo(x, y);
+						} else {
+							sctx.lineTo(x, cy);
+						}
+					}
+				}
+				sctx.stroke();
+				sctx.shadowBlur = 0;
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('|Ψ(x,t)|² > 0 inside and beyond classically forbidden region', 16, 24);
+			});
+
+			/* ========================================
+			   SCENE: Magnetic Field — Solenoid
+			   ======================================== */
+			const sceneSolenoid = makeScene("Magnetic Field — Solenoid", function () {
+				this.t0 = now();
+				this.cx = W / 2;
+				this.cy = H / 2 + 20;
+				this.L = W * 0.35; // length of solenoid
+				this.R = H * 0.15; // radius of solenoid
+
+				// Generate iron filings (particles)
+				this.filings = [];
+				const nFilings = 1500;
+				for (let i = 0; i < nFilings; i++) {
+					this.filings.push({
+						x: Math.random() * W,
+						y: Math.random() * H,
+						length: 3 + Math.random() * 4,
+						alpha: 0.1 + Math.random() * 0.4
+					});
+				}
+
+				// Helper to calculate B-field at a point (simplified Biot-Savart approximation for a finite solenoid)
+				this.getBField = (x, y) => {
+					// Translate to origin at center of solenoid
+					const dx = x - this.cx;
+					const dy = y - this.cy;
+
+					// Inside the solenoid, near the center, field is strong and uniform
+					if (Math.abs(dx) < this.L / 2 && Math.abs(dy) < this.R) {
+						// stronger towards the center axis
+						const axialFalloff = 1 - (Math.abs(dy) / this.R) * 0.1;
+						return { bx: 10 * axialFalloff, by: dy * 0.02 };
+					}
+
+					// Outside, treat as a dipole if far away, or approximate looping field lines
+					// We'll use two magnetic monopoles (poles of the solenoid) as a heuristic
+					const pole1 = { x: this.cx - this.L / 2, y: this.cy };
+					const pole2 = { x: this.cx + this.L / 2, y: this.cy };
+
+					let rx1 = x - pole1.x, ry1 = y - pole1.y;
+					let r1_3 = Math.pow(rx1 * rx1 + ry1 * ry1, 1.5);
+
+					let rx2 = x - pole2.x, ry2 = y - pole2.y;
+					let r2_3 = Math.pow(rx2 * rx2 + ry2 * ry2, 1.5);
+
+					// Avoid divide by zero near poles
+					if (r1_3 < 100) r1_3 = 100;
+					if (r2_3 < 100) r2_3 = 100;
+
+					// Pole 1 acts like source (N), Pole 2 acts like sink (S) for mapping lines
+					const Bx = rx1 / r1_3 - rx2 / r2_3;
+					const By = ry1 / r1_3 - ry2 / r2_3;
+
+					return { bx: Bx * 20000, by: By * 20000 };
+				};
+
+			}, function (t) {
+				const local = t - this.t0;
+				sctx.clearRect(0, 0, W, H);
+
+				// Pulsing background grid
+				const pulse = 0.5 + 0.5 * Math.sin(local * 3);
+				drawGrid(sctx, 40, 0.05 + 0.05 * pulse);
+
+				/* Draw Filings */
+				sctx.lineWidth = 1;
+				for (const f of this.filings) {
+					// Add some per-filing noise to time to make them twinkle
+					const f_pulse = 0.5 + 0.5 * Math.sin(local * 4 + f.x * 0.1);
+
+					const B = this.getBField(f.x, f.y);
+					const Bmag = Math.sqrt(B.bx * B.bx + B.by * B.by);
+
+					// Only draw clearly if field is strong enough
+					if (Bmag > 0.1) {
+						// Normalize vector to get direction
+						const nx = B.bx / Bmag;
+						const ny = B.by / Bmag;
+
+						// Intensity based on field strength and pulse
+						const intensity = Math.min(1, Bmag * 0.5) * f.alpha * (0.5 + 0.5 * f_pulse);
+
+						sctx.strokeStyle = `rgba(160, 255, 106, ${intensity})`;
+						sctx.beginPath();
+						sctx.moveTo(f.x - nx * f.length / 2, f.y - ny * f.length / 2);
+						sctx.lineTo(f.x + nx * f.length / 2, f.y + ny * f.length / 2);
+						sctx.stroke();
+					} else {
+						// If field is very weak, just draw a faint dot
+						sctx.fillStyle = `rgba(255, 255, 255, ${f.alpha * 0.2})`;
+						sctx.fillRect(f.x, f.y, 1, 1);
+					}
+				}
+
+				/* Draw Solenoid Coils */
+				const nCoils = 18;
+				sctx.strokeStyle = '#58e1ff';
+				sctx.lineWidth = 3;
+				sctx.shadowColor = '#58e1ff';
+
+				const startX = this.cx - this.L / 2;
+				const coilDx = this.L / nCoils;
+
+				// Draw back halves of coils (dimmer)
+				sctx.globalAlpha = 0.3;
+				sctx.shadowBlur = 0;
+				for (let i = 0; i < nCoils; i++) {
+					const x = startX + i * coilDx;
+					sctx.beginPath();
+					sctx.ellipse(x + coilDx / 2, this.cy, coilDx / 2, this.R, 0, -Math.PI / 2, Math.PI / 2, true);
+					sctx.stroke();
+				}
+
+				// Draw front halves of coils (brighter, pulsating with current)
+				sctx.globalAlpha = 0.8 + 0.2 * pulse;
+				sctx.shadowBlur = 10 * pulse;
+				for (let i = 0; i < nCoils; i++) {
+					const x = startX + i * coilDx;
+					sctx.beginPath();
+					sctx.ellipse(x + coilDx / 2, this.cy, coilDx / 2, this.R, 0, Math.PI / 2, -Math.PI / 2, true);
+					sctx.stroke();
+
+					// Draw current arrows on front coils
+					if (i % 3 === 1) {
+						const ax = x + coilDx / 2;
+						const ay = this.cy + this.R;
+						drawArrow(sctx, ax - 5, ay, ax + 5, ay, '#58e1ff');
+					}
+				}
+				sctx.globalAlpha = 1;
+				sctx.shadowBlur = 0;
+
+				// Label current
+				sctx.fillStyle = 'rgba(88,225,255, 0.8)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('Current I', startX - 40, this.cy + this.R + 20);
+
+				/* Label */
+				sctx.fillStyle = 'rgba(255,255,255,.85)';
+				sctx.font = '14px Inter, sans-serif';
+				sctx.fillText('B = μ₀nI  (Uniform field inside ideal solenoid)', 16, 24);
+			});
+
 			/* ===== Scene list (curated order) ===== */
 			const scenes = [
 				sceneDoublePendulum,  // 1 — chaotic rainbow eye-catcher
-				sceneSolar,           // 2 — space
+				sceneQuantumTunneling,// 2 — wave packet encountering barrier
 				sceneStandingWave,    // 3 — harmonics
 				sceneEMWave,          // 4 — 3D fields
-				sceneSpring,          // 5 — classic + trace
-				sceneGalaxy,          // 6 — spiral particles
-				sceneDoppler,         // 7 — wavefronts
-				scenePendulum,        // 8 — swinging trail
-				sceneRipple           // 9 — interference
+				sceneSolenoid,        // 5 — iron filings magnetic field
+				sceneSpring,          // 6 — classic + trace
+				sceneGalaxy,          // 7 — spiral particles
+				sceneDoppler,         // 8 — wavefronts
+				scenePendulum,        // 9 — swinging trail
+				sceneRipple           // 10 — interference
 			];
 
 			let index = 0, current = null;
