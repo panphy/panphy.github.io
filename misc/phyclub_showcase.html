@@ -851,141 +851,6 @@
 			});
 
 			/* ========================================
-			   SCENE: EM Wave — 3D perspective
-			   ======================================== */
-			const sceneEMWave = makeScene("Electromagnetic Wave (3D Rotating)", function () {
-				this.t0 = now();
-				this.cx = W * 0.5; this.cy = H * 0.5;
-				this.perspective = 800;
-
-				// Rotation axis (arbitrary off-axis)
-				const ax = 0.4, ay = 0.6, az = 0.3;
-				const len = Math.sqrt(ax * ax + ay * ay + az * az);
-				this.rotAxis = { x: ax / len, y: ay / len, z: az / len };
-				this.rotSpeed = 0.4;
-			}, function (t) {
-				const local = t - this.t0;
-				sctx.clearRect(0, 0, W, H);
-				sctx.fillStyle = '#070b14';
-				sctx.fillRect(0, 0, W, H);
-
-				const span = Math.min(W, H) * 0.85;
-				const amp = Math.min(W, H) * 0.18;
-				const numPts = 120;
-				// wave number
-				const k = TAU * 2.5 / span;
-				const omega = 3;
-
-				// Rotation matrix (Rodrigues' formula)
-				const angle = local * this.rotSpeed;
-				const cA = Math.cos(angle), sA = Math.sin(angle), iA = 1 - cA;
-				const kx = this.rotAxis.x, ky = this.rotAxis.y, kz = this.rotAxis.z;
-
-				const r11 = cA + kx * kx * iA, r12 = kx * ky * iA - kz * sA, r13 = kx * kz * iA + ky * sA;
-				const r21 = ky * kx * iA + kz * sA, r22 = cA + ky * ky * iA, r23 = ky * kz * iA - kx * sA;
-				const r31 = kz * kx * iA - ky * sA, r32 = kz * ky * iA + kx * sA, r33 = cA + kz * kz * iA;
-
-				const rotate3D = (vx, vy, vz) => ({
-					x: r11 * vx + r12 * vy + r13 * vz,
-					y: r21 * vx + r22 * vy + r23 * vz,
-					z: r31 * vx + r32 * vy + r33 * vz
-				});
-
-				const project = (px, py, pz) => {
-					const scale = this.perspective / (this.perspective + pz + 500);
-					return {
-						x: this.cx + px * scale,
-						y: this.cy + py * scale,
-						scale: scale,
-						z: pz
-					};
-				};
-
-				const renderables = [];
-
-				/* Propagation axis */
-				const axisP1Raw = rotate3D(-span * 0.45, 0, 0);
-				const axisP2Raw = rotate3D(span * 0.45, 0, 0);
-				const axisP1 = project(axisP1Raw.x, axisP1Raw.y, axisP1Raw.z);
-				const axisP2 = project(axisP2Raw.x, axisP2Raw.y, axisP2Raw.z);
-
-				renderables.push({
-					type: 'line', p1: axisP1, p2: axisP2,
-					z: (axisP1.z + axisP2.z) / 2, color: 'rgba(255,255,255,.2)', w: 1, glow: null
-				});
-
-				/* Build wave curves and arrows */
-				let lastEProj = null, lastBProj = null;
-				const arrInt = Math.floor(numPts / 14);
-
-				for (let i = 0; i <= numPts; i++) {
-					const lx = -span * 0.42 + (i / numPts) * span * 0.84;
-					const phase = k * (lx + span * 0.42) - omega * local;
-					const ey = amp * Math.sin(phase);
-					const bz = amp * 0.7 * Math.sin(phase);
-
-					const eRot = rotate3D(lx, ey, 0); const eProj = project(eRot.x, eRot.y, eRot.z);
-					const bRot = rotate3D(lx, 0, bz); const bProj = project(bRot.x, bRot.y, bRot.z);
-					const oRot = rotate3D(lx, 0, 0); const oProj = project(oRot.x, oRot.y, oRot.z);
-
-					if (lastEProj) {
-						renderables.push({ type: 'line', p1: lastEProj, p2: eProj, z: (lastEProj.z + eProj.z) / 2, color: '#58e1ff', w: 2.5 * eProj.scale, glow: '#58e1ff' });
-					}
-					if (lastBProj) {
-						renderables.push({ type: 'line', p1: lastBProj, p2: bProj, z: (lastBProj.z + bProj.z) / 2, color: '#a0ff6a', w: 2.5 * bProj.scale, glow: '#a0ff6a' });
-					}
-
-					// Arrows
-					if (i % arrInt === 0) {
-						renderables.push({ type: 'line', p1: oProj, p2: eProj, z: (oProj.z + eProj.z) / 2, color: 'rgba(88,225,255,.4)', w: 1.5 * eProj.scale, glow: null });
-						renderables.push({ type: 'line', p1: oProj, p2: bProj, z: (oProj.z + bProj.z) / 2, color: 'rgba(160,255,106,.4)', w: 1.5 * bProj.scale, glow: null });
-					}
-
-					lastEProj = eProj; lastBProj = bProj;
-				}
-
-				// Z-sort (Painter's algorithm)
-				renderables.sort((a, b) => b.z - a.z);
-
-				/* Draw Renderables */
-				sctx.lineCap = 'round';
-				for (const r of renderables) {
-					sctx.lineWidth = r.w;
-					sctx.strokeStyle = r.color;
-					if (r.glow) {
-						sctx.shadowColor = r.glow;
-						sctx.shadowBlur = 8 * r.p1.scale;
-					} else {
-						sctx.shadowBlur = 0;
-					}
-					sctx.beginPath();
-					sctx.moveTo(r.p1.x, r.p1.y);
-					sctx.lineTo(r.p2.x, r.p2.y);
-					sctx.stroke();
-				}
-				sctx.lineCap = 'butt';
-				sctx.shadowBlur = 0;
-
-				/* Axis labels */
-				const labelEAxis = rotate3D(0, amp + 20, 0);
-				const labelEProj = project(labelEAxis.x, labelEAxis.y, labelEAxis.z);
-				const labelBAxis = rotate3D(0, 0, amp * 0.7 + 20);
-				const labelBProj = project(labelBAxis.x, labelBAxis.y, labelBAxis.z);
-
-				sctx.font = 'bold 16px Inter, sans-serif';
-				sctx.textAlign = 'center';
-				sctx.fillStyle = '#58e1ff';
-				sctx.fillText('E', labelEProj.x, labelEProj.y);
-				sctx.fillStyle = '#a0ff6a';
-				sctx.fillText('B', labelBProj.x, labelBProj.y);
-				sctx.textAlign = 'start';
-
-				sctx.fillStyle = 'rgba(255,255,255,.85)';
-				sctx.font = '14px Inter, sans-serif';
-				sctx.fillText('E ⊥ B ⊥ propagation direction, c = 3×10⁸ m/s', 16, 24);
-			});
-
-			/* ========================================
 			   SCENE: SHM — Spring + Oscilloscope
 			   ======================================== */
 			const sceneSpring = makeScene("SHM — Mass on a Spring", function () {
@@ -1651,17 +1516,16 @@
 				// Cyclotron Frequency (omega = qB/m)
 				this.omega_c = (this.q * this.B) / this.m;
 				// Electric field magnitude in the gap
-				this.E_mag = 1200; // Increased E_mag to accelerate faster per loop
+				this.E_mag = 400; // Lower E_mag so it gains less speed per crossing
 
 				this.p = {
 					x: this.cx, y: this.cy + 2, // Start slightly off-center to kickstart spiral
-					vx: 0, vy: 120, // Start with a bit more initial speed to get wider early loops
+					vx: 0, vy: 30, // Low initial speed for tight inner orbits
 					trail: []
 				};
 			}, function (t) {
 				const dt = 1 / 60;
 				const substeps = 10; // high precision for circular orbit Integration
-				const sdt = dt / substeps;
 
 				const local = t - this.t0;
 
@@ -1784,13 +1648,12 @@
 				sceneDoublePendulum,  // 1 — chaotic rainbow eye-catcher
 				sceneQuantumTunneling,// 2 — wave packet encountering barrier
 				sceneStandingWave,    // 3 — harmonics
-				sceneEMWave,          // 4 — 3D fields
-				sceneSolenoid,        // 5 — iron filings magnetic field
-				sceneSpring,          // 6 — classic + trace
-				sceneCyclotron,       // 7 — spiral accelerator
-				sceneBrownian,        // 8 — thermodynamics collisions
-				sceneGalaxy,          // 9 — spiral particles
-				sceneDoppler          // 10 — wavefronts
+				sceneSolenoid,        // 4 — iron filings magnetic field
+				sceneSpring,          // 5 — classic + trace
+				sceneCyclotron,       // 6 — spiral accelerator
+				sceneBrownian,        // 7 — thermodynamics collisions
+				sceneGalaxy,          // 8 — spiral particles
+				sceneDoppler          // 9 — wavefronts
 			];
 
 			let index = 0, current = null;
