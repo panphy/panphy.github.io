@@ -1526,6 +1526,7 @@
 			}, function (t) {
 				const dt = 1 / 60;
 				const substeps = 10; // high precision for circular orbit Integration
+				const sdt = dt / substeps;
 
 				const local = t - this.t0;
 
