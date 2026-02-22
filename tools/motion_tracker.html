@@ -279,13 +279,15 @@
 			background: rgba(108, 92, 231, 0.2);
 		}
 
-		/* --- Plot Buttons (Colorful) --- */
+		/* --- Plot Buttons (Pill) --- */
 		.plot-btn {
 			color: white;
 			border: none;
-			font-size: 0.85rem;
-			flex: 1;
-			min-width: 0;
+			font-size: 0.78rem;
+			font-weight: 600;
+			padding: 5px 12px;
+			border-radius: 999px;
+			white-space: nowrap;
 		}
 
 		.plot-btn:hover:not(:disabled) {
@@ -293,11 +295,11 @@
 		}
 
 		.plot-btn.active {
-			box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 2.5px rgba(255,255,255,0.7);
+			box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.7);
 		}
 
 		[data-theme="dark"] .plot-btn.active {
-			box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 0 2.5px rgba(255,255,255,0.45);
+			box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.45);
 		}
 
 		/* Position plot buttons - same colors as velocity counterparts */
@@ -659,18 +661,21 @@
 			.chart-controls {
 				display: flex;
 				flex-direction: column;
-				gap: 6px;
-				margin-top: 15px;
+				gap: 5px;
+				margin-top: 12px;
 				width: 100%;
+				align-items: center;
 			}
 
 		.chart-controls-row {
 			display: flex;
-			gap: 6px;
+			gap: 5px;
+			justify-content: center;
+			flex-wrap: wrap;
 		}
 
-		.chart-controls button {
-			min-height: 36px;
+		.chart-controls .plot-btn {
+			min-height: 30px;
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
