@@ -574,7 +574,7 @@ textarea:focus {
   }
 
   .insert-math-group {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: none;
     padding-bottom: 4px;
     margin-bottom: 2px;
   }
