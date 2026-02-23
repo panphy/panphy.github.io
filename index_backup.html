@@ -101,69 +101,12 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            /* Dot pattern */
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
-            position: relative;
-        }
-
-        /* SVG Background Animation */
-        .bg-grid-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .bg-grid {
-            width: 200vw;
-            height: 200vh;
-            position: absolute;
-            top: -50vh;
-            left: -50vw;
-            stroke: var(--text-main);
-            opacity: 0.03;
-            /* Very subtle */
-            stroke-width: 1px;
-            animation: gridDrift 60s linear infinite;
-        }
-
-        [data-theme="dark"] .bg-grid {
-            opacity: 0.05;
-        }
-
-        .grid-line-vertical {
-            animation: pulseLine 8s ease-in-out infinite alternate;
-        }
-
-        .grid-line-horizontal {
-            animation: pulseLine 11s ease-in-out infinite alternate-reverse;
-        }
-
-        @keyframes gridDrift {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            100% {
-                transform: translate(100px, 100px);
-            }
-
-            /* Shifts the exact size of one grid cell (100x100) to loop seamlessly */
-        }
-
-        @keyframes pulseLine {
-            0% {
-                opacity: 0.2;
-            }
-
-            100% {
-                opacity: 1;
-            }
         }
 
         /* Hero Header */
@@ -524,26 +467,6 @@
 </head>
 
 <body>
-    <!-- Background Animation (Grid Interpolation) -->
-    <div class="bg-grid-container">
-        <svg class="bg-grid" xmlns="http://www.w3.org/2000/svg">
-            <!-- Defines the base 100x100 grid pattern -->
-            <defs>
-                <pattern id="baseGrid" width="100" height="100" patternUnits="userSpaceOnUse">
-                    <path class="grid-line-horizontal" d="M 0 0 L 100 0" fill="none" />
-                    <path class="grid-line-vertical" d="M 0 0 L 0 100" fill="none" />
-                </pattern>
-                <pattern id="subGrid" width="33.33" height="33.33" patternUnits="userSpaceOnUse">
-                    <rect width="33.33" height="33.33" fill="none" stroke-width="0.5" stroke-dasharray="2 4" />
-                </pattern>
-            </defs>
-
-            <!-- Apply patterns to a rectangle covering the entire SVG -->
-            <rect width="100%" height="100%" fill="url(#subGrid)" />
-            <rect width="100%" height="100%" fill="url(#baseGrid)" />
-        </svg>
-    </div>
-
     <nav>
         <a href="#tools">Tools</a>
         <a href="#simulations">Sims</a>
