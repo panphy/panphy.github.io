@@ -665,7 +665,7 @@
             // Idle detection & 30fps throttle
             var running = false;
             var lastFrameTime = 0;
-            var frameInterval = 1000 / 30; // 30fps
+            var frameInterval = 1000 / 60; // 60fps
             var idleThreshold = 0.5; // stop when active is within 0.5px of mouse
 
             function wake() {
