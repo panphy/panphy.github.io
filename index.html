@@ -96,14 +96,15 @@
             --font-mono: 'JetBrains Mono', monospace;
         }
 
+        html {
+            background-color: var(--bg-color);
+        }
+
         body {
             font-family: var(--font-sans);
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-            background-size: 30px 30px;
-            /* Dot pattern */
+            background: transparent;
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
