@@ -20,6 +20,20 @@ import {
 let themeToggleButton = null;
 let highlightStyle = null;
 
+function updateAppChromeTheme(theme) {
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  const isDarkTheme = theme === 'dark';
+
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+  }
+
+  if (appleStatusBarMeta) {
+    appleStatusBarMeta.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
+  }
+}
+
 /**
  * Initialize UI module with DOM references
  * @param {Object} elements - Object containing DOM element references
@@ -79,7 +93,13 @@ export function initializeTheme() {
     }
   }
   updateThemeToggleButton();
+  updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
+
+  window.addEventListener('pageshow', () => {
+    updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
+  });
 }
+
 
 /**
  * Toggle between dark and light themes and save the preference.
@@ -99,6 +119,7 @@ export function toggleTheme() {
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
     }
     saveThemePreference('markdown-dark');
+    updateAppChromeTheme('dark');
   } else {
     if (themeToggleButton) {
       themeToggleButton.textContent = '\u{2600}\u{FE0F}'; // Sun emoji
@@ -109,6 +130,7 @@ export function toggleTheme() {
       highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
     }
     saveThemePreference('markdown-light');
+    updateAppChromeTheme('light');
   }
 }
 
