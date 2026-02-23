@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-22T16:42:00Z';
+  const BUILD_ID = '2026-02-24T00:20:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -10,6 +10,33 @@
   let updateBanner;
   let refreshing = false;
   let newWorker;
+  let currentRegistration = null;
+  let updateFallbackTimer = 0;
+
+  const completeRefresh = () => {
+    if (refreshing) {
+      return;
+    }
+    refreshing = true;
+    if (updateFallbackTimer) {
+      window.clearTimeout(updateFallbackTimer);
+      updateFallbackTimer = 0;
+    }
+    removeUpdateBanner();
+    window.location.reload();
+  };
+
+  const startUpdateFallback = () => {
+    if (updateFallbackTimer) {
+      window.clearTimeout(updateFallbackTimer);
+    }
+
+    updateFallbackTimer = window.setTimeout(() => {
+      // Some browser/tab states may not emit controllerchange in-place.
+      // Fall back to a hard reload so users are never stuck on "Updating...".
+      completeRefresh();
+    }, 5000);
+  };
 
   const removeUpdateBanner = () => {
     if (!updateBanner) {
@@ -64,12 +91,26 @@
     ].join(';');
 
     button.addEventListener('click', () => {
-      if (refreshing || !newWorker) {
+      if (refreshing) {
         return;
       }
       button.disabled = true;
       button.textContent = 'Updating...';
-      newWorker.postMessage({ type: 'SKIP_WAITING' });
+
+      const waitingWorker = (currentRegistration && currentRegistration.waiting) || newWorker;
+      if (!waitingWorker) {
+        completeRefresh();
+        return;
+      }
+
+      waitingWorker.addEventListener('statechange', () => {
+        if (waitingWorker.state === 'activated') {
+          completeRefresh();
+        }
+      });
+
+      startUpdateFallback();
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     });
 
     updateBanner.append(message, button);
@@ -90,7 +131,7 @@
         // Once installed, check if there's an existing controller.
         // If there's no controller, this is the very first install, so we don't need to prompt.
         if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          showUpdateBanner(installingWorker);
+          showUpdateBanner(registration.waiting || installingWorker);
         }
       });
     });
@@ -101,16 +142,14 @@
       const registration = await navigator.serviceWorker.register('/sw.js', {
         updateViaCache: 'none'
       });
+      currentRegistration = registration;
 
       listenForUpdates(registration);
 
       // When the new worker takes over (activation completes and it claims clients),
       // we just softly reload the page to start using the new resources.
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        removeUpdateBanner();
-        window.location.reload();
+        completeRefresh();
       });
 
       // Periodically check for updates
