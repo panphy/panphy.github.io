@@ -97,16 +97,24 @@
         </span>
         <button id="clearButton">Clear</button>
         <button id="historyButton" title="Browse saved snapshots">History</button>
-        <div class="math-menu" id="mathMenu">
-          <button id="mathButton" aria-expanded="false" aria-controls="mathPanel">Math</button>
-          <div id="mathPanel" class="math-panel" hidden>
-            <button class="math-template-btn" data-template="basic">Basic</button>
-            <button class="math-template-btn" data-template="calculus">Calculus</button>
-            <button class="math-template-btn" data-template="matrices">Matrices</button>
-            <button class="math-template-btn" data-template="table">Table</button>
+        <div class="insert-menu" id="insertMenu">
+          <button id="insertButton" aria-expanded="false" aria-controls="insertPanel" title="Insert math, table, or image">Insert</button>
+          <div id="insertPanel" class="insert-panel" hidden>
+            <div class="insert-math-group" id="insertMathGroup">
+              <div class="insert-panel-item insert-has-submenu">
+                <span>Math</span>
+                <span class="insert-chevron" aria-hidden="true">&#8250;</span>
+              </div>
+              <div class="insert-submenu">
+                <button class="insert-action-btn" data-template="basic">Basic</button>
+                <button class="insert-action-btn" data-template="calculus">Advanced</button>
+                <button class="insert-action-btn" data-template="matrices">Matrices</button>
+              </div>
+            </div>
+            <button class="insert-action-btn" data-action="table">Table</button>
+            <button class="insert-action-btn" data-action="image">Image</button>
           </div>
         </div>
-        <button id="imageButton" title="Insert image from URL">Image</button>
         <div class="font-menu" id="fontMenu">
           <button id="fontButton" aria-expanded="false" aria-controls="fontPanel">Font</button>
           <div id="fontPanel" class="font-panel" hidden>

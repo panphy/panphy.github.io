@@ -56,10 +56,9 @@ const inputPane = document.getElementById('inputPane');
 const outputPane = document.getElementById('outputPane');
 const renderedOutput = document.getElementById('renderedOutput');
 const clearButton = document.getElementById('clearButton');
-const mathMenu = document.getElementById('mathMenu');
-const mathButton = document.getElementById('mathButton');
-const mathPanel = document.getElementById('mathPanel');
-const imageButton = document.getElementById('imageButton');
+const insertMenu = document.getElementById('insertMenu');
+const insertButton = document.getElementById('insertButton');
+const insertPanel = document.getElementById('insertPanel');
 const loadSampleButton = document.getElementById('loadSampleButton');
 const exportHTMLButton = document.getElementById('exportHTMLButton');
 const presentButton = document.getElementById('presentButton');
@@ -681,26 +680,26 @@ const mathTemplatePaths = {
   table: '/tools/markdown_editor/templates/math-table.md'
 };
 
-function openMathPanel() {
-  if (!mathPanel || !mathButton) return;
-  mathPanel.hidden = false;
-  mathButton.setAttribute('aria-expanded', 'true');
+function openInsertPanel() {
+  if (!insertPanel || !insertButton) return;
+  insertPanel.hidden = false;
+  insertButton.setAttribute('aria-expanded', 'true');
 }
 
-function closeMathPanel() {
-  if (!mathPanel || !mathButton) return;
-  mathPanel.hidden = true;
-  mathButton.setAttribute('aria-expanded', 'false');
+function closeInsertPanel() {
+  if (!insertPanel || !insertButton) return;
+  insertPanel.hidden = true;
+  insertButton.setAttribute('aria-expanded', 'false');
 }
 
-function toggleMathPanel() {
-  if (!mathPanel) return;
-  if (mathPanel.hidden) {
+function toggleInsertPanel() {
+  if (!insertPanel) return;
+  if (insertPanel.hidden) {
     closeFontPanel();
-    openMathPanel();
+    openInsertPanel();
     return;
   }
-  closeMathPanel();
+  closeInsertPanel();
 }
 
 // ---- Font panel ----
@@ -719,7 +718,7 @@ function closeFontPanel() {
 function toggleFontPanel() {
   if (!fontPanel) return;
   if (fontPanel.hidden) {
-    closeMathPanel();
+    closeInsertPanel();
     openFontPanel();
     return;
   }
@@ -786,7 +785,7 @@ function insertMathTemplate(templateKey) {
     })
     .then(data => {
       insertTextAtCursor(data, { insertAtCursorOnBlankLine: true });
-      closeMathPanel();
+      closeInsertPanel();
     })
     .catch(error => {
       console.error('Error loading math template:', error);
@@ -1584,18 +1583,29 @@ saveMDButton.addEventListener('click', saveMarkdown);
 loadFileButton.addEventListener('click', loadMarkdownFile);
 loadSampleButton.addEventListener('click', loadSampleDocument);
 
-if (mathButton) {
-  mathButton.addEventListener('click', event => {
+if (insertButton) {
+  insertButton.addEventListener('click', event => {
     event.stopPropagation();
-    toggleMathPanel();
+    toggleInsertPanel();
   });
 }
 
-if (mathPanel) {
-  mathPanel.addEventListener('click', event => {
-    const btn = event.target.closest('.math-template-btn');
-    if (btn) {
-      insertMathTemplate(btn.dataset.template);
+if (insertPanel) {
+  insertPanel.addEventListener('click', async event => {
+    const templateBtn = event.target.closest('.insert-action-btn[data-template]');
+    if (templateBtn) {
+      insertMathTemplate(templateBtn.dataset.template);
+      return;
+    }
+
+    const actionBtn = event.target.closest('.insert-action-btn[data-action]');
+    if (!actionBtn) return;
+
+    if (actionBtn.dataset.action === 'table') {
+      insertMathTemplate('table');
+    } else if (actionBtn.dataset.action === 'image') {
+      closeInsertPanel();
+      await insertImageFromModal();
     }
   });
 }
@@ -1620,19 +1630,10 @@ if (fontPanel) {
   });
 }
 
-if (imageButton) {
-  imageButton.addEventListener('click', async event => {
-    event.stopPropagation();
-    closeMathPanel();
-    closeFontPanel();
-    await insertImageFromModal();
-  });
-}
-
 // Close panels when clicking outside
 document.addEventListener('click', event => {
-  if (mathMenu && mathPanel && !mathPanel.hidden && !mathMenu.contains(event.target)) {
-    closeMathPanel();
+  if (insertMenu && insertPanel && !insertPanel.hidden && !insertMenu.contains(event.target)) {
+    closeInsertPanel();
   }
   if (fontMenu && fontPanel && !fontPanel.hidden && !fontMenu.contains(event.target)) {
     closeFontPanel();
