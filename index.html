@@ -649,16 +649,30 @@
             var spacing = 40;
             var time = 0;
 
-            // Warp sources — masses that bend the grid
-            var masses = [
-                { x: 0.3, y: 0.4, strength: 120, radius: 180 },
-                { x: 0.7, y: 0.6, strength: 80, radius: 140 }
-            ];
-            // Slow drift for the masses
-            var drifts = [
-                { dx: 0.012, dy: 0.008 },
-                { dx: -0.009, dy: 0.011 }
-            ];
+            // Mouse-driven mass
+            var mouseX = w * 0.5;
+            var mouseY = h * 0.5;
+            var activeX = mouseX;
+            var activeY = mouseY;
+            var hasInteracted = false;
+            var strength = 120;
+            var massRadius = 180;
+
+            document.addEventListener('mousemove', function (e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                hasInteracted = true;
+            });
+            document.addEventListener('touchmove', function (e) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+                hasInteracted = true;
+            }, { passive: true });
+            document.addEventListener('touchstart', function (e) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+                hasInteracted = true;
+            }, { passive: true });
 
             function resize() {
                 w = window.innerWidth;
@@ -685,38 +699,26 @@
             }
 
             function warp(gx, gy, t) {
-                var dx = 0, dy = 0;
-                for (var m = 0; m < masses.length; m++) {
-                    var mx = masses[m].x * w;
-                    var my = masses[m].y * h;
-                    var distX = gx - mx;
-                    var distY = gy - my;
-                    var dist = Math.sqrt(distX * distX + distY * distY);
-                    if (dist < 1) dist = 1;
-                    var strength = masses[m].strength;
-                    var radius = masses[m].radius;
-                    var falloff = Math.exp(-(dist * dist) / (radius * radius));
-                    // Pull toward mass + subtle ripple
-                    var ripple = Math.sin(dist * 0.04 - t * 1.5) * 0.3;
-                    var pull = (strength * falloff * (1 + ripple)) / (dist + 50);
-                    dx -= distX * pull;
-                    dy -= distY * pull;
-                }
-                return { x: gx + dx, y: gy + dy };
+                var distX = gx - activeX;
+                var distY = gy - activeY;
+                var dist = Math.sqrt(distX * distX + distY * distY);
+                if (dist < 1) dist = 1;
+                var falloff = Math.exp(-(dist * dist) / (massRadius * massRadius));
+                var ripple = Math.sin(dist * 0.04 - t * 1.5) * 0.3;
+                var pull = (strength * falloff * (1 + ripple)) / (dist + 50);
+                return {
+                    x: gx - distX * pull,
+                    y: gy - distY * pull
+                };
             }
 
             function draw() {
                 time += 0.008;
                 ctx.clearRect(0, 0, w, h);
 
-                // Drift masses slowly
-                for (var m = 0; m < masses.length; m++) {
-                    masses[m].x += drifts[m].dx * 0.001;
-                    masses[m].y += drifts[m].dy * 0.001;
-                    // Bounce off edges
-                    if (masses[m].x < 0.15 || masses[m].x > 0.85) drifts[m].dx *= -1;
-                    if (masses[m].y < 0.15 || masses[m].y > 0.85) drifts[m].dy *= -1;
-                }
+                // Smoothly follow the mouse (lerp for fluid feel)
+                activeX += (mouseX - activeX) * 0.08;
+                activeY += (mouseY - activeY) * 0.08;
 
                 var lineColor = getGridColor();
                 var nodeColor = getNodeColor();
