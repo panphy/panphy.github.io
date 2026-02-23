@@ -661,6 +661,7 @@
             var activeY = 0;
             var strength = 120;
             var massRadius = 180;
+            var hasPointerInteraction = false;
 
             // Idle detection & 30fps throttle
             var running = false;
@@ -676,20 +677,54 @@
                 }
             }
 
-            document.addEventListener('mousemove', function (e) {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function getInitialAnchor() {
+                var heading = document.querySelector('header h1');
+                if (!heading) {
+                    return {
+                        x: w * 0.66,
+                        y: h * 0.28
+                    };
+                }
+
+                var rect = heading.getBoundingClientRect();
+                return {
+                    x: clamp(rect.right + Math.max(48, rect.width * 0.18), 80, w - 80),
+                    y: clamp(rect.top + rect.height * 0.58, 80, h - 80)
+                };
+            }
+
+            function setPointerTarget(x, y, snapActive) {
+                mouseX = x;
+                mouseY = y;
+                if (snapActive) {
+                    activeX = x;
+                    activeY = y;
+                }
                 wake();
+            }
+
+            function handlePointerInput(x, y) {
+                if (!hasPointerInteraction) {
+                    hasPointerInteraction = true;
+                    // Avoid a long startup chase from the landing anchor.
+                    setPointerTarget(x, y, true);
+                    return;
+                }
+                setPointerTarget(x, y, false);
+            }
+
+            document.addEventListener('mousemove', function (e) {
+                handlePointerInput(e.clientX, e.clientY);
             });
             document.addEventListener('touchmove', function (e) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-                wake();
+                handlePointerInput(e.touches[0].clientX, e.touches[0].clientY);
             }, { passive: true });
             document.addEventListener('touchstart', function (e) {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-                wake();
+                handlePointerInput(e.touches[0].clientX, e.touches[0].clientY);
             }, { passive: true });
 
             function resize() {
@@ -700,6 +735,13 @@
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 cols = Math.ceil(w / spacing) + 2;
                 rows = Math.ceil(h / spacing) + 2;
+                if (!hasPointerInteraction) {
+                    var anchor = getInitialAnchor();
+                    mouseX = anchor.x;
+                    mouseY = anchor.y;
+                    activeX = anchor.x;
+                    activeY = anchor.y;
+                }
                 wake();
             }
 
@@ -827,16 +869,11 @@
             }
 
             resize();
-            // Start mass off-screen so the grid is flat until the user moves their mouse
-            mouseX = -9999;
-            mouseY = -9999;
-            activeX = -9999;
-            activeY = -9999;
             window.addEventListener('resize', resize);
             // Respect prefers-reduced-motion
             var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
             if (!mq.matches) {
-                // Draw the flat grid once, then go idle
+                // Draw once immediately at the landing anchor.
                 draw();
             }
         })();
