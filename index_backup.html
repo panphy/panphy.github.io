@@ -463,61 +463,10 @@
                 min-height: 44px;
             }
         }
-
-        /* Floating Physics Symbols Background */
-        .physics-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .physics-bg text {
-            fill: var(--brand-primary);
-            font-family: 'Georgia', 'Times New Roman', serif;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: var(--sym-opacity);
-            }
-            90% {
-                opacity: var(--sym-opacity);
-            }
-            100% {
-                transform: translateY(calc(-100vh - 60px)) rotate(var(--sym-rotate));
-                opacity: 0;
-            }
-        }
-
-        .physics-bg text {
-            animation: floatUp var(--sym-duration) var(--sym-delay) linear infinite;
-            opacity: 0;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .physics-bg { display: none; }
-        }
-
-        /* Ensure content sits above the background */
-        nav, header, .section, footer {
-            position: relative;
-            z-index: 1;
-        }
     </style>
 </head>
 
 <body>
-    <svg class="physics-bg" aria-hidden="true"></svg>
-
     <nav>
         <a href="#tools">Tools</a>
         <a href="#simulations">Sims</a>
@@ -658,51 +607,6 @@
         </p>
     </footer>
 
-    <script>
-        // Floating Physics Symbols
-        (function () {
-            var svgNS = 'http://www.w3.org/2000/svg';
-            var bg = document.querySelector('.physics-bg');
-            if (!bg) return;
-
-            var symbols = [
-                // Greek letters
-                'α', 'β', 'γ', 'δ', 'θ', 'λ', 'μ', 'π', 'σ', 'φ', 'ω',
-                'Σ', 'Δ', 'Ω',
-                // Equations
-                'F=ma', 'E=mc²', 'v=fλ', 'p=mv', 'PV=nRT',
-                'a²+b²=c²', 'F=kx', 'W=Fd',
-                // Math symbols
-                '∫', '∂', '∇', '∞', '±', '√',
-                // Units & constants
-                'ℏ', 'eV', 'Hz', 'kg'
-            ];
-
-            var count = Math.min(30, Math.floor(window.innerWidth / 50));
-
-            for (var i = 0; i < count; i++) {
-                var text = document.createElementNS(svgNS, 'text');
-                var sym = symbols[Math.floor(Math.random() * symbols.length)];
-                var size = 14 + Math.random() * 20;
-                var x = Math.random() * 100;
-                var duration = 25 + Math.random() * 35;
-                var delay = -(Math.random() * duration);
-                var opacity = 0.04 + Math.random() * 0.05;
-                var rotate = -20 + Math.random() * 40;
-
-                text.textContent = sym;
-                text.setAttribute('x', x + '%');
-                text.setAttribute('y', 'calc(100% + 40px)');
-                text.setAttribute('font-size', size + 'px');
-                text.style.setProperty('--sym-duration', duration + 's');
-                text.style.setProperty('--sym-delay', delay + 's');
-                text.style.setProperty('--sym-opacity', opacity);
-                text.style.setProperty('--sym-rotate', rotate + 'deg');
-
-                bg.appendChild(text);
-            }
-        })();
-    </script>
     <script>
         // Theme Toggle Functionality
         const themeButton = document.getElementById('theme-button');
