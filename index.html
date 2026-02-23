@@ -662,17 +662,34 @@
             var strength = 120;
             var massRadius = 180;
 
+            // Idle detection & 30fps throttle
+            var running = false;
+            var lastFrameTime = 0;
+            var frameInterval = 1000 / 30; // 30fps
+            var idleThreshold = 0.5; // stop when active is within 0.5px of mouse
+
+            function wake() {
+                if (!running) {
+                    running = true;
+                    lastFrameTime = performance.now();
+                    requestAnimationFrame(loop);
+                }
+            }
+
             document.addEventListener('mousemove', function (e) {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
+                wake();
             });
             document.addEventListener('touchmove', function (e) {
                 mouseX = e.touches[0].clientX;
                 mouseY = e.touches[0].clientY;
+                wake();
             }, { passive: true });
             document.addEventListener('touchstart', function (e) {
                 mouseX = e.touches[0].clientX;
                 mouseY = e.touches[0].clientY;
+                wake();
             }, { passive: true });
 
             function resize() {
@@ -683,6 +700,7 @@
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 cols = Math.ceil(w / spacing) + 2;
                 rows = Math.ceil(h / spacing) + 2;
+                wake();
             }
 
             function getGridColor() {
@@ -781,8 +799,31 @@
                         }
                     }
                 }
+            }
 
-                requestAnimationFrame(draw);
+            function loop(now) {
+                if (!running) return;
+
+                // Throttle to 30fps
+                if (now - lastFrameTime < frameInterval) {
+                    requestAnimationFrame(loop);
+                    return;
+                }
+                lastFrameTime = now;
+
+                draw();
+
+                // Go idle when the warp has caught up to the cursor
+                var dx = mouseX - activeX;
+                var dy = mouseY - activeY;
+                if (dx * dx + dy * dy < idleThreshold * idleThreshold) {
+                    // One final draw at rest, then stop
+                    draw();
+                    running = false;
+                    return;
+                }
+
+                requestAnimationFrame(loop);
             }
 
             resize();
@@ -795,7 +836,8 @@
             // Respect prefers-reduced-motion
             var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
             if (!mq.matches) {
-                requestAnimationFrame(draw);
+                // Draw the flat grid once, then go idle
+                draw();
             }
         })();
     </script>
