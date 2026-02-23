@@ -6,6 +6,9 @@
     <script src="/assets/sw-register.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f8f9fa">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>PanPhy Labs | Physics Tools & Simulations</title>
     <meta name="description"
         content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
@@ -885,7 +888,26 @@
                 "light";
 
         document.documentElement.setAttribute('data-theme', currentTheme);
+        updateAppChromeTheme(currentTheme);
         updateButtonEmoji(currentTheme);
+
+        function updateAppChromeTheme(theme) {
+            const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+            const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+            const isDarkTheme = theme === 'dark';
+
+            if (themeColorMeta) {
+                themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+            }
+
+            if (appleStatusBarMeta) {
+                appleStatusBarMeta.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
+            }
+        }
+
+        window.addEventListener('pageshow', function () {
+            updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
+        });
 
         function updateButtonEmoji(theme) {
             themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
@@ -897,11 +919,13 @@
                 document.documentElement.setAttribute('data-theme', 'dark');
                 localStorage.setItem(DARK_THEME_KEY, 'true');
                 localStorage.removeItem(LIGHT_THEME_KEY);
+                updateAppChromeTheme('dark');
                 updateButtonEmoji('dark');
             } else {
                 document.documentElement.setAttribute('data-theme', 'light');
                 localStorage.setItem(LIGHT_THEME_KEY, 'true');
                 localStorage.removeItem(DARK_THEME_KEY);
+                updateAppChromeTheme('light');
                 updateButtonEmoji('light');
             }
         });

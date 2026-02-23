@@ -8,6 +8,22 @@ document.addEventListener("DOMContentLoaded", function() {
 	const storedTheme = localStorage.getItem(THEME_KEY);
 	const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
 	document.documentElement.setAttribute('data-theme', initialTheme);
+	updateAppChromeTheme(initialTheme);
+
+
+	function updateAppChromeTheme(theme) {
+		const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+		const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+		const isDarkTheme = theme === 'dark';
+
+		if (themeColorMeta) {
+			themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+		}
+
+		if (appleStatusBarMeta) {
+			appleStatusBarMeta.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
+		}
+	}
 
 	function updateThemeButton(theme) {
 		if (themeButton) {
@@ -17,12 +33,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	updateThemeButton(initialTheme);
 
+	window.addEventListener('pageshow', function() {
+		const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+		updateAppChromeTheme(currentTheme);
+	});
+
 	if (themeButton) {
 		themeButton.addEventListener('click', function() {
 			const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
 			const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
 			document.documentElement.setAttribute('data-theme', nextTheme);
 			localStorage.setItem(THEME_KEY, nextTheme);
+			updateAppChromeTheme(nextTheme);
 			updateThemeButton(nextTheme);
 			lastPlotState.data = null;
 			lastPlotState.layout = null;
