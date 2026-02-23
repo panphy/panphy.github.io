@@ -96,15 +96,11 @@
             --font-mono: 'JetBrains Mono', monospace;
         }
 
-        html {
-            background-color: var(--bg-color);
-        }
-
         body {
             font-family: var(--font-sans);
             margin: 0;
             padding: 0;
-            background: transparent;
+            background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
@@ -651,28 +647,24 @@
             var time = 0;
 
             // Mouse-driven mass
-            var mouseX = w * 0.5;
-            var mouseY = h * 0.5;
-            var activeX = mouseX;
-            var activeY = mouseY;
-            var hasInteracted = false;
+            var mouseX = 0;
+            var mouseY = 0;
+            var activeX = 0;
+            var activeY = 0;
             var strength = 120;
             var massRadius = 180;
 
             document.addEventListener('mousemove', function (e) {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
-                hasInteracted = true;
             });
             document.addEventListener('touchmove', function (e) {
                 mouseX = e.touches[0].clientX;
                 mouseY = e.touches[0].clientY;
-                hasInteracted = true;
             }, { passive: true });
             document.addEventListener('touchstart', function (e) {
                 mouseX = e.touches[0].clientX;
                 mouseY = e.touches[0].clientY;
-                hasInteracted = true;
             }, { passive: true });
 
             function resize() {
@@ -688,15 +680,15 @@
             function getGridColor() {
                 var theme = document.documentElement.getAttribute('data-theme');
                 return theme === 'dark'
-                    ? 'rgba(162, 155, 254, 0.08)'
-                    : 'rgba(108, 92, 231, 0.07)';
+                    ? 'rgba(162, 155, 254, 0.12)'
+                    : 'rgba(108, 92, 231, 0.10)';
             }
 
             function getNodeColor() {
                 var theme = document.documentElement.getAttribute('data-theme');
                 return theme === 'dark'
-                    ? 'rgba(162, 155, 254, 0.15)'
-                    : 'rgba(108, 92, 231, 0.12)';
+                    ? 'rgba(162, 155, 254, 0.25)'
+                    : 'rgba(108, 92, 231, 0.18)';
             }
 
             function warp(gx, gy, t) {
@@ -786,6 +778,11 @@
             }
 
             resize();
+            // Start mass off-screen so the grid is flat until the user moves their mouse
+            mouseX = -9999;
+            mouseY = -9999;
+            activeX = -9999;
+            activeY = -9999;
             window.addEventListener('resize', resize);
             // Respect prefers-reduced-motion
             var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
