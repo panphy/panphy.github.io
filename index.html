@@ -101,104 +101,12 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
+            background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+            background-size: 30px 30px;
+            /* Dot pattern */
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden;
-            position: relative;
-        }
-
-        /* CSS Grid Animation */
-        .bg-grid-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-            overflow: hidden;
-            background-color: var(--bg-color);
-        }
-
-        .bg-grid {
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            /* Light theme grid color: very faint dark blue/gray */
-            background-image:
-                linear-gradient(rgba(45, 52, 54, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(45, 52, 54, 0.04) 1px, transparent 1px);
-            background-size: 80px 80px;
-            animation: gridMove 40s linear infinite;
-        }
-
-        [data-theme="dark"] .bg-grid {
-            /* Dark theme grid color: faint white/light blue */
-            background-image:
-                linear-gradient(rgba(223, 230, 233, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(223, 230, 233, 0.06) 1px, transparent 1px);
-        }
-
-        /* Add a secondary, larger sub-grid for more depth */
-        .bg-grid::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(rgba(45, 52, 54, 0.08) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(45, 52, 54, 0.08) 2px, transparent 2px);
-            background-size: 320px 320px;
-        }
-
-        [data-theme="dark"] .bg-grid::after {
-            background-image:
-                linear-gradient(rgba(223, 230, 233, 0.1) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(223, 230, 233, 0.1) 2px, transparent 2px);
-        }
-
-        /* Subtle vertical pulse overlay */
-        .bg-pulse {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, transparent 0%, rgba(108, 92, 231, 0.03) 50%, transparent 100%);
-            background-size: 100% 200%;
-            animation: pulseWave 15s ease-in-out infinite alternate;
-        }
-
-        [data-theme="dark"] .bg-pulse {
-            background: linear-gradient(180deg, transparent 0%, rgba(162, 155, 254, 0.05) 50%, transparent 100%);
-        }
-
-        @keyframes gridMove {
-            0% {
-                transform: translateY(0);
-            }
-
-            100% {
-                transform: translateY(320px);
-            }
-
-            /* Move exactly one large cell size to loop perfectly */
-        }
-
-        @keyframes pulseWave {
-            0% {
-                background-position: 0% 0%;
-                opacity: 0.2;
-            }
-
-            100% {
-                background-position: 0% 100%;
-                opacity: 1;
-            }
         }
 
         /* Hero Header */
@@ -559,12 +467,6 @@
 </head>
 
 <body>
-    <!-- Background Animation (Grid Interpolation via CSS) -->
-    <div class="bg-grid-container">
-        <div class="bg-pulse"></div>
-        <div class="bg-grid"></div>
-    </div>
-
     <nav>
         <a href="#tools">Tools</a>
         <a href="#simulations">Sims</a>
