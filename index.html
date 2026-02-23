@@ -697,24 +697,18 @@
                 };
             }
 
-            function setPointerTarget(x, y, snapActive) {
+            function setPointerTarget(x, y) {
                 mouseX = x;
                 mouseY = y;
-                if (snapActive) {
-                    activeX = x;
-                    activeY = y;
-                }
                 wake();
             }
 
             function handlePointerInput(x, y) {
                 if (!hasPointerInteraction) {
                     hasPointerInteraction = true;
-                    // Avoid a long startup chase from the landing anchor.
-                    setPointerTarget(x, y, true);
-                    return;
                 }
-                setPointerTarget(x, y, false);
+                // Keep first interaction smooth from the landing anchor.
+                setPointerTarget(x, y);
             }
 
             document.addEventListener('mousemove', function (e) {
@@ -778,8 +772,8 @@
                 ctx.clearRect(0, 0, w, h);
 
                 // Slowly chase the cursor (lower = more sluggish)
-                activeX += (mouseX - activeX) * 0.02;
-                activeY += (mouseY - activeY) * 0.02;
+                activeX += (mouseX - activeX) * 0.012;
+                activeY += (mouseY - activeY) * 0.012;
 
                 var lineColor = getGridColor();
                 var nodeColor = getNodeColor();
