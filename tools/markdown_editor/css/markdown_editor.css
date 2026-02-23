@@ -85,6 +85,11 @@ body {
   overflow-x: hidden;
 }
 
+body.history-modal-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 a {
   color: #ff5f1f;
   text-decoration: none;
@@ -1655,6 +1660,7 @@ mjx-container.copy-failed::after {
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
+  overscroll-behavior: contain;
   transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
@@ -1911,6 +1917,8 @@ mjx-container.copy-failed::after {
 .history-list {
   max-height: 400px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -2041,6 +2049,8 @@ mjx-container.copy-failed::after {
   word-break: break-word;
   max-height: 8.4em;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding-right: 6px;
   scrollbar-gutter: stable;
   font-family: var(--font-mono);

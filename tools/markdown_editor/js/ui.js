@@ -863,24 +863,75 @@ export function showHistoryModal(snapshots) {
 
     const listContainer = document.createElement('div');
     listContainer.className = 'history-list';
-    content.addEventListener('wheel', (event) => {
+    let lastTouchY = null;
+
+    const getTargetElement = (event) => {
+      if (event.target instanceof Element) return event.target;
+      if (event.target && event.target.parentElement instanceof Element) {
+        return event.target.parentElement;
+      }
+      return null;
+    };
+
+    const scrollHistoryListBy = (deltaY) => {
+      if (!Number.isFinite(deltaY) || deltaY === 0) return;
+      const maxListScrollTop = Math.max(0, listContainer.scrollHeight - listContainer.clientHeight);
+      if (maxListScrollTop <= 0) return;
+      const nextScrollTop = Math.max(0, Math.min(maxListScrollTop, listContainer.scrollTop + deltaY));
+      listContainer.scrollTop = nextScrollTop;
+    };
+
+    overlay.addEventListener('wheel', (event) => {
+      if (!isTopMostModalOverlay(overlay)) return;
       if (Math.abs(event.deltaY) < Math.abs(event.deltaX)) return;
 
-      const targetElement = event.target instanceof Element
-        ? event.target
-        : event.target && event.target.parentElement
-          ? event.target.parentElement
-          : null;
-
-      // Keep per-preview scrolling behavior intact.
+      const targetElement = getTargetElement(event);
       if (targetElement && targetElement.closest('.history-item-preview')) return;
 
-      const maxListScrollTop = listContainer.scrollHeight - listContainer.clientHeight;
-      if (maxListScrollTop <= 0) return;
+      event.preventDefault();
+      scrollHistoryListBy(event.deltaY);
+    }, { passive: false });
+
+    overlay.addEventListener('touchstart', (event) => {
+      if (!isTopMostModalOverlay(overlay) || event.touches.length !== 1) {
+        lastTouchY = null;
+        return;
+      }
+      lastTouchY = event.touches[0].clientY;
+    }, { passive: true });
+
+    overlay.addEventListener('touchmove', (event) => {
+      if (!isTopMostModalOverlay(overlay) || event.touches.length !== 1) {
+        lastTouchY = null;
+        return;
+      }
+
+      const currentTouchY = event.touches[0].clientY;
+      if (!Number.isFinite(lastTouchY)) {
+        lastTouchY = currentTouchY;
+        return;
+      }
+
+      const targetElement = getTargetElement(event);
+      if (targetElement && targetElement.closest('.history-item-preview')) {
+        lastTouchY = currentTouchY;
+        return;
+      }
+
+      const deltaY = lastTouchY - currentTouchY;
+      lastTouchY = currentTouchY;
 
       event.preventDefault();
-      listContainer.scrollTop += event.deltaY;
+      scrollHistoryListBy(deltaY);
     }, { passive: false });
+
+    overlay.addEventListener('touchend', () => {
+      lastTouchY = null;
+    });
+
+    overlay.addEventListener('touchcancel', () => {
+      lastTouchY = null;
+    });
 
     const selectHistoryItem = (item, snapshotContent) => {
       if (selectedHistoryItem && selectedHistoryItem !== item) {
@@ -1003,6 +1054,7 @@ export function showHistoryModal(snapshots) {
     content.appendChild(buttons);
 
     overlay.appendChild(content);
+    document.body.classList.add('history-modal-open');
     document.body.appendChild(overlay);
 
     const closeModal = (result) => {
@@ -1010,6 +1062,7 @@ export function showHistoryModal(snapshots) {
       closed = true;
       document.removeEventListener('keydown', onKeyDown);
       overlay.classList.remove('visible');
+      document.body.classList.remove('history-modal-open');
       setTimeout(() => {
         if (overlay.parentNode) {
           document.body.removeChild(overlay);
