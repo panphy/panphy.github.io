@@ -464,8 +464,8 @@
             }
         }
 
-        /* Floating Physics Symbols Background */
-        .physics-bg {
+        /* Spacetime Grid Background */
+        .spacetime-bg {
             position: fixed;
             top: 0;
             left: 0;
@@ -476,35 +476,13 @@
             overflow: hidden;
         }
 
-        .physics-bg text {
-            fill: var(--brand-primary);
-            font-family: 'Georgia', 'Times New Roman', serif;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: var(--sym-opacity);
-            }
-            90% {
-                opacity: var(--sym-opacity);
-            }
-            100% {
-                transform: translateY(calc(-100vh - 60px)) rotate(var(--sym-rotate));
-                opacity: 0;
-            }
-        }
-
-        .physics-bg text {
-            animation: floatUp var(--sym-duration) var(--sym-delay) linear infinite;
-            opacity: 0;
+        .spacetime-bg canvas {
+            width: 100%;
+            height: 100%;
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .physics-bg { display: none; }
+            .spacetime-bg { display: none; }
         }
 
         /* Ensure content sits above the background */
@@ -516,7 +494,9 @@
 </head>
 
 <body>
-    <svg class="physics-bg" aria-hidden="true"></svg>
+    <div class="spacetime-bg" aria-hidden="true">
+        <canvas id="spacetime-canvas"></canvas>
+    </div>
 
     <nav>
         <a href="#tools">Tools</a>
@@ -659,47 +639,155 @@
     </footer>
 
     <script>
-        // Floating Physics Symbols
+        // Spacetime Grid Warp Animation
         (function () {
-            var svgNS = 'http://www.w3.org/2000/svg';
-            var bg = document.querySelector('.physics-bg');
-            if (!bg) return;
+            var canvas = document.getElementById('spacetime-canvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var dpr = window.devicePixelRatio || 1;
+            var w, h, cols, rows;
+            var spacing = 40;
+            var time = 0;
 
-            var symbols = [
-                // Greek letters
-                'α', 'β', 'γ', 'δ', 'θ', 'λ', 'μ', 'π', 'σ', 'φ', 'ω',
-                'Σ', 'Δ', 'Ω',
-                // Equations
-                'F=ma', 'E=mc²', 'v=fλ', 'p=mv', 'PV=nRT',
-                'a²+b²=c²', 'F=kx', 'W=Fd',
-                // Math symbols
-                '∫', '∂', '∇', '∞', '±', '√',
-                // Units & constants
-                'ℏ', 'eV', 'Hz', 'kg'
+            // Warp sources — masses that bend the grid
+            var masses = [
+                { x: 0.3, y: 0.4, strength: 120, radius: 180 },
+                { x: 0.7, y: 0.6, strength: 80, radius: 140 }
+            ];
+            // Slow drift for the masses
+            var drifts = [
+                { dx: 0.012, dy: 0.008 },
+                { dx: -0.009, dy: 0.011 }
             ];
 
-            var count = Math.min(30, Math.floor(window.innerWidth / 50));
+            function resize() {
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w * dpr;
+                canvas.height = h * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                cols = Math.ceil(w / spacing) + 2;
+                rows = Math.ceil(h / spacing) + 2;
+            }
 
-            for (var i = 0; i < count; i++) {
-                var text = document.createElementNS(svgNS, 'text');
-                var sym = symbols[Math.floor(Math.random() * symbols.length)];
-                var size = 14 + Math.random() * 20;
-                var x = Math.random() * 100;
-                var duration = 25 + Math.random() * 35;
-                var delay = -(Math.random() * duration);
-                var opacity = 0.04 + Math.random() * 0.05;
-                var rotate = -20 + Math.random() * 40;
+            function getGridColor() {
+                var theme = document.documentElement.getAttribute('data-theme');
+                return theme === 'dark'
+                    ? 'rgba(162, 155, 254, 0.08)'
+                    : 'rgba(108, 92, 231, 0.07)';
+            }
 
-                text.textContent = sym;
-                text.setAttribute('x', x + '%');
-                text.setAttribute('y', 'calc(100% + 40px)');
-                text.setAttribute('font-size', size + 'px');
-                text.style.setProperty('--sym-duration', duration + 's');
-                text.style.setProperty('--sym-delay', delay + 's');
-                text.style.setProperty('--sym-opacity', opacity);
-                text.style.setProperty('--sym-rotate', rotate + 'deg');
+            function getNodeColor() {
+                var theme = document.documentElement.getAttribute('data-theme');
+                return theme === 'dark'
+                    ? 'rgba(162, 155, 254, 0.15)'
+                    : 'rgba(108, 92, 231, 0.12)';
+            }
 
-                bg.appendChild(text);
+            function warp(gx, gy, t) {
+                var dx = 0, dy = 0;
+                for (var m = 0; m < masses.length; m++) {
+                    var mx = masses[m].x * w;
+                    var my = masses[m].y * h;
+                    var distX = gx - mx;
+                    var distY = gy - my;
+                    var dist = Math.sqrt(distX * distX + distY * distY);
+                    if (dist < 1) dist = 1;
+                    var strength = masses[m].strength;
+                    var radius = masses[m].radius;
+                    var falloff = Math.exp(-(dist * dist) / (radius * radius));
+                    // Pull toward mass + subtle ripple
+                    var ripple = Math.sin(dist * 0.04 - t * 1.5) * 0.3;
+                    var pull = (strength * falloff * (1 + ripple)) / (dist + 50);
+                    dx -= distX * pull;
+                    dy -= distY * pull;
+                }
+                return { x: gx + dx, y: gy + dy };
+            }
+
+            function draw() {
+                time += 0.008;
+                ctx.clearRect(0, 0, w, h);
+
+                // Drift masses slowly
+                for (var m = 0; m < masses.length; m++) {
+                    masses[m].x += drifts[m].dx * 0.001;
+                    masses[m].y += drifts[m].dy * 0.001;
+                    // Bounce off edges
+                    if (masses[m].x < 0.15 || masses[m].x > 0.85) drifts[m].dx *= -1;
+                    if (masses[m].y < 0.15 || masses[m].y > 0.85) drifts[m].dy *= -1;
+                }
+
+                var lineColor = getGridColor();
+                var nodeColor = getNodeColor();
+
+                // Compute warped grid positions
+                var grid = [];
+                for (var r = 0; r <= rows; r++) {
+                    grid[r] = [];
+                    for (var c = 0; c <= cols; c++) {
+                        var gx = c * spacing;
+                        var gy = r * spacing;
+                        grid[r][c] = warp(gx, gy, time);
+                    }
+                }
+
+                // Draw grid lines
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+
+                // Horizontal lines
+                for (var r = 0; r <= rows; r++) {
+                    var p = grid[r][0];
+                    ctx.moveTo(p.x, p.y);
+                    for (var c = 1; c <= cols; c++) {
+                        p = grid[r][c];
+                        ctx.lineTo(p.x, p.y);
+                    }
+                }
+
+                // Vertical lines
+                for (var c = 0; c <= cols; c++) {
+                    var p = grid[0][c];
+                    ctx.moveTo(p.x, p.y);
+                    for (var r = 1; r <= rows; r++) {
+                        p = grid[r][c];
+                        ctx.lineTo(p.x, p.y);
+                    }
+                }
+
+                ctx.stroke();
+
+                // Draw subtle nodes at intersections near warp centers
+                ctx.fillStyle = nodeColor;
+                for (var r = 0; r <= rows; r++) {
+                    for (var c = 0; c <= cols; c++) {
+                        var p = grid[r][c];
+                        var origX = c * spacing;
+                        var origY = r * spacing;
+                        var distortion = Math.sqrt(
+                            (p.x - origX) * (p.x - origX) +
+                            (p.y - origY) * (p.y - origY)
+                        );
+                        if (distortion > 2) {
+                            var radius = Math.min(2.5, 0.8 + distortion * 0.08);
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            resize();
+            window.addEventListener('resize', resize);
+            // Respect prefers-reduced-motion
+            var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+            if (!mq.matches) {
+                requestAnimationFrame(draw);
             }
         })();
     </script>
