@@ -107,7 +107,7 @@
             position: relative;
         }
 
-        /* SVG Background Animation */
+        /* CSS Grid Animation */
         .bg-grid-container {
             position: fixed;
             top: 0;
@@ -117,51 +117,86 @@
             z-index: -1;
             pointer-events: none;
             overflow: hidden;
+            background-color: var(--bg-color);
         }
 
         .bg-grid {
-            width: 200vw;
-            height: 200vh;
             position: absolute;
-            top: -50vh;
-            left: -50vw;
-            stroke: var(--text-main);
-            opacity: 0.03;
-            /* Very subtle */
-            stroke-width: 1px;
-            animation: gridDrift 60s linear infinite;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            /* Light theme grid color: very faint dark blue/gray */
+            background-image:
+                linear-gradient(rgba(45, 52, 54, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 52, 54, 0.04) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: gridMove 40s linear infinite;
         }
 
         [data-theme="dark"] .bg-grid {
-            opacity: 0.05;
+            /* Dark theme grid color: faint white/light blue */
+            background-image:
+                linear-gradient(rgba(223, 230, 233, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(223, 230, 233, 0.06) 1px, transparent 1px);
         }
 
-        .grid-line-vertical {
-            animation: pulseLine 8s ease-in-out infinite alternate;
+        /* Add a secondary, larger sub-grid for more depth */
+        .bg-grid::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(45, 52, 54, 0.08) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(45, 52, 54, 0.08) 2px, transparent 2px);
+            background-size: 320px 320px;
         }
 
-        .grid-line-horizontal {
-            animation: pulseLine 11s ease-in-out infinite alternate-reverse;
+        [data-theme="dark"] .bg-grid::after {
+            background-image:
+                linear-gradient(rgba(223, 230, 233, 0.1) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(223, 230, 233, 0.1) 2px, transparent 2px);
         }
 
-        @keyframes gridDrift {
+        /* Subtle vertical pulse overlay */
+        .bg-pulse {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent 0%, rgba(108, 92, 231, 0.03) 50%, transparent 100%);
+            background-size: 100% 200%;
+            animation: pulseWave 15s ease-in-out infinite alternate;
+        }
+
+        [data-theme="dark"] .bg-pulse {
+            background: linear-gradient(180deg, transparent 0%, rgba(162, 155, 254, 0.05) 50%, transparent 100%);
+        }
+
+        @keyframes gridMove {
             0% {
-                transform: translate(0, 0);
+                transform: translateY(0);
             }
 
             100% {
-                transform: translate(100px, 100px);
+                transform: translateY(320px);
             }
 
-            /* Shifts the exact size of one grid cell (100x100) to loop seamlessly */
+            /* Move exactly one large cell size to loop perfectly */
         }
 
-        @keyframes pulseLine {
+        @keyframes pulseWave {
             0% {
+                background-position: 0% 0%;
                 opacity: 0.2;
             }
 
             100% {
+                background-position: 0% 100%;
                 opacity: 1;
             }
         }
@@ -524,24 +559,10 @@
 </head>
 
 <body>
-    <!-- Background Animation (Grid Interpolation) -->
+    <!-- Background Animation (Grid Interpolation via CSS) -->
     <div class="bg-grid-container">
-        <svg class="bg-grid" xmlns="http://www.w3.org/2000/svg">
-            <!-- Defines the base 100x100 grid pattern -->
-            <defs>
-                <pattern id="baseGrid" width="100" height="100" patternUnits="userSpaceOnUse">
-                    <path class="grid-line-horizontal" d="M 0 0 L 100 0" fill="none" />
-                    <path class="grid-line-vertical" d="M 0 0 L 0 100" fill="none" />
-                </pattern>
-                <pattern id="subGrid" width="33.33" height="33.33" patternUnits="userSpaceOnUse">
-                    <rect width="33.33" height="33.33" fill="none" stroke-width="0.5" stroke-dasharray="2 4" />
-                </pattern>
-            </defs>
-
-            <!-- Apply patterns to a rectangle covering the entire SVG -->
-            <rect width="100%" height="100%" fill="url(#subGrid)" />
-            <rect width="100%" height="100%" fill="url(#baseGrid)" />
-        </svg>
+        <div class="bg-pulse"></div>
+        <div class="bg-grid"></div>
     </div>
 
     <nav>
