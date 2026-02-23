@@ -483,9 +483,13 @@
         }
 
         /* Ensure content sits above the background */
-        nav, header, .section, footer {
+        header, .section, footer {
             position: relative;
             z-index: 1;
+        }
+
+        nav {
+            z-index: 1000;
         }
     </style>
 </head>
