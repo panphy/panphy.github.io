@@ -583,6 +583,83 @@
       font-size: 0.98rem;
     }
 
+    .phase-toggle-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: 0.25rem;
+    }
+
+    .phase-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 20px;
+      flex: 0 0 auto;
+    }
+
+    .phase-toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      margin: 0;
+    }
+
+    .phase-toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cfd5df;
+      transition: 0.3s ease;
+      border-radius: 20px;
+    }
+
+    [data-theme="dark"] .phase-toggle-slider {
+      background-color: #4b5563;
+    }
+
+    .phase-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: 0.3s ease;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .phase-toggle-switch input:checked + .phase-toggle-slider {
+      background-color: var(--brand-accent);
+    }
+
+    [data-theme="dark"] .phase-toggle-switch input:checked + .phase-toggle-slider {
+      background-color: #53c7c8;
+    }
+
+    .phase-toggle-switch input:checked + .phase-toggle-slider:before {
+      transform: translateX(22px);
+    }
+
+    .phase-toggle-switch input:disabled + .phase-toggle-slider {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .phase-toggle-text {
+      min-width: 30px;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      user-select: none;
+    }
+
     .channel-actions {
       display: inline-flex;
       gap: 0.45rem;
@@ -1080,11 +1157,8 @@
     const BASE_WINDOW = 0.01;
     const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
     const TWO_PI = Math.PI * 2;
-    const DEG_TO_RAD = Math.PI / 180;
-    const RAD_TO_DEG = 180 / Math.PI;
-    const PHASE_SNAP_DEGREES = 8;
-    const MIN_PHASE_DEGREES = -180;
-    const MAX_PHASE_DEGREES = 180;
+    const PHASE_MODE_IN = 'in';
+    const PHASE_MODE_ANTI = 'anti';
 
     let resumePromise = null;
 
@@ -1095,11 +1169,6 @@
         normalized += TWO_PI;
       }
       return normalized;
-    }
-
-    function normalizeSignedPhase(phase) {
-      const normalized = normalizePhase(phase);
-      return normalized > Math.PI ? normalized - TWO_PI : normalized;
     }
 
     function advanceChannelPhase(channel, now = audioCtx.currentTime) {
@@ -1130,76 +1199,63 @@
       return oscillator;
     }
 
-    function formatPhaseOffsetDegrees(phaseDegrees, isReference = false) {
-      const rounded = Math.round(phaseDegrees);
-      if (isReference) {
-        return '0° (ref)';
-      }
-      if (rounded === 0) {
-        return '0°';
-      }
-      return `${rounded > 0 ? '+' : ''}${rounded}°`;
+    function getPhaseOffsetForMode(mode) {
+      return mode === PHASE_MODE_ANTI ? Math.PI : 0;
     }
 
-    function updateChannelPhaseControls(channel, isReference) {
-      if (!channel || !channel.phaseSlider || !channel.phaseValue) return;
-      const displayDegrees = isReference ? 0 : Math.round(channel.phaseOffsetDeg || 0);
-      channel.phaseSlider.value = String(displayDegrees);
-      channel.phaseSlider.disabled = isReference;
-      channel.phaseValue.textContent = formatPhaseOffsetDegrees(displayDegrees, isReference);
-      channel.phaseSlider.title = isReference
-        ? 'Reference channel (fixed at 0°)'
-        : 'Phase difference relative to Channel 1';
+    function updateChannelPhaseToggle(channel, isReference) {
+      if (!channel || !channel.phaseToggle || !channel.phaseToggleText) return;
+      const isAntiPhase = channel.phaseMode === PHASE_MODE_ANTI;
+      channel.phaseToggle.checked = isAntiPhase;
+      channel.phaseToggle.disabled = isReference;
+      channel.phaseToggle.title = isReference
+        ? 'Reference channel (fixed in-phase)'
+        : 'Toggle in-phase / anti-phase relative to Channel 1';
+      channel.phaseToggleText.textContent = isReference ? 'Ref' : (isAntiPhase ? 'Anti' : 'In');
     }
 
-    function syncPhaseOffsetsToReference() {
+    function syncPhaseModesToReference() {
       if (channels.length === 0) return;
 
       const now = audioCtx.currentTime;
       const referenceChannel = channels[0];
       const referencePhase = advanceChannelPhase(referenceChannel, now);
+      referenceChannel.phaseMode = PHASE_MODE_IN;
       referenceChannel.phaseOffsetRad = 0;
-      referenceChannel.phaseOffsetDeg = 0;
-      updateChannelPhaseControls(referenceChannel, true);
+      referenceChannel.phase = normalizePhase(referencePhase);
+      referenceChannel.phaseTimestamp = now;
+      applyOscillatorPhase(referenceChannel.oscillator, referenceChannel.phase);
+      updateChannelPhaseToggle(referenceChannel, true);
 
       for (let i = 1; i < channels.length; i += 1) {
         const channel = channels[i];
-        const channelPhase = advanceChannelPhase(channel, now);
-        const relativePhase = normalizeSignedPhase(channelPhase - referencePhase);
-        const relativeDegrees = Math.round(relativePhase * RAD_TO_DEG);
-        channel.phaseOffsetDeg = relativeDegrees;
-        channel.phaseOffsetRad = relativeDegrees * DEG_TO_RAD;
+        channel.phaseMode = channel.phaseMode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
+        channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
         channel.phase = normalizePhase(referencePhase + channel.phaseOffsetRad);
         channel.phaseTimestamp = now;
         applyOscillatorPhase(channel.oscillator, channel.phase);
-        updateChannelPhaseControls(channel, false);
+        updateChannelPhaseToggle(channel, false);
       }
     }
 
-    function setChannelPhaseOffsetRelativeToReference(channel, rawDegrees) {
+    function setChannelPhaseModeRelativeToReference(channel, mode) {
       if (!channel) return;
       const referenceChannel = channels[0] || null;
       if (!referenceChannel || channel === referenceChannel) {
-        channel.phaseOffsetDeg = 0;
+        channel.phaseMode = PHASE_MODE_IN;
         channel.phaseOffsetRad = 0;
-        updateChannelPhaseControls(channel, true);
+        updateChannelPhaseToggle(channel, true);
         return;
-      }
-
-      const safeDegrees = Number.isFinite(rawDegrees) ? rawDegrees : 0;
-      let phaseDegrees = Math.round(clamp(safeDegrees, MIN_PHASE_DEGREES, MAX_PHASE_DEGREES));
-      if (Math.abs(phaseDegrees) <= PHASE_SNAP_DEGREES) {
-        phaseDegrees = 0;
       }
 
       const now = audioCtx.currentTime;
       const referencePhase = advanceChannelPhase(referenceChannel, now);
-      channel.phaseOffsetDeg = phaseDegrees;
-      channel.phaseOffsetRad = phaseDegrees * DEG_TO_RAD;
+      channel.phaseMode = mode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
+      channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
       channel.phase = normalizePhase(referencePhase + channel.phaseOffsetRad);
       channel.phaseTimestamp = now;
       applyOscillatorPhase(channel.oscillator, channel.phase);
-      updateChannelPhaseControls(channel, false);
+      updateChannelPhaseToggle(channel, false);
     }
 
     function setAudioBlockedHint() {
@@ -1472,6 +1528,12 @@
       channel.freqSlider.value = String(frequency);
       channel.freqNumber.value = String(frequency);
       channel.freqValue.textContent = `${frequency} Hz`;
+
+      if (channels[0] === channel) {
+        syncPhaseModesToReference();
+      } else {
+        setChannelPhaseModeRelativeToReference(channel, channel.phaseMode);
+      }
     }
 
     async function toggleChannel(channelId) {
@@ -1505,7 +1567,7 @@
       channel.card.remove();
 
       refreshChannelTitles();
-      syncPhaseOffsetsToReference();
+      syncPhaseModesToReference();
       refreshSummary();
 
       if (channels.length === 0) {
@@ -1541,8 +1603,8 @@
       const now = audioCtx.currentTime;
       const referenceChannel = channels[0] || null;
       const initialFrequency = Number.isFinite(options.frequency) ? options.frequency : 440;
-      const initialPhaseOffsetDegrees = 0;
-      const initialPhaseOffset = initialPhaseOffsetDegrees * DEG_TO_RAD;
+      const initialPhaseMode = PHASE_MODE_IN;
+      const initialPhaseOffset = getPhaseOffsetForMode(initialPhaseMode);
       const initialPhase = referenceChannel
         ? normalizePhase(advanceChannelPhase(referenceChannel, now) + initialPhaseOffset)
         : 0;
@@ -1551,7 +1613,7 @@
         frequency: Math.round(clamp(initialFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
         isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
         waveTime: referenceChannel ? referenceChannel.waveTime : 0,
-        phaseOffsetDeg: initialPhaseOffsetDegrees,
+        phaseMode: initialPhaseMode,
         phaseOffsetRad: initialPhaseOffset,
         phase: initialPhase,
         phaseTimestamp: now
@@ -1588,7 +1650,30 @@
       statusChip.className = 'status-chip paused';
       statusChip.textContent = 'Paused';
 
+      const phaseToggleInline = document.createElement('div');
+      phaseToggleInline.className = 'phase-toggle-inline';
+
+      const phaseToggleSwitch = document.createElement('label');
+      phaseToggleSwitch.className = 'phase-toggle-switch';
+
+      const phaseToggle = document.createElement('input');
+      phaseToggle.type = 'checkbox';
+
+      const phaseToggleSlider = document.createElement('span');
+      phaseToggleSlider.className = 'phase-toggle-slider';
+
+      phaseToggleSwitch.appendChild(phaseToggle);
+      phaseToggleSwitch.appendChild(phaseToggleSlider);
+
+      const phaseToggleText = document.createElement('span');
+      phaseToggleText.className = 'phase-toggle-text';
+      phaseToggleText.textContent = 'In';
+
+      phaseToggleInline.appendChild(phaseToggleSwitch);
+      phaseToggleInline.appendChild(phaseToggleText);
+
       titleWrap.appendChild(title);
+      titleWrap.appendChild(phaseToggleInline);
       titleWrap.appendChild(statusChip);
 
       const actions = document.createElement('div');
@@ -1640,29 +1725,6 @@
       freqMeta.appendChild(freqNumber);
       freqMeta.appendChild(freqValue);
 
-      const phaseRow = document.createElement('div');
-      phaseRow.className = 'frequency-row';
-
-      const phaseLabel = document.createElement('label');
-      phaseLabel.className = 'freq-label';
-      phaseLabel.textContent = 'Phase vs Ch1';
-
-      const phaseSlider = document.createElement('input');
-      phaseSlider.type = 'range';
-      phaseSlider.min = String(MIN_PHASE_DEGREES);
-      phaseSlider.max = String(MAX_PHASE_DEGREES);
-      phaseSlider.step = '1';
-      phaseSlider.value = '0';
-
-      const phaseMeta = document.createElement('div');
-      phaseMeta.className = 'freq-meta';
-
-      const phaseValue = document.createElement('span');
-      phaseValue.className = 'freq-value';
-      phaseValue.textContent = '0°';
-
-      phaseMeta.appendChild(phaseValue);
-
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
@@ -1670,13 +1732,9 @@
       frequencyRow.appendChild(freqLabel);
       frequencyRow.appendChild(freqSlider);
       frequencyRow.appendChild(freqMeta);
-      phaseRow.appendChild(phaseLabel);
-      phaseRow.appendChild(phaseSlider);
-      phaseRow.appendChild(phaseMeta);
 
       card.appendChild(header);
       card.appendChild(frequencyRow);
-      card.appendChild(phaseRow);
       card.appendChild(canvas);
 
       channelsList.appendChild(card);
@@ -1688,8 +1746,8 @@
       channel.freqSlider = freqSlider;
       channel.freqNumber = freqNumber;
       channel.freqValue = freqValue;
-      channel.phaseSlider = phaseSlider;
-      channel.phaseValue = phaseValue;
+      channel.phaseToggle = phaseToggle;
+      channel.phaseToggleText = phaseToggleText;
       channel.canvas = canvas;
       channel.ctx = ctx;
 
@@ -1702,8 +1760,11 @@
         applyFrequency(channel, Number.isFinite(raw) ? raw : channel.frequency);
       });
 
-      phaseSlider.addEventListener('input', () => {
-        setChannelPhaseOffsetRelativeToReference(channel, parseFloat(phaseSlider.value));
+      phaseToggle.addEventListener('change', () => {
+        setChannelPhaseModeRelativeToReference(
+          channel,
+          phaseToggle.checked ? PHASE_MODE_ANTI : PHASE_MODE_IN
+        );
       });
 
       toggleBtn.addEventListener('click', () => {
@@ -1718,7 +1779,7 @@
 
       resizeCanvas(canvas);
       refreshChannelTitles();
-      syncPhaseOffsetsToReference();
+      syncPhaseModesToReference();
       syncChannelUi(channel);
       refreshSummary();
       return true;
