@@ -9,7 +9,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <script>
   (function() {
-    if (localStorage.getItem('theme') === 'markdown-dark') {
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem('theme');
+    } catch (_) {
+      savedTheme = null;
+    }
+
+    if (savedTheme === 'markdown-dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
       var tc = document.querySelector('meta[name="theme-color"]');
       var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');

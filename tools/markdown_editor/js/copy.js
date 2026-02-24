@@ -131,11 +131,19 @@ function markTableMathHint(table) {
 
 function isTouchCopyMode() {
   if (typeof window === 'undefined') return false;
+  const hasFinePointer = typeof window.matchMedia === 'function'
+    && (window.matchMedia('(any-pointer: fine)').matches
+      || window.matchMedia('(pointer: fine)').matches
+      || window.matchMedia('(any-hover: hover)').matches
+      || window.matchMedia('(hover: hover)').matches);
   const hasCoarsePointer = typeof window.matchMedia === 'function'
-    && window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    && (window.matchMedia('(any-pointer: coarse)').matches
+      || window.matchMedia('(pointer: coarse)').matches
+      || window.matchMedia('(hover: none)').matches);
   const hasTouchPoints = typeof navigator !== 'undefined'
     && Number.isFinite(navigator.maxTouchPoints)
     && navigator.maxTouchPoints > 0;
+  if (hasFinePointer) return false;
   return hasCoarsePointer || hasTouchPoints;
 }
 

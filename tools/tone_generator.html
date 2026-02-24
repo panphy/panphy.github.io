@@ -9,7 +9,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <script>
     (function() {
-      if (localStorage.getItem('tone-generator-dark')) {
+      var hasDarkPreference = false;
+      try {
+        hasDarkPreference = Boolean(localStorage.getItem('tone-generator-dark'));
+      } catch (_) {
+        hasDarkPreference = false;
+      }
+
+      if (hasDarkPreference) {
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
@@ -877,10 +884,31 @@
     const themeButton = document.getElementById('theme-button');
     const DARK_THEME_KEY = 'tone-generator-dark';
     const LIGHT_THEME_KEY = 'tone-generator-light';
+    function safeStorageGet(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (_) {
+        return null;
+      }
+    }
+    function safeStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (_) {
+        // Ignore storage errors so theme toggle still works for this session.
+      }
+    }
+    function safeStorageRemove(key) {
+      try {
+        localStorage.removeItem(key);
+      } catch (_) {
+        // Ignore storage errors so theme toggle still works for this session.
+      }
+    }
 
-    const currentTheme = localStorage.getItem(DARK_THEME_KEY)
+    const currentTheme = safeStorageGet(DARK_THEME_KEY)
       ? 'dark'
-      : localStorage.getItem(LIGHT_THEME_KEY)
+      : safeStorageGet(LIGHT_THEME_KEY)
         ? 'light'
         : 'light';
 
@@ -914,14 +942,14 @@
       let theme = document.documentElement.getAttribute('data-theme');
       if (theme === 'light') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem(DARK_THEME_KEY, 'true');
-        localStorage.removeItem(LIGHT_THEME_KEY);
+        safeStorageSet(DARK_THEME_KEY, 'true');
+        safeStorageRemove(LIGHT_THEME_KEY);
         updateAppChromeTheme('dark');
         updateButtonEmoji('dark');
       } else {
         document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem(LIGHT_THEME_KEY, 'true');
-        localStorage.removeItem(DARK_THEME_KEY);
+        safeStorageSet(LIGHT_THEME_KEY, 'true');
+        safeStorageRemove(DARK_THEME_KEY);
         updateAppChromeTheme('light');
         updateButtonEmoji('light');
       }
@@ -929,33 +957,7 @@
   </script>
 
   <script>
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
-
-    const channelBus = audioCtx.createGain();
-    channelBus.gain.value = 1;
-
-    const volumeGain = audioCtx.createGain();
-    volumeGain.gain.value = 1;
-
-    const combinedGain = audioCtx.createGain();
-    combinedGain.gain.value = 0;
-
-    const compressor = audioCtx.createDynamicsCompressor();
-    compressor.threshold.value = -22;
-    compressor.knee.value = 18;
-    compressor.ratio.value = 3;
-    compressor.attack.value = 0.004;
-    compressor.release.value = 0.2;
-
-    const stereoPanner = audioCtx.createStereoPanner();
-
-    channelBus.connect(volumeGain);
-    volumeGain.connect(combinedGain);
-    combinedGain.connect(compressor);
-    compressor.connect(stereoPanner);
-    stereoPanner.connect(audioCtx.destination);
-
+    (function () {
     const addChannelBtn = document.getElementById('addChannelBtn');
     const playAllBtn = document.getElementById('playAllBtn');
     const pauseAllBtn = document.getElementById('pauseAllBtn');
@@ -978,6 +980,94 @@
 
     const zoomScaleSlider = document.getElementById('zoomScaleSlider');
     const zoomScaleValue = document.getElementById('zoomScaleValue');
+    const transportHint = document.getElementById('transportHint');
+
+    const DEFAULT_TRANSPORT_HINT = 'Space key toggles combined play/pause.';
+    const AUDIO_BLOCKED_HINT = 'Tap or click to enable audio, then try again.';
+    const AUDIO_UNAVAILABLE_HINT = 'Audio output is unavailable in this browser.';
+
+    function setAudioUnavailableState(message) {
+      if (transportHint) {
+        transportHint.textContent = message || AUDIO_UNAVAILABLE_HINT;
+      }
+      if (combinedStateChip) {
+        combinedStateChip.className = 'status-chip paused';
+        combinedStateChip.textContent = 'Unavailable';
+      }
+      if (activeSummary) {
+        activeSummary.textContent = 'Audio unavailable';
+      }
+      [
+        addChannelBtn,
+        playAllBtn,
+        pauseAllBtn,
+        toggleCombinedBtn,
+        volumeSlider,
+        panningSlider,
+        timeScaleSlider,
+        zoomScaleSlider
+      ].forEach((control) => {
+        if (control) {
+          control.disabled = true;
+        }
+      });
+    }
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    if (AudioContextClass) {
+      try {
+        audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
+      } catch (_) {
+        audioCtx = null;
+      }
+    }
+
+    if (!audioCtx) {
+      setAudioUnavailableState(AUDIO_UNAVAILABLE_HINT);
+      return;
+    }
+
+    const channelBus = audioCtx.createGain();
+    channelBus.gain.value = 1;
+
+    const volumeGain = audioCtx.createGain();
+    volumeGain.gain.value = 1;
+
+    const combinedGain = audioCtx.createGain();
+    combinedGain.gain.value = 0;
+
+    const compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -22;
+    compressor.knee.value = 18;
+    compressor.ratio.value = 3;
+    compressor.attack.value = 0.004;
+    compressor.release.value = 0.2;
+
+    const supportsStereoPanner = typeof audioCtx.createStereoPanner === 'function';
+    const stereoPanner = supportsStereoPanner ? audioCtx.createStereoPanner() : null;
+
+    channelBus.connect(volumeGain);
+    volumeGain.connect(combinedGain);
+    combinedGain.connect(compressor);
+    if (stereoPanner) {
+      compressor.connect(stereoPanner);
+      stereoPanner.connect(audioCtx.destination);
+    } else {
+      compressor.connect(audioCtx.destination);
+      if (panningSlider) {
+        panningSlider.disabled = true;
+      }
+      if (panningValue) {
+        panningValue.textContent = 'N/A';
+      }
+    }
+
+    const MIN_FREQUENCY_HZ = 15;
+    const MAX_FREQUENCY_HZ = Math.max(
+      MIN_FREQUENCY_HZ,
+      Math.min(23000, Math.floor(audioCtx.sampleRate / 2) - 1)
+    );
 
     const channels = [];
     let nextChannelId = 1;
@@ -991,20 +1081,34 @@
 
     let resumePromise = null;
 
+    function setAudioBlockedHint() {
+      if (transportHint) {
+        transportHint.textContent = AUDIO_BLOCKED_HINT;
+      }
+    }
+
+    function setAudioReadyHint() {
+      if (transportHint) {
+        transportHint.textContent = DEFAULT_TRANSPORT_HINT;
+      }
+    }
+
     async function ensureAudioContext() {
       if (audioCtx.state === 'running') {
-        return;
+        return true;
       }
 
       if (!resumePromise) {
-        resumePromise = audioCtx.resume().catch(() => {
-          // Safari/iOS may block resume until a qualifying user gesture.
-        }).finally(() => {
-          resumePromise = null;
-        });
+        resumePromise = audioCtx.resume()
+          .then(() => audioCtx.state === 'running')
+          .catch(() => false)
+          .finally(() => {
+            resumePromise = null;
+          });
       }
 
-      await resumePromise;
+      const resumed = await resumePromise;
+      return resumed || audioCtx.state === 'running';
     }
 
     function setGain(node, targetValue) {
@@ -1038,8 +1142,12 @@
       const volumePercent = Math.round(parseFloat(volumeSlider.value) * 100);
       volumeValue.textContent = `${volumePercent}%`;
 
-      const pan = parseFloat(panningSlider.value);
-      panningValue.textContent = pan.toFixed(2);
+      if (stereoPanner) {
+        const pan = parseFloat(panningSlider.value);
+        panningValue.textContent = pan.toFixed(2);
+      } else {
+        panningValue.textContent = 'N/A';
+      }
 
       timeScaleValue.textContent = `${timeScale.toFixed(3)}x`;
       zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
@@ -1228,7 +1336,7 @@
     }
 
     function applyFrequency(channel, rawFrequency) {
-      const frequency = Math.round(clamp(rawFrequency, 15, 23000));
+      const frequency = Math.round(clamp(rawFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ));
       channel.frequency = frequency;
       channel.oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
       channel.freqSlider.value = String(frequency);
@@ -1242,7 +1350,12 @@
         return;
       }
 
-      await ensureAudioContext();
+      const ready = await ensureAudioContext();
+      if (!ready) {
+        setAudioBlockedHint();
+        return;
+      }
+      setAudioReadyHint();
       channel.isPlaying = !channel.isPlaying;
       setGain(channel.gainNode, channel.isPlaying ? 1 : 0);
       syncChannelUi(channel);
@@ -1290,9 +1403,10 @@
       clearEmptyState();
 
       const referenceChannel = channels.find(c => c.isPlaying) || channels[0];
+      const initialFrequency = Number.isFinite(options.frequency) ? options.frequency : 440;
       const channel = {
         id: nextChannelId,
-        frequency: options.frequency || 440,
+        frequency: Math.round(clamp(initialFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
         isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
         waveTime: referenceChannel ? referenceChannel.waveTime : 0
       };
@@ -1359,8 +1473,8 @@
 
       const freqSlider = document.createElement('input');
       freqSlider.type = 'range';
-      freqSlider.min = '15';
-      freqSlider.max = '23000';
+      freqSlider.min = String(MIN_FREQUENCY_HZ);
+      freqSlider.max = String(MAX_FREQUENCY_HZ);
       freqSlider.step = '1';
       freqSlider.value = String(channel.frequency);
 
@@ -1370,8 +1484,8 @@
       const freqNumber = document.createElement('input');
       freqNumber.className = 'freq-number';
       freqNumber.type = 'number';
-      freqNumber.min = '15';
-      freqNumber.max = '23000';
+      freqNumber.min = String(MIN_FREQUENCY_HZ);
+      freqNumber.max = String(MAX_FREQUENCY_HZ);
       freqNumber.step = '1';
       freqNumber.value = String(channel.frequency);
 
@@ -1436,7 +1550,12 @@
         return;
       }
 
-      await ensureAudioContext();
+      const ready = await ensureAudioContext();
+      if (!ready) {
+        setAudioBlockedHint();
+        return;
+      }
+      setAudioReadyHint();
       channels.forEach((channel) => {
         channel.isPlaying = targetPlaying;
         setGain(channel.gainNode, targetPlaying ? 1 : 0);
@@ -1451,11 +1570,17 @@
         return;
       }
 
-      combinedPlaying = !combinedPlaying;
-      if (combinedPlaying) {
-        await ensureAudioContext();
+      if (!combinedPlaying) {
+        const ready = await ensureAudioContext();
+        if (!ready) {
+          setAudioBlockedHint();
+          syncCombinedUi();
+          return;
+        }
+        setAudioReadyHint();
       }
 
+      combinedPlaying = !combinedPlaying;
       setGain(combinedGain, combinedPlaying ? 1 : 0);
       syncCombinedUi();
       channels.forEach((channel) => {
@@ -1514,7 +1639,12 @@
     }
 
     addChannelBtn.addEventListener('click', async () => {
-      await ensureAudioContext();
+      const ready = await ensureAudioContext();
+      if (!ready) {
+        setAudioBlockedHint();
+        return;
+      }
+      setAudioReadyHint();
       addChannel({ frequency: 440, isPlaying: true });
     });
 
@@ -1537,6 +1667,11 @@
     });
 
     panningSlider.addEventListener('input', () => {
+      if (!stereoPanner) {
+        panningSlider.value = '0';
+        updateControlReadouts();
+        return;
+      }
       let pan = parseFloat(panningSlider.value);
       if (Math.abs(pan) < 0.05) {
         pan = 0;
@@ -1570,7 +1705,11 @@
     });
 
     const unlockAudio = () => {
-      ensureAudioContext();
+      ensureAudioContext().then((ready) => {
+        if (ready) {
+          setAudioReadyHint();
+        }
+      });
     };
     window.addEventListener('pointerdown', unlockAudio, { passive: true });
     window.addEventListener('keydown', unlockAudio);
@@ -1588,6 +1727,7 @@
     renderEmptyState();
     addChannel({ frequency: 440, isPlaying: true });
     requestAnimationFrame(draw);
+    })();
   </script>
 </body>
 

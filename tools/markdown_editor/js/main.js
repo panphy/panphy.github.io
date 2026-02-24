@@ -1833,7 +1833,7 @@ function initMobileLayout() {
 }
 
 const mobileQuery = window.matchMedia('(max-width: 900px)');
-mobileQuery.addEventListener('change', () => {
+const handleMobileQueryChange = () => {
   if (!mobileQuery.matches) {
     inputPane.classList.remove('mobile-hidden');
     outputPane.classList.remove('mobile-hidden');
@@ -1845,7 +1845,13 @@ mobileQuery.addEventListener('change', () => {
     switchMobilePane(activeTab ? activeTab.dataset.pane : 'input');
   }
   debouncedSyncAnchorMapRebuild();
-});
+};
+
+if (typeof mobileQuery.addEventListener === 'function') {
+  mobileQuery.addEventListener('change', handleMobileQueryChange);
+} else if (typeof mobileQuery.addListener === 'function') {
+  mobileQuery.addListener(handleMobileQueryChange);
+}
 
 // Initialize the application
 updateOfflineFontState();
