@@ -339,12 +339,25 @@ function normalizeDropboxImageUrl(parsedUrl) {
   return normalized;
 }
 
-function extractGoogleDriveFileId(parsedUrl) {
-  const filePathMatch = parsedUrl.pathname.match(/^\/file\/d\/([^/]+)/);
-  if (filePathMatch && filePathMatch[1]) {
-    return filePathMatch[1];
+function getGoogleDrivePathFileId(pathname) {
+  const filePathPatterns = [
+    /^\/file\/d\/([^/]+)/,
+    /^\/uc\/id\/([^/]+)/,
+    /^\/thumbnail\/id\/([^/]+)/
+  ];
+
+  for (const pattern of filePathPatterns) {
+    const match = pathname.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
   }
-  return parsedUrl.searchParams.get('id');
+
+  return null;
+}
+
+function extractGoogleDriveFileId(parsedUrl) {
+  return getGoogleDrivePathFileId(parsedUrl.pathname) || parsedUrl.searchParams.get('id');
 }
 
 function normalizeGoogleDriveImageUrl(parsedUrl) {
@@ -356,7 +369,7 @@ function normalizeGoogleDriveImageUrl(parsedUrl) {
   if (!fileId) return parsedUrl;
 
   const normalized = new URL('https://drive.google.com/uc');
-  normalized.searchParams.set('export', 'view');
+  normalized.searchParams.set('export', 'download');
   normalized.searchParams.set('id', fileId);
   const resourceKey = parsedUrl.searchParams.get('resourcekey');
   if (resourceKey) {
@@ -365,7 +378,37 @@ function normalizeGoogleDriveImageUrl(parsedUrl) {
   return normalized;
 }
 
+function toBase64Url(value) {
+  const utf8 = new TextEncoder().encode(value);
+  let binary = '';
+  utf8.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replace(/\//g, '_').replace(/\+/g, '-').replace(/=+$/g, '');
+}
+
+function normalizeOneDriveShareUrl(parsedUrl) {
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isOneDriveShareHost =
+    hostname === '1drv.ms'
+    || hostname.endsWith('.1drv.ms')
+    || hostname === 'onedrive.live.com'
+    || hostname.endsWith('.sharepoint.com');
+
+  if (!isOneDriveShareHost) {
+    return null;
+  }
+
+  const encodedShareUrl = toBase64Url(parsedUrl.href);
+  return new URL(`https://api.onedrive.com/v1.0/shares/u!${encodedShareUrl}/root/content`);
+}
+
 function normalizeOneDriveImageUrl(parsedUrl) {
+  const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
+  if (sharedUrl) {
+    return sharedUrl;
+  }
+
   const hostname = parsedUrl.hostname.toLowerCase();
 
   if (hostname === '1drv.ms' || hostname.endsWith('.1drv.ms')) {
