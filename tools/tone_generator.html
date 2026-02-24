@@ -1212,7 +1212,7 @@
       const activeCount = channels.filter((channel) => channel.isPlaying).length;
       activeSummary.textContent = `${activeCount} active / ${channels.length} channels`;
 
-      const normalizedBusGain = activeCount > 0 ? 1 / activeCount : 1;
+      const normalizedBusGain = activeCount > 0 ? 1 / Math.sqrt(activeCount) : 1;
       setGain(channelBus, normalizedBusGain);
 
       playAllBtn.disabled = channels.length === 0 || activeCount === channels.length;
