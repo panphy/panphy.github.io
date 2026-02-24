@@ -1096,7 +1096,11 @@
       try {
         audioCtx = new AudioContextClass({ latencyHint: 'interactive' });
       } catch (_) {
-        audioCtx = null;
+        try {
+          audioCtx = new AudioContextClass();
+        } catch (_) {
+          audioCtx = null;
+        }
       }
     }
 
@@ -1114,8 +1118,18 @@
     const combinedGain = audioCtx.createGain();
     combinedGain.gain.value = 0;
 
-    const supportsStereoPanner = typeof audioCtx.createStereoPanner === 'function';
-    const stereoPanner = supportsStereoPanner ? audioCtx.createStereoPanner() : null;
+    const isAppleTouchDevice = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    let stereoPanner = null;
+    if (!isAppleTouchDevice && typeof audioCtx.createStereoPanner === 'function') {
+      try {
+        stereoPanner = audioCtx.createStereoPanner();
+      } catch (_) {
+        stereoPanner = null;
+      }
+    }
+    const supportsStereoPanner = Boolean(stereoPanner);
 
     channelBus.connect(volumeGain);
     volumeGain.connect(combinedGain);
@@ -1322,14 +1336,25 @@
 
     function setGain(node, targetValue) {
       const now = audioCtx.currentTime;
+      let heldCurrentValue = false;
       if (typeof node.gain.cancelAndHoldAtTime === 'function') {
-        node.gain.cancelAndHoldAtTime(now);
-      } else {
+        try {
+          node.gain.cancelAndHoldAtTime(now);
+          heldCurrentValue = true;
+        } catch (_) {
+          heldCurrentValue = false;
+        }
+      }
+      if (!heldCurrentValue) {
         const currentValue = node.gain.value;
         node.gain.cancelScheduledValues(now);
         node.gain.setValueAtTime(currentValue, now);
       }
-      node.gain.linearRampToValueAtTime(targetValue, now + 0.012);
+      try {
+        node.gain.linearRampToValueAtTime(targetValue, now + 0.012);
+      } catch (_) {
+        node.gain.setValueAtTime(targetValue, now);
+      }
     }
 
     function clamp(value, min, max) {
@@ -1991,6 +2016,7 @@
       });
     };
     window.addEventListener('pointerdown', unlockAudio, { passive: true });
+    window.addEventListener('touchstart', unlockAudio, { passive: true });
     window.addEventListener('keydown', unlockAudio);
 
     window.addEventListener('resize', debounce(() => {
