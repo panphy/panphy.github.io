@@ -420,6 +420,97 @@ function normalizeAndValidateImageUrl(value) {
   return { value: normalizeCloudImageUrl(parsedUrl.href) };
 }
 
+const IMAGE_FILE_EXTENSIONS = new Set([
+  '.apng',
+  '.avif',
+  '.bmp',
+  '.gif',
+  '.ico',
+  '.jpeg',
+  '.jpg',
+  '.png',
+  '.svg',
+  '.tif',
+  '.tiff',
+  '.webp'
+]);
+
+const NON_IMAGE_FILE_EXTENSIONS = new Set([
+  '.asp',
+  '.aspx',
+  '.cgi',
+  '.csv',
+  '.doc',
+  '.docx',
+  '.htm',
+  '.html',
+  '.js',
+  '.json',
+  '.md',
+  '.pdf',
+  '.php',
+  '.ppt',
+  '.pptx',
+  '.py',
+  '.rb',
+  '.sql',
+  '.txt',
+  '.xls',
+  '.xlsx',
+  '.xml',
+  '.zip'
+]);
+
+function extractFileExtensionFromPath(pathname) {
+  const lastSlashIndex = pathname.lastIndexOf('/');
+  const fileName = lastSlashIndex >= 0 ? pathname.slice(lastSlashIndex + 1) : pathname;
+  if (!fileName || !fileName.includes('.')) return '';
+
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex < 0) return '';
+  return fileName.slice(lastDotIndex).toLowerCase();
+}
+
+function isCloudImageHost(hostname) {
+  const normalizedHost = hostname.toLowerCase();
+  return normalizedHost === 'drive.google.com'
+    || normalizedHost === 'docs.google.com'
+    || normalizedHost === 'dropbox.com'
+    || normalizedHost.endsWith('.dropbox.com')
+    || normalizedHost === 'dl.dropboxusercontent.com'
+    || normalizedHost === 'lh3.googleusercontent.com';
+}
+
+function getLikelyNonImageWarning(rawUrl, normalizedUrl) {
+  let parsedRawUrl;
+  try {
+    parsedRawUrl = new URL(rawUrl);
+    if (isCloudImageHost(parsedRawUrl.hostname)) {
+      return '';
+    }
+  } catch {
+    // Raw URL has already been validated before this function is called.
+  }
+
+  let parsedNormalizedUrl;
+  try {
+    parsedNormalizedUrl = new URL(normalizedUrl);
+  } catch {
+    return '';
+  }
+
+  if (isCloudImageHost(parsedNormalizedUrl.hostname)) {
+    return '';
+  }
+
+  const extension = extractFileExtensionFromPath(parsedNormalizedUrl.pathname);
+  if (!extension) return '';
+  if (IMAGE_FILE_EXTENSIONS.has(extension)) return '';
+  if (!NON_IMAGE_FILE_EXTENSIONS.has(extension)) return '';
+
+  return 'This URL looks like a non-image file and may not render correctly.';
+}
+
 /**
  * Show the image insertion modal.
  * @returns {Promise<{url: string, align: string, width: number}|null>}
@@ -594,6 +685,15 @@ export function showImageModal() {
         setError(urlValidation.error);
         urlInput.focus();
         return;
+      }
+
+      const nonImageWarning = getLikelyNonImageWarning(urlInput.value, urlValidation.value);
+      if (nonImageWarning) {
+        const shouldInsert = window.confirm(`${nonImageWarning}\n\nInsert anyway?`);
+        if (!shouldInsert) {
+          urlInput.focus();
+          return;
+        }
       }
 
       const alignInput = alignGroup.querySelector('input[name="imageAlign"]:checked');
