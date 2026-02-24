@@ -334,9 +334,9 @@ function normalizeDropboxImageUrl(parsedUrl) {
   if (!isLikelyFileShare) return parsedUrl;
 
   const normalized = new URL(parsedUrl.href);
+  normalized.hostname = 'dl.dropboxusercontent.com';
   normalized.searchParams.delete('dl');
   normalized.searchParams.delete('raw');
-  normalized.searchParams.set('raw', '1');
   return normalized;
 }
 
@@ -369,93 +369,12 @@ function normalizeGoogleDriveImageUrl(parsedUrl) {
   const fileId = extractGoogleDriveFileId(parsedUrl);
   if (!fileId) return parsedUrl;
 
-  const normalized = new URL('https://drive.google.com/uc');
-  normalized.searchParams.set('export', 'view');
-  normalized.searchParams.set('id', fileId);
-  const resourceKey = parsedUrl.searchParams.get('resourcekey');
-  if (resourceKey) {
-    normalized.searchParams.set('resourcekey', resourceKey);
-  }
-  return normalized;
-}
-
-function toBase64Url(value) {
-  const utf8 = new TextEncoder().encode(value);
-  let binary = '';
-  utf8.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary).replace(/\//g, '_').replace(/\+/g, '-').replace(/=+$/g, '');
-}
-
-function normalizeOneDriveShareUrl(parsedUrl) {
-  const hostname = parsedUrl.hostname.toLowerCase();
-  const isOneDriveShareHost =
-    hostname === '1drv.ms'
-    || hostname.endsWith('.1drv.ms')
-    || hostname === 'onedrive.live.com'
-    || hostname.endsWith('.sharepoint.com');
-
-  if (!isOneDriveShareHost) {
-    return null;
-  }
-
-  const shareUrl = new URL(parsedUrl.href);
-  shareUrl.searchParams.delete('e');
-  const encodedShareUrl = toBase64Url(shareUrl.href);
-  return new URL(`https://api.onedrive.com/v1.0/shares/u!${encodedShareUrl}/root/content`);
-}
-
-function normalizeOneDriveImageUrl(parsedUrl) {
-  const hostname = parsedUrl.hostname.toLowerCase();
-
-  if (hostname === '1drv.ms' || hostname.endsWith('.1drv.ms')) {
-    const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
-    if (sharedUrl) {
-      return sharedUrl;
-    }
-    const normalized = new URL(parsedUrl.href);
-    normalized.searchParams.set('download', '1');
-    return normalized;
-  }
-
-  if (hostname === 'onedrive.live.com') {
-    const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
-    if (sharedUrl) {
-      return sharedUrl;
-    }
-
-    const resid = parsedUrl.searchParams.get('resid') || parsedUrl.searchParams.get('id');
-    if (resid) {
-      const normalized = new URL('https://onedrive.live.com/download');
-      normalized.searchParams.set('resid', resid);
-      const authKey = parsedUrl.searchParams.get('authkey');
-      if (authKey) {
-        normalized.searchParams.set('authkey', authKey);
-      }
-      return normalized;
-    }
-
-    const normalized = new URL(parsedUrl.href);
-    normalized.searchParams.set('download', '1');
-    normalized.searchParams.delete('web');
-    return normalized;
-  }
-
-  if (hostname.endsWith('.sharepoint.com')) {
-    const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
-    if (sharedUrl) {
-      return sharedUrl;
-    }
-  }
-
-  return parsedUrl;
+  return new URL(`https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}`);
 }
 
 function normalizeImageUrl(parsedUrl) {
   const afterDropbox = normalizeDropboxImageUrl(parsedUrl);
-  const afterGoogleDrive = normalizeGoogleDriveImageUrl(afterDropbox);
-  return normalizeOneDriveImageUrl(afterGoogleDrive);
+  return normalizeGoogleDriveImageUrl(afterDropbox);
 }
 
 /**
