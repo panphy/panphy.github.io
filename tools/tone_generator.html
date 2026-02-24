@@ -753,6 +753,32 @@
       outline-offset: 2px;
     }
 
+    .channel-wave-row {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr);
+      align-items: stretch;
+      gap: 0.45rem;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .channel-volume-slider {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0;
+      margin: 0;
+      writing-mode: vertical-lr;
+      direction: rtl;
+      -webkit-appearance: slider-vertical;
+      appearance: slider-vertical;
+      cursor: pointer;
+    }
+
+    .channel-volume-slider:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
     .channel-canvas {
       width: 100%;
       height: 108px;
@@ -917,6 +943,10 @@
       .frequency-row {
         grid-template-columns: auto 82px minmax(0, 1fr);
         gap: 0.4rem;
+      }
+
+      .channel-wave-row {
+        grid-template-columns: 42px minmax(0, 1fr);
       }
 
       #addChannelSlot {
@@ -1273,9 +1303,16 @@
       return mode === PHASE_MODE_ANTI ? Math.PI : 0;
     }
 
+    function getChannelAmplitude(channel) {
+      if (!channel) return 1;
+      const rawAmplitude = Number.isFinite(channel.amplitude) ? channel.amplitude : 1;
+      return clamp(rawAmplitude, 0, 1);
+    }
+
     function getChannelOutputGain(channel) {
       if (!channel || !channel.isPlaying) return 0;
-      return channel.phaseMode === PHASE_MODE_ANTI ? -1 : 1;
+      const phasePolarity = channel.phaseMode === PHASE_MODE_ANTI ? -1 : 1;
+      return phasePolarity * getChannelAmplitude(channel);
     }
 
     function setChannelOutputGain(channel) {
@@ -1487,7 +1524,7 @@
       ctx.restore();
     }
 
-    function drawWavePath(ctx, width, height, frequency, waveTime, timeWindow, phaseOffset, color) {
+    function drawWavePath(ctx, width, height, frequency, waveTime, timeWindow, phaseOffset, amplitude, color) {
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.strokeStyle = color;
@@ -1495,7 +1532,7 @@
       for (let x = 0; x < width; x += 1) {
         const fraction = x / (width - 1 || 1);
         const t = waveTime - fraction * timeWindow;
-        const sample = Math.sin(2 * Math.PI * frequency * t + phaseOffset);
+        const sample = Math.sin(2 * Math.PI * frequency * t + phaseOffset) * amplitude;
         const y = (sample * 0.5 + 0.5) * height;
         if (x === 0) {
           ctx.moveTo(x, y);
@@ -1527,6 +1564,7 @@
         channel.waveTime,
         timeWindow,
         channel.phaseOffsetRad || 0,
+        getChannelAmplitude(channel),
         animated ? colors.channelLine : colors.channelLinePaused
       );
 
@@ -1563,7 +1601,10 @@
       combinedCtx.lineWidth = 2.25;
       combinedCtx.strokeStyle = combinedPlaying ? colors.combinedLine : colors.combinedLinePaused;
 
-      const ampScale = activeChannels.length;
+      const audibleCount = activeChannels.reduce((count, channel) => {
+        return count + (getChannelAmplitude(channel) > 0.001 ? 1 : 0);
+      }, 0);
+      const ampScale = Math.max(1, audibleCount);
 
       for (let x = 0; x < width; x += 1) {
         const fraction = x / (width - 1 || 1);
@@ -1571,7 +1612,8 @@
 
         for (const channel of activeChannels) {
           const t = channel.waveTime - fraction * timeWindow;
-          sampleSum += Math.sin(2 * Math.PI * channel.frequency * t + (channel.phaseOffsetRad || 0));
+          const amplitude = getChannelAmplitude(channel);
+          sampleSum += amplitude * Math.sin(2 * Math.PI * channel.frequency * t + (channel.phaseOffsetRad || 0));
         }
 
         const y = (sampleSum / ampScale * 0.5 + 0.5) * height;
@@ -1639,13 +1681,22 @@
       }
     }
 
+    function updateChannelBusNormalization(activeChannels = channels.filter((channel) => channel.isPlaying)) {
+      const summedPower = activeChannels.reduce((totalPower, channel) => {
+        const amplitude = getChannelAmplitude(channel);
+        return totalPower + amplitude * amplitude;
+      }, 0);
+      const normalizedBusGain = summedPower > 1 ? 1 / Math.sqrt(summedPower) : 1;
+      setGain(channelBus, normalizedBusGain);
+    }
+
     function refreshSummary() {
-      const activeCount = channels.filter((channel) => channel.isPlaying).length;
+      const activeChannels = channels.filter((channel) => channel.isPlaying);
+      const activeCount = activeChannels.length;
       activeSummary.textContent = `${activeCount} active / ${channels.length} channels`;
       channelsList.dataset.channelCount = String(channels.length);
 
-      const normalizedBusGain = activeCount > 0 ? 1 / Math.sqrt(activeCount) : 1;
-      setGain(channelBus, normalizedBusGain);
+      updateChannelBusNormalization(activeChannels);
 
       const reachedMaxChannels = channels.length >= MAX_CHANNELS;
       addChannelBtn.disabled = reachedMaxChannels;
@@ -1686,6 +1737,17 @@
       } else {
         setChannelPhaseModeRelativeToReference(channel, channel.phaseMode);
       }
+    }
+
+    function applyAmplitudePercent(channel, rawPercent) {
+      if (!channel) return;
+      const percent = clamp(Number.isFinite(rawPercent) ? rawPercent : 100, 0, 100);
+      channel.amplitude = percent / 100;
+      if (channel.volumeSlider) {
+        channel.volumeSlider.value = String(Math.round(percent));
+      }
+      setChannelOutputGain(channel);
+      updateChannelBusNormalization();
     }
 
     async function toggleChannel(channelId) {
@@ -1761,11 +1823,13 @@
       const now = audioCtx.currentTime;
       const referenceChannel = channels[0] || null;
       const initialFrequency = Number.isFinite(options.frequency) ? options.frequency : 440;
+      const initialAmplitude = Number.isFinite(options.amplitude) ? clamp(options.amplitude, 0, 1) : 1;
       const initialPhaseMode = PHASE_MODE_IN;
       const initialPhaseOffset = getPhaseOffsetForMode(initialPhaseMode);
       const channel = {
         id: nextChannelId,
         frequency: Math.round(clamp(initialFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
+        amplitude: initialAmplitude,
         isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
         waveTime: referenceChannel ? referenceChannel.waveTime : 0,
         phaseMode: initialPhaseMode,
@@ -1866,13 +1930,30 @@
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
 
+      const waveRow = document.createElement('div');
+      waveRow.className = 'channel-wave-row';
+
+      const channelVolumeSlider = document.createElement('input');
+      channelVolumeSlider.className = 'channel-volume-slider';
+      channelVolumeSlider.type = 'range';
+      channelVolumeSlider.min = '0';
+      channelVolumeSlider.max = '100';
+      channelVolumeSlider.step = '1';
+      channelVolumeSlider.value = String(Math.round(channel.amplitude * 100));
+      channelVolumeSlider.title = 'Channel volume (0% to 100%)';
+      channelVolumeSlider.setAttribute('aria-label', 'Channel volume');
+      channelVolumeSlider.setAttribute('aria-orientation', 'vertical');
+
+      waveRow.appendChild(channelVolumeSlider);
+      waveRow.appendChild(canvas);
+
       frequencyRow.appendChild(freqLabel);
       frequencyRow.appendChild(freqNumber);
       frequencyRow.appendChild(freqSlider);
 
       card.appendChild(header);
       card.appendChild(frequencyRow);
-      card.appendChild(canvas);
+      card.appendChild(waveRow);
 
       if (addChannelSlot && addChannelSlot.parentNode === channelsList) {
         channelsList.insertBefore(card, addChannelSlot);
@@ -1889,6 +1970,7 @@
       channel.phaseToggleInline = phaseToggleInline;
       channel.phaseToggle = phaseToggle;
       channel.phaseToggleText = phaseToggleText;
+      channel.volumeSlider = channelVolumeSlider;
       channel.canvas = canvas;
       channel.ctx = ctx;
 
@@ -1899,6 +1981,14 @@
       freqNumber.addEventListener('change', () => {
         const raw = parseFloat(freqNumber.value);
         applyFrequency(channel, Number.isFinite(raw) ? raw : channel.frequency);
+      });
+
+      channelVolumeSlider.addEventListener('input', () => {
+        applyAmplitudePercent(channel, parseFloat(channelVolumeSlider.value));
+      });
+
+      channelVolumeSlider.addEventListener('change', () => {
+        applyAmplitudePercent(channel, parseFloat(channelVolumeSlider.value));
       });
 
       phaseToggle.addEventListener('change', () => {
