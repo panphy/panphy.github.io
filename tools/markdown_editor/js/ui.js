@@ -335,6 +335,7 @@ function normalizeDropboxImageUrl(parsedUrl) {
 
   const normalized = new URL(parsedUrl.href);
   normalized.searchParams.delete('dl');
+  normalized.searchParams.delete('raw');
   normalized.searchParams.set('raw', '1');
   return normalized;
 }
@@ -369,7 +370,7 @@ function normalizeGoogleDriveImageUrl(parsedUrl) {
   if (!fileId) return parsedUrl;
 
   const normalized = new URL('https://drive.google.com/uc');
-  normalized.searchParams.set('export', 'download');
+  normalized.searchParams.set('export', 'view');
   normalized.searchParams.set('id', fileId);
   const resourceKey = parsedUrl.searchParams.get('resourcekey');
   if (resourceKey) {
@@ -399,25 +400,31 @@ function normalizeOneDriveShareUrl(parsedUrl) {
     return null;
   }
 
-  const encodedShareUrl = toBase64Url(parsedUrl.href);
+  const shareUrl = new URL(parsedUrl.href);
+  shareUrl.searchParams.delete('e');
+  const encodedShareUrl = toBase64Url(shareUrl.href);
   return new URL(`https://api.onedrive.com/v1.0/shares/u!${encodedShareUrl}/root/content`);
 }
 
 function normalizeOneDriveImageUrl(parsedUrl) {
-  const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
-  if (sharedUrl) {
-    return sharedUrl;
-  }
-
   const hostname = parsedUrl.hostname.toLowerCase();
 
   if (hostname === '1drv.ms' || hostname.endsWith('.1drv.ms')) {
+    const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
+    if (sharedUrl) {
+      return sharedUrl;
+    }
     const normalized = new URL(parsedUrl.href);
     normalized.searchParams.set('download', '1');
     return normalized;
   }
 
   if (hostname === 'onedrive.live.com') {
+    const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
+    if (sharedUrl) {
+      return sharedUrl;
+    }
+
     const resid = parsedUrl.searchParams.get('resid') || parsedUrl.searchParams.get('id');
     if (resid) {
       const normalized = new URL('https://onedrive.live.com/download');
@@ -436,10 +443,10 @@ function normalizeOneDriveImageUrl(parsedUrl) {
   }
 
   if (hostname.endsWith('.sharepoint.com')) {
-    const normalized = new URL(parsedUrl.href);
-    normalized.searchParams.set('download', '1');
-    normalized.searchParams.delete('web');
-    return normalized;
+    const sharedUrl = normalizeOneDriveShareUrl(parsedUrl);
+    if (sharedUrl) {
+      return sharedUrl;
+    }
   }
 
   return parsedUrl;
@@ -449,6 +456,29 @@ function normalizeImageUrl(parsedUrl) {
   const afterDropbox = normalizeDropboxImageUrl(parsedUrl);
   const afterGoogleDrive = normalizeGoogleDriveImageUrl(afterDropbox);
   return normalizeOneDriveImageUrl(afterGoogleDrive);
+}
+
+/**
+ * Normalize known cloud storage share links into direct image URLs.
+ * @param {string} rawUrl
+ * @returns {string}
+ */
+export function normalizeCloudImageUrl(rawUrl) {
+  const trimmed = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+  if (!trimmed) return rawUrl;
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(trimmed);
+  } catch {
+    return rawUrl;
+  }
+
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    return rawUrl;
+  }
+
+  return normalizeImageUrl(parsedUrl).href;
 }
 
 function normalizeAndValidateImageUrl(value) {
@@ -468,7 +498,7 @@ function normalizeAndValidateImageUrl(value) {
     return { error: 'Only http:// and https:// image URLs are allowed.' };
   }
 
-  return { value: normalizeImageUrl(parsedUrl).href };
+  return { value: normalizeCloudImageUrl(parsedUrl.href) };
 }
 
 /**
