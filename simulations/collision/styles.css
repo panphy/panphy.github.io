@@ -18,6 +18,19 @@
     --danger: #ff5d5d;
     --nav-bg: rgba(22, 24, 29, 0.85);
     --nav-border: rgba(255, 255, 255, 0.05);
+
+    --btn-create: #3cc282;
+    --btn-create-hover: #32b074;
+    --btn-create-text: #1a1a1a;
+    --btn-danger: #e87575;
+    --btn-danger-hover: #dc6363;
+    --btn-danger-text: #1a1a1a;
+    --btn-import: #f0a35c;
+    --btn-import-hover: #e5944a;
+    --btn-import-text: #1a1a1a;
+    --btn-reset: #cbd5e1;
+    --btn-reset-hover: #b8c4d3;
+    --btn-reset-text: #111827;
 }
 
 [data-theme="light"] {
@@ -34,6 +47,19 @@
     --danger: #b91c1c;
     --nav-bg: rgba(255, 255, 255, 0.86);
     --nav-border: rgba(17, 24, 39, 0.08);
+
+    --btn-create: #2eac71;
+    --btn-create-hover: #259a63;
+    --btn-create-text: #ffffff;
+    --btn-danger: #dc5f5f;
+    --btn-danger-hover: #c94d4d;
+    --btn-danger-text: #ffffff;
+    --btn-import: #e59347;
+    --btn-import-hover: #d5823a;
+    --btn-import-text: #1a1a1a;
+    --btn-reset: #d6dde6;
+    --btn-reset-hover: #c7d0db;
+    --btn-reset-text: #111827;
 }
 
 * {
@@ -506,16 +532,60 @@ button:disabled {
     cursor: not-allowed;
 }
 
-#startBtn {
-    background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary));
-    color: #111827;
-    border: none;
+#startBtn,
+#addBtn,
+#resetBtn {
+    border: 1px solid transparent;
     font-weight: 700;
+}
+
+#startBtn {
+    background: var(--btn-create);
+    color: var(--btn-create-text);
+}
+
+#startBtn:hover:not(:disabled) {
+    background: var(--btn-create-hover);
+    border-color: transparent;
+}
+
+#startBtn.is-stop {
+    background: var(--btn-danger);
+    color: var(--btn-danger-text);
+}
+
+#startBtn.is-stop:hover:not(:disabled) {
+    background: var(--btn-danger-hover);
+    border-color: transparent;
 }
 
 #startBtn:disabled {
     opacity: 0.82;
-    color: #111827;
+    color: var(--btn-create-text);
+}
+
+#startBtn.is-stop:disabled {
+    color: var(--btn-danger-text);
+}
+
+#addBtn {
+    background: var(--btn-import);
+    color: var(--btn-import-text);
+}
+
+#addBtn:hover:not(:disabled) {
+    background: var(--btn-import-hover);
+    border-color: transparent;
+}
+
+#resetBtn {
+    background: var(--btn-reset);
+    color: var(--btn-reset-text);
+}
+
+#resetBtn:hover:not(:disabled) {
+    background: var(--btn-reset-hover);
+    border-color: transparent;
 }
 
 .control-block {

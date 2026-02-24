@@ -682,6 +682,7 @@ function updateStartButtonState() {
     const isRunning = state.running;
     ui.startBtn.textContent = isRunning ? 'Stop Camera' : 'Start Camera';
     ui.startBtn.setAttribute('aria-label', isRunning ? 'Stop camera' : 'Start camera');
+    ui.startBtn.classList.toggle('is-stop', isRunning);
 }
 
 function resizeStage() {
@@ -803,7 +804,7 @@ function addSphere() {
 
 function resetAll() {
     if (spheres.length === 0) {
-        setStatus('No spheres to reset. Press "Add Sphere" to create one.');
+        setStatus('No spheres to reset. Press "Add Ball" to create one.');
         return;
     }
 
