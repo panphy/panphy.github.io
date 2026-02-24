@@ -9,6 +9,9 @@ node_modules/
 .vscode/
 .idea/
 
+# AI tool local settings
+.claude/
+
 # Temporary and log files
 *.log
 *.tmp
