@@ -27,6 +27,7 @@
   --table-border-color: rgba(45, 52, 54, 0.4);
   --table-header-background: #f4f6f8;
   --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.06);
+  --toggle-hover: rgba(108, 92, 231, 0.15);
   --base-font-size: 16px;
   --copy-hint-outline: #93c5fd;
   --copy-hint-bg: #dbeafe;
@@ -55,6 +56,7 @@
   --table-header-background: #252a33;
   --code-text-color: #f8f8f2;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --toggle-hover: rgba(162, 155, 254, 0.2);
   --copy-hint-outline: #7dd3fc;
   --copy-hint-bg: #dbeafe;
   --copy-hint-chip-bg: #e0f2fe;
@@ -404,17 +406,24 @@ textarea:focus {
 .theme-toggle-button {
   background: none;
   border: none;
+  border-radius: 50%;
   cursor: pointer;
   font-size: 18px;
+  line-height: 1;
+  min-height: 42px;
+  min-width: 42px;
+  padding: 0.5rem;
   color: var(--pane-heading-color);
   margin: 0;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .theme-toggle-button:hover {
-  opacity: 0.8;
+  background-color: var(--toggle-hover);
+  transform: rotate(15deg);
 }
 
 /* ---------------------------------------------------------------------- */
