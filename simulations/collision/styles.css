@@ -63,6 +63,22 @@ body {
     flex: 1 0 auto;
 }
 
+.instruction-message {
+    background: rgba(0, 206, 201, 0.12);
+    color: var(--text-main);
+    padding: 10px 15px;
+    border-radius: 12px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1160px;
+    text-align: center;
+    border: 1px solid rgba(0, 206, 201, 0.3);
+}
+
+.instruction-message p {
+    margin: 0;
+}
+
 .panel {
     border: 1px solid var(--panel-border);
     background: var(--panel-bg);
