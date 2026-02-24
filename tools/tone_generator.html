@@ -499,17 +499,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
-    .utility-row {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.55rem;
-    }
-
-    .utility-row .btn {
-      width: 100%;
-      min-width: 0;
-    }
-
     #channelsPanel {
       display: flex;
       flex-direction: column;
@@ -536,6 +525,7 @@
 
     #channelsList {
       min-height: 0;
+      flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -543,13 +533,32 @@
       padding-right: 0.4rem;
     }
 
+    #addChannelSlot {
+      flex: 1 1 120px;
+      min-height: 110px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    [data-theme="dark"] #addChannelSlot {
+      background: rgba(9, 12, 18, 0.35);
+    }
+
+    #addChannelSlot .btn {
+      width: min(220px, 100%);
+    }
+
     .channel-card {
       background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 0.75rem;
+      padding: 0.62rem;
       display: grid;
-      gap: 0.6rem;
+      gap: 0.48rem;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
@@ -575,7 +584,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      min-height: 40px;
+      min-height: 34px;
     }
 
     .channel-title {
@@ -672,7 +681,14 @@
 
     .frequency-row {
       display: grid;
-      gap: 0.35rem;
+      gap: 0.28rem;
+    }
+
+    .freq-controls {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .freq-label {
@@ -681,17 +697,9 @@
       font-weight: 600;
     }
 
-    .freq-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.55rem;
-      flex-wrap: wrap;
-    }
-
     .freq-number {
-      width: 98px;
-      min-height: 40px;
+      width: 88px;
+      min-height: 36px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--canvas-bg);
@@ -706,16 +714,9 @@
       outline-offset: 2px;
     }
 
-    .freq-value {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      font-weight: 600;
-    }
-
     .channel-canvas {
       width: 100%;
-      height: 92px;
+      height: 74px;
       display: block;
       background: var(--canvas-bg);
       border-radius: 10px;
@@ -829,10 +830,6 @@
         padding: 0.45rem;
       }
 
-      .utility-row {
-        grid-template-columns: 1fr;
-      }
-
       .transport-header {
         flex-direction: column;
         align-items: stretch;
@@ -850,8 +847,13 @@
         flex: 1;
       }
 
-      .freq-meta {
-        justify-content: flex-start;
+      .freq-controls {
+        grid-template-columns: 82px minmax(0, 1fr);
+        gap: 0.4rem;
+      }
+
+      #addChannelSlot {
+        min-height: 84px;
       }
     }
   </style>
@@ -925,11 +927,6 @@
             </div>
           </div>
 
-          <div class="utility-row">
-            <button id="addChannelBtn" class="btn btn-primary">Add Channel (Max 2)</button>
-            <button id="playAllBtn" class="btn btn-secondary" disabled>Play All Channels</button>
-            <button id="pauseAllBtn" class="btn btn-secondary" disabled>Pause All Channels</button>
-          </div>
         </div>
       </section>
 
@@ -938,7 +935,11 @@
           <h2>Channel Mixer</h2>
           <p>Use up to two channels. Channel 2 can be switched in-phase or anti-phase relative to Channel 1.</p>
         </div>
-        <div id="channelsList"></div>
+        <div id="channelsList">
+          <div id="addChannelSlot">
+            <button id="addChannelBtn" class="btn btn-primary">Add Channel</button>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -1036,8 +1037,7 @@
   <script>
     (function () {
     const addChannelBtn = document.getElementById('addChannelBtn');
-    const playAllBtn = document.getElementById('playAllBtn');
-    const pauseAllBtn = document.getElementById('pauseAllBtn');
+    const addChannelSlot = document.getElementById('addChannelSlot');
     const channelsList = document.getElementById('channelsList');
 
     const combinedCanvas = document.getElementById('combinedCanvas');
@@ -1076,8 +1076,6 @@
       }
       [
         addChannelBtn,
-        playAllBtn,
-        pauseAllBtn,
         toggleCombinedBtn,
         volumeSlider,
         panningSlider,
@@ -1220,13 +1218,25 @@
     }
 
     function updateChannelPhaseToggle(channel, isReference) {
-      if (!channel || !channel.phaseToggle || !channel.phaseToggleText) return;
+      if (!channel || !channel.phaseToggle || !channel.phaseToggleText || !channel.phaseToggleInline) return;
+
+      const isSecondChannel = channels[1] === channel;
+      channel.phaseToggleInline.style.display = isSecondChannel ? 'inline-flex' : 'none';
+
+      if (!isSecondChannel) {
+        channel.phaseToggle.checked = false;
+        channel.phaseToggle.disabled = true;
+        channel.phaseToggle.title = isReference
+          ? 'Reference channel (fixed in-phase)'
+          : 'Phase toggle is only available for Channel 2';
+        channel.phaseToggleText.textContent = 'in-phase';
+        return;
+      }
+
       const isAntiPhase = channel.phaseMode === PHASE_MODE_ANTI;
       channel.phaseToggle.checked = isAntiPhase;
-      channel.phaseToggle.disabled = isReference;
-      channel.phaseToggle.title = isReference
-        ? 'Reference channel (fixed in-phase)'
-        : 'Toggle in-phase / anti-phase relative to Channel 1';
+      channel.phaseToggle.disabled = false;
+      channel.phaseToggle.title = 'Toggle in-phase / anti-phase relative to Channel 1';
       channel.phaseToggleText.textContent = isAntiPhase ? 'anti-phase' : 'in-phase';
     }
 
@@ -1568,13 +1578,14 @@
       const normalizedBusGain = activeCount > 0 ? 1 / Math.sqrt(activeCount) : 1;
       setGain(channelBus, normalizedBusGain);
 
-      playAllBtn.disabled = channels.length === 0 || activeCount === channels.length;
-      pauseAllBtn.disabled = channels.length === 0 || activeCount === 0;
       const reachedMaxChannels = channels.length >= MAX_CHANNELS;
       addChannelBtn.disabled = reachedMaxChannels;
       addChannelBtn.title = reachedMaxChannels
         ? `Maximum ${MAX_CHANNELS} channels reached`
         : 'Add Channel';
+      if (addChannelSlot) {
+        addChannelSlot.style.display = reachedMaxChannels ? 'none' : 'flex';
+      }
 
       if (channels.length === 0 && combinedPlaying) {
         combinedPlaying = false;
@@ -1593,7 +1604,6 @@
       }
       channel.freqSlider.value = String(frequency);
       channel.freqNumber.value = String(frequency);
-      channel.freqValue.textContent = `${frequency} Hz`;
 
       if (channels[0] === channel) {
         syncPhaseModesToReference();
@@ -1650,7 +1660,11 @@
       const empty = document.createElement('div');
       empty.id = 'emptyState';
       empty.textContent = 'No channels yet. Add a channel to begin mixing.';
-      channelsList.appendChild(empty);
+      if (addChannelSlot && addChannelSlot.parentNode === channelsList) {
+        channelsList.insertBefore(empty, addChannelSlot);
+      } else {
+        channelsList.appendChild(empty);
+      }
     }
 
     function clearEmptyState() {
@@ -1764,8 +1778,8 @@
       freqSlider.step = '1';
       freqSlider.value = String(channel.frequency);
 
-      const freqMeta = document.createElement('div');
-      freqMeta.className = 'freq-meta';
+      const freqControls = document.createElement('div');
+      freqControls.className = 'freq-controls';
 
       const freqNumber = document.createElement('input');
       freqNumber.className = 'freq-number';
@@ -1774,27 +1788,25 @@
       freqNumber.max = String(MAX_FREQUENCY_HZ);
       freqNumber.step = '1';
       freqNumber.value = String(channel.frequency);
-
-      const freqValue = document.createElement('span');
-      freqValue.className = 'freq-value';
-      freqValue.textContent = `${channel.frequency} Hz`;
-
-      freqMeta.appendChild(freqNumber);
-      freqMeta.appendChild(freqValue);
+      freqControls.appendChild(freqNumber);
+      freqControls.appendChild(freqSlider);
 
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
 
       frequencyRow.appendChild(freqLabel);
-      frequencyRow.appendChild(freqSlider);
-      frequencyRow.appendChild(freqMeta);
+      frequencyRow.appendChild(freqControls);
 
       card.appendChild(header);
       card.appendChild(frequencyRow);
       card.appendChild(canvas);
 
-      channelsList.appendChild(card);
+      if (addChannelSlot && addChannelSlot.parentNode === channelsList) {
+        channelsList.insertBefore(card, addChannelSlot);
+      } else {
+        channelsList.appendChild(card);
+      }
 
       channel.card = card;
       channel.title = title;
@@ -1802,7 +1814,7 @@
       channel.toggleBtn = toggleBtn;
       channel.freqSlider = freqSlider;
       channel.freqNumber = freqNumber;
-      channel.freqValue = freqValue;
+      channel.phaseToggleInline = phaseToggleInline;
       channel.phaseToggle = phaseToggle;
       channel.phaseToggleText = phaseToggleText;
       channel.canvas = canvas;
@@ -1840,30 +1852,6 @@
       syncChannelUi(channel);
       refreshSummary();
       return true;
-    }
-
-    async function setAllChannelsPlaying(targetPlaying) {
-      if (channels.length === 0) {
-        return;
-      }
-
-      const ready = await ensureAudioContext();
-      if (!ready) {
-        setAudioBlockedHint();
-        return;
-      }
-      setAudioReadyHint();
-      channels.forEach((channel) => {
-        channel.isPlaying = targetPlaying;
-        setChannelOutputGain(channel);
-        syncChannelUi(channel);
-      });
-
-      if (targetPlaying && channels.length > 1) {
-        resyncRunningOscillators();
-      }
-
-      refreshSummary();
     }
 
     async function toggleCombined() {
@@ -1950,14 +1938,6 @@
       }
       setAudioReadyHint();
       addChannel({ frequency: 440, isPlaying: true });
-    });
-
-    playAllBtn.addEventListener('click', async () => {
-      await setAllChannelsPlaying(true);
-    });
-
-    pauseAllBtn.addEventListener('click', async () => {
-      await setAllChannelsPlaying(false);
     });
 
     toggleCombinedBtn.addEventListener('click', async () => {
