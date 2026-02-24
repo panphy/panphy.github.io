@@ -43,8 +43,11 @@
   <!-- DOMPurify -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
 
-  <!-- html2canvas (table copy-as-image) -->
+  <!-- html2canvas (table copy-as-image, PDF export) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <!-- jsPDF (PDF export) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 
   <!-- Highlight.js Stylesheets -->
   <link id="highlightStyle" rel="stylesheet"
@@ -171,7 +174,7 @@
       <!-- Buttons and rendered output below -->
       <div class="buttonContainer floating-toolbar output-controls no-print">
         <div class="output-actions">
-          <button id="printButton" title="Prints in light mode">Print to PDF</button>
+          <button id="printButton" title="Export rendered output as a clean PDF">Export as PDF</button>
           <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
           <button id="presentButton" title="Show rendered output in fullscreen">Present</button>
           <button id="loadSampleButton" title="Sample document showing basic Markdown and LaTeX syntax.">Learn</button>
