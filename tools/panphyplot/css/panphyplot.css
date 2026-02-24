@@ -212,10 +212,14 @@ body {
 	justify-content: center;
 	color: var(--text-main);
 	box-shadow: none;
+	min-width: 42px;
+	min-height: 42px;
+	line-height: 1;
+	transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .theme-toggle button:hover {
-	background-color: rgba(128, 128, 128, 0.2);
+	background-color: rgba(108, 92, 231, 0.15);
 	transform: rotate(15deg);
 }
 
