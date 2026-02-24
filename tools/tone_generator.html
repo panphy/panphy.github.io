@@ -707,12 +707,7 @@
 
     .frequency-row {
       display: grid;
-      gap: 0.28rem;
-    }
-
-    .freq-controls {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: auto 88px minmax(0, 1fr);
       align-items: center;
       gap: 0.5rem;
     }
@@ -721,6 +716,7 @@
       font-size: 0.79rem;
       color: var(--text-secondary);
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .freq-number {
@@ -897,8 +893,8 @@
         flex: 1;
       }
 
-      .freq-controls {
-        grid-template-columns: 82px minmax(0, 1fr);
+      .frequency-row {
+        grid-template-columns: auto 82px minmax(0, 1fr);
         gap: 0.4rem;
       }
 
@@ -1830,9 +1826,6 @@
       freqSlider.step = '1';
       freqSlider.value = String(channel.frequency);
 
-      const freqControls = document.createElement('div');
-      freqControls.className = 'freq-controls';
-
       const freqNumber = document.createElement('input');
       freqNumber.className = 'freq-number';
       freqNumber.type = 'number';
@@ -1840,15 +1833,14 @@
       freqNumber.max = String(MAX_FREQUENCY_HZ);
       freqNumber.step = '1';
       freqNumber.value = String(channel.frequency);
-      freqControls.appendChild(freqNumber);
-      freqControls.appendChild(freqSlider);
 
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
 
       frequencyRow.appendChild(freqLabel);
-      frequencyRow.appendChild(freqControls);
+      frequencyRow.appendChild(freqNumber);
+      frequencyRow.appendChild(freqSlider);
 
       card.appendChild(header);
       card.appendChild(frequencyRow);
