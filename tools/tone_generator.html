@@ -652,7 +652,7 @@
     }
 
     .phase-toggle-text {
-      min-width: 30px;
+      min-width: 70px;
       font-size: 0.76rem;
       color: var(--text-secondary);
       font-family: var(--font-mono);
@@ -1199,6 +1199,30 @@
       return oscillator;
     }
 
+    function rebuildChannelOscillator(channel, targetPhase, now = audioCtx.currentTime) {
+      if (!channel || !channel.gainNode || !channel.oscillator) return;
+
+      const newOscillator = createOscillatorWithPhase(channel.frequency, targetPhase, now);
+      newOscillator.connect(channel.gainNode);
+      newOscillator.start(now);
+
+      const oldOscillator = channel.oscillator;
+      channel.oscillator = newOscillator;
+      channel.phase = normalizePhase(targetPhase);
+      channel.phaseTimestamp = now;
+
+      try {
+        oldOscillator.stop(now);
+      } catch (_) {
+        // Ignore already-stopped oscillator errors.
+      }
+      try {
+        oldOscillator.disconnect();
+      } catch (_) {
+        // Ignore disconnect errors if already disconnected.
+      }
+    }
+
     function getPhaseOffsetForMode(mode) {
       return mode === PHASE_MODE_ANTI ? Math.PI : 0;
     }
@@ -1211,7 +1235,7 @@
       channel.phaseToggle.title = isReference
         ? 'Reference channel (fixed in-phase)'
         : 'Toggle in-phase / anti-phase relative to Channel 1';
-      channel.phaseToggleText.textContent = isReference ? 'Ref' : (isAntiPhase ? 'Anti' : 'In');
+      channel.phaseToggleText.textContent = isAntiPhase ? 'anti-phase' : 'in-phase';
     }
 
     function syncPhaseModesToReference() {
@@ -1224,16 +1248,14 @@
       referenceChannel.phaseOffsetRad = 0;
       referenceChannel.phase = normalizePhase(referencePhase);
       referenceChannel.phaseTimestamp = now;
-      applyOscillatorPhase(referenceChannel.oscillator, referenceChannel.phase);
       updateChannelPhaseToggle(referenceChannel, true);
 
       for (let i = 1; i < channels.length; i += 1) {
         const channel = channels[i];
         channel.phaseMode = channel.phaseMode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
         channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-        channel.phase = normalizePhase(referencePhase + channel.phaseOffsetRad);
-        channel.phaseTimestamp = now;
-        applyOscillatorPhase(channel.oscillator, channel.phase);
+        const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
+        rebuildChannelOscillator(channel, targetPhase, now);
         updateChannelPhaseToggle(channel, false);
       }
     }
@@ -1252,9 +1274,8 @@
       const referencePhase = advanceChannelPhase(referenceChannel, now);
       channel.phaseMode = mode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
       channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-      channel.phase = normalizePhase(referencePhase + channel.phaseOffsetRad);
-      channel.phaseTimestamp = now;
-      applyOscillatorPhase(channel.oscillator, channel.phase);
+      const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
+      rebuildChannelOscillator(channel, targetPhase, now);
       updateChannelPhaseToggle(channel, false);
     }
 
@@ -1667,7 +1688,7 @@
 
       const phaseToggleText = document.createElement('span');
       phaseToggleText.className = 'phase-toggle-text';
-      phaseToggleText.textContent = 'In';
+      phaseToggleText.textContent = 'in-phase';
 
       phaseToggleInline.appendChild(phaseToggleSwitch);
       phaseToggleInline.appendChild(phaseToggleText);
