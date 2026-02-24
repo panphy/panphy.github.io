@@ -1068,6 +1068,7 @@
       MIN_FREQUENCY_HZ,
       Math.min(23000, Math.floor(audioCtx.sampleRate / 2) - 1)
     );
+    const MAX_CHANNELS = 10;
 
     const channels = [];
     let nextChannelId = 1;
@@ -1078,8 +1079,128 @@
 
     const BASE_WINDOW = 0.01;
     const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
+    const TWO_PI = Math.PI * 2;
+    const DEG_TO_RAD = Math.PI / 180;
+    const RAD_TO_DEG = 180 / Math.PI;
+    const PHASE_SNAP_DEGREES = 8;
+    const MIN_PHASE_DEGREES = -180;
+    const MAX_PHASE_DEGREES = 180;
 
     let resumePromise = null;
+
+    function normalizePhase(phase) {
+      if (!Number.isFinite(phase)) return 0;
+      let normalized = phase % TWO_PI;
+      if (normalized < 0) {
+        normalized += TWO_PI;
+      }
+      return normalized;
+    }
+
+    function normalizeSignedPhase(phase) {
+      const normalized = normalizePhase(phase);
+      return normalized > Math.PI ? normalized - TWO_PI : normalized;
+    }
+
+    function advanceChannelPhase(channel, now = audioCtx.currentTime) {
+      if (!channel || !Number.isFinite(channel.phaseTimestamp) || !Number.isFinite(channel.phase)) {
+        return 0;
+      }
+      const elapsed = Math.max(0, now - channel.phaseTimestamp);
+      if (elapsed > 0) {
+        channel.phase = normalizePhase(channel.phase + TWO_PI * channel.frequency * elapsed);
+        channel.phaseTimestamp = now;
+      }
+      return channel.phase;
+    }
+
+    function applyOscillatorPhase(oscillator, phase) {
+      const normalizedPhase = normalizePhase(phase);
+      const real = new Float32Array(2);
+      const imag = new Float32Array(2);
+      real[1] = Math.sin(normalizedPhase);
+      imag[1] = Math.cos(normalizedPhase);
+      oscillator.setPeriodicWave(audioCtx.createPeriodicWave(real, imag));
+    }
+
+    function createOscillatorWithPhase(frequency, phase, startTime) {
+      const oscillator = audioCtx.createOscillator();
+      applyOscillatorPhase(oscillator, phase);
+      oscillator.frequency.setValueAtTime(frequency, startTime);
+      return oscillator;
+    }
+
+    function formatPhaseOffsetDegrees(phaseDegrees, isReference = false) {
+      const rounded = Math.round(phaseDegrees);
+      if (isReference) {
+        return '0° (ref)';
+      }
+      if (rounded === 0) {
+        return '0°';
+      }
+      return `${rounded > 0 ? '+' : ''}${rounded}°`;
+    }
+
+    function updateChannelPhaseControls(channel, isReference) {
+      if (!channel || !channel.phaseSlider || !channel.phaseValue) return;
+      const displayDegrees = isReference ? 0 : Math.round(channel.phaseOffsetDeg || 0);
+      channel.phaseSlider.value = String(displayDegrees);
+      channel.phaseSlider.disabled = isReference;
+      channel.phaseValue.textContent = formatPhaseOffsetDegrees(displayDegrees, isReference);
+      channel.phaseSlider.title = isReference
+        ? 'Reference channel (fixed at 0°)'
+        : 'Phase difference relative to Channel 1';
+    }
+
+    function syncPhaseOffsetsToReference() {
+      if (channels.length === 0) return;
+
+      const now = audioCtx.currentTime;
+      const referenceChannel = channels[0];
+      const referencePhase = advanceChannelPhase(referenceChannel, now);
+      referenceChannel.phaseOffsetRad = 0;
+      referenceChannel.phaseOffsetDeg = 0;
+      updateChannelPhaseControls(referenceChannel, true);
+
+      for (let i = 1; i < channels.length; i += 1) {
+        const channel = channels[i];
+        const channelPhase = advanceChannelPhase(channel, now);
+        const relativePhase = normalizeSignedPhase(channelPhase - referencePhase);
+        const relativeDegrees = Math.round(relativePhase * RAD_TO_DEG);
+        channel.phaseOffsetDeg = relativeDegrees;
+        channel.phaseOffsetRad = relativeDegrees * DEG_TO_RAD;
+        channel.phase = normalizePhase(referencePhase + channel.phaseOffsetRad);
+        channel.phaseTimestamp = now;
+        applyOscillatorPhase(channel.oscillator, channel.phase);
+        updateChannelPhaseControls(channel, false);
+      }
+    }
+
+    function setChannelPhaseOffsetRelativeToReference(channel, rawDegrees) {
+      if (!channel) return;
+      const referenceChannel = channels[0] || null;
+      if (!referenceChannel || channel === referenceChannel) {
+        channel.phaseOffsetDeg = 0;
+        channel.phaseOffsetRad = 0;
+        updateChannelPhaseControls(channel, true);
+        return;
+      }
+
+      const safeDegrees = Number.isFinite(rawDegrees) ? rawDegrees : 0;
+      let phaseDegrees = Math.round(clamp(safeDegrees, MIN_PHASE_DEGREES, MAX_PHASE_DEGREES));
+      if (Math.abs(phaseDegrees) <= PHASE_SNAP_DEGREES) {
+        phaseDegrees = 0;
+      }
+
+      const now = audioCtx.currentTime;
+      const referencePhase = advanceChannelPhase(referenceChannel, now);
+      channel.phaseOffsetDeg = phaseDegrees;
+      channel.phaseOffsetRad = phaseDegrees * DEG_TO_RAD;
+      channel.phase = normalizePhase(referencePhase + channel.phaseOffsetRad);
+      channel.phaseTimestamp = now;
+      applyOscillatorPhase(channel.oscillator, channel.phase);
+      updateChannelPhaseControls(channel, false);
+    }
 
     function setAudioBlockedHint() {
       if (transportHint) {
@@ -1165,7 +1286,7 @@
       ctx.restore();
     }
 
-    function drawWavePath(ctx, width, height, frequency, waveTime, timeWindow, color) {
+    function drawWavePath(ctx, width, height, frequency, waveTime, timeWindow, phaseOffset, color) {
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.strokeStyle = color;
@@ -1173,7 +1294,7 @@
       for (let x = 0; x < width; x += 1) {
         const fraction = x / (width - 1 || 1);
         const t = waveTime - fraction * timeWindow;
-        const sample = Math.sin(2 * Math.PI * frequency * t);
+        const sample = Math.sin(2 * Math.PI * frequency * t + phaseOffset);
         const y = (sample * 0.5 + 0.5) * height;
         if (x === 0) {
           ctx.moveTo(x, y);
@@ -1204,6 +1325,7 @@
         channel.frequency,
         channel.waveTime,
         timeWindow,
+        channel.phaseOffsetRad || 0,
         animated ? colors.channelLine : colors.channelLinePaused
       );
 
@@ -1248,7 +1370,7 @@
 
         for (const channel of activeChannels) {
           const t = channel.waveTime - fraction * timeWindow;
-          sampleSum += Math.sin(2 * Math.PI * channel.frequency * t);
+          sampleSum += Math.sin(2 * Math.PI * channel.frequency * t + (channel.phaseOffsetRad || 0));
         }
 
         const y = (sampleSum / ampScale * 0.5 + 0.5) * height;
@@ -1325,6 +1447,11 @@
 
       playAllBtn.disabled = channels.length === 0 || activeCount === channels.length;
       pauseAllBtn.disabled = channels.length === 0 || activeCount === 0;
+      const reachedMaxChannels = channels.length >= MAX_CHANNELS;
+      addChannelBtn.disabled = reachedMaxChannels;
+      addChannelBtn.title = reachedMaxChannels
+        ? `Maximum ${MAX_CHANNELS} channels reached`
+        : 'Add Channel';
 
       if (channels.length === 0 && combinedPlaying) {
         combinedPlaying = false;
@@ -1336,9 +1463,12 @@
     }
 
     function applyFrequency(channel, rawFrequency) {
+      const now = audioCtx.currentTime;
+      advanceChannelPhase(channel, now);
       const frequency = Math.round(clamp(rawFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ));
       channel.frequency = frequency;
-      channel.oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      channel.phaseTimestamp = now;
+      channel.oscillator.frequency.setValueAtTime(frequency, now);
       channel.freqSlider.value = String(frequency);
       channel.freqNumber.value = String(frequency);
       channel.freqValue.textContent = `${frequency} Hz`;
@@ -1375,6 +1505,7 @@
       channel.card.remove();
 
       refreshChannelTitles();
+      syncPhaseOffsetsToReference();
       refreshSummary();
 
       if (channels.length === 0) {
@@ -1400,28 +1531,41 @@
     }
 
     function addChannel(options = {}) {
+      if (channels.length >= MAX_CHANNELS) {
+        refreshSummary();
+        return false;
+      }
+
       clearEmptyState();
 
-      const referenceChannel = channels.find(c => c.isPlaying) || channels[0];
+      const now = audioCtx.currentTime;
+      const referenceChannel = channels[0] || null;
       const initialFrequency = Number.isFinite(options.frequency) ? options.frequency : 440;
+      const initialPhaseOffsetDegrees = 0;
+      const initialPhaseOffset = initialPhaseOffsetDegrees * DEG_TO_RAD;
+      const initialPhase = referenceChannel
+        ? normalizePhase(advanceChannelPhase(referenceChannel, now) + initialPhaseOffset)
+        : 0;
       const channel = {
         id: nextChannelId,
         frequency: Math.round(clamp(initialFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
         isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
-        waveTime: referenceChannel ? referenceChannel.waveTime : 0
+        waveTime: referenceChannel ? referenceChannel.waveTime : 0,
+        phaseOffsetDeg: initialPhaseOffsetDegrees,
+        phaseOffsetRad: initialPhaseOffset,
+        phase: initialPhase,
+        phaseTimestamp: now
       };
       nextChannelId += 1;
 
-      const oscillator = audioCtx.createOscillator();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(channel.frequency, audioCtx.currentTime);
+      const oscillator = createOscillatorWithPhase(channel.frequency, initialPhase, now);
 
       const gainNode = audioCtx.createGain();
-      gainNode.gain.setValueAtTime(channel.isPlaying ? 1 : 0, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(channel.isPlaying ? 1 : 0, now);
 
       oscillator.connect(gainNode);
       gainNode.connect(channelBus);
-      oscillator.start();
+      oscillator.start(now);
 
       channel.oscillator = oscillator;
       channel.gainNode = gainNode;
@@ -1496,6 +1640,29 @@
       freqMeta.appendChild(freqNumber);
       freqMeta.appendChild(freqValue);
 
+      const phaseRow = document.createElement('div');
+      phaseRow.className = 'frequency-row';
+
+      const phaseLabel = document.createElement('label');
+      phaseLabel.className = 'freq-label';
+      phaseLabel.textContent = 'Phase vs Ch1';
+
+      const phaseSlider = document.createElement('input');
+      phaseSlider.type = 'range';
+      phaseSlider.min = String(MIN_PHASE_DEGREES);
+      phaseSlider.max = String(MAX_PHASE_DEGREES);
+      phaseSlider.step = '1';
+      phaseSlider.value = '0';
+
+      const phaseMeta = document.createElement('div');
+      phaseMeta.className = 'freq-meta';
+
+      const phaseValue = document.createElement('span');
+      phaseValue.className = 'freq-value';
+      phaseValue.textContent = '0°';
+
+      phaseMeta.appendChild(phaseValue);
+
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
@@ -1503,9 +1670,13 @@
       frequencyRow.appendChild(freqLabel);
       frequencyRow.appendChild(freqSlider);
       frequencyRow.appendChild(freqMeta);
+      phaseRow.appendChild(phaseLabel);
+      phaseRow.appendChild(phaseSlider);
+      phaseRow.appendChild(phaseMeta);
 
       card.appendChild(header);
       card.appendChild(frequencyRow);
+      card.appendChild(phaseRow);
       card.appendChild(canvas);
 
       channelsList.appendChild(card);
@@ -1517,6 +1688,8 @@
       channel.freqSlider = freqSlider;
       channel.freqNumber = freqNumber;
       channel.freqValue = freqValue;
+      channel.phaseSlider = phaseSlider;
+      channel.phaseValue = phaseValue;
       channel.canvas = canvas;
       channel.ctx = ctx;
 
@@ -1527,6 +1700,10 @@
       freqNumber.addEventListener('change', () => {
         const raw = parseFloat(freqNumber.value);
         applyFrequency(channel, Number.isFinite(raw) ? raw : channel.frequency);
+      });
+
+      phaseSlider.addEventListener('input', () => {
+        setChannelPhaseOffsetRelativeToReference(channel, parseFloat(phaseSlider.value));
       });
 
       toggleBtn.addEventListener('click', () => {
@@ -1541,8 +1718,10 @@
 
       resizeCanvas(canvas);
       refreshChannelTitles();
+      syncPhaseOffsetsToReference();
       syncChannelUi(channel);
       refreshSummary();
+      return true;
     }
 
     async function setAllChannelsPlaying(targetPlaying) {
