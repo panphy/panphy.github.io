@@ -372,35 +372,9 @@ function normalizeGoogleDriveImageUrl(parsedUrl) {
   return new URL(`https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}`);
 }
 
-function normalizeOneDriveImageUrl(parsedUrl) {
-  const hostname = parsedUrl.hostname.toLowerCase();
-
-  const isOneDriveHost =
-    hostname === '1drv.ms'
-    || hostname.endsWith('.1drv.ms')
-    || hostname === 'onedrive.live.com'
-    || hostname.endsWith('.sharepoint.com');
-
-  if (!isOneDriveHost) return parsedUrl;
-
-  if (hostname === 'onedrive.live.com') {
-    const resid = parsedUrl.searchParams.get('resid') || parsedUrl.searchParams.get('id');
-    const authKey = parsedUrl.searchParams.get('authkey');
-    if (resid && authKey) {
-      const normalized = new URL('https://onedrive.live.com/download');
-      normalized.searchParams.set('resid', resid);
-      normalized.searchParams.set('authkey', authKey);
-      return normalized;
-    }
-  }
-
-  return parsedUrl;
-}
-
 function normalizeImageUrl(parsedUrl) {
   const afterDropbox = normalizeDropboxImageUrl(parsedUrl);
-  const afterGoogleDrive = normalizeGoogleDriveImageUrl(afterDropbox);
-  return normalizeOneDriveImageUrl(afterGoogleDrive);
+  return normalizeGoogleDriveImageUrl(afterDropbox);
 }
 
 /**
