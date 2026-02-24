@@ -437,9 +437,27 @@ export function showImageModal() {
     const content = document.createElement('div');
     content.className = 'modal-content image-modal';
 
+    const titleRow = document.createElement('div');
+    titleRow.className = 'image-modal-header';
+
     const titleEl = document.createElement('h3');
     titleEl.className = 'modal-title';
     titleEl.textContent = 'Insert Image';
+
+    const helpBtn = document.createElement('button');
+    helpBtn.type = 'button';
+    helpBtn.className = 'image-modal-help';
+    helpBtn.setAttribute('aria-label', 'Cloud link help');
+    helpBtn.textContent = '?';
+
+    const tooltip = document.createElement('span');
+    tooltip.className = 'image-modal-tooltip';
+    tooltip.textContent =
+      'You can paste Google Drive or Dropbox share links — they\u2019ll be converted to direct image URLs automatically.';
+
+    helpBtn.appendChild(tooltip);
+    titleRow.appendChild(titleEl);
+    titleRow.appendChild(helpBtn);
 
     const urlLabel = document.createElement('label');
     urlLabel.className = 'modal-field-label';
@@ -531,7 +549,7 @@ export function showImageModal() {
     buttons.appendChild(cancelBtn);
     buttons.appendChild(insertBtn);
 
-    content.appendChild(titleEl);
+    content.appendChild(titleRow);
     content.appendChild(urlLabel);
     content.appendChild(urlInput);
     content.appendChild(alignLabel);
