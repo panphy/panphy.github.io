@@ -47,7 +47,8 @@ import {
   showImageModal,
   showConfirmationModal,
   showHistoryModal,
-  updateDirtyIndicator
+  updateDirtyIndicator,
+  normalizeCloudImageUrl
 } from './ui.js';
 
 // DOM element references
@@ -817,6 +818,15 @@ async function insertImageFromModal() {
   insertTextAtCursor(imageTag, { insertAtCursorOnBlankLine: true });
 }
 
+function normalizeRenderedImageSources(container) {
+  const imageNodes = container.querySelectorAll('img[src]');
+  imageNodes.forEach((imageNode) => {
+    const rawSrc = imageNode.getAttribute('src');
+    if (!rawSrc) return;
+    imageNode.setAttribute('src', normalizeCloudImageUrl(rawSrc));
+  });
+}
+
 /**
  * Render the markdown content to the output pane
  */
@@ -836,6 +846,7 @@ function renderContent() {
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   dismissTableCopyActions();
   renderedOutput.innerHTML = sanitizedContent;
+  normalizeRenderedImageSources(renderedOutput);
 
   const syncPreviewScrollToInput = () => {
     if (!state.isSyncScrollEnabled) return;
