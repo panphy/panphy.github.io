@@ -1214,7 +1214,6 @@
     const PHASE_MODE_IN = 'in';
     const PHASE_MODE_ANTI = 'anti';
 
-    let resumePromise = null;
     let audioPrimed = false;
 
     function stopAndDisconnectOscillator(oscillator, stopTime = audioCtx.currentTime) {
@@ -1381,17 +1380,19 @@
         return true;
       }
 
-      if (!resumePromise) {
-        resumePromise = audioCtx.resume()
-          .then(() => audioCtx.state === 'running')
-          .catch(() => false)
-          .finally(() => {
-            resumePromise = null;
-          });
+      try {
+        await audioCtx.resume();
+      } catch (_) {
+        // Retry once; iPad Safari can transiently reject the first resume attempt.
       }
-
-      const resumed = await resumePromise;
-      const running = resumed || audioCtx.state === 'running';
+      if (audioCtx.state !== 'running') {
+        try {
+          await audioCtx.resume();
+        } catch (_) {
+          // Ignore and report blocked state below.
+        }
+      }
+      const running = audioCtx.state === 'running';
       if (running) {
         primeAudioContext();
         syncPhaseModesToReference();
@@ -2039,19 +2040,6 @@
       event.preventDefault();
       toggleCombined();
     });
-
-    const unlockAudio = () => {
-      ensureAudioContext().then((ready) => {
-        if (ready) {
-          setAudioReadyHint();
-        }
-      });
-    };
-    window.addEventListener('pointerdown', unlockAudio, { passive: true });
-    window.addEventListener('touchstart', unlockAudio, { passive: true });
-    window.addEventListener('touchend', unlockAudio, { passive: true });
-    window.addEventListener('click', unlockAudio, { passive: true });
-    window.addEventListener('keydown', unlockAudio);
 
     window.addEventListener('resize', debounce(() => {
       resizeCanvas(combinedCanvas);
