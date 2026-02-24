@@ -408,11 +408,11 @@ textarea:focus {
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1;
-  min-height: 42px;
-  min-width: 42px;
-  padding: 0.5rem;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 0.35rem;
   color: var(--pane-heading-color);
   margin: 0;
   display: inline-flex;
