@@ -244,8 +244,8 @@
     }
 
     #combinedCard {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
       min-height: 0;
       flex: 1 1 auto;
     }
@@ -297,9 +297,8 @@
     #combinedCanvas {
       display: block;
       width: 100%;
-      height: auto;
-      min-height: 320px;
-      flex: 1 1 auto;
+      height: 100%;
+      min-height: 0;
       background: var(--canvas-bg);
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -543,22 +542,21 @@
     }
 
     #channelsList[data-channel-count="2"] {
-      display: grid;
-      grid-template-rows: repeat(2, minmax(0, 1fr));
-      align-content: stretch;
+      display: flex;
       overflow: hidden;
     }
 
     #channelsList[data-channel-count="2"] .channel-card {
+      flex: 1 1 0;
       min-height: 0;
-      height: 100%;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
+      overflow: hidden;
     }
 
     #channelsList[data-channel-count="2"] .channel-canvas {
       height: 100%;
-      min-height: 130px;
+      min-height: 0;
     }
 
     #addChannelSlot {
@@ -830,7 +828,8 @@
       }
 
       #combinedCanvas {
-        min-height: 220px;
+        height: 220px;
+        min-height: 0;
       }
 
       #channelsList[data-channel-count="2"] {
