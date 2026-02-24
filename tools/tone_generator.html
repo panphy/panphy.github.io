@@ -1322,6 +1322,13 @@
       return clamp(rawAmplitude, 0, 1);
     }
 
+    // Anti-phase cancellation: each channel runs its own Web Audio OscillatorNode.
+    // Both oscillators feed into the shared channelBus summing node via separate
+    // gain nodes. Anti-phase inverts the gain to -1, so the Web Audio mixer
+    // performs real destructive interference (digital, not acoustic). When ch1 and
+    // ch2 share the same frequency and amplitude, the summed signal is zero —
+    // genuine signal cancellation inside the audio graph, not a pre-calculated
+    // combined waveform.
     function getChannelOutputGain(channel) {
       if (!channel || !channel.isPlaying) return 0;
       const phasePolarity = channel.phaseMode === PHASE_MODE_ANTI ? -1 : 1;
@@ -1380,7 +1387,7 @@
       });
 
       oldOscillators.forEach((oscillator) => {
-        stopAndDisconnectOscillator(oscillator, startAt + 0.02);
+        stopAndDisconnectOscillator(oscillator, startAt);
       });
     }
 
@@ -1497,8 +1504,10 @@
       return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
 
-    function getThemeColors() {
-      return {
+    let cachedThemeColors = null;
+
+    function refreshCachedThemeColors() {
+      cachedThemeColors = {
         canvasBg: getCssVar('--canvas-bg'),
         axisLine: getCssVar('--axis-line'),
         textMuted: getCssVar('--text-secondary'),
@@ -1509,6 +1518,15 @@
         combinedLinePaused: getCssVar('--combined-line-paused')
       };
     }
+
+    function getThemeColors() {
+      if (!cachedThemeColors) refreshCachedThemeColors();
+      return cachedThemeColors;
+    }
+
+    new MutationObserver(() => {
+      refreshCachedThemeColors();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     function updateControlReadouts() {
       const volumePercent = Math.round(parseFloat(volumeSlider.value) * 100);
@@ -1560,9 +1578,10 @@
     function drawChannelWave(channel, colors) {
       const ctx = channel.ctx;
       const canvas = channel.canvas;
-      const width = canvas.width;
-      const height = canvas.height;
+      const width = canvas._cssWidth || canvas.width;
+      const height = canvas._cssHeight || canvas.height;
 
+      applyCanvasDpr(ctx);
       ctx.fillStyle = colors.canvasBg;
       ctx.fillRect(0, 0, width, height);
       drawCenterAxis(ctx, width, height, colors.axisLine);
@@ -1592,9 +1611,10 @@
     }
 
     function drawCombinedWave(colors) {
-      const width = combinedCanvas.width;
-      const height = combinedCanvas.height;
+      const width = combinedCanvas._cssWidth || combinedCanvas.width;
+      const height = combinedCanvas._cssHeight || combinedCanvas.height;
 
+      applyCanvasDpr(combinedCtx);
       combinedCtx.fillStyle = colors.canvasBg;
       combinedCtx.fillRect(0, 0, width, height);
       drawCenterAxis(combinedCtx, width, height, colors.axisLine);
@@ -1614,10 +1634,11 @@
       combinedCtx.lineWidth = 2.25;
       combinedCtx.strokeStyle = combinedPlaying ? colors.combinedLine : colors.combinedLinePaused;
 
-      const audibleCount = activeChannels.reduce((count, channel) => {
-        return count + (getChannelAmplitude(channel) > 0.001 ? 1 : 0);
+      const summedPower = activeChannels.reduce((total, channel) => {
+        const a = getChannelAmplitude(channel);
+        return total + a * a;
       }, 0);
-      const ampScale = Math.max(1, audibleCount);
+      const ampScale = summedPower > 1 ? Math.sqrt(summedPower) : 1;
 
       for (let x = 0; x < width; x += 1) {
         const fraction = x / (width - 1 || 1);
@@ -1736,7 +1757,7 @@
       });
     }
 
-    function applyFrequency(channel, rawFrequency) {
+    function applyFrequency(channel, rawFrequency, options = {}) {
       const frequency = Math.round(clamp(rawFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ));
       channel.frequency = frequency;
       if (channel.oscillator) {
@@ -1744,6 +1765,8 @@
       }
       channel.freqSlider.value = String(frequency);
       channel.freqNumber.value = String(frequency);
+
+      if (options.skipResync) return;
 
       if (channels[0] === channel) {
         syncPhaseModesToReference();
@@ -1920,9 +1943,12 @@
       const frequencyRow = document.createElement('div');
       frequencyRow.className = 'frequency-row';
 
+      const freqNumberId = 'freq-number-' + channel.id;
+
       const freqLabel = document.createElement('label');
       freqLabel.className = 'freq-label';
       freqLabel.textContent = 'Frequency';
+      freqLabel.htmlFor = freqNumberId;
 
       const freqSlider = document.createElement('input');
       freqSlider.type = 'range';
@@ -1930,14 +1956,17 @@
       freqSlider.max = String(MAX_FREQUENCY_HZ);
       freqSlider.step = '1';
       freqSlider.value = String(channel.frequency);
+      freqSlider.setAttribute('aria-label', 'Channel frequency');
 
       const freqNumber = document.createElement('input');
       freqNumber.className = 'freq-number';
+      freqNumber.id = freqNumberId;
       freqNumber.type = 'number';
       freqNumber.min = String(MIN_FREQUENCY_HZ);
       freqNumber.max = String(MAX_FREQUENCY_HZ);
       freqNumber.step = '1';
       freqNumber.value = String(channel.frequency);
+      freqNumber.setAttribute('aria-label', 'Channel frequency in Hz');
 
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
@@ -1988,6 +2017,10 @@
       channel.ctx = ctx;
 
       freqSlider.addEventListener('input', () => {
+        applyFrequency(channel, parseFloat(freqSlider.value), { skipResync: true });
+      });
+
+      freqSlider.addEventListener('change', () => {
         applyFrequency(channel, parseFloat(freqSlider.value));
       });
 
@@ -2071,6 +2104,12 @@
         channels.forEach((channel) => {
           if (channel.isPlaying) {
             channel.waveTime += step;
+            // Wrap to prevent floating-point precision loss after extended use.
+            // 1e5 / freq keeps the value small while preserving phase continuity.
+            const wrapAt = 1e5 / Math.max(1, channel.frequency);
+            if (channel.waveTime > wrapAt) {
+              channel.waveTime -= wrapAt;
+            }
           }
         });
       }
@@ -2084,15 +2123,21 @@
 
     function resizeCanvas(canvas) {
       const rect = canvas.getBoundingClientRect();
-      const width = Math.max(1, Math.floor(rect.width));
-      const height = Math.max(1, Math.floor(rect.height));
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.max(1, Math.floor(rect.width * dpr));
+      const height = Math.max(1, Math.floor(rect.height * dpr));
 
-      if (canvas.width !== width) {
+      if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
-      }
-      if (canvas.height !== height) {
         canvas.height = height;
       }
+      canvas._cssWidth = Math.max(1, Math.floor(rect.width));
+      canvas._cssHeight = Math.max(1, Math.floor(rect.height));
+    }
+
+    function applyCanvasDpr(ctx) {
+      const dpr = window.devicePixelRatio || 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function debounce(fn, waitMs) {
