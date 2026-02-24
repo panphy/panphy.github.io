@@ -1114,24 +1114,16 @@
     const combinedGain = audioCtx.createGain();
     combinedGain.gain.value = 0;
 
-    const compressor = audioCtx.createDynamicsCompressor();
-    compressor.threshold.value = -22;
-    compressor.knee.value = 18;
-    compressor.ratio.value = 3;
-    compressor.attack.value = 0.004;
-    compressor.release.value = 0.2;
-
     const supportsStereoPanner = typeof audioCtx.createStereoPanner === 'function';
     const stereoPanner = supportsStereoPanner ? audioCtx.createStereoPanner() : null;
 
     channelBus.connect(volumeGain);
     volumeGain.connect(combinedGain);
-    combinedGain.connect(compressor);
     if (stereoPanner) {
-      compressor.connect(stereoPanner);
+      combinedGain.connect(stereoPanner);
       stereoPanner.connect(audioCtx.destination);
     } else {
-      compressor.connect(audioCtx.destination);
+      combinedGain.connect(audioCtx.destination);
       if (panningSlider) {
         panningSlider.disabled = true;
       }
@@ -1227,6 +1219,16 @@
       return mode === PHASE_MODE_ANTI ? Math.PI : 0;
     }
 
+    function getChannelOutputGain(channel) {
+      if (!channel || !channel.isPlaying) return 0;
+      return channel.phaseMode === PHASE_MODE_ANTI ? -1 : 1;
+    }
+
+    function setChannelOutputGain(channel) {
+      if (!channel || !channel.gainNode) return;
+      setGain(channel.gainNode, getChannelOutputGain(channel));
+    }
+
     function updateChannelPhaseToggle(channel, isReference) {
       if (!channel || !channel.phaseToggle || !channel.phaseToggleText) return;
       const isAntiPhase = channel.phaseMode === PHASE_MODE_ANTI;
@@ -1249,6 +1251,7 @@
       referenceChannel.phase = normalizePhase(referencePhase);
       referenceChannel.phaseTimestamp = now;
       updateChannelPhaseToggle(referenceChannel, true);
+      setChannelOutputGain(referenceChannel);
 
       for (let i = 1; i < channels.length; i += 1) {
         const channel = channels[i];
@@ -1257,26 +1260,34 @@
         const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
         rebuildChannelOscillator(channel, targetPhase, now);
         updateChannelPhaseToggle(channel, false);
+        setChannelOutputGain(channel);
       }
     }
 
-    function setChannelPhaseModeRelativeToReference(channel, mode) {
+    function setChannelPhaseModeRelativeToReference(channel, mode, options = {}) {
       if (!channel) return;
+      const shouldResyncPhase = options.resyncPhase !== false;
       const referenceChannel = channels[0] || null;
       if (!referenceChannel || channel === referenceChannel) {
         channel.phaseMode = PHASE_MODE_IN;
         channel.phaseOffsetRad = 0;
         updateChannelPhaseToggle(channel, true);
+        setChannelOutputGain(channel);
         return;
       }
 
       const now = audioCtx.currentTime;
-      const referencePhase = advanceChannelPhase(referenceChannel, now);
       channel.phaseMode = mode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
       channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-      const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
-      rebuildChannelOscillator(channel, targetPhase, now);
+      if (shouldResyncPhase) {
+        const referencePhase = advanceChannelPhase(referenceChannel, now);
+        const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
+        rebuildChannelOscillator(channel, targetPhase, now);
+      } else {
+        advanceChannelPhase(channel, now);
+      }
       updateChannelPhaseToggle(channel, false);
+      setChannelOutputGain(channel);
     }
 
     function setAudioBlockedHint() {
@@ -1311,8 +1322,14 @@
 
     function setGain(node, targetValue) {
       const now = audioCtx.currentTime;
-      node.gain.cancelScheduledValues(now);
-      node.gain.setTargetAtTime(targetValue, now, 0.012);
+      if (typeof node.gain.cancelAndHoldAtTime === 'function') {
+        node.gain.cancelAndHoldAtTime(now);
+      } else {
+        const currentValue = node.gain.value;
+        node.gain.cancelScheduledValues(now);
+        node.gain.setValueAtTime(currentValue, now);
+      }
+      node.gain.linearRampToValueAtTime(targetValue, now + 0.012);
     }
 
     function clamp(value, min, max) {
@@ -1570,7 +1587,7 @@
       }
       setAudioReadyHint();
       channel.isPlaying = !channel.isPlaying;
-      setGain(channel.gainNode, channel.isPlaying ? 1 : 0);
+      setChannelOutputGain(channel);
       syncChannelUi(channel);
       refreshSummary();
     }
@@ -1644,7 +1661,7 @@
       const oscillator = createOscillatorWithPhase(channel.frequency, initialPhase, now);
 
       const gainNode = audioCtx.createGain();
-      gainNode.gain.setValueAtTime(channel.isPlaying ? 1 : 0, now);
+      gainNode.gain.setValueAtTime(getChannelOutputGain(channel), now);
 
       oscillator.connect(gainNode);
       gainNode.connect(channelBus);
@@ -1784,7 +1801,8 @@
       phaseToggle.addEventListener('change', () => {
         setChannelPhaseModeRelativeToReference(
           channel,
-          phaseToggle.checked ? PHASE_MODE_ANTI : PHASE_MODE_IN
+          phaseToggle.checked ? PHASE_MODE_ANTI : PHASE_MODE_IN,
+          { resyncPhase: false }
         );
       });
 
@@ -1819,7 +1837,7 @@
       setAudioReadyHint();
       channels.forEach((channel) => {
         channel.isPlaying = targetPlaying;
-        setGain(channel.gainNode, targetPlaying ? 1 : 0);
+        setChannelOutputGain(channel);
         syncChannelUi(channel);
       });
 
