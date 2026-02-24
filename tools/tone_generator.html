@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <script>
     (function() {
-      if (localStorage.getItem('panphy-dark')) {
+      if (localStorage.getItem('tone-generator-dark')) {
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
@@ -875,8 +875,8 @@
 
     // Theme Toggle
     const themeButton = document.getElementById('theme-button');
-    const DARK_THEME_KEY = 'panphy-dark';
-    const LIGHT_THEME_KEY = 'panphy-light';
+    const DARK_THEME_KEY = 'tone-generator-dark';
+    const LIGHT_THEME_KEY = 'tone-generator-light';
 
     const currentTheme = localStorage.getItem(DARK_THEME_KEY)
       ? 'dark'
