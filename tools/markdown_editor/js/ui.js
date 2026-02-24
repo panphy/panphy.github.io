@@ -435,32 +435,6 @@ const IMAGE_FILE_EXTENSIONS = new Set([
   '.webp'
 ]);
 
-const NON_IMAGE_FILE_EXTENSIONS = new Set([
-  '.asp',
-  '.aspx',
-  '.cgi',
-  '.csv',
-  '.doc',
-  '.docx',
-  '.htm',
-  '.html',
-  '.js',
-  '.json',
-  '.md',
-  '.pdf',
-  '.php',
-  '.ppt',
-  '.pptx',
-  '.py',
-  '.rb',
-  '.sql',
-  '.txt',
-  '.xls',
-  '.xlsx',
-  '.xml',
-  '.zip'
-]);
-
 function extractFileExtensionFromPath(pathname) {
   const lastSlashIndex = pathname.lastIndexOf('/');
   const fileName = lastSlashIndex >= 0 ? pathname.slice(lastSlashIndex + 1) : pathname;
@@ -506,9 +480,8 @@ function getLikelyNonImageWarning(rawUrl, normalizedUrl) {
   const extension = extractFileExtensionFromPath(parsedNormalizedUrl.pathname);
   if (!extension) return '';
   if (IMAGE_FILE_EXTENSIONS.has(extension)) return '';
-  if (!NON_IMAGE_FILE_EXTENSIONS.has(extension)) return '';
 
-  return 'This URL looks like a non-image file and may not render correctly.';
+  return 'This URL does not look like a direct image file and may not render correctly.';
 }
 
 /**
