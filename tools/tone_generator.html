@@ -541,11 +541,13 @@
       padding-right: 0.4rem;
     }
 
+    #channelsList[data-channel-count="1"],
     #channelsList[data-channel-count="2"] {
       display: flex;
       overflow: hidden;
     }
 
+    #channelsList[data-channel-count="1"] .channel-card,
     #channelsList[data-channel-count="2"] .channel-card {
       flex: 1 1 0;
       min-height: 0;
@@ -554,6 +556,7 @@
       overflow: hidden;
     }
 
+    #channelsList[data-channel-count="1"] .channel-canvas,
     #channelsList[data-channel-count="2"] .channel-canvas {
       height: 100%;
       min-height: 0;
@@ -828,16 +831,20 @@
         min-height: 0;
       }
 
+      #channelsList[data-channel-count="1"],
       #channelsList[data-channel-count="2"] {
         display: flex;
         overflow-y: auto;
       }
 
+      #channelsList[data-channel-count="1"] .channel-card,
       #channelsList[data-channel-count="2"] .channel-card {
         height: auto;
+        flex: 0 0 auto;
         grid-template-rows: none;
       }
 
+      #channelsList[data-channel-count="1"] .channel-canvas,
       #channelsList[data-channel-count="2"] .channel-canvas {
         height: 108px;
         min-height: 0;
