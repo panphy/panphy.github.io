@@ -25,7 +25,7 @@
       }
     })();
     </script>
-  <title>Multi-Channel Tone Generator</title>
+  <title>Two-Channel Tone Generator</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <script src="/assets/sw-register.js" defer></script>
   <style>
@@ -926,7 +926,7 @@
           </div>
 
           <div class="utility-row">
-            <button id="addChannelBtn" class="btn btn-primary">Add Channel</button>
+            <button id="addChannelBtn" class="btn btn-primary">Add Channel (Max 2)</button>
             <button id="playAllBtn" class="btn btn-secondary" disabled>Play All Channels</button>
             <button id="pauseAllBtn" class="btn btn-secondary" disabled>Pause All Channels</button>
           </div>
@@ -936,7 +936,7 @@
       <section id="channelsPanel" class="panel">
         <div class="channels-header">
           <h2>Channel Mixer</h2>
-          <p>Each channel has independent play/pause. Combined play controls final audio output and combined waveform motion.</p>
+          <p>Use up to two channels. Channel 2 can be switched in-phase or anti-phase relative to Channel 1.</p>
         </div>
         <div id="channelsList"></div>
       </section>
@@ -1151,7 +1151,7 @@
       MIN_FREQUENCY_HZ,
       Math.min(23000, Math.floor(audioCtx.sampleRate / 2) - 1)
     );
-    const MAX_CHANNELS = 10;
+    const MAX_CHANNELS = 2;
 
     const channels = [];
     let nextChannelId = 1;
@@ -1162,70 +1162,46 @@
 
     const BASE_WINDOW = 0.01;
     const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
-    const TWO_PI = Math.PI * 2;
     const PHASE_MODE_IN = 'in';
     const PHASE_MODE_ANTI = 'anti';
 
     let resumePromise = null;
+    let audioPrimed = false;
 
-    function normalizePhase(phase) {
-      if (!Number.isFinite(phase)) return 0;
-      let normalized = phase % TWO_PI;
-      if (normalized < 0) {
-        normalized += TWO_PI;
-      }
-      return normalized;
-    }
-
-    function advanceChannelPhase(channel, now = audioCtx.currentTime) {
-      if (!channel || !Number.isFinite(channel.phaseTimestamp) || !Number.isFinite(channel.phase)) {
-        return 0;
-      }
-      const elapsed = Math.max(0, now - channel.phaseTimestamp);
-      if (elapsed > 0) {
-        channel.phase = normalizePhase(channel.phase + TWO_PI * channel.frequency * elapsed);
-        channel.phaseTimestamp = now;
-      }
-      return channel.phase;
-    }
-
-    function applyOscillatorPhase(oscillator, phase) {
-      const normalizedPhase = normalizePhase(phase);
-      const real = new Float32Array(2);
-      const imag = new Float32Array(2);
-      real[1] = Math.sin(normalizedPhase);
-      imag[1] = Math.cos(normalizedPhase);
-      oscillator.setPeriodicWave(audioCtx.createPeriodicWave(real, imag));
-    }
-
-    function createOscillatorWithPhase(frequency, phase, startTime) {
-      const oscillator = audioCtx.createOscillator();
-      applyOscillatorPhase(oscillator, phase);
-      oscillator.frequency.setValueAtTime(frequency, startTime);
-      return oscillator;
-    }
-
-    function rebuildChannelOscillator(channel, targetPhase, now = audioCtx.currentTime) {
-      if (!channel || !channel.gainNode || !channel.oscillator) return;
-
-      const newOscillator = createOscillatorWithPhase(channel.frequency, targetPhase, now);
-      newOscillator.connect(channel.gainNode);
-      newOscillator.start(now);
-
-      const oldOscillator = channel.oscillator;
-      channel.oscillator = newOscillator;
-      channel.phase = normalizePhase(targetPhase);
-      channel.phaseTimestamp = now;
-
+    function stopAndDisconnectOscillator(oscillator, stopTime = audioCtx.currentTime) {
+      if (!oscillator) return;
       try {
-        oldOscillator.stop(now);
+        oscillator.stop(stopTime);
       } catch (_) {
         // Ignore already-stopped oscillator errors.
       }
       try {
-        oldOscillator.disconnect();
+        oscillator.disconnect();
       } catch (_) {
         // Ignore disconnect errors if already disconnected.
+      }
+    }
+
+    function createChannelOscillator(channel, startTime) {
+      const oscillator = audioCtx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(channel.frequency, startTime);
+      oscillator.connect(channel.gainNode);
+      oscillator.start(startTime);
+      return oscillator;
+    }
+
+    function primeAudioContext() {
+      if (audioPrimed) return;
+      try {
+        const source = audioCtx.createBufferSource();
+        source.buffer = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+        source.connect(audioCtx.destination);
+        source.start(audioCtx.currentTime);
+        source.stop(audioCtx.currentTime + 0.001);
+        audioPrimed = true;
+      } catch (_) {
+        // If priming fails, keep going and let normal playback path handle it.
       }
     }
 
@@ -1254,16 +1230,41 @@
       channel.phaseToggleText.textContent = isAntiPhase ? 'anti-phase' : 'in-phase';
     }
 
-    function syncPhaseModesToReference() {
-      if (channels.length === 0) return;
+    function resyncRunningOscillators() {
+      if (audioCtx.state !== 'running' || channels.length === 0) return;
 
       const now = audioCtx.currentTime;
+      const startAt = now + 0.012;
+      const oldOscillators = channels.map((channel) => channel.oscillator || null);
+
+      channels.forEach((channel) => {
+        channel.oscillator = createChannelOscillator(channel, startAt);
+      });
+
+      channels.forEach((channel) => {
+        const targetGain = getChannelOutputGain(channel);
+        try {
+          channel.gainNode.gain.cancelScheduledValues(now);
+          channel.gainNode.gain.setValueAtTime(channel.gainNode.gain.value, now);
+          channel.gainNode.gain.setValueAtTime(channel.gainNode.gain.value, startAt);
+          channel.gainNode.gain.linearRampToValueAtTime(targetGain, startAt + 0.008);
+        } catch (_) {
+          channel.gainNode.gain.setValueAtTime(targetGain, now);
+        }
+      });
+
+      oldOscillators.forEach((oscillator) => {
+        stopAndDisconnectOscillator(oscillator, startAt + 0.02);
+      });
+    }
+
+    function syncPhaseModesToReference(options = {}) {
+      if (channels.length === 0) return;
+      const shouldResyncAudio = options.resyncAudio !== false;
+
       const referenceChannel = channels[0];
-      const referencePhase = advanceChannelPhase(referenceChannel, now);
       referenceChannel.phaseMode = PHASE_MODE_IN;
       referenceChannel.phaseOffsetRad = 0;
-      referenceChannel.phase = normalizePhase(referencePhase);
-      referenceChannel.phaseTimestamp = now;
       updateChannelPhaseToggle(referenceChannel, true);
       setChannelOutputGain(referenceChannel);
 
@@ -1271,16 +1272,17 @@
         const channel = channels[i];
         channel.phaseMode = channel.phaseMode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
         channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-        const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
-        rebuildChannelOscillator(channel, targetPhase, now);
         updateChannelPhaseToggle(channel, false);
         setChannelOutputGain(channel);
       }
+
+      if (shouldResyncAudio) {
+        resyncRunningOscillators();
+      }
     }
 
-    function setChannelPhaseModeRelativeToReference(channel, mode, options = {}) {
+    function setChannelPhaseModeRelativeToReference(channel, mode) {
       if (!channel) return;
-      const shouldResyncPhase = options.resyncPhase !== false;
       const referenceChannel = channels[0] || null;
       if (!referenceChannel || channel === referenceChannel) {
         channel.phaseMode = PHASE_MODE_IN;
@@ -1290,18 +1292,11 @@
         return;
       }
 
-      const now = audioCtx.currentTime;
       channel.phaseMode = mode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
       channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-      if (shouldResyncPhase) {
-        const referencePhase = advanceChannelPhase(referenceChannel, now);
-        const targetPhase = normalizePhase(referencePhase + channel.phaseOffsetRad);
-        rebuildChannelOscillator(channel, targetPhase, now);
-      } else {
-        advanceChannelPhase(channel, now);
-      }
       updateChannelPhaseToggle(channel, false);
       setChannelOutputGain(channel);
+      resyncRunningOscillators();
     }
 
     function setAudioBlockedHint() {
@@ -1318,6 +1313,10 @@
 
     async function ensureAudioContext() {
       if (audioCtx.state === 'running') {
+        primeAudioContext();
+        if (channels.some((channel) => !channel.oscillator)) {
+          syncPhaseModesToReference();
+        }
         return true;
       }
 
@@ -1331,7 +1330,12 @@
       }
 
       const resumed = await resumePromise;
-      return resumed || audioCtx.state === 'running';
+      const running = resumed || audioCtx.state === 'running';
+      if (running) {
+        primeAudioContext();
+        syncPhaseModesToReference();
+      }
+      return running;
     }
 
     function setGain(node, targetValue) {
@@ -1582,12 +1586,11 @@
     }
 
     function applyFrequency(channel, rawFrequency) {
-      const now = audioCtx.currentTime;
-      advanceChannelPhase(channel, now);
       const frequency = Math.round(clamp(rawFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ));
       channel.frequency = frequency;
-      channel.phaseTimestamp = now;
-      channel.oscillator.frequency.setValueAtTime(frequency, now);
+      if (channel.oscillator) {
+        channel.oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      }
       channel.freqSlider.value = String(frequency);
       channel.freqNumber.value = String(frequency);
       channel.freqValue.textContent = `${frequency} Hz`;
@@ -1613,6 +1616,9 @@
       setAudioReadyHint();
       channel.isPlaying = !channel.isPlaying;
       setChannelOutputGain(channel);
+      if (channel.isPlaying && channels.length > 1) {
+        resyncRunningOscillators();
+      }
       syncChannelUi(channel);
       refreshSummary();
     }
@@ -1624,8 +1630,7 @@
       }
 
       const [channel] = channels.splice(index, 1);
-      channel.oscillator.stop();
-      channel.oscillator.disconnect();
+      stopAndDisconnectOscillator(channel.oscillator);
       channel.gainNode.disconnect();
       channel.card.remove();
 
@@ -1668,9 +1673,6 @@
       const initialFrequency = Number.isFinite(options.frequency) ? options.frequency : 440;
       const initialPhaseMode = PHASE_MODE_IN;
       const initialPhaseOffset = getPhaseOffsetForMode(initialPhaseMode);
-      const initialPhase = referenceChannel
-        ? normalizePhase(advanceChannelPhase(referenceChannel, now) + initialPhaseOffset)
-        : 0;
       const channel = {
         id: nextChannelId,
         frequency: Math.round(clamp(initialFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
@@ -1678,21 +1680,13 @@
         waveTime: referenceChannel ? referenceChannel.waveTime : 0,
         phaseMode: initialPhaseMode,
         phaseOffsetRad: initialPhaseOffset,
-        phase: initialPhase,
-        phaseTimestamp: now
+        oscillator: null
       };
       nextChannelId += 1;
 
-      const oscillator = createOscillatorWithPhase(channel.frequency, initialPhase, now);
-
       const gainNode = audioCtx.createGain();
-      gainNode.gain.setValueAtTime(getChannelOutputGain(channel), now);
-
-      oscillator.connect(gainNode);
+      gainNode.gain.setValueAtTime(0, now);
       gainNode.connect(channelBus);
-      oscillator.start(now);
-
-      channel.oscillator = oscillator;
       channel.gainNode = gainNode;
 
       const card = document.createElement('article');
@@ -1826,8 +1820,7 @@
       phaseToggle.addEventListener('change', () => {
         setChannelPhaseModeRelativeToReference(
           channel,
-          phaseToggle.checked ? PHASE_MODE_ANTI : PHASE_MODE_IN,
-          { resyncPhase: false }
+          phaseToggle.checked ? PHASE_MODE_ANTI : PHASE_MODE_IN
         );
       });
 
@@ -1866,6 +1859,10 @@
         syncChannelUi(channel);
       });
 
+      if (targetPlaying && channels.length > 1) {
+        resyncRunningOscillators();
+      }
+
       refreshSummary();
     }
 
@@ -1882,6 +1879,9 @@
           return;
         }
         setAudioReadyHint();
+        if (channels.length > 1) {
+          resyncRunningOscillators();
+        }
       }
 
       combinedPlaying = !combinedPlaying;
@@ -2017,6 +2017,8 @@
     };
     window.addEventListener('pointerdown', unlockAudio, { passive: true });
     window.addEventListener('touchstart', unlockAudio, { passive: true });
+    window.addEventListener('touchend', unlockAudio, { passive: true });
+    window.addEventListener('click', unlockAudio, { passive: true });
     window.addEventListener('keydown', unlockAudio);
 
     window.addEventListener('resize', debounce(() => {
