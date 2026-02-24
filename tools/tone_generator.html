@@ -543,14 +543,18 @@
 
     #channelsList[data-channel-count="1"],
     #channelsList[data-channel-count="2"] {
-      display: flex;
-      overflow: hidden;
+      display: grid;
+      grid-template-rows: repeat(2, minmax(230px, 1fr));
+      align-content: stretch;
+      overflow-y: auto;
     }
 
+    #channelsList[data-channel-count="1"] #addChannelSlot,
+    #channelsList[data-channel-count="2"] #addChannelSlot,
     #channelsList[data-channel-count="1"] .channel-card,
     #channelsList[data-channel-count="2"] .channel-card {
-      flex: 1 1 0;
       min-height: 0;
+      height: 100%;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
       overflow: hidden;
@@ -563,8 +567,7 @@
     }
 
     #addChannelSlot {
-      flex: 1 1 120px;
-      min-height: 110px;
+      min-height: 0;
       border: 1px dashed var(--border);
       border-radius: 12px;
       display: flex;
@@ -1649,6 +1652,13 @@
 
       toggleCombinedBtn.disabled = channels.length === 0;
       syncCombinedUi();
+
+      requestAnimationFrame(() => {
+        resizeCanvas(combinedCanvas);
+        channels.forEach((channel) => {
+          resizeCanvas(channel.canvas);
+        });
+      });
     }
 
     function applyFrequency(channel, rawFrequency) {
