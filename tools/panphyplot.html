@@ -7,6 +7,19 @@
     <meta name="theme-color" content="#f8f9fa">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <script>
+    (function() {
+      var t = localStorage.getItem('panphyplot-theme');
+      var isDark = t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute('content', '#0f1014');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      }
+    })();
+    </script>
 
 	<title>PanPhyPlot</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
