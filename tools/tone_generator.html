@@ -410,6 +410,11 @@
       min-width: 128px;
     }
 
+    #toggleCombinedBtn {
+      width: 128px;
+      flex: 0 0 128px;
+    }
+
     .btn-primary:hover {
       background: var(--btn-primary-hover);
     }
@@ -943,6 +948,11 @@
         width: 100%;
       }
 
+      #toggleCombinedBtn {
+        width: 100%;
+        flex: 1 1 auto;
+      }
+
       .channel-actions {
         width: 100%;
       }
@@ -994,7 +1004,7 @@
                 <p id="activeSummary">0 active / 0 channels</p>
               </div>
             </div>
-            <button id="toggleCombinedBtn" class="btn btn-primary" disabled>Play Combined</button>
+            <button id="toggleCombinedBtn" class="btn btn-primary" disabled>Play</button>
           </div>
           <div id="combinedCanvasWrap">
             <canvas id="combinedCanvas"></canvas>
@@ -1699,11 +1709,11 @@
       if (combinedPlaying) {
         combinedStateChip.className = 'status-chip playing';
         combinedStateChip.textContent = 'Playing';
-        toggleCombinedBtn.textContent = 'Pause Combined';
+        toggleCombinedBtn.textContent = 'Pause';
       } else {
         combinedStateChip.className = 'status-chip paused';
         combinedStateChip.textContent = 'Paused';
-        toggleCombinedBtn.textContent = 'Play Combined';
+        toggleCombinedBtn.textContent = 'Play';
       }
 
       if (channels.length === 0) {
