@@ -334,9 +334,9 @@ function normalizeDropboxImageUrl(parsedUrl) {
   if (!isLikelyFileShare) return parsedUrl;
 
   const normalized = new URL(parsedUrl.href);
+  normalized.hostname = 'dl.dropboxusercontent.com';
   normalized.searchParams.delete('dl');
   normalized.searchParams.delete('raw');
-  normalized.searchParams.set('raw', '1');
   return normalized;
 }
 
