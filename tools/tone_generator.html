@@ -989,10 +989,22 @@
     const BASE_WINDOW = 0.01;
     const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
 
-    function ensureAudioContext() {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+    let resumePromise = null;
+
+    async function ensureAudioContext() {
+      if (audioCtx.state === 'running') {
+        return;
       }
+
+      if (!resumePromise) {
+        resumePromise = audioCtx.resume().catch(() => {
+          // Safari/iOS may block resume until a qualifying user gesture.
+        }).finally(() => {
+          resumePromise = null;
+        });
+      }
+
+      await resumePromise;
     }
 
     function setGain(node, targetValue) {
@@ -1200,6 +1212,9 @@
       const activeCount = channels.filter((channel) => channel.isPlaying).length;
       activeSummary.textContent = `${activeCount} active / ${channels.length} channels`;
 
+      const normalizedBusGain = activeCount > 0 ? 1 / activeCount : 1;
+      setGain(channelBus, normalizedBusGain);
+
       playAllBtn.disabled = channels.length === 0 || activeCount === channels.length;
       pauseAllBtn.disabled = channels.length === 0 || activeCount === 0;
 
@@ -1221,13 +1236,13 @@
       channel.freqValue.textContent = `${frequency} Hz`;
     }
 
-    function toggleChannel(channelId) {
+    async function toggleChannel(channelId) {
       const channel = channels.find((item) => item.id === channelId);
       if (!channel) {
         return;
       }
 
-      ensureAudioContext();
+      await ensureAudioContext();
       channel.isPlaying = !channel.isPlaying;
       setGain(channel.gainNode, channel.isPlaying ? 1 : 0);
       syncChannelUi(channel);
@@ -1416,12 +1431,12 @@
       refreshSummary();
     }
 
-    function setAllChannelsPlaying(targetPlaying) {
+    async function setAllChannelsPlaying(targetPlaying) {
       if (channels.length === 0) {
         return;
       }
 
-      ensureAudioContext();
+      await ensureAudioContext();
       channels.forEach((channel) => {
         channel.isPlaying = targetPlaying;
         setGain(channel.gainNode, targetPlaying ? 1 : 0);
@@ -1431,14 +1446,14 @@
       refreshSummary();
     }
 
-    function toggleCombined() {
+    async function toggleCombined() {
       if (channels.length === 0) {
         return;
       }
 
       combinedPlaying = !combinedPlaying;
       if (combinedPlaying) {
-        ensureAudioContext();
+        await ensureAudioContext();
       }
 
       setGain(combinedGain, combinedPlaying ? 1 : 0);
@@ -1498,21 +1513,21 @@
       };
     }
 
-    addChannelBtn.addEventListener('click', () => {
-      ensureAudioContext();
+    addChannelBtn.addEventListener('click', async () => {
+      await ensureAudioContext();
       addChannel({ frequency: 440, isPlaying: true });
     });
 
-    playAllBtn.addEventListener('click', () => {
-      setAllChannelsPlaying(true);
+    playAllBtn.addEventListener('click', async () => {
+      await setAllChannelsPlaying(true);
     });
 
-    pauseAllBtn.addEventListener('click', () => {
-      setAllChannelsPlaying(false);
+    pauseAllBtn.addEventListener('click', async () => {
+      await setAllChannelsPlaying(false);
     });
 
-    toggleCombinedBtn.addEventListener('click', () => {
-      toggleCombined();
+    toggleCombinedBtn.addEventListener('click', async () => {
+      await toggleCombined();
     });
 
     volumeSlider.addEventListener('input', () => {
@@ -1553,6 +1568,12 @@
       event.preventDefault();
       toggleCombined();
     });
+
+    const unlockAudio = () => {
+      ensureAudioContext();
+    };
+    window.addEventListener('pointerdown', unlockAudio, { passive: true });
+    window.addEventListener('keydown', unlockAudio);
 
     window.addEventListener('resize', debounce(() => {
       resizeCanvas(combinedCanvas);
