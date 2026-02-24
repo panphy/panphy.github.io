@@ -175,12 +175,15 @@
       align-items: center;
       justify-content: center;
       color: var(--text-main);
-      transition: background-color 0.2s ease, transform 0.2s ease;
+      min-width: 42px;
+      min-height: 42px;
+      line-height: 1;
+      transition: transform 0.2s ease, background-color 0.2s ease;
     }
 
     .theme-toggle button:hover {
       background-color: var(--toggle-hover);
-      transform: translateY(-1px);
+      transform: rotate(15deg);
     }
 
     main {
