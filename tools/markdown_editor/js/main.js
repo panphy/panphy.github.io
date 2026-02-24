@@ -1102,113 +1102,16 @@ function toggleLaser() {
 }
 
 /**
- * Export the rendered output as a clean PDF (no browser headers/footers).
+ * Print the document to PDF.
  *
- * Uses html2canvas to capture the rendered output and jsPDF to assemble
- * a multi-page A4 PDF.  On Apple mobile WebKit the resulting blob is
- * offered via the share sheet; everywhere else a download is triggered.
+ * Must be synchronous so that window.print() runs inside the original
+ * user-gesture context (Safari/iOS block it otherwise).  The @media print
+ * CSS already forces light-mode colours, and the beforeprint / afterprint
+ * handlers swap the highlight.js stylesheet, so we only need to call
+ * window.print() here.
  */
-async function exportAsPDF() {
-  if (typeof window.jspdf === 'undefined') {
-    alert('PDF export library failed to load. Please check your internet connection and try again.');
-    return;
-  }
-
-  const fileName = await showFilenameModal('document.pdf', 'Export as PDF');
-  if (!fileName) return;
-
-  printButton.disabled = true;
-  const originalText = printButton.textContent;
-  printButton.textContent = 'Exporting\u2026';
-
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-  // Save original inline styles so we can restore them exactly
-  const prevOverflow = renderedOutput.style.overflow;
-  const prevHeight = renderedOutput.style.height;
-  const prevMaxHeight = renderedOutput.style.maxHeight;
-  const prevPosition = renderedOutput.style.position;
-
-  try {
-    // Force light mode for PDF capture
-    if (isDark) {
-      document.documentElement.setAttribute('data-theme', 'light');
-      highlightStyle.href =
-        'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-
-    // Expand the rendered output so html2canvas sees the full content
-    renderedOutput.style.overflow = 'visible';
-    renderedOutput.style.height = 'auto';
-    renderedOutput.style.maxHeight = 'none';
-    renderedOutput.style.position = 'relative';
-
-    // Wait two frames for layout to settle
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    const canvas = await html2canvas(renderedOutput, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff'
-    });
-
-    // A4 dimensions in mm
-    const PAGE_W = 210;
-    const PAGE_H = 297;
-    const MARGIN = 15;
-    const CONTENT_W = PAGE_W - 2 * MARGIN;
-    const CONTENT_H = PAGE_H - 2 * MARGIN;
-
-    // How the captured canvas maps onto pages
-    const pxPerMm = canvas.width / CONTENT_W;
-    const sliceHeightPx = Math.floor(CONTENT_H * pxPerMm);
-    const pageCount = Math.max(1, Math.ceil(canvas.height / sliceHeightPx));
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    for (let i = 0; i < pageCount; i++) {
-      if (i > 0) pdf.addPage();
-
-      const srcY = i * sliceHeightPx;
-      const srcH = Math.min(sliceHeightPx, canvas.height - srcY);
-
-      const pageCanvas = document.createElement('canvas');
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = srcH;
-      const ctx = pageCanvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-      ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-
-      const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
-      const sliceH = srcH / pxPerMm;
-      pdf.addImage(imgData, 'JPEG', MARGIN, MARGIN, CONTENT_W, sliceH);
-    }
-
-    const blob = pdf.output('blob');
-    await saveBlobWithFallback(blob, fileName, { title: 'Export PDF' });
-  } catch (err) {
-    console.error('PDF export failed:', err);
-    alert('PDF export failed. Please try again.');
-  } finally {
-    // Restore theme
-    if (isDark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      highlightStyle.href =
-        'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    }
-
-    // Restore renderedOutput styles
-    renderedOutput.style.overflow = prevOverflow;
-    renderedOutput.style.height = prevHeight;
-    renderedOutput.style.maxHeight = prevMaxHeight;
-    renderedOutput.style.position = prevPosition;
-
-    printButton.disabled = false;
-    printButton.textContent = originalText;
-  }
+function printToPDF() {
+  window.print();
 }
 
 function sanitizeFilenameForDownload(filename, fallback) {
@@ -1673,7 +1576,7 @@ renderedOutput.addEventListener('click', event => {
   }
 });
 
-printButton.addEventListener('click', exportAsPDF);
+printButton.addEventListener('click', printToPDF);
 exportHTMLButton.addEventListener('click', exportHTML);
 presentButton.addEventListener('click', togglePresentMode);
 saveMDButton.addEventListener('click', saveMarkdown);
