@@ -1213,7 +1213,7 @@
 
                 // Events – draw moving-frame (primed) rockets first, then rest-frame
                 // rockets on top so rest-frame is visible when frames overlap.
-                const emojiSize = p => p.radius * 2.4;
+                const emojiSize = p => p.radius * 3.2;
 
                 events.forEach(p => {
                     let pm = lorentzTransform(p, relSpeed);
@@ -1230,7 +1230,7 @@
                     ctx.font = "14px Arial";
                     ctx.textAlign = 'start';
                     ctx.textBaseline = 'alphabetic';
-                    ctx.fillText(p.label + primeSuffix, cpm.x + p.radius + 2, cpm.y - p.radius - 2);
+                    ctx.fillText(p.label + primeSuffix, cpm.x + p.radius + 6, cpm.y - p.radius - 6);
                 });
 
                 events.forEach(p => {
@@ -1256,7 +1256,7 @@
                     ctx.font = "14px Arial";
                     ctx.textAlign = 'start';
                     ctx.textBaseline = 'alphabetic';
-                    ctx.fillText(p.label, cp.x + p.radius + 2, cp.y - p.radius - 2);
+                    ctx.fillText(p.label, cp.x + p.radius + 6, cp.y - p.radius - 6);
                 });
 
                 let html = `
