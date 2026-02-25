@@ -1615,7 +1615,7 @@ if (insertPanel) {
     if (actionBtn.dataset.action === 'table') {
       insertMathTemplate('table');
     } else if (actionBtn.dataset.action === 'pagebreak') {
-      insertTextAtCursor('<div class="page-break"></div>', { insertAtCursorOnBlankLine: true });
+      insertTextAtCursor('<div class="page-break"></div>\n', { insertAtCursorOnBlankLine: true });
       closeInsertPanel();
     } else if (actionBtn.dataset.action === 'image') {
       closeInsertPanel();
