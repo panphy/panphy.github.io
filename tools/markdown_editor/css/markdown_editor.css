@@ -1031,6 +1031,7 @@ td[align="right"] {
   body {
     display: block !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
     margin: 0 !important;
     -webkit-print-color-adjust: exact !important;
