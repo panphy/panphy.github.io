@@ -497,8 +497,8 @@
         }
 
         .spacetime-bg canvas {
-            width: 100%;
-            height: 100%;
+            display: block;
+            /* width/height set programmatically to avoid iOS PWA canvas scaling bugs */
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -745,6 +745,8 @@
                 h = window.innerHeight;
                 canvas.width = w * dpr;
                 canvas.height = h * dpr;
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 cols = Math.ceil(w / spacing) + 2;
                 rows = Math.ceil(h / spacing) + 2;
@@ -883,6 +885,15 @@
 
             resize();
             window.addEventListener('resize', resize);
+            // Re-sync canvas size when iOS PWA restores from background
+            window.addEventListener('pageshow', function () {
+                requestAnimationFrame(resize);
+            });
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    requestAnimationFrame(resize);
+                }
+            });
             // Respect prefers-reduced-motion
             var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
             if (!mq.matches) {
