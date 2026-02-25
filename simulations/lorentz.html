@@ -1590,4 +1590,9 @@
         // Gradient text: skip on Brave iOS where background-clip:text is broken
         (function() {
             if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-            document.que
+            document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
+        })();
+    </script>
+</body>
+
+</html>
