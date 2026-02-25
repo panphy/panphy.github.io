@@ -27,15 +27,15 @@
 │   └── sw-register.js          # Service Worker registration script
 │
 ├── beta/                   # Unpublished WIP pages/assets (never SW-cached)
-│   ├── ar.html
-│   └── ball_assets/
 │
 ├── tools/                  # Educational data analysis tools
 │   ├── panphyplot.html     # Advanced plotting tool (entry point)
 │   ├── panphyplot/         # Modular JS/CSS for PanPhyPlot
 │   │   ├── css/panphyplot.css
-│   │   ├── js/             # state.js, main.js, plotting.js, curve-fitting.js, etc.
-│   │   └── panphyplot_manual.html  # User manual
+│   │   ├── js/             # state.js, main.js, plotting.js, curve-fitting.js,
+│   │   │                   # data-processing.js, fit-worker.js, latex-rendering.js, ui.js
+│   │   ├── panphyplot_manual.html  # User manual
+│   │   └── math_ref.html          # Math reference
 │   ├── markdown_editor.html # Markdown & LaTeX editor (entry point)
 │   ├── markdown_editor/    # Modular JS/CSS for Markdown Editor
 │   │   ├── css/markdown_editor.css
@@ -46,7 +46,6 @@
 │   │       ├── math-calculus.md
 │   │       ├── math-matrices.md
 │   │       └── math-table.md
-│   ├── digitizer.html
 │   ├── motion_tracker.html
 │   ├── sound_analyzer.html
 │   └── tone_generator.html
@@ -54,7 +53,13 @@
 ├── simulations/            # Physics simulations
 │   ├── superposition.html
 │   ├── standing_wave.html
-│   └── lorentz.html
+│   ├── lorentz.html
+│   ├── lorentz_learn.html  # Lorentz sim learning companion
+│   ├── collision.html      # 3D collision sim (entry point)
+│   └── collision/          # Modular JS/CSS/assets for Collision sim
+│       ├── app.js
+│       ├── styles.css
+│       └── collision_assets/  # MediaPipe models & WASM
 │
 ├── fun/                    # Interactive games
 │   ├── dodge.html          # Asteroid Storm (requires network for leaderboard)
@@ -68,6 +73,7 @@
 │   └── visualizer.html
 │
 └── misc/                   # Miscellaneous physics tools
+    ├── digitizer.html
     ├── gcse_phy/           # GCSE exam preparation flashcards
     │   ├── phy_flashcard.html
     │   ├── phy_flashcard_cs.html
@@ -87,12 +93,13 @@ Not every HTML file in the repo is currently treated as a published page.
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
 - `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
 - **Current unlisted/legacy pages**:
-  - `beta/ball.html`
+  - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
   - `misc/gcse_phy/phy_flashcard_cs.html`
   - `misc/gcse_phy/phy_flashcard_ss.html`
   - `misc/ising_model.html`
   - `misc/phyclub_showcase.html`
+  - `simulations/lorentz_backup.html`
 - Unlisted/internal pages should remain outside SW registration and pre-cache unless intentionally promoted
 
 If you promote an unlisted page to production, do all of the following:
@@ -114,12 +121,14 @@ If you promote an unlisted page to production, do all of the following:
 ### External Libraries (CDN)
 - `Plotly.js` (2.29.1) - Graphing and data visualization
 - `Math.js` (11.5.0) - Mathematical computations
-- `MathJax` (2.7.5 & 3.x) - LaTeX equation rendering
+- `MathJax` (2.7.5 in PanPhyPlot, 3.x in Markdown Editor) - LaTeX equation rendering
 - `Highlight.js` (11.8.0) - Code syntax highlighting
 - `DOMPurify` (2.3.4) - HTML sanitization
-- `Marked` - Markdown parsing
+- `Marked` (4.3.0) - Markdown parsing
 - `Chart.js` - Data visualization
 - `html2canvas` (1.4.1) - HTML-to-canvas screenshots
+- `Three.js` (0.161.0) - 3D rendering (Collision sim)
+- `MediaPipe` (0.10.32) - Hand tracking (Collision sim)
 - `Supabase.js` - Backend for leaderboards
 
 ## Coding Conventions
@@ -177,13 +186,15 @@ For complex tools, code is split into modules:
 **PanPhyPlot:**
 ```
 panphyplot.html (imports scripts)
-├── js/state.js          # State management & localStorage
-├── js/main.js           # App initialization
-├── js/plotting.js       # Rendering logic
-├── js/curve-fitting.js  # Math algorithms
-├── js/latex-rendering.js
-├── js/ui.js            # UI interactions
-└── css/panphyplot.css  # Styling
+├── js/state.js            # State management & localStorage
+├── js/main.js             # App initialization
+├── js/plotting.js         # Rendering logic
+├── js/curve-fitting.js    # Math algorithms
+├── js/data-processing.js  # Data import/export
+├── js/fit-worker.js       # Web Worker for curve fitting
+├── js/latex-rendering.js  # LaTeX output
+├── js/ui.js               # UI interactions
+└── css/panphyplot.css     # Styling
 ```
 
 **Markdown Editor:**

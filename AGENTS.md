@@ -51,12 +51,13 @@ Not every HTML file in the repo is currently part of the published navigation.
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
 - `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
 - **Current unlisted/legacy pages** include:
-  - `beta/ball.html`
+  - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
   - `misc/gcse_phy/phy_flashcard_cs.html`
   - `misc/gcse_phy/phy_flashcard_ss.html`
   - `misc/ising_model.html`
   - `misc/phyclub_showcase.html`
+  - `simulations/lorentz_backup.html`
 - Unlisted/internal pages should stay outside service-worker registration and pre-cache lists unless explicitly promoted
 
 If you promote an unlisted page to production, treat it as a full launch task:
@@ -90,11 +91,13 @@ If you promote an unlisted page to production, treat it as a full launch task:
 ├── tools/                  # Educational tools
 │   ├── panphyplot.html     # Entry point → panphyplot/ (modular JS/CSS)
 │   ├── markdown_editor.html # Entry point → markdown_editor/ (ES modules)
-│   └── *.html              # digitizer, motion_tracker, sound_analyzer, tone_generator
+│   └── *.html              # motion_tracker, sound_analyzer, tone_generator
 ├── simulations/            # Physics simulations
+│   ├── *.html              # superposition, standing_wave, lorentz, lorentz_learn
+│   └── collision.html      # Entry point → collision/ (modular JS/CSS/assets)
 ├── fun/                    # Games (dodge.html excluded from SW cache)
 ├── for_teachers/           # Teacher utilities
-└── misc/                   # Miscellaneous (includes gcse_phy flashcards)
+└── misc/                   # Unlisted/legacy (digitizer, gcse_phy flashcards, etc.)
 ```
 
 ## Testing Locally
