@@ -77,6 +77,7 @@ If you promote an unlisted page to production, treat it as a full launch task:
 - **Mobile-first**: Touch targets 48px+, responsive design
 - **Offline-first**: New features must work without network
 - **External libraries**: Loaded from CDNs (Plotly, MathJax, etc.), not bundled
+- **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`)
 
 
 ## Directory Layout

@@ -365,3 +365,4 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 9. **Offline-first**: Ensure new features work without network
 10. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
 11. **Keep it simple**: Avoid adding frameworks or build complexity
+12. **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`, not `/Users/.../main.js`)

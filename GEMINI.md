@@ -65,3 +65,4 @@ When assisting with this project:
 - Prioritize Vanilla JS solutions.
 - Always bump `BUILD_ID` in `sw.js` as your final step after modifying any cached asset.
 - New pages go in `/beta` by default unless explicitly asked to publish.
+- For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead.
