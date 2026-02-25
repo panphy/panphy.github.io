@@ -501,12 +501,14 @@ textarea:focus {
 .insert-has-submenu {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: center;
+  position: relative;
   transition: background 0.15s;
 }
 
 .insert-chevron {
+  position: absolute;
+  right: 10px;
   font-size: 1rem;
   line-height: 1;
   color: var(--text-muted);
