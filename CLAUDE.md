@@ -346,7 +346,7 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 1. **No build step**: Edit files directly, no npm/webpack/etc.
 2. **Self-contained pages**: Each HTML file is a complete application
 3. **New pages default to `/beta`**: Unless explicitly asked to publish/list in `index.html`, create under `/beta`
-4. **Update sw.js for published cached assets only**: When adding or modifying cached assets, bump `BUILD_ID` and update the cache list
+4. **Always bump `BUILD_ID` in `sw.js` after code changes**: Any time you modify a file that is listed in `ASSETS_TO_CACHE`, bump the `BUILD_ID` timestamp as your **final step** before finishing. This is easy to forget — do not skip it
 5. **Never cache `/beta/*`**: Keep `/beta` files out of SW registration and `ASSETS_TO_CACHE`
 6. **CDN URL exactness**: Keep CDN script/style URLs in HTML exactly aligned with `ASSETS_TO_CACHE`
 7. **Theme awareness**: Always use CSS variables, not hardcoded colors

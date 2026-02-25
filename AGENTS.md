@@ -15,7 +15,7 @@
 
 The site uses a service worker for offline support. Assets are served **cache-first**, so users won't see updates unless the cache is invalidated.
 
-**Every time you modify a file listed in `ASSETS_TO_CACHE` in `sw.js`, you MUST bump the `BUILD_ID` timestamp at the top of `sw.js`.** Without this, returning users will continue to be served the old cached version.
+**Every time you modify a file listed in `ASSETS_TO_CACHE` in `sw.js`, you MUST bump the `BUILD_ID` timestamp at the top of `sw.js` as your final step before finishing. This is easy to forget — do not skip it.** Without this, returning users will continue to be served the old cached version.
 
 ```javascript
 // sw.js - update this timestamp whenever any cached asset changes

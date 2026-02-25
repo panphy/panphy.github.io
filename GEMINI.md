@@ -26,7 +26,7 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 ## Development Guidelines & Conventions
 
 ### 1. File Modification & Caching
-- **Service Worker:** When modifying any file listed in the `ASSETS_TO_CACHE` array in `sw.js`, you **MUST** bump the `BUILD_ID` constant at the top of `sw.js`. This ensures users receive the updated files.
+- **Service Worker:** When modifying any file listed in the `ASSETS_TO_CACHE` array in `sw.js`, you **MUST** bump the `BUILD_ID` constant at the top of `sw.js` as your **final step** before finishing. This is easy to forget — do not skip it. Without this, returning users will continue to be served the old cached version.
 - **Self-Contained Pages:** Each HTML entry point should be as independent as possible. Shared logic should be placed in subdirectories (e.g., `tools/panphyplot/js/`) or `assets/`.
 
 ### 2. UI/UX Principles
