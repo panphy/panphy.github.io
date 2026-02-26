@@ -75,8 +75,6 @@
             --context-menu-bg: #ffffff;
             --context-menu-border: #e2e8f0;
             --context-menu-hover: #f1f5f9;
-
-            --ref-line: #d97706;
         }
 
         [data-theme="dark"] {
@@ -125,8 +123,6 @@
             --context-menu-bg: #1e2129;
             --context-menu-border: #374151;
             --context-menu-hover: #2d3436;
-
-            --ref-line: #fbbf24;
         }
 
         * {
@@ -497,15 +493,21 @@
             padding: 8px 6px;
         }
 
-        /* Draw Line active state */
-        button.tool-active {
-            background: var(--brand-accent);
-            box-shadow: 0 0 0 2px var(--brand-accent), 0 4px 12px rgba(0,206,201,0.3);
+        /* Canvas Controls Section */
+        .canvas-controls {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
         }
 
-        button.tool-active:hover {
-            background: var(--brand-accent);
-            opacity: 0.9;
+        .canvas-controls .section-header {
+            margin-bottom: 8px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2px 24px;
         }
 
         /* Context menu items */
@@ -717,6 +719,46 @@
         <div id="mainContainer">
             <div id="diagramContainer">
                 <canvas id="minkowskiCanvas" width="800" height="600"></canvas>
+                <div class="canvas-controls">
+                    <div class="section-header">Controls</div>
+                    <div class="controls-grid">
+                        <label class="toggle-row">
+                            <span class="toggle-label">Rest Frame Grid</span>
+                            <input type="checkbox" class="toggle-input" id="gridToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Moving Frame Grid</span>
+                            <input type="checkbox" class="toggle-input" id="movingGridToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Moving Frame Axes</span>
+                            <input type="checkbox" class="toggle-input" id="movingAxesToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Rest Frame Events</span>
+                            <input type="checkbox" class="toggle-input" id="restEventsToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Moving Frame Events</span>
+                            <input type="checkbox" class="toggle-input" id="movingEventsToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Projection Lines</span>
+                            <input type="checkbox" class="toggle-input" id="projectionToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Velocity Transform</span>
+                            <input type="checkbox" class="toggle-input" id="velocityToggle">
+                            <span class="toggle-switch"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div id="controlsContainer">
@@ -730,48 +772,9 @@
                     </div>
                 </div>
 
-                <!-- Display Options -->
-                <div class="control-section">
-                    <div class="section-header">Display</div>
-                    <label class="toggle-row">
-                        <span class="toggle-label">Rest Frame Grid</span>
-                        <input type="checkbox" class="toggle-input" id="gridToggle" checked>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="toggle-row">
-                        <span class="toggle-label">Moving Frame Grid</span>
-                        <input type="checkbox" class="toggle-input" id="movingGridToggle" checked>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="toggle-row">
-                        <span class="toggle-label">Moving Frame Axes</span>
-                        <input type="checkbox" class="toggle-input" id="movingAxesToggle" checked>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="toggle-row">
-                        <span class="toggle-label">Rest Frame Events</span>
-                        <input type="checkbox" class="toggle-input" id="restEventsToggle" checked>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="toggle-row">
-                        <span class="toggle-label">Moving Frame Events</span>
-                        <input type="checkbox" class="toggle-input" id="movingEventsToggle" checked>
-                        <span class="toggle-switch"></span>
-                    </label>
-                    <label class="toggle-row">
-                        <span class="toggle-label">Projection Lines</span>
-                        <input type="checkbox" class="toggle-input" id="projectionToggle" checked>
-                        <span class="toggle-switch"></span>
-                    </label>
-                </div>
-
                 <!-- Velocity Transformation -->
                 <div class="control-section">
-                    <label class="toggle-row">
-                        <span class="toggle-label" style="font-weight:600; color:var(--text-secondary); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px;">Velocity Transformation</span>
-                        <input type="checkbox" class="toggle-input" id="velocityToggle">
-                        <span class="toggle-switch"></span>
-                    </label>
+                    <div class="section-header">Velocity Transform</div>
                     <div class="controlItem">
                         <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong> (unit: c)</label>
                         <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
@@ -784,11 +787,7 @@
                     <div class="section-header">Tools</div>
                     <div class="button-row">
                         <button id="addEventBtn">Add Event</button>
-                        <button id="drawLineBtn">Draw Line</button>
-                    </div>
-                    <div class="button-row">
                         <button id="removeAllEventsBtn">Clear Events</button>
-                        <button id="removeAllLinesBtn">Clear Lines</button>
                     </div>
                     <button id="alignFramesBtn">Align Frames</button>
                 </div>
@@ -806,7 +805,6 @@
 
     <div id="contextMenu">
         <div class="context-menu-item" id="contextRemoveEvent">Remove Event</div>
-        <div class="context-menu-item" id="contextRemoveLine">Remove Line</div>
     </div>
 
     <script>
@@ -896,19 +894,15 @@
 
             const addEventBtn = document.getElementById("addEventBtn");
             const removeAllEventsBtn = document.getElementById("removeAllEventsBtn");
-            const removeAllLinesBtn = document.getElementById("removeAllLinesBtn");
             const alignFramesBtn = document.getElementById("alignFramesBtn");
-            const drawLineBtn = document.getElementById("drawLineBtn");
 
             const coordinatesDiv = document.getElementById("coordinates");
             const contextMenu = document.getElementById("contextMenu");
             const contextRemoveEvent = document.getElementById("contextRemoveEvent");
-            const contextRemoveLine = document.getElementById("contextRemoveLine");
 
             let selectedEvent = null;
             let draggingEvent = null;
             let contextEvent = null;
-            let contextLine = null;
             let longPressTimeout = null;
 
             let didDrag = false;
@@ -917,13 +911,6 @@
             let draggingCanvas = false;
             let canvasDragStart = { x: 0, y: 0 };
             let originStart = { x: 0, y: 0 };
-
-            // Reference lines
-            let referenceLines = [];
-            let drawLineMode = false;
-            let drawingLine = null; // { x1, t1, x2, t2 } in Minkowski coords while drawing
-            const LINE_HIT_THRESHOLD = 8; // pixels (mouse)
-            const LINE_HIT_THRESHOLD_TOUCH = 20; // pixels (touch)
 
             let origin = { x: canvas.width * 0.5, y: canvas.height * 0.9 };
             const scale = 80;
@@ -939,71 +926,6 @@
             function snapToGrid(value) {
                 const rounded = Math.round(value);
                 return Math.abs(value - rounded) < SNAP_THRESHOLD ? rounded : value;
-            }
-
-            function pointToSegmentDistSq(px, py, ax, ay, bx, by) {
-                const dx = bx - ax, dy = by - ay;
-                const lenSq = dx * dx + dy * dy;
-                if (lenSq === 0) return (px - ax) ** 2 + (py - ay) ** 2;
-                let t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
-                t = Math.max(0, Math.min(1, t));
-                const projX = ax + t * dx, projY = ay + t * dy;
-                return (px - projX) ** 2 + (py - projY) ** 2;
-            }
-
-            function findLineAtCanvasPos(cx, cy, isTouch) {
-                const thresh = isTouch ? LINE_HIT_THRESHOLD_TOUCH : LINE_HIT_THRESHOLD;
-                const threshSq = thresh * thresh;
-                for (let i = referenceLines.length - 1; i >= 0; i--) {
-                    const ln = referenceLines[i];
-                    const c1 = toCanvasCoords(ln.x1, ln.t1);
-                    const c2 = toCanvasCoords(ln.x2, ln.t2);
-                    if (pointToSegmentDistSq(cx, cy, c1.x, c1.y, c2.x, c2.y) < threshSq) {
-                        return i;
-                    }
-                }
-                return -1;
-            }
-
-            function drawReferenceLines() {
-                const color = getCssVar('--ref-line');
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                ctx.setLineDash([]);
-
-                referenceLines.forEach(ln => {
-                    const c1 = toCanvasCoords(ln.x1, ln.t1);
-                    const c2 = toCanvasCoords(ln.x2, ln.t2);
-                    ctx.beginPath();
-                    ctx.moveTo(c1.x, c1.y);
-                    ctx.lineTo(c2.x, c2.y);
-                    ctx.stroke();
-
-                    // Endpoint dots
-                    ctx.fillStyle = color;
-                    ctx.beginPath();
-                    ctx.arc(c1.x, c1.y, 3, 0, 2 * Math.PI);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.arc(c2.x, c2.y, 3, 0, 2 * Math.PI);
-                    ctx.fill();
-                });
-
-                // In-progress line while drawing
-                if (drawingLine) {
-                    const c1 = toCanvasCoords(drawingLine.x1, drawingLine.t1);
-                    const c2 = toCanvasCoords(drawingLine.x2, drawingLine.t2);
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = 2;
-                    ctx.globalAlpha = 0.5;
-                    ctx.setLineDash([6, 4]);
-                    ctx.beginPath();
-                    ctx.moveTo(c1.x, c1.y);
-                    ctx.lineTo(c2.x, c2.y);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    ctx.globalAlpha = 1.0;
-                }
             }
 
             function clientToCanvas(clientX, clientY) {
@@ -1473,9 +1395,6 @@
                     drawProjections(selectedEvent, relSpeed);
                 }
 
-                // Reference lines (drawn before events so events appear on top)
-                drawReferenceLines();
-
                 // Events – draw moving-frame (primed) rockets first, then rest-frame
                 // rockets on top so rest-frame is visible when frames overlap.
                 const emojiSize = p => p.radius * 3.2;
@@ -1579,18 +1498,11 @@
                 }
 
                 if (!foundEvent) {
-                    if (drawLineMode) {
-                        // Start drawing a reference line
-                        const coords = toMinkowskiCoords(mx, my);
-                        const snapped = { x: snapToGrid(coords.x), t: snapToGrid(coords.t) };
-                        drawingLine = { x1: snapped.x, t1: snapped.t, x2: snapped.x, t2: snapped.t };
-                    } else {
-                        draggingCanvas = true;
-                        canvasDragStart.x = mx;
-                        canvasDragStart.y = my;
-                        originStart.x = origin.x;
-                        originStart.y = origin.y;
-                    }
+                    draggingCanvas = true;
+                    canvasDragStart.x = mx;
+                    canvasDragStart.y = my;
+                    originStart.x = origin.x;
+                    originStart.y = origin.y;
                 }
             });
 
@@ -1608,11 +1520,6 @@
                     draggingEvent.x = snapToGrid(coords.x);
                     draggingEvent.t = snapToGrid(coords.t);
                     draw();
-                } else if (drawingLine) {
-                    const coords = toMinkowskiCoords(mx, my);
-                    drawingLine.x2 = snapToGrid(coords.x);
-                    drawingLine.t2 = snapToGrid(coords.t);
-                    draw();
                 } else if (draggingCanvas) {
                     const nextOrigin = {
                         x: originStart.x + (mx - canvasDragStart.x),
@@ -1624,18 +1531,7 @@
             });
 
             canvas.addEventListener("mouseup", e => {
-                if (drawingLine) {
-                    if (didDrag) {
-                        // Finalize reference line (only if actually dragged)
-                        const dx = drawingLine.x2 - drawingLine.x1;
-                        const dt = drawingLine.t2 - drawingLine.t1;
-                        if (dx * dx + dt * dt > 0.01) {
-                            referenceLines.push({ ...drawingLine });
-                        }
-                    }
-                    drawingLine = null;
-                    draw();
-                } else if (!didDrag) {
+                if (!didDrag) {
                     if (draggingEvent) {
                         selectedEvent = (selectedEvent === draggingEvent) ? null : draggingEvent;
                     } else {
@@ -1648,10 +1544,6 @@
             });
 
             canvas.addEventListener("mouseleave", () => {
-                if (drawingLine) {
-                    drawingLine = null;
-                    draw();
-                }
                 draggingEvent = null;
                 draggingCanvas = false;
             });
@@ -1673,33 +1565,18 @@
                         found = true;
                         longPressTimeout = setTimeout(() => {
                             contextEvent = p;
-                            showContextMenu(touch.pageX, touch.pageY, 'event');
+                            showContextMenu(touch.pageX, touch.pageY);
                         }, 800);
                         break;
                     }
                 }
 
                 if (!found) {
-                    // Check for long-press on reference line
-                    const lineIdx = findLineAtCanvasPos(tx, ty, true);
-                    if (lineIdx >= 0 && !drawLineMode) {
-                        longPressTimeout = setTimeout(() => {
-                            contextLine = lineIdx;
-                            showContextMenu(touch.pageX, touch.pageY, 'line');
-                        }, 800);
-                    }
-
-                    if (drawLineMode) {
-                        const coords = toMinkowskiCoords(tx, ty);
-                        const snapped = { x: snapToGrid(coords.x), t: snapToGrid(coords.t) };
-                        drawingLine = { x1: snapped.x, t1: snapped.t, x2: snapped.x, t2: snapped.t };
-                    } else {
-                        draggingCanvas = true;
-                        canvasDragStart.x = tx;
-                        canvasDragStart.y = ty;
-                        originStart.x = origin.x;
-                        originStart.y = origin.y;
-                    }
+                    draggingCanvas = true;
+                    canvasDragStart.x = tx;
+                    canvasDragStart.y = ty;
+                    originStart.x = origin.x;
+                    originStart.y = origin.y;
                 }
             });
 
@@ -1724,11 +1601,6 @@
                     draggingEvent.x = snapToGrid(coords.x);
                     draggingEvent.t = snapToGrid(coords.t);
                     draw();
-                } else if (drawingLine) {
-                    const coords = toMinkowskiCoords(tx, ty);
-                    drawingLine.x2 = snapToGrid(coords.x);
-                    drawingLine.t2 = snapToGrid(coords.t);
-                    draw();
                 } else if (draggingCanvas) {
                     const nextOrigin = {
                         x: originStart.x + (tx - canvasDragStart.x),
@@ -1742,17 +1614,7 @@
             canvas.addEventListener("touchend", () => {
                 if (longPressTimeout) clearTimeout(longPressTimeout);
 
-                if (drawingLine) {
-                    if (didDrag) {
-                        const dx = drawingLine.x2 - drawingLine.x1;
-                        const dt = drawingLine.t2 - drawingLine.t1;
-                        if (dx * dx + dt * dt > 0.01) {
-                            referenceLines.push({ ...drawingLine });
-                        }
-                    }
-                    drawingLine = null;
-                    draw();
-                } else if (!didDrag) {
+                if (!didDrag) {
                     if (draggingEvent) {
                         selectedEvent = (selectedEvent === draggingEvent) ? null : draggingEvent;
                     } else {
@@ -1781,17 +1643,11 @@
 
             canvas.addEventListener("touchcancel", () => {
                 if (longPressTimeout) clearTimeout(longPressTimeout);
-                if (drawingLine) {
-                    drawingLine = null;
-                    draw();
-                }
                 draggingEvent = null;
                 draggingCanvas = false;
             });
 
-            function showContextMenu(pageX, pageY, type) {
-                contextRemoveEvent.style.display = type === 'event' ? 'block' : 'none';
-                contextRemoveLine.style.display = type === 'line' ? 'block' : 'none';
+            function showContextMenu(pageX, pageY) {
                 contextMenu.style.display = "block";
                 contextMenu.style.left = pageX + "px";
                 contextMenu.style.top = pageY + "px";
@@ -1801,25 +1657,14 @@
                 e.preventDefault();
                 const { x: mx, y: my } = clientToCanvas(e.clientX, e.clientY);
 
-                // Check events first
                 for (let i = events.length - 1; i >= 0; i--) {
                     const p = events[i];
                     const cp = toCanvasCoords(p.x, p.t);
                     if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
                         contextEvent = p;
-                        contextLine = null;
-                        showContextMenu(e.pageX, e.pageY, 'event');
+                        showContextMenu(e.pageX, e.pageY);
                         return;
                     }
-                }
-
-                // Check reference lines
-                const lineIdx = findLineAtCanvasPos(mx, my);
-                if (lineIdx >= 0) {
-                    contextLine = lineIdx;
-                    contextEvent = null;
-                    showContextMenu(e.pageX, e.pageY, 'line');
-                    return;
                 }
 
                 contextMenu.style.display = "none";
@@ -1834,15 +1679,6 @@
                         events.splice(idx, 1);
                     }
                     contextEvent = null;
-                    contextMenu.style.display = "none";
-                    draw();
-                }
-            });
-
-            contextRemoveLine.addEventListener("click", () => {
-                if (contextLine !== null && contextLine >= 0 && contextLine < referenceLines.length) {
-                    referenceLines.splice(contextLine, 1);
-                    contextLine = null;
                     contextMenu.style.display = "none";
                     draw();
                 }
@@ -1925,18 +1761,6 @@
                 events = [];
                 selectedEvent = null;
                 draw();
-            });
-
-            removeAllLinesBtn.addEventListener("click", () => {
-                referenceLines = [];
-                draw();
-            });
-
-            drawLineBtn.addEventListener("click", () => {
-                drawLineMode = !drawLineMode;
-                drawLineBtn.classList.toggle('tool-active', drawLineMode);
-                drawLineBtn.textContent = drawLineMode ? 'Drawing...' : 'Draw Line';
-                canvas.style.cursor = drawLineMode ? 'crosshair' : 'pointer';
             });
 
             alignFramesBtn.addEventListener("click", () => {
