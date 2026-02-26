@@ -501,10 +501,6 @@
             /* width/height set programmatically to avoid iOS PWA canvas scaling bugs */
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            .spacetime-bg { display: none; }
-        }
-
         /* Ensure content sits above the background */
         header, .section, footer {
             position: relative;
@@ -682,6 +678,9 @@
             var massRadius = 180;
             var hasPointerInteraction = false;
 
+            // Respect prefers-reduced-motion: show static grid but skip animation
+            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
             // Idle detection & 30fps throttle
             var running = false;
             var lastFrameTime = 0;
@@ -723,6 +722,7 @@
             }
 
             function handlePointerInput(x, y) {
+                if (reducedMotion) return;
                 if (!hasPointerInteraction) {
                     hasPointerInteraction = true;
                 }
@@ -757,21 +757,25 @@
                     activeX = anchor.x;
                     activeY = anchor.y;
                 }
-                wake();
+                if (reducedMotion) {
+                    draw();
+                } else {
+                    wake();
+                }
             }
 
             function getGridColor() {
                 var theme = document.documentElement.getAttribute('data-theme');
                 return theme === 'dark'
-                    ? 'rgba(162, 155, 254, 0.12)'
-                    : 'rgba(108, 92, 231, 0.10)';
+                    ? 'rgba(162, 155, 254, 0.18)'
+                    : 'rgba(108, 92, 231, 0.14)';
             }
 
             function getNodeColor() {
                 var theme = document.documentElement.getAttribute('data-theme');
                 return theme === 'dark'
-                    ? 'rgba(162, 155, 254, 0.25)'
-                    : 'rgba(108, 92, 231, 0.18)';
+                    ? 'rgba(162, 155, 254, 0.32)'
+                    : 'rgba(108, 92, 231, 0.25)';
             }
 
             function warp(gx, gy, t) {
@@ -812,7 +816,7 @@
 
                 // Draw grid lines
                 ctx.strokeStyle = lineColor;
-                ctx.lineWidth = 0.8;
+                ctx.lineWidth = 1.0;
                 ctx.beginPath();
 
                 // Horizontal lines
@@ -894,12 +898,8 @@
                     requestAnimationFrame(resize);
                 }
             });
-            // Respect prefers-reduced-motion
-            var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-            if (!mq.matches) {
-                // Draw once immediately at the landing anchor.
-                draw();
-            }
+            // Draw once immediately at the landing anchor.
+            draw();
         })();
     </script>
     <script>
