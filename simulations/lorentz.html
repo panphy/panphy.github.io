@@ -1035,8 +1035,11 @@
                 }
 
                 ctx.setLineDash([]);
+            }
 
-                // Tick labels
+            function drawRestFrameTickMarks() {
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+
                 ctx.fillStyle = getCssVar('--text-secondary');
                 ctx.font = "12px Arial";
                 ctx.textAlign = "center";
@@ -1054,7 +1057,65 @@
                     ctx.fillText(t, origin.x - 8, pos.y);
                 }
 
-                // Reset text alignment
+                ctx.textAlign = "start";
+                ctx.textBaseline = "alphabetic";
+            }
+
+            function drawMovingFrameTickMarks(v) {
+                if (isFramesAligned(v)) return;
+
+                const gamma = 1 / Math.sqrt(1 - v * v);
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+                const axisAngle = Math.atan(v);
+                const tickLen = 5;
+
+                ctx.fillStyle = getCssVar('--axis-moving');
+                ctx.strokeStyle = getCssVar('--axis-moving');
+                ctx.font = "11px Arial";
+                ctx.lineWidth = 1.5;
+
+                // t'-axis ticks (x'=0, t'=n): rest frame coords (v*n*gamma, n*gamma)
+                for (let n = -10; n <= 10; n++) {
+                    if (n === 0) continue;
+                    const restX = v * n * gamma;
+                    const restT = n * gamma;
+                    if (restX < xMin - 0.5 || restX > xMax + 0.5 || restT < tMin - 0.5 || restT > tMax + 0.5) continue;
+
+                    const cp = toCanvasCoords(restX, restT);
+                    ctx.save();
+                    ctx.translate(cp.x, cp.y);
+                    ctx.rotate(-axisAngle);
+                    ctx.beginPath();
+                    ctx.moveTo(-tickLen, 0);
+                    ctx.lineTo(tickLen, 0);
+                    ctx.stroke();
+                    ctx.textAlign = "right";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(n, -tickLen - 3, 0);
+                    ctx.restore();
+                }
+
+                // x'-axis ticks (t'=0, x'=n): rest frame coords (n*gamma, v*n*gamma)
+                for (let n = -10; n <= 10; n++) {
+                    if (n === 0) continue;
+                    const restX = n * gamma;
+                    const restT = v * n * gamma;
+                    if (restX < xMin - 0.5 || restX > xMax + 0.5 || restT < tMin - 0.5 || restT > tMax + 0.5) continue;
+
+                    const cp = toCanvasCoords(restX, restT);
+                    ctx.save();
+                    ctx.translate(cp.x, cp.y);
+                    ctx.rotate(-axisAngle);
+                    ctx.beginPath();
+                    ctx.moveTo(0, -tickLen);
+                    ctx.lineTo(0, tickLen);
+                    ctx.stroke();
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "top";
+                    ctx.fillText(n, 0, tickLen + 2);
+                    ctx.restore();
+                }
+
                 ctx.textAlign = "start";
                 ctx.textBaseline = "alphabetic";
             }
@@ -1327,6 +1388,8 @@
                 ctx.fillText("x", canvas.width - 20, origin.y - 10);
                 ctx.fillText("t", origin.x + 10, 20);
 
+                drawRestFrameTickMarks();
+
                 if (movingGridToggle.checked) {
                     drawMovingGridLines(relSpeed);
                 }
@@ -1360,6 +1423,8 @@
                         ctx.fillText(`t${primeSuffix}`, tB.x + 10, tB.y + 20);
                         ctx.fillText(`x${primeSuffix}`, xB.x - 30, xB.y - 5);
                     }
+
+                    drawMovingFrameTickMarks(relSpeed);
                 }
 
                 if (velocityToggle.checked) {
