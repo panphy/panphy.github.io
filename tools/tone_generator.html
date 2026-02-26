@@ -583,7 +583,7 @@
       min-height: 0;
       height: 100%;
       display: grid;
-      grid-template-rows: auto auto auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
       overflow: hidden;
     }
 
@@ -769,63 +769,6 @@
       outline-offset: 2px;
     }
 
-    .speaker-side-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.55rem;
-      flex-wrap: wrap;
-    }
-
-    .speaker-side-label {
-      font-size: 0.77rem;
-      color: var(--text-secondary);
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .speaker-side-toggle {
-      display: inline-grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      align-items: center;
-      gap: 0.16rem;
-      padding: 0.18rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--canvas-bg);
-      min-width: 150px;
-    }
-
-    .speaker-side-btn {
-      border: none;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      font-weight: 700;
-      min-height: 30px;
-      padding: 0.2rem 0.4rem;
-      cursor: pointer;
-      transition: background-color 0.18s ease, color 0.18s ease;
-    }
-
-    .speaker-side-btn:hover {
-      background: var(--toggle-hover);
-      color: var(--text-main);
-    }
-
-    .speaker-side-btn.active {
-      background: var(--brand-primary);
-      color: var(--btn-text);
-    }
-
-    .speaker-side-btn:focus-visible {
-      outline: 2px solid var(--brand-primary);
-      outline-offset: 2px;
-    }
-
     .channel-wave-row {
       display: grid;
       grid-template-columns: 36px minmax(0, 1fr);
@@ -888,7 +831,6 @@
       .btn,
       .btn-small,
       .freq-number,
-      .speaker-side-btn,
       #theme-button {
         min-height: 48px;
       }
@@ -1026,10 +968,6 @@
 
       .channel-wave-row {
         grid-template-columns: 42px minmax(0, 1fr);
-      }
-
-      .speaker-side-toggle {
-        width: 100%;
       }
 
       #addChannelSlot {
@@ -1289,7 +1227,6 @@
       return;
     }
 
-    const channelBusInput = audioCtx.createChannelMerger(2);
     const channelBus = audioCtx.createGain();
     channelBus.gain.value = 1;
 
@@ -1309,7 +1246,6 @@
     }
     const supportsStereoPanner = Boolean(stereoPanner);
 
-    channelBusInput.connect(channelBus);
     channelBus.connect(volumeGain);
     volumeGain.connect(combinedGain);
     if (stereoPanner) {
@@ -1343,16 +1279,8 @@
     const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
     const PHASE_MODE_IN = 'in';
     const PHASE_MODE_ANTI = 'anti';
-    const CHANNEL_SIDE_LEFT = 'left';
-    const CHANNEL_SIDE_BOTH = 'both';
-    const CHANNEL_SIDE_RIGHT = 'right';
-    const PAN_LOCK_TITLE = 'Disabled while any channel is routed Left or Right';
 
     let audioPrimed = false;
-    let panLockedByChannelRouting = false;
-    let lastManualPanValue = Number.isFinite(parseFloat(panningSlider.value))
-      ? parseFloat(panningSlider.value)
-      : 0;
 
     function stopAndDisconnectOscillator(oscillator, stopTime = audioCtx.currentTime) {
       if (!oscillator) return;
@@ -1417,103 +1345,6 @@
     function setChannelOutputGain(channel) {
       if (!channel || !channel.gainNode) return;
       setGain(channel.gainNode, getChannelOutputGain(channel));
-    }
-
-    function applyStereoPan(rawPan, options = {}) {
-      if (!stereoPanner) return 0;
-      const normalizedRawPan = Number.isFinite(rawPan) ? rawPan : 0;
-      let pan = clamp(normalizedRawPan, -1, 1);
-      if (Math.abs(pan) < 0.05) {
-        pan = 0;
-      }
-      stereoPanner.pan.setValueAtTime(pan, audioCtx.currentTime);
-      if (!options.skipSliderUpdate && panningSlider) {
-        panningSlider.value = String(pan);
-      }
-      return pan;
-    }
-
-    function normalizeChannelSide(side) {
-      if (side === CHANNEL_SIDE_LEFT || side === CHANNEL_SIDE_RIGHT) {
-        return side;
-      }
-      return CHANNEL_SIDE_BOTH;
-    }
-
-    function getChannelSideWeights(side) {
-      const normalizedSide = normalizeChannelSide(side);
-      if (normalizedSide === CHANNEL_SIDE_LEFT) {
-        return { left: 1, right: 0 };
-      }
-      if (normalizedSide === CHANNEL_SIDE_RIGHT) {
-        return { left: 0, right: 1 };
-      }
-      return { left: 1, right: 1 };
-    }
-
-    function updateChannelSideToggleUi(channel) {
-      if (!channel || !Array.isArray(channel.sideToggleButtons)) return;
-      const activeSide = normalizeChannelSide(channel.outputSide);
-      channel.sideToggleButtons.forEach((button) => {
-        const isActive = button.dataset.side === activeSide;
-        button.classList.toggle('active', isActive);
-        button.setAttribute('aria-checked', isActive ? 'true' : 'false');
-        button.tabIndex = isActive ? 0 : -1;
-      });
-    }
-
-    function hasDirectionalChannelRouting() {
-      return channels.some((channel) => normalizeChannelSide(channel.outputSide) !== CHANNEL_SIDE_BOTH);
-    }
-
-    function updatePanningControlLock() {
-      if (!stereoPanner || !panningSlider) return;
-      const shouldLockPan = hasDirectionalChannelRouting();
-
-      if (shouldLockPan) {
-        const currentPan = parseFloat(panningSlider.value);
-        if (!panLockedByChannelRouting && Number.isFinite(currentPan)) {
-          lastManualPanValue = currentPan;
-        }
-        panLockedByChannelRouting = true;
-        panningSlider.disabled = true;
-        panningSlider.title = PAN_LOCK_TITLE;
-        applyStereoPan(0);
-      } else {
-        panningSlider.disabled = false;
-        panningSlider.title = 'Adjust overall output pan';
-        if (panLockedByChannelRouting) {
-          panLockedByChannelRouting = false;
-          const restoredPan = applyStereoPan(lastManualPanValue);
-          lastManualPanValue = restoredPan;
-        } else {
-          const currentPan = applyStereoPan(parseFloat(panningSlider.value));
-          lastManualPanValue = currentPan;
-        }
-      }
-
-      updateControlReadouts();
-    }
-
-    function setChannelSide(channel, side, options = {}) {
-      if (!channel) return;
-      const normalizedSide = normalizeChannelSide(side);
-      channel.outputSide = normalizedSide;
-      const sideWeights = getChannelSideWeights(normalizedSide);
-
-      if (channel.outputLeftGain) {
-        setGain(channel.outputLeftGain, sideWeights.left);
-      }
-      if (channel.outputRightGain) {
-        setGain(channel.outputRightGain, sideWeights.right);
-      }
-
-      updateChannelSideToggleUi(channel);
-
-      if (!options.skipNormalization) {
-        updateChannelBusNormalization();
-      }
-      updatePanningControlLock();
     }
 
     function updateChannelPhaseToggle(channel, isReference) {
@@ -1709,10 +1540,8 @@
       volumeValue.textContent = `${volumePercent}%`;
 
       if (stereoPanner) {
-        const pan = Number.isFinite(parseFloat(panningSlider.value)) ? parseFloat(panningSlider.value) : 0;
-        panningValue.textContent = panLockedByChannelRouting
-          ? `${pan.toFixed(2)} (locked)`
-          : pan.toFixed(2);
+        const pan = parseFloat(panningSlider.value);
+        panningValue.textContent = pan.toFixed(2);
       } else {
         panningValue.textContent = 'N/A';
       }
@@ -1892,15 +1721,11 @@
     }
 
     function updateChannelBusNormalization(activeChannels = channels.filter((channel) => channel.isPlaying)) {
-      const sidePower = activeChannels.reduce((totals, channel) => {
+      const summedPower = activeChannels.reduce((totalPower, channel) => {
         const amplitude = getChannelAmplitude(channel);
-        const sideWeights = getChannelSideWeights(channel.outputSide);
-        totals.left += (amplitude * sideWeights.left) * (amplitude * sideWeights.left);
-        totals.right += (amplitude * sideWeights.right) * (amplitude * sideWeights.right);
-        return totals;
-      }, { left: 0, right: 0 });
-      const maxSidePower = Math.max(sidePower.left, sidePower.right);
-      const normalizedBusGain = maxSidePower > 1 ? 1 / Math.sqrt(maxSidePower) : 1;
+        return totalPower + amplitude * amplitude;
+      }, 0);
+      const normalizedBusGain = summedPower > 1 ? 1 / Math.sqrt(summedPower) : 1;
       setGain(channelBus, normalizedBusGain);
     }
 
@@ -1911,7 +1736,6 @@
       channelsList.dataset.channelCount = String(channels.length);
 
       updateChannelBusNormalization(activeChannels);
-      updatePanningControlLock();
 
       const reachedMaxChannels = channels.length >= MAX_CHANNELS;
       addChannelBtn.disabled = reachedMaxChannels;
@@ -1997,12 +1821,6 @@
       const [channel] = channels.splice(index, 1);
       stopAndDisconnectOscillator(channel.oscillator);
       channel.gainNode.disconnect();
-      if (channel.outputLeftGain) {
-        channel.outputLeftGain.disconnect();
-      }
-      if (channel.outputRightGain) {
-        channel.outputRightGain.disconnect();
-      }
       channel.card.remove();
 
       refreshChannelTitles();
@@ -2057,24 +1875,14 @@
         waveTime: referenceChannel ? referenceChannel.waveTime : 0,
         phaseMode: initialPhaseMode,
         phaseOffsetRad: initialPhaseOffset,
-        outputSide: CHANNEL_SIDE_BOTH,
         oscillator: null
       };
       nextChannelId += 1;
 
       const gainNode = audioCtx.createGain();
       gainNode.gain.setValueAtTime(0, now);
-      const outputLeftGain = audioCtx.createGain();
-      const outputRightGain = audioCtx.createGain();
-      outputLeftGain.gain.setValueAtTime(1, now);
-      outputRightGain.gain.setValueAtTime(1, now);
-      gainNode.connect(outputLeftGain);
-      gainNode.connect(outputRightGain);
-      outputLeftGain.connect(channelBusInput, 0, 0);
-      outputRightGain.connect(channelBusInput, 0, 1);
+      gainNode.connect(channelBus);
       channel.gainNode = gainNode;
-      channel.outputLeftGain = outputLeftGain;
-      channel.outputRightGain = outputRightGain;
 
       const card = document.createElement('article');
       card.className = 'channel-card';
@@ -2165,40 +1973,6 @@
       freqNumber.value = String(channel.frequency);
       freqNumber.setAttribute('aria-label', 'Channel frequency in Hz');
 
-      const speakerSideRow = document.createElement('div');
-      speakerSideRow.className = 'speaker-side-row';
-
-      const speakerSideLabel = document.createElement('span');
-      speakerSideLabel.className = 'speaker-side-label';
-      speakerSideLabel.textContent = 'Speaker Side';
-
-      const speakerSideToggle = document.createElement('div');
-      speakerSideToggle.className = 'speaker-side-toggle';
-      speakerSideToggle.setAttribute('role', 'radiogroup');
-      speakerSideToggle.setAttribute('aria-label', 'Speaker side');
-
-      const speakerSideConfig = [
-        { side: CHANNEL_SIDE_LEFT, label: 'Left', title: 'Play this channel on the left speaker only' },
-        { side: CHANNEL_SIDE_BOTH, label: 'Both', title: 'Play this channel on both speakers' },
-        { side: CHANNEL_SIDE_RIGHT, label: 'Right', title: 'Play this channel on the right speaker only' }
-      ];
-
-      const sideToggleButtons = speakerSideConfig.map((item) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'speaker-side-btn';
-        button.dataset.side = item.side;
-        button.textContent = item.label;
-        button.title = item.title;
-        button.setAttribute('role', 'radio');
-        button.setAttribute('aria-checked', 'false');
-        speakerSideToggle.appendChild(button);
-        return button;
-      });
-
-      speakerSideRow.appendChild(speakerSideLabel);
-      speakerSideRow.appendChild(speakerSideToggle);
-
       const canvas = document.createElement('canvas');
       canvas.className = 'channel-canvas';
       const ctx = canvas.getContext('2d');
@@ -2226,7 +2000,6 @@
 
       card.appendChild(header);
       card.appendChild(frequencyRow);
-      card.appendChild(speakerSideRow);
       card.appendChild(waveRow);
 
       if (addChannelSlot && addChannelSlot.parentNode === channelsList) {
@@ -2244,7 +2017,6 @@
       channel.phaseToggleInline = phaseToggleInline;
       channel.phaseToggle = phaseToggle;
       channel.phaseToggleText = phaseToggleText;
-      channel.sideToggleButtons = sideToggleButtons;
       channel.volumeSlider = channelVolumeSlider;
       channel.canvas = canvas;
       channel.ctx = ctx;
@@ -2277,24 +2049,6 @@
         );
       });
 
-      sideToggleButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-          setChannelSide(channel, button.dataset.side);
-        });
-      });
-
-      speakerSideToggle.addEventListener('keydown', (event) => {
-        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
-          return;
-        }
-        event.preventDefault();
-        const sideOrder = [CHANNEL_SIDE_LEFT, CHANNEL_SIDE_BOTH, CHANNEL_SIDE_RIGHT];
-        const currentIndex = sideOrder.indexOf(normalizeChannelSide(channel.outputSide));
-        const direction = event.key === 'ArrowRight' ? 1 : -1;
-        const nextIndex = (currentIndex + direction + sideOrder.length) % sideOrder.length;
-        setChannelSide(channel, sideOrder[nextIndex]);
-      });
-
       toggleBtn.addEventListener('click', () => {
         toggleChannel(channel.id);
       });
@@ -2304,7 +2058,6 @@
       });
 
       channels.push(channel);
-      setChannelSide(channel, channel.outputSide, { skipNormalization: true });
 
       resizeCanvas(canvas);
       refreshChannelTitles();
@@ -2428,13 +2181,12 @@
         updateControlReadouts();
         return;
       }
-      if (panLockedByChannelRouting) {
-        applyStereoPan(0);
-        updateControlReadouts();
-        return;
+      let pan = parseFloat(panningSlider.value);
+      if (Math.abs(pan) < 0.05) {
+        pan = 0;
+        panningSlider.value = '0';
       }
-      const pan = applyStereoPan(parseFloat(panningSlider.value));
-      lastManualPanValue = pan;
+      stereoPanner.pan.setValueAtTime(pan, audioCtx.currentTime);
       updateControlReadouts();
     });
 
