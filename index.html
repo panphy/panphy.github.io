@@ -763,15 +763,15 @@
             function getGridColor() {
                 var theme = document.documentElement.getAttribute('data-theme');
                 return theme === 'dark'
-                    ? 'rgba(162, 155, 254, 0.12)'
-                    : 'rgba(108, 92, 231, 0.10)';
+                    ? 'rgba(162, 155, 254, 0.18)'
+                    : 'rgba(108, 92, 231, 0.14)';
             }
 
             function getNodeColor() {
                 var theme = document.documentElement.getAttribute('data-theme');
                 return theme === 'dark'
-                    ? 'rgba(162, 155, 254, 0.25)'
-                    : 'rgba(108, 92, 231, 0.18)';
+                    ? 'rgba(162, 155, 254, 0.32)'
+                    : 'rgba(108, 92, 231, 0.25)';
             }
 
             function warp(gx, gy, t) {
@@ -812,7 +812,7 @@
 
                 // Draw grid lines
                 ctx.strokeStyle = lineColor;
-                ctx.lineWidth = 0.8;
+                ctx.lineWidth = 1.0;
                 ctx.beginPath();
 
                 // Horizontal lines
