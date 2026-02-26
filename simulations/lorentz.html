@@ -747,12 +747,12 @@
                         <!-- Col 2: Moving Frame -->
                         <label class="toggle-row">
                             <span class="toggle-label">Moving Frame Grid</span>
-                            <input type="checkbox" class="toggle-input" id="movingGridToggle" checked>
+                            <input type="checkbox" class="toggle-input" id="movingGridToggle">
                             <span class="toggle-switch"></span>
                         </label>
                         <label class="toggle-row">
                             <span class="toggle-label">Moving Frame Axes</span>
-                            <input type="checkbox" class="toggle-input" id="movingAxesToggle" checked>
+                            <input type="checkbox" class="toggle-input" id="movingAxesToggle">
                             <span class="toggle-switch"></span>
                         </label>
                         <label class="toggle-row">
@@ -1313,7 +1313,7 @@
                 ctx.fillText(evt.t.toFixed(2), tAxisPt.x - 8, tAxisPt.y);
 
                 // --- Moving frame: project from green dot parallel to primed axes ---
-                if (isFramesAligned(v)) {
+                if (!movingAxesToggle.checked || isFramesAligned(v)) {
                     ctx.textAlign = "start";
                     ctx.textBaseline = "alphabetic";
                     return;
