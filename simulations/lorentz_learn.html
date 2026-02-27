@@ -693,7 +693,7 @@
       The object is at rest in the moving frame, exactly as expected! And if $u = c$:
     </p>
     <p>
-      $$u' = \frac{c - v}{1 - v} = \frac{c(1 - v/c)}{1 - v/c} = c$$
+      $$u' = \frac{c - v}{1 - v/c} = \frac{c\,(1 - v/c)}{1 - v/c} = c$$
     </p>
     <p>
       Light always travels at $c$ in every frame&mdash;consistent with Einstein's second postulate.
@@ -710,24 +710,24 @@
     <h2>Events on the Diagram</h2>
     <p>
       An <strong>event</strong> is something that happens at a specific place and time&mdash;it has definite
-      coordinates $(x, t)$. On the Minkowski diagram, each event appears as a dot.
+      coordinates $(x, t)$. On the Minkowski diagram, each event is marked with a rocket icon.
     </p>
     <p>
       In the app, each event is plotted twice:
     </p>
     <ul>
-      <li>A <strong style="color: #10b981;">green dot</strong> at $(x, t)$&mdash;its rest-frame coordinates (plotted on the $S$ grid).</li>
-      <li>A <strong style="color: #f43f5e;">red dot</strong> at $(x', t')$&mdash;its moving-frame coordinates (also plotted on the $S$ grid
+      <li>A <strong>solid rocket</strong> at $(x, t)$&mdash;its rest-frame coordinates (plotted on the $S$ grid).</li>
+      <li>A <strong>faded rocket</strong> at $(x', t')$&mdash;its moving-frame coordinates (also plotted on the $S$ grid
         to show the numerical values from the Lorentz transformation).</li>
     </ul>
     <p>
-      As you change $v$, the red dots move to show how the same physical event has different coordinates
-      in a different frame. The coordinates table below the diagram updates in real time.
+      As you change $v$, the faded (moving-frame) rockets shift to show how the same physical event has
+      different coordinates in a different frame. The coordinates table below the diagram updates in real time.
     </p>
 
     <h3>Reading Coordinates with Projection Lines</h3>
     <p>
-      Click (or tap) any green event dot to select it. When an event is selected and the
+      Click (or tap) any rest-frame event to select it. When an event is selected and the
       "Projection Lines" toggle is on, the app draws dashed guide lines from the event
       showing how to read its coordinates in both frames:
     </p>
@@ -752,7 +752,7 @@
 
     <div class="tip-box">
       <p><strong>Try it in the app:</strong> Add two or more events, then slowly drag the velocity slider.
-        Watch how the red (moving-frame) dots shift. Events that were simultaneous may no longer be,
+        Watch how the faded (moving-frame) rockets shift. Events that were simultaneous may no longer be,
         and time orderings can reverse for spacelike-separated events.</p>
     </div>
 
@@ -824,8 +824,9 @@
     <ol>
       <li>
         <strong>Verify time dilation:</strong> Place two events at $(0,\,0)$ and $(0,\,3)$ (same $x$, different $t$).
-        Set $v = 0.60\,c$. Read off $\Delta t_0$ and confirm that $\Delta t = \gamma\,\Delta t_0$.
-        Calculate: $\gamma = 1/\sqrt{1 - 0.36} = 1.25$.
+        The events are co-located in $S$, so the proper time is $\Delta t_0 = 3$.
+        Set $v = 0.60\,c$ ($\gamma = 1/\sqrt{1 - 0.36} = 1.25$).
+        Read off $\Delta t'$ from the app and confirm that it equals $\gamma\,\Delta t_0 = 1.25 \times 3 = 3.75$.
       </li>
       <li>
         <strong>Explore simultaneity:</strong> Place events at $(-2,\,3)$ and $(2,\,3)$. They share the same $t$, so
