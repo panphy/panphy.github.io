@@ -1323,7 +1323,8 @@
                 const padX = 8;
                 const padY = 4;
                 const margin = 4;
-                const resolvedTextColor = textColor || getReadableTextColor(background);
+                const isDarkTheme = document.documentElement.getAttribute("data-theme") === "dark";
+                const resolvedTextColor = textColor || (isDarkTheme ? "#000000" : getReadableTextColor(background));
 
                 ctx.save();
                 ctx.font = font;
