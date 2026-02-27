@@ -500,7 +500,6 @@
         .canvas-controls {
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid var(--card-border);
         }
 
         .canvas-controls .section-header {
@@ -510,7 +509,23 @@
         .controls-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px 28px;
+            gap: 6px 16px;
+        }
+
+        .controls-grid .toggle-row {
+            display: grid;
+            grid-template-columns: max-content auto 1fr;
+            align-items: center;
+            column-gap: 8px;
+            justify-content: start;
+        }
+
+        .controls-grid .toggle-switch {
+            justify-self: start;
+        }
+
+        .velocity-transform-section {
+            margin-top: 8px;
         }
 
         @media (max-width: 560px) {
@@ -563,6 +578,21 @@
         button:hover {
             background-color: var(--btn-hover);
             transform: translateY(-2px);
+        }
+
+        .inline-action-btn {
+            width: auto;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            line-height: 1.1;
+            box-shadow: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .inline-action-btn:hover {
+            transform: translateY(-1px);
         }
 
         /* Coordinate Display */
@@ -669,6 +699,15 @@
             .main-content {
                 padding: 12px;
             }
+
+            .controlInline.velocity-header-row {
+                flex-wrap: wrap;
+                row-gap: 8px;
+            }
+
+            .controlInline.velocity-header-row .inline-action-btn {
+                margin-left: auto;
+            }
         }
 
         @media (pointer: coarse) {
@@ -765,15 +804,18 @@
                 <div class="control-section">
                     <div class="section-header">Velocity</div>
                     <div class="controlItem">
-                        <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong></label>
+                        <div class="controlInline velocity-header-row">
+                            <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong></label>
+                            <button id="alignFramesBtn" class="inline-action-btn">Set v=0</button>
+                        </div>
                         <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
                         <span id="speedValue" class="valueBadge">0.00c</span>
                     </div>
                 </div>
 
                 <!-- Velocity Transformation -->
-                <div class="control-section">
-                    <div class="section-header">Velocity Transform</div>
+                <div class="control-section velocity-transform-section">
+                    <div class="section-header">Velocity Transformation</div>
                     <label class="toggle-row">
                         <span class="toggle-label">Show Velocity</span>
                         <input type="checkbox" class="toggle-input" id="velocityToggle">
@@ -793,7 +835,6 @@
                         <button id="addEventBtn">Add Event</button>
                         <button id="removeAllEventsBtn">Clear Events</button>
                     </div>
-                    <button id="alignFramesBtn">Align Frames</button>
                 </div>
 
                 <!-- Coordinates -->
