@@ -508,13 +508,14 @@
 
         .controls-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px 16px;
+            grid-template-columns: repeat(3, minmax(150px, 190px));
+            gap: 6px 14px;
+            width: fit-content;
         }
 
         .controls-grid .toggle-row {
             display: grid;
-            grid-template-columns: max-content auto 1fr;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: center;
             column-gap: 8px;
             justify-content: start;
@@ -524,6 +525,10 @@
             justify-self: start;
         }
 
+        .controls-grid .toggle-row-spacer {
+            pointer-events: none;
+        }
+
         .velocity-transform-section {
             margin-top: 8px;
         }
@@ -531,6 +536,11 @@
         @media (max-width: 560px) {
             .controls-grid {
                 grid-template-columns: 1fr;
+                width: 100%;
+            }
+
+            .controls-grid .toggle-row-spacer {
+                display: none;
             }
         }
 
@@ -780,6 +790,7 @@
                             <input type="checkbox" class="toggle-input" id="restEventsToggle" checked>
                             <span class="toggle-switch"></span>
                         </label>
+                        <div class="toggle-row-spacer" aria-hidden="true"></div>
                         <label class="toggle-row">
                             <span class="toggle-label">Moving Frame Grid</span>
                             <input type="checkbox" class="toggle-input" id="movingGridToggle">
