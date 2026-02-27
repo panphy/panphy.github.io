@@ -507,19 +507,19 @@
         }
 
         .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, auto);
-            grid-auto-flow: column;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-wrap: wrap;
             gap: 2px 24px;
         }
 
-        @media (max-width: 640px) {
-            .controls-grid {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto;
-                grid-auto-flow: row;
-            }
+        .toggle-group .toggle-row {
+            min-width: 160px;
         }
 
         /* Context menu items */
@@ -734,45 +734,37 @@
                 <div class="canvas-controls">
                     <div class="section-header">Controls</div>
                     <div class="controls-grid">
-                        <!-- Col 1: Rest Frame -->
-                        <label class="toggle-row">
-                            <span class="toggle-label">Rest Frame Grid</span>
-                            <input type="checkbox" class="toggle-input" id="gridToggle" checked>
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <label class="toggle-row">
-                            <span class="toggle-label">Rest Frame Events</span>
-                            <input type="checkbox" class="toggle-input" id="restEventsToggle" checked>
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <div></div>
-                        <!-- Col 2: Moving Frame -->
-                        <label class="toggle-row">
-                            <span class="toggle-label">Moving Frame Grid</span>
-                            <input type="checkbox" class="toggle-input" id="movingGridToggle">
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <label class="toggle-row">
-                            <span class="toggle-label">Moving Frame Axes</span>
-                            <input type="checkbox" class="toggle-input" id="movingAxesToggle">
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <label class="toggle-row">
-                            <span class="toggle-label">Moving Frame Events</span>
-                            <input type="checkbox" class="toggle-input" id="movingEventsToggle" checked>
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <!-- Col 3: Other -->
-                        <label class="toggle-row">
-                            <span class="toggle-label">Projection Lines</span>
-                            <input type="checkbox" class="toggle-input" id="projectionToggle" checked>
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <label class="toggle-row">
-                            <span class="toggle-label">Velocity Transform</span>
-                            <input type="checkbox" class="toggle-input" id="velocityToggle">
-                            <span class="toggle-switch"></span>
-                        </label>
+                        <!-- Row 1: Rest Frame -->
+                        <div class="toggle-group">
+                            <label class="toggle-row">
+                                <span class="toggle-label">Rest Frame Grid</span>
+                                <input type="checkbox" class="toggle-input" id="gridToggle" checked>
+                                <span class="toggle-switch"></span>
+                            </label>
+                            <label class="toggle-row">
+                                <span class="toggle-label">Rest Frame Events</span>
+                                <input type="checkbox" class="toggle-input" id="restEventsToggle" checked>
+                                <span class="toggle-switch"></span>
+                            </label>
+                        </div>
+                        <!-- Row 2: Moving Frame -->
+                        <div class="toggle-group">
+                            <label class="toggle-row">
+                                <span class="toggle-label">Moving Frame Grid</span>
+                                <input type="checkbox" class="toggle-input" id="movingGridToggle">
+                                <span class="toggle-switch"></span>
+                            </label>
+                            <label class="toggle-row">
+                                <span class="toggle-label">Moving Frame Axes</span>
+                                <input type="checkbox" class="toggle-input" id="movingAxesToggle">
+                                <span class="toggle-switch"></span>
+                            </label>
+                            <label class="toggle-row">
+                                <span class="toggle-label">Moving Frame Events</span>
+                                <input type="checkbox" class="toggle-input" id="movingEventsToggle" checked>
+                                <span class="toggle-switch"></span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -782,19 +774,24 @@
                 <div class="control-section">
                     <div class="section-header">Velocity</div>
                     <div class="controlItem">
-                        <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong> (unit: c)</label>
+                        <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong></label>
                         <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
-                        <span id="speedValue" class="valueBadge">0.00</span>
+                        <span id="speedValue" class="valueBadge">0.00c</span>
                     </div>
                 </div>
 
                 <!-- Velocity Transformation -->
                 <div class="control-section">
                     <div class="section-header">Velocity Transform</div>
+                    <label class="toggle-row">
+                        <span class="toggle-label">Show Velocity</span>
+                        <input type="checkbox" class="toggle-input" id="velocityToggle">
+                        <span class="toggle-switch"></span>
+                    </label>
                     <div class="controlItem">
-                        <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong> (unit: c)</label>
+                        <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong></label>
                         <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
-                        <span id="velocityValue" class="valueBadge">0.30</span>
+                        <span id="velocityValue" class="valueBadge">0.30c</span>
                     </div>
                 </div>
 
@@ -904,7 +901,6 @@
             const restEventsToggle = document.getElementById("restEventsToggle");
             const movingEventsToggle = document.getElementById("movingEventsToggle");
             const velocityToggle = document.getElementById("velocityToggle");
-            const projectionToggle = document.getElementById("projectionToggle");
             const velocitySlider = document.getElementById("velocitySlider");
             const velocityValueDisplay = document.getElementById("velocityValue");
 
@@ -1375,10 +1371,10 @@
             function draw() {
                 const relSpeed = parseFloat(speedSlider.value);
                 const primeSuffix = getPrimeSuffix(relSpeed);
-                speedValueDisplay.textContent = relSpeed.toFixed(2);
+                speedValueDisplay.textContent = relSpeed.toFixed(2) + 'c';
 
                 const u_line = parseFloat(velocitySlider.value);
-                velocityValueDisplay.textContent = u_line.toFixed(2);
+                velocityValueDisplay.textContent = u_line.toFixed(2) + 'c';
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -1472,7 +1468,7 @@
                 ctx.setLineDash([]);
 
                 // Projection lines for selected event (drawn before dots so dots appear on top)
-                if (selectedEvent && projectionToggle.checked && events.includes(selectedEvent)) {
+                if (selectedEvent && events.includes(selectedEvent)) {
                     drawProjections(selectedEvent, relSpeed);
                 }
 
@@ -1857,7 +1853,6 @@
             movingEventsToggle.addEventListener("change", draw);
             velocitySlider.addEventListener("input", draw);
             velocityToggle.addEventListener("change", draw);
-            projectionToggle.addEventListener("change", draw);
 
             draw();
         });
