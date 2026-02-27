@@ -15,6 +15,27 @@ const CUSTOM_FIT_FORBIDDEN_NODE_TYPES = new Set([
 	'BlockNode'
 ]);
 const CUSTOM_FIT_FORBIDDEN_FUNCTION_NAMES = new Set(['import']);
+const fitCore = (typeof globalThis === 'object' && globalThis.PanPhyFitCore) ? globalThis.PanPhyFitCore : {};
+
+function missingFitCoreFunction(name) {
+	return () => {
+		throw new Error(`PanPhyFitCore.${name} is unavailable.`);
+	};
+}
+
+const levenbergMarquardt = typeof fitCore.levenbergMarquardt === 'function'
+	? fitCore.levenbergMarquardt
+	: missingFitCoreFunction('levenbergMarquardt');
+const buildFitDomainFromData = typeof fitCore.buildFitDomainFromData === 'function'
+	? fitCore.buildFitDomainFromData
+	: missingFitCoreFunction('buildFitDomainFromData');
+const buildSinusoidalEquation = typeof fitCore.buildSinusoidalEquation === 'function'
+	? fitCore.buildSinusoidalEquation
+	: missingFitCoreFunction('buildSinusoidalEquation');
+const buildGaussianEquation = typeof fitCore.buildGaussianEquation === 'function'
+	? fitCore.buildGaussianEquation
+	: missingFitCoreFunction('buildGaussianEquation');
+
 const debouncedRefreshCustomFitDefinition = debounce(() => {
 	refreshCustomFitDefinition({ preserveUserValues: true });
 }, 180);
@@ -1686,142 +1707,6 @@ function performPowerFit() {
 }
 
 
-function levenbergMarquardt(data, initialParams, residualFn, jacobianFn, options = {}) {
-	// Generic Levenberg-Marquardt solver.
-	// residualFn(params, data) -> Array<number> of residuals (y_pred - y)
-	// jacobianFn(params, data) -> Array<Array<number>> Jacobian rows matching residuals
-	const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 200;
-	const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-8;
-
-	let params = initialParams.slice();
-	let lambda = Number.isFinite(options.initialLambda) ? options.initialLambda : 1e-3; // initial damping
-	let nu = 2; // factor to adjust lambda
-	let prevCost = Infinity;
-
-	let bestParams = params.slice();
-	let bestCost = Infinity;
-
-	const PENALTY = 1e6;
-
-	function safeResiduals(p) {
-		let r;
-		try {
-			r = residualFn(p, data);
-		} catch {
-			r = null;
-		}
-		if (!Array.isArray(r) || r.length !== data.length) {
-			r = new Array(data.length).fill(PENALTY);
-		}
-		for (let i = 0; i < r.length; i++) {
-			if (!Number.isFinite(r[i])) r[i] = PENALTY;
-		}
-		return r;
-	}
-
-	function safeJacobian(p, nParams) {
-		let J;
-		try {
-			J = jacobianFn(p, data);
-		} catch {
-			J = null;
-		}
-		if (!Array.isArray(J) || J.length !== data.length) {
-			J = new Array(data.length).fill(null).map(() => new Array(nParams).fill(0));
-		}
-		for (let i = 0; i < J.length; i++) {
-			const row = Array.isArray(J[i]) ? J[i] : [];
-			if (row.length !== nParams) {
-				J[i] = new Array(nParams).fill(0);
-				continue;
-			}
-			for (let j = 0; j < nParams; j++) {
-				if (!Number.isFinite(J[i][j])) J[i][j] = 0;
-			}
-		}
-		return J;
-	}
-
-	function costFromResiduals(r) {
-		let s = 0;
-		for (let i = 0; i < r.length; i++) {
-			const v = r[i];
-			s += v * v;
-			if (!Number.isFinite(s)) return Number.MAX_VALUE;
-		}
-		return s;
-	}
-
-	for (let iter = 0; iter < maxIterations; iter++) {
-		// 1. Compute residuals & cost
-		const residuals = safeResiduals(params);
-		const cost = costFromResiduals(residuals);
-
-		// 2. Convergence check
-		if (Math.abs(prevCost - cost) < tolerance) {
-			return { params, cost };
-		}
-		prevCost = cost;
-
-		// 3. Jacobian
-		const J = safeJacobian(params, params.length);
-		const JT = transpose(J);
-		const JTJ = multiply(JT, J);
-		const JTr = multiplyMatrixVector(JT, residuals);
-
-		// 4. Build damped matrix
-		const n = JTJ.length;
-		let A_lm = new Array(n).fill(null).map(() => new Array(n).fill(0));
-		for (let i = 0; i < n; i++) {
-			for (let j = 0; j < n; j++) {
-				A_lm[i][j] = JTJ[i][j];
-				if (i === j) {
-					const diag = (Number.isFinite(A_lm[i][j]) && Math.abs(A_lm[i][j]) > 0) ? Math.abs(A_lm[i][j]) : 1;
-					A_lm[i][j] += lambda * diag;
-				}
-			}
-		}
-
-		// 5. Solve for delta
-		let delta;
-		try {
-			const negJTr = JTr.map(v => -v);
-			delta = solve(A_lm, negJTr);
-		} catch {
-			lambda *= nu;
-			continue;
-		}
-
-		if (!Array.isArray(delta) || delta.length !== params.length || delta.some(v => !Number.isFinite(v))) {
-			lambda *= nu;
-			continue;
-		}
-
-		// 6. Check new parameters
-		const newParams = params.map((p, i) => p + delta[i]);
-		const newRes = safeResiduals(newParams);
-		const newCost = costFromResiduals(newRes);
-
-		if (newCost < cost) {
-			params = newParams;
-			if (newCost < bestCost) {
-				bestCost = newCost;
-				bestParams = params.slice();
-			}
-			lambda *= 0.3;
-			if (lambda < 1e-20) lambda = 1e-20;
-		} else {
-			lambda *= nu;
-			if (lambda > 1e20) {
-				return { params: bestParams, cost: bestCost };
-			}
-		}
-	}
-
-	return { params: bestParams, cost: bestCost };
-}
-
-
 function computeResiduals(params, data) {
 	const [A, b, x0, c] = params;
 	return data.map(({ x, y }) => {
@@ -1889,81 +1774,6 @@ function computeJacobian(params, data) {
 
 		return [dA, db, dx0, dc];
 	});
-}
-
-
-function transpose(matrix) {
-	return matrix[0].map((_, i) => matrix.map(row => row[i]));
-}
-
-
-function multiply(a, b) {
-	// matrix x matrix
-	const m = a.length;
-	const n = b[0].length;
-	const result = new Array(m).fill(null).map(() => new Array(n).fill(0));
-	for (let i = 0; i < m; i++) {
-		for (let j = 0; j < n; j++) {
-			let sum = 0;
-			for (let k = 0; k < b.length; k++) {
-				sum += a[i][k] * b[k][j];
-			}
-			result[i][j] = sum;
-		}
-	}
-	return result;
-}
-
-
-function multiplyMatrixVector(matrix, vector) {
-	return matrix.map(row => {
-		let sum = 0;
-		for (let i = 0; i < row.length; i++) {
-			sum += row[i] * vector[i];
-		}
-		return sum;
-	});
-}
-
-
-function solve(matrix, vector) {
-	const n = matrix.length;
-	const augmented = matrix.map((row, i) => row.concat([vector[i]]));
-
-	for (let i = 0; i < n; i++) {
-		// Find pivot
-		let maxRow = i;
-		for (let r = i + 1; r < n; r++) {
-			if (Math.abs(augmented[r][i]) > Math.abs(augmented[maxRow][i])) {
-				maxRow = r;
-			}
-		}
-		if (maxRow !== i) {
-			[augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
-		}
-
-		const pivot = augmented[i][i];
-		if (Math.abs(pivot) < 1e-14) {
-			throw new Error("Singular matrix");
-		}
-
-		// Normalize pivot row
-		for (let c = i; c <= n; c++) {
-			augmented[i][c] /= pivot;
-		}
-
-		// Eliminate in other rows
-		for (let r = 0; r < n; r++) {
-			if (r !== i) {
-				const factor = augmented[r][i];
-				for (let c = i; c <= n; c++) {
-					augmented[r][c] -= factor * augmented[i][c];
-				}
-			}
-		}
-	}
-
-	return augmented.map(row => row[n]);
 }
 
 
@@ -2130,16 +1940,6 @@ function estimateKFromData() {
 }
 
 
-function buildFitDomainFromData(data, sampleCount = 300) {
-	const xMin = Math.min(...data.map(p => p.x));
-	const xMax = Math.max(...data.map(p => p.x));
-	const span = xMax - xMin;
-	if (!Number.isFinite(span) || Math.abs(span) < 1e-12) {
-		return Array.from({ length: sampleCount }, () => xMin);
-	}
-	return Array.from({ length: sampleCount }, (_, i) => xMin + i * span / (sampleCount - 1));
-}
-
 function normalizeWorkerCurve(rawX, rawY, fallbackX, evaluator) {
 	if (!Array.isArray(rawX) || !Array.isArray(rawY) || rawX.length !== rawY.length || rawX.length === 0) {
 		return {
@@ -2175,22 +1975,6 @@ function evaluateSinusoidalFunction(params, xValue) {
 	const phi = Number(params.phi);
 	const c = Number(params.c);
 	return A * Math.exp(b * xValue) * Math.sin(k * xValue - phi) + c;
-}
-
-function buildSinusoidalEquation(params) {
-	const A = Number(params.A);
-	const b = Number(params.b);
-	const k = Number(params.k);
-	const phi = Number(params.phi);
-	const c = Number(params.c);
-
-	let equation = `y = ${A.toFixed(3)} e^{${b.toFixed(3)}x} \\sin(${k.toFixed(3)}x`;
-	if (phi > 0) equation += ` - ${phi.toFixed(3)}`;
-	else if (phi < 0) equation += ` + ${Math.abs(phi).toFixed(3)}`;
-	equation += `)`;
-	if (c > 0) equation += ` + ${c.toFixed(3)}`;
-	else if (c < 0) equation += ` - ${Math.abs(c).toFixed(3)}`;
-	return equation;
 }
 
 function solveSinusoidalFitMainThread(data, initialParams) {
@@ -2390,18 +2174,6 @@ function evaluateGaussianFunction(params, xValue) {
 	const sigma = Number(params.sigma);
 	const c = Number(params.c);
 	return A * Math.exp(-((xValue - mu) ** 2) / (2 * sigma * sigma)) + c;
-}
-
-function buildGaussianEquation(params) {
-	const A = Number(params.A);
-	const mu = Number(params.mu);
-	const sigma = Number(params.sigma);
-	const c = Number(params.c);
-
-	let equation = `y = ${A.toFixed(3)} e^{-\\frac{(x - ${mu.toFixed(3)})^2}{2(${sigma.toFixed(3)})^2}}`;
-	if (c > 0) equation += ` + ${c.toFixed(3)}`;
-	else if (c < 0) equation += ` - ${Math.abs(c).toFixed(3)}`;
-	return equation;
 }
 
 function solveGaussianFitMainThread(data, initialParams) {

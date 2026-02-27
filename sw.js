@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-02-28T00:20:00Z';
+const BUILD_ID = '2026-02-27T14:46:29Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -32,6 +32,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphyplot/css/panphyplot.css',
   '/tools/panphyplot/js/curve-fitting.js',
   '/tools/panphyplot/js/data-processing.js',
+  '/tools/panphyplot/js/fit-core.js',
   '/tools/panphyplot/js/fit-worker.js',
   '/tools/panphyplot/js/latex-rendering.js',
   '/tools/panphyplot/js/main.js',

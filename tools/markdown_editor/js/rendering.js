@@ -194,33 +194,3 @@ export function restoreEscapedDollarPlaceholders(element) {
 export function getCleanRenderedOutputHTML(renderedOutput) {
   return renderedOutput.innerHTML;
 }
-
-/**
- * Run preprocessMarkdown tests
- */
-export function runPreprocessMarkdownTests() {
-  const cases = [
-    { input: '$5/day', expected: '$5/day', label: 'currency slash' },
-    { input: '$5-month', expected: '$5-month', label: 'currency hyphen' },
-    { input: '$5 per day', expected: '$5 per day', label: 'currency spaced' },
-    {
-      input: '\\$10, \\$20',
-      expected: `${ESCAPED_DOLLAR_PLACEHOLDER}10, ${ESCAPED_DOLLAR_PLACEHOLDER}20`,
-      label: 'escaped dollar literals'
-    },
-    { input: '$\\frac{1}{2}$', expected: '$\\\\frac{1}{2}$', label: 'inline fraction' },
-    {
-      input: '$\\begin{matrix}a&b\\\\c&d\\end{matrix}$',
-      expected: '$\\\\begin{matrix}a&b\\\\\\\\c&d\\\\end{matrix}$',
-      label: 'matrix commands'
-    }
-  ];
-
-  cases.forEach(({ input, expected, label }) => {
-    const actual = preprocessMarkdown(input);
-    console.assert(
-      actual === expected,
-      `preprocessMarkdown test failed (${label}): expected "${expected}", got "${actual}"`
-    );
-  });
-}

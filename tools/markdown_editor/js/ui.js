@@ -49,7 +49,7 @@ function isTopMostModalOverlay(overlay) {
   return overlays.length > 0 && overlays[overlays.length - 1] === overlay;
 }
 
-function isTouchInteractionMode() {
+export function isTouchInteractionMode() {
   if (typeof window === 'undefined') return false;
   const hasFinePointer = typeof window.matchMedia === 'function'
     && (window.matchMedia('(any-pointer: fine)').matches
@@ -70,7 +70,7 @@ function isTouchInteractionMode() {
 /**
  * Update the theme toggle button's icon and attributes.
  */
-export function updateThemeToggleButton() {
+function updateThemeToggleButton() {
   if (!themeToggleButton) return;
 
   if (document.documentElement.getAttribute('data-theme') === 'dark') {

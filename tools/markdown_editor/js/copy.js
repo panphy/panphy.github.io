@@ -3,6 +3,8 @@
  * Handles copying equations and tables
  */
 
+import { isTouchInteractionMode } from './ui.js';
+
 const EQUATION_PNG_BASE_SCALE = 4;
 const EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
 const EQUATION_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
@@ -127,24 +129,6 @@ function markTableMathHint(table) {
   const hasMath = tableContainsMath(table);
   table.classList.toggle('math-copy-table', hasMath);
   return hasMath;
-}
-
-function isTouchCopyMode() {
-  if (typeof window === 'undefined') return false;
-  const hasFinePointer = typeof window.matchMedia === 'function'
-    && (window.matchMedia('(any-pointer: fine)').matches
-      || window.matchMedia('(pointer: fine)').matches
-      || window.matchMedia('(any-hover: hover)').matches
-      || window.matchMedia('(hover: hover)').matches);
-  const hasCoarsePointer = typeof window.matchMedia === 'function'
-    && (window.matchMedia('(any-pointer: coarse)').matches
-      || window.matchMedia('(pointer: coarse)').matches
-      || window.matchMedia('(hover: none)').matches);
-  const hasTouchPoints = typeof navigator !== 'undefined'
-    && Number.isFinite(navigator.maxTouchPoints)
-    && navigator.maxTouchPoints > 0;
-  if (hasFinePointer) return false;
-  return hasCoarsePointer || hasTouchPoints;
 }
 
 function clearPendingTableCopyActionsHide() {
@@ -993,7 +977,7 @@ function showTouchCopyActions(targetElement, { targetType, hasMath = false } = {
 }
 
 export function handleCopyHover(event) {
-  if (isTouchCopyMode()) return false;
+  if (isTouchInteractionMode()) return false;
   if (window.getSelection().toString()) return false;
   const table = event.target.closest('table');
   if (!table) return false;
@@ -1006,7 +990,7 @@ export function handleCopyHover(event) {
 }
 
 export function handleCopyHoverOut(event) {
-  if (isTouchCopyMode()) return false;
+  if (isTouchInteractionMode()) return false;
   if (!activeMathTable) return false;
 
   const exitedTable = event.target.closest('table');
@@ -1248,7 +1232,7 @@ export async function copyTableToClipboard(table) {
  * Show copy feedback animation on an element.
  * @param {Element} element - The element to show feedback on
  */
-export function showCopyFeedback(element) {
+function showCopyFeedback(element) {
   element.classList.add('copied');
   setTimeout(() => {
     element.classList.remove('copied');
@@ -1259,7 +1243,7 @@ export function showCopyFeedback(element) {
  * Show copy failed feedback animation on an element.
  * @param {Element} element - The element to show feedback on
  */
-export function showCopyFailedFeedback(element) {
+function showCopyFailedFeedback(element) {
   element.classList.add('copy-failed');
   setTimeout(() => {
     element.classList.remove('copy-failed');
@@ -1275,7 +1259,7 @@ export function handleCopyClick(event) {
     dismissDesktopTableCopyActions();
   }
 
-  const touchMode = isTouchCopyMode();
+  const touchMode = isTouchInteractionMode();
 
   // Check if clicked on a table (but not inside a cell for text selection)
   const table = event.target.closest('table');

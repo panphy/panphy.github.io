@@ -41,7 +41,6 @@ import {
   initializeFontSize,
   applyFontSize,
   updateOfflineFontState,
-  updateThemeToggleButton,
   getCurrentFontSize,
   showFilenameModal,
   showImageModal,

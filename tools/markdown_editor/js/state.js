@@ -4,7 +4,7 @@
  */
 
 // Storage keys
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   DRAFT: 'markdownEditorDraft',
   SNAPSHOTS: 'markdownEditorSnapshots',
   SYNC_SCROLL: 'markdownSyncScroll',
@@ -270,25 +270,6 @@ export function debounce(fn, delay) {
     timerId = window.setTimeout(() => {
       fn(...args);
     }, delay);
-  };
-}
-
-/**
- * Throttle utility function
- * @param {Function} fn - The function to throttle
- * @param {number} limit - The minimum interval in milliseconds
- * @returns {Function} The throttled function
- */
-export function throttle(fn, limit) {
-  let inThrottle;
-  return function () {
-    const args = arguments;
-    const context = this;
-    if (!inThrottle) {
-      fn.apply(context, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
   };
 }
 
