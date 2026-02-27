@@ -264,7 +264,7 @@
             grid-gap: 20px;
             justify-content: center;
             width: 100%;
-            align-items: stretch;
+            align-items: start;
         }
 
         @media (max-width: 900px) {
@@ -312,6 +312,7 @@
             flex-direction: column;
             gap: 12px;
             overflow: hidden;
+            min-height: 0;
         }
 
         .controlItem {
@@ -610,18 +611,26 @@
         #coordinates {
             margin-top: 8px;
             font-size: 0.85rem;
-            overflow-y: auto;
             flex: 1;
             min-height: 0;
             border-top: 1px solid var(--card-border);
             padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
         }
 
         #coordinates h3 {
             font-size: 0.9rem;
             font-weight: 600;
-            margin-bottom: 8px;
             color: var(--brand-primary);
+        }
+
+        .coordinates-table-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         #coordinates table {
@@ -953,6 +962,8 @@
             const removeAllEventsBtn = document.getElementById("removeAllEventsBtn");
             const alignFramesBtn = document.getElementById("alignFramesBtn");
 
+            const diagramContainer = document.getElementById("diagramContainer");
+            const controlsContainer = document.getElementById("controlsContainer");
             const coordinatesDiv = document.getElementById("coordinates");
             const contextMenu = document.getElementById("contextMenu");
             const contextRemoveEvent = document.getElementById("contextRemoveEvent");
@@ -1003,6 +1014,18 @@
 
             function getPrimeSuffix(v) {
                 return isFramesAligned(v) ? "" : "'";
+            }
+
+            function syncControlPanelHeight() {
+                if (window.matchMedia("(max-width: 900px)").matches) {
+                    controlsContainer.style.removeProperty("height");
+                    return;
+                }
+
+                const leftPanelHeight = Math.round(diagramContainer.getBoundingClientRect().height);
+                if (leftPanelHeight > 0) {
+                    controlsContainer.style.height = `${leftPanelHeight}px`;
+                }
             }
 
             function getNextLabel() {
@@ -1660,15 +1683,16 @@
 
                 let html = `
                     <h3>Event Coordinates</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Event</th>
-                                <th>Rest (x,t)</th>
-                                <th>Moving (x',t')</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <div class="coordinates-table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Rest (x,t)</th>
+                                    <th>Moving (x',t')</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                 `;
                 events.forEach(p => {
                     let pm = lorentzTransform(p, relSpeed);
@@ -1681,8 +1705,9 @@
                     `;
                 });
                 html += `
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 `;
                 coordinatesDiv.innerHTML = html;
             }
@@ -1987,7 +2012,9 @@
             movingEventsToggle.addEventListener("change", draw);
             velocitySlider.addEventListener("input", draw);
             velocityToggle.addEventListener("change", draw);
+            window.addEventListener("resize", syncControlPanelHeight);
 
+            syncControlPanelHeight();
             draw();
         });
     </script>
