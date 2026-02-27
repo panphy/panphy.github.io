@@ -40,6 +40,7 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 - **Vanilla JS:** Prefer clean, readable Vanilla JavaScript over adding new external dependencies.
 - **Error Handling:** Ensure robust error handling, especially for hardware-dependent features like camera or microphone access.
 - **Performance:** Optimize for low-end school devices. Avoid heavy computations on the main thread where possible (use Web Workers for tasks like curve fitting).
+- **PanPhyPlot Fitting Modules:** Keep shared fit math logic in `tools/panphyplot/js/fit-core.js`; `curve-fitting.js` and `fit-worker.js` should consume that shared module rather than duplicating numerical helpers.
 
 ## Common Tasks
 

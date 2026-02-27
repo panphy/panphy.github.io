@@ -38,6 +38,8 @@ Edit files directly. There is no npm, webpack, or any compilation step. Do not i
 
 Each HTML file in the repo is a complete, standalone application. Complex tools (PanPhyPlot, Markdown Editor) split their JS/CSS into modules under a subfolder, but the entry point is always a single HTML file.
 
+PanPhyPlot curve fitting now uses a shared numeric helper module at `tools/panphyplot/js/fit-core.js`, consumed by both `curve-fitting.js` (main-thread fallback) and `fit-worker.js` (worker path).
+
 ### Filename Hashes
 
 Module files must use **stable, unhashed filenames** (e.g. `copy.js`, not `copy.ab12.js`). Cache busting is handled exclusively via the `BUILD_ID` in `sw.js`. Do not rely on file hash changes for updates.

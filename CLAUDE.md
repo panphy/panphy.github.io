@@ -32,7 +32,7 @@
 │   ├── panphyplot.html     # Advanced plotting tool (entry point)
 │   ├── panphyplot/         # Modular JS/CSS for PanPhyPlot
 │   │   ├── css/panphyplot.css
-│   │   ├── js/             # state.js, main.js, plotting.js, curve-fitting.js,
+│   │   ├── js/             # state.js, main.js, plotting.js, fit-core.js, curve-fitting.js,
 │   │   │                   # data-processing.js, fit-worker.js, latex-rendering.js, ui.js
 │   │   ├── panphyplot_manual.html  # User manual
 │   │   └── math_ref.html          # Math reference
@@ -189,7 +189,8 @@ panphyplot.html (imports scripts)
 ├── js/state.js            # State management & localStorage
 ├── js/main.js             # App initialization
 ├── js/plotting.js         # Rendering logic
-├── js/curve-fitting.js    # Math algorithms
+├── js/fit-core.js         # Shared fit math helpers (used by main thread + worker)
+├── js/curve-fitting.js    # Fit orchestration and main-thread fallback
 ├── js/data-processing.js  # Data import/export
 ├── js/fit-worker.js       # Web Worker for curve fitting
 ├── js/latex-rendering.js  # LaTeX output
@@ -294,7 +295,8 @@ Theme colors are defined in CSS `:root` and `[data-theme="dark"]` selectors. Key
 The most complex tool has modular architecture:
 - State management in `js/state.js` with debounced localStorage persistence
 - Plotting in `js/plotting.js` using Plotly
-- Curve fitting in `js/curve-fitting.js` using Math.js
+- Shared fitting primitives in `js/fit-core.js`
+- Curve fitting orchestration in `js/curve-fitting.js` (with `js/fit-worker.js` for heavy tasks)
 
 ### Touch/Mobile Considerations
 - Prevent double-tap zoom: Already implemented in dodge game
