@@ -1271,6 +1271,95 @@
                 };
             }
 
+            function drawRoundedRect(x, y, width, height, radius) {
+                const r = Math.min(radius, width / 2, height / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + width - r, y);
+                ctx.arcTo(x + width, y, x + width, y + r, r);
+                ctx.lineTo(x + width, y + height - r);
+                ctx.arcTo(x + width, y + height, x + width - r, y + height, r);
+                ctx.lineTo(x + r, y + height);
+                ctx.arcTo(x, y + height, x, y + height - r, r);
+                ctx.lineTo(x, y + r);
+                ctx.arcTo(x, y, x + r, y, r);
+                ctx.closePath();
+            }
+
+            function parseRgbColor(colorValue) {
+                const value = colorValue.trim();
+                const hexMatch = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+                if (hexMatch) {
+                    let hex = hexMatch[1];
+                    if (hex.length === 3) {
+                        hex = hex.split("").map(ch => ch + ch).join("");
+                    }
+                    return {
+                        r: parseInt(hex.slice(0, 2), 16),
+                        g: parseInt(hex.slice(2, 4), 16),
+                        b: parseInt(hex.slice(4, 6), 16)
+                    };
+                }
+                const rgbMatch = value.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+                if (rgbMatch) {
+                    return {
+                        r: parseInt(rgbMatch[1], 10),
+                        g: parseInt(rgbMatch[2], 10),
+                        b: parseInt(rgbMatch[3], 10)
+                    };
+                }
+                return null;
+            }
+
+            function getReadableTextColor(backgroundColor) {
+                const rgb = parseRgbColor(backgroundColor);
+                if (!rgb) return "#ffffff";
+                const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+                return luminance > 0.62 ? "#111827" : "#ffffff";
+            }
+
+            function drawPillLabel({ text, x, y, background, textColor = null, align = "center", baseline = "middle" }) {
+                const font = "bold 12px Arial";
+                const padX = 8;
+                const padY = 4;
+                const margin = 4;
+                const resolvedTextColor = textColor || getReadableTextColor(background);
+
+                ctx.save();
+                ctx.font = font;
+                const textMetrics = ctx.measureText(text);
+                const textWidth = textMetrics.width;
+                const measuredHeight = (textMetrics.actualBoundingBoxAscent || 0) + (textMetrics.actualBoundingBoxDescent || 0);
+                const textHeight = measuredHeight > 0 ? measuredHeight : 12;
+                const pillWidth = textWidth + padX * 2;
+                const pillHeight = textHeight + padY * 2;
+
+                let left = x;
+                if (align === "center") left -= pillWidth / 2;
+                if (align === "right") left -= pillWidth;
+
+                let top = y;
+                if (baseline === "middle") top -= pillHeight / 2;
+                if (baseline === "bottom" || baseline === "alphabetic") top -= pillHeight;
+
+                left = Math.max(margin, Math.min(canvas.width - pillWidth - margin, left));
+                top = Math.max(margin, Math.min(canvas.height - pillHeight - margin, top));
+
+                drawRoundedRect(left, top, pillWidth, pillHeight, pillHeight / 2);
+                ctx.fillStyle = background;
+                ctx.fill();
+
+                ctx.fillStyle = resolvedTextColor;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(text, left + pillWidth / 2, top + pillHeight / 2 + 0.5);
+                ctx.restore();
+            }
+
+            function drawProjectionPills(pills) {
+                pills.forEach(drawPillLabel);
+            }
+
             function drawVelocityLines(u_line, relSpeed) {
                 const primeSuffix = getPrimeSuffix(relSpeed);
                 let endG = computeLineBoxEndpoints(u_line);
@@ -1319,7 +1408,7 @@
                 }
             }
 
-            function drawProjections(evt, v) {
+            function drawProjections(evt, v, projectionPills) {
                 const cp = toCanvasCoords(evt.x, evt.t);
                 const pm = lorentzTransform(evt, v);
                 const primeSuffix = getPrimeSuffix(v);
@@ -1343,20 +1432,25 @@
                 ctx.stroke();
 
                 ctx.setLineDash([]);
-
-                ctx.fillStyle = restColor;
-                ctx.font = "bold 12px Arial";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "top";
-                ctx.fillText(evt.x.toFixed(2), xAxisPt.x, xAxisPt.y + 6);
-                ctx.textAlign = "right";
-                ctx.textBaseline = "middle";
-                ctx.fillText(evt.t.toFixed(2), tAxisPt.x - 8, tAxisPt.y);
+                projectionPills.push({
+                    text: `x=${evt.x.toFixed(2)}`,
+                    x: xAxisPt.x,
+                    y: xAxisPt.y + 16,
+                    background: restColor,
+                    align: "center",
+                    baseline: "middle"
+                });
+                projectionPills.push({
+                    text: `t=${evt.t.toFixed(2)}`,
+                    x: tAxisPt.x - 14,
+                    y: tAxisPt.y,
+                    background: restColor,
+                    align: "right",
+                    baseline: "middle"
+                });
 
                 // --- Moving frame: project from green dot parallel to primed axes ---
                 if (!movingAxesToggle.checked || isFramesAligned(v)) {
-                    ctx.textAlign = "start";
-                    ctx.textBaseline = "alphabetic";
                     return;
                 }
 
@@ -1384,31 +1478,22 @@
                 ctx.stroke();
 
                 ctx.setLineDash([]);
-
-                // Labels rotated to align with the primed axes
-                ctx.fillStyle = movColor;
-                ctx.font = "bold 12px Arial";
-                const axisAngle = Math.atan(v);
-
-                ctx.save();
-                ctx.translate(hitXPrime.x, hitXPrime.y);
-                ctx.rotate(-axisAngle);
-                ctx.textAlign = "center";
-                ctx.textBaseline = "bottom";
-                ctx.fillText(`x${primeSuffix}=` + pm.x.toFixed(2), 0, -6);
-                ctx.restore();
-
-                ctx.save();
-                ctx.translate(hitTPrime.x, hitTPrime.y);
-                ctx.rotate(-axisAngle);
-                ctx.textAlign = "right";
-                ctx.textBaseline = "middle";
-                ctx.fillText(`t${primeSuffix}=` + pm.t.toFixed(2), -6, 0);
-                ctx.restore();
-
-                // Reset text alignment
-                ctx.textAlign = "start";
-                ctx.textBaseline = "alphabetic";
+                projectionPills.push({
+                    text: `x${primeSuffix}=${pm.x.toFixed(2)}`,
+                    x: hitXPrime.x,
+                    y: hitXPrime.y - 14,
+                    background: movColor,
+                    align: "center",
+                    baseline: "bottom"
+                });
+                projectionPills.push({
+                    text: `t${primeSuffix}=${pm.t.toFixed(2)}`,
+                    x: hitTPrime.x - 14,
+                    y: hitTPrime.y,
+                    background: movColor,
+                    align: "right",
+                    baseline: "middle"
+                });
             }
 
             function draw() {
@@ -1420,6 +1505,7 @@
                 velocityValueDisplay.textContent = u_line.toFixed(2) + 'c';
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const projectionPills = [];
 
                 if (gridToggle.checked) {
                     drawRestFrameGrid();
@@ -1512,7 +1598,7 @@
 
                 // Projection lines for selected event (drawn before dots so dots appear on top)
                 if (selectedEvent && events.includes(selectedEvent)) {
-                    drawProjections(selectedEvent, relSpeed);
+                    drawProjections(selectedEvent, relSpeed, projectionPills);
                 }
 
                 // Events – draw moving-frame (primed) rockets first, then rest-frame
@@ -1566,6 +1652,8 @@
                         ctx.fillText(p.label, cp.x + p.radius + 10, cp.y - p.radius - 10);
                     });
                 }
+
+                drawProjectionPills(projectionPills);
 
                 let html = `
                     <h3>Event Coordinates</h3>
