@@ -700,7 +700,7 @@
     </p>
 
     <div class="tip-box">
-      <p><strong>Try it in the app:</strong> Enable the "Velocity Transformation" checkbox. The green line
+      <p><strong>Try it in the app:</strong> In the Velocity Transform section, turn on "Show Velocity". The green line
         shows velocity $u$ in the rest frame, and the orange line shows the transformed velocity $u'$ in the
         moving frame. Adjust both $v$ and $u$ to see how the relativistic formula differs from simple subtraction.</p>
     </div>
@@ -727,9 +727,8 @@
 
     <h3>Reading Coordinates with Projection Lines</h3>
     <p>
-      Click (or tap) any rest-frame event to select it. When an event is selected and the
-      "Projection Lines" toggle is on, the app draws dashed guide lines from the event
-      showing how to read its coordinates in both frames:
+      Click (or tap) any rest-frame event to select it. When an event is selected, the app
+      draws dashed guide lines from the event showing how to read its coordinates in both frames:
     </p>
     <ul>
       <li><strong style="color: #10b981;">Green dashed lines</strong> project vertically down to the $x$-axis
@@ -764,8 +763,8 @@
       <li>
         <strong>Velocity Slider ($v$)</strong>
         <ul>
-          <li>Controls the velocity of frame $S'$ relative to $S$, in units of $c$.</li>
-          <li>Ranges from $-0.95\,c$ to $+0.95\,c$.</li>
+          <li>Controls the velocity of frame $S'$ relative to $S$. The value is displayed with a $c$ suffix (e.g. $0.50c$).</li>
+          <li>Ranges from $-0.95c$ to $+0.95c$.</li>
           <li>At $v = 0$, both frames are aligned and the primed axes overlap the unprimed axes.</li>
         </ul>
       </li>
@@ -777,12 +776,12 @@
         </ul>
       </li>
       <li>
-        <strong>Velocity Transformation</strong>
+        <strong>Velocity Transform</strong>
         <ul>
-          <li>Enables the velocity addition visualisation.</li>
+          <li>Turn on "Show Velocity" to enable the velocity addition visualisation.</li>
           <li>The green line represents an object moving at velocity $u$ in the rest frame.</li>
           <li>The orange line represents the same object's velocity $u'$ in the moving frame.</li>
-          <li>The second slider controls $u$.</li>
+          <li>The slider below controls $u$, displayed with a $c$ suffix (e.g. $0.30c$).</li>
         </ul>
       </li>
       <li>
@@ -799,7 +798,7 @@
       <li>
         <strong>Projection Lines</strong>
         <ul>
-          <li>When an event is selected and this toggle is on, dashed guide lines show how to read coordinates.</li>
+          <li>When an event is selected, dashed guide lines automatically show how to read coordinates.</li>
           <li>Green lines project perpendicular to the rest-frame axes, labelled $(x, t)$.</li>
           <li>Blue lines project parallel to the primed axes, labelled $(x', t')$.</li>
         </ul>
