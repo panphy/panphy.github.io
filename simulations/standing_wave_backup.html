@@ -127,7 +127,7 @@
             padding: 8px 20px;
             margin: 16px auto 0;
             width: calc(100% - 40px);
-            max-width: 1260px;
+            max-width: 1360px;
             background: var(--nav-bg);
             border: 1px solid var(--nav-border);
             border-radius: 20px;
@@ -196,13 +196,45 @@
         /* Main Content */
         .main-content {
             padding: 20px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Simulation Area */
+        .instructions {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .left-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .right-container {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 280px;
+            align-self: stretch;
+        }
+
+        .right-container .control-group {
+            flex: 1;
+        }
+
         .simulation-area {
-            position: relative;
             background: var(--card-bg);
             border-radius: 16px;
             box-shadow: var(--card-shadow);
@@ -220,268 +252,59 @@
             background: var(--canvas-bg);
         }
 
-        /* Play/Pause Button */
-        .play-pause-btn {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: var(--brand-primary);
-            color: white;
-            cursor: pointer;
+        .particle-positions {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            transition: transform 0.15s ease, opacity 0.2s ease;
-            opacity: 0.6;
-            z-index: 10;
+            gap: 16px;
         }
 
-        .play-pause-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
+        .particle-positions .control-group {
+            flex: 1;
         }
 
-        .play-pause-btn svg {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0;
-        }
-
-        /* Controls Panel */
-        .controls-panel {
-            display: grid;
-            grid-template-columns: minmax(170px, 0.8fr) minmax(240px, 1.4fr) minmax(210px, 1fr);
-            margin-top: 16px;
+        .control-group {
             background: var(--card-bg);
+            padding: 16px;
             border-radius: 16px;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--card-border);
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
-        .control-section {
-            padding: 20px;
-        }
-
-        .control-section + .control-section {
-            border-left: 1px solid var(--card-border);
-        }
-
-        .section-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        /* Toggle Buttons for Boundaries */
-        .boundary-group {
-            margin-bottom: 14px;
-        }
-
-        .boundary-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .boundary-group > label {
-            display: block;
-            font-size: 0.82rem;
+        .control-label {
+            font-size: 0.9rem;
             font-weight: 500;
+            margin-bottom: 10px;
             color: var(--text-main);
-            margin-bottom: 6px;
         }
 
-        .toggle-group {
-            display: flex;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--select-border);
-        }
-
-        .toggle-btn {
-            flex: 1;
-            padding: 7px 12px;
-            border: none;
-            background: var(--select-bg);
+        .control-group p {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.82rem;
-            font-weight: 500;
-            font-family: var(--font-sans);
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .toggle-btn + .toggle-btn {
-            border-left: 1px solid var(--select-border);
-        }
-
-        .toggle-btn.active {
-            background: var(--brand-primary);
-            color: #fff;
-        }
-
-        .toggle-btn:hover:not(.active) {
-            background: rgba(108, 92, 231, 0.08);
-        }
-
-        [data-theme="dark"] .toggle-btn:hover:not(.active) {
-            background: rgba(162, 155, 254, 0.12);
-        }
-
-        /* Slider Controls */
-        .slider-control {
-            margin-bottom: 16px;
-        }
-
-        .slider-control:last-child {
-            margin-bottom: 0;
-        }
-
-        .slider-header {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
-        .slider-header label {
-            font-size: 0.82rem;
-            font-weight: 500;
-            color: var(--text-main);
-            white-space: nowrap;
-        }
-
-        .slider-value {
-            font-family: var(--font-mono);
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--brand-primary);
-            text-align: right;
-        }
-
-        .omega-detail {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-
-        /* Info Badges */
-        .info-row {
-            display: flex;
-            gap: 8px;
             margin-top: 8px;
         }
 
-        .info-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            background: rgba(108, 92, 231, 0.08);
-            font-size: 0.76rem;
-            color: var(--text-secondary);
-        }
-
-        [data-theme="dark"] .info-badge {
-            background: rgba(162, 155, 254, 0.1);
-        }
-
-        .info-badge strong {
-            color: var(--accent-gold);
-            font-weight: 600;
-        }
-
-        /* Particle Controls */
-        .particle-control {
-            margin-bottom: 16px;
-        }
-
-        .particle-control:last-child {
-            margin-bottom: 0;
-        }
-
-        .particle-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
-        .particle-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3px currentColor;
-        }
-
-        .particle-dot.red {
-            background: #ef4444;
-            color: #ef4444;
-        }
-
-        .particle-dot.green {
-            background: #22c55e;
-            color: #22c55e;
-        }
-
-        .particle-header label {
-            font-size: 0.82rem;
-            font-weight: 500;
+        input[type="range"],
+        select {
+            width: 100%;
+            padding: 3px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid var(--select-border);
+            background: var(--select-bg);
             color: var(--text-main);
         }
 
-        .particle-amp {
-            margin-left: auto;
-            font-size: 0.76rem;
-            color: var(--text-secondary);
-        }
-
-        .particle-amp strong {
-            font-family: var(--font-mono);
-            color: var(--accent-gold);
-            font-weight: 600;
-        }
-
-        .slider-with-value {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .slider-with-value input[type="range"] {
-            flex: 1;
-        }
-
-        .slider-readout {
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            min-width: 32px;
-            text-align: right;
-        }
-
-        /* Range Inputs */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
-            width: 100%;
             height: 6px;
             border-radius: 5px;
             background: transparent;
             outline: none;
             border: none;
-            padding: 3px 0;
-            margin-top: 2px;
         }
 
         input[type="range"]::-webkit-slider-runnable-track {
@@ -521,27 +344,49 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
-        input[type="range"]:focus {
+        input[type="range"]:focus,
+        select:focus {
+            border-color: var(--brand-primary);
             outline: none;
         }
 
-        /* Hint Text */
-        .hint-text {
-            text-align: center;
-            font-size: 0.76rem;
-            color: var(--text-secondary);
-            margin-top: 14px;
-            opacity: 0.6;
+        select {
+            cursor: pointer;
+            font-size: 0.9rem;
         }
 
-        .hint-text kbd {
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 4px;
-            border: 1px solid var(--select-border);
-            background: var(--select-bg);
-            font-family: var(--font-mono);
-            font-size: 0.72rem;
+        .boundary-select {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .boundary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .boundary-item label {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        .info-block {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .info-block strong {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .info-block p {
+            margin: 4px 0;
         }
 
         /* Footer */
@@ -564,13 +409,13 @@
 
         /* Responsive */
         @media (max-width: 900px) {
-            .controls-panel {
-                grid-template-columns: 1fr;
+            .container {
+                flex-direction: column;
             }
 
-            .control-section + .control-section {
-                border-left: none;
-                border-top: 1px solid var(--card-border);
+            .right-container {
+                width: 100%;
+                min-width: unset;
             }
 
             header.banner {
@@ -589,6 +434,10 @@
         }
 
         @media (max-width: 600px) {
+            .particle-positions {
+                flex-direction: column;
+            }
+
             header.banner {
                 padding: 8px 12px;
             }
@@ -604,36 +453,14 @@
             .main-content {
                 padding: 12px;
             }
-
-            .controls-panel {
-                margin-top: 12px;
-            }
-
-            .control-section {
-                padding: 16px;
-            }
-
-            .play-pause-btn {
-                bottom: 20px;
-                right: 20px;
-            }
         }
 
         @media (pointer: coarse) {
-            button:not(.toggle-btn):not(.play-pause-btn),
+            button,
+            input:not([type="range"]),
+            select,
             .theme-toggle {
                 min-height: 44px;
-                touch-action: manipulation;
-            }
-
-            .toggle-btn {
-                min-height: 40px;
-                touch-action: manipulation;
-            }
-
-            .play-pause-btn {
-                width: 48px;
-                height: 48px;
                 touch-action: manipulation;
             }
 
@@ -680,92 +507,91 @@
     </header>
 
     <div class="main-content">
-        <div class="simulation-area">
-            <canvas id="oscillationCanvas"></canvas>
-            <button class="play-pause-btn" id="playPauseBtn" aria-label="Pause animation" title="Play / Pause (Space)">
-                <svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>
-            </button>
+        <p class="instructions">Press SPACE to pause or resume the animation</p>
+
+        <div class="container">
+            <div class="left-container">
+                <div class="simulation-area">
+                    <canvas id="oscillationCanvas"></canvas>
+                </div>
+                <div class="particle-positions">
+                    <div class="control-group">
+                        <label class="control-label" for="positionSlider"
+                            title="Adjust the position of the red particle along the string.">
+                            Red Particle Position: <span id="positionValue">0.50</span>
+                        </label>
+                        <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5"
+                            aria-label="Red Particle Position Slider">
+                        <p>Amplitude: <span id="redParticleAmplitude">0.00</span></p>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="greenPositionSlider"
+                            title="Adjust the position of the green particle along the string.">
+                            Green Particle Position: <span id="greenPositionValue">0.80</span>
+                        </label>
+                        <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8"
+                            aria-label="Green Particle Position Slider">
+                        <p>Amplitude: <span id="greenParticleAmplitude">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-container">
+                <div class="control-group">
+                    <label class="control-label">Boundary Conditions</label>
+                    <div class="boundary-select">
+                        <div class="boundary-item">
+                            <label for="leftBoundary">Left Boundary:</label>
+                            <select id="leftBoundary" aria-label="Left Boundary Condition">
+                                <option value="fixed">Fixed</option>
+                                <option value="free">Free</option>
+                            </select>
+                        </div>
+                        <div class="boundary-item">
+                            <label for="rightBoundary">Right Boundary:</label>
+                            <select id="rightBoundary" aria-label="Right Boundary Condition">
+                                <option value="fixed">Fixed</option>
+                                <option value="free">Free</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="modeSlider" title="Select the harmonic mode of the wave.">
+                        Mode / Harmonic: <span id="harmonicValue">Mode 1 (1st harmonic)</span>
+                    </label>
+                    <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Slider">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Nodes & Antinodes</label>
+                    <div class="info-block">
+                        <p>Nodes: <strong><span id="nodeCount">2</span></strong></p>
+                        <p>Antinodes: <strong><span id="antinodeCount">1</span></strong></p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="omegaSlider" title="Adjust the angular frequency of the wave.">
+                        Angular Frequency: <span id="omegaValue">6.28</span> rad/s
+                    </label>
+                    <label class="control-label">
+                        Frequency: <span id="frequencyValue">1.00</span> Hz
+                    </label>
+                    <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28"
+                        aria-label="Angular Frequency Slider">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="amplitudeSlider" title="Adjust the maximum displacement of the wave.">
+                        Amplitude: <span id="amplitudeValue">6.0</span>
+                    </label>
+                    <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0"
+                        aria-label="Amplitude Slider">
+                </div>
+            </div>
         </div>
-
-        <div class="controls-panel">
-            <!-- Boundaries -->
-            <div class="control-section">
-                <h3 class="section-title">Boundaries</h3>
-                <div class="boundary-group">
-                    <label>Left End</label>
-                    <div class="toggle-group" id="leftBoundaryToggle">
-                        <button class="toggle-btn active" data-value="fixed" type="button">Fixed</button>
-                        <button class="toggle-btn" data-value="free" type="button">Free</button>
-                    </div>
-                </div>
-                <div class="boundary-group">
-                    <label>Right End</label>
-                    <div class="toggle-group" id="rightBoundaryToggle">
-                        <button class="toggle-btn active" data-value="fixed" type="button">Fixed</button>
-                        <button class="toggle-btn" data-value="free" type="button">Free</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Wave Parameters -->
-            <div class="control-section">
-                <h3 class="section-title">Wave Parameters</h3>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="modeSlider">Harmonic</label>
-                        <span class="slider-value" id="harmonicValue">Mode 1 (1st harmonic)</span>
-                    </div>
-                    <input type="range" id="modeSlider" min="1" max="6" step="1" value="1" aria-label="Harmonic Mode">
-                    <div class="info-row">
-                        <span class="info-badge">Nodes: <strong id="nodeCount">2</strong></span>
-                        <span class="info-badge">Antinodes: <strong id="antinodeCount">1</strong></span>
-                    </div>
-                </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="amplitudeSlider">Amplitude</label>
-                        <span class="slider-value" id="amplitudeValue">6.0</span>
-                    </div>
-                    <input type="range" id="amplitudeSlider" min="1" max="10" step="0.1" value="6.0" aria-label="Amplitude">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="omegaSlider">Frequency</label>
-                        <span class="slider-value"><span id="frequencyValue">1.00</span> Hz <span class="omega-detail">(&#969; = <span id="omegaValue">6.28</span> rad/s)</span></span>
-                    </div>
-                    <input type="range" id="omegaSlider" min="0.1" max="12.57" step="0.1" value="6.28" aria-label="Angular Frequency">
-                </div>
-            </div>
-
-            <!-- Particle Trackers -->
-            <div class="control-section">
-                <h3 class="section-title">Particle Trackers</h3>
-                <div class="particle-control">
-                    <div class="particle-header">
-                        <span class="particle-dot red"></span>
-                        <label for="positionSlider">Red Particle</label>
-                        <span class="particle-amp">Amp: <strong id="redParticleAmplitude">0.00</strong></span>
-                    </div>
-                    <div class="slider-with-value">
-                        <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position">
-                        <span class="slider-readout" id="positionValue">0.50</span>
-                    </div>
-                </div>
-                <div class="particle-control">
-                    <div class="particle-header">
-                        <span class="particle-dot green"></span>
-                        <label for="greenPositionSlider">Green Particle</label>
-                        <span class="particle-amp">Amp: <strong id="greenParticleAmplitude">0.00</strong></span>
-                    </div>
-                    <div class="slider-with-value">
-                        <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position">
-                        <span class="slider-readout" id="greenPositionValue">0.80</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <p class="hint-text"><kbd>Space</kbd> to play / pause</p>
     </div>
 
     <footer>
@@ -856,9 +682,8 @@
         const amplitudeSlider = document.getElementById("amplitudeSlider");
         const modeSlider = document.getElementById("modeSlider");
         const omegaSlider = document.getElementById("omegaSlider");
-
-        const leftBoundaryToggle = document.getElementById("leftBoundaryToggle");
-        const rightBoundaryToggle = document.getElementById("rightBoundaryToggle");
+        const leftBoundarySelect = document.getElementById("leftBoundary");
+        const rightBoundarySelect = document.getElementById("rightBoundary");
 
         const amplitudeValueDisplay = document.getElementById("amplitudeValue");
         const harmonicValueDisplay = document.getElementById("harmonicValue");
@@ -867,17 +692,13 @@
         const nodeCountDisplay = document.getElementById("nodeCount");
         const antinodeCountDisplay = document.getElementById("antinodeCount");
 
-        const playPauseBtn = document.getElementById("playPauseBtn");
-        const pauseIconSVG = '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>';
-        const playIconSVG = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 2.5l9 5.5-9 5.5V2.5z"/></svg>';
-
         let A = parseFloat(amplitudeSlider.value);
         let modeIndex = parseInt(modeSlider.value);
         let xRed = parseFloat(positionSlider.value);
         let xGreen = parseFloat(greenPositionSlider.value);
         let omega = parseFloat(omegaSlider.value);
-        let leftBoundary = 'fixed';
-        let rightBoundary = 'fixed';
+        let leftBoundary = leftBoundarySelect.value;
+        let rightBoundary = rightBoundarySelect.value;
 
         amplitudeValueDisplay.textContent = A.toFixed(1);
         omegaValueDisplay.textContent = omega.toFixed(2);
@@ -978,7 +799,6 @@
             updateAmplitudes();
         }
 
-        // Slider event listeners
         amplitudeSlider.addEventListener("input", () => {
             A = parseFloat(amplitudeSlider.value);
             amplitudeValueDisplay.textContent = A.toFixed(1);
@@ -999,6 +819,18 @@
             frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
         });
 
+        leftBoundarySelect.addEventListener("change", () => {
+            leftBoundary = leftBoundarySelect.value;
+            updateAllowedHarmonics();
+            updateHarmonicSlider();
+        });
+
+        rightBoundarySelect.addEventListener("change", () => {
+            rightBoundary = rightBoundarySelect.value;
+            updateAllowedHarmonics();
+            updateHarmonicSlider();
+        });
+
         positionSlider.addEventListener("input", () => {
             xRed = parseFloat(positionSlider.value);
             positionValue.textContent = xRed.toFixed(2);
@@ -1011,53 +843,6 @@
             updateAmplitudes();
         });
 
-        // Boundary toggle handlers
-        function setupBoundaryToggle(container, callback) {
-            container.addEventListener('click', (e) => {
-                const btn = e.target.closest('.toggle-btn');
-                if (!btn || btn.classList.contains('active')) return;
-                container.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                callback(btn.dataset.value);
-            });
-        }
-
-        setupBoundaryToggle(leftBoundaryToggle, (value) => {
-            leftBoundary = value;
-            updateAllowedHarmonics();
-            updateHarmonicSlider();
-        });
-
-        setupBoundaryToggle(rightBoundaryToggle, (value) => {
-            rightBoundary = value;
-            updateAllowedHarmonics();
-            updateHarmonicSlider();
-        });
-
-        // Play/Pause
-        function syncPlayPauseButton() {
-            playPauseBtn.innerHTML = isPaused ? playIconSVG : pauseIconSVG;
-            playPauseBtn.setAttribute('aria-label', isPaused ? 'Resume animation' : 'Pause animation');
-        }
-
-        playPauseBtn.addEventListener('click', () => {
-            isPaused = !isPaused;
-            syncPlayPauseButton();
-        });
-
-        document.addEventListener("keydown", (event) => {
-            const targetTag = event.target?.tagName?.toLowerCase();
-            if (targetTag === "input" || targetTag === "select" || targetTag === "textarea" || targetTag === "button") {
-                return;
-            }
-            if (event.code === "Space" || event.key === " " || event.key === "Spacebar") {
-                event.preventDefault();
-                isPaused = !isPaused;
-                syncPlayPauseButton();
-            }
-        });
-
-        // Canvas
         let canvasWidth = 0;
         let canvasHeight = 0;
 
@@ -1168,6 +953,18 @@
             ctx.lineWidth = 1.5;
             ctx.stroke();
         }
+
+        // Pause/resume with SPACE
+        document.addEventListener("keydown", (event) => {
+            const targetTag = event.target?.tagName?.toLowerCase();
+            if (targetTag === "input" || targetTag === "select" || targetTag === "textarea") {
+                return;
+            }
+            if (event.code === "Space" || event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                isPaused = !isPaused;
+            }
+        });
 
         window.addEventListener("load", () => {
             resizeCanvas();
