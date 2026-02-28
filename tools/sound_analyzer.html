@@ -375,6 +375,55 @@
       accent-color: var(--brand-primary);
     }
 
+    #input-source {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    #input-source label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    #inputDeviceSelect {
+      flex: 0 1 320px;
+      min-width: 0;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23636e72' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 12px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #inputDeviceSelect:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+    }
+
+    #inputDeviceSelect:hover {
+      border-color: var(--brand-secondary);
+    }
+
     #controls {
       width: min(1100px, 100%);
       margin: 0 auto;
@@ -437,7 +486,8 @@
       button,
       input,
       select,
-      .control-row button {
+      .control-row button,
+      #inputDeviceSelect {
         min-height: 44px;
         touch-action: manipulation;
       }
@@ -508,6 +558,13 @@
           </div>
         </div>
       </section>
+
+      <div id="input-source">
+        <label for="inputDeviceSelect">Input:</label>
+        <select id="inputDeviceSelect">
+          <option value="">Default Microphone</option>
+        </select>
+      </div>
 
       <div id="controls">
         <button id="toggleBtn" class="toggle-button">Start</button>
@@ -657,6 +714,8 @@
 
   const yScaleSlider = document.getElementById('yScale');
   const xScaleSlider = document.getElementById('xScale');
+  const inputDeviceSelect = document.getElementById('inputDeviceSelect');
+  let selectedDeviceId = '';
 
   function getCssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -690,11 +749,57 @@
     waveCtx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
   }
 
+  // ------------------ Input Device Enumeration ------------------
+  async function enumerateAudioInputs() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices.filter(d => d.kind === 'audioinput');
+
+      const previousValue = inputDeviceSelect.value;
+      inputDeviceSelect.innerHTML = '';
+
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Default Microphone';
+      inputDeviceSelect.appendChild(defaultOption);
+
+      audioInputs.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.textContent = device.label || `Microphone ${index + 1}`;
+        inputDeviceSelect.appendChild(option);
+      });
+
+      // Restore previous selection if still available
+      if (previousValue && [...inputDeviceSelect.options].some(o => o.value === previousValue)) {
+        inputDeviceSelect.value = previousValue;
+      } else {
+        inputDeviceSelect.value = '';
+        selectedDeviceId = '';
+      }
+    } catch (err) {
+      console.warn('Could not enumerate audio devices:', err);
+    }
+  }
+
+  inputDeviceSelect.addEventListener('change', async () => {
+    selectedDeviceId = inputDeviceSelect.value;
+    // Force a fresh stream for the new device
+    teardownAudioSession();
+    microphoneStream = null;
+    if (isRunning) {
+      isRunning = false;
+      await startSpectrum();
+    }
+  });
+
   // ------------------ Main Entry ------------------
   window.addEventListener('load', async () => {
     setupCanvasResolution();
     requestAnimationFrame(drawLoop); // always running UI
     await resetAudioSession();
+    await enumerateAudioInputs();
     // Listen for audio device changes (e.g. hub connected/disconnected)
     if (navigator.mediaDevices) {
       navigator.mediaDevices.addEventListener('devicechange', onDeviceChange);
@@ -780,6 +885,7 @@
   // When audio devices change (hub connected/disconnected), invalidate any
   // stream whose tracks have ended so the next Start gets a fresh one.
   function onDeviceChange() {
+    enumerateAudioInputs();
     if (microphoneStream) {
       const tracks = microphoneStream.getAudioTracks();
       const allEnded = !tracks.length || tracks.every(t => t.readyState === 'ended');
@@ -857,6 +963,17 @@
     throw new Error('Unable to start audio context. Please tap Start again.');
   }
 
+  function applyDeviceId(constraints) {
+    if (!selectedDeviceId) return constraints;
+    const copy = JSON.parse(JSON.stringify(constraints));
+    if (typeof copy.audio === 'object') {
+      copy.audio.deviceId = { exact: selectedDeviceId };
+    } else {
+      copy.audio = { deviceId: { exact: selectedDeviceId } };
+    }
+    return copy;
+  }
+
   async function requestMicrophoneStream() {
     if (microphoneStream) {
       return microphoneStream;
@@ -871,7 +988,10 @@
     let lastError = null;
     for (const constraints of constraintsList) {
       try {
-        return await navigator.mediaDevices.getUserMedia(constraints);
+        const stream = await navigator.mediaDevices.getUserMedia(applyDeviceId(constraints));
+        // Re-enumerate to get labels now that we have permission
+        enumerateAudioInputs();
+        return stream;
       } catch (err) {
         lastError = err;
       }
