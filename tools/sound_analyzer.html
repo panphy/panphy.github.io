@@ -818,7 +818,7 @@
         <canvas id="waveform" width="800" height="200"></canvas>
         <div class="grid-legend">
           <span class="grid-legend-item"><span class="grid-legend-icon">&harr;</span> 1 div = <span id="gridTimeDiv">--</span></span>
-          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- dB/div</span></span>
+          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- /div</span></span>
         </div>
       </div>
     </section>
@@ -1012,7 +1012,12 @@
   const xScaleValue = document.getElementById('xScaleValue');
   const gridTimeDivEl = document.getElementById('gridTimeDiv');
   const gridAmpDivEl = document.getElementById('gridAmpDiv');
-  const MIN_AMP_FOR_DB = 1e-6;
+  function formatAmpPerDiv(amp) {
+    if (amp >= 0.1)  return amp.toFixed(2) + ' /div';
+    if (amp >= 0.01) return (amp * 1e3).toFixed(1) + ' m/div';
+    if (amp >= 1e-4) return (amp * 1e3).toFixed(2) + ' m/div';
+    return (amp * 1e6).toFixed(0) + ' \u00B5/div';
+  }
   const inputDeviceSelect = document.getElementById('inputDeviceSelect');
   const INPUT_DEVICE_KEY = 'sound-analyzer-input-device';
   let selectedDeviceId = localStorage.getItem(INPUT_DEVICE_KEY) || '';
@@ -1714,16 +1719,15 @@
       gridTimeDivEl.textContent = (timePerDivMs * 1000).toFixed(1) + ' \u00B5s';
     }
 
-    // Amplitude per division (normalized)
+    // Amplitude per division (linear, normalised to full-scale = 1)
     const gain = displayWaveGain || (waveAmplitudeScale * adaptiveWaveGain);
     const halfHeight = dispH / 2;
     if (gain > 0 && halfHeight > 0) {
       const ampPerDiv = SQUARE_GRID_SPACING / (halfHeight * gain);
-      const dbPerDiv = 20 * Math.log10(1 / Math.max(ampPerDiv, MIN_AMP_FOR_DB));
-      gridAmpDivEl.textContent = `${dbPerDiv.toFixed(dbPerDiv >= 100 ? 0 : 1)} dB/div`;
-      gridAmpDivEl.title = `1 div = ${ampPerDiv.toFixed(4)} a.u. (relative to full scale)`;
+      gridAmpDivEl.textContent = formatAmpPerDiv(ampPerDiv);
+      gridAmpDivEl.title = `1 div = ${ampPerDiv.toFixed(4)} (normalised, full scale = 1)`;
     } else {
-      gridAmpDivEl.textContent = '-- dB/div';
+      gridAmpDivEl.textContent = '-- /div';
       gridAmpDivEl.removeAttribute('title');
     }
   }
