@@ -813,7 +813,7 @@ function buildImageHtmlTag({ url, align, width }) {
 async function insertImageFromModal() {
   const imageData = await showImageModal();
   if (!imageData) return;
-  const imageTag = buildImageHtmlTag(imageData);
+  const imageTag = `${buildImageHtmlTag(imageData)}\n\n`;
   insertTextAtCursor(imageTag, { insertAtCursorOnBlankLine: true });
 }
 
@@ -1614,7 +1614,7 @@ if (insertPanel) {
     if (actionBtn.dataset.action === 'table') {
       insertMathTemplate('table');
     } else if (actionBtn.dataset.action === 'pagebreak') {
-      insertTextAtCursor('<div class="page-break"></div>\n', { insertAtCursorOnBlankLine: true });
+      insertTextAtCursor('<div class="page-break"></div>\n\n', { insertAtCursorOnBlankLine: true });
       closeInsertPanel();
     } else if (actionBtn.dataset.action === 'image') {
       closeInsertPanel();
