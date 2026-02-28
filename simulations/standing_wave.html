@@ -400,7 +400,74 @@
             font-weight: 600;
         }
 
+        /* Section Title Row (with toggle) */
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title-row .section-title {
+            margin-bottom: 0;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--slider-track);
+            border-radius: 20px;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            left: 2px;
+            bottom: 2px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--brand-primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(16px);
+        }
+
         /* Particle Controls */
+        .particle-controls-content {
+            transition: opacity 0.2s ease;
+        }
+
+        .particle-controls-content.hidden {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
         .particle-control {
             margin-bottom: 16px;
         }
@@ -739,27 +806,35 @@
 
             <!-- Particle Trackers -->
             <div class="control-section">
-                <h3 class="section-title">Particle Trackers</h3>
-                <div class="particle-control">
-                    <div class="particle-header">
-                        <span class="particle-dot red"></span>
-                        <label for="positionSlider">Red Particle</label>
-                        <span class="particle-amp">Amp: <strong id="redParticleAmplitude">0.00</strong></span>
-                    </div>
-                    <div class="slider-with-value">
-                        <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position">
-                        <span class="slider-readout" id="positionValue">0.50</span>
-                    </div>
+                <div class="section-title-row">
+                    <h3 class="section-title">Particle Trackers</h3>
+                    <label class="toggle-switch" title="Show / Hide Particles">
+                        <input type="checkbox" id="showParticlesToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
-                <div class="particle-control">
-                    <div class="particle-header">
-                        <span class="particle-dot green"></span>
-                        <label for="greenPositionSlider">Green Particle</label>
-                        <span class="particle-amp">Amp: <strong id="greenParticleAmplitude">0.00</strong></span>
+                <div class="particle-controls-content" id="particleControlsContent">
+                    <div class="particle-control">
+                        <div class="particle-header">
+                            <span class="particle-dot red"></span>
+                            <label for="positionSlider">Red Particle</label>
+                            <span class="particle-amp">Amp: <strong id="redParticleAmplitude">0.00</strong></span>
+                        </div>
+                        <div class="slider-with-value">
+                            <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position">
+                            <span class="slider-readout" id="positionValue">0.50</span>
+                        </div>
                     </div>
-                    <div class="slider-with-value">
-                        <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position">
-                        <span class="slider-readout" id="greenPositionValue">0.80</span>
+                    <div class="particle-control">
+                        <div class="particle-header">
+                            <span class="particle-dot green"></span>
+                            <label for="greenPositionSlider">Green Particle</label>
+                            <span class="particle-amp">Amp: <strong id="greenParticleAmplitude">0.00</strong></span>
+                        </div>
+                        <div class="slider-with-value">
+                            <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position">
+                            <span class="slider-readout" id="greenPositionValue">0.80</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -883,6 +958,15 @@
         omegaValueDisplay.textContent = omega.toFixed(2);
         frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
         harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
+
+        let showParticles = true;
+        const showParticlesToggle = document.getElementById('showParticlesToggle');
+        const particleControlsContent = document.getElementById('particleControlsContent');
+
+        showParticlesToggle.addEventListener('change', () => {
+            showParticles = showParticlesToggle.checked;
+            particleControlsContent.classList.toggle('hidden', !showParticles);
+        });
 
         let isPaused = false;
         let time = 0;
@@ -1143,15 +1227,16 @@
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
 
-                // Red particle
-                const redX = xRed * canvasWidth;
-                const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xRed) * amplitudeScale;
-                drawParticle(redX, redY, "#ef4444");
+                // Particles
+                if (showParticles) {
+                    const redX = xRed * canvasWidth;
+                    const redY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xRed) * amplitudeScale;
+                    drawParticle(redX, redY, "#ef4444");
 
-                // Green particle
-                const greenX = xGreen * canvasWidth;
-                const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xGreen) * amplitudeScale;
-                drawParticle(greenX, greenY, "#22c55e");
+                    const greenX = xGreen * canvasWidth;
+                    const greenY = canvasHeight / 2 - A * Math.cos(omega * time) * getCachedWaveValue(xGreen) * amplitudeScale;
+                    drawParticle(greenX, greenY, "#22c55e");
+                }
 
                 time += deltaTime;
             }
