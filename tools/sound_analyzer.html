@@ -603,8 +603,18 @@
       echoCancellation: false
     }
   };
+  const MICROPHONE_CONSTRAINTS_COMPAT = {
+    audio: {
+      autoGainControl: true,
+      noiseSuppression: true,
+      echoCancellation: true,
+      channelCount: { ideal: 1 }
+    }
+  };
   // Lenient fallback when strict constraints fail (e.g. iPad through a hub)
   const MICROPHONE_CONSTRAINTS_FALLBACK = { audio: true };
+  const AUDIO_CONTEXT_RESUME_ATTEMPTS = 3;
+  const AUDIO_CONTEXT_RESUME_RETRY_MS = 120;
 
   // Frequency data
   let dataArray;
@@ -791,6 +801,85 @@
     });
   }
 
+  function waitFor(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function createAudioContext() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    sampleRate = audioContext.sampleRate;
+    audioContext.addEventListener('statechange', onAudioStateChange);
+  }
+
+  async function ensureAudioContextRunning() {
+    if (audioContext) {
+      const state = audioContext.state;
+      if (state === 'closed' || state === 'interrupted') {
+        try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
+        audioContext = null;
+        analyzer = null;
+        source = null;
+        dataArray = null;
+        timeDomainData = null;
+      }
+    }
+
+    if (!audioContext) {
+      createAudioContext();
+    }
+
+    for (let attempt = 0; attempt < AUDIO_CONTEXT_RESUME_ATTEMPTS; attempt += 1) {
+      if (audioContext.state === 'running') return;
+
+      try {
+        await audioContext.resume();
+      } catch (err) {
+        if (attempt === AUDIO_CONTEXT_RESUME_ATTEMPTS - 1) {
+          throw err;
+        }
+      }
+
+      if (audioContext.state === 'running') return;
+
+      if (audioContext.state === 'interrupted') {
+        try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
+        audioContext = null;
+        analyzer = null;
+        source = null;
+        dataArray = null;
+        timeDomainData = null;
+        createAudioContext();
+      }
+
+      await waitFor(AUDIO_CONTEXT_RESUME_RETRY_MS);
+    }
+
+    throw new Error('Unable to start audio context. Please tap Start again.');
+  }
+
+  async function requestMicrophoneStream() {
+    if (microphoneStream) {
+      return microphoneStream;
+    }
+
+    const constraintsList = [
+      MICROPHONE_CONSTRAINTS,
+      MICROPHONE_CONSTRAINTS_COMPAT,
+      MICROPHONE_CONSTRAINTS_FALLBACK
+    ];
+
+    let lastError = null;
+    for (const constraints of constraintsList) {
+      try {
+        return await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    throw lastError || new Error('Unable to access microphone.');
+  }
+
   // ------------------ Microphone + Analyzer Setup ------------------
   async function startSpectrum() {
     if (isRunning || isStarting) return;
@@ -799,33 +888,9 @@
     toggleBtn.textContent = 'Starting…';
 
     try {
-      // If the AudioContext is in a non-recoverable state (iOS 'interrupted'
-      // from hub/hardware change, or 'closed'), discard it so we get a fresh one.
-      if (audioContext) {
-        const state = audioContext.state;
-        if (state === 'closed' || state === 'interrupted') {
-          try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
-          audioContext = null;
-          analyzer = null;
-          source = null;
-          dataArray = null;
-          timeDomainData = null;
-        }
-      }
-
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        sampleRate = audioContext.sampleRate;
-        audioContext.addEventListener('statechange', onAudioStateChange);
-      }
-
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('This browser does not support microphone access.');
       }
-
-      // Resume audio context — must be initiated from user gesture on iOS
-      const resumePromise =
-        (audioContext.state !== 'running') ? audioContext.resume() : Promise.resolve();
 
       // Discard the existing stream if its tracks have ended (hub disconnect, etc.)
       if (microphoneStream) {
@@ -835,21 +900,13 @@
         }
       }
 
-      // Try preferred (raw) constraints first, then fall back to basic {audio:true}
-      // which is more forgiving with external hardware like hubs and adapters.
-      let streamPromise;
-      if (microphoneStream) {
-        streamPromise = Promise.resolve(microphoneStream);
-      } else {
-        streamPromise = navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS)
-          .catch(() => navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS_FALLBACK));
-      }
-
-      const [, stream] = await Promise.all([resumePromise, streamPromise]);
+      const stream = await requestMicrophoneStream();
       microphoneStream = stream;
 
       // Watch for the track ending (e.g. device unplugged while running)
       setupTrackEndedListeners(stream);
+
+      await ensureAudioContextRunning();
 
       if (!analyzer) {
         analyzer = audioContext.createAnalyser();
@@ -867,8 +924,8 @@
       source.connect(analyzer);
 
       // Belt-and-suspenders: ensure context is actually running after all async work
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
+      if (audioContext.state !== 'running') {
+        await ensureAudioContextRunning();
       }
 
       isRunning = true;
