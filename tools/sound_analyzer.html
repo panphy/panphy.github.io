@@ -1013,10 +1013,10 @@
   const gridTimeDivEl = document.getElementById('gridTimeDiv');
   const gridAmpDivEl = document.getElementById('gridAmpDiv');
   function formatAmpPerDiv(amp) {
-    if (amp >= 0.1)  return amp.toFixed(2) + ' /div';
-    if (amp >= 0.01) return (amp * 1e3).toFixed(1) + ' m/div';
-    if (amp >= 1e-4) return (amp * 1e3).toFixed(2) + ' m/div';
-    return (amp * 1e6).toFixed(0) + ' \u00B5/div';
+    const pct = amp * 100;
+    if (pct >= 1) return pct.toFixed(1) + '% FS/div';
+    if (pct >= 0.1) return pct.toFixed(2) + '% FS/div';
+    return pct.toFixed(3) + '% FS/div';
   }
   const inputDeviceSelect = document.getElementById('inputDeviceSelect');
   const INPUT_DEVICE_KEY = 'sound-analyzer-input-device';
