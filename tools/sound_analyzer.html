@@ -221,45 +221,47 @@
 
     /* Info Bar */
     .info-bar {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
     }
 
     .info-card {
+      width: 240px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 12px 16px;
-      box-shadow: var(--card-shadow);
-      font-weight: 600;
-      color: var(--text-main);
+      border-radius: 999px;
+      padding: 6px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      overflow: hidden;
     }
 
     .info-card span {
-      display: inline-flex;
       font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .info-card strong {
-      display: inline-block;
-      min-width: 16ch;
-      width: 16ch;
-      flex: 0 0 16ch;
-      text-align: right;
       font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--brand-primary);
     }
 
     /* Card Panels */
@@ -1169,7 +1171,14 @@
   waveCanvas.addEventListener('touchend', onWaveformTouchEnd);
   waveCanvas.addEventListener('touchcancel', onWaveformTouchEnd);
 
+  const SPECTRUM_OPEN_KEY = 'sound-analyzer-spectrum-open';
+  const savedSpectrumState = localStorage.getItem(SPECTRUM_OPEN_KEY);
+  if (savedSpectrumState === 'false') {
+    spectrumPanel.removeAttribute('open');
+  }
+
   spectrumPanel.addEventListener('toggle', () => {
+    localStorage.setItem(SPECTRUM_OPEN_KEY, spectrumPanel.open);
     requestAnimationFrame(setupCanvasResolution);
   });
 
