@@ -802,8 +802,10 @@
     if (navigator.mediaDevices) {
       navigator.mediaDevices.addEventListener('devicechange', onDeviceChange);
     }
-    // Important: do NOT auto-start audio on load.
-    // User must tap Start (reliable on refresh, especially on iOS/Safari).
+
+    // Attempt to reduce startup friction by requesting mic access on load.
+    // Some browsers still require a user gesture; failures are silent here.
+    await startSpectrum({ showErrorAlert: false });
   });
 
   window.addEventListener('resize', setupCanvasResolution);
@@ -830,12 +832,16 @@
   exportSpectrumBtn.addEventListener('click', exportSpectrumAsCSV);
   exportWaveformBtn.addEventListener('click', exportWaveformAsCSV);
 
-  window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-      e.preventDefault();
-      toggleRunPause(); // Space counts as a user gesture
-    }
-  });
+  function handleGlobalSpaceShortcut(event) {
+    if (event.code !== 'Space' || event.repeat) return;
+
+    // Use capture so focused controls (like the input device <select>)
+    // do not use Space for their own behavior.
+    event.preventDefault();
+    toggleRunPause(); // Space counts as a user gesture
+  }
+
+  window.addEventListener('keydown', handleGlobalSpaceShortcut, true);
 
   freqCanvas.addEventListener('mousemove', onCanvasHover);
   freqCanvas.addEventListener('touchstart', onCanvasTouch, { passive: false });
@@ -957,8 +963,9 @@
   }
 
   // ------------------ Microphone + Analyzer Setup ------------------
-  async function startSpectrum() {
+  async function startSpectrum(options = {}) {
     if (isRunning || isStarting) return;
+    const { showErrorAlert = true } = options;
     isStarting = true;
     toggleBtn.disabled = true;
     toggleBtn.textContent = 'Starting…';
@@ -1005,7 +1012,9 @@
       exportWaveformBtn.disabled = true;
     } catch (err) {
       console.warn('Start failed:', err);
-      alert('Unable to start microphone/audio. Please tap Start again.\n\n' + (err?.message || err));
+      if (showErrorAlert) {
+        alert('Unable to start microphone/audio. Please tap Start again.\n\n' + (err?.message || err));
+      }
       await resetAudioSession();
     } finally {
       isStarting = false;
