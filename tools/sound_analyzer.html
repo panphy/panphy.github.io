@@ -818,7 +818,7 @@
         <canvas id="waveform" width="800" height="200"></canvas>
         <div class="grid-legend">
           <span class="grid-legend-item"><span class="grid-legend-icon">&harr;</span> 1 div = <span id="gridTimeDiv">--</span></span>
-          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- a.u.</span></span>
+          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- dB/div</span></span>
         </div>
       </div>
     </section>
@@ -1012,6 +1012,7 @@
   const xScaleValue = document.getElementById('xScaleValue');
   const gridTimeDivEl = document.getElementById('gridTimeDiv');
   const gridAmpDivEl = document.getElementById('gridAmpDiv');
+  const MIN_AMP_FOR_DB = 1e-6;
   const inputDeviceSelect = document.getElementById('inputDeviceSelect');
   const INPUT_DEVICE_KEY = 'sound-analyzer-input-device';
   let selectedDeviceId = localStorage.getItem(INPUT_DEVICE_KEY) || '';
@@ -1718,13 +1719,12 @@
     const halfHeight = dispH / 2;
     if (gain > 0 && halfHeight > 0) {
       const ampPerDiv = SQUARE_GRID_SPACING / (halfHeight * gain);
-      if (ampPerDiv >= 0.01) {
-        gridAmpDivEl.textContent = ampPerDiv.toFixed(3) + ' a.u.';
-      } else {
-        gridAmpDivEl.textContent = ampPerDiv.toExponential(1) + ' a.u.';
-      }
+      const dbPerDiv = 20 * Math.log10(1 / Math.max(ampPerDiv, MIN_AMP_FOR_DB));
+      gridAmpDivEl.textContent = `${dbPerDiv.toFixed(dbPerDiv >= 100 ? 0 : 1)} dB/div`;
+      gridAmpDivEl.title = `1 div = ${ampPerDiv.toFixed(4)} a.u. (relative to full scale)`;
     } else {
-      gridAmpDivEl.textContent = '-- a.u.';
+      gridAmpDivEl.textContent = '-- dB/div';
+      gridAmpDivEl.removeAttribute('title');
     }
   }
 
