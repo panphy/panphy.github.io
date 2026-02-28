@@ -809,11 +809,11 @@
                 <div class="section-title-row">
                     <h3 class="section-title">Particle Trackers</h3>
                     <label class="toggle-switch" title="Show / Hide Particles">
-                        <input type="checkbox" id="showParticlesToggle" checked>
+                        <input type="checkbox" id="showParticlesToggle">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <div class="particle-controls-content" id="particleControlsContent">
+                <div class="particle-controls-content hidden" id="particleControlsContent">
                     <div class="particle-control">
                         <div class="particle-header">
                             <span class="particle-dot red"></span>
@@ -959,9 +959,9 @@
         frequencyValueDisplay.textContent = (omega / (2 * Math.PI)).toFixed(2);
         harmonicValueDisplay.textContent = getModeHarmonicLabel(modeIndex);
 
-        let showParticles = true;
         const showParticlesToggle = document.getElementById('showParticlesToggle');
         const particleControlsContent = document.getElementById('particleControlsContent');
+        let showParticles = showParticlesToggle.checked;
 
         showParticlesToggle.addEventListener('change', () => {
             showParticles = showParticlesToggle.checked;
