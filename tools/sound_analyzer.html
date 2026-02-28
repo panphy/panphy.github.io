@@ -603,6 +603,8 @@
       echoCancellation: false
     }
   };
+  // Lenient fallback when strict constraints fail (e.g. iPad through a hub)
+  const MICROPHONE_CONSTRAINTS_FALLBACK = { audio: true };
 
   // Frequency data
   let dataArray;
@@ -683,6 +685,10 @@
     setupCanvasResolution();
     requestAnimationFrame(drawLoop); // always running UI
     await resetAudioSession();
+    // Listen for audio device changes (e.g. hub connected/disconnected)
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.addEventListener('devicechange', onDeviceChange);
+    }
     // Important: do NOT auto-start audio on load.
     // User must tap Start (reliable on refresh, especially on iOS/Safari).
   });
@@ -749,6 +755,42 @@
   });
   resetZoomBtn.addEventListener('click', resetFrequencyZoom);
 
+  // ------------------ iOS / Hardware-Change Recovery Helpers ------------------
+
+  // AudioContext.statechange — iOS uses an 'interrupted' state when the audio
+  // session is taken by another app or when hardware routing changes (hub, AirPlay, etc.).
+  function onAudioStateChange() {
+    if (!audioContext) return;
+    if (audioContext.state === 'interrupted' && isRunning) {
+      // Hardware change interrupted the session — gracefully pause
+      pauseSpectrum();
+    }
+  }
+
+  // When audio devices change (hub connected/disconnected), invalidate any
+  // stream whose tracks have ended so the next Start gets a fresh one.
+  function onDeviceChange() {
+    if (microphoneStream) {
+      const tracks = microphoneStream.getAudioTracks();
+      const allEnded = !tracks.length || tracks.every(t => t.readyState === 'ended');
+      if (allEnded) {
+        microphoneStream = null;
+        if (source) { try { source.disconnect(); } catch {} source = null; }
+      }
+    }
+  }
+
+  // Watch for tracks ending (e.g. mic unplugged, hub disconnected while running).
+  function setupTrackEndedListeners(stream) {
+    stream.getAudioTracks().forEach(track => {
+      track.addEventListener('ended', () => {
+        if (microphoneStream === stream) microphoneStream = null;
+        if (source) { try { source.disconnect(); } catch {} source = null; }
+        if (isRunning) pauseSpectrum();
+      });
+    });
+  }
+
   // ------------------ Microphone + Analyzer Setup ------------------
   async function startSpectrum() {
     if (isRunning || isStarting) return;
@@ -757,25 +799,57 @@
     toggleBtn.textContent = 'Starting…';
 
     try {
+      // If the AudioContext is in a non-recoverable state (iOS 'interrupted'
+      // from hub/hardware change, or 'closed'), discard it so we get a fresh one.
+      if (audioContext) {
+        const state = audioContext.state;
+        if (state === 'closed' || state === 'interrupted') {
+          try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
+          audioContext = null;
+          analyzer = null;
+          source = null;
+          dataArray = null;
+          timeDomainData = null;
+        }
+      }
+
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         sampleRate = audioContext.sampleRate;
+        audioContext.addEventListener('statechange', onAudioStateChange);
       }
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('This browser does not support microphone access.');
       }
 
-      // Kick off permission-sensitive work immediately from this user gesture
+      // Resume audio context — must be initiated from user gesture on iOS
       const resumePromise =
         (audioContext.state !== 'running') ? audioContext.resume() : Promise.resolve();
 
-      const streamPromise =
-        microphoneStream ? Promise.resolve(microphoneStream)
-          : navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS);
+      // Discard the existing stream if its tracks have ended (hub disconnect, etc.)
+      if (microphoneStream) {
+        const tracks = microphoneStream.getAudioTracks();
+        if (!tracks.length || tracks.some(t => t.readyState === 'ended')) {
+          microphoneStream = null;
+        }
+      }
+
+      // Try preferred (raw) constraints first, then fall back to basic {audio:true}
+      // which is more forgiving with external hardware like hubs and adapters.
+      let streamPromise;
+      if (microphoneStream) {
+        streamPromise = Promise.resolve(microphoneStream);
+      } else {
+        streamPromise = navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS)
+          .catch(() => navigator.mediaDevices.getUserMedia(MICROPHONE_CONSTRAINTS_FALLBACK));
+      }
 
       const [, stream] = await Promise.all([resumePromise, streamPromise]);
       microphoneStream = stream;
+
+      // Watch for the track ending (e.g. device unplugged while running)
+      setupTrackEndedListeners(stream);
 
       if (!analyzer) {
         analyzer = audioContext.createAnalyser();
@@ -791,6 +865,11 @@
 
       source = audioContext.createMediaStreamSource(microphoneStream);
       source.connect(analyzer);
+
+      // Belt-and-suspenders: ensure context is actually running after all async work
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
 
       isRunning = true;
       toggleBtn.textContent = 'Pause';
@@ -810,11 +889,14 @@
   async function resetAudioSession() {
     teardownAudioSession();
 
-    if (audioContext && audioContext.state !== 'closed') {
-      try {
-        await audioContext.close();
-      } catch (err) {
-        console.warn('Unable to close audio context cleanly:', err);
+    if (audioContext) {
+      try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
+      if (audioContext.state !== 'closed') {
+        try {
+          await audioContext.close();
+        } catch (err) {
+          console.warn('Unable to close audio context cleanly:', err);
+        }
       }
     }
 
