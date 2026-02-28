@@ -818,7 +818,7 @@
         <canvas id="waveform" width="800" height="200"></canvas>
         <div class="grid-legend">
           <span class="grid-legend-item"><span class="grid-legend-icon">&harr;</span> 1 div = <span id="gridTimeDiv">--</span></span>
-          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">--</span></span>
+          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- a.u.</span></span>
         </div>
       </div>
     </section>
@@ -1719,12 +1719,12 @@
     if (gain > 0 && halfHeight > 0) {
       const ampPerDiv = SQUARE_GRID_SPACING / (halfHeight * gain);
       if (ampPerDiv >= 0.01) {
-        gridAmpDivEl.textContent = ampPerDiv.toFixed(3);
+        gridAmpDivEl.textContent = ampPerDiv.toFixed(3) + ' a.u.';
       } else {
-        gridAmpDivEl.textContent = ampPerDiv.toExponential(1);
+        gridAmpDivEl.textContent = ampPerDiv.toExponential(1) + ' a.u.';
       }
     } else {
-      gridAmpDivEl.textContent = '--';
+      gridAmpDivEl.textContent = '-- a.u.';
     }
   }
 
