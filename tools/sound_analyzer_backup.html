@@ -18,7 +18,7 @@
       }
     })();
     </script>
-  <title>Sound Analyzer</title>
+  <title>Audio Spectrum & Waveform Analyzer</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <style>
@@ -28,43 +28,32 @@
       --font-sans: 'Inter', sans-serif;
       --font-display: 'Poppins', 'Inter', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-
-      /* Light Theme */
       --bg-color: #f8f9fa;
       --bg-pattern: #e9ecef;
       --text-main: #2d3436;
       --text-secondary: #636e72;
-
       --brand-primary: #6c5ce7;
       --brand-secondary: #a29bfe;
       --brand-accent: #00cec9;
-
-      --card-bg: #ffffff;
-      --card-border: #e9ecef;
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-
-      --canvas-bg: #ffffff;
-      --canvas-baseline: #cbd5e1;
-
-      --slider-track: #e2e8f0;
-      --slider-thumb: #6c5ce7;
-
-      --select-bg: #ffffff;
-      --select-border: #e2e8f0;
-
-      --header-bg: rgba(255, 255, 255, 0.9);
-      --header-border: rgba(108, 92, 231, 0.1);
-
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5b4cdb;
+      --btn-secondary: #00cec9;
+      --btn-secondary-hover: #00b3ad;
+      --btn-text: #ffffff;
       --nav-bg: rgba(255, 255, 255, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.5);
-
-      /* Sound analyzer specific */
+      --nav-border: rgba(255, 255, 255, 0.6);
+      --canvas-bg: #ffffff;
       --axis-color: #2d3436;
       --grid-color: #94a3b8;
       --wave-line: #16a34a;
       --marker-color: #f97316;
       --tooltip-bg: rgba(255, 255, 255, 0.95);
       --tooltip-text: #1f2933;
+      --toggle-hover: rgba(108, 92, 231, 0.15);
     }
 
     [data-theme="dark"] {
@@ -72,60 +61,44 @@
       --bg-pattern: #181a20;
       --text-main: #dfe6e9;
       --text-secondary: #b2bec3;
-
       --brand-primary: #a29bfe;
       --brand-secondary: #6c5ce7;
       --brand-accent: #81ecec;
-
-      --card-bg: #1e2129;
-      --card-border: #2d3436;
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-
-      --canvas-bg: #1e1e1e;
-      --canvas-baseline: #4a5568;
-
-      --slider-track: #4a5568;
-      --slider-thumb: #a29bfe;
-
-      --select-bg: #2d3436;
-      --select-border: #4a5568;
-
-      --header-bg: rgba(30, 33, 41, 0.95);
-      --header-border: rgba(162, 155, 254, 0.1);
-
+      --surface: #1e2129;
+      --surface-alt: #17191f;
+      --border: #2d3436;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5849d6;
+      --btn-secondary: #00cec9;
+      --btn-secondary-hover: #00b3ad;
+      --btn-text: #ffffff;
       --nav-bg: rgba(22, 24, 29, 0.85);
       --nav-border: rgba(255, 255, 255, 0.08);
-
-      /* Sound analyzer specific */
+      --canvas-bg: #1e1e1e;
       --axis-color: #ffffff;
       --grid-color: #ffffff;
       --wave-line: #98c616;
       --marker-color: #ff5f1f;
       --tooltip-bg: rgba(15, 16, 20, 0.9);
       --tooltip-text: #ffffff;
+      --toggle-hover: rgba(162, 155, 254, 0.2);
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    html,
+    body {
       margin: 0;
       padding: 0;
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    }
-
-    .offline-font {
-      --font-sans: 'Inter', 'Poppins', sans-serif;
-      --font-display: 'Poppins', 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
-
-    body {
-      font-family: var(--font-sans);
+      min-height: 100%;
       background-color: var(--bg-color);
       background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-      background-size: 30px 30px;
+      background-size: 32px 32px;
       color: var(--text-main);
-      min-height: 100vh;
-      padding: 0;
+      font-family: var(--font-sans);
     }
 
     a {
@@ -137,43 +110,45 @@
       text-decoration: underline;
     }
 
-    /* Compact Header */
-    header.banner {
+    .page {
+      min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 8px 20px;
-      margin: 16px auto 0;
-      width: calc(100% - 40px);
-      max-width: 1160px;
-      background: var(--nav-bg);
-      border: 1px solid var(--nav-border);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      flex-direction: column;
     }
 
-    .banner-logo {
-      display: flex;
+    header {
+      padding: 0.4rem 1.25rem;
+    }
+
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 10px;
+      gap: 1rem;
+      max-width: 1100px;
+      width: min(1100px, calc(100% - 3rem));
+      margin: 0 auto;
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
+      border-radius: 18px;
+      padding: 0.4rem 1.1rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
     .banner-logo img {
-      height: 36px;
+      max-height: 28px;
       width: auto;
-      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      height: auto;
     }
 
     .banner-title {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 800;
       text-align: center;
-      flex: 1;
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
       letter-spacing: -0.5px;
+      font-family: var(--font-display);
       color: var(--brand-primary);
     }
 
@@ -184,18 +159,17 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .banner-actions {
+    .theme-toggle {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      justify-content: flex-end;
     }
 
     .theme-toggle button {
       background: transparent;
       border: none;
       cursor: pointer;
-      font-size: 1.2rem;
-      padding: 0.5rem;
+      font-size: 1.15rem;
+      padding: 0.45rem;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
@@ -208,44 +182,46 @@
     }
 
     .theme-toggle button:hover {
-      background-color: rgba(108, 92, 231, 0.15);
+      background-color: var(--toggle-hover);
       transform: rotate(15deg);
     }
 
-    /* Main Content */
-    .main-content {
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
+    main {
+      flex: 1;
+      padding: 0 1.5rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
     }
 
-    /* Info Bar */
     .info-bar {
+      max-width: 1200px;
+      margin: 1.2rem auto;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 1rem;
     }
 
     .info-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 12px 16px;
-      box-shadow: var(--card-shadow);
+      padding: 0.6rem 1rem;
+      box-shadow: var(--shadow);
       font-weight: 600;
       color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.6rem;
     }
 
     .info-card span {
       display: inline-flex;
-      font-size: 0.7rem;
-      font-weight: 600;
+      font-size: 0.8rem;
+      font-weight: 500;
       color: var(--text-secondary);
+      margin-bottom: 0;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       white-space: nowrap;
@@ -262,79 +238,69 @@
       white-space: nowrap;
     }
 
-    /* Card Panels */
-    .simulation-area {
-      position: relative;
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--card-border);
+    .panel,
+    details.panel {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
       overflow: hidden;
-      margin-bottom: 16px;
     }
 
     .panel-header {
-      padding: 12px 16px;
-      font-size: 0.7rem;
+      padding: 0.75rem 1rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border);
     }
 
-    .panel-body {
-      padding: 16px;
-      position: relative;
-    }
-
-    /* Collapsible Spectrum Panel */
-    details.simulation-area summary {
+    details.panel summary {
       list-style: none;
       cursor: pointer;
-      padding: 12px 16px;
-      font-size: 0.7rem;
+      padding: 0.75rem 1rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 0.5rem;
     }
 
-    details.simulation-area summary::-webkit-details-marker {
+    details.panel summary::-webkit-details-marker {
       display: none;
     }
 
-    details.simulation-area summary::after {
-      content: "\25BE";
+    details.panel summary::after {
+      content: "▾";
       font-size: 1rem;
       color: var(--text-secondary);
       transition: transform 0.2s ease;
     }
 
-    details.simulation-area[open] summary::after {
+    details.panel[open] summary::after {
       transform: rotate(180deg);
     }
 
-    details.simulation-area[open] summary {
-      border-bottom: 1px solid var(--card-border);
+    details.panel[open] summary {
+      border-bottom: 1px solid var(--border);
     }
 
-    details.simulation-area:not([open]) summary {
+    details.panel:not([open]) summary {
       border-bottom: none;
     }
 
-    /* Canvas Styling */
+    .panel-body {
+      padding: 1rem;
+      position: relative;
+    }
+
     canvas {
       display: block;
       width: 100%;
-      height: auto;
-      border: none;
+      height: clamp(180px, 24vh, 240px);
       border-radius: 12px;
-      background: var(--canvas-bg);
+      background-color: var(--canvas-bg);
+      border: 1px solid var(--border);
     }
 
     #visualizer {
@@ -347,20 +313,16 @@
 
     .spectrum-reset {
       position: absolute;
-      top: 8px;
-      right: 12px;
-      padding: 6px 14px;
-      font-size: 0.72rem;
-      font-weight: 500;
-      font-family: var(--font-sans);
+      top: 0.6rem;
+      right: 0.8rem;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.75rem;
       border-radius: 999px;
-      border: 1px solid var(--card-border);
-      background: var(--card-bg);
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
       color: var(--text-secondary);
-      cursor: pointer;
       box-shadow: none;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 2;
     }
 
     .spectrum-reset.is-hidden {
@@ -370,8 +332,6 @@
 
     .spectrum-reset:hover {
       transform: translateY(-1px);
-      border-color: var(--brand-primary);
-      color: var(--brand-primary);
     }
 
     #waveform {
@@ -386,90 +346,67 @@
       color: var(--tooltip-text);
       padding: 6px 10px;
       border-radius: 8px;
-      border: 1px solid var(--card-border);
+      border: 1px solid var(--border);
       pointer-events: none;
       font-size: 0.8rem;
-      font-family: var(--font-mono);
-      box-shadow: var(--card-shadow);
     }
 
-    /* Controls Panel */
-    .controls-panel {
+    #sliders {
+      margin-top: 1rem;
       display: grid;
-      grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr);
-      margin-top: 16px;
-      background: var(--card-bg);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
       border-radius: 16px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--card-border);
-      overflow: hidden;
+      padding: 0.85rem 1.1rem;
     }
 
-    .control-section {
-      padding: 20px;
-    }
-
-    .control-section + .control-section {
-      border-left: 1px solid var(--card-border);
-    }
-
-    .section-title {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    #sliders label {
+      display: block;
+      margin-bottom: 0.35rem;
       color: var(--text-secondary);
-      margin-bottom: 16px;
+      font-size: 0.9rem;
     }
 
-    /* Slider Controls */
-    .slider-control {
-      margin-bottom: 16px;
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+      accent-color: var(--brand-primary);
     }
 
-    .slider-control:last-child {
-      margin-bottom: 0;
-    }
-
-    .slider-header {
+    #input-source {
+      width: min(1100px, 100%);
+      margin: 0 auto;
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 6px;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
 
-    .slider-header label {
-      font-size: 0.82rem;
+    #input-source label {
+      font-size: 0.85rem;
       font-weight: 500;
-      color: var(--text-main);
+      color: var(--text-secondary);
       white-space: nowrap;
     }
 
-    .slider-value {
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--brand-primary);
-      text-align: right;
-    }
-
-    /* Select Input */
-    .device-select {
-      width: 100%;
-      padding: 8px 32px 8px 12px;
-      font-size: 0.82rem;
+    #inputDeviceSelect {
+      flex: 0 1 320px;
+      min-width: 0;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.85rem;
       font-family: var(--font-sans);
       color: var(--text-main);
-      background-color: var(--select-bg);
-      border: 1px solid var(--select-border);
-      border-radius: 10px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
       cursor: pointer;
       appearance: none;
       -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23636e72' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
+      background-position: right 0.75rem center;
       background-size: 12px;
       text-overflow: ellipsis;
       overflow: hidden;
@@ -477,256 +414,86 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .device-select:focus {
+    #inputDeviceSelect:focus {
       outline: none;
       border-color: var(--brand-primary);
       box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
     }
 
-    .device-select:hover {
+    #inputDeviceSelect:hover {
       border-color: var(--brand-secondary);
     }
 
-    /* Buttons */
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
+    #controls {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
       justify-content: center;
-      gap: 6px;
-      padding: 10px 24px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      font-family: var(--font-sans);
+    }
+
+    button {
+      margin: 0;
+      padding: 0.6rem 1.4rem;
+      font-size: 1rem;
       cursor: pointer;
       border: none;
       border-radius: 999px;
-      color: #ffffff;
-      background: var(--brand-primary);
+      color: var(--btn-text);
+      font-weight: 600;
       letter-spacing: 0.2px;
-      transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      width: 100%;
-      min-height: 42px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
     }
 
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-primary:disabled {
+    button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
       box-shadow: none;
     }
 
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 16px;
-      font-size: 0.78rem;
-      font-weight: 500;
-      font-family: var(--font-sans);
-      cursor: pointer;
-      border: 1px solid var(--card-border);
-      border-radius: 999px;
-      color: var(--text-main);
-      background: var(--card-bg);
-      letter-spacing: 0.2px;
-      transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: none;
-      width: 100%;
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
     }
 
-    .btn-secondary:hover:not(:disabled) {
-      border-color: var(--brand-accent);
-      color: var(--brand-accent);
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* Range Inputs */
-    input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 5px;
-      background: transparent;
-      outline: none;
-      border: none;
-      padding: 3px 0;
-      margin-top: 2px;
-    }
-
-    input[type="range"]::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 6px;
-      border-radius: 5px;
-      background: var(--slider-track);
-    }
-
-    input[type="range"]::-moz-range-track {
-      width: 100%;
-      height: 6px;
-      border-radius: 5px;
-      background: var(--slider-track);
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--slider-thumb);
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      margin-top: -6px;
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--slider-thumb);
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    input[type="range"]:focus {
-      outline: none;
-    }
-
-    /* Hint Text */
-    .hint-text {
+    .toggle-button {
+      background: var(--btn-primary);
+      min-width: 140px;
       text-align: center;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      margin-top: 14px;
-      opacity: 0.6;
     }
 
-    .hint-text kbd {
-      display: inline-block;
-      padding: 1px 6px;
-      border-radius: 4px;
-      border: 1px solid var(--select-border);
-      background: var(--select-bg);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
+    .toggle-button:hover {
+      background: var(--btn-primary-hover);
     }
 
-    /* Footer */
+    .export-button {
+      background: linear-gradient(135deg, var(--btn-secondary), #0fb9b1);
+    }
+
+    .export-button:hover {
+      background: linear-gradient(135deg, var(--btn-secondary-hover), #0ba39d);
+    }
+
     footer {
       text-align: center;
-      padding: 20px;
+      padding: 1rem 1rem 1.4rem;
       color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: var(--brand-primary);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .controls-panel {
-        grid-template-columns: 1fr;
-      }
-
-      .control-section + .control-section {
-        border-left: none;
-        border-top: 1px solid var(--card-border);
-      }
-
-      header.banner {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .banner-actions {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .banner-title {
-        font-size: 1.2rem;
-      }
-    }
-
-    @media (max-width: 600px) {
-      header.banner {
-        padding: 8px 12px;
-      }
-
-      .banner-logo img {
-        height: 28px;
-      }
-
-      .banner-title {
-        font-size: 1rem;
-      }
-
-      .main-content {
-        padding: 12px;
-      }
-
-      .controls-panel {
-        margin-top: 12px;
-      }
-
-      .control-section {
-        padding: 16px;
-      }
+      font-size: 0.95rem;
     }
 
     @media (pointer: coarse) {
       button,
+      input,
       select,
-      .theme-toggle {
+      .control-row button,
+      #inputDeviceSelect {
         min-height: 44px;
         touch-action: manipulation;
       }
 
       input[type="range"] {
-        padding: 19px 0;
-        touch-action: manipulation;
-      }
-
-      input[type="range"]::-webkit-slider-runnable-track {
-        height: 6px;
-      }
-
-      input[type="range"]::-webkit-slider-thumb {
-        width: 28px;
-        height: 28px;
-        margin-top: -11px;
-      }
-
-      input[type="range"]::-moz-range-thumb {
-        width: 28px;
-        height: 28px;
+        min-height: 44px;
       }
 
       canvas {
@@ -737,104 +504,80 @@
 </head>
 
 <body>
-  <header class="banner">
-    <div class="banner-logo">
-      <a href="https://panphy.github.io/">
-        <img src="/assets/panphy.png" alt="PanPhy logo" />
-      </a>
-    </div>
-
-    <div class="banner-title">Sound Analyzer</div>
-
-    <div class="banner-actions">
-      <div class="theme-toggle">
-        <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="main-content">
-    <!-- Info Cards -->
-    <div class="info-bar">
-      <div id="peak-frequency" class="info-card">
-        <span>Peak Frequency</span>
-        <strong id="peak-frequency-value">-- Hz</strong>
-      </div>
-      <div id="time-delta" class="info-card">
-        <span>Marker Delta</span>
-        <strong id="time-delta-value">-- ms</strong>
-      </div>
-    </div>
-
-    <!-- Spectrum Panel (collapsible) -->
-    <details class="simulation-area" id="spectrum-panel" open>
-      <summary>Spectrum</summary>
-      <div id="visualizer-container" class="panel-body">
-        <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button">Reset zoom</button>
-        <canvas id="visualizer" width="800" height="200"></canvas>
-        <div id="tooltip"></div>
-      </div>
-    </details>
-
-    <!-- Oscilloscope Panel -->
-    <section class="simulation-area" id="waveform-panel">
-      <div class="panel-header">Oscilloscope</div>
-      <div id="waveform-container" class="panel-body">
-        <canvas id="waveform" width="800" height="200"></canvas>
-      </div>
-    </section>
-
-    <!-- Controls Panel -->
-    <div class="controls-panel">
-      <!-- Column 1: Sliders -->
-      <div class="control-section">
-        <h3 class="section-title">Scale</h3>
-        <div class="slider-control">
-          <div class="slider-header">
-            <label for="yScale">Amplitude Scale</label>
-            <span class="slider-value" id="yScaleValue">5.0</span>
-          </div>
-          <input type="range" id="yScale" min="0.5" max="20" step="0.5" value="5" aria-label="Amplitude Scale">
+  <div class="page">
+    <header>
+      <div id="titleBanner">
+        <div class="banner-logo">
+          <a href="https://panphy.github.io/">
+            <img src="/assets/panphy.png" alt="PanPhy logo" />
+          </a>
         </div>
-        <div class="slider-control">
-          <div class="slider-header">
-            <label for="xScale">Time Scale</label>
-            <span class="slider-value" id="xScaleValue">1.0</span>
-          </div>
-          <input type="range" id="xScale" min="0.5" max="10" step="0.5" value="1" aria-label="Time Scale">
+
+        <h1 class="banner-title">Audio Spectrum & Waveform Analyzer</h1>
+
+        <div class="theme-toggle">
+          <button id="theme-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="info-bar">
+        <div id="peak-frequency" class="info-card">
+          <span>Peak Frequency</span>
+          <strong id="peak-frequency-value">-- Hz</strong>
+        </div>
+        <div id="time-delta" class="info-card">
+          <span>Marker Delta</span>
+          <strong id="time-delta-value">-- ms</strong>
         </div>
       </div>
 
-      <!-- Column 2: Input Source -->
-      <div class="control-section">
-        <h3 class="section-title">Input Source</h3>
-        <label for="inputDeviceSelect" class="slider-header" style="margin-bottom:8px;">
-          <span style="font-size:0.82rem;font-weight:500;color:var(--text-main);">Device</span>
-        </label>
-        <select id="inputDeviceSelect" class="device-select">
+      <details class="panel" id="spectrum-panel">
+        <summary>Spectrum</summary>
+        <div id="visualizer-container" class="panel-body">
+          <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button">Reset zoom</button>
+          <canvas id="visualizer" width="800" height="200"></canvas>
+          <div id="tooltip"></div>
+        </div>
+      </details>
+
+      <section class="panel" id="waveform-panel">
+        <div class="panel-header">Oscilloscope</div>
+        <div id="waveform-container" class="panel-body">
+          <canvas id="waveform" width="800" height="200"></canvas>
+          <div id="sliders">
+            <div>
+              <label for="yScale">Amplitude Scale</label>
+              <input type="range" id="yScale" min="0.5" max="20" step="0.5" value="5">
+            </div>
+            <div>
+              <label for="xScale">Time Scale</label>
+              <input type="range" id="xScale" min="0.5" max="10" step="0.5" value="1">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="input-source">
+        <label for="inputDeviceSelect">Input:</label>
+        <select id="inputDeviceSelect">
           <option value="">Default Microphone</option>
         </select>
       </div>
 
-      <!-- Column 3: Actions -->
-      <div class="control-section">
-        <h3 class="section-title">Actions</h3>
-        <div class="button-group">
-          <button id="toggleBtn" class="btn-primary">Start</button>
-          <button id="exportSpectrumBtn" class="btn-secondary" disabled>Export Spectrum (.csv)</button>
-          <button id="exportWaveformBtn" class="btn-secondary" disabled>Export Waveform (.csv)</button>
-        </div>
+      <div id="controls">
+        <button id="toggleBtn" class="toggle-button">Start</button>
+        <button id="exportSpectrumBtn" class="export-button" disabled>Export Spectrum (.csv)</button>
+        <button id="exportWaveformBtn" class="export-button" disabled>Export Waveform (.csv)</button>
       </div>
-    </div>
+    </main>
 
-    <p class="hint-text"><kbd>Space</kbd> to start / pause</p>
+    <footer>
+      &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+    </footer>
   </div>
-
-  <footer>
-    &copy; <a href="/">PanPhy Labs</a> |
-    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-  </footer>
-
   <script>
     // Gradient text: skip on Brave iOS where background-clip:text is broken
     (function() {
@@ -896,14 +639,6 @@
         updateButtonEmoji('light');
       }
     });
-
-    // Offline font fallback
-    function updateOfflineFontState() {
-      document.documentElement.classList.toggle('offline-font', !navigator.onLine);
-    }
-    window.addEventListener('online', updateOfflineFontState);
-    window.addEventListener('offline', updateOfflineFontState);
-    updateOfflineFontState();
   </script>
 </body>
 
@@ -969,8 +704,6 @@
 
   const yScaleSlider = document.getElementById('yScale');
   const xScaleSlider = document.getElementById('xScale');
-  const yScaleValue = document.getElementById('yScaleValue');
-  const xScaleValue = document.getElementById('xScaleValue');
   const inputDeviceSelect = document.getElementById('inputDeviceSelect');
   const INPUT_DEVICE_KEY = 'sound-analyzer-input-device';
   let selectedDeviceId = localStorage.getItem(INPUT_DEVICE_KEY) || '';
@@ -1136,11 +869,9 @@
 
   yScaleSlider.addEventListener('input', () => {
     waveAmplitudeScale = parseFloat(yScaleSlider.value);
-    yScaleValue.textContent = waveAmplitudeScale.toFixed(1);
   });
   xScaleSlider.addEventListener('input', () => {
     waveTimeScale = parseFloat(xScaleSlider.value);
-    xScaleValue.textContent = waveTimeScale.toFixed(1);
   });
   resetZoomBtn.addEventListener('click', resetFrequencyZoom);
 
@@ -1238,7 +969,7 @@
     const { showErrorAlert = true } = options;
     isStarting = true;
     toggleBtn.disabled = true;
-    toggleBtn.textContent = 'Starting\u2026';
+    toggleBtn.textContent = 'Starting…';
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
