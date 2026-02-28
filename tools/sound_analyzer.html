@@ -835,9 +835,10 @@
   function handleGlobalSpaceShortcut(event) {
     if (event.code !== 'Space' || event.repeat) return;
 
-    // Use capture so focused controls (like the input device <select>)
-    // do not use Space for their own behavior.
+    // Intercept Space globally in capture phase so no focused control
+    // (e.g. an input-source <select>) can consume it first.
     event.preventDefault();
+    event.stopPropagation(); // prevent the event reaching the focused element
     toggleRunPause(); // Space counts as a user gesture
   }
 
