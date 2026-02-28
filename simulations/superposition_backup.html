@@ -46,21 +46,21 @@
             --canvas-bg: #ffffff;
             --canvas-baseline: #cbd5e1;
 
+            --btn-bg: #6c5ce7;
+            --btn-text: #ffffff;
+            --btn-hover: #5b4cdb;
+
             --slider-track: #e2e8f0;
             --slider-thumb: #6c5ce7;
 
-            --select-bg: #ffffff;
-            --select-border: #e2e8f0;
+            --switch-off: #cbd5e1;
+            --switch-on: #6c5ce7;
 
             --header-bg: rgba(255, 255, 255, 0.9);
             --header-border: rgba(108, 92, 231, 0.1);
 
             --nav-bg: rgba(255, 255, 255, 0.85);
             --nav-border: rgba(255, 255, 255, 0.5);
-
-            --wave1-color: #3b82f6;
-            --wave2-color: #f97316;
-            --super-color: #22c55e;
         }
 
         [data-theme="dark"] {
@@ -80,21 +80,21 @@
             --canvas-bg: #16181d;
             --canvas-baseline: #4a5568;
 
+            --btn-bg: #6c5ce7;
+            --btn-text: #ffffff;
+            --btn-hover: #7c6ef0;
+
             --slider-track: #4a5568;
             --slider-thumb: #a29bfe;
 
-            --select-bg: #2d3436;
-            --select-border: #4a5568;
+            --switch-off: #4a5568;
+            --switch-on: #a29bfe;
 
             --header-bg: rgba(30, 33, 41, 0.95);
             --header-border: rgba(162, 155, 254, 0.1);
 
             --nav-bg: rgba(22, 24, 29, 0.85);
             --nav-border: rgba(255, 255, 255, 0.08);
-
-            --wave1-color: #60a5fa;
-            --wave2-color: #fb923c;
-            --super-color: #4ade80;
         }
 
         * {
@@ -129,7 +129,7 @@
             padding: 8px 20px;
             margin: 16px auto 0;
             width: calc(100% - 40px);
-            max-width: 1160px;
+            max-width: 1360px;
             background: var(--nav-bg);
             border: 1px solid var(--nav-border);
             border-radius: 20px;
@@ -198,266 +198,160 @@
         /* Main Content */
         .main-content {
             padding: 20px;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Simulation Area */
-        .simulation-area {
-            position: relative;
+        .instructions {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #mainWrapper {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* Canvas Container */
+        #canvasContainer {
+            flex: 3;
             background: var(--card-bg);
+            padding: 20px;
             border-radius: 16px;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--card-border);
-            overflow: hidden;
-            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        canvas {
+        #zoomMotionControls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .zoomMotion-group {
+            flex: 1 1 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .zoomMotion-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        #waveCanvas {
             width: 100%;
-            height: auto;
-            display: block;
+            height: 400px;
+            border-radius: 12px;
+            background-color: var(--canvas-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        #playPauseBtn {
+            width: 120px;
+            height: 44px;
+            margin: 0 auto;
+            font-size: 1rem;
+            cursor: pointer;
             border: none;
             border-radius: 12px;
-            background: var(--canvas-bg);
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.2s;
         }
 
-        /* Play/Pause Button */
-        .play-pause-btn {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: var(--brand-primary);
-            color: white;
-            cursor: pointer;
+        #playPauseBtn:hover {
+            background: var(--btn-hover);
+            transform: translateY(-2px);
+        }
+
+        #note {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Side Controls */
+        #sideControls {
+            flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-            transition: transform 0.15s ease, opacity 0.2s ease;
-            opacity: 0.6;
-            z-index: 10;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 280px;
         }
 
-        .play-pause-btn:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .play-pause-btn svg {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0;
-        }
-
-        /* Controls Panel */
-        .controls-panel {
-            display: grid;
-            grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr) minmax(200px, 1fr);
-            margin-top: 16px;
+        .wave-controls,
+        .toggle-controls {
             background: var(--card-bg);
+            padding: 20px;
             border-radius: 16px;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--card-border);
-            overflow: hidden;
-        }
-
-        .control-section {
-            padding: 20px;
-        }
-
-        .control-section + .control-section {
-            border-left: 1px solid var(--card-border);
-        }
-
-        .section-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        /* Wave color indicator */
-        .section-title .wave-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-            vertical-align: middle;
-            position: relative;
-            top: -1px;
-        }
-
-        .wave-dot.blue { background: var(--wave1-color); }
-        .wave-dot.orange { background: var(--wave2-color); }
-
-        /* Slider Controls */
-        .slider-control {
-            margin-bottom: 16px;
-        }
-
-        .slider-control:last-child {
-            margin-bottom: 0;
-        }
-
-        .slider-header {
             display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 6px;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .slider-header label {
-            font-size: 0.82rem;
-            font-weight: 500;
-            color: var(--text-main);
-            white-space: nowrap;
-        }
-
-        .slider-value {
-            font-family: var(--font-mono);
-            font-size: 0.82rem;
+        .wave-controls h3,
+        .toggle-controls h3 {
+            font-size: 1rem;
             font-weight: 600;
             color: var(--brand-primary);
-            text-align: right;
+            text-align: center;
+            margin-bottom: 5px;
         }
 
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 36px;
-            height: 20px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-            position: absolute;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            inset: 0;
-            background: var(--slider-track);
-            border-radius: 20px;
-            transition: background-color 0.2s ease;
-        }
-
-        .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            left: 2px;
-            bottom: 2px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        .toggle-switch input:checked + .toggle-slider {
-            background: var(--brand-primary);
-        }
-
-        .toggle-switch input:checked + .toggle-slider::before {
-            transform: translateX(16px);
-        }
-
-        /* Visibility Toggles */
-        .visibility-row {
+        .control-group {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
+            flex-direction: column;
         }
 
-        .visibility-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .visibility-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.82rem;
+        .control-group label {
+            margin-bottom: 6px;
             font-weight: 500;
+            font-size: 0.9rem;
             color: var(--text-main);
         }
 
-        .vis-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        .control-group input[type=range] {
+            width: 100%;
+            cursor: pointer;
         }
 
-        .vis-dot.blue { background: var(--wave1-color); box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3px var(--wave1-color); }
-        .vis-dot.orange { background: var(--wave2-color); box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3px var(--wave2-color); }
-        .vis-dot.green { background: var(--super-color); box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3px var(--super-color); }
-
-        /* Display Section */
-        .section-title-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .section-title-row .section-title {
-            margin-bottom: 0;
-        }
-
-        .display-controls-content {
-            transition: opacity 0.2s ease;
-        }
-
-        .display-controls-content.hidden {
-            opacity: 0.35;
-            pointer-events: none;
-        }
-
-        /* Range Inputs */
-        input[type="range"] {
+        /* Range Slider Styling */
+        input[type=range] {
             -webkit-appearance: none;
             appearance: none;
-            width: 100%;
             height: 6px;
             border-radius: 5px;
             background: transparent;
             outline: none;
-            border: none;
-            padding: 3px 0;
-            margin-top: 2px;
         }
 
-        input[type="range"]::-webkit-slider-runnable-track {
+        input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 6px;
             border-radius: 5px;
             background: var(--slider-track);
         }
 
-        input[type="range"]::-moz-range-track {
+        input[type=range]::-moz-range-track {
             width: 100%;
             height: 6px;
             border-radius: 5px;
             background: var(--slider-track);
         }
 
-        input[type="range"]::-webkit-slider-thumb {
+        input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 18px;
@@ -470,7 +364,7 @@
             margin-top: -6px;
         }
 
-        input[type="range"]::-moz-range-thumb {
+        input[type=range]::-moz-range-thumb {
             width: 18px;
             height: 18px;
             border-radius: 50%;
@@ -480,27 +374,63 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
 
-        input[type="range"]:focus {
-            outline: none;
+        /* Toggle Switch Styles */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* Hint Text */
-        .hint-text {
-            text-align: center;
-            font-size: 0.76rem;
-            color: var(--text-secondary);
-            margin-top: 14px;
-            opacity: 0.6;
+        .toggle-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            cursor: pointer;
         }
 
-        .hint-text kbd {
+        .switch {
+            position: relative;
             display: inline-block;
-            padding: 1px 6px;
-            border-radius: 4px;
-            border: 1px solid var(--select-border);
-            background: var(--select-bg);
-            font-family: var(--font-mono);
-            font-size: 0.72rem;
+            width: 48px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--switch-off);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #fff;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .switch input:checked+.slider-switch {
+            background-color: var(--switch-on);
+        }
+
+        .switch input:checked+.slider-switch:before {
+            transform: translateX(22px);
         }
 
         /* Footer */
@@ -523,13 +453,17 @@
 
         /* Responsive */
         @media (max-width: 900px) {
-            .controls-panel {
-                grid-template-columns: 1fr;
+            #mainWrapper {
+                flex-direction: column;
             }
 
-            .control-section + .control-section {
-                border-left: none;
-                border-top: 1px solid var(--card-border);
+            #sideControls {
+                width: 100%;
+                min-width: unset;
+            }
+
+            #waveCanvas {
+                height: 300px;
             }
 
             header.banner {
@@ -547,7 +481,7 @@
             }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
             header.banner {
                 padding: 8px 12px;
             }
@@ -563,31 +497,14 @@
             .main-content {
                 padding: 12px;
             }
-
-            .controls-panel {
-                margin-top: 12px;
-            }
-
-            .control-section {
-                padding: 16px;
-            }
-
-            .play-pause-btn {
-                bottom: 20px;
-                right: 20px;
-            }
         }
 
         @media (pointer: coarse) {
-            button:not(.play-pause-btn),
+            button,
+            input:not([type="range"]),
+            select,
             .theme-toggle {
                 min-height: 44px;
-                touch-action: manipulation;
-            }
-
-            .play-pause-btn {
-                width: 48px;
-                height: 48px;
                 touch-action: manipulation;
             }
 
@@ -634,119 +551,102 @@
     </header>
 
     <div class="main-content">
-        <div class="simulation-area">
-            <canvas id="waveCanvas"></canvas>
-            <button class="play-pause-btn" id="playPauseBtn" aria-label="Pause animation" title="Play / Pause (Space)">
-                <svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>
-            </button>
-        </div>
+        <p class="instructions">Press SPACE to Pause/Resume the Simulation</p>
 
-        <div class="controls-panel">
-            <!-- Wave 1 -->
-            <div class="control-section">
-                <h3 class="section-title"><span class="wave-dot blue"></span>Wave 1</h3>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="amplitude1">Amplitude</label>
-                        <span class="slider-value"><span id="amplitude1Value">60</span> px</span>
+        <div id="mainWrapper">
+            <div id="canvasContainer">
+                <div id="zoomMotionControls">
+                    <div class="zoomMotion-group">
+                        <label for="timeZoom">
+                            Horizontal Scale: <span id="timeZoomValue">1.0</span>x
+                        </label>
+                        <input type="range" id="timeZoom" min="0.1" max="5" step="0.1" value="1">
                     </div>
-                    <input type="range" id="amplitude1" min="10" max="100" value="60" aria-label="Wave 1 Amplitude">
+                    <div class="zoomMotion-group">
+                        <label for="timeMotion">
+                            Motion Speed: <span id="timeMotionValue">1.00</span>x
+                        </label>
+                        <input type="range" id="timeMotion" min="0.01" max="2" step="0.01" value="1">
+                    </div>
                 </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="frequency1">Frequency</label>
-                        <span class="slider-value"><span id="frequency1Value">1.0</span> Hz</span>
-                    </div>
-                    <input type="range" id="frequency1" min="0.1" max="5" step="0.1" value="1" aria-label="Wave 1 Frequency">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="speed1">Wave Speed</label>
-                        <span class="slider-value"><span id="speed1Value">200</span> px/s</span>
-                    </div>
-                    <input type="range" id="speed1" min="-500" max="500" step="10" value="200" aria-label="Wave 1 Speed">
+                <canvas id="waveCanvas"></canvas>
+                <button id="playPauseBtn">Pause</button>
+                <div id="note">
+                    Press SPACE to Pause/Resume
                 </div>
             </div>
 
-            <!-- Wave 2 -->
-            <div class="control-section">
-                <h3 class="section-title"><span class="wave-dot orange"></span>Wave 2</h3>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="amplitude2">Amplitude</label>
-                        <span class="slider-value"><span id="amplitude2Value">60</span> px</span>
+            <div id="sideControls">
+                <div class="wave-controls">
+                    <h3>Wave 1</h3>
+                    <div class="control-group">
+                        <label for="amplitude1">
+                            Amplitude: <span id="amplitude1Value">60</span> px
+                        </label>
+                        <input type="range" id="amplitude1" min="10" max="100" value="60">
                     </div>
-                    <input type="range" id="amplitude2" min="10" max="100" value="60" aria-label="Wave 2 Amplitude">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="frequency2">Frequency</label>
-                        <span class="slider-value"><span id="frequency2Value">1.0</span> Hz</span>
+                    <div class="control-group">
+                        <label for="frequency1">
+                            Frequency: <span id="frequency1Value">1.0</span> Hz
+                        </label>
+                        <input type="range" id="frequency1" min="0.1" max="5" step="0.1" value="1">
                     </div>
-                    <input type="range" id="frequency2" min="0.1" max="5" step="0.1" value="1.0" aria-label="Wave 2 Frequency">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="speed2">Wave Speed</label>
-                        <span class="slider-value"><span id="speed2Value">-200</span> px/s</span>
+                    <div class="control-group">
+                        <label for="speed1">
+                            Wave Speed: <span id="speed1Value">200</span> px/s
+                        </label>
+                        <input type="range" id="speed1" min="-500" max="500" step="10" value="200">
                     </div>
-                    <input type="range" id="speed2" min="-500" max="500" step="10" value="-200" aria-label="Wave 2 Speed">
                 </div>
-            </div>
 
-            <!-- Display -->
-            <div class="control-section">
-                <h3 class="section-title">Display</h3>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="timeZoom">Horizontal Scale</label>
-                        <span class="slider-value"><span id="timeZoomValue">1.0</span>x</span>
+                <div class="wave-controls">
+                    <h3>Wave 2</h3>
+                    <div class="control-group">
+                        <label for="amplitude2">
+                            Amplitude: <span id="amplitude2Value">60</span> px
+                        </label>
+                        <input type="range" id="amplitude2" min="10" max="100" value="60">
                     </div>
-                    <input type="range" id="timeZoom" min="0.1" max="5" step="0.1" value="1" aria-label="Horizontal Scale">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-header">
-                        <label for="timeMotion">Motion Speed</label>
-                        <span class="slider-value"><span id="timeMotionValue">1.00</span>x</span>
+                    <div class="control-group">
+                        <label for="frequency2">
+                            Frequency: <span id="frequency2Value">1.0</span> Hz
+                        </label>
+                        <input type="range" id="frequency2" min="0.1" max="5" step="0.1" value="1.0">
                     </div>
-                    <input type="range" id="timeMotion" min="0.01" max="2" step="0.01" value="1" aria-label="Motion Speed">
+                    <div class="control-group">
+                        <label for="speed2">
+                            Wave Speed: <span id="speed2Value">-200</span> px/s
+                        </label>
+                        <input type="range" id="speed2" min="-500" max="500" step="10" value="-200">
+                    </div>
                 </div>
-                <div style="margin-top: 8px;">
-                    <div class="visibility-row">
-                        <span class="visibility-label">
-                            <span class="vis-dot blue"></span>
-                            Wave 1
-                        </span>
-                        <label class="toggle-switch" title="Show Wave 1">
+
+                <div class="toggle-controls">
+                    <h3>Toggle Waves</h3>
+                    <div class="toggle-group">
+                        <label for="toggleWave1">Show Wave 1 (Blue)</label>
+                        <label class="switch">
                             <input type="checkbox" id="toggleWave1" checked>
-                            <span class="toggle-slider"></span>
+                            <span class="slider-switch"></span>
                         </label>
                     </div>
-                    <div class="visibility-row">
-                        <span class="visibility-label">
-                            <span class="vis-dot orange"></span>
-                            Wave 2
-                        </span>
-                        <label class="toggle-switch" title="Show Wave 2">
+                    <div class="toggle-group">
+                        <label for="toggleWave2">Show Wave 2 (Orange)</label>
+                        <label class="switch">
                             <input type="checkbox" id="toggleWave2">
-                            <span class="toggle-slider"></span>
+                            <span class="slider-switch"></span>
                         </label>
                     </div>
-                    <div class="visibility-row">
-                        <span class="visibility-label">
-                            <span class="vis-dot green"></span>
-                            Superposition
-                        </span>
-                        <label class="toggle-switch" title="Show Superposition">
+                    <div class="toggle-group">
+                        <label for="toggleSuperposition">Show Superposition (Green)</label>
+                        <label class="switch">
                             <input type="checkbox" id="toggleSuperposition">
-                            <span class="toggle-slider"></span>
+                            <span class="slider-switch"></span>
                         </label>
                     </div>
                 </div>
             </div>
         </div>
-
-        <p class="hint-text"><kbd>Space</kbd> to play / pause</p>
     </div>
 
     <footer>
@@ -822,9 +722,6 @@
         const ctx = canvas.getContext('2d');
         const playPauseBtn = document.getElementById('playPauseBtn');
 
-        const pauseIconSVG = '<svg viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>';
-        const playIconSVG = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 2.5l9 5.5-9 5.5V2.5z"/></svg>';
-
         const amplitude1Slider = document.getElementById('amplitude1');
         const frequency1Slider = document.getElementById('frequency1');
         const speed1Slider = document.getElementById('speed1');
@@ -848,8 +745,7 @@
         const toggleWave2 = document.getElementById('toggleWave2');
         const toggleSuperposition = document.getElementById('toggleSuperposition');
 
-        let canvasWidth = 0;
-        let canvasHeight = 0;
+        let width, height;
 
         let amplitude1 = parseFloat(amplitude1Slider.value);
         let frequency1 = parseFloat(frequency1Slider.value);
@@ -923,76 +819,63 @@
         toggleWave2.addEventListener('change', () => { drawWaves(); });
         toggleSuperposition.addEventListener('change', () => { drawWaves(); });
 
-        // Play/Pause
-        let running = true;
-        let lastTimestamp = null;
-        let accumulatedTime = 0;
-        let animationId;
-
-        function syncPlayPauseButton() {
-            playPauseBtn.innerHTML = running ? pauseIconSVG : playIconSVG;
-            playPauseBtn.setAttribute('aria-label', running ? 'Pause animation' : 'Resume animation');
-        }
-
         playPauseBtn.addEventListener('click', () => {
             running = !running;
-            syncPlayPauseButton();
             if (running) {
+                playPauseBtn.textContent = "Pause";
                 lastTimestamp = null;
                 animationId = requestAnimationFrame(animate);
             } else {
+                playPauseBtn.textContent = "Play";
                 cancelAnimationFrame(animationId);
             }
         });
 
-        // Canvas setup (aspect-ratio driven like standing_wave)
-        function resizeCanvas() {
-            const aspectRatio = 2.5;
-            const width = canvas.clientWidth;
-            const height = width / aspectRatio;
-            const dpr = window.devicePixelRatio || 1;
-            canvasWidth = width;
-            canvasHeight = height;
-            canvas.style.height = `${height}px`;
-            canvas.width = Math.round(width * dpr);
-            canvas.height = Math.round(height * dpr);
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        function setupCanvas() {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            const ratio = window.devicePixelRatio || 1;
+            const computedStyle = getComputedStyle(canvas);
+            width = parseInt(computedStyle.getPropertyValue('width'));
+            height = parseInt(computedStyle.getPropertyValue('height'));
+
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            ctx.scale(ratio, ratio);
         }
 
-        resizeCanvas();
+        setupCanvas();
         window.addEventListener('resize', () => {
-            resizeCanvas();
+            setupCanvas();
             drawWaves();
         });
+
+        let animationId;
+        let running = true;
+        let lastTimestamp = null;
+        let accumulatedTime = 0;
 
         function getBaselineColor() {
             return getComputedStyle(document.documentElement).getPropertyValue('--canvas-baseline').trim() || '#cbd5e1';
         }
 
-        function getWaveColor(varName) {
-            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-        }
-
         function drawWaves() {
             const t = accumulatedTime / 1000;
 
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.clearRect(0, 0, width, height);
 
-            const baseline = canvasHeight / 2;
+            const baseline = height / 2;
             ctx.beginPath();
             ctx.moveTo(0, baseline);
-            ctx.lineTo(canvasWidth, baseline);
+            ctx.lineTo(width, baseline);
             ctx.strokeStyle = getBaselineColor();
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 2;
             ctx.stroke();
-            ctx.setLineDash([]);
 
             const omega1 = 2 * Math.PI * frequency1;
             const omega2 = 2 * Math.PI * frequency2;
 
             function evaluateWave(amplitude, omega, speed, xVirtual, t) {
-                const direction = speed < 0 ? -1 : 1;
+                const direction = speed < 0 ? -1 : 1; // -1 => left, +1 => right
                 const speedMagnitude = Math.max(Math.abs(speed), 1e-6);
                 const k = omega / speedMagnitude;
                 return amplitude * Math.sin((k * xVirtual) - (direction * omega * t));
@@ -1000,35 +883,35 @@
 
             if (toggleWave1.checked) {
                 ctx.beginPath();
-                for (let x = 0; x <= canvasWidth; x++) {
+                for (let x = 0; x <= width; x++) {
                     const xVirtual = x / timeZoom;
                     const wave1Val = evaluateWave(amplitude1, omega1, speed1, xVirtual, t);
                     const canvasY = baseline - wave1Val;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
-                ctx.strokeStyle = getWaveColor('--wave1-color');
+                ctx.strokeStyle = '#3b82f6';
                 ctx.lineWidth = 2;
                 ctx.stroke();
             }
 
             if (toggleWave2.checked) {
                 ctx.beginPath();
-                for (let x = 0; x <= canvasWidth; x++) {
+                for (let x = 0; x <= width; x++) {
                     const xVirtual = x / timeZoom;
                     const wave2Val = evaluateWave(amplitude2, omega2, speed2, xVirtual, t);
                     const canvasY = baseline - wave2Val;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
-                ctx.strokeStyle = getWaveColor('--wave2-color');
+                ctx.strokeStyle = '#f97316';
                 ctx.lineWidth = 2;
                 ctx.stroke();
             }
 
             if (toggleSuperposition.checked) {
                 ctx.beginPath();
-                for (let x = 0; x <= canvasWidth; x++) {
+                for (let x = 0; x <= width; x++) {
                     const xVirtual = x / timeZoom;
                     const wave1Val = evaluateWave(amplitude1, omega1, speed1, xVirtual, t);
                     const wave2Val = evaluateWave(amplitude2, omega2, speed2, xVirtual, t);
@@ -1037,7 +920,7 @@
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
-                ctx.strokeStyle = getWaveColor('--super-color');
+                ctx.strokeStyle = '#22c55e';
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
             }
@@ -1070,11 +953,12 @@
             if (e.code === 'Space' || e.key === ' ') {
                 e.preventDefault();
                 running = !running;
-                syncPlayPauseButton();
                 if (running) {
+                    playPauseBtn.textContent = "Pause";
                     lastTimestamp = null;
                     animationId = requestAnimationFrame(animate);
                 } else {
+                    playPauseBtn.textContent = "Play";
                     cancelAnimationFrame(animationId);
                 }
             }
