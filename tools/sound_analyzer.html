@@ -379,6 +379,39 @@
       touch-action: pan-y;
     }
 
+    /* Grid Legend */
+    .grid-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .grid-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+
+    .grid-legend-icon {
+      font-size: 0.7rem;
+      color: var(--brand-primary);
+      font-weight: 700;
+      line-height: 1;
+    }
+
     #tooltip {
       position: absolute;
       display: none;
@@ -781,6 +814,10 @@
       <div class="panel-header">Oscilloscope</div>
       <div id="waveform-container" class="panel-body">
         <canvas id="waveform" width="800" height="200"></canvas>
+        <div class="grid-legend">
+          <span class="grid-legend-item"><span class="grid-legend-icon">&harr;</span> 1 div = <span id="gridTimeDiv">--</span></span>
+          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">--</span></span>
+        </div>
       </div>
     </section>
 
@@ -971,6 +1008,8 @@
   const xScaleSlider = document.getElementById('xScale');
   const yScaleValue = document.getElementById('yScaleValue');
   const xScaleValue = document.getElementById('xScaleValue');
+  const gridTimeDivEl = document.getElementById('gridTimeDiv');
+  const gridAmpDivEl = document.getElementById('gridAmpDiv');
   const inputDeviceSelect = document.getElementById('inputDeviceSelect');
   const INPUT_DEVICE_KEY = 'sound-analyzer-input-device';
   let selectedDeviceId = localStorage.getItem(INPUT_DEVICE_KEY) || '';
@@ -1482,6 +1521,7 @@
 
     if (!analyzer || !dataArray || !timeDomainData) {
       peakFreqDisplay.textContent = '-- Hz';
+      updateGridLegend(0);
       return;
     }
 
@@ -1564,6 +1604,7 @@
     waveCtx.stroke();
 
     drawWaveformMarkers();
+    updateGridLegend(displayWaveGain);
   }
 
   // ------------------ Draw the Frequency Axis ------------------
@@ -1639,6 +1680,43 @@
 
     waveCtx.globalAlpha = 1;
     waveCtx.restore();
+  }
+
+  function updateGridLegend(displayWaveGain) {
+    const dispW = waveCanvasSize.width;
+    const dispH = waveCanvasSize.height;
+    if (!dispW || !dispH) return;
+
+    // Time per division
+    const sr = sampleRate || 44100;
+    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
+    let windowSize = totalSamples / waveTimeScale;
+    if (windowSize > totalSamples) windowSize = totalSamples;
+    windowSize = Math.max(1, Math.floor(windowSize));
+
+    const totalTimeSec = windowSize / sr;
+    const timePerDivSec = (SQUARE_GRID_SPACING / dispW) * totalTimeSec;
+    const timePerDivMs = timePerDivSec * 1000;
+
+    if (timePerDivMs >= 1) {
+      gridTimeDivEl.textContent = timePerDivMs.toFixed(2) + ' ms';
+    } else {
+      gridTimeDivEl.textContent = (timePerDivMs * 1000).toFixed(1) + ' \u00B5s';
+    }
+
+    // Amplitude per division (normalized)
+    const gain = displayWaveGain || (waveAmplitudeScale * adaptiveWaveGain);
+    const halfHeight = dispH / 2;
+    if (gain > 0 && halfHeight > 0) {
+      const ampPerDiv = SQUARE_GRID_SPACING / (halfHeight * gain);
+      if (ampPerDiv >= 0.01) {
+        gridAmpDivEl.textContent = ampPerDiv.toFixed(3);
+      } else {
+        gridAmpDivEl.textContent = ampPerDiv.toExponential(1);
+      }
+    } else {
+      gridAmpDivEl.textContent = '--';
+    }
   }
 
   function drawWaveformMarkers() {
