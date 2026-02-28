@@ -660,18 +660,8 @@
       echoCancellation: false
     }
   };
-  const MICROPHONE_CONSTRAINTS_COMPAT = {
-    audio: {
-      autoGainControl: true,
-      noiseSuppression: true,
-      echoCancellation: true,
-      channelCount: { ideal: 1 }
-    }
-  };
-  // Lenient fallback when strict constraints fail (e.g. iPad through a hub)
+  // Lenient fallback when strict constraints fail
   const MICROPHONE_CONSTRAINTS_FALLBACK = { audio: true };
-  const AUDIO_CONTEXT_RESUME_ATTEMPTS = 3;
-  const AUDIO_CONTEXT_RESUME_RETRY_MS = 120;
 
   // Frequency data
   let dataArray;
@@ -715,7 +705,8 @@
   const yScaleSlider = document.getElementById('yScale');
   const xScaleSlider = document.getElementById('xScale');
   const inputDeviceSelect = document.getElementById('inputDeviceSelect');
-  let selectedDeviceId = '';
+  const INPUT_DEVICE_KEY = 'sound-analyzer-input-device';
+  let selectedDeviceId = localStorage.getItem(INPUT_DEVICE_KEY) || '';
 
   function getCssVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -771,9 +762,11 @@
         inputDeviceSelect.appendChild(option);
       });
 
-      // Restore previous selection if still available
-      if (previousValue && [...inputDeviceSelect.options].some(o => o.value === previousValue)) {
-        inputDeviceSelect.value = previousValue;
+      // Restore previous selection (from dropdown or saved preference)
+      const preferred = previousValue || selectedDeviceId;
+      if (preferred && [...inputDeviceSelect.options].some(o => o.value === preferred)) {
+        inputDeviceSelect.value = preferred;
+        selectedDeviceId = preferred;
       } else {
         inputDeviceSelect.value = '';
         selectedDeviceId = '';
@@ -785,6 +778,11 @@
 
   inputDeviceSelect.addEventListener('change', async () => {
     selectedDeviceId = inputDeviceSelect.value;
+    if (selectedDeviceId) {
+      localStorage.setItem(INPUT_DEVICE_KEY, selectedDeviceId);
+    } else {
+      localStorage.removeItem(INPUT_DEVICE_KEY);
+    }
     // Force a fresh stream for the new device
     teardownAudioSession();
     microphoneStream = null;
@@ -870,10 +868,9 @@
   });
   resetZoomBtn.addEventListener('click', resetFrequencyZoom);
 
-  // ------------------ iOS / Hardware-Change Recovery Helpers ------------------
+  // ------------------ Audio Recovery Helpers ------------------
 
-  // AudioContext.statechange — iOS uses an 'interrupted' state when the audio
-  // session is taken by another app or when hardware routing changes (hub, AirPlay, etc.).
+  // iOS uses an 'interrupted' state when the audio session is taken by another app.
   function onAudioStateChange() {
     if (!audioContext) return;
     if (audioContext.state === 'interrupted' && isRunning) {
@@ -907,16 +904,6 @@
     });
   }
 
-  function waitFor(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  function createAudioContext() {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    sampleRate = audioContext.sampleRate;
-    audioContext.addEventListener('statechange', onAudioStateChange);
-  }
-
   async function ensureAudioContextRunning() {
     if (audioContext) {
       const state = audioContext.state;
@@ -931,36 +918,14 @@
     }
 
     if (!audioContext) {
-      createAudioContext();
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      sampleRate = audioContext.sampleRate;
+      audioContext.addEventListener('statechange', onAudioStateChange);
     }
 
-    for (let attempt = 0; attempt < AUDIO_CONTEXT_RESUME_ATTEMPTS; attempt += 1) {
-      if (audioContext.state === 'running') return;
-
-      try {
-        await audioContext.resume();
-      } catch (err) {
-        if (attempt === AUDIO_CONTEXT_RESUME_ATTEMPTS - 1) {
-          throw err;
-        }
-      }
-
-      if (audioContext.state === 'running') return;
-
-      if (audioContext.state === 'interrupted') {
-        try { audioContext.removeEventListener('statechange', onAudioStateChange); } catch {}
-        audioContext = null;
-        analyzer = null;
-        source = null;
-        dataArray = null;
-        timeDomainData = null;
-        createAudioContext();
-      }
-
-      await waitFor(AUDIO_CONTEXT_RESUME_RETRY_MS);
+    if (audioContext.state !== 'running') {
+      await audioContext.resume();
     }
-
-    throw new Error('Unable to start audio context. Please tap Start again.');
   }
 
   function applyDeviceId(constraints) {
@@ -979,25 +944,16 @@
       return microphoneStream;
     }
 
-    const constraintsList = [
-      MICROPHONE_CONSTRAINTS,
-      MICROPHONE_CONSTRAINTS_COMPAT,
-      MICROPHONE_CONSTRAINTS_FALLBACK
-    ];
-
-    let lastError = null;
-    for (const constraints of constraintsList) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia(applyDeviceId(constraints));
-        // Re-enumerate to get labels now that we have permission
-        enumerateAudioInputs();
-        return stream;
-      } catch (err) {
-        lastError = err;
-      }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia(applyDeviceId(MICROPHONE_CONSTRAINTS));
+    } catch {
+      stream = await navigator.mediaDevices.getUserMedia(applyDeviceId(MICROPHONE_CONSTRAINTS_FALLBACK));
     }
 
-    throw lastError || new Error('Unable to access microphone.');
+    // Re-enumerate to get labels now that we have permission
+    enumerateAudioInputs();
+    return stream;
   }
 
   // ------------------ Microphone + Analyzer Setup ------------------
@@ -1042,11 +998,6 @@
 
       source = audioContext.createMediaStreamSource(microphoneStream);
       source.connect(analyzer);
-
-      // Belt-and-suspenders: ensure context is actually running after all async work
-      if (audioContext.state !== 'running') {
-        await ensureAudioContextRunning();
-      }
 
       isRunning = true;
       toggleBtn.textContent = 'Pause';
