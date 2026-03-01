@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-03-01T18:45:00Z';
+const BUILD_ID = '2026-03-01T19:10:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -199,9 +199,15 @@ self.addEventListener('fetch', (event) => {
   const isSameOrigin = url.origin === self.location.origin;
   const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
   const isBetaPath = isSameOrigin && (url.pathname === '/beta' || url.pathname.startsWith('/beta/'));
+  const isMiscPath = isSameOrigin && (url.pathname === '/misc' || url.pathname.startsWith('/misc/'));
 
   // Keep all beta routes/assets network-only (no SW cache reads/writes).
   if (isBetaPath) {
+    event.respondWith(fetch(req));
+    return;
+  }
+  // Keep all misc routes/assets network-only (no SW cache reads/writes).
+  if (isMiscPath) {
     event.respondWith(fetch(req));
     return;
   }
