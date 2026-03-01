@@ -1393,10 +1393,18 @@
     }
   }
 
-  function toggleRunPause() {
+  async function toggleRunPause() {
     if (isRunning) {
       pauseSpectrum();
+    } else if (analyzer && source && microphoneStream) {
+      // Fast resume: mic stream is still alive, just unpause
+      await ensureAudioContextRunning();
+      isRunning = true;
+      toggleBtn.textContent = 'Pause';
+      exportSpectrumBtn.disabled = true;
+      exportWaveformBtn.disabled = true;
     } else {
+      // Cold start: no mic stream yet
       startSpectrum();
     }
   }
@@ -1410,11 +1418,11 @@
     if (dataArray) lastFreqFrame = dataArray.slice();
     if (timeDomainData) lastWaveFrame = timeDomainData.slice();
 
+    // Suspend the AudioContext to save CPU, but keep the mic stream alive
+    // so resume is instant (no getUserMedia round-trip).
     if (audioContext && audioContext.state === 'running') {
       audioContext.suspend();
     }
-
-    teardownAudioSession();
   }
 
   function resetFrequencyZoom() {
