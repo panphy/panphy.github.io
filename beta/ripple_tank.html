@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f9fa">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <script>
+    (function () {
+      var hasDarkPreference = false;
+      try {
+        hasDarkPreference = Boolean(localStorage.getItem('ripple-tank-dark'));
+      } catch (_) {
+        hasDarkPreference = false;
+      }
+      if (hasDarkPreference) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute('content', '#0f1014');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      }
+    })();
+  </script>
+  <title>Ripple Tank</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
+    :root {
+      --font-sans: 'Inter', sans-serif;
+      --font-display: 'Poppins', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5b4cdb;
+      --btn-text: #ffffff;
+
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.5);
+
+      --slider-track: #e2e8f0;
+      --slider-thumb: #6c5ce7;
+      --toggle-hover: rgba(108, 92, 231, 0.15);
+
+      --source1-color: #00b8b5;
+      --source2-color: #7c6df0;
+      --source1-light: rgba(0, 206, 201, 0.12);
+      --source2-light: rgba(108, 92, 231, 0.12);
+
+      --scene-bg: #e8edf3;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+
+      --surface: #1e2129;
+      --surface-alt: #17191f;
+      --border: #2d3436;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5849d6;
+      --btn-text: #ffffff;
+
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+
+      --slider-track: #4a5568;
+      --slider-thumb: #a29bfe;
+      --toggle-hover: rgba(162, 155, 254, 0.2);
+
+      --source1-color: #56d4d0;
+      --source2-color: #b4acfe;
+      --source1-light: rgba(129, 236, 236, 0.12);
+      --source2-light: rgba(162, 155, 254, 0.12);
+
+      --scene-bg: #0a0c14;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      overflow: hidden;
+    }
+
+    a {
+      color: var(--brand-primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 0;
+    }
+
+    /* ─── Title Banner ─── */
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 16px auto 0;
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      min-height: 58px;
+      padding: 8px 20px;
+    }
+
+    .banner-logo img {
+      width: auto;
+      height: 36px;
+      display: block;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .banner-title {
+      margin: 0;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--brand-primary);
+    }
+
+    .banner-title.gradient-text {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .banner-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    #theme-button {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      border-radius: 50%;
+      font-size: 1.2rem;
+      line-height: 1;
+      min-height: 42px;
+      min-width: 42px;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    #theme-button:hover {
+      background-color: var(--toggle-hover);
+      transform: rotate(15deg);
+    }
+
+    #theme-button:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
+    /* ─── Workspace ─── */
+    #workspace {
+      min-height: 0;
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+      gap: 0.9rem;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 0 auto;
+      padding-bottom: 0.75rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ─── Sim Panel ─── */
+    #simPanel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #simCanvas {
+      display: block;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      border-radius: 18px;
+      cursor: grab;
+    }
+
+    #simCanvas:active {
+      cursor: grabbing;
+    }
+
+    .sim-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--nav-border);
+      pointer-events: none;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+
+    /* ─── Controls Panel ─── */
+    #controlsPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 0.9rem;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .controls-header h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.06rem;
+      letter-spacing: -0.01em;
+    }
+
+    .controls-header p {
+      margin: 0.2rem 0 0;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+    }
+
+    /* ─── Source Cards ─── */
+    .source-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .source-card[data-source="1"] {
+      border-left: 4px solid var(--source1-color);
+    }
+
+    .source-card[data-source="2"] {
+      border-left: 4px solid var(--source2-color);
+    }
+
+    .source-card.enabled[data-source="1"] {
+      box-shadow: inset 0 0 0 1px rgba(0, 206, 201, 0.15);
+    }
+
+    .source-card.enabled[data-source="2"] {
+      box-shadow: inset 0 0 0 1px rgba(108, 92, 231, 0.15);
+    }
+
+    .source-card.disabled {
+      opacity: 0.5;
+    }
+
+    .source-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .source-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .source-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .source-card[data-source="1"] .source-dot {
+      background: var(--source1-color);
+    }
+
+    .source-card[data-source="2"] .source-dot {
+      background: var(--source2-color);
+    }
+
+    .source-title {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    /* ─── Toggle Switch ─── */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      margin: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cfd5df;
+      transition: 0.3s ease;
+      border-radius: 22px;
+    }
+
+    [data-theme="dark"] .toggle-slider {
+      background-color: #4b5563;
+    }
+
+    .toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: 0.3s ease;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--brand-accent);
+    }
+
+    [data-theme="dark"] .toggle-switch input:checked + .toggle-slider {
+      background-color: #53c7c8;
+    }
+
+    .source-card[data-source="2"] .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--brand-primary);
+    }
+
+    [data-theme="dark"] .source-card[data-source="2"] .toggle-switch input:checked + .toggle-slider {
+      background-color: #8b80f0;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+    }
+
+    /* ─── Control Blocks ─── */
+    .control-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .control-header label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .control-header span {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 28px;
+      background: transparent;
+      cursor: pointer;
+      margin: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="range"]:focus-visible {
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slider-track);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: -6px;
+      border-radius: 50%;
+      border: none;
+      background: var(--slider-thumb);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slider-track);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none;
+      background: var(--slider-thumb);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .source-card[data-source="1"] input[type="range"]::-webkit-slider-thumb {
+      background: var(--source1-color);
+    }
+
+    .source-card[data-source="1"] input[type="range"]::-moz-range-thumb {
+      background: var(--source1-color);
+    }
+
+    .source-card[data-source="2"] input[type="range"]::-webkit-slider-thumb {
+      background: var(--source2-color);
+    }
+
+    .source-card[data-source="2"] input[type="range"]::-moz-range-thumb {
+      background: var(--source2-color);
+    }
+
+    .source-card.disabled input[type="range"] {
+      pointer-events: none;
+    }
+
+    /* ─── Buttons ─── */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      min-height: 44px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .btn-primary {
+      background: var(--btn-primary);
+      color: var(--btn-text);
+    }
+
+    .btn-primary:hover {
+      background: var(--btn-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+
+    .sim-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .sim-actions .btn {
+      flex: 1;
+    }
+
+    /* ─── Separator ─── */
+    .separator {
+      height: 1px;
+      background: var(--border);
+      margin: 0.1rem 0;
+    }
+
+    /* ─── Status ─── */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 0 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .status-chip.running {
+      background: rgba(14, 165, 233, 0.15);
+      border-color: rgba(14, 165, 233, 0.28);
+      color: #0075b1;
+    }
+
+    [data-theme="dark"] .status-chip.running {
+      color: #9ddfff;
+    }
+
+    .status-chip.paused {
+      background: rgba(127, 138, 162, 0.14);
+      border-color: rgba(127, 138, 162, 0.3);
+      color: #63708a;
+    }
+
+    [data-theme="dark"] .status-chip.paused {
+      color: #b4bfd6;
+    }
+
+    .keyboard-hint {
+      margin: 0;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      line-height: 1.5;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    /* ─── Touch / Coarse Pointer ─── */
+    @media (pointer: coarse) {
+      .btn,
+      #theme-button {
+        min-height: 48px;
+      }
+
+      #theme-button {
+        min-width: 48px;
+      }
+
+      input[type="range"] {
+        height: 36px;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        width: 22px;
+        height: 22px;
+        margin-top: -8px;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      #app {
+        height: auto;
+        min-height: 100%;
+      }
+
+      #workspace {
+        grid-template-columns: 1fr;
+      }
+
+      #simPanel {
+        min-height: 50vh;
+        order: 1;
+      }
+
+      #controlsPanel {
+        order: 2;
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #titleBanner {
+        width: calc(100% - 24px);
+        margin: 12px auto 0;
+        min-height: 52px;
+        border-radius: 18px;
+        padding: 8px 12px;
+      }
+
+      #workspace {
+        width: calc(100% - 24px);
+      }
+
+      .banner-logo img {
+        height: 28px;
+      }
+
+      .banner-title {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <header id="titleBanner">
+      <a href="/" class="banner-logo"><img src="/assets/panphy.png" alt="PanPhy Labs"></a>
+      <h1 class="banner-title gradient-text">Ripple Tank</h1>
+      <div class="banner-actions">
+        <button id="theme-button" title="Toggle theme">
+          <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div id="workspace">
+      <div id="simPanel" class="panel">
+        <canvas id="simCanvas"></canvas>
+        <p class="sim-hint">Drag to rotate · Scroll to zoom</p>
+      </div>
+
+      <div id="controlsPanel" class="panel">
+        <div class="controls-header">
+          <h2>Controls</h2>
+          <p>Two-source interference simulation</p>
+        </div>
+
+        <div class="status-row">
+          <span id="statusChip" class="status-chip running">RUNNING</span>
+        </div>
+
+        <!-- Source 1 -->
+        <div class="source-card enabled" data-source="1" id="source1Card">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot"></span>
+              <h3 class="source-title">Source 1</h3>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="s1Toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="s1Freq">Frequency</label>
+              <span id="s1FreqVal">2.0 Hz</span>
+            </div>
+            <input type="range" id="s1Freq" min="0.5" max="5" step="0.1" value="2.0">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="s1Amp">Amplitude</label>
+              <span id="s1AmpVal">0.50</span>
+            </div>
+            <input type="range" id="s1Amp" min="0" max="1" step="0.01" value="0.5">
+          </div>
+        </div>
+
+        <!-- Source 2 -->
+        <div class="source-card enabled" data-source="2" id="source2Card">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot"></span>
+              <h3 class="source-title">Source 2</h3>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="s2Toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="s2Freq">Frequency</label>
+              <span id="s2FreqVal">2.0 Hz</span>
+            </div>
+            <input type="range" id="s2Freq" min="0.5" max="5" step="0.1" value="2.0">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="s2Amp">Amplitude</label>
+              <span id="s2AmpVal">0.50</span>
+            </div>
+            <input type="range" id="s2Amp" min="0" max="1" step="0.01" value="0.5">
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="sim-actions">
+          <button id="playPauseBtn" class="btn btn-primary">⏸ Pause</button>
+          <button id="resetBtn" class="btn btn-secondary">↺ Reset</button>
+        </div>
+
+        <p class="keyboard-hint">
+          <kbd>Space</kbd> Play / Pause &nbsp; <kbd>R</kbd> Reset
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ─── State ───
+    const state = {
+      playing: true,
+      time: 0,
+      speed: 4.0,
+      source1: { enabled: true, freq: 2.0, amp: 0.5 },
+      source2: { enabled: true, freq: 2.0, amp: 0.5 }
+    };
+
+    const SOURCE1_POS = new THREE.Vector2(-3, 0);
+    const SOURCE2_POS = new THREE.Vector2(3, 0);
+    const PLANE_SIZE = 16;
+    const PLANE_SEGMENTS = 200;
+
+    // ─── Theme Colors ───
+    const themeColors = {
+      light: {
+        sceneBg: 0xe8edf3,
+        baseColor: new THREE.Vector3(0.38, 0.55, 0.72),
+        deepColor: new THREE.Vector3(0.16, 0.24, 0.38),
+        source1Color: new THREE.Vector3(0.0, 0.72, 0.70),
+        source2Color: new THREE.Vector3(0.50, 0.40, 0.86)
+      },
+      dark: {
+        sceneBg: 0x0a0c14,
+        baseColor: new THREE.Vector3(0.16, 0.26, 0.44),
+        deepColor: new THREE.Vector3(0.04, 0.07, 0.14),
+        source1Color: new THREE.Vector3(0.0, 0.62, 0.60),
+        source2Color: new THREE.Vector3(0.46, 0.36, 0.80)
+      }
+    };
+
+    // ─── DOM Elements ───
+    const canvas = document.getElementById('simCanvas');
+    const simPanel = document.getElementById('simPanel');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusChip = document.getElementById('statusChip');
+    const themeBtn = document.getElementById('theme-button');
+    const themeIcon = document.getElementById('themeIcon');
+
+    const s1Toggle = document.getElementById('s1Toggle');
+    const s1Freq = document.getElementById('s1Freq');
+    const s1Amp = document.getElementById('s1Amp');
+    const s1FreqVal = document.getElementById('s1FreqVal');
+    const s1AmpVal = document.getElementById('s1AmpVal');
+    const source1Card = document.getElementById('source1Card');
+
+    const s2Toggle = document.getElementById('s2Toggle');
+    const s2Freq = document.getElementById('s2Freq');
+    const s2Amp = document.getElementById('s2Amp');
+    const s2FreqVal = document.getElementById('s2FreqVal');
+    const s2AmpVal = document.getElementById('s2AmpVal');
+    const source2Card = document.getElementById('source2Card');
+
+    // ─── Shaders ───
+    const vertexShader = `
+      uniform float uTime;
+      uniform float uSpeed;
+      uniform float uS1On;
+      uniform float uS1Amp;
+      uniform float uS1Freq;
+      uniform vec2 uS1Pos;
+      uniform float uS2On;
+      uniform float uS2Amp;
+      uniform float uS2Freq;
+      uniform vec2 uS2Pos;
+
+      varying vec3 vWorldPos;
+      varying vec3 vNormal;
+      varying float vH1;
+      varying float vH2;
+
+      const float PI = 3.14159265359;
+      const float HALF_SIZE = ${(PLANE_SIZE / 2).toFixed(1)};
+      const float EDGE_WIDTH = 1.8;
+
+      float calcWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade) {
+        float r = distance(pos, src);
+        float k = 2.0 * PI * freq / speed;
+        float omega = 2.0 * PI * freq;
+        float decay = 1.0 / (1.0 + 0.25 * r);
+        return amp * fade * cos(k * r - omega * time) * decay;
+      }
+
+      vec2 calcGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade) {
+        float r = distance(pos, src);
+        if (r < 0.01) return vec2(0.0);
+        float k = 2.0 * PI * freq / speed;
+        float omega = 2.0 * PI * freq;
+        float decay = 1.0 / (1.0 + 0.25 * r);
+        vec2 dir = (pos - src) / r;
+        float dh_dr = amp * fade * (
+          -k * sin(k * r - omega * time) * decay
+          - cos(k * r - omega * time) * 0.25 * decay * decay
+        );
+        return dir * dh_dr;
+      }
+
+      void main() {
+        vec3 pos = position;
+        vec2 xz = pos.xz;
+
+        float edgeDist = min(HALF_SIZE - abs(xz.x), HALF_SIZE - abs(xz.y));
+        float edgeFade = smoothstep(0.0, EDGE_WIDTH, edgeDist);
+
+        float h1 = 0.0, h2 = 0.0;
+        vec2 grad = vec2(0.0);
+
+        if (uS1On > 0.5) {
+          h1 = calcWave(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade);
+          grad += calcGrad(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade);
+        }
+        if (uS2On > 0.5) {
+          h2 = calcWave(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade);
+          grad += calcGrad(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade);
+        }
+
+        pos.y = h1 + h2;
+        vH1 = h1;
+        vH2 = h2;
+        vNormal = normalize(vec3(-grad.x, 1.0, -grad.y));
+        vWorldPos = (modelMatrix * vec4(pos, 1.0)).xyz;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `;
+
+    const fragmentShader = `
+      uniform vec3 uColor1;
+      uniform vec3 uColor2;
+      uniform vec3 uBaseColor;
+      uniform vec3 uDeepColor;
+      uniform vec3 uLightDir;
+
+      varying vec3 vWorldPos;
+      varying vec3 vNormal;
+      varying float vH1;
+      varying float vH2;
+
+      void main() {
+        vec3 N = normalize(vNormal);
+        vec3 L = normalize(uLightDir);
+        vec3 V = normalize(cameraPosition - vWorldPos);
+
+        // Diffuse lighting
+        float NdotL = max(dot(N, L), 0.0);
+        float ambient = 0.38;
+        float diffuse = ambient + (1.0 - ambient) * NdotL;
+
+        // Specular (Blinn-Phong)
+        vec3 H = normalize(L + V);
+        float NdotH = max(dot(N, H), 0.0);
+        float spec = pow(NdotH, 80.0) * 0.45;
+
+        // Height-based coloring
+        float totalH = vH1 + vH2;
+        float heightFactor = clamp(totalH * 1.5 + 0.5, 0.0, 1.0);
+        vec3 color = mix(uDeepColor, uBaseColor, heightFactor);
+
+        // Source tinting — crests get colored, troughs darken
+        float t1 = clamp(vH1 * 3.5, 0.0, 1.0);
+        float t2 = clamp(vH2 * 3.5, 0.0, 1.0);
+        color = mix(color, uColor1, t1 * 0.5);
+        color = mix(color, uColor2, t2 * 0.5);
+
+        // Constructive interference brightening
+        float constructive = clamp((vH1 + vH2) * 2.0, 0.0, 1.0);
+        color += vec3(0.12) * constructive * constructive;
+
+        // Apply lighting
+        color *= diffuse;
+        color += vec3(1.0) * spec;
+
+        // Fresnel rim
+        float fresnel = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+        color += vec3(0.06) * fresnel;
+
+        gl_FragColor = vec4(color, 0.96);
+      }
+    `;
+
+    // ─── Three.js Setup ───
+    function isDark() {
+      return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+
+    function getColors() {
+      return isDark() ? themeColors.dark : themeColors.light;
+    }
+
+    const scene = new THREE.Scene();
+    const colors = getColors();
+    scene.background = new THREE.Color(colors.sceneBg);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+    camera.position.set(0, 13, 13);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 0);
+    controls.minPolarAngle = 0.1;
+    controls.maxPolarAngle = Math.PI / 2 - 0.02;
+    controls.minDistance = 5;
+    controls.maxDistance = 30;
+    controls.enablePan = false;
+
+    // Water surface
+    const geometry = new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE, PLANE_SEGMENTS, PLANE_SEGMENTS);
+    geometry.rotateX(-Math.PI / 2);
+
+    const uniforms = {
+      uTime: { value: 0 },
+      uSpeed: { value: state.speed },
+      uS1On: { value: 1.0 },
+      uS1Amp: { value: state.source1.amp },
+      uS1Freq: { value: state.source1.freq },
+      uS1Pos: { value: SOURCE1_POS },
+      uS2On: { value: 1.0 },
+      uS2Amp: { value: state.source2.amp },
+      uS2Freq: { value: state.source2.freq },
+      uS2Pos: { value: SOURCE2_POS },
+      uColor1: { value: colors.source1Color.clone() },
+      uColor2: { value: colors.source2Color.clone() },
+      uBaseColor: { value: colors.baseColor.clone() },
+      uDeepColor: { value: colors.deepColor.clone() },
+      uLightDir: { value: new THREE.Vector3(4, 10, 6).normalize() }
+    };
+
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+
+    const water = new THREE.Mesh(geometry, material);
+    scene.add(water);
+
+    // Tank edge outline
+    const edgeGeo = new THREE.EdgesGeometry(
+      new THREE.BoxGeometry(PLANE_SIZE + 0.1, 0.4, PLANE_SIZE + 0.1)
+    );
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: isDark() ? 0x3a4050 : 0xb0bac8,
+      transparent: true,
+      opacity: 0.5
+    });
+    const tankEdge = new THREE.LineSegments(edgeGeo, edgeMat);
+    tankEdge.position.y = -0.2;
+    scene.add(tankEdge);
+
+    // ─── Resize Handling ───
+    function onResize() {
+      const rect = simPanel.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w === 0 || h === 0) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    const resizeObserver = new ResizeObserver(onResize);
+    resizeObserver.observe(simPanel);
+    onResize();
+
+    // ─── Theme ───
+    function updateThemeIcon() {
+      const dark = isDark();
+      themeIcon.innerHTML = dark
+        ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+        : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    }
+
+    function applyThemeToScene() {
+      const c = getColors();
+      scene.background.set(c.sceneBg);
+      uniforms.uBaseColor.value.copy(c.baseColor);
+      uniforms.uDeepColor.value.copy(c.deepColor);
+      uniforms.uColor1.value.copy(c.source1Color);
+      uniforms.uColor2.value.copy(c.source2Color);
+      edgeMat.color.set(isDark() ? 0x3a4050 : 0xb0bac8);
+    }
+
+    function toggleTheme() {
+      const dark = isDark();
+      const next = dark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+
+      const tc = document.querySelector('meta[name="theme-color"]');
+      const sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+      if (next === 'dark') {
+        localStorage.setItem('ripple-tank-dark', '1');
+        if (tc) tc.setAttribute('content', '#0f1014');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      } else {
+        localStorage.removeItem('ripple-tank-dark');
+        if (tc) tc.setAttribute('content', '#f8f9fa');
+        if (sb) sb.setAttribute('content', 'default');
+      }
+
+      updateThemeIcon();
+      applyThemeToScene();
+    }
+
+    themeBtn.addEventListener('click', toggleTheme);
+    updateThemeIcon();
+
+    // ─── Controls ───
+    function updateSourceCard(card, enabled) {
+      card.classList.toggle('enabled', enabled);
+      card.classList.toggle('disabled', !enabled);
+    }
+
+    function updatePlayPauseUI() {
+      if (state.playing) {
+        playPauseBtn.textContent = '⏸ Pause';
+        statusChip.textContent = 'RUNNING';
+        statusChip.className = 'status-chip running';
+      } else {
+        playPauseBtn.textContent = '▶ Play';
+        statusChip.textContent = 'PAUSED';
+        statusChip.className = 'status-chip paused';
+      }
+    }
+
+    function togglePlayPause() {
+      state.playing = !state.playing;
+      updatePlayPauseUI();
+    }
+
+    function resetSim() {
+      state.time = 0;
+      uniforms.uTime.value = 0;
+      state.playing = true;
+      updatePlayPauseUI();
+    }
+
+    // Source 1 controls
+    s1Toggle.addEventListener('change', () => {
+      state.source1.enabled = s1Toggle.checked;
+      uniforms.uS1On.value = s1Toggle.checked ? 1.0 : 0.0;
+      updateSourceCard(source1Card, s1Toggle.checked);
+    });
+
+    s1Freq.addEventListener('input', () => {
+      state.source1.freq = parseFloat(s1Freq.value);
+      uniforms.uS1Freq.value = state.source1.freq;
+      s1FreqVal.textContent = state.source1.freq.toFixed(1) + ' Hz';
+    });
+
+    s1Amp.addEventListener('input', () => {
+      state.source1.amp = parseFloat(s1Amp.value);
+      uniforms.uS1Amp.value = state.source1.amp;
+      s1AmpVal.textContent = state.source1.amp.toFixed(2);
+    });
+
+    // Source 2 controls
+    s2Toggle.addEventListener('change', () => {
+      state.source2.enabled = s2Toggle.checked;
+      uniforms.uS2On.value = s2Toggle.checked ? 1.0 : 0.0;
+      updateSourceCard(source2Card, s2Toggle.checked);
+    });
+
+    s2Freq.addEventListener('input', () => {
+      state.source2.freq = parseFloat(s2Freq.value);
+      uniforms.uS2Freq.value = state.source2.freq;
+      s2FreqVal.textContent = state.source2.freq.toFixed(1) + ' Hz';
+    });
+
+    s2Amp.addEventListener('input', () => {
+      state.source2.amp = parseFloat(s2Amp.value);
+      uniforms.uS2Amp.value = state.source2.amp;
+      s2AmpVal.textContent = state.source2.amp.toFixed(2);
+    });
+
+    // Buttons
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    resetBtn.addEventListener('click', resetSim);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'KeyR') {
+        resetSim();
+      }
+    });
+
+    // ─── Animation Loop ───
+    let lastTime = null;
+
+    function animate(timestamp) {
+      requestAnimationFrame(animate);
+
+      if (lastTime === null) lastTime = timestamp;
+      const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+      lastTime = timestamp;
+
+      if (state.playing) {
+        state.time += dt;
+        uniforms.uTime.value = state.time;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+
+</html>
