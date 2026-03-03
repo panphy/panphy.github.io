@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-03-02T12:00:00Z';
+const BUILD_ID = '2026-03-03T12:00:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -59,6 +59,7 @@ const ASSETS_TO_CACHE = [
   '/tools/tone_generator.html',
 
   // Simulations
+  '/simulations/interference.html',
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',
   '/simulations/lorentz.html',
