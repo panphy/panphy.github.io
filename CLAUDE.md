@@ -53,6 +53,7 @@
 ├── simulations/            # Physics simulations
 │   ├── superposition.html
 │   ├── standing_wave.html
+│   ├── interference.html   # Two-source wave interference (3D ripple tank)
 │   ├── lorentz.html
 │   ├── lorentz_learn.html  # Lorentz sim learning companion
 │   ├── collision.html      # 3D collision sim (entry point)
