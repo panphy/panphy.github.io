@@ -1122,6 +1122,7 @@
     const MIN_DIST = PARTICLE_RADIUS * 2; // visual-contact spacing floor
     const LIQUID_BULK_STIFFNESS = 8.0;
     const LIQUID_THERMAL_EXPANSION = 0.03; // allow slight expansion across liquid range
+    const LIQUID_RMS_AT_MELT_SCALE = 1.01; // slight expansion from solid to liquid
     let liquidTargetRms = null;
 
     function computeRmsRadius(outCenter) {
@@ -1180,7 +1181,7 @@
       if (isLiquid && n > 1) {
         const currentRms = computeRmsRadius(_liquidCom);
         if (liquidTargetRms === null) {
-          liquidTargetRms = currentRms;
+          liquidTargetRms = getNominalLiquidTargetRms();
         }
 
         const liquidT = (T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
@@ -1480,6 +1481,21 @@
           p.equilibrium.copy(p.pos);
         }
         liquidTargetRms = computeRmsRadius(_liquidCom);
+      } else if (oldState === 'gas' && newState === 'liquid') {
+        // Condensation: liquid should target condensed density immediately.
+        liquidTargetRms = getNominalLiquidTargetRms();
+
+        // Remove bulk drift and reduce kinetic energy entering liquid.
+        const meanVel = new THREE.Vector3();
+        for (const p of particleData) {
+          meanVel.add(p.vel);
+        }
+        if (particleData.length > 0) {
+          meanVel.multiplyScalar(1 / particleData.length);
+        }
+        for (const p of particleData) {
+          p.vel.sub(meanVel).multiplyScalar(0.62);
+        }
       } else if (oldState !== 'solid' && newState === 'solid') {
         // Re-establish lattice from current positions (no site memory)
         resetLatticeEquilibria({ reassignFromCurrent: true });
@@ -1495,6 +1511,30 @@
     function getBaseLatticeSpacing() {
       const n = state.gridSize;
       return Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+    }
+
+    function getLatticeUnitRms(n) {
+      const unitOffset = (n - 1) * 0.5;
+      let unitSumSq = 0;
+      let unitCount = 0;
+      for (let ix = 0; ix < n; ix++) {
+        const x = ix - unitOffset;
+        for (let iy = 0; iy < n; iy++) {
+          const y = iy - unitOffset;
+          for (let iz = 0; iz < n; iz++) {
+            const z = iz - unitOffset;
+            unitSumSq += x * x + y * y + z * z;
+            unitCount++;
+          }
+        }
+      }
+      return Math.sqrt(unitSumSq / (unitCount || 1));
+    }
+
+    function getNominalLiquidTargetRms() {
+      const n = state.gridSize;
+      const spacing = getBaseLatticeSpacing();
+      return getLatticeUnitRms(n) * spacing * LIQUID_RMS_AT_MELT_SCALE;
     }
 
     function buildLatticeSites(spacing, center, latticeSites) {
@@ -1524,23 +1564,7 @@
       // scale spacing to match current density (with slight solid contraction).
       if (reassignFromCurrent && particleData.length > 0) {
         const currentRms = computeRmsRadius(center);
-
-        const unitOffset = (n - 1) * 0.5;
-        let unitSumSq = 0;
-        let unitCount = 0;
-        for (let ix = 0; ix < n; ix++) {
-          const x = ix - unitOffset;
-          for (let iy = 0; iy < n; iy++) {
-            const y = iy - unitOffset;
-            for (let iz = 0; iz < n; iz++) {
-              const z = iz - unitOffset;
-              unitSumSq += x * x + y * y + z * z;
-              unitCount++;
-            }
-          }
-        }
-
-        const unitRms = Math.sqrt(unitSumSq / (unitCount || 1));
+        const unitRms = getLatticeUnitRms(n);
         const targetRms = currentRms * 0.98; // solid is slightly denser than liquid
         const fittedSpacing = unitRms > 0 ? targetRms / unitRms : spacing;
         const maxSpacing = getBaseLatticeSpacing();
