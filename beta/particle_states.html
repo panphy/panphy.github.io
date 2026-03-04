@@ -1481,8 +1481,8 @@
         }
         liquidTargetRms = computeRmsRadius(_liquidCom);
       } else if (oldState !== 'solid' && newState === 'solid') {
-        // Re-establish lattice
-        resetLatticeEquilibria();
+        // Re-establish lattice from current positions (no site memory)
+        resetLatticeEquilibria({ reassignFromCurrent: true });
         liquidTargetRms = null;
       }
       if (newState !== 'liquid') {
@@ -1492,23 +1492,101 @@
       updateStateUI();
     });
 
-    function resetLatticeEquilibria() {
+    function getBaseLatticeSpacing() {
       const n = state.gridSize;
-      const spacing = Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+      return Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+    }
+
+    function buildLatticeSites(spacing, center, latticeSites) {
+      const n = state.gridSize;
       const offset = (n - 1) * spacing / 2;
-      let idx = 0;
       for (let ix = 0; ix < n; ix++) {
         for (let iy = 0; iy < n; iy++) {
           for (let iz = 0; iz < n; iz++) {
-            if (idx < particleData.length) {
-              particleData[idx].equilibrium.set(
-                ix * spacing - offset,
-                iy * spacing - offset,
-                iz * spacing - offset
-              );
-            }
-            idx++;
+            latticeSites.push(new THREE.Vector3(
+              center.x + ix * spacing - offset,
+              center.y + iy * spacing - offset,
+              center.z + iz * spacing - offset
+            ));
           }
+        }
+      }
+    }
+
+    function resetLatticeEquilibria(options = {}) {
+      const { reassignFromCurrent = false } = options;
+      const n = state.gridSize;
+
+      let center = new THREE.Vector3(0, 0, 0);
+      let spacing = getBaseLatticeSpacing();
+
+      // On liquid -> solid transition, rebuild lattice around the current COM and
+      // scale spacing to match current density (with slight solid contraction).
+      if (reassignFromCurrent && particleData.length > 0) {
+        const currentRms = computeRmsRadius(center);
+
+        const unitOffset = (n - 1) * 0.5;
+        let unitSumSq = 0;
+        let unitCount = 0;
+        for (let ix = 0; ix < n; ix++) {
+          const x = ix - unitOffset;
+          for (let iy = 0; iy < n; iy++) {
+            const y = iy - unitOffset;
+            for (let iz = 0; iz < n; iz++) {
+              const z = iz - unitOffset;
+              unitSumSq += x * x + y * y + z * z;
+              unitCount++;
+            }
+          }
+        }
+
+        const unitRms = Math.sqrt(unitSumSq / (unitCount || 1));
+        const targetRms = currentRms * 0.98; // solid is slightly denser than liquid
+        const fittedSpacing = unitRms > 0 ? targetRms / unitRms : spacing;
+        const maxSpacing = getBaseLatticeSpacing();
+        spacing = Math.min(maxSpacing, Math.max(MIN_DIST * 1.15, fittedSpacing));
+      }
+
+      // Keep the lattice fully inside the container even if COM drifts near a wall.
+      const halfSpan = (n - 1) * spacing * 0.5;
+      const wallLimit = CONTAINER_HALF - PARTICLE_RADIUS - 0.2;
+      const centerLimit = Math.max(0, wallLimit - halfSpan);
+      center.x = THREE.MathUtils.clamp(center.x, -centerLimit, centerLimit);
+      center.y = THREE.MathUtils.clamp(center.y, -centerLimit, centerLimit);
+      center.z = THREE.MathUtils.clamp(center.z, -centerLimit, centerLimit);
+
+      const latticeSites = [];
+      buildLatticeSites(spacing, center, latticeSites);
+
+      if (!reassignFromCurrent) {
+        for (let i = 0; i < particleData.length && i < latticeSites.length; i++) {
+          particleData[i].equilibrium.copy(latticeSites[i]);
+        }
+        return;
+      }
+
+      // Assign particles to nearby lattice sites without identity memory.
+      // Greedy matching (farthest particles first) reduces crossings and jitter.
+      const used = new Uint8Array(latticeSites.length);
+      const order = particleData
+        .map((p, idx) => ({ idx, r2: p.pos.distanceToSquared(center) }))
+        .sort((a, b) => b.r2 - a.r2);
+
+      for (const entry of order) {
+        const p = particleData[entry.idx];
+        let bestSite = -1;
+        let bestDistSq = Infinity;
+        for (let s = 0; s < latticeSites.length; s++) {
+          if (used[s]) continue;
+          const dSq = p.pos.distanceToSquared(latticeSites[s]);
+          if (dSq < bestDistSq) {
+            bestDistSq = dSq;
+            bestSite = s;
+          }
+        }
+        if (bestSite >= 0) {
+          used[bestSite] = 1;
+          p.equilibrium.copy(latticeSites[bestSite]);
         }
       }
     }
