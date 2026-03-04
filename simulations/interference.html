@@ -332,6 +332,26 @@
       opacity: 0.5;
     }
 
+    .source-card.settings-card {
+      border-left: 4px solid var(--brand-primary);
+    }
+
+    .settings-dot {
+      background: var(--brand-primary);
+    }
+
+    [data-theme="dark"] .settings-dot {
+      background: var(--brand-secondary);
+    }
+
+    .source-card.settings-card input[type="range"]::-webkit-slider-thumb {
+      background: var(--brand-primary);
+    }
+
+    .source-card.settings-card input[type="range"]::-moz-range-thumb {
+      background: var(--brand-primary);
+    }
+
     .source-header {
       display: flex;
       justify-content: space-between;
@@ -806,6 +826,30 @@
           </div>
         </div>
 
+        <!-- Settings -->
+        <div class="source-card settings-card">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot settings-dot"></span>
+              <h3 class="source-title">Settings</h3>
+            </div>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="separation">Source Separation</label>
+              <span id="separationVal">6.0</span>
+            </div>
+            <input type="range" id="separation" min="0.5" max="12" step="0.1" value="6.0">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="animSpeed">Animation Speed</label>
+              <span id="animSpeedVal">1.0×</span>
+            </div>
+            <input type="range" id="animSpeed" min="0.1" max="3" step="0.1" value="1.0">
+          </div>
+        </div>
+
         <div class="separator"></div>
 
         <div class="sim-actions">
@@ -838,6 +882,8 @@
       playing: true,
       time: 0,
       speed: 4.0,
+      separation: 6.0,
+      timeScale: 1.0,
       source1: { enabled: true, freq: 2.0, amp: 0.5 },
       source2: { enabled: true, freq: 2.0, amp: 0.5 }
     };
@@ -886,6 +932,11 @@
     const s2FreqVal = document.getElementById('s2FreqVal');
     const s2AmpVal = document.getElementById('s2AmpVal');
     const source2Card = document.getElementById('source2Card');
+
+    const separationSlider = document.getElementById('separation');
+    const separationVal = document.getElementById('separationVal');
+    const animSpeedSlider = document.getElementById('animSpeed');
+    const animSpeedVal = document.getElementById('animSpeedVal');
 
     // ─── Shaders ───
     const vertexShader = `
@@ -1169,6 +1220,19 @@
     function resetSim() {
       state.time = 0;
       uniforms.uTime.value = 0;
+
+      // Reset separation
+      state.separation = 6.0;
+      SOURCE1_POS.x = -3;
+      SOURCE2_POS.x = 3;
+      separationSlider.value = 6.0;
+      separationVal.textContent = '6.0';
+
+      // Reset animation speed
+      state.timeScale = 1.0;
+      animSpeedSlider.value = 1.0;
+      animSpeedVal.textContent = '1.0\u00d7';
+
       state.playing = true;
       updatePlayPauseUI();
     }
@@ -1211,6 +1275,20 @@
       s2AmpVal.textContent = state.source2.amp.toFixed(2);
     });
 
+    // Settings controls
+    separationSlider.addEventListener('input', () => {
+      state.separation = parseFloat(separationSlider.value);
+      const half = state.separation / 2;
+      SOURCE1_POS.x = -half;
+      SOURCE2_POS.x = half;
+      separationVal.textContent = state.separation.toFixed(1);
+    });
+
+    animSpeedSlider.addEventListener('input', () => {
+      state.timeScale = parseFloat(animSpeedSlider.value);
+      animSpeedVal.textContent = state.timeScale.toFixed(1) + '\u00d7';
+    });
+
     // Buttons
     playPauseBtn.addEventListener('click', togglePlayPause);
     resetBtn.addEventListener('click', resetSim);
@@ -1237,7 +1315,7 @@
       lastTime = timestamp;
 
       if (state.playing) {
-        state.time += dt;
+        state.time += dt * state.timeScale;
         uniforms.uTime.value = state.time;
       }
 
