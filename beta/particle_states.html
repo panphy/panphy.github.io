@@ -1113,6 +1113,7 @@
     // ─── Physics Simulation ───
     const _force = new THREE.Vector3();
     const _diff = new THREE.Vector3();
+    const MIN_DIST = 0.35; // soft-core floor — prevents singularities
 
     function stepPhysics(dt) {
       const T = state.temperature;
@@ -1124,13 +1125,13 @@
       if (T < MELTING_POINT) {
         // Solid: strong spring to lattice, small vibrations
         const solidness = 1 - T / MELTING_POINT;
-        springK = 8.0 + solidness * 12.0; // strong spring
+        springK = 8.0 + solidness * 12.0;
         dampingCoeff = 2.0;
         thermalKick = T * 0.0015;
       } else if (T < BOILING_POINT) {
         // Liquid: weak/no spring, particles interact but flow
         const liquidness = (T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
-        springK = 2.0 * (1 - liquidness * 0.8); // weakening spring
+        springK = 2.0 * (1 - liquidness * 0.8);
         dampingCoeff = 1.5;
         thermalKick = T * 0.002;
       } else {
@@ -1150,44 +1151,36 @@
           _force.addScaledVector(_diff, springK);
         }
 
-        // Intermolecular forces (Lennard-Jones-like, simplified)
-        // Only significant in liquid state to keep particles clustered
-        if (T >= MELTING_POINT * 0.8 && T < BOILING_POINT + 80) {
+        // Soft-core pairwise interactions (liquid + near-transition)
+        // Uses smoothed repulsion that never diverges, plus weak attraction for liquid cohesion
+        if (T >= MELTING_POINT * 0.8) {
           for (let j = 0; j < n; j++) {
             if (i === j) continue;
             _diff.subVectors(particleData[j].pos, p.pos);
             const distSq = _diff.lengthSq();
-            const dist = Math.sqrt(distSq);
+            // Use soft-core distance: never let effective distance fall below MIN_DIST
+            const dist = Math.max(Math.sqrt(distSq), MIN_DIST);
+            const cutoff = T < BOILING_POINT ? 2.0 : 1.0;
 
-            if (dist < 0.01) continue;
+            if (dist < cutoff) {
+              _diff.divideScalar(dist); // normalise using clamped dist
 
-            // Repulsive force at close range
-            const sigma = 0.6;
-            const epsilon = T < BOILING_POINT ? 1.5 : 0.5;
+              // Soft repulsion: linear ramp that saturates at MIN_DIST
+              const overlap = 1 - dist / cutoff; // 0 at cutoff, 1 at centre
+              const repulseStrength = T < BOILING_POINT ? 6.0 : 3.0;
+              const fRepulse = repulseStrength * overlap * overlap; // quadratic, finite
 
-            if (dist < sigma * 2.5) {
-              const sr6 = Math.pow(sigma / dist, 6);
-              const sr12 = sr6 * sr6;
-              const fMag = 24 * epsilon * (2 * sr12 - sr6) / dist;
-              // Clamp force to prevent explosions
-              const clampedF = Math.max(-50, Math.min(50, fMag));
-              _diff.normalize();
-              _force.addScaledVector(_diff, clampedF);
-            }
-          }
-        }
+              // Weak attraction shell for liquid cohesion (pulls particles together at mid-range)
+              let fAttract = 0;
+              if (T >= MELTING_POINT && T < BOILING_POINT + 40) {
+                const attractRange = 1.6;
+                if (dist > cutoff * 0.5 && dist < attractRange) {
+                  const t = (dist - cutoff * 0.5) / (attractRange - cutoff * 0.5);
+                  fAttract = -1.2 * t * (1 - t) * 4; // bell-shaped, peak ≈ −1.2
+                }
+              }
 
-        // Repulsion only (gas state) - just prevent overlap
-        if (T >= BOILING_POINT) {
-          for (let j = 0; j < n; j++) {
-            if (i === j) continue;
-            _diff.subVectors(p.pos, particleData[j].pos);
-            const distSq = _diff.lengthSq();
-            if (distSq < 0.5 * 0.5 && distSq > 0.0001) {
-              const dist = Math.sqrt(distSq);
-              _diff.divideScalar(dist);
-              const repulse = 5.0 / distSq;
-              _force.addScaledVector(_diff, Math.min(repulse, 30));
+              _force.addScaledVector(_diff, fRepulse + fAttract);
             }
           }
         }
@@ -1200,16 +1193,17 @@
         _force.y += (Math.random() - 0.5) * thermalKick * 60;
         _force.z += (Math.random() - 0.5) * thermalKick * 60;
 
-        // Integrate
+        // Integrate velocity
         p.vel.addScaledVector(_force, dt / p.mass);
 
-        // Velocity cap to prevent instability
-        const maxSpeed = 4 + T * 0.02;
+        // Velocity cap — tighter limit prevents sudden jumps
+        const maxSpeed = 3 + T * 0.008;
         const speed = p.vel.length();
         if (speed > maxSpeed) {
           p.vel.multiplyScalar(maxSpeed / speed);
         }
 
+        // Integrate position
         p.pos.addScaledVector(p.vel, dt);
 
         // Container walls (elastic bounce)
@@ -1221,6 +1215,23 @@
           } else if (p.pos[axis] < -wallLimit) {
             p.pos[axis] = -wallLimit;
             p.vel[axis] *= -0.8;
+          }
+        }
+      }
+
+      // Position-based overlap resolution (second pass)
+      // Gently push overlapping particles apart without adding velocity spikes
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          _diff.subVectors(particleData[i].pos, particleData[j].pos);
+          const distSq = _diff.lengthSq();
+          const minSep = MIN_DIST * 2;
+          if (distSq < minSep * minSep && distSq > 0.0001) {
+            const dist = Math.sqrt(distSq);
+            const overlap = (minSep - dist) * 0.5;
+            _diff.divideScalar(dist); // normalise
+            particleData[i].pos.addScaledVector(_diff, overlap * 0.5);
+            particleData[j].pos.addScaledVector(_diff, -overlap * 0.5);
           }
         }
       }
