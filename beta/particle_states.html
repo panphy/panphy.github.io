@@ -1173,6 +1173,8 @@
     const MELT_RATE_COOL = 0.32;
     const BOIL_RATE_HEAT = 0.35;
     const BOIL_RATE_COOL = 0.42;
+    const MELT_STRUCTURE_THRESHOLD = 0.82;
+    const SOLID_STRUCTURE_THRESHOLD = 0.9;
     let liquidTargetRms = null;
 
     function computeRmsRadius(outCenter) {
@@ -1246,8 +1248,10 @@
 
       const next = getPhaseFractions();
 
-      const meltedOut = prev.solid >= 0.9 && next.solid < 0.86;
-      const solidified = prev.solid <= 0.86 && next.solid > 0.92;
+      const meltedOut = prev.solid >= MELT_STRUCTURE_THRESHOLD
+        && next.solid < MELT_STRUCTURE_THRESHOLD;
+      const solidified = prev.solid <= SOLID_STRUCTURE_THRESHOLD
+        && next.solid > SOLID_STRUCTURE_THRESHOLD;
       const condensing = prev.gas >= 0.75 && next.gas < 0.65 && next.liquid > 0.08;
 
       if (meltedOut) {
