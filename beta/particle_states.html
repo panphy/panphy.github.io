@@ -1123,6 +1123,7 @@
     const LIQUID_BULK_STIFFNESS = 8.0;
     const LIQUID_THERMAL_EXPANSION = 0.03; // allow slight expansion across liquid range
     const LIQUID_RMS_AT_MELT_SCALE = 1.01; // slight expansion from solid to liquid
+    const BOILING_BLEND_WIDTH = 35; // smooth gas<->liquid crossover half-width
     let liquidTargetRms = null;
 
     function computeRmsRadius(outCenter) {
@@ -1148,12 +1149,32 @@
       return Math.sqrt(sumSq / n);
     }
 
+    function clamp01(value) {
+      return Math.min(1, Math.max(0, value));
+    }
+
+    function smoothstep(edge0, edge1, x) {
+      if (edge1 === edge0) return x < edge0 ? 0 : 1;
+      const t = clamp01((x - edge0) / (edge1 - edge0));
+      return t * t * (3 - 2 * t);
+    }
+
+    function getGasLiquidBlend(temp) {
+      if (temp <= MELTING_POINT) return 1;
+      const start = BOILING_POINT - BOILING_BLEND_WIDTH;
+      const end = BOILING_POINT + BOILING_BLEND_WIDTH;
+      // 1 = liquid-like, 0 = gas-like
+      return 1 - smoothstep(start, end, temp);
+    }
+
     function stepPhysics(dt) {
       const T = state.temperature;
       const n = particleData.length;
       if (forceData.length !== n) {
         forceData = Array.from({ length: n }, () => new THREE.Vector3());
       }
+
+      const liquidBlend = getGasLiquidBlend(T);
 
       // Determine phase parameters
       let springK, dampingCoeff, thermalKick;
@@ -1164,19 +1185,19 @@
         springK = 8.0 + solidness * 12.0;
         dampingCoeff = 2.0;
         thermalKick = T * 0.0015;
-      } else if (T < BOILING_POINT) {
-        // Liquid: no spring, particles flow freely with pairwise interactions
-        springK = 0;
-        dampingCoeff = 2.6;
-        thermalKick = T * 0.0018;
       } else {
-        // Gas: no spring, particles fly freely
+        // Gas-liquid crossover: no spring, with smooth blending around boiling
         springK = 0;
-        dampingCoeff = 0.3;
-        thermalKick = T * 0.002;
+        const gasDamping = 0.3;
+        const liquidDamping = 2.6;
+        dampingCoeff = gasDamping + (liquidDamping - gasDamping) * liquidBlend;
+
+        const gasKick = T * 0.002;
+        const liquidKick = T * 0.0018;
+        thermalKick = gasKick + (liquidKick - gasKick) * liquidBlend;
       }
 
-      const isLiquid = T >= MELTING_POINT && T < BOILING_POINT;
+      const isLiquid = T >= MELTING_POINT && liquidBlend > 0.01;
       let liquidCompression = 0;
       if (isLiquid && n > 1) {
         const currentRms = computeRmsRadius(_liquidCom);
@@ -1184,18 +1205,18 @@
           liquidTargetRms = getNominalLiquidTargetRms();
         }
 
-        const liquidT = (T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
+        const liquidT = clamp01((Math.min(T, BOILING_POINT) - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
         const allowedRms = liquidTargetRms * (1 + LIQUID_THERMAL_EXPANSION * liquidT);
-        liquidCompression = Math.max(0, (currentRms - allowedRms) / allowedRms);
+        const compressionRaw = Math.max(0, (currentRms - allowedRms) / allowedRms);
+        liquidCompression = compressionRaw * liquidBlend;
       }
 
-      const pairCutoff = isLiquid ? 1.8 : (T < BOILING_POINT ? 2.0 : 1.0);
-      const repulseStrength = isLiquid ? 5.0 : (T < BOILING_POINT ? 6.0 : 3.0);
-      const cohesionStrength = isLiquid
-        ? 0.14 + 0.08 * ((BOILING_POINT - T) / (BOILING_POINT - MELTING_POINT))
-        : 0;
-      const cohesionStart = isLiquid ? pairCutoff * 0.67 : pairCutoff * 0.75;
-      const cohesionEnd = isLiquid ? 1.95 : 2.1;
+      const pairCutoff = 1.0 + 0.8 * liquidBlend;
+      const repulseStrength = 3.0 + 2.0 * liquidBlend;
+      const liquidCoolness = clamp01((BOILING_POINT - T) / (BOILING_POINT - MELTING_POINT));
+      const cohesionStrength = (0.14 + 0.08 * liquidCoolness) * liquidBlend * liquidBlend;
+      const cohesionStart = pairCutoff * (0.75 - 0.08 * liquidBlend);
+      const cohesionEnd = 2.1 - 0.15 * liquidBlend;
 
       // First pass: forces that don't depend on pair symmetry
       for (let i = 0; i < n; i++) {
@@ -1225,7 +1246,7 @@
       }
 
       // Pairwise interactions (liquid + near-transition), computed symmetrically
-      if (T >= MELTING_POINT * 0.8) {
+      if (T >= MELTING_POINT * 0.8 || liquidBlend > 0.001) {
         for (let i = 0; i < n; i++) {
           for (let j = i + 1; j < n; j++) {
             _diff.subVectors(particleData[j].pos, particleData[i].pos);
@@ -1267,10 +1288,10 @@
         let maxSpeed;
         if (T < MELTING_POINT) {
           maxSpeed = 2.0 + T * 0.004;
-        } else if (T < BOILING_POINT) {
-          maxSpeed = 2.6 + (T - MELTING_POINT) * 0.004;
         } else {
-          maxSpeed = 3.4 + (T - BOILING_POINT) * 0.008;
+          const liquidCap = 2.6 + (Math.min(T, BOILING_POINT) - MELTING_POINT) * 0.004;
+          const gasCap = 3.4 + Math.max(T - BOILING_POINT, 0) * 0.008;
+          maxSpeed = gasCap + (liquidCap - gasCap) * liquidBlend;
         }
         const speed = p.vel.length();
         if (speed > maxSpeed) {
@@ -1295,9 +1316,9 @@
 
       // Position-based overlap resolution + viscous velocity mixing (second pass)
       // Pushes true overlaps apart and applies short-range liquid velocity diffusion
-      const viscosityRange = isLiquid ? 1.25 : MIN_DIST;
+      const viscosityRange = MIN_DIST + (1.25 - MIN_DIST) * liquidBlend;
       const viscosityRangeSq = viscosityRange * viscosityRange;
-      const viscosityStrength = isLiquid ? 0.02 : 0;
+      const viscosityStrength = 0.02 * liquidBlend * liquidBlend;
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
           _diff.subVectors(particleData[i].pos, particleData[j].pos);
@@ -1340,9 +1361,11 @@
     // When melting, shift equilibrium points to allow flow
     function updateEquilibria() {
       const T = state.temperature;
-      if (T >= MELTING_POINT && T < BOILING_POINT) {
+      const liquidBlend = getGasLiquidBlend(T);
+      if (T >= MELTING_POINT && liquidBlend > 0.05) {
         // Slowly drift equilibrium toward current pos (liquid flows)
-        const driftRate = 0.02 * ((T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
+        const liquidT = clamp01((Math.min(T, BOILING_POINT) - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
+        const driftRate = 0.02 * liquidT * liquidBlend;
         for (const p of particleData) {
           p.equilibrium.lerp(p.pos, driftRate);
           // Keep equilibria within container
@@ -1482,20 +1505,8 @@
         }
         liquidTargetRms = computeRmsRadius(_liquidCom);
       } else if (oldState === 'gas' && newState === 'liquid') {
-        // Condensation: liquid should target condensed density immediately.
+        // Start targeting condensed density, but let dynamics handle gradual collapse.
         liquidTargetRms = getNominalLiquidTargetRms();
-
-        // Remove bulk drift and reduce kinetic energy entering liquid.
-        const meanVel = new THREE.Vector3();
-        for (const p of particleData) {
-          meanVel.add(p.vel);
-        }
-        if (particleData.length > 0) {
-          meanVel.multiplyScalar(1 / particleData.length);
-        }
-        for (const p of particleData) {
-          p.vel.sub(meanVel).multiplyScalar(0.62);
-        }
       } else if (oldState !== 'solid' && newState === 'solid') {
         // Re-establish lattice from current positions (no site memory)
         resetLatticeEquilibria({ reassignFromCurrent: true });
