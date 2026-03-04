@@ -1202,8 +1202,9 @@
 
             if (pairForce !== 0) {
               _diff.divideScalar(dist);
-              forceData[i].addScaledVector(_diff, pairForce);
-              forceData[j].addScaledVector(_diff, -pairForce);
+              // _diff points i -> j, so repulsion must push i opposite and j along _diff.
+              forceData[i].addScaledVector(_diff, -pairForce);
+              forceData[j].addScaledVector(_diff, pairForce);
             }
           }
         }
