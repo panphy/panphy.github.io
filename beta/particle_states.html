@@ -887,14 +887,26 @@
     // ─── State ───
     const state = {
       playing: true,
-      temperature: 150,
+      temperature: 150,       // bath temperature (slider value)
+      effectiveTemp: 150,     // actual temperature felt by particles
       timeScale: 1.0,
       gridSize: 5,
       time: 0,
-      phase: {
-        melt: 0, // 0 solid, 1 non-solid
-        boil: 0  // 0 condensed, 1 gas-like
-      }
+      latentHeat: {
+        melting: { progress: 0 },  // 0 = fully solid, 1 = fully melted
+        boiling: { progress: 0 }   // 0 = fully liquid, 1 = fully boiled
+      },
+      detectedPhase: {
+        label: 'SOLID',
+        className: 'solid',
+        solid: 1,
+        liquid: 0,
+        gas: 0,
+        avgCoordination: 6,
+        lindemannRatio: 0
+      },
+      tethersActive: true,
+      prevTethersActive: true
     };
 
     // ─── Theme Colors ───
@@ -989,8 +1001,7 @@
     scene.add(containerMesh);
 
     // ─── Particles ───
-    let particleData = []; // { pos, vel, equilibrium, mass }
-    let forceData = []; // per-particle force accumulator (reused each step)
+    let particleData = []; // { pos, vel, equilibrium, mass, force, neighborCount }
     let instancedMesh = null;
     let bondLines = null;
     const sphereGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 12);
@@ -1032,12 +1043,10 @@
 
       const n = state.gridSize;
       const count = n * n * n;
-      const spacing = Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+      const spacing = Math.min(LJ_RMIN, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
       const offset = (n - 1) * spacing / 2;
 
       particleData = [];
-      forceData = [];
-      liquidTargetRms = null;
 
       for (let ix = 0; ix < n; ix++) {
         for (let iy = 0; iy < n; iy++) {
@@ -1055,9 +1064,10 @@
                 (Math.random() - 0.5) * 0.5
               ),
               equilibrium: eq.clone(),
-              mass: 1.0
+              mass: 1.0,
+              force: new THREE.Vector3(),
+              neighborCount: 0
             });
-            forceData.push(new THREE.Vector3());
           }
         }
       }
@@ -1078,6 +1088,8 @@
       // Create bond line geometry (for solid state)
       createBondLines();
 
+      // Verlet needs F at t=0
+      computeForces();
       updateInstancedMesh();
     }
 
@@ -1121,8 +1133,8 @@
       const pairs = bondLines.geometry.userData.pairs;
       const positions = bondLines.geometry.attributes.position.array;
 
-      // Fade bonds based on state
-      const phase = getPhaseFractions();
+      // Fade bonds based on detected phase
+      const phase = state.detectedPhase;
       const bondOpacity = 0.7 * phase.solid * phase.solid;
       bondLines.material.opacity = bondOpacity;
       bondLines.visible = bondOpacity > 0.01;
@@ -1144,13 +1156,13 @@
     }
 
     function updateInstancedMesh() {
-      const phase = getPhaseFractions();
+      const phase = state.detectedPhase;
       for (let i = 0; i < particleData.length; i++) {
         const p = particleData[i];
         dummy.position.copy(p.pos);
 
         // Scale particles smoothly with gas fraction.
-        const extraGasExpansion = clamp01((state.temperature - BOILING_POINT) / 400);
+        const extraGasExpansion = clamp01((state.effectiveTemp - BOILING_POINT) / 400);
         const scale = 1.0 + phase.gas * (0.15 + 0.15 * extraGasExpansion);
         dummy.scale.setScalar(scale);
         dummy.updateMatrix();
@@ -1159,46 +1171,32 @@
       instancedMesh.instanceMatrix.needsUpdate = true;
     }
 
-    // ─── Physics Simulation ───
-    const _force = new THREE.Vector3();
-    const _diff = new THREE.Vector3();
-    const _liquidCom = new THREE.Vector3();
-    const MIN_DIST = PARTICLE_RADIUS * 2; // visual-contact spacing floor
-    const LIQUID_BULK_STIFFNESS = 8.0;
-    const LIQUID_THERMAL_EXPANSION = 0.03; // allow slight expansion across liquid range
-    const LIQUID_RMS_AT_MELT_SCALE = 1.01; // slight expansion from solid to liquid
-    const MELT_TRANSITION_WIDTH = 26;
-    const BOIL_TRANSITION_WIDTH = 40;
-    const MELT_RATE_HEAT = 0.45;
-    const MELT_RATE_COOL = 0.32;
-    const BOIL_RATE_HEAT = 0.35;
-    const BOIL_RATE_COOL = 0.42;
-    const MELT_STRUCTURE_THRESHOLD = 0.82;
-    const SOLID_STRUCTURE_THRESHOLD = 0.9;
-    let liquidTargetRms = null;
+    // ─── Physics Engine ───
+    // Lennard-Jones potential
+    const LJ_SIGMA = 1.34;
+    const LJ_EPSILON = 1.5;
+    const LJ_CUTOFF = 2.5 * LJ_SIGMA;
+    const LJ_CUTOFF_SQ = LJ_CUTOFF * LJ_CUTOFF;
+    const LJ_RMIN = Math.pow(2, 1 / 6) * LJ_SIGMA; // ~1.504, equilibrium distance
+    const LJ_SIGMA_SQ = LJ_SIGMA * LJ_SIGMA;
 
-    function computeRmsRadius(outCenter) {
-      const n = particleData.length;
-      if (n === 0) {
-        outCenter.set(0, 0, 0);
-        return 0;
-      }
+    // Thermostat (Langevin / BBK integrator)
+    const KB = LJ_EPSILON * 0.525 / 200; // maps 200K slider → kT ≈ 0.79ε
+    const LANGEVIN_GAMMA = 2.0;
 
-      outCenter.set(0, 0, 0);
-      for (const p of particleData) {
-        outCenter.add(p.pos);
-      }
-      outCenter.multiplyScalar(1 / n);
+    // Solid tethers
+    const K_SOLID_MAX = 30.0;
 
-      let sumSq = 0;
-      for (const p of particleData) {
-        const dx = p.pos.x - outCenter.x;
-        const dy = p.pos.y - outCenter.y;
-        const dz = p.pos.z - outCenter.z;
-        sumSq += dx * dx + dy * dy + dz * dz;
-      }
-      return Math.sqrt(sumSq / n);
-    }
+    // Latent heat plateau rates
+    const LATENT_MELT_RATE = 0.3;
+    const LATENT_BOIL_RATE = 0.25;
+
+    // Neighbor cutoff for coordination number (~first shell)
+    const NEIGHBOR_CUTOFF = 1.5 * LJ_SIGMA;
+    const NEIGHBOR_CUTOFF_SQ = NEIGHBOR_CUTOFF * NEIGHBOR_CUTOFF;
+
+    // Minimum r² clamp for LJ stability
+    const LJ_R2_MIN = 0.4 * LJ_SIGMA_SQ;
 
     function clamp01(value) {
       return Math.min(1, Math.max(0, value));
@@ -1210,286 +1208,256 @@
       return t * t * (3 - 2 * t);
     }
 
-    function getPhaseTargets(temp) {
-      const meltHalf = MELT_TRANSITION_WIDTH * 0.5;
-      const boilHalf = BOIL_TRANSITION_WIDTH * 0.5;
-      const meltTarget = smoothstep(MELTING_POINT - meltHalf, MELTING_POINT + meltHalf, temp);
-      const boilTargetRaw = smoothstep(BOILING_POINT - boilHalf, BOILING_POINT + boilHalf, temp);
-      return {
-        meltTarget,
-        boilTarget: boilTargetRaw * meltTarget
+    function gaussianRandom() {
+      let u, v, s;
+      do {
+        u = Math.random() * 2 - 1;
+        v = Math.random() * 2 - 1;
+        s = u * u + v * v;
+      } while (s >= 1 || s === 0);
+      return u * Math.sqrt(-2 * Math.log(s) / s);
+    }
+
+    // ─── Latent Heat Model ───
+    function updateEffectiveTemperature(dt) {
+      const Tbath = state.temperature;
+      const lh = state.latentHeat;
+
+      // Melting transition
+      if (Tbath > MELTING_POINT && lh.melting.progress < 1) {
+        const drive = (Tbath - MELTING_POINT) / MELTING_POINT;
+        lh.melting.progress = Math.min(1, lh.melting.progress + LATENT_MELT_RATE * drive * dt);
+        state.effectiveTemp = MELTING_POINT;
+        return;
+      }
+      if (Tbath <= MELTING_POINT && lh.melting.progress > 0) {
+        const drive = (MELTING_POINT - Tbath) / MELTING_POINT;
+        lh.melting.progress = Math.max(0, lh.melting.progress - LATENT_MELT_RATE * drive * dt);
+        if (lh.boiling.progress > 0) {
+          lh.boiling.progress = Math.max(0, lh.boiling.progress - LATENT_BOIL_RATE * drive * dt);
+        }
+        state.effectiveTemp = MELTING_POINT;
+        return;
+      }
+
+      // Boiling transition (only active once fully melted)
+      if (lh.melting.progress >= 1 && Tbath > BOILING_POINT && lh.boiling.progress < 1) {
+        const drive = (Tbath - BOILING_POINT) / BOILING_POINT;
+        lh.boiling.progress = Math.min(1, lh.boiling.progress + LATENT_BOIL_RATE * drive * dt);
+        state.effectiveTemp = BOILING_POINT;
+        return;
+      }
+      if (lh.melting.progress >= 1 && Tbath <= BOILING_POINT && lh.boiling.progress > 0) {
+        const drive = (BOILING_POINT - Tbath) / BOILING_POINT;
+        lh.boiling.progress = Math.max(0, lh.boiling.progress - LATENT_BOIL_RATE * drive * dt);
+        state.effectiveTemp = BOILING_POINT;
+        return;
+      }
+
+      // No transition active: effective temp follows bath
+      state.effectiveTemp = Tbath;
+    }
+
+    // ─── Force Computation (LJ + tethers) ───
+    function computeForces() {
+      const n = particleData.length;
+
+      // Tether strength fades quadratically with melting progress
+      const meltFade = clamp01(1 - state.latentHeat.melting.progress);
+      const tetherK = K_SOLID_MAX * meltFade * meltFade;
+
+      // Reset forces and neighbor counts
+      for (let i = 0; i < n; i++) {
+        particleData[i].force.set(0, 0, 0);
+        particleData[i].neighborCount = 0;
+      }
+
+      // Pairwise Lennard-Jones forces (truncated at cutoff)
+      for (let i = 0; i < n; i++) {
+        const pi = particleData[i];
+        for (let j = i + 1; j < n; j++) {
+          const pj = particleData[j];
+          const dx = pj.pos.x - pi.pos.x;
+          const dy = pj.pos.y - pi.pos.y;
+          const dz = pj.pos.z - pi.pos.z;
+          const r2 = dx * dx + dy * dy + dz * dz;
+
+          if (r2 > LJ_CUTOFF_SQ || r2 < 1e-8) continue;
+
+          // Clamp r² for stability at very short range
+          const r2_safe = Math.max(r2, LJ_R2_MIN);
+          const inv_r2 = 1 / r2_safe;
+          const s2 = LJ_SIGMA_SQ * inv_r2;
+          const s6 = s2 * s2 * s2;
+          const s12 = s6 * s6;
+          // f/r = 24ε/r² [σ⁶/r⁶ - 2σ¹²/r¹²]
+          // Positive = attractive (towards partner), negative = repulsive
+          const f_over_r = 24 * LJ_EPSILON * inv_r2 * (s6 - 2 * s12);
+
+          const fx = f_over_r * dx;
+          const fy = f_over_r * dy;
+          const fz = f_over_r * dz;
+
+          pi.force.x += fx;
+          pi.force.y += fy;
+          pi.force.z += fz;
+          pj.force.x -= fx;
+          pj.force.y -= fy;
+          pj.force.z -= fz;
+
+          // Count neighbors for coordination number
+          if (r2 < NEIGHBOR_CUTOFF_SQ) {
+            pi.neighborCount++;
+            pj.neighborCount++;
+          }
+        }
+      }
+
+      // Harmonic tethers to lattice sites (solid only)
+      if (tetherK > 0.01) {
+        for (let i = 0; i < n; i++) {
+          const p = particleData[i];
+          p.force.x += tetherK * (p.equilibrium.x - p.pos.x);
+          p.force.y += tetherK * (p.equilibrium.y - p.pos.y);
+          p.force.z += tetherK * (p.equilibrium.z - p.pos.z);
+        }
+      }
+    }
+
+    // ─── Velocity Verlet Integrator (BBK Langevin) ───
+    function stepPhysics(dt) {
+      const n = particleData.length;
+      const halfDt = dt * 0.5;
+      const gamma = LANGEVIN_GAMMA;
+      const decay = gamma * halfDt; // γ·dt/2
+
+      // Track tether state before update
+      const prevMeltProgress = state.latentHeat.melting.progress;
+
+      // Update effective temperature (latent heat plateaus)
+      updateEffectiveTemperature(dt);
+
+      // Check for solidification (tethers re-engaging)
+      const wasTethered = prevMeltProgress < 0.98;
+      const nowTethered = state.latentHeat.melting.progress < 0.98;
+      if (nowTethered && !wasTethered) {
+        resetLatticeEquilibria({ reassignFromCurrent: true });
+      }
+      state.tethersActive = nowTethered;
+
+      // Noise amplitude from fluctuation-dissipation theorem
+      const kT = KB * state.effectiveTemp;
+      const noiseHalf = Math.sqrt(gamma * kT * dt);
+
+      // BBK half-step 1: v(t+dt/2) = v(t)(1-γdt/2) + (dt/2)F(t)/m + noise
+      for (let i = 0; i < n; i++) {
+        const p = particleData[i];
+        p.vel.x = p.vel.x * (1 - decay) + halfDt * p.force.x + noiseHalf * gaussianRandom();
+        p.vel.y = p.vel.y * (1 - decay) + halfDt * p.force.y + noiseHalf * gaussianRandom();
+        p.vel.z = p.vel.z * (1 - decay) + halfDt * p.force.z + noiseHalf * gaussianRandom();
+      }
+
+      // Full position update: r(t+dt) = r(t) + dt·v(t+dt/2)
+      const wallLimit = CONTAINER_HALF - PARTICLE_RADIUS;
+      for (let i = 0; i < n; i++) {
+        const p = particleData[i];
+        p.pos.x += dt * p.vel.x;
+        p.pos.y += dt * p.vel.y;
+        p.pos.z += dt * p.vel.z;
+
+        // Elastic wall collisions (reflect position and reverse velocity)
+        if (p.pos.x > wallLimit) { p.pos.x = 2 * wallLimit - p.pos.x; p.vel.x = -p.vel.x; }
+        else if (p.pos.x < -wallLimit) { p.pos.x = -2 * wallLimit - p.pos.x; p.vel.x = -p.vel.x; }
+        if (p.pos.y > wallLimit) { p.pos.y = 2 * wallLimit - p.pos.y; p.vel.y = -p.vel.y; }
+        else if (p.pos.y < -wallLimit) { p.pos.y = -2 * wallLimit - p.pos.y; p.vel.y = -p.vel.y; }
+        if (p.pos.z > wallLimit) { p.pos.z = 2 * wallLimit - p.pos.z; p.vel.z = -p.vel.z; }
+        else if (p.pos.z < -wallLimit) { p.pos.z = -2 * wallLimit - p.pos.z; p.vel.z = -p.vel.z; }
+
+        // Safety clamp for extreme overshoot
+        p.pos.x = Math.max(-wallLimit, Math.min(wallLimit, p.pos.x));
+        p.pos.y = Math.max(-wallLimit, Math.min(wallLimit, p.pos.y));
+        p.pos.z = Math.max(-wallLimit, Math.min(wallLimit, p.pos.z));
+      }
+
+      // Recompute forces at new positions
+      computeForces();
+
+      // BBK half-step 2: v(t+dt) = [v(t+dt/2) + (dt/2)F(t+dt)/m + noise] / (1+γdt/2)
+      const invDecay = 1 / (1 + decay);
+      for (let i = 0; i < n; i++) {
+        const p = particleData[i];
+        p.vel.x = (p.vel.x + halfDt * p.force.x + noiseHalf * gaussianRandom()) * invDecay;
+        p.vel.y = (p.vel.y + halfDt * p.force.y + noiseHalf * gaussianRandom()) * invDecay;
+        p.vel.z = (p.vel.z + halfDt * p.force.z + noiseHalf * gaussianRandom()) * invDecay;
+      }
+    }
+
+    // ─── Emergent Phase Detection ───
+    function detectPhase() {
+      const n = particleData.length;
+      if (n === 0) return;
+
+      const Tbath = state.temperature;
+      const tEff = state.effectiveTemp;
+      const lh = state.latentHeat;
+
+      // Average coordination number (counted during force computation)
+      let totalCoord = 0;
+      for (let i = 0; i < n; i++) {
+        totalCoord += particleData[i].neighborCount;
+      }
+      const avgCoord = totalCoord / n;
+
+      // Lindemann ratio (RMS displacement from equilibrium / nearest-neighbor distance)
+      let lindemannRatio = 0;
+      if (state.tethersActive) {
+        let sumDisp2 = 0;
+        for (let i = 0; i < n; i++) {
+          sumDisp2 += particleData[i].pos.distanceToSquared(particleData[i].equilibrium);
+        }
+        lindemannRatio = Math.sqrt(sumDisp2 / n) / LJ_RMIN;
+      }
+
+      // Phase fractions from latent heat progress (smooth, predictable)
+      const meltProgress = lh.melting.progress;
+      const boilProgress = lh.boiling.progress;
+
+      const solid = Math.max(0, 1 - meltProgress);
+      const gas = meltProgress * boilProgress;
+      const liquid = Math.max(0, meltProgress - gas);
+
+      // Label from context
+      let label, className;
+      if (solid > 0.9) {
+        label = 'SOLID'; className = 'solid';
+      } else if (gas > 0.9) {
+        label = 'GAS'; className = 'gas';
+      } else if (liquid > 0.9) {
+        label = 'LIQUID'; className = 'liquid';
+      } else if (solid > 0.05 && liquid > 0.05 && gas < 0.05) {
+        label = Tbath > tEff ? 'MELTING' : 'FREEZING';
+        className = solid > liquid ? 'solid' : 'liquid';
+      } else if (liquid > 0.05 && gas > 0.05) {
+        label = Tbath > tEff ? 'BOILING' : 'CONDENSING';
+        className = liquid > gas ? 'liquid' : 'gas';
+      } else {
+        label = 'TRANSITION'; className = 'liquid';
+      }
+
+      state.detectedPhase = {
+        label, className, solid, liquid, gas,
+        avgCoordination: avgCoord,
+        lindemannRatio
       };
     }
 
-    function getPhaseFractions() {
-      const melt = clamp01(state.phase.melt);
-      const boil = clamp01(state.phase.boil);
-      const solid = 1 - melt;
-      const gas = melt * boil;
-      const liquid = Math.max(0, melt - gas);
-      return { solid, liquid, gas, melt, boil };
-    }
-
-    function updatePhaseState(dt) {
-      const prev = getPhaseFractions();
-      const { meltTarget, boilTarget } = getPhaseTargets(state.temperature);
-
-      const meltRate = meltTarget > state.phase.melt ? MELT_RATE_HEAT : MELT_RATE_COOL;
-      const boilRate = boilTarget > state.phase.boil ? BOIL_RATE_HEAT : BOIL_RATE_COOL;
-      const meltAlpha = 1 - Math.exp(-meltRate * dt);
-      const boilAlpha = 1 - Math.exp(-boilRate * dt);
-
-      state.phase.melt += (meltTarget - state.phase.melt) * meltAlpha;
-      state.phase.melt = clamp01(state.phase.melt);
-
-      const limitedBoilTarget = state.phase.melt < 0.03 ? 0 : boilTarget;
-      state.phase.boil += (limitedBoilTarget - state.phase.boil) * boilAlpha;
-      state.phase.boil = clamp01(state.phase.boil);
-
-      const next = getPhaseFractions();
-
-      const meltedOut = prev.solid >= MELT_STRUCTURE_THRESHOLD
-        && next.solid < MELT_STRUCTURE_THRESHOLD;
-      const solidified = prev.solid <= SOLID_STRUCTURE_THRESHOLD
-        && next.solid > SOLID_STRUCTURE_THRESHOLD;
-      const condensing = prev.gas >= 0.75 && next.gas < 0.65 && next.liquid > 0.08;
-
-      if (meltedOut) {
-        for (const p of particleData) {
-          p.equilibrium.copy(p.pos);
-        }
-      }
-
-      if (solidified) {
-        resetLatticeEquilibria({ reassignFromCurrent: true });
-        liquidTargetRms = null;
-      } else if (condensing && liquidTargetRms === null) {
-        liquidTargetRms = getNominalLiquidTargetRms();
-      } else if (next.liquid < 0.04) {
-        liquidTargetRms = null;
-      }
-
-      return next;
-    }
-
-    function syncPhaseToTemperature() {
-      const { meltTarget, boilTarget } = getPhaseTargets(state.temperature);
-      state.phase.melt = meltTarget;
-      state.phase.boil = boilTarget;
-    }
-
-    function stepPhysics(dt) {
-      const T = state.temperature;
-      const n = particleData.length;
-      if (forceData.length !== n) {
-        forceData = Array.from({ length: n }, () => new THREE.Vector3());
-      }
-
-      const phase = updatePhaseState(dt);
-      const solidFraction = phase.solid;
-      const liquidFraction = phase.liquid;
-      const gasFraction = phase.gas;
-
-      // Determine phase parameters from evolving phase fractions.
-      const solidnessTemp = clamp01((MELTING_POINT + MELT_TRANSITION_WIDTH - T) / (MELTING_POINT + MELT_TRANSITION_WIDTH));
-      const springK = (8.0 + solidnessTemp * 12.0) * solidFraction;
-      const dampingCoeff = solidFraction * 2.0 + liquidFraction * 2.6 + gasFraction * 0.3;
-      const thermalKick = solidFraction * (T * 0.0015)
-        + liquidFraction * (T * 0.0018)
-        + gasFraction * (T * 0.002);
-
-      const isLiquid = liquidFraction > 0.01;
-      let liquidCompression = 0;
-      if (isLiquid && n > 1) {
-        const currentRms = computeRmsRadius(_liquidCom);
-        if (liquidTargetRms === null) {
-          liquidTargetRms = getNominalLiquidTargetRms();
-        }
-
-        const liquidT = clamp01((Math.min(T, BOILING_POINT) - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
-        const allowedRms = liquidTargetRms * (1 + LIQUID_THERMAL_EXPANSION * liquidT);
-        const compressionRaw = Math.max(0, (currentRms - allowedRms) / allowedRms);
-        liquidCompression = compressionRaw * liquidFraction;
-      }
-
-      const pairCutoff = 1.0 + 0.8 * liquidFraction;
-      const repulseStrength = 3.0 + 2.0 * liquidFraction;
-      const liquidCoolness = clamp01((BOILING_POINT - T) / (BOILING_POINT - MELTING_POINT));
-      const cohesionStrength = (0.14 + 0.08 * liquidCoolness) * liquidFraction * liquidFraction;
-      const cohesionStart = pairCutoff * (0.75 - 0.08 * liquidFraction);
-      const cohesionEnd = 2.1 - 0.15 * liquidFraction;
-
-      // First pass: forces that don't depend on pair symmetry
-      for (let i = 0; i < n; i++) {
-        const p = particleData[i];
-        _force.set(0, 0, 0);
-
-        // Spring force toward equilibrium (solid/liquid)
-        if (springK > 0) {
-          _diff.subVectors(p.equilibrium, p.pos);
-          _force.addScaledVector(_diff, springK);
-        }
-
-        // Liquid bulk restoring term: keeps density roughly constant (low compressibility).
-        if (liquidCompression > 0) {
-          _diff.subVectors(p.pos, _liquidCom);
-          _force.addScaledVector(_diff, -LIQUID_BULK_STIFFNESS * liquidCompression);
-        }
-
-        // Damping
-        _force.addScaledVector(p.vel, -dampingCoeff);
-
-        // Random thermal force
-        _force.x += (Math.random() - 0.5) * thermalKick * 60;
-        _force.y += (Math.random() - 0.5) * thermalKick * 60;
-        _force.z += (Math.random() - 0.5) * thermalKick * 60;
-        forceData[i].copy(_force);
-      }
-
-      // Pairwise interactions (liquid + near-transition), computed symmetrically
-      if (phase.melt > 0.001 || T >= MELTING_POINT * 0.8) {
-        for (let i = 0; i < n; i++) {
-          for (let j = i + 1; j < n; j++) {
-            _diff.subVectors(particleData[j].pos, particleData[i].pos);
-            const distSq = _diff.lengthSq();
-            if (distSq < 0.000001) continue;
-            const dist = Math.max(Math.sqrt(distSq), MIN_DIST);
-
-            let pairForce = 0;
-
-            if (dist < pairCutoff) {
-              // Soft repulsion: finite at short range, smooth to zero at cutoff
-              const overlap = 1 - dist / pairCutoff;
-              pairForce += repulseStrength * overlap * overlap;
-            }
-
-            // Mild liquid cohesion shell, strongest near melting and fading to boiling
-            if (cohesionStrength > 0 && dist > cohesionStart && dist < cohesionEnd) {
-              const t = (dist - cohesionStart) / (cohesionEnd - cohesionStart);
-              pairForce -= cohesionStrength * 4 * t * (1 - t);
-            }
-
-            if (pairForce !== 0) {
-              _diff.divideScalar(dist);
-              // _diff points i -> j, so repulsion must push i opposite and j along _diff.
-              forceData[i].addScaledVector(_diff, -pairForce);
-              forceData[j].addScaledVector(_diff, pairForce);
-            }
-          }
-        }
-      }
-
-      // Integrate
-      for (let i = 0; i < n; i++) {
-        const p = particleData[i];
-        // Integrate velocity
-        p.vel.addScaledVector(forceData[i], dt / p.mass);
-
-        // Velocity cap from phase mixture prevents abrupt jumps at transitions.
-        const solidCap = 2.0 + T * 0.004;
-        const liquidTemp = clamp01((T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
-        const liquidCap = 2.4 + liquidTemp * 0.8;
-        const gasCap = 3.2 + Math.max(T - BOILING_POINT, 0) * 0.008;
-        const maxSpeed = solidFraction * solidCap + liquidFraction * liquidCap + gasFraction * gasCap;
-        const speed = p.vel.length();
-        if (speed > maxSpeed) {
-          p.vel.multiplyScalar(maxSpeed / speed);
-        }
-
-        // Integrate position
-        p.pos.addScaledVector(p.vel, dt);
-
-        // Container walls (elastic bounce)
-        const wallLimit = CONTAINER_HALF - PARTICLE_RADIUS;
-        for (const axis of ['x', 'y', 'z']) {
-          if (p.pos[axis] > wallLimit) {
-            p.pos[axis] = wallLimit;
-            p.vel[axis] *= -0.8;
-          } else if (p.pos[axis] < -wallLimit) {
-            p.pos[axis] = -wallLimit;
-            p.vel[axis] *= -0.8;
-          }
-        }
-      }
-
-      // Position-based overlap resolution + viscous velocity mixing (second pass)
-      // Pushes true overlaps apart and applies short-range liquid velocity diffusion
-      const viscosityRange = MIN_DIST + (1.25 - MIN_DIST) * liquidFraction;
-      const viscosityRangeSq = viscosityRange * viscosityRange;
-      const viscosityStrength = 0.02 * liquidFraction * liquidFraction;
-      for (let i = 0; i < n; i++) {
-        for (let j = i + 1; j < n; j++) {
-          _diff.subVectors(particleData[i].pos, particleData[j].pos);
-          const distSq = _diff.lengthSq();
-          if (distSq <= 0.0001) continue;
-
-          const minSep = MIN_DIST;
-          const overlapNeeded = distSq < minSep * minSep;
-          const mixNeeded = viscosityStrength > 0 && distSq < viscosityRangeSq;
-          if (!overlapNeeded && !mixNeeded) continue;
-
-          const dist = Math.sqrt(distSq);
-
-          if (overlapNeeded) {
-            const correction = (minSep - dist) * 0.5;
-            _diff.divideScalar(dist); // normalise
-            particleData[i].pos.addScaledVector(_diff, correction);
-            particleData[j].pos.addScaledVector(_diff, -correction);
-          }
-
-          // Viscous velocity mixing for nearby liquid particles
-          if (mixNeeded) {
-            const pi = particleData[i], pj = particleData[j];
-            const mix = viscosityStrength * (1 - dist / viscosityRange);
-            const avgVx = (pi.vel.x + pj.vel.x) * 0.5;
-            const avgVy = (pi.vel.y + pj.vel.y) * 0.5;
-            const avgVz = (pi.vel.z + pj.vel.z) * 0.5;
-            pi.vel.x += (avgVx - pi.vel.x) * mix;
-            pi.vel.y += (avgVy - pi.vel.y) * mix;
-            pi.vel.z += (avgVz - pi.vel.z) * mix;
-            pj.vel.x += (avgVx - pj.vel.x) * mix;
-            pj.vel.y += (avgVy - pj.vel.y) * mix;
-            pj.vel.z += (avgVz - pj.vel.z) * mix;
-          }
-        }
-      }
-    }
-
-    // ─── Liquid Transition ───
-    // When melting, shift equilibrium points to allow flow
-    function updateEquilibria() {
-      const T = state.temperature;
-      const phase = getPhaseFractions();
-      if (T >= MELTING_POINT && phase.liquid > 0.05) {
-        // Slowly drift equilibrium toward current pos (liquid flows)
-        const liquidT = clamp01((Math.min(T, BOILING_POINT) - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
-        const driftRate = 0.02 * liquidT * phase.liquid;
-        for (const p of particleData) {
-          p.equilibrium.lerp(p.pos, driftRate);
-          // Keep equilibria within container
-          p.equilibrium.clampScalar(-CONTAINER_HALF + 0.5, CONTAINER_HALF - 0.5);
-        }
-      }
-    }
-
     // ─── UI Helpers ───
-    function getStateName(phase = getPhaseFractions()) {
-      if (phase.solid >= phase.liquid && phase.solid >= phase.gas) return 'solid';
-      if (phase.gas >= phase.liquid) return 'gas';
-      return 'liquid';
+    function getStateName() {
+      return state.detectedPhase.className;
     }
 
-    function getStateBadgeText(phase = getPhaseFractions()) {
-      if (phase.solid > 0.88) return 'SOLID';
-      if (phase.liquid > 0.88) return 'LIQUID';
-      if (phase.gas > 0.88) return 'GAS';
-      if (phase.solid > 0.12 && phase.liquid > 0.12 && phase.gas < 0.1) {
-        return phase.liquid >= phase.solid ? 'MELTING' : 'FREEZING';
-      }
-      if (phase.liquid > 0.12 && phase.gas > 0.12) {
-        return phase.gas >= phase.liquid ? 'BOILING' : 'CONDENSING';
-      }
-      return 'TRANSITION';
+    function getStateBadgeText() {
+      return state.detectedPhase.label;
     }
 
     function temperatureToPercent(temp) {
@@ -1500,12 +1468,17 @@
 
     function updateStateUI() {
       const T = state.temperature;
-      const phase = getPhaseFractions();
-      const stateName = getStateName(phase);
-      const badgeText = getStateBadgeText(phase);
+      const tEff = state.effectiveTemp;
+      const phase = state.detectedPhase;
+      const stateName = phase.className;
+      const badgeText = phase.label;
 
-      tempVal.textContent = T + ' K';
-      tempDisplay.textContent = T + ' K';
+      // Show effective temp during transitions, bath temp otherwise
+      const showTemp = Math.round(tEff);
+      const inTransition = Math.abs(tEff - T) > 1;
+      tempVal.textContent = showTemp + ' K';
+      tempDisplay.textContent = inTransition ?
+        showTemp + ' K (bath: ' + T + ' K)' : T + ' K';
 
       // Temperature bar marker
       const pct = temperatureToPercent(T);
@@ -1520,37 +1493,34 @@
       stateBadge.className = 'state-badge ' + stateName;
 
       // Description
-      const solidPct = Math.round(phase.solid * 100);
-      const liquidPct = Math.round(phase.liquid * 100);
-      const gasPct = Math.round(phase.gas * 100);
-      if (phase.solid > 0.88) {
+      if (phase.solid > 0.9) {
         stateDescription.innerHTML =
           '<strong>Solid:</strong> Particles vibrate about fixed positions in a regular lattice. ' +
-          'Melting starts progressively near <strong>' + MELTING_POINT + ' K</strong>.';
-      } else if (phase.liquid > 0.88) {
+          'Strong intermolecular forces hold the structure.';
+      } else if (phase.liquid > 0.9) {
         stateDescription.innerHTML =
-          '<strong>Liquid:</strong> Particles flow while staying close together. ' +
-          'Freezing near <strong>' + MELTING_POINT + ' K</strong> and boiling near <strong>' + BOILING_POINT + ' K</strong> both take time.';
-      } else if (phase.gas > 0.88) {
+          '<strong>Liquid:</strong> Particles flow freely while remaining close together. ' +
+          'Intermolecular attractions keep the fluid cohesive.';
+      } else if (phase.gas > 0.9) {
         stateDescription.innerHTML =
-          '<strong>Gas:</strong> Particles move rapidly and spread out. ' +
-          'Condensation starts progressively near <strong>' + BOILING_POINT + ' K</strong>.';
-      } else if (phase.solid > 0.1 && phase.liquid > 0.1 && phase.gas < 0.1) {
+          '<strong>Gas:</strong> Particles move rapidly, filling the entire container. ' +
+          'Kinetic energy far exceeds intermolecular attractions.';
+      } else if (phase.solid > 0.05 && phase.liquid > 0.05 && phase.gas < 0.05) {
         stateDescription.innerHTML =
-          '<strong>Melting / Freezing Transition:</strong> Solid ' + solidPct + '% · Liquid ' + liquidPct +
-          '%. At <strong>' + MELTING_POINT + ' K</strong>, the phase change is gradual over time.';
-      } else if (phase.liquid > 0.1 && phase.gas > 0.1) {
+          '<strong>' + badgeText + ':</strong> Energy is absorbed (or released) to break (or form) bonds. ' +
+          'Temperature plateaus at <strong>' + MELTING_POINT + ' K</strong> until the phase change completes \u2014 this is latent heat.';
+      } else if (phase.liquid > 0.05 && phase.gas > 0.05) {
         stateDescription.innerHTML =
-          '<strong>Boiling / Condensation Transition:</strong> Liquid ' + liquidPct + '% · Gas ' + gasPct +
-          '%. At <strong>' + BOILING_POINT + ' K</strong>, the phase change is gradual over time.';
+          '<strong>' + badgeText + ':</strong> Energy is absorbed (or released) to separate (or attract) particles. ' +
+          'Temperature plateaus at <strong>' + BOILING_POINT + ' K</strong> \u2014 latent heat of vaporisation.';
       } else {
         stateDescription.innerHTML =
-          '<strong>Mixed Transition:</strong> Solid ' + solidPct + '% · Liquid ' + liquidPct + '% · Gas ' + gasPct + '%.';
+          '<strong>Transition:</strong> The system is changing state.';
       }
 
-      // Update particle color based on temperature
+      // Update particle color based on effective temperature
       if (instancedMesh) {
-        const col = getTemperatureColor(T);
+        const col = getTemperatureColor(tEff);
         instancedMesh.material.color.copy(col);
         instancedMesh.material.emissive.copy(col).multiplyScalar(0.3);
       }
@@ -1575,16 +1545,25 @@
 
     function resetSim() {
       state.temperature = 150;
+      state.effectiveTemp = 150;
       state.timeScale = 1.0;
       state.time = 0;
-      liquidTargetRms = null;
-      syncPhaseToTemperature();
+      state.latentHeat.melting.progress = 0;
+      state.latentHeat.boiling.progress = 0;
+      state.tethersActive = true;
+      state.prevTethersActive = true;
+      state.detectedPhase = {
+        label: 'SOLID', className: 'solid',
+        solid: 1, liquid: 0, gas: 0,
+        avgCoordination: 6, lindemannRatio: 0
+      };
 
       tempSlider.value = 150;
       animSpeedSlider.value = 1.0;
       animSpeedVal.textContent = '1.0\u00d7';
 
       createParticles();
+      detectPhase();
       updateStateUI();
 
       camera.position.set(8, 8, 8);
@@ -1641,31 +1620,7 @@
 
     function getBaseLatticeSpacing() {
       const n = state.gridSize;
-      return Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
-    }
-
-    function getLatticeUnitRms(n) {
-      const unitOffset = (n - 1) * 0.5;
-      let unitSumSq = 0;
-      let unitCount = 0;
-      for (let ix = 0; ix < n; ix++) {
-        const x = ix - unitOffset;
-        for (let iy = 0; iy < n; iy++) {
-          const y = iy - unitOffset;
-          for (let iz = 0; iz < n; iz++) {
-            const z = iz - unitOffset;
-            unitSumSq += x * x + y * y + z * z;
-            unitCount++;
-          }
-        }
-      }
-      return Math.sqrt(unitSumSq / (unitCount || 1));
-    }
-
-    function getNominalLiquidTargetRms() {
-      const n = state.gridSize;
-      const spacing = getBaseLatticeSpacing();
-      return getLatticeUnitRms(n) * spacing * LIQUID_RMS_AT_MELT_SCALE;
+      return Math.min(LJ_RMIN, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
     }
 
     function buildLatticeSites(spacing, center, latticeSites) {
@@ -1689,17 +1644,12 @@
       const n = state.gridSize;
 
       let center = new THREE.Vector3(0, 0, 0);
-      let spacing = getBaseLatticeSpacing();
+      const spacing = getBaseLatticeSpacing();
 
-      // On liquid -> solid transition, rebuild lattice around the current COM and
-      // scale spacing to match current density (with slight solid contraction).
+      // On solidification, rebuild lattice around the current COM.
       if (reassignFromCurrent && particleData.length > 0) {
-        const currentRms = computeRmsRadius(center);
-        const unitRms = getLatticeUnitRms(n);
-        const targetRms = currentRms * 0.98; // solid is slightly denser than liquid
-        const fittedSpacing = unitRms > 0 ? targetRms / unitRms : spacing;
-        const maxSpacing = getBaseLatticeSpacing();
-        spacing = Math.min(maxSpacing, Math.max(MIN_DIST * 1.15, fittedSpacing));
+        for (const p of particleData) center.add(p.pos);
+        center.multiplyScalar(1 / particleData.length);
       }
 
       // Keep the lattice fully inside the container even if COM drifts near a wall.
@@ -1721,7 +1671,6 @@
         return;
       }
 
-      // Assign particles to nearby lattice sites without identity memory.
       // Greedy matching (farthest particles first) reduces crossings and jitter.
       const used = new Uint8Array(latticeSites.length);
       const order = particleData
@@ -1746,7 +1695,6 @@
         }
       }
 
-      // Equilibrium topology changed; rebuild bond-neighbor graph for solid rendering.
       createBondLines();
     }
 
@@ -1792,8 +1740,8 @@
     onResize();
 
     // ─── Initialize ───
-    syncPhaseToTemperature();
     createParticles();
+    detectPhase();
     updateStateUI();
 
     // ─── Animation Loop ───
@@ -1815,12 +1763,12 @@
         let steps = 0;
         while (accumulator >= PHYSICS_DT && steps < 8) {
           stepPhysics(PHYSICS_DT);
-          updateEquilibria();
           accumulator -= PHYSICS_DT;
           steps++;
         }
         if (accumulator > PHYSICS_DT * 4) accumulator = 0; // prevent spiral
 
+        detectPhase();
         updateInstancedMesh();
         updateBondLines();
         updateStateUI();
