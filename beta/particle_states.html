@@ -1562,6 +1562,7 @@
         for (let i = 0; i < particleData.length && i < latticeSites.length; i++) {
           particleData[i].equilibrium.copy(latticeSites[i]);
         }
+        createBondLines();
         return;
       }
 
@@ -1589,6 +1590,9 @@
           p.equilibrium.copy(latticeSites[bestSite]);
         }
       }
+
+      // Equilibrium topology changed; rebuild bond-neighbor graph for solid rendering.
+      createBondLines();
     }
 
     particleSlider.addEventListener('input', () => {
