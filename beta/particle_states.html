@@ -942,6 +942,7 @@
 
     // ─── Particles ───
     let particleData = []; // { pos, vel, equilibrium, mass }
+    let forceData = []; // per-particle force accumulator (reused each step)
     let instancedMesh = null;
     let bondLines = null;
     const sphereGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 12);
@@ -987,6 +988,7 @@
       const offset = (n - 1) * spacing / 2;
 
       particleData = [];
+      forceData = [];
 
       for (let ix = 0; ix < n; ix++) {
         for (let iy = 0; iy < n; iy++) {
@@ -1006,6 +1008,7 @@
               equilibrium: eq.clone(),
               mass: 1.0
             });
+            forceData.push(new THREE.Vector3());
           }
         }
       }
@@ -1114,11 +1117,14 @@
     // ─── Physics Simulation ───
     const _force = new THREE.Vector3();
     const _diff = new THREE.Vector3();
-    const MIN_DIST = 0.35; // soft-core floor — prevents singularities
+    const MIN_DIST = PARTICLE_RADIUS * 2; // visual-contact spacing floor
 
     function stepPhysics(dt) {
       const T = state.temperature;
       const n = particleData.length;
+      if (forceData.length !== n) {
+        forceData = Array.from({ length: n }, () => new THREE.Vector3());
+      }
 
       // Determine phase parameters
       let springK, dampingCoeff, thermalKick;
@@ -1141,6 +1147,16 @@
         thermalKick = T * 0.002;
       }
 
+      const isLiquid = T >= MELTING_POINT && T < BOILING_POINT;
+      const pairCutoff = T < BOILING_POINT ? 2.0 : 1.0;
+      const repulseStrength = T < BOILING_POINT ? 6.0 : 3.0;
+      const cohesionStrength = isLiquid
+        ? 0.05 * ((BOILING_POINT - T) / (BOILING_POINT - MELTING_POINT))
+        : 0;
+      const cohesionStart = pairCutoff * 0.75;
+      const cohesionEnd = 2.1;
+
+      // First pass: forces that don't depend on pair symmetry
       for (let i = 0; i < n; i++) {
         const p = particleData[i];
         _force.set(0, 0, 0);
@@ -1151,40 +1167,6 @@
           _force.addScaledVector(_diff, springK);
         }
 
-        // Soft-core pairwise interactions (liquid + near-transition)
-        // Uses smoothed repulsion that never diverges, plus weak attraction for liquid cohesion
-        if (T >= MELTING_POINT * 0.8) {
-          for (let j = 0; j < n; j++) {
-            if (i === j) continue;
-            _diff.subVectors(particleData[j].pos, p.pos);
-            const distSq = _diff.lengthSq();
-            // Use soft-core distance: never let effective distance fall below MIN_DIST
-            const dist = Math.max(Math.sqrt(distSq), MIN_DIST);
-            const cutoff = T < BOILING_POINT ? 2.0 : 1.0;
-
-            if (dist < cutoff) {
-              _diff.divideScalar(dist); // normalise using clamped dist
-
-              // Soft repulsion: linear ramp that saturates at MIN_DIST
-              const overlap = 1 - dist / cutoff; // 0 at cutoff, 1 at centre
-              const repulseStrength = T < BOILING_POINT ? 6.0 : 3.0;
-              const fRepulse = repulseStrength * overlap * overlap; // quadratic, finite
-
-              // Weak attraction shell for liquid cohesion (pulls particles together at mid-range)
-              let fAttract = 0;
-              if (T >= MELTING_POINT && T < BOILING_POINT + 40) {
-                const attractRange = 2.2;
-                if (dist > cutoff * 0.6 && dist < attractRange) {
-                  const t = (dist - cutoff * 0.6) / (attractRange - cutoff * 0.6);
-                  fAttract = -0.5 * t * (1 - t) * 4; // gentler attraction, peak ≈ −0.5
-                }
-              }
-
-              _force.addScaledVector(_diff, fRepulse + fAttract);
-            }
-          }
-        }
-
         // Damping
         _force.addScaledVector(p.vel, -dampingCoeff);
 
@@ -1192,9 +1174,46 @@
         _force.x += (Math.random() - 0.5) * thermalKick * 60;
         _force.y += (Math.random() - 0.5) * thermalKick * 60;
         _force.z += (Math.random() - 0.5) * thermalKick * 60;
+        forceData[i].copy(_force);
+      }
 
+      // Pairwise interactions (liquid + near-transition), computed symmetrically
+      if (T >= MELTING_POINT * 0.8) {
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            _diff.subVectors(particleData[j].pos, particleData[i].pos);
+            const distSq = _diff.lengthSq();
+            if (distSq < 0.000001) continue;
+            const dist = Math.max(Math.sqrt(distSq), MIN_DIST);
+
+            let pairForce = 0;
+
+            if (dist < pairCutoff) {
+              // Soft repulsion: finite at short range, smooth to zero at cutoff
+              const overlap = 1 - dist / pairCutoff;
+              pairForce += repulseStrength * overlap * overlap;
+            }
+
+            // Mild liquid cohesion shell, strongest near melting and fading to boiling
+            if (cohesionStrength > 0 && dist > cohesionStart && dist < cohesionEnd) {
+              const t = (dist - cohesionStart) / (cohesionEnd - cohesionStart);
+              pairForce -= cohesionStrength * 4 * t * (1 - t);
+            }
+
+            if (pairForce !== 0) {
+              _diff.divideScalar(dist);
+              forceData[i].addScaledVector(_diff, pairForce);
+              forceData[j].addScaledVector(_diff, -pairForce);
+            }
+          }
+        }
+      }
+
+      // Integrate
+      for (let i = 0; i < n; i++) {
+        const p = particleData[i];
         // Integrate velocity
-        p.vel.addScaledVector(_force, dt / p.mass);
+        p.vel.addScaledVector(forceData[i], dt / p.mass);
 
         // Velocity cap — tighter limit prevents sudden jumps
         const maxSpeed = 3 + T * 0.008;
@@ -1220,35 +1239,43 @@
       }
 
       // Position-based overlap resolution + viscous velocity mixing (second pass)
-      // Pushes overlapping particles apart and blends nearby velocities to
-      // break coherent rotation and prevent cluster spinning
-      const isLiquid = T >= MELTING_POINT && T < BOILING_POINT;
-      const viscosityRange = isLiquid ? 1.8 : MIN_DIST * 2;
-      const viscosityStrength = isLiquid ? 0.05 : 0;
+      // Pushes true overlaps apart and applies short-range liquid velocity diffusion
+      const viscosityRange = isLiquid ? 1.25 : MIN_DIST;
+      const viscosityRangeSq = viscosityRange * viscosityRange;
+      const viscosityStrength = isLiquid ? 0.02 : 0;
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
           _diff.subVectors(particleData[i].pos, particleData[j].pos);
           const distSq = _diff.lengthSq();
-          const minSep = MIN_DIST * 2;
-          if (distSq < minSep * minSep && distSq > 0.0001) {
-            const dist = Math.sqrt(distSq);
-            const overlap = (minSep - dist) * 0.5;
+          if (distSq <= 0.0001) continue;
+
+          const minSep = MIN_DIST;
+          const overlapNeeded = distSq < minSep * minSep;
+          const mixNeeded = viscosityStrength > 0 && distSq < viscosityRangeSq;
+          if (!overlapNeeded && !mixNeeded) continue;
+
+          const dist = Math.sqrt(distSq);
+
+          if (overlapNeeded) {
+            const correction = (minSep - dist) * 0.5;
             _diff.divideScalar(dist); // normalise
-            particleData[i].pos.addScaledVector(_diff, overlap * 0.5);
-            particleData[j].pos.addScaledVector(_diff, -overlap * 0.5);
+            particleData[i].pos.addScaledVector(_diff, correction);
+            particleData[j].pos.addScaledVector(_diff, -correction);
           }
+
           // Viscous velocity mixing for nearby liquid particles
-          if (viscosityStrength > 0 && distSq < viscosityRange * viscosityRange) {
+          if (mixNeeded) {
             const pi = particleData[i], pj = particleData[j];
+            const mix = viscosityStrength * (1 - dist / viscosityRange);
             const avgVx = (pi.vel.x + pj.vel.x) * 0.5;
             const avgVy = (pi.vel.y + pj.vel.y) * 0.5;
             const avgVz = (pi.vel.z + pj.vel.z) * 0.5;
-            pi.vel.x += (avgVx - pi.vel.x) * viscosityStrength;
-            pi.vel.y += (avgVy - pi.vel.y) * viscosityStrength;
-            pi.vel.z += (avgVz - pi.vel.z) * viscosityStrength;
-            pj.vel.x += (avgVx - pj.vel.x) * viscosityStrength;
-            pj.vel.y += (avgVy - pj.vel.y) * viscosityStrength;
-            pj.vel.z += (avgVz - pj.vel.z) * viscosityStrength;
+            pi.vel.x += (avgVx - pi.vel.x) * mix;
+            pi.vel.y += (avgVy - pi.vel.y) * mix;
+            pi.vel.z += (avgVz - pi.vel.z) * mix;
+            pj.vel.x += (avgVx - pj.vel.x) * mix;
+            pj.vel.y += (avgVy - pj.vel.y) * mix;
+            pj.vel.z += (avgVz - pj.vel.z) * mix;
           }
         }
       }
