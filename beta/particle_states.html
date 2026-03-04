@@ -1138,8 +1138,8 @@
       } else if (T < BOILING_POINT) {
         // Liquid: no spring, particles flow freely with pairwise interactions
         springK = 0;
-        dampingCoeff = 1.8;
-        thermalKick = T * 0.003;
+        dampingCoeff = 2.2;
+        thermalKick = T * 0.0022;
       } else {
         // Gas: no spring, particles fly freely
         springK = 0;
@@ -1148,13 +1148,13 @@
       }
 
       const isLiquid = T >= MELTING_POINT && T < BOILING_POINT;
-      const pairCutoff = T < BOILING_POINT ? 2.0 : 1.0;
-      const repulseStrength = T < BOILING_POINT ? 6.0 : 3.0;
+      const pairCutoff = isLiquid ? 1.8 : (T < BOILING_POINT ? 2.0 : 1.0);
+      const repulseStrength = isLiquid ? 5.0 : (T < BOILING_POINT ? 6.0 : 3.0);
       const cohesionStrength = isLiquid
-        ? 0.05 * ((BOILING_POINT - T) / (BOILING_POINT - MELTING_POINT))
+        ? 0.14 + 0.08 * ((BOILING_POINT - T) / (BOILING_POINT - MELTING_POINT))
         : 0;
-      const cohesionStart = pairCutoff * 0.75;
-      const cohesionEnd = 2.1;
+      const cohesionStart = isLiquid ? pairCutoff * 0.67 : pairCutoff * 0.75;
+      const cohesionEnd = isLiquid ? 1.95 : 2.1;
 
       // First pass: forces that don't depend on pair symmetry
       for (let i = 0; i < n; i++) {
@@ -1216,8 +1216,15 @@
         // Integrate velocity
         p.vel.addScaledVector(forceData[i], dt / p.mass);
 
-        // Velocity cap — tighter limit prevents sudden jumps
-        const maxSpeed = 3 + T * 0.008;
+        // Velocity cap by phase keeps liquid from looking gas-like.
+        let maxSpeed;
+        if (T < MELTING_POINT) {
+          maxSpeed = 2.0 + T * 0.004;
+        } else if (T < BOILING_POINT) {
+          maxSpeed = 2.6 + (T - MELTING_POINT) * 0.004;
+        } else {
+          maxSpeed = 3.4 + (T - BOILING_POINT) * 0.008;
+        }
         const speed = p.vel.length();
         if (speed > maxSpeed) {
           p.vel.multiplyScalar(maxSpeed / speed);
