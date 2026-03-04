@@ -1130,11 +1130,10 @@
         dampingCoeff = 2.0;
         thermalKick = T * 0.0015;
       } else if (T < BOILING_POINT) {
-        // Liquid: weak/no spring, particles interact but flow
-        const liquidness = (T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
-        springK = 2.0 * (1 - liquidness * 0.8);
-        dampingCoeff = 1.5;
-        thermalKick = T * 0.002;
+        // Liquid: no spring, particles flow freely with pairwise interactions
+        springK = 0;
+        dampingCoeff = 1.8;
+        thermalKick = T * 0.003;
       } else {
         // Gas: no spring, particles fly freely
         springK = 0;
@@ -1174,10 +1173,10 @@
               // Weak attraction shell for liquid cohesion (pulls particles together at mid-range)
               let fAttract = 0;
               if (T >= MELTING_POINT && T < BOILING_POINT + 40) {
-                const attractRange = 1.6;
-                if (dist > cutoff * 0.5 && dist < attractRange) {
-                  const t = (dist - cutoff * 0.5) / (attractRange - cutoff * 0.5);
-                  fAttract = -1.2 * t * (1 - t) * 4; // bell-shaped, peak ≈ −1.2
+                const attractRange = 2.2;
+                if (dist > cutoff * 0.6 && dist < attractRange) {
+                  const t = (dist - cutoff * 0.6) / (attractRange - cutoff * 0.6);
+                  fAttract = -0.5 * t * (1 - t) * 4; // gentler attraction, peak ≈ −0.5
                 }
               }
 
@@ -1220,8 +1219,12 @@
         }
       }
 
-      // Position-based overlap resolution (second pass)
-      // Gently push overlapping particles apart without adding velocity spikes
+      // Position-based overlap resolution + viscous velocity mixing (second pass)
+      // Pushes overlapping particles apart and blends nearby velocities to
+      // break coherent rotation and prevent cluster spinning
+      const isLiquid = T >= MELTING_POINT && T < BOILING_POINT;
+      const viscosityRange = isLiquid ? 1.8 : MIN_DIST * 2;
+      const viscosityStrength = isLiquid ? 0.05 : 0;
       for (let i = 0; i < n; i++) {
         for (let j = i + 1; j < n; j++) {
           _diff.subVectors(particleData[i].pos, particleData[j].pos);
@@ -1233,6 +1236,19 @@
             _diff.divideScalar(dist); // normalise
             particleData[i].pos.addScaledVector(_diff, overlap * 0.5);
             particleData[j].pos.addScaledVector(_diff, -overlap * 0.5);
+          }
+          // Viscous velocity mixing for nearby liquid particles
+          if (viscosityStrength > 0 && distSq < viscosityRange * viscosityRange) {
+            const pi = particleData[i], pj = particleData[j];
+            const avgVx = (pi.vel.x + pj.vel.x) * 0.5;
+            const avgVy = (pi.vel.y + pj.vel.y) * 0.5;
+            const avgVz = (pi.vel.z + pj.vel.z) * 0.5;
+            pi.vel.x += (avgVx - pi.vel.x) * viscosityStrength;
+            pi.vel.y += (avgVy - pi.vel.y) * viscosityStrength;
+            pi.vel.z += (avgVz - pi.vel.z) * viscosityStrength;
+            pj.vel.x += (avgVx - pj.vel.x) * viscosityStrength;
+            pj.vel.y += (avgVy - pj.vel.y) * viscosityStrength;
+            pj.vel.z += (avgVz - pj.vel.z) * viscosityStrength;
           }
         }
       }
