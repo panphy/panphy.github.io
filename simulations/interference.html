@@ -1219,6 +1219,34 @@
       state.time = 0;
       uniforms.uTime.value = 0;
 
+      // Reset source 1
+      state.source1.enabled = true;
+      state.source1.freq = 2.0;
+      state.source1.amp = 0.5;
+      s1Toggle.checked = true;
+      s1Freq.value = 2.0;
+      s1Amp.value = 0.5;
+      s1FreqVal.textContent = '2.0 Hz';
+      s1AmpVal.textContent = '0.50';
+      uniforms.uS1On.value = 1.0;
+      uniforms.uS1Freq.value = 2.0;
+      uniforms.uS1Amp.value = 0.5;
+      updateSourceCard(source1Card, true);
+
+      // Reset source 2
+      state.source2.enabled = true;
+      state.source2.freq = 2.0;
+      state.source2.amp = 0.5;
+      s2Toggle.checked = true;
+      s2Freq.value = 2.0;
+      s2Amp.value = 0.5;
+      s2FreqVal.textContent = '2.0 Hz';
+      s2AmpVal.textContent = '0.50';
+      uniforms.uS2On.value = 1.0;
+      uniforms.uS2Freq.value = 2.0;
+      uniforms.uS2Amp.value = 0.5;
+      updateSourceCard(source2Card, true);
+
       // Reset separation
       state.separation = 6.0;
       SOURCE1_POS.x = -3;
@@ -1230,6 +1258,11 @@
       state.timeScale = 1.0;
       animSpeedSlider.value = 1.0;
       animSpeedVal.textContent = '1.0\u00d7';
+
+      // Reset camera
+      camera.position.set(0, 13, 13);
+      controls.target.set(0, 0, 0);
+      controls.update();
 
       state.playing = true;
       updatePlayPauseUI();
