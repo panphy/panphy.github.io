@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f9fa">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <script>
+    (function () {
+      var hasDarkPreference = false;
+      try {
+        hasDarkPreference = Boolean(localStorage.getItem('particle-states-dark'));
+      } catch (_) {
+        hasDarkPreference = false;
+      }
+      if (hasDarkPreference) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute('content', '#0f1014');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      }
+    })();
+  </script>
+  <title>States of Matter</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+
+    :root {
+      --font-sans: 'Inter', sans-serif;
+      --font-display: 'Poppins', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --bg-color: #f8f9fa;
+      --bg-pattern: #e9ecef;
+      --text-main: #2d3436;
+      --text-secondary: #636e72;
+
+      --brand-primary: #6c5ce7;
+      --brand-secondary: #a29bfe;
+      --brand-accent: #00cec9;
+
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5b4cdb;
+      --btn-text: #ffffff;
+
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.5);
+
+      --slider-track: #e2e8f0;
+      --slider-thumb: #6c5ce7;
+      --toggle-hover: rgba(108, 92, 231, 0.15);
+
+      --scene-bg: #e8edf3;
+
+      --temp-cold: #3b82f6;
+      --temp-warm: #f59e0b;
+      --temp-hot: #ef4444;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f1014;
+      --bg-pattern: #181a20;
+      --text-main: #dfe6e9;
+      --text-secondary: #b2bec3;
+
+      --brand-primary: #a29bfe;
+      --brand-secondary: #6c5ce7;
+      --brand-accent: #81ecec;
+
+      --surface: #1e2129;
+      --surface-alt: #17191f;
+      --border: #2d3436;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+
+      --btn-primary: #6c5ce7;
+      --btn-primary-hover: #5849d6;
+      --btn-text: #ffffff;
+
+      --nav-bg: rgba(22, 24, 29, 0.85);
+      --nav-border: rgba(255, 255, 255, 0.08);
+
+      --slider-track: #4a5568;
+      --slider-thumb: #a29bfe;
+      --toggle-hover: rgba(162, 155, 254, 0.2);
+
+      --scene-bg: #0a0c14;
+
+      --temp-cold: #60a5fa;
+      --temp-warm: #fbbf24;
+      --temp-hot: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      overflow: hidden;
+    }
+
+    a {
+      color: var(--brand-primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 0;
+    }
+
+    /* Title Banner */
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 16px auto 0;
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      min-height: 58px;
+      padding: 8px 20px;
+    }
+
+    .banner-logo img {
+      width: auto;
+      height: 36px;
+      display: block;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .banner-title {
+      margin: 0;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--brand-primary);
+    }
+
+    .banner-title.gradient-text {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .banner-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    #theme-button {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      border-radius: 50%;
+      font-size: 1.25rem;
+      line-height: 1;
+      min-height: 42px;
+      min-width: 42px;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    #theme-button:hover {
+      background-color: var(--toggle-hover);
+      transform: rotate(15deg);
+    }
+
+    #theme-button:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
+    /* Workspace */
+    #workspace {
+      min-height: 0;
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+      gap: 0.9rem;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 0 auto;
+      padding-bottom: 0.75rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Sim Panel */
+    #simPanel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #simCanvas {
+      display: block;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      border-radius: 18px;
+      cursor: grab;
+    }
+
+    #simCanvas:active {
+      cursor: grabbing;
+    }
+
+    .sim-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--nav-border);
+      pointer-events: none;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+
+    /* Controls Panel */
+    #controlsPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 0.9rem;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .controls-header h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.06rem;
+      letter-spacing: -0.01em;
+    }
+
+    .controls-header p {
+      margin: 0.2rem 0 0;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+    }
+
+    /* Source Cards */
+    .source-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .source-card.temp-card {
+      border-left: 4px solid var(--temp-warm);
+    }
+
+    .source-card.settings-card {
+      border-left: 4px solid var(--text-secondary);
+    }
+
+    .settings-dot {
+      background: var(--text-secondary);
+    }
+
+    .source-card.settings-card input[type="range"]::-webkit-slider-thumb {
+      background: var(--text-secondary);
+    }
+
+    .source-card.settings-card input[type="range"]::-moz-range-thumb {
+      background: var(--text-secondary);
+    }
+
+    .source-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .source-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .source-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .temp-dot {
+      background: var(--temp-warm);
+    }
+
+    .source-title {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    /* State Badge */
+    .state-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 0 0.7rem;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      border: 1px solid transparent;
+      user-select: none;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .state-badge.solid {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.28);
+      color: #2563eb;
+    }
+
+    [data-theme="dark"] .state-badge.solid {
+      color: #93bbfd;
+    }
+
+    .state-badge.liquid {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.28);
+      color: #d97706;
+    }
+
+    [data-theme="dark"] .state-badge.liquid {
+      color: #fcd34d;
+    }
+
+    .state-badge.gas {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.28);
+      color: #dc2626;
+    }
+
+    [data-theme="dark"] .state-badge.gas {
+      color: #fca5a5;
+    }
+
+    /* Temperature Bar */
+    .temp-bar-wrap {
+      position: relative;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: linear-gradient(to right, #3b82f6, #f59e0b 50%, #ef4444);
+      opacity: 0.6;
+    }
+
+    .temp-bar-marker {
+      position: absolute;
+      top: -3px;
+      width: 3px;
+      height: 14px;
+      background: var(--text-main);
+      border-radius: 2px;
+      transition: left 0.15s ease;
+    }
+
+    /* Control Blocks */
+    .control-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .control-header label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .control-header span {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 28px;
+      background: transparent;
+      cursor: pointer;
+      margin: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="range"]:focus-visible {
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slider-track);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: -6px;
+      border-radius: 50%;
+      border: none;
+      background: var(--slider-thumb);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slider-track);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: none;
+      background: var(--slider-thumb);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .temp-card input[type="range"]::-webkit-slider-thumb {
+      background: var(--temp-warm);
+    }
+
+    .temp-card input[type="range"]::-moz-range-thumb {
+      background: var(--temp-warm);
+    }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      min-height: 44px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .btn-primary {
+      background: var(--btn-primary);
+      color: var(--btn-text);
+    }
+
+    .btn-primary:hover {
+      background: var(--btn-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+
+    .sim-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .sim-actions .btn {
+      flex: 1;
+    }
+
+    /* Separator */
+    .separator {
+      height: 1px;
+      background: var(--border);
+      margin: 0.1rem 0;
+    }
+
+    /* Status */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 26px;
+      padding: 0 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .status-chip.running {
+      background: rgba(14, 165, 233, 0.15);
+      border-color: rgba(14, 165, 233, 0.28);
+      color: #0075b1;
+    }
+
+    [data-theme="dark"] .status-chip.running {
+      color: #9ddfff;
+    }
+
+    .status-chip.paused {
+      background: rgba(127, 138, 162, 0.14);
+      border-color: rgba(127, 138, 162, 0.3);
+      color: #63708a;
+    }
+
+    [data-theme="dark"] .status-chip.paused {
+      color: #b4bfd6;
+    }
+
+    .keyboard-hint {
+      margin: 0;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      line-height: 1.5;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    /* Info text */
+    .info-text {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .info-text strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Particle count display */
+    .particle-count {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    /* Touch / Coarse Pointer */
+    @media (pointer: coarse) {
+      .btn,
+      #theme-button {
+        min-height: 48px;
+      }
+
+      #theme-button {
+        min-width: 48px;
+      }
+
+      input[type="range"] {
+        height: 36px;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        width: 22px;
+        height: 22px;
+        margin-top: -8px;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      #app {
+        height: auto;
+        min-height: 100%;
+      }
+
+      #workspace {
+        grid-template-columns: 1fr;
+      }
+
+      #simPanel {
+        min-height: 50vh;
+        order: 1;
+      }
+
+      #controlsPanel {
+        order: 2;
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #titleBanner {
+        width: calc(100% - 24px);
+        margin: 12px auto 0;
+        min-height: 52px;
+        border-radius: 18px;
+        padding: 8px 12px;
+      }
+
+      #workspace {
+        width: calc(100% - 24px);
+      }
+
+      .banner-logo img {
+        height: 28px;
+      }
+
+      .banner-title {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <header id="titleBanner">
+      <a href="/" class="banner-logo"><img src="/assets/panphy.png" alt="PanPhy Labs"></a>
+      <h1 class="banner-title gradient-text">States of Matter</h1>
+      <div class="banner-actions">
+        <button id="theme-button" title="Toggle theme" aria-label="Toggle Light/Dark Theme"></button>
+      </div>
+    </header>
+
+    <div id="workspace">
+      <div id="simPanel" class="panel">
+        <canvas id="simCanvas"></canvas>
+        <p class="sim-hint">Drag to rotate · Scroll to zoom</p>
+      </div>
+
+      <div id="controlsPanel" class="panel">
+        <div class="controls-header">
+          <h2>Controls</h2>
+          <p>Particle model of states of matter</p>
+        </div>
+
+        <div class="status-row">
+          <span id="statusChip" class="status-chip running">RUNNING</span>
+          <span id="stateBadge" class="state-badge solid">SOLID</span>
+        </div>
+
+        <!-- Temperature -->
+        <div class="source-card temp-card">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot temp-dot"></span>
+              <h3 class="source-title">Temperature</h3>
+            </div>
+            <span id="tempDisplay" style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600;">150 K</span>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="tempSlider">Temperature</label>
+              <span id="tempVal">150 K</span>
+            </div>
+            <input type="range" id="tempSlider" min="10" max="600" step="1" value="150">
+          </div>
+          <div class="temp-bar-wrap">
+            <div id="tempBarMarker" class="temp-bar-marker" style="left:23%"></div>
+          </div>
+          <p class="info-text" id="stateDescription">
+            <strong>Solid:</strong> Particles vibrate about fixed positions in a regular lattice. Strong intermolecular forces hold the structure.
+          </p>
+        </div>
+
+        <div class="separator"></div>
+
+        <!-- Settings -->
+        <div class="source-card settings-card">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot settings-dot"></span>
+              <h3 class="source-title">Settings</h3>
+            </div>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="particleSlider">Grid Size</label>
+              <span id="particleVal">5 × 5 × 5</span>
+            </div>
+            <input type="range" id="particleSlider" min="3" max="7" step="1" value="5">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="animSpeed">Animation Speed</label>
+              <span id="animSpeedVal">1.0×</span>
+            </div>
+            <input type="range" id="animSpeed" min="0.2" max="3" step="0.1" value="1.0">
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="sim-actions">
+          <button id="playPauseBtn" class="btn btn-primary">Pause</button>
+          <button id="resetBtn" class="btn btn-secondary">Reset</button>
+        </div>
+
+        <p class="keyboard-hint">
+          <kbd>Space</kbd> Play / Pause &nbsp; <kbd>R</kbd> Reset
+        </p>
+
+        <div class="separator"></div>
+
+        <p class="info-text">
+          This simulation models how particles behave in different states of matter.
+          As temperature increases, kinetic energy overcomes intermolecular forces,
+          transitioning from <strong>solid</strong> to <strong>liquid</strong> to <strong>gas</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ─── Constants ───
+    const MELTING_POINT = 200;
+    const BOILING_POINT = 400;
+    const CONTAINER_HALF = 4.5;
+    const PARTICLE_RADIUS = 0.18;
+    const BOND_VISUAL_LIMIT = 1.8; // max distance to draw bonds in solid
+
+    // ─── State ───
+    const state = {
+      playing: true,
+      temperature: 150,
+      timeScale: 1.0,
+      gridSize: 5,
+      time: 0
+    };
+
+    // ─── Theme Colors ───
+    const themeColors = {
+      light: {
+        sceneBg: 0xe8edf3,
+        particleColor: 0x6c5ce7,
+        particleEmissive: 0x3a2db0,
+        bondColor: 0xa29bfe,
+        containerColor: 0xb0bac8
+      },
+      dark: {
+        sceneBg: 0x0a0c14,
+        particleColor: 0xa29bfe,
+        particleEmissive: 0x5b4cdb,
+        bondColor: 0x6c5ce7,
+        containerColor: 0x3a4050
+      }
+    };
+
+    // ─── DOM Elements ───
+    const canvas = document.getElementById('simCanvas');
+    const simPanel = document.getElementById('simPanel');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusChip = document.getElementById('statusChip');
+    const stateBadge = document.getElementById('stateBadge');
+    const themeBtn = document.getElementById('theme-button');
+    const tempSlider = document.getElementById('tempSlider');
+    const tempVal = document.getElementById('tempVal');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const tempBarMarker = document.getElementById('tempBarMarker');
+    const stateDescription = document.getElementById('stateDescription');
+    const particleSlider = document.getElementById('particleSlider');
+    const particleVal = document.getElementById('particleVal');
+    const animSpeedSlider = document.getElementById('animSpeed');
+    const animSpeedVal = document.getElementById('animSpeedVal');
+
+    // ─── Three.js Setup ───
+    function isDark() {
+      return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+
+    function getColors() {
+      return isDark() ? themeColors.dark : themeColors.light;
+    }
+
+    const scene = new THREE.Scene();
+    const colors = getColors();
+    scene.background = new THREE.Color(colors.sceneBg);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+    camera.position.set(8, 8, 8);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 0);
+    controls.minDistance = 4;
+    controls.maxDistance = 25;
+    controls.enablePan = false;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    fillLight.position.set(-5, 3, -5);
+    scene.add(fillLight);
+
+    // ─── Container (wireframe box) ───
+    const containerGeo = new THREE.BoxGeometry(
+      CONTAINER_HALF * 2, CONTAINER_HALF * 2, CONTAINER_HALF * 2
+    );
+    const containerEdges = new THREE.EdgesGeometry(containerGeo);
+    const containerMat = new THREE.LineBasicMaterial({
+      color: colors.containerColor,
+      transparent: true,
+      opacity: 0.4
+    });
+    const containerMesh = new THREE.LineSegments(containerEdges, containerMat);
+    scene.add(containerMesh);
+
+    // ─── Particles ───
+    let particleData = []; // { pos, vel, equilibrium, mass }
+    let instancedMesh = null;
+    let bondLines = null;
+    const sphereGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 12);
+    let sphereMat = new THREE.MeshPhongMaterial({
+      color: colors.particleColor,
+      emissive: colors.particleEmissive,
+      emissiveIntensity: 0.15,
+      shininess: 60
+    });
+
+    const dummy = new THREE.Object3D();
+    const tempColor = new THREE.Color();
+
+    function getTemperatureColor(temp) {
+      if (temp < MELTING_POINT) {
+        const t = temp / MELTING_POINT;
+        return new THREE.Color().setHSL(0.6 - t * 0.1, 0.7, 0.55 + t * 0.1);
+      } else if (temp < BOILING_POINT) {
+        const t = (temp - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
+        return new THREE.Color().setHSL(0.12 - t * 0.05, 0.8, 0.55 + t * 0.05);
+      } else {
+        const t = Math.min((temp - BOILING_POINT) / 200, 1);
+        return new THREE.Color().setHSL(0.02 - t * 0.02, 0.85, 0.55 + t * 0.1);
+      }
+    }
+
+    function createParticles() {
+      // Clean up old
+      if (instancedMesh) {
+        scene.remove(instancedMesh);
+        instancedMesh.dispose();
+      }
+      if (bondLines) {
+        scene.remove(bondLines);
+        bondLines.geometry.dispose();
+        bondLines.material.dispose();
+        bondLines = null;
+      }
+
+      const n = state.gridSize;
+      const count = n * n * n;
+      const spacing = Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+      const offset = (n - 1) * spacing / 2;
+
+      particleData = [];
+
+      for (let ix = 0; ix < n; ix++) {
+        for (let iy = 0; iy < n; iy++) {
+          for (let iz = 0; iz < n; iz++) {
+            const eq = new THREE.Vector3(
+              ix * spacing - offset,
+              iy * spacing - offset,
+              iz * spacing - offset
+            );
+            particleData.push({
+              pos: eq.clone(),
+              vel: new THREE.Vector3(
+                (Math.random() - 0.5) * 0.5,
+                (Math.random() - 0.5) * 0.5,
+                (Math.random() - 0.5) * 0.5
+              ),
+              equilibrium: eq.clone(),
+              mass: 1.0
+            });
+          }
+        }
+      }
+
+      // Create instanced mesh
+      const col = getTemperatureColor(state.temperature);
+      sphereMat = new THREE.MeshPhongMaterial({
+        color: col,
+        emissive: col.clone().multiplyScalar(0.3),
+        emissiveIntensity: 0.2,
+        shininess: 60
+      });
+
+      instancedMesh = new THREE.InstancedMesh(sphereGeo, sphereMat, count);
+      instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      scene.add(instancedMesh);
+
+      // Create bond line geometry (for solid state)
+      createBondLines();
+
+      updateInstancedMesh();
+    }
+
+    function createBondLines() {
+      if (bondLines) {
+        scene.remove(bondLines);
+        bondLines.geometry.dispose();
+        bondLines.material.dispose();
+      }
+
+      // Pre-compute neighbor pairs (adjacent in lattice)
+      const n = state.gridSize;
+      const pairs = [];
+      for (let i = 0; i < particleData.length; i++) {
+        for (let j = i + 1; j < particleData.length; j++) {
+          const d = particleData[i].equilibrium.distanceTo(particleData[j].equilibrium);
+          if (d < BOND_VISUAL_LIMIT) {
+            pairs.push([i, j]);
+          }
+        }
+      }
+
+      const positions = new Float32Array(pairs.length * 6);
+      const bondGeo = new THREE.BufferGeometry();
+      bondGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      bondGeo.userData.pairs = pairs;
+
+      const c = getColors();
+      const bondMat = new THREE.LineBasicMaterial({
+        color: c.bondColor,
+        transparent: true,
+        opacity: 0.35
+      });
+      bondLines = new THREE.LineSegments(bondGeo, bondMat);
+      scene.add(bondLines);
+    }
+
+    function updateBondLines() {
+      if (!bondLines) return;
+
+      const pairs = bondLines.geometry.userData.pairs;
+      const positions = bondLines.geometry.attributes.position.array;
+
+      // Fade bonds based on state
+      let bondOpacity = 0;
+      if (state.temperature < MELTING_POINT) {
+        bondOpacity = 0.35 * (1 - state.temperature / MELTING_POINT * 0.5);
+      } else if (state.temperature < MELTING_POINT + 40) {
+        bondOpacity = 0.35 * 0.5 * (1 - (state.temperature - MELTING_POINT) / 40);
+      }
+      bondLines.material.opacity = bondOpacity;
+      bondLines.visible = bondOpacity > 0.01;
+
+      if (!bondLines.visible) return;
+
+      for (let k = 0; k < pairs.length; k++) {
+        const [i, j] = pairs[k];
+        const pi = particleData[i].pos;
+        const pj = particleData[j].pos;
+        positions[k * 6] = pi.x;
+        positions[k * 6 + 1] = pi.y;
+        positions[k * 6 + 2] = pi.z;
+        positions[k * 6 + 3] = pj.x;
+        positions[k * 6 + 4] = pj.y;
+        positions[k * 6 + 5] = pj.z;
+      }
+      bondLines.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function updateInstancedMesh() {
+      for (let i = 0; i < particleData.length; i++) {
+        const p = particleData[i];
+        dummy.position.copy(p.pos);
+
+        // Scale particles slightly larger when gas
+        const scale = state.temperature > BOILING_POINT
+          ? 1.0 + Math.min((state.temperature - BOILING_POINT) / 400, 0.3)
+          : 1.0;
+        dummy.scale.setScalar(scale);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+      }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+    }
+
+    // ─── Physics Simulation ───
+    const _force = new THREE.Vector3();
+    const _diff = new THREE.Vector3();
+
+    function stepPhysics(dt) {
+      const T = state.temperature;
+      const n = particleData.length;
+
+      // Determine phase parameters
+      let springK, dampingCoeff, thermalKick;
+
+      if (T < MELTING_POINT) {
+        // Solid: strong spring to lattice, small vibrations
+        const solidness = 1 - T / MELTING_POINT;
+        springK = 8.0 + solidness * 12.0; // strong spring
+        dampingCoeff = 2.0;
+        thermalKick = T * 0.0015;
+      } else if (T < BOILING_POINT) {
+        // Liquid: weak/no spring, particles interact but flow
+        const liquidness = (T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
+        springK = 2.0 * (1 - liquidness * 0.8); // weakening spring
+        dampingCoeff = 1.5;
+        thermalKick = T * 0.002;
+      } else {
+        // Gas: no spring, particles fly freely
+        springK = 0;
+        dampingCoeff = 0.3;
+        thermalKick = T * 0.002;
+      }
+
+      for (let i = 0; i < n; i++) {
+        const p = particleData[i];
+        _force.set(0, 0, 0);
+
+        // Spring force toward equilibrium (solid/liquid)
+        if (springK > 0) {
+          _diff.subVectors(p.equilibrium, p.pos);
+          _force.addScaledVector(_diff, springK);
+        }
+
+        // Intermolecular forces (Lennard-Jones-like, simplified)
+        // Only significant in liquid state to keep particles clustered
+        if (T >= MELTING_POINT * 0.8 && T < BOILING_POINT + 80) {
+          for (let j = 0; j < n; j++) {
+            if (i === j) continue;
+            _diff.subVectors(particleData[j].pos, p.pos);
+            const distSq = _diff.lengthSq();
+            const dist = Math.sqrt(distSq);
+
+            if (dist < 0.01) continue;
+
+            // Repulsive force at close range
+            const sigma = 0.6;
+            const epsilon = T < BOILING_POINT ? 1.5 : 0.5;
+
+            if (dist < sigma * 2.5) {
+              const sr6 = Math.pow(sigma / dist, 6);
+              const sr12 = sr6 * sr6;
+              const fMag = 24 * epsilon * (2 * sr12 - sr6) / dist;
+              // Clamp force to prevent explosions
+              const clampedF = Math.max(-50, Math.min(50, fMag));
+              _diff.normalize();
+              _force.addScaledVector(_diff, clampedF);
+            }
+          }
+        }
+
+        // Repulsion only (gas state) - just prevent overlap
+        if (T >= BOILING_POINT) {
+          for (let j = 0; j < n; j++) {
+            if (i === j) continue;
+            _diff.subVectors(p.pos, particleData[j].pos);
+            const distSq = _diff.lengthSq();
+            if (distSq < 0.5 * 0.5 && distSq > 0.0001) {
+              const dist = Math.sqrt(distSq);
+              _diff.divideScalar(dist);
+              const repulse = 5.0 / distSq;
+              _force.addScaledVector(_diff, Math.min(repulse, 30));
+            }
+          }
+        }
+
+        // Damping
+        _force.addScaledVector(p.vel, -dampingCoeff);
+
+        // Random thermal force
+        _force.x += (Math.random() - 0.5) * thermalKick * 60;
+        _force.y += (Math.random() - 0.5) * thermalKick * 60;
+        _force.z += (Math.random() - 0.5) * thermalKick * 60;
+
+        // Integrate
+        p.vel.addScaledVector(_force, dt / p.mass);
+
+        // Velocity cap to prevent instability
+        const maxSpeed = 4 + T * 0.02;
+        const speed = p.vel.length();
+        if (speed > maxSpeed) {
+          p.vel.multiplyScalar(maxSpeed / speed);
+        }
+
+        p.pos.addScaledVector(p.vel, dt);
+
+        // Container walls (elastic bounce)
+        const wallLimit = CONTAINER_HALF - PARTICLE_RADIUS;
+        for (const axis of ['x', 'y', 'z']) {
+          if (p.pos[axis] > wallLimit) {
+            p.pos[axis] = wallLimit;
+            p.vel[axis] *= -0.8;
+          } else if (p.pos[axis] < -wallLimit) {
+            p.pos[axis] = -wallLimit;
+            p.vel[axis] *= -0.8;
+          }
+        }
+      }
+    }
+
+    // ─── Liquid Transition ───
+    // When melting, shift equilibrium points to allow flow
+    function updateEquilibria() {
+      const T = state.temperature;
+      if (T >= MELTING_POINT && T < BOILING_POINT) {
+        // Slowly drift equilibrium toward current pos (liquid flows)
+        const driftRate = 0.02 * ((T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT));
+        for (const p of particleData) {
+          p.equilibrium.lerp(p.pos, driftRate);
+          // Keep equilibria within container
+          p.equilibrium.clampScalar(-CONTAINER_HALF + 0.5, CONTAINER_HALF - 0.5);
+        }
+      }
+    }
+
+    // ─── UI Helpers ───
+    function getStateName(temp) {
+      if (temp < MELTING_POINT) return 'solid';
+      if (temp < BOILING_POINT) return 'liquid';
+      return 'gas';
+    }
+
+    function updateStateUI() {
+      const T = state.temperature;
+      const stateName = getStateName(T);
+
+      tempVal.textContent = T + ' K';
+      tempDisplay.textContent = T + ' K';
+
+      // Temperature bar marker
+      const pct = ((T - 10) / (600 - 10)) * 100;
+      tempBarMarker.style.left = pct + '%';
+
+      // State badge
+      stateBadge.textContent = stateName.toUpperCase();
+      stateBadge.className = 'state-badge ' + stateName;
+
+      // Description
+      if (stateName === 'solid') {
+        stateDescription.innerHTML =
+          '<strong>Solid:</strong> Particles vibrate about fixed positions in a regular lattice. Strong intermolecular forces hold the structure.';
+      } else if (stateName === 'liquid') {
+        stateDescription.innerHTML =
+          '<strong>Liquid:</strong> Particles move more freely but stay close together. They can flow past each other while maintaining contact.';
+      } else {
+        stateDescription.innerHTML =
+          '<strong>Gas:</strong> Particles move rapidly in all directions with high kinetic energy. They spread out to fill the container.';
+      }
+
+      // Update particle color based on temperature
+      if (instancedMesh) {
+        const col = getTemperatureColor(T);
+        instancedMesh.material.color.copy(col);
+        instancedMesh.material.emissive.copy(col).multiplyScalar(0.3);
+      }
+    }
+
+    function updatePlayPauseUI() {
+      if (state.playing) {
+        playPauseBtn.textContent = 'Pause';
+        statusChip.textContent = 'RUNNING';
+        statusChip.className = 'status-chip running';
+      } else {
+        playPauseBtn.textContent = 'Play';
+        statusChip.textContent = 'PAUSED';
+        statusChip.className = 'status-chip paused';
+      }
+    }
+
+    function togglePlayPause() {
+      state.playing = !state.playing;
+      updatePlayPauseUI();
+    }
+
+    function resetSim() {
+      state.temperature = 150;
+      state.timeScale = 1.0;
+      state.time = 0;
+
+      tempSlider.value = 150;
+      animSpeedSlider.value = 1.0;
+      animSpeedVal.textContent = '1.0\u00d7';
+
+      createParticles();
+      updateStateUI();
+
+      camera.position.set(8, 8, 8);
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      state.playing = true;
+      updatePlayPauseUI();
+    }
+
+    // ─── Theme ───
+    function updateThemeIcon() {
+      themeBtn.textContent = isDark() ? '\u{1F319}' : '\u2600\uFE0F';
+    }
+
+    function applyThemeToScene() {
+      const c = getColors();
+      scene.background.set(c.sceneBg);
+      containerMat.color.set(c.containerColor);
+      if (bondLines) {
+        bondLines.material.color.set(c.bondColor);
+      }
+    }
+
+    function toggleTheme() {
+      const dark = isDark();
+      const next = dark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+
+      const tc = document.querySelector('meta[name="theme-color"]');
+      const sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+      if (next === 'dark') {
+        localStorage.setItem('particle-states-dark', '1');
+        if (tc) tc.setAttribute('content', '#0f1014');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      } else {
+        localStorage.removeItem('particle-states-dark');
+        if (tc) tc.setAttribute('content', '#f8f9fa');
+        if (sb) sb.setAttribute('content', 'default');
+      }
+
+      updateThemeIcon();
+      applyThemeToScene();
+    }
+
+    themeBtn.addEventListener('click', toggleTheme);
+    updateThemeIcon();
+
+    // ─── Control Events ───
+    tempSlider.addEventListener('input', () => {
+      const oldState = getStateName(state.temperature);
+      state.temperature = parseInt(tempSlider.value);
+      const newState = getStateName(state.temperature);
+
+      // On state transition, adjust equilibria
+      if (oldState === 'solid' && newState === 'liquid') {
+        // Loosen equilibria
+        for (const p of particleData) {
+          p.equilibrium.copy(p.pos);
+        }
+      } else if (oldState !== 'solid' && newState === 'solid') {
+        // Re-establish lattice
+        resetLatticeEquilibria();
+      }
+
+      updateStateUI();
+    });
+
+    function resetLatticeEquilibria() {
+      const n = state.gridSize;
+      const spacing = Math.min(1.5, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+      const offset = (n - 1) * spacing / 2;
+      let idx = 0;
+      for (let ix = 0; ix < n; ix++) {
+        for (let iy = 0; iy < n; iy++) {
+          for (let iz = 0; iz < n; iz++) {
+            if (idx < particleData.length) {
+              particleData[idx].equilibrium.set(
+                ix * spacing - offset,
+                iy * spacing - offset,
+                iz * spacing - offset
+              );
+            }
+            idx++;
+          }
+        }
+      }
+    }
+
+    particleSlider.addEventListener('input', () => {
+      state.gridSize = parseInt(particleSlider.value);
+      const n = state.gridSize;
+      particleVal.textContent = n + ' \u00d7 ' + n + ' \u00d7 ' + n;
+      createParticles();
+    });
+
+    animSpeedSlider.addEventListener('input', () => {
+      state.timeScale = parseFloat(animSpeedSlider.value);
+      animSpeedVal.textContent = state.timeScale.toFixed(1) + '\u00d7';
+    });
+
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    resetBtn.addEventListener('click', resetSim);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'KeyR') {
+        resetSim();
+      }
+    });
+
+    // ─── Resize Handling ───
+    function onResize() {
+      const rect = simPanel.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w === 0 || h === 0) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    const resizeObserver = new ResizeObserver(onResize);
+    resizeObserver.observe(simPanel);
+    onResize();
+
+    // ─── Initialize ───
+    createParticles();
+    updateStateUI();
+
+    // ─── Animation Loop ───
+    let lastTime = null;
+    const PHYSICS_DT = 1 / 120;
+    let accumulator = 0;
+
+    function animate(timestamp) {
+      requestAnimationFrame(animate);
+
+      if (lastTime === null) lastTime = timestamp;
+      const rawDt = Math.min((timestamp - lastTime) / 1000, 0.05);
+      lastTime = timestamp;
+
+      if (state.playing) {
+        accumulator += rawDt * state.timeScale;
+
+        // Fixed timestep physics
+        let steps = 0;
+        while (accumulator >= PHYSICS_DT && steps < 8) {
+          stepPhysics(PHYSICS_DT);
+          updateEquilibria();
+          accumulator -= PHYSICS_DT;
+          steps++;
+        }
+        if (accumulator > PHYSICS_DT * 4) accumulator = 0; // prevent spiral
+
+        updateInstancedMesh();
+        updateBondLines();
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+
+</html>
