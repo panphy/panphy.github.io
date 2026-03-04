@@ -989,6 +989,7 @@
 
       particleData = [];
       forceData = [];
+      liquidTargetRms = null;
 
       for (let ix = 0; ix < n; ix++) {
         for (let iy = 0; iy < n; iy++) {
@@ -1117,7 +1118,34 @@
     // ─── Physics Simulation ───
     const _force = new THREE.Vector3();
     const _diff = new THREE.Vector3();
+    const _liquidCom = new THREE.Vector3();
     const MIN_DIST = PARTICLE_RADIUS * 2; // visual-contact spacing floor
+    const LIQUID_BULK_STIFFNESS = 8.0;
+    const LIQUID_THERMAL_EXPANSION = 0.03; // allow slight expansion across liquid range
+    let liquidTargetRms = null;
+
+    function computeRmsRadius(outCenter) {
+      const n = particleData.length;
+      if (n === 0) {
+        outCenter.set(0, 0, 0);
+        return 0;
+      }
+
+      outCenter.set(0, 0, 0);
+      for (const p of particleData) {
+        outCenter.add(p.pos);
+      }
+      outCenter.multiplyScalar(1 / n);
+
+      let sumSq = 0;
+      for (const p of particleData) {
+        const dx = p.pos.x - outCenter.x;
+        const dy = p.pos.y - outCenter.y;
+        const dz = p.pos.z - outCenter.z;
+        sumSq += dx * dx + dy * dy + dz * dz;
+      }
+      return Math.sqrt(sumSq / n);
+    }
 
     function stepPhysics(dt) {
       const T = state.temperature;
@@ -1138,8 +1166,8 @@
       } else if (T < BOILING_POINT) {
         // Liquid: no spring, particles flow freely with pairwise interactions
         springK = 0;
-        dampingCoeff = 2.2;
-        thermalKick = T * 0.0022;
+        dampingCoeff = 2.6;
+        thermalKick = T * 0.0018;
       } else {
         // Gas: no spring, particles fly freely
         springK = 0;
@@ -1148,6 +1176,18 @@
       }
 
       const isLiquid = T >= MELTING_POINT && T < BOILING_POINT;
+      let liquidCompression = 0;
+      if (isLiquid && n > 1) {
+        const currentRms = computeRmsRadius(_liquidCom);
+        if (liquidTargetRms === null) {
+          liquidTargetRms = currentRms;
+        }
+
+        const liquidT = (T - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
+        const allowedRms = liquidTargetRms * (1 + LIQUID_THERMAL_EXPANSION * liquidT);
+        liquidCompression = Math.max(0, (currentRms - allowedRms) / allowedRms);
+      }
+
       const pairCutoff = isLiquid ? 1.8 : (T < BOILING_POINT ? 2.0 : 1.0);
       const repulseStrength = isLiquid ? 5.0 : (T < BOILING_POINT ? 6.0 : 3.0);
       const cohesionStrength = isLiquid
@@ -1165,6 +1205,12 @@
         if (springK > 0) {
           _diff.subVectors(p.equilibrium, p.pos);
           _force.addScaledVector(_diff, springK);
+        }
+
+        // Liquid bulk restoring term: keeps density roughly constant (low compressibility).
+        if (liquidCompression > 0) {
+          _diff.subVectors(p.pos, _liquidCom);
+          _force.addScaledVector(_diff, -LIQUID_BULK_STIFFNESS * liquidCompression);
         }
 
         // Damping
@@ -1433,9 +1479,14 @@
         for (const p of particleData) {
           p.equilibrium.copy(p.pos);
         }
+        liquidTargetRms = computeRmsRadius(_liquidCom);
       } else if (oldState !== 'solid' && newState === 'solid') {
         // Re-establish lattice
         resetLatticeEquilibria();
+        liquidTargetRms = null;
+      }
+      if (newState !== 'liquid') {
+        liquidTargetRms = null;
       }
 
       updateStateUI();
