@@ -544,6 +544,139 @@
       background: var(--temp-warm);
     }
 
+    /* Heater Toggle Switch */
+    .heater-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .heater-label {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--slider-track);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-track {
+      background: #ef4444;
+    }
+
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(24px);
+    }
+
+    .toggle-switch input:focus-visible + .toggle-track {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+      .toggle-switch {
+        width: 58px;
+        height: 32px;
+      }
+
+      .toggle-track::after {
+        top: 4px;
+        left: 4px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .toggle-switch input:checked + .toggle-track::after {
+        transform: translateX(26px);
+      }
+    }
+
+    .measured-temp {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .measured-temp .temp-value {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    .measured-temp .temp-unit {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .heater-status {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      user-select: none;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .heater-status.heating {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    [data-theme="dark"] .heater-status.heating {
+      color: #f87171;
+    }
+
+    .heater-status.cooling {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+    }
+
+    [data-theme="dark"] .heater-status.cooling {
+      color: #60a5fa;
+    }
+
     /* Buttons */
     .btn {
       border: 1px solid transparent;
@@ -779,7 +912,7 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Particle model of states of matter</p>
+          <p>Heat a sample and observe phase changes</p>
         </div>
 
         <div class="status-row">
@@ -787,24 +920,36 @@
           <span id="stateBadge" class="state-badge solid">SOLID</span>
         </div>
 
-        <!-- Temperature -->
+        <!-- Heat Source -->
         <div class="source-card temp-card">
           <div class="source-header">
             <div class="source-title-wrap">
               <span class="source-dot temp-dot"></span>
-              <h3 class="source-title">Temperature</h3>
+              <h3 class="source-title">Heat Source</h3>
             </div>
-            <span id="tempDisplay" style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600;">150 K</span>
+            <span id="heaterStatus" class="heater-status cooling">COOLING</span>
+          </div>
+          <div class="heater-row">
+            <span class="heater-label"><span>Heater</span></span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="heaterToggle">
+              <span class="toggle-track"></span>
+            </label>
           </div>
           <div class="control-block">
             <div class="control-header">
-              <label for="tempSlider">Temperature</label>
-              <span id="tempVal">150 K</span>
+              <label for="heatingRate">Heating Rate</label>
+              <span id="heatingRateVal">Medium</span>
             </div>
-            <input type="range" id="tempSlider" min="10" max="600" step="1" value="150">
+            <input type="range" id="heatingRate" min="1" max="5" step="1" value="3">
+          </div>
+          <div class="separator" style="margin: 0.2rem 0"></div>
+          <div class="measured-temp">
+            <span id="tempValue" class="temp-value">80</span>
+            <span class="temp-unit">K</span>
           </div>
           <div class="temp-bar-wrap">
-            <div id="tempBarMarker" class="temp-bar-marker" style="left:23%"></div>
+            <div id="tempBarMarker" class="temp-bar-marker" style="left:10%"></div>
             <div id="tempMpMarker" class="temp-threshold mp">
               <span id="tempMpLabel" class="temp-threshold-label">MP</span>
             </div>
@@ -857,9 +1002,8 @@
         <div class="separator"></div>
 
         <p class="info-text">
-          This simulation models how particles behave in different states of matter.
-          As temperature increases, kinetic energy overcomes intermolecular forces,
-          transitioning from <strong>solid</strong> to <strong>liquid</strong> to <strong>gas</strong>.
+          Toggle the heater to add thermal energy. A thermometer measures the sample temperature.
+          During phase changes, temperature <strong>plateaus</strong> as energy breaks (or forms) bonds &mdash; this is <strong>latent heat</strong>.
         </p>
       </div>
     </div>
@@ -885,11 +1029,21 @@
     const PARTICLE_RADIUS = 0.18;
     const BOND_VISUAL_LIMIT = 1.8; // max distance to draw bonds in solid
 
+    // ─── Heater / Cooling Constants ───
+    const AMBIENT_TEMP = 80;       // K – room/ambient temperature
+    const TEMP_MIN = 20;           // K – display range minimum
+    const TEMP_MAX = 600;          // K – display range maximum
+    const HEATING_RATES = [8, 15, 30, 55, 100]; // K/s for levels 1-5
+    const COOLING_COEFF = 20;      // K/s base Newton-cooling coefficient
+    const RATE_LABELS = ['Very Slow', 'Slow', 'Medium', 'Fast', 'Very Fast'];
+
     // ─── State ───
     const state = {
       playing: true,
-      temperature: 150,       // bath temperature (slider value)
-      effectiveTemp: 150,     // actual temperature felt by particles
+      heaterOn: false,
+      heatingRate: 3,           // 1-5 index into HEATING_RATES
+      temperature: AMBIENT_TEMP, // bath temperature (auto-controlled)
+      effectiveTemp: AMBIENT_TEMP, // actual temperature felt by particles
       timeScale: 1.0,
       gridSize: 5,
       time: 0,
@@ -936,9 +1090,11 @@
     const statusChip = document.getElementById('statusChip');
     const stateBadge = document.getElementById('stateBadge');
     const themeBtn = document.getElementById('theme-button');
-    const tempSlider = document.getElementById('tempSlider');
-    const tempVal = document.getElementById('tempVal');
-    const tempDisplay = document.getElementById('tempDisplay');
+    const heaterToggle = document.getElementById('heaterToggle');
+    const heaterStatusEl = document.getElementById('heaterStatus');
+    const heatingRateSlider = document.getElementById('heatingRate');
+    const heatingRateValEl = document.getElementById('heatingRateVal');
+    const tempValueEl = document.getElementById('tempValue');
     const tempBarMarker = document.getElementById('tempBarMarker');
     const tempMpMarker = document.getElementById('tempMpMarker');
     const tempBpMarker = document.getElementById('tempBpMarker');
@@ -1219,6 +1375,22 @@
       return u * Math.sqrt(-2 * Math.log(s) / s);
     }
 
+    // ─── Heater / Cooling Model ───
+    function updateBathTemperature(dt) {
+      if (state.heaterOn) {
+        const rate = HEATING_RATES[state.heatingRate - 1];
+        state.temperature = Math.min(TEMP_MAX, state.temperature + rate * dt);
+      } else {
+        // Newton's cooling toward ambient
+        const diff = state.temperature - AMBIENT_TEMP;
+        if (diff > 0.5) {
+          state.temperature = Math.max(AMBIENT_TEMP, state.temperature - COOLING_COEFF * (diff / 300) * dt);
+        } else {
+          state.temperature = AMBIENT_TEMP;
+        }
+      }
+    }
+
     // ─── Latent Heat Model ───
     function updateEffectiveTemperature(dt) {
       const Tbath = state.temperature;
@@ -1334,6 +1506,9 @@
 
       // Track tether state before update
       const prevMeltProgress = state.latentHeat.melting.progress;
+
+      // Drive bath temperature from heater/cooling
+      updateBathTemperature(dt);
 
       // Update effective temperature (latent heat plateaus)
       updateEffectiveTemperature(dt);
@@ -1462,28 +1637,31 @@
     }
 
     function temperatureToPercent(temp) {
-      const min = parseFloat(tempSlider.min);
-      const max = parseFloat(tempSlider.max);
-      return ((temp - min) / (max - min)) * 100;
+      return ((temp - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)) * 100;
     }
 
     function updateStateUI() {
-      const T = state.temperature;
       const tEff = state.effectiveTemp;
       const phase = state.detectedPhase;
       const stateName = phase.className;
       const badgeText = phase.label;
 
-      // Show effective temp during transitions, bath temp otherwise
+      // Show measured (effective) temperature
       const showTemp = Math.round(tEff);
-      const inTransition = Math.abs(tEff - T) > 1;
-      tempVal.textContent = showTemp + ' K';
-      tempDisplay.textContent = inTransition ?
-        showTemp + ' K (bath: ' + T + ' K)' : T + ' K';
+      tempValueEl.textContent = showTemp;
 
-      // Temperature bar marker
-      const pct = temperatureToPercent(T);
-      tempBarMarker.style.left = pct + '%';
+      // Heater status indicator
+      if (state.heaterOn) {
+        heaterStatusEl.textContent = 'HEATING';
+        heaterStatusEl.className = 'heater-status heating';
+      } else {
+        heaterStatusEl.textContent = tEff > AMBIENT_TEMP + 2 ? 'COOLING' : 'IDLE';
+        heaterStatusEl.className = 'heater-status cooling';
+      }
+
+      // Temperature bar marker (follows measured temp)
+      const pct = temperatureToPercent(tEff);
+      tempBarMarker.style.left = Math.max(0, Math.min(100, pct)) + '%';
       tempMpMarker.style.left = temperatureToPercent(MELTING_POINT) + '%';
       tempBpMarker.style.left = temperatureToPercent(BOILING_POINT) + '%';
       if (tempMpLabel) tempMpLabel.textContent = 'MP ' + MELTING_POINT + ' K';
@@ -1545,8 +1723,10 @@
     }
 
     function resetSim() {
-      state.temperature = 150;
-      state.effectiveTemp = 150;
+      state.heaterOn = false;
+      state.heatingRate = 3;
+      state.temperature = AMBIENT_TEMP;
+      state.effectiveTemp = AMBIENT_TEMP;
       state.timeScale = 1.0;
       state.time = 0;
       state.latentHeat.melting.progress = 0;
@@ -1559,7 +1739,9 @@
         avgCoordination: 6, lindemannRatio: 0
       };
 
-      tempSlider.value = 150;
+      heaterToggle.checked = false;
+      heatingRateSlider.value = 3;
+      heatingRateValEl.textContent = 'Medium';
       animSpeedSlider.value = 1.0;
       animSpeedVal.textContent = '1.0\u00d7';
 
@@ -1614,9 +1796,14 @@
     updateThemeIcon();
 
     // ─── Control Events ───
-    tempSlider.addEventListener('input', () => {
-      state.temperature = parseInt(tempSlider.value);
+    heaterToggle.addEventListener('change', () => {
+      state.heaterOn = heaterToggle.checked;
       updateStateUI();
+    });
+
+    heatingRateSlider.addEventListener('input', () => {
+      state.heatingRate = parseInt(heatingRateSlider.value);
+      heatingRateValEl.textContent = RATE_LABELS[state.heatingRate - 1];
     });
 
     function getBaseLatticeSpacing() {
