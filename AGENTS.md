@@ -77,6 +77,7 @@ If you promote an unlisted page to production, treat it as a full launch task:
 - **CSS theming**: Use CSS custom properties (`--bg-color`, `--text-main`, `--brand-primary`, `--brand-accent`); hardcoded colors are allowed upon request
 - **Theme toggle**: `data-theme` attribute on `<html>`, persisted to localStorage
 - **Mobile-first**: Touch targets 48px+, responsive design
+- **Three.js canvas resize**: Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize loops on iPhone). Canvas CSS needs `height: 0; flex: 1; min-height: 0` so flexbox controls sizing
 - **Offline-first**: New features must work without network
 - **External libraries**: Loaded from CDNs (Plotly, MathJax, etc.), not bundled
 - **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`)

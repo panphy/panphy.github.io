@@ -304,6 +304,11 @@ The most complex tool has modular architecture:
 - Touch targets should be 48px+ for accessibility
 - Use `viewport-fit: cover` for edge-to-edge on notched devices
 
+### Three.js Canvas Resize Pattern
+When using Three.js with a `ResizeObserver`, always follow this pattern to prevent an infinite resize loop on mobile (especially iPhone where `overflow: auto` and `height: auto` are used):
+1. Set `height: 0` on the canvas CSS alongside `flex: 1; min-height: 0` — this ensures flexbox grows it from zero rather than from the canvas's intrinsic attribute size
+2. Call `renderer.setSize(w, h, false)` — the `false` third argument prevents Three.js from setting inline `style.width`/`style.height` on the canvas, which would override flexbox constraints and trigger a feedback loop
+
 ## Important Files Reference
 
 | File | Purpose |

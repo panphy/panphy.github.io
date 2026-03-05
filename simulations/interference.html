@@ -247,6 +247,7 @@
     #simCanvas {
       display: block;
       width: 100%;
+      height: 0;
       flex: 1;
       min-height: 0;
       border-radius: 18px;
@@ -1146,7 +1147,7 @@
       if (w === 0 || h === 0) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      renderer.setSize(w, h, false);
     }
 
     const resizeObserver = new ResizeObserver(onResize);

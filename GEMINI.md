@@ -33,6 +33,7 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 
 ### 2. UI/UX Principles
 - **Classroom Ready:** Interfaces must be mobile-friendly and touch-friendly.
+- **Three.js Canvas Resize:** Always call `renderer.setSize(w, h, false)` (the `false` prevents inline CSS that causes resize loops on mobile). Set `height: 0` on the canvas CSS alongside `flex: 1; min-height: 0` so flexbox controls sizing.
 - **Theme Support:** Follow the existing light/dark theme pattern using CSS variables and `data-theme` attributes on `<html>`.
 - **Low Friction:** Avoid mandatory logins or complex setup steps.
 
