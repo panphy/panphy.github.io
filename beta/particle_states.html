@@ -654,6 +654,11 @@
       color: #60a5fa;
     }
 
+    .heater-status.idle {
+      background: var(--slider-track);
+      color: var(--text-secondary);
+    }
+
     /* Buttons */
     .btn {
       border: 1px solid transparent;
@@ -904,7 +909,7 @@
               <span class="source-dot temp-dot"></span>
               <h3 class="source-title">Temperature Control</h3>
             </div>
-            <span id="heaterStatus" class="heater-status cooling">COOLING</span>
+            <span id="heaterStatus" class="heater-status idle">IDLE</span>
           </div>
           <div class="tri-toggle" id="modeToggle">
             <button type="button" data-mode="cool">Cooler</button>
@@ -1363,15 +1368,7 @@
         const rate = COOLING_RATES[state.rate - 1];
         state.temperature = Math.max(TEMP_MIN, state.temperature - rate * dt);
       } else {
-        // Natural cooling toward ambient when off
-        const diff = state.temperature - AMBIENT_TEMP;
-        if (diff > 0.5) {
-          state.temperature = Math.max(AMBIENT_TEMP, state.temperature - NATURAL_COOL_COEFF * (diff / 300) * dt);
-        } else if (diff < -0.5) {
-          state.temperature = Math.min(AMBIENT_TEMP, state.temperature - NATURAL_COOL_COEFF * (diff / 300) * dt);
-        } else {
-          state.temperature = AMBIENT_TEMP;
-        }
+        // Off: hold current temperature
       }
     }
 
@@ -1660,7 +1657,7 @@
         heaterStatusEl.className = 'heater-status cooling';
       } else {
         heaterStatusEl.textContent = 'IDLE';
-        heaterStatusEl.className = 'heater-status cooling';
+        heaterStatusEl.className = 'heater-status idle';
       }
 
       // Temperature bar marker (follows measured temp)
