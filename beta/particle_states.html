@@ -1076,9 +1076,9 @@
           </div>
           <div class="diagnostics-grid">
             <div class="diagnostic-item">
-              <span class="diagnostic-label">Bond Order Q6</span>
-              <span id="q6Value" class="diagnostic-value">0.57</span>
-              <span class="diagnostic-subtext">Crystalline order</span>
+              <span class="diagnostic-label">Potential / N</span>
+              <span id="energyValue" class="diagnostic-value">-5.20</span>
+              <span class="diagnostic-subtext">Pair energy in ε units</span>
             </div>
             <div class="diagnostic-item">
               <span class="diagnostic-label">Coordination</span>
@@ -1097,7 +1097,7 @@
             </div>
           </div>
           <p class="info-text">
-            The badge uses bond order, coordination, clustering and mean-squared displacement. No phase transition is scripted.
+            The badge uses coordination, clustering, mobility and interaction energy. No phase transition is scripted.
           </p>
         </div>
 
@@ -1142,7 +1142,7 @@
         <div class="separator"></div>
 
         <p class="info-text">
-          Model: a 3D Lennard-Jones sample in a periodic simulation cell with a weak Langevin thermostat. Temperatures are reduced units, not Kelvin, so mixed/coexistence states can appear naturally in this finite sample.
+          Model: a 3D Lennard-Jones sample inside a reflective container with a weak Langevin thermostat. Temperatures are reduced units, not Kelvin, and phase labels are inferred from clustering, coordination, mobility and interaction energy.
         </p>
       </div>
     </div>
@@ -1168,7 +1168,7 @@ const KB = 1;
 
 const TEMP_MIN = 0.05;
 const TEMP_MAX = 1.8;
-const DEFAULT_TARGET_TEMP = 0.35;
+const DEFAULT_TARGET_TEMP = 0.14;
 const HEATING_RATES = [0.03, 0.06, 0.1, 0.16, 0.24];
 const COOLING_RATES = [0.03, 0.06, 0.1, 0.16, 0.24];
 const RATE_LABELS = ['Very Slow', 'Slow', 'Medium', 'Fast', 'Very Fast'];
@@ -1182,9 +1182,9 @@ const INV_RC12 = INV_RC6 * INV_RC6;
 const POTENTIAL_SHIFT = 4 * EPSILON * (INV_RC12 - INV_RC6);
 
 const FCC_SOLID_DENSITY = 0.94;
-const BOX_PADDING = 2.25;
+const BOX_PADDING = 2.4;
 const PARTICLE_RADIUS = 0.28;
-const THERMOSTAT_GAMMA = 0.35;
+const THERMOSTAT_GAMMA = 0.45;
 const PHYSICS_DT = 0.003;
 const ANALYSIS_INTERVAL_STEPS = 8;
 const MSD_SNAPSHOT_PERIOD = 0.12;
@@ -1195,13 +1195,6 @@ const NEIGHBOR_CUTOFF = 1.5;
 const NEIGHBOR_CUTOFF_SQ = NEIGHBOR_CUTOFF * NEIGHBOR_CUTOFF;
 const CLUSTER_CUTOFF = 1.65;
 const CLUSTER_CUTOFF_SQ = CLUSTER_CUTOFF * CLUSTER_CUTOFF;
-const Q6_CUTOFF = 1.55;
-const Q6_CUTOFF_SQ = Q6_CUTOFF * Q6_CUTOFF;
-const Q6_L = 6;
-const FACTORIAL = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600];
-const Q6_NORMALISATION = Array.from({ length: Q6_L + 1 }, (_, m) => (
-  Math.sqrt(((2 * Q6_L + 1) / (4 * Math.PI)) * (FACTORIAL[Q6_L - m] / FACTORIAL[Q6_L + m]))
-));
 const FCC_BASIS = [
   [0, 0, 0],
   [0, 0.5, 0.5],
@@ -1224,8 +1217,7 @@ const state = {
   analysis: {
     label: 'SOLID',
     className: 'solid',
-    q6: 0.57,
-    avgCoordination: 12,
+    avgCoordination: 9,
     clusterFraction: 1,
     msd: 0,
     potentialPerParticle: 0
@@ -1267,7 +1259,7 @@ const targetTempValueEl = document.getElementById('targetTempValue');
 const measuredTempValueEl = document.getElementById('measuredTempValue');
 const tempMeasuredMarker = document.getElementById('tempMeasuredMarker');
 const tempTargetMarker = document.getElementById('tempTargetMarker');
-const q6ValueEl = document.getElementById('q6Value');
+const energyValueEl = document.getElementById('energyValue');
 const coordValueEl = document.getElementById('coordValue');
 const clusterValueEl = document.getElementById('clusterValue');
 const msdValueEl = document.getElementById('msdValue');
@@ -1330,7 +1322,6 @@ let sphereMat = new THREE.MeshPhongMaterial({
   shininess: 60
 });
 const dummy = new THREE.Object3D();
-const centerBuffer = new THREE.Vector3();
 let potentialEnergy = 0;
 
 function clamp(value, min, max) {
@@ -1349,23 +1340,30 @@ function gaussianRandom() {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
-function wrapComponent(value, boxLength) {
-  const half = boxLength * 0.5;
-  while (value >= half) value -= boxLength;
-  while (value < -half) value += boxLength;
-  return value;
-}
+function reflectInsideBox(particle, wallLimit) {
+  if (particle.pos.x > wallLimit) {
+    particle.pos.x = 2 * wallLimit - particle.pos.x;
+    particle.vel.x *= -1;
+  } else if (particle.pos.x < -wallLimit) {
+    particle.pos.x = -2 * wallLimit - particle.pos.x;
+    particle.vel.x *= -1;
+  }
 
-function wrapVector(vec, boxLength) {
-  vec.x = wrapComponent(vec.x, boxLength);
-  vec.y = wrapComponent(vec.y, boxLength);
-  vec.z = wrapComponent(vec.z, boxLength);
-}
+  if (particle.pos.y > wallLimit) {
+    particle.pos.y = 2 * wallLimit - particle.pos.y;
+    particle.vel.y *= -1;
+  } else if (particle.pos.y < -wallLimit) {
+    particle.pos.y = -2 * wallLimit - particle.pos.y;
+    particle.vel.y *= -1;
+  }
 
-function minimumImage(delta, boxLength) {
-  delta.x -= boxLength * Math.round(delta.x / boxLength);
-  delta.y -= boxLength * Math.round(delta.y / boxLength);
-  delta.z -= boxLength * Math.round(delta.z / boxLength);
+  if (particle.pos.z > wallLimit) {
+    particle.pos.z = 2 * wallLimit - particle.pos.z;
+    particle.vel.z *= -1;
+  } else if (particle.pos.z < -wallLimit) {
+    particle.pos.z = -2 * wallLimit - particle.pos.z;
+    particle.vel.z *= -1;
+  }
 }
 
 function getCellCount() {
@@ -1387,7 +1385,7 @@ function updateParticleCountUI() {
 }
 
 function getSimulationBoxLength() {
-  return getCellCount() * getLatticeConstant() * BOX_PADDING;
+  return Math.max(8.8, getCellCount() * getLatticeConstant() * BOX_PADDING);
 }
 
 function getTemperatureColor(temp) {
@@ -1436,8 +1434,7 @@ function createParticles() {
               gaussianRandom() * Math.sqrt(state.targetTemp),
               gaussianRandom() * Math.sqrt(state.targetTemp)
             ),
-            force: new THREE.Vector3(),
-            unwrap: pos.clone()
+            force: new THREE.Vector3()
           });
         }
       }
@@ -1482,7 +1479,6 @@ function computeMeasuredTemperature() {
 
 function computeForces() {
   const n = particleData.length;
-  const boxLength = state.boxLength;
   potentialEnergy = 0;
 
   for (let i = 0; i < n; i++) {
@@ -1493,13 +1489,9 @@ function computeForces() {
     const pi = particleData[i];
     for (let j = i + 1; j < n; j++) {
       const pj = particleData[j];
-      let dx = pj.pos.x - pi.pos.x;
-      let dy = pj.pos.y - pi.pos.y;
-      let dz = pj.pos.z - pi.pos.z;
-
-      dx -= boxLength * Math.round(dx / boxLength);
-      dy -= boxLength * Math.round(dy / boxLength);
-      dz -= boxLength * Math.round(dz / boxLength);
+      const dx = pj.pos.x - pi.pos.x;
+      const dy = pj.pos.y - pi.pos.y;
+      const dz = pj.pos.z - pi.pos.z;
 
       const r2 = dx * dx + dy * dy + dz * dz;
       if (r2 >= LJ_CUTOFF_SQ || r2 < 1e-10) continue;
@@ -1540,7 +1532,7 @@ function stepPhysics(dt) {
   updateTargetTemperature(dt);
 
   const halfDt = 0.5 * dt;
-  const boxLength = state.boxLength;
+  const wallLimit = state.boxLength * 0.5 - PARTICLE_RADIUS;
   const damping = Math.exp(-THERMOSTAT_GAMMA * dt);
   const noiseScale = Math.sqrt((1 - damping * damping) * state.targetTemp / MASS);
 
@@ -1555,10 +1547,7 @@ function stepPhysics(dt) {
     p.pos.x += dx1;
     p.pos.y += dy1;
     p.pos.z += dz1;
-    p.unwrap.x += dx1;
-    p.unwrap.y += dy1;
-    p.unwrap.z += dz1;
-    wrapVector(p.pos, boxLength);
+    reflectInsideBox(p, wallLimit);
 
     p.vel.x = damping * p.vel.x + noiseScale * gaussianRandom();
     p.vel.y = damping * p.vel.y + noiseScale * gaussianRandom();
@@ -1570,10 +1559,7 @@ function stepPhysics(dt) {
     p.pos.x += dx2;
     p.pos.y += dy2;
     p.pos.z += dz2;
-    p.unwrap.x += dx2;
-    p.unwrap.y += dy2;
-    p.unwrap.z += dz2;
-    wrapVector(p.pos, boxLength);
+    reflectInsideBox(p, wallLimit);
   }
 
   removeCenterOfMassVelocity();
@@ -1606,9 +1592,9 @@ function captureMsdSnapshot() {
   for (let i = 0; i < particleData.length; i++) {
     const offset = i * 3;
     const p = particleData[i];
-    snapshot[offset] = p.unwrap.x;
-    snapshot[offset + 1] = p.unwrap.y;
-    snapshot[offset + 2] = p.unwrap.z;
+    snapshot[offset] = p.pos.x;
+    snapshot[offset + 1] = p.pos.y;
+    snapshot[offset + 2] = p.pos.z;
   }
   state.msdSnapshots.push({ time: state.time, positions: snapshot });
   while (state.msdSnapshots.length > MAX_MSD_SNAPSHOTS) state.msdSnapshots.shift();
@@ -1626,48 +1612,12 @@ function computeMsd() {
   for (let i = 0; i < particleData.length; i++) {
     const offset = i * 3;
     const p = particleData[i];
-    const dx = p.unwrap.x - reference.positions[offset];
-    const dy = p.unwrap.y - reference.positions[offset + 1];
-    const dz = p.unwrap.z - reference.positions[offset + 2];
+    const dx = p.pos.x - reference.positions[offset];
+    const dy = p.pos.y - reference.positions[offset + 1];
+    const dz = p.pos.z - reference.positions[offset + 2];
     sum += dx * dx + dy * dy + dz * dz;
   }
   return sum / Math.max(1, particleData.length);
-}
-
-function associatedLegendre(l, m, x) {
-  const xc = clamp(x, -1, 1);
-  let pmm = 1;
-  if (m > 0) {
-    const somx2 = Math.sqrt(Math.max(0, (1 - xc) * (1 + xc)));
-    let fact = 1;
-    for (let i = 1; i <= m; i++) {
-      pmm *= -fact * somx2;
-      fact += 2;
-    }
-  }
-  if (l === m) return pmm;
-  let pmmp1 = xc * (2 * m + 1) * pmm;
-  if (l === m + 1) return pmmp1;
-  let pll = 0;
-  for (let ll = m + 2; ll <= l; ll++) {
-    pll = ((2 * ll - 1) * xc * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
-    pmm = pmmp1;
-    pmmp1 = pll;
-  }
-  return pll;
-}
-
-function accumulateQ6(dx, dy, dz, accumRe, accumIm) {
-  const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  if (r < 1e-10) return;
-  const cosTheta = clamp(dz / r, -1, 1);
-  const phi = Math.atan2(dy, dx);
-
-  for (let m = 0; m <= Q6_L; m++) {
-    const harmonic = Q6_NORMALISATION[m] * associatedLegendre(Q6_L, m, cosTheta);
-    accumRe[m] += harmonic * Math.cos(m * phi);
-    accumIm[m] += harmonic * Math.sin(m * phi);
-  }
 }
 
 function buildDisjointSet(size) {
@@ -1707,15 +1657,15 @@ function unionRoots(set, a, b) {
 }
 
 function classifyPhase(metrics) {
-  const { q6, avgCoordination, clusterFraction, msd } = metrics;
+  const { avgCoordination, clusterFraction, msd, potentialPerParticle } = metrics;
 
-  if (clusterFraction < 0.45 && avgCoordination < 3.5) {
+  if (clusterFraction < 0.35 && avgCoordination < 2.5 && potentialPerParticle > -1.2) {
     return { label: 'GAS', className: 'gas' };
   }
-  if (clusterFraction > 0.82 && q6 > 0.38 && msd < 0.12) {
+  if (clusterFraction > 0.94 && avgCoordination > 8.4 && msd < 0.18 && state.measuredTemp < 0.28) {
     return { label: 'SOLID', className: 'solid' };
   }
-  if (clusterFraction > 0.7 && avgCoordination > 6) {
+  if (clusterFraction > 0.7 && avgCoordination > 4.5 && potentialPerParticle < -2.0) {
     return { label: 'LIQUID', className: 'liquid' };
   }
   return { label: 'COEXISTENCE', className: 'mixed' };
@@ -1727,22 +1677,14 @@ function analyzePhase(forceUpdate = false) {
 
   const ds = buildDisjointSet(n);
   const coordination = new Float32Array(n);
-  const q6Re = new Float64Array(Q6_L + 1);
-  const q6Im = new Float64Array(Q6_L + 1);
-  let q6BondCount = 0;
-  const boxLength = state.boxLength;
 
   for (let i = 0; i < n; i++) {
     const pi = particleData[i];
     for (let j = i + 1; j < n; j++) {
       const pj = particleData[j];
-      let dx = pj.pos.x - pi.pos.x;
-      let dy = pj.pos.y - pi.pos.y;
-      let dz = pj.pos.z - pi.pos.z;
-
-      dx -= boxLength * Math.round(dx / boxLength);
-      dy -= boxLength * Math.round(dy / boxLength);
-      dz -= boxLength * Math.round(dz / boxLength);
+      const dx = pj.pos.x - pi.pos.x;
+      const dy = pj.pos.y - pi.pos.y;
+      const dz = pj.pos.z - pi.pos.z;
       const r2 = dx * dx + dy * dy + dz * dz;
 
       if (r2 < NEIGHBOR_CUTOFF_SQ) {
@@ -1751,10 +1693,6 @@ function analyzePhase(forceUpdate = false) {
       }
       if (r2 < CLUSTER_CUTOFF_SQ) {
         unionRoots(ds, i, j);
-      }
-      if (r2 < Q6_CUTOFF_SQ) {
-        accumulateQ6(dx, dy, dz, q6Re, q6Im);
-        q6BondCount += 1;
       }
     }
   }
@@ -1770,20 +1708,7 @@ function analyzePhase(forceUpdate = false) {
     if (nextSize > largestCluster) largestCluster = nextSize;
   }
 
-  let q6 = 0;
-  if (q6BondCount > 0) {
-    let sum = 0;
-    for (let m = 0; m <= Q6_L; m++) {
-      const re = q6Re[m] / q6BondCount;
-      const im = q6Im[m] / q6BondCount;
-      const magSq = re * re + im * im;
-      sum += m === 0 ? magSq : 2 * magSq;
-    }
-    q6 = Math.sqrt((4 * Math.PI / (2 * Q6_L + 1)) * sum);
-  }
-
   const metrics = {
-    q6,
     avgCoordination: totalCoordination / n,
     clusterFraction: largestCluster / n,
     msd: computeMsd(),
@@ -1804,34 +1729,14 @@ function temperatureToPercent(temp) {
   return clamp01((temp - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)) * 100;
 }
 
-function getRenderCenter() {
-  centerBuffer.set(0, 0, 0);
-  if (particleData.length === 0) return centerBuffer;
-  for (const p of particleData) centerBuffer.add(p.unwrap);
-  centerBuffer.multiplyScalar(1 / particleData.length);
-  centerBuffer.x = wrapComponent(centerBuffer.x, state.boxLength);
-  centerBuffer.y = wrapComponent(centerBuffer.y, state.boxLength);
-  centerBuffer.z = wrapComponent(centerBuffer.z, state.boxLength);
-  return centerBuffer;
-}
-
 function updateInstancedMesh() {
   if (!instancedMesh) return;
-  const renderCenter = getRenderCenter();
-  const boxLength = state.boxLength;
   const gasFactor = clamp01((state.analysis.clusterFraction < 0.55 ? 0.55 - state.analysis.clusterFraction : 0) / 0.55);
   const scale = 1 + 0.08 * gasFactor;
 
   for (let i = 0; i < particleData.length; i++) {
     const p = particleData[i];
-    let x = p.pos.x - renderCenter.x;
-    let y = p.pos.y - renderCenter.y;
-    let z = p.pos.z - renderCenter.z;
-    x -= boxLength * Math.round(x / boxLength);
-    y -= boxLength * Math.round(y / boxLength);
-    z -= boxLength * Math.round(z / boxLength);
-
-    dummy.position.set(x, y, z);
+    dummy.position.copy(p.pos);
     dummy.scale.setScalar(scale);
     dummy.updateMatrix();
     instancedMesh.setMatrixAt(i, dummy.matrix);
@@ -1876,7 +1781,7 @@ function updateStateUI() {
 
   stateBadge.textContent = state.analysis.label;
   stateBadge.className = 'state-badge ' + state.analysis.className;
-  q6ValueEl.textContent = state.analysis.q6.toFixed(2);
+  energyValueEl.textContent = state.analysis.potentialPerParticle.toFixed(2);
   coordValueEl.textContent = state.analysis.avgCoordination.toFixed(1);
   clusterValueEl.textContent = Math.round(state.analysis.clusterFraction * 100) + '%';
   msdValueEl.textContent = state.analysis.msd.toFixed(2);
@@ -1935,8 +1840,7 @@ function resetSim() {
   state.analysis = {
     label: 'SOLID',
     className: 'solid',
-    q6: 0.57,
-    avgCoordination: 12,
+    avgCoordination: 9,
     clusterFraction: 1,
     msd: 0,
     potentialPerParticle: 0
