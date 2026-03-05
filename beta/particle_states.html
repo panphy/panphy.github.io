@@ -319,8 +319,16 @@
       border-left: 4px solid var(--text-secondary);
     }
 
+    .source-card.analysis-card {
+      border-left: 4px solid var(--brand-accent);
+    }
+
     .settings-dot {
       background: var(--text-secondary);
+    }
+
+    .analysis-dot {
+      background: var(--brand-accent);
     }
 
     .source-card.settings-card input[type="range"]::-webkit-slider-thumb {
@@ -407,6 +415,16 @@
       color: #fca5a5;
     }
 
+    .state-badge.mixed {
+      background: rgba(0, 206, 201, 0.14);
+      border-color: rgba(0, 206, 201, 0.3);
+      color: #0f766e;
+    }
+
+    [data-theme="dark"] .state-badge.mixed {
+      color: #81ecec;
+    }
+
     /* Temperature Bar */
     .temp-bar-wrap {
       position: relative;
@@ -421,44 +439,61 @@
 
     .temp-bar-marker {
       position: absolute;
-      top: -3px;
-      width: 3px;
-      height: 14px;
-      background: var(--text-main);
+      top: -4px;
+      width: 4px;
+      height: 16px;
       border-radius: 2px;
       transition: left 0.15s ease;
     }
 
-    .temp-threshold {
-      position: absolute;
-      top: -2px;
-      width: 2px;
-      height: 12px;
-      border-radius: 2px;
-      transform: translateX(-1px);
-      pointer-events: none;
+    .temp-bar-marker.measured {
+      background: var(--text-main);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.24);
     }
 
-    .temp-threshold.mp {
-      background: rgba(59, 130, 246, 0.9);
+    .temp-bar-marker.target {
+      background: #ffffff;
+      border: 2px solid var(--brand-primary);
+      width: 10px;
+      height: 18px;
+      top: -5px;
+      transform: translateX(-3px);
+      box-shadow: 0 4px 10px rgba(108, 92, 231, 0.18);
     }
 
-    .temp-threshold.bp {
-      background: rgba(239, 68, 68, 0.9);
+    [data-theme="dark"] .temp-bar-marker.target {
+      box-shadow: 0 4px 10px rgba(162, 155, 254, 0.18);
     }
 
-    .temp-threshold-label {
-      position: absolute;
-      top: 13px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.62rem;
-      line-height: 1;
+    .temp-legend {
+      display: flex;
+      gap: 0.7rem;
       font-family: var(--font-mono);
-      font-weight: 600;
-      white-space: nowrap;
+      font-size: 0.64rem;
       color: var(--text-secondary);
-      user-select: none;
+      margin-top: -0.65rem;
+    }
+
+    .temp-legend span::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.35rem;
+      vertical-align: middle;
+    }
+
+    .temp-legend .legend-target::before {
+      background: #ffffff;
+      border: 2px solid var(--brand-primary);
+      width: 9px;
+      height: 9px;
+      box-sizing: border-box;
+    }
+
+    .temp-legend .legend-measured::before {
+      background: var(--text-main);
     }
 
     /* Control Blocks */
@@ -652,7 +687,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: -0.8rem;
+      margin-top: -0.2rem;
       color: var(--text-secondary);
       font-size: 0.63rem;
       font-family: var(--font-mono);
@@ -830,6 +865,46 @@
       color: var(--text-secondary);
     }
 
+    .diagnostics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .diagnostic-item {
+      border: 1px solid var(--border);
+      background: rgba(127, 138, 162, 0.08);
+      border-radius: 12px;
+      padding: 0.5rem 0.55rem;
+      min-height: 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.2rem;
+    }
+
+    .diagnostic-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .diagnostic-value {
+      font-family: var(--font-mono);
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .diagnostic-subtext {
+      font-size: 0.66rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
     /* Touch / Coarse Pointer */
     @media (pointer: coarse) {
       .btn,
@@ -926,7 +1001,7 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Heat a sample and observe phase changes</p>
+          <p>Finite-size molecular dynamics in reduced Lennard-Jones units</p>
         </div>
 
         <div class="status-row">
@@ -941,12 +1016,12 @@
               <span class="source-dot temp-dot"></span>
               <h3 class="source-title">Temperature Control</h3>
             </div>
-            <span id="heaterStatus" class="heater-status idle">IDLE</span>
+            <span id="heaterStatus" class="heater-status idle">HOLD</span>
           </div>
           <div class="control-block mode-block">
             <div class="control-header">
               <label>Mode</label>
-              <span id="modeHint">Standby</span>
+              <span id="modeHint">Hold target temperature</span>
             </div>
             <div class="tri-toggle" id="modeToggle">
               <button type="button" data-mode="cool">Cooler</button>
@@ -956,7 +1031,7 @@
           </div>
           <div class="control-block" id="rateBlock">
             <div class="control-header">
-              <label for="rateSlider" id="rateLabel">Intensity</label>
+              <label for="rateSlider" id="rateLabel">Ramp Rate</label>
               <span id="rateVal">Medium</span>
             </div>
             <input type="range" id="rateSlider" min="1" max="5" step="1" value="3">
@@ -964,29 +1039,66 @@
           <div class="separator" style="margin: 0.2rem 0"></div>
           <div class="measured-temp">
             <div class="temp-readout">
-              <span class="readout-label">Sample</span>
-              <span id="tempValue" class="temp-value">80</span>
-              <span class="temp-unit">K</span>
+              <span class="readout-label">Target T*</span>
+              <span id="targetTempValue" class="temp-value">0.35</span>
             </div>
             <div class="temp-readout">
-              <span class="readout-label">Bath</span>
-              <span id="bathTempValue" class="temp-value">80</span>
-              <span class="temp-unit">K</span>
+              <span class="readout-label">Measured T*</span>
+              <span id="measuredTempValue" class="temp-value">0.35</span>
             </div>
           </div>
           <div class="temp-bar-wrap">
-            <div id="tempBarMarker" class="temp-bar-marker" style="left:10%"></div>
-            <div id="tempMpMarker" class="temp-threshold mp">
-              <span id="tempMpLabel" class="temp-threshold-label">MP</span>
-            </div>
-            <div id="tempBpMarker" class="temp-threshold bp">
-              <span id="tempBpLabel" class="temp-threshold-label">BP</span>
-            </div>
+            <div id="tempMeasuredMarker" class="temp-bar-marker measured" style="left:17%"></div>
+            <div id="tempTargetMarker" class="temp-bar-marker target" style="left:17%"></div>
+          </div>
+          <div class="temp-legend">
+            <span class="legend-target">Target</span>
+            <span class="legend-measured">Measured</span>
           </div>
           <div class="temp-scale">
-            <span>20 K</span>
-            <span>600 K</span>
+            <span>0.05 T*</span>
+            <span>1.80 T*</span>
           </div>
+          <p class="info-text">
+            <strong>T* = k<sub>B</sub>T / ε</strong>. Heating and cooling move the thermostat target; the measured temperature is computed from particle kinetic energy.
+          </p>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="source-card analysis-card">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot analysis-dot"></span>
+              <h3 class="source-title">State Diagnostics</h3>
+            </div>
+            <span class="heater-status idle">ESTIMATE</span>
+          </div>
+          <div class="diagnostics-grid">
+            <div class="diagnostic-item">
+              <span class="diagnostic-label">Bond Order Q6</span>
+              <span id="q6Value" class="diagnostic-value">0.57</span>
+              <span class="diagnostic-subtext">Crystalline order</span>
+            </div>
+            <div class="diagnostic-item">
+              <span class="diagnostic-label">Coordination</span>
+              <span id="coordValue" class="diagnostic-value">12.0</span>
+              <span class="diagnostic-subtext">Neighbors inside 1.5σ</span>
+            </div>
+            <div class="diagnostic-item">
+              <span class="diagnostic-label">Largest Cluster</span>
+              <span id="clusterValue" class="diagnostic-value">100%</span>
+              <span class="diagnostic-subtext">Connected sample fraction</span>
+            </div>
+            <div class="diagnostic-item">
+              <span class="diagnostic-label">MSD</span>
+              <span id="msdValue" class="diagnostic-value">0.00</span>
+              <span class="diagnostic-subtext">Recent particle mobility</span>
+            </div>
+          </div>
+          <p class="info-text">
+            The badge uses bond order, coordination, clustering and mean-squared displacement. No phase transition is scripted.
+          </p>
         </div>
 
         <div class="separator"></div>
@@ -1001,10 +1113,11 @@
           </div>
           <div class="control-block">
             <div class="control-header">
-              <label for="particleSlider">Grid Size</label>
-              <span id="particleVal">5 × 5 × 5</span>
+              <label for="particleSlider">FCC Cells</label>
+              <span id="particleVal">3 × 3 × 3</span>
             </div>
-            <input type="range" id="particleSlider" min="3" max="7" step="1" value="5">
+            <input type="range" id="particleSlider" min="2" max="4" step="1" value="3">
+            <span id="particleCountNote" class="particle-count">108 particles</span>
           </div>
           <div class="control-block">
             <div class="control-header">
@@ -1029,8 +1142,7 @@
         <div class="separator"></div>
 
         <p class="info-text">
-          Toggle the heater to add thermal energy. A thermometer measures the sample temperature.
-          During phase changes, temperature <strong>plateaus</strong> as energy breaks (or forms) bonds &mdash; this is <strong>latent heat</strong>.
+          Model: a 3D Lennard-Jones sample in a periodic simulation cell with a weak Langevin thermostat. Temperatures are reduced units, not Kelvin, so mixed/coexistence states can appear naturally in this finite sample.
         </p>
       </div>
     </div>
@@ -1046,976 +1158,926 @@
   </script>
 
   <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // ─── Constants ───
-    const MELTING_POINT = 200;
-    const BOILING_POINT = 400;
-    const CONTAINER_HALF = 10;
-    const PARTICLE_RADIUS = 0.18;
-    const BOND_VISUAL_LIMIT = 1.8; // max distance to draw bonds in solid
+const SIGMA = 1;
+const EPSILON = 1;
+const MASS = 1;
+const KB = 1;
 
-    // ─── Heater / Cooling Constants ───
-    const AMBIENT_TEMP = 80;       // K – room/ambient temperature
-    const TEMP_MIN = 20;           // K – display range minimum
-    const TEMP_MAX = 600;          // K – display range maximum
-    const HEATING_RATES = [8, 15, 30, 55, 100]; // K/s for levels 1-5
-    const COOLING_RATES = [8, 15, 30, 55, 100]; // K/s for levels 1-5
-    const NATURAL_COOL_COEFF = 15; // K/s base Newton-cooling when mode=off
-    const RATE_LABELS = ['Very Slow', 'Slow', 'Medium', 'Fast', 'Very Fast'];
+const TEMP_MIN = 0.05;
+const TEMP_MAX = 1.8;
+const DEFAULT_TARGET_TEMP = 0.35;
+const HEATING_RATES = [0.03, 0.06, 0.1, 0.16, 0.24];
+const COOLING_RATES = [0.03, 0.06, 0.1, 0.16, 0.24];
+const RATE_LABELS = ['Very Slow', 'Slow', 'Medium', 'Fast', 'Very Fast'];
 
-    // ─── State ───
-    const state = {
-      playing: true,
-      mode: 'off',              // 'off' | 'heat' | 'cool'
-      rate: 3,                  // 1-5 index into rate arrays
-      temperature: AMBIENT_TEMP, // bath temperature (auto-controlled)
-      effectiveTemp: AMBIENT_TEMP, // actual temperature felt by particles
-      timeScale: 1.0,
-      gridSize: 5,
-      time: 0,
-      latentHeat: {
-        melting: { progress: 0 },  // 0 = fully solid, 1 = fully melted
-        boiling: { progress: 0 }   // 0 = fully liquid, 1 = fully boiled
-      },
-      detectedPhase: {
-        label: 'SOLID',
-        className: 'solid',
-        solid: 1,
-        liquid: 0,
-        gas: 0,
-        avgCoordination: 6,
-        lindemannRatio: 0
-      },
-      tethersActive: true,
-      prevTethersActive: true
-    };
+const LJ_CUTOFF = 2.5 * SIGMA;
+const LJ_CUTOFF_SQ = LJ_CUTOFF * LJ_CUTOFF;
+const MIN_R_SQ = 0.72 * 0.72;
+const INV_RC2 = 1 / LJ_CUTOFF_SQ;
+const INV_RC6 = INV_RC2 * INV_RC2 * INV_RC2;
+const INV_RC12 = INV_RC6 * INV_RC6;
+const POTENTIAL_SHIFT = 4 * EPSILON * (INV_RC12 - INV_RC6);
 
-    // ─── Theme Colors ───
-    const themeColors = {
-      light: {
-        sceneBg: 0xe8edf3,
-        particleColor: 0x6c5ce7,
-        particleEmissive: 0x3a2db0,
-        bondColor: 0xa29bfe,
-        containerColor: 0xb0bac8
-      },
-      dark: {
-        sceneBg: 0x0a0c14,
-        particleColor: 0xa29bfe,
-        particleEmissive: 0x5b4cdb,
-        bondColor: 0x6c5ce7,
-        containerColor: 0x3a4050
+const FCC_SOLID_DENSITY = 0.94;
+const BOX_PADDING = 2.25;
+const PARTICLE_RADIUS = 0.28;
+const THERMOSTAT_GAMMA = 0.35;
+const PHYSICS_DT = 0.003;
+const ANALYSIS_INTERVAL_STEPS = 8;
+const MSD_SNAPSHOT_PERIOD = 0.12;
+const MSD_WINDOW = 0.96;
+const MAX_MSD_SNAPSHOTS = 18;
+
+const NEIGHBOR_CUTOFF = 1.5;
+const NEIGHBOR_CUTOFF_SQ = NEIGHBOR_CUTOFF * NEIGHBOR_CUTOFF;
+const CLUSTER_CUTOFF = 1.65;
+const CLUSTER_CUTOFF_SQ = CLUSTER_CUTOFF * CLUSTER_CUTOFF;
+const Q6_CUTOFF = 1.55;
+const Q6_CUTOFF_SQ = Q6_CUTOFF * Q6_CUTOFF;
+const Q6_L = 6;
+const FACTORIAL = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600];
+const Q6_NORMALISATION = Array.from({ length: Q6_L + 1 }, (_, m) => (
+  Math.sqrt(((2 * Q6_L + 1) / (4 * Math.PI)) * (FACTORIAL[Q6_L - m] / FACTORIAL[Q6_L + m]))
+));
+const FCC_BASIS = [
+  [0, 0, 0],
+  [0, 0.5, 0.5],
+  [0.5, 0, 0.5],
+  [0.5, 0.5, 0]
+];
+
+const state = {
+  playing: true,
+  mode: 'off',
+  rate: 3,
+  targetTemp: DEFAULT_TARGET_TEMP,
+  measuredTemp: DEFAULT_TARGET_TEMP,
+  timeScale: 1.0,
+  gridSize: 3,
+  boxLength: 0,
+  time: 0,
+  snapshotTimer: 0,
+  analysisCounter: 0,
+  analysis: {
+    label: 'SOLID',
+    className: 'solid',
+    q6: 0.57,
+    avgCoordination: 12,
+    clusterFraction: 1,
+    msd: 0,
+    potentialPerParticle: 0
+  },
+  msdSnapshots: []
+};
+
+const themeColors = {
+  light: {
+    sceneBg: 0xe8edf3,
+    particleColor: 0x6c5ce7,
+    particleEmissive: 0x3a2db0,
+    containerColor: 0xb0bac8
+  },
+  dark: {
+    sceneBg: 0x0a0c14,
+    particleColor: 0xa29bfe,
+    particleEmissive: 0x5b4cdb,
+    containerColor: 0x3a4050
+  }
+};
+
+const canvas = document.getElementById('simCanvas');
+const simPanel = document.getElementById('simPanel');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+const statusChip = document.getElementById('statusChip');
+const stateBadge = document.getElementById('stateBadge');
+const themeBtn = document.getElementById('theme-button');
+const modeToggle = document.getElementById('modeToggle');
+const modeButtons = modeToggle.querySelectorAll('button');
+const heaterStatusEl = document.getElementById('heaterStatus');
+const modeHintEl = document.getElementById('modeHint');
+const rateBlock = document.getElementById('rateBlock');
+const rateLabel = document.getElementById('rateLabel');
+const rateSlider = document.getElementById('rateSlider');
+const rateValEl = document.getElementById('rateVal');
+const targetTempValueEl = document.getElementById('targetTempValue');
+const measuredTempValueEl = document.getElementById('measuredTempValue');
+const tempMeasuredMarker = document.getElementById('tempMeasuredMarker');
+const tempTargetMarker = document.getElementById('tempTargetMarker');
+const q6ValueEl = document.getElementById('q6Value');
+const coordValueEl = document.getElementById('coordValue');
+const clusterValueEl = document.getElementById('clusterValue');
+const msdValueEl = document.getElementById('msdValue');
+const particleSlider = document.getElementById('particleSlider');
+const particleVal = document.getElementById('particleVal');
+const particleCountNote = document.getElementById('particleCountNote');
+const animSpeedSlider = document.getElementById('animSpeed');
+const animSpeedVal = document.getElementById('animSpeedVal');
+
+function isDark() {
+  return document.documentElement.getAttribute('data-theme') === 'dark';
+}
+
+function getColors() {
+  return isDark() ? themeColors.dark : themeColors.light;
+}
+
+const scene = new THREE.Scene();
+const colors = getColors();
+scene.background = new THREE.Color(colors.sceneBg);
+
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 0, 0);
+controls.enablePan = false;
+controls.minDistance = 4;
+controls.maxDistance = 60;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.56));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(8, 10, 6);
+scene.add(dirLight);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.28);
+fillLight.position.set(-6, 4, -5);
+scene.add(fillLight);
+
+const containerGeo = new THREE.BoxGeometry(1, 1, 1);
+const containerEdges = new THREE.EdgesGeometry(containerGeo);
+const containerMat = new THREE.LineBasicMaterial({
+  color: colors.containerColor,
+  transparent: true,
+  opacity: 0.85,
+  linewidth: 1
+});
+const containerMesh = new THREE.LineSegments(containerEdges, containerMat);
+scene.add(containerMesh);
+
+let particleData = [];
+let instancedMesh = null;
+const sphereGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 12);
+let sphereMat = new THREE.MeshPhongMaterial({
+  color: colors.particleColor,
+  emissive: colors.particleEmissive,
+  emissiveIntensity: 0.18,
+  shininess: 60
+});
+const dummy = new THREE.Object3D();
+const centerBuffer = new THREE.Vector3();
+let potentialEnergy = 0;
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function clamp01(value) {
+  return clamp(value, 0, 1);
+}
+
+function gaussianRandom() {
+  let u = 0;
+  let v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function wrapComponent(value, boxLength) {
+  const half = boxLength * 0.5;
+  while (value >= half) value -= boxLength;
+  while (value < -half) value += boxLength;
+  return value;
+}
+
+function wrapVector(vec, boxLength) {
+  vec.x = wrapComponent(vec.x, boxLength);
+  vec.y = wrapComponent(vec.y, boxLength);
+  vec.z = wrapComponent(vec.z, boxLength);
+}
+
+function minimumImage(delta, boxLength) {
+  delta.x -= boxLength * Math.round(delta.x / boxLength);
+  delta.y -= boxLength * Math.round(delta.y / boxLength);
+  delta.z -= boxLength * Math.round(delta.z / boxLength);
+}
+
+function getCellCount() {
+  return state.gridSize;
+}
+
+function getParticleCount(cells) {
+  return 4 * cells * cells * cells;
+}
+
+function getLatticeConstant() {
+  return Math.cbrt(4 / FCC_SOLID_DENSITY);
+}
+
+function updateParticleCountUI() {
+  const n = getCellCount();
+  particleVal.textContent = n + ' × ' + n + ' × ' + n;
+  particleCountNote.textContent = getParticleCount(n) + ' particles';
+}
+
+function getSimulationBoxLength() {
+  return getCellCount() * getLatticeConstant() * BOX_PADDING;
+}
+
+function getTemperatureColor(temp) {
+  const span = TEMP_MAX - TEMP_MIN;
+  const t = clamp01((temp - TEMP_MIN) / span);
+  return new THREE.Color().setHSL(0.62 - 0.60 * t, 0.76, 0.54 + 0.06 * t);
+}
+
+function createParticles() {
+  if (instancedMesh) {
+    scene.remove(instancedMesh);
+    instancedMesh.material.dispose();
+    instancedMesh = null;
+  }
+
+  const colorsNow = getColors();
+  sphereMat = new THREE.MeshPhongMaterial({
+    color: colorsNow.particleColor,
+    emissive: colorsNow.particleEmissive,
+    emissiveIntensity: 0.18,
+    shininess: 60
+  });
+
+  const cells = getCellCount();
+  const latticeA = getLatticeConstant();
+  const crystalLength = cells * latticeA;
+  state.boxLength = getSimulationBoxLength();
+  particleData = [];
+
+  for (let ix = 0; ix < cells; ix++) {
+    for (let iy = 0; iy < cells; iy++) {
+      for (let iz = 0; iz < cells; iz++) {
+        for (const [bx, by, bz] of FCC_BASIS) {
+          const pos = new THREE.Vector3(
+            (ix + bx) * latticeA - crystalLength * 0.5,
+            (iy + by) * latticeA - crystalLength * 0.5,
+            (iz + bz) * latticeA - crystalLength * 0.5
+          );
+          pos.x += (Math.random() - 0.5) * 0.04;
+          pos.y += (Math.random() - 0.5) * 0.04;
+          pos.z += (Math.random() - 0.5) * 0.04;
+          particleData.push({
+            pos,
+            vel: new THREE.Vector3(
+              gaussianRandom() * Math.sqrt(state.targetTemp),
+              gaussianRandom() * Math.sqrt(state.targetTemp),
+              gaussianRandom() * Math.sqrt(state.targetTemp)
+            ),
+            force: new THREE.Vector3(),
+            unwrap: pos.clone()
+          });
+        }
       }
-    };
-
-    // ─── DOM Elements ───
-    const canvas = document.getElementById('simCanvas');
-    const simPanel = document.getElementById('simPanel');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const statusChip = document.getElementById('statusChip');
-    const stateBadge = document.getElementById('stateBadge');
-    const themeBtn = document.getElementById('theme-button');
-    const modeToggle = document.getElementById('modeToggle');
-    const modeButtons = modeToggle.querySelectorAll('button');
-    const heaterStatusEl = document.getElementById('heaterStatus');
-    const modeHintEl = document.getElementById('modeHint');
-    const rateBlock = document.getElementById('rateBlock');
-    const rateLabel = document.getElementById('rateLabel');
-    const rateSlider = document.getElementById('rateSlider');
-    const rateValEl = document.getElementById('rateVal');
-    const tempValueEl = document.getElementById('tempValue');
-    const bathTempValueEl = document.getElementById('bathTempValue');
-    const tempBarMarker = document.getElementById('tempBarMarker');
-    const tempMpMarker = document.getElementById('tempMpMarker');
-    const tempBpMarker = document.getElementById('tempBpMarker');
-    const tempMpLabel = document.getElementById('tempMpLabel');
-    const tempBpLabel = document.getElementById('tempBpLabel');
-    const particleSlider = document.getElementById('particleSlider');
-    const particleVal = document.getElementById('particleVal');
-    const animSpeedSlider = document.getElementById('animSpeed');
-    const animSpeedVal = document.getElementById('animSpeedVal');
-
-    // ─── Three.js Setup ───
-    function isDark() {
-      return document.documentElement.getAttribute('data-theme') === 'dark';
     }
+  }
 
-    function getColors() {
-      return isDark() ? themeColors.dark : themeColors.light;
+  removeCenterOfMassVelocity();
+
+  instancedMesh = new THREE.InstancedMesh(sphereGeo, sphereMat, particleData.length);
+  instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  scene.add(instancedMesh);
+
+  containerMesh.scale.setScalar(state.boxLength);
+  updateCameraForBox({ snap: true });
+  computeForces();
+  state.measuredTemp = computeMeasuredTemperature();
+  state.snapshotTimer = 0;
+  state.analysisCounter = 0;
+  state.msdSnapshots = [];
+  captureMsdSnapshot();
+  analyzePhase(true);
+  updateInstancedMesh();
+}
+
+function removeCenterOfMassVelocity() {
+  if (particleData.length === 0) return;
+  const drift = new THREE.Vector3();
+  for (const p of particleData) drift.add(p.vel);
+  drift.multiplyScalar(1 / particleData.length);
+  for (const p of particleData) p.vel.sub(drift);
+}
+
+function computeMeasuredTemperature() {
+  const n = particleData.length;
+  if (n <= 1) return 0;
+  let kineticEnergy = 0;
+  for (const p of particleData) {
+    kineticEnergy += 0.5 * MASS * p.vel.lengthSq();
+  }
+  return (2 * kineticEnergy) / (3 * (n - 1) * KB);
+}
+
+function computeForces() {
+  const n = particleData.length;
+  const boxLength = state.boxLength;
+  potentialEnergy = 0;
+
+  for (let i = 0; i < n; i++) {
+    particleData[i].force.set(0, 0, 0);
+  }
+
+  for (let i = 0; i < n; i++) {
+    const pi = particleData[i];
+    for (let j = i + 1; j < n; j++) {
+      const pj = particleData[j];
+      let dx = pj.pos.x - pi.pos.x;
+      let dy = pj.pos.y - pi.pos.y;
+      let dz = pj.pos.z - pi.pos.z;
+
+      dx -= boxLength * Math.round(dx / boxLength);
+      dy -= boxLength * Math.round(dy / boxLength);
+      dz -= boxLength * Math.round(dz / boxLength);
+
+      const r2 = dx * dx + dy * dy + dz * dz;
+      if (r2 >= LJ_CUTOFF_SQ || r2 < 1e-10) continue;
+
+      const r2Safe = Math.max(r2, MIN_R_SQ);
+      const invR2 = 1 / r2Safe;
+      const invR6 = invR2 * invR2 * invR2;
+      const invR12 = invR6 * invR6;
+      const fOverR = 24 * EPSILON * invR2 * (2 * invR12 - invR6);
+
+      const fx = fOverR * dx;
+      const fy = fOverR * dy;
+      const fz = fOverR * dz;
+
+      pi.force.x += fx;
+      pi.force.y += fy;
+      pi.force.z += fz;
+      pj.force.x -= fx;
+      pj.force.y -= fy;
+      pj.force.z -= fz;
+
+      potentialEnergy += 4 * EPSILON * (invR12 - invR6) - POTENTIAL_SHIFT;
     }
+  }
+}
 
-    const scene = new THREE.Scene();
-    const colors = getColors();
-    scene.background = new THREE.Color(colors.sceneBg);
+function updateTargetTemperature(dt) {
+  if (state.mode === 'heat') {
+    state.targetTemp = Math.min(TEMP_MAX, state.targetTemp + HEATING_RATES[state.rate - 1] * dt);
+  } else if (state.mode === 'cool') {
+    state.targetTemp = Math.max(TEMP_MIN, state.targetTemp - COOLING_RATES[state.rate - 1] * dt);
+  }
+}
 
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 150);
-    camera.position.set(14, 14, 14);
+function stepPhysics(dt) {
+  if (particleData.length === 0) return;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  updateTargetTemperature(dt);
 
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
+  const halfDt = 0.5 * dt;
+  const boxLength = state.boxLength;
+  const damping = Math.exp(-THERMOSTAT_GAMMA * dt);
+  const noiseScale = Math.sqrt((1 - damping * damping) * state.targetTemp / MASS);
+
+  for (const p of particleData) {
+    p.vel.x += halfDt * p.force.x / MASS;
+    p.vel.y += halfDt * p.force.y / MASS;
+    p.vel.z += halfDt * p.force.z / MASS;
+
+    const dx1 = halfDt * p.vel.x;
+    const dy1 = halfDt * p.vel.y;
+    const dz1 = halfDt * p.vel.z;
+    p.pos.x += dx1;
+    p.pos.y += dy1;
+    p.pos.z += dz1;
+    p.unwrap.x += dx1;
+    p.unwrap.y += dy1;
+    p.unwrap.z += dz1;
+    wrapVector(p.pos, boxLength);
+
+    p.vel.x = damping * p.vel.x + noiseScale * gaussianRandom();
+    p.vel.y = damping * p.vel.y + noiseScale * gaussianRandom();
+    p.vel.z = damping * p.vel.z + noiseScale * gaussianRandom();
+
+    const dx2 = halfDt * p.vel.x;
+    const dy2 = halfDt * p.vel.y;
+    const dz2 = halfDt * p.vel.z;
+    p.pos.x += dx2;
+    p.pos.y += dy2;
+    p.pos.z += dz2;
+    p.unwrap.x += dx2;
+    p.unwrap.y += dy2;
+    p.unwrap.z += dz2;
+    wrapVector(p.pos, boxLength);
+  }
+
+  removeCenterOfMassVelocity();
+  computeForces();
+
+  for (const p of particleData) {
+    p.vel.x += halfDt * p.force.x / MASS;
+    p.vel.y += halfDt * p.force.y / MASS;
+    p.vel.z += halfDt * p.force.z / MASS;
+  }
+
+  state.measuredTemp = computeMeasuredTemperature();
+  state.time += dt;
+  state.snapshotTimer += dt;
+
+  if (state.snapshotTimer >= MSD_SNAPSHOT_PERIOD) {
+    captureMsdSnapshot();
+    state.snapshotTimer = 0;
+  }
+
+  state.analysisCounter += 1;
+  if (state.analysisCounter >= ANALYSIS_INTERVAL_STEPS) {
+    analyzePhase();
+    state.analysisCounter = 0;
+  }
+}
+
+function captureMsdSnapshot() {
+  const snapshot = new Float32Array(particleData.length * 3);
+  for (let i = 0; i < particleData.length; i++) {
+    const offset = i * 3;
+    const p = particleData[i];
+    snapshot[offset] = p.unwrap.x;
+    snapshot[offset + 1] = p.unwrap.y;
+    snapshot[offset + 2] = p.unwrap.z;
+  }
+  state.msdSnapshots.push({ time: state.time, positions: snapshot });
+  while (state.msdSnapshots.length > MAX_MSD_SNAPSHOTS) state.msdSnapshots.shift();
+}
+
+function computeMsd() {
+  if (state.msdSnapshots.length === 0) return 0;
+  let reference = state.msdSnapshots[0];
+  for (const snapshot of state.msdSnapshots) {
+    reference = snapshot;
+    if (state.time - snapshot.time <= MSD_WINDOW) break;
+  }
+
+  let sum = 0;
+  for (let i = 0; i < particleData.length; i++) {
+    const offset = i * 3;
+    const p = particleData[i];
+    const dx = p.unwrap.x - reference.positions[offset];
+    const dy = p.unwrap.y - reference.positions[offset + 1];
+    const dz = p.unwrap.z - reference.positions[offset + 2];
+    sum += dx * dx + dy * dy + dz * dz;
+  }
+  return sum / Math.max(1, particleData.length);
+}
+
+function associatedLegendre(l, m, x) {
+  const xc = clamp(x, -1, 1);
+  let pmm = 1;
+  if (m > 0) {
+    const somx2 = Math.sqrt(Math.max(0, (1 - xc) * (1 + xc)));
+    let fact = 1;
+    for (let i = 1; i <= m; i++) {
+      pmm *= -fact * somx2;
+      fact += 2;
+    }
+  }
+  if (l === m) return pmm;
+  let pmmp1 = xc * (2 * m + 1) * pmm;
+  if (l === m + 1) return pmmp1;
+  let pll = 0;
+  for (let ll = m + 2; ll <= l; ll++) {
+    pll = ((2 * ll - 1) * xc * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
+    pmm = pmmp1;
+    pmmp1 = pll;
+  }
+  return pll;
+}
+
+function accumulateQ6(dx, dy, dz, accumRe, accumIm) {
+  const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (r < 1e-10) return;
+  const cosTheta = clamp(dz / r, -1, 1);
+  const phi = Math.atan2(dy, dx);
+
+  for (let m = 0; m <= Q6_L; m++) {
+    const harmonic = Q6_NORMALISATION[m] * associatedLegendre(Q6_L, m, cosTheta);
+    accumRe[m] += harmonic * Math.cos(m * phi);
+    accumIm[m] += harmonic * Math.sin(m * phi);
+  }
+}
+
+function buildDisjointSet(size) {
+  const parent = new Int32Array(size);
+  const weight = new Int32Array(size);
+  for (let i = 0; i < size; i++) {
+    parent[i] = i;
+    weight[i] = 1;
+  }
+  return { parent, weight };
+}
+
+function findRoot(set, index) {
+  const { parent } = set;
+  let root = index;
+  while (parent[root] !== root) root = parent[root];
+  while (parent[index] !== index) {
+    const next = parent[index];
+    parent[index] = root;
+    index = next;
+  }
+  return root;
+}
+
+function unionRoots(set, a, b) {
+  let rootA = findRoot(set, a);
+  let rootB = findRoot(set, b);
+  if (rootA === rootB) return;
+  const { parent, weight } = set;
+  if (weight[rootA] < weight[rootB]) {
+    const swap = rootA;
+    rootA = rootB;
+    rootB = swap;
+  }
+  parent[rootB] = rootA;
+  weight[rootA] += weight[rootB];
+}
+
+function classifyPhase(metrics) {
+  const { q6, avgCoordination, clusterFraction, msd } = metrics;
+
+  if (clusterFraction < 0.45 && avgCoordination < 3.5) {
+    return { label: 'GAS', className: 'gas' };
+  }
+  if (clusterFraction > 0.82 && q6 > 0.38 && msd < 0.12) {
+    return { label: 'SOLID', className: 'solid' };
+  }
+  if (clusterFraction > 0.7 && avgCoordination > 6) {
+    return { label: 'LIQUID', className: 'liquid' };
+  }
+  return { label: 'COEXISTENCE', className: 'mixed' };
+}
+
+function analyzePhase(forceUpdate = false) {
+  const n = particleData.length;
+  if (n === 0) return;
+
+  const ds = buildDisjointSet(n);
+  const coordination = new Float32Array(n);
+  const q6Re = new Float64Array(Q6_L + 1);
+  const q6Im = new Float64Array(Q6_L + 1);
+  let q6BondCount = 0;
+  const boxLength = state.boxLength;
+
+  for (let i = 0; i < n; i++) {
+    const pi = particleData[i];
+    for (let j = i + 1; j < n; j++) {
+      const pj = particleData[j];
+      let dx = pj.pos.x - pi.pos.x;
+      let dy = pj.pos.y - pi.pos.y;
+      let dz = pj.pos.z - pi.pos.z;
+
+      dx -= boxLength * Math.round(dx / boxLength);
+      dy -= boxLength * Math.round(dy / boxLength);
+      dz -= boxLength * Math.round(dz / boxLength);
+      const r2 = dx * dx + dy * dy + dz * dz;
+
+      if (r2 < NEIGHBOR_CUTOFF_SQ) {
+        coordination[i] += 1;
+        coordination[j] += 1;
+      }
+      if (r2 < CLUSTER_CUTOFF_SQ) {
+        unionRoots(ds, i, j);
+      }
+      if (r2 < Q6_CUTOFF_SQ) {
+        accumulateQ6(dx, dy, dz, q6Re, q6Im);
+        q6BondCount += 1;
+      }
+    }
+  }
+
+  const rootSizes = new Map();
+  let largestCluster = 0;
+  let totalCoordination = 0;
+  for (let i = 0; i < n; i++) {
+    totalCoordination += coordination[i];
+    const root = findRoot(ds, i);
+    const nextSize = (rootSizes.get(root) || 0) + 1;
+    rootSizes.set(root, nextSize);
+    if (nextSize > largestCluster) largestCluster = nextSize;
+  }
+
+  let q6 = 0;
+  if (q6BondCount > 0) {
+    let sum = 0;
+    for (let m = 0; m <= Q6_L; m++) {
+      const re = q6Re[m] / q6BondCount;
+      const im = q6Im[m] / q6BondCount;
+      const magSq = re * re + im * im;
+      sum += m === 0 ? magSq : 2 * magSq;
+    }
+    q6 = Math.sqrt((4 * Math.PI / (2 * Q6_L + 1)) * sum);
+  }
+
+  const metrics = {
+    q6,
+    avgCoordination: totalCoordination / n,
+    clusterFraction: largestCluster / n,
+    msd: computeMsd(),
+    potentialPerParticle: potentialEnergy / n
+  };
+  const phase = classifyPhase(metrics);
+
+  state.analysis = {
+    ...metrics,
+    label: phase.label,
+    className: phase.className
+  };
+
+  if (forceUpdate) updateStateUI();
+}
+
+function temperatureToPercent(temp) {
+  return clamp01((temp - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)) * 100;
+}
+
+function getRenderCenter() {
+  centerBuffer.set(0, 0, 0);
+  if (particleData.length === 0) return centerBuffer;
+  for (const p of particleData) centerBuffer.add(p.unwrap);
+  centerBuffer.multiplyScalar(1 / particleData.length);
+  centerBuffer.x = wrapComponent(centerBuffer.x, state.boxLength);
+  centerBuffer.y = wrapComponent(centerBuffer.y, state.boxLength);
+  centerBuffer.z = wrapComponent(centerBuffer.z, state.boxLength);
+  return centerBuffer;
+}
+
+function updateInstancedMesh() {
+  if (!instancedMesh) return;
+  const renderCenter = getRenderCenter();
+  const boxLength = state.boxLength;
+  const gasFactor = clamp01((state.analysis.clusterFraction < 0.55 ? 0.55 - state.analysis.clusterFraction : 0) / 0.55);
+  const scale = 1 + 0.08 * gasFactor;
+
+  for (let i = 0; i < particleData.length; i++) {
+    const p = particleData[i];
+    let x = p.pos.x - renderCenter.x;
+    let y = p.pos.y - renderCenter.y;
+    let z = p.pos.z - renderCenter.z;
+    x -= boxLength * Math.round(x / boxLength);
+    y -= boxLength * Math.round(y / boxLength);
+    z -= boxLength * Math.round(z / boxLength);
+
+    dummy.position.set(x, y, z);
+    dummy.scale.setScalar(scale);
+    dummy.updateMatrix();
+    instancedMesh.setMatrixAt(i, dummy.matrix);
+  }
+
+  instancedMesh.instanceMatrix.needsUpdate = true;
+}
+
+function updateCameraForBox(options = {}) {
+  const { snap = false } = options;
+  const length = state.boxLength;
+  const distance = Math.max(9, length * 1.5);
+  controls.minDistance = Math.max(4, length * 0.45);
+  controls.maxDistance = Math.max(35, length * 4.5);
+
+  if (snap) {
+    camera.position.set(distance, distance * 0.78, distance);
     controls.target.set(0, 0, 0);
-    controls.minDistance = 4;
-    controls.maxDistance = 40;
-    controls.enablePan = false;
-
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(5, 10, 7);
-    scene.add(dirLight);
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    fillLight.position.set(-5, 3, -5);
-    scene.add(fillLight);
-
-    // ─── Container (wireframe box) ───
-    const containerGeo = new THREE.BoxGeometry(
-      CONTAINER_HALF * 2, CONTAINER_HALF * 2, CONTAINER_HALF * 2
-    );
-    const containerEdges = new THREE.EdgesGeometry(containerGeo);
-    const containerMat = new THREE.LineBasicMaterial({
-      color: colors.containerColor,
-      transparent: true,
-      opacity: 0.85,
-      linewidth: 1
-    });
-    const containerMesh = new THREE.LineSegments(containerEdges, containerMat);
-    scene.add(containerMesh);
-
-    // ─── Particles ───
-    let particleData = []; // { pos, vel, equilibrium, mass, force, neighborCount }
-    let instancedMesh = null;
-    let bondLines = null;
-    const sphereGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 12);
-    let sphereMat = new THREE.MeshPhongMaterial({
-      color: colors.particleColor,
-      emissive: colors.particleEmissive,
-      emissiveIntensity: 0.15,
-      shininess: 60
-    });
-
-    const dummy = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-
-    function getTemperatureColor(temp) {
-      if (temp < MELTING_POINT) {
-        const t = temp / MELTING_POINT;
-        return new THREE.Color().setHSL(0.6 - t * 0.1, 0.7, 0.55 + t * 0.1);
-      } else if (temp < BOILING_POINT) {
-        const t = (temp - MELTING_POINT) / (BOILING_POINT - MELTING_POINT);
-        return new THREE.Color().setHSL(0.12 - t * 0.05, 0.8, 0.55 + t * 0.05);
-      } else {
-        const t = Math.min((temp - BOILING_POINT) / 200, 1);
-        return new THREE.Color().setHSL(0.02 - t * 0.02, 0.85, 0.55 + t * 0.1);
-      }
-    }
-
-    function createParticles() {
-      // Clean up old
-      if (instancedMesh) {
-        scene.remove(instancedMesh);
-        instancedMesh.dispose();
-      }
-      if (bondLines) {
-        scene.remove(bondLines);
-        bondLines.geometry.dispose();
-        bondLines.material.dispose();
-        bondLines = null;
-      }
-
-      const n = state.gridSize;
-      const count = n * n * n;
-      const spacing = Math.min(LJ_RMIN, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
-      const offset = (n - 1) * spacing / 2;
-
-      particleData = [];
-
-      for (let ix = 0; ix < n; ix++) {
-        for (let iy = 0; iy < n; iy++) {
-          for (let iz = 0; iz < n; iz++) {
-            const eq = new THREE.Vector3(
-              ix * spacing - offset,
-              iy * spacing - offset,
-              iz * spacing - offset
-            );
-            particleData.push({
-              pos: eq.clone(),
-              vel: new THREE.Vector3(
-                (Math.random() - 0.5) * 0.5,
-                (Math.random() - 0.5) * 0.5,
-                (Math.random() - 0.5) * 0.5
-              ),
-              equilibrium: eq.clone(),
-              mass: 1.0,
-              force: new THREE.Vector3(),
-              neighborCount: 0
-            });
-          }
-        }
-      }
-
-      // Create instanced mesh
-      const col = getTemperatureColor(state.temperature);
-      sphereMat = new THREE.MeshPhongMaterial({
-        color: col,
-        emissive: col.clone().multiplyScalar(0.3),
-        emissiveIntensity: 0.2,
-        shininess: 60
-      });
-
-      instancedMesh = new THREE.InstancedMesh(sphereGeo, sphereMat, count);
-      instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      scene.add(instancedMesh);
-
-      // Create bond line geometry (for solid state)
-      createBondLines();
-
-      // Verlet needs F at t=0
-      computeForces();
-      updateInstancedMesh();
-    }
-
-    function createBondLines() {
-      if (bondLines) {
-        scene.remove(bondLines);
-        bondLines.geometry.dispose();
-        bondLines.material.dispose();
-      }
-
-      // Pre-compute neighbor pairs (adjacent in lattice)
-      const n = state.gridSize;
-      const pairs = [];
-      for (let i = 0; i < particleData.length; i++) {
-        for (let j = i + 1; j < particleData.length; j++) {
-          const d = particleData[i].equilibrium.distanceTo(particleData[j].equilibrium);
-          if (d < BOND_VISUAL_LIMIT) {
-            pairs.push([i, j]);
-          }
-        }
-      }
-
-      const positions = new Float32Array(pairs.length * 6);
-      const bondGeo = new THREE.BufferGeometry();
-      bondGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      bondGeo.userData.pairs = pairs;
-
-      const c = getColors();
-      const bondMat = new THREE.LineBasicMaterial({
-        color: c.bondColor,
-        transparent: true,
-        opacity: 0.7
-      });
-      bondLines = new THREE.LineSegments(bondGeo, bondMat);
-      scene.add(bondLines);
-    }
-
-    function updateBondLines() {
-      if (!bondLines) return;
-
-      const pairs = bondLines.geometry.userData.pairs;
-      const positions = bondLines.geometry.attributes.position.array;
-
-      // Fade bonds based on detected phase
-      const phase = state.detectedPhase;
-      const bondOpacity = 0.7 * phase.solid * phase.solid;
-      bondLines.material.opacity = bondOpacity;
-      bondLines.visible = bondOpacity > 0.01;
-
-      if (!bondLines.visible) return;
-
-      for (let k = 0; k < pairs.length; k++) {
-        const [i, j] = pairs[k];
-        const pi = particleData[i].pos;
-        const pj = particleData[j].pos;
-        positions[k * 6] = pi.x;
-        positions[k * 6 + 1] = pi.y;
-        positions[k * 6 + 2] = pi.z;
-        positions[k * 6 + 3] = pj.x;
-        positions[k * 6 + 4] = pj.y;
-        positions[k * 6 + 5] = pj.z;
-      }
-      bondLines.geometry.attributes.position.needsUpdate = true;
-    }
-
-    function updateInstancedMesh() {
-      const phase = state.detectedPhase;
-      for (let i = 0; i < particleData.length; i++) {
-        const p = particleData[i];
-        dummy.position.copy(p.pos);
-
-        // Scale particles smoothly with gas fraction.
-        const extraGasExpansion = clamp01((state.effectiveTemp - BOILING_POINT) / 400);
-        const scale = 1.0 + phase.gas * (0.15 + 0.15 * extraGasExpansion);
-        dummy.scale.setScalar(scale);
-        dummy.updateMatrix();
-        instancedMesh.setMatrixAt(i, dummy.matrix);
-      }
-      instancedMesh.instanceMatrix.needsUpdate = true;
-    }
-
-    // ─── Physics Engine ───
-    // Lennard-Jones potential
-    const LJ_SIGMA = 1.34;
-    const LJ_EPSILON = 1.5;
-    const LJ_CUTOFF = 2.5 * LJ_SIGMA;
-    const LJ_CUTOFF_SQ = LJ_CUTOFF * LJ_CUTOFF;
-    const LJ_RMIN = Math.pow(2, 1 / 6) * LJ_SIGMA; // ~1.504, equilibrium distance
-    const LJ_SIGMA_SQ = LJ_SIGMA * LJ_SIGMA;
-
-    // Thermostat (Langevin / BBK integrator)
-    const KB = LJ_EPSILON * 0.525 / 200; // maps 200K slider → kT ≈ 0.79ε
-    const LANGEVIN_GAMMA = 2.0;
-
-    // Solid tethers
-    const K_SOLID_MAX = 30.0;
-
-    // Latent heat plateau rates
-    const LATENT_MELT_RATE = 0.3;
-    const LATENT_BOIL_RATE = 0.25;
-
-    // Neighbor cutoff for coordination number (~first shell)
-    const NEIGHBOR_CUTOFF = 1.5 * LJ_SIGMA;
-    const NEIGHBOR_CUTOFF_SQ = NEIGHBOR_CUTOFF * NEIGHBOR_CUTOFF;
-
-    // Minimum r² clamp for LJ stability
-    const LJ_R2_MIN = 0.4 * LJ_SIGMA_SQ;
-
-    function clamp01(value) {
-      return Math.min(1, Math.max(0, value));
-    }
-
-    function smoothstep(edge0, edge1, x) {
-      if (edge1 === edge0) return x < edge0 ? 0 : 1;
-      const t = clamp01((x - edge0) / (edge1 - edge0));
-      return t * t * (3 - 2 * t);
-    }
-
-    function gaussianRandom() {
-      let u, v, s;
-      do {
-        u = Math.random() * 2 - 1;
-        v = Math.random() * 2 - 1;
-        s = u * u + v * v;
-      } while (s >= 1 || s === 0);
-      return u * Math.sqrt(-2 * Math.log(s) / s);
-    }
-
-    // ─── Heater / Cooling Model ───
-    function updateBathTemperature(dt) {
-      if (state.mode === 'heat') {
-        const rate = HEATING_RATES[state.rate - 1];
-        state.temperature = Math.min(TEMP_MAX, state.temperature + rate * dt);
-      } else if (state.mode === 'cool') {
-        const rate = COOLING_RATES[state.rate - 1];
-        state.temperature = Math.max(TEMP_MIN, state.temperature - rate * dt);
-      } else {
-        // Off: hold current temperature
-      }
-    }
-
-    // ─── Latent Heat Model ───
-    function updateEffectiveTemperature(dt) {
-      const Tbath = state.temperature;
-      const lh = state.latentHeat;
-
-      // Melting transition
-      if (Tbath > MELTING_POINT && lh.melting.progress < 1) {
-        const drive = (Tbath - MELTING_POINT) / MELTING_POINT;
-        lh.melting.progress = Math.min(1, lh.melting.progress + LATENT_MELT_RATE * drive * dt);
-        state.effectiveTemp = MELTING_POINT;
-        // When melting just completed, snap bath back to MP so there's
-        // no temperature jump when the plateau ends
-        if (lh.melting.progress >= 1) {
-          state.temperature = MELTING_POINT;
-        }
-        return;
-      }
-      if (Tbath <= MELTING_POINT && lh.melting.progress > 0) {
-        const drive = (MELTING_POINT - Tbath) / MELTING_POINT;
-        lh.melting.progress = Math.max(0, lh.melting.progress - LATENT_MELT_RATE * drive * dt);
-        if (lh.boiling.progress > 0) {
-          lh.boiling.progress = Math.max(0, lh.boiling.progress - LATENT_BOIL_RATE * drive * dt);
-        }
-        state.effectiveTemp = MELTING_POINT;
-        // When freezing just completed, snap bath back to MP
-        if (lh.melting.progress <= 0) {
-          state.temperature = MELTING_POINT;
-        }
-        return;
-      }
-
-      // Boiling transition (only active once fully melted)
-      if (lh.melting.progress >= 1 && Tbath > BOILING_POINT && lh.boiling.progress < 1) {
-        const drive = (Tbath - BOILING_POINT) / BOILING_POINT;
-        lh.boiling.progress = Math.min(1, lh.boiling.progress + LATENT_BOIL_RATE * drive * dt);
-        state.effectiveTemp = BOILING_POINT;
-        // When boiling just completed, snap bath back to BP
-        if (lh.boiling.progress >= 1) {
-          state.temperature = BOILING_POINT;
-        }
-        return;
-      }
-      if (lh.melting.progress >= 1 && Tbath <= BOILING_POINT && lh.boiling.progress > 0) {
-        const drive = (BOILING_POINT - Tbath) / BOILING_POINT;
-        lh.boiling.progress = Math.max(0, lh.boiling.progress - LATENT_BOIL_RATE * drive * dt);
-        state.effectiveTemp = BOILING_POINT;
-        // When condensation just completed, snap bath back to BP
-        if (lh.boiling.progress <= 0) {
-          state.temperature = BOILING_POINT;
-        }
-        return;
-      }
-
-      // No transition active: effective temp follows bath
-      state.effectiveTemp = Tbath;
-    }
-
-    // ─── Force Computation (LJ + tethers) ───
-    function computeForces() {
-      const n = particleData.length;
-
-      // Tether strength fades quadratically with melting progress
-      const meltFade = clamp01(1 - state.latentHeat.melting.progress);
-      const tetherK = K_SOLID_MAX * meltFade * meltFade;
-
-      // Reset forces and neighbor counts
-      for (let i = 0; i < n; i++) {
-        particleData[i].force.set(0, 0, 0);
-        particleData[i].neighborCount = 0;
-      }
-
-      // Pairwise Lennard-Jones forces (truncated at cutoff)
-      for (let i = 0; i < n; i++) {
-        const pi = particleData[i];
-        for (let j = i + 1; j < n; j++) {
-          const pj = particleData[j];
-          const dx = pj.pos.x - pi.pos.x;
-          const dy = pj.pos.y - pi.pos.y;
-          const dz = pj.pos.z - pi.pos.z;
-          const r2 = dx * dx + dy * dy + dz * dz;
-
-          if (r2 > LJ_CUTOFF_SQ || r2 < 1e-8) continue;
-
-          // Clamp r² for stability at very short range
-          const r2_safe = Math.max(r2, LJ_R2_MIN);
-          const inv_r2 = 1 / r2_safe;
-          const s2 = LJ_SIGMA_SQ * inv_r2;
-          const s6 = s2 * s2 * s2;
-          const s12 = s6 * s6;
-          // f/r = 24ε/r² [σ⁶/r⁶ - 2σ¹²/r¹²]
-          // Positive = attractive (towards partner), negative = repulsive
-          const f_over_r = 24 * LJ_EPSILON * inv_r2 * (s6 - 2 * s12);
-
-          const fx = f_over_r * dx;
-          const fy = f_over_r * dy;
-          const fz = f_over_r * dz;
-
-          pi.force.x += fx;
-          pi.force.y += fy;
-          pi.force.z += fz;
-          pj.force.x -= fx;
-          pj.force.y -= fy;
-          pj.force.z -= fz;
-
-          // Count neighbors for coordination number
-          if (r2 < NEIGHBOR_CUTOFF_SQ) {
-            pi.neighborCount++;
-            pj.neighborCount++;
-          }
-        }
-      }
-
-      // Harmonic tethers to lattice sites (solid only)
-      if (tetherK > 0.01) {
-        for (let i = 0; i < n; i++) {
-          const p = particleData[i];
-          p.force.x += tetherK * (p.equilibrium.x - p.pos.x);
-          p.force.y += tetherK * (p.equilibrium.y - p.pos.y);
-          p.force.z += tetherK * (p.equilibrium.z - p.pos.z);
-        }
-      }
-    }
-
-    // ─── Velocity Verlet Integrator (BBK Langevin) ───
-    function stepPhysics(dt) {
-      const n = particleData.length;
-      const halfDt = dt * 0.5;
-      const gamma = LANGEVIN_GAMMA;
-      const decay = gamma * halfDt; // γ·dt/2
-
-      // Track tether state before update
-      const prevMeltProgress = state.latentHeat.melting.progress;
-
-      // Drive bath temperature from heater/cooling
-      updateBathTemperature(dt);
-
-      // Update effective temperature (latent heat plateaus)
-      updateEffectiveTemperature(dt);
-
-      // Check for solidification (tethers re-engaging)
-      const wasTethered = prevMeltProgress < 0.98;
-      const nowTethered = state.latentHeat.melting.progress < 0.98;
-      if (nowTethered && !wasTethered) {
-        resetLatticeEquilibria({ reassignFromCurrent: true });
-      }
-      state.tethersActive = nowTethered;
-
-      // Noise amplitude from fluctuation-dissipation theorem
-      const kT = KB * state.effectiveTemp;
-      const noiseHalf = Math.sqrt(gamma * kT * dt);
-
-      // BBK half-step 1: v(t+dt/2) = v(t)(1-γdt/2) + (dt/2)F(t)/m + noise
-      for (let i = 0; i < n; i++) {
-        const p = particleData[i];
-        p.vel.x = p.vel.x * (1 - decay) + halfDt * p.force.x + noiseHalf * gaussianRandom();
-        p.vel.y = p.vel.y * (1 - decay) + halfDt * p.force.y + noiseHalf * gaussianRandom();
-        p.vel.z = p.vel.z * (1 - decay) + halfDt * p.force.z + noiseHalf * gaussianRandom();
-      }
-
-      // Full position update: r(t+dt) = r(t) + dt·v(t+dt/2)
-      const wallLimit = CONTAINER_HALF - PARTICLE_RADIUS;
-      for (let i = 0; i < n; i++) {
-        const p = particleData[i];
-        p.pos.x += dt * p.vel.x;
-        p.pos.y += dt * p.vel.y;
-        p.pos.z += dt * p.vel.z;
-
-        // Elastic wall collisions (reflect position and reverse velocity)
-        if (p.pos.x > wallLimit) { p.pos.x = 2 * wallLimit - p.pos.x; p.vel.x = -p.vel.x; }
-        else if (p.pos.x < -wallLimit) { p.pos.x = -2 * wallLimit - p.pos.x; p.vel.x = -p.vel.x; }
-        if (p.pos.y > wallLimit) { p.pos.y = 2 * wallLimit - p.pos.y; p.vel.y = -p.vel.y; }
-        else if (p.pos.y < -wallLimit) { p.pos.y = -2 * wallLimit - p.pos.y; p.vel.y = -p.vel.y; }
-        if (p.pos.z > wallLimit) { p.pos.z = 2 * wallLimit - p.pos.z; p.vel.z = -p.vel.z; }
-        else if (p.pos.z < -wallLimit) { p.pos.z = -2 * wallLimit - p.pos.z; p.vel.z = -p.vel.z; }
-
-        // Safety clamp for extreme overshoot
-        p.pos.x = Math.max(-wallLimit, Math.min(wallLimit, p.pos.x));
-        p.pos.y = Math.max(-wallLimit, Math.min(wallLimit, p.pos.y));
-        p.pos.z = Math.max(-wallLimit, Math.min(wallLimit, p.pos.z));
-      }
-
-      // Recompute forces at new positions
-      computeForces();
-
-      // BBK half-step 2: v(t+dt) = [v(t+dt/2) + (dt/2)F(t+dt)/m + noise] / (1+γdt/2)
-      const invDecay = 1 / (1 + decay);
-      for (let i = 0; i < n; i++) {
-        const p = particleData[i];
-        p.vel.x = (p.vel.x + halfDt * p.force.x + noiseHalf * gaussianRandom()) * invDecay;
-        p.vel.y = (p.vel.y + halfDt * p.force.y + noiseHalf * gaussianRandom()) * invDecay;
-        p.vel.z = (p.vel.z + halfDt * p.force.z + noiseHalf * gaussianRandom()) * invDecay;
-      }
-    }
-
-    // ─── Emergent Phase Detection ───
-    function detectPhase() {
-      const n = particleData.length;
-      if (n === 0) return;
-
-      const Tbath = state.temperature;
-      const tEff = state.effectiveTemp;
-      const lh = state.latentHeat;
-
-      // Average coordination number (counted during force computation)
-      let totalCoord = 0;
-      for (let i = 0; i < n; i++) {
-        totalCoord += particleData[i].neighborCount;
-      }
-      const avgCoord = totalCoord / n;
-
-      // Lindemann ratio (RMS displacement from equilibrium / nearest-neighbor distance)
-      let lindemannRatio = 0;
-      if (state.tethersActive) {
-        let sumDisp2 = 0;
-        for (let i = 0; i < n; i++) {
-          sumDisp2 += particleData[i].pos.distanceToSquared(particleData[i].equilibrium);
-        }
-        lindemannRatio = Math.sqrt(sumDisp2 / n) / LJ_RMIN;
-      }
-
-      // Phase fractions from latent heat progress (smooth, predictable)
-      const meltProgress = lh.melting.progress;
-      const boilProgress = lh.boiling.progress;
-
-      const solid = Math.max(0, 1 - meltProgress);
-      const gas = meltProgress * boilProgress;
-      const liquid = Math.max(0, meltProgress - gas);
-
-      // Label from context
-      let label, className;
-      if (solid > 0.9) {
-        label = 'SOLID'; className = 'solid';
-      } else if (gas > 0.9) {
-        label = 'GAS'; className = 'gas';
-      } else if (liquid > 0.9) {
-        label = 'LIQUID'; className = 'liquid';
-      } else if (solid > 0.05 && liquid > 0.05 && gas < 0.05) {
-        label = Tbath > tEff ? 'MELTING' : 'FREEZING';
-        className = solid > liquid ? 'solid' : 'liquid';
-      } else if (liquid > 0.05 && gas > 0.05) {
-        label = Tbath > tEff ? 'BOILING' : 'CONDENSING';
-        className = liquid > gas ? 'liquid' : 'gas';
-      } else {
-        label = 'TRANSITION'; className = 'liquid';
-      }
-
-      state.detectedPhase = {
-        label, className, solid, liquid, gas,
-        avgCoordination: avgCoord,
-        lindemannRatio
-      };
-    }
-
-    // ─── UI Helpers ───
-    function getStateName() {
-      return state.detectedPhase.className;
-    }
-
-    function getStateBadgeText() {
-      return state.detectedPhase.label;
-    }
-
-    function temperatureToPercent(temp) {
-      return ((temp - TEMP_MIN) / (TEMP_MAX - TEMP_MIN)) * 100;
-    }
-
-    function updateStateUI() {
-      const tEff = state.effectiveTemp;
-      const phase = state.detectedPhase;
-      const stateName = phase.className;
-      const badgeText = phase.label;
-
-      // Show measured (effective) and bath temperatures
-      const showTemp = Math.round(tEff);
-      tempValueEl.textContent = showTemp;
-      bathTempValueEl.textContent = Math.round(state.temperature);
-
-      // Heater status indicator
-      if (state.mode === 'heat') {
-        heaterStatusEl.textContent = 'HEATING';
-        heaterStatusEl.className = 'heater-status heating';
-        modeHintEl.textContent = 'Adding thermal energy';
-      } else if (state.mode === 'cool') {
-        heaterStatusEl.textContent = 'COOLING';
-        heaterStatusEl.className = 'heater-status cooling';
-        modeHintEl.textContent = 'Removing thermal energy';
-      } else {
-        heaterStatusEl.textContent = 'IDLE';
-        heaterStatusEl.className = 'heater-status idle';
-        modeHintEl.textContent = 'Standby';
-      }
-
-      // Temperature bar marker (follows measured temp)
-      const pct = temperatureToPercent(tEff);
-      tempBarMarker.style.left = Math.max(0, Math.min(100, pct)) + '%';
-      tempMpMarker.style.left = temperatureToPercent(MELTING_POINT) + '%';
-      tempBpMarker.style.left = temperatureToPercent(BOILING_POINT) + '%';
-      if (tempMpLabel) tempMpLabel.textContent = 'MP ' + MELTING_POINT + ' K';
-      if (tempBpLabel) tempBpLabel.textContent = 'BP ' + BOILING_POINT + ' K';
-
-      // State badge
-      stateBadge.textContent = badgeText;
-      stateBadge.className = 'state-badge ' + stateName;
-
-      // Update particle color based on effective temperature
-      if (instancedMesh) {
-        const col = getTemperatureColor(tEff);
-        instancedMesh.material.color.copy(col);
-        instancedMesh.material.emissive.copy(col).multiplyScalar(0.3);
-      }
-    }
-
-    function updatePlayPauseUI() {
-      if (state.playing) {
-        playPauseBtn.textContent = 'Pause';
-        statusChip.textContent = 'RUNNING';
-        statusChip.className = 'status-chip running';
-      } else {
-        playPauseBtn.textContent = 'Play';
-        statusChip.textContent = 'PAUSED';
-        statusChip.className = 'status-chip paused';
-      }
-    }
-
-    function togglePlayPause() {
-      state.playing = !state.playing;
-      updatePlayPauseUI();
-    }
-
-    function resetSim() {
-      state.mode = 'off';
-      state.rate = 3;
-      state.temperature = AMBIENT_TEMP;
-      state.effectiveTemp = AMBIENT_TEMP;
-      state.timeScale = 1.0;
-      state.time = 0;
-      state.latentHeat.melting.progress = 0;
-      state.latentHeat.boiling.progress = 0;
-      state.tethersActive = true;
-      state.prevTethersActive = true;
-      state.detectedPhase = {
-        label: 'SOLID', className: 'solid',
-        solid: 1, liquid: 0, gas: 0,
-        avgCoordination: 6, lindemannRatio: 0
-      };
-
-      setModeUI('off');
-      rateSlider.value = 3;
-      rateValEl.textContent = 'Medium';
-      animSpeedSlider.value = 1.0;
-      animSpeedVal.textContent = '1.0\u00d7';
-
-      createParticles();
-      detectPhase();
-      updateStateUI();
-
-      camera.position.set(14, 14, 14);
-      controls.target.set(0, 0, 0);
-      controls.update();
-
-      state.playing = true;
-      updatePlayPauseUI();
-    }
-
-    // ─── Theme ───
-    function updateThemeIcon() {
-      themeBtn.textContent = isDark() ? '\u{1F319}' : '\u2600\uFE0F';
-    }
-
-    function applyThemeToScene() {
-      const c = getColors();
-      scene.background.set(c.sceneBg);
-      containerMat.color.set(c.containerColor);
-      if (bondLines) {
-        bondLines.material.color.set(c.bondColor);
-      }
-    }
-
-    function toggleTheme() {
-      const dark = isDark();
-      const next = dark ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-
-      const tc = document.querySelector('meta[name="theme-color"]');
-      const sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-      if (next === 'dark') {
-        localStorage.setItem('particle-states-dark', '1');
-        if (tc) tc.setAttribute('content', '#0f1014');
-        if (sb) sb.setAttribute('content', 'black-translucent');
-      } else {
-        localStorage.removeItem('particle-states-dark');
-        if (tc) tc.setAttribute('content', '#f8f9fa');
-        if (sb) sb.setAttribute('content', 'default');
-      }
-
-      updateThemeIcon();
-      applyThemeToScene();
-    }
-
-    themeBtn.addEventListener('click', toggleTheme);
-    updateThemeIcon();
-
-    // ─── Control Events ───
-    function setModeUI(mode) {
-      state.mode = mode;
-      modeButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
-      });
-      // Update rate label and visibility
-      if (mode === 'heat') {
-        rateLabel.textContent = 'Heating Intensity';
-        rateBlock.style.display = '';
-      } else if (mode === 'cool') {
-        rateLabel.textContent = 'Cooling Intensity';
-        rateBlock.style.display = '';
-      } else {
-        rateBlock.style.display = 'none';
-      }
-      updateStateUI();
-    }
-
-    modeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        setModeUI(btn.dataset.mode);
-      });
-    });
-
-    // Initialize rate block visibility
+    controls.update();
+  }
+}
+
+function updateStateUI() {
+  targetTempValueEl.textContent = state.targetTemp.toFixed(2);
+  measuredTempValueEl.textContent = state.measuredTemp.toFixed(2);
+  tempTargetMarker.style.left = temperatureToPercent(state.targetTemp) + '%';
+  tempMeasuredMarker.style.left = temperatureToPercent(state.measuredTemp) + '%';
+
+  if (state.mode === 'heat') {
+    heaterStatusEl.textContent = 'HEATING';
+    heaterStatusEl.className = 'heater-status heating';
+    modeHintEl.textContent = 'Ramping target temperature up';
+  } else if (state.mode === 'cool') {
+    heaterStatusEl.textContent = 'COOLING';
+    heaterStatusEl.className = 'heater-status cooling';
+    modeHintEl.textContent = 'Ramping target temperature down';
+  } else {
+    heaterStatusEl.textContent = 'HOLD';
+    heaterStatusEl.className = 'heater-status idle';
+    modeHintEl.textContent = 'Holding the current target';
+  }
+
+  stateBadge.textContent = state.analysis.label;
+  stateBadge.className = 'state-badge ' + state.analysis.className;
+  q6ValueEl.textContent = state.analysis.q6.toFixed(2);
+  coordValueEl.textContent = state.analysis.avgCoordination.toFixed(1);
+  clusterValueEl.textContent = Math.round(state.analysis.clusterFraction * 100) + '%';
+  msdValueEl.textContent = state.analysis.msd.toFixed(2);
+
+  if (instancedMesh) {
+    const col = getTemperatureColor(state.measuredTemp);
+    instancedMesh.material.color.copy(col);
+    instancedMesh.material.emissive.copy(col).multiplyScalar(0.32);
+  }
+}
+
+function updatePlayPauseUI() {
+  if (state.playing) {
+    playPauseBtn.textContent = 'Pause';
+    statusChip.textContent = 'RUNNING';
+    statusChip.className = 'status-chip running';
+  } else {
+    playPauseBtn.textContent = 'Play';
+    statusChip.textContent = 'PAUSED';
+    statusChip.className = 'status-chip paused';
+  }
+}
+
+function togglePlayPause() {
+  state.playing = !state.playing;
+  updatePlayPauseUI();
+}
+
+function setModeUI(mode) {
+  state.mode = mode;
+  modeButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  if (mode === 'heat') {
+    rateLabel.textContent = 'Heating Rate';
+    rateBlock.style.display = '';
+  } else if (mode === 'cool') {
+    rateLabel.textContent = 'Cooling Rate';
+    rateBlock.style.display = '';
+  } else {
+    rateLabel.textContent = 'Ramp Rate';
     rateBlock.style.display = 'none';
+  }
+  updateStateUI();
+}
 
-    rateSlider.addEventListener('input', () => {
-      state.rate = parseInt(rateSlider.value);
-      rateValEl.textContent = RATE_LABELS[state.rate - 1];
-    });
+function resetSim() {
+  state.mode = 'off';
+  state.rate = 3;
+  state.targetTemp = DEFAULT_TARGET_TEMP;
+  state.measuredTemp = DEFAULT_TARGET_TEMP;
+  state.timeScale = 1.0;
+  state.time = 0;
+  state.snapshotTimer = 0;
+  state.analysisCounter = 0;
+  state.analysis = {
+    label: 'SOLID',
+    className: 'solid',
+    q6: 0.57,
+    avgCoordination: 12,
+    clusterFraction: 1,
+    msd: 0,
+    potentialPerParticle: 0
+  };
+  state.msdSnapshots = [];
+  accumulator = 0;
 
-    function getBaseLatticeSpacing() {
-      const n = state.gridSize;
-      return Math.min(LJ_RMIN, (CONTAINER_HALF * 2 - 1) / (n - 1 || 1));
+  setModeUI('off');
+  rateSlider.value = 3;
+  rateValEl.textContent = RATE_LABELS[state.rate - 1];
+  animSpeedSlider.value = 1.0;
+  animSpeedVal.textContent = '1.0×';
+
+  createParticles();
+  updateStateUI();
+  state.playing = true;
+  updatePlayPauseUI();
+}
+
+function updateThemeIcon() {
+  themeBtn.textContent = isDark() ? '\u{1F319}' : '\u2600\uFE0F';
+}
+
+function applyThemeToScene() {
+  const c = getColors();
+  scene.background.set(c.sceneBg);
+  containerMat.color.set(c.containerColor);
+  if (instancedMesh) {
+    const col = getTemperatureColor(state.measuredTemp);
+    instancedMesh.material.color.copy(col);
+    instancedMesh.material.emissive.copy(col).multiplyScalar(0.32);
+  }
+}
+
+function toggleTheme() {
+  const dark = isDark();
+  const next = dark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+
+  const tc = document.querySelector('meta[name="theme-color"]');
+  const sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (next === 'dark') {
+    localStorage.setItem('particle-states-dark', '1');
+    if (tc) tc.setAttribute('content', '#0f1014');
+    if (sb) sb.setAttribute('content', 'black-translucent');
+  } else {
+    localStorage.removeItem('particle-states-dark');
+    if (tc) tc.setAttribute('content', '#f8f9fa');
+    if (sb) sb.setAttribute('content', 'default');
+  }
+
+  updateThemeIcon();
+  applyThemeToScene();
+}
+
+function onResize() {
+  const rect = simPanel.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+  if (w === 0 || h === 0) return;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+}
+
+let lastTime = null;
+let accumulator = 0;
+
+themeBtn.addEventListener('click', toggleTheme);
+updateThemeIcon();
+
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    setModeUI(btn.dataset.mode);
+  });
+});
+
+rateBlock.style.display = 'none';
+rateSlider.addEventListener('input', () => {
+  state.rate = parseInt(rateSlider.value, 10);
+  rateValEl.textContent = RATE_LABELS[state.rate - 1];
+});
+
+particleSlider.addEventListener('input', () => {
+  state.gridSize = parseInt(particleSlider.value, 10);
+  updateParticleCountUI();
+  accumulator = 0;
+  createParticles();
+  updateStateUI();
+});
+
+animSpeedSlider.addEventListener('input', () => {
+  state.timeScale = parseFloat(animSpeedSlider.value);
+  animSpeedVal.textContent = state.timeScale.toFixed(1) + '×';
+});
+
+playPauseBtn.addEventListener('click', togglePlayPause);
+resetBtn.addEventListener('click', resetSim);
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    togglePlayPause();
+  } else if (e.code === 'KeyR') {
+    resetSim();
+  }
+});
+
+const resizeObserver = new ResizeObserver(onResize);
+resizeObserver.observe(simPanel);
+onResize();
+updateParticleCountUI();
+resetSim();
+
+function animate(timestamp) {
+  requestAnimationFrame(animate);
+
+  if (lastTime === null) lastTime = timestamp;
+  const rawDt = Math.min((timestamp - lastTime) / 1000, 0.05);
+  lastTime = timestamp;
+
+  if (state.playing) {
+    accumulator += rawDt * state.timeScale;
+    let steps = 0;
+    while (accumulator >= PHYSICS_DT && steps < 10) {
+      stepPhysics(PHYSICS_DT);
+      accumulator -= PHYSICS_DT;
+      steps += 1;
     }
+    if (accumulator > PHYSICS_DT * 6) accumulator = 0;
 
-    function buildLatticeSites(spacing, center, latticeSites) {
-      const n = state.gridSize;
-      const offset = (n - 1) * spacing / 2;
-      for (let ix = 0; ix < n; ix++) {
-        for (let iy = 0; iy < n; iy++) {
-          for (let iz = 0; iz < n; iz++) {
-            latticeSites.push(new THREE.Vector3(
-              center.x + ix * spacing - offset,
-              center.y + iy * spacing - offset,
-              center.z + iz * spacing - offset
-            ));
-          }
-        }
-      }
-    }
-
-    function resetLatticeEquilibria(options = {}) {
-      const { reassignFromCurrent = false } = options;
-      const n = state.gridSize;
-
-      let center = new THREE.Vector3(0, 0, 0);
-      const spacing = getBaseLatticeSpacing();
-
-      // On solidification, rebuild lattice around the current COM.
-      if (reassignFromCurrent && particleData.length > 0) {
-        for (const p of particleData) center.add(p.pos);
-        center.multiplyScalar(1 / particleData.length);
-      }
-
-      // Keep the lattice fully inside the container even if COM drifts near a wall.
-      const halfSpan = (n - 1) * spacing * 0.5;
-      const wallLimit = CONTAINER_HALF - PARTICLE_RADIUS - 0.2;
-      const centerLimit = Math.max(0, wallLimit - halfSpan);
-      center.x = THREE.MathUtils.clamp(center.x, -centerLimit, centerLimit);
-      center.y = THREE.MathUtils.clamp(center.y, -centerLimit, centerLimit);
-      center.z = THREE.MathUtils.clamp(center.z, -centerLimit, centerLimit);
-
-      const latticeSites = [];
-      buildLatticeSites(spacing, center, latticeSites);
-
-      if (!reassignFromCurrent) {
-        for (let i = 0; i < particleData.length && i < latticeSites.length; i++) {
-          particleData[i].equilibrium.copy(latticeSites[i]);
-        }
-        createBondLines();
-        return;
-      }
-
-      // Greedy matching (farthest particles first) reduces crossings and jitter.
-      const used = new Uint8Array(latticeSites.length);
-      const order = particleData
-        .map((p, idx) => ({ idx, r2: p.pos.distanceToSquared(center) }))
-        .sort((a, b) => b.r2 - a.r2);
-
-      for (const entry of order) {
-        const p = particleData[entry.idx];
-        let bestSite = -1;
-        let bestDistSq = Infinity;
-        for (let s = 0; s < latticeSites.length; s++) {
-          if (used[s]) continue;
-          const dSq = p.pos.distanceToSquared(latticeSites[s]);
-          if (dSq < bestDistSq) {
-            bestDistSq = dSq;
-            bestSite = s;
-          }
-        }
-        if (bestSite >= 0) {
-          used[bestSite] = 1;
-          p.equilibrium.copy(latticeSites[bestSite]);
-        }
-      }
-
-      createBondLines();
-    }
-
-    particleSlider.addEventListener('input', () => {
-      state.gridSize = parseInt(particleSlider.value);
-      const n = state.gridSize;
-      particleVal.textContent = n + ' \u00d7 ' + n + ' \u00d7 ' + n;
-      createParticles();
-    });
-
-    animSpeedSlider.addEventListener('input', () => {
-      state.timeScale = parseFloat(animSpeedSlider.value);
-      animSpeedVal.textContent = state.timeScale.toFixed(1) + '\u00d7';
-    });
-
-    playPauseBtn.addEventListener('click', togglePlayPause);
-    resetBtn.addEventListener('click', resetSim);
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.code === 'Space') {
-        e.preventDefault();
-        togglePlayPause();
-      } else if (e.code === 'KeyR') {
-        resetSim();
-      }
-    });
-
-    // ─── Resize Handling ───
-    function onResize() {
-      const rect = simPanel.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-      if (w === 0 || h === 0) return;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h, false);
-    }
-
-    const resizeObserver = new ResizeObserver(onResize);
-    resizeObserver.observe(simPanel);
-    onResize();
-
-    // ─── Initialize ───
-    createParticles();
-    detectPhase();
+    updateInstancedMesh();
     updateStateUI();
+  }
 
-    // ─── Animation Loop ───
-    let lastTime = null;
-    const PHYSICS_DT = 1 / 120;
-    let accumulator = 0;
+  controls.update();
+  renderer.render(scene, camera);
+}
 
-    function animate(timestamp) {
-      requestAnimationFrame(animate);
-
-      if (lastTime === null) lastTime = timestamp;
-      const rawDt = Math.min((timestamp - lastTime) / 1000, 0.05);
-      lastTime = timestamp;
-
-      if (state.playing) {
-        accumulator += rawDt * state.timeScale;
-
-        // Fixed timestep physics
-        let steps = 0;
-        while (accumulator >= PHYSICS_DT && steps < 8) {
-          stepPhysics(PHYSICS_DT);
-          accumulator -= PHYSICS_DT;
-          steps++;
-        }
-        if (accumulator > PHYSICS_DT * 4) accumulator = 0; // prevent spiral
-
-        detectPhase();
-        updateInstancedMesh();
-        updateBondLines();
-        updateStateUI();
-      }
-
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    requestAnimationFrame(animate);
+requestAnimationFrame(animate);
   </script>
 </body>
 
