@@ -856,36 +856,45 @@
     // ─── Physics Engine ───
     const MAX_SPEED = 40.0;
     // Cohesion cutoff: particles attract each other within this radius
-    const COHESION_CUTOFF = PARTICLE_DIAM * 2.5;
+    const COHESION_CUTOFF = PARTICLE_DIAM * 2.8;
     const COHESION_CUTOFF_SQ = COHESION_CUTOFF * COHESION_CUTOFF;
     // Accumulator for inter-particle forces (cohesion)
     const FORCE = new Float32Array(N * 3);
+    // Gravity is always present — phases differ in whether particles
+    // can resist it (solid springs) or are held together (liquid cohesion).
+    const GRAVITY = 20.0;
+
+    // Smooth sigmoid: goes from ~1 well below 'center' to ~0 well above it.
+    // 'width' controls transition sharpness (smaller = sharper).
+    function sigmoid(T, center, width) {
+        return 1.0 / (1.0 + Math.exp((T - center) / width));
+    }
 
     function stepPhysics(dt) {
         const T = TEMP_STATE.val;
         const normT = T / 100;
-        const isSolid = T < MELTING_POINT;
-        const isGas = T > BOILING_POINT;
 
-        // Smooth blending near phase boundaries (5 K transition zone)
-        const BLEND_ZONE = 5;
-        // solidFrac: 1 in solid, blends to 0 over BLEND_ZONE above melting point
-        const solidFrac = isSolid ? 1.0 : Math.max(0, 1 - (T - MELTING_POINT) / BLEND_ZONE);
-        // liquidFrac: 1 in liquid, blends in/out over BLEND_ZONE near boundaries
-        const liquidFrac = isSolid
-            ? Math.max(0, 1 - (MELTING_POINT - T) / BLEND_ZONE)
-            : isGas
-                ? Math.max(0, 1 - (T - BOILING_POINT) / BLEND_ZONE)
-                : 1.0;
-        // gasFrac: 1 in gas, blends in over BLEND_ZONE above boiling point
-        const gasFrac = isGas ? Math.min(1, (T - BOILING_POINT) / BLEND_ZONE) : 0;
+        // Two continuous order parameters that drive all phase behaviour:
+        //   solidness: 1 deep in solid, smoothly → 0 through the melting zone
+        //   cohesion:  1 in solid & liquid, smoothly → 0 through the boiling zone
+        const solidness = sigmoid(T, MELTING_POINT, 2.5);
+        const cohesion  = sigmoid(T, BOILING_POINT, 3.0);
 
-        // 1. Compute inter-particle cohesive forces (liquid state)
-        //    Soft attraction between nearby particles gives liquid its
-        //    characteristic constant-volume, shape-of-container behaviour.
+        // Derived quantities
+        const springK         = 200.0 * solidness;
+        // Cohesion only matters once springs let go (solid→liquid handoff)
+        const cohesionStrength = 80.0 * cohesion * (1.0 - solidness);
+        // Thermal agitation rises continuously; much stronger once cohesion breaks
+        const agitBase        = 30 + 350 * (1.0 - cohesion);
+        const agit            = agitBase * Math.max(0.1, normT);
+        // Damping: solid=0.85, liquid≈0.94, gas=0.99
+        const drag            = 0.99 - 0.05 * cohesion - 0.09 * solidness;
+
+        // 1. Compute inter-particle cohesive forces
+        //    Soft attraction at 1–2.8 diameters gives liquid its
+        //    constant-volume, shape-of-container behaviour.
         FORCE.fill(0);
-        if (liquidFrac > 0.01) {
-            const cohesionStrength = 60.0 * liquidFrac;
+        if (cohesionStrength > 0.5) {
             for (let i = 0; i < N; i++) {
                 for (let j = i + 1; j < N; j++) {
                     let dx = POS[j*3]   - POS[i*3];
@@ -898,10 +907,9 @@
                     let distSq = dx*dx + dy*dy + dz*dz;
                     if (distSq < COHESION_CUTOFF_SQ && distSq > PARTICLE_DIAM * PARTICLE_DIAM) {
                         let dist = Math.sqrt(distSq);
-                        // Attraction ramps up between 1 and 2.5 diameters,
-                        // peaking in the middle, like a simplified LJ well
+                        // Parabolic well peaking in the middle of the attraction range
                         let t = (dist - PARTICLE_DIAM) / (COHESION_CUTOFF - PARTICLE_DIAM);
-                        let attractMag = cohesionStrength * 4 * t * (1 - t); // parabolic well
+                        let attractMag = cohesionStrength * 4 * t * (1 - t);
                         let nx = dx / dist, ny = dy / dist, nz = dz / dist;
                         FORCE[j*3]   -= nx * attractMag;
                         FORCE[j*3+1] -= ny * attractMag;
@@ -919,57 +927,36 @@
             let px = POS[i*3], py = POS[i*3+1], pz = POS[i*3+2];
             let vx = VEL[i*3], vy = VEL[i*3+1], vz = VEL[i*3+2];
 
+            // Start from cohesion forces computed above
             let fx = FORCE[i*3], fy = FORCE[i*3+1], fz = FORCE[i*3+2];
 
-            // --- Solid contribution (spring to lattice + jiggle) ---
-            if (solidFrac > 0.01) {
-                let idx = IDEAL_POS[i*3], idy = IDEAL_POS[i*3+1], idz = IDEAL_POS[i*3+2];
-                let dx = idx - px, dy = idy - py, dz = idz - pz;
+            // Gravity — always present, same magnitude regardless of phase
+            fy -= GRAVITY;
 
+            // Lattice spring (solid): harmonic restoring force to ideal positions
+            if (springK > 0.1) {
+                let dx = IDEAL_POS[i*3] - px;
+                let dy = IDEAL_POS[i*3+1] - py;
+                let dz = IDEAL_POS[i*3+2] - pz;
                 let dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                // Clamp displacement to avoid explosions when reforming from gas
                 if (dist > 1.0) { dx /= dist; dy /= dist; dz /= dist; }
-
-                const springStrength = 200.0 * solidFrac;
-                fx += dx * springStrength;
-                fy += dy * springStrength;
-                fz += dz * springStrength;
-
-                let jiggleFactor = T * 15.0 * solidFrac;
-                fx += (Math.random() - 0.5) * jiggleFactor;
-                fy += (Math.random() - 0.5) * jiggleFactor;
-                fz += (Math.random() - 0.5) * jiggleFactor;
+                fx += dx * springK;
+                fy += dy * springK;
+                fz += dz * springK;
             }
 
-            // --- Liquid contribution (gravity + moderate agitation) ---
-            if (liquidFrac > 0.01) {
-                fy -= 25.0 * liquidFrac;
-
-                let agit = 60.0 * liquidFrac * Math.max(0.2, normT);
-                fx += (Math.random() - 0.5) * agit;
-                fy += (Math.random() - 0.5) * agit;
-                fz += (Math.random() - 0.5) * agit;
-            }
-
-            // --- Gas contribution (weak gravity + strong agitation) ---
-            if (gasFrac > 0.01) {
-                fy -= 5.0 * gasFrac;
-
-                let agit = 400.0 * gasFrac * Math.max(0.1, normT);
-                fx += (Math.random() - 0.5) * agit;
-                fy += (Math.random() - 0.5) * agit;
-                fz += (Math.random() - 0.5) * agit;
-            }
+            // Thermal agitation — always present, scales continuously with T
+            fx += (Math.random() - 0.5) * agit;
+            fy += (Math.random() - 0.5) * agit;
+            fz += (Math.random() - 0.5) * agit;
 
             // Integrate velocity
             vx += fx * dt;
             vy += fy * dt;
             vz += fz * dt;
 
-            // Blended damping: solid=0.85, liquid=0.94, gas=0.99
-            let drag = solidFrac * 0.85 + liquidFrac * 0.94 + gasFrac * 0.99;
-            // Normalise when fracs overlap during transitions
-            let fracSum = solidFrac + liquidFrac + gasFrac;
-            if (fracSum > 0.01) drag /= fracSum;
+            // Damping
             vx *= drag;
             vy *= drag;
             vz *= drag;
@@ -1004,6 +991,8 @@
 
         // 3. Inter-Particle Collisions (Sphere-Sphere)
         const diamSq = PARTICLE_DIAM * PARTICLE_DIAM;
+        // Higher restitution in gas (elastic bounces) vs liquid/solid (inelastic)
+        const restitution = 0.4 + 0.5 * (1 - cohesion);
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
                 let dx = POS[j*3] - POS[i*3];
@@ -1041,7 +1030,6 @@
                     let dot = dvx*nx + dvy*ny + dvz*nz;
 
                     if (dot < 0) {
-                        let restitution = gasFrac > 0.5 ? 0.9 : 0.4;
                         let impulse = -(1 + restitution) * dot / 2;
 
                         VEL[j*3]   += nx * impulse;
