@@ -548,18 +548,19 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Heat to melt and boil.</p>
+          <p>Add heat energy to observe phase transitions.</p>
         </div>
 
         <div class="status-row">
           <span id="stateChip" class="status-chip status-solid">SOLID</span>
+          <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">0 K</span>
         </div>
 
         <div class="control-card">
           <div class="control-block">
             <div class="control-header">
-              <label for="tempSlider">Temperature</label>
-              <span id="tempVal">0 K</span>
+              <label for="tempSlider">Heat Energy</label>
+              <span id="heatVal">0%</span>
             </div>
             <input type="range" id="tempSlider" min="0" max="100" step="1" value="0">
           </div>
@@ -603,17 +604,47 @@
     const HALF_BOX = BOX_SIZE / 2;
     const SPACING = 1.0;
 
-    const MELTING_POINT = 33;
-    const BOILING_POINT = 66;
-
-    const IDEAL_POS = new Float32Array(N * 3);
     const POS = new Float32Array(N * 3);
     const VEL = new Float32Array(N * 3);
 
-    const TEMP_STATE = {
-        val: 0,
-        playing: true
+    const SIM_STATE = {
+        slider: 0,       // heat energy input (0-100)
+        playing: true,
+        measuredT: 0     // temperature measured from avg KE (display units)
     };
+
+    // ─── Heating Curve ───
+    // Maps slider (total heat energy added) to target reduced temperature.
+    // Plateaus at phase transitions represent latent heat:
+    //   energy goes into breaking bonds, not increasing KE.
+    //
+    //   Slider 0–25  → solid heating      T_red 0.05 → 0.40
+    //   Slider 25–45 → melting plateau    T_red 0.40  (latent heat of fusion)
+    //   Slider 45–65 → liquid heating     T_red 0.40 → 1.20
+    //   Slider 65–80 → boiling plateau    T_red 1.20  (latent heat of vaporisation)
+    //   Slider 80–100→ gas heating        T_red 1.20 → 4.00
+    function heatingCurve(s) {
+        if (s <= 25) return 0.05 + (s / 25) * 0.35;
+        if (s <= 45) return 0.40;
+        if (s <= 65) return 0.40 + ((s - 45) / 20) * 0.80;
+        if (s <= 80) return 1.20;
+        return 1.20 + ((s - 80) / 20) * 2.80;
+    }
+
+    // Phase label from slider position
+    function getPhaseInfo(s) {
+        if (s <= 22) return { label: 'SOLID', cls: 'status-solid' };
+        if (s <= 48) return { label: 'MELTING', cls: 'status-solid' };
+        if (s <= 62) return { label: 'LIQUID', cls: 'status-liquid' };
+        if (s <= 83) return { label: 'BOILING', cls: 'status-liquid' };
+        return { label: 'GAS', cls: 'status-gas' };
+    }
+
+    // Convert reduced temperature to display Kelvin (arbitrary but intuitive scale)
+    const T_DISPLAY_SCALE = 500;
+    function toDisplayK(tRed) {
+        return Math.round(tRed * T_DISPLAY_SCALE);
+    }
 
     // Initialize Lattice
     function initParticles() {
@@ -621,14 +652,9 @@
       for (let x = 0; x < N_X; x++) {
         for (let y = 0; y < N_Y; y++) {
           for (let z = 0; z < N_Z; z++) {
-            // Centered in X and Z. Y stacked near bottom.
             const px = (x - (N_X - 1) / 2) * SPACING;
             const pz = (z - (N_Z - 1) / 2) * SPACING;
             const py = (y * SPACING) - HALF_BOX + PARTICLE_RADIUS + 0.1;
-
-            IDEAL_POS[index * 3] = px;
-            IDEAL_POS[index * 3 + 1] = py;
-            IDEAL_POS[index * 3 + 2] = pz;
 
             POS[index * 3] = px;
             POS[index * 3 + 1] = py;
@@ -648,6 +674,7 @@
 
     // ─── DOM Elements ───
     const tempSlider = document.getElementById('tempSlider');
+    const heatVal = document.getElementById('heatVal');
     const tempVal = document.getElementById('tempVal');
     const stateChip = document.getElementById('stateChip');
     const playPauseBtn = document.getElementById('playPauseBtn');
@@ -655,57 +682,37 @@
     const themeBtn = document.getElementById('theme-button');
 
     function updateUIState() {
-      tempVal.textContent = TEMP_STATE.val + ' K';
-      let T = TEMP_STATE.val;
+      const s = SIM_STATE.slider;
+      heatVal.textContent = s + '%';
+      tempVal.textContent = SIM_STATE.measuredT + ' K';
 
-      if (T < MELTING_POINT) {
-        stateChip.textContent = 'SOLID';
-        stateChip.className = 'status-chip status-solid';
-      } else if (T < BOILING_POINT) {
-        stateChip.textContent = 'LIQUID';
-        stateChip.className = 'status-chip status-liquid';
-      } else {
-        stateChip.textContent = 'GAS';
-        stateChip.className = 'status-chip status-gas';
-      }
+      const phase = getPhaseInfo(s);
+      stateChip.textContent = phase.label;
+      stateChip.className = 'status-chip ' + phase.cls;
     }
 
     tempSlider.addEventListener('input', () => {
-      TEMP_STATE.val = parseInt(tempSlider.value);
+      SIM_STATE.slider = parseInt(tempSlider.value);
       updateUIState();
       updateParticleColors();
     });
 
-    func_playPause();
-    function func_playPause() {
-        if(!TEMP_STATE.playing) {
-            TEMP_STATE.playing = true;
-            playPauseBtn.textContent = 'Pause';
-            playPauseBtn.className = 'btn btn-primary';
-        } else {
-            // we init playing to true so this runs on flip
-        }
-    }
-    
     function togglePlay() {
-        TEMP_STATE.playing = !TEMP_STATE.playing;
-        playPauseBtn.textContent = TEMP_STATE.playing ? 'Pause' : 'Play';
-        if (TEMP_STATE.playing) {
-            playPauseBtn.className = 'btn btn-primary';
-        } else {
-            playPauseBtn.className = 'btn btn-secondary';
-        }
+        SIM_STATE.playing = !SIM_STATE.playing;
+        playPauseBtn.textContent = SIM_STATE.playing ? 'Pause' : 'Play';
+        playPauseBtn.className = SIM_STATE.playing ? 'btn btn-primary' : 'btn btn-secondary';
     }
 
     playPauseBtn.addEventListener('click', togglePlay);
 
     resetBtn.addEventListener('click', () => {
       initParticles();
-      TEMP_STATE.val = 0;
+      SIM_STATE.slider = 0;
+      SIM_STATE.measuredT = 0;
       tempSlider.value = 0;
       updateUIState();
       updateParticleColors();
-      if (!TEMP_STATE.playing) togglePlay();
+      if (!SIM_STATE.playing) togglePlay();
     });
 
     document.addEventListener('keydown', (e) => {
@@ -810,6 +817,23 @@
 
     const dummy = new THREE.Object3D();
 
+    // Bond visualization — lines drawn between particles within bonding distance
+    const MAX_BONDS = 2000;
+    const bondPositions = new Float32Array(MAX_BONDS * 2 * 3);
+    const bondGeo = new THREE.BufferGeometry();
+    const bondPosAttr = new THREE.BufferAttribute(bondPositions, 3);
+    bondPosAttr.setUsage(THREE.DynamicDrawUsage);
+    bondGeo.setAttribute('position', bondPosAttr);
+    bondGeo.setDrawRange(0, 0);
+    const bondMat = new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.35,
+        depthWrite: false
+    });
+    const bondLines = new THREE.LineSegments(bondGeo, bondMat);
+    scene.add(bondLines);
+
     function updateThreeTheme() {
         const theme = isDark() ? colors.dark : colors.light;
         scene.background = new THREE.Color(theme.bg);
@@ -819,8 +843,7 @@
     }
     
     function updateParticleColors() {
-        const T = TEMP_STATE.val;
-        const norm = T / 100;
+        const norm = SIM_STATE.slider / 100;
         let c = new THREE.Color();
         if (norm < 0.5) {
             c.lerpColors(phaseColors.cold, phaseColors.mid, norm * 2);
@@ -853,217 +876,198 @@
     setTimeout(resize, 0);
 
 
-    // ─── Physics Engine ───
-    const MAX_SPEED = 40.0;
-    // Cohesion cutoff: particles attract each other within this radius
-    const COHESION_CUTOFF = PARTICLE_DIAM * 2.8;
-    const COHESION_CUTOFF_SQ = COHESION_CUTOFF * COHESION_CUTOFF;
-    // Accumulator for inter-particle forces (cohesion)
-    const FORCE = new Float32Array(N * 3);
-    // Gravity is always present — phases differ in whether particles
-    // can resist it (solid springs) or are held together (liquid cohesion).
-    const GRAVITY = 20.0;
+    // ─── Physics Engine (Lennard-Jones Molecular Dynamics) ───
+    //
+    // Particles interact via a truncated 12-6 Lennard-Jones potential:
+    //   V(r) = 4ε [(σ/r)¹² − (σ/r)⁶]
+    //
+    // This single potential naturally produces:
+    //   • Solid: particles trapped in potential wells, vibrating in place
+    //   • Liquid: particles have enough KE to move past neighbours but
+    //             are still attracted (cohesion → constant volume)
+    //   • Gas:   particles escape attraction entirely, fill the box
+    //
+    // A Berendsen thermostat couples the system to a heat bath whose
+    // target temperature follows a "heating curve" with latent-heat
+    // plateaus at the melting and boiling points.
+    // Temperature is measured from the average kinetic energy.
 
-    // Smooth sigmoid: goes from ~1 well below 'center' to ~0 well above it.
-    // 'width' controls transition sharpness (smaller = sharper).
-    function sigmoid(T, center, width) {
-        return 1.0 / (1.0 + Math.exp((T - center) / width));
+    const LJ_SIGMA   = 0.88;                          // zero-crossing distance
+    const LJ_EPSILON  = 2.5;                           // well depth
+    const LJ_CUTOFF   = 2.5 * LJ_SIGMA;               // interaction range
+    const LJ_CUTOFF_SQ = LJ_CUTOFF * LJ_CUTOFF;
+    const LJ_SIGMA6   = Math.pow(LJ_SIGMA, 6);
+    const LJ_SIGMA12  = LJ_SIGMA6 * LJ_SIGMA6;
+    const MIN_R2       = 0.16;                          // floor r² to soften potential
+    const GRAVITY      = 12.0;
+    const MAX_SPEED    = 30.0;
+    const THERMOSTAT_TAU = 0.08;                        // coupling strength (smaller = tighter)
+    const BOND_CUTOFF  = 1.35 * LJ_SIGMA;              // draw bonds below this distance
+    const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
+
+    const FORCE = new Float32Array(N * 3);
+
+    // Measure kinetic temperature: T = (2 / 3N) × total KE  (kB = 1, m = 1)
+    function measureTemp() {
+        let ke2 = 0;
+        for (let i = 0; i < N; i++) {
+            ke2 += VEL[i*3]*VEL[i*3] + VEL[i*3+1]*VEL[i*3+1] + VEL[i*3+2]*VEL[i*3+2];
+        }
+        return ke2 / (3 * N);   // = (2 * 0.5 * Σmv²) / (3N)
+    }
+
+    // Berendsen velocity-rescaling thermostat
+    function applyThermostat(targetT, dt) {
+        const currentT = measureTemp();
+        if (currentT < 1e-6) {
+            // System is frozen — inject small random velocities
+            const v0 = Math.sqrt(targetT) * 0.5;
+            for (let i = 0; i < N; i++) {
+                VEL[i*3]   = (Math.random() - 0.5) * v0;
+                VEL[i*3+1] = (Math.random() - 0.5) * v0;
+                VEL[i*3+2] = (Math.random() - 0.5) * v0;
+            }
+            return;
+        }
+        const ratio = targetT / currentT;
+        const lambda = Math.sqrt(1 + (dt / THERMOSTAT_TAU) * (ratio - 1));
+        // Clamp to prevent explosions or instant freezing
+        const clamped = Math.max(0.95, Math.min(1.05, lambda));
+        for (let i = 0; i < N; i++) {
+            VEL[i*3]   *= clamped;
+            VEL[i*3+1] *= clamped;
+            VEL[i*3+2] *= clamped;
+        }
     }
 
     function stepPhysics(dt) {
-        const T = TEMP_STATE.val;
-        const normT = T / 100;
-
-        // Two continuous order parameters that drive all phase behaviour:
-        //   solidness: 1 deep in solid, smoothly → 0 through the melting zone
-        //   cohesion:  1 in solid & liquid, smoothly → 0 through the boiling zone
-        const solidness = sigmoid(T, MELTING_POINT, 2.5);
-        const cohesion  = sigmoid(T, BOILING_POINT, 3.0);
-
-        // Derived quantities
-        const springK         = 200.0 * solidness;
-        // Cohesion only matters once springs let go (solid→liquid handoff)
-        const cohesionStrength = 80.0 * cohesion * (1.0 - solidness);
-        // Thermal agitation rises continuously; much stronger once cohesion breaks
-        const agitBase        = 30 + 350 * (1.0 - cohesion);
-        const agit            = agitBase * Math.max(0.1, normT);
-        // Damping: solid=0.85, liquid≈0.94, gas=0.99
-        const drag            = 0.99 - 0.05 * cohesion - 0.09 * solidness;
-
-        // 1. Compute inter-particle cohesive forces
-        //    Soft attraction at 1–2.8 diameters gives liquid its
-        //    constant-volume, shape-of-container behaviour.
+        // 1. Compute forces: LJ pairwise + gravity
         FORCE.fill(0);
-        if (cohesionStrength > 0.5) {
-            for (let i = 0; i < N; i++) {
-                for (let j = i + 1; j < N; j++) {
-                    let dx = POS[j*3]   - POS[i*3];
-                    if (dx > COHESION_CUTOFF || dx < -COHESION_CUTOFF) continue;
-                    let dy = POS[j*3+1] - POS[i*3+1];
-                    if (dy > COHESION_CUTOFF || dy < -COHESION_CUTOFF) continue;
-                    let dz = POS[j*3+2] - POS[i*3+2];
-                    if (dz > COHESION_CUTOFF || dz < -COHESION_CUTOFF) continue;
-
-                    let distSq = dx*dx + dy*dy + dz*dz;
-                    if (distSq < COHESION_CUTOFF_SQ && distSq > PARTICLE_DIAM * PARTICLE_DIAM) {
-                        let dist = Math.sqrt(distSq);
-                        // Parabolic well peaking in the middle of the attraction range
-                        let t = (dist - PARTICLE_DIAM) / (COHESION_CUTOFF - PARTICLE_DIAM);
-                        let attractMag = cohesionStrength * 4 * t * (1 - t);
-                        let nx = dx / dist, ny = dy / dist, nz = dz / dist;
-                        FORCE[j*3]   -= nx * attractMag;
-                        FORCE[j*3+1] -= ny * attractMag;
-                        FORCE[j*3+2] -= nz * attractMag;
-                        FORCE[i*3]   += nx * attractMag;
-                        FORCE[i*3+1] += ny * attractMag;
-                        FORCE[i*3+2] += nz * attractMag;
-                    }
-                }
-            }
-        }
-
-        // 2. Apply per-particle forces, integrate velocity & position
         for (let i = 0; i < N; i++) {
-            let px = POS[i*3], py = POS[i*3+1], pz = POS[i*3+2];
-            let vx = VEL[i*3], vy = VEL[i*3+1], vz = VEL[i*3+2];
-
-            // Start from cohesion forces computed above
-            let fx = FORCE[i*3], fy = FORCE[i*3+1], fz = FORCE[i*3+2];
-
-            // Gravity — always present, same magnitude regardless of phase
-            fy -= GRAVITY;
-
-            // Lattice spring (solid): harmonic restoring force to ideal positions
-            if (springK > 0.1) {
-                let dx = IDEAL_POS[i*3] - px;
-                let dy = IDEAL_POS[i*3+1] - py;
-                let dz = IDEAL_POS[i*3+2] - pz;
-                let dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-                // Clamp displacement to avoid explosions when reforming from gas
-                if (dist > 1.0) { dx /= dist; dy /= dist; dz /= dist; }
-                fx += dx * springK;
-                fy += dy * springK;
-                fz += dz * springK;
-            }
-
-            // Thermal agitation — always present, scales continuously with T
-            fx += (Math.random() - 0.5) * agit;
-            fy += (Math.random() - 0.5) * agit;
-            fz += (Math.random() - 0.5) * agit;
-
-            // Integrate velocity
-            vx += fx * dt;
-            vy += fy * dt;
-            vz += fz * dt;
-
-            // Damping
-            vx *= drag;
-            vy *= drag;
-            vz *= drag;
-
-            // Speed Limit
-            let speedSq = vx*vx + vy*vy + vz*vz;
-            if (speedSq > MAX_SPEED * MAX_SPEED) {
-                let speed = Math.sqrt(speedSq);
-                vx = (vx / speed) * MAX_SPEED;
-                vy = (vy / speed) * MAX_SPEED;
-                vz = (vz / speed) * MAX_SPEED;
-            }
-
-            // Update Positions
-            px += vx * dt;
-            py += vy * dt;
-            pz += vz * dt;
-
-            // Box Bounds Collisions
-            if (px < -HALF_BOX + PARTICLE_RADIUS) { px = -HALF_BOX + PARTICLE_RADIUS; vx *= -0.8; }
-            if (px >  HALF_BOX - PARTICLE_RADIUS) { px =  HALF_BOX - PARTICLE_RADIUS; vx *= -0.8; }
-
-            if (py < -HALF_BOX + PARTICLE_RADIUS) { py = -HALF_BOX + PARTICLE_RADIUS; vy *= -0.8; }
-            if (py >  HALF_BOX - PARTICLE_RADIUS) { py =  HALF_BOX - PARTICLE_RADIUS; vy *= -0.8; }
-
-            if (pz < -HALF_BOX + PARTICLE_RADIUS) { pz = -HALF_BOX + PARTICLE_RADIUS; vz *= -0.8; }
-            if (pz >  HALF_BOX - PARTICLE_RADIUS) { pz =  HALF_BOX - PARTICLE_RADIUS; vz *= -0.8; }
-
-            VEL[i*3] = vx; VEL[i*3+1] = vy; VEL[i*3+2] = vz;
-            POS[i*3] = px; POS[i*3+1] = py; POS[i*3+2] = pz;
+            FORCE[i*3+1] -= GRAVITY;  // gravity always acts downward
         }
 
-        // 3. Inter-Particle Collisions (Sphere-Sphere)
-        const diamSq = PARTICLE_DIAM * PARTICLE_DIAM;
-        // Higher restitution in gas (elastic bounces) vs liquid/solid (inelastic)
-        const restitution = 0.4 + 0.5 * (1 - cohesion);
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
-                let dx = POS[j*3] - POS[i*3];
-                if (dx > PARTICLE_DIAM || dx < -PARTICLE_DIAM) continue;
-
+                let dx = POS[j*3]   - POS[i*3];
+                if (dx > LJ_CUTOFF || dx < -LJ_CUTOFF) continue;
                 let dy = POS[j*3+1] - POS[i*3+1];
-                if (dy > PARTICLE_DIAM || dy < -PARTICLE_DIAM) continue;
-
+                if (dy > LJ_CUTOFF || dy < -LJ_CUTOFF) continue;
                 let dz = POS[j*3+2] - POS[i*3+2];
-                if (dz > PARTICLE_DIAM || dz < -PARTICLE_DIAM) continue;
+                if (dz > LJ_CUTOFF || dz < -LJ_CUTOFF) continue;
 
-                let distSq = dx*dx + dy*dy + dz*dz;
+                let r2 = dx*dx + dy*dy + dz*dz;
+                if (r2 > LJ_CUTOFF_SQ) continue;
+                // Soften potential at very close range to prevent singularity
+                if (r2 < MIN_R2) r2 = MIN_R2;
 
-                if (distSq < diamSq && distSq > 0.0001) {
-                    let dist = Math.sqrt(distSq);
-                    let overlap = PARTICLE_DIAM - dist;
+                const r2inv = 1.0 / r2;
+                const r6inv = r2inv * r2inv * r2inv;
+                const s6r6  = LJ_SIGMA6 * r6inv;
+                const s12r12 = s6r6 * s6r6;
 
-                    let nx = dx / dist;
-                    let ny = dy / dist;
-                    let nz = dz / dist;
+                // F/r = 24ε * (1/r²) * [2(σ/r)¹² − (σ/r)⁶]
+                const fOverR = 24.0 * LJ_EPSILON * r2inv * (2.0 * s12r12 - s6r6);
 
-                    let push = overlap * 0.5;
-                    POS[j*3]   += nx * push;
-                    POS[j*3+1] += ny * push;
-                    POS[j*3+2] += nz * push;
+                const fx = fOverR * dx;
+                const fy = fOverR * dy;
+                const fz = fOverR * dz;
 
-                    POS[i*3]   -= nx * push;
-                    POS[i*3+1] -= ny * push;
-                    POS[i*3+2] -= nz * push;
+                FORCE[j*3]   += fx;  FORCE[j*3+1] += fy;  FORCE[j*3+2] += fz;
+                FORCE[i*3]   -= fx;  FORCE[i*3+1] -= fy;  FORCE[i*3+2] -= fz;
+            }
+        }
 
-                    let dvx = VEL[j*3] - VEL[i*3];
-                    let dvy = VEL[j*3+1] - VEL[i*3+1];
-                    let dvz = VEL[j*3+2] - VEL[i*3+2];
+        // 2. Velocity Verlet integration (symplectic, energy-conserving)
+        for (let i = 0; i < N; i++) {
+            // Update velocities
+            VEL[i*3]   += FORCE[i*3]   * dt;
+            VEL[i*3+1] += FORCE[i*3+1] * dt;
+            VEL[i*3+2] += FORCE[i*3+2] * dt;
 
-                    let dot = dvx*nx + dvy*ny + dvz*nz;
+            // Speed cap
+            let spd2 = VEL[i*3]*VEL[i*3] + VEL[i*3+1]*VEL[i*3+1] + VEL[i*3+2]*VEL[i*3+2];
+            if (spd2 > MAX_SPEED * MAX_SPEED) {
+                const s = MAX_SPEED / Math.sqrt(spd2);
+                VEL[i*3] *= s; VEL[i*3+1] *= s; VEL[i*3+2] *= s;
+            }
 
-                    if (dot < 0) {
-                        let impulse = -(1 + restitution) * dot / 2;
+            // Update positions
+            POS[i*3]   += VEL[i*3]   * dt;
+            POS[i*3+1] += VEL[i*3+1] * dt;
+            POS[i*3+2] += VEL[i*3+2] * dt;
 
-                        VEL[j*3]   += nx * impulse;
-                        VEL[j*3+1] += ny * impulse;
-                        VEL[j*3+2] += nz * impulse;
+            // Wall collisions (elastic-ish bounce)
+            for (let k = 0; k < 3; k++) {
+                const lo = -HALF_BOX + PARTICLE_RADIUS;
+                const hi =  HALF_BOX - PARTICLE_RADIUS;
+                if (POS[i*3+k] < lo) { POS[i*3+k] = lo; VEL[i*3+k] = Math.abs(VEL[i*3+k]) * 0.8; }
+                if (POS[i*3+k] > hi) { POS[i*3+k] = hi; VEL[i*3+k] = -Math.abs(VEL[i*3+k]) * 0.8; }
+            }
+        }
 
-                        VEL[i*3]   -= nx * impulse;
-                        VEL[i*3+1] -= ny * impulse;
-                        VEL[i*3+2] -= nz * impulse;
-                    }
+        // 3. Thermostat — couple to target temperature from heating curve
+        const targetT = heatingCurve(SIM_STATE.slider);
+        applyThermostat(targetT, dt);
+
+        // 4. Measure and store temperature for display
+        SIM_STATE.measuredT = toDisplayK(measureTemp());
+    }
+
+    // ─── Bond Visualization ───
+    // Find pairs within bonding distance and fill the LineSegments buffer.
+    // Bonds are most visible in solid (stable network) and flicker in liquid.
+    function updateBonds() {
+        let count = 0;
+        for (let i = 0; i < N && count < MAX_BONDS; i++) {
+            for (let j = i + 1; j < N && count < MAX_BONDS; j++) {
+                let dx = POS[j*3] - POS[i*3];
+                if (dx > BOND_CUTOFF || dx < -BOND_CUTOFF) continue;
+                let dy = POS[j*3+1] - POS[i*3+1];
+                if (dy > BOND_CUTOFF || dy < -BOND_CUTOFF) continue;
+                let dz = POS[j*3+2] - POS[i*3+2];
+                if (dz > BOND_CUTOFF || dz < -BOND_CUTOFF) continue;
+
+                let r2 = dx*dx + dy*dy + dz*dz;
+                if (r2 < BOND_CUTOFF_SQ) {
+                    const idx = count * 6;
+                    bondPositions[idx]   = POS[i*3];
+                    bondPositions[idx+1] = POS[i*3+1];
+                    bondPositions[idx+2] = POS[i*3+2];
+                    bondPositions[idx+3] = POS[j*3];
+                    bondPositions[idx+4] = POS[j*3+1];
+                    bondPositions[idx+5] = POS[j*3+2];
+                    count++;
                 }
             }
         }
+        bondPosAttr.needsUpdate = true;
+        bondGeo.setDrawRange(0, count * 2);
+
+        // Fade bonds as temperature rises (less visible approaching gas)
+        const tRed = heatingCurve(SIM_STATE.slider);
+        bondMat.opacity = Math.max(0, 0.35 * (1 - tRed / 2.0));
     }
 
     // ─── Render Loop ───
     let lastTime = 0;
-    
+    const SUB_STEPS = 4;   // more substeps = more stable LJ integration
+
     function animate(timestamp) {
         requestAnimationFrame(animate);
-        
+
         if (lastTime === 0) lastTime = timestamp;
         let dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
-        
-        // Cap dt to prevent explosions on lag
-        if (dt > 0.05) dt = 0.05;
 
-        if (TEMP_STATE.playing) {
-            // Step physics multiple times per frame for stability if needed
-            // For N=216, a single step is fine visually if dt is small.
-            // Let's do 2 sub-steps.
-            stepPhysics(dt / 2);
-            stepPhysics(dt / 2);
+        // Cap dt to prevent explosions on lag
+        if (dt > 0.04) dt = 0.04;
+
+        if (SIM_STATE.playing) {
+            const subDt = dt / SUB_STEPS;
+            for (let s = 0; s < SUB_STEPS; s++) {
+                stepPhysics(subDt);
+            }
 
             // Update InstancedMesh matrices
             for (let i = 0; i < N; i++) {
@@ -1072,12 +1076,18 @@
                 instancedMesh.setMatrixAt(i, dummy.matrix);
             }
             instancedMesh.instanceMatrix.needsUpdate = true;
+
+            // Update bond lines
+            updateBonds();
+
+            // Update temperature display
+            updateUIState();
         }
 
         controls.update();
         renderer.render(scene, camera);
     }
-    
+
     // Start loop
     requestAnimationFrame(animate);
 
