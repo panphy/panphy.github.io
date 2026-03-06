@@ -855,87 +855,124 @@
 
     // ─── Physics Engine ───
     const MAX_SPEED = 40.0;
-    
+    // Cohesion cutoff: particles attract each other within this radius
+    const COHESION_CUTOFF = PARTICLE_DIAM * 2.5;
+    const COHESION_CUTOFF_SQ = COHESION_CUTOFF * COHESION_CUTOFF;
+    // Accumulator for inter-particle forces (cohesion)
+    const FORCE = new Float32Array(N * 3);
+
     function stepPhysics(dt) {
         const T = TEMP_STATE.val;
         const normT = T / 100;
         const isSolid = T < MELTING_POINT;
         const isGas = T > BOILING_POINT;
 
-        // 1. Apply Forces
+        // Smooth blending near phase boundaries (5 K transition zone)
+        const BLEND_ZONE = 5;
+        // solidFrac: 1 in solid, blends to 0 over BLEND_ZONE above melting point
+        const solidFrac = isSolid ? 1.0 : Math.max(0, 1 - (T - MELTING_POINT) / BLEND_ZONE);
+        // liquidFrac: 1 in liquid, blends in/out over BLEND_ZONE near boundaries
+        const liquidFrac = isSolid
+            ? Math.max(0, 1 - (MELTING_POINT - T) / BLEND_ZONE)
+            : isGas
+                ? Math.max(0, 1 - (T - BOILING_POINT) / BLEND_ZONE)
+                : 1.0;
+        // gasFrac: 1 in gas, blends in over BLEND_ZONE above boiling point
+        const gasFrac = isGas ? Math.min(1, (T - BOILING_POINT) / BLEND_ZONE) : 0;
+
+        // 1. Compute inter-particle cohesive forces (liquid state)
+        //    Soft attraction between nearby particles gives liquid its
+        //    characteristic constant-volume, shape-of-container behaviour.
+        FORCE.fill(0);
+        if (liquidFrac > 0.01) {
+            const cohesionStrength = 60.0 * liquidFrac;
+            for (let i = 0; i < N; i++) {
+                for (let j = i + 1; j < N; j++) {
+                    let dx = POS[j*3]   - POS[i*3];
+                    if (dx > COHESION_CUTOFF || dx < -COHESION_CUTOFF) continue;
+                    let dy = POS[j*3+1] - POS[i*3+1];
+                    if (dy > COHESION_CUTOFF || dy < -COHESION_CUTOFF) continue;
+                    let dz = POS[j*3+2] - POS[i*3+2];
+                    if (dz > COHESION_CUTOFF || dz < -COHESION_CUTOFF) continue;
+
+                    let distSq = dx*dx + dy*dy + dz*dz;
+                    if (distSq < COHESION_CUTOFF_SQ && distSq > PARTICLE_DIAM * PARTICLE_DIAM) {
+                        let dist = Math.sqrt(distSq);
+                        // Attraction ramps up between 1 and 2.5 diameters,
+                        // peaking in the middle, like a simplified LJ well
+                        let t = (dist - PARTICLE_DIAM) / (COHESION_CUTOFF - PARTICLE_DIAM);
+                        let attractMag = cohesionStrength * 4 * t * (1 - t); // parabolic well
+                        let nx = dx / dist, ny = dy / dist, nz = dz / dist;
+                        FORCE[j*3]   -= nx * attractMag;
+                        FORCE[j*3+1] -= ny * attractMag;
+                        FORCE[j*3+2] -= nz * attractMag;
+                        FORCE[i*3]   += nx * attractMag;
+                        FORCE[i*3+1] += ny * attractMag;
+                        FORCE[i*3+2] += nz * attractMag;
+                    }
+                }
+            }
+        }
+
+        // 2. Apply per-particle forces, integrate velocity & position
         for (let i = 0; i < N; i++) {
             let px = POS[i*3], py = POS[i*3+1], pz = POS[i*3+2];
             let vx = VEL[i*3], vy = VEL[i*3+1], vz = VEL[i*3+2];
-            
-            let fx = 0, fy = 0, fz = 0;
 
-            if (isSolid) {
-                // Harmonic restoring force to ideal positions
+            let fx = FORCE[i*3], fy = FORCE[i*3+1], fz = FORCE[i*3+2];
+
+            // --- Solid contribution (spring to lattice + jiggle) ---
+            if (solidFrac > 0.01) {
                 let idx = IDEAL_POS[i*3], idy = IDEAL_POS[i*3+1], idz = IDEAL_POS[i*3+2];
                 let dx = idx - px, dy = idy - py, dz = idz - pz;
-                
-                // Limit the maximum pull to avoid explosions if they reform from gas
+
                 let dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-                if (dist > 1.0) {
-                    dx /= dist; dy /= dist; dz /= dist;
-                }
-                
-                const springStrength = 200.0;
+                if (dist > 1.0) { dx /= dist; dy /= dist; dz /= dist; }
+
+                const springStrength = 200.0 * solidFrac;
                 fx += dx * springStrength;
                 fy += dy * springStrength;
                 fz += dz * springStrength;
 
-                // Thermal Jiggle
-                let jx = (Math.random() - 0.5);
-                let jy = (Math.random() - 0.5);
-                let jz = (Math.random() - 0.5);
-                
-                // Scale jiggle by temperature
-                let jiggleFactor = T * 15.0;
-                fx += jx * jiggleFactor;
-                fy += jy * jiggleFactor;
-                fz += jz * jiggleFactor;
-
-                vx += fx * dt;
-                vy += fy * dt;
-                vz += fz * dt;
-
-                // Strong damping for solid
-                vx *= 0.85;
-                vy *= 0.85;
-                vz *= 0.85;
-            } else {
-                // Liquid or Gas
-                if (!isGas) {
-                    // Gravity applies strongly for liquid
-                    fy -= 30.0;
-                } else {
-                    // Slight gravity for gas to make it slowly settle if very cold gas
-                    fy -= 5.0;
-                }
-
-                // Thermal Jiggle - base agitation
-                let baseAgit = isGas ? 400.0 : 80.0;
-                let agit = baseAgit * Math.max(0.1, normT);
-                
-                let jx = (Math.random() - 0.5);
-                let jy = (Math.random() - 0.5);
-                let jz = (Math.random() - 0.5);
-                
-                fx += jx * agit;
-                fy += jy * agit;
-                fz += jz * agit;
-
-                vx += fx * dt;
-                vy += fy * dt;
-                vz += fz * dt;
-
-                // Damping
-                let drag = isGas ? 0.99 : 0.94;
-                vx *= drag;
-                vy *= drag;
-                vz *= drag;
+                let jiggleFactor = T * 15.0 * solidFrac;
+                fx += (Math.random() - 0.5) * jiggleFactor;
+                fy += (Math.random() - 0.5) * jiggleFactor;
+                fz += (Math.random() - 0.5) * jiggleFactor;
             }
+
+            // --- Liquid contribution (gravity + moderate agitation) ---
+            if (liquidFrac > 0.01) {
+                fy -= 25.0 * liquidFrac;
+
+                let agit = 60.0 * liquidFrac * Math.max(0.2, normT);
+                fx += (Math.random() - 0.5) * agit;
+                fy += (Math.random() - 0.5) * agit;
+                fz += (Math.random() - 0.5) * agit;
+            }
+
+            // --- Gas contribution (weak gravity + strong agitation) ---
+            if (gasFrac > 0.01) {
+                fy -= 5.0 * gasFrac;
+
+                let agit = 400.0 * gasFrac * Math.max(0.1, normT);
+                fx += (Math.random() - 0.5) * agit;
+                fy += (Math.random() - 0.5) * agit;
+                fz += (Math.random() - 0.5) * agit;
+            }
+
+            // Integrate velocity
+            vx += fx * dt;
+            vy += fy * dt;
+            vz += fz * dt;
+
+            // Blended damping: solid=0.85, liquid=0.94, gas=0.99
+            let drag = solidFrac * 0.85 + liquidFrac * 0.94 + gasFrac * 0.99;
+            // Normalise when fracs overlap during transitions
+            let fracSum = solidFrac + liquidFrac + gasFrac;
+            if (fracSum > 0.01) drag /= fracSum;
+            vx *= drag;
+            vy *= drag;
+            vz *= drag;
 
             // Speed Limit
             let speedSq = vx*vx + vy*vy + vz*vz;
@@ -954,10 +991,10 @@
             // Box Bounds Collisions
             if (px < -HALF_BOX + PARTICLE_RADIUS) { px = -HALF_BOX + PARTICLE_RADIUS; vx *= -0.8; }
             if (px >  HALF_BOX - PARTICLE_RADIUS) { px =  HALF_BOX - PARTICLE_RADIUS; vx *= -0.8; }
-            
+
             if (py < -HALF_BOX + PARTICLE_RADIUS) { py = -HALF_BOX + PARTICLE_RADIUS; vy *= -0.8; }
             if (py >  HALF_BOX - PARTICLE_RADIUS) { py =  HALF_BOX - PARTICLE_RADIUS; vy *= -0.8; }
-            
+
             if (pz < -HALF_BOX + PARTICLE_RADIUS) { pz = -HALF_BOX + PARTICLE_RADIUS; vz *= -0.8; }
             if (pz >  HALF_BOX - PARTICLE_RADIUS) { pz =  HALF_BOX - PARTICLE_RADIUS; vz *= -0.8; }
 
@@ -965,58 +1002,52 @@
             POS[i*3] = px; POS[i*3+1] = py; POS[i*3+2] = pz;
         }
 
-        // 2. Inter-Particle Collisions (Sphere-Sphere)
-        // Optimization check - Solids barely overlap if physics holds, so skip strictly? 
-        // We will run it anyway to handle transitions smoothly.
+        // 3. Inter-Particle Collisions (Sphere-Sphere)
         const diamSq = PARTICLE_DIAM * PARTICLE_DIAM;
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
                 let dx = POS[j*3] - POS[i*3];
-                // Quick AABB test
                 if (dx > PARTICLE_DIAM || dx < -PARTICLE_DIAM) continue;
-                
+
                 let dy = POS[j*3+1] - POS[i*3+1];
                 if (dy > PARTICLE_DIAM || dy < -PARTICLE_DIAM) continue;
-                
+
                 let dz = POS[j*3+2] - POS[i*3+2];
                 if (dz > PARTICLE_DIAM || dz < -PARTICLE_DIAM) continue;
 
                 let distSq = dx*dx + dy*dy + dz*dz;
-                
+
                 if (distSq < diamSq && distSq > 0.0001) {
                     let dist = Math.sqrt(distSq);
                     let overlap = PARTICLE_DIAM - dist;
-                    
+
                     let nx = dx / dist;
                     let ny = dy / dist;
                     let nz = dz / dist;
-                    
-                    // Push apart positionally (resolve overlap to prevent clumping)
+
                     let push = overlap * 0.5;
                     POS[j*3]   += nx * push;
                     POS[j*3+1] += ny * push;
                     POS[j*3+2] += nz * push;
-                    
+
                     POS[i*3]   -= nx * push;
                     POS[i*3+1] -= ny * push;
                     POS[i*3+2] -= nz * push;
-                    
-                    // Velocity impulse (bounce)
+
                     let dvx = VEL[j*3] - VEL[i*3];
                     let dvy = VEL[j*3+1] - VEL[i*3+1];
                     let dvz = VEL[j*3+2] - VEL[i*3+2];
-                    
+
                     let dot = dvx*nx + dvy*ny + dvz*nz;
-                    
+
                     if (dot < 0) {
-                        // Moving towards each other
-                        let restitution = isGas ? 0.9 : 0.4;
-                        let impulse = -(1 + restitution) * dot / 2; // Assuming mass = 1
-                        
+                        let restitution = gasFrac > 0.5 ? 0.9 : 0.4;
+                        let impulse = -(1 + restitution) * dot / 2;
+
                         VEL[j*3]   += nx * impulse;
                         VEL[j*3+1] += ny * impulse;
                         VEL[j*3+2] += nz * impulse;
-                        
+
                         VEL[i*3]   -= nx * impulse;
                         VEL[i*3+1] -= ny * impulse;
                         VEL[i*3+2] -= nz * impulse;
