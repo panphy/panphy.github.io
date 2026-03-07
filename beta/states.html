@@ -637,8 +637,10 @@
       // The simulation runs in Lennard-Jones reduced units internally.
       // For pre-university teaching, we display an illustrative Kelvin scale
       // for a fictional sample substance whose melting point is around 150 K
-      // and boiling point is around 1200 K. This is a presentation mapping,
-      // not a calibration to any specific real material.
+      // and boiling point is around 1200 K. The mapping is tuned so those
+      // display temperatures line up with when this simulated sample starts
+      // to look melted or gas-like. It is a presentation layer, not a
+      // calibration to any specific real material.
       const t = clamp(reducedTemperature, TARGET_T_MIN, TARGET_T_MAX);
       if (t <= DISPLAY_MELT_REDUCED_T) {
         const amount = (t - TARGET_T_MIN) / (DISPLAY_MELT_REDUCED_T - TARGET_T_MIN);
@@ -681,8 +683,8 @@
     const DISPLAY_MELT_K = 150;
     const DISPLAY_BOIL_K = 1200;
     const DISPLAY_MAX_K = 1600;
-    const DISPLAY_MELT_REDUCED_T = 0.68;
-    const DISPLAY_BOIL_REDUCED_T = 1.88;
+    const DISPLAY_MELT_REDUCED_T = 0.58;
+    const DISPLAY_BOIL_REDUCED_T = 1.55;
     const THERMOSTAT_TAU = 0.18;
     const STRUCTURE_GRID = 6;
     const STRUCTURE_CELL_COUNT = STRUCTURE_GRID * STRUCTURE_GRID * STRUCTURE_GRID;
