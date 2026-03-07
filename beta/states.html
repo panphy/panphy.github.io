@@ -572,23 +572,21 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Reduced-unit Lennard-Jones toy model with measured phase-like states.</p>
         </div>
 
         <div class="status-row">
-          <span id="stateChip" class="status-chip status-solid">SOLID-LIKE</span>
-          <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">T* 0.00</span>
+          <span id="stateChip" class="status-chip status-solid">Solid</span>
+          <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">40 K</span>
         </div>
 
         <div class="control-card">
           <div class="control-block">
             <div class="control-header">
-              <label for="tempSlider">Target Reduced Temperature</label>
-              <span id="heatVal">T* 0.05</span>
+              <label for="tempSlider">Temperature</label>
+              <span id="heatVal">40 K</span>
             </div>
             <input type="range" id="tempSlider" min="0" max="100" step="1" value="0">
           </div>
-          <p class="keyboard-hint">Phase is inferred from bonding and how much of the box is occupied, not hard-coded to the slider.</p>
         </div>
 
         <div class="sim-actions">
@@ -631,8 +629,27 @@
       return TARGET_T_MIN + Math.pow(normalized, 1.15) * (TARGET_T_MAX - TARGET_T_MIN);
     }
 
-    function formatReducedTemperature(value) {
-      return 'T* ' + value.toFixed(2);
+    function mapReducedToDisplayKelvin(reducedTemperature) {
+      // The simulation runs in Lennard-Jones reduced units internally.
+      // For pre-university teaching, we display an illustrative Kelvin scale
+      // for a fictional sample substance whose melting point is around 150 K
+      // and boiling point is around 1200 K. This is a presentation mapping,
+      // not a calibration to any specific real material.
+      const t = clamp(reducedTemperature, TARGET_T_MIN, TARGET_T_MAX);
+      if (t <= DISPLAY_MELT_REDUCED_T) {
+        const amount = (t - TARGET_T_MIN) / (DISPLAY_MELT_REDUCED_T - TARGET_T_MIN);
+        return lerp(DISPLAY_MIN_K, DISPLAY_MELT_K, clamp(amount, 0, 1));
+      }
+      if (t <= DISPLAY_BOIL_REDUCED_T) {
+        const amount = (t - DISPLAY_MELT_REDUCED_T) / (DISPLAY_BOIL_REDUCED_T - DISPLAY_MELT_REDUCED_T);
+        return lerp(DISPLAY_MELT_K, DISPLAY_BOIL_K, clamp(amount, 0, 1));
+      }
+      const amount = (t - DISPLAY_BOIL_REDUCED_T) / (TARGET_T_MAX - DISPLAY_BOIL_REDUCED_T);
+      return lerp(DISPLAY_BOIL_K, DISPLAY_MAX_K, clamp(amount, 0, 1));
+    }
+
+    function formatDisplayTemperature(reducedTemperature) {
+      return Math.round(mapReducedToDisplayKelvin(reducedTemperature)) + ' K';
     }
 
     const LJ_SIGMA = 1.0;
@@ -656,6 +673,12 @@
     const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
     const TARGET_T_MIN = 0.05;
     const TARGET_T_MAX = 2.1;
+    const DISPLAY_MIN_K = 40;
+    const DISPLAY_MELT_K = 150;
+    const DISPLAY_BOIL_K = 1200;
+    const DISPLAY_MAX_K = 1600;
+    const DISPLAY_MELT_REDUCED_T = 0.68;
+    const DISPLAY_BOIL_REDUCED_T = 1.88;
     const THERMOSTAT_TAU = 0.18;
     const STRUCTURE_GRID = 6;
     const STRUCTURE_CELL_COUNT = STRUCTURE_GRID * STRUCTURE_GRID * STRUCTURE_GRID;
@@ -674,9 +697,8 @@
       playing: true,
       targetReducedT: TARGET_T_MIN,
       measuredReducedT: TARGET_T_MIN,
-      temperatureTrend: 1,
       referenceBondCount: 1,
-      phaseInfo: { label: 'SOLID-LIKE', cls: 'status-solid' },
+      phaseInfo: { label: 'Solid', cls: 'status-solid' },
       metrics: {
         bondFraction: 1,
         meanCoordination: 0,
@@ -802,6 +824,10 @@
     }
 
     function computeForcesAndPotential() {
+      // 12-6 Lennard-Jones interactions give a compact condensed phase at
+      // low temperature and a dispersed gas at high temperature. The potential
+      // is truncated at 2.5 sigma and shifted so it approaches zero smoothly at
+      // the cutoff, which keeps the model stable for a lightweight browser sim.
       FORCE.fill(0);
       let potentialEnergy = 0;
 
@@ -873,6 +899,9 @@
     }
 
     function applyThermostat(dt, currentReducedT) {
+      // A weak Berendsen-style thermostat nudges the system toward the target
+      // temperature without hard-coding the phase. The observed phase still
+      // comes from particle structure and how much volume the sample occupies.
       if (!isFinite(currentReducedT) || currentReducedT <= 1e-8) return;
 
       const coupling = clamp(dt / THERMOSTAT_TAU, 0, 1);
@@ -950,14 +979,13 @@
     }
 
     function getPhaseInfo(metrics) {
-      const directionDelta = SIM_STATE.targetReducedT - SIM_STATE.measuredReducedT;
-      if (Math.abs(directionDelta) > 0.03) {
-        SIM_STATE.temperatureTrend = directionDelta >= 0 ? 1 : -1;
-      }
-      const activelyDriven = Math.abs(directionDelta) > 0.08;
-
+      // The UI reports a simple school-level state label, but it is still
+      // measured from the particle configuration rather than tied directly to
+      // the slider. Strong bonding and high coordination indicate a solid,
+      // diffuse occupancy with few bonds indicates a gas, and the broad middle
+      // regime is shown as liquid.
       if (metrics.bondFraction >= 0.82 && metrics.meanCoordination >= 8.0 && metrics.reducedT < 0.6) {
-        return { label: 'SOLID-LIKE', cls: 'status-solid' };
+        return { label: 'Solid', cls: 'status-solid' };
       }
 
       if (
@@ -967,28 +995,10 @@
         metrics.rmsRadius >= 0.84 &&
         metrics.reducedT > 1.45
       ) {
-        return { label: 'GAS-LIKE', cls: 'status-gas' };
+        return { label: 'Gas', cls: 'status-gas' };
       }
 
-      if (metrics.bondFraction >= 0.56 && metrics.meanCoordination >= 4.6 && metrics.reducedT < 0.95) {
-        if (activelyDriven) {
-          return SIM_STATE.temperatureTrend >= 0
-            ? { label: 'MELTING', cls: 'status-solid' }
-            : { label: 'FREEZING', cls: 'status-solid' };
-        }
-        return { label: 'LIQUID-LIKE', cls: 'status-liquid' };
-      }
-
-      if (metrics.bondFraction <= 0.36 && metrics.meanCoordination <= 3.4 && metrics.reducedT > 1.0) {
-        if (activelyDriven) {
-          return SIM_STATE.temperatureTrend >= 0
-            ? { label: 'EVAPORATING', cls: 'status-gas' }
-            : { label: 'CONDENSING', cls: 'status-gas' };
-        }
-        return { label: 'LIQUID-LIKE', cls: 'status-liquid' };
-      }
-
-      return { label: 'LIQUID-LIKE', cls: 'status-liquid' };
+      return { label: 'Liquid', cls: 'status-liquid' };
     }
 
     function refreshDiagnostics() {
@@ -1097,8 +1107,8 @@
     const themeBtn = document.getElementById('theme-button');
 
     function updateUIState() {
-      heatVal.textContent = formatReducedTemperature(SIM_STATE.targetReducedT);
-      tempVal.textContent = formatReducedTemperature(SIM_STATE.measuredReducedT);
+      heatVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
+      tempVal.textContent = formatDisplayTemperature(SIM_STATE.measuredReducedT);
       stateChip.textContent = SIM_STATE.phaseInfo.label;
       stateChip.className = 'status-chip ' + SIM_STATE.phaseInfo.cls;
     }
