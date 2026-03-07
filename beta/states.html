@@ -625,8 +625,12 @@
     }
 
     function sliderToTargetTemperature(sliderValue) {
+      // Use a steeper curve so the middle of the slider stays in a clearly
+      // condensed liquid regime instead of jumping too quickly toward gas-like
+      // motion. This gives students more room to explore the solid/liquid
+      // states while keeping the hottest end available for gas.
       const normalized = clamp(sliderValue / 100, 0, 1);
-      return TARGET_T_MIN + Math.pow(normalized, 1.15) * (TARGET_T_MAX - TARGET_T_MIN);
+      return TARGET_T_MIN + Math.pow(normalized, 1.7) * (TARGET_T_MAX - TARGET_T_MIN);
     }
 
     function mapReducedToDisplayKelvin(reducedTemperature) {
@@ -667,7 +671,7 @@
     const N_Z = 4;
     const N = N_X * N_Y * N_Z * 4;
     const PARTICLE_RADIUS = 0.4;
-    const BOX_SIZE = 13;
+    const BOX_SIZE = 12.5;
     const HALF_BOX = BOX_SIZE / 2;
     const BOND_CUTOFF = 1.35 * LJ_SIGMA;
     const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
@@ -984,7 +988,7 @@
       // the slider. Strong bonding and high coordination indicate a solid,
       // diffuse occupancy with few bonds indicates a gas, and the broad middle
       // regime is shown as liquid.
-      if (metrics.bondFraction >= 0.82 && metrics.meanCoordination >= 8.0 && metrics.reducedT < 0.6) {
+      if (metrics.bondFraction >= 0.82 && metrics.meanCoordination >= 7.9 && metrics.reducedT < 0.6) {
         return { label: 'Solid', cls: 'status-solid' };
       }
 
