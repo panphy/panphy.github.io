@@ -572,22 +572,23 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Add heat energy to observe phase transitions.</p>
+          <p>Reduced-unit Lennard-Jones toy model with measured phase-like states.</p>
         </div>
 
         <div class="status-row">
-          <span id="stateChip" class="status-chip status-solid">SOLID</span>
-          <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">0 K</span>
+          <span id="stateChip" class="status-chip status-solid">SOLID-LIKE</span>
+          <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">T* 0.00</span>
         </div>
 
         <div class="control-card">
           <div class="control-block">
             <div class="control-header">
-              <label for="tempSlider">Heat Energy</label>
-              <span id="heatVal">0%</span>
+              <label for="tempSlider">Target Reduced Temperature</label>
+              <span id="heatVal">T* 0.05</span>
             </div>
             <input type="range" id="tempSlider" min="0" max="100" step="1" value="0">
           </div>
+          <p class="keyboard-hint">Phase is inferred from bonding and how much of the box is occupied, not hard-coded to the slider.</p>
         </div>
 
         <div class="sim-actions">
@@ -617,76 +618,476 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // ─── Constants & Physics State ───
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function lerp(start, end, amount) {
+      return start + (end - start) * amount;
+    }
+
+    function sliderToTargetTemperature(sliderValue) {
+      const normalized = clamp(sliderValue / 100, 0, 1);
+      return TARGET_T_MIN + Math.pow(normalized, 1.15) * (TARGET_T_MAX - TARGET_T_MIN);
+    }
+
+    function formatReducedTemperature(value) {
+      return 'T* ' + value.toFixed(2);
+    }
+
+    const LJ_SIGMA = 1.0;
+    const LJ_EPSILON = 1.0;
+    const LJ_SIGMA6 = Math.pow(LJ_SIGMA, 6);
+    const LJ_EQ_DISTANCE = Math.pow(2, 1 / 6) * LJ_SIGMA;
+    const LATTICE_CONST = Math.sqrt(2) * LJ_EQ_DISTANCE;
+    const LJ_CUTOFF = 2.5 * LJ_SIGMA;
+    const LJ_CUTOFF_SQ = LJ_CUTOFF * LJ_CUTOFF;
+    const LJ_AT_CUTOFF = 4.0 * LJ_EPSILON * (Math.pow(LJ_SIGMA / LJ_CUTOFF, 12) - Math.pow(LJ_SIGMA / LJ_CUTOFF, 6));
+    const MIN_R2 = 0.25;
+
     const N_X = 4;
     const N_Y = 4;
     const N_Z = 4;
-    const N = N_X * N_Y * N_Z * 4; // 256 particles
+    const N = N_X * N_Y * N_Z * 4;
     const PARTICLE_RADIUS = 0.4;
-    const PARTICLE_DIAM = PARTICLE_RADIUS * 2;
     const BOX_SIZE = 10;
     const HALF_BOX = BOX_SIZE / 2;
+    const BOND_CUTOFF = 1.35 * LJ_SIGMA;
+    const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
+    const TARGET_T_MIN = 0.05;
+    const TARGET_T_MAX = 2.1;
+    const THERMOSTAT_TAU = 0.18;
+    const STRUCTURE_GRID = 6;
+    const STRUCTURE_CELL_COUNT = STRUCTURE_GRID * STRUCTURE_GRID * STRUCTURE_GRID;
+    const EMERGENCY_SPEED_LIMIT = 12.0;
+    const EMERGENCY_SPEED_LIMIT_SQ = EMERGENCY_SPEED_LIMIT * EMERGENCY_SPEED_LIMIT;
+    const SUB_STEPS = 6;
 
     const POS = new Float32Array(N * 3);
     const VEL = new Float32Array(N * 3);
+    const FORCE = new Float32Array(N * 3);
+    const COORDINATION = new Uint16Array(N);
+    const OCCUPANCY = new Uint8Array(STRUCTURE_CELL_COUNT);
 
     const SIM_STATE = {
-      slider: 0,       // heat energy input (0-100)
+      slider: 0,
       playing: true,
-      measuredT: 0     // temperature measured from avg KE (display units)
+      targetReducedT: TARGET_T_MIN,
+      measuredReducedT: TARGET_T_MIN,
+      temperatureTrend: 1,
+      referenceBondCount: 1,
+      phaseInfo: { label: 'SOLID-LIKE', cls: 'status-solid' },
+      metrics: {
+        bondFraction: 1,
+        meanCoordination: 0,
+        fillFraction: 0,
+        rmsRadius: 0
+      },
+      _smoothReducedT: undefined,
+      _smoothBondFraction: undefined,
+      _smoothMeanCoordination: undefined,
+      _smoothFillFraction: undefined,
+      _smoothRmsRadius: undefined
     };
 
-    // Smooth representation for visual bond fading
-    function heatingCurve(s) {
-      return (s / 100) * 3.0;
+    function removeCenterOfMassDrift() {
+      let meanVX = 0;
+      let meanVY = 0;
+      let meanVZ = 0;
+
+      for (let i = 0; i < N; i++) {
+        meanVX += VEL[i * 3];
+        meanVY += VEL[i * 3 + 1];
+        meanVZ += VEL[i * 3 + 2];
+      }
+
+      meanVX /= N;
+      meanVY /= N;
+      meanVZ /= N;
+
+      for (let i = 0; i < N; i++) {
+        VEL[i * 3] -= meanVX;
+        VEL[i * 3 + 1] -= meanVY;
+        VEL[i * 3 + 2] -= meanVZ;
+      }
     }
 
-    // Phase label mapped to slider / energy input
-    function getPhaseInfo(s) {
-      if (s <= 25) return { label: 'SOLID', cls: 'status-solid' };
-      if (s <= 45) return { label: 'MELTING', cls: 'status-solid' };
-      if (s <= 65) return { label: 'LIQUID', cls: 'status-liquid' };
-      if (s <= 80) return { label: 'BOILING', cls: 'status-liquid' };
-      return { label: 'GAS', cls: 'status-gas' };
+    function computeThermalKineticEnergy() {
+      let kineticEnergy = 0;
+      for (let i = 0; i < N; i++) {
+        const vx = VEL[i * 3];
+        const vy = VEL[i * 3 + 1];
+        const vz = VEL[i * 3 + 2];
+        kineticEnergy += 0.5 * (vx * vx + vy * vy + vz * vz);
+      }
+      return kineticEnergy;
     }
 
-    // Convert reduced kinetic temperature to display Kelvin
-    const T_DISPLAY_SCALE = 500;
-    function toDisplayK(tRed) {
-      return Math.round(tRed * T_DISPLAY_SCALE);
+    function reducedTemperatureFromKE(kineticEnergy) {
+      const dof = Math.max(1, 3 * N - 3);
+      return (2 * kineticEnergy) / dof;
     }
 
-    // Initialize FCC Lattice
+    function updateMeasuredTemperature(reducedTemperature, reset) {
+      if (reset || typeof SIM_STATE._smoothReducedT === 'undefined') {
+        SIM_STATE._smoothReducedT = reducedTemperature;
+      } else {
+        SIM_STATE._smoothReducedT = lerp(SIM_STATE._smoothReducedT, reducedTemperature, 0.12);
+      }
+      SIM_STATE.measuredReducedT = SIM_STATE._smoothReducedT;
+    }
+
+    function measureCurrentTemperature(reset) {
+      removeCenterOfMassDrift();
+      const kineticEnergy = computeThermalKineticEnergy();
+      updateMeasuredTemperature(reducedTemperatureFromKE(kineticEnergy), reset);
+    }
+
+    function rescaleVelocitiesToTemperature(targetReducedT) {
+      removeCenterOfMassDrift();
+      const kineticEnergy = computeThermalKineticEnergy();
+      if (kineticEnergy <= 1e-8) return;
+
+      const currentReducedT = reducedTemperatureFromKE(kineticEnergy);
+      const scale = Math.sqrt(targetReducedT / Math.max(currentReducedT, 1e-8));
+      for (let i = 0; i < N; i++) {
+        VEL[i * 3] *= scale;
+        VEL[i * 3 + 1] *= scale;
+        VEL[i * 3 + 2] *= scale;
+      }
+    }
+
     function initParticles() {
       let index = 0;
-      const a = 1.30;
+      const a = LATTICE_CONST;
+      const originX = -((N_X - 1) * a) / 2 - a / 4;
+      const originY = -((N_Y - 1) * a) / 2 - a / 4;
+      const originZ = -((N_Z - 1) * a) / 2 - a / 4;
+      const basis = [
+        [0, 0, 0],
+        [a / 2, a / 2, 0],
+        [a / 2, 0, a / 2],
+        [0, a / 2, a / 2]
+      ];
+
       for (let x = 0; x < N_X; x++) {
         for (let y = 0; y < N_Y; y++) {
           for (let z = 0; z < N_Z; z++) {
-            const cx = (x - N_X / 2 + 0.5) * a;
-            const cy = y * a - HALF_BOX + PARTICLE_RADIUS + 0.1;
-            const cz = (z - N_Z / 2 + 0.5) * a;
-            const pts = [[0, 0, 0], [a / 2, a / 2, 0], [a / 2, 0, a / 2], [0, a / 2, a / 2]];
-            for (let p of pts) {
-              if (index >= N) break;
-              const posOffset = (Math.random() - 0.5) * 0.02;
-              POS[index * 3] = cx + p[0] + posOffset;
-              POS[index * 3 + 1] = cy + p[1] + posOffset;
-              POS[index * 3 + 2] = cz + p[2] + posOffset;
-              const v0 = 0.5;
-              VEL[index * 3] = (Math.random() - 0.5) * v0;
-              VEL[index * 3 + 1] = (Math.random() - 0.5) * v0;
-              VEL[index * 3 + 2] = (Math.random() - 0.5) * v0;
+            const cellX = originX + x * a;
+            const cellY = originY + y * a;
+            const cellZ = originZ + z * a;
+
+            for (const point of basis) {
+              const jitter = (Math.random() - 0.5) * 0.015;
+              POS[index * 3] = cellX + point[0] + jitter;
+              POS[index * 3 + 1] = cellY + point[1] + jitter;
+              POS[index * 3 + 2] = cellZ + point[2] + jitter;
+
+              VEL[index * 3] = Math.random() - 0.5;
+              VEL[index * 3 + 1] = Math.random() - 0.5;
+              VEL[index * 3 + 2] = Math.random() - 0.5;
               index++;
             }
           }
         }
       }
+
+      removeCenterOfMassDrift();
+      rescaleVelocitiesToTemperature(TARGET_T_MIN);
+      SIM_STATE._smoothReducedT = undefined;
+      SIM_STATE._smoothBondFraction = undefined;
+      SIM_STATE._smoothMeanCoordination = undefined;
+      SIM_STATE._smoothFillFraction = undefined;
+      SIM_STATE._smoothRmsRadius = undefined;
     }
 
-    initParticles();
+    function computeForcesAndPotential() {
+      FORCE.fill(0);
+      let potentialEnergy = 0;
 
-    // ─── DOM Elements ───
+      for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+          const dx = POS[j * 3] - POS[i * 3];
+          if (dx > LJ_CUTOFF || dx < -LJ_CUTOFF) continue;
+
+          const dy = POS[j * 3 + 1] - POS[i * 3 + 1];
+          if (dy > LJ_CUTOFF || dy < -LJ_CUTOFF) continue;
+
+          const dz = POS[j * 3 + 2] - POS[i * 3 + 2];
+          if (dz > LJ_CUTOFF || dz < -LJ_CUTOFF) continue;
+
+          let r2 = dx * dx + dy * dy + dz * dz;
+          if (r2 > LJ_CUTOFF_SQ) continue;
+          if (r2 < MIN_R2) r2 = MIN_R2;
+
+          const r2inv = 1.0 / r2;
+          const r6inv = r2inv * r2inv * r2inv;
+          const s6r6 = LJ_SIGMA6 * r6inv;
+          const s12r12 = s6r6 * s6r6;
+          potentialEnergy += 4.0 * LJ_EPSILON * (s12r12 - s6r6) - LJ_AT_CUTOFF;
+
+          const fOverR = 24.0 * LJ_EPSILON * r2inv * (2.0 * s12r12 - s6r6);
+          const fx = fOverR * dx;
+          const fy = fOverR * dy;
+          const fz = fOverR * dz;
+
+          FORCE[j * 3] += fx;
+          FORCE[j * 3 + 1] += fy;
+          FORCE[j * 3 + 2] += fz;
+          FORCE[i * 3] -= fx;
+          FORCE[i * 3 + 1] -= fy;
+          FORCE[i * 3 + 2] -= fz;
+        }
+      }
+
+      return potentialEnergy;
+    }
+
+    function reflectParticle(baseIndex) {
+      const lo = -HALF_BOX + PARTICLE_RADIUS;
+      const hi = HALF_BOX - PARTICLE_RADIUS;
+
+      for (let axis = 0; axis < 3; axis++) {
+        const idx = baseIndex + axis;
+        if (POS[idx] < lo) {
+          POS[idx] = lo + (lo - POS[idx]);
+          VEL[idx] = Math.abs(VEL[idx]);
+        } else if (POS[idx] > hi) {
+          POS[idx] = hi - (POS[idx] - hi);
+          VEL[idx] = -Math.abs(VEL[idx]);
+        }
+      }
+    }
+
+    function capExtremeVelocities() {
+      for (let i = 0; i < N; i++) {
+        const base = i * 3;
+        let speedSq = VEL[base] * VEL[base] + VEL[base + 1] * VEL[base + 1] + VEL[base + 2] * VEL[base + 2];
+        if (speedSq > EMERGENCY_SPEED_LIMIT_SQ) {
+          const scale = EMERGENCY_SPEED_LIMIT / Math.sqrt(speedSq);
+          VEL[base] *= scale;
+          VEL[base + 1] *= scale;
+          VEL[base + 2] *= scale;
+        }
+      }
+    }
+
+    function applyThermostat(dt, currentReducedT) {
+      if (!isFinite(currentReducedT) || currentReducedT <= 1e-8) return;
+
+      const coupling = clamp(dt / THERMOSTAT_TAU, 0, 1);
+      const lambdaSq = Math.max(0.05, 1 + coupling * (SIM_STATE.targetReducedT / currentReducedT - 1));
+      const scale = Math.sqrt(lambdaSq);
+
+      for (let i = 0; i < N; i++) {
+        VEL[i * 3] *= scale;
+        VEL[i * 3 + 1] *= scale;
+        VEL[i * 3 + 2] *= scale;
+      }
+    }
+
+    function stepPhysics(dt) {
+      for (let i = 0; i < N; i++) {
+        VEL[i * 3] += 0.5 * FORCE[i * 3] * dt;
+        VEL[i * 3 + 1] += 0.5 * FORCE[i * 3 + 1] * dt;
+        VEL[i * 3 + 2] += 0.5 * FORCE[i * 3 + 2] * dt;
+
+        POS[i * 3] += VEL[i * 3] * dt;
+        POS[i * 3 + 1] += VEL[i * 3 + 1] * dt;
+        POS[i * 3 + 2] += VEL[i * 3 + 2] * dt;
+        reflectParticle(i * 3);
+      }
+
+      computeForcesAndPotential();
+
+      for (let i = 0; i < N; i++) {
+        VEL[i * 3] += 0.5 * FORCE[i * 3] * dt;
+        VEL[i * 3 + 1] += 0.5 * FORCE[i * 3 + 1] * dt;
+        VEL[i * 3 + 2] += 0.5 * FORCE[i * 3 + 2] * dt;
+      }
+
+      capExtremeVelocities();
+      removeCenterOfMassDrift();
+
+      let kineticEnergy = computeThermalKineticEnergy();
+      let reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
+      applyThermostat(dt, reducedTemperature);
+      removeCenterOfMassDrift();
+
+      kineticEnergy = computeThermalKineticEnergy();
+      reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
+      updateMeasuredTemperature(reducedTemperature, false);
+    }
+
+    function countBondsOnly() {
+      let bondCount = 0;
+      for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+          const dx = POS[j * 3] - POS[i * 3];
+          if (dx > BOND_CUTOFF || dx < -BOND_CUTOFF) continue;
+
+          const dy = POS[j * 3 + 1] - POS[i * 3 + 1];
+          if (dy > BOND_CUTOFF || dy < -BOND_CUTOFF) continue;
+
+          const dz = POS[j * 3 + 2] - POS[i * 3 + 2];
+          if (dz > BOND_CUTOFF || dz < -BOND_CUTOFF) continue;
+
+          const r2 = dx * dx + dy * dy + dz * dz;
+          if (r2 < BOND_CUTOFF_SQ) bondCount++;
+        }
+      }
+      return bondCount;
+    }
+
+    function smoothMetric(key, value, alpha) {
+      const stateKey = '_smooth' + key;
+      if (typeof SIM_STATE[stateKey] === 'undefined') {
+        SIM_STATE[stateKey] = value;
+      } else {
+        SIM_STATE[stateKey] = lerp(SIM_STATE[stateKey], value, alpha);
+      }
+      return SIM_STATE[stateKey];
+    }
+
+    function getPhaseInfo(metrics) {
+      const directionDelta = SIM_STATE.targetReducedT - SIM_STATE.measuredReducedT;
+      if (Math.abs(directionDelta) > 0.03) {
+        SIM_STATE.temperatureTrend = directionDelta >= 0 ? 1 : -1;
+      }
+      const activelyDriven = Math.abs(directionDelta) > 0.08;
+
+      if (metrics.bondFraction >= 0.82 && metrics.meanCoordination >= 8.0 && metrics.reducedT < 0.6) {
+        return { label: 'SOLID-LIKE', cls: 'status-solid' };
+      }
+
+      if (
+        metrics.bondFraction <= 0.30 &&
+        metrics.meanCoordination <= 2.8 &&
+        metrics.fillFraction >= 0.74 &&
+        metrics.rmsRadius >= 0.84 &&
+        metrics.reducedT > 1.45
+      ) {
+        return { label: 'GAS-LIKE', cls: 'status-gas' };
+      }
+
+      if (metrics.bondFraction >= 0.56 && metrics.meanCoordination >= 4.6 && metrics.reducedT < 0.95) {
+        if (activelyDriven) {
+          return SIM_STATE.temperatureTrend >= 0
+            ? { label: 'MELTING', cls: 'status-solid' }
+            : { label: 'FREEZING', cls: 'status-solid' };
+        }
+        return { label: 'LIQUID-LIKE', cls: 'status-liquid' };
+      }
+
+      if (metrics.bondFraction <= 0.36 && metrics.meanCoordination <= 3.4 && metrics.reducedT > 1.0) {
+        if (activelyDriven) {
+          return SIM_STATE.temperatureTrend >= 0
+            ? { label: 'EVAPORATING', cls: 'status-gas' }
+            : { label: 'CONDENSING', cls: 'status-gas' };
+        }
+        return { label: 'LIQUID-LIKE', cls: 'status-liquid' };
+      }
+
+      return { label: 'LIQUID-LIKE', cls: 'status-liquid' };
+    }
+
+    function refreshDiagnostics() {
+      COORDINATION.fill(0);
+      OCCUPANCY.fill(0);
+
+      let centerX = 0;
+      let centerY = 0;
+      let centerZ = 0;
+
+      for (let i = 0; i < N; i++) {
+        const x = POS[i * 3];
+        const y = POS[i * 3 + 1];
+        const z = POS[i * 3 + 2];
+
+        centerX += x;
+        centerY += y;
+        centerZ += z;
+
+        const ix = clamp(Math.floor(((x + HALF_BOX) / BOX_SIZE) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
+        const iy = clamp(Math.floor(((y + HALF_BOX) / BOX_SIZE) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
+        const iz = clamp(Math.floor(((z + HALF_BOX) / BOX_SIZE) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
+        OCCUPANCY[ix + iy * STRUCTURE_GRID + iz * STRUCTURE_GRID * STRUCTURE_GRID] = 1;
+      }
+
+      centerX /= N;
+      centerY /= N;
+      centerZ /= N;
+
+      let sumR2 = 0;
+      for (let i = 0; i < N; i++) {
+        const dx = POS[i * 3] - centerX;
+        const dy = POS[i * 3 + 1] - centerY;
+        const dz = POS[i * 3 + 2] - centerZ;
+        sumR2 += dx * dx + dy * dy + dz * dz;
+      }
+
+      let bondCount = 0;
+      let visibleBondCount = 0;
+
+      for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+          const dx = POS[j * 3] - POS[i * 3];
+          if (dx > BOND_CUTOFF || dx < -BOND_CUTOFF) continue;
+
+          const dy = POS[j * 3 + 1] - POS[i * 3 + 1];
+          if (dy > BOND_CUTOFF || dy < -BOND_CUTOFF) continue;
+
+          const dz = POS[j * 3 + 2] - POS[i * 3 + 2];
+          if (dz > BOND_CUTOFF || dz < -BOND_CUTOFF) continue;
+
+          const r2 = dx * dx + dy * dy + dz * dz;
+          if (r2 >= BOND_CUTOFF_SQ) continue;
+
+          bondCount++;
+          COORDINATION[i]++;
+          COORDINATION[j]++;
+
+          if (visibleBondCount < MAX_BONDS) {
+            const offset = visibleBondCount * 6;
+            bondPositions[offset] = POS[i * 3];
+            bondPositions[offset + 1] = POS[i * 3 + 1];
+            bondPositions[offset + 2] = POS[i * 3 + 2];
+            bondPositions[offset + 3] = POS[j * 3];
+            bondPositions[offset + 4] = POS[j * 3 + 1];
+            bondPositions[offset + 5] = POS[j * 3 + 2];
+            visibleBondCount++;
+          }
+        }
+      }
+
+      bondPosAttr.needsUpdate = true;
+      bondGeo.setDrawRange(0, visibleBondCount * 2);
+
+      let occupiedCells = 0;
+      for (let i = 0; i < STRUCTURE_CELL_COUNT; i++) {
+        occupiedCells += OCCUPANCY[i];
+      }
+
+      const rawBondFraction = clamp(bondCount / Math.max(1, SIM_STATE.referenceBondCount), 0, 1.25);
+      const rawMeanCoordination = (2 * bondCount) / N;
+      const rawFillFraction = occupiedCells / STRUCTURE_CELL_COUNT;
+      const rawRmsRadius = Math.sqrt(sumR2 / N) / HALF_BOX;
+
+      SIM_STATE.metrics.bondFraction = smoothMetric('BondFraction', rawBondFraction, 0.18);
+      SIM_STATE.metrics.meanCoordination = smoothMetric('MeanCoordination', rawMeanCoordination, 0.18);
+      SIM_STATE.metrics.fillFraction = smoothMetric('FillFraction', rawFillFraction, 0.18);
+      SIM_STATE.metrics.rmsRadius = smoothMetric('RmsRadius', rawRmsRadius, 0.18);
+      SIM_STATE.phaseInfo = getPhaseInfo({
+        bondFraction: SIM_STATE.metrics.bondFraction,
+        meanCoordination: SIM_STATE.metrics.meanCoordination,
+        fillFraction: SIM_STATE.metrics.fillFraction,
+        rmsRadius: SIM_STATE.metrics.rmsRadius,
+        reducedT: SIM_STATE.measuredReducedT
+      });
+
+      bondMat.opacity = 0.04 + 0.34 * clamp(SIM_STATE.metrics.bondFraction, 0, 1);
+    }
+
     const tempSlider = document.getElementById('tempSlider');
     const heatVal = document.getElementById('heatVal');
     const tempVal = document.getElementById('tempVal');
@@ -696,20 +1097,11 @@
     const themeBtn = document.getElementById('theme-button');
 
     function updateUIState() {
-      const s = SIM_STATE.slider;
-      heatVal.textContent = s + '%';
-      tempVal.textContent = SIM_STATE.measuredT + ' K';
-
-      const phase = getPhaseInfo(s);
-      stateChip.textContent = phase.label;
-      stateChip.className = 'status-chip ' + phase.cls;
+      heatVal.textContent = formatReducedTemperature(SIM_STATE.targetReducedT);
+      tempVal.textContent = formatReducedTemperature(SIM_STATE.measuredReducedT);
+      stateChip.textContent = SIM_STATE.phaseInfo.label;
+      stateChip.className = 'status-chip ' + SIM_STATE.phaseInfo.cls;
     }
-
-    tempSlider.addEventListener('input', () => {
-      SIM_STATE.slider = parseInt(tempSlider.value);
-      updateUIState();
-      updateParticleColors();
-    });
 
     function togglePlay() {
       SIM_STATE.playing = !SIM_STATE.playing;
@@ -717,17 +1109,13 @@
       playPauseBtn.className = SIM_STATE.playing ? 'btn btn-primary' : 'btn btn-secondary';
     }
 
-    playPauseBtn.addEventListener('click', togglePlay);
-
-    resetBtn.addEventListener('click', () => {
-      initParticles();
-      SIM_STATE.slider = 0;
-      SIM_STATE.measuredT = 0;
-      tempSlider.value = 0;
+    tempSlider.addEventListener('input', () => {
+      SIM_STATE.slider = parseInt(tempSlider.value, 10);
+      SIM_STATE.targetReducedT = sliderToTargetTemperature(SIM_STATE.slider);
       updateUIState();
-      updateParticleColors();
-      if (!SIM_STATE.playing) togglePlay();
     });
+
+    playPauseBtn.addEventListener('click', togglePlay);
 
     document.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT') return;
@@ -739,7 +1127,17 @@
       }
     });
 
-    // Theme Toggle
+    function setThemeMeta(nextTheme) {
+      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+      const appleMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+      if (themeColorMeta) {
+        themeColorMeta.setAttribute('content', nextTheme === 'dark' ? '#0f1014' : '#f8f9fa');
+      }
+      if (appleMeta) {
+        appleMeta.setAttribute('content', nextTheme === 'dark' ? 'black-translucent' : 'default');
+      }
+    }
+
     function toggleTheme() {
       const html = document.documentElement;
       const current = html.getAttribute('data-theme');
@@ -752,12 +1150,12 @@
         localStorage.removeItem('panphy-dark');
       }
 
+      setThemeMeta(next);
       updateThreeTheme();
     }
+
     themeBtn.addEventListener('click', toggleTheme);
 
-
-    // ─── Three.js Setup ───
     const canvas = document.getElementById('simCanvas');
     const scene = new THREE.Scene();
 
@@ -789,7 +1187,6 @@
     controls.minDistance = 5;
     controls.maxDistance = 40;
 
-    // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
@@ -801,14 +1198,12 @@
     dirLight2.position.set(-10, 10, -10);
     scene.add(dirLight2);
 
-    // Box Container
     const boxGeo = new THREE.BoxGeometry(BOX_SIZE, BOX_SIZE, BOX_SIZE);
     const boxEdges = new THREE.EdgesGeometry(boxGeo);
     const boxMaterial = new THREE.LineBasicMaterial({ color: colors.light.boxEdge, transparent: true, opacity: 0.5 });
     const boxLines = new THREE.LineSegments(boxEdges, boxMaterial);
     scene.add(boxLines);
 
-    // Floor
     const floorGeo = new THREE.PlaneGeometry(BOX_SIZE, BOX_SIZE);
     const floorMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.05, depthWrite: false });
     const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -816,7 +1211,6 @@
     floor.position.y = -HALF_BOX;
     scene.add(floor);
 
-    // Particles (InstancedMesh)
     const particleGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 16);
     const particleMat = new THREE.MeshPhysicalMaterial({
       color: phaseColors.cold,
@@ -830,8 +1224,6 @@
     scene.add(instancedMesh);
 
     const dummy = new THREE.Object3D();
-
-    // Bond visualization — lines drawn between particles within bonding distance
     const MAX_BONDS = 2000;
     const bondPositions = new Float32Array(MAX_BONDS * 2 * 3);
     const bondGeo = new THREE.BufferGeometry();
@@ -857,18 +1249,31 @@
     }
 
     function updateParticleColors() {
-      const norm = SIM_STATE.slider / 100;
-      let c = new THREE.Color();
+      const norm = clamp((SIM_STATE.measuredReducedT - TARGET_T_MIN) / (TARGET_T_MAX - TARGET_T_MIN), 0, 1);
+      const color = new THREE.Color();
       if (norm < 0.5) {
-        c.lerpColors(phaseColors.cold, phaseColors.mid, norm * 2);
+        color.lerpColors(phaseColors.cold, phaseColors.mid, norm * 2);
       } else {
-        c.lerpColors(phaseColors.mid, phaseColors.hot, (norm - 0.5) * 2);
+        color.lerpColors(phaseColors.mid, phaseColors.hot, (norm - 0.5) * 2);
       }
-      particleMat.color.copy(c);
+      particleMat.color.copy(color);
     }
 
-    updateThreeTheme();
-    updateParticleColors();
+    function syncParticlesToScene() {
+      for (let i = 0; i < N; i++) {
+        dummy.position.set(POS[i * 3], POS[i * 3 + 1], POS[i * 3 + 2]);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(i, dummy.matrix);
+      }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+    }
+
+    function refreshVisualState() {
+      refreshDiagnostics();
+      updateParticleColors();
+      updateUIState();
+      syncParticlesToScene();
+    }
 
     function resize() {
       const container = document.getElementById('simPanel');
@@ -876,185 +1281,34 @@
 
       const width = container.clientWidth;
       const height = container.clientHeight;
-
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
-
-      // Crucial: false prevents inline styles from growing infinitely
       renderer.setSize(width, height, false);
     }
 
     window.addEventListener('resize', resize);
-
-    // Initial resize trigger after layout is done
     setTimeout(resize, 0);
 
+    resetBtn.addEventListener('click', () => {
+      SIM_STATE.slider = 0;
+      SIM_STATE.targetReducedT = TARGET_T_MIN;
+      tempSlider.value = '0';
+      initParticles();
+      computeForcesAndPotential();
+      SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
+      measureCurrentTemperature(true);
+      refreshVisualState();
+      if (!SIM_STATE.playing) togglePlay();
+    });
 
-    // ─── Physics Engine (Lennard-Jones Molecular Dynamics) ───
-    //
-    // Particles interact via a 12-6 Lennard-Jones potential.
-    // To correctly simulate latent heat plateaus, we use an Enthalpy/Total Energy controller.
-    // The "Heat Energy" slider directly sets the TARGET TOTAL ENERGY (KE + PE).
-    // As heat is added past the melting point, the system spontaneously breaks bonds,
-    // thereby absorbing potential energy and causing KE (Temperature) to naturally plateau!
+    initParticles();
+    computeForcesAndPotential();
+    SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
+    measureCurrentTemperature(true);
+    updateThreeTheme();
+    refreshVisualState();
 
-    const LJ_SIGMA = 1.0;
-    const LJ_EPSILON = 1.0;
-    const LJ_CUTOFF = 2.5 * LJ_SIGMA;
-    const LJ_CUTOFF_SQ = LJ_CUTOFF * LJ_CUTOFF;
-    const LJ_SIGMA6 = Math.pow(LJ_SIGMA, 6);
-    const LJ_SIGMA12 = LJ_SIGMA6 * LJ_SIGMA6;
-    const MIN_R2 = 0.16; // soften core
-    const GRAVITY = 0.5;  // Low enough to let gas fill the box, strong enough to settle liquids
-    const MAX_SPEED = 20.0;
-    const BOND_CUTOFF = 1.35 * LJ_SIGMA;
-    const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
-
-    const FORCE = new Float32Array(N * 3);
-
-    function stepPhysics(dt) {
-      // 1. Compute forces and Potential Energy
-      FORCE.fill(0);
-      for (let i = 0; i < N; i++) {
-        FORCE[i * 3 + 1] -= GRAVITY;
-      }
-
-      let PE = 0;
-      for (let i = 0; i < N; i++) {
-        for (let j = i + 1; j < N; j++) {
-          let dx = POS[j * 3] - POS[i * 3];
-          if (dx > LJ_CUTOFF || dx < -LJ_CUTOFF) continue;
-          let dy = POS[j * 3 + 1] - POS[i * 3 + 1];
-          if (dy > LJ_CUTOFF || dy < -LJ_CUTOFF) continue;
-          let dz = POS[j * 3 + 2] - POS[i * 3 + 2];
-          if (dz > LJ_CUTOFF || dz < -LJ_CUTOFF) continue;
-
-          let r2 = dx * dx + dy * dy + dz * dz;
-          if (r2 > LJ_CUTOFF_SQ) continue;
-          if (r2 < MIN_R2) r2 = MIN_R2;
-
-          const r2inv = 1.0 / r2;
-          const r6inv = r2inv * r2inv * r2inv;
-          const s6r6 = LJ_SIGMA6 * r6inv;
-          const s12r12 = s6r6 * s6r6;
-
-          PE += 4.0 * LJ_EPSILON * (s12r12 - s6r6);
-
-          const fOverR = 24.0 * LJ_EPSILON * r2inv * (2.0 * s12r12 - s6r6);
-          const fx = fOverR * dx;
-          const fy = fOverR * dy;
-          const fz = fOverR * dz;
-
-          FORCE[j * 3] += fx; FORCE[j * 3 + 1] += fy; FORCE[j * 3 + 2] += fz;
-          FORCE[i * 3] -= fx; FORCE[i * 3 + 1] -= fy; FORCE[i * 3 + 2] -= fz;
-        }
-      }
-
-      // Gravity PE contribution
-      for (let i = 0; i < N; i++) {
-        PE += GRAVITY * (POS[i * 3 + 1] - (-HALF_BOX + PARTICLE_RADIUS));
-      }
-
-      // 2. Velocity Verlet Integration & Kinetic Energy
-      let KE = 0;
-      for (let i = 0; i < N; i++) {
-        VEL[i * 3] += FORCE[i * 3] * dt;
-        VEL[i * 3 + 1] += FORCE[i * 3 + 1] * dt;
-        VEL[i * 3 + 2] += FORCE[i * 3 + 2] * dt;
-
-        let spd2 = VEL[i * 3] * VEL[i * 3] + VEL[i * 3 + 1] * VEL[i * 3 + 1] + VEL[i * 3 + 2] * VEL[i * 3 + 2];
-        if (spd2 > MAX_SPEED * MAX_SPEED) {
-          const s = MAX_SPEED / Math.sqrt(spd2);
-          VEL[i * 3] *= s; VEL[i * 3 + 1] *= s; VEL[i * 3 + 2] *= s;
-          spd2 = MAX_SPEED * MAX_SPEED;
-        }
-        KE += 0.5 * spd2;
-
-        POS[i * 3] += VEL[i * 3] * dt;
-        POS[i * 3 + 1] += VEL[i * 3 + 1] * dt;
-        POS[i * 3 + 2] += VEL[i * 3 + 2] * dt;
-
-        // Wall Collisions
-        for (let k = 0; k < 3; k++) {
-          const lo = -HALF_BOX + PARTICLE_RADIUS;
-          const hi = HALF_BOX - PARTICLE_RADIUS;
-          if (POS[i * 3 + k] < lo) { POS[i * 3 + k] = lo; VEL[i * 3 + k] = Math.abs(VEL[i * 3 + k]) * 0.8; }
-          if (POS[i * 3 + k] > hi) { POS[i * 3 + k] = hi; VEL[i * 3 + k] = -Math.abs(VEL[i * 3 + k]) * 0.8; }
-        }
-      }
-
-      // 3. Enthalpy Controller (Total Energy Thermostat)
-      const current_E = KE + PE;
-
-      // Match Target Energy to slider
-      const E_min = -6.5 * N; // Stable crystalline floor
-      const E_max = 5.0 * N;  // Hot volatile gas
-      const target_E = E_min + (SIM_STATE.slider / 100.0) * (E_max - E_min);
-
-      // Gently scale velocities toward target total energy
-      const dE = (target_E - current_E) * 2.0 * dt;
-      let new_KE = KE + dE;
-
-      // Prevent total freeze
-      if (new_KE < 0.001 * N) new_KE = 0.001 * N;
-
-      const ratio = new_KE / KE;
-      const scale = isFinite(ratio) ? Math.sqrt(ratio) : 1.0;
-
-      for (let i = 0; i < N; i++) {
-        VEL[i * 3] *= scale;
-        VEL[i * 3 + 1] *= scale;
-        VEL[i * 3 + 2] *= scale;
-      }
-
-      // 4. Measure natural temperature (T = 2 * KE / 3N)
-      const measureT = (2.0 * new_KE) / (3.0 * N);
-
-      // Smooth out display measurements using moving average to avoid jitter
-      if (typeof SIM_STATE._smoothT === 'undefined') SIM_STATE._smoothT = measureT;
-      SIM_STATE._smoothT = SIM_STATE._smoothT * 0.95 + measureT * 0.05;
-
-      SIM_STATE.measuredT = toDisplayK(SIM_STATE._smoothT);
-    }
-
-    // ─── Bond Visualization ───
-    // Find pairs within bonding distance and fill the LineSegments buffer.
-    // Bonds are most visible in solid (stable network) and flicker in liquid.
-    function updateBonds() {
-      let count = 0;
-      for (let i = 0; i < N && count < MAX_BONDS; i++) {
-        for (let j = i + 1; j < N && count < MAX_BONDS; j++) {
-          let dx = POS[j * 3] - POS[i * 3];
-          if (dx > BOND_CUTOFF || dx < -BOND_CUTOFF) continue;
-          let dy = POS[j * 3 + 1] - POS[i * 3 + 1];
-          if (dy > BOND_CUTOFF || dy < -BOND_CUTOFF) continue;
-          let dz = POS[j * 3 + 2] - POS[i * 3 + 2];
-          if (dz > BOND_CUTOFF || dz < -BOND_CUTOFF) continue;
-
-          let r2 = dx * dx + dy * dy + dz * dz;
-          if (r2 < BOND_CUTOFF_SQ) {
-            const idx = count * 6;
-            bondPositions[idx] = POS[i * 3];
-            bondPositions[idx + 1] = POS[i * 3 + 1];
-            bondPositions[idx + 2] = POS[i * 3 + 2];
-            bondPositions[idx + 3] = POS[j * 3];
-            bondPositions[idx + 4] = POS[j * 3 + 1];
-            bondPositions[idx + 5] = POS[j * 3 + 2];
-            count++;
-          }
-        }
-      }
-      bondPosAttr.needsUpdate = true;
-      bondGeo.setDrawRange(0, count * 2);
-
-      // Fade bonds as temperature rises (less visible approaching gas)
-      const tRed = heatingCurve(SIM_STATE.slider);
-      bondMat.opacity = Math.max(0, 0.35 * (1 - tRed / 2.0));
-    }
-
-    // ─── Render Loop ───
     let lastTime = 0;
-    const SUB_STEPS = 4;   // more substeps = more stable LJ integration
 
     function animate(timestamp) {
       requestAnimationFrame(animate);
@@ -1062,36 +1316,20 @@
       if (lastTime === 0) lastTime = timestamp;
       let dt = (timestamp - lastTime) / 1000;
       lastTime = timestamp;
-
-      // Cap dt to prevent explosions on lag
       if (dt > 0.04) dt = 0.04;
 
       if (SIM_STATE.playing) {
         const subDt = dt / SUB_STEPS;
-        for (let s = 0; s < SUB_STEPS; s++) {
+        for (let step = 0; step < SUB_STEPS; step++) {
           stepPhysics(subDt);
         }
-
-        // Update InstancedMesh matrices
-        for (let i = 0; i < N; i++) {
-          dummy.position.set(POS[i * 3], POS[i * 3 + 1], POS[i * 3 + 2]);
-          dummy.updateMatrix();
-          instancedMesh.setMatrixAt(i, dummy.matrix);
-        }
-        instancedMesh.instanceMatrix.needsUpdate = true;
-
-        // Update bond lines
-        updateBonds();
-
-        // Update temperature display
-        updateUIState();
+        refreshVisualState();
       }
 
       controls.update();
       renderer.render(scene, camera);
     }
 
-    // Start loop
     requestAnimationFrame(animate);
 
   </script>
