@@ -354,6 +354,57 @@
       gap: 0.4rem;
     }
 
+    .slider-shell {
+      position: relative;
+      padding-bottom: 2.3rem;
+    }
+
+    .slider-markers {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 14px;
+      height: 2rem;
+      pointer-events: none;
+    }
+
+    .slider-marker {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      white-space: nowrap;
+    }
+
+    .slider-marker::before {
+      content: '';
+      width: 2px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--brand-primary);
+      opacity: 0.85;
+    }
+
+    .slider-marker--bp::before {
+      background: #ff7675;
+    }
+
+    .slider-marker-label {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    }
+
     .control-header {
       display: flex;
       justify-content: space-between;
@@ -585,7 +636,13 @@
               <label for="tempSlider">Target Temperature</label>
               <span id="heatVal">40 K</span>
             </div>
-            <input type="range" id="tempSlider" min="0" max="100" step="1" value="0">
+            <div class="slider-shell">
+              <input type="range" id="tempSlider" min="0" max="100" step="1" value="0">
+              <div class="slider-markers" aria-hidden="true">
+                <span id="meltMarker" class="slider-marker slider-marker--mp"><span class="slider-marker-label">MP 150 K</span></span>
+                <span id="boilMarker" class="slider-marker slider-marker--bp"><span class="slider-marker-label">BP 1200 K</span></span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -630,7 +687,12 @@
       // motion. This gives students more room to explore the solid/liquid
       // states while keeping the hottest end available for gas.
       const normalized = clamp(sliderValue / 100, 0, 1);
-      return TARGET_T_MIN + Math.pow(normalized, 1.7) * (TARGET_T_MAX - TARGET_T_MIN);
+      return TARGET_T_MIN + Math.pow(normalized, SLIDER_CURVE_EXPONENT) * (TARGET_T_MAX - TARGET_T_MIN);
+    }
+
+    function reducedTemperatureToSliderPercent(reducedTemperature) {
+      const normalized = clamp((reducedTemperature - TARGET_T_MIN) / (TARGET_T_MAX - TARGET_T_MIN), 0, 1);
+      return Math.pow(normalized, 1 / SLIDER_CURVE_EXPONENT) * 100;
     }
 
     function mapReducedToDisplayKelvin(reducedTemperature) {
@@ -685,6 +747,7 @@
     const DISPLAY_MAX_K = 1600;
     const DISPLAY_MELT_REDUCED_T = 0.58;
     const DISPLAY_BOIL_REDUCED_T = 1.55;
+    const SLIDER_CURVE_EXPONENT = 1.7;
     const THERMOSTAT_TAU = 0.18;
     const STRUCTURE_GRID = 6;
     const STRUCTURE_CELL_COUNT = STRUCTURE_GRID * STRUCTURE_GRID * STRUCTURE_GRID;
@@ -1111,12 +1174,19 @@
     const playPauseBtn = document.getElementById('playPauseBtn');
     const resetBtn = document.getElementById('resetBtn');
     const themeBtn = document.getElementById('theme-button');
+    const meltMarker = document.getElementById('meltMarker');
+    const boilMarker = document.getElementById('boilMarker');
 
     function updateUIState() {
       heatVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
       tempVal.textContent = formatDisplayTemperature(SIM_STATE.measuredReducedT);
       stateChip.textContent = SIM_STATE.phaseInfo.label;
       stateChip.className = 'status-chip ' + SIM_STATE.phaseInfo.cls;
+    }
+
+    function updateSliderMarkers() {
+      meltMarker.style.left = reducedTemperatureToSliderPercent(DISPLAY_MELT_REDUCED_T) + '%';
+      boilMarker.style.left = reducedTemperatureToSliderPercent(DISPLAY_BOIL_REDUCED_T) + '%';
     }
 
     function togglePlay() {
@@ -1322,6 +1392,7 @@
     SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
     measureCurrentTemperature(true);
     updateThreeTheme();
+    updateSliderMarkers();
     refreshVisualState();
 
     let lastTime = 0;
