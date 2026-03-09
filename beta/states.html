@@ -1030,7 +1030,7 @@
               <label for="heatCoolSlider">Heat / Cool</label>
               <span id="heatVal">40 K</span>
             </div>
-            <p class="info-copy">Use the heater/cooler to push the sample gradually through the melting range and up into evaporation.</p>
+            <p class="info-copy">Use the heater/cooler to push the sample through melting and up to boiling.</p>
             <div class="setpoint-row">
               <span>Setpoint</span>
               <strong id="setpointVal">40 K</strong>
@@ -1545,7 +1545,7 @@
       ) {
         const cooling = previousLabel === 'Gas' || previousLabel === 'Condensation';
         return {
-          label: cooling ? 'Condensation' : 'Evaporation',
+          label: cooling ? 'Condensation' : 'Boiling',
           cls: 'status-critical',
           detail: cooling
             ? 'Particles are losing energy and coming closer together as the gas condenses back into a liquid.'
