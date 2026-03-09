@@ -22,13 +22,13 @@
     </script>
     <title>PanPhy Labs | Physics Tools & Simulations</title>
     <meta name="description"
-        content="PanPhy Labs is a browser-based collection of physics tools, simulations, and teacher utilities built for school devices.">
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta property="og:title" content="PanPhy Labs">
     <meta property="og:description"
-        content="PanPhy Labs is a browser-based collection of physics tools, simulations, and teacher utilities built for school devices.">
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta name="twitter:title" content="PanPhy Labs">
     <meta name="twitter:description"
-        content="PanPhy Labs is a browser-based collection of physics tools, simulations, and teacher utilities built for school devices.">
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
 
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
@@ -36,31 +36,31 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
 
+        /* CSS Variables */
         :root {
             --font-sans: 'Inter', sans-serif;
             --font-display: 'Poppins', 'Inter', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
 
+            /* Light Theme */
             --bg-color: #f8f9fa;
             --bg-pattern: #e9ecef;
             --text-main: #2d3436;
             --text-secondary: #636e72;
 
             --brand-primary: #6c5ce7;
+            /* Indigo */
             --brand-secondary: #a29bfe;
             --brand-accent: #00cec9;
+            /* Teal */
 
             --nav-bg: rgba(255, 255, 255, 0.85);
             --nav-border: rgba(255, 255, 255, 0.5);
 
-            --surface: rgba(255, 255, 255, 0.84);
-            --surface-strong: rgba(255, 255, 255, 0.94);
-            --surface-soft: rgba(241, 245, 249, 0.86);
-            --surface-quiet: rgba(255, 255, 255, 0.62);
-            --line: rgba(148, 163, 184, 0.28);
-            --line-strong: rgba(108, 92, 231, 0.2);
-            --card-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
-            --card-hover-shadow: 0 24px 60px rgba(108, 92, 231, 0.14);
+            --card-bg: #ffffff;
+            --card-border: transparent;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.15);
 
             --btn-bg: #2d3436;
             --btn-text: #fff;
@@ -72,6 +72,7 @@
         }
 
         [data-theme="dark"] {
+            /* Dark Theme */
             --bg-color: #0f1014;
             --bg-pattern: #181a20;
             --text-main: #dfe6e9;
@@ -84,12 +85,8 @@
             --nav-bg: rgba(22, 24, 29, 0.85);
             --nav-border: rgba(255, 255, 255, 0.05);
 
-            --surface: rgba(30, 33, 41, 0.84);
-            --surface-strong: rgba(30, 33, 41, 0.94);
-            --surface-soft: rgba(23, 25, 31, 0.84);
-            --surface-quiet: rgba(30, 33, 41, 0.62);
-            --line: rgba(255, 255, 255, 0.08);
-            --line-strong: rgba(162, 155, 254, 0.24);
+            --card-bg: #1e2129;
+            --card-border: #2d3436;
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.2);
 
@@ -104,6 +101,7 @@
 
         * {
             box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
         }
 
         .offline-font {
@@ -122,15 +120,45 @@
             overflow-x: hidden;
         }
 
-        a {
-            color: inherit;
+        /* Hero Header */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
         }
 
-        header,
-        main,
-        footer {
-            position: relative;
-            z-index: 1;
+        .logo {
+            height: 80px;
+            width: auto;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        header h1 {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+            color: var(--brand-primary);
+        }
+
+        header h1.gradient-text {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-top: 1rem;
         }
 
         @keyframes offlinePulse {
@@ -147,223 +175,7 @@
             }
         }
 
-        header {
-            padding: 7rem 1.5rem 2.5rem;
-        }
-
-        .hero-shell {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.9fr);
-            gap: 1.25rem;
-            align-items: stretch;
-        }
-
-        .hero-copy,
-        .hero-panel,
-        .about-card {
-            background: var(--nav-bg);
-            border: 1px solid var(--nav-border);
-            border-radius: 28px;
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
-
-        .hero-copy {
-            padding: 2rem 2rem 2.2rem;
-        }
-
-        .hero-brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.85rem;
-            margin-bottom: 1.1rem;
-        }
-
-        .logo {
-            height: 52px;
-            width: auto;
-            filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.1));
-        }
-
-        .hero-brand span {
-            display: inline-flex;
-            align-items: center;
-            min-height: 28px;
-            padding: 0 0.75rem;
-            border-radius: 999px;
-            background: var(--surface-soft);
-            border: 1px solid var(--line);
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-
-        .eyebrow,
-        .section-kicker {
-            margin: 0 0 0.7rem;
-            color: var(--brand-primary);
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        header h1 {
-            font-family: var(--font-display);
-            font-size: clamp(3rem, 6vw, 4.7rem);
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.06em;
-            color: var(--brand-primary);
-        }
-
-        header h1.gradient-text {
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-text {
-            font-size: 1.12rem;
-            color: var(--text-secondary);
-            max-width: 56ch;
-            margin: 1rem 0 0;
-        }
-
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.85rem;
-            margin-top: 1.5rem;
-        }
-
-        .hero-actions a,
-        .hero-shortcut {
-            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .hero-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 48px;
-            padding: 0.85rem 1.2rem;
-            border-radius: 14px;
-            font-weight: 700;
-            text-decoration: none;
-            border: 1px solid transparent;
-        }
-
-        .hero-btn:hover,
-        .hero-shortcut:hover,
-        .card:hover,
-        .card a:hover,
-        nav a:hover,
-        .theme-toggle button:hover {
-            transform: translateY(-2px);
-        }
-
-        .hero-btn-primary {
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            color: #fff;
-            box-shadow: 0 14px 28px rgba(108, 92, 231, 0.18);
-        }
-
-        .hero-btn-secondary {
-            background: var(--surface-soft);
-            border-color: var(--line);
-            color: var(--text-main);
-        }
-
-        .hero-metrics {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.85rem;
-            margin-top: 1.6rem;
-        }
-
-        .metric {
-            padding: 0.95rem 1rem;
-            border-radius: 18px;
-            background: var(--surface-soft);
-            border: 1px solid var(--line);
-        }
-
-        .metric strong {
-            display: block;
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            line-height: 1;
-            margin-bottom: 0.35rem;
-        }
-
-        .metric span {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.88rem;
-        }
-
-        .hero-panel {
-            padding: 1.4rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.85rem;
-        }
-
-        .hero-panel h2 {
-            margin: 0;
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-        }
-
-        .hero-panel p {
-            margin: 0;
-            color: var(--text-secondary);
-        }
-
-        .hero-shortcut {
-            display: block;
-            text-decoration: none;
-            padding: 1rem 1rem 1.05rem;
-            border-radius: 20px;
-            background: var(--surface-soft);
-            border: 1px solid var(--line);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        }
-
-        .hero-shortcut strong {
-            display: block;
-            font-size: 1rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .hero-shortcut span {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 0.92rem;
-            line-height: 1.45;
-        }
-
-        .hero-note {
-            margin-top: auto;
-            padding: 1rem;
-            border-radius: 18px;
-            background: linear-gradient(135deg, rgba(108, 92, 231, 0.12), rgba(0, 206, 201, 0.1));
-            border: 1px solid var(--line-strong);
-        }
-
-        .hero-note strong {
-            display: block;
-            margin-bottom: 0.3rem;
-            font-size: 0.95rem;
-        }
-
+        /* Floating Navigation */
         nav {
             position: fixed;
             top: calc(12px + env(safe-area-inset-top, 0px));
@@ -371,11 +183,10 @@
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 0.15rem;
             background: var(--nav-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 0.4rem;
+            padding: 0.5rem 0.5rem;
             border-radius: 50px;
             border: 1px solid var(--nav-border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -387,11 +198,12 @@
         nav a {
             color: var(--text-main);
             text-decoration: none;
-            padding: 0.55rem 1rem;
-            font-size: 0.92rem;
-            font-weight: 700;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
             border-radius: 25px;
-            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         nav a:hover {
@@ -405,6 +217,7 @@
             touch-action: manipulation;
         }
 
+        /* Theme Toggle Inside Nav */
         .theme-toggle button {
             background: transparent;
             border: none;
@@ -420,131 +233,100 @@
             min-width: 42px;
             min-height: 42px;
             line-height: 1;
-            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .theme-toggle button:hover {
             background-color: rgba(108, 92, 231, 0.15);
+            transform: rotate(15deg);
         }
 
-        main {
-            padding-bottom: 1rem;
-        }
-
+        /* Sections */
         .section {
             max-width: 1200px;
-            margin: 0 auto 4.5rem;
+            margin: 0 auto 5rem;
             padding: 0 1.5rem;
-            scroll-margin-top: 96px;
-        }
-
-        .section-head {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(220px, 0.56fr);
-            gap: 1rem 2rem;
-            align-items: end;
-            margin-bottom: 1.5rem;
+            scroll-margin-top: 80px;
         }
 
         .section h2 {
             font-family: var(--font-display);
-            font-size: clamp(1.9rem, 3vw, 2.4rem);
-            margin: 0;
+            font-size: 2rem;
+            margin-bottom: 2rem;
             color: var(--text-main);
-            letter-spacing: -0.03em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .section-intro,
-        .section-note {
-            margin: 0.45rem 0 0;
-            color: var(--text-secondary);
+        .section h2::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 32px;
+            background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
+            border-radius: 4px;
         }
 
-        .section-note {
-            justify-self: end;
-            max-width: 26rem;
-            padding: 0.95rem 1rem;
-            border-radius: 18px;
-            background: var(--surface-quiet);
-            border: 1px solid var(--line);
-        }
-
+        /* Grid & Cards */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
         }
 
         .card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            padding: 1.4rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 0.85rem;
+            justify-content: space-between;
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
             height: 100%;
-            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
         }
 
         .card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px);
             box-shadow: var(--card-hover-shadow);
-            border-color: var(--line-strong);
+            border-color: var(--brand-primary);
         }
 
+        /* Modern Card Decoration — soft fade into card */
         .card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 64px;
+            height: 5%;
             background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent);
-            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent);
-            opacity: 0.38;
-            pointer-events: none;
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 20px 20px 0 0;
         }
 
-        .card-spotlight {
-            grid-column: span 2;
-            background: var(--surface-strong);
-        }
-
-        .card-tag {
-            display: inline-flex;
-            align-items: center;
-            align-self: flex-start;
-            min-height: 28px;
-            padding: 0 0.7rem;
-            border-radius: 999px;
-            background: var(--surface-soft);
-            border: 1px solid var(--line);
-            color: var(--text-secondary);
-            font-size: 0.74rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card h3 {
             font-family: var(--font-display);
-            font-size: 1.34rem;
-            line-height: 1.15;
-            margin: 0;
+            font-size: 1.4rem;
+            margin: 0 0 0.8rem 0;
             color: var(--text-main);
-            max-width: calc(100% - 96px);
         }
 
         .card p {
-            font-size: 0.98rem;
-            margin: 0;
+            font-size: 1rem;
+            margin: 0 0 1.5rem 0;
             color: var(--text-secondary);
-            flex: 1;
+            flex-grow: 1;
         }
 
         .card-offline-pill {
@@ -552,12 +334,12 @@
             align-items: center;
             gap: 0.28rem;
             position: absolute;
-            top: 1rem;
-            right: 1rem;
+            top: 0.85rem;
+            right: 0.85rem;
             z-index: 2;
-            padding: 0.28rem 0.5rem;
+            padding: 0.26rem 0.45rem;
             border-radius: 999px;
-            border: 1px solid var(--line);
+            border: 1px solid var(--nav-border);
             background: var(--nav-bg);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -605,57 +387,38 @@
         .card a {
             display: inline-block;
             text-align: center;
-            background: var(--surface-soft);
-            color: var(--text-main);
+            background: transparent;
+            color: var(--brand-primary);
             text-decoration: none;
-            padding: 0.82rem 1.2rem;
-            font-weight: 700;
-            border-radius: 14px;
-            border: 1px solid var(--line);
-            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 2px solid var(--brand-primary);
+            transition: all 0.3s ease;
             align-self: flex-start;
         }
 
         .card a:hover {
             background: var(--brand-primary);
             color: #fff;
-            border-color: transparent;
+            transform: translateY(-2px);
         }
 
-        .about-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
-        }
-
-        .about-card {
-            padding: 1.5rem;
-        }
-
-        .about-card h3 {
-            margin: 0 0 0.65rem;
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-        }
-
-        .about-card p {
-            margin: 0;
+        /* About Section Enhancement */
+        #about p {
+            font-size: 1.1rem;
+            max-width: 800px;
             color: var(--text-secondary);
         }
 
-        .about-card p + p {
-            margin-top: 0.85rem;
-        }
-
+        /* Footer */
         footer {
-            background: var(--surface);
+            background: var(--card-bg);
             color: var(--text-secondary);
             text-align: center;
-            padding: 1.3rem 1.5rem;
+            padding: 1.25rem 1.5rem;
             margin-top: 4rem;
-            border-top: 1px solid var(--line);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--card-border);
         }
 
         footer p {
@@ -672,11 +435,10 @@
             text-decoration: underline;
         }
 
-        @media (max-width: 960px) {
-            .hero-shell,
-            .section-head,
-            .about-grid {
-                grid-template-columns: 1fr;
+        /* Responsive Tweaks */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
             }
 
             nav {
@@ -708,32 +470,6 @@
                 padding: 0.35rem;
             }
 
-            .hero-metrics {
-                grid-template-columns: 1fr;
-            }
-
-            .section-note {
-                justify-self: stretch;
-                max-width: none;
-            }
-
-            .card-spotlight {
-                grid-column: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            header {
-                padding-top: 6.6rem;
-            }
-
-            .hero-copy,
-            .hero-panel,
-            .about-card {
-                padding: 1.25rem;
-                border-radius: 22px;
-            }
-
             .grid {
                 grid-template-columns: 1fr;
             }
@@ -748,6 +484,7 @@
             }
         }
 
+        /* Spacetime Grid Background */
         .spacetime-bg {
             position: fixed;
             top: 0;
@@ -761,6 +498,13 @@
 
         .spacetime-bg canvas {
             display: block;
+            /* width/height set programmatically to avoid iOS PWA canvas scaling bugs */
+        }
+
+        /* Ensure content sits above the background */
+        header, .section, footer {
+            position: relative;
+            z-index: 1;
         }
 
         nav {
@@ -786,236 +530,135 @@
     </nav>
 
     <header>
-        <div class="hero-shell">
-            <div class="hero-copy">
-                <p class="eyebrow">Browser-based physics for classrooms and revision</p>
-                <div class="hero-brand">
-                    <img src="/assets/panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
-                    <span>No install required</span>
-                </div>
-                <h1>PanPhy Labs</h1>
-                <p class="hero-text">A growing library of physics tools, simulations, and teacher utilities designed to work well on school devices, phones, and shared classroom screens.</p>
-                <div class="hero-actions">
-                    <a class="hero-btn hero-btn-primary" href="#tools">Browse Tools</a>
-                    <a class="hero-btn hero-btn-secondary" href="#simulations">Explore Simulations</a>
-                </div>
-                <div class="hero-metrics" aria-label="Site highlights">
-                    <div class="metric">
-                        <strong>17</strong>
-                        <span>apps and simulations</span>
-                    </div>
-                    <div class="metric">
-                        <strong>Offline</strong>
-                        <span>many pages cache after first visit</span>
-                    </div>
-                    <div class="metric">
-                        <strong>Classroom</strong>
-                        <span>built for teaching, demos, and practice</span>
-                    </div>
-                </div>
-            </div>
-            <aside class="hero-panel" aria-label="Suggested starting points">
-                <p class="section-kicker">Start Here</p>
-                <h2>Three strong entry points</h2>
-                <p>Pick a workflow, a concept-first simulation, or a classroom utility and start from there.</p>
-                <a class="hero-shortcut" href="/tools/panphyplot.html">
-                    <strong>Data Plotting &amp; Fitting</strong>
-                    <span>Process results, draw graphs, add uncertainties, and run best-fit analysis.</span>
-                </a>
-                <a class="hero-shortcut" href="/simulations/states.html">
-                    <strong>States of Matter</strong>
-                    <span>Compare solids, liquids, gases, and phase changes in a 3D particle model.</span>
-                </a>
-                <a class="hero-shortcut" href="/for_teachers/timer.html">
-                    <strong>Exam Timer</strong>
-                    <span>Run visible exam timing with automatic extra-time support for the room.</span>
-                </a>
-                <div class="hero-note">
-                    <strong>Offline-friendly</strong>
-                    <p>Look for the badge on cards below. Once cached, those pages are ready without an internet connection.</p>
-                </div>
-            </aside>
-        </div>
+        <img src="/assets/panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
+        <h1>PanPhy Labs</h1>
+        <p>Physics apps, tools, sims, and some random stuff.</p>
     </header>
 
-    <main>
-        <section class="section" id="tools">
-            <div class="section-head">
-                <div>
-                    <p class="section-kicker">Workflows</p>
-                    <h2>Tools</h2>
-                    <p class="section-intro">For plotting, writing, analysis, tracking, and measurement tasks that come up in practical physics.</p>
-                </div>
-                <p class="section-note">Best starting point for lab write-ups, demonstrations, and student investigations.</p>
+    <div class="section" id="tools">
+        <h2>Tools</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Markdown + LaTeX</h3>
+                <p>Write, preview, and present scientific documents with LaTeX support.</p>
+                <a href="/tools/markdown_editor.html">Open Editor</a>
             </div>
-            <div class="grid">
-                <div class="card card-spotlight">
-                    <span class="card-tag">Most Used</span>
-                    <h3>Data Plotting &amp; Fitting</h3>
-                    <p>Process data, plot graphs, add uncertainties, and run best-fit analysis in one place.</p>
-                    <a href="/tools/panphyplot.html">Plot Data</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Writing</span>
-                    <h3>Markdown + LaTeX</h3>
-                    <p>Write, preview, and present scientific documents with LaTeX support.</p>
-                    <a href="/tools/markdown_editor.html">Open Editor</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Video</span>
-                    <h3>Motion Tracker</h3>
-                    <p>Step through video frames, click to track objects, and extract motion data.</p>
-                    <a href="/tools/motion_tracker.html">Track Motion</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Audio</span>
-                    <h3>Sound Analyzer</h3>
-                    <p>Visualize live audio as a frequency spectrum and waveform.</p>
-                    <a href="/tools/sound_analyzer.html">Analyze Sound</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Signal</span>
-                    <h3>Tone Generator</h3>
-                    <p>Generate and mix dual-channel sine waves for audio demonstrations and testing.</p>
-                    <a href="/tools/tone_generator.html">Generate Tone</a>
-                </div>
+            <div class="card">
+                <h3>Data Plotting & Fitting</h3>
+                <p>Process data, plot graphs, add uncertainties, and run best-fit analysis.</p>
+                <a href="/tools/panphyplot.html">Plot Data</a>
             </div>
-        </section>
+            <div class="card">
+                <h3>Motion Tracker</h3>
+                <p>Step through video frames, click to track objects, and extract motion data.</p>
+                <a href="/tools/motion_tracker.html">Track Motion</a>
+            </div>
+            <div class="card">
+                <h3>Sound Analyzer</h3>
+                <p>Visualize live audio as a frequency spectrum and waveform.</p>
+                <a href="/tools/sound_analyzer.html">Analyze Sound</a>
+            </div>
+            <div class="card">
+                <h3>Tone Generator</h3>
+                <p>Dual-channel sine wave mixing.</p>
+                <a href="/tools/tone_generator.html">Generate Tone</a>
+            </div>
+        </div>
+    </div>
 
-        <section class="section" id="simulations">
-            <div class="section-head">
-                <div>
-                    <p class="section-kicker">Concept Models</p>
-                    <h2>Simulations</h2>
-                    <p class="section-intro">Interactive models for waves, motion, matter, and relativity with controls simple enough for classroom projection.</p>
-                </div>
-                <p class="section-note">Use these for explanation first, then let students explore patterns and compare outcomes.</p>
+    <div class="section" id="simulations">
+        <h2>Simulations</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Wave Superposition</h3>
+                <p>Learn how waves interact.</p>
+                <a href="/simulations/superposition.html">Launch Sim</a>
             </div>
-            <div class="grid">
-                <div class="card card-spotlight">
-                    <span class="card-tag">New</span>
-                    <h3>States of Matter</h3>
-                    <p>Compare solids, liquids, gases, and phase changes in a 3D particle model built for pre-university teaching.</p>
-                    <a href="/simulations/states.html">Launch Sim</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Waves</span>
-                    <h3>Wave Superposition</h3>
-                    <p>Learn how waves combine and interfere when they overlap.</p>
-                    <a href="/simulations/superposition.html">Launch Sim</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">3D Waves</span>
-                    <h3>Interference</h3>
-                    <p>Explore two-source wave interference in a 3D ripple tank.</p>
-                    <a href="/simulations/interference.html">Launch Sim</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Oscillations</span>
-                    <h3>Standing Wave</h3>
-                    <p>Visualize standing waves with different boundary conditions.</p>
-                    <a href="/simulations/standing_wave.html">Launch Sim</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Mechanics</span>
-                    <h3>Collision Lab</h3>
-                    <p>Experiment with collision physics using interactive, real-time motion.</p>
-                    <a href="/simulations/collision.html">Launch Sim</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Relativity</span>
-                    <h3>Lorentz Transform</h3>
-                    <p>Learn how spacetime transforms between inertial frames.</p>
-                    <a href="/simulations/lorentz.html">Launch Sim</a>
-                </div>
+            <div class="card">
+                <h3>Interference</h3>
+                <p>Explore two-source wave interference in a 3D ripple tank.</p>
+                <a href="/simulations/interference.html">Launch Sim</a>
             </div>
-        </section>
+            <div class="card">
+                <h3>Standing Wave</h3>
+                <p>Visualize standing waves with different boundary conditions.</p>
+                <a href="/simulations/standing_wave.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>Collision Lab</h3>
+                <p>Experiment with collision physics using interactive, real-time motion.</p>
+                <a href="/simulations/collision.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>States of Matter</h3>
+                <p>Compare solids, liquids, gases, and phase changes in a 3D particle model.</p>
+                <a href="/simulations/states.html">Launch Sim</a>
+            </div>
+            <div class="card">
+                <h3>Lorentz Transform</h3>
+                <p>Learn how spacetime transforms between inertial frames.</p>
+                <a href="/simulations/lorentz.html">Launch Sim</a>
+            </div>
+        </div>
+    </div>
 
-        <section class="section" id="for_teachers">
-            <div class="section-head">
-                <div>
-                    <p class="section-kicker">Classroom Delivery</p>
-                    <h2>For Teachers</h2>
-                    <p class="section-intro">Practical utilities for classroom routines, visualisation, and support during live teaching.</p>
-                </div>
-                <p class="section-note">Designed to stay simple under pressure when a lesson is already running.</p>
+    <div class="section" id="for_teachers">
+        <h2>For Teachers</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Exam Timer</h3>
+                <p>Manage exam times with an automatic extra-time timer.</p>
+                <a href="/for_teachers/timer.html">Open Timer</a>
             </div>
-            <div class="grid">
-                <div class="card card-spotlight">
-                    <span class="card-tag">Utility</span>
-                    <h3>Exam Timer</h3>
-                    <p>Manage exam times with automatic extra-time support and a clear, room-friendly display.</p>
-                    <a href="/for_teachers/timer.html">Open Timer</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Projection</span>
-                    <h3>Camera Visualizer</h3>
-                    <p>Project your device camera to the big screen, then snap and sketch over live images.</p>
-                    <a href="/for_teachers/visualizer.html">Use Camera</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">External</span>
-                    <h3>EAL Companion</h3>
-                    <p>AI-powered language support for EAL learners via a separate hosted app.</p>
-                    <a href="https://panphy-eal.streamlit.app/" target="_blank" rel="noopener noreferrer">Open App</a>
-                </div>
+            <div class="card">
+                <h3>Camera Visualizer</h3>
+                <p>Project your device camera to the big screen, then snap & sketch.</p>
+                <a href="/for_teachers/visualizer.html">Use Camera</a>
             </div>
-        </section>
+            <div class="card">
+                <h3>EAL Companion</h3>
+                <p>AI-powered language support for EAL learners.</p>
+                <a href="https://panphy-eal.streamlit.app/" target="_blank" rel="noopener noreferrer">Open App</a>
+            </div>
+        </div>
+    </div>
 
-        <section class="section" id="fun">
-            <div class="section-head">
-                <div>
-                    <p class="section-kicker">Side Projects</p>
-                    <h2>For Fun</h2>
-                    <p class="section-intro">Smaller experiments, games, and playful demos that still fit the same browser-first approach.</p>
-                </div>
-                <p class="section-note">Useful when you want a quick attention reset or a lightweight interactive demo.</p>
+    <div class="section" id="fun">
+        <h2>For Fun</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Asteroid Storm</h3>
+                <p>Survive the asteroid storm! Beat top survivors worldwide!</p>
+                <a href="/fun/dodge.html">Play Now</a>
             </div>
-            <div class="grid">
-                <div class="card">
-                    <span class="card-tag">Arcade</span>
-                    <h3>Asteroid Storm</h3>
-                    <p>Survive the asteroid storm and chase the leaderboard.</p>
-                    <a href="/fun/dodge.html">Play Now</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Reaction</span>
-                    <h3>Hit Me!</h3>
-                    <p>Wait for green, tap fast, and track your best and average reaction times.</p>
-                    <a href="/fun/react.html">Play Now</a>
-                </div>
-                <div class="card">
-                    <span class="card-tag">Camera</span>
-                    <h3>ASCII Camera</h3>
-                    <p>Turn your live camera feed into an 8-bit colour ASCII display.</p>
-                    <a href="/fun/ascii_cam.html">Open Camera</a>
-                </div>
+            <div class="card">
+                <h3>Hit Me!</h3>
+                <p>Wait for it... tap when green! Tracks your best and average times.</p>
+                <a href="/fun/react.html">Play Now</a>
             </div>
-        </section>
+            <div class="card">
+                <h3>ASCII Camera</h3>
+                <p>See yourself in 8-bit color ASCII characters.</p>
+                <a href="/fun/ascii_cam.html">Open Camera</a>
+            </div>
+        </div>
+    </div>
 
-        <section class="section" id="about">
-            <div class="section-head">
-                <div>
-                    <p class="section-kicker">About The Project</p>
-                    <h2>Why PanPhy Labs Exists</h2>
-                    <p class="section-intro">A classroom-focused collection of web apps built to be easy to open, easy to share, and useful in real teaching.</p>
-                </div>
-                <p class="section-note">The goal is not to be a giant portal. It is to provide a dependable set of apps that teachers and students can actually use.</p>
-            </div>
-            <div class="about-grid">
-                <div class="about-card">
-                    <h3>Built for school devices</h3>
-                    <p>Many teaching environments do not allow software installs or complex setup. PanPhy Labs focuses on browser-based tools that open quickly and behave well on managed laptops, tablets, and phones.</p>
-                    <p>The site mixes practical classroom utilities, concept-first physics simulations, and a few lighter experiments where a playful interface helps learners engage.</p>
-                </div>
-                <div class="about-card">
-                    <h3>Offline where it matters</h3>
-                    <p>Most published pages cache after the first visit. When a card shows <strong>Offline ready</strong>, that page and its core assets are available without a network connection.</p>
-                    <p>A small number of features still depend on live services, especially Asteroid Storm's leaderboard and the external EAL Companion app.</p>
-                </div>
-            </div>
-        </section>
-    </main>
+    <div class="section" id="about">
+        <h2>About</h2>
+        <p>
+            Welcome to <strong>PanPhy Labs</strong>. The tools, simulations, and games here are built with AI and
+            designed to be interactive and educational. While there are many great web tools and physics simulations
+            online, not all meet my needs. On school-managed devices, students and teachers often don't have the
+            admin rights to install software, so I build my own web apps: simple, browser-based, and ready for
+            everyone to explore and enjoy.
+            <br><br>
+            Most apps are also offline-friendly. After your first visit, the site caches each app in the
+            background &mdash; look for the <strong>Offline ready</strong> badge on each card above. Once cached,
+            those tools, simulations, and games work without an internet connection. A few features that rely on
+            external services (Asteroid Storm's leaderboard and the EAL Companion) still require internet access.
+        </p>
+    </div>
 
     <footer>
         <p>&copy; 2026 PanPhy Labs</p>
