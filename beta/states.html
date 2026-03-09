@@ -262,6 +262,36 @@
       white-space: nowrap;
     }
 
+    /* Thermometer overlay on sim canvas */
+    .sim-thermometer-overlay {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .sim-thermometer-overlay .thermo-readout {
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--nav-border);
+      font-size: 0.68rem;
+    }
+
+    .sim-thermometer-overlay .thermometer-marker {
+      left: auto;
+      right: calc(100% + 0.7rem);
+      flex-direction: row-reverse;
+    }
+
     /* Controls Panel */
     #controlsPanel {
       display: flex;
@@ -578,21 +608,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
-    .transition-grid {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 1rem;
-      align-items: stretch;
-    }
-
-    .thermometer-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
-      min-width: 96px;
-    }
-
     .thermometer {
       position: relative;
       width: 54px;
@@ -703,13 +718,6 @@
       font-family: var(--font-mono);
       font-size: 0.78rem;
       color: var(--text-secondary);
-    }
-
-    .heat-cool-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      justify-content: center;
     }
 
     .heat-cool-status {
@@ -895,16 +903,6 @@
         order: 2;
         min-height: auto;
       }
-
-      .transition-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .thermometer-card {
-        flex-direction: row;
-        justify-content: center;
-        gap: 1rem;
-      }
     }
 
     @media (max-width: 640px) {
@@ -927,20 +925,6 @@
       .banner-title {
         font-size: 1.2rem;
       }
-
-      .thermometer-card {
-        flex-direction: column;
-      }
-
-      .thermometer-marker {
-        left: auto;
-        right: calc(100% + 0.6rem);
-        flex-direction: row-reverse;
-      }
-
-      .thermometer-marker::before {
-        width: 10px;
-      }
     }
   </style>
 </head>
@@ -959,6 +943,23 @@
     <div id="workspace">
       <div id="simPanel" class="panel">
         <canvas id="simCanvas"></canvas>
+        <div class="sim-thermometer-overlay" aria-hidden="true">
+          <div class="thermo-readout">Measured</div>
+          <div class="thermometer">
+            <div class="thermometer-track">
+              <div id="thermoFill" class="thermometer-fill"></div>
+            </div>
+            <div id="thermoTargetLine" class="thermometer-target-line"></div>
+            <div id="meltMarker" class="thermometer-marker">
+              <span class="thermometer-marker-label">Melting</span>
+            </div>
+            <div id="criticalMarker" class="thermometer-marker thermometer-marker--critical">
+              <span class="thermometer-marker-label">Boiling</span>
+            </div>
+            <div class="thermometer-bulb"></div>
+          </div>
+          <div class="thermo-readout">40 K to 1600 K (model scale)</div>
+        </div>
         <p class="sim-hint">Drag to rotate · Scroll to zoom</p>
       </div>
 
@@ -1028,48 +1029,26 @@
               <label for="heatCoolSlider">Heat / Cool</label>
               <span id="heatVal">40 K</span>
             </div>
-            <div class="transition-grid">
-              <div class="thermometer-card">
-                <div class="thermo-readout">Measured</div>
-                <div class="thermometer" aria-hidden="true">
-                  <div class="thermometer-track">
-                    <div id="thermoFill" class="thermometer-fill"></div>
-                  </div>
-                  <div id="thermoTargetLine" class="thermometer-target-line"></div>
-                  <div id="meltMarker" class="thermometer-marker">
-                    <span class="thermometer-marker-label">Melting</span>
-                  </div>
-                  <div id="criticalMarker" class="thermometer-marker thermometer-marker--critical">
-                    <span class="thermometer-marker-label">Boiling</span>
-                  </div>
-                  <div class="thermometer-bulb"></div>
-                </div>
-                <div class="thermo-readout">40 K to 1600 K (model scale)</div>
-              </div>
-
-              <div class="heat-cool-stack">
-                <p class="info-copy">Use the heater/cooler to push the sample gradually through the melting range and up into evaporation.</p>
-                <div class="setpoint-row">
-                  <span>Setpoint</span>
-                  <strong id="setpointVal">40 K</strong>
-                </div>
-                <div id="heatCoolStatus" class="heat-cool-status">Holding</div>
-                <div class="heat-cool-shell">
-                  <input type="range" id="heatCoolSlider" min="-100" max="100" step="1" value="0"
-                    aria-label="Heat or cool the sample">
-                  <div class="heat-cool-labels">
-                    <span>Cool</span>
-                    <span>Hold</span>
-                    <span>Heat</span>
-                  </div>
-                </div>
-                <div class="transition-markers" aria-hidden="true">
-                  <span class="transition-pill">Melting ~150 K</span>
-                  <span class="transition-pill">Boiling ~950 K</span>
-                </div>
-                <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer fill tracks the measured temperature, while the dark line marks the current target.</p>
+            <p class="info-copy">Use the heater/cooler to push the sample gradually through the melting range and up into evaporation.</p>
+            <div class="setpoint-row">
+              <span>Setpoint</span>
+              <strong id="setpointVal">40 K</strong>
+            </div>
+            <div id="heatCoolStatus" class="heat-cool-status">Holding</div>
+            <div class="heat-cool-shell">
+              <input type="range" id="heatCoolSlider" min="-100" max="100" step="1" value="0"
+                aria-label="Heat or cool the sample">
+              <div class="heat-cool-labels">
+                <span>Cool</span>
+                <span>Hold</span>
+                <span>Heat</span>
               </div>
             </div>
+            <div class="transition-markers" aria-hidden="true">
+              <span class="transition-pill">Melting ~150 K</span>
+              <span class="transition-pill">Boiling ~950 K</span>
+            </div>
+            <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer on the simulation shows the measured temperature; the dark line marks the target.</p>
           </div>
         </section>
 
@@ -1482,11 +1461,13 @@
       return SIM_STATE[stateKey];
     }
 
-    function getPhaseInfo(metrics) {
+    function getPhaseInfo(metrics, previousLabel) {
       // The labels are inferred from the particle structure, not forced by
       // the controls. The lower transition is treated as a broad melting range.
       // The upper transition passes through a boiling/evaporation region, so
       // we switch to "Gas" only when the sample is clearly dispersed.
+      // The previous label is used to pick direction-aware names for
+      // transition zones (Melting vs Freezing, Evaporation vs Condensation).
       if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.52) {
         return {
           label: 'Solid',
@@ -1496,10 +1477,13 @@
       }
 
       if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.72) {
+        const cooling = previousLabel === 'Liquid';
         return {
-          label: 'Melting',
+          label: cooling ? 'Freezing' : 'Melting',
           cls: 'status-melting',
-          detail: 'The regular arrangement is breaking up: particles stay close together but can now move around each other.'
+          detail: cooling
+            ? 'Particles are slowing down and forming a regular arrangement as the substance solidifies.'
+            : 'The regular arrangement is breaking up: particles stay close together but can now move around each other.'
         };
       }
 
@@ -1524,10 +1508,13 @@
         metrics.rmsRadius >= 0.78 &&
         metrics.reducedT >= DISPLAY_CRITICAL_REDUCED_T - 0.20
       ) {
+        const cooling = previousLabel === 'Gas';
         return {
-          label: 'Evaporation',
+          label: cooling ? 'Condensation' : 'Evaporation',
           cls: 'status-critical',
-          detail: 'Particles are escaping from the liquid — this is similar to boiling, but happens gradually in this small model.'
+          detail: cooling
+            ? 'Particles are coming closer together as the gas turns back into a liquid.'
+            : 'Particles are escaping from the liquid — this is similar to boiling, but happens gradually in this small model.'
         };
       }
 
@@ -1630,7 +1617,7 @@
         fillFraction: SIM_STATE.metrics.fillFraction,
         rmsRadius: SIM_STATE.metrics.rmsRadius,
         reducedT: SIM_STATE.measuredReducedT
-      });
+      }, SIM_STATE.phaseInfo.label);
 
       bondMat.opacity = 0.04 + 0.34 * clamp(SIM_STATE.metrics.bondFraction, 0, 1);
     }
