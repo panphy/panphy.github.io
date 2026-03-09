@@ -97,7 +97,7 @@ If you promote an unlisted page to production, treat it as a full launch task:
 │   ├── markdown_editor.html # Entry point → markdown_editor/ (ES modules)
 │   └── *.html              # motion_tracker, sound_analyzer, tone_generator
 ├── simulations/            # Physics simulations
-│   ├── *.html              # superposition, standing_wave, interference, lorentz, lorentz_learn
+│   ├── *.html              # superposition, standing_wave, interference, states, lorentz, lorentz_learn
 │   └── collision.html      # Entry point → collision/ (modular JS/CSS/assets)
 ├── fun/                    # Games (dodge.html excluded from SW cache)
 ├── for_teachers/           # Teacher utilities

@@ -1,9 +1,10 @@
-const BUILD_ID = '2026-03-05T10:00:00Z';
+const BUILD_ID = '2026-03-09T23:08:22Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
 const CORS_REQUIRED_ASSETS = new Set([
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js'
+  'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
+  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
 ]);
 
 const ASSETS_TO_CACHE = [
@@ -62,12 +63,14 @@ const ASSETS_TO_CACHE = [
   '/simulations/interference.html',
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',
+  '/simulations/states.html',
   '/simulations/lorentz.html',
   '/simulations/lorentz_learn.html',
   '/simulations/collision.html',
   '/simulations/collision/styles.css',
   '/simulations/collision/app.js',
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
+  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/collision/collision_assets/models/hand_landmarker.task',
   '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
   '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',

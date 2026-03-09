@@ -16,7 +16,7 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 ## Project Structure
 - `/index.html`: Main landing page and portal.
 - `/tools/`: Productivity apps (e.g., `panphyplot.html`, `motion_tracker.html`, `markdown_editor.html`, `sound_analyzer.html`, `tone_generator.html`).
-- `/simulations/`: Physics simulations (`superposition.html`, `standing_wave.html`, `interference.html`, `lorentz.html`, `lorentz_learn.html`, `collision.html`).
+- `/simulations/`: Physics simulations (`superposition.html`, `standing_wave.html`, `interference.html`, `states.html`, `lorentz.html`, `lorentz_learn.html`, `collision.html`).
 - `/for_teachers/`: Utility apps for educators (`timer.html`, `visualizer.html`).
 - `/fun/`: Games and demos (`dodge.html`, `react.html`, `ascii_cam.html`).
 - `/misc/`: Unlisted/legacy pages (`digitizer.html`, `gcse_phy/` flashcards, `ising_model.html`, `phyclub_showcase.html`).

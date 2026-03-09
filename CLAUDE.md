@@ -54,6 +54,7 @@
 │   ├── superposition.html
 │   ├── standing_wave.html
 │   ├── interference.html   # Two-source wave interference (3D ripple tank)
+│   ├── states.html         # States of matter particle model
 │   ├── lorentz.html
 │   ├── lorentz_learn.html  # Lorentz sim learning companion
 │   ├── collision.html      # 3D collision sim (entry point)
