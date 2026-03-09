@@ -944,7 +944,6 @@
       <div id="simPanel" class="panel">
         <canvas id="simCanvas"></canvas>
         <div class="sim-thermometer-overlay" aria-hidden="true">
-          <div class="thermo-readout">Measured</div>
           <div class="thermometer">
             <div class="thermometer-track">
               <div id="thermoFill" class="thermometer-fill"></div>
@@ -958,7 +957,7 @@
             </div>
             <div class="thermometer-bulb"></div>
           </div>
-          <div class="thermo-readout">40 K to 1600 K (model scale)</div>
+          <div id="thermoReadout" class="thermo-readout">40 K</div>
         </div>
         <p class="sim-hint">Drag to rotate · Scroll to zoom</p>
       </div>
@@ -1006,7 +1005,7 @@
                     <span>Particles stay close but can slide past one another.</span>
                   </span>
                 </span>
-                <span class="state-preset-temp">~520 K</span>
+                <span class="state-preset-temp">~370 K</span>
               </button>
               <button id="presetGasBtn" class="state-preset" type="button" data-preset="gas">
                 <span class="state-preset-main">
@@ -1137,7 +1136,7 @@
     const N_Z = 4;
     const N = N_X * N_Y * N_Z * 4;
     const PARTICLE_RADIUS = 0.4;
-    const BOX_SIZE = 12.5;
+    const BOX_SIZE = 10.0;
     const HALF_BOX = BOX_SIZE / 2;
     const BOND_CUTOFF = 1.35 * LJ_SIGMA;
     const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
@@ -1160,7 +1159,7 @@
     const THERMOMETER_TRACK_OFFSET_PX = 22;
     const STATE_PRESETS = {
       solid: { targetReducedT: 0.18, label: 'Solid' },
-      liquid: { targetReducedT: 0.92, label: 'Liquid' },
+      liquid: { targetReducedT: 0.78, label: 'Liquid' },
       gas: { targetReducedT: 1.72, label: 'Gas' }
     };
 
@@ -1477,7 +1476,7 @@
       }
 
       if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.72) {
-        const cooling = previousLabel === 'Liquid';
+        const cooling = previousLabel === 'Liquid' || previousLabel === 'Freezing';
         return {
           label: cooling ? 'Freezing' : 'Melting',
           cls: 'status-melting',
@@ -1508,7 +1507,7 @@
         metrics.rmsRadius >= 0.78 &&
         metrics.reducedT >= DISPLAY_CRITICAL_REDUCED_T - 0.20
       ) {
-        const cooling = previousLabel === 'Gas';
+        const cooling = previousLabel === 'Gas' || previousLabel === 'Condensation';
         return {
           label: cooling ? 'Condensation' : 'Evaporation',
           cls: 'status-critical',
@@ -1643,6 +1642,7 @@
     const thermoTargetLine = document.getElementById('thermoTargetLine');
     const meltMarker = document.getElementById('meltMarker');
     const criticalMarker = document.getElementById('criticalMarker');
+    const thermoReadout = document.getElementById('thermoReadout');
 
     const presetButtons = {
       solid: presetSolidBtn,
@@ -1691,6 +1691,7 @@
       positionThermometerElement(thermoTargetLine, SIM_STATE.targetReducedT);
       positionThermometerElement(meltMarker, DISPLAY_MELT_REDUCED_T);
       positionThermometerElement(criticalMarker, DISPLAY_CRITICAL_REDUCED_T);
+      thermoReadout.textContent = formatDisplayTemperature(SIM_STATE.measuredReducedT);
     }
 
     function updateHeatCoolStatus() {
@@ -1808,7 +1809,7 @@
     }
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.set(0, 8, 20);
+    camera.position.set(0, 6, 16);
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
