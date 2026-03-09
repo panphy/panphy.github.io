@@ -390,55 +390,123 @@
       gap: 0.4rem;
     }
 
-    .slider-shell {
-      position: relative;
-      padding-bottom: 2.3rem;
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
     }
 
-    .slider-markers {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 14px;
-      height: 2rem;
-      pointer-events: none;
+    .tab-btn {
+      min-height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
     }
 
-    .slider-marker {
-      position: absolute;
-      top: 0;
-      transform: translateX(-50%);
+    .tab-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .tab-btn[aria-selected="true"] {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      color: #ffffff;
+      box-shadow: 0 12px 24px rgba(108, 92, 231, 0.18);
+    }
+
+    .tab-panel[hidden] {
+      display: none;
+    }
+
+    .state-buttons {
       display: flex;
       flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .state-preset {
+      display: flex;
       align-items: center;
-      gap: 0.2rem;
-      white-space: nowrap;
-    }
-
-    .slider-marker::before {
-      content: '';
-      width: 2px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--brand-primary);
-      opacity: 0.85;
-    }
-
-    .slider-marker--critical::before {
-      background: #ff9f43;
-    }
-
-    .slider-marker-label {
-      padding: 2px 6px;
-      border-radius: 999px;
+      justify-content: space-between;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.85rem 0.95rem;
       border: 1px solid var(--border);
+      border-radius: 14px;
       background: var(--surface);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .state-preset:hover {
+      transform: translateY(-1px);
+      border-color: rgba(108, 92, 231, 0.35);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    }
+
+    .state-preset.is-active {
+      border-color: rgba(108, 92, 231, 0.45);
+      box-shadow: 0 12px 24px rgba(108, 92, 231, 0.12);
+    }
+
+    .state-preset-main {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .state-preset-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .state-preset-swatch--solid {
+      background: #00cec9;
+    }
+
+    .state-preset-swatch--liquid {
+      background: #6c5ce7;
+    }
+
+    .state-preset-swatch--gas {
+      background: #ff7675;
+    }
+
+    .state-preset-label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      min-width: 0;
+    }
+
+    .state-preset-label strong {
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .state-preset-label span {
+      font-size: 0.75rem;
       color: var(--text-secondary);
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .state-preset-temp {
       font-family: var(--font-mono);
-      font-size: 0.62rem;
+      font-size: 0.76rem;
       font-weight: 600;
-      line-height: 1;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      color: var(--text-secondary);
+      white-space: nowrap;
     }
 
     .control-header {
@@ -478,16 +546,16 @@
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
-      height: 6px;
-      border-radius: 5px;
+      height: 8px;
+      border-radius: 999px;
       background: var(--slider-track);
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       margin-top: -7px;
       border-radius: 50%;
       border: none;
@@ -496,27 +564,234 @@
     }
 
     input[type="range"]::-moz-range-track {
-      height: 6px;
-      border-radius: 5px;
+      height: 8px;
+      border-radius: 999px;
       background: var(--slider-track);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       border: none;
       background: var(--slider-thumb);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
-    /* Temp Slider Gradient overlay */
-    #tempSlider::-webkit-slider-runnable-track {
-      background: linear-gradient(to right, #00cec9, #6c5ce7, #ff7675);
+    .transition-grid {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 1rem;
+      align-items: stretch;
     }
 
-    #tempSlider::-moz-range-track {
-      background: linear-gradient(to right, #00cec9, #6c5ce7, #ff7675);
+    .thermometer-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 96px;
+    }
+
+    .thermometer {
+      position: relative;
+      width: 54px;
+      height: 228px;
+      padding: 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(241, 245, 249, 0.95));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+      overflow: hidden;
+    }
+
+    [data-theme="dark"] .thermometer {
+      background: linear-gradient(180deg, rgba(30, 33, 41, 0.95), rgba(23, 25, 31, 0.98));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .thermometer-track {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 182px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      overflow: hidden;
+    }
+
+    [data-theme="dark"] .thermometer-track {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .thermometer-fill {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0%;
+      border-radius: 999px 999px 7px 7px;
+      background: linear-gradient(180deg, #ff7675 0%, #a29bfe 56%, #00cec9 100%);
+      transition: height 0.18s ease;
+    }
+
+    .thermometer-target-line {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--text-main);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+      transition: bottom 0.18s ease;
+    }
+
+    .thermometer-bulb {
+      position: absolute;
+      left: 50%;
+      bottom: 8px;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ff7675, #ff5a5f);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 16px rgba(255, 118, 117, 0.25);
+    }
+
+    .thermometer-marker {
+      position: absolute;
+      left: calc(100% + 0.7rem);
+      transform: translateY(50%);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+    }
+
+    .thermometer-marker::before {
+      content: '';
+      width: 12px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--brand-primary);
+      opacity: 0.9;
+    }
+
+    .thermometer-marker--critical::before {
+      background: #ff9f43;
+    }
+
+    .thermometer-marker-label {
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .thermo-readout {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .heat-cool-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .heat-cool-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: flex-start;
+      min-height: 30px;
+      padding: 0 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(108, 92, 231, 0.18);
+      background: rgba(108, 92, 231, 0.08);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .setpoint-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .setpoint-row span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .setpoint-row strong {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .heat-cool-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    #heatCoolSlider::-webkit-slider-runnable-track {
+      background: linear-gradient(90deg, #00cec9 0%, #cfe8f2 45%, #ffe5c2 55%, #ff7675 100%);
+    }
+
+    #heatCoolSlider::-moz-range-track {
+      background: linear-gradient(90deg, #00cec9 0%, #cfe8f2 45%, #ffe5c2 55%, #ff7675 100%);
+    }
+
+    .heat-cool-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .transition-markers {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .transition-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
     }
 
     /* Buttons */
@@ -589,6 +864,13 @@
       box-shadow: 0 1px 0 var(--border);
     }
 
+    @media (pointer: coarse) {
+      #theme-button {
+        min-height: 48px;
+        min-width: 48px;
+      }
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       body {
@@ -613,6 +895,16 @@
         order: 2;
         min-height: auto;
       }
+
+      .transition-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .thermometer-card {
+        flex-direction: row;
+        justify-content: center;
+        gap: 1rem;
+      }
     }
 
     @media (max-width: 640px) {
@@ -634,6 +926,20 @@
 
       .banner-title {
         font-size: 1.2rem;
+      }
+
+      .thermometer-card {
+        flex-direction: column;
+      }
+
+      .thermometer-marker {
+        left: auto;
+        right: calc(100% + 0.6rem);
+        flex-direction: row-reverse;
+      }
+
+      .thermometer-marker::before {
+        width: 10px;
       }
     }
   </style>
@@ -667,21 +973,105 @@
           <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">40 K</span>
         </div>
 
-        <div class="control-card">
-          <div class="control-block">
+        <div class="tab-bar" role="tablist" aria-label="Matter controls">
+          <button id="statesTabBtn" class="tab-btn" type="button" role="tab" aria-selected="false"
+            aria-controls="statesTabPanel">States</button>
+          <button id="transitionsTabBtn" class="tab-btn" type="button" role="tab" aria-selected="true"
+            aria-controls="transitionsTabPanel">Transitions</button>
+        </div>
+
+        <section id="statesTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="statesTabBtn" hidden>
+          <div class="control-card">
             <div class="control-header">
-              <label for="tempSlider">Target Temperature</label>
+              <label>Jump To Example States</label>
+              <span>Representative targets</span>
+            </div>
+            <div class="state-buttons">
+              <button id="presetSolidBtn" class="state-preset" type="button" data-preset="solid">
+                <span class="state-preset-main">
+                  <span class="state-preset-swatch state-preset-swatch--solid" aria-hidden="true"></span>
+                  <span class="state-preset-label">
+                    <strong>Solid</strong>
+                    <span>Tightly packed lattice with mostly vibrational motion.</span>
+                  </span>
+                </span>
+                <span class="state-preset-temp">~70 K</span>
+              </button>
+              <button id="presetLiquidBtn" class="state-preset" type="button" data-preset="liquid">
+                <span class="state-preset-main">
+                  <span class="state-preset-swatch state-preset-swatch--liquid" aria-hidden="true"></span>
+                  <span class="state-preset-label">
+                    <strong>Liquid</strong>
+                    <span>Particles stay close but can slide past one another.</span>
+                  </span>
+                </span>
+                <span class="state-preset-temp">~520 K</span>
+              </button>
+              <button id="presetGasBtn" class="state-preset" type="button" data-preset="gas">
+                <span class="state-preset-main">
+                  <span class="state-preset-swatch state-preset-swatch--gas" aria-hidden="true"></span>
+                  <span class="state-preset-label">
+                    <strong>Gas-like</strong>
+                    <span>Widely separated particles with only brief encounters.</span>
+                  </span>
+                </span>
+                <span class="state-preset-temp">~1300 K</span>
+              </button>
+            </div>
+            <p class="info-copy info-copy--muted">These buttons move the sample toward clear examples of each regime in this model, so you can compare the 3D particle structure before exploring transitions.</p>
+          </div>
+        </section>
+
+        <section id="transitionsTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="transitionsTabBtn">
+          <div class="control-card">
+            <div class="control-header">
+              <label for="heatCoolSlider">Heat / Cool</label>
               <span id="heatVal">40 K</span>
             </div>
-            <div class="slider-shell">
-              <input type="range" id="tempSlider" min="0" max="100" step="1" value="0">
-              <div class="slider-markers" aria-hidden="true">
-                <span id="meltMarker" class="slider-marker slider-marker--mp"><span class="slider-marker-label">Melting ~150 K</span></span>
-                <span id="criticalMarker" class="slider-marker slider-marker--critical"><span class="slider-marker-label">Critical ~950 K</span></span>
+            <div class="transition-grid">
+              <div class="thermometer-card">
+                <div class="thermo-readout">Measured</div>
+                <div class="thermometer" aria-hidden="true">
+                  <div class="thermometer-track">
+                    <div id="thermoFill" class="thermometer-fill"></div>
+                  </div>
+                  <div id="thermoTargetLine" class="thermometer-target-line"></div>
+                  <div id="meltMarker" class="thermometer-marker">
+                    <span class="thermometer-marker-label">Melting</span>
+                  </div>
+                  <div id="criticalMarker" class="thermometer-marker thermometer-marker--critical">
+                    <span class="thermometer-marker-label">Critical</span>
+                  </div>
+                  <div class="thermometer-bulb"></div>
+                </div>
+                <div class="thermo-readout">40 K to 1600 K</div>
+              </div>
+
+              <div class="heat-cool-stack">
+                <p class="info-copy">Use the heater/cooler to push the sample gradually through the melting range and up into the liquid-gas crossover.</p>
+                <div class="setpoint-row">
+                  <span>Setpoint</span>
+                  <strong id="setpointVal">40 K</strong>
+                </div>
+                <div id="heatCoolStatus" class="heat-cool-status">Holding</div>
+                <div class="heat-cool-shell">
+                  <input type="range" id="heatCoolSlider" min="-100" max="100" step="1" value="0"
+                    aria-label="Heat or cool the sample">
+                  <div class="heat-cool-labels">
+                    <span>Cool</span>
+                    <span>Hold</span>
+                    <span>Heat</span>
+                  </div>
+                </div>
+                <div class="transition-markers" aria-hidden="true">
+                  <span class="transition-pill">Melting ~150 K</span>
+                  <span class="transition-pill">Critical ~950 K</span>
+                </div>
+                <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer fill tracks the measured temperature, while the dark line marks the current target.</p>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         <div class="control-card info-card">
           <p id="transitionSummary" class="info-copy">Particles are tightly packed and mainly vibrate about fixed positions.</p>
@@ -723,18 +1113,8 @@
       return start + (end - start) * amount;
     }
 
-    function sliderToTargetTemperature(sliderValue) {
-      // Use a steeper curve so the middle of the slider stays in a clearly
-      // condensed liquid regime instead of jumping too quickly toward gas-like
-      // motion. This gives students more room to explore the solid/liquid
-      // states while keeping the hottest end available for gas.
-      const normalized = clamp(sliderValue / 100, 0, 1);
-      return TARGET_T_MIN + Math.pow(normalized, SLIDER_CURVE_EXPONENT) * (TARGET_T_MAX - TARGET_T_MIN);
-    }
-
-    function reducedTemperatureToSliderPercent(reducedTemperature) {
-      const normalized = clamp((reducedTemperature - TARGET_T_MIN) / (TARGET_T_MAX - TARGET_T_MIN), 0, 1);
-      return Math.pow(normalized, 1 / SLIDER_CURVE_EXPONENT) * 100;
+    function reducedTemperatureToPercent(reducedTemperature) {
+      return clamp((reducedTemperature - TARGET_T_MIN) / (TARGET_T_MAX - TARGET_T_MIN), 0, 1) * 100;
     }
 
     function mapReducedToDisplayKelvin(reducedTemperature) {
@@ -790,13 +1170,20 @@
     const DISPLAY_MAX_K = 1600;
     const DISPLAY_MELT_REDUCED_T = 0.58;
     const DISPLAY_CRITICAL_REDUCED_T = 1.32;
-    const SLIDER_CURVE_EXPONENT = 1.7;
     const THERMOSTAT_TAU = 0.18;
     const STRUCTURE_GRID = 6;
     const STRUCTURE_CELL_COUNT = STRUCTURE_GRID * STRUCTURE_GRID * STRUCTURE_GRID;
     const EMERGENCY_SPEED_LIMIT = 12.0;
     const EMERGENCY_SPEED_LIMIT_SQ = EMERGENCY_SPEED_LIMIT * EMERGENCY_SPEED_LIMIT;
     const SUB_STEPS = 6;
+    const HEAT_COOL_RATE = 0.58;
+    const THERMOMETER_TRACK_HEIGHT_PX = 182;
+    const THERMOMETER_TRACK_OFFSET_PX = 22;
+    const STATE_PRESETS = {
+      solid: { targetReducedT: 0.18, label: 'Solid' },
+      liquid: { targetReducedT: 0.92, label: 'Liquid' },
+      gas: { targetReducedT: 1.72, label: 'Gas-like' }
+    };
 
     const POS = new Float32Array(N * 3);
     const VEL = new Float32Array(N * 3);
@@ -805,8 +1192,9 @@
     const OCCUPANCY = new Uint8Array(STRUCTURE_CELL_COUNT);
 
     const SIM_STATE = {
-      slider: 0,
       playing: true,
+      activeTab: 'transitions',
+      heatCoolLevel: 0,
       targetReducedT: TARGET_T_MIN,
       measuredReducedT: TARGET_T_MIN,
       referenceBondCount: 1,
@@ -1096,7 +1484,7 @@
 
     function getPhaseInfo(metrics) {
       // The labels are inferred from the particle structure, not forced by
-      // the slider. The lower transition is treated as a broad melting range.
+      // the controls. The lower transition is treated as a broad melting range.
       // The upper transition passes through a critical region, so we switch to
       // "Gas-like" only when the sample is clearly dispersed.
       if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.52) {
@@ -1247,28 +1635,109 @@
       bondMat.opacity = 0.04 + 0.34 * clamp(SIM_STATE.metrics.bondFraction, 0, 1);
     }
 
-    const tempSlider = document.getElementById('tempSlider');
     const heatVal = document.getElementById('heatVal');
+    const setpointVal = document.getElementById('setpointVal');
     const tempVal = document.getElementById('tempVal');
     const stateChip = document.getElementById('stateChip');
     const transitionSummary = document.getElementById('transitionSummary');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const resetBtn = document.getElementById('resetBtn');
     const themeBtn = document.getElementById('theme-button');
+    const statesTabBtn = document.getElementById('statesTabBtn');
+    const transitionsTabBtn = document.getElementById('transitionsTabBtn');
+    const statesTabPanel = document.getElementById('statesTabPanel');
+    const transitionsTabPanel = document.getElementById('transitionsTabPanel');
+    const presetSolidBtn = document.getElementById('presetSolidBtn');
+    const presetLiquidBtn = document.getElementById('presetLiquidBtn');
+    const presetGasBtn = document.getElementById('presetGasBtn');
+    const heatCoolSlider = document.getElementById('heatCoolSlider');
+    const heatCoolStatus = document.getElementById('heatCoolStatus');
+    const thermoFill = document.getElementById('thermoFill');
+    const thermoTargetLine = document.getElementById('thermoTargetLine');
     const meltMarker = document.getElementById('meltMarker');
     const criticalMarker = document.getElementById('criticalMarker');
 
+    const presetButtons = {
+      solid: presetSolidBtn,
+      liquid: presetLiquidBtn,
+      gas: presetGasBtn
+    };
+
+    function setActiveTab(tabName) {
+      SIM_STATE.activeTab = tabName;
+      const showStates = tabName === 'states';
+      statesTabBtn.setAttribute('aria-selected', showStates ? 'true' : 'false');
+      transitionsTabBtn.setAttribute('aria-selected', showStates ? 'false' : 'true');
+      statesTabPanel.hidden = !showStates;
+      transitionsTabPanel.hidden = showStates;
+    }
+
+    function setHeatCoolLevel(rawValue) {
+      SIM_STATE.heatCoolLevel = clamp(rawValue / 100, -1, 1);
+      heatCoolSlider.value = String(Math.round(SIM_STATE.heatCoolLevel * 100));
+      updateUIState();
+    }
+
+    function releaseHeatCoolControl() {
+      if (Math.abs(SIM_STATE.heatCoolLevel) < 1e-4 && heatCoolSlider.value === '0') return;
+      SIM_STATE.heatCoolLevel = 0;
+      heatCoolSlider.value = '0';
+      updateUIState();
+    }
+
+    function adjustTargetTemperature(dt) {
+      if (Math.abs(SIM_STATE.heatCoolLevel) < 1e-4) return;
+      SIM_STATE.targetReducedT = clamp(
+        SIM_STATE.targetReducedT + SIM_STATE.heatCoolLevel * HEAT_COOL_RATE * dt,
+        TARGET_T_MIN,
+        TARGET_T_MAX
+      );
+    }
+
+    function positionThermometerElement(element, reducedTemperature) {
+      const percent = reducedTemperatureToPercent(reducedTemperature) / 100;
+      element.style.bottom = (THERMOMETER_TRACK_OFFSET_PX + percent * THERMOMETER_TRACK_HEIGHT_PX) + 'px';
+    }
+
+    function updateThermometer() {
+      thermoFill.style.height = reducedTemperatureToPercent(SIM_STATE.measuredReducedT) + '%';
+      positionThermometerElement(thermoTargetLine, SIM_STATE.targetReducedT);
+      positionThermometerElement(meltMarker, DISPLAY_MELT_REDUCED_T);
+      positionThermometerElement(criticalMarker, DISPLAY_CRITICAL_REDUCED_T);
+    }
+
+    function updateHeatCoolStatus() {
+      const level = Math.round(Math.abs(SIM_STATE.heatCoolLevel) * 100);
+      heatCoolStatus.textContent = level === 0 ? 'Holding' : (SIM_STATE.heatCoolLevel > 0 ? 'Heating ' + level + '%' : 'Cooling ' + level + '%');
+    }
+
+    function updatePresetButtons() {
+      for (const [presetKey, preset] of Object.entries(STATE_PRESETS)) {
+        const button = presetButtons[presetKey];
+        const isActive = Math.abs(SIM_STATE.targetReducedT - preset.targetReducedT) < 0.12 && Math.abs(SIM_STATE.heatCoolLevel) < 0.01;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      }
+    }
+
+    function jumpToPreset(presetKey) {
+      const preset = STATE_PRESETS[presetKey];
+      if (!preset) return;
+      releaseHeatCoolControl();
+      SIM_STATE.targetReducedT = preset.targetReducedT;
+      updateUIState();
+    }
+
     function updateUIState() {
       heatVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
+      setpointVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
       tempVal.textContent = formatDisplayTemperature(SIM_STATE.measuredReducedT);
       stateChip.textContent = SIM_STATE.phaseInfo.label;
       stateChip.className = 'status-chip ' + SIM_STATE.phaseInfo.cls;
       transitionSummary.textContent = SIM_STATE.phaseInfo.detail;
-    }
-
-    function updateSliderMarkers() {
-      meltMarker.style.left = reducedTemperatureToSliderPercent(DISPLAY_MELT_REDUCED_T) + '%';
-      criticalMarker.style.left = reducedTemperatureToSliderPercent(DISPLAY_CRITICAL_REDUCED_T) + '%';
+      updateHeatCoolStatus();
+      updateThermometer();
+      updatePresetButtons();
     }
 
     function togglePlay() {
@@ -1277,11 +1746,14 @@
       playPauseBtn.className = SIM_STATE.playing ? 'btn btn-primary' : 'btn btn-secondary';
     }
 
-    tempSlider.addEventListener('input', () => {
-      SIM_STATE.slider = parseInt(tempSlider.value, 10);
-      SIM_STATE.targetReducedT = sliderToTargetTemperature(SIM_STATE.slider);
-      updateUIState();
-    });
+    statesTabBtn.addEventListener('click', () => setActiveTab('states'));
+    transitionsTabBtn.addEventListener('click', () => setActiveTab('transitions'));
+    presetSolidBtn.addEventListener('click', () => jumpToPreset('solid'));
+    presetLiquidBtn.addEventListener('click', () => jumpToPreset('liquid'));
+    presetGasBtn.addEventListener('click', () => jumpToPreset('gas'));
+    heatCoolSlider.addEventListener('input', () => setHeatCoolLevel(parseInt(heatCoolSlider.value, 10)));
+    heatCoolSlider.addEventListener('change', releaseHeatCoolControl);
+    window.addEventListener('pointerup', releaseHeatCoolControl);
 
     playPauseBtn.addEventListener('click', togglePlay);
 
@@ -1306,6 +1778,10 @@
       }
     }
 
+    function updateThemeIcon() {
+      themeBtn.textContent = isDark() ? '🌙' : '☀️';
+    }
+
     function toggleTheme() {
       const html = document.documentElement;
       const current = html.getAttribute('data-theme');
@@ -1319,10 +1795,12 @@
       }
 
       setThemeMeta(next);
+      updateThemeIcon();
       updateThreeTheme();
     }
 
     themeBtn.addEventListener('click', toggleTheme);
+    updateThemeIcon();
 
     const canvas = document.getElementById('simCanvas');
     const scene = new THREE.Scene();
@@ -1458,9 +1936,8 @@
     setTimeout(resize, 0);
 
     resetBtn.addEventListener('click', () => {
-      SIM_STATE.slider = 0;
+      releaseHeatCoolControl();
       SIM_STATE.targetReducedT = TARGET_T_MIN;
-      tempSlider.value = '0';
       initParticles();
       computeForcesAndPotential();
       SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
@@ -1473,8 +1950,8 @@
     computeForcesAndPotential();
     SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
     measureCurrentTemperature(true);
+    setActiveTab(SIM_STATE.activeTab);
     updateThreeTheme();
-    updateSliderMarkers();
     refreshVisualState();
 
     let lastTime = 0;
@@ -1488,6 +1965,7 @@
       if (dt > 0.04) dt = 0.04;
 
       if (SIM_STATE.playing) {
+        adjustTargetTemperature(dt);
         const subDt = dt / SUB_STEPS;
         for (let step = 0; step < SUB_STEPS; step++) {
           stepPhysics(subDt);
