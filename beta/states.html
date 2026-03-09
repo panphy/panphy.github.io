@@ -1498,12 +1498,13 @@
     }
 
     function getPhaseInfo(metrics, previousLabel) {
-      // The labels are inferred from the particle structure, not forced by
-      // the controls. The lower transition is treated as a broad melting range.
-      // The upper transition passes through a boiling/evaporation region, so
-      // we switch to "Gas" only when the sample is clearly dispersed.
-      // The previous label is used to pick direction-aware names for
-      // transition zones (Melting vs Freezing, Evaporation vs Condensation).
+      // The labels are inferred from particle structure and box volume.
+      // In the constant-pressure model the box expands sharply at boiling,
+      // so the volume ratio (boxSize / INITIAL_BOX_SIZE) is the most
+      // reliable indicator for the liquid-gas transition. The previous
+      // label picks direction-aware names (Melting/Freezing, etc.).
+      const volumeRatio = boxSize / INITIAL_BOX_SIZE;
+
       if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.52) {
         return {
           label: 'Solid',
@@ -1524,10 +1525,9 @@
       }
 
       if (
-        metrics.bondFraction <= 0.18 &&
-        metrics.meanCoordination <= 1.8 &&
-        metrics.fillFraction >= 0.67 &&
-        metrics.rmsRadius >= 0.88 &&
+        volumeRatio >= 1.6 &&
+        metrics.bondFraction <= 0.25 &&
+        metrics.meanCoordination <= 2.5 &&
         metrics.reducedT >= DISPLAY_BOIL_REDUCED_T + 0.02
       ) {
         return {
@@ -1538,19 +1538,18 @@
       }
 
       if (
-        metrics.bondFraction <= 0.32 &&
-        metrics.meanCoordination <= 3.0 &&
-        metrics.fillFraction >= 0.58 &&
-        metrics.rmsRadius >= 0.78 &&
-        metrics.reducedT >= DISPLAY_BOIL_REDUCED_T - 0.20
+        volumeRatio >= 1.15 &&
+        metrics.bondFraction <= 0.45 &&
+        metrics.meanCoordination <= 4.0 &&
+        metrics.reducedT >= DISPLAY_BOIL_REDUCED_T - 0.15
       ) {
         const cooling = previousLabel === 'Gas' || previousLabel === 'Condensation';
         return {
           label: cooling ? 'Condensation' : 'Evaporation',
           cls: 'status-critical',
           detail: cooling
-            ? 'Particles are coming closer together as the gas turns back into a liquid.'
-            : 'Particles are escaping from the liquid — this is similar to boiling, but happens gradually in this small model.'
+            ? 'Particles are losing energy and coming closer together as the gas condenses back into a liquid.'
+            : 'Particles are gaining enough energy to escape from the liquid as the substance boils.'
         };
       }
 
@@ -1875,13 +1874,6 @@
     const boxLines = new THREE.LineSegments(boxEdges, boxMaterial);
     scene.add(boxLines);
 
-    const floorGeo = new THREE.PlaneGeometry(INITIAL_BOX_SIZE, INITIAL_BOX_SIZE);
-    const floorMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.05, depthWrite: false });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -halfBox;
-    scene.add(floor);
-
     const particleGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 16);
     const particleMat = new THREE.MeshPhysicalMaterial({
       color: phaseColors.cold,
@@ -1915,8 +1907,6 @@
       const theme = isDark() ? colors.dark : colors.light;
       scene.background = new THREE.Color(theme.bg);
       boxMaterial.color.setHex(theme.boxEdge);
-      floorMat.opacity = isDark() ? 0.2 : 0.05;
-      floorMat.color.setHex(isDark() ? 0xffffff : 0x000000);
     }
 
     function updateParticleColors() {
@@ -1933,8 +1923,6 @@
     function updateBoxVisuals() {
       const s = boxSize / INITIAL_BOX_SIZE;
       boxLines.scale.set(s, s, s);
-      floor.scale.set(s, 1, s);
-      floor.position.y = -halfBox;
     }
 
     function syncParticlesToScene() {
