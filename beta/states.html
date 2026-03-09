@@ -1475,7 +1475,7 @@
         };
       }
 
-      if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.72) {
+      if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.63) {
         const cooling = previousLabel === 'Liquid' || previousLabel === 'Freezing';
         return {
           label: cooling ? 'Freezing' : 'Melting',
