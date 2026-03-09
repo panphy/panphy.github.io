@@ -967,7 +967,7 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Phase labels from a constant-volume particle model.</p>
+          <p>Phase labels from a constant-pressure particle model.</p>
         </div>
 
         <div class="status-row">
@@ -1047,7 +1047,7 @@
             </div>
             <div class="transition-markers" aria-hidden="true">
               <span class="transition-pill">Melting ~150 K</span>
-              <span class="transition-pill">Boiling ~950 K</span>
+              <span class="transition-pill">Boiling ~500 K</span>
             </div>
             <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer on the simulation shows the measured temperature; the dark line marks the target.</p>
           </div>
@@ -1055,7 +1055,7 @@
 
         <div class="control-card info-card">
           <p id="transitionSummary" class="info-copy">Particles are tightly packed and mainly vibrate about fixed positions.</p>
-          <p class="info-copy info-copy--muted">This particle model shows gradual transitions, not exact values for any real substance. Temperatures are illustrative and do not match any specific real material. In this model the particles are kept in a fixed-size box (constant volume), so the transition from liquid to gas is more gradual than the sharp boiling point you see at constant pressure in real life.</p>
+          <p class="info-copy info-copy--muted">This particle model runs at constant pressure — the box expands when the liquid boils and shrinks when the gas condenses, just like a real substance. Temperatures are illustrative and do not match any specific real material.</p>
         </div>
 
         <div class="sim-actions">
@@ -1100,23 +1100,22 @@
     function mapReducedToDisplayKelvin(reducedTemperature) {
       // The simulation runs in Lennard-Jones reduced units internally.
       // For pre-university teaching, we display an illustrative Kelvin scale
-      // for a fictional sample substance whose melting crossover is around
-      // 150 K and whose liquid-gas boundary blurs near a critical region
-      // around 950 K. The mapping is tuned so those display temperatures
-      // line up with when this simulated sample starts to look melted or
-      // gas-like. It is a presentation layer, not a calibration to any
-      // specific real material.
+      // for a fictional sample substance whose melting point is around
+      // 150 K and whose boiling point is around 500 K. The mapping is
+      // tuned so those display temperatures line up with when this simulated
+      // sample starts to look melted or gaseous. It is a presentation layer,
+      // not a calibration to any specific real material.
       const t = clamp(reducedTemperature, TARGET_T_MIN, TARGET_T_MAX);
       if (t <= DISPLAY_MELT_REDUCED_T) {
         const amount = (t - TARGET_T_MIN) / (DISPLAY_MELT_REDUCED_T - TARGET_T_MIN);
         return lerp(DISPLAY_MIN_K, DISPLAY_MELT_K, clamp(amount, 0, 1));
       }
-      if (t <= DISPLAY_CRITICAL_REDUCED_T) {
-        const amount = (t - DISPLAY_MELT_REDUCED_T) / (DISPLAY_CRITICAL_REDUCED_T - DISPLAY_MELT_REDUCED_T);
-        return lerp(DISPLAY_MELT_K, DISPLAY_CRITICAL_K, clamp(amount, 0, 1));
+      if (t <= DISPLAY_BOIL_REDUCED_T) {
+        const amount = (t - DISPLAY_MELT_REDUCED_T) / (DISPLAY_BOIL_REDUCED_T - DISPLAY_MELT_REDUCED_T);
+        return lerp(DISPLAY_MELT_K, DISPLAY_BOIL_K, clamp(amount, 0, 1));
       }
-      const amount = (t - DISPLAY_CRITICAL_REDUCED_T) / (TARGET_T_MAX - DISPLAY_CRITICAL_REDUCED_T);
-      return lerp(DISPLAY_CRITICAL_K, DISPLAY_MAX_K, clamp(amount, 0, 1));
+      const amount = (t - DISPLAY_BOIL_REDUCED_T) / (TARGET_T_MAX - DISPLAY_BOIL_REDUCED_T);
+      return lerp(DISPLAY_BOIL_K, DISPLAY_MAX_K, clamp(amount, 0, 1));
     }
 
     function formatDisplayTemperature(reducedTemperature) {
@@ -1138,19 +1137,24 @@
     const N_Z = 4;
     const N = N_X * N_Y * N_Z * 4;
     const PARTICLE_RADIUS = 0.4;
-    const BOX_SIZE = 10.0;
-    const HALF_BOX = BOX_SIZE / 2;
+    const INITIAL_BOX_SIZE = 10.0;
+    const MIN_BOX_SIZE = 7.0;
+    const MAX_BOX_SIZE = 22.0;
+    let boxSize = INITIAL_BOX_SIZE;
+    let halfBox = boxSize / 2;
     const BOND_CUTOFF = 1.35 * LJ_SIGMA;
     const BOND_CUTOFF_SQ = BOND_CUTOFF * BOND_CUTOFF;
     const TARGET_T_MIN = 0.05;
     const TARGET_T_MAX = 2.1;
     const DISPLAY_MIN_K = 40;
     const DISPLAY_MELT_K = 150;
-    const DISPLAY_CRITICAL_K = 950;
+    const DISPLAY_BOIL_K = 500;
     const DISPLAY_MAX_K = 1600;
     const DISPLAY_MELT_REDUCED_T = 0.58;
-    const DISPLAY_CRITICAL_REDUCED_T = 1.32;
+    const DISPLAY_BOIL_REDUCED_T = 0.85;
     const THERMOSTAT_TAU = 0.18;
+    const TARGET_PRESSURE = 0.03;
+    const BAROSTAT_TAU = 2.0;
     const STRUCTURE_GRID = 6;
     const STRUCTURE_CELL_COUNT = STRUCTURE_GRID * STRUCTURE_GRID * STRUCTURE_GRID;
     const EMERGENCY_SPEED_LIMIT = 12.0;
@@ -1177,6 +1181,7 @@
       heatCoolLevel: 0,
       targetReducedT: TARGET_T_MIN,
       measuredReducedT: TARGET_T_MIN,
+      lastVirial: 0,
       referenceBondCount: 1,
       phaseInfo: {
         label: 'Solid',
@@ -1312,8 +1317,10 @@
       // low temperature and a dispersed gas at high temperature. The potential
       // is truncated at 2.5 sigma and shifted so it approaches zero smoothly at
       // the cutoff, which keeps the model stable for a lightweight browser sim.
+      // The virial (sum of r·F for all pairs) is accumulated for the barostat.
       FORCE.fill(0);
       let potentialEnergy = 0;
+      let virial = 0;
 
       for (let i = 0; i < N; i++) {
         for (let j = i + 1; j < N; j++) {
@@ -1337,6 +1344,7 @@
           potentialEnergy += 4.0 * LJ_EPSILON * (s12r12 - s6r6) - LJ_AT_CUTOFF;
 
           const fOverR = 24.0 * LJ_EPSILON * r2inv * (2.0 * s12r12 - s6r6);
+          virial += fOverR * r2;
           const fx = fOverR * dx;
           const fy = fOverR * dy;
           const fz = fOverR * dz;
@@ -1350,12 +1358,13 @@
         }
       }
 
+      SIM_STATE.lastVirial = virial;
       return potentialEnergy;
     }
 
     function reflectParticle(baseIndex) {
-      const lo = -HALF_BOX + PARTICLE_RADIUS;
-      const hi = HALF_BOX - PARTICLE_RADIUS;
+      const lo = -halfBox + PARTICLE_RADIUS;
+      const hi = halfBox - PARTICLE_RADIUS;
 
       for (let axis = 0; axis < 3; axis++) {
         const idx = baseIndex + axis;
@@ -1399,6 +1408,31 @@
       }
     }
 
+    function applyBarostat(dt, currentReducedT) {
+      // Berendsen barostat: computes instantaneous pressure from the ideal-gas
+      // kinetic term plus the virial, then scales the box and all particle
+      // positions to nudge toward the target pressure. When the liquid boils,
+      // internal pressure rises sharply and the box expands — giving the
+      // visible volume jump that students expect from a constant-pressure model.
+      const volume = boxSize * boxSize * boxSize;
+      const pressure = (N * currentReducedT / volume) + SIM_STATE.lastVirial / (3 * volume);
+      const scaling3 = 1 - (dt / BAROSTAT_TAU) * (TARGET_PRESSURE - pressure);
+      const mu = Math.cbrt(clamp(scaling3, 0.97, 1.03));
+      const newBoxSize = clamp(boxSize * mu, MIN_BOX_SIZE, MAX_BOX_SIZE);
+      const actualMu = newBoxSize / boxSize;
+      boxSize = newBoxSize;
+      halfBox = boxSize / 2;
+
+      if (Math.abs(actualMu - 1) > 1e-8) {
+        for (let i = 0; i < N; i++) {
+          POS[i * 3] *= actualMu;
+          POS[i * 3 + 1] *= actualMu;
+          POS[i * 3 + 2] *= actualMu;
+          reflectParticle(i * 3);
+        }
+      }
+    }
+
     function stepPhysics(dt) {
       for (let i = 0; i < N; i++) {
         VEL[i * 3] += 0.5 * FORCE[i * 3] * dt;
@@ -1425,6 +1459,7 @@
       let kineticEnergy = computeThermalKineticEnergy();
       let reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
       applyThermostat(dt, reducedTemperature);
+      applyBarostat(dt, reducedTemperature);
       removeCenterOfMassDrift();
 
       kineticEnergy = computeThermalKineticEnergy();
@@ -1493,7 +1528,7 @@
         metrics.meanCoordination <= 1.8 &&
         metrics.fillFraction >= 0.67 &&
         metrics.rmsRadius >= 0.88 &&
-        metrics.reducedT >= DISPLAY_CRITICAL_REDUCED_T + 0.02
+        metrics.reducedT >= DISPLAY_BOIL_REDUCED_T + 0.02
       ) {
         return {
           label: 'Gas',
@@ -1507,7 +1542,7 @@
         metrics.meanCoordination <= 3.0 &&
         metrics.fillFraction >= 0.58 &&
         metrics.rmsRadius >= 0.78 &&
-        metrics.reducedT >= DISPLAY_CRITICAL_REDUCED_T - 0.20
+        metrics.reducedT >= DISPLAY_BOIL_REDUCED_T - 0.20
       ) {
         const cooling = previousLabel === 'Gas' || previousLabel === 'Condensation';
         return {
@@ -1543,9 +1578,9 @@
         centerY += y;
         centerZ += z;
 
-        const ix = clamp(Math.floor(((x + HALF_BOX) / BOX_SIZE) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
-        const iy = clamp(Math.floor(((y + HALF_BOX) / BOX_SIZE) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
-        const iz = clamp(Math.floor(((z + HALF_BOX) / BOX_SIZE) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
+        const ix = clamp(Math.floor(((x + halfBox) / boxSize) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
+        const iy = clamp(Math.floor(((y + halfBox) / boxSize) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
+        const iz = clamp(Math.floor(((z + halfBox) / boxSize) * STRUCTURE_GRID), 0, STRUCTURE_GRID - 1);
         OCCUPANCY[ix + iy * STRUCTURE_GRID + iz * STRUCTURE_GRID * STRUCTURE_GRID] = 1;
       }
 
@@ -1606,7 +1641,7 @@
       const rawBondFraction = clamp(bondCount / Math.max(1, SIM_STATE.referenceBondCount), 0, 1.25);
       const rawMeanCoordination = (2 * bondCount) / N;
       const rawFillFraction = occupiedCells / STRUCTURE_CELL_COUNT;
-      const rawRmsRadius = Math.sqrt(sumR2 / N) / HALF_BOX;
+      const rawRmsRadius = Math.sqrt(sumR2 / N) / halfBox;
 
       SIM_STATE.metrics.bondFraction = smoothMetric('BondFraction', rawBondFraction, 0.18);
       SIM_STATE.metrics.meanCoordination = smoothMetric('MeanCoordination', rawMeanCoordination, 0.18);
@@ -1692,7 +1727,7 @@
       thermoFill.style.height = reducedTemperatureToPercent(SIM_STATE.measuredReducedT) + '%';
       positionThermometerElement(thermoTargetLine, SIM_STATE.targetReducedT);
       positionThermometerElement(meltMarker, DISPLAY_MELT_REDUCED_T);
-      positionThermometerElement(criticalMarker, DISPLAY_CRITICAL_REDUCED_T);
+      positionThermometerElement(criticalMarker, DISPLAY_BOIL_REDUCED_T);
       thermoReadout.textContent = formatDisplayTemperature(SIM_STATE.measuredReducedT);
     }
 
@@ -1834,17 +1869,17 @@
     dirLight2.position.set(-10, 10, -10);
     scene.add(dirLight2);
 
-    const boxGeo = new THREE.BoxGeometry(BOX_SIZE, BOX_SIZE, BOX_SIZE);
+    const boxGeo = new THREE.BoxGeometry(INITIAL_BOX_SIZE, INITIAL_BOX_SIZE, INITIAL_BOX_SIZE);
     const boxEdges = new THREE.EdgesGeometry(boxGeo);
     const boxMaterial = new THREE.LineBasicMaterial({ color: colors.light.boxEdge, transparent: true, opacity: 0.5 });
     const boxLines = new THREE.LineSegments(boxEdges, boxMaterial);
     scene.add(boxLines);
 
-    const floorGeo = new THREE.PlaneGeometry(BOX_SIZE, BOX_SIZE);
+    const floorGeo = new THREE.PlaneGeometry(INITIAL_BOX_SIZE, INITIAL_BOX_SIZE);
     const floorMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.05, depthWrite: false });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -HALF_BOX;
+    floor.position.y = -halfBox;
     scene.add(floor);
 
     const particleGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 16);
@@ -1895,6 +1930,13 @@
       particleMat.color.copy(color);
     }
 
+    function updateBoxVisuals() {
+      const s = boxSize / INITIAL_BOX_SIZE;
+      boxLines.scale.set(s, s, s);
+      floor.scale.set(s, 1, s);
+      floor.position.y = -halfBox;
+    }
+
     function syncParticlesToScene() {
       for (let i = 0; i < N; i++) {
         dummy.position.set(POS[i * 3], POS[i * 3 + 1], POS[i * 3 + 2]);
@@ -1907,6 +1949,7 @@
     function refreshVisualState() {
       refreshDiagnostics();
       updateParticleColors();
+      updateBoxVisuals();
       updateUIState();
       syncParticlesToScene();
     }
@@ -1928,6 +1971,8 @@
     resetBtn.addEventListener('click', () => {
       releaseHeatCoolControl();
       SIM_STATE.targetReducedT = TARGET_T_MIN;
+      boxSize = INITIAL_BOX_SIZE;
+      halfBox = boxSize / 2;
       initParticles();
       computeForcesAndPotential();
       SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
