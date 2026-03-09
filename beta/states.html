@@ -965,7 +965,7 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Broad crossover labels from a constant-volume particle model.</p>
+          <p>Phase labels from a constant-volume particle model.</p>
         </div>
 
         <div class="status-row">
@@ -1011,14 +1011,14 @@
                 <span class="state-preset-main">
                   <span class="state-preset-swatch state-preset-swatch--gas" aria-hidden="true"></span>
                   <span class="state-preset-label">
-                    <strong>Gas-like</strong>
-                    <span>Widely separated particles with only brief encounters.</span>
+                    <strong>Gas</strong>
+                    <span>Widely separated particles moving randomly with occasional collisions.</span>
                   </span>
                 </span>
                 <span class="state-preset-temp">~1300 K</span>
               </button>
             </div>
-            <p class="info-copy info-copy--muted">These buttons move the sample toward clear examples of each regime in this model, so you can compare the 3D particle structure before exploring transitions.</p>
+            <p class="info-copy info-copy--muted">These buttons move the sample toward clear examples of each state in this model, so you can compare the 3D particle structure before exploring transitions.</p>
           </div>
         </section>
 
@@ -1040,15 +1040,15 @@
                     <span class="thermometer-marker-label">Melting</span>
                   </div>
                   <div id="criticalMarker" class="thermometer-marker thermometer-marker--critical">
-                    <span class="thermometer-marker-label">Critical</span>
+                    <span class="thermometer-marker-label">Boiling</span>
                   </div>
                   <div class="thermometer-bulb"></div>
                 </div>
-                <div class="thermo-readout">40 K to 1600 K</div>
+                <div class="thermo-readout">40 K to 1600 K (model scale)</div>
               </div>
 
               <div class="heat-cool-stack">
-                <p class="info-copy">Use the heater/cooler to push the sample gradually through the melting range and up into the liquid-gas crossover.</p>
+                <p class="info-copy">Use the heater/cooler to push the sample gradually through the melting range and up into evaporation.</p>
                 <div class="setpoint-row">
                   <span>Setpoint</span>
                   <strong id="setpointVal">40 K</strong>
@@ -1065,7 +1065,7 @@
                 </div>
                 <div class="transition-markers" aria-hidden="true">
                   <span class="transition-pill">Melting ~150 K</span>
-                  <span class="transition-pill">Critical ~950 K</span>
+                  <span class="transition-pill">Boiling ~950 K</span>
                 </div>
                 <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer fill tracks the measured temperature, while the dark line marks the current target.</p>
               </div>
@@ -1075,7 +1075,7 @@
 
         <div class="control-card info-card">
           <p id="transitionSummary" class="info-copy">Particles are tightly packed and mainly vibrate about fixed positions.</p>
-          <p class="info-copy info-copy--muted">This Lennard-Jones demo shows broad crossovers, not exact material constants. At the top end the sample becomes gas-like through a critical region, so there is no single boiling-point jump.</p>
+          <p class="info-copy info-copy--muted">This particle model shows gradual transitions, not exact values for any real substance. Temperatures are illustrative and do not match any specific real material. In this model the particles are kept in a fixed-size box (constant volume), so the transition from liquid to gas is more gradual than the sharp boiling point you see at constant pressure in real life.</p>
         </div>
 
         <div class="sim-actions">
@@ -1182,7 +1182,7 @@
     const STATE_PRESETS = {
       solid: { targetReducedT: 0.18, label: 'Solid' },
       liquid: { targetReducedT: 0.92, label: 'Liquid' },
-      gas: { targetReducedT: 1.72, label: 'Gas-like' }
+      gas: { targetReducedT: 1.72, label: 'Gas' }
     };
 
     const POS = new Float32Array(N * 3);
@@ -1485,8 +1485,8 @@
     function getPhaseInfo(metrics) {
       // The labels are inferred from the particle structure, not forced by
       // the controls. The lower transition is treated as a broad melting range.
-      // The upper transition passes through a critical region, so we switch to
-      // "Gas-like" only when the sample is clearly dispersed.
+      // The upper transition passes through a boiling/evaporation region, so
+      // we switch to "Gas" only when the sample is clearly dispersed.
       if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.52) {
         return {
           label: 'Solid',
@@ -1499,7 +1499,7 @@
         return {
           label: 'Melting',
           cls: 'status-melting',
-          detail: 'The lattice is breaking up: particles stay close, but bonds are rearranging continuously.'
+          detail: 'The regular arrangement is breaking up: particles stay close together but can now move around each other.'
         };
       }
 
@@ -1511,9 +1511,9 @@
         metrics.reducedT >= DISPLAY_CRITICAL_REDUCED_T + 0.02
       ) {
         return {
-          label: 'Gas-like',
+          label: 'Gas',
           cls: 'status-gas',
-          detail: 'Particles are spread through the box with only brief, weak attractions between them.'
+          detail: 'Particles are spread through the box, moving randomly with only weak intermolecular forces between them.'
         };
       }
 
@@ -1525,9 +1525,9 @@
         metrics.reducedT >= DISPLAY_CRITICAL_REDUCED_T - 0.20
       ) {
         return {
-          label: 'Critical region',
+          label: 'Evaporation',
           cls: 'status-critical',
-          detail: 'The liquid-gas boundary is blurred here, so there is no sharp boiling line in this model.'
+          detail: 'Particles are escaping from the liquid — this is similar to boiling, but happens gradually in this small model.'
         };
       }
 
