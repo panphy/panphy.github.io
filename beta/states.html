@@ -1830,14 +1830,8 @@
     const scene = new THREE.Scene();
 
     const colors = {
-      light: { bg: 0xe8edf3, boxEdge: 0xa0aec0 },
-      dark: { bg: 0x0a0c14, boxEdge: 0x4a5568 }
-    };
-
-    const phaseColors = {
-      cold: new THREE.Color(0x00cec9),
-      mid: new THREE.Color(0xa29bfe),
-      hot: new THREE.Color(0xff7675)
+      light: { bg: 0xe8edf3, boxEdge: 0xa0aec0, particle: 0x8a99ad, bond: 0x64748b },
+      dark: { bg: 0x0a0c14, boxEdge: 0x4a5568, particle: 0xd8e0ea, bond: 0xe2e8f0 }
     };
 
     function isDark() {
@@ -1876,7 +1870,7 @@
 
     const particleGeo = new THREE.SphereGeometry(PARTICLE_RADIUS, 16, 16);
     const particleMat = new THREE.MeshPhysicalMaterial({
-      color: phaseColors.cold,
+      color: colors.light.particle,
       roughness: 0.2,
       metalness: 0.1,
       clearcoat: 0.8
@@ -1895,7 +1889,7 @@
     bondGeo.setAttribute('position', bondPosAttr);
     bondGeo.setDrawRange(0, 0);
     const bondMat = new THREE.LineBasicMaterial({
-      color: 0xffffff,
+      color: colors.light.bond,
       transparent: true,
       opacity: 0.35,
       depthWrite: false
@@ -1907,17 +1901,8 @@
       const theme = isDark() ? colors.dark : colors.light;
       scene.background = new THREE.Color(theme.bg);
       boxMaterial.color.setHex(theme.boxEdge);
-    }
-
-    function updateParticleColors() {
-      const norm = clamp((SIM_STATE.measuredReducedT - TARGET_T_MIN) / (TARGET_T_MAX - TARGET_T_MIN), 0, 1);
-      const color = new THREE.Color();
-      if (norm < 0.5) {
-        color.lerpColors(phaseColors.cold, phaseColors.mid, norm * 2);
-      } else {
-        color.lerpColors(phaseColors.mid, phaseColors.hot, (norm - 0.5) * 2);
-      }
-      particleMat.color.copy(color);
+      particleMat.color.setHex(theme.particle);
+      bondMat.color.setHex(theme.bond);
     }
 
     function updateBoxVisuals() {
@@ -1936,7 +1921,6 @@
 
     function refreshVisualState() {
       refreshDiagnostics();
-      updateParticleColors();
       updateBoxVisuals();
       updateUIState();
       syncParticlesToScene();
