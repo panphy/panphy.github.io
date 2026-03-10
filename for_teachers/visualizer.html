@@ -1324,6 +1324,11 @@
 				const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
 
 				if (isFullscreen()) {
+					if (pseudoFullscreenActive) {
+						setPseudoFullscreen(false);
+						updateFullscreenUI();
+						return;
+					}
 					if (exitFullscreen) { exitFullscreen.call(document); }
 					return;
 				}
