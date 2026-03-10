@@ -1010,7 +1010,7 @@
                     <span>Particles stay close but can slide past one another.</span>
                   </span>
                 </span>
-                <span class="state-preset-temp">~480 K</span>
+                <span class="state-preset-temp">~350 K</span>
               </button>
               <button id="presetGasBtn" class="state-preset" type="button" data-preset="gas">
                 <span class="state-preset-main">
@@ -1168,7 +1168,7 @@
     const THERMOMETER_TRACK_OFFSET_PX = 22;
     const STATE_PRESETS = {
       solid: { targetReducedT: 0.07, label: 'Solid' },
-      liquid: { targetReducedT: 0.65, label: 'Liquid' },
+      liquid: { targetReducedT: 0.60, label: 'Liquid' },
       gas: { targetReducedT: 1.72, label: 'Gas' }
     };
 
@@ -1508,7 +1508,7 @@
       // label picks direction-aware names (Melting/Freezing, etc.).
       const volumeRatio = boxSize / INITIAL_BOX_SIZE;
 
-      if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.52) {
+      if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.48) {
         return {
           label: 'Solid',
           cls: 'status-solid',
@@ -1516,7 +1516,7 @@
         };
       }
 
-      if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.63) {
+      if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.56) {
         const cooling = previousLabel === 'Liquid' || previousLabel === 'Freezing';
         return {
           label: cooling ? 'Freezing' : 'Melting',
