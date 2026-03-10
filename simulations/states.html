@@ -1544,7 +1544,7 @@
         volumeRatio >= 1.15 &&
         metrics.bondFraction <= 0.45 &&
         metrics.meanCoordination <= 4.0 &&
-        metrics.reducedT >= DISPLAY_BOIL_REDUCED_T - 0.15
+        metrics.reducedT >= DISPLAY_BOIL_REDUCED_T - 0.05
       ) {
         const cooling = previousLabel === 'Gas' || previousLabel === 'Condensation';
         return {
