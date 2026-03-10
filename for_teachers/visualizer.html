@@ -622,6 +622,22 @@
 			box-shadow: 0 8px 32px rgba(0, 0, 0, .4)
 		}
 
+		body.pseudoFullscreen #stage {
+			position: fixed;
+			inset: 0;
+			margin: 0;
+			width: 100vw;
+			height: 100svh;
+			min-height: 0;
+			z-index: 1000;
+			border: 0;
+			border-radius: 0
+		}
+
+		body.pseudoFullscreen .topbar {
+			display: none
+		}
+
 		video,
 		canvas {
 			position: absolute;
@@ -1269,6 +1285,7 @@
 			let recording = false,
 				mediaRecorder = null,
 				recChunks = [];
+			let pseudoFullscreenActive = false;
 
 			/* Zoom state */
 			let zoomLevel = loadNum('zoomLevel', 1);
@@ -1280,13 +1297,22 @@
 
 			/* ===== Fullscreen ===== */
 			function isFullscreen() {
-				return document.fullscreenElement === stage ||
+				return pseudoFullscreenActive ||
+					document.fullscreenElement === stage ||
 					document.fullscreenElement === video ||
 					document.webkitFullscreenElement === stage ||
 					document.webkitFullscreenElement === video;
 			}
 
+			function setPseudoFullscreen(active) {
+				pseudoFullscreenActive = active;
+				document.body.classList.toggle('pseudoFullscreen', active);
+			}
+
 			function updateFullscreenUI() {
+				if (!document.fullscreenElement && !document.webkitFullscreenElement && pseudoFullscreenActive) {
+					setPseudoFullscreen(false);
+				}
 				const active = isFullscreen();
 				fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
 				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
@@ -1298,6 +1324,11 @@
 				const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
 
 				if (isFullscreen()) {
+					if (pseudoFullscreenActive) {
+						setPseudoFullscreen(false);
+						updateFullscreenUI();
+						return;
+					}
 					if (exitFullscreen) { exitFullscreen.call(document); }
 					return;
 				}
@@ -1305,11 +1336,14 @@
 					requestFullscreen.call(stage);
 					return;
 				}
-				if (video.webkitEnterFullscreen) {
-					video.webkitEnterFullscreen();
-					return;
+				setPseudoFullscreen(true);
+			});
+
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape' && pseudoFullscreenActive) {
+					setPseudoFullscreen(false);
+					updateFullscreenUI();
 				}
-				showToast('Fullscreen not supported');
 			});
 
 			document.addEventListener('fullscreenchange', updateFullscreenUI);
