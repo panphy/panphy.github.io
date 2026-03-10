@@ -912,7 +912,6 @@
           <div class="control-card">
             <div class="control-header">
               <label>Jump To Example States</label>
-              <span>Representative targets</span>
             </div>
             <div class="state-buttons">
               <button id="presetSolidBtn" class="state-preset" type="button" data-preset="solid">
@@ -1144,6 +1143,91 @@
       }
     }
 
+    function removeRigidBodyRotation() {
+      let centerX = 0;
+      let centerY = 0;
+      let centerZ = 0;
+
+      for (let i = 0; i < N; i++) {
+        centerX += POS[i * 3];
+        centerY += POS[i * 3 + 1];
+        centerZ += POS[i * 3 + 2];
+      }
+
+      centerX /= N;
+      centerY /= N;
+      centerZ /= N;
+
+      let ixx = 0;
+      let iyy = 0;
+      let izz = 0;
+      let ixy = 0;
+      let ixz = 0;
+      let iyz = 0;
+      let angularX = 0;
+      let angularY = 0;
+      let angularZ = 0;
+
+      for (let i = 0; i < N; i++) {
+        const base = i * 3;
+        const rx = POS[base] - centerX;
+        const ry = POS[base + 1] - centerY;
+        const rz = POS[base + 2] - centerZ;
+        const vx = VEL[base];
+        const vy = VEL[base + 1];
+        const vz = VEL[base + 2];
+
+        angularX += ry * vz - rz * vy;
+        angularY += rz * vx - rx * vz;
+        angularZ += rx * vy - ry * vx;
+
+        ixx += ry * ry + rz * rz;
+        iyy += rx * rx + rz * rz;
+        izz += rx * rx + ry * ry;
+        ixy -= rx * ry;
+        ixz -= rx * rz;
+        iyz -= ry * rz;
+      }
+
+      const c00 = iyy * izz - iyz * iyz;
+      const c01 = ixz * iyz - ixy * izz;
+      const c02 = ixy * iyz - ixz * iyy;
+      const c11 = ixx * izz - ixz * ixz;
+      const c12 = ixz * ixy - ixx * iyz;
+      const c22 = ixx * iyy - ixy * ixy;
+      const determinant = ixx * c00 + ixy * c01 + ixz * c02;
+
+      if (Math.abs(determinant) < 1e-8) return;
+
+      const omegaX = (c00 * angularX + c01 * angularY + c02 * angularZ) / determinant;
+      const omegaY = (c01 * angularX + c11 * angularY + c12 * angularZ) / determinant;
+      const omegaZ = (c02 * angularX + c12 * angularY + c22 * angularZ) / determinant;
+
+      if (!isFinite(omegaX) || !isFinite(omegaY) || !isFinite(omegaZ)) return;
+
+      for (let i = 0; i < N; i++) {
+        const base = i * 3;
+        const rx = POS[base] - centerX;
+        const ry = POS[base + 1] - centerY;
+        const rz = POS[base + 2] - centerZ;
+        const rotationalVX = omegaY * rz - omegaZ * ry;
+        const rotationalVY = omegaZ * rx - omegaX * rz;
+        const rotationalVZ = omegaX * ry - omegaY * rx;
+
+        VEL[base] -= rotationalVX;
+        VEL[base + 1] -= rotationalVY;
+        VEL[base + 2] -= rotationalVZ;
+      }
+    }
+
+    function removeBulkMotion() {
+      removeCenterOfMassDrift();
+      // Strip whole-sample spin so the displayed motion stays thermal rather than
+      // showing the solid or liquid rotating as one body.
+      removeRigidBodyRotation();
+      removeCenterOfMassDrift();
+    }
+
     function computeThermalKineticEnergy() {
       let kineticEnergy = 0;
       for (let i = 0; i < N; i++) {
@@ -1170,13 +1254,13 @@
     }
 
     function measureCurrentTemperature(reset) {
-      removeCenterOfMassDrift();
+      removeBulkMotion();
       const kineticEnergy = computeThermalKineticEnergy();
       updateMeasuredTemperature(reducedTemperatureFromKE(kineticEnergy), reset);
     }
 
     function rescaleVelocitiesToTemperature(targetReducedT) {
-      removeCenterOfMassDrift();
+      removeBulkMotion();
       const kineticEnergy = computeThermalKineticEnergy();
       if (kineticEnergy <= 1e-8) return;
 
@@ -1224,7 +1308,7 @@
         }
       }
 
-      removeCenterOfMassDrift();
+      removeBulkMotion();
       rescaleVelocitiesToTemperature(TARGET_T_MIN);
       SIM_STATE._smoothReducedT = undefined;
       SIM_STATE._smoothBondFraction = undefined;
@@ -1375,13 +1459,13 @@
       }
 
       capExtremeVelocities();
-      removeCenterOfMassDrift();
+      removeBulkMotion();
 
       let kineticEnergy = computeThermalKineticEnergy();
       let reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
       applyThermostat(dt, reducedTemperature);
       applyBarostat(dt, reducedTemperature);
-      removeCenterOfMassDrift();
+      removeBulkMotion();
 
       kineticEnergy = computeThermalKineticEnergy();
       reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
