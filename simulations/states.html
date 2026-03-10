@@ -1508,7 +1508,7 @@
       // label picks direction-aware names (Melting/Freezing, etc.).
       const volumeRatio = boxSize / INITIAL_BOX_SIZE;
 
-      if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.52) {
+      if (metrics.bondFraction >= 0.88 && metrics.meanCoordination >= 8.2 && metrics.reducedT < 0.48) {
         return {
           label: 'Solid',
           cls: 'status-solid',
@@ -1516,7 +1516,7 @@
         };
       }
 
-      if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.63) {
+      if (metrics.bondFraction >= 0.68 && metrics.meanCoordination >= 6.2 && metrics.reducedT < 0.56) {
         const cooling = previousLabel === 'Liquid' || previousLabel === 'Freezing';
         return {
           label: cooling ? 'Freezing' : 'Melting',
