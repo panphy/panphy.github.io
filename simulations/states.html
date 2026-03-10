@@ -314,82 +314,11 @@
       letter-spacing: -0.01em;
     }
 
-    .controls-header p {
-      margin: 0.2rem 0 0;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-    }
-
     .status-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 0.5rem;
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 28px;
-      padding: 0 0.8rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      border: 1px solid transparent;
-      user-select: none;
-      transition: all 0.3s ease;
-    }
-
-    .status-solid {
-      background: rgba(0, 206, 201, 0.15);
-      color: #008f8c;
-      border-color: rgba(0, 206, 201, 0.3);
-    }
-
-    [data-theme="dark"] .status-solid {
-      color: #56d4d0;
-    }
-
-    .status-liquid {
-      background: rgba(108, 92, 231, 0.15);
-      color: #5849d6;
-      border-color: rgba(108, 92, 231, 0.3);
-    }
-
-    [data-theme="dark"] .status-liquid {
-      color: #b4acfe;
-    }
-
-    .status-melting {
-      background: rgba(253, 203, 110, 0.18);
-      color: #b7791f;
-      border-color: rgba(253, 203, 110, 0.35);
-    }
-
-    [data-theme="dark"] .status-melting {
-      color: #ffd37d;
-    }
-
-    .status-critical {
-      background: rgba(255, 159, 67, 0.18);
-      color: #dd6b20;
-      border-color: rgba(255, 159, 67, 0.35);
-    }
-
-    [data-theme="dark"] .status-critical {
-      color: #ffbe76;
-    }
-
-    .status-gas {
-      background: rgba(255, 118, 117, 0.15);
-      color: #d63031;
-      border-color: rgba(255, 118, 117, 0.3);
-    }
-
-    [data-theme="dark"] .status-gas {
-      color: #ff8c8c;
     }
 
     /* Control Blocks */
@@ -401,10 +330,6 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-    }
-
-    .info-card {
-      gap: 0.45rem;
     }
 
     .info-copy {
@@ -970,11 +895,9 @@
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Phase labels from a constant-pressure particle model.</p>
         </div>
 
         <div class="status-row">
-          <span id="stateChip" class="status-chip status-solid">Solid</span>
           <span id="tempVal" style="font-family:var(--font-mono);font-size:0.85rem;font-weight:600;">40 K</span>
         </div>
 
@@ -1055,11 +978,6 @@
             <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer on the simulation shows the measured temperature; the dark line marks the target.</p>
           </div>
         </section>
-
-        <div class="control-card info-card">
-          <p id="transitionSummary" class="info-copy">Particles are tightly packed and mainly vibrate about fixed positions.</p>
-          <p class="info-copy info-copy--muted">This particle model runs at constant pressure — the box expands when the liquid boils and shrinks when the gas condenses, just like a real substance. Temperatures are illustrative and do not match any specific real material.</p>
-        </div>
 
         <div class="sim-actions">
           <button id="playPauseBtn" class="btn btn-primary">Pause</button>
@@ -1663,8 +1581,6 @@
     const heatVal = document.getElementById('heatVal');
     const setpointVal = document.getElementById('setpointVal');
     const tempVal = document.getElementById('tempVal');
-    const stateChip = document.getElementById('stateChip');
-    const transitionSummary = document.getElementById('transitionSummary');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const resetBtn = document.getElementById('resetBtn');
     const themeBtn = document.getElementById('theme-button');
@@ -1759,9 +1675,6 @@
       heatVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
       setpointVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
       tempVal.textContent = formatDisplayTemperature(SIM_STATE.measuredReducedT);
-      stateChip.textContent = SIM_STATE.phaseInfo.label;
-      stateChip.className = 'status-chip ' + SIM_STATE.phaseInfo.cls;
-      transitionSummary.textContent = SIM_STATE.phaseInfo.detail;
       updateHeatCoolStatus();
       updateThermometer();
       updatePresetButtons();
