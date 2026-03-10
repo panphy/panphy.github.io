@@ -1049,8 +1049,8 @@
               </div>
             </div>
             <div class="transition-markers" aria-hidden="true">
-              <span class="transition-pill">Melting ~150 K</span>
-              <span class="transition-pill">Boiling ~500 K</span>
+              <span class="transition-pill">Melting ~300 K</span>
+              <span class="transition-pill">Boiling ~1000 K</span>
             </div>
             <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer on the simulation shows the measured temperature; the dark line marks the target.</p>
           </div>
@@ -1104,7 +1104,7 @@
       // The simulation runs in Lennard-Jones reduced units internally.
       // For pre-university teaching, we display an illustrative Kelvin scale
       // for a fictional sample substance whose melting point is around
-      // 150 K and whose boiling point is around 500 K. The mapping is
+      // 300 K and whose boiling point is around 1000 K. The mapping is
       // tuned so those display temperatures line up with when this simulated
       // sample starts to look melted or gaseous. It is a presentation layer,
       // not a calibration to any specific real material.
@@ -1150,9 +1150,9 @@
     const TARGET_T_MIN = 0.05;
     const TARGET_T_MAX = 2.1;
     const DISPLAY_MIN_K = 40;
-    const DISPLAY_MELT_K = 150;
-    const DISPLAY_BOIL_K = 500;
-    const DISPLAY_MAX_K = 1600;
+    const DISPLAY_MELT_K = 300;
+    const DISPLAY_BOIL_K = 1000;
+    const DISPLAY_MAX_K = 3200;
     const DISPLAY_MELT_REDUCED_T = 0.58;
     const DISPLAY_BOIL_REDUCED_T = 0.85;
     const THERMOSTAT_TAU = 0.18;
