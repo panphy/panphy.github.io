@@ -842,6 +842,13 @@
           </div>
           <div class="control-block">
             <div class="control-header">
+              <label for="phaseDiff">Phase Difference</label>
+              <span id="phaseDiffVal">0</span>
+            </div>
+            <input type="range" id="phaseDiff" min="0" max="6.2831853" step="0.01" value="0">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
               <label for="animSpeed">Animation Speed</label>
               <span id="animSpeedVal">1.0×</span>
             </div>
@@ -884,7 +891,8 @@
       separation: 6.0,
       timeScale: 1.0,
       source1: { enabled: true, freq: 2.0, amp: 0.5 },
-      source2: { enabled: true, freq: 2.0, amp: 0.5 }
+      source2: { enabled: true, freq: 2.0, amp: 0.5 },
+      phaseDiff: 0
     };
 
     const SOURCE1_POS = new THREE.Vector2(-3, 0);
@@ -934,6 +942,8 @@
 
     const separationSlider = document.getElementById('separation');
     const separationVal = document.getElementById('separationVal');
+    const phaseDiffSlider = document.getElementById('phaseDiff');
+    const phaseDiffValEl = document.getElementById('phaseDiffVal');
     const animSpeedSlider = document.getElementById('animSpeed');
     const animSpeedVal = document.getElementById('animSpeedVal');
 
@@ -949,6 +959,7 @@
       uniform float uS2Amp;
       uniform float uS2Freq;
       uniform vec2 uS2Pos;
+      uniform float uS2Phase;
 
       varying vec3 vWorldPos;
       varying vec3 vNormal;
@@ -959,15 +970,15 @@
       const float HALF_SIZE = ${(PLANE_SIZE / 2).toFixed(1)};
       const float EDGE_WIDTH = 1.8;
 
-      float calcWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade) {
+      float calcWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
         float r = distance(pos, src);
         float k = 2.0 * PI * freq / speed;
         float omega = 2.0 * PI * freq;
         float decay = 1.0 / (1.0 + 0.25 * r);
-        return amp * fade * cos(k * r - omega * time) * decay;
+        return amp * fade * cos(k * r - omega * time + phase) * decay;
       }
 
-      vec2 calcGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade) {
+      vec2 calcGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
         float r = distance(pos, src);
         if (r < 0.01) return vec2(0.0);
         float k = 2.0 * PI * freq / speed;
@@ -975,8 +986,8 @@
         float decay = 1.0 / (1.0 + 0.25 * r);
         vec2 dir = (pos - src) / r;
         float dh_dr = amp * fade * (
-          -k * sin(k * r - omega * time) * decay
-          - cos(k * r - omega * time) * 0.25 * decay * decay
+          -k * sin(k * r - omega * time + phase) * decay
+          - cos(k * r - omega * time + phase) * 0.25 * decay * decay
         );
         return dir * dh_dr;
       }
@@ -992,12 +1003,12 @@
         vec2 grad = vec2(0.0);
 
         if (uS1On > 0.5) {
-          h1 = calcWave(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade);
-          grad += calcGrad(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade);
+          h1 = calcWave(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
+          grad += calcGrad(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
         }
         if (uS2On > 0.5) {
-          h2 = calcWave(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade);
-          grad += calcGrad(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade);
+          h2 = calcWave(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
+          grad += calcGrad(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
         }
 
         pos.y = h1 + h2;
@@ -1108,6 +1119,7 @@
       uS2Amp: { value: state.source2.amp },
       uS2Freq: { value: state.source2.freq },
       uS2Pos: { value: SOURCE2_POS },
+      uS2Phase: { value: 0 },
       uColor1: { value: colors.source1Color.clone() },
       uColor2: { value: colors.source2Color.clone() },
       uBaseColor: { value: colors.baseColor.clone() },
@@ -1255,6 +1267,12 @@
       separationSlider.value = 6.0;
       separationVal.textContent = '6.0';
 
+      // Reset phase difference
+      state.phaseDiff = 0;
+      uniforms.uS2Phase.value = 0;
+      phaseDiffSlider.value = 0;
+      phaseDiffValEl.textContent = '0';
+
       // Reset animation speed
       state.timeScale = 1.0;
       animSpeedSlider.value = 1.0;
@@ -1314,6 +1332,32 @@
       SOURCE1_POS.x = -half;
       SOURCE2_POS.x = half;
       separationVal.textContent = state.separation.toFixed(1);
+    });
+
+    function formatPhase(val) {
+      const pi = Math.PI;
+      if (val < 0.01) return '0';
+      if (Math.abs(val - pi / 4) < 0.01) return '\u00bc\u03c0';
+      if (Math.abs(val - pi / 2) < 0.01) return '\u00bd\u03c0';
+      if (Math.abs(val - 3 * pi / 4) < 0.01) return '\u00be\u03c0';
+      if (Math.abs(val - pi) < 0.01) return '\u03c0';
+      if (Math.abs(val - 5 * pi / 4) < 0.01) return '1\u00bc\u03c0';
+      if (Math.abs(val - 3 * pi / 2) < 0.01) return '1\u00bd\u03c0';
+      if (Math.abs(val - 7 * pi / 4) < 0.01) return '1\u00be\u03c0';
+      if (Math.abs(val - 2 * pi) < 0.02) return '2\u03c0';
+      return (val / pi).toFixed(2) + '\u03c0';
+    }
+
+    phaseDiffSlider.addEventListener('input', () => {
+      let val = parseFloat(phaseDiffSlider.value);
+      // Snap to π if within ±0.15 rad
+      if (Math.abs(val - Math.PI) < 0.15) {
+        val = Math.PI;
+        phaseDiffSlider.value = val;
+      }
+      state.phaseDiff = val;
+      uniforms.uS2Phase.value = val;
+      phaseDiffValEl.textContent = formatPhase(val);
     });
 
     animSpeedSlider.addEventListener('input', () => {
