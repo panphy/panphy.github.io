@@ -654,6 +654,20 @@
 			object-position: center center
 		}
 
+		/* Hide native WebKit media controls overlay (iPad fullscreen pause icon) */
+		video::-webkit-media-controls {
+			display: none !important
+		}
+		video::-webkit-media-controls-enclosure {
+			display: none !important
+		}
+		video::-webkit-media-controls-panel {
+			display: none !important
+		}
+		video::-webkit-media-controls-start-playback-button {
+			display: none !important
+		}
+
 		#hud {
 			position: absolute;
 			right: .5rem;
@@ -1131,7 +1145,7 @@
 			</div>
 		</div>
 		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
-		<video id="video" playsinline autoplay muted></video>
+		<video id="video" playsinline autoplay muted disablepictureinpicture disableremoteplayback x-webkit-airplay="deny"></video>
 		<canvas id="freezeCanvas" class="hidden"></canvas>
 		<canvas id="drawCanvas"></canvas>
 		<canvas id="laserCanvas"></canvas>
