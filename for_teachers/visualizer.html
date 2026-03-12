@@ -1309,13 +1309,9 @@
 			pointerColorInput.value = pointerColor;
 			annotColorInput.value = annotColor;
 
-			/* ===== Fullscreen ===== */
+			/* ===== Fullscreen (CSS-only, no native Fullscreen API) ===== */
 			function isFullscreen() {
-				return pseudoFullscreenActive ||
-					document.fullscreenElement === stage ||
-					document.fullscreenElement === video ||
-					document.webkitFullscreenElement === stage ||
-					document.webkitFullscreenElement === video;
+				return pseudoFullscreenActive;
 			}
 
 			function setPseudoFullscreen(active) {
@@ -1324,9 +1320,6 @@
 			}
 
 			function updateFullscreenUI() {
-				if (!document.fullscreenElement && !document.webkitFullscreenElement && pseudoFullscreenActive) {
-					setPseudoFullscreen(false);
-				}
 				const active = isFullscreen();
 				fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
 				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
@@ -1334,23 +1327,8 @@
 			}
 
 			fullscreenBtn.addEventListener('click', () => {
-				const requestFullscreen = stage.requestFullscreen || stage.webkitRequestFullscreen || stage.webkitRequestFullScreen;
-				const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
-
-				if (isFullscreen()) {
-					if (pseudoFullscreenActive) {
-						setPseudoFullscreen(false);
-						updateFullscreenUI();
-						return;
-					}
-					if (exitFullscreen) { exitFullscreen.call(document); }
-					return;
-				}
-				if (requestFullscreen) {
-					requestFullscreen.call(stage);
-					return;
-				}
-				setPseudoFullscreen(true);
+				setPseudoFullscreen(!pseudoFullscreenActive);
+				updateFullscreenUI();
 			});
 
 			document.addEventListener('keydown', (e) => {
@@ -1360,8 +1338,6 @@
 				}
 			});
 
-			document.addEventListener('fullscreenchange', updateFullscreenUI);
-			document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 			updateFullscreenUI();
 
 			/* ===== Controls panel open/close ===== */
