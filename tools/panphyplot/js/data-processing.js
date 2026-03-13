@@ -323,6 +323,7 @@
 			removeButton.type = 'button';
 			removeButton.className = 'data-processing-remove-btn';
 			removeButton.textContent = 'Remove';
+			removeButton.title = 'Remove this processed column';
 			removeButton.setAttribute('data-derived-id', column.id);
 
 			item.appendChild(textWrap);
