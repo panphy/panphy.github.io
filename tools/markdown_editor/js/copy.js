@@ -691,11 +691,13 @@ function ensureTableCopyActionsMenu() {
   copyTableButton.type = 'button';
   copyTableButton.className = 'table-copy-action-btn table-copy-action-btn-table';
   copyTableButton.textContent = 'Copy table';
+  copyTableButton.title = 'Copy the table as formatted text';
 
   const copyImageButton = document.createElement('button');
   copyImageButton.type = 'button';
   copyImageButton.className = 'table-copy-action-btn table-copy-action-btn-image';
   copyImageButton.textContent = 'Copy image';
+  copyImageButton.title = 'Copy the table as an image to clipboard';
 
   buttons.appendChild(copyTableButton);
   buttons.appendChild(copyImageButton);
@@ -892,11 +894,13 @@ function ensureTouchCopyActionsMenu() {
   touchCopyTableButton.type = 'button';
   touchCopyTableButton.className = 'table-copy-action-btn table-copy-action-btn-table';
   touchCopyTableButton.textContent = 'Copy table';
+  touchCopyTableButton.title = 'Copy the table as formatted text';
 
   touchCopyImageButton = document.createElement('button');
   touchCopyImageButton.type = 'button';
   touchCopyImageButton.className = 'table-copy-action-btn table-copy-action-btn-image';
   touchCopyImageButton.textContent = 'Copy image';
+  touchCopyImageButton.title = 'Copy the table as an image to clipboard';
 
   buttons.appendChild(touchCopyTableButton);
   buttons.appendChild(touchCopyImageButton);

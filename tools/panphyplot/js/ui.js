@@ -540,11 +540,13 @@ function ensureFitEquationCopyActionsMenu() {
 	copyImageButton.type = 'button';
 	copyImageButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-image';
 	copyImageButton.textContent = 'Copy image';
+	copyImageButton.title = 'Copy the equation as an image to clipboard';
 
 	const copyLatexButton = document.createElement('button');
 	copyLatexButton.type = 'button';
 	copyLatexButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-latex';
 	copyLatexButton.textContent = 'Copy raw LaTeX';
+	copyLatexButton.title = 'Copy the equation as raw LaTeX markup';
 
 	buttons.appendChild(copyImageButton);
 	buttons.appendChild(copyLatexButton);
@@ -2360,11 +2362,13 @@ function clearFittedCurve() {
 		copyImageButton.type = 'button';
 		copyImageButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-image';
 		copyImageButton.textContent = 'Copy image';
+		copyImageButton.title = 'Copy the table as an image to clipboard';
 
 		const copyLatexButton = document.createElement('button');
 		copyLatexButton.type = 'button';
 		copyLatexButton.className = 'fit-equation-copy-action-btn fit-equation-copy-action-btn-latex';
 		copyLatexButton.textContent = 'Copy raw Markdown';
+		copyLatexButton.title = 'Copy the table as raw Markdown markup';
 
 		buttons.appendChild(copyImageButton);
 		buttons.appendChild(copyLatexButton);

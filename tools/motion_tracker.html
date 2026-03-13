@@ -893,22 +893,22 @@
 
 	<div class="toolbar">
 		<div style="display:flex; gap:10px;">
-			<button id="openVideo" class="btn-primary">Import Video</button>
+			<button id="openVideo" class="btn-primary" title="Load a video file for motion analysis">Import Video</button>
 		</div>
 
 		<div class="toolbar-divider"></div>
 
 		<div style="display:flex; gap:10px;">
-			<button id="calibrate" class="btn-tool" disabled>Calibrate</button>
-			<button id="setOrigin" class="btn-tool" disabled>Set Origin</button>
+			<button id="calibrate" class="btn-tool" disabled title="Set a known distance to calibrate pixel-to-real scale">Calibrate</button>
+			<button id="setOrigin" class="btn-tool" disabled title="Set the coordinate origin on the video">Set Origin</button>
 		</div>
 
 		<div class="toolbar-divider"></div>
 
 		<div style="display:flex; gap:10px;">
-			<button id="clearDataPoints" class="btn-danger" disabled>Clear Data</button>
-			<button id="clearCalibration" class="btn-danger" disabled>Clear Calib</button>
-			<button id="clearOrigin" class="btn-danger" disabled>Clear Origin</button>
+			<button id="clearDataPoints" class="btn-danger" disabled title="Remove all tracked data points">Clear Data</button>
+			<button id="clearCalibration" class="btn-danger" disabled title="Remove the calibration setting">Clear Calib</button>
+			<button id="clearOrigin" class="btn-danger" disabled title="Reset the coordinate origin">Clear Origin</button>
 		</div>
 
 		<input type="file" id="videoUploadInput" accept="video/*" style="display:none">
@@ -924,7 +924,7 @@
 			<div
 				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 				<h3 style="margin:0; font-size:1.1rem;">Video Source</h3>
-				<button id="frameRateButton" class="frame-rate-button" disabled>FPS: 30</button>
+				<button id="frameRateButton" class="frame-rate-button" disabled title="Set the video frame rate for accurate timing">FPS: 30</button>
 			</div>
 
 			<div id="videoWrapper">
@@ -936,7 +936,7 @@
 			</div>
 
 			<div class="playback-controls">
-				<button id="playPause" class="btn-primary" disabled>Play</button>
+				<button id="playPause" class="btn-primary" disabled title="Play or pause the video">Play</button>
 				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 				<span id="timeDisplay">0:00.000</span>
 				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
@@ -950,24 +950,24 @@
 			<div
 				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
 				<h3 style="margin:0; font-size:1.1rem;">Data Analysis</h3>
-				<button id="exportData" class="btn-export" disabled>Export .csv</button>
+				<button id="exportData" class="btn-export" disabled title="Export tracked data as a CSV file">Export .csv</button>
 			</div>
 
 				<div id="chartCanvasContainer">
 					<canvas id="positionChart"></canvas>
-					<button id="chartCopyAction" type="button" hidden>Copy image</button>
+					<button id="chartCopyAction" type="button" hidden title="Copy the chart as an image to clipboard">Copy image</button>
 				</div>
 
 			<div class="chart-controls">
 				<div class="chart-controls-row">
-					<button id="plotX" class="plot-btn" disabled>Plot x vs t</button>
-					<button id="plotY" class="plot-btn" disabled>Plot y vs t</button>
-					<button id="plotXY" class="plot-btn" disabled>x(t) and y(t)</button>
+					<button id="plotX" class="plot-btn" disabled title="Plot horizontal position over time">Plot x vs t</button>
+					<button id="plotY" class="plot-btn" disabled title="Plot vertical position over time">Plot y vs t</button>
+					<button id="plotXY" class="plot-btn" disabled title="Plot both x and y positions over time">x(t) and y(t)</button>
 				</div>
 				<div class="chart-controls-row">
-					<button id="plotVx" class="plot-btn" disabled>Plot vₓ vs t</button>
-					<button id="plotVy" class="plot-btn" disabled>Plot vᵧ vs t</button>
-					<button id="plotVxVy" class="plot-btn" disabled>vₓ(t) and vᵧ(t)</button>
+					<button id="plotVx" class="plot-btn" disabled title="Plot horizontal velocity over time">Plot vₓ vs t</button>
+					<button id="plotVy" class="plot-btn" disabled title="Plot vertical velocity over time">Plot vᵧ vs t</button>
+					<button id="plotVxVy" class="plot-btn" disabled title="Plot both velocity components over time">vₓ(t) and vᵧ(t)</button>
 				</div>
 			</div>
 		</div>

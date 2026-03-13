@@ -111,34 +111,34 @@
 
       <!-- Buttons and the markdown input textarea below -->
       <div class="buttonContainer floating-toolbar">
-        <button id="loadFileButton">Open .md</button>
+        <button id="loadFileButton" title="Open a Markdown file from your device">Open .md</button>
         <span class="save-wrapper">
-          <button id="saveMDButton">Save .md</button>
+          <button id="saveMDButton" title="Save the current document as a Markdown file">Save .md</button>
           <span id="dirtyIndicator" class="dirty-indicator" aria-hidden="true"></span>
         </span>
-        <button id="clearButton">Clear</button>
+        <button id="clearButton" title="Clear the editor contents">Clear</button>
         <button id="historyButton" title="Browse saved snapshots">History</button>
         <div class="insert-menu" id="insertMenu">
           <button id="insertButton" aria-expanded="false" aria-controls="insertPanel" title="Insert math, table, or image">Insert</button>
           <div id="insertPanel" class="insert-panel" hidden>
-            <button class="insert-action-btn" data-action="image">Image</button>
-            <button class="insert-action-btn" data-action="table">Table</button>
-            <button class="insert-action-btn" data-action="pagebreak">Page Break</button>
+            <button class="insert-action-btn" data-action="image" title="Insert an image from a URL">Image</button>
+            <button class="insert-action-btn" data-action="table" title="Insert a Markdown table">Table</button>
+            <button class="insert-action-btn" data-action="pagebreak" title="Insert a page break for printing">Page Break</button>
             <div class="insert-math-group" id="insertMathGroup">
               <div class="insert-panel-item insert-has-submenu">
                 <span>Math</span>
                 <span class="insert-chevron" aria-hidden="true">&#8250;</span>
               </div>
               <div class="insert-submenu">
-                <button class="insert-action-btn" data-template="basic">Basic</button>
-                <button class="insert-action-btn" data-template="calculus">Advanced</button>
-                <button class="insert-action-btn" data-template="matrices">Matrices</button>
+                <button class="insert-action-btn" data-template="basic" title="Insert basic math notation examples">Basic</button>
+                <button class="insert-action-btn" data-template="calculus" title="Insert calculus notation examples">Advanced</button>
+                <button class="insert-action-btn" data-template="matrices" title="Insert matrix notation examples">Matrices</button>
               </div>
             </div>
           </div>
         </div>
         <div class="font-menu" id="fontMenu">
-          <button id="fontButton" aria-expanded="false" aria-controls="fontPanel">Font</button>
+          <button id="fontButton" aria-expanded="false" aria-controls="fontPanel" title="Change editor font size">Font</button>
           <div id="fontPanel" class="font-panel" hidden>
             <button class="font-option-btn" data-size="14px">Small</button>
             <button class="font-option-btn" data-size="16px">Medium</button>

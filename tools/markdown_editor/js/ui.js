@@ -520,6 +520,7 @@ export function showImageModal() {
     helpBtn.type = 'button';
     helpBtn.className = 'image-modal-help';
     helpBtn.setAttribute('aria-label', 'Cloud link help');
+    helpBtn.title = 'How to use cloud image links';
     helpBtn.textContent = '?';
 
     const tooltip = document.createElement('span');
@@ -942,6 +943,7 @@ export function showHistoryModal(snapshots) {
       const clearBtn = document.createElement('button');
       clearBtn.className = 'btn-secondary history-clear-btn';
       clearBtn.textContent = 'Clear All';
+      clearBtn.title = 'Delete all saved snapshots';
       clearBtn.addEventListener('click', async () => {
         const confirmed = await showConfirmationModal(
           'This will permanently delete all saved snapshots from version history. This action cannot be undone.',
@@ -1157,6 +1159,7 @@ export function showHistoryModal(snapshots) {
       restoreBtn.type = 'button';
       restoreBtn.className = 'btn-primary history-restore-btn';
       restoreBtn.textContent = 'Restore Selected';
+      restoreBtn.title = 'Replace editor contents with this snapshot';
       restoreBtn.disabled = true;
       restoreBtn.addEventListener('click', () => {
         if (selectedSnapshotContent === null) return;

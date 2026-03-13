@@ -420,8 +420,8 @@
 				<span id="filename-prompt-extension">.csv</span>
 			</div>
 			<div id="filename-prompt-buttons">
-				<button id="filename-prompt-cancel" onclick="closeFilenamePrompt()">Cancel</button>
-				<button id="filename-prompt-save" onclick="confirmFilename()">Save</button>
+				<button id="filename-prompt-cancel" onclick="closeFilenamePrompt()" title="Cancel without saving">Cancel</button>
+				<button id="filename-prompt-save" onclick="confirmFilename()" title="Save with this filename">Save</button>
 			</div>
 		</div>
 	</div>
@@ -457,8 +457,8 @@
 				<div class="data-processing-section">
 					<div class="data-processing-heading">Column Processing</div>
 					<div class="data-processing-process-actions">
-						<button id="data-processing-process-x" type="button">Process x</button>
-						<button id="data-processing-process-y" type="button">Process y</button>
+						<button id="data-processing-process-x" type="button" title="Apply a formula to the x column">Process x</button>
+						<button id="data-processing-process-y" type="button" title="Apply a formula to the y column">Process y</button>
 					</div>
 					<div id="data-processing-formula-panel" style="display: none;">
 						<div class="data-processing-formula-header">
@@ -469,8 +469,8 @@
 						<input id="data-processing-formula-input" type="text" placeholder="e.g. =1/x" autocomplete="off" />
 						<div id="data-processing-formula-message" aria-live="polite" style="display: none;"></div>
 						<div class="data-processing-inline-actions">
-							<button id="data-processing-apply" type="button">Apply</button>
-							<button id="data-processing-cancel" type="button">Cancel</button>
+							<button id="data-processing-apply" type="button" title="Apply the formula to the selected column">Apply</button>
+							<button id="data-processing-cancel" type="button" title="Cancel and discard the formula">Cancel</button>
 						</div>
 					</div>
 				</div>
@@ -495,8 +495,8 @@
 					</div>
 					<div id="data-processing-message" aria-live="polite"></div>
 					<div class="data-processing-footer-actions">
-						<button id="data-processing-copy" type="button">Copy to Dataset</button>
-						<button id="data-processing-reset" type="button">Reset</button>
+						<button id="data-processing-copy" type="button" title="Copy processed columns to the target dataset">Copy to Dataset</button>
+						<button id="data-processing-reset" type="button" title="Clear all processed columns and start over">Reset</button>
 					</div>
 				</div>
 		</div>
