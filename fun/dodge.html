@@ -1033,7 +1033,9 @@
 
     // Delta time tracking for frame-rate independent movement
     const TARGET_FRAME_MS = 1000 / 60; // Target 60fps (16.67ms per frame)
+    const MAX_FRAME_MS = 100; // Cap at ~6 frames to prevent asteroid teleporting
     let lastFrameTime = 0;
+    let accumulatedGameTimeMs = 0; // Accumulated capped game time for score
 
     const initialsModal = document.getElementById('initialsModal');
     const initialsInput = document.getElementById('initialsInput');
@@ -1297,6 +1299,7 @@
       MIN_ASTEROID_SPEED = BASE_MIN_ASTEROID_SPEED;
       MAX_ASTEROID_SPEED = BASE_MAX_ASTEROID_SPEED;
       spawnAccumulator = 0;
+      accumulatedGameTimeMs = 0;
       gameOver = false;
       lastFrameTime = 0; // Reset to ensure first frame calculates delta correctly
 
@@ -1707,19 +1710,26 @@
       if (!gameOver) {
         // Calculate delta time for frame-rate independent movement
         if (!lastFrameTime) lastFrameTime = currentTime;
-        const deltaTime = currentTime - lastFrameTime;
+        const rawDeltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
+
+        // Cap delta to prevent asteroids teleporting past the player when
+        // rAF is throttled (e.g. backgrounded tab without visibilitychange).
+        const deltaTime = Math.min(rawDeltaTime, MAX_FRAME_MS);
 
         // Keep all gameplay progression tied to elapsed time, not frame count.
         const deltaMultiplier = Math.max(deltaTime / TARGET_FRAME_MS, 0);
         const deltaSeconds = Math.max(deltaTime / 1000, 0);
 
+        // Accumulate only capped game time so paused/throttled periods
+        // don't inflate the survival score.
+        accumulatedGameTimeMs += deltaTime;
+
         ctx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         drawRollingBackground(deltaMultiplier);
 
-        const elapsedMs = performance.now() - gameStartTime;
-        score = Math.floor(elapsedMs / 10) / 100;
+        score = Math.floor(accumulatedGameTimeMs / 10) / 100;
         const scoreDisplay = formatSurvivalTime(score);
         ctx.fillStyle = '#f5f5f5';
         ctx.font = `${18 * gameScale}px Arial`;
@@ -1784,6 +1794,11 @@
         resumeGame();
       }
     });
+
+    // Backup pause/resume for cases where visibilitychange doesn't fire
+    // (e.g. mobile notification shade, app switcher, overlapping windows).
+    window.addEventListener('blur', () => { pauseGame(); });
+    window.addEventListener('focus', () => { resumeGame(); });
   </script>
 </body>
 
