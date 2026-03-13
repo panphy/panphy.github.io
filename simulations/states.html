@@ -902,13 +902,13 @@
         </div>
 
         <div class="tab-bar" role="tablist" aria-label="Matter controls">
-          <button id="statesTabBtn" class="tab-btn" type="button" role="tab" aria-selected="false"
+          <button id="statesTabBtn" class="tab-btn" type="button" role="tab" aria-selected="true"
             aria-controls="statesTabPanel">States</button>
-          <button id="transitionsTabBtn" class="tab-btn" type="button" role="tab" aria-selected="true"
+          <button id="transitionsTabBtn" class="tab-btn" type="button" role="tab" aria-selected="false"
             aria-controls="transitionsTabPanel">Heat &amp; Cool</button>
         </div>
 
-        <section id="statesTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="statesTabBtn" hidden>
+        <section id="statesTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="statesTabBtn">
           <div class="control-card">
             <div class="control-header">
               <label>Choose an example state</label>
@@ -945,11 +945,10 @@
                 <span class="state-preset-temp">~1420 K</span>
               </button>
             </div>
-            <p class="info-copy info-copy--muted">These buttons move the sample toward clear examples of each state in this model, so you can compare the 3D particle structure before exploring transitions.</p>
           </div>
         </section>
 
-        <section id="transitionsTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="transitionsTabBtn">
+        <section id="transitionsTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="transitionsTabBtn" hidden>
           <div class="control-card">
             <div class="control-header">
               <label for="heatCoolSlider">Heat / Cool</label>
@@ -1097,7 +1096,7 @@
 
     const SIM_STATE = {
       playing: true,
-      activeTab: 'transitions',
+      activeTab: 'states',
       heatCoolLevel: 0,
       targetReducedT: TARGET_T_MIN,
       measuredReducedT: TARGET_T_MIN,
