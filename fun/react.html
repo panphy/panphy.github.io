@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f1014">
+    <meta name="theme-color" content="#111110">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Super Reflex Game</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="/assets/sw-register.js" defer></script>
 <style>
         * {
@@ -20,23 +20,23 @@
         }
 
         :root {
-            --bg-gradient-start: #0f0c29;
-            --bg-gradient-mid: #302b63;
-            --bg-gradient-end: #24243e;
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --card-border: rgba(255, 255, 255, 0.15);
+            --bg-gradient-start: #111110;
+            --bg-gradient-mid: #2A1A0E;
+            --bg-gradient-end: #1A1A18;
+            --card-bg: rgba(255, 255, 255, 0.06);
+            --card-border: rgba(255, 255, 255, 0.08);
             --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --accent-blue: #667eea;
-            --accent-purple: #764ba2;
-            --state-idle: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-secondary: rgba(237, 235, 232, 0.7);
+            --accent-blue: #FB923C;
+            --accent-purple: #C2410C;
+            --state-idle: linear-gradient(135deg, #FB923C 0%, #C2410C 100%);
             --state-waiting: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             --state-go: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            --state-result: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --state-result: linear-gradient(135deg, #FDE68A 0%, #FED7AA 100%);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Manrope', sans-serif;
             background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
             display: flex;
@@ -70,8 +70,8 @@
             right: 0;
             bottom: 0;
             background:
-                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+                radial-gradient(circle at 20% 80%, rgba(251, 146, 60, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(194, 65, 12, 0.15) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
@@ -496,7 +496,7 @@
                 this.speedX = (Math.random() - 0.5) * 4;
                 this.rotation = Math.random() * 360;
                 this.rotationSpeed = (Math.random() - 0.5) * 10;
-                this.color = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#11998e', '#38ef7d', '#ffecd2', '#fcb69f'][Math.floor(Math.random() * 8)];
+                this.color = ['#FB923C', '#C2410C', '#f093fb', '#f5576c', '#0D9488', '#5EEAD4', '#FDE68A', '#FED7AA'][Math.floor(Math.random() * 8)];
                 this.opacity = 1;
             }
 

@@ -4,29 +4,29 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f1014">
+    <meta name="theme-color" content="#111110">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 	<title>Live ASCII Camera with 8-bit Color</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <style>
-		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+		@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 		/* CSS Variables matching index.html dark theme */
 		:root {
-			--font-sans: 'Inter', sans-serif;
-			--font-display: 'Poppins', 'Inter', sans-serif;
-			--font-mono: 'JetBrains Mono', monospace;
-			--bg-color: #0f1014;
-			--bg-pattern: #181a20;
-			--text-main: #dfe6e9;
-			--text-secondary: #b2bec3;
-			--brand-primary: #a29bfe;
-			--brand-secondary: #6c5ce7;
-			--brand-accent: #81ecec;
-			--card-bg: #1e2129;
-			--card-border: #2d3436;
+			--font-sans: 'Manrope', sans-serif;
+			--font-display: 'DM Serif Display', serif;
+			--font-mono: 'IBM Plex Mono', monospace;
+			--bg-color: #111110;
+			--bg-pattern: #1A1A18;
+			--text-main: #EDEBE8;
+			--text-secondary: #9C9890;
+			--brand-primary: #FB923C;
+			--brand-secondary: #C2410C;
+			--brand-accent: #5EEAD4;
+			--card-bg: #1A1A19;
+			--card-border: #2A2A28;
 			--card-shadow: 0 10px 30px rgba(0,0,0,0.3);
 		}
 
@@ -154,14 +154,14 @@
 			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
 			border-radius: 50%;
 			cursor: pointer;
-			box-shadow: 0 2px 6px rgba(162, 155, 254, 0.4);
+			box-shadow: 0 2px 6px rgba(251, 146, 60, 0.4);
 			margin-top: -5px;
 			transition: transform 0.2s ease, box-shadow 0.2s ease;
 		}
 
 		input[type=range]::-webkit-slider-thumb:hover {
 			transform: scale(1.1);
-			box-shadow: 0 2px 10px rgba(162, 155, 254, 0.6);
+			box-shadow: 0 2px 10px rgba(251, 146, 60, 0.6);
 		}
 
 		input[type=range]::-moz-range-thumb {
@@ -171,7 +171,7 @@
 			border-radius: 50%;
 			cursor: pointer;
 			border: none;
-			box-shadow: 0 2px 6px rgba(162, 155, 254, 0.4);
+			box-shadow: 0 2px 6px rgba(251, 146, 60, 0.4);
 		}
 
 		input[type=range]::-moz-range-track {
@@ -236,7 +236,7 @@
 			transition: border-color 0.2s ease, box-shadow 0.2s ease;
 			-webkit-appearance: none;
 			appearance: none;
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23b2bec3' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239C9890' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
 			background-repeat: no-repeat;
 			background-position: right 0.5rem center;
 		}
@@ -244,7 +244,7 @@
 		select:hover,
 		select:focus {
 			border-color: var(--brand-primary);
-			box-shadow: 0 0 0 2px rgba(162, 155, 254, 0.15);
+			box-shadow: 0 0 0 2px rgba(251, 146, 60, 0.15);
 		}
 
 		/* Button styling */
@@ -266,7 +266,7 @@
 
 		button:hover {
 			transform: translateY(-1px);
-			box-shadow: 0 3px 12px rgba(108, 92, 231, 0.4);
+			box-shadow: 0 3px 12px rgba(194, 65, 12, 0.4);
 			background: var(--brand-primary);
 		}
 

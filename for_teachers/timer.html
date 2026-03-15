@@ -4,31 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f1014">
+    <meta name="theme-color" content="#111110">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
         :root {
-            --font-sans: 'Inter', sans-serif;
-            --font-display: 'Poppins', 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-            --bg-color: #0f1117;
-            --bg-pattern: rgba(108, 92, 231, 0.2);
-            --text-main: #f5f6fa;
-            --text-secondary: #b2bec3;
-            --brand-primary: #6c5ce7;
-            --brand-secondary: #a29bfe;
-            --brand-accent: #00cec9;
-            --card-bg: #1b1f2a;
+            --font-sans: 'Manrope', sans-serif;
+            --font-display: 'DM Serif Display', serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+            --bg-color: #111110;
+            --bg-pattern: rgba(194, 65, 12, 0.15);
+            --text-main: #EDEBE8;
+            --text-secondary: #9C9890;
+            --brand-primary: #FB923C;
+            --brand-secondary: #C2410C;
+            --brand-accent: #5EEAD4;
+            --card-bg: #1A1A19;
             --card-border: rgba(255, 255, 255, 0.08);
             --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
-            --card-hover-shadow: 0 20px 40px rgba(108, 92, 231, 0.25);
-            --btn-text: #fdfbff;
+            --card-hover-shadow: 0 20px 40px rgba(251, 146, 60, 0.25);
+            --btn-text: #EDEBE8;
         }
 
         *,
@@ -112,7 +112,7 @@
             font-size: clamp(1.4rem, 2.2vw, 2.4rem);
             margin: 0;
             padding: 0.6rem 1rem;
-            background: rgba(108, 92, 231, 0.2);
+            background: rgba(251, 146, 60, 0.15);
             border-radius: 14px;
             color: var(--text-main);
             font-variant-numeric: tabular-nums;
@@ -163,9 +163,9 @@
         select {
             padding: 0.75rem 0.6rem;
             font-size: 1.1rem;
-            border: 1px solid rgba(108, 92, 231, 0.4);
+            border: 1px solid rgba(251, 146, 60, 0.35);
             border-radius: 12px;
-            background: #151825;
+            background: #1A1A19;
             color: var(--text-main);
             text-align: center;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
@@ -181,7 +181,7 @@
         }
 
         select option {
-            background: #151825;
+            background: #1A1A19;
             color: var(--text-main);
         }
 
@@ -189,7 +189,7 @@
         select:focus {
             border-color: var(--brand-primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+            box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
         }
 
         .visually-hidden {
@@ -362,7 +362,7 @@
         }
 
         .offline-font {
-            --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+            --font-sans: 'Manrope', sans-serif;
         }
 
         /* Fullscreen styles */
