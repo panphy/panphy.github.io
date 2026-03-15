@@ -802,7 +802,7 @@ button:hover {
 /* Import CSV - Peach (Import action) */
 .btn-import-csv {
 	background-color: var(--btn-import);
-	color: #1a1a1a;
+	color: #fff;
 	font-weight: 600;
 }
 
@@ -813,7 +813,7 @@ button:hover {
 /* Export CSV - Peach (Import-style action) */
 .btn-export-csv {
 	background-color: var(--btn-import);
-	color: #1a1a1a;
+	color: #fff;
 	font-weight: 600;
 }
 
