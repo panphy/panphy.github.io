@@ -2911,7 +2911,7 @@ function clearFittedCurve() {
 					var ih = dcell.png.height;
 					ctx.drawImage(dcell.png.img, x + (dw - iw) / 2, y + (rh - ih) / 2, iw, ih);
 				} else if (dcell.text) {
-					ctx.fillStyle = '#2d3436';
+					ctx.fillStyle = '#1B1B1B';
 					ctx.font = dcell.isHeader ? boldFont : normalFont;
 					ctx.textAlign = 'center';
 					ctx.textBaseline = 'middle';

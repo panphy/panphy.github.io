@@ -65,22 +65,22 @@
 			// Fit line colors: lighter tint of corresponding data color
 			fitColors: ['#b0d4f4', '#f8b0b2', '#bbe3b8', '#fcd4a3', '#e4c5dc', '#c9ece9'],
 			layout: {
-				paper_bgcolor: '#1e2129',
-				plot_bgcolor: '#1e2129',
-				font: { color: '#dfe6e9' },
+				paper_bgcolor: '#1A1A19',
+				plot_bgcolor: '#1A1A19',
+				font: { color: '#EDEBE8' },
 				xaxis: {
-					gridcolor: '#2d3436',
+					gridcolor: '#2A2A28',
 					zerolinecolor: '#8b98a7',
-					linecolor: '#3a414d',
-					tickcolor: '#cdd9df',
-					titlefont: { color: '#dfe6e9' }
+					linecolor: '#3A3A36',
+					tickcolor: '#CDCAC4',
+					titlefont: { color: '#EDEBE8' }
 				},
 				yaxis: {
-					gridcolor: '#2d3436',
+					gridcolor: '#2A2A28',
 					zerolinecolor: '#8b98a7',
-					linecolor: '#3a414d',
-					tickcolor: '#cdd9df',
-					titlefont: { color: '#dfe6e9' }
+					linecolor: '#3A3A36',
+					tickcolor: '#CDCAC4',
+					titlefont: { color: '#EDEBE8' }
 				}
 			}
 		};
