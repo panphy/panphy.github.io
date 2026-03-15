@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#f8f9fa">
+  <meta name="theme-color" content="#F8F6F1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <script>
@@ -13,7 +13,7 @@
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-        if (tc) tc.setAttribute('content', '#0f1014');
+        if (tc) tc.setAttribute('content', '#111110');
         if (sb) sb.setAttribute('content', 'black-translucent');
       }
     })();
@@ -22,66 +22,66 @@
   <script src="/assets/sw-register.js" defer></script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
     :root {
-      --font-sans: 'Inter', sans-serif;
-      --font-display: 'Poppins', 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Manrope', sans-serif;
+      --font-display: 'DM Serif Display', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
 
-      --bg-color: #f8f9fa;
-      --bg-pattern: #e9ecef;
-      --text-main: #2d3436;
-      --text-secondary: #636e72;
+      --bg-color: #F8F6F1;
+      --bg-pattern: #EDE9E0;
+      --text-main: #1B1B1B;
+      --text-secondary: #6B6560;
 
-      --brand-primary: #6c5ce7;
-      --brand-accent: #00cec9;
+      --brand-primary: #C2410C;
+      --brand-accent: #0D9488;
 
       --surface: #ffffff;
-      --surface-alt: #f1f5f9;
-      --border: #e2e8f0;
+      --surface-alt: #F0ECE4;
+      --border: #E8E4DD;
       --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
 
-      --btn-primary: #6c5ce7;
-      --btn-primary-hover: #5b4cdb;
+      --btn-primary: #C2410C;
+      --btn-primary-hover: #A93A0A;
       --btn-text: #ffffff;
 
-      --nav-bg: rgba(255, 255, 255, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.5);
+      --nav-bg: rgba(248, 246, 241, 0.92);
+      --nav-border: #E8E4DD;
 
-      --slider-track: #e2e8f0;
-      --slider-thumb: #6c5ce7;
-      --toggle-hover: rgba(108, 92, 231, 0.15);
+      --slider-track: #E8E4DD;
+      --slider-thumb: #C2410C;
+      --toggle-hover: rgba(194, 65, 12, 0.12);
 
-      --scene-bg: #e8edf3;
+      --scene-bg: #EDE9E0;
     }
 
     [data-theme="dark"] {
-      --bg-color: #0f1014;
-      --bg-pattern: #181a20;
-      --text-main: #dfe6e9;
-      --text-secondary: #b2bec3;
+      --bg-color: #111110;
+      --bg-pattern: #1A1A18;
+      --text-main: #EDEBE8;
+      --text-secondary: #9C9890;
 
-      --brand-primary: #a29bfe;
-      --brand-accent: #81ecec;
+      --brand-primary: #E8734A;
+      --brand-accent: #2DD4BF;
 
-      --surface: #1e2129;
-      --surface-alt: #17191f;
-      --border: #2d3436;
+      --surface: #1E1E1C;
+      --surface-alt: #1A1A18;
+      --border: #2E2E2A;
       --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
 
-      --btn-primary: #6c5ce7;
-      --btn-primary-hover: #5849d6;
+      --btn-primary: #C2410C;
+      --btn-primary-hover: #A93A0A;
       --btn-text: #ffffff;
 
-      --nav-bg: rgba(22, 24, 29, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.08);
+      --nav-bg: rgba(17, 17, 16, 0.92);
+      --nav-border: #2E2E2A;
 
-      --slider-track: #4a5568;
-      --slider-thumb: #a29bfe;
-      --toggle-hover: rgba(162, 155, 254, 0.2);
+      --slider-track: #3A3A36;
+      --slider-thumb: #E8734A;
+      --toggle-hover: rgba(232, 115, 74, 0.15);
 
-      --scene-bg: #0a0c14;
+      --scene-bg: #111110;
     }
 
     * {
@@ -96,7 +96,7 @@
     }
 
     body {
-      font-family: var(--font-sans);
+      font-family: var(--font-body);
       color: var(--text-main);
       background-color: var(--bg-color);
       background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
@@ -153,7 +153,7 @@
       text-align: center;
       font-family: var(--font-display);
       font-size: 1.6rem;
-      font-weight: 800;
+      font-weight: 400;
       letter-spacing: -0.5px;
       color: var(--brand-primary);
     }
@@ -362,7 +362,7 @@
       border: 1px solid var(--border);
       background: var(--surface-alt);
       color: var(--text-main);
-      font-family: var(--font-sans);
+      font-family: var(--font-body);
       font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
@@ -431,11 +431,11 @@
     }
 
     .state-preset-swatch--solid {
-      background: #00cec9;
+      background: #0D9488;
     }
 
     .state-preset-swatch--liquid {
-      background: #6c5ce7;
+      background: #C2410C;
     }
 
     .state-preset-swatch--gas {
@@ -580,7 +580,7 @@
       bottom: 0;
       height: 0%;
       border-radius: 999px 999px 7px 7px;
-      background: linear-gradient(180deg, #ff7675 0%, #a29bfe 56%, #00cec9 100%);
+      background: linear-gradient(180deg, #ff7675 0%, #C2410C 56%, #0D9488 100%);
       transition: height 0.18s ease;
     }
 
@@ -740,7 +740,7 @@
       padding: 0.5rem 0.9rem;
       font-size: 0.9rem;
       font-weight: 700;
-      font-family: var(--font-sans);
+      font-family: var(--font-body);
       letter-spacing: 0.02em;
       cursor: pointer;
       transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
@@ -1794,7 +1794,7 @@
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       const appleMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
       if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', nextTheme === 'dark' ? '#0f1014' : '#f8f9fa');
+        themeColorMeta.setAttribute('content', nextTheme === 'dark' ? '#111110' : '#F8F6F1');
       }
       if (appleMeta) {
         appleMeta.setAttribute('content', nextTheme === 'dark' ? 'black-translucent' : 'default');

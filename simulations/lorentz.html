@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#f8f9fa">
+    <meta name="theme-color" content="#F8F6F1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <script>
@@ -13,7 +13,7 @@
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-        if (tc) tc.setAttribute('content', '#0f1014');
+        if (tc) tc.setAttribute('content', '#111110');
         if (sb) sb.setAttribute('content', 'black-translucent');
       }
     })();
@@ -22,42 +22,42 @@
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
         :root {
-            --font-sans: 'Inter', sans-serif;
-            --font-display: 'Poppins', 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-body: 'Manrope', sans-serif;
+            --font-display: 'DM Serif Display', serif;
+            --font-mono: 'IBM Plex Mono', monospace;
 
             /* Light Theme */
-            --bg-color: #f8f9fa;
-            --bg-pattern: #e9ecef;
-            --text-main: #2d3436;
-            --text-secondary: #636e72;
+            --bg-color: #F8F6F1;
+            --bg-pattern: #EDE9E0;
+            --text-main: #1B1B1B;
+            --text-secondary: #6B6560;
 
-            --brand-primary: #6c5ce7;
-            --brand-secondary: #a29bfe;
-            --brand-accent: #00cec9;
+            --brand-primary: #C2410C;
+            --brand-secondary: #EA580C;
+            --brand-accent: #0D9488;
 
             --card-bg: #ffffff;
-            --card-border: #e9ecef;
+            --card-border: #E8E4DD;
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 
             --canvas-bg: #ffffff;
-            --canvas-border: #e2e8f0;
+            --canvas-border: #E8E4DD;
 
-            --btn-bg: #6c5ce7;
+            --btn-bg: #C2410C;
             --btn-text: #ffffff;
-            --btn-hover: #5b4cdb;
+            --btn-hover: #A93A0A;
 
-            --slider-track: #e2e8f0;
-            --slider-thumb: #6c5ce7;
+            --slider-track: #E8E4DD;
+            --slider-thumb: #C2410C;
 
-            --header-bg: rgba(255, 255, 255, 0.9);
-            --header-border: rgba(108, 92, 231, 0.1);
+            --header-bg: rgba(248, 246, 241, 0.92);
+            --header-border: rgba(194, 65, 12, 0.1);
 
-            --nav-bg: rgba(255, 255, 255, 0.85);
-            --nav-border: rgba(255, 255, 255, 0.5);
+            --nav-bg: rgba(248, 246, 241, 0.92);
+            --nav-border: #E8E4DD;
 
             --grid-rest: #e2e8f0;
             --grid-moving: #a29bfe;
@@ -69,43 +69,43 @@
             --velocity-line-u: #22c55e;
             --velocity-line-u-prime: #f97316;
 
-            --table-border: #e2e8f0;
-            --table-header-bg: #f8fafc;
+            --table-border: #E8E4DD;
+            --table-header-bg: #F0ECE4;
 
             --context-menu-bg: #ffffff;
-            --context-menu-border: #e2e8f0;
-            --context-menu-hover: #f1f5f9;
+            --context-menu-border: #E8E4DD;
+            --context-menu-hover: #F0ECE4;
         }
 
         [data-theme="dark"] {
-            --bg-color: #0f1014;
-            --bg-pattern: #181a20;
-            --text-main: #dfe6e9;
-            --text-secondary: #b2bec3;
+            --bg-color: #111110;
+            --bg-pattern: #1A1A18;
+            --text-main: #EDEBE8;
+            --text-secondary: #9C9890;
 
-            --brand-primary: #a29bfe;
-            --brand-secondary: #6c5ce7;
-            --brand-accent: #81ecec;
+            --brand-primary: #E8734A;
+            --brand-secondary: #F4845F;
+            --brand-accent: #2DD4BF;
 
-            --card-bg: #1e2129;
-            --card-border: #2d3436;
+            --card-bg: #1E1E1C;
+            --card-border: #2E2E2A;
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 
-            --canvas-bg: #16181d;
-            --canvas-border: #2d3436;
+            --canvas-bg: #1A1A18;
+            --canvas-border: #2E2E2A;
 
-            --btn-bg: #6c5ce7;
+            --btn-bg: #C2410C;
             --btn-text: #ffffff;
-            --btn-hover: #7c6ef0;
+            --btn-hover: #E8734A;
 
-            --slider-track: #4a5568;
-            --slider-thumb: #a29bfe;
+            --slider-track: #3A3A36;
+            --slider-thumb: #E8734A;
 
-            --header-bg: rgba(30, 33, 41, 0.95);
-            --header-border: rgba(162, 155, 254, 0.1);
+            --header-bg: rgba(17, 17, 16, 0.92);
+            --header-border: rgba(232, 115, 74, 0.1);
 
-            --nav-bg: rgba(22, 24, 29, 0.85);
-            --nav-border: rgba(255, 255, 255, 0.08);
+            --nav-bg: rgba(17, 17, 16, 0.92);
+            --nav-border: #2E2E2A;
 
             --grid-rest: #374151;
             --grid-moving: #7c3aed;
@@ -117,12 +117,12 @@
             --velocity-line-u: #4ade80;
             --velocity-line-u-prime: #fb923c;
 
-            --table-border: #374151;
-            --table-header-bg: #1e2129;
+            --table-border: #3A3A36;
+            --table-header-bg: #1E1E1C;
 
-            --context-menu-bg: #1e2129;
-            --context-menu-border: #374151;
-            --context-menu-hover: #2d3436;
+            --context-menu-bg: #1E1E1C;
+            --context-menu-border: #3A3A36;
+            --context-menu-hover: #2E2E2A;
         }
 
         * {
@@ -133,13 +133,13 @@
         }
 
         .offline-font {
-            --font-sans: 'Inter', 'Poppins', sans-serif;
-            --font-display: 'Poppins', 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-body: 'Manrope', sans-serif;
+            --font-display: 'DM Serif Display', serif;
+            --font-mono: 'IBM Plex Mono', monospace;
         }
 
         body {
-            font-family: var(--font-sans);
+            font-family: var(--font-body);
             background-color: var(--bg-color);
             background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
             background-size: 30px 30px;
@@ -181,7 +181,7 @@
         .banner-title {
             font-family: var(--font-display);
             font-size: 1.6rem;
-            font-weight: 800;
+            font-weight: 400;
             text-align: center;
             flex: 1;
             letter-spacing: -0.5px;
@@ -247,7 +247,7 @@
         }
 
         .theme-toggle button:hover {
-            background-color: rgba(108, 92, 231, 0.15);
+            background-color: rgba(194, 65, 12, 0.12);
             transform: rotate(15deg);
         }
 
@@ -564,7 +564,7 @@
         }
 
         .valueBadge {
-            background: rgba(108, 92, 231, 0.15);
+            background: rgba(194, 65, 12, 0.12);
             color: var(--brand-primary);
             font-weight: 600;
             padding: 2px 10px;
@@ -583,7 +583,7 @@
             font-size: 0.95rem;
             cursor: pointer;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+            box-shadow: 0 4px 12px rgba(194, 65, 12, 0.2);
             transition: background-color 0.2s, transform 0.2s;
         }
 
@@ -896,7 +896,7 @@
             const isDarkTheme = theme === 'dark';
 
             if (themeColorMeta) {
-                themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+                themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
             }
 
             if (appleStatusBarMeta) {
