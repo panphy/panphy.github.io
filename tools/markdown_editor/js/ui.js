@@ -26,7 +26,7 @@ function updateAppChromeTheme(theme) {
   const isDarkTheme = theme === 'dark';
 
   if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+    themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
   }
 
   if (appleStatusBarMeta) {
