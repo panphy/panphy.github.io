@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#f8f9fa">
+    <meta name="theme-color" content="#F8F6F1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <script>
@@ -13,7 +13,7 @@
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-        if (tc) tc.setAttribute('content', '#0f1014');
+        if (tc) tc.setAttribute('content', '#111110');
         if (sb) sb.setAttribute('content', 'black-translucent');
       }
     })();
@@ -22,87 +22,87 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
     :root {
-      --font-sans: 'Inter', sans-serif;
-      --font-display: 'Poppins', 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Manrope', sans-serif;
+      --font-display: 'DM Serif Display', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
 
       /* Light Theme */
-      --bg-color: #f8f9fa;
-      --bg-pattern: #e9ecef;
-      --text-main: #2d3436;
-      --text-secondary: #636e72;
+      --bg-color: #F8F6F1;
+      --bg-pattern: #EDE9E0;
+      --text-main: #1B1B1B;
+      --text-secondary: #6B6560;
 
-      --brand-primary: #6c5ce7;
-      --brand-secondary: #a29bfe;
-      --brand-accent: #00cec9;
+      --brand-primary: #C2410C;
+      --brand-secondary: #EA580C;
+      --brand-accent: #0D9488;
 
       --card-bg: #ffffff;
-      --card-border: #e9ecef;
+      --card-border: #E8E4DD;
       --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 
       --canvas-bg: #ffffff;
-      --canvas-baseline: #cbd5e1;
+      --canvas-baseline: #D8D3CB;
 
-      --slider-track: #e2e8f0;
-      --slider-thumb: #6c5ce7;
+      --slider-track: #E8E4DD;
+      --slider-thumb: #C2410C;
 
       --select-bg: #ffffff;
-      --select-border: #e2e8f0;
+      --select-border: #E8E4DD;
 
-      --header-bg: rgba(255, 255, 255, 0.9);
-      --header-border: rgba(108, 92, 231, 0.1);
+      --header-bg: rgba(248, 246, 241, 0.92);
+      --header-border: rgba(194, 65, 12, 0.1);
 
-      --nav-bg: rgba(255, 255, 255, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.5);
+      --nav-bg: rgba(248, 246, 241, 0.92);
+      --nav-border: #E8E4DD;
 
       /* Sound analyzer specific */
-      --axis-color: #2d3436;
-      --grid-color: #94a3b8;
+      --axis-color: #1B1B1B;
+      --grid-color: #9C9890;
       --wave-line: #16a34a;
       --marker-color: #f97316;
-      --tooltip-bg: rgba(255, 255, 255, 0.95);
-      --tooltip-text: #1f2933;
+      --tooltip-bg: rgba(248, 246, 241, 0.95);
+      --tooltip-text: #1B1B1B;
     }
 
     [data-theme="dark"] {
-      --bg-color: #0f1014;
-      --bg-pattern: #181a20;
-      --text-main: #dfe6e9;
-      --text-secondary: #b2bec3;
+      --bg-color: #111110;
+      --bg-pattern: #1A1A18;
+      --text-main: #EDEBE8;
+      --text-secondary: #9C9890;
 
-      --brand-primary: #a29bfe;
-      --brand-secondary: #6c5ce7;
-      --brand-accent: #81ecec;
+      --brand-primary: #FB923C;
+      --brand-secondary: #C2410C;
+      --brand-accent: #5EEAD4;
 
-      --card-bg: #1e2129;
-      --card-border: #2d3436;
+      --card-bg: #1A1A19;
+      --card-border: #2A2A28;
       --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 
-      --canvas-bg: #1e1e1e;
-      --canvas-baseline: #4a5568;
+      --canvas-bg: #1A1A19;
+      --canvas-baseline: #3D3D3A;
 
-      --slider-track: #4a5568;
-      --slider-thumb: #a29bfe;
+      --slider-track: #3D3D3A;
+      --slider-thumb: #FB923C;
 
-      --select-bg: #2d3436;
-      --select-border: #4a5568;
+      --select-bg: #2A2A28;
+      --select-border: #3D3D3A;
 
-      --header-bg: rgba(30, 33, 41, 0.95);
-      --header-border: rgba(162, 155, 254, 0.1);
+      --header-bg: rgba(17, 17, 16, 0.95);
+      --header-border: rgba(251, 146, 60, 0.1);
 
-      --nav-bg: rgba(22, 24, 29, 0.85);
-      --nav-border: rgba(255, 255, 255, 0.08);
+      --nav-bg: rgba(17, 17, 16, 0.92);
+      --nav-border: rgba(255, 255, 255, 0.06);
 
       /* Sound analyzer specific */
-      --axis-color: #ffffff;
-      --grid-color: #ffffff;
+      --axis-color: #EDEBE8;
+      --grid-color: #EDEBE8;
       --wave-line: #98c616;
       --marker-color: #ff5f1f;
-      --tooltip-bg: rgba(15, 16, 20, 0.9);
-      --tooltip-text: #ffffff;
+      --tooltip-bg: rgba(17, 17, 16, 0.9);
+      --tooltip-text: #EDEBE8;
     }
 
     * {
@@ -113,9 +113,9 @@
     }
 
     .offline-font {
-      --font-sans: 'Inter', 'Poppins', sans-serif;
-      --font-display: 'Poppins', 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-sans: 'Manrope', sans-serif;
+      --font-display: 'DM Serif Display', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
     }
 
     body {
@@ -208,7 +208,7 @@
     }
 
     .theme-toggle button:hover {
-      background-color: rgba(108, 92, 231, 0.15);
+      background-color: rgba(194, 65, 12, 0.15);
       transform: rotate(15deg);
     }
 
@@ -517,7 +517,7 @@
     .device-select:focus {
       outline: none;
       border-color: var(--brand-primary);
-      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+      box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.15);
     }
 
     .device-select:hover {
@@ -905,7 +905,7 @@
       const isDarkTheme = theme === 'dark';
 
       if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+        themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
       }
 
       if (appleStatusBarMeta) {

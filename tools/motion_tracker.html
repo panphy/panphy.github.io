@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f8f9fa">
+    <meta name="theme-color" content="#F8F6F1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <script>
@@ -13,7 +13,7 @@
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-        if (tc) tc.setAttribute('content', '#0f1014');
+        if (tc) tc.setAttribute('content', '#111110');
         if (sb) sb.setAttribute('content', 'black-translucent');
       }
     })();
@@ -23,41 +23,41 @@
     <script src="/assets/sw-register.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<style>
-		@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Poppins:wght@600;700;800&display=swap');
+		@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 		:root {
-			--font-sans: 'Inter', sans-serif;
-			--font-display: 'Poppins', 'Inter', sans-serif;
-			--font-mono: 'JetBrains Mono', monospace;
+			--font-sans: 'Manrope', sans-serif;
+			--font-display: 'DM Serif Display', serif;
+			--font-mono: 'IBM Plex Mono', monospace;
 
-			--bg-color: #f8f9fa;
-			--bg-pattern: #e9ecef;
-			--text-main: #2d3436;
-			--text-muted: #636e72;
+			--bg-color: #F8F6F1;
+			--bg-pattern: #EDE9E0;
+			--text-main: #1B1B1B;
+			--text-muted: #6B6560;
 
-			--brand-primary: #6c5ce7;
-			--brand-secondary: #a29bfe;
-			--brand-accent: #00cec9;
+			--brand-primary: #C2410C;
+			--brand-secondary: #EA580C;
+			--brand-accent: #0D9488;
 
 			--surface: #ffffff;
-			--surface-muted: #f4f6f8;
-			--surface-strong: #1f2937;
-			--border-color: rgba(45, 52, 54, 0.12);
-			--shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+			--surface-muted: #F0ECE4;
+			--surface-strong: #1B1B1B;
+			--border-color: rgba(27, 27, 27, 0.10);
+			--shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
 			--border-radius: 12px;
 
-			--primary: #6c5ce7;
-			--primary-hover: #5a4fd6;
-			--danger: #ff7675;
-			--warning: #fdcb6e;
-			--success: #2ecc71;
+			--primary: #C2410C;
+			--primary-hover: #A93B0B;
+			--danger: #B91C1C;
+			--warning: #F59E0B;
+			--success: #2D8C5F;
 
-			--nav-bg: rgba(255, 255, 255, 0.85);
-			--nav-border: rgba(255, 255, 255, 0.5);
+			--nav-bg: rgba(248, 246, 241, 0.92);
+			--nav-border: #E8E4DD;
 
-			--chart-grid: rgba(45, 52, 54, 0.18);
-			--chart-axis: rgba(45, 52, 54, 0.9);
-			--chart-text: rgba(45, 52, 54, 0.95);
+			--chart-grid: rgba(27, 27, 27, 0.15);
+			--chart-axis: rgba(27, 27, 27, 0.85);
+			--chart-text: rgba(27, 27, 27, 0.9);
 			--overlay-axis: rgba(255, 255, 255, 0.9);
 			--overlay-shadow: rgba(0, 0, 0, 0.35);
 			--copy-hint-outline: #93c5fd;
@@ -66,33 +66,33 @@
 		}
 
 		[data-theme="dark"] {
-			--bg-color: #0f1014;
-			--bg-pattern: #181a20;
-			--text-main: #dfe6e9;
-			--text-muted: #b2bec3;
+			--bg-color: #111110;
+			--bg-pattern: #1A1A18;
+			--text-main: #EDEBE8;
+			--text-muted: #9C9890;
 
-			--brand-primary: #a29bfe;
-			--brand-secondary: #6c5ce7;
-			--brand-accent: #81ecec;
+			--brand-primary: #FB923C;
+			--brand-secondary: #C2410C;
+			--brand-accent: #5EEAD4;
 
-			--surface: #1e2129;
-			--surface-muted: #171a21;
-			--surface-strong: #111318;
+			--surface: #1A1A19;
+			--surface-muted: #252523;
+			--surface-strong: #0D0D0C;
 			--border-color: rgba(255, 255, 255, 0.08);
-			--shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+			--shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 
-			--primary: #6c5ce7;
-			--primary-hover: #7f74f1;
-			--danger: #ff6b6b;
-			--warning: #f9ca24;
-			--success: #55efc4;
+			--primary: #FB923C;
+			--primary-hover: #F97316;
+			--danger: #EF4444;
+			--warning: #F59E0B;
+			--success: #34D399;
 
-			--nav-bg: rgba(22, 24, 29, 0.85);
-			--nav-border: rgba(255, 255, 255, 0.08);
+			--nav-bg: rgba(17, 17, 16, 0.92);
+			--nav-border: rgba(255, 255, 255, 0.06);
 
-			--chart-grid: rgba(255, 255, 255, 0.16);
-			--chart-axis: rgba(223, 230, 233, 0.92);
-			--chart-text: rgba(223, 230, 233, 0.95);
+			--chart-grid: rgba(237, 235, 232, 0.14);
+			--chart-axis: rgba(237, 235, 232, 0.88);
+			--chart-text: rgba(237, 235, 232, 0.9);
 			--overlay-axis: rgba(255, 255, 255, 0.75);
 			--overlay-shadow: rgba(0, 0, 0, 0.7);
 			--copy-hint-outline: #7dd3fc;
@@ -199,7 +199,7 @@
 		}
 
 		.theme-toggle button:hover {
-			background-color: rgba(108, 92, 231, 0.15);
+			background-color: rgba(194, 65, 12, 0.15);
 			transform: rotate(15deg);
 		}
 
@@ -289,12 +289,12 @@
 
 		.btn-tool {
 			color: var(--brand-primary);
-			border-color: rgba(108, 92, 231, 0.3);
-			background: rgba(108, 92, 231, 0.12);
+			border-color: rgba(194, 65, 12, 0.3);
+			background: rgba(194, 65, 12, 0.12);
 		}
 
 		.btn-tool:hover:not(:disabled) {
-			background: rgba(108, 92, 231, 0.2);
+			background: rgba(194, 65, 12, 0.2);
 		}
 
 		/* --- Plot Buttons (Pill) --- */
@@ -505,7 +505,7 @@
 		#slider::-webkit-slider-runnable-track {
 			width: 100%;
 			height: 6px;
-			background: rgba(108, 92, 231, 0.3);
+			background: rgba(194, 65, 12, 0.3);
 			border-radius: 3px;
 			cursor: pointer;
 		}
@@ -525,7 +525,7 @@
 		#slider::-moz-range-track {
 			width: 100%;
 			height: 6px;
-			background: rgba(108, 92, 231, 0.3);
+			background: rgba(194, 65, 12, 0.3);
 			border-radius: 3px;
 			cursor: pointer;
 		}
@@ -707,7 +707,7 @@
 			background: linear-gradient(135deg, var(--brand-accent), var(--brand-primary));
 			color: #ffffff;
 			border: none;
-			box-shadow: 0 6px 14px rgba(0, 206, 201, 0.2);
+			box-shadow: 0 6px 14px rgba(13, 148, 136, 0.2);
 		}
 
 		.btn-export:hover:not(:disabled) {
@@ -715,20 +715,20 @@
 		}
 
 		[data-theme="dark"] .btn-export {
-			color: #000000;
+			color: #1B1B1B;
 			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 		}
 
 		/* --- Message Box --- */
 		#message {
-			background: rgba(0, 206, 201, 0.12);
+			background: rgba(13, 148, 136, 0.12);
 			color: var(--text-main);
 			padding: 10px 15px;
 			border-radius: var(--border-radius);
 			margin: 24px auto;
 			max-width: 1160px;
 			text-align: center;
-			border: 1px solid rgba(0, 206, 201, 0.3);
+			border: 1px solid rgba(13, 148, 136, 0.3);
 		}
 
 		/* --- Responsive --- */
@@ -1100,7 +1100,7 @@
 			const isDarkTheme = theme === 'dark';
 
 			if (themeColorMeta) {
-				themeColorMeta.setAttribute('content', isDarkTheme ? '#0f1014' : '#f8f9fa');
+				themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
 			}
 
 			if (appleStatusBarMeta) {
