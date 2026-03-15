@@ -810,6 +810,10 @@ button:hover {
 	background-color: var(--btn-import-hover);
 }
 
+[data-theme="dark"] .btn-import-csv {
+	color: #1a1a1a;
+}
+
 /* Export CSV - Peach (Import-style action) */
 .btn-export-csv {
 	background-color: var(--btn-import);
@@ -819,6 +823,10 @@ button:hover {
 
 .btn-export-csv:hover {
 	background-color: var(--btn-import-hover);
+}
+
+[data-theme="dark"] .btn-export-csv {
+	color: #1a1a1a;
 }
 
 /* View Table - Teal (Utility action) */
