@@ -430,13 +430,6 @@
             line-height: 1.6;
         }
 
-        /* Offline pill on cards */
-        @keyframes offlinePulse {
-            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); }
-            70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-        }
-
         .card-offline-pill {
             display: inline-flex;
             align-items: center;
@@ -468,11 +461,6 @@
             border-radius: 50%;
             background: var(--status-check);
             box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
-        }
-
-        .card-offline-pill[data-state="checking"]::before {
-            background: var(--status-check);
-            animation: offlinePulse 1.4s ease-out infinite;
         }
 
         .card-offline-pill[data-state="ready"]::before {
@@ -1199,6 +1187,7 @@
             if (!pill) return;
             pill.dataset.state = state;
             pill.textContent = label;
+            pill.hidden = state === 'checking';
         }
 
         function normalizeCardPath(hrefValue) {
@@ -1222,7 +1211,7 @@
 
                 const pill = document.createElement('span');
                 pill.className = 'card-offline-pill';
-                setCardOfflineState(pill, 'checking', 'Caching...');
+                setCardOfflineState(pill, 'checking', '');
                 card.prepend(pill);
                 offlineCardPills.set(cardPath, pill);
             });
@@ -1269,7 +1258,7 @@
                     setCardOfflineState(pill, 'ready', 'Offline ready');
                     return;
                 }
-                setCardOfflineState(pill, 'checking', 'Caching...');
+                setCardOfflineState(pill, 'checking', '');
             });
 
             return {
@@ -1285,7 +1274,7 @@
             try {
                 if (!('serviceWorker' in navigator) || !('caches' in window)) {
                     offlineCardPills.forEach((pill) => {
-                        setCardOfflineState(pill, 'checking', 'Caching...');
+                        setCardOfflineState(pill, 'checking', '');
                     });
                     if (offlineReadyPollId) {
                         clearInterval(offlineReadyPollId);
@@ -1312,7 +1301,7 @@
             } catch (error) {
                 offlineCardPills.forEach((pill) => {
                     if (pill.dataset.state !== 'ready') {
-                        setCardOfflineState(pill, 'checking', 'Caching...');
+                        setCardOfflineState(pill, 'checking', '');
                     }
                 });
             } finally {
