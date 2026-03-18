@@ -1961,9 +1961,10 @@
     refreshVisualState();
 
     let lastTime = 0;
+    let animFrameId = null;
 
     function animate(timestamp) {
-      requestAnimationFrame(animate);
+      animFrameId = requestAnimationFrame(animate);
 
       if (lastTime === 0) lastTime = timestamp;
       let dt = (timestamp - lastTime) / 1000;
@@ -1983,7 +1984,16 @@
       renderer.render(scene, camera);
     }
 
-    requestAnimationFrame(animate);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+      } else {
+        lastTime = 0;
+        if (!animFrameId) animFrameId = requestAnimationFrame(animate);
+      }
+    });
+
+    animFrameId = requestAnimationFrame(animate);
 
   </script>
 </body>
