@@ -1094,6 +1094,30 @@
     const COORDINATION = new Uint16Array(N);
     const OCCUPANCY = new Uint8Array(STRUCTURE_CELL_COUNT);
 
+    // --- Cell list for O(N) neighbor lookups ---
+    const CELL_MAX_DIM = 10;
+    const CELL_MAX_TOTAL = CELL_MAX_DIM * CELL_MAX_DIM * CELL_MAX_DIM;
+    const cellHead = new Int32Array(CELL_MAX_TOTAL);
+    const cellNext = new Int32Array(N);
+    let cellNx = 1, cellNy = 1, cellNz = 1, cellSize = 0, invCellSize = 0;
+
+    function buildCellList(cutoff) {
+      const nc = Math.max(1, Math.min(CELL_MAX_DIM, Math.floor(boxSize / cutoff)));
+      cellNx = nc; cellNy = nc; cellNz = nc;
+      cellSize = boxSize / nc;
+      invCellSize = nc / boxSize;
+      const totalCells = nc * nc * nc;
+      for (let c = 0; c < totalCells; c++) cellHead[c] = -1;
+      for (let i = 0; i < N; i++) {
+        const ix = Math.min(nc - 1, Math.max(0, (POS[i * 3] + halfBox) * invCellSize | 0));
+        const iy = Math.min(nc - 1, Math.max(0, (POS[i * 3 + 1] + halfBox) * invCellSize | 0));
+        const iz = Math.min(nc - 1, Math.max(0, (POS[i * 3 + 2] + halfBox) * invCellSize | 0));
+        const ci = ix + iy * nc + iz * nc * nc;
+        cellNext[i] = cellHead[ci];
+        cellHead[ci] = i;
+      }
+    }
+
     const SIM_STATE = {
       playing: true,
       activeTab: 'states',
@@ -1317,48 +1341,79 @@
     }
 
     function computeForcesAndPotential() {
-      // 12-6 Lennard-Jones interactions give a compact condensed phase at
-      // low temperature and a dispersed gas at high temperature. The potential
-      // is truncated at 2.5 sigma and shifted so it approaches zero smoothly at
-      // the cutoff, which keeps the model stable for a lightweight browser sim.
-      // The virial (sum of r·F for all pairs) is accumulated for the barostat.
+      // 12-6 Lennard-Jones with cell-list neighbor search.
+      // The potential is truncated at 2.5 sigma and shifted to zero at the cutoff.
       FORCE.fill(0);
       let potentialEnergy = 0;
       let virial = 0;
 
-      for (let i = 0; i < N; i++) {
-        for (let j = i + 1; j < N; j++) {
-          const dx = POS[j * 3] - POS[i * 3];
-          if (dx > LJ_CUTOFF || dx < -LJ_CUTOFF) continue;
+      buildCellList(LJ_CUTOFF);
+      const nc = cellNx;
+      const ncSq = nc * nc;
 
-          const dy = POS[j * 3 + 1] - POS[i * 3 + 1];
-          if (dy > LJ_CUTOFF || dy < -LJ_CUTOFF) continue;
+      for (let cz = 0; cz < nc; cz++) {
+        for (let cy = 0; cy < nc; cy++) {
+          for (let cx = 0; cx < nc; cx++) {
+            const ci = cx + cy * nc + cz * ncSq;
 
-          const dz = POS[j * 3 + 2] - POS[i * 3 + 2];
-          if (dz > LJ_CUTOFF || dz < -LJ_CUTOFF) continue;
+            // Loop over neighbor cells (including self)
+            for (let dz = -1; dz <= 1; dz++) {
+              const nz = cz + dz;
+              if (nz < 0 || nz >= nc) continue;
+              for (let dy = -1; dy <= 1; dy++) {
+                const ny = cy + dy;
+                if (ny < 0 || ny >= nc) continue;
+                for (let dx2 = -1; dx2 <= 1; dx2++) {
+                  const nx = cx + dx2;
+                  if (nx < 0 || nx >= nc) continue;
+                  const cj = nx + ny * nc + nz * ncSq;
+                  if (cj < ci) continue; // avoid double-counting cell pairs
 
-          let r2 = dx * dx + dy * dy + dz * dz;
-          if (r2 > LJ_CUTOFF_SQ) continue;
-          if (r2 < MIN_R2) r2 = MIN_R2;
+                  const sameCell = ci === cj;
 
-          const r2inv = 1.0 / r2;
-          const r6inv = r2inv * r2inv * r2inv;
-          const s6r6 = LJ_SIGMA6 * r6inv;
-          const s12r12 = s6r6 * s6r6;
-          potentialEnergy += 4.0 * LJ_EPSILON * (s12r12 - s6r6) - LJ_AT_CUTOFF;
+                  let i = cellHead[ci];
+                  while (i !== -1) {
+                    const ix3 = i * 3;
+                    const px = POS[ix3], py = POS[ix3 + 1], pz = POS[ix3 + 2];
 
-          const fOverR = 24.0 * LJ_EPSILON * r2inv * (2.0 * s12r12 - s6r6);
-          virial += fOverR * r2;
-          const fx = fOverR * dx;
-          const fy = fOverR * dy;
-          const fz = fOverR * dz;
+                    let j = sameCell ? cellNext[i] : cellHead[cj];
+                    while (j !== -1) {
+                      const jx3 = j * 3;
+                      const ddx = POS[jx3] - px;
+                      const ddy = POS[jx3 + 1] - py;
+                      const ddz = POS[jx3 + 2] - pz;
 
-          FORCE[j * 3] += fx;
-          FORCE[j * 3 + 1] += fy;
-          FORCE[j * 3 + 2] += fz;
-          FORCE[i * 3] -= fx;
-          FORCE[i * 3 + 1] -= fy;
-          FORCE[i * 3 + 2] -= fz;
+                      let r2 = ddx * ddx + ddy * ddy + ddz * ddz;
+                      if (r2 < LJ_CUTOFF_SQ) {
+                        if (r2 < MIN_R2) r2 = MIN_R2;
+                        const r2inv = 1.0 / r2;
+                        const r6inv = r2inv * r2inv * r2inv;
+                        const s6r6 = LJ_SIGMA6 * r6inv;
+                        const s12r12 = s6r6 * s6r6;
+                        potentialEnergy += 4.0 * LJ_EPSILON * (s12r12 - s6r6) - LJ_AT_CUTOFF;
+
+                        const fOverR = 24.0 * LJ_EPSILON * r2inv * (2.0 * s12r12 - s6r6);
+                        virial += fOverR * r2;
+                        const fx = fOverR * ddx;
+                        const fy = fOverR * ddy;
+                        const fz = fOverR * ddz;
+
+                        FORCE[jx3] += fx;
+                        FORCE[jx3 + 1] += fy;
+                        FORCE[jx3 + 2] += fz;
+                        FORCE[ix3] -= fx;
+                        FORCE[ix3 + 1] -= fy;
+                        FORCE[ix3 + 2] -= fz;
+                      }
+
+                      j = cellNext[j];
+                    }
+                    i = cellNext[i];
+                  }
+                }
+              }
+            }
+          }
         }
       }
 
@@ -1473,19 +1528,41 @@
 
     function countBondsOnly() {
       let bondCount = 0;
-      for (let i = 0; i < N; i++) {
-        for (let j = i + 1; j < N; j++) {
-          const dx = POS[j * 3] - POS[i * 3];
-          if (dx > BOND_CUTOFF || dx < -BOND_CUTOFF) continue;
-
-          const dy = POS[j * 3 + 1] - POS[i * 3 + 1];
-          if (dy > BOND_CUTOFF || dy < -BOND_CUTOFF) continue;
-
-          const dz = POS[j * 3 + 2] - POS[i * 3 + 2];
-          if (dz > BOND_CUTOFF || dz < -BOND_CUTOFF) continue;
-
-          const r2 = dx * dx + dy * dy + dz * dz;
-          if (r2 < BOND_CUTOFF_SQ) bondCount++;
+      buildCellList(BOND_CUTOFF);
+      const nc = cellNx, ncSq = nc * nc;
+      for (let cz = 0; cz < nc; cz++) {
+        for (let cy = 0; cy < nc; cy++) {
+          for (let cx = 0; cx < nc; cx++) {
+            const ci = cx + cy * nc + cz * ncSq;
+            for (let dz2 = -1; dz2 <= 1; dz2++) {
+              const nz = cz + dz2;
+              if (nz < 0 || nz >= nc) continue;
+              for (let dy2 = -1; dy2 <= 1; dy2++) {
+                const ny = cy + dy2;
+                if (ny < 0 || ny >= nc) continue;
+                for (let dx2 = -1; dx2 <= 1; dx2++) {
+                  const nx = cx + dx2;
+                  if (nx < 0 || nx >= nc) continue;
+                  const cj = nx + ny * nc + nz * ncSq;
+                  if (cj < ci) continue;
+                  const sameCell = ci === cj;
+                  let i = cellHead[ci];
+                  while (i !== -1) {
+                    let j = sameCell ? cellNext[i] : cellHead[cj];
+                    while (j !== -1) {
+                      const ddx = POS[j * 3] - POS[i * 3];
+                      const ddy = POS[j * 3 + 1] - POS[i * 3 + 1];
+                      const ddz = POS[j * 3 + 2] - POS[i * 3 + 2];
+                      const r2 = ddx * ddx + ddy * ddy + ddz * ddz;
+                      if (r2 < BOND_CUTOFF_SQ) bondCount++;
+                      j = cellNext[j];
+                    }
+                    i = cellNext[i];
+                  }
+                }
+              }
+            }
+          }
         }
       }
       return bondCount;
@@ -1602,33 +1679,55 @@
       let bondCount = 0;
       let visibleBondCount = 0;
 
-      for (let i = 0; i < N; i++) {
-        for (let j = i + 1; j < N; j++) {
-          const dx = POS[j * 3] - POS[i * 3];
-          if (dx > BOND_CUTOFF || dx < -BOND_CUTOFF) continue;
+      buildCellList(BOND_CUTOFF);
+      const bNc = cellNx, bNcSq = bNc * bNc;
 
-          const dy = POS[j * 3 + 1] - POS[i * 3 + 1];
-          if (dy > BOND_CUTOFF || dy < -BOND_CUTOFF) continue;
-
-          const dz = POS[j * 3 + 2] - POS[i * 3 + 2];
-          if (dz > BOND_CUTOFF || dz < -BOND_CUTOFF) continue;
-
-          const r2 = dx * dx + dy * dy + dz * dz;
-          if (r2 >= BOND_CUTOFF_SQ) continue;
-
-          bondCount++;
-          COORDINATION[i]++;
-          COORDINATION[j]++;
-
-          if (visibleBondCount < MAX_BONDS) {
-            const offset = visibleBondCount * 6;
-            bondPositions[offset] = POS[i * 3];
-            bondPositions[offset + 1] = POS[i * 3 + 1];
-            bondPositions[offset + 2] = POS[i * 3 + 2];
-            bondPositions[offset + 3] = POS[j * 3];
-            bondPositions[offset + 4] = POS[j * 3 + 1];
-            bondPositions[offset + 5] = POS[j * 3 + 2];
-            visibleBondCount++;
+      for (let cz = 0; cz < bNc; cz++) {
+        for (let cy = 0; cy < bNc; cy++) {
+          for (let cx = 0; cx < bNc; cx++) {
+            const ci = cx + cy * bNc + cz * bNcSq;
+            for (let dz2 = -1; dz2 <= 1; dz2++) {
+              const nz = cz + dz2;
+              if (nz < 0 || nz >= bNc) continue;
+              for (let dy2 = -1; dy2 <= 1; dy2++) {
+                const ny = cy + dy2;
+                if (ny < 0 || ny >= bNc) continue;
+                for (let dx2 = -1; dx2 <= 1; dx2++) {
+                  const nx = cx + dx2;
+                  if (nx < 0 || nx >= bNc) continue;
+                  const cj = nx + ny * bNc + nz * bNcSq;
+                  if (cj < ci) continue;
+                  const sameCell = ci === cj;
+                  let i = cellHead[ci];
+                  while (i !== -1) {
+                    let j = sameCell ? cellNext[i] : cellHead[cj];
+                    while (j !== -1) {
+                      const ddx = POS[j * 3] - POS[i * 3];
+                      const ddy = POS[j * 3 + 1] - POS[i * 3 + 1];
+                      const ddz = POS[j * 3 + 2] - POS[i * 3 + 2];
+                      const r2 = ddx * ddx + ddy * ddy + ddz * ddz;
+                      if (r2 < BOND_CUTOFF_SQ) {
+                        bondCount++;
+                        COORDINATION[i]++;
+                        COORDINATION[j]++;
+                        if (visibleBondCount < MAX_BONDS) {
+                          const offset = visibleBondCount * 6;
+                          bondPositions[offset] = POS[i * 3];
+                          bondPositions[offset + 1] = POS[i * 3 + 1];
+                          bondPositions[offset + 2] = POS[i * 3 + 2];
+                          bondPositions[offset + 3] = POS[j * 3];
+                          bondPositions[offset + 4] = POS[j * 3 + 1];
+                          bondPositions[offset + 5] = POS[j * 3 + 2];
+                          visibleBondCount++;
+                        }
+                      }
+                      j = cellNext[j];
+                    }
+                    i = cellNext[i];
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1962,6 +2061,8 @@
 
     let lastTime = 0;
     let animFrameId = null;
+    let diagCounter = 0;
+    const DIAG_INTERVAL = 3;
 
     function animate(timestamp) {
       animFrameId = requestAnimationFrame(animate);
@@ -1977,7 +2078,13 @@
         for (let step = 0; step < SUB_STEPS; step++) {
           stepPhysics(subDt);
         }
-        refreshVisualState();
+        syncParticlesToScene();
+        updateBoxVisuals();
+        if (++diagCounter >= DIAG_INTERVAL) {
+          diagCounter = 0;
+          refreshDiagnostics();
+        }
+        updateUIState();
       }
 
       controls.update();
