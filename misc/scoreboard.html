@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Scoreboard</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #15151e;
+            --border: #2a2a3a;
+            --text: #f0f0f5;
+            --text-dim: #888898;
+            --home-color: #4a90d9;
+            --away-color: #d94a4a;
+            --accent: #ffd700;
+            --timer-bg: #1a1a28;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Main Layout ── */
+        .board {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            grid-template-rows: 1fr;
+            min-height: 0;
+        }
+
+        /* ── Score Panels ── */
+        .score-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            gap: 0;
+        }
+
+        .team-label {
+            font-size: clamp(14px, 2.5vw, 22px);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            position: absolute;
+            top: clamp(8px, 2vh, 20px);
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .team-label:hover { background: rgba(255,255,255,0.06); }
+
+        .score-touch-zone {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .score-touch-zone.up { align-items: flex-end; padding-bottom: 0; }
+        .score-touch-zone.down { align-items: flex-start; padding-top: 0; }
+
+        .score-value {
+            font-size: clamp(80px, 18vw, 240px);
+            font-weight: 800;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+            pointer-events: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .score-panel.home .score-value { color: var(--home-color); }
+        .score-panel.away .score-value { color: var(--away-color); }
+
+        .score-hint {
+            font-size: clamp(10px, 1.5vw, 14px);
+            color: var(--text-dim);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            position: absolute;
+        }
+        .score-touch-zone.up .score-hint { top: clamp(36px, 7vh, 56px); }
+        .score-touch-zone.down .score-hint { bottom: clamp(8px, 2vh, 20px); }
+        .score-touch-zone:hover .score-hint,
+        .score-touch-zone:active .score-hint { opacity: 0.6; }
+
+        /* Tap flash */
+        .score-touch-zone::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 4px;
+            background: currentColor;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+        .score-touch-zone.flash::after { opacity: 0.06; }
+
+        /* ── Center Panel ── */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            padding: clamp(8px, 2vw, 24px);
+            gap: clamp(12px, 3vh, 32px);
+            min-width: clamp(140px, 24vw, 280px);
+        }
+
+        /* Timer */
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-display {
+            font-size: clamp(32px, 6vw, 72px);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--accent);
+            letter-spacing: 0.02em;
+            line-height: 1.1;
+        }
+
+        .timer-display.danger { color: #ff4444; }
+
+        .timer-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .timer-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: clamp(13px, 1.8vw, 16px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .timer-btn:hover { background: var(--border); }
+        .timer-btn:active { background: #3a3a4a; }
+
+        .timer-btn.primary {
+            background: var(--accent);
+            color: #111;
+            border-color: var(--accent);
+        }
+        .timer-btn.primary:hover { filter: brightness(1.1); }
+
+        .gear-btn {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: clamp(16px, 2vw, 22px);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gear-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+
+        /* Period */
+        .period-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .period-label {
+            font-size: clamp(11px, 1.5vw, 14px);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .period-value {
+            font-size: clamp(20px, 3.5vw, 36px);
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .period-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .period-btn:hover { background: var(--border); color: var(--text); }
+
+        /* Fouls */
+        .fouls-row {
+            display: flex;
+            gap: clamp(12px, 3vw, 32px);
+            align-items: center;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .foul-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .foul-label {
+            font-size: clamp(9px, 1.2vw, 12px);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .foul-touch-zone {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 2px;
+            border-radius: 4px;
+            transition: background 0.15s;
+            min-width: 44px;
+            min-height: 28px;
+        }
+        .foul-touch-zone:hover { background: rgba(255,255,255,0.04); }
+        .foul-touch-zone:active { background: rgba(255,255,255,0.08); }
+
+        .foul-value {
+            font-size: clamp(22px, 4vw, 42px);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .foul-block.home .foul-value { color: var(--home-color); }
+        .foul-block.away .foul-value { color: var(--away-color); }
+
+        /* ── Bottom Bar ── */
+        .bottom-bar {
+            display: flex;
+            justify-content: center;
+            padding: 6px 12px;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .bottom-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: clamp(11px, 1.3vw, 13px);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            min-height: 36px;
+        }
+        .bottom-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+
+        /* ── Blinking Overlay ── */
+        .blink-overlay {
+            position: fixed;
+            inset: 0;
+            background: #ff0000;
+            z-index: 100;
+            display: none;
+            cursor: pointer;
+        }
+        .blink-overlay.active {
+            display: block;
+            animation: blink 0.5s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0; }
+        }
+
+        .blink-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(28px, 6vw, 60px);
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-backdrop.active { display: flex; }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: clamp(20px, 4vw, 32px);
+            max-width: 360px;
+            width: 100%;
+        }
+
+        .modal h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .modal-row label {
+            font-size: 14px;
+            color: var(--text-dim);
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .modal-row input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 16px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            min-height: 44px;
+        }
+        .modal-row input:focus { outline: none; border-color: var(--accent); }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            min-height: 44px;
+        }
+
+        .modal-actions .cancel-btn {
+            background: var(--surface);
+            color: var(--text);
+        }
+        .modal-actions .cancel-btn:hover { background: var(--border); }
+
+        .modal-actions .save-btn {
+            background: var(--accent);
+            color: #111;
+            border-color: var(--accent);
+        }
+        .modal-actions .save-btn:hover { filter: brightness(1.1); }
+
+        /* ── Rename Input ── */
+        .rename-input {
+            background: var(--bg);
+            border: 1px solid var(--accent);
+            color: var(--text);
+            font-size: inherit;
+            font-weight: inherit;
+            text-transform: uppercase;
+            letter-spacing: inherit;
+            text-align: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            width: 10ch;
+            outline: none;
+        }
+
+        /* ── Confirm Dialog ── */
+        .confirm-content {
+            text-align: center;
+        }
+        .confirm-content p {
+            color: var(--text-dim);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        /* ── Buzzer Sound Indicator ── */
+        .sound-toggle {
+            font-size: clamp(14px, 1.8vw, 18px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-height: 500px) {
+            .center-panel { gap: 8px; }
+            .period-section { display: none; }
+        }
+
+        @media (orientation: portrait) and (max-width: 600px) {
+            .center-panel { min-width: 110px; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <!-- Home Score -->
+        <div class="score-panel home">
+            <span class="team-label" id="homeLabel" title="Click to rename">HOME</span>
+            <div class="score-touch-zone up" data-team="home" data-dir="up">
+                <span class="score-hint">+1</span>
+            </div>
+            <span class="score-value" id="homeScore">0</span>
+            <div class="score-touch-zone down" data-team="home" data-dir="down">
+                <span class="score-hint">&minus;1</span>
+            </div>
+        </div>
+
+        <!-- Center -->
+        <div class="center-panel">
+            <div class="timer-section">
+                <div class="timer-display" id="timerDisplay">10:00</div>
+                <div class="timer-controls">
+                    <button class="timer-btn primary" id="startStopBtn">Start</button>
+                    <button class="timer-btn" id="resetBtn">Reset</button>
+                    <button class="gear-btn" id="gearBtn" title="Timer settings">&#9881;</button>
+                </div>
+            </div>
+
+            <div class="period-section">
+                <button class="period-btn" id="periodDown">&#8722;</button>
+                <div>
+                    <div class="period-label">Period</div>
+                    <div class="period-value" id="periodValue">1</div>
+                </div>
+                <button class="period-btn" id="periodUp">&#43;</button>
+            </div>
+
+            <div class="fouls-row">
+                <div class="foul-block home">
+                    <div class="foul-label">Fouls</div>
+                    <div class="foul-touch-zone" data-team="home" data-dir="up">
+                        <span class="foul-value" id="homeFouls">0</span>
+                    </div>
+                    <div class="foul-touch-zone" data-team="home" data-dir="down" style="margin-top:-4px">
+                        <span style="font-size:clamp(9px,1.2vw,12px);color:var(--text-dim);">&minus;1</span>
+                    </div>
+                </div>
+                <div class="foul-block away">
+                    <div class="foul-label">Fouls</div>
+                    <div class="foul-touch-zone" data-team="away" data-dir="up">
+                        <span class="foul-value" id="awayFouls">0</span>
+                    </div>
+                    <div class="foul-touch-zone" data-team="away" data-dir="down" style="margin-top:-4px">
+                        <span style="font-size:clamp(9px,1.2vw,12px);color:var(--text-dim);">&minus;1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Away Score -->
+        <div class="score-panel away">
+            <span class="team-label" id="awayLabel" title="Click to rename">AWAY</span>
+            <div class="score-touch-zone up" data-team="away" data-dir="up">
+                <span class="score-hint">+1</span>
+            </div>
+            <span class="score-value" id="awayScore">0</span>
+            <div class="score-touch-zone down" data-team="away" data-dir="down">
+                <span class="score-hint">&minus;1</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="bottom-btn" id="undoBtn" title="Undo last action">Undo</button>
+        <button class="bottom-btn sound-toggle" id="soundBtn" title="Toggle buzzer">&#128264;</button>
+        <button class="bottom-btn" id="swapBtn" title="Swap sides">Swap</button>
+        <button class="bottom-btn" id="resetAllBtn" title="Reset everything">New Game</button>
+    </div>
+
+    <!-- Blink Overlay -->
+    <div class="blink-overlay" id="blinkOverlay">
+        <span class="blink-text">TIME</span>
+    </div>
+
+    <!-- Timer Settings Modal -->
+    <div class="modal-backdrop" id="timerModal">
+        <div class="modal">
+            <h2>Timer Settings</h2>
+            <div class="modal-row">
+                <label>Minutes</label>
+                <input type="number" id="setMinutes" min="0" max="99" value="10">
+            </div>
+            <div class="modal-row">
+                <label>Seconds</label>
+                <input type="number" id="setSeconds" min="0" max="59" value="0">
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="modalCancel">Cancel</button>
+                <button class="save-btn" id="modalSave">Set</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Reset Modal -->
+    <div class="modal-backdrop" id="confirmModal">
+        <div class="modal">
+            <div class="confirm-content">
+                <h2>New Game?</h2>
+                <p>This will reset scores, fouls, timer, and period.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="confirmCancel">Cancel</button>
+                <button class="save-btn" id="confirmOk">Reset</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+(() => {
+    // ── State ──
+    const state = {
+        home: { score: 0, fouls: 0, name: 'HOME' },
+        away: { score: 0, fouls: 0, name: 'AWAY' },
+        period: 1,
+        timerDuration: 600,   // default 10 min in seconds
+        timerRemaining: 600,
+        timerRunning: false,
+        soundOn: true,
+    };
+
+    const history = [];  // undo stack
+    let timerInterval = null;
+    let blinkActive = false;
+
+    // ── DOM refs ──
+    const $ = id => document.getElementById(id);
+    const homeScoreEl   = $('homeScore');
+    const awayScoreEl   = $('awayScore');
+    const homeFoulsEl   = $('homeFouls');
+    const awayFoulsEl   = $('awayFouls');
+    const homeLabel     = $('homeLabel');
+    const awayLabel     = $('awayLabel');
+    const timerDisplay  = $('timerDisplay');
+    const periodValue   = $('periodValue');
+    const startStopBtn  = $('startStopBtn');
+    const blinkOverlay  = $('blinkOverlay');
+    const timerModal    = $('timerModal');
+    const confirmModal  = $('confirmModal');
+    const soundBtn      = $('soundBtn');
+
+    // ── Audio Context for Buzzer ──
+    let audioCtx = null;
+    function ensureAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playBuzzer() {
+        if (!state.soundOn) return;
+        try {
+            ensureAudioCtx();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = 440;
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.5);
+        } catch(e) { /* silent fail */ }
+    }
+
+    // ── Render ──
+    function render() {
+        homeScoreEl.textContent = state.home.score;
+        awayScoreEl.textContent = state.away.score;
+        homeFoulsEl.textContent = state.home.fouls;
+        awayFoulsEl.textContent = state.away.fouls;
+        homeLabel.textContent = state.home.name;
+        awayLabel.textContent = state.away.name;
+        periodValue.textContent = state.period;
+        renderTimer();
+        soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
+    }
+
+    function renderTimer() {
+        const t = Math.max(0, state.timerRemaining);
+        const m = Math.floor(t / 60);
+        const s = t % 60;
+        timerDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        timerDisplay.classList.toggle('danger', t <= 30 && t > 0);
+        startStopBtn.textContent = state.timerRunning ? 'Stop' : 'Start';
+    }
+
+    // ── Undo ──
+    function pushUndo(action) {
+        history.push(action);
+        if (history.length > 100) history.shift();
+    }
+
+    function undo() {
+        const action = history.pop();
+        if (!action) return;
+        if (action.type === 'score') {
+            state[action.team].score -= action.delta;
+            if (state[action.team].score < 0) state[action.team].score = 0;
+        } else if (action.type === 'foul') {
+            state[action.team].fouls -= action.delta;
+            if (state[action.team].fouls < 0) state[action.team].fouls = 0;
+        } else if (action.type === 'period') {
+            state.period -= action.delta;
+            if (state.period < 1) state.period = 1;
+        }
+        render();
+    }
+
+    // ── Score Touch ──
+    document.querySelectorAll('.score-touch-zone').forEach(zone => {
+        zone.addEventListener('click', (e) => {
+            dismissBlink();
+            const team = zone.dataset.team;
+            const delta = zone.dataset.dir === 'up' ? 1 : -1;
+            state[team].score = Math.max(0, state[team].score + delta);
+            pushUndo({ type: 'score', team, delta });
+            flash(zone);
+            render();
+        });
+    });
+
+    // ── Foul Touch ──
+    document.querySelectorAll('.foul-touch-zone').forEach(zone => {
+        zone.addEventListener('click', (e) => {
+            dismissBlink();
+            const team = zone.dataset.team;
+            const delta = zone.dataset.dir === 'up' ? 1 : -1;
+            state[team].fouls = Math.max(0, state[team].fouls + delta);
+            pushUndo({ type: 'foul', team, delta });
+            render();
+        });
+    });
+
+    // ── Flash effect ──
+    function flash(el) {
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 150);
+    }
+
+    // ── Timer ──
+    startStopBtn.addEventListener('click', () => {
+        dismissBlink();
+        ensureAudioCtx(); // unlock audio on user gesture
+        if (state.timerRunning) {
+            stopTimer();
+        } else {
+            startTimer();
+        }
+    });
+
+    $('resetBtn').addEventListener('click', () => {
+        dismissBlink();
+        stopTimer();
+        state.timerRemaining = state.timerDuration;
+        render();
+    });
+
+    function startTimer() {
+        if (state.timerRemaining <= 0) return;
+        state.timerRunning = true;
+        renderTimer();
+        timerInterval = setInterval(() => {
+            state.timerRemaining--;
+            if (state.timerRemaining <= 0) {
+                state.timerRemaining = 0;
+                stopTimer();
+                triggerBlink();
+                playBuzzer();
+            }
+            renderTimer();
+        }, 1000);
+    }
+
+    function stopTimer() {
+        state.timerRunning = false;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        renderTimer();
+    }
+
+    // ── Blink ──
+    function triggerBlink() {
+        blinkActive = true;
+        blinkOverlay.classList.add('active');
+    }
+
+    function dismissBlink() {
+        if (!blinkActive) return;
+        blinkActive = false;
+        blinkOverlay.classList.remove('active');
+    }
+
+    blinkOverlay.addEventListener('click', dismissBlink);
+
+    // ── Gear / Timer Settings ──
+    $('gearBtn').addEventListener('click', () => {
+        const m = Math.floor(state.timerDuration / 60);
+        const s = state.timerDuration % 60;
+        $('setMinutes').value = m;
+        $('setSeconds').value = s;
+        timerModal.classList.add('active');
+    });
+
+    $('modalCancel').addEventListener('click', () => timerModal.classList.remove('active'));
+
+    $('modalSave').addEventListener('click', () => {
+        const m = Math.max(0, parseInt($('setMinutes').value) || 0);
+        const s = Math.max(0, Math.min(59, parseInt($('setSeconds').value) || 0));
+        state.timerDuration = m * 60 + s;
+        state.timerRemaining = state.timerDuration;
+        stopTimer();
+        timerModal.classList.remove('active');
+        render();
+    });
+
+    timerModal.addEventListener('click', (e) => {
+        if (e.target === timerModal) timerModal.classList.remove('active');
+    });
+
+    // ── Period ──
+    $('periodUp').addEventListener('click', () => {
+        state.period++;
+        pushUndo({ type: 'period', delta: 1 });
+        render();
+    });
+
+    $('periodDown').addEventListener('click', () => {
+        if (state.period > 1) {
+            state.period--;
+            pushUndo({ type: 'period', delta: -1 });
+            render();
+        }
+    });
+
+    // ── Team Rename ──
+    function makeEditable(labelEl, team) {
+        labelEl.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'rename-input';
+            input.value = state[team].name;
+            input.maxLength = 12;
+            labelEl.replaceWith(input);
+            input.focus();
+            input.select();
+
+            function commit() {
+                const val = input.value.trim() || team.toUpperCase();
+                state[team].name = val.toUpperCase();
+                const newLabel = document.createElement('span');
+                newLabel.className = 'team-label';
+                newLabel.id = team + 'Label';
+                newLabel.title = 'Click to rename';
+                newLabel.textContent = state[team].name;
+                input.replaceWith(newLabel);
+                makeEditable(newLabel, team);
+            }
+
+            input.addEventListener('blur', commit);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') input.blur();
+                if (e.key === 'Escape') {
+                    input.value = state[team].name;
+                    input.blur();
+                }
+            });
+        });
+    }
+
+    makeEditable(homeLabel, 'home');
+    makeEditable(awayLabel, 'away');
+
+    // ── Swap Sides ──
+    $('swapBtn').addEventListener('click', () => {
+        const tmp = { ...state.home };
+        state.home = { ...state.away };
+        state.away = { ...tmp };
+        // Re-bind labels after swap
+        render();
+        const hl = $('homeLabel') || document.querySelector('.score-panel.home .team-label');
+        const al = $('awayLabel') || document.querySelector('.score-panel.away .team-label');
+        if (hl) makeEditable(hl, 'home');
+        if (al) makeEditable(al, 'away');
+    });
+
+    // ── Sound Toggle ──
+    soundBtn.addEventListener('click', () => {
+        state.soundOn = !state.soundOn;
+        render();
+    });
+
+    // ── Undo ──
+    $('undoBtn').addEventListener('click', undo);
+
+    // ── New Game ──
+    $('resetAllBtn').addEventListener('click', () => {
+        confirmModal.classList.add('active');
+    });
+
+    $('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('active'));
+
+    $('confirmOk').addEventListener('click', () => {
+        confirmModal.classList.remove('active');
+        stopTimer();
+        dismissBlink();
+        state.home.score = 0;
+        state.home.fouls = 0;
+        state.away.score = 0;
+        state.away.fouls = 0;
+        state.period = 1;
+        state.timerRemaining = state.timerDuration;
+        history.length = 0;
+        render();
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+        if (e.target === confirmModal) confirmModal.classList.remove('active');
+    });
+
+    // ── Keyboard Shortcuts ──
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        dismissBlink();
+        switch (e.key) {
+            case ' ':
+                e.preventDefault();
+                startStopBtn.click();
+                break;
+            case 'z':
+                if (e.ctrlKey || e.metaKey) { e.preventDefault(); undo(); }
+                break;
+        }
+    });
+
+    // ── Prevent zoom on double-tap (iOS) ──
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    // ── Init ──
+    render();
+})();
+</script>
+</body>
+</html>
