@@ -557,6 +557,7 @@
         <button class="bottom-btn" id="undoBtn" title="Undo last action">Undo</button>
         <button class="bottom-btn sound-toggle" id="soundBtn" title="Toggle buzzer">&#128264;</button>
         <button class="bottom-btn" id="swapBtn" title="Swap sides">Swap</button>
+        <button class="bottom-btn" id="fullscreenBtn" title="Full screen">&#x26F6;</button>
         <button class="bottom-btn" id="resetAllBtn" title="Reset everything">New Game</button>
     </div>
 
@@ -893,6 +894,21 @@
     soundBtn.addEventListener('click', () => {
         state.soundOn = !state.soundOn;
         render();
+    });
+
+    // ── Fullscreen ──
+    $('fullscreenBtn').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        $('fullscreenBtn').innerHTML = document.fullscreenElement ? '&#x2716;' : '&#x26F6;';
+        // Refit scores after fullscreen transition
+        setTimeout(fitAllScores, 100);
     });
 
     // ── Undo ──
