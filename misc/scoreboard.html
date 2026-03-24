@@ -64,12 +64,10 @@
             color: var(--text-dim);
             position: absolute;
             top: clamp(8px, 2vh, 20px);
-            cursor: pointer;
             padding: 4px 12px;
             border-radius: 6px;
-            transition: background 0.2s;
+            pointer-events: none;
         }
-        .team-label:hover { background: rgba(255,255,255,0.06); }
 
         .score-touch-zone {
             flex: 1;
@@ -97,8 +95,7 @@
             white-space: nowrap;
         }
 
-        .score-panel.home .score-value { color: var(--home-color); }
-        .score-panel.away .score-value { color: var(--away-color); }
+        /* Score and foul colors applied dynamically via JS */
 
         .score-hint {
             font-size: clamp(10px, 1.5vw, 14px);
@@ -299,8 +296,7 @@
             pointer-events: none;
         }
 
-        .foul-block.home .foul-value { color: var(--home-color); }
-        .foul-block.away .foul-value { color: var(--away-color); }
+        /* Foul colors applied dynamically via JS */
 
         /* ── Bottom Bar ── */
         .bottom-bar {
@@ -411,6 +407,27 @@
         }
         .modal-row input:focus { outline: none; border-color: var(--accent); }
 
+        .modal-row input[type="color"] {
+            padding: 4px;
+            height: 44px;
+            cursor: pointer;
+        }
+
+        .modal-section-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .modal-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0;
+        }
+
         .modal-actions {
             display: flex;
             gap: 10px;
@@ -440,22 +457,6 @@
             border-color: var(--accent);
         }
         .modal-actions .save-btn:hover { filter: brightness(1.1); }
-
-        /* ── Rename Input ── */
-        .rename-input {
-            background: var(--bg);
-            border: 1px solid var(--accent);
-            color: var(--text);
-            font-size: inherit;
-            font-weight: inherit;
-            text-transform: uppercase;
-            letter-spacing: inherit;
-            text-align: center;
-            padding: 2px 8px;
-            border-radius: 4px;
-            width: 10ch;
-            outline: none;
-        }
 
         /* ── Confirm Dialog ── */
         .confirm-content {
@@ -487,7 +488,7 @@
     <div class="board">
         <!-- Home Score -->
         <div class="score-panel home">
-            <span class="team-label" id="homeLabel" title="Click to rename">HOME</span>
+            <span class="team-label" id="homeLabel">HOME</span>
             <div class="score-touch-zone up" data-team="home" data-dir="up">
                 <span class="score-hint">+1</span>
             </div>
@@ -541,7 +542,7 @@
 
         <!-- Away Score -->
         <div class="score-panel away">
-            <span class="team-label" id="awayLabel" title="Click to rename">AWAY</span>
+            <span class="team-label" id="awayLabel">AWAY</span>
             <div class="score-touch-zone up" data-team="away" data-dir="up">
                 <span class="score-hint">+1</span>
             </div>
@@ -564,10 +565,11 @@
         <span class="blink-text">TIME</span>
     </div>
 
-    <!-- Timer Settings Modal -->
+    <!-- Settings Modal -->
     <div class="modal-backdrop" id="timerModal">
         <div class="modal">
-            <h2>Timer Settings</h2>
+            <h2>Settings</h2>
+            <div class="modal-section-label">Timer</div>
             <div class="modal-row">
                 <label>Minutes</label>
                 <input type="number" id="setMinutes" min="0" max="99" value="10">
@@ -576,9 +578,27 @@
                 <label>Seconds</label>
                 <input type="number" id="setSeconds" min="0" max="59" value="0">
             </div>
+            <div class="modal-divider"></div>
+            <div class="modal-section-label">Teams</div>
+            <div class="modal-row">
+                <label>Home name</label>
+                <input type="text" id="setHomeName" maxlength="12" value="HOME">
+            </div>
+            <div class="modal-row">
+                <label>Home color</label>
+                <input type="color" id="setHomeColor" value="#4a90d9">
+            </div>
+            <div class="modal-row">
+                <label>Away name</label>
+                <input type="text" id="setAwayName" maxlength="12" value="AWAY">
+            </div>
+            <div class="modal-row">
+                <label>Away color</label>
+                <input type="color" id="setAwayColor" value="#d94a4a">
+            </div>
             <div class="modal-actions">
                 <button class="cancel-btn" id="modalCancel">Cancel</button>
-                <button class="save-btn" id="modalSave">Set</button>
+                <button class="save-btn" id="modalSave">Save</button>
             </div>
         </div>
     </div>
@@ -601,8 +621,8 @@
 (() => {
     // ── State ──
     const state = {
-        home: { score: 0, fouls: 0, name: 'HOME' },
-        away: { score: 0, fouls: 0, name: 'AWAY' },
+        home: { score: 0, fouls: 0, name: 'HOME', color: '#4a90d9' },
+        away: { score: 0, fouls: 0, name: 'AWAY', color: '#d94a4a' },
         period: 1,
         timerDuration: 600,   // default 10 min in seconds
         timerRemaining: 600,
@@ -684,6 +704,11 @@
         homeLabel.textContent = state.home.name;
         awayLabel.textContent = state.away.name;
         periodValue.textContent = state.period;
+        // Apply custom colors
+        homeScoreEl.style.color = state.home.color;
+        awayScoreEl.style.color = state.away.color;
+        homeFoulsEl.style.color = state.home.color;
+        awayFoulsEl.style.color = state.away.color;
         renderTimer();
         soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
         fitAllScores();
@@ -812,6 +837,10 @@
         const s = state.timerDuration % 60;
         $('setMinutes').value = m;
         $('setSeconds').value = s;
+        $('setHomeName').value = state.home.name;
+        $('setAwayName').value = state.away.name;
+        $('setHomeColor').value = state.home.color;
+        $('setAwayColor').value = state.away.color;
         timerModal.classList.add('active');
     });
 
@@ -823,6 +852,12 @@
         state.timerDuration = m * 60 + s;
         state.timerRemaining = state.timerDuration;
         stopTimer();
+        // Team names
+        state.home.name = ($('setHomeName').value.trim() || 'HOME').toUpperCase();
+        state.away.name = ($('setAwayName').value.trim() || 'AWAY').toUpperCase();
+        // Team colors
+        state.home.color = $('setHomeColor').value;
+        state.away.color = $('setAwayColor').value;
         timerModal.classList.remove('active');
         render();
     });
@@ -846,55 +881,12 @@
         }
     });
 
-    // ── Team Rename ──
-    function makeEditable(labelEl, team) {
-        labelEl.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'rename-input';
-            input.value = state[team].name;
-            input.maxLength = 12;
-            labelEl.replaceWith(input);
-            input.focus();
-            input.select();
-
-            function commit() {
-                const val = input.value.trim() || team.toUpperCase();
-                state[team].name = val.toUpperCase();
-                const newLabel = document.createElement('span');
-                newLabel.className = 'team-label';
-                newLabel.id = team + 'Label';
-                newLabel.title = 'Click to rename';
-                newLabel.textContent = state[team].name;
-                input.replaceWith(newLabel);
-                makeEditable(newLabel, team);
-            }
-
-            input.addEventListener('blur', commit);
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') input.blur();
-                if (e.key === 'Escape') {
-                    input.value = state[team].name;
-                    input.blur();
-                }
-            });
-        });
-    }
-
-    makeEditable(homeLabel, 'home');
-    makeEditable(awayLabel, 'away');
-
     // ── Swap Sides ──
     $('swapBtn').addEventListener('click', () => {
         const tmp = { ...state.home };
         state.home = { ...state.away };
         state.away = { ...tmp };
-        // Re-bind labels after swap
         render();
-        const hl = $('homeLabel') || document.querySelector('.score-panel.home .team-label');
-        const al = $('awayLabel') || document.querySelector('.score-panel.away .team-label');
-        if (hl) makeEditable(hl, 'home');
-        if (al) makeEditable(al, 'away');
     });
 
     // ── Sound Toggle ──
