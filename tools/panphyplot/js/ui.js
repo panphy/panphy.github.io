@@ -1,5 +1,17 @@
 // UI and data management
 
+function showToast(message, duration = 3000) {
+	const toast = document.createElement('div');
+	toast.className = 'toast-notification';
+	toast.textContent = message;
+	document.body.appendChild(toast);
+	requestAnimationFrame(() => toast.classList.add('toast-visible'));
+	setTimeout(() => {
+		toast.classList.remove('toast-visible');
+		toast.addEventListener('transitionend', () => toast.remove());
+	}, duration);
+}
+
 const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 const debouncedUpdateData = debounce(updateData, 300);
 const MARKED_CDN_URL = 'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js';

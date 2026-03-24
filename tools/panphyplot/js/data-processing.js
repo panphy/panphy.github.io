@@ -767,20 +767,24 @@
 			scheduleSaveState();
 		}
 
+		closeDataProcessingPopup();
+
+		if (typeof switchDataset === 'function') {
+			switchDataset(targetIndex);
+		}
+
 		const messages = [];
 		if (skippedRows > 0) {
 			messages.push({
 				type: 'warning',
-				text: 'Some rows produced invalid results and will be skipped.'
+				text: 'Some rows produced invalid results and were skipped.'
 			});
 		}
 		messages.push({
 			type: 'success',
 			text: `Processed data copied to ${targetLabel}.`
 		});
-		setMessages(messages);
-
-		renderMappingSection(true);
+		showToast(messages.map(m => m.text).join(' '));
 	}
 
 	function resetSessionState() {
