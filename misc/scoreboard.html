@@ -8,15 +8,16 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #0a0a0f;
-            --surface: #15151e;
-            --border: #2a2a3a;
-            --text: #f0f0f5;
-            --text-dim: #888898;
+            --bg: #06080f;
+            --surface: #111622;
+            --surface-alt: #0d1220;
+            --border: #23314f;
+            --text: #eef3ff;
+            --text-dim: #8c9aba;
             --home-color: #4a90d9;
             --away-color: #d94a4a;
-            --accent: #ffd700;
-            --timer-bg: #1a1a28;
+            --accent: #ffc740;
+            --timer-bg: #090d18;
         }
 
         html, body {
@@ -32,7 +33,7 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
         }
@@ -44,6 +45,9 @@
             grid-template-columns: 1fr auto 1fr;
             grid-template-rows: 1fr;
             min-height: 0;
+            background:
+                radial-gradient(circle at 50% 15%, rgba(255, 199, 64, 0.12), transparent 42%),
+                linear-gradient(180deg, #0b1222, #070b15 70%);
         }
 
         /* ── Score Panels ── */
@@ -58,14 +62,17 @@
 
         .team-label {
             font-size: clamp(14px, 2.5vw, 22px);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--text-dim);
+            letter-spacing: 0.18em;
+            color: #d2dcf5;
             position: absolute;
             top: clamp(8px, 2vh, 20px);
-            padding: 4px 12px;
-            border-radius: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: rgba(4, 9, 21, 0.55);
+            border: 1px solid rgba(188, 211, 255, 0.2);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
             pointer-events: none;
         }
 
@@ -129,11 +136,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-left: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            padding: clamp(8px, 2vw, 24px);
-            gap: clamp(12px, 3vh, 32px);
-            min-width: clamp(140px, 24vw, 280px);
+            border-left: 1px solid rgba(141, 167, 225, 0.25);
+            border-right: 1px solid rgba(141, 167, 225, 0.25);
+            padding: clamp(10px, 2vw, 24px);
+            gap: clamp(14px, 3vh, 36px);
+            min-width: clamp(190px, 30vw, 360px);
+            background: linear-gradient(180deg, rgba(6, 12, 24, 0.8), rgba(8, 13, 22, 0.6));
         }
 
         /* Timer */
@@ -141,16 +149,25 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(10, 16, 30, 0.92), rgba(4, 8, 16, 0.9));
+            border: 1px solid rgba(255, 234, 188, 0.32);
+            border-radius: 12px;
+            padding: clamp(12px, 2.5vw, 18px) clamp(10px, 2vw, 16px);
+            box-shadow:
+                0 0 0 1px rgba(255, 199, 64, 0.1) inset,
+                0 16px 28px rgba(0, 0, 0, 0.45);
         }
 
         .timer-display {
-            font-size: clamp(32px, 6vw, 72px);
-            font-weight: 700;
+            font-size: clamp(56px, 12vw, 150px);
+            font-weight: 800;
             font-variant-numeric: tabular-nums;
             color: var(--accent);
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
             line-height: 1.1;
+            text-shadow: 0 0 18px rgba(255, 194, 71, 0.26);
         }
 
         .timer-display.danger { color: #ff4444; }
@@ -160,25 +177,26 @@
             gap: 8px;
             align-items: center;
             justify-content: center;
+            width: 100%;
         }
 
         .timer-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: rgba(21, 32, 56, 0.9);
+            border: 1px solid rgba(142, 170, 231, 0.3);
             color: var(--text);
             border-radius: 8px;
             padding: 8px 16px;
             font-size: clamp(13px, 1.8vw, 16px);
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: background 0.15s, border-color 0.15s;
-            width: clamp(56px, 8vw, 80px);
+            width: clamp(70px, 10vw, 98px);
             min-height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .timer-btn:hover { background: var(--border); }
+        .timer-btn:hover { background: rgba(39, 58, 97, 0.95); }
         .timer-btn:active { background: #3a3a4a; }
 
         .timer-btn.primary {
@@ -209,7 +227,11 @@
         .period-section {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            background: rgba(7, 12, 24, 0.62);
+            border: 1px solid rgba(137, 163, 220, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
         }
 
         .period-inner {
@@ -221,7 +243,7 @@
 
         .period-label {
             font-size: clamp(11px, 1.5vw, 14px);
-            color: var(--text-dim);
+            color: #a7b6d8;
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
@@ -234,9 +256,9 @@
         }
 
         .period-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-dim);
+            background: rgba(20, 30, 52, 0.85);
+            border: 1px solid rgba(138, 164, 220, 0.3);
+            color: #a3b1d2;
             border-radius: 6px;
             width: 32px;
             height: 32px;
@@ -251,6 +273,54 @@
         }
         .period-btn:hover { background: var(--border); color: var(--text); }
 
+        .possession-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background: rgba(7, 12, 24, 0.62);
+            border: 1px solid rgba(137, 163, 220, 0.2);
+            border-radius: 10px;
+            padding: 8px 10px;
+        }
+
+        .possession-title {
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            font-weight: 700;
+        }
+
+        .arrow-lane {
+            flex: 1;
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .arrow-btn {
+            flex: 1;
+            min-height: 44px;
+            min-width: 44px;
+            border-radius: 8px;
+            border: 1px solid rgba(138, 164, 220, 0.25);
+            background: rgba(18, 29, 50, 0.75);
+            color: #b3c1df;
+            font-size: clamp(18px, 2.2vw, 24px);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .arrow-btn.active {
+            background: rgba(255, 199, 64, 0.92);
+            color: #101010;
+            border-color: rgba(255, 231, 179, 0.9);
+            box-shadow: 0 0 14px rgba(255, 199, 64, 0.35);
+        }
+
         /* Fouls */
         .fouls-row {
             display: flex;
@@ -258,6 +328,10 @@
             align-items: center;
             width: 100%;
             justify-content: center;
+            background: rgba(7, 12, 24, 0.62);
+            border: 1px solid rgba(137, 163, 220, 0.2);
+            border-radius: 10px;
+            padding: 8px 10px;
         }
 
         .foul-block {
@@ -304,8 +378,8 @@
             justify-content: center;
             padding: 6px 12px;
             gap: 12px;
-            border-top: 1px solid var(--border);
-            background: var(--surface);
+            border-top: 1px solid rgba(141, 167, 225, 0.25);
+            background: linear-gradient(180deg, #0d1425, #0a1020);
         }
 
         .bottom-btn {
@@ -518,6 +592,14 @@
                 <button class="period-btn" id="periodUp">&#43;</button>
             </div>
 
+            <div class="possession-row" aria-label="Possession Arrow">
+                <span class="possession-title">Arrow</span>
+                <div class="arrow-lane">
+                    <button class="arrow-btn" id="homeArrowBtn" title="Set possession to home" aria-label="Home possession">&#9664;</button>
+                    <button class="arrow-btn" id="awayArrowBtn" title="Set possession to away" aria-label="Away possession">&#9654;</button>
+                </div>
+            </div>
+
             <div class="fouls-row">
                 <div class="foul-block home">
                     <div class="foul-label">Fouls</div>
@@ -629,6 +711,7 @@
         timerRemaining: 600,
         timerRunning: false,
         soundOn: true,
+        possession: 'home',
     };
 
     const history = [];  // undo stack
@@ -650,6 +733,8 @@
     const timerModal    = $('timerModal');
     const confirmModal  = $('confirmModal');
     const soundBtn      = $('soundBtn');
+    const homeArrowBtn  = $('homeArrowBtn');
+    const awayArrowBtn  = $('awayArrowBtn');
 
     // ── Audio Context for Buzzer ──
     let audioCtx = null;
@@ -712,6 +797,8 @@
         awayFoulsEl.style.color = state.away.color;
         renderTimer();
         soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
+        homeArrowBtn.classList.toggle('active', state.possession === 'home');
+        awayArrowBtn.classList.toggle('active', state.possession === 'away');
         fitAllScores();
     }
 
@@ -887,6 +974,18 @@
         const tmp = { ...state.home };
         state.home = { ...state.away };
         state.away = { ...tmp };
+        state.possession = state.possession === 'home' ? 'away' : 'home';
+        render();
+    });
+
+    // ── Possession Arrow ──
+    homeArrowBtn.addEventListener('click', () => {
+        state.possession = 'home';
+        render();
+    });
+
+    awayArrowBtn.addEventListener('click', () => {
+        state.possession = 'away';
         render();
     });
 
@@ -950,6 +1049,11 @@
                 break;
             case 'z':
                 if (e.ctrlKey || e.metaKey) { e.preventDefault(); undo(); }
+                break;
+            case 'p':
+            case 'P':
+                state.possession = state.possession === 'home' ? 'away' : 'home';
+                render();
                 break;
         }
     });
