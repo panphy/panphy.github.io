@@ -1088,12 +1088,35 @@ function isDatasetEmpty(index = activeSet) {
 	return !Array.isArray(rawData[index]) || rawData[index].length === 0;
 }
 
+const CLEAR_DATA_SKIP_KEY = 'panphyplot-skip-clear-confirm';
+
 function confirmClearRows() {
-	if (!isDatasetEmpty(activeSet)) {
-		const datasetName = getDatasetDisplayName(activeSet);
-		const confirmMessage = `Clear all data in "${datasetName}"? This will remove all rows, uncertainties, and fitted results for this dataset.`;
-		if (!window.confirm(confirmMessage)) return;
+	if (isDatasetEmpty(activeSet)) {
+		clearRows();
+		return;
 	}
+	if (localStorage.getItem(CLEAR_DATA_SKIP_KEY) === 'true') {
+		clearRows();
+		return;
+	}
+	const datasetName = getDatasetDisplayName(activeSet);
+	const msg = document.getElementById('clear-data-prompt-message');
+	msg.textContent = `Clear all data in "${datasetName}"? This will remove all rows, uncertainties, and fitted results for this dataset.`;
+	document.getElementById('clear-data-dont-ask').checked = false;
+	document.getElementById('clear-data-prompt-background').style.display = 'block';
+	document.getElementById('clear-data-prompt-container').style.display = 'flex';
+}
+
+function closeClearDataPrompt() {
+	document.getElementById('clear-data-prompt-background').style.display = 'none';
+	document.getElementById('clear-data-prompt-container').style.display = 'none';
+}
+
+function confirmClearDataPrompt() {
+	if (document.getElementById('clear-data-dont-ask').checked) {
+		localStorage.setItem(CLEAR_DATA_SKIP_KEY, 'true');
+	}
+	closeClearDataPrompt();
 	clearRows();
 }
 
