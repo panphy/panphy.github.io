@@ -410,6 +410,23 @@
 		</div>
 	</div>
 
+	<!-- Clear Data Confirmation Modal -->
+	<div id="clear-data-prompt-background" style="display: none;"></div>
+	<div id="clear-data-prompt-container" style="display: none;">
+		<div id="clear-data-prompt-content" role="dialog" aria-modal="true" aria-labelledby="clear-data-prompt-title">
+			<div id="clear-data-prompt-title">Clear Data</div>
+			<div id="clear-data-prompt-message"></div>
+			<label id="clear-data-prompt-remember">
+				<input type="checkbox" id="clear-data-dont-ask" />
+				Don't ask again
+			</label>
+			<div id="clear-data-prompt-buttons">
+				<button id="clear-data-prompt-cancel" onclick="closeClearDataPrompt()" title="Cancel">Cancel</button>
+				<button id="clear-data-prompt-confirm" onclick="confirmClearDataPrompt()" title="Clear all data">Clear</button>
+			</div>
+		</div>
+	</div>
+
 	<!-- Filename Prompt Modal -->
 	<div id="filename-prompt-background" style="display: none;"></div>
 		<div id="filename-prompt-container" style="display: none;">
