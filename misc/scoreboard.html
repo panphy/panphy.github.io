@@ -85,7 +85,6 @@
         .score-touch-zone.down { align-items: flex-start; padding-top: 0; }
 
         .score-value {
-            font-size: clamp(80px, 18vw, 240px);
             font-weight: 800;
             line-height: 1;
             font-variant-numeric: tabular-nums;
@@ -95,6 +94,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            white-space: nowrap;
         }
 
         .score-panel.home .score-value { color: var(--home-color); }
@@ -654,6 +654,27 @@
         } catch(e) { /* silent fail */ }
     }
 
+    // ── Dynamic Score Sizing ──
+    function fitScoreFont(el) {
+        const panel = el.closest('.score-panel');
+        const panelW = panel.clientWidth;
+        const panelH = panel.clientHeight;
+        // Reserve space for team label at top and hints
+        const availW = panelW * 0.9;
+        const availH = panelH * 0.65;
+        const digits = el.textContent.length || 1;
+        // Scale based on available width per digit and height
+        const byWidth = availW / (digits * 0.65);
+        const byHeight = availH;
+        const size = Math.floor(Math.min(byWidth, byHeight));
+        el.style.fontSize = size + 'px';
+    }
+
+    function fitAllScores() {
+        fitScoreFont(homeScoreEl);
+        fitScoreFont(awayScoreEl);
+    }
+
     // ── Render ──
     function render() {
         homeScoreEl.textContent = state.home.score;
@@ -665,6 +686,7 @@
         periodValue.textContent = state.period;
         renderTimer();
         soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
+        fitAllScores();
     }
 
     function renderTimer() {
@@ -934,6 +956,7 @@
 
     // ── Init ──
     render();
+    window.addEventListener('resize', fitAllScores);
 })();
 </script>
 </body>
