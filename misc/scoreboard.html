@@ -3,26 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Scoreboard</title>
+    <meta name="theme-color" content="#040507">
+    <title>Basketball Scoreboard</title>
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         :root {
-            --bg: #06080f;
-            --surface: #111622;
-            --surface-alt: #0d1220;
-            --border: #23314f;
-            --text: #eef3ff;
-            --text-dim: #8c9aba;
-            --home-color: #4a90d9;
-            --away-color: #d94a4a;
-            --accent: #ffc740;
-            --timer-bg: #090d18;
+            --bg-base: #040507;
+            --bg-top: #0b0f16;
+            --panel: #10141c;
+            --panel-strong: #171d27;
+            --panel-soft: #1c2431;
+            --line: #2b3442;
+            --line-strong: #4c5a6f;
+            --text: #f4efe4;
+            --text-soft: #c9d0dc;
+            --text-muted: #7f8998;
+            --accent: #ffbf3d;
+            --accent-strong: #ff7b28;
+            --danger: #ff5a4f;
+            --success: #71d47a;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --home-team: #2c7df3;
+            --away-team: #f25555;
+            --home-team-rgb: 44, 125, 243;
+            --away-team-rgb: 242, 85, 85;
+            --display-font: "Avenir Next Condensed", "Arial Narrow", "Franklin Gothic Medium", sans-serif;
+            --body-font: "Trebuchet MS", "Gill Sans", sans-serif;
+            --digit-font: "SFMono-Regular", "Roboto Mono", "Consolas", monospace;
         }
 
         html, body {
-            height: 100%;
-            overflow: hidden;
+            min-height: 100%;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
@@ -31,386 +47,1055 @@
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ── Main Layout ── */
-        .board {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            grid-template-rows: 1fr;
-            min-height: 0;
+            min-height: 100svh;
+            overflow: hidden;
             background:
-                radial-gradient(circle at 50% 15%, rgba(255, 199, 64, 0.12), transparent 42%),
-                linear-gradient(180deg, #0b1222, #070b15 70%);
+                radial-gradient(circle at 50% -5%, rgba(255, 191, 61, 0.16), transparent 30%),
+                radial-gradient(circle at 50% 120%, rgba(255, 123, 40, 0.12), transparent 36%),
+                linear-gradient(180deg, #0a0d13 0%, #050608 58%, #020304 100%);
+            color: var(--text);
+            font-family: var(--body-font);
+            position: relative;
         }
 
-        /* ── Score Panels ── */
-        .score-panel {
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        body::before {
+            background:
+                radial-gradient(circle at center, transparent 0 18%, rgba(255, 255, 255, 0.035) 18.3% 18.7%, transparent 19% 100%),
+                linear-gradient(90deg, transparent 0 12%, rgba(255, 255, 255, 0.03) 12.2% 12.35%, transparent 12.6% 87.4%, rgba(255, 255, 255, 0.03) 87.65% 87.8%, transparent 88% 100%),
+                linear-gradient(180deg, transparent 0 14%, rgba(255, 255, 255, 0.02) 14.2% 14.35%, transparent 14.6% 85.4%, rgba(255, 255, 255, 0.02) 85.65% 85.8%, transparent 86% 100%);
+            opacity: 0.75;
+        }
+
+        body::after {
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 22%),
+                linear-gradient(315deg, rgba(255, 255, 255, 0.025), transparent 20%),
+                radial-gradient(circle at center, transparent 38%, rgba(0, 0, 0, 0.62) 100%);
+            mix-blend-mode: screen;
+            opacity: 0.5;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            appearance: none;
+            border: 0;
+            background: none;
+            color: inherit;
+        }
+
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            min-height: 100svh;
             display: flex;
             flex-direction: column;
+            gap: clamp(12px, 1.8vh, 18px);
+            padding:
+                max(12px, env(safe-area-inset-top))
+                max(12px, env(safe-area-inset-right))
+                max(12px, env(safe-area-inset-bottom))
+                max(12px, env(safe-area-inset-left));
+        }
+
+        .broadcast-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: clamp(14px, 1.8vw, 20px) clamp(16px, 2vw, 26px);
+            border: 1px solid rgba(118, 130, 148, 0.22);
+            border-radius: 24px;
+            background:
+                linear-gradient(160deg, rgba(255, 255, 255, 0.06), transparent 40%),
+                linear-gradient(180deg, rgba(14, 18, 26, 0.92), rgba(8, 10, 16, 0.94));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 18px 40px rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(16px);
+            animation: rise-in 0.65s ease both;
+        }
+
+        .header-kicker,
+        .header-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .header-kicker {
+            color: var(--text-muted);
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .kicker-pill {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-height: 28px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 191, 61, 0.32);
+            background: rgba(255, 191, 61, 0.08);
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 0.14em;
+        }
+
+        .header-overline {
+            margin-bottom: 4px;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        .header-main h1 {
+            font-family: var(--display-font);
+            font-size: clamp(26px, 3vw, 42px);
+            line-height: 0.95;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .header-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 34px;
+            padding: 0 12px;
+            border: 1px solid rgba(111, 122, 137, 0.24);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-soft);
+            font-size: 12px;
+        }
+
+        .legend-mark {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+        }
+
+        .score-mark {
+            background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+            box-shadow: 0 0 12px rgba(255, 191, 61, 0.5);
+        }
+
+        .foul-mark {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(148, 156, 170, 0.6));
+        }
+
+        .board {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(300px, 30vw) minmax(0, 1fr);
+            grid-template-areas: "home center away";
+            gap: clamp(12px, 1.5vw, 20px);
+        }
+
+        .team-panel,
+        .center-panel {
+            min-height: 0;
+        }
+
+        .team-panel.home { grid-area: home; }
+        .center-panel { grid-area: center; }
+        .team-panel.away { grid-area: away; }
+
+        .team-card,
+        .center-card {
             position: relative;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 28px;
+            border: 1px solid rgba(116, 131, 151, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
+                linear-gradient(180deg, rgba(15, 18, 26, 0.98), rgba(9, 11, 16, 0.98));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 22px 48px rgba(0, 0, 0, 0.34);
+        }
+
+        .team-card::before,
+        .center-card::before {
+            content: "";
+            position: absolute;
+            inset: -35%;
+            background: linear-gradient(120deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
+            opacity: 0.22;
+            transform: translateX(-36%);
+            animation: sweep 9s linear infinite;
+            pointer-events: none;
+        }
+
+        .team-panel.home .team-card {
+            background:
+                linear-gradient(160deg, rgba(var(--home-team-rgb), 0.14), transparent 38%),
+                linear-gradient(180deg, rgba(13, 17, 24, 0.98), rgba(8, 10, 16, 0.98));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 28px 58px rgba(var(--home-team-rgb), 0.12);
+            animation: rise-in 0.72s ease both;
+        }
+
+        .team-panel.away .team-card {
+            background:
+                linear-gradient(200deg, rgba(var(--away-team-rgb), 0.14), transparent 38%),
+                linear-gradient(180deg, rgba(13, 17, 24, 0.98), rgba(8, 10, 16, 0.98));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 28px 58px rgba(var(--away-team-rgb), 0.12);
+            animation: rise-in 0.82s ease both;
+        }
+
+        .center-card {
+            display: grid;
+            grid-template-rows: auto auto auto 1fr;
+            gap: clamp(12px, 1.6vh, 20px);
+            padding: clamp(16px, 2vw, 24px);
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255, 191, 61, 0.09), transparent 44%),
+                linear-gradient(180deg, rgba(18, 23, 32, 0.98), rgba(9, 11, 16, 0.98));
+            animation: rise-in 0.68s ease both;
+        }
+
+        .team-card {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
             gap: 0;
         }
 
-        .team-label {
-            font-size: clamp(14px, 2.5vw, 22px);
-            font-weight: 700;
-            text-transform: uppercase;
+        .team-header,
+        .team-footer {
+            padding: clamp(16px, 1.8vw, 22px);
+        }
+
+        .team-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid rgba(114, 127, 144, 0.18);
+        }
+
+        .team-label-cluster {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .team-kicker {
+            color: var(--text-muted);
+            font-size: 12px;
             letter-spacing: 0.18em;
-            color: #d2dcf5;
+            text-transform: uppercase;
+        }
+
+        .team-label {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: var(--display-font);
+            font-size: clamp(28px, 4vw, 48px);
+            line-height: 0.92;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .team-panel.home .team-label { color: var(--home-team); }
+        .team-panel.away .team-label { color: var(--away-team); }
+
+        .team-color-chip {
+            flex-shrink: 0;
+            width: clamp(70px, 10vw, 110px);
+            height: 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .team-panel.home .team-color-chip {
+            background: linear-gradient(90deg, rgba(var(--home-team-rgb), 0.9), rgba(var(--home-team-rgb), 0.3));
+            box-shadow: 0 0 18px rgba(var(--home-team-rgb), 0.4);
+        }
+
+        .team-panel.away .team-color-chip {
+            background: linear-gradient(90deg, rgba(var(--away-team-rgb), 0.9), rgba(var(--away-team-rgb), 0.3));
+            box-shadow: 0 0 18px rgba(var(--away-team-rgb), 0.4);
+        }
+
+        .score-stage {
+            position: relative;
+            min-height: 0;
+            padding: clamp(14px, 1.6vw, 20px);
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .score-well {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            min-height: clamp(220px, 32vh, 520px);
+            border-radius: 24px;
+            overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 28%),
+                linear-gradient(180deg, rgba(6, 8, 12, 0.94), rgba(2, 3, 5, 0.98));
+            border: 1px solid rgba(124, 136, 154, 0.2);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+                inset 0 -14px 30px rgba(0, 0, 0, 0.38);
+        }
+
+        .score-well::before {
+            content: "";
             position: absolute;
-            top: clamp(8px, 2vh, 20px);
-            padding: 6px 14px;
-            border-radius: 8px;
-            background: rgba(4, 9, 21, 0.55);
-            border: 1px solid rgba(188, 211, 255, 0.2);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 14px 14px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 100%);
+            opacity: 0.4;
             pointer-events: none;
+        }
+
+        .team-panel.home .score-well {
+            border-color: rgba(var(--home-team-rgb), 0.32);
+            box-shadow:
+                inset 0 0 0 1px rgba(var(--home-team-rgb), 0.12),
+                inset 0 -14px 30px rgba(0, 0, 0, 0.38),
+                0 28px 54px rgba(var(--home-team-rgb), 0.12);
+        }
+
+        .team-panel.away .score-well {
+            border-color: rgba(var(--away-team-rgb), 0.32);
+            box-shadow:
+                inset 0 0 0 1px rgba(var(--away-team-rgb), 0.12),
+                inset 0 -14px 30px rgba(0, 0, 0, 0.38),
+                0 28px 54px rgba(var(--away-team-rgb), 0.12);
         }
 
         .score-touch-zone {
-            flex: 1;
-            width: 100%;
+            position: absolute;
+            left: 0;
+            right: 0;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            height: 50%;
             cursor: pointer;
-            position: relative;
+            z-index: 2;
+            color: var(--accent);
         }
 
-        .score-touch-zone.up { align-items: flex-end; padding-bottom: 0; }
-        .score-touch-zone.down { align-items: flex-start; padding-top: 0; }
+        .score-touch-zone.up {
+            top: 0;
+            align-items: flex-start;
+            padding-top: clamp(16px, 2vw, 22px);
+        }
 
-        .score-value {
-            font-weight: 800;
-            line-height: 1;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: -0.02em;
+        .score-touch-zone.down {
+            bottom: 0;
+            align-items: flex-end;
+            padding-bottom: clamp(16px, 2vw, 22px);
+        }
+
+        .score-touch-zone::before,
+        .score-touch-zone::after {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: 18px;
             pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .score-touch-zone::before {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 60%);
+            opacity: 0;
+        }
+
+        .score-touch-zone::after {
+            inset: 0;
+            border-radius: 0;
+            background: linear-gradient(180deg, rgba(255, 191, 61, 0.18), transparent);
+            opacity: 0;
+        }
+
+        .score-touch-zone.down::after {
+            background: linear-gradient(0deg, rgba(255, 191, 61, 0.18), transparent);
+        }
+
+        .score-touch-zone:hover::before,
+        .score-touch-zone:active::before {
+            opacity: 1;
+        }
+
+        .score-touch-zone.flash::after {
+            opacity: 1;
+        }
+
+        .team-panel.home .score-touch-zone {
+            color: var(--home-team);
+        }
+
+        .team-panel.home .score-touch-zone::after {
+            background: linear-gradient(180deg, rgba(var(--home-team-rgb), 0.18), transparent);
+        }
+
+        .team-panel.home .score-touch-zone.down::after {
+            background: linear-gradient(0deg, rgba(var(--home-team-rgb), 0.18), transparent);
+        }
+
+        .team-panel.away .score-touch-zone {
+            color: var(--away-team);
+        }
+
+        .team-panel.away .score-touch-zone::after {
+            background: linear-gradient(180deg, rgba(var(--away-team-rgb), 0.18), transparent);
+        }
+
+        .team-panel.away .score-touch-zone.down::after {
+            background: linear-gradient(0deg, rgba(var(--away-team-rgb), 0.18), transparent);
+        }
+
+        .score-hint {
+            position: relative;
+            z-index: 1;
+            min-height: 28px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(7, 10, 16, 0.82);
+            color: var(--text-soft);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            opacity: 0.84;
+        }
+
+        .score-frame,
+        .score-value {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            font-variant-numeric: tabular-nums;
+            line-height: 0.84;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .score-frame {
+            z-index: 0;
+        }
+
+        .score-shadow {
+            display: block;
+            opacity: 0.08;
+            color: rgba(255, 255, 255, 0.18);
+            text-shadow: none;
+        }
+
+        .score-shadow,
+        .score-value {
+            font-family: var(--display-font);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .score-value {
+            z-index: 1;
+        }
+
+        .team-panel.home .score-value {
+            color: var(--home-team);
+            text-shadow:
+                0 0 18px rgba(var(--home-team-rgb), 0.34),
+                0 0 60px rgba(var(--home-team-rgb), 0.18);
+        }
+
+        .team-panel.away .score-value {
+            color: var(--away-team);
+            text-shadow:
+                0 0 18px rgba(var(--away-team-rgb), 0.34),
+                0 0 60px rgba(var(--away-team-rgb), 0.18);
+        }
+
+        .team-footer {
+            display: grid;
+            gap: 14px;
+            border-top: 1px solid rgba(114, 127, 144, 0.18);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 46%),
+                linear-gradient(180deg, rgba(12, 15, 22, 0.98), rgba(8, 10, 16, 0.98));
+        }
+
+        .team-note {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .team-note-label {
+            font-size: 11px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .team-note-copy {
+            color: var(--text-soft);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .foul-module {
+            display: grid;
+            gap: 10px;
+        }
+
+        .foul-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .foul-label {
+            font-size: 12px;
+            color: var(--text-soft);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .bonus-chip {
+            min-height: 30px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid rgba(122, 135, 153, 0.24);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
             white-space: nowrap;
         }
 
-        /* Score and foul colors applied dynamically via JS */
-
-        .score-hint {
-            font-size: clamp(10px, 1.5vw, 14px);
-            color: var(--text-dim);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            position: absolute;
+        .bonus-chip.active {
+            border-color: rgba(255, 191, 61, 0.42);
+            background: rgba(255, 191, 61, 0.1);
+            color: var(--accent);
+            box-shadow: 0 0 18px rgba(255, 191, 61, 0.14);
         }
-        .score-touch-zone.up .score-hint { top: clamp(36px, 7vh, 56px); }
-        .score-touch-zone.down .score-hint { bottom: clamp(8px, 2vh, 20px); }
-        .score-touch-zone:hover .score-hint,
-        .score-touch-zone:active .score-hint { opacity: 0.6; }
 
-        /* Tap flash */
-        .score-touch-zone::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 4px;
-            background: currentColor;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.15s;
+        .foul-controls {
+            display: grid;
+            grid-template-columns: minmax(48px, 56px) minmax(0, 1fr) minmax(48px, 56px);
+            gap: 10px;
+            align-items: stretch;
         }
-        .score-touch-zone.flash::after { opacity: 0.06; }
 
-        /* ── Center Panel ── */
-        .center-panel {
-            display: flex;
-            flex-direction: column;
+        .foul-touch-zone,
+        .foul-readout {
+            min-height: 56px;
+            border-radius: 16px;
+            border: 1px solid rgba(124, 136, 154, 0.18);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 40%),
+                linear-gradient(180deg, rgba(20, 26, 35, 0.92), rgba(11, 14, 20, 0.96));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .foul-touch-zone {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-left: 1px solid rgba(141, 167, 225, 0.25);
-            border-right: 1px solid rgba(141, 167, 225, 0.25);
-            padding: clamp(10px, 2vw, 24px);
-            gap: clamp(14px, 3vh, 36px);
-            min-width: clamp(190px, 30vw, 360px);
-            background: linear-gradient(180deg, rgba(6, 12, 24, 0.8), rgba(8, 13, 22, 0.6));
+            cursor: pointer;
+            transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
         }
 
-        /* Timer */
-        .timer-section {
+        .foul-touch-zone:hover,
+        .foul-touch-zone:active {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 45%),
+                linear-gradient(180deg, rgba(23, 30, 40, 0.96), rgba(12, 16, 22, 0.98));
+        }
+
+        .foul-control-glyph {
+            font-family: var(--display-font);
+            font-size: 26px;
+            line-height: 1;
+            color: var(--text-soft);
+        }
+
+        .foul-readout {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            width: 100%;
-            background: linear-gradient(180deg, rgba(10, 16, 30, 0.92), rgba(4, 8, 16, 0.9));
-            border: 1px solid rgba(255, 234, 188, 0.32);
-            border-radius: 12px;
-            padding: clamp(12px, 2.5vw, 18px) clamp(10px, 2vw, 16px);
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .team-panel.home .foul-readout {
+            border-color: rgba(var(--home-team-rgb), 0.28);
             box-shadow:
-                0 0 0 1px rgba(255, 199, 64, 0.1) inset,
-                0 16px 28px rgba(0, 0, 0, 0.45);
+                inset 0 0 0 1px rgba(var(--home-team-rgb), 0.1),
+                0 12px 24px rgba(var(--home-team-rgb), 0.08);
+        }
+
+        .team-panel.away .foul-readout {
+            border-color: rgba(var(--away-team-rgb), 0.28);
+            box-shadow:
+                inset 0 0 0 1px rgba(var(--away-team-rgb), 0.1),
+                0 12px 24px rgba(var(--away-team-rgb), 0.08);
+        }
+
+        .foul-value {
+            font-family: var(--display-font);
+            font-size: clamp(34px, 5vw, 54px);
+            font-weight: 800;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .center-marquee {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .center-kicker {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .center-status {
+            min-height: 32px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid rgba(122, 135, 153, 0.24);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .center-status.running {
+            border-color: rgba(255, 191, 61, 0.38);
+            background: rgba(255, 191, 61, 0.1);
+            color: var(--accent);
+            animation: pulse-live 1.6s ease-in-out infinite;
+        }
+
+        .center-status.expired {
+            border-color: rgba(255, 90, 79, 0.4);
+            background: rgba(255, 90, 79, 0.12);
+            color: #ffd2ce;
+            animation: none;
+        }
+
+        .timer-section {
+            display: grid;
+            gap: 14px;
+        }
+
+        .timer-shell {
+            position: relative;
+            min-height: clamp(180px, 28vh, 300px);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 191, 61, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%),
+                radial-gradient(circle at 50% 0%, rgba(255, 191, 61, 0.14), transparent 54%),
+                linear-gradient(180deg, rgba(8, 10, 14, 0.98), rgba(3, 4, 7, 0.99));
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 191, 61, 0.08),
+                0 28px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .timer-shell::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 14px 14px;
+            opacity: 0.34;
+            pointer-events: none;
+        }
+
+        .timer-grid,
+        .timer-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-variant-numeric: tabular-nums;
+            font-family: var(--display-font);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            line-height: 0.9;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .timer-grid {
+            color: rgba(255, 255, 255, 0.08);
+            text-shadow: none;
+            font-size: clamp(64px, 11vw, 120px);
         }
 
         .timer-display {
-            font-size: clamp(56px, 12vw, 150px);
-            font-weight: 800;
-            font-variant-numeric: tabular-nums;
             color: var(--accent);
-            letter-spacing: 0.04em;
-            line-height: 1.1;
-            text-shadow: 0 0 18px rgba(255, 194, 71, 0.26);
+            text-shadow:
+                0 0 18px rgba(255, 191, 61, 0.28),
+                0 0 56px rgba(255, 123, 40, 0.16);
+            font-size: clamp(64px, 11vw, 120px);
         }
 
-        .timer-display.danger { color: #ff4444; }
+        .timer-display.danger {
+            color: var(--danger);
+            text-shadow:
+                0 0 18px rgba(255, 90, 79, 0.34),
+                0 0 56px rgba(255, 90, 79, 0.22);
+        }
 
         .timer-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            gap: 10px;
         }
 
-        .timer-btn {
-            background: rgba(21, 32, 56, 0.9);
-            border: 1px solid rgba(142, 170, 231, 0.3);
-            color: var(--text);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: clamp(13px, 1.8vw, 16px);
-            font-weight: 700;
+        .timer-btn,
+        .gear-btn,
+        .period-btn,
+        .arrow-btn,
+        .bottom-btn,
+        .modal-actions button {
+            border: 1px solid rgba(122, 135, 153, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 40%),
+                linear-gradient(180deg, rgba(25, 31, 40, 0.98), rgba(13, 16, 22, 0.98));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                0 10px 24px rgba(0, 0, 0, 0.2);
+            transition:
+                transform 0.16s ease,
+                background 0.16s ease,
+                border-color 0.16s ease,
+                box-shadow 0.16s ease,
+                color 0.16s ease;
+        }
+
+        .timer-btn,
+        .gear-btn,
+        .period-btn,
+        .arrow-btn,
+        .bottom-btn {
+            min-height: 56px;
+            border-radius: 16px;
             cursor: pointer;
-            transition: background 0.15s, border-color 0.15s;
-            width: clamp(70px, 10vw, 98px);
-            min-height: 44px;
-            display: flex;
+        }
+
+        .timer-btn,
+        .bottom-btn {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
+            padding: 0 16px;
+            color: var(--text-soft);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
         }
-        .timer-btn:hover { background: rgba(39, 58, 97, 0.95); }
-        .timer-btn:active { background: #3a3a4a; }
+
+        .timer-btn:hover,
+        .gear-btn:hover,
+        .period-btn:hover,
+        .arrow-btn:hover,
+        .bottom-btn:hover,
+        .modal-actions button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.24);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.06),
+                0 14px 26px rgba(0, 0, 0, 0.24);
+        }
+
+        .timer-btn:active,
+        .gear-btn:active,
+        .period-btn:active,
+        .arrow-btn:active,
+        .bottom-btn:active,
+        .modal-actions button:active {
+            transform: translateY(0);
+        }
 
         .timer-btn.primary {
-            background: var(--accent);
-            color: #111;
-            border-color: var(--accent);
+            border-color: rgba(255, 191, 61, 0.38);
+            background:
+                linear-gradient(180deg, rgba(255, 230, 166, 0.16), rgba(255, 191, 61, 0.08)),
+                linear-gradient(180deg, rgba(54, 41, 11, 0.98), rgba(27, 19, 7, 0.98));
+            color: var(--accent);
         }
-        .timer-btn.primary:hover { filter: brightness(1.1); }
+
+        .timer-btn:disabled,
+        .period-btn:disabled,
+        .bottom-btn:disabled {
+            opacity: 0.42;
+            cursor: default;
+            transform: none;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                0 6px 14px rgba(0, 0, 0, 0.18);
+        }
 
         .gear-btn {
-            background: none;
-            border: none;
-            color: var(--text-dim);
-            font-size: clamp(16px, 2vw, 22px);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 6px;
-            transition: color 0.15s, background 0.15s;
-            min-width: 44px;
-            min-height: 44px;
-            display: flex;
-            align-items: center;
+            width: 56px;
             justify-content: center;
+            color: var(--text-soft);
+            font-size: 20px;
         }
-        .gear-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
 
-        /* Period */
-        .period-section {
-            display: flex;
-            align-items: center;
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .period-section,
+        .possession-row {
+            display: grid;
             gap: 10px;
-            background: rgba(7, 12, 24, 0.62);
-            border: 1px solid rgba(137, 163, 220, 0.2);
-            border-radius: 10px;
-            padding: 8px 12px;
+            padding: 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(116, 131, 151, 0.18);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 40%),
+                linear-gradient(180deg, rgba(15, 19, 27, 0.94), rgba(9, 12, 17, 0.98));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .period-section {
+            grid-template-columns: 56px minmax(0, 1fr) 56px;
+            align-items: center;
         }
 
         .period-inner {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: clamp(40px, 6vw, 60px);
+            gap: 4px;
+            min-width: 0;
         }
 
-        .period-label {
-            font-size: clamp(11px, 1.5vw, 14px);
-            color: #a7b6d8;
+        .period-label,
+        .possession-title,
+        .possession-note {
+            font-size: 12px;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+        }
+
+        .period-label,
+        .possession-title {
+            color: var(--text-muted);
         }
 
         .period-value {
-            font-size: clamp(20px, 3.5vw, 36px);
-            font-weight: 700;
+            font-family: var(--display-font);
+            font-size: clamp(34px, 4vw, 54px);
+            font-weight: 800;
+            line-height: 0.9;
             color: var(--text);
-            text-align: center;
         }
 
         .period-btn {
-            background: rgba(20, 30, 52, 0.85);
-            border: 1px solid rgba(138, 164, 220, 0.3);
-            color: #a3b1d2;
-            border-radius: 6px;
-            width: 32px;
-            height: 32px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.15s;
-            min-width: 44px;
-            min-height: 44px;
+            font-family: var(--display-font);
+            font-size: 26px;
+            color: var(--text-soft);
         }
-        .period-btn:hover { background: var(--border); color: var(--text); }
 
-        .possession-row {
+        .possession-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: baseline;
+            justify-content: space-between;
             gap: 10px;
-            width: 100%;
-            background: rgba(7, 12, 24, 0.62);
-            border: 1px solid rgba(137, 163, 220, 0.2);
-            border-radius: 10px;
-            padding: 8px 10px;
         }
 
-        .possession-title {
-            font-size: 11px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            font-weight: 700;
+        .possession-note {
+            color: var(--text-soft);
         }
 
         .arrow-lane {
-            flex: 1;
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
         }
 
         .arrow-btn {
-            flex: 1;
-            min-height: 44px;
-            min-width: 44px;
-            border-radius: 8px;
-            border: 1px solid rgba(138, 164, 220, 0.25);
-            background: rgba(18, 29, 50, 0.75);
-            color: #b3c1df;
-            font-size: clamp(18px, 2.2vw, 24px);
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .arrow-btn.active {
-            background: rgba(255, 199, 64, 0.92);
-            color: #101010;
-            border-color: rgba(255, 231, 179, 0.9);
-            box-shadow: 0 0 14px rgba(255, 199, 64, 0.35);
-        }
-
-        /* Fouls */
-        .fouls-row {
-            display: flex;
-            gap: clamp(12px, 3vw, 32px);
+            padding: 0 12px;
+            display: inline-flex;
             align-items: center;
-            width: 100%;
             justify-content: center;
-            background: rgba(7, 12, 24, 0.62);
-            border: 1px solid rgba(137, 163, 220, 0.2);
-            border-radius: 10px;
-            padding: 8px 10px;
-        }
-
-        .foul-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .foul-label {
-            font-size: clamp(9px, 1.2vw, 12px);
-            color: var(--text-dim);
-            text-transform: uppercase;
+            color: var(--text-soft);
+            font-size: 14px;
+            font-weight: 700;
             letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
 
-        .foul-touch-zone {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px 2px;
-            border-radius: 4px;
-            transition: background 0.15s;
-            min-width: 44px;
-            min-height: 28px;
+        #homeArrowBtn.active {
+            border-color: rgba(var(--home-team-rgb), 0.34);
+            background:
+                linear-gradient(180deg, rgba(var(--home-team-rgb), 0.2), rgba(var(--home-team-rgb), 0.1)),
+                linear-gradient(180deg, rgba(14, 21, 31, 0.98), rgba(8, 12, 17, 0.98));
+            color: #dceaff;
+            box-shadow:
+                inset 0 0 0 1px rgba(var(--home-team-rgb), 0.18),
+                0 12px 24px rgba(var(--home-team-rgb), 0.16);
         }
-        .foul-touch-zone:hover { background: rgba(255,255,255,0.04); }
-        .foul-touch-zone:active { background: rgba(255,255,255,0.08); }
 
-        .foul-value {
-            font-size: clamp(22px, 4vw, 42px);
+        #awayArrowBtn.active {
+            border-color: rgba(var(--away-team-rgb), 0.34);
+            background:
+                linear-gradient(180deg, rgba(var(--away-team-rgb), 0.2), rgba(var(--away-team-rgb), 0.1)),
+                linear-gradient(180deg, rgba(14, 21, 31, 0.98), rgba(8, 12, 17, 0.98));
+            color: #ffe0de;
+            box-shadow:
+                inset 0 0 0 1px rgba(var(--away-team-rgb), 0.18),
+                0 12px 24px rgba(var(--away-team-rgb), 0.16);
+        }
+
+        .shortcut-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            align-self: end;
+        }
+
+        .shortcut-card {
+            min-height: 78px;
+            padding: 12px;
+            display: grid;
+            align-content: center;
+            gap: 6px;
+            border-radius: 18px;
+            border: 1px solid rgba(116, 131, 151, 0.16);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 44%),
+                linear-gradient(180deg, rgba(15, 18, 26, 0.9), rgba(8, 10, 14, 0.96));
+        }
+
+        .shortcut-key {
+            color: var(--text-soft);
+            font-family: var(--digit-font);
+            font-size: 13px;
             font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            line-height: 1;
-            pointer-events: none;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
-        /* Foul colors applied dynamically via JS */
+        .shortcut-text {
+            color: var(--text-muted);
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
 
-        /* ── Bottom Bar ── */
         .bottom-bar {
-            display: flex;
-            justify-content: center;
-            padding: 6px 12px;
-            gap: 12px;
-            border-top: 1px solid rgba(141, 167, 225, 0.25);
-            background: linear-gradient(180deg, #0d1425, #0a1020);
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+            animation: rise-in 0.92s ease both;
         }
 
         .bottom-btn {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            border-radius: 6px;
-            padding: 6px 14px;
-            font-size: clamp(11px, 1.3vw, 13px);
-            cursor: pointer;
-            transition: background 0.15s, color 0.15s;
-            min-height: 36px;
+            min-width: 0;
         }
-        .bottom-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
 
-        /* ── Blinking Overlay ── */
+        .control-icon {
+            font-family: var(--display-font);
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .control-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .blink-overlay {
             position: fixed;
             inset: 0;
-            background: #ff0000;
             z-index: 100;
             display: none;
             cursor: pointer;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 30%),
+                repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0 2px, rgba(255, 255, 255, 0.05) 2px 4px),
+                radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 42%),
+                #ff3022;
         }
+
         .blink-overlay.active {
             display: block;
-            animation: blink 0.5s ease-in-out infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 0; }
+            animation: blink 0.45s steps(2, end) infinite;
         }
 
         .blink-text {
@@ -418,658 +1103,1006 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(28px, 6vw, 60px);
+            font-family: var(--display-font);
+            font-size: clamp(44px, 9vw, 110px);
             font-weight: 800;
+            line-height: 0.9;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
             color: white;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            text-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
             pointer-events: none;
         }
 
-        /* ── Modal ── */
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.6);
             z-index: 200;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            background: rgba(2, 4, 7, 0.72);
+            backdrop-filter: blur(14px);
         }
-        .modal-backdrop.active { display: flex; }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
 
         .modal {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: clamp(20px, 4vw, 32px);
-            max-width: 360px;
-            width: 100%;
+            width: min(420px, 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(124, 136, 154, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%),
+                linear-gradient(180deg, rgba(16, 20, 29, 0.98), rgba(8, 10, 16, 0.98));
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.06),
+                0 28px 60px rgba(0, 0, 0, 0.38);
+            padding: clamp(20px, 4vw, 28px);
         }
 
         .modal h2 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .modal-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .modal-row label {
-            font-size: 14px;
-            color: var(--text-dim);
-            width: 80px;
-            flex-shrink: 0;
-        }
-
-        .modal-row input {
-            flex: 1;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 16px;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            min-height: 44px;
-        }
-        .modal-row input:focus { outline: none; border-color: var(--accent); }
-
-        .modal-row input[type="color"] {
-            padding: 4px;
-            height: 44px;
-            cursor: pointer;
+            font-family: var(--display-font);
+            font-size: clamp(28px, 5vw, 36px);
+            line-height: 0.95;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
         }
 
         .modal-section-label {
+            color: var(--text-muted);
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-dim);
             margin-bottom: 10px;
+        }
+
+        .modal-row {
+            display: grid;
+            grid-template-columns: 92px minmax(0, 1fr);
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .modal-row label {
+            color: var(--text-soft);
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .modal-row input {
+            min-height: 48px;
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(122, 135, 153, 0.22);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 42%),
+                linear-gradient(180deg, rgba(10, 13, 19, 0.96), rgba(5, 7, 10, 0.98));
+            color: var(--text);
+            padding: 0 14px;
+            text-align: center;
+            font-size: 16px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .modal-row input:focus {
+            outline: none;
+            border-color: rgba(255, 191, 61, 0.38);
+            box-shadow: 0 0 0 3px rgba(255, 191, 61, 0.1);
+        }
+
+        .modal-row input[type="color"] {
+            padding: 6px;
+            cursor: pointer;
         }
 
         .modal-divider {
             height: 1px;
-            background: var(--border);
-            margin: 16px 0;
+            margin: 18px 0;
+            background: linear-gradient(90deg, transparent, rgba(122, 135, 153, 0.32), transparent);
         }
 
         .modal-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
-            margin-top: 24px;
+            margin-top: 22px;
         }
 
         .modal-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
+            min-height: 52px;
+            border-radius: 16px;
             cursor: pointer;
-            border: 1px solid var(--border);
-            min-height: 44px;
+            color: var(--text-soft);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
         }
-
-        .modal-actions .cancel-btn {
-            background: var(--surface);
-            color: var(--text);
-        }
-        .modal-actions .cancel-btn:hover { background: var(--border); }
 
         .modal-actions .save-btn {
-            background: var(--accent);
-            color: #111;
-            border-color: var(--accent);
+            border-color: rgba(255, 191, 61, 0.36);
+            background:
+                linear-gradient(180deg, rgba(255, 230, 166, 0.16), rgba(255, 191, 61, 0.08)),
+                linear-gradient(180deg, rgba(54, 41, 11, 0.98), rgba(27, 19, 7, 0.98));
+            color: var(--accent);
         }
-        .modal-actions .save-btn:hover { filter: brightness(1.1); }
 
-        /* ── Confirm Dialog ── */
-        .confirm-content {
-            text-align: center;
-        }
         .confirm-content p {
-            color: var(--text-dim);
-            font-size: 14px;
-            margin-bottom: 8px;
+            color: var(--text-soft);
+            line-height: 1.45;
         }
 
-        /* ── Buzzer Sound Indicator ── */
-        .sound-toggle {
-            font-size: clamp(14px, 1.8vw, 18px);
+        @keyframes rise-in {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* ── Responsive ── */
-        @media (max-height: 500px) {
-            .center-panel { gap: 8px; }
-            .period-section { display: none; }
+        @keyframes sweep {
+            from {
+                transform: translateX(-36%);
+            }
+            to {
+                transform: translateX(36%);
+            }
         }
 
-        @media (orientation: portrait) and (max-width: 600px) {
-            .center-panel { min-width: 110px; padding: 8px; }
+        @keyframes pulse-live {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 191, 61, 0.16);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 191, 61, 0);
+            }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.82; }
+            50% { opacity: 0.2; }
+        }
+
+        @media (max-width: 1160px) {
+            body {
+                overflow: auto;
+            }
+
+            .board {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-areas:
+                    "center center"
+                    "home away";
+            }
+
+            .center-card {
+                grid-template-rows: auto auto auto auto;
+            }
+        }
+
+        @media (max-width: 760px) {
+            body {
+                overflow: auto;
+            }
+
+            .header-main,
+            .header-kicker {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-legend {
+                justify-content: flex-start;
+            }
+
+            .board {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas:
+                    "center"
+                    "home"
+                    "away";
+            }
+
+            .meta-grid,
+            .shortcut-strip,
+            .bottom-bar {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .timer-controls {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .gear-btn {
+                width: auto;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .app-shell {
+                gap: 10px;
+            }
+
+            .broadcast-header {
+                padding: 14px;
+            }
+
+            .header-legend {
+                gap: 8px;
+            }
+
+            .legend-item {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .team-header,
+            .team-footer,
+            .center-card {
+                padding: 14px;
+            }
+
+            .score-stage {
+                padding: 12px;
+            }
+
+            .period-section {
+                grid-template-columns: 48px minmax(0, 1fr) 48px;
+            }
+
+            .meta-grid,
+            .shortcut-strip,
+            .bottom-bar {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .modal-row {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 8px;
+            }
+        }
+
+        @media (max-height: 740px) and (min-width: 900px) {
+            .broadcast-header {
+                padding: 12px 18px;
+            }
+
+            .header-kicker {
+                display: none;
+            }
+
+            .shortcut-strip {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="board">
-        <!-- Home Score -->
-        <div class="score-panel home">
-            <span class="team-label" id="homeLabel">HOME</span>
-            <div class="score-touch-zone up" data-team="home" data-dir="up">
-                <span class="score-hint">+1</span>
+    <div class="app-shell">
+        <header class="broadcast-header">
+            <div class="header-kicker">
+                <span class="kicker-pill">Arena Board</span>
+                <span>Professional basketball control layout</span>
             </div>
-            <span class="score-value" id="homeScore">0</span>
-            <div class="score-touch-zone down" data-team="home" data-dir="down">
-                <span class="score-hint">&minus;1</span>
-            </div>
-        </div>
-
-        <!-- Center -->
-        <div class="center-panel">
-            <div class="timer-section">
-                <div class="timer-display" id="timerDisplay">10:00</div>
-                <div class="timer-controls">
-                    <button class="timer-btn primary" id="startStopBtn">Start</button>
-                    <button class="gear-btn" id="gearBtn" title="Timer settings">&#9881;</button>
-                    <button class="timer-btn" id="resetBtn">Reset</button>
+            <div class="header-main">
+                <div>
+                    <p class="header-overline">Game Console</p>
+                    <h1>Basketball Scoreboard</h1>
                 </div>
-            </div>
-
-            <div class="period-section">
-                <button class="period-btn" id="periodDown">&#8722;</button>
-                <div class="period-inner">
-                    <div class="period-label">Period</div>
-                    <div class="period-value" id="periodValue">1</div>
-                </div>
-                <button class="period-btn" id="periodUp">&#43;</button>
-            </div>
-
-            <div class="possession-row" aria-label="Possession Arrow">
-                <span class="possession-title">Arrow</span>
-                <div class="arrow-lane">
-                    <button class="arrow-btn" id="homeArrowBtn" title="Set possession to home" aria-label="Home possession">&#9664;</button>
-                    <button class="arrow-btn" id="awayArrowBtn" title="Set possession to away" aria-label="Away possession">&#9654;</button>
-                </div>
-            </div>
-
-            <div class="fouls-row">
-                <div class="foul-block home">
-                    <div class="foul-label">Fouls</div>
-                    <div class="foul-touch-zone" data-team="home" data-dir="up">
-                        <span class="foul-value" id="homeFouls">0</span>
+                <div class="header-legend" aria-label="Scoreboard interaction hints">
+                    <div class="legend-item">
+                        <span class="legend-mark score-mark" aria-hidden="true"></span>
+                        <span>Upper half adds a point</span>
                     </div>
-                    <div class="foul-touch-zone" data-team="home" data-dir="down" style="margin-top:-4px">
-                        <span style="font-size:clamp(9px,1.2vw,12px);color:var(--text-dim);">&minus;1</span>
-                    </div>
-                </div>
-                <div class="foul-block away">
-                    <div class="foul-label">Fouls</div>
-                    <div class="foul-touch-zone" data-team="away" data-dir="up">
-                        <span class="foul-value" id="awayFouls">0</span>
-                    </div>
-                    <div class="foul-touch-zone" data-team="away" data-dir="down" style="margin-top:-4px">
-                        <span style="font-size:clamp(9px,1.2vw,12px);color:var(--text-dim);">&minus;1</span>
+                    <div class="legend-item">
+                        <span class="legend-mark foul-mark" aria-hidden="true"></span>
+                        <span>Foul buttons adjust team fouls</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Away Score -->
-        <div class="score-panel away">
-            <span class="team-label" id="awayLabel">AWAY</span>
-            <div class="score-touch-zone up" data-team="away" data-dir="up">
-                <span class="score-hint">+1</span>
-            </div>
-            <span class="score-value" id="awayScore">0</span>
-            <div class="score-touch-zone down" data-team="away" data-dir="down">
-                <span class="score-hint">&minus;1</span>
-            </div>
+        <main class="board">
+            <section class="team-panel home" aria-label="Home team scoreboard">
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-label-cluster">
+                            <span class="team-kicker">Home Bench</span>
+                            <span class="team-label" id="homeLabel">HOME</span>
+                        </div>
+                        <span class="team-color-chip" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="score-stage">
+                        <div class="score-well">
+                            <button type="button" class="score-touch-zone up" data-team="home" data-dir="up" aria-label="Add one point to home">
+                                <span class="score-hint">Add 1</span>
+                            </button>
+                            <div class="score-frame" aria-hidden="true">
+                                <span class="score-shadow">88</span>
+                            </div>
+                            <span class="score-value" id="homeScore">0</span>
+                            <button type="button" class="score-touch-zone down" data-team="home" data-dir="down" aria-label="Subtract one point from home">
+                                <span class="score-hint">Minus 1</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="team-footer">
+                        <div class="team-note">
+                            <span class="team-note-label">Scoring</span>
+                            <span class="team-note-copy">Tap the upper zone to add one point. Tap the lower zone to subtract one.</span>
+                        </div>
+
+                        <div class="foul-module">
+                            <div class="foul-head">
+                                <span class="foul-label">Team Fouls</span>
+                                <span class="bonus-chip" id="homeBonus">No Bonus</span>
+                            </div>
+                            <div class="foul-controls">
+                                <button type="button" class="foul-touch-zone foul-down" data-team="home" data-dir="down" aria-label="Subtract one home foul">
+                                    <span class="foul-control-glyph">&minus;</span>
+                                </button>
+                                <div class="foul-readout">
+                                    <span class="foul-value" id="homeFouls">0</span>
+                                </div>
+                                <button type="button" class="foul-touch-zone foul-up" data-team="home" data-dir="up" aria-label="Add one home foul">
+                                    <span class="foul-control-glyph">&#43;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="center-panel" aria-label="Game controls">
+                <div class="center-card">
+                    <div class="center-marquee">
+                        <span class="center-kicker">Game Clock</span>
+                        <span class="center-status" id="clockState">Ready</span>
+                    </div>
+
+                    <div class="timer-section">
+                        <div class="timer-shell">
+                            <div class="timer-grid" aria-hidden="true">88:88</div>
+                            <div class="timer-display" id="timerDisplay">10:00</div>
+                        </div>
+                        <div class="timer-controls">
+                            <button type="button" class="timer-btn primary" id="startStopBtn">Start</button>
+                            <button type="button" class="gear-btn" id="gearBtn" title="Timer settings" aria-label="Open scoreboard settings">&#9881;</button>
+                            <button type="button" class="timer-btn" id="resetBtn">Reset</button>
+                        </div>
+                    </div>
+
+                    <div class="meta-grid">
+                        <div class="period-section">
+                            <button type="button" class="period-btn" id="periodDown" aria-label="Decrease period">&#8722;</button>
+                            <div class="period-inner">
+                                <div class="period-label" id="periodLabel">Quarter</div>
+                                <div class="period-value" id="periodValue">1</div>
+                            </div>
+                            <button type="button" class="period-btn" id="periodUp" aria-label="Increase period">&#43;</button>
+                        </div>
+
+                        <div class="possession-row" aria-label="Possession arrow">
+                            <div class="possession-header">
+                                <span class="possession-title">Possession</span>
+                                <span class="possession-note">Arrow</span>
+                            </div>
+                            <div class="arrow-lane">
+                                <button type="button" class="arrow-btn" id="homeArrowBtn" title="Set possession to home" aria-label="Home possession">Home &#9664;</button>
+                                <button type="button" class="arrow-btn" id="awayArrowBtn" title="Set possession to away" aria-label="Away possession">&#9654; Away</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="shortcut-strip" aria-label="Keyboard shortcuts">
+                        <div class="shortcut-card">
+                            <span class="shortcut-key">Space</span>
+                            <span class="shortcut-text">Start or pause</span>
+                        </div>
+                        <div class="shortcut-card">
+                            <span class="shortcut-key">P</span>
+                            <span class="shortcut-text">Flip arrow</span>
+                        </div>
+                        <div class="shortcut-card">
+                            <span class="shortcut-key">Ctrl+Z</span>
+                            <span class="shortcut-text">Undo</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="team-panel away" aria-label="Away team scoreboard">
+                <div class="team-card">
+                    <div class="team-header">
+                        <div class="team-label-cluster">
+                            <span class="team-kicker">Away Bench</span>
+                            <span class="team-label" id="awayLabel">AWAY</span>
+                        </div>
+                        <span class="team-color-chip" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="score-stage">
+                        <div class="score-well">
+                            <button type="button" class="score-touch-zone up" data-team="away" data-dir="up" aria-label="Add one point to away">
+                                <span class="score-hint">Add 1</span>
+                            </button>
+                            <div class="score-frame" aria-hidden="true">
+                                <span class="score-shadow">88</span>
+                            </div>
+                            <span class="score-value" id="awayScore">0</span>
+                            <button type="button" class="score-touch-zone down" data-team="away" data-dir="down" aria-label="Subtract one point from away">
+                                <span class="score-hint">Minus 1</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="team-footer">
+                        <div class="team-note">
+                            <span class="team-note-label">Scoring</span>
+                            <span class="team-note-copy">Tap the upper zone to add one point. Tap the lower zone to subtract one.</span>
+                        </div>
+
+                        <div class="foul-module">
+                            <div class="foul-head">
+                                <span class="foul-label">Team Fouls</span>
+                                <span class="bonus-chip" id="awayBonus">No Bonus</span>
+                            </div>
+                            <div class="foul-controls">
+                                <button type="button" class="foul-touch-zone foul-down" data-team="away" data-dir="down" aria-label="Subtract one away foul">
+                                    <span class="foul-control-glyph">&minus;</span>
+                                </button>
+                                <div class="foul-readout">
+                                    <span class="foul-value" id="awayFouls">0</span>
+                                </div>
+                                <button type="button" class="foul-touch-zone foul-up" data-team="away" data-dir="up" aria-label="Add one away foul">
+                                    <span class="foul-control-glyph">&#43;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="bottom-bar">
+            <button type="button" class="bottom-btn" id="undoBtn" title="Undo last action">
+                <span class="control-icon" aria-hidden="true">&#8634;</span>
+                <span class="control-label">Undo</span>
+            </button>
+            <button type="button" class="bottom-btn" id="soundBtn" title="Toggle buzzer">
+                <span class="control-icon" id="soundIcon" aria-hidden="true">On</span>
+                <span class="control-label">Buzzer</span>
+            </button>
+            <button type="button" class="bottom-btn" id="swapBtn" title="Swap sides">
+                <span class="control-icon" aria-hidden="true">&#8646;</span>
+                <span class="control-label">Swap Sides</span>
+            </button>
+            <button type="button" class="bottom-btn" id="fullscreenBtn" title="Toggle fullscreen">
+                <span class="control-icon" id="fullscreenIcon" aria-hidden="true">&#9974;</span>
+                <span class="control-label">Fullscreen</span>
+            </button>
+            <button type="button" class="bottom-btn" id="resetAllBtn" title="Reset everything">
+                <span class="control-icon" aria-hidden="true">New</span>
+                <span class="control-label">New Game</span>
+            </button>
         </div>
     </div>
 
-    <div class="bottom-bar">
-        <button class="bottom-btn" id="undoBtn" title="Undo last action">Undo</button>
-        <button class="bottom-btn sound-toggle" id="soundBtn" title="Toggle buzzer">&#128264;</button>
-        <button class="bottom-btn" id="swapBtn" title="Swap sides">Swap</button>
-        <button class="bottom-btn" id="fullscreenBtn" title="Full screen">&#x26F6;</button>
-        <button class="bottom-btn" id="resetAllBtn" title="Reset everything">New Game</button>
-    </div>
-
-    <!-- Blink Overlay -->
     <div class="blink-overlay" id="blinkOverlay">
-        <span class="blink-text">TIME</span>
+        <span class="blink-text">Horn</span>
     </div>
 
-    <!-- Settings Modal -->
     <div class="modal-backdrop" id="timerModal">
         <div class="modal">
             <h2>Settings</h2>
             <div class="modal-section-label">Timer</div>
             <div class="modal-row">
-                <label>Minutes</label>
+                <label for="setMinutes">Minutes</label>
                 <input type="number" id="setMinutes" min="0" max="99" value="10">
             </div>
             <div class="modal-row">
-                <label>Seconds</label>
+                <label for="setSeconds">Seconds</label>
                 <input type="number" id="setSeconds" min="0" max="59" value="0">
             </div>
             <div class="modal-divider"></div>
             <div class="modal-section-label">Teams</div>
             <div class="modal-row">
-                <label>Home name</label>
-                <input type="text" id="setHomeName" maxlength="12" value="HOME">
+                <label for="setHomeName">Home Name</label>
+                <input type="text" id="setHomeName" maxlength="14" value="HOME">
             </div>
             <div class="modal-row">
-                <label>Home color</label>
-                <input type="color" id="setHomeColor" value="#4a90d9">
+                <label for="setHomeColor">Home Color</label>
+                <input type="color" id="setHomeColor" value="#2c7df3">
             </div>
             <div class="modal-row">
-                <label>Away name</label>
-                <input type="text" id="setAwayName" maxlength="12" value="AWAY">
+                <label for="setAwayName">Away Name</label>
+                <input type="text" id="setAwayName" maxlength="14" value="AWAY">
             </div>
             <div class="modal-row">
-                <label>Away color</label>
-                <input type="color" id="setAwayColor" value="#d94a4a">
+                <label for="setAwayColor">Away Color</label>
+                <input type="color" id="setAwayColor" value="#f25555">
             </div>
             <div class="modal-actions">
-                <button class="cancel-btn" id="modalCancel">Cancel</button>
-                <button class="save-btn" id="modalSave">Save</button>
+                <button type="button" class="cancel-btn" id="modalCancel">Cancel</button>
+                <button type="button" class="save-btn" id="modalSave">Save</button>
             </div>
         </div>
     </div>
 
-    <!-- Confirm Reset Modal -->
     <div class="modal-backdrop" id="confirmModal">
         <div class="modal">
             <div class="confirm-content">
                 <h2>New Game?</h2>
-                <p>This will reset scores, fouls, timer, and period.</p>
+                <p>This resets the clock, scores, fouls, quarter, possession arrow, and undo history.</p>
             </div>
             <div class="modal-actions">
-                <button class="cancel-btn" id="confirmCancel">Cancel</button>
-                <button class="save-btn" id="confirmOk">Reset</button>
+                <button type="button" class="cancel-btn" id="confirmCancel">Cancel</button>
+                <button type="button" class="save-btn" id="confirmOk">Reset</button>
             </div>
         </div>
     </div>
 
-<script>
-(() => {
-    // ── State ──
-    const state = {
-        home: { score: 0, fouls: 0, name: 'HOME', color: '#4a90d9' },
-        away: { score: 0, fouls: 0, name: 'AWAY', color: '#d94a4a' },
-        period: 1,
-        timerDuration: 600,   // default 10 min in seconds
-        timerRemaining: 600,
-        timerRunning: false,
-        soundOn: true,
-        possession: 'home',
-    };
+    <script>
+    (() => {
+        const state = {
+            home: { score: 0, fouls: 0, name: 'HOME', color: '#2c7df3' },
+            away: { score: 0, fouls: 0, name: 'AWAY', color: '#f25555' },
+            period: 1,
+            timerDuration: 600,
+            timerRemaining: 600,
+            timerRunning: false,
+            soundOn: true,
+            possession: 'home',
+        };
 
-    const history = [];  // undo stack
-    let timerInterval = null;
-    let blinkActive = false;
+        const history = [];
+        let timerInterval = null;
+        let blinkActive = false;
 
-    // ── DOM refs ──
-    const $ = id => document.getElementById(id);
-    const homeScoreEl   = $('homeScore');
-    const awayScoreEl   = $('awayScore');
-    const homeFoulsEl   = $('homeFouls');
-    const awayFoulsEl   = $('awayFouls');
-    const homeLabel     = $('homeLabel');
-    const awayLabel     = $('awayLabel');
-    const timerDisplay  = $('timerDisplay');
-    const periodValue   = $('periodValue');
-    const startStopBtn  = $('startStopBtn');
-    const blinkOverlay  = $('blinkOverlay');
-    const timerModal    = $('timerModal');
-    const confirmModal  = $('confirmModal');
-    const soundBtn      = $('soundBtn');
-    const homeArrowBtn  = $('homeArrowBtn');
-    const awayArrowBtn  = $('awayArrowBtn');
+        const $ = id => document.getElementById(id);
+        const homeScoreEl = $('homeScore');
+        const awayScoreEl = $('awayScore');
+        const homeFoulsEl = $('homeFouls');
+        const awayFoulsEl = $('awayFouls');
+        const homeLabel = $('homeLabel');
+        const awayLabel = $('awayLabel');
+        const homeBonus = $('homeBonus');
+        const awayBonus = $('awayBonus');
+        const timerDisplay = $('timerDisplay');
+        const periodLabel = $('periodLabel');
+        const periodValue = $('periodValue');
+        const clockState = $('clockState');
+        const startStopBtn = $('startStopBtn');
+        const periodDownBtn = $('periodDown');
+        const undoBtn = $('undoBtn');
+        const blinkOverlay = $('blinkOverlay');
+        const timerModal = $('timerModal');
+        const confirmModal = $('confirmModal');
+        const soundBtn = $('soundBtn');
+        const soundIcon = $('soundIcon');
+        const fullscreenIcon = $('fullscreenIcon');
+        const homeArrowBtn = $('homeArrowBtn');
+        const awayArrowBtn = $('awayArrowBtn');
 
-    // ── Audio Context for Buzzer ──
-    let audioCtx = null;
-    function ensureAudioCtx() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
+        let audioCtx = null;
 
-    function playBuzzer() {
-        if (!state.soundOn) return;
-        try {
-            ensureAudioCtx();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.value = 440;
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.5);
-        } catch(e) { /* silent fail */ }
-    }
-
-    // ── Dynamic Score Sizing ──
-    function fitScoreFont(el) {
-        const panel = el.closest('.score-panel');
-        const panelW = panel.clientWidth;
-        const panelH = panel.clientHeight;
-        // Reserve space for team label at top and hints
-        const availW = panelW * 0.9;
-        const availH = panelH * 0.65;
-        const digits = el.textContent.length || 1;
-        // Scale based on available width per digit and height
-        const byWidth = availW / (digits * 0.65);
-        const byHeight = availH;
-        const size = Math.floor(Math.min(byWidth, byHeight));
-        el.style.fontSize = size + 'px';
-    }
-
-    function fitAllScores() {
-        fitScoreFont(homeScoreEl);
-        fitScoreFont(awayScoreEl);
-    }
-
-    // ── Render ──
-    function render() {
-        homeScoreEl.textContent = state.home.score;
-        awayScoreEl.textContent = state.away.score;
-        homeFoulsEl.textContent = state.home.fouls;
-        awayFoulsEl.textContent = state.away.fouls;
-        homeLabel.textContent = state.home.name;
-        awayLabel.textContent = state.away.name;
-        periodValue.textContent = state.period;
-        // Apply custom colors
-        homeScoreEl.style.color = state.home.color;
-        awayScoreEl.style.color = state.away.color;
-        homeFoulsEl.style.color = state.home.color;
-        awayFoulsEl.style.color = state.away.color;
-        renderTimer();
-        soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
-        homeArrowBtn.classList.toggle('active', state.possession === 'home');
-        awayArrowBtn.classList.toggle('active', state.possession === 'away');
-        fitAllScores();
-    }
-
-    function renderTimer() {
-        const t = Math.max(0, state.timerRemaining);
-        const m = Math.floor(t / 60);
-        const s = t % 60;
-        timerDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        timerDisplay.classList.toggle('danger', t <= 30 && t > 0);
-        startStopBtn.textContent = state.timerRunning ? 'Stop' : 'Start';
-    }
-
-    // ── Undo ──
-    function pushUndo(action) {
-        history.push(action);
-        if (history.length > 100) history.shift();
-    }
-
-    function undo() {
-        const action = history.pop();
-        if (!action) return;
-        if (action.type === 'score') {
-            state[action.team].score -= action.delta;
-            if (state[action.team].score < 0) state[action.team].score = 0;
-        } else if (action.type === 'foul') {
-            state[action.team].fouls -= action.delta;
-            if (state[action.team].fouls < 0) state[action.team].fouls = 0;
-        } else if (action.type === 'period') {
-            state.period -= action.delta;
-            if (state.period < 1) state.period = 1;
-        }
-        render();
-    }
-
-    // ── Score Touch ──
-    document.querySelectorAll('.score-touch-zone').forEach(zone => {
-        zone.addEventListener('click', (e) => {
-            dismissBlink();
-            const team = zone.dataset.team;
-            const delta = zone.dataset.dir === 'up' ? 1 : -1;
-            state[team].score = Math.max(0, state[team].score + delta);
-            pushUndo({ type: 'score', team, delta });
-            flash(zone);
-            render();
-        });
-    });
-
-    // ── Foul Touch ──
-    document.querySelectorAll('.foul-touch-zone').forEach(zone => {
-        zone.addEventListener('click', (e) => {
-            dismissBlink();
-            const team = zone.dataset.team;
-            const delta = zone.dataset.dir === 'up' ? 1 : -1;
-            state[team].fouls = Math.max(0, state[team].fouls + delta);
-            pushUndo({ type: 'foul', team, delta });
-            render();
-        });
-    });
-
-    // ── Flash effect ──
-    function flash(el) {
-        el.classList.add('flash');
-        setTimeout(() => el.classList.remove('flash'), 150);
-    }
-
-    // ── Timer ──
-    startStopBtn.addEventListener('click', () => {
-        dismissBlink();
-        ensureAudioCtx(); // unlock audio on user gesture
-        if (state.timerRunning) {
-            stopTimer();
-        } else {
-            startTimer();
-        }
-    });
-
-    $('resetBtn').addEventListener('click', () => {
-        dismissBlink();
-        stopTimer();
-        state.timerRemaining = state.timerDuration;
-        render();
-    });
-
-    function startTimer() {
-        if (state.timerRemaining <= 0) return;
-        state.timerRunning = true;
-        renderTimer();
-        timerInterval = setInterval(() => {
-            state.timerRemaining--;
-            if (state.timerRemaining <= 0) {
-                state.timerRemaining = 0;
-                stopTimer();
-                triggerBlink();
-                playBuzzer();
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBuzzer() {
+            if (!state.soundOn) return;
+            try {
+                ensureAudioCtx();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = 440;
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
+            } catch (error) {
+                /* silent fail */
+            }
+        }
+
+        function hexToRgbString(hex) {
+            const cleaned = (hex || '').replace('#', '').trim();
+            const normalized = cleaned.length === 3
+                ? cleaned.split('').map(char => char + char).join('')
+                : cleaned.padEnd(6, '0').slice(0, 6);
+            const int = parseInt(normalized, 16);
+            return `${(int >> 16) & 255}, ${(int >> 8) & 255}, ${int & 255}`;
+        }
+
+        function applyTeamTheme(team, color) {
+            document.documentElement.style.setProperty(`--${team}-team`, color);
+            document.documentElement.style.setProperty(`--${team}-team-rgb`, hexToRgbString(color));
+        }
+
+        function fitScoreFont(el) {
+            const scoreWell = el.closest('.score-well');
+            const scoreShadow = scoreWell.querySelector('.score-shadow');
+            const width = scoreWell.clientWidth;
+            const height = scoreWell.clientHeight;
+            const digits = Math.max(el.textContent.length, 2);
+            const byWidth = width / (digits * 0.62);
+            const byHeight = height * 0.42;
+            const size = Math.max(48, Math.floor(Math.min(byWidth, byHeight)));
+            el.style.fontSize = `${size}px`;
+            scoreShadow.style.fontSize = `${size}px`;
+            scoreShadow.textContent = '8'.repeat(digits);
+        }
+
+        function fitAllScores() {
+            fitScoreFont(homeScoreEl);
+            fitScoreFont(awayScoreEl);
+        }
+
+        function renderPeriod() {
+            if (state.period <= 4) {
+                periodLabel.textContent = 'Quarter';
+                periodValue.textContent = state.period;
+                return;
+            }
+
+            periodLabel.textContent = 'Overtime';
+            periodValue.textContent = state.period - 4;
+        }
+
+        function renderBonuses() {
+            const homeActive = state.home.fouls >= 5;
+            const awayActive = state.away.fouls >= 5;
+            homeBonus.textContent = homeActive ? 'Bonus' : 'No Bonus';
+            awayBonus.textContent = awayActive ? 'Bonus' : 'No Bonus';
+            homeBonus.classList.toggle('active', homeActive);
+            awayBonus.classList.toggle('active', awayActive);
+        }
+
+        function renderTimer() {
+            const time = Math.max(0, state.timerRemaining);
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timerDisplay.classList.toggle('danger', time <= 30 && time > 0);
+
+            if (state.timerRunning) {
+                startStopBtn.textContent = 'Pause';
+                clockState.textContent = 'Live';
+            } else if (time === 0) {
+                startStopBtn.textContent = 'Start';
+                clockState.textContent = 'Horn';
+            } else {
+                startStopBtn.textContent = 'Start';
+                clockState.textContent = 'Ready';
+            }
+
+            clockState.classList.toggle('running', state.timerRunning);
+            clockState.classList.toggle('expired', !state.timerRunning && time === 0);
+            startStopBtn.disabled = time === 0;
+        }
+
+        function render() {
+            homeScoreEl.textContent = state.home.score;
+            awayScoreEl.textContent = state.away.score;
+            homeFoulsEl.textContent = state.home.fouls;
+            awayFoulsEl.textContent = state.away.fouls;
+            homeLabel.textContent = state.home.name;
+            awayLabel.textContent = state.away.name;
+
+            applyTeamTheme('home', state.home.color);
+            applyTeamTheme('away', state.away.color);
+            homeFoulsEl.style.color = state.home.color;
+            awayFoulsEl.style.color = state.away.color;
+
+            renderPeriod();
+            renderBonuses();
             renderTimer();
-        }, 1000);
-    }
 
-    function stopTimer() {
-        state.timerRunning = false;
-        clearInterval(timerInterval);
-        timerInterval = null;
-        renderTimer();
-    }
+            soundIcon.textContent = state.soundOn ? 'On' : 'Off';
+            soundBtn.setAttribute('aria-pressed', String(state.soundOn));
 
-    // ── Blink ──
-    function triggerBlink() {
-        blinkActive = true;
-        blinkOverlay.classList.add('active');
-    }
+            homeArrowBtn.classList.toggle('active', state.possession === 'home');
+            awayArrowBtn.classList.toggle('active', state.possession === 'away');
+            homeArrowBtn.setAttribute('aria-pressed', String(state.possession === 'home'));
+            awayArrowBtn.setAttribute('aria-pressed', String(state.possession === 'away'));
 
-    function dismissBlink() {
-        if (!blinkActive) return;
-        blinkActive = false;
-        blinkOverlay.classList.remove('active');
-    }
+            undoBtn.disabled = history.length === 0;
+            periodDownBtn.disabled = state.period <= 1;
 
-    blinkOverlay.addEventListener('click', dismissBlink);
+            fitAllScores();
+        }
 
-    // ── Gear / Timer Settings ──
-    $('gearBtn').addEventListener('click', () => {
-        const m = Math.floor(state.timerDuration / 60);
-        const s = state.timerDuration % 60;
-        $('setMinutes').value = m;
-        $('setSeconds').value = s;
-        $('setHomeName').value = state.home.name;
-        $('setAwayName').value = state.away.name;
-        $('setHomeColor').value = state.home.color;
-        $('setAwayColor').value = state.away.color;
-        timerModal.classList.add('active');
-    });
+        function pushUndo(action) {
+            history.push(action);
+            if (history.length > 100) {
+                history.shift();
+            }
+        }
 
-    $('modalCancel').addEventListener('click', () => timerModal.classList.remove('active'));
+        function undo() {
+            const action = history.pop();
+            if (!action) return;
 
-    $('modalSave').addEventListener('click', () => {
-        const m = Math.max(0, parseInt($('setMinutes').value) || 0);
-        const s = Math.max(0, Math.min(59, parseInt($('setSeconds').value) || 0));
-        state.timerDuration = m * 60 + s;
-        state.timerRemaining = state.timerDuration;
-        stopTimer();
-        // Team names
-        state.home.name = ($('setHomeName').value.trim() || 'HOME').toUpperCase();
-        state.away.name = ($('setAwayName').value.trim() || 'AWAY').toUpperCase();
-        // Team colors
-        state.home.color = $('setHomeColor').value;
-        state.away.color = $('setAwayColor').value;
-        timerModal.classList.remove('active');
-        render();
-    });
+            if (action.type === 'score') {
+                state[action.team].score -= action.delta;
+                if (state[action.team].score < 0) {
+                    state[action.team].score = 0;
+                }
+            } else if (action.type === 'foul') {
+                state[action.team].fouls -= action.delta;
+                if (state[action.team].fouls < 0) {
+                    state[action.team].fouls = 0;
+                }
+            } else if (action.type === 'period') {
+                state.period -= action.delta;
+                if (state.period < 1) {
+                    state.period = 1;
+                }
+            }
 
-    timerModal.addEventListener('click', (e) => {
-        if (e.target === timerModal) timerModal.classList.remove('active');
-    });
+            render();
+        }
 
-    // ── Period ──
-    $('periodUp').addEventListener('click', () => {
-        state.period++;
-        pushUndo({ type: 'period', delta: 1 });
-        render();
-    });
+        function flash(el) {
+            el.classList.add('flash');
+            setTimeout(() => el.classList.remove('flash'), 160);
+        }
 
-    $('periodDown').addEventListener('click', () => {
-        if (state.period > 1) {
+        document.querySelectorAll('.score-touch-zone').forEach(zone => {
+            zone.addEventListener('click', () => {
+                dismissBlink();
+                const team = zone.dataset.team;
+                const delta = zone.dataset.dir === 'up' ? 1 : -1;
+                state[team].score = Math.max(0, state[team].score + delta);
+                pushUndo({ type: 'score', team, delta });
+                flash(zone);
+                render();
+            });
+        });
+
+        document.querySelectorAll('.foul-touch-zone').forEach(zone => {
+            zone.addEventListener('click', () => {
+                dismissBlink();
+                const team = zone.dataset.team;
+                const delta = zone.dataset.dir === 'up' ? 1 : -1;
+                state[team].fouls = Math.max(0, state[team].fouls + delta);
+                pushUndo({ type: 'foul', team, delta });
+                render();
+            });
+        });
+
+        function startTimer() {
+            if (state.timerRemaining <= 0 || state.timerRunning) return;
+            clearInterval(timerInterval);
+            state.timerRunning = true;
+            renderTimer();
+            timerInterval = setInterval(() => {
+                state.timerRemaining--;
+                if (state.timerRemaining <= 0) {
+                    state.timerRemaining = 0;
+                    stopTimer();
+                    triggerBlink();
+                    playBuzzer();
+                }
+                renderTimer();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            state.timerRunning = false;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            renderTimer();
+        }
+
+        function triggerBlink() {
+            blinkActive = true;
+            blinkOverlay.classList.add('active');
+        }
+
+        function dismissBlink() {
+            if (!blinkActive) return;
+            blinkActive = false;
+            blinkOverlay.classList.remove('active');
+        }
+
+        startStopBtn.addEventListener('click', () => {
+            dismissBlink();
+            ensureAudioCtx();
+            if (state.timerRunning) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        $('resetBtn').addEventListener('click', () => {
+            dismissBlink();
+            stopTimer();
+            state.timerRemaining = state.timerDuration;
+            render();
+        });
+
+        blinkOverlay.addEventListener('click', dismissBlink);
+
+        $('gearBtn').addEventListener('click', () => {
+            const minutes = Math.floor(state.timerDuration / 60);
+            const seconds = state.timerDuration % 60;
+            $('setMinutes').value = minutes;
+            $('setSeconds').value = seconds;
+            $('setHomeName').value = state.home.name;
+            $('setAwayName').value = state.away.name;
+            $('setHomeColor').value = state.home.color;
+            $('setAwayColor').value = state.away.color;
+            timerModal.classList.add('active');
+        });
+
+        $('modalCancel').addEventListener('click', () => timerModal.classList.remove('active'));
+
+        $('modalSave').addEventListener('click', () => {
+            const minutes = Math.max(0, parseInt($('setMinutes').value, 10) || 0);
+            const seconds = Math.max(0, Math.min(59, parseInt($('setSeconds').value, 10) || 0));
+            state.timerDuration = (minutes * 60) + seconds;
+            state.timerRemaining = state.timerDuration;
+            stopTimer();
+            state.home.name = ($('setHomeName').value.trim() || 'HOME').toUpperCase();
+            state.away.name = ($('setAwayName').value.trim() || 'AWAY').toUpperCase();
+            state.home.color = $('setHomeColor').value;
+            state.away.color = $('setAwayColor').value;
+            timerModal.classList.remove('active');
+            render();
+        });
+
+        timerModal.addEventListener('click', event => {
+            if (event.target === timerModal) {
+                timerModal.classList.remove('active');
+            }
+        });
+
+        $('periodUp').addEventListener('click', () => {
+            state.period++;
+            pushUndo({ type: 'period', delta: 1 });
+            render();
+        });
+
+        $('periodDown').addEventListener('click', () => {
+            if (state.period <= 1) return;
             state.period--;
             pushUndo({ type: 'period', delta: -1 });
             render();
-        }
-    });
+        });
 
-    // ── Swap Sides ──
-    $('swapBtn').addEventListener('click', () => {
-        const tmp = { ...state.home };
-        state.home = { ...state.away };
-        state.away = { ...tmp };
-        state.possession = state.possession === 'home' ? 'away' : 'home';
+        $('swapBtn').addEventListener('click', () => {
+            const nextHome = { ...state.away };
+            const nextAway = { ...state.home };
+            state.home = nextHome;
+            state.away = nextAway;
+            state.possession = state.possession === 'home' ? 'away' : 'home';
+            render();
+        });
+
+        homeArrowBtn.addEventListener('click', () => {
+            state.possession = 'home';
+            render();
+        });
+
+        awayArrowBtn.addEventListener('click', () => {
+            state.possession = 'away';
+            render();
+        });
+
+        soundBtn.addEventListener('click', () => {
+            state.soundOn = !state.soundOn;
+            render();
+        });
+
+        $('fullscreenBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            fullscreenIcon.innerHTML = document.fullscreenElement ? '&#10006;' : '&#9974;';
+            setTimeout(fitAllScores, 120);
+        });
+
+        undoBtn.addEventListener('click', undo);
+
+        $('resetAllBtn').addEventListener('click', () => {
+            confirmModal.classList.add('active');
+        });
+
+        $('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('active'));
+
+        $('confirmOk').addEventListener('click', () => {
+            confirmModal.classList.remove('active');
+            stopTimer();
+            dismissBlink();
+            state.home.score = 0;
+            state.home.fouls = 0;
+            state.away.score = 0;
+            state.away.fouls = 0;
+            state.period = 1;
+            state.timerRemaining = state.timerDuration;
+            state.possession = 'home';
+            history.length = 0;
+            render();
+        });
+
+        confirmModal.addEventListener('click', event => {
+            if (event.target === confirmModal) {
+                confirmModal.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.target.tagName === 'INPUT') return;
+
+            if (timerModal.classList.contains('active') || confirmModal.classList.contains('active')) {
+                if (event.key === 'Escape') {
+                    timerModal.classList.remove('active');
+                    confirmModal.classList.remove('active');
+                }
+                return;
+            }
+
+            dismissBlink();
+
+            switch (event.key) {
+                case ' ':
+                    event.preventDefault();
+                    startStopBtn.click();
+                    break;
+                case 'z':
+                    if (event.ctrlKey || event.metaKey) {
+                        event.preventDefault();
+                        undo();
+                    }
+                    break;
+                case 'p':
+                case 'P':
+                    state.possession = state.possession === 'home' ? 'away' : 'home';
+                    render();
+                    break;
+            }
+        });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', event => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
         render();
-    });
-
-    // ── Possession Arrow ──
-    homeArrowBtn.addEventListener('click', () => {
-        state.possession = 'home';
-        render();
-    });
-
-    awayArrowBtn.addEventListener('click', () => {
-        state.possession = 'away';
-        render();
-    });
-
-    // ── Sound Toggle ──
-    soundBtn.addEventListener('click', () => {
-        state.soundOn = !state.soundOn;
-        render();
-    });
-
-    // ── Fullscreen ──
-    $('fullscreenBtn').addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            document.exitFullscreen();
-        }
-    });
-
-    document.addEventListener('fullscreenchange', () => {
-        $('fullscreenBtn').innerHTML = document.fullscreenElement ? '&#x2716;' : '&#x26F6;';
-        // Refit scores after fullscreen transition
-        setTimeout(fitAllScores, 100);
-    });
-
-    // ── Undo ──
-    $('undoBtn').addEventListener('click', undo);
-
-    // ── New Game ──
-    $('resetAllBtn').addEventListener('click', () => {
-        confirmModal.classList.add('active');
-    });
-
-    $('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('active'));
-
-    $('confirmOk').addEventListener('click', () => {
-        confirmModal.classList.remove('active');
-        stopTimer();
-        dismissBlink();
-        state.home.score = 0;
-        state.home.fouls = 0;
-        state.away.score = 0;
-        state.away.fouls = 0;
-        state.period = 1;
-        state.timerRemaining = state.timerDuration;
-        history.length = 0;
-        render();
-    });
-
-    confirmModal.addEventListener('click', (e) => {
-        if (e.target === confirmModal) confirmModal.classList.remove('active');
-    });
-
-    // ── Keyboard Shortcuts ──
-    document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT') return;
-        dismissBlink();
-        switch (e.key) {
-            case ' ':
-                e.preventDefault();
-                startStopBtn.click();
-                break;
-            case 'z':
-                if (e.ctrlKey || e.metaKey) { e.preventDefault(); undo(); }
-                break;
-            case 'p':
-            case 'P':
-                state.possession = state.possession === 'home' ? 'away' : 'home';
-                render();
-                break;
-        }
-    });
-
-    // ── Prevent zoom on double-tap (iOS) ──
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) e.preventDefault();
-        lastTouchEnd = now;
-    }, { passive: false });
-
-    // ── Init ──
-    render();
-    window.addEventListener('resize', fitAllScores);
-})();
-</script>
+        window.addEventListener('resize', fitAllScores);
+    })();
+    </script>
 </body>
 </html>
