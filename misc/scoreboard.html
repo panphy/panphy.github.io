@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Scoreboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #06080f;
-            --surface: #111622;
-            --surface-alt: #0d1220;
-            --border: #23314f;
-            --text: #eef3ff;
-            --text-dim: #8c9aba;
-            --home-color: #4a90d9;
-            --away-color: #d94a4a;
-            --accent: #ffc740;
-            --timer-bg: #090d18;
+            --bg: #07090f;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e8eeff;
+            --text-dim: #4e5d7a;
+            --accent: #ffb800;
         }
 
         html, body {
@@ -33,7 +31,7 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Barlow Condensed', 'Trebuchet MS', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
         }
@@ -41,13 +39,9 @@
         /* ── Main Layout ── */
         .board {
             flex: 1;
+            min-height: 0;
             display: grid;
             grid-template-columns: 1fr auto 1fr;
-            grid-template-rows: 1fr;
-            min-height: 0;
-            background:
-                radial-gradient(circle at 50% 15%, rgba(255, 199, 64, 0.12), transparent 42%),
-                linear-gradient(180deg, #0b1222, #070b15 70%);
         }
 
         /* ── Score Panels ── */
@@ -57,23 +51,19 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            gap: 0;
         }
 
         .team-label {
-            font-size: clamp(14px, 2.5vw, 22px);
+            position: absolute;
+            top: clamp(8px, 2vh, 18px);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(12px, 1.8vw, 18px);
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.18em;
-            color: #d2dcf5;
-            position: absolute;
-            top: clamp(8px, 2vh, 20px);
-            padding: 6px 14px;
-            border-radius: 8px;
-            background: rgba(4, 9, 21, 0.55);
-            border: 1px solid rgba(188, 211, 255, 0.2);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+            letter-spacing: 0.3em;
+            color: var(--text-dim);
             pointer-events: none;
+            z-index: 1;
         }
 
         .score-touch-zone {
@@ -86,14 +76,14 @@
             position: relative;
         }
 
-        .score-touch-zone.up { align-items: flex-end; padding-bottom: 0; }
-        .score-touch-zone.down { align-items: flex-start; padding-top: 0; }
+        .score-touch-zone.up   { align-items: flex-end; }
+        .score-touch-zone.down { align-items: flex-start; }
 
         .score-value {
-            font-weight: 800;
-            line-height: 1;
+            font-family: 'Bebas Neue', 'Impact', 'Arial Narrow', sans-serif;
+            font-weight: 400;
+            line-height: 0.92;
             font-variant-numeric: tabular-nums;
-            letter-spacing: -0.02em;
             pointer-events: none;
             position: absolute;
             top: 50%;
@@ -102,33 +92,32 @@
             white-space: nowrap;
         }
 
-        /* Score and foul colors applied dynamically via JS */
-
         .score-hint {
-            font-size: clamp(10px, 1.5vw, 14px);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(10px, 1.4vw, 13px);
+            font-weight: 600;
             color: var(--text-dim);
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.25s;
             pointer-events: none;
             position: absolute;
+            letter-spacing: 0.05em;
         }
-        .score-touch-zone.up .score-hint { top: clamp(36px, 7vh, 56px); }
-        .score-touch-zone.down .score-hint { bottom: clamp(8px, 2vh, 20px); }
+        .score-touch-zone.up   .score-hint { top: clamp(38px, 7vh, 54px); }
+        .score-touch-zone.down .score-hint { bottom: clamp(10px, 2.5vh, 22px); }
         .score-touch-zone:hover .score-hint,
-        .score-touch-zone:active .score-hint { opacity: 0.6; }
+        .score-touch-zone:active .score-hint { opacity: 0.45; }
 
-        /* Tap flash */
         .score-touch-zone::after {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 4px;
             background: currentColor;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.15s;
+            transition: opacity 0.12s;
         }
-        .score-touch-zone.flash::after { opacity: 0.06; }
+        .score-touch-zone.flash::after { opacity: 0.05; }
 
         /* ── Center Panel ── */
         .center-panel {
@@ -136,216 +125,202 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-left: 1px solid rgba(141, 167, 225, 0.25);
-            border-right: 1px solid rgba(141, 167, 225, 0.25);
-            padding: clamp(10px, 2vw, 24px);
-            gap: clamp(14px, 3vh, 36px);
-            min-width: clamp(190px, 30vw, 360px);
-            background: linear-gradient(180deg, rgba(6, 12, 24, 0.8), rgba(8, 13, 22, 0.6));
+            gap: clamp(10px, 1.8vh, 20px);
+            padding: clamp(10px, 2vw, 20px) clamp(14px, 2.5vw, 26px);
+            min-width: clamp(185px, 27vw, 340px);
+            border-left:  1px solid var(--border);
+            border-right: 1px solid var(--border);
         }
 
-        /* Timer */
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        /* ── Timer ── */
         .timer-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: clamp(6px, 1.2vh, 12px);
             width: 100%;
-            background: linear-gradient(180deg, rgba(10, 16, 30, 0.92), rgba(4, 8, 16, 0.9));
-            border: 1px solid rgba(255, 234, 188, 0.32);
-            border-radius: 12px;
-            padding: clamp(12px, 2.5vw, 18px) clamp(10px, 2vw, 16px);
-            box-shadow:
-                0 0 0 1px rgba(255, 199, 64, 0.1) inset,
-                0 16px 28px rgba(0, 0, 0, 0.45);
         }
 
         .timer-display {
-            font-size: clamp(56px, 12vw, 150px);
-            font-weight: 800;
-            font-variant-numeric: tabular-nums;
+            font-family: 'Bebas Neue', 'Impact', monospace;
+            font-size: clamp(52px, 10.5vw, 140px);
+            line-height: 1;
             color: var(--accent);
             letter-spacing: 0.04em;
-            line-height: 1.1;
-            text-shadow: 0 0 18px rgba(255, 194, 71, 0.26);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 28px rgba(255, 184, 0, 0.18);
         }
 
-        .timer-display.danger { color: #ff4444; }
+        .timer-display.danger {
+            color: #ff3b3b;
+            text-shadow: 0 0 28px rgba(255, 59, 59, 0.2);
+        }
 
         .timer-controls {
             display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: center;
+            gap: 6px;
             width: 100%;
+            justify-content: center;
         }
 
         .timer-btn {
-            background: rgba(21, 32, 56, 0.9);
-            border: 1px solid rgba(142, 170, 231, 0.3);
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
             color: var(--text);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: clamp(13px, 1.8vw, 16px);
+            border-radius: 7px;
+            padding: 8px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(12px, 1.5vw, 15px);
             font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.15s, border-color 0.15s;
-            width: clamp(70px, 10vw, 98px);
-            min-height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: background 0.15s;
+            min-height: 40px;
+            max-width: clamp(70px, 9vw, 100px);
         }
-        .timer-btn:hover { background: rgba(39, 58, 97, 0.95); }
-        .timer-btn:active { background: #3a3a4a; }
+        .timer-btn:hover { background: rgba(255, 255, 255, 0.09); }
 
         .timer-btn.primary {
             background: var(--accent);
-            color: #111;
+            color: #0a0b0e;
             border-color: var(--accent);
         }
-        .timer-btn.primary:hover { filter: brightness(1.1); }
+        .timer-btn.primary:hover { filter: brightness(1.08); }
 
         .gear-btn {
             background: none;
             border: none;
             color: var(--text-dim);
-            font-size: clamp(16px, 2vw, 22px);
+            font-size: clamp(15px, 1.8vw, 20px);
             cursor: pointer;
             padding: 8px;
-            border-radius: 6px;
+            border-radius: 7px;
             transition: color 0.15s, background 0.15s;
-            min-width: 44px;
-            min-height: 44px;
+            min-width: 40px;
+            min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .gear-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+        .gear-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
 
-        /* Period */
+        /* ── Period ── */
         .period-section {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(7, 12, 24, 0.62);
-            border: 1px solid rgba(137, 163, 220, 0.2);
-            border-radius: 10px;
-            padding: 8px 12px;
+            gap: clamp(8px, 1.4vw, 16px);
         }
 
         .period-inner {
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-width: clamp(40px, 6vw, 60px);
+            min-width: clamp(36px, 5vw, 56px);
         }
 
         .period-label {
-            font-size: clamp(11px, 1.5vw, 14px);
-            color: #a7b6d8;
+            font-size: clamp(9px, 1.1vw, 12px);
+            color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.22em;
+            font-weight: 700;
         }
 
         .period-value {
-            font-size: clamp(20px, 3.5vw, 36px);
-            font-weight: 700;
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: clamp(26px, 4.5vw, 54px);
+            line-height: 0.9;
             color: var(--text);
-            text-align: center;
+            font-variant-numeric: tabular-nums;
         }
 
         .period-btn {
-            background: rgba(20, 30, 52, 0.85);
-            border: 1px solid rgba(138, 164, 220, 0.3);
-            color: #a3b1d2;
-            border-radius: 6px;
-            width: 32px;
-            height: 32px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-            min-width: 44px;
-            min-height: 44px;
-        }
-        .period-btn:hover { background: var(--border); color: var(--text); }
-
-        .possession-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            background: rgba(7, 12, 24, 0.62);
-            border: 1px solid rgba(137, 163, 220, 0.2);
-            border-radius: 10px;
-            padding: 8px 10px;
-        }
-
-        .possession-title {
-            font-size: 11px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
             color: var(--text-dim);
-            font-weight: 700;
-        }
-
-        .arrow-lane {
-            flex: 1;
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .arrow-btn {
-            flex: 1;
-            min-height: 44px;
-            min-width: 44px;
-            border-radius: 8px;
-            border: 1px solid rgba(138, 164, 220, 0.25);
-            background: rgba(18, 29, 50, 0.75);
-            color: #b3c1df;
-            font-size: clamp(18px, 2.2vw, 24px);
-            font-weight: 700;
+            border-radius: 7px;
+            font-size: 18px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+            min-width: 40px;
+            min-height: 40px;
+        }
+        .period-btn:hover { background: rgba(255, 255, 255, 0.09); color: var(--text); }
+
+        /* ── Possession Arrow ── */
+        .possession-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 7px;
+            width: 100%;
         }
 
-        .arrow-btn.active {
-            background: rgba(255, 199, 64, 0.92);
-            color: #101010;
-            border-color: rgba(255, 231, 179, 0.9);
-            box-shadow: 0 0 14px rgba(255, 199, 64, 0.35);
+        .poss-label {
+            font-size: clamp(8px, 1vw, 11px);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.22em;
+            font-weight: 700;
         }
 
-        /* Fouls */
+        .poss-display {
+            display: flex;
+            align-items: center;
+            gap: clamp(14px, 2.2vw, 28px);
+            justify-content: center;
+        }
+
+        /* Pure SVG triangle arrows — no button look */
+        .poss-arrow {
+            width: clamp(36px, 5vw, 64px);
+            height: auto;
+            cursor: pointer;
+            fill: rgba(255, 255, 255, 0.07);
+            transition: fill 0.2s ease, filter 0.2s ease;
+            flex-shrink: 0;
+            display: block;
+        }
+        .poss-arrow:hover { fill: rgba(255, 255, 255, 0.2); }
+        .poss-arrow.active {
+            fill: var(--accent);
+            filter: drop-shadow(0 0 8px rgba(255, 184, 0, 0.5));
+        }
+
+        /* ── Fouls ── */
         .fouls-row {
             display: flex;
-            gap: clamp(12px, 3vw, 32px);
-            align-items: center;
-            width: 100%;
+            gap: clamp(10px, 2.2vw, 26px);
+            align-items: flex-start;
             justify-content: center;
-            background: rgba(7, 12, 24, 0.62);
-            border: 1px solid rgba(137, 163, 220, 0.2);
-            border-radius: 10px;
-            padding: 8px 10px;
+            width: 100%;
         }
 
         .foul-block {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
         }
 
         .foul-label {
-            font-size: clamp(9px, 1.2vw, 12px);
+            font-size: clamp(8px, 1.1vw, 11px);
             color: var(--text-dim);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.2em;
+            font-weight: 700;
         }
 
         .foul-touch-zone {
@@ -353,49 +328,61 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 4px 2px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 5px;
             transition: background 0.15s;
             min-width: 44px;
-            min-height: 28px;
+            min-height: 34px;
         }
-        .foul-touch-zone:hover { background: rgba(255,255,255,0.04); }
-        .foul-touch-zone:active { background: rgba(255,255,255,0.08); }
+        .foul-touch-zone:hover  { background: rgba(255, 255, 255, 0.04); }
+        .foul-touch-zone:active { background: rgba(255, 255, 255, 0.08); }
 
         .foul-value {
-            font-size: clamp(22px, 4vw, 42px);
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: clamp(26px, 4.2vw, 48px);
             line-height: 1;
+            font-variant-numeric: tabular-nums;
             pointer-events: none;
         }
 
-        /* Foul colors applied dynamically via JS */
+        .foul-dec {
+            font-size: clamp(9px, 1.1vw, 12px);
+            color: var(--text-dim);
+            font-weight: 700;
+            pointer-events: none;
+            letter-spacing: 0.05em;
+        }
 
         /* ── Bottom Bar ── */
         .bottom-bar {
             display: flex;
             justify-content: center;
-            padding: 6px 12px;
-            gap: 12px;
-            border-top: 1px solid rgba(141, 167, 225, 0.25);
-            background: linear-gradient(180deg, #0d1425, #0a1020);
+            padding: 5px 12px;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            background: rgba(5, 7, 12, 0.98);
         }
 
         .bottom-btn {
             background: none;
             border: 1px solid var(--border);
             color: var(--text-dim);
-            border-radius: 6px;
-            padding: 6px 14px;
-            font-size: clamp(11px, 1.3vw, 13px);
+            border-radius: 5px;
+            padding: 5px 14px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(10px, 1.2vw, 12px);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             cursor: pointer;
             transition: background 0.15s, color 0.15s;
-            min-height: 36px;
+            min-height: 32px;
         }
-        .bottom-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+        .bottom-btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--text); }
 
-        /* ── Blinking Overlay ── */
+        .sound-toggle { font-size: clamp(13px, 1.6vw, 16px); }
+
+        /* ── Blink Overlay ── */
         .blink-overlay {
             position: fixed;
             inset: 0;
@@ -410,18 +397,17 @@
         }
         @keyframes blink {
             0%, 100% { opacity: 0.7; }
-            50% { opacity: 0; }
+            50%       { opacity: 0; }
         }
-
         .blink-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(28px, 6vw, 60px);
-            font-weight: 800;
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: clamp(32px, 7vw, 80px);
             color: white;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            letter-spacing: 0.12em;
             pointer-events: none;
         }
 
@@ -429,26 +415,31 @@
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.72);
             z-index: 200;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            backdrop-filter: blur(4px);
         }
         .modal-backdrop.active { display: flex; }
 
         .modal {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            background: #0d1220;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             padding: clamp(20px, 4vw, 32px);
             max-width: 360px;
             width: 100%;
         }
 
         .modal h2 {
-            font-size: 18px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
             margin-bottom: 20px;
             text-align: center;
         }
@@ -457,24 +448,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .modal-row label {
-            font-size: 14px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             color: var(--text-dim);
-            width: 80px;
+            width: 90px;
             flex-shrink: 0;
         }
 
         .modal-row input {
             flex: 1;
-            background: var(--bg);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
             color: var(--text);
             border-radius: 8px;
             padding: 10px 12px;
+            font-family: 'Barlow Condensed', sans-serif;
             font-size: 16px;
+            font-weight: 600;
             text-align: center;
             font-variant-numeric: tabular-nums;
             min-height: 44px;
@@ -488,10 +485,11 @@
         }
 
         .modal-section-label {
-            font-size: 12px;
-            font-weight: 600;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
             color: var(--text-dim);
             margin-bottom: 10px;
         }
@@ -499,62 +497,57 @@
         .modal-divider {
             height: 1px;
             background: var(--border);
-            margin: 16px 0;
+            margin: 14px 0;
         }
 
         .modal-actions {
             display: flex;
             gap: 10px;
-            margin-top: 24px;
+            margin-top: 20px;
         }
 
         .modal-actions button {
             flex: 1;
             padding: 12px;
             border-radius: 8px;
+            font-family: 'Barlow Condensed', sans-serif;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
             cursor: pointer;
             border: 1px solid var(--border);
             min-height: 44px;
         }
 
         .modal-actions .cancel-btn {
-            background: var(--surface);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--text);
         }
-        .modal-actions .cancel-btn:hover { background: var(--border); }
+        .modal-actions .cancel-btn:hover { background: rgba(255, 255, 255, 0.08); }
 
         .modal-actions .save-btn {
             background: var(--accent);
-            color: #111;
+            color: #0a0b0e;
             border-color: var(--accent);
         }
-        .modal-actions .save-btn:hover { filter: brightness(1.1); }
+        .modal-actions .save-btn:hover { filter: brightness(1.08); }
 
-        /* ── Confirm Dialog ── */
-        .confirm-content {
-            text-align: center;
-        }
+        .confirm-content { text-align: center; }
         .confirm-content p {
             color: var(--text-dim);
             font-size: 14px;
             margin-bottom: 8px;
         }
 
-        /* ── Buzzer Sound Indicator ── */
-        .sound-toggle {
-            font-size: clamp(14px, 1.8vw, 18px);
-        }
-
         /* ── Responsive ── */
         @media (max-height: 500px) {
-            .center-panel { gap: 8px; }
+            .center-panel { gap: 6px; }
             .period-section { display: none; }
         }
 
         @media (orientation: portrait) and (max-width: 600px) {
-            .center-panel { min-width: 110px; padding: 8px; }
+            .center-panel { min-width: 95px; padding: 6px 8px; }
         }
     </style>
 </head>
@@ -572,16 +565,18 @@
             </div>
         </div>
 
-        <!-- Center -->
+        <!-- Center Panel -->
         <div class="center-panel">
             <div class="timer-section">
                 <div class="timer-display" id="timerDisplay">10:00</div>
                 <div class="timer-controls">
                     <button class="timer-btn primary" id="startStopBtn">Start</button>
-                    <button class="gear-btn" id="gearBtn" title="Timer settings">&#9881;</button>
+                    <button class="gear-btn" id="gearBtn" title="Settings">&#9881;</button>
                     <button class="timer-btn" id="resetBtn">Reset</button>
                 </div>
             </div>
+
+            <div class="section-divider"></div>
 
             <div class="period-section">
                 <button class="period-btn" id="periodDown">&#8722;</button>
@@ -592,13 +587,26 @@
                 <button class="period-btn" id="periodUp">&#43;</button>
             </div>
 
-            <div class="possession-row" aria-label="Possession Arrow">
-                <span class="possession-title">Arrow</span>
-                <div class="arrow-lane">
-                    <button class="arrow-btn" id="homeArrowBtn" title="Set possession to home" aria-label="Home possession">&#9664;</button>
-                    <button class="arrow-btn" id="awayArrowBtn" title="Set possession to away" aria-label="Away possession">&#9654;</button>
+            <div class="section-divider"></div>
+
+            <!-- Possession: pure SVG triangles, not buttons -->
+            <div class="possession-section">
+                <div class="poss-label">Possession</div>
+                <div class="poss-display">
+                    <svg id="homeArrowBtn" class="poss-arrow" viewBox="0 0 60 40"
+                         xmlns="http://www.w3.org/2000/svg"
+                         aria-label="Home possession" title="Set possession to home">
+                        <polygon points="0,20 26,0 26,13 60,13 60,27 26,27 26,40"/>
+                    </svg>
+                    <svg id="awayArrowBtn" class="poss-arrow" viewBox="0 0 60 40"
+                         xmlns="http://www.w3.org/2000/svg"
+                         aria-label="Away possession" title="Set possession to away">
+                        <polygon points="60,20 34,0 34,13 0,13 0,27 34,27 34,40"/>
+                    </svg>
                 </div>
             </div>
+
+            <div class="section-divider"></div>
 
             <div class="fouls-row">
                 <div class="foul-block home">
@@ -606,8 +614,8 @@
                     <div class="foul-touch-zone" data-team="home" data-dir="up">
                         <span class="foul-value" id="homeFouls">0</span>
                     </div>
-                    <div class="foul-touch-zone" data-team="home" data-dir="down" style="margin-top:-4px">
-                        <span style="font-size:clamp(9px,1.2vw,12px);color:var(--text-dim);">&minus;1</span>
+                    <div class="foul-touch-zone" data-team="home" data-dir="down">
+                        <span class="foul-dec">&minus;1</span>
                     </div>
                 </div>
                 <div class="foul-block away">
@@ -615,8 +623,8 @@
                     <div class="foul-touch-zone" data-team="away" data-dir="up">
                         <span class="foul-value" id="awayFouls">0</span>
                     </div>
-                    <div class="foul-touch-zone" data-team="away" data-dir="down" style="margin-top:-4px">
-                        <span style="font-size:clamp(9px,1.2vw,12px);color:var(--text-dim);">&minus;1</span>
+                    <div class="foul-touch-zone" data-team="away" data-dir="down">
+                        <span class="foul-dec">&minus;1</span>
                     </div>
                 </div>
             </div>
