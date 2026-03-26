@@ -259,45 +259,26 @@
         }
         .period-btn:hover { background: rgba(255, 255, 255, 0.09); color: var(--text); }
 
-        /* ── Possession Arrow ── */
-        .possession-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 7px;
-            width: 100%;
-        }
-
-        .poss-label {
-            font-size: clamp(8px, 1vw, 11px);
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.22em;
-            font-weight: 700;
-        }
-
-        .poss-display {
-            display: flex;
-            align-items: center;
-            gap: clamp(14px, 2.2vw, 28px);
-            justify-content: center;
-        }
-
-        /* Pure SVG triangle arrows — no button look */
-        .poss-arrow {
-            width: clamp(36px, 5vw, 64px);
-            height: auto;
+        /* ── Possession Dot ── */
+        .poss-dot {
+            position: absolute;
+            bottom: clamp(14px, 2.5vh, 26px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(10px, 1.4vw, 18px);
+            height: clamp(10px, 1.4vw, 18px);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
             cursor: pointer;
-            fill: rgba(255, 255, 255, 0.07);
-            transition: fill 0.2s ease, filter 0.2s ease;
-            flex-shrink: 0;
-            display: block;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+            z-index: 2;
         }
-        .poss-arrow:hover { fill: rgba(255, 255, 255, 0.2); }
-        .poss-arrow.active {
-            fill: var(--accent);
-            filter: drop-shadow(0 0 8px rgba(255, 184, 0, 0.5));
+        .poss-dot:hover { background: rgba(255, 255, 255, 0.28); }
+        .poss-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 12px rgba(255, 184, 0, 0.65);
         }
+        .poss-dot.active:hover { filter: brightness(1.1); }
 
         /* ── Fouls ── */
         .fouls-row {
@@ -563,6 +544,7 @@
             <div class="score-touch-zone down" data-team="home" data-dir="down">
                 <span class="score-hint">&minus;1</span>
             </div>
+            <div class="poss-dot" id="homePossDot" title="Set possession to home"></div>
         </div>
 
         <!-- Center Panel -->
@@ -585,25 +567,6 @@
                     <div class="period-value" id="periodValue">1</div>
                 </div>
                 <button class="period-btn" id="periodUp">&#43;</button>
-            </div>
-
-            <div class="section-divider"></div>
-
-            <!-- Possession: pure SVG triangles, not buttons -->
-            <div class="possession-section">
-                <div class="poss-label">Possession</div>
-                <div class="poss-display">
-                    <svg id="homeArrowBtn" class="poss-arrow" viewBox="0 0 60 40"
-                         xmlns="http://www.w3.org/2000/svg"
-                         aria-label="Home possession" title="Set possession to home">
-                        <polygon points="0,20 26,0 26,13 60,13 60,27 26,27 26,40"/>
-                    </svg>
-                    <svg id="awayArrowBtn" class="poss-arrow" viewBox="0 0 60 40"
-                         xmlns="http://www.w3.org/2000/svg"
-                         aria-label="Away possession" title="Set possession to away">
-                        <polygon points="60,20 34,0 34,13 0,13 0,27 34,27 34,40"/>
-                    </svg>
-                </div>
             </div>
 
             <div class="section-divider"></div>
@@ -640,6 +603,7 @@
             <div class="score-touch-zone down" data-team="away" data-dir="down">
                 <span class="score-hint">&minus;1</span>
             </div>
+            <div class="poss-dot" id="awayPossDot" title="Set possession to away"></div>
         </div>
     </div>
 
@@ -741,8 +705,8 @@
     const timerModal    = $('timerModal');
     const confirmModal  = $('confirmModal');
     const soundBtn      = $('soundBtn');
-    const homeArrowBtn  = $('homeArrowBtn');
-    const awayArrowBtn  = $('awayArrowBtn');
+    const homePossDot   = $('homePossDot');
+    const awayPossDot   = $('awayPossDot');
 
     // ── Audio Context for Buzzer ──
     let audioCtx = null;
@@ -805,8 +769,8 @@
         awayFoulsEl.style.color = state.away.color;
         renderTimer();
         soundBtn.innerHTML = state.soundOn ? '&#128264;' : '&#128263;';
-        homeArrowBtn.classList.toggle('active', state.possession === 'home');
-        awayArrowBtn.classList.toggle('active', state.possession === 'away');
+        homePossDot.classList.toggle('active', state.possession === 'home');
+        awayPossDot.classList.toggle('active', state.possession === 'away');
         fitAllScores();
     }
 
@@ -816,7 +780,8 @@
         const s = t % 60;
         timerDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
         timerDisplay.classList.toggle('danger', t <= 30 && t > 0);
-        startStopBtn.textContent = state.timerRunning ? 'Stop' : 'Start';
+        startStopBtn.textContent = state.timerRunning ? 'Pause'
+            : (state.timerRemaining < state.timerDuration && state.timerRemaining > 0 ? 'Resume' : 'Start');
     }
 
     // ── Undo ──
@@ -986,13 +951,13 @@
         render();
     });
 
-    // ── Possession Arrow ──
-    homeArrowBtn.addEventListener('click', () => {
+    // ── Possession Dot ──
+    homePossDot.addEventListener('click', () => {
         state.possession = 'home';
         render();
     });
 
-    awayArrowBtn.addEventListener('click', () => {
+    awayPossDot.addEventListener('click', () => {
         state.possession = 'away';
         render();
     });
