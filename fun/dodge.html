@@ -43,10 +43,6 @@
 
     * { box-sizing: border-box; }
 
-    html {
-      overflow: hidden;
-    }
-
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -57,7 +53,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
       padding: 20px;
       -webkit-user-select: none;
       user-select: none;
@@ -592,8 +588,8 @@
         Game assets failed to load. Please refresh or check your connection.
       </p>
       <div class="instructions">
-        <p>Use <span class="key">Arrow Keys</span> or <span class="key">Drag</span> the spaceship to move. Avoid the <span class="highlight">asteroids</span>!</p>
-        <p>Press <span class="key">Enter</span> or <span class="key">Tap</span> the canvas to restart after Game Over.</p>
+        <p><span class="key">Drag</span> the spaceship to move. Avoid the <span class="highlight">asteroids</span>!</p>
+        <p><span class="key">Tap</span> the canvas to restart after Game Over.</p>
         <p>Press <span class="key">Spacebar</span> to toggle sound on/off.</p>
       </div>
     </div>
@@ -1001,7 +997,6 @@
     let gameStartTime = 0;
     let asteroids = [];
     let player = null;
-    let keys = {};
     let animationId = null;
     let isPaused = false;
     let pauseStartTime = 0;
@@ -1084,27 +1079,7 @@
         this.speed = this.baseSpeed * gameScale;
       }
 
-      move(deltaMultiplier = 1) {
-        let deltaX = 0;
-        let deltaY = 0;
-
-        if (keys['ArrowLeft']) deltaX -= 1;
-        if (keys['ArrowRight']) deltaX += 1;
-        if (keys['ArrowUp']) deltaY -= 1;
-        if (keys['ArrowDown']) deltaY += 1;
-
-        if (deltaX !== 0 || deltaY !== 0) {
-          const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-          const normX = (deltaX / magnitude) * this.speed * deltaMultiplier;
-          const normY = (deltaY / magnitude) * this.speed * deltaMultiplier;
-
-          const newX = this.x + normX;
-          const newY = this.y + normY;
-
-          if (newX - this.radius >= 0 && newX + this.radius <= SCREEN_WIDTH) this.x = newX;
-          if (newY - this.radius >= 0 && newY + this.radius <= SCREEN_HEIGHT) this.y = newY;
-        }
-      }
+      move() {}
 
       setPosition(newX, newY) { this.x = newX; this.y = newY; }
 
@@ -1210,10 +1185,6 @@
       if (player && !gameOver && !isPaused && !initialsModal.classList.contains('show')) {
         startBackgroundMusic();
       }
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        e.preventDefault();
-        keys[e.key] = true;
-      }
       if ((e.key === ' ' || e.key === 'Spacebar') && !isTextInput) {
         e.preventDefault();
         setMutedState(!isMuted);
@@ -1223,12 +1194,6 @@
       }
       if (gameOver && e.key === 'Enter' && !initialsModal.classList.contains('show')) {
         resetGame();
-      }
-    });
-
-    document.addEventListener('keyup', (e) => {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        keys[e.key] = false;
       }
     });
 
@@ -1740,7 +1705,7 @@
         ctx.textAlign = 'start';
         ctx.fillText('Survival Time: ' + scoreDisplay, 10, 20);
 
-        player.move(deltaMultiplier);
+        player.move();
         player.draw();
 
         // Spawn budget is frame-rate independent and scales with canvas area.
