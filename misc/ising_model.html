@@ -1,447 +1,812 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="noindex, nofollow">
-
-  <title>2D Ising Model Simulation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="robots" content="noindex, nofollow">
+  <script>
+    (function () {
+      if (localStorage.getItem('ising-dark')) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute('content', '#111110');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      }
+    })();
+  </script>
+  <title>2D Ising Model | PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
-  <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
+    :root {
+      --font-body: 'Manrope', sans-serif;
+      --font-display: 'DM Serif Display', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+
+      --bg-color: #F8F6F1;
+      --bg-pattern: #EDE9E0;
+      --text-main: #1B1B1B;
+      --text-secondary: #6B6560;
+
+      --brand-primary: #C2410C;
+      --brand-accent: #0D9488;
+
+      --surface: #ffffff;
+      --surface-alt: #F0ECE4;
+      --border: #E8E4DD;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+
+      --nav-bg: rgba(248, 246, 241, 0.92);
+      --nav-border: #E8E4DD;
+
+      --slider-track: #E8E4DD;
+      --slider-thumb: #C2410C;
+      --toggle-hover: rgba(194, 65, 12, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #111110;
+      --bg-pattern: #1A1A18;
+      --text-main: #EDEBE8;
+      --text-secondary: #9C9890;
+
+      --brand-primary: #E8734A;
+      --brand-accent: #2DD4BF;
+
+      --surface: #1E1E1C;
+      --surface-alt: #1A1A18;
+      --border: #2E2E2A;
+      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+
+      --nav-bg: rgba(17, 17, 16, 0.92);
+      --nav-border: #2E2E2A;
+
+      --slider-track: #3A3A36;
+      --slider-thumb: #E8734A;
+      --toggle-hover: rgba(232, 115, 74, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
     body {
-      font-family: 'Inter', sans-serif;
+      height: 100%;
       margin: 0;
       padding: 0;
-      background-color: #f9f9f9;
-      color: #333;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      overflow: hidden;
     }
 
     a {
-      color: #ff5f1f;
+      color: var(--brand-primary);
       text-decoration: none;
     }
 
     a:hover {
-      color: #ff5f1f;
       text-decoration: underline;
     }
 
-    a:visited {
-      color: #ff5f1f;
-    }
-
-    header {
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      padding: 2px 0;
-    }
-
-    footer {
-      text-align: center;
-      padding: 5px;
-      background: #f9f9f9;
-      color: #555;
-      margin-top: 5px;
-    }
-
-    .container {
-      width: 80%;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .controls {
+    #app {
+      height: 100%;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 20px;
+      flex-direction: column;
+      gap: 0.8rem;
     }
 
-    .control-group {
-      flex: 1;
-      min-width: 250px;
+    /* ── Header Banner ────────────────────────────────────────────────────── */
+    #titleBanner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 16px auto 0;
+      background: var(--nav-bg);
+      border: 1px solid var(--nav-border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      min-height: 58px;
+      padding: 8px 20px;
+      flex-shrink: 0;
     }
 
-    .control-group label {
+    .banner-logo img {
+      width: auto;
+      height: 36px;
       display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
     }
 
-    .control-group input[type="range"] {
+    .banner-title {
+      margin: 0;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      letter-spacing: -0.5px;
+    }
+
+    .banner-title.gradient-text {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .banner-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    #theme-button {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      border-radius: 50%;
+      font-size: 1.25rem;
+      line-height: 1;
+      min-height: 42px;
+      min-width: 42px;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    #theme-button:hover {
+      background-color: var(--toggle-hover);
+      transform: rotate(15deg);
+    }
+
+    /* ── Workspace ────────────────────────────────────────────────────────── */
+    #workspace {
+      min-height: 0;
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      gap: 0.9rem;
+      width: calc(100% - 40px);
+      max-width: 1360px;
+      margin: 0 auto;
+      padding-bottom: 0.75rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Sim Panel ────────────────────────────────────────────────────────── */
+    #simPanel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #simCanvas {
+      display: block;
+      width: 100%;
+      height: 0;
+      flex: 1;
+      min-height: 0;
+      border-radius: 18px;
+    }
+
+    .sim-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      background: var(--nav-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--nav-border);
+      pointer-events: none;
+      opacity: 0.85;
+      white-space: nowrap;
+    }
+
+    kbd {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    /* ── Controls Panel ───────────────────────────────────────────────────── */
+    #controlsPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.2rem;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .controls-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .controls-header h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .status-badge.running {
+      border-color: rgba(13, 148, 136, 0.35);
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--brand-accent);
+    }
+
+    /* Control Card */
+    .control-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .control-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .slider-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .slider-header label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .slider-value {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--brand-primary);
+    }
+
+    .slider-footnote {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .slider-footnote.warn {
+      color: #B45309;
+    }
+
+    [data-theme="dark"] .slider-footnote.warn {
+      color: #FCD34D;
+    }
+
+    /* Range inputs */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: transparent;
+      outline: none;
+      border: none;
+      padding: 3px 0;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slider-track);
+    }
+
+    input[type="range"]::-moz-range-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slider-track);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      margin-top: -6px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Stats card */
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.1rem 0;
+    }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      min-height: 44px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: var(--font-body);
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.16s ease, filter 0.16s ease;
+      white-space: nowrap;
+      text-align: center;
       width: 100%;
     }
 
-    /* Styles for Grid Size Box */
-    .grid-size-box {
-      margin-top: 20px;
-      padding: 15px;
-      border: 2px solid #007bff;
-      border-radius: 8px;
-      background-color: #e7f3ff;
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      color: #007bff;
-      box-sizing: border-box;
-      /* Include padding and border in width */
-      transition: width 0.3s ease;
-      /* Smooth transition for width changes */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(194, 65, 12, 0.25);
     }
 
-    /* CSS for simulation-wrapper */
-    .simulation-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      /* Center child elements horizontally */
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
     }
 
-    .simulation-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 20px;
+    .btn-primary:active {
+      transform: translateY(0);
     }
 
-    #grid {
-      display: grid;
-      border: 2px solid #ddd;
+    /* Info card */
+    .info-card {
+      padding: 0.85rem 1rem;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
     }
 
-    .cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid lightgray;
-    }
-
-    .spin-up {
-      background-color: white;
-    }
-
-    .spin-down {
-      background-color: black;
-    }
-
-    .button-group {
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .button-group button {
-      margin: 5px;
-      padding: 5px 10px;
-      font-size: 16px;
-      color: #fff;
-      background-color: #007bff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 150px;
-    }
-
-    .button-group button:hover {
-      background-color: #0056b3;
-    }
-
-    #warning {
-      color: red;
-      font-weight: bold;
-      margin-top: 0px;
-      text-align: center;
-    }
-
-    /* Touch target sizing for mobile */
-    @media (pointer: coarse) {
-      .button-group button,
-      .control-group input[type="range"] {
-        min-height: 44px;
-        touch-action: manipulation;
-      }
-
-      .button-group button {
-        padding: 12px 20px;
-      }
-    }
-
-    /* Tablet responsive */
+    /* ── Responsive ───────────────────────────────────────────────────────── */
     @media (max-width: 900px) {
-      .container {
-        width: 92%;
-        padding: 15px;
+      body {
+        overflow: auto;
       }
 
-      .control-group {
-        min-width: 200px;
-      }
-    }
-
-    /* Mobile responsive */
-    @media (max-width: 600px) {
-      header h2 {
-        font-size: 1.25rem;
-        padding: 0 10px;
+      #app {
+        height: auto;
+        min-height: 100%;
       }
 
-      .container {
-        width: 95%;
-        margin: 10px auto;
-        padding: 12px;
+      #workspace {
+        grid-template-columns: 1fr;
       }
 
-      .controls {
-        flex-direction: column;
-        gap: 15px;
+      #simPanel {
+        min-height: 70vw;
+        order: 1;
       }
 
-      .control-group {
-        min-width: 100%;
-      }
-
-      .grid-size-box {
-        font-size: 14px;
-        padding: 10px;
-      }
-
-      .button-group button {
-        width: 120px;
-        font-size: 14px;
-      }
-
-      #warning {
-        font-size: 13px;
-        padding: 0 10px;
-      }
-
-      footer {
-        font-size: 13px;
+      #controlsPanel {
+        order: 2;
+        min-height: auto;
       }
     }
 
-    /* Small mobile - constrain grid size */
-    @media (max-width: 520px) {
-      .simulation-area {
-        width: 100%;
-        overflow-x: auto;
+    @media (max-width: 640px) {
+      #titleBanner {
+        width: calc(100% - 24px);
+        margin: 12px auto 0;
+        min-height: 52px;
+        border-radius: 18px;
+        padding: 8px 12px;
       }
 
-      #grid {
-        max-width: calc(100vw - 40px);
+      #workspace {
+        width: calc(100% - 24px);
+      }
+
+      .banner-logo img {
+        height: 28px;
+      }
+
+      .banner-title {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (pointer: coarse) {
+      #theme-button {
+        min-height: 48px;
+        min-width: 48px;
+      }
+
+      .btn {
+        min-height: 52px;
+      }
+
+      input[type="range"] {
+        min-height: 32px;
       }
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <h2>2D Ising Model Simulation</h2>
-  </header>
-  <div class="container">
-    <p id="warning">Warning: Using larger grid sizes may slow down your browser.</p>
-    <div class="controls">
-      <div class="control-group">
-        <label for="smallGridSize">Small Grid Size:</label>
-        <input id="smallGridSize" type="range" min="5" max="50" value="30" oninput="updateSmallGridSize(this.value)">
-        <p><span id="smallGridSizeValue">30</span> x <span id="smallGridSizeValue2">30</span></p>
+  <div id="app">
+    <header id="titleBanner">
+      <a href="/" class="banner-logo">
+        <img src="/assets/panphy.png" alt="PanPhy Labs" onerror="this.style.display='none'">
+      </a>
+      <h1 class="banner-title gradient-text">2D Ising Model</h1>
+      <div class="banner-actions">
+        <button id="theme-button" title="Toggle theme" aria-label="Toggle Light/Dark Theme">☀️</button>
       </div>
-      <div class="control-group">
-        <label for="largeGridSize">Large Grid Size:</label>
-        <input id="largeGridSize" type="range" min="51" max="200" value="51" oninput="updateLargeGridSize(this.value)">
-        <p><span id="largeGridSizeValue">51</span> x <span id="largeGridSizeValue2">51</span></p>
-      </div>
-      <div class="control-group">
-        <label for="temperature">Temperature:</label>
-        <input id="temperature" type="range" min="0.1" max="2.5" step="0.1" value="2.5"
-          oninput="updateTemperature(this.value)">
-        <p><span id="temperatureValue">2.5 T<sub>c</sub></span></p>
-      </div>
-    </div>
+    </header>
 
-    <!-- Wrap Grid Size Box and Simulation Area in a single div -->
-    <div class="simulation-wrapper">
-      <!-- Grid Size Display Box -->
-      <div class="grid-size-box">
-        Current Grid Size: <span id="currentGridSize">30 x 30</span>
+    <div id="workspace">
+      <div id="simPanel" class="panel">
+        <canvas id="simCanvas"></canvas>
+        <p class="sim-hint"><kbd>Space</kbd> to play / pause</p>
       </div>
 
-      <!-- Simulation Area -->
-      <div class="simulation-area">
-        <div id="grid"></div>
-      </div>
-    </div>
+      <div id="controlsPanel" class="panel">
+        <div class="controls-header">
+          <h2>Parameters</h2>
+          <span id="statusBadge" class="status-badge">Paused</span>
+        </div>
 
-    <div class="button-group">
-      <button id="toggleButton" onclick="toggleSimulation()">Run</button>
+        <div class="control-card">
+          <div class="control-block">
+            <div class="slider-header">
+              <label for="temperature">Temperature</label>
+              <span class="slider-value" id="tempDisplay">2.5 T<sub>c</sub></span>
+            </div>
+            <input type="range" id="temperature" min="0.1" max="5.0" step="0.1" value="2.5"
+              aria-label="Temperature in units of critical temperature">
+            <p class="slider-footnote">T<sub>c</sub> ≈ 2.269 J/k<sub>B</sub> — above T<sub>c</sub>: disordered; below: ordered</p>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="control-block">
+            <div class="slider-header">
+              <label for="gridSize">Grid Size</label>
+              <span class="slider-value" id="gridDisplay">30 × 30</span>
+            </div>
+            <input type="range" id="gridSize" min="5" max="200" value="30" aria-label="Grid size">
+            <p class="slider-footnote" id="gridWarning" style="display:none;">⚠ Large grids may slow down rendering.</p>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="stat-row">
+            <span class="stat-label">Spins</span>
+            <span class="stat-value" id="statGrid">900</span>
+          </div>
+          <div class="divider"></div>
+          <div class="stat-row">
+            <span class="stat-label">Magnetisation</span>
+            <span class="stat-value" id="statMag">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Phase</span>
+            <span class="stat-value" id="statPhase">—</span>
+          </div>
+        </div>
+
+        <button id="toggleBtn" class="btn btn-primary">▶ Run</button>
+
+        <div class="info-card">
+          Metropolis algorithm: each step attempts N² random spin flips, accepting with probability
+          min(1,&nbsp;e<sup>−ΔE/kT</sup>). At T&nbsp;&lt;&nbsp;T<sub>c</sub> spontaneous magnetisation emerges.
+        </div>
+      </div>
     </div>
   </div>
-  <script>
-    let size = 30; // Starting grid size
-    let T = 2.5 * 2.269; // Starting temperature (maximum value scaled to T_c)
-    const T_c = 2.269; // Critical temperature for the 2D Ising model
-    const J = 1; // Interaction energy
-    let grid = [];
-    let simulationInterval;
-    const container = document.getElementById('grid');
-    const smallGridSizeValue = document.getElementById('smallGridSizeValue');
-    const smallGridSizeValue2 = document.getElementById('smallGridSizeValue2');
-    const largeGridSizeValue = document.getElementById('largeGridSizeValue');
-    const largeGridSizeValue2 = document.getElementById('largeGridSizeValue2');
-    const temperatureValue = document.getElementById('temperatureValue');
-    const toggleButton = document.getElementById('toggleButton');
-    const currentGridSize = document.getElementById('currentGridSize'); // Grid Size Display
-    const gridSizeBox = document.querySelector('.grid-size-box'); // Grid Size Box Element
-    const totalGridSize = 500; // Fixed simulation area size in pixels
 
-    function initializeGrid() {
+  <script>
+    // ── Constants & state ──────────────────────────────────────────────────────
+    const T_c = 2.269;
+    const J = 1;
+    let size = 30;
+    let T = 2.5 * T_c;
+    let grid = [];
+    let simInterval = null;
+
+    // ── DOM refs ───────────────────────────────────────────────────────────────
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const statusBadge = document.getElementById('statusBadge');
+    const tempSlider = document.getElementById('temperature');
+    const gridSlider = document.getElementById('gridSize');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const gridDisplay = document.getElementById('gridDisplay');
+    const gridWarning = document.getElementById('gridWarning');
+    const statGrid = document.getElementById('statGrid');
+    const statMag = document.getElementById('statMag');
+    const statPhase = document.getElementById('statPhase');
+    const themeBtn = document.getElementById('theme-button');
+
+    // ── Grid initialisation ────────────────────────────────────────────────────
+    function initGrid() {
       grid = [];
       for (let i = 0; i < size; i++) {
-        grid[i] = [];
+        grid[i] = new Int8Array(size);
         for (let j = 0; j < size; j++) {
           grid[i][j] = Math.random() > 0.5 ? 1 : -1;
         }
       }
+      statGrid.textContent = `${size * size}`;
+      updateStats();
       renderGrid();
-      updateGridSizeBox(); // Update the grid size box on initialization
-      synchronizeGridSizeBoxWidth(); // Synchronize widths
+    }
+
+    // ── Canvas rendering ───────────────────────────────────────────────────────
+    function getSpinColors() {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      return {
+        up: dark ? '#EDEBE8' : '#FFFFFF',
+        down: dark ? '#111110' : '#2D2D2A',
+      };
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      if (w === 0 || h === 0) return false;
+      const pw = Math.round(w * dpr);
+      const ph = Math.round(h * dpr);
+      if (canvas.width !== pw || canvas.height !== ph) {
+        canvas.width = pw;
+        canvas.height = ph;
+      }
+      return true;
     }
 
     function renderGrid() {
-      container.innerHTML = ''; // Clear previous grid
-      const cellSize = totalGridSize / size; // Dynamically calculate cell size
-      container.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
-      container.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
-      container.style.width = `${totalGridSize}px`; // Set grid width
-      container.style.height = `${totalGridSize}px`; // Set grid height
+      if (!resizeCanvas()) return;
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      const colors = getSpinColors();
+      const cellW = (w / size) * dpr;
+      const cellH = (h / size) * dpr;
 
+      // Fill background with spin-down color, then only draw spin-up cells
+      ctx.fillStyle = colors.down;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = colors.up;
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
-          const cell = document.createElement('div');
-          cell.classList.add('cell', grid[i][j] === 1 ? 'spin-up' : 'spin-down');
-          cell.style.width = `${cellSize}px`;
-          cell.style.height = `${cellSize}px`;
-          container.appendChild(cell);
+          if (grid[i][j] === 1) {
+            ctx.fillRect(
+              j * cellW,
+              i * cellH,
+              cellW + 0.5,
+              cellH + 0.5
+            );
+          }
         }
       }
-
-      // After rendering the grid, synchronize the grid-size box's width
-      synchronizeGridSizeBoxWidth();
     }
 
+    // ── Monte Carlo (Metropolis) ───────────────────────────────────────────────
     function monteCarloStep() {
-      for (let step = 0; step < size * size; step++) {
-        const i = Math.floor(Math.random() * size);
-        const j = Math.floor(Math.random() * size);
-        const dE = -2 * calculateEnergy(i, j);
+      const n = size;
+      for (let step = 0; step < n * n; step++) {
+        const i = (Math.random() * n) | 0;
+        const j = (Math.random() * n) | 0;
+        const spin = grid[i][j];
+        const sumN =
+          grid[(i - 1 + n) % n][j] +
+          grid[(i + 1) % n][j] +
+          grid[i][(j - 1 + n) % n] +
+          grid[i][(j + 1) % n];
+        const dE = 2 * J * spin * sumN;
         if (dE < 0 || Math.random() < Math.exp(-dE / T)) {
-          grid[i][j] *= -1; // Flip the spin
+          grid[i][j] = -spin;
         }
       }
     }
 
-    function calculateEnergy(i, j) {
-      const spin = grid[i][j];
-      let sumNeighbors = 0;
-      const neighbors = [
-        [(i - 1 + size) % size, j],
-        [(i + 1) % size, j],
-        [i, (j - 1 + size) % size],
-        [i, (j + 1) % size]
-      ];
-      for (const [ni, nj] of neighbors) {
-        sumNeighbors += grid[ni][nj];
+    // ── Statistics ─────────────────────────────────────────────────────────────
+    function updateStats() {
+      let sum = 0;
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) sum += grid[i][j];
       }
-      return -J * spin * sumNeighbors;
+      const m = sum / (size * size);
+      statMag.textContent = m.toFixed(3);
+
+      const tRatio = T / T_c;
+      statPhase.textContent =
+        tRatio < 0.9 ? 'Ferromagnetic' :
+        tRatio > 1.1 ? 'Paramagnetic' : 'Critical';
     }
 
-    function runSimulation() {
-      simulationInterval = setInterval(() => {
+    // ── Simulation loop ────────────────────────────────────────────────────────
+    function runSim() {
+      if (simInterval) return;
+      simInterval = setInterval(() => {
         monteCarloStep();
         renderGrid();
-      }, 100);
-      toggleButton.textContent = "Pause";
+        updateStats();
+      }, 80);
+      toggleBtn.textContent = '⏸ Pause';
+      statusBadge.textContent = 'Running';
+      statusBadge.classList.add('running');
     }
 
-    function pauseSimulation() {
-      clearInterval(simulationInterval);
-      simulationInterval = null;
-      toggleButton.textContent = "Run";
+    function pauseSim() {
+      clearInterval(simInterval);
+      simInterval = null;
+      toggleBtn.textContent = '▶ Run';
+      statusBadge.textContent = 'Paused';
+      statusBadge.classList.remove('running');
     }
 
-    function toggleSimulation() {
-      if (simulationInterval) {
-        pauseSimulation();
+    function toggleSim() {
+      simInterval ? pauseSim() : runSim();
+    }
+
+    // ── Slider handlers ────────────────────────────────────────────────────────
+    tempSlider.addEventListener('input', () => {
+      const tRatio = parseFloat(tempSlider.value);
+      T = tRatio * T_c;
+      tempDisplay.innerHTML = `${tRatio.toFixed(1)} T<sub>c</sub>`;
+    });
+
+    gridSlider.addEventListener('input', () => {
+      size = parseInt(gridSlider.value, 10);
+      gridDisplay.textContent = `${size} \u00d7 ${size}`;
+      gridWarning.style.display = size > 80 ? 'block' : 'none';
+      gridWarning.className = 'slider-footnote warn';
+      const wasRunning = !!simInterval;
+      if (wasRunning) pauseSim();
+      initGrid();
+      if (wasRunning) runSim();
+    });
+
+    // ── Theme toggle ───────────────────────────────────────────────────────────
+    themeBtn.addEventListener('click', () => {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = dark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      if (next === 'dark') {
+        localStorage.setItem('ising-dark', '1');
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#111110');
+        document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', 'black-translucent');
       } else {
-        runSimulation();
+        localStorage.removeItem('ising-dark');
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F8F6F1');
+        document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', 'default');
       }
+      themeBtn.textContent = next === 'dark' ? '🌙' : '☀️';
+      renderGrid();
+    });
+
+    // Sync icon on load
+    if (document.documentElement.getAttribute('data-theme') === 'dark') {
+      themeBtn.textContent = '🌙';
     }
 
-    // Update functions for the controls
-    function updateSmallGridSize(newSize) {
-      size = parseInt(newSize, 10);
-      smallGridSizeValue.textContent = size;
-      smallGridSizeValue2.textContent = size;
-      initializeGrid();
-    }
-
-    function updateLargeGridSize(newSize) {
-      size = parseInt(newSize, 10);
-      largeGridSizeValue.textContent = size;
-      largeGridSizeValue2.textContent = size;
-      initializeGrid();
-    }
-
-    function updateTemperature(newTemp) {
-      T = parseFloat(newTemp) * T_c;
-      temperatureValue.innerHTML = `${(T / T_c).toFixed(1)} T<sub>c</sub>`;
-    }
-
-    // Function to update the Grid Size Box
-    function updateGridSizeBox() {
-      currentGridSize.textContent = `${size} x ${size}`;
-    }
-
-    // Function to synchronize Grid Size Box's width with Simulation Area's width
-    function synchronizeGridSizeBoxWidth() {
-      // Get the computed width of the grid
-      const gridWidth = container.offsetWidth;
-
-      // Set the grid-size box's width to match
-      gridSizeBox.style.width = `${gridWidth}px`;
-    }
-
-    // Allow spacebar press to toggle simulation state
-    document.addEventListener('keydown', (event) => {
-      if (event.code === 'Space') {
-        event.preventDefault(); // Prevent scrolling when space is pressed
-        toggleSimulation();
+    // ── Keyboard shortcut ──────────────────────────────────────────────────────
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+        toggleSim();
       }
     });
 
-    // Initialize the grid at the start
-    initializeGrid();
+    toggleBtn.addEventListener('click', toggleSim);
 
-    // Optional: Handle window resize to keep the grid-size box in sync
-    window.addEventListener('resize', () => {
-      synchronizeGridSizeBoxWidth();
-    });
+    // ── ResizeObserver ─────────────────────────────────────────────────────────
+    new ResizeObserver(() => renderGrid()).observe(canvas);
+
+    // ── Init ───────────────────────────────────────────────────────────────────
+    initGrid();
   </script>
-
-  <footer>
-    &copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> | <a
-      href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My
-      Projects</a>
-  </footer>
-
 </body>
 
 </html>
