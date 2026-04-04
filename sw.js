@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-03-29T11:00:00Z';
+const BUILD_ID = '2026-04-04T00:00:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -80,7 +80,6 @@ const ASSETS_TO_CACHE = [
 
   // For Teachers
   '/for_teachers/timer.html',
-  '/for_teachers/timer_beep.mp3',
   '/for_teachers/visualizer.html',
 
   // Fun

@@ -462,8 +462,6 @@
             </div>
         </div>
     </div>
-    <audio id="alarm-sound-original" src="timer_beep.mp3" preload="auto"></audio>
-    <audio id="alarm-sound-extra" src="timer_beep.mp3" preload="auto"></audio>
     <footer>
         <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
@@ -526,10 +524,32 @@
         const blink = id => document.getElementById(id).classList.add('blink');
         const stopBlink = () => document.querySelectorAll('.blink').forEach(e => e.classList.remove('blink'));
 
-        const playAlarm = id => {
-            const a = document.getElementById(id);
-            a.currentTime = 0;
-            a.play().catch(err => console.log('Audio play failed:', err));
+        let _audioCtx = null;
+        const getAudioCtx = () => {
+            if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return _audioCtx;
+        };
+
+        const playAlarm = () => {
+            const ctx = getAudioCtx();
+            if (ctx.state === 'suspended') ctx.resume();
+            const beeps = 3, dur = 0.12, gap = 0.1;
+            for (let i = 0; i < beeps; i++) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                const t0 = ctx.currentTime + i * (dur + gap);
+                const t1 = t0 + dur;
+                osc.type = 'sine';
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0, t0);
+                gain.gain.linearRampToValueAtTime(0.6, t0 + 0.01);
+                gain.gain.setValueAtTime(0.6, t1 - 0.01);
+                gain.gain.linearRampToValueAtTime(0, t1);
+                osc.start(t0);
+                osc.stop(t1);
+            }
         };
 
         const secondsToHMS = (totalSeconds) => {
@@ -898,7 +918,7 @@
                 // Check original timer completion
                 if (!originalComplete && remaining <= 0) {
                     originalComplete = true;
-                    playAlarm('alarm-sound-original');
+                    playAlarm();
                     blink('original-time');
 
                     if (extraPercent === 0 || extraComplete) {
@@ -912,7 +932,7 @@
                 // Check extra timer completion
                 if (!extraComplete && extraRemaining <= 0 && extraPercent > 0) {
                     extraComplete = true;
-                    playAlarm('alarm-sound-extra');
+                    playAlarm();
                     blink('extra-time');
 
                     if (originalComplete) {
@@ -1155,15 +1175,8 @@
 
         /* ------------ Unlock audio once ------------ */
         const unlockAudio = () => {
-            ['alarm-sound-original', 'alarm-sound-extra'].forEach(id => {
-                const a = document.getElementById(id);
-                a.muted = true;
-                a.play().then(() => {
-                    a.pause();
-                    a.muted = false;
-                    a.currentTime = 0;
-                }).catch(() => {});
-            });
+            const ctx = getAudioCtx();
+            if (ctx.state === 'suspended') ctx.resume();
         };
 
         setResetBtn.addEventListener('click', unlockAudio, { once: true });
