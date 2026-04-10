@@ -59,7 +59,7 @@ Not every HTML file in the repo is currently part of the published navigation.
   - `misc/gcse_phy/phy_flashcard_ss.html`
   - `misc/ising_model.html`
   - `misc/phyclub_showcase.html`
-  - `simulations/lorentz_backup.html`
+  - `misc/scoreboard.html`
 - Unlisted/internal pages should stay outside service-worker registration and pre-cache lists unless explicitly promoted
 
 If you promote an unlisted page to production, treat it as a full launch task:
@@ -68,15 +68,79 @@ If you promote an unlisted page to production, treat it as a full launch task:
 3. Add route + required assets to `ASSETS_TO_CACHE`
 4. Bump `BUILD_ID` in `sw.js`
 5. Link it from `index.html`
-6. Add it to `sitemap.xml`
+6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill
+7. Add it to `sitemap.xml`
 
 ## Coding Conventions
 
 - **Variables/functions**: camelCase
 - **Constants**: UPPER_SNAKE_CASE
-- **CSS theming**: Use CSS custom properties (`--bg-color`, `--text-main`, `--brand-primary`, `--brand-accent`); hardcoded colors are allowed upon request
+- **CSS theming**: Use CSS custom properties; see **UI Design System** below for the full palette
 - **Theme toggle**: `data-theme` attribute on `<html>`, persisted to localStorage
 - **Mobile-first**: Touch targets 48px+, responsive design
+
+## UI Design System
+
+All new pages should follow the design language established across the site. The collision sim is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
+
+### Typography
+
+Three Google Fonts loaded via a single `@import`:
+- `--font-body`: **Manrope** — body text, labels, buttons
+- `--font-display`: **DM Serif Display** — page titles, section headings
+- `--font-mono`: **IBM Plex Mono** — data values, readouts, code
+
+### Color Palette
+
+| Variable | Light | Dark |
+|----------|-------|------|
+| `--bg-color` | `#F8F6F1` | `#111110` |
+| `--bg-pattern` | `#EDE9E0` | `#1A1A18` |
+| `--text-main` | `#1B1B1B` | `#EDEBE8` |
+| `--text-secondary` | `#6B6560` | `#9C9890` |
+| `--brand-primary` | `#C2410C` (burnt orange) | `#E8734A` |
+| `--brand-secondary` | `#EA580C` | `#F4845F` |
+| `--brand-accent` | `#0D9488` (teal) | `#2DD4BF` |
+| `--surface` / `--card-bg` | `#ffffff` | `#1E1E1C` |
+| `--border` / `--card-border` | `#E8E4DD` | `#2E2E2A` |
+| `--slider-track` | `#E8E4DD` | `#3A3A36` |
+| `--slider-thumb` | `#C2410C` | `#E8734A` |
+| `--nav-bg` | `rgba(248,246,241,0.92)` | `rgba(17,17,16,0.92)` |
+| `--nav-border` | `#E8E4DD` | `#2E2E2A` |
+
+### Background Pattern
+
+Dotted texture on `body`: `radial-gradient(var(--bg-pattern) 1px, transparent 1px)` at `30px 30px`.
+
+### Theme Flash Prevention
+
+An inline IIFE in `<head>` reads localStorage and sets `data-theme`, `<meta name="theme-color">`, and `apple-mobile-web-app-status-bar-style` before first paint.
+
+### Layout
+
+- **App shell**: `#app` — full-viewport flex column
+- **Content max-width**: `1360px` with `width: calc(100% - 40px)`
+- **Workspace**: CSS Grid (sim canvas + controls side panel), collapses to single column at ≤900px
+- **Panels**: 18px rounded cards with `1px solid var(--border)` and subtle shadow
+
+### Banner (Title Bar)
+
+Floating pill-shaped bar: 3-column grid (logo | gradient title | actions), `border-radius: 20px`, frosted glass (`backdrop-filter: blur(12px)`). Title uses `--font-display` with gradient text (`--brand-primary` to `--brand-accent`).
+
+### Controls & Inputs
+
+- **Range sliders**: 18px circular thumb, 6px track, `--slider-thumb`/`--slider-track` colors
+- **Slider labels**: Uppercase, 0.76rem, `--text-secondary`; value readouts in `--font-mono`
+- **Buttons**: 12px border-radius, 44px min-height. Hover: `translateY(-1px)` + `brightness(1.02)`
+- **Toggle switches**: 44×22px pill with sliding 18px circle
+
+### Responsive Breakpoints
+
+| Breakpoint | Behavior |
+|------------|----------|
+| `pointer: coarse` | Buttons/sliders enlarge to 48px min |
+| `max-width: 900px` | Workspace collapses to single column; body scrollable |
+| `max-width: 640px` | Banner narrows, logo shrinks to 28px, title to 1.2rem |
 - **Three.js canvas resize**: Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize loops on iPhone). Canvas CSS needs `height: 0; flex: 1; min-height: 0` so flexbox controls sizing
 - **Offline-first**: New features must work without network
 - **External libraries**: Loaded from CDNs (Plotly, MathJax, etc.), not bundled

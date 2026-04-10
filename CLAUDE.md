@@ -16,7 +16,6 @@
 ├── index.html              # Main landing page
 ├── sw.js                   # Service Worker for offline support
 ├── manifest.json           # PWA configuration
-├── _headers                # HTTP headers configuration
 ├── robots.txt              # Search engine crawl rules
 ├── sitemap.xml             # Site sitemap
 │
@@ -71,7 +70,6 @@
 │
 ├── for_teachers/           # Teacher utilities
 │   ├── timer.html
-│   ├── timer_beep.mp3       # Timer audio alert
 │   └── visualizer.html
 │
 └── misc/                   # Miscellaneous physics tools
@@ -83,7 +81,8 @@
     │   ├── phy_cs.csv       # Combined Science flashcard data
     │   └── phy_ss.csv       # Separate Science flashcard data
     ├── ising_model.html
-    └── phyclub_showcase.html
+    ├── phyclub_showcase.html
+    └── scoreboard.html
 ```
 
 ## Published vs Unlisted Routes
@@ -101,7 +100,7 @@ Not every HTML file in the repo is currently treated as a published page.
   - `misc/gcse_phy/phy_flashcard_ss.html`
   - `misc/ising_model.html`
   - `misc/phyclub_showcase.html`
-  - `simulations/lorentz_backup.html`
+  - `misc/scoreboard.html`
 - Unlisted/internal pages should remain outside SW registration and pre-cache unless intentionally promoted
 
 If you promote an unlisted page to production, do all of the following:
@@ -110,7 +109,8 @@ If you promote an unlisted page to production, do all of the following:
 3. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js`
 4. Bump `BUILD_ID` in `sw.js`
 5. Add a card/link in `index.html`
-6. Add the page URL to `sitemap.xml`
+6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill
+7. Add the page URL to `sitemap.xml`
 
 ## Tech Stack & Dependencies
 
@@ -157,24 +157,96 @@ Each application is self-contained in a single HTML file:
 </html>
 ```
 
-### CSS Theming System
-All apps use CSS custom properties for light/dark theme support:
+### UI Design System
+
+All new pages should follow the design language established in the simulation pages. The collision sim (`collision.html`) is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
+
+#### Typography
+
+Three Google Fonts loaded via a single `@import`:
 
 ```css
-:root {
-  --bg-color: #f8f9fa;
-  --text-main: #2d3436;
-  --brand-primary: #6c5ce7;
-  --brand-accent: #00cec9;
-}
-
-[data-theme="dark"] {
-  --bg-color: #0f1014;
-  --text-main: #dfe6e9;
-}
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 ```
 
-Theme is toggled via `data-theme` attribute on `<html>` and persisted to localStorage.
+| Variable | Font | Usage |
+|----------|------|-------|
+| `--font-body` | Manrope | Body text, labels, buttons |
+| `--font-display` | DM Serif Display | Page titles, section headings |
+| `--font-mono` | IBM Plex Mono | Data values, readouts, code |
+
+#### Color Palette
+
+| Variable | Light | Dark |
+|----------|-------|------|
+| `--bg-color` | `#F8F6F1` | `#111110` |
+| `--bg-pattern` | `#EDE9E0` | `#1A1A18` |
+| `--text-main` | `#1B1B1B` | `#EDEBE8` |
+| `--text-secondary` | `#6B6560` | `#9C9890` |
+| `--brand-primary` | `#C2410C` (burnt orange) | `#E8734A` |
+| `--brand-secondary` | `#EA580C` | `#F4845F` |
+| `--brand-accent` | `#0D9488` (teal) | `#2DD4BF` |
+| `--surface` / `--card-bg` | `#ffffff` | `#1E1E1C` |
+| `--border` / `--card-border` | `#E8E4DD` | `#2E2E2A` |
+| `--slider-track` | `#E8E4DD` | `#3A3A36` |
+| `--slider-thumb` | `#C2410C` | `#E8734A` |
+| `--nav-bg` | `rgba(248,246,241,0.92)` | `rgba(17,17,16,0.92)` |
+| `--nav-border` | `#E8E4DD` | `#2E2E2A` |
+
+#### Background Pattern
+
+Dotted texture applied to `body`:
+
+```css
+background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+background-size: 30px 30px;
+```
+
+#### Theme System
+
+- Theme is toggled via `data-theme` attribute on `<html>` and persisted to localStorage.
+- **Flash-of-wrong-theme prevention**: An inline IIFE in `<head>` (before stylesheets paint) reads localStorage and sets `data-theme`, `<meta name="theme-color">`, and `apple-mobile-web-app-status-bar-style` before first paint.
+- Global transition: `* { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }`
+
+#### Layout
+
+- **App shell**: `#app` is a full-viewport-height flex column.
+- **Content max-width**: `1360px`, with `width: calc(100% - 40px)` for side margins.
+- **Workspace**: CSS Grid, typically `grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr)` (sim canvas + controls side panel), collapses to single column on mobile.
+- **Panels**: Rounded cards (18px `border-radius`), `1px solid var(--border)`, subtle shadow.
+
+#### Banner (Title Bar)
+
+A floating pill-shaped bar at the top of the page:
+
+```css
+/* 3-column grid: logo | title | actions */
+display: grid;
+grid-template-columns: auto 1fr auto;
+border-radius: 20px;
+background: var(--nav-bg);
+border: 1px solid var(--nav-border);
+backdrop-filter: blur(12px);
+```
+
+- **Logo**: PanPhy icon at 36px height with drop shadow.
+- **Title**: Uses `--font-display`, gradient text via `background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent))` with `background-clip: text`.
+- **Actions**: Theme toggle button (circular, 42px min-size, rotates 15deg on hover), optional navigation links.
+
+#### Controls & Inputs
+
+- **Range sliders**: Custom thumb (18px circle, `--slider-thumb` color, 6px track).
+- **Slider labels**: Uppercase, 0.76rem, `--text-secondary`; value readouts in `--font-mono`.
+- **Buttons**: Rounded (12px), min-height 44px, `--btn-primary` for primary actions. Hover: `translateY(-1px)` + `brightness(1.02)`.
+- **Toggle switches**: 44x22px pill with sliding 18px circle.
+
+#### Responsive Breakpoints
+
+| Breakpoint | Behavior |
+|------------|----------|
+| `@media (pointer: coarse)` | Buttons/sliders enlarge to 48px min for touch targets |
+| `@media (max-width: 900px)` | Workspace collapses to single-column stack (sim on top, controls below); body becomes scrollable |
+| `@media (max-width: 640px)` | Banner narrows (`calc(100% - 24px)`), logo shrinks to 28px, title to 1.2rem |
 
 ### JavaScript Naming Conventions
 - **Variables**: camelCase (`rawData`, `activeSet`)
@@ -220,7 +292,7 @@ markdown_editor.html (imports scripts via ES modules)
 ## Service Worker & Caching
 
 **File**: `sw.js`
-**Cache Version**: `panphy-labs-<BUILD_ID>` where `BUILD_ID` is a timestamp string
+**Cache Version**: `panphy-labs-precache-<BUILD_ID>` and `panphy-labs-runtime-<BUILD_ID>` where `BUILD_ID` is a timestamp string
 
 ### Caching Strategy
 - **Install**: Pre-caches core assets listed in `ASSETS_TO_CACHE`
@@ -284,14 +356,15 @@ Then open `http://localhost:8000` in a browser.
 5. Use the standard theming CSS variables
 6. If published, add to `sw.js` `ASSETS_TO_CACHE` array and bump `BUILD_ID`
 7. Add link to `index.html` in the appropriate section
-8. Add URL to `sitemap.xml` if page is public
+8. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill
+9. Add URL to `sitemap.xml` if page is public
 
 ### Updating the Theme System
-Theme colors are defined in CSS `:root` and `[data-theme="dark"]` selectors. Key variables:
-- `--bg-color`: Background
-- `--text-main`: Primary text
-- `--brand-primary`: Primary accent (#6c5ce7 indigo)
-- `--brand-accent`: Secondary accent (#00cec9 teal)
+Theme colors are defined in CSS `:root` and `[data-theme="dark"]` selectors. See the **UI Design System** section above for the full color palette. Key variables:
+- `--bg-color`: Background (`#F8F6F1` light / `#111110` dark)
+- `--text-main`: Primary text (`#1B1B1B` / `#EDEBE8`)
+- `--brand-primary`: Primary accent (`#C2410C` burnt orange / `#E8734A`)
+- `--brand-accent`: Secondary accent (`#0D9488` teal / `#2DD4BF`)
 
 ### Working with PanPhyPlot
 The most complex tool has modular architecture:

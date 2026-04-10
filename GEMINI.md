@@ -19,7 +19,7 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 - `/simulations/`: Physics simulations (`superposition.html`, `standing_wave.html`, `interference.html`, `states.html`, `lorentz.html`, `lorentz_learn.html`, `collision.html`).
 - `/for_teachers/`: Utility apps for educators (`timer.html`, `visualizer.html`).
 - `/fun/`: Games and demos (`dodge.html`, `react.html`, `ascii_cam.html`).
-- `/misc/`: Unlisted/legacy pages (`digitizer.html`, `gcse_phy/` flashcards, `ising_model.html`, `phyclub_showcase.html`).
+- `/misc/`: Unlisted/legacy pages (`digitizer.html`, `gcse_phy/` flashcards, `ising_model.html`, `phyclub_showcase.html`, `scoreboard.html`).
 - `/assets/`: Shared assets, icons, and `sw-register.js`.
 - `/beta/`: Staging area for work-in-progress features (never SW-cached).
 - `sw.js`: Service Worker for offline caching and PWA functionality.
@@ -34,8 +34,61 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 ### 2. UI/UX Principles
 - **Classroom Ready:** Interfaces must be mobile-friendly and touch-friendly.
 - **Three.js Canvas Resize:** Always call `renderer.setSize(w, h, false)` (the `false` prevents inline CSS that causes resize loops on mobile). Set `height: 0` on the canvas CSS alongside `flex: 1; min-height: 0` so flexbox controls sizing.
-- **Theme Support:** Follow the existing light/dark theme pattern using CSS variables and `data-theme` attributes on `<html>`.
+- **Theme Support:** Follow the existing light/dark theme pattern using CSS variables and `data-theme` attributes on `<html>`. See **UI Design System** below for the full palette.
 - **Low Friction:** Avoid mandatory logins or complex setup steps.
+
+### UI Design System
+
+All new pages should follow the design language established across the site. The collision sim is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
+
+#### Typography
+Three Google Fonts via a single `@import`: **Manrope** (`--font-body`: body/labels/buttons), **DM Serif Display** (`--font-display`: titles/headings), **IBM Plex Mono** (`--font-mono`: data values/readouts).
+
+#### Color Palette
+
+| Variable | Light | Dark |
+|----------|-------|------|
+| `--bg-color` | `#F8F6F1` | `#111110` |
+| `--bg-pattern` | `#EDE9E0` | `#1A1A18` |
+| `--text-main` | `#1B1B1B` | `#EDEBE8` |
+| `--text-secondary` | `#6B6560` | `#9C9890` |
+| `--brand-primary` | `#C2410C` (burnt orange) | `#E8734A` |
+| `--brand-secondary` | `#EA580C` | `#F4845F` |
+| `--brand-accent` | `#0D9488` (teal) | `#2DD4BF` |
+| `--surface` / `--card-bg` | `#ffffff` | `#1E1E1C` |
+| `--border` / `--card-border` | `#E8E4DD` | `#2E2E2A` |
+| `--slider-track` | `#E8E4DD` | `#3A3A36` |
+| `--slider-thumb` | `#C2410C` | `#E8734A` |
+| `--nav-bg` | `rgba(248,246,241,0.92)` | `rgba(17,17,16,0.92)` |
+
+#### Background Pattern
+Dotted texture on `body`: `radial-gradient(var(--bg-pattern) 1px, transparent 1px)` at `30px 30px`.
+
+#### Theme Flash Prevention
+An inline IIFE in `<head>` reads localStorage and sets `data-theme`, `<meta name="theme-color">`, and `apple-mobile-web-app-status-bar-style` before first paint.
+
+#### Layout
+- **App shell**: `#app` — full-viewport flex column.
+- **Content max-width**: `1360px` with `width: calc(100% - 40px)`.
+- **Workspace**: CSS Grid (sim canvas + controls side panel), collapses to single column at ≤900px.
+- **Panels**: 18px rounded cards with `1px solid var(--border)` and subtle shadow.
+
+#### Banner (Title Bar)
+Floating pill-shaped bar: 3-column grid (logo | gradient title | actions), `border-radius: 20px`, frosted glass (`backdrop-filter: blur(12px)`). Title uses `--font-display` with gradient text (`--brand-primary` to `--brand-accent`).
+
+#### Controls & Inputs
+- **Range sliders**: 18px circular thumb, 6px track, custom webkit/moz styling.
+- **Slider labels**: Uppercase, 0.76rem, `--text-secondary`; values in `--font-mono`.
+- **Buttons**: 12px border-radius, 44px min-height. Hover: `translateY(-1px)`.
+- **Toggle switches**: 44×22px pill with sliding 18px circle.
+
+#### Responsive Breakpoints
+
+| Breakpoint | Behavior |
+|------------|----------|
+| `pointer: coarse` | Buttons/sliders enlarge to 48px min |
+| `max-width: 900px` | Workspace collapses to single column; body scrollable |
+| `max-width: 640px` | Banner narrows, logo shrinks to 28px, title to 1.2rem |
 
 ### 3. Code Quality
 - **Vanilla JS:** Prefer clean, readable Vanilla JavaScript over adding new external dependencies.
