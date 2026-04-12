@@ -213,19 +213,23 @@
 			let inInterstitial = false;
 			let lastSwitch = 0;
 			let playing = true;
-			let startBase = performance.now() / 1000;
-			let elapsed = 0;
+			let simTime = 0;
+			let lastWallTime = performance.now() / 1000;
+			let frameDt = 1 / 60;
 
 			/* ===== Interactions ===== */
 			let touchStartX = null;
+			let touchHandled = false;
 			sim.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
 			sim.addEventListener('touchend', e => {
 				if (touchStartX == null) return;
 				const dx = e.changedTouches[0].clientX - touchStartX;
 				if (Math.abs(dx) > 50) { dx < 0 ? nextScene() : prevScene(); } else togglePlay();
 				touchStartX = null;
+				touchHandled = true;
+				setTimeout(() => touchHandled = false, 300);
 			}, { passive: true });
-			sim.addEventListener('click', togglePlay);
+			sim.addEventListener('click', () => { if (!touchHandled) togglePlay(); });
 			btnPrev.onclick = prevScene;
 			btnNext.onclick = nextScene;
 			btnToggle.onclick = togglePlay;
@@ -246,7 +250,6 @@
 			function togglePlay() {
 				playing = !playing;
 				btnToggle.textContent = playing ? 'Pause ⏸' : 'Play ▶';
-				if (playing) startBase = performance.now() / 1000 - elapsed;
 			}
 
 			/* ===== Helpers ===== */
@@ -316,7 +319,7 @@
 
 			function startInterstitial() {
 				inInterstitial = true;
-				interstitialUntil = now() + interstitialSeconds;
+				interstitialUntil = simTime + interstitialSeconds;
 				sctx.clearRect(0, 0, W, H);
 			}
 
@@ -476,7 +479,7 @@
 				this.pivot = { x: W * 0.5, y: H * 0.16 };
 				this.trail = [];
 			}, function (t) {
-				const dt = 1 / 60;
+				const dt = frameDt;
 				for (let k = 0; k < 2; k++) {
 					const { m1, m2, L1, L2, g, theta1, theta2, w1, w2 } = this;
 					const d = theta1 - theta2;
@@ -529,7 +532,7 @@
 			   SCENE: Electric Field — Dipole
 			   ======================================== */
 			const sceneElectricField = makeScene("Electric Field — Dipole", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				const sep = Math.min(W, H) * 0.3;
 				this.qPos = { x: W / 2 - sep / 2, y: H / 2 };
 				this.qNeg = { x: W / 2 + sep / 2, y: H / 2 };
@@ -592,7 +595,7 @@
 				}
 
 				/* Animate particles */
-				const dt = 1 / 60;
+				const dt = frameDt;
 				for (const p of this.particles) {
 					p.pos += p.speed * dt;
 					if (p.pos >= p.line.length) p.pos -= p.line.length;
@@ -622,7 +625,7 @@
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
 				sctx.fillText('E = kQ/r²', 16, 24);
-			});
+			}, function () { this.init(); });
 
 			/* ========================================
 			   SCENE: Solar System + Comet (3D)
@@ -657,7 +660,7 @@
 				this.camTilt = 0.6; // radian tilt of the whole system
 				this.perspective = 800;
 			}, function (t) {
-				const dt = 1 / 60;
+				const dt = frameDt;
 				sctx.clearRect(0, 0, W, H);
 				sctx.fillStyle = '#070b12';
 				sctx.fillRect(0, 0, W, H);
@@ -780,7 +783,7 @@
 			   SCENE: Standing Wave — Harmonics
 			   ======================================== */
 			const sceneStandingWave = makeScene("Standing Wave — Harmonics", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				this.harmonicDur = 2.5;
 				this.maxN = 5;
 			}, function (t) {
@@ -854,7 +857,7 @@
 			   SCENE: SHM — Spring + Oscilloscope
 			   ======================================== */
 			const sceneSpring = makeScene("SHM — Mass on a Spring", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				this.k = 12; this.m = 1;
 				this.A = Math.min(W, H) * 0.18;
 				this.omega = Math.sqrt(this.k / this.m);
@@ -986,7 +989,7 @@
 				}
 				this.firstFrame = true;
 			}, function (t) {
-				const dt = 1 / 60;
+				const dt = frameDt;
 
 				/* Fade trail */
 				if (this.firstFrame) {
@@ -1028,20 +1031,20 @@
 				sctx.fillStyle = 'rgba(255,255,255,.7)';
 				sctx.font = '14px Inter, sans-serif';
 				sctx.fillText('Differential rotation → spiral arms', 16, 24);
-			}, function (w, h) { this.cx = w / 2; this.cy = h / 2; });
+			}, function (w, h) { this.cx = w / 2; this.cy = h / 2; this.firstFrame = true; });
 
 			/* ========================================
 			   SCENE: Doppler Effect
 			   ======================================== */
 			const sceneDoppler = makeScene("Doppler Effect — Moving Source", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				this.wave = [];
 				this.c = 260; this.v = 160;
 				this.y = H * 0.5; this.x = W * 0.15; this.dir = 1;
 				this.emitEvery = 0.16; this.lastEmit = 0;
 				this.hFront = 190; this.hBack = 340;
 			}, function (t) {
-				const dt = 1 / 60;
+				const dt = frameDt;
 				sctx.clearRect(0, 0, W, H);
 				drawGrid(sctx, 32, 0.18);
 				this.x += this.v * this.dir * dt;
@@ -1069,7 +1072,7 @@
 			   SCENE: Quantum Tunneling (Wave Packet)
 			   ======================================== */
 			const sceneQuantumTunneling = makeScene("Quantum Tunneling — Wave Packet", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				this.k0 = 12; // central wave number
 				this.sigma = W * 0.05; // width of packet
 				this.x0 = W * -0.1; // starting position (slightly offscreen left)
@@ -1166,13 +1169,13 @@
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
 				sctx.fillText('|Ψ(x,t)|² > 0 inside and beyond classically forbidden region', 16, 24);
-			});
+			}, function () { this.init(); });
 
 			/* ========================================
 			   SCENE: Magnetic Field — Solenoid
 			   ======================================== */
 			const sceneSolenoid = makeScene("Magnetic Field — Solenoid (3D)", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				this.cx = W / 2;
 				this.cy = H / 2 + 20;
 				this.L = W * 0.35; // length of solenoid
@@ -1361,13 +1364,13 @@
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
 				sctx.fillText('3D Rotating Magnetic Field (Current loop approximation)', 16, 24);
-			});
+			}, function () { this.init(); });
 
 			/* ========================================
 			   SCENE: Brownian Motion (Thermodynamics)
 			   ======================================== */
 			const sceneBrownian = makeScene("Brownian Motion", function () {
-				this.t0 = now();
+				this.t0 = simTime;
 				this.cx = W / 2;
 				this.cy = H / 2;
 
@@ -1394,7 +1397,7 @@
 					});
 				}
 			}, function (t) {
-				const dt = 1 / 60; // Fixed timestep for stability
+				const dt = frameDt;
 				const substeps = 4; // Sub-stepping for collision accuracy at high speeds
 				const sdt = dt / substeps;
 
@@ -1498,6 +1501,9 @@
 				sctx.fillStyle = 'rgba(255,255,255,.85)';
 				sctx.font = '14px Inter, sans-serif';
 				sctx.fillText('Random walk emerges from microscopic fluid collisions', 16, 24);
+			}, function (w, h) {
+				this.grain.x = Math.min(Math.max(this.grain.x, this.grain.r), w - this.grain.r);
+				this.grain.y = Math.min(Math.max(this.grain.y, this.grain.r), h - this.grain.r);
 			});
 
 
@@ -1532,7 +1538,7 @@
 				current = scenes[index];
 				hudName.textContent = current.name;
 				current.init();
-				lastSwitch = now();
+				lastSwitch = simTime;
 				updateDots();
 				if (showTitle) startInterstitial();
 			}
@@ -1542,16 +1548,20 @@
 
 			/* ===== Main loop ===== */
 			function loop() {
-				const t = now();
+				const wallNow = performance.now() / 1000;
+				const rawDt = wallNow - lastWallTime;
+				lastWallTime = wallNow;
+
 				if (playing) {
-					elapsed = t - startBase;
-					const age = t - lastSwitch;
+					frameDt = Math.min(rawDt || 1 / 60, 1 / 30);
+					simTime += frameDt;
+					const age = simTime - lastSwitch;
 
 					if (inInterstitial) {
-						drawInterstitial(t);
-						if (t >= interstitialUntil) endInterstitial();
+						drawInterstitial(simTime);
+						if (simTime >= interstitialUntil) endInterstitial();
 					} else {
-						current?.draw(t);
+						current?.draw(simTime);
 					}
 
 					if (age > dwellSeconds) {
@@ -1567,7 +1577,6 @@
 			/* ===== Init ===== */
 			resize();
 			setScene(0, true);
-			startBase = now();
 			requestAnimationFrame(loop);
 		})();
 	</script>
