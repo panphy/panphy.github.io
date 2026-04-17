@@ -60,6 +60,7 @@ Three Google Fonts via a single `@import`: **Manrope** (`--font-body`: body/labe
 | `--slider-track` | `#E8E4DD` | `#3A3A36` |
 | `--slider-thumb` | `#C2410C` | `#E8734A` |
 | `--nav-bg` | `rgba(248,246,241,0.92)` | `rgba(17,17,16,0.92)` |
+| `--nav-border` | `#E8E4DD` | `#2E2E2A` |
 
 #### Background Pattern
 Dotted texture on `body`: `radial-gradient(var(--bg-pattern) 1px, transparent 1px)` at `30px 30px`.

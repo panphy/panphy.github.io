@@ -141,11 +141,16 @@ Floating pill-shaped bar: 3-column grid (logo | gradient title | actions), `bord
 | `pointer: coarse` | Buttons/sliders enlarge to 48px min |
 | `max-width: 900px` | Workspace collapses to single column; body scrollable |
 | `max-width: 640px` | Banner narrows, logo shrinks to 28px, title to 1.2rem |
-- **Three.js canvas resize**: Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize loops on iPhone). Canvas CSS needs `height: 0; flex: 1; min-height: 0` so flexbox controls sizing
+
+### Three.js Canvas Resize Pattern
+
+Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize loops on iPhone). Canvas CSS needs `height: 0; flex: 1; min-height: 0` so flexbox controls sizing.
+
+## General Notes
+
 - **Offline-first**: New features must work without network
 - **External libraries**: Loaded from CDNs (Plotly, MathJax, etc.), not bundled
 - **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`)
-
 
 ## Directory Layout
 
