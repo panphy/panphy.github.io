@@ -30,6 +30,7 @@ PanPhy Labs is a collection of browser-based physics tools, simulations, and edu
 - **Service Worker:** When modifying any file listed in the `ASSETS_TO_CACHE` array in `sw.js`, you **MUST** bump the `BUILD_ID` constant at the top of `sw.js` as your **final step** before finishing. This is easy to forget — do not skip it. Without this, returning users will continue to be served the old cached version.
 - **Self-Contained Pages:** Each HTML entry point should be as independent as possible. Shared logic should be placed in subdirectories (e.g., `tools/panphyplot/js/`) or `assets/`.
 - **New pages default to `/beta`:** Unless explicitly asked to publish and list on `index.html`, create new pages in `/beta`. Do not add `/beta/*` paths to `ASSETS_TO_CACHE` or include `sw-register.js` in `/beta` pages.
+- **Route exceptions matter:** `/misc/*` is also kept out of service-worker caching while pages remain there. `fun/dodge.html` is a published exception that stays network-only because its leaderboard depends on live Supabase data. Public support pages can exist outside the `index.html` card grid.
 
 ### 2. UI/UX Principles
 - **Classroom Ready:** Interfaces must be mobile-friendly and touch-friendly.
@@ -113,7 +114,7 @@ Floating pill-shaped bar: 3-column grid (logo | gradient title | actions), `bord
 Since there is no build step, you can serve the project using any local HTTP server:
 - `python3 -m http.server 8000`
 - `npx serve .`
-- Or simply open `index.html` in a browser (though some features like Service Workers and certain API calls may require a local server).
+- Prefer a local HTTP server over opening `index.html` directly, because root-relative paths and service-worker behavior expect an actual site origin.
 
 ## Interaction Context
 When assisting with this project:

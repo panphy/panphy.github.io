@@ -89,10 +89,12 @@
 
 Not every HTML file in the repo is currently treated as a published page.
 
-- **Published pages** are linked from `index.html` and listed in `sitemap.xml`
-- Only published pages should include `<script src="/assets/sw-register.js" defer></script>` and be included in `sw.js` `ASSETS_TO_CACHE`
+- **Published landing-page apps** are linked from `index.html` and usually listed in `sitemap.xml`
+- **Public support/reference pages** can also be service-worker registered and pre-cached without appearing on the landing page (for example `tools/panphyplot/panphyplot_manual.html` and `tools/panphyplot/math_ref.html`)
+- Only public pages that should participate in the site's service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
-- `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
+- `/beta/*` and `/misc/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
+- `fun/dodge.html` is a published exception: it is linked from `index.html` and listed in `sitemap.xml`, but remains network-only because it depends on a live Supabase leaderboard
 - **Current unlisted/legacy pages**:
   - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
@@ -104,7 +106,7 @@ Not every HTML file in the repo is currently treated as a published page.
 - Unlisted/internal pages should remain outside SW registration and pre-cache unless intentionally promoted
 
 If you promote an unlisted page to production, do all of the following:
-1. If the page lives in `/beta`, move it to the correct public directory first
+1. If the page lives in `/beta` or `/misc`, move it to the correct public directory first
 2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
 3. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js`
 4. Bump `BUILD_ID` in `sw.js`
@@ -145,7 +147,7 @@ Each application is self-contained in a single HTML file:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Title</title>
-    <!-- Include only for published pages -->
+    <!-- Include on public pages that should participate in SW updates -->
     <script src="/assets/sw-register.js" defer></script>
     <style>/* CSS with variables for theming */</style>
 </head>
@@ -296,9 +298,9 @@ markdown_editor.html (imports scripts via ES modules)
 
 ### Caching Strategy
 - **Install**: Pre-caches core assets listed in `ASSETS_TO_CACHE`
-- **Navigations**: Network-first, fallback to cache
+- **Navigations**: Cache-first, then network/runtime cache fallback
 - **Assets**: Cache-first, then fetch and update
-- **Exclusions**: `/beta/*`, Dodge game routes, and Supabase API calls (always fetch fresh)
+- **Exclusions**: `/beta/*`, `/misc/*`, Dodge game routes, and Supabase API calls (always fetch fresh)
 
 ### When Modifying Any Cached Asset
 Any time you change a file listed in `ASSETS_TO_CACHE`, **bump the `BUILD_ID` timestamp** at the top of `sw.js`. Without this, returning users will keep getting the old cached version.
@@ -315,7 +317,7 @@ const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';  // Update this on every change
 
 ### When Adding New Pages
 1. Unless explicitly requested to publish and list on `index.html`, create the new page under `/beta`
-2. Keep `/beta` pages out of SW registration and `ASSETS_TO_CACHE`
+2. Keep `/beta` and `/misc` pages out of SW registration and `ASSETS_TO_CACHE` unless they are being explicitly promoted out of those directories
 3. For published pages, add the new page path to `ASSETS_TO_CACHE` array in `sw.js`
 4. Bump the `BUILD_ID` timestamp for published/cached additions
 
@@ -352,7 +354,7 @@ Then open `http://localhost:8000` in a browser.
 1. Unless explicitly requested to publish/list on `index.html`, create new HTML in `/beta`
 2. For `/beta` pages, do not include `<script src="/assets/sw-register.js" defer></script>` and do not add `/beta/*` paths to `sw.js` `ASSETS_TO_CACHE`
 3. If it will be published, create/move it in the appropriate public directory (`tools/`, `simulations/`, etc.)
-4. If it will be published from `index.html`, include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
+4. If it will be a public page that should participate in SW updates, include `<script src="/assets/sw-register.js" defer></script>` in `<head>`
 5. Use the standard theming CSS variables
 6. If published, add to `sw.js` `ASSETS_TO_CACHE` array and bump `BUILD_ID`
 7. Add link to `index.html` in the appropriate section
@@ -421,13 +423,13 @@ function toggleTheme() {
 ```html
 <script src="/assets/sw-register.js" defer></script>
 ```
-Use this only on published pages (not on `/beta/*` pages).
+Use this on public pages that should participate in service-worker updates. Do not use it on `/beta/*` pages, and do not leave pages inside `/misc/*` if you expect them to be cached for offline use.
 
 ## Offline Behavior
 
 - **Guaranteed offline after install**: Pages/assets explicitly listed in `sw.js` `ASSETS_TO_CACHE`
-- **May work offline after first online visit**: Other same-origin GET resources (runtime cache), except `/beta/*`
-- **Requires network**: `/beta/*`, `fun/dodge.html`, `fun/dodge_assets/*`, and any `*.supabase.co` API calls
+- **May work offline after first online visit**: Other same-origin GET resources (runtime cache), except `/beta/*` and `/misc/*`
+- **Requires network**: `/beta/*`, `/misc/*`, `fun/dodge.html`, `fun/dodge_assets/*`, and any `*.supabase.co` API calls
 
 ## External Services
 
@@ -440,11 +442,12 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 2. **Self-contained pages**: Each HTML file is a complete application
 3. **New pages default to `/beta`**: Unless explicitly asked to publish/list in `index.html`, create under `/beta`
 4. **Always bump `BUILD_ID` in `sw.js` after code changes**: Any time you modify a file that is listed in `ASSETS_TO_CACHE`, bump the `BUILD_ID` timestamp as your **final step** before finishing. This is easy to forget — do not skip it
-5. **Never cache `/beta/*`**: Keep `/beta` files out of SW registration and `ASSETS_TO_CACHE`
+5. **Never cache `/beta/*` or `/misc/*` in place**: Keep those files out of SW registration and `ASSETS_TO_CACHE` unless they are first moved to a public directory
 6. **CDN URL exactness**: Keep CDN script/style URLs in HTML exactly aligned with `ASSETS_TO_CACHE`
 7. **Theme awareness**: Always use CSS variables, not hardcoded colors
 8. **Mobile-first**: Consider touch interactions and responsive design
 9. **Offline-first**: Ensure new features work without network
-10. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
-11. **Keep it simple**: Avoid adding frameworks or build complexity
-12. **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`, not `/Users/.../main.js`)
+10. **Know the exceptions**: `fun/dodge.html` is intentionally network-only because it depends on the live Supabase leaderboard, and public support pages do not always need an `index.html` card
+11. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
+12. **Keep it simple**: Avoid adding frameworks or build complexity
+13. **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`, not `/Users/.../main.js`)

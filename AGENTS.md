@@ -48,10 +48,12 @@ Module files must use **stable, unhashed filenames** (e.g. `copy.js`, not `copy.
 
 Not every HTML file in the repo is currently part of the published navigation.
 
-- **Published pages** are linked from `index.html` and listed in `sitemap.xml`
-- Only published pages should include `<script src="/assets/sw-register.js" defer></script>` and be tracked in `ASSETS_TO_CACHE`
+- **Published landing-page apps** are linked from `index.html` and usually listed in `sitemap.xml`
+- **Public support/reference pages** may also be service-worker registered and pre-cached even if they are not linked from `index.html` (for example PanPhyPlot's manual/reference pages)
+- Only public pages that should participate in the site's service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
-- `/beta/*` is intentionally excluded from service-worker caching (pre-cache and runtime cache)
+- `/beta/*` and `/misc/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
+- `fun/dodge.html` is a published exception: it is linked from `index.html` and listed in `sitemap.xml`, but remains network-only because the leaderboard depends on live Supabase data
 - **Current unlisted/legacy pages** include:
   - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
@@ -63,7 +65,7 @@ Not every HTML file in the repo is currently part of the published navigation.
 - Unlisted/internal pages should stay outside service-worker registration and pre-cache lists unless explicitly promoted
 
 If you promote an unlisted page to production, treat it as a full launch task:
-1. If the page lives in `/beta`, move it to the correct public directory first
+1. If the page lives in `/beta` or `/misc`, move it to the correct public directory first
 2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
 3. Add route + required assets to `ASSETS_TO_CACHE`
 4. Bump `BUILD_ID` in `sw.js`
