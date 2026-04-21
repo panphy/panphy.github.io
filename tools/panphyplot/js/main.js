@@ -46,8 +46,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			localStorage.setItem(THEME_KEY, nextTheme);
 			updateAppChromeTheme(nextTheme);
 			updateThemeButton(nextTheme);
-			lastPlotState.data = null;
-			lastPlotState.layout = null;
+			lastPlotState.plot.data = null;
+			lastPlotState.plot.layout = null;
+			lastPlotState['popup-plot'].data = null;
+			lastPlotState['popup-plot'].layout = null;
 			updatePlotAndRenderLatex();
 			const popupContainer = document.getElementById('popup-container');
 			if (popupContainer && popupContainer.style.display === 'block') {

@@ -35,6 +35,9 @@ const buildSinusoidalEquation = typeof fitCore.buildSinusoidalEquation === 'func
 const buildGaussianEquation = typeof fitCore.buildGaussianEquation === 'function'
 	? fitCore.buildGaussianEquation
 	: missingFitCoreFunction('buildGaussianEquation');
+const minMaxFinite = typeof fitCore.minMaxFinite === 'function'
+	? fitCore.minMaxFinite
+	: missingFitCoreFunction('minMaxFinite');
 
 const debouncedRefreshCustomFitDefinition = debounce(() => {
 	refreshCustomFitDefinition({ preserveUserValues: true });
@@ -43,6 +46,7 @@ let fitWorkerInstance = null;
 let fitWorkerRequestCounter = 0;
 const fitWorkerPendingRequests = new Map();
 let fitControlsBusyCount = 0;
+let fitWorkerDisabled = false;
 
 function setFitControlsBusy(isBusy) {
 	const fitButtons = document.querySelectorAll('.fit-button');
@@ -152,10 +156,17 @@ function runFitWorkerTask(task, payload, timeoutMs = FIT_WORKER_TIMEOUT_MS) {
 }
 
 async function runWorkerFitWithFallback(task, payload, fallbackSolver) {
+	if (fitWorkerDisabled) return fallbackSolver();
 	try {
 		return await runFitWorkerTask(task, payload);
 	} catch (workerError) {
 		console.warn(`Falling back to main-thread ${task} fit:`, workerError);
+		if (!fitWorkerDisabled) {
+			fitWorkerDisabled = true;
+			if (typeof showToast === 'function') {
+				showToast('Fit worker unavailable — running on main thread.', 5000);
+			}
+		}
 		return fallbackSolver();
 	}
 }
@@ -333,10 +344,8 @@ function getCustomFitDataStats() {
 
 	const xValues = points.map((point) => point.x);
 	const yValues = points.map((point) => point.y);
-	const xMin = Math.min(...xValues);
-	const xMax = Math.max(...xValues);
-	const yMin = Math.min(...yValues);
-	const yMax = Math.max(...yValues);
+	const { min: xMin, max: xMax } = minMaxFinite(xValues);
+	const { min: yMin, max: yMax } = minMaxFinite(yValues);
 	const xSpan = Math.max(Math.abs(xMax - xMin), 1e-9);
 	const ySpan = Math.max(Math.abs(yMax - yMin), 1e-9);
 	const xMean = xValues.reduce((sum, value) => sum + value, 0) / xValues.length;
@@ -903,8 +912,7 @@ function calculateFWHM(x, y, maxY) {
 		return right - left;
 	} else {
 		const xs = sortedData.map(p => p.x);
-		const minX = Math.min(...xs);
-		const maxX = Math.max(...xs);
+		const { min: minX, max: maxX } = minMaxFinite(xs);
 		return (maxX - minX) / 4;
 	}
 }
@@ -949,8 +957,7 @@ function setInitialParameters(method) {
 	const meanX = x.reduce((sum, val) => sum + val, 0) / x.length;
 	const meanY = y.reduce((sum, val) => sum + val, 0) / y.length;
 
-	const maxY = Math.max(...y);
-	const minY = Math.min(...y);
+	const { min: minY, max: maxY } = minMaxFinite(y);
 
 	// For Gaussian
 	const FWHM = calculateFWHM(x, y, maxY);
@@ -973,7 +980,8 @@ function setInitialParameters(method) {
 
 		let kguess = estimateKFromData();
 		if (kguess === null || !isFinite(kguess) || kguess <= 0) {
-			const span = Math.max(...x) - Math.min(...x);
+			const { min: xLo, max: xHi } = minMaxFinite(x);
+			const span = xHi - xLo;
 			// fallback: assume ~1 cycle across the span
 			kguess = span > 0 ? (2 * Math.PI) / span : 1;
 		}
@@ -1078,8 +1086,7 @@ function exponentialFit_cAbx(raw) {
 	if (data.length < 3) return null;
 	const x = data.map(p => p.x);
 	const y = data.map(p => p.y);
-	const yMin = Math.min(...y);
-	const yMax = Math.max(...y);
+	const { min: yMin, max: yMax } = minMaxFinite(y);
 	const yRange = (yMax - yMin) || 1;
 
 	// Residuals and Jacobian for model: y = c + A * exp(b * x)
@@ -1145,8 +1152,7 @@ function exponentialFit_cAbx(raw) {
 	if (!bestParams) return null;
 
 	const [A, b, c] = bestParams;
-	const xMin = Math.min(...x),
-		xMax = Math.max(...x);
+	const { min: xMin, max: xMax } = minMaxFinite(x);
 	const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
 	const fitFn = xi => c + A * Math.exp(b * xi);
 	const yFit = xFit.map(fitFn);
@@ -1162,11 +1168,9 @@ function exponentialFit_logLinear(raw) {
 	const x = data.map(p => p.x);
 	const y = data.map(p => p.y);
 
-	const yMin = Math.min(...y);
-	const yMax = Math.max(...y);
+	const { min: yMin, max: yMax } = minMaxFinite(y);
 	const yRange = (yMax - yMin) || 1;
-	const xMin = Math.min(...x),
-		xMax = Math.max(...x);
+	const { min: xMin, max: xMax } = minMaxFinite(x);
 
 	// Grid-search over c and x0 candidates for the best log-linear initial guess.
 	// c is now a free parameter: try values below, at, and slightly above yMin.
@@ -1280,12 +1284,20 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeSet) {
 
 function polyfit(x, y, degree) {
 	try {
-		const X = x.map(xi => Array.from({ length: degree + 1 }, (_, j) => xi ** (degree - j)));
+		const n = x.length;
+		const meanX = x.reduce((s, v) => s + v, 0) / n;
+		const stdXRaw = Math.sqrt(x.reduce((s, v) => s + (v - meanX) ** 2, 0) / n);
+		const stdX = stdXRaw > 0 ? stdXRaw : 1;
+
+		const X = x.map(xi => {
+			const u = (xi - meanX) / stdX;
+			return Array.from({ length: degree + 1 }, (_, j) => u ** (degree - j));
+		});
 		const Xt = math.transpose(X);
 		const XtX = math.multiply(Xt, X);
 		const XtY = math.multiply(Xt, y);
 		const coefficients = math.lusolve(XtX, XtY).flat();
-		return coefficients;
+		return { coefficients, meanX, stdX };
 	} catch (error) {
 		console.error('Error performing polynomial fit:', error);
 		throw error;
@@ -1293,9 +1305,13 @@ function polyfit(x, y, degree) {
 }
 
 
-function polyEval(coefficients, x) {
+function polyEval(fit, x) {
 	try {
-		return coefficients.reduce((sum, coef, i) => sum + coef * Math.pow(x, coefficients.length - i - 1), 0);
+		const u = (x - fit.meanX) / fit.stdX;
+		return fit.coefficients.reduce(
+			(sum, coef, i) => sum + coef * Math.pow(u, fit.coefficients.length - i - 1),
+			0
+		);
 	} catch (error) {
 		console.error('Error evaluating polynomial:', error);
 		throw error;
@@ -1435,8 +1451,7 @@ async function fitCustomCurve() {
 
 		const xValues = data.map((point) => point.x);
 		const yValues = data.map((point) => point.y);
-		const xMin = Math.min(...xValues);
-		const xMax = Math.max(...xValues);
+		const { min: xMin, max: xMax } = minMaxFinite(xValues);
 		const xRange = xMax - xMin;
 		const xFit = Array.from({ length: CUSTOM_FIT_SAMPLE_POINTS }, (_, i) => {
 			if (Math.abs(xRange) < 1e-12) return xMin;
@@ -1475,7 +1490,8 @@ function performLinearFit(x, y) {
 	try {
 		const { slope, intercept } = computeLinearFit(x, y);
 
-		const xFit = [Math.min(...x), Math.max(...x)];
+		const { min: xMin, max: xMax } = minMaxFinite(x);
+		const xFit = [xMin, xMax];
 		const yFit = xFit.map(xi => slope * xi + intercept);
 
 		const fitFunction = xi => slope * xi + intercept;
@@ -1499,14 +1515,15 @@ function performLinearFit(x, y) {
 
 function performPolynomialFit(x, y, degree) {
 	try {
-		const coefficients = polyfit(x, y, degree);
-		const xFit = Array.from({ length: 100 }, (_, i) => Math.min(...x) + i * (Math.max(...x) - Math.min(...x)) / 99);
-		const yFit = xFit.map(xi => polyEval(coefficients, xi));
+		const fit = polyfit(x, y, degree);
+		const { min: xMin, max: xMax } = minMaxFinite(x);
+		const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
+		const yFit = xFit.map(xi => polyEval(fit, xi));
 
-		const fitFunction = xi => polyEval(coefficients, xi);
+		const fitFunction = xi => polyEval(fit, xi);
 
 		let equation = 'y = ';
-		coefficients.forEach((c, i) => {
+		fit.coefficients.forEach((c, i) => {
 			const power = degree - i;
 			if (c === 0) return;
 
@@ -1517,13 +1534,14 @@ function performPolynomialFit(x, y, degree) {
 			if (power === 0) {
 				term = `${absC}`;
 			} else if (power === 1) {
-				term = `${absC}x`;
+				term = `${absC}u`;
 			} else {
-				term = `${absC}x^{${power}}`;
+				term = `${absC}u^{${power}}`;
 			}
 
 			equation += `${sign}${term}`;
 		});
+		equation += `,\\ u = \\frac{x - ${fit.meanX.toFixed(3)}}{${fit.stdX.toFixed(3)}}`;
 
 		// Store the fitted curve for this dataset.
 		fittedCurves[activeSet] = { x: xFit, y: yFit, equation: equation };
@@ -1588,9 +1606,9 @@ function performPowerFit() {
 
 		// 2. Generate multiple initial guesses for x0 and c
 		//    We'll sample around (xMin - a bit, yMin - a bit) and also near medians.
-		const xMin = Math.min(...xValues);
+		const { min: xMin } = minMaxFinite(xValues);
 		const xMed = median(xValues);
-		const yMin = Math.min(...yValues);
+		const { min: yMin } = minMaxFinite(yValues);
 		const yMed = median(yValues);
 
 		const guessPairs = [
@@ -1613,12 +1631,12 @@ function performPowerFit() {
 
 			// Ensure (x - x0) > 0 for all x if we want to do an initial log transform
 			// (Avoid potentially huge while-loops for large domains.)
-			const minX = Math.min(...xValues);
+			const { min: minX } = minMaxFinite(xValues);
 			if (!(minX - shiftedX0 > 0)) shiftedX0 = minX - 1e-6;
 			let z = xValues.map(x => x - shiftedX0);
 
 			// Ensure (y - c) > 0 for initial log transform
-			const minY = Math.min(...yValues);
+			const { min: minY } = minMaxFinite(yValues);
 			if (!(minY - shiftedC > 0)) shiftedC = minY - 1e-6;
 			let w = yValues.map(y => y - shiftedC);
 
@@ -1629,6 +1647,12 @@ function performPowerFit() {
 			const AInitial = Math.exp(lnAInitial);
 
 			const initialParams = [AInitial, bInitial, shiftedX0, shiftedC];
+			if (initialParams.some(v => !Number.isFinite(v))) {
+				initialParams[0] = 1;
+				initialParams[1] = 1;
+				initialParams[2] = shiftedX0;
+				initialParams[3] = shiftedC;
+			}
 
 			// 3c. Run LM from this initial guess
 			const { params, cost } = levenbergMarquardt(validData, initialParams, computeResiduals, computeJacobian);
@@ -1648,8 +1672,7 @@ function performPowerFit() {
 		const [A, b, x0, c] = bestParams;
 
 		// 5. Generate fitted curve
-		const xMinFit = Math.min(...xValues);
-		const xMaxFit = Math.max(...xValues);
+		const { min: xMinFit, max: xMaxFit } = minMaxFinite(xValues);
 		const N = 100;
 		const xFit = Array.from({ length: N }, (_, i) => {
 			return xMinFit + (i * (xMaxFit - xMinFit)) / (N - 1);

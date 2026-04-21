@@ -13,8 +13,8 @@ let latexMode = false; // false by default: plain text mode
 let titleWasAuto = true; // track whether graph title should auto-update
 
 let lastPlotState = {
-	data: null,
-	layout: null
+	plot: { data: null, layout: null },
+	'popup-plot': { data: null, layout: null }
 };
 
 rawData.push([]);

@@ -138,8 +138,12 @@
 		for (let iteration = 0; iteration < maxIterations; iteration++) {
 			const residuals = safeResiduals(params);
 			const cost = costFromResiduals(residuals);
+			if (cost < bestCost) {
+				bestCost = cost;
+				bestParams = params.slice();
+			}
 			if (Math.abs(prevCost - cost) < tolerance) {
-				return { params, cost };
+				return { params: bestParams, cost: bestCost };
 			}
 			prevCost = cost;
 
@@ -195,10 +199,21 @@
 		return { params: bestParams, cost: bestCost };
 	}
 
+	function minMaxFinite(values) {
+		let min = Infinity;
+		let max = -Infinity;
+		for (let i = 0; i < values.length; i++) {
+			const v = values[i];
+			if (!Number.isFinite(v)) continue;
+			if (v < min) min = v;
+			if (v > max) max = v;
+		}
+		return { min, max };
+	}
+
 	function buildFitDomainFromData(data, sampleCount = 300) {
 		const xValues = data.map((point) => point.x);
-		const xMin = Math.min(...xValues);
-		const xMax = Math.max(...xValues);
+		const { min: xMin, max: xMax } = minMaxFinite(xValues);
 		const span = xMax - xMin;
 		if (!Number.isFinite(span) || Math.abs(span) < 1e-12) {
 			return Array.from({ length: sampleCount }, () => xMin);
@@ -231,6 +246,7 @@
 		levenbergMarquardt,
 		buildFitDomainFromData,
 		buildSinusoidalEquation,
-		buildGaussianEquation
+		buildGaussianEquation,
+		minMaxFinite
 	});
 })(typeof globalThis !== 'undefined' ? globalThis : self);

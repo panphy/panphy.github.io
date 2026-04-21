@@ -1259,8 +1259,10 @@ function clearFittedCurve() {
 	clearFittingResultDisplay();
 
 	// Force a re-plot so that the old line is removed
-	lastPlotState.data = null;
-	lastPlotState.layout = null;
+	lastPlotState.plot.data = null;
+	lastPlotState.plot.layout = null;
+	lastPlotState['popup-plot'].data = null;
+	lastPlotState['popup-plot'].layout = null;
 
 	// Now re-draw with no line but the same data
 	updatePlotAndRenderLatex();

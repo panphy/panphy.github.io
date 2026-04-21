@@ -2,7 +2,7 @@
 
 const WORKER_PENALTY = 1e6;
 const DEFAULT_SAMPLE_POINTS = 300;
-const MATH_JS_CDN_URL = 'https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js';
+const MATH_JS_URL = '/tools/panphyplot/js/vendor/math.min.js';
 let mathLibraryReadyPromise = null;
 
 try {
@@ -310,7 +310,7 @@ async function ensureMathLibrary() {
 	if (!mathLibraryReadyPromise) {
 		mathLibraryReadyPromise = new Promise((resolve, reject) => {
 			try {
-				self.importScripts(MATH_JS_CDN_URL);
+				self.importScripts(MATH_JS_URL);
 				if (typeof self.math === 'object' && self.math !== null && typeof self.math.parse === 'function') {
 					resolve();
 					return;

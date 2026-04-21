@@ -73,27 +73,24 @@
 					zerolinecolor: '#8b98a7',
 					linecolor: '#3A3A36',
 					tickcolor: '#CDCAC4',
-					titlefont: { color: '#EDEBE8' }
+					title: { font: { color: '#EDEBE8' } }
 				},
 				yaxis: {
 					gridcolor: '#2A2A28',
 					zerolinecolor: '#8b98a7',
 					linecolor: '#3A3A36',
 					tickcolor: '#CDCAC4',
-					titlefont: { color: '#EDEBE8' }
+					title: { font: { color: '#EDEBE8' } }
 				}
 			}
 		};
 	}
 
-	function isPlotStateEqual(newData, newLayout) {
-		// Simple approach: compare JSON strings.
-		// Note: This works fine for small to moderate data sets.
-		const currentDataStr = JSON.stringify(lastPlotState.data);
-		const newDataStr = JSON.stringify(newData);
-		const currentLayoutStr = JSON.stringify(lastPlotState.layout);
-		const newLayoutStr = JSON.stringify(newLayout);
-		return currentDataStr === newDataStr && currentLayoutStr === newLayoutStr;
+	function isPlotStateEqual(targetId, newData, newLayout) {
+		const slot = lastPlotState[targetId];
+		if (!slot) return false;
+		return JSON.stringify(slot.data) === JSON.stringify(newData)
+			&& JSON.stringify(slot.layout) === JSON.stringify(newLayout);
 	}
 
 		function sanitizeFilename(filename, fallbackFilename) {
@@ -360,7 +357,7 @@
 		// Build the layout.
 		const layout = {
 			xaxis: {
-				title: processLabel(document.getElementById('x-column-name').value || 'x'),
+				title: { text: processLabel(document.getElementById('x-column-name').value || 'x') },
 				showline: false,
 				linewidth: 1,
 				autorange: true,
@@ -371,9 +368,9 @@
 			yaxis: {
 				title: {
 					text: processLabel(document.getElementById('y-column-name').value || 'y'),
+					font: { size: 14 },
 					standoff: 25
 				},
-				titlefont: { size: 14 },
 				automargin: true,
 				showline: false,
 				linewidth: 1,
@@ -382,7 +379,7 @@
 				zeroline: true,
 				zerolinewidth: 2
 			},
-			title: titleText,
+			title: { text: titleText, font: { size: 16 } },
 			margin: {
 				t: rawTitle === '' ? 50 : 100, // Optionally reduce top margin when title is blank.
 				b: 80,
@@ -391,15 +388,27 @@
 			}
 		};
 		if (themeSettings.layout.xaxis) {
-			layout.xaxis = { ...layout.xaxis, ...themeSettings.layout.xaxis };
-			if (themeSettings.layout.xaxis.titlefont) {
-				layout.xaxis.titlefont = { ...(layout.xaxis.titlefont || {}), ...themeSettings.layout.xaxis.titlefont };
+			const themeX = themeSettings.layout.xaxis;
+			const themeXTitle = themeX.title;
+			layout.xaxis = { ...layout.xaxis, ...themeX, title: { ...layout.xaxis.title } };
+			if (themeXTitle) {
+				layout.xaxis.title = {
+					...layout.xaxis.title,
+					...themeXTitle,
+					font: { ...(layout.xaxis.title.font || {}), ...(themeXTitle.font || {}) }
+				};
 			}
 		}
 		if (themeSettings.layout.yaxis) {
-			layout.yaxis = { ...layout.yaxis, ...themeSettings.layout.yaxis };
-			if (themeSettings.layout.yaxis.titlefont) {
-				layout.yaxis.titlefont = { ...(layout.yaxis.titlefont || {}), ...themeSettings.layout.yaxis.titlefont };
+			const themeY = themeSettings.layout.yaxis;
+			const themeYTitle = themeY.title;
+			layout.yaxis = { ...layout.yaxis, ...themeY, title: { ...layout.yaxis.title } };
+			if (themeYTitle) {
+				layout.yaxis.title = {
+					...layout.yaxis.title,
+					...themeYTitle,
+					font: { ...(layout.yaxis.title.font || {}), ...(themeYTitle.font || {}) }
+				};
 			}
 		}
 		if (themeSettings.layout.font) {
@@ -413,7 +422,7 @@
 		}
 
 		// Only replot if the new state is different.
-		if (isPlotStateEqual(data, layout)) {
+		if (isPlotStateEqual('plot', data, layout)) {
 			return;
 		}
 
@@ -421,8 +430,8 @@
 		Plotly.react('plot', data, layout, createDownloadImageConfig('data_plot'));
 
 		// Cache the current state.
-		lastPlotState.data = data;
-		lastPlotState.layout = layout;
+		lastPlotState.plot.data = data;
+		lastPlotState.plot.layout = layout;
 	}
 
 
@@ -537,7 +546,7 @@
 		const layout = {
 			title: { text: processedTitle, font: { size: 16 } },
 			xaxis: {
-				title: processedXLabel,
+				title: { text: processedXLabel },
 				showline: false,
 				linewidth: 1,
 				autorange: true,
@@ -557,15 +566,27 @@
 			margin: { t: rawTitle === '' ? 50 : 100, b: 70, l: 140, r: 0 }
 		};
 		if (themeSettings.layout.xaxis) {
-			layout.xaxis = { ...layout.xaxis, ...themeSettings.layout.xaxis };
-			if (themeSettings.layout.xaxis.titlefont) {
-				layout.xaxis.titlefont = { ...(layout.xaxis.titlefont || {}), ...themeSettings.layout.xaxis.titlefont };
+			const themeX = themeSettings.layout.xaxis;
+			const themeXTitle = themeX.title;
+			layout.xaxis = { ...layout.xaxis, ...themeX, title: { ...layout.xaxis.title } };
+			if (themeXTitle) {
+				layout.xaxis.title = {
+					...layout.xaxis.title,
+					...themeXTitle,
+					font: { ...(layout.xaxis.title.font || {}), ...(themeXTitle.font || {}) }
+				};
 			}
 		}
 		if (themeSettings.layout.yaxis) {
-			layout.yaxis = { ...layout.yaxis, ...themeSettings.layout.yaxis };
-			if (themeSettings.layout.yaxis.titlefont) {
-				layout.yaxis.titlefont = { ...(layout.yaxis.titlefont || {}), ...themeSettings.layout.yaxis.titlefont };
+			const themeY = themeSettings.layout.yaxis;
+			const themeYTitle = themeY.title;
+			layout.yaxis = { ...layout.yaxis, ...themeY, title: { ...layout.yaxis.title } };
+			if (themeYTitle) {
+				layout.yaxis.title = {
+					...layout.yaxis.title,
+					...themeYTitle,
+					font: { ...(layout.yaxis.title.font || {}), ...(themeYTitle.font || {}) }
+				};
 			}
 		}
 		if (themeSettings.layout.font) {
@@ -578,18 +599,17 @@
 			layout.plot_bgcolor = themeSettings.layout.plot_bgcolor;
 		}
 
-		if (isPlotStateEqual(traces, layout)) {
+		if (isPlotStateEqual('popup-plot', traces, layout)) {
 			showPopup();
 			return;
 		}
 
 		Plotly.newPlot('popup-plot', traces, layout, createDownloadImageConfig('combined_plot'));
 
-		lastPlotState.data = traces;
-		lastPlotState.layout = layout;
+		lastPlotState['popup-plot'].data = traces;
+		lastPlotState['popup-plot'].layout = layout;
 
 		showPopup();
-		safeTypeset(document.getElementById('popup-plot'));
 	}
 
 	Object.assign(window, {

@@ -39,7 +39,9 @@
 	function updateGraphTitle(force = false) {
 		const xColumn = document.getElementById('x-column-name').value || 'x';
 		const yColumn = document.getElementById('y-column-name').value || 'y';
-		const autoTitle = latexMode ? `${yColumn} \\text{vs} ${xColumn}` : `${yColumn} vs ${xColumn}`;
+		const autoTitle = latexMode
+			? `${yColumn}\\space \\text{ vs }\\space ${xColumn}`
+			: `${yColumn} vs ${xColumn}`;
 
 		const titleInput = document.getElementById('graph-title');
 		if (!titleInput) return;
@@ -52,7 +54,24 @@
 	}
 
 	function formatLabelForLatex(label) {
-		return label ? label.replace(/ /g, '\\space ') : '';
+		if (!label) return '';
+		let out = '';
+		let depth = 0;
+		for (let i = 0; i < label.length; i++) {
+			const ch = label[i];
+			if (ch === '{') {
+				depth++;
+				out += ch;
+			} else if (ch === '}') {
+				if (depth > 0) depth--;
+				out += ch;
+			} else if (ch === ' ' && depth === 0) {
+				out += '\\space ';
+			} else {
+				out += ch;
+			}
+		}
+		return out;
 	}
 
 	Object.assign(window, {
