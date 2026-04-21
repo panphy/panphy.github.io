@@ -7,6 +7,7 @@
 }
 
 :root {
+  color-scheme: light;
   --font-sans: 'Manrope', sans-serif;
   --font-display: 'DM Serif Display', serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -38,6 +39,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --background-color: #111110;
   --background-pattern: #1A1A18;
   --text-color: #EDEBE8;
