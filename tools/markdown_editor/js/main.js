@@ -8,6 +8,8 @@ import {
   saveDraft,
   clearDraft,
   restoreDraft,
+  loadUntouchedSampleDraftFlag,
+  saveUntouchedSampleDraftFlag,
   saveSyncScrollPreference,
   debounce,
   isOpenWarningSuppressed,
@@ -524,9 +526,18 @@ function isUntouchedSampleContent(content = markdownInput.value) {
   return untouchedSampleContent !== null && content === untouchedSampleContent;
 }
 
+function setUntouchedSampleContent(content) {
+  untouchedSampleContent = content;
+  saveUntouchedSampleDraftFlag(content !== null);
+}
+
+function clearUntouchedSampleContent() {
+  setUntouchedSampleContent(null);
+}
+
 function clearUntouchedSampleContentFlagIfEdited(content = markdownInput.value) {
   if (untouchedSampleContent !== null && content !== untouchedSampleContent) {
-    untouchedSampleContent = null;
+    clearUntouchedSampleContent();
   }
 }
 
@@ -571,7 +582,7 @@ function showRestoreUndoToast(previousContent) {
   undoBtn.addEventListener('click', () => {
     saveSnapshotIfNeeded(markdownInput.value);
     markdownInput.value = previousContent;
-    untouchedSampleContent = null;
+    clearUntouchedSampleContent();
     renderAndPersistDraft();
     dismissRestoreUndoToast();
   });
@@ -657,10 +668,10 @@ async function loadSampleDocument() {
     }
 
     markdownInput.value = data;
-    untouchedSampleContent = data;
+    saveDraft(data);
+    setUntouchedSampleContent(data);
     markContentExported(data);
     renderContent();
-    clearDraft();
     updateDirtyIndicator(dirtyIndicator, false);
   } catch (error) {
     console.error('Error loading sample document:', error);
@@ -1495,7 +1506,7 @@ async function loadMarkdownFile() {
       const file = await fileHandle.getFile();
       saveSnapshotIfNeeded(markdownInput.value);
       markdownInput.value = await file.text();
-      untouchedSampleContent = null;
+      clearUntouchedSampleContent();
       markContentExported(markdownInput.value);
       renderContent();
       saveDraft(markdownInput.value);
@@ -1517,7 +1528,7 @@ async function loadMarkdownFile() {
       const reader = new FileReader();
       reader.onload = event => {
         markdownInput.value = event.target.result;
-        untouchedSampleContent = null;
+        clearUntouchedSampleContent();
         markContentExported(markdownInput.value);
         renderContent();
         saveDraft(markdownInput.value);
@@ -1664,7 +1675,7 @@ clearButton.addEventListener('click', async () => {
   if (!confirmed) return;
   saveSnapshotIfNeeded(markdownInput.value);
   markdownInput.value = '';
-  untouchedSampleContent = null;
+  clearUntouchedSampleContent();
   markContentExported('');
   clearDraft();
   renderContent();
@@ -1692,7 +1703,7 @@ if (historyButton) {
     }
 
     markdownInput.value = restored;
-    untouchedSampleContent = null;
+    clearUntouchedSampleContent();
     renderAndPersistDraft();
     showRestoreUndoToast(currentContent);
   });
@@ -1872,6 +1883,14 @@ if (laserCanvas && laserContext) {
 const savedDraft = restoreDraft();
 if (savedDraft !== null) {
   markdownInput.value = savedDraft;
+  if (loadUntouchedSampleDraftFlag()) {
+    setUntouchedSampleContent(savedDraft);
+    markContentExported(savedDraft);
+  } else {
+    saveUntouchedSampleDraftFlag(false);
+  }
+} else {
+  saveUntouchedSampleDraftFlag(false);
 }
 renderContent();
 

@@ -11,6 +11,7 @@
  * - Escaped backslashes: $\\\\$ should remain as a literal double backslash.
  * - Currency: $5/day should stay as plain text.
  * - Currency punctuation: $5-month and $5 per day should stay as plain text.
+ * - Longer code fences: ```` ... ``` ... ```` should stay untouched inside the fence.
  * - Literal dollar: \\$ should stay as plain text.
  *
  * @param {string} input - The raw Markdown input.
@@ -49,9 +50,30 @@ export function preprocessMarkdown(input) {
   let output = '';
   let i = 0;
   let inFencedCodeBlock = false;
-  let fencedDelimiter = null;
+  let fencedDelimiterChar = null;
+  let fencedDelimiterLength = 0;
   let inInlineCodeSpan = false;
   let inlineCodeDelimiterLength = 0;
+
+  const getFenceInfo = index => {
+    const fenceChar = input[index];
+    if (fenceChar !== '`' && fenceChar !== '~') {
+      return null;
+    }
+
+    let fenceLength = 0;
+    let cursor = index;
+    while (cursor < input.length && input[cursor] === fenceChar) {
+      fenceLength += 1;
+      cursor += 1;
+    }
+
+    if (fenceLength < 3) {
+      return null;
+    }
+
+    return { fenceChar, fenceLength, fenceEnd: cursor };
+  };
 
   while (i < input.length) {
     const char = input[i];
@@ -65,19 +87,31 @@ export function preprocessMarkdown(input) {
         fenceIndent += 1;
       }
       const fencePos = i + fenceIndent;
-      if (input.startsWith('```', fencePos) || input.startsWith('~~~', fencePos)) {
-        const delimiter = input.startsWith('```', fencePos) ? '```' : '~~~';
-        if (!inFencedCodeBlock) {
-          inFencedCodeBlock = true;
-          fencedDelimiter = delimiter;
-        } else if (fencedDelimiter === delimiter) {
-          inFencedCodeBlock = false;
-          fencedDelimiter = null;
+      const fenceInfo = getFenceInfo(fencePos);
+      if (fenceInfo) {
+        const { fenceChar, fenceLength, fenceEnd } = fenceInfo;
+        const lineEnd = input.indexOf('\n', fenceEnd);
+        const afterFence = input.slice(fenceEnd, lineEnd === -1 ? input.length : lineEnd);
+        const isClosingFence = inFencedCodeBlock
+          && fenceChar === fencedDelimiterChar
+          && fenceLength >= fencedDelimiterLength
+          && /^[ \t]*$/.test(afterFence);
+
+        if (!inFencedCodeBlock || isClosingFence) {
+          if (!inFencedCodeBlock) {
+            inFencedCodeBlock = true;
+            fencedDelimiterChar = fenceChar;
+            fencedDelimiterLength = fenceLength;
+          } else {
+            inFencedCodeBlock = false;
+            fencedDelimiterChar = null;
+            fencedDelimiterLength = 0;
+          }
+
+          output += input.slice(i, fenceEnd);
+          i = fenceEnd;
+          continue;
         }
-        const totalLength = fenceIndent + delimiter.length;
-        output += input.slice(i, i + totalLength);
-        i += totalLength;
-        continue;
       }
     }
 

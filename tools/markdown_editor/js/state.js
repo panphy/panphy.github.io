@@ -6,6 +6,7 @@
 // Storage keys
 const STORAGE_KEYS = {
   DRAFT: 'markdownEditorDraft',
+  UNTOUCHED_SAMPLE_DRAFT: 'markdownEditorUntouchedSampleDraft',
   SNAPSHOTS: 'markdownEditorSnapshots',
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
@@ -77,6 +78,7 @@ export function saveDraft(content) {
  */
 export function clearDraft() {
   safeRemoveStorageItem(STORAGE_KEYS.DRAFT);
+  safeRemoveStorageItem(STORAGE_KEYS.UNTOUCHED_SAMPLE_DRAFT);
 }
 
 /**
@@ -85,6 +87,22 @@ export function clearDraft() {
  */
 export function restoreDraft() {
   return safeGetStorageItem(STORAGE_KEYS.DRAFT);
+}
+
+/**
+ * Persist whether the current draft is the untouched built-in sample.
+ * @param {boolean} enabled
+ */
+export function saveUntouchedSampleDraftFlag(enabled) {
+  safeSetStorageItem(STORAGE_KEYS.UNTOUCHED_SAMPLE_DRAFT, String(enabled));
+}
+
+/**
+ * Check whether the restored draft should be treated as the untouched sample.
+ * @returns {boolean}
+ */
+export function loadUntouchedSampleDraftFlag() {
+  return safeGetStorageItem(STORAGE_KEYS.UNTOUCHED_SAMPLE_DRAFT) === 'true';
 }
 
 /**
