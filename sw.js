@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-04-22T00:00:00Z';
+const BUILD_ID = '2026-04-26T00:00:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -20,6 +20,7 @@ const ASSETS_TO_CACHE = [
   '/assets/sw-register.js',
   '/tools/markdown_editor/css/markdown_editor.css',
   '/tools/markdown_editor/js/state.js',
+  '/tools/markdown_editor/js/utils.js',
   '/tools/markdown_editor/js/rendering.js',
   '/tools/markdown_editor/js/copy.js',
   '/tools/markdown_editor/js/ui.js',

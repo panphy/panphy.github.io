@@ -4,6 +4,7 @@
  */
 
 import { isTouchInteractionMode } from './ui.js';
+import { isCurrencyLike } from './utils.js';
 
 const EQUATION_PNG_BASE_SCALE = 4;
 const EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
@@ -43,25 +44,6 @@ function getEquationRasterScale(widthPx, heightPx) {
 
 function hasMathDelimiters(text) {
   if (!text || !text.includes('$')) return false;
-
-  const isCurrencyLike = value => {
-    const trimmed = value.trim();
-    if (!/^\d/.test(trimmed)) {
-      return false;
-    }
-
-    const currencyAbbreviation = /\b(?:aud|brl|cad|chf|cny|dkk|eur|gbp|hkd|inr|jpy|krw|mxn|nok|sek|sgd|usd|zar)\b/i;
-
-    if (currencyAbbreviation.test(trimmed)) {
-      return true;
-    }
-
-    if (/^\d+(?:[.,]\d+)?\s+[A-Za-z]/.test(trimmed)) {
-      return true;
-    }
-
-    return /^\d+(?:[.,]\d+)?\s*[\/-]\s*[A-Za-z]/.test(trimmed);
-  };
 
   const isEscaped = (value, index) => {
     let slashCount = 0;
@@ -293,7 +275,6 @@ function prepareEquationSvg(svg) {
   );
   svgClone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
-  svgClone.style.backgroundColor = 'transparent';
   svgClone.removeAttribute('style');
 
   const fallbackColor = '#000000';
@@ -1237,8 +1218,10 @@ export async function copyTableToClipboard(table) {
  * @param {Element} element - The element to show feedback on
  */
 function showCopyFeedback(element) {
+  clearTimeout(element._copyTimer);
   element.classList.add('copied');
-  setTimeout(() => {
+  element.classList.remove('copy-failed');
+  element._copyTimer = setTimeout(() => {
     element.classList.remove('copied');
   }, 1500);
 }
@@ -1248,8 +1231,10 @@ function showCopyFeedback(element) {
  * @param {Element} element - The element to show feedback on
  */
 function showCopyFailedFeedback(element) {
+  clearTimeout(element._copyTimer);
   element.classList.add('copy-failed');
-  setTimeout(() => {
+  element.classList.remove('copied');
+  element._copyTimer = setTimeout(() => {
     element.classList.remove('copy-failed');
   }, 2000);
 }

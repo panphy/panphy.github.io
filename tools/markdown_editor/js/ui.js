@@ -661,7 +661,7 @@ export function showImageModal() {
       resolve(result);
     };
 
-    const submitModal = () => {
+    const submitModal = async () => {
       const urlValidation = normalizeAndValidateImageUrl(urlInput.value);
       if (!urlValidation.value) {
         setError(urlValidation.error);
@@ -671,7 +671,10 @@ export function showImageModal() {
 
       const nonImageWarning = getLikelyNonImageWarning(urlInput.value, urlValidation.value);
       if (nonImageWarning) {
-        const shouldInsert = window.confirm(`${nonImageWarning}\n\nInsert anyway?`);
+        const shouldInsert = await showConfirmationModal(
+          `${nonImageWarning} Insert anyway?`,
+          { allowSuppress: false }
+        );
         if (!shouldInsert) {
           urlInput.focus();
           return;

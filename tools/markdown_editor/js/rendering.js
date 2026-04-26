@@ -3,6 +3,8 @@
  * Handles markdown preprocessing, parsing, and rendering
  */
 
+import { isCurrencyLike } from './utils.js';
+
 /**
  * Preprocess the input Markdown by preserving valid TeX inside math blocks.
  *
@@ -26,25 +28,6 @@ export function preprocessMarkdown(input) {
       backslashCount += 1;
     }
     return backslashCount % 2 === 1;
-  };
-
-  const isCurrencyLike = content => {
-    const trimmed = content.trim();
-    if (!/^\d/.test(trimmed)) {
-      return false;
-    }
-
-    const currencyAbbreviation = /\b(?:aud|brl|cad|chf|cny|dkk|eur|gbp|hkd|inr|jpy|krw|mxn|nok|sek|sgd|usd|zar)\b/i;
-
-    if (currencyAbbreviation.test(trimmed)) {
-      return true;
-    }
-
-    if (/^\d+(?:[.,]\d+)?\s+[A-Za-z]/.test(trimmed)) {
-      return true;
-    }
-
-    return /^\d+(?:[.,]\d+)?\s*[\/-]\s*[A-Za-z]/.test(trimmed);
   };
 
   let output = '';

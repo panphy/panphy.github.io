@@ -111,6 +111,8 @@ function clearSyncAnchorMap() {
 
 function ensureSyncAnchorMirror() {
   if (syncAnchorMirror) return syncAnchorMirror;
+  // Singleton: intentionally never removed. The node lives for the full page
+  // lifetime, which equals the app lifetime for this single-page tool.
   const mirror = document.createElement('div');
   mirror.setAttribute('aria-hidden', 'true');
   mirror.style.position = 'absolute';
@@ -783,9 +785,15 @@ function insertTextAtCursor(textToInsert, { insertAtCursorOnBlankLine = false } 
   renderAndPersistDraft();
 }
 
+let isInsertingTemplate = false;
+
 function insertMathTemplate(templateKey) {
+  if (isInsertingTemplate) return;
+
   const selectedTemplate = templateKey || 'basic';
   const templatePath = mathTemplatePaths[selectedTemplate] || mathTemplatePaths.basic;
+
+  isInsertingTemplate = true;
 
   fetch(templatePath)
     .then(response => {
@@ -801,6 +809,9 @@ function insertMathTemplate(templateKey) {
     .catch(error => {
       console.error('Error loading math template:', error);
       alert('Failed to load the selected math template.');
+    })
+    .finally(() => {
+      isInsertingTemplate = false;
     });
 }
 
@@ -1876,7 +1887,7 @@ updatePresentThemeIcon();
 initMobileLayout();
 if (laserCanvas && laserContext) {
   resizeLaserCanvas();
-  window.addEventListener('resize', resizeLaserCanvas);
+  window.addEventListener('resize', debounce(resizeLaserCanvas, 100));
 }
 
 // Restore draft and render
