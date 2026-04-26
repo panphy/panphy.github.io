@@ -487,12 +487,14 @@ function createShip() {
     roughness: 0.52,
     metalness: 0.28,
     flatShading: true,
+    side: THREE.DoubleSide,
   });
   const redMaterial = new THREE.MeshStandardMaterial({
     color: 0xff4d59,
     roughness: 0.58,
     metalness: 0.2,
     flatShading: true,
+    side: THREE.DoubleSide,
   });
   const flameMaterial = new THREE.MeshBasicMaterial({
     color: 0xffb452,
@@ -581,7 +583,14 @@ function createFin(side, material) {
   ]);
   geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
   geometry.computeVertexNormals();
-  return new THREE.Mesh(geometry, material);
+
+  const fin = new THREE.Mesh(geometry, material);
+  const edge = new THREE.LineSegments(
+    new THREE.EdgesGeometry(geometry),
+    new THREE.LineBasicMaterial({ color: 0xffd195, transparent: true, opacity: 0.36 })
+  );
+  fin.add(edge);
+  return fin;
 }
 
 function createFlightGrid() {
