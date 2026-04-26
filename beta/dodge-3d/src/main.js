@@ -25,6 +25,9 @@ const PLAY_BOUNDS = {
   yMin: -3.55,
   yMax: 3.8,
 };
+const GRID_STEP = 8;
+const GRID_NEAR_Z = 24;
+const GRID_FAR_Z = -160;
 
 const pointerState = {
   active: false,
@@ -44,12 +47,23 @@ let mode = 'idle';
 let elapsed = 0;
 let bestScore = loadBestScore();
 let spawnTimer = 0;
+let waveTimer = 0;
 let lastFrameTime = 0;
 let fieldSpeed = BASE_FIELD_SPEED;
 let shakeAmount = 0;
 let flashTimer = 0;
 let pausedByVisibility = false;
 let hudTimer = 0;
+
+const course = {
+  scrollZ: 0,
+  turnDelay: 5.5,
+  turnAge: 0,
+  turnDuration: 0,
+  turnDirection: 0,
+  turnStrength: 0,
+  turnAmount: 0,
+};
 
 const player = {
   x: 0,
@@ -119,6 +133,14 @@ const asteroidProfiles = [
   { type: 'smooth', weight: 3, detail: 22, distortion: 0.04, flatShading: false, roughness: 0.68, metalness: 0.08, edgeOpacity: 0.035, edgeBoost: 0.08 },
   { type: 'shard', weight: 1, detail: 1, distortion: 0.22, flatShading: true, roughness: 0.9, metalness: 0.04, edgeOpacity: 0.26, edgeBoost: 0.26 },
 ];
+const trajectoryProfiles = [
+  { type: 'drifter', weight: 5 },
+  { type: 'sweeper', weight: 3 },
+  { type: 'sine', weight: 3 },
+  { type: 'corkscrew', weight: 2 },
+  { type: 'heavy', weight: 2 },
+  { type: 'shard', weight: 2 },
+];
 const asteroidWireMaterial = new THREE.LineBasicMaterial({
   color: 0xffd195,
   transparent: true,
@@ -171,6 +193,8 @@ function startGame() {
   clearAsteroids();
   elapsed = 0;
   spawnTimer = 0.62;
+  waveTimer = 4.4;
+  resetCourse();
   fieldSpeed = BASE_FIELD_SPEED;
   shakeAmount = 0;
   flashTimer = 0;
@@ -184,8 +208,8 @@ function startGame() {
   ship.visible = true;
   ship.position.set(player.x, player.y, PLAYER_Z);
   ship.rotation.set(0, 0, 0);
-  spawnAsteroid(1, { x: -4.2, y: 1.2, z: -64, size: 1.18, speed: BASE_FIELD_SPEED * 0.95, profile: asteroidProfiles[2] });
-  spawnAsteroid(1, { x: 4.9, y: -2.2, z: -88, size: 0.92, speed: BASE_FIELD_SPEED * 1.08, profile: asteroidProfiles[1] });
+  spawnAsteroid(1, { x: -4.2, y: 1.2, z: -64, size: 1.18, speed: BASE_FIELD_SPEED * 0.95, profile: asteroidProfiles[2], trajectory: createTrajectory('drifter') });
+  spawnAsteroid(1, { x: 4.9, y: -2.2, z: -88, size: 0.92, speed: BASE_FIELD_SPEED * 1.08, profile: asteroidProfiles[1], trajectory: createTrajectory('sine', { amplitudeX: 0.55, frequency: 1.25 }) });
   mode = 'running';
   document.body.classList.add('is-running');
   document.body.classList.remove('is-crashed');
@@ -313,7 +337,8 @@ function updateShip(delta) {
   const velocityY = (player.y - player.prevY) / Math.max(delta, 0.001);
 
   ship.position.set(player.x, player.y, PLAYER_Z);
-  ship.rotation.z = damp(ship.rotation.z, clamp(-velocityX * 0.055, -0.58, 0.58), 9, delta);
+  const courseBank = clamp(course.turnAmount * 0.035, -0.26, 0.26);
+  ship.rotation.z = damp(ship.rotation.z, clamp(-velocityX * 0.055, -0.58, 0.58) + courseBank, 9, delta);
   ship.rotation.x = damp(ship.rotation.x, clamp(velocityY * 0.025, -0.22, 0.22), 8, delta);
   ship.rotation.y = damp(ship.rotation.y, clamp(-velocityX * 0.018, -0.2, 0.2), 8, delta);
 
@@ -327,10 +352,11 @@ function updateShip(delta) {
 }
 
 function updateEnvironment(delta, speed) {
-  grid.position.z += speed * delta;
-  if (grid.position.z > 8) grid.position.z -= 8;
+  updateCourse(delta, speed);
+  updateCourseLineGeometry(grid);
 
   rails.children.forEach((rail, index) => {
+    updateCourseLineGeometry(rail);
     rail.material.opacity = 0.3 + Math.sin(performance.now() * 0.004 + index) * 0.12;
   });
 
@@ -346,20 +372,95 @@ function updateEnvironment(delta, speed) {
 
   wirePlanet.rotation.x += delta * 0.08;
   wirePlanet.rotation.y += delta * 0.13;
+  wirePlanet.position.x = damp(wirePlanet.position.x, -16 + getCourseBendAtZ(wirePlanet.position.z) * 0.3, 2.2, delta);
   warningRing.rotation.z -= delta * 0.9;
+  warningRing.position.x = damp(warningRing.position.x, getCourseBendAtZ(warningRing.position.z) * 0.72, 3.6, delta);
+  warningRing.rotation.y = damp(warningRing.rotation.y, -course.turnAmount * 0.018, 3.2, delta);
   warningRing.scale.setScalar(1 + Math.sin(performance.now() * 0.004) * 0.035);
+}
+
+function resetCourse() {
+  course.scrollZ = 0;
+  course.turnDelay = random(4.2, 6.2);
+  course.turnAge = 0;
+  course.turnDuration = 0;
+  course.turnDirection = 0;
+  course.turnStrength = 0;
+  course.turnAmount = 0;
+}
+
+function updateCourse(delta, speed) {
+  course.scrollZ = (course.scrollZ + speed * delta) % GRID_STEP;
+
+  if (course.turnDirection === 0) {
+    course.turnDelay -= delta;
+    if (course.turnDelay <= 0) {
+      course.turnDirection = Math.random() < 0.5 ? -1 : 1;
+      course.turnDuration = random(3.8, 5.4);
+      course.turnStrength = random(8.5, 13.0);
+      course.turnAge = 0;
+    }
+  } else {
+    course.turnAge += delta;
+    const progress = clamp(course.turnAge / Math.max(course.turnDuration, 0.001), 0, 1);
+    course.turnAmount = course.turnDirection * course.turnStrength * Math.sin(progress * Math.PI);
+    if (progress >= 1) {
+      course.turnDirection = 0;
+      course.turnAge = 0;
+      course.turnDuration = 0;
+      course.turnStrength = 0;
+      course.turnAmount = 0;
+      course.turnDelay = random(6.5, 10.5);
+    }
+  }
+}
+
+function getCourseBendAtZ(z) {
+  const depth = clamp((GRID_NEAR_Z - z) / (GRID_NEAR_Z - GRID_FAR_Z), 0, 1);
+  const easedDepth = Math.pow(depth, 1.35);
+  return course.turnAmount * easedDepth;
+}
+
+function updateCourseLineGeometry(line) {
+  const segments = line.userData.segments;
+  if (!segments) return;
+
+  const positions = line.geometry.attributes.position.array;
+  let offset = 0;
+  segments.forEach((segment) => {
+    const z1 = segment.z1 + course.scrollZ;
+    const z2 = segment.z2 + course.scrollZ;
+    positions[offset] = segment.x1 + getCourseBendAtZ(z1);
+    positions[offset + 1] = segment.y1;
+    positions[offset + 2] = z1;
+    positions[offset + 3] = segment.x2 + getCourseBendAtZ(z2);
+    positions[offset + 4] = segment.y2;
+    positions[offset + 5] = z2;
+    offset += 6;
+  });
+  line.geometry.attributes.position.needsUpdate = true;
 }
 
 function updateSpawning(delta, level) {
   spawnTimer -= delta;
-  const spawnInterval = Math.max(0.2, 0.82 - elapsed * 0.012);
+  waveTimer -= delta;
+  const spawnInterval = Math.max(0.26, 0.98 - elapsed * 0.01);
+
+  if (waveTimer <= 0) {
+    spawnWave(level);
+    waveTimer = random(
+      Math.max(4.4, 7.2 - elapsed * 0.035),
+      Math.max(6.3, 10.5 - elapsed * 0.045)
+    );
+    spawnTimer += 0.7;
+  }
 
   while (spawnTimer <= 0) {
-    spawnAsteroid(level);
-    if (Math.random() < Math.min(0.08 + elapsed * 0.0035, 0.34)) {
-      spawnAsteroid(level);
+    spawnSoloAsteroid(level);
+    if (Math.random() < Math.min(0.06 + elapsed * 0.0025, 0.24)) {
+      spawnSoloAsteroid(level);
     }
-    spawnTimer += spawnInterval * random(0.68, 1.28);
+    spawnTimer += spawnInterval * random(0.78, 1.34);
   }
 }
 
@@ -367,9 +468,13 @@ function updateAsteroids(delta) {
   for (let i = asteroids.length - 1; i >= 0; i -= 1) {
     const asteroid = asteroids[i];
     const mesh = asteroid.mesh;
+    asteroid.age += delta;
+    asteroid.baseX += asteroid.driftX * delta;
+    asteroid.baseY += asteroid.driftY * delta;
     mesh.position.z += asteroid.speed * delta;
-    mesh.position.x += asteroid.driftX * delta;
-    mesh.position.y += asteroid.driftY * delta;
+    const trajectoryOffset = getTrajectoryOffset(asteroid);
+    mesh.position.x = asteroid.baseX + trajectoryOffset.x;
+    mesh.position.y = asteroid.baseY + trajectoryOffset.y;
     mesh.rotation.x += asteroid.rotationX * delta;
     mesh.rotation.y += asteroid.rotationY * delta;
     mesh.rotation.z += asteroid.rotationZ * delta;
@@ -388,6 +493,275 @@ function updateAsteroids(delta) {
       asteroids.splice(i, 1);
     }
   }
+}
+
+function spawnSoloAsteroid(level) {
+  const trajectoryType = chooseTrajectoryProfile().type;
+  const trajectory = createTrajectory(trajectoryType);
+  const overrides = { trajectory };
+  if (trajectoryType === 'sweeper') {
+    const side = trajectory.driftX > 0 ? -1 : 1;
+    overrides.x = side * (PLAY_BOUNDS.x + random(0.8, 1.6));
+    overrides.y = random(PLAY_BOUNDS.yMin + 0.65, PLAY_BOUNDS.yMax - 0.65);
+    overrides.z = random(-94, -62);
+    overrides.size = random(0.55, 1.08);
+  } else if (trajectoryType === 'heavy') {
+    overrides.size = random(1.18, 1.72);
+    overrides.speed = fieldSpeed * random(0.76, 0.94);
+    overrides.profile = asteroidProfiles[Math.random() < 0.5 ? 0 : 2];
+  } else if (trajectoryType === 'shard') {
+    overrides.size = random(0.36, 0.72);
+    overrides.speed = fieldSpeed * random(1.22, 1.52);
+    overrides.profile = asteroidProfiles[3];
+  }
+  spawnAsteroid(level, overrides);
+}
+
+function spawnWave(level) {
+  const waveTypes = ['crossingPair', 'gapWall', 'sineRibbon', 'corkscrewPair', 'heavyDebris'];
+  const waveType = waveTypes[Math.floor(Math.random() * waveTypes.length)];
+  if (waveType === 'crossingPair') {
+    spawnCrossingPair(level);
+  } else if (waveType === 'gapWall') {
+    spawnGapWall(level);
+  } else if (waveType === 'sineRibbon') {
+    spawnSineRibbon(level);
+  } else if (waveType === 'corkscrewPair') {
+    spawnCorkscrewPair(level);
+  } else {
+    spawnHeavyDebris(level);
+  }
+}
+
+function spawnCrossingPair(level) {
+  const highY = random(0.65, PLAY_BOUNDS.yMax - 0.55);
+  const lowY = random(PLAY_BOUNDS.yMin + 0.55, -0.85);
+  spawnAsteroid(level, {
+    x: -PLAY_BOUNDS.x - 1.2,
+    y: highY,
+    z: -82,
+    size: random(0.72, 1.08),
+    speed: fieldSpeed * random(1.04, 1.18),
+    driftX: random(1.55, 2.25),
+    driftY: random(-0.15, 0.1),
+    trajectory: createTrajectory('sweeper'),
+  });
+  spawnAsteroid(level, {
+    x: PLAY_BOUNDS.x + 1.2,
+    y: lowY,
+    z: -95,
+    size: random(0.62, 0.98),
+    speed: fieldSpeed * random(1.08, 1.24),
+    driftX: random(-2.25, -1.55),
+    driftY: random(-0.08, 0.16),
+    trajectory: createTrajectory('sweeper'),
+  });
+}
+
+function spawnGapWall(level) {
+  const lanes = [-5.4, -2.7, 0, 2.7, 5.4];
+  const gapIndex = Math.floor(Math.random() * lanes.length);
+  lanes.forEach((x, index) => {
+    if (index === gapIndex) return;
+    spawnAsteroid(level, {
+      x,
+      y: random(-2.7, 2.65),
+      z: -76 - Math.abs(index - gapIndex) * 5,
+      size: random(0.62, 1.0),
+      speed: fieldSpeed * random(0.92, 1.04),
+      driftX: random(-0.12, 0.12),
+      driftY: random(-0.18, 0.18),
+      trajectory: createTrajectory('drifter'),
+      profile: asteroidProfiles[index % 2 === 0 ? 0 : 1],
+    });
+  });
+}
+
+function spawnSineRibbon(level) {
+  const centerY = random(-2.1, 2.2);
+  const side = Math.random() < 0.5 ? -1 : 1;
+  for (let i = 0; i < 4; i += 1) {
+    spawnAsteroid(level, {
+      x: side * random(2.4, 5.7),
+      y: centerY + random(-0.35, 0.35),
+      z: -72 - i * 14,
+      size: random(0.45, 0.82),
+      speed: fieldSpeed * random(1.0, 1.18),
+      driftX: side * random(-0.18, 0.12),
+      driftY: random(-0.06, 0.06),
+      trajectory: createTrajectory('sine', {
+        amplitudeX: random(0.72, 1.25),
+        amplitudeY: random(0.08, 0.26),
+        frequency: random(1.5, 2.2),
+        phase: i * 0.9,
+      }),
+    });
+  }
+}
+
+function spawnCorkscrewPair(level) {
+  const centerX = random(-2.6, 2.6);
+  const centerY = random(-1.6, 1.8);
+  for (let i = 0; i < 2; i += 1) {
+    spawnAsteroid(level, {
+      x: centerX + (i === 0 ? -0.9 : 0.9),
+      y: centerY,
+      z: -86 - i * 18,
+      size: random(0.62, 0.96),
+      speed: fieldSpeed * random(1.02, 1.2),
+      driftX: random(-0.12, 0.12),
+      driftY: random(-0.12, 0.12),
+      trajectory: createTrajectory('corkscrew', {
+        amplitudeX: random(0.8, 1.15),
+        amplitudeY: random(0.52, 0.9),
+        frequency: random(1.55, 2.2),
+        phase: i * Math.PI,
+      }),
+    });
+  }
+}
+
+function spawnHeavyDebris(level) {
+  const heavyX = random(-4.7, 4.7);
+  const heavyY = random(-2.3, 2.35);
+  spawnAsteroid(level, {
+    x: heavyX,
+    y: heavyY,
+    z: -78,
+    size: random(1.42, 2.05),
+    speed: fieldSpeed * random(0.72, 0.86),
+    driftX: random(-0.16, 0.16),
+    driftY: random(-0.12, 0.12),
+    trajectory: createTrajectory('heavy'),
+    profile: asteroidProfiles[Math.random() < 0.5 ? 0 : 2],
+  });
+  for (let i = 0; i < 3; i += 1) {
+    const side = i % 2 === 0 ? -1 : 1;
+    spawnAsteroid(level, {
+      x: clamp(heavyX + side * random(2.0, 4.1), -PLAY_BOUNDS.x, PLAY_BOUNDS.x),
+      y: clamp(heavyY + random(-1.65, 1.65), PLAY_BOUNDS.yMin + 0.4, PLAY_BOUNDS.yMax - 0.4),
+      z: -92 - i * 10,
+      size: random(0.38, 0.62),
+      speed: fieldSpeed * random(1.32, 1.58),
+      driftX: side * random(0.35, 0.72),
+      driftY: random(-0.22, 0.22),
+      trajectory: createTrajectory('shard'),
+      profile: asteroidProfiles[3],
+    });
+  }
+}
+
+function chooseTrajectoryProfile() {
+  const totalWeight = trajectoryProfiles.reduce((total, profile) => total + profile.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const profile of trajectoryProfiles) {
+    roll -= profile.weight;
+    if (roll <= 0) return profile;
+  }
+  return trajectoryProfiles[0];
+}
+
+function createTrajectory(type, overrides = {}) {
+  const phase = overrides.phase ?? random(0, Math.PI * 2);
+  if (type === 'sine') {
+    return {
+      type,
+      amplitudeX: overrides.amplitudeX ?? random(0.55, 1.15),
+      amplitudeY: overrides.amplitudeY ?? random(0.06, 0.24),
+      frequency: overrides.frequency ?? random(1.2, 2.05),
+      phase,
+    };
+  }
+  if (type === 'corkscrew') {
+    return {
+      type,
+      amplitudeX: overrides.amplitudeX ?? random(0.5, 0.95),
+      amplitudeY: overrides.amplitudeY ?? random(0.42, 0.82),
+      frequency: overrides.frequency ?? random(1.45, 2.25),
+      phase,
+    };
+  }
+  if (type === 'sweeper') {
+    const direction = overrides.direction ?? (Math.random() < 0.5 ? -1 : 1);
+    return {
+      type,
+      driftX: overrides.driftX ?? direction * random(1.1, 1.85),
+      driftY: overrides.driftY ?? random(-0.14, 0.14),
+      amplitudeX: overrides.amplitudeX ?? random(0.08, 0.22),
+      frequency: overrides.frequency ?? random(1.1, 1.6),
+      phase,
+    };
+  }
+  if (type === 'heavy') {
+    return {
+      type,
+      driftX: overrides.driftX ?? random(-0.12, 0.12),
+      driftY: overrides.driftY ?? random(-0.1, 0.1),
+      amplitudeX: overrides.amplitudeX ?? random(0.08, 0.22),
+      amplitudeY: overrides.amplitudeY ?? random(0.04, 0.16),
+      frequency: overrides.frequency ?? random(0.65, 1.05),
+      phase,
+    };
+  }
+  if (type === 'shard') {
+    const direction = overrides.direction ?? (Math.random() < 0.5 ? -1 : 1);
+    return {
+      type,
+      driftX: overrides.driftX ?? direction * random(0.45, 0.95),
+      driftY: overrides.driftY ?? random(-0.42, 0.42),
+      amplitudeX: overrides.amplitudeX ?? random(0.16, 0.34),
+      amplitudeY: overrides.amplitudeY ?? random(0.08, 0.22),
+      frequency: overrides.frequency ?? random(2.2, 3.7),
+      phase,
+    };
+  }
+  return {
+    type: 'drifter',
+    driftX: overrides.driftX ?? random(-0.3, 0.3),
+    driftY: overrides.driftY ?? random(-0.2, 0.2),
+    amplitudeX: overrides.amplitudeX ?? random(0, 0.16),
+    amplitudeY: overrides.amplitudeY ?? random(0, 0.12),
+    frequency: overrides.frequency ?? random(0.65, 1.1),
+    phase,
+  };
+}
+
+function getTrajectoryOffset(asteroid) {
+  const trajectory = asteroid.trajectory;
+  if (trajectory.type === 'sine') {
+    return {
+      x: Math.sin(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeX,
+      y: Math.sin(asteroid.age * trajectory.frequency * 0.72 + trajectory.phase * 0.6) * trajectory.amplitudeY,
+    };
+  }
+  if (trajectory.type === 'corkscrew') {
+    return {
+      x: Math.cos(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeX,
+      y: Math.sin(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeY,
+    };
+  }
+  if (trajectory.type === 'sweeper') {
+    return {
+      x: Math.sin(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeX,
+      y: 0,
+    };
+  }
+  if (trajectory.type === 'heavy') {
+    return {
+      x: Math.sin(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeX,
+      y: Math.cos(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeY,
+    };
+  }
+  if (trajectory.type === 'shard') {
+    return {
+      x: Math.sin(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeX,
+      y: Math.cos(asteroid.age * trajectory.frequency * 0.82 + trajectory.phase) * trajectory.amplitudeY,
+    };
+  }
+  return {
+    x: Math.sin(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeX,
+    y: Math.cos(asteroid.age * trajectory.frequency + trajectory.phase) * trajectory.amplitudeY,
+  };
 }
 
 function updateEffects(delta) {
@@ -414,16 +788,19 @@ function updateHud(force = false) {
 function updateCamera(delta) {
   const shakeX = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.22 : 0;
   const shakeY = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.18 : 0;
-  camera.position.x = damp(camera.position.x, player.x * 0.08 + shakeX, 5, delta);
+  const courseLookX = getCourseBendAtZ(-98);
+  camera.position.x = damp(camera.position.x, player.x * 0.08 + courseLookX * 0.025 + shakeX, 5, delta);
   camera.position.y = damp(camera.position.y, 2.15 + player.y * 0.045 + shakeY, 5, delta);
   camera.position.z = damp(camera.position.z, mode === 'running' ? 11.15 : 11.8, 4, delta);
-  cameraTarget.set(player.x * 0.055, player.y * 0.035, -48);
+  cameraTarget.set(player.x * 0.055 + courseLookX * 0.08, player.y * 0.035, -48);
   camera.lookAt(cameraTarget);
+  camera.rotation.z += -course.turnAmount * 0.0045;
 }
 
 function spawnAsteroid(level, overrides = {}) {
   const size = overrides.size ?? random(0.44, 1.85) * (Math.random() < 0.12 ? random(1.35, 1.78) : 1);
   const profile = overrides.profile ?? chooseAsteroidProfile();
+  const trajectory = overrides.trajectory ?? createTrajectory(chooseTrajectoryProfile().type);
   const geometry = createAsteroidGeometry(profile);
   const material = createAsteroidMaterial(profile);
   material.color.offsetHSL(random(-0.03, 0.03), random(-0.04, 0.04), random(-0.05, 0.08));
@@ -448,12 +825,16 @@ function spawnAsteroid(level, overrides = {}) {
     mesh,
     wire,
     wireGeometry,
+    trajectory,
+    age: 0,
+    baseX: mesh.position.x,
+    baseY: mesh.position.y,
     edgeOpacity: profile.edgeOpacity,
     edgeBoost: profile.edgeBoost,
     radius: size * Math.max(axisScale.x, axisScale.y, axisScale.z) * 0.84,
     speed: overrides.speed ?? random(fieldSpeed * 0.86, fieldSpeed * 1.42) + level * random(0.35, 0.95),
-    driftX: overrides.driftX ?? random(-0.46, 0.46),
-    driftY: overrides.driftY ?? random(-0.32, 0.32),
+    driftX: overrides.driftX ?? trajectory.driftX ?? random(-0.46, 0.46),
+    driftY: overrides.driftY ?? trajectory.driftY ?? random(-0.32, 0.32),
     rotationX: random(-1.9, 1.9),
     rotationY: random(-1.6, 1.6),
     rotationZ: random(-1.4, 1.4),
@@ -682,17 +1063,22 @@ function createFlightGrid() {
     transparent: true,
     opacity: 0.32,
   });
-  const vertices = [];
+  const segments = [];
   const y = -5.2;
-  for (let z = -160; z <= 24; z += 8) {
-    vertices.push(-13, y, z, 13, y, z);
+  for (let z = GRID_FAR_Z; z <= GRID_NEAR_Z; z += GRID_STEP) {
+    segments.push({ x1: -13, y1: y, z1: z, x2: 13, y2: y, z2: z });
   }
   for (let x = -12; x <= 12; x += 2) {
-    vertices.push(x, y, -160, x, y, 24);
+    for (let z = GRID_FAR_Z; z < GRID_NEAR_Z; z += GRID_STEP) {
+      segments.push({ x1: x, y1: y, z1: z, x2: x, y2: y, z2: z + GRID_STEP });
+    }
   }
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  return new THREE.LineSegments(geometry, lineMaterial);
+  geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(segments.length * 6), 3));
+  const gridLine = new THREE.LineSegments(geometry, lineMaterial);
+  gridLine.userData.segments = segments;
+  updateCourseLineGeometry(gridLine);
+  return gridLine;
 }
 
 function createRails() {
@@ -700,16 +1086,32 @@ function createRails() {
   const railColors = [0x32d7c9, 0xffb452, 0x67ff9f];
   railColors.forEach((color, index) => {
     const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.35 });
+    const segments = [];
     const geometry = new THREE.BufferGeometry();
     const spread = 5.4 + index * 1.65;
     const height = -3.8 + index * 1.15;
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute([
-      -spread, height, 8,
-      -spread * 0.22, height + 2.4, -130,
-      spread, height, 8,
-      spread * 0.22, height + 2.4, -130,
-    ], 3));
-    group.add(new THREE.LineSegments(geometry, material));
+    const nearZ = 8;
+    const farZ = -130;
+    const segmentCount = 18;
+    [-1, 1].forEach((side) => {
+      for (let i = 0; i < segmentCount; i += 1) {
+        const t1 = i / segmentCount;
+        const t2 = (i + 1) / segmentCount;
+        segments.push({
+          x1: side * lerp(spread, spread * 0.22, t1),
+          y1: lerp(height, height + 2.4, t1),
+          z1: lerp(nearZ, farZ, t1),
+          x2: side * lerp(spread, spread * 0.22, t2),
+          y2: lerp(height, height + 2.4, t2),
+          z2: lerp(nearZ, farZ, t2),
+        });
+      }
+    });
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(segments.length * 6), 3));
+    const rail = new THREE.LineSegments(geometry, material);
+    rail.userData.segments = segments;
+    updateCourseLineGeometry(rail);
+    group.add(rail);
   });
   return group;
 }
@@ -874,6 +1276,10 @@ function damp(current, target, lambda, delta) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function lerp(start, end, amount) {
+  return start + (end - start) * amount;
 }
 
 function random(min, max) {
