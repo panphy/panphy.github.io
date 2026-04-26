@@ -112,18 +112,18 @@ scene.add(wirePlanet);
 const warningRing = createWarningRing();
 scene.add(warningRing);
 
-const asteroidGeometry = new THREE.IcosahedronGeometry(1, 1);
-const asteroidMaterials = [
-  new THREE.MeshStandardMaterial({ color: 0x9c7458, roughness: 0.86, metalness: 0.06, flatShading: true }),
-  new THREE.MeshStandardMaterial({ color: 0x5f6875, roughness: 0.9, metalness: 0.04, flatShading: true }),
-  new THREE.MeshStandardMaterial({ color: 0x705345, roughness: 0.92, metalness: 0.02, flatShading: true }),
+const asteroidColorPalette = [0x9c7458, 0x5f6875, 0x705345, 0x847260, 0x4f5a61, 0x8f6146];
+const asteroidProfiles = [
+  { type: 'lumpy', weight: 4, detail: 1, distortion: 0.24, flatShading: true, roughness: 0.92, metalness: 0.03, edgeOpacity: 0.24, edgeBoost: 0.3 },
+  { type: 'crag', weight: 4, detail: 1, distortion: 0.38, flatShading: true, roughness: 0.96, metalness: 0.02, edgeOpacity: 0.34, edgeBoost: 0.34 },
+  { type: 'smooth', weight: 3, detail: 22, distortion: 0.04, flatShading: false, roughness: 0.68, metalness: 0.08, edgeOpacity: 0.035, edgeBoost: 0.08 },
+  { type: 'shard', weight: 1, detail: 1, distortion: 0.22, flatShading: true, roughness: 0.9, metalness: 0.04, edgeOpacity: 0.26, edgeBoost: 0.26 },
 ];
 const asteroidWireMaterial = new THREE.LineBasicMaterial({
   color: 0xffd195,
   transparent: true,
   opacity: 0.28,
 });
-const asteroidWireGeometry = new THREE.EdgesGeometry(asteroidGeometry);
 
 bestValue.textContent = formatTime(bestScore);
 messageScore.textContent = `Best ${formatTime(bestScore)}`;
@@ -184,8 +184,8 @@ function startGame() {
   ship.visible = true;
   ship.position.set(player.x, player.y, PLAYER_Z);
   ship.rotation.set(0, 0, 0);
-  spawnAsteroid(1, { x: -4.2, y: 1.2, z: -64, size: 1.18, speed: BASE_FIELD_SPEED * 0.95 });
-  spawnAsteroid(1, { x: 4.9, y: -2.2, z: -88, size: 0.92, speed: BASE_FIELD_SPEED * 1.08 });
+  spawnAsteroid(1, { x: -4.2, y: 1.2, z: -64, size: 1.18, speed: BASE_FIELD_SPEED * 0.95, profile: asteroidProfiles[2] });
+  spawnAsteroid(1, { x: 4.9, y: -2.2, z: -88, size: 0.92, speed: BASE_FIELD_SPEED * 1.08, profile: asteroidProfiles[1] });
   mode = 'running';
   document.body.classList.add('is-running');
   document.body.classList.remove('is-crashed');
@@ -375,7 +375,7 @@ function updateAsteroids(delta) {
     mesh.rotation.z += asteroid.rotationZ * delta;
 
     const hazardPulse = Math.max(0, 1 - Math.abs(mesh.position.z - PLAYER_Z) / 20);
-    asteroid.wire.material.opacity = 0.18 + hazardPulse * 0.3;
+    asteroid.wire.material.opacity = asteroid.edgeOpacity + hazardPulse * asteroid.edgeBoost;
 
     if (checkCollision(asteroid)) {
       endGame();
@@ -423,18 +423,23 @@ function updateCamera(delta) {
 
 function spawnAsteroid(level, overrides = {}) {
   const size = overrides.size ?? random(0.44, 1.85) * (Math.random() < 0.12 ? random(1.35, 1.78) : 1);
-  const material = asteroidMaterials[Math.floor(Math.random() * asteroidMaterials.length)].clone();
+  const profile = overrides.profile ?? chooseAsteroidProfile();
+  const geometry = createAsteroidGeometry(profile);
+  const material = createAsteroidMaterial(profile);
   material.color.offsetHSL(random(-0.03, 0.03), random(-0.04, 0.04), random(-0.05, 0.08));
 
-  const mesh = new THREE.Mesh(asteroidGeometry, material);
-  mesh.scale.setScalar(size);
+  const mesh = new THREE.Mesh(geometry, material);
+  const axisScale = overrides.axisScale ?? createAsteroidAxisScale(profile);
+  mesh.scale.set(size * axisScale.x, size * axisScale.y, size * axisScale.z);
   mesh.position.set(
     overrides.x ?? random(-PLAY_BOUNDS.x * 1.08, PLAY_BOUNDS.x * 1.08),
     overrides.y ?? random(PLAY_BOUNDS.yMin * 1.05, PLAY_BOUNDS.yMax * 1.05),
     overrides.z ?? random(-96, -54)
   );
 
-  const wire = new THREE.LineSegments(asteroidWireGeometry, asteroidWireMaterial.clone());
+  const wireGeometry = new THREE.EdgesGeometry(geometry);
+  const wire = new THREE.LineSegments(wireGeometry, asteroidWireMaterial.clone());
+  wire.material.opacity = profile.edgeOpacity;
   wire.scale.setScalar(1.012);
   mesh.add(wire);
   asteroidGroup.add(mesh);
@@ -442,7 +447,10 @@ function spawnAsteroid(level, overrides = {}) {
   asteroids.push({
     mesh,
     wire,
-    radius: size * 0.84,
+    wireGeometry,
+    edgeOpacity: profile.edgeOpacity,
+    edgeBoost: profile.edgeBoost,
+    radius: size * Math.max(axisScale.x, axisScale.y, axisScale.z) * 0.84,
     speed: overrides.speed ?? random(fieldSpeed * 0.86, fieldSpeed * 1.42) + level * random(0.35, 0.95),
     driftX: overrides.driftX ?? random(-0.46, 0.46),
     driftY: overrides.driftY ?? random(-0.32, 0.32),
@@ -450,6 +458,79 @@ function spawnAsteroid(level, overrides = {}) {
     rotationY: random(-1.6, 1.6),
     rotationZ: random(-1.4, 1.4),
   });
+}
+
+function createAsteroidGeometry(profile) {
+  let geometry;
+  if (profile.type === 'smooth') {
+    geometry = new THREE.SphereGeometry(1, profile.detail, Math.max(8, Math.floor(profile.detail * 0.7)));
+  } else if (profile.type === 'crag') {
+    geometry = new THREE.DodecahedronGeometry(1, profile.detail);
+  } else if (profile.type === 'shard') {
+    geometry = new THREE.OctahedronGeometry(1, profile.detail);
+  } else {
+    geometry = new THREE.IcosahedronGeometry(1, profile.detail);
+  }
+
+  const positions = geometry.attributes.position;
+  const vertexOffsets = new Map();
+  for (let i = 0; i < positions.count; i += 1) {
+    const x = positions.getX(i);
+    const y = positions.getY(i);
+    const z = positions.getZ(i);
+    const key = `${x.toFixed(3)},${y.toFixed(3)},${z.toFixed(3)}`;
+    let offset = vertexOffsets.get(key);
+    if (offset === undefined) {
+      offset = random(1 - profile.distortion, 1 + profile.distortion);
+      vertexOffsets.set(key, offset);
+    }
+    const ridge = profile.type === 'crag' && Math.random() < 0.16 ? random(1.12, 1.34) : 1;
+    positions.setXYZ(i, x * offset * ridge, y * offset, z * offset * ridge);
+  }
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function chooseAsteroidProfile() {
+  const totalWeight = asteroidProfiles.reduce((total, profile) => total + profile.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const profile of asteroidProfiles) {
+    roll -= profile.weight;
+    if (roll <= 0) return profile;
+  }
+  return asteroidProfiles[0];
+}
+
+function createAsteroidMaterial(profile) {
+  const color = asteroidColorPalette[Math.floor(Math.random() * asteroidColorPalette.length)];
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: profile.roughness,
+    metalness: profile.metalness,
+    flatShading: profile.flatShading,
+  });
+}
+
+function createAsteroidAxisScale(profile) {
+  if (profile.type === 'shard') {
+    return {
+      x: random(0.72, 1.08),
+      y: random(0.78, 1.2),
+      z: random(1.08, 1.52),
+    };
+  }
+  if (profile.type === 'smooth') {
+    return {
+      x: random(0.9, 1.15),
+      y: random(0.88, 1.16),
+      z: random(0.9, 1.15),
+    };
+  }
+  return {
+    x: random(0.72, 1.34),
+    y: random(0.7, 1.3),
+    z: random(0.78, 1.42),
+  };
 }
 
 function checkCollision(asteroid) {
@@ -469,7 +550,9 @@ function clearAsteroids() {
 }
 
 function disposeAsteroid(asteroid) {
+  asteroid.mesh.geometry.dispose();
   asteroid.mesh.material.dispose();
+  asteroid.wireGeometry.dispose();
   asteroid.wire.material.dispose();
 }
 
