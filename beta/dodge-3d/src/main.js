@@ -28,6 +28,10 @@ const PLAY_BOUNDS = {
 const GRID_STEP = 8;
 const GRID_NEAR_Z = 24;
 const GRID_FAR_Z = -160;
+const COURSE_INITIAL_TURN_DELAY = [3.0, 4.6];
+const COURSE_TURN_DURATION = [4.2, 6.0];
+const COURSE_TURN_STRENGTH = [12.0, 17.5];
+const COURSE_TURN_COOLDOWN = [4.7, 7.2];
 
 const pointerState = {
   active: false,
@@ -57,7 +61,7 @@ let hudTimer = 0;
 
 const course = {
   scrollZ: 0,
-  turnDelay: 5.5,
+  turnDelay: COURSE_INITIAL_TURN_DELAY[1],
   turnAge: 0,
   turnDuration: 0,
   turnDirection: 0,
@@ -337,7 +341,7 @@ function updateShip(delta) {
   const velocityY = (player.y - player.prevY) / Math.max(delta, 0.001);
 
   ship.position.set(player.x, player.y, PLAYER_Z);
-  const courseBank = clamp(course.turnAmount * 0.035, -0.26, 0.26);
+  const courseBank = clamp(course.turnAmount * 0.045, -0.34, 0.34);
   ship.rotation.z = damp(ship.rotation.z, clamp(-velocityX * 0.055, -0.58, 0.58) + courseBank, 9, delta);
   ship.rotation.x = damp(ship.rotation.x, clamp(velocityY * 0.025, -0.22, 0.22), 8, delta);
   ship.rotation.y = damp(ship.rotation.y, clamp(-velocityX * 0.018, -0.2, 0.2), 8, delta);
@@ -372,16 +376,16 @@ function updateEnvironment(delta, speed) {
 
   wirePlanet.rotation.x += delta * 0.08;
   wirePlanet.rotation.y += delta * 0.13;
-  wirePlanet.position.x = damp(wirePlanet.position.x, -16 + getCourseBendAtZ(wirePlanet.position.z) * 0.3, 2.2, delta);
+  wirePlanet.position.x = damp(wirePlanet.position.x, -16 + getCourseBendAtZ(wirePlanet.position.z) * 0.42, 2.2, delta);
   warningRing.rotation.z -= delta * 0.9;
-  warningRing.position.x = damp(warningRing.position.x, getCourseBendAtZ(warningRing.position.z) * 0.72, 3.6, delta);
-  warningRing.rotation.y = damp(warningRing.rotation.y, -course.turnAmount * 0.018, 3.2, delta);
+  warningRing.position.x = damp(warningRing.position.x, getCourseBendAtZ(warningRing.position.z) * 0.92, 3.6, delta);
+  warningRing.rotation.y = damp(warningRing.rotation.y, -course.turnAmount * 0.027, 3.2, delta);
   warningRing.scale.setScalar(1 + Math.sin(performance.now() * 0.004) * 0.035);
 }
 
 function resetCourse() {
   course.scrollZ = 0;
-  course.turnDelay = random(4.2, 6.2);
+  course.turnDelay = random(...COURSE_INITIAL_TURN_DELAY);
   course.turnAge = 0;
   course.turnDuration = 0;
   course.turnDirection = 0;
@@ -396,28 +400,29 @@ function updateCourse(delta, speed) {
     course.turnDelay -= delta;
     if (course.turnDelay <= 0) {
       course.turnDirection = Math.random() < 0.5 ? -1 : 1;
-      course.turnDuration = random(3.8, 5.4);
-      course.turnStrength = random(8.5, 13.0);
+      course.turnDuration = random(...COURSE_TURN_DURATION);
+      course.turnStrength = random(...COURSE_TURN_STRENGTH);
       course.turnAge = 0;
     }
   } else {
     course.turnAge += delta;
     const progress = clamp(course.turnAge / Math.max(course.turnDuration, 0.001), 0, 1);
-    course.turnAmount = course.turnDirection * course.turnStrength * Math.sin(progress * Math.PI);
+    const bendPulse = Math.pow(Math.sin(progress * Math.PI), 0.72);
+    course.turnAmount = course.turnDirection * course.turnStrength * bendPulse;
     if (progress >= 1) {
       course.turnDirection = 0;
       course.turnAge = 0;
       course.turnDuration = 0;
       course.turnStrength = 0;
       course.turnAmount = 0;
-      course.turnDelay = random(6.5, 10.5);
+      course.turnDelay = random(...COURSE_TURN_COOLDOWN);
     }
   }
 }
 
 function getCourseBendAtZ(z) {
   const depth = clamp((GRID_NEAR_Z - z) / (GRID_NEAR_Z - GRID_FAR_Z), 0, 1);
-  const easedDepth = Math.pow(depth, 1.35);
+  const easedDepth = Math.pow(depth, 1.12);
   return course.turnAmount * easedDepth;
 }
 
@@ -789,12 +794,12 @@ function updateCamera(delta) {
   const shakeX = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.22 : 0;
   const shakeY = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.18 : 0;
   const courseLookX = getCourseBendAtZ(-98);
-  camera.position.x = damp(camera.position.x, player.x * 0.08 + courseLookX * 0.025 + shakeX, 5, delta);
+  camera.position.x = damp(camera.position.x, player.x * 0.08 + courseLookX * 0.04 + shakeX, 5, delta);
   camera.position.y = damp(camera.position.y, 2.15 + player.y * 0.045 + shakeY, 5, delta);
   camera.position.z = damp(camera.position.z, mode === 'running' ? 11.15 : 11.8, 4, delta);
-  cameraTarget.set(player.x * 0.055 + courseLookX * 0.08, player.y * 0.035, -48);
+  cameraTarget.set(player.x * 0.055 + courseLookX * 0.13, player.y * 0.035, -48);
   camera.lookAt(cameraTarget);
-  camera.rotation.z += -course.turnAmount * 0.0045;
+  camera.rotation.z += -course.turnAmount * 0.006;
 }
 
 function spawnAsteroid(level, overrides = {}) {
