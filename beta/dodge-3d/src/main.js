@@ -32,6 +32,15 @@ const COURSE_INITIAL_TURN_DELAY = [3.0, 4.6];
 const COURSE_TURN_DURATION = [4.2, 6.0];
 const COURSE_TURN_STRENGTH = [12.0, 17.5];
 const COURSE_TURN_COOLDOWN = [4.7, 7.2];
+const GRID_VIOLET_LEVEL = 7;
+const GRID_GLOW_RAMP_LEVELS = 2.5;
+const GRID_GLOW_COLOR = new THREE.Color(0xf0caff);
+const GRID_COLOR_STOPS = [
+  { amount: 0, color: new THREE.Color(0xff3434) },
+  { amount: 0.34, color: new THREE.Color(0xff6833) },
+  { amount: 0.68, color: new THREE.Color(0xf94fff) },
+  { amount: 1, color: new THREE.Color(0x8f55ff) },
+];
 
 const pointerState = {
   active: false,
@@ -45,6 +54,9 @@ const pointerState = {
 const keys = new Set();
 const reusableVector = new THREE.Vector3();
 const cameraTarget = new THREE.Vector3();
+const gridVisualColor = new THREE.Color();
+const railVisualColor = new THREE.Color();
+const lineGlowColor = new THREE.Color();
 const asteroids = [];
 
 let mode = 'idle';
@@ -295,10 +307,11 @@ function updateGame(delta) {
   elapsed += delta;
   fieldSpeed = BASE_FIELD_SPEED + elapsed * 0.62;
   const level = getLevel();
+  const visualLevel = elapsed / 10 + 1;
 
   updateControls(delta);
   updateShip(delta);
-  updateEnvironment(delta, fieldSpeed);
+  updateEnvironment(delta, fieldSpeed, visualLevel);
   updateSpawning(delta, level);
   updateAsteroids(delta);
   updateEffects(delta);
@@ -311,7 +324,7 @@ function updateAttractMode(delta, time) {
   player.targetX = drift;
   player.targetY = lift;
   updateShip(delta);
-  updateEnvironment(delta, BASE_FIELD_SPEED * 0.65);
+  updateEnvironment(delta, BASE_FIELD_SPEED * 0.65, 1);
   updateEffects(delta);
 }
 
@@ -355,13 +368,15 @@ function updateShip(delta) {
   }
 }
 
-function updateEnvironment(delta, speed) {
+function updateEnvironment(delta, speed, level) {
   updateCourse(delta, speed);
   updateCourseLineGeometry(grid);
+  const gridVisuals = updateGridVisuals(level);
 
   rails.children.forEach((rail, index) => {
     updateCourseLineGeometry(rail);
-    rail.material.opacity = 0.3 + Math.sin(performance.now() * 0.004 + index) * 0.12;
+    const railBaseOpacity = rail.userData.levelOpacity ?? gridVisuals.railOpacity;
+    rail.material.opacity = railBaseOpacity + Math.sin(performance.now() * 0.004 + index) * gridVisuals.railPulse;
   });
 
   const positions = starField.geometry.attributes.position.array;
@@ -424,6 +439,55 @@ function getCourseBendAtZ(z) {
   const depth = clamp((GRID_NEAR_Z - z) / (GRID_NEAR_Z - GRID_FAR_Z), 0, 1);
   const easedDepth = Math.pow(depth, 1.12);
   return course.turnAmount * easedDepth;
+}
+
+function updateGridVisuals(level) {
+  const colorProgress = smoothstep(1, GRID_VIOLET_LEVEL, level);
+  const glowProgress = smoothstep(GRID_VIOLET_LEVEL, GRID_VIOLET_LEVEL + GRID_GLOW_RAMP_LEVELS, level);
+  const pulse = 0.5 + Math.sin(performance.now() * 0.006) * 0.5;
+  sampleGridColor(colorProgress, gridVisualColor);
+
+  grid.material.color.copy(gridVisualColor);
+  grid.material.opacity = 0.32 + glowProgress * 0.16;
+
+  const gridGlowMaterial = grid.userData.glowMaterial;
+  if (gridGlowMaterial) {
+    lineGlowColor.copy(gridVisualColor).lerp(GRID_GLOW_COLOR, 0.26 + glowProgress * 0.44);
+    gridGlowMaterial.color.copy(lineGlowColor);
+    gridGlowMaterial.opacity = glowProgress * (0.18 + pulse * 0.22);
+    gridGlowMaterial.visible = glowProgress > 0.01;
+  }
+
+  const railOpacity = 0.32 + glowProgress * 0.16;
+  const railPulse = 0.1 + glowProgress * 0.07;
+  rails.children.forEach((rail, index) => {
+    railVisualColor.copy(gridVisualColor).offsetHSL((index - 1) * 0.035, -0.04, index === 1 ? 0.08 : 0.03);
+    rail.material.color.copy(railVisualColor);
+    rail.userData.levelOpacity = railOpacity;
+
+    const railGlowMaterial = rail.userData.glowMaterial;
+    if (railGlowMaterial) {
+      lineGlowColor.copy(railVisualColor).lerp(GRID_GLOW_COLOR, 0.32 + glowProgress * 0.36);
+      railGlowMaterial.color.copy(lineGlowColor);
+      railGlowMaterial.opacity = glowProgress * (0.12 + pulse * 0.14);
+      railGlowMaterial.visible = glowProgress > 0.01;
+    }
+  });
+
+  return { railOpacity, railPulse };
+}
+
+function sampleGridColor(progress, target) {
+  const amount = clamp(progress, 0, 1);
+  for (let i = 0; i < GRID_COLOR_STOPS.length - 1; i += 1) {
+    const current = GRID_COLOR_STOPS[i];
+    const next = GRID_COLOR_STOPS[i + 1];
+    if (amount <= next.amount) {
+      const localAmount = smoothstep(current.amount, next.amount, amount);
+      return target.copy(current.color).lerp(next.color, localAmount);
+    }
+  }
+  return target.copy(GRID_COLOR_STOPS[GRID_COLOR_STOPS.length - 1].color);
 }
 
 function updateCourseLineGeometry(line) {
@@ -1064,9 +1128,17 @@ function createFin(side, material) {
 
 function createFlightGrid() {
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0x37ff91,
+    color: GRID_COLOR_STOPS[0].color,
     transparent: true,
     opacity: 0.32,
+  });
+  const glowMaterial = new THREE.LineBasicMaterial({
+    color: GRID_GLOW_COLOR,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    visible: false,
   });
   const segments = [];
   const y = -5.2;
@@ -1081,16 +1153,32 @@ function createFlightGrid() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(segments.length * 6), 3));
   const gridLine = new THREE.LineSegments(geometry, lineMaterial);
+  const gridGlow = new THREE.LineSegments(geometry, glowMaterial);
+  gridGlow.renderOrder = 1;
+  gridLine.add(gridGlow);
   gridLine.userData.segments = segments;
+  gridLine.userData.glowMaterial = glowMaterial;
   updateCourseLineGeometry(gridLine);
   return gridLine;
 }
 
 function createRails() {
   const group = new THREE.Group();
-  const railColors = [0x32d7c9, 0xffb452, 0x67ff9f];
-  railColors.forEach((color, index) => {
-    const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.35 });
+  const railCount = 3;
+  for (let index = 0; index < railCount; index += 1) {
+    const material = new THREE.LineBasicMaterial({
+      color: GRID_COLOR_STOPS[0].color,
+      transparent: true,
+      opacity: 0.35,
+    });
+    const glowMaterial = new THREE.LineBasicMaterial({
+      color: GRID_GLOW_COLOR,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      visible: false,
+    });
     const segments = [];
     const geometry = new THREE.BufferGeometry();
     const spread = 5.4 + index * 1.65;
@@ -1114,10 +1202,14 @@ function createRails() {
     });
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(segments.length * 6), 3));
     const rail = new THREE.LineSegments(geometry, material);
+    const railGlow = new THREE.LineSegments(geometry, glowMaterial);
+    railGlow.renderOrder = 1;
+    rail.add(railGlow);
     rail.userData.segments = segments;
+    rail.userData.glowMaterial = glowMaterial;
     updateCourseLineGeometry(rail);
     group.add(rail);
-  });
+  }
   return group;
 }
 
@@ -1281,6 +1373,11 @@ function damp(current, target, lambda, delta) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function smoothstep(edge0, edge1, value) {
+  const amount = clamp((value - edge0) / Math.max(edge1 - edge0, 0.0001), 0, 1);
+  return amount * amount * (3 - 2 * amount);
 }
 
 function lerp(start, end, amount) {
