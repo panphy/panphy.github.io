@@ -228,59 +228,6 @@ a {
   white-space: nowrap;
 }
 
-.reticle {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  z-index: 6;
-  width: min(20vw, 156px);
-  aspect-ratio: 1;
-  border: 1px solid rgba(103, 255, 159, 0.2);
-  border-radius: 50%;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-}
-
-.reticle::before,
-.reticle::after,
-.reticle span::before,
-.reticle span::after {
-  position: absolute;
-  display: block;
-  content: '';
-  background: rgba(103, 255, 159, 0.5);
-}
-
-.reticle::before,
-.reticle::after {
-  top: 50%;
-  width: 26%;
-  height: 1px;
-}
-
-.reticle::before {
-  left: 8%;
-}
-
-.reticle::after {
-  right: 8%;
-}
-
-.reticle span::before,
-.reticle span::after {
-  left: 50%;
-  width: 1px;
-  height: 26%;
-}
-
-.reticle span::before {
-  top: 8%;
-}
-
-.reticle span::after {
-  bottom: 8%;
-}
-
 .corner-panel {
   position: fixed;
   bottom: max(16px, env(safe-area-inset-bottom));
@@ -367,13 +314,8 @@ body.is-running .message-panel {
   display: none;
 }
 
-body.is-running .reticle {
-  opacity: 0.72;
-}
-
 body.is-crashed .flight-bar,
-body.is-crashed .readout-stack,
-body.is-crashed .reticle {
+body.is-crashed .readout-stack {
   filter: saturate(1.4);
 }
 

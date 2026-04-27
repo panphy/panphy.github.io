@@ -136,12 +136,6 @@ scene.add(rails);
 const starField = createStarField();
 scene.add(starField.points);
 
-const wirePlanet = createWirePlanet();
-scene.add(wirePlanet);
-
-const warningRing = createWarningRing();
-scene.add(warningRing);
-
 const asteroidColorPalette = [0x9c7458, 0x5f6875, 0x705345, 0x847260, 0x4f5a61, 0x8f6146];
 const asteroidProfiles = [
   { type: 'lumpy', weight: 4, detail: 1, distortion: 0.24, flatShading: true, roughness: 0.92, metalness: 0.03, edgeOpacity: 0.24, edgeBoost: 0.3 },
@@ -389,13 +383,6 @@ function updateEnvironment(delta, speed, level) {
   }
   starField.geometry.attributes.position.needsUpdate = true;
 
-  wirePlanet.rotation.x += delta * 0.08;
-  wirePlanet.rotation.y += delta * 0.13;
-  wirePlanet.position.x = damp(wirePlanet.position.x, -16 + getCourseBendAtZ(wirePlanet.position.z) * 0.42, 2.2, delta);
-  warningRing.rotation.z -= delta * 0.9;
-  warningRing.position.x = damp(warningRing.position.x, getCourseBendAtZ(warningRing.position.z) * 0.92, 3.6, delta);
-  warningRing.rotation.y = damp(warningRing.rotation.y, -course.turnAmount * 0.027, 3.2, delta);
-  warningRing.scale.setScalar(1 + Math.sin(performance.now() * 0.004) * 0.035);
 }
 
 function resetCourse() {
@@ -1244,31 +1231,6 @@ function resetStar(positions, offset, z = random(-168, -70)) {
   positions[offset] = random(-78, 78);
   positions[offset + 1] = random(-42, 42);
   positions[offset + 2] = z;
-}
-
-function createWirePlanet() {
-  const geometry = new THREE.IcosahedronGeometry(8, 2);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x32d7c9,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.18,
-  });
-  const planet = new THREE.Mesh(geometry, material);
-  planet.position.set(-16, 10, -122);
-  return planet;
-}
-
-function createWarningRing() {
-  const geometry = new THREE.TorusGeometry(9.2, 0.018, 8, 72);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0xffb452,
-    transparent: true,
-    opacity: 0.28,
-  });
-  const ring = new THREE.Mesh(geometry, material);
-  ring.position.set(0, 0, -92);
-  return ring;
 }
 
 function handlePointerDown(event) {
