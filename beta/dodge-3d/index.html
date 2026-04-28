@@ -38,9 +38,7 @@
         <span>BETA FLIGHT</span>
         <h1>Asteroid Storm 3D</h1>
       </div>
-      <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>
-        II
-      </button>
+      <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>⏸</button>
     </header>
 
     <section class="readout-stack" aria-label="Run metrics">
@@ -56,7 +54,7 @@
         <span>Velocity</span>
         <strong id="speedValue">0</strong>
       </div>
-      <div class="readout">
+      <div class="readout" id="levelReadout">
         <span>Level</span>
         <strong id="levelValue">1</strong>
       </div>
@@ -69,6 +67,7 @@
       <p id="messageKicker">LOW-POLY RUN</p>
       <h2 id="messageTitle">Asteroid Field</h2>
       <div class="message-score" id="messageScore">Best 0.00 s</div>
+      <p class="controls-hint" id="controlsHint">WASD / Arrows &bull; tap &amp; drag on mobile</p>
       <button id="startButton" type="button">Start Run</button>
     </section>
   </div>

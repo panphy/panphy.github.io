@@ -1,7 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 
-'use strict';
-
 const canvas = document.getElementById('gameCanvas');
 const scoreValue = document.getElementById('scoreValue');
 const bestValue = document.getElementById('bestValue');
@@ -70,6 +68,8 @@ let shakeAmount = 0;
 let flashTimer = 0;
 let pausedByVisibility = false;
 let hudTimer = 0;
+let gameoverTime = 0;
+let lastLevel = 0;
 
 const course = {
   scrollZ: 0,
@@ -94,7 +94,7 @@ const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: false,
   alpha: false,
-  preserveDrawingBuffer: true,
+  preserveDrawingBuffer: false,
   powerPreference: 'high-performance',
 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -209,6 +209,8 @@ function startGame() {
   shakeAmount = 0;
   flashTimer = 0;
   lastFrameTime = 0;
+  gameoverTime = 0;
+  lastLevel = 0;
   player.x = 0;
   player.y = -1.3;
   player.targetX = 0;
@@ -225,7 +227,7 @@ function startGame() {
   document.body.classList.remove('is-crashed');
   messagePanel.hidden = true;
   pauseButton.disabled = false;
-  pauseButton.textContent = 'II';
+  pauseButton.textContent = '⏸';
   pauseButton.setAttribute('aria-label', 'Pause run');
   updateHud(true);
 }
@@ -233,7 +235,7 @@ function startGame() {
 function pauseGame() {
   if (mode !== 'running') return;
   mode = 'paused';
-  pauseButton.textContent = '>';
+  pauseButton.textContent = '▶';
   pauseButton.setAttribute('aria-label', 'Resume run');
   showMessage('PAUSED', 'Holding Pattern', `Survival ${formatTime(elapsed)}`, 'Resume');
 }
@@ -242,7 +244,7 @@ function resumeGame() {
   if (mode !== 'paused') return;
   mode = 'running';
   lastFrameTime = 0;
-  pauseButton.textContent = 'II';
+  pauseButton.textContent = '⏸';
   pauseButton.setAttribute('aria-label', 'Pause run');
   messagePanel.hidden = true;
   document.body.classList.add('is-running');
@@ -251,8 +253,9 @@ function resumeGame() {
 function endGame() {
   if (mode !== 'running') return;
   mode = 'gameover';
+  gameoverTime = 0;
   pauseButton.disabled = true;
-  pauseButton.textContent = 'II';
+  pauseButton.textContent = '⏸';
   pauseButton.setAttribute('aria-label', 'Pause run');
   document.body.classList.remove('is-running');
   document.body.classList.add('is-crashed');
@@ -261,13 +264,16 @@ function endGame() {
   flashTimer = 0.18;
   screenFlash.classList.add('show');
 
-  if (elapsed > bestScore) {
+  const isNewBest = elapsed > bestScore;
+  if (isNewBest) {
     bestScore = Math.round(elapsed * 100) / 100;
     saveBestScore(bestScore);
   }
 
   bestValue.textContent = formatTime(bestScore);
-  showMessage('RUN ENDED', 'Impact Alert', `Survival ${formatTime(elapsed)} | Best ${formatTime(bestScore)}`, 'Restart');
+  const endKicker = isNewBest ? 'NEW RECORD' : 'RUN ENDED';
+  const endTitle = isNewBest ? 'Personal Best' : 'Impact Alert';
+  showMessage(endKicker, endTitle, `Survival ${formatTime(elapsed)} | Best ${formatTime(bestScore)}`, 'Restart');
 }
 
 function showMessage(kicker, title, scoreText, buttonText) {
@@ -275,6 +281,8 @@ function showMessage(kicker, title, scoreText, buttonText) {
   messageTitle.textContent = title;
   messageScore.textContent = scoreText;
   startButton.textContent = buttonText;
+  const controlsHint = document.getElementById('controlsHint');
+  if (controlsHint) controlsHint.hidden = mode === 'paused';
   messagePanel.hidden = false;
   document.body.classList.toggle('is-running', mode === 'running');
 }
@@ -303,6 +311,11 @@ function updateGame(delta) {
   const level = getLevel();
   const visualLevel = elapsed / 10 + 1;
 
+  if (level > lastLevel) {
+    if (lastLevel > 0) flashLevelUp();
+    lastLevel = level;
+  }
+
   updateControls(delta);
   updateShip(delta);
   updateEnvironment(delta, fieldSpeed, visualLevel);
@@ -313,12 +326,14 @@ function updateGame(delta) {
 }
 
 function updateAttractMode(delta, time) {
+  if (mode === 'gameover') gameoverTime += delta;
   const drift = Math.sin(time * 0.0007) * 2.25;
   const lift = Math.cos(time * 0.0009) * 0.36 - 1.15;
   player.targetX = drift;
   player.targetY = lift;
   updateShip(delta);
   updateEnvironment(delta, BASE_FIELD_SPEED * 0.65, 1);
+  updateAsteroids(delta);
   updateEffects(delta);
 }
 
@@ -830,6 +845,15 @@ function updateEffects(delta) {
   }
 }
 
+function flashLevelUp() {
+  const el = document.getElementById('levelReadout');
+  if (!el) return;
+  el.classList.remove('level-flash');
+  void el.offsetWidth;
+  el.classList.add('level-flash');
+  el.addEventListener('animationend', () => el.classList.remove('level-flash'), { once: true });
+}
+
 function updateHud(force = false) {
   hudTimer -= 1;
   if (!force && hudTimer > 0) return;
@@ -1234,7 +1258,7 @@ function resetStar(positions, offset, z = random(-168, -70)) {
 }
 
 function handlePointerDown(event) {
-  if (mode === 'gameover') {
+  if (mode === 'gameover' && gameoverTime >= 0.6) {
     startGame();
     return;
   }
