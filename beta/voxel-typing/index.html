@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#07120f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Voxel Typing Night | PanPhy Labs Beta</title>
+  <link rel="icon" type="image/png" href="../../assets/favicon.png">
+  <link rel="stylesheet" href="./src/styles.css">
+  <script>
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (event) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+    document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
+    document.addEventListener('gesturechange', (event) => event.preventDefault(), { passive: false });
+    document.addEventListener('gestureend', (event) => event.preventDefault(), { passive: false });
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <canvas id="gameCanvas" aria-label="Voxel Typing Night 3D game scene"></canvas>
+    <div class="moon-haze" aria-hidden="true"></div>
+    <div class="pixel-grain" aria-hidden="true"></div>
+    <div class="damage-flash" id="damageFlash" aria-hidden="true"></div>
+    <div class="labels-layer" id="labelsLayer" aria-hidden="true"></div>
+
+    <header class="game-bar" aria-label="Game status">
+      <a class="brand-mark" href="../../" aria-label="PanPhy Labs home">
+        <img src="../../assets/panphy.png" alt="PanPhy Labs">
+      </a>
+      <div class="game-title">
+        <span>BETA PROTOTYPE</span>
+        <h1>Voxel Typing Night</h1>
+      </div>
+      <button class="icon-button" id="pauseButton" type="button" aria-label="Pause run" disabled>II</button>
+    </header>
+
+    <section class="hud-grid" aria-label="Run metrics">
+      <div class="readout">
+        <span>Score</span>
+        <strong id="scoreValue">0</strong>
+      </div>
+      <div class="readout">
+        <span>Best</span>
+        <strong id="bestValue">0</strong>
+      </div>
+      <div class="readout">
+        <span>Wall</span>
+        <strong id="healthValue">100%</strong>
+      </div>
+      <div class="readout">
+        <span>Wave</span>
+        <strong id="waveValue">1</strong>
+      </div>
+    </section>
+
+    <section class="typing-strip" aria-live="polite">
+      <span id="typingLabel">INPUT</span>
+      <strong id="typedValue">ready</strong>
+      <small id="comboValue">0 chain</small>
+    </section>
+
+    <section class="message-panel" id="messagePanel" aria-live="polite">
+      <p id="messageKicker">VOXEL NIGHTFALL</p>
+      <h2 id="messageTitle">Hold the Gate</h2>
+      <div class="message-score" id="messageScore">Best 0</div>
+      <p class="message-copy" id="messageCopy">Type the floating words before the blocklings reach the wall.</p>
+      <button id="startButton" type="button">Start Night</button>
+    </section>
+
+    <input
+      class="keyboard-input"
+      id="keyboardInput"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      aria-label="Typing input">
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
