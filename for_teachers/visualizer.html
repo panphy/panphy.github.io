@@ -634,6 +634,26 @@
 			border-radius: 0
 		}
 
+		#stage:fullscreen {
+			margin: 0;
+			width: 100vw;
+			height: 100vh;
+			min-height: 0;
+			border: 0;
+			border-radius: 0;
+			background: #000
+		}
+
+		#stage:-webkit-full-screen {
+			margin: 0;
+			width: 100vw;
+			height: 100vh;
+			min-height: 0;
+			border: 0;
+			border-radius: 0;
+			background: #000
+		}
+
 		body.pseudoFullscreen .topbar {
 			display: none
 		}
@@ -1309,14 +1329,87 @@
 			pointerColorInput.value = pointerColor;
 			annotColorInput.value = annotColor;
 
-			/* ===== Fullscreen (CSS-only, no native Fullscreen API) ===== */
+			/* ===== Fullscreen ===== */
+			function getNativeFullscreenElement() {
+				return document.fullscreenElement ||
+					document.webkitFullscreenElement ||
+					document.mozFullScreenElement ||
+					document.msFullscreenElement ||
+					null;
+			}
+
+			function hasNativeFullscreenSupport() {
+				const canRequest = stage.requestFullscreen ||
+					stage.webkitRequestFullscreen ||
+					stage.mozRequestFullScreen ||
+					stage.msRequestFullscreen;
+
+				if (!canRequest) return false;
+				if (document.fullscreenEnabled === false &&
+					document.webkitFullscreenEnabled !== true &&
+					document.mozFullScreenEnabled !== true &&
+					document.msFullscreenEnabled !== true) {
+					return false;
+				}
+
+				return true;
+			}
+
 			function isFullscreen() {
-				return pseudoFullscreenActive;
+				return pseudoFullscreenActive || !!getNativeFullscreenElement();
 			}
 
 			function setPseudoFullscreen(active) {
 				pseudoFullscreenActive = active;
 				document.body.classList.toggle('pseudoFullscreen', active);
+			}
+
+			function requestNativeFullscreen() {
+				try {
+					if (stage.requestFullscreen) {
+						return stage.requestFullscreen({ navigationUI: 'hide' });
+					}
+					if (stage.webkitRequestFullscreen) {
+						stage.webkitRequestFullscreen();
+						return Promise.resolve();
+					}
+					if (stage.mozRequestFullScreen) {
+						stage.mozRequestFullScreen();
+						return Promise.resolve();
+					}
+					if (stage.msRequestFullscreen) {
+						stage.msRequestFullscreen();
+						return Promise.resolve();
+					}
+				} catch (err) {
+					return Promise.reject(err);
+				}
+
+				return Promise.reject(new Error('Native fullscreen is not supported.'));
+			}
+
+			function exitNativeFullscreen() {
+				try {
+					if (document.exitFullscreen) {
+						return document.exitFullscreen();
+					}
+					if (document.webkitExitFullscreen) {
+						document.webkitExitFullscreen();
+						return Promise.resolve();
+					}
+					if (document.mozCancelFullScreen) {
+						document.mozCancelFullScreen();
+						return Promise.resolve();
+					}
+					if (document.msExitFullscreen) {
+						document.msExitFullscreen();
+						return Promise.resolve();
+					}
+				} catch (err) {
+					return Promise.reject(err);
+				}
+
+				return Promise.resolve();
 			}
 
 			function updateFullscreenUI() {
@@ -1326,9 +1419,43 @@
 				fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
 			}
 
-			fullscreenBtn.addEventListener('click', () => {
-				setPseudoFullscreen(!pseudoFullscreenActive);
+			async function enterFullscreen() {
+				setPseudoFullscreen(false);
+
+				if (hasNativeFullscreenSupport()) {
+					try {
+						await requestNativeFullscreen();
+						updateFullscreenUI();
+						return;
+					} catch (err) {
+						// Fall back to the CSS mode on browsers that expose but reject fullscreen.
+					}
+				}
+
+				setPseudoFullscreen(true);
 				updateFullscreenUI();
+			}
+
+			async function exitFullscreen() {
+				if (getNativeFullscreenElement()) {
+					try {
+						await exitNativeFullscreen();
+					} catch (err) {
+						// The fullscreenchange event will keep the button state honest if exit fails.
+					}
+				}
+
+				setPseudoFullscreen(false);
+				updateFullscreenUI();
+			}
+
+			fullscreenBtn.addEventListener('click', async () => {
+				if (isFullscreen()) {
+					await exitFullscreen();
+					return;
+				}
+
+				await enterFullscreen();
 			});
 
 			document.addEventListener('keydown', (e) => {
@@ -1336,6 +1463,10 @@
 					setPseudoFullscreen(false);
 					updateFullscreenUI();
 				}
+			});
+
+			['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(eventName => {
+				document.addEventListener(eventName, updateFullscreenUI);
 			});
 
 			updateFullscreenUI();
