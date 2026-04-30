@@ -161,7 +161,9 @@ Each application is self-contained in a single HTML file:
 
 ### UI Design System
 
-All new pages should follow the design language established in the simulation pages. The collision sim (`collision.html`) is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
+> **`/beta` pages are exempt.** Beta is a sandbox for trying new ideas — feel free to use any colors, fonts, layouts, or libraries without following this design system. These rules only apply when building or promoting pages to the published site.
+
+All new **published** pages should follow the design language established in the simulation pages. The collision sim (`collision.html`) is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
 
 #### Typography
 
@@ -444,7 +446,7 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 4. **Always bump `BUILD_ID` in `sw.js` after code changes**: Any time you modify a file that is listed in `ASSETS_TO_CACHE`, bump the `BUILD_ID` timestamp as your **final step** before finishing. This is easy to forget — do not skip it
 5. **Never cache `/beta/*` or `/misc/*` in place**: Keep those files out of SW registration and `ASSETS_TO_CACHE` unless they are first moved to a public directory
 6. **CDN URL exactness**: Keep CDN script/style URLs in HTML exactly aligned with `ASSETS_TO_CACHE`
-7. **Theme awareness**: Always use CSS variables, not hardcoded colors
+7. **Theme awareness**: Always use CSS variables, not hardcoded colors — **exception: `/beta` pages are a free sandbox and may use any styling approach**
 8. **Mobile-first**: Consider touch interactions and responsive design
 9. **Offline-first**: Ensure new features work without network
 10. **Know the exceptions**: `fun/dodge.html` is intentionally network-only because it depends on the live Supabase leaderboard, and public support pages do not always need an `index.html` card

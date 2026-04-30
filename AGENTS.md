@@ -83,7 +83,9 @@ If you promote an unlisted page to production, treat it as a full launch task:
 
 ## UI Design System
 
-All new pages should follow the design language established across the site. The collision sim is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
+> **`/beta` pages are exempt.** Beta is a sandbox for trying new ideas — feel free to use any colors, fonts, layouts, or libraries without following this design system. These rules only apply when building or promoting pages to the published site.
+
+All new **published** pages should follow the design language established across the site. The collision sim is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
 
 ### Typography
 
