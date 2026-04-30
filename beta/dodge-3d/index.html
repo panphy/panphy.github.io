@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#05070d">
+  <meta name="theme-color" content="#090807">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Asteroid Storm 3D | PanPhy Labs Beta</title>
@@ -26,8 +26,6 @@
 <body>
   <div id="app">
     <canvas id="gameCanvas" aria-label="Asteroid Storm 3D game scene"></canvas>
-    <div class="starscape-noise" aria-hidden="true"></div>
-    <div class="scanlines" aria-hidden="true"></div>
     <div class="screen-flash" id="screenFlash" aria-hidden="true"></div>
 
     <header class="flight-bar" aria-label="Game status">
@@ -35,7 +33,6 @@
         <img src="../../assets/panphy.png" alt="PanPhy Labs">
       </a>
       <div class="flight-title">
-        <span>BETA FLIGHT</span>
         <h1>Asteroid Storm 3D</h1>
       </div>
       <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>⏸</button>
@@ -60,11 +57,8 @@
       </div>
     </section>
 
-    <div class="corner-panel corner-panel-left" aria-hidden="true"></div>
-    <div class="corner-panel corner-panel-right" aria-hidden="true"></div>
-
     <section class="message-panel" id="messagePanel" aria-live="polite">
-      <p id="messageKicker">LOW-POLY RUN</p>
+      <p id="messageKicker">Low-poly run</p>
       <h2 id="messageTitle">Asteroid Field</h2>
       <div class="message-score" id="messageScore">Best 0.00 s</div>
       <p class="controls-hint" id="controlsHint">WASD / Arrows &bull; tap &amp; drag on mobile</p>
