@@ -4,6 +4,7 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+.vite/
 
 # Editor/IDE settings
 .vscode/
