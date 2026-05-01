@@ -329,6 +329,12 @@ a {
   font-weight: 700;
   line-height: 1.45;
   text-transform: none;
+  white-space: pre-line;
+}
+
+.message-panel.is-cleared .message-copy {
+  font-size: 0.84rem;
+  line-height: 1.7;
 }
 
 .message-score {
@@ -409,6 +415,23 @@ a {
 
 .word-tag.is-hidden {
   opacity: 0;
+}
+
+.word-tag.is-boss {
+  min-width: 140px;
+  max-width: 260px;
+  border-color: rgba(243, 78, 85, 0.58);
+  background: rgba(22, 4, 4, 0.9);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.48), inset 0 0 18px rgba(242, 106, 61, 0.1);
+}
+
+.word-tag.is-boss.is-target {
+  border-color: rgba(243, 78, 85, 0.95);
+  background: rgba(36, 6, 6, 0.94);
+}
+
+.word-tag.is-boss.is-danger {
+  border-color: rgba(243, 78, 85, 1);
 }
 
 .keyboard-input {

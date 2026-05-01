@@ -52,7 +52,7 @@ const EASY_WORDS = [
   { term: 'pulse', definition: 'A single disturbance travelling through a medium' },
   { term: 'ray', definition: 'A line showing the direction of wave travel' },
   { term: 'heat', definition: 'Thermal energy transferred between objects at different temperatures' },
-].map(w => ({ ...w, showDefinition: false }));
+];
 const MEDIUM_WORDS = [
   { term: 'gravity', definition: 'Attractive force between any two objects with mass' },
   { term: 'friction', definition: 'A force that opposes relative motion between surfaces' },
@@ -68,7 +68,7 @@ const MEDIUM_WORDS = [
   { term: 'resistor', definition: 'A component that limits the flow of electric current' },
   { term: 'diffraction', definition: 'The spreading of waves around obstacles or through gaps' },
   { term: 'refraction', definition: 'The change in wave direction when crossing a boundary' },
-].map(w => ({ ...w, showDefinition: true }));
+];
 const HARD_WORDS = [
   { term: 'kinetic energy', definition: 'Energy possessed by an object due to its motion' },
   { term: 'resultant force', definition: 'The single force equivalent to all forces acting combined' },
@@ -80,7 +80,7 @@ const HARD_WORDS = [
   { term: 'escape speed', definition: 'Minimum speed needed to break free of a gravitational field' },
   { term: 'ohmic conductor', definition: 'A conductor where current is proportional to voltage' },
   { term: 'inverse square', definition: 'A quantity that decreases with the square of distance' },
-].map(w => ({ ...w, showDefinition: true }));
+];
 const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 const ENEMY_TYPES = [
   {
@@ -124,6 +124,16 @@ const ENEMY_TYPES = [
     score: 70,
   },
 ];
+const BOSS_TYPE = {
+  name: 'Boss',
+  body: 0x2a0808,
+  trim: 0x7a1a1a,
+  eye: 0xf26a3d,
+  speed: 1.1,
+  scale: 1.62,
+  weight: 1,
+  score: 150,
+};
 
 const reusableVector = new THREE.Vector3();
 const reusableVectorTwo = new THREE.Vector3();
@@ -143,7 +153,13 @@ let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
 let health = GATE_HEALTH;
-let wave = 1;
+let waveSet = 1;
+let wavePhase = 'normal';
+let normalEnemyTarget = 8;
+let normalEnemiesSpawned = 0;
+let bossesSpawned = 0;
+let bossSpawnTimer = 0;
+let bossWordsThisSet = [];
 let streak = 0;
 let typedBuffer = '';
 let activeTarget = null;
@@ -215,6 +231,8 @@ updateHud(true);
 startButton.addEventListener('click', () => {
   if (mode === 'paused') {
     resumeGame();
+  } else if (mode === 'wave_cleared') {
+    advanceWaveSet();
   } else {
     startGame();
   }
@@ -255,7 +273,13 @@ function startGame() {
   clearEffects();
   score = 0;
   health = GATE_HEALTH;
-  wave = 1;
+  waveSet = 1;
+  wavePhase = 'normal';
+  normalEnemyTarget = 8;
+  normalEnemiesSpawned = 0;
+  bossesSpawned = 0;
+  bossSpawnTimer = 0;
+  bossWordsThisSet = [];
   streak = 0;
   typedBuffer = '';
   activeTarget = null;
@@ -267,13 +291,12 @@ function startGame() {
   mode = 'running';
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
+  messagePanel.classList.remove('is-cleared');
   pauseButton.disabled = false;
   pauseButton.textContent = 'II';
   pauseButton.setAttribute('aria-label', 'Pause run');
   updateTypedDisplay();
   updateHud(true);
-  spawnEnemy({ forcedPrompt: 'force', lane: -1.7 });
-  spawnEnemy({ forcedPrompt: 'wave', lane: 1.7, delay: 8 });
   focusKeyboard();
 }
 
@@ -322,6 +345,12 @@ function handleKeyDown(event) {
   if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
     event.preventDefault();
     startGame();
+    return;
+  }
+
+  if (event.key === 'Enter' && mode === 'wave_cleared') {
+    event.preventDefault();
+    advanceWaveSet();
     return;
   }
 
@@ -445,12 +474,31 @@ function animate(frameTime) {
 
   if (mode === 'running') {
     elapsed += delta;
-    wave = Math.max(1, Math.floor(elapsed / 24) + 1);
-    spawnTimer -= delta;
-    if (spawnTimer <= 0 && enemies.length < ENEMY_LIMIT) {
-      spawnEnemy();
-      spawnTimer = nextSpawnDelay();
+
+    if (wavePhase === 'normal') {
+      if (normalEnemiesSpawned < normalEnemyTarget) {
+        spawnTimer -= delta;
+        if (spawnTimer <= 0 && enemies.length < ENEMY_LIMIT) {
+          spawnEnemy();
+          normalEnemiesSpawned += 1;
+          spawnTimer = nextSpawnDelay();
+        }
+      } else if (enemies.length === 0) {
+        startBossPhase();
+      }
+    } else if (wavePhase === 'boss') {
+      if (bossesSpawned < 3) {
+        bossSpawnTimer -= delta;
+        if (bossSpawnTimer <= 0) {
+          spawnBoss();
+          bossesSpawned += 1;
+          bossSpawnTimer = 2.5;
+        }
+      } else if (enemies.length === 0) {
+        startWaveCleared();
+      }
     }
+
     updateEnemies(delta, seconds);
     updateHud(false);
   }
@@ -465,7 +513,7 @@ function updateEnemies(delta, seconds) {
   for (let index = enemies.length - 1; index >= 0; index -= 1) {
     const enemy = enemies[index];
     enemy.age += delta;
-    const speed = enemy.speed + wave * 0.13;
+    const speed = enemy.speed + waveSet * 0.13;
     enemy.group.position.z += speed * delta;
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
@@ -646,7 +694,7 @@ function updateHud(force) {
   scoreValue.textContent = formatScore(score);
   bestValue.textContent = formatScore(Math.max(bestScore, score));
   healthValue.textContent = `${Math.max(0, Math.round(health))}%`;
-  waveValue.textContent = String(wave);
+  waveValue.textContent = String(waveSet);
   comboValue.textContent = `${streak} chain`;
 }
 
@@ -656,11 +704,15 @@ function updateTypedDisplay() {
 }
 
 function spawnEnemy(options = {}) {
-  const wordData = options.forcedPrompt
-    ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null, showDefinition: false })
+  const isBoss = options.isBoss || false;
+  const wordData = options.wordData
+    ? options.wordData
+    : options.forcedPrompt
+    ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
     : choosePrompt();
 
-  const type = weightedPick(ENEMY_TYPES);
+  const showDefinition = isBoss && !!wordData.definition;
+  const type = isBoss ? BOSS_TYPE : weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
   const startZ = SPAWN_Z - (options.delay || Math.random() * 10);
   const lane = Number.isFinite(options.lane) ? options.lane : chooseSpawnLane(startZ);
@@ -669,11 +721,7 @@ function spawnEnemy(options = {}) {
   enemyGroup.add(group);
 
   const label = document.createElement('div');
-  label.className = 'word-tag';
-
-  const nameNode = document.createElement('span');
-  nameNode.className = 'name';
-  nameNode.textContent = type.name;
+  label.className = isBoss ? 'word-tag is-boss' : 'word-tag';
 
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
@@ -686,13 +734,13 @@ function spawnEnemy(options = {}) {
 
   promptNode.append(typedNode, remainingNode);
 
-  if (wordData.showDefinition && wordData.definition) {
+  if (showDefinition) {
     const definitionNode = document.createElement('span');
     definitionNode.className = 'definition';
     definitionNode.textContent = wordData.definition;
-    label.append(nameNode, definitionNode, promptNode);
+    label.append(definitionNode, promptNode);
   } else {
-    label.append(nameNode, promptNode);
+    label.append(promptNode);
   }
 
   labelsLayer.append(label);
@@ -705,16 +753,17 @@ function spawnEnemy(options = {}) {
     typedNode,
     remainingNode,
     prompt: wordData.term,
-    showDefinition: wordData.showDefinition,
-    hintMask: wordData.showDefinition ? buildHintMask(wordData.term) : null,
+    showDefinition,
+    hintMask: showDefinition ? buildHintMask(wordData.term) : null,
+    isBoss,
     lane,
-    speed: type.speed + Math.random() * 0.35,
-    damage: type.name === 'Ash Oaf' ? 18 : 12,
+    speed: isBoss ? type.speed : type.speed + Math.random() * 0.35,
+    damage: isBoss ? 30 : type.name === 'Ash Oaf' ? 18 : 12,
     baseY: 0.32,
     age: 0,
-    wobbleAmount: 0.08 + Math.random() * 0.2,
-    wobbleSpeed: 1.2 + Math.random() * 1.4,
-    stepBounce: 0.06 + Math.random() * 0.08,
+    wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
+    wobbleSpeed: isBoss ? 0.7 : 1.2 + Math.random() * 1.4,
+    stepBounce: isBoss ? 0.04 : 0.06 + Math.random() * 0.08,
     phase: Math.random() * Math.PI * 2,
   };
   enemyId += 1;
@@ -768,6 +817,12 @@ function createEnemyMesh(type) {
   if (type.name === 'Cinder Imp') {
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, -0.34, 2.32, 0));
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, 0.34, 2.32, 0));
+  }
+
+  if (type.name === 'Boss') {
+    group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, -0.3, 2.32, 0));
+    group.add(blockMesh(0.18, 0.44, 0.18, trimMaterial, 0, 2.42, 0));
+    group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, 0.3, 2.32, 0));
   }
 
   return group;
@@ -1036,7 +1091,7 @@ function chooseTarget(matches) {
 }
 
 function choosePrompt() {
-  const pool = wave >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS] : wave >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS] : EASY_WORDS;
+  const pool = waveSet >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS] : waveSet >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS] : EASY_WORDS;
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
@@ -1046,7 +1101,7 @@ function choosePrompt() {
 }
 
 function nextSpawnDelay() {
-  return Math.max(0.68, 2.15 - wave * 0.14 + Math.random() * 0.46);
+  return Math.max(0.68, 2.15 - waveSet * 0.14 + Math.random() * 0.46);
 }
 
 function weightedPick(items) {
@@ -1098,4 +1153,70 @@ function loadBestScore() {
 
 function saveBestScore(value) {
   localStorage.setItem(STORAGE_KEY, String(Math.round(value)));
+}
+
+function startBossPhase() {
+  wavePhase = 'boss';
+  bossesSpawned = 0;
+  bossWordsThisSet = [];
+  bossSpawnTimer = 0.8;
+}
+
+function spawnBoss() {
+  const wordData = chooseBossWord();
+  bossWordsThisSet.push(wordData);
+  const lanes = [-3.7, 0, 3.7];
+  const lane = lanes[bossesSpawned % lanes.length];
+  spawnEnemy({ isBoss: true, wordData, lane, delay: 0 });
+}
+
+function chooseBossWord() {
+  const pool = [...MEDIUM_WORDS, ...HARD_WORDS];
+  const usedTerms = new Set(bossWordsThisSet.map(w => w.term));
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const entry = pool[Math.floor(Math.random() * pool.length)];
+    if (!usedTerms.has(entry.term)) return entry;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function startWaveCleared() {
+  mode = 'wave_cleared';
+  typedBuffer = '';
+  activeTarget = null;
+  pauseButton.disabled = true;
+  document.body.classList.remove('is-running');
+  const glossary = bossWordsThisSet.map(w => `${w.term} — ${w.definition}`).join('\n');
+  showMessage(
+    `WAVE ${waveSet} CLEARED`,
+    'Night Holds',
+    `Score ${formatScore(score)}`,
+    'Next Wave',
+    glossary
+  );
+  messagePanel.classList.add('is-cleared');
+  updateHud(true);
+}
+
+function advanceWaveSet() {
+  waveSet += 1;
+  wavePhase = 'normal';
+  normalEnemyTarget = 8 + (waveSet - 1) * 2;
+  normalEnemiesSpawned = 0;
+  bossesSpawned = 0;
+  bossSpawnTimer = 0;
+  bossWordsThisSet = [];
+  typedBuffer = '';
+  activeTarget = null;
+  spawnTimer = 1.25;
+  mode = 'running';
+  document.body.classList.add('is-running');
+  messagePanel.hidden = true;
+  messagePanel.classList.remove('is-cleared');
+  pauseButton.disabled = false;
+  pauseButton.textContent = 'II';
+  pauseButton.setAttribute('aria-label', 'Pause run');
+  updateTypedDisplay();
+  updateHud(true);
+  focusKeyboard();
 }
