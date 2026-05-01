@@ -349,6 +349,7 @@ a {
   position: absolute;
   display: grid;
   min-width: 104px;
+  max-width: 210px;
   gap: 3px;
   padding: 7px 9px 8px;
   border: 1px solid rgba(242, 240, 223, 0.38);
@@ -371,6 +372,15 @@ a {
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.word-tag .definition {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: normal;
 }
 
 .word-tag .prompt {

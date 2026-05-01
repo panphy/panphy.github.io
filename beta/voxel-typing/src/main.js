@@ -36,51 +36,52 @@ const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
 const EASY_WORDS = [
-  'force',
-  'mass',
-  'wave',
-  'speed',
-  'field',
-  'light',
-  'sound',
-  'charge',
-  'energy',
-  'vector',
-  'spring',
-  'orbit',
-  'phase',
-  'pulse',
-  'ray',
-  'heat',
-];
+  { term: 'force', definition: 'A push or pull that can change an object\'s motion' },
+  { term: 'mass', definition: 'The amount of matter in an object' },
+  { term: 'wave', definition: 'A disturbance that transfers energy without moving matter' },
+  { term: 'speed', definition: 'Distance travelled per unit time' },
+  { term: 'field', definition: 'A region of space where a force acts on an object' },
+  { term: 'light', definition: 'Electromagnetic radiation visible to the human eye' },
+  { term: 'sound', definition: 'A longitudinal wave produced by vibrating objects' },
+  { term: 'charge', definition: 'A property of matter that causes electromagnetic force' },
+  { term: 'energy', definition: 'The capacity to do work' },
+  { term: 'vector', definition: 'A quantity with both magnitude and direction' },
+  { term: 'spring', definition: 'An elastic device that stores potential energy' },
+  { term: 'orbit', definition: 'The curved path of one body around another' },
+  { term: 'phase', definition: 'The position within a repeating wave cycle' },
+  { term: 'pulse', definition: 'A single disturbance travelling through a medium' },
+  { term: 'ray', definition: 'A line showing the direction of wave travel' },
+  { term: 'heat', definition: 'Thermal energy transferred between objects at different temperatures' },
+].map(w => ({ ...w, showDefinition: false }));
 const MEDIUM_WORDS = [
-  'gravity',
-  'friction',
-  'voltage',
-  'current',
-  'impulse',
-  'density',
-  'momentum',
-  'pressure',
-  'frequency',
-  'amplitude',
-  'magnetic',
-  'resistor',
-  'diffraction',
-  'refraction',
-];
+  { term: 'gravity', definition: 'Attractive force between any two objects with mass' },
+  { term: 'friction', definition: 'A force that opposes relative motion between surfaces' },
+  { term: 'voltage', definition: 'Energy transferred per unit charge in a circuit' },
+  { term: 'current', definition: 'The rate of flow of electric charge' },
+  { term: 'impulse', definition: 'The product of force and the time it acts' },
+  { term: 'density', definition: 'Mass per unit volume of a substance' },
+  { term: 'momentum', definition: 'The product of an object\'s mass and velocity' },
+  { term: 'pressure', definition: 'Force per unit area' },
+  { term: 'frequency', definition: 'Number of complete wave cycles per second' },
+  { term: 'amplitude', definition: 'Maximum displacement from the equilibrium position' },
+  { term: 'magnetic', definition: 'Relating to the force field around a magnet or current' },
+  { term: 'resistor', definition: 'A component that limits the flow of electric current' },
+  { term: 'diffraction', definition: 'The spreading of waves around obstacles or through gaps' },
+  { term: 'refraction', definition: 'The change in wave direction when crossing a boundary' },
+].map(w => ({ ...w, showDefinition: true }));
 const HARD_WORDS = [
-  'kinetic energy',
-  'resultant force',
-  'electric field',
-  'terminal velocity',
-  'conservation',
-  'standing wave',
-  'wave equation',
-  'escape speed',
-  'ohmic conductor',
-  'inverse square',
-];
+  { term: 'kinetic energy', definition: 'Energy possessed by an object due to its motion' },
+  { term: 'resultant force', definition: 'The single force equivalent to all forces acting combined' },
+  { term: 'electric field', definition: 'A region where a charged object experiences a force' },
+  { term: 'terminal velocity', definition: 'Constant speed when driving and resistive forces balance' },
+  { term: 'conservation', definition: 'A quantity that stays constant in a closed system' },
+  { term: 'standing wave', definition: 'Stationary pattern from two identical waves in opposite directions' },
+  { term: 'wave equation', definition: 'Relationship linking wave speed, frequency and wavelength' },
+  { term: 'escape speed', definition: 'Minimum speed needed to break free of a gravitational field' },
+  { term: 'ohmic conductor', definition: 'A conductor where current is proportional to voltage' },
+  { term: 'inverse square', definition: 'A quantity that decreases with the square of distance' },
+].map(w => ({ ...w, showDefinition: true }));
+const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 const ENEMY_TYPES = [
   {
     name: 'Mudlug',
@@ -625,11 +626,17 @@ function updateLabels() {
   }
 }
 
+function buildHintMask(term) {
+  return term.replace(/\S+/g, word => word[0] + '_'.repeat(word.length - 1));
+}
+
 function renderPrompt(enemy) {
   const matched = enemy.prompt.startsWith(typedBuffer) && typedBuffer.length > 0;
   const typedLength = matched ? typedBuffer.length : 0;
   enemy.typedNode.textContent = enemy.prompt.slice(0, typedLength);
-  enemy.remainingNode.textContent = enemy.prompt.slice(typedLength);
+  enemy.remainingNode.textContent = enemy.showDefinition
+    ? enemy.hintMask.slice(typedLength)
+    : enemy.prompt.slice(typedLength);
 }
 
 function updateHud(force) {
@@ -649,6 +656,10 @@ function updateTypedDisplay() {
 }
 
 function spawnEnemy(options = {}) {
+  const wordData = options.forcedPrompt
+    ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null, showDefinition: false })
+    : choosePrompt();
+
   const type = weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
   const startZ = SPAWN_Z - (options.delay || Math.random() * 10);
@@ -674,7 +685,16 @@ function spawnEnemy(options = {}) {
   remainingNode.className = 'remaining';
 
   promptNode.append(typedNode, remainingNode);
-  label.append(nameNode, promptNode);
+
+  if (wordData.showDefinition && wordData.definition) {
+    const definitionNode = document.createElement('span');
+    definitionNode.className = 'definition';
+    definitionNode.textContent = wordData.definition;
+    label.append(nameNode, definitionNode, promptNode);
+  } else {
+    label.append(nameNode, promptNode);
+  }
+
   labelsLayer.append(label);
 
   const enemy = {
@@ -684,7 +704,9 @@ function spawnEnemy(options = {}) {
     label,
     typedNode,
     remainingNode,
-    prompt: options.forcedPrompt || choosePrompt(),
+    prompt: wordData.term,
+    showDefinition: wordData.showDefinition,
+    hintMask: wordData.showDefinition ? buildHintMask(wordData.term) : null,
     lane,
     speed: type.speed + Math.random() * 0.35,
     damage: type.name === 'Ash Oaf' ? 18 : 12,
@@ -1017,8 +1039,8 @@ function choosePrompt() {
   const pool = wave >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS] : wave >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS] : EASY_WORDS;
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
   for (let attempt = 0; attempt < 8; attempt += 1) {
-    const prompt = pool[Math.floor(Math.random() * pool.length)];
-    if (!nearExisting.has(prompt)) return prompt;
+    const entry = pool[Math.floor(Math.random() * pool.length)];
+    if (!nearExisting.has(entry.term)) return entry;
   }
   return pool[Math.floor(Math.random() * pool.length)];
 }
