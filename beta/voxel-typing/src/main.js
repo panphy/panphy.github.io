@@ -44,6 +44,20 @@ const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
 const MASTER_VOLUME = 0.16;
+const MUSIC_GAIN = 0.58;
+const MUSIC_BASE_STEP = 0.18;
+const MUSIC_TIMER_INTERVAL = 80;
+const MUSIC_SCHEDULE_AHEAD = 0.34;
+const MUSIC_MELODY = [
+  523.25, 659.25, 783.99, 659.25, 587.33, 739.99, 880.0, 739.99,
+  523.25, null, 659.25, 783.99, 987.77, 880.0, 739.99, 659.25,
+  440.0, 523.25, 659.25, 523.25, 493.88, 587.33, 739.99, 587.33,
+  392.0, null, 493.88, 587.33, 783.99, 739.99, 587.33, 493.88,
+];
+const MUSIC_BASS = [
+  130.81, null, null, null, 98.0, null, null, null,
+  116.54, null, null, null, 87.31, null, 98.0, null,
+];
 const EASY_WORDS = [
   { term: 'force', definition: 'A push or pull that can change an object\'s motion' },
   { term: 'mass', definition: 'The amount of matter in an object' },
@@ -185,6 +199,10 @@ let starField = null;
 let audioEnabled = loadAudioSetting();
 let audioContext = null;
 let masterGain = null;
+let musicGain = null;
+let musicTimer = null;
+let musicStep = 0;
+let nextMusicTime = 0;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -259,6 +277,9 @@ audioButton.addEventListener('click', () => {
   if (audioEnabled) {
     resumeAudio();
     playToggleSound();
+    if (mode === 'running') startMusicLoop(false);
+  } else {
+    stopMusicLoop(0.03);
   }
   if (mode === 'running') focusKeyboard();
 });
@@ -316,6 +337,7 @@ function startGame() {
   mistakeTimer = 0;
   damageTimer = 0;
   mode = 'running';
+  startMusicLoop(true);
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
@@ -330,6 +352,7 @@ function startGame() {
 function pauseGame() {
   if (mode !== 'running') return;
   playPauseSound();
+  stopMusicLoop();
   mode = 'paused';
   pauseButton.textContent = '>';
   pauseButton.setAttribute('aria-label', 'Resume run');
@@ -340,6 +363,7 @@ function resumeGame() {
   if (mode !== 'paused') return;
   playStartSound();
   mode = 'running';
+  startMusicLoop(false);
   lastFrameTime = 0;
   messagePanel.hidden = true;
   pauseButton.textContent = 'II';
@@ -349,6 +373,7 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
+  stopMusicLoop(0.04);
   playGameOverSound();
   pauseButton.disabled = true;
   pauseButton.textContent = 'II';
@@ -1347,6 +1372,7 @@ function updateAudioButton() {
     masterGain.gain.cancelScheduledValues(audioContext.currentTime);
     masterGain.gain.setTargetAtTime(audioEnabled ? MASTER_VOLUME : 0.0001, audioContext.currentTime, 0.018);
   }
+  if (!audioEnabled) stopMusicLoop(0.03);
 }
 
 function ensureAudio() {
@@ -1357,7 +1383,10 @@ function ensureAudio() {
   if (!audioContext) {
     audioContext = new AudioContextClass();
     masterGain = audioContext.createGain();
+    musicGain = audioContext.createGain();
     masterGain.gain.setValueAtTime(MASTER_VOLUME, audioContext.currentTime);
+    musicGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+    musicGain.connect(masterGain);
     masterGain.connect(audioContext.destination);
   }
 
@@ -1377,6 +1406,13 @@ function playTone(frequency, duration, options = {}) {
   if (!context || !masterGain) return;
 
   const start = context.currentTime + (options.delay || 0);
+  scheduleTone(frequency, duration, start, options, masterGain);
+}
+
+function scheduleTone(frequency, duration, start, options = {}, destination = masterGain) {
+  const context = audioContext;
+  if (!context || !destination) return;
+
   const attack = Math.min(options.attack ?? 0.008, duration * 0.4);
   const oscillator = context.createOscillator();
   const gainNode = context.createGain();
@@ -1392,7 +1428,7 @@ function playTone(frequency, duration, options = {}) {
   gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
 
   oscillator.connect(gainNode);
-  gainNode.connect(masterGain);
+  gainNode.connect(destination);
   oscillator.start(start);
   oscillator.stop(start + duration + 0.04);
 }
@@ -1402,6 +1438,13 @@ function playNoise(duration, options = {}) {
   if (!context || !masterGain) return;
 
   const start = context.currentTime + (options.delay || 0);
+  scheduleNoise(duration, start, options, masterGain);
+}
+
+function scheduleNoise(duration, start, options = {}, destination = masterGain) {
+  const context = audioContext;
+  if (!context || !destination) return;
+
   const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * duration)), context.sampleRate);
   const data = buffer.getChannelData(0);
   for (let index = 0; index < data.length; index += 1) {
@@ -1421,9 +1464,99 @@ function playNoise(duration, options = {}) {
 
   source.connect(filter);
   filter.connect(gainNode);
-  gainNode.connect(masterGain);
+  gainNode.connect(destination);
   source.start(start);
   source.stop(start + duration + 0.02);
+}
+
+function startMusicLoop(reset) {
+  const context = resumeAudio();
+  if (!context || !musicGain || mode !== 'running') return;
+
+  if (reset || nextMusicTime < context.currentTime) {
+    musicStep = 0;
+    nextMusicTime = context.currentTime + 0.08;
+  }
+
+  musicGain.gain.cancelScheduledValues(context.currentTime);
+  musicGain.gain.setTargetAtTime(MUSIC_GAIN, context.currentTime, 0.12);
+
+  if (!musicTimer) {
+    musicTimer = window.setInterval(scheduleMusic, MUSIC_TIMER_INTERVAL);
+  }
+  scheduleMusic();
+}
+
+function stopMusicLoop(fade = 0.1) {
+  if (musicTimer) {
+    window.clearInterval(musicTimer);
+    musicTimer = null;
+  }
+  if (musicGain && audioContext) {
+    musicGain.gain.cancelScheduledValues(audioContext.currentTime);
+    musicGain.gain.setTargetAtTime(0.0001, audioContext.currentTime, fade);
+  }
+}
+
+function scheduleMusic() {
+  if (!audioEnabled || mode !== 'running' || !audioContext || !musicGain) {
+    stopMusicLoop(0.04);
+    return;
+  }
+
+  const stepDuration = Math.max(0.13, MUSIC_BASE_STEP - Math.min(waveSet - 1, 8) * 0.006);
+  while (nextMusicTime < audioContext.currentTime + MUSIC_SCHEDULE_AHEAD) {
+    scheduleMusicStep(musicStep, nextMusicTime, stepDuration);
+    nextMusicTime += stepDuration;
+    musicStep = (musicStep + 1) % MUSIC_MELODY.length;
+  }
+}
+
+function scheduleMusicStep(step, start, stepDuration) {
+  const melody = MUSIC_MELODY[step % MUSIC_MELODY.length];
+  const bass = MUSIC_BASS[step % MUSIC_BASS.length];
+  const accent = step % 8 === 0;
+
+  if (bass) {
+    scheduleTone(bass, stepDuration * 1.6, start, {
+      gain: accent ? 0.035 : 0.024,
+      type: 'square',
+      attack: 0.004,
+    }, musicGain);
+  }
+
+  if (melody && (step % 2 === 0 || waveSet > 2)) {
+    scheduleTone(melody, stepDuration * 0.82, start + stepDuration * 0.08, {
+      gain: 0.024,
+      type: 'square',
+      attack: 0.003,
+    }, musicGain);
+    if (step % 8 === 6) {
+      scheduleTone(melody * 1.5, stepDuration * 0.5, start + stepDuration * 0.18, {
+        gain: 0.012,
+        type: 'triangle',
+        attack: 0.003,
+      }, musicGain);
+    }
+  }
+
+  if (step % 4 === 2) {
+    scheduleNoise(stepDuration * 0.35, start + stepDuration * 0.16, {
+      gain: 0.009,
+      filterType: 'highpass',
+      filterFrequency: 2400,
+      q: 0.6,
+    }, musicGain);
+  }
+
+  if (step % 16 === 8) {
+    scheduleNoise(stepDuration * 0.55, start, {
+      gain: 0.016,
+      filterType: 'bandpass',
+      filterFrequency: 520,
+      q: 0.9,
+    }, musicGain);
+  }
 }
 
 function playToggleSound() {
@@ -1523,6 +1656,7 @@ function chooseBossWord() {
 
 function startWaveCleared() {
   mode = 'wave_cleared';
+  stopMusicLoop(0.12);
   playWaveClearSound();
   typedBuffer = '';
   activeTarget = null;
@@ -1553,6 +1687,7 @@ function advanceWaveSet() {
   activeTarget = null;
   spawnTimer = 1.25;
   mode = 'running';
+  startMusicLoop(true);
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
