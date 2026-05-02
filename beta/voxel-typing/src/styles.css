@@ -175,6 +175,12 @@ a {
   white-space: nowrap;
 }
 
+.game-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .icon-button,
 .message-panel button {
   min-height: 44px;
@@ -188,6 +194,7 @@ a {
 }
 
 .icon-button {
+  position: relative;
   width: 44px;
   min-width: 44px;
   font-family: var(--font-mono);
@@ -204,6 +211,23 @@ a {
 .icon-button:disabled {
   cursor: default;
   opacity: 0.36;
+}
+
+.icon-button.is-muted {
+  color: var(--muted);
+}
+
+.icon-button.is-muted::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--danger);
+  content: '';
+  transform: translate(-50%, -50%) rotate(-38deg);
+  box-shadow: 0 0 10px rgba(243, 78, 85, 0.34);
 }
 
 .hud-grid {

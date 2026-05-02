@@ -11,6 +11,7 @@ const comboValue = document.getElementById('comboValue');
 const typingStrip = document.querySelector('.typing-strip');
 const gameBar = document.querySelector('.game-bar');
 const startButton = document.getElementById('startButton');
+const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
 const messagePanel = document.getElementById('messagePanel');
 const messageKicker = document.getElementById('messageKicker');
@@ -21,6 +22,7 @@ const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
 
 const STORAGE_KEY = 'panphyVoxelTypingBestV1';
+const AUDIO_STORAGE_KEY = 'panphyVoxelTypingAudioV1';
 const MAX_DELTA = 0.06;
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
@@ -41,6 +43,7 @@ const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
+const MASTER_VOLUME = 0.16;
 const EASY_WORDS = [
   { term: 'force', definition: 'A push or pull that can change an object\'s motion' },
   { term: 'mass', definition: 'The amount of matter in an object' },
@@ -179,6 +182,9 @@ let enemyId = 0;
 let pathMarkerMaterial = null;
 let moon = null;
 let starField = null;
+let audioEnabled = loadAudioSetting();
+let audioContext = null;
+let masterGain = null;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -232,9 +238,11 @@ createSky();
 
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
+updateAudioButton();
 updateHud(true);
 
 startButton.addEventListener('click', () => {
+  resumeAudio();
   if (mode === 'paused') {
     resumeGame();
   } else if (mode === 'wave_cleared') {
@@ -244,7 +252,19 @@ startButton.addEventListener('click', () => {
   }
 });
 
+audioButton.addEventListener('click', () => {
+  audioEnabled = !audioEnabled;
+  saveAudioSetting(audioEnabled);
+  updateAudioButton();
+  if (audioEnabled) {
+    resumeAudio();
+    playToggleSound();
+  }
+  if (mode === 'running') focusKeyboard();
+});
+
 pauseButton.addEventListener('click', () => {
+  resumeAudio();
   if (mode === 'running') {
     pauseGame();
   } else if (mode === 'paused') {
@@ -275,6 +295,7 @@ resizeRenderer();
 requestAnimationFrame(animate);
 
 function startGame() {
+  playStartSound();
   clearEnemies();
   clearEffects();
   score = 0;
@@ -308,6 +329,7 @@ function startGame() {
 
 function pauseGame() {
   if (mode !== 'running') return;
+  playPauseSound();
   mode = 'paused';
   pauseButton.textContent = '>';
   pauseButton.setAttribute('aria-label', 'Resume run');
@@ -316,6 +338,7 @@ function pauseGame() {
 
 function resumeGame() {
   if (mode !== 'paused') return;
+  playStartSound();
   mode = 'running';
   lastFrameTime = 0;
   messagePanel.hidden = true;
@@ -326,6 +349,7 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
+  playGameOverSound();
   pauseButton.disabled = true;
   pauseButton.textContent = 'II';
   pauseButton.setAttribute('aria-label', 'Pause run');
@@ -348,6 +372,8 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
 }
 
 function handleKeyDown(event) {
+  resumeAudio();
+
   if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
     event.preventDefault();
     startGame();
@@ -377,6 +403,7 @@ function handleKeyDown(event) {
   if (event.key === 'Backspace') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
+    playBackspaceSound();
     selectTarget();
     updateTypedDisplay();
     return;
@@ -390,10 +417,12 @@ function handleKeyDown(event) {
 
 function handleBeforeInput(event) {
   if (mode !== 'running') return;
+  resumeAudio();
 
   if (event.inputType === 'deleteContentBackward') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
+    playBackspaceSound();
     selectTarget();
     updateTypedDisplay();
     return;
@@ -417,7 +446,11 @@ function enterCharacter(character) {
   if (nextMatches.length > 0) {
     typedBuffer = next;
     activeTarget = chooseTarget(nextMatches);
-    if (activeTarget.prompt === typedBuffer) defeatEnemy(activeTarget);
+    if (activeTarget.prompt === typedBuffer) {
+      defeatEnemy(activeTarget);
+    } else {
+      playTypeSound();
+    }
     updateTypedDisplay();
     return;
   }
@@ -440,6 +473,7 @@ function enterCharacter(character) {
 function registerMistake() {
   streak = 0;
   mistakeTimer = 0.2;
+  playMistakeSound();
   typingStrip.classList.add('mistake');
   window.setTimeout(() => typingStrip.classList.remove('mistake'), 200);
 }
@@ -448,6 +482,7 @@ function defeatEnemy(enemy) {
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
   score += enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
+  playDefeatSound(enemy);
   spawnBeam(enemy.group.position);
   spawnDebris(enemy.group.position, enemy.type);
   removeEnemy(enemy);
@@ -460,6 +495,7 @@ function defeatEnemy(enemy) {
 function leakEnemy(enemy) {
   health = Math.max(0, health - enemy.damage);
   streak = 0;
+  playDamageSound();
   damageTimer = 0.32;
   damageFlash.classList.add('show');
   window.setTimeout(() => damageFlash.classList.remove('show'), 160);
@@ -529,6 +565,7 @@ function updateEnemies(delta, seconds) {
     enemy.revealed = enemy.group.position.z >= REVEAL_Z;
     if (enemy.revealed && !wasRevealed) {
       enemy.revealFlash = 0.28;
+      playRevealSound(enemy);
     }
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
@@ -1294,11 +1331,176 @@ function saveBestScore(value) {
   localStorage.setItem(STORAGE_KEY, String(Math.round(value)));
 }
 
+function loadAudioSetting() {
+  return localStorage.getItem(AUDIO_STORAGE_KEY) !== 'off';
+}
+
+function saveAudioSetting(enabled) {
+  localStorage.setItem(AUDIO_STORAGE_KEY, enabled ? 'on' : 'off');
+}
+
+function updateAudioButton() {
+  audioButton.classList.toggle('is-muted', !audioEnabled);
+  audioButton.setAttribute('aria-label', audioEnabled ? 'Mute sound' : 'Unmute sound');
+  audioButton.title = audioEnabled ? 'Mute sound' : 'Unmute sound';
+  if (masterGain && audioContext) {
+    masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+    masterGain.gain.setTargetAtTime(audioEnabled ? MASTER_VOLUME : 0.0001, audioContext.currentTime, 0.018);
+  }
+}
+
+function ensureAudio() {
+  if (!audioEnabled) return null;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  if (!audioContext) {
+    audioContext = new AudioContextClass();
+    masterGain = audioContext.createGain();
+    masterGain.gain.setValueAtTime(MASTER_VOLUME, audioContext.currentTime);
+    masterGain.connect(audioContext.destination);
+  }
+
+  return audioContext;
+}
+
+function resumeAudio() {
+  const context = ensureAudio();
+  if (context && context.state === 'suspended') {
+    context.resume().catch(() => {});
+  }
+  return context;
+}
+
+function playTone(frequency, duration, options = {}) {
+  const context = resumeAudio();
+  if (!context || !masterGain) return;
+
+  const start = context.currentTime + (options.delay || 0);
+  const attack = Math.min(options.attack ?? 0.008, duration * 0.4);
+  const oscillator = context.createOscillator();
+  const gainNode = context.createGain();
+  oscillator.type = options.type || 'sine';
+  oscillator.frequency.setValueAtTime(frequency, start);
+  if (options.endFrequency) {
+    oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, options.endFrequency), start + duration);
+  }
+  if (options.detune) oscillator.detune.setValueAtTime(options.detune, start);
+
+  gainNode.gain.setValueAtTime(0.0001, start);
+  gainNode.gain.exponentialRampToValueAtTime(options.gain || 0.05, start + attack);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(masterGain);
+  oscillator.start(start);
+  oscillator.stop(start + duration + 0.04);
+}
+
+function playNoise(duration, options = {}) {
+  const context = resumeAudio();
+  if (!context || !masterGain) return;
+
+  const start = context.currentTime + (options.delay || 0);
+  const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * duration)), context.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let index = 0; index < data.length; index += 1) {
+    data[index] = (Math.random() * 2 - 1) * (1 - index / data.length);
+  }
+
+  const source = context.createBufferSource();
+  const filter = context.createBiquadFilter();
+  const gainNode = context.createGain();
+  source.buffer = buffer;
+  source.playbackRate.setValueAtTime(options.playbackRate || 1, start);
+  filter.type = options.filterType || 'bandpass';
+  filter.frequency.setValueAtTime(options.filterFrequency || 900, start);
+  filter.Q.setValueAtTime(options.q || 0.8, start);
+  gainNode.gain.setValueAtTime(options.gain || 0.04, start);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+  source.connect(filter);
+  filter.connect(gainNode);
+  gainNode.connect(masterGain);
+  source.start(start);
+  source.stop(start + duration + 0.02);
+}
+
+function playToggleSound() {
+  playTone(640, 0.07, { gain: 0.045, type: 'triangle' });
+}
+
+function playStartSound() {
+  playTone(196, 0.16, { gain: 0.045, type: 'triangle' });
+  playTone(294, 0.14, { gain: 0.04, delay: 0.05, type: 'triangle' });
+  playTone(392, 0.18, { gain: 0.036, delay: 0.1, type: 'sine' });
+}
+
+function playPauseSound() {
+  playTone(330, 0.08, { gain: 0.032, type: 'triangle', endFrequency: 220 });
+}
+
+function playTypeSound() {
+  const pitch = 520 + Math.min(typedBuffer.length, 12) * 18;
+  playTone(pitch, 0.045, { gain: 0.026, type: 'square' });
+}
+
+function playBackspaceSound() {
+  playTone(260, 0.05, { gain: 0.02, type: 'triangle', endFrequency: 190 });
+}
+
+function playMistakeSound() {
+  playTone(150, 0.13, { gain: 0.05, type: 'sawtooth', endFrequency: 82 });
+  playNoise(0.08, { gain: 0.025, filterFrequency: 180, filterType: 'lowpass' });
+}
+
+function playRevealSound(enemy) {
+  const laneIndex = Math.max(0, PATH_LANES.findIndex((lane) => lane === enemy.lane));
+  const pitch = enemy.isBoss ? 180 : 460 + laneIndex * 18;
+  playTone(pitch, 0.09, { gain: enemy.isBoss ? 0.06 : 0.03, type: enemy.isBoss ? 'sawtooth' : 'triangle' });
+  if (enemy.isBoss) playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine' });
+}
+
+function playDefeatSound(enemy) {
+  const base = enemy.isBoss ? 180 : 720;
+  playTone(base, 0.09, { gain: 0.055, type: 'square', endFrequency: enemy.isBoss ? 320 : 420 });
+  playTone(base * 1.5, 0.12, { gain: 0.03, delay: 0.035, type: 'triangle', endFrequency: base * 0.75 });
+  playNoise(enemy.isBoss ? 0.24 : 0.13, {
+    gain: enemy.isBoss ? 0.08 : 0.045,
+    filterFrequency: enemy.isBoss ? 360 : 1200,
+    filterType: enemy.isBoss ? 'lowpass' : 'bandpass',
+  });
+}
+
+function playDamageSound() {
+  playTone(78, 0.22, { gain: 0.07, type: 'sawtooth', endFrequency: 45 });
+  playNoise(0.18, { gain: 0.06, filterFrequency: 170, filterType: 'lowpass' });
+}
+
+function playBossWarningSound() {
+  playTone(110, 0.38, { gain: 0.055, type: 'sawtooth', endFrequency: 82 });
+  playTone(55, 0.42, { gain: 0.035, delay: 0.08, type: 'sine' });
+}
+
+function playWaveClearSound() {
+  playTone(262, 0.22, { gain: 0.04, type: 'triangle' });
+  playTone(330, 0.24, { gain: 0.035, delay: 0.04, type: 'triangle' });
+  playTone(392, 0.3, { gain: 0.035, delay: 0.08, type: 'triangle' });
+  playTone(523, 0.22, { gain: 0.026, delay: 0.16, type: 'sine' });
+}
+
+function playGameOverSound() {
+  playTone(196, 0.18, { gain: 0.055, type: 'sawtooth', endFrequency: 130 });
+  playTone(130, 0.26, { gain: 0.052, delay: 0.12, type: 'sawtooth', endFrequency: 70 });
+  playNoise(0.22, { gain: 0.045, delay: 0.04, filterFrequency: 220, filterType: 'lowpass' });
+}
+
 function startBossPhase() {
   wavePhase = 'boss';
   bossesSpawned = 0;
   bossWordsThisSet = [];
   bossSpawnTimer = 0.8;
+  playBossWarningSound();
 }
 
 function spawnBoss() {
@@ -1321,6 +1523,7 @@ function chooseBossWord() {
 
 function startWaveCleared() {
   mode = 'wave_cleared';
+  playWaveClearSound();
   typedBuffer = '';
   activeTarget = null;
   pauseButton.disabled = true;
@@ -1338,6 +1541,7 @@ function startWaveCleared() {
 }
 
 function advanceWaveSet() {
+  playStartSound();
   waveSet += 1;
   wavePhase = 'normal';
   normalEnemyTarget = 8 + (waveSet - 1) * 2;
