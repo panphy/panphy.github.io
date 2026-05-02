@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS } from './question-bank.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -58,53 +59,6 @@ const MUSIC_BASS = [
   130.81, null, null, null, 98.0, null, null, null,
   116.54, null, null, null, 87.31, null, 98.0, null,
 ];
-const EASY_WORDS = [
-  { term: 'force', definition: 'A push or pull that can change an object\'s motion' },
-  { term: 'mass', definition: 'The amount of matter in an object' },
-  { term: 'wave', definition: 'A disturbance that transfers energy without moving matter' },
-  { term: 'speed', definition: 'Distance travelled per unit time' },
-  { term: 'field', definition: 'A region of space where a force acts on an object' },
-  { term: 'light', definition: 'Electromagnetic radiation visible to the human eye' },
-  { term: 'sound', definition: 'A longitudinal wave produced by vibrating objects' },
-  { term: 'charge', definition: 'A property of matter that causes electromagnetic force' },
-  { term: 'energy', definition: 'The capacity to do work' },
-  { term: 'vector', definition: 'A quantity with both magnitude and direction' },
-  { term: 'spring', definition: 'An elastic device that stores potential energy' },
-  { term: 'orbit', definition: 'The curved path of one body around another' },
-  { term: 'phase', definition: 'The position within a repeating wave cycle' },
-  { term: 'pulse', definition: 'A single disturbance travelling through a medium' },
-  { term: 'ray', definition: 'A line showing the direction of wave travel' },
-  { term: 'heat', definition: 'Thermal energy transferred between objects at different temperatures' },
-];
-const MEDIUM_WORDS = [
-  { term: 'gravity', definition: 'Attractive force between any two objects with mass' },
-  { term: 'friction', definition: 'A force that opposes relative motion between surfaces' },
-  { term: 'voltage', definition: 'Energy transferred per unit charge in a circuit' },
-  { term: 'current', definition: 'The rate of flow of electric charge' },
-  { term: 'impulse', definition: 'The product of force and the time it acts' },
-  { term: 'density', definition: 'Mass per unit volume of a substance' },
-  { term: 'momentum', definition: 'The product of an object\'s mass and velocity' },
-  { term: 'pressure', definition: 'Force per unit area' },
-  { term: 'frequency', definition: 'Number of complete wave cycles per second' },
-  { term: 'amplitude', definition: 'Maximum displacement from the equilibrium position' },
-  { term: 'magnetic', definition: 'Relating to the force field around a magnet or current' },
-  { term: 'resistor', definition: 'A component that limits the flow of electric current' },
-  { term: 'diffraction', definition: 'The spreading of waves around obstacles or through gaps' },
-  { term: 'refraction', definition: 'The change in wave direction when crossing a boundary' },
-];
-const HARD_WORDS = [
-  { term: 'kinetic energy', definition: 'Energy possessed by an object due to its motion' },
-  { term: 'resultant force', definition: 'The single force equivalent to all forces acting combined' },
-  { term: 'electric field', definition: 'A region where a charged object experiences a force' },
-  { term: 'terminal velocity', definition: 'Constant speed when driving and resistive forces balance' },
-  { term: 'conservation', definition: 'A quantity that stays constant in a closed system' },
-  { term: 'standing wave', definition: 'Stationary pattern from two identical waves in opposite directions' },
-  { term: 'wave equation', definition: 'Relationship linking wave speed, frequency and wavelength' },
-  { term: 'escape speed', definition: 'Minimum speed needed to break free of a gravitational field' },
-  { term: 'ohmic conductor', definition: 'A conductor where current is proportional to voltage' },
-  { term: 'inverse square', definition: 'A quantity that decreases with the square of distance' },
-];
-const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 const ENEMY_TYPES = [
   {
     name: 'Mudlug',
@@ -149,9 +103,9 @@ const ENEMY_TYPES = [
 ];
 const BOSS_TYPE = {
   name: 'Boss',
-  body: 0x2a0808,
-  trim: 0x7a1a1a,
-  eye: 0xf26a3d,
+  body: 0x5b0614,
+  trim: 0xff351f,
+  eye: 0xfff05a,
   speed: 1.1,
   scale: 1.62,
   weight: 1,
@@ -471,7 +425,7 @@ function enterCharacter(character) {
   if (nextMatches.length > 0) {
     typedBuffer = next;
     activeTarget = chooseTarget(nextMatches);
-    if (activeTarget.prompt === typedBuffer) {
+    if (activeTarget.searchPrompt === typedBuffer) {
       defeatEnemy(activeTarget);
     } else {
       playTypeSound();
@@ -820,9 +774,32 @@ function buildHintMask(term) {
   return term.replace(/\S+/g, word => word[0] + '_'.repeat(word.length - 1));
 }
 
+function buildSearchPrompt(term) {
+  return [...term].map(normalizeCharacter).join('');
+}
+
+function promptIndexForProgress(term, progress) {
+  if (progress <= 0) return 0;
+
+  let matched = 0;
+  for (let index = 0; index < term.length; index += 1) {
+    if (!normalizeCharacter(term[index])) continue;
+    matched += 1;
+    if (matched >= progress) return index + 1;
+  }
+
+  return term.length;
+}
+
+function displayTypedBuffer() {
+  if (!typedBuffer) return '';
+  if (!activeTarget || !activeTarget.searchPrompt.startsWith(typedBuffer)) return typedBuffer;
+  return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length));
+}
+
 function renderPrompt(enemy) {
-  const matched = enemy.prompt.startsWith(typedBuffer) && typedBuffer.length > 0;
-  const typedLength = matched ? typedBuffer.length : 0;
+  const matched = enemy.searchPrompt.startsWith(typedBuffer) && typedBuffer.length > 0;
+  const typedLength = matched ? promptIndexForProgress(enemy.prompt, typedBuffer.length) : 0;
   enemy.typedNode.textContent = enemy.prompt.slice(0, typedLength);
   enemy.remainingNode.textContent = enemy.showDefinition
     ? enemy.hintMask.slice(typedLength)
@@ -841,7 +818,7 @@ function updateHud(force) {
 }
 
 function updateTypedDisplay() {
-  typedValue.textContent = typedBuffer || (mode === 'running' ? '...' : 'ready');
+  typedValue.textContent = displayTypedBuffer() || (mode === 'running' ? '...' : 'ready');
   comboValue.textContent = `${streak} chain`;
 }
 
@@ -899,6 +876,7 @@ function spawnEnemy(options = {}) {
     typedNode,
     remainingNode,
     prompt: wordData.term,
+    searchPrompt: buildSearchPrompt(wordData.term),
     showDefinition,
     hintMask: showDefinition ? buildHintMask(wordData.term) : null,
     isBoss,
@@ -935,20 +913,25 @@ function chooseSpawnLane(startZ) {
 
 function createEnemyMesh(type) {
   const group = new THREE.Group();
+  const isBossType = type.name === 'Boss';
   const bodyMaterial = new THREE.MeshStandardMaterial({
     color: type.body,
-    roughness: 0.82,
+    emissive: isBossType ? 0x3c0208 : 0x000000,
+    emissiveIntensity: isBossType ? 0.62 : 0,
+    roughness: isBossType ? 0.58 : 0.82,
     metalness: 0.03,
   });
   const trimMaterial = new THREE.MeshStandardMaterial({
     color: type.trim,
-    roughness: 0.78,
-    metalness: 0.02,
+    emissive: isBossType ? 0x8f0b05 : 0x000000,
+    emissiveIntensity: isBossType ? 0.95 : 0,
+    roughness: isBossType ? 0.46 : 0.78,
+    metalness: isBossType ? 0.08 : 0.02,
   });
   const eyeMaterial = new THREE.MeshStandardMaterial({
     color: type.eye,
     emissive: type.eye,
-    emissiveIntensity: 0.9,
+    emissiveIntensity: isBossType ? 2.2 : 0.9,
     roughness: 0.4,
   });
 
@@ -976,6 +959,13 @@ function createEnemyMesh(type) {
     group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, -0.3, 2.32, 0));
     group.add(blockMesh(0.18, 0.44, 0.18, trimMaterial, 0, 2.42, 0));
     group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, 0.3, 2.32, 0));
+    group.add(blockMesh(1.32, 0.24, 0.88, trimMaterial, 0, 1.42, -0.02));
+    group.add(blockMesh(0.28, 0.28, 0.12, eyeMaterial, 0, 1.22, 0.43));
+    group.add(blockMesh(0.26, 0.48, 0.26, trimMaterial, -0.58, 2.2, 0));
+    group.add(blockMesh(0.26, 0.48, 0.26, trimMaterial, 0.58, 2.2, 0));
+    const bossGlow = new THREE.PointLight(type.eye, 1.35, 5.5, 2.1);
+    bossGlow.position.set(0, 1.45, 0.45);
+    group.add(bossGlow);
   }
 
   const incomingBeacon = createIncomingBeacon(type);
@@ -1280,11 +1270,11 @@ function selectTarget() {
 
 function findMatches(prefix) {
   if (!prefix) return [];
-  return enemies.filter((enemy) => isEnemyTargetable(enemy) && enemy.prompt.startsWith(prefix));
+  return enemies.filter((enemy) => isEnemyTargetable(enemy) && enemy.searchPrompt.startsWith(prefix));
 }
 
 function chooseTarget(matches) {
-  return [...matches].sort((a, b) => b.group.position.z - a.group.position.z || a.prompt.length - b.prompt.length)[0];
+  return [...matches].sort((a, b) => b.group.position.z - a.group.position.z || a.searchPrompt.length - b.searchPrompt.length)[0];
 }
 
 function isEnemyTargetable(enemy) {
@@ -1320,7 +1310,7 @@ function boxesOverlap(first, second) {
 }
 
 function normalizeCharacter(character) {
-  if (character === ' ') return ' ';
+  if (/\s/.test(character)) return '';
   const normalized = character.toLowerCase();
   return /^[a-z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
 }
