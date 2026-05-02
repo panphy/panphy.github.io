@@ -32,7 +32,11 @@ const REVEAL_Z = -30;
 const SPAWN_SPREAD = 10;
 const FIRST_WAVE_SPAWN_SPREAD = 4;
 const ENEMY_LIMIT = 12;
-const GATE_HEALTH = 100;
+const HEART_COUNT = 5;
+const MAX_LIFE = HEART_COUNT * 2;
+const MINION_DAMAGE = 1;
+const BOSS_DAMAGE = 2;
+const BOSSES_PER_WAVE = 3;
 const LABEL_SAFE_MARGIN = 12;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
@@ -44,8 +48,8 @@ const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
-const MASTER_VOLUME = 0.16;
-const MUSIC_GAIN = 0.58;
+const MASTER_VOLUME = 0.5;
+const MUSIC_GAIN = 0.82;
 const MUSIC_BASE_STEP = 0.18;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
@@ -101,16 +105,53 @@ const ENEMY_TYPES = [
     score: 70,
   },
 ];
-const BOSS_TYPE = {
-  name: 'Boss',
-  body: 0x5b0614,
-  trim: 0xff351f,
-  eye: 0xfff05a,
-  speed: 1.1,
-  scale: 1.62,
-  weight: 1,
-  score: 150,
-};
+const BOSS_TYPES = [
+  {
+    name: 'Crimson Bulwark',
+    isBoss: true,
+    body: 0x5b0614,
+    trim: 0xff351f,
+    eye: 0xfff05a,
+    speed: 1.1,
+    scale: 1.62,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Verdant Colossus',
+    isBoss: true,
+    body: 0x0e3b2f,
+    trim: 0x2dd4bf,
+    eye: 0xd9ff66,
+    speed: 1.05,
+    scale: 1.64,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Storm Warden',
+    isBoss: true,
+    body: 0x1f2a5f,
+    trim: 0x70a5ff,
+    eye: 0xf2f0df,
+    speed: 1.14,
+    scale: 1.6,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Solar Anvil',
+    isBoss: true,
+    body: 0x4b2509,
+    trim: 0xfbbf24,
+    eye: 0x7dd3fc,
+    speed: 1.08,
+    scale: 1.66,
+    weight: 1,
+    score: 150,
+  },
+];
+const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 
 const reusableVector = new THREE.Vector3();
 const reusableVectorTwo = new THREE.Vector3();
@@ -129,7 +170,7 @@ const scrollingTrees = [];
 let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
-let health = GATE_HEALTH;
+let health = MAX_LIFE;
 let waveSet = 1;
 let wavePhase = 'normal';
 let normalEnemyTarget = 8;
@@ -137,6 +178,7 @@ let normalEnemiesSpawned = 0;
 let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let bossWordsThisSet = [];
+let bossPreviewSchedule = new Map();
 let streak = 0;
 let typedBuffer = '';
 let activeTarget = null;
@@ -146,6 +188,7 @@ let elapsed = 0;
 let mistakeTimer = 0;
 let damageTimer = 0;
 let hudTimer = 0;
+let renderedHealth = null;
 let enemyId = 0;
 let pathMarkerMaterial = null;
 let moon = null;
@@ -207,6 +250,7 @@ scene.add(emberLight);
 
 createWorld();
 createSky();
+createLifeMeter();
 
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
@@ -274,14 +318,15 @@ function startGame() {
   clearEnemies();
   clearEffects();
   score = 0;
-  health = GATE_HEALTH;
+  health = MAX_LIFE;
+  renderedHealth = null;
   waveSet = 1;
   wavePhase = 'normal';
   normalEnemyTarget = 8;
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
-  bossWordsThisSet = [];
+  prepareWavePlan();
   streak = 0;
   typedBuffer = '';
   activeTarget = null;
@@ -474,8 +519,8 @@ function defeatEnemy(enemy) {
 function leakEnemy(enemy) {
   health = Math.max(0, health - enemy.damage);
   streak = 0;
-  playDamageSound();
-  damageTimer = 0.32;
+  playDamageSound(enemy);
+  damageTimer = enemy.isBoss ? 0.46 : 0.32;
   damageFlash.classList.add('show');
   window.setTimeout(() => damageFlash.classList.remove('show'), 160);
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
@@ -508,7 +553,7 @@ function animate(frameTime) {
         startBossPhase();
       }
     } else if (wavePhase === 'boss') {
-      if (bossesSpawned < 3) {
+      if (bossesSpawned < BOSSES_PER_WAVE) {
         bossSpawnTimer -= delta;
         if (bossSpawnTimer <= 0) {
           spawnBoss();
@@ -806,13 +851,61 @@ function renderPrompt(enemy) {
     : enemy.prompt.slice(typedLength);
 }
 
+function createLifeMeter() {
+  healthValue.textContent = '';
+  for (let index = 0; index < HEART_COUNT; index += 1) {
+    const heart = document.createElement('span');
+    heart.className = 'life-heart';
+    heart.dataset.index = String(index);
+    heart.innerHTML = `
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <path class="heart-shell" d="${HEART_PATH}"></path>
+        <path class="heart-fill" d="${HEART_PATH}"></path>
+      </svg>
+    `;
+    healthValue.append(heart);
+  }
+}
+
+function updateLifeMeter(force) {
+  const life = Math.max(0, Math.min(MAX_LIFE, health));
+  if (!force && renderedHealth === life) return;
+
+  const previousLife = renderedHealth === null ? life : renderedHealth;
+  const hearts = healthValue.querySelectorAll('.life-heart');
+  for (const heart of hearts) {
+    const index = Number.parseInt(heart.dataset.index || '0', 10);
+    const units = Math.max(0, Math.min(2, life - index * 2));
+    const previousUnits = Math.max(0, Math.min(2, previousLife - index * 2));
+    heart.classList.toggle('is-full', units === 2);
+    heart.classList.toggle('is-half', units === 1);
+    heart.classList.toggle('is-empty', units === 0);
+
+    if (units < previousUnits) {
+      heart.classList.remove('is-hit');
+      void heart.offsetWidth;
+      heart.classList.add('is-hit');
+    }
+  }
+
+  const heartText = formatHeartCount(life);
+  healthValue.setAttribute('aria-label', `Life: ${heartText} of ${HEART_COUNT} hearts`);
+  healthValue.title = `Life: ${heartText}/${HEART_COUNT}`;
+  renderedHealth = life;
+}
+
+function formatHeartCount(life) {
+  const hearts = life / 2;
+  return Number.isInteger(hearts) ? String(hearts) : hearts.toFixed(1);
+}
+
 function updateHud(force) {
   hudTimer -= 1;
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
   bestValue.textContent = formatScore(Math.max(bestScore, score));
-  healthValue.textContent = `${Math.max(0, Math.round(health))}%`;
+  updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
   comboValue.textContent = `${streak} chain`;
 }
@@ -831,7 +924,7 @@ function spawnEnemy(options = {}) {
     : choosePrompt();
 
   const showDefinition = isBoss && !!wordData.definition;
-  const type = isBoss ? BOSS_TYPE : weightedPick(ENEMY_TYPES);
+  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
   const spawnSpread = Number.isFinite(options.delay)
@@ -845,6 +938,10 @@ function spawnEnemy(options = {}) {
 
   const label = document.createElement('div');
   label.className = isBoss ? 'word-tag is-boss is-hidden' : 'word-tag is-hidden';
+  if (isBoss) {
+    label.style.setProperty('--boss-accent', hexColor(type.trim));
+    label.style.setProperty('--boss-glow', hexColor(type.eye));
+  }
 
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
@@ -885,7 +982,7 @@ function spawnEnemy(options = {}) {
     revealed: startZ >= REVEAL_Z,
     revealFlash: 0,
     speed: isBoss ? type.speed : type.speed + Math.random() * 0.35,
-    damage: isBoss ? 30 : type.name === 'Ash Oaf' ? 18 : 12,
+    damage: isBoss ? BOSS_DAMAGE : MINION_DAMAGE,
     baseY: 0.32,
     age: 0,
     wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
@@ -913,18 +1010,18 @@ function chooseSpawnLane(startZ) {
 
 function createEnemyMesh(type) {
   const group = new THREE.Group();
-  const isBossType = type.name === 'Boss';
+  const isBossType = !!type.isBoss;
   const bodyMaterial = new THREE.MeshStandardMaterial({
     color: type.body,
-    emissive: isBossType ? 0x3c0208 : 0x000000,
-    emissiveIntensity: isBossType ? 0.62 : 0,
+    emissive: isBossType ? type.body : 0x000000,
+    emissiveIntensity: isBossType ? 0.56 : 0,
     roughness: isBossType ? 0.58 : 0.82,
     metalness: 0.03,
   });
   const trimMaterial = new THREE.MeshStandardMaterial({
     color: type.trim,
-    emissive: isBossType ? 0x8f0b05 : 0x000000,
-    emissiveIntensity: isBossType ? 0.95 : 0,
+    emissive: isBossType ? type.trim : 0x000000,
+    emissiveIntensity: isBossType ? 0.82 : 0,
     roughness: isBossType ? 0.46 : 0.78,
     metalness: isBossType ? 0.08 : 0.02,
   });
@@ -955,7 +1052,7 @@ function createEnemyMesh(type) {
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, 0.34, 2.32, 0));
   }
 
-  if (type.name === 'Boss') {
+  if (isBossType) {
     group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, -0.3, 2.32, 0));
     group.add(blockMesh(0.18, 0.44, 0.18, trimMaterial, 0, 2.42, 0));
     group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, 0.3, 2.32, 0));
@@ -1281,14 +1378,68 @@ function isEnemyTargetable(enemy) {
   return enemy.revealed && enemy.group.position.z < WALL_Z;
 }
 
+function prepareWavePlan() {
+  bossWordsThisSet = chooseBossWordsForWave();
+  bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, bossWordsThisSet);
+}
+
+function buildBossPreviewSchedule(target, words) {
+  const schedule = new Map();
+  if (target <= 0 || words.length === 0) return schedule;
+
+  words.forEach((word, index) => {
+    let slot = Math.floor(((index + 1) * target) / (words.length + 1));
+    slot = Math.max(0, Math.min(target - 1, slot));
+
+    while (schedule.has(slot) && slot < target - 1) slot += 1;
+    while (schedule.has(slot) && slot > 0) slot -= 1;
+    schedule.set(slot, word);
+  });
+
+  return schedule;
+}
+
+function chooseBossWordsForWave() {
+  const pool = chooseBossPool();
+  const chosen = [];
+  const usedTerms = new Set();
+
+  while (chosen.length < BOSSES_PER_WAVE && usedTerms.size < pool.length) {
+    const entry = pool[Math.floor(Math.random() * pool.length)];
+    if (usedTerms.has(entry.term)) continue;
+    chosen.push(entry);
+    usedTerms.add(entry.term);
+  }
+
+  return chosen;
+}
+
+function chooseBossPool() {
+  if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
+  if (waveSet >= 3) return HARD_WORDS;
+  return MEDIUM_WORDS;
+}
+
 function choosePrompt() {
+  const scheduledBossWord = wavePhase === 'normal' ? bossPreviewSchedule.get(normalEnemiesSpawned) : null;
+  if (scheduledBossWord) return scheduledBossWord;
+
   const pool = waveSet >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS] : waveSet >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS] : EASY_WORDS;
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
+  const reservedBossTerms = wavePhase === 'normal'
+    ? new Set(bossWordsThisSet.map((word) => word.term))
+    : new Set();
+  const regularPool = pool.filter((entry) => !reservedBossTerms.has(entry.term));
+  const usablePool = regularPool.length > 0 ? regularPool : pool;
   for (let attempt = 0; attempt < 8; attempt += 1) {
-    const entry = pool[Math.floor(Math.random() * pool.length)];
+    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
     if (!nearExisting.has(entry.term)) return entry;
   }
-  return pool[Math.floor(Math.random() * pool.length)];
+  return usablePool[Math.floor(Math.random() * usablePool.length)];
+}
+
+function chooseBossType(index) {
+  return BOSS_TYPES[(waveSet + index - 1) % BOSS_TYPES.length];
 }
 
 function nextSpawnDelay() {
@@ -1316,7 +1467,7 @@ function normalizeCharacter(character) {
 }
 
 function accuracy() {
-  const possible = score + (GATE_HEALTH - health) * 10;
+  const possible = score + (MAX_LIFE - health) * 100;
   if (possible <= 0) return 1;
   return THREE.MathUtils.clamp(score / possible, 0, 1);
 }
@@ -1335,6 +1486,10 @@ function resizeRenderer() {
 
 function formatScore(value) {
   return Math.round(value).toLocaleString('en-US');
+}
+
+function hexColor(value) {
+  return `#${value.toString(16).padStart(6, '0')}`;
 }
 
 function loadBestScore() {
@@ -1595,9 +1750,10 @@ function playDefeatSound(enemy) {
   });
 }
 
-function playDamageSound() {
-  playTone(78, 0.22, { gain: 0.07, type: 'sawtooth', endFrequency: 45 });
-  playNoise(0.18, { gain: 0.06, filterFrequency: 170, filterType: 'lowpass' });
+function playDamageSound(enemy) {
+  const bossHit = !!enemy?.isBoss;
+  playTone(bossHit ? 62 : 78, bossHit ? 0.28 : 0.22, { gain: bossHit ? 0.086 : 0.07, type: 'sawtooth', endFrequency: bossHit ? 36 : 45 });
+  playNoise(bossHit ? 0.24 : 0.18, { gain: bossHit ? 0.074 : 0.06, filterFrequency: bossHit ? 135 : 170, filterType: 'lowpass' });
 }
 
 function playBossWarningSound() {
@@ -1621,21 +1777,21 @@ function playGameOverSound() {
 function startBossPhase() {
   wavePhase = 'boss';
   bossesSpawned = 0;
-  bossWordsThisSet = [];
+  if (bossWordsThisSet.length === 0) prepareWavePlan();
   bossSpawnTimer = 0.8;
   playBossWarningSound();
 }
 
 function spawnBoss() {
-  const wordData = chooseBossWord();
-  bossWordsThisSet.push(wordData);
+  const wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
+  if (!bossWordsThisSet.some((word) => word.term === wordData.term)) bossWordsThisSet.push(wordData);
   const lanes = [-3.7, 0, 3.7];
   const lane = lanes[bossesSpawned % lanes.length];
-  spawnEnemy({ isBoss: true, wordData, lane, delay: 0 });
+  spawnEnemy({ isBoss: true, wordData, bossType: chooseBossType(bossesSpawned), lane, delay: 0 });
 }
 
 function chooseBossWord() {
-  const pool = [...MEDIUM_WORDS, ...HARD_WORDS];
+  const pool = chooseBossPool();
   const usedTerms = new Set(bossWordsThisSet.map(w => w.term));
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
@@ -1672,7 +1828,7 @@ function advanceWaveSet() {
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
-  bossWordsThisSet = [];
+  prepareWavePlan();
   typedBuffer = '';
   activeTarget = null;
   spawnTimer = 1.25;
