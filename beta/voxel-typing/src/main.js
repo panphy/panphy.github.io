@@ -9,6 +9,7 @@ const waveValue = document.getElementById('waveValue');
 const typedValue = document.getElementById('typedValue');
 const comboValue = document.getElementById('comboValue');
 const typingStrip = document.querySelector('.typing-strip');
+const gameBar = document.querySelector('.game-bar');
 const startButton = document.getElementById('startButton');
 const pauseButton = document.getElementById('pauseButton');
 const messagePanel = document.getElementById('messagePanel');
@@ -23,8 +24,13 @@ const STORAGE_KEY = 'panphyVoxelTypingBestV1';
 const MAX_DELTA = 0.06;
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
+const FIRST_WAVE_SPAWN_Z = -34;
+const REVEAL_Z = -30;
+const SPAWN_SPREAD = 10;
+const FIRST_WAVE_SPAWN_SPREAD = 4;
 const ENEMY_LIMIT = 12;
 const GATE_HEALTH = 100;
+const LABEL_SAFE_MARGIN = 12;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
 const PATH_MARKER_MAX_Z = 4;
@@ -99,7 +105,7 @@ const ENEMY_TYPES = [
     trim: 0x54c46e,
     eye: 0xefc35c,
     speed: 2.75,
-    scale: 0.72,
+    scale: 0.9,
     weight: 4,
     score: 45,
   },
@@ -119,7 +125,7 @@ const ENEMY_TYPES = [
     trim: 0xf26a3d,
     eye: 0xf2f0df,
     speed: 3.25,
-    scale: 0.66,
+    scale: 0.85,
     weight: 2,
     score: 70,
   },
@@ -519,8 +525,19 @@ function updateEnemies(delta, seconds) {
     enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
     enemy.group.rotation.y = Math.sin(seconds * 2.4 + enemy.phase) * 0.18;
 
-    if (enemy === activeTarget) {
-      enemy.group.scale.setScalar(enemy.type.scale * (1 + Math.sin(seconds * 18) * 0.035));
+    const wasRevealed = enemy.revealed;
+    enemy.revealed = enemy.group.position.z >= REVEAL_Z;
+    if (enemy.revealed && !wasRevealed) {
+      enemy.revealFlash = 0.28;
+    }
+    if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
+
+    updateEnemyMarkers(enemy, seconds);
+
+    if (enemy === activeTarget && isEnemyTargetable(enemy)) {
+      enemy.group.scale.setScalar(enemy.type.scale * (1.12 + Math.sin(seconds * 16) * 0.05));
+    } else if (!enemy.revealed) {
+      enemy.group.scale.setScalar(enemy.type.scale * (1.04 + Math.sin(seconds * 5 + enemy.phase) * 0.025));
     } else {
       enemy.group.scale.setScalar(enemy.type.scale);
     }
@@ -531,6 +548,35 @@ function updateEnemies(delta, seconds) {
   }
 
   selectTarget();
+}
+
+function updateEnemyMarkers(enemy, seconds) {
+  const incomingBeacon = enemy.group.userData.incomingBeacon;
+  if (incomingBeacon) {
+    incomingBeacon.visible = !enemy.revealed;
+    if (!enemy.revealed) {
+      const revealDistance = Math.max(1, REVEAL_Z - enemy.spawnZ);
+      const revealProgress = THREE.MathUtils.clamp((enemy.group.position.z - enemy.spawnZ) / revealDistance, 0, 1);
+      const pulse = 0.5 + Math.sin(seconds * 7.5 + enemy.phase) * 0.16;
+      incomingBeacon.scale.setScalar(THREE.MathUtils.lerp(1.7, 0.8, revealProgress) + pulse * 0.18);
+      incomingBeacon.position.y = 2.72 + Math.sin(seconds * 5.2 + enemy.phase) * 0.16;
+      incomingBeacon.rotation.y = seconds * 1.8 + enemy.phase;
+      incomingBeacon.rotation.x = seconds * 1.2;
+      incomingBeacon.material.opacity = THREE.MathUtils.lerp(0.62, 0.34, revealProgress) + pulse * 0.12;
+    }
+  }
+
+  const targetMarker = enemy.group.userData.targetMarker;
+  if (targetMarker) {
+    const targetLocked = enemy === activeTarget && isEnemyTargetable(enemy);
+    targetMarker.visible = targetLocked;
+    if (targetLocked) {
+      const pulse = 0.62 + Math.sin(seconds * 12) * 0.18;
+      targetMarker.rotation.y = -enemy.group.rotation.y + seconds * 1.1;
+      targetMarker.scale.setScalar(1 + Math.sin(seconds * 10) * 0.045);
+      targetMarker.userData.material.opacity = pulse;
+    }
+  }
 }
 
 function updateEffects(delta) {
@@ -625,6 +671,7 @@ function updateEnvironment(seconds, delta) {
 function updateLabels() {
   const width = window.innerWidth;
   const height = window.innerHeight;
+  const safeBounds = getLabelSafeBounds(height);
   const labelItems = [];
 
   for (const enemy of enemies) {
@@ -633,13 +680,17 @@ function updateLabels() {
     reusableVector.y += 2.2 * enemy.type.scale;
     reusableVector.project(camera);
 
-    const isVisible = reusableVector.z > -1 && reusableVector.z < 1;
+    const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     enemy.label.classList.toggle('is-hidden', !isVisible);
+    enemy.label.classList.toggle('is-revealing', enemy.revealFlash > 0);
     if (!isVisible) continue;
 
     const x = (reusableVector.x * 0.5 + 0.5) * width;
     const y = (-reusableVector.y * 0.5 + 0.5) * height;
-    const scale = THREE.MathUtils.clamp(1.1 - enemy.group.position.z * 0.025, 0.72, 1.18);
+    const approachAmount = THREE.MathUtils.clamp((enemy.group.position.z - REVEAL_Z) / (WALL_Z - REVEAL_Z), 0, 1);
+    const scale = enemy.isBoss
+      ? THREE.MathUtils.lerp(0.92, 1.12, approachAmount)
+      : THREE.MathUtils.lerp(0.86, 1.12, approachAmount);
     labelItems.push({ enemy, x, y, scale });
   }
 
@@ -647,24 +698,42 @@ function updateLabels() {
   labelItems.sort((a, b) => a.y - b.y);
 
   for (const item of labelItems) {
-    const { enemy, x, scale } = item;
-    let y = item.y;
+    const { enemy, scale } = item;
     const labelWidth = enemy.label.offsetWidth * scale;
     const labelHeight = enemy.label.offsetHeight * scale;
+    const x = THREE.MathUtils.clamp(
+      item.x,
+      LABEL_SAFE_MARGIN + labelWidth / 2,
+      width - LABEL_SAFE_MARGIN - labelWidth / 2
+    );
+    const minY = safeBounds.top + labelHeight;
+    const maxY = safeBounds.bottom;
+    const gap = labelHeight + 6;
+    const offsets = [0, -gap, gap, -gap * 2, gap * 2, -gap * 3, gap * 3];
+    let y = THREE.MathUtils.clamp(item.y, minY, maxY);
+    let chosenBox = null;
 
-    for (let attempt = 0; attempt < 5; attempt += 1) {
+    for (const offset of offsets) {
+      const candidateY = THREE.MathUtils.clamp(item.y + offset, minY, maxY);
       const box = {
         left: x - labelWidth / 2,
         right: x + labelWidth / 2,
-        top: y - labelHeight,
-        bottom: y,
+        top: candidateY - labelHeight,
+        bottom: candidateY,
       };
       if (!placedBoxes.some((placed) => boxesOverlap(box, placed))) {
-        placedBoxes.push(box);
+        y = candidateY;
+        chosenBox = box;
         break;
       }
-      y -= labelHeight + 6;
     }
+
+    placedBoxes.push(chosenBox || {
+      left: x - labelWidth / 2,
+      right: x + labelWidth / 2,
+      top: y - labelHeight,
+      bottom: y,
+    });
 
     enemy.label.style.left = `${x}px`;
     enemy.label.style.top = `${y}px`;
@@ -672,6 +741,17 @@ function updateLabels() {
     enemy.label.classList.toggle('is-target', enemy === activeTarget);
     enemy.label.classList.toggle('is-danger', enemy.group.position.z > -4);
   }
+}
+
+function getLabelSafeBounds(height) {
+  const barBottom = gameBar ? gameBar.getBoundingClientRect().bottom : 0;
+  const inputTop = typingStrip ? typingStrip.getBoundingClientRect().top : height;
+  const top = Math.ceil(barBottom + LABEL_SAFE_MARGIN);
+  const bottom = Math.floor(Math.min(height - LABEL_SAFE_MARGIN, inputTop - LABEL_SAFE_MARGIN));
+  return {
+    top,
+    bottom: Math.max(top + 72, bottom),
+  };
 }
 
 function buildHintMask(term) {
@@ -714,14 +794,18 @@ function spawnEnemy(options = {}) {
   const showDefinition = isBoss && !!wordData.definition;
   const type = isBoss ? BOSS_TYPE : weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
-  const startZ = SPAWN_Z - (options.delay || Math.random() * 10);
+  const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
+  const spawnSpread = Number.isFinite(options.delay)
+    ? options.delay
+    : Math.random() * (waveSet === 1 ? FIRST_WAVE_SPAWN_SPREAD : SPAWN_SPREAD);
+  const startZ = spawnBaseZ - spawnSpread;
   const lane = Number.isFinite(options.lane) ? options.lane : chooseSpawnLane(startZ);
   group.position.set(lane, 0.32, startZ);
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
 
   const label = document.createElement('div');
-  label.className = isBoss ? 'word-tag is-boss' : 'word-tag';
+  label.className = isBoss ? 'word-tag is-boss is-hidden' : 'word-tag is-hidden';
 
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
@@ -757,6 +841,9 @@ function spawnEnemy(options = {}) {
     hintMask: showDefinition ? buildHintMask(wordData.term) : null,
     isBoss,
     lane,
+    spawnZ: startZ,
+    revealed: startZ >= REVEAL_Z,
+    revealFlash: 0,
     speed: isBoss ? type.speed : type.speed + Math.random() * 0.35,
     damage: isBoss ? 30 : type.name === 'Ash Oaf' ? 18 : 12,
     baseY: 0.32,
@@ -770,6 +857,10 @@ function spawnEnemy(options = {}) {
   enemies.push(enemy);
   renderPrompt(enemy);
   selectTarget();
+}
+
+function chooseSpawnZ() {
+  return waveSet === 1 ? FIRST_WAVE_SPAWN_Z : SPAWN_Z;
 }
 
 function chooseSpawnLane(startZ) {
@@ -825,7 +916,51 @@ function createEnemyMesh(type) {
     group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, 0.3, 2.32, 0));
   }
 
+  const incomingBeacon = createIncomingBeacon(type);
+  const targetMarker = createTargetMarker(type);
+  group.add(incomingBeacon, targetMarker);
+  group.userData.incomingBeacon = incomingBeacon;
+  group.userData.targetMarker = targetMarker;
+
   return group;
+}
+
+function createIncomingBeacon(type) {
+  const material = new THREE.MeshBasicMaterial({
+    color: type.eye,
+    transparent: true,
+    opacity: 0.58,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const beacon = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), material);
+  beacon.position.set(0, 2.72, 0);
+  return beacon;
+}
+
+function createTargetMarker(type) {
+  const marker = new THREE.Group();
+  const material = new THREE.MeshBasicMaterial({
+    color: type.eye,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const longSide = new THREE.BoxGeometry(1.85, 0.055, 0.12);
+  const shortSide = new THREE.BoxGeometry(0.12, 0.055, 1.85);
+  const front = new THREE.Mesh(longSide, material);
+  const back = new THREE.Mesh(longSide.clone(), material);
+  const left = new THREE.Mesh(shortSide, material);
+  const right = new THREE.Mesh(shortSide.clone(), material);
+  front.position.set(0, 0.08, 0.92);
+  back.position.set(0, 0.08, -0.92);
+  left.position.set(-0.92, 0.08, 0);
+  right.position.set(0.92, 0.08, 0);
+  marker.add(front, back, left, right);
+  marker.visible = false;
+  marker.userData.material = material;
+  return marker;
 }
 
 function blockMesh(width, height, depth, material, x, y, z) {
@@ -1083,11 +1218,15 @@ function selectTarget() {
 
 function findMatches(prefix) {
   if (!prefix) return [];
-  return enemies.filter((enemy) => enemy.prompt.startsWith(prefix));
+  return enemies.filter((enemy) => isEnemyTargetable(enemy) && enemy.prompt.startsWith(prefix));
 }
 
 function chooseTarget(matches) {
   return [...matches].sort((a, b) => b.group.position.z - a.group.position.z || a.prompt.length - b.prompt.length)[0];
+}
+
+function isEnemyTargetable(enemy) {
+  return enemy.revealed && enemy.group.position.z < WALL_Z;
 }
 
 function choosePrompt() {

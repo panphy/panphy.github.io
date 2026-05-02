@@ -369,7 +369,7 @@ a {
   text-shadow: 0 1px 0 #000;
   transform: translate(-50%, -100%);
   transform-origin: center bottom;
-  transition: border-color 100ms ease, background 100ms ease, opacity 100ms ease;
+  transition: border-color 100ms ease, background 100ms ease, box-shadow 100ms ease, filter 100ms ease, opacity 100ms ease;
 }
 
 .word-tag .name {
@@ -403,9 +403,29 @@ a {
   color: var(--ink);
 }
 
+.word-tag::after {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  width: 1px;
+  height: 18px;
+  background: linear-gradient(rgba(242, 240, 223, 0.6), rgba(242, 240, 223, 0));
+  content: '';
+  transform: translateX(-50%);
+}
+
 .word-tag.is-target {
   border-color: rgba(88, 223, 207, 0.9);
   background: rgba(7, 24, 25, 0.9);
+  box-shadow: 0 0 0 1px rgba(88, 223, 207, 0.42), 0 0 28px rgba(88, 223, 207, 0.34), inset 0 0 22px rgba(88, 223, 207, 0.1);
+  filter: brightness(1.1);
+}
+
+.word-tag.is-target::after {
+  bottom: -24px;
+  height: 24px;
+  background: linear-gradient(rgba(88, 223, 207, 0.92), rgba(88, 223, 207, 0));
+  box-shadow: 0 0 12px rgba(88, 223, 207, 0.46);
 }
 
 .word-tag.is-danger {
@@ -415,6 +435,10 @@ a {
 
 .word-tag.is-hidden {
   opacity: 0;
+}
+
+.word-tag.is-revealing {
+  animation: label-pop 280ms ease-out;
 }
 
 .word-tag.is-boss {
@@ -428,6 +452,7 @@ a {
 .word-tag.is-boss.is-target {
   border-color: rgba(243, 78, 85, 0.95);
   background: rgba(36, 6, 6, 0.94);
+  box-shadow: 0 0 0 1px rgba(243, 78, 85, 0.48), 0 0 32px rgba(242, 106, 61, 0.36), inset 0 0 24px rgba(242, 106, 61, 0.14);
 }
 
 .word-tag.is-boss.is-danger {
@@ -457,6 +482,23 @@ a {
 
   75% {
     transform: translateX(calc(-50% + 8px));
+  }
+}
+
+@keyframes label-pop {
+  0% {
+    opacity: 0;
+    filter: brightness(1.8);
+  }
+
+  45% {
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+
+  100% {
+    opacity: 1;
+    filter: brightness(1);
   }
 }
 
