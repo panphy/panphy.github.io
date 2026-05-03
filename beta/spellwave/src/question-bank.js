@@ -127,3 +127,16 @@ export const HARD_WORDS = [
 ];
 
 export const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
+
+// Unit-question pool for the final boss each wave.
+// term = the unit symbol (what the player types); definition = the question shown.
+export const UNIT_WORDS = [
+  { term: 'Pa',   definition: 'unit of pressure',              isUnit: true },
+  { term: 'Hz',   definition: 'unit of frequency',             isUnit: true },
+  { term: 'kg',   definition: 'unit of mass',                  isUnit: true },
+  { term: 'Bq',   definition: 'unit of radioactive activity',  isUnit: true },
+  { term: 'm/s',  definition: 'unit of speed',                 isUnit: true },
+  { term: 'ohm',  definition: 'unit of resistance',            isUnit: true },
+  { term: 'J',    definition: 'unit of energy',                isUnit: true },
+  { term: 'J/kg', definition: 'unit of specific latent heat',  isUnit: true },
+];

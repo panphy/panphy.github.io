@@ -559,6 +559,11 @@ a {
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 82%, white 18%);
 }
 
+.word-tag.is-unit-boss .definition {
+  color: var(--gold);
+  font-weight: 700;
+}
+
 .keyboard-input {
   position: fixed;
   left: 50%;

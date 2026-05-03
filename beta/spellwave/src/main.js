@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS } from './question-bank.js';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, UNIT_WORDS } from './question-bank.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -153,6 +153,17 @@ const BOSS_TYPES = [
     score: 150,
   },
 ];
+const UNIT_BOSS_TYPE = {
+  name: 'Sigil Titan',
+  isBoss: true,
+  body: 0x3b2a00,
+  trim: 0xfbbf24,
+  eye: 0xffffff,
+  speed: 0.88,
+  scale: 1.85,
+  weight: 1,
+  score: 250,
+};
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 
 const reusableVector = new THREE.Vector3();
@@ -357,7 +368,7 @@ function pauseGame() {
   mode = 'paused';
   pauseButton.innerHTML = ICON_PLAY;
   pauseButton.setAttribute('aria-label', 'Resume run');
-  showMessage('PAUSED', 'Moonlit Hold', `Score ${formatScore(score)}`, 'Resume', 'The gate holds while the night is paused.');
+  showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
 }
 
 function resumeGame() {
@@ -384,7 +395,7 @@ function endGame() {
     bestScore = score;
     saveBestScore(score);
   }
-  showMessage('NIGHT BREACHED', 'Gate Down', `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`, 'Try Again', `${Math.round(accuracy() * 100)}% accuracy across ${elapsed.toFixed(0)} seconds.`);
+  showMessage('OVERRUN', 'Wiped Out', `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`, 'Try Again', `${Math.round(accuracy() * 100)}% accuracy across ${elapsed.toFixed(0)} seconds.`);
   updateHud(true);
 }
 
@@ -938,8 +949,11 @@ function spawnEnemy(options = {}) {
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
 
+  const isUnitBoss = options.isUnitBoss || false;
   const label = document.createElement('div');
-  label.className = isBoss ? 'word-tag is-boss is-hidden' : 'word-tag is-hidden';
+  label.className = isBoss
+    ? `word-tag is-boss${isUnitBoss ? ' is-unit-boss' : ''} is-hidden`
+    : 'word-tag is-hidden';
   if (isBoss) {
     label.style.setProperty('--boss-accent', hexColor(type.trim));
     label.style.setProperty('--boss-glow', hexColor(type.eye));
@@ -1406,7 +1420,7 @@ function chooseBossWordsForWave() {
   const chosen = [];
   const usedTerms = new Set();
 
-  while (chosen.length < BOSSES_PER_WAVE && usedTerms.size < pool.length) {
+  while (chosen.length < BOSSES_PER_WAVE - 1 && usedTerms.size < pool.length) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
     if (usedTerms.has(entry.term)) continue;
     chosen.push(entry);
@@ -1785,11 +1799,19 @@ function startBossPhase() {
 }
 
 function spawnBoss() {
-  const wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
-  if (!bossWordsThisSet.some((word) => word.term === wordData.term)) bossWordsThisSet.push(wordData);
+  const isUnitBoss = bossesSpawned === BOSSES_PER_WAVE - 1;
+  let wordData;
+  if (isUnitBoss) {
+    wordData = chooseUnitWord();
+    bossWordsThisSet.push(wordData);
+  } else {
+    wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
+    if (!bossWordsThisSet.some(w => w.term === wordData.term)) bossWordsThisSet.push(wordData);
+  }
+  const bossType = isUnitBoss ? UNIT_BOSS_TYPE : chooseBossType(bossesSpawned);
   const lanes = [-3.7, 0, 3.7];
   const lane = lanes[bossesSpawned % lanes.length];
-  spawnEnemy({ isBoss: true, wordData, bossType: chooseBossType(bossesSpawned), lane, delay: 0 });
+  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, isUnitBoss });
 }
 
 function chooseBossWord() {
@@ -1802,6 +1824,15 @@ function chooseBossWord() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+function chooseUnitWord() {
+  const usedPrompts = new Set(enemies.map(e => e.prompt));
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const entry = UNIT_WORDS[Math.floor(Math.random() * UNIT_WORDS.length)];
+    if (!usedPrompts.has(entry.term)) return entry;
+  }
+  return UNIT_WORDS[Math.floor(Math.random() * UNIT_WORDS.length)];
+}
+
 function startWaveCleared() {
   mode = 'wave_cleared';
   stopMusicLoop(0.12);
@@ -1810,10 +1841,12 @@ function startWaveCleared() {
   activeTarget = null;
   pauseButton.disabled = true;
   document.body.classList.remove('is-running');
-  const glossary = bossWordsThisSet.map(w => `${w.term} — ${w.definition}`).join('\n');
+  const glossary = bossWordsThisSet
+    .map(w => w.isUnit ? `${w.definition}: ${w.term}` : `${w.term} — ${w.definition}`)
+    .join('\n');
   showMessage(
     `WAVE ${waveSet} CLEARED`,
-    'Night Holds',
+    'Wave Clear',
     `Score ${formatScore(score)}`,
     'Next Wave',
     glossary
