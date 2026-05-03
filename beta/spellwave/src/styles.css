@@ -528,13 +528,23 @@ a {
 }
 
 .word-tag.is-boss {
-  min-width: 140px;
-  max-width: 260px;
+  min-width: 160px;
+  max-width: 300px;
+  gap: 6px;
+  padding: 10px 13px 11px;
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 62%, transparent);
   background:
     linear-gradient(135deg, rgba(22, 4, 4, 0.9), rgba(4, 9, 10, 0.88)),
     linear-gradient(90deg, color-mix(in srgb, var(--boss-accent, var(--danger)) 20%, transparent), transparent);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.48), inset 0 0 18px color-mix(in srgb, var(--boss-accent, var(--danger)) 16%, transparent);
+}
+
+.word-tag.is-boss .definition {
+  font-size: 0.8rem;
+}
+
+.word-tag.is-boss .prompt {
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
 }
 
 .word-tag.is-boss.is-target {
