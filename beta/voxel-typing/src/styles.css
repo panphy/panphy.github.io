@@ -169,7 +169,7 @@ a {
   font-size: clamp(1.42rem, 2.8vw, 2rem);
   font-weight: 400;
   letter-spacing: 0;
-  line-height: 0.98;
+  line-height: 1.1;
   text-overflow: ellipsis;
   text-shadow: 0 0 18px rgba(88, 223, 207, 0.34);
   white-space: nowrap;
@@ -403,7 +403,7 @@ a {
   font-size: clamp(2.6rem, 10vw, 4.8rem);
   font-weight: 400;
   letter-spacing: 0;
-  line-height: 0.86;
+  line-height: 0.96;
   text-wrap: balance;
 }
 
@@ -478,7 +478,7 @@ a {
 .word-tag .prompt {
   font-size: clamp(0.82rem, 2vw, 1.05rem);
   font-weight: 700;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .word-tag .typed {
