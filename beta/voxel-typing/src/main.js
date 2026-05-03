@@ -24,6 +24,8 @@ const damageFlash = document.getElementById('damageFlash');
 
 const STORAGE_KEY = 'panphyVoxelTypingBestV1';
 const AUDIO_STORAGE_KEY = 'panphyVoxelTypingAudioV1';
+const ICON_PAUSE = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><rect x="2" y="1" width="4" height="13" rx="1.5"/><rect x="9" y="1" width="4" height="13" rx="1.5"/></svg>';
+const ICON_PLAY = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3.5 1.5L13 7.5L3.5 13.5V1.5Z"/></svg>';
 const MAX_DELTA = 0.06;
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
@@ -341,7 +343,7 @@ function startGame() {
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
   pauseButton.disabled = false;
-  pauseButton.textContent = 'II';
+  pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
   updateTypedDisplay();
   updateHud(true);
@@ -353,7 +355,7 @@ function pauseGame() {
   playPauseSound();
   stopMusicLoop();
   mode = 'paused';
-  pauseButton.textContent = '>';
+  pauseButton.innerHTML = ICON_PLAY;
   pauseButton.setAttribute('aria-label', 'Resume run');
   showMessage('PAUSED', 'Moonlit Hold', `Score ${formatScore(score)}`, 'Resume', 'The gate holds while the night is paused.');
 }
@@ -365,7 +367,7 @@ function resumeGame() {
   startMusicLoop(false);
   lastFrameTime = 0;
   messagePanel.hidden = true;
-  pauseButton.textContent = 'II';
+  pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
   focusKeyboard();
 }
@@ -375,7 +377,7 @@ function endGame() {
   stopMusicLoop(0.04);
   playGameOverSound();
   pauseButton.disabled = true;
-  pauseButton.textContent = 'II';
+  pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
   document.body.classList.remove('is-running');
   if (score > bestScore) {
@@ -1838,7 +1840,7 @@ function advanceWaveSet() {
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
   pauseButton.disabled = false;
-  pauseButton.textContent = 'II';
+  pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
   updateTypedDisplay();
   updateHud(true);
