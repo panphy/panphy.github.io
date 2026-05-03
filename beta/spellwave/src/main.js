@@ -22,8 +22,8 @@ const messageCopy = document.getElementById('messageCopy');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
 
-const STORAGE_KEY = 'panphyVoxelTypingBestV1';
-const AUDIO_STORAGE_KEY = 'panphyVoxelTypingAudioV1';
+const STORAGE_KEY = 'panphySpellwaveBestV1';
+const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
 const ICON_PAUSE = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><rect x="2" y="1" width="4" height="13" rx="1.5"/><rect x="9" y="1" width="4" height="13" rx="1.5"/></svg>';
 const ICON_PLAY = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3.5 1.5L13 7.5L3.5 13.5V1.5Z"/></svg>';
 const MAX_DELTA = 0.06;
