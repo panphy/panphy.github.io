@@ -1137,7 +1137,7 @@ td[align="right"] {
   }
 
   mjx-container svg [stroke-width="0"] {
-    stroke: none !important;
+    stroke-width: 0 !important;
   }
 
   pre {
