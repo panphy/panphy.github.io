@@ -1671,8 +1671,11 @@ function boxesOverlap(first, second) {
   return first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
 }
 
+const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+
 function normalizeCharacter(character) {
   if (/\s/.test(character)) return '';
+  if (SUPERSCRIPT_MAP[character]) return SUPERSCRIPT_MAP[character];
   const normalized = character.toLowerCase();
   return /^[a-z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
 }
