@@ -1166,7 +1166,28 @@ td[align="right"] {
 
   th,
   td {
+    border: 0 !important;
+    border-right: 1px solid var(--table-border-color) !important;
+    border-bottom: 1px solid var(--table-border-color) !important;
     text-align: left !important;
+  }
+
+  table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid var(--table-border-color) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    cursor: default !important;
+  }
+
+  tr > :last-child {
+    border-right: 0 !important;
+  }
+
+  tbody tr:last-child > th,
+  tbody tr:last-child > td {
+    border-bottom: 0 !important;
   }
 
   th {
