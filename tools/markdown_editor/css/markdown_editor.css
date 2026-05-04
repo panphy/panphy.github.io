@@ -1078,6 +1078,32 @@ td[align="right"] {
     font-size: var(--print-font-size, 11pt) !important;
     height: auto !important;
     overflow: visible !important;
+    font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    line-height: 1.6 !important;
+  }
+
+  #renderedOutput h1,
+  #renderedOutput h2,
+  #renderedOutput h3,
+  #renderedOutput h4,
+  #renderedOutput h5,
+  #renderedOutput h6 {
+    page-break-after: avoid !important;
+  }
+
+  #renderedOutput p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  mjx-container {
+    box-shadow: none !important;
+    cursor: default !important;
+  }
+
+  mjx-container::after,
+  #renderedOutput table::before {
+    display: none !important;
   }
 
   .pane-heading-container {
@@ -1108,7 +1134,11 @@ td[align="right"] {
 
   svg {
     color: #000000 !important;
-    stroke: #000000 !important;
+  }
+
+  mjx-container svg * {
+    stroke: none !important;
+    stroke-width: 0 !important;
   }
 
   pre {
@@ -1136,6 +1166,12 @@ td[align="right"] {
   th,
   td {
     text-align: left !important;
+  }
+
+  th {
+    background-color: #e8e8e8 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   th[align="center"],
