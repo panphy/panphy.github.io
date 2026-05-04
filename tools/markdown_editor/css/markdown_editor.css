@@ -1136,7 +1136,9 @@ td[align="right"] {
     color: #000000 !important;
   }
 
-  mjx-container svg [stroke-width="0"] {
+  mjx-container svg use[data-c],
+  mjx-container svg path[data-c] {
+    stroke: none !important;
     stroke-width: 0 !important;
   }
 
