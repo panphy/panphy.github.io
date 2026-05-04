@@ -7,6 +7,7 @@ const scoreValue = document.getElementById('scoreValue');
 const bestValue = document.getElementById('bestValue');
 const healthValue = document.getElementById('healthValue');
 const waveValue = document.getElementById('waveValue');
+const phaseValue = document.getElementById('phaseValue');
 const typedValue = document.getElementById('typedValue');
 const comboValue = document.getElementById('comboValue');
 const typingStrip = document.querySelector('.typing-strip');
@@ -15,6 +16,8 @@ const startButton = document.getElementById('startButton');
 const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
 const messagePanel = document.getElementById('messagePanel');
+const difficultyPanel = document.getElementById('difficultyPanel');
+const difficultyButtons = [...document.querySelectorAll('.difficulty-option')];
 const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
 const messageScore = document.getElementById('messageScore');
@@ -24,6 +27,7 @@ const damageFlash = document.getElementById('damageFlash');
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
+const DIFFICULTY_STORAGE_KEY = 'panphySpellwaveDifficultyV1';
 const ICON_PAUSE = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><rect x="2" y="1" width="4" height="13" rx="1.5"/><rect x="9" y="1" width="4" height="13" rx="1.5"/></svg>';
 const ICON_PLAY = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3.5 1.5L13 7.5L3.5 13.5V1.5Z"/></svg>';
 const MAX_DELTA = 0.06;
@@ -33,12 +37,64 @@ const FIRST_WAVE_SPAWN_Z = -34;
 const REVEAL_Z = -30;
 const SPAWN_SPREAD = 10;
 const FIRST_WAVE_SPAWN_SPREAD = 4;
-const ENEMY_LIMIT = 12;
 const HEART_COUNT = 5;
 const MAX_LIFE = HEART_COUNT * 2;
 const MINION_DAMAGE = 1;
 const BOSS_DAMAGE = 2;
 const BOSSES_PER_WAVE = 3;
+const DIFFICULTY_PROFILES = {
+  study: {
+    label: 'Study',
+    phaseLabel: 'Study pace',
+    description: 'Earlier reveals, fewer enemies',
+    normalBase: 6,
+    normalGrowth: 1,
+    enemyLimit: 9,
+    speedMultiplier: 0.84,
+    waveSpeedBonus: 0.09,
+    spawnBase: 2.55,
+    spawnGrowth: 0.1,
+    spawnJitter: 0.58,
+    spawnMin: 0.95,
+    bossWarningDelay: 1.15,
+    bossSpawnGap: 3.1,
+    revealZ: -35,
+  },
+  arcade: {
+    label: 'Arcade',
+    phaseLabel: 'Arcade pace',
+    description: 'Original wave pressure',
+    normalBase: 8,
+    normalGrowth: 2,
+    enemyLimit: 12,
+    speedMultiplier: 1,
+    waveSpeedBonus: 0.13,
+    spawnBase: 2.15,
+    spawnGrowth: 0.14,
+    spawnJitter: 0.46,
+    spawnMin: 0.68,
+    bossWarningDelay: 0.8,
+    bossSpawnGap: 2.5,
+    revealZ: REVEAL_Z,
+  },
+  challenge: {
+    label: 'Challenge',
+    phaseLabel: 'Challenge pace',
+    description: 'Faster spawns, tighter reads',
+    normalBase: 10,
+    normalGrowth: 3,
+    enemyLimit: 14,
+    speedMultiplier: 1.13,
+    waveSpeedBonus: 0.16,
+    spawnBase: 1.82,
+    spawnGrowth: 0.16,
+    spawnJitter: 0.36,
+    spawnMin: 0.54,
+    bossWarningDelay: 0.55,
+    bossSpawnGap: 2.0,
+    revealZ: -27,
+  },
+};
 const LABEL_SAFE_MARGIN = 12;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
@@ -184,9 +240,10 @@ let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
 let health = MAX_LIFE;
+let currentDifficultyKey = loadDifficultySetting();
 let waveSet = 1;
 let wavePhase = 'normal';
-let normalEnemyTarget = 8;
+let normalEnemyTarget = getNormalEnemyTarget(waveSet);
 let normalEnemiesSpawned = 0;
 let bossesSpawned = 0;
 let bossSpawnTimer = 0;
@@ -213,6 +270,10 @@ let musicGain = null;
 let musicTimer = null;
 let musicStep = 0;
 let nextMusicTime = 0;
+let typedAttempts = 0;
+let mistakeCount = 0;
+let defeatedCount = 0;
+let leakedCount = 0;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -268,6 +329,8 @@ createLifeMeter();
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
+updateDifficultyControls();
+updatePhaseDisplay();
 updateHud(true);
 
 startButton.addEventListener('click', () => {
@@ -294,6 +357,26 @@ audioButton.addEventListener('click', () => {
   }
   if (mode === 'running') focusKeyboard();
 });
+
+difficultyButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    if (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') return;
+    setDifficulty(button.dataset.difficulty);
+  });
+});
+
+if (difficultyPanel) {
+  difficultyPanel.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const keys = Object.keys(DIFFICULTY_PROFILES);
+    const index = keys.indexOf(currentDifficultyKey);
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+    const nextKey = keys[(index + direction + keys.length) % keys.length];
+    setDifficulty(nextKey);
+    difficultyButtons.find(button => button.dataset.difficulty === nextKey)?.focus();
+  });
+}
 
 pauseButton.addEventListener('click', () => {
   resumeAudio();
@@ -335,12 +418,16 @@ function startGame() {
   renderedHealth = null;
   waveSet = 1;
   wavePhase = 'normal';
-  normalEnemyTarget = 8;
+  normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
   prepareWavePlan();
   streak = 0;
+  typedAttempts = 0;
+  mistakeCount = 0;
+  defeatedCount = 0;
+  leakedCount = 0;
   typedBuffer = '';
   activeTarget = null;
   spawnTimer = 1.25;
@@ -353,11 +440,13 @@ function startGame() {
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
+  updateDifficultyPanel(false);
   pauseButton.disabled = false;
   pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
   updateTypedDisplay();
   updateHud(true);
+  updatePhaseDisplay();
   focusKeyboard();
 }
 
@@ -369,6 +458,8 @@ function pauseGame() {
   pauseButton.innerHTML = ICON_PLAY;
   pauseButton.setAttribute('aria-label', 'Resume run');
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
+  updateDifficultyPanel(false);
+  updatePhaseDisplay();
 }
 
 function resumeGame() {
@@ -380,6 +471,7 @@ function resumeGame() {
   messagePanel.hidden = true;
   pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
+  updatePhaseDisplay();
   focusKeyboard();
 }
 
@@ -395,7 +487,15 @@ function endGame() {
     bestScore = score;
     saveBestScore(score);
   }
-  showMessage('OVERRUN', 'Wiped Out', `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`, 'Try Again', `${Math.round(accuracy() * 100)}% accuracy across ${elapsed.toFixed(0)} seconds.`);
+  showMessage(
+    'OVERRUN',
+    'Wiped Out',
+    `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
+    'Try Again',
+    `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
+  );
+  updateDifficultyPanel(true);
+  updatePhaseDisplay();
   updateHud(true);
 }
 
@@ -409,6 +509,8 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
 }
 
 function handleKeyDown(event) {
+  if (event.target?.closest?.('.difficulty-option')) return;
+
   resumeAudio();
 
   if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
@@ -476,6 +578,7 @@ function handleBeforeInput(event) {
 function enterCharacter(character) {
   const normalized = normalizeCharacter(character);
   if (!normalized) return;
+  typedAttempts += 1;
 
   const next = typedBuffer + normalized;
   const nextMatches = findMatches(next);
@@ -509,6 +612,7 @@ function enterCharacter(character) {
 
 function registerMistake() {
   streak = 0;
+  mistakeCount += 1;
   mistakeTimer = 0.2;
   playMistakeSound();
   typingStrip.classList.add('mistake');
@@ -518,6 +622,7 @@ function registerMistake() {
 function defeatEnemy(enemy) {
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
+  defeatedCount += 1;
   score += enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
   playDefeatSound(enemy);
   spawnBeam(enemy.group.position);
@@ -532,6 +637,7 @@ function defeatEnemy(enemy) {
 function leakEnemy(enemy) {
   health = Math.max(0, health - enemy.damage);
   streak = 0;
+  leakedCount += 1;
   playDamageSound(enemy);
   damageTimer = enemy.isBoss ? 0.46 : 0.32;
   damageFlash.classList.add('show');
@@ -557,7 +663,7 @@ function animate(frameTime) {
     if (wavePhase === 'normal') {
       if (normalEnemiesSpawned < normalEnemyTarget) {
         spawnTimer -= delta;
-        if (spawnTimer <= 0 && enemies.length < ENEMY_LIMIT) {
+        if (spawnTimer <= 0 && enemies.length < getEnemyLimit()) {
           spawnEnemy();
           normalEnemiesSpawned += 1;
           spawnTimer = nextSpawnDelay();
@@ -571,7 +677,7 @@ function animate(frameTime) {
         if (bossSpawnTimer <= 0) {
           spawnBoss();
           bossesSpawned += 1;
-          bossSpawnTimer = 2.5;
+          bossSpawnTimer = currentDifficulty().bossSpawnGap;
         }
       } else if (enemies.length === 0) {
         startWaveCleared();
@@ -592,14 +698,14 @@ function updateEnemies(delta, seconds) {
   for (let index = enemies.length - 1; index >= 0; index -= 1) {
     const enemy = enemies[index];
     enemy.age += delta;
-    const speed = enemy.speed + waveSet * 0.13;
+    const speed = getEnemySpeed(enemy);
     enemy.group.position.z += speed * delta;
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
     enemy.group.rotation.y = Math.sin(seconds * 2.4 + enemy.phase) * 0.18;
 
     const wasRevealed = enemy.revealed;
-    enemy.revealed = enemy.group.position.z >= REVEAL_Z;
+    enemy.revealed = enemy.group.position.z >= enemy.revealZ;
     if (enemy.revealed && !wasRevealed) {
       enemy.revealFlash = 0.28;
       playRevealSound(enemy);
@@ -629,7 +735,7 @@ function updateEnemyMarkers(enemy, seconds) {
   if (incomingBeacon) {
     incomingBeacon.visible = !enemy.revealed;
     if (!enemy.revealed) {
-      const revealDistance = Math.max(1, REVEAL_Z - enemy.spawnZ);
+      const revealDistance = Math.max(1, enemy.revealZ - enemy.spawnZ);
       const revealProgress = THREE.MathUtils.clamp((enemy.group.position.z - enemy.spawnZ) / revealDistance, 0, 1);
       const pulse = 0.5 + Math.sin(seconds * 7.5 + enemy.phase) * 0.16;
       incomingBeacon.scale.setScalar(THREE.MathUtils.lerp(1.7, 0.8, revealProgress) + pulse * 0.18);
@@ -761,10 +867,11 @@ function updateLabels() {
 
     const x = (reusableVector.x * 0.5 + 0.5) * width;
     const y = (-reusableVector.y * 0.5 + 0.5) * height;
-    const approachAmount = THREE.MathUtils.clamp((enemy.group.position.z - REVEAL_Z) / (WALL_Z - REVEAL_Z), 0, 1);
+    const approachAmount = THREE.MathUtils.clamp((enemy.group.position.z - enemy.revealZ) / (WALL_Z - enemy.revealZ), 0, 1);
     const scale = enemy.isBoss
       ? THREE.MathUtils.lerp(0.92, 1.12, approachAmount)
       : THREE.MathUtils.lerp(0.86, 1.12, approachAmount);
+    enemy.label.style.setProperty('--threat-progress', approachAmount.toFixed(3));
     labelItems.push({ enemy, x, y, scale });
   }
 
@@ -813,7 +920,9 @@ function updateLabels() {
     enemy.label.style.top = `${y}px`;
     enemy.label.style.transform = `translate(-50%, -100%) scale(${scale.toFixed(3)})`;
     enemy.label.classList.toggle('is-target', enemy === activeTarget);
+    enemy.label.classList.toggle('is-warning', enemy.group.position.z > -10);
     enemy.label.classList.toggle('is-danger', enemy.group.position.z > -4);
+    enemy.label.classList.toggle('is-critical', enemy.group.position.z > 1);
   }
 }
 
@@ -923,6 +1032,80 @@ function updateHud(force) {
   comboValue.textContent = `${streak} chain`;
 }
 
+function currentDifficulty() {
+  return DIFFICULTY_PROFILES[currentDifficultyKey] || DIFFICULTY_PROFILES.study;
+}
+
+function setDifficulty(key) {
+  if (!DIFFICULTY_PROFILES[key] || key === currentDifficultyKey) {
+    updateDifficultyControls();
+    return;
+  }
+  currentDifficultyKey = key;
+  saveDifficultySetting(key);
+  updateDifficultyControls();
+  updatePhaseDisplay();
+  playToggleSound();
+}
+
+function updateDifficultyControls() {
+  const profile = currentDifficulty();
+  for (const button of difficultyButtons) {
+    const selected = button.dataset.difficulty === currentDifficultyKey;
+    button.classList.toggle('is-selected', selected);
+    button.setAttribute('aria-checked', selected ? 'true' : 'false');
+    button.tabIndex = selected ? 0 : -1;
+  }
+  if (messageScore && mode === 'idle') {
+    messageScore.textContent = `Best ${formatScore(bestScore)} | ${profile.label}`;
+  }
+}
+
+function updateDifficultyPanel(visible) {
+  if (!difficultyPanel) return;
+  difficultyPanel.hidden = !visible;
+}
+
+function updatePhaseDisplay() {
+  if (!phaseValue) return;
+  const profile = currentDifficulty();
+  if (mode === 'running') {
+    const phase = wavePhase === 'boss' ? 'Boss wave' : 'Normal wave';
+    phaseValue.textContent = `Wave ${waveSet} · ${phase} · ${profile.label}`;
+    return;
+  }
+  if (mode === 'paused') {
+    phaseValue.textContent = `Paused · Wave ${waveSet} · ${profile.label}`;
+    return;
+  }
+  if (mode === 'wave_cleared') {
+    phaseValue.textContent = `Wave ${waveSet} cleared · ${profile.label}`;
+    return;
+  }
+  if (mode === 'gameover') {
+    phaseValue.textContent = `Run ended · ${profile.label}`;
+    return;
+  }
+  phaseValue.textContent = profile.phaseLabel;
+}
+
+function getNormalEnemyTarget(wave) {
+  const profile = currentDifficulty();
+  return profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth;
+}
+
+function getEnemyLimit() {
+  return currentDifficulty().enemyLimit;
+}
+
+function getEnemySpeed(enemy) {
+  const profile = currentDifficulty();
+  const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
+  const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 5 : 7));
+  const lengthFactor = THREE.MathUtils.clamp(1 - longPromptPenalty * (enemy.isBoss ? 0.024 : 0.016), 0.7, 1);
+  return (enemy.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
+}
+
 function updateTypedDisplay() {
   typedValue.textContent = displayTypedBuffer() || (mode === 'running' ? '...' : 'ready');
   comboValue.textContent = `${streak} chain`;
@@ -945,19 +1128,27 @@ function spawnEnemy(options = {}) {
     : Math.random() * (waveSet === 1 ? FIRST_WAVE_SPAWN_SPREAD : SPAWN_SPREAD);
   const startZ = spawnBaseZ - spawnSpread;
   const lane = Number.isFinite(options.lane) ? options.lane : chooseSpawnLane(startZ);
+  const revealZ = currentDifficulty().revealZ;
   group.position.set(lane, 0.32, startZ);
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
 
   const isUnitBoss = options.isUnitBoss || false;
+  const promptKind = isUnitBoss ? 'unit' : showDefinition ? 'definition' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? `word-tag is-boss${isUnitBoss ? ' is-unit-boss' : ''} is-hidden`
     : 'word-tag is-hidden';
+  label.dataset.kind = promptKind;
+  label.style.setProperty('--threat-progress', '0');
   if (isBoss) {
     label.style.setProperty('--boss-accent', hexColor(type.trim));
     label.style.setProperty('--boss-glow', hexColor(type.eye));
   }
+
+  const kindNode = document.createElement('span');
+  kindNode.className = 'prompt-kind';
+  kindNode.textContent = promptKind;
 
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
@@ -969,6 +1160,7 @@ function spawnEnemy(options = {}) {
   remainingNode.className = 'remaining';
 
   promptNode.append(typedNode, remainingNode);
+  label.append(kindNode);
 
   if (showDefinition) {
     const definitionNode = document.createElement('span');
@@ -978,6 +1170,11 @@ function spawnEnemy(options = {}) {
   } else {
     label.append(promptNode);
   }
+
+  const threatNode = document.createElement('span');
+  threatNode.className = 'threat-meter';
+  threatNode.append(document.createElement('i'));
+  label.append(threatNode);
 
   labelsLayer.append(label);
 
@@ -992,10 +1189,12 @@ function spawnEnemy(options = {}) {
     searchPrompt: buildSearchPrompt(wordData.term),
     showDefinition,
     hintMask: showDefinition ? buildHintMask(wordData.term) : null,
+    promptKind,
     isBoss,
     lane,
     spawnZ: startZ,
-    revealed: startZ >= REVEAL_Z,
+    revealZ,
+    revealed: startZ >= revealZ,
     revealFlash: 0,
     speed: isBoss ? type.speed : type.speed + Math.random() * 0.35,
     damage: isBoss ? BOSS_DAMAGE : MINION_DAMAGE,
@@ -1459,7 +1658,11 @@ function chooseBossType(index) {
 }
 
 function nextSpawnDelay() {
-  return Math.max(0.68, 2.15 - waveSet * 0.14 + Math.random() * 0.46);
+  const profile = currentDifficulty();
+  return Math.max(
+    profile.spawnMin,
+    profile.spawnBase - Math.max(0, waveSet - 1) * profile.spawnGrowth + Math.random() * profile.spawnJitter
+  );
 }
 
 function weightedPick(items) {
@@ -1483,9 +1686,13 @@ function normalizeCharacter(character) {
 }
 
 function accuracy() {
-  const possible = score + (MAX_LIFE - health) * 100;
-  if (possible <= 0) return 1;
-  return THREE.MathUtils.clamp(score / possible, 0, 1);
+  if (typedAttempts <= 0) return 1;
+  return THREE.MathUtils.clamp((typedAttempts - mistakeCount) / typedAttempts, 0, 1);
+}
+
+function formatAccuracySummary() {
+  if (typedAttempts <= 0) return 'No typed attempts';
+  return `${Math.round(accuracy() * 100)}% accuracy`;
 }
 
 function focusKeyboard() {
@@ -1515,6 +1722,15 @@ function loadBestScore() {
 
 function saveBestScore(value) {
   localStorage.setItem(STORAGE_KEY, String(Math.round(value)));
+}
+
+function loadDifficultySetting() {
+  const stored = localStorage.getItem(DIFFICULTY_STORAGE_KEY);
+  return DIFFICULTY_PROFILES[stored] ? stored : 'study';
+}
+
+function saveDifficultySetting(key) {
+  localStorage.setItem(DIFFICULTY_STORAGE_KEY, key);
 }
 
 function loadAudioSetting() {
@@ -1794,8 +2010,9 @@ function startBossPhase() {
   wavePhase = 'boss';
   bossesSpawned = 0;
   if (bossWordsThisSet.length === 0) prepareWavePlan();
-  bossSpawnTimer = 0.8;
+  bossSpawnTimer = currentDifficulty().bossWarningDelay;
   playBossWarningSound();
+  updatePhaseDisplay();
 }
 
 function spawnBoss() {
@@ -1852,14 +2069,16 @@ function startWaveCleared() {
     glossary
   );
   messagePanel.classList.add('is-cleared');
+  updateDifficultyPanel(false);
   updateHud(true);
+  updatePhaseDisplay();
 }
 
 function advanceWaveSet() {
   playStartSound();
   waveSet += 1;
   wavePhase = 'normal';
-  normalEnemyTarget = 8 + (waveSet - 1) * 2;
+  normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
@@ -1872,10 +2091,12 @@ function advanceWaveSet() {
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
+  updateDifficultyPanel(false);
   pauseButton.disabled = false;
   pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
   updateTypedDisplay();
   updateHud(true);
+  updatePhaseDisplay();
   focusKeyboard();
 }
