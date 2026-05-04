@@ -1136,6 +1136,11 @@ td[align="right"] {
     color: #000000 !important;
   }
 
+  mjx-container svg path {
+    stroke: none !important;
+    stroke-width: 0 !important;
+  }
+
   pre {
     background-color: #f0f0f0 !important;
     font-size: 0.95em !important;
