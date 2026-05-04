@@ -209,17 +209,6 @@ const BOSS_TYPES = [
     score: 150,
   },
 ];
-const UNIT_BOSS_TYPE = {
-  name: 'Sigil Titan',
-  isBoss: true,
-  body: 0x3b2a00,
-  trim: 0xfbbf24,
-  eye: 0xffffff,
-  speed: 0.88,
-  scale: 1.85,
-  weight: 1,
-  score: 250,
-};
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 
 const reusableVector = new THREE.Vector3();
@@ -1119,7 +1108,8 @@ function spawnEnemy(options = {}) {
     ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
     : choosePrompt();
 
-  const showDefinition = isBoss && !!wordData.definition;
+  const isUnitPrompt = !!wordData.isUnit;
+  const showDefinition = !!wordData.definition && (isBoss || isUnitPrompt);
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
@@ -1133,11 +1123,10 @@ function spawnEnemy(options = {}) {
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
 
-  const isUnitBoss = options.isUnitBoss || false;
-  const promptKind = isUnitBoss ? 'unit' : showDefinition ? 'definition' : 'keyword';
+  const promptKind = isUnitPrompt ? 'unit' : showDefinition ? 'definition' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
-    ? `word-tag is-boss${isUnitBoss ? ' is-unit-boss' : ''} is-hidden`
+    ? 'word-tag is-boss is-hidden'
     : 'word-tag is-hidden';
   label.dataset.kind = promptKind;
   label.style.setProperty('--threat-progress', '0');
@@ -1619,7 +1608,7 @@ function chooseBossWordsForWave() {
   const chosen = [];
   const usedTerms = new Set();
 
-  while (chosen.length < BOSSES_PER_WAVE - 1 && usedTerms.size < pool.length) {
+  while (chosen.length < BOSSES_PER_WAVE && usedTerms.size < pool.length) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
     if (usedTerms.has(entry.term)) continue;
     chosen.push(entry);
@@ -1644,6 +1633,9 @@ function choosePrompt() {
   const reservedBossTerms = wavePhase === 'normal'
     ? new Set(bossWordsThisSet.map((word) => word.term))
     : new Set();
+  const unitChance = THREE.MathUtils.clamp(0.12 + waveSet * 0.02, 0.14, 0.24);
+  if (Math.random() < unitChance) return chooseUnitWord(nearExisting);
+
   const regularPool = pool.filter((entry) => !reservedBossTerms.has(entry.term));
   const usablePool = regularPool.length > 0 ? regularPool : pool;
   for (let attempt = 0; attempt < 8; attempt += 1) {
@@ -2016,19 +2008,12 @@ function startBossPhase() {
 }
 
 function spawnBoss() {
-  const isUnitBoss = bossesSpawned === BOSSES_PER_WAVE - 1;
-  let wordData;
-  if (isUnitBoss) {
-    wordData = chooseUnitWord();
-    bossWordsThisSet.push(wordData);
-  } else {
-    wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
-    if (!bossWordsThisSet.some(w => w.term === wordData.term)) bossWordsThisSet.push(wordData);
-  }
-  const bossType = isUnitBoss ? UNIT_BOSS_TYPE : chooseBossType(bossesSpawned);
+  const wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
+  if (!bossWordsThisSet.some(w => w.term === wordData.term)) bossWordsThisSet.push(wordData);
+  const bossType = chooseBossType(bossesSpawned);
   const lanes = [-3.7, 0, 3.7];
   const lane = lanes[bossesSpawned % lanes.length];
-  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, isUnitBoss });
+  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0 });
 }
 
 function chooseBossWord() {
@@ -2041,13 +2026,10 @@ function chooseBossWord() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function chooseUnitWord() {
-  const usedPrompts = new Set(enemies.map(e => e.prompt));
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const entry = UNIT_WORDS[Math.floor(Math.random() * UNIT_WORDS.length)];
-    if (!usedPrompts.has(entry.term)) return entry;
-  }
-  return UNIT_WORDS[Math.floor(Math.random() * UNIT_WORDS.length)];
+function chooseUnitWord(usedPrompts = new Set(enemies.map(e => e.prompt))) {
+  const pool = UNIT_WORDS.filter(entry => !usedPrompts.has(entry.term));
+  const usablePool = pool.length > 0 ? pool : UNIT_WORDS;
+  return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
 function startWaveCleared() {

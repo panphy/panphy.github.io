@@ -674,12 +674,12 @@ a {
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 82%, white 18%);
 }
 
-.word-tag.is-unit-boss .definition {
+.word-tag[data-kind="unit"] .definition {
   color: var(--gold);
   font-weight: 700;
 }
 
-.word-tag.is-unit-boss .prompt-kind {
+.word-tag[data-kind="unit"] .prompt-kind {
   background: rgba(239, 195, 92, 0.18);
   color: #ffe39a;
 }

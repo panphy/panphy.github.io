@@ -7,16 +7,16 @@ The game's goal is to give students fun, low-pressure **exposure** to physics ke
 ## Completed
 
 - [x] **[TASK-1] Definition + hint mode**
-  Boss enemies show a one-line definition and a masked hint (`P_` style) instead of the plain term. Normal enemies keep plain words for ease of onboarding.
+  Boss enemies show a one-line definition and a masked hint (`P_` style) instead of the plain term. Unit enemies also show a unit question with a masked hint; other normal enemies keep plain words for ease of onboarding.
 
 - [x] **[TASK-2] Boss wave structure**
-  Each wave ends with 3 bosses: 2 definition bosses + 1 unit-question boss (see TASK-4). A "Wave Clear" screen shows a mini-glossary of all 3 boss terms. State machine: `wavePhase = 'normal' | 'boss'`.
+  Each wave ends with 3 definition bosses. A "Wave Clear" screen shows a mini-glossary of all 3 boss terms. State machine: `wavePhase = 'normal' | 'boss'`.
 
 - [x] **[TASK-3] Remove monster names from labels**
   Enemy names ("Mudlug", "Glowmite", etc.) are not shown in-game; mesh shape and colour provide visual variety only.
 
-- [x] **[TASK-4] Unit boss**
-  The 3rd (final) boss each wave is a *Sigil Titan* — larger, amber-gold, slowest — that asks for the SI unit of a quantity (e.g. "unit of pressure" → type `Pa`). Unit pool lives in `UNIT_WORDS` in `question-bank.js`. The wave-clear glossary formats unit entries as `unit of X: symbol` rather than `term — definition`.
+- [x] **[TASK-4] Unit prompts**
+  Unit questions now appear as normal enemies tagged `unit`, using `UNIT_WORDS` in `question-bank.js`. Bosses are all definition bosses.
 
 ---
 
