@@ -36,6 +36,7 @@
         <img src="../../assets/panphy.png" alt="PanPhy Labs">
       </a>
       <div class="game-title">
+        <span id="phaseValue">Study pace</span>
         <h1>Spellwave</h1>
       </div>
       <div class="game-actions">
@@ -74,6 +75,20 @@
       <h2 id="messageTitle">Face the Wave</h2>
       <div class="message-score" id="messageScore">Best 0</div>
       <p class="message-copy" id="messageCopy">Type the floating words before the monsters reach you!</p>
+      <div class="difficulty-panel" id="difficultyPanel" role="radiogroup" aria-label="Pace">
+        <button class="difficulty-option" type="button" data-difficulty="study" role="radio" aria-checked="true">
+          <span>Study</span>
+          <small>Earlier reveals, fewer enemies</small>
+        </button>
+        <button class="difficulty-option" type="button" data-difficulty="arcade" role="radio" aria-checked="false">
+          <span>Arcade</span>
+          <small>Original wave pressure</small>
+        </button>
+        <button class="difficulty-option" type="button" data-difficulty="challenge" role="radio" aria-checked="false">
+          <span>Challenge</span>
+          <small>Faster spawns, tighter reads</small>
+        </button>
+      </div>
       <button id="startButton" type="button">Start</button>
     </section>
 
