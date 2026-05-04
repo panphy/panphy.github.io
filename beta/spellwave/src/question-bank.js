@@ -128,15 +128,36 @@ export const HARD_WORDS = [
 
 export const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 
-// Unit-question pool for the final boss each wave.
+// Unit-question pool for normal enemies.
 // term = the unit symbol (what the player types); definition = the question shown.
 export const UNIT_WORDS = [
-  { term: 'Pa',   definition: 'unit of pressure',              isUnit: true },
-  { term: 'Hz',   definition: 'unit of frequency',             isUnit: true },
-  { term: 'kg',   definition: 'unit of mass',                  isUnit: true },
-  { term: 'Bq',   definition: 'unit of radioactive activity',  isUnit: true },
-  { term: 'm/s',  definition: 'unit of speed',                 isUnit: true },
-  { term: 'ohm',  definition: 'unit of resistance',            isUnit: true },
-  { term: 'J',    definition: 'unit of energy',                isUnit: true },
-  { term: 'J/kg', definition: 'unit of specific latent heat',  isUnit: true },
+  { term: 'N',       definition: 'unit of force',                         isUnit: true },
+  { term: 'N',       definition: 'unit of weight',                        isUnit: true },
+  { term: 'kg',      definition: 'unit of mass',                          isUnit: true },
+  { term: 'm',       definition: 'unit of distance',                      isUnit: true },
+  { term: 'm',       definition: 'unit of displacement',                  isUnit: true },
+  { term: 's',       definition: 'unit of time',                          isUnit: true },
+  { term: 'm/s',     definition: 'unit of speed',                         isUnit: true },
+  { term: 'm/s',     definition: 'unit of velocity',                      isUnit: true },
+  { term: 'm/s2',    definition: 'unit of acceleration',                  isUnit: true },
+  { term: 'J',       definition: 'unit of energy',                        isUnit: true },
+  { term: 'J',       definition: 'unit of work done',                     isUnit: true },
+  { term: 'W',       definition: 'unit of power',                         isUnit: true },
+  { term: 'A',       definition: 'unit of current',                       isUnit: true },
+  { term: 'C',       definition: 'unit of charge',                        isUnit: true },
+  { term: 'V',       definition: 'unit of potential difference',          isUnit: true },
+  { term: 'V',       definition: 'unit of voltage',                       isUnit: true },
+  { term: 'ohm',     definition: 'unit of resistance',                    isUnit: true },
+  { term: 'Pa',      definition: 'unit of pressure',                      isUnit: true },
+  { term: 'Hz',      definition: 'unit of frequency',                     isUnit: true },
+  { term: 'm',       definition: 'unit of wavelength',                    isUnit: true },
+  { term: 'kg/m3',   definition: 'unit of density',                       isUnit: true },
+  { term: 'J/kgC',   definition: 'unit of specific heat capacity',        isUnit: true },
+  { term: 'J/kg',    definition: 'unit of specific latent heat',          isUnit: true },
+  { term: 'N/m',     definition: 'unit of spring constant',               isUnit: true },
+  { term: 'Nm',      definition: 'unit of moment',                        isUnit: true },
+  { term: 'N/kg',    definition: 'unit of gravitational field strength',  isUnit: true },
+  { term: 'Bq',      definition: 'unit of radioactive activity',          isUnit: true },
+  { term: 'Sv',      definition: 'unit of radiation dose',                isUnit: true },
+  { term: 'T',       definition: 'unit of magnetic flux density',         isUnit: true },
 ];
