@@ -35,7 +35,10 @@
       <div class="flight-title">
         <h1>Asteroid Storm 3D</h1>
       </div>
-      <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>⏸</button>
+      <div class="flight-actions">
+        <button class="hud-button" id="audioButton" type="button" aria-label="Mute sound" title="Mute sound">♪</button>
+        <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>⏸</button>
+      </div>
     </header>
 
     <section class="readout-stack" aria-label="Run metrics">
@@ -56,8 +59,6 @@
         <strong id="levelValue">1</strong>
       </div>
     </section>
-
-    <div class="level-toast" id="levelToast" aria-live="polite" aria-atomic="true"></div>
 
     <section class="message-panel" id="messagePanel" aria-live="polite">
       <p id="messageKicker">Low-poly run</p>

@@ -7,18 +7,23 @@ const speedValue = document.getElementById('speedValue');
 const levelValue = document.getElementById('levelValue');
 const startButton = document.getElementById('startButton');
 const pauseButton = document.getElementById('pauseButton');
+const audioButton = document.getElementById('audioButton');
 const messagePanel = document.getElementById('messagePanel');
 const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
 const messageScore = document.getElementById('messageScore');
 const screenFlash = document.getElementById('screenFlash');
-const levelToast = document.getElementById('levelToast');
 
 const STORAGE_KEY = 'panphyDodge3dBestV1';
+const AUDIO_STORAGE_KEY = 'panphyDodge3dAudioV1';
 const PLAYER_Z = 2.15;
 const PLAYER_RADIUS = 0.72;
 const BASE_FIELD_SPEED = 19;
 const MAX_DELTA = 0.08;
+const GAME_OVER_PANEL_DELAY = 1.05;
+const MUSIC_BPM = 152;
+const MUSIC_STEP_DURATION = 60 / MUSIC_BPM / 4;
+const MUSIC_SCHEDULE_AHEAD = 0.16;
 const PLAY_BOUNDS = {
   x: 7.4,
   yMin: -3.55,
@@ -71,7 +76,17 @@ let flashTimer = 0;
 let pausedByVisibility = false;
 let hudTimer = 0;
 let gameoverTime = 0;
-let lastLevel = 0;
+let pendingGameOverMessage = null;
+let audioEnabled = loadAudioSetting();
+let audioContext = null;
+let masterGain = null;
+let musicGain = null;
+let sfxGain = null;
+let engineGain = null;
+let engineOscillator = null;
+let noiseBuffer = null;
+let nextMusicTime = 0;
+let musicStep = 0;
 
 const course = {
   scrollZ: 0,
@@ -161,6 +176,7 @@ const asteroidWireMaterial = new THREE.LineBasicMaterial({
 
 bestValue.textContent = formatTime(bestScore);
 messageScore.textContent = `Best ${formatTime(bestScore)}`;
+updateAudioButton();
 
 startButton.addEventListener('click', () => {
   if (mode === 'paused') {
@@ -174,6 +190,18 @@ pauseButton.addEventListener('click', () => {
     pauseGame();
   } else if (mode === 'paused') {
     resumeGame();
+  }
+});
+audioButton.addEventListener('click', () => {
+  audioEnabled = !audioEnabled;
+  saveAudioSetting(audioEnabled);
+  updateAudioButton();
+  if (audioEnabled) {
+    resumeAudio();
+    if (mode === 'running') startRunAudio();
+    playConfirmSfx();
+  } else {
+    fadeAudioOut(0.03);
   }
 });
 
@@ -202,6 +230,7 @@ resizeRenderer();
 requestAnimationFrame(animate);
 
 function startGame() {
+  resumeAudio();
   clearAsteroids();
   clearExplosionParticles();
   elapsed = 0;
@@ -213,7 +242,7 @@ function startGame() {
   flashTimer = 0;
   lastFrameTime = 0;
   gameoverTime = 0;
-  lastLevel = 0;
+  pendingGameOverMessage = null;
   player.x = 0;
   player.y = -1.3;
   player.targetX = 0;
@@ -232,6 +261,8 @@ function startGame() {
   pauseButton.disabled = false;
   pauseButton.textContent = '⏸';
   pauseButton.setAttribute('aria-label', 'Pause run');
+  startRunAudio();
+  playStartSfx();
   updateHud(true);
 }
 
@@ -240,17 +271,22 @@ function pauseGame() {
   mode = 'paused';
   pauseButton.textContent = '▶';
   pauseButton.setAttribute('aria-label', 'Resume run');
+  fadeAudioOut(0.05);
+  playPauseSfx();
   showMessage('PAUSED', 'Holding Pattern', `Survival ${formatTime(elapsed)}`, 'Resume');
 }
 
 function resumeGame() {
   if (mode !== 'paused') return;
+  resumeAudio();
   mode = 'running';
   lastFrameTime = 0;
   pauseButton.textContent = '⏸';
   pauseButton.setAttribute('aria-label', 'Pause run');
   messagePanel.hidden = true;
   document.body.classList.add('is-running');
+  startRunAudio();
+  playConfirmSfx();
 }
 
 function endGame() {
@@ -267,6 +303,8 @@ function endGame() {
   shakeAmount = 1.4;
   flashTimer = 0.18;
   screenFlash.classList.add('show');
+  fadeAudioOut(0.12);
+  playExplosionSfx();
 
   const isNewBest = elapsed > bestScore;
   if (isNewBest) {
@@ -276,8 +314,13 @@ function endGame() {
 
   bestValue.textContent = formatTime(bestScore);
   const endKicker = isNewBest ? 'NEW RECORD' : 'RUN ENDED';
-  const endTitle = isNewBest ? 'Personal Best' : 'Impact Alert';
-  showMessage(endKicker, endTitle, `Survival ${formatTime(elapsed)} | Best ${formatTime(bestScore)}`, 'Restart');
+  pendingGameOverMessage = {
+    kicker: endKicker,
+    title: 'Game Over',
+    scoreText: `Survival ${formatTime(elapsed)} | Best ${formatTime(bestScore)}`,
+    buttonText: 'Restart',
+  };
+  messagePanel.hidden = true;
 }
 
 function showMessage(kicker, title, scoreText, buttonText) {
@@ -315,22 +358,29 @@ function updateGame(delta) {
   const level = getLevel();
   const visualLevel = elapsed / 10 + 1;
 
-  if (level > lastLevel) {
-    if (lastLevel > 0) flashLevelUp();
-    lastLevel = level;
-  }
-
   updateControls(delta);
   updateShip(delta);
   updateEnvironment(delta, fieldSpeed, visualLevel);
   updateSpawning(delta, level);
   updateAsteroids(delta);
   updateEffects(delta);
+  updateRunAudio(delta);
   updateHud();
 }
 
 function updateAttractMode(delta, time) {
-  if (mode === 'gameover') gameoverTime += delta;
+  if (mode === 'gameover') {
+    gameoverTime += delta;
+    if (pendingGameOverMessage && gameoverTime >= GAME_OVER_PANEL_DELAY) {
+      showMessage(
+        pendingGameOverMessage.kicker,
+        pendingGameOverMessage.title,
+        pendingGameOverMessage.scoreText,
+        pendingGameOverMessage.buttonText
+      );
+      pendingGameOverMessage = null;
+    }
+  }
   const drift = Math.sin(time * 0.0007) * 2.25;
   const lift = Math.cos(time * 0.0009) * 0.36 - 1.15;
   player.targetX = drift;
@@ -865,21 +915,240 @@ function updateEffects(delta) {
   }
 }
 
-function flashLevelUp() {
-  const el = document.getElementById('levelReadout');
-  if (el) {
-    el.classList.remove('level-flash');
-    void el.offsetWidth;
-    el.classList.add('level-flash');
-    el.addEventListener('animationend', () => el.classList.remove('level-flash'), { once: true });
+function updateAudioButton() {
+  if (!audioButton) return;
+  audioButton.classList.toggle('is-muted', !audioEnabled);
+  audioButton.textContent = audioEnabled ? '♪' : 'x';
+  audioButton.title = audioEnabled ? 'Mute sound' : 'Unmute sound';
+  audioButton.setAttribute('aria-label', audioEnabled ? 'Mute sound' : 'Unmute sound');
+}
+
+function ensureAudio() {
+  if (audioContext) return audioContext;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  audioContext = new AudioContextClass();
+  const compressor = audioContext.createDynamicsCompressor();
+  compressor.threshold.setValueAtTime(-20, audioContext.currentTime);
+  compressor.knee.setValueAtTime(22, audioContext.currentTime);
+  compressor.ratio.setValueAtTime(6, audioContext.currentTime);
+  compressor.attack.setValueAtTime(0.008, audioContext.currentTime);
+  compressor.release.setValueAtTime(0.18, audioContext.currentTime);
+  compressor.connect(audioContext.destination);
+
+  masterGain = audioContext.createGain();
+  musicGain = audioContext.createGain();
+  sfxGain = audioContext.createGain();
+  engineGain = audioContext.createGain();
+  masterGain.gain.setValueAtTime(0.58, audioContext.currentTime);
+  musicGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+  sfxGain.gain.setValueAtTime(0.72, audioContext.currentTime);
+  engineGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+
+  musicGain.connect(masterGain);
+  sfxGain.connect(masterGain);
+  engineGain.connect(masterGain);
+  masterGain.connect(compressor);
+
+  const engineFilter = audioContext.createBiquadFilter();
+  engineFilter.type = 'lowpass';
+  engineFilter.frequency.setValueAtTime(520, audioContext.currentTime);
+  engineOscillator = audioContext.createOscillator();
+  engineOscillator.type = 'sawtooth';
+  engineOscillator.frequency.setValueAtTime(76, audioContext.currentTime);
+  engineOscillator.connect(engineFilter);
+  engineFilter.connect(engineGain);
+  engineOscillator.start();
+
+  noiseBuffer = createNoiseBuffer(audioContext);
+  return audioContext;
+}
+
+function resumeAudio() {
+  if (!audioEnabled) return null;
+  const context = ensureAudio();
+  if (!context) return null;
+  if (context.state === 'suspended') context.resume().catch(() => {});
+  return context;
+}
+
+function startRunAudio() {
+  const context = resumeAudio();
+  if (!context || !musicGain || !engineGain) return;
+  const now = context.currentTime;
+  musicGain.gain.cancelScheduledValues(now);
+  engineGain.gain.cancelScheduledValues(now);
+  musicGain.gain.setTargetAtTime(0.22, now, 0.08);
+  engineGain.gain.setTargetAtTime(0.045, now, 0.12);
+  nextMusicTime = now + 0.03;
+  musicStep = 0;
+}
+
+function fadeAudioOut(fade = 0.08) {
+  if (!audioContext) return;
+  const now = audioContext.currentTime;
+  if (musicGain) {
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setTargetAtTime(0.0001, now, fade);
+  }
+  if (engineGain) {
+    engineGain.gain.cancelScheduledValues(now);
+    engineGain.gain.setTargetAtTime(0.0001, now, fade);
+  }
+}
+
+function updateRunAudio(delta) {
+  const context = audioContext;
+  if (!audioEnabled || !context || context.state !== 'running' || mode !== 'running') return;
+
+  if (engineOscillator) {
+    const drift = Math.abs(player.x - player.prevX) + Math.abs(player.y - player.prevY);
+    const targetFrequency = 72 + fieldSpeed * 0.85 + clamp(drift / Math.max(delta, 0.001), 0, 12) * 2.6;
+    engineOscillator.frequency.setTargetAtTime(targetFrequency, context.currentTime, 0.045);
   }
 
-  if (levelToast) {
-    levelToast.textContent = `Level ${getLevel()}`;
-    levelToast.style.animation = 'none';
-    void levelToast.offsetWidth;
-    levelToast.style.animation = '';
+  scheduleMusic();
+}
+
+function scheduleMusic() {
+  if (!audioContext || !musicGain || !noiseBuffer) return;
+  const now = audioContext.currentTime;
+  if (nextMusicTime < now) {
+    nextMusicTime = now + 0.02;
+    musicStep = 0;
   }
+
+  while (nextMusicTime < now + MUSIC_SCHEDULE_AHEAD) {
+    scheduleMusicStep(musicStep, nextMusicTime);
+    nextMusicTime += MUSIC_STEP_DURATION;
+    musicStep += 1;
+  }
+}
+
+function scheduleMusicStep(step, startTime) {
+  const index = step % 16;
+  const bassPattern = [55, 55, 65.41, 55, 73.42, 65.41, 82.41, 73.42];
+  const leadPattern = [329.63, 392, 493.88, 440, 587.33, 493.88, 392, 440];
+
+  if (index % 4 === 0) scheduleKick(startTime, 0.22, 0.28, musicGain);
+  if (index === 4 || index === 12) scheduleSnare(startTime);
+  if (index % 2 === 1) scheduleHat(startTime);
+  if (index % 2 === 0) {
+    const bassFrequency = bassPattern[(step / 2) % bassPattern.length];
+    scheduleTone(bassFrequency, startTime, MUSIC_STEP_DURATION * 1.65, 'sawtooth', 0.12, musicGain, 520);
+  }
+  if (index === 3 || index === 7 || index === 11 || index === 15) {
+    const leadFrequency = leadPattern[Math.floor(step / 4) % leadPattern.length];
+    scheduleTone(leadFrequency, startTime, MUSIC_STEP_DURATION * 1.4, 'square', 0.035, musicGain, 2600, leadFrequency * 1.01);
+  }
+}
+
+function scheduleTone(frequency, startTime, duration, type, peakGain, output, filterFrequency, endFrequency = frequency) {
+  if (!audioContext || !output) return;
+  const oscillator = audioContext.createOscillator();
+  const amp = audioContext.createGain();
+  const filter = audioContext.createBiquadFilter();
+
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(Math.max(1, frequency), startTime);
+  oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), startTime + duration);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(filterFrequency, startTime);
+  amp.gain.setValueAtTime(0.0001, startTime);
+  amp.gain.exponentialRampToValueAtTime(Math.max(0.0002, peakGain), startTime + 0.018);
+  amp.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+  oscillator.connect(filter);
+  filter.connect(amp);
+  amp.connect(output);
+  oscillator.start(startTime);
+  oscillator.stop(startTime + duration + 0.04);
+}
+
+function scheduleKick(startTime, duration, peakGain, output) {
+  if (!audioContext || !output) return;
+  const oscillator = audioContext.createOscillator();
+  const amp = audioContext.createGain();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(132, startTime);
+  oscillator.frequency.exponentialRampToValueAtTime(42, startTime + duration);
+  amp.gain.setValueAtTime(Math.max(0.0002, peakGain), startTime);
+  amp.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  oscillator.connect(amp);
+  amp.connect(output);
+  oscillator.start(startTime);
+  oscillator.stop(startTime + duration + 0.03);
+}
+
+function scheduleHat(startTime) {
+  scheduleNoise(startTime, 0.055, 0.055, 'highpass', 6200, musicGain);
+}
+
+function scheduleSnare(startTime) {
+  scheduleNoise(startTime, 0.12, 0.1, 'bandpass', 2100, musicGain);
+  scheduleTone(180, startTime, 0.11, 'triangle', 0.035, musicGain, 980, 92);
+}
+
+function scheduleNoise(startTime, duration, peakGain, filterType, filterFrequency, output) {
+  if (!audioContext || !noiseBuffer || !output) return;
+  const source = audioContext.createBufferSource();
+  const filter = audioContext.createBiquadFilter();
+  const amp = audioContext.createGain();
+  source.buffer = noiseBuffer;
+  source.loop = true;
+  filter.type = filterType;
+  filter.frequency.setValueAtTime(filterFrequency, startTime);
+  amp.gain.setValueAtTime(Math.max(0.0002, peakGain), startTime);
+  amp.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  source.connect(filter);
+  filter.connect(amp);
+  amp.connect(output);
+  source.start(startTime);
+  source.stop(startTime + duration + 0.02);
+}
+
+function playStartSfx() {
+  const context = resumeAudio();
+  if (!context) return;
+  const now = context.currentTime + 0.01;
+  scheduleTone(165, now, 0.28, 'sawtooth', 0.13, sfxGain, 1800, 760);
+  scheduleNoise(now, 0.2, 0.09, 'highpass', 1400, sfxGain);
+}
+
+function playConfirmSfx() {
+  const context = resumeAudio();
+  if (!context) return;
+  const now = context.currentTime + 0.01;
+  scheduleTone(440, now, 0.08, 'triangle', 0.08, sfxGain, 2200, 660);
+}
+
+function playPauseSfx() {
+  const context = audioContext;
+  if (!audioEnabled || !context || context.state === 'suspended') return;
+  const now = context.currentTime + 0.01;
+  scheduleTone(360, now, 0.1, 'triangle', 0.055, sfxGain, 1400, 180);
+}
+
+function playExplosionSfx() {
+  const context = audioContext;
+  if (!audioEnabled || !context || context.state === 'suspended') return;
+  const now = context.currentTime + 0.01;
+  scheduleKick(now, 0.62, 0.72, sfxGain);
+  scheduleNoise(now, 0.72, 0.42, 'lowpass', 1800, sfxGain);
+  scheduleNoise(now + 0.06, 0.18, 0.16, 'bandpass', 3200, sfxGain);
+  scheduleTone(112, now + 0.02, 0.46, 'sawtooth', 0.18, sfxGain, 900, 38);
+  scheduleTone(720, now + 0.04, 0.18, 'square', 0.08, sfxGain, 2600, 170);
+}
+
+function createNoiseBuffer(context) {
+  const length = Math.floor(context.sampleRate);
+  const buffer = context.createBuffer(1, length, context.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < length; i += 1) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  return buffer;
 }
 
 function updateHud(force = false) {
@@ -1333,7 +1602,7 @@ function resetStar(positions, offset, z = random(-168, -70)) {
 }
 
 function handlePointerDown(event) {
-  if (mode === 'gameover' && gameoverTime >= 0.6) {
+  if (mode === 'gameover' && gameoverTime >= GAME_OVER_PANEL_DELAY) {
     startGame();
     return;
   }
@@ -1369,7 +1638,7 @@ function handlePointerUp(event) {
 
 function handleKeyDown(event) {
   if (event.code === 'Space' || event.code === 'Enter') {
-    if (mode === 'idle' || mode === 'gameover') {
+    if (mode === 'idle' || (mode === 'gameover' && gameoverTime >= GAME_OVER_PANEL_DELAY)) {
       event.preventDefault();
       startGame();
       return;
@@ -1417,6 +1686,22 @@ function loadBestScore() {
     return Number.isFinite(stored) ? stored : 0;
   } catch (error) {
     return 0;
+  }
+}
+
+function loadAudioSetting() {
+  try {
+    return localStorage.getItem(AUDIO_STORAGE_KEY) !== 'muted';
+  } catch (error) {
+    return true;
+  }
+}
+
+function saveAudioSetting(enabled) {
+  try {
+    localStorage.setItem(AUDIO_STORAGE_KEY, enabled ? 'on' : 'muted');
+  } catch (error) {
+    // Storage can fail in private browsing; audio can still be toggled for this run.
   }
 }
 
