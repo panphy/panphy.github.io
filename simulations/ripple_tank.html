@@ -217,6 +217,15 @@
       outline-offset: 2px;
     }
 
+    #backToMenuBtn {
+      min-height: 42px;
+      padding: 0.45rem 0.75rem;
+      border-color: var(--border);
+      background: var(--surface-alt);
+      color: var(--text-main);
+      font-size: 0.78rem;
+    }
+
     /* ─── Workspace ─── */
     #workspace {
       min-height: 0;
@@ -979,6 +988,7 @@
       <a href="/" class="banner-logo"><img src="/assets/panphy.png" alt="PanPhy Labs"></a>
       <h1 class="banner-title gradient-text">Virtual Ripple Tank</h1>
       <div class="banner-actions">
+        <button id="backToMenuBtn" class="btn is-hidden" type="button">Menu</button>
         <button id="theme-button" title="Toggle theme" aria-label="Toggle Light/Dark Theme">☀️</button>
       </div>
     </header>
@@ -1190,7 +1200,6 @@
         <div class="separator is-hidden" id="actionsSeparator"></div>
 
         <div class="sim-actions is-hidden" id="simActions">
-          <button id="backToMenuBtn" class="btn btn-secondary">Menu</button>
           <button id="playPauseBtn" class="btn btn-primary">Pause</button>
           <button id="resetBtn" class="btn btn-secondary">Reset</button>
         </div>
@@ -1884,6 +1893,7 @@
       setVisible(modeMenu, isMenu);
       setVisible(statusRow, !isMenu);
       setVisible(simActions, !isMenu);
+      setVisible(backToMenuBtn, !isMenu);
       setVisible(actionsSeparator, !isMenu);
       setVisible(keyboardHint, !isMenu);
       setVisible(simPanel, !isMenu);
