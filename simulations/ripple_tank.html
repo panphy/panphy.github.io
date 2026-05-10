@@ -24,7 +24,7 @@
       }
     })();
   </script>
-  <title>Interference</title>
+  <title>Virtual Ripple Tank</title>
   <script src="/assets/sw-register.js" defer></script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <style>
@@ -616,6 +616,57 @@
       border-color: var(--border);
     }
 
+    .btn.active {
+      background: var(--brand-accent);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .preset-row .btn {
+      min-height: 40px;
+      padding-inline: 0.65rem;
+      font-size: 0.78rem;
+    }
+
+    .medium-readout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.05rem;
+    }
+
+    .medium-pill {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-height: 46px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.45rem 0.55rem;
+      background: var(--surface);
+    }
+
+    .medium-pill span:first-child {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .medium-pill span:last-child {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
     .sim-actions {
       display: flex;
       gap: 0.5rem;
@@ -775,7 +826,7 @@
   <div id="app">
     <header id="titleBanner">
       <a href="/" class="banner-logo"><img src="/assets/panphy.png" alt="PanPhy Labs"></a>
-      <h1 class="banner-title gradient-text">Interference</h1>
+      <h1 class="banner-title gradient-text">Virtual Ripple Tank</h1>
       <div class="banner-actions">
         <button id="theme-button" title="Toggle theme" aria-label="Toggle Light/Dark Theme">☀️</button>
       </div>
@@ -784,13 +835,13 @@
     <div id="workspace">
       <div id="simPanel" class="panel">
         <canvas id="simCanvas"></canvas>
-        <p class="sim-hint">Drag to rotate · Scroll to zoom</p>
+        <p class="sim-hint">Drag to rotate · Scroll to zoom · Drag boundary to move or rotate</p>
       </div>
 
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
           <h2>Controls</h2>
-          <p>Two-source interference simulation</p>
+          <p>Interference and refraction in a virtual ripple tank</p>
         </div>
 
         <div class="status-row">
@@ -908,6 +959,65 @@
 
         <div class="separator"></div>
 
+        <!-- Refraction -->
+        <div class="source-card settings-card" id="mediumCard">
+          <div class="source-header">
+            <div class="source-title-wrap">
+              <span class="source-dot settings-dot"></span>
+              <h3 class="source-title">Tank Medium</h3>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="mediumToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="medium-readout">
+            <div class="medium-pill">
+              <span>Region A</span>
+              <span id="regionAVal">4.0</span>
+            </div>
+            <div class="medium-pill">
+              <span>Region B</span>
+              <span id="regionBVal">2.4</span>
+            </div>
+          </div>
+          <div class="preset-row">
+            <button id="deepToShallowBtn" class="btn btn-secondary" type="button">Deep to shallow</button>
+            <button id="shallowToDeepBtn" class="btn btn-secondary" type="button">Shallow to deep</button>
+            <button id="swapMediumBtn" class="btn btn-secondary" type="button">Swap</button>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="boundaryAngle">Boundary Angle</label>
+              <span id="boundaryAngleVal">35°</span>
+            </div>
+            <input type="range" id="boundaryAngle" min="-80" max="80" step="1" value="35">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="boundaryOffset">Boundary Position</label>
+              <span id="boundaryOffsetVal">0.0</span>
+            </div>
+            <input type="range" id="boundaryOffset" min="-5" max="5" step="0.1" value="0">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="speedA">Region A Speed</label>
+              <span id="speedAVal">4.0</span>
+            </div>
+            <input type="range" id="speedA" min="1.2" max="6" step="0.1" value="4.0">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="speedB">Region B Speed</label>
+              <span id="speedBVal">2.4</span>
+            </div>
+            <input type="range" id="speedB" min="1.2" max="6" step="0.1" value="2.4">
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
         <div class="sim-actions">
           <button id="playPauseBtn" class="btn btn-primary">Pause</button>
           <button id="resetBtn" class="btn btn-secondary">Reset</button>
@@ -942,7 +1052,12 @@
       timeScale: 1.0,
       source1: { enabled: true, shape: 'point', freq: 2.0, amp: 0.5 },
       source2: { enabled: true, shape: 'point', freq: 2.0, amp: 0.5 },
-      phaseDiff: 0
+      phaseDiff: 0,
+      twoRegions: false,
+      boundaryAngle: 35,
+      boundaryOffset: 0,
+      speedA: 4.0,
+      speedB: 2.4
     };
 
     const SOURCE1_POS = new THREE.Vector2(-3, 0);
@@ -1000,6 +1115,20 @@
     const phaseDiffValEl = document.getElementById('phaseDiffVal');
     const animSpeedSlider = document.getElementById('animSpeed');
     const animSpeedVal = document.getElementById('animSpeedVal');
+    const mediumToggle = document.getElementById('mediumToggle');
+    const regionAVal = document.getElementById('regionAVal');
+    const regionBVal = document.getElementById('regionBVal');
+    const deepToShallowBtn = document.getElementById('deepToShallowBtn');
+    const shallowToDeepBtn = document.getElementById('shallowToDeepBtn');
+    const swapMediumBtn = document.getElementById('swapMediumBtn');
+    const boundaryAngleSlider = document.getElementById('boundaryAngle');
+    const boundaryAngleVal = document.getElementById('boundaryAngleVal');
+    const boundaryOffsetSlider = document.getElementById('boundaryOffset');
+    const boundaryOffsetVal = document.getElementById('boundaryOffsetVal');
+    const speedASlider = document.getElementById('speedA');
+    const speedAVal = document.getElementById('speedAVal');
+    const speedBSlider = document.getElementById('speedB');
+    const speedBVal = document.getElementById('speedBVal');
 
     // ─── Shaders ───
     const vertexShader = `
@@ -1016,6 +1145,11 @@
       uniform vec2 uS2Pos;
       uniform float uS2Shape;
       uniform float uS2Phase;
+      uniform float uTwoRegions;
+      uniform vec2 uBoundaryNormal;
+      uniform float uBoundaryOffset;
+      uniform float uSpeedA;
+      uniform float uSpeedB;
 
       varying vec3 vWorldPos;
       varying vec3 vNormal;
@@ -1026,62 +1160,66 @@
       const float HALF_SIZE = ${(PLANE_SIZE / 2).toFixed(1)};
       const float EDGE_WIDTH = 1.8;
 
-      float calcPointWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
-        float r = distance(pos, src);
-        float k = 2.0 * PI * freq / speed;
-        float omega = 2.0 * PI * freq;
-        float decay = 1.0 / (1.0 + 0.25 * r);
-        return amp * fade * cos(k * r - omega * time + phase) * decay;
+      float signedMediumDistance(vec2 pos) {
+        return dot(pos, uBoundaryNormal) - uBoundaryOffset;
       }
 
-      vec2 calcPointGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
-        float r = distance(pos, src);
-        if (r < 0.01) return vec2(0.0);
-        float k = 2.0 * PI * freq / speed;
-        float omega = 2.0 * PI * freq;
-        float decay = 1.0 / (1.0 + 0.25 * r);
-        vec2 dir = (pos - src) / r;
-        float dh_dr = amp * fade * (
-          -k * sin(k * r - omega * time + phase) * decay
-          - cos(k * r - omega * time + phase) * 0.25 * decay * decay
-        );
-        return dir * dh_dr;
+      float speedAt(vec2 pos) {
+        if (uTwoRegions < 0.5) return uSpeed;
+        return signedMediumDistance(pos) < 0.0 ? uSpeedA : uSpeedB;
       }
 
-      float calcBarWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
-        float r = abs(pos.x - src.x);
-        float k = 2.0 * PI * freq / speed;
-        float omega = 2.0 * PI * freq;
-        float decay = 1.0 / (1.0 + 0.08 * r);
-        return amp * fade * cos(k * r - omega * time + phase) * decay;
-      }
-
-      vec2 calcBarGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
-        float dx = pos.x - src.x;
-        float r = abs(dx);
-        if (r < 0.01) return vec2(0.0);
-        float k = 2.0 * PI * freq / speed;
-        float omega = 2.0 * PI * freq;
-        float decay = 1.0 / (1.0 + 0.08 * r);
-        float dh_dr = amp * fade * (
-          -k * sin(k * r - omega * time + phase) * decay
-          - cos(k * r - omega * time + phase) * 0.08 * decay * decay
-        );
-        return vec2(sign(dx) * dh_dr, 0.0);
-      }
-
-      float calcSourceWave(vec2 pos, vec2 src, float shape, float amp, float freq, float speed, float time, float fade, float phase) {
-        if (shape > 0.5) {
-          return calcBarWave(pos, src, amp, freq, speed, time, fade, phase);
+      float travelTimeAlongSegment(vec2 startPos, vec2 endPos) {
+        float totalDist = distance(startPos, endPos);
+        if (uTwoRegions < 0.5 || totalDist < 0.001) {
+          return totalDist / uSpeed;
         }
-        return calcPointWave(pos, src, amp, freq, speed, time, fade, phase);
+
+        float startSide = signedMediumDistance(startPos);
+        float endSide = signedMediumDistance(endPos);
+        if (startSide == 0.0 || endSide == 0.0 || startSide * endSide > 0.0) {
+          return totalDist / speedAt(endPos);
+        }
+
+        float crossing = clamp(startSide / (startSide - endSide), 0.0, 1.0);
+        float distA = totalDist * crossing;
+        float distB = totalDist - distA;
+        float startSpeed = startSide < 0.0 ? uSpeedA : uSpeedB;
+        float endSpeed = endSide < 0.0 ? uSpeedA : uSpeedB;
+        return distA / startSpeed + distB / endSpeed;
       }
 
-      vec2 calcSourceGrad(vec2 pos, vec2 src, float shape, float amp, float freq, float speed, float time, float fade, float phase) {
+      float sourceTravelTime(vec2 pos, vec2 src, float shape) {
         if (shape > 0.5) {
-          return calcBarGrad(pos, src, amp, freq, speed, time, fade, phase);
+          vec2 nearestOnBar = vec2(src.x, pos.y);
+          return travelTimeAlongSegment(nearestOnBar, pos);
         }
-        return calcPointGrad(pos, src, amp, freq, speed, time, fade, phase);
+        return travelTimeAlongSegment(src, pos);
+      }
+
+      float sourceDistance(vec2 pos, vec2 src, float shape) {
+        if (shape > 0.5) {
+          return abs(pos.x - src.x);
+        }
+        return distance(pos, src);
+      }
+
+      float calcSourceWave(vec2 pos, vec2 src, float shape, float amp, float freq, float time, float fade, float phase) {
+        float omega = 2.0 * PI * freq;
+        float travelTime = sourceTravelTime(pos, src, shape);
+        float r = sourceDistance(pos, src, shape);
+        float decayRate = shape > 0.5 ? 0.08 : 0.25;
+        float decay = 1.0 / (1.0 + decayRate * r);
+        return amp * fade * cos(omega * (travelTime - time) + phase) * decay;
+      }
+
+      vec2 calcSourceGrad(vec2 pos, vec2 src, float shape, float amp, float freq, float time, float fade, float phase) {
+        const float EPS = 0.045;
+        float right = calcSourceWave(pos + vec2(EPS, 0.0), src, shape, amp, freq, time, fade, phase);
+        float left = calcSourceWave(pos - vec2(EPS, 0.0), src, shape, amp, freq, time, fade, phase);
+        float up = calcSourceWave(pos + vec2(0.0, EPS), src, shape, amp, freq, time, fade, phase);
+        float down = calcSourceWave(pos - vec2(0.0, EPS), src, shape, amp, freq, time, fade, phase);
+        return vec2((right - left) / (2.0 * EPS), (up - down) / (2.0 * EPS));
       }
 
       void main() {
@@ -1095,12 +1233,12 @@
         vec2 grad = vec2(0.0);
 
         if (uS1On > 0.5) {
-          h1 = calcSourceWave(xz, uS1Pos, uS1Shape, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
-          grad += calcSourceGrad(xz, uS1Pos, uS1Shape, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
+          h1 = calcSourceWave(xz, uS1Pos, uS1Shape, uS1Amp, uS1Freq, uTime, edgeFade, 0.0);
+          grad += calcSourceGrad(xz, uS1Pos, uS1Shape, uS1Amp, uS1Freq, uTime, edgeFade, 0.0);
         }
         if (uS2On > 0.5) {
-          h2 = calcSourceWave(xz, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
-          grad += calcSourceGrad(xz, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
+          h2 = calcSourceWave(xz, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uTime, edgeFade, uS2Phase);
+          grad += calcSourceGrad(xz, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uTime, edgeFade, uS2Phase);
         }
 
         pos.y = h1 + h2;
@@ -1200,6 +1338,11 @@
     const geometry = new THREE.PlaneGeometry(PLANE_SIZE, PLANE_SIZE, PLANE_SEGMENTS, PLANE_SEGMENTS);
     geometry.rotateX(-Math.PI / 2);
 
+    function boundaryNormalFromAngle(angleDeg) {
+      const angleRad = THREE.MathUtils.degToRad(angleDeg);
+      return new THREE.Vector2(Math.cos(angleRad), Math.sin(angleRad));
+    }
+
     const uniforms = {
       uTime: { value: 0 },
       uSpeed: { value: state.speed },
@@ -1214,6 +1357,11 @@
       uS2Pos: { value: SOURCE2_POS },
       uS2Shape: { value: 0.0 },
       uS2Phase: { value: 0 },
+      uTwoRegions: { value: 0.0 },
+      uBoundaryNormal: { value: boundaryNormalFromAngle(state.boundaryAngle) },
+      uBoundaryOffset: { value: state.boundaryOffset },
+      uSpeedA: { value: state.speedA },
+      uSpeedB: { value: state.speedB },
       uColor1: { value: colors.source1Color.clone() },
       uColor2: { value: colors.source2Color.clone() },
       uBaseColor: { value: colors.baseColor.clone() },
@@ -1245,6 +1393,154 @@
     tankEdge.position.y = -0.2;
     scene.add(tankEdge);
 
+    // Refraction boundary and region overlays
+    const boundaryGroup = new THREE.Group();
+    scene.add(boundaryGroup);
+
+    const regionAMat = new THREE.MeshBasicMaterial({
+      color: 0x0d9488,
+      transparent: true,
+      opacity: 0.12,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+    const regionBMat = new THREE.MeshBasicMaterial({
+      color: 0xea580c,
+      transparent: true,
+      opacity: 0.10,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+    const regionAMesh = new THREE.Mesh(new THREE.BufferGeometry(), regionAMat);
+    const regionBMesh = new THREE.Mesh(new THREE.BufferGeometry(), regionBMat);
+    regionAMesh.position.y = 0.012;
+    regionBMesh.position.y = 0.014;
+    boundaryGroup.add(regionAMesh, regionBMesh);
+
+    const boundaryLineGeo = new THREE.BufferGeometry();
+    const boundaryLineMat = new THREE.LineBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.86
+    });
+    const boundaryLine = new THREE.Line(boundaryLineGeo, boundaryLineMat);
+    boundaryLine.position.y = 0.09;
+    boundaryGroup.add(boundaryLine);
+
+    const handleGeo = new THREE.SphereGeometry(0.16, 20, 12);
+    const handleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const rotateHandleA = new THREE.Mesh(handleGeo, handleMat);
+    const rotateHandleB = new THREE.Mesh(handleGeo, handleMat);
+    rotateHandleA.position.y = 0.12;
+    rotateHandleB.position.y = 0.12;
+    boundaryGroup.add(rotateHandleA, rotateHandleB);
+
+    function getBoundaryNormal() {
+      return boundaryNormalFromAngle(state.boundaryAngle);
+    }
+
+    function getBoundaryLineEndpoints() {
+      const half = PLANE_SIZE / 2;
+      const n = getBoundaryNormal();
+      const points = [];
+      if (Math.abs(n.y) > 0.0001) {
+        const zAtLeft = (state.boundaryOffset - n.x * -half) / n.y;
+        const zAtRight = (state.boundaryOffset - n.x * half) / n.y;
+        if (zAtLeft >= -half && zAtLeft <= half) points.push(new THREE.Vector2(-half, zAtLeft));
+        if (zAtRight >= -half && zAtRight <= half) points.push(new THREE.Vector2(half, zAtRight));
+      }
+      if (Math.abs(n.x) > 0.0001) {
+        const xAtBottom = (state.boundaryOffset - n.y * -half) / n.x;
+        const xAtTop = (state.boundaryOffset - n.y * half) / n.x;
+        if (xAtBottom >= -half && xAtBottom <= half) points.push(new THREE.Vector2(xAtBottom, -half));
+        if (xAtTop >= -half && xAtTop <= half) points.push(new THREE.Vector2(xAtTop, half));
+      }
+      if (points.length < 2) {
+        const center = n.clone().multiplyScalar(state.boundaryOffset);
+        const tangent = new THREE.Vector2(-n.y, n.x);
+        points.push(center.clone().addScaledVector(tangent, -half), center.clone().addScaledVector(tangent, half));
+      }
+      points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
+      return [points[0], points[points.length - 1]];
+    }
+
+    function clipTankPolygon(keepPositive) {
+      const half = PLANE_SIZE / 2;
+      const n = getBoundaryNormal();
+      let polygon = [
+        new THREE.Vector2(-half, -half),
+        new THREE.Vector2(half, -half),
+        new THREE.Vector2(half, half),
+        new THREE.Vector2(-half, half)
+      ];
+
+      function signed(point) {
+        return point.dot(n) - state.boundaryOffset;
+      }
+
+      function isInside(point) {
+        return keepPositive ? signed(point) >= -0.0001 : signed(point) <= 0.0001;
+      }
+
+      const output = [];
+      for (let i = 0; i < polygon.length; i += 1) {
+        const current = polygon[i];
+        const previous = polygon[(i + polygon.length - 1) % polygon.length];
+        const currentInside = isInside(current);
+        const previousInside = isInside(previous);
+        const denom = signed(previous) - signed(current);
+
+        if (currentInside !== previousInside && Math.abs(denom) > 0.0001) {
+          const t = signed(previous) / denom;
+          output.push(previous.clone().lerp(current, t));
+        }
+        if (currentInside) output.push(current);
+      }
+
+      polygon = output;
+      return polygon;
+    }
+
+    function polygonToGeometry(points) {
+      if (points.length < 3) return new THREE.BufferGeometry();
+      const shape = new THREE.Shape(points);
+      const geometry = new THREE.ShapeGeometry(shape);
+      geometry.rotateX(-Math.PI / 2);
+      return geometry;
+    }
+
+    function updateBoundaryVisuals() {
+      const visible = state.twoRegions;
+      boundaryGroup.visible = visible;
+      if (!visible) return;
+
+      const [a, b] = getBoundaryLineEndpoints();
+      boundaryLine.geometry.dispose();
+      boundaryLine.geometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(a.x, 0, a.y),
+        new THREE.Vector3(b.x, 0, b.y)
+      ]);
+      rotateHandleA.position.set(a.x, 0.12, a.y);
+      rotateHandleB.position.set(b.x, 0.12, b.y);
+
+      regionAMesh.geometry.dispose();
+      regionBMesh.geometry.dispose();
+      regionAMesh.geometry = polygonToGeometry(clipTankPolygon(false));
+      regionBMesh.geometry = polygonToGeometry(clipTankPolygon(true));
+    }
+
+    function updateMediumUniforms() {
+      const normal = getBoundaryNormal();
+      uniforms.uTwoRegions.value = state.twoRegions ? 1.0 : 0.0;
+      uniforms.uBoundaryNormal.value.copy(normal);
+      uniforms.uBoundaryOffset.value = state.boundaryOffset;
+      uniforms.uSpeedA.value = state.speedA;
+      uniforms.uSpeedB.value = state.speedB;
+      updateBoundaryVisuals();
+    }
+
+    updateBoundaryVisuals();
+
     // ─── Resize Handling ───
     function onResize() {
       const rect = simPanel.getBoundingClientRect();
@@ -1273,6 +1569,10 @@
       uniforms.uColor1.value.copy(c.source1Color);
       uniforms.uColor2.value.copy(c.source2Color);
       edgeMat.color.set(isDark() ? 0x3a4050 : 0xb0bac8);
+      regionAMat.color.set(isDark() ? 0x2dd4bf : 0x0d9488);
+      regionBMat.color.set(isDark() ? 0xf4845f : 0xea580c);
+      boundaryLineMat.color.set(isDark() ? 0xede8df : 0xffffff);
+      handleMat.color.set(isDark() ? 0xede8df : 0xffffff);
     }
 
     function toggleTheme() {
@@ -1311,6 +1611,27 @@
 
     function shapeLabel(shape) {
       return shape === 'bar' ? 'Bar' : 'Point';
+    }
+
+    function updateMediumUI() {
+      mediumToggle.checked = state.twoRegions;
+      boundaryAngleSlider.value = state.boundaryAngle;
+      boundaryOffsetSlider.value = state.boundaryOffset;
+      speedASlider.value = state.speedA;
+      speedBSlider.value = state.speedB;
+      boundaryAngleVal.textContent = `${Math.round(state.boundaryAngle)}\u00b0`;
+      boundaryOffsetVal.textContent = state.boundaryOffset.toFixed(1);
+      speedAVal.textContent = state.speedA.toFixed(1);
+      speedBVal.textContent = state.speedB.toFixed(1);
+      regionAVal.textContent = state.speedA >= state.speedB
+        ? `${state.speedA.toFixed(1)} fast`
+        : `${state.speedA.toFixed(1)} slow`;
+      regionBVal.textContent = state.speedB >= state.speedA
+        ? `${state.speedB.toFixed(1)} fast`
+        : `${state.speedB.toFixed(1)} slow`;
+      deepToShallowBtn.classList.toggle('active', state.twoRegions && state.speedA > state.speedB);
+      shallowToDeepBtn.classList.toggle('active', state.twoRegions && state.speedB > state.speedA);
+      updateMediumUniforms();
     }
 
     function updatePlayPauseUI() {
@@ -1387,6 +1708,14 @@
       state.timeScale = 1.0;
       animSpeedSlider.value = 1.0;
       animSpeedVal.textContent = '1.0\u00d7';
+
+      // Reset tank medium
+      state.twoRegions = false;
+      state.boundaryAngle = 35;
+      state.boundaryOffset = 0;
+      state.speedA = 4.0;
+      state.speedB = 2.4;
+      updateMediumUI();
 
       // Reset camera
       camera.position.set(0, 13, 13);
@@ -1487,6 +1816,75 @@
       animSpeedVal.textContent = state.timeScale.toFixed(1) + '\u00d7';
     });
 
+    mediumToggle.addEventListener('change', () => {
+      state.twoRegions = mediumToggle.checked;
+      if (state.twoRegions && state.source1.shape === 'point') {
+        state.source1.shape = 'bar';
+        s1Shape.value = 'bar';
+        uniforms.uS1Shape.value = 1.0;
+        s1ShapeVal.textContent = 'Bar';
+      }
+      updateMediumUI();
+    });
+
+    deepToShallowBtn.addEventListener('click', () => {
+      state.twoRegions = true;
+      state.speedA = 4.0;
+      state.speedB = 2.4;
+      if (state.source1.shape === 'point') {
+        state.source1.shape = 'bar';
+        s1Shape.value = 'bar';
+        uniforms.uS1Shape.value = 1.0;
+        s1ShapeVal.textContent = 'Bar';
+      }
+      updateMediumUI();
+    });
+
+    shallowToDeepBtn.addEventListener('click', () => {
+      state.twoRegions = true;
+      state.speedA = 2.4;
+      state.speedB = 4.0;
+      if (state.source1.shape === 'point') {
+        state.source1.shape = 'bar';
+        s1Shape.value = 'bar';
+        uniforms.uS1Shape.value = 1.0;
+        s1ShapeVal.textContent = 'Bar';
+      }
+      updateMediumUI();
+    });
+
+    swapMediumBtn.addEventListener('click', () => {
+      const nextA = state.speedB;
+      state.speedB = state.speedA;
+      state.speedA = nextA;
+      state.twoRegions = true;
+      updateMediumUI();
+    });
+
+    boundaryAngleSlider.addEventListener('input', () => {
+      state.boundaryAngle = parseFloat(boundaryAngleSlider.value);
+      state.twoRegions = true;
+      updateMediumUI();
+    });
+
+    boundaryOffsetSlider.addEventListener('input', () => {
+      state.boundaryOffset = parseFloat(boundaryOffsetSlider.value);
+      state.twoRegions = true;
+      updateMediumUI();
+    });
+
+    speedASlider.addEventListener('input', () => {
+      state.speedA = parseFloat(speedASlider.value);
+      state.twoRegions = true;
+      updateMediumUI();
+    });
+
+    speedBSlider.addEventListener('input', () => {
+      state.speedB = parseFloat(speedBSlider.value);
+      state.twoRegions = true;
+      updateMediumUI();
+    });
+
     // Buttons
     playPauseBtn.addEventListener('click', togglePlayPause);
     resetBtn.addEventListener('click', resetSim);
@@ -1501,6 +1899,101 @@
         resetSim();
       }
     });
+
+    // Boundary manipulation
+    const pointerRaycaster = new THREE.Raycaster();
+    const tankPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    let boundaryDrag = null;
+
+    function tankPointFromPointer(event) {
+      const rect = canvas.getBoundingClientRect();
+      const pointer = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      pointerRaycaster.setFromCamera(pointer, camera);
+      const hit = new THREE.Vector3();
+      if (!pointerRaycaster.ray.intersectPlane(tankPlane, hit)) return null;
+      const half = PLANE_SIZE / 2;
+      return new THREE.Vector2(
+        THREE.MathUtils.clamp(hit.x, -half, half),
+        THREE.MathUtils.clamp(hit.z, -half, half)
+      );
+    }
+
+    function distanceToPoint(point, target) {
+      return point.distanceTo(target);
+    }
+
+    function getBoundaryDragMode(point) {
+      const [a, b] = getBoundaryLineEndpoints();
+      if (distanceToPoint(point, a) < 0.75 || distanceToPoint(point, b) < 0.75) {
+        return 'rotate';
+      }
+      const n = getBoundaryNormal();
+      const lineDistance = Math.abs(point.dot(n) - state.boundaryOffset);
+      return lineDistance < 0.55 ? 'move' : null;
+    }
+
+    function setBoundaryAngleFromPoint(point) {
+      const n = getBoundaryNormal();
+      const center = n.multiplyScalar(state.boundaryOffset);
+      const tangent = point.clone().sub(center);
+      if (tangent.length() < 0.1) return;
+      tangent.normalize();
+      const angle = THREE.MathUtils.radToDeg(Math.atan2(-tangent.x, tangent.y));
+      state.boundaryAngle = THREE.MathUtils.clamp(angle, -80, 80);
+    }
+
+    canvas.addEventListener('pointerdown', (event) => {
+      if (!state.twoRegions) return;
+      const point = tankPointFromPointer(event);
+      if (!point) return;
+      const mode = getBoundaryDragMode(point);
+      if (!mode) return;
+      event.preventDefault();
+      event.stopPropagation();
+      canvas.setPointerCapture(event.pointerId);
+      controls.enabled = false;
+      boundaryDrag = {
+        mode,
+        pointerId: event.pointerId,
+        startPoint: point,
+        startOffset: state.boundaryOffset
+      };
+    }, true);
+
+    canvas.addEventListener('pointermove', (event) => {
+      if (!boundaryDrag || boundaryDrag.pointerId !== event.pointerId) return;
+      const point = tankPointFromPointer(event);
+      if (!point) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (boundaryDrag.mode === 'move') {
+        const n = getBoundaryNormal();
+        const delta = point.clone().sub(boundaryDrag.startPoint).dot(n);
+        state.boundaryOffset = THREE.MathUtils.clamp(boundaryDrag.startOffset + delta, -5, 5);
+      } else {
+        setBoundaryAngleFromPoint(point);
+      }
+      updateMediumUI();
+    }, true);
+
+    function endBoundaryDrag(event) {
+      if (!boundaryDrag || boundaryDrag.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      event.stopPropagation();
+      boundaryDrag = null;
+      controls.enabled = true;
+      if (canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    canvas.addEventListener('pointerup', endBoundaryDrag, true);
+    canvas.addEventListener('pointercancel', endBoundaryDrag, true);
+
+    updateMediumUI();
 
     // ─── Animation Loop ───
     let lastTime = null;

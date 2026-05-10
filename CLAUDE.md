@@ -52,7 +52,7 @@
 ├── simulations/            # Physics simulations
 │   ├── superposition.html
 │   ├── standing_wave.html
-│   ├── interference.html   # Two-source wave interference (3D ripple tank)
+│   ├── ripple_tank.html    # Virtual ripple tank with interference and refraction
 │   ├── states.html         # States of matter particle model
 │   ├── lorentz.html
 │   ├── lorentz_learn.html  # Lorentz sim learning companion
