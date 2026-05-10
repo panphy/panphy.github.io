@@ -547,6 +547,34 @@
       pointer-events: none;
     }
 
+    .source-card.disabled select {
+      pointer-events: none;
+    }
+
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 2.25rem 0 0.8rem;
+      font-family: var(--font-body);
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background:
+        linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%) calc(100% - 17px) 50% / 6px 6px no-repeat,
+        linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%) calc(100% - 11px) 50% / 6px 6px no-repeat,
+        var(--surface);
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    select:focus-visible {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
     /* ─── Buttons ─── */
     .btn {
       border: 1px solid transparent;
@@ -783,6 +811,16 @@
           </div>
           <div class="control-block">
             <div class="control-header">
+              <label for="s1Shape">Source Shape</label>
+              <span id="s1ShapeVal">Point</span>
+            </div>
+            <select id="s1Shape">
+              <option value="point">Point</option>
+              <option value="bar">Straight bar</option>
+            </select>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
               <label for="s1Freq">Frequency</label>
               <span id="s1FreqVal">2.0 Hz</span>
             </div>
@@ -808,6 +846,16 @@
               <input type="checkbox" id="s2Toggle" checked>
               <span class="toggle-slider"></span>
             </label>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="s2Shape">Source Shape</label>
+              <span id="s2ShapeVal">Point</span>
+            </div>
+            <select id="s2Shape">
+              <option value="point">Point</option>
+              <option value="bar">Straight bar</option>
+            </select>
           </div>
           <div class="control-block">
             <div class="control-header">
@@ -892,8 +940,8 @@
       speed: 4.0,
       separation: 6.0,
       timeScale: 1.0,
-      source1: { enabled: true, freq: 2.0, amp: 0.5 },
-      source2: { enabled: true, freq: 2.0, amp: 0.5 },
+      source1: { enabled: true, shape: 'point', freq: 2.0, amp: 0.5 },
+      source2: { enabled: true, shape: 'point', freq: 2.0, amp: 0.5 },
       phaseDiff: 0
     };
 
@@ -929,15 +977,19 @@
     const themeBtn = document.getElementById('theme-button');
 
     const s1Toggle = document.getElementById('s1Toggle');
+    const s1Shape = document.getElementById('s1Shape');
     const s1Freq = document.getElementById('s1Freq');
     const s1Amp = document.getElementById('s1Amp');
+    const s1ShapeVal = document.getElementById('s1ShapeVal');
     const s1FreqVal = document.getElementById('s1FreqVal');
     const s1AmpVal = document.getElementById('s1AmpVal');
     const source1Card = document.getElementById('source1Card');
 
     const s2Toggle = document.getElementById('s2Toggle');
+    const s2Shape = document.getElementById('s2Shape');
     const s2Freq = document.getElementById('s2Freq');
     const s2Amp = document.getElementById('s2Amp');
+    const s2ShapeVal = document.getElementById('s2ShapeVal');
     const s2FreqVal = document.getElementById('s2FreqVal');
     const s2AmpVal = document.getElementById('s2AmpVal');
     const source2Card = document.getElementById('source2Card');
@@ -957,10 +1009,12 @@
       uniform float uS1Amp;
       uniform float uS1Freq;
       uniform vec2 uS1Pos;
+      uniform float uS1Shape;
       uniform float uS2On;
       uniform float uS2Amp;
       uniform float uS2Freq;
       uniform vec2 uS2Pos;
+      uniform float uS2Shape;
       uniform float uS2Phase;
 
       varying vec3 vWorldPos;
@@ -972,7 +1026,7 @@
       const float HALF_SIZE = ${(PLANE_SIZE / 2).toFixed(1)};
       const float EDGE_WIDTH = 1.8;
 
-      float calcWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
+      float calcPointWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
         float r = distance(pos, src);
         float k = 2.0 * PI * freq / speed;
         float omega = 2.0 * PI * freq;
@@ -980,7 +1034,7 @@
         return amp * fade * cos(k * r - omega * time + phase) * decay;
       }
 
-      vec2 calcGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
+      vec2 calcPointGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
         float r = distance(pos, src);
         if (r < 0.01) return vec2(0.0);
         float k = 2.0 * PI * freq / speed;
@@ -994,6 +1048,42 @@
         return dir * dh_dr;
       }
 
+      float calcBarWave(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
+        float r = abs(pos.x - src.x);
+        float k = 2.0 * PI * freq / speed;
+        float omega = 2.0 * PI * freq;
+        float decay = 1.0 / (1.0 + 0.08 * r);
+        return amp * fade * cos(k * r - omega * time + phase) * decay;
+      }
+
+      vec2 calcBarGrad(vec2 pos, vec2 src, float amp, float freq, float speed, float time, float fade, float phase) {
+        float dx = pos.x - src.x;
+        float r = abs(dx);
+        if (r < 0.01) return vec2(0.0);
+        float k = 2.0 * PI * freq / speed;
+        float omega = 2.0 * PI * freq;
+        float decay = 1.0 / (1.0 + 0.08 * r);
+        float dh_dr = amp * fade * (
+          -k * sin(k * r - omega * time + phase) * decay
+          - cos(k * r - omega * time + phase) * 0.08 * decay * decay
+        );
+        return vec2(sign(dx) * dh_dr, 0.0);
+      }
+
+      float calcSourceWave(vec2 pos, vec2 src, float shape, float amp, float freq, float speed, float time, float fade, float phase) {
+        if (shape > 0.5) {
+          return calcBarWave(pos, src, amp, freq, speed, time, fade, phase);
+        }
+        return calcPointWave(pos, src, amp, freq, speed, time, fade, phase);
+      }
+
+      vec2 calcSourceGrad(vec2 pos, vec2 src, float shape, float amp, float freq, float speed, float time, float fade, float phase) {
+        if (shape > 0.5) {
+          return calcBarGrad(pos, src, amp, freq, speed, time, fade, phase);
+        }
+        return calcPointGrad(pos, src, amp, freq, speed, time, fade, phase);
+      }
+
       void main() {
         vec3 pos = position;
         vec2 xz = pos.xz;
@@ -1005,12 +1095,12 @@
         vec2 grad = vec2(0.0);
 
         if (uS1On > 0.5) {
-          h1 = calcWave(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
-          grad += calcGrad(xz, uS1Pos, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
+          h1 = calcSourceWave(xz, uS1Pos, uS1Shape, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
+          grad += calcSourceGrad(xz, uS1Pos, uS1Shape, uS1Amp, uS1Freq, uSpeed, uTime, edgeFade, 0.0);
         }
         if (uS2On > 0.5) {
-          h2 = calcWave(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
-          grad += calcGrad(xz, uS2Pos, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
+          h2 = calcSourceWave(xz, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
+          grad += calcSourceGrad(xz, uS2Pos, uS2Shape, uS2Amp, uS2Freq, uSpeed, uTime, edgeFade, uS2Phase);
         }
 
         pos.y = h1 + h2;
@@ -1117,10 +1207,12 @@
       uS1Amp: { value: state.source1.amp },
       uS1Freq: { value: state.source1.freq },
       uS1Pos: { value: SOURCE1_POS },
+      uS1Shape: { value: 0.0 },
       uS2On: { value: 1.0 },
       uS2Amp: { value: state.source2.amp },
       uS2Freq: { value: state.source2.freq },
       uS2Pos: { value: SOURCE2_POS },
+      uS2Shape: { value: 0.0 },
       uS2Phase: { value: 0 },
       uColor1: { value: colors.source1Color.clone() },
       uColor2: { value: colors.source2Color.clone() },
@@ -1213,6 +1305,14 @@
       card.classList.toggle('disabled', !enabled);
     }
 
+    function shapeUniformValue(shape) {
+      return shape === 'bar' ? 1.0 : 0.0;
+    }
+
+    function shapeLabel(shape) {
+      return shape === 'bar' ? 'Bar' : 'Point';
+    }
+
     function updatePlayPauseUI() {
       if (state.playing) {
         playPauseBtn.textContent = 'Pause';
@@ -1236,28 +1336,36 @@
 
       // Reset source 1
       state.source1.enabled = true;
+      state.source1.shape = 'point';
       state.source1.freq = 2.0;
       state.source1.amp = 0.5;
       s1Toggle.checked = true;
+      s1Shape.value = 'point';
       s1Freq.value = 2.0;
       s1Amp.value = 0.5;
+      s1ShapeVal.textContent = 'Point';
       s1FreqVal.textContent = '2.0 Hz';
       s1AmpVal.textContent = '0.50';
       uniforms.uS1On.value = 1.0;
+      uniforms.uS1Shape.value = 0.0;
       uniforms.uS1Freq.value = 2.0;
       uniforms.uS1Amp.value = 0.5;
       updateSourceCard(source1Card, true);
 
       // Reset source 2
       state.source2.enabled = true;
+      state.source2.shape = 'point';
       state.source2.freq = 2.0;
       state.source2.amp = 0.5;
       s2Toggle.checked = true;
+      s2Shape.value = 'point';
       s2Freq.value = 2.0;
       s2Amp.value = 0.5;
+      s2ShapeVal.textContent = 'Point';
       s2FreqVal.textContent = '2.0 Hz';
       s2AmpVal.textContent = '0.50';
       uniforms.uS2On.value = 1.0;
+      uniforms.uS2Shape.value = 0.0;
       uniforms.uS2Freq.value = 2.0;
       uniforms.uS2Amp.value = 0.5;
       updateSourceCard(source2Card, true);
@@ -1296,6 +1404,12 @@
       updateSourceCard(source1Card, s1Toggle.checked);
     });
 
+    s1Shape.addEventListener('change', () => {
+      state.source1.shape = s1Shape.value;
+      uniforms.uS1Shape.value = shapeUniformValue(state.source1.shape);
+      s1ShapeVal.textContent = shapeLabel(state.source1.shape);
+    });
+
     s1Freq.addEventListener('input', () => {
       state.source1.freq = parseFloat(s1Freq.value);
       uniforms.uS1Freq.value = state.source1.freq;
@@ -1313,6 +1427,12 @@
       state.source2.enabled = s2Toggle.checked;
       uniforms.uS2On.value = s2Toggle.checked ? 1.0 : 0.0;
       updateSourceCard(source2Card, s2Toggle.checked);
+    });
+
+    s2Shape.addEventListener('change', () => {
+      state.source2.shape = s2Shape.value;
+      uniforms.uS2Shape.value = shapeUniformValue(state.source2.shape);
+      s2ShapeVal.textContent = shapeLabel(state.source2.shape);
     });
 
     s2Freq.addEventListener('input', () => {
@@ -1373,7 +1493,7 @@
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
       if (e.code === 'Space') {
         e.preventDefault();
         togglePlayPause();
