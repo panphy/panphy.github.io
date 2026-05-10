@@ -2265,8 +2265,9 @@
         THREE.MathUtils.clamp(otherX, -PLANE_SIZE / 2, PLANE_SIZE / 2),
         otherEdgeY
       );
-      const dx = endpoint.x - other.x;
-      const dz = endpoint.y - other.y;
+      const [lo, hi] = endpoint.y < other.y ? [endpoint, other] : [other, endpoint];
+      const dx = hi.x - lo.x;
+      const dz = hi.y - lo.y;
       const tangentAngle = Math.atan2(dz, dx);
       const normalAngle = tangentAngle - Math.PI / 2;
       state.boundaryAngle = THREE.MathUtils.radToDeg(normalAngle);
