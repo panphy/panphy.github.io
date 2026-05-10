@@ -556,6 +556,14 @@ a {
   color: var(--ink);
 }
 
+.word-tag .given-tok {
+  color: rgba(242, 240, 223, 0.35);
+}
+
+.word-tag .given-sup {
+  color: rgba(242, 240, 223, 0.28);
+}
+
 .word-tag .threat-meter {
   display: block;
   width: 100%;

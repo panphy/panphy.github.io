@@ -919,8 +919,15 @@ function updateLabels() {
       bottom: y,
     });
 
-    enemy.label.style.left = `${x}px`;
-    enemy.label.style.top = `${y}px`;
+    if (enemy.labelX === undefined) {
+      enemy.labelX = x;
+      enemy.labelY = y;
+    } else {
+      enemy.labelX += (x - enemy.labelX) * 0.14;
+      enemy.labelY += (y - enemy.labelY) * 0.14;
+    }
+    enemy.label.style.left = `${enemy.labelX}px`;
+    enemy.label.style.top = `${enemy.labelY}px`;
     enemy.label.style.transform = `translate(-50%, -100%) scale(${scale.toFixed(3)})`;
     enemy.label.classList.toggle('is-target', enemy === activeTarget);
     enemy.label.classList.toggle('is-warning', enemy.group.position.z > -10);
@@ -941,11 +948,73 @@ function getLabelSafeBounds(height) {
 }
 
 function buildHintMask(term) {
-  return term.replace(/\S+/g, word => word[0] + '_'.repeat(word.length - 1));
+  return term.replace(/\S+/g, word => {
+    let hasTypeable = false;
+    for (const ch of word) if (normalizeCharacter(ch)) { hasTypeable = true; break; }
+    if (!hasTypeable) return word;
+    let result = '';
+    let firstTypeable = true;
+    for (const ch of word) {
+      if (!normalizeCharacter(ch)) { result += ch; }
+      else if (firstTypeable) { result += ch; firstTypeable = false; }
+      else { result += '_'; }
+    }
+    return result;
+  });
 }
 
 function buildSearchPrompt(term) {
   return [...term].map(normalizeCharacter).join('');
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function wrapSups(text) {
+  return text.replace(/²/g, '<sup class="given-sup">²</sup>');
+}
+
+function buildHintPart(text) {
+  let result = '';
+  let firstTypeable = true;
+  for (const ch of text) {
+    if (!normalizeCharacter(ch)) { result += ch; }
+    else if (firstTypeable) { result += ch; firstTypeable = false; }
+    else { result += '_'; }
+  }
+  return result;
+}
+
+function buildHintRemain(text) {
+  let result = '';
+  for (const ch of text) {
+    result += normalizeCharacter(ch) ? '_' : ch;
+  }
+  return result;
+}
+
+function buildTwoWordLimit(term) {
+  const tokens = term.split(/(\s+)/);
+  const typeableIndices = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (/^\s+$/.test(tokens[i])) continue;
+    if (buildSearchPrompt(tokens[i])) typeableIndices.push(i);
+  }
+  if (typeableIndices.length <= 2) return null;
+
+  const shuffled = [...typeableIndices].sort(() => Math.random() - 0.5);
+  const hiddenSet = new Set(shuffled.slice(0, 2));
+
+  const parts = tokens.map((tok, i) => ({
+    text: tok,
+    isWhitespace: /^\s+$/.test(tok),
+    isGiven: typeableIndices.includes(i) && !hiddenSet.has(i),
+    isHidden: hiddenSet.has(i),
+  }));
+
+  const hiddenSearch = tokens.filter((_, i) => hiddenSet.has(i)).map(t => buildSearchPrompt(t)).join('');
+  return { parts, searchPrompt: hiddenSearch };
 }
 
 function promptIndexForProgress(term, progress) {
@@ -964,16 +1033,53 @@ function promptIndexForProgress(term, progress) {
 function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget || !activeTarget.searchPrompt.startsWith(typedBuffer)) return typedBuffer;
+  if (activeTarget.limitedParts) return typedBuffer;
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length));
 }
 
 function renderPrompt(enemy) {
   const matched = enemy.searchPrompt.startsWith(typedBuffer) && typedBuffer.length > 0;
-  const typedLength = matched ? promptIndexForProgress(enemy.prompt, typedBuffer.length) : 0;
-  enemy.typedNode.textContent = enemy.prompt.slice(0, typedLength);
-  enemy.remainingNode.textContent = enemy.showDefinition
-    ? enemy.hintMask.slice(typedLength)
-    : enemy.prompt.slice(typedLength);
+  const typedProgress = matched ? typedBuffer.length : 0;
+
+  let html;
+  if (enemy.limitedParts) {
+    html = buildLimitedPromptHtml(enemy, typedProgress);
+  } else {
+    const displayText = enemy.showDefinition ? enemy.hintMask : enemy.prompt;
+    const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress) : 0;
+    html = `<span class="typed">${wrapSups(escapeHtml(displayText.slice(0, typedLen)))}</span>`
+         + `<span class="remaining">${wrapSups(escapeHtml(displayText.slice(typedLen)))}</span>`;
+  }
+
+  if (enemy.lastPromptHtml === html) return;
+  enemy.lastPromptHtml = html;
+  enemy.promptNode.innerHTML = html;
+}
+
+function buildLimitedPromptHtml(enemy, typedProgress) {
+  let charsLeft = typedProgress;
+  let html = '';
+  for (const part of enemy.limitedParts) {
+    if (part.isWhitespace || (!part.isGiven && !part.isHidden)) {
+      html += wrapSups(escapeHtml(part.text));
+    } else if (part.isGiven) {
+      html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
+    } else {
+      const sp = buildSearchPrompt(part.text);
+      const tokTyped = Math.min(charsLeft, sp.length);
+      charsLeft -= tokTyped;
+      if (tokTyped > 0) {
+        const charPos = promptIndexForProgress(part.text, tokTyped);
+        const typedPart = part.text.slice(0, charPos);
+        const remainPart = part.text.slice(charPos);
+        html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
+        if (remainPart) html += `<span class="remaining">${wrapSups(escapeHtml(buildHintRemain(remainPart)))}</span>`;
+      } else {
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(part.text)))}</span>`;
+      }
+    }
+  }
+  return html;
 }
 
 function createLifeMeter() {
@@ -1182,19 +1288,23 @@ function spawnEnemy(options = {}) {
 
   labelsLayer.append(label);
 
+  const twoWordData = buildTwoWordLimit(wordData.term);
   const enemy = {
     id: enemyId,
     type,
     group,
     label,
+    promptNode,
     typedNode,
     remainingNode,
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
-    searchPrompt: buildSearchPrompt(wordData.term),
+    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term),
+    limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
     hintMask: showDefinition ? buildHintMask(wordData.term) : null,
+    lastPromptHtml: '',
     promptKind,
     isBoss,
     lane,
@@ -1699,7 +1809,7 @@ function boxesOverlap(first, second) {
   return first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
 }
 
-const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
 
 function normalizeCharacter(character) {
   if (/\s/.test(character)) return '';
