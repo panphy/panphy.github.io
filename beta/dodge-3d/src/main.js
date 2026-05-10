@@ -21,7 +21,7 @@ const PLAYER_RADIUS = 0.72;
 const BASE_FIELD_SPEED = 19;
 const MAX_DELTA = 0.08;
 const GAME_OVER_PANEL_DELAY = 1.05;
-const MUSIC_BPM = 152;
+const MUSIC_BPM = 168;
 const MUSIC_STEP_DURATION = 60 / MUSIC_BPM / 4;
 const MUSIC_SCHEDULE_AHEAD = 0.16;
 const PLAY_BOUNDS = {
@@ -82,8 +82,6 @@ let audioContext = null;
 let masterGain = null;
 let musicGain = null;
 let sfxGain = null;
-let engineGain = null;
-let engineOscillator = null;
 let noiseBuffer = null;
 let nextMusicTime = 0;
 let musicStep = 0;
@@ -364,7 +362,7 @@ function updateGame(delta) {
   updateSpawning(delta, level);
   updateAsteroids(delta);
   updateEffects(delta);
-  updateRunAudio(delta);
+  updateRunAudio();
   updateHud();
 }
 
@@ -940,26 +938,13 @@ function ensureAudio() {
   masterGain = audioContext.createGain();
   musicGain = audioContext.createGain();
   sfxGain = audioContext.createGain();
-  engineGain = audioContext.createGain();
-  masterGain.gain.setValueAtTime(0.58, audioContext.currentTime);
+  masterGain.gain.setValueAtTime(0.72, audioContext.currentTime);
   musicGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-  sfxGain.gain.setValueAtTime(0.72, audioContext.currentTime);
-  engineGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+  sfxGain.gain.setValueAtTime(0.82, audioContext.currentTime);
 
   musicGain.connect(masterGain);
   sfxGain.connect(masterGain);
-  engineGain.connect(masterGain);
   masterGain.connect(compressor);
-
-  const engineFilter = audioContext.createBiquadFilter();
-  engineFilter.type = 'lowpass';
-  engineFilter.frequency.setValueAtTime(520, audioContext.currentTime);
-  engineOscillator = audioContext.createOscillator();
-  engineOscillator.type = 'sawtooth';
-  engineOscillator.frequency.setValueAtTime(76, audioContext.currentTime);
-  engineOscillator.connect(engineFilter);
-  engineFilter.connect(engineGain);
-  engineOscillator.start();
 
   noiseBuffer = createNoiseBuffer(audioContext);
   return audioContext;
@@ -975,12 +960,10 @@ function resumeAudio() {
 
 function startRunAudio() {
   const context = resumeAudio();
-  if (!context || !musicGain || !engineGain) return;
+  if (!context || !musicGain) return;
   const now = context.currentTime;
   musicGain.gain.cancelScheduledValues(now);
-  engineGain.gain.cancelScheduledValues(now);
-  musicGain.gain.setTargetAtTime(0.22, now, 0.08);
-  engineGain.gain.setTargetAtTime(0.045, now, 0.12);
+  musicGain.gain.setTargetAtTime(0.44, now, 0.07);
   nextMusicTime = now + 0.03;
   musicStep = 0;
 }
@@ -992,22 +975,11 @@ function fadeAudioOut(fade = 0.08) {
     musicGain.gain.cancelScheduledValues(now);
     musicGain.gain.setTargetAtTime(0.0001, now, fade);
   }
-  if (engineGain) {
-    engineGain.gain.cancelScheduledValues(now);
-    engineGain.gain.setTargetAtTime(0.0001, now, fade);
-  }
 }
 
-function updateRunAudio(delta) {
+function updateRunAudio() {
   const context = audioContext;
   if (!audioEnabled || !context || context.state !== 'running' || mode !== 'running') return;
-
-  if (engineOscillator) {
-    const drift = Math.abs(player.x - player.prevX) + Math.abs(player.y - player.prevY);
-    const targetFrequency = 72 + fieldSpeed * 0.85 + clamp(drift / Math.max(delta, 0.001), 0, 12) * 2.6;
-    engineOscillator.frequency.setTargetAtTime(targetFrequency, context.currentTime, 0.045);
-  }
-
   scheduleMusic();
 }
 
@@ -1028,20 +1000,36 @@ function scheduleMusic() {
 
 function scheduleMusicStep(step, startTime) {
   const index = step % 16;
-  const bassPattern = [55, 55, 65.41, 55, 73.42, 65.41, 82.41, 73.42];
-  const leadPattern = [329.63, 392, 493.88, 440, 587.33, 493.88, 392, 440];
+  const bassPattern = [82.41, 98, 110, 123.47, 73.42, 92.5, 110, 146.83];
+  const leadPattern = [659.25, 783.99, 880, 987.77, 880, 783.99, 659.25, 587.33];
+  const chordProgression = [
+    [329.63, 415.3, 493.88],
+    [369.99, 440, 554.37],
+    [415.3, 493.88, 622.25],
+    [293.66, 369.99, 493.88],
+  ];
 
-  if (index % 4 === 0) scheduleKick(startTime, 0.22, 0.28, musicGain);
+  if (index === 0 || index === 6 || index === 8 || index === 14) scheduleKick(startTime, 0.18, 0.38, musicGain);
   if (index === 4 || index === 12) scheduleSnare(startTime);
   if (index % 2 === 1) scheduleHat(startTime);
+  if (index === 7 || index === 15) scheduleOpenHat(startTime);
   if (index % 2 === 0) {
     const bassFrequency = bassPattern[(step / 2) % bassPattern.length];
-    scheduleTone(bassFrequency, startTime, MUSIC_STEP_DURATION * 1.65, 'sawtooth', 0.12, musicGain, 520);
+    scheduleTone(bassFrequency, startTime, MUSIC_STEP_DURATION * 1.25, 'triangle', 0.16, musicGain, 720);
   }
-  if (index === 3 || index === 7 || index === 11 || index === 15) {
-    const leadFrequency = leadPattern[Math.floor(step / 4) % leadPattern.length];
-    scheduleTone(leadFrequency, startTime, MUSIC_STEP_DURATION * 1.4, 'square', 0.035, musicGain, 2600, leadFrequency * 1.01);
+  if (index === 0 || index === 4 || index === 8 || index === 12) {
+    scheduleChord(chordProgression[Math.floor(step / 4) % chordProgression.length], startTime);
   }
+  if (index === 2 || index === 3 || index === 6 || index === 7 || index === 10 || index === 11 || index === 14 || index === 15) {
+    const leadFrequency = leadPattern[(step + Math.floor(step / 8)) % leadPattern.length];
+    scheduleTone(leadFrequency, startTime, MUSIC_STEP_DURATION * 0.82, 'square', 0.055, musicGain, 3800, leadFrequency * 1.03);
+  }
+}
+
+function scheduleChord(frequencies, startTime) {
+  frequencies.forEach((frequency, index) => {
+    scheduleTone(frequency, startTime + index * 0.008, MUSIC_STEP_DURATION * 1.45, 'sawtooth', 0.028, musicGain, 3200);
+  });
 }
 
 function scheduleTone(frequency, startTime, duration, type, peakGain, output, filterFrequency, endFrequency = frequency) {
@@ -1082,12 +1070,16 @@ function scheduleKick(startTime, duration, peakGain, output) {
 }
 
 function scheduleHat(startTime) {
-  scheduleNoise(startTime, 0.055, 0.055, 'highpass', 6200, musicGain);
+  scheduleNoise(startTime, 0.045, 0.075, 'highpass', 7200, musicGain);
+}
+
+function scheduleOpenHat(startTime) {
+  scheduleNoise(startTime, 0.16, 0.08, 'highpass', 5200, musicGain);
 }
 
 function scheduleSnare(startTime) {
-  scheduleNoise(startTime, 0.12, 0.1, 'bandpass', 2100, musicGain);
-  scheduleTone(180, startTime, 0.11, 'triangle', 0.035, musicGain, 980, 92);
+  scheduleNoise(startTime, 0.13, 0.14, 'bandpass', 2300, musicGain);
+  scheduleTone(220, startTime, 0.1, 'triangle', 0.045, musicGain, 1200, 120);
 }
 
 function scheduleNoise(startTime, duration, peakGain, filterType, filterFrequency, output) {
@@ -1112,33 +1104,35 @@ function playStartSfx() {
   const context = resumeAudio();
   if (!context) return;
   const now = context.currentTime + 0.01;
-  scheduleTone(165, now, 0.28, 'sawtooth', 0.13, sfxGain, 1800, 760);
-  scheduleNoise(now, 0.2, 0.09, 'highpass', 1400, sfxGain);
+  scheduleTone(220, now, 0.18, 'triangle', 0.16, sfxGain, 2400, 880);
+  scheduleTone(440, now + 0.08, 0.16, 'square', 0.09, sfxGain, 3600, 1320);
+  scheduleNoise(now, 0.18, 0.12, 'highpass', 1800, sfxGain);
 }
 
 function playConfirmSfx() {
   const context = resumeAudio();
   if (!context) return;
   const now = context.currentTime + 0.01;
-  scheduleTone(440, now, 0.08, 'triangle', 0.08, sfxGain, 2200, 660);
+  scheduleTone(587.33, now, 0.07, 'triangle', 0.08, sfxGain, 2600, 783.99);
+  scheduleTone(880, now + 0.055, 0.07, 'triangle', 0.06, sfxGain, 3200, 1174.66);
 }
 
 function playPauseSfx() {
   const context = audioContext;
   if (!audioEnabled || !context || context.state === 'suspended') return;
   const now = context.currentTime + 0.01;
-  scheduleTone(360, now, 0.1, 'triangle', 0.055, sfxGain, 1400, 180);
+  scheduleTone(420, now, 0.12, 'triangle', 0.055, sfxGain, 1500, 210);
 }
 
 function playExplosionSfx() {
   const context = audioContext;
   if (!audioEnabled || !context || context.state === 'suspended') return;
   const now = context.currentTime + 0.01;
-  scheduleKick(now, 0.62, 0.72, sfxGain);
-  scheduleNoise(now, 0.72, 0.42, 'lowpass', 1800, sfxGain);
-  scheduleNoise(now + 0.06, 0.18, 0.16, 'bandpass', 3200, sfxGain);
-  scheduleTone(112, now + 0.02, 0.46, 'sawtooth', 0.18, sfxGain, 900, 38);
-  scheduleTone(720, now + 0.04, 0.18, 'square', 0.08, sfxGain, 2600, 170);
+  scheduleKick(now, 0.7, 0.9, sfxGain);
+  scheduleNoise(now, 0.78, 0.5, 'lowpass', 2100, sfxGain);
+  scheduleNoise(now + 0.045, 0.22, 0.22, 'bandpass', 3600, sfxGain);
+  scheduleTone(132, now + 0.015, 0.52, 'sawtooth', 0.22, sfxGain, 1000, 34);
+  scheduleTone(920, now + 0.04, 0.2, 'square', 0.1, sfxGain, 3200, 180);
 }
 
 function createNoiseBuffer(context) {
