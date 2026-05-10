@@ -1503,9 +1503,20 @@
 
     function polygonToGeometry(points) {
       if (points.length < 3) return new THREE.BufferGeometry();
-      const shape = new THREE.Shape(points);
-      const geometry = new THREE.ShapeGeometry(shape);
-      geometry.rotateX(-Math.PI / 2);
+      const vertices = [];
+      for (let i = 1; i < points.length - 1; i += 1) {
+        const a = points[0];
+        const b = points[i];
+        const c = points[i + 1];
+        vertices.push(
+          a.x, 0, a.y,
+          b.x, 0, b.y,
+          c.x, 0, c.y
+        );
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geometry.computeVertexNormals();
       return geometry;
     }
 
