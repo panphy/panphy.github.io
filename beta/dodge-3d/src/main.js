@@ -21,7 +21,7 @@ const PLAYER_RADIUS = 0.72;
 const BASE_FIELD_SPEED = 19;
 const MAX_DELTA = 0.08;
 const GAME_OVER_PANEL_DELAY = 1.05;
-const MUSIC_BPM = 168;
+const MUSIC_BPM = 90;
 const MUSIC_STEP_DURATION = 60 / MUSIC_BPM / 4;
 const MUSIC_SCHEDULE_AHEAD = 0.16;
 const PLAY_BOUNDS = {
@@ -85,6 +85,9 @@ let sfxGain = null;
 let noiseBuffer = null;
 let nextMusicTime = 0;
 let musicStep = 0;
+let nearMissCooldown = 0;
+let engineHumOsc = null;
+let engineHumGain = null;
 
 const course = {
   scrollZ: 0,
@@ -353,6 +356,7 @@ function animate(time) {
 function updateGame(delta) {
   elapsed += delta;
   fieldSpeed = BASE_FIELD_SPEED + elapsed * 0.62;
+  if (nearMissCooldown > 0) nearMissCooldown = Math.max(0, nearMissCooldown - delta);
   const level = getLevel();
   const visualLevel = elapsed / 10 + 1;
 
@@ -604,6 +608,22 @@ function updateAsteroids(delta) {
 
     const hazardPulse = Math.max(0, 1 - Math.abs(mesh.position.z - PLAYER_Z) / 20);
     asteroid.wire.material.opacity = asteroid.edgeOpacity + hazardPulse * asteroid.edgeBoost;
+
+    if (mode === 'running' && !asteroid.nearMissPlayed && nearMissCooldown <= 0) {
+      const zDist = Math.abs(mesh.position.z - PLAYER_Z);
+      if (zDist < 1.5) {
+        const dx = mesh.position.x - player.x;
+        const dy = mesh.position.y - player.y;
+        const xyDistSq = dx * dx + dy * dy;
+        const nearRadius = asteroid.radius + PLAYER_RADIUS + 1.8;
+        const safeRadius = asteroid.radius + PLAYER_RADIUS;
+        if (xyDistSq < nearRadius * nearRadius && xyDistSq >= safeRadius * safeRadius) {
+          asteroid.nearMissPlayed = true;
+          nearMissCooldown = 0.5;
+          playNearMissSfx();
+        }
+      }
+    }
 
     if (checkCollision(asteroid)) {
       endGame();
@@ -963,9 +983,10 @@ function startRunAudio() {
   if (!context || !musicGain) return;
   const now = context.currentTime;
   musicGain.gain.cancelScheduledValues(now);
-  musicGain.gain.setTargetAtTime(0.44, now, 0.07);
+  musicGain.gain.setTargetAtTime(0.38, now, 0.12);
   nextMusicTime = now + 0.03;
   musicStep = 0;
+  startEngineHum();
 }
 
 function fadeAudioOut(fade = 0.08) {
@@ -975,12 +996,17 @@ function fadeAudioOut(fade = 0.08) {
     musicGain.gain.cancelScheduledValues(now);
     musicGain.gain.setTargetAtTime(0.0001, now, fade);
   }
+  if (engineHumGain) {
+    engineHumGain.gain.cancelScheduledValues(now);
+    engineHumGain.gain.setTargetAtTime(0, now, fade * 1.5);
+  }
 }
 
 function updateRunAudio() {
   const context = audioContext;
   if (!audioEnabled || !context || context.state !== 'running' || mode !== 'running') return;
   scheduleMusic();
+  updateEngineHum();
 }
 
 function scheduleMusic() {
@@ -999,36 +1025,80 @@ function scheduleMusic() {
 }
 
 function scheduleMusicStep(step, startTime) {
-  const index = step % 16;
-  const bassPattern = [82.41, 98, 110, 123.47, 73.42, 92.5, 110, 146.83];
-  const leadPattern = [659.25, 783.99, 880, 987.77, 880, 783.99, 659.25, 587.33];
-  const chordProgression = [
-    [329.63, 415.3, 493.88],
-    [369.99, 440, 554.37],
-    [415.3, 493.88, 622.25],
-    [293.66, 369.99, 493.88],
-  ];
+  const index = step % 32;
+  const level = getLevel();
 
-  if (index === 0 || index === 6 || index === 8 || index === 14) scheduleKick(startTime, 0.18, 0.38, musicGain);
-  if (index === 4 || index === 12) scheduleSnare(startTime);
-  if (index % 2 === 1) scheduleHat(startTime);
-  if (index === 7 || index === 15) scheduleOpenHat(startTime);
-  if (index % 2 === 0) {
-    const bassFrequency = bassPattern[(step / 2) % bassPattern.length];
-    scheduleTone(bassFrequency, startTime, MUSIC_STEP_DURATION * 1.25, 'triangle', 0.16, musicGain, 720);
+  // Kick: downbeats; syncopation unlocks at level 6
+  if (index === 0 || index === 16) scheduleKick(startTime, 0.26, 0.3, musicGain);
+  if (level >= 6 && (index === 6 || index === 22)) scheduleKick(startTime, 0.16, 0.14, musicGain);
+
+  // Hi-hats: sparse at low levels, busier as level climbs
+  if (index === 8 || index === 24) scheduleHat(startTime);
+  if (level >= 5 && (index === 4 || index === 12 || index === 20 || index === 28)) scheduleHat(startTime);
+  if (level >= 8 && index % 2 === 1) scheduleHat(startTime);
+
+  // Sub bass pulse on each chord change
+  const subRoots = [55, 46.25, 43.65, 55]; // A1, Bb1, F1, A1
+  if (index === 0 || index === 8 || index === 16 || index === 24) {
+    scheduleTone(subRoots[Math.floor(index / 8)], startTime, MUSIC_STEP_DURATION * 6.5, 'sine', 0.18, musicGain, 200);
   }
-  if (index === 0 || index === 4 || index === 8 || index === 12) {
-    scheduleChord(chordProgression[Math.floor(step / 4) % chordProgression.length], startTime);
+
+  // Evolving space pad — always present for atmosphere
+  const padChords = [
+    [73.42, 87.31, 110],      // Dm: D2 F2 A2
+    [110, 130.81, 164.81],    // Am: A2 C3 E3
+    [58.27, 73.42, 87.31],    // Bb: Bb1 D2 F2
+    [87.31, 110, 130.81],     // F:  F2 A2 C3
+  ];
+  if (index === 0 || index === 8 || index === 16 || index === 24) {
+    scheduleSpacePad(padChords[Math.floor(index / 8)], startTime);
   }
-  if (index === 2 || index === 3 || index === 6 || index === 7 || index === 10 || index === 11 || index === 14 || index === 15) {
-    const leadFrequency = leadPattern[(step + Math.floor(step / 8)) % leadPattern.length];
-    scheduleTone(leadFrequency, startTime, MUSIC_STEP_DURATION * 0.82, 'square', 0.055, musicGain, 3800, leadFrequency * 1.03);
+
+  // Sparse melody: enters at level 4
+  if (level >= 4) {
+    const melodyMap = { 2: 293.66, 5: 261.63, 10: 220, 14: 174.61, 18: 293.66, 21: 329.63, 26: 261.63, 30: 220 };
+    const freq = melodyMap[index];
+    if (freq) scheduleTone(freq, startTime, MUSIC_STEP_DURATION * 2.6, 'sine', 0.036, musicGain, 2600);
+  }
+
+  // Arp line: enters at level 7
+  if (level >= 7 && index % 2 === 1) {
+    const arpNotes = [146.83, 110, 87.31, 73.42, 130.81, 110, 164.81, 146.83];
+    const arpFreq = arpNotes[Math.floor(index / 4) % arpNotes.length];
+    scheduleTone(arpFreq, startTime, MUSIC_STEP_DURATION * 0.8, 'triangle', 0.022, musicGain, 2000);
   }
 }
 
 function scheduleChord(frequencies, startTime) {
   frequencies.forEach((frequency, index) => {
     scheduleTone(frequency, startTime + index * 0.008, MUSIC_STEP_DURATION * 1.45, 'sawtooth', 0.028, musicGain, 3200);
+  });
+}
+
+function scheduleSpacePad(frequencies, startTime) {
+  if (!audioContext || !musicGain) return;
+  const duration = MUSIC_STEP_DURATION * 7.8;
+  frequencies.forEach((freq) => {
+    [1.005, 0.995].forEach((detune) => {
+      const osc = audioContext.createOscillator();
+      const flt = audioContext.createBiquadFilter();
+      const amp = audioContext.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq * detune, startTime);
+      flt.type = 'lowpass';
+      flt.frequency.setValueAtTime(freq * 2.5, startTime);
+      flt.frequency.setTargetAtTime(freq * 5.5, startTime + 0.18, 0.4);
+      flt.frequency.setTargetAtTime(freq * 1.8, startTime + duration * 0.55, 0.7);
+      amp.gain.setValueAtTime(0.0001, startTime);
+      amp.gain.linearRampToValueAtTime(0.017, startTime + 0.3);
+      amp.gain.setValueAtTime(0.017, startTime + duration - 0.28);
+      amp.gain.linearRampToValueAtTime(0.0001, startTime + duration);
+      osc.connect(flt);
+      flt.connect(amp);
+      amp.connect(musicGain);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.1);
+    });
   });
 }
 
@@ -1056,25 +1126,27 @@ function scheduleTone(frequency, startTime, duration, type, peakGain, output, fi
 
 function scheduleKick(startTime, duration, peakGain, output) {
   if (!audioContext || !output) return;
-  const oscillator = audioContext.createOscillator();
+  const osc = audioContext.createOscillator();
   const amp = audioContext.createGain();
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(132, startTime);
-  oscillator.frequency.exponentialRampToValueAtTime(42, startTime + duration);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(148, startTime);
+  osc.frequency.exponentialRampToValueAtTime(38, startTime + duration * 0.8);
   amp.gain.setValueAtTime(Math.max(0.0002, peakGain), startTime);
   amp.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-  oscillator.connect(amp);
+  osc.connect(amp);
   amp.connect(output);
-  oscillator.start(startTime);
-  oscillator.stop(startTime + duration + 0.03);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.04);
+  scheduleNoise(startTime, 0.02, peakGain * 0.2, 'bandpass', 2800, output);
 }
 
 function scheduleHat(startTime) {
-  scheduleNoise(startTime, 0.045, 0.075, 'highpass', 7200, musicGain);
+  scheduleNoise(startTime, 0.035, 0.052, 'highpass', 9000, musicGain);
 }
 
 function scheduleOpenHat(startTime) {
-  scheduleNoise(startTime, 0.16, 0.08, 'highpass', 5200, musicGain);
+  scheduleNoise(startTime, 0.15, 0.065, 'highpass', 7000, musicGain);
+  scheduleNoise(startTime, 0.2, 0.022, 'bandpass', 12000, musicGain);
 }
 
 function scheduleSnare(startTime) {
@@ -1104,35 +1176,43 @@ function playStartSfx() {
   const context = resumeAudio();
   if (!context) return;
   const now = context.currentTime + 0.01;
-  scheduleTone(220, now, 0.18, 'triangle', 0.16, sfxGain, 2400, 880);
-  scheduleTone(440, now + 0.08, 0.16, 'square', 0.09, sfxGain, 3600, 1320);
-  scheduleNoise(now, 0.18, 0.12, 'highpass', 1800, sfxGain);
+  scheduleKick(now, 0.5, 0.55, sfxGain);
+  scheduleTone(65, now, 0.5, 'sawtooth', 0.18, sfxGain, 1200, 280);
+  scheduleNoise(now + 0.08, 0.3, 0.2, 'lowpass', 1800, sfxGain);
+  scheduleNoise(now + 0.26, 0.18, 0.14, 'highpass', 2800, sfxGain);
+  scheduleTone(880, now + 0.33, 0.14, 'sine', 0.1, sfxGain, 3600, 1760);
 }
 
 function playConfirmSfx() {
   const context = resumeAudio();
   if (!context) return;
   const now = context.currentTime + 0.01;
-  scheduleTone(587.33, now, 0.07, 'triangle', 0.08, sfxGain, 2600, 783.99);
-  scheduleTone(880, now + 0.055, 0.07, 'triangle', 0.06, sfxGain, 3200, 1174.66);
+  scheduleTone(523.25, now, 0.1, 'sine', 0.07, sfxGain, 3000, 659.25);
+  scheduleTone(880, now + 0.09, 0.12, 'sine', 0.055, sfxGain, 3600, 1047.5);
 }
 
 function playPauseSfx() {
   const context = audioContext;
   if (!audioEnabled || !context || context.state === 'suspended') return;
   const now = context.currentTime + 0.01;
-  scheduleTone(420, now, 0.12, 'triangle', 0.055, sfxGain, 1500, 210);
+  scheduleTone(480, now, 0.28, 'square', 0.065, sfxGain, 1200, 96);
+  scheduleTone(240, now + 0.05, 0.22, 'sine', 0.042, sfxGain, 800, 80);
+  scheduleNoise(now, 0.04, 0.05, 'highpass', 5500, sfxGain);
 }
 
 function playExplosionSfx() {
   const context = audioContext;
   if (!audioEnabled || !context || context.state === 'suspended') return;
   const now = context.currentTime + 0.01;
-  scheduleKick(now, 0.7, 0.9, sfxGain);
-  scheduleNoise(now, 0.78, 0.5, 'lowpass', 2100, sfxGain);
-  scheduleNoise(now + 0.045, 0.22, 0.22, 'bandpass', 3600, sfxGain);
-  scheduleTone(132, now + 0.015, 0.52, 'sawtooth', 0.22, sfxGain, 1000, 34);
-  scheduleTone(920, now + 0.04, 0.2, 'square', 0.1, sfxGain, 3200, 180);
+  scheduleKick(now, 1.4, 1.1, sfxGain);
+  scheduleNoise(now, 1.0, 0.7, 'lowpass', 2400, sfxGain);
+  scheduleNoise(now + 0.025, 0.5, 0.4, 'bandpass', 1600, sfxGain);
+  scheduleNoise(now + 0.05, 0.22, 0.25, 'highpass', 6000, sfxGain);
+  scheduleTone(340, now, 0.7, 'sine', 0.22, sfxGain, 3800, 90);
+  scheduleTone(720, now + 0.03, 0.35, 'sine', 0.12, sfxGain, 2800, 180);
+  for (let i = 0; i < 3; i += 1) {
+    scheduleNoise(now + 0.12 + i * 0.09, 0.1, 0.12, 'bandpass', 2800 + i * 900, sfxGain);
+  }
 }
 
 function createNoiseBuffer(context) {
@@ -1143,6 +1223,48 @@ function createNoiseBuffer(context) {
     data[i] = Math.random() * 2 - 1;
   }
   return buffer;
+}
+
+function startEngineHum() {
+  if (!audioContext || !audioEnabled) return;
+  stopEngineHum();
+  const ctx = audioContext;
+  const now = ctx.currentTime;
+  engineHumOsc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  engineHumGain = ctx.createGain();
+  engineHumOsc.type = 'sawtooth';
+  engineHumOsc.frequency.setValueAtTime(78 + fieldSpeed * 0.85, now);
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(260, now);
+  engineHumGain.gain.setValueAtTime(0, now);
+  engineHumGain.gain.linearRampToValueAtTime(0.022, now + 0.6);
+  engineHumOsc.connect(filter);
+  filter.connect(engineHumGain);
+  engineHumGain.connect(sfxGain);
+  engineHumOsc.start(now);
+}
+
+function stopEngineHum() {
+  if (engineHumOsc) {
+    try { engineHumOsc.stop(); } catch (e) {}
+    engineHumOsc = null;
+    engineHumGain = null;
+  }
+}
+
+function updateEngineHum() {
+  if (!engineHumOsc || !audioContext) return;
+  const targetFreq = 78 + fieldSpeed * 0.85;
+  engineHumOsc.frequency.setTargetAtTime(targetFreq, audioContext.currentTime, 0.25);
+}
+
+function playNearMissSfx() {
+  const context = audioContext;
+  if (!audioEnabled || !context || context.state === 'suspended') return;
+  const now = context.currentTime + 0.01;
+  scheduleNoise(now, 0.14, 0.14, 'bandpass', 1800, sfxGain);
+  scheduleTone(1760, now, 0.1, 'sine', 0.032, sfxGain, 3200, 440);
 }
 
 function updateHud(force = false) {
@@ -1209,6 +1331,7 @@ function spawnAsteroid(level, overrides = {}) {
     rotationX: random(-1.9, 1.9),
     rotationY: random(-1.6, 1.6),
     rotationZ: random(-1.4, 1.4),
+    nearMissPlayed: false,
   });
 }
 
