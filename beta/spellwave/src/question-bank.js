@@ -128,36 +128,49 @@ export const HARD_WORDS = [
 
 export const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
 
-// Unit-question pool for normal enemies.
-// term = the unit symbol (what the player types); definition = the question shown.
-export const UNIT_WORDS = [
-  { term: 'N',       definition: 'unit of force',                         isUnit: true },
-  { term: 'N',       definition: 'unit of weight',                        isUnit: true },
-  { term: 'kg',      definition: 'unit of mass',                          isUnit: true },
-  { term: 'm',       definition: 'unit of distance',                      isUnit: true },
-  { term: 'm',       definition: 'unit of displacement',                  isUnit: true },
-  { term: 's',       definition: 'unit of time',                          isUnit: true },
-  { term: 'm/s',     definition: 'unit of speed',                         isUnit: true },
-  { term: 'm/s',     definition: 'unit of velocity',                      isUnit: true },
-  { term: 'm/s²',    definition: 'unit of acceleration',                  isUnit: true },
-  { term: 'J',       definition: 'unit of energy',                        isUnit: true },
-  { term: 'J',       definition: 'unit of work done',                     isUnit: true },
-  { term: 'W',       definition: 'unit of power',                         isUnit: true },
-  { term: 'A',       definition: 'unit of current',                       isUnit: true },
-  { term: 'C',       definition: 'unit of charge',                        isUnit: true },
-  { term: 'V',       definition: 'unit of potential difference',          isUnit: true },
-  { term: 'V',       definition: 'unit of voltage',                       isUnit: true },
-  { term: 'ohm',     definition: 'unit of resistance',                    isUnit: true },
-  { term: 'Pa',      definition: 'unit of pressure',                      isUnit: true },
-  { term: 'Hz',      definition: 'unit of frequency',                     isUnit: true },
-  { term: 'm',       definition: 'unit of wavelength',                    isUnit: true },
-  { term: 'kg/m³',   definition: 'unit of density',                       isUnit: true },
-  { term: 'J/kgC',   definition: 'unit of specific heat capacity',        isUnit: true },
-  { term: 'J/kg',    definition: 'unit of specific latent heat',          isUnit: true },
-  { term: 'N/m',     definition: 'unit of spring constant',               isUnit: true },
-  { term: 'Nm',      definition: 'unit of moment',                        isUnit: true },
-  { term: 'N/kg',    definition: 'unit of gravitational field strength',  isUnit: true },
-  { term: 'Bq',      definition: 'unit of radioactive activity',          isUnit: true },
-  { term: 'Sv',      definition: 'unit of radiation dose',                isUnit: true },
-  { term: 'T',       definition: 'unit of magnetic flux density',         isUnit: true },
+// AQA GCSE Physics 8463 word equations — used for the equation boss each wave.
+// term = the word equation the player types; definition = compact symbolic form shown on label.
+export const EQUATION_WORDS = [
+  // Forces & motion
+  { term: 'weight = mass × gravitational field strength', definition: 'W = mg', isEquation: true },
+  { term: 'resultant force = mass × acceleration', definition: 'F = ma', isEquation: true },
+  { term: 'work done = force × distance', definition: 'W = Fs', isEquation: true },
+  { term: 'distance = speed × time', definition: 's = vt', isEquation: true },
+  { term: 'acceleration = change in velocity / time', definition: 'a = Δv / t', isEquation: true },
+  { term: 'momentum = mass × velocity', definition: 'p = mv', isEquation: true },
+  { term: 'force = change in momentum / time', definition: 'F = Δp / Δt', isEquation: true },
+  { term: 'moment = force × distance', definition: 'M = Fd', isEquation: true },
+  { term: 'force = spring constant × extension', definition: 'F = ke', isEquation: true },
+
+  // Energy
+  { term: 'kinetic energy = 0.5 × mass × speed²', definition: 'Ek = ½mv²', isEquation: true },
+  { term: 'gravitational potential energy = mass × gravitational field strength × height', definition: 'Ep = mgh', isEquation: true },
+  { term: 'elastic potential energy = 0.5 × spring constant × extension²', definition: 'Ee = ½ke²', isEquation: true },
+  { term: 'power = energy transferred / time', definition: 'P = E / t', isEquation: true },
+  { term: 'power = work done / time', definition: 'P = W / t', isEquation: true },
+  { term: 'energy transferred = power × time', definition: 'E = Pt', isEquation: true },
+  { term: 'efficiency = useful output power / total input power', definition: 'efficiency = Pout / Pin', isEquation: true },
+
+  // Materials & pressure
+  { term: 'density = mass / volume', definition: 'ρ = m / V', isEquation: true },
+  { term: 'pressure = force / area', definition: 'p = F / A', isEquation: true },
+  { term: 'pressure = height × density × gravitational field strength', definition: 'p = hρg', isEquation: true },
+
+  // Thermal
+  { term: 'change in thermal energy = mass × specific heat capacity × temperature change', definition: 'ΔE = mcΔθ', isEquation: true },
+  { term: 'thermal energy = mass × specific latent heat', definition: 'E = mL', isEquation: true },
+
+  // Waves
+  { term: 'wave speed = frequency × wavelength', definition: 'v = fλ', isEquation: true },
+  { term: 'period = 1 / frequency', definition: 'T = 1 / f', isEquation: true },
+
+  // Electricity
+  { term: 'charge flow = current × time', definition: 'Q = It', isEquation: true },
+  { term: 'potential difference = current × resistance', definition: 'V = IR', isEquation: true },
+  { term: 'power = potential difference × current', definition: 'P = VI', isEquation: true },
+  { term: 'power = current² × resistance', definition: 'P = I²R', isEquation: true },
+  { term: 'energy transferred = charge flow × potential difference', definition: 'E = QV', isEquation: true },
+
+  // Magnetism & induction
+  { term: 'force = magnetic flux density × current × length', definition: 'F = BIl', isEquation: true },
 ];

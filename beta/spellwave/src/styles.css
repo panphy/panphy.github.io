@@ -674,14 +674,20 @@ a {
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 82%, white 18%);
 }
 
-.word-tag[data-kind="unit"] .definition {
-  color: var(--gold);
-  font-weight: 700;
+.word-tag[data-kind="equation"] .definition,
+.word-tag[data-kind="equation"] .prompt-kind {
+  color: #ffe39a;
 }
 
-.word-tag[data-kind="unit"] .prompt-kind {
+.word-tag[data-kind="equation"] .definition {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.word-tag[data-kind="equation"] .prompt-kind {
   background: rgba(239, 195, 92, 0.18);
-  color: #ffe39a;
 }
 
 #comboValue.is-hidden {
@@ -765,6 +771,16 @@ a {
   font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.35;
+}
+
+.glossary-item.is-equation {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+}
+
+.glossary-item.is-equation .gl-term {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
 }
 
 .keyboard-input {

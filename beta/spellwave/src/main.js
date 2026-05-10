@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, UNIT_WORDS } from './question-bank.js';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -621,7 +621,7 @@ function defeatEnemy(enemy) {
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
   score += points;
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: true });
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
   }
   spawnScorePopup(points, enemy);
   playDefeatSound(enemy);
@@ -639,7 +639,7 @@ function leakEnemy(enemy) {
   streak = 0;
   leakedCount += 1;
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: false });
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
   }
   playDamageSound(enemy);
   damageTimer = enemy.isBoss ? 0.46 : 0.32;
@@ -1123,8 +1123,8 @@ function spawnEnemy(options = {}) {
     ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
     : choosePrompt();
 
-  const isUnitPrompt = !!wordData.isUnit;
-  const showDefinition = !!wordData.definition && (isBoss || isUnitPrompt);
+  const isEquationPrompt = !!wordData.isEquation;
+  const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
@@ -1138,7 +1138,7 @@ function spawnEnemy(options = {}) {
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
 
-  const promptKind = isUnitPrompt ? 'unit' : showDefinition ? 'definition' : 'keyword';
+  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
@@ -1191,6 +1191,7 @@ function spawnEnemy(options = {}) {
     remainingNode,
     prompt: wordData.term,
     definition: wordData.definition || null,
+    isEquation: isEquationPrompt,
     searchPrompt: buildSearchPrompt(wordData.term),
     showDefinition,
     hintMask: showDefinition ? buildHintMask(wordData.term) : null,
@@ -1600,7 +1601,8 @@ function isEnemyTargetable(enemy) {
 
 function prepareWavePlan() {
   bossWordsThisSet = chooseBossWordsForWave();
-  bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, bossWordsThisSet);
+  const previewableWords = bossWordsThisSet.filter(w => !w.isEquation);
+  bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
 }
 
 function buildBossPreviewSchedule(target, words) {
@@ -1624,14 +1626,26 @@ function chooseBossWordsForWave() {
   const chosen = [];
   const usedTerms = new Set();
 
-  while (chosen.length < BOSSES_PER_WAVE && usedTerms.size < pool.length) {
+  // First two bosses use vocabulary words
+  while (chosen.length < BOSSES_PER_WAVE - 1 && usedTerms.size < pool.length) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
     if (usedTerms.has(entry.term)) continue;
     chosen.push(entry);
     usedTerms.add(entry.term);
   }
 
+  // Final boss is always an equation question
+  chosen.push(chooseEquationWord(usedTerms));
+
   return chosen;
+}
+
+function chooseEquationWord(usedTerms = new Set()) {
+  for (let attempt = 0; attempt < 16; attempt += 1) {
+    const entry = EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
+    if (!usedTerms.has(entry.term)) return entry;
+  }
+  return EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
 }
 
 function chooseBossPool() {
@@ -1649,8 +1663,6 @@ function choosePrompt() {
   const reservedBossTerms = wavePhase === 'normal'
     ? new Set(bossWordsThisSet.map((word) => word.term))
     : new Set();
-  const unitChance = THREE.MathUtils.clamp(0.12 + waveSet * 0.02, 0.14, 0.24);
-  if (Math.random() < unitChance) return chooseUnitWord(nearExisting);
 
   const regularPool = pool.filter((entry) => !reservedBossTerms.has(entry.term));
   const usablePool = regularPool.length > 0 ? regularPool : pool;
@@ -2045,12 +2057,6 @@ function chooseBossWord() {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function chooseUnitWord(usedPrompts = new Set(enemies.map(e => e.prompt))) {
-  const pool = UNIT_WORDS.filter(entry => !usedPrompts.has(entry.term));
-  const usablePool = pool.length > 0 ? pool : UNIT_WORDS;
-  return usablePool[Math.floor(Math.random() * usablePool.length)];
-}
-
 function startWaveCleared() {
   mode = 'wave_cleared';
   stopMusicLoop(0.12);
@@ -2060,7 +2066,7 @@ function startWaveCleared() {
   pauseButton.disabled = true;
   document.body.classList.remove('is-running');
   const glossary = bossWordsThisSet
-    .map(w => w.isUnit ? `${w.definition}: ${w.term}` : `${w.term} — ${w.definition}`)
+    .map(w => w.isEquation ? `${w.definition}: ${w.term}` : `${w.term} — ${w.definition}`)
     .join('\n');
   showMessage(
     `WAVE ${waveSet} CLEARED`,
@@ -2153,15 +2159,16 @@ function renderRunGlossary() {
 
   for (const entry of sorted) {
     const item = document.createElement('div');
-    item.className = `glossary-item ${entry.defeated ? 'is-defeated' : 'is-leaked'}`;
+    item.className = `glossary-item ${entry.defeated ? 'is-defeated' : 'is-leaked'}${entry.isEquation ? ' is-equation' : ''}`;
 
     const term = document.createElement('span');
     term.className = 'gl-term';
-    term.textContent = entry.term;
+    // For equations show the compact symbol form as the label; full word eq as the definition
+    term.textContent = entry.isEquation ? (entry.definition || entry.term) : entry.term;
 
     const def = document.createElement('span');
     def.className = 'gl-def';
-    def.textContent = entry.definition;
+    def.textContent = entry.isEquation ? entry.term : (entry.definition || '—');
 
     item.append(term, def);
     runGlossary.append(item);
