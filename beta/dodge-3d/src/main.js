@@ -32,10 +32,14 @@ const PLAY_BOUNDS = {
 const GRID_STEP = 8;
 const GRID_NEAR_Z = 24;
 const GRID_FAR_Z = -160;
-const COURSE_INITIAL_TURN_DELAY = [3.0, 4.6];
-const COURSE_TURN_DURATION = [4.2, 6.0];
-const COURSE_TURN_STRENGTH = [12.0, 17.5];
-const COURSE_TURN_COOLDOWN = [4.7, 7.2];
+const COURSE_INITIAL_TURN_DELAY = [1.2, 2.5];
+const COURSE_TURN_DURATION = [3.0, 4.8];
+const COURSE_TURN_STRENGTH = [11.0, 18.0];
+const COURSE_TURN_COOLDOWN = [1.6, 3.5];
+const COURSE_INITIAL_PITCH_DELAY = [1.8, 3.2];
+const COURSE_PITCH_DURATION = [3.2, 5.5];
+const COURSE_PITCH_STRENGTH = [3.0, 6.0];
+const COURSE_PITCH_COOLDOWN = [2.2, 4.5];
 const GRID_VIOLET_LEVEL = 7;
 const GRID_GLOW_RAMP_LEVELS = 2.5;
 const GRID_GLOW_COLOR = new THREE.Color(0xf0caff);
@@ -63,6 +67,7 @@ const railVisualColor = new THREE.Color();
 const lineGlowColor = new THREE.Color();
 const asteroids = [];
 const explosionParticles = [];
+const shockwaves = [];
 
 let mode = 'idle';
 let elapsed = 0;
@@ -97,6 +102,14 @@ const course = {
   turnDirection: 0,
   turnStrength: 0,
   turnAmount: 0,
+  pitchDelay: COURSE_INITIAL_PITCH_DELAY[1],
+  pitchAge: 0,
+  pitchDuration: 0,
+  pitchDirection: 0,
+  pitchStrength: 0,
+  pitchAmount: 0,
+  swayX: 0,
+  swayY: 0,
 };
 
 const player = {
@@ -301,8 +314,8 @@ function endGame() {
   document.body.classList.add('is-crashed');
   spawnShipExplosion();
   ship.visible = false;
-  shakeAmount = 1.4;
-  flashTimer = 0.18;
+  shakeAmount = 2.8;
+  flashTimer = 0.42;
   screenFlash.classList.add('show');
   fadeAudioOut(0.12);
   playExplosionSfx();
@@ -464,11 +477,26 @@ function resetCourse() {
   course.turnDirection = 0;
   course.turnStrength = 0;
   course.turnAmount = 0;
+  course.pitchDelay = random(...COURSE_INITIAL_PITCH_DELAY);
+  course.pitchAge = 0;
+  course.pitchDuration = 0;
+  course.pitchDirection = 0;
+  course.pitchStrength = 0;
+  course.pitchAmount = 0;
+  course.swayX = 0;
+  course.swayY = 0;
 }
 
 function updateCourse(delta, speed) {
   course.scrollZ = (course.scrollZ + speed * delta) % GRID_STEP;
 
+  // Gentle continuous sway — two overlapping frequencies for an irregular, non-repeating feel
+  const t = performance.now() * 0.001;
+  course.swayX = Math.sin(t * 0.38) * 2.8 + Math.sin(t * 0.67) * 1.4;
+  course.swayY = Math.cos(t * 0.31) * 1.6 + Math.cos(t * 0.53) * 0.8;
+
+  // Horizontal discrete turns
+  let discreteTurnX = 0;
   if (course.turnDirection === 0) {
     course.turnDelay -= delta;
     if (course.turnDelay <= 0) {
@@ -480,23 +508,52 @@ function updateCourse(delta, speed) {
   } else {
     course.turnAge += delta;
     const progress = clamp(course.turnAge / Math.max(course.turnDuration, 0.001), 0, 1);
-    const bendPulse = Math.pow(Math.sin(progress * Math.PI), 0.72);
-    course.turnAmount = course.turnDirection * course.turnStrength * bendPulse;
+    discreteTurnX = course.turnDirection * course.turnStrength * Math.pow(Math.sin(progress * Math.PI), 0.72);
     if (progress >= 1) {
       course.turnDirection = 0;
       course.turnAge = 0;
       course.turnDuration = 0;
       course.turnStrength = 0;
-      course.turnAmount = 0;
       course.turnDelay = random(...COURSE_TURN_COOLDOWN);
     }
   }
+  course.turnAmount = course.swayX + discreteTurnX;
+
+  // Vertical discrete pitches
+  let discretePitchY = 0;
+  if (course.pitchDirection === 0) {
+    course.pitchDelay -= delta;
+    if (course.pitchDelay <= 0) {
+      course.pitchDirection = Math.random() < 0.5 ? -1 : 1;
+      course.pitchDuration = random(...COURSE_PITCH_DURATION);
+      course.pitchStrength = random(...COURSE_PITCH_STRENGTH);
+      course.pitchAge = 0;
+    }
+  } else {
+    course.pitchAge += delta;
+    const progress = clamp(course.pitchAge / Math.max(course.pitchDuration, 0.001), 0, 1);
+    discretePitchY = course.pitchDirection * course.pitchStrength * Math.pow(Math.sin(progress * Math.PI), 0.72);
+    if (progress >= 1) {
+      course.pitchDirection = 0;
+      course.pitchAge = 0;
+      course.pitchDuration = 0;
+      course.pitchStrength = 0;
+      course.pitchDelay = random(...COURSE_PITCH_COOLDOWN);
+    }
+  }
+  course.pitchAmount = course.swayY + discretePitchY;
 }
 
 function getCourseBendAtZ(z) {
   const depth = clamp((GRID_NEAR_Z - z) / (GRID_NEAR_Z - GRID_FAR_Z), 0, 1);
   const easedDepth = Math.pow(depth, 1.12);
   return course.turnAmount * easedDepth;
+}
+
+function getCoursePitchAtZ(z) {
+  const depth = clamp((GRID_NEAR_Z - z) / (GRID_NEAR_Z - GRID_FAR_Z), 0, 1);
+  const easedDepth = Math.pow(depth, 1.12);
+  return course.pitchAmount * easedDepth;
 }
 
 function updateGridVisuals(level) {
@@ -558,10 +615,10 @@ function updateCourseLineGeometry(line) {
     const z1 = segment.z1 + course.scrollZ;
     const z2 = segment.z2 + course.scrollZ;
     positions[offset] = segment.x1 + getCourseBendAtZ(z1);
-    positions[offset + 1] = segment.y1;
+    positions[offset + 1] = segment.y1 + getCoursePitchAtZ(z1);
     positions[offset + 2] = z1;
     positions[offset + 3] = segment.x2 + getCourseBendAtZ(z2);
-    positions[offset + 4] = segment.y2;
+    positions[offset + 4] = segment.y2 + getCoursePitchAtZ(z2);
     positions[offset + 5] = z2;
     offset += 6;
   });
@@ -931,6 +988,20 @@ function updateEffects(delta) {
       explosionParticles.splice(index, 1);
     }
   }
+
+  for (let i = shockwaves.length - 1; i >= 0; i -= 1) {
+    const sw = shockwaves[i];
+    sw.life -= delta;
+    const progress = 1 - sw.life / sw.maxLife;
+    sw.mesh.scale.setScalar(1 + progress * 9);
+    sw.mesh.material.opacity = Math.max(0, (1 - progress) * 0.75);
+    if (sw.life <= 0) {
+      scene.remove(sw.mesh);
+      sw.mesh.geometry.dispose();
+      sw.mesh.material.dispose();
+      shockwaves.splice(i, 1);
+    }
+  }
 }
 
 function updateAudioButton() {
@@ -1024,48 +1095,109 @@ function scheduleMusic() {
   }
 }
 
+// 128-step (~21s) melody and harmony scores: { step: [freq, durSteps, gain] }
+const MELODY_SCORE = {
+  // Section 1 (Dm/Am): sparse atmospheric opening
+  3:   [220,    4.2, 0.036],  // A3
+  9:   [261.63, 3.0, 0.032],  // C4
+  14:  [293.66, 2.8, 0.034],  // D4
+  19:  [220,    3.8, 0.032],  // A3
+  25:  [174.61, 5.0, 0.036],  // F3
+  30:  [220,    2.5, 0.032],  // A3
+  // Section 2 (Bb/F/Gm): building
+  33:  [293.66, 2.6, 0.038],  // D4
+  37:  [329.63, 2.0, 0.036],  // E4
+  42:  [349.23, 3.2, 0.04],   // F4
+  46:  [329.63, 1.8, 0.036],  // E4
+  50:  [293.66, 1.6, 0.034],  // D4
+  54:  [261.63, 2.4, 0.032],  // C4
+  58:  [293.66, 2.2, 0.036],  // D4
+  62:  [349.23, 3.0, 0.04],   // F4
+  // Section 3 (Dm/C): full, expressive
+  65:  [440,    2.2, 0.042],  // A4
+  69:  [392,    1.8, 0.04],   // G4
+  73:  [349.23, 2.4, 0.04],   // F4
+  77:  [329.63, 1.6, 0.036],  // E4
+  80:  [293.66, 3.2, 0.036],  // D4
+  85:  [261.63, 2.0, 0.032],  // C4
+  89:  [293.66, 1.8, 0.036],  // D4
+  93:  [392,    2.6, 0.04],   // G4
+  // Section 4 (Am): climax then wind down
+  97:  [523.25, 2.4, 0.044],  // C5 — peak
+  101: [440,    1.8, 0.042],  // A4
+  105: [392,    2.0, 0.04],   // G4
+  109: [349.23, 2.8, 0.04],   // F4
+  112: [293.66, 2.2, 0.036],  // D4
+  116: [261.63, 3.2, 0.034],  // C4
+  120: [220,    4.0, 0.032],  // A3
+  124: [174.61, 5.0, 0.03],   // F3 — low closure
+};
+
+const HARMONY_SCORE = {
+  3:   [261.63, 3.8, 0.018],  // C4 (minor 3rd above A3)
+  14:  [349.23, 2.4, 0.018],  // F4 (3rd above D4)
+  42:  [440,    2.8, 0.02],   // A4 (3rd above F4)
+  65:  [523.25, 2.0, 0.02],   // C5 (minor 3rd above A4)
+  93:  [493.88, 2.2, 0.018],  // B4
+  97:  [659.25, 2.2, 0.022],  // E5 — climax harmony
+  109: [440,    2.4, 0.018],  // A4 (3rd above F4)
+};
+
 function scheduleMusicStep(step, startTime) {
-  const index = step % 32;
+  const index = step % 128;
   const level = getLevel();
 
-  // Kick: downbeats; syncopation unlocks at level 6
-  if (index === 0 || index === 16) scheduleKick(startTime, 0.26, 0.3, musicGain);
-  if (level >= 6 && (index === 6 || index === 22)) scheduleKick(startTime, 0.16, 0.14, musicGain);
-
-  // Hi-hats: sparse at low levels, busier as level climbs
-  if (index === 8 || index === 24) scheduleHat(startTime);
-  if (level >= 5 && (index === 4 || index === 12 || index === 20 || index === 28)) scheduleHat(startTime);
-  if (level >= 8 && index % 2 === 1) scheduleHat(startTime);
-
-  // Sub bass pulse on each chord change
-  const subRoots = [55, 46.25, 43.65, 55]; // A1, Bb1, F1, A1
-  if (index === 0 || index === 8 || index === 16 || index === 24) {
-    scheduleTone(subRoots[Math.floor(index / 8)], startTime, MUSIC_STEP_DURATION * 6.5, 'sine', 0.18, musicGain, 200);
-  }
-
-  // Evolving space pad — always present for atmosphere
-  const padChords = [
-    [73.42, 87.31, 110],      // Dm: D2 F2 A2
-    [110, 130.81, 164.81],    // Am: A2 C3 E3
-    [58.27, 73.42, 87.31],    // Bb: Bb1 D2 F2
-    [87.31, 110, 130.81],     // F:  F2 A2 C3
+  // 8-chord progression, 16 steps (~2.67s) per chord
+  const chordIndex = Math.floor(index / 16);
+  const PAD_CHORDS = [
+    [73.42, 87.31, 110],      // Dm
+    [110, 130.81, 164.81],    // Am
+    [58.27, 73.42, 87.31],    // Bb
+    [87.31, 110, 130.81],     // F
+    [98, 116.54, 146.83],     // Gm
+    [73.42, 87.31, 110],      // Dm
+    [65.41, 82.41, 98],       // C
+    [110, 130.81, 164.81],    // Am
   ];
-  if (index === 0 || index === 8 || index === 16 || index === 24) {
-    scheduleSpacePad(padChords[Math.floor(index / 8)], startTime);
+  const SUB_ROOTS = [73.42, 110, 58.27, 87.31, 98, 73.42, 65.41, 110];
+
+  // Kick: downbeats + syncopation at level 6
+  if (index % 16 === 0) scheduleKick(startTime, 0.26, 0.28, musicGain);
+  if (level >= 6 && index % 16 === 6) scheduleKick(startTime, 0.16, 0.14, musicGain);
+
+  // Hi-hats: sparse → busier with level
+  if (index % 16 === 8) scheduleHat(startTime);
+  if (level >= 5 && index % 8 === 4) scheduleHat(startTime);
+  if (level >= 8 && index % 4 === 2) scheduleHat(startTime);
+
+  // Sub bass on chord change
+  if (index % 16 === 0) {
+    scheduleTone(SUB_ROOTS[chordIndex], startTime, MUSIC_STEP_DURATION * 10, 'sine', 0.18, musicGain, 200);
   }
 
-  // Sparse melody: enters at level 4
-  if (level >= 4) {
-    const melodyMap = { 2: 293.66, 5: 261.63, 10: 220, 14: 174.61, 18: 293.66, 21: 329.63, 26: 261.63, 30: 220 };
-    const freq = melodyMap[index];
-    if (freq) scheduleTone(freq, startTime, MUSIC_STEP_DURATION * 2.6, 'sine', 0.036, musicGain, 2600);
+  // Space pad: twice per chord for smooth overlap
+  if (index % 8 === 0) {
+    scheduleSpacePad(PAD_CHORDS[chordIndex], startTime);
   }
 
-  // Arp line: enters at level 7
-  if (level >= 7 && index % 2 === 1) {
-    const arpNotes = [146.83, 110, 87.31, 73.42, 130.81, 110, 164.81, 146.83];
-    const arpFreq = arpNotes[Math.floor(index / 4) % arpNotes.length];
-    scheduleTone(arpFreq, startTime, MUSIC_STEP_DURATION * 0.8, 'triangle', 0.022, musicGain, 2000);
+  // Melody: enters at level 3
+  if (level >= 3) {
+    const note = MELODY_SCORE[index];
+    if (note) scheduleTone(note[0], startTime, MUSIC_STEP_DURATION * note[1], 'sine', note[2], musicGain, note[0] * 3.5);
+  }
+
+  // Harmony voice: enters at level 5
+  if (level >= 5) {
+    const harmony = HARMONY_SCORE[index];
+    if (harmony) scheduleTone(harmony[0], startTime, MUSIC_STEP_DURATION * harmony[1], 'sine', harmony[2], musicGain, harmony[0] * 3.0);
+  }
+
+  // Arp: follows current chord tones, level 7+
+  if (level >= 7 && index % 4 === 1) {
+    const chord = PAD_CHORDS[chordIndex];
+    const allTones = [...chord, chord[0] * 2, chord[1] * 2];
+    const arpFreq = allTones[Math.floor(index / 4) % allTones.length];
+    scheduleTone(arpFreq, startTime, MUSIC_STEP_DURATION * 0.75, 'triangle', 0.02, musicGain, 2200);
   }
 }
 
@@ -1213,6 +1345,8 @@ function playExplosionSfx() {
   for (let i = 0; i < 3; i += 1) {
     scheduleNoise(now + 0.12 + i * 0.09, 0.1, 0.12, 'bandpass', 2800 + i * 900, sfxGain);
   }
+  scheduleNoise(now + 0.4, 2.4, 0.1, 'lowpass', 360, sfxGain);
+  scheduleTone(168, now + 0.15, 3.2, 'sine', 0.075, sfxGain, 480, 72);
 }
 
 function createNoiseBuffer(context) {
@@ -1282,12 +1416,14 @@ function updateCamera(delta) {
   const shakeX = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.22 : 0;
   const shakeY = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.18 : 0;
   const courseLookX = getCourseBendAtZ(-98);
+  const courseLookY = getCoursePitchAtZ(-98);
   camera.position.x = damp(camera.position.x, player.x * 0.08 + courseLookX * 0.04 + shakeX, 5, delta);
-  camera.position.y = damp(camera.position.y, 2.15 + player.y * 0.045 + shakeY, 5, delta);
+  camera.position.y = damp(camera.position.y, 2.15 + player.y * 0.045 + courseLookY * 0.04 + shakeY, 5, delta);
   camera.position.z = damp(camera.position.z, mode === 'running' ? 11.15 : 11.8, 4, delta);
-  cameraTarget.set(player.x * 0.055 + courseLookX * 0.13, player.y * 0.035, -48);
+  cameraTarget.set(player.x * 0.055 + courseLookX * 0.13, player.y * 0.035 + courseLookY * 0.09, -48);
   camera.lookAt(cameraTarget);
   camera.rotation.z += -course.turnAmount * 0.006;
+  camera.rotation.x += course.pitchAmount * 0.003;
 }
 
 function spawnAsteroid(level, overrides = {}) {
@@ -1426,13 +1562,15 @@ function clearAsteroids() {
 
 function spawnShipExplosion() {
   const origin = ship.position;
-  const SHIP_COLORS = [0xd8e8ed, 0x39b9ff, 0xff4d59, 0xffb452];
-  const count = 18;
+  const SHIP_COLORS = [0xd8e8ed, 0x39b9ff, 0xff4d59, 0xffb452, 0xffffff, 0x80dfff];
+  const count = 44;
 
   for (let index = 0; index < count; index += 1) {
     const color = SHIP_COLORS[index % SHIP_COLORS.length];
-    const size = 0.06 + Math.random() * 0.18;
-    const geometry = new THREE.BoxGeometry(size, size * (0.6 + Math.random()), size);
+    const isBig = index < 8;
+    const size = isBig ? 0.1 + Math.random() * 0.22 : 0.04 + Math.random() * 0.13;
+    const elongation = 0.4 + Math.random() * (isBig ? 1.2 : 1.0);
+    const geometry = new THREE.BoxGeometry(size, size * elongation, size);
     const material = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
@@ -1442,24 +1580,45 @@ function spawnShipExplosion() {
     mesh.position.copy(origin);
     scene.add(mesh);
 
-    const speed = 2.8 + Math.random() * 5.5;
+    const speed = isBig ? 4.0 + Math.random() * 7.5 : 2.5 + Math.random() * 10.5;
     const theta = Math.random() * Math.PI * 2;
     const phi = (Math.random() - 0.5) * Math.PI;
     const velocity = new THREE.Vector3(
       Math.cos(theta) * Math.cos(phi) * speed,
-      Math.sin(phi) * speed * 0.7 + 1.2,
-      (Math.random() - 0.5) * speed * 0.5
+      Math.sin(phi) * speed * 0.8 + 1.8,
+      (Math.random() - 0.5) * speed * 0.65
     );
 
-    const maxLife = 0.55 + Math.random() * 0.45;
+    const maxLife = 0.7 + Math.random() * 1.1;
     explosionParticles.push({
       mesh,
       velocity,
-      spin: { x: (Math.random() - 0.5) * 14, z: (Math.random() - 0.5) * 14 },
+      spin: { x: (Math.random() - 0.5) * 18, z: (Math.random() - 0.5) * 18 },
       life: maxLife,
       maxLife,
     });
   }
+
+  spawnShockwave(origin.clone());
+}
+
+function spawnShockwave(origin) {
+  [{ color: 0x39b9ff, rotX: 0, life: 0.6 }, { color: 0xffd070, rotX: -Math.PI / 2, life: 0.52 }].forEach(({ color, rotX, life }) => {
+    const geometry = new THREE.RingGeometry(0.08, 0.28, 40);
+    const material = new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const ring = new THREE.Mesh(geometry, material);
+    ring.position.copy(origin);
+    ring.rotation.x = rotX;
+    scene.add(ring);
+    shockwaves.push({ mesh: ring, life, maxLife: life });
+  });
 }
 
 function clearExplosionParticles() {
@@ -1469,6 +1628,12 @@ function clearExplosionParticles() {
     p.mesh.material.dispose();
   }
   explosionParticles.length = 0;
+  for (const sw of shockwaves) {
+    scene.remove(sw.mesh);
+    sw.mesh.geometry.dispose();
+    sw.mesh.material.dispose();
+  }
+  shockwaves.length = 0;
 }
 
 function disposeAsteroid(asteroid) {
