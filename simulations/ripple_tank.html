@@ -231,7 +231,7 @@
     }
 
     #workspace.menu-mode {
-      grid-template-columns: minmax(280px, 440px);
+      grid-template-columns: minmax(300px, 680px);
       place-content: center;
       align-items: center;
     }
@@ -686,34 +686,120 @@
     }
 
     .mode-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-      padding: 0.9rem;
-      background: var(--surface);
-      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 1rem;
+      padding: 1.35rem;
+      background:
+        linear-gradient(135deg, rgba(194, 65, 12, 0.10), rgba(13, 148, 136, 0.10)),
+        var(--surface);
+      border-radius: 18px;
+      box-shadow: 0 22px 52px rgba(27, 27, 27, 0.14);
     }
 
     .mode-menu h3 {
       margin: 0;
       font-family: var(--font-display);
-      font-size: 1.35rem;
+      font-size: 2rem;
       font-weight: 400;
       color: var(--text-main);
+      line-height: 1.05;
     }
 
     .mode-menu p {
       margin: 0;
       color: var(--text-secondary);
-      font-size: 0.86rem;
+      font-size: 0.92rem;
       line-height: 1.5;
     }
 
     .mode-actions {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.55rem;
-      margin-top: 0.2rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.35rem;
+    }
+
+    .mode-option {
+      min-height: 150px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      align-items: start;
+      justify-items: start;
+      gap: 0.65rem;
+      padding: 1rem;
+      border-radius: 16px;
+      text-align: left;
+      white-space: normal;
+      background: rgba(255, 255, 255, 0.78);
+      border-color: rgba(232, 228, 221, 0.9);
+      color: var(--text-main);
+      box-shadow: 0 12px 30px rgba(27, 27, 27, 0.08);
+    }
+
+    [data-theme="dark"] .mode-option {
+      background: rgba(30, 30, 28, 0.86);
+      border-color: rgba(46, 46, 42, 0.95);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.32);
+    }
+
+    .mode-option:hover {
+      border-color: var(--brand-primary);
+    }
+
+    .mode-option.refraction:hover {
+      border-color: var(--brand-accent);
+    }
+
+    .mode-icon {
+      width: 46px;
+      height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      font-family: var(--font-mono);
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: rgba(194, 65, 12, 0.12);
+      color: var(--brand-primary);
+    }
+
+    .mode-option.refraction .mode-icon {
+      background: rgba(13, 148, 136, 0.14);
+      color: var(--brand-accent);
+    }
+
+    .mode-copy {
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .mode-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .mode-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+
+    .mode-cta {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .mode-option.refraction .mode-cta {
+      color: var(--brand-accent);
     }
 
     .sim-actions {
@@ -867,6 +953,22 @@
       .banner-title {
         font-size: 1.2rem;
       }
+
+      .mode-menu {
+        padding: 1rem;
+      }
+
+      .mode-menu h3 {
+        font-size: 1.55rem;
+      }
+
+      .mode-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .mode-option {
+        min-height: 124px;
+      }
     }
   </style>
 </head>
@@ -893,12 +995,26 @@
           <p id="controlsDescription">Start with interference or refraction.</p>
         </div>
 
-        <div id="modeMenu" class="source-card settings-card mode-menu">
+        <div id="modeMenu" class="mode-menu">
           <h3>Virtual Ripple Tank</h3>
-          <p>Choose the experiment setup before changing controls.</p>
+          <p>Select an experiment.</p>
           <div class="mode-actions">
-            <button id="chooseInterferenceBtn" class="btn btn-primary" type="button">Interference</button>
-            <button id="chooseRefractionBtn" class="btn btn-secondary" type="button">Refraction</button>
+            <button id="chooseInterferenceBtn" class="btn mode-option interference" type="button">
+              <span class="mode-icon">∿</span>
+              <span class="mode-copy">
+                <span class="mode-title">Interference</span>
+                <span class="mode-subtitle">Two point sources</span>
+              </span>
+              <span class="mode-cta">Start</span>
+            </button>
+            <button id="chooseRefractionBtn" class="btn mode-option refraction" type="button">
+              <span class="mode-icon">↘</span>
+              <span class="mode-copy">
+                <span class="mode-title">Refraction</span>
+                <span class="mode-subtitle">Straight wavefronts</span>
+              </span>
+              <span class="mode-cta">Start</span>
+            </button>
           </div>
         </div>
 
