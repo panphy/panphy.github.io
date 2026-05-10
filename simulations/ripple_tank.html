@@ -651,7 +651,7 @@
 
     .preset-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.5rem;
     }
 
@@ -659,6 +659,21 @@
       min-height: 40px;
       padding-inline: 0.65rem;
       font-size: 0.78rem;
+    }
+
+    .boundary-toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .boundary-toggle-row span {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .medium-readout {
@@ -1150,7 +1165,6 @@
               <span class="source-dot settings-dot"></span>
               <h3 class="source-title">Tank Medium</h3>
             </div>
-            <input type="checkbox" id="mediumToggle" hidden>
           </div>
           <div class="medium-readout">
             <div class="medium-pill">
@@ -1165,7 +1179,20 @@
           <div class="preset-row">
             <button id="deepToShallowBtn" class="btn btn-secondary" type="button">Deep to shallow</button>
             <button id="shallowToDeepBtn" class="btn btn-secondary" type="button">Shallow to deep</button>
-            <button id="swapMediumBtn" class="btn btn-secondary" type="button">Swap</button>
+          </div>
+          <div class="boundary-toggle-row">
+            <span>Show Boundary</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="boundaryToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="refrFreq">Wave Frequency</label>
+              <span id="refrFreqVal">2.0 Hz</span>
+            </div>
+            <input type="range" id="refrFreq" min="0.5" max="5" step="0.1" value="2.0">
           </div>
           <div class="control-block">
             <div class="control-header">
@@ -1323,12 +1350,13 @@
     const interferenceSettingsCard = document.getElementById('interferenceSettingsCard');
     const interferenceSeparator = document.getElementById('interferenceSeparator');
     const refractionSeparator = document.getElementById('refractionSeparator');
-    const mediumToggle = document.getElementById('mediumToggle');
+    const boundaryToggleEl = document.getElementById('boundaryToggle');
     const regionAVal = document.getElementById('regionAVal');
     const regionBVal = document.getElementById('regionBVal');
     const deepToShallowBtn = document.getElementById('deepToShallowBtn');
     const shallowToDeepBtn = document.getElementById('shallowToDeepBtn');
-    const swapMediumBtn = document.getElementById('swapMediumBtn');
+    const refrFreqSlider = document.getElementById('refrFreq');
+    const refrFreqVal = document.getElementById('refrFreqVal');
     const boundaryAngleSlider = document.getElementById('boundaryAngle');
     const boundaryAngleVal = document.getElementById('boundaryAngleVal');
     const boundaryOffsetSlider = document.getElementById('boundaryOffset');
@@ -1935,7 +1963,7 @@
 
     function updateMediumUI() {
       clampBoundaryState();
-      mediumToggle.checked = state.twoRegions;
+      boundaryToggleEl.checked = state.twoRegions;
       boundaryAngleSlider.value = state.boundaryAngle;
       boundaryOffsetSlider.value = state.boundaryOffset;
       speedASlider.value = state.speedA;
@@ -2013,6 +2041,8 @@
       uniforms.uSpeed.value = state.speed;
       setSourceState(1, { enabled: true, shape: 'bar', freq: 2.0, amp: 0.5 });
       setSourceState(2, { enabled: false, shape: 'point', freq: 2.0, amp: 0.5 });
+      refrFreqSlider.value = 2.0;
+      refrFreqVal.textContent = '2.0 Hz';
       SOURCE1_POS.x = -PLANE_SIZE / 2 + 0.45;
       SOURCE1_POS.y = 0;
       SOURCE2_POS.x = PLANE_SIZE / 2;
@@ -2142,14 +2172,8 @@
       setAnimationSpeed(parseFloat(animSpeedSlider.value));
     });
 
-    mediumToggle.addEventListener('change', () => {
-      state.twoRegions = mediumToggle.checked;
-      if (state.twoRegions && state.source1.shape === 'point') {
-        state.source1.shape = 'bar';
-        s1Shape.value = 'bar';
-        uniforms.uS1Shape.value = 1.0;
-        s1ShapeVal.textContent = 'Bar';
-      }
+    boundaryToggleEl.addEventListener('change', () => {
+      state.twoRegions = boundaryToggleEl.checked;
       updateMediumUI();
     });
 
@@ -2179,12 +2203,13 @@
       updateMediumUI();
     });
 
-    swapMediumBtn.addEventListener('click', () => {
-      const nextA = state.speedB;
-      state.speedB = state.speedA;
-      state.speedA = nextA;
-      state.twoRegions = true;
-      updateMediumUI();
+    refrFreqSlider.addEventListener('input', () => {
+      const freq = parseFloat(refrFreqSlider.value);
+      refrFreqVal.textContent = freq.toFixed(1) + ' Hz';
+      state.source1.freq = freq;
+      uniforms.uS1Freq.value = freq;
+      s1Freq.value = freq;
+      s1FreqVal.textContent = freq.toFixed(1) + ' Hz';
     });
 
     boundaryAngleSlider.addEventListener('input', () => {
