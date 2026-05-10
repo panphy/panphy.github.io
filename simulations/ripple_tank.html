@@ -1783,6 +1783,7 @@
       uniforms.uBoundaryOffset.value = state.boundaryOffset;
       uniforms.uSpeedA.value = state.speedA;
       uniforms.uSpeedB.value = state.speedB;
+      if (!state.twoRegions) uniforms.uSpeed.value = state.speedA;
       updateBoundaryVisuals();
     }
 
@@ -2174,6 +2175,7 @@
 
     boundaryToggleEl.addEventListener('change', () => {
       state.twoRegions = boundaryToggleEl.checked;
+      if (!state.twoRegions) state.speedB = state.speedA;
       updateMediumUI();
     });
 
@@ -2226,13 +2228,23 @@
 
     speedASlider.addEventListener('input', () => {
       state.speedA = parseFloat(speedASlider.value);
-      state.twoRegions = true;
+      if (!state.twoRegions) {
+        state.speedB = state.speedA;
+        speedBSlider.value = state.speedA;
+      } else {
+        state.twoRegions = true;
+      }
       updateMediumUI();
     });
 
     speedBSlider.addEventListener('input', () => {
       state.speedB = parseFloat(speedBSlider.value);
-      state.twoRegions = true;
+      if (!state.twoRegions) {
+        state.speedA = state.speedB;
+        speedASlider.value = state.speedB;
+      } else {
+        state.twoRegions = true;
+      }
       updateMediumUI();
     });
 
