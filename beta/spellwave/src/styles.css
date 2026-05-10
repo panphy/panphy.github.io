@@ -684,6 +684,89 @@ a {
   color: #ffe39a;
 }
 
+#comboValue.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.score-popup {
+  position: fixed;
+  z-index: 20;
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  pointer-events: none;
+  text-shadow: 0 0 12px rgba(239, 195, 92, 0.72);
+  transform: translate(-50%, -100%);
+  animation: score-float 820ms ease-out forwards;
+  white-space: nowrap;
+}
+
+@keyframes score-float {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 48px));
+  }
+}
+
+.run-glossary {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid rgba(88, 223, 207, 0.18);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.run-glossary[hidden] {
+  display: none;
+}
+
+.glossary-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 6px 10px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(242, 240, 223, 0.06);
+  align-items: baseline;
+}
+
+.glossary-item:last-child {
+  border-bottom: none;
+}
+
+.glossary-item.is-defeated .gl-term {
+  color: var(--aqua);
+}
+
+.glossary-item.is-leaked .gl-term {
+  color: var(--ember);
+}
+
+.gl-term {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.gl-def {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .keyboard-input {
   position: fixed;
   left: 50%;

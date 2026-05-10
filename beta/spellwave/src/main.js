@@ -24,6 +24,8 @@ const messageScore = document.getElementById('messageScore');
 const messageCopy = document.getElementById('messageCopy');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
+const typingLabel = document.getElementById('typingLabel');
+const runGlossary = document.getElementById('runGlossary');
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
@@ -263,6 +265,7 @@ let typedAttempts = 0;
 let mistakeCount = 0;
 let defeatedCount = 0;
 let leakedCount = 0;
+let encounteredTerms = [];
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -417,6 +420,7 @@ function startGame() {
   mistakeCount = 0;
   defeatedCount = 0;
   leakedCount = 0;
+  encounteredTerms = [];
   typedBuffer = '';
   activeTarget = null;
   spawnTimer = 1.25;
@@ -483,6 +487,7 @@ function endGame() {
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
   );
+  renderRunGlossary();
   updateDifficultyPanel(true);
   updatePhaseDisplay();
   updateHud(true);
@@ -494,6 +499,7 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
   messageScore.textContent = scoreText;
   messageCopy.textContent = copyText;
   startButton.textContent = buttonText;
+  if (runGlossary) runGlossary.hidden = true;
   messagePanel.hidden = false;
 }
 
@@ -612,7 +618,12 @@ function defeatEnemy(enemy) {
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
   defeatedCount += 1;
-  score += enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
+  const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
+  score += points;
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: true });
+  }
+  spawnScorePopup(points, enemy);
   playDefeatSound(enemy);
   spawnBeam(enemy.group.position);
   spawnDebris(enemy.group.position, enemy.type);
@@ -627,6 +638,9 @@ function leakEnemy(enemy) {
   health = Math.max(0, health - enemy.damage);
   streak = 0;
   leakedCount += 1;
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, defeated: false });
+  }
   playDamageSound(enemy);
   damageTimer = enemy.isBoss ? 0.46 : 0.32;
   damageFlash.classList.add('show');
@@ -678,7 +692,7 @@ function animate(frameTime) {
   }
 
   updateEffects(delta);
-    updateEnvironment(seconds, delta);
+  updateEnvironment(seconds, delta);
   updateLabels();
   renderer.render(scene, camera);
 }
@@ -1018,7 +1032,8 @@ function updateHud(force) {
   bestValue.textContent = formatScore(Math.max(bestScore, score));
   updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
-  comboValue.textContent = `${streak} chain`;
+  updateComboDisplay();
+  updateTypingLabel();
 }
 
 function currentDifficulty() {
@@ -1097,7 +1112,7 @@ function getEnemySpeed(enemy) {
 
 function updateTypedDisplay() {
   typedValue.textContent = displayTypedBuffer() || (mode === 'running' ? '...' : 'ready');
-  comboValue.textContent = `${streak} chain`;
+  updateComboDisplay();
 }
 
 function spawnEnemy(options = {}) {
@@ -1175,6 +1190,7 @@ function spawnEnemy(options = {}) {
     typedNode,
     remainingNode,
     prompt: wordData.term,
+    definition: wordData.definition || null,
     searchPrompt: buildSearchPrompt(wordData.term),
     showDefinition,
     hintMask: showDefinition ? buildHintMask(wordData.term) : null,
@@ -2084,4 +2100,72 @@ function advanceWaveSet() {
   updateHud(true);
   updatePhaseDisplay();
   focusKeyboard();
+}
+
+function updateComboDisplay() {
+  comboValue.textContent = `${streak} chain`;
+  comboValue.classList.toggle('is-hidden', streak < 2);
+}
+
+function updateTypingLabel() {
+  if (!typingLabel) return;
+  if (mode !== 'running') {
+    typingLabel.textContent = 'INPUT';
+    return;
+  }
+  if (wavePhase === 'boss') {
+    typingLabel.textContent = `BOSS ${bossesSpawned}/${BOSSES_PER_WAVE}`;
+  } else {
+    typingLabel.textContent = `${normalEnemiesSpawned}/${normalEnemyTarget}`;
+  }
+}
+
+function spawnScorePopup(points, enemy) {
+  const label = enemy.label;
+  if (!label || label.classList.contains('is-hidden')) return;
+  const left = parseFloat(label.style.left);
+  const top = parseFloat(label.style.top);
+  if (!Number.isFinite(left) || !Number.isFinite(top)) return;
+
+  const popup = document.createElement('div');
+  popup.className = 'score-popup';
+  popup.textContent = streak >= 2 ? `+${points} ×${streak}` : `+${points}`;
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function renderRunGlossary() {
+  if (!runGlossary) return;
+  runGlossary.innerHTML = '';
+
+  const withDefs = encounteredTerms.filter(t => t.definition);
+  if (withDefs.length === 0) {
+    runGlossary.hidden = true;
+    return;
+  }
+
+  const sorted = [...withDefs].sort((a, b) => {
+    if (a.defeated !== b.defeated) return a.defeated ? -1 : 1;
+    return a.term.localeCompare(b.term);
+  });
+
+  for (const entry of sorted) {
+    const item = document.createElement('div');
+    item.className = `glossary-item ${entry.defeated ? 'is-defeated' : 'is-leaked'}`;
+
+    const term = document.createElement('span');
+    term.className = 'gl-term';
+    term.textContent = entry.term;
+
+    const def = document.createElement('span');
+    def.className = 'gl-def';
+    def.textContent = entry.definition;
+
+    item.append(term, def);
+    runGlossary.append(item);
+  }
+
+  runGlossary.hidden = false;
 }

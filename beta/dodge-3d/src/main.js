@@ -12,6 +12,7 @@ const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
 const messageScore = document.getElementById('messageScore');
 const screenFlash = document.getElementById('screenFlash');
+const levelToast = document.getElementById('levelToast');
 
 const STORAGE_KEY = 'panphyDodge3dBestV1';
 const PLAYER_Z = 2.15;
@@ -56,6 +57,7 @@ const gridVisualColor = new THREE.Color();
 const railVisualColor = new THREE.Color();
 const lineGlowColor = new THREE.Color();
 const asteroids = [];
+const explosionParticles = [];
 
 let mode = 'idle';
 let elapsed = 0;
@@ -201,6 +203,7 @@ requestAnimationFrame(animate);
 
 function startGame() {
   clearAsteroids();
+  clearExplosionParticles();
   elapsed = 0;
   spawnTimer = 0.62;
   waveTimer = 4.4;
@@ -259,6 +262,7 @@ function endGame() {
   pauseButton.setAttribute('aria-label', 'Pause run');
   document.body.classList.remove('is-running');
   document.body.classList.add('is-crashed');
+  spawnShipExplosion();
   ship.visible = false;
   shakeAmount = 1.4;
   flashTimer = 0.18;
@@ -843,15 +847,39 @@ function updateEffects(delta) {
     flashTimer = Math.max(0, flashTimer - delta);
     if (flashTimer === 0) screenFlash.classList.remove('show');
   }
+
+  for (let index = explosionParticles.length - 1; index >= 0; index -= 1) {
+    const p = explosionParticles[index];
+    p.life -= delta;
+    p.velocity.y -= 6.5 * delta;
+    p.mesh.position.addScaledVector(p.velocity, delta);
+    p.mesh.rotation.x += p.spin.x * delta;
+    p.mesh.rotation.z += p.spin.z * delta;
+    p.mesh.material.opacity = Math.max(0, p.life / p.maxLife);
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      explosionParticles.splice(index, 1);
+    }
+  }
 }
 
 function flashLevelUp() {
   const el = document.getElementById('levelReadout');
-  if (!el) return;
-  el.classList.remove('level-flash');
-  void el.offsetWidth;
-  el.classList.add('level-flash');
-  el.addEventListener('animationend', () => el.classList.remove('level-flash'), { once: true });
+  if (el) {
+    el.classList.remove('level-flash');
+    void el.offsetWidth;
+    el.classList.add('level-flash');
+    el.addEventListener('animationend', () => el.classList.remove('level-flash'), { once: true });
+  }
+
+  if (levelToast) {
+    levelToast.textContent = `Level ${getLevel()}`;
+    levelToast.style.animation = 'none';
+    void levelToast.offsetWidth;
+    levelToast.style.animation = '';
+  }
 }
 
 function updateHud(force = false) {
@@ -1008,6 +1036,53 @@ function clearAsteroids() {
     disposeAsteroid(asteroids[i]);
     asteroids.splice(i, 1);
   }
+}
+
+function spawnShipExplosion() {
+  const origin = ship.position;
+  const SHIP_COLORS = [0xd8e8ed, 0x39b9ff, 0xff4d59, 0xffb452];
+  const count = 18;
+
+  for (let index = 0; index < count; index += 1) {
+    const color = SHIP_COLORS[index % SHIP_COLORS.length];
+    const size = 0.06 + Math.random() * 0.18;
+    const geometry = new THREE.BoxGeometry(size, size * (0.6 + Math.random()), size);
+    const material = new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 1,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.copy(origin);
+    scene.add(mesh);
+
+    const speed = 2.8 + Math.random() * 5.5;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = (Math.random() - 0.5) * Math.PI;
+    const velocity = new THREE.Vector3(
+      Math.cos(theta) * Math.cos(phi) * speed,
+      Math.sin(phi) * speed * 0.7 + 1.2,
+      (Math.random() - 0.5) * speed * 0.5
+    );
+
+    const maxLife = 0.55 + Math.random() * 0.45;
+    explosionParticles.push({
+      mesh,
+      velocity,
+      spin: { x: (Math.random() - 0.5) * 14, z: (Math.random() - 0.5) * 14 },
+      life: maxLife,
+      maxLife,
+    });
+  }
+}
+
+function clearExplosionParticles() {
+  for (const p of explosionParticles) {
+    scene.remove(p.mesh);
+    p.mesh.geometry.dispose();
+    p.mesh.material.dispose();
+  }
+  explosionParticles.length = 0;
 }
 
 function disposeAsteroid(asteroid) {
