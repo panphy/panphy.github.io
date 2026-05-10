@@ -98,6 +98,8 @@ const DIFFICULTY_PROFILES = {
   },
 };
 const LABEL_SAFE_MARGIN = 12;
+const LABEL_STACK_GAP = 8;
+const LABEL_POSITION_EASE = 0.2;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
 const PATH_MARKER_MAX_Z = 4;
@@ -603,6 +605,11 @@ function enterCharacter(character) {
     }
   }
 
+  if (isMathOperatorInput(character) && hasActiveEquationPrefix()) {
+    updateTypedDisplay();
+    return;
+  }
+
   typedBuffer = '';
   activeTarget = null;
   registerMistake();
@@ -883,7 +890,7 @@ function updateLabels() {
     labelItems.push({ enemy, x, y, scale });
   }
 
-  for (const item of labelItems) {
+  const layoutItems = labelItems.map((item) => {
     const { enemy, scale } = item;
     const labelWidth = enemy.label.offsetWidth * scale;
     const labelHeight = enemy.label.offsetHeight * scale;
@@ -900,9 +907,27 @@ function updateLabels() {
       enemy.labelX = x;
       enemy.labelY = y;
     } else {
-      enemy.labelX += (x - enemy.labelX) * 0.14;
-      enemy.labelY += (y - enemy.labelY) * 0.14;
+      enemy.labelX += (x - enemy.labelX) * LABEL_POSITION_EASE;
+      enemy.labelY += (y - enemy.labelY) * LABEL_POSITION_EASE;
     }
+    return {
+      ...item,
+      x: enemy.labelX,
+      y: enemy.labelY,
+      minY,
+      maxY,
+      width: labelWidth,
+      height: labelHeight,
+      left: enemy.labelX - labelWidth / 2,
+      right: enemy.labelX + labelWidth / 2,
+    };
+  });
+
+  resolveLabelStacks(layoutItems);
+
+  for (const item of layoutItems) {
+    const { enemy, scale } = item;
+    enemy.labelY = item.y;
     enemy.label.style.left = `${enemy.labelX}px`;
     enemy.label.style.top = `${enemy.labelY}px`;
     enemy.label.style.transform = `translate(-50%, -100%) scale(${scale.toFixed(3)})`;
@@ -911,6 +936,60 @@ function updateLabels() {
     enemy.label.classList.toggle('is-danger', enemy.group.position.z > -4);
     enemy.label.classList.toggle('is-critical', enemy.group.position.z > 1);
   }
+}
+
+function resolveLabelStacks(items) {
+  const groups = [];
+  for (const item of items) {
+    const matches = groups.filter(group => group.some(groupItem => labelsOverlapHorizontally(item, groupItem)));
+    if (matches.length === 0) {
+      groups.push([item]);
+      continue;
+    }
+    const merged = [item, ...matches.flat()];
+    for (const group of matches) {
+      const index = groups.indexOf(group);
+      if (index >= 0) groups.splice(index, 1);
+    }
+    groups.push(merged);
+  }
+
+  for (const group of groups) {
+    group.sort((a, b) => a.y - b.y || a.enemy.id - b.enemy.id);
+
+    for (let index = 0; index < group.length; index += 1) {
+      const item = group[index];
+      item.y = THREE.MathUtils.clamp(item.y, item.minY, item.maxY);
+      if (index === 0) continue;
+
+      const previous = group[index - 1];
+      const minBottom = previous.y + LABEL_STACK_GAP + item.height;
+      if (item.y < minBottom) item.y = minBottom;
+    }
+
+    const last = group[group.length - 1];
+    if (last && last.y > last.maxY) {
+      const overflow = last.y - last.maxY;
+      for (const item of group) item.y -= overflow;
+    }
+
+    for (let index = group.length - 2; index >= 0; index -= 1) {
+      const item = group[index];
+      const next = group[index + 1];
+      const maxBottom = next.y - next.height - LABEL_STACK_GAP;
+      if (item.y > maxBottom) item.y = maxBottom;
+    }
+
+    const first = group[0];
+    if (first && first.y < first.minY) {
+      const underflow = first.minY - first.y;
+      for (const item of group) item.y += underflow;
+    }
+  }
+}
+
+function labelsOverlapHorizontally(first, second) {
+  return first.left < second.right + LABEL_STACK_GAP && first.right > second.left - LABEL_STACK_GAP;
 }
 
 function getLabelSafeBounds(height) {
@@ -1695,6 +1774,12 @@ function findMatches(prefix, options = {}) {
   });
 }
 
+function hasActiveEquationPrefix() {
+  return enemies.some((enemy) => {
+    return enemy.isEquation && isEnemyTargetable(enemy) && enemy.searchPrompt.startsWith(typedBuffer);
+  });
+}
+
 function chooseTarget(matches) {
   return [...matches].sort((a, b) => b.group.position.z - a.group.position.z || a.searchPrompt.length - b.searchPrompt.length)[0];
 }
@@ -1800,14 +1885,19 @@ function weightedPick(items) {
 }
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+const MATH_OPERATOR_INPUTS = new Set(['*', '+', '-', '=', '/', '×', 'x', 'X']);
 
 function getInputCharacters(character) {
   const inputs = [];
   const base = normalizeCharacter(character);
-  const alias = normalizeCharacter(character, { multiplicationAlias: true });
+  const alias = isMathOperatorInput(character) ? '' : normalizeCharacter(character, { multiplicationAlias: true });
   if (base) inputs.push({ value: base, equationOnly: false });
   if (alias && alias !== base) inputs.push({ value: alias, equationOnly: true });
   return inputs;
+}
+
+function isMathOperatorInput(character) {
+  return MATH_OPERATOR_INPUTS.has(character);
 }
 
 function normalizeCharacter(character, options = {}) {
