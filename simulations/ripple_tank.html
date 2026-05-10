@@ -335,6 +335,10 @@
       opacity: 0.5;
     }
 
+    .is-hidden {
+      display: none !important;
+    }
+
     .source-card.settings-card {
       border-left: 4px solid var(--text-secondary);
     }
@@ -667,6 +671,35 @@
       color: var(--text-main);
     }
 
+    .mode-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 0.9rem;
+    }
+
+    .mode-menu h3 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 400;
+      color: var(--text-main);
+    }
+
+    .mode-menu p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .mode-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+      margin-top: 0.2rem;
+    }
+
     .sim-actions {
       display: flex;
       gap: 0.5rem;
@@ -835,21 +868,30 @@
     <div id="workspace">
       <div id="simPanel" class="panel">
         <canvas id="simCanvas"></canvas>
-        <p class="sim-hint">Drag to rotate · Scroll to zoom · Drag boundary to move or rotate</p>
+        <p class="sim-hint" id="simHint">Choose a mode to begin</p>
       </div>
 
       <div id="controlsPanel" class="panel">
         <div class="controls-header">
-          <h2>Controls</h2>
-          <p>Interference and refraction in a virtual ripple tank</p>
+          <h2 id="controlsTitle">Choose Mode</h2>
+          <p id="controlsDescription">Start with interference or refraction.</p>
         </div>
 
-        <div class="status-row">
+        <div id="modeMenu" class="source-card settings-card mode-menu">
+          <h3>Virtual Ripple Tank</h3>
+          <p>Choose the experiment setup before changing controls.</p>
+          <div class="mode-actions">
+            <button id="chooseInterferenceBtn" class="btn btn-primary" type="button">Interference</button>
+            <button id="chooseRefractionBtn" class="btn btn-secondary" type="button">Refraction</button>
+          </div>
+        </div>
+
+        <div class="status-row is-hidden" id="statusRow">
           <span id="statusChip" class="status-chip running">RUNNING</span>
         </div>
 
         <!-- Source 1 -->
-        <div class="source-card enabled" data-source="1" id="source1Card">
+        <div class="source-card enabled is-hidden" data-source="1" id="source1Card">
           <div class="source-header">
             <div class="source-title-wrap">
               <span class="source-dot"></span>
@@ -860,7 +902,7 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <div class="control-block">
+          <div class="control-block is-hidden">
             <div class="control-header">
               <label for="s1Shape">Source Shape</label>
               <span id="s1ShapeVal">Point</span>
@@ -887,7 +929,7 @@
         </div>
 
         <!-- Source 2 -->
-        <div class="source-card enabled" data-source="2" id="source2Card">
+        <div class="source-card enabled is-hidden" data-source="2" id="source2Card">
           <div class="source-header">
             <div class="source-title-wrap">
               <span class="source-dot"></span>
@@ -898,7 +940,7 @@
               <span class="toggle-slider"></span>
             </label>
           </div>
-          <div class="control-block">
+          <div class="control-block is-hidden">
             <div class="control-header">
               <label for="s2Shape">Source Shape</label>
               <span id="s2ShapeVal">Point</span>
@@ -924,10 +966,10 @@
           </div>
         </div>
 
-        <div class="separator"></div>
+        <div class="separator is-hidden" id="interferenceSeparator"></div>
 
         <!-- Settings -->
-        <div class="source-card settings-card">
+        <div class="source-card settings-card is-hidden" id="interferenceSettingsCard">
           <div class="source-header">
             <div class="source-title-wrap">
               <span class="source-dot settings-dot"></span>
@@ -957,19 +999,16 @@
           </div>
         </div>
 
-        <div class="separator"></div>
+        <div class="separator is-hidden" id="refractionSeparator"></div>
 
         <!-- Refraction -->
-        <div class="source-card settings-card" id="mediumCard">
+        <div class="source-card settings-card is-hidden" id="mediumCard">
           <div class="source-header">
             <div class="source-title-wrap">
               <span class="source-dot settings-dot"></span>
               <h3 class="source-title">Tank Medium</h3>
             </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="mediumToggle">
-              <span class="toggle-slider"></span>
-            </label>
+            <input type="checkbox" id="mediumToggle" hidden>
           </div>
           <div class="medium-readout">
             <div class="medium-pill">
@@ -1016,14 +1055,15 @@
           </div>
         </div>
 
-        <div class="separator"></div>
+        <div class="separator is-hidden" id="actionsSeparator"></div>
 
-        <div class="sim-actions">
+        <div class="sim-actions is-hidden" id="simActions">
+          <button id="backToMenuBtn" class="btn btn-secondary">Menu</button>
           <button id="playPauseBtn" class="btn btn-primary">Pause</button>
           <button id="resetBtn" class="btn btn-secondary">Reset</button>
         </div>
 
-        <p class="keyboard-hint">
+        <p class="keyboard-hint is-hidden" id="keyboardHint">
           <kbd>Space</kbd> Play / Pause &nbsp; <kbd>R</kbd> Reset
         </p>
       </div>
@@ -1045,6 +1085,7 @@
 
     // ─── State ───
     const state = {
+      mode: 'menu',
       playing: true,
       time: 0,
       speed: 4.0,
@@ -1086,8 +1127,19 @@
     // ─── DOM Elements ───
     const canvas = document.getElementById('simCanvas');
     const simPanel = document.getElementById('simPanel');
+    const controlsTitle = document.getElementById('controlsTitle');
+    const controlsDescription = document.getElementById('controlsDescription');
+    const simHint = document.getElementById('simHint');
+    const modeMenu = document.getElementById('modeMenu');
+    const chooseInterferenceBtn = document.getElementById('chooseInterferenceBtn');
+    const chooseRefractionBtn = document.getElementById('chooseRefractionBtn');
+    const statusRow = document.getElementById('statusRow');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const backToMenuBtn = document.getElementById('backToMenuBtn');
+    const simActions = document.getElementById('simActions');
+    const actionsSeparator = document.getElementById('actionsSeparator');
+    const keyboardHint = document.getElementById('keyboardHint');
     const statusChip = document.getElementById('statusChip');
     const themeBtn = document.getElementById('theme-button');
 
@@ -1115,6 +1167,9 @@
     const phaseDiffValEl = document.getElementById('phaseDiffVal');
     const animSpeedSlider = document.getElementById('animSpeed');
     const animSpeedVal = document.getElementById('animSpeedVal');
+    const interferenceSettingsCard = document.getElementById('interferenceSettingsCard');
+    const interferenceSeparator = document.getElementById('interferenceSeparator');
+    const refractionSeparator = document.getElementById('refractionSeparator');
     const mediumToggle = document.getElementById('mediumToggle');
     const regionAVal = document.getElementById('regionAVal');
     const regionBVal = document.getElementById('regionBVal');
@@ -1624,6 +1679,100 @@
       return shape === 'bar' ? 'Bar' : 'Point';
     }
 
+    function setVisible(element, visible) {
+      element.classList.toggle('is-hidden', !visible);
+    }
+
+    function setSourceState(sourceNumber, config) {
+      const isSource1 = sourceNumber === 1;
+      const source = isSource1 ? state.source1 : state.source2;
+      const toggle = isSource1 ? s1Toggle : s2Toggle;
+      const shapeSelect = isSource1 ? s1Shape : s2Shape;
+      const freqSlider = isSource1 ? s1Freq : s2Freq;
+      const ampSlider = isSource1 ? s1Amp : s2Amp;
+      const shapeValue = isSource1 ? s1ShapeVal : s2ShapeVal;
+      const freqValue = isSource1 ? s1FreqVal : s2FreqVal;
+      const ampValue = isSource1 ? s1AmpVal : s2AmpVal;
+      const card = isSource1 ? source1Card : source2Card;
+      const onUniform = isSource1 ? uniforms.uS1On : uniforms.uS2On;
+      const shapeUniform = isSource1 ? uniforms.uS1Shape : uniforms.uS2Shape;
+      const freqUniform = isSource1 ? uniforms.uS1Freq : uniforms.uS2Freq;
+      const ampUniform = isSource1 ? uniforms.uS1Amp : uniforms.uS2Amp;
+
+      source.enabled = config.enabled;
+      source.shape = config.shape;
+      source.freq = config.freq;
+      source.amp = config.amp;
+      toggle.checked = config.enabled;
+      shapeSelect.value = config.shape;
+      freqSlider.value = config.freq;
+      ampSlider.value = config.amp;
+      shapeValue.textContent = shapeLabel(config.shape);
+      freqValue.textContent = config.freq.toFixed(1) + ' Hz';
+      ampValue.textContent = config.amp.toFixed(2);
+      onUniform.value = config.enabled ? 1.0 : 0.0;
+      shapeUniform.value = shapeUniformValue(config.shape);
+      freqUniform.value = config.freq;
+      ampUniform.value = config.amp;
+      updateSourceCard(card, config.enabled);
+    }
+
+    function setSeparation(value) {
+      state.separation = value;
+      const half = state.separation / 2;
+      SOURCE1_POS.x = -half;
+      SOURCE1_POS.y = 0;
+      SOURCE2_POS.x = half;
+      SOURCE2_POS.y = 0;
+      separationSlider.value = value;
+      separationVal.textContent = value.toFixed(1);
+    }
+
+    function setPhaseDifference(value) {
+      state.phaseDiff = value;
+      uniforms.uS2Phase.value = value;
+      phaseDiffSlider.value = value;
+      phaseDiffValEl.textContent = formatPhase(value);
+    }
+
+    function setAnimationSpeed(value) {
+      state.timeScale = value;
+      animSpeedSlider.value = value;
+      animSpeedVal.textContent = value.toFixed(1) + '\u00d7';
+    }
+
+    function setModeVisibility(mode) {
+      const isMenu = mode === 'menu';
+      const isInterference = mode === 'interference';
+      const isRefraction = mode === 'refraction';
+
+      setVisible(modeMenu, isMenu);
+      setVisible(statusRow, !isMenu);
+      setVisible(simActions, !isMenu);
+      setVisible(actionsSeparator, !isMenu);
+      setVisible(keyboardHint, !isMenu);
+      setVisible(source1Card, isInterference);
+      setVisible(source2Card, isInterference);
+      setVisible(interferenceSettingsCard, isInterference);
+      setVisible(interferenceSeparator, isInterference);
+      setVisible(mediumCard, isRefraction);
+      setVisible(refractionSeparator, isRefraction);
+
+      if (isMenu) {
+        controlsTitle.textContent = 'Choose Mode';
+        controlsDescription.textContent = 'Start with interference or refraction.';
+        simHint.textContent = 'Choose a mode to begin';
+      } else if (isInterference) {
+        controlsTitle.textContent = 'Interference';
+        controlsDescription.textContent = 'Two point sources in a ripple tank.';
+        simHint.textContent = 'Drag to rotate · Scroll to zoom';
+      } else {
+        controlsTitle.textContent = 'Refraction';
+        controlsDescription.textContent = 'One straight wave source crossing a boundary.';
+        simHint.textContent = 'Drag to rotate · Scroll to zoom · Drag boundary to move or rotate';
+      }
+    }
+
     function updateMediumUI() {
       mediumToggle.checked = state.twoRegions;
       boundaryAngleSlider.value = state.boundaryAngle;
@@ -1658,83 +1807,89 @@
     }
 
     function togglePlayPause() {
+      if (state.mode === 'menu') return;
       state.playing = !state.playing;
       updatePlayPauseUI();
     }
 
-    function resetSim() {
+    function resetClock() {
       state.time = 0;
       uniforms.uTime.value = 0;
+    }
 
-      // Reset source 1
-      state.source1.enabled = true;
-      state.source1.shape = 'point';
-      state.source1.freq = 2.0;
-      state.source1.amp = 0.5;
-      s1Toggle.checked = true;
-      s1Shape.value = 'point';
-      s1Freq.value = 2.0;
-      s1Amp.value = 0.5;
-      s1ShapeVal.textContent = 'Point';
-      s1FreqVal.textContent = '2.0 Hz';
-      s1AmpVal.textContent = '0.50';
-      uniforms.uS1On.value = 1.0;
-      uniforms.uS1Shape.value = 0.0;
-      uniforms.uS1Freq.value = 2.0;
-      uniforms.uS1Amp.value = 0.5;
-      updateSourceCard(source1Card, true);
+    function resetCamera() {
+      camera.position.set(0, 13, 13);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    }
 
-      // Reset source 2
-      state.source2.enabled = true;
-      state.source2.shape = 'point';
-      state.source2.freq = 2.0;
-      state.source2.amp = 0.5;
-      s2Toggle.checked = true;
-      s2Shape.value = 'point';
-      s2Freq.value = 2.0;
-      s2Amp.value = 0.5;
-      s2ShapeVal.textContent = 'Point';
-      s2FreqVal.textContent = '2.0 Hz';
-      s2AmpVal.textContent = '0.50';
-      uniforms.uS2On.value = 1.0;
-      uniforms.uS2Shape.value = 0.0;
-      uniforms.uS2Freq.value = 2.0;
-      uniforms.uS2Amp.value = 0.5;
-      updateSourceCard(source2Card, true);
-
-      // Reset separation
-      state.separation = 6.0;
-      SOURCE1_POS.x = -3;
-      SOURCE2_POS.x = 3;
-      separationSlider.value = 6.0;
-      separationVal.textContent = '6.0';
-
-      // Reset phase difference
-      state.phaseDiff = 0;
-      uniforms.uS2Phase.value = 0;
-      phaseDiffSlider.value = 0;
-      phaseDiffValEl.textContent = '0';
-
-      // Reset animation speed
-      state.timeScale = 1.0;
-      animSpeedSlider.value = 1.0;
-      animSpeedVal.textContent = '1.0\u00d7';
-
-      // Reset tank medium
+    function configureInterferenceMode() {
+      state.mode = 'interference';
+      resetClock();
+      state.speed = 4.0;
+      uniforms.uSpeed.value = state.speed;
+      setSourceState(1, { enabled: true, shape: 'point', freq: 2.0, amp: 0.5 });
+      setSourceState(2, { enabled: true, shape: 'point', freq: 2.0, amp: 0.5 });
+      setSeparation(6.0);
+      setPhaseDifference(0);
+      setAnimationSpeed(1.0);
       state.twoRegions = false;
       state.boundaryAngle = 35;
       state.boundaryOffset = 0;
       state.speedA = 4.0;
       state.speedB = 2.4;
       updateMediumUI();
-
-      // Reset camera
-      camera.position.set(0, 13, 13);
-      controls.target.set(0, 0, 0);
-      controls.update();
-
+      setModeVisibility('interference');
       state.playing = true;
       updatePlayPauseUI();
+      resetCamera();
+    }
+
+    function configureRefractionMode() {
+      state.mode = 'refraction';
+      resetClock();
+      state.speed = 4.0;
+      uniforms.uSpeed.value = state.speed;
+      setSourceState(1, { enabled: true, shape: 'bar', freq: 2.0, amp: 0.5 });
+      setSourceState(2, { enabled: false, shape: 'point', freq: 2.0, amp: 0.5 });
+      SOURCE1_POS.x = -PLANE_SIZE / 2 + 0.45;
+      SOURCE1_POS.y = 0;
+      SOURCE2_POS.x = PLANE_SIZE / 2;
+      SOURCE2_POS.y = 0;
+      setPhaseDifference(0);
+      setAnimationSpeed(1.0);
+      state.twoRegions = true;
+      state.boundaryAngle = 35;
+      state.boundaryOffset = 0;
+      state.speedA = 4.0;
+      state.speedB = 2.4;
+      updateMediumUI();
+      setModeVisibility('refraction');
+      state.playing = true;
+      updatePlayPauseUI();
+      resetCamera();
+    }
+
+    function showMenu() {
+      state.mode = 'menu';
+      resetClock();
+      setSourceState(1, { enabled: false, shape: 'point', freq: 2.0, amp: 0.5 });
+      setSourceState(2, { enabled: false, shape: 'point', freq: 2.0, amp: 0.5 });
+      state.twoRegions = false;
+      updateMediumUI();
+      setModeVisibility('menu');
+      state.playing = false;
+      updatePlayPauseUI();
+    }
+
+    function resetSim() {
+      if (state.mode === 'interference') {
+        configureInterferenceMode();
+      } else if (state.mode === 'refraction') {
+        configureRefractionMode();
+      } else {
+        showMenu();
+      }
     }
 
     // Source 1 controls
@@ -1897,6 +2052,9 @@
     });
 
     // Buttons
+    chooseInterferenceBtn.addEventListener('click', configureInterferenceMode);
+    chooseRefractionBtn.addEventListener('click', configureRefractionMode);
+    backToMenuBtn.addEventListener('click', showMenu);
     playPauseBtn.addEventListener('click', togglePlayPause);
     resetBtn.addEventListener('click', resetSim);
 
@@ -2004,7 +2162,7 @@
     canvas.addEventListener('pointerup', endBoundaryDrag, true);
     canvas.addEventListener('pointercancel', endBoundaryDrag, true);
 
-    updateMediumUI();
+    showMenu();
 
     // ─── Animation Loop ───
     let lastTime = null;
