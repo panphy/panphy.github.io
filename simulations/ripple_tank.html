@@ -1203,13 +1203,6 @@
           </div>
           <div class="control-block">
             <div class="control-header">
-              <label for="boundaryOffset">Boundary Position</label>
-              <span id="boundaryOffsetVal">0.0</span>
-            </div>
-            <input type="range" id="boundaryOffset" min="-5" max="5" step="0.1" value="0">
-          </div>
-          <div class="control-block">
-            <div class="control-header">
               <label for="speedA">Region A Speed</label>
               <span id="speedAVal">4.0</span>
             </div>
@@ -1359,8 +1352,6 @@
     const refrFreqVal = document.getElementById('refrFreqVal');
     const boundaryAngleSlider = document.getElementById('boundaryAngle');
     const boundaryAngleVal = document.getElementById('boundaryAngleVal');
-    const boundaryOffsetSlider = document.getElementById('boundaryOffset');
-    const boundaryOffsetVal = document.getElementById('boundaryOffsetVal');
     const speedASlider = document.getElementById('speedA');
     const speedAVal = document.getElementById('speedAVal');
     const speedBSlider = document.getElementById('speedB');
@@ -1966,11 +1957,9 @@
       clampBoundaryState();
       boundaryToggleEl.checked = state.twoRegions;
       boundaryAngleSlider.value = state.boundaryAngle;
-      boundaryOffsetSlider.value = state.boundaryOffset;
       speedASlider.value = state.speedA;
       speedBSlider.value = state.speedB;
       boundaryAngleVal.textContent = `${Math.round(state.boundaryAngle)}\u00b0`;
-      boundaryOffsetVal.textContent = state.boundaryOffset.toFixed(1);
       speedAVal.textContent = state.speedA.toFixed(1);
       speedBVal.textContent = state.speedB.toFixed(1);
       regionAVal.textContent = state.speedA >= state.speedB
@@ -2216,12 +2205,6 @@
 
     boundaryAngleSlider.addEventListener('input', () => {
       state.boundaryAngle = parseFloat(boundaryAngleSlider.value);
-      state.twoRegions = true;
-      updateMediumUI();
-    });
-
-    boundaryOffsetSlider.addEventListener('input', () => {
-      state.boundaryOffset = parseFloat(boundaryOffsetSlider.value);
       state.twoRegions = true;
       updateMediumUI();
     });
