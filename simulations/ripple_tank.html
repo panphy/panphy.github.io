@@ -230,6 +230,12 @@
       padding-bottom: 0.75rem;
     }
 
+    #workspace.menu-mode {
+      grid-template-columns: minmax(280px, 440px);
+      place-content: center;
+      align-items: center;
+    }
+
     .panel {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -288,6 +294,14 @@
       padding: 0.9rem;
       overflow-y: auto;
       min-height: 0;
+    }
+
+    #controlsPanel.menu-only {
+      padding: 0;
+      overflow: visible;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
     }
 
     .controls-header h2 {
@@ -676,6 +690,8 @@
       flex-direction: column;
       gap: 0.7rem;
       padding: 0.9rem;
+      background: var(--surface);
+      box-shadow: var(--shadow);
     }
 
     .mode-menu h3 {
@@ -1030,7 +1046,7 @@
               <label for="boundaryAngle">Boundary Angle</label>
               <span id="boundaryAngleVal">35°</span>
             </div>
-            <input type="range" id="boundaryAngle" min="-80" max="80" step="1" value="35">
+            <input type="range" id="boundaryAngle" min="-44" max="44" step="1" value="35">
           </div>
           <div class="control-block">
             <div class="control-header">
@@ -1126,7 +1142,10 @@
 
     // ─── DOM Elements ───
     const canvas = document.getElementById('simCanvas');
+    const workspace = document.getElementById('workspace');
     const simPanel = document.getElementById('simPanel');
+    const controlsPanel = document.getElementById('controlsPanel');
+    const controlsHeader = document.querySelector('.controls-header');
     const controlsTitle = document.getElementById('controlsTitle');
     const controlsDescription = document.getElementById('controlsDescription');
     const simHint = document.getElementById('simHint');
@@ -1494,29 +1513,28 @@
       return boundaryNormalFromAngle(state.boundaryAngle);
     }
 
+    function clampBoundaryState() {
+      const half = PLANE_SIZE / 2;
+      const maxAbsAngle = THREE.MathUtils.radToDeg(Math.atan((half - 0.25) / half));
+      state.boundaryAngle = THREE.MathUtils.clamp(state.boundaryAngle, -maxAbsAngle, maxAbsAngle);
+      const n = getBoundaryNormal();
+      const maxOffset = Math.max(0, half * Math.abs(n.x) - half * Math.abs(n.y) - 0.25);
+      state.boundaryOffset = THREE.MathUtils.clamp(state.boundaryOffset, -maxOffset, maxOffset);
+    }
+
     function getBoundaryLineEndpoints() {
       const half = PLANE_SIZE / 2;
       const n = getBoundaryNormal();
-      const points = [];
-      if (Math.abs(n.y) > 0.0001) {
-        const zAtLeft = (state.boundaryOffset - n.x * -half) / n.y;
-        const zAtRight = (state.boundaryOffset - n.x * half) / n.y;
-        if (zAtLeft >= -half && zAtLeft <= half) points.push(new THREE.Vector2(-half, zAtLeft));
-        if (zAtRight >= -half && zAtRight <= half) points.push(new THREE.Vector2(half, zAtRight));
-      }
-      if (Math.abs(n.x) > 0.0001) {
-        const xAtBottom = (state.boundaryOffset - n.y * -half) / n.x;
-        const xAtTop = (state.boundaryOffset - n.y * half) / n.x;
-        if (xAtBottom >= -half && xAtBottom <= half) points.push(new THREE.Vector2(xAtBottom, -half));
-        if (xAtTop >= -half && xAtTop <= half) points.push(new THREE.Vector2(xAtTop, half));
-      }
-      if (points.length < 2) {
-        const center = n.clone().multiplyScalar(state.boundaryOffset);
-        const tangent = new THREE.Vector2(-n.y, n.x);
-        points.push(center.clone().addScaledVector(tangent, -half), center.clone().addScaledVector(tangent, half));
-      }
-      points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x);
-      return [points[0], points[points.length - 1]];
+      const safeNx = Math.abs(n.x) < 0.0001 ? 0.0001 : n.x;
+      const bottom = new THREE.Vector2(
+        THREE.MathUtils.clamp((state.boundaryOffset + n.y * half) / safeNx, -half, half),
+        -half
+      );
+      const top = new THREE.Vector2(
+        THREE.MathUtils.clamp((state.boundaryOffset - n.y * half) / safeNx, -half, half),
+        half
+      );
+      return [bottom, top];
     }
 
     function clipTankPolygon(keepPositive) {
@@ -1596,6 +1614,7 @@
     }
 
     function updateMediumUniforms() {
+      clampBoundaryState();
       const normal = getBoundaryNormal();
       uniforms.uTwoRegions.value = state.twoRegions ? 1.0 : 0.0;
       uniforms.uBoundaryNormal.value.copy(normal);
@@ -1751,12 +1770,16 @@
       setVisible(simActions, !isMenu);
       setVisible(actionsSeparator, !isMenu);
       setVisible(keyboardHint, !isMenu);
+      setVisible(simPanel, !isMenu);
+      setVisible(controlsHeader, !isMenu);
       setVisible(source1Card, isInterference);
       setVisible(source2Card, isInterference);
       setVisible(interferenceSettingsCard, isInterference);
       setVisible(interferenceSeparator, isInterference);
       setVisible(mediumCard, isRefraction);
       setVisible(refractionSeparator, isRefraction);
+      workspace.classList.toggle('menu-mode', isMenu);
+      controlsPanel.classList.toggle('menu-only', isMenu);
 
       if (isMenu) {
         controlsTitle.textContent = 'Choose Mode';
@@ -1774,6 +1797,7 @@
     }
 
     function updateMediumUI() {
+      clampBoundaryState();
       mediumToggle.checked = state.twoRegions;
       boundaryAngleSlider.value = state.boundaryAngle;
       boundaryOffsetSlider.value = state.boundaryOffset;
@@ -2105,13 +2129,22 @@
     }
 
     function setBoundaryAngleFromPoint(point) {
-      const n = getBoundaryNormal();
-      const center = n.multiplyScalar(state.boundaryOffset);
-      const tangent = point.clone().sub(center);
-      if (tangent.length() < 0.1) return;
-      tangent.normalize();
-      const angle = THREE.MathUtils.radToDeg(Math.atan2(-tangent.x, tangent.y));
-      state.boundaryAngle = THREE.MathUtils.clamp(angle, -80, 80);
+      const endpoint = new THREE.Vector2(
+        THREE.MathUtils.clamp(point.x, -PLANE_SIZE / 2, PLANE_SIZE / 2),
+        point.y >= 0 ? PLANE_SIZE / 2 : -PLANE_SIZE / 2
+      );
+      const otherEdgeY = -endpoint.y;
+      const otherX = (state.boundaryOffset - getBoundaryNormal().y * otherEdgeY) / getBoundaryNormal().x;
+      const other = new THREE.Vector2(
+        THREE.MathUtils.clamp(otherX, -PLANE_SIZE / 2, PLANE_SIZE / 2),
+        otherEdgeY
+      );
+      const dx = endpoint.x - other.x;
+      const dz = endpoint.y - other.y;
+      const tangentAngle = Math.atan2(dz, dx);
+      const normalAngle = tangentAngle - Math.PI / 2;
+      state.boundaryAngle = THREE.MathUtils.radToDeg(normalAngle);
+      clampBoundaryState();
     }
 
     canvas.addEventListener('pointerdown', (event) => {
