@@ -883,9 +883,6 @@ function updateLabels() {
     labelItems.push({ enemy, x, y, scale });
   }
 
-  const placedBoxes = [];
-  labelItems.sort((a, b) => a.y - b.y);
-
   for (const item of labelItems) {
     const { enemy, scale } = item;
     const labelWidth = enemy.label.offsetWidth * scale;
@@ -897,32 +894,7 @@ function updateLabels() {
     );
     const minY = safeBounds.top + labelHeight;
     const maxY = safeBounds.bottom;
-    const gap = labelHeight + 6;
-    const offsets = [0, -gap, gap, -gap * 2, gap * 2, -gap * 3, gap * 3];
-    let y = THREE.MathUtils.clamp(item.y, minY, maxY);
-    let chosenBox = null;
-
-    for (const offset of offsets) {
-      const candidateY = THREE.MathUtils.clamp(item.y + offset, minY, maxY);
-      const box = {
-        left: x - labelWidth / 2,
-        right: x + labelWidth / 2,
-        top: candidateY - labelHeight,
-        bottom: candidateY,
-      };
-      if (!placedBoxes.some((placed) => boxesOverlap(box, placed))) {
-        y = candidateY;
-        chosenBox = box;
-        break;
-      }
-    }
-
-    placedBoxes.push(chosenBox || {
-      left: x - labelWidth / 2,
-      right: x + labelWidth / 2,
-      top: y - labelHeight,
-      bottom: y,
-    });
+    const y = THREE.MathUtils.clamp(item.y, minY, maxY);
 
     if (enemy.labelX === undefined) {
       enemy.labelX = x;
@@ -980,36 +952,37 @@ function wrapSups(text) {
   return text.replace(/²/g, '<sup class="given-sup">²</sup>');
 }
 
-function buildHintPart(text) {
+function buildHintPart(text, options = {}) {
   let result = '';
   let firstTypeable = true;
   for (const ch of text) {
-    if (!normalizeCharacter(ch)) { result += ch; }
+    if (!normalizeCharacter(ch, options)) { result += ch; }
     else if (firstTypeable) { result += ch; firstTypeable = false; }
     else { result += '_'; }
   }
   return result;
 }
 
-function buildHintRemain(text) {
+function buildHintRemain(text, options = {}) {
   let result = '';
   for (const ch of text) {
-    result += normalizeCharacter(ch) ? '_' : ch;
+    result += normalizeCharacter(ch, options) ? '_' : ch;
   }
   return result;
 }
 
-function buildTwoWordLimit(term) {
+function buildTwoWordLimit(term, options = {}) {
   const tokens = term.split(/(\s+)/);
   const typeableIndices = [];
   for (let i = 0; i < tokens.length; i++) {
     if (/^\s+$/.test(tokens[i])) continue;
-    if (buildSearchPrompt(tokens[i])) typeableIndices.push(i);
+    if (isWordToken(tokens[i]) && buildSearchPrompt(tokens[i], options)) typeableIndices.push(i);
   }
-  if (typeableIndices.length <= 2) return null;
+  if (typeableIndices.length === 0) return null;
+  if (typeableIndices.length <= 2 && !options.alwaysLimit) return null;
 
   const shuffled = [...typeableIndices].sort(() => Math.random() - 0.5);
-  const hiddenSet = new Set(shuffled.slice(0, 2));
+  const hiddenSet = new Set(shuffled.slice(0, Math.min(2, shuffled.length)));
 
   const parts = tokens.map((tok, i) => ({
     text: tok,
@@ -1018,8 +991,12 @@ function buildTwoWordLimit(term) {
     isHidden: hiddenSet.has(i),
   }));
 
-  const hiddenSearch = tokens.filter((_, i) => hiddenSet.has(i)).map(t => buildSearchPrompt(t)).join('');
+  const hiddenSearch = tokens.filter((_, i) => hiddenSet.has(i)).map(t => buildSearchPrompt(t, options)).join('');
   return { parts, searchPrompt: hiddenSearch };
+}
+
+function isWordToken(token) {
+  return /[a-z]/i.test(token);
 }
 
 function promptIndexForProgress(term, progress, options = {}) {
@@ -1075,17 +1052,18 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
     } else if (part.isGiven) {
       html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
     } else {
-      const sp = buildSearchPrompt(part.text);
+      const promptOptions = { multiplicationAlias: enemy.isEquation };
+      const sp = buildSearchPrompt(part.text, promptOptions);
       const tokTyped = Math.min(charsLeft, sp.length);
       charsLeft -= tokTyped;
       if (tokTyped > 0) {
-        const charPos = promptIndexForProgress(part.text, tokTyped);
+        const charPos = promptIndexForProgress(part.text, tokTyped, promptOptions);
         const typedPart = part.text.slice(0, charPos);
         const remainPart = part.text.slice(charPos);
         html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
-        if (remainPart) html += `<span class="remaining">${wrapSups(escapeHtml(buildHintRemain(remainPart)))}</span>`;
+        if (remainPart) html += `<span class="remaining">${wrapSups(escapeHtml(buildHintRemain(remainPart, promptOptions)))}</span>`;
       } else {
-        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(part.text)))}</span>`;
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(part.text, promptOptions)))}</span>`;
       }
     }
   }
@@ -1298,7 +1276,10 @@ function spawnEnemy(options = {}) {
 
   labelsLayer.append(label);
 
-  const twoWordData = isEquationPrompt ? null : buildTwoWordLimit(wordData.term);
+  const twoWordData = buildTwoWordLimit(wordData.term, {
+    alwaysLimit: isEquationPrompt,
+    multiplicationAlias: isEquationPrompt,
+  });
   const enemy = {
     id: enemyId,
     type,
@@ -1816,10 +1797,6 @@ function weightedPick(items) {
     if (roll <= 0) return item;
   }
   return items[items.length - 1];
-}
-
-function boxesOverlap(first, second) {
-  return first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
 }
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
