@@ -44,6 +44,8 @@ const BOSS_SHOTS_PER_DAMAGE = 2;
 const BOSS_SHOT_DAMAGE = 1;
 const BOSS_FIRST_SHOT_DELAY = 2.6;
 const BOSS_SHOT_INTERVAL = 4.2;
+const BOSS_ROCK_FLIGHT_TIME = 1.45;
+const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
@@ -604,9 +606,13 @@ function leakEnemy(enemy) {
 }
 
 function bossShootPlayer(enemy) {
+  spawnBossRock(enemy);
+  playBossThrowSound();
+}
+
+function bossProjectileHitPlayer(enemy) {
   bossShotHits += 1;
-  spawnBossBeam(enemy);
-  playBossShotSound();
+  playBossImpactSound();
 
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
     health = Math.max(0, health - BOSS_SHOT_DAMAGE);
@@ -741,15 +747,37 @@ function updateEnemyMarkers(enemy, seconds) {
 
 function updateEffects(delta) {
   for (let index = beams.length - 1; index >= 0; index -= 1) {
-    const beam = beams[index];
-    beam.life -= delta;
-    const amount = Math.max(0, beam.life / beam.maxLife);
-    beam.mesh.material.opacity = amount * 0.82;
-    beam.mesh.scale.set(1, 1, Math.max(0.08, amount));
-    if (beam.life <= 0) {
-      effectsGroup.remove(beam.mesh);
-      beam.mesh.geometry.dispose();
-      beam.mesh.material.dispose();
+    const effect = beams[index];
+
+    if (effect.kind === 'rock') {
+      effect.age += delta;
+      const progress = THREE.MathUtils.clamp(effect.age / effect.flightTime, 0, 1);
+      const eased = easeOutSine(progress);
+      effect.mesh.position.copy(effect.start).lerp(effect.end, eased);
+      effect.mesh.position.y += Math.sin(progress * Math.PI) * effect.arcHeight;
+      effect.mesh.rotation.x += effect.spin.x * delta;
+      effect.mesh.rotation.y += effect.spin.y * delta;
+      effect.mesh.rotation.z += effect.spin.z * delta;
+      effect.mesh.scale.setScalar(THREE.MathUtils.lerp(0.95, 1.2, progress));
+
+      if (progress >= 1) {
+        if (mode === 'running') bossProjectileHitPlayer(effect.enemy);
+        spawnDebris(effect.end, effect.enemy.type);
+        effectsGroup.remove(effect.mesh);
+        disposeObject(effect.mesh);
+        beams.splice(index, 1);
+      }
+      continue;
+    }
+
+    effect.life -= delta;
+    const amount = Math.max(0, effect.life / effect.maxLife);
+    effect.mesh.material.opacity = amount * 0.82;
+    effect.mesh.scale.set(1, 1, Math.max(0.08, amount));
+    if (effect.life <= 0) {
+      effectsGroup.remove(effect.mesh);
+      effect.mesh.geometry.dispose();
+      effect.mesh.material.dispose();
       beams.splice(index, 1);
     }
   }
@@ -1629,22 +1657,47 @@ function spawnBeam(targetPosition) {
   beams.push({ mesh, life: 0.16, maxLife: 0.16 });
 }
 
-function spawnBossBeam(enemy) {
+function spawnBossRock(enemy) {
   const start = enemy.group.position.clone();
-  start.y += 1.65 * enemy.type.scale;
-  const end = new THREE.Vector3(0, 1.35, WALL_Z + 0.78);
-  const distance = start.distanceTo(end);
-  const geometry = new THREE.BoxGeometry(0.09, 0.09, distance);
-  const material = new THREE.MeshBasicMaterial({
+  start.y += 1.8 * enemy.type.scale;
+  const end = new THREE.Vector3(THREE.MathUtils.randFloat(-0.45, 0.45), 1.2 + Math.random() * 0.25, WALL_Z + 0.76);
+  const rockMaterial = new THREE.MeshStandardMaterial({
+    color: 0x5a4636,
+    emissive: enemy.type.trim,
+    emissiveIntensity: 0.14,
+    roughness: 0.92,
+    metalness: 0.02,
+  });
+  const emberMaterial = new THREE.MeshBasicMaterial({
     color: enemy.type.eye,
     transparent: true,
-    opacity: 0.78,
+    opacity: 0.44,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
   });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.copy(start).lerp(end, 0.5);
-  mesh.lookAt(end);
-  effectsGroup.add(mesh);
-  beams.push({ mesh, life: 0.2, maxLife: 0.2 });
+  const rock = new THREE.Group();
+  const core = new THREE.Mesh(new THREE.DodecahedronGeometry(0.34, 0), rockMaterial);
+  const glow = new THREE.Mesh(new THREE.DodecahedronGeometry(0.43, 0), emberMaterial);
+  core.castShadow = true;
+  glow.renderOrder = 2;
+  rock.add(core, glow);
+  rock.position.copy(start);
+  effectsGroup.add(rock);
+  beams.push({
+    kind: 'rock',
+    mesh: rock,
+    enemy,
+    start,
+    end,
+    age: 0,
+    flightTime: BOSS_ROCK_FLIGHT_TIME + Math.random() * 0.18,
+    arcHeight: BOSS_ROCK_ARC_HEIGHT + Math.random() * 0.65,
+    spin: new THREE.Vector3(
+      THREE.MathUtils.randFloat(5, 8),
+      THREE.MathUtils.randFloat(4, 7),
+      THREE.MathUtils.randFloat(6, 10)
+    ),
+  });
 }
 
 function spawnDebris(position, type) {
@@ -1686,8 +1739,7 @@ function clearEnemies() {
 function clearEffects() {
   for (const beam of beams) {
     effectsGroup.remove(beam.mesh);
-    beam.mesh.geometry.dispose();
-    beam.mesh.material.dispose();
+    disposeObject(beam.mesh);
   }
   beams.length = 0;
 
@@ -1836,6 +1888,10 @@ function weightedPick(items) {
     if (roll <= 0) return item;
   }
   return items[items.length - 1];
+}
+
+function easeOutSine(value) {
+  return Math.sin((value * Math.PI) / 2);
 }
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
@@ -2173,9 +2229,14 @@ function playDamageSound(enemy) {
   playNoise(bossHit ? 0.24 : 0.18, { gain: bossHit ? 0.074 : 0.06, filterFrequency: bossHit ? 135 : 170, filterType: 'lowpass' });
 }
 
-function playBossShotSound() {
+function playBossThrowSound() {
   playTone(176, 0.11, { gain: 0.045, type: 'sawtooth', endFrequency: 132 });
   playTone(352, 0.07, { gain: 0.022, delay: 0.03, type: 'square', endFrequency: 260 });
+}
+
+function playBossImpactSound() {
+  playTone(92, 0.16, { gain: 0.058, type: 'sawtooth', endFrequency: 52 });
+  playNoise(0.12, { gain: 0.045, filterFrequency: 260, filterType: 'lowpass' });
 }
 
 function playBossWarningSound() {
