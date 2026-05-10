@@ -16,8 +16,6 @@ const startButton = document.getElementById('startButton');
 const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
 const messagePanel = document.getElementById('messagePanel');
-const difficultyPanel = document.getElementById('difficultyPanel');
-const difficultyButtons = [...document.querySelectorAll('.difficulty-option')];
 const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
 const messageScore = document.getElementById('messageScore');
@@ -29,7 +27,6 @@ const runGlossary = document.getElementById('runGlossary');
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
-const DIFFICULTY_STORAGE_KEY = 'panphySpellwaveDifficultyV1';
 const ICON_PAUSE = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><rect x="2" y="1" width="4" height="13" rx="1.5"/><rect x="9" y="1" width="4" height="13" rx="1.5"/></svg>';
 const ICON_PLAY = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3.5 1.5L13 7.5L3.5 13.5V1.5Z"/></svg>';
 const MAX_DELTA = 0.06;
@@ -42,60 +39,26 @@ const FIRST_WAVE_SPAWN_SPREAD = 4;
 const HEART_COUNT = 5;
 const MAX_LIFE = HEART_COUNT * 2;
 const MINION_DAMAGE = 1;
-const BOSS_DAMAGE = 2;
+const BOSS_CONTACT_DAMAGE = MAX_LIFE;
+const BOSS_SHOTS_PER_DAMAGE = 2;
+const BOSS_SHOT_DAMAGE = 1;
+const BOSS_FIRST_SHOT_DELAY = 2.6;
+const BOSS_SHOT_INTERVAL = 4.2;
 const BOSSES_PER_WAVE = 3;
-const DIFFICULTY_PROFILES = {
-  study: {
-    label: 'Study',
-    phaseLabel: 'Study pace',
-    description: 'Earlier reveals, fewer enemies',
-    normalBase: 6,
-    normalGrowth: 1,
-    enemyLimit: 9,
-    speedMultiplier: 0.84,
-    waveSpeedBonus: 0.09,
-    spawnBase: 2.55,
-    spawnGrowth: 0.1,
-    spawnJitter: 0.58,
-    spawnMin: 0.95,
-    bossWarningDelay: 1.15,
-    bossSpawnGap: 3.1,
-    revealZ: -35,
-  },
-  arcade: {
-    label: 'Arcade',
-    phaseLabel: 'Arcade pace',
-    description: 'Original wave pressure',
-    normalBase: 8,
-    normalGrowth: 2,
-    enemyLimit: 12,
-    speedMultiplier: 1,
-    waveSpeedBonus: 0.13,
-    spawnBase: 2.15,
-    spawnGrowth: 0.14,
-    spawnJitter: 0.46,
-    spawnMin: 0.68,
-    bossWarningDelay: 0.8,
-    bossSpawnGap: 2.5,
-    revealZ: REVEAL_Z,
-  },
-  challenge: {
-    label: 'Challenge',
-    phaseLabel: 'Challenge pace',
-    description: 'Faster spawns, tighter reads',
-    normalBase: 10,
-    normalGrowth: 3,
-    enemyLimit: 14,
-    speedMultiplier: 1.13,
-    waveSpeedBonus: 0.16,
-    spawnBase: 1.82,
-    spawnGrowth: 0.16,
-    spawnJitter: 0.36,
-    spawnMin: 0.54,
-    bossWarningDelay: 0.55,
-    bossSpawnGap: 2.0,
-    revealZ: -27,
-  },
+const GAME_PROFILE = {
+  phaseLabel: 'Spellwave',
+  normalBase: 7,
+  normalGrowth: 2,
+  enemyLimit: 11,
+  speedMultiplier: 0.94,
+  waveSpeedBonus: 0.11,
+  spawnBase: 2.35,
+  spawnGrowth: 0.12,
+  spawnJitter: 0.5,
+  spawnMin: 0.74,
+  bossWarningDelay: 1.0,
+  bossSpawnGap: 2.8,
+  revealZ: -33,
 };
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
@@ -233,7 +196,6 @@ let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
 let health = MAX_LIFE;
-let currentDifficultyKey = loadDifficultySetting();
 let waveSet = 1;
 let wavePhase = 'normal';
 let normalEnemyTarget = getNormalEnemyTarget(waveSet);
@@ -267,6 +229,7 @@ let typedAttempts = 0;
 let mistakeCount = 0;
 let defeatedCount = 0;
 let leakedCount = 0;
+let bossShotHits = 0;
 let encounteredTerms = [];
 
 const renderer = new THREE.WebGLRenderer({
@@ -323,7 +286,6 @@ createLifeMeter();
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
-updateDifficultyControls();
 updatePhaseDisplay();
 updateHud(true);
 
@@ -351,26 +313,6 @@ audioButton.addEventListener('click', () => {
   }
   if (mode === 'running') focusKeyboard();
 });
-
-difficultyButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    if (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') return;
-    setDifficulty(button.dataset.difficulty);
-  });
-});
-
-if (difficultyPanel) {
-  difficultyPanel.addEventListener('keydown', (event) => {
-    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-    event.preventDefault();
-    const keys = Object.keys(DIFFICULTY_PROFILES);
-    const index = keys.indexOf(currentDifficultyKey);
-    const direction = event.key === 'ArrowRight' ? 1 : -1;
-    const nextKey = keys[(index + direction + keys.length) % keys.length];
-    setDifficulty(nextKey);
-    difficultyButtons.find(button => button.dataset.difficulty === nextKey)?.focus();
-  });
-}
 
 pauseButton.addEventListener('click', () => {
   resumeAudio();
@@ -422,6 +364,7 @@ function startGame() {
   mistakeCount = 0;
   defeatedCount = 0;
   leakedCount = 0;
+  bossShotHits = 0;
   encounteredTerms = [];
   typedBuffer = '';
   activeTarget = null;
@@ -435,7 +378,6 @@ function startGame() {
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
-  updateDifficultyPanel(false);
   pauseButton.disabled = false;
   pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
@@ -453,7 +395,6 @@ function pauseGame() {
   pauseButton.innerHTML = ICON_PLAY;
   pauseButton.setAttribute('aria-label', 'Resume run');
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
-  updateDifficultyPanel(false);
   updatePhaseDisplay();
 }
 
@@ -490,7 +431,6 @@ function endGame() {
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
   );
   renderRunGlossary();
-  updateDifficultyPanel(true);
   updatePhaseDisplay();
   updateHud(true);
 }
@@ -506,8 +446,6 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
 }
 
 function handleKeyDown(event) {
-  if (event.target?.closest?.('.difficulty-option')) return;
-
   resumeAudio();
 
   if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
@@ -665,6 +603,24 @@ function leakEnemy(enemy) {
   if (health <= 0) endGame();
 }
 
+function bossShootPlayer(enemy) {
+  bossShotHits += 1;
+  spawnBossBeam(enemy);
+  playBossShotSound();
+
+  if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
+    health = Math.max(0, health - BOSS_SHOT_DAMAGE);
+    streak = 0;
+    damageTimer = 0.24;
+    damageFlash.classList.add('show');
+    window.setTimeout(() => damageFlash.classList.remove('show'), 120);
+    playDamageSound(enemy);
+    updateHud(true);
+    updateTypedDisplay();
+    if (health <= 0) endGame();
+  }
+}
+
 function animate(frameTime) {
   requestAnimationFrame(animate);
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
@@ -725,6 +681,15 @@ function updateEnemies(delta, seconds) {
       playRevealSound(enemy);
     }
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
+
+    if (enemy.isBoss && enemy.revealed) {
+      enemy.shotTimer -= delta;
+      if (enemy.shotTimer <= 0) {
+        bossShootPlayer(enemy);
+        enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
+        if (mode !== 'running') break;
+      }
+    }
 
     updateEnemyMarkers(enemy, seconds);
 
@@ -1210,37 +1175,7 @@ function updateHud(force) {
 }
 
 function currentDifficulty() {
-  return DIFFICULTY_PROFILES[currentDifficultyKey] || DIFFICULTY_PROFILES.study;
-}
-
-function setDifficulty(key) {
-  if (!DIFFICULTY_PROFILES[key] || key === currentDifficultyKey) {
-    updateDifficultyControls();
-    return;
-  }
-  currentDifficultyKey = key;
-  saveDifficultySetting(key);
-  updateDifficultyControls();
-  updatePhaseDisplay();
-  playToggleSound();
-}
-
-function updateDifficultyControls() {
-  const profile = currentDifficulty();
-  for (const button of difficultyButtons) {
-    const selected = button.dataset.difficulty === currentDifficultyKey;
-    button.classList.toggle('is-selected', selected);
-    button.setAttribute('aria-checked', selected ? 'true' : 'false');
-    button.tabIndex = selected ? 0 : -1;
-  }
-  if (messageScore && mode === 'idle') {
-    messageScore.textContent = `Best ${formatScore(bestScore)} | ${profile.label}`;
-  }
-}
-
-function updateDifficultyPanel(visible) {
-  if (!difficultyPanel) return;
-  difficultyPanel.hidden = !visible;
+  return GAME_PROFILE;
 }
 
 function updatePhaseDisplay() {
@@ -1248,19 +1183,19 @@ function updatePhaseDisplay() {
   const profile = currentDifficulty();
   if (mode === 'running') {
     const phase = wavePhase === 'boss' ? 'Boss wave' : 'Normal wave';
-    phaseValue.textContent = `Wave ${waveSet} · ${phase} · ${profile.label}`;
+    phaseValue.textContent = `Wave ${waveSet} · ${phase}`;
     return;
   }
   if (mode === 'paused') {
-    phaseValue.textContent = `Paused · Wave ${waveSet} · ${profile.label}`;
+    phaseValue.textContent = `Paused · Wave ${waveSet}`;
     return;
   }
   if (mode === 'wave_cleared') {
-    phaseValue.textContent = `Wave ${waveSet} cleared · ${profile.label}`;
+    phaseValue.textContent = `Wave ${waveSet} cleared`;
     return;
   }
   if (mode === 'gameover') {
-    phaseValue.textContent = `Run ended · ${profile.label}`;
+    phaseValue.textContent = 'Run ended';
     return;
   }
   phaseValue.textContent = profile.phaseLabel;
@@ -1383,7 +1318,8 @@ function spawnEnemy(options = {}) {
     revealed: startZ >= revealZ,
     revealFlash: 0,
     speed: isBoss ? type.speed : type.speed + Math.random() * 0.35,
-    damage: isBoss ? BOSS_DAMAGE : MINION_DAMAGE,
+    damage: isBoss ? BOSS_CONTACT_DAMAGE : MINION_DAMAGE,
+    shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
     baseY: 0.32,
     age: 0,
     wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
@@ -1693,6 +1629,24 @@ function spawnBeam(targetPosition) {
   beams.push({ mesh, life: 0.16, maxLife: 0.16 });
 }
 
+function spawnBossBeam(enemy) {
+  const start = enemy.group.position.clone();
+  start.y += 1.65 * enemy.type.scale;
+  const end = new THREE.Vector3(0, 1.35, WALL_Z + 0.78);
+  const distance = start.distanceTo(end);
+  const geometry = new THREE.BoxGeometry(0.09, 0.09, distance);
+  const material = new THREE.MeshBasicMaterial({
+    color: enemy.type.eye,
+    transparent: true,
+    opacity: 0.78,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.copy(start).lerp(end, 0.5);
+  mesh.lookAt(end);
+  effectsGroup.add(mesh);
+  beams.push({ mesh, life: 0.2, maxLife: 0.2 });
+}
+
 function spawnDebris(position, type) {
   const geometry = new THREE.BoxGeometry(0.18, 0.18, 0.18);
   for (let index = 0; index < 12; index += 1) {
@@ -1946,15 +1900,6 @@ function loadBestScore() {
 
 function saveBestScore(value) {
   writeStoredValue(STORAGE_KEY, String(Math.round(value)));
-}
-
-function loadDifficultySetting() {
-  const stored = readStoredValue(DIFFICULTY_STORAGE_KEY, '');
-  return DIFFICULTY_PROFILES[stored] ? stored : 'study';
-}
-
-function saveDifficultySetting(key) {
-  writeStoredValue(DIFFICULTY_STORAGE_KEY, key);
 }
 
 function loadAudioSetting() {
@@ -2228,6 +2173,11 @@ function playDamageSound(enemy) {
   playNoise(bossHit ? 0.24 : 0.18, { gain: bossHit ? 0.074 : 0.06, filterFrequency: bossHit ? 135 : 170, filterType: 'lowpass' });
 }
 
+function playBossShotSound() {
+  playTone(176, 0.11, { gain: 0.045, type: 'sawtooth', endFrequency: 132 });
+  playTone(352, 0.07, { gain: 0.022, delay: 0.03, type: 'square', endFrequency: 260 });
+}
+
 function playBossWarningSound() {
   playTone(110, 0.38, { gain: 0.055, type: 'sawtooth', endFrequency: 82 });
   playTone(55, 0.42, { gain: 0.035, delay: 0.08, type: 'sine' });
@@ -2293,7 +2243,6 @@ function startWaveCleared() {
     glossary
   );
   messagePanel.classList.add('is-cleared');
-  updateDifficultyPanel(false);
   updateHud(true);
   updatePhaseDisplay();
 }
@@ -2315,7 +2264,6 @@ function advanceWaveSet() {
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
-  updateDifficultyPanel(false);
   pauseButton.disabled = false;
   pauseButton.innerHTML = ICON_PAUSE;
   pauseButton.setAttribute('aria-label', 'Pause run');
