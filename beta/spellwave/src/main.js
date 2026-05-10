@@ -571,32 +571,36 @@ function handleBeforeInput(event) {
 }
 
 function enterCharacter(character) {
-  const normalized = normalizeCharacter(character);
-  if (!normalized) return;
+  const inputOptions = getInputCharacters(character);
+  if (inputOptions.length === 0) return;
   typedAttempts += 1;
 
-  const next = typedBuffer + normalized;
-  const nextMatches = findMatches(next);
+  for (const inputOption of inputOptions) {
+    const next = typedBuffer + inputOption.value;
+    const nextMatches = findMatches(next, inputOption);
 
-  if (nextMatches.length > 0) {
-    typedBuffer = next;
-    activeTarget = chooseTarget(nextMatches);
-    if (activeTarget.searchPrompt === typedBuffer) {
-      defeatEnemy(activeTarget);
-    } else {
-      playTypeSound();
+    if (nextMatches.length > 0) {
+      typedBuffer = next;
+      activeTarget = chooseTarget(nextMatches);
+      if (activeTarget.searchPrompt === typedBuffer) {
+        defeatEnemy(activeTarget);
+      } else {
+        playTypeSound();
+      }
+      updateTypedDisplay();
+      return;
     }
-    updateTypedDisplay();
-    return;
   }
 
-  const restartMatches = findMatches(normalized);
-  if (restartMatches.length > 0) {
-    typedBuffer = normalized;
-    activeTarget = chooseTarget(restartMatches);
-    registerMistake();
-    updateTypedDisplay();
-    return;
+  for (const inputOption of inputOptions) {
+    const restartMatches = findMatches(inputOption.value, inputOption);
+    if (restartMatches.length > 0) {
+      typedBuffer = inputOption.value;
+      activeTarget = chooseTarget(restartMatches);
+      registerMistake();
+      updateTypedDisplay();
+      return;
+    }
   }
 
   typedBuffer = '';
@@ -727,10 +731,11 @@ function updateEnemies(delta, seconds) {
 
     if (enemy.group.position.z >= WALL_Z) {
       leakEnemy(enemy);
+      if (mode !== 'running') break;
     }
   }
 
-  selectTarget();
+  if (mode === 'running') selectTarget();
 }
 
 function updateEnemyMarkers(enemy, seconds) {
@@ -947,15 +952,15 @@ function getLabelSafeBounds(height) {
   };
 }
 
-function buildHintMask(term) {
+function buildHintMask(term, options = {}) {
   return term.replace(/\S+/g, word => {
     let hasTypeable = false;
-    for (const ch of word) if (normalizeCharacter(ch)) { hasTypeable = true; break; }
+    for (const ch of word) if (normalizeCharacter(ch, options)) { hasTypeable = true; break; }
     if (!hasTypeable) return word;
     let result = '';
     let firstTypeable = true;
     for (const ch of word) {
-      if (!normalizeCharacter(ch)) { result += ch; }
+      if (!normalizeCharacter(ch, options)) { result += ch; }
       else if (firstTypeable) { result += ch; firstTypeable = false; }
       else { result += '_'; }
     }
@@ -963,8 +968,8 @@ function buildHintMask(term) {
   });
 }
 
-function buildSearchPrompt(term) {
-  return [...term].map(normalizeCharacter).join('');
+function buildSearchPrompt(term, options = {}) {
+  return [...term].map(character => normalizeCharacter(character, options)).join('');
 }
 
 function escapeHtml(text) {
@@ -1017,12 +1022,12 @@ function buildTwoWordLimit(term) {
   return { parts, searchPrompt: hiddenSearch };
 }
 
-function promptIndexForProgress(term, progress) {
+function promptIndexForProgress(term, progress, options = {}) {
   if (progress <= 0) return 0;
 
   let matched = 0;
   for (let index = 0; index < term.length; index += 1) {
-    if (!normalizeCharacter(term[index])) continue;
+    if (!normalizeCharacter(term[index], options)) continue;
     matched += 1;
     if (matched >= progress) return index + 1;
   }
@@ -1034,7 +1039,9 @@ function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget || !activeTarget.searchPrompt.startsWith(typedBuffer)) return typedBuffer;
   if (activeTarget.limitedParts) return typedBuffer;
-  return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length));
+  return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length, {
+    multiplicationAlias: activeTarget.isEquation,
+  }));
 }
 
 function renderPrompt(enemy) {
@@ -1045,10 +1052,13 @@ function renderPrompt(enemy) {
   if (enemy.limitedParts) {
     html = buildLimitedPromptHtml(enemy, typedProgress);
   } else {
-    const displayText = enemy.showDefinition ? enemy.hintMask : enemy.prompt;
-    const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress) : 0;
-    html = `<span class="typed">${wrapSups(escapeHtml(displayText.slice(0, typedLen)))}</span>`
-         + `<span class="remaining">${wrapSups(escapeHtml(displayText.slice(typedLen)))}</span>`;
+    const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
+      multiplicationAlias: enemy.isEquation,
+    }) : 0;
+    const typedText = enemy.prompt.slice(0, typedLen);
+    const remainingText = enemy.showDefinition ? enemy.hintMask.slice(typedLen) : enemy.prompt.slice(typedLen);
+    html = `<span class="typed">${wrapSups(escapeHtml(typedText))}</span>`
+         + `<span class="remaining">${wrapSups(escapeHtml(remainingText))}</span>`;
   }
 
   if (enemy.lastPromptHtml === html) return;
@@ -1300,10 +1310,10 @@ function spawnEnemy(options = {}) {
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
-    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term),
+    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, { multiplicationAlias: isEquationPrompt }),
     limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
-    hintMask: showDefinition ? buildHintMask(wordData.term) : null,
+    hintMask: showDefinition ? buildHintMask(wordData.term, { multiplicationAlias: isEquationPrompt }) : null,
     lastPromptHtml: '',
     promptKind,
     isBoss,
@@ -1696,9 +1706,12 @@ function selectTarget() {
   activeTarget = matches.length > 0 ? chooseTarget(matches) : null;
 }
 
-function findMatches(prefix) {
+function findMatches(prefix, options = {}) {
   if (!prefix) return [];
-  return enemies.filter((enemy) => isEnemyTargetable(enemy) && enemy.searchPrompt.startsWith(prefix));
+  return enemies.filter((enemy) => {
+    if (options.equationOnly && !enemy.isEquation) return false;
+    return isEnemyTargetable(enemy) && enemy.searchPrompt.startsWith(prefix);
+  });
 }
 
 function chooseTarget(matches) {
@@ -1811,11 +1824,21 @@ function boxesOverlap(first, second) {
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
 
-function normalizeCharacter(character) {
+function getInputCharacters(character) {
+  const inputs = [];
+  const base = normalizeCharacter(character);
+  const alias = normalizeCharacter(character, { multiplicationAlias: true });
+  if (base) inputs.push({ value: base, equationOnly: false });
+  if (alias && alias !== base) inputs.push({ value: alias, equationOnly: true });
+  return inputs;
+}
+
+function normalizeCharacter(character, options = {}) {
   if (/\s/.test(character)) return '';
   if (SUPERSCRIPT_MAP[character]) return SUPERSCRIPT_MAP[character];
   const normalized = character.toLowerCase();
-  if (normalized === '×' || normalized === '*') return 'x';
+  if (normalized === '×') return options.multiplicationAlias ? 'x' : '';
+  if (normalized === '*') return options.multiplicationAlias ? 'x' : '*';
   return /^[a-z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
 }
 
@@ -1850,29 +1873,45 @@ function hexColor(value) {
 }
 
 function loadBestScore() {
-  const raw = Number.parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+  const raw = Number.parseInt(readStoredValue(STORAGE_KEY, '0'), 10);
   return Number.isFinite(raw) ? raw : 0;
 }
 
 function saveBestScore(value) {
-  localStorage.setItem(STORAGE_KEY, String(Math.round(value)));
+  writeStoredValue(STORAGE_KEY, String(Math.round(value)));
 }
 
 function loadDifficultySetting() {
-  const stored = localStorage.getItem(DIFFICULTY_STORAGE_KEY);
+  const stored = readStoredValue(DIFFICULTY_STORAGE_KEY, '');
   return DIFFICULTY_PROFILES[stored] ? stored : 'study';
 }
 
 function saveDifficultySetting(key) {
-  localStorage.setItem(DIFFICULTY_STORAGE_KEY, key);
+  writeStoredValue(DIFFICULTY_STORAGE_KEY, key);
 }
 
 function loadAudioSetting() {
-  return localStorage.getItem(AUDIO_STORAGE_KEY) !== 'off';
+  return readStoredValue(AUDIO_STORAGE_KEY, 'on') !== 'off';
 }
 
 function saveAudioSetting(enabled) {
-  localStorage.setItem(AUDIO_STORAGE_KEY, enabled ? 'on' : 'off');
+  writeStoredValue(AUDIO_STORAGE_KEY, enabled ? 'on' : 'off');
+}
+
+function readStoredValue(key, fallback) {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredValue(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage can be unavailable in private or restricted browser contexts.
+  }
 }
 
 function updateAudioButton() {
