@@ -64,6 +64,8 @@
 │
 ├── fun/                    # Interactive games
 │   ├── dodge.html          # Asteroid Storm (requires network for leaderboard)
+│   ├── dodge3d.html        # Asteroid Storm 3D (requires network for leaderboard)
+│   ├── dodge3d/            # Modular JS/CSS for Asteroid Storm 3D
 │   ├── dodge_assets/       # Game sprites and audio
 │   ├── react.html
 │   └── ascii_cam.html
@@ -94,7 +96,7 @@ Not every HTML file in the repo is currently treated as a published page.
 - Only public pages that should participate in the site's service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
 - `/beta/*` and `/misc/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
-- `fun/dodge.html` is a published exception: it is linked from `index.html` and listed in `sitemap.xml`, but remains network-only because it depends on a live Supabase leaderboard
+- `fun/dodge.html` and `fun/dodge3d.html` are published exceptions: they are linked from `index.html` and listed in `sitemap.xml`, but remain network-only because they depend on live Supabase leaderboards
 - **Current unlisted/legacy pages**:
   - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
@@ -108,10 +110,10 @@ Not every HTML file in the repo is currently treated as a published page.
 If you promote an unlisted page to production, do all of the following:
 1. If the page lives in `/beta` or `/misc`, move it to the correct public directory first
 2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
-3. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js`
+3. Add page path + required assets to `ASSETS_TO_CACHE` in `sw.js` unless the page must stay network-only for live external data
 4. Bump `BUILD_ID` in `sw.js`
 5. Add a card/link in `index.html`
-6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill
+6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill unless the page is intentionally network-only
 7. Add the page URL to `sitemap.xml`
 
 ## Tech Stack & Dependencies
@@ -431,12 +433,12 @@ Use this on public pages that should participate in service-worker updates. Do n
 
 - **Guaranteed offline after install**: Pages/assets explicitly listed in `sw.js` `ASSETS_TO_CACHE`
 - **May work offline after first online visit**: Other same-origin GET resources (runtime cache), except `/beta/*` and `/misc/*`
-- **Requires network**: `/beta/*`, `/misc/*`, `fun/dodge.html`, `fun/dodge_assets/*`, and any `*.supabase.co` API calls
+- **Requires network**: `/beta/*`, `/misc/*`, `fun/dodge.html`, `fun/dodge_assets/*`, `fun/dodge3d.html`, `fun/dodge3d/*`, and any `*.supabase.co` API calls
 
 ## External Services
 
 ### Supabase
-Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are excluded from caching.
+Used for leaderboards in the Dodge games. API calls go to `*.supabase.co` and are excluded from caching.
 
 ## Notes for AI Assistants
 
@@ -449,7 +451,7 @@ Used for leaderboards in the dodge game. API calls go to `*.supabase.co` and are
 7. **Theme awareness**: Always use CSS variables, not hardcoded colors — **exception: `/beta` pages are a free sandbox and may use any styling approach**
 8. **Mobile-first**: Consider touch interactions and responsive design
 9. **Offline-first**: Ensure new features work without network
-10. **Know the exceptions**: `fun/dodge.html` is intentionally network-only because it depends on the live Supabase leaderboard, and public support pages do not always need an `index.html` card
+10. **Know the exceptions**: `fun/dodge.html` and `fun/dodge3d.html` are intentionally network-only because they depend on live Supabase leaderboards, and public support pages do not always need an `index.html` card
 11. **CDN dependencies**: External libraries are loaded from CDNs, not bundled
 12. **Keep it simple**: Avoid adding frameworks or build complexity
 13. **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`, not `/Users/.../main.js`)

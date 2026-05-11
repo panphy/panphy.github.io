@@ -53,7 +53,7 @@ Not every HTML file in the repo is currently part of the published navigation.
 - Only public pages that should participate in the site's service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
 - `/beta/*` and `/misc/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
-- `fun/dodge.html` is a published exception: it is linked from `index.html` and listed in `sitemap.xml`, but remains network-only because the leaderboard depends on live Supabase data
+- `fun/dodge.html` and `fun/dodge3d.html` are published exceptions: they are linked from `index.html` and listed in `sitemap.xml`, but remain network-only because their leaderboards depend on live Supabase data
 - **Current unlisted/legacy pages** include:
   - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
@@ -67,10 +67,10 @@ Not every HTML file in the repo is currently part of the published navigation.
 If you promote an unlisted page to production, treat it as a full launch task:
 1. If the page lives in `/beta` or `/misc`, move it to the correct public directory first
 2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
-3. Add route + required assets to `ASSETS_TO_CACHE`
+3. Add route + required assets to `ASSETS_TO_CACHE` unless the page must stay network-only for live external data
 4. Bump `BUILD_ID` in `sw.js`
 5. Link it from `index.html`
-6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill
+6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill unless the page is intentionally network-only
 7. Add it to `sitemap.xml`
 
 ## Coding Conventions
@@ -172,7 +172,7 @@ Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize l
 ├── simulations/            # Physics simulations
 │   ├── *.html              # superposition, standing_wave, ripple_tank, states, lorentz, lorentz_learn
 │   └── collision.html      # Entry point → collision/ (modular JS/CSS/assets)
-├── fun/                    # Games (dodge.html excluded from SW cache)
+├── fun/                    # Games (Dodge leaderboard games excluded from SW cache)
 ├── for_teachers/           # Teacher utilities
 └── misc/                   # Unlisted/legacy (digitizer, gcse_phy flashcards, etc.)
 ```

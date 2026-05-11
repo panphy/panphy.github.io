@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-05-11T00:00:00Z';
+const BUILD_ID = '2026-05-11T09:47:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -215,8 +215,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(req));
     return;
   }
-  // Never cache the dodge game or provide offline fallback for it.
-  if (isSameOrigin && (url.pathname === '/fun/dodge.html' || url.pathname.startsWith('/fun/dodge_assets/'))) {
+  // Never cache Supabase-backed dodge games or provide offline fallback for them.
+  if (isSameOrigin && (
+    url.pathname === '/fun/dodge.html' ||
+    url.pathname.startsWith('/fun/dodge_assets/') ||
+    url.pathname === '/fun/dodge3d.html' ||
+    url.pathname.startsWith('/fun/dodge3d/')
+  )) {
     event.respondWith(fetch(req));
     return;
   }
