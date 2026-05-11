@@ -1405,7 +1405,9 @@
         float startSide = signedMediumDistance(startPos);
         float endSide = signedMediumDistance(endPos);
         if (startSide == 0.0 || endSide == 0.0 || startSide * endSide > 0.0) {
-          return totalDist / speedAt(endPos);
+          // When endSide == 0.0, speedAt(endPos) misclassifies the vertex; use startSide instead.
+          float refSide = endSide == 0.0 ? startSide : endSide;
+          return totalDist / (refSide < 0.0 ? uSpeedA : uSpeedB);
         }
 
         float crossing = clamp(startSide / (startSide - endSide), 0.0, 1.0);
