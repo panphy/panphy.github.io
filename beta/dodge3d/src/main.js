@@ -13,9 +13,26 @@ const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
 const messageScore = document.getElementById('messageScore');
 const screenFlash = document.getElementById('screenFlash');
+const scoreList = document.getElementById('scoreList');
+const leaderboardStatus = document.getElementById('leaderboardStatus');
+const initialsModal = document.getElementById('initialsModal');
+const initialsInput = document.getElementById('initialsInput');
+const initialsError = document.getElementById('initialsError');
+const submitInitialsButton = document.getElementById('submitInitials');
+const modalScore = document.getElementById('modalScore');
+const supabaseScript = document.getElementById('supabaseScript');
 
 const STORAGE_KEY = 'panphyDodge3dBestV1';
 const AUDIO_STORAGE_KEY = 'panphyDodge3dAudioV1';
+const LEADERBOARD_CACHE_KEY = 'dodge3dLeaderboardCacheV1';
+const SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
+const LEADERBOARD_TABLE = 'dodge3d_leaderboard';
+const SUBMIT_SCORE_RPC = 'submit_dodge3d_score';
+const SCORE_FIELD = 'survival_time';
+const HIGHLIGHT_DURATION_MS = 6000;
+const MIN_SUBMISSION_SCORE = 0;
+const MAX_SUBMISSION_SCORE = Number.POSITIVE_INFINITY;
 const PLAYER_Z = 2.15;
 const PLAYER_RADIUS = 0.72;
 const BASE_FIELD_SPEED = 19;
@@ -93,6 +110,11 @@ let musicStep = 0;
 let nearMissCooldown = 0;
 let engineHumOsc = null;
 let engineHumGain = null;
+let supabaseClient = null;
+let topScores = [];
+let recentSubmission = null;
+let pendingScore = 0;
+let isSubmittingScore = false;
 
 const course = {
   scrollZ: 0,
@@ -219,6 +241,29 @@ audioButton.addEventListener('click', () => {
   }
 });
 
+if (supabaseScript) {
+  supabaseScript.addEventListener('load', () => {
+    fetchTopScores({ preferRemote: true, showLoading: false });
+  });
+}
+
+if (initialsInput) {
+  initialsInput.addEventListener('input', (event) => {
+    event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
+    if (initialsError) initialsError.textContent = '';
+  });
+  initialsInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSubmitInitials();
+    }
+  });
+}
+
+if (submitInitialsButton) {
+  submitInitialsButton.addEventListener('click', handleSubmitInitials);
+}
+
 window.addEventListener('resize', resizeRenderer);
 window.addEventListener('keydown', handleKeyDown);
 window.addEventListener('keyup', handleKeyUp);
@@ -240,6 +285,15 @@ canvas.addEventListener('pointermove', handlePointerMove, { passive: false });
 canvas.addEventListener('pointerup', handlePointerUp, { passive: false });
 canvas.addEventListener('pointercancel', handlePointerUp, { passive: false });
 
+initSupabaseClient();
+const cachedLeaderboard = loadLeaderboardCache();
+if (cachedLeaderboard && cachedLeaderboard.scores.length > 0) {
+  topScores = mergeRecentSubmission(normalizeCachedScores(cachedLeaderboard.scores));
+  renderTopScores();
+} else {
+  renderLoadingScores();
+}
+fetchTopScores({ preferRemote: true, showLoading: false });
 resizeRenderer();
 requestAnimationFrame(animate);
 
@@ -325,6 +379,7 @@ function endGame() {
     bestScore = Math.round(elapsed * 100) / 100;
     saveBestScore(bestScore);
   }
+  handleGameOver(elapsed);
 
   bestValue.textContent = formatTime(bestScore);
   const endKicker = isNewBest ? 'NEW RECORD' : 'RUN ENDED';
@@ -1412,6 +1467,403 @@ function updateHud(force = false) {
   levelValue.textContent = getLevel().toString();
 }
 
+function initSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  try {
+    const sb = window.supabase || window.Supabase || null;
+    if (sb && typeof sb.createClient === 'function' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+      supabaseClient = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch (error) {
+    console.warn('Supabase initialization failed:', error);
+  }
+  return supabaseClient;
+}
+
+function waitForSupabaseClient({ timeoutMs = 4000, intervalMs = 200 } = {}) {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    const check = () => {
+      const client = initSupabaseClient();
+      if (client || Date.now() - startedAt >= timeoutMs) {
+        resolve(client);
+        return;
+      }
+      setTimeout(check, intervalMs);
+    };
+    check();
+  });
+}
+
+async function ensureSupabaseSession(client) {
+  if (!client || !client.auth) return null;
+  try {
+    const { data } = await client.auth.getSession();
+    if (data && data.session) return data.session;
+    const { data: authData, error } = await client.auth.signInAnonymously();
+    if (error) {
+      console.warn('Supabase anonymous auth failed:', error);
+      return null;
+    }
+    return authData ? authData.session : null;
+  } catch (error) {
+    console.warn('Supabase session check failed:', error);
+    return null;
+  }
+}
+
+function getSupabaseRestHeaders(accessToken = null) {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${accessToken || SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+  };
+}
+
+function loadLeaderboardCache() {
+  try {
+    const raw = localStorage.getItem(LEADERBOARD_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.scores)) return null;
+    return parsed;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveLeaderboardCache(scores) {
+  try {
+    localStorage.setItem(LEADERBOARD_CACHE_KEY, JSON.stringify({ scores: scores || [], savedAt: Date.now() }));
+  } catch (error) {
+    // Leaderboard cache is optional.
+  }
+}
+
+function setLeaderboardStatus(text) {
+  if (leaderboardStatus) leaderboardStatus.textContent = text;
+}
+
+function isSameLeaderboard(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    const left = a[i] || {};
+    const right = b[i] || {};
+    if (left.initials !== right.initials) return false;
+    if (Number(left.score) !== Number(right.score)) return false;
+  }
+  return true;
+}
+
+async function fetchTopScoresRest() {
+  const url = new URL(`${SUPABASE_URL}/rest/v1/${LEADERBOARD_TABLE}`);
+  url.searchParams.set('select', `initials,${SCORE_FIELD}`);
+  url.searchParams.set('order', `${SCORE_FIELD}.desc`);
+  url.searchParams.set('limit', '10');
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers: getSupabaseRestHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error(`Supabase REST fetch failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+async function submitScoreRest(initials, scoreValue, accessToken = null) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${SUBMIT_SCORE_RPC}`, {
+    method: 'POST',
+    headers: {
+      ...getSupabaseRestHeaders(accessToken),
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      initials: initials.toUpperCase(),
+      survival_time: scoreValue,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Supabase RPC insert failed: ${response.status}`);
+  }
+  return true;
+}
+
+async function fetchTopScores({ preferRemote = false, showLoading = true } = {}) {
+  if (showLoading) renderLoadingScores();
+  const cachedScores = normalizeCachedScores(loadLeaderboardCache()?.scores || []);
+
+  let client = initSupabaseClient();
+  if (!client && preferRemote) {
+    client = await waitForSupabaseClient();
+  }
+
+  try {
+    let fetchedScores = [];
+    if (client) {
+      const { data, error } = await client
+        .from(LEADERBOARD_TABLE)
+        .select(`initials, ${SCORE_FIELD}`)
+        .order(SCORE_FIELD, { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      fetchedScores = normalizeScores(data || []);
+    } else {
+      fetchedScores = normalizeScores(await fetchTopScoresRest());
+    }
+
+    const mergedScores = mergeRecentSubmission(fetchedScores);
+    if (!isSameLeaderboard(fetchedScores, cachedScores) || topScores.length === 0) {
+      topScores = mergedScores;
+      renderTopScores();
+      saveLeaderboardCache(fetchedScores);
+    }
+    setLeaderboardStatus('Live');
+  } catch (error) {
+    console.warn('Supabase client fetch failed, retrying with REST fallback.', error);
+    try {
+      const fetchedScores = normalizeScores(await fetchTopScoresRest());
+      const mergedScores = mergeRecentSubmission(fetchedScores);
+      if (!isSameLeaderboard(fetchedScores, cachedScores) || topScores.length === 0) {
+        topScores = mergedScores;
+        renderTopScores();
+        saveLeaderboardCache(fetchedScores);
+      }
+      setLeaderboardStatus('Live');
+    } catch (restError) {
+      console.error('Failed to fetch scores:', restError);
+      setLeaderboardStatus('Offline');
+      if (topScores.length === 0 && scoreList) {
+        scoreList.innerHTML = '<li class="loading">Unable to load scores</li>';
+      }
+    }
+  }
+}
+
+async function submitScore(initials, scoreValue) {
+  let client = initSupabaseClient();
+  if (!client) {
+    client = await waitForSupabaseClient();
+  }
+  const session = await ensureSupabaseSession(client);
+  const accessToken = session ? session.access_token : null;
+
+  try {
+    if (client) {
+      const { error } = await client.rpc(SUBMIT_SCORE_RPC, {
+        initials: initials.toUpperCase(),
+        survival_time: scoreValue,
+      });
+      if (error) throw error;
+    } else {
+      await submitScoreRest(initials, scoreValue, accessToken);
+    }
+
+    registerRecentSubmission(initials, scoreValue);
+    topScores = mergeRecentSubmission(topScores);
+    renderTopScores();
+    saveLeaderboardCache(topScores);
+    setTimeout(() => fetchTopScores({ preferRemote: true, showLoading: false }), 800);
+    return true;
+  } catch (error) {
+    console.warn('Supabase client insert failed, retrying with REST fallback.', error);
+    try {
+      await submitScoreRest(initials, scoreValue, accessToken);
+      registerRecentSubmission(initials, scoreValue);
+      topScores = mergeRecentSubmission(topScores);
+      renderTopScores();
+      saveLeaderboardCache(topScores);
+      setTimeout(() => fetchTopScores({ preferRemote: true, showLoading: false }), 800);
+      return true;
+    } catch (restError) {
+      console.error('Failed to submit score:', restError);
+      return false;
+    }
+  }
+}
+
+function normalizeScores(entries) {
+  return (entries || [])
+    .map((entry) => {
+      const scoreValue = sanitizeScoreValue(entry[SCORE_FIELD]);
+      if (scoreValue === null) return null;
+      return {
+        initials: entry.initials,
+        score: scoreValue,
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeCachedScores(entries) {
+  return (entries || [])
+    .map((entry) => {
+      const scoreValue = sanitizeScoreValue(entry.score);
+      if (scoreValue === null) return null;
+      return {
+        initials: entry.initials,
+        score: scoreValue,
+      };
+    })
+    .filter(Boolean);
+}
+
+function registerRecentSubmission(initials, scoreValue) {
+  recentSubmission = {
+    initials: initials.toUpperCase(),
+    score: scoreValue,
+    expiresAt: Date.now() + HIGHLIGHT_DURATION_MS,
+  };
+}
+
+function hasRecentSubmission(entry) {
+  if (!recentSubmission) return false;
+  if (Date.now() > recentSubmission.expiresAt) {
+    recentSubmission = null;
+    return false;
+  }
+  return (
+    entry &&
+    entry.initials === recentSubmission.initials &&
+    entry.score === recentSubmission.score
+  );
+}
+
+function mergeRecentSubmission(entries) {
+  if (!recentSubmission) return entries || [];
+  if (Date.now() > recentSubmission.expiresAt) {
+    recentSubmission = null;
+    return entries || [];
+  }
+  const list = Array.isArray(entries) ? [...entries] : [];
+  const exists = list.some((entry) => hasRecentSubmission(entry));
+  if (!exists) {
+    list.push({ initials: recentSubmission.initials, score: recentSubmission.score });
+  }
+  list.sort((a, b) => b.score - a.score);
+  return list.slice(0, 10);
+}
+
+function checkIfHighScore(newScore) {
+  if (topScores.length < 10) return true;
+  const lowestScore = topScores[topScores.length - 1]?.score || 0;
+  return newScore > lowestScore;
+}
+
+function sanitizeScoreValue(score) {
+  const numeric = Number(score);
+  if (!Number.isFinite(numeric)) return null;
+  if (numeric < MIN_SUBMISSION_SCORE) return null;
+  if (numeric > MAX_SUBMISSION_SCORE) return null;
+  return Math.round(numeric * 100) / 100;
+}
+
+function handleGameOver(finalScore) {
+  const sanitizedScore = sanitizeScoreValue(finalScore);
+  if (sanitizedScore === null) {
+    console.warn('Score out of allowed range, ignoring submission.', finalScore);
+    return;
+  }
+  if (checkIfHighScore(sanitizedScore)) showInitialsModal(sanitizedScore);
+}
+
+function isInitialsModalOpen() {
+  return Boolean(initialsModal && !initialsModal.hidden);
+}
+
+function showInitialsModal(scoreValue) {
+  if (!initialsModal || !initialsInput || !submitInitialsButton || !modalScore) return;
+  pendingScore = scoreValue;
+  modalScore.textContent = formatTime(scoreValue);
+  initialsInput.value = '';
+  if (initialsError) initialsError.textContent = '';
+  submitInitialsButton.disabled = false;
+  submitInitialsButton.textContent = 'Submit Time';
+  initialsModal.hidden = false;
+  setTimeout(() => initialsInput.focus(), 100);
+}
+
+function hideInitialsModal() {
+  if (!initialsModal) return;
+  initialsModal.hidden = true;
+  isSubmittingScore = false;
+}
+
+function validateInitials(value) {
+  return /^[A-Z0-9]{3}$/.test(value);
+}
+
+async function handleSubmitInitials() {
+  if (isSubmittingScore || !initialsInput || !submitInitialsButton) return;
+
+  const initials = initialsInput.value.trim().toUpperCase();
+  if (!validateInitials(initials)) {
+    if (initialsError) initialsError.textContent = 'Enter exactly 3 letters or numbers';
+    initialsInput.focus();
+    return;
+  }
+
+  isSubmittingScore = true;
+  submitInitialsButton.disabled = true;
+  submitInitialsButton.textContent = 'Submitting...';
+
+  const sanitizedScore = sanitizeScoreValue(pendingScore);
+  if (sanitizedScore === null) {
+    if (initialsError) initialsError.textContent = 'Score could not be submitted.';
+    isSubmittingScore = false;
+    submitInitialsButton.disabled = false;
+    submitInitialsButton.textContent = 'Submit Time';
+    return;
+  }
+
+  const success = await submitScore(initials, sanitizedScore);
+  if (success) {
+    hideInitialsModal();
+  } else {
+    if (initialsError) initialsError.textContent = 'Failed to submit score. Try again.';
+    isSubmittingScore = false;
+    submitInitialsButton.disabled = false;
+  }
+  submitInitialsButton.textContent = 'Submit Time';
+}
+
+function renderTopScores() {
+  if (!scoreList) return;
+  scoreList.innerHTML = '';
+
+  if (topScores.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'loading';
+    li.textContent = 'No scores yet';
+    scoreList.appendChild(li);
+    return;
+  }
+
+  topScores.forEach((entry) => {
+    const li = document.createElement('li');
+    const initials = typeof entry === 'object' ? entry.initials : '???';
+    const score = typeof entry === 'object' ? entry.score : entry;
+    if (hasRecentSubmission({ initials, score })) {
+      li.classList.add('highlight');
+    }
+
+    const initialsSpan = document.createElement('span');
+    initialsSpan.className = 'initials';
+    initialsSpan.textContent = initials;
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'score-value';
+    scoreSpan.textContent = formatTime(score);
+    li.append(initialsSpan, scoreSpan);
+    scoreList.appendChild(li);
+  });
+}
+
+function renderLoadingScores() {
+  if (scoreList) scoreList.innerHTML = '<li class="loading">Loading scores</li>';
+}
+
 function updateCamera(delta) {
   const shakeX = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.22 : 0;
   const shakeY = shakeAmount ? (Math.random() - 0.5) * shakeAmount * 0.18 : 0;
@@ -1884,6 +2336,7 @@ function resetStar(positions, offset, z = random(-168, -70)) {
 }
 
 function handlePointerDown(event) {
+  if (isInitialsModalOpen()) return;
   if (mode === 'gameover' && gameoverTime >= GAME_OVER_PANEL_DELAY) {
     startGame();
     return;
@@ -1919,6 +2372,8 @@ function handlePointerUp(event) {
 }
 
 function handleKeyDown(event) {
+  if (isInitialsModalOpen()) return;
+
   if (event.code === 'Space' || event.code === 'Enter') {
     if (mode === 'idle' || (mode === 'gameover' && gameoverTime >= GAME_OVER_PANEL_DELAY)) {
       event.preventDefault();

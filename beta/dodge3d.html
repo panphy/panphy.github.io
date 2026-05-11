@@ -8,8 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Asteroid Storm 3D | PanPhy Labs Beta</title>
-  <link rel="icon" type="image/png" href="../../assets/favicon.png">
-  <link rel="stylesheet" href="./src/styles.css">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="stylesheet" href="./dodge3d/src/styles.css">
+  <script
+    id="supabaseScript"
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+    defer
+  ></script>
   <script>
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (event) => {
@@ -29,8 +34,8 @@
     <div class="screen-flash" id="screenFlash" aria-hidden="true"></div>
 
     <header class="flight-bar" aria-label="Game status">
-      <a class="brand-mark" href="../../" aria-label="PanPhy Labs home">
-        <img src="../../assets/panphy.png" alt="PanPhy Labs">
+      <a class="brand-mark" href="../" aria-label="PanPhy Labs home">
+        <img src="../assets/panphy.png" alt="PanPhy Labs">
       </a>
       <div class="flight-title">
         <h1>Asteroid Storm 3D</h1>
@@ -60,6 +65,26 @@
       </div>
     </section>
 
+    <aside class="leaderboard-panel" aria-label="Top survivors">
+      <div class="leaderboard-header">
+        <p>Top Survivors</p>
+        <span id="leaderboardStatus">Live</span>
+      </div>
+      <ol id="scoreList" class="score-list"></ol>
+    </aside>
+
+    <div class="initials-modal" id="initialsModal" role="dialog" aria-modal="true" aria-labelledby="initialsTitle" hidden>
+      <div class="initials-card">
+        <p class="modal-kicker">Top survivor</p>
+        <h2 id="initialsTitle">Log Your Run</h2>
+        <div class="modal-score" id="modalScore">0.00 s</div>
+        <label for="initialsInput">Enter 3 initials</label>
+        <input id="initialsInput" type="text" maxlength="3" placeholder="AAA" autocomplete="off" inputmode="latin">
+        <p class="error-text" id="initialsError"></p>
+        <button id="submitInitials" type="button">Submit Time</button>
+      </div>
+    </div>
+
     <section class="message-panel" id="messagePanel" aria-live="polite">
       <p id="messageKicker">Low-poly run</p>
       <h2 id="messageTitle">Asteroid Field</h2>
@@ -69,7 +94,7 @@
     </section>
   </div>
 
-  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./dodge3d/src/main.js"></script>
 </body>
 
 </html>
