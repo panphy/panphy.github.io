@@ -382,7 +382,7 @@ function endGame() {
   handleGameOver(elapsed);
 
   bestValue.textContent = formatTime(bestScore);
-  const endKicker = isNewBest ? 'NEW RECORD' : 'RUN ENDED';
+  const endKicker = isNewBest ? 'NEW RECORD' : '';
   pendingGameOverMessage = {
     kicker: endKicker,
     title: 'Game Over',
