@@ -531,6 +531,11 @@ body.is-running .message-panel {
     align-items: center;
   }
 
+  /* 4 readouts × 42px + 3 gaps × 4px + 8px breathing room = 256px */
+  .leaderboard-panel {
+    top: calc(max(14px, env(safe-area-inset-top)) + 256px);
+  }
+
   .message-panel button {
     min-height: 48px;
   }
