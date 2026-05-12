@@ -1024,6 +1024,25 @@ function wrapSups(text) {
   return text.replace(/²/g, '<sup class="given-sup">²</sup>');
 }
 
+const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const LOW_VALUE_ANSWER_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'as',
+  'by',
+  'for',
+  'from',
+  'in',
+  'of',
+  'on',
+  'or',
+  'per',
+  'the',
+  'to',
+  'with',
+]);
+
 function buildHintPart(text, options = {}) {
   let result = '';
   let firstTypeable = true;
@@ -1048,27 +1067,54 @@ function buildTwoWordLimit(term, options = {}) {
   const typeableIndices = [];
   for (let i = 0; i < tokens.length; i++) {
     if (/^\s+$/.test(tokens[i])) continue;
-    if (isWordToken(tokens[i]) && buildSearchPrompt(tokens[i], options)) typeableIndices.push(i);
+    const answerText = getAnswerTokenText(tokens[i]);
+    if (isWordToken(answerText) && !isLowValueAnswerToken(answerText) && buildSearchPrompt(answerText, options)) {
+      typeableIndices.push(i);
+    }
   }
   if (typeableIndices.length === 0) return null;
-  if (typeableIndices.length <= 2 && !options.alwaysLimit) return null;
+  const hasSkippedAnswerWord = tokens.some((token, index) => {
+    if (/^\s+$/.test(token)) return false;
+    return isWordToken(getAnswerTokenText(token)) && !typeableIndices.includes(index);
+  });
+  if (typeableIndices.length <= 2 && !options.alwaysLimit && !hasSkippedAnswerWord) return null;
 
   const shuffled = [...typeableIndices].sort(() => Math.random() - 0.5);
   const hiddenSet = new Set(shuffled.slice(0, Math.min(2, shuffled.length)));
 
-  const parts = tokens.map((tok, i) => ({
-    text: tok,
-    isWhitespace: /^\s+$/.test(tok),
-    isGiven: typeableIndices.includes(i) && !hiddenSet.has(i),
-    isHidden: hiddenSet.has(i),
-  }));
+  const parts = tokens.map((tok, i) => {
+    const isWhitespace = /^\s+$/.test(tok);
+    const hidden = hiddenSet.has(i);
+    const answerText = hidden ? getAnswerTokenText(tok) : tok;
+    return {
+      text: tok,
+      answerText,
+      exponentText: hidden ? getTokenExponent(tok) : '',
+      isWhitespace,
+      isGiven: typeableIndices.includes(i) && !hidden,
+      isHidden: hidden,
+    };
+  });
 
-  const hiddenSearch = tokens.filter((_, i) => hiddenSet.has(i)).map(t => buildSearchPrompt(t, options)).join('');
+  const hiddenSearch = parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText, options)).join('');
   return { parts, searchPrompt: hiddenSearch };
 }
 
 function isWordToken(token) {
   return /[a-z]/i.test(token);
+}
+
+function getAnswerTokenText(token) {
+  return token.replace(new RegExp(`[${SUPERSCRIPT_DIGITS}]+`, 'g'), '');
+}
+
+function getTokenExponent(token) {
+  const match = token.match(new RegExp(`([${SUPERSCRIPT_DIGITS}]+)$`));
+  return match ? match[1] : '';
+}
+
+function isLowValueAnswerToken(token) {
+  return LOW_VALUE_ANSWER_WORDS.has(token.toLowerCase().replace(/[^a-z]/g, ''));
 }
 
 function promptIndexForProgress(term, progress, options = {}) {
@@ -1125,17 +1171,24 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
       html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
     } else {
       const promptOptions = { multiplicationAlias: enemy.isEquation };
-      const sp = buildSearchPrompt(part.text, promptOptions);
+      const answerText = part.answerText || part.text;
+      const sp = buildSearchPrompt(answerText, promptOptions);
       const tokTyped = Math.min(charsLeft, sp.length);
       charsLeft -= tokTyped;
+      const exponentHtml = part.exponentText ? wrapSups(escapeHtml(part.exponentText)) : '';
+      const wrapSquared = !!part.exponentText;
       if (tokTyped > 0) {
-        const charPos = promptIndexForProgress(part.text, tokTyped, promptOptions);
-        const typedPart = part.text.slice(0, charPos);
-        const remainPart = part.text.slice(charPos);
+        const charPos = promptIndexForProgress(answerText, tokTyped, promptOptions);
+        const typedPart = answerText.slice(0, charPos);
+        const remainPart = answerText.slice(charPos);
+        if (wrapSquared) html += '(';
         html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
         if (remainPart) html += `<span class="remaining">${wrapSups(escapeHtml(buildHintRemain(remainPart, promptOptions)))}</span>`;
+        if (wrapSquared) html += `)${exponentHtml}`;
       } else {
-        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(part.text, promptOptions)))}</span>`;
+        if (wrapSquared) html += '(';
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(answerText, promptOptions)))}</span>`;
+        if (wrapSquared) html += `)${exponentHtml}`;
       }
     }
   }
