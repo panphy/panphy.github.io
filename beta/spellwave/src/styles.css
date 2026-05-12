@@ -680,6 +680,23 @@ a {
   animation: label-pop 280ms ease-out;
 }
 
+.word-tag.is-medic {
+  border-color: rgba(45, 212, 191, 0.74);
+  background:
+    linear-gradient(135deg, rgba(8, 35, 29, 0.92), rgba(4, 14, 14, 0.86)),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.18), transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36), 0 0 22px rgba(45, 212, 191, 0.22), inset 0 0 18px rgba(242, 240, 223, 0.08);
+}
+
+.word-tag.is-medic .prompt-kind {
+  background: rgba(45, 212, 191, 0.2);
+  color: #d8fff7;
+}
+
+.word-tag.is-medic .threat-meter i {
+  background: linear-gradient(90deg, var(--aqua), var(--grass));
+}
+
 .word-tag.is-boss {
   min-width: 160px;
   max-width: 300px;
@@ -835,6 +852,11 @@ a {
   border: 0;
   opacity: 0;
   pointer-events: none;
+}
+
+.score-popup.is-heal {
+  color: #b9ffcf;
+  text-shadow: 0 0 14px rgba(45, 212, 191, 0.58);
 }
 
 @keyframes shake {

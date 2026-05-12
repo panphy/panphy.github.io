@@ -45,6 +45,7 @@ const BOSS_SHOT_INTERVAL = 4.2;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
+const MEDIC_HEAL_AMOUNT = 2;
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
@@ -130,6 +131,17 @@ const ENEMY_TYPES = [
     score: 70,
   },
 ];
+const MEDIC_TYPE = {
+  name: 'Medic Sprig',
+  isMedic: true,
+  body: 0xdaf7df,
+  trim: 0x2dd4bf,
+  eye: 0xf2f0df,
+  speed: 3.65,
+  scale: 0.82,
+  weight: 0,
+  score: 45,
+};
 const BOSS_TYPES = [
   {
     name: 'Crimson Bulwark',
@@ -205,6 +217,8 @@ let bossSpawnTimer = 0;
 let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
+let medicSpawnedThisSet = false;
+let medicSpawnSlot = 0;
 let streak = 0;
 let typedBuffer = '';
 let activeTarget = null;
@@ -564,12 +578,15 @@ function defeatEnemy(enemy) {
   streak += 1;
   defeatedCount += 1;
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
+  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
+  if (healed > 0) health += healed;
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
   }
-  spawnScorePopup(points, enemy);
-  playDefeatSound(enemy);
+  spawnScorePopup(points, enemy, healed);
+  if (enemy.isMedic) playHealSound(healed);
+  else playDefeatSound(enemy);
   spawnBeam(enemy.group.position);
   spawnDebris(enemy.group.position, enemy.type);
   removeEnemy(enemy);
@@ -580,6 +597,16 @@ function defeatEnemy(enemy) {
 }
 
 function leakEnemy(enemy) {
+  if (enemy.isMedic) {
+    const wasActiveTarget = activeTarget === enemy;
+    playMedicPassSound();
+    spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
+    removeEnemy(enemy);
+    if (wasActiveTarget) typedBuffer = '';
+    updateTypedDisplay();
+    return;
+  }
+
   health = Math.max(0, health - enemy.damage);
   streak = 0;
   leakedCount += 1;
@@ -631,7 +658,11 @@ function animate(frameTime) {
     elapsed += delta;
 
     if (wavePhase === 'normal') {
-      if (normalEnemiesSpawned < normalEnemyTarget) {
+      if (shouldSpawnMedic() && enemies.length < getEnemyLimit()) {
+        spawnEnemy({ isMedic: true });
+        medicSpawnedThisSet = true;
+        spawnTimer = Math.max(spawnTimer, 0.55);
+      } else if (normalEnemiesSpawned < normalEnemyTarget) {
         spawnTimer -= delta;
         if (spawnTimer <= 0 && enemies.length < getEnemyLimit()) {
           spawnEnemy();
@@ -1302,15 +1333,18 @@ function updateTypedDisplay() {
 
 function spawnEnemy(options = {}) {
   const isBoss = options.isBoss || false;
+  const isMedic = options.isMedic || false;
   const wordData = options.wordData
     ? options.wordData
     : options.forcedPrompt
     ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
+    : isMedic
+    ? chooseMedicPrompt()
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
-  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : weightedPick(ENEMY_TYPES);
+  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
   const group = createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
   const spawnSpread = Number.isFinite(options.delay)
@@ -1323,10 +1357,12 @@ function spawnEnemy(options = {}) {
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
 
-  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : 'keyword';
+  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
+    : isMedic
+    ? 'word-tag is-medic is-hidden'
     : 'word-tag is-hidden';
   label.dataset.kind = promptKind;
   label.style.setProperty('--threat-progress', '0');
@@ -1393,13 +1429,14 @@ function spawnEnemy(options = {}) {
     lastPromptHtml: '',
     promptKind,
     isBoss,
+    isMedic,
     lane,
     spawnZ: startZ,
     revealZ,
     revealed: startZ >= revealZ,
     revealFlash: 0,
-    speed: isBoss ? type.speed : type.speed + Math.random() * 0.35,
-    damage: isBoss ? BOSS_CONTACT_DAMAGE : MINION_DAMAGE,
+    speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : type.speed + Math.random() * 0.35,
+    damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
     shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
     baseY: 0.32,
     age: 0,
@@ -1432,18 +1469,19 @@ function chooseSpawnLane(startZ) {
 function createEnemyMesh(type) {
   const group = new THREE.Group();
   const isBossType = !!type.isBoss;
+  const isMedicType = !!type.isMedic;
   const bodyMaterial = new THREE.MeshStandardMaterial({
     color: type.body,
-    emissive: isBossType ? type.body : 0x000000,
-    emissiveIntensity: isBossType ? 0.56 : 0,
-    roughness: isBossType ? 0.58 : 0.82,
+    emissive: isBossType || isMedicType ? type.body : 0x000000,
+    emissiveIntensity: isBossType ? 0.56 : isMedicType ? 0.12 : 0,
+    roughness: isBossType ? 0.58 : isMedicType ? 0.5 : 0.82,
     metalness: 0.03,
   });
   const trimMaterial = new THREE.MeshStandardMaterial({
     color: type.trim,
-    emissive: isBossType ? type.trim : 0x000000,
-    emissiveIntensity: isBossType ? 0.82 : 0,
-    roughness: isBossType ? 0.46 : 0.78,
+    emissive: isBossType || isMedicType ? type.trim : 0x000000,
+    emissiveIntensity: isBossType ? 0.82 : isMedicType ? 0.42 : 0,
+    roughness: isBossType ? 0.46 : isMedicType ? 0.38 : 0.78,
     metalness: isBossType ? 0.08 : 0.02,
   });
   const eyeMaterial = new THREE.MeshStandardMaterial({
@@ -1471,6 +1509,16 @@ function createEnemyMesh(type) {
   if (type.name === 'Cinder Imp') {
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, -0.34, 2.32, 0));
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, 0.34, 2.32, 0));
+  }
+
+  if (isMedicType) {
+    group.add(blockMesh(0.18, 0.58, 0.1, trimMaterial, 0, 1.08, 0.43));
+    group.add(blockMesh(0.58, 0.18, 0.1, trimMaterial, 0, 1.08, 0.44));
+    group.add(blockMesh(0.82, 0.16, 0.82, trimMaterial, 0, 2.28, 0));
+    group.add(blockMesh(0.16, 0.38, 0.16, eyeMaterial, 0, 2.55, 0));
+    const medicGlow = new THREE.PointLight(type.trim, 0.95, 4.2, 2.2);
+    medicGlow.position.set(0, 1.45, 0.45);
+    group.add(medicGlow);
   }
 
   if (isBossType) {
@@ -1853,12 +1901,27 @@ function isEnemyTargetable(enemy) {
 function prepareWavePlan() {
   bossWordsThisSet = chooseBossWordsForWave();
   introducedBossTermsThisSet = new Set();
+  medicSpawnedThisSet = false;
+  medicSpawnSlot = chooseMedicSpawnSlot(normalEnemyTarget);
   const previewableWords = definitionBossWordsForWave();
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
 }
 
 function definitionBossWordsForWave() {
   return bossWordsThisSet.filter(w => !w.isEquation);
+}
+
+function chooseMedicSpawnSlot(target) {
+  if (target <= 2) return Math.max(1, target - 1);
+  const earliest = Math.min(2, target - 1);
+  const latest = Math.max(earliest, target - 2);
+  return earliest + Math.floor(Math.random() * (latest - earliest + 1));
+}
+
+function shouldSpawnMedic() {
+  return wavePhase === 'normal'
+    && !medicSpawnedThisSet
+    && normalEnemiesSpawned >= medicSpawnSlot;
 }
 
 function buildBossPreviewSchedule(target, words) {
@@ -1914,7 +1977,7 @@ function choosePrompt() {
   const scheduledBossWord = wavePhase === 'normal' ? bossPreviewSchedule.get(normalEnemiesSpawned) : null;
   if (scheduledBossWord) return scheduledBossWord;
 
-  const pool = waveSet >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS] : waveSet >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS] : EASY_WORDS;
+  const pool = currentKeywordPool();
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
   const reservedBossTerms = wavePhase === 'normal'
     ? new Set(bossWordsThisSet.map((word) => word.term))
@@ -1927,6 +1990,28 @@ function choosePrompt() {
     if (!nearExisting.has(entry.term)) return entry;
   }
   return usablePool[Math.floor(Math.random() * usablePool.length)];
+}
+
+function chooseMedicPrompt() {
+  const reservedBossTerms = new Set(bossWordsThisSet.map((word) => word.term));
+  const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
+  const pool = currentKeywordPool().filter((entry) => !reservedBossTerms.has(entry.term));
+  const compactPool = pool.filter((entry) => {
+    const length = buildSearchPrompt(entry.term).length;
+    return length >= 4 && length <= 12;
+  });
+  const usablePool = compactPool.length > 0 ? compactPool : pool.length > 0 ? pool : EASY_WORDS;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
+    if (!nearExisting.has(entry.term)) return entry;
+  }
+  return usablePool[Math.floor(Math.random() * usablePool.length)];
+}
+
+function currentKeywordPool() {
+  if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
+  if (waveSet >= 3) return [...EASY_WORDS, ...MEDIUM_WORDS];
+  return EASY_WORDS;
 }
 
 function chooseBossType(index) {
@@ -2292,6 +2377,18 @@ function playDefeatSound(enemy) {
   });
 }
 
+function playHealSound(healed) {
+  playTone(660, 0.1, { gain: 0.042, type: 'triangle', endFrequency: 880 });
+  if (healed > 0) {
+    playTone(990, 0.16, { gain: 0.032, delay: 0.04, type: 'sine' });
+  }
+  playNoise(0.1, { gain: 0.022, delay: 0.02, filterFrequency: 1800, filterType: 'bandpass' });
+}
+
+function playMedicPassSound() {
+  playTone(420, 0.08, { gain: 0.026, type: 'triangle', endFrequency: 280 });
+}
+
 function playDamageSound(enemy) {
   const bossHit = !!enemy?.isBoss;
   playTone(bossHit ? 62 : 78, bossHit ? 0.28 : 0.22, { gain: bossHit ? 0.086 : 0.07, type: 'sawtooth', endFrequency: bossHit ? 36 : 45 });
@@ -2431,7 +2528,7 @@ function updateTypingLabel() {
   }
 }
 
-function spawnScorePopup(points, enemy) {
+function spawnScorePopup(points, enemy, healed = 0) {
   const label = enemy.label;
   if (!label || label.classList.contains('is-hidden')) return;
   const left = parseFloat(label.style.left);
@@ -2439,8 +2536,10 @@ function spawnScorePopup(points, enemy) {
   if (!Number.isFinite(left) || !Number.isFinite(top)) return;
 
   const popup = document.createElement('div');
-  popup.className = 'score-popup';
-  popup.textContent = streak >= 2 ? `+${points} ×${streak}` : `+${points}`;
+  popup.className = enemy.isMedic ? 'score-popup is-heal' : 'score-popup';
+  const scoreText = streak >= 2 ? `+${points} ×${streak}` : `+${points}`;
+  const healText = healed >= MEDIC_HEAL_AMOUNT ? '+1 HEART' : '+0.5 HEART';
+  popup.textContent = healed > 0 ? `${scoreText} · ${healText}` : scoreText;
   popup.style.left = `${left}px`;
   popup.style.top = `${top}px`;
   document.body.appendChild(popup);
