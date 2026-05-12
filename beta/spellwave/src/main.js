@@ -1165,8 +1165,10 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
   let charsLeft = typedProgress;
   let html = '';
   for (const part of enemy.limitedParts) {
-    if (part.isWhitespace || (!part.isGiven && !part.isHidden)) {
+    if (part.isWhitespace) {
       html += wrapSups(escapeHtml(part.text));
+    } else if (!part.isGiven && !part.isHidden) {
+      html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
     } else if (part.isGiven) {
       html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
     } else {
