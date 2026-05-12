@@ -191,6 +191,69 @@ const BOSS_TYPES = [
 ];
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 
+const SEASON_PALETTES = [
+  { // Spring (wave 1): soft twilight blue, cherry blossoms
+    name: 'spring',
+    bgColor: 0x6a90b0, fogColor: 0x6a90b0, fogNear: 20, fogFar: 70,
+    hemiSky: 0xb0d8f0, hemiGround: 0x508050, hemiIntensity: 1.2,
+    sunColor: 0xffe0b0, sunIntensity: 1.8,
+    emberColor: 0xff90b0, emberIntensity: 2.0,
+    crystalColor: 0xf09ab8, crystalEmissive: 0xe06890,
+    staffLightColor: 0xf090b0,
+    pathMarkerColor: 0xf098b8, pathMarkerEmissive: 0xd06080,
+    leafColors: [0xeaa8bc, 0xf5c8d8, 0xd890a8], trunkColor: 0x6b4226,
+    moonColor: 0xffeedd, starOpacity: 0.4,
+    groundPath: { h: 0.08, s: 0.2, lBase: 0.28 },
+    groundAlt1: { h: 0.28, s: 0.28, l: 0.28 },
+    groundGrass: { h: 0.28, s: 0.38, l: 0.22 },
+  },
+  { // Summer (wave 2): deep midnight blue, lush greens
+    name: 'summer',
+    bgColor: 0x0c1a38, fogColor: 0x0c1a38, fogNear: 28, fogFar: 90,
+    hemiSky: 0x3868b8, hemiGround: 0x1a4818, hemiIntensity: 1.35,
+    sunColor: 0xfff8d8, sunIntensity: 2.8,
+    emberColor: 0xffcc30, emberIntensity: 2.8,
+    crystalColor: 0x58dfcf, crystalEmissive: 0x2dd4bf,
+    staffLightColor: 0x2dd4bf,
+    pathMarkerColor: 0x58dfcf, pathMarkerEmissive: 0x0e6861,
+    leafColors: [0x1a5c30, 0x2d7a40, 0x0f3d20], trunkColor: 0x3d2010,
+    moonColor: 0xfffff0, starOpacity: 0.1,
+    groundPath: { h: 0.1, s: 0.22, lBase: 0.24 },
+    groundAlt1: { h: 0.28, s: 0.35, l: 0.30 },
+    groundGrass: { h: 0.3, s: 0.44, l: 0.18 },
+  },
+  { // Autumn (wave 3): warm dusk, red/orange leaves
+    name: 'autumn',
+    bgColor: 0x160a04, fogColor: 0x160a04, fogNear: 16, fogFar: 58,
+    hemiSky: 0xb04820, hemiGround: 0x381408, hemiIntensity: 1.1,
+    sunColor: 0xff7824, sunIntensity: 1.6,
+    emberColor: 0xff4818, emberIntensity: 3.0,
+    crystalColor: 0xd86828, crystalEmissive: 0xc04010,
+    staffLightColor: 0xe06028,
+    pathMarkerColor: 0xe87830, pathMarkerEmissive: 0xa83808,
+    leafColors: [0xc04000, 0xd86810, 0xc89010], trunkColor: 0x2a1a0c,
+    moonColor: 0xff8848, starOpacity: 0.55,
+    groundPath: { h: 0.07, s: 0.3, lBase: 0.22 },
+    groundAlt1: { h: 0.06, s: 0.38, l: 0.26 },
+    groundGrass: { h: 0.07, s: 0.42, l: 0.18 },
+  },
+  { // Winter (wave 4): cold midnight, icy blues
+    name: 'winter',
+    bgColor: 0x040810, fogColor: 0x040810, fogNear: 16, fogFar: 65,
+    hemiSky: 0x182848, hemiGround: 0x080c18, hemiIntensity: 0.9,
+    sunColor: 0x90b8ff, sunIntensity: 1.3,
+    emberColor: 0x6888ff, emberIntensity: 1.8,
+    crystalColor: 0x88ccff, crystalEmissive: 0x4888e8,
+    staffLightColor: 0x78aeff,
+    pathMarkerColor: 0x88ccff, pathMarkerEmissive: 0x3870d0,
+    leafColors: [0xc8dff0, 0xd8ecff, 0xbbd4f0], trunkColor: 0x708090,
+    moonColor: 0xd8ecff, starOpacity: 0.88,
+    groundPath: { h: 0.58, s: 0.08, lBase: 0.22 },
+    groundAlt1: { h: 0.58, s: 0.12, l: 0.28 },
+    groundGrass: { h: 0.6, s: 0.18, l: 0.2 },
+  },
+];
+
 const reusableVector = new THREE.Vector3();
 const reusableVectorTwo = new THREE.Vector3();
 const reusableQuaternion = new THREE.Quaternion();
@@ -249,6 +312,13 @@ let bossShotHits = 0;
 let bossesDefeated = 0;
 let encounteredTerms = [];
 let firstMedicHintShown = false;
+let sceneGroundMesh = null;
+let sceneLeafMaterials = [];
+let sceneTrunkMaterial = null;
+let sceneCrystalMat = null;
+let currentSeasonIndex = 0;
+let seasonEmberIntensityBase = 2.1;
+let seasonFade = null;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -299,6 +369,7 @@ scene.add(emberLight);
 
 createWorld();
 createSky();
+applySeasonForWave(1, true);
 createLifeMeter();
 
 bestValue.textContent = formatScore(bestScore);
@@ -402,6 +473,7 @@ function startGame() {
   updateTypedDisplay();
   updateHud(true);
   updatePhaseDisplay();
+  applySeasonForWave(waveSet, true);
   focusKeyboard();
 }
 
@@ -701,6 +773,7 @@ function animate(frameTime) {
 
   updateEffects(delta);
   updateEnvironment(seconds, delta);
+  updateSeasonFade(delta);
   updateLabels();
   renderer.render(scene, camera);
 }
@@ -858,7 +931,7 @@ function updateEffects(delta) {
 }
 
 function updateEnvironment(seconds, delta) {
-  emberLight.intensity = 2.1 + Math.sin(seconds * 5.8) * 0.34;
+  emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   const shake = damageTimer > 0 ? damageTimer * 0.45 : 0;
   camera.position.x = Math.sin(seconds * 0.34) * 0.28 + Math.sin(seconds * 41) * shake;
   camera.position.y = 7.2 + Math.sin(seconds * 0.52) * 0.12 + Math.cos(seconds * 37) * shake;
@@ -1985,7 +2058,6 @@ function createGround() {
   mesh.castShadow = false;
   mesh.receiveShadow = true;
 
-  const color = new THREE.Color();
   let index = 0;
   for (let z = -58; z < 16; z += 1) {
     for (let x = -11; x <= 11; x += 1) {
@@ -1997,27 +2069,18 @@ function createGround() {
       reusableVectorTwo.set(1, 1, 1);
       reusableMatrix.compose(reusableVector, reusableQuaternion, reusableVectorTwo);
       mesh.setMatrixAt(index, reusableMatrix);
-
-      if (Math.abs(x) < 3.1) {
-        color.setHSL(0.1, 0.24, 0.26 + Math.sin(z * 0.7) * 0.025);
-      } else if ((x + z) % 7 === 0) {
-        color.setHSL(0.31, 0.32, 0.32);
-      } else {
-        color.setHSL(0.36, 0.38, 0.24 + Math.random() * 0.08);
-      }
-      mesh.setColorAt(index, color);
       index += 1;
     }
   }
   mesh.instanceMatrix.needsUpdate = true;
-  mesh.instanceColor.needsUpdate = true;
   world.add(mesh);
+  sceneGroundMesh = mesh;
 }
 
 function createTorches() {
   const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88 });
   const bandMat = new THREE.MeshStandardMaterial({ color: 0x7a6040, roughness: 0.48, metalness: 0.5 });
-  const crystalMat = new THREE.MeshStandardMaterial({
+  sceneCrystalMat = new THREE.MeshStandardMaterial({
     color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.0,
     roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9,
   });
@@ -2037,15 +2100,15 @@ function createTorches() {
     // Crystal cluster group (pulsed as a unit)
     const crystalGroup = new THREE.Group();
     crystalGroup.position.set(x, 2.11, z);
-    const core = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.54, 0.36), crystalMat);
+    const core = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.54, 0.36), sceneCrystalMat);
     core.castShadow = true;
     crystalGroup.add(core);
-    const leftShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), crystalMat);
+    const leftShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), sceneCrystalMat);
     leftShard.position.set(-0.2, 0.08, 0);
     leftShard.rotation.z = 0.35;
     leftShard.castShadow = true;
     crystalGroup.add(leftShard);
-    const rightShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), crystalMat);
+    const rightShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), sceneCrystalMat);
     rightShard.position.set(0.2, 0.08, 0);
     rightShard.rotation.z = -0.35;
     rightShard.castShadow = true;
@@ -2062,8 +2125,8 @@ function createTorches() {
 }
 
 function createTrees() {
-  const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x513820, roughness: 0.9 });
-  const leafMaterials = [
+  sceneTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x513820, roughness: 0.9 });
+  sceneLeafMaterials = [
     new THREE.MeshStandardMaterial({ color: 0x1f5b38, roughness: 0.9 }),
     new THREE.MeshStandardMaterial({ color: 0x2f7247, roughness: 0.9 }),
     new THREE.MeshStandardMaterial({ color: 0x163d30, roughness: 0.92 }),
@@ -2076,9 +2139,9 @@ function createTrees() {
     const height = 1.1 + Math.random() * 0.7;
     const tree = new THREE.Group();
     tree.position.set(x, 0, z);
-    tree.add(blockMesh(0.55, height, 0.55, trunkMaterial, 0, height * 0.5, 0));
+    tree.add(blockMesh(0.55, height, 0.55, sceneTrunkMaterial, 0, height * 0.5, 0));
 
-    const leafMaterial = leafMaterials[index % leafMaterials.length];
+    const leafMaterial = sceneLeafMaterials[index % sceneLeafMaterials.length];
     const lowerLeaves = blockMesh(1.5, 1.1, 1.5, leafMaterial, 0, height + 0.72, 0);
     const upperLeaves = blockMesh(1.05, 0.86, 1.05, leafMaterial, 0, height + 1.38, 0);
     tree.add(lowerLeaves);
@@ -2494,6 +2557,165 @@ function weightedPick(items) {
 
 function easeOutSine(value) {
   return Math.sin((value * Math.PI) / 2);
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function buildSeasonFromScene() {
+  return {
+    bgColor: scene.background.clone(),
+    fogColor: scene.fog.color.clone(),
+    fogNear: scene.fog.near,
+    fogFar: scene.fog.far,
+    hemiSky: hemiLight.color.clone(),
+    hemiGround: hemiLight.groundColor.clone(),
+    hemiIntensity: hemiLight.intensity,
+    sunColor: moonLight.color.clone(),
+    sunIntensity: moonLight.intensity,
+    emberColor: emberLight.color.clone(),
+    emberIntensity: seasonEmberIntensityBase,
+    crystalColor: sceneCrystalMat ? sceneCrystalMat.color.clone() : new THREE.Color(0x58dfcf),
+    crystalEmissive: sceneCrystalMat ? sceneCrystalMat.emissive.clone() : new THREE.Color(0x2dd4bf),
+    staffLightColor: torchLights.length > 0 ? torchLights[0].color.clone() : new THREE.Color(0x2dd4bf),
+    pathMarkerColor: pathMarkerMaterial ? pathMarkerMaterial.color.clone() : new THREE.Color(0x58dfcf),
+    pathMarkerEmissive: pathMarkerMaterial ? pathMarkerMaterial.emissive.clone() : new THREE.Color(0x0e6861),
+    leafColors: sceneLeafMaterials.map(m => m.color.clone()),
+    trunkColor: sceneTrunkMaterial ? sceneTrunkMaterial.color.clone() : new THREE.Color(0x513820),
+    moonColor: moon ? moon.material.color.clone() : new THREE.Color(0xf2f0df),
+    starOpacity: starField ? starField.material.opacity : 0.72,
+  };
+}
+
+function buildSeasonTarget(palette) {
+  return {
+    bgColor: new THREE.Color(palette.bgColor),
+    fogColor: new THREE.Color(palette.fogColor),
+    fogNear: palette.fogNear,
+    fogFar: palette.fogFar,
+    hemiSky: new THREE.Color(palette.hemiSky),
+    hemiGround: new THREE.Color(palette.hemiGround),
+    hemiIntensity: palette.hemiIntensity,
+    sunColor: new THREE.Color(palette.sunColor),
+    sunIntensity: palette.sunIntensity,
+    emberColor: new THREE.Color(palette.emberColor),
+    emberIntensity: palette.emberIntensity,
+    crystalColor: new THREE.Color(palette.crystalColor),
+    crystalEmissive: new THREE.Color(palette.crystalEmissive),
+    staffLightColor: new THREE.Color(palette.staffLightColor),
+    pathMarkerColor: new THREE.Color(palette.pathMarkerColor),
+    pathMarkerEmissive: new THREE.Color(palette.pathMarkerEmissive),
+    leafColors: palette.leafColors.map(c => new THREE.Color(c)),
+    trunkColor: new THREE.Color(palette.trunkColor),
+    moonColor: new THREE.Color(palette.moonColor),
+    starOpacity: palette.starOpacity,
+  };
+}
+
+function applySeasonInstant(palette) {
+  scene.background.setHex(palette.bgColor);
+  scene.fog.color.setHex(palette.fogColor);
+  scene.fog.near = palette.fogNear;
+  scene.fog.far = palette.fogFar;
+  hemiLight.color.setHex(palette.hemiSky);
+  hemiLight.groundColor.setHex(palette.hemiGround);
+  hemiLight.intensity = palette.hemiIntensity;
+  moonLight.color.setHex(palette.sunColor);
+  moonLight.intensity = palette.sunIntensity;
+  emberLight.color.setHex(palette.emberColor);
+  seasonEmberIntensityBase = palette.emberIntensity;
+  if (sceneCrystalMat) {
+    sceneCrystalMat.color.setHex(palette.crystalColor);
+    sceneCrystalMat.emissive.setHex(palette.crystalEmissive);
+  }
+  for (const light of torchLights) light.color.setHex(palette.staffLightColor);
+  if (pathMarkerMaterial) {
+    pathMarkerMaterial.color.setHex(palette.pathMarkerColor);
+    pathMarkerMaterial.emissive.setHex(palette.pathMarkerEmissive);
+  }
+  for (let i = 0; i < sceneLeafMaterials.length; i++) {
+    sceneLeafMaterials[i].color.setHex(palette.leafColors[i]);
+  }
+  if (sceneTrunkMaterial) sceneTrunkMaterial.color.setHex(palette.trunkColor);
+  if (moon) moon.material.color.setHex(palette.moonColor);
+  if (starField) starField.material.opacity = palette.starOpacity;
+  recolorGround(palette);
+}
+
+function applySeasonForWave(wave, instant = false) {
+  const index = (wave - 1) % SEASON_PALETTES.length;
+  if (!instant && currentSeasonIndex === index) return;
+  currentSeasonIndex = index;
+  const palette = SEASON_PALETTES[index];
+  if (instant) {
+    applySeasonInstant(palette);
+    seasonFade = null;
+    return;
+  }
+  const from = buildSeasonFromScene();
+  const to = buildSeasonTarget(palette);
+  seasonFade = { from, to, palette, t: 0, duration: 3.5 };
+}
+
+function updateSeasonFade(delta) {
+  if (!seasonFade) return;
+  seasonFade.t = Math.min(seasonFade.t + delta / seasonFade.duration, 1);
+  const t = easeInOutCubic(seasonFade.t);
+  const { from, to } = seasonFade;
+
+  scene.background.lerpColors(from.bgColor, to.bgColor, t);
+  scene.fog.color.lerpColors(from.fogColor, to.fogColor, t);
+  scene.fog.near = THREE.MathUtils.lerp(from.fogNear, to.fogNear, t);
+  scene.fog.far = THREE.MathUtils.lerp(from.fogFar, to.fogFar, t);
+  hemiLight.color.lerpColors(from.hemiSky, to.hemiSky, t);
+  hemiLight.groundColor.lerpColors(from.hemiGround, to.hemiGround, t);
+  hemiLight.intensity = THREE.MathUtils.lerp(from.hemiIntensity, to.hemiIntensity, t);
+  moonLight.color.lerpColors(from.sunColor, to.sunColor, t);
+  moonLight.intensity = THREE.MathUtils.lerp(from.sunIntensity, to.sunIntensity, t);
+  emberLight.color.lerpColors(from.emberColor, to.emberColor, t);
+  seasonEmberIntensityBase = THREE.MathUtils.lerp(from.emberIntensity, to.emberIntensity, t);
+  if (sceneCrystalMat) {
+    sceneCrystalMat.color.lerpColors(from.crystalColor, to.crystalColor, t);
+    sceneCrystalMat.emissive.lerpColors(from.crystalEmissive, to.crystalEmissive, t);
+  }
+  const lerpedStaff = new THREE.Color().lerpColors(from.staffLightColor, to.staffLightColor, t);
+  for (const light of torchLights) light.color.copy(lerpedStaff);
+  if (pathMarkerMaterial) {
+    pathMarkerMaterial.color.lerpColors(from.pathMarkerColor, to.pathMarkerColor, t);
+    pathMarkerMaterial.emissive.lerpColors(from.pathMarkerEmissive, to.pathMarkerEmissive, t);
+  }
+  for (let i = 0; i < sceneLeafMaterials.length; i++) {
+    sceneLeafMaterials[i].color.lerpColors(from.leafColors[i], to.leafColors[i], t);
+  }
+  if (sceneTrunkMaterial) sceneTrunkMaterial.color.lerpColors(from.trunkColor, to.trunkColor, t);
+  if (moon) moon.material.color.lerpColors(from.moonColor, to.moonColor, t);
+  if (starField) starField.material.opacity = THREE.MathUtils.lerp(from.starOpacity, to.starOpacity, t);
+
+  if (seasonFade.t >= 1) {
+    recolorGround(seasonFade.palette);
+    seasonFade = null;
+  }
+}
+
+function recolorGround(palette) {
+  if (!sceneGroundMesh) return;
+  const color = new THREE.Color();
+  let index = 0;
+  for (let z = -58; z < 16; z += 1) {
+    for (let x = -11; x <= 11; x += 1) {
+      if (Math.abs(x) < 3.1) {
+        color.setHSL(palette.groundPath.h, palette.groundPath.s, palette.groundPath.lBase + Math.sin(z * 0.7) * 0.025);
+      } else if ((x + z) % 7 === 0) {
+        color.setHSL(palette.groundAlt1.h, palette.groundAlt1.s, palette.groundAlt1.l);
+      } else {
+        color.setHSL(palette.groundGrass.h, palette.groundGrass.s, palette.groundGrass.l + Math.sin(x * 2.3 + z * 1.7) * 0.03);
+      }
+      sceneGroundMesh.setColorAt(index, color);
+      index += 1;
+    }
+  }
+  sceneGroundMesh.instanceColor.needsUpdate = true;
 }
 
 const SPELLING_ALTS = [
@@ -2980,6 +3202,7 @@ function advanceWaveSet() {
   updateTypedDisplay();
   updateHud(true);
   updatePhaseDisplay();
+  applySeasonForWave(waveSet);
   focusKeyboard();
 }
 
