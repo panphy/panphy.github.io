@@ -267,6 +267,7 @@ const torchFlames = [];
 const torchLights = [];
 const pathMarkerBlocks = [];
 const scrollingTrees = [];
+const clouds = [];
 
 let mode = 'idle';
 let score = 0;
@@ -369,6 +370,7 @@ scene.add(emberLight);
 
 createWorld();
 createSky();
+createClouds();
 applySeasonForWave(1, true);
 createLifeMeter();
 
@@ -979,6 +981,13 @@ function updateEnvironment(seconds, delta) {
     tree.group.position.z += scrollDelta * tree.speed;
     if (tree.group.position.z > TREE_MAX_Z) {
       tree.group.position.z -= TREE_SPAN;
+    }
+  }
+
+  for (const cloud of clouds) {
+    cloud.group.position.x += cloud.speed * delta;
+    if (cloud.group.position.x > 46) {
+      cloud.group.position.x = -46;
     }
   }
 }
@@ -2204,6 +2213,53 @@ function createSky() {
   });
   starField = new THREE.Points(starGeometry, starMaterial);
   scene.add(starField);
+}
+
+function buildCloudGroup(material, template) {
+  const group = new THREE.Group();
+  if (template === 0) {
+    group.add(blockMesh(5.2, 0.8, 2.0, material,  0.0, 0.0,  0));
+    group.add(blockMesh(2.8, 1.2, 1.7, material, -1.2, 0.52, 0));
+    group.add(blockMesh(3.2, 1.5, 1.6, material,  0.6, 0.68, 0));
+    group.add(blockMesh(2.2, 1.0, 1.5, material,  2.2, 0.45, 0));
+  } else if (template === 1) {
+    group.add(blockMesh(4.0, 0.7, 1.8, material,  0.0, 0.0,  0));
+    group.add(blockMesh(2.4, 1.3, 1.6, material,  0.0, 0.60, 0));
+    group.add(blockMesh(1.6, 0.9, 1.4, material, -1.6, 0.40, 0));
+    group.add(blockMesh(1.4, 0.8, 1.3, material,  1.8, 0.38, 0));
+  } else {
+    group.add(blockMesh(6.0, 0.75, 2.2, material,  0.0, 0.0,  0));
+    group.add(blockMesh(2.0, 1.0,  1.8, material, -2.4, 0.44, 0));
+    group.add(blockMesh(2.6, 1.2,  1.7, material, -0.6, 0.58, 0));
+    group.add(blockMesh(2.2, 1.1,  1.6, material,  1.4, 0.50, 0));
+    group.add(blockMesh(1.8, 0.85, 1.5, material,  2.9, 0.40, 0));
+  }
+  return group;
+}
+
+function createClouds() {
+  const cloudMaterial = new THREE.MeshBasicMaterial({
+    color: 0xf0f2f8,
+    transparent: true,
+    opacity: 0.82,
+  });
+  const configs = [
+    { x: -38, y: 17.5, z: -50, scale: 1.05, speed: 0.55, t: 0 },
+    { x: -18, y: 19.0, z: -58, scale: 0.80, speed: 0.40, t: 1 },
+    { x:  -2, y: 15.5, z: -40, scale: 1.20, speed: 0.70, t: 2 },
+    { x:  14, y: 18.0, z: -54, scale: 0.90, speed: 0.48, t: 0 },
+    { x:  28, y: 16.5, z: -44, scale: 1.10, speed: 0.62, t: 1 },
+    { x: -30, y: 20.0, z: -62, scale: 0.70, speed: 0.35, t: 2 },
+    { x:   8, y: 21.0, z: -60, scale: 0.85, speed: 0.42, t: 0 },
+    { x:  38, y: 17.0, z: -46, scale: 1.00, speed: 0.58, t: 1 },
+  ];
+  for (const cfg of configs) {
+    const group = buildCloudGroup(cloudMaterial, cfg.t);
+    group.position.set(cfg.x, cfg.y, cfg.z);
+    group.scale.setScalar(cfg.scale);
+    scene.add(group);
+    clouds.push({ group, speed: cfg.speed });
+  }
 }
 
 function spawnBeam(targetPosition) {
