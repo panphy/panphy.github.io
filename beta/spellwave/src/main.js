@@ -24,6 +24,7 @@ const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
 const typingLabel = document.getElementById('typingLabel');
 const runGlossary = document.getElementById('runGlossary');
+const bossBanner = document.getElementById('bossBanner');
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
@@ -245,7 +246,9 @@ let mistakeCount = 0;
 let defeatedCount = 0;
 let leakedCount = 0;
 let bossShotHits = 0;
+let bossesDefeated = 0;
 let encounteredTerms = [];
+let firstMedicHintShown = false;
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -381,6 +384,7 @@ function startGame() {
   defeatedCount = 0;
   leakedCount = 0;
   bossShotHits = 0;
+  bossesDefeated = 0;
   encounteredTerms = [];
   typedBuffer = '';
   activeTarget = null;
@@ -577,6 +581,7 @@ function defeatEnemy(enemy) {
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
   defeatedCount += 1;
+  if (enemy.isBoss) bossesDefeated += 1;
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
@@ -600,6 +605,11 @@ function leakEnemy(enemy) {
   if (enemy.isMedic) {
     const wasActiveTarget = activeTarget === enemy;
     playMedicPassSound();
+    if (!enemy.label.classList.contains('is-hidden')) {
+      const left = parseFloat(enemy.label.style.left);
+      const top = parseFloat(enemy.label.style.top);
+      if (Number.isFinite(left) && Number.isFinite(top)) spawnMissedHealPopup(left, top);
+    }
     spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
     removeEnemy(enemy);
     if (wasActiveTarget) typedBuffer = '';
@@ -1107,7 +1117,11 @@ function buildTwoWordLimit(term, options = {}) {
   });
   if (typeableIndices.length <= 2 && !options.alwaysLimit && !hasSkippedAnswerWord) return null;
 
-  const shuffled = [...typeableIndices].sort(() => Math.random() - 0.5);
+  const shuffled = [...typeableIndices];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
   const hiddenSet = new Set(shuffled.slice(0, Math.min(2, shuffled.length)));
 
   const parts = tokens.map((tok, i) => {
@@ -1348,6 +1362,10 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
+  if (isMedic && !firstMedicHintShown) {
+    firstMedicHintShown = true;
+    window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
+  }
   const group = createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
   const spawnSpread = Number.isFinite(options.delay)
@@ -1875,6 +1893,7 @@ function spawnDebris(position, type) {
       spin: new THREE.Vector3(Math.random() * 8, Math.random() * 8, Math.random() * 8),
     });
   }
+  geometry.dispose();
 }
 
 function removeEnemy(enemy) {
@@ -2003,8 +2022,14 @@ function chooseBossWordsForWave() {
     usedTerms.add(entry.term);
   }
 
-  // Final boss is always an equation question
+  // Third boss is the equation question
   chosen.push(chooseEquationWord(usedTerms));
+
+  // Shuffle so the equation boss can appear in any position
+  for (let i = chosen.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [chosen[i], chosen[j]] = [chosen[j], chosen[i]];
+  }
 
   return chosen;
 }
@@ -2489,8 +2514,10 @@ function startBossPhase() {
 
   wavePhase = 'boss';
   bossesSpawned = 0;
+  bossesDefeated = 0;
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
   playBossWarningSound();
+  showBanner('BOSS WAVE');
   updatePhaseDisplay();
 }
 
@@ -2521,16 +2548,17 @@ function startWaveCleared() {
   activeTarget = null;
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
-  const glossary = bossWordsThisSet
-    .map(w => w.isEquation ? `${w.definition}: ${w.term}` : `${w.term} — ${w.definition}`)
-    .join('\n');
+  const copyText = streak >= 2
+    ? `${streak}-chain streak carries into wave ${waveSet + 1}!`
+    : 'Boss terms from this wave:';
   showMessage(
     `WAVE ${waveSet} CLEARED`,
     'Wave Clear',
     `Score ${formatScore(score)}`,
     'Next Wave',
-    glossary
+    copyText
   );
+  renderWaveBossGlossary();
   messagePanel.classList.add('is-cleared');
   updateHud(true);
   updatePhaseDisplay();
@@ -2543,6 +2571,8 @@ function advanceWaveSet() {
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
+  bossesDefeated = 0;
+  bossShotHits = 0;
   bossSpawnTimer = 0;
   prepareWavePlan();
   typedBuffer = '';
@@ -2572,7 +2602,7 @@ function updateTypingLabel() {
     return;
   }
   if (wavePhase === 'boss') {
-    typingLabel.textContent = `BOSS ${bossesSpawned}/${BOSSES_PER_WAVE}`;
+    typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
   } else {
     typingLabel.textContent = `${normalEnemiesSpawned}/${normalEnemyTarget}`;
   }
@@ -2629,4 +2659,53 @@ function renderRunGlossary() {
   }
 
   runGlossary.hidden = false;
+}
+
+function renderWaveBossGlossary() {
+  if (!runGlossary) return;
+  runGlossary.innerHTML = '';
+
+  if (bossWordsThisSet.length === 0) {
+    runGlossary.hidden = true;
+    return;
+  }
+
+  for (const word of bossWordsThisSet) {
+    const encountered = encounteredTerms.find(t => t.term === word.term);
+    const wasDefeated = encountered?.defeated === true;
+
+    const item = document.createElement('div');
+    item.className = `glossary-item ${wasDefeated ? 'is-defeated' : 'is-leaked'}${word.isEquation ? ' is-equation' : ''}`;
+
+    const term = document.createElement('span');
+    term.className = 'gl-term';
+    term.textContent = word.isEquation ? (word.definition || word.term) : word.term;
+
+    const def = document.createElement('span');
+    def.className = 'gl-def';
+    def.textContent = word.isEquation ? word.term : (word.definition || '—');
+
+    item.append(term, def);
+    runGlossary.append(item);
+  }
+
+  runGlossary.hidden = false;
+}
+
+function spawnMissedHealPopup(left, top) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-missed-heal';
+  popup.textContent = 'MISSED HEAL';
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function showBanner(text, variant = '') {
+  if (!bossBanner) return;
+  bossBanner.textContent = text;
+  bossBanner.className = 'boss-banner' + (variant ? ` is-${variant}` : '');
+  void bossBanner.offsetWidth;
+  bossBanner.classList.add('is-active');
 }
