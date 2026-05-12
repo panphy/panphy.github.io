@@ -41,9 +41,6 @@ export const EASY_WORDS = [
 
 export const MEDIUM_WORDS = [
   { term: 'energy store', definition: 'A way energy is held before or after a transfer' },
-  { term: 'kinetic store', definition: 'The energy store of a moving object' },
-  { term: 'thermal store', definition: 'The energy store linked to object temperature' },
-  { term: 'elastic store', definition: 'The energy store of a stretched or compressed object' },
   { term: 'work done', definition: 'Energy transferred when a force moves an object' },
   { term: 'efficiency', definition: 'Useful energy output divided by total energy input' },
   { term: 'renewable', definition: 'An energy resource that can be replaced as it is used' },
@@ -88,8 +85,9 @@ export const MEDIUM_WORDS = [
 ];
 
 export const HARD_WORDS = [
-  { term: 'gravitational store', definition: 'Energy stored by an object raised in a gravitational field' },
+  { term: 'gravitational potential energy', definition: 'Energy stored by an object raised in a gravitational field' },
   { term: 'kinetic energy', definition: 'Energy an object has due to its motion' },
+  { term: 'thermal energy', definition: 'Energy a substance has due to the motion of its particles' },
   { term: 'elastic potential', definition: 'Energy stored when an object is stretched or compressed' },
   { term: 'specific heat capacity', definition: 'Energy to raise 1 kg of a substance by 1°C' },
   { term: 'specific latent heat', definition: 'Energy to change the state of 1 kg' },

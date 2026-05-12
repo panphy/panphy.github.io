@@ -536,7 +536,7 @@ function enterCharacter(character) {
     if (nextMatches.length > 0) {
       typedBuffer = next;
       activeTarget = chooseTarget(nextMatches);
-      if (activeTarget.searchPrompt === typedBuffer) {
+      if (activeTarget._matchedSearchPrompt === typedBuffer) {
         defeatEnemy(activeTarget);
       } else {
         playTypeSound();
@@ -1054,6 +1054,21 @@ function buildSearchPrompt(term, options = {}) {
   return [...term].map(character => normalizeCharacter(character, options)).join('');
 }
 
+function buildAltSearchPrompts(term, options = {}) {
+  const canonical = buildSearchPrompt(term, options);
+  const lower = term.toLowerCase();
+  const alts = new Set();
+  for (const [a, b] of SPELLING_ALTS) {
+    for (const [from, to] of [[a, b], [b, a]]) {
+      if (lower.includes(from)) {
+        const alt = buildSearchPrompt(lower.replace(from, to), options);
+        if (alt !== canonical) alts.add(alt);
+      }
+    }
+  }
+  return [...alts];
+}
+
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -1174,7 +1189,11 @@ function promptIndexForProgress(term, progress, options = {}) {
 
 function displayTypedBuffer() {
   if (!typedBuffer) return '';
-  if (!activeTarget || !activeTarget.searchPrompt.startsWith(typedBuffer)) return typedBuffer;
+  if (!activeTarget) return typedBuffer;
+  const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typedBuffer)
+    ? activeTarget._matchedSearchPrompt
+    : activeTarget.searchPrompt;
+  if (!effectiveSP.startsWith(typedBuffer)) return typedBuffer;
   if (activeTarget.limitedParts) return typedBuffer;
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length, {
     multiplicationAlias: activeTarget.isEquation,
@@ -1182,7 +1201,10 @@ function displayTypedBuffer() {
 }
 
 function renderPrompt(enemy) {
-  const matched = enemy.searchPrompt.startsWith(typedBuffer) && typedBuffer.length > 0;
+  const effectiveSP = enemy._matchedSearchPrompt?.startsWith(typedBuffer)
+    ? enemy._matchedSearchPrompt
+    : enemy.searchPrompt;
+  const matched = effectiveSP.startsWith(typedBuffer) && typedBuffer.length > 0;
   const typedProgress = matched ? typedBuffer.length : 0;
 
   let html;
@@ -1443,6 +1465,8 @@ function spawnEnemy(options = {}) {
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
     searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
+    altSearchPrompts: twoWordData ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    _matchedSearchPrompt: null,
     limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
     maskPrompt: showDefinition && !isEquationPrompt,
@@ -1949,13 +1973,25 @@ function findMatches(prefix, options = {}) {
   if (!prefix) return [];
   return enemies.filter((enemy) => {
     if (options.equationOnly && !enemy.isEquation) return false;
-    return isEnemyTargetable(enemy) && enemy.searchPrompt.startsWith(prefix);
+    if (!isEnemyTargetable(enemy)) return false;
+    if (enemy.searchPrompt.startsWith(prefix)) {
+      enemy._matchedSearchPrompt = enemy.searchPrompt;
+      return true;
+    }
+    const alt = enemy.altSearchPrompts?.find(p => p.startsWith(prefix));
+    if (alt) {
+      enemy._matchedSearchPrompt = alt;
+      return true;
+    }
+    return false;
   });
 }
 
 function hasActiveEquationPrefix() {
   return enemies.some((enemy) => {
-    return enemy.isEquation && isEnemyTargetable(enemy) && enemy.searchPrompt.startsWith(typedBuffer);
+    if (!enemy.isEquation || !isEnemyTargetable(enemy)) return false;
+    return enemy.searchPrompt.startsWith(typedBuffer) ||
+      enemy.altSearchPrompts?.some(p => p.startsWith(typedBuffer));
   });
 }
 
@@ -2114,6 +2150,18 @@ function weightedPick(items) {
 function easeOutSine(value) {
   return Math.sin((value * Math.PI) / 2);
 }
+
+const SPELLING_ALTS = [
+  ['colour', 'color'],
+  ['centre', 'center'],
+  ['metre', 'meter'],
+  ['litre', 'liter'],
+  ['fibre', 'fiber'],
+  ['ionise', 'ionize'],
+  ['magnetise', 'magnetize'],
+  ['analyse', 'analyze'],
+  ['polarise', 'polarize'],
+];
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
 const MATH_OPERATOR_INPUTS = new Set(['*', '+', '-', '=', '/', '×', 'x', 'X']);
