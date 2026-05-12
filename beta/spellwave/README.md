@@ -8,6 +8,6 @@ Run it from the repository root with a simple local server:
 python3 -m http.server 8000
 ```
 
-Then open `/beta/spellwave/`.
+Then open `/beta/spellwave.html`.
 
 This page intentionally avoids service-worker registration, published navigation, and `sw.js` cache entries because everything under `/beta` is excluded from the production offline cache.
