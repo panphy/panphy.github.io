@@ -810,8 +810,24 @@ function updateEffects(delta) {
 
     effect.life -= delta;
     const amount = Math.max(0, effect.life / effect.maxLife);
-    effect.mesh.material.opacity = amount * 0.82;
-    effect.mesh.scale.set(1, 1, Math.max(0.08, amount));
+
+    if (effect.kind === 'beam_flash') {
+      const expand = 0.3 + (1 - amount) * 2.2;
+      effect.mesh.scale.setScalar(expand);
+      effect.mesh.material.opacity = amount * 0.9;
+    } else if (effect.kind === 'beam_glow') {
+      const xyScale = 0.5 + amount * 0.5;
+      effect.mesh.scale.set(xyScale, xyScale, Math.max(0.05, amount));
+      effect.mesh.material.opacity = amount * 0.48;
+    } else if (effect.kind === 'beam_core') {
+      const xyScale = 0.35 + amount * 0.65;
+      effect.mesh.scale.set(xyScale, xyScale, Math.max(0.05, amount));
+      effect.mesh.material.opacity = amount;
+    } else {
+      effect.mesh.material.opacity = amount * 0.82;
+      effect.mesh.scale.set(1, 1, Math.max(0.08, amount));
+    }
+
     if (effect.life <= 0) {
       effectsGroup.remove(effect.mesh);
       effect.mesh.geometry.dispose();
@@ -1516,6 +1532,7 @@ function createEnemyMesh(type) {
   const isBossType = !!type.isBoss;
   const isMedicType = !!type.isMedic;
   if (isMedicType) return createMedicHeartMesh(type);
+  if (isBossType) return createSpecificBossMesh(type);
 
   const bodyMaterial = new THREE.MeshStandardMaterial({
     color: type.body,
@@ -1556,19 +1573,6 @@ function createEnemyMesh(type) {
   if (type.name === 'Cinder Imp') {
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, -0.34, 2.32, 0));
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, 0.34, 2.32, 0));
-  }
-
-  if (isBossType) {
-    group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, -0.3, 2.32, 0));
-    group.add(blockMesh(0.18, 0.44, 0.18, trimMaterial, 0, 2.42, 0));
-    group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, 0.3, 2.32, 0));
-    group.add(blockMesh(1.32, 0.24, 0.88, trimMaterial, 0, 1.42, -0.02));
-    group.add(blockMesh(0.28, 0.28, 0.12, eyeMaterial, 0, 1.22, 0.43));
-    group.add(blockMesh(0.26, 0.48, 0.26, trimMaterial, -0.58, 2.2, 0));
-    group.add(blockMesh(0.26, 0.48, 0.26, trimMaterial, 0.58, 2.2, 0));
-    const bossGlow = new THREE.PointLight(type.eye, 1.35, 5.5, 2.1);
-    bossGlow.position.set(0, 1.45, 0.45);
-    group.add(bossGlow);
   }
 
   const incomingBeacon = createIncomingBeacon(type);
@@ -1633,6 +1637,285 @@ function createMedicHeartMesh(type) {
   group.userData.targetMarker = targetMarker;
 
   return group;
+}
+
+function bossMat(type) {
+  return new THREE.MeshStandardMaterial({
+    color: type.body, emissive: type.body, emissiveIntensity: 0.56,
+    roughness: 0.58, metalness: 0.03,
+  });
+}
+function bossTrimMat(type) {
+  return new THREE.MeshStandardMaterial({
+    color: type.trim, emissive: type.trim, emissiveIntensity: 0.82,
+    roughness: 0.46, metalness: 0.08,
+  });
+}
+function bossEyeMat(type) {
+  return new THREE.MeshStandardMaterial({
+    color: type.eye, emissive: type.eye, emissiveIntensity: 2.2, roughness: 0.4,
+  });
+}
+function finishBossGroup(group, type, beaconY = 2.9) {
+  const glow = new THREE.PointLight(type.eye, 1.35, 5.5, 2.1);
+  glow.position.set(0, 1.45, 0.45);
+  group.add(glow);
+  const incomingBeacon = createIncomingBeacon(type);
+  incomingBeacon.position.set(0, beaconY, 0);
+  const targetMarker = createTargetMarker(type);
+  group.add(incomingBeacon, targetMarker);
+  group.userData.incomingBeacon = incomingBeacon;
+  group.userData.targetMarker = targetMarker;
+  return group;
+}
+function createSpecificBossMesh(type) {
+  if (type.name === 'Crimson Bulwark') return createDragonBossMesh(type);
+  if (type.name === 'Verdant Colossus') return createDevilBossMesh(type);
+  if (type.name === 'Storm Warden') return createSkeletonBossMesh(type);
+  return createPhoenixBossMesh(type);
+}
+
+function createDragonBossMesh(type) {
+  const group = new THREE.Group();
+  const bodyMat = bossMat(type);
+  const trimMat = bossTrimMat(type);
+  const eyeMat = bossEyeMat(type);
+  // Legs
+  group.add(blockMesh(0.44, 0.48, 0.56, bodyMat, -0.38, 0.44, 0.1));
+  group.add(blockMesh(0.44, 0.48, 0.56, bodyMat, 0.38, 0.44, 0.1));
+  // Feet
+  group.add(blockMesh(0.54, 0.2, 0.64, trimMat, -0.38, 0.16, 0.22));
+  group.add(blockMesh(0.54, 0.2, 0.64, trimMat, 0.38, 0.16, 0.22));
+  // Torso
+  group.add(blockMesh(1.2, 1.06, 0.88, bodyMat, 0, 0.9, 0));
+  // Spine ridges
+  group.add(blockMesh(0.12, 0.28, 0.12, trimMat, 0, 1.5, -0.28));
+  group.add(blockMesh(0.12, 0.22, 0.12, trimMat, 0, 1.24, -0.3));
+  group.add(blockMesh(0.12, 0.18, 0.12, trimMat, 0, 0.98, -0.3));
+  // Neck
+  group.add(blockMesh(0.52, 0.6, 0.52, bodyMat, 0, 1.65, 0.12));
+  // Head
+  group.add(blockMesh(0.84, 0.52, 0.62, trimMat, 0, 2.1, 0.18));
+  // Snout
+  group.add(blockMesh(0.6, 0.3, 0.44, bodyMat, 0, 2.0, 0.52));
+  // Nostrils
+  group.add(blockMesh(0.1, 0.1, 0.08, eyeMat, -0.18, 2.07, 0.75));
+  group.add(blockMesh(0.1, 0.1, 0.08, eyeMat, 0.18, 2.07, 0.75));
+  // Eyes
+  group.add(blockMesh(0.18, 0.18, 0.08, eyeMat, -0.28, 2.22, 0.5));
+  group.add(blockMesh(0.18, 0.18, 0.08, eyeMat, 0.28, 2.22, 0.5));
+  // Horns
+  const lHorn = blockMesh(0.14, 0.44, 0.14, trimMat, -0.32, 2.46, 0.06);
+  lHorn.rotation.z = 0.38;
+  group.add(lHorn);
+  const rHorn = blockMesh(0.14, 0.44, 0.14, trimMat, 0.32, 2.46, 0.06);
+  rHorn.rotation.z = -0.38;
+  group.add(rHorn);
+  // Wings — left
+  group.add(blockMesh(0.36, 0.7, 0.18, trimMat, -0.84, 1.22, -0.06));
+  group.add(blockMesh(0.32, 0.84, 0.14, trimMat, -1.28, 1.28, 0));
+  group.add(blockMesh(0.24, 0.58, 0.12, trimMat, -1.66, 1.3, 0.04));
+  group.add(blockMesh(0.44, 0.62, 0.07, bodyMat, -1.06, 1.14, -0.02));
+  group.add(blockMesh(0.36, 0.5, 0.07, bodyMat, -1.46, 1.18, 0.02));
+  // Wings — right
+  group.add(blockMesh(0.36, 0.7, 0.18, trimMat, 0.84, 1.22, -0.06));
+  group.add(blockMesh(0.32, 0.84, 0.14, trimMat, 1.28, 1.28, 0));
+  group.add(blockMesh(0.24, 0.58, 0.12, trimMat, 1.66, 1.3, 0.04));
+  group.add(blockMesh(0.44, 0.62, 0.07, bodyMat, 1.06, 1.14, -0.02));
+  group.add(blockMesh(0.36, 0.5, 0.07, bodyMat, 1.46, 1.18, 0.02));
+  // Tail
+  group.add(blockMesh(0.4, 0.36, 0.48, bodyMat, 0, 0.62, -0.64));
+  group.add(blockMesh(0.3, 0.28, 0.38, bodyMat, 0, 0.5, -1.1));
+  group.add(blockMesh(0.22, 0.2, 0.28, trimMat, 0, 0.4, -1.46));
+  return finishBossGroup(group, type);
+}
+
+function createDevilBossMesh(type) {
+  const group = new THREE.Group();
+  const bodyMat = bossMat(type);
+  const trimMat = bossTrimMat(type);
+  const eyeMat = bossEyeMat(type);
+  // Legs
+  group.add(blockMesh(0.42, 0.58, 0.5, bodyMat, -0.32, 0.52, 0.02));
+  group.add(blockMesh(0.42, 0.58, 0.5, bodyMat, 0.32, 0.52, 0.02));
+  // Hooves
+  group.add(blockMesh(0.38, 0.28, 0.42, trimMat, -0.32, 0.16, 0.08));
+  group.add(blockMesh(0.38, 0.28, 0.42, trimMat, 0.32, 0.16, 0.08));
+  // Pelvis
+  group.add(blockMesh(0.98, 0.22, 0.7, bodyMat, 0, 0.28, 0));
+  // Torso
+  group.add(blockMesh(1.22, 1.3, 0.78, bodyMat, 0, 0.9, 0));
+  // Oversized arms
+  group.add(blockMesh(0.38, 1.12, 0.5, bodyMat, -0.86, 0.9, 0.02));
+  group.add(blockMesh(0.38, 1.12, 0.5, bodyMat, 0.86, 0.9, 0.02));
+  // Clawed hands
+  group.add(blockMesh(0.44, 0.24, 0.52, trimMat, -0.86, 0.24, 0.06));
+  group.add(blockMesh(0.44, 0.24, 0.52, trimMat, 0.86, 0.24, 0.06));
+  // Claws
+  for (let i = -1; i <= 1; i++) {
+    group.add(blockMesh(0.08, 0.16, 0.08, trimMat, -0.86 + i * 0.14, 0.08, 0.22));
+    group.add(blockMesh(0.08, 0.16, 0.08, trimMat, 0.86 + i * 0.14, 0.08, 0.22));
+  }
+  // Shoulder guards
+  group.add(blockMesh(0.28, 0.28, 0.24, trimMat, -0.82, 1.58, -0.04));
+  group.add(blockMesh(0.22, 0.2, 0.2, trimMat, -0.98, 1.78, -0.04));
+  group.add(blockMesh(0.28, 0.28, 0.24, trimMat, 0.82, 1.58, -0.04));
+  group.add(blockMesh(0.22, 0.2, 0.2, trimMat, 0.98, 1.78, -0.04));
+  // Head
+  group.add(blockMesh(0.9, 0.72, 0.76, trimMat, 0, 1.9, 0.02));
+  // Heavy brow
+  group.add(blockMesh(0.88, 0.2, 0.26, bodyMat, 0, 2.14, 0.3));
+  // Eyes
+  group.add(blockMesh(0.2, 0.2, 0.08, eyeMat, -0.24, 1.96, 0.42));
+  group.add(blockMesh(0.2, 0.2, 0.08, eyeMat, 0.24, 1.96, 0.42));
+  // Nose + mouth
+  group.add(blockMesh(0.24, 0.14, 0.12, bodyMat, 0, 1.76, 0.42));
+  group.add(blockMesh(0.46, 0.1, 0.08, trimMat, 0, 1.6, 0.42));
+  // Fangs
+  group.add(blockMesh(0.08, 0.16, 0.08, trimMat, -0.14, 1.5, 0.42));
+  group.add(blockMesh(0.08, 0.16, 0.08, trimMat, 0.14, 1.5, 0.42));
+  // Curved horns — left (stepping outward and up)
+  group.add(blockMesh(0.18, 0.22, 0.18, trimMat, -0.36, 2.32, 0));
+  group.add(blockMesh(0.16, 0.3, 0.16, trimMat, -0.56, 2.52, 0));
+  group.add(blockMesh(0.14, 0.26, 0.14, trimMat, -0.72, 2.74, 0));
+  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, -0.82, 2.94, 0));
+  // Curved horns — right
+  group.add(blockMesh(0.18, 0.22, 0.18, trimMat, 0.36, 2.32, 0));
+  group.add(blockMesh(0.16, 0.3, 0.16, trimMat, 0.56, 2.52, 0));
+  group.add(blockMesh(0.14, 0.26, 0.14, trimMat, 0.72, 2.74, 0));
+  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, 0.82, 2.94, 0));
+  // Fork tail
+  group.add(blockMesh(0.24, 0.24, 0.44, bodyMat, 0, 0.44, -0.52));
+  group.add(blockMesh(0.2, 0.2, 0.38, bodyMat, 0, 0.34, -0.92));
+  group.add(blockMesh(0.16, 0.16, 0.3, bodyMat, 0, 0.26, -1.24));
+  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, -0.1, 0.2, -1.52));
+  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, 0.1, 0.2, -1.52));
+  return finishBossGroup(group, type, 3.2);
+}
+
+function createSkeletonBossMesh(type) {
+  const group = new THREE.Group();
+  const bodyMat = bossMat(type);
+  const trimMat = bossTrimMat(type);
+  const eyeMat = bossEyeMat(type);
+  // Feet
+  group.add(blockMesh(0.36, 0.2, 0.54, bodyMat, -0.34, 0.08, 0.14));
+  group.add(blockMesh(0.36, 0.2, 0.54, bodyMat, 0.34, 0.08, 0.14));
+  // Knee joints
+  group.add(blockMesh(0.32, 0.22, 0.38, trimMat, -0.34, 0.24, 0.04));
+  group.add(blockMesh(0.32, 0.22, 0.38, trimMat, 0.34, 0.24, 0.04));
+  // Shins
+  group.add(blockMesh(0.28, 0.56, 0.32, bodyMat, -0.34, 0.56, 0.02));
+  group.add(blockMesh(0.28, 0.56, 0.32, bodyMat, 0.34, 0.56, 0.02));
+  // Pelvis
+  group.add(blockMesh(1.0, 0.26, 0.62, bodyMat, 0, 0.28, 0));
+  // Spine
+  group.add(blockMesh(0.2, 1.06, 0.2, bodyMat, 0, 0.94, -0.1));
+  // Ribcage
+  for (let i = 0; i < 4; i++) {
+    const y = 0.66 + i * 0.22;
+    const tilt = 0.28 + i * 0.06;
+    const lRib = blockMesh(0.5, 0.1, 0.1, trimMat, -0.38, y, 0.06);
+    lRib.rotation.z = tilt;
+    group.add(lRib);
+    const rRib = blockMesh(0.5, 0.1, 0.1, trimMat, 0.38, y, 0.06);
+    rRib.rotation.z = -tilt;
+    group.add(rRib);
+  }
+  // Clavicles
+  group.add(blockMesh(0.62, 0.14, 0.36, bodyMat, -0.58, 1.56, 0));
+  group.add(blockMesh(0.62, 0.14, 0.36, bodyMat, 0.58, 1.56, 0));
+  // Upper arms
+  group.add(blockMesh(0.22, 0.66, 0.26, bodyMat, -0.88, 1.14, 0.02));
+  group.add(blockMesh(0.22, 0.66, 0.26, bodyMat, 0.88, 1.14, 0.02));
+  // Elbow joints
+  group.add(blockMesh(0.26, 0.2, 0.3, trimMat, -0.88, 0.76, 0.04));
+  group.add(blockMesh(0.26, 0.2, 0.3, trimMat, 0.88, 0.76, 0.04));
+  // Forearms
+  group.add(blockMesh(0.2, 0.52, 0.22, bodyMat, -0.88, 0.44, 0.02));
+  group.add(blockMesh(0.2, 0.52, 0.22, bodyMat, 0.88, 0.44, 0.02));
+  // Skull (wider at top)
+  group.add(blockMesh(0.8, 0.56, 0.68, trimMat, 0, 2.08, 0.02));
+  // Cheekbones
+  group.add(blockMesh(0.16, 0.16, 0.38, bodyMat, -0.38, 1.88, 0.08));
+  group.add(blockMesh(0.16, 0.16, 0.38, bodyMat, 0.38, 1.88, 0.08));
+  // Jaw
+  group.add(blockMesh(0.64, 0.2, 0.48, bodyMat, 0, 1.72, 0.06));
+  // Eye sockets (dark recess + glowing core)
+  group.add(blockMesh(0.24, 0.22, 0.14, bodyMat, -0.2, 2.12, 0.28));
+  group.add(blockMesh(0.24, 0.22, 0.14, bodyMat, 0.2, 2.12, 0.28));
+  group.add(blockMesh(0.12, 0.12, 0.08, eyeMat, -0.2, 2.12, 0.38));
+  group.add(blockMesh(0.12, 0.12, 0.08, eyeMat, 0.2, 2.12, 0.38));
+  // Nasal cavity
+  group.add(blockMesh(0.14, 0.18, 0.12, bodyMat, 0, 1.94, 0.34));
+  // Teeth
+  for (let i = -2; i <= 2; i++) {
+    group.add(blockMesh(0.1, 0.14, 0.08, trimMat, i * 0.12, 1.74, 0.3));
+  }
+  // Crown / circlet
+  group.add(blockMesh(0.86, 0.1, 0.74, bodyMat, 0, 2.38, 0));
+  group.add(blockMesh(0.14, 0.24, 0.14, trimMat, -0.3, 2.48, 0));
+  group.add(blockMesh(0.14, 0.34, 0.14, trimMat, 0, 2.56, 0));
+  group.add(blockMesh(0.14, 0.24, 0.14, trimMat, 0.3, 2.48, 0));
+  return finishBossGroup(group, type);
+}
+
+function createPhoenixBossMesh(type) {
+  const group = new THREE.Group();
+  const bodyMat = bossMat(type);
+  const trimMat = bossTrimMat(type);
+  const eyeMat = bossEyeMat(type);
+  // Legs
+  group.add(blockMesh(0.26, 0.52, 0.28, bodyMat, -0.3, 0.56, 0.06));
+  group.add(blockMesh(0.26, 0.52, 0.28, bodyMat, 0.3, 0.56, 0.06));
+  // Talons
+  group.add(blockMesh(0.36, 0.14, 0.14, trimMat, -0.36, 0.26, 0.18));
+  group.add(blockMesh(0.36, 0.14, 0.14, trimMat, 0.36, 0.26, 0.18));
+  group.add(blockMesh(0.14, 0.14, 0.3, trimMat, -0.28, 0.2, 0.28));
+  group.add(blockMesh(0.14, 0.14, 0.3, trimMat, 0.28, 0.2, 0.28));
+  // Body
+  group.add(blockMesh(0.96, 0.82, 0.82, bodyMat, 0, 1.08, 0));
+  // Breast
+  group.add(blockMesh(0.76, 0.6, 0.38, trimMat, 0, 0.96, 0.34));
+  // Neck
+  group.add(blockMesh(0.38, 0.44, 0.38, bodyMat, 0, 1.72, 0.1));
+  // Head
+  group.add(blockMesh(0.62, 0.56, 0.58, trimMat, 0, 2.18, 0.08));
+  // Beak
+  group.add(blockMesh(0.24, 0.2, 0.44, bodyMat, 0, 2.12, 0.46));
+  group.add(blockMesh(0.2, 0.14, 0.36, trimMat, 0, 2.22, 0.56));
+  // Eyes
+  group.add(blockMesh(0.14, 0.16, 0.08, eyeMat, -0.24, 2.24, 0.38));
+  group.add(blockMesh(0.14, 0.16, 0.08, eyeMat, 0.24, 2.24, 0.38));
+  // Crest feathers
+  group.add(blockMesh(0.1, 0.3, 0.1, trimMat, -0.16, 2.58, 0.04));
+  group.add(blockMesh(0.1, 0.44, 0.1, trimMat, 0, 2.64, 0.04));
+  group.add(blockMesh(0.1, 0.3, 0.1, trimMat, 0.16, 2.58, 0.04));
+  // Wings — left
+  group.add(blockMesh(0.42, 0.76, 0.2, bodyMat, -0.86, 1.26, -0.04));
+  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, -1.3, 1.3, 0));
+  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, -1.68, 1.3, 0.04));
+  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, -2.0, 1.26, 0.08));
+  for (let i = 0; i < 4; i++) {
+    group.add(blockMesh(0.14, 0.28, 0.1, trimMat, -1.5 - i * 0.16, 0.84, 0.04 + i * 0.02));
+  }
+  // Wings — right
+  group.add(blockMesh(0.42, 0.76, 0.2, bodyMat, 0.86, 1.26, -0.04));
+  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, 1.3, 1.3, 0));
+  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, 1.68, 1.3, 0.04));
+  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, 2.0, 1.26, 0.08));
+  for (let i = 0; i < 4; i++) {
+    group.add(blockMesh(0.14, 0.28, 0.1, trimMat, 1.5 + i * 0.16, 0.84, 0.04 + i * 0.02));
+  }
+  // Flame tail feathers
+  group.add(blockMesh(0.28, 0.6, 0.18, trimMat, 0, 0.76, -0.56));
+  group.add(blockMesh(0.18, 0.72, 0.14, trimMat, -0.28, 0.7, -0.74));
+  group.add(blockMesh(0.18, 0.72, 0.14, trimMat, 0.28, 0.7, -0.74));
+  group.add(blockMesh(0.14, 0.56, 0.12, trimMat, -0.5, 0.62, -0.88));
+  group.add(blockMesh(0.14, 0.56, 0.12, trimMat, 0.5, 0.62, -0.88));
+  group.add(blockMesh(0.1, 0.4, 0.1, trimMat, -0.68, 0.54, -0.98));
+  group.add(blockMesh(0.1, 0.4, 0.1, trimMat, 0.68, 0.54, -0.98));
+  return finishBossGroup(group, type);
 }
 
 function createIncomingBeacon(type) {
@@ -1732,21 +2015,46 @@ function createGround() {
 }
 
 function createTorches() {
-  const postMaterial = new THREE.MeshStandardMaterial({ color: 0x4b2d1d, roughness: 0.82 });
-  const flameMaterial = new THREE.MeshStandardMaterial({
-    color: 0xf26a3d,
-    emissive: 0xf26a3d,
-    emissiveIntensity: 1.6,
-    roughness: 0.4,
+  const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88 });
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0x7a6040, roughness: 0.48, metalness: 0.5 });
+  const crystalMat = new THREE.MeshStandardMaterial({
+    color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.0,
+    roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9,
   });
 
   for (const x of [-6.7, 6.7]) {
-    world.add(blockMesh(0.24, 1.5, 0.24, postMaterial, x, 1.1, WALL_Z - 0.2));
-    const flame = blockMesh(0.48, 0.48, 0.48, flameMaterial, x, 2.05, WALL_Z - 0.2);
-    world.add(flame);
-    torchFlames.push({ mesh: flame, phase: Math.random() * Math.PI * 2 });
-    const light = new THREE.PointLight(0xf26a3d, 1.8, 12, 2);
-    light.position.set(x, 2.15, WALL_Z - 0.2);
+    const z = WALL_Z - 0.2;
+    // Shaft
+    world.add(blockMesh(0.15, 1.85, 0.15, shaftMat, x, 0.925, z));
+    // Decorative bands
+    world.add(blockMesh(0.24, 0.1, 0.24, bandMat, x, 0.38, z));
+    world.add(blockMesh(0.24, 0.1, 0.24, bandMat, x, 1.0, z));
+    world.add(blockMesh(0.24, 0.1, 0.24, bandMat, x, 1.74, z));
+    // Crystal cage (metal brackets framing the orb)
+    world.add(blockMesh(0.32, 0.1, 0.32, bandMat, x, 1.88, z));
+    world.add(blockMesh(0.32, 0.1, 0.32, bandMat, x, 2.34, z));
+
+    // Crystal cluster group (pulsed as a unit)
+    const crystalGroup = new THREE.Group();
+    crystalGroup.position.set(x, 2.11, z);
+    const core = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.54, 0.36), crystalMat);
+    core.castShadow = true;
+    crystalGroup.add(core);
+    const leftShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), crystalMat);
+    leftShard.position.set(-0.2, 0.08, 0);
+    leftShard.rotation.z = 0.35;
+    leftShard.castShadow = true;
+    crystalGroup.add(leftShard);
+    const rightShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), crystalMat);
+    rightShard.position.set(0.2, 0.08, 0);
+    rightShard.rotation.z = -0.35;
+    rightShard.castShadow = true;
+    crystalGroup.add(rightShard);
+    world.add(crystalGroup);
+    torchFlames.push({ mesh: crystalGroup, phase: Math.random() * Math.PI * 2 });
+
+    const light = new THREE.PointLight(0x2dd4bf, 1.6, 14, 2);
+    light.position.set(x, 2.2, z);
     light.userData.phase = Math.random() * Math.PI * 2;
     scene.add(light);
     torchLights.push(light);
@@ -1840,17 +2148,53 @@ function spawnBeam(targetPosition) {
   const end = targetPosition.clone();
   end.y += 1.2;
   const distance = start.distanceTo(end);
-  const geometry = new THREE.BoxGeometry(0.08, 0.08, distance);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x58dfcf,
-    transparent: true,
-    opacity: 0.82,
+  const mid = start.clone().lerp(end, 0.5);
+
+  // White core beam
+  const coreGeo = new THREE.BoxGeometry(0.14, 0.14, distance);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 1,
+    blending: THREE.AdditiveBlending, depthWrite: false,
   });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.copy(start).lerp(end, 0.5);
-  mesh.lookAt(end);
-  effectsGroup.add(mesh);
-  beams.push({ mesh, life: 0.16, maxLife: 0.16 });
+  const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+  coreMesh.position.copy(mid);
+  coreMesh.lookAt(end);
+  effectsGroup.add(coreMesh);
+  beams.push({ mesh: coreMesh, life: 0.28, maxLife: 0.28, kind: 'beam_core' });
+
+  // Wide teal glow beam
+  const glowGeo = new THREE.BoxGeometry(0.72, 0.72, distance);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0x58dfcf, transparent: true, opacity: 0.48,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+  glowMesh.position.copy(mid);
+  glowMesh.lookAt(end);
+  effectsGroup.add(glowMesh);
+  beams.push({ mesh: glowMesh, life: 0.28, maxLife: 0.28, kind: 'beam_glow' });
+
+  // Impact flash at enemy
+  const flashGeo = new THREE.DodecahedronGeometry(0.55, 0);
+  const flashMat = new THREE.MeshBasicMaterial({
+    color: 0xaaffee, transparent: true, opacity: 0.9,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+  flashMesh.position.copy(end);
+  effectsGroup.add(flashMesh);
+  beams.push({ mesh: flashMesh, life: 0.22, maxLife: 0.22, kind: 'beam_flash' });
+
+  // Muzzle flash at caster
+  const muzzleGeo = new THREE.DodecahedronGeometry(0.38, 0);
+  const muzzleMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.9,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const muzzleMesh = new THREE.Mesh(muzzleGeo, muzzleMat);
+  muzzleMesh.position.copy(start);
+  effectsGroup.add(muzzleMesh);
+  beams.push({ mesh: muzzleMesh, life: 0.14, maxLife: 0.14, kind: 'beam_flash' });
 }
 
 function spawnBossRock(enemy) {
