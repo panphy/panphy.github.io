@@ -42,8 +42,25 @@
         <h1>Asteroid Storm 3D</h1>
       </div>
       <div class="flight-actions">
-        <button class="hud-button" id="audioButton" type="button" aria-label="Mute sound" title="Mute sound">♪</button>
-        <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>⏸</button>
+        <button class="hud-button" id="audioButton" type="button" aria-label="Mute sound" title="Mute sound">
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <ellipse cx="7" cy="18" rx="3.5" ry="2.5" fill="currentColor"/>
+            <rect x="10" y="4.5" width="1.5" height="14" rx="0.75" fill="currentColor"/>
+            <path d="M10 4.5 C14 3, 17 6.5, 14 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path class="wave wave-1" d="M14.5 9.5 C18 9.5, 18 14.5, 14.5 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <path class="wave wave-2" d="M16 7 C21.5 7, 21.5 17, 16 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <line class="mute-slash" x1="19" y1="3" x2="5" y2="21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="hud-button" id="pauseButton" type="button" aria-label="Pause run" disabled>
+          <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <g class="icon-pause">
+              <rect x="5" y="3.5" width="4.5" height="17" rx="1.5" fill="currentColor"/>
+              <rect x="14.5" y="3.5" width="4.5" height="17" rx="1.5" fill="currentColor"/>
+            </g>
+            <path class="icon-play" d="M7 3.5 L7 20.5 L21 12 Z" fill="currentColor"/>
+          </svg>
+        </button>
       </div>
     </header>
 

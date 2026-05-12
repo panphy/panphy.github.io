@@ -327,7 +327,7 @@ function startGame() {
   document.body.classList.remove('is-crashed');
   messagePanel.hidden = true;
   pauseButton.disabled = false;
-  pauseButton.textContent = '⏸';
+  pauseButton.classList.remove('is-paused');
   pauseButton.setAttribute('aria-label', 'Pause run');
   startRunAudio();
   playStartSfx();
@@ -337,7 +337,7 @@ function startGame() {
 function pauseGame() {
   if (mode !== 'running') return;
   mode = 'paused';
-  pauseButton.textContent = '▶';
+  pauseButton.classList.add('is-paused');
   pauseButton.setAttribute('aria-label', 'Resume run');
   fadeAudioOut(0.05);
   playPauseSfx();
@@ -349,7 +349,7 @@ function resumeGame() {
   resumeAudio();
   mode = 'running';
   lastFrameTime = 0;
-  pauseButton.textContent = '⏸';
+  pauseButton.classList.remove('is-paused');
   pauseButton.setAttribute('aria-label', 'Pause run');
   messagePanel.hidden = true;
   document.body.classList.add('is-running');
@@ -362,7 +362,7 @@ function endGame() {
   mode = 'gameover';
   gameoverTime = 0;
   pauseButton.disabled = true;
-  pauseButton.textContent = '⏸';
+  pauseButton.classList.remove('is-paused');
   pauseButton.setAttribute('aria-label', 'Pause run');
   document.body.classList.remove('is-running');
   document.body.classList.add('is-crashed');
@@ -1062,7 +1062,6 @@ function updateEffects(delta) {
 function updateAudioButton() {
   if (!audioButton) return;
   audioButton.classList.toggle('is-muted', !audioEnabled);
-  audioButton.textContent = audioEnabled ? '♪' : 'x';
   audioButton.title = audioEnabled ? 'Mute sound' : 'Unmute sound';
   audioButton.setAttribute('aria-label', audioEnabled ? 'Mute sound' : 'Unmute sound');
 }
