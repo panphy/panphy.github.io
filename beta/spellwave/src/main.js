@@ -204,6 +204,7 @@ let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
+let introducedBossTermsThisSet = new Set();
 let streak = 0;
 let typedBuffer = '';
 let activeTarget = null;
@@ -1144,7 +1145,7 @@ function renderPrompt(enemy) {
       multiplicationAlias: enemy.isEquation,
     }) : 0;
     const typedText = enemy.prompt.slice(0, typedLen);
-    const remainingText = enemy.showDefinition ? enemy.hintMask.slice(typedLen) : enemy.prompt.slice(typedLen);
+    const remainingText = enemy.maskPrompt ? enemy.hintMask.slice(typedLen) : enemy.prompt.slice(typedLen);
     html = `<span class="typed">${wrapSups(escapeHtml(typedText))}</span>`
          + `<span class="remaining">${wrapSups(escapeHtml(remainingText))}</span>`;
   }
@@ -1366,10 +1367,13 @@ function spawnEnemy(options = {}) {
 
   labelsLayer.append(label);
 
-  const twoWordData = buildTwoWordLimit(wordData.term, {
-    alwaysLimit: isEquationPrompt,
-    multiplicationAlias: isEquationPrompt,
-  });
+  const promptOptions = { multiplicationAlias: isEquationPrompt };
+  const twoWordData = isEquationPrompt
+    ? buildTwoWordLimit(wordData.term, {
+        alwaysLimit: isEquationPrompt,
+        multiplicationAlias: isEquationPrompt,
+      })
+    : null;
   const enemy = {
     id: enemyId,
     type,
@@ -1381,10 +1385,11 @@ function spawnEnemy(options = {}) {
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
-    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, { multiplicationAlias: isEquationPrompt }),
+    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
     limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
-    hintMask: showDefinition ? buildHintMask(wordData.term, { multiplicationAlias: isEquationPrompt }) : null,
+    maskPrompt: showDefinition && !isEquationPrompt,
+    hintMask: showDefinition && !isEquationPrompt ? buildHintMask(wordData.term, promptOptions) : null,
     lastPromptHtml: '',
     promptKind,
     isBoss,
@@ -1403,6 +1408,9 @@ function spawnEnemy(options = {}) {
     stepBounce: isBoss ? 0.04 : 0.06 + Math.random() * 0.08,
     phase: Math.random() * Math.PI * 2,
   };
+  if (!isBoss && definitionBossWordsForWave().some(w => w.term === wordData.term)) {
+    introducedBossTermsThisSet.add(wordData.term);
+  }
   enemyId += 1;
   enemies.push(enemy);
   renderPrompt(enemy);
@@ -1844,8 +1852,13 @@ function isEnemyTargetable(enemy) {
 
 function prepareWavePlan() {
   bossWordsThisSet = chooseBossWordsForWave();
-  const previewableWords = bossWordsThisSet.filter(w => !w.isEquation);
+  introducedBossTermsThisSet = new Set();
+  const previewableWords = definitionBossWordsForWave();
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
+}
+
+function definitionBossWordsForWave() {
+  return bossWordsThisSet.filter(w => !w.isEquation);
 }
 
 function buildBossPreviewSchedule(target, words) {
@@ -2314,9 +2327,21 @@ function playGameOverSound() {
 }
 
 function startBossPhase() {
+  if (bossWordsThisSet.length === 0) prepareWavePlan();
+  const missingPreviewWords = definitionBossWordsForWave()
+    .filter(w => !introducedBossTermsThisSet.has(w.term));
+  if (missingPreviewWords.length > 0) {
+    const firstSlot = normalEnemiesSpawned;
+    for (const [index, word] of missingPreviewWords.entries()) {
+      bossPreviewSchedule.set(firstSlot + index, word);
+    }
+    normalEnemyTarget += missingPreviewWords.length;
+    updateHud(true);
+    return;
+  }
+
   wavePhase = 'boss';
   bossesSpawned = 0;
-  if (bossWordsThisSet.length === 0) prepareWavePlan();
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
   playBossWarningSound();
   updatePhaseDisplay();
