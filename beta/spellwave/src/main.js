@@ -132,13 +132,13 @@ const ENEMY_TYPES = [
   },
 ];
 const MEDIC_TYPE = {
-  name: 'Medic Sprig',
+  name: 'Pulse Heart',
   isMedic: true,
-  body: 0xdaf7df,
-  trim: 0x2dd4bf,
+  body: 0xff315f,
+  trim: 0xff8fb3,
   eye: 0xf2f0df,
-  speed: 3.65,
-  scale: 0.82,
+  speed: 8.4,
+  scale: 0.92,
   weight: 0,
   score: 45,
 };
@@ -724,12 +724,15 @@ function updateEnemies(delta, seconds) {
 
     updateEnemyMarkers(enemy, seconds);
 
+    const pulseScale = enemy.isMedic
+      ? 1 + Math.max(0, Math.sin(seconds * 12 + enemy.phase)) * 0.14
+      : 1;
     if (enemy === activeTarget && isEnemyTargetable(enemy)) {
-      enemy.group.scale.setScalar(enemy.type.scale * (1.12 + Math.sin(seconds * 16) * 0.05));
+      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * (1.12 + Math.sin(seconds * 16) * 0.05));
     } else if (!enemy.revealed) {
-      enemy.group.scale.setScalar(enemy.type.scale * (1.04 + Math.sin(seconds * 5 + enemy.phase) * 0.025));
+      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * (1.04 + Math.sin(seconds * 5 + enemy.phase) * 0.025));
     } else {
-      enemy.group.scale.setScalar(enemy.type.scale);
+      enemy.group.scale.setScalar(enemy.type.scale * pulseScale);
     }
 
     if (enemy.group.position.z >= WALL_Z) {
@@ -1470,18 +1473,20 @@ function createEnemyMesh(type) {
   const group = new THREE.Group();
   const isBossType = !!type.isBoss;
   const isMedicType = !!type.isMedic;
+  if (isMedicType) return createMedicHeartMesh(type);
+
   const bodyMaterial = new THREE.MeshStandardMaterial({
     color: type.body,
-    emissive: isBossType || isMedicType ? type.body : 0x000000,
-    emissiveIntensity: isBossType ? 0.56 : isMedicType ? 0.12 : 0,
-    roughness: isBossType ? 0.58 : isMedicType ? 0.5 : 0.82,
+    emissive: isBossType ? type.body : 0x000000,
+    emissiveIntensity: isBossType ? 0.56 : 0,
+    roughness: isBossType ? 0.58 : 0.82,
     metalness: 0.03,
   });
   const trimMaterial = new THREE.MeshStandardMaterial({
     color: type.trim,
-    emissive: isBossType || isMedicType ? type.trim : 0x000000,
-    emissiveIntensity: isBossType ? 0.82 : isMedicType ? 0.42 : 0,
-    roughness: isBossType ? 0.46 : isMedicType ? 0.38 : 0.78,
+    emissive: isBossType ? type.trim : 0x000000,
+    emissiveIntensity: isBossType ? 0.82 : 0,
+    roughness: isBossType ? 0.46 : 0.78,
     metalness: isBossType ? 0.08 : 0.02,
   });
   const eyeMaterial = new THREE.MeshStandardMaterial({
@@ -1511,16 +1516,6 @@ function createEnemyMesh(type) {
     group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, 0.34, 2.32, 0));
   }
 
-  if (isMedicType) {
-    group.add(blockMesh(0.18, 0.58, 0.1, trimMaterial, 0, 1.08, 0.43));
-    group.add(blockMesh(0.58, 0.18, 0.1, trimMaterial, 0, 1.08, 0.44));
-    group.add(blockMesh(0.82, 0.16, 0.82, trimMaterial, 0, 2.28, 0));
-    group.add(blockMesh(0.16, 0.38, 0.16, eyeMaterial, 0, 2.55, 0));
-    const medicGlow = new THREE.PointLight(type.trim, 0.95, 4.2, 2.2);
-    medicGlow.position.set(0, 1.45, 0.45);
-    group.add(medicGlow);
-  }
-
   if (isBossType) {
     group.add(blockMesh(0.18, 0.28, 0.18, trimMaterial, -0.3, 2.32, 0));
     group.add(blockMesh(0.18, 0.44, 0.18, trimMaterial, 0, 2.42, 0));
@@ -1533,6 +1528,61 @@ function createEnemyMesh(type) {
     bossGlow.position.set(0, 1.45, 0.45);
     group.add(bossGlow);
   }
+
+  const incomingBeacon = createIncomingBeacon(type);
+  const targetMarker = createTargetMarker(type);
+  group.add(incomingBeacon, targetMarker);
+  group.userData.incomingBeacon = incomingBeacon;
+  group.userData.targetMarker = targetMarker;
+
+  return group;
+}
+
+function createMedicHeartMesh(type) {
+  const group = new THREE.Group();
+  const heartMaterial = new THREE.MeshStandardMaterial({
+    color: type.body,
+    emissive: type.body,
+    emissiveIntensity: 0.5,
+    roughness: 0.42,
+    metalness: 0.02,
+  });
+  const highlightMaterial = new THREE.MeshStandardMaterial({
+    color: type.trim,
+    emissive: type.trim,
+    emissiveIntensity: 0.62,
+    roughness: 0.34,
+    metalness: 0.02,
+  });
+  const shineMaterial = new THREE.MeshStandardMaterial({
+    color: type.eye,
+    emissive: type.eye,
+    emissiveIntensity: 1.6,
+    roughness: 0.25,
+  });
+
+  const cell = 0.3;
+  const rows = [
+    { y: 2.22, xs: [-0.45, 0.45], material: highlightMaterial },
+    { y: 1.94, xs: [-0.75, -0.45, -0.15, 0.15, 0.45, 0.75], material: heartMaterial },
+    { y: 1.66, xs: [-0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9], material: heartMaterial },
+    { y: 1.38, xs: [-0.6, -0.3, 0, 0.3, 0.6], material: heartMaterial },
+    { y: 1.1, xs: [-0.3, 0, 0.3], material: heartMaterial },
+    { y: 0.82, xs: [0], material: heartMaterial },
+  ];
+
+  for (const row of rows) {
+    for (const x of row.xs) {
+      group.add(blockMesh(cell, cell, 0.46, row.material, x, row.y, 0));
+    }
+  }
+
+  group.add(blockMesh(0.18, 0.18, 0.5, shineMaterial, -0.42, 2.02, 0.08));
+  group.add(blockMesh(0.12, 0.12, 0.5, shineMaterial, -0.2, 1.8, 0.09));
+
+  const medicGlow = new THREE.PointLight(type.body, 1.35, 5.2, 2.0);
+  medicGlow.position.set(0, 1.5, 0.45);
+  group.add(medicGlow);
 
   const incomingBeacon = createIncomingBeacon(type);
   const targetMarker = createTargetMarker(type);

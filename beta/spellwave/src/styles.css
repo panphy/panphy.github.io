@@ -681,20 +681,20 @@ a {
 }
 
 .word-tag.is-medic {
-  border-color: rgba(45, 212, 191, 0.74);
+  border-color: rgba(255, 143, 179, 0.8);
   background:
-    linear-gradient(135deg, rgba(8, 35, 29, 0.92), rgba(4, 14, 14, 0.86)),
-    linear-gradient(90deg, rgba(45, 212, 191, 0.18), transparent);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36), 0 0 22px rgba(45, 212, 191, 0.22), inset 0 0 18px rgba(242, 240, 223, 0.08);
+    linear-gradient(135deg, rgba(58, 7, 24, 0.92), rgba(4, 14, 14, 0.86)),
+    linear-gradient(90deg, rgba(255, 49, 95, 0.22), transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36), 0 0 24px rgba(255, 49, 95, 0.3), inset 0 0 18px rgba(242, 240, 223, 0.08);
 }
 
 .word-tag.is-medic .prompt-kind {
-  background: rgba(45, 212, 191, 0.2);
-  color: #d8fff7;
+  background: rgba(255, 49, 95, 0.24);
+  color: #ffe1ea;
 }
 
 .word-tag.is-medic .threat-meter i {
-  background: linear-gradient(90deg, var(--aqua), var(--grass));
+  background: linear-gradient(90deg, #ff8fb3, #ff315f);
 }
 
 .word-tag.is-boss {
