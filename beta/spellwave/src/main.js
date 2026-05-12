@@ -439,7 +439,7 @@ function endGame() {
   }
   showMessage(
     'OVERRUN',
-    'Wiped Out',
+    'Game Over',
     `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
@@ -2144,7 +2144,8 @@ function createSky() {
 }
 
 function spawnBeam(targetPosition) {
-  const start = new THREE.Vector3(0, 1.65, WALL_Z + 0.65);
+  const staffX = Math.random() < 0.5 ? -6.7 : 6.7;
+  const start = new THREE.Vector3(staffX, 2.38, WALL_Z - 0.2);
   const end = targetPosition.clone();
   end.y += 1.2;
   const distance = start.distanceTo(end);
@@ -2917,7 +2918,7 @@ function spawnBoss() {
   const wordData = bossWordsThisSet[bossesSpawned] || chooseBossWord();
   if (!bossWordsThisSet.some(w => w.term === wordData.term)) bossWordsThisSet.push(wordData);
   const bossType = chooseBossType(bossesSpawned);
-  const lanes = [-3.7, 0, 3.7];
+  const lanes = [-5.0, 0, 5.0];
   const lane = lanes[bossesSpawned % lanes.length];
   spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0 });
 }
