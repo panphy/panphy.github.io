@@ -195,10 +195,101 @@ a {
 
 .icon-button {
   position: relative;
+  display: grid;
+  place-items: center;
   width: 44px;
   min-width: 44px;
   font-family: var(--font-mono);
   font-size: 0.94rem;
+}
+
+.svg-button {
+  overflow: hidden;
+  padding: 0;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(88, 223, 207, 0.18), transparent 34%),
+    rgba(239, 195, 92, 0.1);
+}
+
+.button-svg {
+  width: 34px;
+  height: 34px;
+  overflow: visible;
+}
+
+.button-ring {
+  fill: rgba(7, 18, 15, 0.52);
+  stroke: rgba(239, 195, 92, 0.42);
+  stroke-width: 2;
+  transform-origin: 24px 24px;
+  transition: fill 180ms ease, stroke 180ms ease, transform 180ms ease;
+}
+
+.svg-button:not(:disabled):hover .button-ring {
+  fill: rgba(88, 223, 207, 0.13);
+  stroke: rgba(88, 223, 207, 0.82);
+  transform: scale(1.04);
+}
+
+.play-glyph,
+.pause-glyph rect,
+.speaker-glyph {
+  fill: currentColor;
+  transform-origin: 24px 24px;
+  transition: opacity 170ms ease, transform 210ms cubic-bezier(0.2, 0.9, 0.2, 1), fill 170ms ease;
+}
+
+.transport-button .pause-glyph {
+  opacity: 0;
+  transform: scaleX(0.72);
+  transform-origin: 24px 24px;
+  transition: opacity 170ms ease, transform 210ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.transport-button .play-glyph {
+  opacity: 1;
+  transform: translateX(1px) scale(1);
+}
+
+.transport-button.is-playing .pause-glyph {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.transport-button.is-playing .play-glyph {
+  opacity: 0;
+  transform: translateX(5px) scale(0.62);
+}
+
+.sound-wave,
+.mute-slash {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sound-wave {
+  stroke-width: 2.4;
+  transform-origin: 26px 24px;
+}
+
+.sound-wave-one {
+  animation: sound-wave-pulse 950ms ease-in-out infinite;
+}
+
+.sound-wave-two {
+  animation: sound-wave-pulse 950ms ease-in-out 130ms infinite;
+}
+
+.mute-slash {
+  opacity: 0;
+  stroke: var(--danger);
+  stroke-width: 3.2;
+  stroke-dasharray: 29;
+  stroke-dashoffset: 29;
+  filter: drop-shadow(0 0 5px rgba(243, 78, 85, 0.5));
+  transition: opacity 170ms ease, stroke-dashoffset 210ms ease;
 }
 
 .icon-button:not(:disabled):hover,
@@ -217,17 +308,15 @@ a {
   color: var(--muted);
 }
 
-.icon-button.is-muted::after {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 28px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--danger);
-  content: '';
-  transform: translate(-50%, -50%) rotate(-38deg);
-  box-shadow: 0 0 10px rgba(243, 78, 85, 0.34);
+.icon-button.is-muted .sound-wave {
+  opacity: 0.2;
+  animation-play-state: paused;
+  transform: translateX(-2px) scaleX(0.62);
+}
+
+.icon-button.is-muted .mute-slash {
+  opacity: 1;
+  stroke-dashoffset: 0;
 }
 
 .hud-grid {
@@ -818,6 +907,34 @@ a {
 
   35% {
     stroke: rgba(255, 232, 190, 0.98);
+  }
+}
+
+@keyframes sound-wave-pulse {
+  0%,
+  100% {
+    opacity: 0.58;
+    transform: scaleX(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleX(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-wave {
+    animation: none;
+  }
+
+  .button-ring,
+  .play-glyph,
+  .pause-glyph,
+  .pause-glyph rect,
+  .speaker-glyph,
+  .mute-slash {
+    transition: none;
   }
 }
 

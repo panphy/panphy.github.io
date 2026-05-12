@@ -27,8 +27,6 @@ const runGlossary = document.getElementById('runGlossary');
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
-const ICON_PAUSE = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><rect x="2" y="1" width="4" height="13" rx="1.5"/><rect x="9" y="1" width="4" height="13" rx="1.5"/></svg>';
-const ICON_PLAY = '<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3.5 1.5L13 7.5L3.5 13.5V1.5Z"/></svg>';
 const MAX_DELTA = 0.06;
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
@@ -288,6 +286,7 @@ createLifeMeter();
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
+setPauseButtonState(true, true);
 updatePhaseDisplay();
 updateHud(true);
 
@@ -380,9 +379,7 @@ function startGame() {
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
-  pauseButton.disabled = false;
-  pauseButton.innerHTML = ICON_PAUSE;
-  pauseButton.setAttribute('aria-label', 'Pause run');
+  setPauseButtonState(true, false);
   updateTypedDisplay();
   updateHud(true);
   updatePhaseDisplay();
@@ -394,8 +391,7 @@ function pauseGame() {
   playPauseSound();
   stopMusicLoop();
   mode = 'paused';
-  pauseButton.innerHTML = ICON_PLAY;
-  pauseButton.setAttribute('aria-label', 'Resume run');
+  setPauseButtonState(false, false);
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
   updatePhaseDisplay();
 }
@@ -407,8 +403,7 @@ function resumeGame() {
   startMusicLoop(false);
   lastFrameTime = 0;
   messagePanel.hidden = true;
-  pauseButton.innerHTML = ICON_PAUSE;
-  pauseButton.setAttribute('aria-label', 'Pause run');
+  setPauseButtonState(true, false);
   updatePhaseDisplay();
   focusKeyboard();
 }
@@ -417,9 +412,7 @@ function endGame() {
   mode = 'gameover';
   stopMusicLoop(0.04);
   playGameOverSound();
-  pauseButton.disabled = true;
-  pauseButton.innerHTML = ICON_PAUSE;
-  pauseButton.setAttribute('aria-label', 'Pause run');
+  setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
   if (score > bestScore) {
     bestScore = score;
@@ -2039,6 +2032,7 @@ function writeStoredValue(key, value) {
 
 function updateAudioButton() {
   audioButton.classList.toggle('is-muted', !audioEnabled);
+  audioButton.classList.toggle('is-audio-on', audioEnabled);
   audioButton.setAttribute('aria-label', audioEnabled ? 'Mute sound' : 'Unmute sound');
   audioButton.title = audioEnabled ? 'Mute sound' : 'Unmute sound';
   if (masterGain && audioContext) {
@@ -2046,6 +2040,13 @@ function updateAudioButton() {
     masterGain.gain.setTargetAtTime(audioEnabled ? MASTER_VOLUME : 0.0001, audioContext.currentTime, 0.018);
   }
   if (!audioEnabled) stopMusicLoop(0.03);
+}
+
+function setPauseButtonState(isPlaying, isDisabled = pauseButton.disabled) {
+  pauseButton.disabled = isDisabled;
+  pauseButton.classList.toggle('is-playing', isPlaying);
+  pauseButton.setAttribute('aria-label', isPlaying ? 'Pause run' : 'Resume run');
+  pauseButton.title = isPlaying ? 'Pause run' : 'Resume run';
 }
 
 function ensureAudio() {
@@ -2346,7 +2347,7 @@ function startWaveCleared() {
   playWaveClearSound();
   typedBuffer = '';
   activeTarget = null;
-  pauseButton.disabled = true;
+  setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
   const glossary = bossWordsThisSet
     .map(w => w.isEquation ? `${w.definition}: ${w.term}` : `${w.term} — ${w.definition}`)
@@ -2380,9 +2381,7 @@ function advanceWaveSet() {
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
-  pauseButton.disabled = false;
-  pauseButton.innerHTML = ICON_PAUSE;
-  pauseButton.setAttribute('aria-label', 'Pause run');
+  setPauseButtonState(true, false);
   updateTypedDisplay();
   updateHud(true);
   updatePhaseDisplay();
