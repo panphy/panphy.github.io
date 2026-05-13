@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-05-13T15:57:00Z';
+const BUILD_ID = '2026-05-13T17:00:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -84,16 +84,6 @@ const ASSETS_TO_CACHE = [
   '/for_teachers/timer.html',
   '/for_teachers/visualizer.html',
 
-  // Fun
-  '/fun/spellwave.html',
-  '/fun/spellwave/src/styles.css',
-  '/fun/spellwave/src/main.js',
-  '/fun/spellwave/src/audio.js',
-  '/fun/spellwave/src/seasonal-effects.js',
-  '/fun/spellwave/src/question-bank.js',
-  'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js',
-  '/fun/react.html',
-  '/fun/ascii_cam.html'
 ];
 
 // Install: pre-cache your core pages
@@ -223,13 +213,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(req));
     return;
   }
-  // Never cache Supabase-backed dodge games or provide offline fallback for them.
-  if (isSameOrigin && (
-    url.pathname === '/fun/dodge.html' ||
-    url.pathname.startsWith('/fun/dodge_assets/') ||
-    url.pathname === '/fun/dodge3d.html' ||
-    url.pathname.startsWith('/fun/dodge3d/')
-  )) {
+  // All /fun/* routes are network-only (no SW cache reads/writes).
+  const isFunPath = isSameOrigin && (url.pathname === '/fun' || url.pathname.startsWith('/fun/'));
+  if (isFunPath) {
     event.respondWith(fetch(req));
     return;
   }

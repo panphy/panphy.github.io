@@ -11,7 +11,7 @@ This project started from a practical classroom problem: on school-managed devic
 - **Education-focused**: apps are intentionally practical for classwork, revision, and demonstrations.
 - **Offline-friendly**: most experiences continue to work without a constant connection.
 
-> Note: A few features rely on external services and need internet access (for example, the Asteroid Storm leaderboards and the EAL Companion app).
+> Note: All games and a few other features rely on external services and require internet access (for example, the EAL Companion app). Tools and simulations work offline after your first visit.
 
 ## What you can find here
 

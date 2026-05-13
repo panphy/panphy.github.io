@@ -28,7 +28,7 @@ When adding a new published page, also add its path to the `ASSETS_TO_CACHE` arr
 
 If a cached page depends on local media assets (audio/video/images/fonts) for core UX, add those file paths to `ASSETS_TO_CACHE` as well.
 
-Any file under `/beta` is intentionally excluded from service-worker caching. Do not add `/beta/*` paths to `ASSETS_TO_CACHE`.
+Files under `/beta`, `/misc`, and `/fun` are intentionally excluded from service-worker caching. Do not add `/beta/*`, `/misc/*`, or `/fun/*` paths to `ASSETS_TO_CACHE`.
 
 ### No Build System
 
@@ -52,8 +52,8 @@ Not every HTML file in the repo is currently part of the published navigation.
 - **Public support/reference pages** may also be service-worker registered and pre-cached even if they are not linked from `index.html` (for example PanPhyPlot's manual/reference pages)
 - Only public pages that should participate in the site's service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`
 - New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
-- `/beta/*` and `/misc/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
-- `fun/dodge.html` and `fun/dodge3d.html` are published exceptions: they are linked from `index.html` and listed in `sitemap.xml`, but remain network-only because their leaderboards depend on live Supabase data
+- `/beta/*`, `/misc/*`, and `/fun/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
+- All `fun/` apps are network-only — this applies to every current and future page under `fun/`, regardless of whether they use live external data
 - **Current unlisted/legacy pages** include:
   - `misc/digitizer.html`
   - `misc/gcse_phy/phy_flashcard.html`
@@ -67,7 +67,7 @@ Not every HTML file in the repo is currently part of the published navigation.
 If you promote an unlisted page to production, treat it as a full launch task:
 1. If the page lives in `/beta` or `/misc`, move it to the correct public directory first
 2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
-3. Add route + required assets to `ASSETS_TO_CACHE` unless the page must stay network-only for live external data
+3. Add route + required assets to `ASSETS_TO_CACHE` unless the page is under `fun/` or must stay network-only for other reasons
 4. Bump `BUILD_ID` in `sw.js`
 5. Link it from `index.html`
 6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill unless the page is intentionally network-only
@@ -172,7 +172,7 @@ Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize l
 ├── simulations/            # Physics simulations
 │   ├── *.html              # superposition, standing_wave, ripple_tank, states, lorentz, lorentz_learn
 │   └── collision.html      # Entry point → collision/ (modular JS/CSS/assets)
-├── fun/                    # Games (Dodge leaderboard games excluded from SW cache)
+├── fun/                    # Games (all network-only, never SW-cached)
 ├── for_teachers/           # Teacher utilities
 └── misc/                   # Unlisted/legacy (digitizer, gcse_phy flashcards, etc.)
 ```
