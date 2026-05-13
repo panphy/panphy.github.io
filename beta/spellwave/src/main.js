@@ -275,7 +275,7 @@ const pathMarkerBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
 const springFlowers = [];
-const autumnRoadLeaves = [];
+const autumnFallenLeaves = [];
 
 let mode = 'idle';
 let score = 0;
@@ -1054,14 +1054,14 @@ function updateSeasonalScenery(seconds, scrollDelta) {
     flower.group.rotation.z = Math.sin(seconds * 1.2 + flower.phase) * 0.035;
   }
 
-  for (const leaf of autumnRoadLeaves) {
+  for (const leaf of autumnFallenLeaves) {
     leaf.mesh.position.z += scrollDelta * leaf.speed;
     if (leaf.mesh.position.z > PATH_MARKER_WRAP_Z) {
       leaf.mesh.position.z -= PATH_MARKER_SPAN;
-      leaf.mesh.position.x = (Math.random() - 0.5) * 5.7;
+      leaf.mesh.position.x = leaf.side * (4.95 + Math.random() * 2.2);
       leaf.baseX = leaf.mesh.position.x;
     }
-    leaf.mesh.position.x = leaf.baseX + Math.sin(seconds * 0.9 + leaf.phase) * 0.05;
+    leaf.mesh.position.x = leaf.baseX + Math.sin(seconds * 0.9 + leaf.phase) * 0.08;
     leaf.mesh.rotation.y += scrollDelta * 0.08;
   }
 }
@@ -1099,27 +1099,13 @@ function updateSummerStorm(delta) {
   }
 
   const timerDelta = delta * (mode === 'running' ? 1 : 0.38);
-  if (summerStorm.active) {
-    summerStorm.rainTime -= timerDelta;
-    summerStorm.lightningTime -= timerDelta;
-    if (summerStorm.lightningTime <= 0) {
-      triggerLightning();
-      summerStorm.lightningTime = 1.45 + Math.random() * 2.8;
-    }
-    if (summerStorm.rainTime <= 0) {
-      summerStorm.active = false;
-      summerStorm.nextRain = 9 + Math.random() * 15;
-      if (rainField) rainField.visible = false;
-    }
-    return;
-  }
-
-  summerStorm.nextRain -= timerDelta;
-  if (summerStorm.nextRain <= 0) {
-    summerStorm.active = true;
-    summerStorm.rainTime = 6.5 + Math.random() * 6;
-    summerStorm.lightningTime = 0.9 + Math.random() * 1.8;
-    if (rainField) rainField.visible = true;
+  summerStorm.active = true;
+  summerStorm.rainTime = Number.POSITIVE_INFINITY;
+  if (rainField) rainField.visible = true;
+  summerStorm.lightningTime -= timerDelta;
+  if (summerStorm.lightningTime <= 0) {
+    triggerLightning();
+    summerStorm.lightningTime = 0.85 + Math.random() * 1.75;
   }
 }
 
@@ -2342,7 +2328,7 @@ function createTorches() {
     roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9,
   });
 
-  for (const x of [-6.7, 6.7]) {
+  for (const x of [-5.35, 5.35]) {
     const z = WALL_Z - 0.2;
 
     // Wand group — pivot at the base so the whole wand rotates as one unit
@@ -2520,7 +2506,7 @@ function createClouds() {
 
 function createSeasonalScenery() {
   createSpringFlowers();
-  createAutumnRoadLeaves();
+  createAutumnFallenLeaves();
 }
 
 function createSpringFlowers() {
@@ -2544,14 +2530,14 @@ function createSpringFlowers() {
     const blossoms = 2 + Math.floor(Math.random() * 3);
     for (let blossomIndex = 0; blossomIndex < blossoms; blossomIndex += 1) {
       const petalMaterial = petalMaterials[(patchIndex + blossomIndex) % petalMaterials.length];
-      const localX = (Math.random() - 0.5) * 0.7;
-      const localZ = (Math.random() - 0.5) * 0.55;
-      const height = 0.18 + Math.random() * 0.16;
-      group.add(blockMesh(0.045, height, 0.045, stemMaterial, localX, height * 0.5, localZ));
-      group.add(blockMesh(0.2, 0.08, 0.08, petalMaterial, localX, height + 0.02, localZ));
-      const crossPetal = blockMesh(0.08, 0.08, 0.2, petalMaterial, localX, height + 0.02, localZ);
+      const localX = (Math.random() - 0.5) * 0.86;
+      const localZ = (Math.random() - 0.5) * 0.68;
+      const height = 0.28 + Math.random() * 0.2;
+      group.add(blockMesh(0.07, height, 0.07, stemMaterial, localX, height * 0.5, localZ));
+      group.add(blockMesh(0.34, 0.12, 0.13, petalMaterial, localX, height + 0.035, localZ));
+      const crossPetal = blockMesh(0.13, 0.12, 0.34, petalMaterial, localX, height + 0.035, localZ);
       group.add(crossPetal);
-      group.add(blockMesh(0.07, 0.075, 0.07, centerMaterial, localX, height + 0.052, localZ));
+      group.add(blockMesh(0.11, 0.11, 0.11, centerMaterial, localX, height + 0.075, localZ));
     }
 
     group.visible = false;
@@ -2565,7 +2551,7 @@ function createSpringFlowers() {
   }
 }
 
-function createAutumnRoadLeaves() {
+function createAutumnFallenLeaves() {
   const leafMaterials = [
     new THREE.MeshStandardMaterial({ color: 0xb33b12, roughness: 0.9 }),
     new THREE.MeshStandardMaterial({ color: 0xd76818, roughness: 0.9 }),
@@ -2574,18 +2560,20 @@ function createAutumnRoadLeaves() {
   ];
 
   for (let index = 0; index < 92; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1;
     const material = leafMaterials[index % leafMaterials.length];
-    const mesh = blockMesh(0.18 + Math.random() * 0.16, 0.025, 0.08 + Math.random() * 0.12, material, 0, 0.045, 0);
-    mesh.position.x = (Math.random() - 0.5) * 5.7;
+    const mesh = blockMesh(0.24 + Math.random() * 0.18, 0.025, 0.1 + Math.random() * 0.14, material, 0, 0.045, 0);
+    mesh.position.x = side * (4.95 + Math.random() * 2.2);
     mesh.position.z = PATH_MARKER_MIN_Z + Math.random() * (PATH_MARKER_MAX_Z - PATH_MARKER_MIN_Z);
     mesh.rotation.y = Math.random() * Math.PI;
     mesh.rotation.z = (Math.random() - 0.5) * 0.16;
     mesh.visible = false;
     world.add(mesh);
-    autumnRoadLeaves.push({
+    autumnFallenLeaves.push({
       mesh,
+      side,
       baseX: mesh.position.x,
-      speed: 1.9 + Math.random() * 0.7,
+      speed: 0.9 + Math.random() * 0.45,
       phase: Math.random() * Math.PI * 2,
     });
   }
@@ -3173,7 +3161,7 @@ function setSeasonVisualState(seasonName) {
   const isSummer = seasonName === 'summer';
 
   for (const flower of springFlowers) flower.group.visible = isSpring;
-  for (const leaf of autumnRoadLeaves) leaf.mesh.visible = isAutumn;
+  for (const leaf of autumnFallenLeaves) leaf.mesh.visible = isAutumn;
   if (snowField) snowField.visible = isWinter;
 
   if (!isSummer) {
@@ -3190,10 +3178,11 @@ function setSeasonVisualState(seasonName) {
   }
 
   summerStorm.active = false;
-  summerStorm.rainTime = 0;
+  summerStorm.rainTime = Number.POSITIVE_INFINITY;
   summerStorm.flashTime = 0;
-  summerStorm.lightningTime = 1 + Math.random() * 2;
-  summerStorm.nextRain = 3.5 + Math.random() * 5;
+  summerStorm.lightningTime = 0.6 + Math.random() * 1.2;
+  summerStorm.nextRain = 0;
+  if (rainField) rainField.visible = true;
 }
 
 function updateSeasonFade(delta) {
