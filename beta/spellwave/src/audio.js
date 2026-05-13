@@ -313,44 +313,6 @@ export function createSpellwaveAudio({
     playTone(55, 0.42, { gain: 0.035, delay: 0.08, type: 'sine' });
   }
 
-  function playLightningSound() {
-    playNoise(0.16, {
-      gain: 0.045,
-      filterFrequency: 1250,
-      filterType: 'bandpass',
-      q: 0.7,
-    });
-    playTone(72, 0.34, {
-      gain: 0.052,
-      type: 'sawtooth',
-      endFrequency: 28,
-      attack: 0.003,
-    });
-    playNoise(1.15, {
-      gain: 0.072,
-      delay: 0.12,
-      filterFrequency: 115,
-      filterType: 'lowpass',
-      q: 0.55,
-      playbackRate: 0.72,
-    });
-    playNoise(0.85, {
-      gain: 0.038,
-      delay: 0.32,
-      filterFrequency: 82,
-      filterType: 'lowpass',
-      q: 1.1,
-      playbackRate: 0.55,
-    });
-    playTone(36, 0.9, {
-      gain: 0.036,
-      delay: 0.16,
-      type: 'sine',
-      endFrequency: 22,
-      attack: 0.02,
-    });
-  }
-
   function playWaveClearSound() {
     playTone(262, 0.22, { gain: 0.04, type: 'triangle' });
     playTone(330, 0.24, { gain: 0.035, delay: 0.04, type: 'triangle' });
@@ -384,7 +346,6 @@ export function createSpellwaveAudio({
     playBossThrowSound,
     playBossImpactSound,
     playBossWarningSound,
-    playLightningSound,
     playWaveClearSound,
     playGameOverSound,
   };

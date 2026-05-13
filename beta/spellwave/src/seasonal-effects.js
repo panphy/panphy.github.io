@@ -5,7 +5,6 @@ export function createSeasonalEffects({
   world,
   lightningFlash,
   getMode,
-  playLightningSound,
   treeMinZ,
   treeMaxZ,
   treeSpan,
@@ -167,7 +166,6 @@ export function createSeasonalEffects({
 
   function triggerLightning() {
     summerStorm.flashTime = 0.2 + Math.random() * 0.08;
-    if (getMode() === 'running') playLightningSound();
     const visibleCount = 1 + Math.floor(Math.random() * 2);
     for (let index = 0; index < lightningBolts.length; index += 1) {
       const bolt = lightningBolts[index];

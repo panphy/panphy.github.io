@@ -330,7 +330,6 @@ const {
   playBossThrowSound,
   playBossImpactSound,
   playBossWarningSound,
-  playLightningSound,
   playWaveClearSound,
   playGameOverSound,
 } = createSpellwaveAudio({
@@ -398,7 +397,6 @@ seasonalEffects = createSeasonalEffects({
   world,
   lightningFlash,
   getMode: () => mode,
-  playLightningSound,
   treeMinZ: TREE_MIN_Z,
   treeMaxZ: TREE_MAX_Z,
   treeSpan: TREE_SPAN,
