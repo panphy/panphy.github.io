@@ -314,29 +314,40 @@ export function createSpellwaveAudio({
   }
 
   function playLightningSound() {
-    playNoise(0.09, {
-      gain: 0.07,
-      filterFrequency: 3600,
-      filterType: 'highpass',
-      q: 0.45,
+    playNoise(0.16, {
+      gain: 0.045,
+      filterFrequency: 1250,
+      filterType: 'bandpass',
+      q: 0.7,
     });
-    playTone(96, 0.22, {
-      gain: 0.035,
+    playTone(72, 0.34, {
+      gain: 0.052,
       type: 'sawtooth',
-      endFrequency: 44,
+      endFrequency: 28,
+      attack: 0.003,
     });
-    playNoise(0.72, {
-      gain: 0.055,
-      delay: 0.08,
-      filterFrequency: 190,
+    playNoise(1.15, {
+      gain: 0.072,
+      delay: 0.12,
+      filterFrequency: 115,
       filterType: 'lowpass',
-      q: 0.8,
+      q: 0.55,
+      playbackRate: 0.72,
     });
-    playTone(48, 0.58, {
-      gain: 0.026,
-      delay: 0.1,
+    playNoise(0.85, {
+      gain: 0.038,
+      delay: 0.32,
+      filterFrequency: 82,
+      filterType: 'lowpass',
+      q: 1.1,
+      playbackRate: 0.55,
+    });
+    playTone(36, 0.9, {
+      gain: 0.036,
+      delay: 0.16,
       type: 'sine',
-      endFrequency: 31,
+      endFrequency: 22,
+      attack: 0.02,
     });
   }
 
