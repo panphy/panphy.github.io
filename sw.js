@@ -1,10 +1,11 @@
-const BUILD_ID = '2026-05-11T09:57:14Z';
+const BUILD_ID = '2026-05-13T15:57:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
 const CORS_REQUIRED_ASSETS = new Set([
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
+  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js',
+  'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js'
 ]);
 
 const ASSETS_TO_CACHE = [
@@ -84,6 +85,13 @@ const ASSETS_TO_CACHE = [
   '/for_teachers/visualizer.html',
 
   // Fun
+  '/fun/spellwave.html',
+  '/fun/spellwave/src/styles.css',
+  '/fun/spellwave/src/main.js',
+  '/fun/spellwave/src/audio.js',
+  '/fun/spellwave/src/seasonal-effects.js',
+  '/fun/spellwave/src/question-bank.js',
+  'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js',
   '/fun/react.html',
   '/fun/ascii_cam.html'
 ];
