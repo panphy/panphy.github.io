@@ -65,7 +65,8 @@ const GAME_PROFILE = {
 };
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
-const LABEL_POSITION_EASE = 0.2;
+const LABEL_X_EASE = 0.14;
+const LABEL_Y_EASE = 0.07;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
 const PATH_MARKER_MAX_Z = 4;
@@ -1024,7 +1025,7 @@ function updateLabels() {
   for (const enemy of enemies) {
     renderPrompt(enemy);
     reusableVector.copy(enemy.group.position);
-    reusableVector.y += 2.2 * enemy.type.scale;
+    reusableVector.y += 3.2 * enemy.type.scale;
     reusableVector.project(camera);
 
     const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
@@ -1059,8 +1060,8 @@ function updateLabels() {
       enemy.labelX = x;
       enemy.labelY = y;
     } else {
-      enemy.labelX += (x - enemy.labelX) * LABEL_POSITION_EASE;
-      enemy.labelY += (y - enemy.labelY) * LABEL_POSITION_EASE;
+      enemy.labelX += (x - enemy.labelX) * LABEL_X_EASE;
+      enemy.labelY += (y - enemy.labelY) * LABEL_Y_EASE;
     }
     return {
       ...item,
@@ -1107,35 +1108,41 @@ function resolveLabelStacks(items) {
   }
 
   for (const group of groups) {
-    group.sort((a, b) => a.y - b.y || a.enemy.id - b.enemy.id);
+    // Sort bottommost first (largest Y = lowest on screen).
+    // Primary pass pushes labels UPWARD so they never drift over monster bodies.
+    group.sort((a, b) => b.y - a.y || a.enemy.id - b.enemy.id);
 
     for (let index = 0; index < group.length; index += 1) {
       const item = group[index];
       item.y = THREE.MathUtils.clamp(item.y, item.minY, item.maxY);
       if (index === 0) continue;
 
+      // previous is the label immediately below — push current label UP if needed
       const previous = group[index - 1];
-      const minBottom = previous.y + LABEL_STACK_GAP + item.height;
-      if (item.y < minBottom) item.y = minBottom;
-    }
-
-    const last = group[group.length - 1];
-    if (last && last.y > last.maxY) {
-      const overflow = last.y - last.maxY;
-      for (const item of group) item.y -= overflow;
-    }
-
-    for (let index = group.length - 2; index >= 0; index -= 1) {
-      const item = group[index];
-      const next = group[index + 1];
-      const maxBottom = next.y - next.height - LABEL_STACK_GAP;
+      const maxBottom = previous.y - previous.height - LABEL_STACK_GAP;
       if (item.y > maxBottom) item.y = maxBottom;
     }
 
-    const first = group[0];
-    if (first && first.y < first.minY) {
-      const underflow = first.minY - first.y;
+    // If topmost label crossed minY, shift the whole group back down together
+    const last = group[group.length - 1];
+    if (last && last.y < last.minY) {
+      const underflow = last.minY - last.y;
       for (const item of group) item.y += underflow;
+    }
+
+    // Reverse pass: re-check from top downward in case the shift above caused gaps
+    for (let index = group.length - 2; index >= 0; index -= 1) {
+      const item = group[index];
+      const next = group[index + 1]; // next is above current
+      const minBottom = next.y + next.height + LABEL_STACK_GAP;
+      if (item.y < minBottom) item.y = minBottom;
+    }
+
+    // Final clamp: if bottommost label was pushed below maxY, shift all up
+    const first = group[0];
+    if (first && first.y > first.maxY) {
+      const overflow = first.y - first.maxY;
+      for (const item of group) item.y -= overflow;
     }
   }
 }

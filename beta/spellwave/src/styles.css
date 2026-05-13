@@ -535,7 +535,7 @@ a {
   padding: 7px 9px 8px;
   border: 1px solid rgba(242, 240, 223, 0.38);
   border-radius: 7px;
-  background: rgba(4, 9, 10, 0.84);
+  background: rgba(4, 9, 10, 0.74);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38), inset 0 0 18px rgba(88, 223, 207, 0.06);
   color: var(--ink);
   font-family: var(--font-mono);
