@@ -155,7 +155,6 @@ const BOSS_TYPES = [
     eye: 0xfff05a,
     speed: 1.1,
     scale: 1.62,
-    halfWidth: 1.8,
     weight: 1,
     score: 150,
   },
@@ -167,7 +166,6 @@ const BOSS_TYPES = [
     eye: 0xd9ff66,
     speed: 1.05,
     scale: 1.64,
-    halfWidth: 1.1,
     weight: 1,
     score: 150,
   },
@@ -179,7 +177,6 @@ const BOSS_TYPES = [
     eye: 0xf2f0df,
     speed: 1.14,
     scale: 1.6,
-    halfWidth: 1.0,
     weight: 1,
     score: 150,
   },
@@ -191,7 +188,6 @@ const BOSS_TYPES = [
     eye: 0x7dd3fc,
     speed: 1.08,
     scale: 1.66,
-    halfWidth: 2.2,
     weight: 1,
     score: 150,
   },
@@ -1026,6 +1022,8 @@ function updateLabels() {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const safeBounds = getLabelSafeBounds(height);
+  const hudGrid = document.querySelector('.hud-grid');
+  const hudBottom = hudGrid ? hudGrid.getBoundingClientRect().bottom : 0;
   const labelItems = [];
 
   for (const enemy of enemies) {
@@ -1048,17 +1046,21 @@ function updateLabels() {
     enemy.label.style.setProperty('--threat-progress', approachAmount.toFixed(3));
 
     if (enemy.isBoss) {
-      // Project boss side edge to get screen half-width in pixels
-      reusableVector.copy(enemy.group.position);
-      reusableVector.x += (enemy.type.halfWidth || 1.5) * enemy.type.scale;
+      // Project both road edges at the boss's depth so the label lands in the scenery area
+      const bossY = enemy.group.position.y;
+      const bossZ = enemy.group.position.z;
+      reusableVector.set(5.8, bossY, bossZ);
       reusableVector.project(camera);
-      const bossEdgeScreenX = (reusableVector.x * 0.5 + 0.5) * width;
+      const rightRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
+      reusableVector.set(-5.8, bossY, bossZ);
+      reusableVector.project(camera);
+      const leftRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
       // Project boss mid-height for vertical centering beside boss
       reusableVector.copy(enemy.group.position);
       reusableVector.y += 1.3 * enemy.type.scale;
       reusableVector.project(camera);
       const bossMidScreenY = (-reusableVector.y * 0.5 + 0.5) * height;
-      labelItems.push({ enemy, x, y, scale, bossEdgeScreenX, bossMidScreenY });
+      labelItems.push({ enemy, x, y, scale, rightRoadEdgeX, leftRoadEdgeX, bossMidScreenY });
     } else {
       labelItems.push({ enemy, x, y, scale });
     }
@@ -1073,16 +1075,16 @@ function updateLabels() {
 
     let targetX, targetY;
     if (enemy.isBoss) {
-      // Place label to the side of the boss body instead of above, so the tall
-      // definition label never sits over the boss even when the boss is close.
-      const bossHalfWidthPx = Math.abs(item.bossEdgeScreenX - item.x);
-      const useRight = item.x <= width / 2;
+      // Place label in the scenery area outside the road boundaries (±5.8 world units),
+      // using lane to decide left/right so boss bodies stay fully visible.
+      const useRight = enemy.lane >= 0;
       const rawX = useRight
-        ? item.x + bossHalfWidthPx + BOSS_LABEL_GAP + labelWidth / 2
-        : item.x - bossHalfWidthPx - BOSS_LABEL_GAP - labelWidth / 2;
+        ? item.rightRoadEdgeX + BOSS_LABEL_GAP + labelWidth / 2
+        : item.leftRoadEdgeX - BOSS_LABEL_GAP - labelWidth / 2;
       targetX = THREE.MathUtils.clamp(rawX, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
-      // Vertically center the label beside the boss (label bottom = midY + half-height)
-      targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, minY, maxY);
+      // Left-side labels must clear the hud-grid (Score/Best/Life/Wave readouts)
+      const leftMinY = useRight ? minY : Math.max(minY, hudBottom + LABEL_SAFE_MARGIN + labelHeight);
+      targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, leftMinY, maxY);
     } else {
       targetX = THREE.MathUtils.clamp(item.x, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
       targetY = THREE.MathUtils.clamp(item.y, minY, maxY);
