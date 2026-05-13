@@ -1,4 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+import { createSpellwaveAudio } from './audio.js';
+import { createSeasonalEffects } from './seasonal-effects.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
 
 const canvas = document.getElementById('gameCanvas');
@@ -79,21 +81,6 @@ const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
-const MASTER_VOLUME = 0.5;
-const MUSIC_GAIN = 0.82;
-const MUSIC_BASE_STEP = 0.18;
-const MUSIC_TIMER_INTERVAL = 80;
-const MUSIC_SCHEDULE_AHEAD = 0.34;
-const MUSIC_MELODY = [
-  523.25, 659.25, 783.99, 659.25, 587.33, 739.99, 880.0, 739.99,
-  523.25, null, 659.25, 783.99, 987.77, 880.0, 739.99, 659.25,
-  440.0, 523.25, 659.25, 523.25, 493.88, 587.33, 739.99, 587.33,
-  392.0, null, 493.88, 587.33, 783.99, 739.99, 587.33, 493.88,
-];
-const MUSIC_BASS = [
-  130.81, null, null, null, 98.0, null, null, null,
-  116.54, null, null, null, 87.31, null, 98.0, null,
-];
 const ENEMY_TYPES = [
   {
     name: 'Mudlug',
@@ -274,8 +261,6 @@ const wandSwings = [];
 const pathMarkerBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
-const springFlowers = [];
-const autumnFallenLeaves = [];
 
 let mode = 'idle';
 let score = 0;
@@ -308,13 +293,6 @@ let enemyId = 0;
 let pathMarkerMaterial = null;
 let moon = null;
 let starField = null;
-let audioEnabled = loadAudioSetting();
-let audioContext = null;
-let masterGain = null;
-let musicGain = null;
-let musicTimer = null;
-let musicStep = 0;
-let nextMusicTime = 0;
 let typedAttempts = 0;
 let mistakeCount = 0;
 let defeatedCount = 0;
@@ -330,23 +308,40 @@ let sceneCrystalMat = null;
 let currentSeasonIndex = 0;
 let seasonEmberIntensityBase = 2.1;
 let seasonFade = null;
-let currentSeasonName = 'spring';
-let snowField = null;
-let snowPositions = null;
-let snowSpeeds = null;
-let rainField = null;
-let rainPositions = null;
-let rainSpeeds = null;
-let lightningLight = null;
-let lightningGlow = null;
-let summerStorm = {
-  active: false,
-  nextRain: 7,
-  rainTime: 0,
-  lightningTime: 0,
-  flashTime: 0,
-};
-const lightningBolts = [];
+let seasonalEffects = null;
+
+const {
+  toggleEnabled: toggleAudioEnabled,
+  updateAudioButton,
+  resumeAudio,
+  startMusicLoop,
+  stopMusicLoop,
+  playToggleSound,
+  playStartSound,
+  playPauseSound,
+  playTypeSound,
+  playBackspaceSound,
+  playMistakeSound,
+  playRevealSound,
+  playDefeatSound,
+  playHealSound,
+  playMedicPassSound,
+  playDamageSound,
+  playBossThrowSound,
+  playBossImpactSound,
+  playBossWarningSound,
+  playLightningSound,
+  playWaveClearSound,
+  playGameOverSound,
+} = createSpellwaveAudio({
+  audioButton,
+  initialEnabled: loadAudioSetting(),
+  saveAudioSetting,
+  getMode: () => mode,
+  getWaveSet: () => waveSet,
+  getTypedLength: () => typedBuffer.length,
+  pathLanes: PATH_LANES,
+});
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -398,8 +393,21 @@ scene.add(emberLight);
 createWorld();
 createSky();
 createClouds();
-createSeasonalScenery();
-createWeatherSystems();
+seasonalEffects = createSeasonalEffects({
+  scene,
+  world,
+  lightningFlash,
+  getMode: () => mode,
+  playLightningSound,
+  treeMinZ: TREE_MIN_Z,
+  treeMaxZ: TREE_MAX_Z,
+  treeSpan: TREE_SPAN,
+  pathMarkerMinZ: PATH_MARKER_MIN_Z,
+  pathMarkerMaxZ: PATH_MARKER_MAX_Z,
+  pathMarkerSpan: PATH_MARKER_SPAN,
+  pathMarkerWrapZ: PATH_MARKER_WRAP_Z,
+});
+seasonalEffects.create();
 applySeasonForWave(1, true);
 createLifeMeter();
 
@@ -422,9 +430,7 @@ startButton.addEventListener('click', () => {
 });
 
 audioButton.addEventListener('click', () => {
-  audioEnabled = !audioEnabled;
-  saveAudioSetting(audioEnabled);
-  updateAudioButton();
+  const audioEnabled = toggleAudioEnabled();
   if (audioEnabled) {
     resumeAudio();
     playToggleSound();
@@ -1032,159 +1038,13 @@ function updateEnvironment(seconds, delta) {
     }
   }
 
-  updateSeasonalScenery(seconds, scrollDelta);
+  seasonalEffects.update(seconds, delta, scrollDelta);
 
   for (const cloud of clouds) {
     cloud.group.position.x += cloud.speed * delta;
     if (cloud.group.position.x > 46) {
       cloud.group.position.x = -46;
     }
-  }
-
-  updateWeather(seconds, delta);
-}
-
-function updateSeasonalScenery(seconds, scrollDelta) {
-  for (const flower of springFlowers) {
-    flower.group.position.z += scrollDelta * flower.speed;
-    if (flower.group.position.z > TREE_MAX_Z) {
-      flower.group.position.z -= TREE_SPAN;
-    }
-    flower.group.position.x = flower.baseX + Math.sin(seconds * 0.7 + flower.phase) * 0.05;
-    flower.group.rotation.z = Math.sin(seconds * 1.2 + flower.phase) * 0.035;
-  }
-
-  for (const leaf of autumnFallenLeaves) {
-    leaf.mesh.position.z += scrollDelta * leaf.speed;
-    if (leaf.mesh.position.z > PATH_MARKER_WRAP_Z) {
-      leaf.mesh.position.z -= PATH_MARKER_SPAN;
-      leaf.mesh.position.x = leaf.side * (4.95 + Math.random() * 2.2);
-      leaf.baseX = leaf.mesh.position.x;
-    }
-    leaf.mesh.position.x = leaf.baseX + Math.sin(seconds * 0.9 + leaf.phase) * 0.08;
-    leaf.mesh.rotation.y += scrollDelta * 0.08;
-  }
-}
-
-function updateWeather(seconds, delta) {
-  updateSnow(seconds, delta);
-  updateSummerStorm(delta);
-  updateRain(delta);
-  updateLightning(delta);
-}
-
-function updateSnow(seconds, delta) {
-  if (!snowField || !snowField.visible) return;
-  const runningFactor = mode === 'running' ? 1 : 0.42;
-  for (let index = 0; index < snowSpeeds.length; index += 1) {
-    const offset = index * 3;
-    snowPositions[offset] += Math.sin(seconds * 0.85 + index * 0.37) * delta * 0.42;
-    snowPositions[offset + 1] -= snowSpeeds[index] * delta * runningFactor;
-    snowPositions[offset + 2] += delta * runningFactor * 1.15;
-    if (snowPositions[offset + 1] < -0.25 || snowPositions[offset + 2] > 14) {
-      resetSnowflake(index);
-    }
-  }
-  snowField.geometry.attributes.position.needsUpdate = true;
-}
-
-function updateSummerStorm(delta) {
-  if (currentSeasonName !== 'summer') {
-    summerStorm.active = false;
-    summerStorm.flashTime = 0;
-    if (rainField) rainField.visible = false;
-    hideLightningBolts();
-    if (lightningFlash) lightningFlash.style.opacity = '0';
-    return;
-  }
-
-  const timerDelta = delta * (mode === 'running' ? 1 : 0.38);
-  summerStorm.active = true;
-  summerStorm.rainTime = Number.POSITIVE_INFINITY;
-  if (rainField) rainField.visible = true;
-  summerStorm.lightningTime -= timerDelta;
-  if (summerStorm.lightningTime <= 0) {
-    triggerLightning();
-    summerStorm.lightningTime = 0.85 + Math.random() * 1.75;
-  }
-}
-
-function updateRain(delta) {
-  if (!rainField || !rainField.visible) return;
-  for (let index = 0; index < rainSpeeds.length; index += 1) {
-    const offset = index * 6;
-    const speed = rainSpeeds[index] * delta;
-    const x = rainPositions[offset] - speed * 0.2;
-    const y = rainPositions[offset + 1] - speed;
-    const z = rainPositions[offset + 2] + speed * 0.65;
-    rainPositions[offset] = x;
-    rainPositions[offset + 1] = y;
-    rainPositions[offset + 2] = z;
-    rainPositions[offset + 3] = x - 0.22;
-    rainPositions[offset + 4] = y + 1.15;
-    rainPositions[offset + 5] = z - 0.42;
-    if (y < -0.4 || z > 14) resetRaindrop(index);
-  }
-  rainField.geometry.attributes.position.needsUpdate = true;
-}
-
-function triggerLightning() {
-  summerStorm.flashTime = 0.2 + Math.random() * 0.08;
-  const visibleCount = 1 + Math.floor(Math.random() * 2);
-  for (let index = 0; index < lightningBolts.length; index += 1) {
-    const bolt = lightningBolts[index];
-    if (index >= visibleCount) {
-      bolt.visible = false;
-      continue;
-    }
-    rebuildLightningBolt(bolt, index);
-    bolt.visible = true;
-    bolt.material.opacity = index === 0 ? 0.92 : 0.46;
-  }
-}
-
-function rebuildLightningBolt(bolt, index) {
-  const points = [];
-  const baseX = (Math.random() - 0.5) * 16 + index * 1.6;
-  const baseZ = -44 + Math.random() * 12;
-  const segments = 7 + Math.floor(Math.random() * 3);
-  for (let segment = 0; segment <= segments; segment += 1) {
-    const t = segment / segments;
-    const fork = segment > 1 ? (Math.random() - 0.5) * (1.2 + t * 2.2) : 0;
-    points.push(new THREE.Vector3(
-      baseX + fork + Math.sin(t * Math.PI * 2) * 0.7,
-      THREE.MathUtils.lerp(21, 6.2 + Math.random() * 1.8, t),
-      baseZ + t * 8 + (Math.random() - 0.5) * 1.6
-    ));
-  }
-  bolt.geometry.dispose();
-  bolt.geometry = new THREE.BufferGeometry().setFromPoints(points);
-}
-
-function updateLightning(delta) {
-  if (!lightningLight || !lightningGlow) return;
-  if (summerStorm.flashTime > 0) {
-    summerStorm.flashTime = Math.max(0, summerStorm.flashTime - delta);
-    const intensity = summerStorm.flashTime / 0.22;
-    lightningLight.intensity = 18 * intensity;
-    lightningGlow.intensity = 3.2 * intensity;
-    if (lightningFlash) lightningFlash.style.opacity = String(Math.min(0.8, intensity * 0.7));
-    for (const bolt of lightningBolts) {
-      if (bolt.visible) bolt.material.opacity = Math.max(0, bolt.material.opacity - delta * 3.4);
-    }
-    return;
-  }
-
-  lightningLight.intensity = 0;
-  lightningGlow.intensity = 0;
-  if (lightningFlash) lightningFlash.style.opacity = '0';
-  hideLightningBolts();
-}
-
-function hideLightningBolts() {
-  for (const bolt of lightningBolts) {
-    bolt.visible = false;
-    bolt.material.opacity = 0;
   }
 }
 
@@ -2504,173 +2364,6 @@ function createClouds() {
   }
 }
 
-function createSeasonalScenery() {
-  createSpringFlowers();
-  createAutumnFallenLeaves();
-}
-
-function createSpringFlowers() {
-  const stemMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d48, roughness: 0.82 });
-  const centerMaterial = new THREE.MeshStandardMaterial({ color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
-  const petalMaterials = [
-    new THREE.MeshStandardMaterial({ color: 0xff8fbd, roughness: 0.72 }),
-    new THREE.MeshStandardMaterial({ color: 0xf9c7dc, roughness: 0.72 }),
-    new THREE.MeshStandardMaterial({ color: 0xd9f99d, roughness: 0.75 }),
-    new THREE.MeshStandardMaterial({ color: 0xbde7ff, roughness: 0.7 }),
-  ];
-
-  for (let patchIndex = 0; patchIndex < 42; patchIndex += 1) {
-    const side = patchIndex % 2 === 0 ? -1 : 1;
-    const group = new THREE.Group();
-    const x = side * (4.65 + Math.random() * 1.9);
-    const z = TREE_MIN_Z + 4 + Math.random() * (TREE_SPAN - 8);
-    group.position.set(x, 0, z);
-    group.rotation.y = (Math.random() - 0.5) * 0.45;
-
-    const blossoms = 2 + Math.floor(Math.random() * 3);
-    for (let blossomIndex = 0; blossomIndex < blossoms; blossomIndex += 1) {
-      const petalMaterial = petalMaterials[(patchIndex + blossomIndex) % petalMaterials.length];
-      const localX = (Math.random() - 0.5) * 0.86;
-      const localZ = (Math.random() - 0.5) * 0.68;
-      const height = 0.28 + Math.random() * 0.2;
-      group.add(blockMesh(0.07, height, 0.07, stemMaterial, localX, height * 0.5, localZ));
-      group.add(blockMesh(0.34, 0.12, 0.13, petalMaterial, localX, height + 0.035, localZ));
-      const crossPetal = blockMesh(0.13, 0.12, 0.34, petalMaterial, localX, height + 0.035, localZ);
-      group.add(crossPetal);
-      group.add(blockMesh(0.11, 0.11, 0.11, centerMaterial, localX, height + 0.075, localZ));
-    }
-
-    group.visible = false;
-    world.add(group);
-    springFlowers.push({
-      group,
-      baseX: x,
-      speed: 0.8 + Math.random() * 0.38,
-      phase: Math.random() * Math.PI * 2,
-    });
-  }
-}
-
-function createAutumnFallenLeaves() {
-  const leafMaterials = [
-    new THREE.MeshStandardMaterial({ color: 0xb33b12, roughness: 0.9 }),
-    new THREE.MeshStandardMaterial({ color: 0xd76818, roughness: 0.9 }),
-    new THREE.MeshStandardMaterial({ color: 0xe1a32c, roughness: 0.86 }),
-    new THREE.MeshStandardMaterial({ color: 0x7d2d18, roughness: 0.94 }),
-  ];
-
-  for (let index = 0; index < 92; index += 1) {
-    const side = index % 2 === 0 ? -1 : 1;
-    const material = leafMaterials[index % leafMaterials.length];
-    const mesh = blockMesh(0.24 + Math.random() * 0.18, 0.025, 0.1 + Math.random() * 0.14, material, 0, 0.045, 0);
-    mesh.position.x = side * (4.95 + Math.random() * 2.2);
-    mesh.position.z = PATH_MARKER_MIN_Z + Math.random() * (PATH_MARKER_MAX_Z - PATH_MARKER_MIN_Z);
-    mesh.rotation.y = Math.random() * Math.PI;
-    mesh.rotation.z = (Math.random() - 0.5) * 0.16;
-    mesh.visible = false;
-    world.add(mesh);
-    autumnFallenLeaves.push({
-      mesh,
-      side,
-      baseX: mesh.position.x,
-      speed: 0.9 + Math.random() * 0.45,
-      phase: Math.random() * Math.PI * 2,
-    });
-  }
-}
-
-function createWeatherSystems() {
-  createSnowField();
-  createRainField();
-  createLightning();
-}
-
-function createSnowField() {
-  const count = 420;
-  snowPositions = new Float32Array(count * 3);
-  snowSpeeds = new Float32Array(count);
-  for (let index = 0; index < count; index += 1) {
-    resetSnowflake(index, Math.random() * 22);
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(snowPositions, 3));
-  const material = new THREE.PointsMaterial({
-    color: 0xe8f7ff,
-    size: 0.13,
-    transparent: true,
-    opacity: 0.88,
-    depthWrite: false,
-  });
-  snowField = new THREE.Points(geometry, material);
-  snowField.visible = false;
-  scene.add(snowField);
-}
-
-function resetSnowflake(index, y = 18 + Math.random() * 8) {
-  const offset = index * 3;
-  snowPositions[offset] = (Math.random() - 0.5) * 30;
-  snowPositions[offset + 1] = y;
-  snowPositions[offset + 2] = -58 + Math.random() * 72;
-  snowSpeeds[index] = 1.1 + Math.random() * 1.9;
-}
-
-function createRainField() {
-  const count = 170;
-  rainPositions = new Float32Array(count * 6);
-  rainSpeeds = new Float32Array(count);
-  for (let index = 0; index < count; index += 1) {
-    resetRaindrop(index, 3 + Math.random() * 20);
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
-  const material = new THREE.LineBasicMaterial({
-    color: 0xb9dfff,
-    transparent: true,
-    opacity: 0.52,
-    depthWrite: false,
-  });
-  rainField = new THREE.LineSegments(geometry, material);
-  rainField.visible = false;
-  scene.add(rainField);
-}
-
-function resetRaindrop(index, y = 14 + Math.random() * 11) {
-  const offset = index * 6;
-  const x = (Math.random() - 0.5) * 34;
-  const z = -58 + Math.random() * 70;
-  rainPositions[offset] = x;
-  rainPositions[offset + 1] = y;
-  rainPositions[offset + 2] = z;
-  rainPositions[offset + 3] = x - 0.22;
-  rainPositions[offset + 4] = y + 1.15;
-  rainPositions[offset + 5] = z - 0.42;
-  rainSpeeds[index] = 15 + Math.random() * 8;
-}
-
-function createLightning() {
-  lightningLight = new THREE.PointLight(0xd9f1ff, 0, 70, 1.5);
-  lightningLight.position.set(0, 18, -34);
-  scene.add(lightningLight);
-
-  lightningGlow = new THREE.DirectionalLight(0xe8f5ff, 0);
-  lightningGlow.position.set(-6, 18, -16);
-  scene.add(lightningGlow);
-
-  for (let index = 0; index < 3; index += 1) {
-    const material = new THREE.LineBasicMaterial({
-      color: index === 0 ? 0xffffff : 0x9fd6ff,
-      transparent: true,
-      opacity: 0,
-    });
-    const line = new THREE.Line(new THREE.BufferGeometry(), material);
-    line.visible = false;
-    scene.add(line);
-    lightningBolts.push(line);
-  }
-}
-
 function triggerWandSwing(wandGroup) {
   const existing = wandSwings.findIndex(s => s.group === wandGroup);
   if (existing !== -1) wandSwings.splice(existing, 1);
@@ -3133,7 +2826,7 @@ function applySeasonInstant(palette) {
   if (moon) moon.material.color.setHex(palette.moonColor);
   if (starField) starField.material.opacity = palette.starOpacity;
   recolorGround(palette);
-  setSeasonVisualState(palette.name);
+  seasonalEffects.setSeason(palette.name);
 }
 
 function applySeasonForWave(wave, instant = false) {
@@ -3141,7 +2834,7 @@ function applySeasonForWave(wave, instant = false) {
   if (!instant && currentSeasonIndex === index) return;
   currentSeasonIndex = index;
   const palette = SEASON_PALETTES[index];
-  setSeasonVisualState(palette.name);
+  seasonalEffects.setSeason(palette.name);
   if (instant) {
     applySeasonInstant(palette);
     seasonFade = null;
@@ -3150,39 +2843,6 @@ function applySeasonForWave(wave, instant = false) {
   const from = buildSeasonFromScene();
   const to = buildSeasonTarget(palette);
   seasonFade = { from, to, palette, t: 0, duration: 3.5 };
-}
-
-function setSeasonVisualState(seasonName) {
-  currentSeasonName = seasonName;
-
-  const isSpring = seasonName === 'spring';
-  const isAutumn = seasonName === 'autumn';
-  const isWinter = seasonName === 'winter';
-  const isSummer = seasonName === 'summer';
-
-  for (const flower of springFlowers) flower.group.visible = isSpring;
-  for (const leaf of autumnFallenLeaves) leaf.mesh.visible = isAutumn;
-  if (snowField) snowField.visible = isWinter;
-
-  if (!isSummer) {
-    summerStorm.active = false;
-    summerStorm.rainTime = 0;
-    summerStorm.flashTime = 0;
-    summerStorm.nextRain = 7 + Math.random() * 8;
-    if (rainField) rainField.visible = false;
-    hideLightningBolts();
-    if (lightningFlash) lightningFlash.style.opacity = '0';
-    if (lightningLight) lightningLight.intensity = 0;
-    if (lightningGlow) lightningGlow.intensity = 0;
-    return;
-  }
-
-  summerStorm.active = false;
-  summerStorm.rainTime = Number.POSITIVE_INFINITY;
-  summerStorm.flashTime = 0;
-  summerStorm.lightningTime = 0.6 + Math.random() * 1.2;
-  summerStorm.nextRain = 0;
-  if (rainField) rainField.visible = true;
 }
 
 function updateSeasonFade(delta) {
@@ -3340,299 +3000,11 @@ function writeStoredValue(key, value) {
   }
 }
 
-function updateAudioButton() {
-  audioButton.classList.toggle('is-muted', !audioEnabled);
-  audioButton.classList.toggle('is-audio-on', audioEnabled);
-  audioButton.setAttribute('aria-label', audioEnabled ? 'Mute sound' : 'Unmute sound');
-  audioButton.title = audioEnabled ? 'Mute sound' : 'Unmute sound';
-  if (masterGain && audioContext) {
-    masterGain.gain.cancelScheduledValues(audioContext.currentTime);
-    masterGain.gain.setTargetAtTime(audioEnabled ? MASTER_VOLUME : 0.0001, audioContext.currentTime, 0.018);
-  }
-  if (!audioEnabled) stopMusicLoop(0.03);
-}
-
 function setPauseButtonState(isPlaying, isDisabled = pauseButton.disabled) {
   pauseButton.disabled = isDisabled;
   pauseButton.classList.toggle('is-playing', isPlaying);
   pauseButton.setAttribute('aria-label', isPlaying ? 'Pause run' : 'Resume run');
   pauseButton.title = isPlaying ? 'Pause run' : 'Resume run';
-}
-
-function ensureAudio() {
-  if (!audioEnabled) return null;
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) return null;
-
-  if (!audioContext) {
-    audioContext = new AudioContextClass();
-    masterGain = audioContext.createGain();
-    musicGain = audioContext.createGain();
-    masterGain.gain.setValueAtTime(MASTER_VOLUME, audioContext.currentTime);
-    musicGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-    musicGain.connect(masterGain);
-    masterGain.connect(audioContext.destination);
-  }
-
-  return audioContext;
-}
-
-function resumeAudio() {
-  const context = ensureAudio();
-  if (context && context.state === 'suspended') {
-    context.resume().catch(() => {});
-  }
-  return context;
-}
-
-function playTone(frequency, duration, options = {}) {
-  const context = resumeAudio();
-  if (!context || !masterGain) return;
-
-  const start = context.currentTime + (options.delay || 0);
-  scheduleTone(frequency, duration, start, options, masterGain);
-}
-
-function scheduleTone(frequency, duration, start, options = {}, destination = masterGain) {
-  const context = audioContext;
-  if (!context || !destination) return;
-
-  const attack = Math.min(options.attack ?? 0.008, duration * 0.4);
-  const oscillator = context.createOscillator();
-  const gainNode = context.createGain();
-  oscillator.type = options.type || 'sine';
-  oscillator.frequency.setValueAtTime(frequency, start);
-  if (options.endFrequency) {
-    oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, options.endFrequency), start + duration);
-  }
-  if (options.detune) oscillator.detune.setValueAtTime(options.detune, start);
-
-  gainNode.gain.setValueAtTime(0.0001, start);
-  gainNode.gain.exponentialRampToValueAtTime(options.gain || 0.05, start + attack);
-  gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-  oscillator.connect(gainNode);
-  gainNode.connect(destination);
-  oscillator.start(start);
-  oscillator.stop(start + duration + 0.04);
-}
-
-function playNoise(duration, options = {}) {
-  const context = resumeAudio();
-  if (!context || !masterGain) return;
-
-  const start = context.currentTime + (options.delay || 0);
-  scheduleNoise(duration, start, options, masterGain);
-}
-
-function scheduleNoise(duration, start, options = {}, destination = masterGain) {
-  const context = audioContext;
-  if (!context || !destination) return;
-
-  const buffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * duration)), context.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = (Math.random() * 2 - 1) * (1 - index / data.length);
-  }
-
-  const source = context.createBufferSource();
-  const filter = context.createBiquadFilter();
-  const gainNode = context.createGain();
-  source.buffer = buffer;
-  source.playbackRate.setValueAtTime(options.playbackRate || 1, start);
-  filter.type = options.filterType || 'bandpass';
-  filter.frequency.setValueAtTime(options.filterFrequency || 900, start);
-  filter.Q.setValueAtTime(options.q || 0.8, start);
-  gainNode.gain.setValueAtTime(options.gain || 0.04, start);
-  gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-  source.connect(filter);
-  filter.connect(gainNode);
-  gainNode.connect(destination);
-  source.start(start);
-  source.stop(start + duration + 0.02);
-}
-
-function startMusicLoop(reset) {
-  const context = resumeAudio();
-  if (!context || !musicGain || mode !== 'running') return;
-
-  if (reset || nextMusicTime < context.currentTime) {
-    musicStep = 0;
-    nextMusicTime = context.currentTime + 0.08;
-  }
-
-  musicGain.gain.cancelScheduledValues(context.currentTime);
-  musicGain.gain.setTargetAtTime(MUSIC_GAIN, context.currentTime, 0.12);
-
-  if (!musicTimer) {
-    musicTimer = window.setInterval(scheduleMusic, MUSIC_TIMER_INTERVAL);
-  }
-  scheduleMusic();
-}
-
-function stopMusicLoop(fade = 0.1) {
-  if (musicTimer) {
-    window.clearInterval(musicTimer);
-    musicTimer = null;
-  }
-  if (musicGain && audioContext) {
-    musicGain.gain.cancelScheduledValues(audioContext.currentTime);
-    musicGain.gain.setTargetAtTime(0.0001, audioContext.currentTime, fade);
-  }
-}
-
-function scheduleMusic() {
-  if (!audioEnabled || mode !== 'running' || !audioContext || !musicGain) {
-    stopMusicLoop(0.04);
-    return;
-  }
-
-  const stepDuration = Math.max(0.13, MUSIC_BASE_STEP - Math.min(waveSet - 1, 8) * 0.006);
-  while (nextMusicTime < audioContext.currentTime + MUSIC_SCHEDULE_AHEAD) {
-    scheduleMusicStep(musicStep, nextMusicTime, stepDuration);
-    nextMusicTime += stepDuration;
-    musicStep = (musicStep + 1) % MUSIC_MELODY.length;
-  }
-}
-
-function scheduleMusicStep(step, start, stepDuration) {
-  const melody = MUSIC_MELODY[step % MUSIC_MELODY.length];
-  const bass = MUSIC_BASS[step % MUSIC_BASS.length];
-  const accent = step % 8 === 0;
-
-  if (bass) {
-    scheduleTone(bass, stepDuration * 1.6, start, {
-      gain: accent ? 0.035 : 0.024,
-      type: 'square',
-      attack: 0.004,
-    }, musicGain);
-  }
-
-  if (melody && (step % 2 === 0 || waveSet > 2)) {
-    scheduleTone(melody, stepDuration * 0.82, start + stepDuration * 0.08, {
-      gain: 0.024,
-      type: 'square',
-      attack: 0.003,
-    }, musicGain);
-    if (step % 8 === 6) {
-      scheduleTone(melody * 1.5, stepDuration * 0.5, start + stepDuration * 0.18, {
-        gain: 0.012,
-        type: 'triangle',
-        attack: 0.003,
-      }, musicGain);
-    }
-  }
-
-  if (step % 4 === 2) {
-    scheduleNoise(stepDuration * 0.35, start + stepDuration * 0.16, {
-      gain: 0.009,
-      filterType: 'highpass',
-      filterFrequency: 2400,
-      q: 0.6,
-    }, musicGain);
-  }
-
-  if (step % 16 === 8) {
-    scheduleNoise(stepDuration * 0.55, start, {
-      gain: 0.016,
-      filterType: 'bandpass',
-      filterFrequency: 520,
-      q: 0.9,
-    }, musicGain);
-  }
-}
-
-function playToggleSound() {
-  playTone(640, 0.07, { gain: 0.045, type: 'triangle' });
-}
-
-function playStartSound() {
-  playTone(196, 0.16, { gain: 0.045, type: 'triangle' });
-  playTone(294, 0.14, { gain: 0.04, delay: 0.05, type: 'triangle' });
-  playTone(392, 0.18, { gain: 0.036, delay: 0.1, type: 'sine' });
-}
-
-function playPauseSound() {
-  playTone(330, 0.08, { gain: 0.032, type: 'triangle', endFrequency: 220 });
-}
-
-function playTypeSound() {
-  const pitch = 520 + Math.min(typedBuffer.length, 12) * 18;
-  playTone(pitch, 0.045, { gain: 0.026, type: 'square' });
-}
-
-function playBackspaceSound() {
-  playTone(260, 0.05, { gain: 0.02, type: 'triangle', endFrequency: 190 });
-}
-
-function playMistakeSound() {
-  playTone(150, 0.13, { gain: 0.05, type: 'sawtooth', endFrequency: 82 });
-  playNoise(0.08, { gain: 0.025, filterFrequency: 180, filterType: 'lowpass' });
-}
-
-function playRevealSound(enemy) {
-  const laneIndex = Math.max(0, PATH_LANES.findIndex((lane) => lane === enemy.lane));
-  const pitch = enemy.isBoss ? 180 : 460 + laneIndex * 18;
-  playTone(pitch, 0.09, { gain: enemy.isBoss ? 0.06 : 0.03, type: enemy.isBoss ? 'sawtooth' : 'triangle' });
-  if (enemy.isBoss) playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine' });
-}
-
-function playDefeatSound(enemy) {
-  const base = enemy.isBoss ? 180 : 720;
-  playTone(base, 0.09, { gain: 0.055, type: 'square', endFrequency: enemy.isBoss ? 320 : 420 });
-  playTone(base * 1.5, 0.12, { gain: 0.03, delay: 0.035, type: 'triangle', endFrequency: base * 0.75 });
-  playNoise(enemy.isBoss ? 0.24 : 0.13, {
-    gain: enemy.isBoss ? 0.08 : 0.045,
-    filterFrequency: enemy.isBoss ? 360 : 1200,
-    filterType: enemy.isBoss ? 'lowpass' : 'bandpass',
-  });
-}
-
-function playHealSound(healed) {
-  playTone(660, 0.1, { gain: 0.042, type: 'triangle', endFrequency: 880 });
-  if (healed > 0) {
-    playTone(990, 0.16, { gain: 0.032, delay: 0.04, type: 'sine' });
-  }
-  playNoise(0.1, { gain: 0.022, delay: 0.02, filterFrequency: 1800, filterType: 'bandpass' });
-}
-
-function playMedicPassSound() {
-  playTone(420, 0.08, { gain: 0.026, type: 'triangle', endFrequency: 280 });
-}
-
-function playDamageSound(enemy) {
-  const bossHit = !!enemy?.isBoss;
-  playTone(bossHit ? 62 : 78, bossHit ? 0.28 : 0.22, { gain: bossHit ? 0.086 : 0.07, type: 'sawtooth', endFrequency: bossHit ? 36 : 45 });
-  playNoise(bossHit ? 0.24 : 0.18, { gain: bossHit ? 0.074 : 0.06, filterFrequency: bossHit ? 135 : 170, filterType: 'lowpass' });
-}
-
-function playBossThrowSound() {
-  playTone(176, 0.11, { gain: 0.045, type: 'sawtooth', endFrequency: 132 });
-  playTone(352, 0.07, { gain: 0.022, delay: 0.03, type: 'square', endFrequency: 260 });
-}
-
-function playBossImpactSound() {
-  playTone(92, 0.16, { gain: 0.058, type: 'sawtooth', endFrequency: 52 });
-  playNoise(0.12, { gain: 0.045, filterFrequency: 260, filterType: 'lowpass' });
-}
-
-function playBossWarningSound() {
-  playTone(110, 0.38, { gain: 0.055, type: 'sawtooth', endFrequency: 82 });
-  playTone(55, 0.42, { gain: 0.035, delay: 0.08, type: 'sine' });
-}
-
-function playWaveClearSound() {
-  playTone(262, 0.22, { gain: 0.04, type: 'triangle' });
-  playTone(330, 0.24, { gain: 0.035, delay: 0.04, type: 'triangle' });
-  playTone(392, 0.3, { gain: 0.035, delay: 0.08, type: 'triangle' });
-  playTone(523, 0.22, { gain: 0.026, delay: 0.16, type: 'sine' });
-}
-
-function playGameOverSound() {
-  playTone(196, 0.18, { gain: 0.055, type: 'sawtooth', endFrequency: 130 });
-  playTone(130, 0.26, { gain: 0.052, delay: 0.12, type: 'sawtooth', endFrequency: 70 });
-  playNoise(0.22, { gain: 0.045, delay: 0.04, filterFrequency: 220, filterType: 'lowpass' });
 }
 
 function startBossPhase() {
