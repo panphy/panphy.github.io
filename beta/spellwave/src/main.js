@@ -265,6 +265,8 @@ const debris = [];
 const canopyBlocks = [];
 const torchFlames = [];
 const torchLights = [];
+const wandGroups = [];
+const wandSwings = [];
 const pathMarkerBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
@@ -933,6 +935,7 @@ function updateEffects(delta) {
 }
 
 function updateEnvironment(seconds, delta) {
+  updateWandSwings(delta);
   emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   const shake = damageTimer > 0 ? damageTimer * 0.45 : 0;
   camera.position.x = Math.sin(seconds * 0.34) * 0.28 + Math.sin(seconds * 41) * shake;
@@ -2096,19 +2099,26 @@ function createTorches() {
 
   for (const x of [-6.7, 6.7]) {
     const z = WALL_Z - 0.2;
-    // Shaft
-    world.add(blockMesh(0.15, 1.85, 0.15, shaftMat, x, 0.925, z));
-    // Decorative bands
-    world.add(blockMesh(0.24, 0.1, 0.24, bandMat, x, 0.38, z));
-    world.add(blockMesh(0.24, 0.1, 0.24, bandMat, x, 1.0, z));
-    world.add(blockMesh(0.24, 0.1, 0.24, bandMat, x, 1.74, z));
-    // Crystal cage (metal brackets framing the orb)
-    world.add(blockMesh(0.32, 0.1, 0.32, bandMat, x, 1.88, z));
-    world.add(blockMesh(0.32, 0.1, 0.32, bandMat, x, 2.34, z));
 
-    // Crystal cluster group (pulsed as a unit)
+    // Wand group — pivot at the base so the whole wand rotates as one unit
+    const wandGroup = new THREE.Group();
+    wandGroup.position.set(x, 0, z);
+    world.add(wandGroup);
+    wandGroups.push(wandGroup);
+
+    // Shaft (local coords: x=0, z=0 relative to wand base)
+    wandGroup.add(blockMesh(0.15, 1.85, 0.15, shaftMat, 0, 0.925, 0));
+    // Decorative bands
+    wandGroup.add(blockMesh(0.24, 0.1, 0.24, bandMat, 0, 0.38, 0));
+    wandGroup.add(blockMesh(0.24, 0.1, 0.24, bandMat, 0, 1.0, 0));
+    wandGroup.add(blockMesh(0.24, 0.1, 0.24, bandMat, 0, 1.74, 0));
+    // Crystal cage (metal brackets framing the orb)
+    wandGroup.add(blockMesh(0.32, 0.1, 0.32, bandMat, 0, 1.88, 0));
+    wandGroup.add(blockMesh(0.32, 0.1, 0.32, bandMat, 0, 2.34, 0));
+
+    // Crystal cluster group (pulsed as a unit, local to wandGroup)
     const crystalGroup = new THREE.Group();
-    crystalGroup.position.set(x, 2.11, z);
+    crystalGroup.position.set(0, 2.11, 0);
     const core = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.54, 0.36), sceneCrystalMat);
     core.castShadow = true;
     crystalGroup.add(core);
@@ -2122,13 +2132,14 @@ function createTorches() {
     rightShard.rotation.z = -0.35;
     rightShard.castShadow = true;
     crystalGroup.add(rightShard);
-    world.add(crystalGroup);
+    wandGroup.add(crystalGroup);
     torchFlames.push({ mesh: crystalGroup, phase: Math.random() * Math.PI * 2 });
 
+    // Point light parented to the wand so it follows the swing
     const light = new THREE.PointLight(0x2dd4bf, 1.6, 14, 2);
-    light.position.set(x, 2.2, z);
+    light.position.set(0, 2.2, 0);
     light.userData.phase = Math.random() * Math.PI * 2;
-    scene.add(light);
+    wandGroup.add(light);
     torchLights.push(light);
   }
 }
@@ -2262,8 +2273,39 @@ function createClouds() {
   }
 }
 
+function triggerWandSwing(wandGroup) {
+  const existing = wandSwings.findIndex(s => s.group === wandGroup);
+  if (existing !== -1) wandSwings.splice(existing, 1);
+  wandSwings.push({ group: wandGroup, t: 0, duration: 0.42 });
+}
+
+function updateWandSwings(delta) {
+  for (let i = wandSwings.length - 1; i >= 0; i--) {
+    const swing = wandSwings[i];
+    swing.t = Math.min(swing.t + delta / swing.duration, 1);
+    const t = swing.t;
+    // Fast forward thrust (ease-out rise to peak at 28%), then smoothstep return
+    let angle;
+    if (t <= 0.28) {
+      const p = t / 0.28;
+      angle = (1 - (1 - p) * (1 - p)) * -0.48;
+    } else {
+      const p = (t - 0.28) / 0.72;
+      const eased = p * p * (3 - 2 * p);
+      angle = (1 - eased) * -0.48;
+    }
+    swing.group.rotation.x = angle;
+    if (swing.t >= 1) {
+      swing.group.rotation.x = 0;
+      wandSwings.splice(i, 1);
+    }
+  }
+}
+
 function spawnBeam(targetPosition) {
-  const staffX = Math.random() < 0.5 ? -6.7 : 6.7;
+  const side = Math.random() < 0.5 ? 0 : 1;
+  const staffX = side === 0 ? -6.7 : 6.7;
+  if (wandGroups[side]) triggerWandSwing(wandGroups[side]);
   const start = new THREE.Vector3(staffX, 2.38, WALL_Z - 0.2);
   const end = targetPosition.clone();
   end.y += 1.2;
