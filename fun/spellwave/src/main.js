@@ -599,6 +599,12 @@ function handleKeyDown(event) {
     return;
   }
 
+  if (event.key === 'Enter' && mode === 'paused') {
+    event.preventDefault();
+    resumeGame();
+    return;
+  }
+
   if (event.key === 'Escape' && mode === 'running') {
     event.preventDefault();
     pauseGame();
@@ -2507,10 +2513,11 @@ function spawnDebris(position, type) {
     mesh.position.copy(position);
     mesh.position.y += 0.8 + Math.random() * 0.5;
     effectsGroup.add(mesh);
+    const initialLife = 0.7 + Math.random() * 0.36;
     debris.push({
       mesh,
-      life: 0.7 + Math.random() * 0.36,
-      maxLife: 0.9,
+      life: initialLife,
+      maxLife: initialLife,
       velocity: new THREE.Vector3((Math.random() - 0.5) * 5.5, 2.8 + Math.random() * 3.6, (Math.random() - 0.5) * 5.5),
       spin: new THREE.Vector3(Math.random() * 8, Math.random() * 8, Math.random() * 8),
     });
@@ -2934,7 +2941,7 @@ function normalizeCharacter(character, options = {}) {
   if (SUPERSCRIPT_MAP[character]) return SUPERSCRIPT_MAP[character];
   const normalized = character.toLowerCase();
   if (normalized === '×') return options.multiplicationAlias ? 'x' : '';
-  if (normalized === '*') return options.multiplicationAlias ? 'x' : '*';
+  if (normalized === '*') return options.multiplicationAlias ? 'x' : '';
   return /^[a-z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
 }
 
@@ -3076,6 +3083,7 @@ function startWaveCleared() {
 
 function advanceWaveSet() {
   playStartSound();
+  clearEffects();
   waveSet += 1;
   wavePhase = 'normal';
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
