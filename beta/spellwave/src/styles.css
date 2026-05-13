@@ -64,6 +64,7 @@ a {
 
 .moon-haze,
 .pixel-grain,
+.lightning-flash,
 .damage-flash,
 .labels-layer {
   position: fixed;
@@ -88,6 +89,16 @@ a {
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 4px 4px;
   mask-image: radial-gradient(circle, black 48%, transparent 87%);
+}
+
+.lightning-flash {
+  z-index: 4;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 48% 18%, rgba(255, 255, 255, 0.72), transparent 17%),
+    linear-gradient(180deg, rgba(183, 220, 255, 0.5), rgba(255, 255, 255, 0.16) 48%, transparent 82%);
+  mix-blend-mode: screen;
+  transition: opacity 80ms ease-out;
 }
 
 .damage-flash {
