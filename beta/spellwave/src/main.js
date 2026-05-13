@@ -67,6 +67,7 @@ const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
 const LABEL_X_EASE = 0.14;
 const LABEL_Y_EASE = 0.07;
+const BOSS_LABEL_GAP = 16;
 const PATH_LANES = [-5.8, -3.7, -1.7, 0, 1.7, 3.7, 5.8];
 const PATH_MARKER_MIN_Z = -44;
 const PATH_MARKER_MAX_Z = 4;
@@ -154,6 +155,7 @@ const BOSS_TYPES = [
     eye: 0xfff05a,
     speed: 1.1,
     scale: 1.62,
+    halfWidth: 1.8,
     weight: 1,
     score: 150,
   },
@@ -165,6 +167,7 @@ const BOSS_TYPES = [
     eye: 0xd9ff66,
     speed: 1.05,
     scale: 1.64,
+    halfWidth: 1.1,
     weight: 1,
     score: 150,
   },
@@ -176,6 +179,7 @@ const BOSS_TYPES = [
     eye: 0xf2f0df,
     speed: 1.14,
     scale: 1.6,
+    halfWidth: 1.0,
     weight: 1,
     score: 150,
   },
@@ -187,6 +191,7 @@ const BOSS_TYPES = [
     eye: 0x7dd3fc,
     speed: 1.08,
     scale: 1.66,
+    halfWidth: 2.2,
     weight: 1,
     score: 150,
   },
@@ -1041,28 +1046,54 @@ function updateLabels() {
       ? THREE.MathUtils.lerp(0.92, 1.12, approachAmount)
       : THREE.MathUtils.lerp(0.86, 1.12, approachAmount);
     enemy.label.style.setProperty('--threat-progress', approachAmount.toFixed(3));
-    labelItems.push({ enemy, x, y, scale });
+
+    if (enemy.isBoss) {
+      // Project boss side edge to get screen half-width in pixels
+      reusableVector.copy(enemy.group.position);
+      reusableVector.x += (enemy.type.halfWidth || 1.5) * enemy.type.scale;
+      reusableVector.project(camera);
+      const bossEdgeScreenX = (reusableVector.x * 0.5 + 0.5) * width;
+      // Project boss mid-height for vertical centering beside boss
+      reusableVector.copy(enemy.group.position);
+      reusableVector.y += 1.3 * enemy.type.scale;
+      reusableVector.project(camera);
+      const bossMidScreenY = (-reusableVector.y * 0.5 + 0.5) * height;
+      labelItems.push({ enemy, x, y, scale, bossEdgeScreenX, bossMidScreenY });
+    } else {
+      labelItems.push({ enemy, x, y, scale });
+    }
   }
 
   const layoutItems = labelItems.map((item) => {
     const { enemy, scale } = item;
     const labelWidth = enemy.label.offsetWidth * scale;
     const labelHeight = enemy.label.offsetHeight * scale;
-    const x = THREE.MathUtils.clamp(
-      item.x,
-      LABEL_SAFE_MARGIN + labelWidth / 2,
-      width - LABEL_SAFE_MARGIN - labelWidth / 2
-    );
     const minY = safeBounds.top + labelHeight;
     const maxY = safeBounds.bottom;
-    const y = THREE.MathUtils.clamp(item.y, minY, maxY);
+
+    let targetX, targetY;
+    if (enemy.isBoss) {
+      // Place label to the side of the boss body instead of above, so the tall
+      // definition label never sits over the boss even when the boss is close.
+      const bossHalfWidthPx = Math.abs(item.bossEdgeScreenX - item.x);
+      const useRight = item.x <= width / 2;
+      const rawX = useRight
+        ? item.x + bossHalfWidthPx + BOSS_LABEL_GAP + labelWidth / 2
+        : item.x - bossHalfWidthPx - BOSS_LABEL_GAP - labelWidth / 2;
+      targetX = THREE.MathUtils.clamp(rawX, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
+      // Vertically center the label beside the boss (label bottom = midY + half-height)
+      targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, minY, maxY);
+    } else {
+      targetX = THREE.MathUtils.clamp(item.x, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
+      targetY = THREE.MathUtils.clamp(item.y, minY, maxY);
+    }
 
     if (enemy.labelX === undefined) {
-      enemy.labelX = x;
-      enemy.labelY = y;
+      enemy.labelX = targetX;
+      enemy.labelY = targetY;
     } else {
-      enemy.labelX += (x - enemy.labelX) * LABEL_X_EASE;
-      enemy.labelY += (y - enemy.labelY) * LABEL_Y_EASE;
+      enemy.labelX += (targetX - enemy.labelX) * LABEL_X_EASE;
+      enemy.labelY += (targetY - enemy.labelY) * LABEL_Y_EASE;
     }
     return {
       ...item,
