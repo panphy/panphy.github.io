@@ -1079,3 +1079,82 @@ a {
     min-height: 48px;
   }
 }
+
+/* — God Mode — */
+
+.god-mode-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle, transparent 52%, rgba(255, 196, 0, 0.08) 100%);
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+body.is-god-mode .god-mode-veil {
+  opacity: 1;
+}
+
+.god-mode-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 200, 50, 0.44);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(28, 20, 4, 0.92), rgba(18, 14, 2, 0.88));
+  box-shadow: 0 0 16px rgba(255, 196, 0, 0.08), inset 0 0 12px rgba(255, 196, 0, 0.05);
+  backdrop-filter: blur(10px);
+  color: #ffd060;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 10px rgba(255, 196, 0, 0.72);
+  animation:
+    godMode-appear 0.52s cubic-bezier(0.2, 0.9, 0.2, 1) both,
+    godMode-pulse 2.8s ease-in-out 0.52s infinite;
+}
+
+@keyframes godMode-appear {
+  from {
+    opacity: 0;
+    transform: scaleY(0.5);
+    letter-spacing: 0.32em;
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+    letter-spacing: 0.14em;
+  }
+}
+
+@keyframes godMode-pulse {
+  0%, 100% {
+    border-color: rgba(255, 200, 50, 0.38);
+    box-shadow: 0 0 12px rgba(255, 196, 0, 0.06), inset 0 0 10px rgba(255, 196, 0, 0.03);
+  }
+  50% {
+    border-color: rgba(255, 200, 50, 0.78);
+    box-shadow: 0 0 30px rgba(255, 196, 0, 0.26), inset 0 0 18px rgba(255, 196, 0, 0.11);
+  }
+}
+
+body.is-god-mode .life-heart svg {
+  filter: drop-shadow(0 0 8px rgba(255, 196, 0, 0.58));
+}
+
+body.is-god-mode .life-heart .heart-fill {
+  fill: #ffd060;
+  stroke: rgba(255, 240, 150, 0.86);
+}
+
+body.is-god-mode .life-heart .heart-shell {
+  stroke: rgba(255, 220, 80, 0.52);
+}
+
+body.is-god-mode .damage-flash.show {
+  background: radial-gradient(circle, rgba(255, 255, 200, 0.58), rgba(255, 200, 50, 0.3) 44%, transparent 72%);
+}

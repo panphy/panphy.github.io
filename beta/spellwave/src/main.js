@@ -22,6 +22,7 @@ const messageScore = document.getElementById('messageScore');
 const messageCopy = document.getElementById('messageCopy');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
+const godModeBadge = document.getElementById('godModeBadge');
 const typingLabel = document.getElementById('typingLabel');
 const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
@@ -286,6 +287,8 @@ let bossPreviewSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
 let medicSpawnedThisSet = false;
 let medicSpawnSlot = 0;
+let godMode = false;
+let cheatBuffer = '';
 let streak = 0;
 let typedBuffer = '';
 let activeTarget = null;
@@ -439,10 +442,24 @@ keyboardInput.addEventListener('input', () => {
 resizeRenderer();
 requestAnimationFrame(animate);
 
+function activateGodMode() {
+  if (godMode) return;
+  godMode = true;
+  document.body.classList.add('is-god-mode');
+  // Re-insert badge to replay its entry animation
+  godModeBadge.hidden = true;
+  void godModeBadge.offsetWidth;
+  godModeBadge.hidden = false;
+}
+
 function startGame() {
   playStartSound();
   clearEnemies();
   clearEffects();
+  godMode = false;
+  cheatBuffer = '';
+  document.body.classList.remove('is-god-mode');
+  godModeBadge.hidden = true;
   score = 0;
   health = MAX_LIFE;
   renderedHealth = null;
@@ -509,14 +526,14 @@ function endGame() {
   playGameOverSound();
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
-  if (score > bestScore) {
+  if (!godMode && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
   }
   showMessage(
     'OVERRUN',
     'Game Over',
-    `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
+    godMode ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
   );
@@ -601,6 +618,9 @@ function handleBeforeInput(event) {
 }
 
 function enterCharacter(character) {
+  cheatBuffer = (cheatBuffer + character.toLowerCase()).slice(-5);
+  if (cheatBuffer === 'iddqd') activateGodMode();
+
   const inputOptions = getInputCharacters(character);
   if (inputOptions.length === 0) return;
   typedAttempts += 1;
@@ -693,7 +713,7 @@ function leakEnemy(enemy) {
     return;
   }
 
-  health = Math.max(0, health - enemy.damage);
+  if (!godMode) health = Math.max(0, health - enemy.damage);
   streak = 0;
   leakedCount += 1;
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
@@ -709,7 +729,7 @@ function leakEnemy(enemy) {
   activeTarget = null;
   updateHud(true);
   updateTypedDisplay();
-  if (health <= 0) endGame();
+  if (!godMode && health <= 0) endGame();
 }
 
 function bossShootPlayer(enemy) {
@@ -722,7 +742,7 @@ function bossProjectileHitPlayer(enemy) {
   playBossImpactSound();
 
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
-    health = Math.max(0, health - BOSS_SHOT_DAMAGE);
+    if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
     streak = 0;
     damageTimer = 0.24;
     damageFlash.classList.add('show');
@@ -730,7 +750,7 @@ function bossProjectileHitPlayer(enemy) {
     playDamageSound(enemy);
     updateHud(true);
     updateTypedDisplay();
-    if (health <= 0) endGame();
+    if (!godMode && health <= 0) endGame();
   }
 }
 
@@ -1415,7 +1435,7 @@ function updateHud(force) {
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
-  bestValue.textContent = formatScore(Math.max(bestScore, score));
+  bestValue.textContent = formatScore(godMode ? bestScore : Math.max(bestScore, score));
   updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
   updateComboDisplay();
