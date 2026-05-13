@@ -2681,11 +2681,7 @@ function applySeasonInstant(palette) {
   moonLight.intensity = palette.sunIntensity;
   emberLight.color.setHex(palette.emberColor);
   seasonEmberIntensityBase = palette.emberIntensity;
-  if (sceneCrystalMat) {
-    sceneCrystalMat.color.setHex(palette.crystalColor);
-    sceneCrystalMat.emissive.setHex(palette.crystalEmissive);
-  }
-  for (const light of torchLights) light.color.setHex(palette.staffLightColor);
+  // crystal head stays permanently at summer teal — not season-dependent
   if (pathMarkerMaterial) {
     pathMarkerMaterial.color.setHex(palette.pathMarkerColor);
     pathMarkerMaterial.emissive.setHex(palette.pathMarkerEmissive);
@@ -2731,12 +2727,7 @@ function updateSeasonFade(delta) {
   moonLight.intensity = THREE.MathUtils.lerp(from.sunIntensity, to.sunIntensity, t);
   emberLight.color.lerpColors(from.emberColor, to.emberColor, t);
   seasonEmberIntensityBase = THREE.MathUtils.lerp(from.emberIntensity, to.emberIntensity, t);
-  if (sceneCrystalMat) {
-    sceneCrystalMat.color.lerpColors(from.crystalColor, to.crystalColor, t);
-    sceneCrystalMat.emissive.lerpColors(from.crystalEmissive, to.crystalEmissive, t);
-  }
-  const lerpedStaff = new THREE.Color().lerpColors(from.staffLightColor, to.staffLightColor, t);
-  for (const light of torchLights) light.color.copy(lerpedStaff);
+  // crystal head stays permanently at summer teal — not season-dependent
   if (pathMarkerMaterial) {
     pathMarkerMaterial.color.lerpColors(from.pathMarkerColor, to.pathMarkerColor, t);
     pathMarkerMaterial.emissive.lerpColors(from.pathMarkerEmissive, to.pathMarkerEmissive, t);
