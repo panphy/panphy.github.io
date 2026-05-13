@@ -222,11 +222,11 @@ const SEASON_PALETTES = [
     groundAlt1: { h: 0.28, s: 0.35, l: 0.34 },
     groundGrass: { h: 0.3, s: 0.44, l: 0.24 },
   },
-  { // Autumn (wave 3): warm amber dusk, red/orange leaves
+  { // Autumn (wave 3): golden harvest dusk, amber sky, red/orange leaves
     name: 'autumn',
-    bgColor: 0x8c4018, fogColor: 0x8c4018, fogNear: 22, fogFar: 72,
-    hemiSky: 0xf09848, hemiGround: 0x703820, hemiIntensity: 1.5,
-    sunColor: 0xff9840, sunIntensity: 2.6,
+    bgColor: 0xd07840, fogColor: 0xb06030, fogNear: 22, fogFar: 72,
+    hemiSky: 0xe0b878, hemiGround: 0x703820, hemiIntensity: 1.4,
+    sunColor: 0xff9840, sunIntensity: 2.4,
     emberColor: 0xff4818, emberIntensity: 2.8,
     crystalColor: 0xd86828, crystalEmissive: 0xc04010,
     staffLightColor: 0xe06028,
