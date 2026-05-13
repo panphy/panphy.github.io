@@ -22,7 +22,7 @@ const messageScore = document.getElementById('messageScore');
 const messageCopy = document.getElementById('messageCopy');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
-const godModeBadge = document.getElementById('godModeBadge');
+let godModeBadge = null; // created dynamically on activation, never in static HTML
 const typingLabel = document.getElementById('typingLabel');
 const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
@@ -447,10 +447,11 @@ function activateGodMode() {
   if (godMode) return;
   godMode = true;
   document.body.classList.add('is-god-mode');
-  // Re-insert badge to replay its entry animation
-  godModeBadge.hidden = true;
-  void godModeBadge.offsetWidth;
-  godModeBadge.hidden = false;
+  godModeBadge = document.createElement('div');
+  godModeBadge.className = 'god-mode-badge';
+  godModeBadge.setAttribute('aria-live', 'assertive');
+  godModeBadge.textContent = '✦ GOD MODE ✦';
+  document.querySelector('.hud-grid').append(godModeBadge);
 }
 
 function startGame() {
@@ -460,7 +461,7 @@ function startGame() {
   godMode = false;
   cheatBuffer = '';
   document.body.classList.remove('is-god-mode');
-  godModeBadge.hidden = true;
+  if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
   score = 0;
   health = MAX_LIFE;
   renderedHealth = null;
