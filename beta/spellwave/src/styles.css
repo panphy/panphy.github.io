@@ -537,6 +537,23 @@ a {
   color: #1a120b;
 }
 
+.support-link {
+  justify-self: center;
+  color: rgba(242, 240, 223, 0.58);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 160ms ease, opacity 160ms ease;
+}
+
+.support-link:hover,
+.support-link:focus-visible {
+  color: var(--gold);
+}
+
 .word-tag {
   position: absolute;
   display: grid;

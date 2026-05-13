@@ -22,6 +22,7 @@ const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
 const messageScore = document.getElementById('messageScore');
 const messageCopy = document.getElementById('messageCopy');
+const supportLink = document.getElementById('supportLink');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
 const lightningFlash = document.getElementById('lightningFlash');
@@ -566,6 +567,7 @@ function endGame() {
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
   );
+  if (supportLink) supportLink.hidden = false;
   renderRunGlossary();
   updatePhaseDisplay();
   updateHud(true);
@@ -578,6 +580,7 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
   messageCopy.textContent = copyText;
   startButton.textContent = buttonText;
   if (runGlossary) runGlossary.hidden = true;
+  if (supportLink) supportLink.hidden = true;
   messagePanel.hidden = false;
 }
 
