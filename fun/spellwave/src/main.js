@@ -275,6 +275,7 @@ let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
+let hardGuestSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
 let medicSpawnedThisSet = false;
 let medicSpawnSlot = 0;
@@ -2615,6 +2616,7 @@ function prepareWavePlan() {
   medicSpawnSlot = chooseMedicSpawnSlot(normalEnemyTarget);
   const previewableWords = definitionBossWordsForWave();
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
+  hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
 }
 
 function definitionBossWordsForWave() {
@@ -2644,6 +2646,34 @@ function buildBossPreviewSchedule(target, words) {
 
     while (schedule.has(slot) && slot < target - 1) slot += 1;
     while (schedule.has(slot) && slot > 0) slot -= 1;
+    schedule.set(slot, word);
+  });
+
+  return schedule;
+}
+
+function buildHardGuestSchedule(target) {
+  const count = 1 + Math.floor(Math.random() * 2);
+  const reservedTerms = new Set(bossWordsThisSet.map(w => w.term));
+  const available = HARD_WORDS.filter(w => !reservedTerms.has(w.term));
+  if (available.length === 0) return new Map();
+
+  const picked = [];
+  const usedTerms = new Set();
+  for (let attempt = 0; attempt < 32 && picked.length < count; attempt += 1) {
+    const entry = available[Math.floor(Math.random() * available.length)];
+    if (!usedTerms.has(entry.term)) {
+      picked.push(entry);
+      usedTerms.add(entry.term);
+    }
+  }
+
+  const schedule = new Map();
+  const half = Math.ceil(target / 2);
+  picked.forEach((word, i) => {
+    let slot = half + Math.floor((i * (target - half)) / Math.max(1, picked.length));
+    slot = Math.min(target - 1, slot);
+    while ((bossPreviewSchedule.has(slot) || schedule.has(slot)) && slot < target - 1) slot += 1;
     schedule.set(slot, word);
   });
 
@@ -2692,6 +2722,9 @@ function chooseBossPool() {
 function choosePrompt() {
   const scheduledBossWord = wavePhase === 'normal' ? bossPreviewSchedule.get(normalEnemiesSpawned) : null;
   if (scheduledBossWord) return scheduledBossWord;
+
+  const scheduledHardGuest = wavePhase === 'normal' ? hardGuestSchedule.get(normalEnemiesSpawned) : null;
+  if (scheduledHardGuest) return scheduledHardGuest;
 
   const pool = currentKeywordPool();
   const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
