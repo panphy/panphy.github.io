@@ -297,6 +297,7 @@ let introducedBossTermsThisSet = new Set();
 let medicSpawnedThisSet = false;
 let medicSpawnSlot = 0;
 let godMode = false;
+let godModeUsedThisRun = false;
 let cheatBuffer = '';
 let streak = 0;
 let typedBuffer = '';
@@ -496,15 +497,25 @@ keyboardInput.addEventListener('input', () => {
 resizeRenderer();
 requestAnimationFrame(animate);
 
-function activateGodMode() {
-  if (godMode) return;
+function toggleGodMode() {
+  if (godMode) {
+    godMode = false;
+    document.body.classList.remove('is-god-mode');
+    if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
+    updateHud(true);
+    return;
+  }
+
   godMode = true;
+  godModeUsedThisRun = true;
   document.body.classList.add('is-god-mode');
+  if (godModeBadge) godModeBadge.remove();
   godModeBadge = document.createElement('div');
   godModeBadge.className = 'god-mode-badge';
   godModeBadge.setAttribute('aria-live', 'assertive');
   godModeBadge.textContent = '✦ GOD MODE ✦';
   document.querySelector('.hud-grid').append(godModeBadge);
+  updateHud(true);
 }
 
 function startGame() {
@@ -513,6 +524,7 @@ function startGame() {
   clearEnemies();
   clearEffects();
   godMode = false;
+  godModeUsedThisRun = false;
   cheatBuffer = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
@@ -587,14 +599,14 @@ function endGame() {
   startMusicLoop(false);
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
-  if (!godMode && score > bestScore) {
+  if (!godModeUsedThisRun && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
   }
   showMessage(
     'OVERRUN',
     'Game Over',
-    godMode ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
+    godModeUsedThisRun ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
   );
@@ -688,7 +700,7 @@ function handleBeforeInput(event) {
 
 function enterCharacter(character) {
   cheatBuffer = (cheatBuffer + character.toLowerCase()).slice(-5);
-  if (cheatBuffer === 'iddqd') activateGodMode();
+  if (cheatBuffer === 'iddqd') toggleGodMode();
 
   const inputOptions = getInputCharacters(character);
   if (inputOptions.length === 0) return;
@@ -1631,7 +1643,7 @@ function updateHud(force) {
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
-  bestValue.textContent = formatScore(godMode ? bestScore : Math.max(bestScore, score));
+  bestValue.textContent = formatScore(godModeUsedThisRun ? bestScore : Math.max(bestScore, score));
   updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
   updateComboDisplay();
