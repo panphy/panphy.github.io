@@ -1,17 +1,96 @@
 const MASTER_VOLUME = 0.5;
 const MUSIC_GAIN = 0.82;
-const MUSIC_BASE_STEP = 0.18;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
-const MUSIC_MELODY = [
-  523.25, 659.25, 783.99, 659.25, 587.33, 739.99, 880.0, 739.99,
-  523.25, null, 659.25, 783.99, 987.77, 880.0, 739.99, 659.25,
-  440.0, 523.25, 659.25, 523.25, 493.88, 587.33, 739.99, 587.33,
-  392.0, null, 493.88, 587.33, 783.99, 739.99, 587.33, 493.88,
-];
-const MUSIC_BASS = [
-  130.81, null, null, null, 98.0, null, null, null,
-  116.54, null, null, null, 87.31, null, 98.0, null,
+const MUSIC_SEASONS = [
+  {
+    name: 'spring',
+    baseStep: 0.185,
+    melodyType: 'triangle',
+    bassType: 'sine',
+    accentType: 'sine',
+    melodyGain: 0.022,
+    bassGain: 0.024,
+    hatGain: 0.006,
+    drumGain: 0.011,
+    drumFilter: 680,
+    melody: [
+      523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, null,
+      587.33, 659.25, 783.99, 880.0, 783.99, 659.25, 587.33, null,
+      659.25, 783.99, 987.77, 880.0, 783.99, 659.25, 587.33, 523.25,
+      493.88, null, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25,
+    ],
+    bass: [
+      130.81, null, null, null, 146.83, null, null, null,
+      174.61, null, null, null, 196.0, null, 174.61, null,
+    ],
+  },
+  {
+    name: 'summer',
+    baseStep: 0.168,
+    melodyType: 'square',
+    bassType: 'square',
+    accentType: 'triangle',
+    melodyGain: 0.026,
+    bassGain: 0.03,
+    hatGain: 0.011,
+    drumGain: 0.018,
+    drumFilter: 520,
+    melody: [
+      587.33, 739.99, 880.0, 739.99, 987.77, 880.0, 739.99, 659.25,
+      587.33, null, 659.25, 739.99, 880.0, 987.77, 880.0, 739.99,
+      659.25, 783.99, 987.77, 1174.66, 987.77, 880.0, 783.99, 659.25,
+      739.99, null, 880.0, 987.77, 1174.66, 987.77, 880.0, 739.99,
+    ],
+    bass: [
+      146.83, null, 146.83, null, 110.0, null, 110.0, null,
+      130.81, null, 130.81, null, 98.0, null, 110.0, null,
+    ],
+  },
+  {
+    name: 'autumn',
+    baseStep: 0.178,
+    melodyType: 'sawtooth',
+    bassType: 'triangle',
+    accentType: 'triangle',
+    melodyGain: 0.02,
+    bassGain: 0.032,
+    hatGain: 0.008,
+    drumGain: 0.02,
+    drumFilter: 420,
+    melody: [
+      440.0, 523.25, 659.25, 587.33, 523.25, 493.88, 440.0, null,
+      392.0, 493.88, 587.33, 659.25, 587.33, 523.25, 493.88, null,
+      349.23, 440.0, 523.25, 659.25, 587.33, 523.25, 440.0, 392.0,
+      329.63, null, 392.0, 493.88, 587.33, 523.25, 493.88, 392.0,
+    ],
+    bass: [
+      110.0, null, null, null, 98.0, null, 98.0, null,
+      87.31, null, null, null, 98.0, null, 110.0, null,
+    ],
+  },
+  {
+    name: 'winter',
+    baseStep: 0.192,
+    melodyType: 'sine',
+    bassType: 'sine',
+    accentType: 'triangle',
+    melodyGain: 0.018,
+    bassGain: 0.022,
+    hatGain: 0.007,
+    drumGain: 0.009,
+    drumFilter: 1100,
+    melody: [
+      659.25, null, 783.99, null, 987.77, 880.0, null, 783.99,
+      587.33, null, 739.99, null, 880.0, 783.99, null, 739.99,
+      523.25, null, 659.25, null, 783.99, 739.99, null, 659.25,
+      493.88, null, 587.33, null, 739.99, 659.25, null, 587.33,
+    ],
+    bass: [
+      82.41, null, null, null, 98.0, null, null, null,
+      73.42, null, null, null, 87.31, null, 98.0, null,
+    ],
+  },
 ];
 
 export function createSpellwaveAudio({
@@ -179,56 +258,76 @@ export function createSpellwaveAudio({
       return;
     }
 
-    const stepDuration = Math.max(0.13, MUSIC_BASE_STEP - Math.min(getWaveSet() - 1, 8) * 0.006);
+    const wave = getWaveSet();
+    const season = getMusicSeason(wave);
+    const intensity = getMusicIntensity(wave);
+    const stepDuration = Math.max(0.112, season.baseStep - intensity * 0.0065);
     while (nextMusicTime < audioContext.currentTime + MUSIC_SCHEDULE_AHEAD) {
-      scheduleMusicStep(musicStep, nextMusicTime, stepDuration);
+      scheduleMusicStep(musicStep, nextMusicTime, stepDuration, season, intensity);
       nextMusicTime += stepDuration;
-      musicStep = (musicStep + 1) % MUSIC_MELODY.length;
+      musicStep = (musicStep + 1) % season.melody.length;
     }
   }
 
-  function scheduleMusicStep(step, start, stepDuration) {
-    const melody = MUSIC_MELODY[step % MUSIC_MELODY.length];
-    const bass = MUSIC_BASS[step % MUSIC_BASS.length];
+  function getMusicSeason(wave) {
+    return MUSIC_SEASONS[Math.max(0, wave - 1) % MUSIC_SEASONS.length];
+  }
+
+  function getMusicIntensity(wave) {
+    return Math.min(Math.max(0, wave - 1), 12);
+  }
+
+  function scheduleMusicStep(step, start, stepDuration, season, intensity) {
+    const melody = season.melody[step % season.melody.length];
+    const bass = season.bass[step % season.bass.length];
     const accent = step % 8 === 0;
+    const densePulse = intensity >= 4 && step % 4 === 0;
+    const latePulse = intensity >= 8 && step % 2 === 1;
 
     if (bass) {
       scheduleTone(bass, stepDuration * 1.6, start, {
-        gain: accent ? 0.035 : 0.024,
-        type: 'square',
+        gain: (accent ? season.bassGain * 1.25 : season.bassGain) + intensity * 0.0011,
+        type: season.bassType,
         attack: 0.004,
       }, musicGain);
+      if (densePulse) {
+        scheduleTone(bass * 2, stepDuration * 0.52, start + stepDuration * 0.5, {
+          gain: 0.009 + intensity * 0.0007,
+          type: season.accentType,
+          attack: 0.004,
+        }, musicGain);
+      }
     }
 
-    if (melody && (step % 2 === 0 || getWaveSet() > 2)) {
+    if (melody && (step % 2 === 0 || intensity >= 2 || season.name === 'summer')) {
       scheduleTone(melody, stepDuration * 0.82, start + stepDuration * 0.08, {
-        gain: 0.024,
-        type: 'square',
+        gain: season.melodyGain + intensity * 0.0008,
+        type: season.melodyType,
         attack: 0.003,
       }, musicGain);
-      if (step % 8 === 6) {
-        scheduleTone(melody * 1.5, stepDuration * 0.5, start + stepDuration * 0.18, {
-          gain: 0.012,
-          type: 'triangle',
+      if (step % 8 === 6 || latePulse) {
+        scheduleTone(melody * (season.name === 'winter' ? 2 : 1.5), stepDuration * 0.5, start + stepDuration * 0.18, {
+          gain: 0.009 + intensity * 0.0005,
+          type: season.accentType,
           attack: 0.003,
         }, musicGain);
       }
     }
 
-    if (step % 4 === 2) {
+    if (step % 4 === 2 || latePulse) {
       scheduleNoise(stepDuration * 0.35, start + stepDuration * 0.16, {
-        gain: 0.009,
+        gain: season.hatGain + intensity * 0.00065,
         filterType: 'highpass',
-        filterFrequency: 2400,
+        filterFrequency: season.name === 'winter' ? 3200 : 2400,
         q: 0.6,
       }, musicGain);
     }
 
-    if (step % 16 === 8) {
+    if (step % 16 === 8 || (intensity >= 6 && step % 16 === 0)) {
       scheduleNoise(stepDuration * 0.55, start, {
-        gain: 0.016,
+        gain: season.drumGain + intensity * 0.0009,
         filterType: 'bandpass',
-        filterFrequency: 520,
+        filterFrequency: season.drumFilter,
         q: 0.9,
       }, musicGain);
     }

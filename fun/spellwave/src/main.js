@@ -318,6 +318,7 @@ let leakedCount = 0;
 let bossShotHits = 0;
 let bossesDefeated = 0;
 let encounteredTerms = [];
+let bossQuestionAppearances = new Map();
 let firstMedicHintShown = false;
 let sceneGroundMesh = null;
 let sceneLeafMaterials = [];
@@ -525,6 +526,7 @@ function startGame() {
   bossShotHits = 0;
   bossesDefeated = 0;
   encounteredTerms = [];
+  bossQuestionAppearances.clear();
   typedBuffer = '';
   activeTarget = null;
   spawnTimer = 1.25;
@@ -1319,9 +1321,11 @@ function buildHintMask(term, options = {}) {
   });
 }
 
-function getBossHintLetterCount(wave) {
-  if (wave <= 1) return 3;
-  if (wave === 2) return 2;
+function getBossQuestionHintLetterCount(term) {
+  const appearances = (bossQuestionAppearances.get(term) || 0) + 1;
+  bossQuestionAppearances.set(term, appearances);
+  if (appearances === 1) return 3;
+  if (appearances === 2) return 2;
   return 1;
 }
 
@@ -1508,7 +1512,7 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
       const answerText = part.answerText || part.text;
       const hintOptions = {
         ...promptOptions,
-        leadingTypeableCount: enemy.isBoss ? getBossHintLetterCount(waveSet) : 1,
+        leadingTypeableCount: enemy.hintLetterCount,
       };
       const sp = buildSearchPrompt(answerText, promptOptions);
       const tokTyped = Math.min(charsLeft, sp.length);
@@ -1659,6 +1663,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
+  const hintLetterCount = isBoss ? getBossQuestionHintLetterCount(wordData.term) : 1;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -1758,9 +1763,10 @@ function spawnEnemy(options = {}) {
     hintMask: showDefinition && !isEquationPrompt
       ? buildHintMask(wordData.term, {
           ...promptOptions,
-          leadingTypeableCount: isBoss ? getBossHintLetterCount(waveSet) : 1,
+          leadingTypeableCount: hintLetterCount,
         })
       : null,
+    hintLetterCount,
     lastPromptHtml: '',
     promptKind,
     isBoss,
