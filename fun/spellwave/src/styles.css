@@ -74,11 +74,13 @@ a {
 }
 
 .moon-haze {
+  --moon-haze-x: 72%;
+  --moon-haze-y: 16%;
   z-index: 1;
-  opacity: 0.74;
+  opacity: 0;
   background:
-    radial-gradient(circle at 72% 16%, rgba(242, 240, 223, 0.28), transparent 11%),
-    radial-gradient(circle at 45% 55%, rgba(84, 196, 110, 0.12), transparent 35%);
+    radial-gradient(circle at var(--moon-haze-x) var(--moon-haze-y), rgba(242, 240, 223, 0.28), transparent 11%),
+    radial-gradient(circle at var(--moon-haze-x) var(--moon-haze-y), rgba(84, 196, 110, 0.12), transparent 35%);
   mix-blend-mode: screen;
 }
 

@@ -14,6 +14,7 @@ const typedValue = document.getElementById('typedValue');
 const comboValue = document.getElementById('comboValue');
 const typingStrip = document.querySelector('.typing-strip');
 const gameBar = document.querySelector('.game-bar');
+const moonHaze = document.querySelector('.moon-haze');
 const startButton = document.getElementById('startButton');
 const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
@@ -260,6 +261,7 @@ const SEASON_PALETTES = [
 
 const reusableVector = new THREE.Vector3();
 const reusableVectorTwo = new THREE.Vector3();
+const moonScreenVector = new THREE.Vector3();
 const reusableQuaternion = new THREE.Quaternion();
 const reusableMatrix = new THREE.Matrix4();
 const cameraTarget = new THREE.Vector3(0, 1.1, -18);
@@ -1054,6 +1056,7 @@ function updateEnvironment(seconds, delta) {
           ? (Math.PI - moonAngle) / fadeZone
           : 1;
     }
+    updateMoonHaze();
   }
 
   if (starField) {
@@ -1103,6 +1106,22 @@ function updateEnvironment(seconds, delta) {
       cloud.group.position.x = -46;
     }
   }
+}
+
+function updateMoonHaze() {
+  if (!moonHaze || !moon || !moon.visible) {
+    if (moonHaze) moonHaze.style.opacity = '0';
+    return;
+  }
+
+  moonScreenVector.copy(moon.position).project(camera);
+  const x = (moonScreenVector.x * 0.5 + 0.5) * 100;
+  const y = (-moonScreenVector.y * 0.5 + 0.5) * 100;
+  const opacity = THREE.MathUtils.clamp(moon.material.opacity || 0, 0, 1);
+
+  moonHaze.style.setProperty('--moon-haze-x', `${x.toFixed(2)}%`);
+  moonHaze.style.setProperty('--moon-haze-y', `${y.toFixed(2)}%`);
+  moonHaze.style.opacity = (0.74 * opacity).toFixed(3);
 }
 
 function updateLabels() {
@@ -1353,20 +1372,13 @@ const LOW_VALUE_ANSWER_WORDS = new Set([
 ]);
 
 function buildHintPart(text, options = {}) {
+  const leadingTypeableCount = Math.max(1, Math.floor(options.leadingTypeableCount || 1));
   let result = '';
-  let firstTypeable = true;
+  let revealedTypeable = 0;
   for (const ch of text) {
     if (!normalizeCharacter(ch, options)) { result += ch; }
-    else if (firstTypeable) { result += ch; firstTypeable = false; }
+    else if (revealedTypeable < leadingTypeableCount) { result += ch; revealedTypeable += 1; }
     else { result += '_'; }
-  }
-  return result;
-}
-
-function buildHintRemain(text, options = {}) {
-  let result = '';
-  for (const ch of text) {
-    result += normalizeCharacter(ch, options) ? '_' : ch;
   }
   return result;
 }
@@ -1494,6 +1506,10 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
     } else {
       const promptOptions = { multiplicationAlias: enemy.isEquation };
       const answerText = part.answerText || part.text;
+      const hintOptions = {
+        ...promptOptions,
+        leadingTypeableCount: enemy.isBoss ? getBossHintLetterCount(waveSet) : 1,
+      };
       const sp = buildSearchPrompt(answerText, promptOptions);
       const tokTyped = Math.min(charsLeft, sp.length);
       charsLeft -= tokTyped;
@@ -1505,11 +1521,14 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
         const remainPart = answerText.slice(charPos);
         if (wrapSquared) html += '(';
         html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
-        if (remainPart) html += `<span class="remaining">${wrapSups(escapeHtml(buildHintRemain(remainPart, promptOptions)))}</span>`;
+        if (remainPart) {
+          const maskedPart = buildHintPart(answerText, hintOptions).slice(charPos);
+          html += `<span class="remaining">${wrapSups(escapeHtml(maskedPart))}</span>`;
+        }
         if (wrapSquared) html += `)${exponentHtml}`;
       } else {
         if (wrapSquared) html += '(';
-        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(answerText, promptOptions)))}</span>`;
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(answerText, hintOptions)))}</span>`;
         if (wrapSquared) html += `)${exponentHtml}`;
       }
     }
