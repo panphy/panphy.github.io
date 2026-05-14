@@ -207,7 +207,7 @@ const SEASON_PALETTES = [
     staffLightColor: 0xf090b0,
     pathMarkerColor: 0xf098b8, pathMarkerEmissive: 0xd06080,
     leafColors: [0xeaa8bc, 0xf5c8d8, 0xd890a8], trunkColor: 0x6b4226,
-    moonColor: 0xffeedd, starOpacity: 0.4,
+    moonColor: 0xfff1b8, starOpacity: 0.4,
     groundPath: { h: 0.08, s: 0.2, lBase: 0.28 },
     groundAlt1: { h: 0.28, s: 0.28, l: 0.28 },
     groundGrass: { h: 0.28, s: 0.38, l: 0.22 },
@@ -222,7 +222,7 @@ const SEASON_PALETTES = [
     staffLightColor: 0x2dd4bf,
     pathMarkerColor: 0x58dfcf, pathMarkerEmissive: 0x0e6861,
     leafColors: [0x2a7840, 0x3d9050, 0x1a5530], trunkColor: 0x3d2010,
-    moonColor: 0xffffff, starOpacity: 0.15,
+    moonColor: 0xfff1b8, starOpacity: 0.15,
     groundPath: { h: 0.1, s: 0.22, lBase: 0.28 },
     groundAlt1: { h: 0.28, s: 0.35, l: 0.34 },
     groundGrass: { h: 0.3, s: 0.44, l: 0.24 },
@@ -237,7 +237,7 @@ const SEASON_PALETTES = [
     staffLightColor: 0xe06028,
     pathMarkerColor: 0xe87830, pathMarkerEmissive: 0xa83808,
     leafColors: [0xc04000, 0xd86810, 0xc89010], trunkColor: 0x3d2010,
-    moonColor: 0xffb070, starOpacity: 0.2,
+    moonColor: 0xfff1b8, starOpacity: 0.2,
     groundPath: { h: 0.07, s: 0.3, lBase: 0.30 },
     groundAlt1: { h: 0.06, s: 0.38, l: 0.32 },
     groundGrass: { h: 0.07, s: 0.42, l: 0.26 },
@@ -252,7 +252,7 @@ const SEASON_PALETTES = [
     staffLightColor: 0x78aeff,
     pathMarkerColor: 0x88ccff, pathMarkerEmissive: 0x3870d0,
     leafColors: [0xc8dff0, 0xd8ecff, 0xbbd4f0], trunkColor: 0x708090,
-    moonColor: 0xe8f4ff, starOpacity: 0.65,
+    moonColor: 0xfff1b8, starOpacity: 0.65,
     groundPath: { h: 0.58, s: 0.08, lBase: 0.28 },
     groundAlt1: { h: 0.58, s: 0.12, l: 0.32 },
     groundGrass: { h: 0.6, s: 0.18, l: 0.24 },
@@ -2478,7 +2478,7 @@ function createPathMarkers() {
 
 function createSky() {
   const moonGeometry = new THREE.SphereGeometry(3.2, 24, 16);
-  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xf2f0df, transparent: true });
+  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true });
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
   moon.position.set(20, 18, -42);
   scene.add(moon);
@@ -2993,7 +2993,7 @@ function buildSeasonFromScene() {
     pathMarkerEmissive: pathMarkerMaterial ? pathMarkerMaterial.emissive.clone() : new THREE.Color(0x0e6861),
     leafColors: sceneLeafMaterials.map(m => m.color.clone()),
     trunkColor: sceneTrunkMaterial ? sceneTrunkMaterial.color.clone() : new THREE.Color(0x513820),
-    moonColor: moon ? moon.material.color.clone() : new THREE.Color(0xf2f0df),
+    moonColor: moon ? moon.material.color.clone() : new THREE.Color(0xfff1b8),
     starOpacity: starField ? starField.material.opacity : 0.72,
   };
 }
