@@ -123,6 +123,16 @@ const ENEMY_TYPES = [
     weight: 2,
     score: 70,
   },
+  {
+    name: 'Bog Shambler',
+    body: 0x2a1640,
+    trim: 0x8b4fc8,
+    eye: 0x78ff6e,
+    speed: 2.0,
+    scale: 1.06,
+    weight: 3,
+    score: 50,
+  },
 ];
 const MEDIC_TYPE = {
   name: 'Pulse Heart',
@@ -1714,60 +1724,137 @@ function chooseSpawnLane(startZ) {
 }
 
 function createEnemyMesh(type) {
-  const group = new THREE.Group();
-  const isBossType = !!type.isBoss;
-  const isMedicType = !!type.isMedic;
-  if (isMedicType) return createMedicHeartMesh(type);
-  if (isBossType) return createSpecificBossMesh(type);
+  if (!!type.isMedic) return createMedicHeartMesh(type);
+  if (!!type.isBoss) return createSpecificBossMesh(type);
+  return createNormalEnemyMesh(type);
+}
 
-  const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: type.body,
-    emissive: isBossType ? type.body : 0x000000,
-    emissiveIntensity: isBossType ? 0.56 : 0,
-    roughness: isBossType ? 0.58 : 0.82,
-    metalness: 0.03,
-  });
-  const trimMaterial = new THREE.MeshStandardMaterial({
-    color: type.trim,
-    emissive: isBossType ? type.trim : 0x000000,
-    emissiveIntensity: isBossType ? 0.82 : 0,
-    roughness: isBossType ? 0.46 : 0.78,
-    metalness: isBossType ? 0.08 : 0.02,
-  });
-  const eyeMaterial = new THREE.MeshStandardMaterial({
-    color: type.eye,
-    emissive: type.eye,
-    emissiveIntensity: isBossType ? 2.2 : 0.9,
-    roughness: 0.4,
-  });
-
-  const body = blockMesh(1.15, 1.28, 0.76, bodyMaterial, 0, 0.86, 0);
-  const head = blockMesh(0.88, 0.72, 0.72, trimMaterial, 0, 1.82, 0.02);
-  const leftArm = blockMesh(0.34, 0.94, 0.46, bodyMaterial, -0.82, 0.86, 0.02);
-  const rightArm = blockMesh(0.34, 0.94, 0.46, bodyMaterial, 0.82, 0.86, 0.02);
-  const leftFoot = blockMesh(0.46, 0.32, 0.58, trimMaterial, -0.34, 0.18, 0.08);
-  const rightFoot = blockMesh(0.46, 0.32, 0.58, trimMaterial, 0.34, 0.18, 0.08);
-  const leftEye = blockMesh(0.16, 0.16, 0.08, eyeMaterial, -0.2, 1.9, 0.4);
-  const rightEye = blockMesh(0.16, 0.16, 0.08, eyeMaterial, 0.2, 1.9, 0.4);
-
-  group.add(body, head, leftArm, rightArm, leftFoot, rightFoot, leftEye, rightEye);
-
-  if (type.name === 'Ash Oaf') {
-    group.add(blockMesh(1.36, 0.24, 0.92, trimMaterial, 0, 1.34, -0.02));
-  }
-
-  if (type.name === 'Cinder Imp') {
-    group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, -0.34, 2.32, 0));
-    group.add(blockMesh(0.22, 0.38, 0.22, trimMaterial, 0.34, 2.32, 0));
-  }
-
+function createNormalEnemyMesh(type) {
+  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.82, metalness: 0.03 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.78, metalness: 0.02 });
+  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 0.9, roughness: 0.4 });
+  let g;
+  if (type.name === 'Mudlug') g = createSlugMesh(bodyMat, trimMat, eyeMat);
+  else if (type.name === 'Glowmite') g = createInsectMesh(bodyMat, trimMat, eyeMat);
+  else if (type.name === 'Ash Oaf') g = createGolemMesh(bodyMat, trimMat, eyeMat);
+  else if (type.name === 'Cinder Imp') g = createImpMesh(bodyMat, trimMat, eyeMat);
+  else g = createSpecterMesh(bodyMat, trimMat, eyeMat);
   const incomingBeacon = createIncomingBeacon(type);
   const targetMarker = createTargetMarker(type);
-  group.add(incomingBeacon, targetMarker);
-  group.userData.incomingBeacon = incomingBeacon;
-  group.userData.targetMarker = targetMarker;
+  g.add(incomingBeacon, targetMarker);
+  g.userData.incomingBeacon = incomingBeacon;
+  g.userData.targetMarker = targetMarker;
+  return g;
+}
 
-  return group;
+// Mudlug — squat toad goblin: wide crouching body, big forward eyes with brow ridge, wide mouth, splayed feet
+function createSlugMesh(bodyMat, trimMat, eyeMat) {
+  const g = new THREE.Group();
+  g.add(blockMesh(1.4, 0.7, 0.76, bodyMat, 0, 0.5, 0));
+  g.add(blockMesh(1.1, 0.18, 0.72, trimMat, 0, 0.18, 0.04));
+  g.add(blockMesh(1.0, 0.56, 0.7, trimMat, 0, 1.08, 0.02));
+  g.add(blockMesh(1.06, 0.14, 0.2, bodyMat, 0, 1.4, 0.32));
+  g.add(blockMesh(0.28, 0.28, 0.1, eyeMat, -0.28, 1.22, 0.38));
+  g.add(blockMesh(0.28, 0.28, 0.1, eyeMat, 0.28, 1.22, 0.38));
+  g.add(blockMesh(0.64, 0.1, 0.08, bodyMat, 0, 0.96, 0.38));
+  g.add(blockMesh(0.36, 0.22, 0.52, trimMat, -0.66, 0.14, 0.06));
+  g.add(blockMesh(0.36, 0.22, 0.52, trimMat, 0.66, 0.14, 0.06));
+  g.add(blockMesh(0.22, 0.3, 0.36, bodyMat, -0.88, 0.68, 0.04));
+  g.add(blockMesh(0.22, 0.3, 0.36, bodyMat, 0.88, 0.68, 0.04));
+  return g;
+}
+
+// Glowmite — spindly insect: bulbous abdomen, thin thorax, 3 leg pairs, antennae, 4 eyes
+function createInsectMesh(bodyMat, trimMat, eyeMat) {
+  const g = new THREE.Group();
+  g.add(blockMesh(0.58, 0.56, 0.54, trimMat, 0, 0.32, -0.16));
+  g.add(blockMesh(0.38, 0.48, 0.38, bodyMat, 0, 0.84, 0.04));
+  g.add(blockMesh(0.4, 0.36, 0.4, trimMat, 0, 1.3, 0.04));
+  g.add(blockMesh(0.13, 0.13, 0.08, eyeMat, -0.12, 1.4, 0.26));
+  g.add(blockMesh(0.13, 0.13, 0.08, eyeMat, 0.12, 1.4, 0.26));
+  g.add(blockMesh(0.1, 0.1, 0.07, eyeMat, -0.08, 1.28, 0.26));
+  g.add(blockMesh(0.1, 0.1, 0.07, eyeMat, 0.08, 1.28, 0.26));
+  g.add(blockMesh(0.07, 0.38, 0.07, trimMat, -0.14, 1.6, 0.06));
+  g.add(blockMesh(0.07, 0.38, 0.07, trimMat, 0.14, 1.6, 0.06));
+  for (let i = 0; i < 3; i++) {
+    const y = 0.98 - i * 0.26;
+    g.add(blockMesh(0.52, 0.09, 0.12, trimMat, -0.45, y, 0.04));
+    g.add(blockMesh(0.52, 0.09, 0.12, trimMat, 0.45, y, 0.04));
+  }
+  return g;
+}
+
+// Ash Oaf — heavy stone golem: massive torso, head sunk in shoulders, boulder fists, flat feet
+function createGolemMesh(bodyMat, trimMat, eyeMat) {
+  const g = new THREE.Group();
+  g.add(blockMesh(1.46, 1.32, 0.9, bodyMat, 0, 0.82, 0));
+  g.add(blockMesh(1.62, 0.22, 0.94, trimMat, 0, 1.5, -0.02));
+  g.add(blockMesh(0.94, 0.52, 0.78, trimMat, 0, 1.78, 0.04));
+  g.add(blockMesh(0.86, 0.16, 0.26, bodyMat, 0, 2.0, 0.36));
+  g.add(blockMesh(0.22, 0.2, 0.08, eyeMat, -0.24, 1.86, 0.42));
+  g.add(blockMesh(0.22, 0.2, 0.08, eyeMat, 0.24, 1.86, 0.42));
+  g.add(blockMesh(0.26, 0.44, 0.48, bodyMat, -0.89, 0.64, 0.02));
+  g.add(blockMesh(0.26, 0.44, 0.48, bodyMat, 0.89, 0.64, 0.02));
+  g.add(blockMesh(0.54, 0.64, 0.6, trimMat, -1.08, 0.58, 0.04));
+  g.add(blockMesh(0.54, 0.64, 0.6, trimMat, 1.08, 0.58, 0.04));
+  for (let i = -1; i <= 1; i++) {
+    g.add(blockMesh(0.1, 0.12, 0.1, bodyMat, -1.08 + i * 0.16, 0.28, 0.34));
+    g.add(blockMesh(0.1, 0.12, 0.1, bodyMat, 1.08 + i * 0.16, 0.28, 0.34));
+  }
+  g.add(blockMesh(0.62, 0.26, 0.7, trimMat, -0.36, 0.14, 0.08));
+  g.add(blockMesh(0.62, 0.26, 0.7, trimMat, 0.36, 0.14, 0.08));
+  return g;
+}
+
+// Cinder Imp — slim body, curved multi-block horns with glowing tips, stepping tail with glowing tip
+function createImpMesh(bodyMat, trimMat, eyeMat) {
+  const g = new THREE.Group();
+  g.add(blockMesh(0.74, 1.06, 0.56, bodyMat, 0, 0.8, 0));
+  g.add(blockMesh(0.66, 0.6, 0.62, trimMat, 0, 1.6, 0.02));
+  g.add(blockMesh(0.26, 0.86, 0.34, bodyMat, -0.64, 0.8, 0.02));
+  g.add(blockMesh(0.26, 0.86, 0.34, bodyMat, 0.64, 0.8, 0.02));
+  g.add(blockMesh(0.36, 0.26, 0.48, trimMat, -0.26, 0.15, 0.08));
+  g.add(blockMesh(0.36, 0.26, 0.48, trimMat, 0.26, 0.15, 0.08));
+  g.add(blockMesh(0.14, 0.14, 0.08, eyeMat, -0.18, 1.68, 0.34));
+  g.add(blockMesh(0.14, 0.14, 0.08, eyeMat, 0.18, 1.68, 0.34));
+  g.add(blockMesh(0.14, 0.2, 0.14, trimMat, -0.26, 2.06, 0.02));
+  g.add(blockMesh(0.12, 0.26, 0.12, trimMat, -0.42, 2.26, 0.02));
+  g.add(blockMesh(0.1, 0.22, 0.1, trimMat, -0.56, 2.44, 0.02));
+  g.add(blockMesh(0.08, 0.16, 0.08, eyeMat, -0.66, 2.57, 0.02));
+  g.add(blockMesh(0.14, 0.2, 0.14, trimMat, 0.26, 2.06, 0.02));
+  g.add(blockMesh(0.12, 0.26, 0.12, trimMat, 0.42, 2.26, 0.02));
+  g.add(blockMesh(0.1, 0.22, 0.1, trimMat, 0.56, 2.44, 0.02));
+  g.add(blockMesh(0.08, 0.16, 0.08, eyeMat, 0.66, 2.57, 0.02));
+  g.add(blockMesh(0.22, 0.2, 0.36, bodyMat, 0, 0.5, -0.52));
+  g.add(blockMesh(0.18, 0.2, 0.28, bodyMat, 0, 0.64, -0.84));
+  g.add(blockMesh(0.14, 0.18, 0.2, trimMat, 0, 0.76, -1.06));
+  g.add(blockMesh(0.1, 0.14, 0.14, eyeMat, 0, 0.86, -1.22));
+  return g;
+}
+
+// Bog Shambler — tall cloaked specter: layered cloak, thin torso+neck, oversized head, long drooping arms
+function createSpecterMesh(bodyMat, trimMat, eyeMat) {
+  const g = new THREE.Group();
+  g.add(blockMesh(1.36, 0.2, 0.82, bodyMat, 0, 0.1, -0.02));
+  g.add(blockMesh(1.14, 0.28, 0.74, trimMat, 0, 0.3, -0.01));
+  g.add(blockMesh(0.92, 0.32, 0.66, bodyMat, 0, 0.54, 0));
+  g.add(blockMesh(0.74, 0.36, 0.58, trimMat, 0, 0.78, 0));
+  g.add(blockMesh(0.56, 0.58, 0.5, bodyMat, 0, 1.1, 0.02));
+  g.add(blockMesh(0.26, 0.44, 0.26, trimMat, 0, 1.56, 0.02));
+  g.add(blockMesh(0.76, 0.64, 0.68, trimMat, 0, 2.06, 0.02));
+  g.add(blockMesh(0.2, 0.2, 0.1, eyeMat, -0.2, 2.14, 0.37));
+  g.add(blockMesh(0.2, 0.2, 0.1, eyeMat, 0.2, 2.14, 0.37));
+  g.add(blockMesh(0.32, 0.2, 0.36, trimMat, -0.42, 1.32, 0.02));
+  g.add(blockMesh(0.32, 0.2, 0.36, trimMat, 0.42, 1.32, 0.02));
+  g.add(blockMesh(0.2, 1.04, 0.26, bodyMat, -0.48, 0.82, 0.06));
+  g.add(blockMesh(0.2, 1.04, 0.26, bodyMat, 0.48, 0.82, 0.06));
+  g.add(blockMesh(0.28, 0.18, 0.3, trimMat, -0.48, 0.22, 0.08));
+  g.add(blockMesh(0.28, 0.18, 0.3, trimMat, 0.48, 0.22, 0.08));
+  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, -0.6, 0.1, 0.2));
+  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, -0.44, 0.08, 0.22));
+  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, 0.44, 0.08, 0.22));
+  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, 0.6, 0.1, 0.2));
+  return g;
 }
 
 function createMedicHeartMesh(type) {
