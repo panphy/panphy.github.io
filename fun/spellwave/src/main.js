@@ -1258,19 +1258,26 @@ function getLabelSafeBounds(height) {
 }
 
 function buildHintMask(term, options = {}) {
+  const leadingTypeableCount = Math.max(1, Math.floor(options.leadingTypeableCount || 1));
   return term.replace(/\S+/g, word => {
     let hasTypeable = false;
     for (const ch of word) if (normalizeCharacter(ch, options)) { hasTypeable = true; break; }
     if (!hasTypeable) return word;
     let result = '';
-    let firstTypeable = true;
+    let revealedTypeable = 0;
     for (const ch of word) {
       if (!normalizeCharacter(ch, options)) { result += ch; }
-      else if (firstTypeable) { result += ch; firstTypeable = false; }
+      else if (revealedTypeable < leadingTypeableCount) { result += ch; revealedTypeable += 1; }
       else { result += '_'; }
     }
     return result;
   });
+}
+
+function getBossHintLetterCount(wave) {
+  if (wave <= 1) return 3;
+  if (wave === 2) return 2;
+  return 1;
 }
 
 function buildSearchPrompt(term, options = {}) {
@@ -1703,7 +1710,12 @@ function spawnEnemy(options = {}) {
     limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
     maskPrompt: showDefinition && !isEquationPrompt,
-    hintMask: showDefinition && !isEquationPrompt ? buildHintMask(wordData.term, promptOptions) : null,
+    hintMask: showDefinition && !isEquationPrompt
+      ? buildHintMask(wordData.term, {
+          ...promptOptions,
+          leadingTypeableCount: isBoss ? getBossHintLetterCount(waveSet) : 1,
+        })
+      : null,
     lastPromptHtml: '',
     promptKind,
     isBoss,
