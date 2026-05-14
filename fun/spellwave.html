@@ -42,28 +42,29 @@
         <span id="phaseValue">Study pace</span>
         <h1>Spellwave</h1>
       </div>
-      <div class="game-actions">
-        <button class="icon-button svg-button audio-toggle" id="audioButton" type="button" aria-label="Mute sound">
-          <svg class="button-svg sound-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-            <circle class="button-ring" cx="24" cy="24" r="19"></circle>
-            <path class="speaker-glyph" d="M13.5 27.5h6.2l8.1 6.3V14.2l-8.1 6.3h-6.2z"></path>
-            <path class="sound-wave sound-wave-one" d="M31 19.2c1.5 1.2 2.3 2.9 2.3 4.8s-.8 3.6-2.3 4.8"></path>
-            <path class="sound-wave sound-wave-two" d="M35 15.6c2.6 2.2 4.1 5.1 4.1 8.4s-1.5 6.2-4.1 8.4"></path>
-            <path class="mute-slash" d="M14 14l20 20"></path>
-          </svg>
-        </button>
-        <button class="icon-button svg-button transport-button is-playing" id="pauseButton" type="button" aria-label="Pause run" disabled>
-          <svg class="button-svg transport-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-            <circle class="button-ring" cx="24" cy="24" r="19"></circle>
-            <path class="play-glyph" d="M19 15.5 34.5 24 19 32.5z"></path>
-            <g class="pause-glyph">
-              <rect x="17" y="14" width="5.8" height="20" rx="2"></rect>
-              <rect x="25.2" y="14" width="5.8" height="20" rx="2"></rect>
-            </g>
-          </svg>
-        </button>
-      </div>
     </header>
+
+    <div class="corner-controls" aria-label="Game controls">
+      <button class="icon-button svg-button audio-toggle" id="audioButton" type="button" aria-label="Mute sound">
+        <svg class="button-svg sound-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="speaker-glyph" d="M13.5 27.5h6.2l8.1 6.3V14.2l-8.1 6.3h-6.2z"></path>
+          <path class="sound-wave sound-wave-one" d="M31 19.2c1.5 1.2 2.3 2.9 2.3 4.8s-.8 3.6-2.3 4.8"></path>
+          <path class="sound-wave sound-wave-two" d="M35 15.6c2.6 2.2 4.1 5.1 4.1 8.4s-1.5 6.2-4.1 8.4"></path>
+          <path class="mute-slash" d="M14 14l20 20"></path>
+        </svg>
+      </button>
+      <button class="icon-button svg-button transport-button is-playing" id="pauseButton" type="button" aria-label="Pause run" disabled>
+        <svg class="button-svg transport-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="play-glyph" d="M19 15.5 34.5 24 19 32.5z"></path>
+          <g class="pause-glyph">
+            <rect x="17" y="14" width="5.8" height="20" rx="2"></rect>
+            <rect x="25.2" y="14" width="5.8" height="20" rx="2"></rect>
+          </g>
+        </svg>
+      </button>
+    </div>
 
     <section class="hud-grid" aria-label="Run metrics">
       <div class="readout">
