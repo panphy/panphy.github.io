@@ -306,6 +306,8 @@ let renderedHealth = null;
 let enemyId = 0;
 let pathMarkerMaterial = null;
 let moon = null;
+let moonAngle = 0;
+let moonWaitTimer = 0;
 let starField = null;
 let typedAttempts = 0;
 let mistakeCount = 0;
@@ -526,6 +528,8 @@ function startGame() {
   spawnTimer = 1.25;
   lastFrameTime = 0;
   elapsed = 0;
+  moonAngle = 0;
+  moonWaitTimer = 0;
   mistakeTimer = 0;
   damageTimer = 0;
   mode = 'running';
@@ -1026,20 +1030,24 @@ function updateEnvironment(seconds, delta) {
   camera.lookAt(cameraTarget);
 
   if (moon) {
-    // Moon arc: rises from left horizon, sets at right; one full cycle = 3 waves
-    const normalProgress = wavePhase === 'normal' && normalEnemyTarget > 0
-      ? normalEnemiesSpawned / normalEnemyTarget
-      : 1.0;
-    const waveProgress = wavePhase === 'normal'
-      ? normalProgress * 0.8
-      : 0.8 + (bossesDefeated / BOSSES_PER_WAVE) * 0.2;
-    const moonT = ((waveSet - 1 + waveProgress) / 3) % 1;
-    const theta = moonT * Math.PI;
-    const moonX = -24 * Math.cos(theta);
-    const moonY = 4 + 24 * Math.sin(theta);
-    moon.position.set(moonX, moonY, -42);
-    // Shadow light follows the moon direction
-    moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
+    if (moonWaitTimer > 0) {
+      // Moon has set — hide it and wait before rising again from the left
+      moonWaitTimer -= delta;
+      if (moonWaitTimer <= 0) moonAngle = 0;
+      moon.visible = false;
+      moonLight.position.set(0, 14, -22);
+    } else {
+      moon.visible = true;
+      moonAngle += delta * (Math.PI / 200); // full crossing in ~200 s
+      if (moonAngle >= Math.PI) {
+        moonAngle = Math.PI;
+        moonWaitTimer = 7 + Math.random() * 3; // wait 7–10 s before next rise
+      }
+      const moonX = -24 * Math.cos(moonAngle);
+      const moonY = 4 + 24 * Math.sin(moonAngle);
+      moon.position.set(moonX, moonY, -42);
+      moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
+    }
   }
 
   if (starField) {
