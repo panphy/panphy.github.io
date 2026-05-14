@@ -139,7 +139,7 @@ a {
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-body.is-running .game-bar {
+body.is-running:not(.is-paused) .game-bar {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-6px);
@@ -354,7 +354,7 @@ body.is-running .game-bar {
   transition: top 0.35s ease;
 }
 
-body.is-running .hud-grid {
+body.is-running:not(.is-paused) .hud-grid {
   top: max(14px, env(safe-area-inset-top));
 }
 

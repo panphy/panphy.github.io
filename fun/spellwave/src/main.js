@@ -534,6 +534,7 @@ function pauseGame() {
   playPauseSound();
   stopMusicLoop();
   mode = 'paused';
+  document.body.classList.add('is-paused');
   setPauseButtonState(false, false);
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
   updatePhaseDisplay();
@@ -543,6 +544,7 @@ function resumeGame() {
   if (mode !== 'paused') return;
   playStartSound();
   mode = 'running';
+  document.body.classList.remove('is-paused');
   startMusicLoop(false);
   lastFrameTime = 0;
   messagePanel.hidden = true;
