@@ -577,12 +577,32 @@ body.is-running:not(.is-paused) .hud-grid {
   letter-spacing: 0;
   text-decoration: none;
   text-transform: uppercase;
-  transition: color 160ms ease, opacity 160ms ease;
+  text-shadow: 0 0 8px rgba(239, 195, 92, 0.08);
+  transform-origin: center;
+  animation: support-link-breathe 2.8s ease-in-out infinite;
+  transition: color 160ms ease, opacity 160ms ease, text-shadow 160ms ease;
 }
 
 .support-link:hover,
 .support-link:focus-visible {
   color: var(--gold);
+  text-shadow: 0 0 14px rgba(239, 195, 92, 0.44);
+  animation-play-state: paused;
+}
+
+@keyframes support-link-breathe {
+  0%,
+  100% {
+    opacity: 0.58;
+    transform: scale(1);
+    text-shadow: 0 0 8px rgba(239, 195, 92, 0.08);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.045);
+    text-shadow: 0 0 16px rgba(239, 195, 92, 0.36);
+  }
 }
 
 .word-tag {

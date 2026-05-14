@@ -563,17 +563,24 @@ export function createSpellwaveAudio({
   }
 
   function playGodModeOnSound() {
-    playTone(196, 0.12, { gain: 0.048, type: 'triangle' });
-    playTone(392, 0.16, { gain: 0.042, delay: 0.05, type: 'square' });
-    playTone(784, 0.24, { gain: 0.038, delay: 0.1, type: 'sine' });
-    playNoise(0.18, { gain: 0.024, delay: 0.04, filterFrequency: 2200, filterType: 'highpass' });
+    playTone(523.25, 0.08, { gain: 0.032, type: 'square' });
+    playTone(659.25, 0.08, { gain: 0.03, delay: 0.045, type: 'triangle' });
+    playTone(783.99, 0.09, { gain: 0.032, delay: 0.09, type: 'square' });
+    playTone(1046.5, 0.11, { gain: 0.034, delay: 0.135, type: 'triangle' });
+    playTone(1567.98, 0.28, { gain: 0.026, delay: 0.19, type: 'sine', endFrequency: 2093.0 });
+    playTone(2349.32, 0.12, { gain: 0.015, delay: 0.24, type: 'sine' });
+    playTone(1174.66, 0.16, { gain: 0.018, delay: 0.26, type: 'triangle', detune: 9 });
+    playNoise(0.24, { gain: 0.022, delay: 0.11, filterFrequency: 3600, filterType: 'highpass', q: 0.55 });
   }
 
   function playGodModeOffSound() {
-    playTone(784, 0.1, { gain: 0.038, type: 'sine', endFrequency: 392 });
-    playTone(392, 0.14, { gain: 0.04, delay: 0.06, type: 'triangle', endFrequency: 196 });
-    playTone(147, 0.18, { gain: 0.036, delay: 0.13, type: 'sawtooth', endFrequency: 98 });
-    playNoise(0.12, { gain: 0.018, delay: 0.08, filterFrequency: 420, filterType: 'lowpass' });
+    playTone(2349.32, 0.08, { gain: 0.015, type: 'sine' });
+    playTone(1567.98, 0.12, { gain: 0.026, delay: 0.045, type: 'sine', endFrequency: 1174.66 });
+    playTone(1046.5, 0.09, { gain: 0.034, delay: 0.105, type: 'triangle' });
+    playTone(783.99, 0.09, { gain: 0.032, delay: 0.15, type: 'square' });
+    playTone(659.25, 0.08, { gain: 0.03, delay: 0.195, type: 'triangle' });
+    playTone(523.25, 0.18, { gain: 0.032, delay: 0.24, type: 'square', endFrequency: 261.63 });
+    playNoise(0.24, { gain: 0.018, delay: 0.08, filterFrequency: 1400, filterType: 'lowpass', q: 0.55 });
   }
 
   return {
