@@ -1026,8 +1026,20 @@ function updateEnvironment(seconds, delta) {
   camera.lookAt(cameraTarget);
 
   if (moon) {
-    moon.position.x = 20 + Math.sin(seconds * 0.05) * 0.5;
-    moon.position.y = 18 + Math.cos(seconds * 0.04) * 0.22;
+    // Moon arc: rises from left horizon, sets at right; one full cycle = 3 waves
+    const normalProgress = wavePhase === 'normal' && normalEnemyTarget > 0
+      ? normalEnemiesSpawned / normalEnemyTarget
+      : 1.0;
+    const waveProgress = wavePhase === 'normal'
+      ? normalProgress * 0.8
+      : 0.8 + (bossesDefeated / BOSSES_PER_WAVE) * 0.2;
+    const moonT = ((waveSet - 1 + waveProgress) / 3) % 1;
+    const theta = moonT * Math.PI;
+    const moonX = -24 * Math.cos(theta);
+    const moonY = 4 + 24 * Math.sin(theta);
+    moon.position.set(moonX, moonY, -42);
+    // Shadow light follows the moon direction
+    moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
   }
 
   if (starField) {
