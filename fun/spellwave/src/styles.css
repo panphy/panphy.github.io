@@ -871,7 +871,7 @@ body.is-running:not(.is-paused) .hud-grid {
   font-family: var(--font-mono);
   font-size: 0.74rem;
   font-weight: 700;
-  text-transform: lowercase;
+  text-transform: none;
 }
 
 .gl-def {
