@@ -117,6 +117,29 @@ const BOSS_MUSIC = {
     49.0, null, 49.0, null, 58.27, null, 65.41, null,
   ],
 };
+const WAVE_CLEAR_MUSIC = {
+  name: 'wave-clear',
+  baseStep: 0.176,
+  minStep: 0.118,
+  melodyType: 'triangle',
+  bassType: 'sine',
+  accentType: 'sine',
+  melodyGain: 0.024,
+  bassGain: 0.021,
+  hatGain: 0.005,
+  drumGain: 0.008,
+  drumFilter: 920,
+  melody: [
+    523.25, 659.25, 783.99, 1046.5, 987.77, 783.99, 659.25, null,
+    587.33, 739.99, 880.0, 1174.66, 1046.5, 880.0, 739.99, null,
+    659.25, 783.99, 987.77, 1318.51, 1174.66, 987.77, 880.0, 783.99,
+    698.46, null, 783.99, 987.77, 1046.5, 987.77, 783.99, 659.25,
+  ],
+  bass: [
+    130.81, null, null, null, 164.81, null, null, null,
+    146.83, null, null, null, 196.0, null, 174.61, null,
+  ],
+};
 
 export function createSpellwaveAudio({
   audioButton,
@@ -254,7 +277,7 @@ export function createSpellwaveAudio({
 
   function startMusicLoop(reset) {
     const context = resumeAudio();
-    if (!context || !musicGain || getMode() !== 'running') return;
+    if (!context || !musicGain || !isMusicActiveMode()) return;
 
     if (reset || nextMusicTime < context.currentTime) {
       musicStep = 0;
@@ -286,7 +309,7 @@ export function createSpellwaveAudio({
   }
 
   function scheduleMusic() {
-    if (!audioEnabled || getMode() !== 'running' || !audioContext || !musicGain) {
+    if (!audioEnabled || !isMusicActiveMode() || !audioContext || !musicGain) {
       stopMusicLoop(0.04);
       return;
     }
@@ -312,6 +335,7 @@ export function createSpellwaveAudio({
   }
 
   function getMusicProfile(wave) {
+    if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
     return getWavePhase() === 'boss' ? BOSS_MUSIC : getMusicSeason(wave);
   }
 
@@ -339,7 +363,13 @@ export function createSpellwaveAudio({
   }
 
   function getMusicIntensity(wave, profile) {
+    if (profile.name === 'wave-clear') return Math.min(Math.max(0, wave - 1) * 0.35, 4);
     return Math.min(Math.max(0, wave - 1) + (profile.intensityBoost || 0), 14);
+  }
+
+  function isMusicActiveMode() {
+    const mode = getMode();
+    return mode === 'running' || mode === 'wave_cleared';
   }
 
   function scheduleMusicStep(step, start, stepDuration, profile, intensity, profileGain = 1) {

@@ -3279,8 +3279,8 @@ function chooseBossWord() {
 
 function startWaveCleared() {
   mode = 'wave_cleared';
-  stopMusicLoop(0.12);
   playWaveClearSound();
+  startMusicLoop(false);
   typedBuffer = '';
   activeTarget = null;
   setPauseButtonState(true, true);
@@ -3317,7 +3317,7 @@ function advanceWaveSet() {
   activeTarget = null;
   spawnTimer = 1.25;
   mode = 'running';
-  startMusicLoop(true);
+  startMusicLoop(false);
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
