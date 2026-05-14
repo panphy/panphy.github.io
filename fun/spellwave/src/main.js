@@ -1047,6 +1047,12 @@ function updateEnvironment(seconds, delta) {
       const moonY = 4 + 24 * Math.sin(moonAngle);
       moon.position.set(moonX, moonY, -42);
       moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
+      const fadeZone = 0.18 * Math.PI;
+      moon.material.opacity = moonAngle < fadeZone
+        ? moonAngle / fadeZone
+        : moonAngle > Math.PI - fadeZone
+          ? (Math.PI - moonAngle) / fadeZone
+          : 1;
     }
   }
 
@@ -2453,7 +2459,7 @@ function createPathMarkers() {
 
 function createSky() {
   const moonGeometry = new THREE.SphereGeometry(3.2, 24, 16);
-  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xf2f0df });
+  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xf2f0df, transparent: true });
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
   moon.position.set(20, 18, -42);
   scene.add(moon);
