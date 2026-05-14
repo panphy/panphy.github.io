@@ -295,8 +295,8 @@ let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
-let medicSpawnedThisSet = false;
-let medicSpawnSlot = 0;
+let medicsSpawnedThisSet = 0;
+let medicSpawnSlots = [];
 let godMode = false;
 let godModeUsedThisRun = false;
 let cheatBuffer = '';
@@ -861,7 +861,7 @@ function animate(frameTime) {
     if (wavePhase === 'normal') {
       if (shouldSpawnMedic() && enemies.length < getEnemyLimit()) {
         spawnEnemy({ isMedic: true });
-        medicSpawnedThisSet = true;
+        medicsSpawnedThisSet += 1;
         spawnTimer = Math.max(spawnTimer, 0.55);
       } else if (normalEnemiesSpawned < normalEnemyTarget) {
         spawnTimer -= delta;
@@ -2868,8 +2868,8 @@ function isEnemyTargetable(enemy) {
 function prepareWavePlan() {
   bossWordsThisSet = chooseBossWordsForWave();
   introducedBossTermsThisSet = new Set();
-  medicSpawnedThisSet = false;
-  medicSpawnSlot = chooseMedicSpawnSlot(normalEnemyTarget);
+  medicsSpawnedThisSet = 0;
+  medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
   const previewableWords = definitionBossWordsForWave();
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
   hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
@@ -2879,17 +2879,33 @@ function definitionBossWordsForWave() {
   return bossWordsThisSet.filter(w => !w.isEquation);
 }
 
-function chooseMedicSpawnSlot(target) {
-  if (target <= 2) return Math.max(1, target - 1);
-  const earliest = Math.min(2, target - 1);
-  const latest = Math.max(earliest, target - 2);
-  return earliest + Math.floor(Math.random() * (latest - earliest + 1));
+function getMedicCountForWave(wave) {
+  if (wave >= 7) return 3;
+  if (wave >= 5) return 2;
+  return 1;
+}
+
+function chooseMedicSpawnSlots(target, count) {
+  if (target <= 0 || count <= 0) return [];
+
+  const slots = [];
+  const usableTarget = Math.max(1, target - 1);
+  for (let index = 0; index < count; index += 1) {
+    const slot = THREE.MathUtils.clamp(
+      Math.round(((index + 1) * usableTarget) / (count + 1)),
+      1,
+      usableTarget
+    );
+    slots.push(slot);
+  }
+
+  return slots;
 }
 
 function shouldSpawnMedic() {
   return wavePhase === 'normal'
-    && !medicSpawnedThisSet
-    && normalEnemiesSpawned >= medicSpawnSlot;
+    && medicsSpawnedThisSet < medicSpawnSlots.length
+    && normalEnemiesSpawned >= medicSpawnSlots[medicsSpawnedThisSet];
 }
 
 function buildBossPreviewSchedule(target, words) {
