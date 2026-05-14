@@ -149,6 +149,7 @@ const BOSS_TYPES = [
   {
     name: 'Crimson Bulwark',
     isBoss: true,
+    isFlying: true,
     body: 0x5b0614,
     trim: 0xff351f,
     eye: 0xfff05a,
@@ -182,6 +183,7 @@ const BOSS_TYPES = [
   {
     name: 'Solar Anvil',
     isBoss: true,
+    isFlying: true,
     body: 0x4b2509,
     trim: 0xfbbf24,
     eye: 0x7dd3fc,
@@ -860,7 +862,15 @@ function updateEnemies(delta, seconds) {
     const speed = getEnemySpeed(enemy);
     enemy.group.position.z += speed * delta;
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
-    enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
+    if (enemy.isFlying) {
+      enemy.group.position.y = enemy.baseY + Math.sin(seconds * 1.4 + enemy.phase) * enemy.floatAmount;
+      if (enemy.shadowMesh) {
+        enemy.shadowMesh.position.x = enemy.group.position.x;
+        enemy.shadowMesh.position.z = enemy.group.position.z;
+      }
+    } else {
+      enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
+    }
     enemy.group.rotation.y = Math.sin(seconds * 2.4 + enemy.phase) * 0.18;
 
     const wasRevealed = enemy.revealed;
@@ -1608,9 +1618,19 @@ function spawnEnemy(options = {}) {
   const startZ = spawnBaseZ - spawnSpread;
   const lane = Number.isFinite(options.lane) ? options.lane : chooseSpawnLane(startZ);
   const revealZ = currentDifficulty().revealZ;
-  group.position.set(lane, 0.32, startZ);
+  const isFlying = isBoss && !!type.isFlying;
+  const spawnBaseY = isFlying ? 2.4 : 0.32;
+  group.position.set(lane, spawnBaseY, startZ);
   group.scale.setScalar(type.scale);
   enemyGroup.add(group);
+
+  let shadowMesh = null;
+  if (isFlying) {
+    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
+    shadowMesh = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 3.8), shadowMat);
+    shadowMesh.position.set(lane, 0.04, startZ);
+    scene.add(shadowMesh);
+  }
 
   const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : 'keyword';
   const label = document.createElement('div');
@@ -1687,6 +1707,8 @@ function spawnEnemy(options = {}) {
     promptKind,
     isBoss,
     isMedic,
+    isFlying,
+    shadowMesh,
     lane,
     spawnZ: startZ,
     revealZ,
@@ -1695,11 +1717,12 @@ function spawnEnemy(options = {}) {
     speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : type.speed + Math.random() * 0.35,
     damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
     shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
-    baseY: 0.32,
+    baseY: spawnBaseY,
     age: 0,
     wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
     wobbleSpeed: isBoss ? 0.7 : 1.2 + Math.random() * 1.4,
-    stepBounce: isBoss ? 0.04 : 0.06 + Math.random() * 0.08,
+    stepBounce: isFlying ? 0 : isBoss ? 0.04 : 0.06 + Math.random() * 0.08,
+    floatAmount: isFlying ? 0.22 : 0,
     phase: Math.random() * Math.PI * 2,
   };
   if (!isBoss && definitionBossWordsForWave().some(w => w.term === wordData.term)) {
@@ -2621,6 +2644,12 @@ function removeEnemy(enemy) {
   enemyGroup.remove(enemy.group);
   labelsLayer.removeChild(enemy.label);
   disposeObject(enemy.group);
+  if (enemy.shadowMesh) {
+    scene.remove(enemy.shadowMesh);
+    enemy.shadowMesh.geometry.dispose();
+    enemy.shadowMesh.material.dispose();
+    enemy.shadowMesh = null;
+  }
   if (activeTarget === enemy) activeTarget = null;
 }
 
