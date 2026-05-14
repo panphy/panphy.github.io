@@ -351,6 +351,11 @@ body.is-running .game-bar {
   width: min(238px, calc(100vw - 28px));
   gap: 8px;
   pointer-events: none;
+  transition: top 0.35s ease;
+}
+
+body.is-running .hud-grid {
+  top: max(14px, env(safe-area-inset-top));
 }
 
 .readout {
