@@ -140,6 +140,29 @@ const WAVE_CLEAR_MUSIC = {
     146.83, null, null, null, 196.0, null, 174.61, null,
   ],
 };
+const GAME_OVER_MUSIC = {
+  name: 'game-over',
+  baseStep: 0.34,
+  minStep: 0.24,
+  melodyType: 'sine',
+  bassType: 'triangle',
+  accentType: 'sine',
+  melodyGain: 0.018,
+  bassGain: 0.026,
+  hatGain: 0.001,
+  drumGain: 0.003,
+  drumFilter: 360,
+  melody: [
+    392.0, null, 349.23, null, 329.63, null, 293.66, null,
+    261.63, null, 246.94, null, 220.0, null, 196.0, null,
+    261.63, null, 293.66, null, 246.94, null, 220.0, null,
+    196.0, null, 174.61, null, 164.81, null, 196.0, null,
+  ],
+  bass: [
+    65.41, null, null, null, 61.74, null, null, null,
+    55.0, null, null, null, 49.0, null, null, null,
+  ],
+};
 
 export function createSpellwaveAudio({
   audioButton,
@@ -335,6 +358,7 @@ export function createSpellwaveAudio({
   }
 
   function getMusicProfile(wave) {
+    if (getMode() === 'gameover') return GAME_OVER_MUSIC;
     if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
     return getWavePhase() === 'boss' ? BOSS_MUSIC : getMusicSeason(wave);
   }
@@ -363,13 +387,14 @@ export function createSpellwaveAudio({
   }
 
   function getMusicIntensity(wave, profile) {
+    if (profile.name === 'game-over') return 0;
     if (profile.name === 'wave-clear') return Math.min(Math.max(0, wave - 1) * 0.35, 4);
     return Math.min(Math.max(0, wave - 1) + (profile.intensityBoost || 0), 14);
   }
 
   function isMusicActiveMode() {
     const mode = getMode();
-    return mode === 'running' || mode === 'wave_cleared';
+    return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover';
   }
 
   function scheduleMusicStep(step, start, stepDuration, profile, intensity, profileGain = 1) {

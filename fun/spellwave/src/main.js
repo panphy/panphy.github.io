@@ -195,6 +195,9 @@ const BOSS_TYPES = [
   },
 ];
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
+const FLYING_SHADOW_OPACITY = 0.22;
+const MOON_SHADOW_FADE_IN_RATE = 1.45;
+const MOON_SHADOW_FADE_OUT_RATE = 4.8;
 
 const SEASON_PALETTES = [
   { // Spring (wave 1): soft twilight blue, cherry blossoms
@@ -310,6 +313,8 @@ let pathMarkerMaterial = null;
 let moon = null;
 let moonAngle = 0;
 let moonWaitTimer = 0;
+let moonShadowStrength = 1;
+let moonLightBaseIntensity = 2.2;
 let starField = null;
 let typedAttempts = 0;
 let mistakeCount = 0;
@@ -404,6 +409,7 @@ moonLight.shadow.camera.right = 22;
 moonLight.shadow.camera.top = 22;
 moonLight.shadow.camera.bottom = -22;
 scene.add(moonLight);
+moonLightBaseIntensity = moonLight.intensity;
 
 const emberLight = new THREE.PointLight(0xf26a3d, 2.5, 22, 1.8);
 emberLight.position.set(0, 2.2, 5.7);
@@ -452,7 +458,7 @@ audioButton.addEventListener('click', () => {
   if (audioEnabled) {
     resumeAudio();
     playToggleSound();
-    if (mode === 'running') startMusicLoop(false);
+    if (mode === 'running' || mode === 'wave_cleared' || mode === 'gameover') startMusicLoop(false);
   } else {
     stopMusicLoop(0.03);
   }
@@ -502,6 +508,7 @@ function activateGodMode() {
 }
 
 function startGame() {
+  const transitionFromGameOver = mode === 'gameover';
   playStartSound();
   clearEnemies();
   clearEffects();
@@ -538,7 +545,7 @@ function startGame() {
   mistakeTimer = 0;
   damageTimer = 0;
   mode = 'running';
-  startMusicLoop(true);
+  startMusicLoop(!transitionFromGameOver);
   document.body.classList.add('is-running');
   messagePanel.hidden = true;
   messagePanel.classList.remove('is-cleared');
@@ -576,8 +583,8 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
-  stopMusicLoop(0.04);
   playGameOverSound();
+  startMusicLoop(false);
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
   if (!godMode && score > bestScore) {
@@ -1035,12 +1042,15 @@ function updateEnvironment(seconds, delta) {
   camera.lookAt(cameraTarget);
 
   if (moon) {
+    let targetMoonShadowStrength = 1;
     if (moonWaitTimer > 0) {
       // Moon has set — hide it and wait before rising again from the left
       moonWaitTimer -= delta;
       if (moonWaitTimer <= 0) moonAngle = 0;
       moon.visible = false;
+      moon.material.opacity = 0;
       moonLight.position.set(0, 14, -22);
+      targetMoonShadowStrength = 0;
     } else {
       moon.visible = true;
       moonAngle += delta * (Math.PI / 200); // full crossing in ~200 s
@@ -1058,7 +1068,9 @@ function updateEnvironment(seconds, delta) {
         : moonAngle > Math.PI - fadeZone
           ? (Math.PI - moonAngle) / fadeZone
           : 1;
+      targetMoonShadowStrength = THREE.MathUtils.clamp(moon.material.opacity * 1.8, 0, 1);
     }
+    updateMoonShadowFade(delta, targetMoonShadowStrength);
     updateMoonHaze();
   }
 
@@ -1125,6 +1137,31 @@ function updateMoonHaze() {
   moonHaze.style.setProperty('--moon-haze-x', `${x.toFixed(2)}%`);
   moonHaze.style.setProperty('--moon-haze-y', `${y.toFixed(2)}%`);
   moonHaze.style.opacity = (0.74 * opacity).toFixed(3);
+}
+
+function updateMoonShadowFade(delta, targetStrength) {
+  const rate = targetStrength > moonShadowStrength ? MOON_SHADOW_FADE_IN_RATE : MOON_SHADOW_FADE_OUT_RATE;
+  moonShadowStrength = moveTowards(moonShadowStrength, targetStrength, rate * delta);
+  updateMoonShadowLighting();
+  updateFlyingShadowOpacity();
+}
+
+function updateMoonShadowLighting() {
+  moonLight.intensity = moonLightBaseIntensity * moonShadowStrength;
+  moonLight.castShadow = moonShadowStrength > 0.02;
+}
+
+function updateFlyingShadowOpacity() {
+  for (const enemy of enemies) {
+    if (!enemy.shadowMesh) continue;
+    enemy.shadowMesh.visible = moonShadowStrength > 0.02;
+    enemy.shadowMesh.material.opacity = FLYING_SHADOW_OPACITY * moonShadowStrength;
+  }
+}
+
+function moveTowards(current, target, maxDelta) {
+  if (Math.abs(target - current) <= maxDelta) return target;
+  return current + Math.sign(target - current) * maxDelta;
 }
 
 function updateLabels() {
@@ -1685,9 +1722,15 @@ function spawnEnemy(options = {}) {
 
   let shadowMesh = null;
   if (isFlying) {
-    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false });
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: FLYING_SHADOW_OPACITY * moonShadowStrength,
+      depthWrite: false,
+    });
     shadowMesh = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 3.8), shadowMat);
     shadowMesh.position.set(lane, 0.04, startZ);
+    shadowMesh.visible = moonShadowStrength > 0.02;
     scene.add(shadowMesh);
   }
 
@@ -2990,7 +3033,7 @@ function buildSeasonFromScene() {
     hemiGround: hemiLight.groundColor.clone(),
     hemiIntensity: hemiLight.intensity,
     sunColor: moonLight.color.clone(),
-    sunIntensity: moonLight.intensity,
+    sunIntensity: moonLightBaseIntensity,
     emberColor: emberLight.color.clone(),
     emberIntensity: seasonEmberIntensityBase,
     crystalColor: sceneCrystalMat ? sceneCrystalMat.color.clone() : new THREE.Color(0x58dfcf),
@@ -3039,7 +3082,8 @@ function applySeasonInstant(palette) {
   hemiLight.groundColor.setHex(palette.hemiGround);
   hemiLight.intensity = palette.hemiIntensity;
   moonLight.color.setHex(palette.sunColor);
-  moonLight.intensity = palette.sunIntensity;
+  moonLightBaseIntensity = palette.sunIntensity;
+  updateMoonShadowLighting();
   emberLight.color.setHex(palette.emberColor);
   seasonEmberIntensityBase = palette.emberIntensity;
   // crystal head stays permanently at summer teal — not season-dependent
@@ -3087,7 +3131,8 @@ function updateSeasonFade(delta) {
   hemiLight.groundColor.lerpColors(from.hemiGround, to.hemiGround, t);
   hemiLight.intensity = THREE.MathUtils.lerp(from.hemiIntensity, to.hemiIntensity, t);
   moonLight.color.lerpColors(from.sunColor, to.sunColor, t);
-  moonLight.intensity = THREE.MathUtils.lerp(from.sunIntensity, to.sunIntensity, t);
+  moonLightBaseIntensity = THREE.MathUtils.lerp(from.sunIntensity, to.sunIntensity, t);
+  updateMoonShadowLighting();
   emberLight.color.lerpColors(from.emberColor, to.emberColor, t);
   seasonEmberIntensityBase = THREE.MathUtils.lerp(from.emberIntensity, to.emberIntensity, t);
   // crystal head stays permanently at summer teal — not season-dependent
