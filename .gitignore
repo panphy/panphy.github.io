@@ -12,6 +12,7 @@ node_modules/
 
 # AI tool local settings
 .claude/
+.agents/
 
 # Temporary and log files
 *.log
