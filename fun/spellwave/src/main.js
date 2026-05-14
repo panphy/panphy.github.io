@@ -18,6 +18,7 @@ const moonHaze = document.querySelector('.moon-haze');
 const startButton = document.getElementById('startButton');
 const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
+const fullscreenButton = document.getElementById('fullscreenButton');
 const messagePanel = document.getElementById('messagePanel');
 const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
@@ -442,6 +443,7 @@ bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
 setPauseButtonState(true, true);
+updateFullscreenButton();
 updatePhaseDisplay();
 updateHud(true);
 
@@ -477,7 +479,15 @@ pauseButton.addEventListener('click', () => {
   }
 });
 
+fullscreenButton.addEventListener('click', () => {
+  playToggleSound();
+  toggleFullscreen();
+  if (mode === 'running') focusKeyboard();
+});
+
 window.addEventListener('resize', resizeRenderer);
+document.addEventListener('fullscreenchange', updateFullscreenButton);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 window.addEventListener('keydown', handleKeyDown);
 window.addEventListener('blur', () => {
   if (mode === 'running') pauseGame();
@@ -3294,6 +3304,51 @@ function setPauseButtonState(isPlaying, isDisabled = pauseButton.disabled) {
   pauseButton.classList.toggle('is-playing', isPlaying);
   pauseButton.setAttribute('aria-label', isPlaying ? 'Pause run' : 'Resume run');
   pauseButton.title = isPlaying ? 'Pause run' : 'Resume run';
+}
+
+function toggleFullscreen() {
+  if (getFullscreenElement()) {
+    exitFullscreen();
+    return;
+  }
+
+  const root = document.documentElement;
+  const request = root.requestFullscreen || root.webkitRequestFullscreen;
+  if (request) {
+    const result = request.call(root);
+    if (result && typeof result.catch === 'function') result.catch(() => {});
+  }
+}
+
+function exitFullscreen() {
+  const exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (exit) {
+    const result = exit.call(document);
+    if (result && typeof result.catch === 'function') result.catch(() => {});
+  }
+}
+
+function getFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function isFullscreenSupported() {
+  return !!(
+    document.fullscreenEnabled ||
+    document.webkitFullscreenEnabled ||
+    document.documentElement.requestFullscreen ||
+    document.documentElement.webkitRequestFullscreen
+  );
+}
+
+function updateFullscreenButton() {
+  const isSupported = isFullscreenSupported();
+  const isFullscreen = !!getFullscreenElement();
+  fullscreenButton.hidden = !isSupported;
+  fullscreenButton.disabled = !isSupported;
+  fullscreenButton.classList.toggle('is-fullscreen', isFullscreen);
+  fullscreenButton.setAttribute('aria-label', isFullscreen ? 'Exit full screen' : 'Enter full screen');
+  fullscreenButton.title = isFullscreen ? 'Exit full screen' : 'Enter full screen';
 }
 
 function startBossPhase() {
