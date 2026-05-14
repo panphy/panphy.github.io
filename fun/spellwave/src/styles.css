@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@500;600;700&family=Manrope:wght@500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@500;600;700&family=Manrope:wght@500;700;800&family=Press+Start+2P&display=swap');
 
 :root {
   --night: #07120f;
@@ -16,6 +16,7 @@
   --font-body: 'Manrope', system-ui, sans-serif;
   --font-display: 'DM Serif Display', serif;
   --font-mono: 'IBM Plex Mono', monospace;
+  --font-pixel: 'Press Start 2P', monospace;
 }
 
 * {
@@ -916,47 +917,76 @@ body.is-running:not(.is-paused) .hud-grid {
   z-index: 16;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-family: var(--font-pixel);
+  font-size: clamp(1.0rem, 3.5vw, 2.0rem);
   font-weight: 400;
   color: var(--danger);
   text-align: center;
-  text-shadow: 0 0 32px rgba(243, 78, 85, 0.62);
+  text-shadow:
+    2px 0 0 #000,
+    -2px 0 0 #000,
+    0 2px 0 #000,
+    0 -2px 0 #000,
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    -2px 2px 0 rgba(0, 0, 0, 0.8),
+    2px -2px 0 rgba(0, 0, 0, 0.8),
+    -2px -2px 0 rgba(0, 0, 0, 0.8),
+    0 0 18px rgba(243, 78, 85, 0.5);
   letter-spacing: 0.04em;
+  line-height: 1.6;
   opacity: 0;
   white-space: nowrap;
 }
 
 .boss-banner.is-medic-hint {
   color: #ff8fb3;
-  text-shadow: 0 0 32px rgba(255, 49, 95, 0.58);
+  text-shadow:
+    2px 0 0 #000,
+    -2px 0 0 #000,
+    0 2px 0 #000,
+    0 -2px 0 #000,
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    -2px 2px 0 rgba(0, 0, 0, 0.8),
+    2px -2px 0 rgba(0, 0, 0, 0.8),
+    -2px -2px 0 rgba(0, 0, 0, 0.8),
+    0 0 18px rgba(255, 49, 95, 0.45);
 }
 
 .boss-banner.is-active {
-  animation: boss-banner-flash 1.9s ease-out forwards;
+  animation: boss-banner-flash 2.2s ease-out forwards;
 }
 
 @keyframes boss-banner-flash {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.72);
-    letter-spacing: 0.12em;
+    transform: translate(-50%, -50%) scale(0.7);
   }
 
-  18% {
+  10% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.04);
-    letter-spacing: 0.04em;
+    transform: translate(-50%, -50%) scale(1.08);
   }
 
-  48% {
+  20% {
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+
+  30% {
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+
+  40% {
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+
+  75% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1.0);
   }
 
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1.0);
   }
 }
 

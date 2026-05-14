@@ -864,6 +864,7 @@ function updateEnemies(delta, seconds) {
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     if (enemy.isFlying) {
       enemy.group.position.y = enemy.baseY + Math.sin(seconds * 1.4 + enemy.phase) * enemy.floatAmount;
+      enemy.group.rotation.z = Math.sin(seconds * 0.85 + enemy.phase) * 0.10;
       if (enemy.shadowMesh) {
         enemy.shadowMesh.position.x = enemy.group.position.x;
         enemy.shadowMesh.position.z = enemy.group.position.z;
@@ -1976,12 +1977,11 @@ function createDragonBossMesh(type) {
   const bodyMat = bossMat(type);
   const trimMat = bossTrimMat(type);
   const eyeMat = bossEyeMat(type);
-  // Legs
-  group.add(blockMesh(0.44, 0.48, 0.56, bodyMat, -0.38, 0.44, 0.1));
-  group.add(blockMesh(0.44, 0.48, 0.56, bodyMat, 0.38, 0.44, 0.1));
-  // Feet
-  group.add(blockMesh(0.54, 0.2, 0.64, trimMat, -0.38, 0.16, 0.22));
-  group.add(blockMesh(0.54, 0.2, 0.64, trimMat, 0.38, 0.16, 0.22));
+  // Swept-back claws (tucked under body, angled rear)
+  group.add(blockMesh(0.36, 0.22, 0.42, bodyMat, -0.4, 0.50, -0.34));
+  group.add(blockMesh(0.36, 0.22, 0.42, bodyMat, 0.4, 0.50, -0.34));
+  group.add(blockMesh(0.28, 0.14, 0.28, trimMat, -0.4, 0.36, -0.66));
+  group.add(blockMesh(0.28, 0.14, 0.28, trimMat, 0.4, 0.36, -0.66));
   // Torso
   group.add(blockMesh(1.2, 1.06, 0.88, bodyMat, 0, 0.9, 0));
   // Spine ridges
@@ -2007,18 +2007,22 @@ function createDragonBossMesh(type) {
   const rHorn = blockMesh(0.14, 0.44, 0.14, trimMat, 0.32, 2.46, 0.06);
   rHorn.rotation.z = -0.38;
   group.add(rHorn);
-  // Wings — left
-  group.add(blockMesh(0.36, 0.7, 0.18, trimMat, -0.84, 1.22, -0.06));
-  group.add(blockMesh(0.32, 0.84, 0.14, trimMat, -1.28, 1.28, 0));
-  group.add(blockMesh(0.24, 0.58, 0.12, trimMat, -1.66, 1.3, 0.04));
-  group.add(blockMesh(0.44, 0.62, 0.07, bodyMat, -1.06, 1.14, -0.02));
-  group.add(blockMesh(0.36, 0.5, 0.07, bodyMat, -1.46, 1.18, 0.02));
-  // Wings — right
-  group.add(blockMesh(0.36, 0.7, 0.18, trimMat, 0.84, 1.22, -0.06));
-  group.add(blockMesh(0.32, 0.84, 0.14, trimMat, 1.28, 1.28, 0));
-  group.add(blockMesh(0.24, 0.58, 0.12, trimMat, 1.66, 1.3, 0.04));
-  group.add(blockMesh(0.44, 0.62, 0.07, bodyMat, 1.06, 1.14, -0.02));
-  group.add(blockMesh(0.36, 0.5, 0.07, bodyMat, 1.46, 1.18, 0.02));
+  // Wings — left (V-shape, rising outward from body)
+  group.add(blockMesh(0.34, 0.62, 0.18, trimMat, -0.84, 1.40, -0.06));
+  group.add(blockMesh(0.30, 0.72, 0.14, trimMat, -1.28, 1.74, 0));
+  group.add(blockMesh(0.26, 0.60, 0.12, trimMat, -1.66, 2.10, 0.04));
+  group.add(blockMesh(0.20, 0.48, 0.10, trimMat, -2.00, 2.44, 0.06));
+  group.add(blockMesh(0.48, 0.80, 0.07, bodyMat, -1.06, 1.57, -0.02));
+  group.add(blockMesh(0.42, 0.72, 0.07, bodyMat, -1.47, 1.92, 0.02));
+  group.add(blockMesh(0.36, 0.60, 0.06, bodyMat, -1.83, 2.27, 0.05));
+  // Wings — right (V-shape, rising outward from body)
+  group.add(blockMesh(0.34, 0.62, 0.18, trimMat, 0.84, 1.40, -0.06));
+  group.add(blockMesh(0.30, 0.72, 0.14, trimMat, 1.28, 1.74, 0));
+  group.add(blockMesh(0.26, 0.60, 0.12, trimMat, 1.66, 2.10, 0.04));
+  group.add(blockMesh(0.20, 0.48, 0.10, trimMat, 2.00, 2.44, 0.06));
+  group.add(blockMesh(0.48, 0.80, 0.07, bodyMat, 1.06, 1.57, -0.02));
+  group.add(blockMesh(0.42, 0.72, 0.07, bodyMat, 1.47, 1.92, 0.02));
+  group.add(blockMesh(0.36, 0.60, 0.06, bodyMat, 1.83, 2.27, 0.05));
   // Tail
   group.add(blockMesh(0.4, 0.36, 0.48, bodyMat, 0, 0.62, -0.64));
   group.add(blockMesh(0.3, 0.28, 0.38, bodyMat, 0, 0.5, -1.1));
@@ -2161,14 +2165,11 @@ function createPhoenixBossMesh(type) {
   const bodyMat = bossMat(type);
   const trimMat = bossTrimMat(type);
   const eyeMat = bossEyeMat(type);
-  // Legs
-  group.add(blockMesh(0.26, 0.52, 0.28, bodyMat, -0.3, 0.56, 0.06));
-  group.add(blockMesh(0.26, 0.52, 0.28, bodyMat, 0.3, 0.56, 0.06));
-  // Talons
-  group.add(blockMesh(0.36, 0.14, 0.14, trimMat, -0.36, 0.26, 0.18));
-  group.add(blockMesh(0.36, 0.14, 0.14, trimMat, 0.36, 0.26, 0.18));
-  group.add(blockMesh(0.14, 0.14, 0.3, trimMat, -0.28, 0.2, 0.28));
-  group.add(blockMesh(0.14, 0.14, 0.3, trimMat, 0.28, 0.2, 0.28));
+  // Swept-back talons (tucked under body, angled rear)
+  group.add(blockMesh(0.24, 0.20, 0.38, bodyMat, -0.30, 0.52, -0.34));
+  group.add(blockMesh(0.24, 0.20, 0.38, bodyMat, 0.30, 0.52, -0.34));
+  group.add(blockMesh(0.20, 0.14, 0.24, trimMat, -0.30, 0.38, -0.62));
+  group.add(blockMesh(0.20, 0.14, 0.24, trimMat, 0.30, 0.38, -0.62));
   // Body
   group.add(blockMesh(0.96, 0.82, 0.82, bodyMat, 0, 1.08, 0));
   // Breast
@@ -2187,22 +2188,26 @@ function createPhoenixBossMesh(type) {
   group.add(blockMesh(0.1, 0.3, 0.1, trimMat, -0.16, 2.58, 0.04));
   group.add(blockMesh(0.1, 0.44, 0.1, trimMat, 0, 2.64, 0.04));
   group.add(blockMesh(0.1, 0.3, 0.1, trimMat, 0.16, 2.58, 0.04));
-  // Wings — left
-  group.add(blockMesh(0.42, 0.76, 0.2, bodyMat, -0.86, 1.26, -0.04));
-  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, -1.3, 1.3, 0));
-  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, -1.68, 1.3, 0.04));
-  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, -2.0, 1.26, 0.08));
-  for (let i = 0; i < 4; i++) {
-    group.add(blockMesh(0.14, 0.28, 0.1, trimMat, -1.5 - i * 0.16, 0.84, 0.04 + i * 0.02));
-  }
-  // Wings — right
-  group.add(blockMesh(0.42, 0.76, 0.2, bodyMat, 0.86, 1.26, -0.04));
-  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, 1.3, 1.3, 0));
-  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, 1.68, 1.3, 0.04));
-  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, 2.0, 1.26, 0.08));
-  for (let i = 0; i < 4; i++) {
-    group.add(blockMesh(0.14, 0.28, 0.1, trimMat, 1.5 + i * 0.16, 0.84, 0.04 + i * 0.02));
-  }
+  // Wings — left (V-shape, rising outward from body)
+  group.add(blockMesh(0.42, 0.76, 0.20, bodyMat, -0.86, 1.40, -0.04));
+  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, -1.30, 1.74, 0));
+  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, -1.68, 2.06, 0.04));
+  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, -2.02, 2.34, 0.08));
+  // Primary feathers cascading below the wing underside
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.50, 1.45, 0.04));
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.66, 1.60, 0.04));
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.82, 1.74, 0.05));
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.98, 1.89, 0.06));
+  // Wings — right (V-shape, rising outward from body)
+  group.add(blockMesh(0.42, 0.76, 0.20, bodyMat, 0.86, 1.40, -0.04));
+  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, 1.30, 1.74, 0));
+  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, 1.68, 2.06, 0.04));
+  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, 2.02, 2.34, 0.08));
+  // Primary feathers cascading below the wing underside
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.50, 1.45, 0.04));
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.66, 1.60, 0.04));
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.82, 1.74, 0.05));
+  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.98, 1.89, 0.06));
   // Flame tail feathers
   group.add(blockMesh(0.28, 0.6, 0.18, trimMat, 0, 0.76, -0.56));
   group.add(blockMesh(0.18, 0.72, 0.14, trimMat, -0.28, 0.7, -0.74));
