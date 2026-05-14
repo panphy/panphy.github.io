@@ -390,13 +390,13 @@ const hemiLight = new THREE.HemisphereLight(0xd9f7e5, 0x203126, 1.35);
 scene.add(hemiLight);
 
 const moonLight = new THREE.DirectionalLight(0xc9ffec, 2.2);
-moonLight.position.set(-8, 13, 10);
+moonLight.position.set(18, 14, -28);
 moonLight.castShadow = true;
 moonLight.shadow.mapSize.set(1024, 1024);
-moonLight.shadow.camera.left = -18;
-moonLight.shadow.camera.right = 18;
-moonLight.shadow.camera.top = 18;
-moonLight.shadow.camera.bottom = -18;
+moonLight.shadow.camera.left = -22;
+moonLight.shadow.camera.right = 22;
+moonLight.shadow.camera.top = 22;
+moonLight.shadow.camera.bottom = -22;
 scene.add(moonLight);
 
 const emberLight = new THREE.PointLight(0xf26a3d, 2.5, 22, 1.8);
