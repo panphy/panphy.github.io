@@ -306,7 +306,6 @@ let renderedHealth = null;
 let enemyId = 0;
 let pathMarkerMaterial = null;
 let moon = null;
-let moonGlow = null;
 let moonAngle = 0;
 let moonWaitTimer = 0;
 let starField = null;
@@ -1036,11 +1035,9 @@ function updateEnvironment(seconds, delta) {
       moonWaitTimer -= delta;
       if (moonWaitTimer <= 0) moonAngle = 0;
       moon.visible = false;
-      if (moonGlow) moonGlow.visible = false;
       moonLight.position.set(0, 14, -22);
     } else {
       moon.visible = true;
-      if (moonGlow) moonGlow.visible = true;
       moonAngle += delta * (Math.PI / 200); // full crossing in ~200 s
       if (moonAngle >= Math.PI) {
         moonAngle = Math.PI;
@@ -1049,16 +1046,13 @@ function updateEnvironment(seconds, delta) {
       const moonX = -24 * Math.cos(moonAngle);
       const moonY = 4 + 24 * Math.sin(moonAngle);
       moon.position.set(moonX, moonY, -42);
-      if (moonGlow) moonGlow.position.set(moonX, moonY, -42);
       moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
       const fadeZone = 0.18 * Math.PI;
-      const opacity = moonAngle < fadeZone
+      moon.material.opacity = moonAngle < fadeZone
         ? moonAngle / fadeZone
         : moonAngle > Math.PI - fadeZone
           ? (Math.PI - moonAngle) / fadeZone
           : 1;
-      moon.material.opacity = opacity;
-      if (moonGlow) moonGlow.material.opacity = opacity * 0.18;
     }
   }
 
@@ -2469,19 +2463,6 @@ function createSky() {
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
   moon.position.set(20, 18, -42);
   scene.add(moon);
-
-  const glowGeometry = new THREE.SphereGeometry(7.0, 16, 10);
-  const glowMaterial = new THREE.MeshBasicMaterial({
-    color: 0xe8f0ff,
-    transparent: true,
-    opacity: 0,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.BackSide,
-  });
-  moonGlow = new THREE.Mesh(glowGeometry, glowMaterial);
-  moonGlow.position.copy(moon.position);
-  scene.add(moonGlow);
 
   const starGeometry = new THREE.BufferGeometry();
   const positions = [];
