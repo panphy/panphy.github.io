@@ -357,6 +357,8 @@ const {
   playBossWarningSound,
   playWaveClearSound,
   playGameOverSound,
+  playGodModeOnSound,
+  playGodModeOffSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -500,6 +502,7 @@ requestAnimationFrame(animate);
 function toggleGodMode() {
   if (godMode) {
     godMode = false;
+    playGodModeOffSound();
     document.body.classList.remove('is-god-mode');
     if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
     updateHud(true);
@@ -508,6 +511,7 @@ function toggleGodMode() {
 
   godMode = true;
   godModeUsedThisRun = true;
+  playGodModeOnSound();
   document.body.classList.add('is-god-mode');
   if (godModeBadge) godModeBadge.remove();
   godModeBadge = document.createElement('div');

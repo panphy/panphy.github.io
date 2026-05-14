@@ -562,6 +562,20 @@ export function createSpellwaveAudio({
     playNoise(0.22, { gain: 0.045, delay: 0.04, filterFrequency: 220, filterType: 'lowpass' });
   }
 
+  function playGodModeOnSound() {
+    playTone(196, 0.12, { gain: 0.048, type: 'triangle' });
+    playTone(392, 0.16, { gain: 0.042, delay: 0.05, type: 'square' });
+    playTone(784, 0.24, { gain: 0.038, delay: 0.1, type: 'sine' });
+    playNoise(0.18, { gain: 0.024, delay: 0.04, filterFrequency: 2200, filterType: 'highpass' });
+  }
+
+  function playGodModeOffSound() {
+    playTone(784, 0.1, { gain: 0.038, type: 'sine', endFrequency: 392 });
+    playTone(392, 0.14, { gain: 0.04, delay: 0.06, type: 'triangle', endFrequency: 196 });
+    playTone(147, 0.18, { gain: 0.036, delay: 0.13, type: 'sawtooth', endFrequency: 98 });
+    playNoise(0.12, { gain: 0.018, delay: 0.08, filterFrequency: 420, filterType: 'lowpass' });
+  }
+
   return {
     toggleEnabled,
     updateAudioButton,
@@ -584,5 +598,7 @@ export function createSpellwaveAudio({
     playBossWarningSound,
     playWaveClearSound,
     playGameOverSound,
+    playGodModeOnSound,
+    playGodModeOffSound,
   };
 }
