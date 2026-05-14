@@ -356,6 +356,7 @@ const {
   initialEnabled: loadAudioSetting(),
   saveAudioSetting,
   getMode: () => mode,
+  getWavePhase: () => wavePhase,
   getWaveSet: () => waveSet,
   getTypedLength: () => typedBuffer.length,
   pathLanes: PATH_LANES,
@@ -3252,8 +3253,8 @@ function startBossPhase() {
   bossesSpawned = 0;
   bossesDefeated = 0;
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
-  playBossWarningSound();
   showBanner('BOSS WAVE');
+  playBossWarningSound();
   updatePhaseDisplay();
 }
 

@@ -1,7 +1,8 @@
-const MASTER_VOLUME = 0.9;
+const MASTER_VOLUME = 0.95;
 const MUSIC_GAIN = 0.82;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
+const MUSIC_TRANSITION_DURATION = 1.2;
 const MUSIC_SEASONS = [
   {
     name: 'spring',
@@ -92,12 +93,37 @@ const MUSIC_SEASONS = [
     ],
   },
 ];
+const BOSS_MUSIC = {
+  name: 'boss',
+  baseStep: 0.145,
+  minStep: 0.096,
+  intensityBoost: 5,
+  melodyType: 'sawtooth',
+  bassType: 'square',
+  accentType: 'sawtooth',
+  melodyGain: 0.028,
+  bassGain: 0.04,
+  hatGain: 0.014,
+  drumGain: 0.026,
+  drumFilter: 260,
+  melody: [
+    220.0, 261.63, 311.13, 293.66, 261.63, 233.08, 220.0, null,
+    196.0, 233.08, 277.18, 311.13, 293.66, 261.63, 233.08, null,
+    174.61, 220.0, 261.63, 311.13, 349.23, 311.13, 261.63, 220.0,
+    164.81, null, 196.0, 233.08, 261.63, 311.13, 293.66, 220.0,
+  ],
+  bass: [
+    55.0, null, 55.0, null, 65.41, null, 58.27, null,
+    49.0, null, 49.0, null, 58.27, null, 65.41, null,
+  ],
+};
 
 export function createSpellwaveAudio({
   audioButton,
   initialEnabled,
   saveAudioSetting,
   getMode,
+  getWavePhase = () => 'normal',
   getWaveSet,
   getTypedLength,
   pathLanes,
@@ -109,6 +135,9 @@ export function createSpellwaveAudio({
   let musicTimer = null;
   let musicStep = 0;
   let nextMusicTime = 0;
+  let activeMusicProfile = null;
+  let previousMusicProfile = null;
+  let musicTransitionStart = 0;
 
   function updateAudioButton() {
     audioButton.classList.toggle('is-muted', !audioEnabled);
@@ -230,6 +259,10 @@ export function createSpellwaveAudio({
     if (reset || nextMusicTime < context.currentTime) {
       musicStep = 0;
       nextMusicTime = context.currentTime + 0.08;
+      if (reset) {
+        activeMusicProfile = null;
+        previousMusicProfile = null;
+      }
     }
 
     musicGain.gain.cancelScheduledValues(context.currentTime);
@@ -259,56 +292,91 @@ export function createSpellwaveAudio({
     }
 
     const wave = getWaveSet();
-    const season = getMusicSeason(wave);
-    const intensity = getMusicIntensity(wave);
-    const stepDuration = Math.max(0.112, season.baseStep - intensity * 0.0065);
+    const profile = getMusicProfile(wave);
+    updateMusicProfile(profile);
+
     while (nextMusicTime < audioContext.currentTime + MUSIC_SCHEDULE_AHEAD) {
-      scheduleMusicStep(musicStep, nextMusicTime, stepDuration, season, intensity);
+      const transitionProgress = getMusicTransitionProgress(nextMusicTime);
+      const baseStep = previousMusicProfile
+        ? lerp(previousMusicProfile.baseStep, activeMusicProfile.baseStep, transitionProgress)
+        : activeMusicProfile.baseStep;
+      const intensity = getMusicIntensity(wave, activeMusicProfile);
+      const stepDuration = Math.max(activeMusicProfile.minStep || 0.112, baseStep - intensity * 0.0065);
+      if (previousMusicProfile && transitionProgress < 1) {
+        scheduleMusicStep(musicStep, nextMusicTime, stepDuration, previousMusicProfile, intensity, 1 - transitionProgress);
+      }
+      scheduleMusicStep(musicStep, nextMusicTime, stepDuration, activeMusicProfile, intensity, previousMusicProfile ? transitionProgress : 1);
       nextMusicTime += stepDuration;
-      musicStep = (musicStep + 1) % season.melody.length;
+      musicStep = (musicStep + 1) % activeMusicProfile.melody.length;
     }
+  }
+
+  function getMusicProfile(wave) {
+    return getWavePhase() === 'boss' ? BOSS_MUSIC : getMusicSeason(wave);
+  }
+
+  function updateMusicProfile(profile) {
+    if (!activeMusicProfile) {
+      activeMusicProfile = profile;
+      previousMusicProfile = null;
+      return;
+    }
+    if (activeMusicProfile.name === profile.name) return;
+    previousMusicProfile = activeMusicProfile;
+    activeMusicProfile = profile;
+    musicTransitionStart = audioContext.currentTime;
+  }
+
+  function getMusicTransitionProgress(start) {
+    if (!previousMusicProfile) return 1;
+    const progress = Math.min(Math.max((start - musicTransitionStart) / MUSIC_TRANSITION_DURATION, 0), 1);
+    if (progress >= 1 && audioContext && start >= audioContext.currentTime) previousMusicProfile = null;
+    return progress;
   }
 
   function getMusicSeason(wave) {
     return MUSIC_SEASONS[Math.max(0, wave - 1) % MUSIC_SEASONS.length];
   }
 
-  function getMusicIntensity(wave) {
-    return Math.min(Math.max(0, wave - 1), 12);
+  function getMusicIntensity(wave, profile) {
+    return Math.min(Math.max(0, wave - 1) + (profile.intensityBoost || 0), 14);
   }
 
-  function scheduleMusicStep(step, start, stepDuration, season, intensity) {
-    const melody = season.melody[step % season.melody.length];
-    const bass = season.bass[step % season.bass.length];
+  function scheduleMusicStep(step, start, stepDuration, profile, intensity, profileGain = 1) {
+    if (profileGain <= 0.02) return;
+
+    const melody = profile.melody[step % profile.melody.length];
+    const bass = profile.bass[step % profile.bass.length];
     const accent = step % 8 === 0;
-    const densePulse = intensity >= 4 && step % 4 === 0;
-    const latePulse = intensity >= 8 && step % 2 === 1;
+    const isBoss = profile.name === 'boss';
+    const densePulse = (intensity >= 4 || isBoss) && step % 4 === 0;
+    const latePulse = (intensity >= 8 || isBoss) && step % 2 === 1;
 
     if (bass) {
       scheduleTone(bass, stepDuration * 1.6, start, {
-        gain: (accent ? season.bassGain * 1.25 : season.bassGain) + intensity * 0.0011,
-        type: season.bassType,
+        gain: ((accent ? profile.bassGain * 1.25 : profile.bassGain) + intensity * 0.0011) * profileGain,
+        type: profile.bassType,
         attack: 0.004,
       }, musicGain);
       if (densePulse) {
         scheduleTone(bass * 2, stepDuration * 0.52, start + stepDuration * 0.5, {
-          gain: 0.009 + intensity * 0.0007,
-          type: season.accentType,
+          gain: (0.009 + intensity * 0.0007) * profileGain,
+          type: profile.accentType,
           attack: 0.004,
         }, musicGain);
       }
     }
 
-    if (melody && (step % 2 === 0 || intensity >= 2 || season.name === 'summer')) {
+    if (melody && (step % 2 === 0 || intensity >= 2 || profile.name === 'summer' || isBoss)) {
       scheduleTone(melody, stepDuration * 0.82, start + stepDuration * 0.08, {
-        gain: season.melodyGain + intensity * 0.0008,
-        type: season.melodyType,
+        gain: (profile.melodyGain + intensity * 0.0008) * profileGain,
+        type: profile.melodyType,
         attack: 0.003,
       }, musicGain);
       if (step % 8 === 6 || latePulse) {
-        scheduleTone(melody * (season.name === 'winter' ? 2 : 1.5), stepDuration * 0.5, start + stepDuration * 0.18, {
-          gain: 0.009 + intensity * 0.0005,
-          type: season.accentType,
+        scheduleTone(melody * (profile.name === 'winter' ? 2 : isBoss ? 1.414 : 1.5), stepDuration * 0.5, start + stepDuration * 0.18, {
+          gain: (0.009 + intensity * 0.0005) * profileGain,
+          type: profile.accentType,
           attack: 0.003,
         }, musicGain);
       }
@@ -316,21 +384,33 @@ export function createSpellwaveAudio({
 
     if (step % 4 === 2 || latePulse) {
       scheduleNoise(stepDuration * 0.35, start + stepDuration * 0.16, {
-        gain: season.hatGain + intensity * 0.00065,
+        gain: (profile.hatGain + intensity * 0.00065) * profileGain,
         filterType: 'highpass',
-        filterFrequency: season.name === 'winter' ? 3200 : 2400,
+        filterFrequency: profile.name === 'winter' ? 3200 : isBoss ? 1800 : 2400,
         q: 0.6,
       }, musicGain);
     }
 
-    if (step % 16 === 8 || (intensity >= 6 && step % 16 === 0)) {
+    if (step % 16 === 8 || (intensity >= 6 && step % 16 === 0) || (isBoss && step % 8 === 4)) {
       scheduleNoise(stepDuration * 0.55, start, {
-        gain: season.drumGain + intensity * 0.0009,
+        gain: (profile.drumGain + intensity * 0.0009) * profileGain,
         filterType: 'bandpass',
-        filterFrequency: season.drumFilter,
+        filterFrequency: profile.drumFilter,
         q: 0.9,
       }, musicGain);
     }
+
+    if (isBoss && step % 16 === 0) {
+      scheduleTone(41.2, stepDuration * 3, start, {
+        gain: (0.02 + intensity * 0.0007) * profileGain,
+        type: 'sawtooth',
+        attack: 0.02,
+      }, musicGain);
+    }
+  }
+
+  function lerp(start, end, t) {
+    return start + (end - start) * t;
   }
 
   function playToggleSound() {
@@ -408,8 +488,10 @@ export function createSpellwaveAudio({
   }
 
   function playBossWarningSound() {
-    playTone(110, 0.38, { gain: 0.055, type: 'sawtooth', endFrequency: 82 });
-    playTone(55, 0.42, { gain: 0.035, delay: 0.08, type: 'sine' });
+    playTone(146.83, 0.18, { gain: 0.072, type: 'sawtooth', endFrequency: 110 });
+    playTone(73.42, 0.48, { gain: 0.052, delay: 0.06, type: 'sawtooth', endFrequency: 55 });
+    playTone(220, 0.12, { gain: 0.04, delay: 0.2, type: 'square', endFrequency: 155.56 });
+    playNoise(0.42, { gain: 0.038, delay: 0.04, filterFrequency: 340, filterType: 'bandpass', q: 1.4 });
   }
 
   function playWaveClearSound() {
