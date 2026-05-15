@@ -388,29 +388,9 @@ export function createSeasonalEffects({
     return mesh;
   }
 
-  function forceSummerStorm() {
-    currentSeasonName = 'summer';
-    summerStorm.lightningTime = 0;
-    if (rainField) rainField.visible = true;
-  }
-
-  function debugState() {
-    const visibleAutumnLeaves = autumnFallenLeaves.filter((item) => item.mesh.visible);
-    return {
-      springFlowers: springFlowers.filter((item) => item.group.visible).length,
-      autumnLeaves: visibleAutumnLeaves.length,
-      autumnLeafXs: visibleAutumnLeaves.slice(0, 12).map((item) => item.mesh.position.x),
-      snowVisible: !!snowField?.visible,
-      rainVisible: !!rainField?.visible,
-      bolts: lightningBolts.length,
-    };
-  }
-
   return {
     create,
     update,
     setSeason,
-    forceSummerStorm,
-    debugState,
   };
 }

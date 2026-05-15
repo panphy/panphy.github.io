@@ -187,7 +187,6 @@ export function createSpellwaveAudio({
 
   function updateAudioButton() {
     audioButton.classList.toggle('is-muted', !audioEnabled);
-    audioButton.classList.toggle('is-audio-on', audioEnabled);
     audioButton.setAttribute('aria-label', audioEnabled ? 'Mute sound' : 'Unmute sound');
     audioButton.title = audioEnabled ? 'Mute sound' : 'Unmute sound';
     if (masterGain && audioContext) {

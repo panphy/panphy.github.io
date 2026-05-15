@@ -39,7 +39,6 @@ const MAX_DELTA = 0.06;
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
 const FIRST_WAVE_SPAWN_Z = -34;
-const REVEAL_Z = -30;
 const SPAWN_SPREAD = 10;
 const FIRST_WAVE_SPAWN_SPREAD = 4;
 const HEART_COUNT = 5;
@@ -207,8 +206,6 @@ const SEASON_PALETTES = [
     hemiSky: 0xb0d8f0, hemiGround: 0x508050, hemiIntensity: 1.2,
     sunColor: 0xffe0b0, sunIntensity: 1.8,
     emberColor: 0xff90b0, emberIntensity: 2.0,
-    crystalColor: 0xf09ab8, crystalEmissive: 0xe06890,
-    staffLightColor: 0xf090b0,
     pathMarkerColor: 0xf098b8, pathMarkerEmissive: 0xd06080,
     leafColors: [0xeaa8bc, 0xf5c8d8, 0xd890a8], trunkColor: 0x6b4226,
     moonColor: 0xfff1b8, starOpacity: 0.4,
@@ -222,8 +219,6 @@ const SEASON_PALETTES = [
     hemiSky: 0x4878d0, hemiGround: 0x265028, hemiIntensity: 1.5,
     sunColor: 0xfffac8, sunIntensity: 3.0,
     emberColor: 0xffcc30, emberIntensity: 2.8,
-    crystalColor: 0x58dfcf, crystalEmissive: 0x2dd4bf,
-    staffLightColor: 0x2dd4bf,
     pathMarkerColor: 0x58dfcf, pathMarkerEmissive: 0x0e6861,
     leafColors: [0x2a7840, 0x3d9050, 0x1a5530], trunkColor: 0x3d2010,
     moonColor: 0xfff1b8, starOpacity: 0.15,
@@ -237,8 +232,6 @@ const SEASON_PALETTES = [
     hemiSky: 0xe0b878, hemiGround: 0x703820, hemiIntensity: 1.4,
     sunColor: 0xff9840, sunIntensity: 2.4,
     emberColor: 0xff4818, emberIntensity: 2.8,
-    crystalColor: 0xd86828, crystalEmissive: 0xc04010,
-    staffLightColor: 0xe06028,
     pathMarkerColor: 0xe87830, pathMarkerEmissive: 0xa83808,
     leafColors: [0xc04000, 0xd86810, 0xc89010], trunkColor: 0x3d2010,
     moonColor: 0xfff1b8, starOpacity: 0.2,
@@ -252,8 +245,6 @@ const SEASON_PALETTES = [
     hemiSky: 0x5070b0, hemiGround: 0x182840, hemiIntensity: 1.2,
     sunColor: 0xb8d4ff, sunIntensity: 2.0,
     emberColor: 0x6888ff, emberIntensity: 2.0,
-    crystalColor: 0x88ccff, crystalEmissive: 0x4888e8,
-    staffLightColor: 0x78aeff,
     pathMarkerColor: 0x88ccff, pathMarkerEmissive: 0x3870d0,
     leafColors: [0xc8dff0, 0xd8ecff, 0xbbd4f0], trunkColor: 0x708090,
     moonColor: 0xfff1b8, starOpacity: 0.65,
@@ -1567,9 +1558,7 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
   for (const part of enemy.limitedParts) {
     if (part.isWhitespace) {
       html += wrapSups(escapeHtml(part.text));
-    } else if (!part.isGiven && !part.isHidden) {
-      html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
-    } else if (part.isGiven) {
+    } else if (!part.isHidden) {
       html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
     } else {
       const promptOptions = { multiplicationAlias: enemy.isEquation };
@@ -1781,13 +1770,6 @@ function spawnEnemy(options = {}) {
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
 
-  const typedNode = document.createElement('span');
-  typedNode.className = 'typed';
-
-  const remainingNode = document.createElement('span');
-  remainingNode.className = 'remaining';
-
-  promptNode.append(typedNode, remainingNode);
   label.append(kindNode);
 
   if (showDefinition) {
@@ -1819,8 +1801,6 @@ function spawnEnemy(options = {}) {
     group,
     label,
     promptNode,
-    typedNode,
-    remainingNode,
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
@@ -3078,9 +3058,6 @@ function buildSeasonFromScene() {
     sunIntensity: moonLightBaseIntensity,
     emberColor: emberLight.color.clone(),
     emberIntensity: seasonEmberIntensityBase,
-    crystalColor: sceneCrystalMat ? sceneCrystalMat.color.clone() : new THREE.Color(0x58dfcf),
-    crystalEmissive: sceneCrystalMat ? sceneCrystalMat.emissive.clone() : new THREE.Color(0x2dd4bf),
-    staffLightColor: torchLights.length > 0 ? torchLights[0].color.clone() : new THREE.Color(0x2dd4bf),
     pathMarkerColor: pathMarkerMaterial ? pathMarkerMaterial.color.clone() : new THREE.Color(0x58dfcf),
     pathMarkerEmissive: pathMarkerMaterial ? pathMarkerMaterial.emissive.clone() : new THREE.Color(0x0e6861),
     leafColors: sceneLeafMaterials.map(m => m.color.clone()),
@@ -3103,9 +3080,6 @@ function buildSeasonTarget(palette) {
     sunIntensity: palette.sunIntensity,
     emberColor: new THREE.Color(palette.emberColor),
     emberIntensity: palette.emberIntensity,
-    crystalColor: new THREE.Color(palette.crystalColor),
-    crystalEmissive: new THREE.Color(palette.crystalEmissive),
-    staffLightColor: new THREE.Color(palette.staffLightColor),
     pathMarkerColor: new THREE.Color(palette.pathMarkerColor),
     pathMarkerEmissive: new THREE.Color(palette.pathMarkerEmissive),
     leafColors: palette.leafColors.map(c => new THREE.Color(c)),

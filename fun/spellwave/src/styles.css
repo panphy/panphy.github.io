@@ -677,14 +677,6 @@ body.is-running:not(.is-paused) .hud-grid {
   transition: border-color 100ms ease, background 100ms ease, box-shadow 100ms ease, filter 100ms ease, opacity 100ms ease;
 }
 
-.word-tag .name {
-  color: var(--gold);
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
 .word-tag .prompt-kind {
   justify-self: center;
   padding: 2px 6px;
