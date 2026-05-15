@@ -53,6 +53,7 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
 const MEDIC_HEAL_AMOUNT = 2;
+const INPUT_TRACE_CODES = [0x69, 0x64, 0x64, 0x71, 0x64];
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
@@ -292,7 +293,7 @@ let medicsSpawnedThisSet = 0;
 let medicSpawnSlots = [];
 let godMode = false;
 let godModeUsedThisRun = false;
-let cheatBuffer = '';
+let inputTrace = '';
 let streak = 0;
 let typedBuffer = '';
 let activeTarget = null;
@@ -535,7 +536,7 @@ function startGame() {
   clearEffects();
   godMode = false;
   godModeUsedThisRun = false;
-  cheatBuffer = '';
+  inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
   score = 0;
@@ -709,8 +710,7 @@ function handleBeforeInput(event) {
 }
 
 function enterCharacter(character) {
-  cheatBuffer = (cheatBuffer + character.toLowerCase()).slice(-5);
-  if (cheatBuffer === 'iddqd') toggleGodMode();
+  if (updateInputTrace(character)) toggleGodMode();
 
   const inputOptions = getInputCharacters(character);
   if (inputOptions.length === 0) return;
@@ -753,6 +753,12 @@ function enterCharacter(character) {
   activeTarget = null;
   registerMistake();
   updateTypedDisplay();
+}
+
+function updateInputTrace(character) {
+  inputTrace = (inputTrace + character.toLowerCase()).slice(-INPUT_TRACE_CODES.length);
+  if (inputTrace.length !== INPUT_TRACE_CODES.length) return false;
+  return INPUT_TRACE_CODES.every((code, index) => inputTrace.charCodeAt(index) === code);
 }
 
 function registerMistake() {
