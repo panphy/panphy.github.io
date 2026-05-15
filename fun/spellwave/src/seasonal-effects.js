@@ -224,6 +224,14 @@ export function createSeasonalEffects({
     }
   }
 
+  function getWeatherState() {
+    return {
+      seasonName: currentSeasonName,
+      raining: Boolean(rainField && rainField.visible),
+      snowing: Boolean(snowField && snowField.visible),
+    };
+  }
+
   function createSpringFlowers() {
     const stemMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d48, roughness: 0.82 });
     const centerMaterial = new THREE.MeshStandardMaterial({ color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
@@ -392,5 +400,6 @@ export function createSeasonalEffects({
     create,
     update,
     setSeason,
+    getWeatherState,
   };
 }

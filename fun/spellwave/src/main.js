@@ -198,6 +198,8 @@ const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10
 const FLYING_SHADOW_OPACITY = 0.22;
 const MOON_SHADOW_FADE_IN_RATE = 1.45;
 const MOON_SHADOW_FADE_OUT_RATE = 4.8;
+const CLOUD_WRAP_X = 46;
+const CLOUD_RESET_X = -46;
 
 const SEASON_PALETTES = [
   { // Spring (wave 1): soft twilight blue, cherry blossoms
@@ -326,6 +328,9 @@ let currentSeasonIndex = 0;
 let seasonEmberIntensityBase = 2.1;
 let seasonFade = null;
 let seasonalEffects = null;
+let baseCloudMaterial = null;
+let weatherCloudMaterial = null;
+let cloudWeatherBlend = 0;
 
 const {
   toggleEnabled: toggleAudioEnabled,
@@ -1132,12 +1137,7 @@ function updateEnvironment(seconds, delta) {
 
   seasonalEffects.update(seconds, delta, scrollDelta);
 
-  for (const cloud of clouds) {
-    cloud.group.position.x += cloud.speed * delta;
-    if (cloud.group.position.x > 46) {
-      cloud.group.position.x = -46;
-    }
-  }
+  updateClouds(delta);
 }
 
 function updateMoonHaze() {
@@ -2578,10 +2578,15 @@ function buildCloudGroup(material, template) {
 }
 
 function createClouds() {
-  const cloudMaterial = new THREE.MeshBasicMaterial({
+  baseCloudMaterial = new THREE.MeshBasicMaterial({
     color: 0xf0f2f8,
     transparent: true,
     opacity: 0.82,
+  });
+  weatherCloudMaterial = new THREE.MeshBasicMaterial({
+    color: 0xd8e4f2,
+    transparent: true,
+    opacity: 0,
   });
   const configs = [
     { x: -38, y: 17.5, z: -50, scale: 1.05, speed: 0.55, t: 0 },
@@ -2592,13 +2597,65 @@ function createClouds() {
     { x: -30, y: 20.0, z: -62, scale: 0.70, speed: 0.35, t: 2 },
     { x:   8, y: 21.0, z: -60, scale: 0.85, speed: 0.42, t: 0 },
     { x:  38, y: 17.0, z: -46, scale: 1.00, speed: 0.58, t: 1 },
+    { x: -44, y: 15.0, z: -38, scale: 1.30, speed: 0.50, t: 2, weatherOnly: true },
+    { x: -26, y: 16.2, z: -52, scale: 1.10, speed: 0.44, t: 0, weatherOnly: true },
+    { x: -10, y: 18.4, z: -63, scale: 0.95, speed: 0.37, t: 1, weatherOnly: true },
+    { x:   6, y: 14.6, z: -36, scale: 1.35, speed: 0.61, t: 2, weatherOnly: true },
+    { x:  21, y: 19.2, z: -59, scale: 1.05, speed: 0.43, t: 0, weatherOnly: true },
+    { x:  35, y: 15.8, z: -42, scale: 1.25, speed: 0.56, t: 1, weatherOnly: true },
+    { x:  47, y: 20.5, z: -66, scale: 0.92, speed: 0.34, t: 2, weatherOnly: true },
   ];
   for (const cfg of configs) {
-    const group = buildCloudGroup(cloudMaterial, cfg.t);
+    const material = cfg.weatherOnly ? weatherCloudMaterial : baseCloudMaterial;
+    const group = buildCloudGroup(material, cfg.t);
     group.position.set(cfg.x, cfg.y, cfg.z);
     group.scale.setScalar(cfg.scale);
+    group.visible = !cfg.weatherOnly;
     scene.add(group);
-    clouds.push({ group, speed: cfg.speed });
+    clouds.push({
+      group,
+      speed: cfg.speed,
+      baseScale: cfg.scale,
+      weatherOnly: Boolean(cfg.weatherOnly),
+    });
+  }
+}
+
+function updateClouds(delta) {
+  const weather = seasonalEffects.getWeatherState();
+  const isRainySummer = weather.seasonName === 'summer' && weather.raining;
+  const isSnowyWinter = weather.seasonName === 'winter' && weather.snowing;
+  const weatherTarget = isRainySummer || isSnowyWinter ? 1 : 0;
+  cloudWeatherBlend += (weatherTarget - cloudWeatherBlend) * Math.min(1, delta * 2.4);
+
+  if (baseCloudMaterial) {
+    baseCloudMaterial.color.setHex(isRainySummer ? 0xc9d1df : isSnowyWinter ? 0xf4fbff : 0xf0f2f8);
+    baseCloudMaterial.opacity = 0.82 + cloudWeatherBlend * 0.08;
+  }
+  if (weatherCloudMaterial) {
+    weatherCloudMaterial.color.setHex(isRainySummer ? 0xb7c2d4 : 0xeaf6ff);
+    weatherCloudMaterial.opacity = cloudWeatherBlend * (isSnowyWinter ? 0.92 : 0.86);
+  }
+
+  for (const cloud of clouds) {
+    cloud.group.position.x += cloud.speed * delta;
+    if (cloud.group.position.x > CLOUD_WRAP_X) {
+      cloud.group.position.x = CLOUD_RESET_X;
+    }
+
+    if (cloud.weatherOnly) {
+      cloud.group.visible = cloudWeatherBlend > 0.02;
+    }
+
+    const densityBoost = cloud.weatherOnly ? 1.2 : 1;
+    const widthScale = 1 + cloudWeatherBlend * 0.14 * densityBoost;
+    const heightScale = 1 + cloudWeatherBlend * 0.55 * densityBoost;
+    const depthScale = 1 + cloudWeatherBlend * 0.18 * densityBoost;
+    cloud.group.scale.set(
+      cloud.baseScale * widthScale,
+      cloud.baseScale * heightScale,
+      cloud.baseScale * depthScale
+    );
   }
 }
 
