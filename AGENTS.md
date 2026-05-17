@@ -46,7 +46,6 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 
 - Use stable, unhashed module filenames such as `copy.js`; cache busting is only via `BUILD_ID`.
 - Load external libraries from CDNs; do not bundle them.
-- PanPhyPlot fitting uses `tools/panphyplot/js/fit-core.js`, shared by `curve-fitting.js` and `fit-worker.js`.
 
 ## Published vs Unlisted Pages
 
