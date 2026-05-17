@@ -360,9 +360,15 @@
       box-shadow: 0 0 18px rgba(87, 199, 255, 0.65);
     }
 
-    .pip.is-miss {
+    .pip.is-false {
       background: var(--danger);
       box-shadow: 0 0 18px rgba(255, 77, 93, 0.68);
+    }
+
+    .pip.is-miss {
+      background: transparent;
+      border-color: var(--danger);
+      box-shadow: 0 0 12px rgba(255, 77, 93, 0.45);
     }
 
     @media (max-width: 780px) {
@@ -546,11 +552,11 @@
 
     const STORAGE_KEY = 'panphyBetaReflexCoreBestMsV1';
     const TOTAL_ROUNDS = 10;
-    const CATCH_PROBABILITY = 0.22;
+    const CATCH_ROUNDS_PER_SESSION = 2;
     const MIN_DELAY = 1200;
     const MAX_DELAY = 6400;
     const SIGNAL_WINDOW = 1500;
-    const MIN_VALID_REACTION = 120;
+    const MIN_VALID_REACTION = 100;
     const RESULT_PAUSE = 900;
     const CATCH_RESULT_PAUSE = 650;
     const COLORS = {
@@ -579,6 +585,7 @@
       lastOutcome: '',
       currentTrialCatch: false,
       nextTrialAt: 0,
+      catchRounds: new Set(),
     };
 
     const visual = {
@@ -707,9 +714,26 @@
     briefingButton.addEventListener('click', startSession);
 
     resetButton.addEventListener('click', () => {
+      clearTimers();
+      state.mode = 'idle';
+      state.targetActive = false;
+      state.currentSignalAt = 0;
+      state.round = 0;
+      state.hits = 0;
+      state.falseStarts = 0;
+      state.catches = 0;
+      state.misses = 0;
+      state.totalReaction = 0;
+      state.pips = Array(TOTAL_ROUNDS).fill('empty');
+      state.lastOutcome = '';
       state.bestMs = null;
+      state.catchRounds = new Set();
       safeRemove(STORAGE_KEY);
+      startButton.textContent = 'Start';
+      buildPips();
       updateHud();
+      resetVisuals();
+      showBriefing('Reflex Core', 'Center green only', 'Tap only when the center core turns green. Ignore blue, amber, and red flashes around it.', 'Start Run');
       resetButton.blur();
     });
 
@@ -749,6 +773,7 @@
       state.targetActive = false;
       state.pips = Array(TOTAL_ROUNDS).fill('empty');
       state.lastOutcome = '';
+      state.catchRounds = generateCatchRounds(TOTAL_ROUNDS, CATCH_ROUNDS_PER_SESSION);
       startButton.textContent = 'Stop';
       briefingPanel.hidden = true;
       buildPips();
@@ -785,7 +810,7 @@
       state.mode = 'waiting';
       state.targetActive = false;
       state.currentSignalAt = 0;
-      state.currentTrialCatch = Math.random() < CATCH_PROBABILITY;
+      state.currentTrialCatch = state.catchRounds.has(state.round);
       resetVisuals();
       updateHud();
 
@@ -911,12 +936,14 @@
       state.lastOutcome = formatSeconds(reactionMs);
       visual.targetPulse = 1;
       visual.corePulse = 1;
-      statusKicker.textContent = 'Hit';
       statusTitle.textContent = formatSeconds(reactionMs);
 
       if (state.bestMs === null || reactionMs < state.bestMs) {
         state.bestMs = reactionMs;
         safeSet(STORAGE_KEY, String(Math.round(reactionMs)));
+        statusKicker.textContent = 'New Best!';
+      } else {
+        statusKicker.textContent = 'Hit';
       }
 
       updateHud();
@@ -929,7 +956,7 @@
       state.mode = 'result';
       state.targetActive = false;
       state.falseStarts += 1;
-      state.pips[state.round - 1] = 'miss';
+      state.pips[state.round - 1] = 'false';
       state.lastOutcome = label;
       visual.missPulse = 1;
       visual.shake = 1;
@@ -967,7 +994,7 @@
       const average = state.hits ? `${formatSeconds(state.totalReaction / state.hits)} average` : 'No clean hits';
       statusKicker.textContent = 'Session';
       statusTitle.textContent = `${accuracy}% clean`;
-      showBriefing('Session complete', state.hits ? formatSeconds(state.totalReaction / state.hits) : 'No hits', `${average}. ${state.falseStarts} false starts, ${state.catches} good holds.`, 'Run Again');
+      showBriefing('Session complete', state.hits ? formatSeconds(state.totalReaction / state.hits) : 'No hits', `${average}. ${state.falseStarts} false start${state.falseStarts !== 1 ? 's' : ''}, ${state.misses} missed, ${state.catches} good hold${state.catches !== 1 ? 's' : ''}.`, 'Run Again');
       updateHud();
     }
 
@@ -1036,6 +1063,7 @@
         pip.className = 'pip';
         if (pipState === 'hit') pip.classList.add('is-hit');
         if (pipState === 'catch') pip.classList.add('is-catch');
+        if (pipState === 'false') pip.classList.add('is-false');
         if (pipState === 'miss') pip.classList.add('is-miss');
         trialRail.appendChild(pip);
       });
@@ -1054,6 +1082,14 @@
     function clearTimers() {
       state.timers.forEach((timer) => window.clearTimeout(timer));
       state.timers = [];
+    }
+
+    function generateCatchRounds(total, count) {
+      const rounds = new Set();
+      while (rounds.size < count) {
+        rounds.add(Math.floor(Math.random() * total) + 1);
+      }
+      return rounds;
     }
 
     function randomHazardDelay() {
