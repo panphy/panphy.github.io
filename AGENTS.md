@@ -8,6 +8,15 @@
 - **Deployment**: GitHub Pages (direct file serving)
 - **External Services**: Supabase (leaderboards) - API calls are NOT cached
 
+## Assistant Instruction Files
+
+This repo intentionally keeps both `AGENTS.md` and `CLAUDE.md` tracked because Codex and Claude Code are both part of the development workflow.
+
+- Treat `AGENTS.md` and `CLAUDE.md` as equally important, repo-level instruction files.
+- When changing repository workflow, caching rules, design-system rules, directory guidance, testing instructions, or AI-assistant expectations in one file, update the other in the same change.
+- Keep the two files technically aligned, even if their wording and level of detail differ.
+- Do not add `AGENTS.md` or `CLAUDE.md` to `.gitignore`, and do not remove either file from Git tracking.
+- Local tool state directories such as `.agents/` and `.claude/` remain local-only and ignored.
 
 ## Critical Rules
 
@@ -33,6 +42,8 @@ Files under `/beta`, `/misc`, and `/fun` are intentionally excluded from service
 ### No Build System
 
 Edit files directly. There is no npm, webpack, or any compilation step. Do not introduce one.
+
+Do not add a build pipeline or make the site depend on `package.json`, `package-lock.json`, or other package-manager lockfiles. If local-only dev-server metadata exists, keep it ignored and out of the remote repository.
 
 ### Self-Contained Pages
 

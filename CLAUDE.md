@@ -9,6 +9,16 @@
 - **Tech Stack**: Vanilla JavaScript, HTML5, CSS3
 - **Deployment**: GitHub Pages (direct file serving)
 
+## Assistant Instruction Files
+
+This repo intentionally keeps both `AGENTS.md` and `CLAUDE.md` tracked because Codex and Claude Code are both part of the development workflow.
+
+- Treat `AGENTS.md` and `CLAUDE.md` as equally important, repo-level instruction files.
+- When changing repository workflow, caching rules, design-system rules, directory guidance, testing instructions, or AI-assistant expectations in one file, update the other in the same change.
+- Keep the two files technically aligned, even if their wording and level of detail differ.
+- Do not add `AGENTS.md` or `CLAUDE.md` to `.gitignore`, and do not remove either file from Git tracking.
+- Local tool state directories such as `.agents/` and `.claude/` remain local-only and ignored.
+
 ## Directory Structure
 
 ```
@@ -306,7 +316,7 @@ markdown_editor.html (imports scripts via ES modules)
 - **Install**: Pre-caches core assets listed in `ASSETS_TO_CACHE`
 - **Navigations**: Cache-first, then network/runtime cache fallback
 - **Assets**: Cache-first, then fetch and update
-- **Exclusions**: `/beta/*`, `/misc/*`, Dodge game routes, and Supabase API calls (always fetch fresh)
+- **Exclusions**: `/beta/*`, `/misc/*`, `/fun/*`, and Supabase API calls (always fetch fresh)
 
 ### When Modifying Any Cached Asset
 Any time you change a file listed in `ASSETS_TO_CACHE`, **bump the `BUILD_ID` timestamp** at the top of `sw.js`. Without this, returning users will keep getting the old cached version.
@@ -339,6 +349,8 @@ const ASSETS_TO_CACHE = [
 ### No Build System
 This is a pure static site. Changes are made directly to HTML/CSS/JS files with no compilation or bundling step.
 
+Do not add a build pipeline or make the site depend on `package.json`, `package-lock.json`, or other package-manager lockfiles. If local-only dev-server metadata exists, keep it ignored and out of the remote repository.
+
 ### Git Workflow
 - **Main branch**: Production (deployed to GitHub Pages)
 - **Feature branches**: Use `claude/` or `codex/` prefixes for AI-generated code
@@ -348,8 +360,6 @@ This is a pure static site. Changes are made directly to HTML/CSS/JS files with 
 Serve the files with any static server:
 ```bash
 python3 -m http.server 8000
-# or
-npx serve .
 ```
 
 Then open `http://localhost:8000` in a browser.
