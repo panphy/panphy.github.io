@@ -11,7 +11,6 @@ package.json
 package-lock.json
 
 # Local AI tool metadata
-CLAUDE.md
 skills-lock.json
 
 # Editor/IDE settings
