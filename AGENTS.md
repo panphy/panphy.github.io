@@ -2,214 +2,149 @@
 
 ## Project Overview
 
-**PanPhy Labs** is a Progressive Web App (PWA) providing interactive physics tools, simulations, and educational games. The site is a static site with no build system, deployed via GitHub Pages.
+PanPhy Labs is a static GitHub Pages PWA for interactive physics tools, simulations, and educational games.
 
-- **Tech Stack**: Vanilla JavaScript, HTML5, CSS3 (no frameworks, no bundler)
-- **Deployment**: GitHub Pages (direct file serving)
-- **External Services**: Supabase (leaderboards) - API calls are NOT cached
+- Stack: vanilla JavaScript, HTML5, CSS3; no framework, bundler, or build step
+- Deployment: direct file serving from GitHub Pages
+- Offline: service-worker based; Supabase leaderboard/API calls are never cached
 
 ## Assistant Instruction Files
 
-This repo intentionally keeps both `AGENTS.md` and `CLAUDE.md` tracked because Codex and Claude Code are both part of the development workflow.
+`AGENTS.md` and `CLAUDE.md` are both tracked because Codex and Claude Code are both used.
 
-- Treat `AGENTS.md` and `CLAUDE.md` as equally important, repo-level instruction files.
-- When changing repository workflow, caching rules, design-system rules, directory guidance, testing instructions, or AI-assistant expectations in one file, update the other in the same change.
-- Keep the two files technically aligned, even if their wording and level of detail differ.
-- Do not add `AGENTS.md` or `CLAUDE.md` to `.gitignore`, and do not remove either file from Git tracking.
-- Local tool state directories such as `.agents/` and `.claude/` remain local-only and ignored.
+- Treat both files as repo-level instructions.
+- When changing workflow, caching, design-system, directory, testing, or AI-assistant rules, update both files in the same change.
+- Keep the files technically aligned, even if wording differs.
+- Do not remove either file from git or add either to `.gitignore`.
+- Keep local tool state directories such as `.agents/` and `.claude/` ignored/local-only.
 
 ## Critical Rules
 
-### Service Worker Cache (`sw.js`)
+### Service Worker Cache
 
-The site uses a service worker for offline support. Assets are served **cache-first**, so users won't see updates unless the cache is invalidated.
+Assets in `sw.js` `ASSETS_TO_CACHE` are cache-first. Returning users will not receive changes until the service-worker cache version changes.
 
-**Every time you modify a file listed in `ASSETS_TO_CACHE` in `sw.js`, you MUST bump the `BUILD_ID` timestamp at the top of `sw.js` as your final step before finishing. This is easy to forget — do not skip it.** Without this, returning users will continue to be served the old cached version.
+- After modifying any file listed in `ASSETS_TO_CACHE`, bump `BUILD_ID` at the top of `sw.js` as the final step.
+- When adding a published cached page, add its path and required core local media assets to `ASSETS_TO_CACHE`.
+- Cache keys are exact URL matches. If an HTML file changes a CDN script/style URL, update the exact URL in `ASSETS_TO_CACHE`, including version/path/query string.
+- Never add `/beta/*`, `/misc/*`, or `/fun/*` paths to `ASSETS_TO_CACHE`.
+- Published features should work offline unless explicitly network-only.
+- Non-precached same-origin GET resources may work offline after runtime caching, except excluded paths.
+- Supabase API calls stay network-only.
 
 ```javascript
-// sw.js - update this timestamp whenever any cached asset changes
 const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';
 ```
 
-When adding a new published page, also add its path to the `ASSETS_TO_CACHE` array.
-
-**Cache URLs are exact-match keys.** If an HTML file changes any CDN script/style URL, update the exact same URL in `ASSETS_TO_CACHE` (including version/path/query string), then bump `BUILD_ID`.
-
-If a cached page depends on local media assets (audio/video/images/fonts) for core UX, add those file paths to `ASSETS_TO_CACHE` as well.
-
-Files under `/beta`, `/misc`, and `/fun` are intentionally excluded from service-worker caching. Do not add `/beta/*`, `/misc/*`, or `/fun/*` paths to `ASSETS_TO_CACHE`.
-
 ### No Build System
 
-Edit files directly. There is no npm, webpack, or any compilation step. Do not introduce one.
+Edit files directly. Do not add npm, webpack, bundlers, build pipelines, `package.json`, lockfiles, or remote-required dev-server metadata.
 
-Do not add a build pipeline or make the site depend on `package.json`, `package-lock.json`, or other package-manager lockfiles. If local-only dev-server metadata exists, keep it ignored and out of the remote repository.
+### Page Structure
 
-### Self-Contained Pages
+Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolders, but the entry point remains a single HTML file.
 
-Each HTML file in the repo is a complete, standalone application. Complex tools (PanPhyPlot, Markdown Editor) split their JS/CSS into modules under a subfolder, but the entry point is always a single HTML file.
+- Use stable, unhashed module filenames such as `copy.js`; cache busting is only via `BUILD_ID`.
+- Load external libraries from CDNs; do not bundle them.
+- PanPhyPlot fitting uses `tools/panphyplot/js/fit-core.js`, shared by `curve-fitting.js` and `fit-worker.js`.
 
-PanPhyPlot curve fitting now uses a shared numeric helper module at `tools/panphyplot/js/fit-core.js`, consumed by both `curve-fitting.js` (main-thread fallback) and `fit-worker.js` (worker path).
+## Published vs Unlisted Pages
 
-### Filename Hashes
+- Published landing-page apps are linked from `index.html` and usually listed in `sitemap.xml`.
+- Public support/reference pages may be service-worker registered and pre-cached without appearing on `index.html`.
+- Only public pages that should join the service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`.
+- New pages default to `/beta` unless explicitly requested for publication.
+- `/beta`, `/misc`, and `/fun` are excluded from pre-cache and runtime cache.
+- All `fun/` apps are network-only, now and in the future.
+- Unlisted/internal pages stay outside service-worker registration and pre-cache unless promoted.
 
-Module files must use **stable, unhashed filenames** (e.g. `copy.js`, not `copy.ab12.js`). Cache busting is handled exclusively via the `BUILD_ID` in `sw.js`. Do not rely on file hash changes for updates.
+Current unlisted/legacy pages:
 
-### Published vs Unlisted Pages
+- `misc/digitizer.html`
+- `misc/gcse_phy/phy_flashcard.html`
+- `misc/gcse_phy/phy_flashcard_cs.html`
+- `misc/gcse_phy/phy_flashcard_ss.html`
+- `misc/ising_model.html`
+- `misc/phyclub_showcase.html`
+- `misc/scoreboard.html`
 
-Not every HTML file in the repo is currently part of the published navigation.
+When promoting an unlisted page:
 
-- **Published landing-page apps** are linked from `index.html` and usually listed in `sitemap.xml`
-- **Public support/reference pages** may also be service-worker registered and pre-cached even if they are not linked from `index.html` (for example PanPhyPlot's manual/reference pages)
-- Only public pages that should participate in the site's service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`
-- New pages should be created in `/beta` by default unless explicitly requested to publish and list on `index.html`
-- `/beta/*`, `/misc/*`, and `/fun/*` are intentionally excluded from service-worker caching (pre-cache and runtime cache)
-- All `fun/` apps are network-only — this applies to every current and future page under `fun/`, regardless of whether they use live external data
-- **Current unlisted/legacy pages** include:
-  - `misc/digitizer.html`
-  - `misc/gcse_phy/phy_flashcard.html`
-  - `misc/gcse_phy/phy_flashcard_cs.html`
-  - `misc/gcse_phy/phy_flashcard_ss.html`
-  - `misc/ising_model.html`
-  - `misc/phyclub_showcase.html`
-  - `misc/scoreboard.html`
-- Unlisted/internal pages should stay outside service-worker registration and pre-cache lists unless explicitly promoted
-
-If you promote an unlisted page to production, treat it as a full launch task:
-1. If the page lives in `/beta` or `/misc`, move it to the correct public directory first
-2. Add `<script src="/assets/sw-register.js" defer></script>` if missing
-3. Add route + required assets to `ASSETS_TO_CACHE` unless the page is under `fun/` or must stay network-only for other reasons
-4. Bump `BUILD_ID` in `sw.js`
-5. Link it from `index.html`
-6. Add the page to `OFFLINE_CARD_REQUIREMENTS` in `index.html` to enable the "Offline Ready" pill unless the page is intentionally network-only
-7. Add it to `sitemap.xml`
+1. Move it out of `/beta` or `/misc` into the correct public directory.
+2. Add `/assets/sw-register.js` if it should participate in SW updates.
+3. Add its route and required assets to `ASSETS_TO_CACHE`, unless it is under `fun/` or intentionally network-only.
+4. Bump `BUILD_ID` in `sw.js`.
+5. Link it from `index.html`.
+6. Add it to `OFFLINE_CARD_REQUIREMENTS` unless intentionally network-only.
+7. Add it to `sitemap.xml`.
 
 ## Coding Conventions
 
-- **Variables/functions**: camelCase
-- **Constants**: UPPER_SNAKE_CASE
-- **CSS theming**: Use CSS custom properties; see **UI Design System** below for the full palette
-- **Theme toggle**: `data-theme` attribute on `<html>`, persisted to localStorage
-- **Mobile-first**: Touch targets 48px+, responsive design
+- Variables/functions: camelCase
+- Constants: UPPER_SNAKE_CASE
+- Theme: `data-theme` on `<html>`, persisted to localStorage
+- State: prefer a centralized state object for shared app state
+- CSS: use custom properties for published pages
+- Mobile: responsive layout, 48px+ touch targets, and `viewport-fit: cover` where edge-to-edge/notched layouts need it
+- Output: summarize files with repo-relative paths only, never full absolute paths
 
 ## UI Design System
 
-> **`/beta` pages are exempt.** Beta is a sandbox for trying new ideas — feel free to use any colors, fonts, layouts, or libraries without following this design system. These rules only apply when building or promoting pages to the published site.
+`/beta` pages are exempt. These rules apply to published pages only. The collision sim is a dark, camera-based Three.js exception.
 
-All new **published** pages should follow the design language established across the site. The collision sim is a special case (camera-based, dark-only Three.js) and does not follow this pattern.
-
-### Typography
-
-Three Google Fonts loaded via a single `@import`:
-- `--font-body`: **Manrope** — body text, labels, buttons
-- `--font-display`: **DM Serif Display** — page titles, section headings
-- `--font-mono`: **IBM Plex Mono** — data values, readouts, code
-
-### Color Palette
-
-| Variable | Light | Dark |
-|----------|-------|------|
-| `--bg-color` | `#F8F6F1` | `#111110` |
-| `--bg-pattern` | `#EDE9E0` | `#1A1A18` |
-| `--text-main` | `#1B1B1B` | `#EDEBE8` |
-| `--text-secondary` | `#6B6560` | `#9C9890` |
-| `--brand-primary` | `#C2410C` (burnt orange) | `#E8734A` |
-| `--brand-secondary` | `#EA580C` | `#F4845F` |
-| `--brand-accent` | `#0D9488` (teal) | `#2DD4BF` |
-| `--surface` / `--card-bg` | `#ffffff` | `#1E1E1C` |
-| `--border` / `--card-border` | `#E8E4DD` | `#2E2E2A` |
-| `--slider-track` | `#E8E4DD` | `#3A3A36` |
-| `--slider-thumb` | `#C2410C` | `#E8734A` |
-| `--nav-bg` | `rgba(248,246,241,0.92)` | `rgba(17,17,16,0.92)` |
-| `--nav-border` | `#E8E4DD` | `#2E2E2A` |
-
-### Background Pattern
-
-Dotted texture on `body`: `radial-gradient(var(--bg-pattern) 1px, transparent 1px)` at `30px 30px`.
-
-### Theme Flash Prevention
-
-An inline IIFE in `<head>` reads localStorage and sets `data-theme`, `<meta name="theme-color">`, and `apple-mobile-web-app-status-bar-style` before first paint.
-
-### Layout
-
-- **App shell**: `#app` — full-viewport flex column
-- **Content max-width**: `1360px` with `width: calc(100% - 40px)`
-- **Workspace**: CSS Grid (sim canvas + controls side panel), collapses to single column at ≤900px
-- **Panels**: 18px rounded cards with `1px solid var(--border)` and subtle shadow
-
-### Banner (Title Bar)
-
-Floating pill-shaped bar: 3-column grid (logo | gradient title | actions), `border-radius: 20px`, frosted glass (`backdrop-filter: blur(12px)`). Title uses `--font-display` with gradient text (`--brand-primary` to `--brand-accent`).
-
-### Controls & Inputs
-
-- **Range sliders**: 18px circular thumb, 6px track, `--slider-thumb`/`--slider-track` colors
-- **Slider labels**: Uppercase, 0.76rem, `--text-secondary`; value readouts in `--font-mono`
-- **Buttons**: 12px border-radius, 44px min-height. Hover: `translateY(-1px)` + `brightness(1.02)`
-- **Toggle switches**: 44×22px pill with sliding 18px circle
-
-### Responsive Breakpoints
-
-| Breakpoint | Behavior |
-|------------|----------|
-| `pointer: coarse` | Buttons/sliders enlarge to 48px min |
-| `max-width: 900px` | Workspace collapses to single column; body scrollable |
-| `max-width: 640px` | Banner narrows, logo shrinks to 28px, title to 1.2rem |
-
-### Three.js Canvas Resize Pattern
-
-Always use `renderer.setSize(w, h, false)` (prevents inline CSS causing resize loops on iPhone). Canvas CSS needs `height: 0; flex: 1; min-height: 0` so flexbox controls sizing.
-
-## General Notes
-
-- **Offline-first**: New features must work without network
-- **External libraries**: Loaded from CDNs (Plotly, MathJax, etc.), not bundled
-- **No absolute paths in output**: For security, never show the full absolute file path when summarizing code changes. Use repo-relative paths instead (e.g. `tools/markdown_editor/js/main.js`)
+- Fonts: `--font-body` Manrope, `--font-display` DM Serif Display, `--font-mono` IBM Plex Mono, loaded via one Google Fonts `@import`.
+- Palette: use the established variables `--bg-color`, `--bg-pattern`, `--text-main`, `--text-secondary`, `--brand-primary`, `--brand-secondary`, `--brand-accent`, `--surface`/`--card-bg`, `--border`/`--card-border`, `--slider-track`, `--slider-thumb`, `--nav-bg`, and `--nav-border`.
+- Background: dotted body texture with `radial-gradient(var(--bg-pattern) 1px, transparent 1px)` at `30px 30px`.
+- Theme flash prevention: inline head script sets `data-theme`, `theme-color`, and `apple-mobile-web-app-status-bar-style` before first paint.
+- Theme transitions: color/background/border changes may use the existing 0.3s global transition pattern.
+- Layout: `#app` full-viewport flex column; content max width `1360px` with `width: calc(100% - 40px)`.
+- Workspace: grid with canvas plus controls, collapsing to one column at `max-width: 900px`.
+- Panels: 18px rounded cards, `1px solid var(--border)`, subtle shadow.
+- Banner: floating 3-column pill (logo/title/actions), 20px radius, frosted `var(--nav-bg)`, gradient display title.
+- Controls: 18px slider thumbs/6px tracks, uppercase 0.76rem labels, mono readouts, 12px radius buttons with 44px min-height, 44x22px toggles.
+- Responsive: enlarge controls on coarse pointers; narrow banner and reduce title/logo sizes below 640px.
+- Three.js canvas sizing: use `renderer.setSize(w, h, false)` and CSS `height: 0; flex: 1; min-height: 0`.
 
 ## Directory Layout
 
-```
+```text
 /
 ├── index.html              # Landing page
-├── sw.js                   # Service Worker (update BUILD_ID on changes!)
+├── sw.js                   # Service worker; bump BUILD_ID for cached changes
 ├── manifest.json           # PWA config
 ├── assets/                 # Icons, logos, sw-register.js
-├── beta/                   # Unpublished WIP pages/assets (never SW-cached)
+├── beta/                   # Unpublished WIP, never SW-cached
 ├── tools/                  # Educational tools
-│   ├── panphyplot.html     # Entry point → panphyplot/ (modular JS/CSS)
-│   ├── markdown_editor.html # Entry point → markdown_editor/ (ES modules)
-│   └── *.html              # motion_tracker, sound_analyzer, tone_generator
 ├── simulations/            # Physics simulations
-│   ├── *.html              # superposition, standing_wave, ripple_tank, states, lorentz, lorentz_learn
-│   └── collision.html      # Entry point → collision/ (modular JS/CSS/assets)
-├── fun/                    # Games (all network-only, never SW-cached)
+├── fun/                    # Games, always network-only
 ├── for_teachers/           # Teacher utilities
-└── misc/                   # Unlisted/legacy (digitizer, gcse_phy flashcards, etc.)
+└── misc/                   # Unlisted/legacy pages
 ```
 
 ## Testing Locally
 
-Run a simple HTTP server to test service workers and absolute paths:
+Use a simple static server to test service workers and absolute paths:
 
 ```bash
 python3 -m http.server 8000
-# Open http://localhost:8000
 ```
+
+Then open `http://localhost:8000`.
 
 ## Adding a New Page
 
-1. Unless explicitly requested to publish and list on `index.html`, create the page in `/beta`
-2. For `/beta` pages, do not include service worker registration and do not add any `/beta/*` path to `ASSETS_TO_CACHE`
-3. If the page will be published, place it in the appropriate public directory and include service worker registration via shared loader: `<script src="/assets/sw-register.js" defer></script>`
-4. Use the standard CSS theme variables
-5. If published, add the path to `ASSETS_TO_CACHE` in `sw.js`
-6. Bump the `BUILD_ID` in `sw.js` after published/cached asset changes
-7. Add a link from `index.html`
-8. Add a `<loc>` entry to `sitemap.xml` if the page is public
+1. Create it in `/beta` unless explicitly asked to publish.
+2. For `/beta`, do not include service-worker registration or cache entries.
+3. For published pages, place it in the correct public directory and include `/assets/sw-register.js` if it should join SW updates.
+4. Follow the published-page design system.
+5. Add the path and required assets to `ASSETS_TO_CACHE`.
+6. Bump `BUILD_ID`.
+7. Link it from `index.html`.
+8. Add it to `OFFLINE_CARD_REQUIREMENTS` unless intentionally network-only.
+9. Add it to `sitemap.xml`.
 
 ## Git Workflow
 
-- **Main branch**: Production (auto-deployed to GitHub Pages)
-- **Feature branches**: Use `claude/` or `codex/` prefixes for AI-generated code
-- **Pull requests**: Required for merging to main
+- Main branch: production, auto-deployed to GitHub Pages
+- Feature branches: use `claude/` or `codex/` prefixes
+- Pull requests are required for merging to main
