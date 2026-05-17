@@ -136,10 +136,10 @@ Then open `http://localhost:8000`.
 2. For `/beta`, do not include service-worker registration or cache entries.
 3. For published pages, place it in the correct public directory and include `/assets/sw-register.js` if it should join SW updates.
 4. Follow the published-page design system.
-5. Add the path and required assets to `ASSETS_TO_CACHE`.
+5. Add the path and required assets to `ASSETS_TO_CACHE`, unless under `fun/` or intentionally network-only.
 6. Bump `BUILD_ID`.
 7. Link it from `index.html`.
-8. Add it to `OFFLINE_CARD_REQUIREMENTS` unless intentionally network-only.
+8. Add it to `OFFLINE_CARD_REQUIREMENTS` (in `index.html`; controls the "Offline Ready" pill) unless intentionally network-only.
 9. Add it to `sitemap.xml`.
 
 ## Git Workflow
