@@ -81,7 +81,11 @@ function formatRowInputValue(value) {
 	return String(value);
 }
 
-function getErrorColumnDisplay(axis) {
+function getErrorColumnDisplay(axis, index = activeSet) {
+	const toggles = datasetToggles && datasetToggles[index];
+	if (toggles && typeof toggles[axis] === 'boolean') {
+		return toggles[axis] ? 'table-cell' : 'none';
+	}
 	const toggle = document.getElementById(`toggle-${axis}-error`);
 	return toggle && toggle.checked ? 'table-cell' : 'none';
 }
@@ -942,17 +946,18 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 		titleWasAuto = true;
 		updateDatasetTabsBar();
 
-		// Repopulate the table UI with data from the active dataset.
-		populateTableFromActiveDataset();
-
 		// Load header values for this dataset.
 		loadHeaders();
 
-		// Restore uncertainty toggle state.
-		loadToggles();
-
 		// Restore error type settings.
 		loadErrorTypes();
+
+		// Restore uncertainty toggle state before rendering rows so chunked rows use the right visibility.
+		loadToggles();
+
+		// Repopulate the table UI with data from the active dataset.
+		populateTableFromActiveDataset();
+
 		loadCustomFitUiForActiveDataset();
 
 		// Update the graph and LaTeX-rendered labels.
@@ -1393,7 +1398,6 @@ function clearFittedCurve() {
 				const errorCell = input.parentElement;
 				if (errorCell) {
 					errorCell.style.display = 'none';
-					input.value = '';
 				}
 			});
 		}

@@ -114,10 +114,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	// Populate UI from saved state when available.
 	if (savedState) {
-		populateTableFromActiveDataset();
 		loadHeaders();
-		loadToggles();
 		loadErrorTypes();
+		loadToggles();
+		populateTableFromActiveDataset();
 	}
 	loadCustomFitUiForActiveDataset();
 
