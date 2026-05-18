@@ -10,6 +10,8 @@
   <title>Reflex Core | PanPhy Labs Beta</title>
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -38,7 +40,7 @@
       overflow: hidden;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -148,6 +150,7 @@
       padding: 12px 18px;
       border-radius: 20px;
       text-align: center;
+      transition: border-color 0.22s ease, box-shadow 0.22s ease;
     }
 
     .status-card p {
@@ -288,18 +291,27 @@
     }
 
     .briefing p {
+      display: inline-block;
       color: var(--muted);
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 800;
       letter-spacing: 0.14em;
       text-transform: uppercase;
+      background: rgba(255, 247, 238, 0.07);
+      border: 1px solid rgba(255, 247, 238, 0.12);
+      padding: 3px 12px;
+      border-radius: 999px;
     }
 
     .briefing h2 {
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: clamp(2rem, 9vw, 4rem);
       line-height: 0.92;
-      letter-spacing: 0;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--warm) 0%, var(--target) 50%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .briefing .summary {
@@ -461,6 +473,50 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    /* ── HUD state cues ── */
+    .status-card.is-signal {
+      border-color: rgba(69, 245, 157, 0.55);
+      box-shadow: 0 0 0 1px rgba(69, 245, 157, 0.18), 0 18px 42px var(--shadow);
+    }
+
+    .status-card.is-danger {
+      border-color: rgba(255, 77, 93, 0.55);
+      box-shadow: 0 0 0 1px rgba(255, 77, 93, 0.18), 0 18px 42px var(--shadow);
+    }
+
+    #statusKicker.is-signal { color: var(--target); }
+    #statusKicker.is-danger { color: var(--danger); }
+
+    /* ── Briefing accent bar ── */
+    .briefing-accent {
+      height: 3px;
+      background: linear-gradient(90deg, var(--target), var(--cyan), var(--violet));
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+
+    /* ── Metric values ── */
+    .metric strong {
+      font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    }
+
+    .metric.is-danger strong {
+      color: var(--danger);
+    }
+
+    /* ── Trial pip: active round ── */
+    .pip.is-current {
+      border-color: rgba(255, 180, 77, 0.72);
+      background: rgba(255, 180, 77, 0.14);
+      box-shadow: 0 0 10px rgba(255, 180, 77, 0.45);
+      animation: pip-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pip-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
   </style>
 </head>
 
@@ -521,6 +577,7 @@
     </section>
 
     <section class="briefing" id="briefingPanel" aria-live="polite">
+      <div class="briefing-accent" aria-hidden="true"></div>
       <p id="briefingKicker">Reflex Core</p>
       <h2 id="briefingTitle">Center green only</h2>
       <div class="summary" id="briefingCopy">Tap only when the center core turns green. Ignore blue, amber, and red flashes around it.</div>
@@ -549,6 +606,7 @@
     const hitsValue = document.getElementById('hitsValue');
     const falseValue = document.getElementById('falseValue');
     const trialRail = document.getElementById('trialRail');
+    const statusCard = document.querySelector('.status-card');
 
     const STORAGE_KEY = 'panphyBetaReflexCoreBestMsV1';
     const TOTAL_ROUNDS = 10;
@@ -868,7 +926,9 @@
       visual.targetPulse = 1;
       visual.corePulse = 1;
       visual.messageIntensity = 1;
+      statusCard.className = 'status-card is-signal';
       statusKicker.textContent = 'Now';
+      statusKicker.className = 'is-signal';
       statusTitle.textContent = 'Tap';
       flashScreen('target');
       pulseCore(COLORS.target);
@@ -888,6 +948,8 @@
       state.pips[state.round - 1] = 'catch';
       state.lastOutcome = 'Catch held';
       visual.catchPulse = 1;
+      statusCard.className = 'status-card';
+      statusKicker.className = '';
       statusKicker.textContent = 'Good hold';
       statusTitle.textContent = 'No green signal';
       updateHud();
@@ -936,6 +998,8 @@
       state.lastOutcome = formatSeconds(reactionMs);
       visual.targetPulse = 1;
       visual.corePulse = 1;
+      statusCard.className = 'status-card';
+      statusKicker.className = '';
       statusTitle.textContent = formatSeconds(reactionMs);
 
       if (state.bestMs === null || reactionMs < state.bestMs) {
@@ -960,7 +1024,9 @@
       state.lastOutcome = label;
       visual.missPulse = 1;
       visual.shake = 1;
+      statusCard.className = 'status-card is-danger';
       statusKicker.textContent = label;
+      statusKicker.className = 'is-danger';
       statusTitle.textContent = 'Only tap green';
       flashScreen('danger');
       pulseCore(COLORS.red);
@@ -977,7 +1043,9 @@
       state.pips[state.round - 1] = 'miss';
       state.lastOutcome = label;
       visual.missPulse = 1;
+      statusCard.className = 'status-card is-danger';
       statusKicker.textContent = 'Missed';
+      statusKicker.className = 'is-danger';
       statusTitle.textContent = 'Green passed';
       pulseCore(COLORS.red);
       updateHud();
@@ -990,6 +1058,8 @@
       state.mode = 'summary';
       state.targetActive = false;
       startButton.textContent = 'Start';
+      statusCard.className = 'status-card';
+      statusKicker.className = '';
       const accuracy = Math.round(((state.hits + state.catches) / TOTAL_ROUNDS) * 100);
       const average = state.hits ? `${formatSeconds(state.totalReaction / state.hits)} average` : 'No clean hits';
       statusKicker.textContent = 'Session';
@@ -1042,6 +1112,7 @@
       averageValue.textContent = state.hits ? formatSeconds(state.totalReaction / state.hits) : '--';
       hitsValue.textContent = String(state.hits);
       falseValue.textContent = String(state.falseStarts);
+      falseValue.closest('.metric').classList.toggle('is-danger', state.falseStarts > 0);
     }
 
     function formatSeconds(ms) {
@@ -1058,13 +1129,16 @@
 
     function buildPips() {
       trialRail.textContent = '';
-      state.pips.forEach((pipState) => {
+      state.pips.forEach((pipState, index) => {
         const pip = document.createElement('span');
         pip.className = 'pip';
         if (pipState === 'hit') pip.classList.add('is-hit');
-        if (pipState === 'catch') pip.classList.add('is-catch');
-        if (pipState === 'false') pip.classList.add('is-false');
-        if (pipState === 'miss') pip.classList.add('is-miss');
+        else if (pipState === 'catch') pip.classList.add('is-catch');
+        else if (pipState === 'false') pip.classList.add('is-false');
+        else if (pipState === 'miss') pip.classList.add('is-miss');
+        else if (index === state.round - 1 && (state.mode === 'waiting' || state.mode === 'signalPending' || state.mode === 'signal')) {
+          pip.classList.add('is-current');
+        }
         trialRail.appendChild(pip);
       });
     }
@@ -1077,6 +1151,8 @@
       visual.messageIntensity = 0;
       visual.coreColor.copy(COLORS.idle);
       visual.sideColor.copy(COLORS.idle);
+      statusCard.className = 'status-card';
+      statusKicker.className = '';
     }
 
     function clearTimers() {
