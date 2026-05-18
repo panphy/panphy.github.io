@@ -50,7 +50,7 @@ When contributing, try to preserve the project philosophy:
 
 - This is a static site. Edit files directly in-repo.
 - If you modify files that are pre-cached by the service worker, you must bump `BUILD_ID` in `sw.js` so users receive updates.
-- New work-in-progress pages should normally go under `/beta` unless they are explicitly being published. `beta/beta_index.html` lists all beta pages for testing convenience; keep it in sync when adding, renaming, or removing beta pages.
+- New work-in-progress pages should normally go under `/beta` unless they are explicitly being published. `beta/index.html` lists all beta pages for testing convenience; keep it in sync when adding, renaming, or removing beta pages.
 
 ---
 
