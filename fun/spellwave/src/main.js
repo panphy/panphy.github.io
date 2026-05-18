@@ -79,6 +79,7 @@ const PATH_MARKER_MIN_Z = -44;
 const PATH_MARKER_MAX_Z = 4;
 const PATH_MARKER_SPACING = 6;
 const PATH_MARKER_SPAN = PATH_MARKER_MAX_Z - PATH_MARKER_MIN_Z + PATH_MARKER_SPACING;
+const PATH_MARKER_BASE_Y = 0.08;
 const TREE_MIN_Z = -58;
 const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
@@ -2554,13 +2555,20 @@ function createPathMarkers() {
     roughness: 0.55,
   });
   for (let z = PATH_MARKER_MIN_Z; z <= PATH_MARKER_MAX_Z; z += PATH_MARKER_SPACING) {
-    const leftMarker = blockMesh(0.22, 0.1, 1.1, pathMarkerMaterial, -3.4, 0.02, z);
-    const rightMarker = blockMesh(0.22, 0.1, 1.1, pathMarkerMaterial, 3.4, 0.02, z);
+    const leftMarker = blockMesh(0.22, 0.1, 1.1, pathMarkerMaterial, -3.4, PATH_MARKER_BASE_Y, z);
+    const rightMarker = blockMesh(0.22, 0.1, 1.1, pathMarkerMaterial, 3.4, PATH_MARKER_BASE_Y, z);
+    configurePathMarker(leftMarker);
+    configurePathMarker(rightMarker);
     world.add(leftMarker);
     world.add(rightMarker);
     pathMarkerBlocks.push({ mesh: leftMarker, baseY: leftMarker.position.y, phase: z * 0.3 });
     pathMarkerBlocks.push({ mesh: rightMarker, baseY: rightMarker.position.y, phase: z * 0.3 + Math.PI });
   }
+}
+
+function configurePathMarker(marker) {
+  marker.castShadow = false;
+  marker.receiveShadow = false;
 }
 
 function createSky() {
