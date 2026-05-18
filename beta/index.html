@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beta — PanPhy Labs</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0f0f12;
+      color: #e8e4dc;
+      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+      padding: 48px 24px;
+      max-width: 720px;
+    }
+
+    a.back {
+      display: inline-block;
+      color: rgba(232, 228, 220, 0.42);
+      text-decoration: none;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 40px;
+    }
+
+    a.back:hover {
+      color: #e8e4dc;
+    }
+
+    h1 {
+      font-size: 1rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(232, 228, 220, 0.38);
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.76rem;
+      color: rgba(232, 228, 220, 0.28);
+      letter-spacing: 0.06em;
+      margin-bottom: 36px;
+    }
+
+    ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    a.entry {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      padding: 13px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    a.entry:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .entry-name {
+      font-size: 0.92rem;
+      color: #e8e4dc;
+      flex-shrink: 0;
+    }
+
+    .entry-desc {
+      font-size: 0.78rem;
+      color: rgba(232, 228, 220, 0.42);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+
+<body>
+  <a class="back" href="/">← PanPhy Labs</a>
+  <h1>Beta</h1>
+  <p class="subtitle">Internal testing index — not published</p>
+  <ul>
+    <!-- Add an entry here whenever a new beta page is created. -->
+    <!-- Remove or update the entry when a page is renamed or deleted. -->
+    <li>
+      <a class="entry" href="new_react.html">
+        <span class="entry-name">new_react</span>
+        <span class="entry-desc">Reflex Core — reaction time game prototype</span>
+      </a>
+    </li>
+  </ul>
+</body>
+
+</html>
