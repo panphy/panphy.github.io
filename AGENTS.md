@@ -53,7 +53,7 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 - Public support/reference pages may be service-worker registered and pre-cached without appearing on `index.html`.
 - Only public pages that should join the service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`.
 - New pages default to `/beta` unless explicitly requested for publication.
-- `beta/index.html` is the beta testing hub — a simple link index for internal use. Keep it in sync: add an entry when creating a beta page, update or remove the entry when renaming or deleting one.
+- `beta/beta_index.html` is the beta testing hub — a simple link index for internal use. Keep it in sync: add an entry when creating a beta page, update or remove the entry when renaming or deleting one.
 - `/beta`, `/misc`, and `/fun` are excluded from pre-cache and runtime cache.
 - All `fun/` apps are network-only, now and in the future.
 - Unlisted/internal pages stay outside service-worker registration and pre-cache unless promoted.
@@ -133,7 +133,7 @@ Then open `http://localhost:8000`.
 
 ## Adding a New Page
 
-1. Create it in `/beta` unless explicitly asked to publish. Add an entry to `beta/index.html`.
+1. Create it in `/beta` unless explicitly asked to publish. Add an entry to `beta/beta_index.html`.
 2. For `/beta`, do not include service-worker registration or cache entries.
 3. For published pages, place it in the correct public directory and include `/assets/sw-register.js` if it should join SW updates.
 4. Follow the published-page design system.
