@@ -84,10 +84,11 @@ const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
+const PATH_MARKER_SCROLL_MULTIPLIER = 2.4;
 const ROAD_MIN_Z = -58;
 const ROAD_MAX_Z = 16;
 const ROAD_SPAN = ROAD_MAX_Z - ROAD_MIN_Z;
-const ROAD_SCROLL_MULTIPLIER = 2.4;
+const ROAD_SCROLL_MULTIPLIER = 1.0;
 const ENEMY_TYPES = [
   {
     name: 'Mudlug',
@@ -1120,7 +1121,7 @@ function updateEnvironment(seconds, delta) {
   updateRoad(scrollDelta);
 
   for (const marker of pathMarkerBlocks) {
-    marker.mesh.position.z += scrollDelta * ROAD_SCROLL_MULTIPLIER;
+    marker.mesh.position.z += scrollDelta * PATH_MARKER_SCROLL_MULTIPLIER;
     if (marker.mesh.position.z > PATH_MARKER_WRAP_Z) {
       marker.mesh.position.z -= PATH_MARKER_SPAN;
     }
