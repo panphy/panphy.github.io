@@ -84,6 +84,10 @@ const TREE_MAX_Z = 18;
 const TREE_SPAN = TREE_MAX_Z - TREE_MIN_Z;
 const PATH_MARKER_WRAP_Z = 14;
 const SCENERY_SCROLL_SPEED = 0.58;
+const ROAD_MIN_Z = -58;
+const ROAD_MAX_Z = 16;
+const ROAD_SPAN = ROAD_MAX_Z - ROAD_MIN_Z;
+const ROAD_SCROLL_MULTIPLIER = 2.4;
 const ENEMY_TYPES = [
   {
     name: 'Mudlug',
@@ -272,6 +276,7 @@ const torchLights = [];
 const wandGroups = [];
 const wandSwings = [];
 const pathMarkerBlocks = [];
+const roadBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
 
@@ -1112,8 +1117,10 @@ function updateEnvironment(seconds, delta) {
 
   const scrollDelta = SCENERY_SCROLL_SPEED * delta * (mode === 'running' ? 1 : 0.35);
 
+  updateRoad(scrollDelta);
+
   for (const marker of pathMarkerBlocks) {
-    marker.mesh.position.z += scrollDelta * 2.4;
+    marker.mesh.position.z += scrollDelta * ROAD_SCROLL_MULTIPLIER;
     if (marker.mesh.position.z > PATH_MARKER_WRAP_Z) {
       marker.mesh.position.z -= PATH_MARKER_SPAN;
     }
@@ -1144,6 +1151,22 @@ function updateEnvironment(seconds, delta) {
   seasonalEffects.update(seconds, delta, scrollDelta);
 
   updateClouds(delta);
+}
+
+function updateRoad(scrollDelta) {
+  if (!sceneGroundMesh) return;
+  const zShift = scrollDelta * ROAD_SCROLL_MULTIPLIER;
+  for (let index = 0; index < roadBlocks.length; index += 1) {
+    const block = roadBlocks[index];
+    block.z += zShift;
+    if (block.z > ROAD_MAX_Z) block.z -= ROAD_SPAN;
+    reusableVector.set(block.x, block.y, block.z);
+    reusableQuaternion.identity();
+    reusableVectorTwo.set(1, 1, 1);
+    reusableMatrix.compose(reusableVector, reusableQuaternion, reusableVectorTwo);
+    sceneGroundMesh.setMatrixAt(index, reusableMatrix);
+  }
+  sceneGroundMesh.instanceMatrix.needsUpdate = true;
 }
 
 function updateMoonHaze() {
@@ -2406,11 +2429,12 @@ function createGround() {
   mesh.receiveShadow = true;
 
   let index = 0;
-  for (let z = -58; z < 16; z += 1) {
+  for (let z = ROAD_MIN_Z; z < ROAD_MAX_Z; z += 1) {
     for (let x = -11; x <= 11; x += 1) {
       const pathAmount = Math.max(0, 1 - Math.abs(x) / 3.2);
       const ridge = Math.sin(x * 1.3 + z * 0.27) * 0.12 + Math.cos(z * 0.42) * 0.08;
       const y = -0.38 + ridge * (1 - pathAmount * 0.8);
+      roadBlocks[index] = { x, y, z };
       reusableVector.set(x, y, z);
       reusableQuaternion.identity();
       reusableVectorTwo.set(1, 1, 1);
@@ -3236,7 +3260,7 @@ function recolorGround(palette) {
   if (!sceneGroundMesh) return;
   const color = new THREE.Color();
   let index = 0;
-  for (let z = -58; z < 16; z += 1) {
+  for (let z = ROAD_MIN_Z; z < ROAD_MAX_Z; z += 1) {
     for (let x = -11; x <= 11; x += 1) {
       if (Math.abs(x) < 3.1) {
         color.setHSL(palette.groundPath.h, palette.groundPath.s, palette.groundPath.lBase + Math.sin(z * 0.7) * 0.025);
