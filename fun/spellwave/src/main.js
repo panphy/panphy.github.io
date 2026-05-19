@@ -205,6 +205,7 @@ const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10
 const FLYING_SHADOW_OPACITY = 0.22;
 const MOON_SHADOW_FADE_IN_RATE = 1.45;
 const MOON_SHADOW_FADE_OUT_RATE = 4.8;
+const INITIAL_MOON_ANGLE = Math.random() * Math.PI;
 const CLOUD_WRAP_X = 46;
 const CLOUD_RESET_X = -46;
 
@@ -314,7 +315,7 @@ let renderedHealth = null;
 let enemyId = 0;
 let pathMarkerMaterial = null;
 let moon = null;
-let moonAngle = 0;
+let moonAngle = INITIAL_MOON_ANGLE;
 let moonWaitTimer = 0;
 let moonShadowStrength = 1;
 let moonLightBaseIntensity = 2.2;
@@ -570,7 +571,7 @@ function startGame() {
   spawnTimer = 1.25;
   lastFrameTime = 0;
   elapsed = 0;
-  moonAngle = 0;
+  moonAngle = INITIAL_MOON_ANGLE;
   moonWaitTimer = 0;
   mistakeTimer = 0;
   damageTimer = 0;
@@ -1093,10 +1094,7 @@ function updateEnvironment(seconds, delta) {
         moonAngle = Math.PI;
         moonWaitTimer = 7 + Math.random() * 3; // wait 7–10 s before next rise
       }
-      const moonX = -24 * Math.cos(moonAngle);
-      const moonY = 4 + 24 * Math.sin(moonAngle);
-      moon.position.set(moonX, moonY, -42);
-      moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
+      positionMoonOnArc();
       const fadeZone = 0.18 * Math.PI;
       moon.material.opacity = moonAngle < fadeZone
         ? moonAngle / fadeZone
@@ -1169,6 +1167,13 @@ function updateRoad(scrollDelta) {
     sceneGroundMesh.setMatrixAt(index, reusableMatrix);
   }
   sceneGroundMesh.instanceMatrix.needsUpdate = true;
+}
+
+function positionMoonOnArc() {
+  const moonX = -24 * Math.cos(moonAngle);
+  const moonY = 4 + 24 * Math.sin(moonAngle);
+  if (moon) moon.position.set(moonX, moonY, -42);
+  moonLight.position.set(moonX * 0.55, Math.max(7, moonY * 0.55), -22);
 }
 
 function updateMoonHaze() {
@@ -2575,7 +2580,7 @@ function createSky() {
   const moonGeometry = new THREE.SphereGeometry(3.2, 24, 16);
   const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true });
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
-  moon.position.set(20, 18, -42);
+  positionMoonOnArc();
   scene.add(moon);
 
   const starGeometry = new THREE.BufferGeometry();
