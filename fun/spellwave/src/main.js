@@ -1399,8 +1399,16 @@ function getLabelSafeBounds(height) {
 }
 
 function buildHintMask(term, options = {}) {
-  const leadingTypeableCount = Math.max(1, Math.floor(options.leadingTypeableCount || 1));
+  const getCount = () => {
+    if (options.hintRange) {
+      const { min, max } = options.hintRange;
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    return Math.max(1, Math.floor(options.leadingTypeableCount || 1));
+  };
+
   return term.replace(/\S+/g, word => {
+    const currentLimit = getCount();
     let hasTypeable = false;
     for (const ch of word) if (normalizeCharacter(ch, options)) { hasTypeable = true; break; }
     if (!hasTypeable) return word;
@@ -1408,17 +1416,17 @@ function buildHintMask(term, options = {}) {
     let revealedTypeable = 0;
     for (const ch of word) {
       if (!normalizeCharacter(ch, options)) { result += ch; }
-      else if (revealedTypeable < leadingTypeableCount) { result += ch; revealedTypeable += 1; }
+      else if (revealedTypeable < currentLimit) { result += ch; revealedTypeable += 1; }
       else { result += '_'; }
     }
     return result;
   });
 }
 
-function getBossQuestionHintLetterCount() {
-  if (waveSet === 1) return 3;
-  if (waveSet === 2) return 2 + Math.floor(Math.random() * 2); // 2 or 3
-  return 1 + Math.floor(Math.random() * 3); // 1, 2, or 3
+function getBossQuestionHintRange() {
+  if (waveSet === 1) return { min: 3, max: 3 };
+  if (waveSet === 2) return { min: 2, max: 3 };
+  return { min: 1, max: 3 };
 }
 
 function buildSearchPrompt(term, options = {}) {
@@ -1753,7 +1761,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
-  const hintLetterCount = isBoss ? getBossQuestionHintLetterCount() : 1;
+  const hintRange = isBoss ? getBossQuestionHintRange() : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -1850,10 +1858,11 @@ function spawnEnemy(options = {}) {
     hintMask: showDefinition && !isEquationPrompt
       ? buildHintMask(wordData.term, {
           ...promptOptions,
-          leadingTypeableCount: hintLetterCount,
+          hintRange,
+          leadingTypeableCount: 1, // Fallback
         })
       : null,
-    hintLetterCount,
+    hintRange,
     lastPromptHtml: '',
     promptKind,
     isBoss,
