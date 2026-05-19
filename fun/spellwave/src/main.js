@@ -58,6 +58,7 @@ const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
   normalGrowth: 2,
+  normalMax: 20,
   enemyLimit: 11,
   speedMultiplier: 0.94,
   waveSpeedBonus: 0.11,
@@ -67,7 +68,7 @@ const GAME_PROFILE = {
   spawnMin: 0.74,
   bossWarningDelay: 1.0,
   bossSpawnGap: 2.8,
-  revealZ: -33,
+  revealZ: -40,
 };
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
@@ -327,7 +328,6 @@ let leakedCount = 0;
 let bossShotHits = 0;
 let bossesDefeated = 0;
 let encounteredTerms = [];
-let bossQuestionAppearances = new Map();
 let firstMedicHintShown = false;
 let sceneGroundMesh = null;
 let sceneLeafMaterials = [];
@@ -569,7 +569,6 @@ function startGame() {
   bossShotHits = 0;
   bossesDefeated = 0;
   encounteredTerms = [];
-  bossQuestionAppearances.clear();
   typedBuffer = '';
   activeTarget = null;
   spawnTimer = 1.25;
@@ -1416,12 +1415,10 @@ function buildHintMask(term, options = {}) {
   });
 }
 
-function getBossQuestionHintLetterCount(term) {
-  const appearances = (bossQuestionAppearances.get(term) || 0) + 1;
-  bossQuestionAppearances.set(term, appearances);
-  if (appearances === 1) return 3;
-  if (appearances === 2) return 2;
-  return 1;
+function getBossQuestionHintLetterCount() {
+  if (waveSet === 1) return 3;
+  if (waveSet === 2) return 2 + Math.floor(Math.random() * 2); // 2 or 3
+  return 1 + Math.floor(Math.random() * 3); // 1, 2, or 3
 }
 
 function buildSearchPrompt(term, options = {}) {
@@ -1722,7 +1719,7 @@ function updatePhaseDisplay() {
 
 function getNormalEnemyTarget(wave) {
   const profile = currentDifficulty();
-  return profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth;
+  return Math.min(profile.normalMax, profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth);
 }
 
 function getEnemyLimit() {
@@ -1756,7 +1753,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
-  const hintLetterCount = isBoss ? getBossQuestionHintLetterCount(wordData.term) : 1;
+  const hintLetterCount = isBoss ? getBossQuestionHintLetterCount() : 1;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
