@@ -3472,7 +3472,18 @@ function spawnBoss() {
   const bossType = chooseBossType(bossesSpawned);
   const lanes = [-5.0, 0, 5.0];
   const lane = lanes[bossesSpawned % lanes.length];
-  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0 });
+
+  // Calculate actual speed to guarantee consistent 8s travel time to the reveal line
+  const profile = currentDifficulty();
+  const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
+  const longPromptPenalty = Math.max(0, wordData.term.length - 5);
+  const lengthFactor = THREE.MathUtils.clamp(1 - longPromptPenalty * 0.024, 0.7, 1);
+  const speed = (bossType.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
+
+  const targetWait = 8.0;
+  const startZ = profile.revealZ - (speed * targetWait);
+
+  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ });
 }
 
 function chooseBossWord() {
