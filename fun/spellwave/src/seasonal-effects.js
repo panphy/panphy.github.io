@@ -247,7 +247,7 @@ export function createSeasonalEffects({
       const group = new THREE.Group();
       const x = side * (4.65 + Math.random() * 1.9);
       const z = treeMinZ + 4 + Math.random() * (treeSpan - 8);
-      group.position.set(x, 0, z);
+      group.position.set(x, -0.08, z);
       group.rotation.y = (Math.random() - 0.5) * 0.45;
 
       const blossoms = 2 + Math.floor(Math.random() * 3);
@@ -285,7 +285,7 @@ export function createSeasonalEffects({
     for (let index = 0; index < 92; index += 1) {
       const side = index % 2 === 0 ? -1 : 1;
       const material = leafMaterials[index % leafMaterials.length];
-      const mesh = blockMesh(0.24 + Math.random() * 0.18, 0.025, 0.1 + Math.random() * 0.14, material, 0, 0.045, 0);
+      const mesh = blockMesh(0.24 + Math.random() * 0.18, 0.025, 0.1 + Math.random() * 0.14, material, 0, 0.01, 0);
       mesh.position.x = side * (4.95 + Math.random() * 2.2);
       mesh.position.z = pathMarkerMinZ + Math.random() * (pathMarkerMaxZ - pathMarkerMinZ);
       mesh.rotation.y = Math.random() * Math.PI;

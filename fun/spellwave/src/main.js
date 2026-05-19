@@ -417,6 +417,10 @@ moonLight.shadow.camera.left = -22;
 moonLight.shadow.camera.right = 22;
 moonLight.shadow.camera.top = 22;
 moonLight.shadow.camera.bottom = -22;
+moonLight.shadow.camera.near = 0.5;
+moonLight.shadow.camera.far = 70;
+moonLight.shadow.bias = -0.0004;
+moonLight.shadow.normalBias = 0.02;
 scene.add(moonLight);
 moonLightBaseIntensity = moonLight.intensity;
 
@@ -2524,7 +2528,7 @@ function createTrees() {
     const z = -52 + Math.random() * 62;
     const height = 1.1 + Math.random() * 0.7;
     const tree = new THREE.Group();
-    tree.position.set(x, 0, z);
+    tree.position.set(x, -0.08, z);
     tree.add(blockMesh(0.55, height, 0.55, sceneTrunkMaterial, 0, height * 0.5, 0));
 
     const leafMaterial = sceneLeafMaterials[index % sceneLeafMaterials.length];
