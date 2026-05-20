@@ -1,0 +1,218 @@
+// AQA GCSE Physics 8463-style prompts grouped by typing difficulty.
+// Keep terms concise; definitions appear as hints in later rounds.
+export const EASY_WORDS = [
+  { term: 'force', definition: 'A push or pull that may change speed, shape or direction' },
+  { term: 'mass', definition: 'The amount of matter in an object, measured in kilograms' },
+  { term: 'weight', definition: 'The force on a mass due to gravity' },
+  { term: 'speed', definition: 'Distance travelled per unit time' },
+  { term: 'velocity', definition: 'Speed in a specified direction' },
+  { term: 'distance', definition: 'How far an object has moved' },
+  { term: 'joule', definition: 'The unit of energy and work done' },
+  { term: 'power', definition: 'The rate at which energy is transferred' },
+  { term: 'watt', definition: 'The unit of power, equal to one joule per second' },
+  { term: 'current', definition: 'The rate of flow of electric charge' },
+  { term: 'charge', definition: 'A property of particles; positive or negative, measured in coulombs' },
+  { term: 'coulomb', definition: 'The SI unit of electric charge' },
+  { term: 'resistance', definition: 'How much a component opposes current' },
+  { term: 'circuit', definition: 'A complete path that electric current can flow around' },
+  { term: 'fuse', definition: 'A safety device that melts to break the circuit if current is too high' },
+  { term: 'density', definition: 'Mass per unit volume' },
+  { term: 'pressure', definition: 'Force per unit area' },
+  { term: 'kelvin', definition: 'The SI unit of temperature; 0 K is absolute zero' },
+  { term: 'nucleus', definition: 'The small central part of an atom' },
+  { term: 'proton', definition: 'A positively charged particle in the nucleus' },
+  { term: 'neutron', definition: 'An uncharged particle in the nucleus' },
+  { term: 'electron', definition: 'A negatively charged particle around the nucleus' },
+  { term: 'isotope', definition: 'Atoms of the same element with different numbers of neutrons' },
+  { term: 'alpha', definition: 'A type of nuclear radiation made of two protons and two neutrons' },
+  { term: 'beta', definition: 'A type of nuclear radiation made of a fast moving electron' },
+  { term: 'gamma', definition: 'A high frequency electromagnetic wave from the nucleus' },
+  { term: 'wave', definition: 'A disturbance that transfers energy' },
+  { term: 'sound', definition: 'A longitudinal wave caused by vibrations' },
+  { term: 'light', definition: 'Electromagnetic radiation visible to the eye' },
+  { term: 'reflection', definition: 'The bouncing of waves back from a surface' },
+  { term: 'conduction', definition: 'Heat transfer through a solid by particle vibration and collision' },
+  { term: 'convection', definition: 'Heat transfer through a fluid by the bulk movement of particles' },
+  { term: 'normal', definition: 'A line perpendicular to a surface at the point where a ray meets it' },
+  { term: 'ray', definition: 'A line showing the direction light travels' },
+  { term: 'magnet', definition: 'An object that produces a magnetic field' },
+  { term: 'field', definition: 'A region where a non-contact force acts' },
+  { term: 'orbit', definition: 'The curved path of an object around a star, planet or moon' },
+  { term: 'galaxy', definition: 'A large system of stars, gas and dust held together by gravity' },
+];
+
+export const MEDIUM_WORDS = [
+  // Energy
+  { term: 'energy store', definition: 'A way energy is held before or after a transfer' },
+  { term: 'work done', definition: 'Energy transferred when a force moves an object' },
+  { term: 'efficiency', definition: 'Useful energy output divided by total energy input' },
+  { term: 'renewable', definition: 'An energy resource that can be replaced as it is used' },
+  { term: 'non renewable', definition: 'An energy resource that will run out' },
+  { term: 'national grid', definition: 'The network transferring electricity from power stations to users' },
+  // Electricity
+  { term: 'potential difference', definition: 'Energy transferred per unit charge' },
+  { term: 'ohmic conductor', definition: 'A conductor with current proportional to potential difference' },
+  { term: 'filament lamp', definition: 'A lamp whose resistance rises as temperature increases' },
+  { term: 'thermistor', definition: 'A resistor whose resistance changes with temperature' },
+  { term: 'LDR', definition: 'A resistor whose resistance changes with light intensity' },
+  { term: 'diode', definition: 'A component that allows current to flow in one direction only' },
+  { term: 'direct current', definition: 'Current that flows continuously in one direction' },
+  { term: 'alternating current', definition: 'Current that repeatedly reverses direction' },
+  { term: 'live wire', definition: 'The mains wire at high potential difference' },
+  { term: 'neutral wire', definition: 'The mains wire at 0 V that completes the circuit' },
+  { term: 'earth wire', definition: 'A safety wire that can carry fault current to ground' },
+  // Thermal & particle model
+  { term: 'change of state', definition: 'A change between solid, liquid and gas' },
+  { term: 'latent heat', definition: 'Energy to change state without changing temperature' },
+  { term: 'internal energy', definition: 'Total kinetic and potential energy of particles' },
+  { term: 'absolute zero', definition: 'The lowest possible temperature, equal to 0 K or −273 °C' },
+  { term: 'gas pressure', definition: 'Force per unit area from particles colliding with walls' },
+  // Atomic & nuclear
+  { term: 'half life', definition: 'Time for activity or count rate to halve' },
+  { term: 'activity', definition: 'The rate at which unstable nuclei decay' },
+  { term: 'radioactive decay', definition: 'Spontaneous emission of radiation from an unstable nucleus' },
+  { term: 'count rate', definition: 'The number of nuclear decays detected per second' },
+  { term: 'ionising radiation', definition: 'Radiation that can remove electrons from atoms' },
+  { term: 'irradiation', definition: 'Exposure to radiation from a source outside the body' },
+  { term: 'contamination', definition: 'Unwanted radioactive material on or inside an object' },
+  // Forces & motion
+  { term: 'displacement', definition: 'Distance moved in a specified direction' },
+  { term: 'resultant force', definition: 'The single force with the same effect as all forces combined' },
+  { term: 'drag', definition: 'Resistive force on an object moving through a fluid' },
+  { term: 'upthrust', definition: 'Upward force exerted by a fluid on a submerged object' },
+  { term: 'equilibrium', definition: 'State in which the resultant force and resultant moment are both zero' },
+  { term: 'deformation', definition: 'A change in shape of a material caused by an applied force' },
+  { term: 'friction', definition: 'A force opposing motion between surfaces' },
+  { term: 'momentum', definition: 'Mass multiplied by velocity' },
+  { term: 'acceleration', definition: 'Rate of change of velocity' },
+  { term: 'extension', definition: 'Increase in length of a stretched object' },
+  { term: 'Hooke\'s law', definition: 'Extension is proportional to force until the limit is reached' },
+  { term: 'stopping distance', definition: 'Thinking distance plus braking distance' },
+  { term: 'reaction time', definition: 'Time taken to respond to a stimulus' },
+  { term: 'scalar', definition: 'A quantity with magnitude only' },
+  { term: 'vector', definition: 'A quantity with magnitude and direction' },
+  // Waves
+  { term: 'frequency', definition: 'Number of complete waves passing a point each second' },
+  { term: 'wavelength', definition: 'Distance from one wave crest to the next' },
+  { term: 'amplitude', definition: 'Maximum displacement from the undisturbed position' },
+  { term: 'absorption', definition: 'Transfer of energy from a wave into the medium it passes through' },
+  { term: 'transverse wave', definition: 'A wave with oscillations perpendicular to energy transfer' },
+  { term: 'longitudinal wave', definition: 'A wave with oscillations parallel to energy transfer' },
+  { term: 'refraction', definition: 'Change of direction when a wave changes speed at a boundary' },
+  { term: 'diffraction', definition: 'Spreading of waves through gaps or around obstacles' },
+  // Magnetism
+  { term: 'magnetic field', definition: 'The region where a magnetic material experiences a force' },
+  { term: 'solenoid', definition: 'A coil of wire that produces a magnetic field when carrying current' },
+  { term: 'electromagnet', definition: 'A magnet produced by current in a coil' },
+  { term: 'motor effect', definition: 'Force on a current-carrying wire in a magnetic field' },
+  // Space
+  { term: 'red shift', definition: 'Increase in wavelength from a galaxy moving away' },
+  { term: 'nebula', definition: 'A cloud of gas and dust in space where stars can form' },
+  { term: 'protostar', definition: 'An early stage of star formation from a collapsing nebula' },
+];
+
+export const HARD_WORDS = [
+  // Energy stores
+  { term: 'gravitational potential energy', definition: 'Energy stored by an object raised in a gravitational field' },
+  { term: 'kinetic energy', definition: 'Energy an object has due to its motion' },
+  { term: 'thermal energy', definition: 'Energy a substance has due to the motion of its particles' },
+  { term: 'elastic potential energy', definition: 'Energy stored when an object is stretched or compressed' },
+  { term: 'specific heat capacity', definition: 'Energy to raise 1 kg of a substance by 1°C' },
+  { term: 'specific latent heat', definition: 'Energy to change the state of 1 kg' },
+  // Electricity
+  { term: 'static electricity', definition: 'Charge build-up caused by electrons moving between insulators' },
+  { term: 'electric field', definition: 'A region where a charged object experiences a force' },
+  { term: 'series circuit', definition: 'Circuit where current is the same through all components' },
+  { term: 'parallel circuit', definition: 'Circuit where potential difference is the same across branches' },
+  { term: 'mains electricity', definition: 'Alternating potential difference supplied to homes' },
+  // Nuclear
+  { term: 'nuclear fission', definition: 'Splitting a large unstable nucleus into smaller nuclei' },
+  { term: 'nuclear fusion', definition: 'Joining small nuclei to form a larger nucleus' },
+  { term: 'chain reaction', definition: 'Fission neutrons causing more nuclei to split' },
+  { term: 'background radiation', definition: 'Ionising radiation always present from natural and artificial sources' },
+  // Forces & motion
+  { term: 'terminal velocity', definition: 'Constant velocity when the resultant force is zero' },
+  { term: 'inertial mass', definition: 'Measure of how difficult it is to change velocity' },
+  { term: 'conservation of momentum', definition: 'Total momentum before a collision equals total momentum after' },
+  { term: 'centre of mass', definition: 'The point through which an object\'s weight appears to act' },
+  { term: 'elastic deformation', definition: 'Deformation from which an object fully recovers when the force is removed' },
+  { term: 'inelastic deformation', definition: 'Deformation from which an object does not return to its original shape' },
+  { term: 'thinking distance', definition: 'Distance travelled while the driver reacts' },
+  { term: 'braking distance', definition: 'Distance travelled while brakes slow the vehicle' },
+  // Waves
+  { term: 'electromagnetic wave', definition: 'A transverse wave that can travel through a vacuum' },
+  { term: 'wave equation', definition: 'Wave speed equals frequency multiplied by wavelength' },
+  { term: 'critical angle', definition: 'Angle above which total internal reflection occurs' },
+  { term: 'total internal reflection', definition: 'Complete reflection when incidence angle is above the critical angle' },
+  { term: 'electromagnetic spectrum', definition: 'All electromagnetic waves arranged by wavelength or frequency' },
+  { term: 'ultraviolet', definition: 'Electromagnetic radiation with shorter wavelength than visible light' },
+  { term: 'infrared', definition: 'Electromagnetic radiation emitted by warm objects' },
+  // Magnetism & induction
+  { term: 'magnetic flux density', definition: 'Magnetic field strength measured in tesla' },
+  { term: 'generator effect', definition: 'Induced PD when a conductor moves through a magnetic field' },
+  { term: 'electromagnetic induction', definition: 'Production of a potential difference when magnetic flux through a conductor changes' },
+  { term: 'direct current motor', definition: 'A device that uses the motor effect to convert electrical energy into rotational motion' },
+  { term: 'transformer', definition: 'Device changing alternating potential difference using induction' },
+  { term: 'step up transformer', definition: 'Transformer that increases potential difference' },
+  { term: 'step down transformer', definition: 'Transformer that decreases potential difference' },
+  // Space
+  { term: 'main sequence', definition: 'Stable star stage where fusion balances gravity' },
+  { term: 'red giant', definition: 'A star that has expanded after exhausting hydrogen fuel in its core' },
+  { term: 'white dwarf', definition: 'The dense remnant left when a medium-mass star sheds its outer layers' },
+  { term: 'supernova', definition: 'The explosion marking the end of a massive star\'s life' },
+  { term: 'neutron star', definition: 'The extremely dense remnant of a massive star after a supernova' },
+  { term: 'black hole', definition: 'A region of space where gravity is too strong for even light to escape' },
+  { term: 'cosmic microwave background radiation', definition: 'Uniform microwave radiation across the sky that is evidence for the Big Bang' },
+  { term: 'big bang', definition: 'Theory that the universe began from a very hot dense state' },
+];
+
+export const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
+
+// AQA GCSE Physics 8463 word equations — used for the equation boss each wave.
+// term = the word equation the player types; definition = compact symbolic form shown on label.
+export const EQUATION_WORDS = [
+  // Forces & motion
+  { term: 'weight = mass × gravitational field strength', definition: 'W = mg', isEquation: true },
+  { term: 'resultant force = mass × acceleration', definition: 'F = ma', isEquation: true },
+  { term: 'work done = force × distance', definition: 'W = Fs', isEquation: true },
+  { term: 'distance = speed × time', definition: 's = vt', isEquation: true },
+  { term: 'acceleration = change in velocity / time', definition: 'a = Δv / t', isEquation: true },
+  { term: 'momentum = mass × velocity', definition: 'p = mv', isEquation: true },
+  { term: 'force = change in momentum / time', definition: 'F = Δp / Δt', isEquation: true },
+  { term: 'moment = force × distance', definition: 'M = Fd', isEquation: true },
+  { term: 'force = spring constant × extension', definition: 'F = ke', isEquation: true },
+
+  // Energy
+  { term: 'kinetic energy = 0.5 × mass × speed²', definition: 'Ek = ½mv²', isEquation: true },
+  { term: 'gravitational potential energy = mass × gravitational field strength × height', definition: 'Ep = mgh', isEquation: true },
+  { term: 'elastic potential energy = 0.5 × spring constant × extension²', definition: 'Ee = ½ke²', isEquation: true },
+  { term: 'power = energy transferred / time', definition: 'P = E / t', isEquation: true },
+  { term: 'power = work done / time', definition: 'P = W / t', isEquation: true },
+  { term: 'energy transferred = power × time', definition: 'E = Pt', isEquation: true },
+  { term: 'efficiency = useful output power / total input power', definition: 'efficiency = Pout / Pin', isEquation: true },
+  { term: 'efficiency = useful energy output / total energy input', definition: 'efficiency = Eout / Ein', isEquation: true },
+
+  // Materials & pressure
+  { term: 'density = mass / volume', definition: 'ρ = m / V', isEquation: true },
+  { term: 'pressure = force / area', definition: 'p = F / A', isEquation: true },
+  { term: 'pressure = height × density × gravitational field strength', definition: 'p = hρg', isEquation: true },
+
+  // Thermal
+  { term: 'change in thermal energy = mass × specific heat capacity × temperature change', definition: 'ΔE = mcΔθ', isEquation: true },
+  { term: 'thermal energy = mass × specific latent heat', definition: 'E = mL', isEquation: true },
+
+  // Waves
+  { term: 'wave speed = frequency × wavelength', definition: 'v = fλ', isEquation: true },
+  { term: 'period = 1 / frequency', definition: 'T = 1 / f', isEquation: true },
+
+  // Electricity
+  { term: 'charge flow = current × time', definition: 'Q = It', isEquation: true },
+  { term: 'potential difference = current × resistance', definition: 'V = IR', isEquation: true },
+  { term: 'power = potential difference × current', definition: 'P = VI', isEquation: true },
+  { term: 'power = current² × resistance', definition: 'P = I²R', isEquation: true },
+  { term: 'energy transferred = charge flow × potential difference', definition: 'E = QV', isEquation: true },
+
+  // Magnetism & induction
+  { term: 'force = magnetic flux density × current × length', definition: 'F = BIl', isEquation: true },
+  { term: 'primary potential difference / secondary potential difference = primary turns / secondary turns', definition: 'Vp / Vs = np / ns', isEquation: true },
+];

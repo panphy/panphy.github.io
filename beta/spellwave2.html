@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#07120f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Spellwave | PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="stylesheet" href="./spellwave2/src/styles.css">
+  <script>
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (event) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
+      lastTouchEnd = now;
+    }, { passive: false });
+    document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
+    document.addEventListener('gesturechange', (event) => event.preventDefault(), { passive: false });
+    document.addEventListener('gestureend', (event) => event.preventDefault(), { passive: false });
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <canvas id="gameCanvas" aria-label="Spellwave 3D game scene"></canvas>
+    <div class="moon-haze" aria-hidden="true"></div>
+    <div class="pixel-grain" aria-hidden="true"></div>
+    <div class="lightning-flash" id="lightningFlash" aria-hidden="true"></div>
+    <div class="damage-flash" id="damageFlash" aria-hidden="true"></div>
+    <div class="god-mode-veil" aria-hidden="true"></div>
+    <div class="boss-banner" id="bossBanner" aria-live="assertive" aria-atomic="true"></div>
+    <div class="labels-layer" id="labelsLayer" aria-hidden="true"></div>
+
+    <div class="potion-bar" id="potionBar" aria-label="Potions">
+      <div class="potion-slot" data-slot="0" aria-label="Potion Slot 1 (Left Arrow or 1)">
+        <span class="slot-key">←</span>
+        <div class="potion-icon"></div>
+      </div>
+      <div class="potion-slot" data-slot="1" aria-label="Potion Slot 2 (Up Arrow or 2)">
+        <span class="slot-key">↑</span>
+        <div class="potion-icon"></div>
+      </div>
+      <div class="potion-slot" data-slot="2" aria-label="Potion Slot 3 (Right Arrow or 3)">
+        <span class="slot-key">→</span>
+        <div class="potion-icon"></div>
+      </div>
+      <div class="potion-slot" data-slot="3" aria-label="Potion Slot 4 (Down Arrow or 4)">
+        <span class="slot-key">↓</span>
+        <div class="potion-icon"></div>
+      </div>
+    </div>
+
+    <header class="game-bar" aria-label="Game status">
+      <a class="brand-mark" href="../" aria-label="PanPhy Labs home">
+        <img src="../assets/panphy.png" alt="PanPhy Labs">
+      </a>
+      <div class="game-title">
+        <span id="phaseValue">Study pace</span>
+        <h1>Spellwave</h1>
+      </div>
+    </header>
+
+    <div class="corner-controls" aria-label="Game controls">
+      <button class="icon-button svg-button audio-toggle" id="audioButton" type="button" aria-label="Mute sound">
+        <svg class="button-svg sound-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="speaker-glyph" d="M13.5 27.5h6.2l8.1 6.3V14.2l-8.1 6.3h-6.2z"></path>
+          <path class="sound-wave sound-wave-one" d="M31 19.2c1.5 1.2 2.3 2.9 2.3 4.8s-.8 3.6-2.3 4.8"></path>
+          <path class="sound-wave sound-wave-two" d="M35 15.6c2.6 2.2 4.1 5.1 4.1 8.4s-1.5 6.2-4.1 8.4"></path>
+          <path class="mute-slash" d="M14 14l20 20"></path>
+        </svg>
+      </button>
+      <button class="icon-button svg-button transport-button is-playing" id="pauseButton" type="button" aria-label="Pause run" disabled>
+        <svg class="button-svg transport-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="play-glyph" d="M19 15.5 34.5 24 19 32.5z"></path>
+          <g class="pause-glyph">
+            <rect x="17" y="14" width="5.8" height="20" rx="2"></rect>
+            <rect x="25.2" y="14" width="5.8" height="20" rx="2"></rect>
+          </g>
+        </svg>
+      </button>
+    </div>
+
+    <div class="top-corner-controls" aria-label="Display controls">
+      <button class="icon-button svg-button fullscreen-toggle" id="fullscreenButton" type="button" aria-label="Enter full screen" title="Enter full screen">
+        <svg class="button-svg fullscreen-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <g class="fullscreen-enter-glyph">
+            <path d="M15 21v-6h6"></path>
+            <path d="M33 21v-6h-6"></path>
+            <path d="M15 27v6h6"></path>
+            <path d="M33 27v6h-6"></path>
+          </g>
+          <g class="fullscreen-exit-glyph">
+            <path d="M21 15v6h-6"></path>
+            <path d="M27 15v6h6"></path>
+            <path d="M21 33v-6h-6"></path>
+            <path d="M27 33v-6h6"></path>
+          </g>
+        </svg>
+      </button>
+    </div>
+
+    <section class="hud-grid" aria-label="Run metrics">
+      <div class="readout">
+        <span>Score</span>
+        <strong id="scoreValue">0</strong>
+      </div>
+      <div class="readout">
+        <span>Best</span>
+        <strong id="bestValue">0</strong>
+      </div>
+      <div class="readout life-readout">
+        <span>Life</span>
+        <div class="life-meter" id="healthValue" aria-label="Life: 5 hearts"></div>
+      </div>
+      <div class="readout">
+        <span>Wave</span>
+        <strong id="waveValue">1</strong>
+      </div>
+    </section>
+
+    <section class="typing-strip" aria-live="polite">
+      <span id="typingLabel">INPUT</span>
+      <strong id="typedValue">ready</strong>
+      <small id="comboValue">0 chain</small>
+    </section>
+
+    <section class="message-panel" id="messagePanel" aria-live="polite">
+      <p id="messageKicker">SPELLWAVE</p>
+      <h2 id="messageTitle">Cast or Crumble</h2>
+      <div class="message-score" id="messageScore">Best 0</div>
+      <p class="message-copy" id="messageCopy">Type the words to defeat each enemy. Pink hearts heal you — type them too!</p>
+      <button id="startButton" type="button">Start</button>
+      <a class="support-link" id="supportLink" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" hidden>Support My Projects</a>
+      <div class="run-glossary" id="runGlossary" hidden></div>
+    </section>
+
+    <input
+      class="keyboard-input"
+      id="keyboardInput"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      aria-label="Typing input">
+  </div>
+
+  <script type="module" src="./spellwave2/src/main.js"></script>
+</body>
+
+</html>
