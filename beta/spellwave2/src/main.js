@@ -294,6 +294,7 @@ let health = MAX_LIFE;
 let potions = [null, null, null, null];
 let activeShieldCharges = 0;
 let timeFreezeTimer = 0;
+let chainLightningPrimed = false;
 let waveSet = 1;
 let wavePhase = 'normal';
 let normalEnemyTarget = getNormalEnemyTarget(waveSet);
@@ -563,7 +564,9 @@ function startGame() {
   potions = [null, null, null, null];
   activeShieldCharges = 0;
   timeFreezeTimer = 0;
+  chainLightningPrimed = false;
   document.body.classList.remove('time-frozen');
+  document.body.classList.remove('chain-lightning-primed');
   updatePotionUI();
   waveSet = 1;
   wavePhase = 'normal';
@@ -628,6 +631,8 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
+  chainLightningPrimed = false;
+  document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
   startMusicLoop(false);
   setPauseButtonState(true, true);
@@ -835,6 +840,7 @@ function defeatEnemy(enemy, isNeutral = false) {
     return;
   }
 
+  const chainSource = enemy.group.position.clone();
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
   defeatedCount += 1;
@@ -856,6 +862,7 @@ function defeatEnemy(enemy, isNeutral = false) {
   activeTarget = null;
   updateHud(true);
   updateTypedDisplay();
+  if (chainLightningPrimed) triggerChainLightning(chainSource);
 }
 
 function playShieldBlockEffect() {
@@ -3790,7 +3797,7 @@ function updatePotionUI() {
     if (potion) {
       slot.classList.add('occupied');
       slot.setAttribute('data-potion', potion);
-      slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potion.replace('_', ' ')}`);
+      slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potion.replace(/_/g, ' ')}`);
     } else {
       slot.removeAttribute('data-potion');
       slot.setAttribute('aria-label', `Potion Slot ${index + 1} (Empty)`);
@@ -3838,7 +3845,10 @@ function activatePotionSlot(index) {
     playGodModeOnSound();
     showBanner('TIME FREEZE!', 'time-freeze');
   } else if (potion === 'chain_lightning') {
-    triggerChainLightning();
+    chainLightningPrimed = true;
+    document.body.classList.add('chain-lightning-primed');
+    playToggleSound();
+    showBanner('CHAIN PRIMED!', 'chain-lightning');
   } else if (potion === 'shield') {
     activeShieldCharges = 2;
     playHealSound(1);
@@ -3846,24 +3856,33 @@ function activatePotionSlot(index) {
   }
 }
 
-function triggerChainLightning() {
+function triggerChainLightning(sourcePosition) {
+  chainLightningPrimed = false;
+  document.body.classList.remove('chain-lightning-primed');
   const N = 4;
+  const origin = sourcePosition?.clone?.() ?? new THREE.Vector3(0, 1.2, WALL_Z);
+  origin.y += 1.2;
   const targetableEnemies = enemies
-    .filter(e => e.revealed && !e.dying)
-    .sort((a, b) => b.group.position.z - a.group.position.z);
+    .filter(e => isEnemyTargetable(e) && !e.dying)
+    .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin));
 
   const targets = targetableEnemies.slice(0, N);
   if (targets.length === 0) {
-    playMistakeSound();
+    showBanner('NO CHAIN TARGETS', 'chain-lightning');
     return;
   }
 
   playToggleSound();
+  showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
+  let previousPosition = origin;
   targets.forEach((enemy, idx) => {
     window.setTimeout(() => {
       if (enemies.includes(enemy)) {
-        spawnLightningVisual(enemy.group.position);
+        const targetPosition = enemy.group.position.clone();
+        targetPosition.y += 1.2;
+        spawnLightningVisual(previousPosition, targetPosition);
+        previousPosition = targetPosition;
         defeatEnemy(enemy, true); // Neutral defeat
       }
     }, idx * 100);
@@ -3877,8 +3896,8 @@ function triggerChainLightning() {
   }
 }
 
-function spawnLightningVisual(targetPos) {
-  const origin = new THREE.Vector3(0, 1.2, WALL_Z);
+function spawnLightningVisual(startPos, targetPos) {
+  const origin = startPos.clone();
   const points = [];
   points.push(origin);
   const segments = 5;
