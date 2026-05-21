@@ -27,6 +27,7 @@ const messageCopy = document.getElementById('messageCopy');
 const supportLink = document.getElementById('supportLink');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
+const shieldBarrier = document.getElementById('shieldBarrier');
 const lightningFlash = document.getElementById('lightningFlash');
 let godModeBadge = null; // created dynamically on activation, never in static HTML
 const typingLabel = document.getElementById('typingLabel');
@@ -160,7 +161,7 @@ const MEDIC_TYPE = {
 const MIMIC_TYPE = {
   name: 'Mimic Chest',
   isMimic: true,
-  body: 0xaa7030,
+  body: 0xd4a020,
   trim: 0xffd040,
   eye: 0xef44fb,
   speed: 7.8,
@@ -294,6 +295,7 @@ const torchFlames = [];
 const torchLights = [];
 const wandGroups = [];
 const wandSwings = [];
+const lightningCrowns = [];
 const pathMarkerBlocks = [];
 const roadBlocks = [];
 const scrollingTrees = [];
@@ -307,6 +309,7 @@ let potions = [null, null, null, null];
 let activeShieldCharges = 0;
 let timeFreezeTimer = 0;
 let chainLightningPrimed = false;
+let wandsArePrimed = false;
 let gameTimeSeconds = 0;
 let waveSet = 1;
 let wavePhase = 'normal';
@@ -586,6 +589,8 @@ function startGame() {
   gameTimeSeconds = 0;
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
+  document.body.classList.remove('shield-active');
+  wandsArePrimed = false;
   updatePotionUI();
   waveSet = 1;
   wavePhase = 'normal';
@@ -930,6 +935,10 @@ function playShieldBlockEffect() {
       flash.style.background = '';
     }, 160);
   }
+  if (shieldBarrier) {
+    shieldBarrier.classList.add('is-blocking');
+    shieldBarrier.addEventListener('animationend', () => shieldBarrier.classList.remove('is-blocking'), { once: true });
+  }
   updatePotionUI();
 }
 
@@ -970,6 +979,7 @@ function leakEnemy(enemy) {
 
   if (activeShieldCharges > 0) {
     activeShieldCharges -= 1;
+    if (activeShieldCharges === 0) document.body.classList.remove('shield-active');
     playShieldBlockEffect();
     removeEnemy(enemy);
     updateHud(true);
@@ -1008,6 +1018,7 @@ function bossProjectileHitPlayer(enemy) {
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
     if (activeShieldCharges > 0) {
       activeShieldCharges -= 1;
+      if (activeShieldCharges === 0) document.body.classList.remove('shield-active');
       playShieldBlockEffect();
       updateHud(true);
       return;
@@ -1354,13 +1365,44 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
     marker.mesh.position.y = marker.baseY + Math.sin(seconds * 3.2 + marker.phase) * 0.018;
   }
 
-  for (const flame of torchFlames) {
-    const flamePulse = 1 + Math.sin(seconds * 8.5 + flame.phase) * 0.12;
-    flame.mesh.scale.set(flamePulse, 1 + Math.cos(seconds * 7.2 + flame.phase) * 0.16, flamePulse);
+  if (chainLightningPrimed && !wandsArePrimed) {
+    wandsArePrimed = true;
+    sceneCrystalMat.color.setHex(0xfde068);
+    sceneCrystalMat.emissive.setHex(0xfde068);
+    sceneCrystalMat.emissiveIntensity = 3.5;
+    for (const crown of lightningCrowns) crown.visible = true;
+    for (const light of torchLights) light.color.setHex(0xfde068);
+  } else if (!chainLightningPrimed && wandsArePrimed) {
+    wandsArePrimed = false;
+    sceneCrystalMat.color.setHex(0x58dfcf);
+    sceneCrystalMat.emissive.setHex(0x2dd4bf);
+    sceneCrystalMat.emissiveIntensity = 2.0;
+    for (const crown of lightningCrowns) crown.visible = false;
+    for (const light of torchLights) light.color.setHex(0x2dd4bf);
   }
 
-  for (const light of torchLights) {
-    light.intensity = 1.55 + Math.sin(seconds * 7.8 + light.userData.phase) * 0.26;
+  if (wandsArePrimed) {
+    const pulse = 1.1 + Math.sin(seconds * 12.0) * 0.18;
+    for (const flame of torchFlames) {
+      flame.mesh.scale.set(pulse, pulse, pulse);
+    }
+    sceneCrystalMat.emissiveIntensity = 3.2 + Math.sin(seconds * 9.0) * 0.8;
+    for (const crown of lightningCrowns) {
+      crown.rotation.y = seconds * 5.5;
+      const cs = 1.0 + Math.sin(seconds * 11.0) * 0.12;
+      crown.scale.set(cs, cs, cs);
+    }
+    for (const light of torchLights) {
+      light.intensity = 2.6 + Math.sin(seconds * 10.0 + light.userData.phase) * 0.5;
+    }
+  } else {
+    for (const flame of torchFlames) {
+      const flamePulse = 1 + Math.sin(seconds * 8.5 + flame.phase) * 0.12;
+      flame.mesh.scale.set(flamePulse, 1 + Math.cos(seconds * 7.2 + flame.phase) * 0.16, flamePulse);
+    }
+    for (const light of torchLights) {
+      light.intensity = 1.55 + Math.sin(seconds * 7.8 + light.userData.phase) * 0.26;
+    }
   }
 
   for (const canopy of canopyBlocks) {
@@ -2363,8 +2405,8 @@ function finishBossGroup(group, type, beaconY = 2.9) {
 }
 
 function createMimicChestMesh(type) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.75, metalness: 0.08 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.18, metalness: 1.0 });
+  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x7a4c10, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.12 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, emissive: 0xffe060, emissiveIntensity: 0.55, roughness: 0.18, metalness: 1.0 });
   const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
   const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x0e0115, roughness: 0.9 });
   const toothMat = new THREE.MeshStandardMaterial({ color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
@@ -2406,6 +2448,11 @@ function createMimicChestMesh(type) {
   const light = new THREE.PointLight(type.eye, 0.5, 6.0);
   light.position.set(0, 0.55, 0.1);
   g.add(light);
+
+  // Outer golden glow — casts warm light on ground around the chest
+  const outerGlow = new THREE.PointLight(0xffd040, 1.0, 4.5);
+  outerGlow.position.set(0, 1.6, 0);
+  g.add(outerGlow);
 
   // Lid Group — pivot at top-back edge of the base
   const lidGroup = new THREE.Group();
@@ -2795,6 +2842,35 @@ function createGround() {
   sceneGroundMesh = mesh;
 }
 
+function createLightningCrown() {
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xfde068, emissive: 0xfde068, emissiveIntensity: 3.2,
+    roughness: 0.05, metalness: 0.1,
+  });
+  const crown = new THREE.Group();
+  const R = 0.42;
+  for (let i = 0; i < 3; i++) {
+    const angle = (i / 3) * Math.PI * 2;
+    const boltGroup = new THREE.Group();
+    boltGroup.position.set(Math.sin(angle) * R, 0, Math.cos(angle) * R);
+    boltGroup.rotation.y = angle;
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.22, 0.05), mat);
+    top.position.set(0.05, 0.28, 0);
+    top.rotation.z = 0.55;
+    boltGroup.add(top);
+    const mid = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.22, 0.05), mat);
+    mid.position.set(-0.04, 0.06, 0);
+    mid.rotation.z = -0.55;
+    boltGroup.add(mid);
+    const bot = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.16, 0.04), mat);
+    bot.position.set(0.06, -0.12, 0);
+    bot.rotation.z = 0.55;
+    boltGroup.add(bot);
+    crown.add(boltGroup);
+  }
+  return crown;
+}
+
 function createTorches() {
   const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88 });
   const bandMat = new THREE.MeshStandardMaterial({ color: 0x7a6040, roughness: 0.48, metalness: 0.5 });
@@ -2840,6 +2916,13 @@ function createTorches() {
     crystalGroup.add(rightShard);
     wandGroup.add(crystalGroup);
     torchFlames.push({ mesh: crystalGroup, phase: Math.random() * Math.PI * 2 });
+
+    // Lightning crown — shown only when chain lightning is primed
+    const crown = createLightningCrown();
+    crown.position.set(0, 2.72, 0);
+    crown.visible = false;
+    wandGroup.add(crown);
+    lightningCrowns.push(crown);
 
     // Point light parented to the wand so it follows the swing
     const light = new THREE.PointLight(0x2dd4bf, 1.6, 14, 2);
@@ -3993,6 +4076,17 @@ function spawnLootEscapedPopup(left, top) {
   popup.addEventListener('animationend', () => popup.remove(), { once: true });
 }
 
+function spawnMagicAcquiredBurst(addedType) {
+  const existing = document.querySelector('.magic-acquired-burst');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'magic-acquired-burst';
+  const name = addedType.replace('_', ' ').toUpperCase();
+  el.innerHTML = `<span class="mab-line1">MAGIC ACQUIRED</span><span class="mab-line2">+1 ${name}</span>`;
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+}
+
 function awardMimicLoot(enemy) {
   const types = ['time_freeze', 'chain_lightning', 'shield'];
   const type = types[Math.floor(Math.random() * types.length)];
@@ -4004,6 +4098,7 @@ function awardMimicLoot(enemy) {
     if (Number.isFinite(left) && Number.isFinite(top)) {
       if (success) {
         spawnLootRewardPopup(left, top, type);
+        spawnMagicAcquiredBurst(type);
       } else {
         spawnInventoryFullPopup(left, top);
       }
@@ -4199,6 +4294,7 @@ function activatePotionSlot(index) {
     showBanner('CHAIN PRIMED!', 'chain-lightning');
   } else if (potion === 'shield') {
     activeShieldCharges = 2;
+    document.body.classList.add('shield-active');
     playHealSound(1);
     showBanner('SHIELD ACTIVE!', 'shield');
   }

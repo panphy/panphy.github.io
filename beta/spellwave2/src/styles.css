@@ -1626,3 +1626,100 @@ body.time-frozen #gameCanvas {
 body:not(.time-frozen) #gameCanvas {
   transition: filter 0.4s ease;
 }
+
+/* === Magic Acquired Burst overlay === */
+.magic-acquired-burst {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 200;
+  animation: mab-enter 1.9s ease-out forwards;
+}
+.mab-line1 {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
+  color: #f5d5ff;
+  text-shadow: 0 0 12px #d946ef, 0 0 26px #a21caf;
+}
+.mab-line2 {
+  font-family: var(--font-mono, monospace);
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #d946ef;
+  text-shadow:
+    0 0 10px #d946ef,
+    0 0 30px #a21caf,
+    0 0 56px rgba(217, 70, 239, 0.55);
+}
+@keyframes mab-enter {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  32%  { transform: translate(-50%, -50%) scale(1.0); }
+  70%  { opacity: 1; transform: translate(-50%, -62%); }
+  100% { opacity: 0; transform: translate(-50%, -80%); }
+}
+
+/* === Shield Barrier === */
+.shield-barrier {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 42vh;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to top, rgba(30, 100, 255, 0.12) 0%, transparent 100%);
+  border-top: 2px solid rgba(100, 180, 255, 0.6);
+  border-left: 2px solid rgba(100, 180, 255, 0.35);
+  border-right: 2px solid rgba(100, 180, 255, 0.35);
+  box-shadow:
+    0 -4px 24px rgba(80, 140, 255, 0.45),
+    inset 0 0 40px rgba(30, 80, 255, 0.08);
+  z-index: 50;
+  transition: opacity 0.45s ease;
+}
+.shield-barrier::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 6px,
+    rgba(100, 180, 255, 0.04) 6px,
+    rgba(100, 180, 255, 0.04) 7px
+  );
+  animation: shield-scan 3.5s linear infinite;
+}
+@keyframes shield-scan {
+  from { background-position: 0 0; }
+  to   { background-position: 0 100px; }
+}
+body.shield-active .shield-barrier {
+  opacity: 1;
+  animation: shield-barrier-pulse 2.8s ease-in-out infinite;
+}
+@keyframes shield-barrier-pulse {
+  0%, 100% {
+    box-shadow: 0 -4px 24px rgba(80, 140, 255, 0.45), inset 0 0 40px rgba(30, 80, 255, 0.08);
+  }
+  50% {
+    box-shadow: 0 -10px 40px rgba(80, 140, 255, 0.7), inset 0 0 60px rgba(30, 80, 255, 0.16);
+  }
+}
+.shield-barrier.is-blocking {
+  animation: shield-block-flash 0.22s ease-out forwards !important;
+  opacity: 1 !important;
+}
+@keyframes shield-block-flash {
+  0%   { background: linear-gradient(to top, rgba(100, 180, 255, 0.55) 0%, rgba(80, 160, 255, 0.25) 100%); }
+  100% { background: linear-gradient(to top, rgba(30, 100, 255, 0.12) 0%, transparent 100%); }
+}
