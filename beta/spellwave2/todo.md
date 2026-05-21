@@ -9,7 +9,6 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX**
 
 ### Current status
 - Phase 1 is implemented and being tested in `beta/spellwave2`.
-- Debug testing shortcut: press `P` during a run to add a random potion to the first free slot.
 - Follow-up fixes completed after initial Phase 1:
   - Potion bar remains visible while paused and shifts down with the HUD.
   - Wrong-letter feedback now uses the original centered typing-strip shake without horizontal jump.
@@ -33,16 +32,15 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX**
 
 ## 2. Mimic Chest Enemy
 
-### Next implementation target
-Build this in `beta/spellwave2` before adding more potion polish. The goal is to replace the temporary `P` debug shortcut as the real potion source while keeping `P` available for internal testing until the mechanic feels stable.
-
-- [ ] New enemy type: reward target only, never a damage threat
-- [ ] Spawn rule: rare normal-wave only; excluded from boss waves; does not count toward required kill total
-- [ ] Behavior: mirrors Medic archetype — fast approach, short timer, escapes if not defeated in time
-- [ ] On defeat: drop one random potion if a slot is free; show "INVENTORY FULL" feedback if not
-- [ ] On escape: remove without damaging the player; play missed-loot feedback
-- [ ] 3D animation: lid opens when targeted, snaps shut on escape (Dragon Quest style)
-- [ ] SFX: chest clack/snap sound
+### Current status
+- Phase 2 Mimic Chest Enemy is implemented in `beta/spellwave2`.
+- [x] New enemy type: reward target only, never a damage threat
+- [x] Spawn rule: rare normal-wave only; excluded from boss waves; does not count toward required kill total
+- [x] Behavior: mirrors Medic archetype — fast approach, short timer, escapes if not defeated in time
+- [x] On defeat: drop one random potion if a slot is free; show "INVENTORY FULL" feedback if not
+- [x] On escape: remove without damaging the player; play missed-loot feedback
+- [x] 3D animation: lid opens when targeted, snaps shut on escape (Dragon Quest style)
+- [x] SFX: chest clack/snap sound
 
 ---
 
@@ -72,11 +70,12 @@ Build this in `beta/spellwave2` before adding more potion polish. The goal is to
 
 ## 5. Suggested Next Steps
 
-1. Implement Mimic Chest spawning in normal waves only.
-2. Give mimic its reward-only defeat/escape paths and wire defeat to `addPotion()`.
-3. Add inventory-full and missed-loot feedback.
-4. Playtest potion economy: spawn rate, potion distribution, and whether `P` should remain debug-only behind a dev flag.
-5. Run a focused balance pass on potion durations/counts once mimic drops are working.
+- [x] Implement Mimic Chest spawning in normal waves only.
+- [x] Give mimic its reward-only defeat/escape paths and wire defeat to `addPotion()`.
+- [x] Add inventory-full and missed-loot feedback.
+- [x] Remove the temporary P debug shortcut.
+- [ ] Playtest potion economy: spawn rate and potion distribution.
+- [ ] Run a focused balance pass on potion durations/counts once mimic drops are working.
 
 ---
 

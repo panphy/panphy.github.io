@@ -157,6 +157,25 @@ const MEDIC_TYPE = {
   weight: 0,
   score: 45,
 };
+const MIMIC_TYPE = {
+  name: 'Mimic Chest',
+  isMimic: true,
+  body: 0x8b5a2b, // Brown wood
+  trim: 0xd4af37, // Gold trimmings
+  eye: 0xd946ef,  // Purple/magenta glow
+  speed: 7.8,
+  scale: 1.1,
+  weight: 0,
+  score: 0,
+};
+const MIMIC_WORDS = [
+  'chest', 'mimic', 'loot', 'crate', 'coffer', 'casket', 'trunk', 'strongbox',
+  'relic', 'amulet', 'potion', 'elixir', 'scroll', 'tome', 'chalice', 'goblet',
+  'gemstone', 'emerald', 'sapphire', 'ruby', 'diamond', 'treasure', 'hoard', 'spoils',
+  'bounty', 'vault', 'keycard', 'lockbox', 'trinket', 'bauble', 'keepsake', 'token',
+  'artifact', 'curio', 'heirloom', 'talisman', 'runestone', 'mystic', 'arcane', 'essence'
+];
+
 const BOSS_TYPES = [
   {
     name: 'Crimson Bulwark',
@@ -295,6 +314,7 @@ let potions = [null, null, null, null];
 let activeShieldCharges = 0;
 let timeFreezeTimer = 0;
 let chainLightningPrimed = false;
+let gameTimeSeconds = 0;
 let waveSet = 1;
 let wavePhase = 'normal';
 let normalEnemyTarget = getNormalEnemyTarget(waveSet);
@@ -307,6 +327,9 @@ let hardGuestSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
 let medicsSpawnedThisSet = 0;
 let medicSpawnSlots = [];
+let mimicsSpawnedThisSet = 0;
+let mimicSpawnSlots = [];
+let firstMimicHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
 let inputTrace = '';
@@ -372,6 +395,8 @@ const {
   playGameOverSound,
   playGodModeOnSound,
   playGodModeOffSound,
+  playChestClackSound,
+  playChestOpenSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -565,6 +590,7 @@ function startGame() {
   activeShieldCharges = 0;
   timeFreezeTimer = 0;
   chainLightningPrimed = false;
+  gameTimeSeconds = 0;
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
   updatePotionUI();
@@ -720,12 +746,6 @@ function handleKeyDown(event) {
     }
   }
 
-  if (event.key.toLowerCase() === 'p') {
-    event.preventDefault();
-    addPotion();
-    return;
-  }
-
   if (event.key === 'Backspace') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
@@ -823,11 +843,26 @@ function registerMistake() {
   window.setTimeout(() => typingStrip.classList.remove('mistake'), 200);
 }
 
-function defeatEnemy(enemy, isNeutral = false) {
+function defeatEnemy(enemy, isNeutral = false, isChain = false) {
   if (isNeutral) {
+    if (enemy.isMimic) {
+      awardMimicLoot(enemy);
+      spawnDebris(enemy.group.position, enemy.type);
+      removeEnemy(enemy);
+      if (activeTarget === enemy) {
+        activeTarget = null;
+        typedBuffer = '';
+        updateTypedDisplay();
+      }
+      updateHud(true);
+      updateTypedDisplay();
+      return;
+    }
     if (enemy.isBoss) bossesDefeated += 1;
     playDefeatSound(enemy);
-    spawnBeam(enemy.group.position);
+    if (!isChain) {
+      spawnBeam(enemy.group.position);
+    }
     spawnDebris(enemy.group.position, enemy.type);
     removeEnemy(enemy);
     if (activeTarget === enemy) {
@@ -840,7 +875,36 @@ function defeatEnemy(enemy, isNeutral = false) {
     return;
   }
 
-  const chainSource = enemy.group.position.clone();
+  if (chainLightningPrimed) {
+    if (enemy.isMimic) {
+      awardMimicLoot(enemy);
+    }
+    enemy.dying = true;
+    typedBuffer = '';
+    activeTarget = null;
+    updateHud(true);
+    updateTypedDisplay();
+    triggerChainLightning(enemy);
+    return;
+  }
+
+  if (enemy.isMimic) {
+    awardMimicLoot(enemy);
+    if (!isChain) {
+      spawnBeam(enemy.group.position);
+    }
+    spawnDebris(enemy.group.position, enemy.type);
+    removeEnemy(enemy);
+    if (activeTarget === enemy) {
+      activeTarget = null;
+      typedBuffer = '';
+      updateTypedDisplay();
+    }
+    updateHud(true);
+    updateTypedDisplay();
+    return;
+  }
+
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
   defeatedCount += 1;
@@ -855,6 +919,7 @@ function defeatEnemy(enemy, isNeutral = false) {
   spawnScorePopup(points, enemy, healed);
   if (enemy.isMedic) playHealSound(healed);
   else playDefeatSound(enemy);
+
   spawnBeam(enemy.group.position);
   spawnDebris(enemy.group.position, enemy.type);
   removeEnemy(enemy);
@@ -862,7 +927,6 @@ function defeatEnemy(enemy, isNeutral = false) {
   activeTarget = null;
   updateHud(true);
   updateTypedDisplay();
-  if (chainLightningPrimed) triggerChainLightning(chainSource);
 }
 
 function playShieldBlockEffect() {
@@ -891,6 +955,25 @@ function leakEnemy(enemy) {
     spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
     removeEnemy(enemy);
     if (wasActiveTarget) typedBuffer = '';
+    updateTypedDisplay();
+    return;
+  }
+
+  if (enemy.isMimic) {
+    const wasActiveTarget = activeTarget === enemy;
+    playChestClackSound();
+    if (!enemy.label.classList.contains('is-hidden')) {
+      const left = parseFloat(enemy.label.style.left);
+      const top = parseFloat(enemy.label.style.top);
+      if (Number.isFinite(left) && Number.isFinite(top)) spawnLootEscapedPopup(left, top);
+    }
+    spawnDebris(new THREE.Vector3(enemy.group.position.x, 0.32, WALL_Z), enemy.type);
+    removeEnemy(enemy);
+    if (wasActiveTarget) {
+      activeTarget = null;
+      typedBuffer = '';
+    }
+    updateHud(true);
     updateTypedDisplay();
     return;
   }
@@ -955,7 +1038,10 @@ function animate(frameTime) {
   requestAnimationFrame(animate);
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
-  const seconds = frameTime * 0.001;
+
+  const isTimeFrozen = (mode === 'running' && timeFreezeTimer > 0);
+  const animationDelta = isTimeFrozen ? 0 : delta;
+  gameTimeSeconds += animationDelta;
 
   if (mode === 'running') {
     let currentDelta = delta;
@@ -974,6 +1060,12 @@ function animate(frameTime) {
         if (currentDelta > 0) {
           spawnEnemy({ isMedic: true });
           medicsSpawnedThisSet += 1;
+          spawnTimer = Math.max(spawnTimer, 0.55);
+        }
+      } else if (shouldSpawnMimic() && enemies.length < getEnemyLimit()) {
+        if (currentDelta > 0) {
+          spawnEnemy({ isMimic: true });
+          mimicsSpawnedThisSet += 1;
           spawnTimer = Math.max(spawnTimer, 0.55);
         }
       } else if (normalEnemiesSpawned < normalEnemyTarget) {
@@ -999,12 +1091,12 @@ function animate(frameTime) {
       }
     }
 
-    updateEnemies(currentDelta, seconds);
+    updateEnemies(currentDelta, gameTimeSeconds);
     updateHud(false);
   }
 
   updateEffects(delta);
-  updateEnvironment(seconds, delta);
+  updateEnvironment(gameTimeSeconds, delta, isTimeFrozen);
   updateSeasonFade(delta);
   updateLabels();
   renderer.render(scene, camera);
@@ -1013,7 +1105,33 @@ function animate(frameTime) {
 function updateEnemies(delta, seconds) {
   for (let index = enemies.length - 1; index >= 0; index -= 1) {
     const enemy = enemies[index];
+    if (enemy.dying) continue;
     enemy.age += delta;
+
+    if (enemy.isMimic) {
+      const isTargeted = (activeTarget === enemy && isEnemyTargetable(enemy));
+      const targetLidProgress = isTargeted ? 1.0 : 0.0;
+      const oldProgress = enemy.lidOpenProgress;
+      enemy.lidOpenProgress += (targetLidProgress - enemy.lidOpenProgress) * Math.min(1.0, 12 * delta);
+
+      const creakThreshold = 0.05;
+      if (oldProgress < creakThreshold && enemy.lidOpenProgress >= creakThreshold) {
+        playChestOpenSound();
+      } else if (oldProgress >= creakThreshold && enemy.lidOpenProgress < creakThreshold) {
+        playChestClackSound();
+      }
+
+      const lidGroup = enemy.group.userData.lidGroup;
+      if (lidGroup) {
+        lidGroup.rotation.x = -enemy.lidOpenProgress * (Math.PI / 2.8);
+      }
+
+      const chestLight = enemy.group.userData.chestLight;
+      if (chestLight) {
+        chestLight.intensity = enemy.lidOpenProgress * 2.0;
+      }
+    }
+
     const speed = getEnemySpeed(enemy);
     enemy.group.position.z += speed * delta;
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
@@ -1126,12 +1244,18 @@ function updateEffects(delta) {
       continue;
     }
 
+    if (effect.hold) {
+      if (effect.kind === 'lightning_bolt') {
+        effect.mesh.material.opacity = 1.0;
+      }
+      continue;
+    }
+
     effect.life -= delta;
     const amount = Math.max(0, effect.life / effect.maxLife);
 
     if (effect.kind === 'lightning_bolt') {
       effect.mesh.material.opacity = amount;
-      effect.mesh.scale.setScalar(amount);
     } else if (effect.kind === 'beam_flash') {
       const expand = 0.3 + (1 - amount) * 2.2;
       effect.mesh.scale.setScalar(expand);
@@ -1159,12 +1283,14 @@ function updateEffects(delta) {
 
   for (let index = debris.length - 1; index >= 0; index -= 1) {
     const chunk = debris[index];
-    chunk.life -= delta;
-    chunk.velocity.y -= 8.8 * delta;
-    chunk.mesh.position.addScaledVector(chunk.velocity, delta);
-    chunk.mesh.rotation.x += chunk.spin.x * delta;
-    chunk.mesh.rotation.y += chunk.spin.y * delta;
-    chunk.mesh.rotation.z += chunk.spin.z * delta;
+    if (timeFreezeTimer <= 0) {
+      chunk.life -= delta;
+      chunk.velocity.y -= 8.8 * delta;
+      chunk.mesh.position.addScaledVector(chunk.velocity, delta);
+      chunk.mesh.rotation.x += chunk.spin.x * delta;
+      chunk.mesh.rotation.y += chunk.spin.y * delta;
+      chunk.mesh.rotation.z += chunk.spin.z * delta;
+    }
     chunk.mesh.material.opacity = Math.max(0, chunk.life / chunk.maxLife);
     if (chunk.life <= 0 || chunk.mesh.position.y < -1.2) {
       effectsGroup.remove(chunk.mesh);
@@ -1178,8 +1304,9 @@ function updateEffects(delta) {
   if (mistakeTimer > 0) mistakeTimer -= delta;
 }
 
-function updateEnvironment(seconds, delta) {
-  updateWandSwings(delta);
+function updateEnvironment(seconds, delta, isTimeFrozen = false) {
+  const envDelta = isTimeFrozen ? 0 : delta;
+  updateWandSwings(envDelta);
   emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   const shake = damageTimer > 0 ? damageTimer * 0.45 : 0;
   camera.position.x = Math.sin(seconds * 0.34) * 0.28 + Math.sin(seconds * 41) * shake;
@@ -1191,7 +1318,7 @@ function updateEnvironment(seconds, delta) {
     let targetMoonShadowStrength = 1;
     if (moonWaitTimer > 0) {
       // Moon has set — hide it and wait before rising again from the left
-      moonWaitTimer -= delta;
+      moonWaitTimer -= envDelta;
       if (moonWaitTimer <= 0) moonAngle = 0;
       moon.visible = false;
       moon.material.opacity = 0;
@@ -1199,7 +1326,7 @@ function updateEnvironment(seconds, delta) {
       targetMoonShadowStrength = 0;
     } else {
       moon.visible = true;
-      moonAngle += delta * (Math.PI / 200); // full crossing in ~200 s
+      moonAngle += envDelta * (Math.PI / 200); // full crossing in ~200 s
       if (moonAngle >= Math.PI) {
         moonAngle = Math.PI;
         moonWaitTimer = 7 + Math.random() * 3; // wait 7–10 s before next rise
@@ -1213,7 +1340,7 @@ function updateEnvironment(seconds, delta) {
           : 1;
       targetMoonShadowStrength = THREE.MathUtils.clamp(moon.material.opacity * 1.8, 0, 1);
     }
-    updateMoonShadowFade(delta, targetMoonShadowStrength);
+    updateMoonShadowFade(envDelta, targetMoonShadowStrength);
     updateMoonHaze();
   }
 
@@ -1225,7 +1352,7 @@ function updateEnvironment(seconds, delta) {
     pathMarkerMaterial.emissiveIntensity = 0.24 + Math.sin(seconds * 2.8) * 0.1;
   }
 
-  const scrollDelta = SCENERY_SCROLL_SPEED * delta * (mode === 'running' ? 1 : 0.35);
+  const scrollDelta = SCENERY_SCROLL_SPEED * delta * (isTimeFrozen ? 0 : mode === 'running' ? 1 : 0.35);
 
   updateRoad(scrollDelta);
 
@@ -1258,9 +1385,9 @@ function updateEnvironment(seconds, delta) {
     }
   }
 
-  seasonalEffects.update(seconds, delta, scrollDelta);
+  seasonalEffects.update(seconds, envDelta, scrollDelta);
 
-  updateClouds(delta);
+  updateClouds(envDelta);
 }
 
 function updateRoad(scrollDelta) {
@@ -1857,23 +1984,30 @@ function updateTypedDisplay() {
 function spawnEnemy(options = {}) {
   const isBoss = options.isBoss || false;
   const isMedic = options.isMedic || false;
+  const isMimic = options.isMimic || false;
   const wordData = options.wordData
     ? options.wordData
     : options.forcedPrompt
     ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
     : isMedic
     ? chooseMedicPrompt()
+    : isMimic
+    ? chooseMimicPrompt()
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
-  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
+  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
   const hintRange = isBoss ? getBossQuestionHintRange() : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
   }
-  const group = createEnemyMesh(type);
+  if (isMimic && !firstMimicHintShown) {
+    firstMimicHintShown = true;
+    window.setTimeout(() => { if (mode === 'running') showBanner('MIMIC CHEST DETECTED!', 'mimic-hint'); }, 1100);
+  }
+  const group = isMimic ? createMimicChestMesh(type) : createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
   const spawnSpread = Number.isFinite(options.delay)
     ? options.delay
@@ -1901,12 +2035,14 @@ function spawnEnemy(options = {}) {
     scene.add(shadowMesh);
   }
 
-  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : 'keyword';
+  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
     : isMedic
     ? 'word-tag is-medic is-hidden'
+    : isMimic
+    ? 'word-tag is-mimic is-hidden'
     : 'word-tag is-hidden';
   label.dataset.kind = promptKind;
   label.style.setProperty('--threat-progress', '0');
@@ -1917,7 +2053,7 @@ function spawnEnemy(options = {}) {
 
   const kindNode = document.createElement('span');
   kindNode.className = 'prompt-kind';
-  kindNode.textContent = promptKind;
+  kindNode.textContent = promptKind === 'mimic' ? 'loot' : promptKind;
 
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
@@ -1974,6 +2110,9 @@ function spawnEnemy(options = {}) {
     promptKind,
     isBoss,
     isMedic,
+    isMimic,
+    lidOpenProgress: 0,
+    hasOpened: false,
     isFlying,
     shadowMesh,
     lane,
@@ -1981,8 +2120,8 @@ function spawnEnemy(options = {}) {
     revealZ,
     revealed: startZ >= revealZ,
     revealFlash: 0,
-    speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : type.speed + Math.random() * 0.35,
-    damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
+    speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : isMimic ? type.speed + Math.random() * 0.25 : type.speed + Math.random() * 0.35,
+    damage: isBoss ? BOSS_CONTACT_DAMAGE : (isMedic || isMimic) ? 0 : MINION_DAMAGE,
     shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
     baseY: spawnBaseY,
     age: 0,
@@ -2015,6 +2154,7 @@ function chooseSpawnLane(startZ) {
 
 function createEnemyMesh(type) {
   if (!!type.isMedic) return createMedicHeartMesh(type);
+  if (!!type.isMimic) return createMimicChestMesh(type);
   if (!!type.isBoss) return createSpecificBossMesh(type);
   return createNormalEnemyMesh(type);
 }
@@ -2231,6 +2371,91 @@ function finishBossGroup(group, type, beaconY = 2.9) {
   group.userData.targetMarker = targetMarker;
   return group;
 }
+
+function createMimicChestMesh(type) {
+  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.82, metalness: 0.05 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.5, metalness: 0.8 });
+  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 1.5, roughness: 0.3 });
+  const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x120215, roughness: 0.9 });
+  const toothMat = new THREE.MeshStandardMaterial({ color: 0xf3f3e8, roughness: 0.5 });
+
+  const g = new THREE.Group();
+
+  // Wood base core
+  const baseWood = blockMesh(1.2, 0.5, 0.9, bodyMat, 0, 0.25, 0);
+  g.add(baseWood);
+
+  // Dark interior
+  const interior = blockMesh(1.0, 0.1, 0.7, darkInteriorMat, 0, 0.5, 0);
+  g.add(interior);
+
+  // Metal trim around the base edges (bottom, corners)
+  g.add(blockMesh(1.24, 0.08, 0.94, trimMat, 0, 0.04, 0));
+  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, -0.57, 0.26, 0.42));
+  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, 0.57, 0.26, 0.42));
+  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, -0.57, 0.26, -0.42));
+  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, 0.57, 0.26, -0.42));
+  g.add(blockMesh(1.24, 0.06, 0.1, trimMat, 0, 0.47, 0.42));
+
+  // Glowing eyes inside the chest
+  const eyeL = blockMesh(0.16, 0.16, 0.05, eyeMat, -0.22, 0.54, 0.15);
+  const eyeR = blockMesh(0.16, 0.16, 0.05, eyeMat, 0.22, 0.54, 0.15);
+  g.add(eyeL);
+  g.add(eyeR);
+
+  // Lower teeth
+  for (let i = 0; i < 4; i++) {
+    const x = -0.36 + i * 0.24;
+    const tooth = blockMesh(0.1, 0.12, 0.08, toothMat, x, 0.54, 0.32);
+    tooth.rotation.x = 0.2;
+    g.add(tooth);
+  }
+
+  // PointLight inside the chest
+  const light = new THREE.PointLight(type.eye, 0.0, 4.5);
+  light.position.set(0, 0.55, 0.1);
+  g.add(light);
+
+  // Lid Group
+  const lidGroup = new THREE.Group();
+  lidGroup.position.set(0, 0.56, -0.45);
+  g.add(lidGroup);
+
+  const lidWood = blockMesh(1.2, 0.36, 0.9, bodyMat, 0, 0.18, 0.45);
+  lidGroup.add(lidWood);
+
+  // Metal trim for lid (top, corners)
+  lidGroup.add(blockMesh(1.24, 0.06, 0.94, trimMat, 0, 0.36, 0.45));
+  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, -0.57, 0.18, 0.87));
+  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, 0.57, 0.18, 0.87));
+  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, -0.57, 0.18, 0.03));
+  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, 0.57, 0.18, 0.03));
+  lidGroup.add(blockMesh(1.24, 0.06, 0.1, trimMat, 0, 0.03, 0.87));
+
+  // Metal Lock Clasp
+  lidGroup.add(blockMesh(0.16, 0.22, 0.06, trimMat, 0, 0.02, 0.92));
+
+  // Upper teeth
+  for (let i = 0; i < 5; i++) {
+    const x = -0.44 + i * 0.22;
+    const tooth = blockMesh(0.08, 0.14, 0.08, toothMat, x, 0.0, 0.82);
+    tooth.rotation.x = -0.2;
+    lidGroup.add(tooth);
+  }
+
+  // Incoming beacon & target marker
+  const incomingBeacon = createIncomingBeacon(type);
+  const targetMarker = createTargetMarker(type);
+  g.add(incomingBeacon, targetMarker);
+
+  g.userData.lidGroup = lidGroup;
+  g.userData.chestLight = light;
+  g.userData.incomingBeacon = incomingBeacon;
+  g.userData.targetMarker = targetMarker;
+
+  return g;
+}
+
 function createSpecificBossMesh(type) {
   if (type.name === 'Crimson Bulwark') return createDragonBossMesh(type);
   if (type.name === 'Verdant Colossus') return createDevilBossMesh(type);
@@ -3060,7 +3285,7 @@ function chooseTarget(matches) {
 }
 
 function isEnemyTargetable(enemy) {
-  return enemy.revealed && enemy.group.position.z < WALL_Z;
+  return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
 }
 
 function prepareWavePlan() {
@@ -3068,6 +3293,8 @@ function prepareWavePlan() {
   introducedBossTermsThisSet = new Set();
   medicsSpawnedThisSet = 0;
   medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
+  mimicsSpawnedThisSet = 0;
+  mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
   const previewableWords = definitionBossWordsForWave();
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
   hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
@@ -3105,6 +3332,39 @@ function shouldSpawnMedic() {
     && medicsSpawnedThisSet < medicSpawnSlots.length
     && normalEnemiesSpawned >= medicSpawnSlots[medicsSpawnedThisSet];
 }
+
+function chooseMimicPrompt() {
+  const activeTerms = new Set(enemies.map(e => e.prompt));
+  let available = MIMIC_WORDS.filter(w => !activeTerms.has(w));
+  if (available.length === 0) available = MIMIC_WORDS;
+  const term = available[Math.floor(Math.random() * available.length)];
+  return { term, definition: null };
+}
+
+function getMimicCountForWave(wave) {
+  if (wave <= 1) return 0;
+  if (wave >= 6) return 2;
+  return 1;
+}
+
+function chooseMimicSpawnSlots(target, count) {
+  if (target <= 0 || count <= 0) return [];
+  const slots = [];
+  if (count === 1) {
+    slots.push(Math.max(1, Math.round(target * 0.4)));
+  } else {
+    slots.push(Math.max(1, Math.round(target * 0.3)));
+    slots.push(Math.max(2, Math.round(target * 0.7)));
+  }
+  return slots;
+}
+
+function shouldSpawnMimic() {
+  return wavePhase === 'normal'
+    && mimicsSpawnedThisSet < mimicSpawnSlots.length
+    && normalEnemiesSpawned >= mimicSpawnSlots[mimicsSpawnedThisSet];
+}
+
 
 function buildBossPreviewSchedule(target, words) {
   const schedule = new Map();
@@ -3700,6 +3960,60 @@ function spawnScorePopup(points, enemy, healed = 0) {
   popup.addEventListener('animationend', () => popup.remove(), { once: true });
 }
 
+function spawnLootRewardPopup(left, top, addedType) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-loot-reward';
+  const name = addedType.replace('_', ' ').toUpperCase();
+  popup.textContent = `+1 ${name}`;
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function spawnInventoryFullPopup(left, top) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-inventory-full';
+  popup.textContent = 'INVENTORY FULL';
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function spawnLootEscapedPopup(left, top) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-loot-escaped';
+  popup.textContent = 'LOOT ESCAPED';
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function awardMimicLoot(enemy) {
+  const types = ['time_freeze', 'chain_lightning', 'shield'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const success = addPotion(type);
+
+  if (!enemy.label.classList.contains('is-hidden')) {
+    const left = parseFloat(enemy.label.style.left);
+    const top = parseFloat(enemy.label.style.top);
+    if (Number.isFinite(left) && Number.isFinite(top)) {
+      if (success) {
+        spawnLootRewardPopup(left, top, type);
+      } else {
+        spawnInventoryFullPopup(left, top);
+      }
+    }
+  }
+
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+  }
+}
+
+
 function renderRunGlossary() {
   if (!runGlossary) return;
   runGlossary.innerHTML = '';
@@ -3788,19 +4102,51 @@ function showBanner(text, variant = '') {
 // POTION SYSTEM IMPLEMENTATION
 // ==========================================
 
+const POTION_SVGS = {
+  time_freeze: `
+    <svg class="svg-magic magic-time" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <circle cx="22" cy="22" r="14" class="clock-rim"></circle>
+      <path d="M19 8h6M22 8v3" class="clock-top"></path>
+      <line x1="22" y1="22" x2="22" y2="15" class="clock-hand hour-hand"></line>
+      <line x1="22" y1="22" x2="28" y2="22" class="clock-hand minute-hand"></line>
+      <circle cx="22" cy="22" r="2" class="clock-center"></circle>
+    </svg>
+  `,
+  chain_lightning: `
+    <svg class="svg-magic magic-lightning" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <path d="M25 4 L14 22 H22 L18 40 L30 20 H22 Z" class="bolt-path"></path>
+      <circle cx="10" cy="12" r="2" class="spark"></circle>
+      <circle cx="34" cy="30" r="2" class="spark spark-2"></circle>
+    </svg>
+  `,
+  shield: `
+    <svg class="svg-magic magic-shield" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <path d="M22 6 C28 6 34 8 34 14 C34 26 22 36 22 38 C22 36 10 26 10 14 C10 8 16 6 22 6 Z" class="shield-shape"></path>
+      <path d="M22 11 C26 11 30 12 30 16 C30 24 22 31 22 33 C22 31 14 24 14 16 C14 12 18 11 22 11 Z" class="shield-inner"></path>
+    </svg>
+  `
+};
+
 function updatePotionUI() {
   if (!potionBar || !potionSlots) return;
 
   potionSlots.forEach((slot, index) => {
     const potion = potions[index];
     slot.className = 'potion-slot';
+    const iconContainer = slot.querySelector('.potion-icon');
     if (potion) {
       slot.classList.add('occupied');
       slot.setAttribute('data-potion', potion);
       slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potion.replace(/_/g, ' ')}`);
+      if (iconContainer) {
+        iconContainer.innerHTML = POTION_SVGS[potion] || '';
+      }
     } else {
       slot.removeAttribute('data-potion');
       slot.setAttribute('aria-label', `Potion Slot ${index + 1} (Empty)`);
+      if (iconContainer) {
+        iconContainer.innerHTML = '';
+      }
     }
   });
 }
@@ -3856,76 +4202,270 @@ function activatePotionSlot(index) {
   }
 }
 
-function triggerChainLightning(sourcePosition) {
+function triggerChainLightning(firstEnemy) {
   chainLightningPrimed = false;
   document.body.classList.remove('chain-lightning-primed');
-  const N = 4;
-  const origin = sourcePosition?.clone?.() ?? new THREE.Vector3(0, 1.2, WALL_Z);
-  origin.y += 1.2;
-  const targetableEnemies = enemies
-    .filter(e => isEnemyTargetable(e) && !e.dying)
-    .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin));
-
-  const targets = targetableEnemies.slice(0, N);
-  if (targets.length === 0) {
-    showBanner('NO CHAIN TARGETS', 'chain-lightning');
-    return;
+  
+  const origin = firstEnemy.group.position.clone();
+  const N = 2; // Chain to up to 2 additional monsters (total 3 including the 1st one)
+  const targets = [];
+  let currentPosition = origin.clone();
+  
+  const candidates = enemies.filter(e => isEnemyTargetable(e) && !e.dying && e !== firstEnemy);
+  
+  for (let i = 0; i < N; i++) {
+    if (candidates.length === 0) break;
+    let closestEnemy = null;
+    let closestDistSq = Infinity;
+    let closestIndex = -1;
+    for (let j = 0; j < candidates.length; j++) {
+      const distSq = candidates[j].group.position.distanceToSquared(currentPosition);
+      if (distSq < closestDistSq) {
+        closestDistSq = distSq;
+        closestEnemy = candidates[j];
+        closestIndex = j;
+      }
+    }
+    if (closestEnemy && closestDistSq <= 144) { // 12 units squared (12 * 12 = 144)
+      targets.push(closestEnemy);
+      currentPosition = closestEnemy.group.position.clone();
+      candidates.splice(closestIndex, 1);
+    } else {
+      break;
+    }
   }
 
   playToggleSound();
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
-  let previousPosition = origin;
-  targets.forEach((enemy, idx) => {
-    window.setTimeout(() => {
-      if (enemies.includes(enemy)) {
-        const targetPosition = enemy.group.position.clone();
-        targetPosition.y += 1.2;
-        spawnLightningVisual(previousPosition, targetPosition);
-        previousPosition = targetPosition;
-        defeatEnemy(enemy, true); // Neutral defeat
-      }
-    }, idx * 100);
-  });
+  // Select the wand tip on the side of the 1st monster (origin)
+  const side = origin.x < 0 ? 0 : 1;
+  const selectedWand = wandGroups[side];
+  if (selectedWand) {
+    triggerWandSwing(selectedWand);
+  }
+  const wandTip = selectedWand 
+    ? new THREE.Vector3(selectedWand.position.x, 2.38, selectedWand.position.z)
+    : new THREE.Vector3(side === 0 ? -5.35 : 5.35, 2.38, WALL_Z - 0.2);
 
-  if (lightningFlash) {
-    lightningFlash.style.opacity = '0.8';
+  const chainMonsters = [firstEnemy];
+
+  // 1st segment: wandTip -> 1st monster (immediately, held)
+  const p1 = origin.clone();
+  p1.y += 0.8;
+  spawnLightningVisual(wandTip, p1, true);
+
+  let currentChainOrigin = p1;
+
+  if (targets.length === 0) {
+    // No other monsters: hold visual for 100ms, then burst the single monster
     window.setTimeout(() => {
-      lightningFlash.style.opacity = '0';
-    }, 150);
+      burstChain(chainMonsters);
+    }, 100);
+  } else {
+    // Chain sequentially
+    targets.forEach((enemy, index) => {
+      window.setTimeout(() => {
+        if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
+          enemy.dying = true; // freeze
+          chainMonsters.push(enemy);
+
+          const targetPos = enemy.group.position.clone();
+          targetPos.y += 0.8;
+
+          spawnLightningVisual(currentChainOrigin, targetPos, true); // hold = true
+          currentChainOrigin = targetPos;
+        }
+
+        // Trigger simultaneous burst when sequence completes
+        if (index === targets.length - 1) {
+          window.setTimeout(() => {
+            burstChain(chainMonsters);
+          }, 80);
+        }
+      }, (index + 1) * 60);
+    });
   }
 }
 
-function spawnLightningVisual(startPos, targetPos) {
+function releaseChainBeams() {
+  for (const effect of beams) {
+    if (effect.kind === 'lightning_bolt' && effect.hold) {
+      effect.hold = false;
+      effect.life = 0.10;
+      effect.maxLife = 0.10;
+    }
+  }
+}
+
+function burstChain(chainMonsters) {
+  releaseChainBeams();
+
+  chainMonsters.forEach(enemy => {
+    defeatEnemyChainBurst(enemy);
+  });
+
+  if (lightningFlash) {
+    lightningFlash.style.opacity = '0.92';
+    window.setTimeout(() => {
+      lightningFlash.style.opacity = '0';
+    }, 100);
+  }
+}
+
+function defeatEnemyChainBurst(enemy) {
+  if (enemy.isMimic) {
+    awardMimicLoot(enemy);
+    spawnDebris(enemy.group.position, enemy.type);
+
+    // Spark impact flash mesh at the target position
+    const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
+    const flashMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+    flashMesh.position.copy(enemy.group.position);
+    flashMesh.position.y += 0.8;
+    effectsGroup.add(flashMesh);
+    
+    beams.push({
+      kind: 'beam_flash',
+      mesh: flashMesh,
+      life: 0.15,
+      maxLife: 0.15
+    });
+
+    removeEnemy(enemy);
+    updateHud(true);
+    updateTypedDisplay();
+    return;
+  }
+
+  const promptValue = enemy.prompt.replace(/\s/g, '');
+  streak += 1;
+  defeatedCount += 1;
+  if (enemy.isBoss) bossesDefeated += 1;
+  const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
+  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
+  score += points;
+  if (healed > 0) health += healed;
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+  }
+
+  spawnScorePopup(points, enemy, healed);
+  
+  if (enemy.isMedic) playHealSound(healed);
+  else playDefeatSound(enemy);
+
+  spawnDebris(enemy.group.position, enemy.type);
+
+  // Spark impact flash mesh at the target position
+  const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
+  const flashMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+  flashMesh.position.copy(enemy.group.position);
+  flashMesh.position.y += 0.8;
+  effectsGroup.add(flashMesh);
+  
+  beams.push({
+    kind: 'beam_flash',
+    mesh: flashMesh,
+    life: 0.15,
+    maxLife: 0.15
+  });
+
+  removeEnemy(enemy);
+  
+  updateHud(true);
+  updateTypedDisplay();
+}
+
+function spawnLightningVisual(startPos, targetPos, hold = false) {
   const origin = startPos.clone();
   const points = [];
   points.push(origin);
-  const segments = 5;
+  const segments = 6;
   for (let i = 1; i < segments; i++) {
     const t = i / segments;
     const p = new THREE.Vector3().lerpVectors(origin, targetPos, t);
-    p.x += (Math.random() - 0.5) * 0.4;
-    p.y += (Math.random() - 0.5) * 0.4;
-    p.z += (Math.random() - 0.5) * 0.4;
+    p.x += (Math.random() - 0.5) * 0.6;
+    p.y += (Math.random() - 0.5) * 0.6;
+    p.z += (Math.random() - 0.5) * 0.6;
     points.push(p);
   }
   points.push(targetPos);
 
   const curve = new THREE.CatmullRomCurve3(points);
-  const geom = new THREE.TubeGeometry(curve, 10, 0.08, 4, false);
-  const mat = new THREE.MeshBasicMaterial({
+  
+  // 1. Solid white core tube
+  const coreGeom = new THREE.TubeGeometry(curve, 16, 0.10, 4, false);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 1.0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+  effectsGroup.add(coreMesh);
+
+  // 2. Wide glowing golden sleeve
+  const glowGeom = new THREE.TubeGeometry(curve, 16, 0.38, 5, false);
+  const glowMat = new THREE.MeshBasicMaterial({
     color: 0xefc35c,
     transparent: true,
-    opacity: 0.95
+    opacity: 0.52,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
   });
-  const mesh = new THREE.Mesh(geom, mat);
-  effectsGroup.add(mesh);
+  const glowMesh = new THREE.Mesh(glowGeom, glowMat);
+  effectsGroup.add(glowMesh);
 
+  // 3. Impact flash at the target position
+  const flashGeo = new THREE.DodecahedronGeometry(0.5, 0);
+  const flashMat = new THREE.MeshBasicMaterial({
+    color: 0xffdd66,
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+  flashMesh.position.copy(targetPos);
+  effectsGroup.add(flashMesh);
+
+  // Register them in beams array for decay
+  const duration = 0.10;
   beams.push({
     kind: 'lightning_bolt',
-    mesh: mesh,
-    life: 0.18,
-    maxLife: 0.18
+    mesh: coreMesh,
+    life: duration,
+    maxLife: duration,
+    hold: hold
+  });
+  beams.push({
+    kind: 'lightning_bolt',
+    mesh: glowMesh,
+    life: duration,
+    maxLife: duration,
+    hold: hold
+  });
+  beams.push({
+    kind: 'beam_flash',
+    mesh: flashMesh,
+    life: duration,
+    maxLife: duration
   });
 }
 

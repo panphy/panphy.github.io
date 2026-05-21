@@ -819,6 +819,24 @@ body.is-running:not(.is-paused) .hud-grid {
   background: linear-gradient(90deg, #ff8fb3, #ff315f);
 }
 
+.word-tag.is-mimic {
+  border-color: rgba(217, 70, 239, 0.8);
+  background:
+    linear-gradient(135deg, rgba(32, 5, 36, 0.92), rgba(4, 14, 14, 0.86)),
+    linear-gradient(90deg, rgba(217, 70, 239, 0.22), transparent);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36), 0 0 24px rgba(217, 70, 239, 0.3), inset 0 0 18px rgba(242, 240, 223, 0.08);
+}
+
+.word-tag.is-mimic .prompt-kind {
+  background: rgba(217, 70, 239, 0.24);
+  color: #fdf5ff;
+}
+
+.word-tag.is-mimic .threat-meter i {
+  background: linear-gradient(90deg, #f472b6, #d946ef);
+}
+
+
 .word-tag.is-boss {
   min-width: 160px;
   max-width: 300px;
@@ -986,6 +1004,21 @@ body.is-running:not(.is-paused) .hud-grid {
   text-shadow: 0 0 14px rgba(255, 49, 95, 0.52);
 }
 
+.score-popup.is-loot-reward {
+  color: #fdf5ff;
+  text-shadow: 0 0 14px rgba(217, 70, 239, 0.8), 0 0 24px rgba(217, 70, 239, 0.4);
+}
+
+.score-popup.is-inventory-full {
+  color: #f87171;
+  text-shadow: 0 0 14px rgba(239, 68, 68, 0.8);
+}
+
+.score-popup.is-loot-escaped {
+  color: #94a3b8;
+  text-shadow: 0 0 14px rgba(148, 163, 184, 0.5);
+}
+
 .boss-banner {
   position: fixed;
   top: 50%;
@@ -1027,6 +1060,21 @@ body.is-running:not(.is-paused) .hud-grid {
     -2px -2px 0 rgba(0, 0, 0, 0.8),
     0 0 18px rgba(255, 49, 95, 0.45);
 }
+
+.boss-banner.is-mimic-hint {
+  color: #d946ef;
+  text-shadow:
+    2px 0 0 #000,
+    -2px 0 0 #000,
+    0 2px 0 #000,
+    0 -2px 0 #000,
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    -2px 2px 0 rgba(0, 0, 0, 0.8),
+    2px -2px 0 rgba(0, 0, 0, 0.8),
+    -2px -2px 0 rgba(0, 0, 0, 0.8),
+    0 0 18px rgba(217, 70, 239, 0.45);
+}
+
 
 .boss-banner.is-active {
   animation: boss-banner-flash 2.2s ease-out forwards;
@@ -1317,12 +1365,13 @@ body.is-god-mode .damage-flash.show {
 /* Potion Bar & Slots UI */
 .potion-bar {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + 82px);
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: max(18px, env(safe-area-inset-bottom));
+  right: max(18px, env(safe-area-inset-right));
   z-index: 11;
-  display: flex;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(2, 44px);
+  gap: 8px;
   padding: 8px 12px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -1331,10 +1380,6 @@ body.is-god-mode .damage-flash.show {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: opacity 0.3s ease, transform 0.3s ease;
   pointer-events: auto;
-}
-
-body.is-running:not(.is-paused) .potion-bar {
-  top: max(14px, env(safe-area-inset-top));
 }
 
 body:not(.is-running) .potion-bar {
@@ -1346,21 +1391,38 @@ body:not(.is-running) .potion-bar {
   position: relative;
   width: 44px;
   height: 44px;
-  border: 1px dashed rgba(239, 195, 92, 0.2);
+  border: 1px solid transparent;
   border-radius: 8px;
-  background: rgba(8, 18, 16, 0.4);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  cursor: default;
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.potion-slot[data-slot="1"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+.potion-slot[data-slot="0"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+.potion-slot[data-slot="3"] {
+  grid-column: 2;
+  grid-row: 2;
+}
+.potion-slot[data-slot="2"] {
+  grid-column: 3;
+  grid-row: 2;
+}
+
 .potion-slot.occupied {
-  border-style: solid;
-  border-color: var(--gold);
+  border: 1px solid var(--gold);
   background: rgba(239, 195, 92, 0.08);
   box-shadow: 0 0 12px rgba(239, 195, 92, 0.15);
+  cursor: pointer;
 }
 
 .potion-slot.occupied:hover {
@@ -1378,112 +1440,124 @@ body:not(.is-running) .potion-bar {
   color: var(--muted);
   font-weight: 700;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .potion-slot.occupied .slot-key {
   color: var(--gold);
+  opacity: 1;
 }
 
 .potion-icon {
-  --potion-liquid: var(--aqua);
-  --potion-glow: rgba(88, 223, 207, 0.62);
-  --potion-core: rgba(255, 255, 255, 0.9);
-  width: 21px;
-  height: 29px;
+  width: 32px;
+  height: 32px;
   position: relative;
   pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 9px 9px 11px 11px;
-  background:
-    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.95) 0 2px, transparent 3px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.46), transparent 26% 74%, rgba(0, 0, 0, 0.22)),
-    linear-gradient(to top, var(--potion-liquid) 0 62%, rgba(255, 255, 255, 0.22) 63% 100%);
-  box-shadow:
-    inset 3px 0 7px rgba(255, 255, 255, 0.26),
-    inset -4px -4px 8px rgba(0, 0, 0, 0.34),
-    0 8px 10px rgba(0, 0, 0, 0.32),
-    0 0 13px var(--potion-glow);
-  transform: rotate(-7deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.2s ease;
 }
 
-.potion-icon::before {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: -8px;
-  width: 9px;
-  height: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-bottom: 0;
-  border-radius: 4px 4px 2px 2px;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.4), transparent 42%),
-    linear-gradient(to bottom, #654626, #2f2118);
-  box-shadow: inset -2px 0 3px rgba(0, 0, 0, 0.28), 0 0 7px var(--potion-glow);
+/* Magic SVG Icons */
+.svg-magic {
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 
-.potion-icon::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  right: 5px;
-  bottom: 7px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--potion-core);
-  box-shadow: 0 0 8px var(--potion-core);
+/* Time Freeze (Stopwatch) Animation */
+.magic-time .clock-rim {
+  fill: rgba(88, 223, 207, 0.12);
+  stroke: #58dfcf;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 3px rgba(88, 223, 207, 0.8));
+  animation: pulse-clock 2s ease-in-out infinite alternate;
+}
+.magic-time .clock-top {
+  fill: none;
+  stroke: #e7ffff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.magic-time .clock-hand {
+  stroke: #e7ffff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transform-origin: 22px 22px;
+}
+.magic-time .hour-hand {
+  animation: rotate-hand 8s linear infinite;
+}
+.magic-time .minute-hand {
+  animation: rotate-hand 1.5s linear infinite;
+}
+.magic-time .clock-center {
+  fill: #58dfcf;
 }
 
-.potion-slot.occupied:hover .potion-icon {
-  transform: rotate(-7deg) translateY(-2px) scale(1.08);
+@keyframes rotate-hand {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes pulse-clock {
+  0% { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(88, 223, 207, 0.4)); }
+  100% { opacity: 1; filter: drop-shadow(0 0 6px rgba(88, 223, 207, 0.9)); }
 }
 
-/* Time Freeze Potion */
-.potion-slot[data-potion="time_freeze"] .potion-icon {
-  --potion-liquid: #58dfcf;
-  --potion-glow: rgba(88, 223, 207, 0.8);
-  --potion-core: #e7ffff;
+/* Chain Lightning Animation */
+.magic-lightning .bolt-path {
+  fill: #efc35c;
+  stroke: #bf55ec;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 4px rgba(191, 85, 236, 0.8));
+  animation: lightning-flicker 1.8s ease-in-out infinite;
+}
+.magic-lightning .spark {
+  fill: #fff;
+  filter: drop-shadow(0 0 3px #efc35c);
+  animation: spark-pulse 1s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+.magic-lightning .spark-2 {
+  animation-delay: 0.5s;
 }
 
-/* Chain Lightning Potion */
-.potion-slot[data-potion="chain_lightning"] .potion-icon {
-  --potion-liquid: #bf55ec;
-  --potion-glow: rgba(191, 85, 236, 0.78);
-  --potion-core: #efc35c;
+@keyframes lightning-flicker {
+  0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 2px rgba(191, 85, 236, 0.6)); }
+  5% { opacity: 0.3; }
+  10% { opacity: 1; filter: drop-shadow(0 0 8px rgba(191, 85, 236, 0.9)); }
+  15% { opacity: 0.6; }
+  25% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+@keyframes spark-pulse {
+  0% { transform: scale(0.6); opacity: 0.4; }
+  100% { transform: scale(1.3); opacity: 1; }
 }
 
-.potion-slot[data-potion="chain_lightning"] .potion-icon::after {
-  left: 7px;
-  right: auto;
-  bottom: 5px;
-  width: 8px;
-  height: 17px;
-  border-radius: 0;
-  background: linear-gradient(to bottom, #fff9c8, var(--gold));
-  clip-path: polygon(54% 0, 100% 0, 66% 42%, 100% 42%, 34% 100%, 46% 56%, 12% 56%);
-  box-shadow: 0 0 10px var(--gold);
+/* Shield Animation */
+.magic-shield .shield-shape {
+  fill: rgba(88, 166, 255, 0.16);
+  stroke: #58a6ff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 4px rgba(88, 166, 255, 0.8));
+  animation: shield-glow 2.5s ease-in-out infinite alternate;
+}
+.magic-shield .shield-inner {
+  fill: #dff3ff;
+  opacity: 0.65;
+  animation: shield-inner-pulse 1.2s ease-in-out infinite alternate;
 }
 
-/* Shield Potion */
-.potion-slot[data-potion="shield"] .potion-icon {
-  --potion-liquid: #58a6ff;
-  --potion-glow: rgba(88, 166, 255, 0.78);
-  --potion-core: #dff3ff;
+@keyframes shield-glow {
+  0% { filter: drop-shadow(0 0 2px rgba(88, 166, 255, 0.4)); fill: rgba(88, 166, 255, 0.12); }
+  100% { filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.9)); fill: rgba(88, 166, 255, 0.32); }
 }
-
-.potion-slot[data-potion="shield"] .potion-icon::after {
-  left: 5px;
-  right: auto;
-  bottom: 5px;
-  width: 11px;
-  height: 15px;
-  border-radius: 6px 6px 8px 8px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(223, 243, 255, 0.18) 42%),
-    linear-gradient(to bottom, #dff3ff, #58a6ff);
-  clip-path: polygon(50% 0, 100% 18%, 86% 74%, 50% 100%, 14% 74%, 0 18%);
-  box-shadow: 0 0 10px rgba(88, 166, 255, 0.92);
+@keyframes shield-inner-pulse {
+  0% { opacity: 0.25; }
+  100% { opacity: 0.75; }
 }
 
 body.chain-lightning-primed .typing-strip {
@@ -1495,9 +1569,9 @@ body.chain-lightning-primed .typing-strip {
 }
 
 @keyframes potion-shake {
-  0%, 100% { transform: translateX(-50%); }
-  25% { transform: translateX(calc(-50% - 4px)); }
-  75% { transform: translateX(calc(-50% + 4px)); }
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-4px, 0); }
+  75% { transform: translate(4px, 0); }
 }
 .potion-bar.full-shake {
   animation: potion-shake 0.2s ease-in-out 2;

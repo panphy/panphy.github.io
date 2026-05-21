@@ -1,0 +1,33 @@
+# Task List - Roguelike Expansion Updates & Phase 2 Mimic Chest
+
+- [x] Fix "lightning flying sideways" scaling glitch in `updateEffects()` in [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
+- [x] Align starting coordinate of lightning to the actual wand tip in `triggerChainLightning()`
+- [x] Implement distance limit (`MAX_CHAIN_DISTANCE = 12.0`) in `triggerChainLightning()` to avoid long-range chain segments
+- [x] Freeze enemies during the chain strike sequence (skip movement updates in `updateEnemies()` when `enemy.dying` is true)
+- [x] Support `hold` parameter in `spawnLightningVisual()` and keep held lightning opaque in `updateEffects()`
+- [x] Call `burstChain()` at the end of the sequence to release all lightning bolts and burst all chained monsters simultaneously with a screen flash
+- [x] Refine chain lightning thickness:
+  - [x] Reduce core tube radius to `0.10`
+  - [x] Reduce outer glow sleeve radius to `0.38`
+  - [x] Reduce target impact flash radius to `0.5`
+- [x] Speed up chain propagation and decay timings (Second iteration, even faster):
+  - [x] Decrease sequential strike interval to `60ms`
+  - [x] Decrease burst delay for multi-target chains to `80ms`
+  - [x] Decrease burst delay for single-target chains to `100ms`
+  - [x] Decrease post-release lightning bolt fade decay to `0.10s`
+  - [x] Decrease post-burst screen flash decay to `100ms`
+  - [x] Decrease beam flash decay to `0.15s`
+- [x] Reposition potion bar UI:
+  - [x] Change fixed positioning of `.potion-bar` to bottom-right corner (`bottom` and `right`)
+  - [x] Modify `@keyframes potion-shake` to translate relative to `(0,0)` instead of centering offsets
+- [x] Implement Phase 2: Mimic Chest Enemy
+  - [x] Define `MIMIC_TYPE` and `MIMIC_WORDS`
+  - [x] Program staggered spawn timing rules for normal wave phases
+  - [x] Synthesize `playChestOpenSound` and `playChestClackSound` in [audio.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/audio.js)
+  - [x] Build Three.js 3D voxel chest mesh with rotatable `lidGroup` and internal `PointLight` glow
+  - [x] Interpolate lid opening/closing and glow intensity based on targeted status in `updateEnemies()`
+  - [x] Create CSS styling for `.word-tag.is-mimic` and popups (`.is-loot-reward`, `.is-inventory-full`, `.is-loot-escaped`) in [styles.css](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/styles.css)
+  - [x] Wire loot awarding on direct typing defeat and chain-lightning burst defeats (`awardMimicLoot` drops a random potion, shakes potion bar if full, floats popups)
+  - [x] Implement clean escapes in `leakEnemy` (chest clacks shut, floats "LOOT ESCAPED", no damage, no streak reset)
+  - [x] Remove the temporary P debug shortcut
+  - [x] Update [todo.md](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/todo.md)
