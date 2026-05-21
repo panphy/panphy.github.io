@@ -896,7 +896,8 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
     return;
   }
 
-  if (potionsSystem.isChainLightningPrimed()) {
+  const isNormalEnemy = !enemy.isBoss && !enemy.isMedic && !enemy.isMimic;
+  if (potionsSystem.isChainLightningPrimed() && isNormalEnemy) {
     potionsSystem.clearChainLightningPrimed();
     enemy.dying = true;
     typedBuffer = '';
@@ -3437,19 +3438,22 @@ function chooseMimicPrompt() {
 }
 
 function getMimicCountForWave(wave) {
-  if (wave <= 1) return 0;
-  if (wave >= 6) return 2;
-  return 1;
+  if (wave <= 1) return 1;
+  if (wave >= 6) return 3;
+  return 2;
 }
 
 function chooseMimicSpawnSlots(target, count) {
   if (target <= 0 || count <= 0) return [];
   const slots = [];
-  if (count === 1) {
-    slots.push(Math.max(1, Math.round(target * 0.4)));
-  } else {
-    slots.push(Math.max(1, Math.round(target * 0.3)));
-    slots.push(Math.max(2, Math.round(target * 0.7)));
+  const usableTarget = Math.max(1, target - 1);
+  for (let index = 0; index < count; index += 1) {
+    const slot = THREE.MathUtils.clamp(
+      Math.round(((index + 1) * usableTarget) / (count + 1)),
+      1,
+      usableTarget
+    );
+    slots.push(slot);
   }
   return slots;
 }
@@ -4213,11 +4217,18 @@ function triggerChainLightning(firstEnemy) {
   }
   
   const origin = firstEnemy.group.position.clone();
-  const N = 2; // Chain to up to 2 additional monsters (total 3 including the 1st one)
+  const N = 1; // Chain to up to 1 additional monster (total 2 including the 1st one)
   const targets = [];
   let currentPosition = origin.clone();
   
-  const candidates = enemies.filter(e => isEnemyTargetable(e) && !e.dying && e !== firstEnemy);
+  const candidates = enemies.filter(e => 
+    isEnemyTargetable(e) && 
+    !e.dying && 
+    e !== firstEnemy && 
+    !e.isBoss && 
+    !e.isMedic && 
+    !e.isMimic
+  );
   
   for (let i = 0; i < N; i++) {
     if (candidates.length === 0) break;

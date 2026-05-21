@@ -117,7 +117,7 @@ export function createPotionSystem({
     potions[index] = null;
 
     if (potion === 'time_freeze') {
-      timeFreezeTimer = 5.0;
+      timeFreezeTimer = 3.0;
       playGodModeOnSound();
       showBanner('TIME FREEZE!', 'time-freeze');
     } else if (potion === 'chain_lightning') {
