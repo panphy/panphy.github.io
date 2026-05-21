@@ -20,6 +20,25 @@
 - [x] Reposition potion bar UI:
   - [x] Change fixed positioning of `.potion-bar` to bottom-right corner (`bottom` and `right`)
   - [x] Modify `@keyframes potion-shake` to translate relative to `(0,0)` instead of centering offsets
+- [x] Modify `src/main.js` to integrate the modular potion system
+  - [x] Import and initialize `potionsSystem`
+  - [x] Clean up all old Shield Potion variables, functions, and elements
+  - [x] Remove functions/variables migrated to `potions.js` (e.g. state management for potion inventory)
+  - [x] Update key event listeners to activate potion slots using `potionsSystem`
+  - [x] Update character trace code mechanism to obfuscate `iddqd` and `idkfa` cheat codes
+  - [x] Integrate enemy pushback/stun movement update logic in `updateEnemies()`
+  - [x] Update wall collision and rock impact detection in `updateEnemies()` and `bossProjectileHitPlayer()`
+  - [x] Update `animate()` loop to tick `potionsSystem.update(delta)`
+- [x] Update styling and DOM in `spellwave2.html` and `src/styles.css`
+  - [x] Remove `#shieldBarrier` overlay element from `spellwave2.html`
+  - [x] Remove `.shield-barrier` and other old shield-related classes in `src/styles.css`
+  - [x] Add animations and classes for repulsor and blaze barrier visual details
+- [x] Verify functionality
+  - [x] Run python dev server
+  - [x] Type `idkfa` and verify full potion bar and refill on use
+  - [x] Type `iddqd` and check god mode
+  - [x] Verify Repulsor Blast pushes enemies back and stuns them
+  - [x] Verify Blaze Barrier burns enemies and blocks projectiles up to 3 times
 - [x] Implement Phase 2: Mimic Chest Enemy
   - [x] Define `MIMIC_TYPE` and `MIMIC_WORDS`
   - [x] Program staggered spawn timing rules for normal wave phases

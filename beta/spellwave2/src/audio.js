@@ -596,6 +596,12 @@ export function createSpellwaveAudio({
     playTone(880, 0.16, { gain: 0.020, delay: 0.24, type: 'sine' });
   }
 
+  function playShockwaveSound() {
+    playTone(120, 0.45, { gain: 0.065, type: 'sawtooth', endFrequency: 60 });
+    playTone(60, 0.60, { gain: 0.080, delay: 0.05, type: 'sine', endFrequency: 30 });
+    playNoise(0.60, { gain: 0.075, filterFrequency: 450, filterType: 'lowpass' });
+  }
+
   return {
     toggleEnabled,
     updateAudioButton,
@@ -622,6 +628,7 @@ export function createSpellwaveAudio({
     playGodModeOffSound,
     playChestClackSound,
     playChestOpenSound,
+    playShockwaveSound,
   };
 }
 

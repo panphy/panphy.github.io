@@ -1537,27 +1537,39 @@ body:not(.is-running) .potion-bar {
   100% { transform: scale(1.3); opacity: 1; }
 }
 
-/* Shield Animation */
-.magic-shield .shield-shape {
-  fill: rgba(88, 166, 255, 0.16);
-  stroke: #58a6ff;
+/* Shockwave Animation */
+.magic-shockwave .shockwave-crest {
+  stroke: #0088ff;
   stroke-width: 2.5;
-  filter: drop-shadow(0 0 4px rgba(88, 166, 255, 0.8));
-  animation: shield-glow 2.5s ease-in-out infinite alternate;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.45;
+  filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
+  animation: shockwave-wifi-glow 1.2s infinite;
 }
-.magic-shield .shield-inner {
-  fill: #dff3ff;
-  opacity: 0.65;
-  animation: shield-inner-pulse 1.2s ease-in-out infinite alternate;
+.magic-shockwave .shockwave-crest-1 {
+  animation-delay: 0s;
+}
+.magic-shockwave .shockwave-crest-2 {
+  animation-delay: 0.2s;
+}
+.magic-shockwave .shockwave-crest-3 {
+  animation-delay: 0.4s;
 }
 
-@keyframes shield-glow {
-  0% { filter: drop-shadow(0 0 2px rgba(88, 166, 255, 0.4)); fill: rgba(88, 166, 255, 0.12); }
-  100% { filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.9)); fill: rgba(88, 166, 255, 0.32); }
-}
-@keyframes shield-inner-pulse {
-  0% { opacity: 0.25; }
-  100% { opacity: 0.75; }
+@keyframes shockwave-wifi-glow {
+  0%, 10% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
+  }
+  20%, 45% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(0, 136, 255, 0.9));
+  }
+  55%, 100% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
+  }
 }
 
 body.chain-lightning-primed .typing-strip {
@@ -1597,14 +1609,15 @@ body.chain-lightning-primed .typing-strip {
     0 0 18px rgba(88, 223, 207, 0.7);
 }
 
-.boss-banner.is-shield {
-  color: var(--gold);
+.boss-banner.is-shockwave {
+  color: #0088ff;
   text-shadow:
     2px 0 0 #000,
     -2px 0 0 #000,
     0 2px 0 #000,
     0 -2px 0 #000,
-    0 0 18px rgba(239, 195, 92, 0.7);
+    0 0 18px rgba(0, 136, 255, 0.8),
+    0 0 30px rgba(0, 136, 255, 0.4);
 }
 
 .boss-banner.is-chain-lightning {
@@ -1665,61 +1678,4 @@ body:not(.time-frozen) #gameCanvas {
   32%  { transform: translate(-50%, -50%) scale(1.0); }
   70%  { opacity: 1; transform: translate(-50%, -62%); }
   100% { opacity: 0; transform: translate(-50%, -80%); }
-}
-
-/* === Shield Barrier === */
-.shield-barrier {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 42vh;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(to top, rgba(30, 100, 255, 0.12) 0%, transparent 100%);
-  border-top: 2px solid rgba(100, 180, 255, 0.6);
-  border-left: 2px solid rgba(100, 180, 255, 0.35);
-  border-right: 2px solid rgba(100, 180, 255, 0.35);
-  box-shadow:
-    0 -4px 24px rgba(80, 140, 255, 0.45),
-    inset 0 0 40px rgba(30, 80, 255, 0.08);
-  z-index: 50;
-  transition: opacity 0.45s ease;
-}
-.shield-barrier::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 6px,
-    rgba(100, 180, 255, 0.04) 6px,
-    rgba(100, 180, 255, 0.04) 7px
-  );
-  animation: shield-scan 3.5s linear infinite;
-}
-@keyframes shield-scan {
-  from { background-position: 0 0; }
-  to   { background-position: 0 100px; }
-}
-body.shield-active .shield-barrier {
-  opacity: 1;
-  animation: shield-barrier-pulse 2.8s ease-in-out infinite;
-}
-@keyframes shield-barrier-pulse {
-  0%, 100% {
-    box-shadow: 0 -4px 24px rgba(80, 140, 255, 0.45), inset 0 0 40px rgba(30, 80, 255, 0.08);
-  }
-  50% {
-    box-shadow: 0 -10px 40px rgba(80, 140, 255, 0.7), inset 0 0 60px rgba(30, 80, 255, 0.16);
-  }
-}
-.shield-barrier.is-blocking {
-  animation: shield-block-flash 0.22s ease-out forwards !important;
-  opacity: 1 !important;
-}
-@keyframes shield-block-flash {
-  0%   { background: linear-gradient(to top, rgba(100, 180, 255, 0.55) 0%, rgba(80, 160, 255, 0.25) 100%); }
-  100% { background: linear-gradient(to top, rgba(30, 100, 255, 0.12) 0%, transparent 100%); }
 }

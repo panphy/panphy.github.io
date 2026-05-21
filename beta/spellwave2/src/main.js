@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
+import { createPotionSystem } from './potions.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
 
 const canvas = document.getElementById('gameCanvas');
@@ -27,7 +28,6 @@ const messageCopy = document.getElementById('messageCopy');
 const supportLink = document.getElementById('supportLink');
 const keyboardInput = document.getElementById('keyboardInput');
 const damageFlash = document.getElementById('damageFlash');
-const shieldBarrier = document.getElementById('shieldBarrier');
 const lightningFlash = document.getElementById('lightningFlash');
 let godModeBadge = null; // created dynamically on activation, never in static HTML
 const typingLabel = document.getElementById('typingLabel');
@@ -57,7 +57,8 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
 const MEDIC_HEAL_AMOUNT = 2;
-const INPUT_TRACE_CODES = [0x69, 0x64, 0x64, 0x71, 0x64];
+const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
+const PARTICLE_GRAVITY_COEFFS = [21 * 5, 20 * 5, 10.7 * 10, 34 * 3, 9.7 * 10];
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
@@ -305,10 +306,6 @@ let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
 let health = MAX_LIFE;
-let potions = [null, null, null, null];
-let activeShieldCharges = 0;
-let timeFreezeTimer = 0;
-let chainLightningPrimed = false;
 let wandsArePrimed = false;
 let gameTimeSeconds = 0;
 let waveSet = 1;
@@ -363,6 +360,7 @@ let currentSeasonIndex = 0;
 let seasonEmberIntensityBase = 2.1;
 let seasonFade = null;
 let seasonalEffects = null;
+let potionsSystem = null;
 let baseCloudMaterial = null;
 let weatherCloudMaterial = null;
 let cloudWeatherBlend = 0;
@@ -393,6 +391,7 @@ const {
   playGodModeOffSound,
   playChestClackSound,
   playChestOpenSound,
+  playShockwaveSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -473,6 +472,25 @@ seasonalEffects = createSeasonalEffects({
   pathMarkerWrapZ: PATH_MARKER_WRAP_Z,
 });
 seasonalEffects.create();
+potionsSystem = createPotionSystem({
+  getMode: () => mode,
+  getEnemies: () => enemies,
+  getGameTime: () => gameTimeSeconds,
+  defeatEnemy: (enemy, isNeutral) => defeatEnemy(enemy, isNeutral),
+  showBanner,
+  potionBar,
+  potionSlots,
+  scene,
+  effectsGroup,
+  playShockwaveSound,
+  playGodModeOnSound,
+  playGodModeOffSound,
+  playToggleSound,
+  playStartSound,
+  THREE,
+  SPAWN_Z,
+  WALL_Z
+});
 applySeasonForWave(1, true);
 createLifeMeter();
 
@@ -582,16 +600,11 @@ function startGame() {
   score = 0;
   health = MAX_LIFE;
   renderedHealth = null;
-  potions = [null, null, null, null];
-  activeShieldCharges = 0;
-  timeFreezeTimer = 0;
-  chainLightningPrimed = false;
+  potionsSystem.clear();
   gameTimeSeconds = 0;
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
-  document.body.classList.remove('shield-active');
   wandsArePrimed = false;
-  updatePotionUI();
   waveSet = 1;
   wavePhase = 'normal';
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
@@ -655,7 +668,7 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
-  chainLightningPrimed = false;
+  potionsSystem.clear();
   document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
   startMusicLoop(false);
@@ -731,15 +744,15 @@ function handleKeyDown(event) {
     else if (event.key === 'ArrowUp') slotIndex = 1;
     else if (event.key === 'ArrowRight') slotIndex = 2;
     else if (event.key === 'ArrowDown') slotIndex = 3;
-    if (slotIndex !== -1) activatePotionSlot(slotIndex);
+    if (slotIndex !== -1) potionsSystem.activatePotionSlot(slotIndex);
     return;
   }
 
   if (['1', '2', '3', '4'].includes(event.key)) {
     let slotIndex = parseInt(event.key, 10) - 1;
-    if (slotIndex >= 0 && slotIndex < 4 && potions[slotIndex] !== null) {
+    if (slotIndex >= 0 && slotIndex < 4) {
       event.preventDefault();
-      activatePotionSlot(slotIndex);
+      potionsSystem.activatePotionSlot(slotIndex);
       return;
     }
   }
@@ -781,7 +794,7 @@ function handleBeforeInput(event) {
 }
 
 function enterCharacter(character) {
-  if (updateInputTrace(character)) toggleGodMode();
+  checkCheatCode(character);
 
   const inputOptions = getInputCharacters(character);
   if (inputOptions.length === 0) return;
@@ -826,10 +839,20 @@ function enterCharacter(character) {
   updateTypedDisplay();
 }
 
-function updateInputTrace(character) {
-  inputTrace = (inputTrace + character.toLowerCase()).slice(-INPUT_TRACE_CODES.length);
-  if (inputTrace.length !== INPUT_TRACE_CODES.length) return false;
-  return INPUT_TRACE_CODES.every((code, index) => inputTrace.charCodeAt(index) === code);
+function checkCheatCode(character) {
+  inputTrace = (inputTrace + character.toLowerCase()).slice(-5);
+  if (inputTrace.length < 5) return;
+
+  const matchIddqd = EMBER_HEIGHT_DELTAS.every((code, idx) => inputTrace.charCodeAt(idx) === code);
+  const matchIdkfa = PARTICLE_GRAVITY_COEFFS.every((code, idx) => inputTrace.charCodeAt(idx) === code);
+
+  if (matchIddqd) {
+    toggleGodMode();
+    inputTrace = '';
+  } else if (matchIdkfa) {
+    potionsSystem.togglePotionCheat();
+    inputTrace = '';
+  }
 }
 
 function registerMistake() {
@@ -873,7 +896,8 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
     return;
   }
 
-  if (chainLightningPrimed) {
+  if (potionsSystem.isChainLightningPrimed()) {
+    potionsSystem.clearChainLightningPrimed();
     enemy.dying = true;
     typedBuffer = '';
     activeTarget = null;
@@ -924,23 +948,6 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
   updateTypedDisplay();
 }
 
-function playShieldBlockEffect() {
-  playGodModeOffSound();
-  const flash = document.getElementById('damageFlash');
-  if (flash) {
-    flash.style.background = 'radial-gradient(circle, rgba(135, 206, 250, 0.72), rgba(30, 144, 255, 0.46) 44%, transparent 72%)';
-    flash.classList.add('show');
-    window.setTimeout(() => {
-      flash.classList.remove('show');
-      flash.style.background = '';
-    }, 160);
-  }
-  if (shieldBarrier) {
-    shieldBarrier.classList.add('is-blocking');
-    shieldBarrier.addEventListener('animationend', () => shieldBarrier.classList.remove('is-blocking'), { once: true });
-  }
-  updatePotionUI();
-}
 
 function leakEnemy(enemy) {
   if (enemy.isMedic) {
@@ -977,15 +984,6 @@ function leakEnemy(enemy) {
     return;
   }
 
-  if (activeShieldCharges > 0) {
-    activeShieldCharges -= 1;
-    if (activeShieldCharges === 0) document.body.classList.remove('shield-active');
-    playShieldBlockEffect();
-    removeEnemy(enemy);
-    updateHud(true);
-    updateTypedDisplay();
-    return;
-  }
 
   if (!godMode) health = Math.max(0, health - enemy.damage);
   streak = 0;
@@ -1016,13 +1014,7 @@ function bossProjectileHitPlayer(enemy) {
   playBossImpactSound();
 
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
-    if (activeShieldCharges > 0) {
-      activeShieldCharges -= 1;
-      if (activeShieldCharges === 0) document.body.classList.remove('shield-active');
-      playShieldBlockEffect();
-      updateHud(true);
-      return;
-    }
+
     if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
     streak = 0;
     damageTimer = 0.24;
@@ -1040,14 +1032,15 @@ function animate(frameTime) {
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
 
-  const isTimeFrozen = (mode === 'running' && timeFreezeTimer > 0);
+  potionsSystem.update(delta);
+
+  const isTimeFrozen = (mode === 'running' && potionsSystem.isTimeFrozen());
   const animationDelta = isTimeFrozen ? 0 : delta;
   gameTimeSeconds += animationDelta;
 
   if (mode === 'running') {
     let currentDelta = delta;
-    if (timeFreezeTimer > 0) {
-      timeFreezeTimer = Math.max(0, timeFreezeTimer - delta);
+    if (potionsSystem.isTimeFrozen()) {
       currentDelta = 0;
       document.body.classList.add('time-frozen');
     } else {
@@ -1133,8 +1126,24 @@ function updateEnemies(delta, seconds) {
       }
     }
 
-    const speed = getEnemySpeed(enemy);
-    enemy.group.position.z += speed * delta;
+    if (enemy.stunTimer === undefined) enemy.stunTimer = 0;
+    if (enemy.stunTimer > 0) {
+      enemy.stunTimer = Math.max(0, enemy.stunTimer - delta);
+    }
+
+    let speed = 0;
+    if (enemy.stunTimer <= 0) {
+      speed = getEnemySpeed(enemy);
+    }
+
+    if (enemy.pushbackTargetZ !== undefined) {
+      enemy.group.position.z += (enemy.pushbackTargetZ - enemy.group.position.z) * Math.min(1.0, 10.0 * delta);
+      if (Math.abs(enemy.group.position.z - enemy.pushbackTargetZ) < 0.1) {
+        delete enemy.pushbackTargetZ;
+      }
+    } else {
+      enemy.group.position.z += speed * delta;
+    }
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     if (enemy.isFlying) {
       enemy.group.position.y = enemy.baseY + Math.sin(seconds * 1.4 + enemy.phase) * enemy.floatAmount;
@@ -1156,7 +1165,7 @@ function updateEnemies(delta, seconds) {
     }
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
-    if (enemy.isBoss && enemy.revealed) {
+    if (enemy.isBoss && enemy.revealed && (!enemy.stunTimer || enemy.stunTimer <= 0)) {
       enemy.shotTimer -= delta;
       if (enemy.shotTimer <= 0) {
         bossShootPlayer(enemy);
@@ -1221,14 +1230,14 @@ function updateEffects(delta) {
     const effect = beams[index];
 
     if (effect.kind === 'rock') {
-      if (timeFreezeTimer <= 0) {
+      if (!potionsSystem.isTimeFrozen()) {
         effect.age += delta;
       }
       const progress = THREE.MathUtils.clamp(effect.age / effect.flightTime, 0, 1);
       const eased = easeOutSine(progress);
       effect.mesh.position.copy(effect.start).lerp(effect.end, eased);
       effect.mesh.position.y += Math.sin(progress * Math.PI) * effect.arcHeight;
-      if (timeFreezeTimer <= 0) {
+      if (!potionsSystem.isTimeFrozen()) {
         effect.mesh.rotation.x += effect.spin.x * delta;
         effect.mesh.rotation.y += effect.spin.y * delta;
         effect.mesh.rotation.z += effect.spin.z * delta;
@@ -1284,7 +1293,7 @@ function updateEffects(delta) {
 
   for (let index = debris.length - 1; index >= 0; index -= 1) {
     const chunk = debris[index];
-    if (timeFreezeTimer <= 0) {
+    if (!potionsSystem.isTimeFrozen()) {
       chunk.life -= delta;
       chunk.velocity.y -= 8.8 * delta;
       chunk.mesh.position.addScaledVector(chunk.velocity, delta);
@@ -1365,14 +1374,15 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
     marker.mesh.position.y = marker.baseY + Math.sin(seconds * 3.2 + marker.phase) * 0.018;
   }
 
-  if (chainLightningPrimed && !wandsArePrimed) {
+  const isChainLightningPrimed = potionsSystem ? potionsSystem.isChainLightningPrimed() : false;
+  if (isChainLightningPrimed && !wandsArePrimed) {
     wandsArePrimed = true;
     sceneCrystalMat.color.setHex(0xfde068);
     sceneCrystalMat.emissive.setHex(0xfde068);
     sceneCrystalMat.emissiveIntensity = 3.5;
     for (const crown of lightningCrowns) crown.visible = true;
     for (const light of torchLights) light.color.setHex(0xfde068);
-  } else if (!chainLightningPrimed && wandsArePrimed) {
+  } else if (!isChainLightningPrimed && wandsArePrimed) {
     wandsArePrimed = false;
     sceneCrystalMat.color.setHex(0x58dfcf);
     sceneCrystalMat.emissive.setHex(0x2dd4bf);
@@ -4088,9 +4098,9 @@ function spawnMagicAcquiredBurst(addedType) {
 }
 
 function awardMimicLoot(enemy) {
-  const types = ['time_freeze', 'chain_lightning', 'shield'];
+  const types = ['time_freeze', 'chain_lightning', 'shockwave'];
   const type = types[Math.floor(Math.random() * types.length)];
-  const success = addPotion(type);
+  const success = potionsSystem.addPotion(type);
 
   if (!enemy.label.classList.contains('is-hidden')) {
     const left = parseFloat(enemy.label.style.left);
@@ -4195,114 +4205,12 @@ function showBanner(text, variant = '') {
   bossBanner.classList.add('is-active');
 }
 
-// ==========================================
-// POTION SYSTEM IMPLEMENTATION
-// ==========================================
-
-const POTION_SVGS = {
-  time_freeze: `
-    <svg class="svg-magic magic-time" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-      <circle cx="22" cy="22" r="14" class="clock-rim"></circle>
-      <path d="M19 8h6M22 8v3" class="clock-top"></path>
-      <line x1="22" y1="22" x2="22" y2="15" class="clock-hand hour-hand"></line>
-      <line x1="22" y1="22" x2="28" y2="22" class="clock-hand minute-hand"></line>
-      <circle cx="22" cy="22" r="2" class="clock-center"></circle>
-    </svg>
-  `,
-  chain_lightning: `
-    <svg class="svg-magic magic-lightning" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-      <path d="M25 4 L14 22 H22 L18 40 L30 20 H22 Z" class="bolt-path"></path>
-      <circle cx="10" cy="12" r="2" class="spark"></circle>
-      <circle cx="34" cy="30" r="2" class="spark spark-2"></circle>
-    </svg>
-  `,
-  shield: `
-    <svg class="svg-magic magic-shield" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-      <path d="M22 6 C28 6 34 8 34 14 C34 26 22 36 22 38 C22 36 10 26 10 14 C10 8 16 6 22 6 Z" class="shield-shape"></path>
-      <path d="M22 11 C26 11 30 12 30 16 C30 24 22 31 22 33 C22 31 14 24 14 16 C14 12 18 11 22 11 Z" class="shield-inner"></path>
-    </svg>
-  `
-};
-
-function updatePotionUI() {
-  if (!potionBar || !potionSlots) return;
-
-  potionSlots.forEach((slot, index) => {
-    const potion = potions[index];
-    slot.className = 'potion-slot';
-    const iconContainer = slot.querySelector('.potion-icon');
-    if (potion) {
-      slot.classList.add('occupied');
-      slot.setAttribute('data-potion', potion);
-      slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potion.replace(/_/g, ' ')}`);
-      if (iconContainer) {
-        iconContainer.innerHTML = POTION_SVGS[potion] || '';
-      }
-    } else {
-      slot.removeAttribute('data-potion');
-      slot.setAttribute('aria-label', `Potion Slot ${index + 1} (Empty)`);
-      if (iconContainer) {
-        iconContainer.innerHTML = '';
-      }
-    }
-  });
-}
-
-function addPotion(type) {
-  if (!type) {
-    const types = ['time_freeze', 'chain_lightning', 'shield'];
-    type = types[Math.floor(Math.random() * types.length)];
-  }
-
-  const freeSlot = potions.indexOf(null);
-  if (freeSlot !== -1) {
-    potions[freeSlot] = type;
-    updatePotionUI();
-    playStartSound(); // Play collection chime
-    return true;
-  } else {
-    if (potionBar) {
-      potionBar.classList.add('full-shake');
-      window.setTimeout(() => potionBar.classList.remove('full-shake'), 400);
-    }
-    return false;
-  }
-}
-
-function activatePotionSlot(index) {
-  if (mode !== 'running') return;
-  const potion = potions[index];
-  if (!potion) return;
-
-  const slotEl = potionSlots[index];
-  if (slotEl) {
-    slotEl.classList.add('activating');
-    slotEl.addEventListener('animationend', () => slotEl.classList.remove('activating'), { once: true });
-  }
-
-  potions[index] = null;
-  updatePotionUI();
-
-  if (potion === 'time_freeze') {
-    timeFreezeTimer = 5.0;
-    playGodModeOnSound();
-    showBanner('TIME FREEZE!', 'time-freeze');
-  } else if (potion === 'chain_lightning') {
-    chainLightningPrimed = true;
-    document.body.classList.add('chain-lightning-primed');
-    playToggleSound();
-    showBanner('CHAIN PRIMED!', 'chain-lightning');
-  } else if (potion === 'shield') {
-    activeShieldCharges = 2;
-    document.body.classList.add('shield-active');
-    playHealSound(1);
-    showBanner('SHIELD ACTIVE!', 'shield');
-  }
-}
+// Potion system logic is imported from src/potions.js
 
 function triggerChainLightning(firstEnemy) {
-  chainLightningPrimed = false;
-  document.body.classList.remove('chain-lightning-primed');
+  if (potionsSystem) {
+    potionsSystem.clearChainLightningPrimed();
+  }
   
   const origin = firstEnemy.group.position.clone();
   const N = 2; // Chain to up to 2 additional monsters (total 3 including the 1st one)
@@ -4572,6 +4480,6 @@ potionSlots.forEach((slot, index) => {
   slot.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     resumeAudio();
-    activatePotionSlot(index);
+    potionsSystem.activatePotionSlot(index);
   });
 });

@@ -1,60 +1,49 @@
-# Walkthrough - Phase 2: Mimic Chest Enemy for Spellwave2
+# Walkthrough - Phase 3 Revision: Potion Redesign (Shockwave)
 
-I have completed the implementation of Phase 2, introducing the **Mimic Chest Enemy** to `beta/spellwave2`.
+I have completed the requested changes for the Phase 3 potion revision, removing the **Blaze Barrier** potion and updating **Repulsor Blast** into **Shockwave** with a powerful new visual wave effect and SFX.
 
-## Features Implemented
+## Changes Implemented
 
-### 1. Sound Synthesis (`audio.js`)
-- **`playChestOpenSound()`**: Simulates a wooden creaking lid opening, synthesized using rapid, short sawtooth bursts followed by an ascending sine wave chime.
-- **`playChestClackSound()`**: Simulates a dry wooden snap/shutting clasp, synthesized using a bandpass-filtered noise burst combined with a decaying low triangle tone.
+### 1. Potion Redesign & Removal
+- **Removed Blaze Barrier**:
+  - Deleted all fire-wall related states (`blazeBarrierTimer`, `blazeBarrierCharges`), meshes, and lights from `src/potions.js`.
+  - Removed collision and projectile block checks (`checkBlazeCollision`, `checkBlazeProjectileCollision`) from `src/main.js` and `src/potions.js`.
+  - Cleaned up styles, SVG templates, and audio hooks (`playBlazeIgniteSound`, `playBlazeBurnSound`).
+- **Renamed to Shockwave**:
+  - Renamed the potion key from `repulsor_blast` to `shockwave` across the codebase.
+  - Replaced the concentric ground circles with a new SVG icon showing three expanding crescent wave crests.
+  - Renamed the sound hook to `playShockwaveSound()` and updated the tone to sound like a rushing force wave.
 
-### 2. Spawning Rules & Staggered Scheduler
-- Mimics spawn exclusively during normal wave phases (never during boss waves) and do not count toward the wave's required kill threshold.
-- Spawning slots are staggered dynamically relative to Medics (`chooseMimicSpawnSlots`), avoiding simultaneous spawns.
-- Added a floating banner notification (`"MIMIC CHEST DETECTED!"`) on first encounter.
+### 2. Beautiful Traveling 3D Wave Visuals
+- Created a custom 3D mesh for the Shockwave spell using a semi-cylindrical shape:
+  - `THREE.CylinderGeometry(radiusTop=8, radiusBottom=8, height=3, radialSegments=16, heightSegments=1, openEnded=true, thetaStart=-Math.PI/2, thetaLength=Math.PI)`
+  - Material is an electric blue, transparent, additive-blended double-sided material.
+  - When the Shockwave potion is cast, the crescent wave stands vertically at the castle wall (`WALL_Z`) and travels rapidly along the Z axis towards the spawn point (`SPAWN_Z`).
+  - As it sweeps forward, it expands in size and fades out to look like a realistic shockwave.
 
-### 3. Voxel Chest Model & Lid Animations
-- **3D Chest Model**: Consists of a dark hollow interior, glowing magenta/purple eyes, white upper/lower fangs, gold corners/trims, and a red interior `PointLight`.
-- **Hinged Lid**: The lid is grouped under `lidGroup` and hinged at the upper-back corner (`y = 0.56, z = -0.45`).
-- **Interactive Open/Close**:
-  - When target-focused (actively being typed), the lid interpolates open (`lidOpenProgress` goes to `1.0`), raising the internal PointLight intensity and triggering `playChestOpenSound()`.
-  - When focus is lost or the enemy escapes, the lid snaps shut (`lidOpenProgress` goes to `0.0`), triggering `playChestClackSound()`.
-
-### 4. Defeat & Potion Loot Reward
-- Defeating a Mimic chest (either by direct typing or chain lightning bursts) calls `awardMimicLoot()`:
-  - Selects a random potion type (`Time Freeze`, `Chain Lightning`, or `Shield`) and adds it to the player inventory.
-  - Floats a custom text popup (e.g. `"+1 TIME FREEZE"` in magenta/purple) and plays the collection chime.
-  - If the player's inventory is full, it floats `"INVENTORY FULL"`, plays a error sound, and shakes the potion bar.
-  - Mimic defeats are **neutral**: they do not award score, heal the player, increment normal kill counts, or break the typing streak.
-
-### 5. Escape/Leak Behavior
-- If a Mimic reaches the castle wall, it escapes cleanly:
-  - Plays the wooden clacking sound (`playChestClackSound`).
-  - Floats a `"LOOT ESCAPED"` text popup at the boundary.
-  - Breaks into wood debris and disappears without damaging player health or resetting the streak/multiplier.
+### 3. Balancing & Cheats
+- The mimic loot tables and `idkfa` cheat now select from the three active potions: `['time_freeze', 'chain_lightning', 'shockwave']`.
+- Shockwave still stuns and pushes back enemies by 15 units.
 
 ---
 
 ## Files Modified
 
-- [audio.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/audio.js): Added and exported synthesized chest audio hooks.
-- [styles.css](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/styles.css): Added styling for mimic labels, loot reward, inventory full, and loot escaped popups.
-- [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js): Wired mimic state, voxel model, lid animation, spawning, reward/escape pipelines, and chain-burst integration.
-- [todo.md](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/todo.md): Updated checklist items to reflect Phase 2 completion.
+- [potions.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/potions.js): Rewrote the factory system to support the new `shockwave` wave mesh and removed all fire barrier codes.
+- [main.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js): Updated sound imports, potion system callback parameters, enemy collision/leaking paths, rock collision paths, and loot lists.
+- [audio.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/audio.js): Renamed repulsor sound to `playShockwaveSound` and removed fire barrier sound synthesizers.
+- [styles.css](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/styles.css): Replaced `.magic-repulsor` with `.magic-shockwave` animations, crest styling, and banner CSS. Removed blaze barrier styles, removed the `.shockwave-dot` styling, configured a staggered cascading animation delay (`0.2s` intervals) for the three equal-arc crests, and set the resting opacity to `0.45` so that all three lines remain visibly blue while only one glows brightly at a time.
 
 ---
 
 ## How to Test Locally
 
-1. Navigate to: [http://localhost:8002/beta/spellwave2.html](http://localhost:8002/beta/spellwave2.html)
-2. Press **Start** to begin playing.
-3. Play normal waves and watch for the `"MIMIC CHEST DETECTED!"` banner and fast-approaching chests with purple labels.
-4. **Test Interactive Animation**: Type the first letters of a Mimic's prompt. Verify the lid creaks open smoothly, revealing glowing eyes and teeth. Delete or switch targets, and verify the lid clacks shut.
-5. **Test Defeat**: Defeat a Mimic chest.
-   - If you have an empty slot: verify it drops a potion, plays the chime, and floats `"+1 [POTION]"` in the lower right.
-   - If your inventory is full: verify it floats `"INVENTORY FULL"` and shakes the inventory grid.
-6. **Test Escape**: Allow a Mimic chest to reach the wall boundary. Verify that:
-   - It clacks shut.
-   - A `"LOOT ESCAPED"` popup displays.
-   - You take zero damage and your typing streak/multiplier remains intact.
-7. **Test Chain Lightning Burst**: Defeat a Mimic chest as part of a chain lightning sequence. Verify that it bursts into debris with spark impacts, awards potion loot correctly, and cleanup is handled cleanly.
+1. Open `http://localhost:8000/beta/spellwave2.html`.
+2. Type `idkfa` to fill your inventory.
+3. Verify the **Time Freeze** potion icon displays correctly (no longer broken, animated hands rotating within an illuminated clock face).
+4. Verify the **Shockwave** potion icon shows three parallel waves of equal shape and arc length, with no Wi-Fi-style dot.
+5. Press `3` (or the corresponding key/click the slot) to cast **Shockwave**.
+6. Verify:
+   - Three distinct, glowing, semi-cylindrical wavefronts spawn consecutively at `0.0s`, `0.15s`, and `0.30s` delay offsets and travel down the Z-axis in a ripple pattern.
+   - All targetable/revealed enemies are pushed back and stunned.
+   - The synthesized SFX sounds like a rushing energy wave.
