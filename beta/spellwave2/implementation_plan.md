@@ -1,71 +1,83 @@
-# Implementation Plan - Phase 3 Revision: Potion Redesign & Shockwave Visuals
+# Campaign Mode & Science Subject/Curriculum Selection Design
 
-This plan details the removal of the **Blaze Barrier** potion and the renaming/redesign of the **Repulsor Blast** potion to **Shockwave**, featuring a large semi-cylindrical 3D wave visual sweeping down the road to push enemies back.
+This plan outlines the design and implementation of a 5-Wave Campaign Mode for Spellwave 2. Instead of infinite waves, the game progresses through 5 waves, each focusing on a specific GCSE science topic selected by the player via a Slay the Spire-style path interface. Before starting a run, players select their Subject (Physics, Chemistry, Biology) and Curriculum Tier (Combined vs. Separate Science). Defeating the Wave 5 boss triggers a proper ending and victory summary.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **NO EMOJIS ALLOWED**:
+> Do not use emojis in the game UI (e.g., in the subject select, topic map cards, or victory badge displays). All iconography must be implemented as clean, high-performance inline SVGs, styled and animated with CSS.
+>
+> **Locked Subject Placeholders**:
+> Chemistry and Biology buttons will be rendered as greyed-out, disabled buttons with an elegant custom lock SVG. The question banks for these will not be created in this phase, but the core engine will be structured to dynamically receive them when unlocked.
+>
+> **Curriculum Tagging Rules**:
+> 1. In AQA GCSE, "Separate Science" (Triple) contains extra topics and terms compared to "Combined Science" (Double). E.g., the *Space Physics* topic in Physics is entirely Separate-only.
+> 2. We will tag specific topics or individual words/equations with `separateOnly: true`. If "Combined Science" is selected, these topics/terms will be filtered out of the draft options and spawning pools.
+
+## Open Questions
+
+> [!NOTE]
+> **Setup UX Transition Flow**:
+> We propose a two-step state machine inside the message panel to avoid clutter:
+> * **State 1 (Main Menu)**: Shows "Spellwave", high score, tutorial copy, and a `[ Play Campaign ]` button.
+> * **State 2 (Setup Screen)**: Clicking Play transitions the panel text to show:
+>   * **Subject grid**: Physics (Active), Chemistry (Locked), Biology (Locked) - utilizing custom inline SVGs.
+>   * **Curriculum Toggle**: Combined vs Separate.
+>   * **Launch Button**: `[ Begin Run ]` (which then closes the setup panel and slides in the Wave 1 Path Selection Modal).
+> 
+> *Does this two-step transition align with the premium feel you want, or would you prefer all selectors directly visible on the initial screen?*
 
 ## Proposed Changes
 
 ### [Spellwave2]
 
-#### [MODIFY] [potions.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/potions.js)
-1. **Rename Potion Type and State**:
-   - Rename `repulsor_blast` to `shockwave`.
-   - Remove all references to `blaze_barrier`, `blazeBarrierTimer`, `blazeBarrierCharges`, `blazeBarrierMesh`, `blazeBarrierLight`, `checkBlazeCollision`, and `checkBlazeProjectileCollision`.
-2. **Update Potion SVG List**:
-   - Remove `blaze_barrier` SVG template.
-   - Rename SVG selector `repulsor_blast` to `shockwave`. Update its class/icon to reflect a "wave sweep" visual.
-3. **Shockwave Visual (3D Semi-Cylinder Wave)**:
-   - When the `shockwave` potion is activated:
-     - Push back all targetable/revealed enemies by 15 units along the Z-axis (constrained to `SPAWN_Z`) and stun them for 1.5 seconds (same balance logic as before).
-     - Instantiate a 3D wave mesh:
-       - Geometry: `THREE.CylinderGeometry(radiusTop=8, radiusBottom=8, height=3, radialSegments=16, heightSegments=1, openEnded=true, thetaStart=-Math.PI/2, thetaLength=Math.PI)`.
-       - Material: `THREE.MeshBasicMaterial` with electric blue color, `transparent=true`, `opacity=0.9`, `side=THREE.DoubleSide`, and `blending=THREE.AdditiveBlending`.
-       - Rotation/Position: Face the open side of the crescent towards the spawn point (Z negative). Position it standing vertically: `(0, 1.5, WALL_Z)`.
-     - Track active shockwave waves in an array: `const activeShockwaves = []`.
-4. **Update `update(delta)` Loop**:
-   - Move active shockwaves forward (decreasing Z) towards `SPAWN_Z` at a speed of e.g. `30.0` units/sec.
-   - Fade out their opacity as they travel.
-   - Dispose and remove meshes once they travel past `SPAWN_Z` or their opacity reaches 0.
-   - Remove the `blazeBarrier` logic.
-5. **Adjust Return API**:
-   - Remove `checkBlazeCollision` and `checkBlazeProjectileCollision`.
-   - Update random potion list in `addPotion` and cheat refill code to only include: `['time_freeze', 'chain_lightning', 'shockwave']`.
-
----
+#### [MODIFY] [question-bank.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/question-bank.js)
+1. **Restructure Data Model for Multi-Subject Support**:
+   - Organize all question banks under a top-level `SUBJECTS` configuration containing keys for `physics`, `chemistry`, and `biology`.
+   - Physics will contain the full topics list; Chemistry and Biology will remain empty/stubbed.
+2. **Add Curriculum Tier Support**:
+   - Add `separateOnly: true` tags to individual terms or equations (e.g., Space Physics vocabulary or primary/secondary transformer formulas).
+   - Filter words based on chosen curriculum during wave initialization.
+3. **Backward Compatibility**:
+   - Maintain the exports `EASY_WORDS`, `MEDIUM_WORDS`, `HARD_WORDS`, `ALL_WORDS`, and `EQUATION_WORDS` (defaulting to Physics) so that existing game code or debug functions do not break.
 
 #### [MODIFY] [main.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
-1. **Remove Blaze Barrier Collisions**:
-   - In `updateEnemies()`, remove the call to `potionsSystem.checkBlazeCollision(enemy)`.
-   - In `updateEffects()`, remove the call to `potionsSystem.checkBlazeProjectileCollision()`.
-2. **Update Audio Hooks**:
-   - Keep `playRepulsorSound` or rename it to `playShockwaveSound`. Remove references to blaze barrier burn/ignite sound helpers.
-3. **Update Potion Spawning / Mimic Loot**:
-   - In `awardMimicLoot()`, update the types array to `['time_freeze', 'chain_lightning', 'shockwave']`.
-
----
-
-#### [MODIFY] [audio.js](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/audio.js)
-1. **Remove Blaze SFX**:
-   - Remove `playBlazeIgniteSound` and `playBlazeBurnSound`.
-2. **Rename Repulsor SFX**:
-   - Rename `playRepulsorSound` to `playShockwaveSound`. Customize the synthesizer parameters to make it sound like a deep rushing wind/wave sweep.
-
----
+1. **Add Start Setup State**:
+   - Track `selectedSubject` (`physics`) and `selectedCurriculum` (`combined`, `separate`).
+   - Modify the start panel HTML/CSS to render Subject Buttons (Physics, Chemistry (🔒), Biology (🔒)) and a toggle for Combined Science vs Separate Science. Use SVG icons for all subjects.
+   - Implement the Setup transition states (Main Menu -> Setup Screen -> Launch).
+2. **Campaign State tracking**:
+   - Track campaign progress variables: `activeTopic`, `completedTopics` (array), `campaignCompleted` (boolean).
+   - Cap the game at `waveSet === 5`.
+3. **Word Pooling Logic**:
+   - Modify `currentKeywordPool()` to return words matching the `selectedSubject`, `activeTopic`, `selectedCurriculum` requirements, and the difficulty appropriate for the current wave level.
+   - Modify `chooseEquationWord()` to pull from the active topic's equations.
+4. **Map/Path Selection Overlay**:
+   - Design and render a modal overlay between waves when the current wave is cleared.
+   - Present 3 randomized remaining topics as choice cards (filtering out any `separateOnly: true` topics if Combined is selected).
+   - Use custom SVG iconography for topics on cards.
+   - Highlight the reward/modifiers and node progression tracker (e.g. `Wave 1 ➔ Wave 2 ➔ Wave 3 ➔ Wave 4 ➔ Wave 5 (Final Exam)`).
+5. **Victory Screen**:
+   - On defeating the third boss of Wave 5, transition to a beautiful victory screen instead of advancing to Wave 6.
+   - Calculate and display final stats: GCSE Grade (1-9), Score, Time, WPM, Accuracy, badges for the 5 selected topics (using custom badge SVGs), and a restart button.
 
 #### [MODIFY] [styles.css](file:///Users/ypleung/Library/CloudStorage/Dropbox/Work_in_Progress/My_Projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/styles.css)
-1. **Update Potion Selectors**:
-   - Rename `.magic-repulsor` styling/animations to `.magic-shockwave`.
-   - Remove `.magic-blaze` and all blaze barrier animations/classes.
-   - Rename `.boss-banner.is-repulsor-blast` to `.boss-banner.is-shockwave`. Remove `.boss-banner.is-blaze-barrier`.
-
----
+1. **Setup Controls**:
+   - Add glassmorphic segmented controls, toggle buttons, and grid layouts for selecting subject and curriculum tier in the start panel.
+2. **Map Overlay & Choice Cards**:
+   - Add glassmorphic styling, hover transitions, and badge styling for the topic selector screen.
+3. **Victory Overlay**:
+   - Add gold/glowing themes, certificate styles, and badge grids for the final graduation screen.
+4. **Custom SVG Animations**:
+   - Add pulse, rotate, or glow keyframe animations for setup icons, badges, and topic selectors.
 
 ## Verification Plan
 
+### Automated Tests
+- Test using `http://localhost:8000/beta/spellwave2.html`.
+
 ### Manual Verification
-1. **Visual Test**: Run the game at `http://localhost:8000/beta/spellwave2.html`.
-2. **Cheat Code**: Activate `idkfa`. Ensure only the three active potions (`time_freeze`, `chain_lightning`, `shockwave`) fill the bar.
-3. **Shockwave Spell**: Cast the Shockwave potion.
-   - Verify a beautiful glowing crescent-shaped 3D wave stands vertically and sweeps forward down the path towards the spawn point.
-   - Verify that all enemies are pushed back and stunned.
-   - Verify the sound synthesized for the wave sounds powerful and matches the movement.
-4. **Blaze Barrier Removal**: Confirm no errors are thrown during gameplay or boss battles where rocks hit the player or enemies reach the wall.
+1. Verify Subject / Curriculum options appear at start, and selecting Combined Science hides separate-only options (like Space Physics in Physics).
+2. Complete Wave 1 and verify path choice card screen opens with new options.
+3. Reach Wave 5, defeat the final boss, and verify transition to the Victory screen with the correct grade and topic badges.
