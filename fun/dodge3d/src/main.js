@@ -451,6 +451,7 @@ function updateAttractMode(delta, time) {
       pendingGameOverMessage = null;
     }
   }
+  if (mode === 'paused') return;
   const drift = Math.sin(time * 0.0007) * 2.25;
   const lift = Math.cos(time * 0.0009) * 0.36 - 1.15;
   player.targetX = drift;
