@@ -160,21 +160,14 @@ const MEDIC_TYPE = {
 const MIMIC_TYPE = {
   name: 'Mimic Chest',
   isMimic: true,
-  body: 0x8b5a2b, // Brown wood
-  trim: 0xd4af37, // Gold trimmings
-  eye: 0xd946ef,  // Purple/magenta glow
+  body: 0xaa7030,
+  trim: 0xffd040,
+  eye: 0xef44fb,
   speed: 7.8,
-  scale: 1.1,
+  scale: 1.2,
   weight: 0,
   score: 0,
 };
-const MIMIC_WORDS = [
-  'chest', 'mimic', 'loot', 'crate', 'coffer', 'casket', 'trunk', 'strongbox',
-  'relic', 'amulet', 'potion', 'elixir', 'scroll', 'tome', 'chalice', 'goblet',
-  'gemstone', 'emerald', 'sapphire', 'ruby', 'diamond', 'treasure', 'hoard', 'spoils',
-  'bounty', 'vault', 'keycard', 'lockbox', 'trinket', 'bauble', 'keepsake', 'token',
-  'artifact', 'curio', 'heirloom', 'talisman', 'runestone', 'mystic', 'arcane', 'essence'
-];
 
 const BOSS_TYPES = [
   {
@@ -876,9 +869,6 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
   }
 
   if (chainLightningPrimed) {
-    if (enemy.isMimic) {
-      awardMimicLoot(enemy);
-    }
     enemy.dying = true;
     typedBuffer = '';
     activeTarget = null;
@@ -1110,25 +1100,25 @@ function updateEnemies(delta, seconds) {
 
     if (enemy.isMimic) {
       const isTargeted = (activeTarget === enemy && isEnemyTargetable(enemy));
-      const targetLidProgress = isTargeted ? 1.0 : 0.0;
+      const idleTarget = 0.22 + Math.sin(seconds * 2.2 + enemy.phase) * 0.12;
+      const targetLidProgress = isTargeted ? 1.0 : idleTarget;
       const oldProgress = enemy.lidOpenProgress;
       enemy.lidOpenProgress += (targetLidProgress - enemy.lidOpenProgress) * Math.min(1.0, 12 * delta);
 
-      const creakThreshold = 0.05;
-      if (oldProgress < creakThreshold && enemy.lidOpenProgress >= creakThreshold) {
+      if (oldProgress < 0.05 && enemy.lidOpenProgress >= 0.05) {
         playChestOpenSound();
-      } else if (oldProgress >= creakThreshold && enemy.lidOpenProgress < creakThreshold) {
+      } else if (oldProgress >= 0.85 && enemy.lidOpenProgress < 0.85) {
         playChestClackSound();
       }
 
       const lidGroup = enemy.group.userData.lidGroup;
       if (lidGroup) {
-        lidGroup.rotation.x = -enemy.lidOpenProgress * (Math.PI / 2.8);
+        lidGroup.rotation.x = -enemy.lidOpenProgress * (Math.PI / 2.2);
       }
 
       const chestLight = enemy.group.userData.chestLight;
       if (chestLight) {
-        chestLight.intensity = enemy.lidOpenProgress * 2.0;
+        chestLight.intensity = 0.5 + enemy.lidOpenProgress * 2.5;
       }
     }
 
@@ -1151,7 +1141,7 @@ function updateEnemies(delta, seconds) {
     enemy.revealed = enemy.group.position.z >= enemy.revealZ;
     if (enemy.revealed && !wasRevealed) {
       enemy.revealFlash = 0.28;
-      playRevealSound(enemy);
+      if (!enemy.isMimic) playRevealSound(enemy);
     }
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
@@ -2373,73 +2363,81 @@ function finishBossGroup(group, type, beaconY = 2.9) {
 }
 
 function createMimicChestMesh(type) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.82, metalness: 0.05 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.5, metalness: 0.8 });
-  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 1.5, roughness: 0.3 });
-  const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x120215, roughness: 0.9 });
-  const toothMat = new THREE.MeshStandardMaterial({ color: 0xf3f3e8, roughness: 0.5 });
+  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.75, metalness: 0.08 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.18, metalness: 1.0 });
+  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
+  const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x0e0115, roughness: 0.9 });
+  const toothMat = new THREE.MeshStandardMaterial({ color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
+  const gemMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
 
   const g = new THREE.Group();
 
-  // Wood base core
-  const baseWood = blockMesh(1.2, 0.5, 0.9, bodyMat, 0, 0.25, 0);
-  g.add(baseWood);
+  // Wood base (taller for presence)
+  g.add(blockMesh(1.2, 0.56, 0.9, bodyMat, 0, 0.28, 0));
 
-  // Dark interior
-  const interior = blockMesh(1.0, 0.1, 0.7, darkInteriorMat, 0, 0.5, 0);
-  g.add(interior);
+  // Dark interior tray visible when lid opens
+  g.add(blockMesh(0.96, 0.10, 0.72, darkInteriorMat, 0, 0.52, 0));
 
-  // Metal trim around the base edges (bottom, corners)
-  g.add(blockMesh(1.24, 0.08, 0.94, trimMat, 0, 0.04, 0));
-  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, -0.57, 0.26, 0.42));
-  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, 0.57, 0.26, 0.42));
-  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, -0.57, 0.26, -0.42));
-  g.add(blockMesh(0.1, 0.52, 0.1, trimMat, 0.57, 0.26, -0.42));
-  g.add(blockMesh(1.24, 0.06, 0.1, trimMat, 0, 0.47, 0.42));
+  // Bottom base trim bar
+  g.add(blockMesh(1.28, 0.09, 0.98, trimMat, 0, 0.045, 0));
 
-  // Glowing eyes inside the chest
-  const eyeL = blockMesh(0.16, 0.16, 0.05, eyeMat, -0.22, 0.54, 0.15);
-  const eyeR = blockMesh(0.16, 0.16, 0.05, eyeMat, 0.22, 0.54, 0.15);
-  g.add(eyeL);
-  g.add(eyeR);
+  // Four corner pillars running full height
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, 0.42));
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, 0.42));
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, -0.42));
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, -0.42));
 
-  // Lower teeth
-  for (let i = 0; i < 4; i++) {
-    const x = -0.36 + i * 0.24;
-    const tooth = blockMesh(0.1, 0.12, 0.08, toothMat, x, 0.54, 0.32);
-    tooth.rotation.x = 0.2;
+  // Mid-band gold strip on front face
+  g.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.50, 0.42));
+
+  // Glowing eyes (large, bright)
+  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat, -0.24, 0.54, 0.18));
+  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat,  0.24, 0.54, 0.18));
+
+  // Lower teeth (5 teeth, angled forward)
+  for (let i = 0; i < 5; i++) {
+    const x = -0.40 + i * 0.20;
+    const tooth = blockMesh(0.09, 0.15, 0.09, toothMat, x, 0.54, 0.35);
+    tooth.rotation.x = 0.25;
     g.add(tooth);
   }
 
-  // PointLight inside the chest
-  const light = new THREE.PointLight(type.eye, 0.0, 4.5);
+  // PointLight inside the chest (intensity driven each frame)
+  const light = new THREE.PointLight(type.eye, 0.5, 6.0);
   light.position.set(0, 0.55, 0.1);
   g.add(light);
 
-  // Lid Group
+  // Lid Group — pivot at top-back edge of the base
   const lidGroup = new THREE.Group();
-  lidGroup.position.set(0, 0.56, -0.45);
+  lidGroup.position.set(0, 0.58, -0.45);
   g.add(lidGroup);
 
-  const lidWood = blockMesh(1.2, 0.36, 0.9, bodyMat, 0, 0.18, 0.45);
-  lidGroup.add(lidWood);
+  // Lid wood
+  lidGroup.add(blockMesh(1.2, 0.38, 0.9, bodyMat, 0, 0.19, 0.45));
 
-  // Metal trim for lid (top, corners)
-  lidGroup.add(blockMesh(1.24, 0.06, 0.94, trimMat, 0, 0.36, 0.45));
-  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, -0.57, 0.18, 0.87));
-  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, 0.57, 0.18, 0.87));
-  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, -0.57, 0.18, 0.03));
-  lidGroup.add(blockMesh(0.1, 0.38, 0.1, trimMat, 0.57, 0.18, 0.03));
-  lidGroup.add(blockMesh(1.24, 0.06, 0.1, trimMat, 0, 0.03, 0.87));
+  // Top cap trim strip
+  lidGroup.add(blockMesh(1.28, 0.07, 0.98, trimMat, 0, 0.39, 0.45));
 
-  // Metal Lock Clasp
-  lidGroup.add(blockMesh(0.16, 0.22, 0.06, trimMat, 0, 0.02, 0.92));
+  // Front trim strip on lid
+  lidGroup.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.04, 0.88));
 
-  // Upper teeth
-  for (let i = 0; i < 5; i++) {
-    const x = -0.44 + i * 0.22;
-    const tooth = blockMesh(0.08, 0.14, 0.08, toothMat, x, 0.0, 0.82);
-    tooth.rotation.x = -0.2;
+  // Lid corner posts
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.02));
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.02));
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.88));
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.88));
+
+  // Lock clasp
+  lidGroup.add(blockMesh(0.18, 0.24, 0.07, trimMat, 0, 0.02, 0.94));
+
+  // Center magenta gem on lid front
+  lidGroup.add(blockMesh(0.14, 0.14, 0.07, gemMat, 0, 0.21, 0.92));
+
+  // Upper teeth (6 teeth, angled down)
+  for (let i = 0; i < 6; i++) {
+    const x = -0.46 + i * 0.185;
+    const tooth = blockMesh(0.08, 0.15, 0.09, toothMat, x, 0.0, 0.81);
+    tooth.rotation.x = -0.25;
     lidGroup.add(tooth);
   }
 
@@ -3334,11 +3332,15 @@ function shouldSpawnMedic() {
 }
 
 function chooseMimicPrompt() {
-  const activeTerms = new Set(enemies.map(e => e.prompt));
-  let available = MIMIC_WORDS.filter(w => !activeTerms.has(w));
-  if (available.length === 0) available = MIMIC_WORDS;
-  const term = available[Math.floor(Math.random() * available.length)];
-  return { term, definition: null };
+  const reservedBossTerms = new Set(bossWordsThisSet.map((w) => w.term));
+  const nearExisting = new Set(enemies.map((e) => e.prompt));
+  const pool = currentKeywordPool().filter((entry) => !reservedBossTerms.has(entry.term));
+  const usablePool = pool.length > 0 ? pool : EASY_WORDS;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
+    if (!nearExisting.has(entry.term)) return entry;
+  }
+  return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
 function getMimicCountForWave(wave) {
