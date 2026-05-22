@@ -325,6 +325,7 @@ let mimicSpawnSlots = [];
 let firstMimicHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
+let potionCheatUsedThisRun = false;
 let inputTrace = '';
 let streak = 0;
 let typedBuffer = '';
@@ -594,6 +595,7 @@ function startGame() {
   clearEffects();
   godMode = false;
   godModeUsedThisRun = false;
+  potionCheatUsedThisRun = potionsSystem.isPotionCheatActive();
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
@@ -674,14 +676,15 @@ function endGame() {
   startMusicLoop(false);
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
-  if (!godModeUsedThisRun && score > bestScore) {
+  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun;
+  if (!isUnranked && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
   }
   showMessage(
     'OVERRUN',
     'Game Over',
-    godModeUsedThisRun ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
+    isUnranked ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
   );
@@ -851,6 +854,9 @@ function checkCheatCode(character) {
     inputTrace = '';
   } else if (matchIdkfa) {
     potionsSystem.togglePotionCheat();
+    if (potionsSystem.isPotionCheatActive()) {
+      potionCheatUsedThisRun = true;
+    }
     inputTrace = '';
   }
 }
@@ -2036,7 +2042,8 @@ function updateHud(force) {
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
-  bestValue.textContent = formatScore(godModeUsedThisRun ? bestScore : Math.max(bestScore, score));
+  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun;
+  bestValue.textContent = formatScore(isUnranked ? bestScore : Math.max(bestScore, score));
   updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
   updateComboDisplay();
