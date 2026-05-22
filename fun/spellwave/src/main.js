@@ -967,22 +967,12 @@ function leakEnemy(enemy) {
   }
 
   if (enemy.isMimic) {
-    const wasActiveTarget = activeTarget === enemy;
     playChestClackSound();
     if (!enemy.label.classList.contains('is-hidden')) {
       const left = parseFloat(enemy.label.style.left);
       const top = parseFloat(enemy.label.style.top);
       if (Number.isFinite(left) && Number.isFinite(top)) spawnLootEscapedPopup(left, top);
     }
-    spawnDebris(new THREE.Vector3(enemy.group.position.x, 0.32, WALL_Z), enemy.type);
-    removeEnemy(enemy);
-    if (wasActiveTarget) {
-      activeTarget = null;
-      typedBuffer = '';
-    }
-    updateHud(true);
-    updateTypedDisplay();
-    return;
   }
 
 
@@ -2164,7 +2154,7 @@ function spawnEnemy(options = {}) {
     revealed: startZ >= revealZ,
     revealFlash: 0,
     speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : isMimic ? type.speed + Math.random() * 0.25 : type.speed + Math.random() * 0.35,
-    damage: isBoss ? BOSS_CONTACT_DAMAGE : (isMedic || isMimic) ? 0 : MINION_DAMAGE,
+    damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
     shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
     baseY: spawnBaseY,
     age: 0,
