@@ -1121,54 +1121,80 @@ function updateEnemies(delta, seconds) {
     if (enemy.stunTimer > 0) {
       enemy.stunTimer = Math.max(0, enemy.stunTimer - delta);
       enemy.visualStunApplied = true;
+
+      const uniqueMaterials = new Set();
+      const uniqueLights = new Set();
       enemy.group.traverse(child => {
         if (child.isMesh && child.material) {
-          if (child.userData.origColor === undefined) {
-            child.userData.origColor = child.material.color.clone();
-            if (child.material.emissive) {
-              child.userData.origEmissive = child.material.emissive.clone();
-              child.userData.origEmissiveIntensity = child.material.emissiveIntensity;
-            }
-          }
-          const orig = child.userData.origColor;
-          const gray = 0.299 * orig.r + 0.587 * orig.g + 0.114 * orig.b;
-          child.material.color.setRGB(
-            gray * 0.3 + 0.05,
-            gray * 0.6 + 0.2,
-            gray * 0.9 + 0.45
-          );
-          if (child.material.emissive) {
-            child.material.emissive.setRGB(0.1, 0.35, 0.6);
-            child.material.emissiveIntensity = 0.8;
-          }
+          uniqueMaterials.add(child.material);
         } else if (child.isLight) {
-          if (child.userData.origColor === undefined) {
-            child.userData.origColor = child.color.clone();
-            child.userData.origIntensity = child.intensity;
-          }
-          child.color.setRGB(0.22, 0.68, 1.0);
-          child.intensity = 0.58;
+          uniqueLights.add(child);
         }
+      });
+
+      uniqueMaterials.forEach(mat => {
+        if (mat.userData.origColor === undefined) {
+          mat.userData.origColor = mat.color.clone();
+          if (mat.emissive) {
+            mat.userData.origEmissive = mat.emissive.clone();
+            mat.userData.origEmissiveIntensity = mat.emissiveIntensity;
+          }
+        }
+        const orig = mat.userData.origColor;
+        const gray = 0.299 * orig.r + 0.587 * orig.g + 0.114 * orig.b;
+        mat.color.setRGB(
+          gray * 0.3 + 0.05,
+          gray * 0.6 + 0.2,
+          gray * 0.9 + 0.45
+        );
+        if (mat.emissive) {
+          mat.emissive.setRGB(0.1, 0.35, 0.6);
+          mat.emissiveIntensity = 0.8;
+        }
+      });
+
+      uniqueLights.forEach(light => {
+        if (light.userData.origColor === undefined) {
+          light.userData.origColor = light.color.clone();
+          light.userData.origIntensity = light.intensity;
+        }
+        light.color.setRGB(0.22, 0.68, 1.0);
+        light.intensity = 0.58;
       });
     } else if (enemy.visualStunApplied) {
       enemy.visualStunApplied = false;
+
+      const uniqueMaterials = new Set();
+      const uniqueLights = new Set();
       enemy.group.traverse(child => {
-        if (child.isMesh && child.material && child.userData.origColor !== undefined) {
-          child.material.color.copy(child.userData.origColor);
-          if (child.material.emissive) {
-            child.material.emissive.copy(child.userData.origEmissive);
-            child.material.emissiveIntensity = child.userData.origEmissiveIntensity;
+        if (child.isMesh && child.material) {
+          uniqueMaterials.add(child.material);
+        } else if (child.isLight) {
+          uniqueLights.add(child);
+        }
+      });
+
+      uniqueMaterials.forEach(mat => {
+        if (mat.userData.origColor !== undefined) {
+          mat.color.copy(mat.userData.origColor);
+          if (mat.emissive) {
+            mat.emissive.copy(mat.userData.origEmissive);
+            mat.emissiveIntensity = mat.userData.origEmissiveIntensity;
           }
-          delete child.userData.origColor;
-          if (child.userData.origEmissive !== undefined) {
-            delete child.userData.origEmissive;
-            delete child.userData.origEmissiveIntensity;
+          delete mat.userData.origColor;
+          if (mat.userData.origEmissive !== undefined) {
+            delete mat.userData.origEmissive;
+            delete mat.userData.origEmissiveIntensity;
           }
-        } else if (child.isLight && child.userData.origColor !== undefined) {
-          child.color.copy(child.userData.origColor);
-          child.intensity = child.userData.origIntensity;
-          delete child.userData.origColor;
-          delete child.userData.origIntensity;
+        }
+      });
+
+      uniqueLights.forEach(light => {
+        if (light.userData.origColor !== undefined) {
+          light.color.copy(light.userData.origColor);
+          light.intensity = light.userData.origIntensity;
+          delete light.userData.origColor;
+          delete light.userData.origIntensity;
         }
       });
     }
