@@ -836,6 +836,16 @@ body.is-running:not(.is-paused) .hud-grid {
   background: linear-gradient(90deg, #f472b6, #d946ef);
 }
 
+.word-tag.is-stunned {
+  border-color: rgba(56, 189, 248, 0.8) !important;
+  background: linear-gradient(135deg, rgba(8, 24, 36, 0.94), rgba(4, 14, 14, 0.9)) !important;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.4), inset 0 0 18px rgba(56, 189, 248, 0.15) !important;
+  filter: brightness(1.1);
+}
+
+.word-tag.is-stunned .threat-meter i {
+  background: linear-gradient(90deg, #38bdf8, #bae6fd) !important;
+}
 
 .word-tag.is-boss {
   min-width: 160px;

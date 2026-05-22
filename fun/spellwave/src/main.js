@@ -896,7 +896,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
     return;
   }
 
-  const isChainTarget = !enemy.isBoss;
+  const isChainTarget = true;
   if (potionsSystem.isChainLightningPrimed() && isChainTarget) {
     potionsSystem.clearChainLightningPrimed();
     enemy.dying = true;
@@ -1591,6 +1591,7 @@ function updateLabels() {
     enemy.label.classList.toggle('is-warning', enemy.group.position.z > -10);
     enemy.label.classList.toggle('is-danger', enemy.group.position.z > -4);
     enemy.label.classList.toggle('is-critical', enemy.group.position.z > 1);
+    enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
   }
 }
 
@@ -4214,8 +4215,7 @@ function triggerChainLightning(firstEnemy) {
   const candidates = enemies.filter(e => 
     isEnemyTargetable(e) && 
     !e.dying && 
-    e !== firstEnemy && 
-    !e.isBoss
+    e !== firstEnemy
   );
   
   for (let i = 0; i < N; i++) {
@@ -4272,7 +4272,11 @@ function triggerChainLightning(firstEnemy) {
     targets.forEach((enemy, index) => {
       window.setTimeout(() => {
         if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
-          enemy.dying = true; // freeze
+          if (enemy.isBoss) {
+            enemy.stunTimer = 3.0;
+          } else {
+            enemy.dying = true; // freeze
+          }
           chainMonsters.push(enemy);
 
           const targetPos = enemy.group.position.clone();
@@ -4319,6 +4323,31 @@ function burstChain(chainMonsters) {
 }
 
 function defeatEnemyChainBurst(enemy) {
+  if (enemy.isBoss && !enemy.dying) {
+    const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
+    const flashMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+    flashMesh.position.copy(enemy.group.position);
+    flashMesh.position.y += 0.8;
+    effectsGroup.add(flashMesh);
+    
+    beams.push({
+      kind: 'beam_flash',
+      mesh: flashMesh,
+      life: 0.15,
+      maxLife: 0.15
+    });
+
+    playToggleSound();
+    return;
+  }
+
   if (enemy.isMimic) {
     awardMimicLoot(enemy);
     spawnDebris(enemy.group.position, enemy.type);
