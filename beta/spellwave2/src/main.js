@@ -876,7 +876,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
   if (isNeutral) {
     if (enemy.isMimic) {
       awardMimicLoot(enemy);
-      spawnDebris(enemy.group.position, enemy.type);
+      spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
       removeEnemy(enemy);
       if (activeTarget === enemy) {
         activeTarget = null;
@@ -892,7 +892,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
     if (!isChain) {
       spawnBeam(enemy.group.position);
     }
-    spawnDebris(enemy.group.position, enemy.type);
+    spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
     removeEnemy(enemy);
     if (activeTarget === enemy) {
       activeTarget = null;
@@ -921,7 +921,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
     if (!isChain) {
       spawnBeam(enemy.group.position);
     }
-    spawnDebris(enemy.group.position, enemy.type);
+    spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
     removeEnemy(enemy);
     if (activeTarget === enemy) {
       activeTarget = null;
@@ -949,7 +949,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
   else playDefeatSound(enemy);
 
   spawnBeam(enemy.group.position);
-  spawnDebris(enemy.group.position, enemy.type);
+  spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
   removeEnemy(enemy);
   typedBuffer = '';
   activeTarget = null;
@@ -967,7 +967,7 @@ function leakEnemy(enemy) {
       const top = parseFloat(enemy.label.style.top);
       if (Number.isFinite(left) && Number.isFinite(top)) spawnMissedHealPopup(left, top);
     }
-    spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
+    spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
     removeEnemy(enemy);
     if (wasActiveTarget) typedBuffer = '';
     updateTypedDisplay();
@@ -994,7 +994,7 @@ function leakEnemy(enemy) {
   damageTimer = enemy.isBoss ? 0.46 : 0.32;
   damageFlash.classList.add('show');
   window.setTimeout(() => damageFlash.classList.remove('show'), 160);
-  spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type);
+  spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
   removeEnemy(enemy);
   typedBuffer = '';
   activeTarget = null;
@@ -1362,6 +1362,11 @@ function updateEffects(delta) {
       const xyScale = 0.35 + amount * 0.65;
       effect.mesh.scale.set(xyScale, xyScale, Math.max(0.05, amount));
       effect.mesh.material.opacity = amount;
+    } else if (effect.kind === 'boss_explosion_wave') {
+      const progress = 1 - amount;
+      const currentScale = effect.initialScale + progress * effect.expandSpeed;
+      effect.mesh.scale.setScalar(currentScale);
+      effect.mesh.material.opacity = amount * 0.8;
     } else {
       effect.mesh.material.opacity = amount * 0.82;
       effect.mesh.scale.set(1, 1, Math.max(0.08, amount));
@@ -3351,29 +3356,80 @@ function spawnBossRock(enemy) {
   });
 }
 
-function spawnDebris(position, type) {
-  const geometry = new THREE.BoxGeometry(0.18, 0.18, 0.18);
-  for (let index = 0; index < 12; index += 1) {
+function spawnDebris(position, type, isBoss = false) {
+  const count = isBoss ? 48 : 12;
+  const baseScale = isBoss ? 0.32 : 0.18;
+  const geometry = new THREE.BoxGeometry(baseScale, baseScale, baseScale);
+  for (let index = 0; index < count; index += 1) {
+    let color;
+    if (isBoss) {
+      const rand = Math.random();
+      if (rand < 0.25) color = type.body;
+      else if (rand < 0.5) color = type.trim;
+      else if (rand < 0.75) color = type.eye || 0xffaa00;
+      else color = 0xff5500; // Fire orange
+    } else {
+      color = index % 3 === 0 ? type.trim : type.body;
+    }
     const material = new THREE.MeshStandardMaterial({
-      color: index % 3 === 0 ? type.trim : type.body,
+      color: color,
       transparent: true,
       opacity: 1,
-      roughness: 0.8,
+      roughness: 0.6,
+      emissive: isBoss && Math.random() < 0.5 ? color : 0x000000,
+      emissiveIntensity: isBoss ? 1.8 : 0
     });
     const mesh = new THREE.Mesh(geometry.clone(), material);
     mesh.position.copy(position);
-    mesh.position.y += 0.8 + Math.random() * 0.5;
+    mesh.position.y += isBoss ? (0.8 + (Math.random() - 0.5) * 1.5) : (0.8 + Math.random() * 0.5);
     effectsGroup.add(mesh);
-    const initialLife = 0.7 + Math.random() * 0.36;
+    const initialLife = isBoss
+      ? (1.2 + Math.random() * 0.6)
+      : (0.7 + Math.random() * 0.36);
     debris.push({
       mesh,
       life: initialLife,
       maxLife: initialLife,
-      velocity: new THREE.Vector3((Math.random() - 0.5) * 5.5, 2.8 + Math.random() * 3.6, (Math.random() - 0.5) * 5.5),
-      spin: new THREE.Vector3(Math.random() * 8, Math.random() * 8, Math.random() * 8),
+      velocity: isBoss
+        ? new THREE.Vector3((Math.random() - 0.5) * 11, (Math.random() - 0.2) * 8 + 3, (Math.random() - 0.5) * 11)
+        : new THREE.Vector3((Math.random() - 0.5) * 5.5, 2.8 + Math.random() * 3.6, (Math.random() - 0.5) * 5.5),
+      spin: isBoss
+        ? new THREE.Vector3(Math.random() * 15, Math.random() * 15, Math.random() * 15)
+        : new THREE.Vector3(Math.random() * 8, Math.random() * 8, Math.random() * 8),
     });
   }
   geometry.dispose();
+
+  if (isBoss) {
+    const shockwaveCount = 3;
+    for (let i = 0; i < shockwaveCount; i++) {
+      const scale = 1.0 + i * 0.8;
+      const speed = 6.0 - i * 1.5;
+      const color = i === 0 ? 0xffffff : i === 1 ? 0xffaa00 : 0xff3300;
+      
+      const waveGeo = new THREE.SphereGeometry(scale, 16, 16);
+      const waveMat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const waveMesh = new THREE.Mesh(waveGeo, waveMat);
+      waveMesh.position.copy(position);
+      waveMesh.position.y += 0.8;
+      effectsGroup.add(waveMesh);
+      
+      beams.push({
+        kind: 'boss_explosion_wave',
+        mesh: waveMesh,
+        life: 0.4 + i * 0.1,
+        maxLife: 0.4 + i * 0.1,
+        initialScale: scale,
+        expandSpeed: speed
+      });
+    }
+  }
 }
 
 function removeEnemy(enemy) {
@@ -4326,7 +4382,7 @@ function triggerChainLightning(firstEnemy) {
         closestIndex = j;
       }
     }
-    if (closestEnemy && closestDistSq <= 144) { // 12 units squared (12 * 12 = 144)
+    if (closestEnemy) {
       targets.push(closestEnemy);
       currentPosition = closestEnemy.group.position.clone();
       candidates.splice(closestIndex, 1);
@@ -4445,7 +4501,7 @@ function defeatEnemyChainBurst(enemy) {
 
   if (enemy.isMimic) {
     awardMimicLoot(enemy);
-    spawnDebris(enemy.group.position, enemy.type);
+    spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
 
     // Spark impact flash mesh at the target position
     const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
@@ -4491,7 +4547,7 @@ function defeatEnemyChainBurst(enemy) {
   if (enemy.isMedic) playHealSound(healed);
   else playDefeatSound(enemy);
 
-  spawnDebris(enemy.group.position, enemy.type);
+  spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
 
   // Spark impact flash mesh at the target position
   const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
