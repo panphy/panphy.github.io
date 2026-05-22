@@ -896,8 +896,8 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
     return;
   }
 
-  const isNormalEnemy = !enemy.isBoss && !enemy.isMedic && !enemy.isMimic;
-  if (potionsSystem.isChainLightningPrimed() && isNormalEnemy) {
+  const isChainTarget = !enemy.isBoss;
+  if (potionsSystem.isChainLightningPrimed() && isChainTarget) {
     potionsSystem.clearChainLightningPrimed();
     enemy.dying = true;
     typedBuffer = '';
@@ -4225,9 +4225,7 @@ function triggerChainLightning(firstEnemy) {
     isEnemyTargetable(e) && 
     !e.dying && 
     e !== firstEnemy && 
-    !e.isBoss && 
-    !e.isMedic && 
-    !e.isMimic
+    !e.isBoss
   );
   
   for (let i = 0; i < N; i++) {
