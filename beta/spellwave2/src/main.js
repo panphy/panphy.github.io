@@ -314,6 +314,7 @@ let normalEnemyTarget = getNormalEnemyTarget(waveSet);
 let normalEnemiesSpawned = 0;
 let bossesSpawned = 0;
 let bossSpawnTimer = 0;
+let waveClearDelayTimer = 0;
 let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
@@ -609,6 +610,7 @@ function startGame() {
   wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
+  waveClearDelayTimer = 0;
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
@@ -1078,7 +1080,15 @@ function animate(frameTime) {
           bossSpawnTimer = currentDifficulty().bossSpawnGap;
         }
       } else if (enemies.length === 0) {
-        startWaveCleared();
+        if (waveClearDelayTimer === 0) {
+          waveClearDelayTimer = 1.25;
+        } else {
+          waveClearDelayTimer -= currentDelta;
+          if (waveClearDelayTimer <= 0) {
+            waveClearDelayTimer = 0;
+            startWaveCleared();
+          }
+        }
       }
     }
 
@@ -4075,6 +4085,7 @@ function advanceWaveSet() {
   clearEffects();
   waveSet += 1;
   wavePhase = 'normal';
+  waveClearDelayTimer = 0;
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
   bossesSpawned = 0;
