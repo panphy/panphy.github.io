@@ -13,7 +13,7 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Chain Lightning activates as a primed buff, then triggers after the next normal typed defeat
 
 ### Potion Types
-- [x] **Time Freeze**: pauses enemy movement, spawn timers, boss projectiles in flight, and boss attack cooldown for 3 seconds
+- [x] **Time Freeze**: pauses enemy movement, spawn timers, boss projectiles in flight, and boss attack cooldown for 3.5 seconds
 - [x] **Chain Lightning**: after the next typed defeat, chains to 1 nearest targetable normal enemy (max 2 targets total, excluding bosses, medics, and mimics)
 - [x] **Shockwave**: pushes all enemies back by 15 units, stuns them for 1.5s
 - [x] Balance pass: tune Time Freeze duration, Chain Lightning target count/range, and Shockwave visuals/behavior

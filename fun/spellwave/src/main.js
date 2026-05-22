@@ -1,6 +1,7 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
+import { createPotionSystem } from './potions.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
 
 const canvas = document.getElementById('gameCanvas');
@@ -32,6 +33,9 @@ let godModeBadge = null; // created dynamically on activation, never in static H
 const typingLabel = document.getElementById('typingLabel');
 const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
+const potionBar = document.getElementById('potionBar');
+const potionSlots = document.querySelectorAll('.potion-slot');
+
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
@@ -53,7 +57,8 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
 const MEDIC_HEAL_AMOUNT = 2;
-const INPUT_TRACE_CODES = [0x69, 0x64, 0x64, 0x71, 0x64];
+const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
+const PARTICLE_GRAVITY_COEFFS = [21 * 5, 20 * 5, 10.7 * 10, 34 * 3, 9.7 * 10];
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
@@ -154,6 +159,18 @@ const MEDIC_TYPE = {
   weight: 0,
   score: 45,
 };
+const MIMIC_TYPE = {
+  name: 'Mimic Chest',
+  isMimic: true,
+  body: 0xd4a020,
+  trim: 0xffd040,
+  eye: 0xef44fb,
+  speed: 7.8,
+  scale: 1.2,
+  weight: 0,
+  score: 0,
+};
+
 const BOSS_TYPES = [
   {
     name: 'Crimson Bulwark',
@@ -279,6 +296,7 @@ const torchFlames = [];
 const torchLights = [];
 const wandGroups = [];
 const wandSwings = [];
+const lightningCrowns = [];
 const pathMarkerBlocks = [];
 const roadBlocks = [];
 const scrollingTrees = [];
@@ -288,6 +306,8 @@ let mode = 'idle';
 let score = 0;
 let bestScore = loadBestScore();
 let health = MAX_LIFE;
+let wandsArePrimed = false;
+let gameTimeSeconds = 0;
 let waveSet = 1;
 let wavePhase = 'normal';
 let normalEnemyTarget = getNormalEnemyTarget(waveSet);
@@ -300,6 +320,9 @@ let hardGuestSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
 let medicsSpawnedThisSet = 0;
 let medicSpawnSlots = [];
+let mimicsSpawnedThisSet = 0;
+let mimicSpawnSlots = [];
+let firstMimicHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
 let inputTrace = '';
@@ -337,6 +360,7 @@ let currentSeasonIndex = 0;
 let seasonEmberIntensityBase = 2.1;
 let seasonFade = null;
 let seasonalEffects = null;
+let potionsSystem = null;
 let baseCloudMaterial = null;
 let weatherCloudMaterial = null;
 let cloudWeatherBlend = 0;
@@ -365,6 +389,9 @@ const {
   playGameOverSound,
   playGodModeOnSound,
   playGodModeOffSound,
+  playChestClackSound,
+  playChestOpenSound,
+  playShockwaveSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -445,6 +472,25 @@ seasonalEffects = createSeasonalEffects({
   pathMarkerWrapZ: PATH_MARKER_WRAP_Z,
 });
 seasonalEffects.create();
+potionsSystem = createPotionSystem({
+  getMode: () => mode,
+  getEnemies: () => enemies,
+  getGameTime: () => gameTimeSeconds,
+  defeatEnemy: (enemy, isNeutral) => defeatEnemy(enemy, isNeutral),
+  showBanner,
+  potionBar,
+  potionSlots,
+  scene,
+  effectsGroup,
+  playShockwaveSound,
+  playGodModeOnSound,
+  playGodModeOffSound,
+  playToggleSound,
+  playStartSound,
+  THREE,
+  SPAWN_Z,
+  WALL_Z
+});
 applySeasonForWave(1, true);
 createLifeMeter();
 
@@ -554,6 +600,11 @@ function startGame() {
   score = 0;
   health = MAX_LIFE;
   renderedHealth = null;
+  potionsSystem.clear();
+  gameTimeSeconds = 0;
+  document.body.classList.remove('time-frozen');
+  document.body.classList.remove('chain-lightning-primed');
+  wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
@@ -617,6 +668,8 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
+  potionsSystem.clear();
+  document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
   startMusicLoop(false);
   setPauseButtonState(true, true);
@@ -684,6 +737,26 @@ function handleKeyDown(event) {
 
   if (mode !== 'running') return;
 
+  if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(event.key)) {
+    event.preventDefault();
+    let slotIndex = -1;
+    if (event.key === 'ArrowLeft') slotIndex = 0;
+    else if (event.key === 'ArrowUp') slotIndex = 1;
+    else if (event.key === 'ArrowRight') slotIndex = 2;
+    else if (event.key === 'ArrowDown') slotIndex = 3;
+    if (slotIndex !== -1) potionsSystem.activatePotionSlot(slotIndex);
+    return;
+  }
+
+  if (['1', '2', '3', '4'].includes(event.key)) {
+    let slotIndex = parseInt(event.key, 10) - 1;
+    if (slotIndex >= 0 && slotIndex < 4) {
+      event.preventDefault();
+      potionsSystem.activatePotionSlot(slotIndex);
+      return;
+    }
+  }
+
   if (event.key === 'Backspace') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
@@ -721,7 +794,7 @@ function handleBeforeInput(event) {
 }
 
 function enterCharacter(character) {
-  if (updateInputTrace(character)) toggleGodMode();
+  checkCheatCode(character);
 
   const inputOptions = getInputCharacters(character);
   if (inputOptions.length === 0) return;
@@ -766,10 +839,20 @@ function enterCharacter(character) {
   updateTypedDisplay();
 }
 
-function updateInputTrace(character) {
-  inputTrace = (inputTrace + character.toLowerCase()).slice(-INPUT_TRACE_CODES.length);
-  if (inputTrace.length !== INPUT_TRACE_CODES.length) return false;
-  return INPUT_TRACE_CODES.every((code, index) => inputTrace.charCodeAt(index) === code);
+function checkCheatCode(character) {
+  inputTrace = (inputTrace + character.toLowerCase()).slice(-5);
+  if (inputTrace.length < 5) return;
+
+  const matchIddqd = EMBER_HEIGHT_DELTAS.every((code, idx) => inputTrace.charCodeAt(idx) === code);
+  const matchIdkfa = PARTICLE_GRAVITY_COEFFS.every((code, idx) => inputTrace.charCodeAt(idx) === code);
+
+  if (matchIddqd) {
+    toggleGodMode();
+    inputTrace = '';
+  } else if (matchIdkfa) {
+    potionsSystem.togglePotionCheat();
+    inputTrace = '';
+  }
 }
 
 function registerMistake() {
@@ -781,7 +864,67 @@ function registerMistake() {
   window.setTimeout(() => typingStrip.classList.remove('mistake'), 200);
 }
 
-function defeatEnemy(enemy) {
+function defeatEnemy(enemy, isNeutral = false, isChain = false) {
+  if (isNeutral) {
+    if (enemy.isMimic) {
+      awardMimicLoot(enemy);
+      spawnDebris(enemy.group.position, enemy.type);
+      removeEnemy(enemy);
+      if (activeTarget === enemy) {
+        activeTarget = null;
+        typedBuffer = '';
+        updateTypedDisplay();
+      }
+      updateHud(true);
+      updateTypedDisplay();
+      return;
+    }
+    if (enemy.isBoss) bossesDefeated += 1;
+    playDefeatSound(enemy);
+    if (!isChain) {
+      spawnBeam(enemy.group.position);
+    }
+    spawnDebris(enemy.group.position, enemy.type);
+    removeEnemy(enemy);
+    if (activeTarget === enemy) {
+      activeTarget = null;
+      typedBuffer = '';
+      updateTypedDisplay();
+    }
+    updateHud(true);
+    updateTypedDisplay();
+    return;
+  }
+
+  const isNormalEnemy = !enemy.isBoss && !enemy.isMedic && !enemy.isMimic;
+  if (potionsSystem.isChainLightningPrimed() && isNormalEnemy) {
+    potionsSystem.clearChainLightningPrimed();
+    enemy.dying = true;
+    typedBuffer = '';
+    activeTarget = null;
+    updateHud(true);
+    updateTypedDisplay();
+    triggerChainLightning(enemy);
+    return;
+  }
+
+  if (enemy.isMimic) {
+    awardMimicLoot(enemy);
+    if (!isChain) {
+      spawnBeam(enemy.group.position);
+    }
+    spawnDebris(enemy.group.position, enemy.type);
+    removeEnemy(enemy);
+    if (activeTarget === enemy) {
+      activeTarget = null;
+      typedBuffer = '';
+      updateTypedDisplay();
+    }
+    updateHud(true);
+    updateTypedDisplay();
+    return;
+  }
+
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
   defeatedCount += 1;
@@ -796,6 +939,7 @@ function defeatEnemy(enemy) {
   spawnScorePopup(points, enemy, healed);
   if (enemy.isMedic) playHealSound(healed);
   else playDefeatSound(enemy);
+
   spawnBeam(enemy.group.position);
   spawnDebris(enemy.group.position, enemy.type);
   removeEnemy(enemy);
@@ -804,6 +948,7 @@ function defeatEnemy(enemy) {
   updateHud(true);
   updateTypedDisplay();
 }
+
 
 function leakEnemy(enemy) {
   if (enemy.isMedic) {
@@ -820,6 +965,26 @@ function leakEnemy(enemy) {
     updateTypedDisplay();
     return;
   }
+
+  if (enemy.isMimic) {
+    const wasActiveTarget = activeTarget === enemy;
+    playChestClackSound();
+    if (!enemy.label.classList.contains('is-hidden')) {
+      const left = parseFloat(enemy.label.style.left);
+      const top = parseFloat(enemy.label.style.top);
+      if (Number.isFinite(left) && Number.isFinite(top)) spawnLootEscapedPopup(left, top);
+    }
+    spawnDebris(new THREE.Vector3(enemy.group.position.x, 0.32, WALL_Z), enemy.type);
+    removeEnemy(enemy);
+    if (wasActiveTarget) {
+      activeTarget = null;
+      typedBuffer = '';
+    }
+    updateHud(true);
+    updateTypedDisplay();
+    return;
+  }
+
 
   if (!godMode) health = Math.max(0, health - enemy.damage);
   streak = 0;
@@ -850,6 +1015,7 @@ function bossProjectileHitPlayer(enemy) {
   playBossImpactSound();
 
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
+
     if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
     streak = 0;
     damageTimer = 0.24;
@@ -866,18 +1032,39 @@ function animate(frameTime) {
   requestAnimationFrame(animate);
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
-  const seconds = frameTime * 0.001;
+
+  potionsSystem.update(delta);
+
+  const isTimeFrozen = (mode === 'running' && potionsSystem.isTimeFrozen());
+  const animationDelta = isTimeFrozen ? 0 : delta;
+  gameTimeSeconds += animationDelta;
 
   if (mode === 'running') {
-    elapsed += delta;
+    let currentDelta = delta;
+    if (potionsSystem.isTimeFrozen()) {
+      currentDelta = 0;
+      document.body.classList.add('time-frozen');
+    } else {
+      document.body.classList.remove('time-frozen');
+    }
+
+    elapsed += currentDelta;
 
     if (wavePhase === 'normal') {
       if (shouldSpawnMedic() && enemies.length < getEnemyLimit()) {
-        spawnEnemy({ isMedic: true });
-        medicsSpawnedThisSet += 1;
-        spawnTimer = Math.max(spawnTimer, 0.55);
+        if (currentDelta > 0) {
+          spawnEnemy({ isMedic: true });
+          medicsSpawnedThisSet += 1;
+          spawnTimer = Math.max(spawnTimer, 0.55);
+        }
+      } else if (shouldSpawnMimic() && enemies.length < getEnemyLimit()) {
+        if (currentDelta > 0) {
+          spawnEnemy({ isMimic: true });
+          mimicsSpawnedThisSet += 1;
+          spawnTimer = Math.max(spawnTimer, 0.55);
+        }
       } else if (normalEnemiesSpawned < normalEnemyTarget) {
-        spawnTimer -= delta;
+        spawnTimer -= currentDelta;
         if (spawnTimer <= 0 && enemies.length < getEnemyLimit()) {
           spawnEnemy();
           normalEnemiesSpawned += 1;
@@ -888,7 +1075,7 @@ function animate(frameTime) {
       }
     } else if (wavePhase === 'boss') {
       if (bossesSpawned < BOSSES_PER_WAVE) {
-        bossSpawnTimer -= delta;
+        bossSpawnTimer -= currentDelta;
         if (bossSpawnTimer <= 0) {
           spawnBoss();
           bossesSpawned += 1;
@@ -899,12 +1086,12 @@ function animate(frameTime) {
       }
     }
 
-    updateEnemies(delta, seconds);
+    updateEnemies(currentDelta, gameTimeSeconds);
     updateHud(false);
   }
 
   updateEffects(delta);
-  updateEnvironment(seconds, delta);
+  updateEnvironment(gameTimeSeconds, delta, isTimeFrozen);
   updateSeasonFade(delta);
   updateLabels();
   renderer.render(scene, camera);
@@ -913,9 +1100,51 @@ function animate(frameTime) {
 function updateEnemies(delta, seconds) {
   for (let index = enemies.length - 1; index >= 0; index -= 1) {
     const enemy = enemies[index];
+    if (enemy.dying) continue;
     enemy.age += delta;
-    const speed = getEnemySpeed(enemy);
-    enemy.group.position.z += speed * delta;
+
+    if (enemy.isMimic) {
+      const isTargeted = (activeTarget === enemy && isEnemyTargetable(enemy));
+      const idleTarget = 0.22 + Math.sin(seconds * 2.2 + enemy.phase) * 0.12;
+      const targetLidProgress = isTargeted ? 1.0 : idleTarget;
+      const oldProgress = enemy.lidOpenProgress;
+      enemy.lidOpenProgress += (targetLidProgress - enemy.lidOpenProgress) * Math.min(1.0, 12 * delta);
+
+      if (oldProgress < 0.05 && enemy.lidOpenProgress >= 0.05) {
+        playChestOpenSound();
+      } else if (oldProgress >= 0.85 && enemy.lidOpenProgress < 0.85) {
+        playChestClackSound();
+      }
+
+      const lidGroup = enemy.group.userData.lidGroup;
+      if (lidGroup) {
+        lidGroup.rotation.x = -enemy.lidOpenProgress * (Math.PI / 2.2);
+      }
+
+      const chestLight = enemy.group.userData.chestLight;
+      if (chestLight) {
+        chestLight.intensity = 0.5 + enemy.lidOpenProgress * 2.5;
+      }
+    }
+
+    if (enemy.stunTimer === undefined) enemy.stunTimer = 0;
+    if (enemy.stunTimer > 0) {
+      enemy.stunTimer = Math.max(0, enemy.stunTimer - delta);
+    }
+
+    let speed = 0;
+    if (enemy.stunTimer <= 0) {
+      speed = getEnemySpeed(enemy);
+    }
+
+    if (enemy.pushbackTargetZ !== undefined) {
+      enemy.group.position.z += (enemy.pushbackTargetZ - enemy.group.position.z) * Math.min(1.0, 10.0 * delta);
+      if (Math.abs(enemy.group.position.z - enemy.pushbackTargetZ) < 0.1) {
+        delete enemy.pushbackTargetZ;
+      }
+    } else {
+      enemy.group.position.z += speed * delta;
+    }
     enemy.group.position.x = enemy.lane + Math.sin(seconds * enemy.wobbleSpeed + enemy.phase) * enemy.wobbleAmount;
     if (enemy.isFlying) {
       enemy.group.position.y = enemy.baseY + Math.sin(seconds * 1.4 + enemy.phase) * enemy.floatAmount;
@@ -933,11 +1162,11 @@ function updateEnemies(delta, seconds) {
     enemy.revealed = enemy.group.position.z >= enemy.revealZ;
     if (enemy.revealed && !wasRevealed) {
       enemy.revealFlash = 0.28;
-      playRevealSound(enemy);
+      if (!enemy.isMimic) playRevealSound(enemy);
     }
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
-    if (enemy.isBoss && enemy.revealed) {
+    if (enemy.isBoss && enemy.revealed && (!enemy.stunTimer || enemy.stunTimer <= 0)) {
       enemy.shotTimer -= delta;
       if (enemy.shotTimer <= 0) {
         bossShootPlayer(enemy);
@@ -1002,14 +1231,18 @@ function updateEffects(delta) {
     const effect = beams[index];
 
     if (effect.kind === 'rock') {
-      effect.age += delta;
+      if (!potionsSystem.isTimeFrozen()) {
+        effect.age += delta;
+      }
       const progress = THREE.MathUtils.clamp(effect.age / effect.flightTime, 0, 1);
       const eased = easeOutSine(progress);
       effect.mesh.position.copy(effect.start).lerp(effect.end, eased);
       effect.mesh.position.y += Math.sin(progress * Math.PI) * effect.arcHeight;
-      effect.mesh.rotation.x += effect.spin.x * delta;
-      effect.mesh.rotation.y += effect.spin.y * delta;
-      effect.mesh.rotation.z += effect.spin.z * delta;
+      if (!potionsSystem.isTimeFrozen()) {
+        effect.mesh.rotation.x += effect.spin.x * delta;
+        effect.mesh.rotation.y += effect.spin.y * delta;
+        effect.mesh.rotation.z += effect.spin.z * delta;
+      }
       effect.mesh.scale.setScalar(THREE.MathUtils.lerp(0.95, 1.2, progress));
 
       if (progress >= 1) {
@@ -1022,10 +1255,19 @@ function updateEffects(delta) {
       continue;
     }
 
+    if (effect.hold) {
+      if (effect.kind === 'lightning_bolt') {
+        effect.mesh.material.opacity = 1.0;
+      }
+      continue;
+    }
+
     effect.life -= delta;
     const amount = Math.max(0, effect.life / effect.maxLife);
 
-    if (effect.kind === 'beam_flash') {
+    if (effect.kind === 'lightning_bolt') {
+      effect.mesh.material.opacity = amount;
+    } else if (effect.kind === 'beam_flash') {
       const expand = 0.3 + (1 - amount) * 2.2;
       effect.mesh.scale.setScalar(expand);
       effect.mesh.material.opacity = amount * 0.9;
@@ -1052,12 +1294,14 @@ function updateEffects(delta) {
 
   for (let index = debris.length - 1; index >= 0; index -= 1) {
     const chunk = debris[index];
-    chunk.life -= delta;
-    chunk.velocity.y -= 8.8 * delta;
-    chunk.mesh.position.addScaledVector(chunk.velocity, delta);
-    chunk.mesh.rotation.x += chunk.spin.x * delta;
-    chunk.mesh.rotation.y += chunk.spin.y * delta;
-    chunk.mesh.rotation.z += chunk.spin.z * delta;
+    if (!potionsSystem.isTimeFrozen()) {
+      chunk.life -= delta;
+      chunk.velocity.y -= 8.8 * delta;
+      chunk.mesh.position.addScaledVector(chunk.velocity, delta);
+      chunk.mesh.rotation.x += chunk.spin.x * delta;
+      chunk.mesh.rotation.y += chunk.spin.y * delta;
+      chunk.mesh.rotation.z += chunk.spin.z * delta;
+    }
     chunk.mesh.material.opacity = Math.max(0, chunk.life / chunk.maxLife);
     if (chunk.life <= 0 || chunk.mesh.position.y < -1.2) {
       effectsGroup.remove(chunk.mesh);
@@ -1071,8 +1315,9 @@ function updateEffects(delta) {
   if (mistakeTimer > 0) mistakeTimer -= delta;
 }
 
-function updateEnvironment(seconds, delta) {
-  updateWandSwings(delta);
+function updateEnvironment(seconds, delta, isTimeFrozen = false) {
+  const envDelta = isTimeFrozen ? 0 : delta;
+  updateWandSwings(envDelta);
   emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   const shake = damageTimer > 0 ? damageTimer * 0.45 : 0;
   camera.position.x = Math.sin(seconds * 0.34) * 0.28 + Math.sin(seconds * 41) * shake;
@@ -1084,7 +1329,7 @@ function updateEnvironment(seconds, delta) {
     let targetMoonShadowStrength = 1;
     if (moonWaitTimer > 0) {
       // Moon has set — hide it and wait before rising again from the left
-      moonWaitTimer -= delta;
+      moonWaitTimer -= envDelta;
       if (moonWaitTimer <= 0) moonAngle = 0;
       moon.visible = false;
       moon.material.opacity = 0;
@@ -1092,7 +1337,7 @@ function updateEnvironment(seconds, delta) {
       targetMoonShadowStrength = 0;
     } else {
       moon.visible = true;
-      moonAngle += delta * (Math.PI / 200); // full crossing in ~200 s
+      moonAngle += envDelta * (Math.PI / 200); // full crossing in ~200 s
       if (moonAngle >= Math.PI) {
         moonAngle = Math.PI;
         moonWaitTimer = 7 + Math.random() * 3; // wait 7–10 s before next rise
@@ -1106,7 +1351,7 @@ function updateEnvironment(seconds, delta) {
           : 1;
       targetMoonShadowStrength = THREE.MathUtils.clamp(moon.material.opacity * 1.8, 0, 1);
     }
-    updateMoonShadowFade(delta, targetMoonShadowStrength);
+    updateMoonShadowFade(envDelta, targetMoonShadowStrength);
     updateMoonHaze();
   }
 
@@ -1118,7 +1363,7 @@ function updateEnvironment(seconds, delta) {
     pathMarkerMaterial.emissiveIntensity = 0.24 + Math.sin(seconds * 2.8) * 0.1;
   }
 
-  const scrollDelta = SCENERY_SCROLL_SPEED * delta * (mode === 'running' ? 1 : 0.35);
+  const scrollDelta = SCENERY_SCROLL_SPEED * delta * (isTimeFrozen ? 0 : mode === 'running' ? 1 : 0.35);
 
   updateRoad(scrollDelta);
 
@@ -1130,13 +1375,45 @@ function updateEnvironment(seconds, delta) {
     marker.mesh.position.y = marker.baseY + Math.sin(seconds * 3.2 + marker.phase) * 0.018;
   }
 
-  for (const flame of torchFlames) {
-    const flamePulse = 1 + Math.sin(seconds * 8.5 + flame.phase) * 0.12;
-    flame.mesh.scale.set(flamePulse, 1 + Math.cos(seconds * 7.2 + flame.phase) * 0.16, flamePulse);
+  const isChainLightningPrimed = potionsSystem ? potionsSystem.isChainLightningPrimed() : false;
+  if (isChainLightningPrimed && !wandsArePrimed) {
+    wandsArePrimed = true;
+    sceneCrystalMat.color.setHex(0xfde068);
+    sceneCrystalMat.emissive.setHex(0xfde068);
+    sceneCrystalMat.emissiveIntensity = 3.5;
+    for (const crown of lightningCrowns) crown.visible = true;
+    for (const light of torchLights) light.color.setHex(0xfde068);
+  } else if (!isChainLightningPrimed && wandsArePrimed) {
+    wandsArePrimed = false;
+    sceneCrystalMat.color.setHex(0x58dfcf);
+    sceneCrystalMat.emissive.setHex(0x2dd4bf);
+    sceneCrystalMat.emissiveIntensity = 2.0;
+    for (const crown of lightningCrowns) crown.visible = false;
+    for (const light of torchLights) light.color.setHex(0x2dd4bf);
   }
 
-  for (const light of torchLights) {
-    light.intensity = 1.55 + Math.sin(seconds * 7.8 + light.userData.phase) * 0.26;
+  if (wandsArePrimed) {
+    const pulse = 1.1 + Math.sin(seconds * 12.0) * 0.18;
+    for (const flame of torchFlames) {
+      flame.mesh.scale.set(pulse, pulse, pulse);
+    }
+    sceneCrystalMat.emissiveIntensity = 3.2 + Math.sin(seconds * 9.0) * 0.8;
+    for (const crown of lightningCrowns) {
+      crown.rotation.y = seconds * 5.5;
+      const cs = 1.0 + Math.sin(seconds * 11.0) * 0.12;
+      crown.scale.set(cs, cs, cs);
+    }
+    for (const light of torchLights) {
+      light.intensity = 2.6 + Math.sin(seconds * 10.0 + light.userData.phase) * 0.5;
+    }
+  } else {
+    for (const flame of torchFlames) {
+      const flamePulse = 1 + Math.sin(seconds * 8.5 + flame.phase) * 0.12;
+      flame.mesh.scale.set(flamePulse, 1 + Math.cos(seconds * 7.2 + flame.phase) * 0.16, flamePulse);
+    }
+    for (const light of torchLights) {
+      light.intensity = 1.55 + Math.sin(seconds * 7.8 + light.userData.phase) * 0.26;
+    }
   }
 
   for (const canopy of canopyBlocks) {
@@ -1151,9 +1428,9 @@ function updateEnvironment(seconds, delta) {
     }
   }
 
-  seasonalEffects.update(seconds, delta, scrollDelta);
+  seasonalEffects.update(seconds, envDelta, scrollDelta);
 
-  updateClouds(delta);
+  updateClouds(envDelta);
 }
 
 function updateRoad(scrollDelta) {
@@ -1750,23 +2027,30 @@ function updateTypedDisplay() {
 function spawnEnemy(options = {}) {
   const isBoss = options.isBoss || false;
   const isMedic = options.isMedic || false;
+  const isMimic = options.isMimic || false;
   const wordData = options.wordData
     ? options.wordData
     : options.forcedPrompt
     ? (ALL_WORDS.find(w => w.term === options.forcedPrompt) || { term: options.forcedPrompt, definition: null })
     : isMedic
     ? chooseMedicPrompt()
+    : isMimic
+    ? chooseMimicPrompt()
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
-  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : weightedPick(ENEMY_TYPES);
+  const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
   const hintRange = isBoss ? getBossQuestionHintRange() : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
   }
-  const group = createEnemyMesh(type);
+  if (isMimic && !firstMimicHintShown) {
+    firstMimicHintShown = true;
+    window.setTimeout(() => { if (mode === 'running') showBanner('MIMIC CHEST DETECTED!', 'mimic-hint'); }, 1100);
+  }
+  const group = isMimic ? createMimicChestMesh(type) : createEnemyMesh(type);
   const spawnBaseZ = Number.isFinite(options.startZ) ? options.startZ : chooseSpawnZ();
   const spawnSpread = Number.isFinite(options.delay)
     ? options.delay
@@ -1794,12 +2078,14 @@ function spawnEnemy(options = {}) {
     scene.add(shadowMesh);
   }
 
-  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : 'keyword';
+  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
     : isMedic
     ? 'word-tag is-medic is-hidden'
+    : isMimic
+    ? 'word-tag is-mimic is-hidden'
     : 'word-tag is-hidden';
   label.dataset.kind = promptKind;
   label.style.setProperty('--threat-progress', '0');
@@ -1810,7 +2096,7 @@ function spawnEnemy(options = {}) {
 
   const kindNode = document.createElement('span');
   kindNode.className = 'prompt-kind';
-  kindNode.textContent = promptKind;
+  kindNode.textContent = promptKind === 'mimic' ? 'loot' : promptKind;
 
   const promptNode = document.createElement('span');
   promptNode.className = 'prompt';
@@ -1867,6 +2153,9 @@ function spawnEnemy(options = {}) {
     promptKind,
     isBoss,
     isMedic,
+    isMimic,
+    lidOpenProgress: 0,
+    hasOpened: false,
     isFlying,
     shadowMesh,
     lane,
@@ -1874,8 +2163,8 @@ function spawnEnemy(options = {}) {
     revealZ,
     revealed: startZ >= revealZ,
     revealFlash: 0,
-    speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : type.speed + Math.random() * 0.35,
-    damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
+    speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : isMimic ? type.speed + Math.random() * 0.25 : type.speed + Math.random() * 0.35,
+    damage: isBoss ? BOSS_CONTACT_DAMAGE : (isMedic || isMimic) ? 0 : MINION_DAMAGE,
     shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
     baseY: spawnBaseY,
     age: 0,
@@ -1908,6 +2197,7 @@ function chooseSpawnLane(startZ) {
 
 function createEnemyMesh(type) {
   if (!!type.isMedic) return createMedicHeartMesh(type);
+  if (!!type.isMimic) return createMimicChestMesh(type);
   if (!!type.isBoss) return createSpecificBossMesh(type);
   return createNormalEnemyMesh(type);
 }
@@ -2124,6 +2414,104 @@ function finishBossGroup(group, type, beaconY = 2.9) {
   group.userData.targetMarker = targetMarker;
   return group;
 }
+
+function createMimicChestMesh(type) {
+  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x7a4c10, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.12 });
+  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, emissive: 0xffe060, emissiveIntensity: 0.55, roughness: 0.18, metalness: 1.0 });
+  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
+  const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x0e0115, roughness: 0.9 });
+  const toothMat = new THREE.MeshStandardMaterial({ color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
+  const gemMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
+
+  const g = new THREE.Group();
+
+  // Wood base (taller for presence)
+  g.add(blockMesh(1.2, 0.56, 0.9, bodyMat, 0, 0.28, 0));
+
+  // Dark interior tray visible when lid opens
+  g.add(blockMesh(0.96, 0.10, 0.72, darkInteriorMat, 0, 0.52, 0));
+
+  // Bottom base trim bar
+  g.add(blockMesh(1.28, 0.09, 0.98, trimMat, 0, 0.045, 0));
+
+  // Four corner pillars running full height
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, 0.42));
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, 0.42));
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, -0.42));
+  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, -0.42));
+
+  // Mid-band gold strip on front face
+  g.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.50, 0.42));
+
+  // Glowing eyes (large, bright)
+  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat, -0.24, 0.54, 0.18));
+  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat,  0.24, 0.54, 0.18));
+
+  // Lower teeth (5 teeth, angled forward)
+  for (let i = 0; i < 5; i++) {
+    const x = -0.40 + i * 0.20;
+    const tooth = blockMesh(0.09, 0.15, 0.09, toothMat, x, 0.54, 0.35);
+    tooth.rotation.x = 0.25;
+    g.add(tooth);
+  }
+
+  // PointLight inside the chest (intensity driven each frame)
+  const light = new THREE.PointLight(type.eye, 0.5, 6.0);
+  light.position.set(0, 0.55, 0.1);
+  g.add(light);
+
+  // Outer golden glow — casts warm light on ground around the chest
+  const outerGlow = new THREE.PointLight(0xffd040, 1.0, 4.5);
+  outerGlow.position.set(0, 1.6, 0);
+  g.add(outerGlow);
+
+  // Lid Group — pivot at top-back edge of the base
+  const lidGroup = new THREE.Group();
+  lidGroup.position.set(0, 0.58, -0.45);
+  g.add(lidGroup);
+
+  // Lid wood
+  lidGroup.add(blockMesh(1.2, 0.38, 0.9, bodyMat, 0, 0.19, 0.45));
+
+  // Top cap trim strip
+  lidGroup.add(blockMesh(1.28, 0.07, 0.98, trimMat, 0, 0.39, 0.45));
+
+  // Front trim strip on lid
+  lidGroup.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.04, 0.88));
+
+  // Lid corner posts
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.02));
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.02));
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.88));
+  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.88));
+
+  // Lock clasp
+  lidGroup.add(blockMesh(0.18, 0.24, 0.07, trimMat, 0, 0.02, 0.94));
+
+  // Center magenta gem on lid front
+  lidGroup.add(blockMesh(0.14, 0.14, 0.07, gemMat, 0, 0.21, 0.92));
+
+  // Upper teeth (6 teeth, angled down)
+  for (let i = 0; i < 6; i++) {
+    const x = -0.46 + i * 0.185;
+    const tooth = blockMesh(0.08, 0.15, 0.09, toothMat, x, 0.0, 0.81);
+    tooth.rotation.x = -0.25;
+    lidGroup.add(tooth);
+  }
+
+  // Incoming beacon & target marker
+  const incomingBeacon = createIncomingBeacon(type);
+  const targetMarker = createTargetMarker(type);
+  g.add(incomingBeacon, targetMarker);
+
+  g.userData.lidGroup = lidGroup;
+  g.userData.chestLight = light;
+  g.userData.incomingBeacon = incomingBeacon;
+  g.userData.targetMarker = targetMarker;
+
+  return g;
+}
+
 function createSpecificBossMesh(type) {
   if (type.name === 'Crimson Bulwark') return createDragonBossMesh(type);
   if (type.name === 'Verdant Colossus') return createDevilBossMesh(type);
@@ -2465,6 +2853,35 @@ function createGround() {
   sceneGroundMesh = mesh;
 }
 
+function createLightningCrown() {
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xfde068, emissive: 0xfde068, emissiveIntensity: 3.2,
+    roughness: 0.05, metalness: 0.1,
+  });
+  const crown = new THREE.Group();
+  const R = 0.42;
+  for (let i = 0; i < 3; i++) {
+    const angle = (i / 3) * Math.PI * 2;
+    const boltGroup = new THREE.Group();
+    boltGroup.position.set(Math.sin(angle) * R, 0, Math.cos(angle) * R);
+    boltGroup.rotation.y = angle;
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.22, 0.05), mat);
+    top.position.set(0.05, 0.28, 0);
+    top.rotation.z = 0.55;
+    boltGroup.add(top);
+    const mid = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.22, 0.05), mat);
+    mid.position.set(-0.04, 0.06, 0);
+    mid.rotation.z = -0.55;
+    boltGroup.add(mid);
+    const bot = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.16, 0.04), mat);
+    bot.position.set(0.06, -0.12, 0);
+    bot.rotation.z = 0.55;
+    boltGroup.add(bot);
+    crown.add(boltGroup);
+  }
+  return crown;
+}
+
 function createTorches() {
   const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88 });
   const bandMat = new THREE.MeshStandardMaterial({ color: 0x7a6040, roughness: 0.48, metalness: 0.5 });
@@ -2510,6 +2927,13 @@ function createTorches() {
     crystalGroup.add(rightShard);
     wandGroup.add(crystalGroup);
     torchFlames.push({ mesh: crystalGroup, phase: Math.random() * Math.PI * 2 });
+
+    // Lightning crown — shown only when chain lightning is primed
+    const crown = createLightningCrown();
+    crown.position.set(0, 2.72, 0);
+    crown.visible = false;
+    wandGroup.add(crown);
+    lightningCrowns.push(crown);
 
     // Point light parented to the wand so it follows the swing
     const light = new THREE.PointLight(0x2dd4bf, 1.6, 14, 2);
@@ -2953,7 +3377,7 @@ function chooseTarget(matches) {
 }
 
 function isEnemyTargetable(enemy) {
-  return enemy.revealed && enemy.group.position.z < WALL_Z;
+  return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
 }
 
 function prepareWavePlan() {
@@ -2961,6 +3385,8 @@ function prepareWavePlan() {
   introducedBossTermsThisSet = new Set();
   medicsSpawnedThisSet = 0;
   medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
+  mimicsSpawnedThisSet = 0;
+  mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
   const previewableWords = definitionBossWordsForWave();
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
   hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
@@ -2998,6 +3424,46 @@ function shouldSpawnMedic() {
     && medicsSpawnedThisSet < medicSpawnSlots.length
     && normalEnemiesSpawned >= medicSpawnSlots[medicsSpawnedThisSet];
 }
+
+function chooseMimicPrompt() {
+  const reservedBossTerms = new Set(bossWordsThisSet.map((w) => w.term));
+  const nearExisting = new Set(enemies.map((e) => e.prompt));
+  const pool = currentKeywordPool().filter((entry) => !reservedBossTerms.has(entry.term));
+  const usablePool = pool.length > 0 ? pool : EASY_WORDS;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
+    if (!nearExisting.has(entry.term)) return entry;
+  }
+  return usablePool[Math.floor(Math.random() * usablePool.length)];
+}
+
+function getMimicCountForWave(wave) {
+  if (wave <= 1) return 1;
+  if (wave >= 6) return 3;
+  return 2;
+}
+
+function chooseMimicSpawnSlots(target, count) {
+  if (target <= 0 || count <= 0) return [];
+  const slots = [];
+  const usableTarget = Math.max(1, target - 1);
+  for (let index = 0; index < count; index += 1) {
+    const slot = THREE.MathUtils.clamp(
+      Math.round(((index + 1) * usableTarget) / (count + 1)),
+      1,
+      usableTarget
+    );
+    slots.push(slot);
+  }
+  return slots;
+}
+
+function shouldSpawnMimic() {
+  return wavePhase === 'normal'
+    && mimicsSpawnedThisSet < mimicSpawnSlots.length
+    && normalEnemiesSpawned >= mimicSpawnSlots[mimicsSpawnedThisSet];
+}
+
 
 function buildBossPreviewSchedule(target, words) {
   const schedule = new Map();
@@ -3593,6 +4059,72 @@ function spawnScorePopup(points, enemy, healed = 0) {
   popup.addEventListener('animationend', () => popup.remove(), { once: true });
 }
 
+function spawnLootRewardPopup(left, top, addedType) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-loot-reward';
+  const name = addedType.replace('_', ' ').toUpperCase();
+  popup.textContent = `+1 ${name}`;
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function spawnInventoryFullPopup(left, top) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-inventory-full';
+  popup.textContent = 'INVENTORY FULL';
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function spawnLootEscapedPopup(left, top) {
+  const popup = document.createElement('div');
+  popup.className = 'score-popup is-loot-escaped';
+  popup.textContent = 'LOOT ESCAPED';
+  popup.style.left = `${left}px`;
+  popup.style.top = `${top}px`;
+  document.body.appendChild(popup);
+  popup.addEventListener('animationend', () => popup.remove(), { once: true });
+}
+
+function spawnMagicAcquiredBurst(addedType) {
+  const existing = document.querySelector('.magic-acquired-burst');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'magic-acquired-burst';
+  const name = addedType.replace('_', ' ').toUpperCase();
+  el.innerHTML = `<span class="mab-line1">MAGIC ACQUIRED</span><span class="mab-line2">+1 ${name}</span>`;
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+}
+
+function awardMimicLoot(enemy) {
+  const types = ['time_freeze', 'chain_lightning', 'shockwave'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const success = potionsSystem.addPotion(type);
+
+  if (!enemy.label.classList.contains('is-hidden')) {
+    const left = parseFloat(enemy.label.style.left);
+    const top = parseFloat(enemy.label.style.top);
+    if (Number.isFinite(left) && Number.isFinite(top)) {
+      if (success) {
+        spawnLootRewardPopup(left, top, type);
+        spawnMagicAcquiredBurst(type);
+      } else {
+        spawnInventoryFullPopup(left, top);
+      }
+    }
+  }
+
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+  }
+}
+
+
 function renderRunGlossary() {
   if (!runGlossary) return;
   runGlossary.innerHTML = '';
@@ -3676,3 +4208,289 @@ function showBanner(text, variant = '') {
   void bossBanner.offsetWidth;
   bossBanner.classList.add('is-active');
 }
+
+// Potion system logic is imported from src/potions.js
+
+function triggerChainLightning(firstEnemy) {
+  if (potionsSystem) {
+    potionsSystem.clearChainLightningPrimed();
+  }
+  
+  const origin = firstEnemy.group.position.clone();
+  const N = 1; // Chain to up to 1 additional monster (total 2 including the 1st one)
+  const targets = [];
+  let currentPosition = origin.clone();
+  
+  const candidates = enemies.filter(e => 
+    isEnemyTargetable(e) && 
+    !e.dying && 
+    e !== firstEnemy && 
+    !e.isBoss && 
+    !e.isMedic && 
+    !e.isMimic
+  );
+  
+  for (let i = 0; i < N; i++) {
+    if (candidates.length === 0) break;
+    let closestEnemy = null;
+    let closestDistSq = Infinity;
+    let closestIndex = -1;
+    for (let j = 0; j < candidates.length; j++) {
+      const distSq = candidates[j].group.position.distanceToSquared(currentPosition);
+      if (distSq < closestDistSq) {
+        closestDistSq = distSq;
+        closestEnemy = candidates[j];
+        closestIndex = j;
+      }
+    }
+    if (closestEnemy && closestDistSq <= 144) { // 12 units squared (12 * 12 = 144)
+      targets.push(closestEnemy);
+      currentPosition = closestEnemy.group.position.clone();
+      candidates.splice(closestIndex, 1);
+    } else {
+      break;
+    }
+  }
+
+  playToggleSound();
+  showBanner('CHAIN LIGHTNING!', 'chain-lightning');
+
+  // Select the wand tip on the side of the 1st monster (origin)
+  const side = origin.x < 0 ? 0 : 1;
+  const selectedWand = wandGroups[side];
+  if (selectedWand) {
+    triggerWandSwing(selectedWand);
+  }
+  const wandTip = selectedWand 
+    ? new THREE.Vector3(selectedWand.position.x, 2.38, selectedWand.position.z)
+    : new THREE.Vector3(side === 0 ? -5.35 : 5.35, 2.38, WALL_Z - 0.2);
+
+  const chainMonsters = [firstEnemy];
+
+  // 1st segment: wandTip -> 1st monster (immediately, held)
+  const p1 = origin.clone();
+  p1.y += 0.8;
+  spawnLightningVisual(wandTip, p1, true);
+
+  let currentChainOrigin = p1;
+
+  if (targets.length === 0) {
+    // No other monsters: hold visual for 100ms, then burst the single monster
+    window.setTimeout(() => {
+      burstChain(chainMonsters);
+    }, 100);
+  } else {
+    // Chain sequentially
+    targets.forEach((enemy, index) => {
+      window.setTimeout(() => {
+        if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
+          enemy.dying = true; // freeze
+          chainMonsters.push(enemy);
+
+          const targetPos = enemy.group.position.clone();
+          targetPos.y += 0.8;
+
+          spawnLightningVisual(currentChainOrigin, targetPos, true); // hold = true
+          currentChainOrigin = targetPos;
+        }
+
+        // Trigger simultaneous burst when sequence completes
+        if (index === targets.length - 1) {
+          window.setTimeout(() => {
+            burstChain(chainMonsters);
+          }, 80);
+        }
+      }, (index + 1) * 60);
+    });
+  }
+}
+
+function releaseChainBeams() {
+  for (const effect of beams) {
+    if (effect.kind === 'lightning_bolt' && effect.hold) {
+      effect.hold = false;
+      effect.life = 0.10;
+      effect.maxLife = 0.10;
+    }
+  }
+}
+
+function burstChain(chainMonsters) {
+  releaseChainBeams();
+
+  chainMonsters.forEach(enemy => {
+    defeatEnemyChainBurst(enemy);
+  });
+
+  if (lightningFlash) {
+    lightningFlash.style.opacity = '0.92';
+    window.setTimeout(() => {
+      lightningFlash.style.opacity = '0';
+    }, 100);
+  }
+}
+
+function defeatEnemyChainBurst(enemy) {
+  if (enemy.isMimic) {
+    awardMimicLoot(enemy);
+    spawnDebris(enemy.group.position, enemy.type);
+
+    // Spark impact flash mesh at the target position
+    const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
+    const flashMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+    flashMesh.position.copy(enemy.group.position);
+    flashMesh.position.y += 0.8;
+    effectsGroup.add(flashMesh);
+    
+    beams.push({
+      kind: 'beam_flash',
+      mesh: flashMesh,
+      life: 0.15,
+      maxLife: 0.15
+    });
+
+    removeEnemy(enemy);
+    updateHud(true);
+    updateTypedDisplay();
+    return;
+  }
+
+  const promptValue = enemy.prompt.replace(/\s/g, '');
+  streak += 1;
+  defeatedCount += 1;
+  if (enemy.isBoss) bossesDefeated += 1;
+  const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
+  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
+  score += points;
+  if (healed > 0) health += healed;
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+  }
+
+  spawnScorePopup(points, enemy, healed);
+  
+  if (enemy.isMedic) playHealSound(healed);
+  else playDefeatSound(enemy);
+
+  spawnDebris(enemy.group.position, enemy.type);
+
+  // Spark impact flash mesh at the target position
+  const flashGeo = new THREE.DodecahedronGeometry(0.85, 0);
+  const flashMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+  flashMesh.position.copy(enemy.group.position);
+  flashMesh.position.y += 0.8;
+  effectsGroup.add(flashMesh);
+  
+  beams.push({
+    kind: 'beam_flash',
+    mesh: flashMesh,
+    life: 0.15,
+    maxLife: 0.15
+  });
+
+  removeEnemy(enemy);
+  
+  updateHud(true);
+  updateTypedDisplay();
+}
+
+function spawnLightningVisual(startPos, targetPos, hold = false) {
+  const origin = startPos.clone();
+  const points = [];
+  points.push(origin);
+  const segments = 6;
+  for (let i = 1; i < segments; i++) {
+    const t = i / segments;
+    const p = new THREE.Vector3().lerpVectors(origin, targetPos, t);
+    p.x += (Math.random() - 0.5) * 0.6;
+    p.y += (Math.random() - 0.5) * 0.6;
+    p.z += (Math.random() - 0.5) * 0.6;
+    points.push(p);
+  }
+  points.push(targetPos);
+
+  const curve = new THREE.CatmullRomCurve3(points);
+  
+  // 1. Solid white core tube
+  const coreGeom = new THREE.TubeGeometry(curve, 16, 0.10, 4, false);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 1.0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+  effectsGroup.add(coreMesh);
+
+  // 2. Wide glowing golden sleeve
+  const glowGeom = new THREE.TubeGeometry(curve, 16, 0.38, 5, false);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0xefc35c,
+    transparent: true,
+    opacity: 0.52,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const glowMesh = new THREE.Mesh(glowGeom, glowMat);
+  effectsGroup.add(glowMesh);
+
+  // 3. Impact flash at the target position
+  const flashGeo = new THREE.DodecahedronGeometry(0.5, 0);
+  const flashMat = new THREE.MeshBasicMaterial({
+    color: 0xffdd66,
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const flashMesh = new THREE.Mesh(flashGeo, flashMat);
+  flashMesh.position.copy(targetPos);
+  effectsGroup.add(flashMesh);
+
+  // Register them in beams array for decay
+  const duration = 0.10;
+  beams.push({
+    kind: 'lightning_bolt',
+    mesh: coreMesh,
+    life: duration,
+    maxLife: duration,
+    hold: hold
+  });
+  beams.push({
+    kind: 'lightning_bolt',
+    mesh: glowMesh,
+    life: duration,
+    maxLife: duration,
+    hold: hold
+  });
+  beams.push({
+    kind: 'beam_flash',
+    mesh: flashMesh,
+    life: duration,
+    maxLife: duration
+  });
+}
+
+// Hook up event listeners for potion slots
+potionSlots.forEach((slot, index) => {
+  slot.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    resumeAudio();
+    potionsSystem.activatePotionSlot(index);
+  });
+});

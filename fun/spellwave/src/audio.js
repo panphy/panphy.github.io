@@ -582,6 +582,26 @@ export function createSpellwaveAudio({
     playNoise(0.24, { gain: 0.018, delay: 0.08, filterFrequency: 1400, filterType: 'lowpass', q: 0.55 });
   }
 
+  function playChestClackSound() {
+    playTone(180, 0.12, { gain: 0.05, type: 'triangle', endFrequency: 90 });
+    playNoise(0.06, { gain: 0.045, filterFrequency: 450, filterType: 'bandpass', q: 4.0 });
+  }
+
+  function playChestOpenSound() {
+    playTone(120, 0.04, { gain: 0.035, type: 'sawtooth', endFrequency: 110 });
+    playTone(130, 0.04, { gain: 0.035, delay: 0.035, type: 'sawtooth', endFrequency: 120 });
+    playTone(140, 0.05, { gain: 0.035, delay: 0.07, type: 'sawtooth', endFrequency: 130 });
+    playTone(440, 0.12, { gain: 0.024, delay: 0.12, type: 'sine' });
+    playTone(660, 0.14, { gain: 0.024, delay: 0.18, type: 'sine' });
+    playTone(880, 0.16, { gain: 0.020, delay: 0.24, type: 'sine' });
+  }
+
+  function playShockwaveSound() {
+    playTone(120, 0.45, { gain: 0.065, type: 'sawtooth', endFrequency: 60 });
+    playTone(60, 0.60, { gain: 0.080, delay: 0.05, type: 'sine', endFrequency: 30 });
+    playNoise(0.60, { gain: 0.075, filterFrequency: 450, filterType: 'lowpass' });
+  }
+
   return {
     toggleEnabled,
     updateAudioButton,
@@ -606,5 +626,9 @@ export function createSpellwaveAudio({
     playGameOverSound,
     playGodModeOnSound,
     playGodModeOffSound,
+    playChestClackSound,
+    playChestOpenSound,
+    playShockwaveSound,
   };
 }
+
