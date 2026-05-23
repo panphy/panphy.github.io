@@ -17,6 +17,8 @@ PanPhy Labs is a static GitHub Pages PWA for interactive physics tools, simulati
 - Keep the files technically aligned, even if wording differs.
 - Do not remove either file from git or add either to `.gitignore`.
 - Keep local tool state directories such as `.agents/` and `.claude/` ignored/local-only.
+- Always clean up transient runtime state (such as temporary browser profiles like `chrome-profile`, custom debugging logs, or scratch files) before finishing a task.
+  - **Guardrail**: You must always ask the user for explicit confirmation before deleting any files or directories in the workspace.
 
 ## Critical Rules
 
