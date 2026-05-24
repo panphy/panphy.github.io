@@ -10,7 +10,7 @@
       </svg>`,
     dark: `
       <svg class="panphy-theme-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path class="panphy-theme-icon__fill" d="M18.8 15.5a7.7 7.7 0 0 1-10.3-10 8 8 0 1 0 10.3 10Z"></path>
+        <path d="M18.8 15.4A7.8 7.8 0 0 1 8.6 5.2 8.2 8.2 0 1 0 18.8 15.4Z"></path>
       </svg>`
   };
 
