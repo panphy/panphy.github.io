@@ -62,6 +62,8 @@
 
   <!-- External CSS -->
   <link rel="stylesheet" href="markdown_editor/css/markdown_editor.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <script src="/assets/theme-toggle.js"></script>
 </head>
 
 <body>
@@ -74,7 +76,7 @@
       <button class="mobile-tab active" data-pane="input">Edit</button>
       <button class="mobile-tab" data-pane="output">Preview</button>
     </div>
-    <button id="mobileThemeToggle" class="theme-toggle-button" aria-label="Toggle theme">&#9728;&#65039;</button>
+    <button id="mobileThemeToggle" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle theme">&#9728;&#65039;</button>
   </div>
 
   <!--
@@ -169,7 +171,7 @@
 
         <!-- Theme toggle button on the Right -->
         <div class="theme-toggle-wrapper">
-          <button id="themeToggleButton" class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
+          <button id="themeToggleButton" data-panphy-theme-toggle class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
             title="Switch to Dark Mode">
             &#9728;&#65039;
           </button>
@@ -219,7 +221,7 @@
         </div>
         <button id="presentLaserToggle" class="present-btn" aria-label="Toggle laser pointer"
           title="Toggle laser pointer">&#128994;</button>
-        <button id="presentThemeToggle" class="present-btn" aria-label="Toggle theme"
+        <button id="presentThemeToggle" data-panphy-theme-toggle class="present-btn" aria-label="Toggle theme"
           title="Toggle theme">&#9728;&#65039;</button>
         <button id="presentExitButton" class="present-btn" title="Exit Present">Exit</button>
       </div>

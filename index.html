@@ -681,6 +681,8 @@
             }
         }
     </style>
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <script src="/assets/theme-toggle.js"></script>
 </head>
 
 <body>
@@ -695,7 +697,7 @@
         <a href="#fun">Fun</a>
         <a href="#about">About</a>
         <div class="theme-toggle">
-            <button id="theme-button" aria-label="Toggle Light/Dark Theme">☀️</button>
+            <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme">☀️</button>
         </div>
     </nav>
 
@@ -1196,9 +1198,16 @@
             ],
             '/for_teachers/visualizer.html': ['/for_teachers/visualizer.html']
         };
+        const OFFLINE_COMMON_ASSETS = [
+            '/assets/theme-toggle.css',
+            '/assets/theme-toggle.js'
+        ];
         const OFFLINE_APP_PATHS = Object.keys(OFFLINE_CARD_REQUIREMENTS);
         const OFFLINE_REQUIRED_ASSETS = [...new Set(
-            OFFLINE_APP_PATHS.flatMap((path) => OFFLINE_CARD_REQUIREMENTS[path])
+            [
+                ...OFFLINE_COMMON_ASSETS,
+                ...OFFLINE_APP_PATHS.flatMap((path) => OFFLINE_CARD_REQUIREMENTS[path])
+            ]
         )];
         const offlineCardPills = new Map();
 
@@ -1267,7 +1276,7 @@
             let readyApps = 0;
 
             OFFLINE_APP_PATHS.forEach((path) => {
-                const requirements = OFFLINE_CARD_REQUIREMENTS[path];
+                const requirements = [...OFFLINE_COMMON_ASSETS, ...OFFLINE_CARD_REQUIREMENTS[path]];
                 const ready = requirements.every((asset) => cacheMap.get(asset));
                 if (ready) {
                     readyApps += 1;
