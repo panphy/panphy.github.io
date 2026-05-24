@@ -138,7 +138,7 @@
           </div>
         </div>
         <div class="font-menu" id="fontMenu">
-          <button id="fontButton" aria-expanded="false" aria-controls="fontPanel" title="Change editor font size">Font</button>
+          <button id="fontButton" aria-expanded="false" aria-controls="fontPanel" title="Change editor font size">Font Size</button>
           <div id="fontPanel" class="font-panel" hidden>
             <button class="font-option-btn" data-size="14px">Small</button>
             <button class="font-option-btn" data-size="16px">Medium</button>
@@ -183,6 +183,19 @@
           <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
           <button id="presentButton" title="Show rendered output in fullscreen">Present</button>
           <button id="loadSampleButton" title="Sample document showing basic Markdown and LaTeX syntax.">Learn</button>
+          <div class="preview-font-menu" id="previewFontMenu">
+            <div class="preview-font-btn-wrapper" id="previewFontBtnWrapper">
+              <button id="previewFontButton" aria-expanded="false" aria-controls="previewFontPanel" title="Change preview font">Font</button>
+              <span class="preview-font-offline-tooltip" role="tooltip">Font selection is available online only</span>
+            </div>
+            <div id="previewFontPanel" class="preview-font-panel" hidden>
+              <button class="preview-font-option-btn" data-font-key="Manrope">Default</button>
+              <button class="preview-font-option-btn" data-font-key="Inter">Inter</button>
+              <button class="preview-font-option-btn" data-font-key="Lora">Lora</button>
+              <button class="preview-font-option-btn" data-font-key="Merriweather">Merriweather</button>
+              <button class="preview-font-option-btn" data-font-key="SourceSerif4">Source Serif</button>
+            </div>
+          </div>
         </div>
         <div class="output-toggles">
           <label class="scroll-sync-toggle" for="syncScrollToggle">

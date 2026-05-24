@@ -19,7 +19,9 @@ import {
   saveSnapshot,
   loadSnapshots,
   markContentExported,
-  isDirty
+  isDirty,
+  savePreviewFontPreference,
+  loadPreviewFontPreference
 } from './state.js';
 
 import {
@@ -82,6 +84,21 @@ const presentZoomSelect = document.getElementById('presentZoomSelect');
 const laserPointer = document.getElementById('laserPointer');
 const laserCanvas = document.getElementById('laserCanvas');
 const laserContext = laserCanvas ? laserCanvas.getContext('2d') : null;
+const previewFontMenu = document.getElementById('previewFontMenu');
+const previewFontButton = document.getElementById('previewFontButton');
+const previewFontPanel = document.getElementById('previewFontPanel');
+const previewFontBtnWrapper = document.getElementById('previewFontBtnWrapper');
+
+// Available preview fonts (loaded dynamically from Google Fonts when selected)
+const PREVIEW_FONTS = [
+  { key: 'Manrope', label: 'Default', fontFamily: "'Manrope', sans-serif", googleFontsParam: null },
+  { key: 'Inter', label: 'Inter', fontFamily: "'Inter', sans-serif", googleFontsParam: 'Inter:wght@400;500;600;700' },
+  { key: 'Lora', label: 'Lora', fontFamily: "'Lora', serif", googleFontsParam: 'Lora:ital,wght@0,400;0,500;0,600;0,700;1,400' },
+  { key: 'Merriweather', label: 'Merriweather', fontFamily: "'Merriweather', serif", googleFontsParam: 'Merriweather:ital,wght@0,400;0,700;1,400' },
+  { key: 'SourceSerif4', label: 'Source Serif', fontFamily: "'Source Serif 4', serif", googleFontsParam: 'Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400' },
+];
+
+let currentPreviewFont = PREVIEW_FONTS[0];
 
 // Sync scroll guard flags
 let isSyncingInputScroll = false;
@@ -745,6 +762,79 @@ function updateFontPanelActiveState(activeSize) {
   });
 }
 
+// ---- Preview font panel (output pane) ----
+function openPreviewFontPanel() {
+  if (!previewFontPanel || !previewFontButton) return;
+  previewFontPanel.hidden = false;
+  previewFontButton.setAttribute('aria-expanded', 'true');
+}
+
+function closePreviewFontPanel() {
+  if (!previewFontPanel || !previewFontButton) return;
+  previewFontPanel.hidden = true;
+  previewFontButton.setAttribute('aria-expanded', 'false');
+}
+
+function togglePreviewFontPanel() {
+  if (!previewFontPanel) return;
+  if (previewFontPanel.hidden) {
+    closeFontPanel();
+    closeInsertPanel();
+    openPreviewFontPanel();
+    return;
+  }
+  closePreviewFontPanel();
+}
+
+function updatePreviewFontPanelActiveState(activeKey) {
+  if (!previewFontPanel) return;
+  previewFontPanel.querySelectorAll('.preview-font-option-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.fontKey === activeKey);
+  });
+}
+
+function getPreviewFontByKey(key) {
+  return PREVIEW_FONTS.find(f => f.key === key) || PREVIEW_FONTS[0];
+}
+
+function loadGoogleFont(font) {
+  if (!font.googleFontsParam) return;
+  const linkId = `gf-preview-${font.key}`;
+  if (document.getElementById(linkId)) return;
+  const link = document.createElement('link');
+  link.id = linkId;
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${font.googleFontsParam}&display=swap`;
+  document.head.appendChild(link);
+}
+
+function applyPreviewFont(font) {
+  currentPreviewFont = font;
+  loadGoogleFont(font);
+  document.documentElement.style.setProperty('--preview-font-family', font.fontFamily);
+  savePreviewFontPreference(font.key);
+}
+
+function initializePreviewFont() {
+  const savedKey = loadPreviewFontPreference();
+  const font = savedKey ? getPreviewFontByKey(savedKey) : PREVIEW_FONTS[0];
+  applyPreviewFont(font);
+  updatePreviewFontPanelActiveState(font.key);
+}
+
+function updatePreviewFontOfflineState() {
+  const isOffline = !navigator.onLine;
+  if (previewFontButton) {
+    previewFontButton.disabled = isOffline;
+  }
+  if (previewFontMenu) {
+    previewFontMenu.classList.toggle('preview-font-offline', isOffline);
+  }
+  if (isOffline && previewFontPanel && !previewFontPanel.hidden) {
+    closePreviewFontPanel();
+  }
+}
+
 // ---------------------------------------------------------------------- //
 // File System Access API detection (used by save / open)                   //
 // ---------------------------------------------------------------------- //
@@ -1217,9 +1307,13 @@ async function exportHTML() {
   title.textContent = 'Exported Document';
   head.appendChild(title);
 
+  const exportFont = currentPreviewFont || PREVIEW_FONTS[0];
+  const exportFontParam = exportFont.googleFontsParam || 'Manrope:wght@400;500;600;700;800';
+  const exportFontImport = `https://fonts.googleapis.com/css2?family=${exportFontParam}&family=JetBrains+Mono:wght@400;600&display=swap`;
+
   const style = document.createElement('style');
   style.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+    @import url('${exportFontImport}');
 
     :root {
       --background-color: #ffffff;
@@ -1251,7 +1345,7 @@ async function exportHTML() {
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: ${exportFont.fontFamily};
       line-height: 1.5;
       font-size: ${currentFontSize};
       margin: 20px;
@@ -1665,6 +1759,27 @@ if (fontPanel) {
   });
 }
 
+// Preview font panel (output pane)
+if (previewFontButton) {
+  previewFontButton.addEventListener('click', event => {
+    event.stopPropagation();
+    togglePreviewFontPanel();
+  });
+}
+
+if (previewFontPanel) {
+  previewFontPanel.addEventListener('click', event => {
+    const btn = event.target.closest('.preview-font-option-btn');
+    if (btn) {
+      const font = getPreviewFontByKey(btn.dataset.fontKey);
+      applyPreviewFont(font);
+      updatePreviewFontPanelActiveState(font.key);
+      debouncedSyncAnchorMapRebuild();
+      closePreviewFontPanel();
+    }
+  });
+}
+
 // Close panels when clicking outside
 document.addEventListener('click', event => {
   if (insertMenu && insertPanel && !insertPanel.hidden && !insertMenu.contains(event.target)) {
@@ -1672,6 +1787,9 @@ document.addEventListener('click', event => {
   }
   if (fontMenu && fontPanel && !fontPanel.hidden && !fontMenu.contains(event.target)) {
     closeFontPanel();
+  }
+  if (previewFontMenu && previewFontPanel && !previewFontPanel.hidden && !previewFontMenu.contains(event.target)) {
+    closePreviewFontPanel();
   }
 });
 
@@ -1752,8 +1870,14 @@ window.addEventListener('afterprint', () => {
 });
 
 // Network status handlers
-window.addEventListener('online', updateOfflineFontState);
-window.addEventListener('offline', updateOfflineFontState);
+window.addEventListener('online', () => {
+  updateOfflineFontState();
+  updatePreviewFontOfflineState();
+});
+window.addEventListener('offline', () => {
+  updateOfflineFontState();
+  updatePreviewFontOfflineState();
+});
 window.addEventListener('resize', debouncedSyncAnchorMapRebuild);
 
 
@@ -1882,6 +2006,8 @@ updateOfflineFontState();
 initializeTheme();
 initializeSyncScrollToggle(syncScrollToggle);
 initializeFontSize(fontPanel, updateFontPanelActiveState);
+initializePreviewFont();
+updatePreviewFontOfflineState();
 updatePresentButtonLabel();
 updatePresentThemeIcon();
 initMobileLayout();

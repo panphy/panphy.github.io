@@ -11,6 +11,7 @@
   --font-sans: 'Manrope', sans-serif;
   --font-display: 'DM Serif Display', serif;
   --font-mono: 'IBM Plex Mono', monospace;
+  --preview-font-family: 'Manrope', sans-serif;
   --background-color: #F8F6F1;
   --background-pattern: #EDE9E0;
   --text-color: #1B1B1B;
@@ -833,6 +834,7 @@ textarea {
   overflow-y: auto;
   background-color: var(--pane-background);
   color: var(--text-color);
+  font-family: var(--preview-font-family);
   position: relative;
   z-index: 0;
 }
@@ -1078,7 +1080,7 @@ td[align="right"] {
     font-size: var(--print-font-size, 11pt) !important;
     height: auto !important;
     overflow: visible !important;
-    font-family: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    font-family: var(--preview-font-family, 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif) !important;
     line-height: 1.6 !important;
   }
 
@@ -2256,6 +2258,101 @@ mjx-container.copy-failed::after {
     min-height: 40px;
     padding: 9px 14px;
   }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Preview font picker (in output pane controls)                          */
+/* ---------------------------------------------------------------------- */
+.preview-font-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.preview-font-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.preview-font-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--pane-background);
+  box-shadow: var(--shadow-soft);
+  z-index: 30;
+  min-width: 130px;
+}
+
+.preview-font-panel[hidden] {
+  display: none;
+}
+
+.preview-font-option-btn {
+  display: block;
+  width: 100%;
+  padding: 5.5px 12.5px;
+  border: 1.5px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.2s, color 0.2s;
+}
+
+.preview-font-option-btn:hover {
+  background: var(--button-background);
+}
+
+.preview-font-option-btn.active {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: rgba(194, 65, 12, 0.08);
+}
+
+[data-theme="dark"] .preview-font-option-btn.active {
+  border-color: rgba(251, 146, 60, 0.7);
+  background: rgba(251, 146, 60, 0.15);
+}
+
+/* Offline state: disable the button and show a tooltip */
+.preview-font-menu.preview-font-offline #previewFontButton {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.preview-font-offline-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--pane-background);
+  color: var(--text-color);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  z-index: 40;
+  pointer-events: none;
+}
+
+.preview-font-menu.preview-font-offline .preview-font-btn-wrapper:hover .preview-font-offline-tooltip,
+.preview-font-menu.preview-font-offline .preview-font-btn-wrapper:focus-within .preview-font-offline-tooltip {
+  display: block;
 }
 
 /* Keep these at the end so narrow-screen rules cannot re-hide the preview while printing. */

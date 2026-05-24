@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   SNAPSHOTS: 'markdownEditorSnapshots',
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
+  PREVIEW_FONT: 'markdownPreviewFont',
   THEME: 'theme',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
   SUPPRESS_CLEAR_HISTORY_WARNING: 'markdownSuppressClearHistoryWarning',
@@ -142,6 +143,22 @@ export function saveFontSizePreference(size) {
  */
 export function loadFontSizePreference() {
   return safeGetStorageItem(STORAGE_KEYS.FONT_SIZE);
+}
+
+/**
+ * Save preview font preference
+ * @param {string} fontKey - The font key identifier (e.g., 'Inter', 'Lora')
+ */
+export function savePreviewFontPreference(fontKey) {
+  safeSetStorageItem(STORAGE_KEYS.PREVIEW_FONT, fontKey);
+}
+
+/**
+ * Load preview font preference from localStorage
+ * @returns {string|null} The saved font key or null
+ */
+export function loadPreviewFontPreference() {
+  return safeGetStorageItem(STORAGE_KEYS.PREVIEW_FONT);
 }
 
 /**
