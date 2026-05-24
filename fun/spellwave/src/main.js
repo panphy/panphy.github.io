@@ -3359,7 +3359,6 @@ function spawnBossRock(enemy) {
 function spawnDebris(position, type, isBoss = false) {
   const count = isBoss ? 48 : 12;
   const baseScale = isBoss ? 0.32 : 0.18;
-  const geometry = new THREE.BoxGeometry(baseScale, baseScale, baseScale);
   for (let index = 0; index < count; index += 1) {
     let color;
     if (isBoss) {
@@ -3379,7 +3378,7 @@ function spawnDebris(position, type, isBoss = false) {
       emissive: isBoss && Math.random() < 0.5 ? color : 0x000000,
       emissiveIntensity: isBoss ? 1.8 : 0
     });
-    const mesh = new THREE.Mesh(geometry.clone(), material);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(baseScale, baseScale, baseScale), material);
     mesh.position.copy(position);
     mesh.position.y += isBoss ? (0.8 + (Math.random() - 0.5) * 1.5) : (0.8 + Math.random() * 0.5);
     effectsGroup.add(mesh);

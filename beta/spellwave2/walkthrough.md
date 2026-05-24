@@ -24,7 +24,7 @@ I have completed the requested changes for the Phase 3 potion revision, removing
 ### 3. Balancing & Cheats
 - The mimic loot tables and `idkfa` cheat now select from the three active potions: `['time_freeze', 'chain_lightning', 'shockwave']`.
 - **Time Freeze Duration**: Tuned to `3.5` seconds (down from `5.0` seconds) to keep it as an emergency panic button requiring quick typing.
-- **Chain Lightning Targeting**: Limited targeting to normal enemies only (cannot target or chain to Bosses, Medic/heart enemies, or Mimic chests), and decreased the chain jump limit to `1` (max `2` targets total).
+- **Chain Lightning Targeting**: Can target and chain to any targetable enemy (including Bosses, Medics, and Mimic chests). Chaining to a Boss stuns them for 3.0s instead of defeating them. Chained defeats award normal score, streak, and glossary credit, and trigger Medic healing or Mimic loot awards. Decreased the chain jump limit to `1` (max `2` targets total).
 - **Shockwave Behavior**: Stuns and pushes back enemies by 15 units.
 - **Mimic Spawning Frequency**: Increased spawn rates (Wave 1: `1` mimic; Waves 2–5: `2` mimics; Waves 6+: `3` mimics) with dynamic distribution across wave slots.
 
