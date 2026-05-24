@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <script>
+    (function () {
+      if (localStorage.getItem('panphy-dark')) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute('content', '#111110');
+        if (sb) sb.setAttribute('content', 'black-translucent');
+      }
+    })();
+  </script>
+  <title>Theme Button Test - PanPhy Labs Beta</title>
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      color-scheme: light;
+      --font-body: 'Manrope', sans-serif;
+      --font-display: 'DM Serif Display', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --bg-color: #F8F6F1;
+      --bg-pattern: #EDE9E0;
+      --text-main: #1B1B1B;
+      --text-secondary: #6B6560;
+      --brand-primary: #C2410C;
+      --brand-secondary: #EA580C;
+      --brand-accent: #0D9488;
+      --surface: #FFFFFF;
+      --border: #E8E4DD;
+      --nav-bg: rgba(248, 246, 241, 0.88);
+      --nav-border: rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-color: #111110;
+      --bg-pattern: #1A1A18;
+      --text-main: #EDEBE8;
+      --text-secondary: #9C9890;
+      --brand-primary: #FB923C;
+      --brand-secondary: #F97316;
+      --brand-accent: #5EEAD4;
+      --surface: #1A1A19;
+      --border: #2A2A28;
+      --nav-bg: rgba(17, 17, 16, 0.88);
+      --nav-border: rgba(255, 255, 255, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    #app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 20px 48px;
+    }
+
+    .demo-banner {
+      width: min(100%, 980px);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--nav-border);
+      border-radius: 20px;
+      background: var(--nav-bg);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      color: #fffaf4;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 3vw, 2.7rem);
+      font-weight: 400;
+      line-height: 1;
+      color: var(--text-main);
+    }
+
+    .actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .back-link:hover {
+      color: var(--text-main);
+      background: rgba(194, 65, 12, 0.08);
+    }
+
+    main {
+      width: min(100%, 980px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 14px 42px rgba(0, 0, 0, 0.06);
+      padding: 24px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brand-primary);
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--surface), var(--bg-color) 42%);
+    }
+
+    .preview-label {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .preview-label strong {
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .preview-label span {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .state-readout {
+      display: grid;
+      gap: 14px;
+    }
+
+    .readout-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: var(--bg-color);
+    }
+
+    .readout-box span {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .readout-box strong {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    @media (max-width: 760px) {
+      .demo-banner,
+      main {
+        width: 100%;
+      }
+
+      .demo-banner {
+        grid-template-columns: auto 1fr;
+      }
+
+      .actions {
+        grid-column: 1 / -1;
+        justify-content: space-between;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <header class="demo-banner">
+      <div class="logo" aria-hidden="true">P</div>
+      <h1>Theme Button Test</h1>
+      <div class="actions">
+        <a class="back-link" href="/beta/">Beta Index</a>
+        <button data-panphy-theme-toggle></button>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Shared Asset Prototype</h2>
+        <p>
+          This page uses the reusable CSS and JavaScript from the assets folder. The button is a flat inline SVG,
+          switches between sun and moon states, and adds a small hover animation without depending on platform emoji.
+        </p>
+
+        <div class="preview-row">
+          <div class="preview-label">
+            <strong>Standalone button</strong>
+            <span>&lt;button data-panphy-theme-toggle&gt;</span>
+          </div>
+          <button data-panphy-theme-toggle></button>
+        </div>
+      </section>
+
+      <aside class="panel state-readout">
+        <div class="readout-box">
+          <span>Current theme</span>
+          <strong id="theme-readout">light</strong>
+        </div>
+        <div class="readout-box">
+          <span>Shared files</span>
+          <strong>assets/theme-toggle.*</strong>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="/assets/theme-toggle.js" defer></script>
+  <script>
+    window.addEventListener('panphy:theme-change', function (event) {
+      var readout = document.getElementById('theme-readout');
+      if (readout) readout.textContent = event.detail.theme;
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var readout = document.getElementById('theme-readout');
+      if (readout) readout.textContent = document.documentElement.getAttribute('data-theme') || 'light';
+    });
+  </script>
+</body>
+
+</html>

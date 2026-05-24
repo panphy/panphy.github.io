@@ -1,0 +1,147 @@
+.panphy-theme-button {
+  --panphy-theme-button-size: 44px;
+  --panphy-theme-button-bg: transparent;
+  --panphy-theme-button-bg-hover: rgba(194, 65, 12, 0.08);
+  --panphy-theme-button-focus: rgba(13, 148, 136, 0.34);
+  --panphy-theme-button-sun: #f97316;
+  --panphy-theme-button-sun-ray: #fb923c;
+  --panphy-theme-button-moon: #7dd3fc;
+  --panphy-theme-button-moon-shadow: #1d4ed8;
+  --panphy-theme-button-star: #facc15;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--panphy-theme-button-size);
+  height: var(--panphy-theme-button-size);
+  min-width: var(--panphy-theme-button-size);
+  min-height: var(--panphy-theme-button-size);
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--panphy-theme-button-bg);
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+  touch-action: manipulation;
+  transition: background-color 0.22s ease, transform 0.22s ease;
+}
+
+.panphy-theme-button:hover {
+  background: var(--panphy-theme-button-bg-hover);
+  transform: translateY(-1px);
+}
+
+.panphy-theme-button:focus-visible {
+  outline: 3px solid var(--panphy-theme-button-focus);
+  outline-offset: 3px;
+}
+
+.panphy-theme-button .panphy-theme-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+  overflow: visible;
+}
+
+.panphy-theme-button .panphy-theme-icon__sun,
+.panphy-theme-button .panphy-theme-icon__moon {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.panphy-theme-button .panphy-theme-icon__sun-rays,
+.panphy-theme-button .panphy-theme-icon__moon-body,
+.panphy-theme-button .panphy-theme-icon__star {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.panphy-theme-button .panphy-theme-icon__sun {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.panphy-theme-button .panphy-theme-icon__moon {
+  opacity: 0;
+  transform: scale(0.62) rotate(-18deg);
+}
+
+.panphy-theme-button.is-dark .panphy-theme-icon__sun {
+  opacity: 0;
+  transform: scale(0.62) rotate(18deg);
+}
+
+.panphy-theme-button.is-dark .panphy-theme-icon__moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.panphy-theme-button:hover .panphy-theme-icon__sun-rays {
+  animation: panphy-theme-sun-spin 2.4s linear infinite;
+}
+
+.panphy-theme-button:hover .panphy-theme-icon__sun-core {
+  animation: panphy-theme-sun-pulse 0.9s ease-in-out infinite alternate;
+}
+
+.panphy-theme-button.is-dark:hover .panphy-theme-icon__moon-body {
+  animation: panphy-theme-moon-float 1.2s ease-in-out infinite alternate;
+}
+
+.panphy-theme-button.is-dark:hover .panphy-theme-icon__star {
+  animation: panphy-theme-star-twinkle 1s ease-in-out infinite alternate;
+}
+
+.panphy-theme-button.is-dark:hover .panphy-theme-icon__star:nth-of-type(2) {
+  animation-delay: 0.18s;
+}
+
+.panphy-theme-button.is-dark:hover .panphy-theme-icon__star:nth-of-type(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes panphy-theme-sun-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes panphy-theme-sun-pulse {
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes panphy-theme-moon-float {
+  to {
+    transform: translateY(-2px) rotate(-8deg);
+  }
+}
+
+@keyframes panphy-theme-star-twinkle {
+  from {
+    opacity: 0.55;
+    transform: scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panphy-theme-button,
+  .panphy-theme-button *,
+  .panphy-theme-button:hover,
+  .panphy-theme-button.is-dark:hover .panphy-theme-icon__moon-body,
+  .panphy-theme-button.is-dark:hover .panphy-theme-icon__star,
+  .panphy-theme-button:hover .panphy-theme-icon__sun-rays,
+  .panphy-theme-button:hover .panphy-theme-icon__sun-core {
+    animation: none;
+    transition-duration: 0.01ms;
+  }
+}
