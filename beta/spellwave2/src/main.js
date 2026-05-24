@@ -3397,7 +3397,6 @@ function spawnDebris(position, type, isBoss = false) {
         : new THREE.Vector3(Math.random() * 8, Math.random() * 8, Math.random() * 8),
     });
   }
-  geometry.dispose();
 
   if (isBoss) {
     const shockwaveCount = 3;
