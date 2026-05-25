@@ -818,30 +818,51 @@ export function createSpellwaveAudio({
     const context = resumeAudio();
     if (!context || !masterGain) return;
     const now = context.currentTime;
+
+    // D-major triumph: foundation → build → swell → soaring peak → bell tail
     const chords = [
-      { delay: 0.0, notes: [146.83, 220.0, 293.66, 349.23], duration: 2.6 },
-      { delay: 1.2, notes: [174.61, 261.63, 349.23, 440.0], duration: 2.8 },
-      { delay: 2.55, notes: [196.0, 293.66, 392.0, 587.33], duration: 3.4 },
-      { delay: 4.1, notes: [220.0, 293.66, 440.0, 659.25, 880.0], duration: 4.2 },
+      // Foundation — low, warm, gentle arrival
+      { delay: 0.0,  notes: [73.42, 110.0, 146.83, 220.0], dur: 4.0, gainBase: 0.028, type: 'sine' },
+      // Build — rising harmony
+      { delay: 1.4,  notes: [146.83, 185.0, 220.0, 293.66], dur: 3.8, gainBase: 0.024, type: 'sine' },
+      { delay: 2.8,  notes: [196.0, 293.66, 369.99, 440.0], dur: 3.5, gainBase: 0.022, type: 'sine' },
+      // Swell — full mid-range
+      { delay: 4.4,  notes: [220.0, 293.66, 440.0, 587.33, 659.25], dur: 4.4, gainBase: 0.020, type: 'sine' },
+      // Soaring peak — upper harmonics, triumphant
+      { delay: 6.2,  notes: [293.66, 440.0, 587.33, 739.99, 880.0], dur: 5.0, gainBase: 0.018, type: 'sine' },
+      // Resolution — warm landing
+      { delay: 9.0,  notes: [146.83, 220.0, 293.66, 440.0, 587.33], dur: 5.5, gainBase: 0.022, type: 'sine' },
     ];
-    chords.forEach((chord, chordIndex) => {
-      chord.notes.forEach((frequency, noteIndex) => {
-        scheduleTone(frequency, chord.duration, now + chord.delay, {
-          gain: (noteIndex < 2 ? 0.026 : 0.018) * (chordIndex === chords.length - 1 ? 1.15 : 1),
-          type: noteIndex < 2 ? 'sine' : 'triangle',
-          attack: 0.16,
-          detune: noteIndex % 2 === 0 ? -4 : 5,
+
+    chords.forEach(({ delay, notes, dur, gainBase, type }) => {
+      notes.forEach((freq, i) => {
+        const isLow = i < 2;
+        scheduleTone(freq, dur, now + delay, {
+          gain: gainBase * (isLow ? 1.0 : 0.72),
+          type: isLow ? type : 'triangle',
+          attack: 0.22 + delay * 0.012,
+          detune: i % 2 === 0 ? -5 : 6,
         }, masterGain);
       });
     });
-    scheduleNoise(3.8, now + 0.35, {
-      gain: 0.020,
-      filterType: 'highpass',
-      filterFrequency: 2600,
-      q: 0.45,
-    }, masterGain);
-    scheduleTone(1174.66, 1.4, now + 4.7, { gain: 0.020, type: 'sine', attack: 0.08 }, masterGain);
-    scheduleTone(1760.0, 1.8, now + 5.15, { gain: 0.014, type: 'sine', attack: 0.1 }, masterGain);
+
+    // Shimmer breath — filtered noise across the whole sequence
+    scheduleNoise(5.2, now + 0.3,  { gain: 0.016, filterType: 'highpass', filterFrequency: 2800, q: 0.4 }, masterGain);
+    scheduleNoise(4.0, now + 6.5,  { gain: 0.013, filterType: 'highpass', filterFrequency: 3200, q: 0.4 }, masterGain);
+
+    // Bell tail — crystalline high tones that slowly appear after the peak
+    const bells = [
+      [1174.66, 2.2, 8.2,  0.018],
+      [1318.51, 2.6, 9.0,  0.015],
+      [1760.0,  2.8, 9.8,  0.012],
+      [1174.66, 3.2, 11.0, 0.014],
+      [2093.0,  2.4, 12.2, 0.009],
+      [1318.51, 3.0, 13.5, 0.010],
+      [880.0,   3.8, 14.8, 0.014],
+    ];
+    bells.forEach(([freq, dur, delay, gain]) => {
+      scheduleTone(freq, dur, now + delay, { gain, type: 'sine', attack: 0.06, detune: 3 }, masterGain);
+    });
   }
 
   function playGameOverSound() {

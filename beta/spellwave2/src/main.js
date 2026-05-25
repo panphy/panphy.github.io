@@ -3,6 +3,7 @@ import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
+import { createEndingFX } from './ending-fx.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -38,8 +39,9 @@ const potionSlots = document.querySelectorAll('.potion-slot');
 const gameEnding = document.getElementById('gameEnding');
 const endingFlash = document.getElementById('endingFlash');
 const endingContent = document.getElementById('endingContent');
-const endingStarfield = document.getElementById('endingStarfield');
+const endingCanvasEl = document.getElementById('endingCanvas');
 const endingReplay = document.getElementById('endingReplay');
+let endingFX = null;
 const endScore = document.getElementById('endScore');
 const endWpm = document.getElementById('endWpm');
 const endAccuracy = document.getElementById('endAccuracy');
@@ -4882,7 +4884,11 @@ function startEndingSequence() {
   if (!gameEnding) return;
   clearEndingTimers();
   gameEnding.hidden = false;
-  gameEnding.className = 'game-ending phase-arrival phase-title';
+  gameEnding.className = 'game-ending phase-arrival';
+
+  // Create (or reset) the canvas FX engine
+  if (endingFX) { endingFX.reset(); }
+  else { endingFX = createEndingFX(endingCanvasEl); }
 
   const finalStats = getEndingStats();
   setEndingStats(finalStats, false);
@@ -4893,43 +4899,43 @@ function startEndingSequence() {
   }
 
   // Cinematic steps:
-  // 1. Flash starts at 120ms
+  // 1. Flash + detonation burst at 120ms
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-title phase-flash';
+    gameEnding.className = 'game-ending phase-arrival phase-flash';
+    endingFX.setPhase('detonation');
   }, 120);
 
-  // 2. Warp scroll starts at 760ms (stretched stars)
+  // 2. Nebula fades in at 2200ms; blue introductory text appears
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-title phase-warp';
-  }, 760);
-
-  // 3. Exit warp at 2200ms, show blue introductory text
-  queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-title phase-intro';
+    gameEnding.className = 'game-ending phase-arrival phase-nebula';
+    endingFX.setPhase('nebula');
   }, 2200);
 
-  // 4. Shrink/fly Spellwave logo at 5700ms, start victory theme chord progression
+  // 3. Spellwave logo flies away at 5700ms; sparkle burst; victory chords
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-title phase-title-fly';
+    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-title-fly';
+    endingFX.setPhase('titlefly');
     playVictoryFinaleSound();
   }, 5700);
 
-  // 5. Run the Star Wars crawl at 9700ms (crawling text scrolls up)
+  // 4. Star Wars crawl at 9700ms (20s duration)
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-title phase-crawl';
+    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-crawl';
+    endingFX.setPhase('crawl');
   }, 9700);
 
-  // 6. Complete cinematic and transition to final stats card at 27700ms (18s crawl ends)
+  // 5. Final stats card at 29700ms (20s crawl ends)
   queueEndingStep(() => {
     showEndingStatsScreen(finalStats);
-  }, 27700);
+  }, 29700);
 }
 
 function showEndingStatsScreen(finalStats) {
   clearEndingTimers();
   if (gameEnding) {
-    gameEnding.className = 'game-ending phase-arrival phase-title phase-stats phase-replay';
+    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-stats phase-replay';
   }
+  endingFX?.setPhase('stats');
   setEndingStats(finalStats, true);
   const skipBtn = document.getElementById('endingSkipButton');
   if (skipBtn) skipBtn.onclick = null;
@@ -5028,6 +5034,7 @@ function dismissEndingSequence() {
   gameEnding.className = 'game-ending';
   const skipBtn = document.getElementById('endingSkipButton');
   if (skipBtn) skipBtn.onclick = null;
+  if (endingFX) { endingFX.reset(); }
 }
 
 function activateFinalWaveCheat() {
