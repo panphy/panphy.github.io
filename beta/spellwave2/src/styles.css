@@ -1805,3 +1805,207 @@ body:not(.time-frozen) #gameCanvas {
   70%  { opacity: 1; transform: translate(-50%, -62%); }
   100% { opacity: 0; transform: translate(-50%, -80%); }
 }
+
+/* ── End-game scene ── */
+
+.game-ending {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  pointer-events: none;
+}
+
+.game-ending:not([hidden]) {
+  pointer-events: auto;
+}
+
+.ending-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.game-ending.phase-flash .ending-flash {
+  animation: ending-flash-in 1.0s ease-out forwards;
+}
+
+@keyframes ending-flash-in {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.ending-starfield {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  background-image:
+    radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.65), transparent),
+    radial-gradient(1px 1px at 75% 35%, rgba(255,255,255,0.55), transparent),
+    radial-gradient(1.5px 1.5px at 42% 70%, rgba(255,255,255,0.80), transparent),
+    radial-gradient(2px 2px at 88% 82%, rgba(220,235,255,0.90), transparent),
+    radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,0.50), transparent),
+    radial-gradient(1.5px 1.5px at 55% 25%, rgba(255,245,210,0.75), transparent),
+    radial-gradient(1px 1px at 65% 90%, rgba(255,255,255,0.45), transparent),
+    radial-gradient(2px 2px at 30% 45%, rgba(255,255,255,0.85), transparent),
+    radial-gradient(1px 1px at 95% 50%, rgba(255,255,255,0.60), transparent),
+    radial-gradient(1.5px 1.5px at 5% 90%, rgba(210,220,255,0.70), transparent);
+  background-size: 320px 260px;
+  background-position: 0 0;
+}
+
+.game-ending.phase-warp .ending-starfield {
+  opacity: 1;
+  animation: warp-scroll 1.8s ease-in forwards;
+}
+
+.game-ending.phase-title .ending-starfield,
+.game-ending.phase-stats .ending-starfield,
+.game-ending.phase-replay .ending-starfield {
+  opacity: 1;
+  background-size: 320px 260px;
+  animation: starfield-scroll 22s linear infinite;
+}
+
+@keyframes warp-scroll {
+  0%   { background-size: 320px 260px; opacity: 1; }
+  70%  { background-size: 320px 4000px; opacity: 1; }
+  85%  { background-size: 320px 4000px; opacity: 1; }
+  100% { background-size: 320px 4000px; opacity: 0; }
+}
+
+.ending-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2.5rem 3rem;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.game-ending.phase-title .ending-content,
+.game-ending.phase-stats .ending-content,
+.game-ending.phase-replay .ending-content {
+  pointer-events: auto;
+}
+
+.game-ending.phase-title .ending-content {
+  animation: ending-content-in 1.2s ease-out forwards;
+}
+
+@keyframes ending-content-in {
+  0%   { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.game-ending.phase-stats .ending-content,
+.game-ending.phase-replay .ending-content {
+  opacity: 1;
+}
+
+.ending-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 7vw, 4.8rem);
+  font-weight: 400;
+  color: #ffd700;
+  text-align: center;
+  text-shadow:
+    0 0 20px rgba(255, 200, 0, 0.9),
+    0 0 50px rgba(255, 160, 0, 0.6),
+    0 0 90px rgba(255, 100, 0, 0.3);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.ending-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem 1.6rem;
+  max-width: 640px;
+  width: 100%;
+  opacity: 0;
+}
+
+.game-ending.phase-stats .ending-stats,
+.game-ending.phase-replay .ending-stats {
+  animation: stats-slide-in 0.8s ease-out forwards;
+}
+
+@keyframes stats-slide-in {
+  0%   { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.ending-stat {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 200, 0, 0.25);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 220, 100, 0.65);
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ending-replay {
+  opacity: 0;
+  margin-top: 0.5rem;
+  padding: 0.75rem 2.5rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000;
+  background: #ffd700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 48px;
+  letter-spacing: 0.04em;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.game-ending.phase-replay .ending-replay {
+  animation: replay-fade-in 0.6s ease-out forwards;
+}
+
+@keyframes replay-fade-in {
+  0%   { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.ending-replay:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.6);
+}
+
+.ending-replay:active {
+  transform: scale(0.97);
+}

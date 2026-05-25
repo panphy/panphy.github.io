@@ -35,6 +35,16 @@ const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
 const potionBar = document.getElementById('potionBar');
 const potionSlots = document.querySelectorAll('.potion-slot');
+const gameEnding = document.getElementById('gameEnding');
+const endingFlash = document.getElementById('endingFlash');
+const endingContent = document.getElementById('endingContent');
+const endingStarfield = document.getElementById('endingStarfield');
+const endingReplay = document.getElementById('endingReplay');
+const endScore = document.getElementById('endScore');
+const endWpm = document.getElementById('endWpm');
+const endAccuracy = document.getElementById('endAccuracy');
+const endStreak = document.getElementById('endStreak');
+const endMimics = document.getElementById('endMimics');
 
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
@@ -412,6 +422,8 @@ let godModeUsedThisRun = false;
 let potionCheatUsedThisRun = false;
 let inputTrace = '';
 let streak = 0;
+let peakStreak = 0;
+let mimicsLooted = 0;
 let typedBuffer = '';
 let activeTarget = null;
 let spawnTimer = 0;
@@ -599,6 +611,13 @@ startButton.addEventListener('click', () => {
   }
 });
 
+if (endingReplay) {
+  endingReplay.addEventListener('click', () => {
+    dismissEndingSequence();
+    startGame();
+  });
+}
+
 audioButton.addEventListener('click', () => {
   const audioEnabled = toggleAudioEnabled();
   if (audioEnabled) {
@@ -692,6 +711,7 @@ function startGame() {
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
   document.body.classList.remove('final-wave-active');
+  dismissEndingSequence();
   wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
@@ -706,6 +726,8 @@ function startGame() {
   finalWaveQueueIndex = 0;
   prepareWavePlan();
   streak = 0;
+  peakStreak = 0;
+  mimicsLooted = 0;
   typedAttempts = 0;
   mistakeCount = 0;
   defeatedCount = 0;
@@ -1033,6 +1055,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
 
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
+  if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   if (enemy.isBoss) bossesDefeated += 1;
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
@@ -1195,12 +1218,13 @@ function animate(frameTime) {
           }
         } else if (enemies.length === 0) {
           if (waveClearDelayTimer === 0) {
-            waveClearDelayTimer = 1.25;
+            waveClearDelayTimer = 1.5;
           } else {
             waveClearDelayTimer -= currentDelta;
             if (waveClearDelayTimer <= 0) {
               waveClearDelayTimer = 0;
-              startWaveCleared();
+              endingStartTime = elapsed;
+              startEndingSequence();
             }
           }
         }
@@ -4410,6 +4434,76 @@ function startWaveCleared() {
   updatePhaseDisplay();
 }
 
+function startEndingSequence() {
+  mode = 'gameover'; // freeze input / spawning
+  stopMusicLoop(2.0);
+  document.body.classList.remove('is-running');
+  setPauseButtonState(true, true);
+  clearEnemies();
+  clearEffects();
+
+  if (!gameEnding) return;
+  gameEnding.hidden = false;
+  gameEnding.className = 'game-ending';
+
+  // Phase 1: white flash (0 – 1.2s)
+  window.setTimeout(() => {
+    gameEnding.classList.add('phase-flash');
+  }, 500);
+
+  // Phase 2: warp (1.2s – 3.2s)
+  window.setTimeout(() => {
+    gameEnding.classList.remove('phase-flash');
+    gameEnding.classList.add('phase-warp');
+  }, 1200);
+
+  // Phase 3: title (3.2s)
+  window.setTimeout(() => {
+    gameEnding.classList.remove('phase-warp');
+    gameEnding.classList.add('phase-title');
+  }, 3200);
+
+  // Phase 4: stats (4.8s)
+  window.setTimeout(() => {
+    gameEnding.classList.add('phase-stats');
+    const elapsed = (Date.now() - endingStartTime) / 1000;
+    const wpm = elapsed > 0 ? Math.round((defeatedCount * 60) / elapsed) : 0;
+    const accuracy = typedAttempts > 0
+      ? Math.round(((typedAttempts - mistakeCount) / typedAttempts) * 100)
+      : 100;
+    animateCounter(endScore, 0, score, 1200);
+    animateCounter(endWpm, 0, wpm, 900, v => `${v}`);
+    animateCounter(endAccuracy, 0, accuracy, 900, v => `${v}%`);
+    animateCounter(endStreak, 0, peakStreak, 700);
+    animateCounter(endMimics, 0, mimicsLooted, 600);
+  }, 4800);
+
+  // Phase 5: replay button (7.0s)
+  window.setTimeout(() => {
+    gameEnding.classList.add('phase-replay');
+  }, 7000);
+}
+
+let endingStartTime = 0;
+
+function animateCounter(el, from, to, duration, format = v => String(v)) {
+  if (!el) return;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    el.textContent = format(Math.round(from + (to - from) * eased));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function dismissEndingSequence() {
+  if (!gameEnding) return;
+  gameEnding.hidden = true;
+  gameEnding.className = 'game-ending';
+}
+
 function activateFinalWaveCheat() {
   const savedHealth = (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') ? health : MAX_LIFE;
 
@@ -4562,6 +4656,7 @@ function awardMimicLoot(enemy) {
   const types = ['time_freeze', 'chain_lightning', 'shockwave'];
   const type = types[Math.floor(Math.random() * types.length)];
   const success = potionsSystem.addPotion(type);
+  mimicsLooted += 1;
 
   if (!enemy.label.classList.contains('is-hidden')) {
     const left = parseFloat(enemy.label.style.left);
@@ -4847,6 +4942,7 @@ function defeatEnemyChainBurst(enemy) {
 
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
+  if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   if (enemy.isBoss) bossesDefeated += 1;
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;

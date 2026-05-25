@@ -150,6 +150,22 @@
       autocapitalize="off"
       spellcheck="false"
       aria-label="Typing input">
+
+    <div id="gameEnding" class="game-ending" aria-live="polite" hidden>
+      <div class="ending-flash" id="endingFlash"></div>
+      <div class="ending-starfield" id="endingStarfield"></div>
+      <div class="ending-content" id="endingContent">
+        <h2 class="ending-title" id="endingTitle">PHYSICS MASTERED</h2>
+        <div class="ending-stats" id="endingStats">
+          <div class="ending-stat"><span class="stat-label">Score</span><span class="stat-value" id="endScore">0</span></div>
+          <div class="ending-stat"><span class="stat-label">WPM</span><span class="stat-value" id="endWpm">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
+          <div class="ending-stat"><span class="stat-label">Peak Streak</span><span class="stat-value" id="endStreak">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Mimics Looted</span><span class="stat-value" id="endMimics">0</span></div>
+        </div>
+        <button class="ending-replay" id="endingReplay">Play Again</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="./spellwave2/src/main.js"></script>
