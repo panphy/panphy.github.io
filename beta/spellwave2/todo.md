@@ -62,7 +62,7 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Add normal-wave typed-workload budgets so wave completion is not driven only by enemy count.
 - [x] Add an active typing-pressure cap to reduce prompt pile-ups when long terms are visible.
 - [x] Reduce wave speed and spawn cadence growth so word length, speed, and count do not all spike together.
-- [x] Add one-keyword limiting for long vocabulary phrases while preserving the two-word equation-boss limiter.
+- [x] Add one-keyword limiting for long boss vocabulary phrases while preserving the two-word equation-boss limiter.
 - [x] Change normal-wave progress readout from enemy-count fraction to percentage progress.
 - [ ] Playtest waves 3 and 5 specifically for remaining workload spikes.
 - [ ] Decide whether percentage progress should stay or be replaced with a clearer workload/encounter display.

@@ -4,7 +4,7 @@
   - [x] Add normal-wave typed-workload budgets
   - [x] Add active typing-pressure spawn gating
   - [x] Reduce wave speed and spawn-rate growth
-  - [x] Add one-keyword limiting for long vocabulary phrases
+  - [x] Add one-keyword limiting for long boss vocabulary phrases
   - [x] Keep equation bosses on the existing two-word limiter
   - [x] Change normal-wave progress label to percentage
   - [x] Verify with `node --check beta/spellwave2/src/main.js`

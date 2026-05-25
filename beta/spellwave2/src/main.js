@@ -1910,9 +1910,9 @@ function buildTwoWordLimit(term, options = {}) {
   return { parts, searchPrompt: hiddenSearch };
 }
 
-function shouldUseVocabularyPromptLimit(term, isBoss) {
+function shouldUseVocabularyPromptLimit(term) {
   const searchLength = buildSearchPrompt(term).length;
-  if (searchLength < LONG_VOCAB_LIMIT_LENGTH && !isBoss) return false;
+  if (searchLength < LONG_VOCAB_LIMIT_LENGTH) return false;
   const typeableWords = term.split(/\s+/).filter((word) => {
     const answerText = getAnswerTokenText(word);
     return isWordToken(answerText)
@@ -2285,7 +2285,7 @@ function spawnEnemy(options = {}) {
   labelsLayer.append(label);
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
-  const shouldLimitVocabulary = !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term, isBoss);
+  const shouldLimitVocabulary = isBoss && !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term);
   const twoWordData = isEquationPrompt
     ? buildTwoWordLimit(wordData.term, {
         alwaysLimit: isEquationPrompt,

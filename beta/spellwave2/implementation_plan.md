@@ -9,7 +9,7 @@ Completed changes:
 1. Normal waves now use a typed-workload budget as an additional completion condition, not only the normal enemy count target.
 2. Active normal-wave spawns are gated by a visible typing-pressure cap so long unresolved prompts do not stack too aggressively on screen.
 3. Wave speed and spawn-rate growth were reduced to avoid compounding enemy count, word length, speed, and spawn cadence at the same time.
-4. Long vocabulary phrases can use a one-keyword prompt limit, while equation bosses keep the existing two-word limit.
+4. Long boss vocabulary phrases can use a one-keyword prompt limit, while equation bosses keep the existing two-word limit.
 5. Normal-wave progress is displayed as a percentage because completion may now be driven by enemy count or typing budget.
 
 Design intent:
@@ -21,7 +21,7 @@ Design intent:
 Playtest focus:
 
 - Whether waves 3 and 5 still feel like meaningful difficulty steps without becoming workload spikes.
-- Whether one-keyword long vocabulary prompts still feel educational enough.
+- Whether one-keyword long boss vocabulary prompts still feel educational enough.
 - Whether percentage progress is clear enough during normal waves.
 - Whether the active typing-pressure cap makes late waves feel too quiet or appropriately manageable.
 
