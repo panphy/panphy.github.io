@@ -106,27 +106,24 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 ### 6h. Playtest Bug Fixes (2026-05-25) — see `implementation_plan.md` for full root-cause analysis
 
 **Bug 1: Space background not working**
-- [ ] Replace CSS-only `#starfield` approach with a Three.js `THREE.Points` geometry rendered as a background star layer inside the scene (renders before all other objects, always visible regardless of canvas z-stack).
-- [ ] Set scene clear color to very deep blue-black (`0x000005`) at wave 10 start; restore on reset/Play Again.
-- [ ] Retain moon-haze nebula CSS class as ambient border glow on top of the canvas.
+- [x] Cancel seasonFade and apply deep-space scene.background (`0x000008`) in `startFinalWave()`; boost starField size to 0.22 and opacity to 1.0.
+- [x] Restore starField.material.size to 0.08 in `applySeasonInstant` so Play Again resets it.
+- [x] Retain moon-haze nebula CSS class as ambient border glow on top of the canvas.
 
 **Bug 2: Boss visuals need structural differentiation**
-- [ ] Read and understand the boss mesh-builder block in `main.js`.
-- [ ] Extend `BOSS_TYPES` schema with structural fields: `bodyShape` (`'box'`|`'sphere'`|`'diamond'`|`'cylinder'`), `hasShoulderSpikes`, `hasOrbitalRing`, `hasClaws`, `hasWings`, `legCount`, `scaleX`, `scaleZ`.
-- [ ] Update the boss mesh-builder to consume the new schema fields and generate distinct geometry accordingly.
-- [ ] Assign distinct silhouette archetypes to all 10 bosses so each is recognisable by shape alone (see `implementation_plan.md` Bug 2 table for per-boss targets).
+- [x] Add 7 dedicated mesh builder functions: `createSolarAnvilMesh`, `createGlacialTitanMesh`, `createMagmaSovereignMesh`, `createVoidSpecterMesh`, `createCelestialArbiterMesh`, `createPhantomRiftMesh`, `createStellarDreadnoughtMesh`.
+- [x] Update `createSpecificBossMesh` dispatch to name all 10 bosses with fallback to phoenix.
+- [x] All 10 bosses now have distinct silhouette archetypes (anvil+hammer, golem+ice spikes, boulder/hunch, phantom+tentacles, angel+halo, diamond+ring, fortress+guns, plus original dragon/devil/skeleton).
 
 **Bug 3: Wave 10 music has no audible melody**
-- [ ] Diff `FINAL_WAVE_MUSIC` against working `BOSS_MUSIC` to identify the broken parameter.
-- [ ] Redesign `FINAL_WAVE_MUSIC` from scratch: use `triangle` or `sine` for the melody oscillator, raise `melodyGain` to ≥ 0.18, use an 8–16 step clear minor-key melodic hook.
-- [ ] Balance drum/bass gains down relative to melody so the melody sits audibly on top.
-- [ ] Target feel: dark and propulsive with a recognisable repeating melody — epic final-boss energy, not ambient.
+- [x] Increase `baseStep` from 0.096 to 0.138 (notes were 96ms blips, now 138ms — audible as melody).
+- [x] Rewrite melody in D minor at 440–880 Hz (was 220–370 Hz, too low and overlapping bass).
+- [x] Reduce `drumGain` and `bassGain`; raise `melodyGain` to 0.048 so melody sits on top.
 
 **Bug 4: End-game scene never appears**
-- [ ] Add temporary `console.log` checkpoints at: queue-exhaustion check, `enemies.length === 0` guard, and entry of `startEndingSequence()` to identify which condition is failing.
-- [ ] Audit `endingStartTime`: if set to frame-relative `elapsed`, change WPM calculation to use a wall-clock timestamp stored at `startGame()`.
-- [ ] Confirm `document.getElementById('gameEnding')` resolves at module load time and the DOM reference is not null when `startEndingSequence()` runs.
-- [ ] Walk the phase-class `setTimeout` chain (`phase-flash` → `phase-warp` → `phase-title` → `phase-stats` → `phase-replay`) and verify each fires after the trigger is confirmed working.
+- [x] Change `enemies.length === 0` check to `enemies.filter(e => !e.dying).length === 0` to exclude chain-lightning victims still awaiting setTimeout removal.
+- [x] Fix WPM calculation: `endingStartTime` is game-seconds, not wall-clock — remove `Date.now()` subtraction.
+- [x] Add `console.log` diagnostics at queue-exhaustion check and `startEndingSequence` entry for further playtesting.
 
 ---
 
