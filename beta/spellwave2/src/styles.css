@@ -82,6 +82,54 @@ a {
     radial-gradient(circle at var(--moon-haze-x) var(--moon-haze-y), rgba(242, 240, 223, 0.28), transparent 11%),
     radial-gradient(circle at var(--moon-haze-x) var(--moon-haze-y), rgba(84, 196, 110, 0.12), transparent 35%);
   mix-blend-mode: screen;
+  transition: background 2s ease, opacity 1.5s ease;
+}
+
+body.final-wave-active .moon-haze {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(90, 40, 180, 0.35), transparent 30%),
+    radial-gradient(circle at 72% 75%, rgba(40, 20, 140, 0.22), transparent 38%);
+  opacity: 1;
+}
+
+/* ── Space background: wave 10 starfield ── */
+
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(1px 1px at 20% 15%, rgba(255, 255, 255, 0.60), transparent),
+    radial-gradient(1px 1px at 75% 35%, rgba(255, 255, 255, 0.50), transparent),
+    radial-gradient(1.5px 1.5px at 42% 70%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(2px 2px at 88% 82%, rgba(220, 235, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 10% 60%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1.5px 1.5px at 55% 25%, rgba(255, 245, 210, 0.70), transparent),
+    radial-gradient(1px 1px at 65% 90%, rgba(255, 255, 255, 0.40), transparent),
+    radial-gradient(2px 2px at 30% 45%, rgba(255, 255, 255, 0.80), transparent),
+    radial-gradient(1px 1px at 95% 50%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 5% 90%, rgba(210, 220, 255, 0.65), transparent);
+  background-size: 320px 260px;
+  background-position: 0 0;
+  transition: opacity 1.5s ease;
+}
+
+body.final-wave-active #starfield {
+  opacity: 1;
+  animation: starfield-scroll 22s linear infinite;
+}
+
+body.final-wave-active {
+  background: #020409;
+  transition: background 1.5s ease;
+}
+
+@keyframes starfield-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 -260px; }
 }
 
 .pixel-grain {

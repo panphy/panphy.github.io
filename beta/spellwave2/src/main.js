@@ -690,6 +690,7 @@ function startGame() {
   gameTimeSeconds = 0;
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
+  document.body.classList.remove('final-wave-active');
   wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
@@ -4323,6 +4324,7 @@ function startFinalWave() {
   finalWaveQueue = buildFinalWaveQueue();
   finalWaveQueueIndex = 0;
   refreshWaveBossOrder(FINAL_WAVE_BOSS_COUNT);
+  document.body.classList.add('final-wave-active');
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
   updatePhaseDisplay();
@@ -4444,6 +4446,7 @@ function activateFinalWaveCheat() {
 function advanceWaveSet() {
   playStartSound();
   clearEffects();
+  document.body.classList.remove('final-wave-active');
   waveSet += 1;
   wavePhase = 'normal';
   waveClearDelayTimer = 0;
