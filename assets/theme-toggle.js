@@ -5,8 +5,8 @@
   const ICONS = {
     light: `
       <svg class="panphy-theme-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle class="panphy-theme-icon__fill" cx="12" cy="12" r="5.2"></circle>
-        <path d="M12 3.4v1.8M12 18.8v1.8M3.4 12h1.8M18.8 12h1.8M5.9 5.9l1.2 1.2M16.9 16.9l1.2 1.2M5.9 18.1l1.2-1.2M16.9 7.1l1.2-1.2"></path>
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2.8v2.4M12 18.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
       </svg>`,
     dark: `
       <svg class="panphy-theme-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
