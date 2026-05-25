@@ -14,7 +14,10 @@
       </svg>`
   };
 
-  function isFullscreen() {
+  function isFullscreen(target) {
+    if (target) {
+      return document.fullscreenElement === target || document.webkitFullscreenElement === target;
+    }
     return !!(document.fullscreenElement || document.webkitFullscreenElement);
   }
 
@@ -33,7 +36,7 @@
 
   function syncButton(button) {
     if (!button) return;
-    const full = isFullscreen();
+    const full = isFullscreen(getTarget(button));
     const isDark = getCurrentTheme() === 'dark';
 
     button.classList.add('panphy-fullscreen-button');
@@ -74,10 +77,11 @@
     syncButton(button);
 
     button.addEventListener('click', () => {
-      if (isFullscreen()) {
+      const target = getTarget(button);
+      if (isFullscreen(target)) {
         exitFullscreen().catch(() => {});
       } else {
-        requestFullscreen(getTarget(button)).catch(() => {});
+        requestFullscreen(target).catch(() => {});
       }
     });
   }
@@ -111,7 +115,7 @@
     });
   }
 
-  window.PanPhyFullscreen = { sync: syncButton, syncAll, isFullscreen };
+  window.PanPhyFullscreen = { sync: syncButton, syncAll, isFullscreen: () => isFullscreen() };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

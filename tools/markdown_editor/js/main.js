@@ -984,7 +984,8 @@ function renderContent() {
  * Check if currently in fullscreen (native or pseudo)
  */
 function isInFullscreen() {
-  return Boolean(document.fullscreenElement || document.webkitFullscreenElement)
+  return document.fullscreenElement === outputPane
+    || document.webkitFullscreenElement === outputPane
     || outputPane.classList.contains('pseudo-fullscreen');
 }
 

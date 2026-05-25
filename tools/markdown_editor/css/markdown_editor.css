@@ -361,13 +361,13 @@ body.laser-cursor-hidden *,
 /* ---------------------------------------------------------------------- */
 .pane-heading-container {
   display: grid;
-  grid-template-columns: 50px 1fr 50px;
+  grid-template-columns: 50px 1fr auto;
   height: 44px;
   align-items: center;
   background-color: var(--pane-heading-background);
   color: var(--pane-heading-color);
   margin: 0;
-  padding: 0 12px;
+  padding: 0 8px 0 12px;
   border-bottom: 1px solid var(--border-color);
   backdrop-filter: blur(10px);
 }
@@ -387,6 +387,12 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.theme-toggle-wrapper {
+  gap: 4px;
+  justify-content: flex-end;
+  padding-right: 4px;
 }
 
 .pane-heading {
