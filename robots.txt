@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /beta/
 Disallow: /gcse/
 Disallow: /misc/
 Sitemap: https://panphy.github.io/sitemap.xml
