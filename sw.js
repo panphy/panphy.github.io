@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-05-25T11:41:09Z';
+const BUILD_ID = '2026-05-25T11:56:04Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -21,20 +21,20 @@ const ASSETS_TO_CACHE = [
   '/manifest.json',
 
   // Tools
-  '/tools/markdown_editor.html',
+  '/tools/panphymd.html',
   '/assets/sw-register.js',
-  '/tools/markdown_editor/css/markdown_editor.css',
-  '/tools/markdown_editor/js/state.js',
-  '/tools/markdown_editor/js/utils.js',
-  '/tools/markdown_editor/js/rendering.js',
-  '/tools/markdown_editor/js/copy.js',
-  '/tools/markdown_editor/js/ui.js',
-  '/tools/markdown_editor/js/main.js',
-  '/tools/markdown_editor/sample_doc.md',
-  '/tools/markdown_editor/templates/math-basic.md',
-  '/tools/markdown_editor/templates/math-calculus.md',
-  '/tools/markdown_editor/templates/math-matrices.md',
-  '/tools/markdown_editor/templates/math-table.md',
+  '/tools/panphymd/css/panphymd.css',
+  '/tools/panphymd/js/state.js',
+  '/tools/panphymd/js/utils.js',
+  '/tools/panphymd/js/rendering.js',
+  '/tools/panphymd/js/copy.js',
+  '/tools/panphymd/js/ui.js',
+  '/tools/panphymd/js/main.js',
+  '/tools/panphymd/sample_doc.md',
+  '/tools/panphymd/templates/math-basic.md',
+  '/tools/panphymd/templates/math-calculus.md',
+  '/tools/panphymd/templates/math-matrices.md',
+  '/tools/panphymd/templates/math-table.md',
   '/tools/panphyplot.html',
   '/tools/panphyplot/css/panphyplot.css',
   '/tools/panphyplot/js/curve-fitting.js',

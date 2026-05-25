@@ -123,7 +123,7 @@ a:visited {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Left Pane = Markdown Input; Right Pane = Rendered Output               */
+/* Left Pane = PanPhyMD; Right Pane = Rendered Output                     */
 /* Each is 50% width on larger screens                                   */
 /* ---------------------------------------------------------------------- */
 #inputPane,

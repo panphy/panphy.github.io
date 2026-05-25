@@ -669,7 +669,7 @@ async function loadSampleDocument() {
   setSampleLoadingState(true);
 
   try {
-    const response = await fetch('/tools/markdown_editor/sample_doc.md');
+    const response = await fetch('/tools/panphymd/sample_doc.md');
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -704,10 +704,10 @@ async function loadSampleDocument() {
 
 
 const mathTemplatePaths = {
-  basic: '/tools/markdown_editor/templates/math-basic.md',
-  calculus: '/tools/markdown_editor/templates/math-calculus.md',
-  matrices: '/tools/markdown_editor/templates/math-matrices.md',
-  table: '/tools/markdown_editor/templates/math-table.md'
+  basic: '/tools/panphymd/templates/math-basic.md',
+  calculus: '/tools/panphymd/templates/math-calculus.md',
+  matrices: '/tools/panphymd/templates/math-matrices.md',
+  table: '/tools/panphymd/templates/math-table.md'
 };
 
 function openInsertPanel() {

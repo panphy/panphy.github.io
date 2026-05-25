@@ -25,7 +25,7 @@
     }
   })();
   </script>
-  <title>Markdown Editor with LaTeX</title>
+  <title>PanPhyMD - Markdown & LaTeX Editor</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <!-- MathJax Configuration -->
@@ -61,7 +61,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 
   <!-- External CSS -->
-  <link rel="stylesheet" href="markdown_editor/css/markdown_editor.css">
+  <link rel="stylesheet" href="panphymd/css/panphymd.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
@@ -84,18 +84,18 @@
 
   <!--
       The main container with two panes:
-      - Left = Markdown Input
+      - Left = PanPhyMD
       - Right = Rendered Output
   -->
   <div id="editorContainer">
     <!-- ============================================= -->
-    <!-- =========== Markdown Input Pane ============= -->
+    <!-- =========== PanPhyMD Pane =================== -->
     <!-- ============================================= -->
     <div id="inputPane">
       <!--
           New 3-column heading container:
           1) Logo on the left
-          2) "Markdown Input" in the center
+          2) "PanPhyMD" in the center
           3) placeholder on the right
       -->
       <div class="pane-heading-container">
@@ -108,7 +108,7 @@
         </div>
 
         <!-- The heading in the Center -->
-        <h2 class="pane-heading">Markdown Input</h2>
+        <h2 class="pane-heading">PanPhyMD</h2>
 
         <!-- Placeholder on the Right (keeps grid layout consistent) -->
         <div class="heading-placeholder"></div>
@@ -240,7 +240,7 @@
   </footer>
 
   <!-- Main Application Script (ES Module) -->
-  <script type="module" src="markdown_editor/js/main.js"></script>
+  <script type="module" src="panphymd/js/main.js"></script>
 </body>
 
 </html>
