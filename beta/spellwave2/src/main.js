@@ -224,6 +224,75 @@ const BOSS_TYPES = [
     weight: 1,
     score: 150,
   },
+  {
+    name: 'Glacial Titan',
+    isBoss: true,
+    body: 0x1a3045,
+    trim: 0x9ee8ff,
+    eye: 0xfff8b0,
+    speed: 0.95,
+    scale: 1.68,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Magma Sovereign',
+    isBoss: true,
+    body: 0x3d0a00,
+    trim: 0xff6a00,
+    eye: 0xffffff,
+    speed: 1.08,
+    scale: 1.63,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Void Specter',
+    isBoss: true,
+    isFlying: true,
+    body: 0x08060f,
+    trim: 0x00e5ff,
+    eye: 0x00e5ff,
+    speed: 1.18,
+    scale: 1.58,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Celestial Arbiter',
+    isBoss: true,
+    isFlying: true,
+    body: 0xf0f4ff,
+    trim: 0xffd700,
+    eye: 0x1a3aff,
+    speed: 1.02,
+    scale: 1.65,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Phantom Rift',
+    isBoss: true,
+    isFlying: true,
+    body: 0x0a2a2a,
+    trim: 0xe040fb,
+    eye: 0xe040fb,
+    speed: 1.13,
+    scale: 1.61,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Stellar Dreadnought',
+    isBoss: true,
+    body: 0x050d1a,
+    trim: 0xd4a017,
+    eye: 0xffffff,
+    speed: 0.92,
+    scale: 1.72,
+    weight: 1,
+    score: 150,
+  },
 ];
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 const FLYING_SHADOW_OPACITY = 0.22;
@@ -322,6 +391,7 @@ let normalTypingCostSpawned = 0;
 let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let waveClearDelayTimer = 0;
+let waveBossOrder = [];
 let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
@@ -623,6 +693,7 @@ function startGame() {
   normalTypingCostSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
+  waveBossOrder = [];
   prepareWavePlan();
   streak = 0;
   typedAttempts = 0;
@@ -3838,8 +3909,18 @@ function currentKeywordPool() {
   return EASY_WORDS;
 }
 
+function refreshWaveBossOrder(count) {
+  const indices = BOSS_TYPES.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  waveBossOrder = indices.slice(0, count);
+}
+
 function chooseBossType(index) {
-  return BOSS_TYPES[(waveSet + index - 1) % BOSS_TYPES.length];
+  if (waveBossOrder.length === 0) refreshWaveBossOrder(BOSSES_PER_WAVE);
+  return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
 }
 
 function nextSpawnDelay() {
@@ -4183,6 +4264,7 @@ function startBossPhase() {
   bossesSpawned = 0;
   bossesDefeated = 0;
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
+  refreshWaveBossOrder(BOSSES_PER_WAVE);
   showBanner('BOSS WAVE');
   playBossWarningSound();
   updatePhaseDisplay();
@@ -4255,6 +4337,7 @@ function advanceWaveSet() {
   bossesDefeated = 0;
   bossShotHits = 0;
   bossSpawnTimer = 0;
+  waveBossOrder = [];
   prepareWavePlan();
   typedBuffer = '';
   activeTarget = null;
