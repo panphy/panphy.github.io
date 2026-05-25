@@ -4,7 +4,7 @@
 
 ## Wave 10 Finale
 
-> **Status**: Planning — no code changes yet. Review all sections before implementation begins.
+> **Status**: Implemented in beta. The core wave 10 gauntlet, space presentation, final-wave music, Konami jump, and victory ending are now live in `beta/spellwave2`.
 
 ### Overview
 
@@ -116,22 +116,19 @@ No procedural canvas starfield is needed — CSS animation handles the ambient f
 
 ### 6. Wave 10 Music
 
-A new synthesized track played via Web Audio API in `audio.js`. Two exported functions: `playFinalWaveMusic()` and `stopFinalWaveMusic(fadeOutSeconds)`.
+A synthesized track plays through the existing Web Audio music scheduler in `audio.js` via the `FINAL_WAVE_MUSIC` profile and the dedicated `scheduleFinalWaveStep()` branch. It respects the existing audio toggle and fades through the same `startMusicLoop()` / `stopMusicLoop()` controls used by the rest of the game.
 
-Inspired by FF5's final boss themes (Exdeath / Neo Exdeath): dark, epic, driving, with a sense of cosmic scale.
+The final implementation intentionally moved away from 8-bit boss music toward a more immersive interstellar finale:
 
-Composition approach using Web Audio API:
-- **Bass foundation**: Two detuned sawtooth oscillators (~55 Hz and ~110 Hz) for a thick low drone, with slow LFO amplitude modulation
-- **Rhythm pulse**: Periodic filtered noise burst every 0.5s giving a war-drum feel; gain envelope: instant attack, 0.3s decay
-- **Harmonic layer**: Tri-oscillator chord stack (diminished/augmented voicing) in the 200–600 Hz range, tremolo at ~6 Hz
-- **Melodic arpeggio**: Step sequencer (8-step, minor pentatonic, 160 BPM) using square waves, arpeggiating upward then dropping an octave — runs once every 2 bars
-- **Tension accent**: High-pass filtered noise sweep every ~8s for cosmic effect
+- **Pad foundation**: long sine/triangle chord stacks with slight detune, giving wave 10 a wide space-opera bed.
+- **Deep pulse**: sub-bass and saw layers reinforce the boss pressure without overwhelming the lead.
+- **Shimmer arpeggio**: high sine/triangle arpeggios run above the bass to create the interstellar feel.
+- **Lead phrase**: a higher-register melodic line provides a clear recognisable hook.
+- **Cosmic sweep accents**: periodic high-pass noise sweeps and low-frequency rises create tension and scale.
 
-`stopFinalWaveMusic(2)` applies a gain ramp to silence over 2 seconds before disconnecting nodes.
+The ending sequence now calls `playVictoryFinaleSound()` after the warp arrival: a slow resolving chord swell that bridges the boss fight into the victory scene.
 
-The track loops. The game's normal audio system (boss throws, typing sounds, etc.) plays on top — music occupies a separate gain node chain with its own volume control, lower than SFX by default.
-
-> **Open question**: Should the final wave music volume be adjustable by the existing audio toggle, or always on? Suggestion: respect the existing audio toggle (if audio is off, no music).
+The game's normal audio system (boss throws, typing sounds, etc.) plays on top. Music occupies the existing separate music gain chain and stays below SFX by default.
 
 ---
 
@@ -139,24 +136,28 @@ The track loops. The game's normal audio system (boss throws, typing sounds, etc
 
 Triggered when `bossesDefeated === 10` inside wave 10 (the same condition that normally calls `advanceWaveSet()`).
 
-A `#gameEnding` fullscreen overlay (position fixed, initially `display: none`) takes over the screen. The Three.js animation loop is paused.
+A `#gameEnding` fullscreen overlay takes over the screen and the game enters a dedicated `ending` mode. Enemy/effect state is cleared, final-wave body state is removed, and timed overlay phases control the victory sequence.
 
 **Sequence** (approximate timings):
 
 | t | Event |
 |---|-------|
-| 0s | Stellar Dreadnought death explosion (normal) |
-| 0.5s | White flash covers entire screen; all remaining effects and labels dissolve |
-| 1.0s | Flash fades; starfield remains; `stopFinalWaveMusic(3)` called |
-| 1.5s | Starfield `animation-duration` CSS var shortens: stars become streaks (warp-speed effect, 2s) |
-| 3.5s | Warp flash — brief all-white; then starfield fades to black |
-| 4.5s | Title appears, fade-in: **"PHYSICS MASTERED"** in the display font with gold glow; subtle scale-in |
-| 6.0s | Stats panel slides up from bottom: Score, WPM, Accuracy, Streak peak, Mimics looted — each counter animates from 0 |
-| 9.0s | "Play Again" button fades in |
+| 0s | Final boss death resolves through normal defeat effects |
+| 0.25s | White flash begins; final-wave music fades out over 3 seconds |
+| 1.2s | Warp phase starts; starfield stretches and brightens |
+| 3.25s | Arrival phase starts; cosmic horizon appears and `playVictoryFinaleSound()` resolves the music |
+| 4.3s | Title phase begins: sigil, kicker, and **"PHYSICS MASTERED"** fade in |
+| 6.1s | Stats panel appears; counters animate from 0 |
+| 8.5s | "Begin Again" button and final run summary fade in |
 
-All rendered in HTML/CSS. No Three.js involvement after the death explosion.
+The reworked overlay includes:
 
-The ending overlay is also dismissed cleanly if the player clicks "Play Again" — it resets all state (including removing the `final-wave-active` class and restoring the Three.js clear color).
+- an interstellar starfield, horizon glow, constellation ring, and victory sigil;
+- a short emotional copy beat: "The field falls silent. Every spell you cast becomes a star.";
+- GCSE Grade, Final Score, WPM, Accuracy, Peak Streak, Mimics Looted, Life Left, and Run Time;
+- viewport-safe desktop/mobile layouts verified with headless Chrome.
+
+The ending overlay is dismissed cleanly when the player clicks "Begin Again" or presses Enter from ending mode. It resets state and starts a fresh run from wave 1.
 
 ---
 
@@ -195,9 +196,9 @@ The prior plan described a 5-wave campaign. Wave 10 as finale changes the scope:
 
 1. ~~**Boss order in wave 10**~~ — **Resolved**: randomised each run (Fisher-Yates shuffle of all 10 types).
 2. ~~**Medic/mimic frequency**~~ — **Resolved**: 3 mimics + 2 medics, positions randomised within the 15-slot queue, first slot always a boss.
-3. **Music volume**: Should the wave 10 music respect the audio toggle (recommended) or always play?
-4. **Space background depth**: Pure CSS starfield is clean and low-effort. Worth adding a second JS-driven parallax layer, or is CSS sufficient?
-5. **"Play Again" destination**: Does "Play Again" restart from wave 1, or return to the pre-run setup screen (for subject/curriculum selection)?
+3. ~~**Music volume**~~ — **Resolved**: final-wave music respects the existing audio toggle and music gain path.
+4. ~~**Space background depth**~~ — **Resolved for beta**: CSS overlay remains, with Three.js scene background/starfield boosted for wave 10 visibility.
+5. ~~**"Play Again" destination**~~ — **Resolved**: "Begin Again" starts a fresh run from wave 1.
 6. **Score continuity**: Wave 10 bosses each award 150 points (same as waves 1–9). Should the finale bosses award a bonus multiplier?
 7. ~~**Konami code during active run**~~ — **Resolved**: health is always carried over. Fresh-start cheat begins at full health.
 
@@ -205,7 +206,7 @@ The prior plan described a 5-wave campaign. Wave 10 as finale changes the scope:
 
 ## Wave 10 Playtest Issues (2026-05-25)
 
-Four bugs identified during first playtest via Konami cheat code. No code changes yet — document here for the next implementation pass.
+Four bugs identified during first playtest via Konami cheat code. All four have been addressed in beta, with the music and ending scene receiving an additional quality pass after the initial fixes.
 
 ---
 
@@ -272,6 +273,12 @@ Four bugs identified during first playtest via Konami cheat code. No code change
 - Keep the rhythm pulse (filtered noise burst) for intensity, but reduce drum/bass gain relative to melody so the melody sits on top.
 - Target feel: dark, propulsive, with a clear repeating melodic hook — FF5 Exdeath / Final Fantasy boss-battle energy. Not ambient — active.
 
+**Resolution (2026-05-25)**:
+- Replaced the simple final boss loop with a dedicated `scheduleFinalWaveStep()` branch.
+- Shifted the tone from retro boss music to an immersive interstellar finale.
+- Added long pad chords, a deep sub pulse, shimmer arpeggios, a higher-register lead line, and periodic cosmic sweeps.
+- Added `playVictoryFinaleSound()` so the ending has a satisfying harmonic resolution after the warp sequence.
+
 ---
 
 ### Bug 4: End-game Scene Never Appears
@@ -288,6 +295,13 @@ Four bugs identified during first playtest via Konami cheat code. No code change
 - Audit `endingStartTime`: if it is set to `elapsed` (frame-relative), change the WPM calculation to track wall-clock start time separately (store `Date.now()` at `startGame()` and compute elapsed from that at ending time).
 - Confirm the `#gameEnding` element exists in `spellwave2.html` and that the DOM ref is wired up at module-load time, not lazily.
 - Once the trigger is confirmed, review the phase-class animation sequence (`phase-flash` → `phase-warp` → `phase-title` → `phase-stats` → `phase-replay`) to make sure each `setTimeout` chain fires correctly.
+
+**Resolution (2026-05-25)**:
+- Completion now ignores dying enemies still waiting for timeout removal.
+- `endingStartTime` is treated as game elapsed seconds, not wall-clock time.
+- The old diagnostic `console.log` calls were removed after verification.
+- The ending now uses a dedicated `ending` mode, tracked timers, and a clean reset path.
+- The overlay was redesigned as a cinematic victory scene and verified at desktop and mobile viewport sizes.
 
 ---
 

@@ -55,47 +55,48 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 
 ## 6. Wave 10 Finale (NEW — review implementation_plan.md before starting)
 
-> Resolve all open questions in Section 10 of `implementation_plan.md` before implementation begins.
+> Core finale implementation is complete in beta. Remaining work is playtest tuning only.
 
 ### 6a. Boss Roster Expansion
-- [ ] Add 6 new boss types to `BOSS_TYPES` in `main.js`: Glacial Titan, Magma Sovereign, Void Specter, Celestial Arbiter, Phantom Rift, Stellar Dreadnought.
-- [ ] Update `chooseBossType()` for waves 1–9: shuffle all 10 type indices at wave start, pick first 3 without repeating a type within a wave.
-- [ ] For wave 10: Fisher-Yates shuffle all 10 type indices into `finalWaveBossOrder` at wave 10 start; `chooseBossType` returns `BOSS_TYPES[finalWaveBossOrder[bossesSpawned]]`.
+- [x] Add 6 new boss types to `BOSS_TYPES` in `main.js`: Glacial Titan, Magma Sovereign, Void Specter, Celestial Arbiter, Phantom Rift, Stellar Dreadnought.
+- [x] Update `chooseBossType()` for waves 1–9: shuffle all 10 type indices at wave start, pick first 3 without repeating a type within a wave.
+- [x] For wave 10: Fisher-Yates shuffle all 10 type indices into `finalWaveBossOrder` at wave 10 start; `chooseBossType` returns `BOSS_TYPES[finalWaveBossOrder[bossesSpawned]]`.
 
 ### 6b. Wave 10 Structure
-- [ ] Add `isFinalWave()` helper (`waveSet === 10`).
-- [ ] Add `FINAL_WAVE_BOSS_COUNT = 10` constant.
-- [ ] In the wave start logic, skip the normal phase when `isFinalWave()` is true — call `startFinalWave()` directly.
-- [ ] Implement `startFinalWave()`: sets `wavePhase = 'boss'`, `bossesSpawned = 0`, `bossesDefeated = 0`, shows FINAL WAVE banner, triggers space background, starts music.
-- [ ] Update the boss-phase spawn loop to use `FINAL_WAVE_BOSS_COUNT` instead of `BOSSES_PER_WAVE` when `isFinalWave()`.
-- [ ] Build the wave 10 spawn queue at wave start: 10 boss entries + 3 mimic entries + 2 medic entries, Fisher-Yates shuffled, with first slot forced to be a boss.
-- [ ] Drive the boss-phase spawn loop from the queue; pause the spawn timer when a support enemy is active and resume after it escapes or is defeated.
-- [ ] On wave 10 all-bosses-defeated: call `startEndingSequence()` instead of `advanceWaveSet()`.
+- [x] Add `isFinalWave()` helper (`waveSet === 10`).
+- [x] Add `FINAL_WAVE_BOSS_COUNT = 10` constant.
+- [x] In the wave start logic, skip the normal phase when `isFinalWave()` is true — call `startFinalWave()` directly.
+- [x] Implement `startFinalWave()`: sets `wavePhase = 'boss'`, `bossesSpawned = 0`, `bossesDefeated = 0`, shows FINAL WAVE banner, triggers space background, starts music.
+- [x] Update the boss-phase spawn loop to use `FINAL_WAVE_BOSS_COUNT` instead of `BOSSES_PER_WAVE` when `isFinalWave()`.
+- [x] Build the wave 10 spawn queue at wave start: 10 boss entries + 3 mimic entries + 2 medic entries, Fisher-Yates shuffled, with first slot forced to be a boss.
+- [x] Drive the boss-phase spawn loop from the queue; pause the spawn timer when a support enemy is active and resume after it escapes or is defeated.
+- [x] On wave 10 all-bosses-defeated: call `startEndingSequence()` instead of `advanceWaveSet()`.
 
 ### 6c. FINAL WAVE! Banner
-- [ ] Add CSS `.boss-banner.is-final-wave` variant in `styles.css`: large font (~5–6rem, viewport-clamped), gradient animated text, multi-layer glow shadow, slam-in scale entrance, screen-shake keyframe.
-- [ ] Call `showBanner('FINAL WAVE!', 'final-wave')` in `startFinalWave()`.
+- [x] Add CSS `.boss-banner.is-final-wave` variant in `styles.css`: large font (~5–6rem, viewport-clamped), gradient animated text, multi-layer glow shadow, slam-in scale entrance, screen-shake keyframe.
+- [x] Call `showBanner('FINAL WAVE!', 'final-wave')` in `startFinalWave()`.
 
 ### 6d. Space Background
-- [ ] Add `#starfield` div to `spellwave2.html` (hidden by default, behind canvas via z-index).
-- [ ] Write CSS for `#starfield`: radial-gradient star pattern, `@keyframes` drift animation, deep-space background gradient.
-- [ ] Add/remove `final-wave-active` class on `<body>` when wave 10 starts/ends.
-- [ ] Change Three.js renderer clear color to near-black on wave 10 start; restore on reset.
-- [ ] Transition the moon-haze element to nebula-purple glow via CSS class in wave 10.
-- [ ] Add warp-speed variant CSS (`#starfield.warp`): star streaks, used during the ending sequence.
+- [x] Add `#starfield` div to `spellwave2.html` (hidden by default, behind canvas via z-index).
+- [x] Write CSS for `#starfield`: radial-gradient star pattern, `@keyframes` drift animation, deep-space background gradient.
+- [x] Add/remove `final-wave-active` class on `<body>` when wave 10 starts/ends.
+- [x] Change Three.js renderer clear color to near-black on wave 10 start; restore on reset.
+- [x] Transition the moon-haze element to nebula-purple glow via CSS class in wave 10.
+- [x] Add warp-speed ending visuals through the `#gameEnding .ending-starfield` phase classes.
 
 ### 6e. Wave 10 Music
-- [ ] Add `playFinalWaveMusic()` to `audio.js`: bass drone, rhythm pulse, harmonic layer, melodic arpeggio, tension accents (see plan for Web Audio API spec).
-- [ ] Add `stopFinalWaveMusic(fadeSeconds)` to `audio.js`: ramp gain to 0, then disconnect.
-- [ ] Export both functions; import and wire them in `main.js`.
-- [ ] Respect existing audio toggle: call `playFinalWaveMusic()` only when audio is enabled; stop if player toggles audio off mid-wave.
+- [x] Add dedicated `FINAL_WAVE_MUSIC` profile and `scheduleFinalWaveStep()` branch in `audio.js`.
+- [x] Rework wave 10 music into an immersive interstellar track with pad chords, deep pulse, shimmer arpeggios, lead phrase, and cosmic sweeps.
+- [x] Add `playVictoryFinaleSound()` for the ending-scene harmonic resolution.
+- [x] Respect existing audio toggle and music gain path through `startMusicLoop()` / `stopMusicLoop()`.
 
 ### 6f. End-game Scene
-- [ ] Add `#gameEnding` fullscreen overlay to `spellwave2.html` (hidden by default).
-- [ ] Write CSS for overlay: full-screen fixed, black background, centered content, fade-in/slide-up animations for title and stats panel.
-- [ ] Implement `startEndingSequence()` in `main.js`: pause animation loop, trigger flash, initiate warp, fade music, reveal title and stats on a timed sequence.
-- [ ] Animate stat counters (score, WPM, accuracy, streak, mimics) from 0 to final values.
-- [ ] Show "Play Again" button after stats reveal; wire it to a full reset that removes final-wave state and returns to the start screen.
+- [x] Add `#gameEnding` fullscreen overlay to `spellwave2.html` (hidden by default).
+- [x] Write CSS for overlay: full-screen fixed, black background, centered content, fade-in/slide-up animations for title and stats panel.
+- [x] Implement `startEndingSequence()` in `main.js`: enter dedicated ending mode, trigger flash, initiate warp, fade music, reveal title and stats on a timed sequence.
+- [x] Animate stat counters (score, WPM, accuracy, streak, mimics, grade) from 0 to final values.
+- [x] Show "Begin Again" button after stats reveal; wire it to a full reset that removes final-wave state and starts a new run from wave 1.
+- [x] Verify ending overlay fits desktop and mobile-size viewports with headless Chrome.
 
 ### 6g. Konami Code Cheat
 - [x] Add a 10-slot circular cheat buffer in `main.js`, filled from `keydown` event.key values (before potion/typing handlers consume them).
@@ -119,11 +120,14 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Increase `baseStep` from 0.096 to 0.138 (notes were 96ms blips, now 138ms — audible as melody).
 - [x] Rewrite melody in D minor at 440–880 Hz (was 220–370 Hz, too low and overlapping bass).
 - [x] Reduce `drumGain` and `bassGain`; raise `melodyGain` to 0.048 so melody sits on top.
+- [x] Follow-up quality pass: replace the simple melodic boss loop with an immersive interstellar final-wave scheduler.
 
 **Bug 4: End-game scene never appears**
 - [x] Change `enemies.length === 0` check to `enemies.filter(e => !e.dying).length === 0` to exclude chain-lightning victims still awaiting setTimeout removal.
 - [x] Fix WPM calculation: `endingStartTime` is game-seconds, not wall-clock — remove `Date.now()` subtraction.
 - [x] Add `console.log` diagnostics at queue-exhaustion check and `startEndingSequence` entry for further playtesting.
+- [x] Remove temporary diagnostics after verification.
+- [x] Follow-up quality pass: redesign the ending overlay as a cinematic victory scene with tracked timers and responsive layout.
 
 ---
 

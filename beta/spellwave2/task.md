@@ -1,5 +1,16 @@
 # Task List - Roguelike Expansion Updates & Phase 2 Mimic Chest
 
+- [x] Rework wave 10 finale audio and ending scene in `beta/spellwave2`
+  - [x] Read and update wave 10 planning docs
+  - [x] Replace the simple final-wave music loop with an immersive interstellar Web Audio scheduler
+  - [x] Add victory chord resolution for the ending scene
+  - [x] Rebuild `#gameEnding` with warp, constellation, horizon, sigil, title, copy, and expanded stats
+  - [x] Add dedicated `ending` mode and tracked ending timers
+  - [x] Remove temporary wave-10 diagnostic logging
+  - [x] Verify with `node --check beta/spellwave2/src/main.js`
+  - [x] Verify with `node --check beta/spellwave2/src/audio.js`
+  - [x] Verify with `git diff --check`
+  - [x] Verify forced ending layout in desktop and mobile-size headless Chrome viewports
 - [x] Implement beta difficulty-curve correction in `beta/spellwave2/src/main.js`
   - [x] Add normal-wave typed-workload budgets
   - [x] Add active typing-pressure spawn gating

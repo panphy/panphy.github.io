@@ -1,4 +1,40 @@
-# Walkthrough - Interim Difficulty Curve Pass
+# Walkthrough - Wave 10 Finale Rework
+
+This beta pass updates `beta/spellwave2` so wave 10 feels distinct from the rest of the run. The published `/fun/spellwave` version was not changed.
+
+## Changes Implemented
+
+### 1. Final-Wave Music
+- Replaced the previous final-wave boss loop with a dedicated interstellar music scheduler in `src/audio.js`.
+- The new track uses long pad chords, deep sub pulse, shimmer arpeggios, a higher-register lead phrase, and periodic cosmic sweeps.
+- The track continues to respect the existing audio toggle and music gain path.
+- Added a separate victory chord swell (`playVictoryFinaleSound()`) that resolves after the warp sequence.
+
+### 2. Ending Scene
+- Rebuilt `#gameEnding` as a cinematic fullscreen victory overlay.
+- Added a white flash, warp-speed starfield, cosmic horizon, constellation ring, central sigil, and gold title treatment.
+- Added an emotional victory copy beat after the final wave: "The field falls silent. Every spell you cast becomes a star."
+- Expanded the stats panel to show GCSE Grade, Final Score, WPM, Accuracy, Peak Streak, Mimics Looted, Life Left, and Run Time.
+- Renamed the replay action to **Begin Again** and wired it to start a fresh run from wave 1.
+
+### 3. Ending-State Reliability
+- Added a dedicated `ending` mode so the victory overlay is distinct from ordinary game-over state.
+- Added tracked ending timers and a clean dismissal path.
+- Removed temporary wave-10 console diagnostics after verification.
+- Verified the forced ending state in desktop and mobile-size headless Chrome viewports.
+
+## How to Test Locally
+
+1. Run `python3 -m http.server 8000`.
+2. Open `http://localhost:8000/beta/spellwave2.html`.
+3. Use the Konami sequence `ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a` to jump to wave 10.
+4. Verify wave 10 music feels spacious and special rather than like the normal boss loop.
+5. Defeat the final-wave queue and verify the ending sequence reaches the **PHYSICS MASTERED** scene.
+6. Confirm **Begin Again** starts a fresh run.
+
+---
+
+# Historical Walkthrough - Interim Difficulty Curve Pass
 
 This beta pass updates `beta/spellwave2/src/main.js` to make wave difficulty track the actual typing workload more closely. The published `/fun/spellwave` version was not changed.
 
