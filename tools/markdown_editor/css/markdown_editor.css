@@ -1338,6 +1338,22 @@ button:hover {
     padding: 6px 8px;
     gap: 6px;
   }
+
+  /* Output pane toolbar: allow buttons to wrap in single-pane mobile view */
+  .buttonContainer.output-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .buttonContainer.output-controls .output-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .buttonContainer.output-controls .output-toggles {
+    justify-content: center;
+  }
 }
 
 /* 2) Wrap and resize the buttons when space is too narrow */
@@ -1356,6 +1372,8 @@ button:hover {
   }
 
   .buttonContainer.output-controls .output-actions {
+    flex-wrap: wrap;
+    justify-content: center;
     margin: 0;
   }
 
