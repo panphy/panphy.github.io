@@ -1,4 +1,59 @@
-# Walkthrough - Wave 10 Finale Rework
+# Walkthrough - Ending Scene Cinematic Rework (2026-05-25)
+
+This pass replaces the CSS-only ending overlay with a canvas-based Star Wars victory cinematic in `beta/spellwave2`. The published `/fun/spellwave` version was not changed.
+
+## Changes Implemented
+
+### 1. New File: `src/ending-fx.js`
+- Self-contained canvas 2D effects engine. Exported as `createEndingFX(canvas)` returning `{ setPhase, reset, destroy }`.
+- **Nebula**: 6 screen-blended animated radial gradient layers (deep blue, violet, teal, gold accent) with slow sinusoidal positional drift.
+- **Stars**: 180 pre-generated background stars with per-star twinkle speed and phase offset.
+- **Particle pool**: 320-slot system with four types — `ember` (rising flame motes), `sparkle` (gold/blue burst on titlefly/stats), `burst` (radial explosion particles), `mote` (slow ambient drift).
+- **Explosion rings**: up to 3 concurrent expanding ring arcs (white, blue, gold) launched at `detonation` phase.
+- **Aurora bands**: 3 horizontal screen-blend sweeps during nebula/crawl/titlefly phases.
+- **Chrome blank-canvas fix**: defers first `resize()` to next RAF frame so `offsetWidth` is non-zero after `hidden` is removed; guards resize against 0-size; forces resize in `setPhase()` if dimensions still unresolved (commit `db37271`).
+
+### 2. Ending HTML (`spellwave2.html`)
+- Replaced `<div class="ending-starfield">` with `<canvas id="endingCanvas" class="ending-canvas">`.
+- Added `#endingIntroText` (blue glow intro line), `#endingLogo` (SPELLWAVE logo that flies away), `#endingCrawlContainer` / `.ending-crawl-content` (Star Wars scroll), `#endingSkipButton`.
+
+### 3. Ending CSS (`styles.css`)
+- `.ending-canvas`: absolute inset, `z-index: 2`, `pointer-events: none` — sits above the dark background, below all text layers.
+- `@keyframes crawl-scroll`: Star Wars perspective transform (`rotateX(30deg)`) with vertical translate for the scroll text.
+- `.crawl-episode`, `.crawl-title`, crawl `p`: gold color, text-shadow glow, uppercase tracking.
+- `@keyframes grade-ceremony`: scale + box-shadow pulse on the GCSE grade badge, 2.4s with 0.75s delay.
+- Replaced `phase-warp` with `phase-nebula` / `phase-title-fly` / `phase-crawl` selectors throughout.
+- Enhanced `logo-fly-away` keyframe for a more dramatic exit.
+
+### 4. Ending Sequence (`main.js`)
+- Imports `createEndingFX` from `./ending-fx.js`.
+- `startEndingSequence()` rewritten as a 5-phase timed sequence stored in `endingTimers[]` (clearable on skip):
+  - 0ms: show overlay, create FX engine
+  - 120ms: flash + `detonation` FX (explosion rings + burst)
+  - 2200ms: `nebula` FX + intro text + `playVictoryFinaleSound()`
+  - 5700ms: `titlefly` FX + logo flies away
+  - 9700ms: `crawl` phase — Star Wars text scroll
+  - 29700ms: stats screen
+- Skip button clears timers and calls `showEndingStatsScreen(finalStats)` directly.
+- `dismissEndingSequence()` calls `endingFX.reset()`.
+
+### 5. Victory Music (`audio.js`)
+- `playVictoryFinaleSound()` extended from ~8s to ~15s.
+- D-major 6-chord progression (delays 0s, 1.4s, 2.8s, 4.4s, 6.2s, 9.0s).
+- Shimmer breath via filtered white noise.
+- Bell-tail tones: 7 sine tones from 8.2s to 14.8s.
+
+## How to Test Locally
+
+1. Run `python3 -m http.server 8001`.
+2. Open `http://localhost:8001/beta/spellwave2.html`.
+3. Press `ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a` (Konami) to jump to wave 10.
+4. Defeat all enemies to trigger the ending, or edit `startEndingSequence()` call directly.
+5. Verify: canvas nebula appears (colored space clouds), blue intro text, logo flies away, Star Wars gold crawl text, GCSE grade badge ceremony on stats, skip button works, Begin Again resets cleanly.
+
+---
+
+# Historical Walkthrough - Wave 10 Finale Rework
 
 This beta pass updates `beta/spellwave2` so wave 10 feels distinct from the rest of the run. The published `/fun/spellwave` version was not changed.
 

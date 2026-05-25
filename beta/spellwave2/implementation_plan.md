@@ -138,26 +138,73 @@ Triggered when `bossesDefeated === 10` inside wave 10 (the same condition that n
 
 A `#gameEnding` fullscreen overlay takes over the screen and the game enters a dedicated `ending` mode. Enemy/effect state is cleared, final-wave body state is removed, and timed overlay phases control the victory sequence.
 
-**Sequence** (approximate timings):
+**Current implementation** — canvas-based Star Wars victory cinematic (reworked 2026-05-25, see Section 11):
 
-| t | Event |
-|---|-------|
-| 0s | Final boss death resolves through normal defeat effects |
-| 0.25s | White flash begins; final-wave music fades out over 3 seconds |
-| 1.2s | Warp phase starts; starfield stretches and brightens |
-| 3.25s | Arrival phase starts; cosmic horizon appears and `playVictoryFinaleSound()` resolves the music |
-| 4.3s | Title phase begins: sigil, kicker, and **"PHYSICS MASTERED"** fade in |
-| 6.1s | Stats panel appears; counters animate from 0 |
-| 8.5s | "Begin Again" button and final run summary fade in |
+| t | Phase class | Event |
+|---|-------------|-------|
+| 0ms | `phase-arrival` | Overlay shows; `createEndingFX` initialises nebula canvas |
+| 120ms | `phase-flash` | White flash; canvas enters `detonation` mode (explosion rings + burst) |
+| 2200ms | `phase-nebula` | Nebula fades in; intro text and constellation appear; `playVictoryFinaleSound()` |
+| 5700ms | `phase-title-fly` | Logo flies up and away; sparkle burst from canvas |
+| 9700ms | `phase-crawl` | Star Wars perspective crawl with gold text on nebula background |
+| 29700ms | `phase-stats` | Stats screen fades in; grade badge ceremony animation |
 
-The reworked overlay includes:
+The overlay includes:
 
-- an interstellar starfield, horizon glow, constellation ring, and victory sigil;
-- a short emotional copy beat: "The field falls silent. Every spell you cast becomes a star.";
-- GCSE Grade, Final Score, WPM, Accuracy, Peak Streak, Mimics Looted, Life Left, and Run Time;
+- canvas nebula (6 screen-blended animated radial gradient layers) + 180 background stars + particle system;
+- explosion rings and aurora sweeps from `ending-fx.js`;
+- Star Wars perspective-scroll crawl with episode heading and gold glowing text;
+- GCSE Grade (with grade-ceremony badge pulse animation), Final Score, WPM, Accuracy, Peak Streak, Mimics Looted, Life Left, and Run Time;
+- skip button (shows after crawl starts) that jumps directly to stats screen;
 - viewport-safe desktop/mobile layouts verified with headless Chrome.
 
 The ending overlay is dismissed cleanly when the player clicks "Begin Again" or presses Enter from ending mode. It resets state and starts a fresh run from wave 1.
+
+---
+
+### 11. Ending Scene Cinematic Rework (2026-05-25)
+
+The original CSS-only ending was replaced with a fully canvas-driven cinematic in the style of a Star Wars victory scroll.
+
+**New file: `src/ending-fx.js`**
+
+A self-contained canvas 2D effects engine exported as `createEndingFX(canvas)`. Returns `{ setPhase, reset, destroy }`.
+
+- **Nebula**: 6 screen-blended radial gradient layers with slow sinusoidal drift. Fades in when the `nebula` phase starts.
+- **Stars**: 180 pre-generated background stars with per-star twinkle speed and phase.
+- **Particles**: pooled system (320 slots) with types: `ember` (rising flame), `sparkle` (gold/blue burst), `burst` (explosion radial), `mote` (slow ambient drift).
+- **Explosion rings**: up to 3 concurrent expanding ring arcs with per-ring color, speed, and fade.
+- **Aurora bands**: 3 horizontal screen-blend sweeps during nebula/crawl/titlefly phases.
+- **Sizing**: deferred to next RAF frame after `hidden` is removed so `offsetWidth` is non-zero. `resize()` skips if dimensions are 0. `setPhase()` forces resize if still unresolved.
+
+**Chrome blank-canvas fix (commit `db37271`)**
+
+Root cause: `canvas.offsetWidth` returns 0 when called synchronously immediately after `gameEnding.hidden = false` — Chrome hasn't flushed the layout yet. Fix: defer the first `resize()` and render-loop start to the next `requestAnimationFrame` callback. Also removed a duplicate `raf = requestAnimationFrame(render)` at the bottom of `createEndingFX` that was launching a second parallel RAF loop.
+
+**CSS changes (`styles.css`)**
+
+- Added `.ending-canvas` position/z-index layer.
+- Replaced `phase-warp` with `phase-nebula`/`phase-title-fly`/`phase-crawl` selectors.
+- Added `@keyframes crawl-scroll` with Star Wars perspective transform.
+- Added `.crawl-episode`/`.crawl-title` gold glowing text styles.
+- Added `@keyframes grade-ceremony` badge pulse animation for the GCSE grade stat.
+- Enhanced `logo-fly-away` keyframe.
+
+**HTML changes (`spellwave2.html`)**
+
+- Replaced `<div class="ending-starfield">` with `<canvas id="endingCanvas">`.
+- Added `#endingIntroText`, `#endingLogo`, `#endingCrawlContainer`, `#endingSkipButton` elements.
+
+**JS changes (`main.js`)**
+
+- Import `createEndingFX` from `./ending-fx.js`.
+- `startEndingSequence()` rewritten as a 5-phase timed sequence using `endingTimers` array.
+- Skip button calls `showEndingStatsScreen(finalStats)` directly.
+- `dismissEndingSequence()` calls `endingFX.reset()`.
+
+**Audio changes (`audio.js`)**
+
+- `playVictoryFinaleSound()` expanded from ~8s to ~15s: D-major 6-chord progression, shimmer breath noise, bell-tail tones at 8.2–14.8s.
 
 ---
 

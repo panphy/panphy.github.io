@@ -1,5 +1,12 @@
 # Task List - Roguelike Expansion Updates & Phase 2 Mimic Chest
 
+- [x] Rework ending scene as canvas-based Star Wars crawl cinematic in `beta/spellwave2`
+  - [x] Create `ending-fx.js` — canvas engine with animated nebula (6 screen-blended layers), 180 background stars, particle system (embers, sparkles, bursts, motes), explosion rings, and aurora band sweeps
+  - [x] Update `spellwave2.html` — replace `.ending-starfield` with `<canvas id="endingCanvas">`; add crawl container, intro text, logo, skip button
+  - [x] Update `styles.css` — add `.ending-canvas`, Star Wars perspective crawl keyframe, gold glowing crawl text, grade-ceremony badge animation, enhanced logo fly-away; rewire phase classes to `phase-nebula` / `phase-title-fly` / `phase-crawl`
+  - [x] Update `main.js` — import and wire `createEndingFX`; rewrite `startEndingSequence()` with 5-phase timed sequence (flash → nebula → titlefly → crawl → stats); wire skip button and replay reset
+  - [x] Expand `playVictoryFinaleSound()` to ~15s orchestral arc in `audio.js` — D-major chord progression, shimmer breath noise, bell-tail tones
+  - [x] Fix blank ending canvas on Chrome — defer initial `resize()` to next RAF frame so `offsetWidth` is non-zero after `hidden` is removed; guard `resize()` against 0-size; add `ctx` null check; force resize in `setPhase()` if dimensions still unresolved; remove duplicate RAF start at bottom of `createEndingFX`
 - [x] Rework wave 10 finale audio and ending scene in `beta/spellwave2`
   - [x] Read and update wave 10 planning docs
   - [x] Replace the simple final-wave music loop with an immersive interstellar Web Audio scheduler

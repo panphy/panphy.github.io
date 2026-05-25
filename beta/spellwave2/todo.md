@@ -104,6 +104,16 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Implement `activateFinalWaveCheat()`: preserve current health if a run is in progress; start at full health if no run is active. Clear enemies and effects, set `waveSet = 10`, call `startFinalWave()`.
 - [x] Show brief cheat-activated banner.
 
+### 6i. Ending Scene Cinematic Rework (2026-05-25)
+
+- [x] Replace CSS-only ending with a canvas-based Star Wars victory cinematic.
+- [x] Create `src/ending-fx.js`: canvas 2D engine with animated nebula (6 screen-blended radial gradient layers), 180 pre-generated background stars, particle system (embers, sparkles, burst, motes), explosion rings, and aurora band sweeps.
+- [x] Replace `<div class="ending-starfield">` in `spellwave2.html` with `<canvas id="endingCanvas">`; add crawl container (`#endingCrawlContainer`), intro text, logo, and skip button elements.
+- [x] Rewrite ending CSS: `.ending-canvas` layer, Star Wars perspective crawl keyframe, gold glowing crawl text (`.crawl-episode`, `.crawl-title`, `p`), grade-ceremony badge pulse animation, enhanced logo fly-away; rewire phase selectors to `phase-nebula` / `phase-title-fly` / `phase-crawl`.
+- [x] Rewrite `startEndingSequence()` in `main.js` with 5-phase timed sequence: flash (0ms) → nebula + detonation FX (120ms) → titlefly sparkles (5700ms) → Star Wars crawl (9700ms) → stats screen (29700ms).
+- [x] Expand `playVictoryFinaleSound()` in `audio.js` to ~15s orchestral arc: D-major 6-chord progression, shimmer breath noise filter, and bell-tail tones from 8.2–14.8s.
+- [x] Fix blank ending canvas on Chrome (commit `db37271`): defer `resize()` to next RAF frame after `hidden` is removed; guard resize against 0-size; add `ctx` null check; force resize in `setPhase()` if W/H unresolved; remove duplicate RAF start at bottom of `createEndingFX`.
+
 ### 6h. Playtest Bug Fixes (2026-05-25) — see `implementation_plan.md` for full root-cause analysis
 
 **Bug 1: Space background not working**
