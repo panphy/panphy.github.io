@@ -1,4 +1,4 @@
-# PanPhy Labs - Markdown & LaTeX Editor
+# PanPhyMD - Markdown & LaTeX Editor
 
 Welcome! 🎉
 
