@@ -1959,10 +1959,33 @@ function displayTypedBuffer() {
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
   if (!effectiveSP.startsWith(typedBuffer)) return typedBuffer;
-  if (activeTarget.limitedParts) return typedBuffer;
+  if (activeTarget.limitedParts) return displayLimitedTypedBuffer(activeTarget, typedBuffer);
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length, {
     multiplicationAlias: activeTarget.isEquation,
   }));
+}
+
+function displayLimitedTypedBuffer(enemy, progressText) {
+  const promptOptions = { multiplicationAlias: enemy.isEquation };
+  let charsLeft = progressText.length;
+  const typedParts = [];
+
+  for (const part of enemy.limitedParts) {
+    if (!part.isHidden) continue;
+    const answerText = part.answerText || part.text;
+    const sp = buildSearchPrompt(answerText, promptOptions);
+    const typedCount = Math.min(charsLeft, sp.length);
+    charsLeft -= typedCount;
+
+    if (typedCount > 0) {
+      const charPos = promptIndexForProgress(answerText, typedCount, promptOptions);
+      typedParts.push(answerText.slice(0, charPos));
+    }
+
+    if (charsLeft <= 0) break;
+  }
+
+  return typedParts.join(' ');
 }
 
 function renderPrompt(enemy) {
