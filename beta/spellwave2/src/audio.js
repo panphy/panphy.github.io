@@ -93,8 +93,36 @@ const MUSIC_SEASONS = [
     ],
   },
 ];
+const FINAL_WAVE_MUSIC = {
+  name: 'final-wave',
+  isBoss: true,
+  baseStep: 0.096,
+  minStep: 0.068,
+  intensityBoost: 10,
+  melodyType: 'sawtooth',
+  bassType: 'sawtooth',
+  accentType: 'square',
+  melodyGain: 0.036,
+  bassGain: 0.052,
+  hatGain: 0.018,
+  drumGain: 0.032,
+  drumFilter: 180,
+  melody: [
+    // Ominous descending chromatic figure — urgent, cosmic
+    349.23, 329.63, 311.13, null, 293.66, null, 261.63, null,
+    261.63, null, 293.66, 311.13, 329.63, 349.23, 369.99, null,
+    349.23, null, 329.63, null, 311.13, null, 293.66, 261.63,
+    220.0, null, 233.08, 261.63, 293.66, 311.13, 261.63, 220.0,
+  ],
+  bass: [
+    55.0, null, 55.0, null, 65.41, null, 58.27, null,
+    49.0, null, 49.0, null, 58.27, null, 65.41, null,
+  ],
+};
+
 const BOSS_MUSIC = {
   name: 'boss',
+  isBoss: true,
   baseStep: 0.145,
   minStep: 0.096,
   intensityBoost: 5,
@@ -171,6 +199,7 @@ export function createSpellwaveAudio({
   getMode,
   getWavePhase = () => 'normal',
   getWaveSet,
+  getIsFinalWave = () => false,
   getTypedLength,
   pathLanes,
 }) {
@@ -359,7 +388,8 @@ export function createSpellwaveAudio({
   function getMusicProfile(wave) {
     if (getMode() === 'gameover') return GAME_OVER_MUSIC;
     if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
-    return getWavePhase() === 'boss' ? BOSS_MUSIC : getMusicSeason(wave);
+    if (getWavePhase() === 'boss') return getIsFinalWave() ? FINAL_WAVE_MUSIC : BOSS_MUSIC;
+    return getMusicSeason(wave);
   }
 
   function updateMusicProfile(profile) {
@@ -402,7 +432,7 @@ export function createSpellwaveAudio({
     const melody = profile.melody[step % profile.melody.length];
     const bass = profile.bass[step % profile.bass.length];
     const accent = step % 8 === 0;
-    const isBoss = profile.name === 'boss';
+    const isBoss = profile.isBoss || false;
     const densePulse = (intensity >= 4 || isBoss) && step % 4 === 0;
     const latePulse = (intensity >= 8 || isBoss) && step % 2 === 1;
 

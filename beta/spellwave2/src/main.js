@@ -484,6 +484,7 @@ const {
   getMode: () => mode,
   getWavePhase: () => wavePhase,
   getWaveSet: () => waveSet,
+  getIsFinalWave: () => isFinalWave(),
   getTypedLength: () => typedBuffer.length,
   pathLanes: PATH_LANES,
 });
