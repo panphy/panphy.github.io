@@ -70,7 +70,9 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
 const FINAL_WAVE_NUMBER = 10;
-const FINAL_WAVE_BOSS_COUNT = 10;
+const FINAL_WAVE_NORMAL_COUNT = 5;
+const FINAL_WAVE_BOSS_COUNT = 5;
+const FINAL_WAVE_TOTAL_COUNT = FINAL_WAVE_NORMAL_COUNT + FINAL_WAVE_BOSS_COUNT;
 const KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
@@ -392,6 +394,7 @@ const pathMarkerBlocks = [];
 const roadBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
+const meteors = [];
 
 let mode = 'idle';
 let score = 0;
@@ -559,6 +562,7 @@ scene.add(emberLight);
 
 createWorld();
 createSky();
+createMeteors();
 createClouds();
 seasonalEffects = createSeasonalEffects({
   scene,
@@ -1212,12 +1216,10 @@ function animate(frameTime) {
               if (entry === 'boss') {
                 spawnBoss();
                 bossesSpawned += 1;
-              } else if (entry === 'mimic') {
-                spawnEnemy({ isMimic: true });
-              } else {
-                spawnEnemy({ isMedic: true });
+              } else if (entry === 'normal') {
+                spawnEnemy({ isFinalWaveNormal: true });
               }
-              bossSpawnTimer = currentDifficulty().bossSpawnGap;
+              bossSpawnTimer = entry === 'normal' ? 1.15 : currentDifficulty().bossSpawnGap;
             }
           }
         } else if (enemies.filter(e => !e.dying).length === 0) {
@@ -1568,6 +1570,7 @@ function updateEffects(delta) {
 function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   const envDelta = isTimeFrozen ? 0 : delta;
   updateWandSwings(envDelta);
+  updateMeteors(envDelta);
   emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   const shake = damageTimer > 0 ? damageTimer * 0.45 : 0;
   camera.position.x = Math.sin(seconds * 0.34) * 0.28 + Math.sin(seconds * 41) * shake;
@@ -2348,13 +2351,17 @@ function getEnemyLimit() {
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
+  const effectiveWavePressure = enemy.isFinalWaveNormal
+    ? Math.max(0, 9 - 1) * profile.waveSpeedBonus
+    : wavePressure;
   const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 6 : 8));
   const lengthFactor = THREE.MathUtils.clamp(
     1 / (1 + longPromptPenalty * (enemy.isBoss ? 0.08 : 0.06)),
     enemy.isBoss ? 0.55 : 0.58,
     1
   );
-  return (enemy.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
+  const finalWaveMultiplier = enemy.isFinalWaveNormal ? 1.1 : 1;
+  return (enemy.speed + effectiveWavePressure) * profile.speedMultiplier * lengthFactor * finalWaveMultiplier;
 }
 
 function updateTypedDisplay() {
@@ -2500,6 +2507,7 @@ function spawnEnemy(options = {}) {
     isBoss,
     isMedic,
     isMimic,
+    isFinalWaveNormal: !!options.isFinalWaveNormal,
     lidOpenProgress: 0,
     hasOpened: false,
     isFlying,
@@ -3660,6 +3668,106 @@ function createSky() {
   scene.add(starField);
 }
 
+function createMeteors() {
+  for (let index = 0; index < 5; index += 1) {
+    const group = new THREE.Group();
+    const tailMaterial = new THREE.MeshBasicMaterial({
+      color: 0x9fd7ff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const coreMaterial = new THREE.MeshBasicMaterial({
+      color: 0xfff4ba,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x6fb6ff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.08, 0.08), tailMaterial);
+    tail.position.x = -3.0;
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 8), coreMaterial);
+    core.position.x = 0.42;
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.58, 16, 8), glowMaterial);
+    glow.position.x = 0.42;
+    group.add(tail, core, glow);
+    group.rotation.z = -0.16;
+    group.visible = false;
+    scene.add(group);
+    meteors.push({
+      group,
+      materials: [tailMaterial, coreMaterial, glowMaterial],
+      baseOpacities: [0.45, 0.95, 0.26],
+      age: 0,
+      duration: 1,
+      delay: 2 + index * 2.2,
+      fadeOutStart: 0.58,
+      start: new THREE.Vector3(),
+      end: new THREE.Vector3(),
+      scale: 1,
+    });
+    resetMeteor(meteors[index], true);
+  }
+}
+
+function resetMeteor(meteor, stagger = false) {
+  meteor.age = 0;
+  meteor.duration = 1.2 + Math.random() * 1.5;
+  meteor.delay = stagger ? Math.random() * 8 : 1.2 + Math.random() * 5.8;
+  meteor.fadeOutStart = 0.48 + Math.random() * 0.2;
+  const y = 13 + Math.random() * 9;
+  const z = -76 - Math.random() * 18;
+  meteor.start.set(-42 - Math.random() * 18, y, z);
+  meteor.end.set(42 + Math.random() * 22, y - (2.2 + Math.random() * 4.6), z - (1 + Math.random() * 5));
+  meteor.scale = 0.62 + Math.random() * 0.7;
+  meteor.group.scale.setScalar(meteor.scale);
+  meteor.group.position.copy(meteor.start);
+  meteor.group.visible = false;
+  for (const material of meteor.materials) material.opacity = 0;
+}
+
+function updateMeteors(delta) {
+  const active = isFinalWave() && mode === 'running';
+  for (const meteor of meteors) {
+    if (!active) {
+      meteor.group.visible = false;
+      for (const material of meteor.materials) material.opacity = 0;
+      continue;
+    }
+
+    if (meteor.delay > 0) {
+      meteor.delay -= delta;
+      meteor.group.visible = false;
+      continue;
+    }
+
+    meteor.age += delta;
+    const t = THREE.MathUtils.clamp(meteor.age / meteor.duration, 0, 1);
+    if (t >= 1) {
+      resetMeteor(meteor);
+      continue;
+    }
+
+    const fadeIn = THREE.MathUtils.clamp(t / 0.18, 0, 1);
+    const fadeOut = 1 - THREE.MathUtils.clamp((t - meteor.fadeOutStart) / (1 - meteor.fadeOutStart), 0, 1);
+    const opacity = fadeIn * fadeOut;
+    meteor.group.visible = opacity > 0.02;
+    meteor.group.position.lerpVectors(meteor.start, meteor.end, t);
+    meteor.group.rotation.z = -0.16 + Math.sin((meteor.age + meteor.scale) * 1.7) * 0.025;
+    for (let index = 0; index < meteor.materials.length; index += 1) {
+      meteor.materials[index].opacity = meteor.baseOpacities[index] * opacity;
+    }
+  }
+}
+
 function buildCloudGroup(material, template) {
   const group = new THREE.Group();
   if (template === 0) {
@@ -4621,20 +4729,10 @@ function isFinalWave() {
 }
 
 function buildFinalWaveQueue() {
-  const queue = [
+  return [
+    ...Array(FINAL_WAVE_NORMAL_COUNT).fill('normal'),
     ...Array(FINAL_WAVE_BOSS_COUNT).fill('boss'),
-    'mimic', 'mimic', 'mimic',
-    'medic', 'medic',
   ];
-  for (let i = queue.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [queue[i], queue[j]] = [queue[j], queue[i]];
-  }
-  if (queue[0] !== 'boss') {
-    const firstBossIdx = queue.indexOf('boss');
-    [queue[0], queue[firstBossIdx]] = [queue[firstBossIdx], queue[0]];
-  }
-  return queue;
 }
 
 function startFinalWave() {
@@ -4756,7 +4854,7 @@ function startEndingSequence() {
   if (!gameEnding) return;
   clearEndingTimers();
   gameEnding.hidden = false;
-  gameEnding.className = 'game-ending phase-awakening';
+  gameEnding.className = 'game-ending phase-awakening phase-arrival phase-title';
 
   const finalStats = getEndingStats();
   setEndingStats(finalStats, false);
@@ -4777,17 +4875,13 @@ function startEndingSequence() {
   }, 1800);
 
   queueEndingStep(() => {
-    gameEnding.classList.add('phase-title');
-  }, 2200);
-
-  queueEndingStep(() => {
     gameEnding.classList.add('phase-stats');
     setEndingStats(finalStats, true);
-  }, 3900);
+  }, 2900);
 
   queueEndingStep(() => {
     gameEnding.classList.add('phase-replay');
-  }, 6200);
+  }, 5000);
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
@@ -4960,8 +5054,11 @@ function updateTypingLabel() {
     return;
   }
   if (wavePhase === 'boss') {
-    const bossTotal = isFinalWave() ? FINAL_WAVE_BOSS_COUNT : BOSSES_PER_WAVE;
-    typingLabel.textContent = `BOSS ${bossesDefeated}/${bossTotal}`;
+    if (isFinalWave()) {
+      typingLabel.textContent = `FINAL ${Math.min(finalWaveQueueIndex, FINAL_WAVE_TOTAL_COUNT)}/${FINAL_WAVE_TOTAL_COUNT}`;
+      return;
+    }
+    typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
   } else {
     typingLabel.textContent = 'INPUT';
   }
