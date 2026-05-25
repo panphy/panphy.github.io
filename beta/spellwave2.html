@@ -154,16 +154,36 @@
     <div id="gameEnding" class="game-ending" aria-live="polite" hidden>
       <div class="ending-flash" id="endingFlash"></div>
       <div class="ending-starfield" id="endingStarfield"></div>
+      <div class="ending-horizon" aria-hidden="true"></div>
+      <div class="ending-constellation" aria-hidden="true">
+        <span class="star s1"></span>
+        <span class="star s2"></span>
+        <span class="star s3"></span>
+        <span class="star s4"></span>
+        <span class="star s5"></span>
+        <span class="star s6"></span>
+      </div>
       <div class="ending-content" id="endingContent">
+        <div class="ending-sigil" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <p class="ending-kicker">The final wave collapses</p>
         <h2 class="ending-title" id="endingTitle">PHYSICS MASTERED</h2>
+        <p class="ending-subtitle">The field falls silent. Every spell you cast becomes a star.</p>
         <div class="ending-stats" id="endingStats">
-          <div class="ending-stat"><span class="stat-label">Score</span><span class="stat-value" id="endScore">0</span></div>
+          <div class="ending-stat ending-stat-grade"><span class="stat-label">GCSE Grade</span><span class="stat-value" id="endGrade">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Final Score</span><span class="stat-value" id="endScore">0</span></div>
           <div class="ending-stat"><span class="stat-label">WPM</span><span class="stat-value" id="endWpm">0</span></div>
           <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
           <div class="ending-stat"><span class="stat-label">Peak Streak</span><span class="stat-value" id="endStreak">0</span></div>
           <div class="ending-stat"><span class="stat-label">Mimics Looted</span><span class="stat-value" id="endMimics">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Life Left</span><span class="stat-value" id="endHealth">0/5</span></div>
+          <div class="ending-stat"><span class="stat-label">Run Time</span><span class="stat-value" id="endTime">0:00</span></div>
         </div>
-        <button class="ending-replay" id="endingReplay">Play Again</button>
+        <p class="ending-run-summary">Wave 10 cleared. The castle stands.</p>
+        <button class="ending-replay" id="endingReplay">Begin Again</button>
       </div>
     </div>
   </div>

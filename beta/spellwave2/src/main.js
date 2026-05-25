@@ -45,6 +45,9 @@ const endWpm = document.getElementById('endWpm');
 const endAccuracy = document.getElementById('endAccuracy');
 const endStreak = document.getElementById('endStreak');
 const endMimics = document.getElementById('endMimics');
+const endGrade = document.getElementById('endGrade');
+const endHealth = document.getElementById('endHealth');
+const endTime = document.getElementById('endTime');
 
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
@@ -483,6 +486,7 @@ const {
   playBossImpactSound,
   playBossWarningSound,
   playWaveClearSound,
+  playVictoryFinaleSound,
   playGameOverSound,
   playGodModeOnSound,
   playGodModeOffSound,
@@ -693,7 +697,7 @@ function toggleGodMode() {
 }
 
 function startGame() {
-  const transitionFromGameOver = mode === 'gameover';
+  const transitionFromGameOver = mode === 'gameover' || mode === 'ending';
   playStartSound();
   clearEnemies();
   clearEffects();
@@ -830,7 +834,7 @@ function handleKeyDown(event) {
     return;
   }
 
-  if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
+  if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover' || mode === 'ending')) {
     event.preventDefault();
     startGame();
     return;
@@ -1217,7 +1221,6 @@ function animate(frameTime) {
             }
           }
         } else if (enemies.filter(e => !e.dying).length === 0) {
-          console.log('[Wave10] Queue exhausted, enemies cleared — starting ending countdown', { enemies: enemies.length, elapsed });
           if (waveClearDelayTimer === 0) {
             waveClearDelayTimer = 1.5;
           } else {
@@ -2282,8 +2285,8 @@ function updatePhaseDisplay() {
     phaseValue.textContent = `Wave ${waveSet} cleared`;
     return;
   }
-  if (mode === 'gameover') {
-    phaseValue.textContent = 'Run ended';
+  if (mode === 'gameover' || mode === 'ending') {
+    phaseValue.textContent = mode === 'ending' ? 'Victory' : 'Run ended';
     return;
   }
   phaseValue.textContent = profile.phaseLabel;
@@ -4728,58 +4731,55 @@ function startWaveCleared() {
   updatePhaseDisplay();
 }
 
+let endingStartTime = 0;
+let endingTimers = [];
+
 function startEndingSequence() {
-  console.log('[Wave10] startEndingSequence fired', { defeatedCount, endingStartTime, gameEnding: !!gameEnding });
-  mode = 'gameover'; // freeze input / spawning
-  stopMusicLoop(2.0);
+  mode = 'ending';
+  stopMusicLoop(3.0);
   document.body.classList.remove('is-running');
+  document.body.classList.remove('final-wave-active');
   setPauseButtonState(true, true);
   clearEnemies();
   clearEffects();
+  updatePhaseDisplay();
 
-  if (!gameEnding) { console.error('[Wave10] gameEnding element not found!'); return; }
+  if (!gameEnding) return;
+  clearEndingTimers();
   gameEnding.hidden = false;
-  gameEnding.className = 'game-ending';
+  gameEnding.className = 'game-ending phase-awakening';
 
-  // Phase 1: white flash (0 – 1.2s)
-  window.setTimeout(() => {
+  const finalStats = getEndingStats();
+  setEndingStats(finalStats, false);
+
+  queueEndingStep(() => {
     gameEnding.classList.add('phase-flash');
-  }, 500);
+  }, 250);
 
-  // Phase 2: warp (1.2s – 3.2s)
-  window.setTimeout(() => {
+  queueEndingStep(() => {
     gameEnding.classList.remove('phase-flash');
     gameEnding.classList.add('phase-warp');
   }, 1200);
 
-  // Phase 3: title (3.2s)
-  window.setTimeout(() => {
+  queueEndingStep(() => {
     gameEnding.classList.remove('phase-warp');
+    gameEnding.classList.add('phase-arrival');
+    playVictoryFinaleSound();
+  }, 3250);
+
+  queueEndingStep(() => {
     gameEnding.classList.add('phase-title');
-  }, 3200);
+  }, 4300);
 
-  // Phase 4: stats (4.8s)
-  window.setTimeout(() => {
+  queueEndingStep(() => {
     gameEnding.classList.add('phase-stats');
-    const gameSeconds = endingStartTime; // stored as game elapsed seconds when ending triggered
-    const wpm = gameSeconds > 0 ? Math.round((defeatedCount * 60) / gameSeconds) : 0;
-    const accuracy = typedAttempts > 0
-      ? Math.round(((typedAttempts - mistakeCount) / typedAttempts) * 100)
-      : 100;
-    animateCounter(endScore, 0, score, 1200);
-    animateCounter(endWpm, 0, wpm, 900, v => `${v}`);
-    animateCounter(endAccuracy, 0, accuracy, 900, v => `${v}%`);
-    animateCounter(endStreak, 0, peakStreak, 700);
-    animateCounter(endMimics, 0, mimicsLooted, 600);
-  }, 4800);
+    setEndingStats(finalStats, true);
+  }, 6100);
 
-  // Phase 5: replay button (7.0s)
-  window.setTimeout(() => {
+  queueEndingStep(() => {
     gameEnding.classList.add('phase-replay');
-  }, 7000);
+  }, 8500);
 }
-
-let endingStartTime = 0;
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
   if (!el) return;
@@ -4793,8 +4793,79 @@ function animateCounter(el, from, to, duration, format = v => String(v)) {
   requestAnimationFrame(step);
 }
 
+function getEndingStats() {
+  const gameSeconds = Math.max(1, endingStartTime || elapsed || gameTimeSeconds);
+  const wpm = Math.round((defeatedCount * 60) / gameSeconds);
+  const accuracy = typedAttempts > 0
+    ? Math.round(((typedAttempts - mistakeCount) / typedAttempts) * 100)
+    : 100;
+  const healthHearts = formatLifeValue(health);
+  const grade = calculateEndingGrade({ accuracy, wpm, health });
+  return {
+    score,
+    wpm,
+    accuracy,
+    peakStreak,
+    mimicsLooted,
+    grade,
+    healthHearts,
+    time: formatRunTime(gameSeconds),
+  };
+}
+
+function calculateEndingGrade({ accuracy, wpm, health }) {
+  let grade = 4;
+  if (accuracy >= 72) grade += 1;
+  if (accuracy >= 82) grade += 1;
+  if (accuracy >= 90) grade += 1;
+  if (wpm >= 14) grade += 1;
+  if (wpm >= 22) grade += 1;
+  if (health >= MAX_LIFE * 0.7) grade += 1;
+  if (accuracy < 62) grade -= 1;
+  if (health <= 2) grade -= 1;
+  return THREE.MathUtils.clamp(grade, 1, 9);
+}
+
+function formatRunTime(seconds) {
+  const total = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(total / 60);
+  const remainingSeconds = total % 60;
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+
+function setEndingStats(stats, animate) {
+  if (!stats) return;
+  if (animate) {
+    animateCounter(endScore, 0, stats.score, 1400);
+    animateCounter(endWpm, 0, stats.wpm, 1000, v => `${v}`);
+    animateCounter(endAccuracy, 0, stats.accuracy, 1000, v => `${v}%`);
+    animateCounter(endStreak, 0, stats.peakStreak, 900);
+    animateCounter(endMimics, 0, stats.mimicsLooted, 850);
+    animateCounter(endGrade, 0, stats.grade, 1100, v => `${v}`);
+  } else {
+    if (endScore) endScore.textContent = '0';
+    if (endWpm) endWpm.textContent = '0';
+    if (endAccuracy) endAccuracy.textContent = '0%';
+    if (endStreak) endStreak.textContent = '0';
+    if (endMimics) endMimics.textContent = '0';
+    if (endGrade) endGrade.textContent = '0';
+  }
+  if (endHealth) endHealth.textContent = `${stats.healthHearts}/${HEART_COUNT}`;
+  if (endTime) endTime.textContent = stats.time;
+}
+
+function queueEndingStep(callback, delay) {
+  endingTimers.push(window.setTimeout(callback, delay));
+}
+
+function clearEndingTimers() {
+  endingTimers.forEach(timer => window.clearTimeout(timer));
+  endingTimers = [];
+}
+
 function dismissEndingSequence() {
   if (!gameEnding) return;
+  clearEndingTimers();
   gameEnding.hidden = true;
   gameEnding.className = 'game-ending';
 }
@@ -4802,7 +4873,7 @@ function dismissEndingSequence() {
 function activateFinalWaveCheat() {
   const savedHealth = (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') ? health : MAX_LIFE;
 
-  if (mode === 'idle' || mode === 'gameover') {
+  if (mode === 'idle' || mode === 'gameover' || mode === 'ending') {
     startGame();
   } else {
     clearEnemies();
