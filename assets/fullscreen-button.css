@@ -1,0 +1,93 @@
+.panphy-fullscreen-button,
+[data-panphy-fullscreen] {
+  font-size: 0 !important;
+}
+
+.panphy-fullscreen-button,
+button.panphy-fullscreen-button {
+  --panphy-fs-size: 44px;
+  --panphy-fs-color-light: var(--brand-primary, #c2410c);
+  --panphy-fs-color-dark: var(--brand-accent, #0d9488);
+  --panphy-fs-hover-light: color-mix(in srgb, var(--brand-primary, #c2410c), transparent 92%);
+  --panphy-fs-hover-dark: color-mix(in srgb, var(--brand-accent, #0d9488), transparent 92%);
+  --panphy-fs-focus: color-mix(in srgb, var(--brand-accent, #0d9488), transparent 62%);
+
+  width: var(--panphy-fs-size) !important;
+  height: var(--panphy-fs-size) !important;
+  min-width: var(--panphy-fs-size) !important;
+  min-height: var(--panphy-fs-size) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: var(--panphy-fs-color-light) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  font-size: 0 !important;
+  line-height: 1 !important;
+  overflow: visible;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease !important;
+}
+
+[data-theme="dark"] .panphy-fullscreen-button,
+.panphy-fullscreen-button.is-dark {
+  color: var(--panphy-fs-color-dark) !important;
+}
+
+.panphy-fullscreen-button:hover,
+button.panphy-fullscreen-button:hover {
+  background: var(--panphy-fs-hover-light) !important;
+  border-color: transparent !important;
+  transform: translateY(-0.5px) !important;
+}
+
+[data-theme="dark"] .panphy-fullscreen-button:hover,
+.panphy-fullscreen-button.is-dark:hover {
+  background: var(--panphy-fs-hover-dark) !important;
+}
+
+.panphy-fullscreen-button:focus-visible,
+button.panphy-fullscreen-button:focus-visible {
+  outline: 3px solid var(--panphy-fs-focus) !important;
+  outline-offset: 3px !important;
+}
+
+.panphy-fullscreen-button .panphy-fs-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.3;
+  overflow: visible;
+  transition: transform 0.18s ease;
+}
+
+/* Enter fullscreen hover: corners expand outward */
+.panphy-fullscreen-button:not(.is-fullscreen):hover .panphy-fs-icon {
+  transform: scale(1.1);
+}
+
+/* Exit fullscreen hover: corners compress inward */
+.panphy-fullscreen-button.is-fullscreen:hover .panphy-fs-icon {
+  transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panphy-fullscreen-button,
+  .panphy-fullscreen-button .panphy-fs-icon {
+    transition-duration: 0.01ms !important;
+  }
+
+  .panphy-fullscreen-button:hover,
+  .panphy-fullscreen-button:hover .panphy-fs-icon {
+    transform: none !important;
+  }
+}
