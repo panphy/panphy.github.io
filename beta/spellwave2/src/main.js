@@ -2381,10 +2381,12 @@ function spawnEnemy(options = {}) {
     ? chooseMedicPrompt()
     : isMimic
     ? chooseMimicPrompt()
+    : options.isFinalWaveNormal
+    ? chooseFinalWaveNormalPrompt()
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
-  const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
+  const showDefinition = !!wordData.definition && isBoss;
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
   const hintRange = isBoss ? getBossQuestionHintRange() : null;
   if (isMedic && !firstMedicHintShown) {
@@ -2423,7 +2425,7 @@ function spawnEnemy(options = {}) {
     scene.add(shadowMesh);
   }
 
-  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
+  const promptKind = (isBoss && isEquationPrompt) ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
@@ -2467,7 +2469,7 @@ function spawnEnemy(options = {}) {
   const promptOptions = { multiplicationAlias: isEquationPrompt };
   const shouldLimitVocabulary = isBoss && !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term);
   const bossHiddenWordCap = waveSet >= 5 ? 3 : 2;
-  const twoWordData = isEquationPrompt
+  const twoWordData = (isBoss && isEquationPrompt)
     ? buildTwoWordLimit(wordData.term, {
         alwaysLimit: true,
         multiplicationAlias: true,
@@ -3663,6 +3665,7 @@ function createSky() {
     size: 0.08,
     transparent: true,
     opacity: 0.72,
+    fog: false,
   });
   starField = new THREE.Points(starGeometry, starMaterial);
   scene.add(starField);
@@ -3677,6 +3680,7 @@ function createMeteors() {
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      fog: false,
     });
     const coreMaterial = new THREE.MeshBasicMaterial({
       color: 0xfff4ba,
@@ -3684,6 +3688,7 @@ function createMeteors() {
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      fog: false,
     });
     const glowMaterial = new THREE.MeshBasicMaterial({
       color: 0x6fb6ff,
@@ -3691,6 +3696,7 @@ function createMeteors() {
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      fog: false,
     });
     const tail = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.08, 0.08), tailMaterial);
     tail.position.x = -3.0;
@@ -4379,6 +4385,16 @@ function chooseMedicPrompt() {
   return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
+function chooseFinalWaveNormalPrompt() {
+  const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
+  const pool = EASY_WORDS;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const entry = pool[Math.floor(Math.random() * pool.length)];
+    if (!nearExisting.has(entry.term)) return entry;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function currentKeywordPool() {
   if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
   if (waveSet >= 3) return [...EASY_WORDS, ...MEDIUM_WORDS];
@@ -4854,34 +4870,61 @@ function startEndingSequence() {
   if (!gameEnding) return;
   clearEndingTimers();
   gameEnding.hidden = false;
-  gameEnding.className = 'game-ending phase-awakening phase-arrival phase-title';
+  gameEnding.className = 'game-ending';
 
   const finalStats = getEndingStats();
   setEndingStats(finalStats, false);
 
+  const skipBtn = document.getElementById('endingSkipButton');
+  if (skipBtn) {
+    skipBtn.onclick = () => skipEndingCinematic(finalStats);
+  }
+
+  // Cinematic steps:
+  // 1. Flash starts at 120ms
   queueEndingStep(() => {
-    gameEnding.classList.add('phase-flash');
+    gameEnding.className = 'game-ending phase-flash';
   }, 120);
 
+  // 2. Warp scroll starts at 760ms (stretched stars)
   queueEndingStep(() => {
-    gameEnding.classList.remove('phase-flash');
-    gameEnding.classList.add('phase-warp');
+    gameEnding.className = 'game-ending phase-warp';
   }, 760);
 
+  // 3. Exit warp at 2200ms, show blue introductory text
   queueEndingStep(() => {
-    gameEnding.classList.remove('phase-warp');
-    gameEnding.classList.add('phase-arrival');
+    gameEnding.className = 'game-ending phase-intro';
+  }, 2200);
+
+  // 4. Shrink/fly Spellwave logo at 5700ms, start victory theme chord progression
+  queueEndingStep(() => {
+    gameEnding.className = 'game-ending phase-title-fly';
     playVictoryFinaleSound();
-  }, 1800);
+  }, 5700);
 
+  // 5. Run the Star Wars crawl at 9700ms (crawling text scrolls up)
   queueEndingStep(() => {
-    gameEnding.classList.add('phase-stats');
-    setEndingStats(finalStats, true);
-  }, 2900);
+    gameEnding.className = 'game-ending phase-crawl';
+  }, 9700);
 
+  // 6. Complete cinematic and transition to final stats card at 27700ms (18s crawl ends)
   queueEndingStep(() => {
-    gameEnding.classList.add('phase-replay');
-  }, 5000);
+    showEndingStatsScreen(finalStats);
+  }, 27700);
+}
+
+function showEndingStatsScreen(finalStats) {
+  clearEndingTimers();
+  if (gameEnding) {
+    gameEnding.className = 'game-ending phase-arrival phase-stats phase-replay';
+  }
+  setEndingStats(finalStats, true);
+  const skipBtn = document.getElementById('endingSkipButton');
+  if (skipBtn) skipBtn.onclick = null;
+}
+
+function skipEndingCinematic(finalStats) {
+  showEndingStatsScreen(finalStats);
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
@@ -4971,6 +5014,8 @@ function dismissEndingSequence() {
   clearEndingTimers();
   gameEnding.hidden = true;
   gameEnding.className = 'game-ending';
+  const skipBtn = document.getElementById('endingSkipButton');
+  if (skipBtn) skipBtn.onclick = null;
 }
 
 function activateFinalWaveCheat() {

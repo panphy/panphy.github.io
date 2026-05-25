@@ -1826,6 +1826,182 @@ body:not(.time-frozen) #gameCanvas {
   display: none;
 }
 
+/* Star Wars Victory Cinematic styles */
+.ending-intro-text {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 80vw);
+  font-family: var(--font-mono);
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  color: #4cd2ff;
+  text-align: center;
+  line-height: 1.5;
+  text-shadow: 0 0 12px rgba(76, 210, 255, 0.6);
+  opacity: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.game-ending.phase-intro .ending-intro-text {
+  animation: intro-fade-in-out 3.5s ease-in-out forwards;
+}
+
+@keyframes intro-fade-in-out {
+  0% { opacity: 0; filter: blur(4px); }
+  15% { opacity: 1; filter: blur(0); }
+  85% { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(4px); }
+}
+
+.ending-logo {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(2.4);
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 8vw, 5.8rem);
+  color: #ffe18a;
+  text-align: center;
+  text-shadow: 0 0 24px rgba(255, 225, 138, 0.8);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.game-ending.phase-title-fly .ending-logo {
+  animation: logo-fly-away 4s cubic-bezier(0.12, 0.65, 0.3, 1) forwards;
+}
+
+@keyframes logo-fly-away {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4);
+    filter: blur(8px);
+  }
+  15% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.08);
+    filter: blur(2px);
+  }
+}
+
+.ending-crawl-container {
+  position: absolute;
+  width: min(640px, 85vw);
+  height: 60vh;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  perspective: 300px;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%);
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.game-ending.phase-crawl .ending-crawl-container {
+  opacity: 1;
+}
+
+.ending-crawl-content {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+  line-height: 1.6;
+  color: #ffe18a;
+  text-align: justify;
+  transform-origin: 50% 100%;
+  transform: rotateX(22deg) translateZ(0);
+}
+
+.game-ending.phase-crawl .ending-crawl-content {
+  animation: crawl-animation 18s linear forwards;
+}
+
+.ending-crawl-content p {
+  margin: 0 0 1.5rem 0;
+  text-shadow: 0 0 4px rgba(255, 225, 138, 0.4);
+}
+
+.ending-crawl-content .crawl-episode {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #ffe18a;
+  letter-spacing: 0.15em;
+  margin-bottom: 0.2rem;
+}
+
+.ending-crawl-content .crawl-title {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  color: #fff;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes crawl-animation {
+  0% {
+    top: 100%;
+    transform: rotateX(22deg) translateY(0);
+  }
+  100% {
+    top: -140%;
+    transform: rotateX(22deg) translateY(0);
+  }
+}
+
+.ending-skip-button {
+  position: absolute;
+  bottom: 2.2rem;
+  right: 2.2rem;
+  z-index: 10;
+  padding: 0.55rem 1.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.ending-skip-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.game-ending.phase-crawl .ending-skip-button,
+.game-ending.phase-title-fly .ending-skip-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .game-ending:not([hidden]) {
   pointer-events: auto;
 }
@@ -2012,16 +2188,9 @@ body:not(.time-frozen) #gameCanvas {
   text-align: center;
 }
 
-.game-ending.phase-arrival .ending-content,
-.game-ending.phase-title .ending-content,
 .game-ending.phase-stats .ending-content,
 .game-ending.phase-replay .ending-content {
   pointer-events: auto;
-}
-
-.game-ending.phase-title .ending-content,
-.game-ending.phase-stats .ending-content,
-.game-ending.phase-replay .ending-content {
   opacity: 1;
   animation: ending-content-in 0.45s ease-out forwards;
 }
@@ -2029,11 +2198,6 @@ body:not(.time-frozen) #gameCanvas {
 @keyframes ending-content-in {
   0%   { opacity: 0.72; transform: translateY(8px) scale(0.99); }
   100% { opacity: 1; transform: scale(1); }
-}
-
-.game-ending.phase-stats .ending-content,
-.game-ending.phase-replay .ending-content {
-  opacity: 1;
 }
 
 .ending-sigil {
