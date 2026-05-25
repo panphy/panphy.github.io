@@ -53,6 +53,58 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 
 ---
 
+## 6. Wave 10 Finale (NEW — review implementation_plan.md before starting)
+
+> Resolve all open questions in Section 10 of `implementation_plan.md` before implementation begins.
+
+### 6a. Boss Roster Expansion
+- [ ] Add 6 new boss types to `BOSS_TYPES` in `main.js`: Glacial Titan, Magma Sovereign, Void Specter, Celestial Arbiter, Phantom Rift, Stellar Dreadnought.
+- [ ] Update `chooseBossType()` for waves 1–9: shuffle all 10 type indices at wave start, pick first 3 without repeating a type within a wave.
+- [ ] For wave 10: Fisher-Yates shuffle all 10 type indices into `finalWaveBossOrder` at wave 10 start; `chooseBossType` returns `BOSS_TYPES[finalWaveBossOrder[bossesSpawned]]`.
+
+### 6b. Wave 10 Structure
+- [ ] Add `isFinalWave()` helper (`waveSet === 10`).
+- [ ] Add `FINAL_WAVE_BOSS_COUNT = 10` constant.
+- [ ] In the wave start logic, skip the normal phase when `isFinalWave()` is true — call `startFinalWave()` directly.
+- [ ] Implement `startFinalWave()`: sets `wavePhase = 'boss'`, `bossesSpawned = 0`, `bossesDefeated = 0`, shows FINAL WAVE banner, triggers space background, starts music.
+- [ ] Update the boss-phase spawn loop to use `FINAL_WAVE_BOSS_COUNT` instead of `BOSSES_PER_WAVE` when `isFinalWave()`.
+- [ ] Build the wave 10 spawn queue at wave start: 10 boss entries + 3 mimic entries + 2 medic entries, Fisher-Yates shuffled, with first slot forced to be a boss.
+- [ ] Drive the boss-phase spawn loop from the queue; pause the spawn timer when a support enemy is active and resume after it escapes or is defeated.
+- [ ] On wave 10 all-bosses-defeated: call `startEndingSequence()` instead of `advanceWaveSet()`.
+
+### 6c. FINAL WAVE! Banner
+- [ ] Add CSS `.boss-banner.is-final-wave` variant in `styles.css`: large font (~5–6rem, viewport-clamped), gradient animated text, multi-layer glow shadow, slam-in scale entrance, screen-shake keyframe.
+- [ ] Call `showBanner('FINAL WAVE!', 'final-wave')` in `startFinalWave()`.
+
+### 6d. Space Background
+- [ ] Add `#starfield` div to `spellwave2.html` (hidden by default, behind canvas via z-index).
+- [ ] Write CSS for `#starfield`: radial-gradient star pattern, `@keyframes` drift animation, deep-space background gradient.
+- [ ] Add/remove `final-wave-active` class on `<body>` when wave 10 starts/ends.
+- [ ] Change Three.js renderer clear color to near-black on wave 10 start; restore on reset.
+- [ ] Transition the moon-haze element to nebula-purple glow via CSS class in wave 10.
+- [ ] Add warp-speed variant CSS (`#starfield.warp`): star streaks, used during the ending sequence.
+
+### 6e. Wave 10 Music
+- [ ] Add `playFinalWaveMusic()` to `audio.js`: bass drone, rhythm pulse, harmonic layer, melodic arpeggio, tension accents (see plan for Web Audio API spec).
+- [ ] Add `stopFinalWaveMusic(fadeSeconds)` to `audio.js`: ramp gain to 0, then disconnect.
+- [ ] Export both functions; import and wire them in `main.js`.
+- [ ] Respect existing audio toggle: call `playFinalWaveMusic()` only when audio is enabled; stop if player toggles audio off mid-wave.
+
+### 6f. End-game Scene
+- [ ] Add `#gameEnding` fullscreen overlay to `spellwave2.html` (hidden by default).
+- [ ] Write CSS for overlay: full-screen fixed, black background, centered content, fade-in/slide-up animations for title and stats panel.
+- [ ] Implement `startEndingSequence()` in `main.js`: pause animation loop, trigger flash, initiate warp, fade music, reveal title and stats on a timed sequence.
+- [ ] Animate stat counters (score, WPM, accuracy, streak, mimics) from 0 to final values.
+- [ ] Show "Play Again" button after stats reveal; wire it to a full reset that removes final-wave state and returns to the start screen.
+
+### 6g. Konami Code Cheat
+- [ ] Add a 10-slot circular cheat buffer in `main.js`, filled from `keydown` event.key values (before potion/typing handlers consume them).
+- [ ] On match of `['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a']`: call `activateFinalWaveCheat()`.
+- [ ] Implement `activateFinalWaveCheat()`: preserve current health if a run is in progress; start at full health if no run is active. Clear enemies and effects, set `waveSet = 10`, call `startFinalWave()`.
+- [ ] Show brief cheat-activated banner.
+
+---
+
 ## 5. Phase 4: Campaign Mode & Setup Expansion (NEW)
 
 > [!IMPORTANT]

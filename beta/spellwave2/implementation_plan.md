@@ -1,5 +1,208 @@
 # Spellwave 2 Planning Notes
 
+---
+
+## Wave 10 Finale
+
+> **Status**: Planning — no code changes yet. Review all sections before implementation begins.
+
+### Overview
+
+Wave 10 is the final wave and acts as the game's climax. It differs from all prior waves in structure, presentation, music, and resolution. The normal-wave phase is skipped entirely; the wave is a pure boss gauntlet with 10 bosses (one of each boss type), medics and mimics injected at random positions in the spawn queue, a space-themed visual environment, unique music, and a dedicated ending sequence.
+
+Waves 1–9 remain structurally unchanged. The expanded boss roster (10 types) is used across all waves.
+
+---
+
+### 1. Boss Visuals — 6 New Types
+
+Current roster has 4. Six more are added to reach 10 total. All follow the existing `BOSS_TYPES` schema (name, isBoss, isFlying, body, trim, eye, speed, scale, weight, score).
+
+| # | Name | Style | Flying | Notes |
+|---|------|-------|--------|-------|
+| 5 | **Glacial Titan** | Ice-white body, pale-blue trim, pale-yellow eye | No | Slow, large |
+| 6 | **Magma Sovereign** | Dark-red body, orange-lava trim, white-hot eye | No | Medium speed |
+| 7 | **Void Specter** | Near-black body, electric-cyan trim, cyan eye | Yes | Fast |
+| 8 | **Celestial Arbiter** | Bright-white body, gold trim, deep-blue eye | Yes | Medium-slow |
+| 9 | **Phantom Rift** | Dark-teal body, magenta trim, magenta eye | Yes | Medium-fast |
+| 10 | **Stellar Dreadnought** | Deep-navy body, cosmic-gold trim, white eye | No | Slow, very large (scale 1.72) |
+
+Suggested hex values (exact shades open for adjustment during implementation):
+- Glacial Titan: body `0x1a3045`, trim `0x9ee8ff`, eye `0xfff8b0`
+- Magma Sovereign: body `0x3d0a00`, trim `0xff6a00`, eye `0xffffff`
+- Void Specter: body `0x08060f`, trim `0x00e5ff`, eye `0x00e5ff`
+- Celestial Arbiter: body `0xf0f4ff`, trim `0xffd700`, eye `0x1a3aff`
+- Phantom Rift: body `0x0a2a2a`, trim `0xe040fb`, eye `0xe040fb`
+- Stellar Dreadnought: body `0x050d1a`, trim `0xd4a017`, eye `0xffffff`
+
+**Boss type selection for waves 1–9**: The current `chooseBossType(index)` formula (`(waveSet + index - 1) % 4`) will be updated to draw randomly from all 10 types within a wave, without repeating the same type for the 3 bosses in one wave.
+
+---
+
+### 2. Wave 10 Structure
+
+#### No normal-wave phase
+
+When `waveSet === 10`, the normal-wave phase is skipped. `startBossPhase()` is called immediately when the wave begins (or a new `startFinalWave()` function handles wave 10 setup). The "BOSS WAVE" banner is replaced with the FINAL WAVE banner (see Section 4).
+
+#### 10 bosses, random order
+
+`BOSSES_PER_WAVE` (currently `3`) remains unchanged for waves 1–9. Wave 10 uses `FINAL_WAVE_BOSS_COUNT = 10` and presents all 10 boss types in a randomly shuffled order, re-rolled each run.
+
+`chooseBossType` in wave 10 returns `BOSS_TYPES[finalWaveBossOrder[bossesSpawned]]`, where `finalWaveBossOrder` is a Fisher-Yates shuffle of indices 0–9 generated at the start of wave 10.
+
+#### Medic and Mimic interleave schedule
+
+Medics and mimics currently only spawn in the normal-wave phase. Wave 10 injects 5 support enemies (3 mimics, 2 medics) into the 10-boss queue at random positions, re-rolled each run.
+
+**Interleave construction at wave 10 start:**
+1. Build a 15-slot queue: 10 boss entries + 3 mimic entries + 2 medic entries.
+2. Fisher-Yates shuffle the full queue, then enforce one constraint: no support enemy appears as the very first slot (always start with a boss).
+3. Spawn entries in queue order; the boss spawn timer is paused when a support enemy is active and resumes after it escapes or is defeated.
+
+Example queue (one possible shuffle): B B M B B H B M B H B B M B B  
+= 10 bosses, 3 mimics (M), 2 medics (H), fully randomised each run.
+
+The medic heal amount and mimic loot mechanics are unchanged. Wave 10 interleaves are the only time these enemy types appear during a boss phase.
+
+#### Word-hiding in wave 10
+
+Wave 10 uses `waveSet >= 5`, so the already-implemented rule applies without further changes: equation bosses hide up to 3 words, vocabulary bosses hide up to 3 words.
+
+---
+
+### 3. Waves 1–9 Boss Type Selection
+
+Replace the current `chooseBossType(index)` formula with per-wave random assignment:
+
+- At wave start, shuffle all 10 boss type indices and store the first 3 as that wave's boss order.
+- Within a wave, bosses appear in the shuffled order — no two bosses in the same wave share a type.
+- The shuffle is re-seeded each time `advanceWaveSet()` is called, so each run's wave history is different.
+
+---
+
+### 4. FINAL WAVE! Banner
+
+A new CSS variant `.is-final-wave` on the existing `#bossBanner` element. The JS call is `showBanner('FINAL WAVE!', 'final-wave')`.
+
+Visual targets:
+- Font size: approximately 3× the normal boss banner (normal is currently ~2rem; final wave ~5–6rem, clamped to viewport)
+- Color: animated gradient cycling through deep red → burnt orange → cosmic white
+- Text shadow: multi-layered red/orange glow
+- Animation: the banner slams in with a scale-from-large entrance (rather than the normal slide), then pulses once before fading
+- Screen shake: a CSS `@keyframes` shake is applied to the game wrapper simultaneously with the banner entrance
+- Duration: banner stays visible ~3 seconds (longer than the normal ~1.5s boss banner)
+
+The banner appears before any bosses spawn, on a delay matching the current `bossWarningDelay` pattern.
+
+---
+
+### 5. Space Background
+
+Applied when `waveSet === 10` begins, removed when the ending sequence starts (or when the run resets).
+
+**Implementation approach — pure CSS, no new asset files:**
+
+1. A CSS class `final-wave-active` is added to `<body>` (or the game wrapper) when wave 10 starts.
+2. A `#starfield` `<div>` (hidden by default, created once in the HTML) becomes visible and animated. It sits behind the Three.js `<canvas>` using `z-index`.
+3. The starfield is a `radial-gradient`-based or pseudo-element pattern with a CSS `@keyframes` animation that drifts/scrolls the star dots upward, creating a slow forward-motion-through-space feel.
+4. The `<body>` background transitions from the normal dotted pattern to a near-black/deep-navy gradient.
+5. The Three.js renderer clear color is changed to near-black (e.g., `0x02040a`) when wave 10 begins and restored on wave clear/reset.
+6. The moon haze element transitions to a nebula-purple glow.
+
+No procedural canvas starfield is needed — CSS animation handles the ambient feel. If more dynamism is wanted, a second pass can add a small JS-driven parallax star layer.
+
+---
+
+### 6. Wave 10 Music
+
+A new synthesized track played via Web Audio API in `audio.js`. Two exported functions: `playFinalWaveMusic()` and `stopFinalWaveMusic(fadeOutSeconds)`.
+
+Inspired by FF5's final boss themes (Exdeath / Neo Exdeath): dark, epic, driving, with a sense of cosmic scale.
+
+Composition approach using Web Audio API:
+- **Bass foundation**: Two detuned sawtooth oscillators (~55 Hz and ~110 Hz) for a thick low drone, with slow LFO amplitude modulation
+- **Rhythm pulse**: Periodic filtered noise burst every 0.5s giving a war-drum feel; gain envelope: instant attack, 0.3s decay
+- **Harmonic layer**: Tri-oscillator chord stack (diminished/augmented voicing) in the 200–600 Hz range, tremolo at ~6 Hz
+- **Melodic arpeggio**: Step sequencer (8-step, minor pentatonic, 160 BPM) using square waves, arpeggiating upward then dropping an octave — runs once every 2 bars
+- **Tension accent**: High-pass filtered noise sweep every ~8s for cosmic effect
+
+`stopFinalWaveMusic(2)` applies a gain ramp to silence over 2 seconds before disconnecting nodes.
+
+The track loops. The game's normal audio system (boss throws, typing sounds, etc.) plays on top — music occupies a separate gain node chain with its own volume control, lower than SFX by default.
+
+> **Open question**: Should the final wave music volume be adjustable by the existing audio toggle, or always on? Suggestion: respect the existing audio toggle (if audio is off, no music).
+
+---
+
+### 7. End-game Scene
+
+Triggered when `bossesDefeated === 10` inside wave 10 (the same condition that normally calls `advanceWaveSet()`).
+
+A `#gameEnding` fullscreen overlay (position fixed, initially `display: none`) takes over the screen. The Three.js animation loop is paused.
+
+**Sequence** (approximate timings):
+
+| t | Event |
+|---|-------|
+| 0s | Stellar Dreadnought death explosion (normal) |
+| 0.5s | White flash covers entire screen; all remaining effects and labels dissolve |
+| 1.0s | Flash fades; starfield remains; `stopFinalWaveMusic(3)` called |
+| 1.5s | Starfield `animation-duration` CSS var shortens: stars become streaks (warp-speed effect, 2s) |
+| 3.5s | Warp flash — brief all-white; then starfield fades to black |
+| 4.5s | Title appears, fade-in: **"PHYSICS MASTERED"** in the display font with gold glow; subtle scale-in |
+| 6.0s | Stats panel slides up from bottom: Score, WPM, Accuracy, Streak peak, Mimics looted — each counter animates from 0 |
+| 9.0s | "Play Again" button fades in |
+
+All rendered in HTML/CSS. No Three.js involvement after the death explosion.
+
+The ending overlay is also dismissed cleanly if the player clicks "Play Again" — it resets all state (including removing the `final-wave-active` class and restoring the Three.js clear color).
+
+---
+
+### 8. Konami Code Cheat — Jump to Wave 10
+
+Sequence: `ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a`
+
+**Detection**:
+- A standalone circular buffer of the last 10 `event.key` values from `keydown` events.
+- Buffer is read-only for cheat detection; it does not interfere with the typing buffer or potion activation (those run in their own handlers).
+- Arrow keys added to the cheat buffer before the potion handler consumes them.
+- On match: call `activateFinalWaveCheat()`.
+
+**`activateFinalWaveCheat()`**:
+1. If a run is not in progress: start one at full health, then jump directly to wave 10 via `startFinalWave()`.
+2. If a run is in progress: keep the player's current health, clear all enemies and active effects, set `waveSet = 10`, and call `startFinalWave()`.
+3. Show a brief banner: `showBanner('CHEAT CODE ACTIVATED', 'mimic-hint')` (reuse existing styling).
+
+Health is always preserved when jumping via cheat. If the run starts fresh (no prior run), the player begins wave 10 at full health.
+
+The existing `iddqd` / `idkfa` cheat detection uses a character-trace mechanism. The Konami code uses a separate key-sequence buffer because it includes arrow keys (non-character keys) that do not appear in the typed character stream.
+
+---
+
+### 9. Changes to Existing Campaign Plan
+
+The prior plan described a 5-wave campaign. Wave 10 as finale changes the scope:
+
+- **Wave count**: Campaign extends to 10 waves. The node-path progress map (if implemented) shows 10 nodes, with wave 10 marked distinctly as the finale.
+- **Victory screen**: The wave-5 victory screen described in the campaign plan is superseded by the wave-10 ending scene (Section 7). The GCSE grade computation and stat display from that plan are folded into the ending scene.
+- **Topic selection**: Unchanged — players continue to pick topics between waves. Waves 6–10 draw from whatever topics remain unselected (or recycle if exhausted).
+
+---
+
+### 10. Open Questions for Review
+
+1. ~~**Boss order in wave 10**~~ — **Resolved**: randomised each run (Fisher-Yates shuffle of all 10 types).
+2. ~~**Medic/mimic frequency**~~ — **Resolved**: 3 mimics + 2 medics, positions randomised within the 15-slot queue, first slot always a boss.
+3. **Music volume**: Should the wave 10 music respect the audio toggle (recommended) or always play?
+4. **Space background depth**: Pure CSS starfield is clean and low-effort. Worth adding a second JS-driven parallax layer, or is CSS sufficient?
+5. **"Play Again" destination**: Does "Play Again" restart from wave 1, or return to the pre-run setup screen (for subject/curriculum selection)?
+6. **Score continuity**: Wave 10 bosses each award 150 points (same as waves 1–9). Should the finale bosses award a bonus multiplier?
+7. ~~**Konami code during active run**~~ — **Resolved**: health is always carried over. Fresh-start cheat begins at full health.
+
+---
+
 ## Completed Interim Difficulty Pass
 
 The beta build now includes a first difficulty-curve correction pass in `beta/spellwave2/src/main.js`. The goal was to address the hidden workload increase where later waves were not only adding more enemies, but also requiring more typed characters per enemy as medium, hard, and boss vocabulary entered the pools.

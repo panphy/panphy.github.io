@@ -2309,15 +2309,17 @@ function spawnEnemy(options = {}) {
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
   const shouldLimitVocabulary = isBoss && !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term);
+  const bossHiddenWordCap = waveSet >= 5 ? 3 : 2;
   const twoWordData = isEquationPrompt
     ? buildTwoWordLimit(wordData.term, {
-        alwaysLimit: isEquationPrompt,
-        multiplicationAlias: isEquationPrompt,
+        alwaysLimit: true,
+        multiplicationAlias: true,
+        maxHiddenWords: bossHiddenWordCap,
       })
     : shouldLimitVocabulary
     ? buildTwoWordLimit(wordData.term, {
         alwaysLimit: true,
-        maxHiddenWords: 1,
+        maxHiddenWords: waveSet >= 5 ? 3 : 1,
       })
     : null;
   const enemy = {
