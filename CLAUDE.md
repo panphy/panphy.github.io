@@ -66,6 +66,7 @@ Current unlisted/legacy pages:
 - `misc/gcse_phy/phy_flashcard.html`
 - `misc/gcse_phy/phy_flashcard_cs.html`
 - `misc/gcse_phy/phy_flashcard_ss.html`
+- `misc/index.html`
 - `misc/ising_model.html`
 - `misc/phyclub_showcase.html`
 - `misc/scoreboard.html`
