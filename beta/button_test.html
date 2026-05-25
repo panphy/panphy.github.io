@@ -6,17 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#F8F6F1">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Button Test — PanPhy Labs Beta</title>
+  <title>Button Test - PanPhy Labs Beta</title>
 
   <script>
     (function () {
       var dark = localStorage.getItem('panphy-dark') === '1';
       if (dark) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        document.querySelector('meta[name="theme-color"]') &&
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#111110');
-        document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]') &&
-          document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', 'black-translucent');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        if (tc) tc.setAttribute('content', '#111110');
+        if (sb) sb.setAttribute('content', 'black-translucent');
       }
     })();
   </script>
@@ -34,15 +34,10 @@
       --text-main: #1B1B1B;
       --text-secondary: #6B6560;
       --brand-primary: #C2410C;
-      --brand-secondary: #9A3412;
       --brand-accent: #0D9488;
       --surface: #FFFFFF;
       --surface-muted: #F1EEE7;
-      --card-bg: #FFFFFF;
-      --card-border: #E8E4DD;
       --border: #E8E4DD;
-      --slider-track: #D8D3CA;
-      --slider-thumb: #C2410C;
       --nav-bg: rgba(248, 246, 241, 0.88);
       --nav-border: rgba(0, 0, 0, 0.06);
       --shadow: 0 14px 42px rgba(0, 0, 0, 0.06);
@@ -55,27 +50,22 @@
       --text-main: #EDEBE8;
       --text-secondary: #9C9890;
       --brand-primary: #FB923C;
-      --brand-secondary: #FDBA74;
       --brand-accent: #5EEAD4;
       --surface: #1A1A19;
       --surface-muted: #20201E;
-      --card-bg: #1A1A19;
-      --card-border: #2A2A28;
       --border: #2A2A28;
-      --slider-track: #3A3A37;
-      --slider-thumb: #FB923C;
       --nav-bg: rgba(17, 17, 16, 0.88);
       --nav-border: rgba(255, 255, 255, 0.06);
-      --shadow: 0 14px 42px rgba(0, 0, 0, 0.22);
+      --shadow: 0 14px 42px rgba(0, 0, 0, 0.2);
     }
 
-    *, *::before, *::after {
+    * {
       box-sizing: border-box;
     }
 
     body {
-      margin: 0;
       min-height: 100vh;
+      margin: 0;
       background-color: var(--bg-color);
       background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
       background-size: 30px 30px;
@@ -84,69 +74,50 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    button, a {
+    button,
+    a {
       touch-action: manipulation;
     }
 
-    /* ── App shell ── */
     #app {
-      display: flex;
-      flex-direction: column;
+      width: min(100% - 40px, 1100px);
       min-height: 100vh;
-      width: calc(100% - 40px);
-      max-width: 1100px;
       margin: 0 auto;
       padding: 24px 0 52px;
-      gap: 20px;
     }
 
-    /* ── Banner ── */
-    #titleBanner {
+    .demo-banner {
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
       gap: 18px;
-      padding: 10px 10px 10px 14px;
+      padding: 12px 10px 12px 14px;
       border: 1px solid var(--nav-border);
       border-radius: 20px;
       background: var(--nav-bg);
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      position: sticky;
-      top: 16px;
-      z-index: 100;
     }
 
-    .banner-logo {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-
-    .banner-logo img {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-    }
-
-    .banner-title {
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+      color: #fffaf4;
       font-family: var(--font-display);
-      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-size: 1.4rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 3vw, 2.7rem);
       font-weight: 400;
       line-height: 1;
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
 
     .banner-actions {
@@ -159,190 +130,249 @@
       display: inline-flex;
       align-items: center;
       min-height: 44px;
-      padding: 0 12px;
+      padding: 0 14px;
       border-radius: 12px;
       color: var(--text-secondary);
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.07em;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       text-decoration: none;
       text-transform: uppercase;
-      transition: color 0.18s ease, background-color 0.18s ease;
-      margin-right: 4px;
     }
 
     .back-link:hover {
       color: var(--text-main);
-      background: color-mix(in srgb, var(--brand-primary), transparent 92%);
+      background: color-mix(in srgb, var(--brand-primary), transparent 90%);
     }
 
-    /* ── Workspace ── */
-    #workspace {
+    .intro {
+      max-width: 760px;
+      margin: 28px 0 22px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .options {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .option-card {
+      display: grid;
       gap: 16px;
-      flex: 1;
-    }
-
-    .panel {
-      border: 1px solid var(--card-border);
+      align-content: start;
+      min-width: 0;
+      padding: 18px;
+      border: 1px solid var(--border);
       border-radius: 18px;
-      background: var(--card-bg);
+      background: var(--surface);
       box-shadow: var(--shadow);
-      overflow: hidden;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
-    /* ── Demo canvas ── */
-    #demoPanel {
-      display: flex;
-      flex-direction: column;
+    .option-card h2 {
+      margin: 0;
+      color: var(--text-main);
+      font-size: 0.86rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    #demoCanvas {
-      flex: 1;
-      min-height: 360px;
+    .option-card p {
+      margin: -8px 0 0;
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sample {
+      display: grid;
+      place-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 14px 8px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-muted);
+    }
+
+    .sample span {
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Theme demo buttons (standalone comparison, not from shared assets) ── */
+
+    .theme-demo-button {
+      --button-bg: transparent;
+      --button-border: transparent;
+      --button-color: var(--text-main);
+      --button-hover-bg: color-mix(in srgb, var(--brand-primary), transparent 92%);
+
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid var(--button-border);
+      border-radius: 12px;
+      background: var(--button-bg);
+      color: var(--button-color);
+      cursor: pointer;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    .theme-demo-button svg {
+      width: 24px;
+      height: 24px;
       display: block;
-      width: 100%;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.3;
+      overflow: visible;
+      transition: transform 0.18s ease;
     }
 
-    /* ── Controls panel ── */
-    #controlsPanel {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+    .theme-demo-button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--brand-accent), transparent 62%);
+      outline-offset: 3px;
     }
 
-    .controls-section {
-      padding: 20px;
+    .theme-demo-button:hover {
+      background: var(--button-hover-bg);
+      transform: translateY(-0.5px);
     }
 
-    .controls-section + .controls-section {
-      border-top: 1px solid var(--border);
+    .theme-demo-button:hover svg {
+      transform: rotate(4deg);
     }
 
-    .controls-section h2 {
-      margin: 0 0 4px;
+    .variant-one {
+      --button-color: #c2410c;
+    }
+
+    .variant-one.is-dark {
+      --button-color: #7dd3fc;
+    }
+
+    .variant-two {
+      --button-bg: #ffffff;
+      --button-border: #e3ded5;
+      --button-color: #b45309;
+    }
+
+    .variant-two.is-dark {
+      --button-bg: #181817;
+      --button-border: #363633;
+      --button-color: #93c5fd;
+    }
+
+    .variant-three {
+      --button-bg: #fff7ed;
+      --button-border: #fed7aa;
+      --button-color: #c2410c;
+      border-radius: 999px;
+    }
+
+    .variant-three.is-dark {
+      --button-bg: #172033;
+      --button-border: #2f4f7f;
+      --button-color: #bfdbfe;
+    }
+
+    .variant-four {
+      --button-bg: transparent;
+      --button-border: color-mix(in srgb, var(--text-main), transparent 84%);
+      --button-color: var(--text-main);
+    }
+
+    .variant-four:hover {
+      --button-border: color-mix(in srgb, var(--text-main), transparent 62%);
+    }
+
+    .variant-five {
+      --button-bg: color-mix(in srgb, var(--brand-primary), transparent 90%);
+      --button-color: var(--brand-primary);
+    }
+
+    .variant-five.is-dark {
+      --button-bg: color-mix(in srgb, var(--brand-accent), transparent 90%);
+      --button-color: var(--brand-accent);
+    }
+
+    .variant-five:hover svg {
+      transform: scale(1.03);
+    }
+
+    .theme-demo-button.is-dark:hover svg {
+      transform: translateY(-0.5px);
+    }
+
+    /* ── Section divider ── */
+
+    .section-label {
+      margin: 40px 0 6px;
+      color: var(--text-secondary);
       font-size: 0.72rem;
       font-weight: 800;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--text-secondary);
     }
 
-    .controls-section p {
-      margin: 0 0 16px;
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
+    /* ── Fullscreen button cards ── */
+
+    .fs-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
     }
 
-    .code-block {
+    /* ── Current state readout ── */
+
+    .current-state {
+      margin-top: 18px;
+      color: var(--text-secondary);
       font-family: var(--font-mono);
-      font-size: 0.76rem;
-      line-height: 1.6;
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: var(--text-main);
-      white-space: pre;
-      overflow-x: auto;
-    }
-
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-secondary);
-      flex-shrink: 0;
-      transition: background-color 0.18s ease;
-    }
-
-    .status-dot.active {
-      background: var(--brand-accent);
-    }
-
-    .status-label {
-      color: var(--text-secondary);
-    }
-
-    .status-value {
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .btn-demo {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 44px;
-      padding: 0 18px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text-main);
-      font-family: var(--font-body);
       font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-      width: 100%;
     }
 
-    .btn-demo:hover {
-      background: var(--surface-muted);
-      border-color: color-mix(in srgb, var(--brand-primary), transparent 70%);
-      transform: translateY(-1px);
+    .current-state strong {
+      color: var(--text-main);
     }
 
-    @media (max-width: 900px) {
-      #workspace {
-        grid-template-columns: 1fr;
-      }
-
-      #demoCanvas {
-        min-height: 280px;
+    @media (max-width: 1040px) {
+      .options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 620px) {
       #app {
-        width: calc(100% - 28px);
-        padding: 16px 0 40px;
+        width: min(100% - 28px, 1100px);
       }
 
-      #titleBanner {
-        padding: 8px 8px 8px 12px;
-        gap: 10px;
+      .demo-banner {
+        grid-template-columns: auto 1fr auto;
       }
 
-      .banner-logo img {
-        width: 30px;
-        height: 30px;
-      }
-
-      .banner-title {
-        font-size: 1.1rem;
-      }
-
-      .back-link {
-        display: none;
-      }
-    }
-
-    @media (pointer: coarse) {
-      .btn-demo {
-        min-height: 52px;
-        font-size: 0.9rem;
+      .fs-cards {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -354,22 +384,53 @@
 </head>
 
 <body>
+  <svg width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="icon-sun-simple" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2.8v2.4M12 18.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+    </symbol>
+
+    <symbol id="icon-moon-simple" viewBox="0 0 24 24">
+      <path d="M18.8 15.4A7.8 7.8 0 0 1 8.6 5.2 8.2 8.2 0 1 0 18.8 15.4Z"></path>
+    </symbol>
+
+    <symbol id="icon-sun-dot" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5.2" fill="currentColor" stroke="none"></circle>
+      <path d="M12 3.4v1.8M12 18.8v1.8M3.4 12h1.8M18.8 12h1.8M5.9 5.9l1.2 1.2M16.9 16.9l1.2 1.2M5.9 18.1l1.2-1.2M16.9 7.1l1.2-1.2"></path>
+    </symbol>
+
+    <symbol id="icon-moon-dot" viewBox="0 0 24 24">
+      <path d="M18.8 15.5a7.7 7.7 0 0 1-10.3-10 8 8 0 1 0 10.3 10Z" fill="currentColor" stroke="none"></path>
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle>
+    </symbol>
+
+    <symbol id="icon-moon-plain" viewBox="0 0 24 24">
+      <path d="M18.8 15.5a7.7 7.7 0 0 1-10.3-10 8 8 0 1 0 10.3 10Z" fill="currentColor" stroke="none"></path>
+    </symbol>
+
+    <symbol id="icon-sun-disc" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.2"></circle>
+      <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"></circle>
+    </symbol>
+
+    <symbol id="icon-moon-disc" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.2"></circle>
+      <path d="M15.8 15.2A5.8 5.8 0 0 1 8.8 8a6.2 6.2 0 1 0 7 7.2Z" fill="currentColor" stroke="none"></path>
+    </symbol>
+  </svg>
+
   <div id="app">
-    <header id="titleBanner">
-      <a href="/" class="banner-logo">
-        <img src="/assets/panphy.png" alt="PanPhy Labs">
-      </a>
-      <h1 class="banner-title gradient-text">Fullscreen Button Test</h1>
+    <header class="demo-banner">
+      <div class="logo" aria-hidden="true">P</div>
+      <h1>Button Test</h1>
       <div class="banner-actions">
         <a class="back-link" href="/beta/">Beta</a>
         <button
-          id="theme-button"
           data-panphy-theme-toggle="auto"
           aria-label="Toggle light/dark theme"
           title="Toggle light/dark theme">
         </button>
         <button
-          id="fullscreen-button"
           data-panphy-fullscreen
           aria-label="Enter fullscreen"
           title="Enter fullscreen">
@@ -377,184 +438,206 @@
       </div>
     </header>
 
-    <div id="workspace">
-      <div class="panel" id="demoPanel">
-        <canvas id="demoCanvas"></canvas>
-      </div>
+    <p class="intro">
+      Theme toggle options: five quieter flat SVG directions. Each option shows the light-state button and the dark-state button side by side.
+      Hover them to compare the motion; click any sample to switch the page theme.
+    </p>
 
-      <div class="panel" id="controlsPanel">
-        <div class="controls-section">
-          <h2>Status</h2>
-          <p>Live state of both banner buttons.</p>
-          <div class="status-row" id="fsStatus">
-            <span class="status-dot" id="fsDot"></span>
-            <span class="status-label">Fullscreen:</span>
-            <span class="status-value" id="fsValue">off</span>
+    <main class="options" aria-label="Theme button design options">
+      <section class="option-card">
+        <h2>Option 1</h2>
+        <p>Open icon, no visible container.</p>
+        <div class="pair">
+          <div class="sample">
+            <button class="theme-demo-button variant-one" type="button" data-theme-choice="light" aria-label="Set light theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-sun-simple"></use></svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button class="theme-demo-button variant-one is-dark" type="button" data-theme-choice="dark" aria-label="Set dark theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-moon-simple"></use></svg>
+            </button>
+            <span>Dark</span>
           </div>
         </div>
+      </section>
 
-        <div class="controls-section">
-          <h2>Usage</h2>
-          <p>Add these two lines to any published app's <code>&lt;head&gt;</code> and insert the button next to the theme toggle.</p>
-          <pre class="code-block">&lt;link rel="stylesheet"
-  href="/assets/fullscreen-button.css"&gt;
-&lt;script src=
-  "/assets/fullscreen-button.js"&gt;&lt;/script&gt;</pre>
+      <section class="option-card">
+        <h2>Option 2</h2>
+        <p>Neutral tile with a thin border.</p>
+        <div class="pair">
+          <div class="sample">
+            <button class="theme-demo-button variant-two" type="button" data-theme-choice="light" aria-label="Set light theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-sun-simple"></use></svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button class="theme-demo-button variant-two is-dark" type="button" data-theme-choice="dark" aria-label="Set dark theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-moon-simple"></use></svg>
+            </button>
+            <span>Dark</span>
+          </div>
         </div>
+      </section>
 
-        <div class="controls-section">
-          <h2>HTML</h2>
-          <p>Button element — place it after the theme toggle inside <code>.banner-actions</code>.</p>
-          <pre class="code-block">&lt;button
-  id="fullscreen-button"
-  data-panphy-fullscreen
-  aria-label="Enter fullscreen"
-  title="Enter fullscreen"&gt;
-&lt;/button&gt;</pre>
+      <section class="option-card">
+        <h2>Option 3</h2>
+        <p>Soft circular chip with calm color.</p>
+        <div class="pair">
+          <div class="sample">
+            <button class="theme-demo-button variant-three" type="button" data-theme-choice="light" aria-label="Set light theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-sun-dot"></use></svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button class="theme-demo-button variant-three is-dark" type="button" data-theme-choice="dark" aria-label="Set dark theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-moon-dot"></use></svg>
+            </button>
+            <span>Dark</span>
+          </div>
         </div>
+      </section>
 
-        <div class="controls-section">
-          <h2>Target element</h2>
-          <p>To fullscreen a specific element instead of the whole page, set the attribute value to a CSS selector.</p>
-          <pre class="code-block">data-panphy-fullscreen="#workspace"</pre>
+      <section class="option-card">
+        <h2>Option 4</h2>
+        <p>Monochrome outline for low emphasis.</p>
+        <div class="pair">
+          <div class="sample">
+            <button class="theme-demo-button variant-four" type="button" data-theme-choice="light" aria-label="Set light theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-sun-disc"></use></svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button class="theme-demo-button variant-four is-dark" type="button" data-theme-choice="dark" aria-label="Set dark theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-moon-disc"></use></svg>
+            </button>
+            <span>Dark</span>
+          </div>
         </div>
+      </section>
 
-        <div class="controls-section">
-          <h2>Actions</h2>
-          <button class="btn-demo" id="toggleFsBtn" type="button">Toggle Fullscreen</button>
+      <section class="option-card">
+        <h2>Option 5</h2>
+        <p>Tinted surface, still compact.</p>
+        <div class="pair">
+          <div class="sample">
+            <button class="theme-demo-button variant-five" type="button" data-theme-choice="light" aria-label="Set light theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-sun-dot"></use></svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button class="theme-demo-button variant-five is-dark" type="button" data-theme-choice="dark" aria-label="Set dark theme">
+              <svg aria-hidden="true" focusable="false"><use href="#icon-moon-plain"></use></svg>
+            </button>
+            <span>Dark</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <h2 class="section-label">Fullscreen Button</h2>
+    <p class="intro" style="margin-top: 10px;">
+      Shared asset from <code>/assets/fullscreen-button.{css,js}</code>. The banner above has a live functional button next to the theme toggle. Below are static state samples — enter hover scales out, exit hover scales in.
+    </p>
+
+    <div class="fs-cards" aria-label="Fullscreen button states">
+      <div class="option-card">
+        <h2>Enter Fullscreen</h2>
+        <p>Four outer corner brackets. Normal state icon.</p>
+        <div class="pair">
+          <div class="sample">
+            <button
+              class="panphy-fullscreen-button"
+              type="button"
+              aria-label="Enter fullscreen (light, static sample)"
+              title="Enter fullscreen">
+              <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
+              </svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button
+              class="panphy-fullscreen-button is-dark"
+              type="button"
+              aria-label="Enter fullscreen (dark, static sample)"
+              title="Enter fullscreen">
+              <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
+              </svg>
+            </button>
+            <span>Dark</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="option-card">
+        <h2>Exit Fullscreen</h2>
+        <p>Four inner corner brackets. Fullscreen active icon.</p>
+        <div class="pair">
+          <div class="sample">
+            <button
+              class="panphy-fullscreen-button is-fullscreen"
+              type="button"
+              aria-label="Exit fullscreen (light, static sample)"
+              title="Exit fullscreen">
+              <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>
+              </svg>
+            </button>
+            <span>Light</span>
+          </div>
+          <div class="sample">
+            <button
+              class="panphy-fullscreen-button is-fullscreen is-dark"
+              type="button"
+              aria-label="Exit fullscreen (dark, static sample)"
+              title="Exit fullscreen">
+              <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>
+              </svg>
+            </button>
+            <span>Dark</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <p class="current-state">Page theme: <strong id="theme-readout">light</strong></p>
   </div>
 
   <script>
-    // Canvas animation
-    (function () {
-      var canvas = document.getElementById('demoCanvas');
-      var ctx = canvas.getContext('2d');
-      var raf;
-      var t = 0;
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('theme-readout').textContent = theme;
 
-      function resize() {
-        canvas.width = canvas.clientWidth * (window.devicePixelRatio || 1);
-        canvas.height = canvas.clientHeight * (window.devicePixelRatio || 1);
-      }
+      var themeColor = document.querySelector('meta[name="theme-color"]');
+      var statusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+      if (themeColor) themeColor.setAttribute('content', theme === 'dark' ? '#111110' : '#F8F6F1');
+      if (statusBar) statusBar.setAttribute('content', theme === 'dark' ? 'black-translucent' : 'default');
+    }
 
-      function draw() {
-        var W = canvas.width;
-        var H = canvas.height;
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-        ctx.clearRect(0, 0, W, H);
-
-        // Background
-        ctx.fillStyle = isDark ? '#111110' : '#F8F6F1';
-        ctx.fillRect(0, 0, W, H);
-
-        // Dot grid
-        var step = 30 * (window.devicePixelRatio || 1);
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
-        for (var x = step; x < W; x += step) {
-          for (var y = step; y < H; y += step) {
-            ctx.beginPath();
-            ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        var dpr = window.devicePixelRatio || 1;
-        var cx = W / 2, cy = H / 2;
-        var r = Math.min(W, H) * 0.3;
-
-        // 3 orbiting nodes
-        var colors = isDark
-          ? ['#fb923c', '#5eead4', '#818cf8']
-          : ['#c2410c', '#0d9488', '#6366f1'];
-
-        for (var i = 0; i < 3; i++) {
-          var angle = t * 0.6 + (i * Math.PI * 2) / 3;
-          var nx = cx + Math.cos(angle) * r;
-          var ny = cy + Math.sin(angle) * r;
-
-          // Trail
-          for (var j = 1; j <= 8; j++) {
-            var ta = t * 0.6 + (i * Math.PI * 2) / 3 - j * 0.12;
-            var tx = cx + Math.cos(ta) * r;
-            var ty = cy + Math.sin(ta) * r;
-            ctx.beginPath();
-            ctx.arc(tx, ty, (10 - j) * dpr * 0.5, 0, Math.PI * 2);
-            ctx.fillStyle = colors[i].replace(')', ',' + (0.08 - j * 0.009) + ')').replace('rgb', 'rgba').replace('#', 'rgba(').replace(/^rgba\(([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),/, function(_, r, g, b) {
-              return 'rgba(' + parseInt(r, 16) + ',' + parseInt(g, 16) + ',' + parseInt(b, 16) + ',';
-            });
-            // simpler trail fade
-            ctx.globalAlpha = Math.max(0, 0.5 - j * 0.055);
-            ctx.fillStyle = colors[i];
-            ctx.fill();
-          }
-
-          ctx.globalAlpha = 1;
-          ctx.beginPath();
-          ctx.arc(nx, ny, 10 * dpr * 0.8, 0, Math.PI * 2);
-          ctx.fillStyle = colors[i];
-          ctx.fill();
-        }
-
-        // Central ring
-        ctx.globalAlpha = 0.18;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = isDark ? '#5eead4' : '#0d9488';
-        ctx.lineWidth = 1.5 * dpr;
-        ctx.stroke();
-
-        ctx.globalAlpha = 1;
-        t += 0.016;
-        raf = requestAnimationFrame(draw);
-      }
-
-      function start() {
-        resize();
-        if (!raf) draw();
-      }
-
-      window.addEventListener('resize', function () {
-        resize();
+    // Theme demo comparison buttons (data-theme-choice)
+    document.querySelectorAll('[data-theme-choice]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        applyTheme(button.getAttribute('data-theme-choice'));
       });
+    });
 
-      window.addEventListener('panphy:theme-change', function () {
-        // theme change is reflected in next draw() frame
-      });
+    // Keep theme-readout in sync when the banner theme toggle is used
+    window.addEventListener('panphy:theme-change', function (e) {
+      document.getElementById('theme-readout').textContent = e.detail.theme;
+    });
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', start);
-      } else {
-        start();
-      }
-    })();
-
-    // Fullscreen status readout
-    (function () {
-      var dot = document.getElementById('fsDot');
-      var val = document.getElementById('fsValue');
-
-      function update() {
-        var full = !!(document.fullscreenElement || document.webkitFullscreenElement);
-        dot.classList.toggle('active', full);
-        val.textContent = full ? 'on' : 'off';
-      }
-
-      document.addEventListener('fullscreenchange', update);
-      document.addEventListener('webkitfullscreenchange', update);
-
-      document.getElementById('toggleFsBtn').addEventListener('click', function () {
-        var full = !!(document.fullscreenElement || document.webkitFullscreenElement);
-        if (full) {
-          (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
-        } else {
-          (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || function(){}).call(document.documentElement);
-        }
-      });
-    })();
+    // Initialise readout from current attribute (set by head script)
+    document.getElementById('theme-readout').textContent =
+      document.documentElement.getAttribute('data-theme') || 'light';
   </script>
 </body>
 
