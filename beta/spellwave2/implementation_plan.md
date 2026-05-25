@@ -203,6 +203,94 @@ The prior plan described a 5-wave campaign. Wave 10 as finale changes the scope:
 
 ---
 
+## Wave 10 Playtest Issues (2026-05-25)
+
+Four bugs identified during first playtest via Konami cheat code. No code changes yet — document here for the next implementation pass.
+
+---
+
+### Bug 1: Space Background Not Visible
+
+**Symptom**: Wave 10 starts but the background is identical to normal waves — no outer-space feel.
+
+**Root cause (suspected)**: The `#starfield` div sits behind the Three.js `<canvas>` using `z-index: 2` and `mix-blend-mode: screen`. On a dark 3D scene the white radial-gradient dots blend additively, but the effect is too subtle to register as a real space background. The Three.js renderer clear-color change may also not be perceptible if scene geometry fills most of the viewport.
+
+**Fix direction**:
+- Use a Three.js `THREE.Points` geometry as a background star layer rendered inside the scene itself — engine-native, always visible, easiest to guarantee depth-correctness.
+- Set the scene's clear color to a very deep blue-black (`0x000005`) at wave 10 start, not just a slightly dark value. Restore on reset.
+- Replace the current CSS-only `#starfield` approach (which fights the canvas z-stack) with a dedicated renderer-side star field that renders before all other scene objects.
+- The moon-haze nebula CSS effect remains useful as an ambient border glow; keep it as-is and layer it on top of the canvas.
+
+---
+
+### Bug 2: Boss Visuals Not Distinct — Color Only
+
+**Symptom**: All 10 bosses look structurally identical; only their RGB colors differ. No distinct silhouettes or personality.
+
+**Root cause**: The `BOSS_TYPES` schema only parameterises `body`, `trim`, `eye`, `speed`, `scale`, and `isFlying`. All bosses share the same mesh geometry and part layout. Color-only variation is indistinguishable at game resolution.
+
+**Fix direction**:
+- Investigate how boss meshes are constructed in `main.js` (look for the boss mesh-builder block).
+- Extend the boss schema with structural differentiation fields (all optional, default to existing behaviour when absent):
+  - `bodyShape`: `'box'` (default) | `'sphere'` | `'diamond'` | `'cylinder'` — changes the core torso geometry.
+  - `hasShoulderSpikes`: boolean — adds protruding spikes on each shoulder.
+  - `hasOrbitalRing`: boolean — adds a rotating ring decoration around the body.
+  - `hasClaws`: boolean — replaces the standard arm stubs with claw geometry.
+  - `hasWings`: boolean — adds wing-fin geometry for flying types (distinct from `isFlying`, which only changes Y-spawn height).
+  - `legCount`: `0` | `2` | `4` | `6` — number of visible leg stumps beneath the body.
+  - `scaleX` / `scaleZ`: independent width/depth scale multipliers to create wide vs. narrow silhouettes.
+- Assign each boss a distinct archetype so the player can recognise them by silhouette alone:
+
+  | # | Name | Archetype | Key geometry additions |
+  |---|------|-----------|------------------------|
+  | 1 | Iron Sentinel | Tall humanoid | (existing) |
+  | 2 | Arcane Weaver | Wiry, spindly | (existing) |
+  | 3 | Stone Colossus | Large blocky | (existing) |
+  | 4 | Void Reaper | Flying hooded | (existing) |
+  | 5 | Glacial Titan | Wide hexagonal torso | shoulder spikes, wide scaleX |
+  | 6 | Magma Sovereign | Squat, heavily armoured | claws, large scaleX, no legs |
+  | 7 | Void Specter | Floating shard cluster | orbital ring, no discernible body block |
+  | 8 | Celestial Arbiter | Symmetrical winged form | wings + orbital ring |
+  | 9 | Phantom Rift | Fragmented, offset body parts | offset scaleZ, shoulder spikes |
+  | 10 | Stellar Dreadnought | Fortress-like, multi-cannon | very wide scaleX, claws, 6 legs |
+
+- This requires extending the boss mesh builder — significant but high-value for player experience.
+
+---
+
+### Bug 3: Wave 10 Music Has No Melody
+
+**Symptom**: Music sounds like unstructured drumming with no recognisable melody or dramatic tension.
+
+**Root cause (suspected)**: The `FINAL_WAVE_MUSIC` constant defines a 32-step melody array but either: (a) `melodyGain` (`0.036`) is too low relative to drum and bass gains, or (b) the sawtooth oscillator at the melody frequencies is producing mostly sub-harmonic content that muddies the mix. The result is percussion-dominant with the melody inaudible.
+
+**Fix direction**:
+- Redesign the music profile entirely. Reference: `BOSS_MUSIC` reportedly works — diff the two profiles to isolate the parameter causing the melody failure before redesigning.
+- Use `triangle` or `sine` oscillator type for the melody voice (instead of `sawtooth`) — triangle has strong fundamental, cuts through cleanly.
+- Raise `melodyGain` substantially — start testing from `0.18` upward.
+- Use a shorter, obviously tuneful phrase: 8 or 16 steps with a clear minor key hook. A simple 8-note descending-then-ascending motif in D minor is sufficient to sound epic.
+- Keep the rhythm pulse (filtered noise burst) for intensity, but reduce drum/bass gain relative to melody so the melody sits on top.
+- Target feel: dark, propulsive, with a clear repeating melodic hook — FF5 Exdeath / Final Fantasy boss-battle energy. Not ambient — active.
+
+---
+
+### Bug 4: End-game Scene Never Appears
+
+**Symptom**: All 10 wave-10 bosses are defeated but the ending overlay (`#gameEnding`) never shows. The game appears to hang or returns to idle state without the ending sequence.
+
+**Root cause (suspected)** — three candidates:
+1. The wave-10 completion condition (`finalWaveQueueIndex >= finalWaveQueue.length && enemies.length === 0`) in the boss-phase spawn loop is never evaluated as true — possibly because the `waveClearDelayTimer` path that calls `startEndingSequence()` is not reached.
+2. `endingStartTime` is assigned as `endingStartTime = elapsed` (the running game timer), but `startEndingSequence()` uses `Date.now() - endingStartTime` expecting a wall-clock timestamp. If `elapsed` is a frame-counter float rather than a Unix timestamp, the WPM calculation produces `NaN` and the function may silently abort.
+3. The `gameEnding` DOM reference may be `null` at the time `startEndingSequence()` runs — check whether `document.getElementById('gameEnding')` resolves before or after the module fully initialises.
+
+**Fix direction**:
+- Add temporary `console.log` calls at: (a) the queue-exhaustion check, (b) the `enemies.length === 0` guard, and (c) the entry point of `startEndingSequence()` to confirm which condition is failing.
+- Audit `endingStartTime`: if it is set to `elapsed` (frame-relative), change the WPM calculation to track wall-clock start time separately (store `Date.now()` at `startGame()` and compute elapsed from that at ending time).
+- Confirm the `#gameEnding` element exists in `spellwave2.html` and that the DOM ref is wired up at module-load time, not lazily.
+- Once the trigger is confirmed, review the phase-class animation sequence (`phase-flash` → `phase-warp` → `phase-title` → `phase-stats` → `phase-replay`) to make sure each `setTimeout` chain fires correctly.
+
+---
+
 ## Completed Interim Difficulty Pass
 
 The beta build now includes a first difficulty-curve correction pass in `beta/spellwave2/src/main.js`. The goal was to address the hidden workload increase where later waves were not only adding more enemies, but also requiring more typed characters per enemy as medium, hard, and boss vocabulary entered the pools.
