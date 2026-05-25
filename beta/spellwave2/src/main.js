@@ -56,6 +56,9 @@ const BOSS_SHOT_INTERVAL = 4.2;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
+const FINAL_WAVE_NUMBER = 10;
+const FINAL_WAVE_BOSS_COUNT = 10;
+const KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
 const PARTICLE_GRAVITY_COEFFS = [21 * 5, 20 * 5, 10.7 * 10, 34 * 3, 9.7 * 10];
@@ -392,6 +395,9 @@ let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let waveClearDelayTimer = 0;
 let waveBossOrder = [];
+let finalWaveQueue = [];
+let finalWaveQueueIndex = 0;
+let konamiBuffer = [];
 let bossWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
@@ -694,6 +700,8 @@ function startGame() {
   bossesSpawned = 0;
   bossSpawnTimer = 0;
   waveBossOrder = [];
+  finalWaveQueue = [];
+  finalWaveQueueIndex = 0;
   prepareWavePlan();
   streak = 0;
   typedAttempts = 0;
@@ -788,6 +796,15 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
 
 function handleKeyDown(event) {
   resumeAudio();
+
+  // Konami code detection — runs in all game states
+  konamiBuffer.push(event.key);
+  if (konamiBuffer.length > KONAMI_SEQUENCE.length) konamiBuffer.shift();
+  if (konamiBuffer.length === KONAMI_SEQUENCE.length && KONAMI_SEQUENCE.every((k, i) => k === konamiBuffer[i])) {
+    konamiBuffer = [];
+    activateFinalWaveCheat();
+    return;
+  }
 
   if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
     event.preventDefault();
@@ -1155,21 +1172,53 @@ function animate(frameTime) {
         startBossPhase();
       }
     } else if (wavePhase === 'boss') {
-      if (bossesSpawned < BOSSES_PER_WAVE) {
-        bossSpawnTimer -= currentDelta;
-        if (bossSpawnTimer <= 0) {
-          spawnBoss();
-          bossesSpawned += 1;
-          bossSpawnTimer = currentDifficulty().bossSpawnGap;
+      if (isFinalWave()) {
+        if (finalWaveQueueIndex < finalWaveQueue.length) {
+          const hasActiveSupportEnemy = enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
+          if (!hasActiveSupportEnemy) {
+            bossSpawnTimer -= currentDelta;
+            if (bossSpawnTimer <= 0) {
+              const entry = finalWaveQueue[finalWaveQueueIndex];
+              finalWaveQueueIndex += 1;
+              if (entry === 'boss') {
+                spawnBoss();
+                bossesSpawned += 1;
+              } else if (entry === 'mimic') {
+                spawnEnemy({ isMimic: true });
+              } else {
+                spawnEnemy({ isMedic: true });
+              }
+              bossSpawnTimer = currentDifficulty().bossSpawnGap;
+            }
+          }
+        } else if (enemies.length === 0) {
+          if (waveClearDelayTimer === 0) {
+            waveClearDelayTimer = 1.25;
+          } else {
+            waveClearDelayTimer -= currentDelta;
+            if (waveClearDelayTimer <= 0) {
+              waveClearDelayTimer = 0;
+              startWaveCleared();
+            }
+          }
         }
-      } else if (enemies.length === 0) {
-        if (waveClearDelayTimer === 0) {
-          waveClearDelayTimer = 1.25;
-        } else {
-          waveClearDelayTimer -= currentDelta;
-          if (waveClearDelayTimer <= 0) {
-            waveClearDelayTimer = 0;
-            startWaveCleared();
+      } else {
+        if (bossesSpawned < BOSSES_PER_WAVE) {
+          bossSpawnTimer -= currentDelta;
+          if (bossSpawnTimer <= 0) {
+            spawnBoss();
+            bossesSpawned += 1;
+            bossSpawnTimer = currentDifficulty().bossSpawnGap;
+          }
+        } else if (enemies.length === 0) {
+          if (waveClearDelayTimer === 0) {
+            waveClearDelayTimer = 1.25;
+          } else {
+            waveClearDelayTimer -= currentDelta;
+            if (waveClearDelayTimer <= 0) {
+              waveClearDelayTimer = 0;
+              startWaveCleared();
+            }
           }
         }
       }
@@ -4245,6 +4294,40 @@ function updateFullscreenButton() {
   fullscreenButton.title = isFullscreen ? 'Exit full screen' : 'Enter full screen';
 }
 
+function isFinalWave() {
+  return waveSet === FINAL_WAVE_NUMBER;
+}
+
+function buildFinalWaveQueue() {
+  const queue = [
+    ...Array(FINAL_WAVE_BOSS_COUNT).fill('boss'),
+    'mimic', 'mimic', 'mimic',
+    'medic', 'medic',
+  ];
+  for (let i = queue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [queue[i], queue[j]] = [queue[j], queue[i]];
+  }
+  if (queue[0] !== 'boss') {
+    const firstBossIdx = queue.indexOf('boss');
+    [queue[0], queue[firstBossIdx]] = [queue[firstBossIdx], queue[0]];
+  }
+  return queue;
+}
+
+function startFinalWave() {
+  wavePhase = 'boss';
+  bossesSpawned = 0;
+  bossesDefeated = 0;
+  bossSpawnTimer = currentDifficulty().bossWarningDelay;
+  finalWaveQueue = buildFinalWaveQueue();
+  finalWaveQueueIndex = 0;
+  refreshWaveBossOrder(FINAL_WAVE_BOSS_COUNT);
+  showBanner('FINAL WAVE!', 'final-wave');
+  playBossWarningSound();
+  updatePhaseDisplay();
+}
+
 function startBossPhase() {
   if (bossWordsThisSet.length === 0) prepareWavePlan();
   const missingPreviewWords = isNormalTypingBudgetReached()
@@ -4324,6 +4407,40 @@ function startWaveCleared() {
   updatePhaseDisplay();
 }
 
+function activateFinalWaveCheat() {
+  const savedHealth = (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') ? health : MAX_LIFE;
+
+  if (mode === 'idle' || mode === 'gameover') {
+    startGame();
+  } else {
+    clearEnemies();
+    clearEffects();
+    typedBuffer = '';
+    activeTarget = null;
+    bossesSpawned = 0;
+    bossesDefeated = 0;
+    bossShotHits = 0;
+    bossSpawnTimer = 0;
+    waveBossOrder = [];
+    finalWaveQueue = [];
+    finalWaveQueueIndex = 0;
+    waveClearDelayTimer = 0;
+    mode = 'running';
+    document.body.classList.add('is-running');
+    messagePanel.hidden = true;
+    messagePanel.classList.remove('is-cleared');
+    setPauseButtonState(true, false);
+  }
+
+  waveSet = FINAL_WAVE_NUMBER;
+  health = savedHealth;
+  prepareWavePlan();
+  startFinalWave();
+  showBanner('CHEAT CODE ACTIVATED', 'mimic-hint');
+  updateHud(true);
+  focusKeyboard();
+}
+
 function advanceWaveSet() {
   playStartSound();
   clearEffects();
@@ -4338,6 +4455,8 @@ function advanceWaveSet() {
   bossShotHits = 0;
   bossSpawnTimer = 0;
   waveBossOrder = [];
+  finalWaveQueue = [];
+  finalWaveQueueIndex = 0;
   prepareWavePlan();
   typedBuffer = '';
   activeTarget = null;
@@ -4353,6 +4472,7 @@ function advanceWaveSet() {
   updatePhaseDisplay();
   applySeasonForWave(waveSet);
   focusKeyboard();
+  if (isFinalWave()) startFinalWave();
 }
 
 function updateComboDisplay() {
@@ -4367,7 +4487,8 @@ function updateTypingLabel() {
     return;
   }
   if (wavePhase === 'boss') {
-    typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
+    const bossTotal = isFinalWave() ? FINAL_WAVE_BOSS_COUNT : BOSSES_PER_WAVE;
+    typingLabel.textContent = `BOSS ${bossesDefeated}/${bossTotal}`;
   } else {
     typingLabel.textContent = 'INPUT';
   }

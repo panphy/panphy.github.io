@@ -1609,6 +1609,74 @@ body.chain-lightning-primed .typing-strip {
   animation: flash-active 0.3s ease-out;
 }
 
+.boss-banner.is-final-wave {
+  font-size: clamp(2.4rem, 8vw, 5.2rem);
+  color: #ff2200;
+  text-shadow:
+    3px 0 0 #000,
+    -3px 0 0 #000,
+    0 3px 0 #000,
+    0 -3px 0 #000,
+    0 0 24px rgba(255, 80, 0, 0.95),
+    0 0 48px rgba(255, 40, 0, 0.75),
+    0 0 72px rgba(255, 10, 0, 0.45);
+}
+
+.boss-banner.is-final-wave.is-active {
+  animation: final-wave-banner 3.4s ease-out forwards;
+}
+
+@keyframes final-wave-banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.2);
+  }
+
+  7% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+
+  13% {
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  20% {
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+
+  27% {
+    transform: translate(-50%, -50%) scale(1.01);
+  }
+
+  32% {
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+
+  /* shake */
+  34% { transform: translate(calc(-50% + 8px), -50%) scale(1.0); }
+  36% { transform: translate(calc(-50% - 8px), -50%) scale(1.0); }
+  38% { transform: translate(calc(-50% + 5px), -50%) scale(1.0); }
+  40% { transform: translate(calc(-50% - 5px), -50%) scale(1.0); }
+  42% { transform: translate(calc(-50% + 2px), -50%) scale(1.0); }
+  44% { transform: translate(-50%, -50%) scale(1.0); }
+
+  72% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+
+  88% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+}
+
 .boss-banner.is-time-freeze {
   color: var(--aqua);
   text-shadow:
