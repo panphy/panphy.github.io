@@ -6,7 +6,7 @@
   - [x] Reduce wave speed and spawn-rate growth
   - [x] Add one-keyword limiting for long boss vocabulary phrases
   - [x] Keep equation bosses on the existing two-word limiter
-  - [x] Change normal-wave progress label to percentage
+  - [x] Keep normal-wave typing label neutral instead of showing progress
   - [x] Verify with `node --check beta/spellwave2/src/main.js`
   - [x] Verify with `git diff --check`
 - [x] Fix "lightning flying sideways" scaling glitch in `updateEffects()` in [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)

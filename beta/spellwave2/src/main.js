@@ -4261,10 +4261,7 @@ function updateTypingLabel() {
   if (wavePhase === 'boss') {
     typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
   } else {
-    const countProgress = normalEnemyTarget > 0 ? normalEnemiesSpawned / normalEnemyTarget : 1;
-    const costProgress = normalTypingCostSpawned / getNormalWaveTypingBudget(waveSet);
-    const progress = THREE.MathUtils.clamp(Math.max(countProgress, costProgress), 0, 1);
-    typingLabel.textContent = `${Math.round(progress * 100)}%`;
+    typingLabel.textContent = 'INPUT';
   }
 }
 

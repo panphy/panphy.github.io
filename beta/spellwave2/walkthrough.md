@@ -24,9 +24,9 @@ This beta pass updates `beta/spellwave2/src/main.js` to make wave difficulty tra
 - Added one-keyword limiting for long boss vocabulary phrases only.
 - Normal monster vocabulary remains full-word; the mitigation only affects long boss medium/hard phrases.
 
-### 5. Progress Readout
-- Changed normal-wave progress from `spawned/target` to a percentage.
-- The percentage uses whichever is further along: enemy-count progress or typed-workload-budget progress.
+### 5. Typing Label
+- Removed normal-wave progress from the typing area.
+- The typing label stays neutral during normal waves and only switches to boss status during boss waves.
 
 ## Playtest Focus
 
@@ -35,7 +35,7 @@ This beta pass updates `beta/spellwave2/src/main.js` to make wave difficulty tra
 3. Watch waves 3 and 5 for difficulty jumps caused by medium/hard vocabulary entering the pool.
 4. Check whether long boss vocabulary prompts that ask for one key word still feel educational.
 5. Check whether late waves feel tense enough after the active typing-pressure cap delays extra spawns.
-6. Decide whether the percentage progress label is clear enough during normal waves.
+6. Decide whether workload-budget progress needs a separate UI treatment outside the typing area.
 
 ---
 

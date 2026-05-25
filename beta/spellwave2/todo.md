@@ -63,9 +63,9 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Add an active typing-pressure cap to reduce prompt pile-ups when long terms are visible.
 - [x] Reduce wave speed and spawn cadence growth so word length, speed, and count do not all spike together.
 - [x] Add one-keyword limiting for long boss vocabulary phrases while preserving the two-word equation-boss limiter.
-- [x] Change normal-wave progress readout from enemy-count fraction to percentage progress.
+- [x] Keep normal-wave typing label neutral instead of showing wave progress.
 - [ ] Playtest waves 3 and 5 specifically for remaining workload spikes.
-- [ ] Decide whether percentage progress should stay or be replaced with a clearer workload/encounter display.
+- [ ] Decide whether workload-budget progress needs a separate UI treatment outside the typing area after playtesting.
 
 ### Pre-Run Setup UI
 - [ ] Add Subject selection (Physics, Chemistry [Locked], Biology [Locked]) buttons to the starting screen utilizing custom SVG icons.

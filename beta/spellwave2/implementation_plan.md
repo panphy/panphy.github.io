@@ -10,7 +10,7 @@ Completed changes:
 2. Active normal-wave spawns are gated by a visible typing-pressure cap so long unresolved prompts do not stack too aggressively on screen.
 3. Wave speed and spawn-rate growth were reduced to avoid compounding enemy count, word length, speed, and spawn cadence at the same time.
 4. Long boss vocabulary phrases can use a one-keyword prompt limit, while equation bosses keep the existing two-word limit.
-5. Normal-wave progress is displayed as a percentage because completion may now be driven by enemy count or typing budget.
+5. Normal-wave progress is not shown in the typing area; the typing label remains a neutral input label outside boss waves.
 
 Design intent:
 
@@ -22,7 +22,7 @@ Playtest focus:
 
 - Whether waves 3 and 5 still feel like meaningful difficulty steps without becoming workload spikes.
 - Whether one-keyword long boss vocabulary prompts still feel educational enough.
-- Whether percentage progress is clear enough during normal waves.
+- Whether the hidden workload-budget wave completion feels natural without an explicit normal-wave progress readout.
 - Whether the active typing-pressure cap makes late waves feel too quiet or appropriately manageable.
 
 # Campaign Mode & Science Subject/Curriculum Selection Design
