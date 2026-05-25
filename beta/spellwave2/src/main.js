@@ -627,7 +627,7 @@ audioButton.addEventListener('click', () => {
   if (audioEnabled) {
     resumeAudio();
     playToggleSound();
-    if (mode === 'running' || mode === 'wave_cleared' || mode === 'gameover') startMusicLoop(false);
+    if (mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending') startMusicLoop(false);
   } else {
     stopMusicLoop(0.03);
   }
@@ -3727,6 +3727,13 @@ function createClouds() {
 }
 
 function updateClouds(delta) {
+  if (isFinalWave() || mode === 'ending') {
+    for (const cloud of clouds) {
+      cloud.group.visible = false;
+    }
+    return;
+  }
+
   const weather = seasonalEffects.getWeatherState();
   const isRainySummer = weather.seasonName === 'summer' && weather.raining;
   const isSnowyWinter = weather.seasonName === 'winter' && weather.snowing;
@@ -3750,6 +3757,8 @@ function updateClouds(delta) {
 
     if (cloud.weatherOnly) {
       cloud.group.visible = cloudWeatherBlend > 0.02;
+    } else {
+      cloud.group.visible = true;
     }
 
     const densityBoost = cloud.weatherOnly ? 1.2 : 1;
@@ -4736,7 +4745,7 @@ let endingTimers = [];
 
 function startEndingSequence() {
   mode = 'ending';
-  stopMusicLoop(3.0);
+  startMusicLoop(false);
   document.body.classList.remove('is-running');
   document.body.classList.remove('final-wave-active');
   setPauseButtonState(true, true);
@@ -4754,31 +4763,31 @@ function startEndingSequence() {
 
   queueEndingStep(() => {
     gameEnding.classList.add('phase-flash');
-  }, 250);
+  }, 120);
 
   queueEndingStep(() => {
     gameEnding.classList.remove('phase-flash');
     gameEnding.classList.add('phase-warp');
-  }, 1200);
+  }, 760);
 
   queueEndingStep(() => {
     gameEnding.classList.remove('phase-warp');
     gameEnding.classList.add('phase-arrival');
     playVictoryFinaleSound();
-  }, 3250);
+  }, 1800);
 
   queueEndingStep(() => {
     gameEnding.classList.add('phase-title');
-  }, 4300);
+  }, 2200);
 
   queueEndingStep(() => {
     gameEnding.classList.add('phase-stats');
     setEndingStats(finalStats, true);
-  }, 6100);
+  }, 3900);
 
   queueEndingStep(() => {
     gameEnding.classList.add('phase-replay');
-  }, 8500);
+  }, 6200);
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {

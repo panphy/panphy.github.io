@@ -136,6 +136,37 @@ const FINAL_WAVE_MUSIC = {
     1174.66, 987.77, 783.99, 659.25,
   ],
 };
+const ENDING_MUSIC = {
+  name: 'ending',
+  baseStep: 0.24,
+  minStep: 0.19,
+  melodyType: 'sine',
+  bassType: 'sine',
+  accentType: 'triangle',
+  melodyGain: 0.018,
+  bassGain: 0.020,
+  hatGain: 0.002,
+  drumGain: 0.004,
+  drumFilter: 1200,
+  melody: [
+    587.33, null, null, 698.46, null, 880.00, null, null,
+    783.99, null, 698.46, null, 587.33, null, null, null,
+    659.25, null, null, 783.99, null, 987.77, null, null,
+    880.00, null, 783.99, null, 698.46, null, 587.33, null,
+  ],
+  bass: [
+    73.42, null, null, null, null, null, null, null,
+    87.31, null, null, null, null, null, null, null,
+    65.41, null, null, null, null, null, null, null,
+    58.27, null, null, null, null, null, null, null,
+  ],
+  padChords: [
+    [73.42, 146.83, 220.00, 293.66],
+    [87.31, 174.61, 261.63, 349.23],
+    [65.41, 130.81, 196.00, 293.66],
+    [58.27, 116.54, 174.61, 261.63],
+  ],
+};
 
 const BOSS_MUSIC = {
   name: 'boss',
@@ -403,6 +434,7 @@ export function createSpellwaveAudio({
   }
 
   function getMusicProfile(wave) {
+    if (getMode() === 'ending') return ENDING_MUSIC;
     if (getMode() === 'gameover') return GAME_OVER_MUSIC;
     if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
     if (getWavePhase() === 'boss') return getIsFinalWave() ? FINAL_WAVE_MUSIC : BOSS_MUSIC;
@@ -433,6 +465,7 @@ export function createSpellwaveAudio({
   }
 
   function getMusicIntensity(wave, profile) {
+    if (profile.name === 'ending') return 0;
     if (profile.name === 'game-over') return 0;
     if (profile.name === 'wave-clear') return Math.min(Math.max(0, wave - 1) * 0.35, 4);
     return Math.min(Math.max(0, wave - 1) + (profile.intensityBoost || 0), 14);
@@ -440,13 +473,17 @@ export function createSpellwaveAudio({
 
   function isMusicActiveMode() {
     const mode = getMode();
-    return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover';
+    return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending';
   }
 
   function scheduleMusicStep(step, start, stepDuration, profile, intensity, profileGain = 1) {
     if (profileGain <= 0.02) return;
     if (profile.name === 'final-wave') {
       scheduleFinalWaveStep(step, start, stepDuration, profile, intensity, profileGain);
+      return;
+    }
+    if (profile.name === 'ending') {
+      scheduleEndingStep(step, start, stepDuration, profile, profileGain);
       return;
     }
 
@@ -635,6 +672,52 @@ export function createSpellwaveAudio({
         filterType: 'highpass',
         filterFrequency: 1800,
         q: 0.35,
+      }, musicGain);
+    }
+  }
+
+  function scheduleEndingStep(step, start, stepDuration, profile, profileGain = 1) {
+    const chordIndex = Math.floor(step / 16) % profile.padChords.length;
+    const chord = profile.padChords[chordIndex];
+    const melody = profile.melody[step % profile.melody.length];
+    const bass = profile.bass[step % profile.bass.length];
+
+    if (step % 16 === 0) {
+      chord.forEach((frequency, index) => {
+        scheduleTone(frequency, stepDuration * 18, start, {
+          gain: (index < 2 ? 0.020 : 0.013) * profileGain,
+          type: index < 2 ? 'sine' : 'triangle',
+          attack: 0.22,
+          detune: index % 2 === 0 ? -4 : 5,
+        }, musicGain);
+      });
+      scheduleNoise(stepDuration * 12, start + stepDuration * 0.4, {
+        gain: 0.006 * profileGain,
+        filterType: 'highpass',
+        filterFrequency: 2400,
+        q: 0.35,
+      }, musicGain);
+    }
+
+    if (bass) {
+      scheduleTone(bass * 0.5, stepDuration * 8, start, {
+        gain: profile.bassGain * profileGain,
+        type: 'sine',
+        attack: 0.18,
+      }, musicGain);
+    }
+
+    if (melody) {
+      scheduleTone(melody, stepDuration * 4.2, start + stepDuration * 0.12, {
+        gain: profile.melodyGain * profileGain,
+        type: 'sine',
+        attack: 0.09,
+      }, musicGain);
+      scheduleTone(melody * 2, stepDuration * 2.5, start + stepDuration * 0.35, {
+        gain: 0.006 * profileGain,
+        type: 'triangle',
+        attack: 0.12,
+        detune: 6,
       }, musicGain);
     }
   }

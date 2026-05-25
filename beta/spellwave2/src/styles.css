@@ -132,6 +132,115 @@ body.final-wave-active {
   to   { background-position: 0 -260px; }
 }
 
+.meteor-field {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+body.final-wave-active .meteor-field {
+  opacity: 1;
+}
+
+.meteor {
+  --meteor-top: 18%;
+  --meteor-delay: 0s;
+  --meteor-duration: 7s;
+  --meteor-size: 15vw;
+  position: absolute;
+  top: var(--meteor-top);
+  left: -28vw;
+  width: var(--meteor-size);
+  height: 2px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: rotate(11deg);
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(126, 191, 255, 0.06) 12%, rgba(185, 224, 255, 0.78) 72%, #fff8ce 100%);
+  box-shadow:
+    0 0 14px rgba(139, 202, 255, 0.86),
+    0 0 34px rgba(255, 223, 146, 0.45);
+  animation: meteor-cross var(--meteor-duration) var(--meteor-delay) linear infinite;
+}
+
+.meteor::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: #fff8ce;
+  box-shadow:
+    0 0 12px #fff8ce,
+    0 0 28px rgba(108, 182, 255, 0.86);
+}
+
+.meteor-one {
+  --meteor-top: 14%;
+  --meteor-delay: -1.1s;
+  --meteor-duration: 7.6s;
+  --meteor-size: 13vw;
+}
+
+.meteor-two {
+  --meteor-top: 31%;
+  --meteor-delay: -4.8s;
+  --meteor-duration: 10.4s;
+  --meteor-size: 18vw;
+}
+
+.meteor-three {
+  --meteor-top: 52%;
+  --meteor-delay: -7.3s;
+  --meteor-duration: 11.8s;
+  --meteor-size: 11vw;
+}
+
+.meteor-four {
+  --meteor-top: 22%;
+  --meteor-delay: -9.6s;
+  --meteor-duration: 8.9s;
+  --meteor-size: 16vw;
+}
+
+.meteor-five {
+  --meteor-top: 68%;
+  --meteor-delay: -12.1s;
+  --meteor-duration: 13.2s;
+  --meteor-size: 20vw;
+}
+
+@keyframes meteor-cross {
+  0% {
+    opacity: 0;
+    transform: translate3d(-10vw, 0, 0) rotate(11deg);
+  }
+  6% {
+    opacity: 0;
+  }
+  9% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+  }
+  38% {
+    opacity: 0;
+    transform: translate3d(150vw, 20vh, 0) rotate(11deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(150vw, 20vh, 0) rotate(11deg);
+  }
+}
+
 .pixel-grain {
   z-index: 5;
   opacity: 0.14;
