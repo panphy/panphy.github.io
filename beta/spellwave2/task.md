@@ -1,5 +1,14 @@
 # Task List - Roguelike Expansion Updates & Phase 2 Mimic Chest
 
+- [x] Implement beta difficulty-curve correction in `beta/spellwave2/src/main.js`
+  - [x] Add normal-wave typed-workload budgets
+  - [x] Add active typing-pressure spawn gating
+  - [x] Reduce wave speed and spawn-rate growth
+  - [x] Add one-keyword limiting for long vocabulary phrases
+  - [x] Keep equation bosses on the existing two-word limiter
+  - [x] Change normal-wave progress label to percentage
+  - [x] Verify with `node --check beta/spellwave2/src/main.js`
+  - [x] Verify with `git diff --check`
 - [x] Fix "lightning flying sideways" scaling glitch in `updateEffects()` in [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
 - [x] Align starting coordinate of lightning to the actual wand tip in `triggerChainLightning()`
 - [x] Implement distance limit (`MAX_CHAIN_DISTANCE = 12.0`) in `triggerChainLightning()` to avoid long-range chain segments

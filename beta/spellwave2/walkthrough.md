@@ -1,4 +1,45 @@
-# Walkthrough - Phase 3 Revision: Potion Redesign (Shockwave)
+# Walkthrough - Interim Difficulty Curve Pass
+
+This beta pass updates `beta/spellwave2/src/main.js` to make wave difficulty track the actual typing workload more closely. The published `/fun/spellwave` version was not changed.
+
+## Changes Implemented
+
+### 1. Normal-Wave Workload Budget
+- Added normal-wave typed-workload budgets, starting low and increasing gradually across waves.
+- Normal waves can now finish when either the normal enemy target is reached or the typed-workload budget has been spent.
+- Medics and mimics contribute reduced workload cost because they are reward/support targets rather than core threats.
+
+### 2. Active Typing-Pressure Cap
+- Added an active typing-pressure limit based on currently unresolved normal-wave prompt cost.
+- New normal-wave spawns pause while unresolved prompt workload is above the cap.
+- This should reduce late-wave pile-ups where several long terms appear together.
+
+### 3. Speed and Spawn Growth Tuning
+- Reduced per-wave enemy speed pressure.
+- Reduced spawn-delay shrinkage per wave.
+- Raised the minimum spawn delay to keep later waves from compounding count, speed, and prompt length too sharply.
+
+### 4. Long Prompt Mitigation
+- Kept equation bosses on the existing two-word limiter.
+- Added one-keyword limiting for long vocabulary phrases, including boss vocabulary prompts.
+- Easy vocabulary remains unchanged; the mitigation mainly affects long medium/hard phrases.
+
+### 5. Progress Readout
+- Changed normal-wave progress from `spawned/target` to a percentage.
+- The percentage uses whichever is further along: enemy-count progress or typed-workload-budget progress.
+
+## Playtest Focus
+
+1. Start at `http://localhost:8000/beta/spellwave2.html`.
+2. Compare waves 1-2 against the previous feel; they should remain familiar.
+3. Watch waves 3 and 5 for difficulty jumps caused by medium/hard vocabulary entering the pool.
+4. Check whether long vocabulary prompts that ask for one key word still feel educational.
+5. Check whether late waves feel tense enough after the active typing-pressure cap delays extra spawns.
+6. Decide whether the percentage progress label is clear enough during normal waves.
+
+---
+
+# Historical Walkthrough - Phase 3 Revision: Potion Redesign (Shockwave)
 
 I have completed the requested changes for the Phase 3 potion revision, removing the **Blaze Barrier** potion and updating **Repulsor Blast** into **Shockwave** with a powerful new visual wave effect and SFX.
 

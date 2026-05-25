@@ -1,3 +1,30 @@
+# Spellwave 2 Planning Notes
+
+## Completed Interim Difficulty Pass
+
+The beta build now includes a first difficulty-curve correction pass in `beta/spellwave2/src/main.js`. The goal was to address the hidden workload increase where later waves were not only adding more enemies, but also requiring more typed characters per enemy as medium, hard, and boss vocabulary entered the pools.
+
+Completed changes:
+
+1. Normal waves now use a typed-workload budget as an additional completion condition, not only the normal enemy count target.
+2. Active normal-wave spawns are gated by a visible typing-pressure cap so long unresolved prompts do not stack too aggressively on screen.
+3. Wave speed and spawn-rate growth were reduced to avoid compounding enemy count, word length, speed, and spawn cadence at the same time.
+4. Long vocabulary phrases can use a one-keyword prompt limit, while equation bosses keep the existing two-word limit.
+5. Normal-wave progress is displayed as a percentage because completion may now be driven by enemy count or typing budget.
+
+Design intent:
+
+- Early waves should feel close to the previous version.
+- Medium/hard vocabulary should add educational complexity without multiplying total typed workload too sharply.
+- Later waves should still increase pressure, but more through controlled pacing than through abrupt phrase-length jumps.
+
+Playtest focus:
+
+- Whether waves 3 and 5 still feel like meaningful difficulty steps without becoming workload spikes.
+- Whether one-keyword long vocabulary prompts still feel educational enough.
+- Whether percentage progress is clear enough during normal waves.
+- Whether the active typing-pressure cap makes late waves feel too quiet or appropriately manageable.
+
 # Campaign Mode & Science Subject/Curriculum Selection Design
 
 This plan outlines the design and implementation of a 5-Wave Campaign Mode for Spellwave 2. Instead of infinite waves, the game progresses through 5 waves, each focusing on a specific GCSE science topic selected by the player via a Slay the Spire-style path interface. Before starting a run, players select their Subject (Physics, Chemistry, Biology) and Curriculum Tier (Combined vs. Separate Science). Defeating the Wave 5 boss triggers a proper ending and victory summary.
