@@ -1985,8 +1985,8 @@ body:not(.time-frozen) #gameCanvas {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
+  opacity: 1;
+  pointer-events: auto;
   transition: all 0.2s ease;
 }
 
@@ -1996,10 +1996,10 @@ body:not(.time-frozen) #gameCanvas {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.game-ending.phase-crawl .ending-skip-button,
-.game-ending.phase-title-fly .ending-skip-button {
-  opacity: 1;
-  pointer-events: auto;
+.game-ending.phase-stats .ending-skip-button,
+.game-ending.phase-replay .ending-skip-button {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .game-ending:not([hidden]) {

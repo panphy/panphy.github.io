@@ -70,9 +70,9 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const BOSSES_PER_WAVE = 3;
 const FINAL_WAVE_NUMBER = 10;
-const FINAL_WAVE_NORMAL_COUNT = 5;
-const FINAL_WAVE_BOSS_COUNT = 5;
-const FINAL_WAVE_TOTAL_COUNT = FINAL_WAVE_NORMAL_COUNT + FINAL_WAVE_BOSS_COUNT;
+const FINAL_WAVE_NORMAL_COUNT = 0;
+const FINAL_WAVE_BOSS_COUNT = 10;
+const FINAL_WAVE_TOTAL_COUNT = 16;
 const KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
@@ -1216,10 +1216,12 @@ function animate(frameTime) {
               if (entry === 'boss') {
                 spawnBoss();
                 bossesSpawned += 1;
-              } else if (entry === 'normal') {
-                spawnEnemy({ isFinalWaveNormal: true });
+              } else if (entry === 'medic') {
+                spawnEnemy({ isMedic: true });
+              } else if (entry === 'mimic') {
+                spawnEnemy({ isMimic: true });
               }
-              bossSpawnTimer = entry === 'normal' ? 1.15 : currentDifficulty().bossSpawnGap;
+              bossSpawnTimer = (entry === 'medic' || entry === 'mimic') ? 1.15 : currentDifficulty().bossSpawnGap;
             }
           }
         } else if (enemies.filter(e => !e.dying).length === 0) {
@@ -4745,10 +4747,20 @@ function isFinalWave() {
 }
 
 function buildFinalWaveQueue() {
-  return [
-    ...Array(FINAL_WAVE_NORMAL_COUNT).fill('normal'),
-    ...Array(FINAL_WAVE_BOSS_COUNT).fill('boss'),
+  const queue = [
+    ...Array(10).fill('boss'),
+    ...Array(3).fill('medic'),
+    ...Array(3).fill('mimic'),
   ];
+  for (let i = queue.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [queue[i], queue[j]] = [queue[j], queue[i]];
+  }
+  const firstBossIndex = queue.indexOf('boss');
+  if (firstBossIndex > 0) {
+    [queue[0], queue[firstBossIndex]] = [queue[firstBossIndex], queue[0]];
+  }
+  return queue;
 }
 
 function startFinalWave() {
@@ -4870,7 +4882,7 @@ function startEndingSequence() {
   if (!gameEnding) return;
   clearEndingTimers();
   gameEnding.hidden = false;
-  gameEnding.className = 'game-ending';
+  gameEnding.className = 'game-ending phase-arrival phase-title';
 
   const finalStats = getEndingStats();
   setEndingStats(finalStats, false);
@@ -4883,28 +4895,28 @@ function startEndingSequence() {
   // Cinematic steps:
   // 1. Flash starts at 120ms
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-flash';
+    gameEnding.className = 'game-ending phase-arrival phase-title phase-flash';
   }, 120);
 
   // 2. Warp scroll starts at 760ms (stretched stars)
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-warp';
+    gameEnding.className = 'game-ending phase-arrival phase-title phase-warp';
   }, 760);
 
   // 3. Exit warp at 2200ms, show blue introductory text
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-intro';
+    gameEnding.className = 'game-ending phase-arrival phase-title phase-intro';
   }, 2200);
 
   // 4. Shrink/fly Spellwave logo at 5700ms, start victory theme chord progression
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-title-fly';
+    gameEnding.className = 'game-ending phase-arrival phase-title phase-title-fly';
     playVictoryFinaleSound();
   }, 5700);
 
   // 5. Run the Star Wars crawl at 9700ms (crawling text scrolls up)
   queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-crawl';
+    gameEnding.className = 'game-ending phase-arrival phase-title phase-crawl';
   }, 9700);
 
   // 6. Complete cinematic and transition to final stats card at 27700ms (18s crawl ends)
@@ -4916,7 +4928,7 @@ function startEndingSequence() {
 function showEndingStatsScreen(finalStats) {
   clearEndingTimers();
   if (gameEnding) {
-    gameEnding.className = 'game-ending phase-arrival phase-stats phase-replay';
+    gameEnding.className = 'game-ending phase-arrival phase-title phase-stats phase-replay';
   }
   setEndingStats(finalStats, true);
   const skipBtn = document.getElementById('endingSkipButton');
