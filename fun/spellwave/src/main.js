@@ -63,18 +63,24 @@ const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
   normalGrowth: 2,
-  normalMax: 20,
+  normalMax: 18,
   enemyLimit: 11,
   speedMultiplier: 0.94,
-  waveSpeedBonus: 0.11,
+  waveSpeedBonus: 0.075,
   spawnBase: 2.35,
-  spawnGrowth: 0.12,
+  spawnGrowth: 0.075,
   spawnJitter: 0.5,
-  spawnMin: 0.74,
+  spawnMin: 0.9,
   bossWarningDelay: 1.0,
   bossSpawnGap: 2.8,
   revealZ: -40,
 };
+const NORMAL_TYPING_BUDGETS = [58, 74, 98, 122, 148, 174, 198, 220];
+const NORMAL_TYPING_BUDGET_GROWTH = 18;
+const ACTIVE_TYPING_PRESSURE_BASE = 42;
+const ACTIVE_TYPING_PRESSURE_GROWTH = 6;
+const ACTIVE_TYPING_PRESSURE_MAX = 84;
+const LONG_VOCAB_LIMIT_LENGTH = 16;
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
 const LABEL_X_EASE = 0.14;
@@ -312,6 +318,7 @@ let waveSet = 1;
 let wavePhase = 'normal';
 let normalEnemyTarget = getNormalEnemyTarget(waveSet);
 let normalEnemiesSpawned = 0;
+let normalTypingCostSpawned = 0;
 let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let waveClearDelayTimer = 0;
@@ -613,6 +620,7 @@ function startGame() {
   waveClearDelayTimer = 0;
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
+  normalTypingCostSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
   prepareWavePlan();
@@ -1049,26 +1057,30 @@ function animate(frameTime) {
     elapsed += currentDelta;
 
     if (wavePhase === 'normal') {
-      if (shouldSpawnMedic() && enemies.length < getEnemyLimit()) {
+      const canAddNormalEnemy = !isNormalWaveComplete() && canAcceptNormalSpawnPressure();
+      if (canAddNormalEnemy && shouldSpawnMedic() && enemies.length < getEnemyLimit()) {
         if (currentDelta > 0) {
-          spawnEnemy({ isMedic: true });
+          const enemy = spawnEnemy({ isMedic: true });
+          registerNormalTypingCost(enemy);
           medicsSpawnedThisSet += 1;
           spawnTimer = Math.max(spawnTimer, 0.55);
         }
-      } else if (shouldSpawnMimic() && enemies.length < getEnemyLimit()) {
+      } else if (canAddNormalEnemy && shouldSpawnMimic() && enemies.length < getEnemyLimit()) {
         if (currentDelta > 0) {
-          spawnEnemy({ isMimic: true });
+          const enemy = spawnEnemy({ isMimic: true });
+          registerNormalTypingCost(enemy);
           mimicsSpawnedThisSet += 1;
           spawnTimer = Math.max(spawnTimer, 0.55);
         }
-      } else if (normalEnemiesSpawned < normalEnemyTarget) {
+      } else if (canAddNormalEnemy && normalEnemiesSpawned < normalEnemyTarget) {
         spawnTimer -= currentDelta;
         if (spawnTimer <= 0 && enemies.length < getEnemyLimit()) {
-          spawnEnemy();
+          const enemy = spawnEnemy();
+          registerNormalTypingCost(enemy);
           normalEnemiesSpawned += 1;
           spawnTimer = nextSpawnDelay();
         }
-      } else if (enemies.length === 0) {
+      } else if (isNormalWaveComplete() && enemies.length === 0) {
         startBossPhase();
       }
     } else if (wavePhase === 'boss') {
@@ -1875,7 +1887,10 @@ function buildTwoWordLimit(term, options = {}) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  const hiddenSet = new Set(shuffled.slice(0, Math.min(2, shuffled.length)));
+  const maxHiddenWords = Number.isFinite(options.maxHiddenWords)
+    ? Math.max(1, Math.floor(options.maxHiddenWords))
+    : 2;
+  const hiddenSet = new Set(shuffled.slice(0, Math.min(maxHiddenWords, shuffled.length)));
 
   const parts = tokens.map((tok, i) => {
     const isWhitespace = /^\s+$/.test(tok);
@@ -1893,6 +1908,18 @@ function buildTwoWordLimit(term, options = {}) {
 
   const hiddenSearch = parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText, options)).join('');
   return { parts, searchPrompt: hiddenSearch };
+}
+
+function shouldUseVocabularyPromptLimit(term) {
+  const searchLength = buildSearchPrompt(term).length;
+  if (searchLength < LONG_VOCAB_LIMIT_LENGTH) return false;
+  const typeableWords = term.split(/\s+/).filter((word) => {
+    const answerText = getAnswerTokenText(word);
+    return isWordToken(answerText)
+      && !isLowValueAnswerToken(answerText)
+      && buildSearchPrompt(answerText).length > 0;
+  });
+  return typeableWords.length >= 2;
 }
 
 function isWordToken(token) {
@@ -2097,6 +2124,50 @@ function getNormalEnemyTarget(wave) {
   return Math.min(profile.normalMax, profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth);
 }
 
+function getNormalWaveTypingBudget(wave) {
+  if (wave <= NORMAL_TYPING_BUDGETS.length) return NORMAL_TYPING_BUDGETS[wave - 1];
+  const overflow = wave - NORMAL_TYPING_BUDGETS.length;
+  return NORMAL_TYPING_BUDGETS[NORMAL_TYPING_BUDGETS.length - 1] + overflow * NORMAL_TYPING_BUDGET_GROWTH;
+}
+
+function getActiveTypingPressureLimit() {
+  return Math.min(
+    ACTIVE_TYPING_PRESSURE_MAX,
+    ACTIVE_TYPING_PRESSURE_BASE + Math.max(0, waveSet - 1) * ACTIVE_TYPING_PRESSURE_GROWTH
+  );
+}
+
+function getEnemyTypingCost(enemy) {
+  if (!enemy) return 0;
+  const length = Math.max(1, enemy.searchPrompt.length);
+  if (enemy.isMedic || enemy.isMimic) return length * 0.65;
+  return length;
+}
+
+function registerNormalTypingCost(enemy) {
+  if (!enemy || enemy.isBoss || wavePhase !== 'normal') return;
+  normalTypingCostSpawned += getEnemyTypingCost(enemy);
+}
+
+function getActiveTypingPressure() {
+  return enemies.reduce((sum, enemy) => {
+    if (enemy.isBoss || enemy.dying) return sum;
+    return sum + getEnemyTypingCost(enemy);
+  }, 0);
+}
+
+function canAcceptNormalSpawnPressure() {
+  return getActiveTypingPressure() < getActiveTypingPressureLimit();
+}
+
+function isNormalTypingBudgetReached() {
+  return normalTypingCostSpawned >= getNormalWaveTypingBudget(waveSet);
+}
+
+function isNormalWaveComplete() {
+  return normalEnemiesSpawned >= normalEnemyTarget || isNormalTypingBudgetReached();
+}
+
 function getEnemyLimit() {
   return currentDifficulty().enemyLimit;
 }
@@ -2104,8 +2175,12 @@ function getEnemyLimit() {
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
-  const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 5 : 7));
-  const lengthFactor = THREE.MathUtils.clamp(1 - longPromptPenalty * (enemy.isBoss ? 0.024 : 0.016), 0.7, 1);
+  const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 6 : 8));
+  const lengthFactor = THREE.MathUtils.clamp(
+    1 / (1 + longPromptPenalty * (enemy.isBoss ? 0.08 : 0.06)),
+    enemy.isBoss ? 0.55 : 0.58,
+    1
+  );
   return (enemy.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
 }
 
@@ -2210,10 +2285,16 @@ function spawnEnemy(options = {}) {
   labelsLayer.append(label);
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
+  const shouldLimitVocabulary = isBoss && !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term);
   const twoWordData = isEquationPrompt
     ? buildTwoWordLimit(wordData.term, {
         alwaysLimit: isEquationPrompt,
         multiplicationAlias: isEquationPrompt,
+      })
+    : shouldLimitVocabulary
+    ? buildTwoWordLimit(wordData.term, {
+        alwaysLimit: true,
+        maxHiddenWords: 1,
       })
     : null;
   const enemy = {
@@ -2271,6 +2352,7 @@ function spawnEnemy(options = {}) {
   enemies.push(enemy);
   renderPrompt(enemy);
   selectTarget();
+  return enemy;
 }
 
 function chooseSpawnZ() {
@@ -4059,8 +4141,9 @@ function updateFullscreenButton() {
 
 function startBossPhase() {
   if (bossWordsThisSet.length === 0) prepareWavePlan();
-  const missingPreviewWords = definitionBossWordsForWave()
-    .filter(w => !introducedBossTermsThisSet.has(w.term));
+  const missingPreviewWords = isNormalTypingBudgetReached()
+    ? []
+    : definitionBossWordsForWave().filter(w => !introducedBossTermsThisSet.has(w.term));
   if (missingPreviewWords.length > 0) {
     const firstSlot = normalEnemiesSpawned;
     for (const [index, word] of missingPreviewWords.entries()) {
@@ -4142,6 +4225,7 @@ function advanceWaveSet() {
   waveClearDelayTimer = 0;
   normalEnemyTarget = getNormalEnemyTarget(waveSet);
   normalEnemiesSpawned = 0;
+  normalTypingCostSpawned = 0;
   bossesSpawned = 0;
   bossesDefeated = 0;
   bossShotHits = 0;
@@ -4177,7 +4261,7 @@ function updateTypingLabel() {
   if (wavePhase === 'boss') {
     typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
   } else {
-    typingLabel.textContent = `${normalEnemiesSpawned}/${normalEnemyTarget}`;
+    typingLabel.textContent = 'INPUT';
   }
 }
 
