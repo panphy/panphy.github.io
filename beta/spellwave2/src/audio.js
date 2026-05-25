@@ -96,27 +96,27 @@ const MUSIC_SEASONS = [
 const FINAL_WAVE_MUSIC = {
   name: 'final-wave',
   isBoss: true,
-  baseStep: 0.096,
-  minStep: 0.068,
-  intensityBoost: 10,
+  baseStep: 0.138,
+  minStep: 0.090,
+  intensityBoost: 8,
   melodyType: 'sawtooth',
   bassType: 'sawtooth',
   accentType: 'square',
-  melodyGain: 0.036,
-  bassGain: 0.052,
-  hatGain: 0.018,
-  drumGain: 0.032,
+  melodyGain: 0.048,
+  bassGain: 0.036,
+  hatGain: 0.012,
+  drumGain: 0.020,
   drumFilter: 180,
   melody: [
-    // Ominous descending chromatic figure — urgent, cosmic
-    349.23, 329.63, 311.13, null, 293.66, null, 261.63, null,
-    261.63, null, 293.66, 311.13, 329.63, 349.23, 369.99, null,
-    349.23, null, 329.63, null, 311.13, null, 293.66, 261.63,
-    220.0, null, 233.08, 261.63, 293.66, 311.13, 261.63, 220.0,
+    // D minor hook — dark, propulsive, climbs and falls across two octaves
+    587.33, 523.25, 466.16, 440.00, 392.00, 440.00, 466.16, 523.25,
+    587.33, 698.46, 659.25, 587.33, 523.25, 587.33, 659.25, 698.46,
+    783.99, 698.46, 659.25, 587.33, 659.25, 587.33, 523.25, 466.16,
+    440.00, 466.16, 523.25, 587.33, 523.25, 466.16, 440.00, null,
   ],
   bass: [
-    55.0, null, 55.0, null, 65.41, null, 58.27, null,
-    49.0, null, 49.0, null, 58.27, null, 65.41, null,
+    73.42, null, 73.42, null, 110.00, null, 87.31, null,
+    73.42, null, 73.42, null, 116.54, null, 110.00, null,
   ],
 };
 
