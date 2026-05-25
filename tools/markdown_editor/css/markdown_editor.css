@@ -1184,6 +1184,8 @@ td[align="right"] {
     border-radius: 0 !important;
     box-shadow: none !important;
     cursor: default !important;
+    max-width: calc(100% - 4px) !important;
+    margin: 20px auto !important;
   }
 
   th {
