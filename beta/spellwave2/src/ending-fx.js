@@ -4,17 +4,23 @@ export function createEndingFX(canvas) {
   if (!canvas) return { setPhase() {}, reset() {}, destroy() {} };
 
   const ctx = canvas.getContext('2d');
+  // If the context is unavailable (too many contexts open, etc.), bail gracefully
+  if (!ctx) return { setPhase() {}, reset() {}, destroy() {} };
+
   let raf = null;
   let lastStamp = null;
   let age = 0;
   let phase = 'idle';
 
   // ── Sizing ─────────────────────────────────────────────────────────────────
-  let W = 1, H = 1;
+  let W = 0, H = 0;
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.offsetWidth;
-    H = canvas.offsetHeight;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    if (w === 0 || h === 0) return; // Parent still hidden — skip
+    W = w;
+    H = h;
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -24,7 +30,12 @@ export function createEndingFX(canvas) {
     _resizeObs = new ResizeObserver(() => { resize(); });
     _resizeObs.observe(canvas);
   }
-  resize();
+  // Defer the first resize to the next animation frame so the browser has
+  // computed the layout (offsetWidth returns 0 if parent was just un-hidden)
+  raf = requestAnimationFrame(() => {
+    resize();
+    raf = requestAnimationFrame(render);
+  });
 
   // ── Background starfield (pre-generated, static positions) ────────────────
   const STAR_COUNT = 180;
@@ -290,6 +301,7 @@ export function createEndingFX(canvas) {
 
   // ── Public API ────────────────────────────────────────────────────────────
   function setPhase(name) {
+    if (W === 0 || H === 0) resize(); // Ensure dimensions are set before spawning
     phase = name;
     if (name === 'detonation') {
       spawnBurst(W * 0.5, H * 0.5);
@@ -317,6 +329,5 @@ export function createEndingFX(canvas) {
     if (raf) { cancelAnimationFrame(raf); raf = null; }
   }
 
-  raf = requestAnimationFrame(render);
   return { setPhase, reset, destroy };
 }
