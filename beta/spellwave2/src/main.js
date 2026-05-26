@@ -1140,6 +1140,7 @@ function leakEnemy(enemy) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
   }
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
+  if (isFinalWave() && enemy.isBoss) bossesDefeated += 1;
   removeEnemy(enemy);
   typedBuffer = '';
   activeTarget = null;
@@ -1242,7 +1243,8 @@ function animate(frameTime) {
             }
           }
         } else if (finalWaveQueueIndex < finalWaveQueue.length) {
-          const hasActiveSupportEnemy = enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
+          const nextEntry = finalWaveQueue[finalWaveQueueIndex];
+          const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
           if (!hasActiveSupportEnemy) {
             bossSpawnTimer -= currentDelta;
             if (bossSpawnTimer <= 0) {
@@ -4836,8 +4838,9 @@ function startFinalWave() {
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
   updatePhaseDisplay();
-  // Space background: cancel any in-progress season transition, then apply deep-space look
+  // Space background: cancel season transition, disable weather, apply deep-space look
   seasonFade = null;
+  seasonalEffects.stopWeather();
   scene.background.setHex(0x000008);
   scene.fog.color.setHex(0x000008);
   scene.fog.near = 28;

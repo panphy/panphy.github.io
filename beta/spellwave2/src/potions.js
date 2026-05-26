@@ -190,61 +190,68 @@ export function createPotionSystem({
         shieldGroup = new THREE.Group();
         shieldGroup.position.set(0, 2.0, WALL_Z - 0.5);
 
-        // Concentric bright red rings with additive blending
-        const matRing = new THREE.MeshBasicMaterial({
-          color: 0xff2200,
-          transparent: true,
-          opacity: 0.55,
-          side: THREE.DoubleSide,
-          blending: THREE.AdditiveBlending
-        });
+        // Build a flat-top octagon by rotating the group Math.PI/8
+        // Each of 8 sectors is a ShapeGeometry trapezoid — proper straight edges
 
-        // Translucent red field inside the rings
-        const matField = new THREE.MeshBasicMaterial({
-          color: 0xff2200,
-          transparent: true,
-          opacity: 0.08,
-          side: THREE.DoubleSide,
-          blending: THREE.AdditiveBlending
-        });
+        function makeOctSector(rInner, rOuter, a1, a2) {
+          const shape = new THREE.Shape();
+          shape.moveTo(rOuter * Math.cos(a1), rOuter * Math.sin(a1));
+          shape.lineTo(rOuter * Math.cos(a2), rOuter * Math.sin(a2));
+          shape.lineTo(rInner * Math.cos(a2), rInner * Math.sin(a2));
+          shape.lineTo(rInner * Math.cos(a1), rInner * Math.sin(a1));
+          shape.closePath();
+          return new THREE.ShapeGeometry(shape);
+        }
 
-        // Create 8 segmented slices for the octagon
         for (let i = 0; i < 8; i++) {
-          const thetaStart = i * Math.PI / 4;
-          const thetaLength = Math.PI / 4;
+          const a1 = i * Math.PI / 4;
+          const a2 = (i + 1) * Math.PI / 4;
+          const centerAngle = (a1 + a2) / 2;
 
           const segmentGroup = new THREE.Group();
 
-          // 1-segmented geometries for octagon ring segments
-          const outerMesh = new THREE.Mesh(new THREE.RingGeometry(4.35, 4.5, 1, 1, thetaStart, thetaLength), matRing.clone());
-          const middleMesh = new THREE.Mesh(new THREE.RingGeometry(2.9, 3.0, 1, 1, thetaStart, thetaLength), matRing.clone());
-          const innerMesh = new THREE.Mesh(new THREE.RingGeometry(1.45, 1.5, 1, 1, thetaStart, thetaLength), matRing.clone());
-
-          // Faint interior triangle sector representing the "Field"
-          const fieldMesh = new THREE.Mesh(new THREE.CircleGeometry(4.35, 1, thetaStart, thetaLength), matField.clone());
+          // Fill panel (center to outer_r)
+          const fillShape = new THREE.Shape();
+          fillShape.moveTo(0, 0);
+          fillShape.lineTo(4.35 * Math.cos(a1), 4.35 * Math.sin(a1));
+          fillShape.lineTo(4.35 * Math.cos(a2), 4.35 * Math.sin(a2));
+          fillShape.closePath();
+          const fieldMesh = new THREE.Mesh(new THREE.ShapeGeometry(fillShape), new THREE.MeshBasicMaterial({
+            color: 0xff2200, transparent: true, opacity: 0.08,
+            side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+          }));
           fieldMesh.userData.isField = true;
 
-          segmentGroup.add(fieldMesh);
-          segmentGroup.add(outerMesh);
-          segmentGroup.add(middleMesh);
-          segmentGroup.add(innerMesh);
+          // Outer ring strip
+          const outerMesh = new THREE.Mesh(makeOctSector(4.35, 4.5, a1, a2), new THREE.MeshBasicMaterial({
+            color: 0xff2200, transparent: true, opacity: 0.55,
+            side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+          }));
 
-          // Store center angle and random velocities for organic scattering on shatter
-          const centerAngle = thetaStart + thetaLength / 2;
+          // Middle ring strip
+          const middleMesh = new THREE.Mesh(makeOctSector(2.9, 3.0, a1, a2), new THREE.MeshBasicMaterial({
+            color: 0xff2200, transparent: true, opacity: 0.55,
+            side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+          }));
+
+          // Inner ring strip
+          const innerMesh = new THREE.Mesh(makeOctSector(1.45, 1.5, a1, a2), new THREE.MeshBasicMaterial({
+            color: 0xff2200, transparent: true, opacity: 0.55,
+            side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+          }));
+
+          segmentGroup.add(fieldMesh, outerMesh, middleMesh, innerMesh);
           segmentGroup.userData = {
             angle: centerAngle,
-            speedFactor: 1.0 + (Math.random() - 0.5) * 0.3,
-            spinSpeed: (Math.random() - 0.5) * 4.0,
-            driftAngleOffset: (Math.random() - 0.5) * 0.15
+            speedFactor: 1.0 + (Math.random() - 0.5) * 0.4,
+            spinSpeed: (Math.random() - 0.5) * 20.0,
+            driftAngleOffset: (Math.random() - 0.5) * 0.3,
+            zDrift: (Math.random() - 0.5) * 2.0
           };
-
           shieldGroup.add(segmentGroup);
         }
 
-        matRing.dispose();
-        matField.dispose();
-
-        shieldGroup.rotation.z = Math.PI / 8; // Align upright
+        shieldGroup.rotation.z = Math.PI / 8; // Flat-top octagon alignment
         effectsGroup.add(shieldGroup);
       }
     }
@@ -369,8 +376,8 @@ export function createPotionSystem({
             child.rotation.z = 0;
           });
         } else {
-          // Shattered pieces deactivation fade out - slower (duration ~0.77s)
-          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 1.3);
+          // Shattered pieces deactivation fade out (~0.4s)
+          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 2.5);
           const fadeProgress = shieldFadeTimer;
 
           const baseRingOpacity = 0.55 + Math.sin(time * 3.0) * 0.15;
@@ -391,16 +398,16 @@ export function createPotionSystem({
             screenOverlay.style.opacity = screenOpacity;
           }
 
-          // Animate each segment group flying outward and rotating (shattered)
+          // Animate each segment group flying outward with ease-out quadratic scatter
           shieldGroup.children.forEach((child) => {
             if (child.userData && child.userData.angle !== undefined) {
-              const driftProgress = 1.0 - fadeProgress;
+              const easeOut = 1.0 - fadeProgress * fadeProgress;
               const driftAngle = child.userData.angle + child.userData.driftAngleOffset;
-              const distance = driftProgress * 4.5 * child.userData.speedFactor;
-              
+              const distance = easeOut * 7.0 * child.userData.speedFactor;
               child.position.x = Math.cos(driftAngle) * distance;
               child.position.y = Math.sin(driftAngle) * distance;
-              child.rotation.z = driftProgress * child.userData.spinSpeed;
+              child.position.z = easeOut * child.userData.zDrift;
+              child.rotation.z = easeOut * child.userData.spinSpeed;
             }
           });
 
