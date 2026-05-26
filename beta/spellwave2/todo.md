@@ -110,6 +110,7 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 
 - [x] Diagnose why `ending-fx.js` canvas is blank on Chrome and Brave (confirmed on both).
 - [x] Fix and verify on real Chrome and Brave (not just headless).
+- [x] Improve rising horizon visuals — replace the flat/rectangular linear-gradient top boundary with a bottom-centered radial gradient (`ellipse at 50% 100%`) that fades smoothly to `transparent` near the top, creating a realistic planetary dome glow and preserving text legibility.
 
 
 ### 6i. Ending Scene Cinematic Rework (2026-05-25)
