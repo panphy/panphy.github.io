@@ -128,6 +128,10 @@ export function createPotionSystem({
       }
     });
     shieldGroup = null;
+    const screenOverlay = document.getElementById('shieldScreenOverlay');
+    if (screenOverlay) {
+      screenOverlay.style.opacity = 0;
+    }
   }
 
   function activatePotionSlot(index) {
@@ -186,8 +190,8 @@ export function createPotionSystem({
         shieldGroup = new THREE.Group();
         shieldGroup.position.set(0, 2.0, WALL_Z - 0.5);
 
-        // Concentric red octagons with additive blending
-        const mat = new THREE.MeshBasicMaterial({
+        // Concentric bright red rings with additive blending
+        const matRing = new THREE.MeshBasicMaterial({
           color: 0xff2200,
           transparent: true,
           opacity: 0.55,
@@ -195,31 +199,52 @@ export function createPotionSystem({
           blending: THREE.AdditiveBlending
         });
 
-        const matCenter = new THREE.MeshBasicMaterial({
+        // Translucent red field inside the rings
+        const matField = new THREE.MeshBasicMaterial({
           color: 0xff2200,
           transparent: true,
-          opacity: 0.25,
+          opacity: 0.08,
           side: THREE.DoubleSide,
           blending: THREE.AdditiveBlending
         });
 
-        // 8-segmented Ring and Circle geometries yield perfect octagons
-        const outerMesh = new THREE.Mesh(new THREE.RingGeometry(4.35, 4.5, 8), mat);
-        const middleMesh = new THREE.Mesh(new THREE.RingGeometry(2.9, 3.0, 8), mat);
-        const innerMesh = new THREE.Mesh(new THREE.RingGeometry(1.45, 1.5, 8), mat);
-        const centerMesh = new THREE.Mesh(new THREE.CircleGeometry(0.5, 8), matCenter);
+        // Create 8 segmented slices for the octagon
+        for (let i = 0; i < 8; i++) {
+          const thetaStart = i * Math.PI / 4;
+          const thetaLength = Math.PI / 4;
 
-        // Align octagons upright (matching the SVG icon layout)
-        outerMesh.rotation.z = Math.PI / 8;
-        middleMesh.rotation.z = Math.PI / 8;
-        innerMesh.rotation.z = Math.PI / 8;
-        centerMesh.rotation.z = Math.PI / 8;
+          const segmentGroup = new THREE.Group();
 
-        shieldGroup.add(outerMesh);
-        shieldGroup.add(middleMesh);
-        shieldGroup.add(innerMesh);
-        shieldGroup.add(centerMesh);
+          // 1-segmented geometries for octagon ring segments
+          const outerMesh = new THREE.Mesh(new THREE.RingGeometry(4.35, 4.5, 1, 1, thetaStart, thetaLength), matRing.clone());
+          const middleMesh = new THREE.Mesh(new THREE.RingGeometry(2.9, 3.0, 1, 1, thetaStart, thetaLength), matRing.clone());
+          const innerMesh = new THREE.Mesh(new THREE.RingGeometry(1.45, 1.5, 1, 1, thetaStart, thetaLength), matRing.clone());
 
+          // Faint interior triangle sector representing the "Field"
+          const fieldMesh = new THREE.Mesh(new THREE.CircleGeometry(4.35, 1, thetaStart, thetaLength), matField.clone());
+          fieldMesh.userData.isField = true;
+
+          segmentGroup.add(fieldMesh);
+          segmentGroup.add(outerMesh);
+          segmentGroup.add(middleMesh);
+          segmentGroup.add(innerMesh);
+
+          // Store center angle and random velocities for organic scattering on shatter
+          const centerAngle = thetaStart + thetaLength / 2;
+          segmentGroup.userData = {
+            angle: centerAngle,
+            speedFactor: 1.0 + (Math.random() - 0.5) * 0.3,
+            spinSpeed: (Math.random() - 0.5) * 4.0,
+            driftAngleOffset: (Math.random() - 0.5) * 0.15
+          };
+
+          shieldGroup.add(segmentGroup);
+        }
+
+        matRing.dispose();
+        matField.dispose();
+
+        shieldGroup.rotation.z = Math.PI / 8; // Align upright
         effectsGroup.add(shieldGroup);
       }
     }
@@ -303,52 +328,79 @@ export function createPotionSystem({
 
       // Update A.T. Field shield group
       if (shieldGroup) {
-        // Octagons are stationary (rotation.z is fixed)
+        const screenOverlay = document.getElementById('shieldScreenOverlay');
+        const time = getGameTime();
+
         if (shieldActive) {
+          let ringOpacity = 0.55;
+          let fieldOpacity = 0.08;
+          let screenOpacity = 0.04 + Math.sin(time * 3.0) * 0.02; // breathe 0.02 to 0.06
+
           if (shieldHitProgress > 0) {
             shieldHitProgress = Math.max(0, shieldHitProgress - delta * 2.2); // Fade impact flash
             const scale = 1.0 + shieldHitProgress * 0.28;
             shieldGroup.scale.set(scale, scale, 1);
             
-            // Pulse opacity during flash
-            shieldGroup.traverse((child) => {
-              if (child.isMesh) {
-                child.material.opacity = child === shieldGroup.children[3]
-                  ? 0.25 + shieldHitProgress * 0.5
-                  : 0.55 + shieldHitProgress * 0.45;
-              }
-            });
+            ringOpacity = 0.55 + shieldHitProgress * 0.45;
+            fieldOpacity = 0.08 + shieldHitProgress * 0.22;
+            screenOpacity = screenOpacity + shieldHitProgress * 0.10;
           } else {
-            // Standard ambient breathing glow and scale
-            const time = getGameTime();
-            const pulse = 1.0 + Math.sin(time * 3.0) * 0.02; // Slower breathing scale
+            // Slower breathing scale
+            const pulse = 1.0 + Math.sin(time * 3.0) * 0.02;
             shieldGroup.scale.set(pulse, pulse, 1);
             
-            const breatheOpacity = 0.55 + Math.sin(time * 3.0) * 0.15; // Slow breathing glow
-            const breatheCenterOpacity = 0.25 + Math.sin(time * 3.0) * 0.08;
-            
-            shieldGroup.traverse((child) => {
-              if (child.isMesh) {
-                child.material.opacity = child === shieldGroup.children[3] ? breatheCenterOpacity : breatheOpacity;
-              }
-            });
+            ringOpacity = 0.55 + Math.sin(time * 3.0) * 0.15;
+            fieldOpacity = 0.08 + Math.sin(time * 3.0) * 0.03;
           }
-        } else {
-          // Deactivation fade out - slower (duration ~0.67s)
-          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 1.5);
-          const fadeProgress = shieldFadeTimer;
-          const time = getGameTime();
-          
-          // Expand scale while fading out
-          const scale = 1.0 + Math.sin(time * 3.0) * 0.02 + (1.0 - fadeProgress) * 0.25;
-          shieldGroup.scale.set(scale, scale, 1);
-          
-          const breatheOpacity = (0.55 + Math.sin(time * 3.0) * 0.15) * fadeProgress;
-          const breatheCenterOpacity = (0.25 + Math.sin(time * 3.0) * 0.08) * fadeProgress;
-          
+
+          // Apply opacities
           shieldGroup.traverse((child) => {
             if (child.isMesh) {
-              child.material.opacity = child === shieldGroup.children[3] ? breatheCenterOpacity : breatheOpacity;
+              child.material.opacity = child.userData.isField ? fieldOpacity : ringOpacity;
+            }
+          });
+          if (screenOverlay) {
+            screenOverlay.style.opacity = screenOpacity;
+          }
+
+          // Reset segment position and rotation (in case of transition)
+          shieldGroup.children.forEach((child) => {
+            child.position.set(0, 0, 0);
+            child.rotation.z = 0;
+          });
+        } else {
+          // Shattered pieces deactivation fade out - slower (duration ~0.77s)
+          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 1.3);
+          const fadeProgress = shieldFadeTimer;
+
+          const baseRingOpacity = 0.55 + Math.sin(time * 3.0) * 0.15;
+          const baseFieldOpacity = 0.08 + Math.sin(time * 3.0) * 0.03;
+          const baseScreenOpacity = 0.04 + Math.sin(time * 3.0) * 0.02;
+
+          const ringOpacity = baseRingOpacity * fadeProgress;
+          const fieldOpacity = baseFieldOpacity * fadeProgress;
+          const screenOpacity = baseScreenOpacity * fadeProgress;
+
+          // Apply opacities
+          shieldGroup.traverse((child) => {
+            if (child.isMesh) {
+              child.material.opacity = child.userData.isField ? fieldOpacity : ringOpacity;
+            }
+          });
+          if (screenOverlay) {
+            screenOverlay.style.opacity = screenOpacity;
+          }
+
+          // Animate each segment group flying outward and rotating (shattered)
+          shieldGroup.children.forEach((child) => {
+            if (child.userData && child.userData.angle !== undefined) {
+              const driftProgress = 1.0 - fadeProgress;
+              const driftAngle = child.userData.angle + child.userData.driftAngleOffset;
+              const distance = driftProgress * 4.5 * child.userData.speedFactor;
+              
+              child.position.x = Math.cos(driftAngle) * distance;
+              child.position.y = Math.sin(driftAngle) * distance;
+              child.rotation.z = driftProgress * child.userData.spinSpeed;
             }
           });
 
@@ -357,6 +409,9 @@ export function createPotionSystem({
               effectsGroup.remove(shieldGroup);
             }
             disposeShieldGroup();
+            if (screenOverlay) {
+              screenOverlay.style.opacity = 0;
+            }
           }
         }
       }
