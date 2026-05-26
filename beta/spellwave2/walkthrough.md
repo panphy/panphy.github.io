@@ -6,9 +6,10 @@ This pass implements a new **Shield Potion (A.T. Field)** and adds refinements t
 
 ### 1. Shield Potion (A.T. Field)
 - **Visuals**:
-  - **3D Octagon Shield Mesh**: Created concentric octagons at the castle wall using `THREE.RingGeometry` (8 segments) and a central solid octagon using `THREE.CircleGeometry` (8 segments). Styled with a bright red, double-sided, transparent material utilizing additive blending (`0xff2200`). Aligned upright to match the SVG icon layout.
-  - **Stationary Breathing Glow**: Removed the rotational animation. The shield octagons are stationary and show a slow, rhythmic, atmospheric breathing glow (pulsing opacity and scale) to feel like a stable, high-tech barrier.
-  - **Graceful Deactivation Fade Out**: When the shield is consumed/destroyed, it expands and fades its opacity out smoothly over ~0.67s.
+  - **3D Octagon Shield Slices**: Created the shield by segmenting it into 8 independent slices (each representing a 45° section of the octagon). Each slice contains three concentric boundary rings (`THREE.RingGeometry`) and a faint interior triangle sector (`THREE.CircleGeometry` with opacity `0.08`) representing the translucent red "Field". Aligned upright to match the SVG icon layout. There is no solid circle at the center.
+  - **Stationary Breathing Glow**: Removed the rotational animation. The shield meshes are stationary and show a slow, rhythmic breathing glow (pulsing opacities of rings and fields, plus scale, at 3Hz) to feel like a stable, high-tech barrier.
+  - **Shatter Dispersal on Destruction**: When the shield is consumed/destroyed, the 8 slice groups break apart organically: they fly radially outwards and tumble (rotate around Z-axis) with randomized speed factors and rotation velocities while fading out over `~0.77s`.
+  - **Screen-wide Translucent Overlay**: Added `#shieldScreenOverlay` which tints the entire screen with a very faint, breathing translucent red (`rgba(255, 34, 0, 0.08)`) while the shield is active, fading out synchronously with the shattered pieces on destruction.
   - **Screen-Space Impact Flash**: Added an HTML SVG overlay `#shieldFlash` that flashes bright concentric red octagons scaling outwards on block impacts (Evangelion-style).
   - **Slot Icon**: Added a bright red concentric octagon SVG to the potion slot that glows and breathes in sync with the 3D visual.
 - **Audio**:
