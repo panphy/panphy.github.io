@@ -1,5 +1,15 @@
 # Task List - Roguelike Expansion Updates & Phase 2 Mimic Chest
 
+- [x] Add Shield Potion (A.T. Field) feature
+  - [x] Implement synthesized sound hooks `playShieldActivateSound()` and `playShieldBlockSound()` in `beta/spellwave2/src/audio.js`
+  - [x] Add the `shield` SVG octagon template to `POTION_SVGS` in `beta/spellwave2/src/potions.js`
+  - [x] Implement shield state variables, 3D octagon mesh creation/animation, and block hooks in `beta/spellwave2/src/potions.js`
+  - [x] Add the `#shieldFlash` HTML overlay markup in `beta/spellwave2.html`
+  - [x] Write CSS rules for `.magic-shield` slot animations and `.shield-flash` overlay in `beta/spellwave2/src/styles.css`
+  - [x] Destructure sound hooks, pass them, and wire block logic in `leakEnemy()` and `bossProjectileHitPlayer()` in `beta/spellwave2/src/main.js`
+  - [x] Add `'shield'` to mimic loot and cheat drop arrays
+  - [x] Verify code syntax with `node --check`
+
 - [x] Refine boss previews in normal waves (`beta/spellwave2/src/main.js`)
   - [x] Implement quantity extraction helper `getEquationQuantities()` using whole-word matching from `ALL_WORDS`
   - [x] Select one unseen quantity from the wave's equation boss word and append it to the preview list

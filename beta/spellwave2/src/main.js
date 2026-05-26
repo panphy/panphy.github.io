@@ -499,6 +499,8 @@ const {
   playChestClackSound,
   playChestOpenSound,
   playShockwaveSound,
+  playShieldActivateSound,
+  playShieldBlockSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -592,6 +594,8 @@ potionsSystem = createPotionSystem({
   scene,
   effectsGroup,
   playShockwaveSound,
+  playShieldActivateSound,
+  playShieldBlockSound,
   playGodModeOnSound,
   playGodModeOffSound,
   playToggleSound,
@@ -1116,16 +1120,25 @@ function leakEnemy(enemy) {
   }
 
 
-  if (!godMode) health = Math.max(0, health - enemy.damage);
-  streak = 0;
+  let wasBlocked = false;
+  if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
+    wasBlocked = potionsSystem.blockLeak();
+  }
+
+  if (wasBlocked) {
+    potionsSystem.triggerShieldHitVisual();
+  } else {
+    if (!godMode) health = Math.max(0, health - enemy.damage);
+    streak = 0;
+    playDamageSound(enemy);
+    damageTimer = enemy.isBoss ? 0.46 : 0.32;
+    damageFlash.classList.add('show');
+    window.setTimeout(() => damageFlash.classList.remove('show'), 160);
+  }
   leakedCount += 1;
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
   }
-  playDamageSound(enemy);
-  damageTimer = enemy.isBoss ? 0.46 : 0.32;
-  damageFlash.classList.add('show');
-  window.setTimeout(() => damageFlash.classList.remove('show'), 160);
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
   removeEnemy(enemy);
   typedBuffer = '';
@@ -1145,13 +1158,21 @@ function bossProjectileHitPlayer(enemy) {
   playBossImpactSound();
 
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
+    let wasBlocked = false;
+    if (!godMode && potionsSystem.isShieldActive()) {
+      wasBlocked = potionsSystem.blockBossHit();
+    }
 
-    if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
-    streak = 0;
-    damageTimer = 0.24;
-    damageFlash.classList.add('show');
-    window.setTimeout(() => damageFlash.classList.remove('show'), 120);
-    playDamageSound(enemy);
+    if (wasBlocked) {
+      potionsSystem.triggerShieldHitVisual();
+    } else {
+      if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
+      streak = 0;
+      damageTimer = 0.24;
+      damageFlash.classList.add('show');
+      window.setTimeout(() => damageFlash.classList.remove('show'), 120);
+      playDamageSound(enemy);
+    }
     updateHud(true);
     updateTypedDisplay();
     if (!godMode && health <= 0) endGame();
@@ -5225,7 +5246,7 @@ function spawnMagicAcquiredBurst(addedType) {
 }
 
 function awardMimicLoot(enemy) {
-  const types = ['time_freeze', 'chain_lightning', 'shockwave'];
+  const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
   const type = types[Math.floor(Math.random() * types.length)];
   const success = potionsSystem.addPotion(type);
   mimicsLooted += 1;

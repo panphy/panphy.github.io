@@ -912,6 +912,20 @@ export function createSpellwaveAudio({
     playNoise(0.60, { gain: 0.075, filterFrequency: 450, filterType: 'lowpass' });
   }
 
+  function playShieldActivateSound() {
+    playTone(220, 0.4, { gain: 0.05, type: 'sawtooth', endFrequency: 440 });
+    playTone(330, 0.45, { gain: 0.05, delay: 0.05, type: 'sine', endFrequency: 660 });
+    playTone(440, 0.5, { gain: 0.05, delay: 0.1, type: 'sine', endFrequency: 880 });
+  }
+
+  function playShieldBlockSound() {
+    playTone(880, 0.15, { gain: 0.08, type: 'sine', endFrequency: 1760 });
+    playTone(440, 0.20, { gain: 0.08, type: 'triangle', endFrequency: 880 });
+    playNoise(0.25, { gain: 0.06, filterFrequency: 3000, filterType: 'bandpass', q: 1.5 });
+    // Deep bass deflection
+    playTone(100, 0.35, { gain: 0.07, delay: 0.02, type: 'sine', endFrequency: 40 });
+  }
+
   return {
     toggleEnabled,
     updateAudioButton,
@@ -940,5 +954,7 @@ export function createSpellwaveAudio({
     playChestClackSound,
     playChestOpenSound,
     playShockwaveSound,
+    playShieldActivateSound,
+    playShieldBlockSound,
   };
 }

@@ -67,6 +67,7 @@ a {
 .pixel-grain,
 .lightning-flash,
 .damage-flash,
+.shield-flash,
 .labels-layer {
   position: fixed;
   inset: 0;
@@ -161,6 +162,58 @@ body.final-wave-active {
 
 .damage-flash.show {
   opacity: 1;
+}
+
+.shield-flash {
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 34, 0, 0.28) 20%, transparent 80%);
+}
+
+.shield-flash.show {
+  opacity: 1;
+  animation: shield-flash-anim 0.45s ease-out forwards;
+}
+
+.flash-oct {
+  fill: none;
+  stroke: #ff2200;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 8px rgba(255, 34, 0, 0.85));
+  transform-origin: 50% 50%;
+}
+
+.flash-outer {
+  animation: oct-pulse-out 0.45s ease-out forwards;
+}
+
+.flash-middle {
+  animation: oct-pulse-mid 0.45s ease-out forwards;
+}
+
+.flash-inner {
+  animation: oct-pulse-in 0.45s ease-out forwards;
+}
+
+@keyframes shield-flash-anim {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
+@keyframes oct-pulse-out {
+  0% { transform: scale(0.5); stroke-width: 4.5; }
+  100% { transform: scale(1.15); stroke-width: 0.5; }
+}
+
+@keyframes oct-pulse-mid {
+  0% { transform: scale(0.4); stroke-width: 4.5; }
+  100% { transform: scale(1.08); stroke-width: 0.5; }
+}
+
+@keyframes oct-pulse-in {
+  0% { transform: scale(0.3); stroke-width: 4.5; }
+  100% { transform: scale(1.0); stroke-width: 0.5; }
 }
 
 .labels-layer {
@@ -1628,6 +1681,35 @@ body:not(.is-running) .potion-bar {
     opacity: 0.45;
     filter: drop-shadow(0 0 1.5px rgba(0, 136, 255, 0.4));
   }
+}
+
+/* Shield (A.T. Field Octagon) SVG Icon Styles */
+.magic-shield .shield-oct {
+  fill: rgba(255, 34, 0, 0.08);
+  stroke: #ff2200;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 3px rgba(255, 34, 0, 0.8));
+  transform-origin: 22px 22px;
+}
+.magic-shield .shield-outer {
+  animation: shield-spin-cw 12s linear infinite;
+}
+.magic-shield .shield-middle {
+  animation: shield-spin-ccw 9s linear infinite;
+  fill: none;
+}
+.magic-shield .shield-inner {
+  animation: shield-spin-cw 6s linear infinite;
+  fill: rgba(255, 34, 0, 0.18);
+}
+
+@keyframes shield-spin-cw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes shield-spin-ccw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
 }
 
 body.chain-lightning-primed .typing-strip {

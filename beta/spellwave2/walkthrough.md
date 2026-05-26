@@ -1,10 +1,24 @@
-# Walkthrough - Boss Previews Refinement & Ending Scene Cinematic Rework (2026-05-26)
+# Walkthrough - Shield Potion (A.T. Field) & Boss Previews Refinement (2026-05-26)
 
-This pass adds refinements to the boss previews in normal waves (`beta/spellwave2/src/main.js`) to guarantee players see vocabulary boss answers and at least one quantity of each equation boss before transitioning to the boss phase. The published `/fun/spellwave` version was not changed.
+This pass implements a new **Shield Potion (A.T. Field)** and adds refinements to the boss previews in normal waves. The published `/fun/spellwave` version was not changed.
 
 ## Changes Implemented
 
-### 1. Boss Previews Refinement
+### 1. Shield Potion (A.T. Field)
+- **Visuals**:
+  - **3D Octagon Shield Mesh**: Created concentric octagons at the castle wall using `THREE.RingGeometry` (8 segments) and a central solid octagon using `THREE.CircleGeometry` (8 segments). Styled with a bright red, double-sided, transparent material utilizing additive blending (`0xff2200`).
+  - **Rotational Animation**: Configured the nested octagons to rotate slowly in alternating clockwise and counter-clockwise directions to create a shimmering field look.
+  - **Screen-Space Impact Flash**: Added an HTML SVG overlay `#shieldFlash` that flashes bright concentric red octagons scaling outwards on block impacts (Evangelion-style).
+  - **Slot Icon**: Added a bright red, rotating concentric octagon SVG to the potion slot.
+- **Audio**:
+  - `playShieldActivateSound()`: Synthesized a rising high-tech hum to represent the shield forming.
+  - `playShieldBlockSound()`: Synthesized a glassy/crystalline "shhnnggg!" block impact followed by a deep electronic deflection sweep.
+- **Gameplay Integration**:
+  - **Damaging Leaks**: Prevented player damage on the next leak if the shield is active (consuming the entire shield). Crucially, the multiplier/streak is preserved on block.
+  - **Boss Hits**: Prevented player damage from the next two boss projectile hits (each hit consumes 1 charge of the shield).
+  - **Loot Pool**: Added the `'shield'` potion to the mimic chest random drop pool and potion refill cheat.
+
+### 2. Boss Previews Refinement
 - **Equation Quantity Matcher**: Added `getEquationQuantities(equationTerm)` which normalizes mathematical equations to text terms and extracts matching vocabulary entries from `ALL_WORDS` via length-descending whole-word checks.
 - **Wave Planning (`prepareWavePlan`)**: 
   - Finds the equation boss word for the wave.

@@ -16,6 +16,8 @@ export function createPotionSystem({
   scene,
   effectsGroup,
   playShockwaveSound,
+  playShieldActivateSound,
+  playShieldBlockSound,
   playGodModeOnSound,
   playGodModeOffSound,
   playToggleSound,
@@ -28,6 +30,13 @@ export function createPotionSystem({
   let timeFreezeTimer = 0;
   let chainLightningPrimed = false;
   let potionCheatActive = false;
+
+  // Shield (A.T. Field) state
+  let shieldActive = false;
+  let shieldCharges = 0;
+  let shieldGroup = null;
+  let shieldHitProgress = 0; // 0 to 1 for block impact flash/pulse
+  let shieldFadeTimer = 0;   // 0 to 1 for deactivation fade out
 
   const activeShockwaves = [];
   const pendingWaves = [];
@@ -54,6 +63,13 @@ export function createPotionSystem({
         <path d="M 12 36 Q 22 20 32 36" class="shockwave-crest shockwave-crest-1" fill="none" stroke-linecap="round"></path>
         <path d="M 12 30 Q 22 14 32 30" class="shockwave-crest shockwave-crest-2" fill="none" stroke-linecap="round"></path>
         <path d="M 12 24 Q 22 8 32 24" class="shockwave-crest shockwave-crest-3" fill="none" stroke-linecap="round"></path>
+      </svg>
+    `,
+    shield: `
+      <svg class="svg-magic magic-shield" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+        <polygon points="38,22 33,33 22,38 11,33 6,22 11,11 22,6 33,11" class="shield-oct shield-outer"></polygon>
+        <polygon points="33,22 30,30 22,33 14,30 11,22 14,14 22,11 30,14" class="shield-oct shield-middle"></polygon>
+        <polygon points="28,22 26,26 22,28 18,26 16,22 18,18 22,16 26,18" class="shield-oct shield-inner"></polygon>
       </svg>
     `
   };
@@ -84,7 +100,7 @@ export function createPotionSystem({
 
   function addPotion(type) {
     if (!type) {
-      const types = ['time_freeze', 'chain_lightning', 'shockwave'];
+      const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
       type = types[Math.floor(Math.random() * types.length)];
     }
 
@@ -101,6 +117,17 @@ export function createPotionSystem({
       }
       return false;
     }
+  }
+
+  function disposeShieldGroup() {
+    if (!shieldGroup) return;
+    shieldGroup.traverse((child) => {
+      if (child.isMesh) {
+        child.geometry.dispose();
+        child.material.dispose();
+      }
+    });
+    shieldGroup = null;
   }
 
   function activatePotionSlot(index) {
@@ -142,16 +169,92 @@ export function createPotionSystem({
       pendingWaves.push({ delay: 0.0 });
       pendingWaves.push({ delay: 0.15 });
       pendingWaves.push({ delay: 0.30 });
+    } else if (potion === 'shield') {
+      shieldActive = true;
+      shieldCharges = 2;
+      shieldHitProgress = 0;
+      shieldFadeTimer = 0;
+      playShieldActivateSound();
+      showBanner('A.T. FIELD!', 'shield');
+
+      if (THREE && effectsGroup) {
+        if (shieldGroup) {
+          effectsGroup.remove(shieldGroup);
+          disposeShieldGroup();
+        }
+
+        shieldGroup = new THREE.Group();
+        shieldGroup.position.set(0, 2.0, WALL_Z - 0.5);
+
+        // Concentric red octagons with additive blending
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0xff2200,
+          transparent: true,
+          opacity: 0.55,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending
+        });
+
+        const matCenter = new THREE.MeshBasicMaterial({
+          color: 0xff2200,
+          transparent: true,
+          opacity: 0.25,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending
+        });
+
+        // 8-segmented Ring and Circle geometries yield perfect octagons
+        const outerMesh = new THREE.Mesh(new THREE.RingGeometry(4.35, 4.5, 8), mat);
+        const middleMesh = new THREE.Mesh(new THREE.RingGeometry(2.9, 3.0, 8), mat);
+        const innerMesh = new THREE.Mesh(new THREE.RingGeometry(1.45, 1.5, 8), mat);
+        const centerMesh = new THREE.Mesh(new THREE.CircleGeometry(0.5, 8), matCenter);
+
+        shieldGroup.add(outerMesh);
+        shieldGroup.add(middleMesh);
+        shieldGroup.add(innerMesh);
+        shieldGroup.add(centerMesh);
+
+        effectsGroup.add(shieldGroup);
+      }
     }
 
     if (potionCheatActive) {
       // immediately refill the slot with a random potion
-      const types = ['time_freeze', 'chain_lightning', 'shockwave'];
+      const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
       const randomType = types[Math.floor(Math.random() * types.length)];
       potions[index] = randomType;
     }
 
     updatePotionUI();
+  }
+
+  function triggerShieldHitVisual() {
+    playShieldBlockSound();
+    shieldHitProgress = 1.0;
+
+    const shieldFlash = document.getElementById('shieldFlash');
+    if (shieldFlash) {
+      shieldFlash.classList.remove('show');
+      void shieldFlash.offsetWidth; // Force reflow
+      shieldFlash.classList.add('show');
+    }
+  }
+
+  function blockLeak() {
+    if (!shieldActive) return false;
+    shieldActive = false;
+    shieldFadeTimer = 1.0; // Start Z-scale fade out
+    return true;
+  }
+
+  function blockBossHit() {
+    if (!shieldActive) return false;
+    shieldCharges -= 1;
+    if (shieldCharges <= 0) {
+      shieldActive = false;
+      shieldFadeTimer = 1.0; // Start Z-scale fade out
+    }
+    return true;
   }
 
   function update(delta) {
@@ -191,6 +294,59 @@ export function createPotionSystem({
           pendingWaves.splice(i, 1);
         }
       }
+
+      // Update A.T. Field shield group
+      if (shieldGroup) {
+        // Rotate nested octagons in opposite directions
+        shieldGroup.children[0].rotation.z += delta * 0.18; // Outer
+        shieldGroup.children[1].rotation.z -= delta * 0.32; // Middle
+        shieldGroup.children[2].rotation.z += delta * 0.54; // Inner
+        shieldGroup.children[3].rotation.z -= delta * 0.10; // Center
+
+        if (shieldActive) {
+          if (shieldHitProgress > 0) {
+            shieldHitProgress = Math.max(0, shieldHitProgress - delta * 2.2); // Fade impact flash
+            const scale = 1.0 + shieldHitProgress * 0.28;
+            shieldGroup.scale.set(scale, scale, 1);
+            
+            // Pulse opacity during flash
+            shieldGroup.traverse((child) => {
+              if (child.isMesh) {
+                child.material.opacity = child === shieldGroup.children[3]
+                  ? 0.25 + shieldHitProgress * 0.5
+                  : 0.55 + shieldHitProgress * 0.45;
+              }
+            });
+          } else {
+            // Standard ambient breathing pulse
+            const pulse = 1.0 + Math.sin(getGameTime() * 6.0) * 0.03;
+            shieldGroup.scale.set(pulse, pulse, 1);
+            
+            shieldGroup.traverse((child) => {
+              if (child.isMesh) {
+                child.material.opacity = child === shieldGroup.children[3] ? 0.25 : 0.55;
+              }
+            });
+          }
+        } else {
+          // Deactivation fade out
+          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 3.5);
+          const fadeProgress = shieldFadeTimer;
+          shieldGroup.scale.set(1.0 + (1.0 - fadeProgress) * 0.2, 1.0 + (1.0 - fadeProgress) * 0.2, 1);
+          shieldGroup.traverse((child) => {
+            if (child.isMesh) {
+              child.material.opacity = (child === shieldGroup.children[3] ? 0.25 : 0.55) * fadeProgress;
+            }
+          });
+
+          if (shieldFadeTimer <= 0) {
+            if (effectsGroup) {
+              effectsGroup.remove(shieldGroup);
+            }
+            disposeShieldGroup();
+          }
+        }
+      }
     }
 
     // Update active shockwaves
@@ -225,7 +381,7 @@ export function createPotionSystem({
       // Fill all slots
       for (let i = 0; i < 4; i++) {
         if (potions[i] === null) {
-          const types = ['time_freeze', 'chain_lightning', 'shockwave'];
+          const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
           potions[i] = types[Math.floor(Math.random() * types.length)];
         }
       }
@@ -242,6 +398,15 @@ export function createPotionSystem({
     potions = [null, null, null, null];
     timeFreezeTimer = 0;
     chainLightningPrimed = false;
+    shieldActive = false;
+    shieldCharges = 0;
+    shieldHitProgress = 0;
+    shieldFadeTimer = 0;
+
+    if (shieldGroup && effectsGroup) {
+      effectsGroup.remove(shieldGroup);
+    }
+    disposeShieldGroup();
 
     // Clean up active shockwaves
     for (const sw of activeShockwaves) {
@@ -269,5 +434,10 @@ export function createPotionSystem({
       document.body.classList.remove('chain-lightning-primed');
     },
     isPotionCheatActive: () => potionCheatActive,
+    isShieldActive: () => shieldActive,
+    blockLeak,
+    blockBossHit,
+    triggerShieldHitVisual
   };
 }
+
