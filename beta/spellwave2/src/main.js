@@ -4963,7 +4963,7 @@ function getEndingStats() {
   const accuracy = typedAttempts > 0
     ? Math.round(((typedAttempts - mistakeCount) / typedAttempts) * 100)
     : 100;
-  const healthHearts = formatLifeValue(health);
+  const healthHearts = formatHeartCount(health);
   const grade = calculateEndingGrade({ accuracy, wpm, health });
   return {
     score,
