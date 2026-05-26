@@ -1,3 +1,81 @@
+# Walkthrough - Wave 10 Bug Fixes & AT Field Redesign (2026-05-26)
+
+Three bugs identified during playtesting wave 10 and fixed in commit `7b1d273`.
+
+## Changes Implemented
+
+### 1. Fix: Bosses 9 & 10 Never Spawn
+
+Two independent root causes both needed fixing.
+
+**Root cause A — spawn blocked by support-enemy guard**
+
+The `hasActiveSupportEnemy` condition in the final-wave boss spawn loop (`animate()`, boss phase) was written as:
+
+```javascript
+const hasActiveSupportEnemy = enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
+if (!hasActiveSupportEnemy) { /* spawn next queue entry */ }
+```
+
+This blocked ALL queue entries — including boss entries — whenever any medic or mimic was alive. Fix: only apply the guard when the next queued entry is itself a support enemy:
+
+```javascript
+const nextEntry = finalWaveQueue[finalWaveQueueIndex];
+const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
+```
+
+**Root cause B — queue-exhausted deadlock in godMode**
+
+Once all 16 queue entries were consumed (`finalWaveQueueIndex >= 16`), the spawn loop fell through to neither branch. If godMode was active and a boss had leaked, `bossesDefeated` was never incremented by `leakEnemy()`, so `bossesDefeated >= FINAL_WAVE_BOSS_COUNT` was never true either — permanent hang. Fix: in `leakEnemy()`, increment `bossesDefeated` when a final-wave boss leaks:
+
+```javascript
+if (isFinalWave() && enemy.isBoss) bossesDefeated += 1;
+```
+
+**Files changed**: `beta/spellwave2/src/main.js`
+
+---
+
+### 2. Fix: Rain and Lightning Appear in Wave 10
+
+**Root cause**: `startFinalWave()` switches to the space background but never disables the seasonal weather system. Because wave 10 maps to summer (season index `(10-1) % 4 = 1`), `updateSummerStorm()` runs every frame and continuously re-enables rain and lightning — regardless of the space scene.
+
+**Fix**:
+- Added `weatherDisabled` flag and `stopWeather()` function to `seasonal-effects.js`.
+- `updateSummerStorm()` and `updateSnow()` bail early when `weatherDisabled` is set.
+- `setSeason()` resets `weatherDisabled = false` so weather works normally on runs that start or restart after wave 10.
+- `startFinalWave()` in `main.js` now calls `seasonalEffects.stopWeather()` immediately after cancelling the season fade.
+
+**Files changed**: `beta/spellwave2/src/seasonal-effects.js`, `beta/spellwave2/src/main.js`
+
+---
+
+### 3. Redesign: AT Field Octagon Geometry & Shatter
+
+**Problem**: The shield used `THREE.RingGeometry(r_inner, r_outer, 1, 1, θ, π/4)` with only 1 radial segment — which produces degenerate arc shapes (curved approximations), not proper straight-edged octagon faces. The shatter animation was also too slow (0.77 s), linear, and purely 2D.
+
+**Fix — geometry**: Each of the 8 sectors now uses `THREE.ShapeGeometry` with explicitly computed straight-line vertices. Ring strips are trapezoids (4 corners: two outer, two inner); fill panels are triangles (center + two outer corners). The `makeOctSector(rInner, rOuter, a1, a2)` helper constructs each shape.
+
+**Fix — shatter animation**:
+- Duration: ~0.4 s (`delta * 2.5` vs old `delta * 1.3`)
+- Distance: quadratic ease-out (`easeOut = 1 - fadeProgress²`), max 7.0 units (was 4.5, linear)
+- Z-axis: each segment drifts ±1 unit on the z-axis (`zDrift` in userData) for an explosive 3D feel
+- Spin: range widened to ±10 rad per segment (was ±2 rad)
+
+**Files changed**: `beta/spellwave2/src/potions.js`
+
+---
+
+## How to Test Locally
+
+1. Run `python3 -m http.server 8001` and open `http://localhost:8001/beta/spellwave2.html`.
+2. Press the Konami sequence to jump to wave 10: `↑ ↑ ↓ ↓ ← → ← → b a`.
+3. **Boss spawn fix**: activate godMode (`iddqd`) and let bosses reach the wall — confirm all 10 bosses eventually spawn without hanging after boss 8.
+4. **Weather fix**: confirm no rain or lightning appears during wave 10.
+5. **AT Field**: activate the potion cheat (`idkfa`), use a shield potion, and verify the 3D field looks like a clean octagon with straight edges; let it shatter and confirm pieces scatter with z-depth and spin.
+
+---
+
 # Walkthrough - Shield Potion (A.T. Field) & Boss Previews Refinement (2026-05-26)
 
 This pass implements a new **Shield Potion (A.T. Field)** and adds refinements to the boss previews in normal waves. The published `/fun/spellwave` version was not changed.

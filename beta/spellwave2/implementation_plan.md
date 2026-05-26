@@ -463,13 +463,78 @@ This plan outlines the design and implementation of a 5-Wave Campaign Mode for S
 
 ---
 
-## Shield Potion (A.T. Field) Visuals (Postponed for User Refinement)
+## Shield Potion (A.T. Field) Visuals
 
-The Shield Potion (A.T. Field) has been integrated into the game loop in the beta build:
+The Shield Potion (A.T. Field) is fully integrated and visually redesigned (2026-05-26):
+
 - **Audio Synthesizer**: Rising activation hum and crystalline block impact deflection sweep.
 - **Gameplay Triggers**: Absorbs 1 leak or 2 boss projectile hits while keeping multiplier and combo streak safe.
-- **Shatter Dispersal**: Visualizing octagon rings and internal translucency split into 8 independent slices that drift and rotate apart on impact/destruction.
+- **Geometry (redesigned 2026-05-26)**: Each of 8 sectors uses `THREE.ShapeGeometry` with explicitly computed straight-line vertices — proper straight-edged octagon faces. Ring strips are trapezoids; fill panels are triangles from the center.
+- **Shatter Dispersal (redesigned 2026-05-26)**: 8 slices fly outward in ~0.4 s with quadratic ease-out, z-axis depth scatter (±1 unit), and wide spin (±10 rad). Max scatter distance is 7.0 units.
 - **Screen Tint Overlay**: Breathing screen-wide faint red overlay that fades out on destruction.
 
-**Current Visual Status**: The core rendering (mesh structure, segments, materials, and screen space elements) is functioning, but the aesthetic styling is **postponed for future refinement**. The user will directly adjust the Three.js materials, colors, opacity curves, or particle details later.
+---
+
+## Wave 10 Playtest Bug Fixes (2026-05-26)
+
+Three additional bugs found during playtesting after the 2026-05-25 quality pass. All fixed in commit `7b1d273`.
+
+---
+
+### Bug 1: Bosses 9 & 10 Never Spawn
+
+**Symptom**: Wave 10 hangs after the 8th boss is defeated. Nothing spawns.
+
+**Root cause A — spawn blocked by support-enemy guard**: The `hasActiveSupportEnemy` check in the final-wave spawn loop blocked ALL queue entries — including boss entries — whenever any medic or mimic was alive. Since mimics and medics can overlap with boss slots in the shuffled queue, the boss spawn timer never triggered when a support enemy was on screen.
+
+**Root cause B — queue-exhausted deadlock in godMode**: Once `finalWaveQueueIndex >= 16` (all entries consumed), the `else if (finalWaveQueueIndex < finalWaveQueue.length)` branch stops firing. If a boss leaked in godMode, `leakEnemy()` did not increment `bossesDefeated`, so `bossesDefeated >= FINAL_WAVE_BOSS_COUNT` was also never true — permanent hang.
+
+**Fix**:
+- Changed `hasActiveSupportEnemy` to only gate support-on-support spawning:
+  ```javascript
+  const nextEntry = finalWaveQueue[finalWaveQueueIndex];
+  const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
+  ```
+- Added `if (isFinalWave() && enemy.isBoss) bossesDefeated += 1;` in `leakEnemy()` before `removeEnemy()`.
+
+**Files**: `beta/spellwave2/src/main.js`
+
+---
+
+### Bug 2: Rain and Lightning Appear in Wave 10
+
+**Symptom**: Rain and lightning run throughout wave 10 despite the space background.
+
+**Root cause**: `startFinalWave()` switches to the deep-space Three.js scene but never disables the seasonal weather system. Wave 10 maps to summer (`(10-1) % 4 = 1`), so `updateSummerStorm()` fires every frame and continuously re-enables rain and lightning regardless of scene state.
+
+**Fix**:
+- Added `weatherDisabled` boolean flag (default `false`) to the closure in `seasonal-effects.js`.
+- Added `stopWeather()` export: sets `weatherDisabled = true`, immediately hides rain/snow/lightning.
+- `updateSummerStorm()` and `updateSnow()` bail early when `weatherDisabled` is set.
+- `setSeason()` resets `weatherDisabled = false` so weather is restored on subsequent runs.
+- `startFinalWave()` calls `seasonalEffects.stopWeather()` after cancelling the season fade.
+
+**Files**: `beta/spellwave2/src/seasonal-effects.js`, `beta/spellwave2/src/main.js`
+
+---
+
+### Bug 3: AT Field Octagon Geometry and Ugly Shatter
+
+**Symptom**: The shield looks like arc segments (curved geometry) rather than clean octagon facets, and the shatter animation is slow and flat.
+
+**Root cause — geometry**: `THREE.RingGeometry(r_inner, r_outer, 1, 1, θ, π/4)` with 1 segment produces a single degenerate quadrilateral that approximates an arc, not a straight-edged polygon face. Similarly, `THREE.CircleGeometry(r, 1, θ, π/4)` produces a triangle, not a clean sector.
+
+**Root cause — shatter**: Duration of ~0.77 s, linear distance growth (`driftProgress * 4.5`), no z-axis movement, and narrow spin range (±2 rad) made the break look weak.
+
+**Fix**:
+- Replaced all ring/circle geometry with `THREE.ShapeGeometry` using explicit vertex coordinates:
+  - Ring strips: 4-vertex trapezoids (`moveTo` outer-left, `lineTo` outer-right, `lineTo` inner-right, `lineTo` inner-left, `closePath`).
+  - Fill panels: 3-vertex triangles (center, outer-left, outer-right).
+- Shatter improvements:
+  - Rate: `delta * 2.5` → ~0.4 s total
+  - Distance: `easeOut = 1 - fadeProgress²` → quadratic ease-out, max 7.0 units
+  - Z-axis: per-segment `zDrift` (±1 unit) adds depth to the explosion
+  - Spin: ±10 rad range (was ±2 rad)
+
+**Files**: `beta/spellwave2/src/potions.js`
 

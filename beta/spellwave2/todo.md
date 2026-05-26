@@ -126,6 +126,21 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Expand `playVictoryFinaleSound()` in `audio.js` to ~15s orchestral arc: D-major 6-chord progression, shimmer breath noise filter, and bell-tail tones from 8.2–14.8s.
 - [x] Fix blank ending canvas on Chrome (commit `db37271`): defer `resize()` to next RAF frame after `hidden` is removed; guard resize against 0-size; add `ctx` null check; force resize in `setPhase()` if W/H unresolved; remove duplicate RAF start at bottom of `createEndingFX`.
 
+### 6j. Playtest Bug Fixes (2026-05-26) — see `implementation_plan.md` for full root-cause analysis
+
+**Bug 1: Bosses 9 & 10 never appear**
+- [x] Root cause A — spawn blocked: `hasActiveSupportEnemy` guard in the final-wave spawn loop blocked all entries (including bosses) while any medic/mimic was alive. Fix: only apply the guard when `nextEntry !== 'boss'` so bosses always advance on timer.
+- [x] Root cause B — queue-exhausted deadlock: when all 16 queue entries were consumed but a boss leaked in godMode, `bossesDefeated` was never incremented, neither branch fired, and wave 10 hung permanently. Fix: increment `bossesDefeated` in `leakEnemy()` when `isFinalWave() && enemy.isBoss`.
+
+**Bug 2: Rain and lightning appear in wave 10**
+- [x] Add `weatherDisabled` flag and `stopWeather()` function to `seasonal-effects.js`; `updateSummerStorm()` and `updateSnow()` bail early when flag is set.
+- [x] `setSeason()` resets `weatherDisabled = false` so weather works normally on subsequent runs.
+- [x] Call `seasonalEffects.stopWeather()` in `startFinalWave()` in `main.js`.
+
+**Bug 3: AT Field octagon geometry and ugly shatter**
+- [x] Replace `THREE.RingGeometry`/`THREE.CircleGeometry` with `THREE.ShapeGeometry` trapezoids for each of 8 sectors — proper straight-edged octagon faces with no arc approximation.
+- [x] Shatter rewrite: faster (~0.4 s, rate `delta * 2.5`), quadratic ease-out distance, per-segment z-axis drift (`zDrift` in userData), spin range widened to ±10 rad, max scatter distance 7.0 units.
+
 ### 6h. Playtest Bug Fixes (2026-05-25) — see `implementation_plan.md` for full root-cause analysis
 
 **Bug 1: Space background not working**

@@ -93,6 +93,11 @@
   - [x] Type `iddqd` and check god mode
   - [x] Verify Repulsor Blast pushes enemies back and stuns them
   - [x] Verify Blaze Barrier burns enemies and blocks projectiles up to 3 times
+- [x] Playtest bug fixes (2026-05-26)
+  - [x] Fix bosses 9 & 10 never spawning in wave 10: change `hasActiveSupportEnemy` guard so bosses always spawn on timer regardless of live medics/mimics; also increment `bossesDefeated` in `leakEnemy()` for final-wave bosses to prevent queue-exhausted deadlock in godMode
+  - [x] Fix rain/lightning appearing in wave 10: add `weatherDisabled` flag and `stopWeather()` to `seasonal-effects.js`; call it from `startFinalWave()` in `main.js`; `setSeason()` resets the flag so subsequent runs work normally
+  - [x] Redesign AT Field (shield) geometry and shatter: replace `RingGeometry`/`CircleGeometry` with `THREE.ShapeGeometry` trapezoids for true straight-edged octagon sectors; shatter is now faster (~0.4 s), uses quadratic ease-out, adds per-segment z-axis drift, and widens spin range to ±10 rad
+
 - [x] Implement Phase 2: Mimic Chest Enemy
   - [x] Define `MIMIC_TYPE` and `MIMIC_WORDS`
   - [x] Program staggered spawn timing rules for normal wave phases
