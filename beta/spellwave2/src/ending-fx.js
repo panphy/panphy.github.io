@@ -11,6 +11,7 @@ export function createEndingFX(canvas) {
   let lastStamp = null;
   let age = 0;
   let phase = 'idle';
+  let pendingSpawns = null;
 
   // ── Sizing ─────────────────────────────────────────────────────────────────
   let W = 0, H = 0;
@@ -19,11 +20,17 @@ export function createEndingFX(canvas) {
     const w = canvas.offsetWidth;
     const h = canvas.offsetHeight;
     if (w === 0 || h === 0) return; // Parent still hidden — skip
+    if (w === W && h === H) return; // Already correct size — skip
     W = w;
     H = h;
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (pendingSpawns) {
+      triggerPhaseSpawns(pendingSpawns);
+      pendingSpawns = null;
+    }
   }
   let _resizeObs = null;
   if (typeof ResizeObserver !== 'undefined') {
@@ -291,7 +298,8 @@ export function createEndingFX(canvas) {
       nebulaAlpha = Math.min(1, nebulaAlpha + dt * 0.14);
     }
 
-    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#02030a';
+    ctx.fillRect(0, 0, W, H);
     drawNebula();
     drawStars();
     updateRings(dt);
@@ -300,9 +308,7 @@ export function createEndingFX(canvas) {
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
-  function setPhase(name) {
-    if (W === 0 || H === 0) resize(); // Ensure dimensions are set before spawning
-    phase = name;
+  function triggerPhaseSpawns(name) {
     if (name === 'detonation') {
       spawnBurst(W * 0.5, H * 0.5);
       spawnRings(W * 0.5, H * 0.5);
@@ -310,6 +316,18 @@ export function createEndingFX(canvas) {
       for (let i = 0; i < 55; i++) spawnSparkle(W * 0.5, H * 0.40);
     } else if (name === 'stats') {
       for (let i = 0; i < 24; i++) spawnSparkle(W * 0.5, H * 0.48);
+    }
+  }
+
+  function setPhase(name) {
+    phase = name;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    if (w > 0 && h > 0) {
+      resize();
+      triggerPhaseSpawns(name);
+    } else {
+      pendingSpawns = name;
     }
   }
 
@@ -322,6 +340,10 @@ export function createEndingFX(canvas) {
     _moteAccum = 0;
     rings.length = 0;
     for (const p of pool) p.alive = false;
+    pendingSpawns = null;
+    if (W > 0 && H > 0) {
+      ctx.clearRect(0, 0, W, H);
+    }
   }
 
   function destroy() {

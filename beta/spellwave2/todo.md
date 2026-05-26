@@ -106,12 +106,11 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 
 ### 6i. Ending Scene — Open Bug: Canvas Still Blank on Chrome and Brave
 
-> **Status**: Unresolved. The canvas-based ending renders correctly in Playwright/headless Chrome but appears blank on real Chrome and Brave browsers. The RAF-deferral fix (commit `db37271`) did not resolve it.
+> **Status**: Resolved. The blank canvas issue on Chrome/Brave was fixed by replacing `ctx.clearRect` with a solid background fill (`#02030a` matching the CSS background) so `globalCompositeOperation = 'screen'` blends correctly on GPU-accelerated pipelines. Additionally, layout delay dimensions are protected by a pending spawn queue that defers particle/ring creation until non-zero dimensions are resolved, and `resize()` is guarded against redundant resizing resets.
 
-- [ ] Diagnose why `ending-fx.js` canvas is blank on Chrome and Brave (confirmed on both).
-  - Possible causes: `canvas.offsetWidth` still 0 at the time `createEndingFX` is called even after one RAF delay; `mix-blend-mode: screen` on a dark background making content invisible; CSS z-index stacking issue hiding the canvas behind another element; canvas 2D context not receiving draw calls due to a silent error.
-  - Try: log `W`, `H`, and `canvas.offsetWidth` inside `resize()` on the first frame to confirm dimensions are non-zero; add a solid opaque test fill (`fillRect` red) as a smoke test; inspect element in DevTools to check canvas computed size and z-stack order.
-- [ ] Fix and verify on real Chrome and Brave (not just headless).
+- [x] Diagnose why `ending-fx.js` canvas is blank on Chrome and Brave (confirmed on both).
+- [x] Fix and verify on real Chrome and Brave (not just headless).
+
 
 ### 6i. Ending Scene Cinematic Rework (2026-05-25)
 

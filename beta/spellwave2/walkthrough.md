@@ -11,7 +11,10 @@ This pass replaces the CSS-only ending overlay with a canvas-based Star Wars vic
 - **Particle pool**: 320-slot system with four types — `ember` (rising flame motes), `sparkle` (gold/blue burst on titlefly/stats), `burst` (radial explosion particles), `mote` (slow ambient drift).
 - **Explosion rings**: up to 3 concurrent expanding ring arcs (white, blue, gold) launched at `detonation` phase.
 - **Aurora bands**: 3 horizontal screen-blend sweeps during nebula/crawl/titlefly phases.
-- **Chrome blank-canvas fix**: defers first `resize()` to next RAF frame so `offsetWidth` is non-zero after `hidden` is removed; guards resize against 0-size; forces resize in `setPhase()` if dimensions still unresolved (commit `db37271`).
+- **Chrome/Brave blank-canvas fix**:
+  - Replaced `ctx.clearRect` with a solid background fill (`#02030a`, matching CSS) so `globalCompositeOperation = 'screen'` renders correctly on GPU-accelerated pipelines.
+  - Implemented a `pendingSpawns` queue to protect against premature `setPhase()` triggers when the parent container has 0 dimensions during layout delays.
+  - Added redundant `resize()` checks and guards (`w === W && h === H`) to prevent layout resizing loops.
 
 ### 2. Ending HTML (`spellwave2.html`)
 - Replaced `<div class="ending-starfield">` with `<canvas id="endingCanvas" class="ending-canvas">`.

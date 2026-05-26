@@ -7,6 +7,7 @@
   - [x] Update `main.js` — import and wire `createEndingFX`; rewrite `startEndingSequence()` with 5-phase timed sequence (flash → nebula → titlefly → crawl → stats); wire skip button and replay reset
   - [x] Expand `playVictoryFinaleSound()` to ~15s orchestral arc in `audio.js` — D-major chord progression, shimmer breath noise, bell-tail tones
   - [x] Fix blank ending canvas on Chrome — defer initial `resize()` to next RAF frame so `offsetWidth` is non-zero after `hidden` is removed; guard `resize()` against 0-size; add `ctx` null check; force resize in `setPhase()` if dimensions still unresolved; remove duplicate RAF start at bottom of `createEndingFX`
+  - [x] Complete blank ending canvas fix on Chrome/Brave — replace `ctx.clearRect` with solid dark background fill (`#02030a`) to fix GPU-accelerated screen-blending transparency; implement `pendingSpawns` queue to protect against early `setPhase()` triggers when parent is hidden; add redundant `resize()` checks.
 - [x] Rework wave 10 finale audio and ending scene in `beta/spellwave2`
   - [x] Read and update wave 10 planning docs
   - [x] Replace the simple final-wave music loop with an immersive interstellar Web Audio scheduler
