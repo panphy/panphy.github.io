@@ -40,6 +40,8 @@ This pass replaces the CSS-only ending overlay with a canvas-based Star Wars vic
   - 29700ms: stats screen
 - Skip button clears timers and calls `showEndingStatsScreen(finalStats)` directly.
 - `dismissEndingSequence()` calls `endingFX.reset()`.
+- **Boss Word Hinting**: Standardized word hinting for all bosses across all waves to consistently show exactly 3 letters per word (except for words shorter than 3 letters).
+- **Ending Copy Clean-up**: Replaced the legacy prototype reference `"The castle stands."` in `spellwave2.html` with `"The barrier holds."` to match the physics/spell-casting theme.
 
 ### 5. Victory Music (`audio.js`)
 - `playVictoryFinaleSound()` extended from ~8s to ~15s.

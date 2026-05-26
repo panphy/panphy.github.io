@@ -111,6 +111,9 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [x] Diagnose why `ending-fx.js` canvas is blank on Chrome and Brave (confirmed on both).
 - [x] Fix and verify on real Chrome and Brave (not just headless).
 - [x] Improve rising horizon visuals — set height to 100vh (container boundary off-screen) and set custom ellipse bounds `ellipse 80vw 55vh at 50% 100%` to resolve widescreen horizontal clipping and ensure smooth gradient blending.
+- [x] Ensure all bosses show exactly 3 hinting letters for hidden words across all waves (except words < 3 letters).
+- [x] Update ending summary text to remove legacy "castle" reference and change it to "The barrier holds." to match the physics theme.
+
 
 
 ### 6i. Ending Scene Cinematic Rework (2026-05-25)

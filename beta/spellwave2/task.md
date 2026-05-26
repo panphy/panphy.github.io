@@ -9,6 +9,8 @@
   - [x] Fix blank ending canvas on Chrome — defer initial `resize()` to next RAF frame so `offsetWidth` is non-zero after `hidden` is removed; guard `resize()` against 0-size; add `ctx` null check; force resize in `setPhase()` if dimensions still unresolved; remove duplicate RAF start at bottom of `createEndingFX`
   - [x] Complete blank ending canvas fix on Chrome/Brave — replace `ctx.clearRect` with solid dark background fill (`#02030a`) to fix GPU-accelerated screen-blending transparency; implement `pendingSpawns` queue to protect against early `setPhase()` triggers when parent is hidden; add redundant `resize()` checks.
   - [x] Redesign rising horizon glow — set height to `100vh` and set explicit ellipse size (`80vw 55vh`) to fix widescreen horizontal edge clipping and create a smooth planetary dome glow that fades seamlessly.
+  - [x] Standardize boss hinting — ensure all bosses across all waves show exactly 3 hinting letters (unless word length is < 3).
+  - [x] Clean up legacy references — replace the prototype "castle stands" copy in the victory overlay with "The barrier holds."
 - [x] Rework wave 10 finale audio and ending scene in `beta/spellwave2`
   - [x] Read and update wave 10 planning docs
   - [x] Replace the simple final-wave music loop with an immersive interstellar Web Audio scheduler

@@ -1959,9 +1959,7 @@ function buildHintMask(term, options = {}) {
 }
 
 function getBossQuestionHintRange() {
-  if (waveSet === 1) return { min: 3, max: 3 };
-  if (waveSet === 2) return { min: 2, max: 3 };
-  return { min: 1, max: 3 };
+  return { min: 3, max: 3 };
 }
 
 function buildSearchPrompt(term, options = {}) {
@@ -2504,10 +2502,11 @@ function spawnEnemy(options = {}) {
       ? buildHintMask(wordData.term, {
           ...promptOptions,
           hintRange,
-          leadingTypeableCount: 1, // Fallback
+          leadingTypeableCount: isBoss ? 3 : 1,
         })
       : null,
     hintRange,
+    hintLetterCount: isBoss ? 3 : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,
