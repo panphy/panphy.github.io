@@ -1690,26 +1690,28 @@ body:not(.is-running) .potion-bar {
   stroke-width: 2.2;
   filter: drop-shadow(0 0 3px rgba(255, 34, 0, 0.8));
   transform-origin: 22px 22px;
+  animation: shield-breath-icon 2.5s ease-in-out infinite;
 }
 .magic-shield .shield-outer {
-  animation: shield-spin-cw 12s linear infinite;
 }
 .magic-shield .shield-middle {
-  animation: shield-spin-ccw 9s linear infinite;
   fill: none;
 }
 .magic-shield .shield-inner {
-  animation: shield-spin-cw 6s linear infinite;
   fill: rgba(255, 34, 0, 0.18);
 }
 
-@keyframes shield-spin-cw {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes shield-spin-ccw {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-360deg); }
+@keyframes shield-breath-icon {
+  0%, 100% {
+    opacity: 0.55;
+    filter: drop-shadow(0 0 2px rgba(255, 34, 0, 0.6));
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1.0;
+    filter: drop-shadow(0 0 6px rgba(255, 34, 0, 1.0));
+    transform: scale(1.03);
+  }
 }
 
 body.chain-lightning-primed .typing-strip {

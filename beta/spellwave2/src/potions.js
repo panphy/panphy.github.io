@@ -209,6 +209,12 @@ export function createPotionSystem({
         const innerMesh = new THREE.Mesh(new THREE.RingGeometry(1.45, 1.5, 8), mat);
         const centerMesh = new THREE.Mesh(new THREE.CircleGeometry(0.5, 8), matCenter);
 
+        // Align octagons upright (matching the SVG icon layout)
+        outerMesh.rotation.z = Math.PI / 8;
+        middleMesh.rotation.z = Math.PI / 8;
+        innerMesh.rotation.z = Math.PI / 8;
+        centerMesh.rotation.z = Math.PI / 8;
+
         shieldGroup.add(outerMesh);
         shieldGroup.add(middleMesh);
         shieldGroup.add(innerMesh);
@@ -297,12 +303,7 @@ export function createPotionSystem({
 
       // Update A.T. Field shield group
       if (shieldGroup) {
-        // Rotate nested octagons in opposite directions
-        shieldGroup.children[0].rotation.z += delta * 0.18; // Outer
-        shieldGroup.children[1].rotation.z -= delta * 0.32; // Middle
-        shieldGroup.children[2].rotation.z += delta * 0.54; // Inner
-        shieldGroup.children[3].rotation.z -= delta * 0.10; // Center
-
+        // Octagons are stationary (rotation.z is fixed)
         if (shieldActive) {
           if (shieldHitProgress > 0) {
             shieldHitProgress = Math.max(0, shieldHitProgress - delta * 2.2); // Fade impact flash
@@ -318,24 +319,36 @@ export function createPotionSystem({
               }
             });
           } else {
-            // Standard ambient breathing pulse
-            const pulse = 1.0 + Math.sin(getGameTime() * 6.0) * 0.03;
+            // Standard ambient breathing glow and scale
+            const time = getGameTime();
+            const pulse = 1.0 + Math.sin(time * 3.0) * 0.02; // Slower breathing scale
             shieldGroup.scale.set(pulse, pulse, 1);
+            
+            const breatheOpacity = 0.55 + Math.sin(time * 3.0) * 0.15; // Slow breathing glow
+            const breatheCenterOpacity = 0.25 + Math.sin(time * 3.0) * 0.08;
             
             shieldGroup.traverse((child) => {
               if (child.isMesh) {
-                child.material.opacity = child === shieldGroup.children[3] ? 0.25 : 0.55;
+                child.material.opacity = child === shieldGroup.children[3] ? breatheCenterOpacity : breatheOpacity;
               }
             });
           }
         } else {
-          // Deactivation fade out
-          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 3.5);
+          // Deactivation fade out - slower (duration ~0.67s)
+          shieldFadeTimer = Math.max(0, shieldFadeTimer - delta * 1.5);
           const fadeProgress = shieldFadeTimer;
-          shieldGroup.scale.set(1.0 + (1.0 - fadeProgress) * 0.2, 1.0 + (1.0 - fadeProgress) * 0.2, 1);
+          const time = getGameTime();
+          
+          // Expand scale while fading out
+          const scale = 1.0 + Math.sin(time * 3.0) * 0.02 + (1.0 - fadeProgress) * 0.25;
+          shieldGroup.scale.set(scale, scale, 1);
+          
+          const breatheOpacity = (0.55 + Math.sin(time * 3.0) * 0.15) * fadeProgress;
+          const breatheCenterOpacity = (0.25 + Math.sin(time * 3.0) * 0.08) * fadeProgress;
+          
           shieldGroup.traverse((child) => {
             if (child.isMesh) {
-              child.material.opacity = (child === shieldGroup.children[3] ? 0.25 : 0.55) * fadeProgress;
+              child.material.opacity = child === shieldGroup.children[3] ? breatheCenterOpacity : breatheOpacity;
             }
           });
 
