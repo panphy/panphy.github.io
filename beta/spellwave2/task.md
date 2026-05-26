@@ -1,5 +1,12 @@
 # Task List - Roguelike Expansion Updates & Phase 2 Mimic Chest
 
+- [x] Refine boss previews in normal waves (`beta/spellwave2/src/main.js`)
+  - [x] Implement quantity extraction helper `getEquationQuantities()` using whole-word matching from `ALL_WORDS`
+  - [x] Select one unseen quantity from the wave's equation boss word and append it to the preview list
+  - [x] Enforce spawning of all boss previews (vocabulary and equation quantity) in `isNormalWaveComplete()` by ignoring the typing budget for scheduled previews
+  - [x] Reschedule missing previews at the end of the normal wave phase in `startBossPhase()` and truncate the normal target to only spawn those remaining previews
+  - [x] Verify code syntax with `node --check`
+
 - [x] Rework ending scene as canvas-based Star Wars crawl cinematic in `beta/spellwave2`
   - [x] Create `ending-fx.js` — canvas engine with animated nebula (6 screen-blended layers), 180 background stars, particle system (embers, sparkles, bursts, motes), explosion rings, and aurora band sweeps
   - [x] Update `spellwave2.html` — replace `.ending-starfield` with `<canvas id="endingCanvas">`; add crawl container, intro text, logo, skip button

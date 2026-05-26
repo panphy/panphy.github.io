@@ -1,8 +1,24 @@
-# Walkthrough - Ending Scene Cinematic Rework (2026-05-25)
+# Walkthrough - Boss Previews Refinement & Ending Scene Cinematic Rework (2026-05-26)
 
-This pass replaces the CSS-only ending overlay with a canvas-based Star Wars victory cinematic in `beta/spellwave2`. The published `/fun/spellwave` version was not changed.
+This pass adds refinements to the boss previews in normal waves (`beta/spellwave2/src/main.js`) to guarantee players see vocabulary boss answers and at least one quantity of each equation boss before transitioning to the boss phase. The published `/fun/spellwave` version was not changed.
 
 ## Changes Implemented
+
+### 1. Boss Previews Refinement
+- **Equation Quantity Matcher**: Added `getEquationQuantities(equationTerm)` which normalizes mathematical equations to text terms and extracts matching vocabulary entries from `ALL_WORDS` via length-descending whole-word checks.
+- **Wave Planning (`prepareWavePlan`)**: 
+  - Finds the equation boss word for the wave.
+  - Automatically identifies its vocabulary quantities.
+  - Randomly selects one quantity that is not already a vocabulary boss in the wave and appends it to `previewableWordsThisSet` (which also contains the normal definition boss words).
+  - Feeds the combined array to `buildBossPreviewSchedule()`.
+- **Completion Check (`isNormalWaveComplete`)**:
+  - Checks if the current slot is a scheduled boss preview. If the typing budget has been reached but a scheduled boss preview is next, it allows spawning that preview (returning `false` for complete). This preserves the typing budget for regular/filler monsters while guaranteeing previews spawn.
+- **Rescheduling (`startBossPhase`)**:
+  - Checks against `previewableWordsThisSet` instead of `definitionBossWordsForWave()` for missing preview words.
+  - Removes the typing budget bypass, ensuring that any missing previews are scheduled and spawned at the end of the wave even if the budget has been reached.
+  - Truncates `normalEnemyTarget` to only spawn the rescheduled preview words.
+
+## Changes Implemented (Ending Scene Cinematic Rework - 2026-05-25)
 
 ### 1. New File: `src/ending-fx.js`
 - Self-contained canvas 2D effects engine. Exported as `createEndingFX(canvas)` returning `{ setPhase, reset, destroy }`.

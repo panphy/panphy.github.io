@@ -417,6 +417,7 @@ let finalWaveQueue = [];
 let finalWaveQueueIndex = 0;
 let konamiBuffer = [];
 let bossWordsThisSet = [];
+let previewableWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
@@ -2343,7 +2344,12 @@ function isNormalTypingBudgetReached() {
 }
 
 function isNormalWaveComplete() {
-  return normalEnemiesSpawned >= normalEnemyTarget || isNormalTypingBudgetReached();
+  if (normalEnemiesSpawned >= normalEnemyTarget) return true;
+  if (isNormalTypingBudgetReached()) {
+    // If typing budget is reached, we only allow spawning scheduled boss previews
+    return !bossPreviewSchedule.has(normalEnemiesSpawned);
+  }
+  return false;
 }
 
 function getEnemyLimit() {
@@ -2533,7 +2539,7 @@ function spawnEnemy(options = {}) {
     floatAmount: isFlying ? 0.22 : 0,
     phase: Math.random() * Math.PI * 2,
   };
-  if (!isBoss && definitionBossWordsForWave().some(w => w.term === wordData.term)) {
+  if (!isBoss && previewableWordsThisSet.some(w => w.term === wordData.term)) {
     introducedBossTermsThisSet.add(wordData.term);
   }
   enemyId += 1;
@@ -4182,6 +4188,27 @@ function isEnemyTargetable(enemy) {
   return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
 }
 
+function getEquationQuantities(equationTerm) {
+  const normalizedEq = equationTerm.toLowerCase()
+    .replace(/[²³½0-9.×/=\-+()]/g, ' ')
+    .replace(/\s+/g, ' ');
+
+  const matched = [];
+  const tempEq = " " + normalizedEq + " ";
+  const sortedWords = [...ALL_WORDS].sort((a, b) => b.term.length - a.term.length);
+
+  let remainingEq = tempEq;
+  for (const word of sortedWords) {
+    const term = word.term.toLowerCase();
+    const termPattern = " " + term + " ";
+    if (remainingEq.includes(termPattern)) {
+      matched.push(word);
+      remainingEq = remainingEq.replace(termPattern, " ");
+    }
+  }
+  return matched;
+}
+
 function prepareWavePlan() {
   bossWordsThisSet = chooseBossWordsForWave();
   introducedBossTermsThisSet = new Set();
@@ -4189,7 +4216,19 @@ function prepareWavePlan() {
   medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
   mimicsSpawnedThisSet = 0;
   mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
-  const previewableWords = definitionBossWordsForWave();
+  
+  const previewableWords = [...definitionBossWordsForWave()];
+  const equationWord = bossWordsThisSet.find(w => w.isEquation);
+  if (equationWord) {
+    const quantities = getEquationQuantities(equationWord.term);
+    const unseenQuantities = quantities.filter(q => !previewableWords.some(pw => pw.term === q.term));
+    if (unseenQuantities.length > 0) {
+      const chosenQuantity = unseenQuantities[Math.floor(Math.random() * unseenQuantities.length)];
+      previewableWords.push(chosenQuantity);
+    }
+  }
+  previewableWordsThisSet = previewableWords;
+
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
   hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
 }
@@ -4790,15 +4829,13 @@ function startFinalWave() {
 
 function startBossPhase() {
   if (bossWordsThisSet.length === 0) prepareWavePlan();
-  const missingPreviewWords = isNormalTypingBudgetReached()
-    ? []
-    : definitionBossWordsForWave().filter(w => !introducedBossTermsThisSet.has(w.term));
+  const missingPreviewWords = previewableWordsThisSet.filter(w => !introducedBossTermsThisSet.has(w.term));
   if (missingPreviewWords.length > 0) {
     const firstSlot = normalEnemiesSpawned;
     for (const [index, word] of missingPreviewWords.entries()) {
       bossPreviewSchedule.set(firstSlot + index, word);
     }
-    normalEnemyTarget += missingPreviewWords.length;
+    normalEnemyTarget = normalEnemiesSpawned + missingPreviewWords.length;
     updateHud(true);
     return;
   }
