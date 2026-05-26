@@ -27,7 +27,7 @@ This pass replaces the CSS-only ending overlay with a canvas-based Star Wars vic
 - `@keyframes grade-ceremony`: scale + box-shadow pulse on the GCSE grade badge, 2.4s with 0.75s delay.
 - Replaced `phase-warp` with `phase-nebula` / `phase-title-fly` / `phase-crawl` selectors throughout.
 - Enhanced `logo-fly-away` keyframe for a more dramatic exit.
-- **Rising Horizon glow**: Replaced the previous rectangular-bound linear gradient with a bottom-centered radial gradient (`ellipse at 50% 100%`) that fades smoothly to fully transparent at the top, creating a realistic planetary dome glow.
+- **Rising Horizon glow**: Fixed a horizontal edge clipping bug on wide screens by increasing `.ending-horizon` height to `100vh` (ensuring its container boundary is off-screen) and explicitly defining the radial-gradient's dimensions as `ellipse 80vw 55vh at 50% 100%`. This guarantees the Y-axis radius terminates in 100% transparency at `55vh`, well before the screen edges, creating a seamless dome glow.
 
 ### 4. Ending Sequence (`main.js`)
 - Imports `createEndingFX` from `./ending-fx.js`.

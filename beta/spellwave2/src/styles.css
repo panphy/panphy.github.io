@@ -2088,10 +2088,10 @@ body:not(.time-frozen) #gameCanvas {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 60vh;
+  height: 100vh;
   z-index: 4;
   opacity: 0;
-  background: radial-gradient(ellipse at 50% 100%,
+  background: radial-gradient(ellipse 80vw 55vh at 50% 100%,
     rgba(255, 235, 174, 0.92) 0%,     /* Intense bright golden center */
     rgba(255, 155, 80, 0.52) 28%,     /* Vibrant orange glow */
     rgba(100, 160, 255, 0.28) 60%,    /* Soft cyan/blue transition */
