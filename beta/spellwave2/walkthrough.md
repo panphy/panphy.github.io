@@ -6,10 +6,11 @@ This pass implements a new **Shield Potion (A.T. Field)** and adds refinements t
 
 ### 1. Shield Potion (A.T. Field)
 - **Visuals**:
-  - **3D Octagon Shield Mesh**: Created concentric octagons at the castle wall using `THREE.RingGeometry` (8 segments) and a central solid octagon using `THREE.CircleGeometry` (8 segments). Styled with a bright red, double-sided, transparent material utilizing additive blending (`0xff2200`).
-  - **Rotational Animation**: Configured the nested octagons to rotate slowly in alternating clockwise and counter-clockwise directions to create a shimmering field look.
+  - **3D Octagon Shield Mesh**: Created concentric octagons at the castle wall using `THREE.RingGeometry` (8 segments) and a central solid octagon using `THREE.CircleGeometry` (8 segments). Styled with a bright red, double-sided, transparent material utilizing additive blending (`0xff2200`). Aligned upright to match the SVG icon layout.
+  - **Stationary Breathing Glow**: Removed the rotational animation. The shield octagons are stationary and show a slow, rhythmic, atmospheric breathing glow (pulsing opacity and scale) to feel like a stable, high-tech barrier.
+  - **Graceful Deactivation Fade Out**: When the shield is consumed/destroyed, it expands and fades its opacity out smoothly over ~0.67s.
   - **Screen-Space Impact Flash**: Added an HTML SVG overlay `#shieldFlash` that flashes bright concentric red octagons scaling outwards on block impacts (Evangelion-style).
-  - **Slot Icon**: Added a bright red, rotating concentric octagon SVG to the potion slot.
+  - **Slot Icon**: Added a bright red concentric octagon SVG to the potion slot that glows and breathes in sync with the 3D visual.
 - **Audio**:
   - `playShieldActivateSound()`: Synthesized a rising high-tech hum to represent the shield forming.
   - `playShieldBlockSound()`: Synthesized a glassy/crystalline "shhnnggg!" block impact followed by a deep electronic deflection sweep.

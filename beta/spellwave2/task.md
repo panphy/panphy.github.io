@@ -8,6 +8,7 @@
   - [x] Write CSS rules for `.magic-shield` slot animations and `.shield-flash` overlay in `beta/spellwave2/src/styles.css`
   - [x] Destructure sound hooks, pass them, and wire block logic in `leakEnemy()` and `bossProjectileHitPlayer()` in `beta/spellwave2/src/main.js`
   - [x] Add `'shield'` to mimic loot and cheat drop arrays
+  - [x] Tweak A.T. Field shield visuals: remove rotation, implement slow breathing glow/scale, and slow down/expand deactivation fade out
   - [x] Verify code syntax with `node --check`
 
 - [x] Refine boss previews in normal waves (`beta/spellwave2/src/main.js`)
