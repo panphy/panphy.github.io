@@ -460,3 +460,16 @@ This plan outlines the design and implementation of a 5-Wave Campaign Mode for S
 1. Verify Subject / Curriculum options appear at start, and selecting Combined Science hides separate-only options (like Space Physics in Physics).
 2. Complete Wave 1 and verify path choice card screen opens with new options.
 3. Reach Wave 5, defeat the final boss, and verify transition to the Victory screen with the correct grade and topic badges.
+
+---
+
+## Shield Potion (A.T. Field) Visuals (Postponed for User Refinement)
+
+The Shield Potion (A.T. Field) has been integrated into the game loop in the beta build:
+- **Audio Synthesizer**: Rising activation hum and crystalline block impact deflection sweep.
+- **Gameplay Triggers**: Absorbs 1 leak or 2 boss projectile hits while keeping multiplier and combo streak safe.
+- **Shatter Dispersal**: Visualizing octagon rings and internal translucency split into 8 independent slices that drift and rotate apart on impact/destruction.
+- **Screen Tint Overlay**: Breathing screen-wide faint red overlay that fades out on destruction.
+
+**Current Visual Status**: The core rendering (mesh structure, segments, materials, and screen space elements) is functioning, but the aesthetic styling is **postponed for future refinement**. The user will directly adjust the Three.js materials, colors, opacity curves, or particle details later.
+
