@@ -2085,17 +2085,22 @@ body:not(.time-frozen) #gameCanvas {
 
 .ending-horizon {
   position: absolute;
-  left: -10vw;
-  right: -10vw;
-  bottom: -34vh;
-  height: 62vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60vh;
   z-index: 4;
   opacity: 0;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 235, 174, 0.72) 0%, rgba(100, 160, 255, 0.28) 28%, rgba(55, 28, 130, 0.14) 50%, transparent 72%),
-    linear-gradient(180deg, transparent 0%, rgba(255, 200, 100, 0.14) 38%, rgba(10, 5, 20, 0.88) 100%);
-  filter: blur(0.5px);
-  transform: translateY(16vh);
+  background: radial-gradient(ellipse at 50% 100%,
+    rgba(255, 235, 174, 0.92) 0%,     /* Intense bright golden center */
+    rgba(255, 155, 80, 0.52) 28%,     /* Vibrant orange glow */
+    rgba(100, 160, 255, 0.28) 60%,    /* Soft cyan/blue transition */
+    rgba(40, 20, 100, 0.08) 82%,      /* Deep cosmic purple edge */
+    transparent 100%                  /* Smooth space blend */
+  );
+  filter: blur(2px);
+  transform: translateY(22vh);
+  pointer-events: none;
 }
 
 .game-ending.phase-nebula .ending-horizon,
@@ -2105,7 +2110,7 @@ body:not(.time-frozen) #gameCanvas {
 }
 
 @keyframes ending-horizon-rise {
-  0%   { opacity: 0; transform: translateY(16vh) scale(0.95); }
+  0%   { opacity: 0; transform: translateY(22vh) scale(0.95); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
