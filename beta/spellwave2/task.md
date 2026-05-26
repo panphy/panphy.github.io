@@ -5,6 +5,9 @@
   - [x] Select one unseen quantity from the wave's equation boss word and append it to the preview list
   - [x] Enforce spawning of all boss previews (vocabulary and equation quantity) in `isNormalWaveComplete()` by ignoring the typing budget for scheduled previews
   - [x] Reschedule missing previews at the end of the normal wave phase in `startBossPhase()` and truncate the normal target to only spawn those remaining previews
+  - [x] Wave 10 UI and Clear Criteria:
+    - [x] Replaced the "FINAL x/16" typing area progress label with "BOSS x/10" to match other waves
+    - [x] Modified the Wave 10 victory check to trigger the ending scene immediately after the 10th boss is defeated, ignoring live support monsters (mimics/medics)
   - [x] Verify code syntax with `node --check`
 
 - [x] Rework ending scene as canvas-based Star Wars crawl cinematic in `beta/spellwave2`

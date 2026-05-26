@@ -17,6 +17,9 @@ This pass adds refinements to the boss previews in normal waves (`beta/spellwave
   - Checks against `previewableWordsThisSet` instead of `definitionBossWordsForWave()` for missing preview words.
   - Removes the typing budget bypass, ensuring that any missing previews are scheduled and spawned at the end of the wave even if the budget has been reached.
   - Truncates `normalEnemyTarget` to only spawn the rescheduled preview words.
+- **Wave 10 UI and Clear Criteria**:
+  - Replaced the `FINAL x/16` typing area progress label with `BOSS x/10` to maintain consistency with other waves.
+  - Configured the Wave 10 completion check to transition to the ending scene immediately when all 10 bosses are defeated (`bossesDefeated >= FINAL_WAVE_BOSS_COUNT`), ignoring any remaining live support monsters (mimics or medics).
 
 ## Changes Implemented (Ending Scene Cinematic Rework - 2026-05-25)
 

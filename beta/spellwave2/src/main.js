@@ -1209,7 +1209,18 @@ function animate(frameTime) {
       }
     } else if (wavePhase === 'boss') {
       if (isFinalWave()) {
-        if (finalWaveQueueIndex < finalWaveQueue.length) {
+        if (bossesDefeated >= FINAL_WAVE_BOSS_COUNT) {
+          if (waveClearDelayTimer === 0) {
+            waveClearDelayTimer = 1.5;
+          } else {
+            waveClearDelayTimer -= currentDelta;
+            if (waveClearDelayTimer <= 0) {
+              waveClearDelayTimer = 0;
+              endingStartTime = elapsed;
+              startEndingSequence();
+            }
+          }
+        } else if (finalWaveQueueIndex < finalWaveQueue.length) {
           const hasActiveSupportEnemy = enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
           if (!hasActiveSupportEnemy) {
             bossSpawnTimer -= currentDelta;
@@ -1225,17 +1236,6 @@ function animate(frameTime) {
                 spawnEnemy({ isMimic: true });
               }
               bossSpawnTimer = (entry === 'medic' || entry === 'mimic') ? 1.15 : currentDifficulty().bossSpawnGap;
-            }
-          }
-        } else if (enemies.filter(e => !e.dying).length === 0) {
-          if (waveClearDelayTimer === 0) {
-            waveClearDelayTimer = 1.5;
-          } else {
-            waveClearDelayTimer -= currentDelta;
-            if (waveClearDelayTimer <= 0) {
-              waveClearDelayTimer = 0;
-              endingStartTime = elapsed;
-              startEndingSequence();
             }
           }
         }
@@ -5155,7 +5155,7 @@ function updateTypingLabel() {
   }
   if (wavePhase === 'boss') {
     if (isFinalWave()) {
-      typingLabel.textContent = `FINAL ${Math.min(finalWaveQueueIndex, FINAL_WAVE_TOTAL_COUNT)}/${FINAL_WAVE_TOTAL_COUNT}`;
+      typingLabel.textContent = `BOSS ${bossesDefeated}/${FINAL_WAVE_BOSS_COUNT}`;
       return;
     }
     typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
