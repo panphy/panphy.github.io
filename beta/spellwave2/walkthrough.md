@@ -49,7 +49,8 @@ We have successfully implemented and verified the battery and performance optimi
   - Intro kicker, master title, and subtitle description.
   - All stats cards (labels, values, and the GCSE Grade ceremony card).
   - The final run summary text and "Begin Again" replay button.
-- Adjusted font-sizes, margins, and line-heights dynamically via CSS and media queries for mobile (`max-width: 760px`) and short displays (`max-height: 760px`) to prevent spacing overflow and ensure readability.
+- Upscaled all clamp-based font-sizes for these elements by 30-40% to make them significantly more prominent and legible.
+- Adjusted the media query overrides for mobile (`max-width: 760px`) and short displays (`max-height: 760px`) accordingly to ensure the upscaled text scales down beautifully without overflow.
 
 ---
 

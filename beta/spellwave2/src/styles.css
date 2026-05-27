@@ -1965,7 +1965,7 @@ body:not(.time-frozen) #gameCanvas {
   transform: translate(-50%, -50%);
   width: min(520px, 82vw);
   font-family: var(--font-pixel);
-  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  font-size: clamp(0.75rem, 1.8vw, 1.1rem);
   color: #6dd8ff;
   text-align: center;
   line-height: 1.85;
@@ -1995,7 +1995,7 @@ body:not(.time-frozen) #gameCanvas {
   left: 50%;
   transform: translate(-50%, -50%) scale(1.6);
   font-family: var(--font-pixel);
-  font-size: clamp(1.2rem, 4.5vw, 3.4rem);
+  font-size: clamp(1.8rem, 6vw, 4.5rem);
   color: #ffe18a;
   text-align: center;
   text-shadow:
@@ -2064,7 +2064,7 @@ body:not(.time-frozen) #gameCanvas {
   top: 100%;
   width: 100%;
   font-family: var(--font-pixel);
-  font-size: clamp(0.5rem, 1.1vw, 0.65rem);
+  font-size: clamp(0.72rem, 1.6vw, 1.0rem);
   line-height: 2.1;
   color: #ffe18a;
   text-align: center;
@@ -2089,14 +2089,14 @@ body:not(.time-frozen) #gameCanvas {
   color: #b8d4ff;
   letter-spacing: 0.16em;
   margin-bottom: 0.8rem;
-  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  font-size: clamp(0.85rem, 1.8vw, 1.15rem);
   text-shadow: 0 0 12px rgba(160, 200, 255, 0.6);
 }
 
 .ending-crawl-content .crawl-title {
   text-align: center;
   font-family: var(--font-pixel);
-  font-size: clamp(0.68rem, 1.5vw, 0.95rem);
+  font-size: clamp(1.05rem, 2.2vw, 1.5rem);
   color: #fff;
   margin-top: 0;
   margin-bottom: 2.4rem;
@@ -2338,7 +2338,7 @@ body:not(.time-frozen) #gameCanvas {
   opacity: 0;
   color: rgba(207, 224, 255, 0.78);
   font-family: var(--font-pixel);
-  font-size: clamp(0.5rem, 1vw, 0.65rem);
+  font-size: clamp(0.68rem, 1.4vw, 0.85rem);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2352,7 +2352,7 @@ body:not(.time-frozen) #gameCanvas {
 
 .ending-title {
   font-family: var(--font-pixel);
-  font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+  font-size: clamp(1.6rem, 4.5vw, 2.8rem);
   font-weight: 700;
   color: #ffe18a;
   text-align: center;
@@ -2390,7 +2390,7 @@ body:not(.time-frozen) #gameCanvas {
 .ending-subtitle {
   color: rgba(244, 241, 220, 0.82);
   font-family: var(--font-pixel);
-  font-size: clamp(0.44rem, 1vw, 0.58rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.8rem);
   line-height: 1.85;
   letter-spacing: 0.02em;
 }
@@ -2486,7 +2486,7 @@ body:not(.time-frozen) #gameCanvas {
 
 .stat-label {
   font-family: var(--font-pixel);
-  font-size: clamp(0.36rem, 0.75vw, 0.44rem);
+  font-size: clamp(0.48rem, 0.95vw, 0.6rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(207, 224, 255, 0.68);
@@ -2494,7 +2494,7 @@ body:not(.time-frozen) #gameCanvas {
 
 .stat-value {
   font-family: var(--font-pixel);
-  font-size: clamp(0.72rem, 1.4vw, 1.05rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.35rem);
   font-weight: 700;
   color: #fff;
   text-shadow: 0 0 18px rgba(128, 185, 255, 0.38);
@@ -2502,7 +2502,7 @@ body:not(.time-frozen) #gameCanvas {
 
 .ending-stat-grade .stat-value {
   font-family: var(--font-pixel);
-  font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+  font-size: clamp(1.8rem, 3.8vw, 2.8rem);
   line-height: 1.1;
   color: #ffe18a;
   text-shadow:
@@ -2513,7 +2513,7 @@ body:not(.time-frozen) #gameCanvas {
 .ending-run-summary {
   color: rgba(255, 226, 139, 0.82);
   font-family: var(--font-pixel);
-  font-size: clamp(0.44rem, 1vw, 0.58rem);
+  font-size: clamp(0.65rem, 1.3vw, 0.8rem);
   font-weight: 700;
   line-height: 1.85;
   letter-spacing: 0.08em;
@@ -2529,7 +2529,7 @@ body:not(.time-frozen) #gameCanvas {
   margin-top: 0.1rem;
   padding: 0.85rem 2.2rem;
   font-family: var(--font-pixel);
-  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  font-size: clamp(0.8rem, 1.6vw, 1.1rem);
   font-weight: 700;
   color: #08060c;
   background:
@@ -2583,20 +2583,20 @@ body:not(.time-frozen) #gameCanvas {
   }
 
   .ending-title {
-    font-size: clamp(1.0rem, 5.5vw, 1.8rem);
+    font-size: clamp(1.3rem, 6.5vw, 2.2rem);
   }
 
   .ending-subtitle {
-    font-size: clamp(0.42rem, 1.2vw, 0.54rem);
+    font-size: clamp(0.55rem, 1.5vw, 0.72rem);
   }
 
   .ending-kicker {
-    font-size: clamp(0.42rem, 1.1vw, 0.54rem);
+    font-size: clamp(0.55rem, 1.5vw, 0.72rem);
     letter-spacing: 0.08em;
   }
 
   .ending-run-summary {
-    font-size: clamp(0.42rem, 1.1vw, 0.54rem);
+    font-size: clamp(0.55rem, 1.5vw, 0.72rem);
     letter-spacing: 0.08em;
   }
 }
@@ -2612,15 +2612,15 @@ body:not(.time-frozen) #gameCanvas {
   }
 
   .ending-kicker {
-    font-size: clamp(0.45rem, 1vw, 0.55rem);
+    font-size: clamp(0.6rem, 1.2vw, 0.72rem);
   }
 
   .ending-title {
-    font-size: clamp(1.1rem, 3.2vw, 1.9rem);
+    font-size: clamp(1.4rem, 3.8vw, 2.2rem);
   }
 
   .ending-subtitle {
-    font-size: clamp(0.45rem, 1vw, 0.55rem);
+    font-size: clamp(0.6rem, 1.2vw, 0.72rem);
   }
 
   .ending-stats {
@@ -2633,25 +2633,25 @@ body:not(.time-frozen) #gameCanvas {
   }
 
   .stat-label {
-    font-size: clamp(0.32rem, 0.7vw, 0.42rem);
+    font-size: clamp(0.44rem, 0.85vw, 0.52rem);
   }
 
   .stat-value {
-    font-size: clamp(0.68rem, 1.3vw, 0.95rem);
+    font-size: clamp(0.85rem, 1.6vw, 1.15rem);
   }
 
   .ending-stat-grade .stat-value {
-    font-size: clamp(1.3rem, 2.5vw, 2.0rem);
+    font-size: clamp(1.6rem, 3.2vw, 2.4rem);
   }
 
   .ending-run-summary {
-    font-size: clamp(0.45rem, 1vw, 0.55rem);
+    font-size: clamp(0.6rem, 1.2vw, 0.72rem);
   }
 
   .ending-replay {
     min-height: 44px;
     padding: 0.65rem 2.0rem;
-    font-size: clamp(0.55rem, 1.2vw, 0.7rem);
+    font-size: clamp(0.72rem, 1.4vw, 0.92rem);
   }
 }
 
