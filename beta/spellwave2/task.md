@@ -56,7 +56,7 @@
   - [x] Verify with `git diff --check`
 - [x] Fix "lightning flying sideways" scaling glitch in `updateEffects()` in [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
 - [x] Align starting coordinate of lightning to the actual wand tip in `triggerChainLightning()`
-- [x] Implement distance limit (`MAX_CHAIN_DISTANCE = 12.0`) in `triggerChainLightning()` to avoid long-range chain segments
+- [x] Keep Chain Lightning uncapped by distance: it jumps to the nearest targetable enemy, even if that creates a long-range segment
 - [x] Freeze enemies during the chain strike sequence (skip movement updates in `updateEnemies()` when `enemy.dying` is true)
 - [x] Support `hold` parameter in `spawnLightningVisual()` and keep held lightning opaque in `updateEffects()`
 - [x] Call `burstChain()` at the end of the sequence to release all lightning bolts and burst all chained monsters simultaneously with a screen flash

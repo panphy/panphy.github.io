@@ -470,6 +470,7 @@ let potionsSystem = null;
 let baseCloudMaterial = null;
 let weatherCloudMaterial = null;
 let cloudWeatherBlend = 0;
+let chainLightningTimers = [];
 
 const {
   toggleEnabled: toggleAudioEnabled,
@@ -513,13 +514,9 @@ const {
   pathLanes: PATH_LANES,
 });
 
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: true,
-  alpha: false,
-  preserveDrawingBuffer: false,
-  powerPreference: 'high-performance',
-});
+const rendererState = createRenderer();
+const renderer = rendererState.renderer;
+const webGLAvailable = rendererState.available;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -614,6 +611,7 @@ setPauseButtonState(true, true);
 updateFullscreenButton();
 updatePhaseDisplay();
 updateHud(true);
+if (!webGLAvailable) showWebGLUnavailable();
 
 startButton.addEventListener('click', () => {
   resumeAudio();
@@ -708,6 +706,11 @@ function toggleGodMode() {
 }
 
 function startGame() {
+  if (!webGLAvailable) {
+    showWebGLUnavailable();
+    return;
+  }
+
   const transitionFromGameOver = mode === 'gameover' || mode === 'ending';
   playStartSound();
   clearEnemies();
@@ -798,6 +801,8 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
+  clearChainLightningTimers();
+  releaseChainBeams();
   potionsSystem.clear();
   document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
@@ -831,6 +836,18 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
   if (runGlossary) runGlossary.hidden = true;
   if (supportLink) supportLink.hidden = true;
   messagePanel.hidden = false;
+}
+
+function showWebGLUnavailable() {
+  showMessage(
+    'WEBGL REQUIRED',
+    'Graphics Unavailable',
+    'Spellwave needs browser WebGL support',
+    'Unavailable',
+    'Enable hardware acceleration or try a browser/device with WebGL enabled.'
+  );
+  startButton.disabled = true;
+  setPauseButtonState(true, true);
 }
 
 function handleKeyDown(event) {
@@ -2085,8 +2102,13 @@ function buildTwoWordLimit(term, options = {}) {
     };
   });
 
-  const hiddenSearch = parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText, options)).join('');
-  return { parts, searchPrompt: hiddenSearch };
+  const hiddenTexts = parts.filter(part => part.isHidden).map(part => part.answerText);
+  const hiddenSearch = hiddenTexts.map(text => buildSearchPrompt(text, options)).join('');
+  return {
+    parts,
+    searchPrompt: hiddenSearch,
+    altSearchPrompts: buildAltSearchPrompts(hiddenTexts.join(' '), options),
+  };
 }
 
 function shouldUseVocabularyPromptLimit(term) {
@@ -2522,7 +2544,7 @@ function spawnEnemy(options = {}) {
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
     searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: twoWordData ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    altSearchPrompts: twoWordData ? twoWordData.altSearchPrompts : buildAltSearchPrompts(wordData.term, promptOptions),
     _matchedSearchPrompt: null,
     limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
@@ -4126,7 +4148,7 @@ function removeEnemy(enemy) {
   const index = enemies.indexOf(enemy);
   if (index >= 0) enemies.splice(index, 1);
   enemyGroup.remove(enemy.group);
-  labelsLayer.removeChild(enemy.label);
+  if (enemy.label.parentNode) enemy.label.parentNode.removeChild(enemy.label);
   disposeObject(enemy.group);
   if (enemy.shadowMesh) {
     scene.remove(enemy.shadowMesh);
@@ -4142,6 +4164,7 @@ function clearEnemies() {
 }
 
 function clearEffects() {
+  clearChainLightningTimers();
   for (const beam of beams) {
     effectsGroup.remove(beam.mesh);
     disposeObject(beam.mesh);
@@ -4660,6 +4683,8 @@ const SPELLING_ALTS = [
   ['litre', 'liter'],
   ['fibre', 'fiber'],
   ['ionise', 'ionize'],
+  ['ionising', 'ionizing'],
+  ['ionising', 'ionization'],
   ['magnetise', 'magnetize'],
   ['analyse', 'analyze'],
   ['polarise', 'polarize'],
@@ -4671,7 +4696,7 @@ const MATH_OPERATOR_INPUTS = new Set(['*', '+', '-', '=', '/', '×', 'x', 'X']);
 function getInputCharacters(character) {
   const inputs = [];
   const base = normalizeCharacter(character);
-  const alias = isMathOperatorInput(character) ? '' : normalizeCharacter(character, { multiplicationAlias: true });
+  const alias = normalizeCharacter(character, { multiplicationAlias: true });
   if (base) inputs.push({ value: base, equationOnly: false });
   if (alias && alias !== base) inputs.push({ value: alias, equationOnly: true });
   return inputs;
@@ -4702,6 +4727,45 @@ function formatAccuracySummary() {
 
 function focusKeyboard() {
   keyboardInput.focus({ preventScroll: true });
+}
+
+function createRenderer() {
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    const message = args.map((arg) => String(arg)).join(' ');
+    if (!message.startsWith('THREE.WebGLRenderer:')) {
+      originalConsoleError.apply(console, args);
+    }
+  };
+  try {
+    return {
+      renderer: new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: false,
+        preserveDrawingBuffer: false,
+        powerPreference: 'high-performance',
+      }),
+      available: true,
+    };
+  } catch (error) {
+    console.warn('Spellwave could not create a WebGL renderer.', error);
+    return {
+      renderer: createFallbackRenderer(),
+      available: false,
+    };
+  } finally {
+    console.error = originalConsoleError;
+  }
+}
+
+function createFallbackRenderer() {
+  return {
+    shadowMap: {},
+    setPixelRatio() {},
+    setSize() {},
+    render() {},
+  };
 }
 
 function resizeRenderer() {
@@ -5421,13 +5485,13 @@ function triggerChainLightning(firstEnemy) {
 
   if (targets.length === 0) {
     // No other monsters: hold visual for 100ms, then burst the single monster
-    window.setTimeout(() => {
+    scheduleChainLightningTimer(() => {
       burstChain(chainMonsters);
     }, 100);
   } else {
     // Chain sequentially
     targets.forEach((enemy, index) => {
-      window.setTimeout(() => {
+      scheduleChainLightningTimer(() => {
         if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
           if (enemy.isBoss) {
             enemy.stunTimer = 3.0;
@@ -5445,13 +5509,30 @@ function triggerChainLightning(firstEnemy) {
 
         // Trigger simultaneous burst when sequence completes
         if (index === targets.length - 1) {
-          window.setTimeout(() => {
+          scheduleChainLightningTimer(() => {
             burstChain(chainMonsters);
           }, 80);
         }
       }, (index + 1) * 60);
     });
   }
+}
+
+function scheduleChainLightningTimer(callback, delay) {
+  const timerId = window.setTimeout(() => {
+    const index = chainLightningTimers.indexOf(timerId);
+    if (index >= 0) chainLightningTimers.splice(index, 1);
+    callback();
+  }, delay);
+  chainLightningTimers.push(timerId);
+  return timerId;
+}
+
+function clearChainLightningTimers() {
+  for (const timerId of chainLightningTimers) {
+    window.clearTimeout(timerId);
+  }
+  chainLightningTimers = [];
 }
 
 function releaseChainBeams() {
@@ -5473,7 +5554,7 @@ function burstChain(chainMonsters) {
 
   if (lightningFlash) {
     lightningFlash.style.opacity = '0.92';
-    window.setTimeout(() => {
+    scheduleChainLightningTimer(() => {
       lightningFlash.style.opacity = '0';
     }, 100);
   }
