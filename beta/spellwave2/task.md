@@ -117,3 +117,16 @@
   - [x] Implement clean escapes in `leakEnemy` (chest clacks shut, floats "LOOT ESCAPED", no damage, no streak reset)
   - [x] Remove the temporary P debug shortcut
   - [x] Update [todo.md](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/todo.md)
+
+- [x] Refactor: Extract `enemy-meshes.js` module from `main.js` (2026-05-27)
+  - [x] Move all 25 enemy/boss/world mesh builder functions (~897 lines) into `src/enemy-meshes.js`
+  - [x] Export `createEnemyMesh`, `createMimicChestMesh`, and `blockMesh`; all other builders are unexported helpers
+  - [x] Add `import { createEnemyMesh, createMimicChestMesh, blockMesh }` to `main.js`
+  - [x] Verify with `node --check` on both files
+
+- [x] Refactor: Extract `prompt-utils.js` module from `main.js` (2026-05-27)
+  - [x] Move all pure text/prompt utility functions and constants (3 non-contiguous blocks, ~219 lines) into `src/prompt-utils.js`; `main.js` reduced from ~5 800 to ~4 700 lines across both extractions
+  - [x] Constants: `LONG_VOCAB_LIMIT_LENGTH`, `SPELLING_ALTS`, `SUPERSCRIPT_MAP`, `MATH_OPERATOR_INPUTS`, `SUPERSCRIPT_DIGITS`, `LOW_VALUE_ANSWER_WORDS`
+  - [x] 12 named exports wired to all call sites in `main.js`: `getInputCharacters`, `isMathOperatorInput`, `buildSearchPrompt`, `buildAltSearchPrompts`, `buildHintMask`, `getBossQuestionHintRange`, `escapeHtml`, `wrapSups`, `buildHintPart`, `buildTwoWordLimit`, `shouldUseVocabularyPromptLimit`, `promptIndexForProgress`
+  - [x] 5 internal helpers remain unexported: `normalizeCharacter`, `isWordToken`, `getAnswerTokenText`, `getTokenExponent`, `isLowValueAnswerToken`
+  - [x] Verify with `node --check` on both files
