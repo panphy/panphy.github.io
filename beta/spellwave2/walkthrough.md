@@ -49,7 +49,7 @@ We have successfully implemented and verified the battery and performance optimi
   - Intro kicker, master title, and subtitle description.
   - All stats cards (labels, values, and the GCSE Grade ceremony card).
   - The final run summary text and "Begin Again" replay button.
-- Upscaled all clamp-based font-sizes for these elements by 30-40% to make them significantly more prominent and legible.
+- Upscaled all clamp-based font-sizes for these elements significantly (up to 70-80% larger than the initial pixel-art font reduction) to ensure bold prominence and easy readability on large and high-DPI Mac/desktop displays.
 - Adjusted the media query overrides for mobile (`max-width: 760px`) and short displays (`max-height: 760px`) accordingly to ensure the upscaled text scales down beautifully without overflow.
 
 ---
