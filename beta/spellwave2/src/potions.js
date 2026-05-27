@@ -82,15 +82,18 @@ export function createPotionSystem({
       slot.className = 'potion-slot';
       const iconContainer = slot.querySelector('.potion-icon');
       if (potion) {
+        const potionName = potion.replace(/_/g, ' ');
         slot.classList.add('occupied');
         slot.setAttribute('data-potion', potion);
-        slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potion.replace(/_/g, ' ')}`);
+        slot.setAttribute('aria-label', `Potion Slot ${index + 1}: ${potionName}`);
+        slot.setAttribute('title', `Use Potion: ${potionName}`);
         if (iconContainer) {
           iconContainer.innerHTML = POTION_SVGS[potion] || '';
         }
       } else {
         slot.removeAttribute('data-potion');
         slot.setAttribute('aria-label', `Potion Slot ${index + 1} (Empty)`);
+        slot.setAttribute('title', `Potion Slot ${index + 1} (Empty)`);
         if (iconContainer) {
           iconContainer.innerHTML = '';
         }

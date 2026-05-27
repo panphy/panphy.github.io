@@ -39,10 +39,11 @@ export function createEndingFX(canvas) {
   }
   // Defer the first resize to the next animation frame so the browser has
   // computed the layout (offsetWidth returns 0 if parent was just un-hidden)
-  raf = requestAnimationFrame(() => {
+  let startupRaf = requestAnimationFrame(() => {
     resize();
-    raf = requestAnimationFrame(render);
+    startupRaf = null;
   });
+
 
   // ── Background starfield (pre-generated, static positions) ────────────────
   const STAR_COUNT = 180;
@@ -321,6 +322,17 @@ export function createEndingFX(canvas) {
 
   function setPhase(name) {
     phase = name;
+    if (phase !== 'idle') {
+      if (!raf) {
+        lastStamp = null;
+        raf = requestAnimationFrame(render);
+      }
+    } else {
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
+    }
     const w = canvas.offsetWidth;
     const h = canvas.offsetHeight;
     if (w > 0 && h > 0) {
@@ -333,6 +345,10 @@ export function createEndingFX(canvas) {
 
   function reset() {
     phase = 'idle';
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = null;
+    }
     age = 0;
     lastStamp = null;
     nebulaAlpha = 0;
@@ -348,6 +364,7 @@ export function createEndingFX(canvas) {
 
   function destroy() {
     if (_resizeObs) _resizeObs.disconnect();
+    if (startupRaf) { cancelAnimationFrame(startupRaf); startupRaf = null; }
     if (raf) { cancelAnimationFrame(raf); raf = null; }
   }
 

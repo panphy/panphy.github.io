@@ -43,7 +43,7 @@
     <div class="boss-banner" id="bossBanner" aria-live="assertive" aria-atomic="true"></div>
     <div class="labels-layer" id="labelsLayer" aria-hidden="true"></div>
 
-    <div class="potion-bar" id="potionBar" aria-label="Potions">
+    <div class="potion-bar" id="potionBar" aria-label="Potions" title="Potion inventory — press Arrow Keys or 1-4 to activate">
       <div class="potion-slot" data-slot="0" aria-label="Potion Slot 1 (Left Arrow or 1)">
         <span class="slot-key">←</span>
         <div class="potion-icon"></div>
@@ -63,7 +63,7 @@
     </div>
 
     <header class="game-bar" aria-label="Game status">
-      <a class="brand-mark" href="../" aria-label="PanPhy Labs home">
+      <a class="brand-mark" href="../" aria-label="PanPhy Labs home" title="Go to PanPhy Labs home">
         <img src="../assets/panphy.png" alt="PanPhy Labs">
       </a>
       <div class="game-title">
@@ -73,7 +73,7 @@
     </header>
 
     <div class="corner-controls" aria-label="Game controls">
-      <button class="icon-button svg-button audio-toggle" id="audioButton" type="button" aria-label="Mute sound">
+      <button class="icon-button svg-button audio-toggle" id="audioButton" type="button" aria-label="Mute sound" title="Mute sound">
         <svg class="button-svg sound-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
           <circle class="button-ring" cx="24" cy="24" r="19"></circle>
           <path class="speaker-glyph" d="M13.5 27.5h6.2l8.1 6.3V14.2l-8.1 6.3h-6.2z"></path>
@@ -82,7 +82,7 @@
           <path class="mute-slash" d="M14 14l20 20"></path>
         </svg>
       </button>
-      <button class="icon-button svg-button transport-button is-playing" id="pauseButton" type="button" aria-label="Pause run" disabled>
+      <button class="icon-button svg-button transport-button is-playing" id="pauseButton" type="button" aria-label="Pause run" title="Pause run" disabled>
         <svg class="button-svg transport-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
           <circle class="button-ring" cx="24" cy="24" r="19"></circle>
           <path class="play-glyph" d="M19 15.5 34.5 24 19 32.5z"></path>
@@ -95,6 +95,14 @@
     </div>
 
     <div class="top-corner-controls" aria-label="Display controls">
+      <button class="icon-button svg-button battery-saver-toggle" id="batterySaverButton" type="button" aria-label="Toggle Battery Saver" title="Toggle Battery Saver">
+        <svg class="button-svg battery-saver-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="leaf-path" d="M30 17c-3 0-7 2.2-8.5 5.2-1.5-3-5.5-5.2-8.5-5.2 0 5.2 3 9 6 10.5 1.5 0.7 3 1.5 4.5 1.5s3-0.7 4.5-1.5c3-1.5 6-5.2 6-10.5z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path class="leaf-stem" d="M21.5 22.5v7.5c0 1.2-0.8 2-1.5 2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+          <line class="saver-slash" x1="14" y1="14" x2="34" y2="34" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"></line>
+        </svg>
+      </button>
       <button class="icon-button svg-button fullscreen-toggle" id="fullscreenButton" type="button" aria-label="Enter full screen" title="Enter full screen">
         <svg class="button-svg fullscreen-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
           <circle class="button-ring" cx="24" cy="24" r="19"></circle>
@@ -115,25 +123,25 @@
     </div>
 
     <section class="hud-grid" aria-label="Run metrics">
-      <div class="readout">
+      <div class="readout" title="Your current run score">
         <span>Score</span>
         <strong id="scoreValue">0</strong>
       </div>
-      <div class="readout">
+      <div class="readout" title="Your personal best score">
         <span>Best</span>
         <strong id="bestValue">0</strong>
       </div>
-      <div class="readout life-readout">
+      <div class="readout life-readout" title="Your remaining life points">
         <span>Life</span>
         <div class="life-meter" id="healthValue" aria-label="Life: 5 hearts"></div>
       </div>
-      <div class="readout">
+      <div class="readout" title="Current wave level">
         <span>Wave</span>
         <strong id="waveValue">1</strong>
       </div>
     </section>
 
-    <section class="typing-strip" aria-live="polite">
+    <section class="typing-strip" aria-live="polite" title="Your current typing input and chain combo streak">
       <span id="typingLabel">INPUT</span>
       <strong id="typedValue">ready</strong>
       <small id="comboValue">0 chain</small>
@@ -144,8 +152,8 @@
       <h2 id="messageTitle">Cast or Crumble</h2>
       <div class="message-score" id="messageScore">Best 0</div>
       <p class="message-copy" id="messageCopy">Type the words to defeat each enemy. Pink hearts heal you — type them too!</p>
-      <button id="startButton" type="button">Start</button>
-      <a class="support-link" id="supportLink" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" hidden>Support My Projects</a>
+      <button id="startButton" type="button" title="Start run">Start</button>
+      <a class="support-link" id="supportLink" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" title="Support my projects on BuyMeACoffee" hidden>Support My Projects</a>
       <div class="run-glossary" id="runGlossary" hidden></div>
     </section>
 
@@ -182,7 +190,6 @@
           <p>Every formula you recalled and every spell you cast has ascended, crystallizing into stars that will guide future apprentices through the dark void...</p>
         </div>
       </div>
-      <button class="ending-skip-button" id="endingSkipButton" type="button">Skip Intro</button>
       <div class="ending-content" id="endingContent">
         <div class="ending-sigil" aria-hidden="true">
           <span></span>
@@ -203,7 +210,7 @@
           <div class="ending-stat"><span class="stat-label">Run Time</span><span class="stat-value" id="endTime">0:00</span></div>
         </div>
         <p class="ending-run-summary">Wave 10 cleared. The barrier holds.</p>
-        <button class="ending-replay" id="endingReplay">Begin Again</button>
+        <button class="ending-replay" id="endingReplay" title="Begin a new run">Begin Again</button>
       </div>
     </div>
   </div>

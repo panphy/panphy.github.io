@@ -1,5 +1,93 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
 
+const materialCache = new Map();
+
+function getCachedMaterial(key, options) {
+  if (!materialCache.has(key)) {
+    const mat = new THREE.MeshStandardMaterial(options);
+    mat.userData.isShared = true;
+    const origColor = mat.color;
+    const gray = 0.299 * origColor.r + 0.587 * origColor.g + 0.114 * origColor.b;
+    const stunColor = new THREE.Color(
+      gray * 0.3 + 0.05,
+      gray * 0.6 + 0.2,
+      gray * 0.9 + 0.45
+    );
+    const stunMat = mat.clone();
+    stunMat.color.copy(stunColor);
+    if (stunMat.emissive) {
+      stunMat.emissive.setRGB(0.1, 0.35, 0.6);
+      stunMat.emissiveIntensity = 0.8;
+    }
+    stunMat.userData.isShared = true;
+    mat.userData.stunMaterial = stunMat;
+    materialCache.set(key, mat);
+  }
+  return materialCache.get(key);
+}
+
+function getBodyMat(color) {
+  return getCachedMaterial(`body-${color}`, { color: color, roughness: 0.82, metalness: 0.03 });
+}
+function getTrimMat(color) {
+  return getCachedMaterial(`trim-${color}`, { color: color, roughness: 0.78, metalness: 0.02 });
+}
+function getEyeMat(color) {
+  return getCachedMaterial(`eye-${color}`, { color: color, emissive: color, emissiveIntensity: 0.9, roughness: 0.4 });
+}
+function getBossMat(type) {
+  return getCachedMaterial(`boss-${type.name}-${type.body}`, {
+    color: type.body, emissive: type.body, emissiveIntensity: 0.56,
+    roughness: 0.58, metalness: 0.03,
+  });
+}
+function getBossTrimMat(type) {
+  return getCachedMaterial(`bosstrim-${type.name}-${type.trim}`, {
+    color: type.trim, emissive: type.trim, emissiveIntensity: 0.82,
+    roughness: 0.46, metalness: 0.08,
+  });
+}
+function getBossEyeMat(type) {
+  return getCachedMaterial(`bosseye-${type.name}-${type.eye}`, {
+    color: type.eye, emissive: type.eye, emissiveIntensity: 2.2, roughness: 0.4,
+  });
+}
+function getMedicHeartMat(type) {
+  return getCachedMaterial(`medic-heart-${type.body}`, {
+    color: type.body, emissive: type.body, emissiveIntensity: 0.5,
+    roughness: 0.42, metalness: 0.02,
+  });
+}
+function getMedicHighlightMat(type) {
+  return getCachedMaterial(`medic-highlight-${type.trim}`, {
+    color: type.trim, emissive: type.trim, emissiveIntensity: 0.62,
+    roughness: 0.34, metalness: 0.02,
+  });
+}
+function getMedicShineMat(type) {
+  return getCachedMaterial(`medic-shine-${type.eye}`, {
+    color: type.eye, emissive: type.eye, emissiveIntensity: 1.6, roughness: 0.25,
+  });
+}
+function getMimicBodyMat(type) {
+  return getCachedMaterial(`mimic-body-${type.body}`, { color: type.body, emissive: 0x7a4c10, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.12 });
+}
+function getMimicTrimMat(type) {
+  return getCachedMaterial(`mimic-trim-${type.trim}`, { color: type.trim, emissive: 0xffe060, emissiveIntensity: 0.55, roughness: 0.18, metalness: 1.0 });
+}
+function getMimicEyeMat(type) {
+  return getCachedMaterial(`mimic-eye-${type.eye}`, { color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
+}
+function getMimicInteriorMat() {
+  return getCachedMaterial('mimic-interior', { color: 0x0e0115, roughness: 0.9 });
+}
+function getMimicToothMat() {
+  return getCachedMaterial('mimic-tooth', { color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
+}
+function getMimicGemMat(type) {
+  return getCachedMaterial(`mimic-gem-${type.eye}`, { color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
+}
+
 export function createEnemyMesh(type) {
   if (!!type.isMedic) return createMedicHeartMesh(type);
   if (!!type.isMimic) return createMimicChestMesh(type);
@@ -8,9 +96,9 @@ export function createEnemyMesh(type) {
 }
 
 function createNormalEnemyMesh(type) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.82, metalness: 0.03 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.78, metalness: 0.02 });
-  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 0.9, roughness: 0.4 });
+  const bodyMat = getBodyMat(type.body);
+  const trimMat = getTrimMat(type.trim);
+  const eyeMat = getEyeMat(type.eye);
   let g;
   if (type.name === 'Mudlug') g = createSlugMesh(bodyMat, trimMat, eyeMat);
   else if (type.name === 'Glowmite') g = createInsectMesh(bodyMat, trimMat, eyeMat);
@@ -137,26 +225,9 @@ function createSpecterMesh(bodyMat, trimMat, eyeMat) {
 
 function createMedicHeartMesh(type) {
   const group = new THREE.Group();
-  const heartMaterial = new THREE.MeshStandardMaterial({
-    color: type.body,
-    emissive: type.body,
-    emissiveIntensity: 0.5,
-    roughness: 0.42,
-    metalness: 0.02,
-  });
-  const highlightMaterial = new THREE.MeshStandardMaterial({
-    color: type.trim,
-    emissive: type.trim,
-    emissiveIntensity: 0.62,
-    roughness: 0.34,
-    metalness: 0.02,
-  });
-  const shineMaterial = new THREE.MeshStandardMaterial({
-    color: type.eye,
-    emissive: type.eye,
-    emissiveIntensity: 1.6,
-    roughness: 0.25,
-  });
+  const heartMaterial = getMedicHeartMat(type);
+  const highlightMaterial = getMedicHighlightMat(type);
+  const shineMaterial = getMedicShineMat(type);
 
   const cell = 0.3;
   const rows = [
@@ -191,21 +262,13 @@ function createMedicHeartMesh(type) {
 }
 
 function bossMat(type) {
-  return new THREE.MeshStandardMaterial({
-    color: type.body, emissive: type.body, emissiveIntensity: 0.56,
-    roughness: 0.58, metalness: 0.03,
-  });
+  return getBossMat(type);
 }
 function bossTrimMat(type) {
-  return new THREE.MeshStandardMaterial({
-    color: type.trim, emissive: type.trim, emissiveIntensity: 0.82,
-    roughness: 0.46, metalness: 0.08,
-  });
+  return getBossTrimMat(type);
 }
 function bossEyeMat(type) {
-  return new THREE.MeshStandardMaterial({
-    color: type.eye, emissive: type.eye, emissiveIntensity: 2.2, roughness: 0.4,
-  });
+  return getBossEyeMat(type);
 }
 function finishBossGroup(group, type, beaconY = 2.9) {
   const glow = new THREE.PointLight(type.eye, 1.35, 5.5, 2.1);
@@ -221,12 +284,12 @@ function finishBossGroup(group, type, beaconY = 2.9) {
 }
 
 export function createMimicChestMesh(type) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x7a4c10, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.12 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, emissive: 0xffe060, emissiveIntensity: 0.55, roughness: 0.18, metalness: 1.0 });
-  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
-  const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x0e0115, roughness: 0.9 });
-  const toothMat = new THREE.MeshStandardMaterial({ color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
-  const gemMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
+  const bodyMat = getMimicBodyMat(type);
+  const trimMat = getMimicTrimMat(type);
+  const eyeMat = getMimicEyeMat(type);
+  const darkInteriorMat = getMimicInteriorMat();
+  const toothMat = getMimicToothMat();
+  const gemMat = getMimicGemMat(type);
 
   const g = new THREE.Group();
 
@@ -894,5 +957,11 @@ export function blockMesh(width, height, depth, material, x, y, z) {
   mesh.position.set(x, y, z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
+  if (material && material.userData) {
+    if (material.userData.stunMaterial) {
+      mesh.userData.normalMaterial = material;
+      mesh.userData.stunMaterial = material.userData.stunMaterial;
+    }
+  }
   return mesh;
 }

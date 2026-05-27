@@ -448,6 +448,39 @@ body.is-running:not(.is-paused) .top-corner-controls {
   transition: opacity 170ms ease, stroke-dashoffset 210ms ease;
 }
 
+.battery-saver-toggle .leaf-path {
+  stroke: var(--ink);
+  transition: stroke 170ms ease;
+}
+
+.battery-saver-toggle .leaf-stem {
+  stroke: var(--muted);
+  transition: stroke 170ms ease;
+}
+
+.battery-saver-toggle .saver-slash {
+  opacity: 1;
+  stroke: var(--danger);
+  stroke-width: 3.2;
+  stroke-dasharray: 29;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 5px rgba(243, 78, 85, 0.5));
+  transition: opacity 170ms ease, stroke-dashoffset 210ms ease;
+}
+
+.battery-saver-toggle.is-active .leaf-path {
+  stroke: var(--grass);
+}
+
+.battery-saver-toggle.is-active .leaf-stem {
+  stroke: var(--grass);
+}
+
+.battery-saver-toggle.is-active .saver-slash {
+  opacity: 0;
+  stroke-dashoffset: 29;
+}
+
 .fullscreen-enter-glyph path,
 .fullscreen-exit-glyph path {
   stroke-width: 2.8;
@@ -1931,11 +1964,11 @@ body:not(.time-frozen) #gameCanvas {
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(520px, 82vw);
-  font-family: var(--font-mono);
-  font-size: clamp(0.95rem, 2vw, 1.22rem);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
   color: #6dd8ff;
   text-align: center;
-  line-height: 1.65;
+  line-height: 1.85;
   text-shadow:
     0 0 14px rgba(109, 216, 255, 0.75),
     0 0 38px rgba(109, 216, 255, 0.25);
@@ -1960,16 +1993,16 @@ body:not(.time-frozen) #gameCanvas {
   position: absolute;
   top: 40%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(2.4);
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 8vw, 5.8rem);
+  transform: translate(-50%, -50%) scale(1.6);
+  font-family: var(--font-pixel);
+  font-size: clamp(1.2rem, 4.5vw, 3.4rem);
   color: #ffe18a;
   text-align: center;
   text-shadow:
     0 0 28px rgba(255, 225, 138, 0.95),
     0 0 72px rgba(255, 200, 80, 0.50),
     0 0 140px rgba(100, 160, 255, 0.30);
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 0.05em;
   opacity: 0;
   z-index: 7;
@@ -1983,7 +2016,7 @@ body:not(.time-frozen) #gameCanvas {
 @keyframes logo-fly-away {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(2.6);
+    transform: translate(-50%, -50%) scale(1.8);
     filter: blur(12px) brightness(2.0);
   }
   12% {
@@ -1999,7 +2032,7 @@ body:not(.time-frozen) #gameCanvas {
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.05);
+    transform: translate(-50%, -50%) scale(0.04);
     filter: blur(3px) brightness(2.5);
   }
 }
@@ -2011,7 +2044,8 @@ body:not(.time-frozen) #gameCanvas {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  perspective: 380px;
+  perspective: 300px;
+  perspective-origin: 50% 25%;
   overflow: hidden;
   mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 80%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 18%, #000 80%, transparent 100%);
@@ -2029,43 +2063,43 @@ body:not(.time-frozen) #gameCanvas {
   position: absolute;
   top: 100%;
   width: 100%;
-  font-family: var(--font-body);
-  font-size: clamp(0.92rem, 1.75vw, 1.18rem);
-  line-height: 1.72;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1.1vw, 0.65rem);
+  line-height: 2.1;
   color: #ffe18a;
-  text-align: justify;
+  text-align: center;
   transform-origin: 50% 100%;
-  transform: rotateX(26deg) translateZ(0);
+  transform: rotateX(25deg) translateZ(0);
 }
 
 .game-ending.phase-crawl .ending-crawl-content {
-  animation: crawl-animation 20s linear forwards;
+  animation: crawl-animation 24s linear forwards;
 }
 
 .ending-crawl-content p {
-  margin: 0 0 1.6rem 0;
+  margin: 0 0 1.8rem 0;
   text-shadow:
-    0 0 8px rgba(255, 225, 138, 0.55),
-    0 0 22px rgba(255, 200, 80, 0.20);
+    0 0 4px rgba(255, 225, 138, 0.35);
 }
 
 .ending-crawl-content .crawl-episode {
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-pixel);
   font-weight: 700;
   color: #b8d4ff;
-  letter-spacing: 0.22em;
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.8rem;
+  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
   text-shadow: 0 0 12px rgba(160, 200, 255, 0.6);
 }
 
 .ending-crawl-content .crawl-title {
   text-align: center;
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.68rem, 1.5vw, 0.95rem);
   color: #fff;
   margin-top: 0;
-  margin-bottom: 2.2rem;
+  margin-bottom: 2.4rem;
   letter-spacing: 0.05em;
   text-shadow:
     0 0 14px rgba(255, 255, 255, 0.88),
@@ -2075,46 +2109,14 @@ body:not(.time-frozen) #gameCanvas {
 @keyframes crawl-animation {
   0% {
     top: 100%;
-    transform: rotateX(26deg) translateY(0);
+    transform: rotateX(25deg) translateY(0);
   }
   100% {
-    top: -160%;
-    transform: rotateX(26deg) translateY(0);
+    top: -190%;
+    transform: rotateX(25deg) translateY(0);
   }
 }
 
-.ending-skip-button {
-  position: absolute;
-  bottom: 2.2rem;
-  right: 2.2rem;
-  z-index: 10;
-  padding: 0.55rem 1.3rem;
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 1;
-  pointer-events: auto;
-  transition: all 0.2s ease;
-}
-
-.ending-skip-button:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.game-ending.phase-stats .ending-skip-button,
-.game-ending.phase-replay .ending-skip-button {
-  opacity: 0;
-  pointer-events: none;
-}
 
 .game-ending:not([hidden]) {
   pointer-events: auto;
@@ -2335,10 +2337,10 @@ body:not(.time-frozen) #gameCanvas {
   margin: 0;
   opacity: 0;
   color: rgba(207, 224, 255, 0.78);
-  font-family: var(--font-mono);
-  font-size: clamp(0.72rem, 1.4vw, 0.92rem);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.5rem, 1vw, 0.65rem);
   font-weight: 700;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
@@ -2349,9 +2351,9 @@ body:not(.time-frozen) #gameCanvas {
 }
 
 .ending-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.85rem, 7vw, 5.4rem);
-  font-weight: 400;
+  font-family: var(--font-pixel);
+  font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+  font-weight: 700;
   color: #ffe18a;
   text-align: center;
   text-shadow:
@@ -2359,8 +2361,8 @@ body:not(.time-frozen) #gameCanvas {
     0 0 54px rgba(110, 166, 255, 0.72),
     0 0 110px rgba(255, 180, 80, 0.35);
   margin: 0;
-  letter-spacing: 0;
-  line-height: 0.9;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
   opacity: 0;
   transform: translateY(12px) scale(0.95);
 }
@@ -2382,10 +2384,15 @@ body:not(.time-frozen) #gameCanvas {
 .ending-run-summary {
   margin: 0;
   max-width: 680px;
-  color: rgba(244, 241, 220, 0.82);
-  font-size: clamp(0.95rem, 1.8vw, 1.18rem);
-  line-height: 1.45;
   opacity: 0;
+}
+
+.ending-subtitle {
+  color: rgba(244, 241, 220, 0.82);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.44rem, 1vw, 0.58rem);
+  line-height: 1.85;
+  letter-spacing: 0.02em;
 }
 
 .game-ending.phase-stats .ending-subtitle,
@@ -2478,25 +2485,25 @@ body:not(.time-frozen) #gameCanvas {
 }
 
 .stat-label {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.36rem, 0.75vw, 0.44rem);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(207, 224, 255, 0.68);
 }
 
 .stat-value {
-  font-family: var(--font-mono);
-  font-size: clamp(1.35rem, 2.5vw, 2rem);
-  font-weight: 600;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.72rem, 1.4vw, 1.05rem);
+  font-weight: 700;
   color: #fff;
   text-shadow: 0 0 18px rgba(128, 185, 255, 0.38);
 }
 
 .ending-stat-grade .stat-value {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3.4rem);
-  line-height: 0.9;
+  font-family: var(--font-pixel);
+  font-size: clamp(1.4rem, 2.8vw, 2.2rem);
+  line-height: 1.1;
   color: #ffe18a;
   text-shadow:
     0 0 16px rgba(255, 226, 139, 0.88),
@@ -2505,10 +2512,11 @@ body:not(.time-frozen) #gameCanvas {
 
 .ending-run-summary {
   color: rgba(255, 226, 139, 0.82);
-  font-family: var(--font-mono);
-  font-size: clamp(0.78rem, 1.8vw, 0.95rem);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.44rem, 1vw, 0.58rem);
   font-weight: 700;
-  letter-spacing: 0.16em;
+  line-height: 1.85;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -2519,10 +2527,10 @@ body:not(.time-frozen) #gameCanvas {
 .ending-replay {
   opacity: 0;
   margin-top: 0.1rem;
-  padding: 0.85rem 2.6rem;
-  font-family: var(--font-body);
-  font-size: 1.02rem;
-  font-weight: 800;
+  padding: 0.85rem 2.2rem;
+  font-family: var(--font-pixel);
+  font-size: clamp(0.55rem, 1.2vw, 0.72rem);
+  font-weight: 700;
   color: #08060c;
   background:
     linear-gradient(135deg, #fff5bd, #ffd368 48%, #8fc7ff);
@@ -2530,7 +2538,7 @@ body:not(.time-frozen) #gameCanvas {
   border-radius: 8px;
   cursor: pointer;
   min-height: 48px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   box-shadow:
     0 0 26px rgba(255, 211, 104, 0.42),
     0 18px 38px rgba(0, 0, 0, 0.32);
@@ -2575,16 +2583,21 @@ body:not(.time-frozen) #gameCanvas {
   }
 
   .ending-title {
-    font-size: clamp(2.45rem, 13vw, 4.2rem);
+    font-size: clamp(1.0rem, 5.5vw, 1.8rem);
   }
 
   .ending-subtitle {
-    font-size: 0.98rem;
+    font-size: clamp(0.42rem, 1.2vw, 0.54rem);
   }
 
-  .ending-kicker,
+  .ending-kicker {
+    font-size: clamp(0.42rem, 1.1vw, 0.54rem);
+    letter-spacing: 0.08em;
+  }
+
   .ending-run-summary {
-    letter-spacing: 0.12em;
+    font-size: clamp(0.42rem, 1.1vw, 0.54rem);
+    letter-spacing: 0.08em;
   }
 }
 
@@ -2599,15 +2612,15 @@ body:not(.time-frozen) #gameCanvas {
   }
 
   .ending-kicker {
-    font-size: 0.68rem;
+    font-size: clamp(0.45rem, 1vw, 0.55rem);
   }
 
   .ending-title {
-    font-size: clamp(2.75rem, 5.7vw, 4.6rem);
+    font-size: clamp(1.1rem, 3.2vw, 1.9rem);
   }
 
   .ending-subtitle {
-    font-size: 0.95rem;
+    font-size: clamp(0.45rem, 1vw, 0.55rem);
   }
 
   .ending-stats {
@@ -2620,23 +2633,60 @@ body:not(.time-frozen) #gameCanvas {
   }
 
   .stat-label {
-    font-size: 0.58rem;
+    font-size: clamp(0.32rem, 0.7vw, 0.42rem);
   }
 
   .stat-value {
-    font-size: 1.25rem;
+    font-size: clamp(0.68rem, 1.3vw, 0.95rem);
   }
 
   .ending-stat-grade .stat-value {
-    font-size: 2rem;
+    font-size: clamp(1.3rem, 2.5vw, 2.0rem);
   }
 
   .ending-run-summary {
-    font-size: 0.7rem;
+    font-size: clamp(0.45rem, 1vw, 0.55rem);
   }
 
   .ending-replay {
     min-height: 44px;
-    padding: 0.65rem 2rem;
+    padding: 0.65rem 2.0rem;
+    font-size: clamp(0.55rem, 1.2vw, 0.7rem);
   }
+}
+
+/* ── Battery Saver overrides (performance optimization) ── */
+body.battery-saver .game-bar,
+body.battery-saver .readout,
+body.battery-saver .typing-strip,
+body.battery-saver .message-panel,
+body.battery-saver .god-mode-badge,
+body.battery-saver .potion-bar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.battery-saver .game-bar {
+  background: linear-gradient(135deg, rgba(14, 32, 24, 0.96), rgba(4, 12, 15, 0.92)) !important;
+}
+
+body.battery-saver .readout {
+  background: var(--panel-solid) !important;
+  box-shadow: inset 0 0 10px rgba(88, 223, 207, 0.04) !important;
+}
+
+body.battery-saver .typing-strip {
+  background: linear-gradient(135deg, rgba(8, 18, 16, 0.96), rgba(33, 15, 15, 0.92)) !important;
+}
+
+body.battery-saver .message-panel {
+  background: linear-gradient(135deg, rgba(10, 28, 20, 0.98), rgba(9, 11, 15, 0.96)) !important;
+}
+
+body.battery-saver .god-mode-badge {
+  background: linear-gradient(135deg, rgba(28, 20, 4, 0.98), rgba(18, 14, 2, 0.96)) !important;
+}
+
+body.battery-saver .potion-bar {
+  background: var(--panel-solid) !important;
 }

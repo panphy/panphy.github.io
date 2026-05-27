@@ -23,6 +23,7 @@ const startButton = document.getElementById('startButton');
 const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
 const fullscreenButton = document.getElementById('fullscreenButton');
+const batterySaverButton = document.getElementById('batterySaverButton');
 const messagePanel = document.getElementById('messagePanel');
 const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
@@ -448,6 +449,10 @@ let spawnTimer = 0;
 let lastFrameTime = 0;
 let lastIdleFrameTime = 0;
 let rafId = null;
+let isTimeoutScheduled = false;
+let batterySaver = false;
+const BATTERY_SAVER_STORAGE_KEY = 'spellwave_battery_saver_active';
+
 let elapsed = 0;
 let mistakeTimer = 0;
 let damageTimer = 0;
@@ -669,6 +674,10 @@ fullscreenButton.addEventListener('click', () => {
   if (mode === 'running') focusKeyboard();
 });
 
+if (batterySaverButton) {
+  batterySaverButton.addEventListener('click', toggleBatterySaver);
+}
+
 window.addEventListener('resize', resizeRenderer);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
@@ -680,10 +689,10 @@ window.addEventListener('blur', () => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     if (mode === 'running') pauseGame();
-    if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+    cancelFrame();
   } else {
     lastFrameTime = 0;
-    if (rafId === null) rafId = requestAnimationFrame(animate);
+    scheduleFrame();
   }
 });
 
@@ -697,7 +706,10 @@ keyboardInput.addEventListener('input', () => {
 });
 
 resizeRenderer();
-rafId = requestAnimationFrame(animate);
+batterySaver = loadBatterySaverSetting();
+applyBatterySaver();
+scheduleFrame();
+
 
 function toggleGodMode() {
   if (godMode) {
@@ -790,6 +802,7 @@ function startGame() {
   updatePhaseDisplay();
   applySeasonForWave(waveSet, true);
   focusKeyboard();
+  scheduleFrame();
 }
 
 function pauseGame() {
@@ -797,6 +810,7 @@ function pauseGame() {
   playPauseSound();
   stopMusicLoop();
   mode = 'paused';
+  cancelFrame();
   document.body.classList.add('is-paused');
   setPauseButtonState(false, false);
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
@@ -814,6 +828,7 @@ function resumeGame() {
   setPauseButtonState(true, false);
   updatePhaseDisplay();
   focusKeyboard();
+  scheduleFrame();
 }
 
 function endGame() {
@@ -850,6 +865,21 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
   messageScore.textContent = scoreText;
   messageCopy.textContent = copyText;
   startButton.textContent = buttonText;
+  
+  if (buttonText === 'Start') {
+    startButton.title = 'Start the physics typing run';
+  } else if (buttonText === 'Resume') {
+    startButton.title = 'Resume the paused run';
+  } else if (buttonText === 'Try Again') {
+    startButton.title = 'Restart the run from Wave 1';
+  } else if (buttonText === 'Next Wave') {
+    startButton.title = 'Proceed to the next wave';
+  } else if (buttonText === 'Unavailable') {
+    startButton.title = 'Simulation requires WebGL support';
+  } else {
+    startButton.title = buttonText;
+  }
+
   if (runGlossary) runGlossary.hidden = true;
   if (supportLink) supportLink.hidden = true;
   messagePanel.hidden = false;
@@ -1214,12 +1244,38 @@ function bossProjectileHitPlayer(enemy) {
   }
 }
 
-function animate(frameTime) {
-  rafId = requestAnimationFrame(animate);
+function scheduleFrame() {
+  cancelFrame();
+  if (mode === 'paused' || mode === 'ending') return;
 
   if (mode !== 'running') {
-    if (frameTime - lastIdleFrameTime < IDLE_FRAME_INTERVAL) return;
-    lastIdleFrameTime = frameTime;
+    isTimeoutScheduled = true;
+    rafId = setTimeout(() => {
+      isTimeoutScheduled = false;
+      rafId = requestAnimationFrame(animate);
+    }, IDLE_FRAME_INTERVAL);
+  } else {
+    isTimeoutScheduled = false;
+    rafId = requestAnimationFrame(animate);
+  }
+}
+
+function cancelFrame() {
+  if (rafId !== null) {
+    if (isTimeoutScheduled) {
+      clearTimeout(rafId);
+    } else {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = null;
+    isTimeoutScheduled = false;
+  }
+}
+
+function animate(frameTime) {
+  if (mode === 'paused' || mode === 'ending') {
+    rafId = null;
+    return;
   }
 
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
@@ -1333,6 +1389,8 @@ function animate(frameTime) {
   updateSeasonFade(delta);
   updateLabels();
   renderer.render(scene, camera);
+
+  scheduleFrame();
 }
 
 function updateEnemies(delta, seconds) {
@@ -1368,81 +1426,33 @@ function updateEnemies(delta, seconds) {
     if (enemy.stunTimer === undefined) enemy.stunTimer = 0;
     if (enemy.stunTimer > 0) {
       enemy.stunTimer = Math.max(0, enemy.stunTimer - delta);
-      enemy.visualStunApplied = true;
-
-      const uniqueMaterials = new Set();
-      const uniqueLights = new Set();
-      enemy.group.traverse(child => {
-        if (child.isMesh && child.material) {
-          uniqueMaterials.add(child.material);
-        } else if (child.isLight) {
-          uniqueLights.add(child);
-        }
-      });
-
-      uniqueMaterials.forEach(mat => {
-        if (mat.userData.origColor === undefined) {
-          mat.userData.origColor = mat.color.clone();
-          if (mat.emissive) {
-            mat.userData.origEmissive = mat.emissive.clone();
-            mat.userData.origEmissiveIntensity = mat.emissiveIntensity;
+      if (!enemy.visualStunApplied) {
+        enemy.visualStunApplied = true;
+        enemy.group.traverse(child => {
+          if (child.isMesh && child.userData.stunMaterial) {
+            child.material = child.userData.stunMaterial;
+          } else if (child.isLight) {
+            if (child.userData.origColor === undefined) {
+              child.userData.origColor = child.color.clone();
+              child.userData.origIntensity = child.intensity;
+            }
+            child.color.setRGB(0.22, 0.68, 1.0);
+            child.intensity = 0.58;
           }
-        }
-        const orig = mat.userData.origColor;
-        const gray = 0.299 * orig.r + 0.587 * orig.g + 0.114 * orig.b;
-        mat.color.setRGB(
-          gray * 0.3 + 0.05,
-          gray * 0.6 + 0.2,
-          gray * 0.9 + 0.45
-        );
-        if (mat.emissive) {
-          mat.emissive.setRGB(0.1, 0.35, 0.6);
-          mat.emissiveIntensity = 0.8;
-        }
-      });
-
-      uniqueLights.forEach(light => {
-        if (light.userData.origColor === undefined) {
-          light.userData.origColor = light.color.clone();
-          light.userData.origIntensity = light.intensity;
-        }
-        light.color.setRGB(0.22, 0.68, 1.0);
-        light.intensity = 0.58;
-      });
+        });
+      }
     } else if (enemy.visualStunApplied) {
       enemy.visualStunApplied = false;
-
-      const uniqueMaterials = new Set();
-      const uniqueLights = new Set();
       enemy.group.traverse(child => {
-        if (child.isMesh && child.material) {
-          uniqueMaterials.add(child.material);
+        if (child.isMesh && child.userData.normalMaterial) {
+          child.material = child.userData.normalMaterial;
         } else if (child.isLight) {
-          uniqueLights.add(child);
-        }
-      });
-
-      uniqueMaterials.forEach(mat => {
-        if (mat.userData.origColor !== undefined) {
-          mat.color.copy(mat.userData.origColor);
-          if (mat.emissive) {
-            mat.emissive.copy(mat.userData.origEmissive);
-            mat.emissiveIntensity = mat.userData.origEmissiveIntensity;
+          if (child.userData.origColor !== undefined) {
+            child.color.copy(child.userData.origColor);
+            child.intensity = child.userData.origIntensity;
+            delete child.userData.origColor;
+            delete child.userData.origIntensity;
           }
-          delete mat.userData.origColor;
-          if (mat.userData.origEmissive !== undefined) {
-            delete mat.userData.origEmissive;
-            delete mat.userData.origEmissiveIntensity;
-          }
-        }
-      });
-
-      uniqueLights.forEach(light => {
-        if (light.userData.origColor !== undefined) {
-          light.color.copy(light.userData.origColor);
-          light.intensity = light.userData.origIntensity;
-          delete light.userData.origColor;
-          delete light.userData.origIntensity;
         }
       });
     }
@@ -3143,10 +3153,13 @@ function disposeObject(object) {
   object.traverse((child) => {
     if (!child.isMesh) return;
     child.geometry.dispose();
-    if (Array.isArray(child.material)) {
-      for (const material of child.material) material.dispose();
-    } else {
-      child.material.dispose();
+    if (child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of mats) {
+        if (material && (!material.userData || !material.userData.isShared)) {
+          material.dispose();
+        }
+      }
     }
   });
 }
@@ -3731,6 +3744,55 @@ function saveAudioSetting(enabled) {
   writeStoredValue(AUDIO_STORAGE_KEY, enabled ? 'on' : 'off');
 }
 
+function loadBatterySaverSetting() {
+  const stored = readStoredValue(BATTERY_SAVER_STORAGE_KEY, 'false');
+  return stored === 'true';
+}
+
+function saveBatterySaverSetting(active) {
+  writeStoredValue(BATTERY_SAVER_STORAGE_KEY, active ? 'true' : 'false');
+}
+
+function applyBatterySaver() {
+  if (batterySaver) {
+    document.body.classList.add('battery-saver');
+    if (batterySaverButton) {
+      batterySaverButton.classList.add('is-active');
+      batterySaverButton.title = "Disable Battery Saver";
+      batterySaverButton.setAttribute('aria-label', "Disable Battery Saver");
+    }
+    if (renderer) renderer.shadowMap.enabled = false;
+    if (moonLight) moonLight.castShadow = false;
+  } else {
+    document.body.classList.remove('battery-saver');
+    if (batterySaverButton) {
+      batterySaverButton.classList.remove('is-active');
+      batterySaverButton.title = "Enable Battery Saver";
+      batterySaverButton.setAttribute('aria-label', "Enable Battery Saver");
+    }
+    if (renderer) renderer.shadowMap.enabled = true;
+    if (moonLight) moonLight.castShadow = true;
+  }
+  if (scene) {
+    scene.traverse(child => {
+      if (child.isMesh && child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(mat => { mat.needsUpdate = true; });
+        } else {
+          child.material.needsUpdate = true;
+        }
+      }
+    });
+  }
+}
+
+function toggleBatterySaver() {
+  batterySaver = !batterySaver;
+  saveBatterySaverSetting(batterySaver);
+  applyBatterySaver();
+  if (mode === 'running') focusKeyboard();
+}
+
 function readStoredValue(key, fallback) {
   try {
     return localStorage.getItem(key) ?? fallback;
@@ -3947,11 +4009,6 @@ function startEndingSequence() {
   const finalStats = getEndingStats();
   setEndingStats(finalStats, false);
 
-  const skipBtn = document.getElementById('endingSkipButton');
-  if (skipBtn) {
-    skipBtn.onclick = () => skipEndingCinematic(finalStats);
-  }
-
   // Cinematic steps:
   // 1. Flash + detonation burst at 120ms
   queueEndingStep(() => {
@@ -3991,12 +4048,6 @@ function showEndingStatsScreen(finalStats) {
   }
   endingFX?.setPhase('stats');
   setEndingStats(finalStats, true);
-  const skipBtn = document.getElementById('endingSkipButton');
-  if (skipBtn) skipBtn.onclick = null;
-}
-
-function skipEndingCinematic(finalStats) {
-  showEndingStatsScreen(finalStats);
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
@@ -4086,8 +4137,6 @@ function dismissEndingSequence() {
   clearEndingTimers();
   gameEnding.hidden = true;
   gameEnding.className = 'game-ending';
-  const skipBtn = document.getElementById('endingSkipButton');
-  if (skipBtn) skipBtn.onclick = null;
   if (endingFX) { endingFX.reset(); }
 }
 
