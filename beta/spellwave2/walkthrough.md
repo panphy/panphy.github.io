@@ -216,18 +216,20 @@ This beta pass updates `beta/spellwave2/src/main.js` to make wave difficulty tra
 
 ### 1. Normal-Wave Workload Budget
 - Added normal-wave typed-workload budgets, starting low and increasing gradually across waves.
+- Added explicit normal-wave enemy targets (`7, 8, 10, 11, 12, 13, 14, 15, 16, 16`) so late normal waves do not keep increasing enemy count indefinitely.
 - Normal waves can now finish when either the normal enemy target is reached or the typed-workload budget has been spent.
 - Medics and mimics contribute reduced workload cost because they are reward/support targets rather than core threats.
 
 ### 2. Active Typing-Pressure Cap
 - Added an active typing-pressure limit based on currently unresolved normal-wave prompt cost.
 - New normal-wave spawns pause while unresolved prompt workload is above the cap.
-- This should reduce late-wave pile-ups where several long terms appear together.
+- Added a separate active-long-prompt cap: up to 2 active long normal prompts before wave 5, and up to 3 from wave 5 onward. The late-wave cap is intentionally high enough to keep waves 5-7 tense for stronger players.
 
 ### 3. Speed and Spawn Growth Tuning
 - Reduced per-wave enemy speed pressure.
 - Reduced spawn-delay shrinkage per wave.
 - Raised the minimum spawn delay to keep later waves from compounding count, speed, and prompt length too sharply.
+- The next normal-wave spawn delay now scales with the typing cost of the enemy just spawned, so longer prompts naturally create more breathing room without adapting to player WPM.
 
 ### 4. Long Prompt Mitigation
 - Kept equation bosses on the existing two-word limiter.
@@ -244,7 +246,7 @@ This beta pass updates `beta/spellwave2/src/main.js` to make wave difficulty tra
 2. Compare waves 1-2 against the previous feel; they should remain familiar.
 3. Watch waves 3 and 5 for difficulty jumps caused by medium/hard vocabulary entering the pool.
 4. Check whether long boss vocabulary prompts that ask for one key word still feel educational.
-5. Check whether late waves feel tense enough after the active typing-pressure cap delays extra spawns.
+5. Check whether late waves feel tense enough with up to 3 active long normal prompts and cost-scaled spawn delays.
 6. Decide whether workload-budget progress needs a separate UI treatment outside the typing area.
 
 ---

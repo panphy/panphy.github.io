@@ -176,6 +176,9 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 ### Interim Difficulty Curve Tuning
 - [x] Add normal-wave typed-workload budgets so wave completion is not driven only by enemy count.
 - [x] Add an active typing-pressure cap to reduce prompt pile-ups when long terms are visible.
+- [x] Scale the next normal-wave spawn delay by the typing cost of the enemy just spawned.
+- [x] Allow up to 2 active long normal prompts before wave 5 and up to 3 from wave 5 onward, so late waves remain threatening.
+- [x] Use explicit normal-wave enemy targets with gentler workload-budget growth.
 - [x] Reduce wave speed and spawn cadence growth so word length, speed, and count do not all spike together.
 - [x] Add one-keyword limiting for long boss vocabulary phrases while preserving the two-word equation-boss limiter.
 - [x] Keep normal-wave typing label neutral instead of showing wave progress.

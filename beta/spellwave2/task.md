@@ -48,6 +48,9 @@
 - [x] Implement beta difficulty-curve correction in `beta/spellwave2/src/main.js`
   - [x] Add normal-wave typed-workload budgets
   - [x] Add active typing-pressure spawn gating
+  - [x] Scale normal-wave spawn delay by the typing cost of the enemy just spawned
+  - [x] Limit active long normal prompts to 2 before wave 5 and 3 from wave 5 onward
+  - [x] Use explicit normal-wave enemy targets and gentler typed-workload budget growth
   - [x] Reduce wave speed and spawn-rate growth
   - [x] Add one-keyword limiting for long boss vocabulary phrases
   - [x] Keep equation bosses on the existing two-word limiter

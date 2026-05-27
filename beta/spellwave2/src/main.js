@@ -82,24 +82,31 @@ const PARTICLE_GRAVITY_COEFFS = [21 * 5, 20 * 5, 10.7 * 10, 34 * 3, 9.7 * 10];
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
-  normalGrowth: 2,
-  normalMax: 18,
+  normalGrowth: 1,
+  normalMax: 16,
   enemyLimit: 11,
   speedMultiplier: 0.94,
   waveSpeedBonus: 0.075,
-  spawnBase: 2.35,
-  spawnGrowth: 0.075,
+  spawnBase: 2.45,
+  spawnGrowth: 0.04,
   spawnJitter: 0.5,
-  spawnMin: 0.9,
+  spawnMin: 1.05,
   bossWarningDelay: 1.0,
   bossSpawnGap: 2.8,
   revealZ: -40,
 };
-const NORMAL_TYPING_BUDGETS = [58, 74, 98, 122, 148, 174, 198, 220];
-const NORMAL_TYPING_BUDGET_GROWTH = 18;
-const ACTIVE_TYPING_PRESSURE_BASE = 42;
-const ACTIVE_TYPING_PRESSURE_GROWTH = 6;
-const ACTIVE_TYPING_PRESSURE_MAX = 84;
+const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
+const NORMAL_TYPING_BUDGETS = [58, 72, 88, 106, 124, 142, 158, 174, 188, 202];
+const NORMAL_TYPING_BUDGET_GROWTH = 14;
+const ACTIVE_TYPING_PRESSURE_BASE = 36;
+const ACTIVE_TYPING_PRESSURE_GROWTH = 4;
+const ACTIVE_TYPING_PRESSURE_MAX = 58;
+const LONG_ACTIVE_PROMPT_COST = 13;
+const ACTIVE_LONG_PROMPT_LIMIT = 2;
+const LATE_ACTIVE_LONG_PROMPT_LIMIT = 3;
+const SPAWN_COST_BASELINE = 7;
+const SPAWN_COST_DELAY_MAX = 1.85;
+const SUPPORT_SPAWN_DELAY_MIN = 0.75;
 const LONG_VOCAB_LIMIT_LENGTH = 16;
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
@@ -1226,14 +1233,14 @@ function animate(frameTime) {
           const enemy = spawnEnemy({ isMedic: true });
           registerNormalTypingCost(enemy);
           medicsSpawnedThisSet += 1;
-          spawnTimer = Math.max(spawnTimer, 0.55);
+          spawnTimer = Math.max(spawnTimer, nextSpawnDelay(enemy, { support: true }));
         }
       } else if (canAddNormalEnemy && shouldSpawnMimic() && enemies.length < getEnemyLimit()) {
         if (currentDelta > 0) {
           const enemy = spawnEnemy({ isMimic: true });
           registerNormalTypingCost(enemy);
           mimicsSpawnedThisSet += 1;
-          spawnTimer = Math.max(spawnTimer, 0.55);
+          spawnTimer = Math.max(spawnTimer, nextSpawnDelay(enemy, { support: true }));
         }
       } else if (canAddNormalEnemy && normalEnemiesSpawned < normalEnemyTarget) {
         spawnTimer -= currentDelta;
@@ -1241,7 +1248,7 @@ function animate(frameTime) {
           const enemy = spawnEnemy();
           registerNormalTypingCost(enemy);
           normalEnemiesSpawned += 1;
-          spawnTimer = nextSpawnDelay();
+          spawnTimer = nextSpawnDelay(enemy);
         }
       } else if (isNormalWaveComplete() && enemies.length === 0) {
         startBossPhase();
@@ -2345,6 +2352,7 @@ function updatePhaseDisplay() {
 
 function getNormalEnemyTarget(wave) {
   const profile = currentDifficulty();
+  if (wave <= NORMAL_ENEMY_TARGETS.length) return NORMAL_ENEMY_TARGETS[wave - 1];
   return Math.min(profile.normalMax, profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth);
 }
 
@@ -2380,8 +2388,20 @@ function getActiveTypingPressure() {
   }, 0);
 }
 
+function getActiveLongPromptCount() {
+  return enemies.reduce((count, enemy) => {
+    if (enemy.isBoss || enemy.isMedic || enemy.isMimic || enemy.dying) return count;
+    return count + (getEnemyTypingCost(enemy) >= LONG_ACTIVE_PROMPT_COST ? 1 : 0);
+  }, 0);
+}
+
+function getActiveLongPromptLimit() {
+  return waveSet >= 5 ? LATE_ACTIVE_LONG_PROMPT_LIMIT : ACTIVE_LONG_PROMPT_LIMIT;
+}
+
 function canAcceptNormalSpawnPressure() {
-  return getActiveTypingPressure() < getActiveTypingPressureLimit();
+  return getActiveTypingPressure() < getActiveTypingPressureLimit()
+    && getActiveLongPromptCount() < getActiveLongPromptLimit();
 }
 
 function isNormalTypingBudgetReached() {
@@ -4503,11 +4523,20 @@ function chooseBossType(index) {
   return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
 }
 
-function nextSpawnDelay() {
+function nextSpawnDelay(enemy = null, options = {}) {
   const profile = currentDifficulty();
+  const wavePace = profile.spawnBase - Math.max(0, waveSet - 1) * profile.spawnGrowth;
+  const cost = Math.max(1, enemy ? getEnemyTypingCost(enemy) : SPAWN_COST_BASELINE);
+  const costFactor = THREE.MathUtils.clamp(
+    Math.sqrt(cost / SPAWN_COST_BASELINE),
+    1,
+    SPAWN_COST_DELAY_MAX
+  );
+  const supportFactor = options.support ? 0.8 : 1;
+  const minimumDelay = options.support ? SUPPORT_SPAWN_DELAY_MIN : profile.spawnMin;
   return Math.max(
-    profile.spawnMin,
-    profile.spawnBase - Math.max(0, waveSet - 1) * profile.spawnGrowth + Math.random() * profile.spawnJitter
+    minimumDelay,
+    wavePace * costFactor * supportFactor + Math.random() * profile.spawnJitter
   );
 }
 

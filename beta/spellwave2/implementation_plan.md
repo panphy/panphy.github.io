@@ -359,23 +359,25 @@ The beta build now includes a first difficulty-curve correction pass in `beta/sp
 Completed changes:
 
 1. Normal waves now use a typed-workload budget as an additional completion condition, not only the normal enemy count target.
-2. Active normal-wave spawns are gated by a visible typing-pressure cap so long unresolved prompts do not stack too aggressively on screen.
-3. Wave speed and spawn-rate growth were reduced to avoid compounding enemy count, word length, speed, and spawn cadence at the same time.
-4. Long boss vocabulary phrases can use a one-keyword prompt limit, while equation bosses keep the existing two-word limit.
-5. Normal-wave progress is not shown in the typing area; the typing label remains a neutral input label outside boss waves.
+2. Explicit normal-wave enemy targets and gentler typed-workload budgets keep late normal waves from escalating only by raw count.
+3. Active normal-wave spawns are gated by visible typing pressure, plus a separate active-long-prompt cap of 2 before wave 5 and 3 from wave 5 onward.
+4. Normal-wave spawn delay now scales with the typing cost of the enemy just spawned, so longer prompts create more breathing room without adapting to player WPM.
+5. Wave speed and spawn-rate growth were reduced to avoid compounding enemy count, word length, speed, and spawn cadence at the same time.
+6. Long boss vocabulary phrases can use a one-keyword prompt limit, while equation bosses keep the existing two-word limit.
+7. Normal-wave progress is not shown in the typing area; the typing label remains a neutral input label outside boss waves.
 
 Design intent:
 
 - Early waves should feel close to the previous version.
 - Medium/hard vocabulary should add educational complexity without multiplying total typed workload too sharply.
-- Later waves should still increase pressure, but more through controlled pacing than through abrupt phrase-length jumps.
+- Later waves should still increase pressure, including up to 3 overlapping long normal prompts, but through controlled pacing rather than abrupt phrase-length jumps alone.
 
 Playtest focus:
 
 - Whether waves 3 and 5 still feel like meaningful difficulty steps without becoming workload spikes.
 - Whether one-keyword long boss vocabulary prompts still feel educational enough.
 - Whether the hidden workload-budget wave completion feels natural without an explicit normal-wave progress readout.
-- Whether the active typing-pressure cap makes late waves feel too quiet or appropriately manageable.
+- Whether the late-wave cap of 3 active long normal prompts keeps waves 5-7 threatening without creating unavoidable overload.
 
 # Campaign Mode & Science Subject/Curriculum Selection Design
 
@@ -537,4 +539,3 @@ Three additional bugs found during playtesting after the 2026-05-25 quality pass
   - Spin: ±10 rad range (was ±2 rad)
 
 **Files**: `beta/spellwave2/src/potions.js`
-
