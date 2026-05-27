@@ -43,14 +43,16 @@ We have successfully implemented and verified the battery and performance optimi
 ### 3. Star Wars Crawl Perspective
 - Fine-tuned the crawl container and content layout: set parent `perspective` to `300px` and added `perspective-origin: 50% 25%` to create a beautiful, high vanishing point towards the top-center.
 - Tilted the inner crawl text using `transform: rotateX(25deg)` (and matching keyframe transforms) to achieve the authentic receding Star Wars look while maintaining pixel legibility.
+- **Widened Crawl Viewport:** Increased `.ending-crawl-container` width from `580px` to `min(920px, 90vw)` on desktop, preventing text from clipping to only 4-5 words per line and allowing comfortable 7-8 word layouts.
+- **Enlarged Crawl Text:** Upscaled `.ending-crawl-content` body font to `clamp(1.2rem, 2.2vw, 1.7rem)` and headings accordingly (`1.85rem` for episode, `2.6rem` for title) so the crawl text looks grand and cinematic on large screens.
 
 ### 4. Retro Pixel Art Styling
 - Updated all ending scene elements to the retro `'Press Start 2P'` (`var(--font-pixel)`) font:
   - Intro kicker, master title, and subtitle description.
   - All stats cards (labels, values, and the GCSE Grade ceremony card).
   - The final run summary text and "Begin Again" replay button.
-- Upscaled all clamp-based font-sizes for these elements significantly (up to 70-80% larger than the initial pixel-art font reduction) to ensure bold prominence and easy readability on large and high-DPI Mac/desktop displays.
-- Adjusted the media query overrides for mobile (`max-width: 760px`) and short displays (`max-height: 760px`) accordingly to ensure the upscaled text scales down beautifully without overflow.
+- **Balanced Summary Sizing:** Scaled the game summary elements down to a balanced size (`clamp(1.3rem, 3.8vw, 2.4rem)` for the victory title and `0.5rem` to `1.15rem` for stats) so it fits nicely on Mac displays without feeling overwhelming.
+- **Responsive Scaling:** Configured media query overrides for mobile (`max-width: 760px`) and short displays (`max-height: 760px`) to scale summary and crawl components dynamically.
 
 ---
 
