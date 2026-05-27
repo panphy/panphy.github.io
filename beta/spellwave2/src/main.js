@@ -55,6 +55,7 @@ const endTime = document.getElementById('endTime');
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
 const MAX_DELTA = 0.06;
+const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
 const FIRST_WAVE_SPAWN_Z = -34;
@@ -444,6 +445,8 @@ let typedBuffer = '';
 let activeTarget = null;
 let spawnTimer = 0;
 let lastFrameTime = 0;
+let lastIdleFrameTime = 0;
+let rafId = null;
 let elapsed = 0;
 let mistakeTimer = 0;
 let damageTimer = 0;
@@ -674,7 +677,13 @@ window.addEventListener('blur', () => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && mode === 'running') pauseGame();
+  if (document.hidden) {
+    if (mode === 'running') pauseGame();
+    if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+  } else {
+    lastFrameTime = 0;
+    if (rafId === null) rafId = requestAnimationFrame(animate);
+  }
 });
 
 document.addEventListener('pointerdown', () => {
@@ -687,7 +696,7 @@ keyboardInput.addEventListener('input', () => {
 });
 
 resizeRenderer();
-requestAnimationFrame(animate);
+rafId = requestAnimationFrame(animate);
 
 function toggleGodMode() {
   if (godMode) {
@@ -1205,7 +1214,13 @@ function bossProjectileHitPlayer(enemy) {
 }
 
 function animate(frameTime) {
-  requestAnimationFrame(animate);
+  rafId = requestAnimationFrame(animate);
+
+  if (mode !== 'running') {
+    if (frameTime - lastIdleFrameTime < IDLE_FRAME_INTERVAL) return;
+    lastIdleFrameTime = frameTime;
+  }
+
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
 

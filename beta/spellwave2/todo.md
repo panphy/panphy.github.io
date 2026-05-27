@@ -173,6 +173,11 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 > [!IMPORTANT]
 > **Asset Constraint**: Do not use emojis anywhere in the UI (e.g. for topic selectors or subject buttons). All icons must be clean, high-performance inline SVGs, styled and animated with CSS keyframes.
 
+### Performance & Battery
+
+- [x] Throttle render loop to ~10 fps when not actively playing (idle/paused/gameover/ending modes) — saves GPU on title/gameover screens.
+- [x] Stop the rAF loop entirely when the tab is hidden (`visibilitychange`); restart and reset `lastFrameTime` on tab restore.
+
 ### Interim Difficulty Curve Tuning
 - [x] Add normal-wave typed-workload budgets so wave completion is not driven only by enemy count.
 - [x] Add an active typing-pressure cap to reduce prompt pile-ups when long terms are visible.

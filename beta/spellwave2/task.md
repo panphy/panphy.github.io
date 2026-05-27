@@ -96,6 +96,11 @@
   - [x] Type `iddqd` and check god mode
   - [x] Verify Repulsor Blast pushes enemies back and stuns them
   - [x] Verify Blaze Barrier burns enemies and blocks projectiles up to 3 times
+- [x] Fix battery drain from unbounded WebGL render loop (2026-05-27)
+  - [x] Throttle `animate()` to ~10 fps when `mode !== 'running'` (idle/paused/gameover/ending) using `IDLE_FRAME_INTERVAL = 100ms`
+  - [x] Stop rAF loop entirely on `visibilitychange` hidden; restart and reset `lastFrameTime` on restore
+  - [x] Track active rAF handle in `rafId` and update initial `requestAnimationFrame` call accordingly
+
 - [x] Playtest bug fixes (2026-05-26)
   - [x] Fix bosses 9 & 10 never spawning in wave 10: change `hasActiveSupportEnemy` guard so bosses always spawn on timer regardless of live medics/mimics; also increment `bossesDefeated` in `leakEnemy()` for final-wave bosses to prevent queue-exhausted deadlock in godMode
   - [x] Fix rain/lightning appearing in wave 10: add `weatherDisabled` flag and `stopWeather()` to `seasonal-effects.js`; call it from `startFinalWave()` in `main.js`; `setSeason()` resets the flag so subsequent runs work normally
