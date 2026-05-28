@@ -75,6 +75,7 @@ const BOSS_SHOT_INTERVAL = 4.2;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
+const MIN_PROJECTILE_SPACING = 1.6;
 const BOSSES_PER_WAVE = 3;
 const FINAL_WAVE_NUMBER = 10;
 const FINAL_WAVE_NORMAL_COUNT = 0;
@@ -446,6 +447,7 @@ let peakStreak = 0;
 let mimicsLooted = 0;
 let typedBuffer = '';
 let activeTarget = null;
+let lastBossShotTime = -999;
 let spawnTimer = 0;
 let lastFrameTime = 0;
 let lastIdleFrameTime = 0;
@@ -1496,12 +1498,14 @@ function updateEnemies(delta, seconds) {
       enemy.shotTimer -= delta;
       if (enemy.shotTimer <= 0) {
         const activeRocksCount = beams.filter(b => b.kind === 'rock').length;
-        if (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES) {
+        const timeSinceLastShot = seconds - lastBossShotTime;
+        if (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES && timeSinceLastShot >= MIN_PROJECTILE_SPACING) {
           bossShootPlayer(enemy);
           enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
+          lastBossShotTime = seconds;
           if (mode !== 'running') break;
         } else {
-          enemy.shotTimer = 0; // Hold throw until a slot opens
+          enemy.shotTimer = 0; // Hold throw until a slot opens AND spacing is met
         }
       }
     }
@@ -3146,6 +3150,7 @@ function clearEffects() {
     disposeObject(beam.mesh);
   }
   beams.length = 0;
+  lastBossShotTime = -999;
 
   for (const chunk of debris) {
     effectsGroup.remove(chunk.mesh);
