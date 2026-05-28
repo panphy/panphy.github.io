@@ -93,8 +93,84 @@ const MUSIC_SEASONS = [
     ],
   },
 ];
+const FINAL_WAVE_MUSIC = {
+  name: 'final-wave',
+  isBoss: true,
+  baseStep: 0.156,
+  minStep: 0.112,
+  intensityBoost: 5,
+  melodyType: 'triangle',
+  bassType: 'sine',
+  accentType: 'sine',
+  melodyGain: 0.034,
+  bassGain: 0.030,
+  hatGain: 0.006,
+  drumGain: 0.018,
+  drumFilter: 150,
+  melody: [
+    587.33, null, 698.46, 880.00, null, 783.99, 698.46, null,
+    659.25, null, 880.00, 1046.50, null, 987.77, 880.00, null,
+    783.99, null, 987.77, 1174.66, null, 1046.50, 987.77, null,
+    880.00, 783.99, 698.46, null, 659.25, 698.46, 783.99, null,
+    587.33, null, 698.46, 880.00, null, 783.99, 698.46, null,
+    659.25, null, 880.00, 1046.50, null, 1174.66, 1318.51, null,
+    1396.91, 1318.51, 1174.66, 1046.50, 987.77, 880.00, 783.99, null,
+    698.46, null, 587.33, null, 440.00, 523.25, 587.33, null,
+  ],
+  bass: [
+    73.42, null, null, null, 73.42, null, null, null,
+    58.27, null, null, null, 58.27, null, null, null,
+    87.31, null, null, null, 87.31, null, null, null,
+    65.41, null, null, null, 65.41, null, null, null,
+  ],
+  padChords: [
+    [73.42, 146.83, 220.00, 293.66, 349.23],
+    [58.27, 116.54, 174.61, 293.66, 349.23],
+    [87.31, 174.61, 261.63, 349.23, 440.00],
+    [65.41, 130.81, 196.00, 261.63, 392.00],
+  ],
+  arpeggio: [
+    587.33, 880.00, 1174.66, 1396.91,
+    1046.50, 880.00, 698.46, 523.25,
+    659.25, 987.77, 1318.51, 1567.98,
+    1174.66, 987.77, 783.99, 659.25,
+  ],
+};
+const ENDING_MUSIC = {
+  name: 'ending',
+  baseStep: 0.24,
+  minStep: 0.19,
+  melodyType: 'sine',
+  bassType: 'sine',
+  accentType: 'triangle',
+  melodyGain: 0.018,
+  bassGain: 0.020,
+  hatGain: 0.002,
+  drumGain: 0.004,
+  drumFilter: 1200,
+  melody: [
+    587.33, null, null, 698.46, null, 880.00, null, null,
+    783.99, null, 698.46, null, 587.33, null, null, null,
+    659.25, null, null, 783.99, null, 987.77, null, null,
+    880.00, null, 783.99, null, 698.46, null, 587.33, null,
+  ],
+  bass: [
+    73.42, null, null, null, null, null, null, null,
+    87.31, null, null, null, null, null, null, null,
+    65.41, null, null, null, null, null, null, null,
+    58.27, null, null, null, null, null, null, null,
+  ],
+  padChords: [
+    [73.42, 146.83, 220.00, 293.66],
+    [87.31, 174.61, 261.63, 349.23],
+    [65.41, 130.81, 196.00, 293.66],
+    [58.27, 116.54, 174.61, 261.63],
+  ],
+};
+
 const BOSS_MUSIC = {
   name: 'boss',
+  isBoss: true,
   baseStep: 0.145,
   minStep: 0.096,
   intensityBoost: 5,
@@ -171,6 +247,7 @@ export function createSpellwaveAudio({
   getMode,
   getWavePhase = () => 'normal',
   getWaveSet,
+  getIsFinalWave = () => false,
   getTypedLength,
   pathLanes,
 }) {
@@ -357,9 +434,11 @@ export function createSpellwaveAudio({
   }
 
   function getMusicProfile(wave) {
+    if (getMode() === 'ending') return ENDING_MUSIC;
     if (getMode() === 'gameover') return GAME_OVER_MUSIC;
     if (getMode() === 'wave_cleared') return WAVE_CLEAR_MUSIC;
-    return getWavePhase() === 'boss' ? BOSS_MUSIC : getMusicSeason(wave);
+    if (getWavePhase() === 'boss') return getIsFinalWave() ? FINAL_WAVE_MUSIC : BOSS_MUSIC;
+    return getMusicSeason(wave);
   }
 
   function updateMusicProfile(profile) {
@@ -386,6 +465,7 @@ export function createSpellwaveAudio({
   }
 
   function getMusicIntensity(wave, profile) {
+    if (profile.name === 'ending') return 0;
     if (profile.name === 'game-over') return 0;
     if (profile.name === 'wave-clear') return Math.min(Math.max(0, wave - 1) * 0.35, 4);
     return Math.min(Math.max(0, wave - 1) + (profile.intensityBoost || 0), 14);
@@ -393,16 +473,24 @@ export function createSpellwaveAudio({
 
   function isMusicActiveMode() {
     const mode = getMode();
-    return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover';
+    return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending';
   }
 
   function scheduleMusicStep(step, start, stepDuration, profile, intensity, profileGain = 1) {
     if (profileGain <= 0.02) return;
+    if (profile.name === 'final-wave') {
+      scheduleFinalWaveStep(step, start, stepDuration, profile, intensity, profileGain);
+      return;
+    }
+    if (profile.name === 'ending') {
+      scheduleEndingStep(step, start, stepDuration, profile, profileGain);
+      return;
+    }
 
     const melody = profile.melody[step % profile.melody.length];
     const bass = profile.bass[step % profile.bass.length];
     const accent = step % 8 === 0;
-    const isBoss = profile.name === 'boss';
+    const isBoss = profile.isBoss || false;
     const densePulse = (intensity >= 4 || isBoss) && step % 4 === 0;
     const latePulse = (intensity >= 8 || isBoss) && step % 2 === 1;
 
@@ -459,6 +547,177 @@ export function createSpellwaveAudio({
         gain: (0.02 + intensity * 0.0007) * profileGain,
         type: 'sawtooth',
         attack: 0.02,
+      }, musicGain);
+    }
+  }
+
+  function scheduleFinalWaveStep(step, start, stepDuration, profile, intensity, profileGain = 1) {
+    const chordIndex = Math.floor(step / 16) % profile.padChords.length;
+    const chord = profile.padChords[chordIndex];
+    const bass = profile.bass[step % profile.bass.length];
+    const melody = profile.melody[step % profile.melody.length];
+    const arp = profile.arpeggio[step % profile.arpeggio.length];
+    const pulseGain = profileGain * (0.9 + Math.min(intensity, 10) * 0.025);
+
+    if (step % 16 === 0) {
+      chord.forEach((frequency, index) => {
+        const duration = stepDuration * 18;
+        const gain = (index < 2 ? 0.012 : 0.0075) * profileGain;
+        scheduleTone(frequency, duration, start, {
+          gain,
+          type: index < 2 ? 'sine' : 'triangle',
+          attack: 0.18,
+          detune: index % 2 === 0 ? -5 : 6,
+        }, musicGain);
+        if (index >= 2) {
+          scheduleTone(frequency * 1.005, duration, start + 0.018, {
+            gain: gain * 0.62,
+            type: 'sine',
+            attack: 0.24,
+            detune: index % 2 === 0 ? 7 : -8,
+          }, musicGain);
+        }
+      });
+    }
+
+    if (bass) {
+      scheduleTone(bass * 0.5, stepDuration * 4.4, start, {
+        gain: profile.bassGain * 0.72 * pulseGain,
+        type: 'sine',
+        attack: 0.035,
+      }, musicGain);
+      scheduleTone(bass, stepDuration * 2.6, start, {
+        gain: profile.bassGain * 0.52 * pulseGain,
+        type: 'sawtooth',
+        attack: 0.024,
+        detune: -7,
+      }, musicGain);
+      scheduleTone(bass * 1.5, stepDuration * 1.4, start + stepDuration * 0.38, {
+        gain: profile.bassGain * 0.18 * profileGain,
+        type: 'triangle',
+        attack: 0.02,
+      }, musicGain);
+    }
+
+    if (step % 4 === 0) {
+      scheduleNoise(stepDuration * 1.5, start + stepDuration * 0.02, {
+        gain: (profile.drumGain + intensity * 0.00055) * profileGain,
+        filterType: 'lowpass',
+        filterFrequency: profile.drumFilter,
+        q: 0.75,
+      }, musicGain);
+    }
+
+    if (step % 8 === 6) {
+      scheduleNoise(stepDuration * 0.75, start + stepDuration * 0.18, {
+        gain: 0.0065 * profileGain,
+        filterType: 'highpass',
+        filterFrequency: 5200,
+        q: 0.4,
+      }, musicGain);
+    }
+
+    if (arp) {
+      const shimmerGain = (0.010 + intensity * 0.00035) * profileGain;
+      scheduleTone(arp, stepDuration * 1.1, start + stepDuration * 0.06, {
+        gain: shimmerGain,
+        type: 'sine',
+        attack: 0.018,
+      }, musicGain);
+      scheduleTone(arp * 2, stepDuration * 0.72, start + stepDuration * 0.22, {
+        gain: shimmerGain * 0.46,
+        type: 'triangle',
+        attack: 0.012,
+        detune: 5,
+      }, musicGain);
+      if (step % 2 === 0) {
+        scheduleTone(arp * 1.5, stepDuration * 0.8, start + stepDuration * 0.58, {
+          gain: shimmerGain * 0.32,
+          type: 'sine',
+          attack: 0.02,
+          detune: -9,
+        }, musicGain);
+      }
+    }
+
+    if (melody) {
+      scheduleTone(melody, stepDuration * 1.8, start + stepDuration * 0.12, {
+        gain: (profile.melodyGain + intensity * 0.00042) * profileGain,
+        type: 'triangle',
+        attack: 0.045,
+      }, musicGain);
+      scheduleTone(melody * 0.5, stepDuration * 2.4, start + stepDuration * 0.12, {
+        gain: 0.010 * profileGain,
+        type: 'sine',
+        attack: 0.09,
+      }, musicGain);
+      if (step % 8 === 2 || step % 16 === 12) {
+        scheduleTone(melody * 1.5, stepDuration * 1.25, start + stepDuration * 0.32, {
+          gain: 0.0105 * profileGain,
+          type: 'sine',
+          attack: 0.03,
+        }, musicGain);
+      }
+    }
+
+    if (step % 32 === 24) {
+      scheduleTone(55, stepDuration * 8, start, {
+        gain: 0.018 * profileGain,
+        type: 'sawtooth',
+        attack: 0.22,
+        endFrequency: 73.42,
+      }, musicGain);
+      scheduleNoise(stepDuration * 7.5, start, {
+        gain: 0.010 * profileGain,
+        filterType: 'highpass',
+        filterFrequency: 1800,
+        q: 0.35,
+      }, musicGain);
+    }
+  }
+
+  function scheduleEndingStep(step, start, stepDuration, profile, profileGain = 1) {
+    const chordIndex = Math.floor(step / 16) % profile.padChords.length;
+    const chord = profile.padChords[chordIndex];
+    const melody = profile.melody[step % profile.melody.length];
+    const bass = profile.bass[step % profile.bass.length];
+
+    if (step % 16 === 0) {
+      chord.forEach((frequency, index) => {
+        scheduleTone(frequency, stepDuration * 18, start, {
+          gain: (index < 2 ? 0.020 : 0.013) * profileGain,
+          type: index < 2 ? 'sine' : 'triangle',
+          attack: 0.22,
+          detune: index % 2 === 0 ? -4 : 5,
+        }, musicGain);
+      });
+      scheduleNoise(stepDuration * 12, start + stepDuration * 0.4, {
+        gain: 0.006 * profileGain,
+        filterType: 'highpass',
+        filterFrequency: 2400,
+        q: 0.35,
+      }, musicGain);
+    }
+
+    if (bass) {
+      scheduleTone(bass * 0.5, stepDuration * 8, start, {
+        gain: profile.bassGain * profileGain,
+        type: 'sine',
+        attack: 0.18,
+      }, musicGain);
+    }
+
+    if (melody) {
+      scheduleTone(melody, stepDuration * 4.2, start + stepDuration * 0.12, {
+        gain: profile.melodyGain * profileGain,
+        type: 'sine',
+        attack: 0.09,
+      }, musicGain);
+      scheduleTone(melody * 2, stepDuration * 2.5, start + stepDuration * 0.35, {
+        gain: 0.006 * profileGain,
+        type: 'triangle',
+        attack: 0.12,
+        detune: 6,
       }, musicGain);
     }
   }
@@ -555,6 +814,57 @@ export function createSpellwaveAudio({
     playTone(523, 0.22, { gain: 0.026, delay: 0.16, type: 'sine' });
   }
 
+  function playVictoryFinaleSound() {
+    const context = resumeAudio();
+    if (!context || !masterGain) return;
+    const now = context.currentTime;
+
+    // D-major triumph: foundation → build → swell → soaring peak → bell tail
+    const chords = [
+      // Foundation — low, warm, gentle arrival
+      { delay: 0.0,  notes: [73.42, 110.0, 146.83, 220.0], dur: 4.0, gainBase: 0.028, type: 'sine' },
+      // Build — rising harmony
+      { delay: 1.4,  notes: [146.83, 185.0, 220.0, 293.66], dur: 3.8, gainBase: 0.024, type: 'sine' },
+      { delay: 2.8,  notes: [196.0, 293.66, 369.99, 440.0], dur: 3.5, gainBase: 0.022, type: 'sine' },
+      // Swell — full mid-range
+      { delay: 4.4,  notes: [220.0, 293.66, 440.0, 587.33, 659.25], dur: 4.4, gainBase: 0.020, type: 'sine' },
+      // Soaring peak — upper harmonics, triumphant
+      { delay: 6.2,  notes: [293.66, 440.0, 587.33, 739.99, 880.0], dur: 5.0, gainBase: 0.018, type: 'sine' },
+      // Resolution — warm landing
+      { delay: 9.0,  notes: [146.83, 220.0, 293.66, 440.0, 587.33], dur: 5.5, gainBase: 0.022, type: 'sine' },
+    ];
+
+    chords.forEach(({ delay, notes, dur, gainBase, type }) => {
+      notes.forEach((freq, i) => {
+        const isLow = i < 2;
+        scheduleTone(freq, dur, now + delay, {
+          gain: gainBase * (isLow ? 1.0 : 0.72),
+          type: isLow ? type : 'triangle',
+          attack: 0.22 + delay * 0.012,
+          detune: i % 2 === 0 ? -5 : 6,
+        }, masterGain);
+      });
+    });
+
+    // Shimmer breath — filtered noise across the whole sequence
+    scheduleNoise(5.2, now + 0.3,  { gain: 0.016, filterType: 'highpass', filterFrequency: 2800, q: 0.4 }, masterGain);
+    scheduleNoise(4.0, now + 6.5,  { gain: 0.013, filterType: 'highpass', filterFrequency: 3200, q: 0.4 }, masterGain);
+
+    // Bell tail — crystalline high tones that slowly appear after the peak
+    const bells = [
+      [1174.66, 2.2, 8.2,  0.018],
+      [1318.51, 2.6, 9.0,  0.015],
+      [1760.0,  2.8, 9.8,  0.012],
+      [1174.66, 3.2, 11.0, 0.014],
+      [2093.0,  2.4, 12.2, 0.009],
+      [1318.51, 3.0, 13.5, 0.010],
+      [880.0,   3.8, 14.8, 0.014],
+    ];
+    bells.forEach(([freq, dur, delay, gain]) => {
+      scheduleTone(freq, dur, now + delay, { gain, type: 'sine', attack: 0.06, detune: 3 }, masterGain);
+    });
+  }
+
   function playGameOverSound() {
     playTone(196, 0.18, { gain: 0.055, type: 'sawtooth', endFrequency: 130 });
     playTone(130, 0.26, { gain: 0.052, delay: 0.12, type: 'sawtooth', endFrequency: 70 });
@@ -602,6 +912,20 @@ export function createSpellwaveAudio({
     playNoise(0.60, { gain: 0.075, filterFrequency: 450, filterType: 'lowpass' });
   }
 
+  function playShieldActivateSound() {
+    playTone(220, 0.4, { gain: 0.05, type: 'sawtooth', endFrequency: 440 });
+    playTone(330, 0.45, { gain: 0.05, delay: 0.05, type: 'sine', endFrequency: 660 });
+    playTone(440, 0.5, { gain: 0.05, delay: 0.1, type: 'sine', endFrequency: 880 });
+  }
+
+  function playShieldBlockSound() {
+    playTone(880, 0.15, { gain: 0.08, type: 'sine', endFrequency: 1760 });
+    playTone(440, 0.20, { gain: 0.08, type: 'triangle', endFrequency: 880 });
+    playNoise(0.25, { gain: 0.06, filterFrequency: 3000, filterType: 'bandpass', q: 1.5 });
+    // Deep bass deflection
+    playTone(100, 0.35, { gain: 0.07, delay: 0.02, type: 'sine', endFrequency: 40 });
+  }
+
   return {
     toggleEnabled,
     updateAudioButton,
@@ -623,12 +947,14 @@ export function createSpellwaveAudio({
     playBossImpactSound,
     playBossWarningSound,
     playWaveClearSound,
+    playVictoryFinaleSound,
     playGameOverSound,
     playGodModeOnSound,
     playGodModeOffSound,
     playChestClackSound,
     playChestOpenSound,
     playShockwaveSound,
+    playShieldActivateSound,
+    playShieldBlockSound,
   };
 }
-

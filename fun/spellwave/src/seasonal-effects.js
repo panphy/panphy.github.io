@@ -18,6 +18,7 @@ export function createSeasonalEffects({
   const lightningBolts = [];
 
   let currentSeasonName = 'spring';
+  let weatherDisabled = false;
   let snowField = null;
   let snowPositions = null;
   let snowSpeeds = null;
@@ -47,7 +48,21 @@ export function createSeasonalEffects({
     updateWeather(seconds, delta);
   }
 
+  function stopWeather() {
+    weatherDisabled = true;
+    summerStorm.active = false;
+    summerStorm.rainTime = 0;
+    summerStorm.flashTime = 0;
+    if (rainField) rainField.visible = false;
+    if (snowField) snowField.visible = false;
+    hideLightningBolts();
+    if (lightningFlash) lightningFlash.style.opacity = '0';
+    if (lightningLight) lightningLight.intensity = 0;
+    if (lightningGlow) lightningGlow.intensity = 0;
+  }
+
   function setSeason(seasonName) {
+    weatherDisabled = false;
     currentSeasonName = seasonName;
 
     const isSpring = seasonName === 'spring';
@@ -110,6 +125,7 @@ export function createSeasonalEffects({
   }
 
   function updateSnow(seconds, delta) {
+    if (weatherDisabled && snowField) { snowField.visible = false; }
     if (!snowField || !snowField.visible) return;
     const runningFactor = getMode() === 'running' ? 1 : 0.42;
     for (let index = 0; index < snowSpeeds.length; index += 1) {
@@ -125,6 +141,14 @@ export function createSeasonalEffects({
   }
 
   function updateSummerStorm(delta) {
+    if (weatherDisabled) {
+      summerStorm.active = false;
+      summerStorm.flashTime = 0;
+      if (rainField) rainField.visible = false;
+      hideLightningBolts();
+      if (lightningFlash) lightningFlash.style.opacity = '0';
+      return;
+    }
     if (currentSeasonName !== 'summer') {
       summerStorm.active = false;
       summerStorm.flashTime = 0;
@@ -400,6 +424,7 @@ export function createSeasonalEffects({
     create,
     update,
     setSeason,
+    stopWeather,
     getWeatherState,
   };
 }

@@ -3,6 +3,9 @@ import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
+import { createEndingFX } from './ending-fx.js';
+import { createEnemyMesh, createMimicChestMesh, blockMesh } from './enemy-meshes.js';
+import { getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -20,6 +23,7 @@ const startButton = document.getElementById('startButton');
 const audioButton = document.getElementById('audioButton');
 const pauseButton = document.getElementById('pauseButton');
 const fullscreenButton = document.getElementById('fullscreenButton');
+const batterySaverButton = document.getElementById('batterySaverButton');
 const messagePanel = document.getElementById('messagePanel');
 const messageKicker = document.getElementById('messageKicker');
 const messageTitle = document.getElementById('messageTitle');
@@ -35,11 +39,26 @@ const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
 const potionBar = document.getElementById('potionBar');
 const potionSlots = document.querySelectorAll('.potion-slot');
+const gameEnding = document.getElementById('gameEnding');
+const endingFlash = document.getElementById('endingFlash');
+const endingContent = document.getElementById('endingContent');
+const endingCanvasEl = document.getElementById('endingCanvas');
+const endingReplay = document.getElementById('endingReplay');
+let endingFX = null;
+const endScore = document.getElementById('endScore');
+const endWpm = document.getElementById('endWpm');
+const endAccuracy = document.getElementById('endAccuracy');
+const endStreak = document.getElementById('endStreak');
+const endMimics = document.getElementById('endMimics');
+const endGrade = document.getElementById('endGrade');
+const endHealth = document.getElementById('endHealth');
+const endTime = document.getElementById('endTime');
 
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
 const MAX_DELTA = 0.06;
+const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
 const FIRST_WAVE_SPAWN_Z = -34;
@@ -55,32 +74,45 @@ const BOSS_FIRST_SHOT_DELAY = 2.6;
 const BOSS_SHOT_INTERVAL = 4.2;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
+const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
+const MIN_PROJECTILE_SPACING = 1.6;
 const BOSSES_PER_WAVE = 3;
+const FINAL_WAVE_NUMBER = 10;
+const FINAL_WAVE_NORMAL_COUNT = 0;
+const FINAL_WAVE_BOSS_COUNT = 10;
+const FINAL_WAVE_TOTAL_COUNT = 16;
+const KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
 const PARTICLE_GRAVITY_COEFFS = [21 * 5, 20 * 5, 10.7 * 10, 34 * 3, 9.7 * 10];
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
-  normalGrowth: 2,
-  normalMax: 18,
+  normalGrowth: 1,
+  normalMax: 16,
   enemyLimit: 11,
   speedMultiplier: 0.94,
   waveSpeedBonus: 0.075,
-  spawnBase: 2.35,
-  spawnGrowth: 0.075,
+  spawnBase: 2.45,
+  spawnGrowth: 0.04,
   spawnJitter: 0.5,
-  spawnMin: 0.9,
+  spawnMin: 1.05,
   bossWarningDelay: 1.0,
   bossSpawnGap: 2.8,
   revealZ: -40,
 };
-const NORMAL_TYPING_BUDGETS = [58, 74, 98, 122, 148, 174, 198, 220];
-const NORMAL_TYPING_BUDGET_GROWTH = 18;
-const ACTIVE_TYPING_PRESSURE_BASE = 42;
-const ACTIVE_TYPING_PRESSURE_GROWTH = 6;
-const ACTIVE_TYPING_PRESSURE_MAX = 84;
-const LONG_VOCAB_LIMIT_LENGTH = 16;
+const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
+const NORMAL_TYPING_BUDGETS = [58, 72, 88, 106, 124, 142, 158, 174, 188, 202];
+const NORMAL_TYPING_BUDGET_GROWTH = 14;
+const ACTIVE_TYPING_PRESSURE_BASE = 36;
+const ACTIVE_TYPING_PRESSURE_GROWTH = 4;
+const ACTIVE_TYPING_PRESSURE_MAX = 58;
+const LONG_ACTIVE_PROMPT_COST = 13;
+const ACTIVE_LONG_PROMPT_LIMIT = 2;
+const LATE_ACTIVE_LONG_PROMPT_LIMIT = 3;
+const SPAWN_COST_BASELINE = 7;
+const SPAWN_COST_DELAY_MAX = 1.85;
+const SUPPORT_SPAWN_DELAY_MIN = 0.75;
 const LABEL_SAFE_MARGIN = 12;
 const LABEL_STACK_GAP = 8;
 const LABEL_X_EASE = 0.14;
@@ -224,6 +256,75 @@ const BOSS_TYPES = [
     weight: 1,
     score: 150,
   },
+  {
+    name: 'Glacial Titan',
+    isBoss: true,
+    body: 0x1a3045,
+    trim: 0x9ee8ff,
+    eye: 0xfff8b0,
+    speed: 0.95,
+    scale: 1.68,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Magma Sovereign',
+    isBoss: true,
+    body: 0x3d0a00,
+    trim: 0xff6a00,
+    eye: 0xffffff,
+    speed: 1.08,
+    scale: 1.63,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Void Specter',
+    isBoss: true,
+    isFlying: true,
+    body: 0x08060f,
+    trim: 0x00e5ff,
+    eye: 0x00e5ff,
+    speed: 1.18,
+    scale: 1.58,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Celestial Arbiter',
+    isBoss: true,
+    isFlying: true,
+    body: 0xf0f4ff,
+    trim: 0xffd700,
+    eye: 0x1a3aff,
+    speed: 1.02,
+    scale: 1.65,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Phantom Rift',
+    isBoss: true,
+    isFlying: true,
+    body: 0x0a2a2a,
+    trim: 0xe040fb,
+    eye: 0xe040fb,
+    speed: 1.13,
+    scale: 1.61,
+    weight: 1,
+    score: 150,
+  },
+  {
+    name: 'Stellar Dreadnought',
+    isBoss: true,
+    body: 0x050d1a,
+    trim: 0xd4a017,
+    eye: 0xffffff,
+    speed: 0.92,
+    scale: 1.72,
+    weight: 1,
+    score: 150,
+  },
 ];
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 const FLYING_SHADOW_OPACITY = 0.22;
@@ -307,6 +408,7 @@ const pathMarkerBlocks = [];
 const roadBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
+const meteors = [];
 
 let mode = 'idle';
 let score = 0;
@@ -322,7 +424,12 @@ let normalTypingCostSpawned = 0;
 let bossesSpawned = 0;
 let bossSpawnTimer = 0;
 let waveClearDelayTimer = 0;
+let waveBossOrder = [];
+let finalWaveQueue = [];
+let finalWaveQueueIndex = 0;
+let konamiBuffer = [];
 let bossWordsThisSet = [];
+let previewableWordsThisSet = [];
 let bossPreviewSchedule = new Map();
 let hardGuestSchedule = new Map();
 let introducedBossTermsThisSet = new Set();
@@ -336,10 +443,19 @@ let godModeUsedThisRun = false;
 let potionCheatUsedThisRun = false;
 let inputTrace = '';
 let streak = 0;
+let peakStreak = 0;
+let mimicsLooted = 0;
 let typedBuffer = '';
 let activeTarget = null;
+let lastBossShotTime = -999;
 let spawnTimer = 0;
 let lastFrameTime = 0;
+let lastIdleFrameTime = 0;
+let rafId = null;
+let isTimeoutScheduled = false;
+let batterySaver = false;
+const BATTERY_SAVER_STORAGE_KEY = 'spellwave_battery_saver_active';
+
 let elapsed = 0;
 let mistakeTimer = 0;
 let damageTimer = 0;
@@ -373,6 +489,7 @@ let potionsSystem = null;
 let baseCloudMaterial = null;
 let weatherCloudMaterial = null;
 let cloudWeatherBlend = 0;
+let chainLightningTimers = [];
 
 const {
   toggleEnabled: toggleAudioEnabled,
@@ -395,12 +512,15 @@ const {
   playBossImpactSound,
   playBossWarningSound,
   playWaveClearSound,
+  playVictoryFinaleSound,
   playGameOverSound,
   playGodModeOnSound,
   playGodModeOffSound,
   playChestClackSound,
   playChestOpenSound,
   playShockwaveSound,
+  playShieldActivateSound,
+  playShieldBlockSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -408,17 +528,14 @@ const {
   getMode: () => mode,
   getWavePhase: () => wavePhase,
   getWaveSet: () => waveSet,
+  getIsFinalWave: () => isFinalWave(),
   getTypedLength: () => typedBuffer.length,
   pathLanes: PATH_LANES,
 });
 
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: true,
-  alpha: false,
-  preserveDrawingBuffer: false,
-  powerPreference: 'high-performance',
-});
+const rendererState = createRenderer();
+const renderer = rendererState.renderer;
+const webGLAvailable = rendererState.available;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -466,6 +583,7 @@ scene.add(emberLight);
 
 createWorld();
 createSky();
+createMeteors();
 createClouds();
 seasonalEffects = createSeasonalEffects({
   scene,
@@ -492,6 +610,8 @@ potionsSystem = createPotionSystem({
   scene,
   effectsGroup,
   playShockwaveSound,
+  playShieldActivateSound,
+  playShieldBlockSound,
   playGodModeOnSound,
   playGodModeOffSound,
   playToggleSound,
@@ -510,6 +630,7 @@ setPauseButtonState(true, true);
 updateFullscreenButton();
 updatePhaseDisplay();
 updateHud(true);
+if (!webGLAvailable) showWebGLUnavailable();
 
 startButton.addEventListener('click', () => {
   resumeAudio();
@@ -522,12 +643,19 @@ startButton.addEventListener('click', () => {
   }
 });
 
+if (endingReplay) {
+  endingReplay.addEventListener('click', () => {
+    dismissEndingSequence();
+    startGame();
+  });
+}
+
 audioButton.addEventListener('click', () => {
   const audioEnabled = toggleAudioEnabled();
   if (audioEnabled) {
     resumeAudio();
     playToggleSound();
-    if (mode === 'running' || mode === 'wave_cleared' || mode === 'gameover') startMusicLoop(false);
+    if (mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending') startMusicLoop(false);
   } else {
     stopMusicLoop(0.03);
   }
@@ -549,6 +677,10 @@ fullscreenButton.addEventListener('click', () => {
   if (mode === 'running') focusKeyboard();
 });
 
+if (batterySaverButton) {
+  batterySaverButton.addEventListener('click', toggleBatterySaver);
+}
+
 window.addEventListener('resize', resizeRenderer);
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
@@ -558,7 +690,13 @@ window.addEventListener('blur', () => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && mode === 'running') pauseGame();
+  if (document.hidden) {
+    if (mode === 'running') pauseGame();
+    cancelFrame();
+  } else {
+    lastFrameTime = 0;
+    scheduleFrame();
+  }
 });
 
 document.addEventListener('pointerdown', () => {
@@ -571,7 +709,10 @@ keyboardInput.addEventListener('input', () => {
 });
 
 resizeRenderer();
-requestAnimationFrame(animate);
+batterySaver = loadBatterySaverSetting();
+applyBatterySaver();
+scheduleFrame();
+
 
 function toggleGodMode() {
   if (godMode) {
@@ -597,7 +738,12 @@ function toggleGodMode() {
 }
 
 function startGame() {
-  const transitionFromGameOver = mode === 'gameover';
+  if (!webGLAvailable) {
+    showWebGLUnavailable();
+    return;
+  }
+
+  const transitionFromGameOver = mode === 'gameover' || mode === 'ending';
   playStartSound();
   clearEnemies();
   clearEffects();
@@ -614,6 +760,8 @@ function startGame() {
   gameTimeSeconds = 0;
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
+  document.body.classList.remove('final-wave-active');
+  dismissEndingSequence();
   wandsArePrimed = false;
   waveSet = 1;
   wavePhase = 'normal';
@@ -623,8 +771,13 @@ function startGame() {
   normalTypingCostSpawned = 0;
   bossesSpawned = 0;
   bossSpawnTimer = 0;
+  waveBossOrder = [];
+  finalWaveQueue = [];
+  finalWaveQueueIndex = 0;
   prepareWavePlan();
   streak = 0;
+  peakStreak = 0;
+  mimicsLooted = 0;
   typedAttempts = 0;
   mistakeCount = 0;
   defeatedCount = 0;
@@ -652,6 +805,7 @@ function startGame() {
   updatePhaseDisplay();
   applySeasonForWave(waveSet, true);
   focusKeyboard();
+  scheduleFrame();
 }
 
 function pauseGame() {
@@ -659,6 +813,7 @@ function pauseGame() {
   playPauseSound();
   stopMusicLoop();
   mode = 'paused';
+  cancelFrame();
   document.body.classList.add('is-paused');
   setPauseButtonState(false, false);
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
@@ -676,10 +831,13 @@ function resumeGame() {
   setPauseButtonState(true, false);
   updatePhaseDisplay();
   focusKeyboard();
+  scheduleFrame();
 }
 
 function endGame() {
   mode = 'gameover';
+  clearChainLightningTimers();
+  releaseChainBeams();
   potionsSystem.clear();
   document.body.classList.remove('chain-lightning-primed');
   playGameOverSound();
@@ -710,15 +868,51 @@ function showMessage(kicker, title, scoreText, buttonText, copyText) {
   messageScore.textContent = scoreText;
   messageCopy.textContent = copyText;
   startButton.textContent = buttonText;
+  
+  if (buttonText === 'Start') {
+    startButton.title = 'Start the physics typing run';
+  } else if (buttonText === 'Resume') {
+    startButton.title = 'Resume the paused run';
+  } else if (buttonText === 'Try Again') {
+    startButton.title = 'Restart the run from Wave 1';
+  } else if (buttonText === 'Next Wave') {
+    startButton.title = 'Proceed to the next wave';
+  } else if (buttonText === 'Unavailable') {
+    startButton.title = 'Simulation requires WebGL support';
+  } else {
+    startButton.title = buttonText;
+  }
+
   if (runGlossary) runGlossary.hidden = true;
   if (supportLink) supportLink.hidden = true;
   messagePanel.hidden = false;
 }
 
+function showWebGLUnavailable() {
+  showMessage(
+    'WEBGL REQUIRED',
+    'Graphics Unavailable',
+    'Spellwave needs browser WebGL support',
+    'Unavailable',
+    'Enable hardware acceleration or try a browser/device with WebGL enabled.'
+  );
+  startButton.disabled = true;
+  setPauseButtonState(true, true);
+}
+
 function handleKeyDown(event) {
   resumeAudio();
 
-  if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover')) {
+  // Konami code detection — runs in all game states
+  konamiBuffer.push(event.key);
+  if (konamiBuffer.length > KONAMI_SEQUENCE.length) konamiBuffer.shift();
+  if (konamiBuffer.length === KONAMI_SEQUENCE.length && KONAMI_SEQUENCE.every((k, i) => k === konamiBuffer[i])) {
+    konamiBuffer = [];
+    activateFinalWaveCheat();
+    return;
+  }
+
+  if (event.key === 'Enter' && (mode === 'idle' || mode === 'gameover' || mode === 'ending')) {
     event.preventDefault();
     startGame();
     return;
@@ -943,6 +1137,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
 
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
+  if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   if (enemy.isBoss) bossesDefeated += 1;
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
@@ -992,17 +1187,27 @@ function leakEnemy(enemy) {
   }
 
 
-  if (!godMode) health = Math.max(0, health - enemy.damage);
-  streak = 0;
+  let wasBlocked = false;
+  if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
+    wasBlocked = potionsSystem.blockLeak();
+  }
+
+  if (wasBlocked) {
+    potionsSystem.triggerShieldHitVisual();
+  } else {
+    if (!godMode) health = Math.max(0, health - enemy.damage);
+    streak = 0;
+    playDamageSound(enemy);
+    damageTimer = enemy.isBoss ? 0.46 : 0.32;
+    damageFlash.classList.add('show');
+    window.setTimeout(() => damageFlash.classList.remove('show'), 160);
+  }
   leakedCount += 1;
   if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
     encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
   }
-  playDamageSound(enemy);
-  damageTimer = enemy.isBoss ? 0.46 : 0.32;
-  damageFlash.classList.add('show');
-  window.setTimeout(() => damageFlash.classList.remove('show'), 160);
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
+  if (isFinalWave() && enemy.isBoss) bossesDefeated += 1;
   removeEnemy(enemy);
   typedBuffer = '';
   activeTarget = null;
@@ -1021,21 +1226,61 @@ function bossProjectileHitPlayer(enemy) {
   playBossImpactSound();
 
   if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
+    let wasBlocked = false;
+    if (!godMode && potionsSystem.isShieldActive()) {
+      wasBlocked = potionsSystem.blockBossHit();
+    }
 
-    if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
-    streak = 0;
-    damageTimer = 0.24;
-    damageFlash.classList.add('show');
-    window.setTimeout(() => damageFlash.classList.remove('show'), 120);
-    playDamageSound(enemy);
+    if (wasBlocked) {
+      potionsSystem.triggerShieldHitVisual();
+    } else {
+      if (!godMode) health = Math.max(0, health - BOSS_SHOT_DAMAGE);
+      streak = 0;
+      damageTimer = 0.24;
+      damageFlash.classList.add('show');
+      window.setTimeout(() => damageFlash.classList.remove('show'), 120);
+      playDamageSound(enemy);
+    }
     updateHud(true);
     updateTypedDisplay();
     if (!godMode && health <= 0) endGame();
   }
 }
 
+function scheduleFrame() {
+  cancelFrame();
+  if (mode === 'paused' || mode === 'ending') return;
+
+  if (mode !== 'running') {
+    isTimeoutScheduled = true;
+    rafId = setTimeout(() => {
+      isTimeoutScheduled = false;
+      rafId = requestAnimationFrame(animate);
+    }, IDLE_FRAME_INTERVAL);
+  } else {
+    isTimeoutScheduled = false;
+    rafId = requestAnimationFrame(animate);
+  }
+}
+
+function cancelFrame() {
+  if (rafId !== null) {
+    if (isTimeoutScheduled) {
+      clearTimeout(rafId);
+    } else {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = null;
+    isTimeoutScheduled = false;
+  }
+}
+
 function animate(frameTime) {
-  requestAnimationFrame(animate);
+  if (mode === 'paused' || mode === 'ending') {
+    rafId = null;
+    return;
+  }
+
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
 
@@ -1063,14 +1308,14 @@ function animate(frameTime) {
           const enemy = spawnEnemy({ isMedic: true });
           registerNormalTypingCost(enemy);
           medicsSpawnedThisSet += 1;
-          spawnTimer = Math.max(spawnTimer, 0.55);
+          spawnTimer = Math.max(spawnTimer, nextSpawnDelay(enemy, { support: true }));
         }
       } else if (canAddNormalEnemy && shouldSpawnMimic() && enemies.length < getEnemyLimit()) {
         if (currentDelta > 0) {
           const enemy = spawnEnemy({ isMimic: true });
           registerNormalTypingCost(enemy);
           mimicsSpawnedThisSet += 1;
-          spawnTimer = Math.max(spawnTimer, 0.55);
+          spawnTimer = Math.max(spawnTimer, nextSpawnDelay(enemy, { support: true }));
         }
       } else if (canAddNormalEnemy && normalEnemiesSpawned < normalEnemyTarget) {
         spawnTimer -= currentDelta;
@@ -1078,27 +1323,61 @@ function animate(frameTime) {
           const enemy = spawnEnemy();
           registerNormalTypingCost(enemy);
           normalEnemiesSpawned += 1;
-          spawnTimer = nextSpawnDelay();
+          spawnTimer = nextSpawnDelay(enemy);
         }
       } else if (isNormalWaveComplete() && enemies.length === 0) {
         startBossPhase();
       }
     } else if (wavePhase === 'boss') {
-      if (bossesSpawned < BOSSES_PER_WAVE) {
-        bossSpawnTimer -= currentDelta;
-        if (bossSpawnTimer <= 0) {
-          spawnBoss();
-          bossesSpawned += 1;
-          bossSpawnTimer = currentDifficulty().bossSpawnGap;
+      if (isFinalWave()) {
+        if (bossesDefeated >= FINAL_WAVE_BOSS_COUNT) {
+          if (waveClearDelayTimer === 0) {
+            waveClearDelayTimer = 1.5;
+          } else {
+            waveClearDelayTimer -= currentDelta;
+            if (waveClearDelayTimer <= 0) {
+              waveClearDelayTimer = 0;
+              endingStartTime = elapsed;
+              startEndingSequence();
+            }
+          }
+        } else if (finalWaveQueueIndex < finalWaveQueue.length) {
+          const nextEntry = finalWaveQueue[finalWaveQueueIndex];
+          const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
+          if (!hasActiveSupportEnemy) {
+            bossSpawnTimer -= currentDelta;
+            if (bossSpawnTimer <= 0) {
+              const entry = finalWaveQueue[finalWaveQueueIndex];
+              finalWaveQueueIndex += 1;
+              if (entry === 'boss') {
+                spawnBoss();
+                bossesSpawned += 1;
+              } else if (entry === 'medic') {
+                spawnEnemy({ isMedic: true });
+              } else if (entry === 'mimic') {
+                spawnEnemy({ isMimic: true });
+              }
+              bossSpawnTimer = (entry === 'medic' || entry === 'mimic') ? 1.15 : currentDifficulty().bossSpawnGap;
+            }
+          }
         }
-      } else if (enemies.length === 0) {
-        if (waveClearDelayTimer === 0) {
-          waveClearDelayTimer = 1.25;
-        } else {
-          waveClearDelayTimer -= currentDelta;
-          if (waveClearDelayTimer <= 0) {
-            waveClearDelayTimer = 0;
-            startWaveCleared();
+      } else {
+        if (bossesSpawned < BOSSES_PER_WAVE) {
+          bossSpawnTimer -= currentDelta;
+          if (bossSpawnTimer <= 0) {
+            spawnBoss();
+            bossesSpawned += 1;
+            bossSpawnTimer = currentDifficulty().bossSpawnGap;
+          }
+        } else if (enemies.length === 0) {
+          if (waveClearDelayTimer === 0) {
+            waveClearDelayTimer = 1.25;
+          } else {
+            waveClearDelayTimer -= currentDelta;
+            if (waveClearDelayTimer <= 0) {
+              waveClearDelayTimer = 0;
+              startWaveCleared();
+            }
           }
         }
       }
@@ -1113,6 +1392,8 @@ function animate(frameTime) {
   updateSeasonFade(delta);
   updateLabels();
   renderer.render(scene, camera);
+
+  scheduleFrame();
 }
 
 function updateEnemies(delta, seconds) {
@@ -1148,81 +1429,33 @@ function updateEnemies(delta, seconds) {
     if (enemy.stunTimer === undefined) enemy.stunTimer = 0;
     if (enemy.stunTimer > 0) {
       enemy.stunTimer = Math.max(0, enemy.stunTimer - delta);
-      enemy.visualStunApplied = true;
-
-      const uniqueMaterials = new Set();
-      const uniqueLights = new Set();
-      enemy.group.traverse(child => {
-        if (child.isMesh && child.material) {
-          uniqueMaterials.add(child.material);
-        } else if (child.isLight) {
-          uniqueLights.add(child);
-        }
-      });
-
-      uniqueMaterials.forEach(mat => {
-        if (mat.userData.origColor === undefined) {
-          mat.userData.origColor = mat.color.clone();
-          if (mat.emissive) {
-            mat.userData.origEmissive = mat.emissive.clone();
-            mat.userData.origEmissiveIntensity = mat.emissiveIntensity;
+      if (!enemy.visualStunApplied) {
+        enemy.visualStunApplied = true;
+        enemy.group.traverse(child => {
+          if (child.isMesh && child.userData.stunMaterial) {
+            child.material = child.userData.stunMaterial;
+          } else if (child.isLight) {
+            if (child.userData.origColor === undefined) {
+              child.userData.origColor = child.color.clone();
+              child.userData.origIntensity = child.intensity;
+            }
+            child.color.setRGB(0.22, 0.68, 1.0);
+            child.intensity = 0.58;
           }
-        }
-        const orig = mat.userData.origColor;
-        const gray = 0.299 * orig.r + 0.587 * orig.g + 0.114 * orig.b;
-        mat.color.setRGB(
-          gray * 0.3 + 0.05,
-          gray * 0.6 + 0.2,
-          gray * 0.9 + 0.45
-        );
-        if (mat.emissive) {
-          mat.emissive.setRGB(0.1, 0.35, 0.6);
-          mat.emissiveIntensity = 0.8;
-        }
-      });
-
-      uniqueLights.forEach(light => {
-        if (light.userData.origColor === undefined) {
-          light.userData.origColor = light.color.clone();
-          light.userData.origIntensity = light.intensity;
-        }
-        light.color.setRGB(0.22, 0.68, 1.0);
-        light.intensity = 0.58;
-      });
+        });
+      }
     } else if (enemy.visualStunApplied) {
       enemy.visualStunApplied = false;
-
-      const uniqueMaterials = new Set();
-      const uniqueLights = new Set();
       enemy.group.traverse(child => {
-        if (child.isMesh && child.material) {
-          uniqueMaterials.add(child.material);
+        if (child.isMesh && child.userData.normalMaterial) {
+          child.material = child.userData.normalMaterial;
         } else if (child.isLight) {
-          uniqueLights.add(child);
-        }
-      });
-
-      uniqueMaterials.forEach(mat => {
-        if (mat.userData.origColor !== undefined) {
-          mat.color.copy(mat.userData.origColor);
-          if (mat.emissive) {
-            mat.emissive.copy(mat.userData.origEmissive);
-            mat.emissiveIntensity = mat.userData.origEmissiveIntensity;
+          if (child.userData.origColor !== undefined) {
+            child.color.copy(child.userData.origColor);
+            child.intensity = child.userData.origIntensity;
+            delete child.userData.origColor;
+            delete child.userData.origIntensity;
           }
-          delete mat.userData.origColor;
-          if (mat.userData.origEmissive !== undefined) {
-            delete mat.userData.origEmissive;
-            delete mat.userData.origEmissiveIntensity;
-          }
-        }
-      });
-
-      uniqueLights.forEach(light => {
-        if (light.userData.origColor !== undefined) {
-          light.color.copy(light.userData.origColor);
-          light.intensity = light.userData.origIntensity;
-          delete light.userData.origColor;
-          delete light.userData.origIntensity;
         }
       });
     }
@@ -1264,9 +1497,16 @@ function updateEnemies(delta, seconds) {
     if (enemy.isBoss && enemy.revealed && (!enemy.stunTimer || enemy.stunTimer <= 0)) {
       enemy.shotTimer -= delta;
       if (enemy.shotTimer <= 0) {
-        bossShootPlayer(enemy);
-        enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
-        if (mode !== 'running') break;
+        const activeRocksCount = beams.filter(b => b.kind === 'rock').length;
+        const timeSinceLastShot = seconds - lastBossShotTime;
+        if (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES && timeSinceLastShot >= MIN_PROJECTILE_SPACING) {
+          bossShootPlayer(enemy);
+          enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
+          lastBossShotTime = seconds;
+          if (mode !== 'running') break;
+        } else {
+          enemy.shotTimer = 0; // Hold throw until a slot opens AND spacing is met
+        }
       }
     }
 
@@ -1418,6 +1658,7 @@ function updateEffects(delta) {
 function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   const envDelta = isTimeFrozen ? 0 : delta;
   updateWandSwings(envDelta);
+  updateMeteors(envDelta);
   emberLight.intensity = seasonEmberIntensityBase + Math.sin(seconds * 5.8) * 0.34;
   const shake = damageTimer > 0 ? damageTimer * 0.45 : 0;
   camera.position.x = Math.sin(seconds * 0.34) * 0.28 + Math.sin(seconds * 41) * shake;
@@ -1776,182 +2017,6 @@ function getLabelSafeBounds(height) {
   };
 }
 
-function buildHintMask(term, options = {}) {
-  const getCount = () => {
-    if (options.hintRange) {
-      const { min, max } = options.hintRange;
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    return Math.max(1, Math.floor(options.leadingTypeableCount || 1));
-  };
-
-  return term.replace(/\S+/g, word => {
-    const currentLimit = getCount();
-    let hasTypeable = false;
-    for (const ch of word) if (normalizeCharacter(ch, options)) { hasTypeable = true; break; }
-    if (!hasTypeable) return word;
-    let result = '';
-    let revealedTypeable = 0;
-    for (const ch of word) {
-      if (!normalizeCharacter(ch, options)) { result += ch; }
-      else if (revealedTypeable < currentLimit) { result += ch; revealedTypeable += 1; }
-      else { result += '_'; }
-    }
-    return result;
-  });
-}
-
-function getBossQuestionHintRange() {
-  if (waveSet === 1) return { min: 3, max: 3 };
-  if (waveSet === 2) return { min: 2, max: 3 };
-  return { min: 1, max: 3 };
-}
-
-function buildSearchPrompt(term, options = {}) {
-  return [...term].map(character => normalizeCharacter(character, options)).join('');
-}
-
-function buildAltSearchPrompts(term, options = {}) {
-  const canonical = buildSearchPrompt(term, options);
-  const lower = term.toLowerCase();
-  const alts = new Set();
-  for (const [a, b] of SPELLING_ALTS) {
-    for (const [from, to] of [[a, b], [b, a]]) {
-      if (lower.includes(from)) {
-        const alt = buildSearchPrompt(lower.replace(from, to), options);
-        if (alt !== canonical) alts.add(alt);
-      }
-    }
-  }
-  return [...alts];
-}
-
-function escapeHtml(text) {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function wrapSups(text) {
-  return text.replace(/²/g, '<sup class="given-sup">²</sup>');
-}
-
-const SUPERSCRIPT_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
-const LOW_VALUE_ANSWER_WORDS = new Set([
-  'a',
-  'an',
-  'and',
-  'as',
-  'by',
-  'for',
-  'from',
-  'in',
-  'of',
-  'on',
-  'or',
-  'per',
-  'the',
-  'to',
-  'with',
-]);
-
-function buildHintPart(text, options = {}) {
-  const leadingTypeableCount = Math.max(1, Math.floor(options.leadingTypeableCount || 1));
-  let result = '';
-  let revealedTypeable = 0;
-  for (const ch of text) {
-    if (!normalizeCharacter(ch, options)) { result += ch; }
-    else if (revealedTypeable < leadingTypeableCount) { result += ch; revealedTypeable += 1; }
-    else { result += '_'; }
-  }
-  return result;
-}
-
-function buildTwoWordLimit(term, options = {}) {
-  const tokens = term.split(/(\s+)/);
-  const typeableIndices = [];
-  for (let i = 0; i < tokens.length; i++) {
-    if (/^\s+$/.test(tokens[i])) continue;
-    const answerText = getAnswerTokenText(tokens[i]);
-    if (isWordToken(answerText) && !isLowValueAnswerToken(answerText) && buildSearchPrompt(answerText, options)) {
-      typeableIndices.push(i);
-    }
-  }
-  if (typeableIndices.length === 0) return null;
-  const hasSkippedAnswerWord = tokens.some((token, index) => {
-    if (/^\s+$/.test(token)) return false;
-    return isWordToken(getAnswerTokenText(token)) && !typeableIndices.includes(index);
-  });
-  if (typeableIndices.length <= 2 && !options.alwaysLimit && !hasSkippedAnswerWord) return null;
-
-  const shuffled = [...typeableIndices];
-  for (let i = shuffled.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  const maxHiddenWords = Number.isFinite(options.maxHiddenWords)
-    ? Math.max(1, Math.floor(options.maxHiddenWords))
-    : 2;
-  const hiddenSet = new Set(shuffled.slice(0, Math.min(maxHiddenWords, shuffled.length)));
-
-  const parts = tokens.map((tok, i) => {
-    const isWhitespace = /^\s+$/.test(tok);
-    const hidden = hiddenSet.has(i);
-    const answerText = hidden ? getAnswerTokenText(tok) : tok;
-    return {
-      text: tok,
-      answerText,
-      exponentText: hidden ? getTokenExponent(tok) : '',
-      isWhitespace,
-      isGiven: typeableIndices.includes(i) && !hidden,
-      isHidden: hidden,
-    };
-  });
-
-  const hiddenSearch = parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText, options)).join('');
-  return { parts, searchPrompt: hiddenSearch };
-}
-
-function shouldUseVocabularyPromptLimit(term) {
-  const searchLength = buildSearchPrompt(term).length;
-  if (searchLength < LONG_VOCAB_LIMIT_LENGTH) return false;
-  const typeableWords = term.split(/\s+/).filter((word) => {
-    const answerText = getAnswerTokenText(word);
-    return isWordToken(answerText)
-      && !isLowValueAnswerToken(answerText)
-      && buildSearchPrompt(answerText).length > 0;
-  });
-  return typeableWords.length >= 2;
-}
-
-function isWordToken(token) {
-  return /[a-z]/i.test(token);
-}
-
-function getAnswerTokenText(token) {
-  return token.replace(new RegExp(`[${SUPERSCRIPT_DIGITS}]+`, 'g'), '');
-}
-
-function getTokenExponent(token) {
-  const match = token.match(new RegExp(`([${SUPERSCRIPT_DIGITS}]+)$`));
-  return match ? match[1] : '';
-}
-
-function isLowValueAnswerToken(token) {
-  return LOW_VALUE_ANSWER_WORDS.has(token.toLowerCase().replace(/[^a-z]/g, ''));
-}
-
-function promptIndexForProgress(term, progress, options = {}) {
-  if (progress <= 0) return 0;
-
-  let matched = 0;
-  for (let index = 0; index < term.length; index += 1) {
-    if (!normalizeCharacter(term[index], options)) continue;
-    matched += 1;
-    if (matched >= progress) return index + 1;
-  }
-
-  return term.length;
-}
-
 function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget) return typedBuffer;
@@ -2135,8 +2200,8 @@ function updatePhaseDisplay() {
     phaseValue.textContent = `Wave ${waveSet} cleared`;
     return;
   }
-  if (mode === 'gameover') {
-    phaseValue.textContent = 'Run ended';
+  if (mode === 'gameover' || mode === 'ending') {
+    phaseValue.textContent = mode === 'ending' ? 'Victory' : 'Run ended';
     return;
   }
   phaseValue.textContent = profile.phaseLabel;
@@ -2144,6 +2209,7 @@ function updatePhaseDisplay() {
 
 function getNormalEnemyTarget(wave) {
   const profile = currentDifficulty();
+  if (wave <= NORMAL_ENEMY_TARGETS.length) return NORMAL_ENEMY_TARGETS[wave - 1];
   return Math.min(profile.normalMax, profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth);
 }
 
@@ -2179,8 +2245,20 @@ function getActiveTypingPressure() {
   }, 0);
 }
 
+function getActiveLongPromptCount() {
+  return enemies.reduce((count, enemy) => {
+    if (enemy.isBoss || enemy.isMedic || enemy.isMimic || enemy.dying) return count;
+    return count + (getEnemyTypingCost(enemy) >= LONG_ACTIVE_PROMPT_COST ? 1 : 0);
+  }, 0);
+}
+
+function getActiveLongPromptLimit() {
+  return waveSet >= 5 ? LATE_ACTIVE_LONG_PROMPT_LIMIT : ACTIVE_LONG_PROMPT_LIMIT;
+}
+
 function canAcceptNormalSpawnPressure() {
-  return getActiveTypingPressure() < getActiveTypingPressureLimit();
+  return getActiveTypingPressure() < getActiveTypingPressureLimit()
+    && getActiveLongPromptCount() < getActiveLongPromptLimit();
 }
 
 function isNormalTypingBudgetReached() {
@@ -2188,7 +2266,12 @@ function isNormalTypingBudgetReached() {
 }
 
 function isNormalWaveComplete() {
-  return normalEnemiesSpawned >= normalEnemyTarget || isNormalTypingBudgetReached();
+  if (normalEnemiesSpawned >= normalEnemyTarget) return true;
+  if (isNormalTypingBudgetReached()) {
+    // If typing budget is reached, we only allow spawning scheduled boss previews
+    return !bossPreviewSchedule.has(normalEnemiesSpawned);
+  }
+  return false;
 }
 
 function getEnemyLimit() {
@@ -2198,13 +2281,17 @@ function getEnemyLimit() {
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
+  const effectiveWavePressure = enemy.isFinalWaveNormal
+    ? Math.max(0, 9 - 1) * profile.waveSpeedBonus
+    : wavePressure;
   const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 6 : 8));
   const lengthFactor = THREE.MathUtils.clamp(
     1 / (1 + longPromptPenalty * (enemy.isBoss ? 0.08 : 0.06)),
     enemy.isBoss ? 0.55 : 0.58,
     1
   );
-  return (enemy.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
+  const finalWaveMultiplier = enemy.isFinalWaveNormal ? 1.1 : 1;
+  return (enemy.speed + effectiveWavePressure) * profile.speedMultiplier * lengthFactor * finalWaveMultiplier;
 }
 
 function updateTypedDisplay() {
@@ -2224,10 +2311,12 @@ function spawnEnemy(options = {}) {
     ? chooseMedicPrompt()
     : isMimic
     ? chooseMimicPrompt()
+    : options.isFinalWaveNormal
+    ? chooseFinalWaveNormalPrompt()
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
-  const showDefinition = !!wordData.definition && (isBoss || isEquationPrompt);
+  const showDefinition = !!wordData.definition && isBoss;
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
   const hintRange = isBoss ? getBossQuestionHintRange() : null;
   if (isMedic && !firstMedicHintShown) {
@@ -2266,7 +2355,7 @@ function spawnEnemy(options = {}) {
     scene.add(shadowMesh);
   }
 
-  const promptKind = isEquationPrompt ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
+  const promptKind = (isBoss && isEquationPrompt) ? 'equation' : showDefinition ? 'definition' : isMedic ? 'medic' : isMimic ? 'mimic' : 'keyword';
   const label = document.createElement('div');
   label.className = isBoss
     ? 'word-tag is-boss is-hidden'
@@ -2309,15 +2398,17 @@ function spawnEnemy(options = {}) {
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
   const shouldLimitVocabulary = isBoss && !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term);
-  const twoWordData = isEquationPrompt
+  const bossHiddenWordCap = waveSet >= 5 ? 3 : 2;
+  const twoWordData = (isBoss && isEquationPrompt)
     ? buildTwoWordLimit(wordData.term, {
-        alwaysLimit: isEquationPrompt,
-        multiplicationAlias: isEquationPrompt,
+        alwaysLimit: true,
+        multiplicationAlias: true,
+        maxHiddenWords: bossHiddenWordCap,
       })
     : shouldLimitVocabulary
     ? buildTwoWordLimit(wordData.term, {
         alwaysLimit: true,
-        maxHiddenWords: 1,
+        maxHiddenWords: waveSet >= 5 ? 3 : 1,
       })
     : null;
   const enemy = {
@@ -2330,7 +2421,7 @@ function spawnEnemy(options = {}) {
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
     searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: twoWordData ? [] : buildAltSearchPrompts(wordData.term, promptOptions),
+    altSearchPrompts: twoWordData ? twoWordData.altSearchPrompts : buildAltSearchPrompts(wordData.term, promptOptions),
     _matchedSearchPrompt: null,
     limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
@@ -2339,15 +2430,17 @@ function spawnEnemy(options = {}) {
       ? buildHintMask(wordData.term, {
           ...promptOptions,
           hintRange,
-          leadingTypeableCount: 1, // Fallback
+          leadingTypeableCount: isBoss ? 3 : 1,
         })
       : null,
     hintRange,
+    hintLetterCount: isBoss ? 3 : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,
     isMedic,
     isMimic,
+    isFinalWaveNormal: !!options.isFinalWaveNormal,
     lidOpenProgress: 0,
     hasOpened: false,
     isFlying,
@@ -2368,7 +2461,7 @@ function spawnEnemy(options = {}) {
     floatAmount: isFlying ? 0.22 : 0,
     phase: Math.random() * Math.PI * 2,
   };
-  if (!isBoss && definitionBossWordsForWave().some(w => w.term === wordData.term)) {
+  if (!isBoss && previewableWordsThisSet.some(w => w.term === wordData.term)) {
     introducedBossTermsThisSet.add(wordData.term);
   }
   enemyId += 1;
@@ -2388,623 +2481,6 @@ function chooseSpawnLane(startZ) {
   });
   const lanePool = openLanes.length > 0 ? openLanes : PATH_LANES;
   return lanePool[Math.floor(Math.random() * lanePool.length)];
-}
-
-function createEnemyMesh(type) {
-  if (!!type.isMedic) return createMedicHeartMesh(type);
-  if (!!type.isMimic) return createMimicChestMesh(type);
-  if (!!type.isBoss) return createSpecificBossMesh(type);
-  return createNormalEnemyMesh(type);
-}
-
-function createNormalEnemyMesh(type) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, roughness: 0.82, metalness: 0.03 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, roughness: 0.78, metalness: 0.02 });
-  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 0.9, roughness: 0.4 });
-  let g;
-  if (type.name === 'Mudlug') g = createSlugMesh(bodyMat, trimMat, eyeMat);
-  else if (type.name === 'Glowmite') g = createInsectMesh(bodyMat, trimMat, eyeMat);
-  else if (type.name === 'Ash Oaf') g = createGolemMesh(bodyMat, trimMat, eyeMat);
-  else if (type.name === 'Cinder Imp') g = createImpMesh(bodyMat, trimMat, eyeMat);
-  else g = createSpecterMesh(bodyMat, trimMat, eyeMat);
-  const incomingBeacon = createIncomingBeacon(type);
-  const targetMarker = createTargetMarker(type);
-  g.add(incomingBeacon, targetMarker);
-  g.userData.incomingBeacon = incomingBeacon;
-  g.userData.targetMarker = targetMarker;
-  return g;
-}
-
-// Mudlug — squat toad goblin: wide crouching body, big forward eyes with brow ridge, wide mouth, splayed feet
-function createSlugMesh(bodyMat, trimMat, eyeMat) {
-  const g = new THREE.Group();
-  g.add(blockMesh(1.4, 0.7, 0.76, bodyMat, 0, 0.5, 0));
-  g.add(blockMesh(1.1, 0.18, 0.72, trimMat, 0, 0.18, 0.04));
-  g.add(blockMesh(1.0, 0.56, 0.7, trimMat, 0, 1.08, 0.02));
-  g.add(blockMesh(1.06, 0.14, 0.2, bodyMat, 0, 1.4, 0.32));
-  g.add(blockMesh(0.28, 0.28, 0.1, eyeMat, -0.28, 1.22, 0.38));
-  g.add(blockMesh(0.28, 0.28, 0.1, eyeMat, 0.28, 1.22, 0.38));
-  g.add(blockMesh(0.64, 0.1, 0.08, bodyMat, 0, 0.96, 0.38));
-  g.add(blockMesh(0.36, 0.22, 0.52, trimMat, -0.66, 0.14, 0.06));
-  g.add(blockMesh(0.36, 0.22, 0.52, trimMat, 0.66, 0.14, 0.06));
-  g.add(blockMesh(0.22, 0.3, 0.36, bodyMat, -0.88, 0.68, 0.04));
-  g.add(blockMesh(0.22, 0.3, 0.36, bodyMat, 0.88, 0.68, 0.04));
-  return g;
-}
-
-// Glowmite — spindly insect: bulbous abdomen, thin thorax, 3 leg pairs, antennae, 4 eyes
-function createInsectMesh(bodyMat, trimMat, eyeMat) {
-  const g = new THREE.Group();
-  g.add(blockMesh(0.58, 0.56, 0.54, trimMat, 0, 0.32, -0.16));
-  g.add(blockMesh(0.38, 0.48, 0.38, bodyMat, 0, 0.84, 0.04));
-  g.add(blockMesh(0.4, 0.36, 0.4, trimMat, 0, 1.3, 0.04));
-  g.add(blockMesh(0.13, 0.13, 0.08, eyeMat, -0.12, 1.4, 0.26));
-  g.add(blockMesh(0.13, 0.13, 0.08, eyeMat, 0.12, 1.4, 0.26));
-  g.add(blockMesh(0.1, 0.1, 0.07, eyeMat, -0.08, 1.28, 0.26));
-  g.add(blockMesh(0.1, 0.1, 0.07, eyeMat, 0.08, 1.28, 0.26));
-  g.add(blockMesh(0.07, 0.38, 0.07, trimMat, -0.14, 1.6, 0.06));
-  g.add(blockMesh(0.07, 0.38, 0.07, trimMat, 0.14, 1.6, 0.06));
-  for (let i = 0; i < 3; i++) {
-    const y = 0.98 - i * 0.26;
-    g.add(blockMesh(0.52, 0.09, 0.12, trimMat, -0.45, y, 0.04));
-    g.add(blockMesh(0.52, 0.09, 0.12, trimMat, 0.45, y, 0.04));
-  }
-  return g;
-}
-
-// Ash Oaf — heavy stone golem: massive torso, head sunk in shoulders, boulder fists, flat feet
-function createGolemMesh(bodyMat, trimMat, eyeMat) {
-  const g = new THREE.Group();
-  g.add(blockMesh(1.46, 1.32, 0.9, bodyMat, 0, 0.82, 0));
-  g.add(blockMesh(1.62, 0.22, 0.94, trimMat, 0, 1.5, -0.02));
-  g.add(blockMesh(0.94, 0.52, 0.78, trimMat, 0, 1.78, 0.04));
-  g.add(blockMesh(0.86, 0.16, 0.26, bodyMat, 0, 2.0, 0.36));
-  g.add(blockMesh(0.22, 0.2, 0.08, eyeMat, -0.24, 1.86, 0.42));
-  g.add(blockMesh(0.22, 0.2, 0.08, eyeMat, 0.24, 1.86, 0.42));
-  g.add(blockMesh(0.26, 0.44, 0.48, bodyMat, -0.89, 0.64, 0.02));
-  g.add(blockMesh(0.26, 0.44, 0.48, bodyMat, 0.89, 0.64, 0.02));
-  g.add(blockMesh(0.54, 0.64, 0.6, trimMat, -1.08, 0.58, 0.04));
-  g.add(blockMesh(0.54, 0.64, 0.6, trimMat, 1.08, 0.58, 0.04));
-  for (let i = -1; i <= 1; i++) {
-    g.add(blockMesh(0.1, 0.12, 0.1, bodyMat, -1.08 + i * 0.16, 0.28, 0.34));
-    g.add(blockMesh(0.1, 0.12, 0.1, bodyMat, 1.08 + i * 0.16, 0.28, 0.34));
-  }
-  g.add(blockMesh(0.62, 0.26, 0.7, trimMat, -0.36, 0.14, 0.08));
-  g.add(blockMesh(0.62, 0.26, 0.7, trimMat, 0.36, 0.14, 0.08));
-  return g;
-}
-
-// Cinder Imp — slim body, curved multi-block horns with glowing tips, stepping tail with glowing tip
-function createImpMesh(bodyMat, trimMat, eyeMat) {
-  const g = new THREE.Group();
-  g.add(blockMesh(0.74, 1.06, 0.56, bodyMat, 0, 0.8, 0));
-  g.add(blockMesh(0.66, 0.6, 0.62, trimMat, 0, 1.6, 0.02));
-  g.add(blockMesh(0.26, 0.86, 0.34, bodyMat, -0.64, 0.8, 0.02));
-  g.add(blockMesh(0.26, 0.86, 0.34, bodyMat, 0.64, 0.8, 0.02));
-  g.add(blockMesh(0.36, 0.26, 0.48, trimMat, -0.26, 0.15, 0.08));
-  g.add(blockMesh(0.36, 0.26, 0.48, trimMat, 0.26, 0.15, 0.08));
-  g.add(blockMesh(0.14, 0.14, 0.08, eyeMat, -0.18, 1.68, 0.34));
-  g.add(blockMesh(0.14, 0.14, 0.08, eyeMat, 0.18, 1.68, 0.34));
-  g.add(blockMesh(0.14, 0.2, 0.14, trimMat, -0.26, 2.06, 0.02));
-  g.add(blockMesh(0.12, 0.26, 0.12, trimMat, -0.42, 2.26, 0.02));
-  g.add(blockMesh(0.1, 0.22, 0.1, trimMat, -0.56, 2.44, 0.02));
-  g.add(blockMesh(0.08, 0.16, 0.08, eyeMat, -0.66, 2.57, 0.02));
-  g.add(blockMesh(0.14, 0.2, 0.14, trimMat, 0.26, 2.06, 0.02));
-  g.add(blockMesh(0.12, 0.26, 0.12, trimMat, 0.42, 2.26, 0.02));
-  g.add(blockMesh(0.1, 0.22, 0.1, trimMat, 0.56, 2.44, 0.02));
-  g.add(blockMesh(0.08, 0.16, 0.08, eyeMat, 0.66, 2.57, 0.02));
-  g.add(blockMesh(0.22, 0.2, 0.36, bodyMat, 0, 0.5, -0.52));
-  g.add(blockMesh(0.18, 0.2, 0.28, bodyMat, 0, 0.64, -0.84));
-  g.add(blockMesh(0.14, 0.18, 0.2, trimMat, 0, 0.76, -1.06));
-  g.add(blockMesh(0.1, 0.14, 0.14, eyeMat, 0, 0.86, -1.22));
-  return g;
-}
-
-// Bog Shambler — tall cloaked specter: layered cloak, thin torso+neck, oversized head, long drooping arms
-function createSpecterMesh(bodyMat, trimMat, eyeMat) {
-  const g = new THREE.Group();
-  g.add(blockMesh(1.36, 0.2, 0.82, bodyMat, 0, 0.1, -0.02));
-  g.add(blockMesh(1.14, 0.28, 0.74, trimMat, 0, 0.3, -0.01));
-  g.add(blockMesh(0.92, 0.32, 0.66, bodyMat, 0, 0.54, 0));
-  g.add(blockMesh(0.74, 0.36, 0.58, trimMat, 0, 0.78, 0));
-  g.add(blockMesh(0.56, 0.58, 0.5, bodyMat, 0, 1.1, 0.02));
-  g.add(blockMesh(0.26, 0.44, 0.26, trimMat, 0, 1.56, 0.02));
-  g.add(blockMesh(0.76, 0.64, 0.68, trimMat, 0, 2.06, 0.02));
-  g.add(blockMesh(0.2, 0.2, 0.1, eyeMat, -0.2, 2.14, 0.37));
-  g.add(blockMesh(0.2, 0.2, 0.1, eyeMat, 0.2, 2.14, 0.37));
-  g.add(blockMesh(0.32, 0.2, 0.36, trimMat, -0.42, 1.32, 0.02));
-  g.add(blockMesh(0.32, 0.2, 0.36, trimMat, 0.42, 1.32, 0.02));
-  g.add(blockMesh(0.2, 1.04, 0.26, bodyMat, -0.48, 0.82, 0.06));
-  g.add(blockMesh(0.2, 1.04, 0.26, bodyMat, 0.48, 0.82, 0.06));
-  g.add(blockMesh(0.28, 0.18, 0.3, trimMat, -0.48, 0.22, 0.08));
-  g.add(blockMesh(0.28, 0.18, 0.3, trimMat, 0.48, 0.22, 0.08));
-  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, -0.6, 0.1, 0.2));
-  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, -0.44, 0.08, 0.22));
-  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, 0.44, 0.08, 0.22));
-  g.add(blockMesh(0.06, 0.22, 0.06, trimMat, 0.6, 0.1, 0.2));
-  return g;
-}
-
-function createMedicHeartMesh(type) {
-  const group = new THREE.Group();
-  const heartMaterial = new THREE.MeshStandardMaterial({
-    color: type.body,
-    emissive: type.body,
-    emissiveIntensity: 0.5,
-    roughness: 0.42,
-    metalness: 0.02,
-  });
-  const highlightMaterial = new THREE.MeshStandardMaterial({
-    color: type.trim,
-    emissive: type.trim,
-    emissiveIntensity: 0.62,
-    roughness: 0.34,
-    metalness: 0.02,
-  });
-  const shineMaterial = new THREE.MeshStandardMaterial({
-    color: type.eye,
-    emissive: type.eye,
-    emissiveIntensity: 1.6,
-    roughness: 0.25,
-  });
-
-  const cell = 0.3;
-  const rows = [
-    { y: 2.22, xs: [-0.45, 0.45], material: highlightMaterial },
-    { y: 1.94, xs: [-0.75, -0.45, -0.15, 0.15, 0.45, 0.75], material: heartMaterial },
-    { y: 1.66, xs: [-0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9], material: heartMaterial },
-    { y: 1.38, xs: [-0.6, -0.3, 0, 0.3, 0.6], material: heartMaterial },
-    { y: 1.1, xs: [-0.3, 0, 0.3], material: heartMaterial },
-    { y: 0.82, xs: [0], material: heartMaterial },
-  ];
-
-  for (const row of rows) {
-    for (const x of row.xs) {
-      group.add(blockMesh(cell, cell, 0.46, row.material, x, row.y, 0));
-    }
-  }
-
-  group.add(blockMesh(0.18, 0.18, 0.5, shineMaterial, -0.42, 2.02, 0.08));
-  group.add(blockMesh(0.12, 0.12, 0.5, shineMaterial, -0.2, 1.8, 0.09));
-
-  const medicGlow = new THREE.PointLight(type.body, 1.35, 5.2, 2.0);
-  medicGlow.position.set(0, 1.5, 0.45);
-  group.add(medicGlow);
-
-  const incomingBeacon = createIncomingBeacon(type);
-  const targetMarker = createTargetMarker(type);
-  group.add(incomingBeacon, targetMarker);
-  group.userData.incomingBeacon = incomingBeacon;
-  group.userData.targetMarker = targetMarker;
-
-  return group;
-}
-
-function bossMat(type) {
-  return new THREE.MeshStandardMaterial({
-    color: type.body, emissive: type.body, emissiveIntensity: 0.56,
-    roughness: 0.58, metalness: 0.03,
-  });
-}
-function bossTrimMat(type) {
-  return new THREE.MeshStandardMaterial({
-    color: type.trim, emissive: type.trim, emissiveIntensity: 0.82,
-    roughness: 0.46, metalness: 0.08,
-  });
-}
-function bossEyeMat(type) {
-  return new THREE.MeshStandardMaterial({
-    color: type.eye, emissive: type.eye, emissiveIntensity: 2.2, roughness: 0.4,
-  });
-}
-function finishBossGroup(group, type, beaconY = 2.9) {
-  const glow = new THREE.PointLight(type.eye, 1.35, 5.5, 2.1);
-  glow.position.set(0, 1.45, 0.45);
-  group.add(glow);
-  const incomingBeacon = createIncomingBeacon(type);
-  incomingBeacon.position.set(0, beaconY, 0);
-  const targetMarker = createTargetMarker(type);
-  group.add(incomingBeacon, targetMarker);
-  group.userData.incomingBeacon = incomingBeacon;
-  group.userData.targetMarker = targetMarker;
-  return group;
-}
-
-function createMimicChestMesh(type) {
-  const bodyMat = new THREE.MeshStandardMaterial({ color: type.body, emissive: 0x7a4c10, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.12 });
-  const trimMat = new THREE.MeshStandardMaterial({ color: type.trim, emissive: 0xffe060, emissiveIntensity: 0.55, roughness: 0.18, metalness: 1.0 });
-  const eyeMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
-  const darkInteriorMat = new THREE.MeshStandardMaterial({ color: 0x0e0115, roughness: 0.9 });
-  const toothMat = new THREE.MeshStandardMaterial({ color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
-  const gemMat = new THREE.MeshStandardMaterial({ color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
-
-  const g = new THREE.Group();
-
-  // Wood base (taller for presence)
-  g.add(blockMesh(1.2, 0.56, 0.9, bodyMat, 0, 0.28, 0));
-
-  // Dark interior tray visible when lid opens
-  g.add(blockMesh(0.96, 0.10, 0.72, darkInteriorMat, 0, 0.52, 0));
-
-  // Bottom base trim bar
-  g.add(blockMesh(1.28, 0.09, 0.98, trimMat, 0, 0.045, 0));
-
-  // Four corner pillars running full height
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, 0.42));
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, 0.42));
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, -0.42));
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, -0.42));
-
-  // Mid-band gold strip on front face
-  g.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.50, 0.42));
-
-  // Glowing eyes (large, bright)
-  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat, -0.24, 0.54, 0.18));
-  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat,  0.24, 0.54, 0.18));
-
-  // Lower teeth (5 teeth, angled forward)
-  for (let i = 0; i < 5; i++) {
-    const x = -0.40 + i * 0.20;
-    const tooth = blockMesh(0.09, 0.15, 0.09, toothMat, x, 0.54, 0.35);
-    tooth.rotation.x = 0.25;
-    g.add(tooth);
-  }
-
-  // PointLight inside the chest (intensity driven each frame)
-  const light = new THREE.PointLight(type.eye, 0.5, 6.0);
-  light.position.set(0, 0.55, 0.1);
-  g.add(light);
-
-  // Outer golden glow — casts warm light on ground around the chest
-  const outerGlow = new THREE.PointLight(0xffd040, 1.0, 4.5);
-  outerGlow.position.set(0, 1.6, 0);
-  g.add(outerGlow);
-
-  // Lid Group — pivot at top-back edge of the base
-  const lidGroup = new THREE.Group();
-  lidGroup.position.set(0, 0.58, -0.45);
-  g.add(lidGroup);
-
-  // Lid wood
-  lidGroup.add(blockMesh(1.2, 0.38, 0.9, bodyMat, 0, 0.19, 0.45));
-
-  // Top cap trim strip
-  lidGroup.add(blockMesh(1.28, 0.07, 0.98, trimMat, 0, 0.39, 0.45));
-
-  // Front trim strip on lid
-  lidGroup.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.04, 0.88));
-
-  // Lid corner posts
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.02));
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.02));
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.88));
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.88));
-
-  // Lock clasp
-  lidGroup.add(blockMesh(0.18, 0.24, 0.07, trimMat, 0, 0.02, 0.94));
-
-  // Center magenta gem on lid front
-  lidGroup.add(blockMesh(0.14, 0.14, 0.07, gemMat, 0, 0.21, 0.92));
-
-  // Upper teeth (6 teeth, angled down)
-  for (let i = 0; i < 6; i++) {
-    const x = -0.46 + i * 0.185;
-    const tooth = blockMesh(0.08, 0.15, 0.09, toothMat, x, 0.0, 0.81);
-    tooth.rotation.x = -0.25;
-    lidGroup.add(tooth);
-  }
-
-  // Incoming beacon & target marker
-  const incomingBeacon = createIncomingBeacon(type);
-  const targetMarker = createTargetMarker(type);
-  g.add(incomingBeacon, targetMarker);
-
-  g.userData.lidGroup = lidGroup;
-  g.userData.chestLight = light;
-  g.userData.incomingBeacon = incomingBeacon;
-  g.userData.targetMarker = targetMarker;
-
-  return g;
-}
-
-function createSpecificBossMesh(type) {
-  if (type.name === 'Crimson Bulwark') return createDragonBossMesh(type);
-  if (type.name === 'Verdant Colossus') return createDevilBossMesh(type);
-  if (type.name === 'Storm Warden') return createSkeletonBossMesh(type);
-  return createPhoenixBossMesh(type);
-}
-
-function createDragonBossMesh(type) {
-  const group = new THREE.Group();
-  const bodyMat = bossMat(type);
-  const trimMat = bossTrimMat(type);
-  const eyeMat = bossEyeMat(type);
-  // Swept-back claws (tucked under body, angled rear)
-  group.add(blockMesh(0.36, 0.22, 0.42, bodyMat, -0.4, 0.50, -0.34));
-  group.add(blockMesh(0.36, 0.22, 0.42, bodyMat, 0.4, 0.50, -0.34));
-  group.add(blockMesh(0.28, 0.14, 0.28, trimMat, -0.4, 0.36, -0.66));
-  group.add(blockMesh(0.28, 0.14, 0.28, trimMat, 0.4, 0.36, -0.66));
-  // Torso
-  group.add(blockMesh(1.2, 1.06, 0.88, bodyMat, 0, 0.9, 0));
-  // Spine ridges
-  group.add(blockMesh(0.12, 0.28, 0.12, trimMat, 0, 1.5, -0.28));
-  group.add(blockMesh(0.12, 0.22, 0.12, trimMat, 0, 1.24, -0.3));
-  group.add(blockMesh(0.12, 0.18, 0.12, trimMat, 0, 0.98, -0.3));
-  // Neck
-  group.add(blockMesh(0.52, 0.6, 0.52, bodyMat, 0, 1.65, 0.12));
-  // Head
-  group.add(blockMesh(0.84, 0.52, 0.62, trimMat, 0, 2.1, 0.18));
-  // Snout
-  group.add(blockMesh(0.6, 0.3, 0.44, bodyMat, 0, 2.0, 0.52));
-  // Nostrils
-  group.add(blockMesh(0.1, 0.1, 0.08, eyeMat, -0.18, 2.07, 0.75));
-  group.add(blockMesh(0.1, 0.1, 0.08, eyeMat, 0.18, 2.07, 0.75));
-  // Eyes
-  group.add(blockMesh(0.18, 0.18, 0.08, eyeMat, -0.28, 2.22, 0.5));
-  group.add(blockMesh(0.18, 0.18, 0.08, eyeMat, 0.28, 2.22, 0.5));
-  // Horns
-  const lHorn = blockMesh(0.14, 0.44, 0.14, trimMat, -0.32, 2.46, 0.06);
-  lHorn.rotation.z = 0.38;
-  group.add(lHorn);
-  const rHorn = blockMesh(0.14, 0.44, 0.14, trimMat, 0.32, 2.46, 0.06);
-  rHorn.rotation.z = -0.38;
-  group.add(rHorn);
-  // Wings — left (V-shape, rising outward from body)
-  group.add(blockMesh(0.34, 0.62, 0.18, trimMat, -0.84, 1.40, -0.06));
-  group.add(blockMesh(0.30, 0.72, 0.14, trimMat, -1.28, 1.74, 0));
-  group.add(blockMesh(0.26, 0.60, 0.12, trimMat, -1.66, 2.10, 0.04));
-  group.add(blockMesh(0.20, 0.48, 0.10, trimMat, -2.00, 2.44, 0.06));
-  group.add(blockMesh(0.48, 0.80, 0.07, bodyMat, -1.06, 1.57, -0.02));
-  group.add(blockMesh(0.42, 0.72, 0.07, bodyMat, -1.47, 1.92, 0.02));
-  group.add(blockMesh(0.36, 0.60, 0.06, bodyMat, -1.83, 2.27, 0.05));
-  // Wings — right (V-shape, rising outward from body)
-  group.add(blockMesh(0.34, 0.62, 0.18, trimMat, 0.84, 1.40, -0.06));
-  group.add(blockMesh(0.30, 0.72, 0.14, trimMat, 1.28, 1.74, 0));
-  group.add(blockMesh(0.26, 0.60, 0.12, trimMat, 1.66, 2.10, 0.04));
-  group.add(blockMesh(0.20, 0.48, 0.10, trimMat, 2.00, 2.44, 0.06));
-  group.add(blockMesh(0.48, 0.80, 0.07, bodyMat, 1.06, 1.57, -0.02));
-  group.add(blockMesh(0.42, 0.72, 0.07, bodyMat, 1.47, 1.92, 0.02));
-  group.add(blockMesh(0.36, 0.60, 0.06, bodyMat, 1.83, 2.27, 0.05));
-  // Tail
-  group.add(blockMesh(0.4, 0.36, 0.48, bodyMat, 0, 0.62, -0.64));
-  group.add(blockMesh(0.3, 0.28, 0.38, bodyMat, 0, 0.5, -1.1));
-  group.add(blockMesh(0.22, 0.2, 0.28, trimMat, 0, 0.4, -1.46));
-  return finishBossGroup(group, type);
-}
-
-function createDevilBossMesh(type) {
-  const group = new THREE.Group();
-  const bodyMat = bossMat(type);
-  const trimMat = bossTrimMat(type);
-  const eyeMat = bossEyeMat(type);
-  // Legs
-  group.add(blockMesh(0.42, 0.58, 0.5, bodyMat, -0.32, 0.52, 0.02));
-  group.add(blockMesh(0.42, 0.58, 0.5, bodyMat, 0.32, 0.52, 0.02));
-  // Hooves
-  group.add(blockMesh(0.38, 0.28, 0.42, trimMat, -0.32, 0.16, 0.08));
-  group.add(blockMesh(0.38, 0.28, 0.42, trimMat, 0.32, 0.16, 0.08));
-  // Pelvis
-  group.add(blockMesh(0.98, 0.22, 0.7, bodyMat, 0, 0.28, 0));
-  // Torso
-  group.add(blockMesh(1.22, 1.3, 0.78, bodyMat, 0, 0.9, 0));
-  // Oversized arms
-  group.add(blockMesh(0.38, 1.12, 0.5, bodyMat, -0.86, 0.9, 0.02));
-  group.add(blockMesh(0.38, 1.12, 0.5, bodyMat, 0.86, 0.9, 0.02));
-  // Clawed hands
-  group.add(blockMesh(0.44, 0.24, 0.52, trimMat, -0.86, 0.24, 0.06));
-  group.add(blockMesh(0.44, 0.24, 0.52, trimMat, 0.86, 0.24, 0.06));
-  // Claws
-  for (let i = -1; i <= 1; i++) {
-    group.add(blockMesh(0.08, 0.16, 0.08, trimMat, -0.86 + i * 0.14, 0.08, 0.22));
-    group.add(blockMesh(0.08, 0.16, 0.08, trimMat, 0.86 + i * 0.14, 0.08, 0.22));
-  }
-  // Shoulder guards
-  group.add(blockMesh(0.28, 0.28, 0.24, trimMat, -0.82, 1.58, -0.04));
-  group.add(blockMesh(0.22, 0.2, 0.2, trimMat, -0.98, 1.78, -0.04));
-  group.add(blockMesh(0.28, 0.28, 0.24, trimMat, 0.82, 1.58, -0.04));
-  group.add(blockMesh(0.22, 0.2, 0.2, trimMat, 0.98, 1.78, -0.04));
-  // Head
-  group.add(blockMesh(0.9, 0.72, 0.76, trimMat, 0, 1.9, 0.02));
-  // Heavy brow
-  group.add(blockMesh(0.88, 0.2, 0.26, bodyMat, 0, 2.14, 0.3));
-  // Eyes
-  group.add(blockMesh(0.2, 0.2, 0.08, eyeMat, -0.24, 1.96, 0.42));
-  group.add(blockMesh(0.2, 0.2, 0.08, eyeMat, 0.24, 1.96, 0.42));
-  // Nose + mouth
-  group.add(blockMesh(0.24, 0.14, 0.12, bodyMat, 0, 1.76, 0.42));
-  group.add(blockMesh(0.46, 0.1, 0.08, trimMat, 0, 1.6, 0.42));
-  // Fangs
-  group.add(blockMesh(0.08, 0.16, 0.08, trimMat, -0.14, 1.5, 0.42));
-  group.add(blockMesh(0.08, 0.16, 0.08, trimMat, 0.14, 1.5, 0.42));
-  // Curved horns — left (stepping outward and up)
-  group.add(blockMesh(0.18, 0.22, 0.18, trimMat, -0.36, 2.32, 0));
-  group.add(blockMesh(0.16, 0.3, 0.16, trimMat, -0.56, 2.52, 0));
-  group.add(blockMesh(0.14, 0.26, 0.14, trimMat, -0.72, 2.74, 0));
-  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, -0.82, 2.94, 0));
-  // Curved horns — right
-  group.add(blockMesh(0.18, 0.22, 0.18, trimMat, 0.36, 2.32, 0));
-  group.add(blockMesh(0.16, 0.3, 0.16, trimMat, 0.56, 2.52, 0));
-  group.add(blockMesh(0.14, 0.26, 0.14, trimMat, 0.72, 2.74, 0));
-  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, 0.82, 2.94, 0));
-  // Fork tail
-  group.add(blockMesh(0.24, 0.24, 0.44, bodyMat, 0, 0.44, -0.52));
-  group.add(blockMesh(0.2, 0.2, 0.38, bodyMat, 0, 0.34, -0.92));
-  group.add(blockMesh(0.16, 0.16, 0.3, bodyMat, 0, 0.26, -1.24));
-  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, -0.1, 0.2, -1.52));
-  group.add(blockMesh(0.1, 0.22, 0.1, trimMat, 0.1, 0.2, -1.52));
-  return finishBossGroup(group, type, 3.2);
-}
-
-function createSkeletonBossMesh(type) {
-  const group = new THREE.Group();
-  const bodyMat = bossMat(type);
-  const trimMat = bossTrimMat(type);
-  const eyeMat = bossEyeMat(type);
-  // Feet
-  group.add(blockMesh(0.36, 0.2, 0.54, bodyMat, -0.34, 0.08, 0.14));
-  group.add(blockMesh(0.36, 0.2, 0.54, bodyMat, 0.34, 0.08, 0.14));
-  // Knee joints
-  group.add(blockMesh(0.32, 0.22, 0.38, trimMat, -0.34, 0.24, 0.04));
-  group.add(blockMesh(0.32, 0.22, 0.38, trimMat, 0.34, 0.24, 0.04));
-  // Shins
-  group.add(blockMesh(0.28, 0.56, 0.32, bodyMat, -0.34, 0.56, 0.02));
-  group.add(blockMesh(0.28, 0.56, 0.32, bodyMat, 0.34, 0.56, 0.02));
-  // Pelvis
-  group.add(blockMesh(1.0, 0.26, 0.62, bodyMat, 0, 0.28, 0));
-  // Spine
-  group.add(blockMesh(0.2, 1.06, 0.2, bodyMat, 0, 0.94, -0.1));
-  // Ribcage
-  for (let i = 0; i < 4; i++) {
-    const y = 0.66 + i * 0.22;
-    const tilt = 0.28 + i * 0.06;
-    const lRib = blockMesh(0.5, 0.1, 0.1, trimMat, -0.38, y, 0.06);
-    lRib.rotation.z = tilt;
-    group.add(lRib);
-    const rRib = blockMesh(0.5, 0.1, 0.1, trimMat, 0.38, y, 0.06);
-    rRib.rotation.z = -tilt;
-    group.add(rRib);
-  }
-  // Clavicles
-  group.add(blockMesh(0.62, 0.14, 0.36, bodyMat, -0.58, 1.56, 0));
-  group.add(blockMesh(0.62, 0.14, 0.36, bodyMat, 0.58, 1.56, 0));
-  // Upper arms
-  group.add(blockMesh(0.22, 0.66, 0.26, bodyMat, -0.88, 1.14, 0.02));
-  group.add(blockMesh(0.22, 0.66, 0.26, bodyMat, 0.88, 1.14, 0.02));
-  // Elbow joints
-  group.add(blockMesh(0.26, 0.2, 0.3, trimMat, -0.88, 0.76, 0.04));
-  group.add(blockMesh(0.26, 0.2, 0.3, trimMat, 0.88, 0.76, 0.04));
-  // Forearms
-  group.add(blockMesh(0.2, 0.52, 0.22, bodyMat, -0.88, 0.44, 0.02));
-  group.add(blockMesh(0.2, 0.52, 0.22, bodyMat, 0.88, 0.44, 0.02));
-  // Skull (wider at top)
-  group.add(blockMesh(0.8, 0.56, 0.68, trimMat, 0, 2.08, 0.02));
-  // Cheekbones
-  group.add(blockMesh(0.16, 0.16, 0.38, bodyMat, -0.38, 1.88, 0.08));
-  group.add(blockMesh(0.16, 0.16, 0.38, bodyMat, 0.38, 1.88, 0.08));
-  // Jaw
-  group.add(blockMesh(0.64, 0.2, 0.48, bodyMat, 0, 1.72, 0.06));
-  // Eye sockets (dark recess + glowing core)
-  group.add(blockMesh(0.24, 0.22, 0.14, bodyMat, -0.2, 2.12, 0.28));
-  group.add(blockMesh(0.24, 0.22, 0.14, bodyMat, 0.2, 2.12, 0.28));
-  group.add(blockMesh(0.12, 0.12, 0.08, eyeMat, -0.2, 2.12, 0.38));
-  group.add(blockMesh(0.12, 0.12, 0.08, eyeMat, 0.2, 2.12, 0.38));
-  // Nasal cavity
-  group.add(blockMesh(0.14, 0.18, 0.12, bodyMat, 0, 1.94, 0.34));
-  // Teeth
-  for (let i = -2; i <= 2; i++) {
-    group.add(blockMesh(0.1, 0.14, 0.08, trimMat, i * 0.12, 1.74, 0.3));
-  }
-  // Crown / circlet
-  group.add(blockMesh(0.86, 0.1, 0.74, bodyMat, 0, 2.38, 0));
-  group.add(blockMesh(0.14, 0.24, 0.14, trimMat, -0.3, 2.48, 0));
-  group.add(blockMesh(0.14, 0.34, 0.14, trimMat, 0, 2.56, 0));
-  group.add(blockMesh(0.14, 0.24, 0.14, trimMat, 0.3, 2.48, 0));
-  return finishBossGroup(group, type);
-}
-
-function createPhoenixBossMesh(type) {
-  const group = new THREE.Group();
-  const bodyMat = bossMat(type);
-  const trimMat = bossTrimMat(type);
-  const eyeMat = bossEyeMat(type);
-  // Swept-back talons (tucked under body, angled rear)
-  group.add(blockMesh(0.24, 0.20, 0.38, bodyMat, -0.30, 0.52, -0.34));
-  group.add(blockMesh(0.24, 0.20, 0.38, bodyMat, 0.30, 0.52, -0.34));
-  group.add(blockMesh(0.20, 0.14, 0.24, trimMat, -0.30, 0.38, -0.62));
-  group.add(blockMesh(0.20, 0.14, 0.24, trimMat, 0.30, 0.38, -0.62));
-  // Body
-  group.add(blockMesh(0.96, 0.82, 0.82, bodyMat, 0, 1.08, 0));
-  // Breast
-  group.add(blockMesh(0.76, 0.6, 0.38, trimMat, 0, 0.96, 0.34));
-  // Neck
-  group.add(blockMesh(0.38, 0.44, 0.38, bodyMat, 0, 1.72, 0.1));
-  // Head
-  group.add(blockMesh(0.62, 0.56, 0.58, trimMat, 0, 2.18, 0.08));
-  // Beak
-  group.add(blockMesh(0.24, 0.2, 0.44, bodyMat, 0, 2.12, 0.46));
-  group.add(blockMesh(0.2, 0.14, 0.36, trimMat, 0, 2.22, 0.56));
-  // Eyes
-  group.add(blockMesh(0.14, 0.16, 0.08, eyeMat, -0.24, 2.24, 0.38));
-  group.add(blockMesh(0.14, 0.16, 0.08, eyeMat, 0.24, 2.24, 0.38));
-  // Crest feathers
-  group.add(blockMesh(0.1, 0.3, 0.1, trimMat, -0.16, 2.58, 0.04));
-  group.add(blockMesh(0.1, 0.44, 0.1, trimMat, 0, 2.64, 0.04));
-  group.add(blockMesh(0.1, 0.3, 0.1, trimMat, 0.16, 2.58, 0.04));
-  // Wings — left (V-shape, rising outward from body)
-  group.add(blockMesh(0.42, 0.76, 0.20, bodyMat, -0.86, 1.40, -0.04));
-  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, -1.30, 1.74, 0));
-  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, -1.68, 2.06, 0.04));
-  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, -2.02, 2.34, 0.08));
-  // Primary feathers cascading below the wing underside
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.50, 1.45, 0.04));
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.66, 1.60, 0.04));
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.82, 1.74, 0.05));
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, -1.98, 1.89, 0.06));
-  // Wings — right (V-shape, rising outward from body)
-  group.add(blockMesh(0.42, 0.76, 0.20, bodyMat, 0.86, 1.40, -0.04));
-  group.add(blockMesh(0.38, 0.88, 0.16, bodyMat, 1.30, 1.74, 0));
-  group.add(blockMesh(0.32, 0.76, 0.14, trimMat, 1.68, 2.06, 0.04));
-  group.add(blockMesh(0.26, 0.56, 0.12, trimMat, 2.02, 2.34, 0.08));
-  // Primary feathers cascading below the wing underside
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.50, 1.45, 0.04));
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.66, 1.60, 0.04));
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.82, 1.74, 0.05));
-  group.add(blockMesh(0.14, 0.28, 0.10, trimMat, 1.98, 1.89, 0.06));
-  // Flame tail feathers
-  group.add(blockMesh(0.28, 0.6, 0.18, trimMat, 0, 0.76, -0.56));
-  group.add(blockMesh(0.18, 0.72, 0.14, trimMat, -0.28, 0.7, -0.74));
-  group.add(blockMesh(0.18, 0.72, 0.14, trimMat, 0.28, 0.7, -0.74));
-  group.add(blockMesh(0.14, 0.56, 0.12, trimMat, -0.5, 0.62, -0.88));
-  group.add(blockMesh(0.14, 0.56, 0.12, trimMat, 0.5, 0.62, -0.88));
-  group.add(blockMesh(0.1, 0.4, 0.1, trimMat, -0.68, 0.54, -0.98));
-  group.add(blockMesh(0.1, 0.4, 0.1, trimMat, 0.68, 0.54, -0.98));
-  return finishBossGroup(group, type);
-}
-
-function createIncomingBeacon(type) {
-  const material = new THREE.MeshBasicMaterial({
-    color: type.eye,
-    transparent: true,
-    opacity: 0.58,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-  const beacon = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.42), material);
-  beacon.position.set(0, 2.72, 0);
-  return beacon;
-}
-
-function createTargetMarker(type) {
-  const marker = new THREE.Group();
-  const material = new THREE.MeshBasicMaterial({
-    color: type.eye,
-    transparent: true,
-    opacity: 0,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-  const longSide = new THREE.BoxGeometry(1.85, 0.055, 0.12);
-  const shortSide = new THREE.BoxGeometry(0.12, 0.055, 1.85);
-  const front = new THREE.Mesh(longSide, material);
-  const back = new THREE.Mesh(longSide.clone(), material);
-  const left = new THREE.Mesh(shortSide, material);
-  const right = new THREE.Mesh(shortSide.clone(), material);
-  front.position.set(0, 0.08, 0.92);
-  back.position.set(0, 0.08, -0.92);
-  left.position.set(-0.92, 0.08, 0);
-  right.position.set(0.92, 0.08, 0);
-  marker.add(front, back, left, right);
-  marker.visible = false;
-  marker.userData.material = material;
-  return marker;
-}
-
-function blockMesh(width, height, depth, material, x, y, z) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  return mesh;
 }
 
 function createWorld() {
@@ -3223,9 +2699,113 @@ function createSky() {
     size: 0.08,
     transparent: true,
     opacity: 0.72,
+    fog: false,
   });
   starField = new THREE.Points(starGeometry, starMaterial);
   scene.add(starField);
+}
+
+function createMeteors() {
+  for (let index = 0; index < 5; index += 1) {
+    const group = new THREE.Group();
+    const tailMaterial = new THREE.MeshBasicMaterial({
+      color: 0x9fd7ff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+    });
+    const coreMaterial = new THREE.MeshBasicMaterial({
+      color: 0xfff4ba,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+    });
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: 0x6fb6ff,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+    });
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.08, 0.08), tailMaterial);
+    tail.position.x = -3.0;
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 8), coreMaterial);
+    core.position.x = 0.42;
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.58, 16, 8), glowMaterial);
+    glow.position.x = 0.42;
+    group.add(tail, core, glow);
+    group.rotation.z = -0.16;
+    group.visible = false;
+    scene.add(group);
+    meteors.push({
+      group,
+      materials: [tailMaterial, coreMaterial, glowMaterial],
+      baseOpacities: [0.45, 0.95, 0.26],
+      age: 0,
+      duration: 1,
+      delay: 2 + index * 2.2,
+      fadeOutStart: 0.58,
+      start: new THREE.Vector3(),
+      end: new THREE.Vector3(),
+      scale: 1,
+    });
+    resetMeteor(meteors[index], true);
+  }
+}
+
+function resetMeteor(meteor, stagger = false) {
+  meteor.age = 0;
+  meteor.duration = 1.2 + Math.random() * 1.5;
+  meteor.delay = stagger ? Math.random() * 8 : 1.2 + Math.random() * 5.8;
+  meteor.fadeOutStart = 0.48 + Math.random() * 0.2;
+  const y = 13 + Math.random() * 9;
+  const z = -76 - Math.random() * 18;
+  meteor.start.set(-42 - Math.random() * 18, y, z);
+  meteor.end.set(42 + Math.random() * 22, y - (2.2 + Math.random() * 4.6), z - (1 + Math.random() * 5));
+  meteor.scale = 0.62 + Math.random() * 0.7;
+  meteor.group.scale.setScalar(meteor.scale);
+  meteor.group.position.copy(meteor.start);
+  meteor.group.visible = false;
+  for (const material of meteor.materials) material.opacity = 0;
+}
+
+function updateMeteors(delta) {
+  const active = isFinalWave() && mode === 'running';
+  for (const meteor of meteors) {
+    if (!active) {
+      meteor.group.visible = false;
+      for (const material of meteor.materials) material.opacity = 0;
+      continue;
+    }
+
+    if (meteor.delay > 0) {
+      meteor.delay -= delta;
+      meteor.group.visible = false;
+      continue;
+    }
+
+    meteor.age += delta;
+    const t = THREE.MathUtils.clamp(meteor.age / meteor.duration, 0, 1);
+    if (t >= 1) {
+      resetMeteor(meteor);
+      continue;
+    }
+
+    const fadeIn = THREE.MathUtils.clamp(t / 0.18, 0, 1);
+    const fadeOut = 1 - THREE.MathUtils.clamp((t - meteor.fadeOutStart) / (1 - meteor.fadeOutStart), 0, 1);
+    const opacity = fadeIn * fadeOut;
+    meteor.group.visible = opacity > 0.02;
+    meteor.group.position.lerpVectors(meteor.start, meteor.end, t);
+    meteor.group.rotation.z = -0.16 + Math.sin((meteor.age + meteor.scale) * 1.7) * 0.025;
+    for (let index = 0; index < meteor.materials.length; index += 1) {
+      meteor.materials[index].opacity = meteor.baseOpacities[index] * opacity;
+    }
+  }
 }
 
 function buildCloudGroup(material, template) {
@@ -3295,6 +2875,13 @@ function createClouds() {
 }
 
 function updateClouds(delta) {
+  if (isFinalWave() || mode === 'ending') {
+    for (const cloud of clouds) {
+      cloud.group.visible = false;
+    }
+    return;
+  }
+
   const weather = seasonalEffects.getWeatherState();
   const isRainySummer = weather.seasonName === 'summer' && weather.raining;
   const isSnowyWinter = weather.seasonName === 'winter' && weather.snowing;
@@ -3318,6 +2905,8 @@ function updateClouds(delta) {
 
     if (cloud.weatherOnly) {
       cloud.group.visible = cloudWeatherBlend > 0.02;
+    } else {
+      cloud.group.visible = true;
     }
 
     const densityBoost = cloud.weatherOnly ? 1.2 : 1;
@@ -3539,7 +3128,7 @@ function removeEnemy(enemy) {
   const index = enemies.indexOf(enemy);
   if (index >= 0) enemies.splice(index, 1);
   enemyGroup.remove(enemy.group);
-  labelsLayer.removeChild(enemy.label);
+  if (enemy.label.parentNode) enemy.label.parentNode.removeChild(enemy.label);
   disposeObject(enemy.group);
   if (enemy.shadowMesh) {
     scene.remove(enemy.shadowMesh);
@@ -3555,11 +3144,13 @@ function clearEnemies() {
 }
 
 function clearEffects() {
+  clearChainLightningTimers();
   for (const beam of beams) {
     effectsGroup.remove(beam.mesh);
     disposeObject(beam.mesh);
   }
   beams.length = 0;
+  lastBossShotTime = -999;
 
   for (const chunk of debris) {
     effectsGroup.remove(chunk.mesh);
@@ -3573,10 +3164,13 @@ function disposeObject(object) {
   object.traverse((child) => {
     if (!child.isMesh) return;
     child.geometry.dispose();
-    if (Array.isArray(child.material)) {
-      for (const material of child.material) material.dispose();
-    } else {
-      child.material.dispose();
+    if (child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of mats) {
+        if (material && (!material.userData || !material.userData.isShared)) {
+          material.dispose();
+        }
+      }
     }
   });
 }
@@ -3624,6 +3218,27 @@ function isEnemyTargetable(enemy) {
   return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
 }
 
+function getEquationQuantities(equationTerm) {
+  const normalizedEq = equationTerm.toLowerCase()
+    .replace(/[²³½0-9.×/=\-+()]/g, ' ')
+    .replace(/\s+/g, ' ');
+
+  const matched = [];
+  const tempEq = " " + normalizedEq + " ";
+  const sortedWords = [...ALL_WORDS].sort((a, b) => b.term.length - a.term.length);
+
+  let remainingEq = tempEq;
+  for (const word of sortedWords) {
+    const term = word.term.toLowerCase();
+    const termPattern = " " + term + " ";
+    if (remainingEq.includes(termPattern)) {
+      matched.push(word);
+      remainingEq = remainingEq.replace(termPattern, " ");
+    }
+  }
+  return matched;
+}
+
 function prepareWavePlan() {
   bossWordsThisSet = chooseBossWordsForWave();
   introducedBossTermsThisSet = new Set();
@@ -3631,7 +3246,19 @@ function prepareWavePlan() {
   medicSpawnSlots = chooseMedicSpawnSlots(normalEnemyTarget, getMedicCountForWave(waveSet));
   mimicsSpawnedThisSet = 0;
   mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
-  const previewableWords = definitionBossWordsForWave();
+  
+  const previewableWords = [...definitionBossWordsForWave()];
+  const equationWord = bossWordsThisSet.find(w => w.isEquation);
+  if (equationWord) {
+    const quantities = getEquationQuantities(equationWord.term);
+    const unseenQuantities = quantities.filter(q => !previewableWords.some(pw => pw.term === q.term));
+    if (unseenQuantities.length > 0) {
+      const chosenQuantity = unseenQuantities[Math.floor(Math.random() * unseenQuantities.length)];
+      previewableWords.push(chosenQuantity);
+    }
+  }
+  previewableWordsThisSet = previewableWords;
+
   bossPreviewSchedule = buildBossPreviewSchedule(normalEnemyTarget, previewableWords);
   hardGuestSchedule = waveSet <= 4 ? buildHardGuestSchedule(normalEnemyTarget) : new Map();
 }
@@ -3830,21 +3457,50 @@ function chooseMedicPrompt() {
   return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
+function chooseFinalWaveNormalPrompt() {
+  const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
+  const pool = EASY_WORDS;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const entry = pool[Math.floor(Math.random() * pool.length)];
+    if (!nearExisting.has(entry.term)) return entry;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function currentKeywordPool() {
   if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
   if (waveSet >= 3) return [...EASY_WORDS, ...MEDIUM_WORDS];
   return EASY_WORDS;
 }
 
-function chooseBossType(index) {
-  return BOSS_TYPES[(waveSet + index - 1) % BOSS_TYPES.length];
+function refreshWaveBossOrder(count) {
+  const indices = BOSS_TYPES.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  waveBossOrder = indices.slice(0, count);
 }
 
-function nextSpawnDelay() {
+function chooseBossType(index) {
+  if (waveBossOrder.length === 0) refreshWaveBossOrder(BOSSES_PER_WAVE);
+  return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
+}
+
+function nextSpawnDelay(enemy = null, options = {}) {
   const profile = currentDifficulty();
+  const wavePace = profile.spawnBase - Math.max(0, waveSet - 1) * profile.spawnGrowth;
+  const cost = Math.max(1, enemy ? getEnemyTypingCost(enemy) : SPAWN_COST_BASELINE);
+  const costFactor = THREE.MathUtils.clamp(
+    Math.sqrt(cost / SPAWN_COST_BASELINE),
+    1,
+    SPAWN_COST_DELAY_MAX
+  );
+  const supportFactor = options.support ? 0.8 : 1;
+  const minimumDelay = options.support ? SUPPORT_SPAWN_DELAY_MIN : profile.spawnMin;
   return Math.max(
-    profile.spawnMin,
-    profile.spawnBase - Math.max(0, waveSet - 1) * profile.spawnGrowth + Math.random() * profile.spawnJitter
+    minimumDelay,
+    wavePace * costFactor * supportFactor + Math.random() * profile.spawnJitter
   );
 }
 
@@ -3933,7 +3589,10 @@ function applySeasonInstant(palette) {
   }
   if (sceneTrunkMaterial) sceneTrunkMaterial.color.setHex(palette.trunkColor);
   if (moon) moon.material.color.setHex(palette.moonColor);
-  if (starField) starField.material.opacity = palette.starOpacity;
+  if (starField) {
+    starField.material.size = 0.08;
+    starField.material.opacity = palette.starOpacity;
+  }
   recolorGround(palette);
   seasonalEffects.setSeason(palette.name);
 }
@@ -4010,43 +3669,6 @@ function recolorGround(palette) {
   sceneGroundMesh.instanceColor.needsUpdate = true;
 }
 
-const SPELLING_ALTS = [
-  ['colour', 'color'],
-  ['centre', 'center'],
-  ['metre', 'meter'],
-  ['litre', 'liter'],
-  ['fibre', 'fiber'],
-  ['ionise', 'ionize'],
-  ['magnetise', 'magnetize'],
-  ['analyse', 'analyze'],
-  ['polarise', 'polarize'],
-];
-
-const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
-const MATH_OPERATOR_INPUTS = new Set(['*', '+', '-', '=', '/', '×', 'x', 'X']);
-
-function getInputCharacters(character) {
-  const inputs = [];
-  const base = normalizeCharacter(character);
-  const alias = isMathOperatorInput(character) ? '' : normalizeCharacter(character, { multiplicationAlias: true });
-  if (base) inputs.push({ value: base, equationOnly: false });
-  if (alias && alias !== base) inputs.push({ value: alias, equationOnly: true });
-  return inputs;
-}
-
-function isMathOperatorInput(character) {
-  return MATH_OPERATOR_INPUTS.has(character);
-}
-
-function normalizeCharacter(character, options = {}) {
-  if (/\s/.test(character)) return '';
-  if (SUPERSCRIPT_MAP[character]) return SUPERSCRIPT_MAP[character];
-  const normalized = character.toLowerCase();
-  if (normalized === '×') return options.multiplicationAlias ? 'x' : '';
-  if (normalized === '*') return options.multiplicationAlias ? 'x' : '';
-  return /^[a-z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
-}
-
 function accuracy() {
   if (typedAttempts <= 0) return 1;
   return THREE.MathUtils.clamp((typedAttempts - mistakeCount) / typedAttempts, 0, 1);
@@ -4059,6 +3681,45 @@ function formatAccuracySummary() {
 
 function focusKeyboard() {
   keyboardInput.focus({ preventScroll: true });
+}
+
+function createRenderer() {
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    const message = args.map((arg) => String(arg)).join(' ');
+    if (!message.startsWith('THREE.WebGLRenderer:')) {
+      originalConsoleError.apply(console, args);
+    }
+  };
+  try {
+    return {
+      renderer: new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: false,
+        preserveDrawingBuffer: false,
+        powerPreference: 'high-performance',
+      }),
+      available: true,
+    };
+  } catch (error) {
+    console.warn('Spellwave could not create a WebGL renderer.', error);
+    return {
+      renderer: createFallbackRenderer(),
+      available: false,
+    };
+  } finally {
+    console.error = originalConsoleError;
+  }
+}
+
+function createFallbackRenderer() {
+  return {
+    shadowMap: {},
+    setPixelRatio() {},
+    setSize() {},
+    render() {},
+  };
 }
 
 function resizeRenderer() {
@@ -4092,6 +3753,55 @@ function loadAudioSetting() {
 
 function saveAudioSetting(enabled) {
   writeStoredValue(AUDIO_STORAGE_KEY, enabled ? 'on' : 'off');
+}
+
+function loadBatterySaverSetting() {
+  const stored = readStoredValue(BATTERY_SAVER_STORAGE_KEY, 'false');
+  return stored === 'true';
+}
+
+function saveBatterySaverSetting(active) {
+  writeStoredValue(BATTERY_SAVER_STORAGE_KEY, active ? 'true' : 'false');
+}
+
+function applyBatterySaver() {
+  if (batterySaver) {
+    document.body.classList.add('battery-saver');
+    if (batterySaverButton) {
+      batterySaverButton.classList.add('is-active');
+      batterySaverButton.title = "Disable Battery Saver";
+      batterySaverButton.setAttribute('aria-label', "Disable Battery Saver");
+    }
+    if (renderer) renderer.shadowMap.enabled = false;
+    if (moonLight) moonLight.castShadow = false;
+  } else {
+    document.body.classList.remove('battery-saver');
+    if (batterySaverButton) {
+      batterySaverButton.classList.remove('is-active');
+      batterySaverButton.title = "Enable Battery Saver";
+      batterySaverButton.setAttribute('aria-label', "Enable Battery Saver");
+    }
+    if (renderer) renderer.shadowMap.enabled = true;
+    if (moonLight) moonLight.castShadow = true;
+  }
+  if (scene) {
+    scene.traverse(child => {
+      if (child.isMesh && child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(mat => { mat.needsUpdate = true; });
+        } else {
+          child.material.needsUpdate = true;
+        }
+      }
+    });
+  }
+}
+
+function toggleBatterySaver() {
+  batterySaver = !batterySaver;
+  saveBatterySaverSetting(batterySaver);
+  applyBatterySaver();
+  if (mode === 'running') focusKeyboard();
 }
 
 function readStoredValue(key, fallback) {
@@ -4162,17 +3872,61 @@ function updateFullscreenButton() {
   fullscreenButton.title = isFullscreen ? 'Exit full screen' : 'Enter full screen';
 }
 
+function isFinalWave() {
+  return waveSet === FINAL_WAVE_NUMBER;
+}
+
+function buildFinalWaveQueue() {
+  const queue = [
+    ...Array(10).fill('boss'),
+    ...Array(3).fill('medic'),
+    ...Array(3).fill('mimic'),
+  ];
+  for (let i = queue.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [queue[i], queue[j]] = [queue[j], queue[i]];
+  }
+  const firstBossIndex = queue.indexOf('boss');
+  if (firstBossIndex > 0) {
+    [queue[0], queue[firstBossIndex]] = [queue[firstBossIndex], queue[0]];
+  }
+  return queue;
+}
+
+function startFinalWave() {
+  wavePhase = 'boss';
+  bossesSpawned = 0;
+  bossesDefeated = 0;
+  bossSpawnTimer = currentDifficulty().bossWarningDelay;
+  finalWaveQueue = buildFinalWaveQueue();
+  finalWaveQueueIndex = 0;
+  refreshWaveBossOrder(FINAL_WAVE_BOSS_COUNT);
+  document.body.classList.add('final-wave-active');
+  showBanner('FINAL WAVE!', 'final-wave');
+  playBossWarningSound();
+  updatePhaseDisplay();
+  // Space background: cancel season transition, disable weather, apply deep-space look
+  seasonFade = null;
+  seasonalEffects.stopWeather();
+  scene.background.setHex(0x000008);
+  scene.fog.color.setHex(0x000008);
+  scene.fog.near = 28;
+  scene.fog.far = 90;
+  if (starField) {
+    starField.material.size = 0.22;
+    starField.material.opacity = 1.0;
+  }
+}
+
 function startBossPhase() {
   if (bossWordsThisSet.length === 0) prepareWavePlan();
-  const missingPreviewWords = isNormalTypingBudgetReached()
-    ? []
-    : definitionBossWordsForWave().filter(w => !introducedBossTermsThisSet.has(w.term));
+  const missingPreviewWords = previewableWordsThisSet.filter(w => !introducedBossTermsThisSet.has(w.term));
   if (missingPreviewWords.length > 0) {
     const firstSlot = normalEnemiesSpawned;
     for (const [index, word] of missingPreviewWords.entries()) {
       bossPreviewSchedule.set(firstSlot + index, word);
     }
-    normalEnemyTarget += missingPreviewWords.length;
+    normalEnemyTarget = normalEnemiesSpawned + missingPreviewWords.length;
     updateHud(true);
     return;
   }
@@ -4181,6 +3935,7 @@ function startBossPhase() {
   bossesSpawned = 0;
   bossesDefeated = 0;
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
+  refreshWaveBossOrder(BOSSES_PER_WAVE);
   showBanner('BOSS WAVE');
   playBossWarningSound();
   updatePhaseDisplay();
@@ -4240,9 +3995,200 @@ function startWaveCleared() {
   updatePhaseDisplay();
 }
 
+let endingStartTime = 0;
+let endingTimers = [];
+
+function startEndingSequence() {
+  mode = 'ending';
+  startMusicLoop(false);
+  document.body.classList.remove('is-running');
+  document.body.classList.remove('final-wave-active');
+  setPauseButtonState(true, true);
+  clearEnemies();
+  clearEffects();
+  updatePhaseDisplay();
+
+  if (!gameEnding) return;
+  clearEndingTimers();
+  gameEnding.hidden = false;
+  gameEnding.className = 'game-ending phase-arrival';
+
+  // Create (or reset) the canvas FX engine
+  if (endingFX) { endingFX.reset(); }
+  else { endingFX = createEndingFX(endingCanvasEl); }
+
+  const finalStats = getEndingStats();
+  setEndingStats(finalStats, false);
+
+  // Cinematic steps:
+  // 1. Flash + detonation burst at 120ms
+  queueEndingStep(() => {
+    gameEnding.className = 'game-ending phase-arrival phase-flash';
+    endingFX.setPhase('detonation');
+  }, 120);
+
+  // 2. Nebula fades in at 2200ms; blue introductory text appears
+  queueEndingStep(() => {
+    gameEnding.className = 'game-ending phase-arrival phase-nebula';
+    endingFX.setPhase('nebula');
+  }, 2200);
+
+  // 3. Spellwave logo flies away at 5700ms; sparkle burst; victory chords
+  queueEndingStep(() => {
+    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-title-fly';
+    endingFX.setPhase('titlefly');
+    playVictoryFinaleSound();
+  }, 5700);
+
+  // 4. Star Wars crawl at 9700ms (20s duration)
+  queueEndingStep(() => {
+    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-crawl';
+    endingFX.setPhase('crawl');
+  }, 9700);
+
+  // 5. Final stats card at 29700ms (20s crawl ends)
+  queueEndingStep(() => {
+    showEndingStatsScreen(finalStats);
+  }, 29700);
+}
+
+function showEndingStatsScreen(finalStats) {
+  clearEndingTimers();
+  if (gameEnding) {
+    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-stats phase-replay';
+  }
+  endingFX?.setPhase('stats');
+  setEndingStats(finalStats, true);
+}
+
+function animateCounter(el, from, to, duration, format = v => String(v)) {
+  if (!el) return;
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    el.textContent = format(Math.round(from + (to - from) * eased));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function getEndingStats() {
+  const gameSeconds = Math.max(1, endingStartTime || elapsed || gameTimeSeconds);
+  const wpm = Math.round((defeatedCount * 60) / gameSeconds);
+  const accuracy = typedAttempts > 0
+    ? Math.round(((typedAttempts - mistakeCount) / typedAttempts) * 100)
+    : 100;
+  const healthHearts = formatHeartCount(health);
+  const grade = calculateEndingGrade({ accuracy, wpm, health });
+  return {
+    score,
+    wpm,
+    accuracy,
+    peakStreak,
+    mimicsLooted,
+    grade,
+    healthHearts,
+    time: formatRunTime(gameSeconds),
+  };
+}
+
+function calculateEndingGrade({ accuracy, wpm, health }) {
+  let grade = 4;
+  if (accuracy >= 72) grade += 1;
+  if (accuracy >= 82) grade += 1;
+  if (accuracy >= 90) grade += 1;
+  if (wpm >= 14) grade += 1;
+  if (wpm >= 22) grade += 1;
+  if (health >= MAX_LIFE * 0.7) grade += 1;
+  if (accuracy < 62) grade -= 1;
+  if (health <= 2) grade -= 1;
+  return THREE.MathUtils.clamp(grade, 1, 9);
+}
+
+function formatRunTime(seconds) {
+  const total = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(total / 60);
+  const remainingSeconds = total % 60;
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+
+function setEndingStats(stats, animate) {
+  if (!stats) return;
+  if (animate) {
+    animateCounter(endScore, 0, stats.score, 1400);
+    animateCounter(endWpm, 0, stats.wpm, 1000, v => `${v}`);
+    animateCounter(endAccuracy, 0, stats.accuracy, 1000, v => `${v}%`);
+    animateCounter(endStreak, 0, stats.peakStreak, 900);
+    animateCounter(endMimics, 0, stats.mimicsLooted, 850);
+    animateCounter(endGrade, 0, stats.grade, 1100, v => `${v}`);
+  } else {
+    if (endScore) endScore.textContent = '0';
+    if (endWpm) endWpm.textContent = '0';
+    if (endAccuracy) endAccuracy.textContent = '0%';
+    if (endStreak) endStreak.textContent = '0';
+    if (endMimics) endMimics.textContent = '0';
+    if (endGrade) endGrade.textContent = '0';
+  }
+  if (endHealth) endHealth.textContent = `${stats.healthHearts}/${HEART_COUNT}`;
+  if (endTime) endTime.textContent = stats.time;
+}
+
+function queueEndingStep(callback, delay) {
+  endingTimers.push(window.setTimeout(callback, delay));
+}
+
+function clearEndingTimers() {
+  endingTimers.forEach(timer => window.clearTimeout(timer));
+  endingTimers = [];
+}
+
+function dismissEndingSequence() {
+  if (!gameEnding) return;
+  clearEndingTimers();
+  gameEnding.hidden = true;
+  gameEnding.className = 'game-ending';
+  if (endingFX) { endingFX.reset(); }
+}
+
+function activateFinalWaveCheat() {
+  const savedHealth = (mode === 'running' || mode === 'paused' || mode === 'wave_cleared') ? health : MAX_LIFE;
+
+  if (mode === 'idle' || mode === 'gameover' || mode === 'ending') {
+    startGame();
+  } else {
+    clearEnemies();
+    clearEffects();
+    typedBuffer = '';
+    activeTarget = null;
+    bossesSpawned = 0;
+    bossesDefeated = 0;
+    bossShotHits = 0;
+    bossSpawnTimer = 0;
+    waveBossOrder = [];
+    finalWaveQueue = [];
+    finalWaveQueueIndex = 0;
+    waveClearDelayTimer = 0;
+    mode = 'running';
+    document.body.classList.add('is-running');
+    messagePanel.hidden = true;
+    messagePanel.classList.remove('is-cleared');
+    setPauseButtonState(true, false);
+  }
+
+  waveSet = FINAL_WAVE_NUMBER;
+  health = savedHealth;
+  prepareWavePlan();
+  startFinalWave();
+  showBanner('CHEAT CODE ACTIVATED', 'mimic-hint');
+  updateHud(true);
+  focusKeyboard();
+}
+
 function advanceWaveSet() {
   playStartSound();
   clearEffects();
+  document.body.classList.remove('final-wave-active');
   waveSet += 1;
   wavePhase = 'normal';
   waveClearDelayTimer = 0;
@@ -4253,6 +4199,9 @@ function advanceWaveSet() {
   bossesDefeated = 0;
   bossShotHits = 0;
   bossSpawnTimer = 0;
+  waveBossOrder = [];
+  finalWaveQueue = [];
+  finalWaveQueueIndex = 0;
   prepareWavePlan();
   typedBuffer = '';
   activeTarget = null;
@@ -4268,6 +4217,7 @@ function advanceWaveSet() {
   updatePhaseDisplay();
   applySeasonForWave(waveSet);
   focusKeyboard();
+  if (isFinalWave()) startFinalWave();
 }
 
 function updateComboDisplay() {
@@ -4282,6 +4232,10 @@ function updateTypingLabel() {
     return;
   }
   if (wavePhase === 'boss') {
+    if (isFinalWave()) {
+      typingLabel.textContent = `BOSS ${bossesDefeated}/${FINAL_WAVE_BOSS_COUNT}`;
+      return;
+    }
     typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
   } else {
     typingLabel.textContent = 'INPUT';
@@ -4349,9 +4303,10 @@ function spawnMagicAcquiredBurst(addedType) {
 }
 
 function awardMimicLoot(enemy) {
-  const types = ['time_freeze', 'chain_lightning', 'shockwave'];
+  const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
   const type = types[Math.floor(Math.random() * types.length)];
   const success = potionsSystem.addPotion(type);
+  mimicsLooted += 1;
 
   if (!enemy.label.classList.contains('is-hidden')) {
     const left = parseFloat(enemy.label.style.left);
@@ -4520,13 +4475,13 @@ function triggerChainLightning(firstEnemy) {
 
   if (targets.length === 0) {
     // No other monsters: hold visual for 100ms, then burst the single monster
-    window.setTimeout(() => {
+    scheduleChainLightningTimer(() => {
       burstChain(chainMonsters);
     }, 100);
   } else {
     // Chain sequentially
     targets.forEach((enemy, index) => {
-      window.setTimeout(() => {
+      scheduleChainLightningTimer(() => {
         if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
           if (enemy.isBoss) {
             enemy.stunTimer = 3.0;
@@ -4544,13 +4499,30 @@ function triggerChainLightning(firstEnemy) {
 
         // Trigger simultaneous burst when sequence completes
         if (index === targets.length - 1) {
-          window.setTimeout(() => {
+          scheduleChainLightningTimer(() => {
             burstChain(chainMonsters);
           }, 80);
         }
       }, (index + 1) * 60);
     });
   }
+}
+
+function scheduleChainLightningTimer(callback, delay) {
+  const timerId = window.setTimeout(() => {
+    const index = chainLightningTimers.indexOf(timerId);
+    if (index >= 0) chainLightningTimers.splice(index, 1);
+    callback();
+  }, delay);
+  chainLightningTimers.push(timerId);
+  return timerId;
+}
+
+function clearChainLightningTimers() {
+  for (const timerId of chainLightningTimers) {
+    window.clearTimeout(timerId);
+  }
+  chainLightningTimers = [];
 }
 
 function releaseChainBeams() {
@@ -4572,7 +4544,7 @@ function burstChain(chainMonsters) {
 
   if (lightningFlash) {
     lightningFlash.style.opacity = '0.92';
-    window.setTimeout(() => {
+    scheduleChainLightningTimer(() => {
       lightningFlash.style.opacity = '0';
     }, 100);
   }
@@ -4637,6 +4609,7 @@ function defeatEnemyChainBurst(enemy) {
 
   const promptValue = enemy.prompt.replace(/\s/g, '');
   streak += 1;
+  if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   if (enemy.isBoss) bossesDefeated += 1;
   const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
