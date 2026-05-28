@@ -74,6 +74,7 @@ const BOSS_FIRST_SHOT_DELAY = 2.6;
 const BOSS_SHOT_INTERVAL = 4.2;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
+const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
 const BOSSES_PER_WAVE = 3;
 const FINAL_WAVE_NUMBER = 10;
 const FINAL_WAVE_NORMAL_COUNT = 0;
@@ -1494,9 +1495,14 @@ function updateEnemies(delta, seconds) {
     if (enemy.isBoss && enemy.revealed && (!enemy.stunTimer || enemy.stunTimer <= 0)) {
       enemy.shotTimer -= delta;
       if (enemy.shotTimer <= 0) {
-        bossShootPlayer(enemy);
-        enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
-        if (mode !== 'running') break;
+        const activeRocksCount = beams.filter(b => b.kind === 'rock').length;
+        if (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES) {
+          bossShootPlayer(enemy);
+          enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
+          if (mode !== 'running') break;
+        } else {
+          enemy.shotTimer = 0; // Hold throw until a slot opens
+        }
       }
     }
 
