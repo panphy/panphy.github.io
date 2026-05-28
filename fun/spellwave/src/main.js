@@ -1499,10 +1499,13 @@ function updateEnemies(delta, seconds) {
       if (enemy.shotTimer <= 0) {
         const activeRocksCount = beams.filter(b => b.kind === 'rock').length;
         const timeSinceLastShot = seconds - lastBossShotTime;
-        if (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES && timeSinceLastShot >= MIN_PROJECTILE_SPACING) {
+        const canShoot = enemy.isClimaxBoss || (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES && timeSinceLastShot >= MIN_PROJECTILE_SPACING);
+        if (canShoot) {
           bossShootPlayer(enemy);
           enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
-          lastBossShotTime = seconds;
+          if (!enemy.isClimaxBoss) {
+            lastBossShotTime = seconds;
+          }
           if (mode !== 'running') break;
         } else {
           enemy.shotTimer = 0; // Hold throw until a slot opens AND spacing is met
@@ -1515,12 +1518,13 @@ function updateEnemies(delta, seconds) {
     const pulseScale = enemy.isMedic
       ? 1 + Math.max(0, Math.sin(seconds * 12 + enemy.phase)) * 0.14
       : 1;
+    const finalScaleMultiplier = enemy.isClimaxBoss ? 1.5 : 1.0;
     if (enemy === activeTarget && isEnemyTargetable(enemy)) {
-      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * (1.12 + Math.sin(seconds * 16) * 0.05));
+      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * finalScaleMultiplier * (1.12 + Math.sin(seconds * 16) * 0.05));
     } else if (!enemy.revealed) {
-      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * (1.04 + Math.sin(seconds * 5 + enemy.phase) * 0.025));
+      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * finalScaleMultiplier * (1.04 + Math.sin(seconds * 5 + enemy.phase) * 0.025));
     } else {
-      enemy.group.scale.setScalar(enemy.type.scale * pulseScale);
+      enemy.group.scale.setScalar(enemy.type.scale * pulseScale * finalScaleMultiplier);
     }
 
     if (enemy.group.position.z >= WALL_Z) {
@@ -1849,7 +1853,7 @@ function updateLabels() {
   for (const enemy of enemies) {
     renderPrompt(enemy);
     reusableVector.copy(enemy.group.position);
-    reusableVector.y += 3.2 * enemy.type.scale;
+    reusableVector.y += 3.2 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
     reusableVector.project(camera);
 
     const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
@@ -1877,7 +1881,7 @@ function updateLabels() {
       const leftRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
       // Project boss mid-height for vertical centering beside boss
       reusableVector.copy(enemy.group.position);
-      reusableVector.y += 1.3 * enemy.type.scale;
+      reusableVector.y += 1.3 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
       reusableVector.project(camera);
       const bossMidScreenY = (-reusableVector.y * 0.5 + 0.5) * height;
       labelItems.push({ enemy, x, y, scale, rightRoadEdgeX, leftRoadEdgeX, bossMidScreenY });
@@ -2303,6 +2307,7 @@ function spawnEnemy(options = {}) {
   const isBoss = options.isBoss || false;
   const isMedic = options.isMedic || false;
   const isMimic = options.isMimic || false;
+  const isClimaxBoss = options.isClimaxBoss || false;
   const wordData = options.wordData
     ? options.wordData
     : options.forcedPrompt
@@ -2338,7 +2343,7 @@ function spawnEnemy(options = {}) {
   const isFlying = isBoss && !!type.isFlying;
   const spawnBaseY = isFlying ? 2.4 : 0.32;
   group.position.set(lane, spawnBaseY, startZ);
-  group.scale.setScalar(type.scale);
+  group.scale.setScalar(type.scale * (isClimaxBoss ? 1.5 : 1.0));
   enemyGroup.add(group);
 
   let shadowMesh = null;
@@ -2352,6 +2357,7 @@ function spawnEnemy(options = {}) {
     shadowMesh = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 3.8), shadowMat);
     shadowMesh.position.set(lane, 0.04, startZ);
     shadowMesh.visible = moonShadowStrength > 0.02;
+    if (isClimaxBoss) shadowMesh.scale.setScalar(1.5);
     scene.add(shadowMesh);
   }
 
@@ -2440,6 +2446,7 @@ function spawnEnemy(options = {}) {
     isBoss,
     isMedic,
     isMimic,
+    isClimaxBoss,
     isFinalWaveNormal: !!options.isFinalWaveNormal,
     lidOpenProgress: 0,
     hasOpened: false,
@@ -3009,7 +3016,7 @@ function spawnBeam(targetPosition) {
 
 function spawnBossRock(enemy) {
   const start = enemy.group.position.clone();
-  start.y += 1.8 * enemy.type.scale;
+  start.y += 1.8 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
   const end = new THREE.Vector3(THREE.MathUtils.randFloat(-0.45, 0.45), 1.2 + Math.random() * 0.25, WALL_Z + 0.76);
   const rockMaterial = new THREE.MeshStandardMaterial({
     color: 0x5a4636,
@@ -3958,7 +3965,8 @@ function spawnBoss() {
   const targetWait = 8.0;
   const startZ = profile.revealZ - (speed * targetWait);
 
-  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ });
+  const isClimaxBoss = isFinalWave() && (bossesSpawned >= 7);
+  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ, isClimaxBoss });
 }
 
 function chooseBossWord() {
