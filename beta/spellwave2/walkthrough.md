@@ -1,66 +1,28 @@
-# Spellwave 2 Battery & Performance Optimization Walkthrough
+# Walkthrough - Boss Projectile Concurrency Cap & Staggered Spacing
 
-We have successfully implemented and verified the battery and performance optimizations for `/beta/spellwave2`. Below is a summary of the improvements.
+We have successfully implemented and verified the boss projectile rate-limiting optimizations for Wave 10. Below is a summary of the changes.
 
 ## Changes Made
 
-### 1. Unified Animation Frame Control
-- Stopped scheduling `requestAnimationFrame` entirely when the game is paused, resulting in **0% CPU/GPU rendering usage** during pause overlays.
-- Replaced the high-frequency 120Hz/60Hz event loop polling during start/game-over screens with a `setTimeout` throttled `10fps` sleep window, preventing unnecessary thread wakeups.
-- Wired up proper loop restarting in `startGame` and `resumeGame`.
+### 1. Projectile Concurrency Cap
+- Added a new constant `MAX_CONCURRENT_BOSS_PROJECTILES = 2` in `main.js`.
+- Modified the boss shot timer loop in `updateEnemies()` to check the active count of rocks in the air. If the count is at or above the cap, the boss holds their throw (keeping `shotTimer = 0`).
+- This prevents the screen from becoming cluttered and protects the player from taking massive, unavoidable damage from multiple synchronized hits.
 
-### 2. Ending FX Loop Leak Fix
-- Corrected the victory sequence particle engine (`ending-fx.js`) so that it no longer runs its animation loop in the background during normal gameplay.
-- It now starts the loop dynamically only when transitioning to victory cinematics, and cancels the loop completely when the ending is idle or reset.
-
-### 3. Material Caching & Re-use
-- Built a cached material factory inside `enemy-meshes.js` that pools standard materials based on colors for all normal, boss, medic, and mimic meshes.
-- This prevents dynamic WebGL program recompilation, state changes, and garbage collection pauses when spawning and defeating enemies.
-- Modified `disposeObject` to skip disposing pooled shared materials while still cleaning up one-off geometries.
-
-### 4. Transition-Based Visual Stuns
-- Reworked the stun visual update loop in `updateEnemies` to perform mesh material swaps and light desaturation *only once* when the stun state changes (starts/ends) instead of traversing the object tree and mutating material properties every frame.
-
-### 5. Battery Saver UI & Override Styling
-- **HTML**: Added a new leaf icon button (`#batterySaverButton`) in the top right controls in `spellwave2.html`.
-- **CSS**: Created responsive overrides under `body.battery-saver` in `styles.css` that disable high-overhead CSS `backdrop-filter: blur(...)` elements (game bar, HUD readouts, typing strip, potion bar, and god mode badge) and increase panel opacity to preserve high-contrast readability.
-- **JS**: Toggled Three.js shadow mapping (`renderer.shadowMap.enabled = !batterySaver`) and directional light shadows (`moonLight.castShadow = !batterySaver`) dynamically when Battery Saver mode is toggled, and persisted the setting in `localStorage` as `spellwave_battery_saver_active`.
-
----
-
-## Ending Cinematic & UI Refinements
-
-### 1. Tooltips & Accessibility
-- Added static tooltips (`title` attribute) to the brand mark logo, audio toggle button, pause button, battery saver button, fullscreen toggle button, and all HUD readouts (Score, Best, Life, Wave) in `spellwave2.html`.
-- Added dynamic tooltip updating in `potions.js` to show the name of the potion in the slot or state that it is empty.
-- Added dynamic tooltip updating in `main.js` to change the start button's title between 'Start the physics typing run', 'Resume the paused run', 'Restart the run from Wave 1', and 'Proceed to the next wave' based on active state.
-- Added descriptive hover tooltips to the potion bar container and the typing input strip.
-
-### 2. Ending Skip Button Removal
-- Removed the `#endingSkipButton` element entirely from the HTML.
-- Cleaned up the click listener references and the `skipEndingCinematic()` logic from `main.js`.
-
-### 3. Star Wars Crawl Perspective
-- Fine-tuned the crawl container and content layout: set parent `perspective` to `300px` and added `perspective-origin: 50% 25%` to create a beautiful, high vanishing point towards the top-center.
-- Tilted the inner crawl text using `transform: rotateX(25deg)` (and matching keyframe transforms) to achieve the authentic receding Star Wars look while maintaining pixel legibility.
-- **Widened Crawl Viewport:** Increased `.ending-crawl-container` width from `580px` to `min(920px, 90vw)` on desktop, preventing text from clipping to only 4-5 words per line and allowing comfortable 7-8 word layouts.
-- **Enlarged Crawl Text:** Upscaled `.ending-crawl-content` body font to `clamp(1.2rem, 2.2vw, 1.7rem)` and headings accordingly (`1.85rem` for episode, `2.6rem` for title) so the crawl text looks grand and cinematic on large screens.
-
-### 4. Retro Pixel Art Styling
-- Updated all ending scene elements to the retro `'Press Start 2P'` (`var(--font-pixel)`) font:
-  - Intro kicker, master title, and subtitle description.
-  - All stats cards (labels, values, and the GCSE Grade ceremony card).
-  - The final run summary text and "Begin Again" replay button.
-- **Balanced Summary Sizing:** Scaled the game summary elements down to a balanced size (`clamp(1.3rem, 3.8vw, 2.4rem)` for the victory title and `0.5rem` to `1.15rem` for stats) so it fits nicely on Mac displays without feeling overwhelming.
-- **Responsive Scaling:** Configured media query overrides for mobile (`max-width: 760px`) and short displays (`max-height: 760px`) to scale summary and crawl components dynamically.
+### 2. Staggered Launch Spacing
+- Added `MIN_PROJECTILE_SPACING = 1.6` seconds in `main.js`.
+- Declared a global `lastBossShotTime = -999` state variable to track the timestamp of the last rock thrown.
+- Modified the boss shot timer loop in `updateEnemies()` to verify that `seconds - lastBossShotTime >= 1.6` before firing.
+- This forces bosses to stagger their throws even if multiple bosses are waiting at `shotTimer = 0`, resolving the issue where projectiles synchronized and fired in pairs.
+- Updated `clearEffects()` to reset `lastBossShotTime = -999` to ensure clean state resets between runs.
 
 ---
 
 ## Verification & Manual Testing
 
-1. **Local Server**: Serves files on port `9090`.
-2. **Visual Refinements**:
-   - Checked that all buttons (start, pause, audio, battery, fullscreen, potions, replay) and metrics correctly render helpful hover tooltips.
-   - Triggering the victory scene shows a beautiful, retro pixel-art styling across the entire summary screen.
-   - The Star Wars crawl converges naturally towards the horizon at `rotateX(25deg)` and is perfectly readable.
-   - The "Skip Intro" button has been completely eliminated from the cinematic.
+1. **Local Server**: Serves files on port `8006`.
+2. **Combat Playtesting**:
+   - Triggering Wave 10 with 10 bosses spawns a steady, readable stream of rocks.
+   - Verified that even under high pressure (all bosses revealed), there are never more than 2 rocks in the air at the same time.
+   - Verified that projectiles are launched with a distinct 1.6-second delay between them, completely breaking up synchronized launches.
+   - Verified that resetting the game correctly clears all timers.

@@ -1,64 +1,33 @@
-# Spellwave 2 UI Refinements & Victory Theme Optimization
+# Implementation Plan: Boss Projectile Concurrency Firing Cap & Staggered Spacing
 
-## Goal Description
-Implement the user's requests to:
-1. Add tooltips/titles to interactive buttons and HUD readouts.
-2. Remove the "Skip Intro" button from the ending cinematic.
-3. Enhance the perspective angle of the victory crawl to make it mimic the Star Wars opening crawl.
-4. Style the ending scene's text with a pixel art theme (using Press Start 2P font, optimized sizing, and styling).
+Limit the maximum number of simultaneous boss projectiles in flight and enforce a minimum spacing interval between throws to make Wave 10 challenging but readable and playable.
 
 ## Proposed Changes
 
-### UI & Tooltips
+### Configuration Constants & State Variables
 
-#### [MODIFY] [spellwave2.html](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy Labs/GitHub/panphy.github.io/beta/spellwave2.html)
-- Add static `title="..."` attributes to:
-  - Brand logo link in header
-  - Audio toggle button
-  - Pause button
-  - HUD readout blocks (`Score`, `Best`, `Life`, `Wave`)
-- Remove the `<button class="ending-skip-button" id="endingSkipButton" ...>Skip Intro</button>` element.
+#### [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
+- Add a concurrency limit: `const MAX_CONCURRENT_BOSS_PROJECTILES = 2;` (no more than 2 rocks can be in flight simultaneously).
+- Add a spacing limit: `const MIN_PROJECTILE_SPACING = 1.6;` (forces a minimum time interval of 1.6s between consecutive projectile launches).
+- Declare state variable: `let lastBossShotTime = -999;` (tracks the game-time timestamp of the last rock thrown).
 
-#### [MODIFY] [potions.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy Labs/GitHub/panphy.github.io/beta/spellwave2/src/potions.js)
-- Update `updatePotionUI()` to set the `title` attribute of each potion slot dynamically (e.g. `Use Time Freeze Potion` vs `Empty Slot`).
+### Firing Logic & State Cleanup
 
-#### [MODIFY] [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
-- Update `applyBatterySaver()` to dynamically update `batterySaverButton.title` and `aria-label` to reflect the active state.
-- Remove references to `#endingSkipButton` and the `skipEndingCinematic()` function.
-
----
-
-### Ending Crawl & Pixel Art Theme
-
-#### [MODIFY] [styles.css](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy Labs/GitHub/panphy.github.io/beta/spellwave2/src/styles.css)
-- **Crawl Perspective & Angle**:
-  - Decrease `.ending-crawl-container` perspective from `380px` to `280px` for a stronger 3D perspective effect.
-  - Tilt `.ending-crawl-content` further back by changing `rotateX(26deg)` to `rotateX(62deg)`.
-  - Update `@keyframes crawl-animation` to maintain `rotateX(62deg)` during the translation.
-- **Pixel Art Text Styling**:
-  - Update the `font-family` of all ending scene text elements to `var(--font-pixel)` (`'Press Start 2P'`).
-  - Scale down the `font-size` and optimize `line-height` for:
-    - `.ending-intro-text`
-    - `.ending-logo`
-    - `.ending-crawl-content` (episode, title, body paragraphs)
-    - `.ending-kicker`
-    - `.ending-title`
-    - `.ending-subtitle`
-    - `.stat-label`
-    - `.stat-value`
-    - `.ending-stat-grade .stat-value`
-    - `.ending-run-summary`
-    - `.ending-replay` (button)
-  - Change `.ending-crawl-content` text alignment from `justify` to `center` for better readability with the monospaced pixel font.
+#### [main.js](file:///Users/ypleung/dropbox/work_in_progress/my_projects/PanPhy%20Labs/GitHub/panphy.github.io/beta/spellwave2/src/main.js)
+- Update the boss projectile firing check in `updateEnemies()`:
+  - Check both the concurrency cap (`activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES`) and the launch spacing (`seconds - lastBossShotTime >= MIN_PROJECTILE_SPACING`).
+  - If both conditions are met, allow the throw and set `lastBossShotTime = seconds`.
+  - Otherwise, hold the shot and keep `shotTimer = 0` to fire as soon as both conditions are met.
+- Update `clearEffects()` to reset `lastBossShotTime = -999;` on restart.
 
 ---
 
 ## Verification Plan
 
 ### Manual Verification
-- Test in browser via `http://localhost:9090/beta/spellwave2.html`.
-- Hover over buttons and readouts to verify tooltips/titles show up.
-- Use a cheat code or complete Wave 10 to trigger the ending sequence:
-  - Verify that the "Skip Intro" button is completely gone.
-  - Verify the crawl angle looks exactly like Star Wars (steep tilt back).
-  - Verify that all victory text is rendered in the pixel art font and does not overflow on desktop or mobile viewports.
+- Deploy locally using `python3 -m http.server 8006` or similar.
+- Trigger wave 10 or spawn boss projectiles using the Konami Code cheat.
+- Verify that even if multiple bosses are active:
+  - There are never more than 2 rocks in the air at the same time.
+  - Projectiles are launched with a distinct 1.6-second delay between them, preventing them from grouping up and launching in pairs or clusters.
+  - When a rock hits the player or is blocked, the waiting boss immediately throws its rock once spacing allows.

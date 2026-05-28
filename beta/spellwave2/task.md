@@ -1,10 +1,8 @@
-# Spellwave 2 UI Refinements & Victory Theme - Tasks
+# Boss Projectile Concurrency Cap & Staggered Spacing - Tasks
 
-- `[x]` Add title attributes (tooltips) for buttons and HUD in `spellwave2.html`
-- `[x]` Update potion UI slot tooltips dynamically in `potions.js`
-- `[x]` Add battery saver button dynamic tooltip in `main.js`
-- `[x]` Remove the "Skip Intro" button in `spellwave2.html`
-- `[x]` Clean up references to `endingSkipButton` and remove `skipEndingCinematic()` in `main.js`
-- `[x]` Update Star Wars crawl angle and perspective in `styles.css`
-- `[x]` Rework the text style of the ending scene to pixel art theme in `styles.css`
-- `[x]` Verify tooltips, crawl angle, and pixel art styles in the browser
+- `[x]` Add `MAX_CONCURRENT_BOSS_PROJECTILES` constant in `main.js`
+- `[x]` Add `MIN_PROJECTILE_SPACING` constant in `main.js`
+- `[x]` Declare and initialize `lastBossShotTime` global variable in `main.js`
+- `[x]` Modify boss projectile shooting logic in `updateEnemies()` to enforce cap and spacing
+- `[x]` Reset `lastBossShotTime` in `clearEffects()` in `main.js`
+- `[x]` Verify staggered projectile launches and concurrency cap in the browser
