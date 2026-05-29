@@ -19,3 +19,4 @@
 - `[x]` Add visual blocked-active feedback (red glow + shake) when trying to activate a duplicate potion of an already active type
 - `[x]` Add "You are killed by a boss..." slow-motion banner screen on boss death, delaying `endGame()` by 2.5s
 - `[x]` Update startup message panel instruction copy to be simple, concise, and text-only: "Type to kill. Type to heal. Type to loot. Just don't let the bosses leak!"
+- `[x]` Increase game difficulty in spellwave2: leaked normal monster causes -1 heart, boss projectile causes -1/2 heart (on every hit), and leaked boss still causes instant kill
