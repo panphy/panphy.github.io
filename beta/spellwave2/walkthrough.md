@@ -69,3 +69,9 @@ Aligned the floating hammer's handle and head along the same center (X = 0) to f
 
 ### 9. Potion slot duplicate activation feedback (`potions.js` `activatePotionSlot()`, `styles.css`)
 Added a new `blocked-active` state animation. When a player attempts to activate a potion whose effect of the same type is already active, instead of silent rejection, the target slot now triggers a high-frequency horizontal shake with a red glow (`rgba(255, 60, 60, 1)`) similar to the scaling and brightness increase of the standard `activating` animation. The class is removed automatically after the 0.3s animation ends.
+
+### 10. Slow-motion Boss Death Screen (`main.js`, `styles.css`)
+When the player is killed by a boss (either a boss leak or a boss projectile), the game sets a global `killedByBoss` flag, pauses game frame logic (`mode = 'boss_killing'`), freezes the screen, and triggers a massive red glowing banner: "KILLED BY A BOSS...". The banner runs a custom 2.5-second `@keyframes boss-kill-banner` that slams in and shakes violently before fading out, after which the game transitions to the Game Over screen. The Game Over screen title and kicker are dynamically customized to show "Killed by a Boss" and "DEFEATED" instead of the standard "Game Over" and "OVERRUN".
+
+### 11. Updated Startup Instruction Copy (`spellwave.html` / `spellwave2.html`)
+Updated the startup message panel text content to reflect the new features: "Type terms to banish the entropy minions. 💖 Hearts heal you. 📦 Mimics drop potions (Arrow keys to use!). 🐉 Warning: Leaking a Boss will instantly vaporize you. No pressure!"

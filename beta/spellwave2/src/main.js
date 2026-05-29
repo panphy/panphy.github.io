@@ -442,6 +442,7 @@ let firstMimicHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
 let potionCheatUsedThisRun = false;
+let killedByBoss = false;
 let inputTrace = '';
 let streak = 0;
 let peakStreak = 0;
@@ -761,6 +762,7 @@ function startGame() {
   // The potion cheat is cleared by potionsSystem.clear() below, so a fresh run starts
   // ranked; it only becomes unranked if the player re-enters the cheat mid-run.
   potionCheatUsedThisRun = false;
+  killedByBoss = false;
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
@@ -861,8 +863,8 @@ function endGame() {
     saveBestScore(score);
   }
   showMessage(
-    'OVERRUN',
-    'Game Over',
+    killedByBoss ? 'DEFEATED' : 'OVERRUN',
+    killedByBoss ? 'Killed by a Boss' : 'Game Over',
     isUnranked ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
@@ -1201,7 +1203,18 @@ function leakEnemy(enemy) {
   activeTarget = null;
   updateHud(true);
   updateTypedDisplay();
-  if (!godMode && health <= 0) endGame();
+  if (!godMode && health <= 0) {
+    if (enemy.isBoss) {
+      killedByBoss = true;
+      mode = 'boss_killing';
+      showBanner('KILLED BY A BOSS...', 'boss-kill');
+      window.setTimeout(() => {
+        endGame();
+      }, 2500);
+    } else {
+      endGame();
+    }
+  }
 }
 
 function bossShootPlayer(enemy) {
@@ -1231,13 +1244,20 @@ function bossProjectileHitPlayer(enemy) {
     }
     updateHud(true);
     updateTypedDisplay();
-    if (!godMode && health <= 0) endGame();
+    if (!godMode && health <= 0) {
+      killedByBoss = true;
+      mode = 'boss_killing';
+      showBanner('KILLED BY A BOSS...', 'boss-kill');
+      window.setTimeout(() => {
+        endGame();
+      }, 2500);
+    }
   }
 }
 
 function scheduleFrame() {
   cancelFrame();
-  if (mode === 'paused' || mode === 'ending') return;
+  if (mode === 'paused' || mode === 'ending' || mode === 'boss_killing') return;
 
   if (mode !== 'running') {
     isTimeoutScheduled = true;
@@ -1264,7 +1284,7 @@ function cancelFrame() {
 }
 
 function animate(frameTime) {
-  if (mode === 'paused' || mode === 'ending') {
+  if (mode === 'paused' || mode === 'ending' || mode === 'boss_killing') {
     rafId = null;
     return;
   }

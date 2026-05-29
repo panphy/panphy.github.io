@@ -242,3 +242,5 @@ and `fun/spellwave/src/`.
 - [x] Implemented: Rearranged the summary cards into a centered 2x3 grid with Final Score and Run Time in the 1st column.
 - [x] Fixed: Redesigned the Solar Anvil boss's floating hammer head and handle alignment to center it properly (preventing it from looking like a flag) and added a pair of eyes to the hammer head.
 - [x] Implemented: Added a visual red-glow shake animation (`blocked-active`) to the potion slot when duplicate potion activation is blocked.
+- [x] Implemented: Added a slow-motion dramatic death banner ("Killed by a Boss") and 2.5s game freeze when defeated by a boss, followed by a customized Game Over screen.
+- [x] Implemented: Updated the startup message panel instructions to concisely and humorously explain hearts, mimics, potions, and boss insta-kills.
