@@ -57,3 +57,12 @@ Removed "WPM" and "GCSE Grade" stats entirely from the game summary. Highlighted
 
 ### 5. Replay button rename (`spellwave.html` / `spellwave2.html`)
 Renamed the replay button from "Begin Again" to "Another Attempt".
+
+### 6. Ending subtitle and run summary removal (`spellwave.html` / `spellwave2.html`)
+Removed the text blocks for the subtitle ("The field falls silent...") and run summary ("Wave 10 cleared...") from the ending scene layout in the HTML files.
+
+### 7. Centered 2x3 summary stats grid layout (`spellwave.html` / `spellwave2.html`, `styles.css`)
+Rearranged the 6 remaining statistics cards in the HTML files, placing `Final Score` and `Run Time` as the first and fourth elements so that they align in the first column of the grid. Configured `.ending-stats` in the CSS to display as 3 columns on desktop/tablet (resulting in a 2x3 grid) with a maximum width of `640px` to keep it centered and compact.
+
+### 8. Centered Solar Anvil floating hammer with eyes (`enemy-meshes.js`)
+Aligned the floating hammer's handle and head along the same center (X = 0) to fix the offset handle that looked like a flagpole. Additionally, added a pair of glowing eyes to the front face of the hammer head to ensure all bosses have a visible pair of eyes.

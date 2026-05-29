@@ -2408,9 +2408,9 @@ body:not(.time-frozen) #gameCanvas {
 
 .ending-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.85rem;
-  max-width: 840px;
+  max-width: 640px;
   width: 100%;
   opacity: 0;
   transform: translateY(26px);

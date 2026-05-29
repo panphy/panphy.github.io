@@ -14,3 +14,6 @@
 - `[x]` Remove WPM and GCSE Grade from ending stats, highlight Final Score and Run Time (added highlighted class and styling, removed WPM/Grade)
 - `[x]` Rename replay button to "Another Attempt"
 - `[x]` Mirror all these changes to `/fun/spellwave`
+- `[x]` Remove ending subtitle and summary texts from the ending scene
+- `[x]` Rearrange summary cards into a 2x3 grid with Final Score and Run Time in the 1st column
+- `[x]` Redesign Solar Anvil's floating hammer head/handle alignment to not look like a flag, and add a pair of eyes to it

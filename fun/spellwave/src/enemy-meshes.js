@@ -666,12 +666,22 @@ function createSolarAnvilMesh(type) {
     group.add(blockMesh(0.14, 0.14, 0.14, trimMat, rx, 0.18, rz));
   }
   // Floating hammer (hovering above, tilted)
-  const hamH = blockMesh(0.82, 0.46, 0.46, trimMat, 0.08, 2.12, 0);
-  hamH.rotation.z = 0.24;
-  group.add(hamH);
-  const hamN = blockMesh(0.12, 0.86, 0.12, bodyMat, -0.18, 1.70, 0);
-  hamN.rotation.z = 0.24;
-  group.add(hamN);
+  const hammerGroup = new THREE.Group();
+  hammerGroup.position.set(0, 1.70, 0);
+  
+  const hamN = blockMesh(0.12, 0.86, 0.12, bodyMat, 0, 0, 0);
+  hammerGroup.add(hamN);
+
+  const hamH = blockMesh(0.82, 0.46, 0.46, trimMat, 0, 0.52, 0);
+  hammerGroup.add(hamH);
+
+  // Add a pair of glowing eyes to the hammer head
+  const eyeL = blockMesh(0.14, 0.14, 0.06, eyeMat, -0.2, 0.52, 0.24);
+  const eyeR = blockMesh(0.14, 0.14, 0.06, eyeMat, 0.2, 0.52, 0.24);
+  hammerGroup.add(eyeL, eyeR);
+
+  hammerGroup.rotation.z = 0.24;
+  group.add(hammerGroup);
   return finishBossGroup(group, type, 2.56);
 }
 
