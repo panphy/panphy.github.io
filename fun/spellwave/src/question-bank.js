@@ -175,7 +175,6 @@ export const HARD_WORDS = [
   { term: 'magnetic flux density', definition: 'Magnetic field strength measured in tesla' },
   { term: 'generator effect', definition: 'Induced PD when a conductor moves through a magnetic field' },
   { term: 'electromagnetic induction', definition: 'Production of a potential difference when magnetic flux through a conductor changes' },
-  { term: 'direct current motor', definition: 'A device that uses the motor effect to convert electrical energy into rotational motion' },
   { term: 'transformer', definition: 'Device changing alternating potential difference using induction' },
   { term: 'step up transformer', definition: 'Transformer that increases potential difference' },
   { term: 'step down transformer', definition: 'Transformer that decreases potential difference' },
