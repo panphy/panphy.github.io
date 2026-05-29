@@ -142,6 +142,10 @@ export function createPotionSystem({
     const potion = potions[index];
     if (!potion) return;
 
+    if (potion === 'time_freeze' && timeFreezeTimer > 0) return;
+    if (potion === 'chain_lightning' && chainLightningPrimed) return;
+    if (potion === 'shield' && shieldActive) return;
+
     const slotEl = potionSlots[index];
     if (slotEl) {
       slotEl.classList.add('activating');
@@ -500,6 +504,14 @@ export function createPotionSystem({
     updatePotionUI();
   }
 
+  function deactivateShield() {
+    if (shieldActive) {
+      shieldActive = false;
+      shieldCharges = 0;
+      shieldFadeTimer = 1.0;
+    }
+  }
+
   return {
     addPotion,
     activatePotionSlot,
@@ -514,6 +526,7 @@ export function createPotionSystem({
     },
     isPotionCheatActive: () => potionCheatActive,
     isShieldActive: () => shieldActive,
+    deactivateShield,
     blockLeak,
     blockBossHit,
     triggerShieldHitVisual

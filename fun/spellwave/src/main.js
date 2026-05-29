@@ -44,6 +44,7 @@ const endingFlash = document.getElementById('endingFlash');
 const endingContent = document.getElementById('endingContent');
 const endingCanvasEl = document.getElementById('endingCanvas');
 const endingReplay = document.getElementById('endingReplay');
+const endingSkip = document.getElementById('endingSkip');
 let endingFX = null;
 const endScore = document.getElementById('endScore');
 const endWpm = document.getElementById('endWpm');
@@ -648,6 +649,13 @@ if (endingReplay) {
   endingReplay.addEventListener('click', () => {
     dismissEndingSequence();
     startGame();
+  });
+}
+
+if (endingSkip) {
+  endingSkip.addEventListener('click', () => {
+    const finalStats = getEndingStats();
+    showEndingStatsScreen(finalStats);
   });
 }
 
@@ -3996,9 +4004,11 @@ function startWaveCleared() {
 
 let endingStartTime = 0;
 let endingTimers = [];
+let victorySoundPlayed = false;
 
 function startEndingSequence() {
   mode = 'ending';
+  victorySoundPlayed = false;
   startMusicLoop(false);
   document.body.classList.remove('is-running');
   document.body.classList.remove('final-wave-active');
@@ -4036,7 +4046,10 @@ function startEndingSequence() {
   queueEndingStep(() => {
     gameEnding.className = 'game-ending phase-arrival phase-nebula phase-title-fly';
     endingFX.setPhase('titlefly');
-    playVictoryFinaleSound();
+    if (!victorySoundPlayed) {
+      playVictoryFinaleSound();
+      victorySoundPlayed = true;
+    }
   }, 5700);
 
   // 4. Star Wars crawl at 9700ms (20s duration)
@@ -4058,6 +4071,10 @@ function showEndingStatsScreen(finalStats) {
   }
   endingFX?.setPhase('stats');
   setEndingStats(finalStats, true);
+  if (!victorySoundPlayed) {
+    playVictoryFinaleSound();
+    victorySoundPlayed = true;
+  }
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
@@ -4187,6 +4204,9 @@ function activateFinalWaveCheat() {
 function advanceWaveSet() {
   playStartSound();
   clearEffects();
+  if (potionsSystem) {
+    potionsSystem.deactivateShield();
+  }
   document.body.classList.remove('final-wave-active');
   waveSet += 1;
   wavePhase = 'normal';

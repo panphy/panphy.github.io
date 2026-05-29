@@ -231,3 +231,10 @@ and `fun/spellwave/src/`.
 - [x] Fixed: `idkfa` potion cheat persisted across runs; now cleared on run start like god mode.
 - [x] Perf: cached label dimensions in `updateLabels()` to remove a per-label forced reflow.
 - [x] Cleanup: removed dead `isNeutral`/`isChain` paths in `defeatEnemy()`; generalized `wrapSups()`.
+
+### Roguelike Polish & UI Update (May 2026)
+- [x] Fixed: Shield (A.T. Field) effect no longer carries over to the next wave (deactivated on wave advance).
+- [x] Implemented: Duplicate potion activation is blocked if the effect of that type is already active (prevents wasting potion slots while letting different potions stack).
+- [x] Implemented: Added a "Skip" button in the lower-right corner of the ending cinematic.
+- [x] Implemented: Removed WPM and GCSE Grade from the ending stats card; highlighted Final Score and Run Time instead.
+- [x] Implemented: Renamed "Begin Again" replay button to "Another Attempt".

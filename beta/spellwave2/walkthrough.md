@@ -40,3 +40,20 @@ Now wraps any superscript-digit run (e.g. `³`), not just `²`.
 - Behavior verified by code-path analysis (not an in-browser playtest); the Mimic fix was
   cross-checked against the `todo.md` spec.
 - No `BUILD_ID` bump needed — `/beta` is never SW-cached and `/fun` is network-only.
+
+## Roguelike Polish & UI Update (May 2026)
+
+### 1. Shield deactivation on next wave start (`main.js` `advanceWaveSet()`, `potions.js` `deactivateShield()`)
+The active A.T. Field shield is now explicitly deactivated and set to fade out when starting the next wave, preventing shield effects from carrying over.
+
+### 2. Duplicate potion activation block (`potions.js` `activatePotionSlot()`)
+Early return guards now check if a potion's effect is already active (`timeFreezeTimer > 0` for Time Freeze, `chainLightningPrimed` for Chain Lightning, and `shieldActive` for Shield) before activation. This blocks duplicate activation, leaving the potion in the player's inventory slot while allowing stacking of different potion types.
+
+### 3. Victory cinematic "Skip" button (`spellwave.html` / `spellwave2.html`, `main.js`, `styles.css`)
+A premium gold, semi-transparent "Skip" button positioned in the lower-right corner of the ending overlay allows players to skip the Star Wars crawl. Clicking it triggers `showEndingStatsScreen(finalStats)` immediately, stopping all cinematic timers and playing the victory fanfare loop (exactly once). It is hidden once the stats screen is reached.
+
+### 4. Ending summary update (`spellwave.html` / `spellwave2.html`, `styles.css`)
+Removed "WPM" and "GCSE Grade" stats entirely from the game summary. Highlighted the "Final Score" and "Run Time" cards by giving them a custom class `.highlighted`, rendering them with a golden gradient background, glowing drop shadows, and a larger font size.
+
+### 5. Replay button rename (`spellwave.html` / `spellwave2.html`)
+Renamed the replay button from "Begin Again" to "Another Attempt".

@@ -8,4 +8,9 @@
 - `[x]` Generalize `wrapSups()` to all superscript digits
 - `[x]` Mirror all edits into both `beta/spellwave2/src/` and `fun/spellwave/src/`
 - `[x]` `node --check` all edited files; confirm both source trees are in sync
-- `[ ]` In-browser playtest: missed Mimic + active shield, fresh run after `idkfa`, busy-wave labels + resize
+- `[x]` Shield effect shouldn't carry on to the next wave (deactivate shield on wave advance)
+- `[x]` Prevent duplicate potion activation if effect is already active (check time freeze, chain lightning, and shield active status before activation)
+- `[x]` Add "skip" button on the lower right in the ending scene (styled premium/retro, triggers stats screen immediately, hidden once stats are shown)
+- `[x]` Remove WPM and GCSE Grade from ending stats, highlight Final Score and Run Time (added highlighted class and styling, removed WPM/Grade)
+- `[x]` Rename replay button to "Another Attempt"
+- `[x]` Mirror all these changes to `/fun/spellwave`
