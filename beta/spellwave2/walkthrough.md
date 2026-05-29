@@ -66,3 +66,6 @@ Rearranged the 6 remaining statistics cards in the HTML files, placing `Final Sc
 
 ### 8. Centered Solar Anvil floating hammer with eyes (`enemy-meshes.js`)
 Aligned the floating hammer's handle and head along the same center (X = 0) to fix the offset handle that looked like a flagpole. Additionally, added a pair of glowing eyes to the front face of the hammer head to ensure all bosses have a visible pair of eyes.
+
+### 9. Potion slot duplicate activation feedback (`potions.js` `activatePotionSlot()`, `styles.css`)
+Added a new `blocked-active` state animation. When a player attempts to activate a potion whose effect of the same type is already active, instead of silent rejection, the target slot now triggers a high-frequency horizontal shake with a red glow (`rgba(255, 60, 60, 1)`) similar to the scaling and brightness increase of the standard `activating` animation. The class is removed automatically after the 0.3s animation ends.

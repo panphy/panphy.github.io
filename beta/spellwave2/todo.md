@@ -241,3 +241,4 @@ and `fun/spellwave/src/`.
 - [x] Implemented: Removed ending subtitle and run summary text from the ending scene.
 - [x] Implemented: Rearranged the summary cards into a centered 2x3 grid with Final Score and Run Time in the 1st column.
 - [x] Fixed: Redesigned the Solar Anvil boss's floating hammer head and handle alignment to center it properly (preventing it from looking like a flag) and added a pair of eyes to the hammer head.
+- [x] Implemented: Added a visual red-glow shake animation (`blocked-active`) to the potion slot when duplicate potion activation is blocked.

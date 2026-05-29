@@ -17,3 +17,4 @@
 - `[x]` Remove ending subtitle and summary texts from the ending scene
 - `[x]` Rearrange summary cards into a 2x3 grid with Final Score and Run Time in the 1st column
 - `[x]` Redesign Solar Anvil's floating hammer head/handle alignment to not look like a flag, and add a pair of eyes to it
+- `[x]` Add visual blocked-active feedback (red glow + shake) when trying to activate a duplicate potion of an already active type

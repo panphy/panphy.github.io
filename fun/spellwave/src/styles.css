@@ -1781,6 +1781,17 @@ body.chain-lightning-primed .typing-strip {
   animation: flash-active 0.3s ease-out;
 }
 
+@keyframes flash-blocked {
+  0% { transform: scale(1); filter: brightness(1); }
+  25% { transform: scale(1.1) translateX(-4px); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 60, 60, 0.8)); color: rgba(255, 60, 60, 1); }
+  50% { transform: scale(1.1) translateX(4px); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 60, 60, 0.8)); color: rgba(255, 60, 60, 1); }
+  75% { transform: scale(1.1) translateX(-2px); filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 60, 60, 0.8)); color: rgba(255, 60, 60, 1); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.potion-slot.blocked-active {
+  animation: flash-blocked 0.3s ease-in-out;
+}
+
 .boss-banner.is-final-wave {
   font-size: clamp(2.4rem, 8vw, 5.2rem);
   color: #ff2200;

@@ -142,9 +142,20 @@ export function createPotionSystem({
     const potion = potions[index];
     if (!potion) return;
 
-    if (potion === 'time_freeze' && timeFreezeTimer > 0) return;
-    if (potion === 'chain_lightning' && chainLightningPrimed) return;
-    if (potion === 'shield' && shieldActive) return;
+    const isAlreadyActive = (potion === 'time_freeze' && timeFreezeTimer > 0) ||
+                            (potion === 'chain_lightning' && chainLightningPrimed) ||
+                            (potion === 'shield' && shieldActive);
+
+    if (isAlreadyActive) {
+      const slotEl = potionSlots[index];
+      if (slotEl) {
+        slotEl.classList.remove('blocked-active');
+        void slotEl.offsetWidth; // force reflow
+        slotEl.classList.add('blocked-active');
+        slotEl.addEventListener('animationend', () => slotEl.classList.remove('blocked-active'), { once: true });
+      }
+      return;
+    }
 
     const slotEl = potionSlots[index];
     if (slotEl) {
