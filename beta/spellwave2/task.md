@@ -17,6 +17,7 @@
 - `[x]` Remove ending subtitle and summary texts from the ending scene
 - `[x]` Rearrange summary cards into a 2x3 grid with Final Score and Run Time in the 1st column
 - `[x]` Add visual blocked-active feedback (red glow + shake) when trying to activate a duplicate potion of an already active type
-- `[x]` Add "You are killed by a boss..." slow-motion banner screen on boss death, delaying `endGame()` by 2.5s
+- `[x]` Add "BOSS LEAKED!" slow-motion banner screen and Instant Defeat screen on boss leak, delaying `endGame()` by 2.5s
 - `[x]` Update startup message panel instruction copy to be simple, concise, and text-only: "Type to kill. Type to heal. Type to loot. Just don't let the bosses leak!"
-- `[x]` Increase game difficulty in spellwave2: leaked normal monster causes -1 heart, boss projectile damage is unchanged, and leaked boss still causes instant kill
+- `[x]` Increase game difficulty in spellwave2: leaked normal monster causes -1 heart, boss projectile damage is unchanged (still 1/2 heart on every 2nd hit), and leaked boss causes instant kill (ordinary Game Over for death via projectile/minion leak)
+

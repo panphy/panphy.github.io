@@ -863,8 +863,8 @@ function endGame() {
     saveBestScore(score);
   }
   showMessage(
-    killedByBoss ? 'DEFEATED' : 'OVERRUN',
-    killedByBoss ? 'Killed by a Boss' : 'Game Over',
+    killedByBoss ? 'BOSS LEAKED' : 'OVERRUN',
+    killedByBoss ? 'Instant Defeat' : 'Game Over',
     isUnranked ? `Score ${formatScore(score)} · ⚡ Unranked` : `Score ${formatScore(score)} | Best ${formatScore(bestScore)}`,
     'Try Again',
     `${formatAccuracySummary()} · ${defeatedCount} defeated · ${leakedCount} leaked · ${elapsed.toFixed(0)}s`
@@ -1207,7 +1207,7 @@ function leakEnemy(enemy) {
     if (enemy.isBoss) {
       killedByBoss = true;
       mode = 'boss_killing';
-      showBanner('KILLED BY A BOSS...', 'boss-kill');
+      showBanner('BOSS LEAKED!', 'boss-kill');
       window.setTimeout(() => {
         endGame();
       }, 2500);
@@ -1245,12 +1245,7 @@ function bossProjectileHitPlayer(enemy) {
     updateHud(true);
     updateTypedDisplay();
     if (!godMode && health <= 0) {
-      killedByBoss = true;
-      mode = 'boss_killing';
-      showBanner('KILLED BY A BOSS...', 'boss-kill');
-      window.setTimeout(() => {
-        endGame();
-      }, 2500);
+      endGame();
     }
   }
 }
