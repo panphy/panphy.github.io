@@ -476,6 +476,7 @@ export function createPotionSystem({
     potions = [null, null, null, null];
     timeFreezeTimer = 0;
     chainLightningPrimed = false;
+    potionCheatActive = false;
     shieldActive = false;
     shieldCharges = 0;
     shieldHitProgress = 0;

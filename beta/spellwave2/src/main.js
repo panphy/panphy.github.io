@@ -462,6 +462,7 @@ let damageTimer = 0;
 let hudTimer = 0;
 let renderedHealth = null;
 let enemyId = 0;
+let labelMeasureGen = 0; // bumped on resize; invalidates cached label dimensions
 let pathMarkerMaterial = null;
 let moon = null;
 let moonAngle = INITIAL_MOON_ANGLE;
@@ -603,7 +604,7 @@ potionsSystem = createPotionSystem({
   getMode: () => mode,
   getEnemies: () => enemies,
   getGameTime: () => gameTimeSeconds,
-  defeatEnemy: (enemy, isNeutral) => defeatEnemy(enemy, isNeutral),
+  defeatEnemy: (enemy) => defeatEnemy(enemy),
   showBanner,
   potionBar,
   potionSlots,
@@ -749,7 +750,9 @@ function startGame() {
   clearEffects();
   godMode = false;
   godModeUsedThisRun = false;
-  potionCheatUsedThisRun = potionsSystem.isPotionCheatActive();
+  // The potion cheat is cleared by potionsSystem.clear() below, so a fresh run starts
+  // ranked; it only becomes unranked if the player re-enters the cheat mid-run.
+  potionCheatUsedThisRun = false;
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
   if (godModeBadge) { godModeBadge.remove(); godModeBadge = null; }
@@ -1074,40 +1077,8 @@ function registerMistake() {
   window.setTimeout(() => typingStrip.classList.remove('mistake'), 200);
 }
 
-function defeatEnemy(enemy, isNeutral = false, isChain = false) {
-  if (isNeutral) {
-    if (enemy.isMimic) {
-      awardMimicLoot(enemy);
-      spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
-      removeEnemy(enemy);
-      if (activeTarget === enemy) {
-        activeTarget = null;
-        typedBuffer = '';
-        updateTypedDisplay();
-      }
-      updateHud(true);
-      updateTypedDisplay();
-      return;
-    }
-    if (enemy.isBoss) bossesDefeated += 1;
-    playDefeatSound(enemy);
-    if (!isChain) {
-      spawnBeam(enemy.group.position);
-    }
-    spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
-    removeEnemy(enemy);
-    if (activeTarget === enemy) {
-      activeTarget = null;
-      typedBuffer = '';
-      updateTypedDisplay();
-    }
-    updateHud(true);
-    updateTypedDisplay();
-    return;
-  }
-
-  const isChainTarget = true;
-  if (potionsSystem.isChainLightningPrimed() && isChainTarget) {
+function defeatEnemy(enemy) {
+  if (potionsSystem.isChainLightningPrimed()) {
     potionsSystem.clearChainLightningPrimed();
     enemy.dying = true;
     typedBuffer = '';
@@ -1120,9 +1091,7 @@ function defeatEnemy(enemy, isNeutral = false, isChain = false) {
 
   if (enemy.isMimic) {
     awardMimicLoot(enemy);
-    if (!isChain) {
-      spawnBeam(enemy.group.position);
-    }
+    spawnBeam(enemy.group.position);
     spawnDebris(enemy.group.position, enemy.type, enemy.isBoss);
     removeEnemy(enemy);
     if (activeTarget === enemy) {
@@ -1178,12 +1147,23 @@ function leakEnemy(enemy) {
   }
 
   if (enemy.isMimic) {
+    // A Mimic Chest is bonus loot, not a threat — letting it escape costs you the
+    // reward but never deals damage, breaks your shield, or resets your streak.
+    const wasActiveTarget = activeTarget === enemy;
     playChestClackSound();
     if (!enemy.label.classList.contains('is-hidden')) {
       const left = parseFloat(enemy.label.style.left);
       const top = parseFloat(enemy.label.style.top);
       if (Number.isFinite(left) && Number.isFinite(top)) spawnLootEscapedPopup(left, top);
     }
+    if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+      encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: false });
+    }
+    spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
+    removeEnemy(enemy);
+    if (wasActiveTarget) typedBuffer = '';
+    updateTypedDisplay();
+    return;
   }
 
 
@@ -1892,8 +1872,16 @@ function updateLabels() {
 
   const layoutItems = labelItems.map((item) => {
     const { enemy, scale } = item;
-    const labelWidth = enemy.label.offsetWidth * scale;
-    const labelHeight = enemy.label.offsetHeight * scale;
+    // The unscaled label box only changes when its text changes or the viewport resizes,
+    // so cache the measurement to avoid a forced reflow per label every frame.
+    if (enemy._labelDimsGen !== labelMeasureGen || enemy._labelDimsHtml !== enemy.lastPromptHtml) {
+      enemy._labelW = enemy.label.offsetWidth;
+      enemy._labelH = enemy.label.offsetHeight;
+      enemy._labelDimsGen = labelMeasureGen;
+      enemy._labelDimsHtml = enemy.lastPromptHtml;
+    }
+    const labelWidth = enemy._labelW * scale;
+    const labelHeight = enemy._labelH * scale;
     const minY = safeBounds.top + labelHeight;
     const maxY = safeBounds.bottom;
 
@@ -3735,6 +3723,9 @@ function resizeRenderer() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height, false);
+  // Label dimensions depend on the viewport (vw font sizing + px max-width wrapping),
+  // so invalidate cached measurements whenever the viewport changes.
+  labelMeasureGen += 1;
 }
 
 function formatScore(value) {

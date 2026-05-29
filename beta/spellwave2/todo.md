@@ -218,3 +218,16 @@ Core mechanics first: **Potion System → Mimic Chest → UI → VFX → Campaig
 - [ ] Display GCSE Grade (1-9) computed based on accuracy, WPM, and final health.
 - [ ] Render visual badge icons (using custom animated SVGs) representing the 5 chosen topics completed along the path.
 - [ ] List detailed stats (Score, Time, WPM, accuracy, mimics defeated, potions used) and include a "Play Again" button.
+
+---
+
+## Maintenance Log
+
+### Bug-Fix & Cleanup Pass
+See `task.md` / `walkthrough.md` for details. Edits mirrored into both `beta/spellwave2/src/`
+and `fun/spellwave/src/`.
+- [x] Fixed: escaping Mimic Chests were dealing damage / breaking the shield / resetting the
+  streak (regression against the "never a damage threat" / "escape without damaging" spec above).
+- [x] Fixed: `idkfa` potion cheat persisted across runs; now cleared on run start like god mode.
+- [x] Perf: cached label dimensions in `updateLabels()` to remove a per-label forced reflow.
+- [x] Cleanup: removed dead `isNeutral`/`isChain` paths in `defeatEnemy()`; generalized `wrapSups()`.

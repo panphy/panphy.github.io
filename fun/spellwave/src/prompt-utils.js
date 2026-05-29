@@ -130,7 +130,7 @@ function escapeHtml(text) {
 }
 
 function wrapSups(text) {
-  return text.replace(/²/g, '<sup class="given-sup">²</sup>');
+  return text.replace(new RegExp(`[${SUPERSCRIPT_DIGITS}]+`, 'g'), match => `<sup class="given-sup">${match}</sup>`);
 }
 
 function buildHintPart(text, options = {}) {

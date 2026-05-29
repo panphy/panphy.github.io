@@ -1,28 +1,42 @@
-# Walkthrough - Boss Projectile Concurrency Cap & Staggered Spacing
+# Walkthrough - Spellwave Bug-Fix & Cleanup Pass
 
-We have successfully implemented and verified the boss projectile rate-limiting optimizations for Wave 10. Below is a summary of the changes.
+Static review of `main.js`, `potions.js`, and `prompt-utils.js` found two gameplay bugs
+(also live in the published `fun/spellwave` copy), one performance issue, and minor
+cleanup. All edits are mirrored into `beta/spellwave2/src/` and `fun/spellwave/src/`.
 
 ## Changes Made
 
-### 1. Projectile Concurrency Cap
-- Added a new constant `MAX_CONCURRENT_BOSS_PROJECTILES = 2` in `main.js`.
-- Modified the boss shot timer loop in `updateEnemies()` to check the active count of rocks in the air. If the count is at or above the cap, the boss holds their throw (keeping `shotTimer = 0`).
-- This prevents the screen from becoming cluttered and protects the player from taking massive, unavoidable damage from multiple synchronized hits.
+### 1. Mimic Chest escape no longer punishes the player (`main.js` `leakEnemy()`)
+The `isMimic` block was missing a `return`, so a missed chest fell through into the enemy
+damage path: it subtracted a life, destroyed an active A.T. Field shield via `blockLeak()`,
+reset the chain streak, and triggered the damage flash + sound on top of the chest clack.
+A Mimic is bonus loot, so the branch now returns early — records the term as not-defeated,
+drops debris, removes the enemy, clears the buffer if it was the active target, and deals
+no damage. This restores the documented behavior in `todo.md`.
 
-### 2. Staggered Launch Spacing
-- Added `MIN_PROJECTILE_SPACING = 1.6` seconds in `main.js`.
-- Declared a global `lastBossShotTime = -999` state variable to track the timestamp of the last rock thrown.
-- Modified the boss shot timer loop in `updateEnemies()` to verify that `seconds - lastBossShotTime >= 1.6` before firing.
-- This forces bosses to stagger their throws even if multiple bosses are waiting at `shotTimer = 0`, resolving the issue where projectiles synchronized and fired in pairs.
-- Updated `clearEffects()` to reset `lastBossShotTime = -999` to ensure clean state resets between runs.
+### 2. `idkfa` potion cheat no longer persists across runs (`potions.js`, `main.js`)
+`clear()` reset all potion state except `potionCheatActive`, so the cheat (and its infinite
+auto-refilling potions) survived game-over into the next run and silently kept runs
+unranked. `clear()` now resets `potionCheatActive`, and `startGame()` sets
+`potionCheatUsedThisRun = false` so a fresh run is ranked unless the cheat is re-entered —
+matching how god mode already behaves.
 
----
+### 3. Removed per-label forced reflow (`main.js` `updateLabels()`)
+Label box dimensions (`offsetWidth`/`offsetHeight`) were read every frame for every label,
+forcing a layout reflow that scaled with enemy count. They are now cached per enemy and
+re-measured only when the label text changes (`lastPromptHtml`) or the viewport resizes
+(`labelMeasureGen`, bumped in `resizeRenderer()`).
 
-## Verification & Manual Testing
+### 4. Removed dead code (`main.js` `defeatEnemy()`)
+The unreachable `isNeutral`/`isChain` branches were deleted and the potion-system wrapper
+simplified.
 
-1. **Local Server**: Serves files on port `8006`.
-2. **Combat Playtesting**:
-   - Triggering Wave 10 with 10 bosses spawns a steady, readable stream of rocks.
-   - Verified that even under high pressure (all bosses revealed), there are never more than 2 rocks in the air at the same time.
-   - Verified that projectiles are launched with a distinct 1.6-second delay between them, completely breaking up synchronized launches.
-   - Verified that resetting the game correctly clears all timers.
+### 5. Generalized `wrapSups()` (`prompt-utils.js`)
+Now wraps any superscript-digit run (e.g. `³`), not just `²`.
+
+## Verification
+- `node --check` passes on all three edited files.
+- `beta/spellwave2/src/` and `fun/spellwave/src/` confirmed byte-identical after edits.
+- Behavior verified by code-path analysis (not an in-browser playtest); the Mimic fix was
+  cross-checked against the `todo.md` spec.
+- No `BUILD_ID` bump needed — `/beta` is never SW-cached and `/fun` is network-only.
