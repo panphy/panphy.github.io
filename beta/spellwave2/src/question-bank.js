@@ -39,6 +39,18 @@ export const EASY_WORDS = [
   { term: 'field', definition: 'A region where a non-contact force acts' },
   { term: 'orbit', definition: 'The curved path of an object around a star, planet or moon' },
   { term: 'galaxy', definition: 'A large system of stars, gas and dust held together by gravity' },
+  { term: 'vacuum', definition: 'A space entirely empty of matter where sound cannot travel' },
+  { term: 'fluid', definition: 'A substance that can flow; a liquid or a gas' },
+  { term: 'solid', definition: 'A state of matter with fixed shape and volume' },
+  { term: 'liquid', definition: 'A state of matter with fixed volume but changing shape' },
+  { term: 'gas', definition: 'A state of matter with no fixed shape or volume' },
+  { term: 'mirror', definition: 'A polished surface that reflects light rays specularly' },
+  { term: 'lens', definition: 'A piece of curved glass or plastic that refracts light' },
+  { term: 'prism', definition: 'A triangular glass block that disperses light into a spectrum' },
+  { term: 'echo', definition: 'A reflected sound wave' },
+  { term: 'pitch', definition: 'How high or low a sound is, determined by wave frequency' },
+  { term: 'crest', definition: 'The highest point of a transverse wave' },
+  { term: 'trough', definition: 'The lowest point of a transverse wave' },
 ];
 
 export const MEDIUM_WORDS = [
@@ -109,6 +121,18 @@ export const MEDIUM_WORDS = [
   { term: 'red shift', definition: 'Increase in wavelength from a galaxy moving away' },
   { term: 'nebula', definition: 'A cloud of gas and dust in space where stars can form' },
   { term: 'protostar', definition: 'An early stage of star formation from a collapsing nebula' },
+  { term: 'conductor', definition: 'A material that allows heat or electricity to pass through easily' },
+  { term: 'insulator', definition: 'A material that opposes the flow of heat or electricity' },
+  { term: 'lubricant', definition: 'A substance reducing friction between moving surfaces' },
+  { term: 'incident ray', definition: 'A light ray travelling towards a boundary or surface' },
+  { term: 'refracted ray', definition: 'A light ray that has bent at a boundary due to change in speed' },
+  { term: 'reflected ray', definition: 'A light ray that has bounced off a surface' },
+  { term: 'convex lens', definition: 'A lens that converges parallel light rays to a principal focus' },
+  { term: 'concave lens', definition: 'A lens that diverges parallel light rays' },
+  { term: 'real image', definition: 'An image formed where light rays meet; can be projected on a screen' },
+  { term: 'virtual image', definition: 'An image where light rays only appear to meet; cannot be projected' },
+  { term: 'compression', definition: 'Region of high pressure in a longitudinal wave' },
+  { term: 'rarefaction', definition: 'Region of low pressure in a longitudinal wave' }
 ];
 
 export const HARD_WORDS = [
@@ -164,6 +188,17 @@ export const HARD_WORDS = [
   { term: 'black hole', definition: 'A region of space where gravity is too strong for even light to escape' },
   { term: 'cosmic microwave background radiation', definition: 'Uniform microwave radiation across the sky that is evidence for the Big Bang' },
   { term: 'big bang', definition: 'Theory that the universe began from a very hot dense state' },
+  { term: 'limit of proportionality', definition: 'The point beyond which Hooke\'s Law is no longer obeyed' },
+  { term: 'principle of moments', definition: 'In equilibrium, the sum of clockwise moments equals anti-clockwise moments' },
+  { term: 'gravitational field strength', definition: 'The force per unit mass on an object in a gravitational field' },
+  { term: 'control rods', definition: 'Rods in a reactor that absorb neutrons to control the reaction rate' },
+  { term: 'moderator', definition: 'A material in a nuclear reactor that slows down fission neutrons' },
+  { term: 'specular reflection', definition: 'Reflection from a smooth surface in a single direction' },
+  { term: 'diffuse reflection', definition: 'Reflection from a rough surface causing scattering of light' },
+  { term: 'radio waves', definition: 'Electromagnetic waves with the longest wavelengths and lowest frequencies' },
+  { term: 'microwaves', definition: 'Electromagnetic waves used for satellite communication and heating food' },
+  { term: 'visible light', definition: 'The narrow band of electromagnetic waves visible to the human eye' },
+  { term: 'x rays', definition: 'High-energy electromagnetic waves used for medical imaging' }
 ];
 
 export const ALL_WORDS = [...EASY_WORDS, ...MEDIUM_WORDS, ...HARD_WORDS];
@@ -215,4 +250,8 @@ export const EQUATION_WORDS = [
   // Magnetism & induction
   { term: 'force = magnetic flux density × current × length', definition: 'F = BIl', isEquation: true },
   { term: 'primary potential difference / secondary potential difference = primary turns / secondary turns', definition: 'Vp / Vs = np / ns', isEquation: true },
+  { term: 'magnification = image height / object height', definition: 'magnification = hi / ho', isEquation: true },
+  { term: 'pressure × volume = constant', definition: 'pV = constant', isEquation: true },
+  { term: 'primary voltage × primary current = secondary voltage × secondary current', definition: 'VpIp = VsIs', isEquation: true },
+  { term: 'final velocity² − initial velocity² = 2 × acceleration × distance', definition: 'v² − u² = 2as', isEquation: true },
 ];
