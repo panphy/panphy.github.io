@@ -289,7 +289,9 @@
       border-radius: 999px;
       border: 1px solid var(--nav-border);
       font-size: 0.68rem;
-      min-width: 5.5ch;
+      /* Reserve room for the widest reading ("1600 K", 6 monospace chars) plus
+         the 8px side padding, so the pill width never jumps as digits change. */
+      min-width: calc(6.5ch + 16px);
       text-align: center;
     }
 
