@@ -668,6 +668,50 @@
       font-weight: 600;
     }
 
+    .energy-units {
+      font-family: var(--font-mono);
+      font-size: 0.7rem !important;
+      color: var(--text-secondary) !important;
+      font-weight: 600;
+    }
+
+    .energy-readout {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .energy-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.55rem 0.4rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .energy-item span {
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .energy-item strong {
+      font-family: var(--font-mono);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .energy-item--total {
+      border-color: transparent;
+      background: linear-gradient(135deg, rgba(194, 65, 12, 0.12), rgba(13, 148, 136, 0.12));
+    }
+
     .setpoint-row {
       display: flex;
       align-items: baseline;
@@ -961,7 +1005,7 @@
               <label for="heatCoolSlider">Heat / Cool</label>
               <span id="heatVal">40 K</span>
             </div>
-            <p class="info-copy">Use the heater/cooler to push the sample through melting and up to boiling.</p>
+            <p class="info-copy">Add or remove energy with the heater/cooler. Watch the temperature pause as the solid melts — the energy goes into breaking the structure apart, not into making the particles hotter.</p>
             <div class="setpoint-row">
               <span>Setpoint</span>
               <strong id="setpointVal">40 K</strong>
@@ -980,9 +1024,31 @@
               <span class="transition-pill">Melting ~300 K</span>
               <span class="transition-pill">Boiling ~1000 K</span>
             </div>
-            <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released. The thermometer on the simulation shows the measured temperature; the line marks the target.</p>
+            <p class="info-copy info-copy--muted">The heater/cooler springs back to zero when released, holding the sample at whatever temperature it reached. The thermometer on the simulation shows the measured temperature.</p>
           </div>
         </section>
+
+        <div class="control-card">
+          <div class="control-header">
+            <label>Energy per particle</label>
+            <span class="energy-units">units of ε</span>
+          </div>
+          <div class="energy-readout">
+            <div class="energy-item">
+              <span>Kinetic</span>
+              <strong id="keVal">0.00</strong>
+            </div>
+            <div class="energy-item">
+              <span>Potential</span>
+              <strong id="peVal">0.00</strong>
+            </div>
+            <div class="energy-item energy-item--total">
+              <span>Total</span>
+              <strong id="teVal">0.00</strong>
+            </div>
+          </div>
+          <p class="info-copy info-copy--muted">Kinetic energy tracks temperature. While the sample melts, added energy goes into breaking up the regular arrangement rather than raising the temperature, so the total keeps climbing even as the temperature pauses.</p>
+        </div>
 
         <div class="sim-actions">
           <button id="playPauseBtn" class="btn btn-primary">Pause</button>
@@ -1086,7 +1152,7 @@
     const EMERGENCY_SPEED_LIMIT = 12.0;
     const EMERGENCY_SPEED_LIMIT_SQ = EMERGENCY_SPEED_LIMIT * EMERGENCY_SPEED_LIMIT;
     const SUB_STEPS = 6;
-    const HEAT_COOL_RATE = 0.58;
+    const HEAT_FLUX_POWER = 200;
     const THERMOMETER_TRACK_HEIGHT_PX = 182;
     const THERMOMETER_TRACK_OFFSET_PX = 22;
     const STATE_PRESETS = {
@@ -1132,6 +1198,8 @@
       targetReducedT: TARGET_T_MIN,
       measuredReducedT: TARGET_T_MIN,
       lastVirial: 0,
+      kineticEnergy: 0,
+      potentialEnergy: 0,
       referenceBondCount: 1,
       phaseInfo: {
         label: 'Solid',
@@ -1148,7 +1216,9 @@
       _smoothBondFraction: undefined,
       _smoothMeanCoordination: undefined,
       _smoothFillFraction: undefined,
-      _smoothRmsRadius: undefined
+      _smoothRmsRadius: undefined,
+      _smoothKE: undefined,
+      _smoothPE: undefined
     };
 
     function removeCenterOfMassDrift() {
@@ -1474,6 +1544,33 @@
       }
     }
 
+    function applyHeatFlux(dt) {
+      // Energy-based heating/cooling for the Heat & Cool tab. Instead of forcing a
+      // target temperature, the slider adds or removes kinetic energy at a fixed
+      // rate; the dynamics then decide how that energy splits between motion
+      // (temperature) and pulling particles apart (potential energy). That split is
+      // what produces a real latent-heat pause while the solid melts: poured-in
+      // energy goes into breaking the structure rather than raising the temperature.
+      const level = SIM_STATE.heatCoolLevel;
+      if (Math.abs(level) < 1e-4) return;
+      const kineticEnergy = computeThermalKineticEnergy();
+      if (kineticEnergy <= 1e-9) return;
+      const dof = Math.max(1, 3 * N - 3);
+      const minKineticEnergy = (dof / 2) * TARGET_T_MIN;
+      const maxKineticEnergy = (dof / 2) * TARGET_T_MAX;
+      const targetKineticEnergy = clamp(
+        kineticEnergy + level * HEAT_FLUX_POWER * dt,
+        minKineticEnergy,
+        maxKineticEnergy
+      );
+      const scale = Math.sqrt(targetKineticEnergy / kineticEnergy);
+      for (let i = 0; i < N; i++) {
+        VEL[i * 3] *= scale;
+        VEL[i * 3 + 1] *= scale;
+        VEL[i * 3 + 2] *= scale;
+      }
+    }
+
     function applyBarostat(dt, currentReducedT) {
       // Berendsen barostat: computes instantaneous pressure from the ideal-gas
       // kinetic term plus the virial, then scales the box and all particle
@@ -1511,7 +1608,7 @@
         reflectParticle(i * 3);
       }
 
-      computeForcesAndPotential();
+      SIM_STATE.potentialEnergy = computeForcesAndPotential();
 
       for (let i = 0; i < N; i++) {
         VEL[i * 3] += 0.5 * FORCE[i * 3] * dt;
@@ -1524,13 +1621,29 @@
 
       let kineticEnergy = computeThermalKineticEnergy();
       let reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
-      applyThermostat(dt, reducedTemperature);
+
+      if (Math.abs(SIM_STATE.heatCoolLevel) > 1e-4) {
+        // Heat & Cool tab: pour energy in/out and let the temperature emerge,
+        // rather than forcing it to a setpoint. This is what lets the thermometer
+        // pause at melting while the structure breaks up (latent heat).
+        applyHeatFlux(dt);
+        removeBulkMotion();
+        kineticEnergy = computeThermalKineticEnergy();
+        reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
+        // Hold wherever we have heated to, so releasing the slider stays put.
+        SIM_STATE.targetReducedT = reducedTemperature;
+      } else {
+        // States tab / holding: gently thermostat toward the chosen temperature.
+        applyThermostat(dt, reducedTemperature);
+      }
+
       applyBarostat(dt, reducedTemperature);
       removeBulkMotion();
 
       kineticEnergy = computeThermalKineticEnergy();
       reducedTemperature = reducedTemperatureFromKE(kineticEnergy);
       updateMeasuredTemperature(reducedTemperature, false);
+      SIM_STATE.kineticEnergy = kineticEnergy;
     }
 
     function countBondsOnly() {
@@ -1787,6 +1900,9 @@
     const meltMarker = document.getElementById('meltMarker');
     const criticalMarker = document.getElementById('criticalMarker');
     const thermoReadout = document.getElementById('thermoReadout');
+    const keVal = document.getElementById('keVal');
+    const peVal = document.getElementById('peVal');
+    const teVal = document.getElementById('teVal');
 
     const presetButtons = {
       solid: presetSolidBtn,
@@ -1814,15 +1930,6 @@
       SIM_STATE.heatCoolLevel = 0;
       heatCoolSlider.value = '0';
       updateUIState();
-    }
-
-    function adjustTargetTemperature(dt) {
-      if (Math.abs(SIM_STATE.heatCoolLevel) < 1e-4) return;
-      SIM_STATE.targetReducedT = clamp(
-        SIM_STATE.targetReducedT + SIM_STATE.heatCoolLevel * HEAT_COOL_RATE * dt,
-        TARGET_T_MIN,
-        TARGET_T_MAX
-      );
     }
 
     function positionThermometerElement(element, reducedTemperature) {
@@ -1860,6 +1967,23 @@
       updateUIState();
     }
 
+    function updateEnergyReadout() {
+      // Display per-particle energies in units of the LJ well depth (epsilon).
+      // Light smoothing keeps the numbers readable without hiding the trend.
+      SIM_STATE._smoothKE = (typeof SIM_STATE._smoothKE === 'undefined')
+        ? SIM_STATE.kineticEnergy
+        : lerp(SIM_STATE._smoothKE, SIM_STATE.kineticEnergy, 0.15);
+      SIM_STATE._smoothPE = (typeof SIM_STATE._smoothPE === 'undefined')
+        ? SIM_STATE.potentialEnergy
+        : lerp(SIM_STATE._smoothPE, SIM_STATE.potentialEnergy, 0.15);
+
+      const kePerParticle = SIM_STATE._smoothKE / N;
+      const pePerParticle = SIM_STATE._smoothPE / N;
+      keVal.textContent = kePerParticle.toFixed(2);
+      peVal.textContent = pePerParticle.toFixed(2);
+      teVal.textContent = (kePerParticle + pePerParticle).toFixed(2);
+    }
+
     function updateUIState() {
       heatVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
       setpointVal.textContent = formatDisplayTemperature(SIM_STATE.targetReducedT);
@@ -1867,6 +1991,7 @@
       updateHeatCoolStatus();
       updateThermometer();
       updatePresetButtons();
+      updateEnergyReadout();
     }
 
     function togglePlay() {
@@ -2051,7 +2176,10 @@
       boxSize = INITIAL_BOX_SIZE;
       halfBox = boxSize / 2;
       initParticles();
-      computeForcesAndPotential();
+      SIM_STATE.potentialEnergy = computeForcesAndPotential();
+      SIM_STATE.kineticEnergy = computeThermalKineticEnergy();
+      SIM_STATE._smoothKE = undefined;
+      SIM_STATE._smoothPE = undefined;
       SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
       measureCurrentTemperature(true);
       refreshVisualState();
@@ -2059,7 +2187,8 @@
     });
 
     initParticles();
-    computeForcesAndPotential();
+    SIM_STATE.potentialEnergy = computeForcesAndPotential();
+    SIM_STATE.kineticEnergy = computeThermalKineticEnergy();
     SIM_STATE.referenceBondCount = Math.max(1, countBondsOnly());
     measureCurrentTemperature(true);
     setActiveTab(SIM_STATE.activeTab);
@@ -2080,7 +2209,6 @@
       if (dt > 0.04) dt = 0.04;
 
       if (SIM_STATE.playing) {
-        adjustTargetTemperature(dt);
         const subDt = dt / SUB_STEPS;
         for (let step = 0; step < SUB_STEPS; step++) {
           stepPhysics(subDt);
