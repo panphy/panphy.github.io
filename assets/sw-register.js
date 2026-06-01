@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-02-24T00:20:00Z';
+  const BUILD_ID = '2026-06-01T08:28:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -99,6 +99,13 @@
 
       const waitingWorker = (currentRegistration && currentRegistration.waiting) || newWorker;
       if (!waitingWorker) {
+        completeRefresh();
+        return;
+      }
+
+      // If the worker has already activated (e.g. from another tab or fast transition),
+      // reload immediately instead of waiting for statechange or fallback timer.
+      if (waitingWorker.state === 'activated') {
         completeRefresh();
         return;
       }
