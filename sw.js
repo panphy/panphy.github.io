@@ -1,4 +1,20 @@
-const BUILD_ID = '2026-06-01T08:28:00Z';
+const BUILD_ID = '2026-06-01T09:00:00Z';
+const APP_VERSIONS = {
+  core: BUILD_ID,
+  panphymd: BUILD_ID,
+  panphyplot: BUILD_ID,
+  motion_tracker: BUILD_ID,
+  sound_analyzer: BUILD_ID,
+  tone_generator: BUILD_ID,
+  ripple_tank: BUILD_ID,
+  superposition: BUILD_ID,
+  standing_wave: BUILD_ID,
+  states: BUILD_ID,
+  lorentz: BUILD_ID,
+  collision: BUILD_ID,
+  timer: BUILD_ID,
+  visualizer: BUILD_ID
+};
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -142,8 +158,17 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event && event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+  if (event && event.data) {
+    if (event.data.type === 'SKIP_WAITING') {
+      self.skipWaiting();
+    } else if (event.data.type === 'GET_VERSION_MAP') {
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({
+          buildId: BUILD_ID,
+          appVersions: APP_VERSIONS
+        });
+      }
+    }
   }
 });
 

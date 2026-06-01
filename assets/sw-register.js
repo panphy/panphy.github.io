@@ -1,5 +1,5 @@
 (() => {
-  const BUILD_ID = '2026-06-01T08:28:00Z';
+  const BUILD_ID = '2026-06-01T09:00:00Z';
   window.__BUILD_ID__ = BUILD_ID;
   console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
 
@@ -12,6 +12,81 @@
   let newWorker;
   let currentRegistration = null;
   let updateFallbackTimer = 0;
+  let updateNeeded = false;
+
+  const getAppGroup = (pathname) => {
+    if (pathname === '/' || pathname === '/index.html') return 'core';
+    if (pathname.startsWith('/tools/panphymd')) return 'panphymd';
+    if (pathname.startsWith('/tools/panphyplot')) return 'panphyplot';
+    if (pathname.startsWith('/simulations/collision')) return 'collision';
+    if (pathname.startsWith('/simulations/lorentz')) return 'lorentz';
+
+    const match = pathname.match(/\/([^/]+)\.html$/);
+    if (match) {
+      return match[1];
+    }
+    return 'core';
+  };
+
+  const currentAppGroup = getAppGroup(window.location.pathname);
+
+  const getWorkerVersions = (worker) => {
+    return new Promise((resolve) => {
+      if (!worker) {
+        resolve(null);
+        return;
+      }
+      const channel = new MessageChannel();
+      channel.port1.onmessage = (event) => {
+        resolve(event.data);
+      };
+      worker.postMessage({ type: 'GET_VERSION_MAP' }, [channel.port2]);
+      setTimeout(() => resolve(null), 1000);
+    });
+  };
+
+  const checkUpdateNeeded = async (waitingWorker) => {
+    if (!navigator.serviceWorker.controller) {
+      return false;
+    }
+
+    try {
+      const [activeInfo, newInfo] = await Promise.all([
+        getWorkerVersions(navigator.serviceWorker.controller),
+        getWorkerVersions(waitingWorker)
+      ]);
+
+      if (!newInfo) {
+        return true;
+      }
+
+      const activeVersions = activeInfo ? activeInfo.appVersions : {};
+      const activeBuild = activeInfo ? activeInfo.buildId : '';
+
+      const newVersions = newInfo.appVersions || {};
+      const newBuild = newInfo.buildId;
+
+      const activeVer = activeVersions[currentAppGroup] || activeBuild;
+      const newVer = newVersions[currentAppGroup] || newBuild;
+
+      console.info(`[PanPhy Labs] App: ${currentAppGroup}, Active Version: ${activeVer}, New Version: ${newVer}`);
+
+      return activeVer !== newVer;
+    } catch (e) {
+      console.warn('[PanPhy Labs] Failed to compare version maps', e);
+      return true;
+    }
+  };
+
+  const handleUpdate = async (waitingWorker) => {
+    const needed = await checkUpdateNeeded(waitingWorker);
+    if (needed) {
+      updateNeeded = true;
+      showUpdateBanner(waitingWorker);
+    } else {
+      console.info(`[PanPhy Labs] Background update available but not required for current app (${currentAppGroup}).`);
+    }
+  };
 
   const completeRefresh = () => {
     if (refreshing) {
@@ -127,7 +202,7 @@
   const listenForUpdates = (registration) => {
     // If a worker is already waiting, it's ready to take over
     if (registration.waiting) {
-      showUpdateBanner(registration.waiting);
+      handleUpdate(registration.waiting);
     }
 
     registration.addEventListener('updatefound', () => {
@@ -138,7 +213,7 @@
         // Once installed, check if there's an existing controller.
         // If there's no controller, this is the very first install, so we don't need to prompt.
         if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          showUpdateBanner(registration.waiting || installingWorker);
+          handleUpdate(registration.waiting || installingWorker);
         }
       });
     });
@@ -154,9 +229,13 @@
       listenForUpdates(registration);
 
       // When the new worker takes over (activation completes and it claims clients),
-      // we just softly reload the page to start using the new resources.
+      // we reload the page if this specific app needs the update.
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        completeRefresh();
+        if (updateNeeded) {
+          completeRefresh();
+        } else {
+          console.info(`[PanPhy Labs] Service Worker updated in background. No reload needed for app: ${currentAppGroup}`);
+        }
       });
 
       // Periodically check for updates
