@@ -4032,6 +4032,12 @@ function startEndingSequence() {
   clearEffects();
   updatePhaseDisplay();
 
+  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun;
+  if (!isUnranked && score > bestScore) {
+    bestScore = score;
+    saveBestScore(score);
+  }
+
   if (!gameEnding) return;
   clearEndingTimers();
   gameEnding.hidden = false;
