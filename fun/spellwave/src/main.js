@@ -54,10 +54,28 @@ const endMimics = document.getElementById('endMimics');
 const endGrade = document.getElementById('endGrade');
 const endHealth = document.getElementById('endHealth');
 const endTime = document.getElementById('endTime');
+const supabaseScript = document.getElementById('supabaseScript');
+const swScoreList = document.getElementById('swScoreList');
+const swLeaderboardStatus = document.getElementById('swLeaderboardStatus');
+const swInitialsModal = document.getElementById('swInitialsModal');
+const swInitialsInput = document.getElementById('swInitialsInput');
+const swInitialsError = document.getElementById('swInitialsError');
+const swSubmitInitials = document.getElementById('swSubmitInitials');
+const swModalScore = document.getElementById('swModalScore');
 
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
+const SW_SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
+const SW_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
+const SW_LEADERBOARD_TABLE = 'spellwave_leaderboard';
+const SW_SUBMIT_SCORE_RPC = 'submit_spellwave_score';
+const SW_SCORE_FIELD = 'score';
+const SW_LEADERBOARD_CACHE_KEY = 'spellwaveLeaderboardCacheV1';
+const SW_LEADERBOARD_SIZE = 5;
+const SW_MIN_SCORE = 1;
+const SW_MAX_SCORE = 9999999;
+const SW_HIGHLIGHT_MS = 6000;
 const MAX_DELTA = 0.06;
 const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
@@ -457,6 +475,11 @@ let rafId = null;
 let isTimeoutScheduled = false;
 let batterySaver = false;
 const BATTERY_SAVER_STORAGE_KEY = 'spellwave_battery_saver_active';
+let swSupabaseClient = null;
+let swTopScores = [];
+let swRecentSubmission = null;
+let swPendingScore = 0;
+let swIsSubmitting = false;
 
 let elapsed = 0;
 let mistakeTimer = 0;
@@ -629,6 +652,36 @@ createLifeMeter();
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
+swInitSupabaseClient();
+const swCachedBoard = swLoadLeaderboardCache();
+if (swCachedBoard && swCachedBoard.scores.length > 0) {
+  swTopScores = swMergeRecentSubmission(swNormalizeCachedScores(swCachedBoard.scores));
+  swRenderTopScores();
+} else {
+  swRenderLoadingScores();
+}
+swFetchTopScores({ preferRemote: true, showLoading: false });
+if (supabaseScript) {
+  supabaseScript.addEventListener('load', () => {
+    swFetchTopScores({ preferRemote: true, showLoading: false });
+  });
+}
+if (swInitialsInput) {
+  swInitialsInput.addEventListener('input', (event) => {
+    event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
+    if (swInitialsError) swInitialsError.textContent = '';
+  });
+  swInitialsInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      swHandleSubmitInitials();
+    }
+  });
+}
+if (swSubmitInitials) {
+  swSubmitInitials.addEventListener('click', swHandleSubmitInitials);
+}
 setPauseButtonState(true, true);
 updateFullscreenButton();
 updatePhaseDisplay();
@@ -873,6 +926,7 @@ function endGame() {
   renderRunGlossary();
   updatePhaseDisplay();
   updateHud(true);
+  swHandleLeaderboard(score);
 }
 
 function showMessage(kicker, title, scoreText, buttonText, copyText) {
@@ -914,6 +968,7 @@ function showWebGLUnavailable() {
 }
 
 function handleKeyDown(event) {
+  if (swIsInitialsModalOpen()) return;
   resumeAudio();
 
   // Konami code detection — runs in all game states
@@ -4096,6 +4151,7 @@ function showEndingStatsScreen(finalStats) {
     playVictoryFinaleSound();
     victorySoundPlayed = true;
   }
+  swHandleLeaderboard(score);
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
@@ -4780,3 +4836,317 @@ potionSlots.forEach((slot, index) => {
     potionsSystem.activatePotionSlot(index);
   });
 });
+
+// ── Spellwave Leaderboard ─────────────────────────────────────────────
+
+function swInitSupabaseClient() {
+  if (swSupabaseClient) return swSupabaseClient;
+  try {
+    const sb = window.supabase || window.Supabase || null;
+    if (sb && typeof sb.createClient === 'function' && SW_SUPABASE_URL && SW_SUPABASE_ANON_KEY) {
+      swSupabaseClient = sb.createClient(SW_SUPABASE_URL, SW_SUPABASE_ANON_KEY);
+    }
+  } catch (e) {
+    console.warn('Supabase init failed:', e);
+  }
+  return swSupabaseClient;
+}
+
+function swWaitForSupabaseClient({ timeoutMs = 4000, intervalMs = 200 } = {}) {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    const check = () => {
+      const client = swInitSupabaseClient();
+      if (client || Date.now() - startedAt >= timeoutMs) { resolve(client); return; }
+      setTimeout(check, intervalMs);
+    };
+    check();
+  });
+}
+
+function swGetRestHeaders(accessToken = null) {
+  return {
+    apikey: SW_SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${accessToken || SW_SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+  };
+}
+
+function swLoadLeaderboardCache() {
+  try {
+    const raw = localStorage.getItem(SW_LEADERBOARD_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && Array.isArray(parsed.scores) ? parsed : null;
+  } catch { return null; }
+}
+
+function swSaveLeaderboardCache(scores) {
+  try {
+    localStorage.setItem(SW_LEADERBOARD_CACHE_KEY, JSON.stringify({ scores: scores || [], savedAt: Date.now() }));
+  } catch {}
+}
+
+function swSetStatus(text) {
+  if (swLeaderboardStatus) swLeaderboardStatus.textContent = text;
+}
+
+function swSanitizeScore(value) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n) || n < SW_MIN_SCORE || n > SW_MAX_SCORE) return null;
+  return n;
+}
+
+function swNormalizeScores(entries) {
+  return (entries || []).map((e) => {
+    const val = swSanitizeScore(e[SW_SCORE_FIELD]);
+    if (val === null) return null;
+    return { initials: e.initials, score: val };
+  }).filter(Boolean);
+}
+
+function swNormalizeCachedScores(entries) {
+  return (entries || []).map((e) => {
+    const val = swSanitizeScore(e.score);
+    if (val === null) return null;
+    return { initials: e.initials, score: val };
+  }).filter(Boolean);
+}
+
+function swRegisterRecentSubmission(initials, scoreValue) {
+  swRecentSubmission = {
+    initials: initials.toUpperCase(),
+    score: scoreValue,
+    expiresAt: Date.now() + SW_HIGHLIGHT_MS,
+  };
+}
+
+function swHasRecentSubmission(entry) {
+  if (!swRecentSubmission) return false;
+  if (Date.now() > swRecentSubmission.expiresAt) { swRecentSubmission = null; return false; }
+  return entry && entry.initials === swRecentSubmission.initials && entry.score === swRecentSubmission.score;
+}
+
+function swMergeRecentSubmission(entries) {
+  if (!swRecentSubmission) return entries || [];
+  if (Date.now() > swRecentSubmission.expiresAt) { swRecentSubmission = null; return entries || []; }
+  const list = Array.isArray(entries) ? [...entries] : [];
+  if (!list.some((e) => swHasRecentSubmission(e))) {
+    list.push({ initials: swRecentSubmission.initials, score: swRecentSubmission.score });
+  }
+  list.sort((a, b) => b.score - a.score);
+  return list.slice(0, SW_LEADERBOARD_SIZE);
+}
+
+function swIsSameLeaderboard(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].initials !== b[i].initials || Number(a[i].score) !== Number(b[i].score)) return false;
+  }
+  return true;
+}
+
+function swCheckIfHighScore(newScore) {
+  if (swTopScores.length < SW_LEADERBOARD_SIZE) return true;
+  return newScore > (swTopScores[swTopScores.length - 1]?.score ?? 0);
+}
+
+async function swFetchTopScoresRest() {
+  const url = new URL(`${SW_SUPABASE_URL}/rest/v1/${SW_LEADERBOARD_TABLE}`);
+  url.searchParams.set('select', `initials,${SW_SCORE_FIELD}`);
+  url.searchParams.set('order', `${SW_SCORE_FIELD}.desc`);
+  url.searchParams.set('limit', String(SW_LEADERBOARD_SIZE));
+  const response = await fetch(url.toString(), { method: 'GET', headers: swGetRestHeaders() });
+  if (!response.ok) throw new Error(`REST fetch failed: ${response.status}`);
+  return response.json();
+}
+
+async function swSubmitScoreRest(initials, scoreValue, accessToken = null) {
+  const response = await fetch(`${SW_SUPABASE_URL}/rest/v1/rpc/${SW_SUBMIT_SCORE_RPC}`, {
+    method: 'POST',
+    headers: { ...swGetRestHeaders(accessToken), Prefer: 'return=minimal' },
+    body: JSON.stringify({ initials: initials.toUpperCase(), score: scoreValue }),
+  });
+  if (!response.ok) throw new Error(`RPC insert failed: ${response.status}`);
+  return true;
+}
+
+async function swFetchTopScores({ preferRemote = false, showLoading = true } = {}) {
+  if (showLoading) swRenderLoadingScores();
+  const cachedScores = swNormalizeCachedScores(swLoadLeaderboardCache()?.scores || []);
+  let client = swInitSupabaseClient();
+  if (!client && preferRemote) client = await swWaitForSupabaseClient();
+  try {
+    let fetched = [];
+    if (client) {
+      const { data, error } = await client
+        .from(SW_LEADERBOARD_TABLE)
+        .select(`initials, ${SW_SCORE_FIELD}`)
+        .order(SW_SCORE_FIELD, { ascending: false })
+        .limit(SW_LEADERBOARD_SIZE);
+      if (error) throw error;
+      fetched = swNormalizeScores(data || []);
+    } else {
+      fetched = swNormalizeScores(await swFetchTopScoresRest());
+    }
+    const merged = swMergeRecentSubmission(fetched);
+    if (!swIsSameLeaderboard(fetched, cachedScores) || swTopScores.length === 0) {
+      swTopScores = merged;
+      swRenderTopScores();
+      swSaveLeaderboardCache(fetched);
+    }
+    swSetStatus('Live');
+  } catch (err) {
+    console.warn('Supabase fetch failed, retrying with REST:', err);
+    try {
+      const fetched = swNormalizeScores(await swFetchTopScoresRest());
+      const merged = swMergeRecentSubmission(fetched);
+      if (!swIsSameLeaderboard(fetched, cachedScores) || swTopScores.length === 0) {
+        swTopScores = merged;
+        swRenderTopScores();
+        swSaveLeaderboardCache(fetched);
+      }
+      swSetStatus('Live');
+    } catch (restErr) {
+      console.error('Leaderboard fetch failed:', restErr);
+      swSetStatus('Offline');
+      if (swTopScores.length === 0) swRenderLoadingScores();
+    }
+  }
+}
+
+async function swSubmitScore(initials, scoreValue) {
+  let client = swInitSupabaseClient();
+  if (!client) client = await swWaitForSupabaseClient();
+  let accessToken = null;
+  try {
+    if (client?.auth) {
+      const { data } = await client.auth.getSession();
+      accessToken = data?.session?.access_token || null;
+      if (!accessToken) {
+        const { data: authData } = await client.auth.signInAnonymously();
+        accessToken = authData?.session?.access_token || null;
+      }
+    }
+  } catch {}
+  try {
+    if (client) {
+      const { error } = await client.rpc(SW_SUBMIT_SCORE_RPC, {
+        initials: initials.toUpperCase(),
+        score: scoreValue,
+      });
+      if (error) throw error;
+    } else {
+      await swSubmitScoreRest(initials, scoreValue, accessToken);
+    }
+    swRegisterRecentSubmission(initials, scoreValue);
+    swTopScores = swMergeRecentSubmission(swTopScores);
+    swRenderTopScores();
+    swSaveLeaderboardCache(swTopScores);
+    setTimeout(() => swFetchTopScores({ preferRemote: true, showLoading: false }), 800);
+    return true;
+  } catch (err) {
+    console.warn('Submit failed, retrying with REST:', err);
+    try {
+      await swSubmitScoreRest(initials, scoreValue, accessToken);
+      swRegisterRecentSubmission(initials, scoreValue);
+      swTopScores = swMergeRecentSubmission(swTopScores);
+      swRenderTopScores();
+      swSaveLeaderboardCache(swTopScores);
+      setTimeout(() => swFetchTopScores({ preferRemote: true, showLoading: false }), 800);
+      return true;
+    } catch (restErr) {
+      console.error('Score submit failed:', restErr);
+      return false;
+    }
+  }
+}
+
+function swRenderTopScores() {
+  if (!swScoreList) return;
+  swScoreList.innerHTML = '';
+  if (swTopScores.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'sw-loading';
+    li.textContent = 'No scores yet';
+    swScoreList.appendChild(li);
+    return;
+  }
+  swTopScores.forEach((entry) => {
+    const li = document.createElement('li');
+    const initials = typeof entry === 'object' ? entry.initials : '???';
+    const scoreVal = typeof entry === 'object' ? entry.score : entry;
+    if (swHasRecentSubmission({ initials, score: scoreVal })) li.classList.add('sw-highlight');
+    const initialsSpan = document.createElement('span');
+    initialsSpan.className = 'sw-initials';
+    initialsSpan.textContent = initials;
+    const scoreSpan = document.createElement('span');
+    scoreSpan.className = 'sw-score-val';
+    scoreSpan.textContent = formatScore(scoreVal);
+    li.append(initialsSpan, scoreSpan);
+    swScoreList.appendChild(li);
+  });
+}
+
+function swRenderLoadingScores() {
+  if (swScoreList) swScoreList.innerHTML = '<li class="sw-loading">Loading…</li>';
+}
+
+function swIsInitialsModalOpen() {
+  return Boolean(swInitialsModal && !swInitialsModal.hidden);
+}
+
+function swShowInitialsModal(scoreValue) {
+  if (!swInitialsModal || !swInitialsInput || !swSubmitInitials || !swModalScore) return;
+  swPendingScore = scoreValue;
+  swModalScore.textContent = formatScore(scoreValue);
+  swInitialsInput.value = '';
+  if (swInitialsError) swInitialsError.textContent = '';
+  swSubmitInitials.disabled = false;
+  swSubmitInitials.textContent = 'Submit Score';
+  swInitialsModal.hidden = false;
+  setTimeout(() => swInitialsInput.focus(), 100);
+}
+
+function swHideInitialsModal() {
+  if (!swInitialsModal) return;
+  swInitialsModal.hidden = true;
+  swIsSubmitting = false;
+}
+
+async function swHandleSubmitInitials() {
+  if (swIsSubmitting || !swInitialsInput || !swSubmitInitials) return;
+  const initials = swInitialsInput.value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{3}$/.test(initials)) {
+    if (swInitialsError) swInitialsError.textContent = 'Enter exactly 3 letters or numbers';
+    swInitialsInput.focus();
+    return;
+  }
+  swIsSubmitting = true;
+  swSubmitInitials.disabled = true;
+  swSubmitInitials.textContent = 'Submitting…';
+  const sanitized = swSanitizeScore(swPendingScore);
+  if (sanitized === null) {
+    if (swInitialsError) swInitialsError.textContent = 'Score could not be submitted.';
+    swIsSubmitting = false;
+    swSubmitInitials.disabled = false;
+    swSubmitInitials.textContent = 'Submit Score';
+    return;
+  }
+  const success = await swSubmitScore(initials, sanitized);
+  if (success) {
+    swHideInitialsModal();
+  } else {
+    if (swInitialsError) swInitialsError.textContent = 'Failed to submit. Try again.';
+    swIsSubmitting = false;
+    swSubmitInitials.disabled = false;
+  }
+  swSubmitInitials.textContent = 'Submit Score';
+}
+
+function swHandleLeaderboard(finalScore) {
+  if (godModeUsedThisRun || potionCheatUsedThisRun) return;
+  const sanitized = swSanitizeScore(finalScore);
+  if (sanitized === null) return;
+  if (swCheckIfHighScore(sanitized)) swShowInitialsModal(sanitized);
+}
