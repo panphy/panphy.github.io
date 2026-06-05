@@ -346,7 +346,14 @@
 
 		.btn-icon {
 			font-size: 1rem;
-			line-height: 1
+			line-height: 1;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.btn-icon svg {
+			display: block;
 		}
 
 		.btn-text {
@@ -1051,7 +1058,12 @@
 		<button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
 
 		<div class="controls-panel" id="controlsPanel">
-			<button id="controlsClose" type="button" aria-label="Close controls">&#x2715;</button>
+			<button id="controlsClose" type="button" aria-label="Close controls">
+				<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 
 			<!-- Source section -->
 			<div class="cp-section">
@@ -1059,7 +1071,12 @@
 				<div class="cp-row">
 					<select id="cameraSelect"></select>
 					<button id="refreshBtn" data-tooltip="Refresh camera list">
-						<span class="btn-icon">&#x21bb;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M23 4v6h-6"></path>
+								<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+							</svg>
+						</span>
 					</button>
 					<span class="cp-sep"></span>
 					<label class="switch">
@@ -1085,11 +1102,22 @@
 					<span id="zoomVal">1.0×</span>
 					<span class="cp-sep"></span>
 					<button id="mirrorBtn" data-tooltip="Mirror view">
-						<span class="btn-icon">&#x21C4;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="20" y1="8" x2="4" y2="8"></line>
+								<polyline points="8 4 4 8 8 12"></polyline>
+								<line x1="4" y1="16" x2="20" y2="16"></line>
+								<polyline points="16 12 20 16 16 20"></polyline>
+							</svg>
+						</span>
 						<span class="btn-text">Mirror</span>
 					</button>
 					<button id="fitBtn" data-tooltip="Toggle fit/fill mode">
-						<span class="btn-icon">&#x26F6;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M9 3H5a2 2 0 0 0-2 2v4m16-6h-4a2 2 0 0 0-2 2v4M3 15v4a2 2 0 0 0 2 2h4m12-6v4a2 2 0 0 0-2 2h-4"></path>
+							</svg>
+						</span>
 						<span class="btn-text">Fit</span>
 					</button>
 				</div>
@@ -1102,15 +1130,29 @@
 				<span class="cp-label">Tools</span>
 				<div class="cp-row cp-row-tools">
 					<button id="laserBtn" class="tool-btn" data-tooltip="Laser pointer (L)">
-						<span class="btn-icon">&#x2739;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="3" fill="currentColor"></circle>
+								<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path>
+							</svg>
+						</span>
 						<span class="btn-text">Laser</span>
 					</button>
 					<button id="annotationBtn" class="tool-btn" data-tooltip="Draw (D)">
-						<span class="btn-icon">&#x270E;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+							</svg>
+						</span>
 						<span class="btn-text">Draw</span>
 					</button>
 					<button id="eraserBtn" class="tool-btn" data-tooltip="Eraser (E)">
-						<span class="btn-icon">&#x232B;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path>
+								<path d="M22 21H7M5 11h9"></path>
+							</svg>
+						</span>
 						<span class="btn-text">Erase</span>
 					</button>
 					<button id="textBtn" class="tool-btn" data-tooltip="Add text (T)">
@@ -1138,7 +1180,12 @@
 							<span class="btn-text">Undo</span>
 						</button>
 						<button id="clearBtn" class="danger" data-tooltip="Clear all">
-							<span class="btn-icon">&#x2715;</span>
+							<span class="btn-icon">
+								<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+									<line x1="18" y1="6" x2="6" y2="18"></line>
+									<line x1="6" y1="6" x2="18" y2="18"></line>
+								</svg>
+							</span>
 							<span class="btn-text">Clear</span>
 						</button>
 					</div>
@@ -1151,11 +1198,23 @@
 			<div class="cp-section">
 				<div class="cp-row cp-row-actions">
 					<button id="screenshotBtn" data-tooltip="Take snapshot">
-						<span class="btn-icon">&#x1F4F7;</span>
+						<span class="btn-icon">
+							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+								<circle cx="12" cy="13" r="4"></circle>
+							</svg>
+						</span>
 						<span class="btn-text">Snapshot</span>
 					</button>
 					<button id="recordBtn" data-tooltip="Start recording">
-						<span class="btn-icon">&#x23FA;</span>
+						<span class="btn-icon">
+							<svg class="record-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display: inline-block;">
+								<circle cx="12" cy="12" r="6"></circle>
+							</svg>
+							<svg class="stop-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display: none;">
+								<rect x="6" y="6" width="12" height="12" rx="2"></rect>
+							</svg>
+						</span>
 						<span class="btn-text">Record</span>
 					</button>
 					<button id="defaultsBtn" class="muted" data-tooltip="Reset to default settings">
@@ -1164,7 +1223,14 @@
 				</div>
 			</div>
 		</div>
-		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">&#x26F6;</button>
+		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">
+			<svg class="enter-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M9 3H5a2 2 0 0 0-2 2v4m16-6h-4a2 2 0 0 0-2 2v4M3 15v4a2 2 0 0 0 2 2h4m12-6v4a2 2 0 0 0-2 2h-4"></path>
+			</svg>
+			<svg class="exit-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+				<path d="M4 14h6v-6m10 6h-6v-6M4 10h6V4m10 6h-6V4"></path>
+			</svg>
+		</button>
 		<video id="video" playsinline autoplay muted disablepictureinpicture disableremoteplayback x-webkit-airplay="deny"></video>
 		<canvas id="freezeCanvas" class="hidden"></canvas>
 		<canvas id="drawCanvas"></canvas>
@@ -1414,7 +1480,8 @@
 
 			function updateFullscreenUI() {
 				const active = isFullscreen();
-				fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
+				fullscreenBtn.querySelector('.enter-icon').style.display = active ? 'none' : 'block';
+				fullscreenBtn.querySelector('.exit-icon').style.display = active ? 'block' : 'none';
 				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
 				fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
 			}
@@ -2633,7 +2700,9 @@
 					};
 					mediaRecorder.start(120);
 					recording = true;
-					recordBtn.innerHTML = '<span class="btn-icon">&#x23F9;</span><span class="btn-text">Stop</span>';
+					recordBtn.querySelector('.record-icon').style.display = 'none';
+					recordBtn.querySelector('.stop-icon').style.display = 'inline-block';
+					recordBtn.querySelector('.btn-text').textContent = 'Stop';
 					recordBtn.classList.add('danger');
 					hud.classList.add('recording');
 					drawCompositeFrame();
@@ -2641,7 +2710,9 @@
 				} else {
 					recording = false;
 					try { mediaRecorder.stop(); } catch (e) {}
-					recordBtn.innerHTML = '<span class="btn-icon">&#x23FA;</span><span class="btn-text">Record</span>';
+					recordBtn.querySelector('.record-icon').style.display = 'inline-block';
+					recordBtn.querySelector('.stop-icon').style.display = 'none';
+					recordBtn.querySelector('.btn-text').textContent = 'Record';
 					recordBtn.classList.remove('danger');
 					hud.classList.remove('recording');
 				}
