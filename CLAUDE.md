@@ -63,12 +63,15 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 Current unlisted/legacy pages:
 
 - `misc/digitizer.html`
+- `misc/dodge.html`
+- `misc/dodge3d.html`
 - `misc/gcse_phy/phy_flashcard.html`
 - `misc/gcse_phy/phy_flashcard_cs.html`
 - `misc/gcse_phy/phy_flashcard_ss.html`
 - `misc/index.html`
 - `misc/ising_model.html`
 - `misc/phyclub_showcase.html`
+- `misc/react.html`
 - `misc/scoreboard.html`
 
 When promoting an unlisted page:
