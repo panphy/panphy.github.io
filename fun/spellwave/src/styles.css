@@ -261,29 +261,9 @@ body.is-running:not(.is-paused) .game-bar {
   bottom: max(18px, env(safe-area-inset-bottom));
   left: 14px;
   z-index: 12;
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, 44px);
   gap: 8px;
-}
-
-.top-corner-controls {
-  position: fixed;
-  top: max(14px, env(safe-area-inset-top));
-  right: 14px;
-  z-index: 12;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-6px);
-  transition: opacity 220ms ease, transform 220ms ease;
-}
-
-body.is-running:not(.is-paused) .top-corner-controls {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
 }
 
 .brand-mark {
@@ -2823,7 +2803,7 @@ body.battery-saver .potion-bar {
   top: calc(max(14px, env(safe-area-inset-top)) + 82px);
   right: 14px;
   z-index: 11;
-  width: min(200px, calc(100vw - 28px));
+  width: min(210px, calc(100vw - 28px));
   padding: 11px 12px 10px;
   border: 1px solid rgba(88, 223, 207, 0.22);
   border-top: 2px solid var(--aqua);
@@ -2836,7 +2816,7 @@ body.battery-saver .potion-bar {
 }
 
 body.is-running:not(.is-paused) .sw-leaderboard {
-  top: calc(max(14px, env(safe-area-inset-top)) + 58px);
+  top: max(14px, env(safe-area-inset-top));
 }
 
 .sw-leaderboard-header {
@@ -2851,7 +2831,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2861,7 +2841,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   flex: 0 0 auto;
   color: var(--aqua);
   font-family: var(--font-mono);
-  font-size: 0.52rem;
+  font-size: 0.60rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2880,22 +2860,22 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .sw-score-list li {
   counter-increment: score-rank;
   display: grid;
-  grid-template-columns: 20px minmax(36px, 1fr) auto;
+  grid-template-columns: 22px minmax(40px, 1fr) auto;
   align-items: center;
   gap: 6px;
-  min-height: 22px;
-  padding: 3px 4px;
+  min-height: 24px;
+  padding: 4px 5px;
   border-left: 1px solid rgba(88, 223, 207, 0.18);
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.76rem;
   line-height: 1;
 }
 
 .sw-score-list li::before {
   content: counter(score-rank, decimal-leading-zero);
   color: rgba(242, 240, 223, 0.28);
-  font-size: 0.52rem;
+  font-size: 0.60rem;
 }
 
 .sw-score-list li:first-child {
@@ -2919,7 +2899,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 
 .sw-score-list .sw-score-val {
   color: var(--aqua);
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   white-space: nowrap;
 }
 
@@ -2932,7 +2912,7 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   align-content: center;
   min-height: 48px;
   color: var(--muted);
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   text-align: center;
 }
 
