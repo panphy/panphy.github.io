@@ -42,6 +42,7 @@ function debounce(func, wait) {
 }
 
 let saveTimeout;
+let lastSavedSerialized = null;
 
 function getUiStateSnapshotFromDom() {
 	const graphTitleInput = document.getElementById('graph-title');
@@ -130,8 +131,11 @@ function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
 
 function saveState() {
 	try {
-		const state = buildPersistedState();
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		const serialized = JSON.stringify(buildPersistedState());
+		// Skip the write (and its localStorage I/O) when nothing changed.
+		if (serialized === lastSavedSerialized) return;
+		localStorage.setItem(STORAGE_KEY, serialized);
+		lastSavedSerialized = serialized;
 		for (const legacyKey of LEGACY_STORAGE_KEYS) {
 			if (legacyKey !== STORAGE_KEY) {
 				localStorage.removeItem(legacyKey);
@@ -142,9 +146,23 @@ function saveState() {
 	}
 }
 
-function scheduleSaveState(delay = 200) {
+function scheduleSaveState(delay = 500) {
 	clearTimeout(saveTimeout);
 	saveTimeout = setTimeout(saveState, delay);
+}
+
+function flushSaveState() {
+	clearTimeout(saveTimeout);
+	saveState();
+}
+
+// Guarantee the latest state is persisted when the page is hidden or closed,
+// so the debounced autosave never loses recent edits.
+if (typeof window !== 'undefined') {
+	window.addEventListener('pagehide', flushSaveState);
+	window.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'hidden') flushSaveState();
+	});
 }
 
 function loadState() {

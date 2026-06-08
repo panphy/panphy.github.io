@@ -86,11 +86,11 @@
 		};
 	}
 
-	function isPlotStateEqual(targetId, newData, newLayout) {
+	function isPlotStateEqual(targetId, dataKey, layoutKey) {
 		const slot = lastPlotState[targetId];
-		if (!slot) return false;
-		return JSON.stringify(slot.data) === JSON.stringify(newData)
-			&& JSON.stringify(slot.layout) === JSON.stringify(newLayout);
+		// A null cached data/layout is the "force replot" flag set elsewhere.
+		if (!slot || slot.data === null || slot.layout === null) return false;
+		return slot.dataKey === dataKey && slot.layoutKey === layoutKey;
 	}
 
 		function sanitizeFilename(filename, fallbackFilename) {
@@ -421,8 +421,11 @@
 			layout.plot_bgcolor = themeSettings.layout.plot_bgcolor;
 		}
 
-		// Only replot if the new state is different.
-		if (isPlotStateEqual('plot', data, layout)) {
+		// Only replot if the new state is different. Serialize the new data/layout
+		// once and compare against cached keys (avoids re-serializing the cache).
+		const dataKey = JSON.stringify(data);
+		const layoutKey = JSON.stringify(layout);
+		if (isPlotStateEqual('plot', dataKey, layoutKey)) {
 			return;
 		}
 
@@ -432,6 +435,8 @@
 		// Cache the current state.
 		lastPlotState.plot.data = data;
 		lastPlotState.plot.layout = layout;
+		lastPlotState.plot.dataKey = dataKey;
+		lastPlotState.plot.layoutKey = layoutKey;
 	}
 
 
@@ -599,7 +604,9 @@
 			layout.plot_bgcolor = themeSettings.layout.plot_bgcolor;
 		}
 
-		if (isPlotStateEqual('popup-plot', traces, layout)) {
+		const dataKey = JSON.stringify(traces);
+		const layoutKey = JSON.stringify(layout);
+		if (isPlotStateEqual('popup-plot', dataKey, layoutKey)) {
 			showPopup();
 			return;
 		}
@@ -608,6 +615,8 @@
 
 		lastPlotState['popup-plot'].data = traces;
 		lastPlotState['popup-plot'].layout = layout;
+		lastPlotState['popup-plot'].dataKey = dataKey;
+		lastPlotState['popup-plot'].layoutKey = layoutKey;
 
 		showPopup();
 	}

@@ -1403,7 +1403,6 @@ function clearFittedCurve() {
 		}
 
 		updateData();
-		setInitialParameters(getCurrentAdvancedFitMethod());
 		scheduleSaveState();
 	}
 
@@ -1523,7 +1522,6 @@ function clearFittedCurve() {
 		}
 
 		updateData();
-		setInitialParameters(getCurrentAdvancedFitMethod());
 		scheduleSaveState();
 	}
 
@@ -1839,8 +1837,8 @@ function clearFittedCurve() {
 		// Dynamically update the graph title, but do not override a user-edited title.
 		updateGraphTitle();
 
-		// Update any other elements that depend on the headers.
-		setInitialParameters(getCurrentAdvancedFitMethod());
+		// Axis labels don't affect fit seeds, so seeds are recomputed lazily
+		// (on fit-tab open / method change / data load) rather than per keystroke.
 		updateCombinedPlotInputsToActive();
 		scheduleSaveState();
 	}
@@ -3149,9 +3147,6 @@ function clearFittedCurve() {
 
 		updateData();
 		document.getElementById(`global-${axis}-uncertainty`).value = '';
-
-		// Update initial parameters based on the selected advanced fit method
-		setInitialParameters(getCurrentAdvancedFitMethod());
 	}
 
 
