@@ -896,9 +896,9 @@ function calculateFWHM(x, y, maxY) {
 		}
 	}
 
-	// Find right crossing
+	// Find right crossing (falling edge: above half-max on the left, below on the right)
 	for (let i = sortedData.length - 1; i > 0; i--) {
-		if (sortedData[i - 1].y < halfMax && sortedData[i].y >= halfMax) {
+		if (sortedData[i - 1].y >= halfMax && sortedData[i].y < halfMax) {
 			const x1 = sortedData[i - 1].x;
 			const y1 = sortedData[i - 1].y;
 			const x2 = sortedData[i].x;

@@ -78,7 +78,6 @@
 		let params = initialParams.slice();
 		let lambda = Number.isFinite(options.initialLambda) ? options.initialLambda : 1e-3;
 		const nu = 2;
-		let prevCost = Infinity;
 
 		let bestParams = params.slice();
 		let bestCost = Infinity;
@@ -142,10 +141,6 @@
 				bestCost = cost;
 				bestParams = params.slice();
 			}
-			if (Math.abs(prevCost - cost) < tolerance) {
-				return { params: bestParams, cost: bestCost };
-			}
-			prevCost = cost;
 
 			const jacobian = safeJacobian(params, params.length);
 			const jTranspose = transpose(jacobian);
@@ -185,6 +180,9 @@
 				if (nextCost < bestCost) {
 					bestCost = nextCost;
 					bestParams = params.slice();
+				}
+				if (Math.abs(cost - nextCost) < tolerance) {
+					return { params: bestParams, cost: bestCost };
 				}
 				lambda *= 0.3;
 				if (lambda < 1e-20) lambda = 1e-20;
