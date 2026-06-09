@@ -9,7 +9,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="stylesheet" href="/assets/fullscreen-button.css">
     <script src="/assets/sw-register.js" defer></script>
+    <script src="/assets/fullscreen-button.js" defer></script>
 <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -146,11 +148,22 @@
             min-height: 1.5em;
         }
 
+        /* Header Actions (Fullscreen, etc) */
+        .header-actions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+        }
+
         /* Schedule Grid Styling */
         .schedule-grid {
             display: flex;
             justify-content: center;
-            gap: 1rem;
+            gap: 1.2rem;
             margin: 1.5rem 0 0.5rem;
             flex-wrap: wrap;
             opacity: 0;
@@ -167,9 +180,9 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            padding: 0.6rem 1rem;
-            flex: 1 1 100px;
-            max-width: 160px;
+            padding: 0.8rem 1.2rem;
+            flex: 1 1 120px;
+            max-width: 200px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -177,16 +190,16 @@
         }
 
         .schedule-label {
-            font-size: 0.72rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             font-weight: 700;
             letter-spacing: 0.05em;
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.2rem;
         }
 
         .schedule-value {
             font-family: var(--font-mono);
-            font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+            font-size: clamp(1.3rem, 2.5vw, 2.2rem);
             font-weight: 600;
             color: var(--text-main);
         }
@@ -449,41 +462,24 @@
         }
 
         .fullscreen-active .schedule-grid {
-            margin-top: 2rem;
-            gap: 2rem;
+            margin-top: 2.5rem;
+            gap: 3rem;
         }
 
         .fullscreen-active .schedule-card {
-            padding: 1.2rem 2rem;
+            padding: 1.5rem 2.5rem;
             border-radius: 18px;
-            max-width: 260px;
-            flex: 0 1 240px;
+            max-width: 380px;
+            flex: 0 1 320px;
         }
 
         .fullscreen-active .schedule-label {
-            font-size: clamp(0.9rem, 2vw, 1.3rem);
-            margin-bottom: 0.4rem;
+            font-size: clamp(1.1rem, 2.5vw, 2rem);
+            margin-bottom: 0.5rem;
         }
 
         .fullscreen-active .schedule-value {
-            font-size: clamp(1.8rem, 4.5vw, 3.5rem);
-        }
-
-        .fullscreen-exit-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: auto;
-            height: auto;
-            padding: 0.75rem 1.5rem;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 1000;
-            display: none;
-        }
-
-        .fullscreen-active .fullscreen-exit-btn {
-            display: flex;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
         }
     </style>
 </head>
@@ -495,7 +491,9 @@
         </a>
     </div>
 
-    <button id="fullscreenExitBtn" class="fullscreen-exit-btn">Exit Fullscreen (Esc)</button>
+    <div class="header-actions">
+        <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+    </div>
 
     <div class="app-container">
         <div class="timer-container">
@@ -569,7 +567,6 @@
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
         const clearBtn = document.getElementById('clearBtn');
-        const fullscreenExitBtn = document.getElementById('fullscreenExitBtn');
         const previewHint = document.getElementById('preview-hint');
 
         /* ------------- Live HH:MM clock ------------- */
@@ -1123,6 +1120,7 @@
                         toggleBtn.textContent = 'Pause';
                         toggleBtn.classList.remove('btn-start');
                         toggleBtn.classList.add('btn-pause');
+                        enterFullscreen();
                     }
                     break;
                 case 'pause':
@@ -1207,26 +1205,28 @@
 
         /* ------------ Fullscreen functionality ------------ */
         const enterFullscreen = () => {
-            document.body.classList.add('fullscreen-active');
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
+            const el = document.documentElement;
+            if (el.requestFullscreen) {
+                el.requestFullscreen().catch(() => {});
+            } else if (el.webkitRequestFullscreen) {
+                el.webkitRequestFullscreen().catch(() => {});
             }
         };
 
         const exitFullscreen = () => {
-            document.body.classList.remove('fullscreen-active');
-            if (document.fullscreenElement && document.exitFullscreen) {
+            if (document.exitFullscreen) {
                 document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen().catch(() => {});
             }
         };
 
-        fullscreenExitBtn.onclick = exitFullscreen;
-
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                document.body.classList.remove('fullscreen-active');
-            }
-        });
+        const checkFullscreenState = () => {
+            const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            document.body.classList.toggle('fullscreen-active', isFS);
+        };
+        document.addEventListener('fullscreenchange', checkFullscreenState);
+        document.addEventListener('webkitfullscreenchange', checkFullscreenState);
 
         /* ------------ Keyboard shortcuts ------------ */
         document.addEventListener('keydown', (e) => {
