@@ -212,21 +212,6 @@
             color: #e17055;
         }
 
-        /* Timers Display Wrapper */
-        .timers-display-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        .timer-column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
         .inputs {
             display: flex;
             justify-content: center;
@@ -452,7 +437,6 @@
             max-width: none;
             height: 100vh;
             align-items: center;
-            overflow: hidden;
         }
 
         .fullscreen-active .timer-container {
@@ -460,80 +444,42 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
+            justify-content: center;
             border-radius: 0;
             height: 100%;
-            padding: 2vh 2vw;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        .fullscreen-active #current-clock {
-            font-size: clamp(1.5rem, 4.5vh, 2.5rem);
-            padding: 0.8vh 1.5vw;
-            margin-bottom: 0.5vh;
         }
 
         .fullscreen-active .time {
-            font-size: clamp(3.5rem, 18vh, 10rem);
-            line-height: 1.1;
-            margin: 0;
+            font-size: clamp(5rem, 20vw, 15rem);
         }
 
         .fullscreen-active .label {
-            font-size: clamp(1.2rem, 3.5vh, 2rem);
-            margin-bottom: 0.5vh;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
         }
 
         .fullscreen-active .inputs {
             display: none;
         }
 
-        .fullscreen-active .timers-display-wrapper {
-            flex-direction: row;
-            justify-content: space-around;
-            align-items: center;
-            width: 100%;
-            margin: 1vh 0;
-        }
-
-        .fullscreen-active .timer-column {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
         .fullscreen-active .schedule-grid {
-            margin-top: 1.5vh;
-            gap: 2vw;
-            width: 100%;
-            max-width: 1000px;
+            margin-top: 2.5rem;
+            gap: 3rem;
         }
 
         .fullscreen-active .schedule-card {
-            padding: 1.2vh 1.8vw;
-            border-radius: 16px;
-            max-width: 300px;
-            flex: 0 1 240px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            padding: 1.5rem 2.5rem;
+            border-radius: 18px;
+            max-width: 380px;
+            flex: 0 1 320px;
         }
 
         .fullscreen-active .schedule-label {
-            font-size: clamp(0.9rem, 2.5vh, 1.4rem);
-            margin-bottom: 0.3vh;
+            font-size: clamp(1.1rem, 2.5vw, 2rem);
+            margin-bottom: 0.5rem;
         }
 
         .fullscreen-active .schedule-value {
-            font-size: clamp(2rem, 6vh, 4rem);
-        }
-
-        .fullscreen-active .info {
-            font-size: clamp(1.2rem, 4vh, 2.2rem);
-            margin-top: 0.5vh;
-            min-height: 1.2em;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
         }
     </style>
 </head>
@@ -553,15 +499,9 @@
         <div class="timer-container">
             <h1 id="current-clock" aria-live="off">Current Time: --:--</h1>
 
-            <div class="timers-display-wrapper">
-                <div class="timer-column" id="col-original">
-                    <div class="time" id="original-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
-                </div>
-                <div class="timer-column" id="col-extra">
-                    <div class="label" id="extra-label">25% Extra Time</div>
-                    <div class="time extra-time" id="extra-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
-                </div>
-            </div>
+            <div class="time" id="original-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
+            <div class="label" id="extra-label">25% Extra Time</div>
+            <div class="time extra-time" id="extra-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
             <div class="schedule-grid" id="schedule-grid" aria-live="polite">
                 <div class="schedule-card" id="card-start">
                     <div class="schedule-label">START</div>
@@ -892,13 +832,11 @@
         };
 
         const updateExtraLabel = () => {
-            const colExtra = document.getElementById('col-extra');
             if (extraPercent === 0) {
                 extraLabel.textContent = 'No Extra Time';
-                if (colExtra) colExtra.style.display = 'none';
+                extraEl.style.opacity = '0.3';
             } else {
                 extraLabel.textContent = `${extraPercent}% Extra Time`;
-                if (colExtra) colExtra.style.display = 'flex';
                 extraEl.style.opacity = '1';
             }
         };
