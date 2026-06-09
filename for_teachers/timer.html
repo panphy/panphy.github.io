@@ -121,9 +121,9 @@
         }
 
         .time {
-            font-size: clamp(3rem, 9vw, 8rem);
+            font-size: clamp(2rem, 5.5vw, 5rem);
             font-weight: 700;
-            margin: 1rem 0;
+            margin: 0.5rem 0;
             letter-spacing: 1px;
             font-variant-numeric: tabular-nums;
         }
@@ -161,19 +161,21 @@
 
         /* Schedule Grid Styling */
         .schedule-grid {
-            display: flex;
+            display: none;
             justify-content: center;
             gap: 1.2rem;
             margin: 1.5rem 0 0.5rem;
             flex-wrap: wrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
         }
 
         .schedule-grid.visible {
-            opacity: 1;
-            visibility: visible;
+            display: flex;
+            animation: fadeInGrid 0.4s ease;
+        }
+
+        @keyframes fadeInGrid {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .schedule-card {
@@ -215,16 +217,18 @@
         /* Timers Display Wrapper */
         .timers-display-wrapper {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: flex-start;
             width: 100%;
+            gap: 1rem;
         }
 
         .timer-column {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
+            flex: 1;
         }
 
         .inputs {
@@ -392,6 +396,16 @@
                 font-size: 6vw;
             }
 
+            .timers-display-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .timer-column {
+                flex: none;
+                width: 100%;
+            }
+
             .time {
                 font-size: 14vw;
             }
@@ -417,6 +431,10 @@
 
             .control-container {
                 align-self: auto;
+            }
+
+            footer {
+                display: none;
             }
         }
 
@@ -476,7 +494,7 @@
         }
 
         .fullscreen-active .time {
-            font-size: clamp(3.5rem, 18vh, 10rem);
+            font-size: clamp(2.5rem, min(14vh, 8vw), 9rem);
             line-height: 1.1;
             margin: 0;
         }
@@ -491,7 +509,6 @@
         }
 
         .fullscreen-active .timers-display-wrapper {
-            flex-direction: row;
             justify-content: space-around;
             align-items: center;
             width: 100%;
@@ -555,6 +572,7 @@
 
             <div class="timers-display-wrapper">
                 <div class="timer-column" id="col-original">
+                    <div class="label">Standard Time</div>
                     <div class="time" id="original-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
                 </div>
                 <div class="timer-column" id="col-extra">
