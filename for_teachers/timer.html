@@ -442,15 +442,23 @@
 
         /* Fullscreen styles */
         .fullscreen-active .logo-container,
-        .fullscreen-active footer,
-        .fullscreen-active .side-column {
+        .fullscreen-active footer {
             display: none;
         }
 
+        body.fullscreen-active {
+            justify-content: center;
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+
         .fullscreen-active .app-container {
+            flex-wrap: nowrap;
+            gap: 1.25rem;
             max-width: none;
-            height: 100vh;
-            align-items: center;
+            width: min(1500px, calc(100vw - 3rem));
+            height: calc(100vh - 3rem);
+            align-items: stretch;
         }
 
         .fullscreen-active .timer-container {
@@ -459,20 +467,64 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            border-radius: 0;
             height: 100%;
+            min-width: 0;
+            padding: clamp(1rem, 2vh, 2rem);
+        }
+
+        .fullscreen-active .side-column {
+            flex: 0 0 clamp(150px, 13vw, 210px);
+            min-width: 0;
+        }
+
+        .fullscreen-active .control-container {
+            width: 100%;
+            min-width: 0;
+            padding: clamp(1rem, 2vh, 1.5rem);
+        }
+
+        .fullscreen-active .end-times-panel {
+            padding: clamp(1rem, 2vh, 1.4rem) clamp(0.8rem, 1.4vw, 1.2rem);
+        }
+
+        .fullscreen-active .end-time-value {
+            font-size: clamp(1.8rem, 3.6vw, 3.4rem);
+        }
+
+        .fullscreen-active .control-area {
+            gap: clamp(0.55rem, 1.4vh, 0.8rem);
+        }
+
+        .fullscreen-active button {
+            height: clamp(52px, 8vh, 64px);
         }
 
         .fullscreen-active .time {
-            font-size: clamp(5rem, 20vw, 15rem);
+            font-size: clamp(4rem, 14vh, 9rem);
+            margin: clamp(0.4rem, 1.8vh, 1rem) 0;
         }
 
         .fullscreen-active .label {
-            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-size: clamp(1.2rem, 2.6vh, 2rem);
         }
 
         .fullscreen-active .inputs {
             display: none;
+        }
+
+        .fullscreen-active #current-clock {
+            font-size: clamp(1.4rem, 3.8vh, 2.4rem);
+            padding: clamp(0.45rem, 1.5vh, 0.8rem) 1rem;
+        }
+
+        .fullscreen-active .info {
+            min-height: 2.8em;
+        }
+
+        .fullscreen-active #preview-hint {
+            height: 0;
+            margin: 0;
+            overflow: hidden;
         }
 
         .fullscreen-toggle {
