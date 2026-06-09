@@ -449,7 +449,7 @@
         body.fullscreen-active {
             justify-content: center;
             overflow: hidden;
-            padding: 1.5rem;
+            padding: 3.5rem 1.5rem 1.5rem; /* Increased top padding to prevent overlap with fullscreen button */
         }
 
         .fullscreen-active .app-container {
@@ -457,7 +457,7 @@
             gap: 1.25rem;
             max-width: none;
             width: min(1500px, calc(100vw - 3rem));
-            height: calc(100vh - 3rem);
+            height: calc(100vh - 5rem); /* Adjusted for the new body padding */
             align-items: stretch;
         }
 
@@ -529,13 +529,167 @@
 
         .fullscreen-toggle {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 16px;
+            right: 16px;
             z-index: 1000;
         }
 
+        /* Styling for fullscreen button in fullscreen mode */
         .fullscreen-active .fullscreen-toggle {
-            display: none !important;
+            display: inline-grid !important;
+            background: rgba(26, 26, 25, 0.75) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .fullscreen-active .fullscreen-toggle:hover {
+            background: rgba(38, 38, 37, 0.9) !important;
+            border-color: var(--brand-accent) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* RESPONSIVE FULLSCREEN WORKSPACE */
+
+        /* 1. Medium/small width screens or portrait: stack vertically */
+        @media (max-width: 900px) {
+            .fullscreen-active .app-container {
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: stretch;
+            }
+
+            .fullscreen-active .side-column {
+                flex: 0 0 auto;
+                flex-direction: row;
+                width: 100%;
+                align-items: stretch;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .fullscreen-active .end-times-panel,
+            .fullscreen-active .control-container {
+                flex: 1;
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .fullscreen-active .control-area {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .fullscreen-active button {
+                height: 48px;
+                font-size: 0.95rem;
+            }
+
+            .fullscreen-active .end-time-value {
+                font-size: clamp(1.6rem, 4vw, 2.4rem);
+            }
+
+            .fullscreen-active .end-time-row + .end-time-row {
+                margin-top: 0.8rem;
+            }
+        }
+
+        /* 2. Landscape on very short viewports (like mobile landscape) */
+        @media (max-height: 640px) and (min-width: 641px) {
+            .fullscreen-active .app-container {
+                gap: 1rem;
+            }
+
+            .fullscreen-active .side-column {
+                flex: 0 0 clamp(280px, 35vw, 385px);
+                flex-direction: row;
+                justify-content: center;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .fullscreen-active .end-times-panel,
+            .fullscreen-active .control-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 0.8rem;
+            }
+
+            .fullscreen-active .control-area {
+                height: 100%;
+                justify-content: space-evenly;
+            }
+
+            .fullscreen-active button {
+                height: clamp(38px, 7vh, 48px);
+                font-size: 0.9rem;
+            }
+
+            .fullscreen-active .end-time-value {
+                font-size: clamp(1.5rem, 3.2vh, 2rem);
+            }
+        }
+
+        /* 3. Extremely small/narrow portrait screens: stack everything vertically */
+        @media (max-width: 500px) {
+            .fullscreen-active {
+                padding: 3.5rem 1rem 1rem;
+            }
+
+            .fullscreen-active .app-container {
+                height: calc(100vh - 4.5rem);
+                gap: 0.75rem;
+            }
+
+            .fullscreen-active .side-column {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .fullscreen-active .end-times-panel,
+            .fullscreen-active .control-container {
+                padding: 0.75rem;
+            }
+
+            .fullscreen-active .end-time-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+
+            .fullscreen-active .end-time-row + .end-time-row {
+                margin-top: 0.5rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                padding-top: 0.5rem;
+            }
+
+            .fullscreen-active .end-time-label {
+                margin-bottom: 0;
+            }
+
+            .fullscreen-active .end-time-value {
+                font-size: 1.6rem;
+            }
+
+            .fullscreen-active .control-area {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+
+            .fullscreen-active button {
+                height: 44px;
+                font-size: 0.85rem;
+                padding: 0 8px;
+            }
         }
     </style>
 </head>
@@ -1288,6 +1442,16 @@
 
         document.addEventListener('fullscreenchange', syncFullscreenLayout);
         document.addEventListener('webkitfullscreenchange', syncFullscreenLayout);
+
+        // Double-click background to toggle fullscreen
+        document.addEventListener('dblclick', (e) => {
+            // Avoid toggling when clicking interactive controls (buttons, inputs, select dropdowns, links)
+            if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select') || e.target.closest('a')) {
+                return;
+            }
+            const btn = document.getElementById('fullscreenBtn');
+            if (btn) btn.click();
+        });
 
         /* ------------ Keyboard shortcuts ------------ */
         document.addEventListener('keydown', (e) => {
