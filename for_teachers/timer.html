@@ -951,9 +951,6 @@
             }
 
             saveState();
-            if (!isValidTime) {
-                exitFullscreenIfNoTimerSet();
-            }
         }
 
         function resetTimer() {
@@ -1029,7 +1026,6 @@
             toggleBtn.disabled = true;
 
             clearState();
-            exitFullscreenIfNoTimerSet();
         }
 
         const resetToggleButton = () => {
@@ -1278,7 +1274,6 @@
 
         const syncFullscreenLayout = () => {
             document.body.classList.toggle('fullscreen-active', !!isDocumentFullscreen());
-            exitFullscreenIfNoTimerSet();
         };
 
         const exitFullscreen = () => {
@@ -1288,12 +1283,6 @@
                 document.webkitExitFullscreen();
             } else {
                 document.body.classList.remove('fullscreen-active');
-            }
-        };
-
-        const exitFullscreenIfNoTimerSet = () => {
-            if (initTotal === 0 && isDocumentFullscreen()) {
-                exitFullscreen();
             }
         };
 
