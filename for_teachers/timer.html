@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="stylesheet" href="/assets/fullscreen-button.css">
+    <script src="/assets/fullscreen-button.js" defer></script>
     <script src="/assets/sw-register.js" defer></script>
 <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -473,21 +475,11 @@
             display: none;
         }
 
-        .fullscreen-exit-btn {
+        .fullscreen-toggle {
             position: fixed;
             top: 20px;
             right: 20px;
-            width: auto;
-            height: auto;
-            padding: 0.75rem 1.5rem;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             z-index: 1000;
-            display: none;
-        }
-
-        .fullscreen-active .fullscreen-exit-btn {
-            display: flex;
         }
     </style>
 </head>
@@ -499,7 +491,7 @@
         </a>
     </div>
 
-    <button id="fullscreenExitBtn" class="fullscreen-exit-btn">Exit Fullscreen (Esc)</button>
+    <button id="fullscreenBtn" class="fullscreen-toggle" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
 
     <div class="app-container">
         <div class="timer-container">
@@ -572,7 +564,6 @@
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
         const clearBtn = document.getElementById('clearBtn');
-        const fullscreenExitBtn = document.getElementById('fullscreenExitBtn');
         const previewHint = document.getElementById('preview-hint');
 
         /* ------------- Live HH:MM clock ------------- */
@@ -1221,27 +1212,26 @@
         };
 
         /* ------------ Fullscreen functionality ------------ */
-        const enterFullscreen = () => {
-            document.body.classList.add('fullscreen-active');
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
+        const isDocumentFullscreen = () => (
+            document.fullscreenElement || document.webkitFullscreenElement
+        );
+
+        const syncFullscreenLayout = () => {
+            document.body.classList.toggle('fullscreen-active', !!isDocumentFullscreen());
         };
 
         const exitFullscreen = () => {
-            document.body.classList.remove('fullscreen-active');
             if (document.fullscreenElement && document.exitFullscreen) {
                 document.exitFullscreen().catch(() => {});
+            } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else {
+                document.body.classList.remove('fullscreen-active');
             }
         };
 
-        fullscreenExitBtn.onclick = exitFullscreen;
-
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                document.body.classList.remove('fullscreen-active');
-            }
-        });
+        document.addEventListener('fullscreenchange', syncFullscreenLayout);
+        document.addEventListener('webkitfullscreenchange', syncFullscreenLayout);
 
         /* ------------ Keyboard shortcuts ------------ */
         document.addEventListener('keydown', (e) => {
@@ -1255,7 +1245,7 @@
                 toggleBtn.click();
             } else if (e.code === 'Escape') {
                 e.preventDefault();
-                if (document.body.classList.contains('fullscreen-active')) {
+                if (isDocumentFullscreen()) {
                     exitFullscreen();
                 } else if (setResetBtn.dataset.state === 'reset') {
                     resetTimer();
