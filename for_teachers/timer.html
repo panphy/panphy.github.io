@@ -695,6 +695,65 @@
                 padding: 0 8px;
             }
         }
+
+        /* Custom Confirmation Dialog */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: min(400px, calc(100vw - 3rem));
+            text-align: center;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .confirm-overlay.show .confirm-card {
+            transform: scale(1);
+        }
+
+        .confirm-card p {
+            font-size: 1.2rem;
+            margin: 0 0 1.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .confirm-actions button {
+            flex: 1;
+            height: 48px;
+            font-size: 1rem;
+        }
     </style>
 </head>
 
@@ -753,6 +812,16 @@
             </div>
         </div>
     </div>
+    <div id="confirmDialog" class="confirm-overlay" aria-hidden="true" role="dialog" aria-labelledby="confirmMessage">
+        <div class="confirm-card">
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="confirm-actions">
+                <button id="confirmCancelBtn" class="btn-clear">Cancel</button>
+                <button id="confirmYesBtn" class="btn-reset">Yes</button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>&copy; <a href="https://panphy.github.io/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a> |
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
@@ -1282,12 +1351,43 @@
 
         const isTimerRunning = () => timerInterval !== null && !paused;
 
-        const confirmRunningTimerAction = (actionName) => {
-            if (!isTimerRunning()) {
-                return true;
-            }
+        const showConfirmDialog = (message) => {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmDialog');
+                const msgEl = document.getElementById('confirmMessage');
+                const yesBtn = document.getElementById('confirmYesBtn');
+                const cancelBtn = document.getElementById('confirmCancelBtn');
 
-            return window.confirm(`The timer is still running. Do you want to ${actionName} anyway?`);
+                msgEl.textContent = message;
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+
+                // Remember the active element to restore focus later
+                const previousActiveElement = document.activeElement;
+
+                // Focus Cancel button by default to prevent accidental triggers
+                cancelBtn.focus();
+
+                const cleanUp = (value) => {
+                    overlay.classList.remove('show');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    yesBtn.onclick = null;
+                    cancelBtn.onclick = null;
+                    overlay.onclick = null;
+                    if (previousActiveElement && previousActiveElement.focus) {
+                        previousActiveElement.focus();
+                    }
+                    resolve(value);
+                };
+
+                yesBtn.onclick = () => cleanUp(true);
+                cancelBtn.onclick = () => cleanUp(false);
+                overlay.onclick = (e) => {
+                    if (e.target === overlay) {
+                        cleanUp(false);
+                    }
+                };
+            });
         };
 
         const resumeTimer = () => {
@@ -1315,7 +1415,7 @@
         setResetBtn.dataset.state = 'set';
         toggleBtn.dataset.state = 'start';
 
-        setResetBtn.onclick = () => {
+        setResetBtn.onclick = async () => {
             if (setResetBtn.dataset.state === 'set') {
                 setTimer();
                 if (initTotal > 0) {
@@ -1325,8 +1425,9 @@
                     setResetBtn.classList.add('btn-reset');
                 }
             } else {
-                if (!confirmRunningTimerAction('reset it')) {
-                    return;
+                if (isTimerRunning()) {
+                    const confirmReset = await showConfirmDialog('The timer is still running. Do you want to reset it anyway?');
+                    if (!confirmReset) return;
                 }
                 resetTimer();
             }
@@ -1365,9 +1466,10 @@
             }
         };
 
-        clearBtn.onclick = () => {
-            if (!confirmRunningTimerAction('clear it')) {
-                return;
+        clearBtn.onclick = async () => {
+            if (isTimerRunning()) {
+                const confirmClear = await showConfirmDialog('The timer is still running. Do you want to clear it anyway?');
+                if (!confirmClear) return;
             }
 
             clearTimer();
@@ -1461,6 +1563,16 @@
 
         /* ------------ Keyboard shortcuts ------------ */
         document.addEventListener('keydown', (e) => {
+            // Handle escape/cancel key for confirm dialog if open
+            const confirmOverlay = document.getElementById('confirmDialog');
+            if (confirmOverlay && confirmOverlay.classList.contains('show')) {
+                if (e.code === 'Escape') {
+                    e.preventDefault();
+                    document.getElementById('confirmCancelBtn').click();
+                }
+                return;
+            }
+
             // Ignore if typing in input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
                 return;
