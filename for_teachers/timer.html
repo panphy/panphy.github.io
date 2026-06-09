@@ -143,60 +143,12 @@
 
         .info {
             color: var(--text-secondary);
-            min-height: 1.5em;
+            min-height: 3.6em;
         }
 
-        /* Schedule Grid Styling */
-        .schedule-grid {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 1.5rem 0 0.5rem;
-            flex-wrap: wrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
-        }
-
-        .schedule-grid.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .schedule-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 0.6rem 1rem;
-            flex: 1 1 100px;
-            max-width: 160px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .schedule-label {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.15rem;
-        }
-
-        .schedule-value {
-            font-family: var(--font-mono);
-            font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        #card-end .schedule-value {
-            color: var(--brand-primary);
-        }
-
-        #card-extra .schedule-value {
-            color: #e17055;
+        .info-line {
+            display: block;
+            margin: 0.2rem 0;
         }
 
         .inputs {
@@ -448,27 +400,6 @@
             display: none;
         }
 
-        .fullscreen-active .schedule-grid {
-            margin-top: 2rem;
-            gap: 2rem;
-        }
-
-        .fullscreen-active .schedule-card {
-            padding: 1.2rem 2rem;
-            border-radius: 18px;
-            max-width: 260px;
-            flex: 0 1 240px;
-        }
-
-        .fullscreen-active .schedule-label {
-            font-size: clamp(0.9rem, 2vw, 1.3rem);
-            margin-bottom: 0.4rem;
-        }
-
-        .fullscreen-active .schedule-value {
-            font-size: clamp(1.8rem, 4.5vw, 3.5rem);
-        }
-
         .fullscreen-exit-btn {
             position: fixed;
             top: 20px;
@@ -504,21 +435,7 @@
             <div class="time" id="original-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
             <div class="label" id="extra-label">25% Extra Time</div>
             <div class="time extra-time" id="extra-time" role="timer" aria-live="polite" aria-atomic="true">00:00:00</div>
-            <div class="schedule-grid" id="schedule-grid" aria-live="polite">
-                <div class="schedule-card" id="card-start">
-                    <div class="schedule-label">START</div>
-                    <div class="schedule-value" id="val-start">--:--</div>
-                </div>
-                <div class="schedule-card" id="card-end">
-                    <div class="schedule-label">END</div>
-                    <div class="schedule-value" id="val-end">--:--</div>
-                </div>
-                <div class="schedule-card" id="card-extra">
-                    <div class="schedule-label">EXTRA END</div>
-                    <div class="schedule-value" id="val-extra">--:--</div>
-                </div>
-            </div>
-            <div class="info" id="schedule-message" aria-live="polite"></div>
+            <div class="info" id="start-end-times" aria-live="polite"></div>
             <div id="preview-hint">Preview — click Set Time to confirm</div>
             <div class="inputs">
                 <label class="visually-hidden" for="hours">Hours</label>
@@ -563,8 +480,7 @@
         const originalEl = document.getElementById('original-time');
         const extraEl = document.getElementById('extra-time');
         const extraLabel = document.getElementById('extra-label');
-        const infoEl = document.getElementById('schedule-message');
-        const scheduleGrid = document.getElementById('schedule-grid');
+        const infoEl = document.getElementById('start-end-times');
 
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
@@ -652,37 +568,49 @@
         };
 
         const updateInfoDisplay = () => {
-            infoEl.textContent = ''; // Clear warnings
-
+            // Show placeholder content when timer is set but not started (prevents layout jump)
             if (!startTimestamp) {
-                scheduleGrid.classList.remove('visible');
+                if (initTotal > 0) {
+                    let html = '<span class="info-line" style="visibility: hidden;">Start: --:-- | End: --:--</span>';
+                    if (extraPercent > 0) {
+                        html += '<span class="info-line extra-time" style="visibility: hidden;">Extra End: --:--</span>';
+                    }
+                    infoEl.innerHTML = html;
+                } else {
+                    infoEl.innerHTML = '';
+                }
                 return;
             }
 
-            scheduleGrid.classList.add('visible');
+            let html = `<span class="info-line">Start: ${fClock(startTimestamp)}`;
 
-            // Set Start time
-            document.getElementById('val-start').textContent = fClock(startTimestamp);
-
-            // Set Normal End
-            if (endTime) {
-                document.getElementById('val-end').textContent = fClock(endTime);
-                document.getElementById('card-end').style.opacity = originalComplete ? '0.35' : '1';
+            if (endTime && !originalComplete) {
+                html += ` | End: ${fClock(endTime)}`;
             }
+            html += '</span>';
 
-            // Set Extra End
-            const cardExtra = document.getElementById('card-extra');
-            if (extraPercent > 0 && extraEndTime) {
-                cardExtra.style.display = 'flex';
-                document.getElementById('val-extra').textContent = fClock(extraEndTime);
-                cardExtra.style.opacity = extraComplete ? '0.35' : '1';
-            } else {
-                cardExtra.style.display = 'none';
+            if (extraPercent > 0) {
+                html += `<span class="info-line extra-time">`;
+                if (extraEndTime && !extraComplete) {
+                    html += `Extra End: ${fClock(extraEndTime)}`;
+                }
+                if (originalComplete && !extraComplete) {
+                    html += ' | Original complete';
+                }
+                if (extraComplete) {
+                    html += 'Extra time complete';
+                }
+                html += '</span>';
             }
 
             if (originalComplete && (extraPercent === 0 || extraComplete)) {
-                infoEl.textContent = 'Timer complete!';
+                html = '<span class="info-line">Timer complete!</span>';
+                if (extraPercent > 0) {
+                    html += '<span class="info-line" style="visibility: hidden;">&nbsp;</span>';
+                }
             }
+
+            infoEl.innerHTML = html;
         };
 
         /* ----------- localStorage persistence ----------- */
@@ -760,10 +688,7 @@
                     extraRemaining = state.extraRemaining;
                     paused = true;
                     startTimestamp = state.startTimestamp ? new Date(state.startTimestamp) : null;
-                    endTime = state.endTime ? new Date(state.endTime) : null;
-                    extraEndTime = state.extraEndTime ? new Date(state.extraEndTime) : null;
                     updateDisplays();
-                    updateInfoDisplay();
                     restoreButtonStates(state);
                     return true;
                 } else if (initTotal > 0 && !originalComplete) {
