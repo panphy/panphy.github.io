@@ -50,9 +50,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100dvh;
-            overflow: hidden;
-            padding: 3.5rem 1.5rem 1rem;
+            min-height: 100vh;
+            padding: 3.5rem 1.5rem 1.5rem;
         }
 
         a {
@@ -81,11 +80,9 @@
             flex-wrap: wrap;
             gap: 2rem;
             justify-content: center;
-            align-items: stretch;
+            align-items: flex-start;
             width: 100%;
-            max-width: none;
-            flex: 1;
-            min-height: 0;
+            max-width: 1200px;
         }
 
         .timer-container {
@@ -93,16 +90,12 @@
             border-radius: 20px;
             padding: 2rem 2rem 1.5rem;
             flex: 1 1 500px;
-            max-width: none;
+            max-width: 900px;
             text-align: center;
             box-shadow: var(--card-shadow);
             border: 1px solid var(--card-border);
             position: relative;
             overflow: hidden;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         .timer-container::before {
@@ -118,7 +111,7 @@
 
         #current-clock {
             font-family: var(--font-display);
-            font-size: clamp(1.4rem, min(2.2vw, 3.5vh), 2.8rem);
+            font-size: clamp(1.4rem, 2.2vw, 2.4rem);
             margin: 0;
             padding: 0.6rem 1rem;
             background: rgba(251, 146, 60, 0.15);
@@ -128,7 +121,7 @@
         }
 
         .time {
-            font-size: clamp(2.5rem, min(7vw, 16vh), 10rem);
+            font-size: clamp(2rem, 5.5vw, 5rem);
             font-weight: 700;
             margin: 0.5rem 0;
             letter-spacing: 1px;
@@ -141,7 +134,7 @@
 
         .label,
         .info {
-            font-size: clamp(0.95rem, min(1.4vw, 2.5vh), 1.5rem);
+            font-size: clamp(0.95rem, 1.3vw, 1.2rem);
             margin-top: 0.35rem;
         }
 
@@ -189,9 +182,9 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            padding: 1rem 1.8rem;
-            flex: 1 1 140px;
-            max-width: 320px;
+            padding: 0.8rem 1.2rem;
+            flex: 1 1 120px;
+            max-width: 200px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -199,16 +192,16 @@
         }
 
         .schedule-label {
-            font-size: clamp(0.8rem, min(1vw, 1.8vh), 1.1rem);
+            font-size: 0.8rem;
             color: var(--text-secondary);
             font-weight: 700;
             letter-spacing: 0.05em;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.2rem;
         }
 
         .schedule-value {
             font-family: var(--font-mono);
-            font-size: clamp(1.5rem, min(2.5vw, 5vh), 3.5rem);
+            font-size: clamp(1.3rem, 2.5vw, 2.2rem);
             font-weight: 600;
             color: var(--text-main);
         }
@@ -302,8 +295,7 @@
             border: 1px solid var(--card-border);
             position: relative;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            align-self: flex-end;
         }
 
         .control-container::before {
@@ -321,8 +313,6 @@
             display: flex;
             flex-direction: column;
             gap: 0.8rem;
-            flex: 1;
-            justify-content: center;
         }
 
         button {
@@ -449,7 +439,10 @@
         }
 
         footer {
-            display: none;
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
         @media (pointer: coarse) {
