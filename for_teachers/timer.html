@@ -449,7 +449,7 @@
         body.fullscreen-active {
             justify-content: center;
             overflow: hidden;
-            padding: 3.5rem 1.5rem 1.5rem; /* Increased top padding to prevent overlap with fullscreen button */
+            padding: 5rem 1.5rem 1.5rem; /* Increased top padding to move cards lower and avoid exit button overlap */
         }
 
         .fullscreen-active .app-container {
@@ -457,7 +457,7 @@
             gap: 1.25rem;
             max-width: none;
             width: min(1500px, calc(100vw - 3rem));
-            height: calc(100vh - 5rem); /* Adjusted for the new body padding */
+            height: calc(100vh - 6.5rem); /* Decreased container height to shrink the card heights slightly */
             align-items: stretch;
         }
 
@@ -508,7 +508,8 @@
             font-size: clamp(1.2rem, 2.6vh, 2rem);
         }
 
-        .fullscreen-active .inputs {
+        /* Show inputs in fullscreen mode only when in setting state */
+        .fullscreen-active:not(.is-setting) .inputs {
             display: none;
         }
 
@@ -521,7 +522,8 @@
             min-height: 2.8em;
         }
 
-        .fullscreen-active #preview-hint {
+        /* Show preview hint in fullscreen mode only when in setting state */
+        .fullscreen-active:not(.is-setting) #preview-hint {
             height: 0;
             margin: 0;
             overflow: hidden;
@@ -559,6 +561,7 @@
                 flex-direction: column;
                 flex-wrap: nowrap;
                 align-items: stretch;
+                height: calc(100vh - 7.5rem);
             }
 
             .fullscreen-active .side-column {
@@ -604,6 +607,7 @@
         @media (max-height: 640px) and (min-width: 641px) {
             .fullscreen-active .app-container {
                 gap: 1rem;
+                height: calc(100vh - 6.5rem);
             }
 
             .fullscreen-active .side-column {
@@ -641,11 +645,11 @@
         /* 3. Extremely small/narrow portrait screens: stack everything vertically */
         @media (max-width: 500px) {
             .fullscreen-active {
-                padding: 3.5rem 1rem 1rem;
+                padding: 5rem 1rem 1rem;
             }
 
             .fullscreen-active .app-container {
-                height: calc(100vh - 4.5rem);
+                height: calc(100vh - 6.5rem);
                 gap: 0.75rem;
             }
 
@@ -1078,6 +1082,7 @@
 
             const isValidTime = initTotal > 0;
             toggleBtn.disabled = !isValidTime;
+            document.body.classList.toggle('is-setting', !isValidTime);
 
             // Clear inputs immediately
             hoursInput.value = '';
@@ -1178,6 +1183,7 @@
             toggleBtn.classList.remove('btn-pause');
             toggleBtn.classList.add('btn-start');
             toggleBtn.disabled = true;
+            document.body.classList.add('is-setting');
 
             clearState();
         }
@@ -1513,6 +1519,7 @@
             toggleBtn.disabled = true;
         }
         updateExtraLabel();
+        document.body.classList.toggle('is-setting', initTotal === 0);
     </script>
 </body>
 
