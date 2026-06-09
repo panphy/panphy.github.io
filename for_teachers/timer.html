@@ -208,7 +208,7 @@
             background: var(--card-bg);
             border-radius: 20px;
             padding: 2rem 1.5rem 1.5rem;
-            flex: 0 0 140px;
+            width: 140px;
             min-width: 140px;
             text-align: center;
             box-shadow: var(--card-shadow);
@@ -216,6 +216,66 @@
             position: relative;
             overflow: hidden;
             align-self: flex-end;
+        }
+
+        .side-column {
+            flex: 0 0 180px;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .end-times-panel {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.4rem 1.2rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .end-times-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            opacity: 0.9;
+        }
+
+        .end-time-row + .end-time-row {
+            margin-top: 1.2rem;
+        }
+
+        .end-time-label {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .end-time-value {
+            display: block;
+            color: var(--text-main);
+            font-size: clamp(2rem, 3.2vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .end-time-value.extra-time {
+            color: #e17055;
         }
 
         .control-container::before {
@@ -340,7 +400,20 @@
             }
 
             .control-container {
+                width: 100%;
                 align-self: auto;
+            }
+        }
+
+        @media(max-width:720px) {
+            .side-column {
+                flex: 1 1 100%;
+                align-self: auto;
+                width: 100%;
+            }
+
+            .end-times-panel {
+                max-width: none;
             }
         }
 
@@ -368,7 +441,7 @@
         /* Fullscreen styles */
         .fullscreen-active .logo-container,
         .fullscreen-active footer,
-        .fullscreen-active .control-container {
+        .fullscreen-active .side-column {
             display: none;
         }
 
@@ -454,11 +527,23 @@
             </div>
             <span id="time-input-hint" class="visually-hidden">Enter hours (0-23), minutes (0-59), and seconds (0-59)</span>
         </div>
-        <div class="control-container">
-            <div class="control-area">
-                <button id="toggleBtn" class="btn-start">Start</button>
-                <button id="setResetBtn" class="btn-set">Set&nbsp;Time</button>
-                <button id="clearBtn" class="btn-clear">Clear<br>Timer</button>
+        <div class="side-column" aria-label="Timer controls and end times">
+            <aside class="end-times-panel" aria-live="polite">
+                <div class="end-time-row">
+                    <span class="end-time-label">End Time</span>
+                    <span class="end-time-value" id="end-time-display">--:--</span>
+                </div>
+                <div class="end-time-row">
+                    <span class="end-time-label">Extra End Time</span>
+                    <span class="end-time-value extra-time" id="extra-end-time-display">--:--</span>
+                </div>
+            </aside>
+            <div class="control-container">
+                <div class="control-area">
+                    <button id="toggleBtn" class="btn-start">Start</button>
+                    <button id="setResetBtn" class="btn-set">Set&nbsp;Time</button>
+                    <button id="clearBtn" class="btn-clear">Clear<br>Timer</button>
+                </div>
             </div>
         </div>
     </div>
@@ -481,6 +566,8 @@
         const extraEl = document.getElementById('extra-time');
         const extraLabel = document.getElementById('extra-label');
         const infoEl = document.getElementById('start-end-times');
+        const endTimeDisplay = document.getElementById('end-time-display');
+        const extraEndTimeDisplay = document.getElementById('extra-end-time-display');
 
         const setResetBtn = document.getElementById('setResetBtn');
         const toggleBtn = document.getElementById('toggleBtn');
@@ -568,6 +655,9 @@
         };
 
         const updateInfoDisplay = () => {
+            endTimeDisplay.textContent = endTime ? fClock(endTime) : '--:--';
+            extraEndTimeDisplay.textContent = extraPercent > 0 && extraEndTime ? fClock(extraEndTime) : '--:--';
+
             // Show placeholder content when timer is set but not started (prevents layout jump)
             if (!startTimestamp) {
                 if (initTotal > 0) {
