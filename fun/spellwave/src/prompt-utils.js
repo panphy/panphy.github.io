@@ -8,7 +8,7 @@ const SPELLING_ALTS = [
   ['fibre', 'fiber'],
   ['ionise', 'ionize'],
   ['ionising', 'ionizing'],
-  ['ionising', 'ionization'],
+  ['ionisation', 'ionization'],
   ['magnetise', 'magnetize'],
   ['analyse', 'analyze'],
   ['polarise', 'polarize'],

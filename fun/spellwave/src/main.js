@@ -47,11 +47,9 @@ const endingReplay = document.getElementById('endingReplay');
 const endingSkip = document.getElementById('endingSkip');
 let endingFX = null;
 const endScore = document.getElementById('endScore');
-const endWpm = document.getElementById('endWpm');
 const endAccuracy = document.getElementById('endAccuracy');
 const endStreak = document.getElementById('endStreak');
 const endMimics = document.getElementById('endMimics');
-const endGrade = document.getElementById('endGrade');
 const endHealth = document.getElementById('endHealth');
 const endTime = document.getElementById('endTime');
 const supabaseScript = document.getElementById('supabaseScript');
@@ -61,6 +59,7 @@ const swInitialsModal = document.getElementById('swInitialsModal');
 const swInitialsInput = document.getElementById('swInitialsInput');
 const swInitialsError = document.getElementById('swInitialsError');
 const swSubmitInitials = document.getElementById('swSubmitInitials');
+const swSkipInitials = document.getElementById('swSkipInitials');
 const swModalScore = document.getElementById('swModalScore');
 
 
@@ -89,17 +88,17 @@ const MINION_DAMAGE = 2;
 const BOSS_CONTACT_DAMAGE = MAX_LIFE;
 const BOSS_SHOTS_PER_DAMAGE = 2;
 const BOSS_SHOT_DAMAGE = 1;
-const BOSS_FIRST_SHOT_DELAY = 2.6;
-const BOSS_SHOT_INTERVAL = 4.2;
+// Tuned so rocks alone take slightly longer to kill a full-health player than a
+// boss takes to walk from reveal to the wall — a boss leak must stay reachable.
+const BOSS_FIRST_SHOT_DELAY = 3.4;
+const BOSS_SHOT_INTERVAL = 6.0;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
-const MIN_PROJECTILE_SPACING = 1.6;
+const MIN_PROJECTILE_SPACING = 2.6;
 const BOSSES_PER_WAVE = 3;
 const FINAL_WAVE_NUMBER = 10;
-const FINAL_WAVE_NORMAL_COUNT = 0;
 const FINAL_WAVE_BOSS_COUNT = 10;
-const FINAL_WAVE_TOTAL_COUNT = 16;
 const KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
@@ -460,6 +459,7 @@ let firstMimicHintShown = false;
 let godMode = false;
 let godModeUsedThisRun = false;
 let potionCheatUsedThisRun = false;
+let finalWaveCheatUsedThisRun = false;
 let killedByBoss = false;
 let inputTrace = '';
 let streak = 0;
@@ -682,6 +682,9 @@ if (swInitialsInput) {
 if (swSubmitInitials) {
   swSubmitInitials.addEventListener('click', swHandleSubmitInitials);
 }
+if (swSkipInitials) {
+  swSkipInitials.addEventListener('click', () => swHideInitialsModal());
+}
 setPauseButtonState(true, true);
 updateFullscreenButton();
 updatePhaseDisplay();
@@ -815,6 +818,7 @@ function startGame() {
   // The potion cheat is cleared by potionsSystem.clear() below, so a fresh run starts
   // ranked; it only becomes unranked if the player re-enters the cheat mid-run.
   potionCheatUsedThisRun = false;
+  finalWaveCheatUsedThisRun = false;
   killedByBoss = false;
   inputTrace = '';
   document.body.classList.remove('is-god-mode');
@@ -880,6 +884,7 @@ function pauseGame() {
   stopMusicLoop();
   mode = 'paused';
   cancelFrame();
+  suspendChainLightningTimers();
   document.body.classList.add('is-paused');
   setPauseButtonState(false, false);
   showMessage('PAUSED', 'Wave Paused', `Score ${formatScore(score)}`, 'Resume', 'Take a breath — press Resume when ready.');
@@ -890,6 +895,7 @@ function resumeGame() {
   if (mode !== 'paused') return;
   playStartSound();
   mode = 'running';
+  resumeChainLightningTimers();
   document.body.classList.remove('is-paused');
   startMusicLoop(false);
   lastFrameTime = 0;
@@ -910,7 +916,7 @@ function endGame() {
   startMusicLoop(false);
   setPauseButtonState(true, true);
   document.body.classList.remove('is-running');
-  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun;
+  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
   if (!isUnranked && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
@@ -927,6 +933,9 @@ function endGame() {
   updatePhaseDisplay();
   updateHud(true);
   swHandleLeaderboard(score);
+  // Restart the idle frame loop — endGame can arrive via the boss_killing timeout,
+  // during which scheduleFrame refuses to run and the loop is left dead.
+  scheduleFrame();
 }
 
 function showMessage(kicker, title, scoreText, buttonText, copyText) {
@@ -968,10 +977,17 @@ function showWebGLUnavailable() {
 }
 
 function handleKeyDown(event) {
-  if (swIsInitialsModalOpen()) return;
+  if (swIsInitialsModalOpen()) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      swHideInitialsModal();
+    }
+    return;
+  }
   resumeAudio();
 
-  // Konami code detection — runs in all game states
+  // Konami code detection — runs in all game states. Mid-run, the keys still
+  // reach the potion/typing handlers below; the cheat tolerates that noise.
   konamiBuffer.push(event.key);
   if (konamiBuffer.length > KONAMI_SEQUENCE.length) konamiBuffer.shift();
   if (konamiBuffer.length === KONAMI_SEQUENCE.length && KONAMI_SEQUENCE.every((k, i) => k === konamiBuffer[i])) {
@@ -1011,6 +1027,9 @@ function handleKeyDown(event) {
   }
 
   if (mode !== 'running') return;
+
+  // Leave browser/system shortcuts (Cmd+R, Ctrl+C, Alt+Left, ...) untouched.
+  if (event.metaKey || event.ctrlKey || event.altKey) return;
 
   if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(event.key)) {
     event.preventDefault();
@@ -1232,6 +1251,7 @@ function leakEnemy(enemy) {
   }
 
 
+  const wasActiveTarget = activeTarget === enemy;
   let wasBlocked = false;
   if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
     wasBlocked = potionsSystem.blockLeak();
@@ -1254,8 +1274,9 @@ function leakEnemy(enemy) {
   spawnDebris(new THREE.Vector3(enemy.group.position.x, 1.2, WALL_Z), enemy.type, enemy.isBoss);
   if (isFinalWave() && enemy.isBoss) bossesDefeated += 1;
   removeEnemy(enemy);
-  typedBuffer = '';
-  activeTarget = null;
+  // Keep typing progress on other targets — only reset when the leaked enemy
+  // was the one being typed (matches the medic/mimic leak behaviour).
+  if (wasActiveTarget) typedBuffer = '';
   updateHud(true);
   updateTypedDisplay();
   if (!godMode && health <= 0) {
@@ -2242,7 +2263,7 @@ function updateHud(force) {
   if (!force && hudTimer > 0) return;
   hudTimer = 6;
   scoreValue.textContent = formatScore(score);
-  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun;
+  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
   bestValue.textContent = formatScore(isUnranked ? bestScore : Math.max(bestScore, score));
   updateLifeMeter(force);
   waveValue.textContent = String(waveSet);
@@ -4087,7 +4108,7 @@ function startEndingSequence() {
   clearEffects();
   updatePhaseDisplay();
 
-  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun;
+  const isUnranked = godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun;
   if (!isUnranked && score > bestScore) {
     bestScore = score;
     saveBestScore(score);
@@ -4168,35 +4189,18 @@ function animateCounter(el, from, to, duration, format = v => String(v)) {
 
 function getEndingStats() {
   const gameSeconds = Math.max(1, endingStartTime || elapsed || gameTimeSeconds);
-  const wpm = Math.round((defeatedCount * 60) / gameSeconds);
   const accuracy = typedAttempts > 0
     ? Math.round(((typedAttempts - mistakeCount) / typedAttempts) * 100)
     : 100;
   const healthHearts = formatHeartCount(health);
-  const grade = calculateEndingGrade({ accuracy, wpm, health });
   return {
     score,
-    wpm,
     accuracy,
     peakStreak,
     mimicsLooted,
-    grade,
     healthHearts,
     time: formatRunTime(gameSeconds),
   };
-}
-
-function calculateEndingGrade({ accuracy, wpm, health }) {
-  let grade = 4;
-  if (accuracy >= 72) grade += 1;
-  if (accuracy >= 82) grade += 1;
-  if (accuracy >= 90) grade += 1;
-  if (wpm >= 14) grade += 1;
-  if (wpm >= 22) grade += 1;
-  if (health >= MAX_LIFE * 0.7) grade += 1;
-  if (accuracy < 62) grade -= 1;
-  if (health <= 2) grade -= 1;
-  return THREE.MathUtils.clamp(grade, 1, 9);
 }
 
 function formatRunTime(seconds) {
@@ -4210,18 +4214,14 @@ function setEndingStats(stats, animate) {
   if (!stats) return;
   if (animate) {
     animateCounter(endScore, 0, stats.score, 1400);
-    animateCounter(endWpm, 0, stats.wpm, 1000, v => `${v}`);
     animateCounter(endAccuracy, 0, stats.accuracy, 1000, v => `${v}%`);
     animateCounter(endStreak, 0, stats.peakStreak, 900);
     animateCounter(endMimics, 0, stats.mimicsLooted, 850);
-    animateCounter(endGrade, 0, stats.grade, 1100, v => `${v}`);
   } else {
     if (endScore) endScore.textContent = '0';
-    if (endWpm) endWpm.textContent = '0';
     if (endAccuracy) endAccuracy.textContent = '0%';
     if (endStreak) endStreak.textContent = '0';
     if (endMimics) endMimics.textContent = '0';
-    if (endGrade) endGrade.textContent = '0';
   }
   if (endHealth) endHealth.textContent = `${stats.healthHearts}/${HEART_COUNT}`;
   if (endTime) endTime.textContent = stats.time;
@@ -4264,11 +4264,14 @@ function activateFinalWaveCheat() {
     waveClearDelayTimer = 0;
     mode = 'running';
     document.body.classList.add('is-running');
+    document.body.classList.remove('is-paused');
     messagePanel.hidden = true;
     messagePanel.classList.remove('is-cleared');
     setPauseButtonState(true, false);
+    startMusicLoop(false);
   }
 
+  finalWaveCheatUsedThisRun = true;
   waveSet = FINAL_WAVE_NUMBER;
   health = savedHealth;
   prepareWavePlan();
@@ -4276,6 +4279,7 @@ function activateFinalWaveCheat() {
   showBanner('CHEAT CODE ACTIVATED', 'mimic-hint');
   updateHud(true);
   focusKeyboard();
+  scheduleFrame();
 }
 
 function advanceWaveSet() {
@@ -4604,21 +4608,42 @@ function triggerChainLightning(firstEnemy) {
   }
 }
 
-function scheduleChainLightningTimer(callback, delay) {
-  const timerId = window.setTimeout(() => {
-    const index = chainLightningTimers.indexOf(timerId);
+function armChainLightningTimer(entry, delay) {
+  entry.fireAt = performance.now() + delay;
+  entry.id = window.setTimeout(() => {
+    const index = chainLightningTimers.indexOf(entry);
     if (index >= 0) chainLightningTimers.splice(index, 1);
-    callback();
+    entry.callback();
   }, delay);
-  chainLightningTimers.push(timerId);
-  return timerId;
+}
+
+function scheduleChainLightningTimer(callback, delay) {
+  const entry = { callback, id: 0, fireAt: 0 };
+  armChainLightningTimer(entry, delay);
+  chainLightningTimers.push(entry);
+  return entry.id;
 }
 
 function clearChainLightningTimers() {
-  for (const timerId of chainLightningTimers) {
-    window.clearTimeout(timerId);
+  for (const entry of chainLightningTimers) {
+    window.clearTimeout(entry.id);
   }
   chainLightningTimers = [];
+}
+
+// Pausing must not let the chain sequence resolve behind the pause overlay,
+// so in-flight timers are halted and re-armed with their remaining delay.
+function suspendChainLightningTimers() {
+  for (const entry of chainLightningTimers) {
+    window.clearTimeout(entry.id);
+    entry.remainingDelay = Math.max(0, entry.fireAt - performance.now());
+  }
+}
+
+function resumeChainLightningTimers() {
+  for (const entry of chainLightningTimers) {
+    armChainLightningTimer(entry, entry.remainingDelay ?? 0);
+  }
 }
 
 function releaseChainBeams() {
@@ -5145,7 +5170,7 @@ async function swHandleSubmitInitials() {
 }
 
 function swHandleLeaderboard(finalScore) {
-  if (godModeUsedThisRun || potionCheatUsedThisRun) return;
+  if (godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun) return;
   const sanitized = swSanitizeScore(finalScore);
   if (sanitized === null) return;
   if (swCheckIfHighScore(sanitized)) swShowInitialsModal(sanitized);

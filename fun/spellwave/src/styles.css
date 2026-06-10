@@ -2486,47 +2486,6 @@ body:not(.time-frozen) #gameCanvas {
     0 12px 34px rgba(0, 0, 0, 0.22);
 }
 
-.ending-stat-grade {
-  background:
-    radial-gradient(circle at 50% 24%, rgba(255, 238, 166, 0.24), transparent 45%),
-    linear-gradient(180deg, rgba(255, 226, 139, 0.18), rgba(255, 255, 255, 0.045));
-  border-color: rgba(255, 226, 139, 0.42);
-}
-
-.game-ending.phase-stats .ending-stat-grade,
-.game-ending.phase-replay .ending-stat-grade {
-  animation: grade-ceremony 2.4s 0.75s ease-out both;
-}
-
-@keyframes grade-ceremony {
-  0% {
-    transform: scale(0.88);
-    box-shadow: 0 0 0 0 rgba(255, 226, 139, 0);
-    border-color: rgba(255, 226, 139, 0.42);
-  }
-  35% {
-    transform: scale(1.06);
-    box-shadow:
-      0 0 36px 4px rgba(255, 226, 139, 0.55),
-      0 0 80px 8px rgba(255, 180, 80, 0.25);
-    border-color: rgba(255, 226, 139, 0.85);
-  }
-  65% {
-    transform: scale(1.02);
-    box-shadow:
-      0 0 24px 2px rgba(255, 226, 139, 0.38),
-      0 0 55px 6px rgba(255, 180, 80, 0.18);
-    border-color: rgba(255, 226, 139, 0.65);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow:
-      0 0 14px 1px rgba(255, 226, 139, 0.22),
-      0 0 32px 4px rgba(255, 180, 80, 0.10);
-    border-color: rgba(255, 226, 139, 0.50);
-  }
-}
-
 .stat-label {
   font-family: var(--font-pixel);
   font-size: clamp(0.42rem, 0.8vw, 0.5rem);
@@ -2541,16 +2500,6 @@ body:not(.time-frozen) #gameCanvas {
   font-weight: 700;
   color: #fff;
   text-shadow: 0 0 18px rgba(128, 185, 255, 0.38);
-}
-
-.ending-stat-grade .stat-value {
-  font-family: var(--font-pixel);
-  font-size: clamp(1.5rem, 3vw, 2.4rem);
-  line-height: 1.1;
-  color: #ffe18a;
-  text-shadow:
-    0 0 16px rgba(255, 226, 139, 0.88),
-    0 0 38px rgba(95, 154, 255, 0.42);
 }
 
 .ending-run-summary {
@@ -2681,10 +2630,6 @@ body:not(.time-frozen) #gameCanvas {
 
   .stat-value {
     font-size: clamp(0.72rem, 1.4vw, 1.05rem);
-  }
-
-  .ending-stat-grade .stat-value {
-    font-size: clamp(1.3rem, 2.5vw, 2.0rem);
   }
 
   .ending-run-summary {
@@ -3047,4 +2992,18 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   cursor: progress;
   opacity: 0.52;
   transform: none;
+}
+
+.sw-initials-card .sw-skip-button {
+  margin-top: 8px;
+  background: transparent;
+  border-color: rgba(242, 240, 223, 0.22);
+  color: rgba(242, 240, 223, 0.66);
+  font-weight: 600;
+}
+
+.sw-initials-card .sw-skip-button:hover {
+  filter: none;
+  border-color: rgba(242, 240, 223, 0.45);
+  color: rgba(242, 240, 223, 0.92);
 }
