@@ -99,10 +99,10 @@ const MIN_PROJECTILE_SPACING = 2.6;
 const BOSSES_PER_WAVE = 3;
 const FINAL_WAVE_NUMBER = 10;
 const FINAL_WAVE_BOSS_COUNT = 10;
-const KONAMI_SEQUENCE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+const COSMIC_WAVE_THRESHOLD = 99149236;
 const MEDIC_HEAL_AMOUNT = 2;
-const EMBER_HEIGHT_DELTAS = [35 * 3, 50 * 2, 20 * 5, 56.5 * 2, 25 * 4];
-const PARTICLE_GRAVITY_COEFFS = [21 * 5, 20 * 5, 10.7 * 10, 34 * 3, 9.7 * 10];
+const EMBER_HEIGHT_DELTAS = 1819600217;
+const PARTICLE_GRAVITY_COEFFS = 2242416284;
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
   normalBase: 7,
@@ -445,7 +445,7 @@ let waveClearDelayTimer = 0;
 let waveBossOrder = [];
 let finalWaveQueue = [];
 let finalWaveQueueIndex = 0;
-let konamiBuffer = [];
+let cosmicBuffer = [];
 let bossWordsThisSet = [];
 let previewableWordsThisSet = [];
 let bossPreviewSchedule = new Map();
@@ -986,12 +986,12 @@ function handleKeyDown(event) {
   }
   resumeAudio();
 
-  // Konami code detection — runs in all game states. Mid-run, the keys still
+  // Special sequence detection — runs in all game states. Mid-run, the keys still
   // reach the potion/typing handlers below; the cheat tolerates that noise.
-  konamiBuffer.push(event.key);
-  if (konamiBuffer.length > KONAMI_SEQUENCE.length) konamiBuffer.shift();
-  if (konamiBuffer.length === KONAMI_SEQUENCE.length && KONAMI_SEQUENCE.every((k, i) => k === konamiBuffer[i])) {
-    konamiBuffer = [];
+  cosmicBuffer.push(event.key);
+  if (cosmicBuffer.length > 10) cosmicBuffer.shift();
+  if (cosmicBuffer.length === 10 && fnv1a(cosmicBuffer.join(',')) === COSMIC_WAVE_THRESHOLD) {
+    cosmicBuffer = [];
     activateFinalWaveCheat();
     return;
   }
@@ -1133,17 +1133,25 @@ function enterCharacter(character) {
   updateTypedDisplay();
 }
 
+// Simple FNV-1a 32-bit hash function
+function fnv1a(str) {
+  let hash = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+  }
+  return hash >>> 0;
+}
+
 function checkCheatCode(character) {
   inputTrace = (inputTrace + character.toLowerCase()).slice(-5);
   if (inputTrace.length < 5) return;
 
-  const matchIddqd = EMBER_HEIGHT_DELTAS.every((code, idx) => inputTrace.charCodeAt(idx) === code);
-  const matchIdkfa = PARTICLE_GRAVITY_COEFFS.every((code, idx) => inputTrace.charCodeAt(idx) === code);
-
-  if (matchIddqd) {
+  const traceHash = fnv1a(inputTrace);
+  if (traceHash === EMBER_HEIGHT_DELTAS) {
     toggleGodMode();
     inputTrace = '';
-  } else if (matchIdkfa) {
+  } else if (traceHash === PARTICLE_GRAVITY_COEFFS) {
     potionsSystem.togglePotionCheat();
     if (potionsSystem.isPotionCheatActive()) {
       potionCheatUsedThisRun = true;
