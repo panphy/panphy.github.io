@@ -38,6 +38,15 @@ const buildGaussianEquation = typeof fitCore.buildGaussianEquation === 'function
 const minMaxFinite = typeof fitCore.minMaxFinite === 'function'
 	? fitCore.minMaxFinite
 	: missingFitCoreFunction('minMaxFinite');
+const fromFitCore = (name) => (typeof fitCore[name] === 'function' ? fitCore[name] : missingFitCoreFunction(name));
+const evaluateSinusoidal = fromFitCore('evaluateSinusoidal');
+const solveSinusoidal = fromFitCore('solveSinusoidal');
+const evaluateGaussian = fromFitCore('evaluateGaussian');
+const solveGaussian = fromFitCore('solveGaussian');
+const evaluateCustomExpression = fromFitCore('evaluateCustomExpression');
+const buildCustomResidualFn = fromFitCore('buildCustomResidualFn');
+const buildCustomJacobianFn = fromFitCore('buildCustomJacobianFn');
+const solveCustomMultiStart = fromFitCore('solveCustomMultiStart');
 
 const debouncedRefreshCustomFitDefinition = debounce(() => {
 	refreshCustomFitDefinition({ preserveUserValues: true });
@@ -646,21 +655,6 @@ function handleCustomFitParameterInput(event) {
 	const state = ensureCustomFitState(activeSet);
 	state.initialValues[parameterName] = input.value;
 	if (typeof scheduleSaveState === 'function') scheduleSaveState();
-}
-
-function evaluateCustomFitExpression(compiledExpression, parameterNames, parameterValues, xValue) {
-	const scope = { x: xValue };
-	for (let index = 0; index < parameterNames.length; index++) {
-		scope[parameterNames[index]] = parameterValues[index];
-	}
-
-	try {
-		const raw = compiledExpression.evaluate(scope);
-		const numeric = Number(raw);
-		return Number.isFinite(numeric) ? numeric : NaN;
-	} catch {
-		return NaN;
-	}
 }
 
 function normalizeCustomFitEquationSigns(latexExpression) {
@@ -1337,28 +1331,6 @@ async function fitAdvancedCurve() {
 	}
 }
 
-function solveCustomFitMainThread(data, starts, residualFn, jacobianFn) {
-	let bestParams = null;
-	let bestCost = Infinity;
-
-	for (const start of starts) {
-		const result = levenbergMarquardt(
-			data,
-			start,
-			residualFn,
-			jacobianFn,
-			{ maxIterations: 350, tolerance: 1e-10 }
-		);
-		if (!Number.isFinite(result.cost)) continue;
-		if (result.cost < bestCost) {
-			bestCost = result.cost;
-			bestParams = result.params;
-		}
-	}
-
-	return { params: bestParams, cost: bestCost };
-}
-
 async function fitCustomCurve() {
 	try {
 		if (typeof updateData === 'function') {
@@ -1391,35 +1363,8 @@ async function fitCustomCurve() {
 		}
 
 		const starts = buildCustomFitInitialCandidates(initialParams);
-		const residualFn = (params, points) => {
-			return points.map(({ x, y }) => {
-				const yPred = evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, params, x);
-				if (!Number.isFinite(yPred)) return CUSTOM_FIT_PENALTY;
-				return yPred - y;
-			});
-		};
-		const jacobianFn = (params, points) => {
-			const cols = analysis.parameterNames.length;
-			return points.map(({ x }) => {
-				const row = new Array(cols).fill(0);
-				for (let col = 0; col < cols; col++) {
-					const base = params[col];
-					const delta = Math.max(1e-6, Math.abs(base) * 1e-6);
-					const plus = params.slice();
-					const minus = params.slice();
-					plus[col] = base + delta;
-					minus[col] = base - delta;
-
-					const fPlus = evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, plus, x);
-					const fMinus = evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, minus, x);
-
-					if (Number.isFinite(fPlus) && Number.isFinite(fMinus)) {
-						row[col] = (fPlus - fMinus) / (2 * delta);
-					}
-				}
-				return row;
-			});
-		};
+		const residualFn = buildCustomResidualFn(analysis.compiledExpression, analysis.parameterNames, CUSTOM_FIT_PENALTY);
+		const jacobianFn = buildCustomJacobianFn(analysis.compiledExpression, analysis.parameterNames);
 
 		let solved = null;
 		beginFitControlsBusy();
@@ -1434,7 +1379,7 @@ async function fitCustomCurve() {
 					maxIterations: 350,
 					tolerance: 1e-10
 				},
-				() => solveCustomFitMainThread(data, starts, residualFn, jacobianFn)
+				() => solveCustomMultiStart(data, starts, residualFn, jacobianFn, { maxIterations: 350, tolerance: 1e-10 })
 			);
 		} finally {
 			endFitControlsBusy();
@@ -1458,7 +1403,7 @@ async function fitCustomCurve() {
 			return xMin + (i * xRange) / (CUSTOM_FIT_SAMPLE_POINTS - 1);
 		});
 		const fitFunction = (xInput) => {
-			return evaluateCustomFitExpression(analysis.compiledExpression, analysis.parameterNames, bestParams, xInput);
+			return evaluateCustomExpression(analysis.compiledExpression, analysis.parameterNames, bestParams, xInput);
 		};
 		const yFit = xFit.map(fitFunction);
 		const equation = buildCustomFitEquationLatex(analysis.parsedExpression, analysis.parameterNames, bestParams);
@@ -1991,112 +1936,6 @@ function normalizeWorkerCurve(rawX, rawY, fallbackX, evaluator) {
 	return { xFit, yFit };
 }
 
-function evaluateSinusoidalFunction(params, xValue) {
-	const A = Number(params.A);
-	const b = Number(params.b);
-	const k = Number(params.k);
-	const phi = Number(params.phi);
-	const c = Number(params.c);
-	return A * Math.exp(b * xValue) * Math.sin(k * xValue - phi) + c;
-}
-
-function solveSinusoidalFitMainThread(data, initialParams) {
-	const A0 = Number(initialParams.A);
-	const b0 = Number(initialParams.b);
-	const k0 = Number(initialParams.k);
-	const phi0 = Number(initialParams.phi);
-	const c0 = Number(initialParams.c);
-
-	// Model: y = A e^{b x} sin(k x - phi) + c
-	function residualFn(params, pts) {
-		const [A, b, k, phi, c] = params;
-		const PEN = 1e6;
-		return pts.map(({ x, y }) => {
-			try {
-				const expTerm = Math.exp(b * x);
-				const ang = k * x - phi;
-				const yPred = A * expTerm * Math.sin(ang) + c;
-				if (!Number.isFinite(yPred)) return PEN;
-				return yPred - y;
-			} catch {
-				return PEN;
-			}
-		});
-	}
-
-	function jacobianFn(params, pts) {
-		const [A, b, k, phi, c] = params;
-		return pts.map(({ x }) => {
-			let expTerm, sinTerm, cosTerm;
-			try {
-				expTerm = Math.exp(b * x);
-				const ang = k * x - phi;
-				sinTerm = Math.sin(ang);
-				cosTerm = Math.cos(ang);
-			} catch {
-				return [0, 0, 0, 0, 0];
-			}
-			let dA = expTerm * sinTerm;
-			let db = A * x * expTerm * sinTerm;
-			let dk = A * expTerm * x * cosTerm;
-			let dphi = -A * expTerm * cosTerm;
-			let dc = 1;
-
-			if (!Number.isFinite(dA)) dA = 0;
-			if (!Number.isFinite(db)) db = 0;
-			if (!Number.isFinite(dk)) dk = 0;
-			if (!Number.isFinite(dphi)) dphi = 0;
-
-			return [dA, db, dk, dphi, dc];
-		});
-	}
-
-	// Multi-start: try several k values to avoid local minima
-	const kCandidates = [k0];
-	if (k0 > 0) {
-		kCandidates.push(k0 * 0.667, k0 * 1.5, k0 * 2.0);
-	}
-
-	let bestResult = null;
-	let bestCost = Infinity;
-
-	for (const kCandidate of kCandidates) {
-		// Compute phase estimate for this k candidate
-		let sumS = 0, sumC = 0;
-		for (let j = 0; j < data.length; j++) {
-			const val = data[j].y - c0;
-			sumS += val * Math.sin(kCandidate * data[j].x);
-			sumC += val * Math.cos(kCandidate * data[j].x);
-		}
-		let phiCandidate = Math.atan2(-sumC, sumS);
-		if (!Number.isFinite(phiCandidate)) phiCandidate = phi0;
-
-		const candidateParams = [A0, b0, kCandidate, phiCandidate, c0];
-		const result = levenbergMarquardt(data, candidateParams, residualFn, jacobianFn, { maxIterations: 300, tolerance: 1e-10 });
-
-		if (result.cost < bestCost) {
-			bestCost = result.cost;
-			bestResult = result;
-		}
-	}
-	if (!bestResult || !Array.isArray(bestResult.params)) {
-		return null;
-	}
-
-	const [A, b, k, phi, c] = bestResult.params;
-	const xFit = buildFitDomainFromData(data, 300);
-	const params = { A, b, k, phi, c };
-	const yFit = xFit.map((xValue) => evaluateSinusoidalFunction(params, xValue));
-	const equation = buildSinusoidalEquation(params);
-
-	return {
-		params,
-		xFit,
-		yFit,
-		equation
-	};
-}
-
 async function performSinusoidalFit() {
 	try {
 		let A0 = parseFloat(document.getElementById('initial-A').value);
@@ -2137,7 +1976,7 @@ async function performSinusoidalFit() {
 					data,
 					initial: { A: A0, b: b0, k: k0, phi: phi0, c: c0 }
 				},
-				() => solveSinusoidalFitMainThread(data, { A: A0, b: b0, k: k0, phi: phi0, c: c0 })
+				() => solveSinusoidal(data, { A: A0, b: b0, k: k0, phi: phi0, c: c0 })
 			);
 		} finally {
 			endFitControlsBusy();
@@ -2169,7 +2008,7 @@ async function performSinusoidalFit() {
 			result ? result.xFit : null,
 			result ? result.yFit : null,
 			fallbackX,
-			(xValue) => evaluateSinusoidalFunction(normalizedParams, xValue)
+			(xValue) => evaluateSinusoidal(normalizedParams, xValue)
 		);
 		const xFit = curve.xFit;
 		const yFit = curve.yFit;
@@ -2179,7 +2018,7 @@ async function performSinusoidalFit() {
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation: equation };
 
-		const fitFunction = (xValue) => evaluateSinusoidalFunction(normalizedParams, xValue);
+		const fitFunction = (xValue) => evaluateSinusoidal(normalizedParams, xValue);
 		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex);
 		if (targetDatasetIndex === activeSet) {
 			plotGraph(xFit, yFit);
@@ -2190,93 +2029,6 @@ async function performSinusoidalFit() {
 	}
 }
 
-
-function evaluateGaussianFunction(params, xValue) {
-	const A = Number(params.A);
-	const mu = Number(params.mu);
-	const sigma = Number(params.sigma);
-	const c = Number(params.c);
-	return A * Math.exp(-((xValue - mu) ** 2) / (2 * sigma * sigma)) + c;
-}
-
-function solveGaussianFitMainThread(data, initialParams) {
-	let A0 = Number(initialParams.A);
-	let mu0 = Number(initialParams.mu);
-	let sigma0 = Number(initialParams.sigma);
-	const c0 = Number(initialParams.c);
-
-	if (sigma0 === 0) sigma0 = 1e-6;
-	if (sigma0 < 0) sigma0 = Math.abs(sigma0);
-
-	// Model: y = A exp(- (x-mu)^2 / (2 sigma^2)) + c
-	function residualFn(params, pts) {
-		const [A, mu, sigma, c] = params;
-		const PEN = 1e6;
-		if (!Number.isFinite(sigma) || sigma <= 0) {
-			return new Array(pts.length).fill(PEN);
-		}
-		const s2 = sigma * sigma;
-		return pts.map(({ x, y }) => {
-			try {
-				const d = x - mu;
-				const expo = -(d * d) / (2 * s2);
-				const e = Math.exp(expo);
-				const yPred = A * e + c;
-				if (!Number.isFinite(yPred)) return PEN;
-				return yPred - y;
-			} catch {
-				return PEN;
-			}
-		});
-	}
-
-	function jacobianFn(params, pts) {
-		const [A, mu, sigma] = params;
-		if (!Number.isFinite(sigma) || sigma <= 0) {
-			return pts.map(() => [0, 0, 0, 0]);
-		}
-		const s2 = sigma * sigma;
-		const s3 = s2 * sigma;
-		return pts.map(({ x }) => {
-			const d = x - mu;
-			let e;
-			try {
-				e = Math.exp(-(d * d) / (2 * s2));
-			} catch {
-				return [0, 0, 0, 0];
-			}
-			let dA = e;
-			let dMu = A * e * (d / s2);
-			let dSigma = A * e * ((d * d) / s3);
-			let dC = 1;
-
-			if (!Number.isFinite(dA)) dA = 0;
-			if (!Number.isFinite(dMu)) dMu = 0;
-			if (!Number.isFinite(dSigma)) dSigma = 0;
-
-			return [dA, dMu, dSigma, dC];
-		});
-	}
-
-	const initial = [A0, mu0, sigma0, c0];
-	const { params } = levenbergMarquardt(data, initial, residualFn, jacobianFn, { maxIterations: 300, tolerance: 1e-10 });
-	if (!Array.isArray(params)) return null;
-
-	let [A, mu, sigma, c] = params;
-	if (!Number.isFinite(sigma) || sigma <= 0) sigma = Math.max(1e-6, Math.abs(sigma0));
-
-	const xFit = buildFitDomainFromData(data, 300);
-	const normalizedParams = { A, mu, sigma, c };
-	const yFit = xFit.map((xValue) => evaluateGaussianFunction(normalizedParams, xValue));
-	const equation = buildGaussianEquation(normalizedParams);
-
-	return {
-		params: normalizedParams,
-		xFit,
-		yFit,
-		equation
-	};
-}
 
 async function performGaussianFit() {
 	try {
@@ -2309,7 +2061,7 @@ async function performGaussianFit() {
 					data,
 					initial: { A: A0, mu: mu0, sigma: sigma0, c: c0 }
 				},
-				() => solveGaussianFitMainThread(data, { A: A0, mu: mu0, sigma: sigma0, c: c0 })
+				() => solveGaussian(data, { A: A0, mu: mu0, sigma: sigma0, c: c0 })
 			);
 		} finally {
 			endFitControlsBusy();
@@ -2340,7 +2092,7 @@ async function performGaussianFit() {
 			result ? result.xFit : null,
 			result ? result.yFit : null,
 			fallbackX,
-			(xValue) => evaluateGaussianFunction(normalizedParams, xValue)
+			(xValue) => evaluateGaussian(normalizedParams, xValue)
 		);
 		const xFit = curve.xFit;
 		const yFit = curve.yFit;
@@ -2350,7 +2102,7 @@ async function performGaussianFit() {
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation: equation };
 
-		const fitFunction = (xValue) => evaluateGaussianFunction(normalizedParams, xValue);
+		const fitFunction = (xValue) => evaluateGaussian(normalizedParams, xValue);
 		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex);
 		if (targetDatasetIndex === activeSet) {
 			plotGraph(xFit, yFit);

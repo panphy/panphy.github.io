@@ -236,6 +236,238 @@
 		return equation;
 	}
 
+	// ---- Shared fit models (used by both the main thread and the worker) ----
+
+	function evaluateSinusoidal(params, xValue) {
+		const A = Number(params.A);
+		const b = Number(params.b);
+		const k = Number(params.k);
+		const phi = Number(params.phi);
+		const c = Number(params.c);
+		return A * Math.exp(b * xValue) * Math.sin(k * xValue - phi) + c;
+	}
+
+	// Solve y = A e^{bx} sin(kx - phi) + c with a small multi-start over k.
+	// Returns { params, xFit, yFit, equation } or null if it cannot converge.
+	function solveSinusoidal(data, initial, options = {}) {
+		const A0 = Number(initial.A);
+		const b0 = Number(initial.b);
+		const k0 = Number(initial.k);
+		const phi0 = Number(initial.phi);
+		const c0 = Number(initial.c);
+		const penalty = Number.isFinite(options.penalty) ? options.penalty : DEFAULT_PENALTY;
+		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 300;
+		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
+		const sampleCount = Number.isFinite(options.sampleCount) ? options.sampleCount : 300;
+
+		function residualFn(params, pts) {
+			const [A, b, k, phi, c] = params;
+			return pts.map(({ x, y }) => {
+				try {
+					const yPred = A * Math.exp(b * x) * Math.sin(k * x - phi) + c;
+					if (!Number.isFinite(yPred)) return penalty;
+					return yPred - y;
+				} catch {
+					return penalty;
+				}
+			});
+		}
+
+		function jacobianFn(params, pts) {
+			const [A, b, k, phi] = params;
+			return pts.map(({ x }) => {
+				try {
+					const expTerm = Math.exp(b * x);
+					const angle = k * x - phi;
+					const sinTerm = Math.sin(angle);
+					const cosTerm = Math.cos(angle);
+					return [
+						finiteOrZero(expTerm * sinTerm),
+						finiteOrZero(A * x * expTerm * sinTerm),
+						finiteOrZero(A * expTerm * x * cosTerm),
+						finiteOrZero(-A * expTerm * cosTerm),
+						1
+					];
+				} catch {
+					return [0, 0, 0, 0, 0];
+				}
+			});
+		}
+
+		const kCandidates = [...new Set(
+			[k0, k0 * 0.667, k0 * 1.5, k0 * 2.0].filter((value) => Number.isFinite(value) && value > 0)
+		)];
+
+		let best = null;
+		let bestCost = Infinity;
+		for (let index = 0; index < kCandidates.length; index++) {
+			const kCandidate = kCandidates[index];
+			let sumSin = 0;
+			let sumCos = 0;
+			for (let pointIndex = 0; pointIndex < data.length; pointIndex++) {
+				const val = data[pointIndex].y - c0;
+				sumSin += val * Math.sin(kCandidate * data[pointIndex].x);
+				sumCos += val * Math.cos(kCandidate * data[pointIndex].x);
+			}
+			let phiCandidate = Math.atan2(-sumCos, sumSin);
+			if (!Number.isFinite(phiCandidate)) phiCandidate = phi0;
+			const start = [A0, b0, kCandidate, phiCandidate, c0];
+			const result = levenbergMarquardt(data, start, residualFn, jacobianFn, { maxIterations, tolerance });
+			if (Number.isFinite(result.cost) && result.cost < bestCost) {
+				best = result;
+				bestCost = result.cost;
+			}
+		}
+
+		if (!best || !Array.isArray(best.params) || best.params.length !== 5) return null;
+		const params = {
+			A: Number(best.params[0]),
+			b: Number(best.params[1]),
+			k: Number(best.params[2]),
+			phi: Number(best.params[3]),
+			c: Number(best.params[4])
+		};
+		const xFit = buildFitDomainFromData(data, sampleCount);
+		const yFit = xFit.map((xValue) => evaluateSinusoidal(params, xValue));
+		return { params, xFit, yFit, equation: buildSinusoidalEquation(params) };
+	}
+
+	function evaluateGaussian(params, xValue) {
+		const A = Number(params.A);
+		const mu = Number(params.mu);
+		const sigma = Number(params.sigma);
+		const c = Number(params.c);
+		return A * Math.exp(-((xValue - mu) ** 2) / (2 * sigma * sigma)) + c;
+	}
+
+	// Solve y = A e^{-(x-mu)^2 / (2 sigma^2)} + c.
+	// Returns { params, xFit, yFit, equation } or null if it cannot converge.
+	function solveGaussian(data, initial, options = {}) {
+		const A0 = Number(initial.A);
+		const mu0 = Number(initial.mu);
+		let sigma0 = Number(initial.sigma);
+		const c0 = Number(initial.c);
+		if (sigma0 === 0) sigma0 = 1e-6;
+		if (sigma0 < 0) sigma0 = Math.abs(sigma0);
+		const penalty = Number.isFinite(options.penalty) ? options.penalty : DEFAULT_PENALTY;
+		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 300;
+		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
+		const sampleCount = Number.isFinite(options.sampleCount) ? options.sampleCount : 300;
+
+		function residualFn(params, pts) {
+			const [A, mu, sigma, c] = params;
+			if (!Number.isFinite(sigma) || sigma <= 0) return new Array(pts.length).fill(penalty);
+			const sigmaSq = sigma * sigma;
+			return pts.map(({ x, y }) => {
+				try {
+					const d = x - mu;
+					const yPred = A * Math.exp(-(d * d) / (2 * sigmaSq)) + c;
+					if (!Number.isFinite(yPred)) return penalty;
+					return yPred - y;
+				} catch {
+					return penalty;
+				}
+			});
+		}
+
+		function jacobianFn(params, pts) {
+			const [A, mu, sigma] = params;
+			if (!Number.isFinite(sigma) || sigma <= 0) return pts.map(() => [0, 0, 0, 0]);
+			const sigmaSq = sigma * sigma;
+			const sigmaCubed = sigmaSq * sigma;
+			return pts.map(({ x }) => {
+				try {
+					const d = x - mu;
+					const e = Math.exp(-(d * d) / (2 * sigmaSq));
+					return [
+						finiteOrZero(e),
+						finiteOrZero(A * e * (d / sigmaSq)),
+						finiteOrZero(A * e * ((d * d) / sigmaCubed)),
+						1
+					];
+				} catch {
+					return [0, 0, 0, 0];
+				}
+			});
+		}
+
+		const result = levenbergMarquardt(data, [A0, mu0, sigma0, c0], residualFn, jacobianFn, { maxIterations, tolerance });
+		if (!result || !Array.isArray(result.params) || result.params.length !== 4) return null;
+		let [A, mu, sigma, c] = result.params;
+		// Finite fallback when the solver returns a degenerate sigma.
+		if (!Number.isFinite(sigma) || sigma <= 0) sigma = Math.max(1e-6, Math.abs(sigma0));
+		const params = { A: Number(A), mu: Number(mu), sigma: Number(sigma), c: Number(c) };
+		const xFit = buildFitDomainFromData(data, sampleCount);
+		const yFit = xFit.map((xValue) => evaluateGaussian(params, xValue));
+		return { params, xFit, yFit, equation: buildGaussianEquation(params) };
+	}
+
+	// ---- Shared custom-formula fitting helpers ----
+
+	function evaluateCustomExpression(compiledExpression, parameterNames, parameterValues, xValue) {
+		const scope = { x: xValue };
+		for (let index = 0; index < parameterNames.length; index++) {
+			scope[parameterNames[index]] = parameterValues[index];
+		}
+		try {
+			const raw = compiledExpression.evaluate(scope);
+			const numeric = Number(raw);
+			return Number.isFinite(numeric) ? numeric : NaN;
+		} catch {
+			return NaN;
+		}
+	}
+
+	function buildCustomResidualFn(compiledExpression, parameterNames, penalty = DEFAULT_PENALTY) {
+		return (params, points) => points.map(({ x, y }) => {
+			const yPred = evaluateCustomExpression(compiledExpression, parameterNames, params, x);
+			if (!Number.isFinite(yPred)) return penalty;
+			return yPred - y;
+		});
+	}
+
+	function buildCustomJacobianFn(compiledExpression, parameterNames) {
+		const cols = parameterNames.length;
+		return (params, points) => points.map(({ x }) => {
+			const row = new Array(cols).fill(0);
+			for (let col = 0; col < cols; col++) {
+				const base = params[col];
+				const delta = Math.max(1e-6, Math.abs(base) * 1e-6);
+				const plus = params.slice();
+				const minus = params.slice();
+				plus[col] = base + delta;
+				minus[col] = base - delta;
+				const fPlus = evaluateCustomExpression(compiledExpression, parameterNames, plus, x);
+				const fMinus = evaluateCustomExpression(compiledExpression, parameterNames, minus, x);
+				if (Number.isFinite(fPlus) && Number.isFinite(fMinus)) {
+					row[col] = (fPlus - fMinus) / (2 * delta);
+				}
+			}
+			return row;
+		});
+	}
+
+	// Run Levenberg-Marquardt from each start, keeping the lowest-cost result.
+	function solveCustomMultiStart(data, starts, residualFn, jacobianFn, options = {}) {
+		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 350;
+		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
+		let bestParams = null;
+		let bestCost = Infinity;
+		for (let index = 0; index < starts.length; index++) {
+			const result = levenbergMarquardt(data, starts[index], residualFn, jacobianFn, { maxIterations, tolerance });
+			if (!Number.isFinite(result.cost)) continue;
+			if (result.cost < bestCost) {
+				bestCost = result.cost;
+				bestParams = result.params;
+			}
+		}
+		return { params: bestParams, cost: bestCost };
+	}
+
+	function finiteOrZero(value) {
+		return Number.isFinite(value) ? value : 0;
+	}
+
 	globalScope.PanPhyFitCore = Object.freeze({
 		transpose,
 		multiply,
@@ -245,6 +477,14 @@
 		buildFitDomainFromData,
 		buildSinusoidalEquation,
 		buildGaussianEquation,
-		minMaxFinite
+		minMaxFinite,
+		evaluateSinusoidal,
+		solveSinusoidal,
+		evaluateGaussian,
+		solveGaussian,
+		evaluateCustomExpression,
+		buildCustomResidualFn,
+		buildCustomJacobianFn,
+		solveCustomMultiStart
 	});
 })(typeof globalThis !== 'undefined' ? globalThis : self);
