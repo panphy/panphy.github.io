@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Circuit Builder - PanPhy Labs Beta</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f3ec;
+      --grid: #e4dfd4;
+      --text: #171717;
+      --muted: #625d55;
+      --panel: #fffaf2;
+      --panel-2: #ede7dc;
+      --line: #2b2b2b;
+      --border: #d8d0c2;
+      --brand: #c2410c;
+      --accent: #0f766e;
+      --fault: #dc2626;
+      --live: #2563eb;
+      --lamp: #f59e0b;
+      --shadow: 0 18px 48px rgba(56, 37, 21, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(var(--grid) 1px, transparent 1px) 0 0 / 30px 30px,
+        var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button,
+    a {
+      touch-action: manipulation;
+    }
+
+    #app {
+      width: min(100% - 24px, 1420px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 0 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 250, 242, 0.86);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .back-link,
+    .status-pill {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .back-link {
+      padding: 0 12px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--brand);
+      background: rgba(194, 65, 12, 0.08);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 2.2vw, 2.2rem);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status-pill {
+      padding: 0 13px;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr) 300px;
+      gap: 14px;
+      min-height: 0;
+      flex: 1;
+    }
+
+    .panel,
+    .board-shell {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255, 250, 242, 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .tool-grid,
+    .preset-grid,
+    .action-row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tool-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    button {
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    button:hover {
+      border-color: rgba(194, 65, 12, 0.45);
+      color: var(--brand);
+    }
+
+    button.is-active,
+    button.primary {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: #fffaf2;
+    }
+
+    button.danger {
+      border-color: rgba(220, 38, 38, 0.45);
+      color: var(--fault);
+    }
+
+    .file-button {
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 750;
+      text-align: center;
+    }
+
+    .file-button:hover {
+      border-color: rgba(194, 65, 12, 0.45);
+      color: var(--brand);
+    }
+
+    .file-button input {
+      display: none;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .board-shell {
+      min-height: 620px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .board-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 44px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .board-toolbar strong {
+      color: var(--text);
+    }
+
+    #circuitSvg {
+      width: 100%;
+      flex: 1;
+      min-height: 520px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background:
+        linear-gradient(to right, rgba(43, 43, 43, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(43, 43, 43, 0.06) 1px, transparent 1px),
+        #fffdf8;
+      background-size: 20px 20px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .wire {
+      stroke: var(--line);
+      stroke-width: 5;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    .wire-hit,
+    .component-hit {
+      stroke: transparent;
+      stroke-width: 24;
+      fill: none;
+      cursor: pointer;
+    }
+
+    .symbol-line,
+    .component use,
+    .component circle,
+    .component path,
+    .component line,
+    .component polyline {
+      stroke: var(--line);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .component text,
+    .readout {
+      fill: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 800;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .select-box {
+      fill: none;
+      stroke: none;
+      pointer-events: none;
+    }
+
+    .component.is-selected .select-box {
+      stroke: var(--brand);
+      stroke-width: 2;
+      stroke-dasharray: 6 5;
+      fill: rgba(194, 65, 12, 0.07);
+    }
+
+    .component.is-fault use,
+    .component.is-fault line,
+    .component.is-fault circle,
+    .component.is-fault path,
+    .component.is-fault polyline,
+    .wire.is-fault {
+      stroke: var(--fault);
+    }
+
+    .component.is-live use,
+    .component.is-live line,
+    .component.is-live circle,
+    .component.is-live path,
+    .component.is-live polyline,
+    .wire.is-live {
+      stroke: var(--live);
+    }
+
+    .component.is-open .switch-blade {
+      stroke: var(--fault);
+    }
+
+    .component.is-dim .lamp-glow {
+      fill: rgba(245, 158, 11, 0.18);
+      stroke: none;
+    }
+
+    .component.is-bright .lamp-glow {
+      fill: rgba(245, 158, 11, 0.45);
+      stroke: none;
+    }
+
+    .current-arrow {
+      stroke: var(--live);
+      stroke-width: 3;
+      fill: none;
+      stroke-dasharray: 10 12;
+      animation: march 0.9s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes march {
+      to {
+        stroke-dashoffset: -22;
+      }
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .readout-card {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--panel-2);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    .metric strong {
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: nowrap;
+    }
+
+    .message-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .message-list .fault {
+      color: var(--fault);
+      font-weight: 750;
+    }
+
+    body.worksheet-mode .readout,
+    body.worksheet-mode #metricsPanel,
+    body.worksheet-mode #messageList,
+    body.worksheet-mode .current-arrow {
+      visibility: hidden;
+    }
+
+    body.worksheet-mode .status-pill::after {
+      content: " worksheet";
+    }
+
+    .scope-card {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    #scopeSvg {
+      width: 100%;
+      height: 120px;
+      display: block;
+      border: 1px solid var(--panel-2);
+      border-radius: 10px;
+      background:
+        linear-gradient(to right, rgba(43, 43, 43, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(43, 43, 43, 0.06) 1px, transparent 1px),
+        #fffdf8;
+      background-size: 20px 20px;
+    }
+
+    .scope-wave {
+      fill: none;
+      stroke: var(--live);
+      stroke-width: 3;
+    }
+
+    @media (max-width: 1040px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        display: block;
+      }
+
+      .tool-grid,
+      .preset-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      #app {
+        width: min(100% - 14px, 1420px);
+        padding-top: 8px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .status-pill {
+        justify-content: flex-start;
+      }
+
+      .tool-grid,
+      .preset-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .board-shell {
+        min-height: 560px;
+      }
+
+      #circuitSvg {
+        min-height: 460px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <header class="topbar">
+      <a class="back-link" href="/beta/">Back to Beta</a>
+      <div>
+        <h1>Circuit Builder</h1>
+        <p class="subtitle">Build simple DC circuits with SVG symbols and live meter readings.</p>
+      </div>
+      <div class="status-pill" id="checkStatus">Self-check pending</div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel" aria-label="Component tools">
+        <section>
+          <h2>Tools</h2>
+          <div class="tool-grid" id="toolGrid"></div>
+          <p class="hint" id="toolHint">Choose a component, then click the grid. Wire mode uses two clicks.</p>
+        </section>
+
+        <section>
+          <h2>Presets</h2>
+          <div class="preset-grid">
+            <button data-preset="series">Series</button>
+            <button data-preset="parallel">Parallel</button>
+            <button data-preset="lamp">Lamp</button>
+            <button data-preset="voltmeter">Voltmeter</button>
+            <button data-preset="ammeter">Ammeter</button>
+            <button data-preset="capacitor">Capacitor</button>
+            <button data-preset="ac">AC</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Actions</h2>
+          <div class="action-row">
+            <button id="saveJsonButton" type="button">Save JSON</button>
+            <label class="file-button">
+              Load JSON
+              <input id="loadJsonInput" type="file" accept="application/json,.json">
+            </label>
+            <button id="exportPngButton" type="button">Export PNG</button>
+            <button id="worksheetButton" type="button">Worksheet mode</button>
+            <button id="rotateButton">Rotate selected</button>
+            <button id="resetButton" class="danger">Reset</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="board-shell" aria-label="Circuit workspace">
+        <div class="board-toolbar">
+          <span><strong id="modeLabel">Select</strong> mode</span>
+          <span id="wireLabel">No wire start selected</span>
+        </div>
+        <svg id="circuitSvg" viewBox="0 0 900 560" role="application" aria-label="Circuit builder workspace">
+          <defs>
+            <marker id="arrowHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"></path>
+            </marker>
+
+            <symbol id="sym-battery" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-18" y2="0"></line>
+              <line class="symbol-line" x1="18" y1="0" x2="44" y2="0"></line>
+              <line class="symbol-line" x1="-18" y1="-20" x2="-18" y2="20"></line>
+              <line class="symbol-line" x1="6" y1="-12" x2="6" y2="12"></line>
+              <text x="-28" y="-12">+</text>
+            </symbol>
+
+            <symbol id="sym-resistor" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-30" y2="0"></line>
+              <polyline class="symbol-line" points="-30,0 -22,-14 -12,14 -2,-14 8,14 18,-14 28,0"></polyline>
+              <line class="symbol-line" x1="28" y1="0" x2="44" y2="0"></line>
+            </symbol>
+
+            <symbol id="sym-lamp" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-23" y2="0"></line>
+              <line class="symbol-line" x1="23" y1="0" x2="44" y2="0"></line>
+              <circle class="lamp-glow" cx="0" cy="0" r="24"></circle>
+              <circle class="symbol-line" cx="0" cy="0" r="22"></circle>
+              <line class="symbol-line" x1="-12" y1="-12" x2="12" y2="12"></line>
+              <line class="symbol-line" x1="12" y1="-12" x2="-12" y2="12"></line>
+            </symbol>
+
+            <symbol id="sym-capacitor" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-10" y2="0"></line>
+              <line class="symbol-line" x1="10" y1="0" x2="44" y2="0"></line>
+              <line class="symbol-line" x1="-10" y1="-22" x2="-10" y2="22"></line>
+              <line class="symbol-line" x1="10" y1="-22" x2="10" y2="22"></line>
+            </symbol>
+
+            <symbol id="sym-switch" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-20" y2="0"></line>
+              <line class="symbol-line" x1="22" y1="0" x2="44" y2="0"></line>
+              <circle class="symbol-line" cx="-20" cy="0" r="3"></circle>
+              <circle class="symbol-line" cx="22" cy="0" r="3"></circle>
+              <line class="symbol-line switch-blade" x1="-18" y1="-2" x2="18" y2="-16"></line>
+            </symbol>
+
+            <symbol id="sym-switch-closed" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-20" y2="0"></line>
+              <line class="symbol-line" x1="22" y1="0" x2="44" y2="0"></line>
+              <circle class="symbol-line" cx="-20" cy="0" r="3"></circle>
+              <circle class="symbol-line" cx="22" cy="0" r="3"></circle>
+              <line class="symbol-line switch-blade" x1="-18" y1="-2" x2="20" y2="0"></line>
+            </symbol>
+
+            <symbol id="sym-ammeter" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-24" y2="0"></line>
+              <line class="symbol-line" x1="24" y1="0" x2="44" y2="0"></line>
+              <circle class="symbol-line" cx="0" cy="0" r="22"></circle>
+              <text x="0" y="6">A</text>
+            </symbol>
+
+            <symbol id="sym-voltmeter" viewBox="-50 -30 100 60">
+              <line class="symbol-line" x1="-44" y1="0" x2="-24" y2="0"></line>
+              <line class="symbol-line" x1="24" y1="0" x2="44" y2="0"></line>
+              <circle class="symbol-line" cx="0" cy="0" r="22"></circle>
+              <text x="0" y="6">V</text>
+            </symbol>
+          </defs>
+          <g id="wireLayer"></g>
+          <g id="arrowLayer"></g>
+          <g id="componentLayer"></g>
+          <g id="wirePreviewLayer"></g>
+        </svg>
+      </section>
+
+      <aside class="panel" aria-label="Circuit details">
+        <section>
+          <h2>Selected</h2>
+          <div id="selectedPanel"></div>
+        </section>
+
+        <section>
+          <h2>Readout</h2>
+          <div class="readout-card" id="metricsPanel"></div>
+        </section>
+
+        <section>
+          <h2>Oscilloscope</h2>
+          <div class="scope-card">
+            <svg id="scopeSvg" viewBox="0 0 260 120" aria-label="Oscilloscope trace">
+              <path id="scopeWave" class="scope-wave" d=""></path>
+            </svg>
+          </div>
+        </section>
+
+        <section>
+          <h2>Messages</h2>
+          <ul class="message-list" id="messageList"></ul>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const GRID = 20;
+    const TERM = 44;
+    const ZERO_R = 1e-6;
+    const VOLTMETER_R = 1e9;
+    const CAPACITOR_OPEN_R = 1e9;
+    const tools = [
+      ['select', 'Select'],
+      ['wire', 'Wire'],
+      ['battery', 'Battery'],
+      ['resistor', 'Resistor'],
+      ['lamp', 'Lamp'],
+      ['capacitor', 'Capacitor'],
+      ['switch', 'Switch'],
+      ['ammeter', 'Ammeter'],
+      ['voltmeter', 'Voltmeter']
+    ];
+
+    const labels = {
+      battery: 'Battery',
+      resistor: 'Resistor',
+      lamp: 'Lamp',
+      capacitor: 'Capacitor',
+      switch: 'Switch',
+      ammeter: 'Ammeter',
+      voltmeter: 'Voltmeter'
+    };
+
+    const state = {
+      tool: 'select',
+      selectedId: null,
+      wireStart: null,
+      nextId: 1,
+      components: [],
+      wires: [],
+      analysis: null,
+      worksheetMode: false,
+      sourceMode: 'dc',
+      frequency: 50,
+      time: 0,
+      lastFrame: performance.now()
+    };
+
+    const svg = document.getElementById('circuitSvg');
+    const toolGrid = document.getElementById('toolGrid');
+    const wireLayer = document.getElementById('wireLayer');
+    const arrowLayer = document.getElementById('arrowLayer');
+    const componentLayer = document.getElementById('componentLayer');
+    const wirePreviewLayer = document.getElementById('wirePreviewLayer');
+    const selectedPanel = document.getElementById('selectedPanel');
+    const metricsPanel = document.getElementById('metricsPanel');
+    const messageList = document.getElementById('messageList');
+    const modeLabel = document.getElementById('modeLabel');
+    const wireLabel = document.getElementById('wireLabel');
+    const checkStatus = document.getElementById('checkStatus');
+    const scopeWave = document.getElementById('scopeWave');
+
+    class UnionFind {
+      constructor() {
+        this.parent = new Map();
+      }
+
+      add(x) {
+        if (!this.parent.has(x)) this.parent.set(x, x);
+      }
+
+      find(x) {
+        this.add(x);
+        const p = this.parent.get(x);
+        if (p === x) return x;
+        const root = this.find(p);
+        this.parent.set(x, root);
+        return root;
+      }
+
+      union(a, b) {
+        const ra = this.find(a);
+        const rb = this.find(b);
+        if (ra !== rb) this.parent.set(rb, ra);
+      }
+    }
+
+    function keyAt(x, y) {
+      return `${Math.round(x)},${Math.round(y)}`;
+    }
+
+    function parseKey(key) {
+      const parts = key.split(',').map(Number);
+      return { x: parts[0], y: parts[1] };
+    }
+
+    function fmt(value, unit, digits = 2) {
+      if (!Number.isFinite(value)) return '--';
+      if (Math.abs(value) < 0.000001) return `0 ${unit}`;
+      if (Math.abs(value) >= 1000 || Math.abs(value) < 0.01) {
+        return `${value.toExponential(2)} ${unit}`;
+      }
+      return `${value.toFixed(digits)} ${unit}`;
+    }
+
+    function clamp(n, min, max) {
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function snap(n) {
+      return Math.round(n / GRID) * GRID;
+    }
+
+    function pointFromEvent(event) {
+      const pt = svg.createSVGPoint();
+      pt.x = event.clientX;
+      pt.y = event.clientY;
+      const ctm = svg.getScreenCTM();
+      const p = ctm ? pt.matrixTransform(ctm.inverse()) : { x: 0, y: 0 };
+      return {
+        x: clamp(snap(p.x), GRID, 880),
+        y: clamp(snap(p.y), GRID, 540)
+      };
+    }
+
+    function terminalPoints(component) {
+      const radians = component.rotation * Math.PI / 180;
+      const dx = Math.cos(radians) * TERM;
+      const dy = Math.sin(radians) * TERM;
+      return [
+        { x: snap(component.x - dx), y: snap(component.y - dy) },
+        { x: snap(component.x + dx), y: snap(component.y + dy) }
+      ];
+    }
+
+    function terminalKeys(component) {
+      return terminalPoints(component).map((p) => keyAt(p.x, p.y));
+    }
+
+    function makeComponent(type, x, y, options = {}) {
+      const defaults = {
+        battery: { value: 10, internalResistance: 0 },
+        resistor: { value: 10 },
+        lamp: { value: 12, nonOhmic: false },
+        capacitor: { value: 1000 },
+        switch: { value: 0, closed: false },
+        ammeter: { value: 0 },
+        voltmeter: { value: 0 }
+      };
+      const base = defaults[type];
+      return {
+        id: `c${state.nextId++}`,
+        type,
+        x: snap(x),
+        y: snap(y),
+        rotation: options.rotation ?? 0,
+        value: options.value ?? base.value,
+        internalResistance: options.internalResistance ?? base.internalResistance ?? 0,
+        nonOhmic: options.nonOhmic ?? base.nonOhmic ?? false,
+        closed: options.closed ?? base.closed ?? true,
+        reading: 0,
+        current: 0,
+        voltage: 0,
+        power: 0,
+        charge: 0,
+        fault: false
+      };
+    }
+
+    function addComponent(type, x, y, options) {
+      const component = makeComponent(type, x, y, options);
+      state.components.push(component);
+      state.selectedId = component.id;
+      analyzeAndRender();
+      return component;
+    }
+
+    function addWire(x1, y1, x2, y2) {
+      if (x1 === x2 && y1 === y2) return;
+      state.wires.push({
+        id: `w${state.nextId++}`,
+        x1: snap(x1),
+        y1: snap(y1),
+        x2: snap(x2),
+        y2: snap(y2),
+        fault: false,
+        current: 0
+      });
+      analyzeAndRender();
+    }
+
+    function setTool(tool) {
+      state.tool = tool;
+      state.wireStart = null;
+      modeLabel.textContent = tools.find((item) => item[0] === tool)?.[1] || tool;
+      wireLabel.textContent = 'No wire start selected';
+      renderTools();
+      renderWirePreview();
+    }
+
+    function renderTools() {
+      toolGrid.innerHTML = '';
+      tools.forEach(([tool, label]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.className = state.tool === tool ? 'is-active' : '';
+        button.addEventListener('click', () => setTool(tool));
+        toolGrid.appendChild(button);
+      });
+    }
+
+    function symbolHref(component) {
+      if (component.type === 'switch' && component.closed) return '#sym-switch-closed';
+      return `#sym-${component.type}`;
+    }
+
+    function renderWires() {
+      wireLayer.innerHTML = '';
+      state.wires.forEach((wire) => {
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', wire.x1);
+        line.setAttribute('y1', wire.y1);
+        line.setAttribute('x2', wire.x2);
+        line.setAttribute('y2', wire.y2);
+        line.setAttribute('class', `wire${wire.fault ? ' is-fault' : ''}${Math.abs(wire.current) > 1e-6 ? ' is-live' : ''}`);
+        const hit = line.cloneNode(false);
+        hit.setAttribute('class', 'wire-hit');
+        hit.addEventListener('click', (event) => {
+          event.stopPropagation();
+          state.selectedId = wire.id;
+          setTool('select');
+          render();
+        });
+        group.append(line, hit);
+        wireLayer.appendChild(group);
+      });
+    }
+
+    function renderArrows() {
+      arrowLayer.innerHTML = '';
+      state.wires.forEach((wire) => {
+        if (Math.abs(wire.current) < 1e-6 || wire.fault) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const forward = wire.current >= 0;
+        line.setAttribute('x1', forward ? wire.x1 : wire.x2);
+        line.setAttribute('y1', forward ? wire.y1 : wire.y2);
+        line.setAttribute('x2', forward ? wire.x2 : wire.x1);
+        line.setAttribute('y2', forward ? wire.y2 : wire.y1);
+        line.setAttribute('class', 'current-arrow');
+        line.setAttribute('marker-end', 'url(#arrowHead)');
+        arrowLayer.appendChild(line);
+      });
+    }
+
+    function renderComponents() {
+      componentLayer.innerHTML = '';
+      state.components.forEach((component) => {
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const selected = state.selectedId === component.id;
+        const classes = ['component'];
+        if (selected) classes.push('is-selected');
+        if (component.fault) classes.push('is-fault');
+        if (component.type === 'switch' && !component.closed) classes.push('is-open');
+        if (Math.abs(component.current) > 1e-6) classes.push('is-live');
+        if (component.type === 'lamp' && component.power > 0.08) classes.push(component.power > 1 ? 'is-bright' : 'is-dim');
+        group.setAttribute('class', classes.join(' '));
+        group.setAttribute('transform', `translate(${component.x} ${component.y}) rotate(${component.rotation})`);
+        group.setAttribute('data-id', component.id);
+
+        const selectBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        selectBox.setAttribute('class', 'select-box');
+        selectBox.setAttribute('x', '-54');
+        selectBox.setAttribute('y', '-34');
+        selectBox.setAttribute('width', '108');
+        selectBox.setAttribute('height', '68');
+        selectBox.setAttribute('rx', '8');
+        group.appendChild(selectBox);
+
+        const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        use.setAttribute('href', symbolHref(component));
+        group.appendChild(use);
+
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        hit.setAttribute('class', 'component-hit');
+        hit.setAttribute('x', '-58');
+        hit.setAttribute('y', '-38');
+        hit.setAttribute('width', '116');
+        hit.setAttribute('height', '76');
+        hit.setAttribute('rx', '10');
+        hit.addEventListener('click', (event) => {
+          event.stopPropagation();
+          state.selectedId = component.id;
+          setTool('select');
+          render();
+        });
+        group.appendChild(hit);
+
+        componentLayer.appendChild(group);
+
+        const readout = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        readout.setAttribute('class', 'readout');
+        readout.setAttribute('x', component.x);
+        readout.setAttribute('y', component.y + 48);
+        readout.textContent = componentReadout(component);
+        componentLayer.appendChild(readout);
+      });
+    }
+
+    function componentReadout(component) {
+      if (component.type === 'battery') return `${state.sourceMode.toUpperCase()} ${fmt(component.value, 'V', 1)}`;
+      if (component.type === 'resistor') return `${fmt(component.value, 'ohm', 1)}  ${fmt(component.current, 'A', 2)}`;
+      if (component.type === 'lamp') return `${fmt(component.power, 'W', 2)}`;
+      if (component.type === 'capacitor') return `${fmt(component.value, 'uF', 0)}  ${fmt(component.charge, 'C', 3)}`;
+      if (component.type === 'switch') return component.closed ? 'closed' : 'open';
+      if (component.type === 'ammeter') return fmt(component.reading, 'A', 2);
+      if (component.type === 'voltmeter') return fmt(component.reading, 'V', 2);
+      return '';
+    }
+
+    function renderWirePreview() {
+      wirePreviewLayer.innerHTML = '';
+      if (!state.wireStart) return;
+      const point = state.wireStart;
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', '7');
+      circle.setAttribute('fill', '#c2410c');
+      wirePreviewLayer.appendChild(circle);
+    }
+
+    function renderSelectedPanel() {
+      const selectedComponent = state.components.find((component) => component.id === state.selectedId);
+      const selectedWire = state.wires.find((wire) => wire.id === state.selectedId);
+      const sourceControls = `
+        <div class="field">
+          <label for="sourceModeInput">Source mode</label>
+          <select id="sourceModeInput">
+            <option value="dc"${state.sourceMode === 'dc' ? ' selected' : ''}>DC</option>
+            <option value="ac"${state.sourceMode === 'ac' ? ' selected' : ''}>AC</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="frequencyInput">AC frequency (Hz)</label>
+          <input id="frequencyInput" type="number" min="0.1" max="1000" step="0.1" value="${state.frequency}">
+        </div>
+      `;
+      if (!selectedComponent && !selectedWire) {
+        selectedPanel.innerHTML = `${sourceControls}<p class="hint">Select a symbol or wire to edit it.</p>`;
+        bindSourceControls();
+        return;
+      }
+
+      if (selectedWire) {
+        selectedPanel.innerHTML = `
+          ${sourceControls}
+          <p class="hint">Wire from (${selectedWire.x1}, ${selectedWire.y1}) to (${selectedWire.x2}, ${selectedWire.y2}).</p>
+          <button id="deleteSelected" class="danger" type="button">Delete wire</button>
+        `;
+        bindSourceControls();
+        document.getElementById('deleteSelected').addEventListener('click', deleteSelected);
+        return;
+      }
+
+      const fields = [];
+      fields.push(sourceControls);
+      fields.push(`<p class="hint">${labels[selectedComponent.type]} at (${selectedComponent.x}, ${selectedComponent.y}).</p>`);
+      fields.push(numberField('X position', 'xInput', selectedComponent.x, 'grid', GRID, 880, GRID));
+      fields.push(numberField('Y position', 'yInput', selectedComponent.y, 'grid', GRID, 540, GRID));
+      if (selectedComponent.type === 'battery') {
+        fields.push(numberField('Voltage', 'valueInput', selectedComponent.value, 'V', 0.1, 30, 0.1));
+        fields.push(numberField('Internal resistance', 'internalResistanceInput', selectedComponent.internalResistance, 'ohm', 0, 100, 0.1));
+      }
+      if (selectedComponent.type === 'resistor' || selectedComponent.type === 'lamp') {
+        fields.push(numberField('Resistance', 'valueInput', selectedComponent.value, 'ohm', 0.1, 1000, 0.1));
+      }
+      if (selectedComponent.type === 'lamp') {
+        fields.push(`
+          <div class="field">
+            <label for="nonOhmicInput">Lamp model</label>
+            <select id="nonOhmicInput">
+              <option value="false"${selectedComponent.nonOhmic ? '' : ' selected'}>Ohmic</option>
+              <option value="true"${selectedComponent.nonOhmic ? ' selected' : ''}>Non-ohmic</option>
+            </select>
+          </div>
+        `);
+      }
+      if (selectedComponent.type === 'capacitor') {
+        fields.push(numberField('Capacitance', 'valueInput', selectedComponent.value, 'uF', 1, 100000, 1));
+      }
+      if (selectedComponent.type === 'switch') {
+        fields.push(`
+          <div class="field">
+            <label for="closedInput">Switch state</label>
+            <select id="closedInput">
+              <option value="false"${selectedComponent.closed ? '' : ' selected'}>Open</option>
+              <option value="true"${selectedComponent.closed ? ' selected' : ''}>Closed</option>
+            </select>
+          </div>
+        `);
+      }
+      fields.push(`
+        <div class="action-row">
+          <button id="rotateSelected" type="button">Rotate 90 deg</button>
+          <button id="deleteSelected" class="danger" type="button">Delete selected</button>
+        </div>
+      `);
+      selectedPanel.innerHTML = fields.join('');
+      bindSourceControls();
+
+      const xInput = document.getElementById('xInput');
+      const yInput = document.getElementById('yInput');
+      if (xInput && yInput) {
+        const updatePosition = () => {
+          selectedComponent.x = clamp(snap(Number(xInput.value) || selectedComponent.x), GRID, 880);
+          selectedComponent.y = clamp(snap(Number(yInput.value) || selectedComponent.y), GRID, 540);
+          analyzeAndRender();
+        };
+        xInput.addEventListener('change', updatePosition);
+        yInput.addEventListener('change', updatePosition);
+      }
+
+      const valueInput = document.getElementById('valueInput');
+      if (valueInput) {
+        valueInput.addEventListener('input', () => {
+          selectedComponent.value = Math.max(Number(valueInput.min), Number(valueInput.value) || Number(valueInput.min));
+          analyzeAndRender();
+        });
+      }
+
+      const internalResistanceInput = document.getElementById('internalResistanceInput');
+      if (internalResistanceInput) {
+        internalResistanceInput.addEventListener('input', () => {
+          selectedComponent.internalResistance = Math.max(0, Number(internalResistanceInput.value) || 0);
+          analyzeAndRender();
+        });
+      }
+
+      const nonOhmicInput = document.getElementById('nonOhmicInput');
+      if (nonOhmicInput) {
+        nonOhmicInput.addEventListener('change', () => {
+          selectedComponent.nonOhmic = nonOhmicInput.value === 'true';
+          analyzeAndRender();
+        });
+      }
+
+      const closedInput = document.getElementById('closedInput');
+      if (closedInput) {
+        closedInput.addEventListener('change', () => {
+          selectedComponent.closed = closedInput.value === 'true';
+          analyzeAndRender();
+        });
+      }
+
+      document.getElementById('rotateSelected').addEventListener('click', rotateSelected);
+      document.getElementById('deleteSelected').addEventListener('click', deleteSelected);
+    }
+
+    function bindSourceControls() {
+      const sourceModeInput = document.getElementById('sourceModeInput');
+      const frequencyInput = document.getElementById('frequencyInput');
+      if (sourceModeInput) {
+        sourceModeInput.addEventListener('change', () => {
+          state.sourceMode = sourceModeInput.value;
+          analyzeAndRender();
+        });
+      }
+      if (frequencyInput) {
+        frequencyInput.addEventListener('input', () => {
+          state.frequency = Math.max(0.1, Number(frequencyInput.value) || 50);
+          analyzeAndRender();
+        });
+      }
+    }
+
+    function numberField(label, id, value, unit, min, max, step) {
+      return `
+        <div class="field">
+          <label for="${id}">${label} (${unit})</label>
+          <input id="${id}" type="number" min="${min}" max="${max}" step="${step}" value="${value}">
+        </div>
+      `;
+    }
+
+    function renderMetrics() {
+      const a = state.analysis;
+      metricsPanel.innerHTML = `
+        <div class="metric"><span>Equivalent resistance</span><strong>${fmt(a.equivalentResistance, 'ohm', 2)}</strong></div>
+        <div class="metric"><span>Terminal voltage</span><strong>${fmt(a.terminalVoltage ?? 0, 'V', 2)}</strong></div>
+        <div class="metric"><span>Total current</span><strong>${fmt(a.totalCurrent, 'A', 2)}</strong></div>
+        <div class="metric"><span>Total power</span><strong>${fmt(a.totalPower, 'W', 2)}</strong></div>
+        <div class="metric"><span>Source mode</span><strong>${state.sourceMode.toUpperCase()} ${state.sourceMode === 'ac' ? fmt(state.frequency, 'Hz', 1) : ''}</strong></div>
+        <div class="metric"><span>Components</span><strong>${state.components.length}</strong></div>
+      `;
+    }
+
+    function renderScope() {
+      const battery = state.components.find((component) => component.type === 'battery');
+      const capacitor = state.components.find((component) => component.type === 'capacitor');
+      const amplitude = battery ? Math.max(0, Number(battery.value) || 0) : 0;
+      const points = [];
+      for (let i = 0; i <= 120; i += 1) {
+        const x = i / 120 * 260;
+        let normalized = 0;
+        if (state.sourceMode === 'ac') {
+          normalized = Math.sin(i / 120 * Math.PI * 4 + state.time * state.frequency * Math.PI * 2);
+        } else if (capacitor && amplitude > 0) {
+          const capacitance = Math.max(1, Number(capacitor.value) || 1) / 1000000;
+          const resistance = state.analysis && Number.isFinite(state.analysis.equivalentResistance)
+            ? Math.max(0.001, state.analysis.equivalentResistance)
+            : 10;
+          const tau = Math.max(0.05, resistance * capacitance);
+          normalized = 1 - Math.exp(-(i / 120 * 5 + state.time) / tau);
+          normalized = normalized * 2 - 1;
+        }
+        const y = 60 - normalized * 42;
+        points.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
+      }
+      scopeWave.setAttribute('d', points.join(' '));
+    }
+
+    function renderMessages() {
+      const messages = state.analysis.messages;
+      messageList.innerHTML = '';
+      if (!messages.length) {
+        const li = document.createElement('li');
+        li.textContent = 'Circuit solved.';
+        messageList.appendChild(li);
+        return;
+      }
+      messages.forEach((message) => {
+        const li = document.createElement('li');
+        li.textContent = message.text;
+        if (message.level === 'fault') li.className = 'fault';
+        messageList.appendChild(li);
+      });
+    }
+
+    function resetReadings() {
+      state.components.forEach((component) => {
+        component.lastPower = component.power || component.lastPower || 0;
+        component.current = 0;
+        component.voltage = 0;
+        component.power = 0;
+        component.reading = 0;
+        component.fault = false;
+      });
+      state.wires.forEach((wire) => {
+        wire.current = 0;
+        wire.fault = false;
+      });
+    }
+
+    function componentResistance(component) {
+      if (component.type === 'resistor') return Math.max(0.001, Number(component.value) || 0.001);
+      if (component.type === 'lamp') {
+        const base = Math.max(0.001, Number(component.value) || 0.001);
+        if (!component.nonOhmic) return base;
+        return base * (1 + Math.min(2.5, Math.sqrt(component.lastPower || 0) / 3));
+      }
+      if (component.type === 'capacitor') return CAPACITOR_OPEN_R;
+      if (component.type === 'voltmeter') return VOLTMETER_R;
+      return null;
+    }
+
+    function getSourceVoltage(emf, loadResistance, internalResistance) {
+      if (!Number.isFinite(loadResistance) || loadResistance <= 0) return emf;
+      if (!internalResistance) return emf;
+      return emf * loadResistance / (loadResistance + internalResistance);
+    }
+
+    function analyzeCircuit() {
+      resetReadings();
+      const messages = [];
+      const uf = new UnionFind();
+
+      state.components.forEach((component) => terminalKeys(component).forEach((key) => uf.add(key)));
+      state.wires.forEach((wire) => {
+        const a = keyAt(wire.x1, wire.y1);
+        const b = keyAt(wire.x2, wire.y2);
+        uf.union(a, b);
+      });
+      state.components.forEach((component) => {
+        if (component.type === 'switch' && component.closed || component.type === 'ammeter') {
+          const [a, b] = terminalKeys(component);
+          uf.union(a, b);
+        }
+      });
+
+      const batteryList = state.components.filter((component) => component.type === 'battery');
+      if (batteryList.length !== 1) {
+        messages.push({ level: 'fault', text: 'Add exactly one battery. Multiple batteries are not supported yet.' });
+      }
+      const battery = batteryList[0] || null;
+      const sourceVoltage = battery ? Math.max(0, Number(battery.value) || 0) : 0;
+
+      const elements = state.components.map((component) => {
+        const [rawA, rawB] = terminalKeys(component);
+        return {
+          component,
+          rawA,
+          rawB,
+          a: uf.find(rawA),
+          b: uf.find(rawB),
+          resistance: componentResistance(component)
+        };
+      });
+
+      state.wires.forEach((wire) => {
+        wire.a = uf.find(keyAt(wire.x1, wire.y1));
+        wire.b = uf.find(keyAt(wire.x2, wire.y2));
+      });
+
+      if (!battery) {
+        return baseAnalysis(messages);
+      }
+
+      const batteryEl = elements.find((item) => item.component.id === battery.id);
+      const pos = batteryEl.a;
+      const neg = batteryEl.b;
+      if (pos === neg) {
+        battery.fault = true;
+        messages.push({ level: 'fault', text: 'Short circuit: the battery terminals are connected by zero resistance.' });
+        state.wires.forEach((wire) => {
+          if (wire.a === pos && wire.b === neg || wire.a === neg && wire.b === pos || wire.a === wire.b) wire.fault = true;
+        });
+        return baseAnalysis(messages);
+      }
+
+      const finite = elements.filter((item) => item.resistance !== null && item.a !== item.b);
+      const loads = finite.filter((item) => item.component.type !== 'voltmeter');
+      if (!loads.length) {
+        messages.push({ level: 'fault', text: 'Open circuit: add a load such as a resistor or lamp.' });
+      }
+
+      elements.forEach((item) => {
+        if (item.component.type === 'resistor' || item.component.type === 'lamp') {
+          if (item.a === item.b) {
+            item.component.fault = true;
+            messages.push({ level: 'fault', text: `${labels[item.component.type]} is shorted by a wire or ammeter.` });
+          }
+        }
+      });
+
+      elements.filter((item) => item.component.type === 'ammeter').forEach((ammeter) => {
+        const shortsLoad = loads.some((load) => load.a === ammeter.a && load.b === ammeter.a);
+        if (shortsLoad) {
+          ammeter.component.fault = true;
+          messages.push({ level: 'fault', text: 'Ammeter is connected in parallel and is shorting a component.' });
+        }
+      });
+
+      elements.filter((item) => item.component.type === 'voltmeter').forEach((voltmeter) => {
+        const acrossLoad = loads.some((load) => {
+          const same = load.a === voltmeter.a && load.b === voltmeter.b;
+          const reversed = load.a === voltmeter.b && load.b === voltmeter.a;
+          return same || reversed;
+        });
+        if (!acrossLoad) {
+          voltmeter.component.fault = true;
+          messages.push({ level: 'fault', text: 'Voltmeter should be connected across a resistor, lamp, or other load.' });
+        }
+      });
+
+      const reachable = findReachableNodes(pos, loads);
+      if (!reachable.has(neg)) {
+        messages.push({ level: 'fault', text: 'Open circuit: there is no complete conducting path from the battery.' });
+      }
+      loads.forEach((load) => {
+        if (!reachable.has(load.a) || !reachable.has(load.b)) {
+          load.component.fault = true;
+          messages.push({ level: 'fault', text: `${labels[load.component.type]} is on a floating branch.` });
+        }
+      });
+
+      const idealSolution = solveNetwork(sourceVoltage, pos, neg, finite);
+      if (!idealSolution.ok) {
+        messages.push({ level: 'fault', text: idealSolution.message || 'Circuit could not be solved.' });
+        return baseAnalysis(messages);
+      }
+      const idealNodeVoltage = (node) => {
+        if (node === pos) return sourceVoltage;
+        if (node === neg) return 0;
+        return idealSolution.voltages.get(node) ?? 0;
+      };
+      const idealCurrent = Math.abs(getSourceCurrent(pos, loads, idealNodeVoltage));
+      const loadResistance = idealCurrent > 1e-9 ? sourceVoltage / idealCurrent : Infinity;
+      const terminalVoltage = getSourceVoltage(sourceVoltage, loadResistance, Number(battery.internalResistance) || 0);
+      const solution = solveNetwork(terminalVoltage, pos, neg, finite);
+      if (!solution.ok) {
+        messages.push({ level: 'fault', text: solution.message || 'Circuit could not be solved.' });
+        return baseAnalysis(messages);
+      }
+
+      const nodeVoltage = (node) => {
+        if (node === pos) return terminalVoltage;
+        if (node === neg) return 0;
+        return solution.voltages.get(node) ?? 0;
+      };
+
+      finite.forEach((item) => {
+        const va = nodeVoltage(item.a);
+        const vb = nodeVoltage(item.b);
+        const voltage = va - vb;
+        const current = voltage / item.resistance;
+        item.component.voltage = voltage;
+        item.component.current = current;
+        item.component.power = voltage * current;
+        if (item.component.type === 'voltmeter') {
+          item.component.reading = Math.abs(voltage);
+          item.component.current = 0;
+          item.component.power = 0;
+        }
+        if (item.component.type === 'capacitor') {
+          const capacitance = Math.max(1, Number(item.component.value) || 1) / 1000000;
+          const tau = Math.max(0.05, equivalentSeries(loads.filter((load) => load.component.type !== 'capacitor').map((load) => load.resistance)) * capacitance);
+          const chargeProgress = 1 - Math.exp(-state.time / tau);
+          item.component.charge = capacitance * Math.abs(voltage) * chargeProgress;
+          item.component.current = Math.abs(voltage) / Math.max(0.001, tau / capacitance) * Math.exp(-state.time / tau);
+          item.component.power = Math.abs(voltage * item.component.current);
+        }
+      });
+
+      elements.filter((item) => item.component.type === 'ammeter' || item.component.type === 'switch').forEach((item) => {
+        item.component.current = estimateZeroOhmCurrent(item.a, item.b, finite, nodeVoltage);
+        item.component.reading = Math.abs(item.component.current);
+      });
+
+      const totalCurrent = loads.reduce((sum, item) => {
+        if (item.a === pos) return sum + item.component.current;
+        if (item.b === pos) return sum - item.component.current;
+        return sum;
+      }, 0);
+      const capacitorCurrent = Math.max(0, ...loads
+        .filter((item) => item.component.type === 'capacitor')
+        .map((item) => Math.abs(item.component.current)));
+      const absTotalCurrent = Math.max(Math.abs(totalCurrent), capacitorCurrent);
+      const totalPower = loads.reduce((sum, item) => sum + Math.abs(item.component.power), 0) + absTotalCurrent * absTotalCurrent * (Number(battery.internalResistance) || 0);
+      const equivalentResistance = absTotalCurrent > 1e-9 ? terminalVoltage / absTotalCurrent : Infinity;
+      battery.current = absTotalCurrent;
+      battery.voltage = terminalVoltage;
+      battery.power = terminalVoltage * absTotalCurrent;
+
+      state.wires.forEach((wire) => {
+        wire.current = estimateZeroOhmCurrent(wire.a, wire.b, finite, nodeVoltage);
+      });
+
+      if (!messages.length && absTotalCurrent < 1e-9) {
+        messages.push({ level: 'fault', text: 'Open circuit: no measurable current is flowing.' });
+      }
+
+      return {
+        messages: uniqueMessages(messages),
+        equivalentResistance,
+        totalCurrent: absTotalCurrent,
+        totalPower,
+        terminalVoltage
+      };
+    }
+
+    function getSourceCurrent(pos, loads, nodeVoltage) {
+      return loads.reduce((sum, item) => {
+        const resistance = item.resistance || componentResistance(item.component);
+        if (!resistance) return sum;
+        if (item.a === pos) return sum + (nodeVoltage(item.a) - nodeVoltage(item.b)) / resistance;
+        if (item.b === pos) return sum + (nodeVoltage(item.b) - nodeVoltage(item.a)) / resistance;
+        return sum;
+      }, 0);
+    }
+
+    function baseAnalysis(messages) {
+      return {
+        messages: uniqueMessages(messages),
+        equivalentResistance: Infinity,
+        totalCurrent: 0,
+        totalPower: 0,
+        terminalVoltage: 0
+      };
+    }
+
+    function uniqueMessages(messages) {
+      const seen = new Set();
+      return messages.filter((message) => {
+        if (seen.has(message.text)) return false;
+        seen.add(message.text);
+        return true;
+      });
+    }
+
+    function findReachableNodes(start, loads) {
+      const graph = new Map();
+      loads.forEach((load) => {
+        if (!graph.has(load.a)) graph.set(load.a, []);
+        if (!graph.has(load.b)) graph.set(load.b, []);
+        graph.get(load.a).push(load.b);
+        graph.get(load.b).push(load.a);
+      });
+      const seen = new Set([start]);
+      const queue = [start];
+      while (queue.length) {
+        const node = queue.shift();
+        (graph.get(node) || []).forEach((next) => {
+          if (seen.has(next)) return;
+          seen.add(next);
+          queue.push(next);
+        });
+      }
+      return seen;
+    }
+
+    function solveNetwork(sourceVoltage, pos, neg, elements) {
+      const unknownNodes = [...new Set(elements.flatMap((item) => [item.a, item.b]))]
+        .filter((node) => node !== pos && node !== neg);
+      const index = new Map(unknownNodes.map((node, i) => [node, i]));
+      const n = unknownNodes.length;
+      const matrix = Array.from({ length: n }, () => Array(n).fill(0));
+      const rhs = Array(n).fill(0);
+
+      function knownVoltage(node) {
+        if (node === pos) return sourceVoltage;
+        if (node === neg) return 0;
+        return null;
+      }
+
+      elements.forEach((item) => {
+        const g = 1 / item.resistance;
+        const ka = knownVoltage(item.a);
+        const kb = knownVoltage(item.b);
+        const ia = index.get(item.a);
+        const ib = index.get(item.b);
+
+        if (ia !== undefined) {
+          matrix[ia][ia] += g;
+          if (ib !== undefined) matrix[ia][ib] -= g;
+          if (kb !== null) rhs[ia] += g * kb;
+        }
+        if (ib !== undefined) {
+          matrix[ib][ib] += g;
+          if (ia !== undefined) matrix[ib][ia] -= g;
+          if (ka !== null) rhs[ib] += g * ka;
+        }
+      });
+
+      const solved = gaussianSolve(matrix, rhs);
+      if (!solved.ok) return solved;
+      return {
+        ok: true,
+        voltages: new Map(unknownNodes.map((node, i) => [node, solved.values[i]]))
+      };
+    }
+
+    function gaussianSolve(matrix, rhs) {
+      const n = rhs.length;
+      if (n === 0) return { ok: true, values: [] };
+      const a = matrix.map((row, i) => [...row, rhs[i]]);
+
+      for (let col = 0; col < n; col += 1) {
+        let pivot = col;
+        for (let row = col + 1; row < n; row += 1) {
+          if (Math.abs(a[row][col]) > Math.abs(a[pivot][col])) pivot = row;
+        }
+        if (Math.abs(a[pivot][col]) < 1e-12) {
+          return { ok: false, message: 'Circuit contains a floating node or unsolved branch.' };
+        }
+        [a[col], a[pivot]] = [a[pivot], a[col]];
+        const div = a[col][col];
+        for (let j = col; j <= n; j += 1) a[col][j] /= div;
+        for (let row = 0; row < n; row += 1) {
+          if (row === col) continue;
+          const factor = a[row][col];
+          for (let j = col; j <= n; j += 1) a[row][j] -= factor * a[col][j];
+        }
+      }
+
+      return { ok: true, values: a.map((row) => row[n]) };
+    }
+
+    function estimateZeroOhmCurrent(nodeA, nodeB, finite, nodeVoltage) {
+      if (nodeA !== nodeB) return 0;
+      return finite.reduce((sum, item) => {
+        if (item.a === nodeA) return sum + (nodeVoltage(item.a) - nodeVoltage(item.b)) / item.resistance;
+        if (item.b === nodeA) return sum + (nodeVoltage(item.b) - nodeVoltage(item.a)) / item.resistance;
+        return sum;
+      }, 0);
+    }
+
+    function analyzeAndRender() {
+      state.analysis = analyzeCircuit();
+      render();
+    }
+
+    function render() {
+      renderTools();
+      renderWires();
+      renderArrows();
+      renderComponents();
+      renderWirePreview();
+      renderSelectedPanel();
+      renderMetrics();
+      renderMessages();
+      renderScope();
+    }
+
+    function rotateSelected() {
+      const component = state.components.find((item) => item.id === state.selectedId);
+      if (!component) return;
+      component.rotation = (component.rotation + 90) % 360;
+      analyzeAndRender();
+    }
+
+    function deleteSelected() {
+      state.components = state.components.filter((component) => component.id !== state.selectedId);
+      state.wires = state.wires.filter((wire) => wire.id !== state.selectedId);
+      state.selectedId = null;
+      analyzeAndRender();
+    }
+
+    function clearCircuit() {
+      state.components = [];
+      state.wires = [];
+      state.selectedId = null;
+      state.wireStart = null;
+      state.time = 0;
+      analyzeAndRender();
+    }
+
+    function circuitPayload() {
+      return {
+        version: 1,
+        nextId: state.nextId,
+        sourceMode: state.sourceMode,
+        frequency: state.frequency,
+        worksheetMode: state.worksheetMode,
+        components: state.components.map((component) => ({
+          id: component.id,
+          type: component.type,
+          x: component.x,
+          y: component.y,
+          rotation: component.rotation,
+          value: component.value,
+          internalResistance: component.internalResistance || 0,
+          nonOhmic: Boolean(component.nonOhmic),
+          closed: Boolean(component.closed)
+        })),
+        wires: state.wires.map((wire) => ({
+          id: wire.id,
+          x1: wire.x1,
+          y1: wire.y1,
+          x2: wire.x2,
+          y2: wire.y2
+        }))
+      };
+    }
+
+    function loadCircuitPayload(payload) {
+      if (!payload || !Array.isArray(payload.components) || !Array.isArray(payload.wires)) {
+        throw new Error('Invalid circuit JSON.');
+      }
+      state.components = payload.components
+        .filter((component) => labels[component.type])
+        .map((component) => ({
+          ...makeComponent(component.type, component.x, component.y, component),
+          id: String(component.id || `c${state.nextId++}`)
+        }));
+      state.wires = payload.wires.map((wire) => ({
+        id: String(wire.id || `w${state.nextId++}`),
+        x1: snap(Number(wire.x1) || GRID),
+        y1: snap(Number(wire.y1) || GRID),
+        x2: snap(Number(wire.x2) || GRID),
+        y2: snap(Number(wire.y2) || GRID),
+        fault: false,
+        current: 0
+      }));
+      state.nextId = Math.max(Number(payload.nextId) || 1, findNextId());
+      state.sourceMode = payload.sourceMode === 'ac' ? 'ac' : 'dc';
+      state.frequency = Math.max(0.1, Number(payload.frequency) || 50);
+      state.worksheetMode = Boolean(payload.worksheetMode);
+      document.body.classList.toggle('worksheet-mode', state.worksheetMode);
+      state.selectedId = null;
+      state.wireStart = null;
+      state.time = 0;
+      setTool('select');
+      analyzeAndRender();
+    }
+
+    function findNextId() {
+      const ids = [...state.components, ...state.wires]
+        .map((item) => Number(String(item.id).replace(/^[cw]/, '')))
+        .filter(Number.isFinite);
+      return ids.length ? Math.max(...ids) + 1 : 1;
+    }
+
+    function downloadText(filename, text, type) {
+      const blob = new Blob([text], { type });
+      downloadBlob(filename, blob);
+    }
+
+    function downloadBlob(filename, blob) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    function saveJson() {
+      downloadText('panphy-circuit.json', JSON.stringify(circuitPayload(), null, 2), 'application/json');
+    }
+
+    async function loadJsonFile(file) {
+      if (!file) return;
+      const text = await file.text();
+      loadCircuitPayload(JSON.parse(text));
+    }
+
+    function exportPng() {
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('width', '900');
+      clone.setAttribute('height', '560');
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      style.textContent = `
+        .wire,.symbol-line,.component use,.component circle,.component path,.component line,.component polyline{stroke:#2b2b2b;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;fill:none}
+        .wire{stroke-width:5}.wire-hit,.component-hit{display:none}.readout,.component text{fill:#171717;font:800 13px monospace;text-anchor:middle}
+        .lamp-glow{fill:rgba(245,158,11,.28);stroke:none}.select-box{display:none}.is-live use,.is-live line,.is-live circle,.is-live path,.is-live polyline,.wire.is-live{stroke:#2563eb}
+      `;
+      clone.insertBefore(style, clone.firstChild);
+      const svgText = new XMLSerializer().serializeToString(clone);
+      const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1800;
+        canvas.height = 1120;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fffdf8';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob((blob) => {
+          if (blob) downloadBlob('panphy-circuit.png', blob);
+        }, 'image/png');
+      };
+      image.src = url;
+    }
+
+    function toggleWorksheetMode() {
+      state.worksheetMode = !state.worksheetMode;
+      document.body.classList.toggle('worksheet-mode', state.worksheetMode);
+      render();
+    }
+
+    function loadPreset(name) {
+      clearCircuit();
+      state.sourceMode = name === 'ac' ? 'ac' : 'dc';
+      if (name !== 'ac') state.frequency = 50;
+      if (name === 'series') {
+        addComponent('battery', 140, 280, { value: 10, rotation: 90 });
+        addComponent('resistor', 340, 160, { value: 10 });
+        addComponent('resistor', 560, 160, { value: 10 });
+        addWire(140, 236, 140, 160);
+        addWire(140, 160, 296, 160);
+        addWire(384, 160, 516, 160);
+        addWire(604, 160, 760, 160);
+        addWire(760, 160, 760, 324);
+        addWire(760, 324, 140, 324);
+      } else if (name === 'parallel') {
+        addComponent('battery', 140, 280, { value: 10, rotation: 90 });
+        addComponent('resistor', 460, 200, { value: 10 });
+        addComponent('resistor', 460, 360, { value: 10 });
+        addWire(140, 236, 140, 200);
+        addWire(140, 200, 416, 200);
+        addWire(140, 200, 140, 360);
+        addWire(140, 360, 416, 360);
+        addWire(504, 200, 760, 200);
+        addWire(504, 360, 760, 360);
+        addWire(760, 200, 760, 360);
+        addWire(760, 360, 140, 324);
+      } else if (name === 'lamp') {
+        addComponent('battery', 140, 280, { value: 9, rotation: 90 });
+        addComponent('switch', 360, 160, { closed: false });
+        addComponent('lamp', 600, 160, { value: 12 });
+        addWire(140, 236, 140, 160);
+        addWire(140, 160, 316, 160);
+        addWire(404, 160, 556, 160);
+        addWire(644, 160, 760, 160);
+        addWire(760, 160, 760, 324);
+        addWire(760, 324, 140, 324);
+      } else if (name === 'voltmeter') {
+        loadPreset('series');
+        addComponent('voltmeter', 340, 260, { rotation: 0 });
+        addWire(296, 260, 296, 160);
+        addWire(384, 260, 384, 160);
+      } else if (name === 'ammeter') {
+        addComponent('battery', 140, 280, { value: 10, rotation: 90 });
+        addComponent('ammeter', 320, 160);
+        addComponent('resistor', 560, 160, { value: 5 });
+        addWire(140, 236, 140, 160);
+        addWire(140, 160, 276, 160);
+        addWire(364, 160, 516, 160);
+        addWire(604, 160, 760, 160);
+        addWire(760, 160, 760, 324);
+        addWire(760, 324, 140, 324);
+      } else if (name === 'capacitor') {
+        addComponent('battery', 140, 280, { value: 10, internalResistance: 2, rotation: 90 });
+        addComponent('resistor', 360, 160, { value: 20 });
+        addComponent('capacitor', 600, 160, { value: 4700 });
+        addWire(140, 236, 140, 160);
+        addWire(140, 160, 316, 160);
+        addWire(404, 160, 556, 160);
+        addWire(644, 160, 760, 160);
+        addWire(760, 160, 760, 324);
+        addWire(760, 324, 140, 324);
+      } else if (name === 'ac') {
+        state.frequency = 50;
+        addComponent('battery', 140, 280, { value: 6, internalResistance: 1, rotation: 90 });
+        addComponent('lamp', 460, 160, { value: 8, nonOhmic: true });
+        addWire(140, 236, 140, 160);
+        addWire(140, 160, 416, 160);
+        addWire(504, 160, 760, 160);
+        addWire(760, 160, 760, 324);
+        addWire(760, 324, 140, 324);
+      }
+      state.selectedId = null;
+      setTool('select');
+      analyzeAndRender();
+    }
+
+    function animationLoop(now) {
+      const dt = Math.min(0.1, Math.max(0, (now - state.lastFrame) / 1000));
+      state.lastFrame = now;
+      if (state.sourceMode === 'ac' || state.components.some((component) => component.type === 'capacitor' || component.nonOhmic)) {
+        state.time += dt;
+        state.analysis = analyzeCircuit();
+        renderWires();
+        renderArrows();
+        renderComponents();
+        renderMetrics();
+        renderMessages();
+        renderScope();
+      }
+      requestAnimationFrame(animationLoop);
+    }
+
+    function handleBoardClick(event) {
+      if (event.target.closest('.component')) return;
+      const point = pointFromEvent(event);
+      if (state.tool === 'select') {
+        state.selectedId = null;
+        render();
+        return;
+      }
+      if (state.tool === 'wire') {
+        if (!state.wireStart) {
+          state.wireStart = point;
+          wireLabel.textContent = `Wire start: ${point.x}, ${point.y}`;
+          renderWirePreview();
+          return;
+        }
+        addWire(state.wireStart.x, state.wireStart.y, point.x, point.y);
+        state.wireStart = null;
+        wireLabel.textContent = 'No wire start selected';
+        renderWirePreview();
+        return;
+      }
+      addComponent(state.tool, point.x, point.y);
+      setTool('select');
+    }
+
+    function runSelfChecks() {
+      const checks = [
+        { name: '10 V across 5 ohm gives 2 A', ok: Math.abs(ohmsLawCurrent(10, 5) - 2) < 1e-9 },
+        { name: '10 ohm + 10 ohm in series gives 20 ohm', ok: Math.abs(equivalentSeries([10, 10]) - 20) < 1e-9 },
+        { name: '10 ohm || 10 ohm gives 5 ohm', ok: Math.abs(equivalentParallel([10, 10]) - 5) < 1e-9 },
+        { name: '10 V source, 5 ohm load, 5 ohm internal gives 5 V terminal', ok: Math.abs(getSourceVoltage(10, 5, 5) - 5) < 1e-9 },
+        { name: 'Non-ohmic lamp resistance rises when hot', ok: componentResistance({ type: 'lamp', value: 10, nonOhmic: true, lastPower: 9 }) > 10 }
+      ];
+      return checks;
+    }
+
+    function ohmsLawCurrent(voltage, resistance) {
+      return voltage / resistance;
+    }
+
+    function equivalentSeries(values) {
+      return values.reduce((sum, value) => sum + value, 0);
+    }
+
+    function equivalentParallel(values) {
+      return 1 / values.reduce((sum, value) => sum + 1 / value, 0);
+    }
+
+    function bootSelfChecks() {
+      const checks = runSelfChecks();
+      const ok = checks.every((check) => check.ok);
+      checkStatus.textContent = ok ? 'Self-check passed' : 'Self-check failed';
+      checkStatus.style.color = ok ? 'var(--accent)' : 'var(--fault)';
+      if (!ok) console.warn('Circuit Builder self-check failed', checks);
+    }
+
+    toolGrid.addEventListener('click', (event) => event.stopPropagation());
+    svg.addEventListener('click', handleBoardClick);
+    document.getElementById('saveJsonButton').addEventListener('click', saveJson);
+    document.getElementById('loadJsonInput').addEventListener('change', (event) => {
+      loadJsonFile(event.target.files[0]).catch((error) => {
+        state.analysis.messages.push({ level: 'fault', text: error.message });
+        renderMessages();
+      });
+      event.target.value = '';
+    });
+    document.getElementById('exportPngButton').addEventListener('click', exportPng);
+    document.getElementById('worksheetButton').addEventListener('click', toggleWorksheetMode);
+    document.getElementById('rotateButton').addEventListener('click', rotateSelected);
+    document.getElementById('resetButton').addEventListener('click', clearCircuit);
+    document.querySelectorAll('[data-preset]').forEach((button) => {
+      button.addEventListener('click', () => loadPreset(button.dataset.preset));
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        state.wireStart = null;
+        setTool('select');
+      } else if (event.key === 'Delete' || event.key === 'Backspace') {
+        const active = document.activeElement;
+        const editing = active && ['INPUT', 'SELECT', 'TEXTAREA'].includes(active.tagName);
+        if (!editing) deleteSelected();
+      }
+    });
+
+    window.__circuitBuilderSelfCheck = runSelfChecks;
+    window.__circuitBuilderPayload = circuitPayload;
+    window.__circuitBuilderLoadPayload = loadCircuitPayload;
+    bootSelfChecks();
+    renderTools();
+    loadPreset('series');
+    requestAnimationFrame(animationLoop);
+  </script>
+</body>
+
+</html>
