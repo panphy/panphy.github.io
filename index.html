@@ -611,7 +611,7 @@
                 width: calc(100vw - 16px);
                 max-width: 760px;
                 display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+                grid-template-columns: repeat(5, minmax(0, 1fr)) auto auto;
                 align-items: center;
                 gap: 0.1rem;
                 padding: 0.3rem 0.35rem;
@@ -1078,7 +1078,6 @@
 
         document.documentElement.setAttribute('data-theme', currentTheme);
         updateAppChromeTheme(currentTheme);
-        updateButtonEmoji(currentTheme);
 
         function updateAppChromeTheme(theme) {
             const themeColorMeta = document.querySelector('meta[name="theme-color"]');
@@ -1098,10 +1097,6 @@
             updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
         });
 
-        function updateButtonEmoji(theme) {
-            themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-        }
-
         themeButton.addEventListener('click', function () {
             let theme = document.documentElement.getAttribute('data-theme');
             if (theme === 'light') {
@@ -1109,13 +1104,11 @@
                 localStorage.setItem(DARK_THEME_KEY, 'true');
                 localStorage.removeItem(LIGHT_THEME_KEY);
                 updateAppChromeTheme('dark');
-                updateButtonEmoji('dark');
             } else {
                 document.documentElement.setAttribute('data-theme', 'light');
                 localStorage.setItem(LIGHT_THEME_KEY, 'true');
                 localStorage.removeItem(DARK_THEME_KEY);
                 updateAppChromeTheme('light');
-                updateButtonEmoji('light');
             }
         });
 
