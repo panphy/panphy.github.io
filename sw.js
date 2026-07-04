@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-06-20T08:07:28Z';
+const BUILD_ID = '2026-07-04T11:25:48Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -20,8 +20,7 @@ const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
 const CORS_REQUIRED_ASSETS = new Set([
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js',
-  'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js'
+  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
 ]);
 
 const ASSETS_TO_CACHE = [
@@ -189,11 +188,11 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-function getNavigationFallbackCandidates(requestUrl) {
+function getNavigationCandidates(requestUrl) {
   const candidates = [];
   const pathname = requestUrl.pathname;
 
-  // Try exact route, then route with trailing slash handling, then index fallback.
+  // Try exact route, then route with trailing slash handling.
   if (pathname === '/') {
     candidates.push('/');
     candidates.push('/index.html');
@@ -206,7 +205,6 @@ function getNavigationFallbackCandidates(requestUrl) {
     }
   }
 
-  candidates.push('/index.html');
   return [...new Set(candidates)];
 }
 
@@ -254,10 +252,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigations: Cache first
+  // Navigations: Cache first, network next, cached homepage only as offline fallback
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
-      const navigationCandidates = getNavigationFallbackCandidates(url);
+      const navigationCandidates = getNavigationCandidates(url);
 
       for (const candidate of navigationCandidates) {
         const cachedCandidate = await matchCurrentCaches(candidate);
@@ -273,6 +271,8 @@ self.addEventListener('fetch', (event) => {
         }
         return fresh;
       } catch {
+        const homeFallback = await matchCurrentCaches('/index.html');
+        if (homeFallback) return homeFallback;
         return Response.error();
       }
     })());

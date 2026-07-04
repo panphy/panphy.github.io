@@ -784,6 +784,7 @@
                 <input id="seconds" type="number" placeholder="Sec" min="0" max="59">
                 <label class="visually-hidden" for="extra-percent">Extra Time Percentage</label>
                 <select id="extra-percent" aria-label="Extra time percentage">
+                    <option value="0">No Extra</option>
                     <option value="10">10% Extra</option>
                     <option value="25" selected>25% Extra</option>
                     <option value="50">50% Extra</option>
@@ -1586,7 +1587,8 @@
                 if (isDocumentFullscreen()) {
                     exitFullscreen();
                 } else if (setResetBtn.dataset.state === 'reset') {
-                    resetTimer();
+                    // Route through the button so a running timer gets the confirm dialog.
+                    setResetBtn.click();
                 }
             }
         });
@@ -1616,12 +1618,6 @@
                 updateDisplays();
                 updateInfoDisplay();
             }
-        });
-
-        /* ------------ Clear state on page close ------------ */
-        // Reset timer when page/tab is closed so it doesn't run in background
-        window.addEventListener('pagehide', () => {
-            clearState();
         });
 
         /* ------------ Initialize ------------ */
