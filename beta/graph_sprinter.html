@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F8F6F1">
+  <script>
+    (function () {
+      if (localStorage.getItem('graph-sprinter-dark')) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        if (tc) tc.setAttribute('content', '#111110');
+      }
+    })();
+  </script>
+  <title>Graph Sprinter — PanPhy Labs (beta)</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      color-scheme: light;
+      --font-body: 'Manrope', sans-serif;
+      --font-display: 'DM Serif Display', serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --bg-color: #F8F6F1;
+      --bg-pattern: #EDE9E0;
+      --text-main: #1B1B1B;
+      --text-secondary: #6B6560;
+      --brand-primary: #C2410C;
+      --brand-secondary: #EA580C;
+      --brand-accent: #0D9488;
+      --card-bg: #ffffff;
+      --card-border: #E8E4DD;
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      --canvas-grid: #EFEBE3;
+      --slider-track: #E8E4DD;
+      --slider-thumb: #C2410C;
+      --accent-gold: #f59e0b;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg-color: #111110;
+      --bg-pattern: #1A1A18;
+      --text-main: #EDEBE8;
+      --text-secondary: #9C9890;
+      --brand-primary: #E8734A;
+      --brand-secondary: #F4845F;
+      --brand-accent: #2DD4BF;
+      --card-bg: #1E1E1C;
+      --card-border: #2E2E2A;
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      --canvas-grid: #262623;
+      --slider-track: #3A3A36;
+      --slider-thumb: #E8734A;
+      --accent-gold: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-color);
+      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+      background-size: 30px 30px;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 14px calc(24px + env(safe-area-inset-bottom));
+    }
+
+    header {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 400;
+      background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header .tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+
+    header .spacer { flex: 1; }
+
+    #themeBtn {
+      font-size: 1.05rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    a.back {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      align-self: center;
+    }
+
+    a.back:hover { color: var(--brand-primary); }
+
+    main {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .levels {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .level-chip {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 9px 14px;
+      min-height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .level-chip .stars {
+      font-size: 0.72rem;
+      color: var(--accent-gold);
+      letter-spacing: 0.05em;
+    }
+
+    .level-chip.active {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-primary) 30%, transparent);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      box-shadow: var(--card-shadow);
+      padding: 14px;
+      position: relative;
+    }
+
+    .card h2 {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card h2 .hint {
+      text-transform: none;
+      letter-spacing: 0;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: var(--brand-accent);
+    }
+
+    canvas { display: block; width: 100%; }
+
+    #trackCanvas { height: 92px; }
+    #graphCanvas { height: 330px; }
+
+    .hud {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 5px 12px;
+      color: var(--text-secondary);
+    }
+
+    .pill strong { color: var(--brand-primary); font-weight: 600; }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    #startBtn {
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.95rem;
+      min-height: 48px;
+      padding: 10px 26px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary));
+    }
+
+    #startBtn:disabled { opacity: 0.45; cursor: default; }
+
+    .slider-wrap {
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slider-wrap .end-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--slider-track);
+      outline: none;
+      min-height: 44px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      border: 3px solid var(--card-bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      cursor: grab;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--slider-thumb);
+      border: 3px solid var(--card-bg);
+      cursor: grab;
+    }
+
+    #vReadout {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      min-width: 108px;
+      text-align: right;
+      color: var(--brand-primary);
+    }
+
+    .note {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      width: 100%;
+    }
+
+    kbd {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      border: 1px solid var(--card-border);
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      padding: 1px 6px;
+      background: var(--card-bg);
+    }
+
+    /* Result / countdown overlay */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--card-bg) 55%, transparent);
+      backdrop-filter: blur(2px);
+      z-index: 5;
+    }
+
+    #overlay.show { display: flex; }
+
+    #overlay .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      padding: 20px 30px;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    #overlay .big {
+      font-family: var(--font-display);
+      font-size: 3.4rem;
+      line-height: 1.1;
+      color: var(--brand-primary);
+    }
+
+    #overlay .stars-big {
+      font-size: 1.9rem;
+      letter-spacing: 0.12em;
+      color: var(--accent-gold);
+      margin: 4px 0;
+    }
+
+    #overlay .sub {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    #overlay .row { display: flex; gap: 10px; justify-content: center; }
+
+    #overlay button {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.85rem;
+      min-height: 44px;
+      padding: 8px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+    }
+
+    #overlay button.primary {
+      border: none;
+      color: #fff;
+      background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary));
+    }
+
+    @media (max-width: 640px) {
+      header h1 { font-size: 1.35rem; }
+      #graphCanvas { height: 260px; }
+      #overlay .big { font-size: 2.6rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Graph Sprinter</h1>
+    <span class="tag">beta · kinematics</span>
+    <span class="spacer"></span>
+    <a class="back" href="/beta/">← beta index</a>
+    <button id="themeBtn" aria-label="Toggle theme">☀︎</button>
+  </header>
+
+  <main>
+    <div class="levels" id="levels"></div>
+
+    <div class="card" id="gameCard">
+      <h2 id="levelTitle">Level</h2>
+      <canvas id="trackCanvas"></canvas>
+      <canvas id="graphCanvas"></canvas>
+      <div class="hud">
+        <span class="pill">t <strong id="tReadout">0.0</strong> s</span>
+        <span class="pill">match <strong id="matchReadout">—</strong></span>
+      </div>
+      <div id="overlay">
+        <div class="panel">
+          <div class="big" id="ovBig">3</div>
+          <div class="stars-big" id="ovStars"></div>
+          <div class="sub" id="ovSub"></div>
+          <div class="row" id="ovBtns" style="display:none">
+            <button id="retryBtn">Retry</button>
+            <button id="nextBtn" class="primary">Next level →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card controls">
+      <button id="startBtn">▶ Start run</button>
+      <div class="slider-wrap">
+        <span class="end-label">−3 m/s ⟵</span>
+        <input type="range" id="vSlider" min="-3" max="3" step="0.05" value="0"
+          aria-label="Runner velocity">
+        <span class="end-label">⟶ +3 m/s</span>
+      </div>
+      <span id="vReadout">v = 0.00 m/s</span>
+      <p class="note">Drag the slider (or hold <kbd>←</kbd>/<kbd>→</kbd>, tap <kbd>0</kbd> to stop) to drive the
+        runner so your <b>solid line</b> traces the <b>dashed target graph</b>. <kbd>Space</kbd> starts a run.</p>
+    </div>
+  </main>
+
+  <script>
+    'use strict';
+
+    /* ---------- levels ---------- */
+    const DURATION = 10; // s
+    const X_MAX = 20;    // m track length
+    const V_MAX = 3;     // m/s slider limit
+
+    function piecewise(pts) {
+      return t => {
+        if (t <= pts[0][0]) return pts[0][1];
+        for (let i = 1; i < pts.length; i++) {
+          if (t <= pts[i][0]) {
+            const [t0, y0] = pts[i - 1], [t1, y1] = pts[i];
+            return y0 + (y1 - y0) * (t - t0) / (t1 - t0);
+          }
+        }
+        return pts[pts.length - 1][1];
+      };
+    }
+
+    const LEVELS = [
+      { name: '1 · Steady Walk', mode: 'd', hint: 'Constant velocity → a straight sloped d–t line.', target: piecewise([[0, 0], [10, 15]]) },
+      { name: '2 · Wait, Then Go', mode: 'd', hint: 'Flat line = stationary. Gradient = velocity.', target: piecewise([[0, 2], [3, 2], [10, 16]]) },
+      { name: '3 · There & Back', mode: 'd', hint: 'Negative gradient = moving back toward the start.', target: piecewise([[0, 0], [4, 10], [6, 10], [10, 0]]) },
+      { name: '4 · Cruise Control', mode: 'v', hint: 'Now you match a v–t graph: hold a steady velocity.', target: () => 2 },
+      { name: '5 · Speed Up', mode: 'v', hint: 'Straight rising v–t line = constant acceleration.', target: t => 0.3 * t },
+      { name: '6 · Shuttle Run', mode: 'v', hint: 'Jumps in v–t need quick slider flicks. Negative v = backwards.', target: piecewise([[0, 2], [4, 2], [4.01, 0], [6, 0], [6.01, -2], [10, -2]]) },
+      { name: '7 · Smooth Wave', mode: 'v', hint: 'Changing acceleration — the gradient itself changes.', target: t => 2.2 * Math.sin(Math.PI * t / 5) },
+    ];
+
+    /* ---------- state ---------- */
+    const state = {
+      level: 0,
+      phase: 'idle', // idle | countdown | running | done
+      t: 0, x: 0,
+      samples: [],   // {t, x, v}
+      errInt: 0,     // ∫|err| dt
+      countdownEnd: 0,
+      best: JSON.parse(localStorage.getItem('graphSprinterBest') || '{}'),
+    };
+
+    /* ---------- dom ---------- */
+    const $ = id => document.getElementById(id);
+    const trackCv = $('trackCanvas'), graphCv = $('graphCanvas');
+    const trackCtx = trackCv.getContext('2d'), graphCtx = graphCv.getContext('2d');
+    const vSlider = $('vSlider');
+
+    function css(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    /* ---------- theme ---------- */
+    $('themeBtn').addEventListener('click', () => {
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+      if (dark) localStorage.removeItem('graph-sprinter-dark');
+      else localStorage.setItem('graph-sprinter-dark', '1');
+      $('themeBtn').textContent = dark ? '☀︎' : '☾';
+    });
+    if (localStorage.getItem('graph-sprinter-dark')) $('themeBtn').textContent = '☾';
+
+    /* ---------- level chips ---------- */
+    function starStr(n) { return n ? '★'.repeat(n) : ''; }
+
+    function renderChips() {
+      const box = $('levels');
+      box.innerHTML = '';
+      LEVELS.forEach((lv, i) => {
+        const b = document.createElement('button');
+        b.className = 'level-chip' + (i === state.level ? ' active' : '');
+        const best = state.best[i];
+        b.innerHTML = `${lv.name}${best ? ` <span class="stars">${starStr(best.stars)}</span>` : ''}`;
+        b.addEventListener('click', () => selectLevel(i));
+        box.appendChild(b);
+      });
+    }
+
+    function selectLevel(i) {
+      state.level = i;
+      resetRun();
+      renderChips();
+      const lv = LEVELS[i];
+      $('levelTitle').innerHTML =
+        `${lv.mode === 'd' ? 'Distance–time' : 'Velocity–time'} · ${lv.name}` +
+        ` <span class="hint">${lv.hint}</span>`;
+    }
+
+    /* ---------- run control ---------- */
+    function resetRun() {
+      state.phase = 'idle';
+      state.t = 0;
+      state.x = LEVELS[state.level].mode === 'd' ? LEVELS[state.level].target(0) : 0;
+      state.samples = [];
+      state.errInt = 0;
+      vSlider.value = 0;
+      $('overlay').classList.remove('show');
+      $('startBtn').disabled = false;
+      $('tReadout').textContent = '0.0';
+      $('matchReadout').textContent = '—';
+    }
+
+    function startRun() {
+      if (state.phase === 'countdown' || state.phase === 'running') return;
+      resetRun();
+      state.phase = 'countdown';
+      state.countdownEnd = performance.now() + 3000;
+      $('startBtn').disabled = true;
+      $('ovBtns').style.display = 'none';
+      $('ovStars').textContent = '';
+      $('ovSub').textContent = 'Get ready…';
+      $('overlay').classList.add('show');
+    }
+
+    function finishRun() {
+      state.phase = 'done';
+      const lv = LEVELS[state.level];
+      const mae = state.errInt / DURATION;
+      const scale = lv.mode === 'd' ? 2.2 : 1.1; // MAE giving 0 %
+      const acc = Math.round(Math.max(0, 100 * (1 - mae / scale)));
+      const stars = acc >= 88 ? 3 : acc >= 70 ? 2 : acc >= 45 ? 1 : 0;
+      const prev = state.best[state.level];
+      if (!prev || acc > prev.acc) {
+        state.best[state.level] = { acc, stars };
+        localStorage.setItem('graphSprinterBest', JSON.stringify(state.best));
+      }
+      renderChips();
+      $('ovBig').textContent = acc + '%';
+      $('ovStars').textContent = stars ? starStr(stars) : '☆';
+      $('ovSub').textContent =
+        (acc >= 88 ? 'Superb match!' : acc >= 70 ? 'Solid run — tighten it up!' : acc >= 45 ? 'Getting there. Watch the gradient!' : 'Study the dashed line, then retry.') +
+        (state.best[state.level] ? `  Best: ${state.best[state.level].acc}%` : '');
+      $('ovBtns').style.display = 'flex';
+      $('nextBtn').style.display = state.level < LEVELS.length - 1 ? '' : 'none';
+      $('overlay').classList.add('show');
+      $('startBtn').disabled = false;
+    }
+
+    $('startBtn').addEventListener('click', startRun);
+    $('retryBtn').addEventListener('click', startRun);
+    $('nextBtn').addEventListener('click', () => { selectLevel(state.level + 1); startRun(); });
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); startRun(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); vSlider.value = Math.min(V_MAX, +vSlider.value + 0.15); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); vSlider.value = Math.max(-V_MAX, +vSlider.value - 0.15); }
+      else if (e.key === '0') { vSlider.value = 0; }
+    });
+
+    /* ---------- physics + loop ---------- */
+    let lastTime = performance.now();
+
+    function tick(now) {
+      let dt = Math.min((now - lastTime) / 1000, 0.05); // clamp tab-switch jumps
+      lastTime = now;
+      const lv = LEVELS[state.level];
+      const v = +vSlider.value;
+      $('vReadout').textContent = `v = ${v >= 0 ? '+' : ''}${v.toFixed(2)} m/s`;
+
+      if (state.phase === 'countdown') {
+        const left = state.countdownEnd - now;
+        if (left <= 0) {
+          state.phase = 'running';
+          $('overlay').classList.remove('show');
+        } else {
+          $('ovBig').textContent = Math.ceil(left / 1000);
+        }
+      }
+
+      if (state.phase === 'running') {
+        state.t += dt;
+        state.x = Math.max(0, Math.min(X_MAX, state.x + v * dt));
+        const actual = lv.mode === 'd' ? state.x : v;
+        state.errInt += Math.abs(actual - lv.target(Math.min(state.t, DURATION))) * dt;
+        state.samples.push({ t: state.t, x: state.x, v });
+        $('tReadout').textContent = state.t.toFixed(1);
+        const scale = lv.mode === 'd' ? 2.2 : 1.1;
+        const liveAcc = Math.round(Math.max(0, 100 * (1 - (state.errInt / state.t) / scale)));
+        $('matchReadout').textContent = liveAcc + '%';
+        if (state.t >= DURATION) finishRun();
+      }
+
+      drawTrack(v);
+      drawGraph();
+      requestAnimationFrame(tick);
+    }
+
+    /* ---------- drawing ---------- */
+    function fitCanvas(cv, ctx) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = cv.clientWidth, h = cv.clientHeight;
+      if (cv.width !== w * dpr || cv.height !== h * dpr) {
+        cv.width = w * dpr;
+        cv.height = h * dpr;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return [w, h];
+    }
+
+    function drawTrack(v) {
+      const [w, h] = fitCanvas(trackCv, trackCtx);
+      const ctx = trackCtx;
+      ctx.clearRect(0, 0, w, h);
+      const pad = 28, y = h - 26;
+      const xPix = m => pad + (w - 2 * pad) * m / X_MAX;
+
+      ctx.strokeStyle = css('--slider-track');
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(pad, y); ctx.lineTo(w - pad, y);
+      ctx.stroke();
+
+      ctx.fillStyle = css('--text-secondary');
+      ctx.font = '10px ' + css('--font-mono');
+      ctx.textAlign = 'center';
+      for (let m = 0; m <= X_MAX; m += 2) {
+        ctx.beginPath();
+        ctx.moveTo(xPix(m), y - 4); ctx.lineTo(xPix(m), y + 4);
+        ctx.strokeStyle = css('--text-secondary');
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        if (m % 4 === 0) ctx.fillText(m + ' m', xPix(m), y + 17);
+      }
+
+      // ghost: where the runner *should* be (d-mode only)
+      const lv = LEVELS[state.level];
+      if (lv.mode === 'd') {
+        const gx = xPix(lv.target(Math.min(state.t, DURATION)));
+        ctx.globalAlpha = 0.35;
+        ctx.font = '22px serif';
+        ctx.fillText('🎯', gx, y - 12);
+        ctx.globalAlpha = 1;
+      }
+
+      // runner
+      const rx = xPix(state.x);
+      ctx.font = '26px serif';
+      ctx.save();
+      ctx.translate(rx, y - 14);
+      if (v < -0.05) ctx.scale(-1, 1); // face the way you run
+      ctx.fillText(Math.abs(v) < 0.05 ? '🧍' : '🏃', 0, 0);
+      ctx.restore();
+    }
+
+    function drawGraph() {
+      const [w, h] = fitCanvas(graphCv, graphCtx);
+      const ctx = graphCtx;
+      ctx.clearRect(0, 0, w, h);
+      const lv = LEVELS[state.level];
+      const padL = 46, padR = 14, padT = 16, padB = 30;
+      const yMin = lv.mode === 'd' ? 0 : -V_MAX;
+      const yMax = lv.mode === 'd' ? X_MAX : V_MAX;
+      const px = t => padL + (w - padL - padR) * t / DURATION;
+      const py = val => padT + (h - padT - padB) * (1 - (val - yMin) / (yMax - yMin));
+
+      // grid
+      ctx.strokeStyle = css('--canvas-grid');
+      ctx.lineWidth = 1;
+      ctx.fillStyle = css('--text-secondary');
+      ctx.font = '10px ' + css('--font-mono');
+      const yStep = lv.mode === 'd' ? 5 : 1;
+      for (let val = yMin; val <= yMax; val += yStep) {
+        ctx.beginPath(); ctx.moveTo(padL, py(val)); ctx.lineTo(w - padR, py(val)); ctx.stroke();
+        ctx.textAlign = 'right';
+        ctx.fillText(String(val), padL - 6, py(val) + 3);
+      }
+      for (let t = 0; t <= DURATION; t += 1) {
+        ctx.beginPath(); ctx.moveTo(px(t), padT); ctx.lineTo(px(t), h - padB); ctx.stroke();
+        ctx.textAlign = 'center';
+        ctx.fillText(String(t), px(t), h - padB + 14);
+      }
+
+      // axis labels
+      ctx.fillStyle = css('--text-secondary');
+      ctx.textAlign = 'center';
+      ctx.fillText('time / s', (padL + w - padR) / 2, h - 6);
+      ctx.save();
+      ctx.translate(12, (padT + h - padB) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(lv.mode === 'd' ? 'distance / m' : 'velocity / m s⁻¹', 0, 0);
+      ctx.restore();
+
+      // zero line for v-t
+      if (lv.mode === 'v') {
+        ctx.strokeStyle = css('--text-secondary');
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(padL, py(0)); ctx.lineTo(w - padR, py(0)); ctx.stroke();
+      }
+
+      // dashed target
+      ctx.strokeStyle = css('--brand-accent');
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([7, 6]);
+      ctx.beginPath();
+      for (let t = 0; t <= DURATION; t += 0.05) {
+        const y = py(lv.target(t));
+        t === 0 ? ctx.moveTo(px(t), y) : ctx.lineTo(px(t), y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // student trace
+      if (state.samples.length > 1) {
+        ctx.strokeStyle = css('--brand-primary');
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        state.samples.forEach((s, i) => {
+          const y = py(lv.mode === 'd' ? s.x : s.v);
+          i === 0 ? ctx.moveTo(px(s.t), y) : ctx.lineTo(px(s.t), y);
+        });
+        ctx.stroke();
+        // moving dot
+        const last = state.samples[state.samples.length - 1];
+        ctx.fillStyle = css('--brand-primary');
+        ctx.beginPath();
+        ctx.arc(px(last.t), py(lv.mode === 'd' ? last.x : last.v), 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // idle preview dot at t=0
+      if (state.phase === 'idle') {
+        ctx.fillStyle = css('--brand-primary');
+        ctx.beginPath();
+        ctx.arc(px(0), py(lv.mode === 'd' ? state.x : +vSlider.value), 5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    /* ---------- go ---------- */
+    selectLevel(0);
+    requestAnimationFrame(tick);
+  </script>
+</body>
+
+</html>
