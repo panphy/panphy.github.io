@@ -33,6 +33,7 @@ Assets in `sw.js` `ASSETS_TO_CACHE` are cache-first. Returning users will not re
 - Published features should work offline unless explicitly network-only.
 - Non-precached same-origin GET resources may work offline after runtime caching, except excluded paths.
 - Supabase API calls stay network-only.
+- `sw.js` also defines `APP_VERSIONS` (app group → version); `assets/sw-register.js` compares the current app group's version to decide whether to show the update banner. All entries currently track `BUILD_ID`, and app groups missing from the map fall back to `BUILD_ID`. When publishing a new app, add its group to `APP_VERSIONS`.
 
 ```javascript
 const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';
@@ -57,7 +58,7 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 - New pages default to `/beta` unless explicitly requested for publication.
 - `beta/index.html` is the beta testing hub — a simple link index for internal use. Keep it in sync: add an entry when creating a beta page, update or remove the entry when renaming or deleting one.
 - `/beta`, `/misc`, and `/fun` are excluded from pre-cache and runtime cache.
-- All `fun/` apps are network-only, now and in the future.
+- All `fun/` apps are network-only, now and in the future. They do not include `/assets/sw-register.js` — network-only pages never need the update banner.
 - Unlisted/internal pages stay outside service-worker registration and pre-cache unless promoted.
 
 Current unlisted/legacy pages:
@@ -92,6 +93,7 @@ When promoting an unlisted page:
 - State: prefer a centralized state object for shared app state
 - CSS: use custom properties for published pages
 - Mobile: responsive layout, 48px+ touch targets, and `viewport-fit: cover` where edge-to-edge/notched layouts need it
+- Inputs for physical quantities: prefer precise, steppable controls (exact-step +/- buttons, hold-to-ramp, or direct numeric entry) over bare sliders; if a slider is used, pair it with a numeric readout/entry
 - Output: summarize files with repo-relative paths only, never full absolute paths
 
 ## UI Design System
@@ -118,6 +120,7 @@ When promoting an unlisted page:
 ├── index.html              # Landing page
 ├── sw.js                   # Service worker; bump BUILD_ID for cached changes
 ├── manifest.json           # PWA config
+├── .github/workflows/      # GitHub Actions (e.g., Supabase keep-alive)
 ├── assets/                 # Icons, logos, sw-register.js
 ├── beta/                   # Unpublished WIP, never SW-cached
 ├── tools/                  # Educational tools
