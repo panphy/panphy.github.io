@@ -1,8 +1,4 @@
 (() => {
-  const BUILD_ID = '2026-06-01T09:00:00Z';
-  window.__BUILD_ID__ = BUILD_ID;
-  console.info(`[PanPhy Labs] Build ${BUILD_ID}`);
-
   if (!('serviceWorker' in navigator)) {
     return;
   }
@@ -225,6 +221,15 @@
         updateViaCache: 'none'
       });
       currentRegistration = registration;
+
+      // Report the build from the service worker itself so there is no
+      // second BUILD_ID constant to keep in sync with sw.js.
+      getWorkerVersions(navigator.serviceWorker.controller || registration.active).then((info) => {
+        if (info && info.buildId) {
+          window.__BUILD_ID__ = info.buildId;
+          console.info(`[PanPhy Labs] Build ${info.buildId}`);
+        }
+      });
 
       listenForUpdates(registration);
 
