@@ -19,6 +19,7 @@ PanPhy Labs is a static GitHub Pages PWA for interactive physics tools, simulati
 - Keep local tool state directories such as `.agents/` and `.claude/` ignored/local-only.
 - Always clean up transient runtime state (such as temporary browser profiles like `chrome-profile`, custom debugging logs, or scratch files) before finishing a task.
   - **Guardrail**: You must always ask the user for explicit confirmation before deleting any files or directories in the workspace.
+- **Guardrail**: Never remove, hide, or disable an existing UI element (e.g., a footer, button, or control) unless explicitly asked to.
 
 ## Critical Rules
 
@@ -43,6 +44,8 @@ const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';
 
 Edit files directly. Do not add npm, webpack, bundlers, build pipelines, `package.json`, lockfiles, or remote-required dev-server metadata.
 
+- Local npm tooling (e.g. `node_modules/`, a gitignored `package.json`) may exist on a machine for editor/dev-server convenience. It must stay gitignored and never become required to serve or build the site.
+
 ### Page Structure
 
 Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolders, but the entry point remains a single HTML file.
@@ -61,29 +64,18 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 - All `fun/` apps are network-only, now and in the future. They do not include `/assets/sw-register.js` — network-only pages never need the update banner.
 - Unlisted/internal pages stay outside service-worker registration and pre-cache unless promoted.
 
-Current unlisted/legacy pages:
-
-- `misc/digitizer.html`
-- `misc/dodge.html`
-- `misc/dodge3d.html`
-- `misc/gcse_phy/phy_flashcard.html`
-- `misc/gcse_phy/phy_flashcard_cs.html`
-- `misc/gcse_phy/phy_flashcard_ss.html`
-- `misc/index.html`
-- `misc/ising_model.html`
-- `misc/phyclub_showcase.html`
-- `misc/react.html`
-- `misc/scoreboard.html`
+Everything under `misc/` is unlisted/legacy by default — no separate inventory to maintain here.
 
 When promoting an unlisted page:
 
-1. Move it out of `/beta` or `/misc` into the correct public directory.
+1. Move it out of `/beta` or `/misc` into the correct public directory. If promoting from `/beta`, remove its entry from `beta/index.html`.
 2. Add `/assets/sw-register.js` if it should participate in SW updates.
 3. Add its route and required assets to `ASSETS_TO_CACHE`, unless it is under `fun/` or intentionally network-only.
-4. Bump `BUILD_ID` in `sw.js`.
-5. Link it from `index.html`.
-6. Add it to `OFFLINE_CARD_REQUIREMENTS` unless intentionally network-only.
-7. Add it to `sitemap.xml`.
+4. Add its app group to `APP_VERSIONS` in `sw.js` if it registers the service worker.
+5. Bump `BUILD_ID` in `sw.js`.
+6. Link it from `index.html`.
+7. Add it to `OFFLINE_CARD_REQUIREMENTS` unless intentionally network-only.
+8. Add it to `sitemap.xml`.
 
 ## Coding Conventions
 
@@ -147,10 +139,11 @@ Then open `http://localhost:8000`.
 3. For published pages, place it in the correct public directory and include `/assets/sw-register.js` if it should join SW updates.
 4. Follow the published-page design system.
 5. Add the path and required assets to `ASSETS_TO_CACHE`, unless under `fun/` or intentionally network-only.
-6. Bump `BUILD_ID`.
-7. Link it from `index.html`.
-8. Add it to `OFFLINE_CARD_REQUIREMENTS` (in `index.html`; controls the "Offline Ready" pill) unless intentionally network-only.
-9. Add it to `sitemap.xml`.
+6. Add its app group to `APP_VERSIONS` in `sw.js` if it registers the service worker.
+7. Bump `BUILD_ID`.
+8. Link it from `index.html`.
+9. Add it to `OFFLINE_CARD_REQUIREMENTS` (in `index.html`; controls the "Offline Ready" pill) unless intentionally network-only.
+10. Add it to `sitemap.xml`.
 
 ## Git Workflow
 
