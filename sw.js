@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-07-16T17:46:52Z';
+const BUILD_ID = '2026-08-18T07:58:42Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -64,6 +64,10 @@ const ASSETS_TO_CACHE = [
   'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
   '/tools/panphyplot/js/vendor/math.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_SVG.js?V=2.7.5',
+  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/jax.js?V=2.7.5',
+  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/fontdata.js?V=2.7.5',
+  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Main/Regular/GreekAndCoptic.js?V=2.7.5',
   '/tools/panphyplot/panphyplot_manual.html',
   '/tools/panphyplot/math_ref.html',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js',
@@ -105,61 +109,105 @@ const ASSETS_TO_CACHE = [
 
 ];
 
-// Install: pre-cache your core pages
-self.addEventListener('install', (event) => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(PRECACHE_NAME);
-    await Promise.allSettled(ASSETS_TO_CACHE.map(async (url) => {
+async function cachePrecacheAsset(cache, url, onlyMissing) {
+  try {
+    const resolvedUrl = new URL(url, self.location.origin);
+    if (onlyMissing && await cache.match(resolvedUrl.href)) {
+      return true;
+    }
+
+    const isSameOrigin = resolvedUrl.origin === self.location.origin;
+    const isCorsRequired = CORS_REQUIRED_ASSETS.has(resolvedUrl.href);
+    const requestModes = isSameOrigin
+      ? ['same-origin']
+      : (isCorsRequired ? ['cors'] : ['cors', 'no-cors']);
+
+    for (const mode of requestModes) {
       try {
-        const resolvedUrl = new URL(url, self.location.origin);
-        const isSameOrigin = resolvedUrl.origin === self.location.origin;
-        const isCorsRequired = CORS_REQUIRED_ASSETS.has(resolvedUrl.href);
-        const requestModes = isSameOrigin
-          ? ['same-origin']
-          : (isCorsRequired ? ['cors'] : ['cors', 'no-cors']);
-        let precached = false;
+        const fetchUrl = new URL(resolvedUrl.href);
+        if (isSameOrigin) {
+          fetchUrl.searchParams.set('v', BUILD_ID);
+        }
+        const res = await fetch(
+          new Request(fetchUrl.href, {
+            cache: 'no-store',
+            mode
+          })
+        );
 
-        for (const mode of requestModes) {
-          try {
-            const fetchUrl = new URL(resolvedUrl.href);
-            if (isSameOrigin) {
-              fetchUrl.searchParams.set('v', BUILD_ID);
-            }
-            const res = await fetch(
-              new Request(fetchUrl.href, {
-                cache: 'no-store',
-                mode
-              })
-            );
-
-            const isOpaque = res.type === 'opaque';
-            if (res.ok || isOpaque) {
-              if (isCorsRequired && isOpaque) {
-                continue;
-              }
-              await cache.put(resolvedUrl.href, res);
-              precached = true;
-              break;
-            }
-          } catch (fetchErr) {
-            // Try fallback mode (if available) before logging.
+        const isOpaque = res.type === 'opaque';
+        if (res.ok || isOpaque) {
+          if (isCorsRequired && isOpaque) {
+            continue;
           }
+          await cache.put(resolvedUrl.href, res);
+          return true;
         }
-
-        if (!precached) {
-          console.warn('Precache failed:', url);
-        }
-      } catch (e) {
-        console.warn('Precache failed:', url, e);
+      } catch (fetchErr) {
+        // Try fallback mode (if available) before reporting the failure.
       }
-    }));
-  })());
+    }
+  } catch (error) {
+    // Report the URL below so a malformed entry cannot abort the whole repair.
+  }
+
+  console.warn('Precache failed:', url);
+  return false;
+}
+
+async function cachePrecacheAssets(onlyMissing = false) {
+  const cache = await caches.open(PRECACHE_NAME);
+  const results = await Promise.all(
+    ASSETS_TO_CACHE.map(async (url) => ({
+      url,
+      cached: await cachePrecacheAsset(cache, url, onlyMissing)
+    }))
+  );
+  const failed = results.filter((result) => !result.cached).map((result) => result.url);
+  return {
+    cached: results.length - failed.length,
+    failed
+  };
+}
+
+let precacheRepairPromise = null;
+
+function repairPrecache() {
+  if (!precacheRepairPromise) {
+    precacheRepairPromise = cachePrecacheAssets(true)
+      .finally(() => {
+        precacheRepairPromise = null;
+      });
+  }
+  return precacheRepairPromise;
+}
+
+// Install: pre-cache your core pages. Individual failures do not block the
+// worker; the landing page can ask it to repair only the missing entries.
+self.addEventListener('install', (event) => {
+  event.waitUntil(cachePrecacheAssets());
 });
 
 self.addEventListener('message', (event) => {
   if (event && event.data) {
     if (event.data.type === 'SKIP_WAITING') {
       self.skipWaiting();
+    } else if (event.data.type === 'REPAIR_PRECACHE') {
+      const replyPort = event.ports && event.ports[0];
+      event.waitUntil(
+        repairPrecache()
+          .then((result) => {
+            if (replyPort) {
+              replyPort.postMessage({ ok: result.failed.length === 0, ...result });
+            }
+          })
+          .catch((error) => {
+            console.warn('Precache repair failed:', error);
+            if (replyPort) {
+              replyPort.postMessage({ ok: false, cached: 0, failed: ASSETS_TO_CACHE });
+            }
+          })
+      );
     } else if (event.data.type === 'GET_VERSION_MAP') {
       if (event.ports && event.ports[0]) {
         event.ports[0].postMessage({

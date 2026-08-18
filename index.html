@@ -1137,7 +1137,11 @@
                 '/tools/panphyplot/js/fit-worker.js',
                 'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
                 '/tools/panphyplot/js/vendor/math.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js'
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_SVG.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/jax.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/fontdata.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Main/Regular/GreekAndCoptic.js?V=2.7.5'
             ],
             '/tools/motion_tracker.html': [
                 '/tools/motion_tracker.html',
@@ -1186,9 +1190,11 @@
             ]
         )];
         const offlineCardPills = new Map();
+        const OFFLINE_REPAIR_RETRY_MS = 60 * 1000;
 
         let offlineReadyPollId = 0;
         let offlineReadinessUpdateInFlight = false;
+        let lastOfflineRepairAttempt = 0;
 
         function setCardOfflineState(pill, state, label) {
             if (!pill) return;
@@ -1274,6 +1280,25 @@
             };
         }
 
+        function requestOfflineCacheRepair() {
+            const worker = navigator.serviceWorker.controller;
+            const now = Date.now();
+            if (!worker || now - lastOfflineRepairAttempt < OFFLINE_REPAIR_RETRY_MS) {
+                return Promise.resolve(false);
+            }
+
+            lastOfflineRepairAttempt = now;
+            return new Promise((resolve) => {
+                const channel = new MessageChannel();
+                const timeoutId = window.setTimeout(() => resolve(false), 15000);
+                channel.port1.onmessage = () => {
+                    window.clearTimeout(timeoutId);
+                    resolve(true);
+                };
+                worker.postMessage({ type: 'REPAIR_PRECACHE' }, [channel.port2]);
+            });
+        }
+
         async function updateOfflineReadiness() {
             if (offlineReadinessUpdateInFlight) return;
             offlineReadinessUpdateInFlight = true;
@@ -1290,8 +1315,8 @@
                     return;
                 }
 
-                const cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
-                const summary = updateOfflineCardPills(cacheMap);
+                let cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
+                let summary = updateOfflineCardPills(cacheMap);
 
                 if (summary.readyApps === summary.totalApps) {
                     if (offlineReadyPollId) {
@@ -1303,6 +1328,16 @@
 
                 if (!navigator.onLine) {
                     return;
+                }
+
+                const repairCompleted = await requestOfflineCacheRepair();
+                if (repairCompleted) {
+                    cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
+                    summary = updateOfflineCardPills(cacheMap);
+                    if (summary.readyApps === summary.totalApps && offlineReadyPollId) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                    }
                 }
 
             } catch (error) {

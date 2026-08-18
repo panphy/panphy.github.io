@@ -34,6 +34,7 @@ Assets in `sw.js` `ASSETS_TO_CACHE` are cache-first. Returning users will not re
 - Published features should work offline unless explicitly network-only.
 - Non-precached same-origin GET resources may work offline after runtime caching, except excluded paths.
 - Supabase API calls stay network-only.
+- The landing page requests `REPAIR_PRECACHE` when an offline-ready app is missing required cache entries; the service worker must retry only missing `ASSETS_TO_CACHE` entries and rate-limit retries on the page.
 - `sw.js` also defines `APP_VERSIONS` (app group → version); `assets/sw-register.js` compares the current app group's version to decide whether to show the update banner. All entries currently track `BUILD_ID`, and app groups missing from the map fall back to `BUILD_ID`. When publishing a new app, add its group to `APP_VERSIONS`.
 
 ```javascript
