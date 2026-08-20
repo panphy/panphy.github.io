@@ -29,6 +29,16 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
 | `source/` | Original editable website and teaching-deck authoring archive | Keep this when moving or backing up the project |
 
+## Working copy and source of truth
+
+This `year9phy/unit01/` directory is the **authoritative and only working copy** of the project. Make future changes here and commit them to the repository; do not assume that a separate original authoring folder exists.
+
+- The files in `md files/` are the editable masters for the lesson plans. Keep each Markdown file and its exported PDF in step.
+- `Work Like a Physicist - Year 9 Teaching Deck.pptx` is the editable teaching-deck master.
+- `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
+- `source/` preserves the original website and teaching-deck authoring archive, including scripts, image assets and attribution records.
+- `Work Like a Physicist - Year 9 Student Field Notebook.pdf` is currently stored only as a PDF. If an editable source is recreated, add it to this directory and document it here.
+
 ### How the parts fit together
 
 - **Lesson plans** — the full detail: objectives, vocabulary, activities, expected answers, teacher notes.
@@ -201,11 +211,11 @@ Each lesson opens with a real case study, and seven of those slides carry a phot
 
 The remaining three case slides (13, 21, 29 — the energy-drink study, the helmet drop test, the stunt ramp) use **AI-generated illustrations**, not photographs of real events. They are there to set a scene, and it is worth being straight with a class about that if anyone asks.
 
-**If you redistribute the deck**, keep the credit lines on the slides. The Wikimedia image is CC BY-SA, which requires attribution and share-alike; the BAS, NASA and LIGO images are used with credit as educational material. Full source URLs are retained in the original authoring folder.
+**If you redistribute the deck**, keep the credit lines on the slides. The Wikimedia image is CC BY-SA, which requires attribution and share-alike; the BAS, NASA and LIGO images are used with credit as educational material. Full attribution and source notes are preserved in `source/teaching-deck/photo-credits.txt` and `source/teaching-deck/source-notes.txt`.
 
 ---
 
-## What is included in this hosted copy
+## What is included in this repository
 
 - the seven lesson-plan PDFs
 - the seven editable Markdown lesson-plan masters
@@ -215,7 +225,7 @@ The remaining three case slides (13, 21, 29 — the energy-drink study, the helm
 - the static student companion site, including all seven missions and 28 questions
 - a curated source archive containing the original Sites/React website, its four-commit history, teaching-deck image assets, attribution records and authoring scripts
 
-Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated.
+Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated. Any future editable source or production record needed to maintain the unit should be added to this repository before its separate working copy is removed.
 
 ---
 

@@ -13,6 +13,9 @@ package-lock.json
 # Local AI tool metadata
 skills-lock.json
 
+# Local Year 9 Physics assessment materials
+year9phy/unit01/assessment/
+
 # Editor/IDE settings
 .vscode/
 .idea/
