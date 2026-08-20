@@ -25,6 +25,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | `Work Like a Physicist - Year 9 Teaching Deck.pptx` | 65-slide teaching deck covering all eight lessons | **Open the speaker notes before you teach.** The slides are deliberately sparse; the teaching is in the notes |
 | `Work Like a Physicist - Year 9 Student Field Notebook.pdf` | 40-page A4 student booklet, one per student for the whole unit | Print double-sided. Students keep the same booklet for all eight lessons |
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
+| `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
 
 ### How the parts fit together
@@ -169,7 +170,7 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 - Support: scaffolded tables are printed in the booklet for Lessons 3, 4 and 7–8.
 - Stretch: every lesson has a marked stretch task; Lesson 6 asks students to design their own table from nothing, and to read a prediction off their own best-fit line.
 
-**If you revise a lesson plan**, update the editable master in the original authoring folder and re-export its PDF for this hosted copy.
+**If you revise a lesson plan**, edit its Markdown master in `md files/` and re-export the matching PDF so the pair stays in step.
 
 ---
 
@@ -206,12 +207,13 @@ The remaining three case slides (13, 21, 29 — the energy-drink study, the helm
 ## What is included in this hosted copy
 
 - the seven lesson-plan PDFs
+- the seven editable Markdown lesson-plan masters
 - the student field notebook PDF
 - the teaching deck
 - this overview
 - the static student companion site, including all seven missions and 28 questions
 
-Authoring environments, dependency folders, build output, caches, duplicate Markdown lesson plans and internal production files are intentionally not included.
+Authoring environments, dependency folders, build output, caches and internal production files are intentionally not included.
 
 ---
 
