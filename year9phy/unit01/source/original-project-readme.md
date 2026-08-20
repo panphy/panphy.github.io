@@ -25,9 +25,10 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | `Work Like a Physicist - Year 9 Teaching Deck.pptx` | 65-slide teaching deck covering all eight lessons | **Open the speaker notes before you teach.** The slides are deliberately sparse; the teaching is in the notes |
 | `Work Like a Physicist - Year 9 Student Field Notebook.pdf` | 40-page A4 student booklet, one per student for the whole unit | Print double-sided. Students keep the same booklet for all eight lessons |
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
-| `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
-| `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
-| `source/` | Original editable website and teaching-deck authoring archive | Keep this when moving or backing up the project |
+| `md files/` | The same seven lesson plans in Markdown | The plain-text master. Edit these if you are changing a plan, then re-export the PDF |
+| `student-companion-site/` | Source code for the online student companion | You do not need this to teach the unit. See **The companion site** below |
+
+The Markdown files and the lesson-plan PDFs are word-for-word identical. The Markdown exists so the content stays readable, searchable and diffable without needing any particular software — if you revise a lesson, revise the `.md` and keep the pair in step.
 
 ### How the parts fit together
 
@@ -58,7 +59,7 @@ The shape is deliberate: **Lessons 1–2 build the language, 3–5 build the tec
 
 ## The companion site
 
-**Address: <https://panphy.github.io/year9phy/unit01/>**
+**Address: `<paste the site URL here>`**
 
 An optional student-facing website covering the same seven lessons. Students can use it for revision, for catching up after an absence, or for extra practice at home. Nothing in the taught unit depends on it.
 
@@ -77,7 +78,7 @@ The intended sequence is printed on each lesson page: *attempt → hint if stuck
 
 The answers are visible to students by design — this is a revision tool, not an assessment. If you want to set questions from it as unseen homework, copy the prompts out rather than sending the link.
 
-This hosted copy is a static site and does not need a build step or server-side runtime.
+**The source code** in `student-companion-site/` is only needed if you want to change the site's content. The questions live in `app/data.ts`. Running it locally needs Node 22 or newer and `npm install` then `npm run dev`.
 
 ---
 
@@ -171,7 +172,7 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 - Support: scaffolded tables are printed in the booklet for Lessons 3, 4 and 7–8.
 - Stretch: every lesson has a marked stretch task; Lesson 6 asks students to design their own table from nothing, and to read a prediction off their own best-fit line.
 
-**If you revise a lesson plan**, edit its Markdown master in `md files/` and re-export the matching PDF so the pair stays in step.
+**If you revise a lesson plan**, edit the Markdown in `md files/` and re-export the PDF so the pair stays in step. The Markdown is the master copy.
 
 ---
 
@@ -201,21 +202,29 @@ Each lesson opens with a real case study, and seven of those slides carry a phot
 
 The remaining three case slides (13, 21, 29 — the energy-drink study, the helmet drop test, the stunt ramp) use **AI-generated illustrations**, not photographs of real events. They are there to set a scene, and it is worth being straight with a class about that if anyone asks.
 
-**If you redistribute the deck**, keep the credit lines on the slides. The Wikimedia image is CC BY-SA, which requires attribution and share-alike; the BAS, NASA and LIGO images are used with credit as educational material. Full source URLs are retained in the original authoring folder.
+**If you redistribute the deck**, keep the credit lines on the slides. The Wikimedia image is CC BY-SA, which requires attribution and share-alike; the BAS, NASA and LIGO images are used with credit as educational material. Full source URLs are recorded in `.codex-work/case-images/source-notes.txt`.
 
 ---
 
-## What is included in this hosted copy
+## Before you upload this to a shared folder
 
-- the seven lesson-plan PDFs
-- the seven editable Markdown lesson-plan masters
-- the student field notebook PDF
+Some of what is in here is working material, not teaching material. **Share these:**
+
+- the seven lesson-plan PDFs and the `md files/` folder
+- the student booklet PDF
 - the teaching deck
-- this overview
-- the static student companion site, including all seven missions and 28 questions
-- a curated source archive containing the original Sites/React website, its four-commit history, teaching-deck image assets, attribution records and authoring scripts
+- this README
 
-Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated.
+**Leave these behind.** They are large, regenerable, or of no use to anyone teaching the unit:
+
+| Folder | Size | What it is |
+|---|---|---|
+| `student-companion-site/node_modules/` | ~467 MB | Downloaded packages. Rebuilt by `npm install` |
+| `student-companion-site/dist/`, `.next/`, `.wrangler/` | ~4 MB | Build output |
+| `.venv/` | ~59 MB | A Python environment left over from building the booklet |
+| `.codex-work/` | — | Working files from producing the deck images. Keep your own copy: it holds the photo sourcing records |
+
+If you are sharing the companion site's source as well, send `student-companion-site/` **without** `node_modules` — anyone who wants to run it will regenerate that themselves.
 
 ---
 

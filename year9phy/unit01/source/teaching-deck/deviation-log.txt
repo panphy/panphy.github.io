@@ -1,0 +1,5 @@
+Slides 4, 13, 21, 29, 37, 53: existing body text boxes are narrowed and reflowed; a new rounded image primitive is added in a bounded right-hand zone. Reason: the source case pattern has no inherited image placeholder, and the user explicitly requested visuals on every case page.
+
+Slide 46: the existing diagram image is replaced by an authentic NASA/JPL photograph of Ingenuity and its frame is enlarged vertically within the existing right-column zone.
+
+All other slides: preserved without edits.
