@@ -83,9 +83,16 @@
         <a href="../#missions"><span>← Choose a mission</span><strong>Review one skill</strong></a>
         <a class="next-link" href="../#resources"><span>Use your workbook →</span><strong>Record your progress</strong></a>
       </nav>
-      <footer>
-        <div class="brand"><span class="brand-mark">WLP</span><span>Work Like a Physicist</span></div>
-        <p>Attempt. Hint. Mark. Improve.</p><a href="#top">Back to top ↑</a>
+      <footer class="site-footer">
+        <div class="unit-footer-row">
+          <div class="brand"><span class="brand-mark">WLP</span><span>Work Like a Physicist</span></div>
+          <p>Attempt. Hint. Mark. Improve.</p><a href="#top">Back to top ↑</a>
+        </div>
+        <div class="panphy-footer-row">
+          <a class="panphy-home-link" href="/" aria-label="Visit the PanPhy Labs landing page"><img src="/assets/favicon.png" width="30" height="30" alt=""></a>
+          <p>&copy; 2026 PanPhy Labs</p>
+          <p class="panphy-footer-links"><a href="mailto:panphylabs@icloud.com">Contact Me</a><span class="footer-sep">·</span><a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></p>
+        </div>
       </footer>
     </main>`;
   document.body.id = "top";
