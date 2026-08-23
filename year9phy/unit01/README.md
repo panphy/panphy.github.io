@@ -70,18 +70,19 @@ The shape is deliberate: **Lessons 1–2 build the language, 3–5 build the tec
 
 **Address: <https://panphy.github.io/year9phy/unit01/>**
 
-An optional student-facing website covering the same seven lessons. Students can use it for revision, for catching up after an absence, or for extra practice at home. Nothing in the taught unit depends on it.
+A student-facing lesson companion and revision hub covering the same seven lesson sections. Students can use it alongside the workbook in class, to catch up after an absence, to revise independently, or to prepare for the end-of-unit test. Nothing in the taught unit depends on it.
 
 **What is on it**
 
-- A page per lesson, matching the seven lesson plans, with the mission, the key rule and what the lesson unlocks.
+- A page per lesson with **workbook-matched revision notes**, key vocabulary and a direct link to the relevant workbook pages.
+- The notes cover the same variables, calculations, practical methods, graph rules, conclusions and evaluation language as workbook pages 4–38.
 - **40 questions in total** — four questions in each of the seven missions, plus 12 separate AQA-style Exam Zone questions worth 50 marks. The Exam Zone uses fresh contexts and does not repeat mission questions.
 - Every question has a **hint** and a **full worked answer**, both hidden behind a click.
 - A typing area for each question, so students write their own attempt before revealing anything.
 
 **How students are meant to use it**
 
-The intended sequence is printed on each lesson page: *attempt → hint if stuck → answer → improve your answer.* It is worth saying this out loud the first time you point a class at it. The answers show the working and where the marks fall, so it rewards attempting first and punishes nothing.
+The intended sequence is printed on each lesson page: *review the notes → use the matching workbook pages → attempt the questions → hint if stuck → check → improve.* The answers show the working and where the marks fall, so it rewards attempting first and punishes nothing.
 
 **A note for teachers**
 
@@ -222,7 +223,7 @@ The remaining three case slides (13, 21, 29 — the energy-drink study, the helm
 - the student workbook PDF
 - the teaching deck
 - this overview
-- the static student companion site, including all seven missions and 40 questions
+- the static student companion site, including seven workbook-matched revision guides, all seven missions and 40 questions
 - curated source material containing the original Sites/React website, its four-commit history, teaching-deck image assets, attribution records and the photo-credit maintenance script
 
 Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated. Any future editable source or production record needed to maintain the unit should be added to this repository before its separate working copy is removed.

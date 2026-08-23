@@ -21,6 +21,28 @@
   if (description) description.content = lesson.intro;
 
   const skills = lesson.unlocks.map((skill) => `<span>✓ ${skill}</span>`).join("");
+  const revision = lesson.revision;
+  const workbookHref = `../../Work Like a Physicist - Year 9 Student Workbook.pdf#page=${revision.pageStart}`;
+  const revisionCards = revision.sections.map((section, sectionIndex) => {
+    const paragraphs = section.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("");
+    const points = section.points?.length
+      ? `<ul>${section.points.map((point) => `<li>${point}</li>`).join("")}</ul>`
+      : "";
+    const formula = section.formula
+      ? `<div class="revision-formula"><span>Worked pattern</span><strong>${section.formula}</strong></div>`
+      : "";
+    const remember = section.remember
+      ? `<p class="remember-note"><strong>Remember:</strong> ${section.remember}</p>`
+      : "";
+
+    return `
+      <article class="revision-card">
+        <div class="revision-card-heading"><span>${String(sectionIndex + 1).padStart(2, "0")}</span><h3>${section.title}</h3></div>
+        <div class="revision-copy">${paragraphs}${points}${formula}${remember}</div>
+      </article>`;
+  }).join("");
+  const vocabulary = revision.vocabulary.map(([term, definition]) => `
+    <div class="vocabulary-item"><dt>${term}</dt><dd>${definition}</dd></div>`).join("");
   const questions = lesson.questions.map((question, questionIndex) => {
     const rows = question.marks && question.marks >= 5 ? 8 : question.type === "AQA-style" ? 6 : 4;
     const tagClass = question.type === "AQA-style" ? "exam-tag" : "practice-tag";
@@ -71,9 +93,35 @@
         </div>
       </header>
       <section class="unlock-strip" aria-label="Skills unlocked"><strong>Skills unlocked</strong>${skills}</section>
-      <section class="question-section">
+      <nav class="lesson-tools" aria-label="Use this mission">
+        <a href="#revision"><span>01</span><strong>Revision notes</strong></a>
+        <a href="#practice"><span>02</span><strong>Practice questions</strong></a>
+        <a href="../../exam-zone/"><span>03</span><strong>Exam Zone</strong></a>
+        <a href="${workbookHref}" target="_blank" rel="noopener"><span>PDF</span><strong>Workbook pp. ${revision.pageRange}</strong></a>
+      </nav>
+      <section class="revision-section" id="revision">
+        <div class="revision-intro">
+          <p class="eyebrow dark">Workbook-matched revision</p>
+          <h2>Learn it.<br>Use it.</h2>
+          <p>${revision.summary}</p>
+          <a class="workbook-link" href="${workbookHref}" target="_blank" rel="noopener">Open workbook pages ${revision.pageRange} <span>↗</span></a>
+          <div class="revision-route" aria-label="Three ways to use these notes">
+            <p><strong>Lesson companion</strong><br>Read the matching card as you complete each workbook task.</p>
+            <p><strong>Revision hub</strong><br>Cover the notes and explain each heading from memory.</p>
+            <p><strong>Test preparation</strong><br>Use the exact scientific language in your practice answers.</p>
+          </div>
+        </div>
+        <div class="revision-content">
+          <div class="revision-grid">${revisionCards}</div>
+          <section class="vocabulary-panel" aria-labelledby="vocabulary-title">
+            <div><p class="eyebrow dark">Words that earn marks</p><h3 id="vocabulary-title">Key vocabulary</h3></div>
+            <dl>${vocabulary}</dl>
+          </section>
+        </div>
+      </section>
+      <section class="question-section" id="practice">
         <div class="question-intro">
-          <p class="eyebrow dark">Challenge set</p><h2>Think first.<br>Reveal second.</h2>
+          <p class="eyebrow dark">After the notes</p><h2>Think first.<br>Reveal second.</h2>
           <p>Say or write your answer before opening anything. Hints give you a nudge; answers show the science and the marks.</p>
           <div class="answer-code">
             <span>1</span><p><strong>Attempt</strong><br>Use what you remember.</p>

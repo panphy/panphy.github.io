@@ -11,6 +11,71 @@ window.LESSONS = [
     icon: "±",
     unlocks: ["precision vs accuracy", "half-range uncertainty", "random & systematic error"],
     keyRule: "Uncertainty = (maximum − minimum) ÷ 2",
+    revision: {
+      pageStart: 4,
+      pageRange: "4–8",
+      summary:
+        "Measurements are evidence only when you can explain their spread, their limits and the errors that may have shifted them.",
+      sections: [
+        {
+          title: "Precision and accuracy answer different questions",
+          paragraphs: [
+            "Precision describes how close repeated readings are to each other. Accuracy describes how close a measurement is to the true value.",
+            "A set can be precise but inaccurate: tightly grouped readings may all be shifted by the same systematic fault.",
+          ],
+          points: [
+            "Precise: repeats form a tight group.",
+            "Accurate: the result is close to the accepted or true value.",
+            "Repeats help you judge precision; they do not prove accuracy.",
+          ],
+          remember: "Consistent does not automatically mean correct.",
+        },
+        {
+          title: "Calculate the mean and the uncertainty",
+          paragraphs: [
+            "Use repeated readings to calculate a mean, then use half the range as an estimate of uncertainty.",
+          ],
+          points: [
+            "Mean = total of the readings ÷ number of readings.",
+            "Range = largest reading − smallest reading.",
+            "Uncertainty = range ÷ 2.",
+            "Write the final result as mean ± uncertainty, with a unit.",
+          ],
+          formula: "1.20 s, 1.25 s, 1.22 s → mean = 1.22 s; uncertainty = 0.03 s; result = 1.22 ± 0.03 s",
+        },
+        {
+          title: "Random and systematic errors need different fixes",
+          paragraphs: [
+            "Random error scatters readings unpredictably. More repeats and a mean reduce its effect. Systematic error shifts every reading in the same direction, so repeating the same faulty method does not remove it.",
+          ],
+          points: [
+            "Random example: reaction time varies when using a stopwatch.",
+            "Systematic example: a balance reads 0.2 g when empty.",
+            "Improve random error with repeats or more objective measurement.",
+            "Find systematic error by checking zero, calibration, alignment and method.",
+          ],
+          remember: "Name the mechanism. ‘Human error’ is too vague to earn marks.",
+        },
+        {
+          title: "Resolution limits what an instrument can show",
+          paragraphs: [
+            "Resolution is the smallest change an instrument can detect. A stopwatch reading to 0.01 s cannot provide information about a 0.001 s change.",
+          ],
+          points: [
+            "Better resolution gives finer readings.",
+            "Better resolution does not remove a systematic fault.",
+            "Always state the quantity and unit when describing a measurement.",
+          ],
+          remember: "In an explanation, link the error to its effect and then to a matching improvement.",
+        },
+      ],
+      vocabulary: [
+        ["Precision", "How close repeated measurements are to each other."],
+        ["Accuracy", "How close a measurement is to the true value."],
+        ["Uncertainty", "An estimate of the doubt attached to a measurement."],
+        ["Resolution", "The smallest change an instrument can detect."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
@@ -60,6 +125,68 @@ window.LESSONS = [
     icon: "x→y",
     unlocks: ["independent variables", "continuous vs categoric", "line graph or bar chart"],
     keyRule: "Continuous independent variable → line graph. Categoric independent variable → bar chart.",
+    revision: {
+      pageStart: 9,
+      pageRange: "9–11",
+      summary:
+        "A fair investigation changes one thing, measures one thing and keeps every other important factor as constant as possible.",
+      sections: [
+        {
+          title: "Identify all three variables",
+          paragraphs: [
+            "The independent variable is deliberately changed. The dependent variable is measured. Control variables are the other factors kept the same so they cannot provide a rival explanation.",
+          ],
+          points: [
+            "Independent = I change.",
+            "Dependent = I measure.",
+            "Control = I keep the same.",
+            "A good answer names the quantity clearly and includes a unit when appropriate.",
+          ],
+          remember: "If two important variables change together, you cannot tell which caused the result.",
+        },
+        {
+          title: "Sort the independent variable",
+          paragraphs: [
+            "Continuous data can take any value on a numerical scale, including values between the ones tested. Categoric data consists of names, types or groups.",
+          ],
+          points: [
+            "Continuous: length, time, temperature and mass.",
+            "Categoric: material, colour, brand and surface type.",
+            "Ask whether a meaningful value exists between two examples.",
+          ],
+        },
+        {
+          title: "Let the independent variable choose the graph",
+          paragraphs: [
+            "Use a line graph for a continuous independent variable and a bar chart for a categoric independent variable.",
+          ],
+          points: [
+            "Line graph: values go on a scale and a trend between points is meaningful.",
+            "Bar chart: categories stay separate, so bars have gaps.",
+            "The dependent variable is usually numerical in both cases, so it does not decide the graph.",
+          ],
+          formula: "Continuous independent variable → line graph | Categoric independent variable → bar chart",
+        },
+        {
+          title: "Turn a vague idea into a fair question",
+          paragraphs: [
+            "A testable question names one independent variable and one measurable dependent variable. Then the method explains how the important control variables will be kept the same.",
+          ],
+          points: [
+            "Write the question as ‘How does X affect Y?’ or ‘Which X gives the greatest Y?’",
+            "Choose a measurable outcome rather than words such as ‘best’ or ‘better’.",
+            "When justifying the graph, use the word continuous or categoric.",
+          ],
+          remember: "Graph choice depends on what you changed, not on what you measured.",
+        },
+      ],
+      vocabulary: [
+        ["Independent variable", "The one thing deliberately changed."],
+        ["Dependent variable", "The outcome that is measured."],
+        ["Control variable", "A factor kept the same for a fair comparison."],
+        ["Categoric data", "Data sorted into named groups or types."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
@@ -109,6 +236,70 @@ window.LESSONS = [
     icon: "↓",
     unlocks: ["three trials and a mean", "results tables", "bar chart quality"],
     keyRule: "The best shock absorber gives the lowest mean bounce height.",
+    revision: {
+      pageStart: 12,
+      pageRange: "12–15",
+      summary:
+        "The drop test turns a categoric comparison into trustworthy evidence by controlling the drop, repeating each material and plotting the mean.",
+      sections: [
+        {
+          title: "Set up a fair comparison",
+          paragraphs: [
+            "Material type is the categoric independent variable. Bounce height is the dependent variable. The best shock absorber gives the lowest mean bounce because it returns less energy to the ball.",
+          ],
+          points: [
+            "Change only the material.",
+            "Keep the ball, drop height, release method and ruler position the same.",
+            "Measure the first bounce at eye level.",
+          ],
+          remember: "Lowest bounce = best shock absorber.",
+        },
+        {
+          title: "Collect data another scientist could use",
+          paragraphs: [
+            "Take three trials for every material and record each reading immediately. Calculate one mean bounce height for each category.",
+          ],
+          points: [
+            "Put units in the table headings, not beside every value.",
+            "Keep the trial columns separate and add a mean column.",
+            "If a reading looks odd, check or repeat it while the equipment is available.",
+            "Show at least one full mean calculation.",
+          ],
+          formula: "Mean bounce height = (trial 1 + trial 2 + trial 3) ÷ 3",
+        },
+        {
+          title: "Build a marker-proof bar chart",
+          paragraphs: [
+            "Material names belong on the x-axis and mean bounce height belongs on the y-axis. Separate categories with equal gaps.",
+          ],
+          points: [
+            "Write a title that says what is plotted against what.",
+            "Label the y-axis with the quantity and cm.",
+            "Use a sensible scale that fills most of the space.",
+            "Draw equal-width bars whose heights match the means, not trial 1.",
+          ],
+        },
+        {
+          title: "Conclude and evaluate from your own evidence",
+          paragraphs: [
+            "Name the best material and quote its mean bounce height. Then identify errors that really belong to this method and match each one with an improvement.",
+          ],
+          points: [
+            "Random: judging the top of the bounce by eye varies from trial to trial.",
+            "Systematic: measuring from the wrong zero would shift every height.",
+            "Video playback or a fixed camera can reduce the judgement problem.",
+            "More repeats reduce random variation but do not fix a systematic shift.",
+          ],
+          remember: "A conclusion needs a number; an evaluation needs a specific mechanism.",
+        },
+      ],
+      vocabulary: [
+        ["Trial", "One repeat of a measurement."],
+        ["Mean", "The total of the trials divided by their number."],
+        ["Bar chart", "The graph used for a categoric independent variable."],
+        ["Reliability", "How far results can be trusted and repeated."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
@@ -157,6 +348,70 @@ window.LESSONS = [
     icon: "↗",
     unlocks: ["continuous data", "axes, units & scales", "accurate plotting"],
     keyRule: "Independent variable on x. Dependent variable on y. Units on both.",
+    revision: {
+      pageStart: 16,
+      pageRange: "16–19",
+      summary:
+        "A line graph makes a pattern visible when the independent variable is continuous, but only if the table, scale and plotting are accurate.",
+      sections: [
+        {
+          title: "Plan the ramp investigation",
+          paragraphs: [
+            "Ramp height is the continuous independent variable and distance travelled is the dependent variable. A line graph is suitable because meaningful ramp heights exist between the values tested.",
+          ],
+          points: [
+            "Use five heights across a sensible range, such as 5, 10, 15, 20 and 25 cm.",
+            "Keep the trolley, ramp, start point, release method and floor surface the same.",
+            "Release without a push and measure from the same two points every time.",
+          ],
+        },
+        {
+          title: "Repeat, record and process",
+          paragraphs: [
+            "Take three distance readings at each ramp height and calculate the mean before drawing the graph.",
+          ],
+          points: [
+            "Record readings immediately rather than from memory.",
+            "Use headings such as ‘Ramp height / cm’ and ‘Mean distance / cm’.",
+            "Check unusual trials before changing the height.",
+            "Find the largest and smallest means before choosing a scale.",
+          ],
+          formula: "Mean distance = total of the three distances ÷ 3",
+        },
+        {
+          title: "Choose the scale before plotting",
+          paragraphs: [
+            "A good scale uses most of the graph area and goes up in equal, easy-to-read steps.",
+          ],
+          points: [
+            "Find the largest value and count the available big squares.",
+            "Divide, then round up to a simple step such as 1, 2, 5, 10, 20 or 50.",
+            "Check that the largest value still fits.",
+            "Never change the step size halfway along an axis.",
+          ],
+          remember: "If the data occupies only one corner, the scale is wasting space and hiding the pattern.",
+        },
+        {
+          title: "Plot a line graph precisely",
+          paragraphs: [
+            "Put ramp height on the x-axis and mean distance on the y-axis. Plot each point as a small cross so its exact position is visible.",
+          ],
+          points: [
+            "Include a title, labels and units on both axes.",
+            "Use the full grid and plot the processed mean values.",
+            "Do not draw bars and do not join points dot-to-dot.",
+            "Leave the best-fit line until you have considered the overall trend.",
+          ],
+          remember: "Independent on x; dependent on y; units on both.",
+        },
+      ],
+      vocabulary: [
+        ["Continuous data", "Number data that can take any value on a scale."],
+        ["Scale", "The value represented by each division on an axis."],
+        ["Line graph", "The graph used for a continuous independent variable."],
+        ["Control variable", "A factor held constant so the comparison is fair."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
@@ -206,6 +461,72 @@ window.LESSONS = [
     icon: "••/",
     unlocks: ["best-fit lines", "outlier decisions", "evidence-led conclusions"],
     keyRule: "Check or repeat an outlier before deciding what to do with it.",
+    revision: {
+      pageStart: 20,
+      pageRange: "20–24",
+      summary:
+        "Experimental data is rarely perfect. A best-fit line shows the overall pattern, while an honest scientist investigates points that do not fit.",
+      sections: [
+        {
+          title: "A best-fit line shows the trend",
+          paragraphs: [
+            "Draw one smooth straight or curved line that represents the pattern, with roughly balanced points above and below it. It does not need to touch any measured point.",
+          ],
+          points: [
+            "Use one thin, clear line across the range of the data.",
+            "Balance the scatter rather than forcing the line through the first and last points.",
+            "Do not zig-zag from point to point.",
+            "A best-fit line accepts that measurements include uncertainty and random variation.",
+          ],
+          remember: "Best fit means overall trend, not every measurement.",
+        },
+        {
+          title: "Treat an outlier as a question",
+          paragraphs: [
+            "An outlier is a result that does not fit the pattern of the others. It may be a mistake, a method problem or a genuine effect.",
+          ],
+          points: [
+            "Check the recording, calculation and plotting.",
+            "Check whether the equipment or method changed.",
+            "Repeat the measurement if possible.",
+            "Correct a known mistake; otherwise report and annotate the unexplained outlier.",
+          ],
+          remember: "Never silently delete inconvenient evidence.",
+        },
+        {
+          title: "Write a conclusion that follows the evidence",
+          paragraphs: [
+            "State the relationship between the independent and dependent variables, then support it with processed data from the table or graph.",
+          ],
+          points: [
+            "Name both variables and the direction of the change.",
+            "Quote at least two relevant values with units.",
+            "Say whether the pattern is strong, weak, straight or curved when the graph supports that claim.",
+            "Mention a possible outlier only with a reason.",
+          ],
+          formula: "As ramp height increased, mean distance increased from ___ cm at ___ cm to ___ cm at ___ cm.",
+        },
+        {
+          title: "Check the finished graph like a marker",
+          paragraphs: [
+            "A scientific graph must make the evidence easy for somebody else to read and challenge.",
+          ],
+          points: [
+            "Title, axes, units and sensible scale are present.",
+            "Points are accurate small crosses.",
+            "The best-fit line is clear and not dot-to-dot.",
+            "Outliers are identified and explained, or their absence is stated.",
+          ],
+          remember: "Peer review should give one specific improvement, not ‘make it neater’.",
+        },
+      ],
+      vocabulary: [
+        ["Best-fit line", "One line showing the overall trend of the data."],
+        ["Outlier", "A result that does not fit the pattern of the others."],
+        ["Trend", "The overall relationship shown by the data."],
+        ["Conclusion", "A statement supported by processed evidence."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
@@ -255,6 +576,70 @@ window.LESSONS = [
     icon: "⌁",
     unlocks: ["independent planning", "table design", "evaluation"],
     keyRule: "Change one variable, measure one variable, control everything else you reasonably can.",
+    revision: {
+      pageStart: 25,
+      pageRange: "25–29",
+      summary:
+        "The paper-helicopter challenge combines the whole process: plan a fair test, collect repeated data, graph it, conclude and evaluate independently.",
+      sections: [
+        {
+          title: "Plan before touching the equipment",
+          paragraphs: [
+            "A suitable question is ‘How does wing length affect the fall time of a paper helicopter?’ Wing length is continuous, so the finished data needs a line graph.",
+          ],
+          points: [
+            "Choose at least five wing lengths across a useful range.",
+            "Measure fall time as the dependent variable.",
+            "Control paper, body shape, paperclip mass, drop height and release method.",
+            "Keep the landing area clear and never climb on furniture for extra height.",
+          ],
+        },
+        {
+          title: "Design the table and collect honest data",
+          paragraphs: [
+            "Your table needs one column for wing length, three trial columns and one mean column, with units in every heading.",
+          ],
+          points: [
+            "Use the same person or timing system throughout where possible.",
+            "Start timing at release and stop at landing.",
+            "If a drop hits an object or catches a draught, record the reason and repeat it.",
+            "A discarded trial with a written reason is honest; a quietly deleted one is not.",
+          ],
+          remember: "Fall times are short, so reaction time is a large source of random error.",
+        },
+        {
+          title: "Graph, conclude and predict",
+          paragraphs: [
+            "Plot wing length on the x-axis and mean fall time on the y-axis. Add a best-fit line and use it to estimate a value between measured points.",
+          ],
+          points: [
+            "Use the correct title, units, scale and small crosses.",
+            "Identify possible outliers or state that there are none.",
+            "Describe the relationship and quote two values with units.",
+            "A prediction inside the measured range is interpolation and is more trustworthy than extending far beyond it.",
+          ],
+        },
+        {
+          title: "Evaluate with a matching improvement",
+          paragraphs: [
+            "A useful evaluation identifies a specific strength, weakness or error, explains its effect, and proposes an improvement that tackles that exact cause.",
+          ],
+          points: [
+            "Weak: ‘There was human error.’",
+            "Better: ‘Reaction time varied when starting and stopping the stopwatch, increasing scatter.’",
+            "Matching improvement: use slow-motion video or electronic timing.",
+            "Self-assess the variables, table, repeats, means, graph, outliers and evidence-led conclusion.",
+          ],
+          remember: "Problem → effect on data → realistic improvement.",
+        },
+      ],
+      vocabulary: [
+        ["Method", "Numbered instructions another scientist can repeat."],
+        ["Interpolation", "Reading a prediction within the measured data range."],
+        ["Evaluation", "A judgement of method quality, errors and improvements."],
+        ["Safety risk", "A hazard considered together with how its risk is reduced."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
@@ -304,6 +689,71 @@ window.LESSONS = [
     icon: "?",
     unlocks: ["testable questions", "team investigation", "defensible conclusions"],
     keyRule: "A strong question is specific, measurable and written: ‘How does X affect Y?’",
+    revision: {
+      pageStart: 30,
+      pageRange: "30–38",
+      summary:
+        "A complete investigation produces evidence that survives planning checks, honest data collection, graphing, evaluation and questions from other people.",
+      sections: [
+        {
+          title: "Choose one question you can actually answer",
+          paragraphs: [
+            "Write a focused question in the form ‘How does X affect Y?’ X must be one independent variable and Y must be one measurable dependent variable.",
+          ],
+          points: [
+            "Test four or five values or categories.",
+            "Take at least three trials at each one and calculate a mean.",
+            "Avoid vague words such as ‘best’ unless you define the measured outcome.",
+            "Avoid questions with several dependent variables or variables you cannot measure consistently.",
+          ],
+          remember: "One change, one measurement, one answerable question.",
+        },
+        {
+          title: "Pass the planning checkpoint",
+          paragraphs: [
+            "Before collecting data, identify the variables, range, equipment, graph, safety controls and a numbered method that another group could follow without asking questions.",
+          ],
+          points: [
+            "Name at least three realistic control variables.",
+            "Explain exactly how the dependent variable will be measured.",
+            "Include repeats and a table with units in the headings.",
+            "Check that equipment is available and risks are reduced.",
+          ],
+        },
+        {
+          title: "Record, process and graph the evidence",
+          paragraphs: [
+            "Record results as they are measured and keep lab notes about anything that changed, failed or had to be repeated. Those notes become the evidence for your evaluation.",
+          ],
+          points: [
+            "Calculate a mean for every value or category.",
+            "Continuous independent variable → line graph with best fit.",
+            "Categoric independent variable → bar chart with gaps.",
+            "Use titles, labels, units, a sensible scale and accurate plotting.",
+          ],
+          formula: "Decide the graph from the independent variable, then plot the mean dependent variable.",
+        },
+        {
+          title: "Defend the conclusion and evaluation",
+          paragraphs: [
+            "Interrogate the graph before writing: identify the pattern, judge its strength, consider outliers and choose the strongest numerical evidence.",
+          ],
+          points: [
+            "A conclusion states the relationship and quotes processed values with units.",
+            "An evaluation names one strength, one weakness, random and systematic errors, and a matching improvement.",
+            "State how confident you are and what extra evidence would increase that confidence.",
+            "Peer review checks whether another scientist could trust and reproduce the work.",
+          ],
+          remember: "Good scientists try to find the weakness before somebody else does.",
+        },
+      ],
+      vocabulary: [
+        ["Research question", "A focused, measurable question linking X and Y."],
+        ["Lab notes", "A record of events that may affect the data."],
+        ["Peer review", "Another scientist checks the method, evidence and claims."],
+        ["Confidence", "How strongly the available evidence supports a conclusion."],
+      ],
+    },
     questions: [
       {
         type: "Practice",
