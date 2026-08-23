@@ -23,7 +23,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | File | What it is | What to do with it |
 |---|---|---|
 | `Work Like a Physicist - Year 9 Teaching Deck.pptx` | 65-slide teaching deck covering all eight lessons | **Open the speaker notes before you teach.** The slides are deliberately sparse; the teaching is in the notes |
-| `Work Like a Physicist - Year 9 Student Field Notebook.pdf` | 40-page A4 student booklet, one per student for the whole unit | Print double-sided. Students keep the same booklet for all eight lessons |
+| `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
 | `md files/` | The same seven lesson plans in Markdown | The plain-text master. Edit these if you are changing a plan, then re-export the PDF |
 | `student-companion-site/` | Source code for the online student companion | You do not need this to teach the unit. See **The companion site** below |

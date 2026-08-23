@@ -2,7 +2,7 @@
 
 **Year 9 Physics · Collecting, Processing and Presenting Data · eight lessons**
 
-A complete unit on how to produce evidence other people will accept. Lesson plans, a student booklet, a teaching deck and an online companion site — ready to pick up and run, or to pull apart and rebuild for your own classes.
+A complete unit on how to produce evidence other people will accept. Lesson plans, a student workbook, a teaching deck and an online companion site — ready to pick up and run, or to pull apart and rebuild for your own classes.
 
 ---
 
@@ -23,11 +23,11 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | File | What it is | What to do with it |
 |---|---|---|
 | `Work Like a Physicist - Year 9 Teaching Deck.pptx` | 65-slide teaching deck covering all eight lessons | **Open the speaker notes before you teach.** The slides are deliberately sparse; the teaching is in the notes |
-| `Work Like a Physicist - Year 9 Student Field Notebook.pdf` | 40-page A4 student booklet, one per student for the whole unit | Print double-sided. Students keep the same booklet for all eight lessons |
+| `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
 | `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
-| `source/` | Original editable website and teaching-deck authoring archive | Keep this when moving or backing up the project |
+| `source/` | Original editable website plus teaching-deck media, source notes and attribution records | Keep this when moving or backing up the project |
 
 ## Working copy and source of truth
 
@@ -36,17 +36,17 @@ This `year9phy/unit01/` directory is the **authoritative and only working copy**
 - The files in `md files/` are the editable masters for the lesson plans. Keep each Markdown file and its exported PDF in step.
 - `Work Like a Physicist - Year 9 Teaching Deck.pptx` is the editable teaching-deck master.
 - `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
-- `source/` preserves the original website and teaching-deck authoring archive, including scripts, image assets and attribution records.
-- `Work Like a Physicist - Year 9 Student Field Notebook.pdf` is currently stored only as a PDF. If an editable source is recreated, add it to this directory and document it here.
+- `source/` preserves the original website plus teaching-deck image assets, source notes, attribution records and the photo-credit maintenance script. The superseded starter PowerPoint and its generation script are not retained; the finished deck above is the only PowerPoint master.
+- `Work Like a Physicist - Year 9 Student Workbook.pdf` is currently stored only as a PDF. If an editable source is recreated, add it to this directory and document it here.
 
 ### How the parts fit together
 
 - **Lesson plans** — the full detail: objectives, vocabulary, activities, expected answers, teacher notes.
-- **Teaching deck** — what goes on the board, plus roughly a thousand words of teaching notes per slide: what to say, what to ask, the common wrong answer, and the booklet answers.
-- **Student booklet** — where students actually write. Slides refer to booklet task numbers, so the two are designed to be used together.
+- **Teaching deck** — what goes on the board, plus roughly a thousand words of teaching notes per slide: what to say, what to ask, the common wrong answer, and the workbook answers.
+- **Student workbook** — where students actually write. Slides refer to workbook task numbers, so the two are designed to be used together.
 - **Companion site** — optional, for students: revision, practice questions and catch-up outside the lesson.
 
-You can teach from the deck alone in a pinch. You cannot teach it well without the booklet in students' hands, because every task assumes they are writing into it. The site is a bonus, not a dependency — the unit works completely without it.
+You can teach from the deck alone in a pinch. You cannot teach it well without the workbook in students' hands, because every task assumes they are writing into it. The site is a bonus, not a dependency — the unit works completely without it.
 
 ---
 
@@ -75,7 +75,7 @@ An optional student-facing website covering the same seven lessons. Students can
 **What is on it**
 
 - A page per lesson, matching the seven lesson plans, with the mission, the key rule and what the lesson unlocks.
-- **28 questions in total, four per lesson** — 14 practice questions and 14 AQA-style questions with mark allocations.
+- **40 questions in total** — four questions in each of the seven missions, plus 12 separate AQA-style Exam Zone questions worth 50 marks. The Exam Zone uses fresh contexts and does not repeat mission questions.
 - Every question has a **hint** and a **full worked answer**, both hidden behind a click.
 - A typing area for each question, so students write their own attempt before revealing anything.
 
@@ -152,9 +152,9 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 - best-fit lines, anomalies and outliers
 - conclusions supported by evidence, and evaluations naming realistic improvements
 
-**What it feeds into.** Every required practical from Year 10 onwards. When students write an evaluation next year and reach for "human error", send them back to this booklet — the structure does not change, only the context. The glossary and the graph checklist at the back are designed to stay useful long after the unit ends.
+**What it feeds into.** Every required practical from Year 10 onwards. When students write an evaluation next year and reach for "human error", send them back to this workbook — the structure does not change, only the context. The glossary and the graph checklist at the back are designed to stay useful long after the unit ends.
 
-**Assessment points.** Lesson 6 and Lessons 7–8 both carry success-criteria checklists in the student booklet, written in the same words a marker would use. Students self-assess against them first; that conversation is usually more useful than the mark itself. Lesson 6 is the natural point to collect books if you want a formal assessment.
+**Assessment points.** Lesson 6 and Lessons 7–8 both carry success-criteria checklists in the student workbook, written in the same words a marker would use. Students self-assess against them first; that conversation is usually more useful than the mark itself. Lesson 6 is the natural point to collect books if you want a formal assessment.
 
 ---
 
@@ -178,23 +178,23 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 
 **Differentiation already built in**
 
-- Support: scaffolded tables are printed in the booklet for Lessons 3, 4 and 7–8.
+- Support: scaffolded tables are printed in the workbook for Lessons 3, 4 and 7–8.
 - Stretch: every lesson has a marked stretch task; Lesson 6 asks students to design their own table from nothing, and to read a prediction off their own best-fit line.
 
 **If you revise a lesson plan**, edit its Markdown master in `md files/` and re-export the matching PDF so the pair stays in step.
 
 ---
 
-## A note on the student booklet
+## A note on the student workbook
 
-One booklet per student, kept for all eight lessons. It is designed so that everything a student needs is inside it:
+One workbook per student, kept for all eight lessons. It is designed so that everything a student needs is inside it:
 
 - **Page 3, The Physicist's Toolkit** — every rule, formula and checklist on one page. Tell them to fold the corner; they will come back to it constantly.
 - Each lesson follows the same four-part shape: **The Case → Your Mission → the numbered Tasks → Checkpoint.** Students always know where they are.
 - Printed grid paper wherever a graph is needed, so no separate graph paper is required.
 - A glossary, a "write this instead of that" phrase table, and a progress tracker at the back.
 
-Answers to the booklet tasks are in the deck's speaker notes only — nothing is revealed on the board unless you choose to reveal it.
+Answers to the workbook tasks are in the deck's speaker notes only — nothing is revealed on the board unless you choose to reveal it.
 
 ---
 
@@ -219,11 +219,11 @@ The remaining three case slides (13, 21, 29 — the energy-drink study, the helm
 
 - the seven lesson-plan PDFs
 - the seven editable Markdown lesson-plan masters
-- the student field notebook PDF
+- the student workbook PDF
 - the teaching deck
 - this overview
-- the static student companion site, including all seven missions and 28 questions
-- a curated source archive containing the original Sites/React website, its four-commit history, teaching-deck image assets, attribution records and authoring scripts
+- the static student companion site, including all seven missions and 40 questions
+- curated source material containing the original Sites/React website, its four-commit history, teaching-deck image assets, attribution records and the photo-credit maintenance script
 
 Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated. Any future editable source or production record needed to maintain the unit should be added to this repository before its separate working copy is removed.
 

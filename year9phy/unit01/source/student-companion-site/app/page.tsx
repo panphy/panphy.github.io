@@ -53,7 +53,7 @@ export default function Home() {
       <section className="missions" id="missions">
         <div className="section-heading">
           <div>
-            <p className="eyebrow dark">Your field notebook, online</p>
+            <p className="eyebrow dark">Your workbook, online</p>
             <h2>Choose your mission</h2>
           </div>
           <p>Start with your current lesson, revisit a tricky skill or work through the full investigation journey.</p>

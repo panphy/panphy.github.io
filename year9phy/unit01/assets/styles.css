@@ -97,7 +97,7 @@ button, summary { font: inherit; }
 footer { min-height: 150px; padding: 38px clamp(22px, 6vw, 90px); display: flex; justify-content: space-between; align-items: center; gap: 30px; background: #030c1e; color: white; }
 footer p { color: #aab6c8; } footer a { font-weight: 900; font-size: 13px; }
 
-/* hosted teaching resources */
+/* student workbook resource */
 .resources { padding: 100px clamp(22px, 6vw, 90px) 120px; background: #fffdf7; border-top: 2px solid var(--ink); }
 .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 48px; }
 .resource-card { display: flex; flex-direction: column; min-height: 250px; padding: 26px; border: 2px solid var(--ink); background: var(--paper); transition: transform .2s, box-shadow .2s; }
@@ -144,6 +144,17 @@ footer p { color: #aab6c8; } footer a { font-weight: 900; font-size: 13px; }
 .exam-tag { background: var(--navy); color: white; }
 .marks { font-size: 12px; font-weight: 800; }.question-count { margin-left: auto; font: 900 18px/1 "Arial Black"; }
 .question-card h3 { font: 800 clamp(20px,2.3vw,29px)/1.28 Arial, sans-serif; letter-spacing: -.025em; margin: 0; }
+.skill-tag { padding: 7px 9px; border: 2px solid var(--ink); background: #fff6ce; font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.question-divider { padding: 34px 0 4px; border-top: 2px solid var(--ink); }
+.question-divider:first-child { padding-top: 0; border-top: 0; }
+.question-divider span { display: inline-block; padding: 8px 11px; background: var(--accent); border: 2px solid var(--ink); font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.question-stimulus { margin-bottom: 24px; overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; background: white; font-size: 14px; }
+.data-table caption { padding: 11px 13px; border: 2px solid var(--ink); border-bottom: 0; background: var(--accent); font-weight: 900; text-align: left; }
+.data-table th, .data-table td { padding: 10px 12px; border: 1px solid #8d97a5; text-align: center; }
+.data-table th { background: #eaf4f7; font-size: 12px; }
+.exam-hero { min-height: 470px; }
+.exam-question-card { scroll-margin-top: 24px; }
 .working-area { display: block; margin: 28px 0; }
 .working-label { display: flex; justify-content: space-between; gap: 15px; align-items: baseline; margin-bottom: 10px; }
 .working-label strong { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
@@ -195,6 +206,7 @@ footer p { color: #aab6c8; } footer a { font-weight: 900; font-size: 13px; }
   .lesson-hero { padding-block: 58px; }.lesson-heading h1 { font-size: clamp(49px,15vw,75px); }.lesson-dossier { box-shadow: 7px 7px 0 var(--accent); }
   .unlock-strip { gap: 13px 20px; }.unlock-strip strong { width: 100%; }
   .question-section { padding-block: 70px; }.reveal-row { grid-template-columns: 1fr; }.question-card { padding: 22px; }.working-label { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .exam-question-card .question-meta { flex-wrap: wrap; }.exam-question-card .question-count { margin-left: 0; width: 100%; }.data-table { min-width: 500px; }
   .checkpoint { grid-template-columns: 1fr; }.checkpoint-stamp { width: 95px; height: 95px; font-size: 16px; }
   .lesson-pagination { grid-template-columns: 1fr; }.lesson-pagination a { min-height: 140px; }.lesson-pagination .next-link { text-align: left; align-items: flex-start; }
 }
