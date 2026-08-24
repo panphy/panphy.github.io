@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-08-24T17:25:55Z';
+const BUILD_ID = '2026-08-24T17:39:49Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -19,6 +19,11 @@ const APP_VERSIONS = {
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
+const YEAR9_UNIT01_PATH_PREFIX = '/year9phy/unit01';
+const YEAR9_UNIT01_ENTRY_PATHS = [
+  '/year9phy/unit01/',
+  '/year9phy/unit01/index.html'
+];
 const CORS_REQUIRED_ASSETS = new Set([
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
@@ -201,10 +206,70 @@ function repairPrecache() {
   return precacheRepairPromise;
 }
 
+let legacyYear9RefreshNeeded = false;
+
+async function hasLegacyYear9Cache() {
+  const cacheNames = await caches.keys();
+  const oldPanPhyCaches = cacheNames.filter((cacheName) => (
+    cacheName.startsWith(CACHE_PREFIX) && cacheName !== PRECACHE_NAME
+  ));
+
+  for (const cacheName of oldPanPhyCaches) {
+    const cache = await caches.open(cacheName);
+    for (const entryPath of YEAR9_UNIT01_ENTRY_PATHS) {
+      const cachedPage = await cache.match(entryPath);
+      if (!cachedPage || cachedPage.type === 'opaque') {
+        continue;
+      }
+
+      try {
+        const html = await cachedPage.clone().text();
+        if (!html.includes('/assets/sw-register.js')) {
+          return true;
+        }
+      } catch {
+        // Ignore unreadable entries and continue checking the remaining caches.
+      }
+    }
+  }
+
+  return false;
+}
+
+async function refreshLegacyYear9Clients() {
+  const windowClients = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true
+  });
+
+  await Promise.all(windowClients.map(async (client) => {
+    try {
+      const clientUrl = new URL(client.url);
+      if (clientUrl.origin === self.location.origin
+        && clientUrl.pathname.startsWith(YEAR9_UNIT01_PATH_PREFIX)
+        && typeof client.navigate === 'function') {
+        await client.navigate(client.url);
+      }
+    } catch {
+      // A client may close or navigate away while the new worker activates.
+    }
+  }));
+}
+
 // Install: pre-cache your core pages. Individual failures do not block the
 // worker; the landing page can ask it to repair only the missing entries.
 self.addEventListener('install', (event) => {
-  event.waitUntil(cachePrecacheAssets());
+  event.waitUntil((async () => {
+    await cachePrecacheAssets();
+
+    // Companion pages cached before they registered the service worker cannot
+    // display the update prompt. Activate immediately only for that legacy
+    // state; normal future updates continue to wait for the user's approval.
+    legacyYear9RefreshNeeded = await hasLegacyYear9Cache();
+    if (legacyYear9RefreshNeeded) {
+      await self.skipWaiting();
+    }
+  })());
 });
 
 self.addEventListener('message', (event) => {
@@ -241,6 +306,10 @@ self.addEventListener('message', (event) => {
 // Activate: clear old caches, then claim clients.
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    // Recheck because a browser may restart the worker between install and
+    // activate, which would clear the in-memory migration flag.
+    legacyYear9RefreshNeeded = legacyYear9RefreshNeeded || await hasLegacyYear9Cache();
+
     if ('navigationPreload' in self.registration) {
       await self.registration.navigationPreload.enable();
     }
@@ -252,6 +321,10 @@ self.addEventListener('activate', (event) => {
       return null;
     }));
     await self.clients.claim();
+
+    if (legacyYear9RefreshNeeded) {
+      await refreshLegacyYear9Clients();
+    }
   })());
 });
 
