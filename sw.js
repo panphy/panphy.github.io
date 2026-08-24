@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-08-18T07:58:42Z';
+const BUILD_ID = '2026-08-24T17:25:55Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -13,7 +13,8 @@ const APP_VERSIONS = {
   lorentz: BUILD_ID,
   collision: BUILD_ID,
   timer: BUILD_ID,
-  visualizer: BUILD_ID
+  visualizer: BUILD_ID,
+  year9phy_unit01: BUILD_ID
 };
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
@@ -106,6 +107,24 @@ const ASSETS_TO_CACHE = [
   // For Teachers
   '/for_teachers/timer.html',
   '/for_teachers/visualizer.html',
+
+  // Year 9 Physics companion site
+  '/year9phy/unit01/index.html',
+  '/year9phy/unit01/exam-zone/index.html',
+  '/year9phy/unit01/lesson/trust-the-data/index.html',
+  '/year9phy/unit01/lesson/variables-and-graphs/index.html',
+  '/year9phy/unit01/lesson/shock-absorber/index.html',
+  '/year9phy/unit01/lesson/ramp-line-graph/index.html',
+  '/year9phy/unit01/lesson/best-fit-outliers/index.html',
+  '/year9phy/unit01/lesson/solo-flight/index.html',
+  '/year9phy/unit01/lesson/research-project/index.html',
+  '/year9phy/unit01/assets/styles.css',
+  '/year9phy/unit01/assets/lessons.js',
+  '/year9phy/unit01/assets/site.js',
+  '/year9phy/unit01/assets/exam-questions.js',
+  '/year9phy/unit01/assets/exam-zone.js',
+  '/year9phy/unit01/assets/og.png',
+  '/year9phy/unit01/Work Like a Physicist - Year 9 Student Workbook.pdf',
 
 ];
 

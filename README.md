@@ -19,9 +19,18 @@ This project started from a practical classroom problem: on school-managed devic
 - **Simulations** for key concepts
 - **Teacher utilities**
 - **Small games / interactive demos** for engagement and quick practice
+- **School-specific curriculum resources** under `year9phy/`
 
-The landing page is the best place to browse everything currently published:
+The landing page is the best place to browse the general-audience PanPhy Labs apps:
 - `index.html`
+
+### Year 9 Physics curriculum resources
+
+`year9phy/` is a public, open-source collection designed for the Year 9 Physics curriculum at the author's school. Because the material is school-specific and may not be relevant to general visitors, it is intentionally not listed on the main PanPhy Labs landing page.
+
+The resources remain available by direct link, and teachers and students are welcome to use them if they find them useful. The current unit is:
+
+- **Work Like a Physicist** — [open the companion site](https://panphy.github.io/year9phy/unit01/) or [browse the source files](year9phy/unit01/); includes a lesson companion, revision material, test preparation, and downloadable resources
 
 ## Tech stack (simple on purpose)
 

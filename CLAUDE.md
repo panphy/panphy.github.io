@@ -67,6 +67,15 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 
 Everything under `misc/` is unlisted/legacy by default — no separate inventory to maintain here.
 
+### School Curriculum Resources (`year9phy/`)
+
+- `year9phy/` contains public, open-source resources designed for the author's school-specific Year 9 Physics curriculum.
+- The material is intentionally excluded from the general PanPhy Labs landing-page catalogue because it may not be relevant to general visitors.
+- Do not add `year9phy/` pages, cards, or resources to the root `index.html` or `OFFLINE_CARD_REQUIREMENTS` unless the user explicitly changes this policy.
+- The resources remain available through stable direct URLs. Do not treat their absence from the landing page as private or internal; teachers and students are welcome to use them if useful.
+- `year9phy/` is exempt from the normal `/beta` placement, landing-page promotion, and published-page UI design-system requirements.
+- `year9phy/` may register the service worker and be pre-cached for offline access and update prompts without being promoted on the landing page. When its cached files change, maintain `ASSETS_TO_CACHE`, `APP_VERSIONS`, app-group detection, and bump `BUILD_ID` as usual.
+
 When promoting an unlisted page:
 
 1. Move it out of `/beta` or `/misc` into the correct public directory. If promoting from `/beta`, remove its entry from `beta/index.html`.
@@ -91,7 +100,7 @@ When promoting an unlisted page:
 
 ## UI Design System
 
-`/beta` pages are exempt. These rules apply to published pages only. The collision sim is a dark, camera-based Three.js exception.
+`/beta` pages and school-specific `year9phy/` resources are exempt. These rules apply to general published PanPhy apps only. The collision sim is a dark, camera-based Three.js exception.
 
 - Fonts: `--font-body` Manrope, `--font-display` DM Serif Display, `--font-mono` IBM Plex Mono, loaded via one Google Fonts `@import`.
 - Palette: use the established variables `--bg-color`, `--bg-pattern`, `--text-main`, `--text-secondary`, `--brand-primary`, `--brand-secondary`, `--brand-accent`, `--surface`/`--card-bg`, `--border`/`--card-border`, `--slider-track`, `--slider-thumb`, `--nav-bg`, and `--nav-border`.
@@ -120,7 +129,8 @@ When promoting an unlisted page:
 ├── simulations/            # Physics simulations
 ├── fun/                    # Games, always network-only
 ├── for_teachers/           # Teacher utilities
-└── misc/                   # Unlisted/legacy pages
+├── misc/                   # Unlisted/legacy pages
+└── year9phy/               # Public, unlisted school-specific curriculum resources
 ```
 
 ## Testing Locally
@@ -134,6 +144,8 @@ python3 -m http.server 8000
 Then open `http://localhost:8000`.
 
 ## Adding a New Page
+
+The generic workflow below does not apply to `year9phy/`; follow the scoped school-curriculum policy above for that directory.
 
 1. Create it in `/beta` unless explicitly asked to publish. Add an entry to `beta/index.html`.
 2. For `/beta`, do not include service-worker registration or cache entries.

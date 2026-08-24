@@ -16,6 +16,7 @@
     if (pathname.startsWith('/tools/panphyplot')) return 'panphyplot';
     if (pathname.startsWith('/simulations/collision')) return 'collision';
     if (pathname.startsWith('/simulations/lorentz')) return 'lorentz';
+    if (pathname.startsWith('/year9phy/unit01')) return 'year9phy_unit01';
 
     const match = pathname.match(/\/([^/]+)\.html$/);
     if (match) {
