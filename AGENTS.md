@@ -37,6 +37,7 @@ Assets in `sw.js` `ASSETS_TO_CACHE` are cache-first. Returning users will not re
 - The landing page requests `REPAIR_PRECACHE` when an offline-ready app is missing required cache entries; the service worker must retry only missing `ASSETS_TO_CACHE` entries and rate-limit retries on the page.
 - `sw.js` also defines `APP_VERSIONS` (app group → version); `assets/sw-register.js` compares the current app group's version to decide whether to show the update banner. All entries currently track `BUILD_ID`, and app groups missing from the map fall back to `BUILD_ID`. When publishing a new app, add its group to `APP_VERSIONS`.
 - The Year 9 companion has a legacy-cache migration: if an older cached entry page lacks `/assets/sw-register.js`, the new worker may activate immediately and reload only affected `year9phy/unit01` clients once. Normal updates must continue to wait for the user's update-button approval.
+- The service worker must redirect the slashless `/year9phy/unit01` route to `/year9phy/unit01/` before cache lookup so relative companion-site assets resolve from the correct directory in every browser.
 
 ```javascript
 const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';

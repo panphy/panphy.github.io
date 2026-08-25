@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-08-24T17:39:49Z';
+const BUILD_ID = '2026-08-25T11:54:32Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -394,6 +394,16 @@ self.addEventListener('fetch', (event) => {
 
   // Navigations: Cache first, network next, cached homepage only as offline fallback
   if (req.mode === 'navigate') {
+    // Preserve the directory URL GitHub Pages normally enforces. Serving the
+    // cached index at the slashless path makes relative assets resolve from
+    // /year9phy/ instead of /year9phy/unit01/ in some browsers.
+    if (isSameOrigin && url.pathname === YEAR9_UNIT01_PATH_PREFIX) {
+      const canonicalUrl = new URL(url.href);
+      canonicalUrl.pathname = `${YEAR9_UNIT01_PATH_PREFIX}/`;
+      event.respondWith(Response.redirect(canonicalUrl.href, 308));
+      return;
+    }
+
     event.respondWith((async () => {
       const navigationCandidates = getNavigationCandidates(url);
 
