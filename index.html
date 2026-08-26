@@ -618,19 +618,6 @@
             display: none;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            right: -46px;
-            bottom: -58px;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: radial-gradient(circle, color-mix(in srgb, var(--card-icon-color) 9%, transparent), transparent 68%);
-            pointer-events: none;
-            transition: transform 0.35s ease, opacity 0.35s ease;
-        }
-
         .card.revealed {
             opacity: 1;
             transform: translateY(0);
@@ -651,10 +638,6 @@
 
         .card.revealed:hover {
             transform: translateY(-5px);
-        }
-
-        .card:hover::before {
-            transform: scale(1.18);
         }
 
         .card:focus-visible {
@@ -778,8 +761,6 @@
         .card-cta {
             display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
             width: 100%;
             margin-top: auto;
             padding-top: 1.35rem;
@@ -789,23 +770,6 @@
             font-weight: 600;
             letter-spacing: 0.04em;
             text-transform: uppercase;
-        }
-
-        .card-cta-arrow {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            color: var(--card-icon-color);
-            background: var(--card-icon-bg);
-            border-radius: 9px;
-            font-size: 0.95rem;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover .card-cta-arrow {
-            transform: translate(2px, -2px);
         }
 
         #simulations .card,
@@ -1247,7 +1211,7 @@
                     <h3>PanPhyMD</h3>
                     <p>A simple Markdown editor with LaTeX support.</p>
                 </div>
-                <span class="card-cta">Open editor <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Open editor</span>
             </a>
             <a class="card" href="/tools/panphyplot.html" data-search="graphs graphing plotting uncertainty best fit data analysis">
                 <div class="card-top">
@@ -1258,7 +1222,7 @@
                     <h3>PanPhyPlot</h3>
                     <p>Process data, plot graphs, add uncertainties, and run best-fit analysis.</p>
                 </div>
-                <span class="card-cta">Plot data <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Plot data</span>
             </a>
             <a class="card" href="/tools/motion_tracker.html" data-search="video frames motion tracking position velocity movement">
                 <div class="card-top">
@@ -1269,7 +1233,7 @@
                     <h3>Motion Tracker</h3>
                     <p>Step through video frames, track objects, and extract motion data.</p>
                 </div>
-                <span class="card-cta">Track motion <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Track motion</span>
             </a>
             <a class="card" href="/tools/sound_analyzer.html" data-search="sound audio frequency spectrum waveform microphone">
                 <div class="card-top">
@@ -1280,7 +1244,7 @@
                     <h3>Sound Analyzer</h3>
                     <p>Visualize live audio as a frequency spectrum and waveform.</p>
                 </div>
-                <span class="card-cta">Analyze sound <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Analyze sound</span>
             </a>
             <a class="card" href="/tools/tone_generator.html" data-search="sound audio tone sine frequency mixing dual channel">
                 <div class="card-top">
@@ -1291,7 +1255,7 @@
                     <h3>Tone Generator</h3>
                     <p>Mix two sine-wave channels with precise frequency and level controls.</p>
                 </div>
-                <span class="card-cta">Generate tone <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Generate tone</span>
             </a>
         </div>
     </section>
@@ -1317,7 +1281,7 @@
                     <h3>Virtual Ripple Tank</h3>
                     <p>Explore wave interference and refraction in a 3D ripple tank.</p>
                 </div>
-                <span class="card-cta">Launch sim <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/superposition.html" data-search="waves superposition interference addition phase amplitude">
                 <div class="card-top">
@@ -1328,7 +1292,7 @@
                     <h3>Wave Superposition</h3>
                     <p>Combine waves and see how amplitude, phase, and interference interact.</p>
                 </div>
-                <span class="card-cta">Launch sim <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/standing_wave.html" data-search="waves standing nodes antinodes boundary conditions harmonics">
                 <div class="card-top">
@@ -1339,7 +1303,7 @@
                     <h3>Standing Wave</h3>
                     <p>Visualize standing waves with different boundary conditions.</p>
                 </div>
-                <span class="card-cta">Launch sim <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/collision.html" data-search="collision mechanics momentum kinetic energy camera motion">
                 <div class="card-top">
@@ -1350,7 +1314,7 @@
                     <h3>Collision Lab</h3>
                     <p>Experiment with collision physics using interactive, real-time motion.</p>
                 </div>
-                <span class="card-cta">Launch sim <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/states.html" data-search="states matter solid liquid gas particles phase change temperature">
                 <div class="card-top">
@@ -1361,7 +1325,7 @@
                     <h3>States of Matter</h3>
                     <p>Compare solids, liquids, gases, and phase changes in a 3D particle model.</p>
                 </div>
-                <span class="card-cta">Launch sim <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/lorentz.html" data-search="relativity lorentz spacetime inertial frames special relativity">
                 <div class="card-top">
@@ -1372,7 +1336,7 @@
                     <h3>Lorentz Transform</h3>
                     <p>Learn how spacetime transforms between inertial frames.</p>
                 </div>
-                <span class="card-cta">Launch sim <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Launch sim</span>
             </a>
         </div>
     </section>
@@ -1398,7 +1362,7 @@
                     <h3>Exam Timer</h3>
                     <p>Manage exam times with an automatic extra-time timer.</p>
                 </div>
-                <span class="card-cta">Open timer <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Open timer</span>
             </a>
             <a class="card" href="/for_teachers/visualizer.html" data-search="teacher camera visualizer projector classroom demonstration annotate sketch">
                 <div class="card-top">
@@ -1409,7 +1373,7 @@
                     <h3>Camera Visualizer</h3>
                     <p>Project your device camera to the big screen, then snap and sketch.</p>
                 </div>
-                <span class="card-cta">Use camera <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Use camera</span>
             </a>
         </div>
     </section>
@@ -1435,7 +1399,7 @@
                     <h3>Spellwave</h3>
                     <p>Type to cast spells and beat the monsters.</p>
                 </div>
-                <span class="card-cta">Play now <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Play now</span>
             </a>
             <a class="card" href="/fun/ascii_cam.html" data-search="ascii camera webcam 8 bit text characters creative">
                 <div class="card-top">
@@ -1446,7 +1410,7 @@
                     <h3>ASCII Camera</h3>
                     <p>See yourself in 8-bit colour ASCII characters.</p>
                 </div>
-                <span class="card-cta">Open camera <span class="card-cta-arrow" aria-hidden="true">↗</span></span>
+                <span class="card-cta">Open camera</span>
             </a>
         </div>
     </section>
