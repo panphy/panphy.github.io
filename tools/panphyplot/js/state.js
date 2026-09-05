@@ -11,6 +11,55 @@ let customFitStates = {}; // per-dataset custom fit drafts, e.g. { 0: { formula:
 let dataset1XValues = [];
 let latexMode = false; // false by default: plain text mode
 let titleWasAuto = true; // track whether graph title should auto-update
+let datasetDraftRows = {}; // Preserve exact cell text, including incomplete and invalid rows.
+let datasetTitles = {};
+let combinedLabelsAuto = { title: true, xLabel: true, yLabel: true };
+const datasetIdentities = {};
+const datasetFitEpochs = {};
+let nextDatasetIdentity = 0;
+
+function parseNumericInput(value) {
+	const text = String(value ?? '').trim();
+	if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(text)) return NaN;
+	const number = Number(text);
+	return Number.isFinite(number) ? number : NaN;
+}
+
+function getDatasetIdentity(index) {
+	if (!datasetIdentities[index]) datasetIdentities[index] = `dataset-${++nextDatasetIdentity}`;
+	return datasetIdentities[index];
+}
+
+function invalidatePendingFit(index = activeSet) {
+	datasetFitEpochs[index] = (datasetFitEpochs[index] || 0) + 1;
+}
+
+function getDatasetFitSignature(index) {
+	return JSON.stringify(getFiniteDatasetPoints(index).map(({ x, y }) => [x, y]));
+}
+
+function captureFitTarget(index = activeSet) {
+	invalidatePendingFit(index);
+	return { id: getDatasetIdentity(index), epoch: datasetFitEpochs[index], signature: getDatasetFitSignature(index) };
+}
+
+function resolveFitTarget(target) {
+	const index = rawData.findIndex((_, i) => datasetIdentities[i] === target.id);
+	return index >= 0 && datasetFitEpochs[index] === target.epoch
+		&& getDatasetFitSignature(index) === target.signature ? index : -1;
+}
+
+function saveActiveGraphTitle() {
+	const input = document.getElementById('graph-title');
+	if (input) datasetTitles[activeSet] = { text: input.value, automatic: titleWasAuto };
+}
+
+function loadActiveGraphTitle() {
+	const saved = datasetTitles[activeSet];
+	titleWasAuto = saved ? saved.automatic : true;
+	const input = document.getElementById('graph-title');
+	if (input) input.value = saved ? saved.text : '';
+}
 
 let lastPlotState = {
 	plot: { data: null, layout: null },
@@ -23,7 +72,7 @@ datasetToggles[0] = { x: false, y: false };
 datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
 
 let isSyncing = false;
-const STATE_SCHEMA_VERSION = 2;
+const STATE_SCHEMA_VERSION = 3;
 const STORAGE_KEY = 'panphyplot-state-v2';
 const LEGACY_STORAGE_KEYS = ['panphyplot-state-v1'];
 const THEME_KEY = 'panphyplot-theme';
@@ -88,6 +137,9 @@ function buildCorePersistedState() {
 		fittedCurves,
 		datasetFitResults,
 		customFitStates,
+		datasetDraftRows,
+		datasetTitles,
+		combinedLabelsAuto,
 		dataset1XValues,
 		latexMode,
 		titleWasAuto
@@ -95,6 +147,7 @@ function buildCorePersistedState() {
 }
 
 function buildPersistedState(uiState = getUiStateSnapshotFromDom()) {
+	saveActiveGraphTitle();
 	return {
 		...buildCorePersistedState(),
 		...normalizePersistedUiState(uiState)
@@ -124,6 +177,13 @@ function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
 	const maxActive = Math.max(0, migrated.rawData.length - 1);
 	const active = Number(migrated.activeSet);
 	migrated.activeSet = Number.isInteger(active) ? Math.min(Math.max(active, 0), maxActive) : 0;
+	if (detectedVersion < 3) {
+		migrated.datasetTitles = {
+			[migrated.activeSet]: { text: migrated.graphTitle || '', automatic: migrated.titleWasAuto !== false }
+		};
+		migrated.combinedLabelsAuto = Object.fromEntries(['title', 'xLabel', 'yLabel'].map(key =>
+			[key, !migrated.combinedPlot || typeof migrated.combinedPlot[key] !== 'string']));
+	}
 	migrated.schemaVersion = STATE_SCHEMA_VERSION;
 
 	return migrated;
@@ -211,8 +271,8 @@ function normalizeFittedCurvesState(savedCurves, datasetCount) {
 		const x = [];
 		const y = [];
 		for (let i = 0; i < maxLen; i++) {
-			const xi = Number(curve.x[i]);
-			const yi = Number(curve.y[i]);
+			const xi = parseNumericInput(curve.x[i]);
+			const yi = parseNumericInput(curve.y[i]);
 			if (!Number.isFinite(xi) || !Number.isFinite(yi)) continue;
 			x.push(xi);
 			y.push(yi);
@@ -244,7 +304,15 @@ function normalizeDatasetFitResultsState(savedResults, datasetCount) {
 		const rSquared = typeof result.rSquared === 'string'
 			? result.rSquared
 			: String(result.rSquared ?? '');
-		normalized[index] = { equation, rSquared };
+		const residuals = Array.isArray(result.residuals)
+			? result.residuals.filter(point => point && Number.isFinite(point.x) && Number.isFinite(point.y)) : [];
+		normalized[index] = {
+			equation, rSquared, residuals,
+			stale: result.stale === true,
+			status: typeof result.status === 'string' ? result.status : 'Saved fit — refit to calculate diagnostics.',
+			rmse: Number.isFinite(result.rmse) ? result.rmse : null,
+			choice: result.choice && typeof result.choice === 'object' ? result.choice : null
+		};
 	}
 
 	return normalized;
@@ -262,6 +330,26 @@ function normalizeDatasetNamesState(savedNames, datasetCount) {
 		normalized[index] = trimmed.slice(0, DATASET_NAME_MAX_LENGTH);
 	}
 
+	return normalized;
+}
+
+function normalizeDatasetDraftRows(saved, datasetCount) {
+	const normalized = {};
+	for (let index = 0; index < datasetCount; index++) {
+		if (!Array.isArray(saved?.[index])) continue;
+		normalized[index] = saved[index].map(row => Object.fromEntries(
+			['xValue', 'yValue', 'xErrorValue', 'yErrorValue'].map(key => [key, typeof row?.[key] === 'string' ? row[key] : ''])
+		));
+	}
+	return normalized;
+}
+
+function normalizeDatasetTitles(saved, datasetCount) {
+	const normalized = {};
+	for (let index = 0; index < datasetCount; index++) {
+		if (typeof saved?.[index]?.text !== 'string') continue;
+		normalized[index] = { text: saved[index].text, automatic: saved[index].automatic !== false };
+	}
 	return normalized;
 }
 

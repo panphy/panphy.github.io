@@ -66,8 +66,8 @@ function sanitizeDataPoints(rawData) {
 	for (let index = 0; index < rawData.length; index++) {
 		const point = rawData[index];
 		if (!point || typeof point !== 'object') continue;
-		const x = Number(point.x);
-		const y = Number(point.y);
+		const x = point.x;
+		const y = point.y;
 		if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
 		points.push({ x, y });
 	}
@@ -215,16 +215,16 @@ async function solveCustomFit(payload) {
 	const residualFn = buildCustomResidualFn(compiledExpression, parameterNames, WORKER_PENALTY);
 	const jacobianFn = buildCustomJacobianFn(compiledExpression, parameterNames);
 
-	const { params: bestParams, cost: bestCost } = solveCustomMultiStart(
+	const result = solveCustomMultiStart(
 		data, starts, residualFn, jacobianFn, { maxIterations, tolerance }
 	);
 
-	if (!bestParams || !Array.isArray(bestParams)) {
+	if (!result.params || !Array.isArray(result.params)) {
 		throw new Error('Custom fit did not converge.');
 	}
 
 	return {
-		params: bestParams.map((value) => Number(value)),
-		cost: Number(bestCost)
+		...result,
+		params: result.params.map((value) => Number(value))
 	};
 }

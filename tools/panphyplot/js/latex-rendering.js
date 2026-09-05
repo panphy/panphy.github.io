@@ -47,10 +47,11 @@
 		if (!titleInput) return;
 
 		const current = (titleInput.value || '').trim();
-		if (force || titleWasAuto || current === '') {
+		if (force || titleWasAuto) {
 			titleInput.value = autoTitle;
 			titleWasAuto = true;
 		}
+		saveActiveGraphTitle();
 	}
 
 	function formatLabelForLatex(label) {

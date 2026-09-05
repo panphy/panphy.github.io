@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			lastPlotState['popup-plot'].data = null;
 			lastPlotState['popup-plot'].layout = null;
 			updatePlotAndRenderLatex();
+			renderFitDiagnostics();
 			const popupContainer = document.getElementById('popup-container');
 			if (popupContainer && popupContainer.style.display === 'block') {
 				plotAllDatasets();
@@ -62,6 +63,9 @@ document.addEventListener("DOMContentLoaded", function() {
 		rawData = Array.isArray(savedState.rawData) && savedState.rawData.length ? savedState.rawData : [[]];
 		activeSet = Math.min(savedState.activeSet ?? 0, rawData.length - 1);
 		datasetHeaders = savedState.datasetHeaders || {};
+		datasetDraftRows = normalizeDatasetDraftRows(savedState.datasetDraftRows, rawData.length);
+		datasetTitles = normalizeDatasetTitles(savedState.datasetTitles, rawData.length);
+		combinedLabelsAuto = { title: true, xLabel: true, yLabel: true, ...savedState.combinedLabelsAuto };
 		datasetNames = typeof normalizeDatasetNamesState === 'function'
 			? normalizeDatasetNamesState(savedState.datasetNames, rawData.length)
 			: (savedState.datasetNames || {});
@@ -79,6 +83,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		dataset1XValues = savedState.dataset1XValues || [];
 		latexMode = !!savedState.latexMode;
 		titleWasAuto = savedState.titleWasAuto ?? true;
+		loadActiveGraphTitle();
 
 		rawData.forEach((dataset, index) => {
 			if (!Array.isArray(dataset)) rawData[index] = [];
@@ -174,6 +179,8 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 		titleInput.addEventListener('input', function() {
 			titleWasAuto = false;
+			saveActiveGraphTitle();
+			updateCombinedPlotInputsToActive();
 			scheduleSaveState();
 		});
 	}
@@ -199,6 +206,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		});
 	}
 
+	initializeDialogFocus();
 	initializeFitEquationCopyInteractions();
 	if (typeof initializeDataProcessing === 'function') {
 		initializeDataProcessing();

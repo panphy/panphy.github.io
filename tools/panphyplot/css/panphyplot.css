@@ -2778,3 +2778,37 @@ footer a:visited {
 	opacity: 1;
 	transform: translateX(-50%) translateY(0);
 }
+
+.validation-message,
+.fit-outdated {
+	color: var(--brand-primary);
+	font-weight: 600;
+}
+.validation-message:empty { margin: 0; }
+.fit-weighting-note,
+#fit-status,
+#residual-description { font-size: 0.85rem; line-height: 1.6; }
+#residual-details { margin-top: 16px; text-align: left; }
+#residual-details summary { cursor: pointer; min-height: 48px; align-content: center; font-weight: 600; }
+#residual-plot { width: 100%; height: 280px; }
+.dataset-tab [role="tab"]:focus-visible,
+.dataset-tab .tab-close:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.dataset-tab .tab-close {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	padding: 0;
+	margin: 0;
+	min-width: 48px;
+	min-height: 48px;
+	font: inherit;
+	font-size: 1.3rem;
+}
+.dataset-tab [role="tab"] { min-height: 48px; align-content: center; }
+.dataset-tab { flex-shrink: 0; padding: 0 8px 0 14px; }
+.dataset-tab [role="tab"] { min-width: 76px; }
+.fit-weighting-note,
+#fit-status,
+#residual-description { white-space: normal; overflow-wrap: anywhere; }
+#refit-button { min-height: 48px; }
+.result .fit-weighting-note { white-space: normal; overflow-wrap: anywhere; }

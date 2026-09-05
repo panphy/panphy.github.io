@@ -145,6 +145,14 @@ python3 -m http.server 8000
 
 Then open `http://localhost:8000`.
 
+PanPhyPlot has dependency-free model and numerical regression checks:
+
+```bash
+node --test tools/panphyplot/tests/regression.test.cjs
+```
+
+When changing PanPhyPlot data handling or fitting, run these checks and verify the affected browser flows. Use an uncached local origin during development; check the service-worker cache version before publishing.
+
 ## Adding a New Page
 
 The generic workflow below does not apply to `year9phy/`; follow the scoped school-curriculum policy above for that directory.

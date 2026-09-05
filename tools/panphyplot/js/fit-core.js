@@ -5,6 +5,57 @@
 	const DEFAULT_PENALTY = 1e6;
 	const MIN_PIVOT_ABS = 1e-14;
 
+	function formatFitNumber(value, latex = true) {
+		if (!Number.isFinite(value)) return 'N/A';
+		if (value === 0) return '0';
+		const scientific = Math.abs(value) < 1e-3 || Math.abs(value) >= 1e6;
+		const rounded = Number(value.toPrecision(8));
+		const text = scientific ? rounded.toExponential() : rounded.toString();
+		if (!latex) return text;
+		const [coefficient, exponent] = text.split('e');
+		return exponent === undefined ? text : `${coefficient}\\times 10^{${Number(exponent)}}`;
+	}
+
+	function computeLinearFit(x, y) {
+		const n = x.length;
+		const xOrigin = x[0];
+		const offsets = x.map(value => value - xOrigin);
+		const { min, max } = minMaxFinite(offsets);
+		const scale = Math.max(Math.abs(min), Math.abs(max));
+		if (!(scale > 0) || !Number.isFinite(scale)) throw new Error('Linear fitting needs distinct x values with a finite range.');
+		const u = offsets.map(value => value / scale);
+		const uMean = u.reduce((sum, value) => sum + value / n, 0);
+		const yMean = y.reduce((sum, value) => sum + value / n, 0);
+		let numerator = 0;
+		let denominator = 0;
+		for (let i = 0; i < n; i++) {
+			numerator += (u[i] - uMean) * (y[i] - yMean);
+			denominator += (u[i] - uMean) ** 2;
+		}
+		const scaledSlope = numerator / denominator;
+		const slope = scaledSlope / scale;
+		const center = xOrigin + scale * uMean;
+		const intercept = yMean - slope * center;
+		return { slope, intercept, evaluate: value => yMean + scaledSlope * ((value - xOrigin) / scale - uMean) };
+	}
+
+	function computeRSq(x, y, evaluate) {
+		if (!x.length || x.length !== y.length) return NaN;
+		const predictions = x.map(evaluate);
+		if (predictions.some(value => !Number.isFinite(value))) return NaN;
+		const mean = y.reduce((sum, value) => sum + value / y.length, 0);
+		let scale = 0;
+		for (let i = 0; i < y.length; i++) scale = Math.max(scale, Math.abs(y[i] - mean), Math.abs(y[i] - predictions[i]));
+		if (scale === 0) return 1;
+		let total = 0;
+		let residual = 0;
+		for (let i = 0; i < y.length; i++) {
+			total += ((y[i] - mean) / scale) ** 2;
+			residual += ((y[i] - predictions[i]) / scale) ** 2;
+		}
+		return total === 0 ? (residual === 0 ? 1 : NaN) : 1 - residual / total;
+	}
+
 	function transpose(matrix) {
 		return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
 	}
@@ -81,6 +132,11 @@
 
 		let bestParams = params.slice();
 		let bestCost = Infinity;
+		let iterations = 0;
+		let dataMagnitude = 0;
+		for (const point of data) dataMagnitude = Math.max(dataMagnitude, Math.abs(point.y || 0));
+		const roundoffCost = data.length * (16 * Number.EPSILON * dataMagnitude) ** 2;
+		const finish = (converged, reason) => ({ params: bestParams, cost: bestCost, converged, reason, iterations });
 
 		function safeResiduals(p) {
 			let residuals = null;
@@ -135,6 +191,7 @@
 		}
 
 		for (let iteration = 0; iteration < maxIterations; iteration++) {
+			iterations = iteration + 1;
 			const residuals = safeResiduals(params);
 			const cost = costFromResiduals(residuals);
 			if (cost < bestCost) {
@@ -142,10 +199,14 @@
 				bestParams = params.slice();
 			}
 
+			if (cost <= roundoffCost) return finish(true, 'residual-at-roundoff');
 			const jacobian = safeJacobian(params, params.length);
 			const jTranspose = transpose(jacobian);
 			const jtj = multiply(jTranspose, jacobian);
 			const jtr = multiplyMatrixVector(jTranspose, residuals);
+
+			const gradientSmall = jtr.every((value, i) => Math.abs(value) <= tolerance * Math.sqrt(Math.abs(jtj[i][i])) * Math.sqrt(cost));
+			if (gradientSmall) return finish(true, 'stationary');
 
 			const n = jtj.length;
 			const damped = new Array(n).fill(null).map(() => new Array(n).fill(0));
@@ -181,20 +242,20 @@
 					bestCost = nextCost;
 					bestParams = params.slice();
 				}
-				if (Math.abs(cost - nextCost) < tolerance) {
-					return { params: bestParams, cost: bestCost };
+				if (Math.abs(cost - nextCost) <= tolerance * Math.max(cost, Number.MIN_VALUE)) {
+					return finish(true, 'relative-cost');
 				}
 				lambda *= 0.3;
 				if (lambda < 1e-20) lambda = 1e-20;
 			} else {
 				lambda *= nu;
 				if (lambda > 1e20) {
-					return { params: bestParams, cost: bestCost };
+					return finish(false, 'stalled');
 				}
 			}
 		}
 
-		return { params: bestParams, cost: bestCost };
+		return finish(false, 'iteration-limit');
 	}
 
 	function minMaxFinite(values) {
@@ -213,26 +274,26 @@
 		const xValues = data.map((point) => point.x);
 		const { min: xMin, max: xMax } = minMaxFinite(xValues);
 		const span = xMax - xMin;
-		if (!Number.isFinite(span) || Math.abs(span) < 1e-12) {
+		if (!Number.isFinite(span) || span === 0) {
 			return Array.from({ length: sampleCount }, () => xMin);
 		}
 		return Array.from({ length: sampleCount }, (_, index) => xMin + index * span / (sampleCount - 1));
 	}
 
 	function buildSinusoidalEquation(params) {
-		let equation = `y = ${params.A.toFixed(3)} e^{${params.b.toFixed(3)}x} \\sin(${params.k.toFixed(3)}x`;
-		if (params.phi > 0) equation += ` - ${params.phi.toFixed(3)}`;
-		else if (params.phi < 0) equation += ` + ${Math.abs(params.phi).toFixed(3)}`;
+		let equation = `y = ${formatFitNumber(params.A)} e^{${formatFitNumber(params.b)}x} \\sin(${formatFitNumber(params.k)}x`;
+		if (params.phi > 0) equation += ` - ${formatFitNumber(params.phi)}`;
+		else if (params.phi < 0) equation += ` + ${formatFitNumber(Math.abs(params.phi))}`;
 		equation += `)`;
-		if (params.c > 0) equation += ` + ${params.c.toFixed(3)}`;
-		else if (params.c < 0) equation += ` - ${Math.abs(params.c).toFixed(3)}`;
+		if (params.c > 0) equation += ` + ${formatFitNumber(params.c)}`;
+		else if (params.c < 0) equation += ` - ${formatFitNumber(Math.abs(params.c))}`;
 		return equation;
 	}
 
 	function buildGaussianEquation(params) {
-		let equation = `y = ${params.A.toFixed(3)} e^{-\\frac{(x - ${params.mu.toFixed(3)})^2}{2(${params.sigma.toFixed(3)})^2}}`;
-		if (params.c > 0) equation += ` + ${params.c.toFixed(3)}`;
-		else if (params.c < 0) equation += ` - ${Math.abs(params.c).toFixed(3)}`;
+		let equation = `y = ${formatFitNumber(params.A)} e^{-\\frac{(x - ${formatFitNumber(params.mu)})^2}{2(${formatFitNumber(params.sigma)})^2}}`;
+		if (params.c > 0) equation += ` + ${formatFitNumber(params.c)}`;
+		else if (params.c < 0) equation += ` - ${formatFitNumber(Math.abs(params.c))}`;
 		return equation;
 	}
 
@@ -329,7 +390,7 @@
 		};
 		const xFit = buildFitDomainFromData(data, sampleCount);
 		const yFit = xFit.map((xValue) => evaluateSinusoidal(params, xValue));
-		return { params, xFit, yFit, equation: buildSinusoidalEquation(params) };
+		return { params, xFit, yFit, equation: buildSinusoidalEquation(params), converged: best.converged, reason: best.reason, iterations: best.iterations };
 	}
 
 	function evaluateGaussian(params, xValue) {
@@ -399,7 +460,7 @@
 		const params = { A: Number(A), mu: Number(mu), sigma: Number(sigma), c: Number(c) };
 		const xFit = buildFitDomainFromData(data, sampleCount);
 		const yFit = xFit.map((xValue) => evaluateGaussian(params, xValue));
-		return { params, xFit, yFit, equation: buildGaussianEquation(params) };
+		return { params, xFit, yFit, equation: buildGaussianEquation(params), converged: result.converged, reason: result.reason, iterations: result.iterations };
 	}
 
 	// ---- Shared custom-formula fitting helpers ----
@@ -453,15 +514,17 @@
 		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
 		let bestParams = null;
 		let bestCost = Infinity;
+		let bestResult = null;
 		for (let index = 0; index < starts.length; index++) {
 			const result = levenbergMarquardt(data, starts[index], residualFn, jacobianFn, { maxIterations, tolerance });
 			if (!Number.isFinite(result.cost)) continue;
 			if (result.cost < bestCost) {
 				bestCost = result.cost;
 				bestParams = result.params;
+				bestResult = result;
 			}
 		}
-		return { params: bestParams, cost: bestCost };
+		return bestResult || { params: bestParams, cost: bestCost, converged: false, reason: 'no-solution', iterations: 0 };
 	}
 
 	function finiteOrZero(value) {
@@ -469,6 +532,9 @@
 	}
 
 	globalScope.PanPhyFitCore = Object.freeze({
+		formatFitNumber,
+		computeLinearFit,
+		computeRSq,
 		transpose,
 		multiply,
 		multiplyMatrixVector,

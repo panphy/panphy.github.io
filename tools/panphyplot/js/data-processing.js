@@ -110,10 +110,10 @@
 		const isXValid = isValidIdentifier(xHeader);
 		const isYValid = isValidIdentifier(yHeader);
 
-		if (isXValid && xHeader !== yHeader) {
+		if (isXValid && xHeader !== yHeader && xHeader !== 'y') {
 			aliases.push({ name: xHeader, axis: 'x' });
 		}
-		if (isYValid && yHeader !== xHeader) {
+		if (isYValid && yHeader !== xHeader && yHeader !== 'x') {
 			aliases.push({ name: yHeader, axis: 'y' });
 		}
 
@@ -667,10 +667,12 @@
 	}
 
 	function isDatasetNonEmpty(index) {
-		return Array.isArray(rawData[index]) && rawData[index].length > 0;
+		return !isDatasetEmpty(index);
 	}
 
 	function writeToTargetDataset(targetIndex, xLabel, yLabel, points) {
+		invalidatePendingFit(targetIndex);
+		delete datasetDraftRows[targetIndex];
 		rawData[targetIndex] = points.map((point) => ({
 			x: point.x,
 			y: point.y,
@@ -717,8 +719,8 @@
 		const outputRows = [];
 		let skippedRows = 0;
 		for (let rowIndex = 0; rowIndex < state.sourceRows.length; rowIndex++) {
-			const xValue = Number(xColumn.values[rowIndex]);
-			const yValue = Number(yColumn.values[rowIndex]);
+			const xValue = xColumn.values[rowIndex];
+			const yValue = yColumn.values[rowIndex];
 			if (Number.isFinite(xValue) && Number.isFinite(yValue)) {
 				outputRows.push({ x: xValue, y: yValue });
 			} else {
@@ -750,6 +752,9 @@
 			if (!confirmed) return;
 		}
 
+		// Capture the source table before replacing a target that may be active.
+		updateData({ deferPlot: true });
+		saveActiveGraphTitle();
 		writeToTargetDataset(targetIndex, xColumn.label, yColumn.label, outputRows);
 
 		if (targetIndex === 0 && typeof syncDataset1XValues === 'function') {
@@ -770,7 +775,7 @@
 		closeDataProcessingPopup();
 
 		if (typeof switchDataset === 'function') {
-			switchDataset(targetIndex);
+			switchDataset(targetIndex, false);
 		}
 
 		const messages = [];
