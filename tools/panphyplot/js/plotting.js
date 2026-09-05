@@ -242,6 +242,7 @@
 			};
 
 			return {
+				responsive: true,
 				displayModeBar: true,
 				displaylogo: false,
 				modeBarButtons: [[
@@ -345,8 +346,8 @@
 				x: fittedX,
 				y: fittedY,
 				mode: 'lines',
-				name: 'Fit',
-				line: { color: themeSettings.fitColor }
+				name: datasetFitResults[activeSet]?.stale ? 'Fit (outdated)' : 'Fit',
+				line: { color: themeSettings.fitColor, dash: datasetFitResults[activeSet]?.stale ? 'dash' : 'solid' }
 			});
 		}
 
@@ -522,14 +523,14 @@
 			// Fitted curve trace, if available.
 			if (fittedCurves.hasOwnProperty(index)) {
 				const fitColor = fitColors[index % fitColors.length];
-				const fitName = latexMode ? getFitLegendName(index, yLabelRaw) : `Fit: ${yLabelRaw}`;
+				const fitName = datasetFitResults[index]?.stale ? `Outdated fit: ${yLabelRaw}` : latexMode ? getFitLegendName(index, yLabelRaw) : `Fit: ${yLabelRaw}`;
 
 				traces.push({
 					x: fittedCurves[index].x,
 					y: fittedCurves[index].y,
 					mode: 'lines',
 					name: fitName,
-					line: { color: fitColor }
+					line: { color: fitColor, dash: datasetFitResults[index]?.stale ? 'dash' : 'solid' }
 				});
 			}
 		});

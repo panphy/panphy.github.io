@@ -13,7 +13,8 @@ function showToast(message, duration = 3000) {
 }
 
 const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
-const debouncedUpdateData = debounce(updateData, 300);
+// Capture edits synchronously; only the expensive redraw waits.
+const debouncedUpdateData = () => updateData({ deferPlot: true });
 const MARKED_CDN_URL = 'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js';
 const DOMPURIFY_CDN_URL = 'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js';
 const TABLE_RENDER_CHUNK_SIZE = 250;
@@ -78,7 +79,7 @@ async function ensureTableRenderLibraries() {
 
 function formatRowInputValue(value) {
 	if (value === undefined || value === null) return '';
-	return String(value);
+	return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function getErrorColumnDisplay(axis, index = activeSet) {
@@ -168,6 +169,7 @@ function renderTableRows(tableBody, rowOptions = []) {
 
 		tableBody.style.pointerEvents = '';
 		tableBody.removeAttribute('aria-busy');
+		validateNumericInputs();
 	};
 
 	window.requestAnimationFrame(renderChunk);
@@ -179,7 +181,7 @@ function isValidPercentageUncertainty(value) {
 
 function isValidUncertaintyForType(value, errorType) {
 	if (errorType === 'percentage') return isValidPercentageUncertainty(value);
-	return Number.isFinite(value);
+	return Number.isFinite(value) && value >= 0;
 }
 
 function syncDataset1XValues() {
@@ -191,7 +193,7 @@ function syncDataset1XValues() {
 	function parseMarkdownTableLine(line) {
 		const rawLine = String(line || '').trim();
 		if (!rawLine) return [];
-		const cells = rawLine.split('|');
+		const cells = rawLine.split(/(?<!\\)\|/).map(cell => cell.replace(/\\\|/g, '|'));
 		if (cells.length && cells[0].trim() === '') cells.shift();
 		if (cells.length && cells[cells.length - 1].trim() === '') cells.pop();
 		return cells.map(cell => cell.trim());
@@ -650,6 +652,7 @@ function dismissFitEquationCopyActions() {
 function clearFittingResultDisplay() {
 	dismissFitEquationCopyActions();
 	activeFitEquationRawLatex = '';
+	renderFitDiagnostics();
 
 	const fitEquationElement = document.getElementById('fit-equation');
 	const rSquaredElement = document.getElementById('r-squared-container');
@@ -689,6 +692,7 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	rSquaredElement.textContent = `\\( R^2 = ${rSquaredDisplay} \\)`;
 	rSquaredElement.style.display = 'block';
 
+	renderFitDiagnostics();
 	initializeFitEquationCopyInteractions();
 	safeTypeset(fitEquationElement);
 	safeTypeset(rSquaredElement);
@@ -821,6 +825,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 		tabElement.classList.remove('renaming');
 		labelElement.innerHTML = '';
 		renderDatasetTabLabel(labelElement, index);
+		labelElement.focus();
 	};
 
 	input.addEventListener('keydown', event => {
@@ -856,6 +861,8 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 	function updateDatasetTabsBar() {
 		const tabsBar = document.querySelector('.dataset-tabs-bar');
 		if (!tabsBar) return;
+		tabsBar.setAttribute('role', 'tablist');
+		tabsBar.setAttribute('aria-label', 'Datasets');
 
 		// Clear all tabs except the Add Dataset button.
 		const existingTabs = Array.from(tabsBar.querySelectorAll('.dataset-tab'));
@@ -871,6 +878,11 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 			// Create a span for the label (e.g., "Dataset 1")
 			const labelSpan = document.createElement('span');
 			labelSpan.classList.add('tab-label');
+			labelSpan.setAttribute('role', 'tab');
+			labelSpan.setAttribute('aria-selected', String(index === activeSet));
+			labelSpan.setAttribute('aria-controls', 'data-table');
+			labelSpan.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight Home End F2 Delete');
+			labelSpan.tabIndex = index === activeSet ? 0 : -1;
 			renderDatasetTabLabel(labelSpan, index);
 			tab.appendChild(labelSpan);
 
@@ -904,7 +916,9 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 			// Create the close button. (Do not add a close icon if there is only one dataset.)
 			if (rawData.length > 1) {
-				const closeSpan = document.createElement('span');
+				const closeSpan = document.createElement('button');
+				closeSpan.type = 'button';
+				closeSpan.setAttribute('aria-label', `Remove ${getDatasetDisplayName(index)}`);
 				closeSpan.classList.add('tab-close');
 				closeSpan.textContent = '×';
 				// When the close button is clicked, remove this dataset.
@@ -929,6 +943,26 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 				switchDataset(index);
 			});
 
+			labelSpan.addEventListener('keydown', event => {
+				if (tab.classList.contains('renaming')) return;
+				if (event.key === 'F2') {
+					event.preventDefault();
+					startDatasetTabRename(index, tab, labelSpan);
+					return;
+				}
+				if (event.key === 'Delete') {
+					event.preventDefault();
+					removeDataset(index);
+					document.querySelector('.dataset-tab.active [role="tab"]')?.focus();
+					return;
+				}
+				const targets = { ArrowLeft: (index + rawData.length - 1) % rawData.length, ArrowRight: (index + 1) % rawData.length, Home: 0, End: rawData.length - 1, Enter: index, ' ': index };
+				if (!(event.key in targets)) return;
+				event.preventDefault();
+				switchDataset(targets[event.key]);
+				document.querySelector('.dataset-tab.active [role="tab"]')?.focus();
+			});
+
 			// Insert the new tab before the Add Dataset button.
 			// (We assume the Add Dataset button remains as the last element.)
 			const addBtn = tabsBar.querySelector('.add-dataset-btn');
@@ -937,13 +971,17 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 	}
 
 
-	function switchDataset(index) {
+	function switchDataset(index, captureCurrent = true) {
 		if (index < 0 || index >= rawData.length) {
 			console.error("Invalid dataset index.");
 			return;
 		}
+		if (captureCurrent) {
+			updateData({ deferPlot: true });
+			saveActiveGraphTitle();
+		}
 		activeSet = index;
-		titleWasAuto = true;
+		loadActiveGraphTitle();
 		updateDatasetTabsBar();
 
 		// Load header values for this dataset.
@@ -985,6 +1023,11 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 			const yErrorDisplay = getErrorColumnDisplay('y');
 
 			const rowOptions = [];
+			if (Array.isArray(datasetDraftRows[activeSet])) {
+				renderTableRows(tableBody, datasetDraftRows[activeSet].map(row => ({ ...row, xErrorDisplay, yErrorDisplay })));
+				validateNumericInputs();
+				return;
+			}
 
 			// For Dataset 1: if rawData is empty but we have stored x-values, rebuild the table from them.
 			if (activeSet === 0 && dataset.length === 0 && dataset1XValues && dataset1XValues.length > 0) {
@@ -998,6 +1041,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 						yErrorDisplay
 					});
 				});
+				datasetDraftRows[activeSet] = rowOptions.map(({ xValue, yValue, xErrorValue, yErrorValue }) => ({ xValue: String(xValue ?? ''), yValue: String(yValue ?? ''), xErrorValue: String(xErrorValue ?? ''), yErrorValue: String(yErrorValue ?? '') }));
 				renderTableRows(tableBody, rowOptions);
 				return;
 			}
@@ -1014,6 +1058,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 						yErrorDisplay
 					});
 				});
+				datasetDraftRows[activeSet] = rowOptions.map(({ xValue, yValue, xErrorValue, yErrorValue }) => ({ xValue: String(xValue ?? ''), yValue: String(yValue ?? ''), xErrorValue: String(xErrorValue ?? ''), yErrorValue: String(yErrorValue ?? '') }));
 				renderTableRows(tableBody, rowOptions);
 				return;
 			}
@@ -1024,11 +1069,15 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 
 	function addDataset() {
+		updateData({ deferPlot: true });
+		saveActiveGraphTitle();
 		// Add a new empty dataset to rawData.
 		rawData.push([]);
 
 		// Then switch to the newly added dataset.
 		activeSet = rawData.length - 1;
+		datasetErrorTypes[activeSet] = { x: 'absolute', y: 'absolute' };
+		loadErrorTypes();
 		updateDatasetTabsBar();
 
 		// Now clear the UI for the active dataset 
@@ -1056,6 +1105,8 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 			}
 		}
 
+		updateData({ deferPlot: true });
+		saveActiveGraphTitle();
 		// Remove this dataset from rawData.
 		rawData.splice(index, 1);
 
@@ -1076,7 +1127,7 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 		// Rebuild UI and re-plot
 		updateDatasetTabsBar();
-		switchDataset(activeSet);
+		switchDataset(activeSet, false);
 		updatePlotAndRenderLatex();
 		scheduleSaveState();
 	}
@@ -1093,8 +1144,16 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 
 		function addRow() {
-			cancelTableRenderJob();
 			const tableBody = document.querySelector('#data-table tbody');
+			if (tableBody.getAttribute('aria-busy') === 'true') {
+				const rows = datasetDraftRows[activeSet] || [];
+				datasetDraftRows[activeSet] = rows;
+				rows.push({ xValue: '', yValue: '', xErrorValue: '', yErrorValue: '' });
+				populateTableFromActiveDataset();
+				scheduleSaveState();
+				return;
+			}
+			cancelTableRenderJob();
 			const newRow = tableBody.insertRow();
 			newRow.innerHTML = buildDataRowHtml();
 			updateData();
@@ -1102,7 +1161,8 @@ function startDatasetTabRename(index, tabElement, labelElement) {
 
 
 function isDatasetEmpty(index = activeSet) {
-	return !Array.isArray(rawData[index]) || rawData[index].length === 0;
+	return !getDatasetPoints(index).length && !(datasetDraftRows[index] || []).some(row =>
+		['xValue', 'yValue', 'xErrorValue', 'yErrorValue'].some(key => String(row[key] ?? '').trim()));
 }
 
 const CLEAR_DATA_SKIP_KEY = 'panphyplot-skip-clear-confirm';
@@ -1155,6 +1215,8 @@ function confirmImportCSV() {
 		const tableBody = document.querySelector('#data-table tbody');
 		tableBody.innerHTML = '';
 
+		invalidatePendingFit();
+		delete datasetDraftRows[activeSet];
 		// Empty out the active dataset’s raw data
 		rawData[activeSet] = [];
 		if (activeSet === 0) dataset1XValues = [];
@@ -1210,7 +1272,7 @@ function confirmImportCSV() {
 			const sourceXValues = Array.from(document.querySelectorAll('#data-table .x-input'))
 				.map(input => (input ? String(input.value || '') : '').trim());
 			const sourceX = sourceXValues
-				.map(value => Number.parseFloat(value))
+				.map(value => parseNumericInput(value))
 				.filter(Number.isFinite);
 
 			if (sourceX.length === 0) {
@@ -1252,6 +1314,7 @@ function confirmImportCSV() {
 
 
 function clearFittedCurve() {
+	invalidatePendingFit();
 	// Remove any stored fit results from datasetFitResults
 	if (datasetFitResults.hasOwnProperty(activeSet)) {
 		delete datasetFitResults[activeSet];
@@ -1284,13 +1347,13 @@ function clearFittedCurve() {
 		const xLabelInput = document.getElementById('combined-x-label');
 		const yLabelInput = document.getElementById('combined-y-label');
 
-		if (titleInput) {
+		if (titleInput && combinedLabelsAuto.title) {
 			titleInput.value = rawTitle;
 		}
-		if (xLabelInput) {
+		if (xLabelInput && combinedLabelsAuto.xLabel) {
 			xLabelInput.value = rawXLabel;
 		}
-		if (yLabelInput) {
+		if (yLabelInput && combinedLabelsAuto.yLabel) {
 			yLabelInput.value = rawYLabel;
 		}
 	}
@@ -1322,10 +1385,12 @@ function clearFittedCurve() {
 				targetCol = colIndex;
 				break;
 			case 'ArrowRight':
+				if (currentInput.selectionEnd < currentInput.value.length || currentInput.selectionStart !== currentInput.selectionEnd) return;
 				event.preventDefault();
 				targetCol = colIndex + 1;
 				break;
 			case 'ArrowLeft':
+				if (currentInput.selectionStart > 0 || currentInput.selectionStart !== currentInput.selectionEnd) return;
 				event.preventDefault();
 				targetCol = colIndex - 1;
 				break;
@@ -1479,7 +1544,11 @@ function clearFittedCurve() {
 			datasetErrorTypes,
 			datasetFitResults,
 			fittedCurves,
-			customFitStates
+			customFitStates,
+			datasetDraftRows,
+			datasetTitles,
+			datasetIdentities,
+			datasetFitEpochs
 		];
 
 		for (const mapRef of indexedMaps) {
@@ -1922,7 +1991,9 @@ function clearFittedCurve() {
 	}
 
 
-	function updateCombinedPlotFromInputs() {
+	function updateCombinedPlotFromInputs(event) {
+		const field = { 'combined-title': 'title', 'combined-x-label': 'xLabel', 'combined-y-label': 'yLabel' }[event?.target?.id];
+		if (field) combinedLabelsAuto[field] = false;
 		// Simply call plotAllDatasets; the updated version will check the input box values.
 		plotAllDatasets();
 		scheduleSaveState();
@@ -1957,104 +2028,65 @@ function clearFittedCurve() {
 	}
 
 
-	// Validate percentage uncertainty inputs and apply visual feedback.
-	// Returns true if all inputs are valid, false otherwise.
-	function validatePercentageUncertaintyInputs() {
-		const xErrorType = document.getElementById('x-error-type')?.value;
-		const yErrorType = document.getElementById('y-error-type')?.value;
-		const xErrorInputs = document.querySelectorAll('.x-error-input');
-		const yErrorInputs = document.querySelectorAll('.y-error-input');
-
-		let allValid = true;
-
-		xErrorInputs.forEach(input => {
-			if (xErrorType === 'percentage' && input.value.trim() !== '') {
-				const val = parseFloat(input.value);
-				if (isNaN(val) || val <= 0) {
-					input.classList.add('invalid-input');
-					input.title = 'Percentage uncertainty must be greater than 0';
-					allValid = false;
-				} else {
-					input.classList.remove('invalid-input');
-					input.title = '';
-				}
-			} else {
-				input.classList.remove('invalid-input');
-				input.title = '';
-			}
-		});
-
-		yErrorInputs.forEach(input => {
-			if (yErrorType === 'percentage' && input.value.trim() !== '') {
-				const val = parseFloat(input.value);
-				if (isNaN(val) || val <= 0) {
-					input.classList.add('invalid-input');
-					input.title = 'Percentage uncertainty must be greater than 0';
-					allValid = false;
-				} else {
-					input.classList.remove('invalid-input');
-					input.title = '';
-				}
-			} else {
-				input.classList.remove('invalid-input');
-				input.title = '';
-			}
-		});
-
-		return allValid;
-	}
-
-	function updateData() {
-		try {
-			const xInputs = document.querySelectorAll('.x-input');
-			const yInputs = document.querySelectorAll('.y-input');
-			const xErrorInputs = document.querySelectorAll('.x-error-input');
-			const yErrorInputs = document.querySelectorAll('.y-error-input');
-			const xErrorType = document.getElementById('x-error-type')?.value || 'absolute';
-			const yErrorType = document.getElementById('y-error-type')?.value || 'absolute';
-
-			// Validate percentage uncertainty inputs
-			validatePercentageUncertaintyInputs();
-
-			// For Dataset 1, store all x-values even if y is missing.
-			if (activeSet === 0) {
-				dataset1XValues = [];
-				for (let i = 0; i < xInputs.length; i++) {
-					const xVal = parseFloat(xInputs[i].value);
-					if (Number.isFinite(xVal)) {
-						dataset1XValues.push(xVal);
-					}
-				}
-			}
-
-			// Clear the current active dataset and repopulate it from the table inputs.
-			rawData[activeSet] = [];
-			for (let i = 0; i < xInputs.length; i++) {
-				const x = parseFloat(xInputs[i].value);
-				const y = parseFloat(yInputs[i].value);
-				const parsedXError = parseFloat(xErrorInputs[i]?.value);
-				const parsedYError = parseFloat(yErrorInputs[i]?.value);
-				const xErrorRaw = isValidUncertaintyForType(parsedXError, xErrorType) ? parsedXError : 0;
-				const yErrorRaw = isValidUncertaintyForType(parsedYError, yErrorType) ? parsedYError : 0;
-
-				// Save the row if x is a valid number, regardless of y.
-				if (Number.isFinite(x)) {
-					rawData[activeSet].push({
-						x: x,
-						y: (Number.isFinite(y) ? y : null), // If y is not valid, store it as null.
-						xErrorRaw: xErrorRaw,
-						yErrorRaw: yErrorRaw
-					});
-				}
-			}
-
-			// Update the plot using only the active dataset.
-			plotGraph();
-			scheduleSaveState();
-		} catch (error) {
-			console.error('Error updating data:', error);
+function validateNumericInputs() {
+	let invalidCount = 0;
+	for (const axis of ['x', 'y']) {
+		for (const suffix of ['', '-error']) {
+			const isError = suffix !== '';
+			const type = document.getElementById(`${axis}-error-type`)?.value || 'absolute';
+			document.querySelectorAll(`.${axis}${suffix}-input`).forEach(input => {
+				const text = input.value.trim();
+				const number = parseNumericInput(text);
+				const invalid = text !== '' && (!Number.isFinite(number) || (isError && !isValidUncertaintyForType(number, type)));
+				input.classList.toggle('invalid-input', invalid);
+				input.setAttribute('aria-invalid', String(invalid));
+				input.setAttribute('aria-describedby', 'data-validation-message');
+				input.title = invalid ? (isError ? 'Use a non-negative absolute uncertainty or a positive percentage.' : 'Enter a number such as -1.25 or 1e-5; commas and other text are not accepted.') : '';
+				if (invalid) invalidCount++;
+			});
 		}
 	}
+	const message = document.getElementById('data-validation-message');
+	if (message) message.textContent = invalidCount ? `${invalidCount} invalid ${invalidCount === 1 ? 'cell' : 'cells'}. Use numbers such as -1.25 or 1e-5, without commas. Uncertainties must be non-negative (percentages greater than zero). Invalid entries are saved but excluded from calculations.` : '';
+	return invalidCount === 0;
+}
+
+function updateData(options = {}) {
+	const tableBody = document.querySelector('#data-table tbody');
+	if (!tableBody || tableBody.getAttribute('aria-busy') === 'true') return;
+	const previousSignature = getDatasetFitSignature(activeSet);
+	const drafts = Array.from(tableBody.querySelectorAll('tr'), row => ({
+		xValue: row.querySelector('.x-input')?.value || '',
+		yValue: row.querySelector('.y-input')?.value || '',
+		xErrorValue: row.querySelector('.x-error-input')?.value || '',
+		yErrorValue: row.querySelector('.y-error-input')?.value || ''
+	}));
+	datasetDraftRows[activeSet] = drafts;
+	const xType = document.getElementById('x-error-type')?.value || 'absolute';
+	const yType = document.getElementById('y-error-type')?.value || 'absolute';
+	rawData[activeSet] = drafts.flatMap(row => {
+		const x = parseNumericInput(row.xValue);
+		const y = parseNumericInput(row.yValue);
+		if (!Number.isFinite(x)) return [];
+		const xError = parseNumericInput(row.xErrorValue);
+		const yError = parseNumericInput(row.yErrorValue);
+		return [{ x, y: Number.isFinite(y) ? y : null,
+			xErrorRaw: isValidUncertaintyForType(xError, xType) ? xError : 0,
+			yErrorRaw: isValidUncertaintyForType(yError, yType) ? yError : 0 }];
+	});
+	if (activeSet === 0) syncDataset1XValues();
+	validateNumericInputs();
+	if (getDatasetFitSignature(activeSet) !== previousSignature) {
+		invalidatePendingFit();
+		if (datasetFitResults[activeSet]) {
+			datasetFitResults[activeSet].stale = true;
+			renderFitDiagnostics();
+		}
+	}
+	if (options.deferPlot) debouncedUpdatePlotAndRenderLatex();
+	else plotGraph();
+	scheduleSaveState();
+}
 
 
 	function formatDataForExport(valueStr, errorStr, errorEnabled, errorType, val, rowVal, rowErr) {
@@ -2066,9 +2098,9 @@ function clearFittedCurve() {
 
 		if (errorType === 'absolute') {
 			const dp = countDecimalPlaces(errorStr);
-			return val.toFixed(dp);
+			return formatFixedPrecision(val, dp);
 		} else if (errorType === 'percentage') {
-			const perc = parseFloat(errorStr);
+			const perc = parseNumericInput(errorStr);
 			const sigFigs = getSigFigsFromPercentage(perc);
 			if (sigFigs === null) {
 				return valueStr; // invalid percentage, return unformatted
@@ -2081,9 +2113,17 @@ function clearFittedCurve() {
 	}
 
 
+function formatFixedPrecision(value, decimalPlaces) {
+		if (!Number.isFinite(value)) return '';
+		if (decimalPlaces <= 100) return value.toFixed(decimalPlaces);
+		const digits = Math.max(1, Math.min(15, decimalPlaces + Math.floor(Math.log10(Math.abs(value) || 1)) + 1));
+		return value.toExponential(digits - 1);
+	}
+
 	function countDecimalPlaces(numStr) {
-		if (!numStr.includes('.')) return 0;
-		return numStr.length - numStr.indexOf('.') - 1;
+		const [mantissa, exponent = '0'] = String(numStr).trim().toLowerCase().split('e');
+		const fraction = (mantissa.split('.')[1] || '').length;
+		return Math.max(0, fraction - Number(exponent));
 	}
 
 
@@ -2112,7 +2152,7 @@ function clearFittedCurve() {
 		if (numStr.includes('e') || numStr.includes('E')) {
 			const [mantissa, exponent] = numStr.split(/e/i);
 			const exponentVal = parseInt(exponent, 10);
-			let fixedNum = parseFloat(mantissa) * Math.pow(10, exponentVal);
+			let fixedNum = parseNumericInput(mantissa) * Math.pow(10, exponentVal);
 			const decimalPlaces = sigFigs - 1 - Math.floor(Math.log10(Math.abs(num)));
 			return fixedNum.toFixed(decimalPlaces > 0 ? decimalPlaces : 0);
 		}
@@ -2140,10 +2180,10 @@ function clearFittedCurve() {
 				const dp = countDecimalPlaces(uncertaintyVal.toString());
 				// Simply return the data value formatted with 'dp' decimal places,
 				// preserving all trailing zeros.
-				return dataVal.toFixed(dp);
+				return formatFixedPrecision(dataVal, dp);
 			}
 		} else if (uncertaintyType === 'percentage') {
-			const perc = parseFloat(uncertaintyVal);
+			const perc = parseNumericInput(uncertaintyVal);
 			const sigFigs = getSigFigsFromPercentage(perc);
 			if (sigFigs === null) return dataVal.toString(); // invalid percentage, return unformatted
 			if (useSciNotation) {
@@ -2162,9 +2202,9 @@ function clearFittedCurve() {
 			return errStr; // Optionally: return errStr + '\\%' if desired.
 		} else if (errorType === 'absolute') {
 			const dp = countDecimalPlaces(errStr);
-			const errVal = parseFloat(errStr);
+			const errVal = parseNumericInput(errStr);
 			if (isNaN(errVal)) return errStr;
-			return errVal.toFixed(dp);
+			return formatFixedPrecision(errVal, dp);
 		} else {
 			return errStr;
 		}
@@ -2204,11 +2244,11 @@ function clearFittedCurve() {
 				const yValStr = yInputElem.value.trim();
 
 				if (xValStr !== '') {
-					const xVal = parseFloat(xValStr);
+					const xVal = parseNumericInput(xValStr);
 					if (!isNaN(xVal)) xValues.push(xVal);
 				}
 				if (yValStr !== '') {
-					const yVal = parseFloat(yValStr);
+					const yVal = parseNumericInput(yValStr);
 					if (!isNaN(yVal)) yValues.push(yVal);
 				}
 			});
@@ -2236,7 +2276,7 @@ function clearFittedCurve() {
 				headers.push(`$${yUncHeading}$`);
 			}
 
-			let markdown = `| ${headers.join(' | ')} |\n`;
+			let markdown = `| ${headers.map(header => header.replace(/\|/g, '\\|')).join(' | ')} |\n`;
 			markdown += `|${headers.map(() => ':---:').join('|')}|\n`;
 
 			// Process each row
@@ -2249,15 +2289,15 @@ function clearFittedCurve() {
 				const yValStr = yInputElem.value.trim();
 				if (xValStr === '' && yValStr === '') return;
 
-				const xVal = parseFloat(xValStr);
-				const yVal = parseFloat(yValStr);
+				const xVal = parseNumericInput(xValStr);
+				const yVal = parseNumericInput(yValStr);
 
 				const xErrInput = row.querySelector('.x-error-input');
 				const yErrInput = row.querySelector('.y-error-input');
 				const xErrStr = xErrInput ? xErrInput.value.trim() : '';
 				const yErrStr = yErrInput ? yErrInput.value.trim() : '';
-				const xErrVal = parseFloat(xErrStr);
-				const yErrVal = parseFloat(yErrStr);
+				const xErrVal = parseNumericInput(xErrStr);
+				const yErrVal = parseNumericInput(yErrStr);
 				const xErrorEnabledThisRow = xErrorEnabled && xErrStr !== '' && isValidUncertaintyForType(xErrVal, xErrorType);
 				const yErrorEnabledThisRow = yErrorEnabled && yErrStr !== '' && isValidUncertaintyForType(yErrVal, yErrorType);
 
@@ -3067,16 +3107,16 @@ function clearFittedCurve() {
 				const yValStr = dataRows[i].querySelector('.y-input')?.value.trim() || '';
 				if (xValStr === '' && yValStr === '') continue;
 
-				let xVal = parseFloat(xValStr);
-				let yVal = parseFloat(yValStr);
+				let xVal = parseNumericInput(xValStr);
+				let yVal = parseNumericInput(yValStr);
 
 				const xErrInput = dataRows[i].querySelector('.x-error-input');
 				const yErrInput = dataRows[i].querySelector('.y-error-input');
 
 				const xErrStr = xErrInput ? xErrInput.value.trim() : '';
 				const yErrStr = yErrInput ? yErrInput.value.trim() : '';
-				const xErrVal = parseFloat(xErrStr);
-				const yErrVal = parseFloat(yErrStr);
+				const xErrVal = parseNumericInput(xErrStr);
+				const yErrVal = parseNumericInput(yErrStr);
 				const xErrorType = document.getElementById('x-error-type').value;
 				const yErrorType = document.getElementById('y-error-type').value;
 
@@ -3222,3 +3262,90 @@ function clearFittedCurve() {
 					await saveExportedMarkdown(filename);
 				}
 			}
+
+// Report the provenance of the displayed fit; retain old results with an explicit stale label.
+function renderFitDiagnostics() {
+	const status = document.getElementById('fit-status');
+	if (!status) return;
+	const result = datasetFitResults[activeSet];
+	const rmse = Number.isFinite(result?.rmse) ? ` RMSE: ${PanPhyFitCore.formatFitNumber(result.rmse, false)}.` : '';
+	status.textContent = !result ? 'No fit calculated yet.' : result.stale
+		? 'Outdated fit: measurements changed. The equation, R² and residuals describe the previous data. Choose Refit to update them.'
+		: `${result.status || 'Fit calculated.'}${rmse}`;
+	status.classList.toggle('fit-outdated', !!result?.stale);
+	const description = document.getElementById('residual-description');
+	if (description) description.textContent = result?.residuals?.length
+		? `Residual = measured y − fitted y. ${result.residuals.length} points.${rmse}${result.stale ? ' Showing the previous fit.' : ''}`
+		: 'Residual = measured y − fitted y. Fit a curve to see residuals.';
+	const details = document.getElementById('residual-details');
+	if (!details || !details.open || typeof Plotly === 'undefined') return;
+	const points = result?.residuals || [];
+	const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+	Plotly.react('residual-plot', [{
+		x: points.map(point => point.x), y: points.map(point => point.y), type: 'scatter', mode: 'markers',
+		marker: { color: dark ? '#fb923c' : '#c2410c', size: 7 }, name: 'Residual'
+	}], {
+		xaxis: { title: { text: processLabel(datasetHeaders[activeSet]?.x || 'x') }, automargin: true },
+		yaxis: { title: { text: 'Residual' }, zeroline: true, zerolinewidth: 2, automargin: true },
+		paper_bgcolor: dark ? '#1A1A19' : '#ffffff', plot_bgcolor: dark ? '#1A1A19' : '#ffffff',
+		font: { color: dark ? '#EDEBE8' : '#1B1B1B' }, margin: { t: 20, b: 55, l: 70, r: 20 }
+	}, { responsive: true, displaylogo: false });
+}
+
+// Every modal shares keyboard containment, Escape dismissal, and focus restoration.
+function initializeDialogFocus() {
+	const closers = {
+		'popup-container': closePopup,
+		'export-table-container': closeExportTablePopup,
+		'clear-data-prompt-container': closeClearDataPrompt,
+		'filename-prompt-container': closeFilenamePrompt,
+		'data-processing-container': closeDataProcessingPopup
+	};
+	const openDialogs = [];
+	const focusable = container => Array.from(container.querySelectorAll('button, input, select, textarea, a[href], summary, [tabindex]'))
+		.filter(element => !element.disabled && element.tabIndex >= 0 && element.getClientRects().length > 0);
+	const observer = new MutationObserver(() => {
+		for (const [id, close] of Object.entries(closers)) {
+			const container = document.getElementById(id);
+			if (!container) continue;
+			const position = openDialogs.findIndex(entry => entry.container === container);
+			const visible = container.style.display !== 'none' && container.getClientRects().length > 0;
+			if (visible && position < 0) {
+				const opener = document.activeElement;
+				openDialogs.push({ container, opener, close });
+				const dialog = container.querySelector('[role="dialog"]');
+				if (dialog) dialog.tabIndex = -1;
+				if (!container.contains(opener)) (focusable(container)[0] || dialog)?.focus();
+			} else if (!visible && position >= 0) {
+				const [entry] = openDialogs.splice(position, 1);
+				const fallback = document.querySelector('.dataset-tab.active [role="tab"]');
+				(entry.opener?.isConnected ? entry.opener : fallback)?.focus();
+			}
+		}
+	});
+	Object.keys(closers).forEach(id => {
+		const container = document.getElementById(id);
+		if (container) observer.observe(container, { attributes: true, attributeFilter: ['style'] });
+	});
+	document.addEventListener('keydown', event => {
+		const entry = openDialogs[openDialogs.length - 1];
+		if (!entry) return;
+		if (isExportTableCopyActionsVisible() || isFitEquationCopyActionsVisible()) return;
+		if (event.key === 'Escape') {
+			// A formula editor consumes its first Escape to discard that draft.
+			if (event.target.id === 'data-processing-formula-input') return;
+			event.preventDefault();
+			event.stopImmediatePropagation();
+			entry.close();
+		} else if (event.key === 'Tab') {
+			const elements = focusable(entry.container);
+			const current = elements.indexOf(document.activeElement);
+			const next = event.shiftKey ? current - 1 : current + 1;
+			if (current < 0 || next < 0 || next >= elements.length) {
+				event.preventDefault();
+				(event.shiftKey ? elements[elements.length - 1] : elements[0])?.focus();
+			}
+		}
+	}, true);
+	document.getElementById('residual-details')?.addEventListener('toggle', renderFitDiagnostics);
+}

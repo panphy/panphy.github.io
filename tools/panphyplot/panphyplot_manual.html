@@ -534,7 +534,7 @@
           <li>Enter your data points manually in the table.</li>
           <li><strong>Datasets:</strong> Create and manage multiple datasets using the <code>+</code> tab. You can
             rename a dataset tab (double-click on desktop, long-press on touch/pen). Each dataset retains its own
-            data, uncertainty settings, and fitting results.</li>
+            data, exact cell text, uncertainty settings, graph title, and fitting results.</li>
           <li><strong>Add Row:</strong> Click the "Add Row" button to add an individual data row.</li>
           <li><strong>Clear Data:</strong> Remove all data from the active dataset. A confirmation dialog appears when
             the dataset already contains data. You can tick "Don't ask again" to skip the confirmation in future.</li>
@@ -622,6 +622,9 @@
     <h2>Getting Started</h2>
 
     <h3>1. Entering Data</h3>
+    <p>Edits are captured immediately. Incomplete rows, invalid entries, and trailing zeros are preserved when you
+      switch datasets or reload. Only valid numeric points are used in calculations. Use decimal numbers or scientific
+      notation such as <code>-1.25</code> and <code>1e-5</code>; commas, units, and other text are flagged as invalid.</p>
     <ul>
       <li><strong>Adding Data Points:</strong> Click the "Add Row" button to add a new data row. Enter your
         <code>x</code> and <code>y</code> values in the respective input fields.</li>
@@ -634,7 +637,9 @@
       <li><strong>Renaming a Dataset:</strong> Double-click a dataset tab label on desktop, or long-press it on touch/pen devices.</li>
       <li><strong>Removing a Dataset:</strong> Click the × button on a dataset tab to remove that dataset. A confirmation is shown when the dataset is not empty. You must keep at least one dataset.</li>
       <li><strong>Keyboard Navigation:</strong> Use the arrow keys to navigate between cells in the data table. Press
-        Enter to move to the cell below.</li>
+        Enter to move to the cell below. Left/right arrows edit within a number and move cells at its edges.
+        On a dataset tab, use Left/Right or Home/End to switch, F2 to rename, and Delete to request removal.
+        Dialogs keep Tab focus inside and Escape closes them, returning focus to the opening control.</li>
     </ul>
 
     <h3>2. Managing Uncertainties</h3>
@@ -645,8 +650,8 @@
         <strong>percentage</strong> uncertainties from the dropdown menus.</li>
       <li><strong>Entering Uncertainties:</strong> Enter the uncertainty values in the input fields that appear once
         uncertainties are enabled.</li>
-      <li><strong>Applying Global Uncertainties:</strong> Enter a value in the "Enter Δx" or "Enter Δy" fields and click
-        the corresponding "Apply Δx" or "Apply Δy" button to apply the uncertainty across all data points.</li>
+      <li><strong>Applying Global Uncertainties:</strong> Enter a value in a "Value for all rows" field and press Enter or leave the field to apply it to complete rows.
+        Absolute uncertainties must be non-negative; percentage uncertainties must be greater than zero.</li>
     </ul>
 
     <h3>3. Importing and Exporting Data</h3>
@@ -716,6 +721,16 @@
     </ul>
 
     <h3>5. Performing Curve Fitting</h3>
+    <p>All fits use <strong>unweighted least squares</strong>: uncertainty bars are displayed for reference and do not
+      influence the fit. Displayed coefficients use up to eight significant figures, with scientific notation for small
+      or large values. Calculations use the full precision of the fitted parameters.</p>
+    <p>The fitting result reports convergence for iterative fits and the root mean square error (RMSE). Convergence
+      means the solver met a numerical stopping criterion; it does not establish that the model is physically appropriate
+      or the best possible solution. If convergence is not confirmed, try different initial parameters.</p>
+    <p>Open <strong>Residual plot</strong> to inspect measured y minus fitted y against x. Patterns in residuals can
+      indicate a model mismatch. If you edit measurements, the previous fit is marked <strong>outdated</strong> and its
+      curve becomes dashed. The equation, R², and residuals still refer to the previous data until you choose
+      <strong>Refit</strong>. Background results are discarded if their dataset changes, is cleared, or is removed.</p>
     <ul>
       <li>
         <strong>Basic Fit:</strong>
@@ -765,6 +780,8 @@
     </ul>
 
     <h3>6. Visualizing All Datasets</h3>
+    <p>Each dataset keeps its own graph title, including an intentionally empty title. Custom titles and axis labels
+      in the combined plot are retained across dataset switches and reloads.</p>
     <ul>
       <li>
         <strong>Plot All Datasets:</strong> Click the "Plot All Datasets" button to open a popup displaying a combined

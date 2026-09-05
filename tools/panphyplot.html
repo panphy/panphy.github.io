@@ -102,6 +102,7 @@
 		<div class="input-section">
 			<h2>Data</h2>
 			<div class="table-container">
+				<p id="data-validation-message" class="validation-message" role="status"></p>
 				<table class="data-table" id="data-table">
 					<thead>
 						<tr>
@@ -367,6 +368,14 @@
 				<h3>Fitting Result</h3>
 				<p id="fit-equation" style="display: none;"></p>
 				<p id="r-squared-container" style="display: none;"></p>
+				<p class="fit-weighting-note">Fits use unweighted least squares. Uncertainty bars are shown for reference and do not affect the fit.</p>
+				<p id="fit-status" role="status">No fit calculated yet.</p>
+				<button id="refit-button" class="fit-button" type="button" onclick="refitLastCurve()">Refit</button>
+				<details id="residual-details">
+					<summary>Residual plot</summary>
+					<p id="residual-description">Residual = measured y − fitted y. Fit a curve to see residuals.</p>
+					<div id="residual-plot" role="img" aria-label="Residuals versus x" aria-describedby="residual-description"></div>
+				</details>
 			</div>
 
 			<div class="plot-all-container">
