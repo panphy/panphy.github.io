@@ -309,7 +309,7 @@ function normalizeDatasetFitResultsState(savedResults, datasetCount) {
 		normalized[index] = {
 			equation, rSquared, residuals,
 			stale: result.stale === true,
-			status: typeof result.status === 'string' ? result.status : 'Saved fit — refit to calculate diagnostics.',
+			status: typeof result.status === 'string' ? result.status : 'Saved fit. Click Fit Curve to update it.',
 			rmse: Number.isFinite(result.rmse) ? result.rmse : null,
 			choice: result.choice && typeof result.choice === 'object' ? result.choice : null
 		};

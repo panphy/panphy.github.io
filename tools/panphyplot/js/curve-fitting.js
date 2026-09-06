@@ -1226,23 +1226,6 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeSet, so
 	scheduleSaveState();
 }
 
-async function refitLastCurve() {
-	const choice = datasetFitResults[activeSet]?.choice;
-	if (!choice) { fitCurve(); return; }
-	if (choice.kind === 'custom') {
-		document.getElementById('custom-fit-formula-input').value = choice.formula || '';
-		await fitCustomCurve();
-	} else if (choice.kind === 'advanced') {
-		document.getElementById('advanced-fit-method').value = choice.method;
-		changeAdvancedFitMethod();
-		await fitAdvancedCurve();
-	} else {
-		document.getElementById('fit-method').value = choice.method;
-		fitCurve();
-	}
-}
-
-
 function polyfit(x, y, degree) {
 	try {
 		const n = x.length;
@@ -2090,7 +2073,6 @@ async function performGaussianFit() {
 }
 
 Object.assign(window, {
-	refitLastCurve,
 	fitCurve,
 	updateBasicFitEquation,
 	changeAdvancedFitMethod,
