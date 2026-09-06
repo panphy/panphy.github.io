@@ -2786,11 +2786,7 @@ footer a:visited {
 }
 .validation-message:empty { margin: 0; }
 .fit-weighting-note,
-#fit-status,
-#residual-description { font-size: 0.85rem; line-height: 1.6; }
-#residual-details { margin-top: 16px; text-align: left; }
-#residual-details summary { cursor: pointer; min-height: 48px; align-content: center; font-weight: 600; }
-#residual-plot { width: 100%; height: 280px; }
+#fit-status { font-size: 0.85rem; line-height: 1.6; }
 .dataset-tab [role="tab"]:focus-visible,
 .dataset-tab .tab-close:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .dataset-tab .tab-close {
@@ -2808,7 +2804,5 @@ footer a:visited {
 .dataset-tab { flex-shrink: 0; padding: 0 8px 0 14px; }
 .dataset-tab [role="tab"] { min-width: 76px; }
 .fit-weighting-note,
-#fit-status,
-#residual-description { white-space: normal; overflow-wrap: anywhere; }
-#refit-button { min-height: 48px; }
+#fit-status { white-space: normal; overflow-wrap: anywhere; }
 .result .fit-weighting-note { white-space: normal; overflow-wrap: anywhere; }

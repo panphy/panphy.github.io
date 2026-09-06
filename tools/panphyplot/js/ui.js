@@ -3270,26 +3270,10 @@ function renderFitDiagnostics() {
 	const result = datasetFitResults[activeSet];
 	const rmse = Number.isFinite(result?.rmse) ? ` RMSE: ${PanPhyFitCore.formatFitNumber(result.rmse, false)}.` : '';
 	status.textContent = !result ? 'No fit calculated yet.' : result.stale
-		? 'Outdated fit: measurements changed. The equation, R² and residuals describe the previous data. Choose Refit to update them.'
+		? 'Data changed. Click Fit Curve to update the fit.'
 		: `${result.status || 'Fit calculated.'}${rmse}`;
 	status.classList.toggle('fit-outdated', !!result?.stale);
-	const description = document.getElementById('residual-description');
-	if (description) description.textContent = result?.residuals?.length
-		? `Residual = measured y − fitted y. ${result.residuals.length} points.${rmse}${result.stale ? ' Showing the previous fit.' : ''}`
-		: 'Residual = measured y − fitted y. Fit a curve to see residuals.';
-	const details = document.getElementById('residual-details');
-	if (!details || !details.open || typeof Plotly === 'undefined') return;
-	const points = result?.residuals || [];
-	const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-	Plotly.react('residual-plot', [{
-		x: points.map(point => point.x), y: points.map(point => point.y), type: 'scatter', mode: 'markers',
-		marker: { color: dark ? '#fb923c' : '#c2410c', size: 7 }, name: 'Residual'
-	}], {
-		xaxis: { title: { text: processLabel(datasetHeaders[activeSet]?.x || 'x') }, automargin: true },
-		yaxis: { title: { text: 'Residual' }, zeroline: true, zerolinewidth: 2, automargin: true },
-		paper_bgcolor: dark ? '#1A1A19' : '#ffffff', plot_bgcolor: dark ? '#1A1A19' : '#ffffff',
-		font: { color: dark ? '#EDEBE8' : '#1B1B1B' }, margin: { t: 20, b: 55, l: 70, r: 20 }
-	}, { responsive: true, displaylogo: false });
+
 }
 
 // Every modal shares keyboard containment, Escape dismissal, and focus restoration.
@@ -3347,5 +3331,4 @@ function initializeDialogFocus() {
 			}
 		}
 	}, true);
-	document.getElementById('residual-details')?.addEventListener('toggle', renderFitDiagnostics);
 }
