@@ -124,7 +124,8 @@ function selectModel(model) {
   state.model = model;
   const data = MODELS[model];
   document.body.dataset.model = model;
-  document.getElementById('positive-label').textContent = model === 'bohr' ? 'Proton (positive)' : 'Positive charge';
+  document.getElementById('positive-label').textContent = model === 'bohr' ? 'Proton (positive)' : model === 'rutherford' ? 'Nucleus (positive)' : 'Positive charge (spread)';
+  document.getElementById('neutron-legend').hidden = model !== 'bohr';
   renderChallenge();
   document.getElementById('particle-readout').textContent = model === 'bohr' ? 'CARBON-12 · 6 protons + 6 neutrons + 6 electrons' : 'Tap a particle to discover its job.';
   document.getElementById('action-hint').textContent = model === 'bohr' ? 'Tap a proton or neutron to learn about the nucleus.' : model === 'plum' ? 'This classroom picture is static. Drag to look inside from another angle.' : 'Orbit lines are illustrative paths, not fixed energy shells.';
