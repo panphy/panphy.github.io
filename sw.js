@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-06T13:35:51Z';
+const BUILD_ID = '2026-09-09T08:34:33Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -12,6 +12,7 @@ const APP_VERSIONS = {
   states: BUILD_ID,
   lorentz: BUILD_ID,
   collision: BUILD_ID,
+  atomic_models: BUILD_ID,
   timer: BUILD_ID,
   visualizer: BUILD_ID,
   year9phy_unit01: BUILD_ID
@@ -25,6 +26,8 @@ const YEAR9_UNIT01_ENTRY_PATHS = [
   '/year9phy/unit01/index.html'
 ];
 const CORS_REQUIRED_ASSETS = new Set([
+  'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+  'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
   'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
 ]);
@@ -91,6 +94,11 @@ const ASSETS_TO_CACHE = [
   '/tools/tone_generator.html',
 
   // Simulations
+  '/simulations/atomic_models.html',
+  '/simulations/atomic_models/style.css',
+  '/simulations/atomic_models/app.js',
+  'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+  'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/ripple_tank.html',
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',

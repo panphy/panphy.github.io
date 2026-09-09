@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Explore three historical atomic models in interactive 3D: plum pudding, Rutherford and Bohr. A Year 9 physics learning tool.">
+  <title>Atomic Models — PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#f5f6f4">
+  <script src="/assets/sw-register.js" defer></script>
+  <link rel="stylesheet" href="atomic_models/style.css">
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body>
+  <header><a class="brand" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="48" height="48"><span>PanPhy Labs</span></a><span>YEAR 9 · MATTER</span></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">THE ATOM LAB / EXPLORE THE INVISIBLE</p><h1>Tiny atom.<br>Huge discoveries<span>!</span></h1></div><p>Spin it. Pause it. Get inside it.<br>Travel through three ideas that changed science.</p></div>
+    <nav class="models" aria-label="Choose an atomic model">
+      <button data-model="plum" aria-pressed="true"><span>01 / 1904</span><strong>Plum pudding</strong><small>J. J. Thomson</small></button>
+      <button data-model="rutherford" aria-pressed="false"><span>02 / 1911</span><strong>Rutherford</strong><small>The nuclear model</small></button>
+      <button data-model="bohr" aria-pressed="false"><span>03 / 1913</span><strong>Bohr</strong><small>Energy levels</small></button>
+    </nav>
+    <div class="lab-strip"><span>YOUR MISSION <b>Discover what changed.</b></span><span id="progress">0 / 3 discoveries unlocked</span></div>
+    <section class="workspace" aria-label="Atomic model explorer">
+      <div class="viewer-panel">
+        <div class="viewer-heading"><span id="scene-title">PLUM PUDDING MODEL</span><span class="scale">NOT TO SCALE</span></div>
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D atom. Drag or use arrow keys to rotate; scroll or pinch to zoom."><p id="load-status" role="status">Loading the 3D model…</p></div>
+        <p class="particle-readout" id="particle-readout" role="status">Tap a particle to discover its job.</p><div class="legend"><span><i class="electron">−</i> Electron (negative)</span><span><i class="positive">+</i> <span id="positive-label">Positive charge</span></span><span><i class="neutron">0</i> Neutron (Bohr view)</span></div>
+        <p class="gesture">Drag to rotate · Scroll or pinch to zoom · Arrow keys to rotate</p>
+        <div class="controls" aria-label="View controls"><button id="motion" aria-pressed="false" disabled>Static model</button><button id="reset">Reset view</button></div><div class="lab-actions"><button id="inspect">Inspect an electron</button><button id="nucleus">Explore the centre</button></div><p id="action-hint">This classroom picture is static. Drag to look inside from another angle.</p>
+      </div>
+      <aside aria-live="polite">
+        <p class="eyebrow" id="model-date">THOMSON · 1904</p><h2 id="model-heading">A positive sphere, with electrons inside.</h2>
+        <p id="description">Negative electrons are embedded in a spread of positive charge, like fruit in a pudding. There is no nucleus in this model.</p>
+        <div class="idea"><h3>🔎 Your observation mission</h3><p id="look">Rotate the sphere. The blue electrons are inside it, not on an outer shell. The orange tint represents positive charge spread throughout the atom.</p></div>
+        <h3>Why did the idea change?</h3><p id="evidence">Some alpha particles bounced back in the gold-foil experiment. Spread-out positive charge could not explain these large deflections.</p>
+        <div class="question"><h3>✦ Unlock this discovery</h3><p id="question">Does this model have a nucleus?</p><div id="choices" class="choices"></div><p id="feedback" role="status"></p><button id="answer-toggle" aria-expanded="false" aria-controls="answer">Reveal answer</button><p id="answer" hidden>No. Its positive charge is spread throughout the sphere.</p></div>
+      </aside>
+    </section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Colours, particle sizes and distances are chosen to help you see the ideas. The nucleus and electrons are enlarged to make them visible. Particle sizes are illustrative: they do not represent a mass ratio or actual relative sizes. Motion is illustrative, not a simulation of real electron trajectories. Real atoms are mostly empty space, and electrons do not follow neat planetary paths. Modern models describe where electrons are likely to be found.</p><p>These are simplified classroom versions of historical models. Each view uses six electrons for comparison; the Bohr view shows a carbon shell arrangement (2, 4). Rutherford’s nucleus is one positive region. Our Bohr view is a modern classroom adaptation: carbon-12 with six protons and six neutrons. Neutrons were discovered by James Chadwick in 1932, after Bohr’s 1913 model. <a href="https://www.nobelprize.org/laureate/41" target="_blank" rel="noopener noreferrer">The neutron discovery ↗</a></p></div></section>
+  </main>
+  <footer><span>PanPhy Labs · Atomic models</span><a href="https://edu.rsc.org/cpd/how-to-teach-atomic-structure-at-14-16/4020896.article" target="_blank" rel="noopener noreferrer">Teacher reading: Royal Society of Chemistry ↗</a></footer>
+  <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The model descriptions remain available above.</p></noscript>
+  <script type="module">import('./atomic_models/app.js').catch(() => { document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
+</body>
+</html>
