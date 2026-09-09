@@ -95,7 +95,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 }
 @media (max-width: 760px) {
   header, main, footer { width: calc(100% - 28px); }
-  header > span { display: none; }
   .intro { display: block; padding: 25px 0; }
   .intro > p { margin-top: 18px; font-size: .9rem; }
   .intro h1 { font-size: 3.1rem; }
