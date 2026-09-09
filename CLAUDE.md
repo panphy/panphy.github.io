@@ -67,7 +67,11 @@ Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolde
 - All `fun/` apps are network-only, now and in the future. They do not include `/assets/sw-register.js` — network-only pages never need the update banner.
 - Unlisted/internal pages stay outside service-worker registration and pre-cache unless promoted.
 
-Everything under `misc/` is unlisted/legacy by default — no separate inventory to maintain here.
+Everything under `misc/` is unlisted from the root catalogue by default. `misc/index.html` is the landing page and required inventory for this folder.
+
+- Whenever adding a page, app, or standalone resource under `misc/` (including subfolders), add a link and short description to `misc/index.html` in the same change. App supporting files do not need separate entries.
+- Update the landing-page entry when moving or renaming content, and remove its entry when deleting content.
+- Keep `misc/` outside service-worker registration and caching as above.
 
 ### School Curriculum Resources (`year9phy/`)
 
