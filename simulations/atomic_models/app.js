@@ -7,7 +7,7 @@ const MODELS = {
   bohr: { title: 'BOHR MODEL', date: 'BOHR · 1913', heading: 'Electrons occupy fixed energy levels.', description: 'Bohr added allowed energy levels around the nucleus. Our carbon-12 classroom adaptation has six protons, six neutrons and six electrons (2 in the first shell, 4 in the second). Neutrons were discovered later, in 1932.', look: 'Follow the two rings. Each represents a different energy level, not a solid track. The first shell is closer to the nucleus and has lower energy than the second.', evidence: 'Bohr’s energy levels helped explain hydrogen’s line spectrum: electrons absorb or emit specific amounts of energy when changing levels. More complex atoms needed a later quantum model.', question: 'Can a Bohr electron stay halfway between allowed energy levels?', answer: 'No. In this model it must occupy an allowed energy level. It can change levels by absorbing or emitting the right amount of energy.' }
 };
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const state = { model: 'plum', playing: !reducedMotion, time: 0, expanded: false, discoveries: new Set() };
+const state = { model: 'plum', playing: !reducedMotion, time: 0, discoveries: new Set() };
 const viewer = document.getElementById('viewer');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
@@ -28,7 +28,6 @@ controls.saveState();
 const atom = new THREE.Group();
 scene.add(atom);
 let electrons = [];
-let nucleons = [];
 let trails = [];
 const COLORS = { electron: 0x1675bb, proton: 0xd45132, neutron: 0x657481 };
 const ELECTRON_RADIUS = 0.09; // Readable marker size, not a physical size or mass ratio.
@@ -57,9 +56,7 @@ function buildAtom() {
     atom.remove(child);
   }
   electrons = [];
-  nucleons = [];
   trails = [];
-  state.expanded = false;
   atom.rotation.set(0, 0, 0);
   state.time = 0;
   if (state.model === 'plum') {
@@ -74,7 +71,6 @@ function buildAtom() {
       sites.forEach((site, i) => {
         const mesh = sphere(0.18, i % 2 === 0 ? COLORS.proton : COLORS.neutron, site.map(n => n * 0.245));
         mesh.userData.kind = i % 2 === 0 ? 'proton' : 'neutron';
-        nucleons.push({ mesh, home: mesh.position.clone() });
       });
     } else {
       sphere(0.32, 0xd99a36).userData.kind = 'nucleus';
@@ -131,8 +127,7 @@ function selectModel(model) {
   document.getElementById('positive-label').textContent = model === 'bohr' ? 'Proton (positive)' : 'Positive charge';
   renderChallenge();
   document.getElementById('particle-readout').textContent = model === 'bohr' ? 'CARBON-12 · 6 protons + 6 neutrons + 6 electrons' : 'Tap a particle to discover its job.';
-  document.getElementById('nucleus').textContent = model === 'bohr' ? 'Unpack the nucleus' : 'Explore the centre';
-  document.getElementById('action-hint').textContent = model === 'bohr' ? 'Unpack the nucleus to count its protons and neutrons.' : model === 'plum' ? 'This classroom picture is static. Drag to look inside from another angle.' : 'Orbit lines are illustrative paths, not fixed energy shells.';
+  document.getElementById('action-hint').textContent = model === 'bohr' ? 'Tap a proton or neutron to learn about the nucleus.' : model === 'plum' ? 'This classroom picture is static. Drag to look inside from another angle.' : 'Orbit lines are illustrative paths, not fixed energy shells.';
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence', question: 'question', answer: 'answer' })) document.getElementById(id).textContent = data[key];
   document.querySelectorAll('[data-model]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.model === model)));
   document.getElementById('answer').hidden = true;
@@ -219,15 +214,9 @@ renderer.domElement.addEventListener('pointerup', event => {
   if (hit) inspect(hit.object.userData.kind);
 });
 document.getElementById('inspect').addEventListener('click', () => inspect('electron'));
-document.getElementById('nucleus').addEventListener('click', event => {
+document.getElementById('nucleus').addEventListener('click', () => {
   if (state.model === 'bohr') {
-    state.expanded = !state.expanded;
-    nucleons.forEach(({ mesh, home }, i) => {
-      if (state.expanded) mesh.position.set((i % 4 - 1.5) * 0.39, (Math.floor(i / 4) - 1) * 0.39, 0);
-      else mesh.position.copy(home);
-    });
-    event.currentTarget.textContent = state.expanded ? 'Pack the nucleus' : 'Unpack the nucleus';
-    document.getElementById('particle-readout').textContent = state.expanded ? 'NUCLEUS UNPACKED · 6 red protons (+) and 6 grey neutrons (0). Separated for counting, not a physical process.' : 'CARBON-12 · 6 protons + 6 neutrons in a compact nucleus.';
+    document.getElementById('particle-readout').textContent = 'CARBON-12 · 6 protons + 6 neutrons in a compact nucleus. It contains almost all the atom’s mass.';
   } else if (state.model === 'rutherford') inspect('nucleus');
   else document.getElementById('particle-readout').textContent = 'NO NUCLEUS · Positive charge fills the whole pudding. That is the big difference from the later models.';
 });
