@@ -1,179 +1,62 @@
-# AGENTS.md - AI Agent Guide for PanPhy Labs
+# AGENTS.md — PanPhy Labs
 
-## Project Overview
+PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classroom utilities, and games. See `README.md` for the project map and local setup.
 
-PanPhy Labs is a static GitHub Pages PWA for interactive physics tools, simulations, and educational games.
+## Working rules
 
-- Stack: vanilla JavaScript, HTML5, CSS3; no framework, bundler, or build step
-- Deployment: direct file serving from GitHub Pages
-- Offline: service-worker based; Supabase leaderboard/API calls are never cached
+- Edit HTML, CSS, and vanilla JavaScript directly; the served site must need no framework, bundler, or build step. Local development dependencies stay ignored and optional.
+- Keep each app independently accessible through an HTML entry point. Split supporting CSS/JS when useful and use stable, unhashed filenames. Follow existing CDN or local-library patterns without adding a build pipeline.
+- Keep `AGENTS.md` and `CLAUDE.md` tracked and equivalent; update both when project rules change.
+- Preserve unrelated user changes and existing functionality. UI changes and file removals should serve the requested task; ask before destructive changes outside that scope.
+- Keep tool state (such as `.agents/` and `.claude/`) local and ignored. Put scratch files outside the repository where practical, and clean up temporary files you created.
+- `main` is production and auto-deploys to GitHub Pages. Use `codex/` or `claude/` feature branches and pull requests for merges to `main`.
 
-## Assistant Instruction Files
+## Page placement and publishing
 
-`AGENTS.md` and `CLAUDE.md` are both tracked because Codex and Claude Code are both used.
+| Location | Purpose | Catalogue and offline policy |
+| --- | --- | --- |
+| `tools/`, `simulations/`, `for_teachers/` | General published apps | Listed on the homepage and in `sitemap.xml`; offline by default |
+| `fun/` | Games and playful demos | May be listed publicly; always network-only |
+| `beta/` | New work unless publication is requested | Maintain `beta/index.html`; no service-worker registration or caching |
+| `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
+| `year9phy/` | Public school-specific curriculum resources | Direct-link access, outside the root catalogue; may support offline use |
 
-- Treat both files as repo-level instructions.
-- When changing workflow, caching, design-system, directory, testing, or AI-assistant rules, update both files in the same change.
-- Keep the files technically aligned, even if wording differs.
-- Do not remove either file from git or add either to `.gitignore`.
-- Keep local tool state directories such as `.agents/` and `.claude/` ignored/local-only.
-- Always clean up transient runtime state (such as temporary browser profiles like `chrome-profile`, custom debugging logs, or scratch files) before finishing a task.
-  - **Guardrail**: You must always ask the user for explicit confirmation before deleting any files or directories in the workspace.
-- **Guardrail**: Never remove, hide, or disable an existing UI element (e.g., a footer, button, or control) unless explicitly asked to.
+Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 
-## Critical Rules
+For a new or promoted general published app:
 
-### Service Worker Cache
+1. Place it in the appropriate directory and update its previous inventory if moved.
+2. Link it from `index.html` and add it to `sitemap.xml`.
+3. For offline support, include `<script src="/assets/sw-register.js" defer></script>`, add the page and required assets to `ASSETS_TO_CACHE`, and add its homepage requirements to `OFFLINE_CARD_REQUIREMENTS` in `index.html`.
+4. For registered apps, add an `APP_VERSIONS` entry in `sw.js` and ensure `getAppGroup` in `assets/sw-register.js` identifies it.
+5. Bump `BUILD_ID` after cached-file changes, as below.
 
-Assets in `sw.js` `ASSETS_TO_CACHE` are cache-first. Returning users will not receive changes until the service-worker cache version changes.
+Network-only apps omit registration and offline requirements. Public support/reference pages may use the service worker without a homepage listing.
 
-- After modifying any file listed in `ASSETS_TO_CACHE`, bump `BUILD_ID` at the top of `sw.js` as the final step.
-- When adding a published cached page, add its path and required core local media assets to `ASSETS_TO_CACHE`.
-- Cache keys are exact URL matches. If an HTML file changes a CDN script/style URL, update the exact URL in `ASSETS_TO_CACHE`, including version/path/query string.
-- Never add `/beta/*`, `/misc/*`, or `/fun/*` paths to `ASSETS_TO_CACHE`.
-- Published features should work offline unless explicitly network-only.
-- Non-precached same-origin GET resources may work offline after runtime caching, except excluded paths.
-- Supabase API calls stay network-only.
-- The landing page requests `REPAIR_PRECACHE` when an offline-ready app is missing required cache entries; the service worker must retry only missing `ASSETS_TO_CACHE` entries and rate-limit retries on the page.
-- `sw.js` also defines `APP_VERSIONS` (app group → version); `assets/sw-register.js` compares the current app group's version to decide whether to show the update banner. All entries currently track `BUILD_ID`, and app groups missing from the map fall back to `BUILD_ID`. When publishing a new app, add its group to `APP_VERSIONS`.
-- The Year 9 companion has a legacy-cache migration: if an older cached entry page lacks `/assets/sw-register.js`, the new worker may activate immediately and reload only affected `year9phy/unit01` clients once. Normal updates must continue to wait for the user's update-button approval.
-- The service worker must redirect the slashless `/year9phy/unit01` route to `/year9phy/unit01/` before cache lookup so relative companion-site assets resolve from the correct directory in every browser.
+`year9phy/` is exempt from beta placement, general app styling, and homepage promotion. Do not add it to root `index.html` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Maintain its cache entries and app-group mapping when applicable. Its absence from the catalogue does not make it private.
 
-```javascript
-const BUILD_ID = 'YYYY-MM-DDTHH:MM:SSZ';
-```
+## Service worker
 
-### No Build System
+- Files in `sw.js` → `ASSETS_TO_CACHE` are cache-first. After changing any of them, update `BUILD_ID` as the final code change using a UTC timestamp: `YYYY-MM-DDTHH:MM:SSZ`.
+- Cache URLs must match exactly, including CDN versions, paths, and query strings. Include required local modules and media for offline apps.
+- `/beta`, `/misc`, `/fun`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
+- Keep `APP_VERSIONS` and app-group detection aligned. Entries currently use `BUILD_ID`, which is also the fallback version.
+- Preserve user-approved activation for normal updates. Keep precache repair limited to missing entries and rate-limited by the landing page.
+- When changing worker routing or activation, preserve the `/year9phy/unit01` trailing-slash redirect before cache lookup and the one-time legacy-cache migration limited to affected Year 9 clients.
 
-Edit files directly. Do not add npm, webpack, bundlers, build pipelines, `package.json`, lockfiles, or remote-required dev-server metadata.
+## Code and interface conventions
 
-- Local npm tooling (e.g. `node_modules/`, a gitignored `package.json`) may exist on a machine for editor/dev-server convenience. It must stay gitignored and never become required to serve or build the site.
+- Use camelCase for variables/functions, UPPER_SNAKE_CASE for constants, and a shared state object where useful.
+- For general published apps, follow the existing design in `tools/panphyplot.html` and `tools/panphyplot/css/panphyplot.css`: Manrope body text, DM Serif Display headings, IBM Plex Mono readouts, theme variables, dotted backgrounds, rounded panels, and a floating banner. Reuse shared controls in `assets/` where appropriate; adapt dimensions to the app.
+- Persist the theme through `data-theme` on `<html>` and localStorage. Apply the theme and browser theme metadata before first paint.
+- Make layouts responsive and controls keyboard- and touch-accessible; aim for 48px touch targets. Use `viewport-fit: cover` where needed.
+- Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
+- Beta and Year 9 pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
+- For flex-based Three.js canvases, use `renderer.setSize(w, h, false)` with CSS `height: 0; flex: 1; min-height: 0` to avoid sizing feedback loops.
 
-### Page Structure
+## Verification
 
-Each HTML file is a standalone app. Complex tools may split CSS/JS into subfolders, but the entry point remains a single HTML file.
-
-- Use stable, unhashed module filenames such as `copy.js`; cache busting is only via `BUILD_ID`.
-- Load external libraries from CDNs; do not bundle them.
-
-## Published vs Unlisted Pages
-
-- Published landing-page apps are linked from `index.html` and usually listed in `sitemap.xml`.
-- Public support/reference pages may be service-worker registered and pre-cached without appearing on `index.html`.
-- Only public pages that should join the service-worker update flow should include `<script src="/assets/sw-register.js" defer></script>`.
-- New pages default to `/beta` unless explicitly requested for publication.
-- `beta/index.html` is the beta testing hub — a simple link index for internal use. Keep it in sync: add an entry when creating a beta page, update or remove the entry when renaming or deleting one.
-- `/beta`, `/misc`, and `/fun` are excluded from pre-cache and runtime cache.
-- All `fun/` apps are network-only, now and in the future. They do not include `/assets/sw-register.js` — network-only pages never need the update banner.
-- Unlisted/internal pages stay outside service-worker registration and pre-cache unless promoted.
-
-Everything under `misc/` is unlisted from the root catalogue by default. `misc/index.html` is the landing page and required inventory for this folder.
-
-- Whenever adding a page, app, or standalone resource under `misc/` (including subfolders), add a link and short description to `misc/index.html` in the same change. App supporting files do not need separate entries.
-- Update the landing-page entry when moving or renaming content, and remove its entry when deleting content.
-- Keep `misc/` outside service-worker registration and caching as above.
-
-### School Curriculum Resources (`year9phy/`)
-
-- `year9phy/` contains public, open-source resources designed for the author's school-specific Year 9 Physics curriculum.
-- The material is intentionally excluded from the general PanPhy Labs landing-page catalogue because it may not be relevant to general visitors.
-- Do not add `year9phy/` pages, cards, or resources to the root `index.html` or `OFFLINE_CARD_REQUIREMENTS` unless the user explicitly changes this policy.
-- The resources remain available through stable direct URLs. Do not treat their absence from the landing page as private or internal; teachers and students are welcome to use them if useful.
-- `year9phy/` is exempt from the normal `/beta` placement, landing-page promotion, and published-page UI design-system requirements.
-- `year9phy/` may register the service worker and be pre-cached for offline access and update prompts without being promoted on the landing page. When its cached files change, maintain `ASSETS_TO_CACHE`, `APP_VERSIONS`, app-group detection, and bump `BUILD_ID` as usual.
-
-When promoting an unlisted page:
-
-1. Move it out of `/beta` or `/misc` into the correct public directory. If promoting from `/beta`, remove its entry from `beta/index.html`.
-2. Add `/assets/sw-register.js` if it should participate in SW updates.
-3. Add its route and required assets to `ASSETS_TO_CACHE`, unless it is under `fun/` or intentionally network-only.
-4. Add its app group to `APP_VERSIONS` in `sw.js` if it registers the service worker.
-5. Bump `BUILD_ID` in `sw.js`.
-6. Link it from `index.html`.
-7. Add it to `OFFLINE_CARD_REQUIREMENTS` unless intentionally network-only.
-8. Add it to `sitemap.xml`.
-
-## Coding Conventions
-
-- Variables/functions: camelCase
-- Constants: UPPER_SNAKE_CASE
-- Theme: `data-theme` on `<html>`, persisted to localStorage
-- State: prefer a centralized state object for shared app state
-- CSS: use custom properties for published pages
-- Mobile: responsive layout, 48px+ touch targets, and `viewport-fit: cover` where edge-to-edge/notched layouts need it
-- Inputs for physical quantities: prefer precise, steppable controls (exact-step +/- buttons, hold-to-ramp, or direct numeric entry) over bare sliders; if a slider is used, pair it with a numeric readout/entry
-- Output: summarize files with repo-relative paths only, never full absolute paths
-
-## UI Design System
-
-`/beta` pages and school-specific `year9phy/` resources are exempt. These rules apply to general published PanPhy apps only. The collision sim is a dark, camera-based Three.js exception.
-
-- Fonts: `--font-body` Manrope, `--font-display` DM Serif Display, `--font-mono` IBM Plex Mono, loaded via one Google Fonts `@import`.
-- Palette: use the established variables `--bg-color`, `--bg-pattern`, `--text-main`, `--text-secondary`, `--brand-primary`, `--brand-secondary`, `--brand-accent`, `--surface`/`--card-bg`, `--border`/`--card-border`, `--slider-track`, `--slider-thumb`, `--nav-bg`, and `--nav-border`.
-- Background: dotted body texture with `radial-gradient(var(--bg-pattern) 1px, transparent 1px)` at `30px 30px`.
-- Theme flash prevention: inline head script sets `data-theme`, `theme-color`, and `apple-mobile-web-app-status-bar-style` before first paint.
-- Theme transitions: color/background/border changes may use the existing 0.3s global transition pattern.
-- Layout: `#app` full-viewport flex column; content max width `1360px` with `width: calc(100% - 40px)`.
-- Workspace: grid with canvas plus controls, collapsing to one column at `max-width: 900px`.
-- Panels: 18px rounded cards, `1px solid var(--border)`, subtle shadow.
-- Banner: floating 3-column pill (logo/title/actions), 20px radius, frosted `var(--nav-bg)`, gradient display title.
-- Controls: 18px slider thumbs/6px tracks, uppercase 0.76rem labels, mono readouts, 12px radius buttons with 44px min-height, 44x22px toggles.
-- Responsive: enlarge controls on coarse pointers; narrow banner and reduce title/logo sizes below 640px.
-- Three.js canvas sizing: use `renderer.setSize(w, h, false)` and CSS `height: 0; flex: 1; min-height: 0`.
-
-## Directory Layout
-
-```text
-/
-├── index.html              # Landing page
-├── sw.js                   # Service worker; bump BUILD_ID for cached changes
-├── manifest.json           # PWA config
-├── .github/workflows/      # GitHub Actions (e.g., Supabase keep-alive)
-├── assets/                 # Icons, logos, sw-register.js
-├── beta/                   # Unpublished WIP, never SW-cached
-├── tools/                  # Educational tools
-├── simulations/            # Physics simulations
-├── fun/                    # Games, always network-only
-├── for_teachers/           # Teacher utilities
-├── misc/                   # Unlisted/legacy pages
-└── year9phy/               # Public, unlisted school-specific curriculum resources
-```
-
-## Testing Locally
-
-Use a simple static server to test service workers and absolute paths:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000`.
-
-PanPhyPlot has dependency-free model and numerical regression checks:
-
-```bash
-node --test tools/panphyplot/tests/regression.test.cjs
-```
-
-When changing PanPhyPlot data handling or fitting, run these checks and verify the affected browser flows. Use an uncached local origin during development; check the service-worker cache version before publishing.
-
-## Adding a New Page
-
-The generic workflow below does not apply to `year9phy/`; follow the scoped school-curriculum policy above for that directory.
-
-1. Create it in `/beta` unless explicitly asked to publish. Add an entry to `beta/index.html`.
-2. For `/beta`, do not include service-worker registration or cache entries.
-3. For published pages, place it in the correct public directory and include `/assets/sw-register.js` if it should join SW updates.
-4. Follow the published-page design system.
-5. Add the path and required assets to `ASSETS_TO_CACHE`, unless under `fun/` or intentionally network-only.
-6. Add its app group to `APP_VERSIONS` in `sw.js` if it registers the service worker.
-7. Bump `BUILD_ID`.
-8. Link it from `index.html`.
-9. Add it to `OFFLINE_CARD_REQUIREMENTS` (in `index.html`; controls the "Offline Ready" pill) unless intentionally network-only.
-10. Add it to `sitemap.xml`.
-
-## Git Workflow
-
-- Main branch: production, auto-deployed to GitHub Pages
-- Feature branches: use `claude/` or `codex/` prefixes
-- Pull requests are required for merging to main
+- Serve locally with `python3 -m http.server 8000` and open `http://localhost:8000`. Use an uncached origin or clean browser context to avoid stale service-worker content.
+- Verify affected browser flows and responsive layouts for UI changes; check offline behavior and update prompts when changing caching.
+- For PanPhyPlot data handling or fitting changes, run `node --test tools/panphyplot/tests/regression.test.cjs` and check affected browser flows.
+- For documentation-only changes, check accuracy, links, and consistency; no app test run or cache-version bump is needed unless cached content also changes.

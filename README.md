@@ -1,69 +1,71 @@
 # PanPhy Labs
 
-PanPhy Labs is a collection of browser-based physics tools, simulations, and mini games designed for learning by doing.
+[Open PanPhy Labs](https://panphy.github.io/)
 
-This project started from a practical classroom problem: on school-managed devices, students and teachers often don't have the admin rights to install software. PanPhy Labs takes a different approach — keep everything simple, interactive, and available in the browser so anyone can get started immediately. The site also caches each app for offline use after your first visit, so learning can continue even without an internet connection.
+Browser-based physics tools, simulations, classroom utilities, and games for learning by doing. The project grew out of a classroom constraint: students and teachers on school-managed devices often cannot install software. These apps run directly in the browser.
 
-## Why PanPhy Labs exists
+## Explore
 
-- **Accessible by default**: works in a browser without installing desktop software.
-- **Interactive over passive**: tools are made for exploration, not just reading.
-- **Education-focused**: apps are intentionally practical for classwork, revision, and demonstrations.
-- **Offline-friendly**: most experiences continue to work without a constant connection.
+- **Tools:** graph plotting and curve fitting, Markdown editing, motion tracking, sound analysis, and tone generation.
+- **Simulations:** waves, states of matter, atomic models, relativity, and collisions.
+- **Teacher utilities:** a classroom timer and camera visualizer.
+- **Games and demos:** spelling practice and an ASCII camera.
+- **Year 9 Physics:** school-specific teaching and revision resources, available by direct link.
 
-> Note: All games and a few other features rely on external services and require internet access. Tools and simulations work offline after your first visit.
+### Year 9 Physics
 
-## What you can find here
+[Work Like a Physicist](https://panphy.github.io/year9phy/unit01/) includes a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](year9phy/unit01/README.md) for materials and editable sources.
 
-- **Physics tools** for analysis and productivity (e.g., plotting, digitizing, trackers, editors)
-- **Simulations** for key concepts
-- **Teacher utilities**
-- **Small games / interactive demos** for engagement and quick practice
-- **School-specific curriculum resources** under `year9phy/`
+These public, open-source resources follow the author's school curriculum. They are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
-The landing page is the best place to browse the general-audience PanPhy Labs apps:
-- `index.html`
+## Offline use
 
-### Year 9 Physics curriculum resources
+Most published tools and simulations support offline use once their required files have been cached. Visit online first and check the homepage's **Offline Ready** indicator before relying on an app offline. Normal updates appear through an update prompt.
 
-`year9phy/` is a public, open-source collection designed for the Year 9 Physics curriculum at the author's school. Because the material is school-specific and may not be relevant to general visitors, it is intentionally not listed on the main PanPhy Labs landing page.
+All pages under `fun/`, `beta/`, and `misc/` require internet access. Supabase features, such as leaderboards, also stay online-only. The Year 9 companion supports offline caching despite not appearing on the homepage.
 
-The resources remain available by direct link, and teachers and students are welcome to use them if they find them useful. The current unit is:
+## Run locally
 
-- **Work Like a Physicist** — [open the companion site](https://panphy.github.io/year9phy/unit01/) or [browse the source files](year9phy/unit01/); includes a lesson companion, revision material, test preparation, and downloadable resources
+The served site uses HTML, CSS, and vanilla JavaScript, with no framework, bundler, or build step. GitHub Pages serves the files directly; a service worker handles offline caching, and selected online features use Supabase.
 
-## Tech stack (simple on purpose)
+From the repository root, run:
 
-PanPhy Labs is intentionally lightweight:
+```bash
+python3 -m http.server 8000
+```
 
-- **HTML5, CSS3, Vanilla JavaScript**
-- **No framework, no bundler, no build step**
-- **Service Worker** for offline support and caching
-- **GitHub Pages** deployment
-- **Supabase** for selected online features (e.g., leaderboard)
+Open [localhost:8000](http://localhost:8000). A static server is needed to test absolute paths and service workers. Use a fresh browser context or an uncached local origin when checking changes so old cached files do not mask them. No npm installation is required to serve the site.
 
-## For contributors
+## Repository map
 
-Contributions are welcome - especially fixes, usability improvements, and new educational tools.
+| Path | Contents |
+| --- | --- |
+| `index.html` | General app catalogue and offline readiness indicators |
+| `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
+| `assets/` | Shared controls, icons, and service-worker registration |
+| `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
+| `fun/` | Network-only games and demos |
+| `beta/` | Work in progress, listed in `beta/index.html` |
+| `misc/` | Unlisted resources, inventoried in `misc/index.html` |
+| `year9phy/` | Public school-specific curriculum resources |
+| `.github/workflows/` | Repository automation |
 
-### Project principles
+## Contributing
 
-When contributing, try to preserve the project philosophy:
+Fixes, usability improvements, and new educational tools are welcome. Keep changes lightweight, independently usable, and accessible on classroom devices.
 
-1. **Keep it simple**: prefer small, readable, dependency-light solutions.
-2. **Keep it usable in classrooms**: mobile-friendly, touch-friendly, low-friction UI.
-3. **Keep it resilient**: avoid unnecessary network dependencies.
-4. **Keep pages self-contained**: each published HTML entry should work as an independent app/page.
+- New pages normally start in `beta/`; keep the beta and misc inventories current. Year 9 curriculum work stays in `year9phy/`.
+- When changing a precached file, bump `BUILD_ID` in `sw.js`. Published offline apps need their required assets in `ASSETS_TO_CACHE` and their homepage checks in `OFFLINE_CARD_REQUIREMENTS`.
+- Check affected browser flows, including mobile layouts and offline behavior where relevant. PanPhyPlot data or fitting changes also require its dependency-free regression checks (Node.js):
 
-### Important implementation notes
+  ```bash
+  node --test tools/panphyplot/tests/regression.test.cjs
+  ```
 
-- This is a static site. Edit files directly in-repo.
-- If you modify files that are pre-cached by the service worker, you must bump `BUILD_ID` in `sw.js` so users receive updates.
-- New work-in-progress pages should normally go under `/beta` unless they are explicitly being published. `beta/index.html` lists all beta pages for testing convenience; keep it in sync when adding, renaming, or removing beta pages.
-
----
+- Use a `codex/` or `claude/` feature branch and a pull request; `main` auto-deploys to production.
+- [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) contain equivalent assistant guidance and the publishing checklist. Keep them aligned when changing project rules.
 
 ## Contact
 
-- Email: `panphylabs@icloud.com`
-- Support: https://buymeacoffee.com/panphy
+- [Email PanPhy Labs](mailto:panphylabs@icloud.com)
+- [Support the project](https://buymeacoffee.com/panphy)
