@@ -21,7 +21,7 @@
 	<title>Motion Tracker</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -393,6 +393,7 @@
 
 		/* --- Cards (Video & Plot) --- */
 		.card {
+            min-width: 0;
 			background: var(--surface);
 			border-radius: var(--border-radius);
 			box-shadow: var(--shadow);
@@ -412,11 +413,11 @@
 			overflow: hidden;
 			margin-bottom: 15px;
 			/* Enforce aspect ratio or limits */
-			max-height: 500px;
+			max-height: none;
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			min-height: 300px;
+			min-height: 0;
 		}
 
 		video,
@@ -431,6 +432,7 @@
 		}
 
 		#frameCanvas {
+            width: 100%;
 			display: none;
 		}
 
@@ -477,8 +479,14 @@
 		}
 
 
-		/* Playback Controls (Under Video) */
+		#pointEditor { margin-bottom: 16px; width: 100%; min-width: 0; }
+        #pointEditor summary { cursor: pointer; padding: 12px 0; }
+        #pointEditor th, #pointEditor td { padding: 6px; text-align: left; }
+        #pointEditor input, #pointEditor button, .playback-controls button { min-height: 48px; }
+        .toolbar > div { flex-wrap: wrap; justify-content: center; }
+        /* Playback Controls (Under Video) */
 		.playback-controls {
+            flex-wrap: wrap;
 			display: flex;
 			align-items: center;
 			gap: 15px;
@@ -496,6 +504,7 @@
 		}
 
 		#slider {
+            min-width: 100px;
 			flex-grow: 1;
 			cursor: pointer;
 			-webkit-appearance: none;
@@ -918,10 +927,13 @@
 			<button id="clearOrigin" class="btn-danger" disabled title="Reset the coordinate origin">Clear Origin</button>
 		</div>
 
-		<input type="file" id="videoUploadInput" accept="video/*" style="display:none">
+		<button id="saveProject" disabled>Save Project</button>
+        <button id="loadProject" disabled>Load Project</button>
+        <input type="file" id="projectUpload" accept=".json,application/json" hidden>
+        <input type="file" id="videoUploadInput" accept="video/*" style="display:none">
 	</div>
 
-	<div id="message">
+	<div id="message" role="status" aria-live="polite">
 		<p>Import a video to start analysis.</p>
 	</div>
 
@@ -944,7 +956,9 @@
 
 			<div class="playback-controls">
 				<button id="playPause" class="btn-primary" disabled title="Play or pause the video">Play</button>
-				<input type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
+				<button id="previousFrame" disabled aria-label="Previous frame">◀ Frame</button>
+                <button id="nextFrame" disabled aria-label="Next frame">Frame ▶</button>
+                <input aria-label="Video time" type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
 				<span id="timeDisplay">0:00.000</span>
 				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
 					<span class="toggle-text">Hide</span>
@@ -960,7 +974,12 @@
 				<button id="exportData" class="btn-export" disabled title="Export tracked data as a CSV file">Export .csv</button>
 			</div>
 
-				<div id="chartCanvasContainer">
+				<details id="pointEditor"><summary>Tracked points</summary>
+                    <button id="undoPoint" disabled>Undo last point change</button>
+                    <p>Edit coordinates in video pixels. One point is stored per frame; clicking that frame again replaces it.</p>
+                    <div style="overflow-x:auto;max-height:260px"><table><thead><tr><th>Time (s)</th><th>x (px)</th><th>y (px)</th><th>Actions</th></tr></thead><tbody id="pointRows"></tbody></table></div>
+                </details>
+                <div id="chartCanvasContainer">
 					<canvas id="positionChart"></canvas>
 					<button id="chartCopyAction" type="button" hidden title="Copy the chart as an image to clipboard">Copy image</button>
 				</div>
@@ -1011,7 +1030,9 @@
 		<h2>Frame Rate Settings</h2>
 		<form autocomplete="off">
 			<div class="frame-rate-field" id="detectedFpsSection">
-				<label>Detected FPS</label>
+				<label for="userPlaybackFrameRate">Playback FPS</label>
+                <input id="userPlaybackFrameRate" type="number" min="0.001" step="any">
+                <p class="frame-rate-hint">Detection is an estimate. Correct it using your video's frame rate if needed.</p>
 				<div id="detectedFpsDisplay" style="padding: 8px 10px; background: var(--surface-muted); border-radius: 6px; font-weight: 600; color: var(--brand-primary);">
 					Detecting...
 				</div>
@@ -1062,6 +1083,11 @@
 			let graphTouchCopyMode = false;
 			let graphCopyStatusResetTimeoutId = 0;
 			let hasUnsavedChanges = false;
+        let videoReady = false;
+        let videoFileInfo = null;
+        let undoHistory = [];
+        let cancelFpsDetection = () => {};
+        let playbackCallbackId = null;
 
 			const GRAPH_PNG_BASE_SCALE = 3;
 			const GRAPH_PNG_MAX_CANVAS_SIDE = 8192;
@@ -1232,8 +1258,7 @@
 
 		function getAnalysisTime(playbackTime) {
 			if (!Number.isFinite(playbackTime)) return 0;
-			const frameIndex = Math.round(playbackTime * playbackFrameRate);
-			return frameIndex / captureFrameRate;
+			return playbackTime * playbackFrameRate / captureFrameRate;
 		}
 
 			function updateTimeDisplay(playbackTime) {
@@ -1455,6 +1480,7 @@
 
 		/* ===== Auto FPS Detection ===== */
 		function detectFrameRate() {
+            cancelFpsDetection();
 			if (typeof hiddenVideo.requestVideoFrameCallback !== 'function') {
 				// Browser doesn't support requestVideoFrameCallback, use fallback
 				console.log('requestVideoFrameCallback not supported, using fallback FPS');
@@ -1463,6 +1489,7 @@
 			}
 
 			fpsDetectionPending = true;
+            disableControls(true);
 			detectedFpsDisplay.textContent = 'Detecting...';
 			frameRateButton.textContent = 'FPS: ...';
 
@@ -1471,9 +1498,16 @@
 			let lastMediaTime = null;
 			let callbackId = null;
 			let timeoutId = null;
+            let sampleTimeoutId = null;
+            let active = true;
+            const originalPlaybackRate = hiddenVideo.playbackRate;
+            hiddenVideo.playbackRate = 0.25;
 
 			const cleanup = () => {
+                active = false;
+                hiddenVideo.playbackRate = originalPlaybackRate;
 				fpsDetectionPending = false;
+                clearTimeout(sampleTimeoutId);
 				if (callbackId !== null && typeof hiddenVideo.cancelVideoFrameCallback === 'function') {
 					hiddenVideo.cancelVideoFrameCallback(callbackId);
 				}
@@ -1482,7 +1516,9 @@
 				}
 			};
 
-			const calculateFps = () => {
+			cancelFpsDetection = cleanup;
+
+            const calculateFps = () => {
 				cleanup();
 
 				if (frameTimes.length < 2) {
@@ -1512,20 +1548,15 @@
 
 				// Round to common frame rates for cleaner display
 				const commonRates = [15, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 120, 240];
-				let roundedFps = fps;
-				for (const rate of commonRates) {
-					if (Math.abs(fps - rate) < 1) {
-						roundedFps = rate;
-						break;
-					}
-				}
+                const nearest = commonRates.reduce((best, rate) => Math.abs(fps - rate) < Math.abs(fps - best) ? rate : best);
+                const roundedFps = Math.abs(fps - nearest) < 1 ? nearest : fps;
 
 				console.log(`Detected FPS: ${fps.toFixed(2)}, rounded to: ${roundedFps}`);
 				applyDetectedFps(roundedFps);
 			};
 
 			const onFrame = (now, metadata) => {
-				if (!fpsDetectionPending) return;
+				if (!active || !fpsDetectionPending) return;
 
 				const mediaTime = metadata.mediaTime;
 
@@ -1559,8 +1590,9 @@
 
 			// Play video to get frames
 			hiddenVideo.play().then(() => {
-				// Wait for enough samples, then stop
-				setTimeout(() => {
+				if (!active) return;
+                // Wait for enough samples, then stop
+				sampleTimeoutId = setTimeout(() => {
 					if (fpsDetectionPending && frameTimes.length >= 3) {
 						hiddenVideo.pause();
 						hiddenVideo.currentTime = startTime;
@@ -1568,7 +1600,8 @@
 					}
 				}, 500);
 			}).catch(() => {
-				// Autoplay blocked, use fallback
+				if (!active) return;
+                // Autoplay blocked, use fallback
 				cleanup();
 				console.log('Autoplay blocked, using fallback FPS');
 				applyDetectedFps(30);
@@ -1577,6 +1610,7 @@
 
 		function applyDetectedFps(fps) {
 			detectedFps = fps;
+            disableControls(!videoReady);
 			playbackFrameRate = fps;
 
 			// If not in special recording mode, capture rate = playback rate
@@ -1627,6 +1661,7 @@
 		}
 
 		function disableControls(state) {
+            ['previousFrame', 'nextFrame', 'saveProject', 'loadProject'].forEach(id => document.getElementById(id).disabled = state);
 			playPauseButton.disabled = state;
 			calibrateButton.disabled = state;
 			setOriginButton.disabled = state;
@@ -1647,6 +1682,9 @@
 
 		/* ===== RESET FUNCTION ===== */
 			function resetApp() {
+                cancelFpsDetection();
+                videoReady = false;
+                undoHistory = [];
 				// 1. Clear data
 				frameData = [];
 				clearUnsavedChanges();
@@ -1657,7 +1695,8 @@
 			isPlaying = false;
 			crossesVisible = true;
 
-			// 2. Reset FPS detection state
+			renderPointRows();
+            // 2. Reset FPS detection state
 			detectedFps = null;
 			isSpecialRecording = false;
 			fpsDetectionPending = false;
@@ -1749,7 +1788,8 @@
 				if (blobUrl) URL.revokeObjectURL(blobUrl);
 			resetApp();
 
-			blobUrl = URL.createObjectURL(file);
+			videoFileInfo = { name: file.name, size: file.size };
+            blobUrl = URL.createObjectURL(file);
 			hiddenVideo.src = blobUrl;
 			hiddenVideo.load();
 			e.target.value = '';
@@ -1769,9 +1809,27 @@
 		hiddenVideo.addEventListener('canplay', updateSliderDomain);
 		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
 
-		/* First frame ready */
+		hiddenVideo.addEventListener('error', () => {
+            cancelFpsDetection();
+            videoReady = false;
+            disableControls(true);
+            document.getElementById('message').textContent = 'This video could not be opened. Try a supported MP4 or WebM file.';
+        });
+        hiddenVideo.addEventListener('play', () => {
+            const paint = () => {
+                if (hiddenVideo.paused || hiddenVideo.ended) return;
+                drawFrame();
+                playbackCallbackId = hiddenVideo.requestVideoFrameCallback(paint);
+            };
+            if (hiddenVideo.requestVideoFrameCallback) {
+                if (playbackCallbackId !== null) hiddenVideo.cancelVideoFrameCallback(playbackCallbackId);
+                playbackCallbackId = hiddenVideo.requestVideoFrameCallback(paint);
+            }
+        });
+        /* First frame ready */
 		hiddenVideo.addEventListener('loadeddata', () => {
-			frameCanvas.width = hiddenVideo.videoWidth || 1280;
+			videoReady = true;
+            frameCanvas.width = hiddenVideo.videoWidth || 1280;
 			frameCanvas.height = hiddenVideo.videoHeight || 720;
 			frameCanvas.style.display = "block";
 			document.getElementById('analysisContainer').style.display = "grid"; // Show grid
@@ -1787,7 +1845,7 @@
 			if (frameData.length === 0) {
 				document.getElementById('message').innerHTML =
 					"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
-					"<li>Frame rate auto-detected. Click FPS button for special recordings (slow-mo/time-lapse).</li>" +
+					"<li>Frame rate is estimated automatically. Check FPS settings, especially for slow-motion or time-lapse recordings.</li>" +
 					"<li>Click the video to record a data point.</li>" +
 					"</ul>";
 			}
@@ -1819,18 +1877,18 @@
 
 		/* Scrubbing */
 		function scrubToSlider() {
-			if (isPlaying) {
+			if (!hiddenVideo.paused) {
 				hiddenVideo.pause();
 				isPlaying = false;
 				playPauseButton.textContent = "Play";
 			}
-			const end = getSeekableEnd();
+			if (!videoReady || fpsDetectionPending || skippingFrame) return;
+            const end = getSeekableEnd();
 			let t = parseFloat(slider.value);
 			if (!Number.isFinite(t)) return;
-			if (end > 0) t = Math.min(t, end - 0.02);
-			if (t < 0) t = 0;
-			const EPS = Math.max(1e-3, (1 / playbackFrameRate) * 0.15);
-			if (Math.abs(hiddenVideo.currentTime - t) < EPS) t += EPS;
+            t = Math.round(t * playbackFrameRate) / playbackFrameRate;
+            if (end > 0) t = Math.min(t, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) / playbackFrameRate));
+            t = Math.max(0, t) + 0.00001;
 			hiddenVideo.currentTime = t;
 			updateTimeDisplay(t);
 		}
@@ -1839,7 +1897,7 @@
 
 		/* Play/Pause */
 		playPauseButton.addEventListener('click', async () => {
-			if (isPlaying) {
+			if (!hiddenVideo.paused) {
 				hiddenVideo.pause();
 				playPauseButton.textContent = "Play";
 			} else {
@@ -1858,7 +1916,7 @@
 
 		/* Click to add point and step */
 		frameCanvas.addEventListener('click', (event) => {
-			if (!calibrationMode && !originMode && !skippingFrame) {
+			if (videoReady && !hiddenVideo.seeking && !fpsDetectionPending && !calibrationMode && !originMode && !skippingFrame) {
 				const rect = frameCanvas.getBoundingClientRect();
 				const scaleX = frameCanvas.width / rect.width;
 				const scaleY = frameCanvas.height / rect.height;
@@ -1867,7 +1925,13 @@
 				const cartesianY = canvasYToCartesianY(canvasY);
 
 					// Store playbackTime so analysis time can be recalculated if FPS changes
-					frameData.push({ x: canvasX, y: cartesianY, playbackTime: hiddenVideo.currentTime });
+					rememberPoints();
+                    const frameIndex = Math.floor(hiddenVideo.currentTime * playbackFrameRate + 1e-4);
+                    const point = { x: canvasX, y: cartesianY, playbackTime: frameIndex / playbackFrameRate };
+                    frameData = frameData.filter(p => Math.round(p.playbackTime * playbackFrameRate) !== frameIndex);
+                    frameData.push(point);
+                    frameData.sort((a, b) => a.playbackTime - b.playbackTime);
+                    renderPointRows();
 					markUnsavedChanges();
 
 				// Update the specific plot user is viewing
@@ -1923,7 +1987,8 @@
 
 		/* Frame rate dialog */
 		frameRateButton.addEventListener('click', () => {
-			// Set up dialog state
+			document.getElementById('userPlaybackFrameRate').value = playbackFrameRate;
+            // Set up dialog state
 			specialRecordingCheckbox.checked = isSpecialRecording;
 			captureRateSection.style.display = isSpecialRecording ? 'block' : 'none';
 			userCaptureFrameRateInput.value = isSpecialRecording ? captureFrameRate : 240;
@@ -1931,9 +1996,16 @@
 			frameRatePrompt.style.display = "block";
 		});
 		confirmFrameRateButton.addEventListener('click', () => {
-			isSpecialRecording = specialRecordingCheckbox.checked;
+			const rate = Number(document.getElementById('userPlaybackFrameRate').value);
+            const capture = Number(userCaptureFrameRateInput.value);
+            if (!Number.isFinite(rate) || rate <= 0 || (specialRecordingCheckbox.checked && (!Number.isFinite(capture) || capture <= 0))) {
+                alert('Enter positive, finite frame rates.'); return;
+            }
+            playbackFrameRate = rate;
+            markUnsavedChanges();
+            isSpecialRecording = specialRecordingCheckbox.checked;
 
-			if (isSpecialRecording) {
+            if (isSpecialRecording) {
 				const captureValue = parseFloat(userCaptureFrameRateInput.value);
 				if (Number.isFinite(captureValue) && captureValue > 0) {
 					captureFrameRate = captureValue;
@@ -1944,6 +2016,7 @@
 			}
 
 			frameRatePrompt.style.display = "none";
+            renderPointRows();
 			updateFpsButtonText();
 			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
 			updateTimeDisplay(hiddenVideo.currentTime);
@@ -1960,12 +2033,12 @@
 		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
 
 		/* ===== Robust frame stepping ===== */
-		function stepOneFrame() {
-			if (skippingFrame) return;
+		function stepOneFrame(direction = 1) {
+            if (!videoReady || fpsDetectionPending || hiddenVideo.seeking || skippingFrame) return;
 			skippingFrame = true;
 
 			// Always pause first
-			if (isPlaying) {
+			if (!hiddenVideo.paused) {
 				hiddenVideo.pause();
 				isPlaying = false;
 				playPauseButton.textContent = "Play";
@@ -1980,7 +2053,8 @@
 				drawOverlay();
 			};
 
-			let finished = false;
+			let fallbackTimer;
+            let finished = false;
 			let frameCallbackId = null;
 			const clean = () => {
 				if (finished) return;
@@ -1997,16 +2071,16 @@
 			// Time-based seek for deterministic 1-frame stepping
 			const dt = 1 / playbackFrameRate;
 			const end = getSeekableEnd();
-			const candidate = hiddenVideo.currentTime + dt;
+			const candidate = (Math.floor(hiddenVideo.currentTime * playbackFrameRate + 1e-4) + direction) * dt;
 			let target = candidate;
 			if (end > 0) {
-				target = Math.min(candidate, end);
+				target = Math.max(0, Math.min(candidate, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) * dt)));
 			} else if (!Number.isFinite(candidate)) {
 				clean();
 				return;
 			}
 
-			const fallbackTimer = setTimeout(clean, 500);
+			fallbackTimer = setTimeout(clean, 500);
 			hiddenVideo.addEventListener('seeked', onSeeked, { once: true });
 			if (typeof hiddenVideo.requestVideoFrameCallback === "function") {
 				frameCallbackId = hiddenVideo.requestVideoFrameCallback(() => clean());
@@ -2044,16 +2118,16 @@
 			mode = mode || 'xy';
 			currentPlotMode = mode === 'xy' ? 'pos' : mode;
 
-			const xData = frameData.map(p => parseFloat(getAnalysisTime(p.playbackTime).toFixed(3)));
+			const xData = frameData.map(p => getAnalysisTime(p.playbackTime));
 			const datasets = [];
 			const theme = getChartTheme();
 
 			if (mode === 'x' || mode === 'xy') {
-				const yDataX = frameData.map(p => parseFloat(((p.x - (originSet ? originPoint.x : 0)) * scaleFactor).toFixed(3)));
+				const yDataX = frameData.map(p => ((p.x - (originSet ? originPoint.x : 0)) * scaleFactor));
 				datasets.push({ label: "x-position", data: xData.map((t, i) => ({ x: t, y: yDataX[i] })), borderColor: dataPointColors.x, backgroundColor: dataPointColors.x, showLine: false, pointRadius: 4 });
 			}
 			if (mode === 'y' || mode === 'xy') {
-				const yDataY = frameData.map(p => parseFloat(((p.y - (originSet ? originPoint.y : 0)) * scaleFactor).toFixed(3)));
+				const yDataY = frameData.map(p => ((p.y - (originSet ? originPoint.y : 0)) * scaleFactor));
 				datasets.push({ label: "y-position", data: xData.map((t, i) => ({ x: t, y: yDataY[i] })), borderColor: dataPointColors.y, backgroundColor: dataPointColors.y, showLine: false, pointRadius: 4 });
 			}
 
@@ -2100,35 +2174,10 @@
 			const datasets = [];
 
 			for (const axis of axes) {
-				const velocityEstimates = [];
-				const velocityTimes = [];
-				for (let i = 1; i < frameData.length; i++) {
-					const t1 = getAnalysisTime(frameData[i - 1].playbackTime);
-					const t2 = getAnalysisTime(frameData[i].playbackTime);
-					const dt = t2 - t1;
-					const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-					const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-					const d = axis === 'x' ? (p2.x - p1.x) : (p2.y - p1.y);
-					const v = dt > 0 ? (d * scaleFactor) / dt : 0;
-					if (dt > 0) {
-						velocityEstimates.push(v);
-						velocityTimes.push((t2 + t1) / 2);
-					}
-				}
-
-				if (velocityEstimates.length < 3) {
-					document.getElementById('message').innerHTML = "<p>Velocity smoothing requires multiple distinct timestamps. Add more points with different times to plot velocity.</p>";
-					return;
-				}
-
-				const smoothed = [];
-				const times = [];
-				for (let i = 2; i < velocityEstimates.length; i++) {
-					const avg = (velocityEstimates[i - 2] + velocityEstimates[i - 1] + velocityEstimates[i]) / 3;
-					smoothed.push(parseFloat(avg.toFixed(3)));
-					const avgTime = (velocityTimes[i - 2] + velocityTimes[i]) / 2;
-					times.push(parseFloat(avgTime.toFixed(3)));
-				}
+                const samples = getVelocityData().smoothed;
+                const smoothed = samples.map(p => p[axis]);
+                const times = samples.map(p => p.time);
+                if (!samples.length) document.getElementById('message').textContent = 'Add at least four points at distinct times for smoothed velocity.';
 
 				datasets.push({
 					label: axis === "x" ? "x-velocity" : "y-velocity",
@@ -2195,8 +2244,10 @@
 					return;
 				}
 
-				frameData = [];
-				clearUnsavedChanges();
+				rememberPoints();
+                frameData = [];
+                markUnsavedChanges();
+                renderPointRows();
 				if (positionChart) {
 					positionChart.data.datasets.forEach(d => d.data = []);
 					positionChart.update();
@@ -2210,9 +2261,7 @@
 				scaleUnit = "pixels";
 				calibrationStart = null;
 				calibrationEnd = null;
-				if (frameData.length > 0 || originSet) {
-					markUnsavedChanges();
-				}
+				markUnsavedChanges();
 				drawOverlay();
 				drawFrame();
 			if (positionChart) {
@@ -2223,9 +2272,7 @@
 			clearOriginButton.addEventListener("click", () => {
 				originSet = false;
 				originPoint = { x: 0, y: 0 };
-				if (frameData.length > 0) {
-					markUnsavedChanges();
-				}
+				markUnsavedChanges();
 				drawOverlay();
 				replotCurrentView();
 			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
@@ -2241,7 +2288,6 @@
 				const sanitized = desired.replace(/[^a-zA-Z0-9-_.]/g, "_");
 				const finalName = sanitized.toLowerCase().endsWith(".csv") ? sanitized : sanitized + ".csv";
 				exportCSV(finalName);
-				clearUnsavedChanges();
 				exportPrompt.style.display = "none";
 				document.getElementById('message').innerHTML = `<p>Data exported as ${finalName}.</p>`;
 			});
@@ -2250,42 +2296,133 @@
 			document.getElementById('message').innerHTML = "<p>Export cancelled.</p>";
 		});
 
-		function exportCSV(filename) {
-			// Calculate analysis times for all points
-			const analysisTimes = frameData.map(p => getAnalysisTime(p.playbackTime));
+        function rememberPoints() {
+            undoHistory.push(frameData.map(p => ({ ...p })));
+            if (undoHistory.length > 100) undoHistory.shift();
+        }
+        function refreshPoints() {
+            markUnsavedChanges(); renderPointRows(); replotCurrentView(); drawFrame();
+        }
+        function renderPointRows() {
+            const rows = document.getElementById('pointRows');
+            rows.replaceChildren();
+            document.getElementById('undoPoint').disabled = undoHistory.length === 0;
+            frameData.forEach((point, index) => {
+                const row = document.createElement('tr');
+                const time = document.createElement('td');
+                time.textContent = getAnalysisTime(point.playbackTime).toFixed(4);
+                row.append(time);
+                for (const axis of ['x', 'y']) {
+                    const cell = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'number'; input.step = 'any'; input.value = point[axis];
+                    input.setAttribute('aria-label', `Point ${index + 1} ${axis} in pixels`);
+                    input.style.width = '100px';
+                    input.addEventListener('change', () => {
+                        if (input.value.trim() === '' || !Number.isFinite(Number(input.value))) { input.value = point[axis]; return; }
+                        rememberPoints(); point[axis] = Number(input.value); refreshPoints();
+                    });
+                    cell.append(input); row.append(cell);
+                }
+                const actions = document.createElement('td');
+                const remove = document.createElement('button');
+                remove.textContent = 'Delete'; remove.setAttribute('aria-label', `Delete point ${index + 1}`);
+                remove.addEventListener('click', () => { rememberPoints(); frameData.splice(index, 1); refreshPoints(); });
+                actions.append(remove); row.append(actions); rows.append(row);
+            });
+        }
+        document.getElementById('undoPoint').addEventListener('click', () => {
+            if (!undoHistory.length) return;
+            frameData = undoHistory.pop(); refreshPoints();
+        });
+        document.getElementById('previousFrame').addEventListener('click', () => stepOneFrame(-1));
+        document.getElementById('nextFrame').addEventListener('click', () => stepOneFrame(1));
+        document.getElementById('saveProject').addEventListener('click', () => {
+            const project = { format: 'panphy-motion-tracker', version: 1,
+                video: { ...videoFileInfo, width: frameCanvas.width, height: frameCanvas.height, duration: hiddenVideo.duration },
+                frameData, playbackFrameRate, captureFrameRate, isSpecialRecording,
+                scaleFactor, scaleUnit, originSet, originPoint, calibrationStart, calibrationEnd };
+            downloadFile('motion-tracker-project.json', JSON.stringify(project, null, 2), 'application/json');
+            clearUnsavedChanges();
+            document.getElementById('message').textContent = 'Project saved. To resume, import the same video, then load this project file.';
+        });
+        document.getElementById('loadProject').addEventListener('click', () => document.getElementById('projectUpload').click());
+        document.getElementById('projectUpload').addEventListener('change', async event => {
+            const file = event.target.files?.[0]; event.target.value = '';
+            if (!file) return;
+            const activeVideo = blobUrl;
+            try {
+                const project = JSON.parse(await file.text());
+                const positive = value => Number.isFinite(value) && value > 0;
+                const point = value => value && Number.isFinite(value.x) && Number.isFinite(value.y);
+                if (project.format !== 'panphy-motion-tracker' || project.version !== 1 ||
+                    !Array.isArray(project.frameData) || !positive(project.playbackFrameRate) || !positive(project.captureFrameRate) ||
+                    !positive(project.scaleFactor) || typeof project.scaleUnit !== 'string' || !project.scaleUnit.trim() ||
+                    typeof project.originSet !== 'boolean' || typeof project.isSpecialRecording !== 'boolean' || !point(project.originPoint) ||
+                    ![project.calibrationStart, project.calibrationEnd].every(p => p === null || point(p)) ||
+                    !project.frameData.every(p => point(p) && Number.isFinite(p.playbackTime) && p.playbackTime >= 0 && p.playbackTime < hiddenVideo.duration)) {
+                    throw new Error('Invalid motion tracker project.');
+                }
+                const video = project.video;
+                if (!videoReady || fpsDetectionPending || activeVideo !== blobUrl || !video || video.name !== videoFileInfo.name || video.size !== videoFileInfo.size ||
+                    video.width !== frameCanvas.width || video.height !== frameCanvas.height || Math.abs(video.duration - hiddenVideo.duration) > 0.001) {
+                    throw new Error('Import the same video used by this project, wait for FPS detection, then load the project again.');
+                }
+                if (hasUnsavedChanges && !confirm('Replace your current analysis with this project?')) return;
+                hiddenVideo.pause(); isPlaying = false; playPauseButton.textContent = 'Play';
+                playbackFrameRate = project.playbackFrameRate;
+                captureFrameRate = project.isSpecialRecording ? project.captureFrameRate : project.playbackFrameRate;
+                isSpecialRecording = project.isSpecialRecording;
+                const unique = new Map();
+                project.frameData.forEach(p => unique.set(Math.round(p.playbackTime * playbackFrameRate), { x: p.x, y: p.y, playbackTime: p.playbackTime }));
+                frameData = [...unique.values()].sort((a, b) => a.playbackTime - b.playbackTime);
+                scaleFactor = project.scaleFactor; scaleUnit = project.scaleUnit;
+                originSet = project.originSet; originPoint = project.originPoint;
+                calibrationStart = project.calibrationStart; calibrationEnd = project.calibrationEnd;
+                calibrationMode = originMode = isDrawingCalibration = false;
+                overlayCanvas.style.pointerEvents = 'none';
+                document.getElementById('crosshair').style.display = 'none';
+                undoHistory = []; clearUnsavedChanges(); renderPointRows();
+                updateFpsButtonText(); updateTimeDisplay(hiddenVideo.currentTime);
+                slider.step = String(1 / playbackFrameRate);
+                drawFrame(); drawOverlay(); replotCurrentView();
+                document.getElementById('message').textContent = 'Project restored.';
+            } catch (error) { document.getElementById('message').textContent = error.message; }
+        });
 
-			const velocityData = [];
-			for (let i = 1; i < frameData.length; i++) {
-				const dt = analysisTimes[i] - analysisTimes[i - 1];
-				const p1 = { x: frameData[i - 1].x - (originSet ? originPoint.x : 0), y: frameData[i - 1].y - (originSet ? originPoint.y : 0) };
-				const p2 = { x: frameData[i].x - (originSet ? originPoint.x : 0), y: frameData[i].y - (originSet ? originPoint.y : 0) };
-				const dX = p2.x - p1.x,
-					dY = p2.y - p1.y;
-				const v_x = dt > 0 ? (dX * scaleFactor) / dt : 0;
-				const v_y = dt > 0 ? (dY * scaleFactor) / dt : 0;
-				velocityData.push({ v_x, v_y });
-			}
-			let csv = `Time (s),x (${scaleUnit}),y (${scaleUnit}),v_x (${scaleUnit}/s),v_y (${scaleUnit}/s)\n`;
-			for (let i = 0; i < frameData.length; i++) {
-				const xAdj = (frameData[i].x - (originSet ? originPoint.x : 0)) * scaleFactor;
-				const yAdj = (frameData[i].y - (originSet ? originPoint.y : 0)) * scaleFactor;
-				const time = analysisTimes[i].toFixed(3);
-				const x = xAdj.toFixed(3);
-				const y = yAdj.toFixed(3);
-				const v_x = i > 0 ? velocityData[i - 1].v_x.toFixed(3) : "";
-				const v_y = i > 0 ? velocityData[i - 1].v_y.toFixed(3) : "";
-				csv += `${time},${x},${y},${v_x},${v_y}\n`;
-			}
-			const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = filename;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-		}
+        function getVelocityData() {
+            const raw = [];
+            for (let i = 1; i < frameData.length; i++) {
+                const a = frameData[i - 1], b = frameData[i];
+                const t1 = getAnalysisTime(a.playbackTime), t2 = getAnalysisTime(b.playbackTime);
+                if (t2 <= t1) continue;
+                raw.push({ time: (t1 + t2) / 2, x: (b.x - a.x) * scaleFactor / (t2 - t1), y: (b.y - a.y) * scaleFactor / (t2 - t1) });
+            }
+            const smoothed = raw.slice(2).map((p, i) => ({
+                time: (raw[i].time + raw[i + 1].time + p.time) / 3,
+                x: (raw[i].x + raw[i + 1].x + p.x) / 3,
+                y: (raw[i].y + raw[i + 1].y + p.y) / 3
+            }));
+            return { raw, smoothed };
+        }
+
+        function downloadFile(filename, text, type) {
+            const url = URL.createObjectURL(new Blob([text], { type }));
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function exportCSV(filename) {
+            const { raw, smoothed } = getVelocityData();
+            const rows = [[ 'Position time (s)', `x (${scaleUnit})`, `y (${scaleUnit})`, 'Raw velocity time (s)', `Raw vx (${scaleUnit}/s)`, `Raw vy (${scaleUnit}/s)`, 'Smoothed velocity time (s)', `Smoothed vx (${scaleUnit}/s)`, `Smoothed vy (${scaleUnit}/s)` ]];
+            frameData.forEach((p, i) => {
+                rows.push([getAnalysisTime(p.playbackTime), (p.x - (originSet ? originPoint.x : 0)) * scaleFactor, (p.y - (originSet ? originPoint.y : 0)) * scaleFactor,
+                    raw[i]?.time ?? '', raw[i]?.x ?? '', raw[i]?.y ?? '', smoothed[i]?.time ?? '', smoothed[i]?.x ?? '', smoothed[i]?.y ?? '']);
+            });
+            const escape = value => '"' + String(value).replaceAll('"', '""') + '"';
+            downloadFile(filename, rows.map(row => row.map(escape).join(',')).join('\n') + '\n', 'text/csv;charset=utf-8;');
+        }
 
 		/* Drawing */
 		function resizeOverlay() {
@@ -2294,6 +2431,7 @@
 		}
 
 		function drawFrame() {
+            if (!videoReady || hiddenVideo.readyState < 2) return;
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 			ctx.drawImage(hiddenVideo, 0, 0, frameCanvas.width, frameCanvas.height);
 
@@ -2386,6 +2524,8 @@
 
 		/* Calibration */
 		calibrateButton.addEventListener('click', () => {
+            originMode = false;
+            hiddenVideo.pause(); isPlaying = false; playPauseButton.textContent = 'Play';
 			document.getElementById('crosshair').style.display = "none";
 			overlayCanvas.style.pointerEvents = "auto";
 			calibrationMode = true;
@@ -2428,7 +2568,7 @@
 			const r = overlayCanvas.getBoundingClientRect();
 			updateCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
 		});
-		overlayCanvas.addEventListener('mouseup', () => { if (calibrationMode) endCalibrationDraw(); });
+		window.addEventListener('mouseup', () => { if (calibrationMode) endCalibrationDraw(); });
 		overlayCanvas.addEventListener('touchstart', (e) => {
 			if (!calibrationMode || e.touches.length !== 1) return;
 			e.preventDefault();
@@ -2453,7 +2593,8 @@
 				const actualLength = parseFloat(actualLengthInput.value);
 				const actualUnit = actualUnitInput.value.trim();
 				if (!Number.isFinite(actualLength) || actualLength <= 0 || !actualUnit) { alert("Enter a positive length and a unit."); return; }
-			const dx = calibrationEnd.x - calibrationStart.x,
+			if (!calibrationStart || !calibrationEnd) { alert('Draw a calibration line first.'); return; }
+            const dx = calibrationEnd.x - calibrationStart.x,
 				dy = calibrationEnd.y - calibrationStart.y;
 			const pxLen = Math.hypot(dx, dy);
 			if (pxLen === 0) { alert("Calibration line length cannot be zero."); return; }
@@ -2464,7 +2605,7 @@
 				drawOverlay();
 				drawFrame();
 			replotCurrentView();
-			document.getElementById('message').innerHTML = `<p>Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}</p>`;
+			document.getElementById('message').textContent = `Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}`;
 		});
 		cancelCalibrationButton.addEventListener('click', () => {
 			calibrationPrompt.style.display = "none";
@@ -2479,6 +2620,7 @@
 
 		/* Origin button */
 		setOriginButton.addEventListener('click', () => {
+            hiddenVideo.pause(); isPlaying = false; playPauseButton.textContent = 'Play';
 			calibrationMode = false;
 			isDrawingCalibration = false;
 			originMode = true;
@@ -2490,7 +2632,7 @@
 
 			/* Cleanup + Unsaved warning */
 			window.addEventListener('beforeunload', (event) => {
-				if (hasDataLossRisk()) {
+				if (hasUnsavedChanges) {
 					event.preventDefault();
 					event.returnValue = UNSAVED_EXIT_WARNING;
 				}
