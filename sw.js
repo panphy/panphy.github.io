@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-09T09:15:00Z';
+const BUILD_ID = '2026-09-15T09:54:52Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -89,7 +89,7 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
   '/tools/motion_tracker.html',
-  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
   '/tools/sound_analyzer.html',
   '/tools/tone_generator.html',
 
