@@ -9,6 +9,46 @@ const MODELS = {
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state = { model: 'plum', playing: !reducedMotion, time: 0, discoveries: new Set() };
 const viewer = document.getElementById('viewer');
+const viewerPanel = document.getElementById('viewer-panel');
+const fullscreenButton = document.getElementById('fullscreen');
+let fallbackFullscreen = false;
+
+function updateFullscreen() {
+  const expanded = document.fullscreenElement === viewerPanel || fallbackFullscreen;
+  viewerPanel.classList.toggle('is-fullscreen', expanded);
+  document.body.classList.toggle('viewer-expanded', expanded);
+  fullscreenButton.classList.toggle('is-fullscreen', expanded);
+  fullscreenButton.setAttribute('aria-label', expanded ? 'Exit fullscreen' : 'Enter fullscreen');
+  fullscreenButton.title = expanded ? 'Exit fullscreen' : 'Enter fullscreen';
+  fullscreenButton.querySelector('path').setAttribute('d', expanded
+    ? 'M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5'
+    : 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5');
+  fullscreenButton.setAttribute('aria-pressed', String(expanded));
+  fullscreenButton.focus({ preventScroll: true });
+}
+fullscreenButton.addEventListener('click', async () => {
+  if (document.fullscreenElement === viewerPanel) {
+    await document.exitFullscreen();
+  } else if (fallbackFullscreen) {
+    fallbackFullscreen = false;
+    updateFullscreen();
+  } else {
+    try {
+      await viewerPanel.requestFullscreen();
+    } catch {
+      // Keep an expanded viewer available on browsers without element fullscreen.
+      fallbackFullscreen = true;
+      updateFullscreen();
+    }
+  }
+});
+document.addEventListener('fullscreenchange', updateFullscreen);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && fallbackFullscreen) {
+    fallbackFullscreen = false;
+    updateFullscreen();
+  }
+});
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
 camera.position.set(0, 1.2, 9);

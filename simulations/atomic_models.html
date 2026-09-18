@@ -10,6 +10,7 @@
   <meta name="theme-color" content="#f5f6f4">
   <script src="/assets/sw-register.js" defer></script>
   <link rel="stylesheet" href="atomic_models/style.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -23,8 +24,8 @@
     </nav>
     <div class="lab-strip"><span>YOUR MISSION <b>Discover what changed.</b></span><span id="progress">0 / 3 discoveries unlocked</span></div>
     <section class="workspace" aria-label="Atomic model explorer">
-      <div class="viewer-panel">
-        <div class="viewer-heading"><span id="scene-title">PLUM PUDDING MODEL</span><span class="scale">NOT TO SCALE</span></div>
+      <div class="viewer-panel" id="viewer-panel">
+        <div class="viewer-heading"><span id="scene-title">PLUM PUDDING MODEL</span><span class="scale">NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
         <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D atom. Drag or use arrow keys to rotate; scroll or pinch to zoom."><p id="load-status" role="status">Loading the 3D model…</p></div>
         <p class="particle-readout" id="particle-readout" role="status">Tap a particle to discover its job.</p><div class="legend"><span><i class="electron">−</i> Electron (negative)</span><span><i class="positive">+</i> <span id="positive-label">Positive charge</span></span><span id="neutron-legend" hidden><i class="neutron">0</i> Neutron (neutral)</span></div>
         <p class="gesture">Drag to rotate · Scroll or pinch to zoom · Arrow keys to rotate</p>
