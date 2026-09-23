@@ -42,7 +42,7 @@ export const MODELS = {
     look: 'Each dot marks a place where an electron could be found; denser regions are more likely. The flicker shows that the position is not fixed. Use “Inspect an orbital” to pick out each shape.',
     evidence: 'Bohr’s model worked for hydrogen but failed for atoms with more electrons. Quantum mechanics, which treats electrons as waves, predicted the spectra and chemistry of all atoms.',
     hint: 'Inspect each orbital to compare the 1s, 2s and 2p shapes.',
-    positiveLabel: 'Nucleus (positive)'
+    positiveLabel: 'Proton (positive)'
   }
 };
 
