@@ -750,9 +750,21 @@ function alphaForce(position, target) {
   const soft = r * r + 0.0004;
   return target.copy(position).multiplyScalar(ALPHA_K / (soft * Math.sqrt(soft)));
 }
+const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hit evenly.
+const AIMED_INTERVAL = 4; // Seconds between extra shots aimed at the centre.
+function aimTarget() {
+  return state.model === 'plum' ? 'centre' : 'nucleus';
+}
 function startBeam() {
   stopBeam();
-  beam = { alphas: [], history: [], timer: 0, stats: { fired: 0, straight: 0, deflected: 0, back: 0 } };
+  const labelTexture = canvasTexture(512, 96, (ctx, w, h) => {
+    ctx.fillStyle = `#${palette.alpha.getHexString()}`;
+    ctx.font = '600 40px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`aimed at ${aimTarget()}`, w / 2, h / 2);
+  }, false);
+  beam = { alphas: [], history: [], backHistory: [], aimedHistory: [], timer: 0, aimTimer: 1.5, labelTexture, stats: { fired: 0, straight: 0, deflected: 0, back: 0, aimed: 0 } };
   $('alpha').setAttribute('aria-pressed', 'true');
   $('alpha').textContent = 'Stop the beam';
   $('alpha-legend').hidden = false;
@@ -760,54 +772,91 @@ function startBeam() {
   updateBeamStats();
   if (!state.playing) setPlaying(true);
   flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 13, 24) });
-  readout.textContent = `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam. Watch how each path bends as it passes the atom.`;
+  readout.textContent = `${PARTICLES.alpha} They arrive evenly from the left as a wide, parallel beam. Dashed paths are extra shots aimed at the ${aimTarget()}.`;
 }
 function stopBeam() {
   for (const child of [...beamGroup.children]) {
     disposeObject(child);
     beamGroup.remove(child);
   }
+  beam?.labelTexture.dispose();
   beam = null;
   $('alpha').setAttribute('aria-pressed', 'false');
   $('alpha').textContent = 'Fire alpha particles';
   $('alpha-legend').hidden = true;
   $('beam-stats').hidden = true;
+  $('action-hint').textContent = MODELS[state.model].hint;
 }
-function spawnAlpha() {
-  // Most aimed at random across the atom; some aimed close to the centre so
-  // rare large deflections appear quickly (see the note below the explorer).
-  const close = Math.random() < 0.2;
-  const b = (close ? 0.25 : 2.6) * Math.sqrt(Math.random());
+function randomEntry(radius) {
+  // Uniform over the beam's cross-section, as when the beam is far wider than an atom.
+  const b = radius * Math.sqrt(Math.random());
   const angle = Math.random() * Math.PI * 2;
-  const position = new THREE.Vector3(-6, b * Math.cos(angle), b * Math.sin(angle));
+  return new THREE.Vector3(-6, b * Math.cos(angle), b * Math.sin(angle));
+}
+function spawnAlpha(aimed) {
+  const position = randomEntry(aimed ? 0.04 : BEAM_RADIUS);
   const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshStandardMaterial({ color: palette.alpha, emissive: palette.alpha, emissiveIntensity: 0.3 }));
   mesh.position.copy(position);
   mesh.add(glow(palette.alpha, 0.4));
+  if (aimed) {
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: beam.labelTexture, transparent: true, depthWrite: false }));
+    label.scale.set(1.5, 0.28, 1);
+    label.position.y = 0.32;
+    label.raycast = () => {};
+    mesh.add(label);
+  }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(240 * 3), 3));
   geometry.setDrawRange(0, 0);
-  const trail = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: palette.alpha, transparent: true, opacity: 0.8 }));
+  const material = aimed
+    ? new THREE.LineDashedMaterial({ color: palette.alpha, transparent: true, opacity: 0.95, dashSize: 0.14, gapSize: 0.1 })
+    : new THREE.LineBasicMaterial({ color: palette.alpha, transparent: true, opacity: 0.8 });
+  const trail = new THREE.Line(geometry, material);
   beamGroup.add(mesh, trail);
-  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0 });
-  beam.stats.fired += 1;
+  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0, aimed });
+  if (!aimed) beam.stats.fired += 1;
 }
 const force = new THREE.Vector3();
+function integrate(position, velocity, duration, maxStep) {
+  let remaining = duration;
+  while (remaining > 0) {
+    const r = Math.max(position.length(), 0.02);
+    const h = Math.min(remaining, Math.max(0.0004, maxStep * r / ALPHA_SPEED));
+    velocity.addScaledVector(alphaForce(position, force), h);
+    position.addScaledVector(velocity, h);
+    remaining -= h;
+  }
+}
+function deflection(velocity) {
+  return THREE.MathUtils.radToDeg(Math.acos(THREE.MathUtils.clamp(velocity.x / velocity.length(), -1, 1)));
+}
+function countDeflection(angle) {
+  if (angle > 90) beam.stats.back += 1;
+  else if (angle > 10) beam.stats.deflected += 1;
+  else beam.stats.straight += 1;
+}
+function keepPath(list, line, limit) {
+  list.push(line);
+  if (list.length > limit) {
+    const old = list.shift();
+    disposeObject(old);
+    beamGroup.remove(old);
+  }
+}
 function stepBeam(delta) {
   if (!beam) return;
   beam.timer -= delta;
+  beam.aimTimer -= delta;
   if (beam.timer <= 0 && beam.alphas.length < 12) {
-    spawnAlpha();
+    spawnAlpha(false);
     beam.timer = 0.32;
   }
+  if (beam.aimTimer <= 0) {
+    spawnAlpha(true);
+    beam.aimTimer = AIMED_INTERVAL;
+  }
   for (const alpha of [...beam.alphas]) {
-    let remaining = delta;
-    while (remaining > 0) {
-      const r = Math.max(alpha.position.length(), 0.02);
-      const h = Math.min(remaining, Math.max(0.0004, 0.02 * r / ALPHA_SPEED));
-      alpha.velocity.addScaledVector(alphaForce(alpha.position, force), h);
-      alpha.position.addScaledVector(alpha.velocity, h);
-      remaining -= h;
-    }
+    integrate(alpha.position, alpha.velocity, delta, 0.02);
     alpha.mesh.position.copy(alpha.position);
     const positions = alpha.trail.geometry.attributes.position;
     if (alpha.count < positions.count) {
@@ -816,31 +865,61 @@ function stepBeam(delta) {
       alpha.trail.geometry.setDrawRange(0, alpha.count);
       positions.needsUpdate = true;
       alpha.trail.geometry.computeBoundingSphere();
+      if (alpha.aimed) alpha.trail.computeLineDistances();
     }
     if (alpha.position.length() > 7.5) {
-      const angle = THREE.MathUtils.radToDeg(Math.acos(THREE.MathUtils.clamp(alpha.velocity.x / alpha.velocity.length(), -1, 1)));
-      if (angle > 90) beam.stats.back += 1;
-      else if (angle > 10) beam.stats.deflected += 1;
-      else beam.stats.straight += 1;
+      const angle = deflection(alpha.velocity);
       disposeObject(alpha.mesh);
       beamGroup.remove(alpha.mesh);
-      alpha.trail.material.opacity = angle > 10 ? 0.55 : 0.2;
-      beam.history.push(alpha.trail);
-      if (beam.history.length > 36) {
-        const old = beam.history.shift();
-        disposeObject(old);
-        beamGroup.remove(old);
+      if (alpha.aimed) {
+        // Demonstration shots are shown but never counted.
+        beam.stats.aimed += 1;
+        alpha.trail.material.opacity = 0.7;
+        keepPath(beam.aimedHistory, alpha.trail, 4);
+      } else {
+        countDeflection(angle);
+        alpha.trail.material.opacity = angle > 10 ? 0.55 : 0.2;
+        // Rare bounce-backs are kept separately so common paths never push them off screen.
+        keepPath(angle > 90 ? beam.backHistory : beam.history, alpha.trail, angle > 90 ? 8 : 36);
       }
       beam.alphas.splice(beam.alphas.indexOf(alpha), 1);
       updateBeamStats();
     }
   }
 }
+function fireBatch(count) {
+  if (!beam) startBeam();
+  const position = new THREE.Vector3();
+  const velocity = new THREE.Vector3();
+  for (let i = 0; i < count; i++) {
+    position.copy(randomEntry(BEAM_RADIUS));
+    velocity.set(ALPHA_SPEED, 0, 0);
+    const points = [position.clone()];
+    for (let step = 0; step < 4000 && position.length() <= 7.5; step++) {
+      integrate(position, velocity, 0.02, 0.03);
+      points.push(position.clone());
+    }
+    const angle = deflection(velocity);
+    beam.stats.fired += 1;
+    countDeflection(angle);
+    if (angle > 10) {
+      // Only the rare large deflections stay on screen, like flashes counted on a detector.
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: palette.alpha, transparent: true, opacity: 0.55 }));
+      beamGroup.add(line);
+      keepPath(angle > 90 ? beam.backHistory : beam.history, line, angle > 90 ? 8 : 36);
+    }
+  }
+  updateBeamStats();
+  readout.textContent = `${count} ALPHA PARTICLES FIRED EVENLY · Only paths turned by more than 10° are kept on screen. Most passed almost straight through.`;
+}
 function updateBeamStats() {
-  const { fired, straight, deflected, back } = beam.stats;
-  const landed = straight + deflected + back;
-  $('beam-stats').innerHTML = `<b>α fired ${fired}</b><br>Nearly straight (&lt;10°): ${straight}<br>Deflected 10–90°: ${deflected}<br>Bounced back (&gt;90°): ${back}`
-    + (landed >= 20 && state.model === 'plum' ? '<br>No large deflections!' : '');
+  const { fired, straight, deflected, back, aimed } = beam.stats;
+  const note = state.model === 'plum'
+    ? 'Dashed paths are extra shots aimed straight at the centre. Even they pass almost straight through.'
+    : 'Dashed paths are extra shots aimed at the nucleus to show a bounce-back. They are not counted. In the real experiment about 1 in 8000 bounced back.';
+  $('beam-stats').innerHTML = `<b>Even beam · ${fired} fired</b><br>Nearly straight (&lt;10°): ${straight}<br>Deflected 10–90°: ${deflected}<br>Bounced back (&gt;90°): ${back}`
+    + `<span class="aimed">Aimed shots (dashed): ${aimed}, not counted</span>`;
+  $('action-hint').textContent = note;
 }
 
 // ---------- True scale ----------
@@ -1011,6 +1090,7 @@ $('nucleus').addEventListener('click', () => {
   }
 });
 $('alpha').addEventListener('click', () => (beam ? stopBeam() : startBeam()));
+$('alpha-batch').addEventListener('click', () => fireBatch(1000));
 $('true-scale').addEventListener('click', () => setTrueScale(!state.trueScale));
 $('excite').addEventListener('click', startExcite);
 viewer.addEventListener('keydown', event => {
@@ -1058,6 +1138,7 @@ function selectModel(model, animate = true) {
   $('photon-legend').hidden = model !== 'bohr';
   $('energy-diagram').hidden = model !== 'bohr';
   $('alpha').hidden = !['plum', 'rutherford'].includes(model);
+  $('alpha-batch').hidden = !['plum', 'rutherford'].includes(model);
   $('true-scale').hidden = model !== 'rutherford';
   $('excite').hidden = model !== 'bohr';
   $('inspect').textContent = model === 'cloud' ? 'Inspect an orbital' : 'Inspect an electron';

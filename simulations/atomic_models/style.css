@@ -201,7 +201,8 @@ body[data-model=rutherford] .legend .positive { background: #D99A36; }
 .legend .cloud-dot { background: radial-gradient(circle, var(--electron) 0 2px, transparent 2.5px) 0 0 / 6px 6px, color-mix(in srgb, var(--electron), transparent 80%); }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
 .beam-stats { top: 34px; left: 10px; padding: 8px 10px; border-radius: 10px; background: var(--overlay-bg); border: 1px solid var(--card-border); line-height: 1.5; }
-.beam-stats b { color: var(--alpha); font-weight: 600; }
+.beam-stats b, .beam-stats .aimed { color: var(--alpha); font-weight: 600; }
+.beam-stats .aimed { display: block; }
 .energy-diagram { top: 8px; right: 8px; width: 176px; padding: 6px 8px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .energy-diagram svg { display: block; width: 100%; height: auto; overflow: visible; }
 .energy-diagram text { font-family: var(--font-mono); font-size: 10px; fill: var(--text-secondary); }

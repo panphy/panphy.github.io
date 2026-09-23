@@ -21,7 +21,7 @@ export const MODELS = {
     description: 'Positive charge and most of the mass are concentrated in a tiny central nucleus. Electrons are outside it. This model did not specify fixed electron energy levels.',
     look: 'Find the orange nucleus, then the blue electrons around it. The orbit lines show the paths used in this animation; Rutherford’s model did not specify them. The nucleus is hugely enlarged. Use “Show true scale” to see how small it really is.',
     evidence: 'Most alpha particles passed straight through gold foil; a few turned sharply or bounced back. This supported a small, dense, positive nucleus. The nuclear model alone did not explain atoms’ discrete light spectra.',
-    hint: 'Fire alpha particles: most pass straight through, but close approaches turn sharply.',
+    hint: 'Fire alpha particles: most pass straight through. Dashed shots aimed at the nucleus show a bounce-back.',
     positiveLabel: 'Nucleus (positive)'
   },
   bohr: {
@@ -73,7 +73,7 @@ export const QUESTIONS = {
   ],
   rutherford: [
     { q: 'Why did most alpha particles pass straight through the gold foil?', choices: ['The nucleus has no charge', 'The atom is mostly empty space', 'Alpha particles are too small to hit anything'], correct: 1, why: 'Most alpha particles did not pass close enough to a nucleus to be strongly deflected.', hint: 'Compare the tiny centre with the space around it.' },
-    { q: 'Why did a very few alpha particles bounce back?', choices: ['They came very close to a small, dense, positive nucleus', 'They hit an electron', 'The foil was too thick'], correct: 0, why: 'Only a tiny, concentrated positive charge can push a fast alpha particle back the way it came.', hint: 'Fire alpha particles and look at the paths that pass nearest the centre.' },
+    { q: 'Why did a very few alpha particles bounce back?', choices: ['They came very close to a small, dense, positive nucleus', 'They hit an electron', 'The foil was too thick'], correct: 0, why: 'Only a tiny, concentrated positive charge can push a fast alpha particle back the way it came.', hint: 'Fire alpha particles and watch the dashed shots aimed at the nucleus.' },
     { q: 'Where is almost all of the atom’s mass?', choices: ['Spread evenly through the atom', 'In the electrons', 'In the tiny nucleus'], correct: 2, why: 'The nucleus contains almost all the mass, in a tiny volume.', hint: 'Electrons are very light.' }
   ],
   bohr: [
