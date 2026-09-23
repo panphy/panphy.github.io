@@ -752,10 +752,6 @@ function alphaForce(position, target) {
 }
 function startBeam() {
   stopBeam();
-  const source = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 0.8, 24), new THREE.MeshStandardMaterial({ color: palette.line, roughness: 0.5 }));
-  source.rotation.z = Math.PI / 2;
-  source.position.set(-6.3, 0, 0);
-  beamGroup.add(source);
   beam = { alphas: [], history: [], timer: 0, stats: { fired: 0, straight: 0, deflected: 0, back: 0 } };
   $('alpha').setAttribute('aria-pressed', 'true');
   $('alpha').textContent = 'Stop the beam';
@@ -764,7 +760,7 @@ function startBeam() {
   updateBeamStats();
   if (!state.playing) setPlaying(true);
   flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 13, 24) });
-  readout.textContent = `${PARTICLES.alpha} Watch how each path bends as it passes the atom.`;
+  readout.textContent = `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam. Watch how each path bends as it passes the atom.`;
 }
 function stopBeam() {
   for (const child of [...beamGroup.children]) {
@@ -1143,7 +1139,7 @@ function resize() {
 }
 new ResizeObserver(resize).observe(viewer);
 resize();
-new IntersectionObserver(entries => { state.visible = entries[0].isIntersecting; }).observe(viewer);
+new IntersectionObserver(entries => { state.visible = entries[entries.length - 1].isIntersecting; }).observe(viewer);
 renderer.domElement.addEventListener('webglcontextlost', event => {
   event.preventDefault();
   $('load-status').hidden = false;
