@@ -25,9 +25,8 @@ import {
 } from './state.js';
 
 import {
-  preprocessMarkdown,
-  restoreEscapedDollarPlaceholders,
-  getCleanRenderedOutputHTML
+  createMathExtension,
+  prepareMarkdownSource
 } from './rendering.js';
 
 import {
@@ -159,12 +158,9 @@ function getSourceAnchorOffsets(content) {
   }
 
   try {
-    const tokens = markedLib.lexer(content || '', {
-      gfm: true,
-      breaks: true,
-      headerIds: true,
-      tables: true
-    });
+    // Lex with the configured defaults so the math extension applies and
+    // block anchors line up with what renderContent() produces.
+    const tokens = markedLib.lexer(content || '', markedLib.defaults);
 
     const offsets = [];
     let cursor = 0;
@@ -531,6 +527,7 @@ if (markedLib) {
     }
   });
   markedLib.use({ renderer: customRenderer });
+  markedLib.use(createMathExtension());
 } else {
   console.error('Marked.js failed to load. Preview rendering is unavailable.');
 }
@@ -938,6 +935,36 @@ function normalizeRenderedImageSources(container) {
   });
 }
 
+// MathJax typeset calls must not overlap; chain them on one promise.
+let mathTypesetQueue = Promise.resolve();
+
+function canTypesetMath() {
+  return Boolean(window.MathJax && typeof MathJax.typesetPromise === 'function');
+}
+
+function queueMathTypeset(isCurrent, hasMath) {
+  const readyPromise = window.MathJax && MathJax.startup && MathJax.startup.promise
+    ? MathJax.startup.promise
+    : Promise.resolve();
+
+  mathTypesetQueue = mathTypesetQueue
+    .then(() => readyPromise)
+    .then(() => {
+      // Skip stale renders: a newer render has replaced the content and
+      // queued its own typeset.
+      if (!isCurrent() || !canTypesetMath()) return undefined;
+      // Only the preview holds math, so drop every record from earlier
+      // renders (their nodes are gone) to keep MathJax's list from growing.
+      if (typeof MathJax.typesetClear === 'function') {
+        MathJax.typesetClear();
+      }
+      return hasMath ? MathJax.typesetPromise([renderedOutput]) : undefined;
+    })
+    .catch(console.error);
+
+  return mathTypesetQueue;
+}
+
 /**
  * Render the markdown content to the output pane
  */
@@ -952,8 +979,7 @@ function renderContent() {
     return;
   }
 
-  const preprocessedText = preprocessMarkdown(inputText);
-  const parsedMarkdown = markedLib.parse(preprocessedText);
+  const parsedMarkdown = markedLib.parse(prepareMarkdownSource(inputText));
   const sanitizedContent = DOMPurify.sanitize(parsedMarkdown);
   dismissTableCopyActions();
   renderedOutput.innerHTML = sanitizedContent;
@@ -964,17 +990,16 @@ function renderContent() {
     syncInputToOutput();
   };
 
+  const isCurrentRender = () => currentRenderCycle === renderCycleId;
   const finalizeRender = () => {
-    if (currentRenderCycle !== renderCycleId) return;
-    restoreEscapedDollarPlaceholders(renderedOutput);
+    if (!isCurrentRender()) return;
     scheduleSyncAnchorMapRebuild(inputText, currentRenderCycle);
     syncPreviewScrollToInput();
   };
 
-  if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
-    MathJax.typesetPromise([renderedOutput])
-      .catch(console.error)
-      .finally(finalizeRender);
+  if (window.MathJax) {
+    const hasMath = Boolean(renderedOutput.querySelector('.math-inline, .math-display'));
+    queueMathTypeset(isCurrentRender, hasMath).then(finalizeRender);
   } else {
     finalizeRender();
   }
@@ -1287,16 +1312,63 @@ async function saveBlobWithFallback(blob, filename, { title = 'Save file' } = {}
   return true;
 }
 
+const HIGHLIGHT_LIGHT_CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+const HIGHLIGHT_DARK_CSS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
+
 /**
- * Export the document as HTML
+ * CSS that MathJax's SVG output needs (display layout, hidden assistive
+ * MathML). Without it, exported equations show duplicated text.
+ */
+function getMathJaxSvgStyles() {
+  try {
+    if (window.MathJax && typeof MathJax.svgStylesheet === 'function') {
+      const sheet = MathJax.svgStylesheet();
+      if (sheet && sheet.textContent) return sheet.textContent;
+    }
+  } catch (error) {
+    console.warn('Unable to read the MathJax SVG stylesheet.', error);
+  }
+  const existing = document.getElementById('MJX-SVG-styles');
+  return existing ? existing.textContent : '';
+}
+
+async function fetchStylesheetText(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return await response.text();
+  } catch {
+    return null;
+  }
+}
+
+function getExportTitle() {
+  const heading = renderedOutput.querySelector('h1, h2, h3');
+  const text = heading ? heading.textContent.trim() : '';
+  return text || 'Exported Document';
+}
+
+/**
+ * Export the document as HTML.
+ *
+ * Math is already rendered to SVG and code is already highlighted, so the
+ * exported file inlines the styles it needs and loads no scripts. It opens
+ * offline and looks the same as the preview.
  */
 async function exportHTML() {
+  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+  const highlightCssUrl = isDarkMode ? HIGHLIGHT_DARK_CSS_URL : HIGHLIGHT_LIGHT_CSS_URL;
+  // Start fetching while the filename modal is open, so saving right after
+  // the click stays within the user gesture (needed for the iOS share sheet).
+  const highlightCssPromise = fetchStylesheetText(highlightCssUrl);
+
   const fileName = await showFilenameModal('document.html', 'Export as HTML');
   if (!fileName) return;
 
-  const sanitizedHTML = getCleanRenderedOutputHTML(renderedOutput);
+  const renderedHTML = renderedOutput.innerHTML;
   const currentFontSize = getCurrentFontSize();
-  const doc = document.implementation.createHTMLDocument('Exported Document');
+  const exportTitle = getExportTitle();
+  const doc = document.implementation.createHTMLDocument(exportTitle);
   const head = doc.head;
   const body = doc.body;
 
@@ -1304,9 +1376,12 @@ async function exportHTML() {
   meta.setAttribute('charset', 'UTF-8');
   head.appendChild(meta);
 
-  const title = document.createElement('title');
-  title.textContent = 'Exported Document';
-  head.appendChild(title);
+  const viewportMeta = document.createElement('meta');
+  viewportMeta.setAttribute('name', 'viewport');
+  viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+  head.appendChild(viewportMeta);
+
+  doc.title = exportTitle;
 
   const exportFont = currentPreviewFont || PREVIEW_FONTS[0];
   const exportFontParam = exportFont.googleFontsParam || 'Manrope:wght@400;500;600;700;800';
@@ -1491,49 +1566,26 @@ async function exportHTML() {
   `;
   head.appendChild(style);
 
-  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-  const highlightLink = document.createElement('link');
-  highlightLink.rel = 'stylesheet';
-  if (isDarkMode) {
-    highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-  } else {
-    highlightLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
+  const mathStyles = getMathJaxSvgStyles();
+  if (mathStyles) {
+    const mathStyle = document.createElement('style');
+    mathStyle.textContent = mathStyles;
+    head.appendChild(mathStyle);
   }
-  head.appendChild(highlightLink);
 
-  const highlightScript = document.createElement('script');
-  highlightScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js';
-  head.appendChild(highlightScript);
+  const highlightCss = await highlightCssPromise;
+  if (highlightCss) {
+    const highlightStyleEl = document.createElement('style');
+    highlightStyleEl.textContent = highlightCss;
+    head.appendChild(highlightStyleEl);
+  } else {
+    const highlightLink = document.createElement('link');
+    highlightLink.rel = 'stylesheet';
+    highlightLink.href = highlightCssUrl;
+    head.appendChild(highlightLink);
+  }
 
-  const highlightInit = document.createElement('script');
-  highlightInit.textContent = `
-    window.addEventListener('DOMContentLoaded', () => {
-      hljs.highlightAll();
-    });
-  `;
-  head.appendChild(highlightInit);
-
-  const mathjaxConfigScript = document.createElement('script');
-  mathjaxConfigScript.textContent = `
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$']],
-        displayMath: [['$$', '$$']],
-        processEscapes: true,
-        packages: ['base', 'ams', 'array'],
-      },
-      svg: {
-        fontCache: 'local',
-      }
-    };
-  `;
-  head.appendChild(mathjaxConfigScript);
-
-  const mathjaxScript = document.createElement('script');
-  mathjaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
-  head.appendChild(mathjaxScript);
-
-  body.innerHTML = sanitizedHTML;
+  body.innerHTML = renderedHTML;
 
   if (isDarkMode) {
     doc.documentElement.setAttribute('data-theme', 'dark');
@@ -2043,9 +2095,25 @@ setInterval(() => {
   saveSnapshotIfNeeded(markdownInput.value);
 }, SNAPSHOT_INTERVAL_MS);
 
+// Persist immediately when the page is hidden or unloaded: the debounced
+// draft save may still be pending, and mobile browsers often skip
+// beforeunload entirely.
+function flushDraftAndSnapshot() {
+  persistDraftAndDirtyState();
+  saveSnapshotIfNeeded(markdownInput.value);
+}
+
+window.addEventListener('pagehide', flushDraftAndSnapshot);
+document.addEventListener('visibilitychange', () => {
+  // Draft only: snapshotting on every tab switch would crowd out history.
+  if (document.visibilityState === 'hidden') {
+    persistDraftAndDirtyState();
+  }
+});
+
 // Also snapshot right before leaving the page
 window.addEventListener('beforeunload', (e) => {
-  saveSnapshotIfNeeded(markdownInput.value);
+  flushDraftAndSnapshot();
 
   // Warn if there are unsaved changes
   if (isDirty(markdownInput.value)) {

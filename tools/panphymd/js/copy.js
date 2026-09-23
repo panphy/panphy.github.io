@@ -4,7 +4,6 @@
  */
 
 import { isTouchInteractionMode } from './ui.js';
-import { isCurrencyLike } from './utils.js';
 
 const EQUATION_PNG_BASE_SCALE = 4;
 const EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
@@ -42,67 +41,15 @@ function getEquationRasterScale(widthPx, heightPx) {
   return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
 }
 
-function hasMathDelimiters(text) {
-  if (!text || !text.includes('$')) return false;
-
-  const isEscaped = (value, index) => {
-    let slashCount = 0;
-    for (let i = index - 1; i >= 0 && value[i] === '\\'; i -= 1) {
-      slashCount += 1;
-    }
-    return slashCount % 2 === 1;
-  };
-
-  let i = 0;
-  while (i < text.length) {
-    if (text[i] !== '$' || isEscaped(text, i)) {
-      i += 1;
-      continue;
-    }
-
-    const isDisplay = text[i + 1] === '$' && !isEscaped(text, i + 1);
-    const delimiter = isDisplay ? '$$' : '$';
-    const start = i + delimiter.length;
-    let searchIndex = start;
-    let closingIndex = -1;
-
-    while (searchIndex < text.length) {
-      if (text.startsWith(delimiter, searchIndex) && !isEscaped(text, searchIndex)) {
-        closingIndex = searchIndex;
-        break;
-      }
-      searchIndex += 1;
-    }
-
-    if (closingIndex === -1) {
-      i += delimiter.length;
-      continue;
-    }
-
-    const content = text.slice(start, closingIndex).trim();
-    if (!isDisplay && isCurrencyLike(content)) {
-      i = closingIndex + delimiter.length;
-      continue;
-    }
-    if (content.length > 0) {
-      return true;
-    }
-
-    i = closingIndex + delimiter.length;
-  }
-
-  return false;
-}
-
 function tableContainsMath(table) {
   if (!table) return false;
   if (tableMathDetectionCache.has(table)) {
     return tableMathDetectionCache.get(table);
   }
 
-  const hasMath = table.querySelector('mjx-container')
-    ? true
-    : hasMathDelimiters(table.textContent || '');
+  // Math spans are tokenized into .math-inline / .math-display elements,
+  // so this also works before MathJax has finished typesetting.
+  const hasMath = Boolean(table.querySelector('mjx-container, .math-inline, .math-display'));
   tableMathDetectionCache.set(table, hasMath);
   return hasMath;
 }
@@ -1243,7 +1190,14 @@ function showCopyFailedFeedback(element) {
  * Handle clicks on the rendered output for copy-to-clipboard functionality.
  * @param {MouseEvent} event - The click event
  */
+const INTERACTIVE_TARGET_SELECTOR = 'a[href], button, input, select, textarea, label, summary';
+
 export function handleCopyClick(event) {
+  // Let links, checkboxes and other controls inside tables behave normally.
+  if (event.target.closest(INTERACTIVE_TARGET_SELECTOR)) {
+    return false;
+  }
+
   if (activeMathTable && (!event.target.closest('table') || !activeMathTable.contains(event.target))) {
     dismissDesktopTableCopyActions();
   }
