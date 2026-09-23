@@ -21,9 +21,10 @@ const ELECTRON_RADIUS = 0.09;
 const NUCLEON_RADIUS = 0.17;
 const PLUM_RADIUS = 2;
 const RUTHERFORD_NUCLEUS = 0.32;
-const CLOUD_NUCLEUS = 0.13;
+const BOHR_NUCLEUS = 0.45;
+const CLOUD_NUCLEUS_SCALE = 0.6;
 const BOHR_RADII = [1.0, 1.95, 2.9];
-const POSITIVE_RADIUS = { plum: PLUM_RADIUS, rutherford: RUTHERFORD_NUCLEUS, bohr: 0.45, cloud: CLOUD_NUCLEUS };
+const POSITIVE_RADIUS = { plum: PLUM_RADIUS, rutherford: RUTHERFORD_NUCLEUS, bohr: BOHR_NUCLEUS, cloud: BOHR_NUCLEUS * CLOUD_NUCLEUS_SCALE };
 const ALPHA_SPEED = 4;
 const ALPHA_K = 1.5; // Same total positive charge in both models; only its spread differs.
 const TRANSITION_TIME = 1.3;
@@ -343,8 +344,8 @@ function bohrSpeed(radius) {
   // Bohr: orbital speed falls as 1/n, so outer electrons move more slowly.
   return 1.1 * BOHR_RADII[0] / radius;
 }
-function buildBohr() {
-  // Twelve nucleons settled into a compact, slightly irregular cluster.
+function buildNucleus(scale, kind) {
+  // Carbon-12: twelve nucleons settled into a compact, slightly irregular cluster.
   const rand = random(7);
   const points = Array.from({ length: 12 }, () => randomDirection(rand).multiplyScalar(0.35 * Math.cbrt(rand())));
   for (let step = 0; step < 300; step++) {
@@ -365,7 +366,9 @@ function buildBohr() {
   const kinds = ['proton', 'neutron', 'proton', 'proton', 'neutron', 'neutron', 'proton', 'neutron', 'proton', 'neutron', 'neutron', 'proton'];
   const nucleus = new THREE.Group();
   nucleus.userData.radius = 0.5;
-  nucleus.userData.kind = 'bohrNucleus';
+  nucleus.userData.kind = kind;
+  nucleus.scale.setScalar(scale);
+  nucleus.userData.baseScale = scale;
   const textures = { proton: symbolTexture(palette.proton, '+'), neutron: symbolTexture(palette.neutron, '0') };
   points.forEach((point, i) => {
     const mesh = sphere(NUCLEON_RADIUS, palette[kinds[i]], { map: textures[kinds[i]] });
@@ -377,7 +380,9 @@ function buildBohr() {
   });
   atom.add(nucleus);
   positiveBody = nucleus;
-
+}
+function buildBohr() {
+  buildNucleus(1, 'bohrNucleus');
   BOHR_RADII.forEach((radius, level) => {
     const line = ring(radius, palette.line, level === 2 ? 0.55 : 0.6, 0, level === 2);
     const label = labelSprite(`n = ${level + 1}`, palette.line);
@@ -434,11 +439,8 @@ function sampleOrbital(key) {
   }
 }
 function buildCloud() {
-  const nucleus = sphere(CLOUD_NUCLEUS, palette.proton, { map: symbolTexture(palette.proton, '+'), emissive: 0.15 });
-  nucleus.userData.kind = 'cloudNucleus';
-  atom.add(nucleus);
-  positiveBody = nucleus;
-  pickables.push({ object: nucleus, kind: 'cloudNucleus' });
+  // Smaller than in the Bohr view so the 1s cloud around it stays visible.
+  buildNucleus(CLOUD_NUCLEUS_SCALE, 'cloudNucleus');
   cloud = [];
   // Carbon's two 2p electrons occupy two different 2p orbitals, drawn in two colours.
   [
@@ -457,7 +459,7 @@ function buildCloud() {
     atom.add(points);
     cloud.push({ key, sample, points });
   });
-  pickables.push({ object: nucleus, kind: 'cloud', background: true, radius: 2.8 });
+  pickables.push({ object: atom, kind: 'cloud', background: true, radius: 2.8 });
 }
 
 const BUILDERS = { plum: buildPlum, rutherford: buildRutherford, bohr: buildBohr, cloud: buildCloud };
@@ -531,7 +533,7 @@ function stepTransition(delta) {
   if (!transition) return;
   transition.t = Math.min(1, transition.t + delta / TRANSITION_TIME);
   const k = ease(transition.t);
-  if (positiveBody) positiveBody.scale.setScalar(THREE.MathUtils.lerp(transition.startScale, 1, k));
+  if (positiveBody) positiveBody.scale.setScalar(THREE.MathUtils.lerp(transition.startScale, 1, k) * (positiveBody.userData.baseScale || 1));
   electrons.forEach((electron, i) => {
     if (transition.from[i]) electron.mesh.position.lerpVectors(transition.from[i], electron.mesh.position, k);
   });
@@ -1060,7 +1062,7 @@ function selectModel(model, animate = true) {
   state.orbitalIndex = -1;
   state.inspectIndex = 0;
   $('positive-label').textContent = data.positiveLabel;
-  $('neutron-legend').hidden = model !== 'bohr';
+  $('neutron-legend').hidden = !['bohr', 'cloud'].includes(model);
   $('electron-legend').hidden = model === 'cloud';
   $('cloud-legend').hidden = model !== 'cloud';
   $('photon-legend').hidden = model !== 'bohr';
