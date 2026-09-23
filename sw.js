@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-23T19:46:42Z';
+const BUILD_ID = '2026-09-23T20:30:41Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -106,6 +106,9 @@ const ASSETS_TO_CACHE = [
   '/simulations/superposition.html',
   '/simulations/standing_wave.html',
   '/simulations/states.html',
+  '/simulations/states/style.css',
+  '/simulations/states/app.js',
+  '/simulations/states/physics.js',
   '/simulations/lorentz.html',
   '/simulations/lorentz_learn.html',
   '/simulations/collision.html',
