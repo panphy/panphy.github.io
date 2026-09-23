@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-18T12:09:49Z';
+const BUILD_ID = '2026-09-23T19:11:24Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -97,6 +97,8 @@ const ASSETS_TO_CACHE = [
   '/simulations/atomic_models.html',
   '/simulations/atomic_models/style.css',
   '/simulations/atomic_models/app.js',
+  '/simulations/atomic_models/content.js',
+  '/simulations/atomic_models/quiz.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/ripple_tank.html',
