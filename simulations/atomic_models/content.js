@@ -19,7 +19,7 @@ export const MODELS = {
     date: 'RUTHERFORD · 1911',
     heading: 'A tiny nucleus. Mostly empty space.',
     description: 'Positive charge and most of the mass are concentrated in a tiny central nucleus. Electrons are outside it. This model did not specify fixed electron energy levels.',
-    look: 'Find the orange nucleus, then the blue electrons around it. The orbit lines show the paths used in this animation; Rutherford’s model did not specify them. The nucleus is hugely enlarged. Use “Show true scale” to see how small it really is.',
+    look: 'Find the orange nucleus, then the blue electrons around it. The orbit lines show the paths used in this animation; Rutherford’s model did not specify them. The nucleus is hugely enlarged: a real one is about 1/100 000 of the atom’s width.',
     evidence: 'Most alpha particles passed straight through gold foil; a few turned sharply or bounced back. This supported a small, dense, positive nucleus. The nuclear model alone did not explain atoms’ discrete light spectra.',
     hint: 'Fire alpha particles: most pass straight through. Dashed shots aimed at the nucleus show a bounce-back.',
     positiveLabel: 'Nucleus (positive)'

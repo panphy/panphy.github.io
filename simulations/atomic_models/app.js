@@ -13,8 +13,7 @@ const state = {
   inspectIndex: 0,
   orbitalIndex: -1,
   orbitalFocus: null,
-  exciteIndex: 0,
-  trueScale: false
+  exciteIndex: 0
 };
 
 // Display sizes in scene units. Markers are enlarged and not to scale.
@@ -25,7 +24,6 @@ const RUTHERFORD_NUCLEUS = 0.32;
 const CLOUD_NUCLEUS = 0.13;
 const BOHR_RADII = [1.0, 1.95, 2.9];
 const POSITIVE_RADIUS = { plum: PLUM_RADIUS, rutherford: RUTHERFORD_NUCLEUS, bohr: 0.45, cloud: CLOUD_NUCLEUS };
-const TRUE_SCALE_FACTOR = 1e-4;
 const ALPHA_SPEED = 4;
 const ALPHA_K = 1.5; // Same total positive charge in both models; only its spread differs.
 const TRANSITION_TIME = 1.3;
@@ -110,8 +108,6 @@ let transition = null;
 let cameraTween = null;
 let beam = null;
 let excite = null;
-let scaleTween = null;
-let nucleusScale = 1;
 
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
@@ -168,14 +164,6 @@ const shadowTexture = canvasTexture(128, 128, (ctx, w) => {
   gradient.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, w, w);
-}, false);
-const markerTexture = canvasTexture(128, 128, ctx => {
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 8;
-  ctx.setLineDash([14, 10]);
-  ctx.beginPath();
-  ctx.arc(64, 64, 52, 0, Math.PI * 2);
-  ctx.stroke();
 }, false);
 
 // A sphere texture with a charge symbol repeated around it.
@@ -264,14 +252,9 @@ floorShadow.raycast = () => {};
 scene.add(floorShadow);
 const halo = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.35, side: THREE.BackSide, depthWrite: false }));
 halo.raycast = () => {};
-const trueScaleMarker = new THREE.Sprite(new THREE.SpriteMaterial({ map: markerTexture, transparent: true, depthTest: false, sizeAttenuation: false }));
-trueScaleMarker.scale.set(0.07, 0.07, 1);
-trueScaleMarker.visible = false;
-scene.add(trueScaleMarker);
 function applyThemeToPersistent() {
   floorShadow.material.opacity = palette.dark ? 0.7 : 0.25;
   halo.material.color.copy(palette.accent);
-  trueScaleMarker.material.color.copy(palette.primary);
 }
 applyThemeToPersistent();
 
@@ -489,8 +472,6 @@ function buildAtom(animate) {
   clearAtom();
   atom.userData.model = state.model;
   BUILDERS[state.model]();
-  nucleusScale = 1;
-  scaleTween = null;
   positionElectrons();
   transition = null;
   if (!animate || reducedMotion || !previousModel || previousModel === state.model) {
@@ -550,7 +531,7 @@ function stepTransition(delta) {
   if (!transition) return;
   transition.t = Math.min(1, transition.t + delta / TRANSITION_TIME);
   const k = ease(transition.t);
-  if (positiveBody) positiveBody.scale.setScalar(THREE.MathUtils.lerp(transition.startScale, 1, k) * nucleusScale);
+  if (positiveBody) positiveBody.scale.setScalar(THREE.MathUtils.lerp(transition.startScale, 1, k));
   electrons.forEach((electron, i) => {
     if (transition.from[i]) electron.mesh.position.lerpVectors(transition.from[i], electron.mesh.position, k);
   });
@@ -688,7 +669,6 @@ function select(object, text) {
 function describe(kind) {
   switch (kind) {
     case 'electron': return state.model === 'plum' ? PARTICLES.plumElectron : PARTICLES.electron;
-    case 'nucleus': return state.trueScale ? `${PARTICLES.nucleus} At true scale it is far too small to see.` : PARTICLES.nucleus;
     case 'cloud': return 'ELECTRON CLOUD · Six electrons spread over the 1s, 2s and 2p orbitals. Use “Inspect an orbital” to pick out each shape.';
     default: return PARTICLES[kind];
   }
@@ -887,31 +867,6 @@ function stepBeam(delta) {
     }
   }
 }
-function fireBatch(count) {
-  if (!beam) startBeam();
-  const position = new THREE.Vector3();
-  const velocity = new THREE.Vector3();
-  for (let i = 0; i < count; i++) {
-    position.copy(randomEntry(BEAM_RADIUS));
-    velocity.set(ALPHA_SPEED, 0, 0);
-    const points = [position.clone()];
-    for (let step = 0; step < 4000 && position.length() <= 7.5; step++) {
-      integrate(position, velocity, 0.02, 0.03);
-      points.push(position.clone());
-    }
-    const angle = deflection(velocity);
-    beam.stats.fired += 1;
-    countDeflection(angle);
-    if (angle > 10) {
-      // Only the rare large deflections stay on screen, like flashes counted on a detector.
-      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: palette.alpha, transparent: true, opacity: 0.55 }));
-      beamGroup.add(line);
-      keepPath(angle > 90 ? beam.backHistory : beam.history, line, angle > 90 ? 8 : 36);
-    }
-  }
-  updateBeamStats();
-  readout.textContent = `${count} ALPHA PARTICLES FIRED EVENLY · Only paths turned by more than 10° are kept on screen. Most passed almost straight through.`;
-}
 function updateBeamStats() {
   const { fired, straight, deflected, back, aimed } = beam.stats;
   const note = state.model === 'plum'
@@ -920,29 +875,6 @@ function updateBeamStats() {
   $('beam-stats').innerHTML = `<b>Even beam · ${fired} fired</b><br>Nearly straight (&lt;10°): ${straight}<br>Deflected 10–90°: ${deflected}<br>Bounced back (&gt;90°): ${back}`
     + `<span class="aimed">Aimed shots (dashed): ${aimed}, not counted</span>`;
   $('action-hint').textContent = note;
-}
-
-// ---------- True scale ----------
-function setTrueScale(on) {
-  state.trueScale = on;
-  const button = $('true-scale');
-  button.setAttribute('aria-pressed', String(on));
-  button.textContent = on ? 'Show enlarged nucleus' : 'Show true scale';
-  $('scale-badge').textContent = on ? 'NUCLEUS AT TRUE SCALE' : 'NOT TO SCALE';
-  $('scale-badge').classList.toggle('is-true', on);
-  $('scale-callout').hidden = !on;
-  trueScaleMarker.visible = on;
-  scaleTween = { from: nucleusScale, to: on ? TRUE_SCALE_FACTOR : 1, t: 0 };
-  if (on) readout.textContent = 'TRUE SCALE · If this atom were a football stadium, the nucleus would be a pea at the centre spot. Electron markers stay enlarged so you can see them.';
-  else readout.textContent = PARTICLES.nucleus;
-}
-function stepScale(delta) {
-  if (!scaleTween || !positiveBody) return;
-  scaleTween.t = reducedMotion ? 1 : Math.min(1, scaleTween.t + delta / 1.4);
-  const k = ease(scaleTween.t);
-  nucleusScale = Math.exp(THREE.MathUtils.lerp(Math.log(scaleTween.from), Math.log(scaleTween.to), k));
-  if (!transition) positiveBody.scale.setScalar(nucleusScale);
-  if (scaleTween.t >= 1) scaleTween = null;
 }
 
 // ---------- Bohr excitation ----------
@@ -1085,13 +1017,11 @@ $('nucleus').addEventListener('click', () => {
     select(positiveBody, PARTICLES.cloudNucleus);
     flyTo({ distance: 1.6 });
   } else {
-    select(state.trueScale ? null : positiveBody, describe('nucleus'));
-    flyTo({ distance: state.trueScale ? 1.4 : 2.2 });
+    select(positiveBody, describe('nucleus'));
+    flyTo({ distance: 2.2 });
   }
 });
 $('alpha').addEventListener('click', () => (beam ? stopBeam() : startBeam()));
-$('alpha-batch').addEventListener('click', () => fireBatch(1000));
-$('true-scale').addEventListener('click', () => setTrueScale(!state.trueScale));
 $('excite').addEventListener('click', startExcite);
 viewer.addEventListener('keydown', event => {
   const step = 0.12;
@@ -1126,8 +1056,6 @@ function selectModel(model, animate = true) {
   document.body.dataset.model = model;
   stopBeam();
   endExcite();
-  if (state.trueScale) setTrueScale(false);
-  scaleTween = null;
   state.orbitalFocus = null;
   state.orbitalIndex = -1;
   state.inspectIndex = 0;
@@ -1138,8 +1066,6 @@ function selectModel(model, animate = true) {
   $('photon-legend').hidden = model !== 'bohr';
   $('energy-diagram').hidden = model !== 'bohr';
   $('alpha').hidden = !['plum', 'rutherford'].includes(model);
-  $('alpha-batch').hidden = !['plum', 'rutherford'].includes(model);
-  $('true-scale').hidden = model !== 'rutherford';
   $('excite').hidden = model !== 'bohr';
   $('inspect').textContent = model === 'cloud' ? 'Inspect an orbital' : 'Inspect an electron';
   $('action-hint').textContent = data.hint;
@@ -1197,12 +1123,7 @@ window.addEventListener('panphy:theme-change', () => {
   const hadBeam = Boolean(beam);
   stopBeam();
   endExcite();
-  const trueScale = state.trueScale;
   buildAtom(false);
-  if (trueScale) {
-    nucleusScale = TRUE_SCALE_FACTOR;
-    positiveBody.scale.setScalar(nucleusScale);
-  }
   if (hadBeam) startBeam();
 });
 document.fonts?.ready.then(() => {
@@ -1246,7 +1167,6 @@ function frame(time) {
   }
   positionElectrons();
   stepTransition(delta);
-  stepScale(delta);
   stepCamera(delta);
   if (halo.parent) halo.material.opacity = 0.28 + 0.14 * Math.sin(time / 220);
   controls.update();

@@ -173,8 +173,7 @@ h1 span { color: var(--brand-primary); }
 .viewer-panel { display: flex; flex-direction: column; min-width: 0; padding: 20px; background: var(--viewer-bg); }
 .viewer-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: .76rem; font-weight: 600; letter-spacing: .08em; }
 #scene-title { margin-right: auto; }
-.scale { color: var(--text-secondary); font-size: .68rem; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 10px; transition: color .2s, border-color .2s; }
-.scale.is-true { color: var(--brand-primary); border-color: var(--brand-primary); }
+.scale { color: var(--text-secondary); font-size: .68rem; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 10px; }
 #fullscreen { --panphy-fs-size: 48px; }
 body.viewer-expanded { overflow: hidden; }
 .viewer-panel.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100%; height: 100dvh; overflow: auto; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
@@ -211,7 +210,6 @@ body[data-model=rutherford] .legend .positive { background: #D99A36; }
 .energy-diagram .dot { fill: var(--electron); }
 .energy-diagram .transition { stroke: var(--photon); stroke-width: 2; fill: none; }
 .energy-diagram .transition-head { fill: var(--photon); }
-.scale-callout { bottom: 52px; left: 50%; transform: translateX(-50%); width: min(78%, 340px); padding: 10px 12px; border-radius: 12px; text-align: center; background: var(--overlay-bg); border: 1px solid var(--brand-primary); color: var(--text-main); font-size: .8rem; }
 
 .particle-readout { margin: 0 0 12px; min-height: 58px; padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
 .toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -310,6 +308,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   footer { flex-direction: column; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .models button, .toolbar button, .scale { transition: none; }
+  .models button, .toolbar button { transition: none; }
   .models button:hover { transform: none; }
 }
