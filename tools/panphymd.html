@@ -30,12 +30,23 @@
     <script src="/assets/sw-register.js" defer></script>
 <!-- MathJax Configuration -->
   <script>
+    // Math is tokenized by the Markdown renderer into .math-inline /
+    // .math-display elements using \(...\) and \[...\]. MathJax only
+    // typesets those elements, so literal $ signs never pair up as math, and
+    // typesetting is driven by the app rather than on page load.
     window.MathJax = {
       tex: {
-        inlineMath: [['$', '$']],
-        displayMath: [['$$', '$$']],
-        processEscapes: true,
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: false,
         packages: ['base', 'ams', 'array'],
+      },
+      options: {
+        ignoreHtmlClass: 'mathjax-ignore',
+        processHtmlClass: 'math-inline|math-display'
+      },
+      startup: {
+        typeset: false
       },
       svg: {
         fontCache: 'local',
@@ -48,7 +59,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
 
   <!-- DOMPurify -->
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js"></script>
 
   <!-- html2canvas (table copy-as-image) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -211,7 +222,7 @@
           </label>
         </div>
       </div>
-      <div id="renderedOutput"></div>
+      <div id="renderedOutput" class="mathjax-ignore"></div>
       <div id="presentControls" class="present-controls">
         <div class="font-size-selector present-zoom-selector">
           <label for="presentZoomSelect">Zoom</label>
