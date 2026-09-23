@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Heat and cool a 3D particle model through solid, liquid and gas. Watch melting and boiling, the piston lid rise, and the heating curve's latent-heat pauses.">
+  <meta name="description" content="Explore solid, liquid and gas in a 3D particle model. Watch the sample melt, boil and freeze, the piston lid rise as it turns to gas, and a crystal regrow as it cools.">
   <meta name="theme-color" content="#F8F6F1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -106,16 +106,9 @@
           <p id="phaseDetail" class="info-copy" aria-live="polite">Particles are locked in a regular pattern and vibrate about fixed positions.</p>
         </div>
 
-        <div class="tab-bar" role="tablist" aria-label="Matter controls">
-          <button id="statesTabBtn" class="tab-btn" type="button" role="tab" aria-selected="true"
-            aria-controls="statesTabPanel">States</button>
-          <button id="transitionsTabBtn" class="tab-btn" type="button" role="tab" aria-selected="false"
-            aria-controls="transitionsTabPanel" tabindex="-1">Heat &amp; Cool</button>
-        </div>
-
-        <section id="statesTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="statesTabBtn">
+        <section class="states-section" aria-labelledby="statesHeading">
           <div class="control-card">
-            <h3 class="card-title">Choose a state</h3>
+            <h3 id="statesHeading" class="card-title">Choose a state</h3>
             <div class="state-buttons">
               <button id="presetSolidBtn" class="state-preset" type="button" data-preset="solid" aria-pressed="false">
                 <span class="state-preset-main">
@@ -149,57 +142,16 @@
               </button>
             </div>
             <p class="info-copy info-copy--muted">A constant outside pressure pushes the lid down, as the air does on a real sample. The lid rests on a solid or liquid and rises when the sample boils. Choosing Solid cools the sample gently through its freezing point so the particles have time to line up into a crystal.</p>
+            <label class="toggle-row" for="fastForwardToggle">
+              <span class="toggle-text">
+                <strong>Fast-forward freezing</strong>
+                <span>Runs ×4 faster while a crystal grows after choosing Solid.</span>
+              </span>
+              <input id="fastForwardToggle" class="switch" type="checkbox" role="switch" checked>
+            </label>
           </div>
         </section>
 
-        <section id="transitionsTabPanel" class="tab-panel" role="tabpanel" aria-labelledby="transitionsTabBtn" hidden>
-          <div class="control-card">
-            <div class="control-header">
-              <h3 class="card-title">Heater</h3>
-              <span id="heatCoolStatus" class="heat-cool-status" data-mode="off">Holding</span>
-            </div>
-            <p class="info-copy">Heat steadily and watch the heating curve. While the sample melts or boils, its temperature climbs much more slowly: the energy goes into pulling particles apart, not into making them move faster.</p>
-            <div class="hold-buttons">
-              <button id="coolHoldBtn" class="btn hold-btn hold-btn--cool" type="button">Hold to cool</button>
-              <button id="heatHoldBtn" class="btn hold-btn hold-btn--heat" type="button">Hold to heat</button>
-            </div>
-            <div class="heat-cool-shell">
-              <label for="heatCoolSlider" class="field-label">Heater power · springs back when released</label>
-              <input type="range" id="heatCoolSlider" min="-100" max="100" step="5" value="0"
-                aria-valuetext="Off">
-              <div class="heat-cool-labels" aria-hidden="true">
-                <span>Cool</span>
-                <span>Off</span>
-                <span>Heat</span>
-              </div>
-            </div>
-            <div class="setpoint-field">
-              <label for="setpointInput" class="field-label">Hold the temperature at</label>
-              <div class="stepper">
-                <button id="setpointDownBtn" class="stepper-btn" type="button" aria-label="Lower by 10 K">−10</button>
-                <div class="stepper-input-wrap">
-                  <input id="setpointInput" type="number" min="20" max="1500" step="10" inputmode="numeric" value="100">
-                  <span class="stepper-unit" aria-hidden="true">K</span>
-                </div>
-                <button id="setpointUpBtn" class="stepper-btn" type="button" aria-label="Raise by 10 K">+10</button>
-              </div>
-            </div>
-            <div class="transition-markers">
-              <span id="meltPill" class="transition-pill transition-pill--melt">Melting ≈ 300 K</span>
-              <span id="boilPill" class="transition-pill transition-pill--boil">Boiling ≈ 640 K</span>
-            </div>
-          </div>
-
-          <div class="control-card">
-            <div class="control-header">
-              <h3 class="card-title">Heating curve</h3>
-              <button id="clearGraphBtn" class="btn btn-small" type="button">Clear</button>
-            </div>
-            <canvas id="heatingCurve" class="heating-curve" role="img"
-              aria-label="Graph of temperature against energy per particle, drawn as the sample is heated or cooled"></canvas>
-            <p class="info-copy info-copy--muted">Temperature against the energy stored per particle. The flatter stretches are the melting and boiling pauses. This sample has only 256 particles, so its pauses are short and slightly sloped; a real sample with trillions of particles pauses completely. Cool quickly and the liquid can freeze into a jumbled, glass-like solid instead of a crystal.</p>
-          </div>
-        </section>
 
         <div class="control-card">
           <div class="control-header">

@@ -27,17 +27,14 @@
   --nav-border: #E8E4DD;
 
   --slider-track: #E8E4DD;
-  --slider-thumb: #C2410C;
   --toggle-hover: rgba(194, 65, 12, 0.12);
   --brand-soft: rgba(194, 65, 12, 0.1);
   --brand-line: rgba(194, 65, 12, 0.35);
 
-  /* Phase colours, shared with the 3D particles and the heating curve. */
+  /* Phase colours, shared by the badge, thermometer and preset swatches. */
   --phase-solid: #0D9488;
   --phase-liquid: #D97706;
   --phase-gas: #DB2777;
-  --cool: #0284C7;
-  --heat: #DC2626;
 
   --thermo-glass: rgba(255, 255, 255, 0.92);
   --thermo-track: #F0ECE4;
@@ -62,7 +59,6 @@
   --nav-border: #2E2E2A;
 
   --slider-track: #3A3A36;
-  --slider-thumb: #E8734A;
   --toggle-hover: rgba(232, 115, 74, 0.15);
   --brand-soft: rgba(232, 115, 74, 0.12);
   --brand-line: rgba(232, 115, 74, 0.4);
@@ -70,8 +66,6 @@
   --phase-solid: #2DD4BF;
   --phase-liquid: #F59E0B;
   --phase-gas: #F472B6;
-  --cool: #38BDF8;
-  --heat: #F87171;
 
   --thermo-glass: rgba(30, 30, 28, 0.94);
   --thermo-track: #2A2A27;
@@ -548,47 +542,6 @@ a:hover {
   height: 10px;
 }
 
-/* Tabs */
-.tab-bar {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.tab-btn {
-  min-height: 44px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface-alt);
-  color: var(--text-main);
-  font-family: var(--font-body);
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
-}
-
-.tab-btn:hover {
-  transform: translateY(-1px);
-}
-
-.tab-btn[aria-selected="true"] {
-  border-color: transparent;
-  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-  color: #ffffff;
-  box-shadow: 0 10px 22px var(--brand-soft);
-}
-
-.tab-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.tab-panel[hidden] {
-  display: none;
-}
-
 /* State presets */
 .state-buttons {
   display: flex;
@@ -669,238 +622,75 @@ a:hover {
   white-space: nowrap;
 }
 
-/* Heater */
-.heat-cool-status {
-  display: inline-flex;
+/* Fast-forward switch */
+.toggle-row {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 28px;
-  padding: 0 0.75rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-main);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.heat-cool-status[data-mode="heat"] {
-  border-color: var(--heat);
-  color: var(--heat);
-}
-
-.heat-cool-status[data-mode="cool"] {
-  border-color: var(--cool);
-  color: var(--cool);
-}
-
-.hold-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.hold-btn {
-  min-height: 52px;
-  color: #ffffff;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-/* Fixed deep shades keep white text readable in both themes. */
-.hold-btn--cool { background: #0369A1; }
-.hold-btn--heat { background: #B91C1C; }
-
-.hold-btn.is-held {
-  transform: translateY(1px) scale(0.98);
-  filter: brightness(0.9);
-}
-
-.heat-cool-shell {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-input[type="range"] {
-  width: 100%;
-  height: 32px;
-  background: transparent;
-  cursor: pointer;
-  margin: 0;
-  -webkit-appearance: none;
-  appearance: none;
-  touch-action: none;
-}
-
-input[type="range"]:focus-visible {
-  outline: 2px solid var(--brand-primary);
-  outline-offset: 4px;
-  border-radius: 999px;
-}
-
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--cool) 0%, var(--slider-track) 45%, var(--slider-track) 55%, var(--heat) 100%);
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  margin-top: -8px;
-  border-radius: 50%;
-  border: 2px solid var(--surface);
-  background: var(--slider-thumb);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-input[type="range"]::-moz-range-track {
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--cool) 0%, var(--slider-track) 45%, var(--slider-track) 55%, var(--heat) 100%);
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--surface);
-  background: var(--slider-thumb);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.heat-cool-labels {
-  display: flex;
   justify-content: space-between;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Setpoint stepper */
-.setpoint-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.stepper {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 56px;
-  gap: 0.4rem;
-  align-items: stretch;
-}
-
-.stepper-btn {
+  gap: 0.75rem;
   min-height: 48px;
+  padding: 0.6rem 0.8rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text-main);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 600;
   cursor: pointer;
-  touch-action: manipulation;
 }
 
-.stepper-btn:hover {
-  border-color: var(--brand-line);
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
-.stepper-btn:focus-visible,
-.stepper-input-wrap:focus-within {
+.toggle-text strong {
+  font-size: 0.86rem;
+}
+
+.toggle-text span {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.switch {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 0 0 auto;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--slider-track);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.switch:checked {
+  background: var(--brand-primary);
+}
+
+.switch:checked::after {
+  transform: translateX(20px);
+}
+
+.switch:focus-visible {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
-}
-
-.stepper-input-wrap {
-  display: flex;
-  align-items: center;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  padding: 0 0.8rem;
-}
-
-.stepper-input-wrap input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
-  color: var(--text-main);
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 600;
-  text-align: right;
-  padding: 0.5rem 0.3rem 0.5rem 0;
-  outline: none;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.stepper-input-wrap input::-webkit-outer-spin-button,
-.stepper-input-wrap input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.stepper-unit {
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.transition-markers {
-  display: flex;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-}
-
-.transition-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 28px;
-  padding: 0 0.7rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-}
-
-.transition-pill::before {
-  content: '';
-  width: 14px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--marker-color);
-}
-
-.transition-pill--melt { --marker-color: var(--phase-liquid); }
-.transition-pill--boil { --marker-color: var(--phase-gas); }
-
-/* Heating curve */
-.heating-curve {
-  display: block;
-  width: 100%;
-  height: 200px;
-  border-radius: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
 }
 
 /* Energy */
@@ -1025,8 +815,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .btn:focus-visible,
-.state-preset:focus-visible,
-.tab-btn:focus-visible {
+.state-preset:focus-visible {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
@@ -1091,7 +880,6 @@ kbd {
 
 @media (pointer: coarse) {
   .btn,
-  .tab-btn,
   .segmented button {
     min-height: 48px;
   }
@@ -1114,7 +902,7 @@ kbd {
   }
 
   /* Keep the particles in view while the controls scroll underneath, so
-     students can watch the sample as they heat or cool it. */
+     students can watch the sample change as they pick a state. */
   #simPanel {
     position: sticky;
     top: max(8px, env(safe-area-inset-top));
