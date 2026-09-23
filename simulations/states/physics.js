@@ -57,7 +57,6 @@ export function createSim() {
     lidForce: 0,
     time: 0,
     targetT: T_MIN,
-    heatPower: 0, // energy per unit time added (+) or removed (-) by the heater
     kinetic: 0,
     potential: 0,
     coordination: new Uint8Array(N),
@@ -101,7 +100,6 @@ export function resetSim(sim, temperature = T_MIN) {
   sim.lid = top + WALL_CONTACT + 0.05;
   sim.lidVel = 0;
   sim.time = 0;
-  sim.heatPower = 0;
   sim.targetT = temperature;
   removeBulkMotion(sim);
   scaleToTemperature(sim, temperature);
@@ -328,15 +326,11 @@ export function stepSim(sim, dt) {
   capSpeeds(sim);
   removeBulkMotion(sim);
 
+  // Weak Berendsen thermostat towards the target temperature.
   const before = kineticEnergy(sim);
-  let after = before;
-  if (sim.heatPower !== 0) {
-    after = Math.max(0.5 * DOF * T_MIN, Math.min(0.5 * DOF * T_MAX, before + sim.heatPower * dt));
-  } else {
-    const current = (2 * before) / DOF;
-    const coupling = Math.min(1, dt / THERMOSTAT_TAU);
-    after = before * Math.max(0.05, 1 + coupling * (sim.targetT / Math.max(current, 1e-9) - 1));
-  }
+  const current = (2 * before) / DOF;
+  const coupling = Math.min(1, dt / THERMOSTAT_TAU);
+  const after = before * Math.max(0.05, 1 + coupling * (sim.targetT / Math.max(current, 1e-9) - 1));
   if (before > 1e-12 && after !== before) {
     const scale = Math.sqrt(after / before);
     for (let i = 0; i < N * 3; i++) vel[i] *= scale;

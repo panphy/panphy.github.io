@@ -9,37 +9,29 @@ const { N } = Physics;
 // kelvin for a fictional substance, so equal steps in the model are equal
 // steps on the thermometer. With this factor the 256-particle sample melts
 // near 300 K and boils near 640 K at the lid's outside pressure (measured
-// from slow heating runs of this model).
+// from slow heating runs of this model); the thermometer marks both.
 const KELVIN_PER_UNIT = 750;
 const MELT_K = 300;
 const BOIL_K = 640;
 const DISPLAY_MAX_K = Physics.T_MAX * KELVIN_PER_UNIT;
-const SETPOINT_MIN_K = 20;
-const SETPOINT_MAX_K = 1500;
-const SETPOINT_STEP_K = 10;
 const PRESET_K = { solid: 100, liquid: 450, gas: 1000 };
 
 // --- Timing and control --------------------------------------------------
 const SIM_SPEED = 2.5; // simulation time units per real second
 const TIME_STEP = 0.005;
 const MAX_STEPS_PER_FRAME = 40;
-const HEATER_MAX_POWER = 60; // energy per simulation time unit at 100%
-const HOLD_BUTTON_LEVEL = 0.3;
-const RAMP_RATE = 0.15; // reduced temperature per time unit for presets/setpoint
+const RAMP_RATE = 0.15; // reduced temperature per time unit between presets
 const TEMPERATURE_SMOOTHING_TIME = 1.0;
 // The Solid preset first lets any gas condense into a liquid, then pauses just
 // below the freezing point until the particles have lined up into a crystal
-// (or the wait times out), then cools to the preset. The pause is shown in
-// fast-forward because crystals take a while to grow.
+// (or the wait times out), then cools to the preset. Crystals take a while to
+// grow, so by default the pause runs in fast-forward; users can turn that off.
 const CONDENSE_T = 0.55;
 const ANNEAL_T = 0.3;
 const ANNEAL_MIN_TIME = 5;
 const ANNEAL_TIMEOUT = 100;
 const FAST_FORWARD = 4;
-const GRAPH_SAMPLE_INTERVAL = 0.1; // seconds
-const GRAPH_MAX_POINTS = 3000;
-const GRAPH_E_MIN = -5.8;
-const GRAPH_E_MAX = 3.2;
+const FAST_FORWARD_STORAGE_KEY = 'panphy-states-fast-forward';
 const DIAG_INTERVAL = 3; // frames between structure analyses
 const PHASE_CONFIRM_COUNT = 6; // analyses a new phase must persist for
 
@@ -71,19 +63,7 @@ const volumeVal = $('volumeVal');
 const keVal = $('keVal');
 const peVal = $('peVal');
 const teVal = $('teVal');
-const statesTabBtn = $('statesTabBtn');
-const transitionsTabBtn = $('transitionsTabBtn');
-const statesTabPanel = $('statesTabPanel');
-const transitionsTabPanel = $('transitionsTabPanel');
-const heatCoolSlider = $('heatCoolSlider');
-const heatCoolStatus = $('heatCoolStatus');
-const heatHoldBtn = $('heatHoldBtn');
-const coolHoldBtn = $('coolHoldBtn');
-const setpointInput = $('setpointInput');
-const setpointDownBtn = $('setpointDownBtn');
-const setpointUpBtn = $('setpointUpBtn');
-const graphCanvas = $('heatingCurve');
-const clearGraphBtn = $('clearGraphBtn');
+const fastForwardToggle = $('fastForwardToggle');
 const playPauseBtn = $('playPauseBtn');
 const resetBtn = $('resetBtn');
 const simHint = $('simHint');
@@ -101,8 +81,7 @@ const sim = Physics.createSim();
 
 const state = {
   playing: true,
-  heater: { slider: 0, hold: 0 },
-  sliderKeyboard: false,
+  fastForwardEnabled: true,
   rampTarget: kelvinToReduced(PRESET_K.solid),
   activePreset: 'solid',
   anneal: null,
@@ -122,72 +101,11 @@ const state = {
   userInteracting: false,
   lastInteraction: 0,
   viewReserve: 0,
-  accumulator: 0,
-  graphTimer: 0,
-  graphDirty: true
+  accumulator: 0
 };
 
-// --- Heater and thermostat ------------------------------------------------
-function heatLevel() {
-  return state.heater.hold !== 0 ? state.heater.hold : state.heater.slider;
-}
-
-function onHeaterChanged(previousLevel) {
-  const level = heatLevel();
-  if (level !== 0) {
-    state.anneal = null;
-    state.activePreset = null;
-  } else if (previousLevel !== 0) {
-    // Hold wherever the heater left the sample.
-    state.rampTarget = state.smoothT;
-    sim.targetT = state.smoothT;
-  }
-  updateHeaterStatus();
-}
-
-function setHeater(source, value) {
-  const previous = heatLevel();
-  state.heater[source] = value;
-  onHeaterChanged(previous);
-}
-
-function releaseSlider() {
-  state.sliderKeyboard = false;
-  if (state.heater.slider === 0 && heatCoolSlider.value === '0') return;
-  heatCoolSlider.value = '0';
-  setHeater('slider', 0);
-}
-
-function releaseAllHeating() {
-  heatHoldBtn.classList.remove('is-held');
-  coolHoldBtn.classList.remove('is-held');
-  state.heater.hold = 0;
-  releaseSlider();
-  onHeaterChanged(0);
-}
-
-function updateHeaterStatus() {
-  const level = heatLevel();
-  const percent = Math.round(Math.abs(level) * 100);
-  let text = 'Holding';
-  let mode = 'off';
-  if (percent > 0) {
-    mode = level > 0 ? 'heat' : 'cool';
-    text = (level > 0 ? 'Heating ' : 'Cooling ') + percent + '%';
-  }
-  heatCoolStatus.textContent = text;
-  heatCoolStatus.dataset.mode = mode;
-  heatCoolSlider.setAttribute('aria-valuetext', percent === 0 ? 'Off' : text);
-}
-
+// --- Thermostat ---------------------------------------------------------------
 function updateThermostat(dt) {
-  const level = heatLevel();
-  if (level !== 0) {
-    sim.heatPower = level * HEATER_MAX_POWER;
-    return;
-  }
-  sim.heatPower = 0;
-
   let goal = state.rampTarget;
   const anneal = state.anneal;
   if (anneal && anneal.stage === 'condense') {
@@ -212,10 +130,9 @@ function updateThermostat(dt) {
   if (anneal && anneal.stage === 'done' && sim.targetT === state.rampTarget) state.anneal = null;
 }
 
-function holdTemperature(reducedT, preset) {
-  releaseAllHeating();
-  state.rampTarget = clamp(reducedT, Physics.T_MIN, Physics.T_MAX);
-  state.activePreset = preset || null;
+function applyPreset(preset) {
+  state.rampTarget = clamp(kelvinToReduced(PRESET_K[preset]), Physics.T_MIN, Physics.T_MAX);
+  state.activePreset = preset;
   state.anneal = null;
   if (preset === 'solid') {
     // Cool (or warm a glassy solid) gently through the freezing point unless
@@ -226,28 +143,12 @@ function holdTemperature(reducedT, preset) {
       state.anneal = { stage: needsCondensing ? 'condense' : 'hold', held: 0, holding: false };
     }
   }
-  syncSetpointInput(true);
   updatePresetButtons();
-}
-
-function applySetpoint(kelvin) {
-  if (!Number.isFinite(kelvin)) {
-    syncSetpointInput(true);
-    return;
-  }
-  const k = clamp(Math.round(kelvin), SETPOINT_MIN_K, SETPOINT_MAX_K);
-  holdTemperature(kelvinToReduced(k), null);
-}
-
-function syncSetpointInput(force) {
-  if (!force && document.activeElement === setpointInput) return;
-  const k = String(Math.round(reducedToKelvin(state.rampTarget)));
-  if (setpointInput.value !== k) setpointInput.value = k;
 }
 
 function updatePresetButtons() {
   for (const [key, button] of Object.entries(presetButtons)) {
-    const active = state.activePreset === key && heatLevel() === 0;
+    const active = state.activePreset === key;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
   }
@@ -424,14 +325,9 @@ const palette = {
   mid: new THREE.Color('#FACC15'),
   fast: new THREE.Color('#DC2626')
 };
-const cssColors = {};
 const smoothCoordination = new Float32Array(N).fill(12);
 const smoothSpeed = new Float32Array(N);
 const tmpColor = new THREE.Color();
-
-function cssVar(name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
 
 function isDark() {
   return document.documentElement.getAttribute('data-theme') === 'dark';
@@ -447,10 +343,6 @@ function applyTheme() {
   rodMat.color.setHex(dark ? 0x8A857C : 0x8C857B);
   bondMat.color.setHex(dark ? 0xE7E2DA : 0x5A544E);
   palette.plain.setHex(dark ? 0xD6D0C8 : 0x77706A);
-  for (const name of ['--text-secondary', '--border', '--brand-primary', '--phase-liquid', '--phase-gas', '--text-main', '--surface']) {
-    cssColors[name] = cssVar(name);
-  }
-  state.graphDirty = true;
 }
 
 // A neutral scale (not the phase colours): particles on a crystal's surface
@@ -591,129 +483,12 @@ function updateReadouts() {
   teVal.textContent = (state.smoothKE + state.smoothPE).toFixed(2);
 
   fastForwardBadge.hidden = !isFastForwarding();
-  syncSetpointInput(false);
   updatePresetButtons();
   renderPhase();
 }
 
-// --- Heating curve -----------------------------------------------------------
-const graph = {
-  ctx: graphCanvas.getContext('2d'),
-  xs: new Float32Array(GRAPH_MAX_POINTS),
-  ys: new Float32Array(GRAPH_MAX_POINTS),
-  start: 0,
-  count: 0
-};
-
-function clearGraph() {
-  graph.start = 0;
-  graph.count = 0;
-  state.graphDirty = true;
-}
-
-function addGraphPoint(energy, kelvin) {
-  const index = (graph.start + graph.count) % GRAPH_MAX_POINTS;
-  graph.xs[index] = energy;
-  graph.ys[index] = kelvin;
-  if (graph.count < GRAPH_MAX_POINTS) graph.count++;
-  else graph.start = (graph.start + 1) % GRAPH_MAX_POINTS;
-  state.graphDirty = true;
-}
-
-function drawGraph() {
-  const cssWidth = graphCanvas.clientWidth;
-  const cssHeight = graphCanvas.clientHeight;
-  if (!cssWidth || !cssHeight) return;
-  state.graphDirty = false;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = Math.round(cssWidth * dpr);
-  const h = Math.round(cssHeight * dpr);
-  if (graphCanvas.width !== w || graphCanvas.height !== h) {
-    graphCanvas.width = w;
-    graphCanvas.height = h;
-  }
-  const ctx = graph.ctx;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, cssWidth, cssHeight);
-
-  const pad = { left: 44, right: 10, top: 10, bottom: 30 };
-  const plotW = cssWidth - pad.left - pad.right;
-  const plotH = cssHeight - pad.top - pad.bottom;
-  const xOf = (e) => pad.left + ((e - GRAPH_E_MIN) / (GRAPH_E_MAX - GRAPH_E_MIN)) * plotW;
-  const yOf = (k) => pad.top + (1 - k / DISPLAY_MAX_K) * plotH;
-
-  ctx.font = '10px "IBM Plex Mono", monospace';
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = cssColors['--border'];
-  ctx.fillStyle = cssColors['--text-secondary'];
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'middle';
-  for (let k = 0; k <= DISPLAY_MAX_K; k += 500) {
-    const y = yOf(k);
-    ctx.beginPath();
-    ctx.moveTo(pad.left, y);
-    ctx.lineTo(pad.left + plotW, y);
-    ctx.stroke();
-    ctx.fillText(k + ' K', pad.left - 4, y);
-  }
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  for (let e = -4; e <= 2; e += 2) {
-    const x = xOf(e);
-    ctx.beginPath();
-    ctx.moveTo(x, pad.top);
-    ctx.lineTo(x, pad.top + plotH);
-    ctx.stroke();
-    ctx.fillText(String(e), x, pad.top + plotH + 4);
-  }
-  ctx.fillText('Energy per particle (ε)', pad.left + plotW / 2, pad.top + plotH + 16);
-
-  ctx.setLineDash([4, 4]);
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'bottom';
-  for (const [k, color, label] of [[MELT_K, cssColors['--phase-liquid'], 'melting'], [BOIL_K, cssColors['--phase-gas'], 'boiling']]) {
-    const y = yOf(k);
-    ctx.strokeStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(pad.left, y);
-    ctx.lineTo(pad.left + plotW, y);
-    ctx.stroke();
-    ctx.fillStyle = color;
-    ctx.fillText(label, pad.left + plotW - 2, y - 2);
-  }
-  ctx.setLineDash([]);
-
-  if (graph.count === 0) return;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(pad.left, pad.top, plotW, plotH);
-  ctx.clip();
-  ctx.strokeStyle = cssColors['--brand-primary'];
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  for (let n = 0; n < graph.count; n++) {
-    const i = (graph.start + n) % GRAPH_MAX_POINTS;
-    const x = xOf(graph.xs[i]);
-    const y = yOf(graph.ys[i]);
-    if (n === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-  const last = (graph.start + graph.count - 1) % GRAPH_MAX_POINTS;
-  ctx.fillStyle = cssColors['--brand-primary'];
-  ctx.strokeStyle = cssColors['--surface'];
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(xOf(graph.xs[last]), yOf(graph.ys[last]), 4.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  ctx.restore();
-}
-
 // --- Simulation control -------------------------------------------------------
 function resetSimulation() {
-  releaseAllHeating();
   const start = kelvinToReduced(PRESET_K.solid);
   Physics.resetSim(sim, start);
   state.rampTarget = start;
@@ -736,12 +511,9 @@ function resetSimulation() {
   smoothCoordination.set(sim.coordination);
   smoothSpeed.fill(0);
   state.accumulator = 0;
-  clearGraph();
   updateStructure();
   syncScene();
   updateParticleColors();
-  updateHeaterStatus();
-  syncSetpointInput(true);
   updateReadouts();
   if (!state.playing) togglePlay();
 }
@@ -753,7 +525,7 @@ function togglePlay() {
 }
 
 function isFastForwarding() {
-  return Boolean(state.anneal && state.anneal.holding);
+  return state.fastForwardEnabled && Boolean(state.anneal && state.anneal.holding);
 }
 
 function advance(realDt) {
@@ -770,132 +542,39 @@ function advance(realDt) {
     updateThermostat(TIME_STEP);
     Physics.stepSim(sim, TIME_STEP);
     state.smoothT += (Physics.temperatureOf(sim) - state.smoothT) * alpha;
-    if (heatLevel() !== 0) {
-      sim.targetT = state.smoothT;
-      state.rampTarget = state.smoothT;
-    }
   }
 
-  // Heating or cooling, judged from what the heater or thermostat is doing so
-  // that noise cannot flip "Melting" to "Freezing" while the sample is held.
-  const level = heatLevel();
-  if (level > 0) state.direction = 1;
-  else if (level < 0) state.direction = -1;
-  else if (sim.targetT - state.smoothT > 0.01) state.direction = 1;
+  // Heating or cooling, judged from where the thermostat is heading so that
+  // noise cannot flip "Melting" to "Freezing" while the sample is held.
+  if (sim.targetT - state.smoothT > 0.01) state.direction = 1;
   else if (sim.targetT - state.smoothT < -0.01) state.direction = -1;
-
-  const energy = (sim.kinetic + sim.potential) / N;
-
-  state.graphTimer += realDt;
-  if (state.graphTimer >= GRAPH_SAMPLE_INTERVAL) {
-    state.graphTimer = 0;
-    addGraphPoint(energy, reducedToKelvin(state.smoothT));
-  }
 }
 
 // --- Events -------------------------------------------------------------------
-function setActiveTab(tabName, focus) {
-  const showStates = tabName === 'states';
-  statesTabBtn.setAttribute('aria-selected', showStates ? 'true' : 'false');
-  transitionsTabBtn.setAttribute('aria-selected', showStates ? 'false' : 'true');
-  statesTabBtn.tabIndex = showStates ? 0 : -1;
-  transitionsTabBtn.tabIndex = showStates ? -1 : 0;
-  statesTabPanel.hidden = !showStates;
-  transitionsTabPanel.hidden = showStates;
-  if (focus) (showStates ? statesTabBtn : transitionsTabBtn).focus();
-  state.graphDirty = true;
-}
-
-statesTabBtn.addEventListener('click', () => setActiveTab('states'));
-transitionsTabBtn.addEventListener('click', () => setActiveTab('transitions'));
-for (const tab of [statesTabBtn, transitionsTabBtn]) {
-  tab.addEventListener('keydown', (e) => {
-    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) === -1) return;
-    e.preventDefault();
-    let next = tab === statesTabBtn ? 'transitions' : 'states';
-    if (e.key === 'Home') next = 'states';
-    if (e.key === 'End') next = 'transitions';
-    setActiveTab(next, true);
-  });
-}
-
 for (const [key, button] of Object.entries(presetButtons)) {
-  button.addEventListener('click', () => holdTemperature(kelvinToReduced(PRESET_K[key]), key));
+  button.addEventListener('click', () => applyPreset(key));
 }
 
-// Heater slider: springs back to zero whenever it is let go, however that
-// happens (pointer up, touch cancelled by scrolling, focus lost, key up).
-const SLIDER_KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
-heatCoolSlider.addEventListener('input', () => setHeater('slider', clamp(Number(heatCoolSlider.value) / 100, -1, 1)));
-heatCoolSlider.addEventListener('change', () => {
-  if (!state.sliderKeyboard) releaseSlider();
-});
-heatCoolSlider.addEventListener('keydown', (e) => {
-  if (SLIDER_KEYS.indexOf(e.key) !== -1) state.sliderKeyboard = true;
-});
-heatCoolSlider.addEventListener('keyup', (e) => {
-  if (SLIDER_KEYS.indexOf(e.key) !== -1) releaseSlider();
-});
-heatCoolSlider.addEventListener('blur', releaseSlider);
-window.addEventListener('pointerup', () => {
-  if (!state.sliderKeyboard) releaseSlider();
-});
-window.addEventListener('pointercancel', releaseSlider);
-window.addEventListener('blur', releaseAllHeating);
-
-function bindHoldButton(button, level) {
-  const start = () => {
-    button.classList.add('is-held');
-    setHeater('hold', level);
-  };
-  const stop = () => {
-    if (!button.classList.contains('is-held')) return;
-    button.classList.remove('is-held');
-    if (state.heater.hold === level) setHeater('hold', 0);
-  };
-  button.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    button.setPointerCapture(e.pointerId);
-    start();
-  });
-  button.addEventListener('pointerup', stop);
-  button.addEventListener('pointercancel', stop);
-  button.addEventListener('lostpointercapture', stop);
-  button.addEventListener('keydown', (e) => {
-    if (e.key !== ' ' && e.key !== 'Enter') return;
-    e.preventDefault();
-    if (!e.repeat) start();
-  });
-  button.addEventListener('keyup', (e) => {
-    if (e.key !== ' ' && e.key !== 'Enter') return;
-    e.preventDefault();
-    stop();
-  });
-  button.addEventListener('blur', stop);
-  button.addEventListener('contextmenu', (e) => e.preventDefault());
-}
-bindHoldButton(heatHoldBtn, HOLD_BUTTON_LEVEL);
-bindHoldButton(coolHoldBtn, -HOLD_BUTTON_LEVEL);
-
-function stepSetpoint(direction) {
-  const current = Number(setpointInput.value);
-  const base = Number.isFinite(current) ? current : reducedToKelvin(state.rampTarget);
-  const next = direction > 0
-    ? Math.floor(base / SETPOINT_STEP_K) * SETPOINT_STEP_K + SETPOINT_STEP_K
-    : Math.ceil(base / SETPOINT_STEP_K) * SETPOINT_STEP_K - SETPOINT_STEP_K;
-  applySetpoint(next);
-}
-setpointDownBtn.addEventListener('click', () => stepSetpoint(-1));
-setpointUpBtn.addEventListener('click', () => stepSetpoint(1));
-setpointInput.addEventListener('change', () => applySetpoint(Number(setpointInput.value)));
-setpointInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    applySetpoint(Number(setpointInput.value));
-    setpointInput.blur();
+function readFastForwardPreference() {
+  try {
+    return localStorage.getItem(FAST_FORWARD_STORAGE_KEY) !== '0';
+  } catch (error) {
+    return true;
   }
-});
+}
+
+function setFastForward(enabled) {
+  state.fastForwardEnabled = enabled;
+  fastForwardToggle.checked = enabled;
+  try {
+    if (enabled) localStorage.removeItem(FAST_FORWARD_STORAGE_KEY);
+    else localStorage.setItem(FAST_FORWARD_STORAGE_KEY, '0');
+  } catch (error) {
+    // The choice still applies for this visit when storage is unavailable.
+  }
+}
+
+fastForwardToggle.addEventListener('change', () => setFastForward(fastForwardToggle.checked));
 
 colorModeButtons.forEach((button, index) => {
   button.addEventListener('click', () => setColorMode(button.dataset.colorMode));
@@ -908,11 +587,10 @@ colorModeButtons.forEach((button, index) => {
   });
 });
 
-clearGraphBtn.addEventListener('click', clearGraph);
 playPauseBtn.addEventListener('click', togglePlay);
 resetBtn.addEventListener('click', resetSimulation);
 
-const INTERACTIVE = 'button, input, select, textarea, a, [role="tab"], [role="radio"], [contenteditable]';
+const INTERACTIVE = 'button, input, select, textarea, a, label, [role="radio"], [contenteditable]';
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.target instanceof Element && e.target.closest(INTERACTIVE)) return;
@@ -934,14 +612,11 @@ coarsePointer.addEventListener('change', updateHint);
 updateHint();
 
 new ResizeObserver(resize).observe(simPanel);
-new ResizeObserver(() => { state.graphDirty = true; }).observe(graphCanvas);
 
 // --- Start --------------------------------------------------------------------
 function placeStaticMarkers() {
   meltMarker.style.setProperty('--p', kelvinFraction(MELT_K).toFixed(4));
   boilMarker.style.setProperty('--p', kelvinFraction(BOIL_K).toFixed(4));
-  $('meltPill').textContent = 'Melting ≈ ' + MELT_K + ' K';
-  $('boilPill').textContent = 'Boiling ≈ ' + BOIL_K + ' K';
   for (const [key, k] of Object.entries(PRESET_K)) {
     const label = document.querySelector('[data-preset-temp="' + key + '"]');
     if (label) label.textContent = k + ' K';
@@ -950,7 +625,7 @@ function placeStaticMarkers() {
 
 placeStaticMarkers();
 applyTheme();
-setActiveTab('states');
+setFastForward(readFastForwardPreference());
 setColorMode(state.colorMode);
 resetSimulation();
 resize();
@@ -979,12 +654,10 @@ function animate(timestamp) {
   updateCamera();
   controls.update();
   renderer.render(scene, camera);
-  if (state.graphDirty && !transitionsTabPanel.hidden) drawGraph();
 }
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    releaseAllHeating();
     if (animationId) cancelAnimationFrame(animationId);
     animationId = null;
   } else if (!animationId) {
