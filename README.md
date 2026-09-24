@@ -28,6 +28,8 @@ Most published tools and simulations support offline use once their required fil
 
 All pages under `fun/`, `beta/`, `misc/`, and `gcsephy/` require internet access. Supabase features, such as leaderboards, also stay online-only.
 
+`gcsephy/` pages register their own small service worker (`gcsephy/sw.js`, scoped to `/gcsephy/`). It stores nothing; it makes every page and asset request revalidate with the server, so edits appear on the next load instead of after the browser's 10-minute HTTP cache. If the network drops, it falls back to the browser's existing copy.
+
 ## Run locally
 
 The served site uses HTML, CSS, and vanilla JavaScript, with no framework, bundler, or build step. GitHub Pages serves the files directly; a service worker handles offline caching, and selected online features use Supabase.
@@ -51,14 +53,14 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | `fun/` | Network-only games and demos |
 | `beta/` | Work in progress, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `gcsephy/` | GCSE Physics curriculum resources and flashcards, inventoried in `gcsephy/index.html` |
+| `gcsephy/` | GCSE Physics curriculum resources and flashcards, inventoried in `gcsephy/index.html`; `sw.js` and `sw-register.js` keep them fresh |
 | `.github/workflows/` | Repository automation |
 
 ## Contributing
 
 Fixes, usability improvements, and new educational tools are welcome. Keep changes lightweight, independently usable, and accessible on classroom devices.
 
-- New pages normally start in `beta/`; keep the beta, misc and GCSE Physics inventories current. School curriculum work goes in `gcsephy/`.
+- New pages normally start in `beta/`; keep the beta, misc and GCSE Physics inventories current. School curriculum work goes in `gcsephy/`, and new pages there include `<script src="/gcsephy/sw-register.js" defer></script>`.
 - When changing a precached file, bump `BUILD_ID` in `sw.js`. Published offline apps need their required assets in `ASSETS_TO_CACHE` and their homepage checks in `OFFLINE_CARD_REQUIREMENTS`.
 - Check affected browser flows, including mobile layouts and offline behavior where relevant. PanPhyPlot data or fitting changes also require its dependency-free regression checks (Node.js):
 
