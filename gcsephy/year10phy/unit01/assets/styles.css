@@ -304,8 +304,6 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .cd text.axis-label { font: 800 12px/1 Arial, Helvetica, sans-serif; }
 .cd .wire-brown { stroke: #8a4b1f; stroke-width: 9; }
 .cd .wire-blue { stroke: #2563b8; stroke-width: 9; }
-.cd .wire-green { stroke: #2f9e44; stroke-width: 9; }
-.cd .wire-yellow { stroke: #f2c500; stroke-width: 9; stroke-dasharray: 7 7; }
 .cd .sheath { fill: #d9d4c7; stroke: var(--ink); }
 
 .symbol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 16px 0 4px; }
