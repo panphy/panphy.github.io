@@ -847,21 +847,21 @@ button:disabled {
     right: 12px;
     z-index: 17;
     display: grid;
-    gap: 8px;
+    gap: 10px;
     width: max-content;
-    max-width: min(380px, calc(100% - 24px));
+    max-width: calc(100% - 24px);
     max-height: calc(100% - 70px);
     overflow: hidden;
-    padding: 10px 12px;
+    padding: 10px 14px 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    background: rgba(17, 17, 16, 0.78);
+    background: rgba(17, 17, 16, 0.8);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     color: var(--text-main);
-    font-size: 0.74rem;
-    line-height: 1.35;
+    font-size: 0.78rem;
+    line-height: 1.3;
     pointer-events: none;
 }
 
@@ -869,41 +869,104 @@ button:disabled {
     display: none;
 }
 
-.data-table {
-    display: grid;
-    gap: 2px;
+.data-panel.is-docked {
+    position: static;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    overflow-x: auto;
+    border-color: var(--panel-border);
+    background: rgba(30, 30, 28, 0.82);
+    pointer-events: auto;
 }
 
-.data-row {
+/* One grid per table so every column lines up; numbers are right-aligned tabular figures. */
+.data-grid {
     display: grid;
-    grid-template-columns: 3.4em 5.2em 6.4em 3.6em;
-    gap: 8px;
-    align-items: center;
+    column-gap: 14px;
+    row-gap: 3px;
+    align-items: baseline;
+}
+
+.data-grid.is-1d {
+    grid-template-columns: auto repeat(3, minmax(3.6em, auto));
+}
+
+.data-grid.is-2d {
+    grid-template-columns: auto repeat(5, minmax(3.6em, auto));
+}
+
+.data-collision-grid.is-1d {
+    grid-template-columns: auto repeat(2, minmax(3.6em, auto));
+}
+
+.data-collision-grid.is-2d {
+    grid-template-columns: auto repeat(3, minmax(3.6em, auto));
+}
+
+.data-cell {
     text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
-.data-table.is-2d .data-row {
-    grid-template-columns: 3.4em 10.5em 10.5em 3.6em;
-}
-
-.data-row > span:first-child {
-    text-align: left;
+.data-cell.data-label {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    text-align: left;
+}
+
+.data-group,
+.data-head,
+.data-title,
+.data-verdict,
+.data-empty {
+    font-family: var(--font-ui);
+}
+
+.data-group {
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.data-group.data-span-2 {
+    grid-column: span 2;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.data-grid.is-2d .data-group:nth-child(4) {
+    text-align: right;
 }
 
 .data-head {
     color: var(--text-muted);
-    font-size: 0.66rem;
-    letter-spacing: 0.02em;
-    padding-bottom: 2px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.data-group em,
+.data-head em {
+    font-style: normal;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.8;
+}
+
+.data-rule {
+    grid-column: 1 / -1;
+    height: 1px;
+    margin: 1px 0;
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .data-total {
-    padding-top: 2px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--brand-accent);
     font-weight: 600;
 }
@@ -917,32 +980,53 @@ button:disabled {
 
 .data-collision {
     display: grid;
-    gap: 2px;
-    padding-top: 6px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .data-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
     color: var(--brand-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.data-title span {
+    color: var(--text-main);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-size: 0.74rem;
+}
+
+.data-collision-grid .data-label {
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
     font-weight: 600;
 }
 
-.data-line {
+.data-verdict {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    gap: 16px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
 }
 
-.data-line > span:first-child {
-    color: var(--text-muted);
-}
-
-.data-verdict {
-    color: var(--text-muted);
+.data-verdict span {
+    color: var(--text-main);
+    font-weight: 600;
 }
 
 .data-empty {
     color: var(--text-muted);
+    font-size: 0.74rem;
 }
 
 .stage:fullscreen,
@@ -1108,6 +1192,11 @@ footer a:hover {
     .data-panel {
         font-size: 0.66rem;
         padding: 8px 10px;
+    }
+
+    .data-panel.is-docked {
+        font-size: 0.72rem;
+        padding: 10px 12px;
     }
 }
 
