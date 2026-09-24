@@ -905,7 +905,7 @@ kbd {
      students can watch the sample change as they pick a state. */
   #simPanel {
     position: sticky;
-    top: max(8px, env(safe-area-inset-top));
+    top: max(8px, env(safe-area-inset-top), calc(8px + var(--standalone-top)));
     z-index: 4;
     height: 46vh;
     height: 46svh;

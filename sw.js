@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-24T06:54:50Z';
+const BUILD_ID = '2026-09-24T07:06:58Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -42,6 +42,7 @@ const ASSETS_TO_CACHE = [
   '/assets/theme-toggle.js',
   '/assets/fullscreen-button.css',
   '/assets/fullscreen-button.js',
+  '/assets/standalone-top.css',
   '/manifest.json',
 
   // Tools

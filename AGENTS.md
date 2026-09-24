@@ -49,7 +49,7 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - Use camelCase for variables/functions, UPPER_SNAKE_CASE for constants, and a shared state object where useful.
 - For general published apps, follow the existing design in `tools/panphyplot.html` and `tools/panphyplot/css/panphyplot.css`: Manrope body text, DM Serif Display headings, IBM Plex Mono readouts, theme variables, dotted backgrounds, rounded panels, and a floating banner. Reuse shared controls in `assets/` where appropriate; adapt dimensions to the app.
 - Persist the theme through `data-theme` on `<html>` and localStorage. Apply the theme and browser theme metadata before first paint.
-- Keep `apple-mobile-web-app-status-bar-style` set to `default` in every theme and never switch it to `black-translucent`: on iPadOS/iOS 26+ home-screen apps, content under a translucent status bar gets a Liquid Glass blur band. Use `theme-color` for the status-bar colour.
+- Keep `apple-mobile-web-app-status-bar-style` at `default` in every theme; use `theme-color` for the bar colour. iOS/iPadOS 26+ home-screen apps still blur the top of the screen, so published pages link `/assets/standalone-top.css`, which reserves a flat strip in that mode. Offset anything pinned to the top edge (sticky headers, fixed buttons, fullscreen panes) by `var(--standalone-top)`.
 - Make layouts responsive and controls keyboard- and touch-accessible; aim for 48px touch targets. Use `viewport-fit: cover` where needed.
 - Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
 - Beta and Year 9 pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
