@@ -589,7 +589,7 @@ button:disabled {
     border-color: transparent;
 }
 
-#launchBtn {
+.ball-launch-btn {
     grid-column: 1 / -1;
     border: 1px solid transparent;
     font-weight: 700;
@@ -597,7 +597,7 @@ button:disabled {
     color: #0f1f1d;
 }
 
-#launchBtn:hover:not(:disabled) {
+.ball-launch-btn:hover:not(:disabled) {
     background: #26bfac;
     border-color: transparent;
 }
