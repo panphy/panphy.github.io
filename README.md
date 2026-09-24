@@ -1,6 +1,6 @@
 # PanPhy Labs
 
-[Open PanPhy Labs](https://panphy.github.io/)
+[Open PanPhy Labs](https://panphy.app/)
 
 Browser-based physics tools, simulations, classroom utilities, and games for learning by doing. The project grew out of a classroom constraint: students and teachers on school-managed devices often cannot install software. These apps run directly in the browser.
 
@@ -14,10 +14,10 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 
 ### GCSE Physics
 
-The [GCSE Physics hub](https://panphy.github.io/gcsephy/) collects the author's school curriculum resources:
+The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school curriculum resources:
 
-- **Year 9 · [Work Like a Physicist](https://panphy.github.io/gcsephy/year9phy/unit01/):** a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
-- **Year 10 · [Electric Circuits](https://panphy.github.io/gcsephy/year10phy/unit01/):** revision notes, practice questions, and an Exam Zone for AQA GCSE electricity. See the [unit overview](gcsephy/year10phy/unit01/README.md).
+- **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
+- **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, and an Exam Zone for AQA GCSE electricity. See the [unit overview](gcsephy/year10phy/unit01/README.md).
 - **Flashcards:** physics retrieval practice for Combined and Separate Science.
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.

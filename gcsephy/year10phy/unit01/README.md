@@ -4,7 +4,7 @@
 
 A student companion site for the Year 10 electricity unit: revision notes, worked examples, common mistakes, practice questions and an Exam Zone. It sits alongside the teaching deck and the *Electric circuits virtual labs* worksheet used in class.
 
-**Address:** <https://panphy.github.io/gcsephy/year10phy/unit01/>
+**Address:** <https://panphy.app/gcsephy/year10phy/unit01/>
 
 ---
 
