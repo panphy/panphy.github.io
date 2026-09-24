@@ -19,7 +19,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 | `fun/` | Games and playful demos | May be listed publicly; always network-only |
 | `beta/` | New work unless publication is requested | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
-| `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and flashcards | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; no registration or caching (network-only in `sw.js`) |
+| `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and flashcards | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; network-only in root `sw.js`; pages load `/gcsephy/sw-register.js`, whose `/gcsephy/`-scoped worker revalidates every request and stores nothing |
 
 Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 
@@ -40,6 +40,7 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - Files in `sw.js` → `ASSETS_TO_CACHE` are cache-first. After changing any of them, update `BUILD_ID` as the final code change using a UTC timestamp: `YYYY-MM-DDTHH:MM:SSZ`.
 - Cache URLs must match exactly, including CDN versions, paths, and query strings. Include required local modules and media for offline apps.
 - `/beta`, `/misc`, `/fun`, `/gcsephy`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
+- `gcsephy/sw.js` is a separate freshness worker, not an offline cache: it uses `cache: 'no-cache'` fetches, no Cache Storage and no `BUILD_ID`. New `gcsephy/` pages include `<script src="/gcsephy/sw-register.js" defer></script>`.
 - Keep `APP_VERSIONS` and app-group detection aligned. Entries currently use `BUILD_ID`, which is also the fallback version.
 - Preserve user-approved activation for normal updates. Keep precache repair limited to missing entries and rate-limited by the landing page.
 
