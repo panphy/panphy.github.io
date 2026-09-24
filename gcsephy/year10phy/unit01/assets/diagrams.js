@@ -157,6 +157,61 @@
     return figure(svg, caption, "Cutaway of a three-core cable: a dark outer sheath surrounds brown live, blue neutral, and green and yellow earth wires, which fan out from the open end");
   }
 
+  // Transformer icon: turns drawn across each limb of the core; more turns on
+  // the output side for step-up, fewer for step-down.
+  function transformerIcon(up) {
+    const turns = (x, n) => Array.from({ length: n }, (_, i) => {
+      const y = 24 - (n - 1) * 2.1 + i * 4.2;
+      return `M${x - 5} ${y.toFixed(1)}H${x + 5}`;
+    }).join("");
+    const [inTurns, outTurns] = up ? [3, 6] : [6, 3];
+    const arrow = up ? "M24 30V18M20 22l4-4 4 4" : "M24 18V30M20 26l4 4 4-4";
+    return `<rect x="12" y="10" width="24" height="28" rx="2" fill="#dfe3e8" stroke-width="4.5"/>
+      <rect x="12" y="10" width="24" height="28" rx="2" fill="none" stroke="#6b7684" stroke-width="1.2"/>
+      <path class="coil" d="${turns(12, inTurns)}${turns(36, outTurns)}"/>
+      <path d="${arrow}" stroke-width="2.6"/>`;
+  }
+
+  const GRID_ICONS = {
+    station: `<path d="M3 41H45"/>
+      <path d="M5 41V26l8-5v5l8-5v5l8-5v20Z" fill="#dfe3e8"/>
+      <path d="M31 41V11h7v30" fill="#b9c1ca"/>
+      <g fill="#e8ebee" stroke-width="1.6"><circle cx="36" cy="7" r="2.6"/><circle cx="41" cy="4.5" r="2"/></g>
+      <path class="bolt" d="M18 28.5 14 35h4l-2 5 6-7.5h-4l2.5-4Z"/>`,
+    up: transformerIcon(true),
+    cables: `<path d="M2 16c7 5 14 5 22 0s15-5 22 0M2 24c7 5 14 5 22 0s15-5 22 0" stroke="#d9480f" stroke-width="1.8"/>
+      <path d="M24 6 15 43M24 6l9 37M13 16h22M15 24h18M17.5 32h13M19 32l12 11M29 32 17 43M18 24l12 8M30 24l-12 8"/>`,
+    down: transformerIcon(false),
+    homes: `<path d="M3 41H45"/>
+      <path d="M8 41V22L24 9l16 13v19Z" fill="#dfe3e8"/>
+      <path d="M20 41V30h8v11" fill="#fffdf8"/>
+      <rect x="30" y="24" width="6" height="6" fill="#ffe89a" stroke-width="2"/>
+      <path d="M31 14v-4h4v7.5" fill="#b9c1ca"/>`,
+  };
+
+  // The National Grid as a vertical route: pictorial stages joined by a cable,
+  // with the grid itself shown as a shaded band. Text stays HTML so it wraps.
+  function nationalGrid() {
+    const stage = (key, name, pd, pdClass, text) => `<li class="grid-stage grid-stage-${key}">
+        <span class="grid-icon"><svg viewBox="0 0 48 48" aria-hidden="true">${GRID_ICONS[key]}</svg></span>
+        <span class="grid-text"><span class="grid-head"><strong>${name}</strong><span class="grid-pd ${pdClass}">${pd}</span></span>${text}</span>
+      </li>`;
+    return `<figure class="circuit-figure grid-route" aria-label="Electricity from power station through the National Grid to homes">
+      <ol>
+        ${stage("station", "Power station", "≈ 25 kV", "pd-mid", "Generates electricity at about 25 kV.")}
+        <li class="grid-band">
+          <span class="grid-band-tag"><strong>National Grid</strong> cables and transformers</span>
+          <ol aria-label="Stages within the National Grid">
+            ${stage("up", "Step-up transformer", "up to 400 kV", "pd-high", "Increases the p.d. to as much as 400 kV.")}
+            ${stage("cables", "Transmission cables", "very high p.d.", "pd-high", "Very high p.d., so a small current: less heating in the cables.")}
+            ${stage("down", "Step-down transformer", "p.d. lowered", "pd-mid", "Decreases the p.d. to a much lower value.")}
+          </ol>
+        </li>
+        ${stage("homes", "Homes", "230 V", "pd-low", "A safer 230 V supply.")}
+      </ol>
+    </figure>`;
+  }
+
   function symbolGrid(items) {
     const tiles = items.map(([type, name]) => {
       const svg = `<svg class="cd" viewBox="-52 -46 104 70" aria-hidden="true"><path d="M-48 0 H48"/>${drawPart([type, 0, 0, "h"])}</svg>`;
@@ -254,5 +309,5 @@
     });
   }
 
-  window.Diagrams = { circuit, threeCoreCable, symbolGrid, graph, ivSketch, IV, sub };
+  window.Diagrams = { circuit, threeCoreCable, nationalGrid, symbolGrid, graph, ivSketch, IV, sub };
 })();
