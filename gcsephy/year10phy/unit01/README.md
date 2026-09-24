@@ -18,10 +18,12 @@ Written for AQA GCSE Combined Science: Trilogy (Higher), sections 6.2.1–6.2.4.
 | 2 | Energy per coulomb | 6.2.1.3, 6.2.4.2: p.d. as energy per coulomb, E = Q V | Lab 2, pp. 7–11 |
 | 3 | Resistance & V = IR | 6.2.1.3–6.2.1.4: V = I R, ohmic conductors, origin of resistance | Lab 3, pp. 12–16 |
 | 4 | Build & measure | 6.2.1.1, RP 15: symbols, meters, measuring resistance, wire length | Meters, pp. 1–2 |
-| 5 | I–V characteristics | 6.2.1.4, RP 16: resistor, lamp, diode, thermistor, LDR | — (links to PhET) |
+| 5 | I–V characteristics | 6.2.1.4, RP 16: resistor, lamp, diode, thermistor, LDR | — |
 | 6 | Series & parallel | 6.2.2, RP 15: rules, R_total = R₁ + R₂, qualitative parallel | Lab 2, pp. 9–10 |
 | 7 | Mains & safety | 6.2.3: ac/dc, 230 V 50 Hz, three-core cable, earth wire | — |
 | 8 | Power & the National Grid | 6.2.4: P = V I, P = I² R, E = P t, transformers (HT: V_p I_p = V_s I_s) | — |
+
+Missions 1–6 also link to the PhET Circuit Construction Kit (DC). Missions 7–8 cover mains and the National Grid, which the kit cannot model, so they have no simulation link.
 
 Required-practical numbers differ between courses: resistance is RP 15 (Trilogy) / RP 3 (Physics); I–V characteristics is RP 16 (Trilogy) / RP 4 (Physics).
 

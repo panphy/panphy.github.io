@@ -119,12 +119,14 @@
     ? `<a class="next-link" href="../${next.slug}/"><span>Next mission →</span><strong>${next.shortTitle}</strong></a>`
     : '<a class="next-link" href="../../exam-zone/"><span>Unit complete →</span><strong>Enter the Exam Zone</strong></a>';
 
+  const phetTool = `<a href="${PHET}" target="_blank" rel="noopener"><span>Sim</span><strong>PhET circuit lab</strong></a>`;
   const fourthTool = lesson.lab
     ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label} · pp. ${lesson.lab.range}</strong></a>`
-    : `<a href="${PHET}" target="_blank" rel="noopener"><span>Sim</span><strong>PhET circuit lab</strong></a>`;
-  const labLink = lesson.lab
-    ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs pp. ${lesson.lab.range} <span>↗</span></a>`
-    : `<a class="workbook-link" href="${PHET}" target="_blank" rel="noopener">Try it in PhET <span>↗</span></a>`;
+    : lesson.phet ? phetTool : "";
+  const labLink = [
+    lesson.lab ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs pp. ${lesson.lab.range} <span>↗</span></a>` : "",
+    lesson.phet ? `<a class="workbook-link" href="${PHET}" target="_blank" rel="noopener">Try it in PhET <span>↗</span></a>` : ""
+  ].join("");
 
   document.body.innerHTML = `
     <main class="lesson-page ${lesson.colour}">
@@ -144,7 +146,7 @@
         </div>
       </header>
       <section class="unlock-strip" aria-label="Skills unlocked"><strong>Skills unlocked</strong>${skills}</section>
-      <nav class="lesson-tools" aria-label="Use this mission">
+      <nav class="lesson-tools${fourthTool ? "" : " three-tools"}" aria-label="Use this mission">
         <a href="#revision"><span>01</span><strong>Revision notes</strong></a>
         <a href="#practice"><span>02</span><strong>Practice questions</strong></a>
         <a href="../../exam-zone/"><span>03</span><strong>Exam Zone</strong></a>
