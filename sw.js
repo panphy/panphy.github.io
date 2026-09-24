@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-24T09:41:55Z';
+const BUILD_ID = '2026-09-24T09:47:01Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -19,7 +19,7 @@ const APP_VERSIONS = {
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
-// Legacy Year 9 address. The companion now lives in /misc/gcsephy/year9phy/
+// Legacy Year 9 address. The companion now lives in /gcsephy/year9phy/
 // (network-only); these paths hold redirect pages for old links and caches.
 const YEAR9_UNIT01_PATH_PREFIX = '/year9phy/unit01';
 const YEAR9_UNIT01_ENTRY_PATHS = [
@@ -223,7 +223,7 @@ async function hasLegacyYear9Cache() {
         const html = await cachedPage.clone().text();
         // Redirect pages at the old address also skip registration; only
         // real legacy companion pages need the one-time forced refresh.
-        const isRedirectPage = html.includes('/misc/gcsephy/year9phy/');
+        const isRedirectPage = html.includes('/gcsephy/year9phy/');
         if (!isRedirectPage && !html.includes('/assets/sw-register.js')) {
           return true;
         }
@@ -369,6 +369,7 @@ self.addEventListener('fetch', (event) => {
   const isSupabaseApi = !isSameOrigin && url.hostname.endsWith('.supabase.co');
   const isBetaPath = isSameOrigin && (url.pathname === '/beta' || url.pathname.startsWith('/beta/'));
   const isMiscPath = isSameOrigin && (url.pathname === '/misc' || url.pathname.startsWith('/misc/'));
+  const isGcsePath = isSameOrigin && (url.pathname === '/gcsephy' || url.pathname.startsWith('/gcsephy/'));
 
   // Keep all beta routes/assets network-only (no SW cache reads/writes).
   if (isBetaPath) {
@@ -377,6 +378,11 @@ self.addEventListener('fetch', (event) => {
   }
   // Keep all misc routes/assets network-only (no SW cache reads/writes).
   if (isMiscPath) {
+    event.respondWith(fetch(req));
+    return;
+  }
+  // GCSE curriculum resources are network-only too.
+  if (isGcsePath) {
     event.respondWith(fetch(req));
     return;
   }

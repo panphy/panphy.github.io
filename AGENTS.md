@@ -19,7 +19,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 | `fun/` | Games and playful demos | May be listed publicly; always network-only |
 | `beta/` | New work unless publication is requested | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
-| `misc/gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and flashcards | Direct-link access, outside the root catalogue; maintain `misc/gcsephy/index.html`; network-only like the rest of `misc/` |
+| `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and flashcards | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; no registration or caching (network-only in `sw.js`) |
 
 Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 
@@ -33,13 +33,13 @@ For a new or promoted general published app:
 
 Network-only apps omit registration and offline requirements. Public support/reference pages may use the service worker without a homepage listing.
 
-`misc/gcsephy/` is exempt from beta placement, general app styling, and homepage promotion. Do not add it to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Its absence from the catalogue does not make it private. The root `year9phy/unit01/` and `misc/gcse_phy/` paths hold redirect pages for old links only.
+`gcsephy/` is exempt from beta placement, general app styling, and homepage promotion. Do not add it to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Its absence from the catalogue does not make it private. The root `year9phy/unit01/` and `misc/gcse_phy/` paths hold redirect pages for old links only.
 
 ## Service worker
 
 - Files in `sw.js` → `ASSETS_TO_CACHE` are cache-first. After changing any of them, update `BUILD_ID` as the final code change using a UTC timestamp: `YYYY-MM-DDTHH:MM:SSZ`.
 - Cache URLs must match exactly, including CDN versions, paths, and query strings. Include required local modules and media for offline apps.
-- `/beta`, `/misc`, `/fun`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
+- `/beta`, `/misc`, `/fun`, `/gcsephy`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
 - Keep `APP_VERSIONS` and app-group detection aligned. Entries currently use `BUILD_ID`, which is also the fallback version.
 - Preserve user-approved activation for normal updates. Keep precache repair limited to missing entries and rate-limited by the landing page.
 - When changing worker routing or activation, preserve the legacy `/year9phy/unit01` trailing-slash redirect before cache lookup and the one-time legacy-cache migration limited to affected Year 9 clients (redirect pages at the old address must not trigger it).
@@ -52,7 +52,7 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - Keep `apple-mobile-web-app-status-bar-style` at `default` in every theme; use `theme-color` for the bar colour. iOS/iPadOS 26+ home-screen apps still blur the top of the screen, so published pages link `/assets/standalone-top.css`, which reserves a flat strip in that mode. Offset anything pinned to the top edge (sticky headers, fixed buttons, fullscreen panes) by `var(--standalone-top)`.
 - Make layouts responsive and controls keyboard- and touch-accessible; aim for 48px touch targets. Use `viewport-fit: cover` where needed.
 - Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
-- Beta and `misc/gcsephy/` pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
+- Beta and `gcsephy/` pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
 - For flex-based Three.js canvases, use `renderer.setSize(w, h, false)` with CSS `height: 0; flex: 1; min-height: 0` to avoid sizing feedback loops.
 
 ## Verification
