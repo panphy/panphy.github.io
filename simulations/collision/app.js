@@ -4,7 +4,6 @@ const ui = {
     startBtn: document.getElementById('startBtn'),
     addBtn: document.getElementById('addBtn'),
     resetBtn: document.getElementById('resetBtn'),
-    launchBtn: document.getElementById('launchBtn'),
     pauseBtn: document.getElementById('pauseBtn'),
     stepBtn: document.getElementById('stepBtn'),
     speedSelect: document.getElementById('speedSelect'),
@@ -819,6 +818,13 @@ function renderBallControls() {
             grid.appendChild(vyStepper.element);
         }
 
+        const launchBtn = document.createElement('button');
+        launchBtn.type = 'button';
+        launchBtn.className = 'ball-launch-btn';
+        launchBtn.textContent = `Launch ${ballName}`;
+        launchBtn.addEventListener('click', () => launchSphere(sphere));
+        grid.appendChild(launchBtn);
+
         card.appendChild(grid);
         ui.ballControlsList.appendChild(card);
     }
@@ -846,7 +852,6 @@ function updateAddBtnState() {
     const maxAllowedSpheres = (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
     ui.addBtn.disabled = spheres.length >= maxAllowedSpheres;
     ui.resetBtn.disabled = spheres.length === 0;
-    ui.launchBtn.disabled = spheres.length === 0;
 }
 
 function updateStartButtonState() {
@@ -1087,23 +1092,27 @@ function clearHandInteractionState() {
     releaseHandSuppression.clear();
 }
 
-// Return every ball to its start position. With `withLaunch`, give each its launch velocity.
+function restoreSphereStartPosition(sphere, withLaunch) {
+    const xSign = screenXSign();
+    placeSphere(sphere, sphere.spawnPosition.x, sphere.spawnPosition.y);
+    if (withLaunch) {
+        sphere.velocity.set(
+            sphere.launchVelocity.x * xSign,
+            state.oneD ? 0 : sphere.launchVelocity.y,
+            0
+        );
+    } else {
+        sphere.velocity.set(0, 0, 0);
+    }
+    sphere.contactCount = 0;
+    sphere.group.rotation.set(0, 0, 0);
+}
+
+// Return every ball to its start position, optionally with its launch velocity.
 function restoreStartPositions(withLaunch) {
     deselectSphere();
-    const xSign = screenXSign();
     for (const sphere of spheres) {
-        placeSphere(sphere, sphere.spawnPosition.x, sphere.spawnPosition.y);
-        if (withLaunch) {
-            sphere.velocity.set(
-                sphere.launchVelocity.x * xSign,
-                state.oneD ? 0 : sphere.launchVelocity.y,
-                0
-            );
-        } else {
-            sphere.velocity.set(0, 0, 0);
-        }
-        sphere.contactCount = 0;
-        sphere.group.rotation.set(0, 0, 0);
+        restoreSphereStartPosition(sphere, withLaunch);
     }
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
@@ -1125,16 +1134,21 @@ function resetAll() {
     setStatus('Motion reset. Balls restored to their starting positions.');
 }
 
-function launchAll() {
-    if (spheres.length === 0) {
-        setStatus('No balls to launch. Press "Add Ball" or pick a preset.');
+function launchSphere(sphere) {
+    if (!spheres.includes(sphere)) {
         return;
     }
-    restoreStartPositions(true);
+    clearGripReferencesToSphere(sphere);
+    frameGrippedSpheres.delete(sphere);
+    restoreSphereStartPosition(sphere, true);
+    clearTrail(sphere);
+    syncSphereMeshes();
+    renderDataPanel(true);
+    const ballName = getBallLabel(sphere);
     if (state.paused) {
-        setStatus('Launched. Press play to run the collision.');
+        setStatus(`${ballName} launched. Press play to run it.`);
     } else {
-        setStatus('Launched from the start positions.');
+        setStatus(`${ballName} launched from its start position.`);
     }
 }
 
@@ -3644,7 +3658,6 @@ async function handleStartStopClick() {
 ui.startBtn.addEventListener('click', handleStartStopClick);
 ui.addBtn.addEventListener('click', addSphere);
 ui.resetBtn.addEventListener('click', resetAll);
-ui.launchBtn.addEventListener('click', launchAll);
 ui.pauseBtn.addEventListener('click', () => setPaused(!state.paused));
 ui.stepBtn.addEventListener('click', () => {
     if (state.paused) {
