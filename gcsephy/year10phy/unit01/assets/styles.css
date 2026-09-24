@@ -325,12 +325,18 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .revision-card:last-child:nth-child(odd) { grid-column: span 2; min-height: auto; }
 
 /* grid flow (National Grid) */
-.grid-flow { list-style: none; margin: 18px 0 6px; padding: 0; display: grid; gap: 0; }
-.grid-flow li { position: relative; padding: 11px 14px; border: 2px solid var(--ink); background: var(--diagram-bg); font-size: 14px; line-height: 1.35; }
-.grid-flow li + li { margin-top: 26px; }
-.grid-flow li + li::before { content: "↓"; position: absolute; top: -26px; left: 18px; font: 900 19px/26px Arial; color: var(--ink); }
+.grid-flow, .grid-flow-network ol { list-style: none; margin: 18px 0 6px; padding: 0; display: grid; gap: 30px; }
+.grid-flow > li, .grid-flow-network ol > li { position: relative; margin: 0; }
+.grid-flow > li + li::before, .grid-flow-network ol > li::before { content: ""; position: absolute; top: -30px; left: 50%; width: 4px; height: 22px; background: var(--ink); transform: translateX(-50%); }
+.grid-flow > li + li::after, .grid-flow-network ol > li::after { content: ""; position: absolute; top: -9px; left: 50%; border-right: 9px solid transparent; border-left: 9px solid transparent; border-top: 10px solid var(--ink); transform: translateX(-50%); }
+.grid-flow > .grid-flow-endpoint, .grid-flow-network ol > li { padding: 11px 14px; border: 2px solid var(--ink); background: var(--diagram-bg); font-size: 14px; line-height: 1.35; }
 .grid-flow li strong { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.grid-flow li.up { background: #fff4c7; }.grid-flow li.down { background: #e2f7fb; }
+.grid-flow > .grid-flow-network { padding: 10px; border: 3px solid #1479a8; background: #e9f7fb; }
+.grid-flow-network-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 9px; margin: -10px -10px 30px; padding: 9px 11px; background: var(--navy); color: white; }
+.grid-flow-network-label span { font-size: 11px; font-weight: 700; }
+.grid-flow-network ol { position: relative; margin: 0; }
+.grid-flow-network ol::after { content: ""; position: absolute; bottom: -13px; left: 50%; width: 4px; height: 13px; background: var(--ink); transform: translateX(-50%); }
+.grid-flow-network ol > li.up { background: #fff4c7; }.grid-flow-network ol > li.down { background: #e2f7fb; }
 
 /* tags */
 .spec-chip { display: inline-block; margin-top: 18px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.35); font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: #d4deec; }
