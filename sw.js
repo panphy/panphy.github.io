@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-24T07:06:58Z';
+const BUILD_ID = '2026-09-24T09:41:55Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -14,12 +14,13 @@ const APP_VERSIONS = {
   collision: BUILD_ID,
   atomic_models: BUILD_ID,
   timer: BUILD_ID,
-  visualizer: BUILD_ID,
-  year9phy_unit01: BUILD_ID
+  visualizer: BUILD_ID
 };
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
+// Legacy Year 9 address. The companion now lives in /misc/gcsephy/year9phy/
+// (network-only); these paths hold redirect pages for old links and caches.
 const YEAR9_UNIT01_PATH_PREFIX = '/year9phy/unit01';
 const YEAR9_UNIT01_ENTRY_PATHS = [
   '/year9phy/unit01/',
@@ -127,25 +128,6 @@ const ASSETS_TO_CACHE = [
   // For Teachers
   '/for_teachers/timer.html',
   '/for_teachers/visualizer.html',
-
-  // Year 9 Physics companion site
-  '/year9phy/unit01/index.html',
-  '/year9phy/unit01/exam-zone/index.html',
-  '/year9phy/unit01/lesson/trust-the-data/index.html',
-  '/year9phy/unit01/lesson/variables-and-graphs/index.html',
-  '/year9phy/unit01/lesson/shock-absorber/index.html',
-  '/year9phy/unit01/lesson/ramp-line-graph/index.html',
-  '/year9phy/unit01/lesson/best-fit-outliers/index.html',
-  '/year9phy/unit01/lesson/solo-flight/index.html',
-  '/year9phy/unit01/lesson/research-project/index.html',
-  '/year9phy/unit01/assets/styles.css',
-  '/year9phy/unit01/assets/lessons.js',
-  '/year9phy/unit01/assets/site.js',
-  '/year9phy/unit01/assets/exam-questions.js',
-  '/year9phy/unit01/assets/exam-zone.js',
-  '/year9phy/unit01/assets/og.png',
-  '/year9phy/unit01/Work Like a Physicist - Year 9 Student Workbook.pdf',
-
 ];
 
 async function cachePrecacheAsset(cache, url, onlyMissing) {
@@ -239,7 +221,10 @@ async function hasLegacyYear9Cache() {
 
       try {
         const html = await cachedPage.clone().text();
-        if (!html.includes('/assets/sw-register.js')) {
+        // Redirect pages at the old address also skip registration; only
+        // real legacy companion pages need the one-time forced refresh.
+        const isRedirectPage = html.includes('/misc/gcsephy/year9phy/');
+        if (!isRedirectPage && !html.includes('/assets/sw-register.js')) {
           return true;
         }
       } catch {
