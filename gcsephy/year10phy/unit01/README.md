@@ -4,7 +4,7 @@
 
 A student companion site for the Year 10 electricity unit: revision notes, worked examples, common mistakes, practice questions and an Exam Zone. It sits alongside the teaching deck and the *Electric circuits virtual labs* worksheet used in class.
 
-**Address:** <https://panphy.github.io/misc/gcsephy/year10phy/unit01/>
+**Address:** <https://panphy.github.io/gcsephy/year10phy/unit01/>
 
 ---
 
@@ -50,7 +50,7 @@ To edit content, change `assets/lessons.js` or `assets/exam-questions.js`. There
 
 ## Hosting notes
 
-The unit lives under `misc/`, so it is unlisted, marked `noindex`, and network-only: it does not register the service worker and is not in `ASSETS_TO_CACHE`. It is listed in `misc/gcsephy/index.html`.
+The unit lives under `gcsephy/`, outside the homepage catalogue. It is marked `noindex` and network-only: it does not register the service worker, is not in `ASSETS_TO_CACHE`, and the worker never caches `/gcsephy/` requests. It is listed in `gcsephy/index.html`.
 
 ---
 

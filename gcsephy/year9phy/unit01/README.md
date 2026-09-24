@@ -31,7 +31,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 
 ## Working copy and source of truth
 
-This `misc/gcsephy/year9phy/unit01/` directory is the **authoritative and only working copy** of the project. Make future changes here and commit them to the repository; do not assume that a separate original authoring folder exists.
+This `gcsephy/year9phy/unit01/` directory is the **authoritative and only working copy** of the project. Make future changes here and commit them to the repository; do not assume that a separate original authoring folder exists.
 
 - The files in `md files/` are the editable masters for the lesson plans. Keep each Markdown file and its exported PDF in step.
 - `Work Like a Physicist - Year 9 Teaching Deck.pptx` is the editable teaching-deck master.
@@ -68,7 +68,7 @@ The shape is deliberate: **Lessons 1–2 build the language, 3–5 build the tec
 
 ## The companion site
 
-**Address: <https://panphy.github.io/misc/gcsephy/year9phy/unit01/>** (the old `/year9phy/unit01/` address redirects here)
+**Address: <https://panphy.github.io/gcsephy/year9phy/unit01/>** (the old `/year9phy/unit01/` address redirects here)
 
 A student-facing lesson companion and revision hub covering the same seven lesson sections. Students can use it alongside the workbook in class, to catch up after an absence, to revise independently, or to prepare for the end-of-unit test. Nothing in the taught unit depends on it.
 
@@ -88,7 +88,7 @@ The intended sequence is printed on each lesson page: *review the notes → use 
 
 The answers are visible to students by design — this is a revision tool, not an assessment. If you want to set questions from it as unseen homework, copy the prompts out rather than sending the link.
 
-This hosted copy is a static site and does not need a build step or server-side runtime. It lives under `misc/`, so it is network-only: it does not register the service worker or work offline.
+This hosted copy is a static site and does not need a build step or server-side runtime. It lives under `gcsephy/`, which is network-only: it does not register the service worker or work offline.
 
 ---
 
