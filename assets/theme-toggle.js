@@ -91,12 +91,8 @@
       }
 
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-      const statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
       if (themeColorMeta) {
         themeColorMeta.setAttribute('content', next === 'dark' ? options.darkThemeColor : options.lightThemeColor);
-      }
-      if (statusBarMeta) {
-        statusBarMeta.setAttribute('content', next === 'dark' ? 'black-translucent' : 'default');
       }
 
       syncAll(next);
