@@ -1021,12 +1021,17 @@
             paragraphs: [
               "The National Grid is a system of cables and transformers linking power stations to consumers across the country.",
             ],
-            figure: `<ol class="grid-flow" aria-label="Stages of the National Grid">
-                <li><strong>Power station</strong>Generates electricity at about 25 kV.</li>
-                <li class="up"><strong>Step-up transformer</strong>Increases the p.d. to as much as 400 kV.</li>
-                <li><strong>Transmission cables</strong>Very high p.d., so a small current: less heating in the cables.</li>
-                <li class="down"><strong>Step-down transformer</strong>Decreases the p.d. to a much lower value.</li>
-                <li><strong>Homes</strong>A safer 230 V supply.</li>
+            figure: `<ol class="grid-flow" aria-label="Electricity from power station through the National Grid to homes">
+                <li class="grid-flow-endpoint"><strong>Power station</strong>Generates electricity at about 25 kV.</li>
+                <li class="grid-flow-network">
+                  <div class="grid-flow-network-label"><strong>National Grid</strong><span>Cables and transformers</span></div>
+                  <ol aria-label="Stages within the National Grid">
+                    <li class="up"><strong>Step-up transformer</strong>Increases the p.d. to as much as 400 kV.</li>
+                    <li><strong>Transmission cables</strong>Very high p.d., so a small current: less heating in the cables.</li>
+                    <li class="down"><strong>Step-down transformer</strong>Decreases the p.d. to a much lower value.</li>
+                  </ol>
+                </li>
+                <li class="grid-flow-endpoint"><strong>Homes</strong>A safer 230 V supply.</li>
               </ol>`,
             points: [
               "For a given power, P = V I: raising the p.d. lowers the current.",
