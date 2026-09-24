@@ -1,60 +1,60 @@
 <?xml version='1.0' encoding='utf-8'?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://panphy.github.io/</loc>
+    <loc>https://panphy.app/</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/for_teachers/timer.html</loc>
+    <loc>https://panphy.app/for_teachers/timer.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/for_teachers/visualizer.html</loc>
+    <loc>https://panphy.app/for_teachers/visualizer.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/fun/spellwave.html</loc>
+    <loc>https://panphy.app/fun/spellwave.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/fun/ascii_cam.html</loc>
+    <loc>https://panphy.app/fun/ascii_cam.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/lorentz.html</loc>
+    <loc>https://panphy.app/simulations/lorentz.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/lorentz_learn.html</loc>
+    <loc>https://panphy.app/simulations/lorentz_learn.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/standing_wave.html</loc>
+    <loc>https://panphy.app/simulations/standing_wave.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/superposition.html</loc>
+    <loc>https://panphy.app/simulations/superposition.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/collision.html</loc>
+    <loc>https://panphy.app/simulations/collision.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/states.html</loc>
+    <loc>https://panphy.app/simulations/states.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/ripple_tank.html</loc>
+    <loc>https://panphy.app/simulations/ripple_tank.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/tools/panphymd.html</loc>
+    <loc>https://panphy.app/tools/panphymd.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/tools/motion_tracker.html</loc>
+    <loc>https://panphy.app/tools/motion_tracker.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/tools/panphyplot.html</loc>
+    <loc>https://panphy.app/tools/panphyplot.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/tools/panphyplot/panphyplot_manual.html</loc>
+    <loc>https://panphy.app/tools/panphyplot/panphyplot_manual.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/tools/sound_analyzer.html</loc>
+    <loc>https://panphy.app/tools/sound_analyzer.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/tools/tone_generator.html</loc>
+    <loc>https://panphy.app/tools/tone_generator.html</loc>
   </url>
   <url>
-    <loc>https://panphy.github.io/simulations/atomic_models.html</loc>
+    <loc>https://panphy.app/simulations/atomic_models.html</loc>
   </url>
 </urlset>
