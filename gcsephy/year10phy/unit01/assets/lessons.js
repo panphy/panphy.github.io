@@ -851,7 +851,7 @@
               sketch: true, w: 340, h: 220, x: [0, 1], y: [-1, 1],
               xLabel: "time", yLabel: "p.d.",
               series: [{ fn: () => 0.45, from: 0, to: 0.8, cls: "curve-2" }, { fn: (x) => 0.85 * Math.sin(2 * Math.PI * 2.5 * x), from: 0, to: 0.8 }],
-              notes: [[0.86, 0.41, "dc", "start", "cool"], [0.1, 0.93, "ac", "middle", "hot"]],
+              notes: [[0.86, 0.41, "dc", "start", "cool"], [0.37, -0.82, "ac", "start", "hot"]],
               caption: "dc (blue) stays positive and constant; ac (orange) keeps reversing direction.",
             }),
           },
@@ -876,8 +876,8 @@
               extra: `<rect class="sheath" x="12" y="38" width="118" height="96" rx="14"/>
                 <line class="wire-brown" x1="120" y1="60" x2="340" y2="60"/>
                 <line class="wire-blue" x1="120" y1="88" x2="340" y2="88"/>
-                <line class="wire-green" x1="120" y1="116" x2="340" y2="116"/>
-                <line class="wire-yellow" x1="120" y1="116" x2="340" y2="116"/>
+                <defs><pattern id="earth-stripes" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="8" height="16" fill="#2f9e44" stroke="none"/><rect x="8" width="8" height="16" fill="#f2c500" stroke="none"/></pattern></defs>
+                <rect x="116" y="111.5" width="228" height="9" rx="4.5" fill="url(#earth-stripes)" stroke="none"/>
                 <text x="150" y="48">Live · brown · ≈230 V</text>
                 <text x="150" y="80" dy="-2">Neutral · blue · ≈0 V</text>
                 <text x="150" y="108" dy="-2">Earth · green &amp; yellow · 0 V</text>
