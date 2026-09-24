@@ -20,7 +20,7 @@ The [GCSE Physics hub](https://panphy.github.io/gcsephy/) collects the author's 
 - **Year 10 · [Electric Circuits](https://panphy.github.io/gcsephy/year10phy/unit01/):** revision notes, practice questions, and an Exam Zone for AQA GCSE electricity. See the [unit overview](gcsephy/year10phy/unit01/README.md).
 - **Flashcards:** physics retrieval practice for Combined and Separate Science.
 
-These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them. The old `/year9phy/unit01/` and `/misc/gcse_phy/` addresses redirect to the new locations.
+These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
 ## Offline use
 
@@ -52,8 +52,6 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | `beta/` | Work in progress, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources and flashcards, inventoried in `gcsephy/index.html` |
-| `year9phy/`, `misc/gcse_phy/` | Redirect pages for old addresses only |
-| `404.html` | Not-found page; also forwards briefly used `/misc/gcsephy/` and `/misc/year10phy/` addresses |
 | `.github/workflows/` | Repository automation |
 
 ## Contributing
