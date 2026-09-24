@@ -870,21 +870,7 @@
             paragraphs: [
               "Each wire has insulation of a set colour, so anyone wiring a plug can identify it.",
             ],
-            figure: D.circuit({
-              w: 360, h: 170,
-              wires: [],
-              extra: `<rect class="sheath" x="12" y="38" width="118" height="96" rx="14"/>
-                <line class="wire-brown" x1="120" y1="60" x2="340" y2="60"/>
-                <line class="wire-blue" x1="120" y1="88" x2="340" y2="88"/>
-                <defs><pattern id="earth-stripes" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="8" height="16" fill="#2f9e44" stroke="none"/><rect x="8" width="8" height="16" fill="#f2c500" stroke="none"/></pattern></defs>
-                <rect x="116" y="111.5" width="228" height="9" rx="4.5" fill="url(#earth-stripes)" stroke="none"/>
-                <text x="150" y="48">Live · brown · ≈230 V</text>
-                <text x="150" y="80" dy="-2">Neutral · blue · ≈0 V</text>
-                <text x="150" y="108" dy="-2">Earth · green &amp; yellow · 0 V</text>
-                <text class="note" x="71" y="92" text-anchor="middle">cable</text>`,
-              caption: "Live (brown), neutral (blue) and earth (green and yellow stripes).",
-              label: "Three-core cable with live, neutral and earth wires",
-            }),
+            figure: D.threeCoreCable(),
             points: [
               "<strong>Live</strong> (brown): carries the alternating p.d. from the supply.",
               "<strong>Neutral</strong> (blue): completes the circuit; at, or close to, 0 V.",

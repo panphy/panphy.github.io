@@ -115,6 +115,48 @@
     return figure(svg, spec.caption, spec.label);
   }
 
+  function threeCoreCable() {
+    const svg = `<svg class="cable-cutaway" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cable-sheath" gradientUnits="userSpaceOnUse" x1="0" y1="96" x2="0" y2="222">
+          <stop offset="0" stop-color="#777f87"/><stop offset=".14" stop-color="#4d5762"/>
+          <stop offset=".5" stop-color="#273440"/><stop offset=".85" stop-color="#17232e"/>
+          <stop offset="1" stop-color="#0d1721"/>
+        </linearGradient>
+        <linearGradient id="cable-filler" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#68747b"/><stop offset=".55" stop-color="#b0b6b3"/><stop offset="1" stop-color="#e1ded0"/>
+        </linearGradient>
+        <pattern id="cable-earth" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(40)">
+          <rect width="18" height="18" fill="#258044"/><rect width="9" height="18" fill="#f7d83b"/>
+        </pattern>
+      </defs>
+      <!-- The sheath continues beyond the drawing, so this reads as a length of cable. -->
+      <path d="M-30 131 C55 127 119 130 179 100 C192 94 205 94 218 98 L235 182 C219 185 201 188 184 191 C116 220 44 222 -30 218Z" fill="url(#cable-sheath)" stroke="#111e29" stroke-width="3"/>
+      <path d="M-20 138 C66 134 120 135 180 108 C192 103 203 101 213 102" fill="none" stroke="#a7b0b7" stroke-width="4" opacity=".5" stroke-linecap="round"/>
+      <path d="M-20 210 C68 216 129 205 181 184" fill="none" stroke="#07111c" stroke-width="5" opacity=".45"/>
+      <!-- The pale cut face shows that the three cores sit inside one outer sheath. -->
+      <ellipse cx="216" cy="140" rx="29" ry="43" transform="rotate(-12 216 140)" fill="#15212b" stroke="#83909a" stroke-width="5"/>
+      <ellipse cx="216" cy="140" rx="21" ry="36" transform="rotate(-12 216 140)" fill="url(#cable-filler)"/>
+      <g fill="none" stroke="#17222d" stroke-width="27" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M216 109 C255 103 267 72 296 54 C323 37 350 44 367 60 C384 77 401 72 418 61"/>
+        <path d="M221 141 C254 133 270 143 298 153 C325 163 349 148 376 136 C394 128 411 130 431 141"/>
+        <path d="M213 172 C247 178 266 201 295 220 C317 235 339 236 360 224 C380 213 404 229 418 249"/>
+      </g>
+      <g fill="none" stroke-width="21" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M216 109 C255 103 267 72 296 54 C323 37 350 44 367 60 C384 77 401 72 418 61" stroke="#95582f"/>
+        <path d="M221 141 C254 133 270 143 298 153 C325 163 349 148 376 136 C394 128 411 130 431 141" stroke="#2876be"/>
+        <path d="M213 172 C247 178 266 201 295 220 C317 235 339 236 360 224 C380 213 404 229 418 249" stroke="url(#cable-earth)"/>
+      </g>
+      <g fill="none" stroke-width="4" stroke-linecap="round" opacity=".38">
+        <path d="M218 101 C255 96 268 65 296 47 C323 31 351 36 373 54 C388 67 400 65 414 56" stroke="#f2c59e"/>
+        <path d="M223 134 C256 127 274 136 300 145 C326 154 351 141 375 130 C394 121 414 124 433 135" stroke="#b2dfff"/>
+        <path d="M215 165 C250 172 269 194 299 213 C319 228 340 227 357 216 C382 205 407 224 424 242" stroke="#fff5b3"/>
+      </g>
+    </svg>`;
+    const caption = `<span class="cable-key"><span><i class="cable-key-live"></i><strong>Live</strong> · brown</span><span><i class="cable-key-neutral"></i><strong>Neutral</strong> · blue</span><span><i class="cable-key-earth"></i><strong>Earth</strong> · green &amp; yellow</span></span><span class="cable-caption">The outer sheath holds all three insulated wires together.</span>`;
+    return figure(svg, caption, "Cutaway of a three-core cable: a dark outer sheath surrounds brown live, blue neutral, and green and yellow earth wires, which fan out from the open end");
+  }
+
   function symbolGrid(items) {
     const tiles = items.map(([type, name]) => {
       const svg = `<svg class="cd" viewBox="-52 -46 104 70" aria-hidden="true"><path d="M-48 0 H48"/>${drawPart([type, 0, 0, "h"])}</svg>`;
@@ -212,5 +254,5 @@
     });
   }
 
-  window.Diagrams = { circuit, symbolGrid, graph, ivSketch, IV, sub };
+  window.Diagrams = { circuit, threeCoreCable, symbolGrid, graph, ivSketch, IV, sub };
 })();
